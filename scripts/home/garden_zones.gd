@@ -18,6 +18,10 @@ static func rules() -> Dictionary:
 static func ids() -> Array:
 	return (rules()["zones"] as Dictionary).keys()
 
+## The zones with a build of their own (a zone's island is made from its "build" data) plus the start zone.
+static func built() -> Array:
+	return ids().filter(func(id): return id == start() or rules()["zones"][id].has("build"))
+
 static func info(id: String) -> Dictionary:
 	return rules()["zones"].get(id, {})
 
@@ -36,11 +40,33 @@ static func migrate(data: Dictionary) -> void:
 		if not rec.has("zone"):
 			rec["zone"] = start()
 
+## The zone Game.goto("home", opts) shows: the one asked for; none for a visit or with the garden off;
+## the one you were in when coming back from the house; else the hub, once the first day's tutorial is done
+## (it runs in the start zone).
+static func landing(opts: Dictionary) -> String:
+	if opts.has("zone"):
+		return String(opts["zone"])
+	var visiting: Dictionary = opts.get("visit", {})
+	if not visiting.is_empty():
+		return HUB if VisitZones.has(visiting) else ""
+	if not FarmUnlocks.base_mode():
+		return ""
+	if opts.has("spawn"):
+		return here
+	return HUB if bool(Save.d.get("tutorial", {}).get("day1_done", false)) else ""
+
 static func zone_of(rec: Dictionary) -> String:
 	return String(rec.get("zone", start()))
 
 static func is_open(id: String) -> bool:
 	return bool(Save.d.get("zones", fresh()).get(id, {}).get("open", false))
+
+## A locked zone wakes: it opens, with its sting (the one place a zone opens, for the unlock step to call).
+static func wake(id: String) -> void:
+	if is_open(id):
+		return
+	Save.d["zones"][id] = {"open": true}
+	Sfx.play("garden_wake")
 
 ## The Boki out (not in the Burrow) whose home is this zone.
 static func residents(id: String) -> Array:
@@ -53,10 +79,18 @@ static func current() -> String:
 static func is_partner(rec: Dictionary) -> bool:
 	return String(rec.get("uid", "")) == str(Save.d.get("active", ""))
 
-## Who walks the zone you are in: its residents, and your partner wherever it lives.
+## Does `rec` walk zone `id`: it lives there, or it is your partner (which is in every zone)?
+static func walks_in(rec: Dictionary, id: String) -> bool:
+	return zone_of(rec) == id or is_partner(rec)
+
+## Who walks the zone you are in: its residents, your partner wherever it lives and a wild visitor (GardenVisitor).
 static func out_here() -> Array:
 	var z := current()
-	return KinBox.farm().filter(func(r): return zone_of(r) == z or is_partner(r))
+	var out := KinBox.farm().filter(func(r): return walks_in(r, z))
+	var wild := GardenVisitor.in_zone(z)
+	if not wild.is_empty():
+		out.append(wild)
+	return out
 
 ## How many more Boki can be out in a zone.
 static func room(id: String) -> int:
@@ -94,9 +128,18 @@ static func wants(rec: Dictionary) -> String:
 			return id
 	return ""
 
-## The bag item that is a zone's first key (GARDEN.md 10.3; the item itself comes with the unlock step).
+## The bag item that is a zone's first key (Loot.VALUABLES names it on a run, Econ banks it as an item).
 static func wayseed(id: String) -> String:
 	return "wayseed_" + id
+
+## The still-locked zone whose Wayseed a lair in this biome holds, or "" (base mode only).
+static func seed_zone_for(biome: String) -> String:
+	if not FarmUnlocks.base_mode():
+		return ""
+	for id in ids():
+		if not is_open(id) and info(id).get("lair_biomes", []).has(biome):
+			return id
+	return ""
 
 ## A Boki out on the base that leans far enough toward the zone to wake it (the second key), or {}.
 static func leaner(id: String) -> Dictionary:
@@ -110,3 +153,39 @@ static func leaner(id: String) -> Dictionary:
 ## The two keys of a locked zone: {"seed": have the Wayseed, "lean": have a Boki leaning toward it}.
 static func keys_for(id: String) -> Dictionary:
 	return {"seed": int(Save.d.get("items", {}).get(wayseed(id), 0)) > 0, "lean": not leaner(id).is_empty()}
+
+## How far a Boki matches the zone's trait, 0..1 (a calm zone, trait_low, matches a low trait).
+static func trait_match(rec: Dictionary, zone: Dictionary) -> float:
+	var v := float(rec.get("traits", {}).get(zone["trait"], 0.5))
+	return 1.0 - v if zone.get("trait_low", false) else v
+
+## Does `rec` thrive in the zone you are in (GARDEN.md 10.2)? Only on the base; never in the hub.
+static func thrives(rec: Dictionary) -> bool:
+	var zone := info(here)
+	if zone.is_empty() or not FarmUnlocks.base_mode():
+		return false
+	return zone["types"].has(Evo.lean(rec)[0]) or trait_match(rec, zone) > float(rules()["thrive"]["trait_over"])
+
+## Stat points a toy gives `rec`: `base`, and now and then one more while it thrives or loves its zone.
+static func train_gain(rec: Dictionary, base: int) -> int:
+	var chance := float(rules()["thrive"]["train_bonus"]) if thrives(rec) else 0.0
+	return base + (1 if randf() < chance + ZoneAffinity.stat_bonus(rec) else 0)
+
+## Both keys in hand: plants the Wayseed and wakes the zone. The Boki that leans toward it becomes its
+## founder: it moves in, remembers the day and writes it in its journal. {"ok", "why", "founder"}.
+static func attune(id: String) -> Dictionary:
+	var keys := keys_for(id)
+	if is_open(id) or not (keys["seed"] and keys["lean"]):
+		return {"ok": false, "why": "%s needs both keys" % info(id).get("name", id)}
+	var rec := leaner(id)
+	var nm: String = info(id)["name"]
+	Save.add_item(wayseed(id), -1)
+	Save.d["zones"][id] = {"open": true, "founder": rec["uid"]}
+	rec["zone"] = id
+	Save.remember(rec, "zone", "the day I woke " + nm)
+	CareJournal.note(rec, "woke " + nm)
+	return {"ok": true, "why": "", "founder": rec}
+
+## The Boki that woke the zone, or {} (the start zone, or one that has left).
+static func founder(id: String) -> Dictionary:
+	return Save.kin(String(Save.d.get("zones", {}).get(id, {}).get("founder", "")))

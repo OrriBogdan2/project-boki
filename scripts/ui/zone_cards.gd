@@ -2,7 +2,8 @@ class_name ZoneCards
 extends RefCounted
 ## The Waystone's destination cards (briefs/design/GARDEN.md 10.5): one per zone, plus the hub when
 ## you're in a zone. An open zone's card has its colour, who lives there and how they feel, and
-## today's game. A locked one is grey and lists its two keys as ticks, and where to get each.
+## today's game. A locked one is grey and lists its two keys as ticks, and where to get each; with both
+## in hand its button reads "Wake it" (HubWaystone.attune).
 ## The same cards answer "Move to..." for a Boki (move_to): Send, or why it can't go there.
 
 const CARD_W := 150.0       # px, one card's width
@@ -25,7 +26,28 @@ static func open(h, here: String) -> void:
 		else:
 			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
 			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, func(): h.hway.hop(id), "Locked", false))
+			var keys := GardenZones.keys_for(id)
+			var ready: bool = keys["seed"] and keys["lean"]
+			var wake := func(): h.hway.attune(id)
+			row.add_child(_card(String(z["name"]), UI.FAINT, lines, wake, "Wake it" if ready else "Locked", ready))
+
+## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
+## the showcase wall's winners.
+static func board(h) -> void:
+	var v: VBoxContainer = h._new_panel("Games board", 420.0)
+	for id in GardenZones.ids():
+		var z := GardenZones.info(id)
+		var open := GardenZones.is_open(id)
+		var row := UI.hbox(10)
+		row.add_child(UI.label(String(z["name"]), 15, Color(String(z["colour"])) if open else UI.FAINT))
+		row.add_child(UI.label(String(z["game"]), 13, UI.INK) if open else UI.label("asleep", 13, UI.MUTED))
+		v.add_child(row)
+	var tw := BaseRace.twist()
+	v.add_child(UI.label("This week: %s. %s" % [tw["name"], tw["note"]], 14, UI.GOLD))
+	var wall: Array = Save.d.get("showcase", [])
+	v.add_child(UI.label("Showcase wall: no Dash winners yet" if wall.is_empty() else "Showcase wall:", 13, UI.MUTED))
+	for e in wall:
+		v.add_child(UI.label("%s, %s (%s)" % [e["name"], e["date"], e["twist"]], 13, UI.INK))
 
 ## "Move to..." on a Boki's card: only for one out in this zone, not your partner, with another zone open.
 static func add_move_link(h, row: Control, rec: Dictionary) -> void:
@@ -71,6 +93,9 @@ static func _open_lines(id: String) -> Array:
 		out.append(UI.para("Nobody lives here yet.", 12, UI.MUTED))
 	for rec in res:
 		out.append(UI.para("%s, %s" % [rec["name"], _mood(rec)], 12, UI.MUTED))
+	var founder := GardenZones.founder(id)
+	if not founder.is_empty():
+		out.append(UI.para("Woken by %s" % founder["name"], 12, UI.MUTED))
 	out.append(UI.para("Today: " + String(GardenZones.info(id)["game"]), 12, UI.INK))
 	return out
 

@@ -39,7 +39,7 @@ static func pantry(rec: Dictionary) -> String:
 	var grown := SnackPatch.snacks(Save.d)
 	if int(crops.get(fav, 0)) > 0 or (grown.has(fav) and Econ.pantry(fav) > 0):
 		return fav
-	for f in grown + SnackPatch.rules()["snacks"]:
+	for f in grown:
 		if Econ.pantry(String(f)) > 0 and String(f) != String(likes.get("hates", "")):
 			return String(f)
 	return ""
@@ -77,6 +77,7 @@ static func tick(h, k: Dictionary, since: float) -> bool:
 		h._emote(k, "?")
 		return false
 	h._emote(k, "♥" if res.get("love", false) else "♪")
+	GardenFirstDay.mark("feed", h)
 	if String(e["from"]) == "patch":
 		h._toast("%s picked the patch and ate a %s; the rest went to the pantry"
 				% [rec["name"], Care.food_name(food).to_lower()])

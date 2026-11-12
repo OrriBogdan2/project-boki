@@ -31,6 +31,7 @@ check: `--base-life-check`.
 - Sulky, never sick (care.json `sulky`, `Care.sulky()`): on base_mode every need bottoms out at its floor in both
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
+- Duo bonus (`scripts/home/base_duo.gd`, `content/rules/base_duo.json`): friends at bond 0.6 or more wake +6 joy from a shared nap (8 s asleep side by side), hand off cleanly in the Dash (x1.06 pace into a stretch with the friend alongside), show a heart pair and "Duo with X" on the Boki card in the Burrow view, and get one journal line the first time. The Show Ring joint trick waits for the Show Ring. Check: `--duo-check`.
 - Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, or an unfed Boki that never ate on its own, and writes every state change to user://garden_soak.json.
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
@@ -52,9 +53,22 @@ check: `--base-life-check`.
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
+- Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
+  grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
+  (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none
+  recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
+  `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
+- Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
+  Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
+  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
+  `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
+  The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
+  lane** (none exist yet; the walk just slows and the shake is a Body wobble): `wade` (a slow knee-high walk loop),
+  `shake` (a shake-off, 0.6 s), `paddle` (a longer water-play loop; `splash` stands in).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
@@ -64,10 +78,6 @@ check: `--base-life-check`.
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
 
-## Kitewind Ridge (GARDEN.md 10.2, step 7d)
-
-A zone is a home theme (`HomeLayout.THEMES`, `"zone": true`, not sold in the Island tab); the zone system will point a zone at its theme. `"ridge"` carries the ground colours, `style` (`storm`: the world's MultiMesh flora set for its trees, rocks and undergrowth, set on the island by `HomeBuild._apply_theme`) and `track` (the Dash course). On a ridge island: the Updraft vent toy (`toy_vent`, liked by Flying, Electric, Fairy and Sound leans), the snack patch grows `puffcorn`, `tonicbrew`, `starfruit` and `chimebun` (snack_patch.json `zone_snacks`; prepared foods go to the items store, `SnackPatch.shelve`), and the Dash runs `base_race.json` `tracks.ridge` (two glide gaps, an updraft climb that every ridge type rides). `--garden-nav-check` sweeps both themes, `--race-check` both courses, `--snack-patch-check` the ridge patch, `--ridge-shots --shots-dir=<dir>` makes day, night and course shots, and `--perf-bench --bench-secs=0 --bench-theme=ridge` benches the zone part.
-
 ## Zone air (ambient layer per zone)
 
-Each garden zone has one ambient layer so arriving through the Waystone reads as a new place: pollen in Bramblebank, glints in Glasswater, embers in Cinderstep, fireflies in Hushwood, wind streaks on Kitewind Ridge (`scripts/home/zone_air.gd`, `content/rules/zone_air.json`). It is one `GPUParticles3D` named `ZoneAir` over the island round `HomeLayout.LANDING`, a small fixed count, unshaded billboards with a fade ramp, no light, no burst, added once by Home's build in base_mode (never in the hub). Off at the lowest quality preset (`off_at`, Low: this build has no Very Low), the count times `Settings` `fx` above it (Medium 0.7, High 1.0); a quality change shows on the next zone load. `--zone-air-check` asserts all of that and one layer per zone in a real Home; `--zone-shots --shots-dir=<dir> [--shots-zone=<id>|all]` makes a day and a night shot per zone; `--perf-bench --bench-secs=0 --bench-zone=all` benches a `zone-<id>` part per zone (GARDEN.md 10.6).
+Each garden zone has one ambient layer so arriving through the Waystone reads as a new place: pollen in Bramblebank, glints in Glasswater, embers in Cinderstep, fireflies in Hushwood, wind streaks on Kitewind Ridge (`scripts/home/zone_air.gd`, `content/rules/zone_air.json`). It is one `GPUParticles3D` named `ZoneAir` over the island round `HomeLayout.LANDING`, a small fixed count, unshaded billboards with a fade ramp, no light, no burst, added once by Home's build in base_mode (never in the hub). Off at the lowest quality preset (`off_at`, Low), the count times `Settings` `fx` above it; a quality change shows on the next zone load. `--zone-air-check` asserts all of that and one layer per zone in a real Home; `--garden-zone-shots --zone=<id>` shows it by day and night.

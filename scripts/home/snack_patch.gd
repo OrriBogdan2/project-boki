@@ -22,11 +22,21 @@ static func grant(d: Dictionary) -> void:
 	if FarmUnlocks.base_mode() and HomeLayout.count_of(ID, d) == 0:
 		HomeLayout.of(d)["inv"][ID] = 1
 
-## The snacks this island's patch grows: the zone's look patch (ZoneLook), else its zone theme's own, else the
-## start garden's four.
+## The snacks this island's patch grows: its zone theme's list, else the start garden's four.
 static func snacks(d: Dictionary) -> Array:
-	var by_theme: Array = rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
-	return ZoneLook.look(GardenZones.current()).get("patch", by_theme)
+	return rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
+
+## Where the zones are not built, one more food every ripening so every snack gets grown: the next, in
+## zone-list order, that the patch's own list lacks (rot on the entry counts ripenings). "" on a zone.
+static func extra(d: Dictionary, e: Dictionary) -> String:
+	var zones: Dictionary = rules()["zone_snacks"]
+	if zones.has(String(HomeLayout.of(d)["theme"])):
+		return ""
+	var own := snacks(d)
+	var rest: Array = []
+	for z in zones:
+		rest.append_array((zones[z] as Array).filter(func(s): return not own.has(s)))
+	return String(rest[int(e.get("rot", 0)) % rest.size()])
 
 ## The placed patch's deco entry, or {}.
 static func entry(d: Dictionary) -> Dictionary:
@@ -45,6 +55,10 @@ static func harvest(d: Dictionary, now: float) -> Array:
 		return []
 	e["t"] = now
 	var got: Array = snacks(d).duplicate()
+	var more := extra(d, e)
+	if more != "":
+		got.append(more)
+		e["rot"] = int(e.get("rot", 0)) + 1
 	for s in got:
 		shelve(d, String(s))
 	return got
