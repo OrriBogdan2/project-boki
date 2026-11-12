@@ -372,7 +372,7 @@ const CHECKS := {
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],  # decision 0040
 	"--guardian-stance-check": ["res://tools/guardian_stance_check.gd", "guardian_stance_check", null],
-	"--guardian-stance-shots": ["res://tools/guardian_stance_shots.gd", "guardian_stance_shots", null],      # --shots-dir=<dir>
+	"--guardian-stance-shots": ["res://tools/guardian_stance_shots.gd", "guardian_stance_shots", null],  # --shots-dir=
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018

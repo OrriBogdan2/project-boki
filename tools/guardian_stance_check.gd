@@ -91,13 +91,13 @@ func _facing(plan: String) -> void:
 	var leash := float(KinGuardian.rules()["leash"])
 	ok(worst < leash + LEASH_SLACK, "%s: it stays on the %.0f m leash (%.1f m at most)" % [plan, leash, worst])
 
-## A threat it watches but cannot reach yet (Kin._wisp_threat fights inside 3 m; with nothing at all near it
-## nudges the Hunter up instead): it holds the stance, low and wide on Flex; a plain summon has its normal pose.
+## A threat it watches but cannot reach (it gave up on it: Kin.ignore_until; Kin._wisp_threat fights inside
+## 3 m): it holds the stance, low and wide on Flex; a plain summon has its normal pose.
 func _standing(plan: String) -> void:
 	_foe_to(Vector3(6.0, 0, 0))
 	k.target = null
-	k.revive_wait = 99.0      # hold off its revive nudge (Kin._consider_revive) so the stance is what shows
-	_frames(1.0)
+	k.ignore_until[foe] = m.time + 99.0
+	_frames(2.0)      # back at its side spot and still
 	ok(k.model.get_meta("pose") == "stance", "%s: standing guard, the pose is stance" % plan)
 	var flex := k.model.get_node("Body/Flex") as Node3D
 	var low := _settle(flex)
@@ -107,6 +107,7 @@ func _standing(plan: String) -> void:
 	ok(low.y < normal.y - 0.04, "%s: low (Flex height %.2f against %.2f)" % [plan, low.y, normal.y])
 	ok(low.x > normal.x + 0.04, "%s: wide (Flex width %.2f against %.2f)" % [plan, low.x, normal.x])
 	k.summon.guardian = true
+	k.ignore_until.erase(foe)
 
 ## The pose springs run on frames: step them by hand and read Flex.
 func _settle(flex: Node3D) -> Vector3:
