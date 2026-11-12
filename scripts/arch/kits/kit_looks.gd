@@ -101,9 +101,9 @@ func _build(kind: String) -> Node3D:
 			_build_void_shot(n, kind)
 		"aura":
 			Models.part(
-				n, Models.sphere(1.25, 20), glass_mat(Color("7a1a68"), Color("ff4fd8"), 0.6, 0.12), Vector3(0, 1.0, 0)
+				n, Models.sphere(1.25, 20), glass_mat(Color("0e4a42"), OstraKit.HOT, 0.6, 0.12), Vector3(0, 1.0, 0)
 			)
-			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(0.75, 0.12, 0.6, 0.45)), Vector3(0, 0.05, 0))
+			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(OstraKit.SEA, 0.45)), Vector3(0, 0.05, 0))
 		"crown":
 			_build_crown(n)
 		"burst", "crater":
@@ -287,20 +287,20 @@ func _build_sigil(n: Node3D) -> void:
 		Models.part(n, Models.box(0.05, 0.015, 0.16), seg_mat, tick_at, Vector3.ONE, Vector3(0, -a2, 0))
 	Models.part(n, Models.box(0.14, 0.015, 0.14), star_mat, Vector3.ZERO, Vector3.ONE, Vector3(0, PI * 0.25, 0))
 
-## The Trade's lobbed lantern: a black-violet glass orb with a magenta rim and short violet spikes, turning,
-## a hot magenta heart, and a faint pale jester's mask on its face (it doesn't turn).
+## The Trade's lobbed lantern: a near-black teal glass orb with a sea-teal rim and short pale teal spikes, turning,
+## a hot light-teal heart, and a faint pale jester's mask on its face (it doesn't turn). His colours (VFX_QUALITY).
 func _build_star(n: Node3D) -> void:
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	Models.part(spin, Models.sphere(0.3, 14), glass_mat(Color("1e1430"), Color("ff3fd0"), 1.0, 0.92), Vector3.ZERO)
+	Models.part(spin, Models.sphere(0.3, 14), glass_mat(Color("06221e"), OstraKit.TRADE_EDGE, 1.0, 0.92), Vector3.ZERO)
 	for i in 6:
 		var a := TAU * i / 6.0
 		Models.part(
-			spin, PrismMesh.new(), shade_mat(Color(0.78, 0.36, 1.0, 0.95)), Vector3(cos(a), sin(a), 0.0) * 0.36,
+			spin, PrismMesh.new(), shade_mat(Color(OstraKit.TEAL, 0.95)), Vector3(cos(a), sin(a), 0.0) * 0.36,
 			Vector3(0.12, 0.3, 0.06), Vector3(0, 0, a - PI * 0.5)
 		)
-	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("ff8ae8")), Vector3.ZERO)
+	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(OstraKit.HOT), Vector3.ZERO)
 	_build_mask(n)
 
 ## The faint mask on the Trade's lantern: a pale oval face, slanted eye slits and a thin grin, laid on the
@@ -310,9 +310,9 @@ func _build_mask(n: Node3D) -> void:
 	mask.position = Vector3(0, 0.27, 0.12)
 	mask.rotation.x = MASK_TILT
 	n.add_child(mask)
-	var face := shade_mat(Color(0.93, 0.86, 1.0, 0.38))
+	var face := shade_mat(Color(0.86, 1.0, 0.96, 0.38))
 	Models.part(mask, Models.sphere(0.2, 14), face, Vector3.ZERO, Vector3(1.0, 0.18, 1.2))
-	var slit := shade_mat(Color(0.06, 0.0, 0.1, 0.85))
+	var slit := shade_mat(Color(0.0, 0.08, 0.07, 0.85))
 	for side in [-1.0, 1.0]:
 		var eye := Vector3(0.075 * side, 0.04, -0.06)
 		Models.part(mask, Models.box(0.09, 0.02, 0.035), slit, eye, Vector3.ONE, Vector3(0, 0.35 * side, 0))
@@ -323,7 +323,7 @@ func _build_mask(n: Node3D) -> void:
 
 ## Ostra's Nightwell, radius 1 (scaled to the well): a lit teal rim with a soft inner falloff and no floor
 ## (docs/VFX_QUALITY.md zone rule), four spiral arms of light turning on it, small black orbs riding the rim, and a
-## pink core shown when she cast it Swollen.
+## light-teal core (OstraKit.HOT) shown when she cast it Swollen.
 func _build_well(n: Node3D) -> void:
 	var floor_mat := Models.ring_mat(WELL_RIM, 0.1)
 	floor_mat.set_shader_parameter("fill", 0.0)
