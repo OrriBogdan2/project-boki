@@ -48,6 +48,8 @@ func _host() -> void:
 	for l in lines:
 		f.store_line(l)
 	f.close()
+	if FileAccess.file_exists(dir.path_join("guest.log")):
+		DirAccess.copy_absolute(dir.path_join("guest.log"), shots_dir.path_join("guest.log"))
 	_finish()
 
 
@@ -109,5 +111,7 @@ func _cast_here(arch: String, key: String, held: float) -> void:
 	if inp != "fire":
 		me.inp[inp] = false
 	await main.get_tree().create_timer(held).timeout
+	var up := AimKit.layer(m).entries.keys()
+	printerr("%s guest cast %s %s at %s, net %s, up %s, t %.1f" % [tag, arch, key, me.pos, m.net_on, up, m.time])
 	for k in ["fire", "sec", "sec_hold", "sig", "ult"]:
 		me.inp[k] = false
