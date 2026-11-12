@@ -7,6 +7,7 @@ extends RefCounted
 ## the drop, with the countdown and the squad's drop order. The match keeps going behind it.
 
 const SIDE_W := 268.0
+const NOTE_H := 14.0             # px a legend row grows by for its first-time line (Glossary)
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const GOLD := Color("f2c84a")
@@ -573,12 +574,15 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var sp: SpawnPlan = m.spawn_plan
 	var cats: Array = sp.shown_cats() if sp else []
 	var rows := cats.size()
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 138))
+	var notes: Array = cats.map(func(cat): return Glossary.first_line(String(sp.cats[cat].get("name", cat))))
+	var note_rows := notes.filter(func(note): return note != "").size()
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + note_rows * NOTE_H + 138))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
 	hud._text(r.position + Vector2(14, 44), "Same map every time, different spawns", 11, MUTED)
 	var y := r.position.y + 72.0
-	for cat in cats:
+	for ci in cats.size():
+		var cat: String = cats[ci]
 		var def: Dictionary = sp.cats[cat]
 		var col: Color = def.get("col", Color.WHITE)
 		var all: Array = sp.of(cat)
@@ -593,6 +597,9 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._text(Vector2(r.position.x + 48, y - 2), String(def.get("name", cat)), 15, col, hud.big)
 		var line := ("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]) if announce else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
 		hud._text(Vector2(r.position.x + 48, y + 15), line, 11, INK)
+		if notes[ci] != "":
+			hud._text(Vector2(r.position.x + 48, y + 29), String(notes[ci]), 11, MUTED)
+			y += NOTE_H
 		y += 46.0
 	# what the marks mean
 	y += 4.0
@@ -611,7 +618,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
 		OutpostGlyph.draw(c, Vector2(r2.position.x + 26, r2.position.y + 42), 1.0, ExitModels.UPLINK, Color(0.55, 0.58, 0.64, 0.9), 0.0)
-		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Uplink outpost", 12, INK)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Uplink outpost (hold it, fly out)", 12, INK)
 		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
@@ -651,7 +658,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		var sub := ""
 		if h.out: sub = "Out"
 		elif h.extracted: sub = "Extracted"
-		elif lead and in_drop: sub = "Drop leader"
+		elif lead and in_drop: sub = "Leads the drop"
 		elif h.drop_solo and (h.riding or h.dropping): sub = "Dropping solo"
 		elif h.riding or h.dropping: sub = "Following the leader"
 		var pg: Dictionary = {}
@@ -670,7 +677,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		y += 6.0
 		var keys: Array = []
 		if i_lead:
-			keys = [["jump", "Jump (the squad jumps with you)" if p.riding else "Glider: you steer the squad"], ["pass_lead", "Pass the lead"]]
+			keys = [["jump", "Jump (the squad jumps with you)" if p.riding else "Glider: you steer the squad"], ["pass_lead", "Let a squadmate lead"]]
 		elif p.drop_solo:
 			keys = [["jump", "Jump" if p.riding else "Glide on your own"]]
 		else:

@@ -182,6 +182,7 @@ static func _glider_pick(home: Node, id: String) -> Control:
 	var v := UI.vbox(4)
 	v.set_meta("glider_pick", true)
 	v.add_child(UI.label("Glider", 12, UI.MUTED, UI.caps))
+	Glossary.add_note(v, "Glider")
 	var flow := HFlowContainer.new()
 	flow.custom_minimum_size.x = LEFT_W
 	flow.add_theme_constant_override("h_separation", 6)
