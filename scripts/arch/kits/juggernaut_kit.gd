@@ -313,8 +313,8 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h) or riposte.move_k() <= 0.0:
-		# merged, the form owns the attack key (a charge from before must not go off); guarding, no swings
+	if riposte.move_k() <= 0.0:
+		# guarding: no swings
 		lmb_was = false
 		return true
 	var ld := lmb_def()

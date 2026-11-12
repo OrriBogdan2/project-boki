@@ -22,8 +22,8 @@
 		],
 		"why": "~30% bigger: reads as the heaviest form from across the map"
 	},
-	"shell_k": 1.3,
-	"shell_why": "x1.3: the toughest shell",
+	"shell_k": 0.9,
+	"shell_why": "x0.9: its 20% damage reduction makes it the hardest form to break; a bigger shell left the Hunter ultimates' band (docs/FUSION_BAND.md)",
 	"baseline": {
 		"light": {
 			"move_speed": 0.14
@@ -62,14 +62,14 @@
 							{
 								"type": "area",
 								"radius": 5.0,
-								"dmg": 18,
+								"dmg": 12,
 								"color": "#b48cff"
 							},
 							{
 								"type": "area",
 								"radius": 5.0,
 								"delay": 0.4,
-								"dmg": 48,
+								"dmg": 34,
 								"kb": 15.0,
 								"lift": 9.0,
 								"color": "#e8d6ff"
@@ -90,7 +90,7 @@
 				"type": "area",
 				"at": "here",
 				"radius": 2.6,
-				"dmg": 14,
+				"dmg": 2,
 				"kb": 8.0,
 				"color": "#b48cff"
 			}

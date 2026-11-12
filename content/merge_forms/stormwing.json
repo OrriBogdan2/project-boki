@@ -74,9 +74,9 @@
 		"lmb": {
 			"name": "Chain Lightning",
 			"icon": "chain",
-			"desc": "Every hit arcs to 1 more foe for half damage.",
+			"desc": "Every hit arcs to 1 more foe for 30% of its damage.",
 			"chain": 1,
-			"chain_dmg": 0.5,
+			"chain_dmg": 0.3,
 			"chain_reach": 6.0,
 			"color": "#fff27a"
 		},

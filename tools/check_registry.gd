@@ -67,6 +67,7 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],      # gloves stay inside the kits' E band
+	"--fusion-band-check": ["res://tools/fusion_band_check.gd", "fusion_band_check", null],      # Fusions stay inside the Hunter ultimates' band
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],      # first press after a panel closes
