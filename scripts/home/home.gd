@@ -2537,7 +2537,7 @@ func open_build() -> void:
 
 func _refresh_top() -> void:
 	if _visiting():
-		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
+		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % ClanInfo.tagged(String(visit.get("name", "a friend")).substr(0, 16), String(visit.get("tag", "")))
 		if visit.has("clan_base"):
 			topbar.text = "%s's clan base   ·   Every member has a corner   ·   The portal takes you home" \
 					% visit["name"]
