@@ -48,6 +48,7 @@ func run(main_node: Node) -> void:
 	var lair_racing := func():
 		L["state"] = "awake"
 		L["locked"] = true
+		L["lock_at"] = m.time
 		L["sealed_in"] = [user]
 	var lair_won := func():
 		L["state"] = "cleared"
