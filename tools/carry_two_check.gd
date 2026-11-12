@@ -9,7 +9,7 @@ extends RefCounted
 ##   7. stealing from a deathbox: one stolen slot, at most 4 Boki on one hunter
 ##   8. bots bring two
 ##   9. the HUD's second-Boki badge has an icon for every passive stat (the box itself: --carry-two-clip shots)
-## --carry-two-shots --shots-dir=<dir>: three stills of the Boki box (run at --resolution 1280x720 and 2560x1440).
+## --carry-two-shots --shots-dir=<dir>: three stills of the Boki box (--view=1280x720 or --view=2560x1440 sets the window).
 ## --carry-two-clip --shots-dir=<dir>: the swap and the carry-out HUD as numbered JPGs (frame_0000.jpg ...) for an MP4.
 
 const SHOT_AT := [1.0, 2.5, 4.0]       # s: ready, mid swap cooldown, after the claim (--carry-two-shots)
@@ -173,6 +173,9 @@ func _clip(main: Node, stills := false) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--view="):
+			var wh := String(a).substr(7).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	var tree := main.get_tree()
 	if main.get("fade") != null:

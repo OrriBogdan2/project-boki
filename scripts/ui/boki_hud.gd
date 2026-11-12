@@ -98,8 +98,9 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
 	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
-const SECOND_SIZE := 28.0       # px: the second Boki's badge on the Boki box's top-left corner
-const SECOND_OUT := Vector2(-8.0, -14.0)   # px: where its top-left sits relative to the box's
+const SECOND_SIZE := 26.0       # px: the second Boki's badge above the Boki box's top-left corner
+const SECOND_OUT := Vector2(-16.0, -24.0)  # px: where its top-left sits relative to the box's (clear of the box's tags)
+const LEAD_MARK := 0.17         # the lead's type badge on a locked or fused box, as a fraction of the box
 const SECOND_RING := 3.0        # px: the swap cooldown ring sits this far outside the badge
 const PASSIVE_ICON := {         # owner stat of a carry passive -> its Icons id
 	"move_speed": "dash", "extra_jumps": "jump", "air_dashes": "dash", "dodge_charges": "dash", "dodge_regen": "dash",
@@ -107,11 +108,16 @@ const PASSIVE_ICON := {         # owner stat of a carry passive -> its Icons id
 	"regen": "heart", "damage": "burst", "fire_rate": "smg", "reload": "rifle", "reveal_radius": "pulse",
 	"cooldown": "clock"}
 
-## The lead Boki's summon ring round the Boki box: the recall cooldown filling back up, then a full ring in the Boki's
-## colour while it can go out (nothing while it is fused, resting or down: the box says so).
+## The lead Boki on the Boki box: its type badge above the padlock while the Merge is locked or running (the open box
+## already is the badge), and its summon ring round the box: the recall cooldown filling back up, then a full ring in
+## the Boki's colour while it can go out (no ring while it is fused, resting or down: the box says so).
 static func lead_ring(H, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
-	if k == null or not is_instance_valid(k) or KinMerge.active(p) or not k.ready_to_fight():
+	if k == null or not is_instance_valid(k):
+		return
+	if int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p):
+		DexView.draw_type(H.c, DexView.type_of(k.species), r.get_center() + Vector2(0, -r.size.y * 0.24), r.size.y * LEAD_MARK)
+	if KinMerge.active(p) or not k.ready_to_fight():
 		return
 	var cd := float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
 	_ring(H, r.grow(RING_GROW + 3.0), 1.0 - clampf(k.throw_cd / cd, 0.0, 1.0), Color(k.sp["color"], 0.9), 3.0)
