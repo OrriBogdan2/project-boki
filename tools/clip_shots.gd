@@ -101,6 +101,7 @@ func run(main: Node) -> void:
 	if OS.get_cmdline_user_args().has("--flinch"):
 		await _flinch(model, sync, fps, out)
 	if OS.get_cmdline_user_args().has("--cc"):
+		await tree.create_timer(1.5).timeout       # (the title's logo fades in real time, not in frames)
 		for key in ["stun", "rooted", "gnd"]:
 			await _cc(model, sync, fps, out, key)
 	if OS.get_cmdline_user_args().has("--moods"):
