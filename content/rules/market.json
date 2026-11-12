@@ -11,8 +11,8 @@
 	"transfer_doc": "Handing a Boki straight to a named player: a flat fee (destroyed), one per week per sender, and the receiver has to accept.",
 	"auction": {"hours": [12, 24, 48], "snipe_s": 60, "extend_s": 120, "max_open": 3, "npc_lots": 3, "npc_bid_k": 0.8, "npc_lot_start": 1.0, "npc_lot_cap": 1.3},
 	"auction_doc": "A bid with less than snipe_s left pushes the end out to extend_s from now. NPC bidders (offline) bid on your lots up to npc_bid_k x reference, never on friends-only lots. NPC lots open at npc_lot_start x reference and NPC rivals bid them up to npc_lot_cap x.",
-	"black_market": {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5},
-	"black_market_doc": "Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches.",
+	"black_market": {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5, "wayseed_price": 110, "wayseed_days": 3},
+	"black_market_doc": "Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches. wayseed_price: once every wayseed_days he also holds one Wayseed (GARDEN.md 10.3) for a zone that is still locked, never for an open one.",
 	"rarity": {
 		"common": {"name": "Common", "restock": 0.9, "col": "c8cdd8"},
 		"uncommon": {"name": "Uncommon", "restock": 0.6, "col": "6fd86a"},
