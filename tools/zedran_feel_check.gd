@@ -334,6 +334,22 @@ func chain_pull() -> void:
 	A.ok("jug RMB row: airborne after a chain launch = Meteor Drop", K.meteor.running() and K.last_variant == "air",
 			"variant %s" % K.last_variant)
 	A.step(m, 1.4)
+	# a pull started in the air (hooked, then a jump, then E) holds his height to the anchor
+	_settle(m, P, K, home)
+	T.teleport(home + Vector3(8.0, 0, 0))
+	_hook(m, P, K, T.pos, 0.4)
+	P.do_jump()
+	A.step(m, 0.15)
+	var y0 := P.pos.y
+	K.use_e()
+	var low_y := y0
+	t = 0.0
+	while W.state == "pulling" and t < 1.5:
+		m.step(A.DT)
+		t += A.DT
+		low_y = minf(low_y, P.pos.y)
+	A.ok("jug pull: a pull started in the air holds its height to the anchor (no source frame shows an airborne chain)",
+			W.exits == "arrived" and low_y >= y0 - 0.3, "exit %s y0 %.2f low %.2f" % [W.exits, y0, low_y])
 	# a stun in the pull stops it dead
 	_settle(m, P, K, home)
 	_hook(m, P, K, T.pos, 0.4)
@@ -869,7 +885,7 @@ func chain_steer() -> void:
 			Wd.level[Wd.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 3
 	T.teleport(home + Vector3(-6.0, 0, 8.0))
 	var runs := {}
-	for how in ["straight", "strafe", "face", "sling"]:
+	for how in ["straight", "strafe", "face", "sling", "away"]:
 		_settle(m, P, K, home)
 		if how == "sling":
 			P.teleport(home + Vector3(3.0, 0, 0))
@@ -879,6 +895,8 @@ func chain_steer() -> void:
 			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
 		if how == "face":
 			A.aim_at(P, P.pos + Vector3(0, 0, 9.0))
+		if how == "away":
+			A.aim_at(P, P.pos + Vector3(-9.0, 0, 0))     # facing straight away from the anchor
 		var from := P.pos
 		K.use_e()
 		var t := 0.0
@@ -909,6 +927,11 @@ func chain_steer() -> void:
 			float(sl["sling"]) > 2.5 and float(sl["speed"]) > float(ed["reel_speed"]) + 2.5
 					and float(sl["avg"]) > float(st["avg"]) + 1.5, "sling %.1f, avg %.1f against %.1f m/s" % [
 					float(sl["sling"]), float(sl["avg"]), float(st["avg"])])
+	var aw: Dictionary = runs["away"]
+	A.ok("jug chain pull: facing straight away from the anchor, it hauls him straight in at the reel speed (no swing, "
+			+ "no sling; the source shows no such pull, 0333-0336)",
+			aw["exit"] == "arrived" and float(aw["wide"]) < 0.3
+					and absf(float(aw["speed"]) - float(ed["reel_speed"])) < 0.01, str(aw))
 	# strafing at the press: the pull starts swung wide that way (the sideways speed carries in)
 	_settle(m, P, K, home)
 	_hook(m, P, K, home + Vector3(9.0, 0, 0), 0.35)

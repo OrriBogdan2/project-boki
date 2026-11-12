@@ -32,7 +32,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
 | Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
-| Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) |
+| Kael | E range, tether max | 13, 24 | 7 bh (12.6) a floor; max not seen (0305-0320: at most 5-6 bh, let go before a limit) | range match; tether [?] Not determinable, 24 m kept (owner Warchain note; see "Warchain states") |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
 | Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] |
@@ -67,6 +67,20 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 
 Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
 
+## Warchain states: Kael E against the source footage (main 88b06b9e7e, 2026-11-12)
+
+A re-read of `briefs/hero-ref/juggernaut.md` frames 0301-0366 (the tether) and 0251-0300 (the Air Slam) for the states the owner's Warchain note names (briefs/DECISIONS.md:73: not super long, stays attached as he moves back up to a max, the pull depends on facing and movement). The frames themselves are not on this box, so the brief's frame-by-frame notes are the read. Each state's source string is `e.sources` in `content/archetypes/juggernaut.json`; the assert runs in `--juggernaut-combo-check` unless the row says `--kit-parity-check`.
+
+| State | Source frames | Verdict | Ours, asserted |
+|---|---|---|---|
+| Hooked, backing away: max tether length | 0305-0320: attached while he walks (about 2.5 s), never over about 5-6 bh (10 m), let go by 0320 before any limit; the bite at 7 bh (0305) is a 12.6 m floor | Not determinable; 24 m kept `[?]` | pays out to 24 m, taut, holds, no break: "jug chain: backing away it pays out to its full 24m ..." |
+| Pulling, facing away | 0333-0336: the one pull is straight, facing the dummy; no recast facing away or aside | Not determinable | straight in at the reel speed, no swing, no sling: "jug chain pull: facing straight away from the anchor ..." (new) |
+| Pulling, moving back | 0333: he stands at the recast (the start puff); no pull while backing away | Not determinable | slingshot +0.8 of his speed away, up to +10 m/s: "jug chain pull: pulled while backing away it slingshots in faster" |
+| Pulling, airborne | 0301-0366 is all on the ground; 0251-0300 (Air Slam) shows no chain | Not determinable | a pull from the air holds its height to the anchor: "jug pull: a pull started in the air ..." (new); a jump in the pull exits at 70%: "jug pull: a jump exits ..." |
+| Pulling, speed | 0333: about 5 bh in about 0.4 s = 22.5 m/s (coarse: 2 frames at 5 fps) | settled; ours 22 match | `--kit-parity-check` e.reel_speed 22.5 +-7.5 (new) |
+| Throwing, speed and range | 0303-0305: about 7 bh in about 0.4 s to the wall = 31.5 m/s; 12.6 m is a floor, no cap shown | speed settled, ours 32 match; range 13 over the floor | `--kit-parity-check` e.speed 31.5 +-6 (new); range 13 in "jug chain: Ready > E > Throwing > Hooked ... 7 bh" |
+
+
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
 | Slot | Source | Ours | Verdict |
@@ -88,7 +102,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) |
 | Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, cursor marker | match; 0.8x cd |
 | Q | none | glove | ours |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) |
+| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` Not determinable (0305-0320 shows none; 24 m kept); pull 22 m/s = F 22.5 (parity row); the states per frame: see "Warchain states" |
 | R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` |
 | Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) |
 | Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape |
