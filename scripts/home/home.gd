@@ -3093,6 +3093,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
 	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
+	if RunPayoff.line(rec) != "": lines.append([RunPayoff.line(rec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)])
 	for ln in lines:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])
