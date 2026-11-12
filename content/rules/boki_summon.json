@@ -1,5 +1,5 @@
 {
-	"_doc": "card_lines: [from s, text], the plain line on the Field Book and Boki cards for a window of at least that many s (the last one reached). The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band.",
+	"_doc": "card_lines: [from s, text], the plain line on the Field Book and Boki cards for a window of at least that many s (the last one reached). The Boki summon (KinSummon, decisions 0039, 0044): killed_cd_mult = cooldown x after a rival hunter kills it, home_speed = m/s the wisp flies home, reveal_s = s its owner shows on the killer squad's minimap; [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band.",
 	"table": {
 		"bruiser":    {"small": [8, 60],  "medium": [10, 65], "large": [12, 70]},
 		"skirmisher": {"small": [7, 55],  "medium": [9, 60],  "large": [11, 65]},
@@ -11,8 +11,14 @@
 	"fallback": [10, 60],
 	"card_lines": [[0, "Short summon, strong"], [13, "Long summon, steady"]],
 	"uptime_band": [0.09, 0.2],
-	"knocked_cd_mult": 1.25,
+	"killed_cd_mult": 1.25,
+	"home_speed": 25.0,
+	"reveal_s": 2.0,
 	"leash": 10.0,
 	"leash_swing": 2.0,
-	"rebloom_dist": 20.0
+	"rebloom_dist": 20.0,
+	"steal": {
+		"_doc": "Stolen Boki wisps (KinSteal, decision 0041, WISP_DESIGN_OPEN.md Q6/Q8): loose_s = s a downed hunter's wisp floats loose; grab_r = m reach, grab_s = s holding interact; carry_max = stolen wisps one hunter carries; passive_k = share of each stolen carry passive; summon_k = share of its window for the one stolen summon, at least summon_min_s s.",
+		"loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0
+	}
 }
