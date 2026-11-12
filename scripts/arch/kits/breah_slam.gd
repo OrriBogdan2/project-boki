@@ -196,7 +196,7 @@ func slam(c: float, at_feet: bool) -> void:
 	m.fx.spark(
 		at + Vector3(0, 0.2, 0), Vector3.UP, Color("9ad0ff"), int(10 + 10 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3
 	)
-	m.fx.flash(at + Vector3(0, 0.5, 0), Color("9ad0ff"), 0.6 + 0.3 * c, 0.08)
+	DolmImpact.hit(m, at, dmg)
 	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
 	m.sfx("br_slam", at, 0.0, 1.0)
 	k.net_ring(at, r, Color("3a7cff"))
