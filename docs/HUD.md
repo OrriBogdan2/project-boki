@@ -52,8 +52,14 @@ drawn, the downed plate and status words show, cooldown text appears).
   utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key.
 - Point at a thing for a hover card (`InvTip`, words in `InvText`). A piece of gear is compared with what you wear
   in its slot (`GearCompare`): only the numbers that change, green when better and red when worse.
-- Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
-  wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
+- Press, hold and move a thing onto another slot (`SlotDrag`, `scripts/ui/slot_drag.gd`): a backpack piece onto
+  its slot wears it, a glove onto the other glove swaps them, a worn piece onto the pack takes it off, a belt item
+  onto another belt slot swaps the two. With the mouse it comes up after HOLD_S held still or MOVE_PX moved; on
+  the pad hold A, move focus, release A. A drop that can't go there snaps back with a short reason under the slot
+  (and the deny tick). A tap still clicks. Or point and press Enter to wear it (a worn piece: take it off) and
+  Delete to drop it on the ground. The Wear and Drop buttons stay.
+- The practice loadout panel (L, `Arena`) uses the same drag: hold a glove button and drop it on the other glove's
+  row to wear it there (the one you wear: the two swap). Check: `--lpage-drag-check`.
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
