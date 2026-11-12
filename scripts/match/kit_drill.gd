@@ -60,7 +60,7 @@ static func steps(hunter_id: String) -> Array:
 static func line(hunter_id: String, slot: String) -> String:
 	if hunter_id in SLICE:
 		return AbilityClip.line_for(hunter_id, slot)
-	var nm := String(HunterViewer.slot_info(hunter_id, slot)["name"])
+	var nm := String(HunterViewer.slot_info(hunter_id, slot).get("name", ""))
 	return "Try %s on the dummy." % (nm if nm != "" else "it")
 
 ## What the slot's JSON text says it takes: "again" (a recast), "hold", or "" (a plain press).
@@ -189,7 +189,9 @@ func _label(parent: Node, col: Color, px: int) -> Label:
 func _show() -> void:
 	if _panel == null:
 		return
-	_panel.visible = not plan.is_empty()
+	_panel.visible = not plan.is_empty()      # no steps (the player has no Hunter): no banner
+	if plan.is_empty():
+		return
 	if step >= plan.size():
 		_key.text = ""
 		_line.text = "That's the kit. Try it all on the dummies."

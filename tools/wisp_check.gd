@@ -21,7 +21,7 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
-var _spot: Vector3       # where each hero cycle starts: the drift rows walk the Wisp 1.4 m, a few cycles reach the abyss
+var _spot: Vector3       # each hero cycle starts here: the drift rows walk the Wisp 1.4 m a cycle, toward the abyss
 
 func run(main_node: Node) -> void:
 	main = main_node
