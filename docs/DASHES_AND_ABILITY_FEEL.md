@@ -375,7 +375,7 @@ Notation:
 
 | Ability | Tell | Cast / Impact | Sound | Cat | HS | Shake | Cohesion and part changes |
 |---|---|---|---|---|---|---|---|
-| **Gravity Slam** (leap 7m → pull 3.5m → burst 2.4m lift + spike) | the landing circle shows to everyone for the whole 0.5s flight and fills as it falls; a low gravity whine rises in pitch | two beats: the pull lands on touchdown (T2, debris sucked inward), then **0.12s later** the crater erupts (lift + spike). Spiked foes get a downward slam streak and a "SPIKED" word | tell: whine; impact 1: sub-bass whump; impact 2: control hard hit + crack; sweetener: pebbles | control | T2 then T4 on spike | 0.3 owner, 0.35 spiked | add `{"type":"delay","time":0.12}` to the second burst, so pull and lift read as two beats and the spike has a chance on foes the pull lifted. 0.5s flight is above the 0.40s hard-CC rule |
+| **Gravity Slam** (leap 7m → pull 3.5m → burst 2.4m lift + spike) | the landing circle shows to everyone for the whole 0.5s flight and fills as it falls; a low gravity whine rises in pitch | two beats: the pull lands on touchdown (T2, debris sucked inward), then **0.12s later** the crater erupts (lift + spike). Spiked foes get a downward slam streak | tell: whine; impact 1: sub-bass whump; impact 2: control hard hit + crack; sweetener: pebbles | control | T2 then T4 on spike | 0.3 owner, 0.35 spiked | add `{"type":"delay","time":0.12}` to the second burst, so pull and lift read as two beats and the spike has a chance on foes the pull lifted. 0.5s flight is above the 0.40s hard-CC rule |
 | **Mass Guard** (auto wall 2.4m, follows owner) | the kin rolls into a ball for 0.15s, then the plate rises | the plate slams up: dust, a clunk; enemy shots spark off it | impact: utility thunk; while up, shots hitting it ping | utility (shield) | T0 | 0 | add `then.on_end`: burst 1.5m push 6 ("the plate drops"), so the end is visible and gives a peel moment both sides can play around |
 | **Gravity Wake** (dodge rider) | a purple ring shows at the dash's end for 0.15s before the pull | foes slide in with debris streaks | sweetener: whump | control | T1 | 0.05 | setter for Slam |
 | **Heavy Star** (merge) | 0.35s collapse animation: a purple vortex column, ground cracks radiating out | on_start burst 4.5m: damage 22, push 14, lift 8. Pulses every 1.5s (burst 2.6m) | each pulse has a 0.3s ground ripple tell, a low drone while merged, and footsteps 2× louder | control | T4 on start; pulses T2, T4 on spike | 0.45 start; 0.15 per pulse | add `spike` to the pulses (the setter lifts, the next pulse spikes): a rhythm opponents can learn and dodge between |
@@ -585,7 +585,7 @@ FeelSpec for one stage =
 | `split` | a fan flash at the muzzle |
 | `pierce` | the projectile keeps its streak through targets; a small tick per target |
 | `return` | a returning streak and rising whirr |
-| `spike` | downward slam streaks, "SPIKED" word, T4 |
+| `spike` | downward slam streaks, T4 |
 | `exploit` (new) | a payoff glyph flashes on the target (the state's icon cracking), T4 |
 
 | Delivery | Automatic tell shape |

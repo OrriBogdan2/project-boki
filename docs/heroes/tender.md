@@ -49,7 +49,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | Hearthlight self_k 0.33 (not in the data) | LOW | (c) | kept, noted: healing yourself fully would make her solo-unkillable |
 | Ember Cast magazine 18 and a 15% slow while firing | LOW | (b) | 99f79210: no magazine (99) and no firing slow; `mm LMB: Ember Cast has no magazine ...` |
 | Empowered as +40% range | LOW | (c) | kept: the source names Empowered without saying what it adds |
-| Pickup ring (cosmetic) | LOW | (b) | 99f79210: removed (the CARRY word and the sound stay) |
+| Pickup ring (cosmetic) | LOW | (b) | 99f79210: removed (the sound stays; the CARRY word is cut) |
 | Self screen shake | MED | (c) | ext/no-shake owns it |
 | Dash -> ability rows | LOW | (c) | left as they are (a separate agent researches presses during a dash) |
 | RMB shape, E, X shape, Bearer, rank 3, dash VFX | ok | (a) | matched in the audit |
@@ -88,7 +88,7 @@ The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main 
 | 6 | Hearthlight cast and thrown look | closed | `cast_e` lantern plus and rising rays (`lk().burst("plus", ...)`), thrown disc `fill` 1.8, amber to teal rim, brighter than the carried ring (`_hearth_node`) |
 | 7 | Cooldowns | closed (data wins) | Burrseed 10.5 s, Hearthlight 11 s, dashes 7 / 14 s: the tooltip data over the blurry card (see the dash table's precedence); "mm RMB: Burrseed 10.5 s", "mm dashes: Elluna's cooldowns". Suggestion only: the footage card reads about 7.2 s for Bound by Fate |
 | 8 | Crook cast swirl | closed | a swirl, flash and sparks at the casting hand per ember (`_dress_ember`, `stats["swirls"]`); "mm LMB: each ember has its comet look, a swirl at the hand and the flick move" |
-| 9 | Ramp readability | partly open | closed: the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`) and "KINDLED" at 5. Open: damage numbers do not tint with the stacks (the shared `HudStyle.dmg_col` path in match.gd); the sheet itself calls it optional, so it is a suggestion, and the kit hook would sit in `tender_kit.gd` (in flight) |
+| 9 | Ramp readability | partly open | closed: the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`; no word at 5). Open: damage numbers do not tint with the stacks (the shared `HudStyle.dmg_col` path in match.gd); the sheet itself calls it optional, so it is a suggestion, and the kit hook would sit in `tender_kit.gd` (in flight) |
 | 10 | Dash direction | closed | `on_dash` steers by `h.roll_dir` (movement); "mm Shift: Relay Step goes where you move" |
 | 11 | Sound | n/a | no audio in the footage |
 
@@ -210,7 +210,7 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Hearthlight (E) | disc r 2.6 m (2.9 m on a toss) | heal zone 2.6 m | everyone | lantern ring | ok, asserted |
 | Hearth Call (X) range | dashed ring r 12.6 m round her | pick range 12.6 m | her screen / everyone while linked | range ring | a range marker, not an area; ok |
 | Hearth Call pick | ring r 0.7-0.8 m on the teammate and a line | the chosen target | her screen / everyone | ring + line | a marker, kept |
-| Hearth Call arrival | heal word + ring pulse | single heal | everyone | - | fixed: removed the 2.4 m and 1.0 m rings and a 1.8 m flare (a heal marks no area) |
+| Hearth Call arrival | heal number + ring pulse | single heal | everyone | - | fixed: removed the 2.4 m and 1.0 m rings and a 1.8 m flare (a heal marks no area) |
 | Relay Step (dash) | none | none | - | none | ok |
 
 Suggestion (not built): the wind-up flare could be dropped too if the owner wants the wind-up to show only the lane.

@@ -137,7 +137,7 @@ makes it louder:
 | R at 6-8 | rank pips | rank pip 1/2 plus a small "9" corner tag for the next rank |
 | enemy level | — | a small level badge at the left end of every enemy nameplate (with a gold rim once they're 6+ and their R is unlocked) |
 | resource | — | the archetype resource arc at the crosshair and a bar under the health bar (§3.2) |
-| bond | kin card on the portrait corner | the kin card's ring is the bond meter. When full, the R slot gets a **kin-coloured rim and "BONDED"** (§5) |
+| bond | kin card on the portrait corner | the kin card's ring is the bond meter. When full, the R slot gets a **kin-coloured rim** (§5) |
 
 ---
 
@@ -225,7 +225,7 @@ archetype. Options:
 |---|---|---|---|
 | **A. Separate merge key** (e.g. V) with its own bond meter | press V to merge any time the meter's full; R is the archetype ult | the most freedom; two separate big moments | a 7th combat key; merge + ult can stack into a huge spike; two "transform" states to read; screens get noisy |
 | **B. Merge replaces R when bond is full** | while bond is full, R casts the merge instead of the ult | no new key | you lose your ult whenever bond is full (or have to waste bond); confusing ("what does R do right now?"); the ult and merge compete instead of combining |
-| **C. Bonded R** (recommended) | R is always the archetype ult (level 6). When the bond meter is full, the next R is **bonded**: the ult fires with the kin's R sockets at bonded budget, and the kin merges for the merge's duration (passives, `on_shot`, pulses, and `merged` patches retargeted to RMB/E sockets). Bond spent; the ult goes on its normal cooldown | one key, one big moment that's both "my character" and "my kin"; the bond meter has a clear purpose; the kin's merge identity survives intact; the moment gets the T5 feel budget once, not twice; enemies get one clear tell (§3.5: kin glow, BONDED rim) | the merge can't happen without the ult; the bond meter and the ult cooldown need tuning so bond is usually full about every second R |
+| **C. Bonded R** (recommended) | R is always the archetype ult (level 6). When the bond meter is full, the next R is **bonded**: the ult fires with the kin's R sockets at bonded budget, and the kin merges for the merge's duration (passives, `on_shot`, pulses, and `merged` patches retargeted to RMB/E sockets). Bond spent; the ult goes on its normal cooldown | one key, one big moment that's both "my character" and "my kin"; the bond meter has a clear purpose; the kin's merge identity survives intact; the moment gets the T5 feel budget once, not twice; enemies get one clear tell (§3.5: kin glow, bonded rim) | the merge can't happen without the ult; the bond meter and the ult cooldown need tuning so bond is usually full about every second R |
 | **C′. Bonded R + hold R** (playtest toggle) | as C, plus: if bond is full and R is on cooldown, **hold R for 0.5s** to merge alone (the merge without the ult's blast) | covers a long ult cooldown with a full bond | slightly more to learn; a merge without the ult is weaker, and that's on purpose |
 
 **Recommendation: C, with C′ behind a playtest flag.** Details:
@@ -234,7 +234,7 @@ archetype. Options:
   unlock fills it once, so the very first R is bonded: the moment the owner liked, kept.
 - **Bonded R tell:** at a full bond, the kin's eyes and aura glow in its theme colour, with orbiting
   motes. Enemies within 20m see it, so "their next R is bonded" is readable. The R slot shows the
-  kin-coloured rim and "BONDED".
+  kin-coloured rim.
 - **Cast:** the ult's own cast tell, then **0.2s later** the merge's `on_start`. Two beats, one
   moment. One T5 hitstop for the caster (DASHES §5.4).
 - **MergeSpec change:** `merged` keys move from `active`/`auto` to the archetype sockets: `rmb`, `e`,
@@ -859,7 +859,7 @@ enemies, also sent to other players through the existing Net `fx` ring/bolt even
 the camera pushes in. Then the effect fires with an impact (ring, burst, flash, T4 shake, camera
 punch). The cooldown starts at the fuse, so the slot reads as spent; R rank 2 is 15% shorter. A
 Bonded R pours the Boki into the hunter during the fuse (kin-coloured streams from the Boki to the
-chest) and the merge starts on the same frame the ult fires, with the BONDED column.
+chest) and the merge starts on the same frame the ult fires, with the bonded column.
 
 | Archetype | R | Cooldown | Fuse | During the fuse |
 |---|---|---|---|---|
@@ -902,7 +902,7 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 | Slot | What it does |
 |---|---|
 | LMB (Longbow) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
-| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8. In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
 | E | **Hail Wall**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
@@ -918,7 +918,7 @@ stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
   crosshair reads "DEADEYE READY" (or "GREAT ARROWS · n" during the ult).
 - Payoff: "DEADEYE", the arrow's line redrawn in gold, `pay_deadeye`, T4 hitstop and shake.
 - Numbers: Longbow Focus shot 60 + 18 = 78 into a rooted target. Note the existing combo system
-  (`Combos.payoff`) also boosts a hit on a stunned target, so a Deadeye on a wall-PINNED foe reads
+  (`Combos.payoff`) also boosts a hit on a stunned target, so a Deadeye on a foe pinned to a wall reads
   about 108; it needs a full Heavy Shot into a wall first. Great Arrows 100 if all three land
   (Volley was 30 + a root over 2s, but area); Hail Wall ~35 over its life plus the slow and blight.
 - Bots: snare first when the target isn't pinned; loose the Deadeye when armed and they're pinned;
@@ -999,8 +999,8 @@ above is superseded by this:
 
 | Archetype | Input | Shape | Sound | Payoff |
 |---|---|---|---|---|
-| Thief | tap | a spinning Bola; the first foe it wraps is Grounded and it flies on; a second foe caught and both are stunned | a whirr, a cord snap, a stun clang | TANGLED; Marks |
-| Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: PINNED (stun); feeds Focus for the Deadeye |
+| Thief | tap | a spinning Bola; the first foe it wraps is Grounded and it flies on; a second foe caught and both are stunned | a whirr, a cord snap, a stun clang | Marks |
+| Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: a stun; feeds Focus for the Deadeye |
 | Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
 | Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
 | Juggernaut | tap (wound up) / hold / air / in the pull | a Finishing Slam cone after a 0.5s aimed wind-up; hold a Lunge; air a Meteor Drop; in the chain pull a Scorching Spin | a charge hum, a cleave and a slam | the sweet spot is the payoff; at rank 3 it also crashes and heals |
@@ -1052,7 +1052,7 @@ step (cooldown -10%, damage +15%); rank 3 carries the wiki's level 3-4 specials.
 | Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, one per Mark, up to 5; 4s, refreshed): +8% damage from your weapon hits per Mark. Primed hit +2, Bola +1. A knock heals 15% on top of the shared 10% knock heal (25%); an assist heals 25% |
 | LMB | tap / hold | Arcslinger, one stack per hit | Twin Blades or SMG; every hit stacks |
 | Shift | tap | **Quickflip**: a short dash and a speed boost; the next LMB is empowered (damage, 2 stacks, armor shred); landing it resets the cooldown; the speed boost ends on the empowered attack | **Vault**: a 3.4m flip, +30% speed until the next hit (2s max); the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s); landing it resets Vault (the payoff: VAULT RESET, T4, `pay_cashin`) |
-| RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 (TANGLED) |
+| RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 |
 | E (their Q) | tap, recast | **Farstep Dagger**: a dagger that sticks to surfaces or characters (slows 50% 4s); recast to teleport to it; after 6s you teleport anyway | **Shadow Knife**: 12m, sticks in the first foe (8, slow 50% for 2.5s) or where it stops; recast to step to it; after 5s you step anyway |
 | R | tap | **Fusillade**: after a short delay, up to 5 shots at each nearby enemy over 2s, each resetting all stacks' duration; the outer ring takes bonus damage and anti-heal; 2 charges of a weaker dash; LMB usable | **No R (kits2-nor).** **Jackpot** is a Mark trigger: the fifth Mark on a foe releases 4 knives at it over 0.45s (4.5 each, in sight within 14m); each knife refreshes every Mark; one free Vault (2.8m, it Primes too) for 4s; it rests 8s. R is the Boki Merge |
 
@@ -1076,7 +1076,7 @@ ranks.)
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
 | LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
-| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
+| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (T4, `pay_rage`, no word); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
 | R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
@@ -1091,11 +1091,11 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
-| Juggernaut | RMB tap, sweet spot (rank 1-2) | the SWEET SPOT payoff (T4) | wiki |
+| Juggernaut | RMB tap, sweet spot (rank 1-2) | the sweet-spot payoff (T4) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 3) | the payoff **and a crash** on the foe (3m, 24) that heals you 60% of its damage; it rests 12s | wiki (Volcanic Rebuke, folded in) |
 | Juggernaut | the crash, then a knock on someone it hit (2s) | **the crash is ready again**; the knock also heals 20% of their health and gives a Rampage charge | wiki |
 | Juggernaut | RMB hold that strikes nothing | the Smash cooldown **doubles** | wiki |
@@ -1135,7 +1135,7 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
   spin -> Rampage tip -> an Finishing Slam's sweet spot (rank 3: the crash and its heal) -> the knock
   makes the crash ready again.
 - Tells: red heat at the pauldrons that grows with Rage; the Enraged shell, swell and roar; the red "!"
-  over the head while a Smash winds up; crosshair "ENRAGED" / "SMASH · aim it".
+  over the head while a Smash winds up; crosshair "SMASH · aim it".
 - Retired: the Rage Smash (Brall's Empowered state buffs everything instead of one strike), the
   tap/hold Rampage carry, Earthshatter, Iron Hide, Avalanche, the chain's slow, leash and haul stun.
 

@@ -102,7 +102,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 | E air smash, E rank 3 | ok | (c) | owner / data |
 | LMB mag and reload | LOW | (c) | owner call (the footage never shows a reload); left as it is |
 | Passive cap and heal | LOW | (c) | wiki-sourced, owner call |
-| Passive stack ring | LOW | (b) | no ground ring on a stack: the word, the sound and the flex |
+| Passive stack ring | LOW | (b) | no ground ring on a stack: the sound and the flex |
 | X | ok | (c) | matches |
 | X stop refund | LOW | (c) | ours, noted |
 | Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and X combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
@@ -161,7 +161,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 Where the footage and the wiki are silent, we picked the most likely behaviour (the owner can correct these):
 - "Through terrain" means rocks, trees, props and cliff faces: the hook flies through them and the body is hauled up and over
   (lifted onto a cliff face, carried to the first clear spot past a rock). A placed ability wall still stops the hook and the reel
-  ("SNAGGED" / "WALLED"). The abyss is not special: a body dragged over it falls (the knock rules).
+  (dust where it snags a wall). The abyss is not special: a body dragged over it falls (the knock rules).
 - The reel can't be cancelled by the caster; he can shuffle (20%) and barge during it (the shuffle is what swings the body).
 - Hook hold (owner item 31): the source data has no number for walking while the arm is out, so the out-flight walk is the owner's default band (20%). During the reel he stands braced (the footage: side-on through the pull) and shuffles at the same 20%, between the owner's fallback of rooting him and the wiki's physics pull (the shuffle still swings the body). His height is held only while he is off the ground (on the ground there is nothing to hold); only his vertical speed is held, so a mid-air drift is the same 20% walk and knocks still shove him.
 - The grab's hitbox is the hook's own size; with no target it flies its full 11.5m.
@@ -188,7 +188,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Fire a burst, pause briefly, then pause 1s | volley 1 on the aim line, 2-3 fanned wider; after 0.3s off still fanned; after 1s off the next volley is aimed again | "gun: the first volley of a burst flies straight down the aim line"; "gun: the volleys after it fan out"; "gun: a short pause keeps the fan"; "gun: after a pause past the reset beat the next volley is aimed again" (`tools/dredge_gun_check.gd`) |
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, one aim line | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the cone folds into one aim line" |
 | Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the stretched arm shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the stretched arm is drawn (through rocks)" |
-| Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
+| Wait for the arrival | foe lands at your feet (not Grounded); your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Abyssal Hand is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
 | Reel, then Anchor Drop | the fist raised over the filling cone, the slam at ~0.38s: damage, a long stun with a spiral, Grounded | "anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast"; the timing rows below (`dredge_timing_check.gd`); "anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction"; "anchor tell: the slam hits inside the drawn cone and nothing outside it"; "combo: reel > Anchor Drop = damage, stun, Grounded"; "anchor: the stunned foe shows a stun spiral"; "anchor: E cooldown set" |
