@@ -25,7 +25,7 @@ The guild doc gains `open` (default true); the founder can close the clan to new
 content: leaving or never joining costs nothing. Size cap 24, as the spec's default.
 
 ## Consequences
-- `Save.VERSION` 12 to 13 (renumbered when merged after Evo took 12); the migration turns a saved `guild_id` into a member clan, everyone else gets `{}`.
+- `Save.VERSION` 13 to 14 (renumbered when merged after Evo took 12 and the garden zones took 13); the migration turns a saved `guild_id` into a member clan, everyone else gets `{}`.
 - Net.VERSION: no. This is the page store, not the match relay.
 - Closing is checked in the join button only (the store has no rules); a forged join can at worst put a name on
   a roll, never touch another save.

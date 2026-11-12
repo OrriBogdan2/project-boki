@@ -176,7 +176,7 @@ static func profile_doc() -> Dictionary:
 	for r in KinBox.farm().slice(0, 12):       # visitors see the kin out on your farm
 		Evo.ensure(r)
 		roster.append({"uid": r["uid"], "species": r["species"], "name": r["name"], "level": int(r["level"]),
-			"trust": int(r["trust"]), "forms": r["forms"], "muts": r["muts"], "shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)})
+			"trust": int(r["trust"]), "zone": GardenZones.zone_of(r), "forms": r["forms"], "muts": r["muts"], "shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)})
 	var d := {
 		"name": Save.d.get("name", "Hunter"), "cls": Data.class_of_save(), "weapon": Save.d.get("weapon", ""),
 		"active": Save.d.get("active", ""), "roster": roster,
@@ -186,7 +186,9 @@ static func profile_doc() -> Dictionary:
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
 		"tag": ClanInfo.my_tag(), "last": ClanInfo.last_deed(Save.d.get("log", [])),
 		"decor": Save.d.get("decor", {}).get("house", []),
+		"showcase": Save.d.get("showcase", []),
 	}
+	d.merge(VisitZones.doc())
 	return d
 
 ## cb gets [{id, d}] with d already cleaned (see clean_island).
@@ -749,7 +751,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
 		"tag": ClanInfo.clean_tag(d.get("tag")),
-		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system()))}
+		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system())),
+		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
 
 ## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.
 static func clean_snap_kin(rv) -> Dictionary:
@@ -767,7 +770,7 @@ static func clean_snap_kin(rv) -> Dictionary:
 		if Evo.PART_NAMES.has(mid) and Evo.AFF.has(aff):
 			muts.append({"id": mid, "lv": clampi(int_of(m.get("lv"), 1), 1, 5), "aff": aff})
 	return {"uid": txt_of(r.get("uid"), "", 24), "species": sp, "name": say_of(r.get("name"), "Kin", 14),
-		"level": clampi(int_of(r.get("level"), 1), 1, 999), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
+		"level": clampi(int_of(r.get("level"), 1), 1, 999), "zone": txt_of(r.get("zone"), GardenZones.start(), 24), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
 		"forms": forms.slice(0, 50), "muts": muts.slice(0, 40), "traits": Data.KIN[sp]["traits"].duplicate(), "memory": [],
 		"shimmer": r.get("shimmer", false) == true, "mutations": arr_of(r.get("mutations")).map(func(x): return txt_of(x)).filter(func(x): return not Mutations.info(x).is_empty()).slice(0, 4)}
 
