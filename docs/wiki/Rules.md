@@ -448,6 +448,37 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | courts | {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}} |
 | courts_doc | A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post. |
 
+## blight_nests (`content/rules/blight_nests.json`)
+
+Blight nests (scripts/match/blight_nests.gd, docs/SPAWNS.md): the only place Skitters come from. Fixed spots picked from the match seed, the same on every client; each holds a fixed stock, stirs warn_s before Skitters climb out, and once empty stays empty for cooldown_s. Breaking a nest pays like a small camp.
+
+| Setting | Value |
+|---|---|
+| per_island | [1, 1, 2] |
+| _per_island | nests on an island, by its danger (outer, middle, core) |
+| stock | [6, 7, 8] |
+| _stock | Skitters a full nest holds, by island danger |
+| cooldown_s | 300 |
+| _cooldown_s | seconds an empty or broken nest stays empty before it fills (and regrows) again |
+| warn_s | 2 |
+| _warn_s | seconds a nest pulses and hisses before Skitters climb out |
+| wake_r | 9 |
+| _wake_r | a hunter this close (on its level, in sight) stirs the nest |
+| noise_k | 0.6 |
+| _noise_k | a loud noise (shot, blast, chest; Blight noise table) stirs a nest within this share of its reach |
+| shriek_r | 22 |
+| _shriek_r | a Warden's shriek stirs nests this close: they release what they hold, never more |
+| area_r | 26 |
+| area_cap | 8 |
+| _area_cap | at most this many Skitters alive within area_r of a nest; the rest wait in it |
+| pop_xp | 80 |
+| _pop_xp | XP for each hunter of the breaking squad within 14 m (a knock pays 90) |
+| tide_s | 40 |
+| _tide_s | the tide: every tide_s (on the match clock) the nearest stocked nest within tide_r of each squad outside the ring stirs |
+| tide_r | 45 |
+| space_m | 16 |
+| _space_m | nests keep this far apart, 9 m from camps, exits, Warden posts and drop spots, and out of lairs |
+
 ## How kit hits land on a Boki (`content/rules/boki_hit.json`)
 
 How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the source's creeps and summons take every ability as written (one number per card, no creep scaling) and every crowd control on the cards works on them.
@@ -988,7 +1019,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | rarity_weights | [30, 36, 22, 9, 3] |
 | slot_weights | {"glove": 3.0, "passive": 1.5, "armor": 2.0, "boots": 2.0} |
 | ground_spacing | 1.25 |
-| tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}], "chest": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}]} |
+| tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_nest": [{"kind": "tune", "chance": 0.5}, {"kind": "gear", "chance": 0.3}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}], "chest": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}]} |
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
@@ -1109,8 +1140,6 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | _tide_src_hp | the source's base health for a medium Hunter: the curve is scaled by our medium health over this, so a stage takes as long to kill as there |
 | tide_tick_s | 1 |
 | _tide_tick_s | seconds between tide hits (the source gives a per-stage value and no rate: read as per second) |
-| tide_heat | 0.06 |
-| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
 | map | {"_doc": "where the seats sit (spec section 8): metres on the 216 m design; a map's \"ways_scale\" (1.412 on the 305 m Hollow Crown) stretches these, the tide radii and gate_dist, never times. tools/ways_out_sites.py (the generators) and --ways-out-map-check enforce them", "seat_window_s": 150.0, "_seat_window_s": "a quest seat's site stays inside the tide ring this long after it opens (and lies outside the final ring)", "uplink_band": [42.0, 50.0], "_uplink_band": "the two uplink outposts stand this far from the Heart", "uplink_apart_deg": 90.0, "_uplink_apart_deg": "degrees round the Heart between the two outposts (opposite sides; exactly opposite is impossible with gate_clear)", "gate_clear": 60.0, "_gate_clear": "the seeded Heart Gate keeps this far from every uplink outpost", "gate_arc_min_deg": 30.0, "_gate_arc_min_deg": "whole degrees of Gate angle that must be on ground and gate_clear from both outposts"} |
 | reward | {"_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is 3x to 4x minor in what it pays (gems 150 vs 40) and the only one with the egg; the ratio is an open question in docs/decisions/0051", "minor": {"egg": false, "seeds": {"emberberry": 1, "sunroot": 1, "mindmint": 1, "tidebloom": 1}, "goods": {"heartwood": 1}, "gems": 40, "trust": 6.0}, "major": {"egg": true, "seeds": {"emberberry": 3, "sunroot": 3, "mindmint": 3, "tidebloom": 3}, "goods": {"heartwood": 2, "starstone": 2}, "gems": 150, "trust": 20.0}} |
 | quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
