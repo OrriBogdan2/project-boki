@@ -39,6 +39,7 @@ var out_path := ""
 var zone := ""
 var trios := 0           # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
 var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
+var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
 var hud_us := 0
@@ -131,6 +132,8 @@ func _match() -> Array:
 		m.step(DT)
 		m._process(DT)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
+		if trios > 0:
+			_count_rigs(m)
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
@@ -144,7 +147,7 @@ func _match() -> Array:
 			_pose_sample(m)
 			last = Time.get_ticks_usec()      # (the timed poses stay out of the frame times)
 	_summary("match", fl)
-	_pose_lines(m)
+	_pose_lines(m, fl.size())
 	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
@@ -181,6 +184,14 @@ func _pose_sample(m: Match) -> void:
 			(sk as Skeleton3D).force_update_all_bone_transforms()
 		_pose_file(m, "boki", k.pos, t0)
 
+## Hero rigs (WardenGlb.Sync) that pose this frame: those whose Hunter did not hold theirs (WardenGlb.POSE_HELD).
+func _count_rigs(m: Match) -> void:
+	for h in m.hunters:
+		if h.model and h.model.get_node_or_null("Warden/Sync"):
+			rigs_posed.y += 1
+			if int(h.model.get_meta(WardenGlb.POSE_HELD, -1)) != Engine.get_process_frames():
+				rigs_posed.x += 1
+
 func _pose_file(m: Match, kind: String, at: Vector3, t0: int) -> void:
 	var us := Time.get_ticks_usec() - t0
 	var d := Vector2(at.x - m.cam.focus.x, at.z - m.cam.focus.z).length()
@@ -194,7 +205,7 @@ func _pose_file(m: Match, kind: String, at: Vector3, t0: int) -> void:
 	pose_us[key] = [int(acc[0]) + us, int(acc[1]) + 1]
 
 ## "BENCH pose" lines: us per pose by band, the poses filed, and the share of characters in it.
-func _pose_lines(m: Match) -> void:
+func _pose_lines(m: Match, frames: int) -> void:
 	var ks := pose_us.keys()
 	ks.sort()
 	var all := 0
@@ -204,6 +215,8 @@ func _pose_lines(m: Match) -> void:
 		print("BENCH pose %s: %.0f us per pose, %d poses (%.0f%%)" % [k, float(acc[0]) / acc[1], acc[1],
 			100.0 * acc[1] / maxf(1.0, all)])
 	print("BENCH pose hunters %d, boki %d, camera zoom %.2f" % [m.hunters.size(), m.kins.size(), m.cam.zoom])
+	var n := maxf(1.0, frames)
+	print("BENCH pose Hero rigs posed per frame: %.1f of %.1f" % [rigs_posed.x / n, rigs_posed.y / n])
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
