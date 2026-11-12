@@ -9,6 +9,7 @@ func run(main_node: Node) -> void:
 	await _breah()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
+	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
 	n += ult_check.n
 	fails += ult_check.fails
 	var flow = load("res://tools/dash_flow_check.gd").new()
@@ -869,8 +870,10 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	var t := 0.0
 	while not P.gliding and t < 1.0:
 		P.inp["glide"] = true
+		P.inp["glide_btn"] = true     # (the glide button: a held Space never opens it)
 		m.step(DT)
 		t += DT
+	P.inp["glide_btn"] = false
 	var glided := P.gliding
 	var s0 := K.slams
 	var vx0 := absf(P.vel.x)
@@ -948,7 +951,7 @@ func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))
