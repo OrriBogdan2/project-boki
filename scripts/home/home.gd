@@ -3950,7 +3950,8 @@ func _use_visiting(it: Dictionary) -> void:
 				_emote(it["k"], "♥")
 				return
 			petted[rec["uid"]] = true
-			Social.send_gift(String(rec.get("owner", visit_id)), "pet", String(rec["uid"]))   # a clan base's Boki each have their own owner
+			# a clan base's Boki each have their own owner
+			Social.send_gift(String(rec.get("owner", visit_id)), "pet", String(rec["uid"]))
 			_emote(it["k"], "♥")
 			Sfx.play("kin_happy")
 			_toast("%s will remember your visit" % rec["name"])
