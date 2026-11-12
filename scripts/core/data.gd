@@ -379,6 +379,7 @@ const TIERS := [
 ]
 
 ## Home islands beyond the first one. Build a bridge to reach them. Rects are in home grid tiles.
+## Retired in the Boki base (base_mode hides the unbuilt bridges); delete after sign-off, GARDEN.md 10.7 step 11.
 const ISLES := {
 	"orchard": {"name": "Orchard Isle", "cost": 100, "need": 1, "c": Vector2(69, 11), "r": Vector2(8.5, 6.5),
 		"bridge": [62, 14, 63, 29], "sign": Vector2(60.6, 29.4), "desc": "A sunny isle with room for a greenhouse."},
@@ -419,6 +420,5 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"length": 360.0,       # seconds until the islands fall
 	"down_hp": 100.0,      # the pool a downed hunter bleeds out of (it drains over 15 seconds)
 }
