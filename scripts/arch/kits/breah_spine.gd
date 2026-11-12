@@ -3,7 +3,7 @@ extends RefCounted
 ## Tarek's ultimate on X, Basalt Spine (HeroUlt): a ridge of rocks laid in a shallow arc round him. Tap X for
 ## a ridge centred at the cursor, across his aim, bowing away from him (its ends curve back toward him by
 ## `bend` degrees in all); hold X and drag the cursor to swing it round that centre, let go to cast. Everyone
-## then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward over 0.4s, slowing
+## then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward over 0.8s, slowing
 ## whoever stands beside them and shoving anyone on the line aside. They are ordinary rocks of his, one rock
 ## deep (block foes and their shots, stand on them, punch them into foes). Over the abyss the rocks are
 ## ground for as long as they stand (Ent.over_void reads StoneStand): the ridge is a walkway, and when the
