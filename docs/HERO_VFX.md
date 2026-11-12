@@ -25,7 +25,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 
 | layer `p` | what | key fields |
 |---|---|---|
-| `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `yaw`, `flip` |
+| `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `lean` (deg it turns toward the camera about the aim, so a stood-up arc never shows edge-on), `yaw`, `flip` |
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow` |

@@ -58,6 +58,7 @@ func run(main: Node) -> void:
 	_budget(V, P)
 	await _holds(main, m, V, P)
 	_view(m, V, P)
+	_lean()
 	_kit(m, V, P)
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
@@ -222,6 +223,23 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(ally), HeroVfx.ALLY_K), "an ally's effects sit at ALLY_K")
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
+
+## A sweep stood up along the aim ("tilt" 90) turns up to its "lean" toward the match camera: no aim shows it
+## edge-on, and it never tips past the lean.
+func _lean() -> void:
+	var back := Vector3(0, sin(deg_to_rad(57.0)), cos(deg_to_rad(57.0)))
+	var layer := {"tilt": 90.0, "lean": 30.0}
+	var worst := 1.0
+	var within := true
+	for i in 8:
+		var b := Basis(Vector3.UP, TAU * i / 8.0)
+		var roll := HeroVfx.sweep_roll(layer, b, back)
+		var normal := b * Basis(Vector3(0, 0, 1), roll) * Vector3.UP
+		worst = minf(worst, absf(normal.dot(back)))
+		within = within and absf(roll - PI * 0.5) <= deg_to_rad(30.0) + 0.001
+	var stood := HeroVfx.sweep_roll({"tilt": 90.0}, Basis(), back)
+	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
+	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
