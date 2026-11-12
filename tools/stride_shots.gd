@@ -52,7 +52,7 @@ func _speeds(id: String) -> Array:
 		v.append(top)
 	var let_go := v.size()
 	while s > 0.0:
-		s = HunterMove.brake(Vector2(s, 0.0), top, 1.0, DT).x
+		s = HunterMove.brake(Vector2(s, 0.0), 1.0, DT).x
 		v.append(s)
 	for f in TAIL:
 		v.append(0.0)
