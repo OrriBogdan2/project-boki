@@ -542,6 +542,17 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}} |
 | kinds | {"crate": {"weight": 0.45, "material": "wood", "chunks": 14, "loot": {"gems": [2, 4], "gem_base": 2, "tonic": 0.3, "armor": 0.4, "armor_amount": 25, "table": "crate"}}, "pot": {"weight": 0.3, "material": "clay", "chunks": 12, "loot": {"gems": [1, 2], "gem_base": 2, "seed": 0.2}}, "barrel": {"weight": 0.13, "material": "wood", "chunks": 16, "loot": {"gems": [1, 3], "gem_base": 2, "tonic": 0.15}}, "keg": {"weight": 0.12, "material": "metal", "chunks": 18, "loot": {}, "explosive": {"radius": 2.6, "damage": 22.0, "knockback": 10.0, "lift": 7.5, "fuse": 0.45, "chain_fuse": 0.22, "edge_falloff": 0.5, "height": 2.0, "color": "ff7a3a"}}} |
 
+## build_sfx (`content/rules/build_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | BuildSfx (scripts/home/build_sfx.gd): which pieces land with a stone thunk (everything else lands as wood), the level of the build cues, and how long a blocked spot stays quiet after its knock. |
+| stone | ["stone_wall", "path_stone", "pillar", "kin_statue", "fountain", "toy_stone", "quarry", "kiln", "graveyard", "cold_store", "hearth_oven"] |
+| cue_db | -3 |
+| knock_quiet_s | 1.5 |
+
 ## camera (`content/rules/camera.json`)
 
 

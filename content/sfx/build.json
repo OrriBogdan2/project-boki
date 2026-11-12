@@ -1,0 +1,10 @@
+{
+ "group": "build",
+ "name": "Build and decorate",
+ "script": "tools/gen_sfx_build.py",
+ "sounds": {
+  "build_pick": "ui", "build_rotate": "ui", "build_place_wood": "ui", "build_place_stone": "ui",
+  "build_store": "ui", "build_move": "ui", "build_blocked": "ui"
+ },
+ "signature": []
+}
