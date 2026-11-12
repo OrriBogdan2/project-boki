@@ -1358,7 +1358,7 @@ func _bulwark_combos() -> void:
 	step(m, 4.0)
 	ok("bulwark: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the holds: no Crushing Blow when LMB is let go, the raised shield comes down
-	
+
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
