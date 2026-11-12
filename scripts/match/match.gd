@@ -3097,6 +3097,22 @@ func _make_deco(kind_s: String, col: Color, size: float, rope: bool) -> Node3D:
 	add_child(n)
 	return n
 
+## Shots in flight drawn `alpha` of the way through a step (reels that step the match themselves call it too).
+func render_shots(alpha: float) -> void:
+	for s in shots:
+		if s.has("deco"):
+			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+		if s["node"]:
+			var mi: MeshInstance3D = s["node"]
+			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
+			var v: Vector2 = s["vel"]
+			if v.length() > 1.0:
+				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
+				var r: float = s.get("vr", s["r"])
+				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+
 func _render_deco(s: Dictionary, alpha: float) -> void:
 	var n: Node3D = s["deco"]
 	if not is_instance_valid(n):
@@ -3202,19 +3218,7 @@ func _process(delta: float) -> void:
 			e.lod_dt += delta
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
-	for s in shots:
-		if s.has("deco"):
-			_render_deco(s, alpha)
-		if String((s["x"] as Dictionary).get("src", "")) == "abil":
-			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-		if s["node"]:
-			var mi: MeshInstance3D = s["node"]
-			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
-			var v: Vector2 = s["vel"]
-			if v.length() > 1.0:
-				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
-				var r: float = s.get("vr", s["r"])
-				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+	render_shots(alpha)
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))

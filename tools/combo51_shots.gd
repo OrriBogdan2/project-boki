@@ -169,6 +169,7 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start(o)
 	m.set_process(false)
+	HeroVfx.of(m).set_process(false)      # (ticked by _go's steps, as in vv_shots)
 	P = m.player
 	for mb in m.mobs:
 		mb.queue_free()
