@@ -258,7 +258,8 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
-## Planted in the guard and the cleave: no other button does anything (but E on a held chain, use_e).
+## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits BUFFER for the
+## cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
 
@@ -311,9 +312,13 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h) or riposte.move_k() <= 0.0:
-		# merged, the form owns the attack key (a charge from before must not go off); guarding, no swings
-		lmb_was = false
+	if KinMerge.active(h):
+		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
+		return true
+	if riposte.move_k() <= 0.0:
+		# planted in the guard or the cleave: a slash press is kept for BUFFER and swings as the cleave lands
+		if held and not lmb_was: lmb_buf = BUFFER
+		lmb_was = held
 		return true
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
@@ -635,10 +640,11 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
-## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop) is kept for
-## BUFFER and goes off when it ends; in the Warchain's pull (and just after) it spins at once.
+## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
+## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Warchain's pull (and just
+## after) it spins at once.
 func press_rmb() -> void:
-	if smash_running():
+	if _rmb_waits():
 		rmb_queued_at = m.time
 		return
 	super.press_rmb()
@@ -649,6 +655,10 @@ func press_rmb() -> void:
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
+## Every interaction is chainable (DECISIONS): a Smash pressed in a heavy move or the Riposte's planted beat waits.
+func _rmb_waits() -> bool:
+	return smash_running() or riposte.move_k() <= 0.0
+
 ## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
 ## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
@@ -656,7 +666,7 @@ func _pull_waits() -> bool:
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
-	if not smash_running() and rmb_queued_at > -9.0:
+	if not _rmb_waits() and rmb_queued_at > -9.0:
 		var fresh: bool = m.time - rmb_queued_at <= BUFFER
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
