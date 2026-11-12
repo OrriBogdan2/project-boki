@@ -9,16 +9,19 @@ extends RefCounted
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
-## nap in a pile; rivals stare and huff.
+## nap in a pile; rivals stare and huff. A Boki that would thrive in another open zone sometimes goes
+## and waits at the return pad with a bubble: it looks at the pad (HubWaystone.pad) the way it comes
+## to look at a newcomer, and E on it sends it (HubWaystone.answer); ignored, it wanders off.
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, ASK }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Ask"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, ASK }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead", "Ask"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.ASK],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.ASK],
+	S.LEAD: [S.ROAM, S.NAP],
 	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
 	S.EAT: [S.ROAM, S.NAP],
 	S.NAP: [S.ROAM],
@@ -41,10 +44,13 @@ var night := false
 var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
+var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
+var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
 
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
+	whistle = BaseWhistle.new(home, R)
 
 static func nocturnal(rec: Dictionary) -> bool:
 	return Work.NOCTURNAL.has(String(rec["species"]))
@@ -87,16 +93,23 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: BaseTag.clear(k))
-		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
-		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_spot"))
+		m.on_exit(S.NAP, func(_to: int) -> void:
+			k.erase("life_pile")
+			k.erase("life_spot")
+			BaseDuo.woke(k))
 		m.on_exit(S.ASK, func(_to: int) -> void: k.erase("life_ask"))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
 		k["life"] = m
 	return k["life"]
 
+## How fast `rec` loses joy: a Boki thriving in this zone loses it more slowly (garden_zones.json thrive).
+static func joy_rate(rec: Dictionary) -> float:
+	return float(GardenZones.rules()["thrive"]["joy_rate"]) if GardenZones.thrives(rec) else 1.0
+
 ## Moves every machine on; called each frame from home.gd _move_kin, ticks at 10 Hz.
 func step(d: float) -> void:
+	whistle.step(d)
 	_acc += d
 	if _acc < STEP:
 		return
@@ -107,6 +120,8 @@ func step(d: float) -> void:
 		var recs: Array = h.kins.map(func(k): return k["rec"])
 		BaseDrift.day(recs)
 		BaseRival.day(recs)
+		for k in h.kins:
+			GardenItems.day(k["rec"])
 	_day_t = h.day_t
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one
@@ -119,6 +134,9 @@ func step(d: float) -> void:
 			_seen[uid] = true
 	for k in h.kins:
 		_tick(k, dt)
+	GardenVisitor.step(h, dt)
+	if h.hway:
+		h.hway.step(dt)
 
 ## Separation scale for two Boki (home.gd _separate_kin): napping friends lie close in a pile.
 func pile(a: Dictionary, b: Dictionary) -> float:
@@ -171,7 +189,7 @@ func choose(k: Dictionary) -> void:
 		if bond(rec, o["rec"]) <= float(R["rival_at"]) and randf() < 0.3 + float(traits.get("temper", 0.5)) * 0.5:
 			_watch(k, o, "rival")
 			return
-	if BaseRival.ask(self, k):
+	if _ask(k) or BaseRival.ask(self, k):
 		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
@@ -203,6 +221,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		m.go(S.NAP, "dozed")
 	if k.has("play") and m.is_in(S.ROAM):
 		m.go(S.PLAY, "toy")      # home_toys.gd took it to a toy (home.gd _care_goal): the machine says so
+	elif m.is_in(S.ROAM) and BaseTutLead.target(h, k).x != INF:
+		m.go(S.LEAD, "tutorial")      # the base tutorial's step is up: your Boki leads (BaseTutLead)
 	match m.state:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
@@ -224,6 +244,9 @@ func _tick(k: Dictionary, dt: float) -> void:
 			_look_tick(k, m)
 		S.CHORE:
 			BaseChore.tick(self, k, m, dt)
+		S.LEAD:
+			if not BaseTutLead.tick(h, k):
+				m.go(S.ROAM, "led")
 		S.ASK:
 			BaseRival.ask_tick(self, k, m, dt)
 	if not m.is_in(S.NAP):
@@ -252,7 +275,9 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	for o in h.kins:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
+			GardenFirstDay.mark("nap", h)
 			add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
+			BaseDuo.nap_beside(k, o, dt)
 
 ## HomeToys runs the play (walk, play, squabble, finish); the machine only shows it and lets go when it is done.
 func _play_tick(k: Dictionary, m: Fsm, _dt: float) -> void:
@@ -268,6 +293,8 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 		k["goal"] = k["pos"]
 		(k["node"] as Node3D).rotation.y = atan2(-to.x, -to.y)
 	var cap := float(R["max"]["watch" if m.is_in(S.WATCH) else "react"])
+	if h.hway and is_same(at, h.hway.pad):
+		cap = float(k["life_for"])      # an ask at the pad waits its whole time
 	if m.since >= minf(float(k["life_for"]), cap):
 		m.go(S.ROAM, "looked")
 
@@ -337,6 +364,23 @@ func _watch(k: Dictionary, o: Dictionary, why: String) -> void:
 	k["t"] = float(k["life_for"])
 	_huff(k)
 
+## It would thrive in another open zone: now and then (once per load) it goes to wait at the pad.
+func _ask(k: Dictionary) -> bool:
+	var uid := String(k["rec"]["uid"])
+	var Z := GardenZones.rules()
+	if h.hway == null or _asked.has(uid):
+		return false
+	var id := GardenZones.wants(k["rec"])
+	if id == "" or randf() >= float(Z["ask_chance"]) or not machine(k).go(S.REACT, "ask"):
+		return false
+	_asked[uid] = true
+	k["life_at"] = h.hway.pad
+	k["life_for"] = float(Z["ask_s"])
+	k["t"] = float(k["life_for"])
+	var line := "%s keeps looking at %s (%s: send it)"
+	h._say(k, line % [k["rec"]["name"], GardenZones.info(id)["name"], Settings.key_cap("interact")], k["life_for"])
+	return true
+
 ## A new Boki on the base: the ones near by come over to have a look.
 func _arrived(k: Dictionary) -> void:
 	for o in _near(k):
@@ -354,7 +398,8 @@ func _awake(k: Dictionary) -> bool:
 ## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors or leaping).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.get("nap_go", false) or float(k.get("hold_t", 0.0)) > 0.0
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) \
+		or float(k.get("hold_t", 0.0)) > 0.0
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()

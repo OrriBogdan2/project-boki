@@ -3,39 +3,13 @@ extends RefCounted
 ## The Games board (briefs/design/GARDEN.md section 5), a prop by the Training post, base_mode only.
 ## Press interact at it for a plain list of the built Boki-vs-Boki minigames (the Dash, Stump Shove,
 ## Seek, Spark Volley): each one's best Boki (most wins) and last winner. Up and Down pick a game and
-## interact starts it through the game's own use(), so no rules live here. Results are kept in
-## Save.d["game_board"] = {game id: {"last": name, "wins": {name: count}}}; fresh() gives {} and
-## an older save simply has no results yet, so there is no migration.
+## interact starts it through the game's own use(), so no rules live here. Results are MinigameHub's
+## (Save.d["game_board"]); this prop adds the rematch spot for BaseRival.
 
 const BOARD_OFF := Vector3(-2.4, 0, 2.6)     # m from the Training post to the board
 const REACH := 1.6                            # m from the board to open it
 const CLOSE_AT := 3.2                         # m from the board at which the list closes itself
 const POST_H := 1.1                           # m, the board's height
-
-## Records a finished game for the board (id is the game's key in the list below) and tells BaseRival who lost.
-static func record(game: String, win: Dictionary, lose: Dictionary) -> void:
-	BaseRival.result(game, win, lose)
-	var all: Dictionary = Save.d["game_board"]
-	if not all.has(game):
-		all[game] = {"last": "", "wins": {}}
-	var rec: Dictionary = all[game]
-	var who := String(win["name"])
-	rec["last"] = who
-	rec["wins"][who] = int(rec["wins"].get(who, 0)) + 1
-
-## "no games yet", or "best Pip, 3 wins · last Rue".
-static func summary(game: String) -> String:
-	var rec: Dictionary = Save.d["game_board"].get(game, {})
-	var wins: Dictionary = rec.get("wins", {})
-	if wins.is_empty():
-		return "no games yet"
-	var best := ""
-	for n in wins:
-		if best == "" or int(wins[n]) > int(wins[best]):
-			best = String(n)
-	var count := int(wins[best])
-	var unit := "win" if count == 1 else "wins"
-	return "best %s, %d %s · last %s" % [best, count, unit, rec["last"]]
 
 var h                          # the Home screen
 var board: Node3D = null
@@ -116,7 +90,7 @@ func _fill() -> void:
 	var list := games()
 	for i in list.size():
 		var on := i == pick
-		var line := "%s%s: %s" % ["> " if on else "  ", list[i][1], summary(list[i][0])]
+		var line := "%s%s: %s" % ["> " if on else "  ", list[i][1], MinigameHub.summary(list[i][0])]
 		v.add_child(UI.label(line, 14, UI.INK if on else UI.MUTED))
 	var keys := ["up", "down", "interact", "menu"].map(func(a): return Settings.key_cap(a))
 	v.add_child(UI.label("%s / %s pick   %s start   %s close" % keys, 12, UI.MUTED))

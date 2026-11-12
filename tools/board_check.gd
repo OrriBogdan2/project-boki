@@ -40,15 +40,13 @@ func _kin(sp: String, kname: String) -> Dictionary:
 	return k
 
 func _results() -> void:
-	ok(BaseBoard.summary("race") == "no games yet", "results: nothing played reads 'no games yet'")
-	var a := _kin("zapple", "Pip")
-	var b := _kin("cindle", "Ash")
-	BaseBoard.record("race", a, b)
-	BaseBoard.record("race", a, b)
-	BaseBoard.record("race", b, a)
-	var line := "best Pip, 2 wins · last Ash"
-	ok(BaseBoard.summary("race") == line, "results: best is the most wins, last is the latest")
-	ok(BaseBoard.summary("seek") == "no games yet", "results: another game keeps its own record")
+	ok(MinigameHub.summary("race") == "No games yet", "results: nothing played reads 'No games yet'")
+	MinigameHub.record("race", "Pip")
+	MinigameHub.record("race", "Pip")
+	MinigameHub.record("race", "Ash")
+	var line := "Best Pip, 2 wins · last Ash"
+	ok(MinigameHub.summary("race") == line, "results: best is the most wins, last is the latest")
+	ok(MinigameHub.summary("seek") == "No games yet", "results: another game keeps its own record")
 
 func _key(home, action: String) -> void:
 	var ev := InputEventAction.new()
@@ -126,7 +124,7 @@ func _games(home) -> void:
 			total += int(wins[n])
 		var last: String = Save.d["game_board"].get(ids[i], {}).get("last", "")
 		ok(total == 1 and wins.has(last), "%s: one result recorded, last winner is the winner" % ids[i])
-		ok(not BaseBoard.summary(ids[i]).begins_with("no games"), "%s: the list shows it" % ids[i])
+		ok(not MinigameHub.summary(ids[i]).begins_with("No games"), "%s: the list shows it" % ids[i])
 		game.tick(60.0)
 
 ## With a game on, the board starts nothing on top of it.
