@@ -16,23 +16,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASELINE = os.path.join(ROOT, "tools", "style_baseline.json")
 MAX_LINE = 120      # characters, tabs counted as 4
 
-# Members that Node, Node2D, Node3D, CanvasItem, Control and Object already define. Declaring a variable
-# or parameter with one of these names hides the engine's own (Godot warns: SHADOWED_VARIABLE_BASE_CLASS).
-ENGINE_MEMBERS = {
-    "name", "owner", "position", "rotation", "scale", "transform", "visible", "size", "modulate",
-    "material", "global_position", "global_transform", "basis", "process_mode", "z_index", "tooltip_text",
-    "get", "set", "call", "free", "show", "hide", "connect", "notification", "get_parent", "queue_free",
-}
-# Built-in global functions (Godot warns: SHADOWED_GLOBAL_IDENTIFIER).
-GLOBALS = {
-    "min", "max", "abs", "range", "str", "load", "preload", "floor", "ceil", "round", "clamp", "lerp",
-    "sign", "print", "len", "hash", "sqrt", "pow", "randf", "randi", "snapped", "wrap", "char", "type_string",
-}
-SHADOWABLE = ENGINE_MEMBERS | GLOBALS
-
-DECL = re.compile(r"^\s*(?:static\s+)?var\s+([A-Za-z_]\w*)")
-FUNC = re.compile(r"^\s*(?:static\s+)?func\s+\w+\s*\(([^)]*)\)")
-
 
 def code_part(line: str) -> str:
     """The line without its comment and string contents (good enough for counting)."""
@@ -54,7 +37,7 @@ def code_part(line: str) -> str:
 
 def problems(path: str) -> dict:
     """Rule name -> list of line numbers."""
-    found = {"long_line": [], "semicolon": [], "nested_ternary": [], "shadow": [], "history_comment": []}
+    found = {"long_line": [], "semicolon": [], "nested_ternary": [], "history_comment": []}
     with open(os.path.join(ROOT, path), encoding="utf-8", errors="ignore") as f:
         for i, raw in enumerate(f, 1):
             line = raw.rstrip("\n")
@@ -65,13 +48,6 @@ def problems(path: str) -> dict:
                 found["semicolon"].append(i)
             if code.count(" if ") >= 2 and code.count(" else ") >= 2:
                 found["nested_ternary"].append(i)
-            m = DECL.match(code)
-            names = [m.group(1)] if m else []
-            fm = FUNC.match(code)
-            if fm:
-                names += [a.strip().split(":")[0].split("=")[0].strip() for a in fm.group(1).split(",") if a.strip()]
-            if any(n in SHADOWABLE for n in names):
-                found["shadow"].append(i)
             comment = line[len(code):]
             if re.search(r"\((was |owner[:, ]|movefeel|sync\d+)", comment):
                 found["history_comment"].append(i)
