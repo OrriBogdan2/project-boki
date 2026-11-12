@@ -41,8 +41,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false,
-		"map": "skyreach"})
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
 	m.set_process(false)
 	var st: SkyTrain = m.skytrain
 	ok(st != null, "the map has a sky train")
