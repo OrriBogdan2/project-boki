@@ -508,26 +508,22 @@ for gait in GAITS:
         SPEED[gait] = measure("crouch_f", fwd, 0.0)
     planted = {k: measure("%s_%s" % (gait, k), shipped[k], SPEED[gait]) for k in shipped}
     for k in BUILD:
+        name = "%s_%s" % (gait, k.rstrip("~+"))
+        old = bpy.data.actions.get(name) or next((a for a in bpy.data.actions if a.name.startswith(name + "_") and
+                                                  not a.name.endswith("_was") and "Armature" in a.name), None)
+        if old is not None:                                # (a loop already on the model: the new one takes its name)
+            old.name = name + "_was"
+        arm.animation_data.action = None
         if k.endswith("~"):
             k = k[:-1]
-            arm.animation_data.action = None
-            turned("%s_%s" % (gait, k), shipped["f" if DIRS[k].y > 0 else "b"], k)
-            made.append("%s_%s" % (gait, k))
+            turned(name, shipped["f" if DIRS[k].y > 0 else "b"], k)
+            made.append(name)
             continue
         if k.endswith("+"):
-            arm.animation_data.action = None
             k = k[:-1]
-            name = "%s_%s" % (gait, k)
-            action(name).name = name + "_was"
             restride(name, shipped[k], SPEED[gait], planted[k])
             made.append(name)
             continue
-        name = "%s_%s" % (gait, k)
-        old = bpy.data.actions.get(name) or next((a for a in bpy.data.actions if a.name.startswith(name + "_") and
-                                                  not a.name.endswith("_was") and "Armature" in a.name), None)
-        if old is not None:                                # (a diagonal already on the model too: the new bake takes its name)
-            old.name = name + "_was"
-        arm.animation_data.action = None
         scale = 1.0
         while True:
             g = Gait(gait, k, fwd, scale)
