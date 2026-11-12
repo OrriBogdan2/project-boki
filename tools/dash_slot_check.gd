@@ -57,15 +57,12 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		P.unlock_all()
 		P.dashes = P.max_dashes()
 		await _drawn(m.hud)
-		var own: Variant = Arch.def(a)["dash"].get("charges", Content.class_dodge(Arch.weight(a)).charges)
-		var want := int(own) + int(P.ak.extra_dashes() if P.ak else 0.0)
+		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes() if P.ak else 0.0)
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
 		ok(pips.size() == want and pips.all(func(f): return f == 1.0) and (float(sh.get("air", -1.0)) >= 0.0) == air,
 			"%s: %d pips, all full = %d charges, air dash %s" % [a, pips.size(), want, air])
-	var owed := DashSlot.next_secs(DashSlot.src(-0.4, 1, 8.5, 0.0, 0.0, "", Color.WHITE))
-	ok(absf(owed - 1.4 * 8.5) < 0.01, "a held slide's charge (-0.4) counts down 1.4 recharges, not 0.4 (%.1fs)" % owed)
 	P.reclass(Arch.weight("juggernaut"), "juggernaut", Arch.signature("juggernaut"))
 	P.unlock_all()
 	var regen: float = P.dash_regen()
@@ -128,6 +125,7 @@ func _deny(m: Match, P: Hunter) -> void:
 		P.roll_t = 0.0
 		P.dash_buf = 0.0
 		m.hud.slot_fx.erase("dash")
+		PressDeny.last.clear()      # every archetype presses on the same frame: the mash throttle is not tested here
 		P.do_dash()
 		if m.hud.slot_fx.get("dash", {}).get("kind", "") == "deny":
 			denied += 1

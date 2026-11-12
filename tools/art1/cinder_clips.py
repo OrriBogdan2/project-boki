@@ -15,6 +15,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import cinder_pieces as K
 import crouchkit
+import gardenkit
 
 A_Z = K.ANKLE_Z
 
@@ -249,10 +250,30 @@ def crouch_set():
     return crouchkit.quick(C, END, PILOT, CREEP, hands=("G", "LP"), scan=0.36)
 
 
+# ---- the garden (DECISIONS 2026-11-09): the best day of her life. She drops to the Boki in a giggling squat and does it fast (quick scratches with the LEFT hand, never the flame hand;
+# the right hand stays low and still, palm closed), holds the snack in a loose open palm, and the cheer is all of her: a hard dip, a big hop, both arms up, mouth open.
+SQUAT = dict(PILOT, pel=(0.03, 0.08, -0.30), prt=(0.34, -0.14, 0.05), tor=(0.28, 0.18, -0.05), hed=(-0.55, -0.10, 0.12), G=(0.2, 0.2, 0.62), cast=0.0, jaw=0.35, brow=-0.1, lid=0.04)
+PET_A = dict(SQUAT, LP=(-0.05, 0.62, 0.68), castl=0.0, fistl=0.0, fing=0.1)
+GIVE = dict(SQUAT, pel=(0.03, 0.08, -0.34), LP=(-0.1, 0.62, 0.56), castl=0.5, jaw=0.5)
+PEAK = dict(READY, pel=(0.022, 0.0, 0.07), prt=(-0.1, -0.14, 0.09), tor=(-0.1, 0.2, -0.1), hed=(0.2, -0.12, 0.12), G=(0.36, 0.05, 1.7), LP=(-0.36, 0.05, 1.7), cast=0.3, castl=0.3,
+            FL=(-0.085, 0.05, A_Z + 0.12), FR=(0.135, -0.05, A_Z + 0.14), FLp=0.7, FRp=0.7, jaw=0.9, brow=0.4, lid=0.0, skirt=0.5)
+
+
+def garden_set():
+    P = {"kneel": SQUAT, "pet_a": PET_A, "pet_b": dict(PET_A, LP=(-0.05, 0.5, 0.7), tor=(0.24, 0.18, -0.05)),
+         "give": GIVE, "give_in": dict(GIVE, LP=(-0.1, 0.54, 0.56)),
+         "dip": dict(SQUAT, pel=(0.03, 0.0, -0.3), G=(0.3, 0.1, 0.5), LP=(-0.3, 0.1, 0.5)), "up": dict(PEAK, G=(0.34, 0.1, 1.4), LP=(-0.34, 0.1, 1.4)),
+         "peak": PEAK, "pump": dict(PEAK, pel=(0.022, 0.0, 0.0), G=(0.38, 0.05, 1.58), LP=(-0.38, 0.05, 1.58), FL=(-0.085, 0.05, A_Z), FR=(0.135, -0.05, A_Z))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.03, "snap": 1.0})
+
+
 def clips():
     out = [FnClip("idle", 6.0, idle), FnClip("stance", 6.0, stance)]
     out += crouch_set()
-    for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.6, 0.37, 0.2)):
+    out += garden_set()
+    # the run scurries (docs/heroes/ashwick.md, Animation timing: a footfall every 0.15-0.2 s): short low steps, half the
+    # cycle on the ground; played at the rate foot_mps gives (WardenGait), the cycle is ~0.38 s in game, the feet planted
+    for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.39, 0.5, 0.12)):
         T = 2 * stride / (share * sp)
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stride * (0.8 if tag in "lr" else 1.0), share, lift)))
@@ -299,8 +320,9 @@ def clips():
     f3 = dict(fly, prt=(0.66, 0, -0.05), jet=1.0)
     out.append(C("jet", 1.0, [(0.0, END), (0.08, up0, "out"), (0.22, fly, "out"), (0.45, f2), (0.72, f3), (1.0, fly)]))
     fl0 = dict(fly, pel=(0, 0, 0.1), jet=0.4, prt=(0.2, 0, 0), FL=(-0.12, 0.06, 0.34), FR=(0.13, -0.02, 0.36))
-    sq = {"pel": (0, 0.0, -0.2), "prt": (0.32, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.28, 0, 0), "G": (0.25, 0.04, 0.72), "LP": (-0.28, 0.1, 0.8), "FL": (-0.12, 0.1, A_Z), "FR": (0.13, -0.08, A_Z), "jet": 0.0, "jaw": 0.4, }
-    out.append(C("jet_land", 0.36, [(0.0, fl0), (0.08, sq, "out"), (0.2, dict(sq, pel=(0, 0, -0.08))), (0.36, END)]))
+    sq = {"pel": (0, 0.0, -0.07), "prt": (0.12, 0, 0), "tor": (0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (0.27, 0.05, 0.8), "LP": (-0.28, 0.06, 0.84), "FL": (-0.1, 0.06, A_Z), "FR": (0.13, -0.06, A_Z), "jet": 0.0, "jaw": 0.3}
+    # the landing is light (the source shows no squash): feet down, a soft give in the knees, standing by 0.2 s
+    out.append(C("jet_land", 0.2, [(0.0, fl0), (0.07, sq, "out"), (0.2, END)]))
     # air
     out.append(C("jump", 0.45, [(0.0, {"pel": (0, 0, -0.1), "prt": (0.2, 0, 0)}), (0.07, {"pel": (0, 0, 0.02), "prt": (-0.05, 0, 0), "tor": (-0.12, 0.1, 0), "FL": (-0.09, 0.2, 0.34), "FR": (0.12, -0.1, 0.2), "FLp": -0.4, "FRp": 0.5, "LP": (-0.3, 0.12, 1.1), "jaw": 0.3}, "out"),
                                 (0.3, {"FL": (-0.09, 0.14, 0.38), "FR": (0.12, 0.0, 0.3)}), (0.45, {"FL": (-0.09, 0.1, 0.32), "FR": (0.12, -0.02, 0.28), })]))
@@ -484,6 +506,6 @@ if __name__ == "__main__":
             o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=a[1], export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="AUTO", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
     print("exported", os.path.getsize(a[1]))

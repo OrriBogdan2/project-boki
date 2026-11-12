@@ -284,7 +284,7 @@ const PRESETS := {
 }
 
 ## Cosmetic themes: tint and particle flavour only. Never a rule.
-const THEMES := ["poison", "spore", "psychic", "crystal", "fairy", "sound", "fire", "ice", "electric", "rock", "grass", "dark", "steel", "bug", "flying", "none"]
+const THEMES := ["venom", "spore", "gravity", "prism", "lunar", "echo", "ember", "frost", "storm", "stone", "bloom", "shadow", "titan", "swarm", "tempest", "none"]
 
 # ---- the kin: body, stats, carry ----
 const ROLES := ["bruiser", "tank", "skirmisher", "controller", "support", "trickster"]

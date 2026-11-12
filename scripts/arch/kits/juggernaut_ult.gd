@@ -28,9 +28,6 @@ var last_healed := 0.0
 func _init(kit: JuggernautKit) -> void:
 	k = kit
 
-var vel_before := Vector3.ZERO      # (debug readout) his velocity at the cast, before and after the ult touched it
-var vel_after := Vector3.ZERO
-
 func data() -> Dictionary:
 	return k.x_def()
 
@@ -53,27 +50,9 @@ func start() -> void:
 	var h := k.h
 	casts += 1
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
-	_keep_momentum()
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.vfx("guard_tell")
-
-## Casting keeps his motion: a share of the horizontal run carries into the guard (bleeding off over time), and an
-## upward speed already there (jump, launch, mantle) gets a bonus instead of being zeroed. Numbers: tuning "kael".
-func _keep_momentum() -> void:
-	var h := k.h
-	var tn := Tuning.of("kael")
-	vel_before = h.vel
-	var carry := Vector2(h.vel.x, h.vel.z) * float(tn["ult_carry_k"])
-	st["carry"] = carry
-	h.vel.x = carry.x
-	h.vel.z = carry.y
-	if h.vel.y >= float(tn["ult_up_min_mps"]):
-		h.vel.y += float(tn["ult_up_bonus_mps"])
-		h.lfloat = {}               # mid-mantle: the ledge rise rewrites vel.y each tick; the boost takes over
-		st["rising"] = true
-	vel_after = h.vel
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
 ## takes it as the cleave lands.
@@ -101,7 +80,7 @@ func tick(dt: float) -> void:
 	st["t"] = float(st["t"]) + dt
 	match String(st["phase"]):
 		"guard":
-			_tick_guard(d, dt)
+			_tick_guard(d)
 		"strike":
 			if float(st["t"]) >= float(d["strike_t"]):
 				_land(d)
@@ -113,16 +92,10 @@ func tick(dt: float) -> void:
 				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
-func _tick_guard(d: Dictionary, dt: float) -> void:
+func _tick_guard(d: Dictionary) -> void:
 	var h := k.h
-	if h.vel.y > 0.0 and not st.get("rising", false):
+	if h.vel.y > 0.0:
 		h.vel.y = 0.0          # no jumping off the guard (it lands straight back)
-	var carry: Vector2 = st["carry"]
-	if carry.length() > 0.05:
-		carry *= maxf(0.0, 1.0 - float(Tuning.of("kael")["ult_carry_decay_per_s"]) * dt)
-		st["carry"] = carry
-		h.vel.x = carry.x
-		h.vel.z = carry.y
 	var aim := h.aim_dir()
 	var chain := k.warchain
 	if chain.pulling():
@@ -203,7 +176,6 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 func _reset() -> void:
 	resets += 1
 	HeroUlt.reset(k)
-	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
 	k.vfx("riposte_reset")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
@@ -221,7 +193,6 @@ func block(by: Ent, o: Dictionary) -> bool:
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
 		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
 				{"pitch": 0.08 * float(st["blocks"])})
-		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).

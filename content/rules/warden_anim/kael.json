@@ -8,7 +8,6 @@
 		"spring_hangwarchain"
 	],
 	"loco": {
-		"blend_rate": 7.5,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 4.0,
@@ -25,7 +24,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
+		"run_speed": 4.6, "stride": [1.5, 1.2], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -125,6 +124,7 @@
 			"clip": "fusion"
 		}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -200,7 +200,6 @@
 			0.8
 		]
 	],
-	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
 	"procedural": [
 		"ledge",
 		"mantle",

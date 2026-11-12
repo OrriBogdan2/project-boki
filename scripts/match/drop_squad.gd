@@ -28,6 +28,7 @@ var _bot_ping := {}           # hunter nid -> plan time left when it pings
 var _ack := []                # bot acknowledgements due {h, at, id}
 var clock := 0.0              # runs through the planning phase too (the match clock waits)
 var events: Array = []        # what happened, for tests
+var chests_hidden := false    # no chests show while you ride the ship and drop in (KeyChest.show_all)
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -48,19 +49,28 @@ func setup() -> void:
 		elif mem.has(m.player):
 			lead = m.player
 		leads[t] = lead
+	if m.player and (m.player.riding or m.player.dropping):
+		chests_hidden = true
+		KeyChest.show_all(m, false)      # until you're down (tick)
 	var o: Dictionary = m.opts
 	if m.big and not m.ship.is_empty() and not o.get("no_plan", false) and not o.get("tutorial", false) and not o.get("training", false) and not o.get("duel", false):
 		planning = true
 		plan_len = float(o.get("plan_t", PLAN_T))
 		plan_t = plan_len
 		for h in m.hunters:
-			if h.ctrl == "bot" and not h.remote and h.riding:
+			if h.ctrl == "bot" and not h.remote and (h.riding or m.rolling == null):
 				# leaders always ping their pick early on; the others now and then add theirs after it
 				# (the value is the time left on the countdown when they ping)
 				if is_lead(h):
 					_bot_ping[h.nid] = maxf(0.3, randf_range(plan_len - 3.0, plan_len - 1.2))
 				elif randf() < 0.35:
 					_bot_ping[h.nid] = randf_range(1.2, maxf(1.3, plan_len - 3.5))
+
+## A squad that boards later (a rolling session's drop wave): its first member leads the drop.
+func add_squad(mem: Array) -> void:
+	if mem.is_empty():
+		return
+	leads[(mem[0] as Hunter).team] = mem[0]
 
 func leader(team: int) -> Hunter:
 	var l = leads.get(team, null)
@@ -130,7 +140,7 @@ func _depart() -> void:
 	for t in leads:
 		var l := leader(int(t))
 		if l == null or l.ctrl != "bot" or l.remote or not l.riding:
-			continue      # (already down)
+			continue      # (a rolling session's earlier squads are already down)
 		var hp := _human_ping(l.team)
 		if hp != Vector3.INF:
 			_set_land(l, hp)
@@ -242,7 +252,7 @@ func separate(h: Hunter, from_net := false) -> bool:
 ## The leader just jumped: everyone still following jumps with them and takes a slot behind.
 func on_lead_jump(l: Hunter) -> void:
 	var hd := Vector2(l.vel.x, l.vel.z)
-	var sd: Vector3 = m.ship.get("dir", Vector3.FORWARD)
+	var sd: Vector3 = m.ship_of(l).get("dir", Vector3.FORWARD)
 	heading[l.team] = hd.normalized() if hd.length() > 0.1 else Vector2(sd.x, sd.z)
 	var n := 0
 	for f in m.hunters:
@@ -294,6 +304,9 @@ func follow_vy(f: Hunter) -> float:
 func tick(dt: float) -> void:
 	clock += dt
 	_tick_acks()
+	if chests_hidden and not (m.player.riding or m.player.dropping):
+		chests_hidden = false      # landed, or fell short and came back on foot
+		KeyChest.show_all(m, true)
 	for t in leads:
 		var l := leader(int(t))
 		if l == null or not l.dropping:

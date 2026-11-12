@@ -4,16 +4,13 @@ extends Node
 ## and logs per phase: wall frame time, script time, draw calls, objects, primitives, memory, and the
 ## worst hitches with the build steps (PerfLog marks) that ran inside them.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-probe
-##   [--probe-out=/path/report.txt] [--probe-quick] [--probe-teams=10] [--probe-squad=3] [--quality=high]
-##   [--probe-shots=<dir>: a frame of each phase as <phase>.png]
-## Teams and squad default to the expedition's format (Data.squad_opts).
+##   [--probe-out=/path/report.txt] [--probe-quick] [--probe-squad=3] [--probe-teams=40] [--quality=high]
 ## A software-rendered GPU makes wall time mostly raster time, so read the CPU columns (script,
 ## render submit) and the counts; wall time is still where hitches show.
 
 const DT := 1.0 / 60.0
 
 var out_path := ""
-var shots_dir := ""
 var quick := false
 var m: Match = null
 var phase := "load"
@@ -37,9 +34,6 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--probe-out="): out_path = a.substr(12)
 		if a == "--probe-quick": quick = true
-		if a.begins_with("--probe-shots="): shots_dir = a.substr(14)
-	if shots_dir != "":
-		DirAccess.make_dir_recursive_absolute(shots_dir)
 	vp_rid = get_viewport().get_viewport_rid()
 	get_tree().node_added.connect(func(n: Node):
 		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
@@ -55,15 +49,14 @@ func _ready() -> void:
 	process_priority = -100
 	Save.no_write = true      # never touches the dev save (the music list would write it)
 	Save.d["tutorial"]["home"] = true
-	var o := Data.squad_opts()
+	var squad := 1
+	var teams := 6       # --probe-teams=N: a full lobby (Data.MATCH_PLAYERS) for before/after match-size runs
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--probe-teams="): o["teams"] = int(a.substr(14))
-		if a.begins_with("--probe-squad="): o["squad"] = int(a.substr(14))
-	o["total"] = int(o["teams"]) * int(o["squad"])
-	o.merge({"tier": 0, "seed": 4101, "autoplay": true, "probe": true, "god": true})
+		if a.begins_with("--probe-squad="): squad = int(a.substr(14))
+		if a.begins_with("--probe-teams="): teams = int(a.substr(14))
 	started_us = Time.get_ticks_usec()
 	last_us = started_us
-	Game.main.show_screen("match", o)
+	Game.main.show_screen("match", {"teams": teams, "squad": squad, "tier": 0, "seed": 4101, "autoplay": true, "probe": true, "god": true})
 
 func _rinfo(k: int) -> int:
 	return RenderingServer.get_rendering_info(k)
@@ -119,8 +112,6 @@ func _process(_delta: float) -> void:
 	var nf: int = frames.filter(func(f): return f["phase"] == phase).size()
 	if nf == 12:
 		_casters()
-		if shots_dir != "":
-			get_viewport().get_texture().get_image().save_png(shots_dir.path_join(phase + ".png"))
 		if phase in ["planning", "drop", "land", "fight"]:
 			_breakdown()
 	_next_phase()
@@ -303,7 +294,7 @@ func _print_phase(ph: String) -> void:
 	var w := _stats(fl, "wall"); var pr := _stats(fl, "proc"); var dr := _stats(fl, "draws"); var pm := _stats(fl, "prims")
 	var si := _stats(fl, "sim"); var vi := _stats(fl, "vis"); var hd := _stats(fl, "hud")
 	print("PROBE phase %s draws by pass: 3D %.0f, shadows %.0f, canvas (HUD) %.0f" % [ph, _stats(fl, "d3d")[0], _stats(fl, "dsh")[0], _stats(fl, "dcv")[0]])
-	if ph in ["land", "fight"] and not Match.prof.is_empty():
+	if ph in ["ride", "land", "fight"] and not Match.prof.is_empty():
 		var tot := 0
 		for k in Match.prof: tot += int(Match.prof[k])
 		var ks := Match.prof.keys()

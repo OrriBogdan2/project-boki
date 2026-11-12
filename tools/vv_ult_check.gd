@@ -47,7 +47,6 @@ func mage() -> void:
 	var U := K.ult
 	var xd := K.x_def()
 	_gate(m, P, K)
-	Sfx.listener = home          # (the looks draw near the listener: HeroVfx.lod_at)
 	# the press: one cast, the cooldown starts, the crouch
 	T.teleport(home + Vector3(6, 0, 0))
 	T2.teleport(home + Vector3(6.5, 0, 1.2))
@@ -62,18 +61,13 @@ func mage() -> void:
 	var hanging := U.phase() == MageUlt.AIR and P.pos.y > home.y + 3.5
 	ok("Kitefall: launched up and hanging", hanging and K.anim_id == "mage_x_air",
 			"y +%.1f %s" % [P.pos.y - home.y, U.phase()])
-	ac.step(m, 0.1, func(): ac.aim_at(P, T.pos))          # (a beat of the hang: its crackle)
 	var ring := AimKit.entry(P, "x_ring")
 	var ring_r := float(ring.get("r", 0.0))
 	ok("Kitefall: the gold range ring (8 bh) round the take-off, seen by everyone",
 			AimKit.shown(P, "x_ring") and bool(ring.get("all", false)) and absf(ring_r - 8.0 * AimKit.BH) < 0.1,
 			"r %.1f" % float(ring.get("r", 0.0)))
-	var fills := (VVFx.of(m).pools.get("disc", []) as Array).filter(func(n): return (n as Node3D).visible)
-	ok("Kitefall: the range is a ring only, no dark fill over the screen", fills.is_empty(), "%d discs" % fills.size())
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
-	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
-			- float(U.data()["radius"])) < 0.05)
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
@@ -111,11 +105,7 @@ func mage() -> void:
 			is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"]))
 			and P.ult >= float(KinBond.rules()["hit"]) - 0.01,
 			"paid %.2f bar %.2f" % [_paid(P, id), P.ult])
-	var ult_looks := HeroVfx.of(m).plays
-	ok("Kitefall: the call, the launch, the hang and the strike as her own looks (HeroVfx x_*)",
-			["x_cast", "x_rise", "x_hang", "x_strike"].all(func(mv): return int(ult_looks.get(mv, 0)) >= 1),
-			str(ult_looks.keys()))
-	ok("Kitefall: free again at once (the attack works, sparks settling at her feet)",
+	ok("Kitefall: free again at once (the attack works, gold crackle at her feet)",
 			U.phase() == MageUlt.AFTER and K.fire_ok() and K.anim_id == "mage_x_land")
 	ok("Kitefall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	ac.step(m, 0.6)
@@ -289,7 +279,7 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])
 	K.reset_dash_boost = false
-	ok("Wirerun: a plain run stays 7.5 to 13 m, full at 0.6 s",
+	ok("Wirerun: a plain run stays 5.6 to 9.75 m, full at 0.6 s",
 			absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01)
 	K.cd["dash"] = 0.0
 	P.teleport(home)
@@ -425,8 +415,6 @@ func gunslinger() -> void:
 			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
 			and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2,
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
-	ok("Cinderfall: the disc is a lit rim over a see-through centre, not a solid sheet (docs/VFX_QUALITY.md)",
-			float(disc.get("alpha", 1.0)) <= 0.5 and int(HeroVfx.of(m).plays.get("x_cast", 0)) >= 1)
 	# he is free the whole time: he walks and the rifle works
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))
@@ -440,8 +428,6 @@ func gunslinger() -> void:
 			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5 and absf(ac.dmg(T2) - base) < 0.5
 			and U.last.get("centre", 0) == 1,
 			"centre %.1f edge %.1f (base %.1f)" % [ac.dmg(T), ac.dmg(T2), base])
-	ok("Cinderfall: the shell streaks down and lands as its own look (HeroVfx x_shell, x_impact)",
-			int(HeroVfx.of(m).plays.get("x_shell", 0)) >= 1 and int(HeroVfx.of(m).plays.get("x_impact", 0)) >= 1)
 	var hit_share := float(KinBond.rules()["hit"])
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))

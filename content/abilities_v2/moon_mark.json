@@ -4,7 +4,7 @@
 	"name": "Moon Mark",
 	"short": "Mark",
 	"flavor": "Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.",
-	"theme": "fairy",
+	"theme": "lunar",
 	"tier": 1,
 	"from": "kin",
 	"range": 9,

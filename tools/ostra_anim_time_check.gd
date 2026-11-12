@@ -80,7 +80,7 @@ func _time(
 		if float(r["in"]) < 0.0 and w >= 0.999:
 			r["in"] = t
 		var mv: Dictionary = (c.d["kmoves"] as Dictionary).get(K.anim_id, {})
-		var live := _upper(c) if bool(mv.get("upper", false)) else c.cur
+		var live := c.cur_u if bool(mv.get("upper", false)) else c.cur
 		if live != "" and String(r["clip"]) == "":
 			r["clip"] = live
 			r["len"] = c.lib.get_animation(live).length
@@ -90,10 +90,6 @@ func _time(
 	print("TIME %s play %.2f in %.2f hit %.2f (clip %.2f) %s %.2f out %.2f"
 			% [moves[0], r["play"], r["in"], r["hit"], r["at"], r["clip"], r["len"], r["out"]])
 	return r
-
-## The clip on the upper-body channel (a move with "upper": the legs keep walking under it).
-func _upper(c: WardenClips) -> String:
-	return ((c.tree.tree_root as AnimationNodeBlendTree).get_node("anim_u") as AnimationNodeAnimation).animation
 
 ## `r` (a _time result) read against the footage: the clip owns the body by BLEND_IN, the kit's event lands within
 ## `ev` s of the press, and the body is back with the legs by the clip's end + HAND_BACK (a move he holds: no `out`).

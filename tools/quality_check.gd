@@ -109,11 +109,6 @@ func _shadows_and_aa() -> void:
 	Settings.v["quality"] = "very_low"
 	Settings.apply("msaa")
 	ok(root.screen_space_aa == Viewport.SCREEN_SPACE_AA_DISABLED, "very low: no anti-aliasing pass")
-	Settings.v["quality"] = "medium"
-	Settings.v["msaa"] = 2
-	Settings.v["video_v"] = 4
-	Settings._video_v5()
-	ok(int(Settings.v["msaa"]) == 0 and int(Settings.v["video_v"]) == 5, "video_v 5: Medium's saved 2x MSAA turns off")
 	Settings.v["quality"] = "high"
 	Settings._apply_quality()
 	ok(Engine.max_physics_steps_per_frame == 8 and root.debug_draw == Viewport.DEBUG_DRAW_DISABLED,
