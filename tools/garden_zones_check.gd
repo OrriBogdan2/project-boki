@@ -448,7 +448,7 @@ func _thrive_part() -> void:
 	for i in 2:
 		var r: Dictionary = [rec, other][i]
 		r["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 90.0}
-		Care.tick(r, 600.0)
+		Care.tick(r, 60.0 * 30.0 / Care.joy_decay())      # a 30-point fall at the usual pace, clear of the sulky floor
 		lost[i] = 90.0 - Care.need(r, "joy")
 	ok(lost[1] > 0.0 and is_equal_approx(lost[0], lost[1] * float(T["joy_rate"])),
 		"thriving joy falls at %.1fx (%.1f vs %.1f)" % [float(T["joy_rate"]), lost[0], lost[1]])
