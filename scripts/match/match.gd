@@ -5665,6 +5665,7 @@ func _tips() -> void:
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
+	if _tip_t > CamWheel.HINT_AFTER_S: CamWheel.hint(self)
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", TipText.ability(true))
