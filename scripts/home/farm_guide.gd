@@ -10,8 +10,7 @@ const DONE_TICK_S := 1.6      # s the "Done!" stays on the goal line before fadi
 
 var h
 var tracker: PanelContainer = null
-var hint_box: PanelContainer = null
-var hint_lbl: Label = null
+var hint_box: StripView = null      # the one objective strip (TutorialStrip), as on the match HUD
 var skip_row: HBoxContainer = null
 var marker: Label3D = null
 var crop_lbl: Label3D = null
@@ -25,6 +24,7 @@ var tree_t := 0.0
 var tree_at := Vector3.INF
 var tab_for := ""
 var tree_what := ""
+var done_t := 0.0     # s left of the "Done!" in front of the strip line
 var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
 
 func _init(home) -> void:
@@ -74,6 +74,7 @@ func tick(dt: float) -> void:
 	if not h.visit.is_empty():
 		return
 	t += dt
+	done_t = maxf(0.0, done_t - dt)
 	detect_t -= dt
 	if h.hob:
 		h.hob.tick(dt)
@@ -116,21 +117,14 @@ func _poll() -> void:
 	FarmSpotlight.sync(h, quiet)
 	_tick_off_done()
 
-## A green "Done!" on the goal line for a moment when a step has just been finished.
+## A green "Done!" on the strip's line for a moment when a step has just been finished.
 func _tick_off_done() -> void:
 	var n := FarmTutorial.done_count()
 	var gained := done_seen >= 0 and n > done_seen
 	done_seen = n
-	if not gained or not is_instance_valid(hint_box):
-		return
-	var tick := UI.label("\u2713 Done!", 16, UI.GOOD, UI.semi)
-	var row := hint_box.get_child(0) as HBoxContainer
-	row.add_child(tick)
-	row.move_child(tick, 0)
-	var tw := tick.create_tween()
-	tw.tween_interval(DONE_TICK_S)
-	tw.tween_property(tick, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(tick.queue_free)
+	if gained and is_instance_valid(hint_box):
+		done_t = DONE_TICK_S
+		_refresh_hint()
 
 # ------------------------------------------------------------------ the hint line
 func hint_visible() -> bool:
@@ -157,11 +151,14 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	hint_lbl.text = "%d/%d  %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), s]
-	# a long hint wraps at about 600 px (under the chips, clear of the Goals card) instead of running wide
-	var fw := hint_lbl.get_theme_font("font").get_string_size(hint_lbl.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 6.0
-	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint_lbl.custom_minimum_size.x = minf(fw, 600.0)
+	var txt := s.strip_edges()
+	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
+			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)
+	_place_skip()
+
+## The line the strip shows now (the checks read it).
+func hint_text() -> String:
+	return String(hint_box.line.get("text", "")) if is_instance_valid(hint_box) else ""
 
 func _clear_hint() -> void:
 	if is_instance_valid(hint_box):
@@ -178,19 +175,17 @@ func _site_progress() -> String:
 	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
 
 func _make_hint() -> void:
-	hint_box = UI.card(Color(UI.NIGHT, 0.9), 10, 14)
-	UI.set_card_border(hint_box, Color(UI.GOLD, 0.5), 1)
-	hint_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	hint_box.offset_top = 66      # under the top chips
-	var row := UI.hbox(14)
-	hint_box.add_child(row)
-	hint_lbl = UI.label("", 16, UI.INK, UI.semi)
-	row.add_child(hint_lbl)
+	hint_box = StripView.new()
 	skip_row = UI.hbox(6)
-	row.add_child(skip_row)
+	hint_box.add_child(skip_row)
+	skip_row.resized.connect(_place_skip)
 	_skip_buttons()
 	h.root_ui.add_child(hint_box)
+
+## Skip sits just under the strip's right end: small, and out of the way of the world.
+func _place_skip() -> void:
+	var r := TutorialStrip.rect(h.root_ui.get_viewport_rect().size)
+	skip_row.position = Vector2(r.end.x - skip_row.size.x, r.end.y + 6.0)
 
 func _skip_buttons() -> void:
 	for c in skip_row.get_children():

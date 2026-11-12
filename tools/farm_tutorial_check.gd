@@ -198,7 +198,7 @@ func _base_world() -> void:
 	ok(FarmTutorial.did("meet") and FarmTutorial.did("eat") and FarmTutorial.current() == "toy"
 			and FarmTutorial.done_count() == 2, "after save and load it resumes at the toy step")
 	guide._poll()
-	ok(_skip_shown(guide) and guide.hint_lbl.text.begins_with("3/4"), "resumed: 3/4 on the line, Skip still there")
+	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "3/4", "resumed: 3/4 on the line, Skip still there")
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
@@ -546,7 +546,7 @@ func _spotlight() -> void:
 	home.guide.tick(0.6)
 	ok(not FarmSpotlight.showing() or FarmSpotlight._node.spec != {"world": true},
 			"the job step done: its spotlight is gone")
-	ok(home.guide.hint_box.get_child(0).get_child(0).text.contains("Done"), "a tick says Done! on the goal line")
+	ok(home.guide.hint_text().contains("Done"), "a tick says Done! on the strip line")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
@@ -633,13 +633,13 @@ func _world() -> void:
 	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
 			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
 			"Hob waits by the market stall from the start")
-	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("Hob"),
-			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
+	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_text().contains("Hob"),
+			"the first prompt is on screen: %s" % home.guide.hint_text())
 	var seed_save: Dictionary = Save.d["plots"][0].duplicate()
 	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": Time.get_unix_time_from_system()}
 	home.guide.refresh()
-	ok(not FarmCropGuide.growing().is_empty() and not home.guide.hint_lbl.text.to_lower().contains("ripe in"),
-			"a seed growing adds no 'ripe in' timer to the line: %s" % home.guide.hint_lbl.text)
+	ok(not FarmCropGuide.growing().is_empty() and not home.guide.hint_text().to_lower().contains("ripe in"),
+			"a seed growing adds no 'ripe in' timer to the line: %s" % home.guide.hint_text())
 	Save.d["plots"][0] = seed_save
 	FarmTutorial.event("hob")
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
@@ -707,7 +707,7 @@ func _world() -> void:
 	var shown: bool = ["Buildings", "Fences", "Paths", "Garden", "Work"].all(func(t): return tabs.has(t))
 	var hidden: bool = ["Lights", "Furniture", "Statues"].all(func(t): return not tabs.has(t))
 	ok(shown and hidden,
-			
+
 		"tabs with something to build stay, empty ones are hidden (%s)" % ", ".join(tabs))
 	home.hb.toggle()
 	# the one Boki builds it alone, and it is finished by the work
@@ -887,13 +887,13 @@ func _ripe_gate() -> void:
 	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": 0.0}
 	home.guide._refresh_hint()
 	home.guide._update_marker(0.0)
-	ok(FarmTutorial.stage("crop") == "water" and not home.guide.hint_lbl.text.to_lower().contains("pick")
+	ok(FarmTutorial.stage("crop") == "water" and not home.guide.hint_text().to_lower().contains("pick")
 			and (home.guide.crop_lbl == null or not home.guide.crop_lbl.visible),
-			"planted, not watered: water it, no pick prompt and no growth bar ('%s')" % home.guide.hint_lbl.text)
+			"planted, not watered: water it, no pick prompt and no growth bar ('%s')" % home.guide.hint_text())
 	home._water("plots", 0)
 	home.guide._refresh_hint()
 	home.guide._update_marker(0.0)
-	var hint := home.guide.hint_lbl.text as String
+	var hint := home.guide.hint_text() as String
 	var plot_lbl: String = home._label_for({"kind": "plot", "arr": "plots", "i": 0})
 	var marker_on: bool = is_instance_valid(home.guide.marker) and home.guide.marker.visible
 	ok(FarmTutorial.current() == "crop" and FarmTutorial.stage("crop") == "grow",
@@ -911,7 +911,7 @@ func _ripe_gate() -> void:
 	home._farm_tick()
 	home.guide._refresh_hint()
 	home.guide._update_marker(0.0)
-	hint = home.guide.hint_lbl.text
+	hint = home.guide.hint_text()
 	marker_on = is_instance_valid(home.guide.marker) and home.guide.marker.visible
 	ok(FarmTutorial.stage("crop") == "pick" and hint.contains("pick it") and marker_on
 			and home.guide.marker.text.begins_with("Pick it") and not home.guide.crop_lbl.visible,
