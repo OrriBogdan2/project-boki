@@ -6,6 +6,7 @@ extends RefCounted
 ## Never touches the real save.
 
 const STEP := 0.1
+const PLAYER_R := 0.3     # m: how wide you are to a prop (a Boki is 0.3 in the same walk)
 var bad := 0
 var main: Node
 var home
@@ -55,7 +56,12 @@ func _walk(k: Dictionary, secs: float) -> float:
 	var far := 0.0
 	for i in int(secs / STEP):
 		var turn := float(i) * STEP * 2.0      # a small circle, so the island never runs out
-		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		var step: Vector3 = Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		# props stop you as they stop a Boki
+		if home.world.occupy(home.ppos.x + step.x, home.ppos.z, PLAYER_R, 0.0, true) == 0.0:
+			home.ppos.x += step.x
+		if home.world.occupy(home.ppos.x, home.ppos.z + step.z, PLAYER_R, 0.0, true) == 0.0:
+			home.ppos.z += step.z
 		home.player.position = home.ppos
 		home.carry.tick(STEP, {}, true)
 		home._move_kin(STEP)
@@ -192,6 +198,10 @@ func _trust(brave: Dictionary, wary: Dictionary) -> void:
 func _lead(rec: Dictionary) -> void:
 	var c: HomeCarry = home.carry
 	var k := _put(rec)
+	for o in home.kins:     # the earlier rows left the small ones parked round you; leading is about the one you lead
+		if o != k:
+			o["pos"] = home.ppos + Vector3(14.0, 0.0, 14.0)
+			(o["node"] as Node3D).position = o["pos"]
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
 	var far := _walk(k, 4.0)

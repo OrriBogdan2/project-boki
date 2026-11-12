@@ -22,6 +22,7 @@ const CARRY_SCALE := 0.7      # a carried Boki is shown this share of its size, 
 const DROP_DIST := 0.9        # m in front of you where it is set down
 const LEAD_SLOT := 0.9        # m to your right where a led Boki walks
 const LEAD_MAX := 10.0        # m away at which a led Boki is let go
+const LEAD_PACE := 1.5        # x the 4.4 m/s run: a led Boki out-trots your lead walk and closes gaps
 
 var h                         # the Home screen
 var k := {}                   # the Boki in your arms, on your back or on its lead
@@ -141,6 +142,7 @@ func _let_go(who: Dictionary, at: Vector3) -> void:
 		who["hold_t"] = 1.0
 		who["goal"] = who["pos"]
 	who.erase("led")
+	who.erase("call_pace")
 	who["t"] = 1.5
 	k = {}
 	mode = ""
@@ -209,5 +211,6 @@ func _lead() -> void:
 		return
 	var side := Vector3(-_forward().z, 0.0, _forward().x)
 	k["goal"] = h.ppos + side * LEAD_SLOT - _forward() * 0.3
+	k["call_pace"] = LEAD_PACE
 	k["t"] = 1.0
 	k["hold_t"] = 0.0
