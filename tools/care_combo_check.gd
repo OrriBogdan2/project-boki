@@ -1820,9 +1820,9 @@ func rimewright() -> void:
 	var w1: Dictionary = K.wall["w"]
 	var mid1 := ((w1["a"] as Vector2) + (w1["b"] as Vector2)) * 0.5
 	ok(
-			"tm E: it slides toward the cursor, widening, and shoves the foe ahead",
-			float(w1["len"]) > 3.5 and mid1.x > mid0.x + 3.0 and T.pos.x > tx + 1.0,
-			"len %.1f moved %.1f foe +%.1f" % [float(w1["len"]), mid1.x - mid0.x, T.pos.x - tx])
+			"tm E: it slides toward the cursor, widening, and shoves the foe ahead without slowing it",
+			float(w1["len"]) > 3.5 and mid1.x > mid0.x + 3.0 and T.pos.x > tx + 1.0 and T.slow_t <= 0.0,
+			"len %.1f moved %.1f foe +%.1f slow %.2f" % [float(w1["len"]), mid1.x - mid0.x, T.pos.x - tx, T.slow_t])
 	ok(
 			"tm E: it stops at the cursor", not bool(K.wall["sliding"]) and absf(mid1.x - cur.x) < 0.8,
 			"mid at %.1f, cursor %.1f" % [mid1.x - P.pos.x, cur.x - P.pos.x])

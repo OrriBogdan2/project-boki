@@ -436,8 +436,6 @@ func _wave() -> void:
 	var wave_size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
 	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)},
 			{"type": "push", "strength": lerpf(3.0, 6.0, k), "from": "caster"}]
-	if full:
-		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
 	var stg := StageSpec.parse(
 			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},

@@ -663,6 +663,11 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast, the full wave does not slow)",
 			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t <= 0.0 and K.res > 45.0,
 			"mid %.2f took %.0f rage %.0f slow %.2f" % [midk, A.dmg(T), K.res, T.slow_t])
+	var took := A.dmg(T)
+	A.step(m, 2.2)
+	A.ok(
+			"juggernaut LMB hold: the full wave leaves no burn behind",
+			A.dmg(T) <= took + 0.01, "took %.1f then %.1f" % [took, A.dmg(T)])
 	K.res = 0.0
 	# RMB tap: the Finishing Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
 	P.teleport(home)

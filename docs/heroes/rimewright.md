@@ -70,7 +70,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | RMB cd 10.2 s vs 12 s | LOW | (c) | kept: the data pass scaled it by our wall (17 s vs the source's 20 s); every Neve cooldown would have to move together |
 | Passive: Chill's 15% slow (not in the source) | LOW | (a) | removed (owner, 2026-11-07: no ours-only riders) |
 | Knock Shatter 30 vs about 37 | LOW | (b) | ec88bfc0: 37 |
-| E wall touch slow (not in the data) | LOW | (c) | kept: it is how the sliding wall reads as carrying foes; noted here |
+| E wall touch slow (not in the data) | LOW | (a) | removed (ext/parity-rider-sweep-0246: no source row, no owner line) |
 | Stale wiki link / name | MED | (a) | f1c1a91c (Class-Neve.md, Classes.md, sidebar) |
 | "Merge stays on R" in this doc | MED | (b) | fixed in the table above |
 | Self screen shake | MED | (c) | ext/no-shake owns it; nothing added here (the spear's cast shake was removed in acd818b3) |

@@ -735,7 +735,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 			{
 				"length": float(ed["length"]), "hp": hp, "time": float(ed["time"]), "move": true,
 				"color": String(ed["col"]), "block": "enemy",
-				"touch": {"kb": float(ed["push"]), "dmg": 0.5, "slow": 1.0, "slow_k": 0.3}},
+				"touch": {"kb": float(ed["push"]), "dmg": 0.5}},
 			power("kin"))
 	w["y"] = at.y
 	# her own ice look instead (CareLook "wall")
