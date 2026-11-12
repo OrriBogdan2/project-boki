@@ -35,8 +35,8 @@ A ground ring means gameplay, so in a pile the draw order and strength are one r
 | -2 | ownership rings (`SideRings`: Hunter and Boki) | thinnest band (`THIN` 0.07), and `COVERED_K` 0.25 of their alpha while any telegraph, cast ring or AimKit shape covers the body |
 One full-strength fill under a body: `Fx.stack_telegraphs` drops a telegraph whose centre lies inside a higher one (the
 later on a tie) to `UNDER_A` 0.35 of its alpha until that one ends; AimKit fills are already faint (0.18). Checked in
-`--clarity-check` (3v3 pile, Boki out) and `--aimkit-check`; stills `docs/shots/combat-melee-ring-stack/` from
-`--ring-stack-shots` (before = the clarity branch tip 8c5cc0019, after = this).
+`--clarity-check` (3v3 pile, Boki out) and `--aimkit-check`; stills `docs/shots/combat-melee-ring-stack/` (`before*.png` on the clarity branch tip 8c5cc0019, `after*.png` on this; `_close` is a 2x crop) from
+`--ring-stack-shots`, GPU jobs 20261112-114315-11530 / -13824.
 
 Checked by `--clarity-check` (side edges per viewer, the side lean, the shot halo, stars / tendrils / frost / tint on
 and off, the cast glint and ring, Boki bubbles and ability names in and out of a fight); the X band by
