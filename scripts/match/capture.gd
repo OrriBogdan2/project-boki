@@ -192,7 +192,7 @@ static func cancel(m, h: Hunter, why: String) -> void:
 	if why in ["dash", "cc"]:               # (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
 		if h.is_local() and m.hud:
 			m.hud.toast("Scan cancelled: hold %s beside it to try again" % Settings.key_cap("interact") if why == "dash" else "Scan interrupted: hold %s to try again" % Settings.key_cap("interact"), Color("ffd89a"))
-		m.sfx("kin_unsure", h.pos, -6.0)
+		m.sfx("scan_fail", h.pos, 0.0)
 
 ## The match is going away: stop every beam and hum (a loop key outlives the node that started it).
 static func teardown(m) -> void:
@@ -213,6 +213,7 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 		# the box filled while it ran (a deathbox looted, a net catch): it lets go, and rivals see it stop, not finish
 		_send(m, "scan_stop", h, k, 0.0)
 		full_note(m, h)
+		m.sfx("scan_fail", h.pos, 0.0)
 		return
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
@@ -262,6 +263,8 @@ static func on_net(m, h: Hunter, kind: String, extra: String) -> void:
 				h.remove_meta("cap")
 				if kind == "scan_stop" and k != null:
 					_fizzle(m, k)
+					if not k.dead:
+						m.sfx("scan_fail", h.pos, 0.0)          # a rival's scan broke off: you hear the snap
 			if kind == "scan_done" and k != null:
 				_pop(m, h, k)
 
@@ -316,10 +319,20 @@ static func _stop_fx(m, h: Hunter, st: Dictionary) -> void:
 		Sfx.loop_stop(String(st["hum"]))
 		st.erase("hum")
 
+## 0 common, 1 a mutated Boki, 2 a shimmer or a rare species: picks the chime in rules "pop_sounds".
+static func rarity_tier(k: Kin) -> int:
+	if bool(k.rec.get("shimmer", false)) or bool(k.sp.get("rare", false)):
+		return 2
+	return 1 if Mutations.special(k.rec) else 0
+
 ## The finish: a bright pop and the capsule flying to the hunter.
 static func _pop(m, h: Hunter, k: Kin) -> void:
 	var col: Color = Data.KIN[k.species]["color"]
-	m.sfx("scan_pop", k.pos, 0.0)
+	var tier := rarity_tier(k)
+	m.sfx(rules()["pop_sounds"][tier], k.pos, 0.0)
+	m.sfx("scan_call", k.pos, -2.0)
+	if Sfx.listener.distance_to(k.pos) < Sfx.hear_range:
+		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
 	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)

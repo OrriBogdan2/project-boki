@@ -127,8 +127,8 @@ func tick(dt: float) -> void:
 	if phase == "":
 		return
 	t += dt
+	_telegraph()
 	if phase == "wind":
-		_telegraph()
 		h.vel = Vector3(0, h.vel.y, 0)
 		if h.stun_t > 0.0 or h.downed or h.out:
 			_interrupt()
@@ -145,7 +145,6 @@ func tick(dt: float) -> void:
 	while erupted < mini(due, cells.size()):
 		_erupt(erupted)
 		erupted += 1
-	_telegraph()          # after the eruptions, so a cell fills on the frame its slab hits
 	if erupted >= cells.size() and t > float(x.get("lead", 0.2)) + float(x.get("cell_t", 0.15)) * cells.size():
 		phase = ""
 		var length := cell_len() * cells.size()
@@ -163,7 +162,6 @@ func _interrupt() -> void:
 	phase = ""
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
-	k.m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
 	_hide_lane()
 
