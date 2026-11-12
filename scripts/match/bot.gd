@@ -940,6 +940,10 @@ func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 ## aim forward one waypoint at a time instead of re-testing every waypoint every step.
 const LINE_RECHECK_S := 0.3    # s between straight-line re-tests toward the same goal tile
 const PATH_REPLAN_S := 2.0     # s before a tile path is rebuilt (others may have moved the bot)
+const PATH_MARGIN := 8        # tiles the path window reaches past the trip's box
+const PATH_WIDE := 26          # ... for a way round a hazard field (TerrainHazards): a big field needs a long detour
+const PATH_STEPS := 4000       # tiles one search expands
+const PATH_STEPS_WIDE := 12000 # ... in the wide window
 const PULL_PER_STEP := 3       # waypoints the aim may advance per sim step (caps line tests)
 func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var from := Vector2(h.pos.x, h.pos.z)
@@ -1012,16 +1016,17 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	return true
 
 ## Breadth-first search over walkable tiles (a window around the trip), returning tile centres. With
-## h, it keeps off hazard ground h's Boki can't handle, and only crosses it when there's no way round.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
+## h, it keeps off hazard ground h can't handle (searching a wider window for a way round a big field),
+## and only crosses it when there's no way round.
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := PATH_MARGIN) -> Array:
 	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+	var lo := Vector2i(mini(a.x, b.x) - margin, mini(a.y, b.y) - margin)
+	var hi := Vector2i(maxi(a.x, b.x) + margin, maxi(a.y, b.y) + margin)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false
 	var steps := 0
-	while q.size() > 0 and steps < 4000:
+	while q.size() > 0 and steps < (PATH_STEPS if margin == PATH_MARGIN else PATH_STEPS_WIDE):
 		steps += 1
 		var cur: Vector2i = q.pop_front()
 		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
@@ -1042,7 +1047,10 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
 			prev[nx] = cur
 			q.append(nx)
 	if not found:
-		return _grid_path(m, a, b) if h else []
+		if h == null:
+			return []
+		# a way round a big field in a wider window, else across it
+		return _grid_path(m, a, b, h, PATH_WIDE) if margin == PATH_MARGIN else _grid_path(m, a, b)
 	var out: Array = []
 	var c := b
 	while c != a:

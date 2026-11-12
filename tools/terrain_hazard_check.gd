@@ -8,13 +8,16 @@ extends RefCounted
 ##   ice         low grip, a push slides far             / frost: full grip, it stops short
 ##   static      the next shock hurts and stuns          / storm: no damage, no stun
 ##   bramble     slowed and scratched                    / bloom: neither
-## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
+## each with its counter Boki and with its hazard perk (Lava-walker, Tidewader, Iceboots; plain Boki + perk),
+## plus the big fields (tagged regions, safe paths and stones, perk loot near them), the HUD's underfoot
+## reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## Steps the real match at Match.DT; never touches the save. Prints "TERRAIN ..." lines and
 ## "TERRAIN CHECK DONE, N checks, failures: F".
 
 const COUNTER := {"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike",
 	"bramble": "heatherhorn"}
+const PERK := {"lava": "lavawalker", "deep_water": "tidewader", "ice": "iceboots"}      # the immunity perks
 const PLAIN := "cindle"          # venom: counters none of them
 var main: Node
 var m: Match
@@ -44,17 +47,23 @@ func run(main_node: Node) -> void:
 			var ai := _first(kind)
 			ok("%s: an area on the map" % kind, ai >= 0)
 			if ai < 0: continue
-			for safe in [false, true]:
-				_kin(COUNTER[kind] if safe else PLAIN)
+			for via in ["none", "boki", "perk"]:
+				if via == "perk" and not PERK.has(kind): continue
+				var safe: bool = via != "none"
+				_kin(COUNTER[kind] if via == "boki" else PLAIN)
+				P.perks.clear()
+				if via == "perk": P.perks.append(PERK[kind])
 				match kind:
 					"lava": await _lava(ai, safe)
 					"deep_water": await _deep_water(ai, safe)
 					"ice": await _ice(ai, safe)
 					"static": await _static(ai, safe)
 					"bramble": await _bramble(ai, safe)
-				var hud_safe: Variant = tz.underfoot(P).get("safe", null)
-				ok("%s %s: the HUD reads it (safe = %s)" % [kind, _who(safe), safe], hud_safe == safe)
+				var hud: Dictionary = tz.underfoot(P)
+				ok("%s %s: the HUD reads it (safe = %s, by %s)" % [kind, via, safe, hud.get("by", "")],
+					hud.get("safe", null) == safe)
 				_hint(kind, safe)
+		_fields()
 		_bots()
 	print("TERRAIN CHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -67,6 +76,35 @@ func _first(kind: String) -> int:
 
 func _who(safe: bool) -> String:
 	return "with its counter" if safe else "without"
+
+## The big fields: the map's regions are tagged with their hazard and its share of the ground; a safe path
+## (a lane or an islet) is ground, and a field's loot leans to the perk that walks it.
+func _fields() -> void:
+	var seen := {}
+	for R in World.load_layout("hollowcrown")["regions"]:
+		if R.has("hazard"): seen[R["hazard"]] = float(R["share"])
+	for kind in PERK:
+		ok("%s: a region built round it with 30%%+ of its ground" % kind, seen.get(kind, 0.0) >= 0.3,
+			str(seen.get(kind)))
+	var ai := _first("lava")
+	var A: Dictionary = tz.areas[ai]
+	ok("the lava field is big (500+ tiles)", (A["cells"] as Array).size() >= 500, str((A["cells"] as Array).size()))
+	var dry := 0
+	for q in A["cells"]:
+		for d in [Vector2i(1, 0), Vector2i(0, 1)]:
+			if tz.cell[m.world.idx(q.x + d.x, q.y + d.y)] == 0: dry += 1
+	ok("walkable paths and stones cut through it (its edge is long)", dry >= 100, str(dry))
+	var c: Vector3 = A["centre"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var near := TerrainHazards.perk_near(m, c, 40.0)
+	var n_near := 0
+	var n_far := 0
+	for i in 300:
+		n_near += 1 if PerkOrbs.roll(rng, "chest", null, [], near) == "lavawalker" else 0
+		n_far += 1 if PerkOrbs.roll(rng, "chest") == "lavawalker" else 0
+	ok("the field names its perk, and chests beside it drop it 5x more",
+		near == "lavawalker" and n_near > 5 * maxi(n_far, 1), "%d vs %d of 300" % [n_near, n_far])
 
 ## The player's active Boki becomes this species (its type is what counters a hazard).
 func _kin(species: String) -> void:
@@ -106,7 +144,7 @@ func _lava(ai: int, safe: bool) -> void:
 	await _run(2.0)
 	var lost := P.max_hp - P.hp
 	if safe:
-		ok("lava with an ember Boki: no burn, no damage", P.burn_t <= 0.0 and lost < 0.5, "lost %.1f" % lost)
+		ok("lava with its counter: no burn, no damage", P.burn_t <= 0.0 and lost < 0.5, "lost %.1f" % lost)
 	else:
 		ok("lava without: it burns (hp drops 10+)", P.burn_t > 0.0 and lost >= 10.0, "lost %.1f" % lost)
 
@@ -118,7 +156,7 @@ func _deep_water(ai: int, safe: bool) -> void:
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
 	var lost := P.max_hp - P.hp
 	if safe:
-		ok("deep water with a swimmer: swims faster, full hits, never drowns",
+		ok("deep water with its counter: swims faster, full hits, never drowns",
 			spd > 1.2 and is_equal_approx(hits, 1.0) and lost < 0.5,
 			"speed x%.2f hits x%.2f lost %.1f" % [spd, hits, lost])
 	else:
@@ -134,7 +172,7 @@ func _ice(ai: int, safe: bool) -> void:
 	await _run(0.5)
 	var slid := Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
 	if safe:
-		ok("ice with a frost Boki: full footing, a push stops short", is_equal_approx(g, 1.0) and slid < 1.0,
+		ok("ice with its counter: full footing, a push stops short", is_equal_approx(g, 1.0) and slid < 1.0,
 			"grip %.2f slid %.2f m" % [g, slid])
 	else:
 		ok("ice without: low footing, a push slides on", g < 0.3 and slid > 1.2, "grip %.2f slid %.2f m" % [g, slid])
@@ -190,16 +228,15 @@ func _hint(kind: String, safe: bool) -> void:
 ## A bot whose Boki can't handle lava walks round the field; one whose Boki can walks straight over it.
 func _bots() -> void:
 	var ai := _first("lava")
-	var cells: Array = tz.areas[ai]["cells"]
-	var mid: int = (tz.areas[ai]["centre"] as Vector3).z
-	var x0 := 99999
-	var x1 := -99999
-	for q in cells:
-		if q.y == mid:
-			x0 = mini(x0, q.x)
-			x1 = maxi(x1, q.x)
-	var a := Vector2i(x0 - 3, mid)        # 3 tiles off the field's west edge, on its middle row
-	var b := Vector2i(x1 + 3, mid)
+	var a := Vector2i(42, 141)        # the lake's west chest, and its east islet: causeways cross between them
+	var b := Vector2i(85, 158)
+	var edge := Vector2i.ZERO        # dry ground 2 tiles west of a lava tile: facing east is facing the lava
+	for q: Vector2i in tz.areas[ai]["cells"]:
+		var w := m.world
+		var at := w.idx(q.x - 2, q.y)
+		if w.inb(q.x - 2, q.y) and w.kind[at] == World.T_GROUND and tz.cell[at] == 0 and tz.cell[at + 1] == 0:
+			edge = Vector2i(q.x - 2, q.y)
+			break
 	var bot: Hunter = null
 	for h in m.hunters:
 		if h != P and h.kin is Kin:
@@ -223,6 +260,7 @@ func _bots() -> void:
 		else:
 			ok("a bot without paths round the lava", not path.is_empty() and through == 0,
 				info % [path.size(), through])
-		var d := Vector2(b.x - a.x, 0).normalized()
+		var d := Vector2(1, 0)
+		bot.teleport(Vector3(edge.x + 0.5, float(tz.areas[ai]["y"]), edge.y + 0.5))
 		var guard := "ignores" if safe else "steers off"
 		ok("its edge guard %s the lava ahead" % guard, m.bot_brain._safe(m, bot, d, 3.5) == safe)

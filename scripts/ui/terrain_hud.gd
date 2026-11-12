@@ -1,7 +1,8 @@
 class_name TerrainHud
 extends RefCounted
 ## What you're standing in (TerrainHazards), drawn through the in-match HUD `H` under your hunter:
-## the hazard's name, then either a shield and "<Boki> keeps you safe" or what it's doing to you,
+## the hazard's name, then either a shield and "<Boki or perk> keeps you safe" or what it's doing to you
+## (the same shield when you're next to a hazard you're immune to),
 ## and in deep water without a swimmer, your breath. Kept out of hud.gd (a god file): one call.
 
 const SAFE := Color("8fe3a0")
@@ -19,7 +20,7 @@ static func draw(H) -> void:
 	var sz: Vector2 = H.c.size
 	var safe: bool = info["safe"]
 	var col: Color = SAFE if safe else RISK
-	var said := "%s keeps you safe" % info["kin"] if safe else String(info["hurts"])
+	var said := "%s keeps you safe" % info["by"] if safe else String(info["hurts"])
 	var line := "%s  ·  %s" % [info["name"], said]
 	var c := Vector2(sz.x * 0.5, sz.y * Y)
 	var half := 12.0 + line.length() * 4.2

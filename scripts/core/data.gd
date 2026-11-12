@@ -126,6 +126,13 @@ const PERKS := {
 	"focus": {"name": "Clear Mind", "desc": "Abilities recharge 12% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 2, "stats": {"cdr": 0.12}},
 	"tailwind": {"name": "Tailwind", "desc": "Glide 15% faster.", "icon": "gust", "col": Color("9fe8ff"), "max": 1, "stats": {"glide_speed": 0.15}},
 	"remedy": {"name": "Remedy", "desc": "Tonics heal 40% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1},
+	# hazard perks (TerrainHazards): full footing on one kind of hazard ground, wherever your Boki's type is
+	"lavawalker": {"name": "Lava-walker", "desc": "Lava can't burn you: walk the lava fields.", "icon": "fireball",
+		"col": Color("ff8a3a"), "max": 1},
+	"tidewader": {"name": "Tidewader", "desc": "Deep water doesn't slow or drown you: you swim fast.", "icon": "wave",
+		"col": Color("6ab8ff"), "max": 1},
+	"iceboots": {"name": "Iceboots", "desc": "Spiked soles: full footing on the ice sheets.", "icon": "snare",
+		"col": Color("bff0ff"), "max": 1},
 	# the old kit passives, now found as orbs (the same numbers they had as kit gear)
 	"field_kit": {"name": "Field Surgeon", "desc": "Needle and thread: tonics heal 35% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1, "stats": {"tonic": 0.35}},
 	"magpie": {"name": "Magpie Pouch", "desc": "Shiny things stick: gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 1, "stats": {"gems": 0.25}},

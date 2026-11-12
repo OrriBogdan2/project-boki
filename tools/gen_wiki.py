@@ -530,8 +530,9 @@ def _terrain_hazards(hz_at):
         where = sorted({nm for k, nm in hz_at if k == kind})
         C = D["counter"]
         safe = [t.title() + " type" for t in C.get("themes", [])] + [kin.get(k, {}).get("name", k) for k in C.get("kin", [])]
+        safe += [(gd_const("core/data.gd", "PERKS") or {}).get(pk, {}).get("name", pk) + " perk" for pk in C.get("perks", [])]
         rows.append([D["name"], ", ".join(where), D["hurts"].capitalize(), ", ".join(safe)])
-    return "### Terrain hazards\n\nGround that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) walks it safely; bots go round what theirs can't handle.\n\n" + table(["Hazard", "Where", "Does", "Safe with"], rows) + "\n\n"
+    return "### Terrain hazards\n\nGround that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) or a hazard perk (found as a perk orb, more often near its field) walks it safely; bots go round what theirs can't handle. Big fields make up half a region's ground with paths, fords and stepping stones through them.\n\n" + table(["Hazard", "Where", "Does", "Safe with"], rows) + "\n\n"
 
 def gen_maps():
     try:

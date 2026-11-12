@@ -17,7 +17,7 @@ var fails := 0
 var n := 0
 const BUSH_BIOMES := ["bloom", "meadow", "gloom", "storm"]
 const ORDER := ["bloom", "meadow", "gloom", "storm", "ember", "frost"]
-var hazard_polys: Array = []      # the map's bare terrain hazard outlines (TerrainHazards): no grass there
+var hazard_areas: Array = []      # bare hazards {poly, safe}: grass only on their safe shapes
 
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
@@ -33,7 +33,7 @@ func run(main_node: Node) -> void:
 			if A["kind"] == "bramble": continue      # (grass grows in the bramble: make_hollowcrown GRASSY_HAZARDS)
 			var poly := PackedVector2Array()
 			for q in A["poly"]: poly.append(Vector2(float(q[0]), float(q[1])))
-			hazard_polys.append(poly)
+			hazard_areas.append({"poly": poly, "safe": TerrainHazards.safe_shapes(A.get("safe", []))})
 	var T: Dictionary = KeyRun.rules()["cover"]["biome_targets"]
 	for sd in [3, 5, 9, 12, 21]:
 		var w := World.new()
@@ -54,7 +54,10 @@ func _is_ground(w: World, i: int) -> bool:
 
 func _on_hazard(w: World, i: int) -> bool:
 	var p := Vector2(i % w.w + 0.5, i / w.w + 0.5)
-	return hazard_polys.any(func(poly): return Geometry2D.is_point_in_polygon(p, poly))
+	for A in hazard_areas:
+		if Geometry2D.is_point_in_polygon(p, A["poly"]) and not TerrainHazards.on_safe(A["safe"], p):
+			return true
+	return false
 
 func _shares(w: World, sd: int, T: Dictionary) -> void:
 	var ground := {}

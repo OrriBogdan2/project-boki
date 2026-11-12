@@ -12,6 +12,7 @@ extends RefCounted
 const PATH := "res://content/rules/terrain_hazards.json"
 const SDF_PX := 2.0          # distance-field texels per metre of an area's surface
 const SDF_PAD := 1.0         # m of margin round an outline in its surface quad (the soft edge)
+const SDF_BAND := 3.5        # m: how deep inside an edge the shader still shades (terrain_hazard.gdshader's `deep`)
 const STAND_Y := 0.35        # m: this close to the area's ground you're in it (a jump or a glide clears it)
 const TICK_S := 0.5          # s between drowning or scratch hits
 const FX_S := 0.35           # s between splashes or sparks at the feet of someone moving through
@@ -21,11 +22,12 @@ static var _rules := {}
 
 var m: Match
 var w: World
-var areas: Array = []                 # {kind, def, y, centre, cells: Array[Vector2i], mat, t, phase}
+var areas: Array = []                 # {kind, def, y, box, centre, cells: Array[Vector2i], mat, t, phase}
 var cell := PackedInt32Array()        # per tile: area index + 1, 0 = no hazard
 var state := {}                       # hunter instance id -> {area, safe, breath, tick, fx}
 var hint_t := 0.0
 var hinted := {}                      # kind -> m.time the player's Boki last spoke of it
+var ahead := {}                       # underfoot()'s reading for a hazard the player is next to and immune to
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -49,17 +51,21 @@ func _init(match_node: Match) -> void:
 	cell.fill(0)
 	for D in World.load_layout(w.layout_id).get("islands", []):
 		for A in D.get("hazard_areas", []):
-			_add_area(String(A["kind"]), A["poly"])
+			_add_area(A)
 
 # ------------------------------------------------------------------ the areas
-func _add_area(kind: String, pts: Array) -> void:
+## One area: its outline, minus its "safe" shapes (paths, fords, islets: circles or polygons that stay
+## walkable ground inside a big field).
+func _add_area(A: Dictionary) -> void:
+	var kind := String(A["kind"])
 	var def := kind_def(kind)
 	if def.is_empty():
 		push_warning("TerrainHazards: unknown hazard kind '%s'" % kind)
 		return
 	var poly := PackedVector2Array()
-	for p in pts:
+	for p in A["poly"]:
 		poly.append(Vector2(float(p[0]), float(p[1])))
+	var safe := safe_shapes(A.get("safe", []))
 	var box := Rect2(poly[0], Vector2.ZERO)
 	for p in poly:
 		box = box.expand(p)
@@ -68,25 +74,69 @@ func _add_area(kind: String, pts: Array) -> void:
 	var sum := Vector2.ZERO
 	for z in range(int(box.position.y), int(box.end.y) + 1):
 		for x in range(int(box.position.x), int(box.end.x) + 1):
-			if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND:
+			var at := Vector2(x + 0.5, z + 0.5)
+			if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND or not Geometry2D.is_point_in_polygon(at, poly):
 				continue
-			if Geometry2D.is_point_in_polygon(Vector2(x + 0.5, z + 0.5), poly):
-				cell[w.idx(x, z)] = ai + 1
-				cells.append(Vector2i(x, z))
-				sum += Vector2(x + 0.5, z + 0.5)
+			if on_safe(safe, at):
+				continue
+			cell[w.idx(x, z)] = ai + 1
+			cells.append(Vector2i(x, z))
+			sum += at
 	if cells.is_empty():
 		return
-	var c := sum / cells.size()
+	var mean := sum / cells.size()
+	var mid := cells[0]
+	var mean_tile := mean - Vector2(0.5, 0.5)
+	for c in cells:
+		if Vector2(c).distance_squared_to(mean_tile) < Vector2(mid).distance_squared_to(mean_tile):
+			mid = c
 	var y := w.ground_at(cells[0].x + 0.5, cells[0].y + 0.5)
-	var A := {"kind": kind, "def": def, "y": y, "centre": Vector3(c.x, y, c.y), "cells": cells,
+	var centre := Vector3(mid.x + 0.5, y, mid.y + 0.5)
+	var A2 := {"kind": kind, "def": def, "y": y, "box": box, "centre": centre, "cells": cells,
 		"t": float(def["effect"].get("every_s", 0.0)), "phase": "idle"}
-	A["mat"] = _surface(poly, box.grow(SDF_PAD), y, def["look"])
+	A2["mat"] = _surface(poly, safe, box.grow(SDF_PAD), y, def["look"])
 	if kind == "bramble":
 		_thorns(cells, y)
-	areas.append(A)
+	areas.append(A2)
 
-## The area's surface: one flat quad over its box; the shader cuts the outline out of a distance field.
-func _surface(poly: PackedVector2Array, box: Rect2, y: float, look: Dictionary) -> ShaderMaterial:
+## The safe shapes as {c, r} circles or {poly, box} polygons.
+static func safe_shapes(list: Array) -> Array:
+	var out: Array = []
+	for S in list:
+		if S.has("circle"):
+			out.append({"c": Vector2(float(S["circle"][0]), float(S["circle"][1])), "r": float(S["r"])})
+			continue
+		var pts := PackedVector2Array()
+		for p in S["poly"]:
+			pts.append(Vector2(float(p[0]), float(p[1])))
+		var box := Rect2(pts[0], Vector2.ZERO)
+		for p in pts:
+			box = box.expand(p)
+		out.append({"poly": pts, "box": box})
+	return out
+
+static func on_safe(safe: Array, p: Vector2) -> bool:
+	for S in safe:
+		if S.has("c"):
+			if p.distance_squared_to(S["c"]) < float(S["r"]) * float(S["r"]):
+				return true
+		elif (S["box"] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, S["poly"]):
+			return true
+	return false
+
+## How far inside a safe shape p is (metres; negative outside it).
+static func _safe_depth(S: Dictionary, p: Vector2) -> float:
+	if S.has("c"):
+		return float(S["r"]) - p.distance_to(S["c"])
+	var pts: PackedVector2Array = S["poly"]
+	var d := INF
+	for k in pts.size():
+		d = minf(d, p.distance_to(Geometry2D.get_closest_point_to_segment(p, pts[k], pts[(k + 1) % pts.size()])))
+	return d if Geometry2D.is_point_in_polygon(p, pts) else -d
+
+## The area's surface: one flat quad over its box; the shader cuts the outline out of a distance field
+## (metres inside: the outline's, but never deeper than the nearest safe shape's edge).
+func _surface(poly: PackedVector2Array, safe: Array, box: Rect2, y: float, look: Dictionary) -> ShaderMaterial:
 	var iw := maxi(2, int(ceil(box.size.x * SDF_PX)))
 	var ih := maxi(2, int(ceil(box.size.y * SDF_PX)))
 	var img := Image.create(iw, ih, false, Image.FORMAT_RF)
@@ -98,6 +148,8 @@ func _surface(poly: PackedVector2Array, box: Rect2, y: float, look: Dictionary) 
 				var q := Geometry2D.get_closest_point_to_segment(p, poly[k], poly[(k + 1) % poly.size()])
 				d = minf(d, p.distance_to(q))
 			img.set_pixel(i, j, Color(d if Geometry2D.is_point_in_polygon(p, poly) else -d, 0, 0))
+	for S in safe:
+		_carve(img, box, S)
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://shaders/terrain_hazard.gdshader")
 	mat.set_shader_parameter("sdf", ImageTexture.create_from_image(img))
@@ -117,6 +169,19 @@ func _surface(poly: PackedVector2Array, box: Rect2, y: float, look: Dictionary) 
 	m.add_child(mi)
 	mi.global_position = Vector3(box.get_center().x, y + 0.05, box.get_center().y)
 	return mat
+
+## Cuts a safe shape out of the distance field, over the texels within the shader's soft band of it.
+func _carve(img: Image, box: Rect2, S: Dictionary) -> void:
+	var reach: Rect2 = S["box"] if S.has("box") else Rect2(S["c"] - Vector2.ONE * S["r"], Vector2.ONE * S["r"] * 2.0)
+	reach = reach.grow(SDF_BAND)
+	var i0 := maxi(0, int((reach.position.x - box.position.x) * SDF_PX))
+	var i1 := mini(img.get_width() - 1, int((reach.end.x - box.position.x) * SDF_PX))
+	var j0 := maxi(0, int((reach.position.y - box.position.y) * SDF_PX))
+	var j1 := mini(img.get_height() - 1, int((reach.end.y - box.position.y) * SDF_PX))
+	for j in range(j0, j1 + 1):
+		for i in range(i0, i1 + 1):
+			var p := box.position + Vector2((i + 0.5) / SDF_PX, (j + 0.5) / SDF_PX)
+			img.set_pixel(i, j, Color(minf(img.get_pixel(i, j).r, -_safe_depth(S, p)), 0, 0))
 
 ## Bramble stands up out of the ground: a thorn tuft on every other tile, one draw call per area.
 func _thorns(cells: Array[Vector2i], y: float) -> void:
@@ -149,13 +214,33 @@ func area_at(p: Vector3) -> int:
 		return -1
 	return a
 
-## Whether h's active Boki walks this kind of ground safely (its type or its species is a counter).
+## Whether h walks this kind of ground safely: its active Boki's type or species counters it, or it
+## holds the matching hazard perk (Lava-walker, Tidewader, Iceboots).
 func guards(h: Hunter, kind: String) -> bool:
+	var C: Dictionary = kind_def(kind).get("counter", {})
+	if _boki_guards(h, C):
+		return true
+	for pk in C.get("perks", []):
+		if h.perk_n(pk) > 0:
+			return true
+	return false
+
+func _boki_guards(h: Hunter, C: Dictionary) -> bool:
 	var k := h.kin as Kin
 	if k == null or k.state == "downed":
 		return false
-	var C: Dictionary = kind_def(kind).get("counter", {})
 	return String(k.sp.get("theme", "")) in C.get("themes", []) or k.species in C.get("kin", [])
+
+## Who keeps h safe here, for the HUD: the Boki's name, else the perk's; "" when nothing does.
+func protector(h: Hunter, kind: String) -> String:
+	var C: Dictionary = kind_def(kind).get("counter", {})
+	if _boki_guards(h, C):
+		var k := h.kin as Kin
+		return String(k.rec.get("name", k.sp.get("name", "Your Boki")))
+	for pk in C.get("perks", []):
+		if h.perk_n(pk) > 0:
+			return String(Data.PERKS[pk]["name"])
+	return ""
 
 ## Footing at p for h: low on an ice sheet unless its Boki is a frost one.
 func grip(p: Vector3, h: Hunter) -> float:
@@ -176,6 +261,24 @@ static func avoid(mm: Node, h: Hunter, x: float, z: float) -> bool:
 	var a := tz.cell[tz.w.idx(xi, zi)] - 1
 	return a >= 0 and tz.area_at(h.pos) < 0 and not tz.guards(h, String(tz.areas[a]["kind"]))
 
+## The perk that counters the hazard nearest p, if one lies within `near_m` of it ("" otherwise): loot
+## dropped by a lava field leans to the Lava-walker (PerkOrbs).
+static func perk_near(mm: Node, p: Vector3, near_m: float) -> String:
+	var tz := of(mm)
+	if tz == null:
+		return ""
+	var best := ""
+	var best_d := near_m
+	for A in tz.areas:
+		var perks: Array = A["def"]["counter"].get("perks", [])
+		var box: Rect2 = A["box"]
+		var off := Vector2(box.position.x - p.x, box.position.y - p.z).max(Vector2(p.x - box.end.x, p.z - box.end.y))
+		var d := off.max(Vector2.ZERO).length()
+		if not perks.is_empty() and d < best_d:
+			best = String(perks[0])
+			best_d = d
+	return best
+
 ## Hits from a hunter wading in deep water without a swimmer are weaker.
 static func hit_mult(mm: Node, by: Ent) -> float:
 	var tz := of(mm)
@@ -184,18 +287,22 @@ static func hit_mult(mm: Node, by: Ent) -> float:
 	var st: Dictionary = tz.state.get(by.get_instance_id(), {})
 	return float(st.get("weak", 1.0))
 
-## What the player is standing in, for the HUD: {} or {name, col, safe, hurts, breath (0..1), kin}.
+## What the player is standing in, for the HUD: {} or {name, col, safe, hurts, by (who keeps them safe),
+## breath (0..1, -1 when none)}. Next to a hazard they're immune to it's the same, so the HUD says so.
 func underfoot(h: Hunter) -> Dictionary:
 	var st: Dictionary = state.get(h.get_instance_id(), {})
-	if int(st.get("area", -1)) < 0:
-		return {}
-	var A: Dictionary = areas[int(st["area"])]
-	var E: Dictionary = A["def"]["effect"]
-	var k := h.kin as Kin
-	var kin_name := String(k.rec.get("name", k.sp.get("name", "Your Boki"))) if k else ""
-	return {"name": String(A["def"]["name"]), "col": Color(String(A["def"]["look"]["edge"])), "safe": bool(st["safe"]),
-		"hurts": String(A["def"]["hurts"]), "kin": kin_name,
-		"breath": clampf(float(st["breath"]) / float(E["breath_s"]), 0.0, 1.0) if E.has("breath_s") else -1.0}
+	var ai := int(st.get("area", -1))
+	if ai < 0:
+		return ahead
+	var E: Dictionary = areas[ai]["def"]["effect"]
+	var breath := clampf(float(st["breath"]) / float(E["breath_s"]), 0.0, 1.0) if E.has("breath_s") else -1.0
+	return _reading(h, String(areas[ai]["kind"]), breath)
+
+func _reading(h: Hunter, kind: String, breath: float) -> Dictionary:
+	var def := kind_def(kind)
+	var by := protector(h, kind)
+	return {"name": String(def["name"]), "col": Color(String(def["look"]["edge"])), "safe": by != "",
+		"hurts": String(def["hurts"]), "by": by, "breath": breath}
 
 # ------------------------------------------------------------------ every frame
 func tick(dt: float) -> void:
@@ -327,13 +434,19 @@ func _feet_fx(h: Hunter, st: Dictionary, kind: String, dt: float) -> void:
 	st["fx"] = FX_S
 	m.fx.burst(h.pos + Vector3(0, 0.1, 0), Color(FEET_FX[kind]), 6, 2.0, 0.35, 6.0, 0.8)
 
-## The player's Boki says when a hazard is near, and whether it can handle it.
+## What's near the player: the HUD says so when they're immune to it, and their Boki says whether it can
+## handle it.
 func _hint() -> void:
 	var P := m.player
-	if P == null or P.out or not P.kin is Kin:
+	ahead = {}
+	if P == null or P.out:
 		return
 	var kind := _near_kind(P.pos, float(rules()["hint"]["near_m"]))
-	if kind == "" or m.time - float(hinted.get(kind, -1e9)) < float(rules()["hint"]["again_s"]):
+	if kind == "":
+		return
+	if guards(P, kind):
+		ahead = _reading(P, kind, -1.0)
+	if not P.kin is Kin or m.time - float(hinted.get(kind, -1e9)) < float(rules()["hint"]["again_s"]):
 		return
 	hinted[kind] = m.time
 	var trig := "hazard_safe" if guards(P, kind) else "hazard_risk"

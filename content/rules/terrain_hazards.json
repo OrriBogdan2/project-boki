@@ -1,5 +1,5 @@
 {
-	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). look: the surface shader (shaders/terrain_hazard.gdshader).",
+	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas: kind, poly, and safe: circles and polygons of walkable ground cut out of a big field, its paths, fords and islets); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't), and so does holding a listed perk (Data.PERKS: found as perk orbs, PerkOrbs). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). look: the surface shader (shaders/terrain_hazard.gdshader).",
 	"hint": {
 		"near_m": 8.0,
 		"every_s": 0.5,
@@ -16,7 +16,8 @@
 			},
 			"counter": {
 				"themes": ["ember"],
-				"kin": []
+				"kin": [],
+				"perks": ["lavawalker"]
 			},
 			"look": {
 				"mode": 0,
@@ -40,7 +41,8 @@
 			},
 			"counter": {
 				"themes": [],
-				"kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"]
+				"kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"],
+				"perks": ["tidewader"]
 			},
 			"look": {
 				"mode": 1,
@@ -60,7 +62,8 @@
 			},
 			"counter": {
 				"themes": ["frost"],
-				"kin": []
+				"kin": [],
+				"perks": ["iceboots"]
 			},
 			"look": {
 				"mode": 2,

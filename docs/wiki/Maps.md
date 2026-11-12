@@ -49,17 +49,17 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 58 |  |
-| Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
+| The Crown | heart | Gloom | dangerous | 51 |  |
+| Stormcrown Gaol | camp | Storm | dangerous | 10 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
-| Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 26 |  |
-| Thornwood | nest | Bloom | contested | 61 | Bramble Rise |
-| Larkhollow | landing | Meadow | quiet | 48 | The Hollow |
+| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 18 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 22 |  |
+| Thornwood | nest | Bloom | contested | 73 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 47 | The Hollow |
 | Highwatch | landing | Frost | quiet | 3 | The Lookout |
 | Duskmoor | landing | Storm | quiet | 16 | Moor Chapel |
-| Saltmere | landing | Bloom | quiet | 28 | Salt River |
+| Saltmere | landing | Bloom | quiet | 23 | Salt River |
 
 ### Boss lairs
 
@@ -75,13 +75,13 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 ### Terrain hazards
 
-Ground that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) walks it safely; bots go round what theirs can't handle.
+Ground that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) or a hazard perk (found as a perk orb, more often near its field) walks it safely; bots go round what theirs can't handle. Big fields make up half a region's ground with paths, fords and stepping stones through them.
 
 | Hazard | Where | Does | Safe with |
 |---|---|---|---|
-| Lava Field | Cinder Steps | Burning | Ember type |
-| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak |
-| Ice Sheet | Frostgate | No footing | Frost type |
+| Lava Field | Cinder Steps | Burning | Ember type, Lava-walker perk |
+| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak, Tidewader perk |
+| Ice Sheet | Frostgate | No footing | Frost type, Iceboots perk |
 | Static Flats | Stormbreak | Shocks | Storm type, Tempest type |
 | Bramble | Thornwood | Slow, scratches | Bloom type, Spore type |
 
