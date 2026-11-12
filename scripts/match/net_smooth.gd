@@ -3,7 +3,8 @@ extends RefCounted
 ## A remote Hunter's snapshot buffer. The body is drawn DELAY behind its owner's clock, on a smooth
 ## curve between the two snapshots around that moment (cubic Hermite through their positions and
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
-## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump.
+## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump, unless the
+## velocities the two snapshots report account for it (a kit's scripted dive, like Kitefall's fall).
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest recent arrival.
 
@@ -32,7 +33,7 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 		off = gap
 	else:
 		off += (gap - off) * OFF_EASE
-	if n > 0 and p.distance_to(ps[n - 1]) > SNAP_SPEED * (t_owner - ts[n - 1]):
+	if n > 0 and p.distance_to(ps[n - 1]) > _reach(p - ps[n - 1], v, vs[n - 1]) * (t_owner - ts[n - 1]):
 		_clear()
 		jumped = true
 	ts.append(t_owner)
@@ -66,6 +67,13 @@ func follow(e: Ent, now: float) -> void:
 	if jumped:
 		e.prev = e.pos
 		jumped = false
+
+## m/s along the move `d` between two snapshots that is still motion: SNAP_SPEED, or twice the faster speed
+## the two report along it (a move that speeds up from rest or lands hard between them covers up to that).
+## A teleport reports the speed it goes on with, not one along the jump, so it still snaps.
+static func _reach(d: Vector3, v: Vector3, v0: Vector3) -> float:
+	var along := d.normalized()
+	return maxf(SNAP_SPEED, 2.0 * maxf(v.dot(along), v0.dot(along)))
 
 func _clear() -> void:
 	ts.clear()

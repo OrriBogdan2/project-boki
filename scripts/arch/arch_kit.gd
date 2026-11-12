@@ -956,6 +956,15 @@ func net_bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	if m.net_on and not h.remote:
 		m.net_fx(["bolt", m._r(a.x), m._r(a.y), m._r(a.z), m._r(b.x), m._r(b.y), m._r(b.z), col.to_html(false)])
 
+## The velocity the hunter snapshot reports: the body's own, or what a kit move that places the body itself
+## (holding vel at zero so the physics leaves it alone) reports instead, so NetSmooth on the other game
+## draws the move instead of a jump.
+static func net_vel(h: Hunter) -> Vector3:
+	return h.ak.move_vel() if h.ak else h.vel
+
+func move_vel() -> Vector3:
+	return h.vel
+
 ## Other players' games don't run this kit: while the payoff is armed a ring in the resource colour
 ## pulses under the hunter for them every 1.1s (the existing Net fx ring; the protocol is unchanged).
 func net_pulse(dt: float, on: bool, r := 1.1) -> void:
