@@ -35,6 +35,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+A re-key with no source .blend at hand: `tools/art1/clip_blend.py` turns the game .glb into the .blend a `*_clips.py` keys on
+(control-bake an untouched clip against the glb first), and `glb_add_clips.py` copies the new clip back.
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
 1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.
