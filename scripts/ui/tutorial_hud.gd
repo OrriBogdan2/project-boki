@@ -5,8 +5,9 @@ extends RefCounted
 ## pauses play), the step panel pinned at the top-centre for the whole step (it pops in for each new
 ## step, and carries an arrow and the distance while the target is off screen or under the hunter), a
 ## quiet check beside it, and the message lane in the top-right. Nothing sits in the middle or the
-## bottom of the screen, where the hunter, the Boki and the hotbar are. While a new panel is fresh
-## (Tutorial.card_up) other popups (messages, Boki bubbles, the scout hint) wait.
+## bottom of the screen, where the hunter, the Boki and the hotbar are. One prompt at a time: while the
+## panel is up (Tutorial.card_open) toasts queue (HIGH ones still show) and the world's interact prompt
+## shows only on steps that ask for it; while it is fresh (card_up) Boki bubbles and the scout hint wait too.
 
 const MINT := TutorialStrip.MINT
 const GOLD := TutorialStrip.GOLD
@@ -108,7 +109,7 @@ static func _check(h, r: Rect2, k: float) -> void:
 	h.c.draw_polyline(pts, col, 5.0, true)
 
 ## During the tutorial the message lane is the top-right column, clear of the panel
-## (Hud holds it while the panel is fresh).
+## (Tutorial holds it while the card is up).
 static func place_msgs(lane: MsgLane, sz: Vector2) -> void:
 	var r: Rect2 = lanes(sz)["toast"]
 	lane.top = r.position.y

@@ -24,7 +24,7 @@ const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
-var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
+var hold := false:              ## true: only HIGH lines come in, the rest wait (the tutorial card has the floor)
 	set(v):
 		hold = v
 		_promote()
@@ -145,11 +145,13 @@ func _process(delta: float) -> void:
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
+	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
 		var best := 0
 		for i in _waiting.size():
 			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
+		if hold and int(_waiting[best]["prio"]) < HIGH:
+			break
 		var e: Dictionary = _waiting.pop_at(best)
 		e["box"] = _card(e)
 		add_child(e["box"])

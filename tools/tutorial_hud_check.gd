@@ -88,10 +88,12 @@ func _course() -> void:
 	var worst := 0.0
 	var toast_in_card := 0
 	var bubble_in_card := 0
-	var shown_after := 0
+	var high_shown := 0
+	var queued := 0
 	var asked := 0
 	var under := 0
 	var texts := {}
+	var asks: Array[String] = []
 	var counters := {}
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
@@ -104,24 +106,34 @@ func _course() -> void:
 			step_t = 0.0
 			if m.hud and not m.player.extracted:
 				m.hud.toast("check %d" % last, Color.WHITE)
+				m.hud.msgs.push("alert %d" % last, Color.WHITE, MsgLane.HIGH)
 				asked += 1
 			texts[tu.id()] = tu.text
+			if tu.asks_prompt():
+				asks.append(tu.id())
 			counters[tu.id()] = tu.progress_text()
 		step_t += Match.DT
 		if m.hud == null:
 			continue
+		if tu.card_open():
+			for line in m.hud.msgs.texts():
+				if line.begins_with("alert"):
+					high_shown += 1
+				elif not line.begins_with("LEVEL"):      # (a level-up is HIGH: it shows)
+					toast_in_card += 1
+			queued += m.hud.msgs.waiting()
+			m.hud.msgs.clear()
 		if tu.card_up():
-			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
 			under += _under_banner()
-		elif not m.hud.msgs.texts().is_empty():
-			shown_after += 1
-			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
-	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
+	ok(toast_in_card == 0, "no LOW or NORMAL toast shows while the card is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
-	var waited := "(%d asked, %d shown)" % [asked, shown_after]
-	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	var waited := "(%d asked, %d HIGH shown, %d frames queued)" % [asked, high_shown, queued]
+	ok(asked > 0 and queued > 0 and high_shown > 0, "a toast fired during the card queues, a HIGH one shows " + waited)
+	ok(not m.hud.msgs.hold, "the lane is released once the card is gone")
+	ok("pickup" in asks and "chest" in asks and not "shoot" in asks and not "fight" in asks,
+		"the world prompt shows on the steps that ask for it (%s)" % str(asks))
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)

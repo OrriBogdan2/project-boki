@@ -1721,6 +1721,8 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := sz.y - 222.0
+	if m.tut and m.tut.card_open() and not m.tut.asks_prompt():
+		it = {}      # (one prompt: the card says what to do, not a second line at the bottom)
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:

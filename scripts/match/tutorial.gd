@@ -32,7 +32,7 @@ const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
 const KIT_KEY := {"pick_sec": "rmb", "sec": "rmb", "pick_dash": "dash", "dash": "dash", "pick_kin": "e",
 	"kin": "e", "shoot": "lmb", "pick_ult": "r"}
 
-const CARD_T := 1.5        # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
+const CARD_T := 1.5        # s a new step's panel counts as fresh: Boki bubbles and the scout hint wait
 const NAG_T := 8.0         # s without progress before the panel pulses and the Boki says it once more
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0        # s the lookout shows the glove it spotted
@@ -157,6 +157,8 @@ func applies(sid: String) -> bool:
 ## Called by Match every step.
 func update(dt: float) -> void:
 	var p := m.player
+	if m.hud and p:
+		m.hud.msgs.hold = card_open()      # one prompt: toasts queue while the card is up
 	if p == null or p.extracted:
 		return
 	if step < 0:
@@ -175,8 +177,6 @@ func update(dt: float) -> void:
 	flash_t = maxf(0.0, flash_t - dt)
 	nag_t = maxf(0.0, nag_t - dt)
 	spot_t = maxf(0.0, spot_t - dt)
-	if m.hud:
-		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
 	var sid := id()
 	camps.update()
 	var done := _is_done(sid, dt)
@@ -261,7 +261,6 @@ func _enter() -> void:
 	m.bubbles.clear()       # one voice at a time: the old step's lines go, the banner has the floor
 	if m.hud:
 		m.hud.msgs.clear()
-		m.hud.msgs.hold = true
 	stall_t = 0.0
 	nag_t = 0.0
 	flash_t = 0.0
@@ -637,7 +636,16 @@ func scout_hint() -> String:
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
 
-## The banner is up (the first CARD_T of a step): other popups wait their turn.
+## The step's card (or the intro) is up: one prompt at a time, so toasts queue and world prompts keep
+## to what the card asks (Hud holds the message lane on this).
+func card_open() -> bool:
+	return intro or (step >= 0 and step < steps().size() and not m.player.extracted)
+
+## The world's interact prompt (hold E to open) is the thing this step's card asks for.
+func asks_prompt() -> bool:
+	return KEYS.get(id(), "") == "interact"
+
+## The banner is fresh (the first CARD_T of a step): Boki bubbles and the scout hint wait their turn.
 func card_up() -> bool:
 	return intro or (step >= 0 and card_t < CARD_T)
 

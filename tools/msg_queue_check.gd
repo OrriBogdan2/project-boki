@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. five lines fired at once: at most MAX_SHOWN show, the rest wait, no two cards overlap
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
-##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
+##   4. while held (the tutorial card) only HIGH lines show, the rest queue; they come in when the hold lifts
 ##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
@@ -110,6 +110,13 @@ func _hold(host: Control) -> void:
 	ok(lane.texts().is_empty() and lane.waiting() == 1, "held: the line waits")
 	lane.hold = false
 	ok(str(lane.texts()) == str(["check 1"]), "the hold lifts: it shows at once")
+	lane.hold = true
+	lane.push("check 2", Color.WHITE, MsgLane.NORMAL)
+	lane.push("you are downed", Color.WHITE, MsgLane.HIGH)
+	ok(lane.texts().has("you are downed") and not lane.texts().has("check 2") and lane.waiting() == 1,
+		"held: a HIGH line still shows, the NORMAL one waits")
+	lane.hold = false
+	ok(lane.texts().has("check 2") and lane.waiting() == 0, "the hold lifts: the queue is released")
 
 # ------------------------------------------------------------------ 5. in a fight
 func _fight(host: Control) -> void:
