@@ -41,7 +41,7 @@ func _cases() -> Array:
 		{"arch": "ostra", "name": "Brimseed pop", "lead": 0.3, "start": e, "each": recast_e},
 		{"arch": "ostra", "name": "Nightwell", "lead": 0.8, "start": ult},
 		{"arch": "juggernaut", "name": "Finishing Slam", "lead": 0.6, "dist": 3.0, "start": rmb.call(0.0)},
-		{"arch": "juggernaut", "name": "Meteor Drop", "lead": 0.85, "kept": 0.4, "dist": 4.0, "start": air_rmb},
+		{"arch": "juggernaut", "name": "Meteor Drop", "lead": 0.85, "kept": 0.2, "dist": 2.0, "start": air_rmb},
 		{"arch": "gunslinger", "name": "Burr Charge", "lead": 0.8, "prep": beside, "start": rmb.call(0.0)},
 		{"arch": "gunslinger", "name": "Nuke", "lead": 1.5, "start": ult},
 		{"arch": "dredge", "name": "Anchor slam", "lead": 0.4, "dist": 2.5, "start": e},
