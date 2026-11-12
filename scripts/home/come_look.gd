@@ -57,7 +57,7 @@ static func event(h, kind: String, at: Vector3, who: Dictionary, what := "") -> 
 static func _pick(h, at: Vector3, who: Dictionary) -> Array:
 	var isle: int = h.world.island_of(at.x, at.z)
 	var out: Array = (h.kins as Array).filter(func(k):
-		return k != who and _free(k) and h.world.island_of(k["pos"].x, k["pos"].z) == isle \
+		return k != who and at_leisure(k) and h.world.island_of(k["pos"].x, k["pos"].z) == isle \
 			and (k["pos"] as Vector3).distance_to(at) < NEAR_R)
 	out.sort_custom(func(a, b): return _trait(a, "curiosity") > _trait(b, "curiosity"))
 	out = out.slice(0, MAX_LOOKERS)
@@ -67,7 +67,8 @@ static func _pick(h, at: Vector3, who: Dictionary) -> Array:
 static func _timid(k: Dictionary) -> bool:
 	return _trait(k, "bravery") < TIMID
 
-static func _free(k: Dictionary) -> bool:
+## True for a Boki at leisure: not asleep, indoors, whistled over, or busy with a chore or game.
+static func at_leisure(k: Dictionary) -> bool:
 	if k.get("busy", false) or k.has("job") or k.has("fetch") or k.has("bath") or k.has("indoors") or k.has("called_t"):
 		return false
 	return float(k.get("nap_t", 0.0)) <= 0.0
