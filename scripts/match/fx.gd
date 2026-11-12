@@ -3,6 +3,9 @@ extends Node3D
 ## Pooled visual effects: particle bursts, damage numbers, ground rings, attack telegraphs, lightning.
 
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
+const RING: Shader = preload("res://shaders/fx_ring.gdshader")
+## cel_ring's band ends at this share of the quad's half-size, so a burst is scaled to end at the radius asked
+const RING_REACH := 0.9
 ## a word that would land on another stacks this far above it (m along the camera's up), at most this
 ## many times
 const WORD_STEP := 0.62
@@ -13,7 +16,7 @@ var bursts: Array[CPUParticles3D] = []
 var bi := 0
 var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
-var rings: Array = []         # {node, t, dur, r}
+var rings: Array = []         # {node, t, dur, col}
 var teles: Array = []
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
@@ -383,14 +386,16 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	radial += 1
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
-	mi.material_override = Models.ring_mat(col, 0.12)
-	mi.material_override.set_shader_parameter("wash", 1.0)
-	mi.material_override.set_shader_parameter("halo", 1.0)
+	var mat := ShaderMaterial.new()
+	mat.shader = RING
+	mat.set_shader_parameter("color", col)
+	mat.set_shader_parameter("seed", rng.randf() * 10.0)
+	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = at + Vector3(0, 0.08, 0)
-	mi.scale = Vector3.ONE * 0.1
-	rings.append({"node": mi, "t": 0.0, "dur": dur, "r": radius, "col": col})
+	mi.scale = Vector3.ONE * radius / RING_REACH
+	rings.append({"node": mi, "t": 0.0, "dur": dur, "col": col})
 
 ## A melee swing: a bright crescent sweeping the arc in front of you, gone in a blink.
 func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy := false) -> void:
@@ -538,8 +543,7 @@ func _process(delta: float) -> void:
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]
 		var mi: MeshInstance3D = rg["node"]
-		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
-		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
+		mi.material_override.set_shader_parameter("life", minf(k, 1.0))
 		if k >= 1.0:
 			mi.queue_free(); rings.erase(rg)
 	for f in flashes.duplicate():
