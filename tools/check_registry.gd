@@ -75,6 +75,7 @@ const CHECKS := {
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
 	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
+	"--bot-zone-check": ["res://tools/bot_zone_check.gd", "bot_zone_check", null],      # bots keep inside the zone
 	"--air-rings-check": ["res://tools/air_rings_check.gd", "air_rings_check", null],      # lanes, lifts, bots
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94

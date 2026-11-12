@@ -27,9 +27,26 @@ static func next_hop(m: Match, h: Hunter, here: int, there: int) -> Dictionary:
 	h.ai["route"] = {"here": here, "there": there, "hop": hop}
 	return hop
 
-## Dijkstra over the island graph: each island is reached at the landing of the hop into it, and a hop
-## costs the run to its take-off plus its flight. Returns the first hop of the quickest way.
+## The first hop of the quickest way: each island is reached at the landing of the hop into it, and a
+## hop costs the run to its take-off plus its flight.
 static func plan(w: World, from: Vector3, here: int, there: int) -> Dictionary:
+	return _search(w, from, here, there)["first"].get(there, {})
+
+## Seconds on the quickest way from `from` to `to` (the same search as plan, then the walk from the
+## last landing); INF when no way there. Off the islands (in the air) it is the straight run.
+static func eta(w: World, from: Vector3, to: Vector3) -> float:
+	var here := w.island_of(from.x, from.z)
+	var there := w.island_of(to.x, to.z)
+	if here < 0 or there < 0 or here == there:
+		return _flat(from, to) / WALK_MS
+	var q := _search(w, from, here, there)
+	if not q["best"].has(there):
+		return INF
+	return float(q["best"][there]) + _flat(q["at"][there], to) / WALK_MS
+
+## Dijkstra over the island graph from `here`, stopping at `there`: {best: island -> s, at: island ->
+## landing, first: island -> first hop}.
+static func _search(w: World, from: Vector3, here: int, there: int) -> Dictionary:
 	var best := {here: 0.0}
 	var at := {here: from}
 	var first := {here: {}}
@@ -52,7 +69,7 @@ static func plan(w: World, from: Vector3, here: int, there: int) -> Dictionary:
 					best[to] = t
 					at[to] = hp["land"]
 					first[to] = hp if cur == here else first[cur]
-	return first.get(there, {})
+	return {"best": best, "at": at, "first": first}
 
 static func take_of(hp: Dictionary) -> Vector3:
 	return hp["pos"] if hp.has("pos") else hp["take"]

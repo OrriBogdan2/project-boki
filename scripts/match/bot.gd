@@ -714,8 +714,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or randf() < 0.5):
 				best = k; break
-	if m.zone and m.zone.k > 0 and m.zone.outside(h.pos):
-		best = null      # outside the zone's edge: get inside before anything else
+	if BotZone.drop_fight(m, h, best):
+		best = null      # outside the zone's edge, or it's time to go in: get inside first
 	a["tgt"] = best
 	if best:
 		return
@@ -857,12 +857,11 @@ func _choose(m: Match, h: Hunter) -> void:
 			dt = m.world.random_ground()
 			a["detour"] = dt
 		goal = dt; gk = "roam"
-	# outside the zone, or a goal outside it: head inside first
-	if m.zone:
-		var zg := m.zone.bot_goal(h, goal)
-		if zg != goal:
-			goal = zg
-			gk = "zone"
+	# a goal outside the circle that counts, or time to go in: head inside first (BotZone)
+	var zg := BotZone.goal(m, h, goal)
+	if zg != goal:
+		goal = zg
+		gk = "zone"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
 	# for a while. Two goals pulling opposite ways had a bot turning round every think: it spun.
 	# (a goal that only moved a little is the same one, walking: a kin, a squadmate we follow)

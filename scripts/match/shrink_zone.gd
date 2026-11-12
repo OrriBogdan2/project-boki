@@ -8,7 +8,7 @@ extends RefCounted
 ## Outside the edge hurts, more each phase; when the last close ends, the islands wholly outside the
 ## final circle fall. The fall at the end of the clock (Match._update_rules) stays.
 ## Shown on the drop/full map, the minimap, a row under the match clock, and in the world as a glowing
-## wall; the kin warns before each close; bots keep inside (bot_goal). Nothing goes over Net: the
+## wall; the kin warns before each close; bots keep inside (BotZone). Nothing goes over Net: the
 ## circles come from the seed and the match clock alone, and each game hurts only its own bodies.
 
 const RULES_PATH := "res://content/rules/shrink_zone.json"
@@ -146,19 +146,6 @@ func out_at(p: Vector3) -> float:
 			return t1[j]
 	return 1e9
 
-## The docks close as the edge passes them (Exits.setup); the one nearest the final area is the last.
-func time_docks(docks: Array) -> void:
-	var best := -1
-	var bd := 1e9
-	for i in docks.size():
-		docks[i]["close_at"] = out_at(docks[i]["pos"])
-		var d := cs[last()].distance_to(Vector2(docks[i]["pos"].x, docks[i]["pos"].z))
-		if d < bd:
-			bd = d
-			best = i
-	if best >= 0 and float(docks[best]["close_at"]) >= 1e8:
-		docks[best]["last"] = true
-
 func tick(dt: float) -> void:
 	var e := edge_at(m.time)
 	cur_c = e[0]
@@ -216,31 +203,6 @@ func _fall() -> void:
 	for h in m.hunters:
 		if not (h.out or h.extracted or h.remote) and gone.has(m.world.island_of(h.pos.x, h.pos.z)):
 			m.eliminate(h, null, "abyss", true)
-
-## Where a bot should be heading: its own goal while that and the bot are inside the circle that
-## counts (the next one once its close is near), else a spot on solid ground inside it.
-func bot_goal(h: Hunter, goal: Vector3) -> Vector3:
-	var c := cur_c
-	var r := cur_r
-	if k < last() and t0[k + 1] - m.time < float(rules()["bot_lead_s"]):
-		c = cs[k + 1]
-		r = rs[k + 1]
-	var here := Vector2(h.pos.x, h.pos.z)
-	if here.distance_to(c) < r * 0.85 and (goal == Vector3.INF or Vector2(goal.x, goal.z).distance_to(c) < r * 0.85):
-		return goal
-	var key := Vector3(c.x, r, c.y)
-	# Bot._choose gave up on the spot we gave it (no way there): pick another
-	var gave_up := float(h.ai.get("banned", {}).get(h.ai.get("zone_at"), -1.0)) > m.time
-	if h.ai.get("zone_key", Vector3.INF) != key or gave_up:
-		h.ai["zone_key"] = key
-		var p := c + (here - c).limit_length(r * 0.5)
-		if gave_up:
-			p = c + Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * r * 0.45
-		var spot := m.world.free_spot_near(Vector3(p.x, 0, p.y), [], 1.0, 0.45, 16.0)
-		if spot == Vector3.INF:
-			spot = m.world.free_spot_near(Vector3(c.x, 0, c.y), [], 1.0, 0.45, r * 0.7)
-		h.ai["zone_at"] = spot
-	return h.ai["zone_at"]
 
 func _build_wall() -> void:
 	var cm := CylinderMesh.new()
