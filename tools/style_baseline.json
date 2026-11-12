@@ -194,7 +194,7 @@
 "shadow": 2
 },
 "scripts/core/social.gd": {
-"long_line": 13,
+"long_line": 12,
 "semicolon": 1
 },
 "scripts/core/synth.gd": {
@@ -211,22 +211,6 @@
 "scripts/core/work.gd": {
 "long_line": 17,
 "semicolon": 2
-},
-"scripts/feel/feel_config.gd": {
-"long_line": 2
-},
-"scripts/feel/feel_test_world.gd": {
-"long_line": 1,
-"shadow": 2
-},
-"scripts/feel/hunter_controller.gd": {
-"long_line": 1,
-"shadow": 1
-},
-"scripts/feel/top_down_camera.gd": {
-"long_line": 1,
-"semicolon": 6,
-"shadow": 1
 },
 "scripts/home/econ_models.gd": {
 "long_line": 17,
@@ -681,7 +665,7 @@
 "semicolon": 3
 },
 "scripts/match/practice.gd": {
-"long_line": 2
+"long_line": 1
 },
 "scripts/match/practice_hero.gd": {
 "long_line": 2,
@@ -882,9 +866,6 @@
 "nested_ternary": 1,
 "semicolon": 33,
 "shadow": 1
-},
-"scripts/ui/reset_pop.gd": {
-"long_line": 1
 },
 "scripts/ui/results.gd": {
 "long_line": 25,

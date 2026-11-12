@@ -464,7 +464,7 @@ func _start(o: Dictionary) -> void:
 	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
 	Bridge.kin_lines_for_match(self)
 	await _stage("build.finish")
 	set_process(true)
@@ -3395,7 +3395,7 @@ func _gather_input() -> void:
 			continue
 		if slot_of.has(a[0]) and player and Input.is_action_just_pressed(a[0]) and not paused:
 			var sl: String = slot_of[a[0]]
-			if Input.is_key_pressed(KEY_ALT) and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
+			if Input.is_action_pressed("level_mod") and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
 				player.level_slot(sl)       # Alt + key: put a point into it
 				continue
 			if int(player.slot_lv[sl]) == 0:
@@ -3459,7 +3459,7 @@ func on_menu_opened() -> void:
 func _on_menu_closed() -> void:
 	paused = false
 	if not over:
-		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+		CursorMode.aim()
 
 func step(dt: float) -> void:
 	if over:
@@ -3942,6 +3942,7 @@ func step(dt: float) -> void:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
+	loot_sfx.sweep()
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -4151,6 +4152,7 @@ func _update_dex(dt: float) -> void:
 ## breaks or completes. Rivals who hear it get a sound ping on the minimap; bots come to look.
 const HUM_RANGE := 30.0
 const HUM_DB := 2.0
+var loot_sfx := LootOpenSfx.new()     # the sound of a chest or deathbox opening
 var box_hums := {}             # hum key -> its box, while that box's revive hum is playing
 var _hum_seq := 0
 func _update_box_hums() -> void:
@@ -4348,19 +4350,23 @@ func _update_interact(dt: float) -> void:
 						if b0["empty"] or got > 0: hud.close_loot()
 					else:
 						hud.open_loot(b0)
+						loot_sfx.done(b0, LootOpenSfx.box_rar(b0))
 			"boxrev":
 				BoxRevive.hold(self, h, best["box"], dt)
 			"loot":
 				h.set_hold("loot")
+				loot_sfx.hold("box", best["box"])
 				h.box_t = 0.0 if time - h.hurt_at < 0.1 else h.box_t + dt     # a hit starts the loot over
 				if h.box_t >= Life.R["loot_time"]:
 					h.box_t = 0.0
+					loot_sfx.done(best["box"], LootOpenSfx.box_rar(best["box"]))
 					Life.loot_box(self, h, best["box"])
 			"catch":
 				Capture.hold(self, h, best["ent"], dt)
 			"chest":
 				var c: Dictionary = best["chest"]
 				h.set_hold("chest")
+				loot_sfx.hold("chest", c)
 				c["prog"] += dt / float(ChestLoot.R()["hold_s"])
 				if c["prog"] >= 1.0:
 					_open_chest(h, c)
@@ -5078,7 +5084,7 @@ func _finish() -> void:
 	if player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if net_on:
 		Net.end_match()
 	Game.finish_match(r)

@@ -1889,7 +1889,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	# Body moves the kin around (hops, lunges, tumbles); Flex inside it squashes and stretches (KinPuppet)
 	var body_root := Node3D.new(); body_root.name = "Body"; root.add_child(body_root)
 	var body := Node3D.new(); body.name = "Flex"; body_root.add_child(body)
-	var built := KinModels.build(species, body, {"body": m_body, "belly": m_belly, "dark": m_dark, "glow": m_glow, "eye": m_eye, "white": m_white,
+	var built := KinModels.build(species, body, {"body": m_body, "belly": m_belly, "dark": m_dark, "glow": m_glow, "eye": m_eye, "white": m_white, "rec": rec,
 		"wing_col": Shiny.palette(species).get("wing", (Shiny.col(species, rec, "belly") as Color).lerp(glow_c, 0.3)) if shimmer else sp.get("wing", (sp["belly"] as Color).lerp(glow_c, 0.3))}, mats)
 	if built.is_empty():
 		var shape := String(look.get("body", "round"))
@@ -2066,6 +2066,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	painted(m_dark, 2, 0.2, 0.2, 0.2)
 	bake_part_y(body_root)
 	Evo.dress(root, rec)
+	GardenAura.dress(root, rec)          # a worn garden aura (Glowmoss Sprig), looks only
 	if shimmer:
 		# a shimmer sparkles a little, all the time
 		for i in 3:

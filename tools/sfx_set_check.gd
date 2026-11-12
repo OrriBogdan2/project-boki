@@ -28,6 +28,8 @@ extends RefCounted
 ##  18. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
 ##      drops, and stops on a heal, a down or out
 ##  19. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
+##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
+##      without taking a slot, and a need falling to urgent sulks once
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -74,6 +76,7 @@ func run(main: Node) -> void:
 	_ui_cues()
 	_low_hp()
 	_pickups()
+	_voices()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -341,7 +344,7 @@ func _dash_air() -> void:
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
-## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
+## 8. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
 func _garden() -> void:
 	var beds := ["garden_morning", "garden_midday", "garden_evening", "garden_night", "pond"]
@@ -565,3 +568,31 @@ func _beats(cue: LowHpCue, s: float, secs: float) -> int:
 		if cue.step(s, 1.0 / 60.0):
 			n += 1
 	return n
+## 9. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
+func _voices() -> void:
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	var at := Sfx.listener + Vector3(2, 0, 0)
+	var far := Sfx.listener + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	var recs := []
+	for i in 6:
+		recs.append({"uid": "voice_test_%d" % i, "species": "no_such_species", "name": "T%d" % i})
+	HomeVoice.say(recs[5], "happy", far)
+	ok(HomeVoice._until.is_empty(), "voices: a Boki past earshot takes no slot")
+	for i in 5:
+		HomeVoice.say(recs[i], "happy", at)
+	ok(HomeVoice._until.size() == HomeVoice.MAX_VOICES, "voices: five Bokis at once sound %d" % HomeVoice._until.size())
+	HomeVoice._until.clear()
+	HomeVoice.say(recs[0], "happy", at)
+	ok(HomeVoice._until.is_empty(), "voices: the same Boki twice inside its gap speaks once")
+	recs[1]["needs"] = {"food": 5.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
+	var k := {"rec": recs[1], "pos": at}
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	var sulked := HomeVoice._until.size()
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()

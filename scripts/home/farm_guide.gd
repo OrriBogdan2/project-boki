@@ -33,6 +33,7 @@ func _init(home) -> void:
 func build_ui() -> void:
 	if h.root_ui == null:
 		return
+	BaseHud.attach(h)
 	refresh()
 
 ## Rebuilds the card and the hint now.
@@ -146,7 +147,7 @@ func _near_boki() -> bool:
 
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
-	if id == "":
+	if id == "" or FarmUnlocks.base_mode():      # base mode: BaseHud holds the next step
 		_clear_hint()
 		return
 	if not is_instance_valid(hint_box):

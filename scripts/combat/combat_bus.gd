@@ -8,8 +8,8 @@ signal hit_landed(attacker: Node, target: Node, amount: float, tags: Array)
 signal ability_used(caster: Node, ability_id: String, slot: String)
 ## A status (stun, root, slow, burn...) went onto a target.
 signal status_applied(target: Node, status: String, by: Node, duration: float)
-## A dash came straight back for the local hunter and the reset cue played (source: "takedown" or "hero").
-signal dash_reset_cue(hunter: Node, source: String)
+## An ability came straight back for the local hunter and ResetCue played (path: a key of content/rules/reset_cue.json).
+signal reset_cue(hunter: Node, path: String)
 ## A key tool of the local hunter came back and its quiet cue played: hunter, sound (ReadyCues.CUE_OF).
 signal ready_cue(hunter: Node, cue: String)
 ## Something other than plain fighting (a hero's ultimate) added to the bond meter: hunter, share of the bar, reason.
