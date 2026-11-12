@@ -4,7 +4,9 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## id and HunterAnim's), compared per cast. Every AimKit `all` telegraph the host's hunter draws in a cast
+## must show on the guest under its copy too (AimNet, Net 0.24.6), asserted once per shape kind.
+## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -32,6 +34,9 @@ var played := {}             # arch -> casts that played any move
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
+var tele := {}               # the watched hunter's `all` telegraphs this cast: id -> [shape kind, first ms, last ms]
+var tele_kinds := {}         # shape kind -> host telegraphs of that kind over every cast ("arch key: id")
+var tele_miss := {}          # shape kind -> the ones the guest never showed
 
 func _init() -> void:
 	tag = "RANIM"
@@ -51,6 +56,11 @@ func _host() -> void:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
 	_wash_rows_ok()
+	ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
+	for kind in tele_kinds:
+		var drawn: int = tele_kinds[kind].size()
+		ok(not tele_miss.has(kind), "telegraph %s: all %d the host drew show on the guest" % [kind, drawn],
+			"missing: %s" % str(tele_miss.get(kind, [])))
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
@@ -73,6 +83,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	await _run(0.3)
 	log_rows.clear()
 	wash_rows.clear()
+	tele.clear()
 	last_row = ["?", "?"]
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
@@ -88,6 +99,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 		wash_host = wash_rows.duplicate()
 		wash_guest = replies[0].get("wash", []) if not replies.is_empty() else []
 	var cmp := _compare(mine, theirs)
+	_tele_ok(what, replies[0].get("tele", {}) if not replies.is_empty() else {})
 	if cmp["moves"] > 0:
 		played[arch] = int(played.get(arch, 0)) + 1
 	if KNOWN.has(what):
@@ -122,6 +134,21 @@ func _press(key: String, held: bool) -> void:
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
+
+## Every `all` telegraph the host's hunter drew this cast for MIN_LIFE or more showed on the guest under its
+## copy, same kind (one up for less can show and drop in the same 0.1 s flush).
+func _tele_ok(what: String, theirs: Dictionary) -> void:
+	for id in tele:
+		var kind := String(tele[id][0])
+		if (float(tele[id][2]) - float(tele[id][1])) / 1000.0 < MIN_LIFE:
+			continue
+		tele_kinds[kind] = tele_kinds.get(kind, []) + ["%s: %s" % [what, id]]
+		if String(theirs.get(id, [""])[0]) != kind:
+			tele_miss[kind] = tele_miss.get(kind, []) + ["%s: %s" % [what, id]]
+			print("%s FAIL %s: telegraph %s (%s) not on the guest" % [tag, what, id, kind])
+	if not tele.is_empty():
+		var ids := tele.keys().map(func(id): return "%s %s" % [tele[id][0], id])
+		print("%s %s  telegraphs: %s (guest shows %d)" % [tag, what, ", ".join(ids), theirs.size()])
 
 ## Lace's Spirit Walk darkens her body on both games: on within LAG_TOL of the host's, and off again within
 ## LAG_TOL of the host's (the copy's walk is the base length, so it never outstays the walk).
@@ -182,9 +209,10 @@ func _on_msg(topic: String, data, from: String) -> void:
 			"mark":
 				log_rows.clear()
 				wash_rows.clear()
+				tele.clear()
 				last_row = ["?", "?"]
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "tele": tele})
 		return
 	super._on_msg(topic, data, from)
 
@@ -204,6 +232,7 @@ func _sample() -> void:
 	H.render(DT, 1.0)      # (Match's own render pass is off in the checks)
 	if H.ak == null or H.anim == null:
 		return
+	_tele_sample(H)
 	var shown := H.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
 		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
@@ -213,3 +242,14 @@ func _sample() -> void:
 	if row != last_row or restart:
 		last_row = row
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+
+## The `all` telegraphs up under the watched hunter now (the host's own, the guest's copy's).
+func _tele_sample(H: Hunter) -> void:
+	var d := AimKit.layer(m)
+	var now := int(Time.get_unix_time_from_system() * 1000.0)
+	for k in d.entries:
+		var e: Dictionary = d.entries[k]
+		if e["h"] == H and e["all"] and d.live(e):
+			var id := String(k).substr(String(k).find(":") + 1)
+			if not tele.has(id): tele[id] = [String(e["kind"]), now, now]
+			tele[id][2] = now
