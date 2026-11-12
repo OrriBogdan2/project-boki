@@ -11,7 +11,9 @@ extends RefCounted
 ##      end as such, and the bot's sessions last about two minutes
 ##   7. settle: each catch is banked (items to the bag, snacks to the pantry), joy, energy, a memory line
 ##   8. on the rock: Glasswater has the rock and a session started there runs to a result card, its sounds once
-##      per event (garden_sfx.gd): cast, bite warning, the reel loop per hook, catch or miss per cast
+##      per event (garden_sfx.gd): cast, bite warning, the reel loop per hook, catch or miss per cast; the Empty
+##      holds the rod and casts through it (HunterRod poses via HomeVerbs) and puts it away at the end
+## --glint-fishing-shots=<dir> makes a strip of one cast on the Empty instead (a real renderer).
 ## Never touches the real save.
 
 const SESSIONS := 120
@@ -34,6 +36,10 @@ func ok(cond: bool, what: String) -> void:
 
 func run(m: Node) -> void:
 	main = m
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--glint-fishing-shots="):
+			await load("res://tools/glint_fishing_shots.gd").new().run(m, String(a).substr(22))
+			return
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_windows()
@@ -253,10 +259,14 @@ func _on_rock() -> void:
 	ok(gf.run != null, "a session starts with your partner")
 	var r: GlintFishing.Run = gf.run
 	var t := 0.0
+	var posed := {}              # the Empty's rod poses seen (HomeVerbs: a one-shot over the held pose)
 	while gf.run != null and t < float(GlintFishing.rules()["max_s"]) + 30.0:
 		gf.holding = _hands(r)
 		gf.tick(DT)
 		t += DT
+		posed[gw.verbs.act if gw.verbs.act != "" else gw.verbs.stance] = true
+	ok(posed.has("wait") and posed.has("cast"), "the Empty holds the rod and casts (poses seen: %s)" % [posed.keys()])
+	ok(gw.verbs.stance == "" and gw.verbs.act == "", "the rod is put away when fishing ends")
 	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, bot hands)" % t)
 	_sounds(r)
 	Content.rules("farm_build")["base_mode"] = false
