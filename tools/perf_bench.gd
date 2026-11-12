@@ -382,7 +382,7 @@ func _emitters() -> void:
 ## in docs/GARDEN_PERF.md starts from these lines): "BENCH vfx <part> <kind> <owner/name> xN (emitting or shown)".
 func _vfx_inventory(part: String) -> void:
 	var by := {}
-	for n in main.get_tree().root.find_children("*", "Node3D", true, false):
+	for n in main.current.find_children("*", "Node3D", true, false):
 		var kind := _vfx_kind(n)
 		if kind == "" or not n.is_visible_in_tree():
 			continue
