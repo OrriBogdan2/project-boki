@@ -8197,3 +8197,4 @@ READY ext/ui-words-cut-match aa7952adf0 (bulk-rebase: origin/main merged in mech
 READY ext/anim-react-settle-neve-tenzo 14b8469d8f (bulk-rebase: origin/main merged in mechanically, was c0e69d11c5; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/feel-ranges-on-screen 2b36d9da7c (bulk-rebase: origin/main merged in mechanically, was ac28ef1a5f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/tut-heart-raid-hints cdd5a28e1c (bulk-rebase: origin/main merged in mechanically, was 1d2ccd2797; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/knock-banners-1112 3401499969 (knock banners crisper and see-through: slash and name pill at 50% alpha, anti-aliased blades, whole-pixel placement, text at real size; hudref-check green; before/after /home/boki/meshy/knock-banners-1112/knock_banners_before_after.mp4)
