@@ -7878,3 +7878,4 @@ READY ext/sfx-gil-dash-air 50396951c (gil_dash_air cue in his water + dash.json 
 READY ext/sfx-vex-ult-whistle 379b28b9f (Vex Cinderfall fall whistle rises over exactly 1.6 s, reach 40 m, sfx-set-check length row)
 READY ext/sfx-sparkle-ult-beats 0c16987a1f (Sparkle ult: cue on every beat, hover hum loop stops on drop, sfx_set_check rows)
 READY ext/farm-site-assign 74888ad943 (assign a Boki to one farm site from the site panel: Assign list, saved build_at, slot kept; farmbuild 74->89 rows)
+READY ext/pitch-reel-watchdog 6c89ec19b (pitch reel take watchdog follow-up: stalled take killed once, PITCH_BEAT heartbeat on the job log, --pitch-check covers the watchdog, main merged; supersedes the 50103aeec line; GPU test job 20261112-114045-13680 --shots=7 --takes=2 not run yet, queued 2h on rp1)
