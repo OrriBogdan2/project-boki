@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips. Body6 pass (2026-11-11, job 20261111-083301-a5, patch 0.24.6): master now the body6 pick cand_B (~/meshy/v95/Sparkle/r2/body6/pick.txt; basis final/sparkle_final.glb, positions+normals only, same UVs/vertex order).",
- "master": "~/meshy/v95/Sparkle/r2/body6/cand_B.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips. Body6 pass (2026-11-11, job 20261111-083301-a5, patch 0.24.6): master now the body6 pick cand_B (~/meshy/v95/Sparkle/r2/body6/pick.txt; basis final/sparkle_final.glb, positions+normals only, same UVs/vertex order). Bust fix 2026-11-12: master cand_B_bust.glb (cand_B with the bust rounded and the painted underside shading redone; art/wardens/ryzz/IMPORT.md).",
+ "master": "~/meshy/v95/Sparkle/r2/body6/cand_B_bust.glb",
  "game": "art/wardens/ryzz/ryzz.glb",
  "tris": 13000,
  "head": {
