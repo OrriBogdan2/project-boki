@@ -91,11 +91,11 @@ func _fall_tick(s: Dictionary) -> void:
 	var delay := float(xd["delay"])
 	var k := clampf(float(s["t"]) / delay, 0.0, 1.0)
 	var disc := {"at": at, "r": float(xd["radius"]), "ticks": true, "fill": k, "core": float(xd["core_r"])}
-	disc.merge({"all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.DEEP, "hot": k * 0.6, "lw": 0.09})
+	disc.merge({"all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.DEEP, "hot": k * 0.3, "lw": 0.09})
 	disc["alpha"] = DISC_ALPHA
 	AimKit.circle(kit.h, "x%d" % int(s["n"]), disc)
 	var rivets := {"at": at, "r": float(xd["radius"]) + 0.35 * (1.0 - k), "dashed": true, "all": true}
-	rivets.merge({"col": GunslingerKit.HOT, "col2": GunslingerKit.LIME, "alpha": 0.6 + 0.6 * k})
+	rivets.merge({"col": GunslingerKit.LIME, "col2": GunslingerKit.HOT, "alpha": 1.0 + 0.4 * k, "lw": 0.12})
 	AimKit.circle(kit.h, "xr%d" % int(s["n"]), rivets)
 	_drop_shell(s, delay)
 	if float(s["t"]) >= delay:

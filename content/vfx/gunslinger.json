@@ -38,12 +38,14 @@
 
 		"slide": {"sfx": [{"n": "vn_slide", "db": -4.0, "at": "h"}], "fx": [
 			{"p": "ribbon", "at": "chest", "life": 0.5, "tail": 0.22, "size": 0.42, "wave": 0.06, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "at": "chest", "life": 0.5, "tail": 0.22, "size": 0.12, "c": "main", "c2": "white", "c3": "deep"},
 			{"p": "ribbon", "at": "feet", "life": 0.5, "tail": 0.3, "size": 0.2, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "smoke", "at": "h", "n": 4, "way": "back", "speed": 1.6, "spread": 0.6, "grav": -0.4, "life": 0.5,
 				"size": 0.18, "c": "dust", "c3": "soot", "near": true}
 		]},
 		"slide_air": {"sfx": [{"n": "vn_slide", "db": -4.0, "pitch": 1.2, "at": "h", "unless": "ex"}], "fx": [
 			{"p": "ribbon", "at": "chest", "life": 0.4, "tail": 0.2, "size": 0.42, "wave": 0.06, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "at": "chest", "life": 0.4, "tail": 0.2, "size": 0.12, "c": "main", "c2": "white", "c3": "deep"},
 			{"p": "ember", "at": "chest", "n": 8, "way": "back", "speed": 2.5, "spread": 0.6, "grav": -0.5, "life": 0.35,
 				"size": 0.04, "c": "fire", "c2": "hot", "c3": "deep"}
 		]},
