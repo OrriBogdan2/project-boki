@@ -5,6 +5,8 @@ extends RefCounted
 ##  - walk and run, live: the game's own locomotion hand-off at three speeds: foot slide against the ground while the
 ##    foot is planted (m/s and % of the speed), the clip's own speed, hip bob, arm swing against the legs, how far
 ##    the arms reach;
+##  - the run stop: a let-go from full stick under the game's brake, the model carried over the ground, the planted
+##    feet's slide (WardenStride's pins included; the same MAX_SLIDE gate);
 ##  - the loop seam of walk_f, run_f and the idle, and the pop from the idle into the walk and the walk into the run;
 ##  - the two attacks of anim_shots.gd: the weapon hand's travel and how long an arm stands out sideways.
 ## Prints one line per Hunter and writes every number to --json.
@@ -20,7 +22,8 @@ const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
 const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## The gate (every Hunter whose clips move the legs): at full stick a planted foot slides at most this share of the
-## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
+## speed (and in a run stop), and the arms swing against their legs at least this much (-1: with, +1: against;
+## reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const MAX_FREE := 0.1        # a move with data "free_arm" keeps that arm out for at most this share of the clip
@@ -28,6 +31,10 @@ const MAX_STRIKE_MOVE := 0.005  # m: the free_arm layer may move the casting han
 const SAME_AS_IDLE := 0.26   # rad (15 deg): an elbow this close to the idle's is the idle's own hold, not the move's
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
+const STOP_DT := 1.0 / 60.0  # s: a run stop is judged at the game's frame rate
+const STOP_LEAD_S := 0.3     # s of the run before the let-go, sampled for the feet's lift range
+const STOP_S := 0.4          # s after the let-go: the source is in its next pose by 0.2 s (5 fps refs)
+const STOP_PHASES := 8       # let-gos spread evenly over one run cycle, averaged
 
 var bad := 0
 var holder: Node3D
@@ -95,6 +102,14 @@ func _hero(main: Node, id: String) -> void:
 			row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt, rest)
 		var spec: Variant = clips.d["free_arm"][nm]
 		_gate_free(id, String(nm), row["attacks"][nm], _aim_hold(clips, String(nm)), spec is Dictionary)
+	if not id in NO_LEGS:
+		row["stop"] = _stop(m, sync, clips, sk, id)
+		print("STOP  %-10s run let-go: planted feet slide %d%% of the run, one foot skates %.2f m" % [id,
+				round(100.0 * row["stop"]["share"]), row["stop"]["skate_m"]])
+		if row["stop"]["share"] > MAX_SLIDE:
+			print("FAIL %s: a run stop's planted feet slide %d%% of the run (limit %d%%)" % [id,
+					round(100.0 * row["stop"]["share"]), round(100.0 * MAX_SLIDE)])
+			bad += 1
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
@@ -199,6 +214,64 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	var out := _slide(fr, s)
 	out.merge(_swing(fr))
 	return out
+
+## The let-go of a full-stick run under the game's brake (HunterMove.brake), the model carried over the ground as the
+## match carries it (WardenStride pins its feet in the world): a planted foot's mean speed over the ground as a share of
+## the run ("share") and how far one foot skates ("skate_m") in the STOP_S after, the mean of STOP_PHASES let-gos
+## spread through the run cycle.
+func _stop(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: String) -> Dictionary:
+	var run := float(HunterMove.of(id)["speed"])
+	var out := {"share": 0.0, "skate_m": 0.0}
+	for i in STOP_PHASES:
+		m.position = Vector3.ZERO
+		_carry(m, sync, 0.0, 0.8 / STOP_DT)
+		_carry(m, sync, run, WARM_S / STOP_DT)
+		var cycle := clips.lib.get_animation(String(clips.d["loco"]["run"]["f"])).length \
+				/ maxf(float(clips.tree.get("parameters/loco_rate/scale")), 0.1)
+		_carry(m, sync, run, i * cycle / STOP_PHASES / STOP_DT)
+		var fr: Array = []
+		var hv := Vector2(0.0, run)
+		for k in int((STOP_LEAD_S + STOP_S) / STOP_DT):
+			if k >= int(STOP_LEAD_S / STOP_DT):
+				hv = HunterMove.brake(hv, 1.0, STOP_DT)
+			_carry(m, sync, hv.length(), 1)
+			fr.append(_read(sk))
+		var one := _ground_slide(fr, int(STOP_LEAD_S / STOP_DT), run)
+		out["share"] += one["share"] / STOP_PHASES
+		out["skate_m"] += one["skate_m"] / STOP_PHASES
+	m.set_meta(WardenClips.STATE, {})
+	m.position = Vector3.ZERO
+	return out
+
+## `frames` steps of STOP_DT at `mps` forward (facing -Z), the model moved as far.
+func _carry(m: Node3D, sync: Node, mps: float, frames: float) -> void:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -mps), "face": 0.0, "grounded": true})
+	for k in int(frames):
+		m.position.z -= mps * STOP_DT
+		sync.call("_process", STOP_DT)
+
+## Over frames `from`.. of world-frame `fr`: a planted foot's (lowest PLANT_BAND of its lift over all of `fr`) mean
+## ground speed over `mps`, and the most one foot skates (m).
+func _ground_slide(fr: Array, from: int, mps: float) -> Dictionary:
+	var slide := 0.0
+	var n := 0
+	var skate := 0.0
+	for f in ["foot.L", "foot.R"]:
+		var lo := INF
+		var hi := -INF
+		for p in fr:
+			lo = minf(lo, (p[f] as Vector3).y)
+			hi = maxf(hi, (p[f] as Vector3).y)
+		var foot := 0.0
+		for i in range(from, fr.size() - 1):
+			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
+				continue
+			var v := ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * STOP_DT)
+			slide += Vector2(v.x, v.z).length()
+			n += 1
+			foot += Vector2(v.x, v.z).length() * STOP_DT
+		skate = maxf(skate, foot)
+	return {"share": slide / maxi(n, 1) / mps, "skate_m": skate}
 
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
 func _slide(fr: Array, s: float) -> Dictionary:
