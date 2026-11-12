@@ -43,6 +43,10 @@ func run(main_node: Node) -> void:
 		if h.kin == null:
 			m.give_kin(h, m.bot_kin_record())
 	var spot := m.world.random_ground()
+	for _try in 40:      # land on both sides: the player's 25 m off must not be the void (it sent them out)
+		if not m.world.is_void(spot.x + 25.0, spot.z) and not m.world.is_void(spot.x - 25.0, spot.z):
+			break
+		spot = m.world.random_ground()
 	_put(bot, spot)
 	_put(P, spot + Vector3(25, 0, 0))
 	_put(foe, spot + Vector3(-25, 0, 0))

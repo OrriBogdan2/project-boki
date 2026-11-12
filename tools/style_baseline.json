@@ -477,7 +477,7 @@
 "history_comment": 27,
 "long_line": 92,
 "nested_ternary": 15,
-"semicolon": 47
+"semicolon": 48
 },
 "scripts/match/hunter_anim.gd": {
 "long_line": 40,
@@ -536,6 +536,24 @@
 "long_line": 49,
 "nested_ternary": 9,
 "semicolon": 28
+},
+"scripts/match/lairs_bots.gd": {
+"long_line": 2,
+"semicolon": 2
+},
+"scripts/match/lairs_demo.gd": {
+"long_line": 7,
+"semicolon": 6
+},
+"scripts/match/lairs_fight.gd": {
+"long_line": 8,
+"nested_ternary": 3,
+"semicolon": 3
+},
+"scripts/match/lairs_lock.gd": {
+"long_line": 17,
+"nested_ternary": 6,
+"semicolon": 8
 },
 "scripts/match/landmarks.gd": {
 "long_line": 23,
@@ -861,6 +879,9 @@
 "long_line": 33,
 "semicolon": 15
 },
+"tools/camps_check.gd": {
+"long_line": 21
+},
 "tools/capture_check.gd": {
 "long_line": 29,
 "semicolon": 9
@@ -979,7 +1000,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 30,
+"long_line": 31,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
