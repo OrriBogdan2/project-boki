@@ -676,7 +676,7 @@ func _call_preview() -> void:
 	if not hearth_call.is_empty() or not h.is_local() or not _x_ready():
 		return
 	var who := call_target()
-	if who == null:
+	if who == null or who == h:
 		return
 	var xd := x_def()
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
@@ -691,20 +691,24 @@ func _x_ready() -> bool:
 	return HeroUlt.ready(self) and not busy()
 
 
-## The teammate (or downed teammate, the source's ally Wisp) under the cursor within reach; null when there
-## is none, and X then does nothing (CareUtil.mates leaves out herself).
+## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
+## all, herself (so the key is never dead in solo play).
 func call_target() -> Hunter:
 	var xd := x_def()
 	var aim_p: Vector3 = h.inp.get("aim", h.pos)
 	var best: Hunter = null
 	var best_d := float(xd["pick_r"])
+	var any_mate := false
 	for o in CareUtil.mates(m, h):
+		any_mate = true
 		if h.flat_dist(o) > float(xd["range"]):
 			continue
 		var dc := Vector2(o.pos.x - aim_p.x, o.pos.z - aim_p.z).length()
 		if dc < best_d:
 			best_d = dc
 			best = o
+	if best == null and not any_mate and bool(xd.get("self_when_solo", true)):
+		return h
 	return best
 
 
@@ -719,6 +723,8 @@ func _start_call() -> bool:
 		ult_look.drop("tether_aim")
 	var who := call_target()
 	if who == null:
+		if h.is_local() and m.hud:
+			m.hud.toast_small("No teammate there", Color("a2a8bb"))
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
@@ -755,12 +761,15 @@ func _tick_call(dt: float) -> void:
 		_call_end(true)
 
 
-## A tick of the tether's heal on the teammate. A downed teammate is healed
+## A tick of the tether's heal on the teammate (or herself in solo, at self_k). A downed teammate is healed
 ## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
-	_mend(who, amt, float(e_def().get("wisp_k", 5.0)))
+	if who == h:
+		_mend(h, amt * float(e_def().get("self_k", 0.33)))
+	else:
+		_mend(who, amt, float(e_def().get("wisp_k", 5.0)))
 
 
 func _call_look(who: Hunter, dt: float) -> void:
@@ -768,8 +777,10 @@ func _call_look(who: Hunter, dt: float) -> void:
 	var gold := Color("ffd27a")
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
 	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
-	ulk().keep("tether", "tether", CareUtil.hand_at(h, false), {"b": who.pos + Vector3(0, 1.1, 0)})
+	if who != h:
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+		var hand := CareUtil.hand_at(h, false)
+		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22
@@ -793,7 +804,7 @@ func _call_end(done: bool) -> void:
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
-	var rescue := who.downed
+	var rescue := who != h and who.downed
 	if rescue:
 		_call_home(who)
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
