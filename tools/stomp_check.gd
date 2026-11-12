@@ -14,6 +14,9 @@ extends RefCounted
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
+##  7. Bots (BotStomp): a lone bot stomps a downed rival; a bot with two rivals on their feet near the
+##     wisp does not; a bot with a ready breaker (content/rules/bot_stomp.json, every one listed)
+##     breaks a stomp on its teammate within 1 s and the wisp lives.
 ## Never touches the save.
 
 var bad := 0
@@ -74,7 +77,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 31, "no_drop": true})
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 31, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
@@ -90,6 +93,7 @@ func run(main: Node) -> void:
 	_check_cc(home + Vector3(6, 0, 0))
 	_check_soft_cc(home + Vector3(6, 0, 0))
 	_check_stun(home + Vector3(6, 0, 0))
+	_check_bots(home + Vector3(0, 0, -6))
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
 	_check_styles()
@@ -208,6 +212,51 @@ func _check_finish(at: Vector3) -> void:
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "left alone the stomp executes the wisp")
 	ok(absf(took - Stomp.TIME) <= 0.05, "at %.2fs (Stomp.TIME %.1fs)" % [took, Stomp.TIME])
 	ok(foe.stomp.is_empty(), "and the stomper is free again")
+
+## The bot foe next to the fresh wisp W for up to 2 s, with `near` (its rivals) standing 10 m off: inside
+## BotStomp's punish_r, outside the reach at which a bot picks a fight this early in a match.
+func _bot_stomps(at: Vector3, near: Array) -> bool:
+	_setup(at)
+	for i in near.size():
+		_spot(near[i], at + Vector3(0, 0, 10.0 + i))
+	foe.ctrl = "bot"
+	foe.ai["think"] = 0.0
+	var t0 := m.time
+	while foe.stomp.is_empty() and m.time - t0 < 2.0:
+		_run(Match.DT)
+	foe.ctrl = "idle"
+	var stomped := not foe.stomp.is_empty()
+	Stomp.end(m, foe, "gone")
+	return stomped
+
+func _check_bots(at: Vector3) -> void:
+	var rivals: Array = m.hunters.filter(func(x): return x.team != foe.team and x != W)      # W's teammate and team 3
+	ok(_bot_stomps(at, []), "a lone bot stomps the downed rival")
+	ok(not _bot_stomps(at, rivals), "a bot with two rivals standing 10 m off doesn't")
+	var rescuer := m.player      # W's one teammate, played by a bot mind here
+	for k in m.kins:
+		k.dead = true      # (a Boki wandering into the line takes the shot)
+	rescuer.ai = m.bot_brain.new_mind(m.rng, 0.7)
+	for arch in BotStomp.rules()["breakers"]:
+		_setup(at)
+		rescuer.cls = Arch.weight(arch)
+		rescuer.set_arch(arch)
+		rescuer.unlock_all()
+		var reach := float(BotStomp.rules()["breakers"][arch]["reach"])
+		_spot(rescuer, at + Vector3(0, 0, maxf(1.5, reach - 1.0)))
+		_commit()
+		rescuer.stun_t = 0.0      # (the row before's snap can bounce a stun back on it)
+		rescuer.ctrl = "bot"
+		var t0 := m.time
+		while not foe.stomp.is_empty() and m.time - t0 < 1.0:
+			_run(Match.DT)
+		rescuer.ctrl = "idle"
+		var took := m.time - t0
+		ok(foe.stomp.is_empty() and W.downed and not W.out,
+			"a %s bot with its breaker ready breaks the stomp on its teammate (%.2fs)" % [arch, took])
+		Stomp.end(m, foe, "gone")
+	if W.downed:
+		m.revive_hunter(W, null)
 
 func _check_net(at: Vector3) -> void:
 	# the last wisp was executed (a knock now would wipe its team): the player stomps a rival instead
