@@ -1843,8 +1843,10 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			BokiChatter.say(self, h.kin, "owner_down")
 	_check_team(h.team)
 
+## Every offline freeze shares the player's cap (Feel.spend), charged for only the time it adds to a running one.
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
+	var held := maxf(hitstop, 0.0)
+	hitstop = held + Feel.spend(player, maxf(0.0, t - held), time)
 
 ## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
 func _armor_up(h: Hunter) -> void:

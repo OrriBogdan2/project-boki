@@ -8,7 +8,9 @@ extends RefCounted
 ##   4. all 13 Hunters press LMB / RMB / E / X / dash at a dummy: every slot that lands damage has a tier;
 ##   5. a light, solid and heavy hit hold the struck body for their fixed time, a ranged one never the attacker;
 ##   6. the team-fight cap: six heavy hits on one body at once hold it no longer than the cap, and five heavy
-##      hits on you inside the shake gap start one shake.
+##      hits on you inside the shake gap start one shake;
+##   7. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
+##      shares that cap, and one asked while another runs costs only the time it adds.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
@@ -201,9 +203,37 @@ func _stacking(m: Match) -> void:
 	ok(m.hitstop <= cap_s + 0.0001,
 		"and hold your game %.0f ms at most (cap %d)" % [m.hitstop * 1000.0, int(cap_s * 1000.0)])
 	Settings.v["screen_shake"] = Settings.DEFAULTS["screen_shake"]
+	_freezes(m, cap_s)
 	for f in foes:
 		f.free()
 	t.free()
+
+## Three 0.07 s freezes of your game, each drained before the next as the running game does: the first in full, all
+## three within the cap. Then one asked twice on the same step holds it once and costs once: the next gets the rest.
+func _freezes(m: Match, cap_s: float) -> void:
+	const ASK := 0.07               # s: a parry's freeze (combat/verbs.gd)
+	m.time += 2.0
+	var got: Array[float] = []
+	for i in 3:
+		m.hitstop = 0.0
+		m.freeze_frame(ASK)
+		got.append(m.hitstop)
+		m.time += 0.05
+	var total := got[0] + got[1] + got[2]
+	ok(is_equal_approx(got[0], ASK) and total <= cap_s + 0.0001,
+		"three %.0f ms freezes inside %.2f s hold your game %.0f ms in all (cap %d): %s"
+			% [ASK * 1000.0, ImpactWeight.cap("hitstop_window_s"), total * 1000.0, int(cap_s * 1000.0), str(got)])
+	m.time += 2.0
+	m.hitstop = 0.0
+	m.freeze_frame(ASK)
+	m.freeze_frame(ASK)
+	var twice := m.hitstop
+	m.hitstop = 0.0
+	m.freeze_frame(ASK)
+	ok(is_equal_approx(twice, ASK) and is_equal_approx(m.hitstop, cap_s - ASK),
+		"a %.0f ms freeze asked twice on one step holds %.0f ms and costs that once: the next gets %.0f ms (want %.0f)"
+			% [ASK * 1000.0, twice * 1000.0, m.hitstop * 1000.0, (cap_s - ASK) * 1000.0])
+	m.hitstop = 0.0
 
 ## A free-standing body for direct Feel calls (no match tree).
 func _body(arch: String, at: Vector3) -> Hunter:
