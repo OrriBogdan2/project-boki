@@ -15,7 +15,10 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
-##  10. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
+##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
+##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
+##      the farm's build mode and the house's decorating play them
+##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
 ## Reads the files only; never touches the save.
@@ -48,6 +51,7 @@ func run(main: Node) -> void:
 	_ult_cues()
 	_garden_names()
 	_garden()
+	_build_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -79,7 +83,7 @@ func _check_set(path: String) -> void:
 	if group == "boki_voices":
 		_boki_voices(d["sounds"])
 
-## 10. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
+## 11. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
 ## species on a shared cue fails, an unknown one falls back.
 func _boki_voices(sounds: Dictionary) -> void:
 	var gaps := []
@@ -305,6 +309,42 @@ func _garden() -> void:
 	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
 	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
 	Sfx.clear_amb_layers(0.0)
+
+## Does calling play() make the named sound start (it stamps Sfx.last_played)?
+func _plays(sname: String, act: Callable) -> bool:
+	Sfx.last_played.erase(sname)
+	act.call()
+	return Sfx.last_played.has(sname)
+
+## 10. The build and decorate cues.
+func _build_cues() -> void:
+	var names := ["build_pick", "build_rotate", "build_place_wood", "build_place_stone", "build_store",
+			"build_move", "build_blocked"]
+	var silent := names.filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "build cues: %d sounds exist (silent: %s)" % [names.size(), silent])
+	var made := [BuildSfx.placed_name("fence", false), BuildSfx.placed_name("stone_wall", false),
+			BuildSfx.placed_name("stone_wall", true)]
+	ok(made == ["build_place_wood", "build_place_stone", "build_move"],
+			"build cues: wood or stone by material, a move is its own (%s)" % [made])
+	var stone_ids: Array = BuildSfx.rules()["stone"]
+	var unknown := stone_ids.filter(func(i): return not HomeLayout.CATALOG.has(i))
+	ok(unknown.is_empty(), "build cues: every stone piece is in the catalog (unknown: %s)" % [unknown])
+	var knock := func(spot): return _plays("build_blocked", func(): BuildSfx.blocked(spot))
+	var spots := [knock.call("check_a"), knock.call("check_a"), knock.call("check_b"), knock.call("check_b")]
+	ok(spots == [true, false, true, false], "build cues: one knock per attempt, then silent on that spot %s" % [spots])
+	BuildSfx.quiet = true
+	var hushed := [_plays("build_pick", BuildSfx.picked), _plays("build_store", BuildSfx.stored),
+			_plays("build_rotate", BuildSfx.rotated)]
+	BuildSfx.quiet = false
+	ok(hushed == [false, false, true], "build cues: quiet mutes pick and store, not the turn %s" % [hushed])
+	var wired := []
+	for f in ["home_build.gd", "decorate.gd"]:
+		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
+		for cue in ["picked()", "rotated()", "placed(", "stored()", "blocked("]:
+			var needle: String = "BuildSfx." + cue
+			if not src.contains(needle):
+				wired.append("%s %s" % [f, needle])
+	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
 
 func _takes(sname: String) -> Array:
 	var out := []
