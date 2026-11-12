@@ -10,6 +10,7 @@ const DISC := 2.0       # m, shadow disc diameter at the feet (a hunter's body i
 const LIFT := 0.04      # m, above the ground so the disc does not z-fight
 const ABYSS_DIM := 0.55 # brightness of the abyss clouds relative to normal
 const STRENGTH := 0.75  # darkest alpha at the centre of the disc
+const WISP_DISC := 0.9  # m, under a downed Hunter's Wisp (its body is 0.6 m wide)
 const SHOT_DISC := 0.9  # m, shadow disc diameter under a shot (they are small, so the disc is too)
 const SHOT_STRENGTH := 0.55 # darkest alpha at the centre of a shot's disc (fainter than a hunter's)
 
@@ -69,7 +70,9 @@ func _process(_dt: float) -> void:
 		if disc == null:
 			disc = _new_disc(_mesh, _mat)
 			_discs[h] = disc
-		_lay(disc, h.global_position, h.visible and not h.out)
+		var wisp := HunterWisp.node_of(h) if HunterWisp.hides(h) else null
+		disc.scale = Vector3.ONE * (WISP_DISC / DISC if wisp != null else 1.0)
+		_lay(disc, wisp.global_position if wisp != null else h.global_position, h.visible and not h.out)
 	var n := 0
 	for s: Dictionary in _match.shots:
 		var node: MeshInstance3D = s["node"]

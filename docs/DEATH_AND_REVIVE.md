@@ -128,7 +128,7 @@ All names and multipliers are placeholders.
 
 ## Revive readability
 
-- Every visible wisp has a compact ring hugging it in its side colour (ally or rival): the bleed-out drains round it, revive progress fills inside it, it flashes over the last 5 s and goes red while stomped (`DownedMarks`, docs/decisions/0019). No big ground circle.
+- Every visible wisp has a compact ring on the ground round it in its side colour (ally or rival): the bleed-out drains round it, revive progress fills inside it, it flashes over the last 5 s and goes red while stomped (`DownedMarks`, docs/decisions/0019). No big ground circle.
 - While a teammate revives, the inner ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
 - The Wisp itself (owner 11-12): a chubby round soul about knee high, sitting on the ground with a tiny face, under a see-through plume. The plume and the body's outline are the viewer's relation colour, the same as nameplates (you green, your squad blue, rivals red), whatever skin the Wisp wears. The nameplate drops onto the Wisp.
 - A teammate within 9 m sees the revive reach on the ground (thin, filling as they revive) and "JUMP TO REVIVE" under the Wisp's plate (jumping onto it or standing over it both revive). Rivals see the Wisp, its colour and its plate, never the prompt.

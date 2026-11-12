@@ -81,8 +81,9 @@ Supersedes the outline rule above for the Hunter Wisp (round body with a head, w
   and up to 0.6 rad toward the way the hunter faces). It breathes (a slow squash) instead of bobbing; the heavy
   drag and lean when it creeps stay. Procedural, not a Meshy mesh: a ball is a primitive, and drawing the face and
   skins in the shader keeps every skin on one shared mesh (0 credits).
-- **Plume:** a see-through flame over it (`shaders/wisp_plume.gdshader`, one camera-facing quad), in the viewer's
-  relation colour (SideColor: you, ally, rival = the nameplate colours). The body's thin outline takes the same
+- **Plume:** a see-through flame round it (`shaders/wisp_plume.gdshader`, one camera-facing quad rising up the
+  screen from the body's bottom edge, with the body cut out so it sits in the flame, and a thin dark rim so it
+  reads on any ground), in the viewer's relation colour (SideColor: you, ally, rival = the nameplate colours). The body's thin outline takes the same
   colour. `HunterWisp` re-tints both whenever the viewer's relation changes, so online every game colours a Wisp
   by its own local player, never by the owner's team.
 - **Skins:** `wisp_looks.json` is the skin registry (`Save.d["look"]["wisp"]` is the wisp-skin slot, as before):
@@ -90,7 +91,10 @@ Supersedes the outline rule above for the Hunter Wisp (round body with a head, w
   cracks). A skin changes only the body; the plume and outline always carry the relation colour. Your own hunter
   wears your skin; bots and other players wear `default` (see DEBT). Picker: a "Wisp skins" row in the glider
   rack's panel at home (`WispPicker`), all free for now.
-- **Plate:** a downed Hunter's plate sits on the Wisp (`HudPlate.WISP_OFFSET`); under it a teammate in cue range
+- **Marks at game zoom:** the compact ring now lies on the ground round the Wisp's base (`DownedMarks.HUG`), not
+  over the body, so the body and face stay in view; the depth-cue shadow under a Wisp is Wisp-sized
+  (`DepthCues.WISP_DISC`), not a hero's 2 m disc.
+- **Plate:** a downed Hunter's plate sits on the Wisp at the plume's tip (`HudPlate.WISP_OFFSET`); under it a teammate in cue range
   sees "JUMP TO REVIVE" (`DownedMarks.cued`), replacing the old HUD line. Revive rules are unchanged: a teammate
   in the air over the Wisp counts like one standing on it.
 - Checks: `--kin-wisp-form-check` part 7 (form swap, skin, colour for three viewers, prompt for allies only,
