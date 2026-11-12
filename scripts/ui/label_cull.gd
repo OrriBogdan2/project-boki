@@ -8,6 +8,8 @@ extends RefCounted
 
 const FAR_M := 60.0            # m (flat) from the camera's focus: nothing further gets a plate or label
 const EDGE_PX := 120.0         # how far past the screen edge an anchor may be and still draw (plates are wide)
+const RIDE_M := 5.0            # m (flat): aboard the sky ship a rival's plate draws only this close (30 riders'
+                               # plates stacked on one deck read as nothing and cost half the ride's HUD frame)
 
 ## nid -> the frame its plate was last laid out (checks read it), and how many were skipped last frame
 static var laid := {}
@@ -30,6 +32,12 @@ static func at(H, wpos: Vector3, far := FAR_M) -> Vector2:
 	return sp
 
 ## A plate drawn for this entity this frame.
+## While the local player rides the sky ship: a rival further than RIDE_M along the deck gets no plate.
+static func ride_skip(m: Match, h: Hunter) -> bool:
+	var me: Hunter = m.player
+	if me == null or not me.riding or h.team == me.team:
+		return false
+	return h.flat_dist(me) > RIDE_M
 static func mark(e: Ent) -> void:
 	laid[e.nid] = Engine.get_process_frames()
 
