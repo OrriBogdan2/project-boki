@@ -39,7 +39,7 @@ func run(main: Node) -> void:
 		if dd.has("crouch"):
 			n += 1
 			await _hero(main, String(id), art_name)
-		elif not dd.is_empty():
+		elif dd.has("loco"):      # (no clips at all yet, as Gil: nothing to crouch with)
 			ok(id in LATER, "%s: has clips and a crouch" % id)
 	ok(n > 0, "at least one Hero has a crouch (%d)" % n)
 	print("CROUCH_CHECK_DONE, failures: ", bad)
