@@ -175,7 +175,7 @@ static func detect() -> void:
 	var stone := int(cost.get("stone", 0))
 	if HomeGather.has_tool("axe"):
 		mark("axe")
-	if FarmSites.have("wood") >= wood and wood > 0:
+	if FarmSites.have("wood") >= wood and wood > 0 and HoldTeach.count("chop") >= 1:      # one real hold, not taps
 		mark("axe")
 		mark("chop")
 	if HomeGather.has_tool("pickaxe") and FarmSites.have("stone") >= stone and stone > 0:

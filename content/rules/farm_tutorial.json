@@ -43,7 +43,7 @@
 			],
 			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Walk up to a tree and hold {interact} to chop. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."
+				"go": "Walk up to a tree and HOLD {interact} down to chop (a tap is one swing): keep holding until it falls. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."
 			},
 			"world": {
 				"go": "Chop a tree"
@@ -56,7 +56,7 @@
 			],
 			"title": "Mine rocks for the house",
 			"hints": {
-				"go": "Rocks give stone. Take this pickaxe and hold {interact} at a rock."
+				"go": "Rocks give stone. Take this pickaxe and HOLD {interact} down at a rock."
 			},
 			"world": {
 				"go": "Mine this rock"

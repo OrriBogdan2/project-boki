@@ -63,6 +63,7 @@ var spot_t := 0.0            # s left of "You spotted it!" and the glove beam
 var wait := 0.0
 var down_t := 0.0
 var flag := false
+var glide_run := 0.0          # s the glider has been open in one go (the glide step wants a hold)
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
 var stall_got := 0            # got at the last look: a hit or a cast is progress too
@@ -354,7 +355,9 @@ func _is_done(sid: String, dt: float) -> bool:
 			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
 			return flag and near.call(4.5)
 		"glide":
-			flag = flag or p.gliding
+			# a held glide, not a tapped one (HoldTeach): the glider stays open GLIDE_DONE_S in one go
+			glide_run = glide_run + dt if p.gliding else 0.0
+			flag = flag or glide_run >= HoldTeach.GLIDE_DONE_S
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0

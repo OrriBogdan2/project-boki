@@ -317,9 +317,15 @@ func _tutorial_rules() -> void:
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("axe") and FarmTutorial.current() == "chop", "owning an axe finishes step 1: chop a tree")
 	Work.add_mat("wood", int(FarmSites.build_cost("house")["wood"]))
+	var holds0: Dictionary = Settings.get_v("hold_done")
+	Settings.set_v("hold_done", {}, false)
 	FarmTutorial.detect()
+	ok(not FarmTutorial.did("chop"), "the wood alone isn't enough: the step waits for one held chop (HoldTeach)")
+	Settings.set_v("hold_done", {"chop": 1}, false)
+	FarmTutorial.detect()
+	Settings.set_v("hold_done", holds0, false)
 	ok(FarmTutorial.did("chop") and FarmTutorial.current() == "stone",
-			"enough wood for the house finishes chopping; the rocks are next")
+			"enough wood and a held chop finish chopping; the rocks are next")
 	ok(FarmTutorial.give_step_tool("stone") == "pickaxe" and HomeGather.has_tool("pickaxe"),
 			"the rock step hands over a pickaxe")
 	ok(FarmTutorial.hint_text("stone").contains("stone") and FarmTutorial.world_text("stone") != "",
