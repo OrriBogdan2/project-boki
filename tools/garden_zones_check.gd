@@ -148,7 +148,7 @@ func _travel_part(m: Node) -> void:
 	hub.hway.use()
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
-	_cards_part(m, hub)
+	await _cards_part(m, hub)
 	var home_uids: Array = GardenZones.residents("bramblebank").map(func(r): return String(r["uid"]))
 	home_uids.sort()
 	ok(hub.hway.hop("bramblebank"), "a hop to open Bramblebank starts")
