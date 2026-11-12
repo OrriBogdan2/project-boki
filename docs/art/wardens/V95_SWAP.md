@@ -65,6 +65,11 @@ unless `keep` names bones. Proof: `tools/art1/ingame_face_sheet.py` (ffmpeg) fro
 engine's own close-up and match cameras; the older facekeep sheets framed the glb in Blender with guessed fractions
 of a bounding box, in rest pose, which is why their "game" column looked wrong.
 
+Bake misses: a triangle the decimation folds under catches no ray, and its texels bake exactly black (Sparkle's
+forehead, Cinder's arm in the first 11-12 swaps; a bigger cage or ray distance did not reach them). `fill_misses` in
+v95_swap.py fills exact-black base-colour texels from their neighbours (max(32, tex/64) texels in), not the glow map.
+Step 1 is skipped while WORK/bake.blend exists: delete it to re-bake.
+
 ## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
 the master has no extra hand and its slime arm and gauntlet are right (master_v95_grid_front.jpg), the skeleton,

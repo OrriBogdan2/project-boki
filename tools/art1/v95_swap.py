@@ -116,6 +116,26 @@ def uv_density(ob):
     return np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]).sum() / max(a3, 1e-9), uv
 
 
+def fill_misses(body, steps):
+    """Base-colour texels the bake missed take their neighbours' colour, up to `steps` texels in (in place). A miss is
+    exactly black: a ray that found no surface, as from a triangle the decimation folded under (Sparkle's forehead,
+    Cinder's arm in the 11-12 swaps; no cage size reached them). Painted black never bakes to exactly 0, and the empty
+    space between islands only gains padding."""
+    rgb = body[..., :3]
+    hole = rgb.max(-1) == 0
+    for _ in range(steps):
+        if not hole.any():
+            break
+        acc, cnt = np.zeros_like(rgb), np.zeros(hole.shape, F)
+        for ax, sh in ((0, 1), (0, -1), (1, 1), (1, -1)):
+            ok = np.roll(~hole, sh, ax)
+            acc += np.roll(rgb, sh, ax) * ok[..., None]
+            cnt += ok
+        new = hole & (cnt > 0)
+        rgb[new] = acc[new] / cnt[new][:, None]
+        hole &= ~new
+
+
 def lay_kept(old, kept, body, tex, socket="Base Color"):
     """The old atlas (or the image on its `socket`) baked onto the kept parts' new UVs, laid over the body's pixels (in place)."""
     old_img = BW.base_image(old, socket)
@@ -187,6 +207,8 @@ def bake():
         low.data.materials.clear()
         img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
         body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
+        if name == "atlas":     # (not the emission map, where black is no glow)
+            fill_misses(body, max(32, tex // 64))
         if kept.data.polygons:  # the kept parts: the old image onto their new UVs, on an image of their own, laid over the body's
             lay_kept(old, kept, body, tex, socket)
         body[..., 3] = 1
