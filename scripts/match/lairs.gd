@@ -66,6 +66,8 @@ func setup(match_node: Match) -> void:
 	m = match_node
 	if m.opts.get("training", false) or m.opts.get("duel", false) or m.opts.get("tutorial", false) or m.opts.get("sandbox", false):
 		return
+	if HeartRaid.on(m.opts):
+		return      # a raid's one boss is at the Heart (HeartRaid); its lairs stay empty
 	for D in m.world.lair_defs:
 		_add(D)
 
@@ -296,7 +298,7 @@ func boss_for(p: Hunter) -> Boss:
 		var b: Boss = boss_of(L)
 		if b and is_instance_valid(b) and not b.dead and not b.dormant and inside(L, p.pos, 4.0):
 			return b
-	return null
+	return m.heart_raid.boss_for(p) if m.heart_raid else null
 
 func adds_alive(L: Dictionary) -> int:
 	L["adds"] = (L["adds"] as Array).filter(func(x): return is_instance_valid(x) and not x.dead)
@@ -653,6 +655,8 @@ func spawn_add(L: Dictionary, kind: String, at: Vector3) -> void:
 
 ## Every monster death passes through here: bosses, ward stones, guards.
 func on_mob_dead(mb: Mob, credit: Ent) -> void:
+	if mb is Boss and (mb as Boss).lair.get("heart_raid", false):
+		return      # the raid's boss: HeartRaid sees it fall
 	if mb is Boss:
 		_boss_dead((mb as Boss).lair, mb as Boss, credit)
 		return

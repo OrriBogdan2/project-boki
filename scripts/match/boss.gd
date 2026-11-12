@@ -212,7 +212,8 @@ func sim(dt: float) -> void:
 	var inside := foes_inside()
 	if inside.is_empty():
 		empty_t += dt
-		if empty_t > 12.0:
+		# (the Heart Raid's boss holds the Heart: it never sleeps)
+		if empty_t > 12.0 and not lair.get("heart_raid", false):
 			m.lairs.reset_boss(self)
 			return
 	else:
@@ -315,8 +316,21 @@ func _clear_attack() -> void:
 	if buried: _surface()
 
 func _choose_attack() -> void:
+	var opts := attacks()
+	# never the same attack twice in a row, so a fight reads as a rhythm, not a loop
+	var last := String(get_meta("last_atk", ""))
+	var pool: Array = opts.filter(func(o): return o != last)
+	if pool.is_empty(): pool = opts
+	var pick: String = pool[randi() % pool.size()]
+	set_meta("last_atk", pick)
+	if OS.get_cmdline_user_args().has("--boss-debug"): print("BOSSDBG %s t=%.1f %s from %s" % [mkind, awake_t, pick, str(opts)])
+	call("_atk_" + pick)
+
+## The attacks it may pick now (weighted by repeats), plus its lair's extra one (a Nightmare Heart Raid's
+## lair["extra"], one more attack of its kit, e.g. the Colossus's rockfall).
+func attacks() -> Array:
 	var opts: Array = []
-	var d := flat_dist(tgt)
+	var d := flat_dist(tgt) if tgt else INF
 	match mkind:
 		"colossus":
 			if d < 5.0: opts += ["slam", "slam"]
@@ -330,14 +344,9 @@ func _choose_attack() -> void:
 			opts += ["spit", "lob"]
 			if m.lairs.adds_alive(lair) < 3 + phase * 2: opts.append("brood")
 			if phase >= 1: opts.append("burrow")
-	# never the same attack twice in a row, so a fight reads as a rhythm, not a loop
-	var last := String(get_meta("last_atk", ""))
-	var pool: Array = opts.filter(func(o): return o != last)
-	if pool.is_empty(): pool = opts
-	var pick: String = pool[randi() % pool.size()]
-	set_meta("last_atk", pick)
-	if OS.get_cmdline_user_args().has("--boss-debug"): print("BOSSDBG %s t=%.1f %s from %s d=%.1f" % [mkind, awake_t, pick, str(opts), d])
-	call("_atk_" + pick)
+	if String(lair.get("extra", "")) != "":
+		opts.append(String(lair["extra"]))
+	return opts
 
 func _wind() -> float:
 	return float(md["windup"]) * (0.8 if enraged else 1.0) * (1.0 - 0.1 * phase)
@@ -361,6 +370,23 @@ func _atk_slam() -> void:
 		_wave(at, 9.5, 7.5)
 		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
 		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
+
+## Rocks come down on marked circles round its square (the ceiling of the old forge, in a lair): on each
+## phase change, and as an attack of its own when its lair adds it (lair["extra"]).
+func _rockfall(n: int) -> void:
+	var c: Vector3 = centre()
+	var hf := float(lair.get("half", 7)) - 2.0
+	for i in n:
+		var at := Vector3(c.x + randf_range(-hf, hf), c.y, c.z + randf_range(-hf, hf))
+		var dl := 0.9 + randf() * 0.9
+		_tele_c(at, 1.6, Color("ff6a3a"), dl)
+		_at(dl, func():
+			m.fx.burst(at + Vector3(0, 3.0, 0), Color("9c968a"), 14, 3.0, 0.6, 14.0, 1.4, Vector3.DOWN, 30.0)
+			blast(at, 1.6, 16.0, 4.0, 2.0))
+
+func _atk_rockfall() -> void:
+	_begin("rockfall", 2.2, "roar")
+	_rockfall(4 + phase * 2)
 
 func _wave(at: Vector3, max_r: float, speed: float) -> void:
 	var n := MeshInstance3D.new()
@@ -662,14 +688,7 @@ func _phase_up(p: int) -> void:
 	var hf := float(lair.get("half", 7)) - 2.0
 	match mkind:
 		"colossus":
-			# the ceiling of the old forge comes down in places
-			for i in 5 + p * 2:
-				var at := Vector3(c.x + randf_range(-hf, hf), c.y, c.z + randf_range(-hf, hf))
-				var dl := 0.9 + randf() * 0.9
-				_tele_c(at, 1.6, Color("ff6a3a"), dl)
-				_at(dl, func():
-					m.fx.burst(at + Vector3(0, 3.0, 0), Color("9c968a"), 14, 3.0, 0.6, 14.0, 1.4, Vector3.DOWN, 30.0)
-					blast(at, 1.6, 16.0, 4.0, 2.0))
+			_rockfall(5 + p * 2)
 		"serpent":
 			for i in 6 + p * 2:
 				var at := Vector3(c.x + randf_range(-hf, hf), c.y, c.z + randf_range(-hf, hf))

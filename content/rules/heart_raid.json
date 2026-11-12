@@ -1,0 +1,68 @@
+{
+ "_doc": "Heart Raid (prototype, docs/design/PVE_HEART_RAID.md): the PvE mode on the expedition map. One squad of 1-4 Hunters (bots fill a squad of 4 offline) holds the Heart against waves and one boss while the Blight's tide closes. scripts/match/heart_raid.gd runs it. Seconds on the session clock, metres; the tide itself is heart.json's.",
+ "match_s": 900.0,
+ "_match_s": "the islands fall this many seconds in: the raid is lost if the squad has not won by then",
+ "first_wave_s": 75.0,
+ "wave_every_s": 75.0,
+ "_wave_every_s": "a new wave this often; the last wave of the list ends the wave phase",
+ "boss_s": 660.0,
+ "_boss_s": "the boss comes at this time, or boss_after_clear_s after the last wave is cleared, whichever is first",
+ "boss_after_clear_s": 20.0,
+ "boss": {"kind": "colossus", "name": "Blighted Cairnback", "hp": 4000.0, "half": 13.0, "enrage": 150.0,
+  "_doc": "the one prototype boss: a Lair boss kit (scripts/match/boss.gd) fought in the open around the Heart, named for the Boki it is (content/kin/*.json \"boss\"). hp is for a squad of 4 at tier 1 before scale.boss_hp; enrage = seconds before it hits harder (a Lair's is 75); half = the half-width in metres of the square it fights in, centred on the Heart"},
+ "warn_s": 10.0,
+ "_warn_s": "a wave's gates are marked (a ring and a countdown on the ground, a badge on the minimap) this many seconds before it comes out of them",
+ "gates": {
+  "_doc": "the fixed points every wave comes out of (principle 1, clarity: never a random spot or time). deg: bearing from the Heart, clockwise from north (-z); m: metres from the Heart; guard: its monsters guard the Heart, else they come for the squad. An outer gate the tide has closed past is pulled in to EDGE_IN inside the ring the tide has at that wave's time (the same every raid)",
+  "n": {"deg": 0, "m": 11, "guard": true},
+  "se": {"deg": 120, "m": 11, "guard": true},
+  "sw": {"deg": 240, "m": 11, "guard": true},
+  "ne": {"deg": 60, "m": 28, "guard": false},
+  "s": {"deg": 180, "m": 28, "guard": false},
+  "nw": {"deg": 300, "m": 28, "guard": false}
+ },
+ "steer_r": 32.0,
+ "_steer_r": "a wave monster with nobody to fight goes for the nearest standing Hunter of the squad this close",
+ "rally_r": 18.0,
+ "_rally_r": "bot Hunters of the squad farther than this from the fight's centre (the Heart, then the boss) are pinged back to it",
+ "waves": [
+  [{"gate": "n", "mobs": ["skitter", "skitter"]}, {"gate": "ne", "mobs": ["skitter"]}],
+  [{"gate": "se", "mobs": ["skitter", "spitter"]}, {"gate": "s", "mobs": ["skitter", "skitter"]}],
+  [{"gate": "sw", "mobs": ["bomber", "skitter", "spitter"]}, {"gate": "nw", "mobs": ["bl_skitter", "bl_skitter"]}],
+  [{"gate": "n", "mobs": ["sentinel", "skitter"]}, {"gate": "ne", "mobs": ["skitter", "bomber", "bl_skitter"]}],
+  [{"gate": "se", "mobs": ["brute", "skitter"]}, {"gate": "s", "mobs": ["bl_skitter", "bl_skitter", "spitter"]}],
+  [{"gate": "sw", "mobs": ["spitter", "spitter", "bomber"]}, {"gate": "nw", "mobs": ["brute", "skitter", "bl_skitter"]}],
+  [{"gate": "n", "mobs": ["brute", "sentinel", "skitter"]}, {"gate": "ne", "mobs": ["bl_skitter", "bl_skitter", "bl_skitter", "bomber"]}],
+  [{"gate": "se", "mobs": ["brute", "brute", "spitter"]}, {"gate": "s", "mobs": ["bl_warden", "bl_skitter", "bl_skitter", "skitter"]}]
+ ],
+ "_waves": "each wave: its groups, each out of one gate (gates) with its monsters; a group's headcount is scaled by the squad (scale.count) and the difficulty (difficulty.count)",
+ "scale": {
+  "_doc": "by squad size 1..4 (every Hunter in the squad, bots too): wave headcount, monster health, boss health, the cap on wave monsters alive at once",
+  "count": [1.0, 1.4, 1.8, 2.2],
+  "hp": [0.8, 1.0, 1.15, 1.3],
+  "boss_hp": [0.2, 0.45, 0.7, 1.0],
+  "cap": [8, 11, 14, 17]
+ },
+ "difficulty": {
+  "_doc": "picked before the raid (HeartRaidPick, the lobby, --heart-raid=N:hard). Multiplies the squad scale: hp = wave monsters' health, dmg = the damage wave monsters and the boss deal, count = wave headcount and the alive cap, boss_hp = the boss's health; boss_extra = one more attack of the boss's kit (Boss.attacks: its lair's extra). Which raid Boki can turn up is boki_modes.json's min_difficulty. Order: boki_modes.json modes.heart_raid.difficulties",
+  "normal": {"name": "Normal", "hp": 1.0, "dmg": 1.0, "count": 1.0, "boss_hp": 1.0},
+  "hard": {"name": "Hard", "hp": 1.3, "dmg": 1.25, "count": 1.25, "boss_hp": 1.35},
+  "nightmare": {"name": "Nightmare", "hp": 1.7, "dmg": 1.5, "count": 1.5, "boss_hp": 1.8, "boss_extra": "rockfall"}
+ },
+ "stand_ins": {
+  "_doc": "TODO (until the raid's own Boki are modelled): the game species that stands in for a Heart Raid line of boki_modes.json while that line has no game kin. Same rarity as the line, so the draw tickets match; the line's min_difficulty gates it. Delete an entry once its line gets a kin",
+  "bellowlet": "kindlewren", "grainspin": "glintmole", "lurklet": "gloamshell",
+  "kitlet": "threadwyrm", "malletary": "kilnbadger",
+  "sarcobra": "umbrathere", "siegephant": "moundvark"
+ },
+ "blight_lvl": 0.7,
+ "_blight_lvl": "strength of the Blight monsters a wave brings (BlightDir.spawn level; 1 = full)",
+ "reward": {
+  "_doc": "paid to each Hunter who holds the Heart ring once the boss is down (Heart.pay reads this in a Heart Raid). An egg of one of the raid's Boki open at the difficulty (HeartRaid.boki), fewer gems than the Expedition's major seat",
+  "egg": true,
+  "seeds": {"emberberry": 2, "sunroot": 2, "mindmint": 2, "tidebloom": 2},
+  "goods": {"heartwood": 2},
+  "gems": 100,
+  "trust": 15.0
+ }
+}

@@ -126,6 +126,7 @@ var early_team := -1           # the squad that took the early seat
 var final_team := -1           # the squad whose progress the Heart ring holds
 var final_prog := 0.0          # 0..1
 var rush := false              # one squad left: the final seat is open and faster
+var locked := false            # Heart Raid: no timer or last squad opens it, only HeartRaid (its boss down)
 var drops := 0
 var audio: HeartSfx            # the hum, stings, heartbeat, gate cues and the Ways Out calls
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
@@ -240,7 +241,7 @@ func tick(dt: float) -> void:
 
 func _host_tick(dt: float) -> void:
 	var t := m.sess_time()
-	if state == S.ASLEEP and t >= r("wake_s"):
+	if state == S.ASLEEP and t >= r("wake_s") and not locked:
 		go(S.CHARGING, "wake")
 	if state == S.CHARGING:
 		charge += dt
@@ -250,14 +251,14 @@ func _host_tick(dt: float) -> void:
 			go(S.READY, "charged")
 	if carrier != null and (carrier.downed or carrier.out or carrier.extracted):
 		_drop(carrier.pos)
-	if t >= r("final_s") and state < S.FINAL:
+	if t >= r("final_s") and state < S.FINAL and not locked:
 		go(S.FINAL, "time")
 	if state == S.FINAL:
 		_ring_tick(dt)
 
 ## Only one squad is left (Match._check_last): the final seat opens for them at once, faster.
 func on_last_team() -> void:
-	if site == Vector3.INF or not host() or state == S.DONE:
+	if site == Vector3.INF or not host() or state == S.DONE or locked:
 		return
 	rush = true
 	if state != S.FINAL:
@@ -430,7 +431,8 @@ func interact_for(h: Hunter) -> Dictionary:
 	var say := ""
 	match state:
 		S.ASLEEP:
-			say = "The Heart is asleep  ·  it wakes in %ds" % int(ceil(r("wake_s") - m.sess_time()))
+			say = "The Heart sleeps until the raid's boss falls" if locked \
+				else "The Heart is asleep  ·  it wakes in %ds" % int(ceil(r("wake_s") - m.sess_time()))
 		S.CHARGING:
 			say = "The Heartspark is charging  ·  %d%%  ·  everyone can see it" % int(charge / r("charge_s") * 100.0)
 		S.WAITING:
@@ -470,10 +472,12 @@ func act(what: String, h: Hunter) -> void:
 ## settles them at home).
 func pay(h: Hunter, how: String) -> Dictionary:
 	var rw: Dictionary = rules()["reward"]["major" if how == HOW_FINAL else "minor"]
+	if m.heart_raid:
+		rw = HeartRaid.reward()
 	var out := {"egg": {}, "goods": (rw["goods"] as Dictionary).duplicate(),
 		"seeds": (rw["seeds"] as Dictionary).duplicate(), "gems": int(rw["gems"]), "trust": float(rw["trust"])}
 	if bool(rw["egg"]):
-		var sp := _egg_species()
+		var sp: String = m.heart_raid.egg_species() if m.heart_raid else _egg_species()
 		out["egg"] = {"sp": sp, "boss": String(Data.KIN.get(sp, {}).get("boss", ""))}
 	for s in out["seeds"]:
 		h.seeds[s] = int(h.seeds.get(s, 0)) + int(out["seeds"][s])

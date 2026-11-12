@@ -20,6 +20,7 @@ var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
+var heart_raid: HeartRaid = null # Heart Raid's waves and boss (null outside the PvE mode)
 var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
@@ -371,6 +372,7 @@ func _start(o: Dictionary) -> void:
 		heart = Heart.new(self)
 		heart.setup(layout)
 		ways_vfx = WaysOutVfx.new(self)
+		if HeartRaid.on(opts): heart_raid = HeartRaid.new(self)
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()
@@ -1546,7 +1548,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
+		var sp := BokiModes.draw(HeartRaid.site_pool(opts, "wild"), rng)      # this mode's Boki (a raid: its own)
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
@@ -3943,6 +3945,7 @@ func step(dt: float) -> void:
 	_tick_chase()
 	Beacons.tick(self, dt)
 	if heart: heart.tick(dt)
+	if heart_raid: heart_raid.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
 	if not net_on:
 		_watch_death()
@@ -5066,7 +5069,8 @@ func _finish() -> void:
 		if not player_lost.is_empty():
 			r["lost_kin"] = _resolve_lost()
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
-	if player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
+	if heart_raid: r["heart_raid"] = heart_raid.summary()
+	elif player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -5456,6 +5460,8 @@ func _net_ev(x, from: String) -> void:
 			BoxRevive.net_in(self, x)
 		"ht":
 			if heart: heart.net_in(x)
+		"hr":
+			if heart_raid: heart_raid.net_in(x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
