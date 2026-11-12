@@ -152,6 +152,8 @@ func _corner(hb: HomeBuild) -> Vector2i:
 ## The pocket tile that opens onto the ground outside the 3x3 round c (the way out).
 func _way_out(hb: HomeBuild, c: Vector2i, pocket: Array) -> Vector2i:
 	for t in pocket:
+		if absi(t.x - c.x) + absi(t.y - c.y) != 1:
+			continue    # a gap on the diagonal between two fences is too tight to walk through
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var n: Vector2i = t + dv
 			if maxi(absi(n.x - c.x), absi(n.y - c.y)) >= 2 and hb.cell_reason(n) == "":

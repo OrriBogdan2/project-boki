@@ -150,7 +150,7 @@ func _pocket_rules(home, hb: HomeBuild, o: Vector2i) -> void:
 	var k: Dictionary = home.kins[0]
 	_place_kin(k, p)
 	var pillar := {"kind": "deco", "id": "pillar", "r": 0, "from": -1}
-	ok(not hb.fits(pillar, [p + Vector2i(0, 1)]) and hb.why == HomeBuild.POCKET_TEXT,
+	ok(not hb.fits(pillar, [p + Vector2i(0, 1)]) and hb.why == PlaceClearance.why(String(k["rec"]["name"])),
 			"a pillar that would shut %s into the fenced corner is refused: '%s'" % [k["rec"]["name"], hb.why])
 	ok(hb.fits(pillar, [o + Vector2i(13, 9)]), "the same pillar on open ground fits ('%s')" % hb.why)
 
