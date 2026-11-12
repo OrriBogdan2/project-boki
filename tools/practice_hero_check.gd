@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	for area in areas:
 		var o: Dictionary = OPTS.duplicate()
 		o.merge(areas[area], true)
-		Settings.v["cam_zoom"] = 1.0      # (the wheel is kept between matches: each starts from the default)
+		Settings.v["cam_zoom"] = 0.0      # (the wheel is kept between matches: each starts from the default)
 		var m := Match.new()
 		main.add_child(m)
 		await m.start(o)

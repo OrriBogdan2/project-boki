@@ -30,10 +30,14 @@ static func input(m: Match, event: InputEvent) -> bool:
 	Settings.set_v("cam_zoom", m.cam.user_zoom, false)
 	return true
 
-## The zoom the player left the wheel at (Settings "cam_zoom"), inside the range.
-static func saved() -> float:
+## The zoom a match starts at: where the player left the wheel (Settings "cam_zoom"), inside the range; until
+## they first turn it, the widest for an expedition (`host` is its Match) and the style's own framing elsewhere.
+static func saved(host: Node) -> float:
 	var r: Dictionary = rules()["match"]
-	return clampf(float(Settings.get_v("cam_zoom")), float(r["min"]), float(r["max"]))
+	var z := float(Settings.get_v("cam_zoom"))
+	if z <= 0.0:
+		z = float(r["max"]) if host is Match and Prematch.expedition((host as Match).opts) else 1.0
+	return clampf(z, float(r["min"]), float(r["max"]))
 
 ## Whether a player's Settings put this mouse button on an action.
 static func _bound(button: int) -> bool:

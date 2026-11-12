@@ -119,7 +119,7 @@ func _results(main: Node) -> void:
 
 func _match(main: Node) -> void:
 	var tree := main.get_tree()
-	Settings.v["cam_zoom"] = 1.0      # (the wheel is kept between matches: each starts from the default)
+	Settings.v["cam_zoom"] = 0.0      # (a new player: the wheel never turned)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
@@ -127,8 +127,20 @@ func _match(main: Node) -> void:
 	for i in 5: await tree.process_frame
 	var r: Dictionary = CamWheel.rules()["match"]
 	var w: Dictionary = CamWheel.rules()["widen"]
+	ok(is_equal_approx(m.cam.user_zoom, float(r["max"])), "match: a new player's expedition starts at the widest (%.2f)"
+			% m.cam.user_zoom)
+	var drill := Match.new()
+	drill.opts = {"teams": 2, "practice": true}
+	var away := CamRig.new()
+	ok(CamWheel.saved(drill) == 1.0 and CamWheel.saved(away) == 1.0,
+		"match: other modes and screens start at the style's own framing (%.2f, %.2f)" % [CamWheel.saved(drill),
+		CamWheel.saved(away)])
+	Settings.v["cam_zoom"] = 1.0
+	ok(CamWheel.saved(m) == 1.0, "match: a zoom the player chose wins in an expedition (%.2f)" % CamWheel.saved(m))
+	drill.free()
+	away.free()
 	var used := CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_UP))
-	ok(used and m.cam.user_zoom < 1.0, "match: the wheel zooms in (%.2f)" % m.cam.user_zoom)
+	ok(used and m.cam.user_zoom < float(r["max"]), "match: the wheel zooms in (%.2f)" % m.cam.user_zoom)
 	for i in 100: CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_UP))
 	ok(is_equal_approx(m.cam.user_zoom, float(r["min"])), "match: stops at the closest (%.2f)" % m.cam.user_zoom)
 	for i in 100: CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_DOWN))
@@ -140,8 +152,8 @@ func _match(main: Node) -> void:
 	ok(is_equal_approx(next.user_zoom, float(r["max"])), "match: the next camera starts there (%.2f)" % next.user_zoom)
 	next.queue_free()
 	Settings.set_v("cam_zoom", 9.0, false)
-	ok(is_equal_approx(CamWheel.saved(), float(r["max"])), "match: a saved zoom past the range is clamped (%.2f)"
-			% CamWheel.saved())
+	ok(is_equal_approx(CamWheel.saved(m), float(r["max"])), "match: a saved zoom past the range is clamped (%.2f)"
+			% CamWheel.saved(m))
 	Settings.set_v("cam_zoom", float(r["max"]), false)
 	# Ctrl: past the max, then back
 	var P: Hunter = m.player
@@ -168,6 +180,6 @@ func _match(main: Node) -> void:
 	var zoomed := CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_UP))
 	ok(not zoomed and m.cam.user_zoom == was, "match: a wheel bound to an action stays theirs")
 	InputMap.action_erase_event("emote", bind)
-	Settings.set_v("cam_zoom", 1.0, false)      # (a later check starts from the default)
+	Settings.set_v("cam_zoom", 0.0, false)      # (a later check starts from the default)
 	m.queue_free()
 	await tree.process_frame

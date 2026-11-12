@@ -114,7 +114,7 @@ static func style_across(id: String) -> float:
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
-	user_zoom = CamWheel.saved()
+	user_zoom = CamWheel.saved(get_parent())
 	fov = 28.0
 	near = 1.0
 	far = 120.0
