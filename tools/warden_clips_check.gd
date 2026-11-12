@@ -17,7 +17,8 @@ const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
-const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: their own ledge climb
+const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender",    # Vex, Kael, Cinder, Meeko: their own ledge climb
+	"archer", "dolm", "dredge", "rimewright"]    # Lace, Tenzo, Grimble, Neve (tools/art1/glb_climb_clips.py)
 
 var bad := 0
 var holder: Node3D
@@ -40,6 +41,9 @@ func run(main: Node) -> void:
 	_finishers()
 	for id in MANTLERS:
 		_mantle(String(id))
+	for id in Arch.ORDER:
+		if not MANTLERS.has(String(id)):
+			_mantle_proc(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -255,6 +259,17 @@ func _mantle(id: String) -> void:
 		lo = minf(lo, p.y)
 		hi = maxf(hi, p.y)
 	ok(hi - lo > 0.15, "%s: the legs move through the climb (%.2f m)" % [id, hi - lo])
+	m.free()
+
+## A Hunter with no climb clip keeps the rig's procedural reach and push for a ledge rise.
+func _mantle_proc(id: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var sync := m.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	if sync != null and sync.clips != null:
+		var clips: WardenClips = sync.clips
+		ok(not clips.d.has("mantle") and bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
+				"%s: no climb clip, a ledge rise plays the procedural pose" % id)
 	m.free()
 
 func _companions() -> void:
