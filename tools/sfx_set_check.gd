@@ -18,7 +18,8 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
-##  11. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
+##  11. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist;
+##      every form file names its own cast, travel and hit sounds (MergeSfx), all on file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -196,9 +197,10 @@ func _ult_cues() -> void:
 ## 11. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
 func _fusion_cues() -> void:
 	var cues := {}
+	var files := DirAccess.get_files_at("res://content/merge_forms")
 	for t in (MergeForm.data()["types"] as Dictionary).values():
 		cues[String(t["cue"])] = true
-	for f in DirAccess.get_files_at("res://content/merge_forms"):
+	for f in files:
 		cues[String(MergeForm.kit_form(f.get_basename())["cue"])] = true
 	var missing := []
 	for c in cues:
@@ -209,6 +211,17 @@ func _fusion_cues() -> void:
 			missing.append(c)
 	ok(missing.is_empty() and cues.size() >= 16,
 		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+	# every form names its own cast, travel and hit (MergeSfx), each on file and none shared with another form
+	var named := {}
+	var silent := []
+	for f in files:
+		for kind in ["cast", "travel", "hit"]:
+			var sname := MergeSfx.name_of(f.get_basename(), kind)
+			named[sname] = true
+			if sname == "" or not Sfx.ensure(sname):
+				silent.append("%s %s" % [f.get_basename(), kind])
+	ok(silent.is_empty() and named.size() == files.size() * 3,
+		"%d forms: own cast, travel and hit, %d sounds on file (silent %s)" % [files.size(), named.size(), silent])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

@@ -8,6 +8,7 @@ extends RefCounted
 ##   5. no tiers: two Boki of very different level and trust give the same numbers; the weight-class baseline
 ##   6. the warning in the last 3 seconds (local and in another game)
 ##   7. the net round trip (form, shell, pose, rest, events) and bots using the ultimate
+##   8. sounds: each form's own cast, travel and hit replace the shared ones; anyone else's form plays quieter
 ## Run one part: --mergeform-only=xform,aug
 
 var bad := 0
@@ -114,7 +115,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--mergeform-only="): only = a.substr(17)
-	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards"]:
+	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards", "sounds"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.ability_used.disconnect(_on_used)
@@ -1071,3 +1072,74 @@ func _bots() -> void:
 	foe(P.pos + Vector3(30.0, 0, 0))
 	MergeKit.bot_use(P)
 	ok(not k.ulting(), "...and holds it with no foe near and time left")
+
+# ------------------------------------------------------------------ 8. the forms' own sounds
+const SHARED_SFX := ["charge", "warn", "whoosh", "zap", "ab_slam", "boom"]     # what a form's moves played before
+
+## The sounds played while `secs` run, the listener kept on the hunter (the camera does that in a match).
+func _heard(P: Hunter, secs: float, each := Callable()) -> Array:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	var step := func():
+		Sfx.listener = P.pos
+		if each.is_valid():
+			each.call()
+	run_for(secs, step)
+	return Sfx.last_played.keys()
+
+func _no_shared(names: Array) -> bool:
+	return not names.any(func(s): return s in SHARED_SFX)
+
+func _sounds() -> void:
+	for pick in [["pebbit", "titan"], ["zephyrak", "stormwing"], ["puddlet", "tidal_shell"]]:
+		var id: String = pick[1]
+		var P := merged(pick[0])
+		var own: Dictionary = Content.merge_form(id)["sound"]
+		var R := foe(P.pos + Vector3(1.5, 0, 0))
+		P.roll_dir = Vector2(1, 0)
+		var dash := _heard(P, 0.4, func():
+			if P.merge_st["aug"]["dash"].is_empty():
+				CombatBus.ability_used.emit(P, "test_dash", "dodge")
+			P.pos.x += 0.1)
+		var hits := String(MergeForm.aug_of(MergeForm.of(P))["dash"]["kind"]) != "reflect"      # (a mirror: no hit)
+		var dash_ok := dash.has(own["travel"]) and (dash.has(own["hit"]) or not hits) and _no_shared(dash)
+		ok(dash_ok, "%s: the form dash plays its own travel%s (%s)" % [id, " and hit" if hits else "", dash])
+		var kit := live_kit(P)
+		kit.age = 2.0
+		R = foe(P.pos + Vector3(3.0, 0, 0))
+		aim_at(P, R.pos)
+		P.inp["ult"] = true
+		var cast := _heard(P, 0.05)
+		P.inp["ult"] = false
+		var cast_ok := kit.ulting() and cast.has(own["cast"]) and not cast.has("charge")
+		ok(cast_ok, "%s: R plays its own cast (%s)" % [id, cast])
+		var land := _heard(P, float(Content.merge_form(id)["r"]["end"]) + 0.3)
+		ok(land.has(own["hit"]) and _no_shared(land), "%s: the ultimate lands with its own (%s)" % [id, land])
+	# a Boki with no form file keeps the shared sounds
+	var F := merged("cindle")
+	live_kit(F).age = 2.0
+	F.inp["ult"] = true
+	var fb := _heard(F, 0.05)
+	F.inp["ult"] = false
+	var any_own := fb.any(func(s): return String(s).begins_with("boki_form_"))
+	ok(fb.has("charge") and not any_own, "no form file: the shared cast (%s)" % [fb])
+	# yours at full, anyone else's quieter; another game hears a rival's cast and dash from where it is
+	var P := merged("pebbit")
+	var R := foe(P.pos + Vector3(8.0, 0, 0))
+	R.set_meta("mf_id", "titan")
+	var fs: Dictionary = MergeForm.data()["form_sfx"]
+	var mine := MergeSfx.level(P, "cast")
+	var theirs := MergeSfx.level(R, "cast")
+	var levels_ok := is_equal_approx(mine, float(fs["db"]["cast"]))
+	levels_ok = levels_ok and is_equal_approx(theirs, mine + float(fs["other_db"]))
+	ok(levels_ok and theirs < mine, "your form's cast plays at %.0f dB, a rival's at %.0f dB" % [mine, theirs])
+	m.net_on = false
+	Sfx.listener = P.pos
+	Sfx.last_played.clear()
+	for slot in ["ult", "dash"]:
+		var extra := "%s|%.1f|%.1f|5.0|1.0" % [slot, R.pos.x, R.pos.z]
+		KinNet.on_event(m, ["kcmd", "mcast", R.nid, R.pos.x, R.pos.y, R.pos.z, extra])
+	var heard: Array = Sfx.last_played.keys()
+	var remote_ok := heard.has("boki_form_titan_cast") and heard.has("boki_form_titan_travel")
+	remote_ok = remote_ok and not heard.has("warn")
+	ok(remote_ok, "another game: a rival's Fusion cast and dash play its form's sounds 8 m off (%s)" % [heard])
