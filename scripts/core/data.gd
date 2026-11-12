@@ -145,7 +145,7 @@ const PERKS := {
 }
 
 ## Bot hunter difficulty. "auto" (the default) picks one from the run tier and how experienced you
-## are; admins can force one in Settings > Gameplay or the admin panel (F1).
+## are; admins can force one in Settings > Gameplay or the admin panel (`).
 ##   skill: aim lead/accuracy and how often they think   react: seconds before they fire on a new target
 ##   dmg: their damage   fire: how much of the time they keep the trigger down
 ##   abil: how readily they use abilities and kin   aggro: how far they chase and how hard they press

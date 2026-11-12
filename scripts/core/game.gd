@@ -26,7 +26,7 @@ func _ready() -> void:
 		god = true
 
 ## Mod mode (Settings > Gameplay, for the game's owner): everything unlocked, building and
-## bridges are free and need no expeditions, kin can be spawned from the admin tools (F1).
+## bridges are free and need no expeditions, kin can be spawned from the admin tools (`).
 func modding() -> bool:
 	return bool(Settings.get_v("mod_mode")) and Overlay.admin_allowed()
 
@@ -106,6 +106,9 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
+	_key("mate_look_1", [KEY_F1])             # hold: the camera looks at your teammate 1 (MateLook)
+	_key("mate_look_2", [KEY_F2])             # teammate 2
+	_key("mate_look_3", [KEY_F3])             # teammate 3 (a 4-player squad)
 	_key("move_readout", [KEY_F7])            # the movement readout (speeds, state) for tuning
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 

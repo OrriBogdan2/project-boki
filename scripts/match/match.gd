@@ -44,6 +44,7 @@ var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.g
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
+var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
 var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
@@ -562,6 +563,8 @@ func _spawn_pads_and_exits() -> void:
 	await exits.setup(self)
 	await _slice()
 	truce = Truce.new(self)
+	mate_look = MateLook.new(self)
+	add_child(mate_look)
 	lairs = Lairs.new()
 	lairs.setup(self)
 
@@ -3272,7 +3275,8 @@ func _process(delta: float) -> void:
 			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
 			cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
-		cam.follow(player.render_pos(alpha), delta, not player.dropping)
+		var peek := mate_look.focus(player.render_pos(alpha), alpha)
+		cam.follow(peek, delta, not player.dropping and mate_look.looking == null)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)
