@@ -1,0 +1,9 @@
+{
+ "group": "capture",
+ "name": "Capture",
+ "script": "tools/gen_sfx_capture.py",
+ "sounds": {"scan_pop_fine": "boki", "scan_pop_rare": "boki", "scan_fail": "cast", "scan_call": "boki"},
+ "signature": [],
+ "reach": {"scan_call": 11},
+ "replaces": []
+}
