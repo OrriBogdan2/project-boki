@@ -330,7 +330,6 @@ func fire_rmb(c: Dictionary) -> void:
 	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if hook_aloft else 0.0
 	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
-	m.sfx("dr_throw", h.pos, -2.0, 1.0)
 	coil = float(rdf["windup"])
 
 ## The coil-back: the readable cue before a slow hook. A stun or a knock down in it cancels the throw.
@@ -344,9 +343,10 @@ func _tick_coil(dt: float) -> void:
 		coil = 0.0
 		_launch_hook()
 
-## The arm shoots out once the coil-back is over.
+## The arm shoots out once the coil-back is over (its fling sound with it, not on the press).
 func _launch_hook() -> void:
 	var rdf := rmb_def()
+	m.sfx("dr_throw", h.pos, -2.0, 1.0)
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
