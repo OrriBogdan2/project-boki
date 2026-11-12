@@ -37,7 +37,7 @@ const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
-const NOZZLE_REACH := 2.6                # m at the plain drawn size (grows with it): a palm further off isn't posed yet: use NOZZLE
+const NOZZLE_REACH := 2.6                # m at the plain drawn size: a palm further off isn't posed yet: use NOZZLE
 # m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
 const PALM_AHEAD := 0.12
 
