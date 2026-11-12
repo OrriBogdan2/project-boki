@@ -164,7 +164,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
+| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s), 3 large on the let-go, 0.5 s pause; skating: beams, semi-homing, 2x damage | match (burst); skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skating beams semi-homing (owner, gap 16 done) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
@@ -297,7 +297,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 13 | Grimble's air dash lacks its own 12.5 s slot | Add slot | dredge_kit.gd, dredge.json | M |
 | 14 | Tarek's allies can't hop his rocks | Add jump hop | dolm_kit.gd | M, owner |
 | 15 | Bjorn's Guard meter and Shield Slam are invented | Remove, or owner keeps | bulwark_kit.gd, bulwark.json | M, owner |
-| 16 | Claire's darts fly straight while skating | Owner answer, then home | rimewright_kit.gd | S, owner |
+| 16 | Done: Claire's skating beams home late like her darts (owner: semi-homing, 2x damage) | none | asserted in --rimewright-combo-check | done |
 | 17 | Ostra's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
