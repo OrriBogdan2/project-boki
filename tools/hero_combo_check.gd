@@ -484,7 +484,7 @@ func _mage() -> void:
 	m.step(DT)
 	ok("dash table: Wirerun is rolling and DashFlow says LMB fires (the source is silent), E fires",
 			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
-			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
+			and absf(Loco.buf_ability_hold - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false

@@ -220,6 +220,7 @@ func run(main: Node) -> void:
 	_ground()
 	_face_turn()
 	_jump()
+	_buffers()
 	_glide()
 	_glide_dive()
 	_dash_glide()
@@ -375,6 +376,26 @@ func _jump() -> void:
 	var y0 := P.pos.y
 	_steps(60)
 	rec("freefall_1s_depth", y0 - P.pos.y)
+
+# ---------------------------------------------------------------- input windows
+## The input windows live in tuning.json buffers (DECISIONS 11-08): every key is set and has its line in
+## buffers.doc, and none of the old code constants (or a literal window) is back anywhere in scripts/.
+const BUFFER_KEYS := ["ability_hold", "recast", "jump", "coyote", "shift"]
+const OLD_CONSTS := "const (BUFFER_S|RECAST_BUFFER|JUMP_BUFFER|DASH_BUFFER)\\b"
+# a non-zero window set inline
+const WINDOW_LITERAL := "(coyote|jump_buf|dash_buf|recast_buf\\[[^]]*\\]) = [0-9.]*[1-9]"
+
+func _buffers() -> void:
+	var b: Dictionary = Loco.T["buffers"]
+	for k in BUFFER_KEYS:
+		var documented := String(b["doc"].get(k, "")) != ""
+		ok(b.get(k) is float and documented, "tuning.json buffers.%s = %s, documented" % [k, b.get(k)])
+	var re := RegEx.create_from_string(OLD_CONSTS + "|" + WINDOW_LITERAL)
+	var hits := []
+	for f in load("res://tools/check.gd").new()._scan("res://scripts"):
+		for r in re.search_all(FileAccess.get_file_as_string(f)):
+			hits.append("%s: %s" % [f.get_file(), r.get_string()])
+	ok(hits.is_empty(), "no input window is a code constant again %s" % str(hits))
 
 ## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
 ## turn takes in the air).
