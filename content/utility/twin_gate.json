@@ -1,0 +1,21 @@
+{
+ "id": "twin_gate",
+ "name": "Twin Gate",
+ "short": "Gate",
+ "icon": "swap",
+ "col": "c9a0ff",
+ "use": "field",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 60,
+ "desc": "Opens a gate where you aim and one at your feet. After 8s everything standing in each gate swaps places.",
+ "field": "gate",
+ "range": 9.0,
+ "time": 8.0,
+ "r": 2.0
+}

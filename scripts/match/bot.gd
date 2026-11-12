@@ -50,6 +50,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	var inp := h.inp
 	inp["fire"] = false
 	inp["interact"] = false
+	inp["crouch"] = false
 	if h.downed:
 		_crawl(m, h)
 		return
@@ -63,7 +64,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / DropFeel.canopy_fall * DropFeel.canopy_speed)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -77,6 +78,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			land = best
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
+		inp["crouch"] = DropSquad.bot_dive(m, h, to)
 		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
@@ -276,6 +278,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
 		if heal_ok:
+			BotShop.think(m, h)
 			BotBelt.think(m, h, a, inp)       # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -535,7 +538,7 @@ func _brake_at_lip(m: Match, h: Hunter, move: Vector2) -> Vector2:
 func _safe(m: Match, h: Hunter, d: Vector2, dist: float) -> bool:
 	for k in [0.5, 1.0]:
 		var p: Vector2 = Vector2(h.pos.x, h.pos.z) + d * dist * k
-		if m.world.is_void(p.x, p.y):
+		if m.world.is_void(p.x, p.y) or TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
 
@@ -769,6 +772,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		var og := PerkOrbs.bot_goal(m, h, cur)
 		if og != Vector3.INF:
 			goal = og; gk = "orb"
+	if goal == Vector3.INF:
+		var sg := BotShop.goal(m, h)       # spare gems and a vendor close: go shopping
+		if not sg.is_empty():
+			goal = sg[0]
+			gk = String(sg[1])
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]
@@ -945,6 +953,10 @@ func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 ## aim forward one waypoint at a time instead of re-testing every waypoint every step.
 const LINE_RECHECK_S := 0.3    # s between straight-line re-tests toward the same goal tile
 const PATH_REPLAN_S := 2.0     # s before a tile path is rebuilt (others may have moved the bot)
+const PATH_MARGIN := 8        # tiles the path window reaches past the trip's box
+const PATH_WIDE := 26          # ... for a way round a hazard field (TerrainHazards): a big field needs a long detour
+const PATH_STEPS := 4000       # tiles one search expands
+const PATH_STEPS_WIDE := 12000 # ... in the wide window
 const PULL_PER_STEP := 3       # waypoints the aim may advance per sim step (caps line tests)
 func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var from := Vector2(h.pos.x, h.pos.z)
@@ -952,7 +964,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var wp: Dictionary = h.ai.get("wp", {})
 	var fresh: bool = wp.is_empty() or wp["goal"] != gt
 	if fresh or (wp.has("line") and m.time - float(wp["t"]) > LINE_RECHECK_S):
-		if _clear_line(m, from, Vector2(goal.x, goal.z)):
+		if _clear_line(m, h, from, Vector2(goal.x, goal.z)):
 			h.ai["wp"] = {"goal": gt, "t": m.time, "line": true}
 			h.ai.erase("nopath")
 			return h.dir_to(goal)
@@ -961,7 +973,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		return h.dir_to(goal)
 	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
 		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
-		wp = {"goal": gt, "t": m.time, "aim": 0, "path": _grid_path(m, at, gt)}
+		wp = {"goal": gt, "t": m.time, "aim": 0, "path": _grid_path(m, at, gt, h)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
@@ -977,10 +989,10 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		aim -= 1
 	aim = clampi(aim, 0, path.size() - 1)
 	var pulls := 0
-	while aim + 1 < path.size() and pulls < PULL_PER_STEP and _clear_line(m, from, path[aim + 1]):
+	while aim + 1 < path.size() and pulls < PULL_PER_STEP and _clear_line(m, h, from, path[aim + 1]):
 		aim += 1
 		pulls += 1
-	if pulls == 0 and aim > 0 and not _clear_line(m, from, path[aim]):
+	if pulls == 0 and aim > 0 and not _clear_line(m, h, from, path[aim]):
 		aim = 0                  # pushed off the line: fall back to the next waypoint
 	wp["aim"] = aim
 	var d: Vector2 = (path[aim] as Vector2) - from
@@ -1002,7 +1014,7 @@ func _no_path(m: Match, h: Hunter) -> void:
 		a["banned"] = bans
 		a.erase("nopath")
 
-func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
+func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
@@ -1012,20 +1024,22 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 			return false
 		# the abyss blocks a walk too: straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
-		if m.world.is_void(p.x, p.y):
+		if m.world.is_void(p.x, p.y) or TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
 
-## Breadth-first search over walkable tiles (a window around the trip), returning tile centres.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
+## Breadth-first search over walkable tiles (a window around the trip), returning tile centres. With
+## h, it keeps off hazard ground h can't handle (searching a wider window for a way round a big field),
+## and only crosses it when there's no way round.
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := PATH_MARGIN) -> Array:
 	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+	var lo := Vector2i(mini(a.x, b.x) - margin, mini(a.y, b.y) - margin)
+	var hi := Vector2i(maxi(a.x, b.x) + margin, maxi(a.y, b.y) + margin)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false
 	var steps := 0
-	while q.size() > 0 and steps < 4000:
+	while q.size() > 0 and steps < (PATH_STEPS if margin == PATH_MARGIN else PATH_STEPS_WIDE):
 		steps += 1
 		var cur: Vector2i = q.pop_front()
 		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
@@ -1041,10 +1055,15 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
 				continue
 			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue
+			if h and TerrainHazards.avoid(m, h, nx.x + 0.5, nx.y + 0.5):
+				continue
 			prev[nx] = cur
 			q.append(nx)
 	if not found:
-		return []
+		if h == null:
+			return []
+		# a way round a big field in a wider window, else across it
+		return _grid_path(m, a, b, h, PATH_WIDE) if margin == PATH_MARGIN else _grid_path(m, a, b)
 	var out: Array = []
 	var c := b
 	while c != a:

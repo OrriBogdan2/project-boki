@@ -328,22 +328,6 @@ static func play_train(rec: Dictionary, play: String) -> int:
 		return 0
 	return add_stat(rec, String(PLAY_TRAINS[play]), 1)
 
-## What its raising does for it on an expedition, in one line (the expedition panel): match_mods
-## as percentages, so the care at home shows up where you pick your Boki.
-static func care_line(rec: Dictionary) -> String:
-	var mm := match_mods(rec)
-	var bits: Array = []
-	for pair in [["dmg", "damage"], ["hp", "health"], ["speed", "speed"]]:
-		var pct := roundi((float(mm[pair[0]]) - 1.0) * 100.0)
-		if pct != 0:
-			bits.append("%+d%% %s" % [pct, pair[1]])
-	var faster := roundi((1.0 - float(mm["cd"])) * 100.0)
-	if faster != 0:
-		bits.append("skills recharge %d%% faster" % faster)
-	if bits.is_empty():
-		return "Care, training and trust at home make it stronger out there."
-	return "From how you've raised it: %s." % ", ".join(bits)
-
 ## Trained points can't run too far ahead of its level (StatBudget: also 100 a stat, 240 in all).
 static func stat_cap(rec: Dictionary) -> int:
 	return StatBudget.cap(rec)
@@ -708,6 +692,9 @@ static func dex_mark(species: String, what: String, extra := "") -> void:
 		"form":
 			if extra != "" and not (e["forms"] as Array).has(extra): e["forms"].append(extra)
 		"shimmer": e["shimmer"] = true
+		"echo":           # a stolen wisp's soul echo (KinSteal)
+			e["seen"] = true
+			e["echo"] = int(e.get("echo", 0)) + 1
 		"mutation":
 			if extra != "" and not (e["mutations"] as Array).has(extra): e["mutations"].append(extra)
 
