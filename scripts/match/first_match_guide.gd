@@ -17,6 +17,7 @@ var shown := {}               # ids already shown this match
 var _t := 0.0                 # s the line has been up
 var _gap := 0.0               # s of quiet left before the next line
 var _throws0 := 0             # the Boki's sends when its line came up
+var _fight_t := -1.0          # s since a monster came close or picked you out (-1: none)
 
 static func rules() -> Dictionary:
 	return Content.rules("first_match_guide")
@@ -52,7 +53,9 @@ func tick(dt: float) -> void:
 			id = ""
 			line = ""
 			_gap = float(rules()["gap"])
-	if id == "" and _gap <= 0.0:
+	if id == "":
+		_fight_t = maxf(_fight_t, 0.0) + dt if _fight_on(p) else -1.0
+	if id == "" and _gap <= 0.0 and not _fight_new():
 		for cand: String in ORDER:
 			if not shown.has(cand) and _due(cand, p):
 				_start(cand, p)
@@ -88,6 +91,18 @@ func _enemy_near(p: Hunter) -> bool:
 
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
+
+## A monster is close or has picked you out.
+func _fight_on(p: Hunter) -> bool:
+	var reach := float(rules()["fight_range"])
+	for mb: Mob in m.mobs:
+		if not mb.dead and (mb.tgt == p or p.flat_dist(mb) < reach):
+			return true
+	return false
+
+## The first seconds of a fight: no new line then, the player is busy.
+func _fight_new() -> bool:
+	return _fight_t >= 0.0 and _fight_t < float(rules()["fight_quiet"])
 
 func _kin_ready(p: Hunter) -> bool:
 	return p.kin != null and p.kin.state != "downed"
