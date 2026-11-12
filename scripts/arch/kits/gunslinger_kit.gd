@@ -47,7 +47,6 @@ var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
-var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
@@ -216,12 +215,11 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
 		add_fever(1)
-	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
-		_on_knock(t)
 
-## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
-func _on_knock(t: Ent) -> void:
-	knocked[t.get_instance_id()] = true
+## Hot Streak: a knock of ours (the Slipstep back and the heal are DashReset's); rank 3 also resets the Burr Charge.
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if not mine:
+		return
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
