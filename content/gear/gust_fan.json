@@ -9,9 +9,5 @@
   "glide_speed": 0.1
  },
  "icon": "gust_fan",
- "desc": "A burst of wind launches you up and forward and cools your glider. Saves falls, reaches high ground.",
- "launch": {
-  "up_mps": 13.0,
-  "fwd_mps": 7.5
- }
+ "desc": "A burst of wind launches you up and forward and cools your glider. Saves falls, reaches high ground."
 }

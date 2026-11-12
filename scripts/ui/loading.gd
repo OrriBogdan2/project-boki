@@ -7,7 +7,7 @@ extends CanvasLayer
 signal shown
 
 const TIPS := [
-	"Press Space again in the air and hold to glide. You can open your glider off any booster too.",
+	"Press Space again in the air (or Mouse 5) and hold to glide. You can open your glider off any booster too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
@@ -31,7 +31,7 @@ const TIPS := [
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (press Space again in the air, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
+	"Falling all the way into the abyss is death. Glide (press Space again in the air, or Mouse 5, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
@@ -53,6 +53,10 @@ const LORE := [
 	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
+const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
+const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
+const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
+const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
 var c: Control
@@ -99,14 +103,19 @@ func setup(opts: Dictionary) -> void:
 	if opts.get("tutorial", false):
 		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
-		title = "Training Grounds"; sub = "Dummies, a range, a movement lane and the duel room. No danger here."
+		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
-		var squads := "%d squads of %d" % [int(opts.get("teams", Data.SQUADS)), int(opts.get("squad", Data.SQUAD_SIZE))]
-		mode_line = "%s  •  skyship drop" % squads
+		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
+		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
+		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
+		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
+		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
+		if opts.get("rolling", false):
+			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
@@ -132,36 +141,29 @@ func setup(opts: Dictionary) -> void:
 func _process(delta: float) -> void:
 	t += delta
 	if leaving:
-		fade = maxf(0.0, fade - delta * 2.2)
+		fade = maxf(0.0, fade - delta / FADE_OUT_T)
 		if fade <= 0.0:
 			queue_free()
 	else:
 		var was := fade
-		fade = minf(1.0, fade + delta * 3.5)
+		fade = minf(1.0, fade + delta / FADE_IN_T)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
 	prog = move_toward(prog, want, delta * maxf(0.9, (want - prog) * 6.0))
 	c.queue_redraw()
 
-## Move the bar to a stage (0..1) and wait until it gets there.
-func step(frac: float) -> void:
-	want = maxf(want, frac)
-	while prog < want - 0.01 and is_inside_tree():
-		await get_tree().process_frame
-
+## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
+## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
 func finish() -> void:
-	await step(1.0)
-	var hold := 0.35
-	while hold > 0.0 and is_inside_tree():
-		hold -= get_process_delta_time()
-		await get_tree().process_frame
-	# gone before the map shows: fading this out over the planning map blended the two for half a
-	# second, so the screen's ink sweeps over first, this goes, and the ink sweeps off the map
+	want = 1.0
+	prog = 1.0
+	# gone before the map shows: fading this out over the planning map blended the two, so the
+	# screen's ink sweeps over first, this goes, and the ink sweeps off the map
 	var sf: ScreenFade = Game.main.get("fade") if Game.main else null
 	if sf and is_inside_tree() and not sf.covered:
-		await sf.cover(0.22)
+		await sf.cover(COVER_T)
 		queue_free()
-		sf.reveal(0.4)
+		sf.reveal(REVEAL_T)
 		return
 	leaving = true
 

@@ -1,4 +1,4 @@
-# Hired Gun
+# The Hired Gun
 
 The ember-rifle skirmisher. A spiked charge bounced off a wall or the ground blasts a cone back over a
 foe and Dazes them, and the rifle and one long needle of light do the rest.
@@ -21,7 +21,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
 4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
 5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
-6. There is no R: the Boki Merge takes that key.
+6. There is no R: the Boki Fusion takes that key.
 
 ## Combos and interactions
 
@@ -70,7 +70,7 @@ What the in-game kit card (K) says.
 
 **Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch.
 
-**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid on her measured dash curve (a fast start that bleeds off) over about 0.5s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
+**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
 
 **Burr Charge (RMB, 6.5s cooldown).**
 

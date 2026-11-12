@@ -1,5 +1,5 @@
 extends RefCounted
-## --lineup-shot --shots-dir=<dir> [--list-meshes]: all 12 Hunters as the game builds them (Models.hunter, same
+## --lineup-shot --shots-dir=<dir> [--list-meshes]: every Hunter as the game builds them (Models.hunter, same
 ## loader and scale), idle playing, in one row at true scale on a 1 m grid. Writes <dir>/lineup_front.png (straight
 ## on), <dir>/lineup_match.png (the match camera's angle and distance) and lineup_match_close.png (same angle,
 ## closer), and prints each Hunter's measured standing height:
@@ -7,8 +7,8 @@ extends RefCounted
 ## meshes whose names say weapon, prop or similar are left out), plus the head-top anchor when the model has one.
 ## --list-meshes prints every mesh with its own skinned top. Needs a renderer.
 
-const ORDER := ["gunslinger", "bulwark", "rimewright", "juggernaut", "ashwick", "dolm", "mage", "dredge", "tender",
-	"thief", "archer", "ostra"]
+const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright",
+	"mage", "thief", "ostra", "gil"]
 const GAP := 2.0              # m between Hunters (centre to centre)
 const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
 const CAM_DIST := 23.0

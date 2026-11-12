@@ -20,6 +20,7 @@ const WANT := {
 	"dolm": {"cooldown": [40.0, 35.0], "time": [9.5, 12.0]},
 	"ostra": {"cooldown": [65.0, 60.0], "time": [3.5, 3.5]},
 	"tender": {"cooldown": [41.4, 36.8]},
+	"gil": {"cooldown": [81.0, 72.0]},
 }
 
 var bad := 0

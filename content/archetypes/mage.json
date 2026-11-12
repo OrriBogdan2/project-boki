@@ -33,35 +33,31 @@
 		"gap": 0.15,
 		"blow_dmg": 16.0,
 		"blow_pct": 0.18,
-		"col": "#ffd6ee"
+		"col": "#c6fff2"
 	},
 	"passive": {
 		"name": "Static",
-		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back."
+		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health."
 	},
 	"dash": {
 		"id": "wirerun",
 		"name": "Wirerun",
 		"icon": "dash",
-		"col": "#ff8fd0",
+		"col": "#9ff5e0",
 		"cd": 8.0,
 		"reset_mult": 1.5,
 		"reset_charge": 0.75,
 		"reset_window": 5.0,
 		"dist": [
-			7.0,
-			11.0
+			5.6,
+			9.75
 		],
-		"hold": 0.9,
-		"speed": 34.0,
-		"ramp": 0.15,
-		"ramp_from": 0.35,
-		"exit_cap": 1.5,
-		"exit_ease": 0.25,
+		"hold": 0.6,
+		"speed": 40.0,
 		"dmg": 20.0,
 		"width": 0.9,
-		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7 to 11m over 0.9s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning, building over 0.15s to 34m/s (shots pass through you), carrying that drift. The run ends at run speed: it hands no momentum into a jump or a glide. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.68s.",
-		"auto": 1.2,
+		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 5.6 to 9.75m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
+		"auto": 0.9,
 		"full_mult": 2.0,
 		"end_r": 2.25,
 		"drift_k": 1.0,
@@ -72,13 +68,11 @@
 		"name": "Storm Rod",
 		"short": "Rod",
 		"icon": "shock",
-		"col": "#ff6cc0",
+		"col": "#7dffd8",
 		"cooldown": 8.0,
 		"charges": 1,
 		"hold": 1.0,
 		"min_t": 0.33,
-		"self_slow": 0.18,
-		"slow_in": 0.3,
 		"coil": {
 			"dmg": [
 				18.0,
@@ -113,7 +107,7 @@
 		"name": "Skycall",
 		"short": "Sky",
 		"icon": "updraft",
-		"col": "#ffb3e0",
+		"col": "#b8f7ff",
 		"cooldown": 10.5,
 		"reach": 11.0,
 		"delay": 0.8,

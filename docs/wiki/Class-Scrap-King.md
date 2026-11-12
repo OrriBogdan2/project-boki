@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 **Abyssal Hand (RMB, 12s cooldown).**
 
-- *Tap:* Your abyssal arm cocks back and whips out 11.5m through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
+- *Tap:* Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
 **Anchor Drop (E, 7s cooldown).** Raise your fist while the area fills on the ground in front of you (0.38s), then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 
@@ -86,9 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 12s -> 10.3s. | cooldown 12s -> 8.7s; hitting a foe takes half of it off. |
-| Dash (Shift) | recharge 10s -> 8.2s per charge. | recharge 10s -> 6.4s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
-| E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.4s in all (0.1s a rank, 0.2s more); double damage on a foe over the abyss. |
+| RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe takes half of it off. |
+| Dash (Shift) | recharge 10s -> 8.5s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 7s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more. |
 | R (ultimate) | Brass Broadside cooldown 21s -> 18s, damage 4 -> 4.8. The Merge lasts 30% longer. | Brass Broadside cooldown 21s -> 15s, damage 4 -> 5.6. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).

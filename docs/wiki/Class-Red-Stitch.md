@@ -1,4 +1,4 @@
-# Red Stitch
+# The Red Stitch
 
 A light marksman who controls space. Every bow draw is timed, Heavy Shots pin people to walls, and a pinned
 target eats the big shot. Spirit Walk carries her through rocks and barriers.
@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
 | Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
-| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
+| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
@@ -82,11 +82,11 @@ What the in-game kit card (K) says.
 
 **Hawk Sense (passive).** Rivals under half health are seen through cover within 22m.
 
-**Spirit Walk (dash, Shift, 9.5s cooldown).** Two charges. A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
+**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
-- *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 8 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
 **Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 

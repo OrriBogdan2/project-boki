@@ -1,4 +1,4 @@
-# Mad Pyromancer
+# The Ashen Kiss
 
 A flue sweep in a sooty top hat with a bellows pack. Hoses foes down with fire until they Flash over, rams them
 head first, and hits back harder after every knock.
@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Cinder Shot | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
 | E: Furnace Cloak | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
 | Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your stream of fire is off while you fly. |
-| Weapon: Torch Lance | Hold to pour fire from your hand 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
+| Weapon: Torch Lance | Hold to pour fire from your hand 6m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
 ### Abilities in full
 
