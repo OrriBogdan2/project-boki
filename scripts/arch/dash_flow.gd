@@ -7,7 +7,7 @@ extends RefCounted
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 ## A press that crowd control still forbids, made in its last Loco.press_buffer (tuning.json), is held the same way
 ## and goes on the first step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is an RMB or E pressed
-## while the kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall).
+## while the kit's own cast lock holds the body (Motley's Nightwell, Kael's Riposte, Vex's Kitefall).
 
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
