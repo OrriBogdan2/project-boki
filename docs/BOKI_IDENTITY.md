@@ -124,6 +124,15 @@ serial are never inherited.
   This is the hook for ranked play or lower tiers to neutralize size later: set the option when
   starting those matches.
 
+## Size at home: carrying (`HomeCarry`)
+
+Hold interact on a Boki to pick it up; press interact again to set it down; a tap is still a pat.
+By weight (`Unique.size_info`): up to 3.5 kg rides in your arms, up to 9 kg on your back, heavier ones
+are led beside you (hold again to let go). You walk at 90%. Brave ones wriggle, timid ones cling, a
+grumpy one (temper over 0.62) squirms free after 5 s. A Close-or-better bond gains 1 trust from its
+first carry of the day (3 s or more); the day is kept in `rec["carried_day"]` (absent on old saves,
+so no migration). Home only.
+
 ## Showing it to the player
 
 Following docs/POSITIONING.md (design branch): rarity shows in the Boki itself (its size, coat,
@@ -142,6 +151,24 @@ Player-facing words say *scanned* (the box and the Field Book say *caught*), not
 Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`
 (the About tab), `--nest-demo=kin` (the Nook panel), `--training --no-drop --size-demo` (an XS and
 an XL Vespyx in a match, their rings showing the hitbox). `--normalize-size` sets `Unique.normalize`.
+
+## Species quirks (`BokiQuirks`)
+
+`content/rules/boki_quirks.json` holds the Bokidex's species details (owner 11-09): a one-line
+`quirk` for 120 kinds and a `sexNote` for 18, keyed by Bokidex id (a species' display name in lower
+case, so `basaltoad` reads `rampartoad`). The Field Book page shows both. A few are real behaviour:
+- `female_share`: the hatch-time sex roll (`BokiQuirks.sex_for`, from the egg's seed, in
+  `Save.new_kin` and after `Care.breed` inherits). Hivara and Mossgrade hatch only female,
+  Marchleaf and Lodestick 95% female, Buckleron always male. Every other kind keeps the coin flip,
+  and Boki already hatched keep the sex they have.
+- `food_rate`: the Rimeshrew's food need drains twice as fast (`Care.tick`).
+- `rain_joy`: joy per minute out in the farm rain (Effigeetle and Frigatee sulk, Mycroll and
+  Barrelmander perk up; `Care.tick`, not while asleep or indoors).
+- `storm_sense`: a Kestrike or Barokat near you warns once before each rain (`FarmChatter`, the
+  `rain_soon` lines); Home decides the next weather turn ahead (`rain_next`) so the warning is true.
+
+Not modelled yet: the "no sexes", "both sexes" and egg-temperature notes (the record only knows
+female and male), so those kinds roll half and half and the note explains.
 
 ## Later, with a server
 
