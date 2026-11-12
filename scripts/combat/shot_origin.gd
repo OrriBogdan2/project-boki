@@ -29,6 +29,15 @@ static func body(by: Ent, at: Vector3) -> Vector3:
 static func extra_life(at: Vector3, from: Vector3, v2: Vector2) -> float:
 	return Vector2(at.x - from.x, at.z - from.z).length() / maxf(0.01, v2.length())
 
+## The launch velocity for a slowing shot (`decel`, Grimble's slugs) pulled back to the body: fast enough to still
+## stop where the kit asked, `range` past the muzzle, not 0.6 m short of it.
+static func keep_reach(at: Vector3, from: Vector3, v2: Vector2, x: Dictionary) -> Vector2:
+	if not x.has("decel") or at == from or v2.length() < 0.01:
+		return v2
+	var lead := Vector2(at.x - from.x, at.z - from.z).length()
+	return v2.normalized() * sqrt(v2.length_squared() + 2.0 * float(x["decel"]) * lead)
+
+
 ## Where to draw shot `s` whose swept point is `p`: never behind its muzzle (once past it, as swept).
 static func drawn(s: Dictionary, p: Vector3) -> Vector3:
 	if not s.has("muzzle"):
