@@ -764,7 +764,6 @@ func _bulwark_combos() -> void:
 		K.lock_t = 0.0
 		K.ch_rmb = 1.0
 		K.cd["rmb"] = 0.0
-		K.res = 0.0
 		P.fire_cd = 0.0
 		P.dashes = P.max_dashes()
 		K.lmb_t = -1.0
@@ -1114,28 +1113,25 @@ func _bulwark_combos() -> void:
 		)
 	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
-	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
+	# the source kit: Shift behind the shield is the Bash on the source's 6 s cooldown; no Guard meter, no Shield Slam
 	step(m, 1.0)
 	reset.call()
-	K.res = 80.0
-	var guard_before := K.res
-	var slams_before := K.shield_slams
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
-	guard_before = K.res
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	var cd_full := float(K.cd["rmb"])
 	P.do_dash()
 	step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
 	ok(
-		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
-		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
-		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
+		"combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam",
+		float(K.rmb_def()["cooldown"]) == 6.0 and float(K.cd["rmb"]) > 4.5 and cd_full <= 0.0
+				and not K.has_meter() and not K.d["rmb"].has("slam"),
+		"cd %.2f" % float(K.cd["rmb"])
 	)
-	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
-		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+	ok("bulwark vfx: the Shield Charge plays its look; no Shield Slam look is left",
+		int(hv.plays.get("charge_go", 0)) >= 1 and not hv.plays.has("slam"),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
