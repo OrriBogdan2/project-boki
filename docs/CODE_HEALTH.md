@@ -12,7 +12,7 @@ Method. All 254 tracked `.py` files were inventoried. A file was only touched wh
 `build_boki.py`/`build_fusion.py` on their own species tables and by `fit_warden.py` for recipe `scripted.module`,
 none of which name these files); and no recently active branch adds a line that mentions them.
 
-### Removed (12 files, about 1050 lines)
+### Removed (12 files, 814 lines)
 
 | Path | What it was | Evidence |
 |---|---|---|
@@ -49,7 +49,7 @@ level; it is wired into CI through `server/matchmaker/tests/test_tool_help.py` (
   `gen_break_sfx.py`, `gen_music.py`, `compose.py`, `.github/workflows/release.yml`. They still lack a `main()` +
   `--help` (about 50 leaf scripts). Convert them once their branches have merged.
 - **Near-copy families** that should be merged into one script with options once the above are free:
-  the 17 `gen_sfx_<group>.py` (each re-declares the synth primitives that `sfx_lib.py` already holds; outputs depend on
+  the 20 `gen_sfx_<group>.py` (each re-declares the synth primitives that `sfx_lib.py` already holds; outputs depend on
   per-script random streams, so the merge needs a before/after wav hash like the one used here), the per-hero
   `art1/<hero>_clips.py` / `_finish.py` triples, and `boki/<species>_anim.py`.
 - **ext-refs.txt**: 61 `.py` paths (`tools/boki/<species>*.py`, `tools/art1/*_finish|_pieces|_source.py`, `meshy_task.py`,
