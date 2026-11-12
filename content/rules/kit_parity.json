@@ -47,6 +47,18 @@
 		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.pair_dmg", "value": 6.12, "tol": 0.15, "evidence": "D Chain Bolas: 2 targets take 94 bonus, of 2364 = 4.0% = 6.1 of 154"},
 		{"hero": "thief", "slot": "X", "field": "x.dmg", "value": 4.49, "tol": 0.1, "evidence": "D Fusillade 69 of 2364 (level 15) = 2.9% of the target = 4.5 of 154 a blade"},
 		{"hero": "thief", "slot": "X", "field": "x.rim_dmg", "value": 3.13, "tol": 0.1, "evidence": "D Fusillade +48 near the edge, of 2364 = 2.0% = 3.1 of 154"},
-		{"hero": "archer", "slot": "X", "field": "x.final_dmg", "per": "x.dmg", "value": 1.2945, "tol": 0.01, "evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"}
+		{"hero": "archer", "slot": "X", "field": "x.final_dmg", "per": "x.dmg", "value": 1.2945, "tol": 0.01, "evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"},
+		{"hero": "bulwark", "slot": "LMB", "field": "lmb.throw_rate", "value": 0.45, "tol": 0.0, "evidence": "D Oath card: throw cadence 0.45s (docs/heroes/bulwark.md:22; supervive_kits.md:88)"},
+		{"hero": "bulwark", "slot": "LMB", "field": "lmb.recall_dmg", "per": "lmb.throw_dmg", "value": 1.0, "tol": 0.12, "evidence": "D Magnetic Hammer recall 192 vs throw 192 @15 (supervive_kits.md:88) = 192/192"},
+		{"hero": "bulwark", "slot": "LMB", "field": "lmb.smash_dmg.0", "per": "lmb.throw_dmg", "value": 2.719, "tol": 0.326, "evidence": "D Magnetic Hammer charged swing 522 vs throw 192 @15 (supervive_kits.md:88) = 522/192"},
+		{"hero": "bulwark", "slot": "RMB", "field": "rmb.hold", "value": 0.1, "tol": 0.0, "evidence": "D Brightshield 0.1s (supervive_kits.md:89)"},
+		{"hero": "bulwark", "slot": "RMB", "field": "rmb.cooldown", "value": 6.0, "tol": 0.0, "evidence": "D Shield Bash CD 6s (supervive_kits.md:90)"},
+		{"hero": "bulwark", "slot": "RMB", "field": "dash.charge_dmg", "per": "lmb.throw_dmg", "value": 1.031, "tol": 0.124, "evidence": "D Shield Bash 198 vs throw 192 @15 (supervive_kits.md:90) = 198/192"},
+		{"hero": "bulwark", "slot": "Shift", "field": "dash.cd", "value": 8.0, "tol": 0.0, "evidence": "D Spin Dash CD 8s (supervive_kits.md:91)"},
+		{"hero": "bulwark", "slot": "Shift", "field": "dash.whirl_dmg", "per": "lmb.throw_dmg", "value": 1.896, "tol": 0.228, "evidence": "D Spin Dash 364 vs throw 192 @15 (supervive_kits.md:91) = 364/192"},
+		{"hero": "bulwark", "slot": "E", "field": "e.cooldown", "value": 12.0, "tol": 0.0, "evidence": "D Regen Field 8s @IV with -4s on the second upgrade = 12s base (supervive_kits.md:92)"},
+		{"hero": "bulwark", "slot": "E", "field": "e.cooldown_rank3", "value": 8.0, "tol": 0.0, "evidence": "D Regen Field 8s @IV (supervive_kits.md:92)"},
+		{"hero": "bulwark", "slot": "R", "field": "x.strike_dmg", "per": "lmb.throw_dmg", "value": 0.161, "tol": 0.019, "evidence": "D Abyssalbreaker fissure strike 31 vs throw 192 @15 (supervive_kits.md:93) = 31/192"},
+		{"hero": "bulwark", "slot": "R", "field": "x.dmg", "per": "lmb.throw_dmg", "value": 2.062, "tol": 0.247, "evidence": "D Abyssalbreaker AoE series 396 vs throw 192 @15 (supervive_kits.md:93) = 396/192"}
 	]
 }

@@ -571,6 +571,7 @@ func recast_now(slot_id: String) -> void:
 
 func _recall() -> void:
 	play("bul_recall")
+	h.fire_cd = float(lmb_def()["throw_rate"])      # a recall is a press: 0.45 s to the next
 	mace["st"] = "back"
 	mace["hit"] = {}
 	HeroVfx.of(m).trail(h, "throw", fx.hammer)
