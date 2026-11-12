@@ -476,6 +476,7 @@ func _build(d: Dictionary) -> void:
 		if h.kin:
 			h.kin.dead = true
 			nm.kins.erase(h.kin)
+			nm.ents_by_id.erase(h.kin.nid)
 			h.kin.queue_free()
 			h.kin = null
 	var P := nm.player

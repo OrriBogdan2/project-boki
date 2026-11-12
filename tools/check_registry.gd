@@ -377,6 +377,7 @@ const CHECKS := {
 	# 2 games, laggy relay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
 	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],      # 2 games, 100 ms, 2% loss
+	"--summon-press-check": ["res://tools/summon_press_check.gd", "summon_press_check", null],      # 2 games, 100 ms
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],

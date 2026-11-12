@@ -433,6 +433,17 @@ Measured round trip, client to host and back: 149-162 ms (the 100 ms of weather 
 - **The later cells are local gates, the same offline:** Kael's LMB shows its wave-charge look once the hold becomes a charge (13), his RMB is the tap/hold split (its pose on the hold threshold, a charge spark at 4), Lace's RMB draw pose waits for the 0.15 s tap guard (10; ext/input-latency-check starts it on the press), Vex's RMB first spark at 3 and Cinder's aim at 1 (the kit's first hold tick).
 - **How the check keeps the comparison fair:** the same dice for both runs (Kael's charge sparks are a coin flip a tick), the offline bot stands idle and no Boki run about, the camp's monsters are cleared, and looks are counted only at the pressing Hunter.
 
+## The Summon key: press to burst (`--summon-press-check`)
+The Summon key (`KinSummon`, Boki wisps on) goes off like your own abilities. The press is read in `Match._gather_input` and acted on in the fixed step of the same frame, so the wisp bursts into the Boki on tick 0. The Boki is not the Hunter's body, so a dash, a cast or a recast window doesn't hold it. The check plays Sparkle (still, dash), Meeko (Hearthlight's recast window) and Neve (Rime's cast pose) with a Cindle wisp on --cast-predict-check's two games. It reads press to the first tick the burst shows (the wisp gone, a burst spawned):
+
+| Case | Offline | Online, 100 ms (rtt 160-170 ms measured) |
+|---|---|---|
+| Standing still, mid-dash, in a cast, in a recast window | 0 | 0 |
+| In hit-stop (0.1 s, the longest tier) | 7 (117 ms): the press waits out the freeze and goes on the first step after, within the 0.15 s shared buffer (`DashFlow.BUFFER_S`) | no hit-stop online (the sim never stops) |
+
+- **No game change was needed.** Each game owns its own Boki, so nothing in the summon path waits for the host and `Net.VERSION` is unchanged.
+- **Summon and G never swallow each other:** pressed in the same frame, both come through. Summon pressed during a G hold bursts the Boki, and the hold still opens the order wheel. Summon with the wheel open sends the Boki back, and the wheel stays open until G comes up. Default keys C and G don't clash. Every key name shown goes through `Settings.key_cap`.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
