@@ -20,6 +20,7 @@ extends ArchKit
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
+const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full violet, then a fade
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
 ## Her looks read her colour table (content/archetypes/thief.json "palette", docs/HERO_VFX.md "Ability colours").
 static var main_col := Arch.fx_col("thief", "main")     # her violet: the bolt (content/vfx/thief.json reads it too)
@@ -415,6 +416,8 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	if emp: chain.bolt_ended()
 	var way := Vector2(at.x - h.pos.x, at.z - h.pos.z).normalized()
 	if e != null:
+		e.flash_tint = main_col                  # the struck body flashes in her violet
+		e.flash_t = maxf(e.flash_t, FLASH_HIT)
 		vfx("bolt_hit_emp" if emp else "bolt_hit", at, way)
 	elif why == "expire":
 		fizzles += 1

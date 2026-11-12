@@ -21,6 +21,7 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var flash_tint := Color.WHITE   # the hit flash's colour (a Hunter's own, set with the hit; white again once it ends)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
@@ -368,3 +369,6 @@ func render(delta: float, alpha: float) -> void:
 		_flash_n = mats.size()
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", flash_tint)
+	if f == 0.0:
+		flash_tint = Color.WHITE
