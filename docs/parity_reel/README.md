@@ -275,7 +275,8 @@ Still differs:
 - Hearthlight: cooldown 11 s vs 12 [D]; heals her at a third (ours); the throw latches onto the first teammate it
   passes (owner call), where the source's lands on the cursor and no latch was seen [F].
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
-  (ours). The channel is 5 s where the footage's tether runs about 2.4 s [F 0249-0271].
+  (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
+  stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
 - Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
@@ -289,7 +290,7 @@ with thorns, and the root shows as a white swirl where the footage has a smaller
 thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan disc, but the ring on her before the
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
-cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271],
+cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
 ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
