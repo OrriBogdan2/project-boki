@@ -28,7 +28,7 @@ const CASES := [
 	{"arch": "dredge", "name": "Grimble shotgun", "fire": 0.4, "ranges": [2.0, 3.5, 5.0]},
 	{"arch": "thief", "name": "Sparkle Shadow Knife", "e": true},
 	{"arch": "thief", "name": "Sparkle Bola", "rmb": 0.0, "ranges": [3.0, 5.0, 6.5]},
-	{"arch": "mage", "name": "Motley dash", "dash": true},
+	{"arch": "mage", "name": "Motley dash", "dash": true, "ranges": [4.0, 7.0, 9.0]},
 	{"arch": "mage", "name": "Motley Coilshot", "rmb": 1.0},
 	{"arch": "juggernaut", "name": "Kael Warchain", "e": true},
 	{"arch": "juggernaut", "name": "Kael Rampage", "dash": true, "no_cover": true, "ranges": [2.0, 3.5, 5.0]},
