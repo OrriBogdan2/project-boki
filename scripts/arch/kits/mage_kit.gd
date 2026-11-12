@@ -25,6 +25,8 @@ var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
 var run_exit := false          # the streak's hand-over at run speed is still to come (_exit_run)
+var run_n := 0                 # streaks started or cut: a cut streak's pending _arrive is not the current one's
+var glide_key_was := false     # the glide key held last step (only a fresh press cancels: _tick_glide_cancel)
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
@@ -198,6 +200,7 @@ func _tick(dt: float) -> void:
 	if reset_dash_boost:
 		reset_boost_t -= dt
 		reset_dash_boost = reset_boost_t > 0.0
+	_tick_glide_cancel()
 	ult.tick(dt)
 	_tick_echo(dt)
 	_tick_trail()
@@ -480,7 +483,8 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	net_bolt(a, b, col_of(dd))
 	m.sfx("vv_surge_go", h.pos, -1.0)
 	if h.model: h.model.visible = false
-	m.later(time, _arrive)
+	run_n += 1
+	m.later(time, _arrive.bind(run_n))
 
 ## The streak itself: the body is hidden behind her own pink-teal after-images (_tick_echo); orbs crossed burst.
 func _tick_run(dt: float) -> void:
@@ -493,6 +497,38 @@ func _tick_run(dt: float) -> void:
 	if run_t <= 0.0 and h.model:
 		h.model.visible = true
 
+## Source patch 05.03.25: "Stuns, Roots, Grounds, and Glider cancel the state". A fresh press of the glide key
+## in the air (never Space held: DECISIONS 11-08) ends the Wirerun's charge or streak or Kitefall's climb and hang
+## the way a stun ends the charge: the charge stays spent, nothing hits after it, and Hunter._update_glide opens
+## the glider on the same press this step.
+func _tick_glide_cancel() -> void:
+	var key := bool(h.inp.get("glide_btn", false))
+	var fresh := key and not glide_key_was
+	glide_key_was = key
+	if not fresh or h.grounded or h.glide_cd > 0.0 or h.shot_down or m.time - h.kb_t <= 0.4:
+		return
+	if not wire.is_empty():
+		_end_wire(false)
+	elif run_t > 0.0:
+		_cut_run()
+	elif not ult.glide_out():
+		return
+	play("")
+	h.knock_t = 0.0                # the charge's own no-keys hold
+	h.loco.go(Loco.S.AIRBORNE)     # (that hold left the state Knocked, which may not open a glider)
+
+## The streak cut short: no more hits and no landing; she shows where she is and goes on at run speed, the
+## hand-over every Wirerun ends with (_exit_run). The run's invulnerability ends with it.
+func _cut_run() -> void:
+	run_t = 0.0
+	run_n += 1
+	h.roll_t = 0.0
+	h.dash_pass = {}
+	h.inv_t = 0.0
+	h.phase_t = 0.0
+	if h.model: h.model.visible = true
+	_exit_run()
+
 ## The step after the streak: she lands on the ring, handing over at run speed in the air too (a ground dash's
 ## exit), so its 40 m/s never carries on as an air slide or into the next Wirerun's drift. The kit
 ## ticks before the move, so nothing of the streak's speed slips into the air step; a jump out of it keeps its own.
@@ -504,8 +540,8 @@ func _exit_run() -> void:
 	h.vel.x = hv.x
 	h.vel.z = hv.y
 
-func _arrive() -> void:
-	if not is_instance_valid(h): return
+func _arrive(n: int) -> void:
+	if not is_instance_valid(h) or n != run_n: return
 	run_t = 0.0
 	if h.model: h.model.visible = true
 	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way

@@ -383,10 +383,21 @@ func _after_fx(dt: float) -> void:
 func drop() -> void:
 	if leap.is_empty():
 		return
-	var h := kit.h
 	if AIRBORNE.has(phase()):
-		h.teleport(leap["from"])
-		h.vel = Vector3.ZERO
+		kit.h.teleport(leap["from"])
+		kit.h.vel = Vector3.ZERO
+	_clear()
+
+## The glider opened in the climb or the hang (MageKit._tick_glide_cancel): she stays where she is, nothing
+## strikes, the cooldown stays spent. False when she isn't up there.
+func glide_out() -> bool:
+	if phase() != RISE and phase() != AIR:
+		return false
+	_clear()
+	return true
+
+func _clear() -> void:
+	var h := kit.h
 	if h.model:
 		h.model.visible = true
 	kit.fx().cut(leap.get("disc"))

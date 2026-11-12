@@ -33,6 +33,7 @@ func run(main_node: Node, who: String) -> void:
 		n += ac.n - before[0]
 		fails += ac.fails - before[1]
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
+		await load("res://tools/mage_glide_cancel_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
 		await parity.vireo()
