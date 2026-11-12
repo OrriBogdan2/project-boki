@@ -755,20 +755,12 @@ func _isle_open(isle: String) -> bool:
 # ---- buildings and building sites
 func _build_lots() -> void:
 	for b in Data.BUILDINGS:
-		var bd: Dictionary = Data.BUILDINGS[b]
 		var pl := HomeLayout.place_of(b, _d())
 		var rc: Array = HomeLayout.rect_of(b, _d())
 		var at := _rect_center(rc)
 		var holder := Node3D.new(); holder.position = at; holder.rotation.y = int(pl["r"]) * PI * 0.5; add_child(holder)
 		var built := _has_b(b)
-		var n: Node3D
-		if built:
-			n = Models.building(b)
-		else:
-			var sz := HomeLayout.base_size(b)
-			var lcost := FarmBuilder.lot_cost(b)
-			n = Models.lot(sz.x, sz.y, bd["name"], FarmSites.cost_text(lcost) if not lcost.is_empty() else "%d gems" % int(bd["cost"]))
-		holder.add_child(n)
+		holder.add_child(Models.building(b) if built else FarmLots.look(b, _d()))
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
 		if not HomeLayout.placed(b, _d()):
 			# a farm-start lot you haven't marked out yet (build mode, Buildings)
@@ -2075,6 +2067,7 @@ func _find_interact() -> void:
 		if d < reach and d < bd + 0.6: bd = d; best = {"kind": nm}
 	for b in lots:
 		var l: Dictionary = lots[b]
+		if not l["built"] and FarmSites.has_site(FarmLots.entry(b, _d())): continue      # FarmHob finds the site
 		var dp: Vector3 = l["door"] if l["built"] else l["at"]
 		var d := p2.distance_to(Vector2(dp.x, dp.z))
 		if d < (1.8 if l["built"] else 2.4) and d < bd + 0.4: bd = d; best = {"kind": "lot", "b": b}
@@ -2238,9 +2231,8 @@ func _label_for(it: Dictionary) -> String:
 		"portal": return "Start an expedition"
 		"house": return "Go inside"
 		"lot":
-			var bd: Dictionary = Data.BUILDINGS[it["b"]]
 			if lots[it["b"]]["built"]: return _building_verb(it["b"])
-			return "Build a %s" % bd["name"]
+			return "Mark out the %s site" % Data.BUILDINGS[it["b"]]["name"]
 		"bridge": return "Build a bridge to %s" % Data.ISLES[it["isle"]]["name"]
 		"kin":
 			var rec: Dictionary = it["k"]["rec"]
@@ -3751,28 +3743,14 @@ func _open_lot(b: String) -> void:
 				if rec["uid"] != Save.d.get("active", ""): resting.append(rec["name"])
 			v.add_child(UI.label(("Resting here: " + ", ".join(resting)) if resting.size() > 0 else "Nobody's resting here right now. Boki who aren't your partner sleep here.", 15, UI.MUTED))
 		return
-	if b == "shrine":
-		hecon.open_shrine_lot()
+	if _visiting():
 		return
-	var v := _new_panel("Build a %s" % bd["name"], 500)
-	v.add_child(UI.label(bd["desc"], 16))
-	var lc := FarmBuilder.lot_cost(b)       # a farm under the building pass pays some lots in wood and stone
-	var cost := int(bd["cost"])
-	var can := FarmSites.can_pay(lc) if not lc.is_empty() else int(Save.d["gems"]) >= cost
-	var cost_line := "Costs %d gems. You have %d." % [cost, int(Save.d["gems"])]
-	if not lc.is_empty():
-		cost_line = "Costs %s. You have %s." % [FarmSites.cost_text(lc), FarmSites.mats_text()]
-	v.add_child(UI.label(cost_line, 15, UI.GOLD if can else UI.BAD))
-	var btn := UI.button("Build it", func():
-		if Save.has_building(b) or not (FarmSites.can_pay(lc) if not lc.is_empty() else int(Save.d["gems"]) >= cost): return
-		if lc.is_empty(): Save.d["gems"] = int(Save.d["gems"]) - cost
-		else: FarmSites.pay(lc)
-		Save.d["buildings"].append(b)
-		Save.save_game()
-		_close_panel()
-		_construct(b), 200)
-	btn.disabled = not can
-	v.add_child(btn)
+	var why := FarmLots.why_not(b)
+	if why != "":
+		_toast(why)
+		return
+	FarmLots.start(self, b)
+	_toast("%s site marked out: hold interact to hammer it, and your Boki will help" % bd["name"])
 
 var wedge_t := 0.0
 

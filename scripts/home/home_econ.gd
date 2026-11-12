@@ -732,36 +732,6 @@ func open_shrine() -> void:
 		cv.add_child(r)
 		v.add_child(card)
 
-## The empty lot: what the shrine needs before you can build it.
-func open_shrine_lot() -> void:
-	var bd: Dictionary = Data.BUILDINGS["shrine"]
-	var v: VBoxContainer = h._new_panel("Build the Soul Shrine", 520)
-	UI.subtitle(v, String(bd["desc"]))
-	var ex := int(Save.d.get("extracts", 0))
-	v.add_child(UI.section("What it needs"))
-	var need := func(ok: bool, txt: String) -> void:
-		var r := UI.hbox(10)
-		r.add_child(UI.IconDot.new("check" if ok else "lock", UI.GOOD if ok else UI.FAINT, 16.0))
-		r.add_child(UI.label(txt, UI.T_BODY, UI.INK if ok else UI.MUTED))
-		v.add_child(r)
-	need.call(ex >= 3, "3 successful expeditions  (%d)" % ex)
-	need.call(Econ.embers() > 0, "A Soul Ember to light it  (%d)" % Econ.embers())
-	need.call(int(Save.d["gems"]) >= int(bd["cost"]), "%d gems  (you have %d)" % [int(bd["cost"]), int(Save.d["gems"])])
-	var why := Econ.shrine_why()
-	var btn := UI.primary("Build it", func():
-		if Econ.shrine_why() != "" or Save.has_building("shrine"): return
-		Econ.use_ember()
-		Save.d["gems"] = int(Save.d["gems"]) - int(bd["cost"])
-		Save.d["buildings"].append("shrine")
-		Save.save_game()
-		h._close_panel()
-		h._construct("shrine"), 200)
-	btn.disabled = why != ""
-	btn.tooltip_text = why
-	v.add_child(btn)
-	if why != "":
-		v.add_child(UI.label(why, 13, Color("ffb0a0")))
-
 # ------------------------------------------------------------------ the Armory
 ## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots, then the
 ## utility stash and treasure. (Armor is found in the match, not stored: Equal.)

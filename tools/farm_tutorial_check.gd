@@ -774,19 +774,14 @@ func _farm2() -> void:
 	ok(_item_texts(home).any(func(t): return t.begins_with("Challenge House") and t.contains("wood")),
 			"once Hob has drawn it up it is in the Buildings tab with its price")
 	var keep := JSON.stringify(Save.d["buildings"])
-	home._open_lot("board")
-	var build_btn: Button = null
-	for b in home.panel_host.find_children("*", "Button", true, false):
-		if String(b.text) == "Build it": build_btn = b
-	ok(build_btn != null and build_btn.disabled, "with no wood and stone the Build button is greyed")
+	home._open_lot("board")      # a lot goes up as a construction site (FarmLots); nothing is spent yet
+	var e := FarmLots.entry("board")
+	ok(FarmSites.is_site(e) and not Save.has_building("board") and FarmSites.stalled(e),
+			"marking it out leaves a site that waits while there is no wood and stone")
 	Work.add_mat("wood", int(lc["wood"])); Work.add_mat("stone", int(lc["stone"]))
-	home._close_panel()
-	home._open_lot("board")
-	build_btn = null
-	for b in home.panel_host.find_children("*", "Button", true, false):
-		if String(b.text) == "Build it": build_btn = b
 	var gems_before := int(Save.d["gems"])
-	if build_btn: build_btn.pressed.emit()
+	for i in 40:
+		if FarmSites.has_site(e): FarmSites.land(home.hw, e, home.lots["board"]["at"], "You")
 	ok(Save.has_building("board") and Work.mat("wood") == 0 and Work.mat("stone") == 0 and int(Save.d["gems"]) == gems_before,
 			"building it spends the wood and stone and no gems (was %s)" % keep)
 	home.queue_free()
