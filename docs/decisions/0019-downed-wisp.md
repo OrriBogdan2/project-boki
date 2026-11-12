@@ -17,7 +17,13 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
-- Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
+- Knocked-down beat (`HunterFall`, 0.4-0.5 s by weight) before the Wisp takes over: the hero staggers
+  along the hit (away from the knocker), plays its death clip on its weight's curve (no clip: kneels and
+  slumps in HunterAnim) where it went down and facing the way it fell, then fades out as the Wisp rises out
+  of it; heavies hold then drop with a dust thud, lights crumple at once. Visual only: the Wisp and the
+  downed rules are live from the first frame, a revive mid-beat ends it. Remote copies run it from their
+  `knock` event (the knocker id it already carries), so no Net change.
+- Pop-in (at the down): flash, ring (0.25 s), puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
   scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally. The id is `Save.d["look"]["wisp"]`, the same pattern as glider skins; unknown ids give
