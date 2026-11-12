@@ -55,6 +55,10 @@ const PLATE_ICON_ROW := 22.0
 const SLOT_RAD := 9            # ability slot corner radius
 const KEY_FS := 12             # key label size
 
+# style boxes are made once per look and reused (dozens of frames are drawn every frame)
+static var _boxes := {}
+static var _torn: UiTorn
+
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
@@ -167,10 +171,6 @@ static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
 	return HIT_ARMOR if armor_hit else HIT
-
-# style boxes are made once per look and reused (dozens of frames are drawn every frame)
-static var _boxes := {}
-static var _torn: UiTorn
 
 ## The torn void panel with its neon edge, for the few big boxes the HUD puts over the world (the
 ## tutorial's intro card). One shape per rect, cached by the box, so it draws as cheaply as a flat one.
