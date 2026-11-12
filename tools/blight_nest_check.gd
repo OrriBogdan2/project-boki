@@ -140,7 +140,7 @@ func _none_outside(main: Node) -> void:
 				var d: float = x.flat_dist(n["pos"]) if not n.is_empty() else 999.0
 				seen[x.nid] = d
 				c["far"] = maxf(float(c["far"]), d)
-				if d > 2.5:
+				if d > 4.0:  # they climb out 1.5 m from it; the old heat spawns landed 13-20 m out
 					c["stray"] = int(c["stray"]) + 1
 	# loud far from every nest as well: shots and blasts in the open draw nothing out of the ground
 	for team in bl.land_at.keys():
