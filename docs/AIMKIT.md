@@ -61,7 +61,7 @@ Common params (every shape):
 | `alpha` | 1.0 | overall strength. 1 is the quiet default; don't go above about 1.4 |
 | `hot` | 0 | 0..1, brightens toward white. Lanes, Vs and sweet circles go hot by themselves at `k >= 1` |
 | `lw` | 0.06 | rim width in m |
-| `all` | false | foes and allies see it too. A foe's is tinted toward the hostile rim colour. Default: only your own player sees it (aim reticles) |
+| `all` | false | foes and allies see it too, on their own games online as well (section 6). A foe's is tinted toward the hostile rim colour. Default: only your own player sees it (aim reticles) |
 | `dur` | 0.1 | seconds it stays without a refresh |
 
 Directions are flat `Vector2(x, z)`, the same as `h.aim_dir()`. Points are `Vector3`. Every shape sits
@@ -192,9 +192,8 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - A kit that draws its own aim line returns true from `own_aim_line()`, so the shared weapon line hides
     (two lines read as two aims). The per-hero audit is docs/AIM_PREVIEWS.md.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
-  - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
-    runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
-    to see one (see Open questions in the branch report).
+  - Online, every `all` telegraph reaches the other games by itself (AimNet, section 6); aim reticles
+    and cursor states stay on your own screen. Nothing to add in the kit.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
@@ -265,3 +264,35 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
+
+## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0061-telegraph-net.md)
+
+Remote hunters are puppets: their kits run only on their owner's game. `AimNet` (scripts/match/aim/aim_net.gd)
+sends every `all` entry AimDraw is given for a hunter this game runs (the player, the host's bots) as the
+Net event `["tele", nid, id, entry]`, the resolved entry AimShapes draws; `["tele", nid, id]` drops it.
+The other games put it under their copy of that hunter, so the shape, size, fill and colour are the
+caster's, tinted hostile for a foe by AimDraw. A refreshed telegraph goes out at most every 0.1 s
+(`SEND_GAP`) and lives 0.25 s (`LAG`) past its keep on the receiver; the caster's game sends the drop.
+
+Every `all` telegraph in the kits (the 2026-11-12 audit). "Before" is what another player's game got
+before 0.24.6: never the telegraph itself, at most a 0.35 s Net fx ring or bolt at the payoff.
+Now all of them arrive through "tele".
+
+| Hunter (kit) | `all` telegraphs (id: shape) | Before 0.24.6 on other games |
+|---|---|---|
+| Lace (archer) | E Hail Wall `e`: arc_wall | nothing |
+| Cinder (ashwick) | E cloak ring `e_ring`: circle | nothing |
+| Albert (bulwark, bjorn_*) | RMB push `aegis_push`: lane; E mend zone `e`: circle; R cells `x`: lane | a ring at the mend and per R cell |
+| Tenzo (dolm, breah_*) | RMB slam `rmb`: sweet circle; Shift hop `leap`: circle; E tells `e_tell<n>`: circle; X cracks `x_cracks`: span | a ring at the slam, the blast and the spine |
+| Grimble (dredge) | E `e_tell`, `e_hit`: cone; dive quake: circle; X fan `x_fan`: cone | a ring at the hit |
+| Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Longneedle `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
+| Kael (juggernaut) | RMB slam `slam`: cone; Meteor Drop `drop`, `drop_core`: circle; R guard `ult`: lane | nothing |
+| Sparkle (mage) | Shift end `dash_end`: circle; E Skycall `e<n>`: circle; X `x_ring`, `x_land`: circle | a ring at the Skycall and the X |
+| Motley (ostra) | Shift Trade `swap_fly`: swap; E seed: circle; X Nightwell `x`: circle | a bolt and ring for the Trade, the seed node (HeroZones), a ring at the well |
+| Neve (rimewright) | spear zones: circle; E Rink Wall: lane; X rink `x`: circle | nothing |
+| Meeko (tender) | burr circles; X `x`, `x_me`, `x_pick`: circle | a bolt at the X pick |
+| Sable (thief) | Bola ground rings `gnd2<n>`: circle; X `ult`, `ult_rim`: circle | a ring at the X |
+
+`--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-check` asserts,
+per shape kind, that every `all` telegraph up 0.15 s or more in each kit's casts shows on the other game;
+`--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few.
