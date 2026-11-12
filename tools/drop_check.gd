@@ -3,6 +3,7 @@ extends RefCounted
 ##   1. the player's Boki is never downed or killed in the first 10 s of a normal match or the tutorial
 ##   2. steering ramps (no snapping), the dive is clearly faster than the glider, the flare slows the last metres
 ##   3. the reticle: projected landing matches where you land, sits on the ground, hides on landing; red over the void
+##   4. no chests before the match proper: all hidden on the ship and the drop, all shown once you land
 var bad := 0
 var m: Match
 var main: Node
@@ -132,6 +133,38 @@ func _reticle() -> void:
 				W.kind[i] = World.T_VOID
 	ok(DropReticle.project(P, far)["void"], "a projected spot over the void is flagged")
 
+## How many of the match's chests are hidden.
+func _hidden_chests() -> int:
+	return m.chests.filter(func(c): return not (c["node"] as Node3D).visible).size()
+
+## Every chest was hidden at the start (`hid` of them), and none is once you've landed (steps up to 30 s for that).
+func _chests_wait(what: String, hid: int) -> void:
+	var t := 0.0
+	while t < 30.0 and (m.player.riding or m.player.dropping):
+		if m.player.riding:
+			m.ship_jump(m.player, true)
+		m.step(Match.DT)
+		t += Match.DT
+	var landed: bool = not (m.player.riding or m.player.dropping)
+	var info := "%d of %d hidden at the start, %d now, landed %s" % [hid, m.chests.size(), _hidden_chests(), landed]
+	ok(not m.chests.is_empty() and hid == m.chests.size() and landed and _hidden_chests() == 0,
+			"%s: no chest shows before you land, all once you have (%s)" % [what, info])
+
+## Tutorial: no chest shows before you land (however many the level has), and every one does once you have.
+func _tutorial_chests_wait() -> void:
+	var seen := m.chests.size() - _hidden_chests()
+	var t := 0.0
+	while t < 30.0 and (m.player.riding or m.player.dropping):
+		if m.player.riding:
+			m.ship_jump(m.player, true)
+		m.step(Match.DT)
+		t += Match.DT
+	var landed: bool = not (m.player.riding or m.player.dropping)
+	var n := m.chests.size()
+	var info := "%d of %d visible before landing, %d now, landed %s" % [seen, n, n - _hidden_chests(), landed]
+	ok(seen == 0 and landed and _hidden_chests() == 0,
+			"tutorial: no chest shows before you land, the level's chests do once you have (%s)" % info)
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -139,12 +172,15 @@ func run(mn: Node) -> void:
 	_reticle()
 	for steer in [Vector2.ZERO, Vector2(1, 0)]:
 		_start({})
+		var hid := _hidden_chests()
 		var why := _watch_boki(12.0, steer)
 		print("  normal steer=", steer, " ", why)
 		ok(why == "", "normal match, steer %s: your Boki rides with you and is untouched for 12 s" % str(steer))
+		_chests_wait("normal match, steer %s" % str(steer), hid)
 	_start({"tutorial": true, "teams": 1, "length": 1500.0})
 	var tw := _watch_boki(12.0)
 	print("  tutorial ", tw)
 	ok(tw == "", "tutorial: your Boki rides with you and is untouched for 12 s")
+	_tutorial_chests_wait()
 	print("DROP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

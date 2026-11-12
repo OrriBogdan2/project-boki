@@ -23,7 +23,7 @@ static func plan(a: Dictionary, b: Dictionary) -> Array:
 		{"t": 1.25, "snd": "nook_settle", "vol": BASE_VOL - 2.0, "pitch": 1.0, "var": 0.05},
 		{"t": 1.3, "snd": "kin_happy", "vol": -12.0, "pitch": Unique.voice(b), "var": 0.05},
 	]
-	if Care.unstable_mix(a, b):
+	if UnstableMix.unstable(a, b):
 		steps.append({"t": 1.8, "snd": "nook_wobble", "vol": BASE_VOL - 1.0, "pitch": 1.0, "var": 0.0})
 	return steps
 
