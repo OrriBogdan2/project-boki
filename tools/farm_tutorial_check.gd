@@ -197,7 +197,7 @@ func _base_world() -> void:
 	ok(FarmTutorial.did("meet") and FarmTutorial.did("eat") and FarmTutorial.current() == "toy"
 			and FarmTutorial.done_count() == 2, "after save and load it resumes at the toy step")
 	guide._poll()
-	ok(_skip_shown(guide) and guide.hint_lbl.text.begins_with("3/4"), "resumed: 3/4 on the line, Skip still there")
+	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "3/4", "resumed: 3/4 on the line, Skip still there")
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
@@ -540,7 +540,7 @@ func _spotlight() -> void:
 	home.guide.tick(0.6)
 	ok(not FarmSpotlight.showing() or FarmSpotlight._node.spec != {"world": true},
 			"the job step done: its spotlight is gone")
-	ok(home.guide.hint_box.get_child(0).get_child(0).text.contains("Done"), "a tick says Done! on the goal line")
+	ok(home.guide.hint_text().contains("Done"), "a tick says Done! on the strip line")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
@@ -627,8 +627,8 @@ func _world() -> void:
 	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
 			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
 			"Hob waits by the market stall from the start")
-	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("Hob"),
-			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
+	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_text().contains("Hob"),
+			"the first prompt is on screen: %s" % home.guide.hint_text())
 	FarmTutorial.event("hob")
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])
