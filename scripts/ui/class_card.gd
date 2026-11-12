@@ -98,16 +98,20 @@ static func kit_tip(id: String) -> String:
 ## became ready.
 static func results_strip(s: Dictionary) -> Control:
 	var cu: Dictionary = s.get("class_unlock", {})
-	var v := UI.vbox(4)
+	var v := UI.vbox(0)
+	var news: Array = []
 	for m in cu.get("mastered", []):
 		var rw: Dictionary = m["reward"]
-		var ml := UI.label("%s mastery: %s  ·  %s %s" % [Arch.name_of(String(m["id"])), String(m["text"]),
-				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])], UI.T_SMALL, GOAL_COL, UI.semi)
-		ml.set_meta("mastery_done", String(m["id"]))
-		v.add_child(ml)
+		news.append("%s mastery: %s (%s %s)" % [Arch.name_of(String(m["id"])), String(m["text"]),
+				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])])
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Relic challenge done! Hold to unlock it on the Relics screen at home.", UI.T_SMALL,
-				GOAL_COL, UI.semi)
+		news.append("Relic challenge done: hold to unlock it on the Relics screen at home")
+	if news.is_empty():
+		return v
+	var nl := UI.para("New: " + "  ·  ".join(news), UI.T_SMALL, GOAL_COL)
+	if not (cu.get("mastered", []) as Array).is_empty():
+		nl.set_meta("mastery_done", String(cu["mastered"][0]["id"]))
+	if int(cu.get("new", 0)) > 0:
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
-		v.add_child(nl)
+	v.add_child(nl)
 	return v
