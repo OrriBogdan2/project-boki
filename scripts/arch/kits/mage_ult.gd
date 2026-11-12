@@ -189,7 +189,6 @@ func _take_off() -> void:
 	_next(RISE)
 	kit.play("mage_x_air")
 	kit.vfx("x_air", from, null, {"len": float(data()["height"])})
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
