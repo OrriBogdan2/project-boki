@@ -12,7 +12,8 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const SAVE_EVERY := 2          # sim steps per saved frame: 30 fps
-const GAP := 2.6               # m between the Wisps in the row (more than the revive reach)
+const ZOOM := 0.7              # closer than the match's own zoom so the Wisps read in the clip
+const GAP := 3.8               # m between the Wisps in the row (more than the revive reach)
 
 var main: Node
 var m: Match
@@ -40,12 +41,11 @@ func run(main_node: Node) -> void:
 	mate.teleport(m.world.free_spot_near(P.pos + Vector3(GAP, 0, 0), [], 0.5, 0.4, 3.0))
 	foe.teleport(m.world.free_spot_near(P.pos + Vector3(GAP * 2.0, 0, 0), [], 0.5, 0.4, 3.0))
 	runner.teleport(m.world.free_spot_near(P.pos + Vector3(-9.0, 0, 3.0), [], 0.5, 0.4, 3.0))
-	focus = mate.pos
+	focus = mate.pos + Vector3(1.0, 0, 0)    # (the row clears the kit panel on the right)
 	await _go(0.6)
 	print("WISPCLARITY side by side from frame %d" % frame)
 	for h in [P, mate, foe]:
 		m.knock(h, null, {})
-		h.down_hp = 1e6
 		h.reveal_t = 60.0
 	await _go(DT)
 	for k in m.kins:
@@ -94,20 +94,29 @@ func _walk(h: Hunter, o: Hunter, secs: float, stop := 0.5) -> void:
 		t += DT
 	h.inp["move"] = Vector2.ZERO
 
-## `h` hops onto downed `o` again and again until `o` is back up (at most 8 s).
+## `h` hops onto downed `o` again and again until `o` is back up (at most 8 s), steering back over it
+## each frame (a hop keeps the walk's speed, so without the steer it bounces off and away).
 func _jump_until_up(h: Hunter, o: Hunter) -> void:
 	var t := 0.0
 	while o.downed and t < 8.0:
-		if h.grounded:
+		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
+		h.inp["move"] = to.normalized() if to.length() > 0.35 else Vector2.ZERO
+		if h.grounded and to.length() < 0.8:
 			h.do_jump()
 		await _go(DT)
 		t += DT
+	h.inp["move"] = Vector2.ZERO
 
 func _go(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
+		for h in m.hunters:
+			if h.downed:
+				h.down_hp = Data.MATCH["down_hp"]     # (no bleed-out mid-clip; the timer reads full)
 		t += DT
+		m.cam.zoom = ZOOM
+		m.cam.zoom_to = ZOOM
 		m.cam.snap(focus)
 		for h in m.hunters:
 			h.render(DT, 1.0)
