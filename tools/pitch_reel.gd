@@ -33,6 +33,7 @@ var shot := 2
 var take := 1
 var hunter := Demo.DEFAULT_HUNTER
 var failed := false             # a shot that cannot be filmed on this build says so (fail()), and the take is dropped
+var marks := {}                 # part -> the frame it started on (mark())
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -60,11 +61,9 @@ func run(main_node: Node) -> void:
 		_film_all(shots, takes)
 		return
 	hunter = _hunter_for(args)
-	Save.no_write = true
-	Record.set_level(1)
-	Settings.v["tips"] = false
+	set_up_take()
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
-	await _play()
+	await play()
 	print("PITCH_DONE shot=%d take=%d frames=%d" % [shot, take, Engine.get_frames_drawn()])
 	main.get_tree().quit(1 if failed else 0)
 
@@ -76,7 +75,15 @@ func _hunter_for(args: PackedStringArray) -> String:
 	var ids := Arch.ids()
 	return String(ids[(take - 1) % ids.size()]) if shot == 7 else Demo.DEFAULT_HUNTER
 
-func _play() -> void:
+## A take never writes the save and shows the clean HUD with no tips.
+func set_up_take() -> void:
+	failed = false
+	marks.clear()
+	Save.no_write = true
+	Record.set_level(1)
+	Settings.v["tips"] = false
+
+func play() -> void:
 	var farm = load("res://tools/pitch_reel_farm.gd").new(self)
 	match shot:
 		2: await farm.hatch(take)
@@ -98,13 +105,13 @@ func _film_all(shots: PackedStringArray, takes: int) -> void:
 	f.store_string("window/size/viewport_height=%d\n\n" % HEIGHT_PX)
 	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=%s\n" % MJPEG_QUALITY)
 	f.close()
-	var failed := 0
+	var bad := 0
 	for s in shots:
 		for k in range(1, takes + 1):
-			failed += _film_one(int(s), k)
+			bad += _film_one(int(s), k)
 	DirAccess.remove_absolute(cfg)
-	print("PITCH_ALL failed=%d" % failed)
-	main.get_tree().quit(1 if failed > 0 else 0)
+	print("PITCH_ALL failed=%d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
 
 ## One take; returns 1 when the child failed or wrote no movie.
 func _film_one(s: int, k: int) -> int:
@@ -141,6 +148,7 @@ func fail(why: String) -> void:
 
 ## The frame a part starts on, for the encoder.
 func mark(what: String) -> void:
+	marks[what] = Engine.get_frames_drawn()
 	print("PITCH_MARK %s movie_frame=%d" % [what, Engine.get_frames_drawn()])
 
 # ------------------------------------------------------------------ the raid shots
