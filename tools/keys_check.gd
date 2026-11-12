@@ -9,7 +9,7 @@ extends RefCounted
 ##   5. the Shrubling: disguised until approached, flees (faster than a hunter on foot, slower than a
 ##      dash) and hides again, repeats, always carries a key, a root or a slow catches it, Grounded
 ##      stops its dive, it drops the key
-##   6. bots go for a key, then open a chest
+##   6. bots go for a key, then open a chest; a carrier they gave up on is left alone for a while
 ##   7. fewer chests: a match places chest.keep of the map's chests (the most crowded go first, no dice)
 ##      and of the item caches; the vaults stay; the tutorial has exactly one, the chest step's
 
@@ -441,7 +441,37 @@ func _bots() -> void:
 	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get(
 			"ride", false) and not x.get("free", false))[0]
 	ok("a bot without a key has no chest goal", not BotKeys.chest_open_for(B, c2) or B.chest_keys > 0)
+	_given_up(m, B)
 	m.queue_free()
+
+## A carrier the bot has given up on is left alone: the fight dropped it (no clear shot), or the walk
+## did (no way there). The no-path clock follows a carrier that walks about instead of restarting.
+func _given_up(m: Match, B: Hunter) -> void:
+	B.chest_keys = 0
+	m.pickups = m.pickups.filter(func(p): return String(p["kind"]) != "ckey")
+	var mb: Mob = m.mobs.filter(func(x): return not (x is Blight))[0]
+	mb.dead = false
+	mb.hp = 50.0
+	KeyCarry.mark(mb)
+	mb.pos = _ground_near(m, B.pos + Vector3(6.0, 0, 0))
+	var g := BotKeys.goal(m, B, Vector3.INF)
+	ok("a bot without a key goes for a carrier 6 m off",
+			not g.is_empty() and String(g[1]) == "keyhunt" and g[0] == mb.pos)
+	B.ai["ignore"] = {"e": mb, "until": m.time + 4.0}
+	ok("not one its fight gave up on (no clear shot)", BotKeys.goal(m, B, Vector3.INF).is_empty())
+	B.ai.erase("ignore")
+	B.ai["goal"] = BotKeys.goal(m, B, Vector3.INF)[0]
+	B.ai["goal_kind"] = "keyhunt"
+	B.ai.erase("nopath")
+	var brain := Bot.new()
+	for i in 12:      # 2 s of no path while the carrier ambles 0.1 m a step
+		mb.pos.x += 0.1
+		B.ai["goal"] = mb.pos
+		brain._no_path(m, B)
+		m.time += 0.17
+	ok("no way to a walking carrier: given up within 2 s", BotKeys.goal(m, B, Vector3.INF).is_empty())
+	m.time += Bot.GIVE_UP_S
+	ok("and taken up again once the give-up runs out", not BotKeys.goal(m, B, Vector3.INF).is_empty())
 
 # ------------------------------------------------------------------ 7. bonus keys
 func _ckeys(m: Match) -> int:
