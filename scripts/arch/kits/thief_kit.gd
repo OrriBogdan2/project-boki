@@ -382,7 +382,7 @@ func _bolt() -> void:
 	sd["pos"] = start
 	sd["prev"] = start
 	sd["start"] = start
-	sd["vis"] = Muzzle.offset(h, "lmb_r" if hand == 1 else "lmb_l", start)
+	Muzzle.leave(sd, h, "lmb_r" if hand == 1 else "lmb_l")
 	if v.length() > 0.05: sd["vel"] = v.normalized() * spd
 	sd["life"] = dist / spd
 	sd["life0"] = sd["life"]
@@ -641,12 +641,14 @@ func _throw_bola() -> void:
 		"effects": [{"type": "damage", "amount": float(bd["dmg"])},
 				{"type": "slow", "duration": float(bd["ground"]), "strength": float(bd["slow"])}]})
 	var dv := h.aim_dir()
-	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
-			"bounces": int(bd["bounces"]), "stg": stg}
+	var at := h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5)
+	bola = {"pos": at, "dir": dv, "left": float(bd["range"]), "first": null, "bounces": int(bd["bounces"]), "stg": stg,
+			"start": at}
+	Muzzle.leave(bola, h, "rmb")      # (its look leaves her hand: Muzzle.drawn)
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
 	# the yellow flash of the throw
-	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
+	fx().star(Muzzle.drawn(bola, at), col_of(rmb_def()), 0.8, 0.12)
 	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0),
 			col_of(rmb_def()))
 
@@ -705,7 +707,8 @@ func _tick_bola(dt: float) -> void:
 			return
 	bola["pos"] = p
 	bola["dir"] = dir
-	fx().place("bola%d" % h.get_instance_id(), "bola", p, dir * spd, col_of(rmb_def()), BOLA_CORD, 1.0, 0.25)
+	fx().place("bola%d" % h.get_instance_id(), "bola", Muzzle.drawn(bola, p), dir * spd, col_of(rmb_def()), BOLA_CORD,
+			1.0, 0.25)
 
 func _walled(q: Vector3) -> bool:
 	return m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > q.y - 0.4

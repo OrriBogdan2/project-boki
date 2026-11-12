@@ -126,7 +126,7 @@ func _loose() -> void:
 	var start := h.pos + Vector3(dir.x * 0.6, 0.95 * float(h.cdat.get("scale", 1.0)), dir.y * 0.6)
 	var arrow := {"last": last}
 	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 4.0)),
-		"tracer": 0.0,
+		"tracer": 0.0, "muz": "x",
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, arrow)}
 	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, PinFx.THREAD, extra)
 	k.vfx("ult_beam", Vector3(start.x, h.pos.y, start.z), dir, {"last": last})

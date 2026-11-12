@@ -11,7 +11,7 @@ const CROP := Vector2i(640, 440) # px round the Hunter
 const ZOOM := 0.7                # the wheel's closest: the Hunter fills more of the crop
 const SETTLE := 60               # frames before the first press
 const GAP := 55                  # frames after each press
-const SLOTS := ["lmb", "lmb", "rmb", "e", "r", "x"]
+const SLOTS := ["lmb", "lmb", "rmb", "e", "r", "x", "lmb"]      # (the last LMB: Lace's Starpiercer arrow)
 
 var main: Node
 var m: Match
@@ -95,11 +95,12 @@ func _hunter(arch: String) -> void:
 	P.inp["aim"] = P.pos + Vector3(11, 0.9, 0)
 	P.inp["aim_y"] = P.pos.y
 	n = 0
-	label.text = "%s" % arch
+	var who := String(Arch.def(arch).get("base_name", arch))
+	label.text = who
 	for f in SETTLE:
 		await _frame(P, true)
 	for slot in SLOTS:
-		label.text = "%s  %s" % [arch, slot.to_upper()]
+		label.text = "%s  %s" % [who, slot.to_upper()]
 		P.fire_cd = 0.0
 		P.ammo = int(P.wpn.get("mag", 12))
 		for k in P.ak.cd:

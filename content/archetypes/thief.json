@@ -35,6 +35,7 @@
 	"rank_next": {"sec": "Rank 3: cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks.", "kin": "Rank 3: cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back.", "dash": "Rank 3: the empowered bonus +40% in all, and the speed boost is half again as big."},
 	"tells": {"half": "gold Mark diamonds over the target, one per stack", "full": "a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Encore runs", "dash_spent": "a white cartwheel arc, dash pip dark; a landed empowered shot flashes the pip back with RESET at her hand"},
 	"muzzle": {
+		"rmb": ["anchor_hand_r"],
 		"lmb_l": ["weapon_muzzle_l"],
 		"lmb_r": ["weapon_muzzle"],
 		"x_l": ["anchor_hand_l"],

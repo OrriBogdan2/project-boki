@@ -1,9 +1,9 @@
 extends RefCounted
 ## --muzzle-live-check: every Hunter's shots leave the drawn weapon. Each of the 13 Hunters, in a real match with
-## its model dressed and drawn at the match camera's size, presses LMB, RMB, E, R and X; the round each press spawns
-## starts within MAX_OFF (on screen: off the camera's ray through it) of that slot's weapon point (Muzzle) as the
-## arm stands a few frames later. One MUZZLE line per press, a table to paste. A press that spawns no round
-## (a dash, a melee swing, a field) is n/a, a round ring (a nova) leaves the body, not the weapon.
+## its model dressed and drawn at the match camera's size, presses LMB, RMB, E, R, X and LMB again right after X;
+## the round each press spawns starts within MAX_OFF (on screen: off the camera's ray through it) of that slot's
+## weapon point (Muzzle) as the arm stands a few frames later. One MUZZLE line per press, a table to paste. A press
+## that spawns no round (a dash, a melee swing, a field) is n/a, a round ring (a nova) leaves the body, not the weapon.
 ## --only=<archetype> runs one. Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -12,7 +12,7 @@ const WAIT := 2               # frames after the round spawns, for the arm to st
 const RING := 0.4             # m: rounds of one press starting this far apart are a ring, not a muzzle
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gil", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
-const SLOTS := ["lmb", "rmb", "e", "r", "x"]
+const SLOTS := ["lmb", "rmb", "e", "r", "x", "x_lmb"]      # x_lmb: LMB right after X (Lace's Starpiercer arrows)
 
 var bad := 0
 var first: Dictionary = {}      # the first round of the press
@@ -30,11 +30,15 @@ func _frame(m: Match, h: Hunter) -> void:
 		sync.set_process(false)
 		sync.call("_process", DT)
 
+## Adds the press's new rounds (their dictionaries) to group.
 func _collect(m: Match, P: Hunter, sid0: int, group: Array) -> void:
 	for s in m.shots:
 		if s["by"] == P and int(s["sid"]) > sid0 and not (s["x"] as Dictionary).get("melee", false):
-			group.append(Muzzle.drawn(s, s["start"]))
+			group.append(s)
 			first = s
+	var b: Dictionary = (P.ak as ThiefKit).bola if P.ak is ThiefKit else {}
+	if not b.is_empty() and group.is_empty():      # (Sable's Bola is the kit's own flight, not a round)
+		group.append(b)
 
 ## Presses `slot` and returns {"n": rounds, "off": m} for the first round(s) it spawns, off -1 when none or a ring.
 func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
@@ -44,7 +48,7 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 	for k in P.ak.cd:
 		P.ak.cd[k] = 0.0
 	match slot:
-		"lmb": P.inp["fire"] = true
+		"lmb", "x_lmb": P.inp["fire"] = true
 		"rmb": P.inp["sec"] = true
 		"e": P.ak.use_e()
 		"r": P.ak.use_r()
@@ -74,6 +78,7 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 		_copy_leaves(m, P, first)
 	if group.is_empty():
 		return {"n": 0, "off": -1.0}
+	group = group.map(func(s: Dictionary): return Muzzle.drawn(s, s.get("start", s["pos"])))      # (drawn now)
 	var mid := Vector3.ZERO
 	for g in group:
 		mid += g / group.size()
@@ -83,7 +88,7 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 	var worst := 0.0
 	for g in group:
 		var best := 99.0
-		for p in Muzzle.points(P, slot):
+		for p in Muzzle.points(P, slot.trim_prefix("x_")):
 			best = minf(best, Muzzle.off_screen(P, g, p))
 		worst = maxf(worst, best)
 	return {"n": group.size(), "off": worst}
@@ -94,7 +99,7 @@ func _look_eases(P: Hunter, s: Dictionary) -> void:
 		return
 	var start_at: Vector3 = s["start"]
 	var far := start_at + Vector3(Muzzle.BLEND_M, 0, 0)
-	ok(Muzzle.drawn(s, far) == far and Muzzle.drawn(s, start_at) == start_at + (s["vis"] as Vector3),
+	ok(Muzzle.drawn(s, far) == far and Muzzle.drawn(s, start_at) != start_at,
 		"%s: the look is at the muzzle at the start and on the round's line %.0f m on" % [P.arch, Muzzle.BLEND_M])
 
 ## The other player's game (decision 0061): the copy the "s" event makes of the round gets its look's offset

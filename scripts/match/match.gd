@@ -2711,7 +2711,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	if String(extra.get("muz", "")) != "" and by is Hunter:
-		sd["vis"] = Muzzle.offset(by as Hunter, String(extra["muz"]), at)
+		Muzzle.leave(sd, by as Hunter, String(extra["muz"]))
 	shots.append(sd)
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
