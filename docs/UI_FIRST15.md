@@ -86,6 +86,10 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
 2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
+   Done (ext/tut-one-prompt): the old card's faded copy went with the one-line strip (bab079536; not in fresh
+   `--tutorial-hud-shots` renders); the step's plain words were re-sent to the lane every frame ("x123", a lasting
+   copy of the tip) and now go once a step; the world's F prompt waits with the toasts; URGENT lines and revive /
+   stomp prompts still show (docs/HUD.md).
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
