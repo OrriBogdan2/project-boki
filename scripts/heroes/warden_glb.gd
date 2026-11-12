@@ -940,6 +940,7 @@ class Sync extends Node:
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var head_look: WardenLookAt   # the head turns to the aim ahead of the body (WardenLookAt)
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
+	var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
 	var blade_bone := -1
@@ -990,6 +991,7 @@ class Sync extends Node:
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
+		opener = WardenOpen.make(clips) if clips else null
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		if clips:
 			_look_pose()
@@ -1095,6 +1097,8 @@ class Sync extends Node:
 						_rig_pose(l), w))
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		if opener:
+			opener.step(dt, 1.0 - w)
 		if sway:
 			sway.step(dt)
 		if w < 1.0:

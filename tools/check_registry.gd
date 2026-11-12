@@ -202,6 +202,7 @@ const CHECKS := {
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
+	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
