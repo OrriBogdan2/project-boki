@@ -26,7 +26,15 @@ const FULL_RATE_GOALS := ["board", "lift", "yard", "hum", "beacon", "lair_fight"
 const THINK_FAR_M := 90.0  # m from the local player (flat): two camera views off, nobody sees it decide
 const THINK_FAR_K := 2.0   # how much longer such a bot waits between picking goals and targets
 
+## A Hunter's pose (pose_every): frames per pose when unseen, off screen, or on screen but far from the camera's focus
+const POSE_UNSEEN := 6
+const POSE_OFF_SCREEN := 3
+const POSE_FAR := 2
+static var POSE_FAR_M: float = CamRig.RULES["pose_far_m"]   # m (flat) from the focus: past it on screen is "far"
+
 static var _n := 0             # sim steps planned (staggers the bots' slots)
+static var _hit_frame := -1    # the frame _hit_squad was filled in
+static var _hit_squad := {}    # Hunter -> true: hit one of the local player's squad (or their Boki) within HIT_CALM_S
 
 ## Once per sim step, before the bots think: sets each bot's step time for this step (0 = skip).
 static func plan(m: Match, dt: float) -> void:
@@ -70,6 +78,38 @@ static func kin_dt(k: Kin, dt: float) -> float:
 		return dt
 	return step_dt(o, dt)
 
+## Frames per pose of a Hunter's model (HunterAnim, and a Hero's clips, springs and skeleton: WardenGlb.Sync): every
+## frame for the local player's squad and anyone in a fight with it; else POSE_UNSEEN when hidden by sight,
+## POSE_OFF_SCREEN off screen and POSE_FAR on screen past POSE_FAR_M from the focus (a small figure at the wide
+## camera; at zoom 1 that is off screen). Hunter.render staggers the frames and catches up the skipped time.
+static func pose_every(m: Match, h: Hunter) -> int:
+	var me := m.player
+	if m.cam == null or h.is_local() or (me and (h.team == me.team or _fights_squad(m, h, me))):
+		return 1
+	if h.unseen or not h.visible:
+		return POSE_UNSEEN
+	if not m.cam.on_screen(h.position):
+		return POSE_OFF_SCREEN
+	var cf := m.cam.focus
+	return POSE_FAR if Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared() > POSE_FAR_M * POSE_FAR_M else 1
+
+## In a fight with the local player's squad: hit by one of it (or their Boki) or hit one within HIT_CALM_S, or a bot
+## after one of it.
+static func _fights_squad(m: Match, h: Hunter, me: Hunter) -> bool:
+	if m.time - h.hurt_at < HIT_CALM_S and _squad(h.last_hit_by, me):
+		return true
+	var t = h.ai.get("tgt")
+	if is_instance_valid(t) and t is Ent and (t as Ent).team == me.team:
+		return true
+	if _hit_frame != Engine.get_process_frames():
+		_hit_frame = Engine.get_process_frames()
+		_hit_squad.clear()
+		for mate in m.hunters:
+			var by = mate.last_hit_by
+			if mate.team == me.team and m.time - mate.hurt_at < HIT_CALM_S and is_instance_valid(by):
+				_hit_squad[(by as Kin).owner_h if by is Kin else by] = true
+	return _hit_squad.has(h)
+
 static func _calm(m: Match, h: Hunter, me: Hunter) -> bool:
 	if h.out or h.extracted or h.riding or h.downed or not h.grounded or h.gliding:
 		return false
@@ -86,6 +126,14 @@ static func _calm(m: Match, h: Hunter, me: Hunter) -> bool:
 	if is_instance_valid(t) and t is Ent and (t as Ent).flat_dist(me) <= FAR_M:
 		return false
 	return h.flat_dist(me) > FAR_M
+
+## One of the local player's squad, or their Boki.
+static func _squad(by: Variant, me: Hunter) -> bool:
+	if not is_instance_valid(by) or not by is Ent:
+		return false
+	if by is Kin:
+		by = (by as Kin).owner_h
+	return by != null and (by as Ent).team == me.team
 
 ## The player or their Boki.
 static func _mine(by: Variant, me: Hunter) -> bool:

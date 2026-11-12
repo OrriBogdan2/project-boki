@@ -3163,15 +3163,13 @@ func render(delta: float, alpha: float) -> void:
 		stretch = 0.25 if anim.dash_kind != "roll" else 0.0
 	elif not gliding and not grounded and pad.is_empty():
 		stretch = clampf(vel.y / 30.0, -0.1, 0.18)
-	# hunters you can't see right now (hidden by sight or off screen) pose less often; the animation
-	# catches up in one bigger step (its springs sub-step) when they show again
+	# posed every SimLod.pose_every frames (staggered), catching up the skipped time; a backlog from a slower rate
+	# (it just came on screen or closer) poses now
 	_anim_dt += delta
 	_anim_n += 1
-	var every := 1
-	if not is_local() and m.cam:
-		if unseen or not visible: every = 6
-		elif not m.cam.on_screen(position): every = 3
-	var posed := _anim_n % every == 0
+	var every := SimLod.pose_every(m, self)
+	var posed := (_anim_n + get_instance_id()) % every == 0 or _anim_dt > every * delta
+	model.set_meta(WardenGlb.POSE_HELD, not posed)
 	if posed:
 		_anim_state(stretch)
 		anim.update(_anim_dt, anim_s)

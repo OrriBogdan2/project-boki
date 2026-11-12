@@ -97,6 +97,7 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## variant's name, art()).
 const SETTING := "warden_models"
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
+const POSE_HELD := "pose_held"   # root meta: the Hunter skipped this frame's pose (SimLod.pose_every); Sync waits too
 const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
@@ -944,6 +945,7 @@ class Sync extends Node:
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
+	var held_dt := 0.0            # s of frames held (POSE_HELD) that the next pose catches up
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -1008,6 +1010,11 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
+		held_dt += dt
+		if root.get_meta(POSE_HELD, false):
+			return
+		dt = held_dt
+		held_dt = 0.0
 		if clips:
 			_play(dt)
 			springs.still = clips.cur in clips.d.get("still", [])

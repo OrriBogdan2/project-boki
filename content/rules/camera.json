@@ -1,5 +1,5 @@
 {
-	"doc": "The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them.",
+	"doc": "The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. pose_far_m: metres (flat) from the camera's focus past which a Hunter on screen is posed every 2nd frame (SimLod.pose_every): past the play view at zoom 1, small at a wide one. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them.",
 	"styles": {
 		"supervive": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Supervive"},
 		"supervive_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Supervive (wider lens)"},
@@ -14,6 +14,7 @@
 		"locked": [0.0, 0.0, 0.0, 0.0, false]
 	},
 	"lean_edge_m": 1.5,
+	"pose_far_m": 40.0,
 	"source": {
 		"pitch_deg": [64.0, 67.0],
 		"fov_deg": [25.0, 34.0],
