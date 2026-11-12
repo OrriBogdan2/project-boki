@@ -75,7 +75,6 @@
 		],
 		"smash_reach": 2.8,
 		"smash_arc": 180.0,
-		"smash_stun": 0.4,
 		"smash_rate": 0.61,
 		"carry": [
 			1.5,

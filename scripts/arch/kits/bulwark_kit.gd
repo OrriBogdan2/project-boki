@@ -466,7 +466,6 @@ func _smash() -> void:
 	h.mel_hold = 0.0
 	fx.hold_end()
 	flared = false
-	var full := k >= 0.99
 	var dmg := lerpf(float(md["smash_dmg"][0]), float(md["smash_dmg"][1]), k) * _wk()
 	var kb := lerpf(float(md["smash_kb"][0]), float(md["smash_kb"][1]), k)
 	if perfect:
@@ -476,7 +475,7 @@ func _smash() -> void:
 	slam_k = k
 	knock_until = m.time + 0.25
 	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
-		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
+		{"heavy": true, "charged": true})
 	var dv := h.aim_dir()
 	if perfect:
 		launch.start(dv)

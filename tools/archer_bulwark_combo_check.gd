@@ -903,6 +903,7 @@ func _bulwark_combos() -> void:
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
+	ok("combo bjorn: a full slam only knocks, no stun (the source gives none)", T.stun_t <= 0.0, "stun %.2f" % T.stun_t)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	var hv := HeroVfx.of(m)
 	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
