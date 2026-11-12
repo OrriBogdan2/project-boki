@@ -14,6 +14,8 @@ extends RefCounted
 ##  11. A* is throttled: an unreachable goal does not search every step
 ##  12. an explicit Follow in a fight sticks (disengage): it stays at your side with a foe 8m off, and goes back in only when
 ##      you hit something, a foe hits it or you from within 4m, or you Sic/Chase; out of a fight nothing changes
+##  13. it keeps up (keep_up): a led Boki is paced over the Hunter's lead pace, however slow its own; at that pace and at
+##      a match follow it gallops (BokiRig.run_from is under both), and a stroll is still a walk
 ## (Merge from Return is instant and from out is a leap: --boki-system-check)
 
 var bad := 0
@@ -99,7 +101,7 @@ func run(mn: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokifollow-only="): only = a.substr(18)
 	var parts := ["default", "leash", "traverse", "sic_call", "wheel", "carried", "guard_side", "no_refusal", "bots", "net",
-		"air_orders", "path_cost", "disengage"]
+		"air_orders", "path_cost", "disengage", "keep_up"]
 	for part in parts:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
@@ -611,3 +613,28 @@ func _disengage() -> void:
 	k = P.kin
 	KinCommand.order(P, "follow")
 	ok(not k.disengaged, "out of a fight a plain Follow changes nothing")
+
+## 13. A led Boki keeps up at home, and a following one runs, not speed-walks, at your pace.
+func _keep_up() -> void:
+	var slowest := INF
+	for arch: String in ["", "bulwark", "rimewright", "thief", "archer"]:
+		var lead := float(HunterMove.of(arch)["speed"]) * HomeCarry.SPEED_K
+		var who := arch if arch != "" else "default"
+		slowest = minf(slowest, lead)
+		ok(HomeCarry.led_pace(2.0, arch) > lead * 1.1, "a tired plodder led by %s closes on its slot (%.2f > %.2f m/s)"
+				% [who, HomeCarry.led_pace(2.0, arch), lead])
+		ok(HomeCarry.led_pace(6.0, arch) == 6.0, "a fast Boki led by %s keeps its own pace" % who)
+	var top := float(BokiRig.gait()["run_from"][1])
+	ok(top < slowest, "the latest run switch %.1f m/s is under the slowest lead pace %.2f" % [top, slowest])
+	for id in ["cindle", "puddlet", "mossgrade", "kestrike"]:
+		var k: Node3D = load("res://tools/boki_rig_shots.gd").rigged_kin(id)
+		main.add_child(k)
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		rig.manual = true
+		for v in [1.5, slowest, KinLib.stat_value("kin_speed", {})]:
+			rig._speed = v
+			rig._pick_clip(0.016)
+			var want := "walk" if v < 2.0 else "run"
+			ok(rig.clip == want, "%s at %.1f m/s plays %s (got %s, run from %.2f)"
+					% [id, v, want, rig.clip, rig.run_from()])
+		k.free()

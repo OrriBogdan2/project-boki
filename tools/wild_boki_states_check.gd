@@ -48,7 +48,7 @@ func _hold(rig: BokiRig, k: Node3D, pose: String, secs: float, speed := 0.0) -> 
 	for i in int(secs / STEP):
 		rig._pos_prev = k.global_position - Vector3(0, 0, speed * STEP)
 		rig._pick_clip(STEP)
-		rig._keep_flex()
+		rig._keep_flex(0.0)
 		lean = maxf(lean, absf(rig.flex.rotation.x))
 		zmin = minf(zmin, rig.flex.rotation.z)
 		zmax = maxf(zmax, rig.flex.rotation.z)

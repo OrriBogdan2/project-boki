@@ -107,36 +107,9 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
 }
-## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
-const STRIDE := {
-	"cindle": [0.80, 1.60],
-	"puddlet": [0.58, 1.15],
-	"burrlet": [0.50, 1.02],
-	"glintmole": [0.49, 1.04],
-	"rimeshrew": [0.56, 1.09],
-	"zephyrak": [1.50, 2.90],
-	"pebbit": [0.48, 1.10],
-	"cairnback": [0.29, 0.90],
-	"wisplet": [0.45, 0.42],
-	"gloamshell": [1.50, 2.90],
-	"selenfin": [1.50, 2.90],
-	"zapple": [0.75, 1.74],
-	"hivara": [0.63, 1.42],
-	"caecilith": [0.14, 0.35],
-	"glomwort": [1.50, 2.90],
-	"kestrike": [0.30, 0.42],
-	"kindlewren": [0.39, 0.50],
-	"lodestick": [0.22, 0.62],
-	"marchleaf": [0.51, 2.02],
-	"mossgrade": [0.12, 0.74],
-	"nettlynx": [0.54, 1.07],
-	"thrumbird": [1.50, 2.90],
-}
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
-const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
-const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -200,6 +173,7 @@ const SWAY_RATE := 4.0        # rad/s of the knocked-out sway
 const SHIVER_RATE := 45.0     # rad/s
 
 static var enabled := true
+static var _gait := {}        # content/rules/boki_gait.json, read once (gait())
 
 var species := ""
 var manual := false            # tools pose it by hand: set_clip, seek and set_face, nothing automatic
@@ -409,10 +383,27 @@ func _pick_clip(dt: float) -> void:
 	player.speed_scale = float(feel.get("rate", 1.0))
 	if feel.has("rate") or (want != "run" and want != "walk" and want != "carry"):
 		return
-	# the world scale: a size roll's bigger Boki takes longer steps
-	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
-			* model.global_basis.z.length())
-	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	var g := gait()
+	var step: float = stride(species)[1 if want == "run" else 0] * model.global_basis.z.length()
+	player.speed_scale = clampf(_speed / step, g["min_rate"], g["max_cadence"] * player.get_animation(want).length)
+
+## Gait tuning, content/rules/boki_gait.json: per-species stride, the rate's floor and cadence cap, the run switch.
+static func gait() -> Dictionary:
+	if _gait.is_empty():
+		_gait = Content.rules("boki_gait")
+	return _gait
+
+## m/s a planted foot of species `id` moves back at rate 1 and scale 1: [walk, run].
+static func stride(id: String) -> Array:
+	return gait()["stride"].get(id, gait()["default"])
+
+## m/s from which this Boki gallops. The world scale counts: a size roll's bigger Boki takes longer steps. A walk
+## sped a little past full cadence slides less than a gallop's long stance (--boki-anim-audit, the 2.4 m/s column).
+func run_from() -> float:
+	var g := gait()
+	var walk_top: float = float(stride(species)[0]) * model.global_basis.z.length() * g["max_cadence"] \
+			* player.get_animation("walk").length
+	return clampf(walk_top * g["walk_past"], g["run_from"][0], g["run_from"][1])
 
 ## Eases the pose layer toward what the pose asks (zero for none); lean and sway scale with the body plan.
 func _step_layer(feel: Dictionary, dt: float) -> void:
@@ -443,7 +434,7 @@ func _state_clip() -> String:
 		return _shot
 	if root.get_meta("happy", false):
 		return "hop"
-	if _speed >= RUN_SPEED or (_speed >= WALK_SPEED and String(root.get_meta("pose", "")) in CHASE_POSES):
+	if _speed >= run_from() or (_speed >= WALK_SPEED and String(root.get_meta("pose", "")) in CHASE_POSES):
 		return "run"
 	return "walk" if _speed >= WALK_SPEED else "idle"
 

@@ -446,6 +446,19 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | courts | {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}} |
 | courts_doc | A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post. |
 
+## boki_gait (`content/rules/boki_gait.json`)
+
+How a rigged Boki's walk, carry and run clips play (BokiRig). Rate = move speed / (stride x its world scale), between min_rate and max_cadence step cycles/s; it gallops from run_from: just past (walk_past x) the speed where its walk reaches max_cadence, kept in the run_from range. stride: m/s a planted foot moves back at rate 1 and scale 1, [walk, run], measured by --boki-anim-audit; a Boki with no stepping feet (flyers, serpents, blobs) has no row and keeps default.
+
+| Setting | Value |
+|---|---|
+| min_rate | 0.6 |
+| max_cadence | 6 |
+| walk_past | 1.15 |
+| run_from | [2.2, 3.2] |
+| default | [1.5, 2.9] |
+| stride | {"cindle": [0.8, 1.6], "puddlet": [0.58, 1.15], "burrlet": [0.5, 1.02], "glintmole": [0.49, 1.04], "rimeshrew": [0.56, 1.09], "pebbit": [0.48, 1.1], "cairnback": [0.29, 0.9], "wisplet": [0.45, 0.42], "zapple": [0.75, 1.74], "hivara": [0.63, 1.42], "caecilith": [0.14, 0.35], "kestrike": [0.3, 0.42], "kindlewren": [0.39, 0.5], "lodestick": [0.22, 0.62], "marchleaf": [0.51, 2.02], "mossgrade": [0.12, 0.74], "nettlynx": [0.54, 1.07]} |
+
 ## How kit hits land on a Boki (`content/rules/boki_hit.json`)
 
 How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the source's creeps and summons take every ability as written (one number per card, no creep scaling) and every crowd control on the cards works on them.

@@ -79,13 +79,68 @@ A Boki without legs (Zephyrak) writes all its own clips: the body is a chain ben
 To add a species: copy `prismander*.py` to its own shapes, coat and clips, add it to `SPECS` (`build_boki.py`),
 `MODULES` (`build_fusion.py`), `BokiRig.FRAME` and `BokiFusion.SPECIES`.
 
-Stride: `BokiRig.STRIDE[species]` is `[walk, run]`, the m/s a paw on the ground moves back along the body at
-`speed_scale` 1 and model scale 1: the median over the clip's contact samples (`boki_anim_audit.contact_steps`: low
-in its lift and moving back; the legs swing from the hips, so a paw also passes low on its way forward), the rate
-that keeps a planted paw closest to the ground most of the stance. `_pick_clip` sets
-`speed_scale = speed / (stride x the model's world scale)`, so a size roll's bigger Boki steps longer, kept under
-`MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
-`STRIDE`.
+Stride: the `stride` rows of `content/rules/boki_gait.json` (`BokiRig.stride(species)`) are `[walk, run]`, the m/s a
+paw on the ground moves back along the body at `speed_scale` 1 and model scale 1: the median over the clip's contact
+samples (`boki_anim_audit.contact_steps`: low in its lift and moving back; the legs swing from the hips, so a paw also
+passes low on its way forward), the rate that keeps a planted paw closest to the ground most of the stance.
+`_pick_clip` sets `speed_scale = speed / (stride x the model's world scale)`, so a size roll's bigger Boki steps
+longer, between `min_rate` and `max_cadence` cycles/s. It gallops from `BokiRig.run_from()`: `walk_past` (1.15) x the
+speed at which its walk reaches `max_cadence`, kept in `run_from` (2.2-3.2 m/s). A Boki with no stepping feet has no
+row and keeps `default`. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
+its row.
+
+### One stride system (ext/boki-stride-one)
+
+Two systems were on the table: 0.24.5's `BokiRig.STRIDE` (measured stride for 17 legged species x the size roll,
+capped at `MAX_CADENCE` 6 steps/s, run from 2.2 m/s) and held ext/boki-gait's `boki_gait.json` `play_scale`
+(stride/min/max rows for 5 species, a shared 1.5 / 2.9 m/s for the rest, no size roll, run from 3.2 m/s). Both
+driven through the live rig by `--boki-anim-audit` (worst slide over scale 0.8 / 1 / 1.25; home = 1.5, 2.4, 4.4 m/s,
+match = the species' `kin_speed`; every match speed is a run in both):
+
+| Boki | walk home: STRIDE / json | run home | run match |
+|---|---|---|---|
+| cindle | 21% / 64% | 38% / 64% | 57% / 75% |
+| puddlet | 16% / 74% | 53% / 75% | 66% / 81% |
+| burrlet | 30% / 79% | 59% / 78% | 71% / 83% |
+| glintmole | 33% / 79% | 57% / 76% | 69% / 82% |
+| rimeshrew | 27% / 77% | 63% / 76% | 78% / 85% |
+| pebbit | 33% / 79% | 55% / 76% | 64% / 79% |
+| cairnback | 30% / 88% | 65% / 83% | 72% / 86% |
+| wisplet | 34% / 75% | 70% / 75% | 83% / 86% |
+| zapple | 59% / 71% | 71% / 70% | 70% / 81% |
+| hivara | 27% / 73% | 44% / 69% | 65% / 80% |
+| kestrike | 41% / 78% | 74% / 78% | 85% / 87% |
+| kindlewren | 32% / 73% | 75% / 80% | 85% / 88% |
+| lodestick | 72% / 81% | 76% / 80% | 86% / 88% |
+| marchleaf | 48% / 76% | 41% / 59% | 57% / 71% |
+| mossgrade | 61% / 86% | 53% / 62% | 66% / 72% |
+| nettlynx | 26% / 74% | 60% / 79% | 74% / 85% |
+| caecilith | 64% / 94% | 81% / 92% | 89% / 95% |
+
+(zapple run home 71 vs 70 is one size-roll cell; at scale 1 every json cell is worse.) The json system's five own rows
+(kestrike, wisplet, kindlewren, lodestick, mossgrade) were measured on the clips before the 11-09 re-measure and are
+worse than the STRIDE rows too. **Pick: the measured STRIDE system**, data over code kept by moving its table and
+tunables into `content/rules/boki_gait.json` (the file the json system used; its `play_scale`, per-species min/max
+and the shared 1.5 / 2.9 rows are not taken, so ext/boki-gait stays held as superseded). Measured on origin/main +
+ext/w0246-anim (ext/boki-gait-plant and -rekey are READY but in neither, so not built on).
+
+Its one per-species win was the later run switch. At 2.4 m/s and scale 1, walk (run from 3.2) vs run (run from 2.2):
+walking slides less for cindle 21/38, puddlet 16/36, burrlet 27/33, glintmole 29/33, rimeshrew 30/40, pebbit 29/33,
+zapple 59/71, hivara 27/36, kindlewren 41/43, nettlynx 26/33; galloping for cairnback 46/40, wisplet 47/43, kestrike
+54/49, lodestick 59/48, marchleaf 46/41, mossgrade 69/35, caecilith 72/57, the walkers whose walk is at full cadence
+well before 2.4. Hence `run_from()` per species and size: a Boki gallops a little past where its walk tops out, never
+before 2.2 nor after 3.2 m/s. At 2.4 every species but kindlewren and marchleaf now gets its better gait (kindlewren
+runs 43 vs 41, marchleaf walks 46 vs 41: DEBT). Only the 2.4 column moved; 1.5 is a walk and 4.4 and the match speeds
+are runs as before. `rimeshrew walk` in `OVER` 0.30 -> 0.32: its 2.4 m/s cell moved from the run row (40%) to the
+walk row (30.x%).
+
+Run speed against the Hunter: a Hunter leads a Boki at home at its run speed x `HomeCarry.SPEED_K` 0.9 = 4.00
+(rimewright) to 4.37 m/s (bulwark), and a following Boki in a match paces your 4.45-4.85 m/s run. The latest switch,
+3.2, is under both, so a Boki keeping up always gallops (3.2 from ext/boki-gait was the top of that, 2.2 the bottom).
+A led Boki walked at 4.4 x its care pace x its personality pace: as low as 2.0 m/s for a tired plodder, so it fell
+behind and was let go at `LEAD_MAX` 10 m. `HomeCarry.led_pace` now holds it at least `LEAD_CATCH` 1.15 x your lead
+pace. `--boki-follow-check` part `keep_up` asserts both, plus live rig rows (cindle, puddlet, mossgrade, kestrike:
+1.5 m/s walks, the slowest lead pace and the base match speed run).
 
 ## Gait audit
 
@@ -99,7 +154,7 @@ gait's ceiling; they only come down, `docs/DEBT.md`). Flyers, serpents and blobs
 are exactly the Boki whose feet do not sweep.
 
 Slide at scale 1, before (origin/main: speed over 1.5 / 2.9 m/s, at most 1.6x, run from 3.2 m/s) → after (measured
-`STRIDE` per species, run from 2.2 m/s, `MAX_CADENCE` 6 steps/s). The rate fix only matches the paw's average
+`STRIDE` per species, run from 2.2 m/s, `MAX_CADENCE` 6 steps/s; since ext/boki-stride-one the stride rows and run switch above). The rate fix only matches the paw's average
 pace to the ground: the clips' sine stance and their short steps at match speed keep most gaits over 25%. The fix
 for those is re-keying the clips (`docs/DEBT.md`), not the rate. Side-view strips of the worst three before the
 fix (lodestick, mossgrade, cairnback): `docs/art/kin/boki_gait/<id>_before.png` and `_after.png` (top row 2.4 m/s,

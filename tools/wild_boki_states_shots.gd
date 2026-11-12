@@ -65,7 +65,7 @@ func _row(id: String) -> Image:
 		for s in 90:
 			rig._pos_prev = rig_kin.global_position - Vector3(0, 0, float(f[2]) * STEP)
 			rig._pick_clip(STEP)
-			rig._keep_flex()
+			rig._keep_flex(0.0)
 		rig._face_step(1.0)
 		rig.seek(float(f[3]))
 	for k in 3:

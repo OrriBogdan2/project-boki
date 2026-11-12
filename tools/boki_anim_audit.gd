@@ -3,7 +3,8 @@ extends RefCounted
 ## (HOME_SPEEDS and the species' own match speed, KinLib kin_speed), unscaled and at the size roll's ends. Per gait:
 ## the planted feet's slide as a share of the move speed, steps per second, then the loop seams and the idle-to-walk
 ## pop. Fails a slide over MAX_SLIDE (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
-## BokiRig.STRIDE must also match what the clips measure. Table: docs/art/kin/RIGGED_BOKI.md "Gait audit".
+## The stride rows (content/rules/boki_gait.json, BokiRig.stride) must also match what the clips measure.
+## Table: docs/art/kin/RIGGED_BOKI.md "Gait audit".
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
@@ -11,15 +12,14 @@ const Check := preload("res://tools/boki_rig_check.gd")
 const HOME_SPEEDS := [1.5, 2.4, 4.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
-const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
+const STRIDE_TOL := 0.05      # BokiRig.stride vs the measured clip, as a fraction
 const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not stepping (it floats, glides or is tucked)
-const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
 	"gloamshell": "blob (snail foot)"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
-## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
+## step is too short even at boki_gait.json's max_cadence. Ceilings only come down: lower or drop a row when a clip is
 ## re-keyed (docs/DEBT.md).
 const OVER := {
 	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
@@ -27,7 +27,7 @@ const OVER := {
 	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.75,
 	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
 	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
-	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
+	"puddlet run": 0.70, "rimeshrew walk": 0.32, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
 	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
 }
 const SAMPLES := 48           # poses per loop
@@ -66,17 +66,18 @@ func _species(main: Node, id: String) -> void:
 	var feetless: bool = measured.min() < FEETLESS
 	ok(feetless == (id in EXEMPT), "%s is %s" % [id, "EXEMPT " + EXEMPT[id] if id in EXEMPT else "gated"])
 	if feetless:
-		ok(BokiRig.STRIDE[id] == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
+		ok(not BokiRig.gait()["stride"].has(id), "%s has no stepping feet, so no stride row (keeps default)" % id)
 		k.queue_free()
 		return
 	for i in 2:
-		var near: bool = absf(measured[i] - BokiRig.STRIDE[id][i]) <= STRIDE_TOL * measured[i]
-		ok(near, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], BokiRig.STRIDE[id][i]])
+		var kept: float = BokiRig.stride(id)[i]
+		ok(absf(measured[i] - kept) <= STRIDE_TOL * measured[i],
+				"%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], kept])
 	var speeds: Array = HOME_SPEEDS + [match_speed(id)]
 	var row: Array = []
 	for grown in SIZES:
 		k.scale = Vector3.ONE * grown
-		rig._keep_flex()
+		rig._keep_flex(0.0)
 		for v in speeds:
 			var got := _gait(rig, steps, id, grown, v)
 			if grown == 1.0:
@@ -98,7 +99,7 @@ func _gait(rig: BokiRig, steps: Dictionary, id: String, grown: float, v: float) 
 	var sc := rig.player.speed_scale
 	var slid := slip(steps[rig.clip], length, v / grown, sc)
 	var limit: float = OVER.get("%s %s" % [id, rig.clip], MAX_SLIDE)
-	var why := " (at full cadence)" if is_equal_approx(sc, BokiRig.MAX_CADENCE * length) else ""
+	var why := " (at full cadence)" if is_equal_approx(sc, float(BokiRig.gait()["max_cadence"]) * length) else ""
 	var what := "%s x%.2f at %.1f m/s (%s x%.2f, %.1f steps/s)" % [id, grown, v, rig.clip, sc, sc / length]
 	ok(slid <= limit, "%s slides %.0f%% of its speed%s, under %.0f%%" % [what, slid * 100.0, why, limit * 100.0])
 	return [slid * 100.0, sc / length]
@@ -139,7 +140,7 @@ static func _steps(path: Array) -> Array:
 		out.append(b.z - a.z if a.y <= limit and b.y <= limit and b.z > a.z else NAN)
 	return out
 
-## m/s a foot on the ground moves back at speed 1 (BokiRig.STRIDE): the median over every foot's contact, the rate
+## m/s a foot on the ground moves back at speed 1 (BokiRig.stride): the median over every foot's contact, the rate
 ## that keeps the planted feet closest to the ground's speed most of the time.
 static func stride(steps: Array, length: float) -> float:
 	var all: Array = []

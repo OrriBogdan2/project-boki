@@ -22,6 +22,7 @@ const CARRY_SCALE := 0.7      # a carried Boki is shown this share of its size, 
 const DROP_DIST := 0.9        # m in front of you where it is set down
 const LEAD_SLOT := 0.9        # m to your right where a led Boki walks
 const LEAD_MAX := 10.0        # m away at which a led Boki is let go
+const LEAD_CATCH := 1.15      # a led Boki's least pace over yours while leading: it closes a gap, never drops back
 
 var h                         # the Home screen
 var k := {}                   # the Boki in your arms, on your back or on its lead
@@ -57,6 +58,11 @@ func carrying() -> bool:
 
 func speed_mul() -> float:
 	return SPEED_K if not k.is_empty() else 1.0
+
+## m/s a led Boki walks at: its own `pace`, but never under LEAD_CATCH x the pace you lead at (hero `arch`'s run
+## speed x SPEED_K), so a slow, tired or hungry one keeps its slot instead of falling LEAD_MAX behind.
+static func led_pace(pace: float, arch: String) -> float:
+	return maxf(pace, float(HunterMove.of(arch)["speed"]) * SPEED_K * LEAD_CATCH)
 
 func anim_state() -> Dictionary:
 	return {"act": mode} if carrying() else {}
