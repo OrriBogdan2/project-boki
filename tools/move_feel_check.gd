@@ -728,7 +728,7 @@ const KIT_DASH := {
 	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
 	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
 	"thief": {"ground": [4.5, 0.48], "air": [4.5, 0.48], "src": "[footage] Shiv Cartwheel 4.5 m in 0.48 s"},
-	"juggernaut": {"ground": [3.6, 0.27], "src": "[footage] Brall Quick Dash 2 bh in 0.2 s, after owner 113.8's 0.07 s dip"},
+	"juggernaut": {"ground": [3.6, 0.27], "src": "[footage] Brall Quick Dash 2 bh in 0.2 s, owner 113.8 dip 0.07 s"},
 	"dredge": {"ground": [2.72, 0.184], "air": [3.672, 0.184],
 			"src": "owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35"},
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
