@@ -1,7 +1,7 @@
 extends RefCounted
 ## --airdash-glide-check: an air dash straight into a glide keeps its speed, for every hunter. The
 ## glider must open with at least KEEP of the dash's exit speed (its speed on the last step of the dash),
-## where the exit speed counts only up to the fastest a dash can hand the glider (Hunter.GLIDE_BOOST_MAX).
+## pressed during the dash it glides that step at the dash's speed (playtest 11-08 item 4).
 
 const KEEP := 0.7
 const HEIGHT := 40.0
@@ -70,8 +70,7 @@ func run(main: Node) -> void:
 		var r := _air_dash(m)
 		var exit_speed: float = r["exit"]
 		var open_speed: float = r["open"]
-		var counted := minf(exit_speed, Hunter.GLIDE_BOOST_MAX)
-		ok(open_speed >= counted * KEEP,
+		ok(open_speed >= exit_speed * KEEP,
 			"%s: dash exit %.1f m/s, glide opens at %.1f m/s (%.0f%%)" % [arch, exit_speed, open_speed,
 			100.0 * open_speed / maxf(0.01, exit_speed) if exit_speed > 0.0 else 0.0])
 		m.queue_free()
