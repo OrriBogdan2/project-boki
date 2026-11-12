@@ -20,6 +20,7 @@ func run() -> void:
 	await _throw_and_reel()
 	await _anchor()
 	await _barge()
+	await _barge_run()
 	_clips()
 
 ## Abyssal Hand (0121-0129): the arm is out at full reach 0.4 s after the cast (~5 bh), then the pull takes ~1.0 s.
@@ -97,6 +98,47 @@ func _barge() -> void:
 	ok("timing barge: short, 1.5-3 bh", far >= 1.5 * BH * 0.8 and far <= 3.0 * BH, "%.2f m" % far)
 	await ak.done(m)
 
+## Three shoves with the 0.22 s gap are one burst (owner): each joins the ball still rolling from the last (the move
+## stays dr_lunge, restarted at the clip's closed pose), it opens (dr_lunge_out) the moment the last charge is spent,
+## and a lone shove opens once the next press is too late.
+func _barge_run() -> void:
+	var r: Array = ak.setup("dredge", 8.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DredgeKit = P.ak
+	ak.aim_at(P, r[4] + Vector3(0, 0, -6.0))
+	P.dashes = 3.0
+	var seeks: Array = []
+	var held := true
+	for i in 3:
+		while m.time < K.next_barge:
+			m.step(ak.DT)
+			held = held and K.anim_id == "dr_lunge"
+		P.do_dash()
+		seeks.append(m.time - K.anim_at)
+	var joined := absf(seeks[1] - K.FOLD_T) < 0.001 and absf(seeks[2] - K.FOLD_T) < 0.001 and seeks[0] < 0.001
+	ok("barge run: shoves 2 and 3 join the ball at the clip's closed pose, no opening between",
+			held and K.anim_id == "dr_lunge" and joined, "%s held %s" % [seeks, held])
+	var t := 0.0
+	while t < P.roll_t + 0.1 and K.anim_id != "dr_lunge_out":
+		m.step(ak.DT)
+		t += ak.DT
+	ok("barge run: the ball opens as the last shove ends (no charge left)",
+			K.anim_id == "dr_lunge_out" and t < 0.3, "%.2f s" % t)
+	P.dashes = 3.0
+	while m.time < K.next_barge + 0.2:
+		m.step(ak.DT)
+	P.do_dash()
+	var gap := float(K.dash_def()["gap"])
+	t = 0.0
+	while t < 1.0 and K.anim_id != "dr_lunge_out":
+		m.step(ak.DT)
+		t += ak.DT
+	var after := P.roll_t + gap
+	ok("barge run: a lone shove stays closed through the gap, opens just after it",
+			t >= after and t <= after + K.CHAIN_GRACE + 0.1, "%.2f s (gap %.2f)" % [t, gap])
+	await ak.done(m)
+
 ## The clip in the .glb is what is drawn: each held-less move's clip lasts exactly the kit's keyed move, so the hit key
 ## (shot 0.05, anchor 0.38, lunge 0.18...) is the same instant in both.
 func _clips() -> void:
@@ -113,5 +155,21 @@ func _clips() -> void:
 		var clip_end := player.get_animation(String(mv["clip"])).length
 		if absf(clip_end - kit_end) > 0.03:
 			off.append("%s %.2f/%.2f" % [k, clip_end, kit_end])
-	glb.free()
 	ok("timing clips: every move's .glb clip lasts as long as the kit's keyed move", off.is_empty(), str(off))
+	_ball_clip(player)
+	glb.free()
+
+## The ball holds closed at the clip's end exactly as at its fold-in (the pose a
+## chained shove joins), and the recovery is quick.
+func _ball_clip(player: AnimationPlayer) -> void:
+	var lunge := player.get_animation("lunge")
+	var out := player.get_animation("lunge_out")
+	var worst := 0.0
+	for tr in lunge.get_track_count():
+		var spring := str(lunge.track_get_path(tr)).contains("spring_")
+		if lunge.track_get_type(tr) == Animation.TYPE_ROTATION_3D and not spring:
+			var from: Quaternion = lunge.rotation_track_interpolate(tr, DredgeKit.FOLD_T)
+			worst = maxf(worst, from.angle_to(lunge.rotation_track_interpolate(tr, lunge.length)))
+	ok("timing lunge clip: closed at the end as at 0.033 s (a chained shove joins it), the recovery under 0.25 s",
+			worst < 0.05 and lunge.length >= 0.38 and out.length <= 0.25,
+			"worst %.3f rad, %.2f / %.2f s" % [worst, lunge.length, out.length])
