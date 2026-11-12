@@ -21,6 +21,7 @@ boot_splash/show_image=true
 boot_splash/minimum_display_time=0
 
 [autoload]
+CrashReport="*res://scripts/core/crash_report.gd"
 Data="*res://scripts/core/data.gd"
 Save="*res://scripts/core/save.gd"
 Sfx="*res://scripts/core/sfx.gd"
@@ -32,6 +33,10 @@ Social="*res://scripts/core/social.gd"
 Overlay="*res://scripts/ui/overlay.gd"
 Shot="*res://scripts/shot.gd"
 CombatBus="*res://scripts/combat/combat_bus.gd"
+
+[debug]
+; Sentry needs it for GDScript stack traces in exported builds (docs/SENTRY.md).
+settings/gdscript/always_track_call_stacks=true
 
 [display]
 window/size/viewport_width=1280
@@ -145,3 +150,9 @@ lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
 environment/ssao/quality=2
 textures/canvas_textures/default_texture_filter=1
 textures/vram_compression/import_etc2_astc=true
+
+[sentry]
+; docs/SENTRY.md: CrashReport starts the SDK (never auto-start); the DSN is written in at export time only.
+schema_version=5
+options/auto_init=false
+godot_logger/logs=15
