@@ -14,6 +14,7 @@ const DT := 1.0 / 60.0
 const SAVE_EVERY := 2          # sim steps per saved frame: 30 fps
 const ZOOM := 0.7              # closer than the match's own zoom so the Wisps read in the clip
 const GAP := 3.8               # m between the Wisps in the row (more than the revive reach)
+const ROOM := 10               # m of level ground with no drop round the row (the walks stay on it)
 
 var main: Node
 var m: Match
@@ -40,7 +41,7 @@ func run(main_node: Node) -> void:
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	mate.teleport(m.world.free_spot_near(P.pos + Vector3(GAP, 0, 0), [], 0.5, 0.4, 3.0))
 	foe.teleport(m.world.free_spot_near(P.pos + Vector3(GAP * 2.0, 0, 0), [], 0.5, 0.4, 3.0))
-	runner.teleport(m.world.free_spot_near(P.pos + Vector3(-9.0, 0, 3.0), [], 0.5, 0.4, 3.0))
+	runner.teleport(m.world.free_spot_near(P.pos + Vector3(-4.0, 0, 2.0), [], 0.5, 0.4, 3.0))
 	focus = mate.pos + Vector3(1.0, 0, 0)    # (the row clears the kit panel on the right)
 	await _go(0.6)
 	print("WISPCLARITY side by side from frame %d" % frame)
@@ -80,10 +81,25 @@ func _setup() -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	main.get_viewport().warp_mouse(Vector2(4, 4))     # (no hover cards in the frames)
-	P.teleport(m.world.random_ground())
+	P.teleport(_open_spot())
 	for h in m.hunters:
 		if h != P:
 			h.teleport(m.world.free_spot_near(P.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 8.0))
+
+## A ground spot with level ground ROOM metres round it (no edge to fall off on the walks).
+func _open_spot() -> Vector3:
+	for _t in 200:
+		var at := m.world.random_ground()
+		var flat := true
+		for dx in range(-ROOM, ROOM + 1):
+			for dz in range(-ROOM, ROOM + 1):
+				var x := at.x + dx
+				var z := at.z + dz
+				if m.world.is_void(x, z) or absf(m.world.ground_at(x, z) - at.y) > 0.1:
+					flat = false
+		if flat:
+			return at
+	return m.world.random_ground()
 
 ## `h` walks toward `o` until within `stop` metres (at most `secs`).
 func _walk(h: Hunter, o: Hunter, secs: float, stop := 0.5) -> void:
