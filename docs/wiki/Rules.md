@@ -65,6 +65,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | lift_dy | 1 |
 | lift_vy | 8 |
 | look_r | 1.9 |
+| sources | {"doc": "Where the glide ring stands against SUPERVIVE's hoops (docs/AIR_RINGS.md 'Source'). Notes only, nothing here is read as a number (AirRings.r reads the keys above). Searched Nov 12 2026: briefs/supervive-data/supervive_physics.md and PHYSICS_PARITY.md, the hero-ref footage sheets, all on ext/agent-briefs. [?] = not found, ours kept.", "entry_speed": "[?] GlideBoost* are encrypted C++ defaults (supervive_physics.md 'Glide boost (hoops/jetstreams)'; PHYSICS_PARITY.md 'Unknowns ... boost: locked'). Ours: any speed counts, the ring throws you at the faster of your own and `speed`.", "boost": "[?] GlideBoostBonusSpeed, GlideBoostForceMul encrypted. Ours: `speed` 13 m/s along the lane (a plain glide cruises at 5, tuning.json glide).", "duration": "[?] GlideBoostDuration, GlideBoostDecayDuration encrypted. Ours: `hold` 1.4 s at or above ring speed while you glide, then the glide's own drag (Loco.glide_step) takes it back.", "dash_inside": "[?] no hoop or jetstream in any hero-ref clip. Ours: Hunter.do_dash as anywhere in the air; the dash folds the glider and the hold drops with it.", "glider_inside": "[?] same. Ours: the glider steers as ever; the hold only keeps you at ring speed and, on a lane, eases you to its height.", "lift_ring": "[?] no SUPERVIVE equivalent found (updrafts are ours, world.updraft_at). Ours."} |
 
 ## base_drift (`content/rules/base_drift.json`)
 

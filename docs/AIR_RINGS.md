@@ -12,7 +12,8 @@ air rings lay readable air routes between regions and up to high ground. Code: `
   drops only over the `rise` m next to its lower end: over the void a glider can't sink below where it took
   off, so a lane sloping down all the way would leave its low rings under you. Rings sit
   every `gap` m, so a chain is a continuous fast lane: a 95 m lane takes 8-9.5 s from rim to landing instead of being past a
-  glider's 45 m reach. Your keys still steer; leave the line and the hold runs out.
+  glider's 45 m reach. Your keys still steer; leave the line and the hold runs out. Stopped or turned back (a wall) the
+  hold ends at once: it never throws you back the way you came.
 - **Lift ring (gold, lies flat over an updraft at the foot of high ground).** Hop into it: it throws you up
   at `lift_vy` and opens the glider (it stays open until you land), the updraft under it carries you over the
   plateau's rim, and you glide onto the top.
@@ -51,6 +52,46 @@ Measured by `--air-rings-check` (keys held like a player: run off the rim, jump,
 every lane both ways goes through all its rings and lands in 3-9.5 s, never more than 2.7 s between rings; a
 bot crosses the 97 m Moor Line on its own crossing logic in 8 s; every lift ring puts you on its high ground
 in about 4.5 s.
+
+## Source (SUPERVIVE's hoops)
+docs/SUPERVIVE_FEEL.md lists the hoop boost among the values still unknown. Searched Nov 12 2026: the game data
+notes (`briefs/supervive-data/supervive_physics.md`, `PHYSICS_PARITY.md`) and the hero-ref footage sheets
+(`briefs/hero-ref/*.md`), all on `ext/agent-briefs`. The hoop numbers are constructor defaults in the game's
+encrypted code (`GlideBoostBonusSpeed`, `GlideBoostDuration`, `GlideBoostDecayDuration`, `GlideBoostForceMul`;
+supervive_physics.md "Glide boost (hoops/jetstreams)"), and no hero-ref clip goes through a hoop or jetstream.
+Every row below is **[?]**: nothing found, ours kept. The same notes sit in `content/rules/air_rings.json`
+"sources" (text only, nothing reads them as numbers). Nothing here invents a ring mechanic the source may not have.
+
+| Row | Source | Ours |
+|---|---|---|
+| Entry speed | [?] | any; the ring throws you at the faster of your speed and `speed` |
+| Boost | [?] | `speed` 13 m/s along the lane (plain glide cruise 5) |
+| How long | [?] | `hold` 1.4 s at or above ring speed while you glide; then glide drag |
+| A dash inside | [?] | `Hunter.do_dash` as anywhere in the air: the dash folds the glider, the hold drops |
+| The glider inside | [?] | steers as ever; the hold keeps ring speed and, on a lane, the lane's height |
+| Lift ring | [?] (no equivalent found) | `lift_vy` 8 m/s up, glider open, the updraft does the rest |
+
+What would settle it: a 60 fps clip of one Hunter through a hoop, speed before, inside and after, and one
+dashing inside it.
+
+## Hand-over
+A ring's exit speed goes into the ordinary moves by their own rules; nothing of the ring's rides along past its
+hold:
+- **Glide.** The ring opens a shut glider (auto, like a pad: it stays open until a fresh press takes it back, and
+  letting go then shuts it, hold and all: the player's glide is press-only). Through the hold you are at ring
+  speed or faster; after it `Loco.glide_step`'s drag takes the speed back toward cruise within the dash-into-glide
+  bounds (`--move-feel-check` dashglide_1s/2s), never over the glide's max.
+- **Dash.** Pressed inside the hold the dash starts at its own speed and folds the glider, so the hold drops with it;
+  as the dash ends the ring-opened glider is back the same step at the dash's own velocity (a kit's presses round
+  its dash go through DashFlow as ever), and the glide's drag has it under 9 m/s a second on. Ring speed is never
+  re-applied.
+- **Wall kick.** Thrown head-on into a wall the stop eats the throw (no bounce head-on, WallMoves) and ends the hold
+  (before this pass the hold re-threw the wall's small push-off at full ring speed, back the way you came); a jump there
+  kicks by the kick's own numbers: keys into the wall rise KICK_RISE, keys away push off at KICK_PUSH, the glider
+  shut for the rise and the hold gone.
+
+`--air-rings-check` "hand-over" rows measure each of these on a flat spot (the kick against a 20-terrace wall it
+raises there, the class dash and the player's own kit).
 
 ## On the maps
 The full map always shows lanes (dashed cyan lines, a tick per ring) and lift rings (gold ring with an up

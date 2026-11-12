@@ -161,7 +161,7 @@ func _boost(h: Hunter, rg: Dictionary) -> void:
 	h.vel.x = heading.x * speed
 	h.vel.z = heading.y * speed
 	h.vel.y = maxf(h.vel.y, r("kick_vy"))
-	_slip[h] = {"until": _m.time + r("hold"), "speed": speed, "lane": rg["lane"]}
+	_slip[h] = {"until": _m.time + r("hold"), "speed": speed, "lane": rg["lane"], "dir": heading}
 	_cool(h, rg, GLIDE_COL)
 
 ## A lift ring: straight up with the glider open; the updraft under it does the rest.
@@ -184,13 +184,15 @@ func _cool(h: Hunter, rg: Dictionary, col: Color) -> void:
 	_m.sfx("whoosh", c, -2.0 if h == _m.player else -10.0, 1.3)
 
 ## While the hold lasts and you keep gliding: never slower than the ring threw you, and on a lane, eased
-## to its height (so a lane up to higher ground carries you up it). Your keys still steer.
+## to its height (so a lane up to higher ground carries you up it). Your keys still steer; stopped or turned
+## back (a wall's stop leaves a small push off it: Hunter's -0.1) the hold ends rather than throw you back.
 func _hold(h: Hunter, dt: float) -> void:
 	var s: Dictionary = _slip[h]
-	if not is_instance_valid(h) or h.grounded or not h.gliding or h.downed or _m.time > float(s["until"]):
+	var flat := Vector2(h.vel.x, h.vel.z)
+	if not is_instance_valid(h) or h.grounded or not h.gliding or h.downed or _m.time > float(s["until"]) \
+			or flat.dot(s["dir"]) <= 0.0:
 		_slip.erase(h)
 		return
-	var flat := Vector2(h.vel.x, h.vel.z)
 	if flat.length() > 0.5 and flat.length() < float(s["speed"]):
 		flat = flat.normalized() * float(s["speed"])
 		h.vel.x = flat.x

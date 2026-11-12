@@ -5,13 +5,20 @@ extends RefCounted
 ## held at ring speed and well inside AIR_MAX_S; a bot takes a lane on its own crossing logic and plans
 ## each lane as its quickest way across (BotRoute, by time); a hop into each lift ring lands you on the
 ## high ground it serves, and a bot sent up there gets there quickly (by the ring when that is quicker).
-## Never touches the save.
+## Hand-over (docs/AIR_RINGS.md "Hand-over"): a ring's exit speed goes into the glide, a dash and a wall kick by
+## their own rules only (glide drag, Hunter.do_dash, WallMoves), the glider opened by a ring stays a press-only
+## glider (Match gives the player glide_press_only). Never touches the save.
 
 const AIR_MAX_S := 25.0         # s: the longest a lane may take (no empty runs past this)
 const RING_GAP_S := 3.0         # s: the longest between two rings on a lane
 const FLY_LIMIT_S := 30.0       # s: a flight that hasn't landed by now failed
 const LIFT_LIMIT_S := 6.0       # s: a hop into a lift ring that isn't on top by now failed
 const BOT_LIFT_LIMIT_S := 7.0   # s: a bot 3 m off a lift ring not on top by now was too slow (the ring takes ~5)
+const HAND_S := 2.0             # s after the hold ends: the throw has bled back toward cruise (dashglide_2s_speed)
+const HAND_SPEED := 6.5         # m/s, that row's bound
+const HAND_1S_SPEED := 9.0      # m/s: a dash's speed one second into the glide it hands over to (dashglide_1s_speed)
+const ALOFT := 25.0             # m up: the air rows start here over a flat spot (a high glide sinks ~3.5 m/s)
+const WALL_UPS := 20            # terraces: the kick row's wall, far taller than any hop or mantle
 
 var bad := 0
 var bot_lifts := 0              # lift rings a bot took on its own (_bot_lift)
@@ -55,6 +62,7 @@ func run(main: Node) -> void:
 			_lift(rg)
 			_bot_lift(rg)
 	ok(bot_lifts >= 2, "bots take lift rings by themselves (%d)" % bot_lifts)
+	_handover()
 	print("AIRRINGS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -276,3 +284,210 @@ func _bot_lift(rg: Dictionary) -> void:
 	ok(B.grounded and B.pos.y >= top_y - 0.05, "%s in %.1f s (%s)" % [what, t, way])
 	B.ctrl = "idle"
 	_park(B)
+
+# ---------------------------------------------------------------- hand-over
+## A ring's exit speed hands into glide, dash and wall kick by their ordinary rules; nothing of the ring's own
+## rides along past its hold. The throw is AirRings._boost on a ring stood where P is (lane -1: no lane height).
+func _handover() -> void:
+	var spot := _spot(12.0)
+	var kit_was := P.arch
+	P.unlock_all()      # (a point in the dash slot, or the press is gated: Hunter._gate)
+	P.set_arch("")      # the class moves: core physics (a kit's own air dash is its combo check's job)
+	_hand_glide(spot)
+	_hand_dash(spot, "class")
+	P.set_arch(kit_was)
+	if kit_was != "":
+		_hand_dash(spot, kit_was)      # the kit's path: DashFlow routes the presses round its dash
+	P.set_arch("")
+	_hand_kick(spot)
+	P.set_arch(kit_was)
+
+func _hv() -> Vector2:
+	return Vector2(P.vel.x, P.vel.z)
+
+func _held() -> bool:
+	return m.air_rings._slip.has(P)
+
+## A flat open spot (clear and level `r` m all round), the way --move-feel-check finds its own.
+func _spot(r: float) -> Vector3:
+	for k in 3000:
+		var g: Vector3 = w.random_ground()
+		var good := not w.is_void(g.x, g.z) and not w.is_block(g.x, g.z)
+		for i in 16:
+			var a := TAU * i / 16.0
+			for d in [r * 0.33, r * 0.66, r]:
+				var x: float = g.x + cos(a) * d
+				var z: float = g.z + sin(a) * d
+				if w.is_void(x, z) or w.is_block(x, z) or absf(w.ground_at(x, z) - g.y) > 0.01:
+					good = false
+		if good:
+			return Vector3(floor(g.x) + 0.5, g.y, floor(g.z) + 0.5)
+	return w.random_ground()
+
+## P in the air `up` m over `spot`, falling with the glider shut, keys `dir`, the player's press-only glide.
+func _aloft(spot: Vector3, up: float, dir: Vector2) -> void:
+	_reset(P, spot + Vector3.UP * up)
+	P.grounded = false
+	P.air_t = 0.5
+	P.last_gy = spot.y
+	for f in ["roll_t", "ex_cd", "glide_cd", "wall_touch_t", "knock_t", "stun_t"]:
+		P.set(f, 0.0)
+	P.kb_t = -9.0
+	P.dashes = P.max_dashes()
+	P.air_dashed = false
+	P.wall_hit_v = Vector2.ZERO
+	P.wall_moves.land()
+	P.inp["glide_press_only"] = true
+	P.inp["move"] = dir
+	m.step(Match.DT)
+
+func _throw(dir: Vector2) -> void:
+	var at: Vector3 = P.pos + Vector3.UP * AirRings.BODY_Y
+	m.air_rings._boost(P, {"pos": at, "dir": dir, "lift": false, "lane": -1, "cd": {}})
+
+## Steps `n` times with the keys `dir`, glide held if `glide`.
+func _go(dir: Vector2, glide: bool, n: int) -> void:
+	for i in n:
+		P.inp["move"] = dir
+		P.inp["glide"] = glide
+		m.step(Match.DT)
+
+## Glide: the ring opens a shut glider and holds ring speed for `hold`, then the glide's own drag takes the speed
+## back toward cruise (the dash-into-glide bounds), never over Loco.glide_max; a fresh press takes the glider
+## back from the ring and letting go then shuts it, and the hold goes with it (glide_press_only).
+func _hand_glide(spot: Vector3) -> void:
+	var dir := Vector2(1, 0)
+	var hold := AirRings.r("hold")
+	var ring := AirRings.r("speed")
+	_aloft(spot, ALOFT, dir)
+	ok(not P.gliding, "hand-over glide: the glider is shut before the ring (press-only, nothing pressed)")
+	_throw(dir)
+	m.step(Match.DT)
+	ok(P.gliding and P.auto_glide, "hand-over glide: the ring opens the shut glider (auto, until a fresh press)")
+	var peak := 0.0
+	var late := 0.0
+	_go(dir, false, int(round((hold - 0.1) / Match.DT)) - 1)
+	late = _hv().length()
+	ok(late >= ring - 0.5, "hand-over glide: at ring speed through the hold (%.1f m/s at %.1f s)" % [late, hold - 0.1])
+	var t := hold - 0.1
+	while t < hold + HAND_S - Match.DT * 0.5:
+		_go(dir, false, 1)
+		t += Match.DT
+		peak = maxf(peak, _hv().length())
+	var after := _hv().length()
+	ok(P.gliding and not P.grounded, "hand-over glide: still gliding %.1f s after the hold" % HAND_S)
+	ok(not _held(), "hand-over glide: the hold is over (%.1f s)" % t)
+	ok(after <= HAND_SPEED,
+		"hand-over glide: glide drag took the throw back to %.1f m/s %.0f s after the hold (bound %.1f)"
+		% [after, HAND_S, HAND_SPEED])
+	ok(peak <= Loco.glide_max + 0.01, "hand-over glide: never over the glide's max %.1f m/s (%.1f)"
+		% [Loco.glide_max, peak])
+	# a fresh press takes the glider back from the ring; let go and it shuts, hold and all
+	_aloft(spot, ALOFT, dir)
+	_throw(dir)
+	_go(dir, false, 6)
+	P.inp["jump"] = true
+	_go(dir, true, 1)
+	P.inp["jump"] = false
+	_go(dir, true, 3)
+	ok(P.gliding and not P.auto_glide and _held(),
+		"hand-over glide: a fresh press takes the glider back, still held at ring speed (%.1f m/s)" % _hv().length())
+	_go(dir, false, 2)
+	ok(not P.gliding and not _held(),
+		"hand-over glide: let go of the press and the glider shuts and the hold drops (press only)")
+
+## Dash: pressed inside the hold the dash starts at its own speed and folds the glider, so the hold drops with it;
+## as the dash ends the ring-opened glider comes back the same step (auto glide, as off a pad) at the dash's own
+## velocity, and the glide's drag has it under the dash-into-glide bound a second on. Nothing re-applies ring speed.
+func _hand_dash(spot: Vector3, who: String) -> void:
+	var dir := Vector2(1, 0)
+	var ring := AirRings.r("speed")
+	_aloft(spot, ALOFT, dir)
+	_throw(dir)
+	_go(dir, false, 18)       # 0.3 s into the hold
+	var pre := _hv().length()
+	P.inp["dash"] = true
+	_go(dir, false, 1)
+	P.inp["dash"] = false
+	var rolling := P.roll_t > 0.0
+	if who != "class" and not rolling:
+		ok(true, "hand-over dash (%s): n/a, the kit's air press is not a plain dash" % who)
+		return
+	ok(rolling, "hand-over dash (%s): a dash pressed inside the hold (%.1f m/s) starts" % [who, pre])
+	ok(not P.gliding, "hand-over dash (%s): the dash folds the glider" % who)
+	ok(not _held(), "hand-over dash (%s): and the ring's hold drops with it" % who)
+	if who == "class":
+		var ds := _hv().length()
+		ok(absf(ds - P.roll_speed) < 0.1,
+			"hand-over dash (%s): at the dash's own speed %.1f m/s, not the ring's %.1f" % [who, ds, ring])
+	var dash_end := -1
+	var reopen := -1
+	var open_v := 0.0
+	var v1 := 0.0
+	for i in 150:
+		var was_rolling := P.roll_t > 0.0
+		_go(dir, false, 1)
+		if dash_end < 0 and was_rolling and P.roll_t <= 0.0:
+			dash_end = i
+		if dash_end >= 0 and reopen < 0 and P.gliding:
+			reopen = i - dash_end + 1
+			open_v = _hv().length()
+		if reopen >= 0 and i - (dash_end + reopen - 1) == 60:
+			v1 = _hv().length()
+	ok(dash_end >= 0, "hand-over dash (%s): the dash ends in the air" % who)
+	ok(reopen == 1,
+		"hand-over dash (%s): the ring-opened glider is back the step the dash ends (%d frames)" % [who, reopen])
+	if who == "class":
+		ok(absf(open_v - P.roll_speed) < 0.1,
+			"hand-over dash (%s): reopens at the dash's own velocity %.1f m/s (dash %.1f)"
+			% [who, open_v, P.roll_speed])
+	ok(v1 > 0.0 and v1 <= HAND_1S_SPEED,
+		"hand-over dash (%s): a second on, glide drag has it at %.1f m/s (bound %.1f), no hold re-applied"
+		% [who, v1, HAND_1S_SPEED])
+	ok(not _held(), "hand-over dash (%s): no ring hold after the dash" % who)
+
+## Wall kick: thrown head-on into a tall wall the stop eats the throw (no bounce head-on, WallMoves); a jump there
+## kicks by the kick's own numbers: keys into the wall rise KICK_RISE, keys away push off at KICK_PUSH (the along-wall
+## share is nil head-on), the glider shut for the rise and the hold gone.
+func _hand_kick(spot: Vector3) -> void:
+	var dir := Vector2(1, 0)
+	var sx := int(floor(spot.x))
+	var sz := int(floor(spot.z))
+	for dz in range(-6, 7):
+		for dx in range(9, 12):
+			w.level[w.idx(sx + dx, sz + dz)] = int(round(spot.y / World.LEVEL)) + WALL_UPS
+	for away in [false, true]:
+		var keys := -dir if away else dir
+		_aloft(spot + Vector3(-2.0, 0, 0), 3.0, dir)
+		P.last_gy = spot.y + 2.5      # off a ledge 2.5 m up: the hop's climb cap is measured from the take-off
+		_throw(dir)
+		var n := 0
+		while P.wall_touch_t <= 0.0 and not P.grounded and n < 90:
+			_go(dir, false, 1)
+			n += 1
+		var label := "hand-over kick (keys %s)" % ("away" if away else "into")
+		ok(P.wall_touch_t > 0.0 and not P.grounded,
+			"%s: the throw meets the wall in the air (%.2f s, %.1f m up)" % [label, n * Match.DT, P.pos.y - spot.y])
+		ok(P.wall_moves.bounce_t <= 0.0 and _hv().x > -2.0 and not _held(),
+			"%s: head-on no bounce, the wall's own nudge off it (%.1f m/s), the hold over, not a ring throw back"
+			% [label, _hv().x])
+		var kicks0 := int(P.stats.get("wall_kicks", 0))
+		var vy0 := maxf(P.vel.y, 0.0)
+		P.inp["jump"] = true
+		P.inp["move"] = keys
+		P.inp["glide"] = false
+		m.step(Match.DT)
+		P.inp["jump"] = false
+		ok(int(P.stats.get("wall_kicks", 0)) == kicks0 + 1, "%s: the press kicks" % label)
+		if away:
+			ok(absf(_hv().length() - WallMoves.KICK_PUSH) < 0.3,
+				"%s: pushes off at the kick's %.1f m/s (%.1f): the ring's speed does not carry"
+				% [label, WallMoves.KICK_PUSH, _hv().length()])
+		else:
+			var vy_kick := sqrt(2.0 * Hunter.H_GRAV * (vy0 * vy0 / (2.0 * Hunter.H_GRAV) + WallMoves.KICK_RISE))
+			var vy_step := vy_kick - Hunter.H_GRAV * Match.DT      # one step of gravity on
+			ok(absf(P.vel.y - vy_step) < 0.3,
+				"%s: jumps at the kick's %.1f m/s (%.1f, a step on): KICK_RISE %.1f m, nothing of the ring's"
+				% [label, vy_step, P.vel.y, WallMoves.KICK_RISE])
+		_go(keys, false, 1)
+		ok(not P.gliding and not _held(), "%s: glider shut for the rise and the hold gone" % label)
