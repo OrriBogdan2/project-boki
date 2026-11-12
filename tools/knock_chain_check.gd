@@ -13,7 +13,9 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const MID := 0.15            # s into the first knock's flight when the second lands
 const SETTLE := 1.5          # s to let the body come to rest
-const DIST_TOL := 0.2        # m: the chained knock covers the solo knock's distance within this
+const DIST_TOL := 0.3        # m: the chained knock covers the solo knock's distance within this (the first knock's
+							# leftover lift moves the landing a few cm)
+const SLAM_SPEED := 8.0     # m/s: Hunter's wall-slam threshold; a slower knock into a wall only stops
 const SPD_TOL := 0.05        # m/s: right after the second knock its speed is the knock's own
 
 var main: Node
@@ -63,7 +65,9 @@ func run(main_node: Node) -> void:
 		ok("%s: covers the solo knock's distance (replace, no add, no immunity)" % p[0], gap < DIST_TOL,
 			"%.2f m vs solo %.2f m (off %.2f)" % [Vector2(chain["moved"].x, chain["moved"].z).length(),
 			Vector2(solo.x, solo.z).length(), gap])
-		ok("%s: into a wall, the second knock wall-stuns" % p[0], int(into["slams"]) >= 1, "stun %.2f" % into["stun"])
+		if want.length() > SLAM_SPEED:
+			ok("%s: into a wall, the second knock wall-stuns" % p[0], int(into["slams"]) >= 1,
+				"stun %.2f" % into["stun"])
 		if p[1].has("mode"):
 			ok("%s: the knock ends the reel" % p[0], chain["tow_end"] == "knocked", String(chain["tow_end"]))
 		rows.append([p[0], Vector2(chain["moved"].x, chain["moved"].z).length(), Vector2(solo.x, solo.z).length(),
