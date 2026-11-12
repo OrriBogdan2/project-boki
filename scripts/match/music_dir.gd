@@ -3,15 +3,19 @@ extends RefCounted
 ## Drives the expedition's layered score (Sfx.play_layers, tools/compose.py LAYERS) from what's
 ## happening to the player: the calm bed while exploring, the drive stem when a fight is on (you hit
 ## or got hit lately, or a rival is close and in sight), the boss stem inside a woken boss's arena,
-## and the clock stem while extracting or when the islands are about to fall.
-## Reads the match, never changes it.
+## and the clock stem while extracting or when the islands are about to fall. Three stingers mark the
+## run: the last squad standing (you are in it), and the run's end (out, or taken out), each with the
+## stems falling away under it. Reads the match, never changes it.
 
 const FIGHT_HOLD := 7.0       # seconds the fight music hangs on after the last shot traded
 const RIVAL_NEAR := 13.0
+const UNDER := 0.15           # how much of the stems is left while a sting plays
 var heat := 0.0               # 0..1, how much of a fight is going on
 var last_fight := -99.0
 var last_done := 0.0
 var started := false
+var ended := false            # the run-end sting has played
+var last_said := false        # the last-squad sting has played
 
 func start(m: Match) -> void:
 	if m.tier >= 2:
@@ -62,11 +66,23 @@ func _muffle_for(p: Hunter) -> Sfx.Muffle:
 		return Sfx.Muffle.DOWN
 	return Sfx.Muffle.LOW_HP if LowHpCue.under_line(p) else Sfx.Muffle.OFF
 
+## The last squad standing is yours (Exits.on_last_team): one sting, once.
+func last_squad() -> void:
+	if not last_said and not ended:
+		last_said = true
+		Sfx.sting("last")
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
 	Sfx.set_muffle(_muffle_for(p))
+	if m.result.get("ending", false):
+		if not ended:
+			ended = true
+			Sfx.sting("extract" if m.result.get("extracted", false) else "out")
+		Sfx.set_layers({"calm": 0.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
+		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
 	if not started:
@@ -93,4 +109,5 @@ func tick(m: Match, dt: float) -> void:
 			extract = 1.0; calm = minf(calm, 0.8)
 		if p.downed:
 			calm = 0.5; drive *= 0.4; boss *= 0.5
-	Sfx.set_layers({"calm": calm, "drive": drive, "boss": boss, "extract": extract})
+	var under := UNDER if Sfx.sting_on() else 1.0
+	Sfx.set_layers({"calm": calm * under, "drive": drive * under, "boss": boss * under, "extract": extract * under})
