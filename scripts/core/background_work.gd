@@ -7,6 +7,11 @@ static var _reads := {}       # path -> true while a threaded read is requested 
 static var _tasks := {}       # worker task id -> true while it is added and not yet joined
 static var _hooked := false
 
+## False headless: the dummy renderer's texture store is not thread-safe, so a .glb read on a loader thread races the
+## main thread's textures and crashes the engine now and then. Callers that only read ahead then load on first use.
+static func can_read_ahead() -> bool:
+	return DisplayServer.get_name() != "headless"
+
 ## Starts reading `path` on a loader thread (take() collects it).
 static func request(path: String) -> void:
 	_hook_quit()
