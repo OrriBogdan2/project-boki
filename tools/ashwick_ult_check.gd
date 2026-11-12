@@ -90,7 +90,16 @@ func _flight() -> void:
 		"ult recast: X again lands early", not J.running() and J.early >= 1 and K.anim_id == "lw_land",
 		"early %d" % J.early
 	)
-	ak.step(m, 0.3)
+	var fall := 0.0
+	while not P.grounded and fall < 1.0:
+		ak.step(m, Match.DT)
+		fall += Match.DT
+	var land_len := float(HunterAnim.km_def("lw_land")["keys"][-1][0])
+	var min_fall := float(WardenClips.data("cinder")["land"]["min_fall"])
+	ok("ult landing: she touches down within a short fall of the landing move (no generic land clip after it)",
+			P.grounded and fall - land_len < min_fall,
+			"down after %.2fs, the move %.2fs, min_fall %.2f" % [fall, land_len, min_fall])
+	ak.step(m, 0.3 - fall)
 	ok(
 		"ult recast: he stops soon after the early landing", P.pos.distance_to(start) < 1.6,
 		"slid %.1f" % P.pos.distance_to(start)

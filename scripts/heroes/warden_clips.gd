@@ -341,7 +341,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_km = km
 		alt_t = tt
 		if mv.get("owns_land", false):
-			land_t = LAND_DONE      # this move is the landing: the generic land clip must not follow it
+			# this move is the landing (it may start in the air): the generic land clip must not follow it, and the
+			# fall counts afresh from here, so only a real fall (land.min_fall) after it lands again
+			land_t = LAND_DONE
+			air_t = 0.0
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
 		# (a lead clip holds its last frame rather than ending before the move does)
