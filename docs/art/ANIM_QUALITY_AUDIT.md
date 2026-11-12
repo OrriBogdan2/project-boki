@@ -368,5 +368,6 @@ standing sole), and the pins let go over 5 frames while the loco blend was still
 
 (`--stride-check` limit 3 cm, bold over it; it now follows a stop until WardenStride hands the feet back to the idle,
 1 s at most, and covers Lace and Cinder. Neve's 2.4 cm: her idle shifts weight while the pins hand over.) Albert's
-audit skate rises 3 cm: the audit window (0.4 s) ends inside his longer step-in. GPU strip:
-`docs/shots/anim-stop-on-stride/`.
+audit skate rises 3 cm: the audit window (0.4 s) ends inside his longer step-in. Strip (old stride over new, frames -4..40 from the let-go):
+`docs/shots/anim-stop-on-stride/stop_strip_xvfb.jpg`, an xvfb software render; GPU job 20261112-023048-04532
+(`--stride-shots`, the five Heroes) was queued behind ~100 jobs.
