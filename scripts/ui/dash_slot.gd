@@ -55,7 +55,7 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 	var hid: int = H.get_instance_id()
 	if _was.has(hid) and n > int(_was[hid]):
 		H.ready_flash["dash"] = HudSlot.READY_FLASH
-		if audible and (int(_was[hid]) > 0 or not ReadyCues.in_match(H)):      # (from empty, the ready cue plays)
+		if audible:
 			Sfx.play("click", null, TICK_VOL, 0.0, TICK_PITCH)
 	_was[hid] = n
 	var key := Settings.key_cap("dash")

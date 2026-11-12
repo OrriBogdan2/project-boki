@@ -401,7 +401,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), String(rd.get("name", "")).to_upper(), col, true)
 	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
@@ -410,7 +409,6 @@ func _fuse_start(bond: bool) -> void:
 		m.sfx("bond", h.pos, -3.0, 0.9)
 	if String(fuse["guard"]) == "unstoppable":
 		h.fortify_t = maxf(h.fortify_t, T + 0.05)
-		m.fx.word(h.pos + Vector3(0, 2.2, 0), "UNSTOPPABLE", Color("ffe2a0"), false)
 	# everyone else's game: a ring and a column of light where it's winding up (the existing fx path)
 	if m.net_on and not h.remote:
 		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 2.4, col.to_html(false)])
@@ -429,7 +427,6 @@ func _tick_fuse(dt: float) -> void:
 		# interrupted: the ult fizzles and comes back after a short wait (that's the counterplay)
 		fuse = {}
 		cd["r"] = minf(float(cd["r"]), 8.0)
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 		m.sfx("warn", h.pos, -4.0, 0.8)
 		return
 	# energy gathers inward, faster and brighter toward the end
@@ -496,7 +493,6 @@ func _bond_tell() -> void:
 	m.fx.ring(h.pos, 2.6, Color(kc, 0.95), 0.35)
 	for i in 6:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.4 + 0.5 * i, 0), kc, 10, 2.5, 0.35, -2.0, 1.1))
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "BONDED", kc, true)
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
@@ -694,17 +690,25 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees: the hero's colour, edged in the side colour. Returns the node.
+## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
 func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(col, 0.9), SideColor.of(m, h))
+	var c := col
+	var p = m.get("player")
+	if p != null and int(p.team) != h.team:
+		c = col.lerp(Feel.RIM_ENEMY, 0.45)
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
 	return tele
 
-## A filling lane (dash arrows, beams, charge lines), edged in the side colour like tele_circle.
+## A filling lane (dash arrows, beams, charge lines).
 func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(col, 0.9), SideColor.of(m, h))
+	var c := col
+	var p = m.get("player")
+	if p != null and int(p.team) != h.team:
+		c = col.lerp(Feel.RIM_ENEMY, 0.45)
+	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
 	if t > 0.0:
 		var tw := tele.create_tween()
 		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -963,21 +967,18 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: a word over the hunter, the body glow, the ready ping (the owner's slot pings too).
-func armed_fx(word: String, slot := "sec") -> void:
-	var rc := res_col()
-	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
-	m.fx.body_glow(h.pos, rc)
+## The payoff becoming armed: the body glow, the ready ping (the owner's slot pings too).
+func armed_fx(slot := "sec") -> void:
+	m.fx.body_glow(h.pos, res_col())
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
+## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
+func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
 		rings := true) -> void:
-	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
 	if rings:
 		m.fx.ring(at, 2.4, col, 0.38)
 		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
@@ -1124,12 +1125,14 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var ring_r := 1.15 * float(h.cdat.get("scale", 1.0))
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, ring_r, Color(col, 0.9), SideColor.of(m, h))
+		var rc := col
+		var p = m.get("player")
+		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)
-		net_ring(h.pos, 0.8, col)           # remote players: "they're winding something up"
+		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
 	var ring2: Node3D = chg.get("ring")
 	if ring2 and is_instance_valid(ring2):
@@ -1181,4 +1184,13 @@ func _charge_release() -> void:
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
+## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
+func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
+	var k := 0.3
+	while k <= reach:
+		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
+		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
+			return true
+		k += 0.3
+	return false
 

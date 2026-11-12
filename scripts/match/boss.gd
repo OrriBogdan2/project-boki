@@ -36,6 +36,7 @@ var dash_hit := {}
 var buried := false
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
 var anim_k := 0.0
+var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
 
 const COL := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
@@ -72,7 +73,12 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			return 0.0
 	if invul_t > 0.0:
 		d *= 0.15
-	return super.hurt(d, by, opts)
+	var real: Ent = by
+	if by is Kin and (by as Kin).owner_h: real = (by as Kin).owner_h
+	var dealt := super.hurt(d, by, opts)
+	if real and dealt > 0.0:
+		damage_by[real.team] = float(damage_by.get(real.team, 0.0)) + dealt
+	return dealt
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:
 	_clear_attack()
@@ -351,7 +357,7 @@ func _atk_slam() -> void:
 		stag_open = maxf(stag_open, w + 0.15)
 	_at(w, func():
 		blast(at, float(md["slam_r"]), float(md["dmg"]), 9.0, 5.0)
-		m.sfx("k_rock", at, 2.0, 0.6)
+		m.sfx("k_gravity", at, 2.0, 0.6)
 		_wave(at, 9.5, 7.5)
 		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
 		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
@@ -447,7 +453,7 @@ func _atk_fissure() -> void:
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
 		Shake.incoming_big(m, a, 0.5)
-		m.sfx("k_rock", a, 0.0, 0.5))
+		m.sfx("k_gravity", a, 0.0, 0.5))
 
 # ---- Stormcoil
 func _atk_dash() -> void:
@@ -617,7 +623,7 @@ func _atk_burrow() -> void:
 	_at(0.4, func():
 		buried = true
 		m.fx.dust(pos, 20)
-		m.sfx("k_rock", pos, 0.0, 0.7))
+		m.sfx("k_gravity", pos, 0.0, 0.7))
 	var mark := {"at": pos}
 	_at(0.5, func():
 		var to := clamp_in(tgt.pos if tgt else centre(), 1.0)
@@ -703,7 +709,8 @@ func render(delta: float, alpha: float) -> void:
 		position = prev.lerp(pos, alpha)
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	show_flash(f)
+	for mt in mats:
+		if mt is ShaderMaterial: mt.set_shader_parameter("flash", f)
 	if stag_ring:
 		stag_ring.visible = stag_open > 0.0 and stagger_t <= 0.0 and not dead
 		if stag_ring.visible:

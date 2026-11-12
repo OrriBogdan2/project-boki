@@ -124,7 +124,7 @@ func _catch_and_hold() -> void:
 	step(m, 1.05)
 	ok(
 		"ult open: a foe inside is caught and stunned until it closes",
-		T.stun_t > 3.2 and StatusLooks.of(m).showing(T, "stun"),
+		T.stun_t > 3.2 and KitLooks.of(m).crowned(T),
 		"stun %.2f" % T.stun_t
 	)
 	var paid := paid(P) - paid0

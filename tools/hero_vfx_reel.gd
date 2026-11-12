@@ -13,7 +13,7 @@ extends "res://tools/combo51_shots.gd"
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
-const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "armour", "tierup"]
+const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -160,36 +160,6 @@ func _part_r() -> void:
 			P.ak.cast_ult()
 		_aim(T.pos)
 	await _go(2.8, cast, _sheet("r", "R, the ultimate", [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
-	await _go(GAP)
-
-## The shared armour language on the dummy: two hits on the shell, the hit that breaks it, then a hit on health.
-func _part_armour() -> void:
-	await _reset(3.0)
-	T.armor = T.max_armor
-	var hits := func(t: float):
-		if _at(t, 0.15) or _at(t, 0.7):
-			T.hurt(10.0, P, {})
-		if _at(t, 1.2):
-			T.armor = 3.0
-			T.hurt(10.0, P, {})
-		if _at(t, 1.9):
-			T.hurt(10.0, P, {})
-		_aim(T.pos)
-	await _go(2.4, hits, _sheet("armour", "armour hit, armour hit, the break, then a health hit",
-		[0.17, 0.22, 0.72, 0.77, 1.22, 1.3, 1.45, 1.92, 1.98]), 1.5)
-
-## The armour tier-up sheen on a Hunter at match zoom: Rare (blue) at 0.2 s, then Legendary (gold) at 1.4 s.
-func _part_tierup() -> void:
-	await _reset(3.0)
-	var ups := func(t: float):
-		for up: Array in [[0.2, 2], [1.4, 4]]:
-			if _at(t, float(up[0])):
-				P.armor_gain(float(Hunter.ARMOR_TIERS[int(up[1])][2]) - P.armor_xp)
-				m._armor_up(P)
-		_aim(T.pos)
-	var marks := _sheet("tierup", "armour tier-up: Rare, then Legendary",
-		[0.22, 0.27, 0.32, 0.37, 0.42, 1.42, 1.47, 1.52, 1.57])
-	await _go(2.2, ups, marks, 1.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael

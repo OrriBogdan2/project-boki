@@ -835,10 +835,6 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
-		"party":
-			var Pt = PartyView.new()
-			Pt.setup(opts)
-			current = _layer(Pt)
 		"prematch":
 			var Pv = load("res://scripts/ui/prematch_view.gd")
 			var pscr = Pv.new()

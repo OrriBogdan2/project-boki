@@ -31,7 +31,7 @@ static func mates(m: Node, h: Hunter, at := Vector3.INF, r := 1e9, include_downe
 
 ## Heal a teammate. A standing one heals normally (remote ones through the "heal" event); a downed
 ## one gets its bleed-out bar topped up `wisp_k` times as much, or revive progress if it is online.
-static func heal(m: Node, t: Hunter, n: float, wisp_k := 5.0, tint := Color.TRANSPARENT) -> void:
+static func heal(m: Node, t: Hunter, n: float, wisp_k := 5.0) -> void:
 	if t == null or t.out or t.dead:
 		return
 	if t.downed:
@@ -41,7 +41,7 @@ static func heal(m: Node, t: Hunter, n: float, wisp_k := 5.0, tint := Color.TRAN
 		else:
 			t.down_hp = minf(cap, t.down_hp + n * wisp_k)
 		return
-	t.heal(n, tint)
+	t.heal(n)
 
 ## Stand a downed teammate back up (the existing revive; online ones are told through "rev").
 static func revive(m: Node, t: Hunter, by: Ent) -> bool:
@@ -92,16 +92,3 @@ static func carried_tick(m: Node, o: Hunter) -> bool:
 	o.set_meta("stomped", false)
 	o.set_meta("revivers", [])
 	return true
-
-## The support pair's payoff moment: a big word, rings (unless `rings` is off: a heal marks no area), a flash,
-## hitstop-grade shake and its own sound.
-static func payoff(m: Node, h: Hunter, at: Vector3, word: String, col: Color, snd: String, rings := true) -> void:
-	if word != "":
-		m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
-	if rings:
-		m.fx.ring(at, 2.4, col, 0.38)
-		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
-	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
-	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
-	if snd != "": m.sfx(snd, at, 0.0, 1.0)
-	if rings and h.ak: h.ak.net_ring(at, 2.4, col)

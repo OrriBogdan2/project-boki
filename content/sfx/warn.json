@@ -1,7 +1,0 @@
-{
- "group": "warn",
- "name": "Warnings",
- "script": "tools/gen_sfx_warn.py",
- "sounds": {"blight_rumble": "cast"},
- "signature": []
-}

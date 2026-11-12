@@ -877,17 +877,19 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 	match e.type:
 		"shield":
 			if "shield" in t:
-				ReceiverCue.shield(t, float(pr["amount"]) * k * weak, col)
+				t.set("shield", maxf(float(t.get("shield")), float(pr["amount"]) * k * weak))
 				if "shield_t" in t: t.set("shield_t", maxf(float(t.get("shield_t")), float(pr["duration"])))
+			m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", t.pos, -3.0)
 		"heal":
 			var amt := float(pr["amount"]) * k * weak
 			if float(pr["over"]) > 0.0:
 				var n := maxi(1, int(round(float(pr["over"]) / 0.5)))
 				for i in n:
-					m.later(0.5 * (i + 1), func(): if is_instance_valid(t) and not t.dead: Effects._heal(t, amt / float(n), col))
+					m.later(0.5 * (i + 1), func(): if is_instance_valid(t) and not t.dead: Effects._heal(t, amt / float(n)))
 			else:
-				Effects._heal(t, amt, col)
+				Effects._heal(t, amt)
+			m.fx.burst(t.pos + Vector3(0, 1.0, 0), col, 12, 2.5, 0.5, -3.0)
 		"cleanse":
 			t.slow_t = 0.0; t.root_t = 0.0; t.stun_t = 0.0; t.burn_t = 0.0; t.slow_k = 0.0
 			m.fx.burst(t.pos + Vector3(0, 1.0, 0), col, 10, 2.5, 0.4, -3.0)

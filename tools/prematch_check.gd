@@ -6,7 +6,6 @@ extends RefCounted
 ## lobby_enabled) and which matches get a lobby, the squad the loading screen shows, the options the match
 ## starts with, bot fill-ins never doubling a squadmate, chat lines, the voice hook, and the screen
 ## (the turn banner, the declutter cards, the safe margin).
-## Sounds (_cues): each lobby event plays its UiSfx cue once, a teammate's live pick is silent.
 
 var bad := 0
 const EXPEDITION := {"teams": 10, "squad": 2, "tier": 0}
@@ -32,7 +31,6 @@ func run(main: Node) -> void:
 	_squad()
 	_chat_and_voice()
 	await _screen(main)
-	await _cues(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -272,60 +270,3 @@ func _declutter(view: Control) -> void:
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
-## The sound cues: every event plays its own cue exactly once (the played-list is emptied before each
-## event, and an event that should be silent or already sounded leaves it empty).
-func _heard(trigger: Callable) -> Array:
-	Sfx.last_played.clear()
-	Sfx.recent.clear()
-	trigger.call()
-	var names: Array = Sfx.last_played.keys()
-	names.sort()
-	return names
-
-func _cues(main: Node) -> void:
-	var lens: Array = []
-	for ak in Arch.ids():
-		var st := load("res://audio/%s_lock.wav" % ak) as AudioStreamWAV
-		lens.append(st.get_length() if st != null else 0.0)
-	var about_a_beat: bool = lens.all(func(t): return t > 0.5 and t < 0.7)
-	ok(about_a_beat, "every Hunter has its own lock-in sting, about 0.6 s (%s)" % [lens])
-	var o := EXPEDITION.duplicate()
-	Prematch.deal_mates(o)
-	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
-	view.setup(o)
-	main.add_child(view)
-	await main.get_tree().process_frame
-	view.set_process(false)
-	var pm: Prematch = view.pm
-	var card: Control = view.grid.get_child(0)
-	ok(_heard(func(): card.mouse_entered.emit()) == ["hover"], "hovering a Hunter card ticks once")
-	pm.squad[1]["bot"] = false              # a human squadmate on peer 9, so nothing locks in by itself
-	pm.squad[1]["peer"] = "9"
-	var shut := Arch.ids().filter(func(a): return not ClassUnlock.is_open(a))
-	var refused := _heard(func(): view._choose(String(shut[0])))
-	ok(refused == ["ui_deny"], "a Hunter that isn't open gets the refusal cue only")
-	ok(_heard(func(): view._choose("bulwark")) == ["lobby_pick"], "picking a Hunter plays the pick cue once")
-	var locked := _heard(func(): pm.tick(Prematch.TURN + 0.01))
-	ok(locked == ["bulwark_lock"], "your lock-in plays your Hunter's own sting once")
-	var live := _heard(func(): view._on_msg("pick", {"arch": "mage", "final": false}, "9"))
-	ok(live.is_empty() and pm.squad[1]["arch"] == "mage", "a teammate's live pick (their hover) makes no sound")
-	var final := _heard(func(): view._on_msg("pick", {"arch": "mage", "final": true}, "9"))
-	ok(final == ["lobby_mate"], "a teammate locking in plays the quiet cue once (%s)" % [final])
-	ok(UiSfx.MATE_DB < -6.0, "the teammate cue sits well under your own")
-	view.queue_free()
-	var t: Control = load("res://scripts/ui/prematch_view.gd").new()
-	t.setup(o)
-	main.add_child(t)
-	await main.get_tree().process_frame
-	t.set_process(false)
-	t.pm.turn_left = 7.5
-	ok(_heard(t._tick_label) == ["lobby_tick"], "the countdown ticks as a second goes by")
-	ok(_heard(t._tick_label).is_empty(), "and not again within the same second")
-	t.pm.turn_left = 5.5
-	ok(_heard(t._tick_label) == ["lobby_tick"], "6 s left still the plain tick")
-	t.pm.turn_left = 4.9
-	ok(_heard(t._tick_label) == ["lobby_tick_urgent"], "the last 5 s tick more urgently")
-	t.pm.turn = 1                           # a teammate's turn: your countdown cue is not for you
-	t.pm.turn_left = 2.5
-	ok(_heard(t._tick_label).is_empty(), "no ticks on a teammate's turn")
-	t.queue_free()

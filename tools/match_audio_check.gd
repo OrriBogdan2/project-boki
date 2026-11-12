@@ -5,8 +5,6 @@ extends RefCounted
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
-## Sound zones (owner's reverb ask): the room send is on inside a zone and off outside, and every zone
-## the maps place names a real preset.
 
 var main: Node
 var fails := 0
@@ -59,36 +57,6 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
-	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
-	m.music_dir.beds.tick(m, P)
-	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
-	_belt_items(m, P)
-	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
-	m.player.hp = 1.0                    # the low-health line: the milder filter, the heartbeat stays clear
-	m.player.armor = 0.0
-	m.music_dir.tick(m, 0.0)
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
-	var low := Sfx.muffle_state()
-	ok(low.fx and is_equal_approx(low.db, Sfx.LOW_HP_DB) and is_equal_approx(low.hz, Sfx.LOW_HP_HZ),
-		"under 25%% health: a mild low-pass and duck (%s)" % low)
-	ok(Sfx._bus_for(null, "heartbeat" in Sfx.CLEAR) != "SFXWorld", "...and the heartbeat skips the world bus")
-	m.player.hp = m.player.max_hp
-	m.player.armor = m.player.max_armor
-	await _muffle_step(m, true)
-	var dull := Sfx.muffle_state()
-	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),
-		"downed: the world bus is low-passed and ducked (%s)" % dull)
-	var bus := AudioServer.get_bus_index("SFXWorld")
-	ok(Sfx._bus_for(null, true) != "SFXWorld" and Sfx._bus_for(null, false) == "SFXWorld",
-		"the Wisp hum, pings and Boki voices skip the world bus")
-	await _muffle_step(m, false)
-	var clear := Sfx.muffle_state()
-	ok(not clear.fx and is_zero_approx(clear.db) and is_equal_approx(clear.hz, Sfx.MUFFLE_OPEN_HZ),
-		"revived: the muffle is off again (%s)" % clear)
-	await _muffle_step(m, true)
-	ok(Sfx.muffle_state().fx and bus >= 0, "downed again: muffled")
-	await _duck_check(m)
-	_check_zones(P.pos)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -100,11 +68,13 @@ func run(main_node: Node) -> void:
 			await main.get_tree().process_frame
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
-	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
-	ok(Sfx.room == "", "the match's sound zones are gone with it")
-	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
+	var farm_beds := 0      # HomeAmbience's own beds, still up on the farm
+	for n in Sfx.amb_layers:
+		if not n in ["abyss", "ruins"] and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).playing:
+			farm_beds += 1
+	var left := Sfx.match_voices() - farm_beds
+	ok(left == 0, "after the fades nothing the match started is playing (%d, %d farm beds)" % [left, farm_beds])
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -202,81 +172,6 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 	Sfx.last_played.erase(cue)
 	g.tick(h)
 	ok(first and not Sfx.last_played.has(cue), what)
-## Every belt item makes its own start cue at the user; the tonic and the armour kit loop while they channel and
-## then play their end cue, or the cancel cue when spilt (BeltSfx, content/rules/belt_sfx.json).
-func _belt_items(m: Match, P: Hunter) -> void:
-	Sfx.listener = P.pos
-	for id in BeltSfx.items():
-		var start := BeltSfx.cue(id, "start")
-		Sfx.last_played.erase(start)
-		UtilityBelt.set_slot(P, 0, id, 3, 0)
-		UtilityUse.start(P, 0, id)
-		ok(Sfx.last_played.has(start), "belt %s: heard at its start cue %s" % [id, start])
-		if not BeltSfx.cue(id, "loop").is_empty():
-			_belt_channel(m, P, id)
-		_step(m, 0.3)
-		P.drink_t = 0.0
-		P.kit_t = 0.0
-		P.hp = P.max_hp
-		Sfx.loop_stop(BeltSfx.loop_key(P, id))
-
-func _belt_channel(m: Match, P: Hunter, id: String) -> void:
-	var key := BeltSfx.loop_key(P, id)
-	_step(m, 0.1)
-	ok(Sfx.loop_on(key), "belt %s: loops while it channels" % id)
-	Sfx.last_played.erase(BeltSfx.cue(id, "end"))
-	_step(m, UtilityUse.channel(id, "time") + 0.1)
-	ok(not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "end")), "belt %s: ends with its end cue" % id)
-	UtilityBelt.set_slot(P, 0, id, 3, 0)
-	P.hp = P.max_hp - 10.0          # (hurt enough to drink, never near a down: the match runs around it)
-	P.armor = 0.0
-	UtilityUse.start(P, 0, id)
-	_step(m, 0.1)
-	Sfx.last_played.erase(BeltSfx.cue(id, "cancel"))
-	P.stun_t = 1.0
-	_step(m, 0.1)
-	var spilt := not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "cancel"))
-	ok(spilt, "belt %s: a spill plays its cancel cue" % id)
-	P.stun_t = 0.0
-## Downs (or revives) the player and lets the match's audio director and the ramp run.
-func _muffle_step(m: Match, down: bool) -> void:
-	m.player.downed = down
-	m.music_dir.tick(m, 0.0)
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
-## Ducking: a rival's ult cast in earshot dips the music and ambience buses;
-## a knock in earshot dips them too; the dip is gone again after the hold and about a second.
-func _duck_check(m: Match) -> void:
-	var P: Hunter = m.player
-	var rival: Hunter = null
-	for h: Hunter in m.hunters:
-		if h != P and h.team != P.team and rival == null: rival = h
-	ok(rival != null, "setup: a rival Hunter to cast")
-	if rival == null:
-		return
-	Sfx.listener = P.pos
-	rival.pos = P.pos + Vector3(8, 0, 0)
-	var mus := Sfx._duck_fx[0]
-	CombatBus.ability_used.emit(rival, "check_x", "ultimate")
-	await main.get_tree().create_timer(0.4).timeout
-	var rules: Dictionary = Sfx.duck_rules
-	var amb: AudioEffectAmplify = Sfx._duck_fx[1]
-	var depth := float(rules["ult_db"])
-	ok(mus.volume_db <= depth + 0.5 and amb.volume_db <= depth + 0.5,
-		"a rival's ult dips the score and the ambience (%.1f / %.1f dB, rule %.1f)"
-		% [mus.volume_db, amb.volume_db, depth])
-	var back := float(rules["ult_hold_s"]) + float(rules["back_s"]) + 0.3
-	await main.get_tree().create_timer(back).timeout
-	ok(mus.volume_db > -0.5 and amb.volume_db > -0.5,
-		"...and both are back about a second after the cast (%.1f dB)" % mus.volume_db)
-	rival.pos = P.pos + Vector3(float(rules["range_m"]) + 20.0, 0, 0)
-	CombatBus.ability_used.emit(rival, "check_x", "ultimate")
-	await main.get_tree().create_timer(0.4).timeout
-	ok(mus.volume_db > -0.5, "a rival's ult out of earshot does not duck (%.1f dB)" % mus.volume_db)
-	rival.pos = P.pos + Vector3(8, 0, 0)
-	Juice.knock(m, rival, P)
-	await main.get_tree().create_timer(0.3).timeout
-	ok(mus.volume_db < -3.0, "a knock call in earshot dips them (%.1f dB)" % mus.volume_db)
-	await main.get_tree().create_timer(float(rules["knock_hold_s"]) + float(rules["back_s"]) + 0.3).timeout
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
@@ -287,33 +182,3 @@ func _step(m: Match, secs: float) -> void:
 func _on_farm() -> bool:
 	var sc: Script = main.current.get_script() if is_instance_valid(main.current) else null
 	return sc != null and sc.resource_path.ends_with("home/home.gd")
-
-func _check_zones(at: Vector3) -> void:
-	var inside := at + Vector3(30, 0, 0)
-	Sfx.set_room_zones([{"at": [inside.x, inside.z], "r": 5, "preset": "arch"}])
-	Sfx.move_listener(at)
-	ok(Sfx.room == "" and _step_bus(at) == "SFXWorld", "outside a zone the sound plays dry (%s)" % _step_bus(at))
-	Sfx.move_listener(inside)
-	var wet := _step_bus(inside)
-	ok(Sfx.room == "arch" and wet == String(Sfx.ROOM_BUS), "inside a zone it goes through the room send (%s)" % wet)
-	var bi := AudioServer.get_bus_index(Sfx.ROOM_BUS)
-	ok(AudioServer.is_bus_effect_enabled(bi, 0), "...and the send's reverb is on")
-	Sfx.move_listener(inside + Vector3(5.5, 0, 0))
-	ok(Sfx.room == "arch", "just past the edge it holds on (no flutter)")
-	Sfx.move_listener(at)
-	ok(Sfx.room == "" and _step_bus(at) == "SFXWorld", "leaving the zone is dry again (%s)" % _step_bus(at))
-	ok(not AudioServer.is_bus_effect_enabled(bi, 0), "...and the send's reverb is off")
-	Sfx.move_listener(inside)
-	ok(Sfx.room == "arch" and Sfx._bus_for(null, true) == "SFX", "a clear sound (no position) stays dry inside a zone")
-	Sfx.set_room_zones([])
-	for id in ["hollowcrown", "skyreach"]:
-		var zones: Array = World.load_layout(id).get("sound_zones", [])
-		var known := zones.all(func(z): return z["preset"] in Sfx.ROOMS)
-		ok(not zones.is_empty() and known, "%s places sound zones with known presets (%d)" % [id, zones.size()])
-
-## The bus a footstep at pos lands on.
-func _step_bus(pos: Vector3) -> String:
-	Sfx.last_played.erase("step0")
-	Sfx.recent.erase("step0")
-	Sfx.play("step0", pos, 0.0, 0.0)
-	return String(Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].bus)
