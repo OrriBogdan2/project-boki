@@ -43,15 +43,35 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
  "kit_files": ["gunslinger_ult.gd"], "replaces": ["vn_rifle", "..."],
  "reach": {"gunslinger_fire": 45}, "loops": ["gunslinger_spin"]}
 ```
-`--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 22 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 11 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
+`--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 30 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 15 m, half of gunfire) (past 19 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
+## Falloff (`Sfx.NEAR/SPREAD/FAR/hear_range`)
+All match sounds go through `Sfx._distance_db`; the numbers live in one place at the top of `scripts/core/sfx.gd`. There is one 2D pool (no 3D players), so the "max distance" of the SFX bus is `hear_range` and its "unit size" is NEAR (full level inside it) plus SPREAD (the roll-off is -20 log10(1 + (d - NEAR) / SPREAD)); SFXFar (the muffled send into SFX) starts at FAR. The view is the source's: what you see you hear, off-screen threats are quieter but there. The SUPERVIVE view is 37 m across (`Cam.style_across`), so the side edge is 18.5 m (the top and bottom edges ~10 m; the widest wheel zoom ~26 m). The old numbers were sized to the 23.5 m view (edge 11.75 m).
+- NEAR 3.5 -> 5.5 m, SPREAD 5 -> 8 m, FAR 9 -> 19 m (muffling now starts just past the side edge), hear_range 22 -> 30 m (the edge fade still starts at 0.7 of it). `scan_call` reach 11 -> 15 m (stays half of hear range).
+- Unchanged: a sound's own `reach` (ult cues 60 m), the scan hum's 26 m, hidden rivals' footsteps (`Juice.footstep` still skips rivals past 14 m and unseen ones; `Sfx.step` volumes as before).
+
+| distance (m) | before (3.5/5/9/22) | after (5.5/8/19/30) |
+|---|---|---|
+| 5 | -2.3 dB, clear | 0.0 dB, clear |
+| 10 | -7.2 dB, muffled | -3.9 dB, clear |
+| 11.75 (old screen edge) | -8.5 dB, muffled | -5.0 dB, clear |
+| 15 | -10.4 dB, muffled | -6.8 dB, clear |
+| 18.5 (new screen edge) | -17.3 dB, muffled | -8.4 dB, clear |
+| 22 | -73 dB, muffled | -10.0 dB, muffled |
+| 25 | silent | -15.4 dB, muffled |
+| 28.5 (10 m off screen) | silent | -34.4 dB, muffled |
+| 30 | silent | -72.2 dB, muffled |
+| 31 | silent | silent |
+
+`--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 6 dB quieter but present, one at 31 m is silent.
+
 ## Ultimate cast cues
-You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
+You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 19 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
@@ -61,7 +81,7 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).
 - **Success chime** by the Boki's rarity (`Capture.rarity_tier`, rules `pop_sounds`): `scan_pop` common, `scan_pop_fine` mutated, `scan_pop_rare` shimmer or a rare species. The music ducks (`duck_s`, `duck_db`) for a catch within hearing.
 - **`scan_fail`**: a scan cancelled by a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
-- **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m.
+- **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 15 m (half of hear range).
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
 ## The Heart and the Ways Out calls
 - `scripts/match/heart_sfx.gd` (`Heart.audio`) owns the Heartspark cues (`tools/gen_sfx_heart.py`, set `content/sfx/heart.json`) and the Ways Out calls: `call_out(event, seat, team)` with `open`, `start`, `taken`, `warn`, `last` plays one flat UI sting (`ways_*`) and writes the same line to the match feed and the toast lane, so sound and banner fire together. Each call plays once per seat (a squad's `start` again after 10 s); the quest seats call it the same way when they are built. `--ways-out-sfx-check` asserts it.
