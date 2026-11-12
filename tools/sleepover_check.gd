@@ -14,10 +14,10 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	Save.no_write = true
 	var old := Save.fresh()
-	old["v"] = 12
+	old["v"] = 13
 	old.erase("sleepovers")
 	var up := Save.migrate(old) and int(old["v"]) == Save.VERSION
-	ok(up and old["sleepovers"] == [], "a v12 save upgrades with no Boki away")
+	ok(up and old["sleepovers"] == [], "a v13 save upgrades with no Boki away")
 	Save.d = Save.fresh()
 	var lead := Save.new_kin("zapple", "Lead")
 	var guest := Save.new_kin("kilnbadger", "Ember")

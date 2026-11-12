@@ -27,7 +27,7 @@ your last or your active Boki, and at most 2 are away at once. On return `Sleepo
 No reply from the friend (empty snapshot): it still comes home, with only the memory line.
 
 ## Consequences
-- Save v13 (`sleepovers: []`, migration 12 -> 13). Old saves load.
+- Save v14 (`sleepovers: []`, migration 13 -> 14; v13 is main's garden zones). Old saves load.
 - Net: no new topics or messages, so Net.VERSION stays. Only existing `Social.get_doc`.
 - `scripts/core/sleepover.gd`, `scripts/home/sleepover_panel.gd`, a few wiring lines in `home.gd`.
 - Check: `--sleepover-check`. The host is not told (alternative: a "pet"-style gift doc, later).
