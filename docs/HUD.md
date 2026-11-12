@@ -11,9 +11,9 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
-| `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
-| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips (each fills as its charge recharges; a ready charge shows the next one's countdown small at the top), key pill, rank pips, lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
 | `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
+| `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
+| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
@@ -118,3 +118,15 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+
+## Tutorial objective strip (one banner for both tutorials)
+- `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
+  title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
+  pulses for 1.6 s whenever the objective changes, then keeps a steady rim. The message lane starts at 72% of the
+  width, so the strip never touches it. In the match tutorial the Ways Out strip, the match clock and the ship's
+  planning countdown are off; in a real match (`FirstMatchGuide`) the strip drops under `WaysOutHud.bottom()`
+  (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
+- The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
+  Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.

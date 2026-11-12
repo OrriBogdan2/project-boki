@@ -14,6 +14,10 @@ func run(main_node: Node) -> void:
 	await orb_check.orbs(main)
 	n += orb_check.n
 	fails += orb_check.fails
+	var globe_check = load("res://tools/ostra_globe_check.gd").new()
+	await globe_check.globe(main)
+	n += globe_check.n
+	fails += globe_check.fails
 	var arena_check = load("res://tools/ostra_arena_check.gd").new()
 	await arena_check.arena(main)
 	n += arena_check.n
@@ -732,7 +736,7 @@ func _ranks(P: Hunter, K: OstraKit) -> void:
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))

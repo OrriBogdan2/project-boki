@@ -444,127 +444,20 @@ PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a 
 **Verdict: no outlier over 1.25x, so no health number was changed** (global scale untouched). Kael and Cinder sit at 1.249 and Neve, Sparkle and Sable at 0.802 (1/1.247): inside the bar by a hair, caused by the same thing: three weight classes against a source where 8 of 12 Hunters share 1290. No owner note on tankiness was found in DECISIONS or OWNER_REVIEW_1103, so none overrides these rows. `--archetype-check` ("health:" rows) asserts every Hunter is inside 0.8x to 1.25x.
 
 **Suggestion, not built.** The source is flatter: 1100 to 1475 (1.34x spread) against our 124 to 193 (1.56x). Lowering heavy to about 185 and raising light to about 128 would bring all five near-limit Hunters to about 1.2x/0.83x. That moves a whole weight class, so it is the owner's call. Per-archetype health (Hem and Motley a little lower, Bjorn and Grimble a little higher) would match the source more exactly but breaks the one-weight-one-health rule.
-## Boots and charms (gear parity, `--gear-parity-check`)
-Loadout is 2 gloves, 2 charms, boots (DECISIONS). Searched briefs/supervive-data and briefs/hero-ref
-(origin/ext/agent-briefs, 2026-11-10) for boots actives, cooldowns and passive move speed: the source data
-has no boots or charm items at all (no item tables; PHYSICS_PARITY only says gear scales move speed at
-runtime, with no numbers). So no piece has a source match and nothing was changed; the list below goes to
-the owner. The check pins these values so any change goes through this list.
+| Vex (`gunslinger`) | dash.ground.{rmb,e,x}\*, dash.air.{lmb,rmb,e,x}\* (7) |
+| Kael (`juggernaut`) | hold.lmb.jump, hold.rmb.{ground,air,jump} (4) |
+| Cinder (`ashwick`) | dash.ground.lmb\*, hold.rmb.{ground,air,jump} (4) |
+| Meeko (`tender`) | hold.rmb.{ground,air,jump} (3) |
+| Tenzo (`dolm`) | hold.lmb.{ground,air,jump}, hold.rmb.{ground,air,jump} (6) |
+| Lace (`archer`) | dash.ground.lmb\*, dash.air.{lmb,rmb,e,x}\*, dash.{ground,air}.q (Q is ours), hold.lmb.{ground,air,jump}, hold.rmb.{ground,air,jump} (13) |
+| Grimble (`dredge`) | dash.ground.lmb\* (1) |
+| Neve (`rimewright`) | hold.rmb.{ground,air,jump} (3) |
+| Sparkle (`mage`) | dash.{ground,air}.{lmb,rmb,e,x}\*, dash.{ground,air}.q (Q is ours), hold.rmb.{ground,air,jump} (13) |
+| Albert (`bulwark`) | hold.lmb.jump (1) |
 
-| Kind | Piece | Cooldown | Stats (Common) | Source match |
-|---|---|---|---|---|
-| boots | Springheel Boots (`boots`) | none (passive) | +8% move speed | none |
-| boots | Quickstep Boots (`quickstep_boots`) | none | dash back 15% sooner, +3% move speed | none |
-| boots | Skylark Boots (`skylark_boots`) | none | +35% glider heat | none |
-| boots | Windstep Boots (`windstep_boots`) | none | +10% glide speed, +15% glider heat | none |
-| charm* | `booster` | none | +20% glide speed, +20% glider heat | none |
-| charm* | `focus` | none | 18% cooldown reduction | none |
-| charm* | `heat_sink` | none | +45% glider heat | none |
-| charm* | `power_core` | none | +12% damage | none |
-
-\* Charms are not built yet (note 0005): there is no charm gear kind, and these passive gloves are the
-pieces meant to become charms. No boots piece has an active, so none needs a key: the HUD boots cell
-(GearPanel) shows the icon and rarity with no key and no cooldown, and its hover reads "Boots" plus the
-stat line; the check asserts both for every boots piece.
-## Friendly fire (--friendly-fire-check)
-
-**Rule** [O: owner brief, PARITY FIRST]: a Hunter's abilities never hurt a teammate or the caster; a world explosion (powder keg, meteor) hurts everyone. `supervive_kits.md` states no exception: every damage line names "enemies", "struck targets" or "foes"; `docs/SUPERVIVE_DATA.md` has no self-damage row.
-
-**Audit (all 128 `.hurt(` call sites).** Every damage source picks its victims through one of three team-filtered lists, so there is no per-kit exception to fix and none was added:
-
-| Victim list | Filter | Sources (file:line) |
-|---|---|---|
-| `Match.foes_of(team)` (`match.gd:2032`) | `h.team != team`, kins not wild, mobs | gunslinger_kit.gd:558,564,660; gunslinger_ult.gd; juggernaut_kit.gd:798, juggernaut_ult.gd:151; ashwick_kit.gd:408, ashwick_jet.gd:243; effects.gd:325,336,701 (gloves, Boki abilities); verbs.gd:442; fields.gd; abilities.gd:16; merge_kit.gd:156, merge_augment.gd:167,246,256; match.gd:3471 (bolas), 5189 (well); kin.gd:683; mob.gd / boss.gd / blight.gd (monsters, own team -2) |
-| `ArchKit.foes_in(at, r)` (`arch_kit.gd:602`) | `m.foes_of(h.team)` + radius | archer, ashwick:670, bulwark, dolm:185,424,470,476, breah_hop/slam/spine, juggernaut_kit.gd:533, juggernaut_drop.gd, mage_kit.gd:668,673, ostra_kit.gd:564,625, ostra_well.gd, rimewright_kit.gd:135,639,682,1019, tender_kit.gd:452 |
-| `Match._shot_targets(s)` (`match.gd:3304`) | `h.team != s.team`, `k.team != s.team` | every projectile, `_boom` (match.gd:3562) |
-| World, no team | none on purpose | `Breakables._hurt_around` (`breakables.gd:133`: kegs and barrels hit hunters, mobs and kins; credit is dropped for the lighter's own team), `Match._meteor_hit` (match.gd:5279), glider heat, fall and wall damage (`by` null or the last enemy) |
-
-**Result.** `--friendly-fire-check` casts each of the 12 kits' LMB, RMB tap and hold, E (and a second press), R, X and dash, plus the four damaging gloves (blink, grapple, quake, shock; Bubble only reflects), with a foe, a teammate and the caster all inside: 707 checks, 0 failures. It counts hits through `CombatBus.hit_landed`. A powder keg hurts the caster, a teammate and a foe. Control run: with `foes_of` changed to include the caster's team, 127 checks fail across all 12 kits and the gloves, so the check does bite.
-
-**Not reached by the check (no foe damage in that case):** `archer` and `bulwark` RMB taps, `bulwark`, `dolm` and `tender` E (shields, heals), the dashes of `archer`, `dredge`, `gunslinger`, `ostra`, `rimewright`, `tender` and `thief`. Utility belt items (`content/utility`) carry no damage. Boki species abilities (G, ~40 species through `Effects`/`KinExec`) go through the same `foes_of` but are not cast per species here.
-## Hunter abilities on monsters (`--mob-cc-check`)
-
-Parity rule: in the source's PvE a Hunter's CC and displacement work on camps as they do on Hunters (knocks scale with Mass, stuns and roots apply). One ability per kit (two where a kit has a second CC route) is cast at a Hunter dummy, a skitter, a brute and a lair boss that stand still (speed 0), headless on the Training strip. Mass: Hunter 1 (source 100 for all), skitter 1, brute 3, boss 80 (ours; the source gives no monster Mass). The check asserts a monster feels every kit status the Hunter did (stun, root, slow of 0.5 s or more, Grounded, Daze), that a knock moves it, and that heavier moves less. Cells show the longest status seen and the farthest it was moved.
-
-| Kit | Ability | Hunter | Skitter (Mass 1) | Brute (3) | Boss (80) |
-|---|---|---|---|---|---|
-| archer | Heavy Shot hold: knock, wall stun | stun 1.20 s, 1.06 m | stun 1.20 s, 0.88 m | stun 1.20 s, 1.10 m | stun 1.20 s |
-| ashwick | Furnace Cloak pull | 2.70 m | 2.75 m | 3.20 m | no effect |
-| ashwick | Soot Ram knock | 1.95 m | 2.22 m | 0.74 m | ~0 m |
-| bulwark | Shield Charge: knock, stun | 4.02 m | 4.36 m | 1.75 m | ~0 m |
-| bulwark | Faultline stun, slow | stun 0.48 s, slow 1.48 s | stun 0.48 s, slow 1.48 s | stun 0.48 s, slow 1.48 s | stun 0.48 s, slow 1.48 s |
-| dolm | Quakefall knock | stun 0.76 s, 1.81 m | stun 0.76 s, 2.24 m | stun 0.76 s, 0.79 m | stun 0.76 s, ~0 m |
-| dolm | Basalt Spine slow | slow 0.98 s, 0.97 m | slow 0.98 s, 0.97 m | slow 0.98 s, 0.97 m | slow 0.98 s, 1.01 m |
-| dredge | Abyssal Hand pull | stun 0.20 s, 5.50 m | stun 0.20 s, 5.55 m | stun 0.20 s, 5.98 m | no effect |
-| dredge | Anchor Drop stun | stun 1.08 s, Grounded 1.00 s | stun 1.08 s, Grounded 1.00 s | stun 1.08 s, Grounded 1.00 s | stun 1.08 s, Grounded 1.00 s |
-| gunslinger | Burr direct hit, Daze | Daze 1.40 s | Daze 1.40 s | Daze 1.40 s | Daze 1.40 s |
-| gunslinger | Burr cone: push, Daze, wall stun | stun 0.88 s, Daze 1.97 s, 0.24 m | stun 0.98 s, Daze 1.97 s, 1.11 m | stun 0.67 s, Daze 1.97 s | stun 0.67 s, Daze 1.97 s |
-| juggernaut | Smash push | 1.63 m | 2.13 m | 0.71 m | ~0 m |
-| mage | Storm Rod hold: knock, wall stun | stun 0.80 s, 2.10 m | stun 0.80 s, 1.99 m | stun 0.80 s, 1.14 m | stun 0.80 s, ~0 m |
-| mage | Skycall Grounded, drag | Grounded 1.50 s, 3.24 m | Grounded 1.50 s, 3.22 m | Grounded 1.50 s, 3.22 m | Grounded 1.50 s, 2.94 m |
-| ostra | Shard Snap slow | stun 1.08 s, ~0 m | stun 1.08 s, 0.37 m | stun 1.08 s, 0.12 m | stun 1.08 s |
-| ostra | Nightwell stun, pull | stun 3.47 s | stun 3.47 s | stun 3.47 s, 0.25 m | stun 3.47 s, 0.95 m |
-| rimewright | Rink Wall push | slow 1.00 s, 4.30 m | slow 1.00 s, 4.96 m | slow 1.00 s, 3.75 m | slow 1.00 s, 3.16 m |
-| rimewright | Rimelock stun | stun 0.73 s | stun 0.73 s | stun 0.73 s | stun 0.73 s |
-| tender | Burrseed root | root 1.08 s | root 1.08 s | root 1.08 s | root 1.08 s |
-| thief | Bola Grounded, slow | slow 1.48 s, Grounded 1.50 s | slow 1.48 s, Grounded 1.50 s | slow 1.48 s, Grounded 1.50 s | slow 1.48 s, Grounded 1.50 s |
-
-Fixed (each skipped monsters because it looped only `m.hunters` or tested `is Hunter`):
-- Ryzz's Skycall Grounded now lands on monsters (`mage_sky.gd`).
-- Vex's Burr cone wall stun now lands on monsters pressed to terrain (`gunslinger_kit.gd`).
-- Tarek's Basalt Spine moves a monster off a rock's line like a Hunter, so a rock never rises inside it (`breah_spine.gd`).
-- Tarek's Quakefall dunk counts any airborne foe, not only Hunters (`breah_slam.gd`; not asserted, no airborne case).
-- A monster knocked into a wall is stunned for the hit's `wallstun` (min 1 s), as Hunters are (`mob.gd`).
-
-Boss resistance: no row in briefs/supervive-data (supervive_kits, supervive_physics, PHYSICS_PARITY, kit_comparison) or docs/SUPERVIVE_DATA.md says a boss resists displacement or CC, so none was added. What exists already, kept as is: monsters of Mass 6 or more (Warden, bosses) are not pulled by Cinder's cloak, Grimble's hook, Boki yanks, and monsters of Mass 10 or more take no wall-slam stun. Rimewright's Rink Wall and Ryzz's Skycall drag still move a boss (rows above), so the existing gate is not uniform; the owner may want one rule (suggestion, not built). The only monster-specific data row is "Monsters can't spike" (SUPERVIVE_DATA section 5), which concerns gliding Hunters, not CC.
-## Cooldown start (when it starts, how charges come back)
-
-Sources: `supervive_kits.md` (tooltips: charges, "reactivate", "-x% CD on hit"), `docs/heroes/*.md` wiki rows, footage `vireo.md` (Surge: HUD shows 7 s while she still holds, so the cooldown starts on the press), `DASH_UI.md` (dash recharge is one charge at a time, the countdown restarts per charge). The sheets record no other cooldown overlay at 5 fps, so everything not listed below is "no evidence": ours stays the shared default.
-
-**Shared rules in ours (the default every row below is measured against).**
-- A cast starts its cooldown on the press that casts it: `ArchKit.use_e` (E), `HeroUlt.press` (X), `ArchKit.use_r` (R, at the fuse start), `Hunter.do_dash` / `ArchKit.spend_dash` (Shift). A recast, a channel or an end never moves it.
-- RMB charges (`ch_rmb`) and dash charges (`Hunter.dashes`, a float) recharge one at a time: one timer runs, a spent charge does not wait for another, a charge spent mid-recharge keeps the progress already made. No kit recharges all at once, none restarts a running timer.
-- A hold-and-release RMB spends at the release (`fire_rmb`), because its "cast" is the release in our kits.
-
-| Hunter | Slot | Source says | Ours | Verdict |
-|---|---|---|---|---|
-| Vex | RMB, E, X | tooltips only; E "hunter hit -20% CD" (running from the cast) | press; E cut on hit | match |
-| Vex | Shift | hold = longer dash on a longer CD | press, the hold takes 0.4 of a charge more at 0.18 s | match |
-| Zedran | RMB | air slam is its own 9 s slot | `spend_air`, own slot; lunge doubles if nothing is struck | match |
-| Zedran | E | wiki 07.01.25: starts on the pull or when the chain breaks, not the throw | `start_e_cd` on pull, break, miss, stun | match, asserted |
-| Zedran | Shift | 3 charges, one at a time (footage) | float charges, one at a time | match |
-| Hem | RMB | hold, release; no overlay | spends at the release | no evidence, see "Suggestions" |
-| Hem | E, X | X "next 3 shots" | press; X on the cast (`archer.md`) | match |
-| Cinder | RMB, E, X | "+1 charge" rank, no overlay | press at the release of the aim hold; charges one at a time | no evidence |
-| Cinder | Shift | 2 charges | one at a time | match |
-| Pip | RMB | plain shot in the source | owner item 118: 1 s wind-up, spends at the throw | owner note |
-| Pip | E | "reactivate to throw the zone" | press; the throw does not touch it | no evidence |
-| Pip | X, Shift, air dash | air dash own slot (14 s) | cast; two slots | match |
-| Tarek | LMB | patch 2.01/2.04: Quake Punch cooldown starts at cast, not on release | **was on the release, now on the press** | fixed, asserted |
-| Tarek | RMB | hold, release | spends at the release | no evidence, see "Suggestions" |
-| Tarek | Shift | Landslide: one dash, no chain in the source | Rock Hop (owner item 111): spent on the press, recharge waits for the chain's end (`breah_hop`) | owner design |
-| Grimble | RMB | -50% CD on an enemy hit (running from the cast) | press, half off on a hit | match |
-| Grimble | E, X | press | press | match |
-| Grimble | Shift | ground and air dash separate slots | `dash.air.cd` own slot | match |
-| Claire | RMB | 2 charges, 12 s | `ch_rmb` 2, one at a time | match |
-| Claire | E, X | "recast to freeze"; "reactivate to cancel" | press; recast/cancel do not touch it | no evidence |
-| Claire | Shift | wiki: early release refunds part | press, refund on early release | match |
-| Ostra | RMB, E, X | E "reactivate to detonate" | press at the plant; pop does not touch it | no evidence |
-| Bjorn | RMB | aegis raise 0.1 s; Shield Bash own 6 s | raise free; Shield Charge spends the RMB slot's charge on the press | match |
-| Bjorn | E, X, Shift | press | press; Spin Dash charges separate | match |
-| Ryzz | Shift | footage: Surge starts on the press | spent on the press, a cancel keeps it spent | match, asserted |
-| Ryzz | RMB, E, X | spear hold-release; X "reactivate" | RMB at the release; E, X press | no evidence |
-| Sable | E | "refund 25% CD on terrain, 50% on a foe" (so it runs from the throw) | press at the throw, refund on hit | match |
-| Sable | RMB, Shift, X | Quickflip reset on shot | press | match |
-
-**Fixed (1).** Tarek's LMB Quake Punch: the cooldown (`lmb.boulder.rate`, 0.6 s, the card's value) now starts when the hold starts and the punch's own `rate` 0.7 is gone, so a long hold leaves no pause after the release (was 0.7 s). The boulder tap and the bot use the same start. Asserted in `--dolm-combo-check` ("cooldown: the punch's cooldown starts on the press").
-
-**Suggestions, not built (parity first, evidence is by analogy).**
-- Hold-and-release RMBs (Hem Heartpiercer, Ryzz Voltaic Spear, Tarek Volcano Crusher) may start on the press like Surge (footage) and the Punch (patch): a shared `ArchKit` rule would spend at the hold's start. Not built: no overlay shows these three, and a spend on the press needs a refund rule for a cancelled hold.
-- Every multi-charge dash card reads "0.4 s between uses" (`DASH_UI.md` for Brall's 3 charges; `pin.md` reads a 0.4 s card next to a 9.5 s real cooldown). Ours has no such floor beyond the dash's own length (Rampage 0.17 s plus 0.07 s wind-up). Likely a global minimum gap; not built, it touches every dash.
-- Our air dash is a second cooldown slot for every Hunter (`h.ex_cd`), and it also fires when the ground charges are out; the tooltips give a separate air slot only to Pip and Grimble. That is the air-dash rule (owner item 183, `ext/airdash-rule-audit`); left to that branch.
-- Rock Hop's "nothing recharges during the chain" is ours; the source's Landslide recharges from the press.
-
+Dash -> LMB fires mid-dash for Lace, Sparkle, Cinder (both dashes) and Tenzo (air dash), where the source is silent (`--dash-flow-check` SOURCE_ROWS); Kael and Albert dash as the attack and buffer it; Grimble's ground row stays buffered (owner fallback) and his air pounce has its own row.
+Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`. Re-checked 2026-11-09 (ext/dash-nd-rows-a) against data, footage and the wiki lines in the briefs: Vex `dash.air.lmb` is settled by the card's unqualified "can fire the rifle while sliding" plus the wiki's air tap (asserted in `--dash-flow-check`); Vex `dash.{ground,air}.{rmb,e,x}`, Cinder and Grimble `dash.ground.lmb` stay "Not determinable", each `source` says which lines and frames were read.
+Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x} (all 13 re-checked 11-09 against the data, the pin/vireo frames, the cancel-matrix-a/b tables and the patch lines; none settled, each `source` says why in one line). Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
 ## Allies and forced movement (PARITY FIRST pass, ext/feel-ally-safe)
 
 Every knock, pull, push, root, slow, stun and Grounded the 12 kits apply goes to `foes_of(team)` (or `foes_in`), so a teammate is never moved or given a status. `--ally-cc-check` (`tools/ally_cc_check.gd`) proves it: each hero presses LMB, RMB tap and hold, E, X and the dash, on the ground and in the air, with a teammate standing on the aim line at 2, 3.5, 6 and 9 m; the teammate must not move, be towed, or gain stun, root, slow, knock, Shred, Blight, burn, Grounded, Dazed or Disoriented. Over the relay, `--displace-net-check` aims Cinder's cloak, Sparkle's Skycall and Albert's aegis at a teammate on the guest's game: no move is sent and the guest stays put.

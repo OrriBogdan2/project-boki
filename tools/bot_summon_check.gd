@@ -38,7 +38,7 @@ func _start(opts := {}) -> void:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	var base := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true, "boki_wisps": true}
+	var base := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 81, "no_drop": true, "boki_wisps": true}
 	m.start(base.merged(opts))
 	m.set_process(false)
 	for mb in m.mobs:

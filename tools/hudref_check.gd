@@ -276,7 +276,6 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.0
 	flow.held.clear()
 
-
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})

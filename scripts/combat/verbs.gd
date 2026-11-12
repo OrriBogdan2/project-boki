@@ -99,9 +99,7 @@ static func blocks_sight(w: Dictionary) -> bool:
 ## crosser class (Blockers): "phase" for a Spirit Walk.
 static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		if not Blockers.wall_stops(w, cls):
-			continue
-		var top := wall_top(w, y)
+		var top := wall_top(w, y, cls)
 		if top <= 0.0:
 			continue
 		var p := Vector2(x, z)
@@ -111,9 +109,9 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls
 	return 0.0
 
 ## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
-## block movement, or the body is above or on it).
-static func wall_top(w: Dictionary, y: float) -> float:
-	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+## block movement, or is not one its class stops (Blockers), or the body is above or on it).
+static func wall_top(w: Dictionary, y: float, cls := "body") -> float:
+	if not w["move"] or not Blockers.wall_stops(w, cls) or absf(y - float(w["y"])) > 1.9:
 		return 0.0
 	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
 	var top := StoneStand.top_for(w) if w.has("top") else 3.0

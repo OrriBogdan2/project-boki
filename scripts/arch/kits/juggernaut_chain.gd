@@ -142,10 +142,6 @@ func _hook(f: Ent, at: Vector3) -> void:
 	tightened = false
 	hooks += 1
 	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
-	if f:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
-	else:
-		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
 	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
 		pull()                      # E was pressed a hair before it bit
 
@@ -154,21 +150,20 @@ func _miss(at: Vector3) -> void:
 	misses += 1
 	k.start_e_cd()                  # hooked nothing: the chain breaks, its cooldown starts
 	k.vfx("chain_snap", at)
-	k.m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)
 
 ## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
-func snap(word := "CHAIN BROKE") -> void:
+func snap(quiet := false) -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
-		if state == "hooked":
+		if quiet:
+			pass
+		elif state == "hooked":
 			snap_t = SNAP_T
 			snap_end = anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 			k.vfx("chain_snap", _chain_from().lerp(snap_end, 0.5))
-		elif word != "":
+		else:
 			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
-		if word != "":
-			k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
 	elif state == "pulling":
 		_stop("stopped", false)
 	state = "ready"
@@ -291,7 +286,7 @@ func _tick_hooked(dt: float) -> void:
 		snap()
 		return
 	if tether_t <= 0.0:
-		snap("")
+		snap(true)
 		return
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most

@@ -3,6 +3,7 @@ extends RefCounted
 ## one Hunter at a time (both fighters play that Hunter), counting what the bots really press in each
 ## slot: presses, holds, recasts and hits, plus dashes and glides (table in docs/BOT_KIT_USE.md).
 ## Fails when a slot a bot should use is never used, or a hold-only slot is only ever tapped.
+## With --kit-use-match: the ultimate and Boki use in a 10-trio match instead (tools/bot_ult_use.gd).
 ## Never touches the save.
 
 ## arch -> the counters (keys of the tally) that must be above zero: the slots with a hold or a recast.
@@ -30,6 +31,11 @@ func run(main: Node) -> void:
 		if a.begins_with("--bot-kit-use="): only = a.substr(14)
 		if a.begins_with("--kit-use-t="): secs = float(a.substr(12))
 		if a.begins_with("--kit-use-seeds="): seeds = Array(a.substr(16).split(",")).map(func(x): return int(x))
+	if "--kit-use-match" in OS.get_cmdline_user_args():
+		var ult := preload("res://tools/bot_ult_use.gd").new()
+		await ult.run(main)
+		main.get_tree().quit(1 if ult.bad > 0 else 0)
+		return
 	for arch in Arch.ids():
 		if only == "" or only == arch:
 			_duel(main, String(arch), seeds, secs)

@@ -8,6 +8,7 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--bench-shots=<dir>]  saves each zone part's default-camera frame (screen UI hidden) as <part>.jpg
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
@@ -34,6 +35,7 @@ var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
 var zone := ""
+var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
 var hunters := 6
 var wisps := false
@@ -67,8 +69,8 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
 		if a.begins_with("--bench-hunters="): hunters = maxi(2, int(a.substr(16)))
-		if a == "--boki-wisps": wisps = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -188,6 +190,7 @@ func _frames(part: String) -> void:
 	_meshes()
 	if part != "farm" and part != "hub_bare":
 		await _budget(part, fl)
+		_vfx_inventory(part)
 
 ## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
 func _zone(id: String) -> void:
@@ -219,6 +222,9 @@ func _budget(part: String, fl: Array) -> void:
 		cl.visible = false
 	for i in 8:
 		await main.get_tree().process_frame
+	if shots_dir != "":
+		DirAccess.make_dir_recursive_absolute(shots_dir)
+		main.get_viewport().get_texture().get_image().save_jpg("%s/%s.jpg" % [shots_dir, part], 0.9)
 	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
 		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall"), "base_life_ms": _life_ms(home)}
@@ -375,6 +381,59 @@ func _emitters() -> void:
 	ks.sort_custom(func(a, b): return by[a] > by[b])
 	print("BENCH emitting particles (%d): %s" % [by.values().reduce(func(a, b): return a + b, 0),
 		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))])
+
+## Every particle system, Decal and see-through glow card of the part, grouped by owner path (the keep/cut list
+## in docs/GARDEN_PERF.md starts from these lines): "BENCH vfx <part> <kind> <owner/name> xN (emitting or shown)".
+func _vfx_inventory(part: String) -> void:
+	var by := {}
+	for n in main.current.find_children("*", "Node3D", true, false):
+		var kind := _vfx_kind(n)
+		if kind == "" or not n.is_visible_in_tree():
+			continue
+		var key := "%s %s" % [kind, _owner_path(n)]
+		if kind == "emitter" and not "Aura" in key:
+			key += " amount %d at %s" % [n.amount, (n as Node3D).global_position.snapped(Vector3.ONE * 0.5)]
+		by[key] = int(by.get(key, 0)) + 1
+	var ks := by.keys()
+	ks.sort()
+	for k in ks:
+		print("BENCH vfx %s %s x%d" % [part, k, by[k]])
+
+const FX_SHADERS := [      # the see-through light and glow shaders ("card" lines of the vfx inventory)
+	"glow", "ring", "mote", "spark", "light_shaft", "waterfall", "updraft", "wind", "seat_beam", "exit_beam",
+	"glowball", "fx_dot", "care_glow", "care_disc", "care_ice", "cloud_puff", "kin_aura", "boki_wisp", "wisp_core",
+	"blob_shadow"]
+
+func _vfx_kind(n: Node3D) -> String:
+	if n is GPUParticles3D or n is CPUParticles3D:
+		return "emitter" if n.emitting else ""
+	if n is Decal:
+		return "decal"
+	if not n is GeometryInstance3D:
+		return ""
+	var mats: Array[Material] = [(n as GeometryInstance3D).material_override]
+	var mesh: Mesh = null
+	if n is MeshInstance3D:
+		mesh = (n as MeshInstance3D).mesh
+	elif n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh != null:
+		mesh = (n as MultiMeshInstance3D).multimesh.mesh
+	for i in (mesh.get_surface_count() if mesh != null else 0):
+		mats.append(mesh.surface_get_material(i))
+	for m in mats:
+		var sm := m as ShaderMaterial
+		if sm != null and sm.shader != null and sm.shader.resource_path.get_file().get_basename() in FX_SHADERS:
+			return "card:" + sm.shader.resource_path.get_file().get_basename()
+	return ""
+
+func _owner_path(n: Node) -> String:
+	var names := PackedStringArray()
+	var cur := n
+	while cur != null and names.size() < 4 and cur != main.get_tree().root:
+		var nm := String(cur.name).rstrip("0123456789")
+		names.append(cur.get_class() if nm.begins_with("@") else nm)
+		cur = cur.get_parent()
+	names.reverse()
+	return "/".join(names)
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()

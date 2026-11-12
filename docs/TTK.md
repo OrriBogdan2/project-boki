@@ -32,8 +32,8 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | mage (Joule) | combo rank max | 1.25 | 6.40 | 0.20 | FAIL |
 | bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
 | bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.35 | 5.85 | 0.74 | FAIL |
-| bulwark (Oath) | combo rank max | 4.35 | 5.00 | 0.87 | ok |
+| bulwark (Oath) | combo rank 0 | 4.37 | 5.85 | 0.75 | FAIL |
+| bulwark (Oath) | combo rank max | 4.37 | 5.00 | 0.87 | ok |
 | thief (Shiv) | LMB rank 0 | 4.70 | 4.95 | 0.95 | ok |
 | thief (Shiv) | LMB rank max | 4.70 | 4.95 | 0.95 | ok |
 | thief (Shiv) | combo rank 0 | 4.23 | 4.95 | 0.86 | ok |
