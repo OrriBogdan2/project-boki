@@ -60,7 +60,7 @@ static func plan(h: Hunter) -> String:
 	if not ready(h):
 		return ""
 	var k: Kin = h.kin
-	if k != null and not k.dead and k.state in ["downed", "reviving"]:
+	if k != null and not k.dead and k.state in ["downed", "wisp"]:
 		return "rescue"
 	if not boki_with_you(h):
 		return "surge"
