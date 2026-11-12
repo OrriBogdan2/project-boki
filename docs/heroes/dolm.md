@@ -174,6 +174,11 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   spot back; no spot at all ends the chain where he is, with the crash.
 - **Other moves:** RMB let go mid-hop: the slam lands with that hop and the chain ends there (crash and slam, as the old leap). Opening the
   glider, being downed or a merge drops the chain with no crash. Bots ride the whole chain.
+- **Space in a hop's flight (DECISIONS 11-08, Shift cancels into glide instantly for every Hunter):** the hop lets go on the press
+  (`BreahHop.let_go` through `ArchKit.glide_cancel`: `launch_to`'s `fly_t` hold ends) and the glider opens within 2 steps at the hop's own
+  speed, no snap, no added speed, no crash, no rock; the charge recharges from there. A hop up onto a ledge is the shared sure arc and
+  keeps it. No press: the landing, the ally hop-over and the crash are unchanged. Asserted by `--move-rule-guard-check` (Tenzo `shift`/`keep`
+  rows) and `--dolm-combo-check` (`glide (DECISIONS 11-08): ...`).
 - **Cooldown:** the charge is spent at the press; the recharge waits for the chain's end (`_hold_charge` undoes the shared step).
 - **Anim ids:** `breah_hop` (each hop), `breah_skate` (the skid), `breah_leap_land` (the crash). ART-1 Tenzo maps `breah_hop` -> `dash_hop` and `breah_skate` -> `dash_skate`.
 - **Hooks for S3/S4 (placeholders use existing dust and sounds):** take-off `br_leap` at the feet; rock rise `br_rise`; touchdown `br_slam` (soft); crash `br_slam`; roll `br_roll`.
