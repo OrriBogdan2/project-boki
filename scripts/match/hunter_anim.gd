@@ -766,7 +766,7 @@ func update(dt: float, s: Dictionary) -> void:
 		else:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
-	if gait != null:
+	if gait != null and gait.legs.is_inside_tree():      # rest_pose's model has no world yet
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
 		hl = gait.hl
 		hr = gait.hr
