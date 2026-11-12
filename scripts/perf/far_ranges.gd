@@ -23,11 +23,11 @@ const BIG := {
 }
 
 ## The class of one scatter batch: its group's "far" hint ("tree", "rock" or "cliff"), or the name.
-static func class_of(label: String, chunk: int, hint := "") -> String:
+static func class_of(label: String, chunk: int, far_hint := "") -> String:
 	if label.begins_with("Bushes"):
 		return "bush"
-	if hint in BIG_CLASSES:
-		return hint
+	if far_hint in BIG_CLASSES:
+		return far_hint
 	if label.begins_with("Grass") or label.begins_with("Flowers") or label.begins_with("Pebbles") or chunk >= 32:
 		return "small"
 	return "rock"

@@ -156,12 +156,12 @@ func snap(quiet := false) -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
-		var hooked := state == "hooked"
-		if hooked:
+		var was_hooked := state == "hooked"
+		if was_hooked:
 			snap_t = SNAP_T
 			snap_end = anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 		if not quiet:
-			var at := _chain_from().lerp(snap_end, 0.5) if hooked else k.h.pos + Vector3(0, 1.0, 0)
+			var at := _chain_from().lerp(snap_end, 0.5) if was_hooked else k.h.pos + Vector3(0, 1.0, 0)
 			k.vfx("chain_snap", at)
 	elif state == "pulling":
 		_stop("stopped", false)

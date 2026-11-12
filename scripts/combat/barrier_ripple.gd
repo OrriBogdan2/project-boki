@@ -44,14 +44,14 @@ func on_wall(w: Dictionary, from: Vector3, broke: bool) -> void:
 	var face := Vector3(c.x, y, c.y) + Vector3(nrm.x, 0.0, nrm.y) * float(w["th"])
 	hit(face, ab.normalized(), nrm, w["col"], broke)
 
-## A hit at `at` on the face whose outward side is `nrm` (flat), the face running along `tan`.
-func hit(at: Vector3, tan: Vector2, nrm: Vector2, col: Color, broke: bool) -> void:
+## A hit at `at` on the face whose outward side is `nrm` and which runs along `along` (both flat).
+func hit(at: Vector3, along: Vector2, nrm: Vector2, col: Color, broke: bool) -> void:
 	var mi: MeshInstance3D
 	if _free.is_empty():
 		mi = (_live.pop_front() as Dictionary)["node"]       # all busy: the oldest ring gives way
 	else:
 		mi = _free.pop_back()
-	var t3 := Vector3(tan.x, 0.0, tan.y)
+	var t3 := Vector3(along.x, 0.0, along.y)
 	var n3 := Vector3(nrm.x, 0.0, nrm.y)
 	var up := (n3 + Vector3.UP * LEAN).normalized()      # the ring's normal: out of the face, tipped up
 	var shown := col.lerp(Color.WHITE, 0.3)

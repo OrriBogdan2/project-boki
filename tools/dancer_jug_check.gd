@@ -324,7 +324,7 @@ func thief(a) -> void:
 	A.step(m, 6.1)
 	A.ok("dancer E: waiting 6s steps you to it anyway",
 			P.flat_dist(T) < 1.8 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
-	_knife_in_barriers(m, A, P, T, K, home)
+	_knife_in_barriers(m, P, T, K, home)
 	# a knock heals a fifth (15% passive, 5% from the takedown reset) in all; the crimson star and the green pillar
 	P.hp = P.max_hp * 0.5
 	var php := P.hp
@@ -392,7 +392,7 @@ func _move_len(mv: String) -> float:
 
 ## E into a placed barrier (a Verbs wall: rock, ice, shield): the dagger sticks, rides it, drops under it when it
 ## breaks, the 6s return stays, and the blink lands beside it on her side, never inside.
-func _knife_in_barriers(m, A, P, T, K, home: Vector3) -> void:
+func _knife_in_barriers(m, P, T, K, home: Vector3) -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	var wd := {"time": 30.0, "hp": 500.0, "move": true, "length": 4.0}
 	var at := home + Vector3(5.0, 0, 0)

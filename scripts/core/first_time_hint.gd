@@ -56,13 +56,13 @@ static func show(id: String, toast: Callable) -> bool:
 ## steps taught, so it gets none of their hints; a save still in the farm tutorial keeps them.
 static func migrate(data: Dictionary) -> void:
 	var tut: Dictionary = data.get("tutorial", {})
-	var seen: Dictionary = tut.get("hints", {}) if typeof(tut.get("hints")) == TYPE_DICTIONARY else {}
+	var hints: Dictionary = tut.get("hints", {}) if typeof(tut.get("hints")) == TYPE_DICTIONARY else {}
 	var ft = tut.get("ft")
 	var ft_done: bool = typeof(ft) == TYPE_DICTIONARY and bool(ft.get("done", false))
 	var farm_over: bool = bool(tut.get("day1_done", false)) or ft_done
 	for group in [["match", bool(tut.get("match", false))], ["farm", farm_over]]:
 		if group[1]:
 			for id in ids(String(group[0])):
-				seen[id] = true
-	tut["hints"] = seen
+				hints[id] = true
+	tut["hints"] = hints
 	data["tutorial"] = tut
