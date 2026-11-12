@@ -404,6 +404,7 @@ const CHECKS := {
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--fps-parity-check": ["res://tools/fps_parity_check.gd", "fps_parity_check", null],      # same input script at 30/60/144 fps
 	"--party-client-check": ["res://tools/party_client_check.gd", "party_client_check", null],      # docs/specs/PARTY.md, fake matchmaker
+	"--party-view-check": ["res://tools/party_view_check.gd", "party_view_check", null],      # the party screen
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--camera-fast-check": ["res://tools/camera_fast_check.gd", "camera_fast_check", "check"],      # locked follow
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
