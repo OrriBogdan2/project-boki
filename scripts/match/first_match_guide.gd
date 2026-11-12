@@ -4,10 +4,14 @@ extends RefCounted
 ## (content/rules/first_match_guide.json). A line shows once per match, when its moment comes, and clears
 ## on its trigger or after its time. It is only drawn: it never pauses or blocks anything. The save's
 ## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
+## The "dive" line outlives that: the first time the glider has been open for a while, high up, in any
+## Extraction, it says which key dives. It shows once per save and stops at the first dive
+## (Save.d tutorial glide_dive); a guide kept only for it has `dive_only`.
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
-const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
+# what to say first when two lines are due
+const ORDER := ["land", "dive", "squad", "blight", "exit", "rank", "send", "chest"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
 var m: Match
@@ -17,6 +21,8 @@ var shown := {}               # ids already shown this match
 var _t := 0.0                 # s the line has been up
 var _gap := 0.0               # s of quiet left before the next line
 var _throws0 := 0             # the Boki's sends when its line came up
+var dive_only := false        # past the first matches: only the dive line can show
+var _glide_t := 0.0           # s the glider has been open (and above dive_height) without a break
 
 static func rules() -> Dictionary:
 	return Content.rules("first_match_guide")
@@ -27,12 +33,18 @@ static func for_match(mt: Match, opts: Dictionary) -> FirstMatchGuide:
 		if opts.get(skip, false):
 			return null
 	var n := int(Save.d.get("first_guide", 0))
-	if n >= int(rules()["matches"]):
-		return null
-	Save.d["first_guide"] = n + 1
 	var g := FirstMatchGuide.new()
 	g.m = mt
+	if n < int(rules()["matches"]):
+		Save.d["first_guide"] = n + 1
+	elif dive_taught():
+		return null
+	else:
+		g.dive_only = true
 	return g
+
+static func dive_taught() -> bool:
+	return bool(Save.d["tutorial"].get("glide_dive", false))
 
 ## Old saves: one that has played already has had its first matches (keyed by its own field, like FarmBuilder).
 static func migrate(data: Dictionary) -> void:
@@ -46,6 +58,7 @@ func tick(dt: float) -> void:
 		id = ""
 		return
 	_gap = maxf(_gap - dt, 0.0)
+	_watch_glide(p, dt)
 	if id != "":
 		_t += dt
 		if _t >= _life(id) or _done(id, p):
@@ -54,9 +67,16 @@ func tick(dt: float) -> void:
 			_gap = float(rules()["gap"])
 	if id == "" and _gap <= 0.0:
 		for cand: String in ORDER:
-			if not shown.has(cand) and _due(cand, p):
+			if not shown.has(cand) and (cand == "dive" or not dive_only) and _due(cand, p):
 				_start(cand, p)
 				return
+
+## Times the open glider; a dive (here or anywhere) counts as learnt for good.
+func _watch_glide(p: Hunter, dt: float) -> void:
+	if p.glide_dive.on:
+		Save.d["tutorial"]["glide_dive"] = true
+	var open := p.gliding and not p.dropping and GlideDive.height(p) > float(rules()["dive_height"])
+	_glide_t = _glide_t + dt if open else 0.0
 
 func _life(lid: String) -> float:
 	for row: Array in rules()["lines"]:
@@ -73,6 +93,8 @@ func _start(lid: String, p: Hunter) -> void:
 	for row: Array in rules()["lines"]:
 		if row[0] == lid:
 			txt = String(row[1])
+	if lid == "dive":
+		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who)
 
@@ -99,6 +121,7 @@ func _due(lid: String, p: Hunter) -> bool:
 	if p.dropping:
 		return false
 	match lid:
+		"dive": return not dive_taught() and _glide_t >= float(rules()["dive_open_s"])
 		"squad": return _enemy_near(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
@@ -110,6 +133,7 @@ func _due(lid: String, p: Hunter) -> bool:
 ## Has the player done what this line says (or is it no longer true)?
 func _done(lid: String, p: Hunter) -> bool:
 	match lid:
+		"dive": return p.glide_dive.on or not p.gliding
 		"land": return not p.dropping
 		"squad": return not _enemy_near(p)
 		"exit": return _exit_near(p)

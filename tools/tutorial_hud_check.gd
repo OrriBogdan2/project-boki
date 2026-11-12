@@ -10,6 +10,9 @@ extends RefCounted
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
 ##      wall kick (taller than a jump, within a jump and a kick's climb)
+##   6. the glide dive line (FirstMatchGuide): shown once per save after the glider has been open for
+##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
+##      again; a save that has dived never sees it
 
 var bad := 0
 var m: Match
@@ -27,6 +30,7 @@ func run(mn: Node) -> void:
 	_lanes()
 	_course()
 	_reach()
+	_dive_hint()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -207,3 +211,50 @@ func _reach() -> void:
 	var cr := tu.stop("crouch")
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
 	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+
+# ------------------------------------------------------------------ 6. the glide dive line
+func _glide_secs(g: FirstMatchGuide, p: Hunter, secs: float) -> void:
+	p.dropping = false
+	p.gliding = true
+	p.pos.y += float(FirstMatchGuide.rules()["dive_height"]) + 5.0 - GlideDive.height(p)
+	for i in int(secs * 10.0):
+		g.tick(0.1)
+
+func _dive_hint() -> void:
+	Save.d["tutorial"].erase("glide_dive")
+	Save.d["first_guide"] = int(FirstMatchGuide.rules()["matches"])      # past the first matches: dive line only
+	var dm := Match.new()
+	main.add_child(dm)
+	dm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	dm.set_process(false)
+	var g := dm.guide
+	var p: Hunter = dm.player
+	ok(g != null and g.dive_only, "after the first matches the guide stays, for the dive line only")
+	_glide_secs(g, p, float(FirstMatchGuide.rules()["dive_open_s"]) - 0.5)
+	ok(g.line == "", "the glider open for less than dive_open_s: no line")
+	_glide_secs(g, p, 0.6)
+	var cap := Settings.key_cap("crouch")
+	var says := "the dive line with the crouch key (%s)" % g.line
+	ok(g.id == "dive" and g.line.contains(cap), "glider open past dive_open_s: " + says)
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var px := int(strip.size.y * 0.5)
+	var wide: float = dm.hud.big.get_string_size(g.line, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	ok(wide <= strip.size.x - strip.size.y, "the dive line fits the one-line strip at %d px" % px)
+	p.glide_dive.on = true
+	g.tick(0.1)
+	ok(g.line == "" and FirstMatchGuide.dive_taught(), "the dive stops the line and counts as learnt")
+	p.glide_dive.on = false
+	g.shown.clear()
+	_glide_secs(g, p, 5.0)
+	ok(g.line == "", "never again after a dive")
+	ok(FirstMatchGuide.for_match(null, {}) == null, "the next Extraction gets no guide at all")
+	Save.d["tutorial"].erase("glide_dive")
+	var g2 := FirstMatchGuide.for_match(dm, {})
+	g2.shown.clear()
+	_glide_secs(g2, p, 2.0)
+	ok(g2.id == "dive" and FirstMatchGuide.dive_taught(), "the line itself counts as shown for the save")
+	g2.tick(20.0)
+	g2.shown.clear()
+	_glide_secs(g2, p, 5.0)
+	ok(g2.line == "", "shown once per save: not again after it ran out")
+	dm.queue_free()
