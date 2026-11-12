@@ -285,7 +285,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 		verdict = "hesitate"
 	if verdict == "refuse":
 		bark("refuse")
-		m.sfx("kin_unsure", owner_h.pos, -2.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -2.0, Unique.voice(rec))
 		note("refused", "refused to jump into a fight that looked too dangerous", -1.0)
 		pend_slot = ""; pend_skill = Vector3.INF
 		return
@@ -294,7 +294,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 		hesitate_to = p
 		if trust < 60.0 or not owner_h.is_local():
 			bark("hesitate")
-		m.sfx("kin_unsure", owner_h.pos, -4.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -4.0, Unique.voice(rec))
 		return
 	if from_shoulder:
 		_launch(p)
@@ -424,10 +424,7 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	if model:
 		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
-	# each kin has its own cue: a warm whoomp (venom), a puff (spore), a stone rumble (gravity),
-	# a glassy chime (prism), a swirl of wind (lunar), a low crackle of storm (echo)
-	var cue := "k_%s" % String(sp.get("type", ""))
-	m.sfx(cue if Sfx.has(cue) else "skill", pos, -2.0 if not auto else -7.0)
+	m.sfx(KinLib.cue_of(String(sp.get("type", ""))), pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
 
 ## An event trigger (KinParts.TRIGGERS): on_throw, on_hit, on_recall, on_bond_full, on_low_hp.
@@ -486,6 +483,7 @@ func start_leap(to: Vector3, e: Dictionary, ctx: Dictionary) -> void:
 # ------------------------------------------------------------------ the merge (bond ultimate)
 ## KinMerge starts it: a mount grows giant under you; any other kin fuses onto you as armor.
 func merge_in(giant_form: bool) -> void:
+	m.sfx("boki_fuse", pos, -4.0)
 	fly = {}
 	target = null
 	pend_skill = Vector3.INF
@@ -517,6 +515,8 @@ func merge_leap() -> bool:
 
 ## KinMerge ends it: back to riding with you, ready to throw again straight away.
 func merge_out() -> void:
+	if state == "fused":
+		m.sfx("boki_unfuse", pos, -4.0)
 	if not giant.is_empty():
 		giant = {}
 		m.fx.burst(pos + Vector3(0, 0.6, 0), sp["color"], 20, 4.0)
@@ -537,7 +537,7 @@ func land_pumped(secs: float) -> void:
 	rest_t = secs
 	m.fx.burst(pos + Vector3(0, 1.0, 0), sp["color"], 22, 4.0)
 	m.fx.ring(pos, 1.6, Color(sp["color"], 0.9), 0.35)
-	m.sfx("kin_happy", pos, -4.0, Unique.voice(rec))
+	m.sfx(KinVoice.cue(species, "sleepy"), pos, -4.0, Unique.voice(rec))
 	KinNet.event(m, "rest", self, owner_h.pos, "%.1f" % secs)
 	if owner_h.is_local():
 		KinCommand.say(owner_h, "%s is pumped: back in %ds" % [rec.get("name", "Your Boki"), int(ceil(secs))], sp["color"])
@@ -546,6 +546,7 @@ func land_pumped(secs: float) -> void:
 func merge_pop() -> void:
 	if state != "fused" or owner_h == null or dead:
 		return
+	m.sfx("boki_unfuse", owner_h.pos, -4.0)
 	teleport(owner_h.pos + Vector3(0, 1.0, 0))
 	cmd = "follow"
 	hold_at = Vector3.INF
@@ -594,7 +595,7 @@ func sim(dt: float) -> void:
 		set(k, maxf(0.0, get(k) - dt))
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
-		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
 		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt

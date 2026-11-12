@@ -24,6 +24,8 @@ var flash_pool: Array[MeshInstance3D] = []
 var fi := 0
 
 func _ready() -> void:
+	wall_impact = WallImpact.new(self)
+	add_child(wall_impact)
 	particles = PARTICLES * float(Settings.q("fx"))
 	particle_mat = StandardMaterial3D.new()
 	particle_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -152,25 +154,6 @@ func muzzle(at: Vector3, dir2: Vector2, col: Color, power := 1.0) -> void:
 	if power >= 1.8:
 		burst(at + d * 0.35, Color(0.78, 0.76, 0.74, 0.35), int(3 * power), 1.2, 0.5, -0.6, 1.6, d, 30.0)
 
-## A hit landing: a flash where it struck, sparks thrown out the far side along the shot, a few
-## kicked back toward the shooter; crits flash gold and wider, armor sheds blue shards.
-## power: 0..3 from the damage.
-func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, armor := false) -> void:
-	var fcol := col
-	if crit: fcol = Color("ffd23f")
-	elif armor: fcol = Color("8fd4ff")
-	var sz := (0.34 + 0.17 * power) * (1.45 if crit else 1.0)
-	flash(at, fcol, sz, 0.07 + 0.02 * power + (0.04 if crit else 0.0))
-	var dd := dir.normalized() if dir.length() > 0.01 else Vector3.UP
-	dd = (dd + Vector3(0, 0.35, 0)).normalized()
-	spark(at, dd, fcol.lerp(Color.WHITE, 0.3), int(5 + 4 * power) + (6 if crit else 0), 7.0 + 3.0 * power, 38.0 + (25.0 if crit else 0.0), 0.2 + 0.04 * power, 12.0, 1.0 + 0.2 * power)
-	if power >= 1.0 or crit:
-		spark(at, (-dd + Vector3(0, 0.9, 0)).normalized(), fcol, int(2 + 2 * power), 4.0 + 1.5 * power, 70.0, 0.18, 14.0, 0.8)
-	if armor:
-		burst(at, Color("9ad8ff"), int(4 + 3 * power), 4.5, 0.35, 14.0, 0.8, dd, 70.0)
-	if crit:
-		ring(at + Vector3(0, -0.6, 0), 1.1 + 0.25 * power, Color(1.0, 0.85, 0.3, 0.85), 0.2)
-
 ## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
 ## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
 var _beam_sh: Shader
@@ -204,6 +187,7 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
+var wall_impact: WallImpact     # the crack decals where a wall stun landed
 var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
 ## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
@@ -234,8 +218,8 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	p.emitting = true
 
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
-func dust(at: Vector3, n := 8) -> void:
-	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
+func dust(at: Vector3, n := 8, col := Color(0.82, 0.8, 0.72, 0.9)) -> void:
+	_emit(at + Vector3(0, 0.1, 0), col, n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
 ## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
 ## burst: those are kept for blasts that do something.
@@ -456,11 +440,13 @@ func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
 		burst(at + Vector3(d.x, 0.5, d.y) * (0.5 + i * 1.2), col, 12, 6.0, 0.4, 4.0, 1.4, Vector3(d.x, 0.2, d.y), 25.0)
 
 # ---- telegraphs
-func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
+## `side`: the thin outer edge in whose-it-is colour (SideColor); alpha 0 (the default) draws none.
+func _tele_mesh(col: Color, shape: int, side: Color) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var mat := ShaderMaterial.new()
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
+	mat.set_shader_parameter("side", side)
 	mat.set_shader_parameter("shape", shape)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -468,14 +454,15 @@ func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
 	teles.append(mi)
 	return mi
 
-func telegraph_circle(at: Vector3, radius: float, col: Color) -> Node3D:
-	var mi := _tele_mesh(col, 0)
+func telegraph_circle(at: Vector3, radius: float, col: Color, side := Color(0, 0, 0, 0)) -> Node3D:
+	var mi := _tele_mesh(col, 0, side)
 	mi.mesh = Models.flat_quad(radius * 2.0)
 	mi.global_position = at + Vector3(0, 0.07, 0)
 	return mi
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color) -> Node3D:
-	var mi := _tele_mesh(col, 1)
+func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color,
+		side := Color(0, 0, 0, 0)) -> Node3D:
+	var mi := _tele_mesh(col, 1, side)
 	var pm := PlaneMesh.new(); pm.size = Vector2(width, length)
 	mi.mesh = pm
 	mi.set_meta("len", length)

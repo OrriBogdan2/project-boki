@@ -16,6 +16,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import hem_pieces as H
 import crouchkit
+import gardenkit
 from posekit import Clip, FnClip, Solver, ang_dir as D, frame_of, two_bone
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -49,6 +50,11 @@ HIP = {k: READY[k] for k in ("tor", "hed", "G", "BA", "BS", "Rw", "RF", "RD", "R
 
 def C(name, dur, keys, loop=False, base=READY):
     return Clip(name, dur, keys, base, loop)
+
+
+def amp(pose, k):
+    """The pose's travel from READY scaled by k (numbers and vectors alike)."""
+    return {c: (READY[c] + k * (v - READY[c]) if isinstance(v, float) else tuple(r + k * (x - r) for r, x in zip(READY[c], v))) for c, v in pose.items()}
 
 
 class HemSolver(Solver):
@@ -230,9 +236,26 @@ def crouch_set():
     return crouchkit.quick(C, READY, STALK, STILL, hands=("G", "RF"), scan=0.22)
 
 
+# ---- the garden (DECISIONS 2026-11-09): cold and economical. She crouches to the Boki's height with the bow still low in her left hand; the right does the work, once and precisely
+# (flat palm on the head, a held-out snack with the fingers together), and the cheer is a short tight lift of the bow, the right fist at her chest, the chin up. No hop.
+TEND = dict(STALK, pel=(0.02, 0.06, -0.30), prt=(0.30, 0.16, -0.05), tor=(0.28, 0.08, 0.06), hed=(-0.52, -0.06, -0.02), G=(-0.27, 0.40, 0.56), brow=0.3, lid=0.1)
+PET_A = dict(TEND, RF=(0.06, 0.66, 0.66), RD=n3((0.0, 1.0, -0.25)), RP=n3((0.0, 0.25, -1.0)), Rpole=(1.0, -0.2, 0.2), Rw=0.0, fing=0.2)
+GIVE = dict(TEND, pel=(0.02, 0.06, -0.34), RF=(0.08, 0.64, 0.56), RD=n3((0.0, 1.0, 0.1)), RP=n3((0.0, 0.1, 1.0)), Rpole=(1.0, -0.2, 0.2), fing=0.05)
+PEAK = dict(READY, G=(-0.30, 0.30, 1.52), BA=n3((-0.1, 0.2, 1.0)), RF=(0.12, 0.2, 1.12), RD=n3((0.1, 0.4, 0.9)), RP=n3((-0.6, 0.6, 0.0)), fing=0.9, brow=0.6, lid=0.05, hed=(-0.40, -0.1, -0.04))
+
+
+def garden_set():
+    P = {"kneel": TEND, "pet_a": PET_A, "pet_b": dict(PET_A, RF=(0.06, 0.52, 0.68), tor=(0.26, 0.08, 0.06)),
+         "give": GIVE, "give_in": dict(GIVE, RF=(0.08, 0.54, 0.56)),
+         "dip": dict(READY, pel=(0.02, 0.0, -0.12), tor=(0.22, 0.10, 0.11)), "up": dict(PEAK, G=(-0.28, 0.4, 1.30), RF=(0.12, 0.3, 1.0)),
+         "peak": PEAK, "pump": dict(PEAK, G=(-0.3, 0.32, 1.44), RF=(0.12, 0.22, 1.06))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.04, "snap": 0.25})
+
+
 def clips():
     out = [F("idle", 3.6, idle), F("stance", 4.6, stance)]
     out += crouch_set()
+    out += garden_set()
     wk, rn = 1.04, 0.66
     for n, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(F("walk_" + n, wk, gait(0.45, h)))
@@ -298,8 +321,11 @@ def clips():
     ufin = dict(urel, tor=(-0.12, AIM_Y - 0.5, -0.1), RF=(0.17, -0.22, 1.36), G=(-0.05, 0.57, 1.36), BA=n3((0.1, -0.2, 0.96)))
     out.append(C("ult_final", 0.65, [(0.0, UN), (0.1, ufin, "out"), (0.25, dict(ufin, tor=(-0.08, AIM_Y - 0.4, -0.06))), (0.65, dict(HIP))]))
     # --- reactions
-    out.append(C("hit_f", 0.42, [(0.0, dict(READY)), (0.07, {"tor": (-0.22, 0.14, 0.1), "hed": (-0.3, -0.25, 0.14), "G": (-0.27, 0.05, 0.84), "RF": (0.24, 0.04, 1.02), "brow": -0.7, "lid": 0.45}, "out"), (0.42, dict(READY))]))
-    out.append(C("hit_b", 0.42, [(0.0, dict(READY)), (0.07, {"tor": (0.26, -0.05, -0.08), "hed": (0.18, 0.2, -0.1), "G": (-0.24, 0.2, 0.83), "RF": (0.24, 0.1, 1.02), "brow": -0.7, "lid": 0.45}, "out"), (0.42, dict(READY))]))
+    # hits: the peak at 0.07 s, back in her stance by 0.24 s (a light body snaps back; docs/art/REACT_AUDIT.md); the back hit 1.8x
+    hf = {"tor": (-0.22, 0.14, 0.1), "hed": (-0.3, -0.25, 0.14), "G": (-0.27, 0.05, 0.84), "RF": (0.24, 0.04, 1.02), "brow": -0.7, "lid": 0.45}
+    hb = amp({"tor": (0.26, -0.05, -0.08), "hed": (0.18, 0.2, -0.1), "G": (-0.24, 0.2, 0.83), "RF": (0.24, 0.1, 1.02), "brow": -0.7, "lid": 0.45}, 1.8)
+    out.append(C("hit_f", 0.42, [(0.0, dict(READY)), (0.07, hf, "out"), (0.24, dict(READY)), (0.42, dict(READY))]))
+    out.append(C("hit_b", 0.42, [(0.0, dict(READY)), (0.07, hb, "out"), (0.24, dict(READY)), (0.42, dict(READY))]))
     STUN = {"pel": (0, -0.02, -0.08), "prt": (0.05, 0, 0.05), "tor": (0.32, 0.1, 0.1), "hed": (0.35, 0.2, 0.2), "G": (-0.235, 0.12, 0.60), "BA": n3((0.0, 0.78, 0.62)), "BS": n3((0.0, -0.62, 0.78)), "RF": (0.2, 0.1, 0.8), "RD": (0, 0.1, -1), "RP": (-1, 0, 0), "Rpole": (0.8, -0.5, 0), "brow": -0.8, "lid": 0.55, "fing": 0.1}
     out.append(C("stun", 1.2, [(0.0, STUN), (0.6, dict(STUN, tor=(0.3, -0.1, -0.06), hed=(0.3, -0.2, -0.16), pel=(0, -0.02, -0.09))), (1.2, STUN)], True))
     DN = {"pel": (0.0, -0.1, -0.44), "prt": (0.45, 0.0, -0.1), "tor": (0.3, 0.1, 0.08), "hed": (-0.3, -0.08, 0.05), "FL": (-0.17, 0.18, A_Z), "FR": (0.14, -0.34, 0.12), "FRp": 1.15, "FLy": 0.2, "FRy": -0.1,

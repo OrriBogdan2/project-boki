@@ -455,9 +455,14 @@ effect category" made concrete.
 
 | Viewer sees | Rim and pattern | Opacity | Sound |
 |---|---|---|---|
-| own casts | a thin white rim | fill 30% | normal |
-| ally casts | a thin team-colour rim (TEAM_COLORS) | fill 20% | −4 dB |
-| enemy casts | a **thick red rim `#ff2d55` with animated inward chevrons**, drawn on top of everything | fill 35% | +3 dB if it can reach you (in range, aimed at you), otherwise normal |
+| own casts | a thin rim in your side colour (`SideColor.YOU`) | fill 30% | normal |
+| ally casts | a thin rim in the ally colour (`SideColor.ALLY`) | fill 20% | −4 dB |
+| enemy casts | a thin rim in the foe colour (`SideColor.FOE`) | fill 35% | +3 dB if it can reach you (in range, aimed at you), otherwise normal |
+
+The fill always keeps the caster's own colour (each Hunter's ability colour), so an enemy Vex and your
+teammate Vex share the fill and differ only at the edge: the telegraph shader's `side` edge (ArchKit
+`tele_circle`/`tele_lane`, the charge ring), the AimKit rim on `all` areas, and the halo round a shot
+(`Oomph.shot_look`). `--clarity-check` asserts it.
 
 Rules:
 

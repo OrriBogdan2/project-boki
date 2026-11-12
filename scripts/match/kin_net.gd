@@ -80,7 +80,7 @@ static func decode_form(s: String) -> Dictionary:
 		return {}
 	if p[1] == "1" and p[0] != "" and not Content.merge_form(p[0]).is_empty():
 		return MergeForm.kit_form(p[0], float(p[13]))
-	return {"id": p[0], "kit": false, "name": p[2], "type": p[3], "color": Color.html(p[4]), "glow": Color.html(p[5]), "accent": Color.html(p[6]), "parts": Array(p[7].split(",", false)),
+	return {"id": p[0], "kit": false, "name": p[2], "type": p[3], "cue": MergeForm.type_cue(p[3]), "color": Color.html(p[4]), "glow": Color.html(p[5]), "accent": Color.html(p[6]), "parts": Array(p[7].split(",", false)),
 		"size": float(p[8]), "part_k": 1.3, "style": p[9], "word": p[10], "surge": p[11] == "1", "ring": float(p[12]), "dur": float(p[13]), "aug": {}, "haste": 0.0, "def": {}}
 
 ## Tell the other games something happened to this Boki or hunter (only for bodies this game owns).
@@ -117,16 +117,20 @@ static func on_event(m: Match, x: Array) -> void:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
+			m.sfx("boki_downed", at, -4.0)
 		"scoop", "round":
 			m.fx.ring(at, 1.2, Color.WHITE, 0.3)
-			m.sfx("recall", at, -4.0)
+			m.sfx("boki_revive", at, -4.0)
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":
 			if String(x[6]) == "shell" and e is Hunter:
 				(e as Hunter).set_meta("shell_break_at", m.time)
 				(e as Hunter).set_meta("shell_break_col", (e as Hunter).get_meta("mf_glow", Color.WHITE))
-			m.sfx("armor_break" if String(x[6]) == "shell" else "recall", at, -2.0, 0.9 if String(x[6]) == "shell" else 1.3)
+			if String(x[6]) == "shell":
+				m.sfx("armor_break", at, -2.0, 0.9)
+			else:
+				m.sfx(MergeXform.end_cue(String(x[6])), at, -2.0)
 		"mcast":
 			if e is Hunter:
 				MergeXform.on_cast(m, e as Hunter, at, String(x[6]))
