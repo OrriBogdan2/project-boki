@@ -6,8 +6,8 @@ extends RefCounted
 
 const MAX_WORDS := 12
 ## term -> the step id that introduces it ("" = never introduced by the tutorial, so never allowed).
-const JARGON := {"fuse": "", "relic": "expedition", "kin": "", "rank": "rank", "daze": "",
-		"uplink": "uplink", "ultimate": ""}
+const JARGON := {"fuse": "pick_ult", "relic": "expedition", "kin": "", "rank": "rank", "daze": "",
+		"uplink": "wayout", "ultimate": "pick_ult"}
 
 var bad := 0
 var main: Node

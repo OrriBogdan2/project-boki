@@ -124,6 +124,7 @@
 			"clip": "fusion"
 		}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -199,6 +200,7 @@
 			0.8
 		]
 	],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
 	"procedural": [
 		"ledge",
 		"mantle",

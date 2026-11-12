@@ -11,7 +11,6 @@ extends ArchKit
 ## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in
 ## KitLooks.
 
-const ROCK_PAY := "ROCKFALL"
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
@@ -174,7 +173,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		x["slow_k"] = float(rd["slow_k"])
 		if e is Hunter:
 			launch_pay += 1
-			payoff_fx(e.pos, ROCK_PAY, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
+			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
 		var f_dmg := splash_dmg * _repeat_k(f)
@@ -249,8 +248,19 @@ func _tick_dive() -> void:
 		dive = false
 		dive_glide = false
 		slam.land(dive_k)
+	elif dive_fall and h.over_void() and h.pos.y <= h.lip_y - float(slam_def()["void_drop"]):
+		_end_plunge()
 	elif dive_fall:
 		h.vel.y = minf(h.vel.y, -dive_speed())
+
+## Over the abyss the plunge takes him `void_drop` under the nearest lip and no further (low, never
+## dunked): no ground to slam, so the slam is dropped and he falls on at the abyss's own pace, glider free.
+func _end_plunge() -> void:
+	dive = false
+	dive_fall = false
+	dive_glide = false
+	h.vel.y = maxf(h.vel.y, -HunterMove.fall_cap(h))
+	play("")
 
 ## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
 func dive_speed() -> float:
@@ -436,7 +446,10 @@ func _punch(k: float) -> void:
 	var dir := h.aim_dir()
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
 	# that slides "step" metres ([footage] half a body height) under the ground brake
-	var stepv := HunterMove.slide_speed(float(pd["step"])) * (float(pd["air_k"]) if not h.grounded else 1.0)
+	var stepv := HunterMove.slide_speed(float(pd["step"]))
+	if not h.grounded:
+		# no ground brake up there: a short push, but never slower than she flies (item 51, out of an air dash)
+		stepv = maxf(stepv * float(pd["air_k"]), Vector2(h.vel.x, h.vel.z).length())
 	h.vel.x = dir.x * stepv
 	h.vel.z = dir.y * stepv
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
@@ -470,11 +483,10 @@ func _punch(k: float) -> void:
 		f.hurt(dmg, h, o)
 		landed += 1
 		_punch_impact(f.pos, dir, k)
-		if terrain_behind(f, dir, 1.6):
+		if KnockWall.behind(m, f, dir, 1.6):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
-			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
@@ -551,7 +563,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(
 			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}
 		)
-		m.sfx("dolm_dash", h.pos, -4.0, 1.0)
+		m.sfx(HeroSfx.dash_name(h), h.pos, -4.0, 1.0)
 		return true
 	if in_dash() or not spend_dash(false):
 		return true
@@ -690,7 +702,7 @@ func _raise_feel() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return

@@ -14,6 +14,10 @@ func run(main_node: Node) -> void:
 	await orb_check.orbs(main)
 	n += orb_check.n
 	fails += orb_check.fails
+	var globe_check = load("res://tools/ostra_globe_check.gd").new()
+	await globe_check.globe(main)
+	n += globe_check.n
+	fails += globe_check.fails
 	var arena_check = load("res://tools/ostra_arena_check.gd").new()
 	await arena_check.arena(main)
 	n += arena_check.n
@@ -101,7 +105,7 @@ func _ostra() -> void:
 	P.inp["fire"] = false
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
-	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
+	ok("lmb: a plain orb flies past the cursor to full range (12.25m)", olen > 11.0 and olen < 13.0, "%.1f m" % olen)
 	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
@@ -375,10 +379,27 @@ func _ostra() -> void:
 	)
 	reset.call()
 	K.cd["e"] = 0.0
-	var hp_fizz := T.hp
-	K.cast_e()
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
-	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
+	var hp_idle := T.hp
+	K.use_e()
+	var cd_cast := float(K.cd["e"])
+	step(m, float(K.e_def()["grow"]) + 60.0)
+	ok(
+		"e: no fizzle: a full seed left a whole minute is still there at full size, harmless",
+		not K.seed.is_empty() and K.seed_k() >= 0.99 and T.hp >= hp_idle and K.e_recastable(),
+		"seed %s k %.2f" % [not K.seed.is_empty(), K.seed_k()]
+	)
+	ok(
+		"e: the cooldown starts on the plant (it has run out by the minute, the pop is not waited for)",
+		cd_cast > 0.0 and float(K.cd["e"]) <= 0.0 and K.in_e(),
+		"cd at plant %.1f now %.1f" % [cd_cast, float(K.cd["e"])]
+	)
+	ok("e: the data lists no timer: no hold_full cap in the def", not K.e_def().has("hold_full"))
+	ok("e: a merge does not take the waiting seed", _merge(P) and not K.seed.is_empty())
+	step(m, 2.0)
+	P.downed = true
+	K._tick(0.016)
+	P.downed = false
+	ok("e: going down ends the seed with no damage", K.seed.is_empty() and T.hp >= hp_idle and not K.in_e())
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -746,8 +767,8 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 75 + owner 11-08: in flight he drifts at dash.fly_slow (0.35, +17%) of his run speed",
-		flying and run_speed > 1.0 and absf(fly_slow - 0.35) < 0.001
+		"owner 11-10: in flight he drifts at dash.fly_slow (0.675, the old 0.35 slow halved) of his run speed",
+		flying and run_speed > 1.0 and absf(fly_slow - 0.675) < 0.001
 			and absf(speed / run_speed - fly_slow) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)
