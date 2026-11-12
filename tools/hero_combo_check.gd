@@ -997,8 +997,16 @@ func _gunslinger() -> void:
 	ac.step(m, 0.2)
 	P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
-	_dash(m, P, 0.3)
-	ac.step(m, 0.2)
+	var old_rings := {}      # ground rings up before the press; any other seen through the slide's end is on Shift
+	for e in m.fx.rings + VVFx.of(m).live: old_rings[(e["node"] as Node3D).get_instance_id()] = true
+	var new_rings := {}
+	var watch := func():
+		for e in m.fx.rings + VVFx.of(m).live:
+			var id := (e["node"] as Node3D).get_instance_id()
+			if not old_rings.has(id) and String(e.get("kind", "ring")) in ["ring", "disc"]: new_rings[id] = true
+	_dash(m, P, 0.3, watch)
+	ac.step(m, 0.2, watch)
+	ok("Slipstep: no ground ring or disc on the slide", new_rings.is_empty(), "rings %d" % new_rings.size())
 	ok("Slipstep: a held slide is owed a longer cooldown and letting go early refunds nothing",
 			K.last_dash_kind == "slide" and P.dashes < -0.2 and absf(float(K.dash_def()["hold_cost"]) - 0.4) < 0.001,
 			"dashes %.2f" % P.dashes)

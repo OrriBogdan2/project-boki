@@ -1785,10 +1785,10 @@ func rimewright() -> void:
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
+			"tm Shift: full skating speed within about 0.2 s, a trail of ice plates, no ground disc",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
 				and K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time) >= 4
-				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
+				and HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch"),
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",
@@ -1801,8 +1801,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
+				and HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch"), "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()
