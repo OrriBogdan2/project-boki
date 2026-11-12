@@ -497,7 +497,7 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
-## RecastCue: the light is the marker; left alone it flares by itself (no "EXPIRED").
+## RecastCue: the light is the marker; left alone it flares by itself (the slot still shows "EXPIRED").
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():

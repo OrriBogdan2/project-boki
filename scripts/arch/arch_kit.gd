@@ -135,7 +135,7 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
-## armed (false while a press is still eaten), auto (it fires itself at the end: no "EXPIRED")}. The base reports E while it's up and e_recastable().
+## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if left unused)}. The base reports E while it's up and e_recastable().
 func recast_window() -> Dictionary:
 	if e_t > 0.0 and e_recastable():
 		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())

@@ -12,7 +12,7 @@ extends RefCounted
 const KEYS := {"e": "signature", "x": "hunter_ult", "dash": "dash", "lmb": "fire", "sec": "secondary"}
 const WARN := 0.6              # s left when the ring turns hot and the ticks start
 const TICKS := [0.6, 0.4, 0.2] # s left at which a closing tick plays
-const EXPIRED_T := 0.9         # s "EXPIRED" stays on the slot
+const EXPIRED_T := 0.6         # s "EXPIRED" stays on the slot (DECISIONS 2026-11-08: about 0.6s)
 const RAN_OUT := 0.12          # s: a window that vanished with less than this left ran out (more: it was used)
 const POP_T := 0.45            # s the payoff flash on a foe's badge lasts
 const BADGE_GAP := 72.0        # px between two badges on one foe
@@ -29,10 +29,12 @@ static func track(k: ArchKit, dt: float) -> void:
 	var was := String(cue.get("slot", ""))
 	if not w.is_empty() and String(w["slot"]) != was:
 		cue["col"] = slot_col(k, String(w["slot"]))
-		cue["tick"] = 0
+		var left0 := float(w["left"])
+		# a window shorter than a tick's mark skips it: no tick on top of the opening chime
+		cue["tick"] = TICKS.filter(func(t): return float(t) >= left0).size()
 		Sfx.play("ab_ready", null, -3.0, 0.0, 1.35)
 	elif w.is_empty() and was != "":
-		if float(cue.get("last", 1.0)) < RAN_OUT and not bool((cue.get("w", {}) as Dictionary).get("auto", false)):
+		if float(cue.get("last", 1.0)) < RAN_OUT:    # ran out unused, even one that then fires itself: never silent
 			cue["exp_slot"] = was
 			cue["exp_t"] = EXPIRED_T
 			Sfx.play("click", null, -5.0, 0.0, 0.6)
