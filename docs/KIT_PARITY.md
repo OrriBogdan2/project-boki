@@ -16,7 +16,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 - **Q:** ours (a glove, gear slot, with V). Not in the source, so no parity target. DashFlow fires it through dashes.
 - **Keys:** R = hunter ult (JSON slot `x`), X = Fuse, G = Boki (owner).
 - **Run speed, ground accel, gravity, fall cap:** match [D]. **Stopping, air control, dash carry:** differ, see gaps 2 to 4.
-- **Buffer:** `DashFlow.BUFFER_S` 0.15 s past a dash's end; the data gives no window.
+- **Buffer:** tuning.json `buffers.ability_hold` 0.15 s past a dash's end; the data gives no window.
 - **Cooldowns below** read ours / source level 1 [D].
 
 ## Ranges and radii: RMB, E, R (main d255acbee, 2026-11-10)

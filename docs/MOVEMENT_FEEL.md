@@ -35,7 +35,9 @@ Nothing here comes from SUPERVIVE's files.
   - Glide turn rate.
   - Drop dive speed.
   - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump keeps the glider open, so **no variable jump height** was added.
-  - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
+  - Coyote time or buffer values. Ours live in content/rules/tuning.json `buffers` (coyote 0.12 s, jump 0.12 s,
+    Shift 0.18 s, ability hold 0.15 s, recast 0.15 s), one line each in `buffers.doc`; `--move-feel-check` fails if
+    one comes back as a code constant.
 
 ## Targets and results
 
