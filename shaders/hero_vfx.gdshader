@@ -20,6 +20,7 @@ const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from whe
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
 const int M_CHAIN = 10;     // a held chain: UV.x counts links from the hand, UV.y across; life is its tension 0..1
 const int M_WEDGE = 11;     // a cone's area on the ground, apex at the centre, pointing +UV.y: UV across the quad
+const int M_FIST = 12;      // a translucent cel-shaded fist (a mesh) falling onto the ground over `fall` of its life
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -36,11 +37,18 @@ uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
+uniform float fall = 0.5;   // M_FIST: the share of its life it falls over; it then rests, and fades at the end
+uniform float drop = 3.0;   // M_FIST: model units it falls from
 
 void vertex() {
 	if (billboard) {
 		float s = length(MODEL_MATRIX[0].xyz);
 		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0] * s, INV_VIEW_MATRIX[1] * s, INV_VIEW_MATRIX[2] * s, MODEL_MATRIX[3]);
+	}
+	if (mode == M_FIST) {
+		float k = clamp(life / max(fall, 0.01), 0.0, 1.0);
+		vec3 up = normalize(inverse(mat3(MODEL_MATRIX)) * vec3(0.0, 1.0, 0.0));   // world up, however it is tipped
+		VERTEX += up * drop * (1.0 - k * k);      // drops faster as it falls: it lands on the last step
 	}
 }
 
@@ -288,6 +296,17 @@ vec4 ring(vec2 uv) {
 	return vec4(c * a, a);
 }
 
+// A translucent fist in flat cel steps: char, body and a lit top, a bright hard rim so the shape reads over the
+// ground, the rest see-through. It fades in as it starts to fall and out as it rests.
+vec4 fist(vec3 n, vec3 view) {
+	float lit = cel(clamp(dot(normalize(n), normalize(vec3(-0.35, 0.8, 0.5))) * 0.5 + 0.5, 0.0, 1.0));
+	vec3 body = lit < 0.3 ? col3.rgb : (lit < 0.7 ? mix(col3.rgb, col.rgb, 0.6) : col.rgb);
+	float rim = hard(1.0 - abs(dot(normalize(n), normalize(view))) - 0.68);
+	float seen = smoothstep(0.0, 0.12, life) * (1.0 - smoothstep(0.82, 1.0, life));
+	float cover = mix(0.3, 0.9, rim) * seen;
+	return vec4(mix(body, col2.rgb, rim) * cover, cover);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
@@ -301,6 +320,7 @@ void fragment() {
 	else if (mode == M_RING) { v = ring(UV); }
 	else if (mode == M_CHAIN) { v = chain(UV); }
 	else if (mode == M_WEDGE) { v = wedge(UV); }
+	else if (mode == M_FIST) { v = fist(NORMAL, VIEW); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;

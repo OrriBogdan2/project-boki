@@ -14,13 +14,13 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8, "sheen": 9, "wedge": 11}
+	"ring": 8, "sheen": 9, "wedge": 11, "fist": 12}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "sheen": 6, "wedge": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
-	"drop": 6}
+	"ring": 6, "sheen": 6, "wedge": 6, "fist": 3, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4,
+	"star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -48,7 +48,7 @@ static var _data := {}         # arch -> its content/vfx data ({} when the Hero 
 
 var m: Node
 var pools := {}                # kind -> nodes made for it
-var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind}
+var live: Array = []           # shader looks running: {node, mat, t, dur, b, s0, s1; follow, off; cut, h}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
@@ -221,7 +221,7 @@ func tier_up(h: Hunter, tier: int) -> void:
 	var s := Vector3.ONE * SHEEN_SIZE
 	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos + Vector3(0, SHEEN_LIFT, 0))
 	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s,
-			"follow": h})
+			"follow": h, "off": Vector3(0, SHEEN_LIFT, 0)})
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
@@ -347,6 +347,8 @@ func _surface_node(kind: String) -> Node3D:
 			strip.size = Vector2.ONE
 			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
+		"fist":
+			mi.mesh = HeroVfxFist.fist_mesh()
 		"vortex", "ring", "wedge":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
@@ -494,10 +496,21 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s0 = _wedge(mt, layer, extent, _num(layer, "lead", o, 0.0) / _num(layer, "life", o, 0.4))
 			s1 = s0
 			p.y += SCORCH_LIFT
+		"fist":
+			b = b * Basis(Vector3.RIGHT, deg_to_rad(float(layer.get("pitch", 0.0))))
+			mt.set_shader_parameter("fall", float(layer.get("fall", 0.5)))
+			mt.set_shader_parameter("drop", _num(layer, "drop", o, 3.0) / extent)
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1})
+	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
+	if bool(layer.get("follow", false)):
+		e["follow"] = h
+		e["off"] = p - h.pos
+	if layer.has("cut"):
+		e["cut"] = float(layer["cut"])
+		e["h"] = h
+	live.append(e)
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
@@ -837,13 +850,13 @@ func _process(delta: float) -> void:
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta
 		var u := float(e["t"]) / float(e["dur"])
-		if u >= 1.0:
+		if u >= 1.0 or (e.has("cut") and u < float(e["cut"]) and _stopped(e["h"])):
 			(e["node"] as Node3D).visible = false
 			live.remove_at(i)
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
 		if e.has("follow") and is_instance_valid(e["follow"]):
-			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
+			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)
@@ -859,6 +872,11 @@ func _process(delta: float) -> void:
 		if not _tick_ribbon(ribbons[i], delta):
 			(ribbons[i]["node"] as Node3D).visible = false
 			ribbons.remove_at(i)
+
+## A "cut" layer goes the moment its hunter is stunned, downed or gone before that share of its life (a wind-up
+## the stun stopped: the move never comes).
+func _stopped(h: Variant) -> bool:
+	return not is_instance_valid(h) or (h as Hunter).stun_t > 0.0 or (h as Hunter).downed
 
 ## One mesh trail's frame: it samples its anchor while it runs, then the tail runs out. False once it's gone.
 func _tick_ribbon(e: Dictionary, delta: float) -> bool:
