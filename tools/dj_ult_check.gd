@@ -95,8 +95,9 @@ func dancer(a) -> void:
 			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
 	var total := float(d["dmg"]) * float(d["shots"])
-	A.ok("dancer X: the faster blades keep the old totals (40 inside, 60 from the outer band)", total == 40.0
-			and (float(d["dmg"]) + float(d["rim_dmg"])) * float(d["shots"]) == 60.0, "%.0f" % total)
+	var rim_total := (float(d["dmg"]) + float(d["rim_dmg"])) * float(d["shots"])
+	A.ok("dancer X: the blades keep the sourced totals (45 inside, 76 from the outer band)",
+			is_equal_approx(total, 45.0) and is_equal_approx(rim_total, 76.0), "%.0f" % total)
 	A.ok("dancer X small mechanic: every blade refreshes her Marks", K.marks_on(T) >= 2
 			and float(T.get_meta("marks")[P.nid][1]) > 3.0)
 	A.ok("dancer X: blades landing on a hunter fill the bond once a cast (a hit: 60% of the bar, KinBond.from_ult)",
