@@ -485,7 +485,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
 	# the abyss that's a fall). Monsters drain it but can't spike you.
 	var spiked := false
-	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
+	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat", "zone"]:
 		var was := glide_fuel
 		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 3x
 		glide_fuel = maxf(0.0, glide_fuel - 3.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
@@ -526,7 +526,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
-	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
+	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat", "zone"]:
 		d *= 1.0 - ARMOR_DR
 		# your kin's armor stats make it wear more slowly
 		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))

@@ -13,6 +13,7 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##   9 closing zone  a Hollow Crown match's zone (ShrinkZone) in time-lapse: the full map, then the minimap and wall
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -71,6 +72,7 @@ func run(main_node: Node) -> void:
 		6: await _echo(secs)
 		7: await _show(secs)
 		8: await _relay(secs)
+		9: await _zone(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -426,3 +428,34 @@ func _relay(secs: float) -> void:
 		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
+# ------------------------------------------------------------------ 5: closing zone
+## From just before the first close to just after the last, sped up to fit `secs`. The player stands
+## inside the final circle, near its edge, so the wall comes past the camera; the full map shows the
+## first half, the minimap and the world the second.
+func _zone(secs: float) -> void:
+	Save.d["name"] = HeroTitle.base_name("ashwick")
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"teams": 6, "squad": 3, "tier": 1, "seed": 3, "no_drop": true, "raid": "clear", "sim_keep": true})
+	m.set_process(false)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	m.hud.guide_hidden = true
+	Game.god = true
+	var z := m.zone
+	var fc := z.cs[z.last()]
+	var mid := Vector2(m.world.w, m.world.h) * 0.5
+	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.85
+	m.player.teleport(_ground(Vector3(at.x, 0, at.y)))
+	var from := z.t0[1] - 8.0
+	var warp := (z.t1[z.last()] + 4.0 - from) / secs
+	m.hud.full_map.open()
+	still_at = secs * 0.35
+	await _go(secs, func(t: float):
+		m.time = from + t * warp
+		m.player.inp["move"] = Vector2.ZERO
+		if t >= secs * 0.5:
+			m.hud.full_map.close(),
+		func(_t: float): return m.player.pos)
+	Game.god = false
