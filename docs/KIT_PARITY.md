@@ -184,7 +184,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Q | none | glove | ours |
 | E | Bomb grows, reactivate, up to 3.5x [D] | Grows 6.5 s, dmg_max_k 3.5, waits at full size until popped, no timer; cooldown on the plant [?] | match (the fizzle is removed) |
 | R | Vortex stun + pull, 70 s [D] | Tell 1.0, 3.5 s, pull 12, cd 70 | match; ~1 s lock (owner) |
-| Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift 35% (owner 11-08 +17%; source gives no drift), moves foes and allies (counters both) | match |
+| Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift at 67.5% speed (owner 11-08, halved slow 11-10; source gives no drift), moves foes and allies (counters both) | match |
 | Passive | Damage Empowers; floats [D] | Swollen variants | match; floating `[?]` |
 | Anim | Footage poses | 14 moves, all on `ostra.glb` (45) | match on coverage |
 
@@ -210,7 +210,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Q | none | glove | ours |
 | E | Press, or hold + drag aim, 12 s, 1 Static [D] | Drag built, delay .8, stacks 1, cd 10.5 | match |
 | R | Launch, recast, crash, spreads Static, 60 s [D] | Hover 1.7, spread built, cd 42 | match; 0.7x cd |
-| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 7.5-13 m at 40 m/s (owner), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) |
+| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 5.6-9.75 m at 40 m/s (owner item 70, cut 11-10), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) |
 | Passive | Static, 4 stacks [D] | Built, orb reset closed by owner | match |
 | Anim | Footage poses | 16 moves, all on `ryzz.glb` (45) | match on coverage |
 | Flow | Silent | Dash→LMB, X buffer | gap 9 |
@@ -224,7 +224,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Q | none | glove | ours |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, the same in the air (item 183), off the dash feel, prime 2.34x, cd 4.5 | match |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
