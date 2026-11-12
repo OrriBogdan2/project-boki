@@ -1,15 +1,14 @@
 class_name Portraits
 extends RefCounted
-## Hunters' faces, wherever one is shown: the HUD's portrait slot, squad frames and ally popups, the
-## Hunter pick, the Hunters screen and its viewer, the practice picker, the kit card and the unlock
-## reveal. A Warden's painted portrait (art/portraits/<archetype>.jpg, made by tools/portrait_art.gd)
-## is its face, and its splash (<archetype>_splash.jpg) fills the bigger spots (a Warden with no
-## splash shows its portrait there). A Warden with no painted art falls back to a render of its model
-## (make()). Each place draws a copy cut to its own size around the framing in
-## content/rules/portraits.json, corners rounded (greyed for the fallen), made once and kept. A menu's
-## portrait (Pic) reads its art on a loader thread and cuts it on a worker thread (cut_soon), so a screen
-## full of faces never stalls a frame. Headless there are no pixels to cut: frames draw the art's region
-## straight from its texture.
+## Hunters' faces, wherever one is shown: the HUD's portrait slot, squad frames and ally popups, the Hunter pick,
+## the Hunters screen and its viewer, the practice picker, the kit card and the unlock reveal. A Warden's painted
+## portrait (art/portraits/<archetype>.jpg, made by tools/portrait_art.gd) is its face, and its splash
+## (<archetype>_splash.jpg, 2560x1440, made by tools/splash_art.py) fills the bigger spots (a Warden with no
+## splash shows its portrait there). A Warden with no painted art falls back to a render of its model (make()).
+## Each place draws a copy cut to its own size around the framing in content/rules/portraits.json, corners
+## rounded (greyed for the fallen), made once and kept. A menu's portrait (Pic) reads its art on a loader thread
+## and cuts it on a worker thread (cut_soon), so a screen full of faces never stalls a frame. Headless there are
+## no pixels to cut: frames draw the art's region straight from its texture.
 
 const SIZE := 96              # px: the rendered fallback's square
 const RULES_PATH := "res://content/rules/portraits.json"

@@ -1,0 +1,141 @@
+{
+	"doc": "The painted art the title and loading screens rotate (SplashGallery), in the order shown: every Hunter's splash and the owner-approved alternates, the owner-approved Bokidex key art and Sable's vault scene, and Bokidex heroes of Boki in the game whose hero art came from an approved gen. src: the approved file each piece is made from. briefs/... is on ext/agent-briefs (tools/splash_art.py cuts it to 2560x1440); site:... is the hero cutout in the projectboki.com repo, kept as it is. Gil has no full-size source yet, so is not here.",
+	"art": [
+		{
+			"file": "res://art/portraits/juggernaut_splash.jpg",
+			"src": "briefs/art-refs/kael_v2/kael_v2_splash_final.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_egg.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_egg_A.jpg"
+		},
+		{
+			"file": "res://art/portraits/gunslinger_splash.jpg",
+			"src": "briefs/art-refs/vex_v2/vex_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/vespyx.webp",
+			"src": "site:bokidex/d/3e101c89a47f8d92a665.webp"
+		},
+		{
+			"file": "res://art/portraits/mage_splash.jpg",
+			"src": "briefs/art-refs/ryzz_v2/ryzz_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_storm.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_storm_A.jpg"
+		},
+		{
+			"file": "res://art/portraits/archer_splash.jpg",
+			"src": "briefs/art-refs/ravel_v2/ravel_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/zephyrak.webp",
+			"src": "site:bokidex/d/92b1166847de1b68ff3c.webp"
+		},
+		{
+			"file": "res://art/portraits/bulwark_splash.jpg",
+			"src": "briefs/art-refs/breaker_splash.png"
+		},
+		{
+			"file": "res://art/gallery/thief_lockatara_vault.jpg",
+			"src": "briefs/boki-art/splash/sable_lockatara_vault.jpg"
+		},
+		{
+			"file": "res://art/portraits/rimewright_splash.jpg",
+			"src": "briefs/art-refs/claire_v2/nivi_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/mycroll.webp",
+			"src": "site:bokidex/d/8c5d513724f44e259adc.webp"
+		},
+		{
+			"file": "res://art/portraits/ostra_splash.jpg",
+			"src": "briefs/art-refs/motley_v2/motley_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_aurora.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_aurora_A.jpg"
+		},
+		{
+			"file": "res://art/portraits/thief_splash.jpg",
+			"src": "briefs/art-refs/sable_v2/sable_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/knotwyrm.webp",
+			"src": "site:bokidex/d/e53bdeb45b15fe32f2d2.webp"
+		},
+		{
+			"file": "res://art/portraits/dolm_splash.jpg",
+			"src": "briefs/art-refs/tarek_v2/tarek_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_titan.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_titan_A.jpg"
+		},
+		{
+			"file": "res://art/portraits/ashwick_splash.jpg",
+			"src": "briefs/art-refs/cinder_v2/cinder_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/prismander.webp",
+			"src": "site:bokidex/d/801f5d709611170885d9.webp"
+		},
+		{
+			"file": "res://art/portraits/dredge_splash.jpg",
+			"src": "briefs/art-refs/grimble_v2/grimble_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_storybook.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_storybook_A.jpg"
+		},
+		{
+			"file": "res://art/portraits/tender_splash.jpg",
+			"src": "briefs/art-refs/pip_v2/meeko_v2_splash.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/rampartoad.webp",
+			"src": "site:bokidex/d/2f16a438d056b4bcd487.webp"
+		},
+		{
+			"file": "res://art/gallery/juggernaut_warchain.jpg",
+			"src": "briefs/art-refs/kael_v2/kael_v2_splash_alt_warchain.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_dawn.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_dawn_A.jpg"
+		},
+		{
+			"file": "res://art/gallery/rimewright_thin_ice.jpg",
+			"src": "briefs/art-refs/claire_v2/nivi_v2_splash_alt.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/hivara.webp",
+			"src": "site:bokidex/d/25b24876cac0ab74e379.webp"
+		},
+		{
+			"file": "res://art/gallery/gunslinger_joyride.jpg",
+			"src": "briefs/art-refs/vex_v2/vex_v2_alt_joyride.jpg"
+		},
+		{
+			"file": "res://art/gallery/keyart_anime.jpg",
+			"src": "briefs/boki-art/og/bokidex_keyart_anime_A.jpg"
+		},
+		{
+			"file": "res://art/gallery/thief_perch.jpg",
+			"src": "briefs/art-refs/sable_v2/sable_v2_splash_alt_perch.jpg"
+		},
+		{
+			"file": "res://art/gallery/boki/cairnback.webp",
+			"src": "site:bokidex/d/6b7ac0d9e1f9ca5afc9f.webp"
+		},
+		{
+			"file": "res://art/gallery/ashwick_pyre_queen.jpg",
+			"src": "briefs/art-refs/cinder_v2/cinder_v2_splash_alt.jpg"
+		},
+		{
+			"file": "res://art/gallery/thief_upside_down.jpg",
+			"src": "briefs/art-refs/sable_v2/sable_v2_splash_alt_upside_down.jpg"
+		}
+	]
+}

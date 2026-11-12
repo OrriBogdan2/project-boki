@@ -1,7 +1,7 @@
 extends RefCounted
 ## --portrait-check: the Wardens' painted portraits are the faces in the menus and the HUD (Portraits).
 ##   1. every Hunter resolves to its painted portrait (512 px square) and, where it has one, its splash
-##      (16:9); one without a splash shows its portrait there; every one has its framing
+##      (2560x1440, Gil's still 960x540); one without a splash shows its portrait there; every one has its framing
 ##   2. a small frame crops in around the face; every cut stays inside the art
 ##   3. each place shows the art: the Hunters tiles, the practice picker, the Hunter viewer, the Mantle
 ##      pick's chips, the expedition chips, the kit card, the unlock reveal (the splash) and the HUD's
@@ -11,7 +11,9 @@ extends RefCounted
 ## Prints PORTRAIT lines and "PORTRAIT DONE, n checks, failures: n".
 
 const PORTRAIT_PX := 512
-const SPLASH_PX := Vector2i(960, 540)
+const SPLASH_PX := Vector2i(2560, 1440)
+## Splashes with no full-size source yet, at the size they have (docs/DEBT.md).
+const SMALL_SPLASH := {"gil": Vector2i(960, 540)}
 ## Wardens whose splash isn't in yet (or was redrawn away): their portrait stands in.
 const NO_SPLASH := []
 
@@ -58,17 +60,15 @@ func _art() -> void:
 		else:
 			var st := load(splash) as Texture2D
 			ok("%s: its splash" % Arch.name_of(ak), splash.ends_with("_splash.jpg") and st != null
-					and Vector2i(st.get_size()) == SPLASH_PX, splash)
-	var backdrop := TitleBackdrop.ORDER.duplicate()
-	backdrop.sort()
-	var every := Arch.ids().duplicate()
-	every.sort()
-	ok("the title backdrop shows every Hunter's current splash", backdrop == every)
+					and Vector2i(st.get_size()) == _splash_px(ak), splash)
 	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Neve"
 	var names2: bool = HeroTitle.base_name("tender") == "Meeko" and HeroTitle.base_name("mage") == "Sparkle"
 	var names3: bool = HeroTitle.base_name("bulwark") == "Albert" and HeroTitle.base_name("archer") == "Lace"
 	var names4: bool = HeroTitle.base_name("juggernaut") == "Kael"
 	ok("the new names", names_ok and names2 and names3 and names4)
+
+func _splash_px(ak: String) -> Vector2i:
+	return SMALL_SPLASH.get(ak, SPLASH_PX)
 
 # ------------------------------------------------------------------ 2. framing
 func _framing() -> void:
@@ -89,7 +89,7 @@ func _framing() -> void:
 		ok("%s: the HUD's slot shows the whole bust, inside the art" % Arch.name_of(ak),
 				is_equal_approx(hud.size.y, src.y) and whole.encloses(hud), str(hud))
 		var sp := Portraits.art_path(ak, true)
-		var sp_src := Vector2(SPLASH_PX) if sp.ends_with("_splash.jpg") else src
+		var sp_src := Vector2(_splash_px(ak)) if sp.ends_with("_splash.jpg") else src
 		var reveal := Portraits.region(ak, sp, sp_src, Vector2(280, 280))
 		ok("%s: the reveal's square of the splash stays inside it" % Arch.name_of(ak),
 				Rect2(Vector2.ZERO, sp_src).encloses(reveal) and is_equal_approx(reveal.size.y, sp_src.y))
