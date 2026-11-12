@@ -72,17 +72,14 @@ static func spend(h: Hunter, c: Dictionary) -> bool:
 static func cap() -> int:
 	return int(KeyRun.rules()["keys"]["cap"])
 
-## Keys of `kind` ("chest" or "rift") that `h` holds: what the utility belt shows.
-static func count(h: Hunter, kind: String) -> int:
-	return h.chest_keys if kind == "chest" else h.rift_keys
+## Keys of `kind` ("chest", the only kind) that `h` holds: what the utility belt shows.
+static func count(h: Hunter, _kind: String) -> int:
+	return h.chest_keys
 
 ## Removes up to `n` keys of `kind` from `h` and returns how many it took (the belt spends through this).
 static func take(h: Hunter, kind: String, n: int) -> int:
 	var taken := mini(n, count(h, kind))
-	if kind == "chest":
-		h.chest_keys -= taken
-	else:
-		h.rift_keys -= taken
+	h.chest_keys -= taken
 	return taken
 
 ## Adds up to `n` chest keys, never past the cap, and returns how many fit. The rest stay where they were.
