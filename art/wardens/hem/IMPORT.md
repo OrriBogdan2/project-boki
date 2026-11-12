@@ -22,3 +22,8 @@ Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/arc
 
 Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
 through the chest; the bow passes through her open left hand.
+
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `roll` (Spirit Walk) re-keyed to her felt roll, 3.0 m in 0.386 s
+(roll_t 0.27 at tuning.json dash_speed 0.7): 0.52 s, the turn on the dash curve, low and crouched at 0.386 s where the walk
+takes over (PinSpirit.roll_time). Baked on this glb through `tools/art1/clip_blend.py ... pinch=fing_a2.R` (a control bake
+of `roll` and `flick` matched this glb's exactly) and copied on with `glb_add_clips.py ... roll`; `flick` unchanged.
