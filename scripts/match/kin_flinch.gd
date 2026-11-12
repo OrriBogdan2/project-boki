@@ -16,6 +16,7 @@ const OMEGA_PER_S := 1.75      # natural frequency (rad) times settle time (s) a
 const K_MIN := 0.5             # strength of a chip hit
 const K_PER_FRAC := 4.0        # strength gained per share of max health a hit takes
 const K_MAX := 1.3
+const LAND_FRAC := 0.25        # the share of max health a landing jolts like (a squash, no shove: K_MAX)
 ## Per body plan, per unit of strength: pitch and roll (rad), yaw twist (rad), shove (m), squash and lift (m).
 const PLAN := {
 	"quad": {"pitch": 0.15, "roll": 0.11, "yaw": 0.0, "shove": 0.025, "squash": 0.08, "lift": 0.0},
@@ -43,6 +44,10 @@ static func hit(model: Node3D, push: Vector3, frac: float, mass: float) -> void:
 	var cur: Dictionary = model.get_meta("hit", {"n": 0})
 	var k := clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1))
 	model.set_meta("hit", {"n": int(cur["n"]) + 1, "k": k, "push": push, "mass": mass})
+
+## A Boki touching down after a throw or a leap: the hit's spring with no push, so it only squashes.
+static func land(model: Node3D, mass: float) -> void:
+	hit(model, Vector3.ZERO, LAND_FRAC, mass)
 
 ## Takes up a new hit if there is one and steps the spring; then rot, shove, wide and tall are the pose.
 func update(root: Node3D, dt: float) -> void:
