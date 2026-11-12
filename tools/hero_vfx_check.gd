@@ -35,6 +35,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
 
+const DT_FILL := 1.0 / 60.0   # s per step while timing the Faultline fill
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -63,6 +64,7 @@ func run(main: Node) -> void:
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
+	await _slam_fill(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -374,3 +376,38 @@ func _scarf(main: Node) -> void:
 	S.prewarm(P.pos)
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
+
+## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at every
+## rank, and the slam lands on the step it closes. Also with a changed windup, so the time is read from data.
+func _slam_fill(main: Node) -> void:
+	var m: Match = flow._match(main, "bulwark")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var K: BulwarkKit = P.ak
+	var xd: Dictionary = K.d["x"]
+	var windup0: float = xd["windup"]
+	P.lvl = 6
+	for rank in [1, 2, 3, 0]:
+		xd["windup"] = 0.6 if rank == 0 else windup0
+		for slot: String in P.slot_lv:
+			P.slot_lv[slot] = maxi(rank, 1)
+		K.cd["x"] = 0.0
+		K.ult.cast()
+		var t_full := -1.0
+		var t_slam := -1.0
+		var t := 0.0
+		while K.ult.phase != "" and t < 2.0 and t_slam < 0.0:
+			m.step(DT_FILL)
+			t += DT_FILL
+			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 0.999:
+				t_full = t
+			if K.ult.slams > 0:
+				t_slam = t
+		var label := "rank %d windup %.2f: fill closed at %.3f s, slam at %.3f s" % [
+			maxi(rank, 1), xd["windup"], t_full, t_slam]
+		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and absf(t_slam - t_full) <= DT_FILL * 1.5, label)
+		K.ult.slams = 0
+		K.ult.phase = ""
+		K.ult._hide_lane()
+	xd["windup"] = windup0
+	m.queue_free()
