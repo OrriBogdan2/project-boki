@@ -665,20 +665,26 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	for k in 30:
 		sync.call("_process", DT)
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
+	var legs0 := _legs(sk)       # the run before the hit: each build is measured from its own legs
+
 	var out: Array = []
 	var t := 0.0
 	while t < 1.0:
 		s["hit_t"] = t if hit_t < 1.0 else 99.0
 		sync.call("_process", DT)
 		await holder.get_tree().process_frame
-		var legs := 0.0
-		for b in ["thigh.L", "thigh.R", "shin.L", "shin.R"]:
-			var o := sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
-			legs += o.x * 1.0 + o.y * 3.0 + o.z * 7.0
-		out.append({"legs": legs, "hand": hand.global_position, "act": clips.act_w})
+		out.append({"legs": _legs(sk) - legs0, "hand": hand.global_position, "act": clips.act_w})
 		t += DT
 	m.free()
 	return out
+## The leg bones' places folded into one number (a slide of any of them changes it).
+func _legs(sk: Skeleton3D) -> float:
+	var legs := 0.0
+	for b in ["thigh.L", "thigh.R", "shin.L", "shin.R"]:
+		var o := sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
+		legs += o.x * 1.0 + o.y * 3.0 + o.z * 7.0
+	return legs
+
 ## Snaps (docs/MOVEMENT_FEEL.md, Strike snaps): a clip whose strike or release key, where its fastest arm bone stops,
 ## lands inside the blend-in carries a shorter "fade", so the strike pose is at full weight from locomotion on its key.
 ## (An authored fade longer than FADE marks a wind-up blend, not a strike.)
