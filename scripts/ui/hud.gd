@@ -333,6 +333,7 @@ func _draw_world_labels() -> void:
 	var cam := m.cam
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
+	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -345,7 +346,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
-		if cam.is_position_behind(h.position):
+		if cam.is_position_behind(h.position) or LabelCull.ride_skip(m, h):
 			continue
 		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
 		if not sp.is_finite():
@@ -633,6 +634,7 @@ func _draw_feed(sz: Vector2) -> void:
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
+	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
 	var s := 340.0 if riding else 196.0
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
@@ -672,9 +674,10 @@ func _draw_minimap(sz: Vector2) -> void:
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
-	_draw_map_labels(w, inner, view, k, riding)
-	if m.skytrain:
-		_draw_map_train(inner, view, k)
+	if MapDetail.shows("place", hold):
+		_draw_map_labels(w, inner, view, k, riding)
+	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
+		train_map.draw(self, m.skytrain, inner, view, k, false)
 	# your view cone, faintly
 	if m.player and not riding:
 		var pp: Vector2 = to_map.call(m.player.pos)
@@ -688,31 +691,37 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(pts, Color(1, 1, 1, 0.07))
 	if m.exits:
 		for x in m.exits.list:
-			var pv: Vector2 = to_map.call(x.get("berth", x["pos"]))
-			var busy: bool = String(x["state"]) in ["called", "boarding", "charging", "open"]
-			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a called skiff, a charging uplink, an open lift)
-				if busy and x["kind"] != "hatch": _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+			var pv: Vector2 = to_map.call(x["pos"])
+			var busy: bool = String(x["state"]) in ["charging", "open"]
+			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
 				continue
-			_draw_exit_icon(pv, x, 1.0 if not riding else 0.8)
+			if not on_map.call(pv, 4.0):
+				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
+				if busy: _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+				continue
+			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
 	if m.lairs:
-		_draw_map_lairs(inner, to_map, on_map, riding)
-	ReviveHud.minimap(self, inner, to_map, on_map)
-	if m.biomes: m.biomes.hot.minimap(self, to_map, on_map)
+		_draw_map_lairs(inner, to_map, on_map, hold)
+	ReviveHud.minimap(self, inner, to_map, on_map, hold)
+	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
+	HeartHud.minimap(self, inner, to_map, on_map)
+	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
 			if m.spawn_plan.state_for(cnd, m.player.team) != "active":
 				continue
+			if not MapDetail.shows("cache", hold, (cnd["known"] as Dictionary).has(m.player.team)):
+				continue
 			var cpv: Vector2 = to_map.call(cnd["pos"])
 			if on_map.call(cpv, 5.0):
 				var cdef: Dictionary = m.spawn_plan.cats.get(cnd["cat"], {})
-				full_map.marker(c, String(cdef.get("shape", "star")), cpv, 4.5 if riding else 4.0, cdef.get("col", Color.WHITE), "active")
-	if not m.ship.is_empty() and not m.ship.get("gone", false):
+				full_map.marker(c, String(cdef.get("shape", "star")), cpv, MapDetail.ICON_R / 1.35, cdef.get("col", Color.WHITE), "active")
+	if not m.ship.is_empty() and not m.ship.get("gone", false) and MapDetail.shows("ship", hold):
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
-		c.draw_circle(to_map.call(m.ship_pos()), 5.0, GOLD)
-	if m.rolling:
+		c.draw_circle(to_map.call(m.ship_pos()), MapDetail.ICON_R, GOLD)
+	if m.rolling and MapDetail.shows("bounty", hold):
 		# the other drop waves' skyships (amber), and hunters with a bounty on them (seen by everyone)
 		for ws in m.ships:
 			if ws.get("gone", false) or ws.get("node") == null:
@@ -721,14 +730,14 @@ func _draw_minimap(sz: Vector2) -> void:
 			if on_map.call(wp, 3.0):
 				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
 				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
-				c.draw_circle(wp, 4.5, Color("ffb64a"))
+				c.draw_circle(wp, MapDetail.ICON_R, Color("ffb64a"))
 			else:
 				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
 		for h in m.hunters:
 			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
 				continue
 			var bp: Vector2 = to_map.call(h.pos)
-			if on_map.call(bp, 3.0): bounty_marker(c, bp, 0.85)
+			if on_map.call(bp, 3.0): bounty_marker(c, bp, MapDetail.ICON_R / 6.5)
 			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
 	if m.tut and m.tut.target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut.target)
@@ -742,10 +751,10 @@ func _draw_minimap(sz: Vector2) -> void:
 			if pg.has("by") or pg.has("kin"):
 				# a squad ping: a little pin in the pinger's colour
 				c.draw_colored_polygon(PackedVector2Array([pv, pv + Vector2(-4, -7), pv + Vector2(4, -7)]), pg["col"])
-				c.draw_circle(pv + Vector2(0, -9), 5.0, Color(0, 0, 0, 0.6))
-				c.draw_circle(pv + Vector2(0, -9), 4.0, pg["col"])
+				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R - 1.0, pg["col"])
 			else:
-				c.draw_circle(pv, 4.0, pg["col"])
+				c.draw_circle(pv, MapDetail.ICON_R - 1.0, pg["col"])
 		else: _edge_arrow(inner, inner.get_center(), pv, pg["col"])
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
@@ -770,12 +779,12 @@ func _draw_minimap(sz: Vector2) -> void:
 			if m.truce.is_marked(h):
 				var ph := fmod(m.time * 1.5, 1.0)
 				if on_map.call(tv, 3.0):
-					c.draw_circle(tv, 4.0, BAD)
-					c.draw_arc(tv, 5.0 + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
+					c.draw_circle(tv, MapDetail.ICON_R - 1.0, BAD)
+					c.draw_arc(tv, MapDetail.ICON_R + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
 				else: _edge_arrow(inner, inner.get_center(), tv, BAD)
-			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0):
-				c.draw_circle(tv, 4.5, Color(0, 0, 0, 0.6))
-				c.draw_circle(tv, 3.5, Color("f4f1e6"))
+			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0) and MapDetail.shows("ally", hold):
+				c.draw_circle(tv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+				c.draw_circle(tv, MapDetail.ICON_R - 1.0, Color("f4f1e6"))
 	# your squad, with an arrow for anyone off the edge (a dead teammate shows at their deathbox)
 	for h in m.hunters:
 		if m.player == null or h.team != m.player.team:
@@ -793,13 +802,14 @@ func _draw_minimap(sz: Vector2) -> void:
 			var side := Vector2(-d.y, d.x)
 			c.draw_colored_polygon(PackedVector2Array([pv + d * 8.0, pv - d * 4.0 + side * 5.0, pv - d * 2.0, pv - d * 4.0 - side * 5.0]), col)
 		else:
-			c.draw_circle(pv, 4.5, Color(0, 0, 0, 0.6))
-			c.draw_circle(pv, 3.5, col)
+			c.draw_circle(pv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+			c.draw_circle(pv, MapDetail.ICON_R - 1.0, col)
 			_ctext(pv + Vector2(0, -7), h.pname.substr(0, 1), 11, col, big)
+	BokiHud.map_kin(c, m, to_map, on_map)
 	for dk in BokiHud.squad_downed(m):
 		var dv: Vector2 = to_map.call(dk.position)
 		if on_map.call(dv, 3.0):
-			BokiHud.map_dot(c, dv, dk, 5.0, m.time)
+			BokiHud.map_dot(c, dv, dk, MapDetail.ICON_R, m.time)
 		else:
 			_edge_arrow(inner, inner.get_center(), dv, Color(dk.sp.get("glow", dk.sp["color"])))
 
@@ -809,18 +819,17 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
 	_draw_clock_bar(sz, r)
 
-## Under the minimap, like Supervive's day bar: the match clock, what the exits are doing, your run
+## Under the minimap, like Supervive's day bar: the match clock, your run
 ## level, and a thin bar for how far through the match you are.
 func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
+	WaysOutHud.draw(self)
 	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
 	mm_bottom = r.end.y
 	var left := m.length - m.time
 	var phase := ""; var pc := MUTED
-	var xl: Array = m.exits.clock_line() if m.exits else ["", MUTED]
-	if left < 30.0 and (m.exits == null or m.exits.active_for(m.player.team if m.player else -9).is_empty()): phase = "ISLANDS FALLING"; pc = BAD
-	else: phase = String(xl[0]); pc = xl[1]
+	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
@@ -889,40 +898,24 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, an outpost's banner
-## post (OutpostGlyph). Bright when it's usable, grey when not; a pulsing ring while it's going.
+## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
+## when not; a pulsing ring while it's going.
 func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var col: Color = Exits.color_of(x)
 	var usable: bool = m.exits.live(x)
 	var st := String(x["state"])
 	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var dark := Color(0, 0, 0, 0.7)
-	match String(x["kind"]):
-		"dock":
-			var hull := PackedVector2Array([pv + Vector2(-6, 1) * k, pv + Vector2(6, 1) * k, pv + Vector2(4, 5) * k, pv + Vector2(-4, 5) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-7, 0) * k, pv + Vector2(7, 0) * k, pv + Vector2(5, 6) * k, pv + Vector2(-5, 6) * k]), dark)
-			c.draw_colored_polygon(hull, col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 0) * k]), col)
-			c.draw_line(pv + Vector2(0, -7) * k, pv + Vector2(0, 1) * k, dark, 1.5)
-			if st == "closed":
-				c.draw_line(pv + Vector2(-6, -6) * k, pv + Vector2(6, 6) * k, Color(BAD, 0.8), 2.0)
-		"hatch":
-			var dm := PackedVector2Array([pv + Vector2(0, -5) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 5) * k, pv + Vector2(-5, 0) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6.5) * k, pv + Vector2(6.5, 0) * k, pv + Vector2(0, 6.5) * k, pv + Vector2(-6.5, 0) * k]), dark)
-			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
-			c.draw_circle(pv, 1.6 * k, dark)
-		"outpost":
-			var held := OutpostLook.held(x)
-			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-			OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
-			if st == "charging":
-				_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["called", "boarding", "charging", "open", "unlocking"]:
+	var held := OutpostLook.held(x)
+	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
+	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
+	if st == "charging":
+		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
+	if st in ["charging", "open"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
-## Over each exit nearby: its name and what it's doing. Your squad's own exit (a skiff you called, an
-## uplink you're charging) gets a waypoint from anywhere on the map.
+## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
+## anywhere on the map.
 func _draw_exit_labels() -> void:
 	if m.exits == null or m.player == null or m.player.out or m.player.extracted:
 		return
@@ -935,37 +928,21 @@ func _draw_exit_labels() -> void:
 		var d := p.flat_dist(at)
 		var st := String(x["state"])
 		var line := ""
-		match String(x["kind"]):
-			"dock":
-				match st:
-					"called": line = "Skiff inbound  %s" % _fmt(x["t"])
-					"boarding": line = "BOARDING  %ds" % int(ceil(x["t"]))
-					"gone": line = "Skiff away"
-					"closed": line = "Closed"
-					_: line = "Call skiff" if m.exits.callable(x) else ("Opens %s" % _fmt(float(x["open_at"]) - m.time) if m.time < float(x["open_at"]) else "")
-			"hatch":
-				match st:
-					"unlocking": line = "OPENING  %ds" % int(ceil(float(x["t"])))
-					"open": line = "OPEN  ·  %d/%d left" % [int(x["uses"]), Exits.HATCH_USES]
-					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
-			"outpost":
-				match st:
-					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
-					"fizzling": line = "Shutting off"
-					"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
-					"spent": line = "Cooling down"
-					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
-		var reach := 26.0 if x["kind"] == "hatch" else 44.0
-		if st in ["boarding", "open", "unlocking"]: reach = 70.0
+		match st:
+			"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+			"fizzling": line = "Shutting off"
+			"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
+			"spent": line = "Cooling down"
+			_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
+		var reach := 70.0 if st == "open" else 44.0
 		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)     # the prompt already says it
 		if d < reach and not cam.is_position_behind(at) and not prompted:
-			var lp := cam.unproject_position(at + Vector3(0, 3.4 if x["kind"] != "hatch" else 1.6, 0))
+			var lp := cam.unproject_position(at + Vector3(0, 3.4, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
 			if line != "":
-				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open", "unlocking"] else 16, INK if st not in ["boarding", "open", "unlocking"] else col, big)
+				_ctext(lp + Vector2(0, 17), line, 16 if st == "open" else 12, col if st == "open" else INK, big)
 		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
-			var tgt: Vector3 = x.get("berth", at)
-			_draw_waypoint(tgt, "Skiff" if x["kind"] == "dock" else ("Hatch" if x["kind"] == "hatch" else ("Lift" if st == "open" else "Uplink")), col)
+			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
 func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
@@ -1776,12 +1753,14 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"chest": prog = it["chest"]["prog"]
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
-		var s: String = it["label"]
-		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
-		if prog > 0.0:
-			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
+			"heart": prog = float(it.get("prog", 0.0))
+		if not WaysOutHud.gate_prompt(self, sz, y, it):
+			var s: String = it["label"]
+			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
+			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+			if prog > 0.0:
+				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
@@ -2301,34 +2280,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		c.draw_multiline_string(body, Vector2(pos.x + 12, y + 13), String(lines[i][0]), HORIZONTAL_ALIGNMENT_LEFT, w - 24, 13, -1, lines[i][1])
 		y += hh + 3.0
 
-## The sky train on the minimap: its loop as a dashed amber line (fainter where it runs under a
-## bridge), and the train itself, the engine marked red so you can see which way it's coming.
-var _train_line := PackedVector2Array()
-var _train_low: Array = []
-func _draw_map_train(inner: Rect2, view: Rect2, k: float) -> void:
-	var st: SkyTrain = m.skytrain
-	if _train_line.is_empty():
-		var s := 0.0
-		while s < st.loop_len:
-			var p := m.world.train_at(s)
-			_train_line.append(Vector2(p.x, p.z)); _train_low.append(p.y < -1.0)
-			s += 1.5
-	var n := _train_line.size()
-	for i in n:
-		if i % 2 == 1:
-			continue
-		var a := inner.position + (_train_line[i] - view.position) * k
-		var b := inner.position + (_train_line[(i + 1) % n] - view.position) * k
-		if not (_mm_has(inner, a) and _mm_has(inner, b)):
-			continue
-		c.draw_line(a, b, Color(1.0, 0.72, 0.35, 0.35 if _train_low[i] else 0.8), 2.0, true)
-	var cars: Array = st.car_positions()
-	for ci in range(cars.size() - 1, -1, -1):
-		var pv: Vector2 = inner.position + ((cars[ci] as Vector2) - view.position) * k
-		if not _mm_has(inner, pv, 3.0):
-			continue
-		c.draw_circle(pv, 4.0 if ci == 0 else 3.2, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 3.0 if ci == 0 else 2.3, Color("ff5a3a") if ci == 0 else Color("ffcf7a"))
+var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
 var _regions_of: World = null
 var _regions := {}
@@ -2362,10 +2314,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
-			# a train stop: a small amber square, named in the overview
-			c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-			c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-			continue      # (unnamed here: stop, road and perch names piled on top of each other at this size; the full map names them)
+			continue      # (the halts are TrainMap's, gated as the "train" kind)
 		if String(lb["kind"]) == "choke":
 			# a chokepoint: a small orange diamond, named in the overview
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
@@ -2979,8 +2928,10 @@ func _lair_icon(pv: Vector2, L: Dictionary, k := 1.0) -> void:
 			c.draw_circle(pv, 5.5 * k, Color(0.55, 0.58, 0.64, 0.9))
 			c.draw_polyline(PackedVector2Array([pv + Vector2(-3, 0) * k, pv + Vector2(-0.8, 2.6) * k, pv + Vector2(3.4, -2.6) * k]), dark, 2.0 * k)
 
-func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview: bool) -> void:
+func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: bool) -> void:
 	for L in m.lairs.list:
+		if not MapDetail.shows("lair", hold, m.player != null and MapDetail.lair_matters(m, L)):
+			continue
 		var pv: Vector2 = to_map.call(L["c"])
 		# a fight you heard (or its boss falling): a big pulsing ring round the boss's icon
 		var al: bool = m.player != null and m.lairs.alerted(L, m.player)
@@ -2990,7 +2941,7 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview:
 				var ph := fmod(m.time * 1.2, 1.0)
 				c.draw_arc(pv, 9.0 + ph * 16.0, 0, TAU, 28, Color(acol, 1.0 - ph), 3.0, true)
 				c.draw_arc(pv, 10.0, 0, TAU, 24, Color(acol, 0.9), 2.0, true)
-			_lair_icon(pv, L, (1.0 if not overview else 0.9) * (1.3 if al else 1.0))
+			_lair_icon(pv, L, MapDetail.ICON_R / 8.0)
 		elif al:
 			_edge_arrow(inner, inner.get_center(), pv, acol)
 		elif L["state"] == "awake":
