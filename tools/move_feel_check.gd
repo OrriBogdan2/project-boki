@@ -14,6 +14,7 @@ var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
 const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const FALL_ROWS := preload("res://tools/fall_carry_rows.gd")
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -235,6 +236,7 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
+	await _no_fall_carry(main)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -1275,3 +1277,27 @@ func _e2e() -> void:
 	rec("render_lag_m", absf(P.pos.x - P.position.x))
 	Input.action_release("right")
 	for i in 10: m._process(DT)
+
+# ---------------------------------------------------------------- falling never becomes horizontal speed
+## The same rows for every Hunter in the match and in the garden (tools/fall_carry_rows.gd).
+func _no_fall_carry(main: Node) -> void:
+	var rows := FALL_ROWS.new()
+	var laid := rows.lay(w)
+	await rows.run_all("match", w, FALL_ROWS.MatchBody.new(m, P, _reset))
+	rows.lift(w, laid)
+	m.queue_free()
+	Save.d = Save.fresh()
+	Save.d["tutorial"]["home"] = true
+	Save.d["tutorial"]["day1_done"] = true
+	Econ.ensure()
+	var hm = load("res://scripts/home/home.gd").new()
+	main.add_child(hm)
+	await main.get_tree().process_frame
+	while hm.building:      # (the farm comes in slices)
+		await main.get_tree().process_frame
+	hm.set_process(false)
+	laid = rows.lay(hm.world)
+	await rows.run_all("home", hm.world, FALL_ROWS.HomeBody.new(hm))
+	rows.lift(hm.world, laid)
+	hm.queue_free()
+	bad += rows.bad
