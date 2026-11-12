@@ -245,7 +245,7 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
-	k.m.sfx("recall", k.owner_h.pos, -4.0)
+	SfxCast.hold_back(func(): k.m.sfx("recall", k.owner_h.pos, -4.0))     # (the scoop/round event plays it there)
 	if rescued:
 		k.note("rescued", "you ran in and carried it out", 1.5)
 		k.bark("revive")

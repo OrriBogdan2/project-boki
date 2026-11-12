@@ -3,21 +3,31 @@ extends RefCounted
 ## What a Hunter of this game sounds like on the other players' games. A kit runs only where its Hunter is
 ## owned, so every sound it starts while that Hunter acts (its sim: a cast, its dash, its weapon; a step Match.later
 ## scheduled from it; where its shot ends) is also sent as a Net fx event, ["fx", "snd", name, x, y, z, dB, pitch],
-## and played at the same place there. It follows Sfx.played, so only sounds that really started go out (none
-## that Sfx merged or dropped), and a move needs no id to be heard. UltCue sends its own tagged cue; its sounds
-## are held back here.
+## and played at the same place there. Its Boki's doing counts as its own: the Boki's sim (its hits, its own
+## casts) and a cast however it was ordered. It follows Sfx.played, so only sounds that really started go out
+## (none that Sfx merged or dropped), and a move needs no id to be heard. UltCue sends its own tagged cue, and
+## the Boki moments KinNet already sends (throw, recall, scoop) play from those events: their sounds are held back
+## here.
 
 static var _who: Variant = null      # the owned Hunter whose doing this is (see scope); null for anything else
-static var _quiet := false           # UltCue's turn: its cue goes out through its own event
+static var _quiet := false           # held back: the cue goes out through its own event
 
 static func sim(h: Hunter, dt: float) -> void:
 	scope(h)
 	h.sim(dt)
 	scope(null)
 
-## Whose doing the sounds from here on are: `e` when it is a Hunter of this game in an online match, else nobody.
+static func sim_kin(k: Kin, dt: float) -> void:
+	scope(k)
+	k.sim(dt)
+	scope(null)
+
+## Whose doing the sounds from here on are: `e` when it is a Hunter of this game in an online match, or a
+## Boki of this game that belongs to a Hunter (a wild one has none), else nobody.
 static func scope(e: Variant) -> void:
 	_who = null
+	if is_instance_valid(e) and e is Kin and not (e as Kin).remote:
+		e = (e as Kin).owner_h
 	if is_instance_valid(e) and e is Hunter and (e as Hunter).m.net_on and not (e as Hunter).remote:
 		_who = e
 		if not Sfx.played.is_connected(_started):
