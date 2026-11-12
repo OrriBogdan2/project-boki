@@ -707,24 +707,10 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_row.add_child(ne)
+	var step := NameStep.new(sp_id, "")      # ("Head out together" below keeps the name)
+	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(step)
 	v.add_child(name_row)
-	# a few ideas, and a button for a fresh handful
-	var picks := UI.hbox(6)
-	var fill_picks := func(self_ref: Callable) -> void:
-		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picks.add_child(il)
-		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-		for nm in pool.slice(0, 4):
-			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
-		more.flat = true
-		picks.add_child(more)
-	fill_picks.call(fill_picks)
-	v.add_child(picks)
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
@@ -732,18 +718,18 @@ func _show_name() -> void:
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(10)
-	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
+	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, step.chosen(), ye.text, true), 240))
+	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, step.chosen(), ye.text, false), 180)
 	skip.flat = true
 	btns.add_child(skip)
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
 	# Enter in either box is the same as "Head out together"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
-	ne.grab_focus()
-	ne.select_all()
+	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, true))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, true))
+	step.box.grab_focus()
+	step.box.select_all()
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
