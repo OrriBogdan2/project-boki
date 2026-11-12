@@ -130,11 +130,13 @@ func _no_hints_in_flight(p: Hunter) -> void:
 		p.set(st, false)
 
 func _fit() -> void:
-	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var w := strip.size.x - strip.size.y
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle")
-		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
-		var n: int = fit["lines"].size()
-		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+		var px := int(strip.size.y * 0.5)
+		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+			px -= 1
+		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])
 		var gone := txt.contains("slip away") or txt.contains("landing spot")
 		ok(not gone, "%s is not the squad or landing line" % row[0])
