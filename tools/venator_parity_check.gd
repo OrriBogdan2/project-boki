@@ -11,6 +11,7 @@ const REFILL_BY := 1.2       # s of rest that brings a drum back from 18 to full
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (the source's 1280 deg/s: 0.14s)
 const WALK_KEEP := 0.85      # share of her walk she keeps while firing
 const OLD_NEEDLE_W := 0.5    # m either side of the line, before item 68
+const CANCEL_ROWS := preload("res://tools/vex_cancel_rows_check.gd")   # her Cancels table, row by row
 const SWEEP := 6.0           # rad/s the cursor swings round her (a round a step late would be 5.7 degrees off)
 var C                        # the combo check (ok, ac, helpers)
 
@@ -27,6 +28,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_launcher(m, P, K, T, home)
 	_needle(m, P, K, T, home)
 	_audit(m, P, K, T, home)
+	CANCEL_ROWS.new(C).run(m, P, K, T, home)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
 	C.ac.step(m, 0.5)
