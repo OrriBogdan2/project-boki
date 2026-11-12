@@ -6,6 +6,9 @@ extends RefCounted
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
+##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
+##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
+##      MateAlerts.LINE_S
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -108,19 +111,22 @@ func run(main_node: Node) -> void:
 	var down_word := String(ds.get("word", ""))
 	ok(dn.downed and bool(ds.get("downed", false)) and down_word.begins_with("DOWN"),
 		"a downed rival shows the downed plate ('%s')" % down_word)
-	var sl: Hunter = foes[3]
+	var sl: Hunter = foes[3]  # the demo holds the whole CC row on them: the bar's word is the worst, STUNNED
 	sl.reveal_t = 3.0       # seen however the headless camera faces
 	var sw := ""
 	for i in 60:            # vision refreshes every 0.05s and line of sight can lag a few frames headless
 		await main.get_tree().process_frame
 		sw = String(_shown(hud, sl).get("word", ""))
-		if sw == "SLOWED":
+		if sw == "STUNNED":
 			break
 	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
-	ok(sw == "SLOWED", "a slowed rival's plate says SLOWED over the bar ('%s', %s)" % [sw, why])
+	var cc_row: Array = HudPlate.statuses(sl).map(func(ic): return String(ic[2]))
+	ok(sw == "STUNNED" and "SLOWED" in cc_row,
+		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
+	await _mate_down(m, hud, P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -159,6 +165,31 @@ func run(main_node: Node) -> void:
 	P.arch = ""
 	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
 	P.arch = arch_was
+	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)
+	await hud.panels.draw
+	ok(mates.size() >= 1 and mates.all(func(x): return TeamBoki.shown.has(x.nid)),
+		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
+	if mates.size() >= 1:
+		var mate: Hunter = mates[0]
+		var chip: int = TeamBoki.levels.get(mate.nid, -1)
+		ok(chip == mate.lvl, "a squad row carries the teammate's level chip (%d vs %d)" % [chip, mate.lvl])
+		mate.downed = false        # (the demo downs one rival)
+		mate.kin.hp = mate.kin.max_hp * 0.5
+		await hud.panels.draw
+		ok(absf(float(TeamBoki.shown[mate.nid]["frac"]) - 0.5) < 0.05 and TeamBoki.shown[mate.nid]["state"] == "",
+			"a half-health Boki's icon shows half a bar, untinted (%s)" % str(TeamBoki.shown[mate.nid]))
+		mate.kin.state = "downed"      # (the kin's own update would stand it up again before a draw)
+		ok(TeamBoki.state_of(mate, mate.kin) == "down", "a downed Boki's icon is tinted down")
+		mate.kin.state = "active"
+		mate.kin.rest_t = 5.0
+		await hud.panels.draw
+		ok(TeamBoki.shown[mate.nid]["state"] == "rest", "a resting Boki's icon is tinted resting")
+		mate.kin.rest_t = 0.0
+		mate.downed = true
+		await hud.panels.draw
+		ok(TeamBoki.shown[mate.nid]["state"] == "wisp", "a Boki whose owner is a wisp is tinted wisp")
+		mate.downed = false
 	# ---------------------------------------------------------------- 5. cooldown text
 	P.slot_lv["kin"] = 1
 	P.ak.cd["e"] = 6.4
@@ -171,6 +202,7 @@ func run(main_node: Node) -> void:
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
+	_check_deny(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -209,6 +241,41 @@ func _check_keys(P: Hunter) -> void:
 		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
 	P.ak.cd["x"] = 0.0
 
+## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
+## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
+## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+func _check_deny(P: Hunter) -> void:
+	var hud = P.m.hud
+	PressDeny.last.clear()
+	hud.slot_fx.erase("k1")
+	P.ak.cd["e"] = 6.0
+	var n0 := PressDeny.raised
+	P.ak.use_e()
+	ok(PressDeny.raised == n0 + 1 and String(hud.slot_fx.get("k1", {}).get("kind", "")) == "deny",
+		"E pressed on cooldown: one deny on the k1 slot (%d)" % (PressDeny.raised - n0))
+	P.ak.use_e()
+	ok(PressDeny.raised == n0 + 1, "pressed again inside %.1fs: still one deny" % PressDeny.THROTTLE_S)
+	P.cls = Arch.weight("ashwick")
+	P.set_arch("ashwick")
+	P.unlock_all()
+	var flow := P.ak.flow
+	ok(P.ak.id == "ashwick" and String(DashFlow.row_of("ashwick", "e", false)["mode"]) == "buffer",
+		"Cinder's ground dash buffers E (its row)")
+	PressDeny.last.clear()
+	P.ak.cd["e"] = 6.0
+	P.move_kind = "dash"
+	P.roll_t = 0.3
+	P.inp["sig"] = true
+	flow.route(Match.DT)
+	var held_mid := flow.held.has("e") and not bool(P.inp["sig"])
+	P.roll_t = 0.0
+	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
+	flow.route(Match.DT)
+	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
+		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+	P.stun_t = 0.0
+	flow.held.clear()
+
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
@@ -216,6 +283,27 @@ func _shown(hud, h: Hunter) -> Dictionary:
 ## The plate's animation state (chip, crack, burst ...) for this hunter.
 func _state(hud, h: Hunter) -> Dictionary:
 	return hud.plates.st.get(h.nid, {})
+
+## 7. A teammate knocked: a short faint line (MateAlerts), gone after LINE_S.
+func _mate_down(m: Match, hud, P: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.downed)
+	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
+	ok(not mates.is_empty() and not rivals.is_empty(),
+		"a teammate and a rival to knock them (%d, %d)" % [mates.size(), rivals.size()])
+	if mates.is_empty() or rivals.is_empty():
+		return
+	var mate: Hunter = mates[0]
+	m.knock(mate, rivals[0], {})
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var ln: Dictionary = hud.mates.lines.get(mate.nid, {})
+	ok(String(ln.get("text", "")) == "down",
+		"a teammate down: one line by their squad row ('%s')" % ln.get("text", ""))
+	ok(MateAlerts.LINE_S <= 1.5 and MateAlerts.LINE_A <= 0.6,
+		"the line is short and faint (%.1fs, %.1f)" % [MateAlerts.LINE_S, MateAlerts.LINE_A])
+	hud.mates.track(hud, P, MateAlerts.LINE_S)
+	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
+		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

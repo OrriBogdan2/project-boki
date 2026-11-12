@@ -10,7 +10,7 @@ const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
 const ART := {"bulwark": "breaker", "archer": "hem", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
-	"tender": "pip", "dredge": "dredge"}
+	"tender": "pip", "dredge": "dredge", "gil": "gil"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
 	"root": "Rig",
@@ -70,16 +70,19 @@ const INK_TAGS := ["braid", "mane", "mane_dk"]
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
 ## the match camera, so the model reads as bright as the art. (A procedural hero's shadow floor is 0.37.)
-## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
-## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
-## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
-## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm. At the match
-## camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN); a Hunter's
-## signature rim there is rim_far / rim_far_color in its warden_look.json "painted".
-const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
-	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
-	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
-	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0}
+## The scene's light is split: a cool violet ambient and blue fill (Look: about half the light on a painted model)
+## against a low amber sun (RaidLook "clear": ffb27a). The cool half turned a painted atlas's skin lilac, so
+## ambient_cut and own_ambient swap the scene's ambient for a neutral one a step brighter and light_neutral takes the
+## hue out of the cool fill; the sun's amber then had nothing left to balance it and every Hunter read red (owner
+## 11-11), so light_neutral_warm takes most of its hue out too and the toon tints stay near white. dark_lift raises
+## near-black paint one step. At the match camera far_smooth takes the atlas's fine detail out (no speckle) and the
+## ink thins (INK_FAR_THIN); a Hunter's signature rim there is rim_far / rim_far_color in its warden_look.json
+## "painted".
+const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.98, 0.96), "light_tint": Color.WHITE,
+	"shadow_sat": 0.0, "sss": 0.0, "sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3,
+	"fres_tint": 0.95, "rim_amount": 0.5, "top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0,
+	"own_ambient": Vector3(0.56, 0.55, 0.54), "light_neutral": 0.9, "light_neutral_warm": 0.8, "dark_lift": 0.07,
+	"far_smooth": 0.7, "far_smooth_bias": 1.0}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
 const ICE := {"fres": 2.6, "fres_color": Color(0.72, 0.9, 1.0), "fres_tint": 0.25, "gloss": 0.45, "rim_amount": 0.8}
@@ -127,6 +130,12 @@ static var _look = null         # content/rules/warden_look.json, read once (loo
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
+## Starts reading every Warden model a match may dress a Hunter in (as the loading screen comes up): the first
+## load of each was 200-450 ms on the main thread, a dozen of them in a 40-hunter build.
+static func fetch_all() -> void:
+	for a in Arch.ORDER:
+		fetch(a)
+
 static func path(arch: String) -> String:
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
@@ -170,6 +179,13 @@ static func set_model(arch: String, on: bool) -> void:
 		picks[arch] = "procedural"
 	Settings.set_v(SETTING, picks)
 
+## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
+## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+static func shown_torso(model: Node3D) -> Transform3D:
+	var torso := model.get_node(^"Rig/Torso") as Node3D
+	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	return sync.shown(torso) if sync and sync.clips else torso.global_transform
+
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
 	var skels: Array = glb.find_children("*", "Skeleton3D", true, false) if glb else []
@@ -195,23 +211,18 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
 	root.set_meta("rig_rest", WardenSkeleton.rig_rest(root))
-	if _measuring or not uses_model(arch):
+	if not will_dress(arch):
 		return
 	var rest := neutral_rest(arch)
-	var scene := _scene(arch)
-	var glb: Node3D = scene.instantiate() as Node3D if scene else null
+	var glb := _scene(arch).instantiate() as Node3D
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]
-	if not bad.is_empty():
-		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
-		if glb:
-			glb.free()
-		return
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
 	var sync := Sync.new()
 	sync.name = "Sync"
+	# (before the toon pass and the moods)
+	sync.companions = WardenCompanions.detach(glb, skel, WardenClips.data(art(arch)))
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
@@ -235,6 +246,28 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
+
+## Whether a build of this Warden is drawn from its .glb (Models.hunter then drops the procedural body's
+## loose parts instead of merging meshes nobody sees). The rig check runs once per model file.
+static func will_dress(arch: String) -> bool:
+	return not _measuring and uses_model(arch) and misfits(arch).is_empty()
+
+static var _misfits := {}      # .glb path -> the bones that don't fit the rig ([] when it fits)
+static func misfits(arch: String) -> Array:
+	var p := path(arch)
+	if not _misfits.has(p):
+		var scene := _scene(arch)
+		var glb: Node3D = scene.instantiate() as Node3D if scene else null
+		var skel := skeleton(glb)
+		var bad: Array = ["no armature"]
+		if skel:
+			bad = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch))
+		_misfits[p] = bad
+		if glb:
+			glb.free()
+		if not bad.is_empty():
+			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
+	return _misfits[p]
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
@@ -515,10 +548,23 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p):
+	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
+
+## Starts reading the .glb files a match's build dresses (your Warden and your dealt squadmates', opts "mates"),
+## so they load on a loader thread while the world builds instead of in build.hunters. A match with rival
+## squads (bots or other players) reads every Warden's: 30 Hunters use nearly all of them, and each read
+## on the main thread was 10-120 ms of build.hunters.
+static func fetch_for(opts: Dictionary) -> void:
+	fetch(String(opts.get("arch", Save.d.get("arch", ""))))
+	for mt in opts.get("mates", []):
+		fetch(String((mt as Dictionary).get("arch", "")))
+	var solo := ["tutorial", "duel", "arena"].any(func(k): return opts.get(k, false))
+	if not solo and int(opts.get("teams", 4)) > 1:
+		for a in Arch.ids():
+			fetch(String(a))
 
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:
@@ -558,16 +604,21 @@ static func _skinned_weapon(root: Node3D) -> void:
 		mag.mesh = null
 		mag.visible = false
 
-## The rig rest of the Warden's model in the neutral look (built once a session).
+## The rig rest of the Warden's model in the neutral look: baked (WardenRest), else measured once a session.
 static func neutral_rest(arch: String) -> Dictionary:
 	if not _neutral.has(arch):
-		_measuring = true
-		var look := PlayerLook.neutral()
-		var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
-		_measuring = false
-		_neutral[arch] = m.get_meta("rig_rest")
-		m.free()
+		var baked := WardenRest.baked(arch)
+		_neutral[arch] = baked if not baked.is_empty() else measure_rest(arch)
 	return _neutral[arch]
+
+## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
+static func measure_rest(arch: String) -> Dictionary:
+	_measuring = true
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+	_measuring = false
+	var rest: Dictionary = m.get_meta("rig_rest")
+	m.free()
+	return rest
 
 ## Hides the procedural body's meshes, leaving the KEEP pieces.
 static func _hide_body(n: Node) -> void:
@@ -901,6 +952,7 @@ class Sync extends Node:
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
+	var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
@@ -978,6 +1030,8 @@ class Sync extends Node:
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		if companions:
+			companions.step(dt)     # (before the blade: the sun's FX points ride it)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
@@ -988,6 +1042,14 @@ class Sync extends Node:
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
+
+	## A rig node's place on the body you see (world): its bone's pose back through the retarget.
+	func shown(nd: Node3D) -> Transform3D:
+		for l in links:
+			if l[1] == nd:
+				var to_rest := (l[3] as Transform3D).affine_inverse() * (l[2] as Transform3D).affine_inverse()
+				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
+		return nd.global_transform
 
 	func apply() -> void:
 		for l in links:
