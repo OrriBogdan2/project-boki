@@ -21,7 +21,7 @@ Weight Medium (145 hp). Fixed weapon Rubble Fists (`content/weapons/rubble_fists
 with magma cracks (shaders/molten_rock.gdshader), knuckle studs and a hot core (scripts/match/hero_arms.gd); the gauntlets
 ride her hands (HunterAnim's "fist" hold), so every move's arm reach shows. Body (content "body"): 0.97 tall, 1.2 wide (big
 forearms and fists, a short wide read); the medium hitbox 0.40 is kept (the fists are not body). Palette ochre stone `#d9a35b`
-with molten orange `#ff7a2a`. Payoff word ROCKFALL. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
+with molten orange `#ff7a2a`. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
 looks in `kit_looks.gd`, standing on rocks in `scripts/arch/stone_stand.gd`, moves in `scripts/match/kmoves_stone.gd`,
 sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
 
@@ -197,7 +197,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
-| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
+| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then slam | rocks in the ring fly outward | `combo: Stone Row > slam launches the rocks` |
 | Stone Row, then walk into a rock | he rises onto it and walks over (0.58s to cross, no jump); anyone else is stopped | `rock (item 25): walking into her own rock lifts her...`, `rock (item 25): an ally / a foe walking or jumping into her rock is stopped`, `rock: dropped onto a rock, she stands on its top` |
 | Punch into a wall | 0.9s stun with stars | `combo: punch into a wall = stun, with stars over the head` |
@@ -211,7 +211,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Two bursts on one foe | the second inside 0.8s deals 30% less | `small: a second burst on the same foe inside 0.8s deals 30% less` |
 | Boulder into a pair | the one beside takes half | `small: the boulder's burst splashes the foe beside it` |
 | Merge start | dive, charge, its leap, Rock Hop, the Spine's aim and telegraphs all drop | `merge hold: ...` |
-| Basalt Spine, then a punch along it | the whole ridge flies in a stream at whoever is down the line (40 cap per hunter), ROCKFALL | `ult combo: a punch along the ridge launches its rocks in a stream` |
+| Basalt Spine, then a punch along it | the whole ridge flies in a stream at whoever is down the line (40 cap per hunter) | `ult combo: a punch along the ridge launches its rocks in a stream` |
 | Basalt Spine across a fleeing foe | the foe is shoved to its side of the line and slowed; the ridge walls it off | `ult: a body on the line is shoved off it...`, `ult: the rise slows a foe beside it` |
 | Basalt Spine over the abyss | the rocks are laid on the gap and are ground: a hunter lands on the ridge, stands and walks along it, and falls when the rocks crumble | `spine: over the abyss the rocks are the walkway...`, `spine: rocks stand over the gap...`, `spine walkway: ...` |
 | Basalt Spine, punch, then the merge | the target lives (burst cap) | `ult burst: ridge, punch, merge and its ultimate leave a full-health light hunter standing` |
@@ -255,7 +255,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - She can walk while charging Quakefall, at 55% speed.
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
-- The KNOCK beam on the dunk is our DUNKED word plus a vertical light (a generic knock look in the source, it seems).
+- The KNOCK beam on the dunk is our vertical light, with no word (a generic knock look in the source, it seems).
 - Anyone dropped onto a rock from above (a glide, a knock) stands on it and can walk off; only climbing is the caster's.
 - Rock Hop's landing spots: the cursor clamped to a hop's reach, pulled back to the nearest ground a body fits on (never into
   a wall). In the air Shift stays the class long dash. See Rock Hop below.

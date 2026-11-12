@@ -164,7 +164,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00 |
 | Hooked | E with the Lunge charging | Pulling with a Haul Slam armed for the arrival | ours |
 | Hooked | he holds aside | the chain bows that way and his screen shows the predicted arc | [O] item 57 |
-| Hooked | stunned, or the foe is downed or gone | Broken: "CHAIN BROKE", the cooldown starts | [W] 05.02.25 |
+| Hooked | stunned, or the foe is downed or gone | Broken (the chain snaps, no word), the cooldown starts | [W] 05.02.25 |
 | Hooked | a Boki merge starts | Broken | ours |
 | Pulling | each step | you fly at the pull's speed along a circular arc (at most 6 rad/s) to the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 |
 | Pulling | facing aside (the cursor off the chain's line) | you swing out that way, 36% of the chain's length at 90 deg (up to 6 m): a ~40 deg arc that lands beside or past the anchor | [O] item 57 |

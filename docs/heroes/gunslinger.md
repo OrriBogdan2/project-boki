@@ -5,7 +5,7 @@ Source behaviour reference: the hero named in the Inspired-by table in docs/ARCH
 sheet: briefs/hero-ref/venator.md, from the source's real segment; owner notes override the footage).
 Our hero is an original character, the ember-rifle skirmisher: a visored cap, a cropped jacket, a long
 streaming scarf, a bandolier of spiked charges, one bronze pauldron and a long-shrouded drum rifle.
-Palette: ember orange, bronze and hot white. Payoff word: SKEWERED.
+Palette: ember orange, bronze and hot white.
 
 ## Kit card (L picker)
 - Role: Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.
