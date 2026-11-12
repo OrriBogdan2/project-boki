@@ -3683,7 +3683,8 @@ func _play_evolutions() -> void:
 	n.remove_child(lbl)
 	nn.add_child(lbl)
 	if k.has("say") and is_instance_valid(k["say"]):
-		n.remove_child(k["say"]); nn.add_child(k["say"])
+		n.remove_child(k["say"])
+		nn.add_child(k["say"])
 	k.erase("bubble")
 	k["node"] = nn
 	var seen := EvolveMoment.on_screen(cam, at) and EvolveMoment.has_model(nn)
