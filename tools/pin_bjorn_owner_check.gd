@@ -693,7 +693,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
-	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
+	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.39, "pin_flick": 0.22})
 
 ## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:

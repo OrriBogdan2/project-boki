@@ -269,11 +269,11 @@ const MOVES := {
 			}
 		],
 		[0.6, {}]]},
-	# Spirit Walk's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
+	# Spirit Walk's dodge roll: one forward roll across her felt 0.386 s travel (the clip's times), then up light
 	"pin_roll": {"keys": [
 		[0.0, {"p": -0.35, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, 0.9, -1.3]}],
 		[
-			0.07,
+			0.08,
 			{
 				"p": -0.5,
 				"fx": 2.2,
@@ -285,9 +285,9 @@ const MOVES := {
 				"fl": Vector3(0.0, -0.1, -0.2)
 			}
 		],
-		[0.24, {"p": -0.3, "fx": 6.28, "sq": 0.15, "lift": 0.2, "lw": 1.0, "legs": [0.7, -1.0, 0.7, -1.0]}],
+		[0.34, {"p": -0.3, "fx": 6.28, "sq": 0.15, "lift": 0.2, "lw": 1.0, "legs": [0.7, -1.0, 0.7, -1.0]}],
 		[
-			0.36,
+			0.52,
 			{
 				"p": -0.25,
 				"fx": 6.28,
