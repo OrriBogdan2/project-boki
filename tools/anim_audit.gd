@@ -11,7 +11,7 @@ extends RefCounted
 
 const DT := 1.0 / 30.0
 const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
-const SAMPLE_S := 2.4        # s of locomotion sampled
+const SAMPLE_S := 2.4        # s of locomotion sampled, about: whole loops of it
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
@@ -150,8 +150,12 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	clips.move_v = 0.0
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
+	# (whole loops of the ring that shows, about SAMPLE_S of them: a mean over part of a loop would hang on where the
+	# loop stood when sampling began, and a start picks up at a set phase, WardenStart)
+	var ring := "run" if clips.run_w >= 0.5 else "walk"
+	var loop := float(clips.tree.get("parameters/%s/current_length" % ring)) / maxf(clips.loco_rate, 0.1)
 	var fr: Array = []
-	for k in int(SAMPLE_S / DT):
+	for k in roundi(maxf(roundf(SAMPLE_S / loop), 1.0) * loop / DT):
 		sync.call("_process", DT)
 		fr.append(_read(sk))
 	m.set_meta(WardenClips.STATE, {})
