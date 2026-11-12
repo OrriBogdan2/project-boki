@@ -7853,3 +7853,4 @@ READY ext/meeko-lane-picks dd00ee939 (Meeko lane picks from docs/MERGE_0246_COMB
 READY ext/verify-kael-ult-recovery d37107c74 (7 frame-exact rows in dj_ult_check: Space/Shift on Kael ult recovery frames 1,10,21 act that frame, no fix needed)
 READY ext/ui-actions-hunter d059903c54 (guard row: no ACTIONS label says Archetype; labels were already Hunter)
 READY ext/feel-glide-btn-online c44b415c3c (glide button online: host copy opens within 1 Net tick of the client, no fallback; --glide-net-check + glide-hold remote row; no Net change)
+READY ext/ui-meeko-channel-ally 5a5986844b (Meeko's Hearth Call protection bar under the ally's vitals, online via a hunter-row tail, Net 0.24.6)
