@@ -273,7 +273,8 @@ func _ready() -> void:
 				var to := tgt - Vector2(ph.pos.x, ph.pos.z)
 				ph.inp["move"] = to.normalized() if to.length() > 0.4 else Vector2.ZERO
 				ph.inp["jump"] = t < 0.1 or (ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) != pi)
-				ph.inp["glide"] = t > 0.25; ph.inp["glide_btn"] = t > 0.25
+				ph.inp["glide"] = t > 0.25
+				ph.inp["glide_btn"] = t > 0.25
 				pm.step(Match.DT); t += Match.DT
 				top_y = maxf(top_y, ph.pos.y)
 				var up: Dictionary = pm.world.updraft_at(ph.pos)
