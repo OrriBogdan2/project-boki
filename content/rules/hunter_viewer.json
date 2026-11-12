@@ -1,0 +1,19 @@
+{
+	"desc": "The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the reveal). Each ability plays in its own clip (AbilityClip): the real model uses it on a training dummy. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back in the clip, the same ids the kits play. A slot with no entry falls back to the weapon swing or shots (lmb), the class dodge (dash) or a cast pose (rmb, e, x). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
+	"turn_rate": 0.45,
+	"turn_rate_desc": "rad/s the viewer's turntable spins",
+	"moves": {
+		"thief": {"dash": ["thf_vault_r"], "lmb": ["thf_lmb_r", "thf_lmb_l"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "x": ["thf_encore"]},
+		"archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_cast", "pin_ult_loose"]},
+		"mage": {"dash": ["mage_dash", "mage_dash_go"], "lmb": ["mage_lmb_r", "mage_lmb_l"], "rmb": ["mage_rmb_hold", "mage_rmb"], "e": ["mage_e"], "x": ["mage_x", "mage_x_land"]},
+		"gunslinger": {"dash": ["gunslinger_dash"], "lmb": ["gunslinger_lmb"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"], "x": ["gunslinger_x"]},
+		"juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_slash_r", "jug_slash_l"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "passive": ["jug_roar"], "x": ["jug_guard", "jug_riposte"]},
+		"bulwark": {"dash": ["bul_charge"], "lmb": ["bul_smash_wind", "bul_smash"], "rmb": ["bul_guard", "bul_slamshield"], "e": ["bul_mend"], "passive": ["bul_whirl"], "x": ["bul_ult_wind", "bul_ult_slam"]},
+		"dredge": {"dash": ["dr_lunge", "dr_pounce"], "lmb": ["dr_shot"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor", "dr_quake"], "x": ["dr_blast"]},
+		"ashwick": {"dash": ["as_leap", "lw_hop"], "lmb": ["as_lance", "as_lance_end"], "rmb": ["as_aim", "as_shot"], "e": ["as_cloak"], "x": ["lw_jet"]},
+		"tender": {"dash": ["mm_skip", "mm_float"], "lmb": ["mm_shot_r", "mm_shot_l"], "rmb": ["mm_seed_aim", "mm_seed"], "e": ["mm_hearth"], "x": ["mm_call", "mm_call_end"]},
+		"rimewright": {"dash": ["tm_skate", "tm_skate_go", "tm_skate_air"], "lmb": ["tm_dart_r", "tm_dart_l"], "rmb": ["tm_spear_aim", "tm_spear"], "e": ["tm_wall"], "x": ["tm_rime", "tm_rime_crash"]},
+		"dolm": {"dash": ["breah_hop", "breah_skate"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"]},
+		"ostra": {"dash": ["ostra_swap_aim", "ostra_swap"], "lmb": ["ostra_orb"], "rmb": ["ostra_snap_wind", "ostra_snap"], "e": ["ostra_seed"], "x": ["ostra_well"]}
+	}
+}

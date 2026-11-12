@@ -174,7 +174,7 @@ const EFFECTS := {
 			"amount": ["float", 0.0, 1.0, 0.0, "x", "size of the boost; bounds depend on the stat (BUFF_STATS); 0 = the stat's default"],
 			"duration": ["float", 0.5, 8.0, 3.0, "s", "how long (ignored by dash_refill and glider_cool)"]}},
 	"signature": {"cat": "utility", "cost": 3, "targets": ["foes", "owner", "self", "allies"], "doc": "a hand-coded mechanic from the reviewed SIGNATURES list",
-		"params": {"id": ["enum", ["swap", "decoy", "bridge"], null, null, "", "which signature mechanic"]}},
+		"params": {"id": ["enum", ["decoy", "bridge"], null, null, "", "which signature mechanic"]}},
 }
 
 ## Buff stats: [min, max, default, unit, doc]. amount 0 in a file means "use the default".
@@ -190,8 +190,6 @@ const BUFF_STATS := {
 
 ## Signature mechanics: hand-coded, reviewed one by one (Phase 6). Their own parameters.
 const SIGNATURES := {
-	"swap": {"doc": "the target trades places with the caster or its hunter", "params": {
-		"who": ["enum", ["owner", "caster"], null, "owner", "", "who trades places with the target"]}},
 	"decoy": {"doc": "leaves a copy of the origin unit that draws bots' fire", "params": {
 		"duration": ["float", 0.5, 3.0, 1.8, "s", "how long the copy stays"]}},
 	"bridge": {"doc": "abyss along the aim becomes walkable ground for a while", "params": {
@@ -330,7 +328,7 @@ const STATS := {
 const CARRY := {
 	"shoulder": {"sizes": ["small"], "doc": "rides your shoulder; its passive works once it has settled"},
 	"perch": {"sizes": ["small", "medium"], "doc": "perches on your pack; same passive rules as shoulder"},
-	"mount": {"sizes": ["large"], "doc": "a big kin you ride: it changes your movement, and you can't glide while mounted"},
+	"mount": {"sizes": ["large"], "doc": "a big kin: on Return it guards at your side, never under you; only its giant Fusion form is ridden (mount speed and jump apply then)"},
 }
 const MOUNT := {
 	"speed": ["float", 0.8, 1.3, 1.0, "x", "ground speed while riding"],
@@ -350,12 +348,12 @@ const OWNER_STATS := {
 	"armor": ["defence", "float", 0.2, 0.5, "x", "armor durability"],
 	"damage_reduction": ["defence", "float", 0.15, 0.3, "x", "less damage taken"],
 	"knockback_resist": ["defence", "float", 0.5, 0.75, "x", "less knockback"],
-	"shield": ["defence", "float", 0.0, 150.0, "hp", "a shield when the merge starts"],
 	"regen": ["defence", "float", 3.0, 8.0, "hp/s", "health regen"],
 	"damage": ["offence", "float", 0.1, 0.35, "x", "more damage"],
 	"fire_rate": ["offence", "float", 0.2, 0.3, "x", "faster firing"],
 	"reload": ["offence", "float", 0.2, 0.3, "x", "faster reloads"],
 	"reveal_radius": ["senses", "float", 0.0, 20.0, "m", "rivals this near are revealed"],
+	"cooldown": ["offence", "float", 0.0, 0.5, "x", "every Hunter ability recharges this much faster (set by the merge form, content/rules/merge_forms.json)"],
 }
 
 ## Riders on the owner's shots (carry passive and merge). Hard CC is never allowed on every shot.
@@ -366,9 +364,7 @@ const SHOT := {
 }
 
 const MERGE := {
-	"duration": ["float", 4.0, 10.0, 6.0, "s", "how long the merge lasts at bond and level 1"],
-	"grow_duration": ["float", 0.0, 3.0, 1.0, "s", "extra time at full kin level and bond"],
-	"grow_strength": ["float", 0.0, 0.25, 0.1, "x", "extra strength at full kin level and bond"],
+	"duration": ["float", 4.0, 10.0, 6.0, "s", "how long the merge lasts"],
 }
 const PULSE := {"every": ["float", 0.4, 3.0, 1.0, "s", "how often the pulse fires"]}
 const MERGED_SCALE := [1.0, 1.3]   # merged ability numbers may grow up to 30%

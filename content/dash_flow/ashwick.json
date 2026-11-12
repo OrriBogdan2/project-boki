@@ -1,0 +1,37 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "buffer", "source": "Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands."},
+			"e": {"mode": "buffer", "source": "Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends."},
+			"x": {"mode": "cancel", "carry": true, "source": "Data: Flight of the Firefox flies forward; knockback impulses speed it up (momentum feeds it). Footage: not cast from a bash. Ours: X ends the ram at once and the flight takes over from where he is (the row ends the dash first; no kit code for it)."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the ram like any glove."}
+		},
+		"air": {
+			"lmb": {"mode": "fire", "source": "Data: no air bash in the source (the jetpack is his only air move). Owner note (23:40): the air dash is a fast poof, balled up for one roll. Ours: the hose lights mid-poof (the 0.35s relight gap after a release still applies)."},
+			"rmb": {"mode": "fire", "source": "Data: no air bash; the jetpack allows the shield ability mid-flight. Ours: the bolt leaves from the poof (its speed is kept after it anyway)."},
+			"e": {"mode": "fire", "source": "Data (wiki): Heat Shield can be cast mid-flight in the jetpack, his one air move. Ours: likewise mid-poof."},
+			"x": {"mode": "cancel", "carry": true, "source": "Data: knockback impulses speed the flight up. Ours: X ends the poof and the flight takes over."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the poof."}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once; the stream goes out for the ram and, still held, roars again the step it ends (hold.lmb)."},
+		"rmb": {"mode": "fire", "source": "Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release."},
+		"e": {"mode": "fire", "source": "Heat Shield is instant (owner item 11): there is no wind-up to dash out of."},
+		"x": {"mode": "lock", "reason": "Owner decision (item 66): in Flue Flight only E works, so Shift does nothing there: no poof, no dash spent, not buffered (AshwickJet.lock_inputs).", "source": "Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours (owner, item 66): in Flue Flight only E works, so Shift in the flight does nothing (no poof, no dash spent, not buffered); AshwickJet.lock_inputs."},
+		"q": {"mode": "fire", "source": "No source glove."}
+	},
+	"into_jump": {
+		"x": {"mode": "cancel", "source": "Data: reactivating ends the flight early (the source's way out of it); the flight holds him low. Ours: a jump in the flight leaps off it at once: the flight ends (the carpet laid stays), he keeps a jump-out-of-a-dash share of its speed and hands it on to a glide (Hunter.glide_handoff)."}
+	},
+	"hold": {
+		"lmb": {"ground": {"mode": "keep", "source": "Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Flue Flight is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends."}, "air": {"mode": "keep", "source": "As on the ground: held through the poof, the stream is back the step it ends."}, "jump": {"mode": "keep", "source": "Ours: the hose keeps burning through a jump."}},
+		"rmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		}
+	}
+}

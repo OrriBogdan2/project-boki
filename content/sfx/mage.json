@@ -1,0 +1,56 @@
+{
+ "group": "mage",
+ "name": "Sparkle",
+ "script": "tools/gen_sfx_ryzz.py",
+ "sounds": {
+  "vv_bolt": "fire",
+  "mage_zap": "signature",
+  "mage_bubble_pop": "signature",
+  "vv_static_full": "impact",
+  "vv_surge_charge": "cast",
+  "vv_surge_go": "cast",
+  "mage_dash": "dash",
+  "vv_rod_summon": "cast",
+  "vv_rod_full": "cast",
+  "vv_rod_throw": "cast",
+  "mage_rod_hit": "impact",
+  "vv_orb": "impact",
+  "vv_sky_place": "cast",
+  "vv_sky_count": "cast",
+  "vv_sky_strike": "impact",
+  "vv_ult_rise": "cast",
+  "vv_ult_hum": "loop",
+  "vv_ult_slam": "impact",
+  "mage_step_grass": "step",
+  "mage_step_stone": "step",
+  "mage_step_wood": "step",
+  "mage_step_snow": "step",
+  "mage_hurt": "grunt",
+  "mage_down": "grunt",
+  "mage_death": "grunt"
+ },
+ "signature": [
+  "mage_zap",
+  "mage_bubble_pop"
+ ],
+ "replaces": [
+  "vv_bolt",
+  "vv_static_full",
+  "vv_surge_charge",
+  "vv_surge_go",
+  "vv_rod_summon",
+  "vv_rod_full",
+  "vv_rod_throw",
+  "vv_orb",
+  "vv_sky_place",
+  "vv_sky_count",
+  "vv_sky_strike",
+  "vv_ult_rise",
+  "vv_ult_hum",
+  "vv_ult_slam"
+ ],
+ "kit_files": [
+  "mage_sky.gd",
+  "mage_ult.gd"
+ ]
+}

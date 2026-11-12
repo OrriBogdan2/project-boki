@@ -1,5 +1,0 @@
-farm_1_crop_ready.png: A grown Boki (Echolop) beside a ripe crop: a crop_ready line
-farm_2_young_petted.png: A just-hatched Boki (stage 0) petted: only its name and an action
-farm_3_rain_night.png: Night and rain, the live FarmChatter tick: a Boki speaks up about it
-match_1_ability.png: In a match: the Boki (Lunowl) calls out as it uses its own ability
-match_2_level_up.png: In a match: the Boki cheers when you level up

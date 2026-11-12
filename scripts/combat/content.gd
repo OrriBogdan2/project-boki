@@ -21,7 +21,7 @@ static func _load(kind: String, id: String) -> Dictionary:
 	return out
 
 static func ability(id: String) -> AbilityDef:
-	var d := _load("abilities", id)
+	var d := _load("hunter_abilities", id)
 	return AbilityDef.from_dict(d) if not d.is_empty() else null
 
 static func weapon(id: String) -> WeaponDef:
@@ -36,6 +36,10 @@ static func class_dodge(cls: String) -> AbilityDef:
 ## Tuning tables under content/rules (bond meter, kin AI).
 static func rules(id: String) -> Dictionary:
 	return _load("rules", id)
+
+## A merge form with a kit (docs/decisions/0003): content/merge_forms/<merge id>.json, {} when that Boki has none yet.
+static func merge_form(id: String) -> Dictionary:
+	return _load("merge_forms", id)
 
 static var _combos: Array = []
 static func combos() -> Array:

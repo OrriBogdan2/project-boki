@@ -55,14 +55,15 @@ func pick_target() -> Ent:
 	var own := k.owner_h
 	var best: Ent = null
 	var bs := -1e9
+	var focus: Ent = KinFollow.owner_focus(k) if own else null       # what you are fighting
 	var attacker: Ent = own.last_hit_by if own else null
 	if attacker is Kin and (attacker as Kin).owner_h:
 		attacker = attacker
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		if f is Hunter and (f.downed or f.cloak_t > 0.0):
 			continue
-		if not f.hittable():
-			continue
+		if not f.hittable() or Shrubling.hidden(f):
+			continue      # (a disguised Shrubling is not given away by its Boki)
 		if float(k.ignore_until.get(f, -1.0)) > k.m.time:
 			continue      # it gave up on this one a moment ago (couldn't reach it)
 		var d := k.flat_dist(f)
@@ -73,6 +74,7 @@ func pick_target() -> Ent:
 		var s := -d
 		if f == attacker: s += 2.0 + loyalty * _r("guard_owner_per_loyalty", 4.0)
 		if f == k.target: s += 1.5
+		if f == focus: s += 3.0
 		if f is Hunter: s += aggression * 1.5
 		if own:
 			s -= own.flat_dist(f) * loyalty * 0.25
@@ -84,7 +86,7 @@ func pick_target() -> Ent:
 ## Called a few times a second while the kin is out (or riding with you, for abilities that work
 ## on you). Uses abilities by itself when their cue (KinParts.CUES) fits:
 ##   k2, the auto active, is the kin's own: it always uses it when it sees the chance
-##   k1, the active on E, only for bots, or for you if you turned on "kin_auto" in Settings
+##   k1, the Boki's own ability, when the cue fits; yours casts it only while it is out beside you or fighting
 ## Locked slots (run levels) are never cast. Event triggers (on_hit, on_throw...) fire elsewhere;
 ## on_low_hp is watched here.
 func think_abilities(dt: float) -> void:
@@ -101,8 +103,8 @@ func think_abilities(dt: float) -> void:
 		var def := k.runner.def_of(slot)
 		if def.cue == null:
 			continue
-		if slot == "k1" and k.owner_h.is_local() and not Settings.get_v("kin_auto"):
-			continue     # your E stays yours unless you asked the kin to use it
+		if slot == "k1" and k.owner_h.is_local() and k.state != "active":
+			continue     # your Boki casts its own ability once it is out
 		if slot == "k2" and (def.trigger == null or def.trigger.type != "auto"):
 			continue
 		if k.state in ["shoulder", "fused"] and def.from == "kin":
@@ -138,7 +140,7 @@ func cue_aim(cue: PartSpec) -> Vector3:
 		"foes_clumped":
 			if k.target and k.flat_dist(k.target) < float(p["range"]):
 				var n := 0
-				for f in k.m.foes_of(k.team):
+				for f in k.m.foes_of(k.team, false):
 					if f.flat_dist(k.target) < float(p["radius"]): n += 1
 				if n >= int(p["count"]) and randf() < offensive_rate:
 					return k.target.pos
@@ -157,6 +159,6 @@ func cue_aim(cue: PartSpec) -> Vector3:
 			if (own.below_lip or (own.over_void() and own.vel.y < -4.0 and not own.grounded)) and randf() < 0.35 + loyalty * 0.65:
 				return own.pos
 		"owner_fighting":
-			if own.idle_fire < 1.5 and k.m.foes_of(k.team).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
+			if own.idle_fire < 1.5 and k.m.foes_of(k.team, false).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
 				return own.inp.get("aim", own.pos)
 	return Vector3.INF

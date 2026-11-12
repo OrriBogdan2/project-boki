@@ -244,11 +244,6 @@ def hurt(i):
 takes('hurt', hurt, rms_db=-20, lp=1600)
 
 
-def kinhit(i):
-    d = 0.2
-    return mix(tone(360 + 25 * i, 180, d, (1.0, 0.2)) * env(N(d), 0.004, 0.045), bpf(noise(d), 300, 1400) * env(N(d), 0.004, 0.03) * 1.2)
-takes('kinhit', kinhit, rms_db=-21, lp=2000)
-
 # a kill: a low thud and a warm two-note bell, not a laser
 save('kill', mix(thud(150, 60, 0.3, 0.004, 0.06, 600, 0.4) * 0.7, at(bell(659, 0.5, 0.006, 0.16), 0.03) * 0.5,
                  at(bell(988, 0.5, 0.006, 0.18), 0.12) * 0.4), rms_db=-20, lp=3200)
@@ -288,50 +283,10 @@ save('whoosh', swish(0.26, 300, 1000, 450, 0.04, 1.1), rms_db=-22, lp=2000)
 # falling off the world: a long soft fall in pitch, with air rushing past
 d = 1.1; save('fall', mix(tone(420, 110, d, (1.0, 0.15)) * swell(N(d), 0.04, 0.5) * 0.6, swish(d, 900, 300, None, 0.1, 0.9) * 0.6), rms_db=-19, lp=1600)
 
-# ================================================================== kin: voices, throws, abilities
-def chirp(f, d, up=True, vib=0.012):
-    n = N(d); u = np.arange(n) / n
-    ff = f * (1 + (0.18 if up else -0.15) * np.sin(np.pi * u))
-    ph = 2 * np.pi * np.cumsum(ff * (1 + vib * np.sin(2 * np.pi * 9 * u * d))) / SR
-    return (np.sin(ph) + 0.15 * np.sin(2 * ph)) * swell(n, min(0.015, d * 0.25), d * 0.55)
-save('kin_happy', cat(chirp(660, 0.1), gap(0.02), chirp(880, 0.14)), rms_db=-20, lp=3000)
-save('kin_unsure', cat(chirp(560, 0.13, False), gap(0.03), chirp(440, 0.18, False)), rms_db=-20, lp=2600)
-save('kin_alert', cat(chirp(990, 0.07), gap(0.04), chirp(990, 0.08)), rms_db=-21, lp=3200)
-save('recall', tone(700, 330, 0.5, (1.0, 0.15)) * swell(N(0.5), 0.015, 0.35) * 0.7 + swish(0.5, 900, 300, None, 0.05, 1.0) * 0.4, rms_db=-21, lp=2400)
-save('throw', mix(swish(0.3, 300, 1100, 500, 0.02, 1.2), tone(240, 420, 0.25, (1.0, 0.1)) * swell(N(0.25), 0.02, 0.15) * 0.3), rms_db=-21, lp=2200)
-# a generic ability (gloves, anything without its own sound): a soft rising shimmer
-save('skill', mix(tone(330, 660, 0.4, (1.0, 0.2, 0.05)) * swell(N(0.4), 0.025, 0.25) * 0.5, swish(0.4, 400, 1200, 600, 0.04, 1.2) * 0.5),
-     rms_db=-21, lp=2600)
-
-# each kin type's own ability cue, fitting its element
-# venom (fireball, flare dash): a warm whoomp of flame
-d = 0.55; n = N(d)
-save('k_venom', mix(svf_bp(noise(d), np.concatenate([glide(200, 1200, n // 3), glide(1200, 300, n - n // 3)]), 0.8) * swell(n, 0.03, 0.4) * 1.5,
-                    tone(85, 55, d) * env(n, 0.03, 0.15) * 0.6,
-                    crackle(d, 25, 1500) * swell(n, 0.05, 0.3) * 0.8),
-     rms_db=-20, lp=1800)
-# spore (snare, thorn patch): a soft puff, then two smaller ones
-def puff(d, lo, hi): return bpf(noise(d), lo, hi) * env(N(d), 0.01, d * 0.3) + tone(160, 110, d) * env(N(d), 0.01, d * 0.25) * 0.15
-save('k_spore', mix(puff(0.25, 300, 1400), at(puff(0.18, 400, 1600) * 0.6, 0.12), at(puff(0.15, 500, 1800) * 0.4, 0.22)), rms_db=-21, lp=2000)
-# gravity (slam, rock guard): a low rumbling thud of stone
-d = 0.7; n = N(d)
-save('k_gravity', mix(thud(110, 50, d, 0.012, 0.16, 500, 0.5) * 0.6, bpf(noise(d), 80, 450) * swell(n, 0.03, 0.4) * 1.6), rms_db=-18, lp=900)
-# prism (wave, bubble guard): a glassy soft chime, a fifth and an octave
-save('k_prism', mix(bell(784, 0.8, 0.008, 0.25), at(bell(1175, 0.7, 0.008, 0.2), 0.05) * 0.6, at(bell(1568, 0.6, 0.008, 0.15), 0.1) * 0.3,
-                    swish(0.5, 500, 1200, 600, 0.05, 1.0) * 0.25), rms_db=-22, lp=4200)
-# lunar (gust, updraft): wind swirling up, with a faint pale tone in it
-d = 0.7; n = N(d)
-save('k_lunar', mix(svf_bp(noise(d), 600 + 400 * np.sin(np.linspace(0, 2.2 * np.pi, n)) ** 2, 1.4) * swell(n, 0.08, 0.35) * 1.2,
-                    tone(440, 523, d, (1.0, 0.1)) * swell(n, 0.12, 0.35) * 0.12), rms_db=-21, lp=2200)
-# echo (chain spark, overcharge): storm energy, a low rumble with soft crackles
-d = 0.6; n = N(d)
-save('k_echo', mix(bpf(noise(d), 70, 300) * swell(n, 0.03, 0.35) * 2.0, crackle(d, 45) * swell(n, 0.02, 0.3) * 0.8, tone(80, 60, d) * swell(n, 0.03, 0.3) * 0.25),
-     rms_db=-20, lp=1800)
+# ================================================================== abilities (the Boki's voices and moves: gen_sfx_boki.py)
 # a lightning arc between foes: a short low crackle, not a buzz
 d = 0.32; n = N(d)
 save('zap', mix(crackle(d, 90, 2000) * env(n, 0.004, 0.09), lpf(noise(d), 200) * env(n, 0.01, 0.1) * 1.2), rms_db=-21, lp=2200)
-# the bond filling: three warm chimes
-save('bond', mix(bell(523, 0.5, 0.008, 0.15), at(bell(659, 0.5, 0.008, 0.15), 0.1), at(bell(784, 0.7, 0.008, 0.25), 0.2)), rms_db=-21, lp=3600)
 # an ultimate: a deep swell that blooms
 d = 1.1; n = N(d)
 save('ult', mix(svf_bp(noise(d), glide(150, 700, n), 0.9) * swell(n, 0.15, 0.6) * 1.8, tone(70, 90, d, (1.0, 0.3)) * swell(n, 0.1, 0.6) * 0.35,
@@ -348,10 +303,6 @@ d = 0.7; save('heal', mix(tone(392, 523, d, (1.0, 0.12)) * swell(N(d), 0.05, 0.4
 # ================================================================== the world
 save('plant', mix(bpf(noise(0.25), 150, 700) * env(N(0.25), 0.006, 0.06) * 2.0, tone(160, 110, 0.2) * env(N(0.2), 0.006, 0.05) * 0.3), rms_db=-21, lp=1000)
 save('harvest', mix(pluck(523), at(pluck(659), 0.08), at(pluck(784, 0.35, 0.004, 0.14), 0.16)), rms_db=-21, lp=2800)
-save('ping', bell(880, 0.5, 0.008, 0.16), rms_db=-23, lp=3200)
-save('pickup', mix(pluck(659, 0.18, 0.004, 0.05), at(pluck(880, 0.25, 0.004, 0.08), 0.06)), rms_db=-22, lp=3000)
-save('catch', mix(*[at(pluck(f, 0.4 if k < 3 else 0.7, 0.005, 0.1 if k < 3 else 0.28), 0.11 * k) for k, f in enumerate((392, 494, 587, 784))]),
-     rms_db=-19, lp=3000)
 # a warning: a low two-tone hum that swells in, noticeable but never a siren
 d = 0.7; n = N(d)
 save('warn', mix(tone(196, 196, d, (1.0, 0.25, 0.08)), tone(233, 233, d, (1.0, 0.2)) * 0.6) * swell(n, 0.12, 0.3) * (0.8 + 0.2 * np.sin(2 * np.pi * 5 * T(d))),
@@ -360,14 +311,10 @@ d = 1.0; n = N(d)
 save('portal', mix(tone(200, 600, d, (1.0, 0.1)) * swell(n, 0.25, 0.45) * 0.5, tone(300, 900, d) * swell(n, 0.3, 0.45) * 0.2, swish(d, 300, 900, 400, 0.25, 1.0) * 0.4),
      rms_db=-20, lp=2400)
 save('revive', mix(bell(523, 0.5, 0.01, 0.14), at(bell(659, 0.5, 0.01, 0.14), 0.13), at(bell(784, 0.8, 0.01, 0.3), 0.26)), rms_db=-20, lp=3400)
-# ui: short, soft ticks
-save('click', tone(820, 650, 0.05, (1.0, 0.1)) * env(N(0.05), 0.004, 0.01), rms_db=-22, lp=3000)
-save('hover', tone(1050, 980, 0.04) * env(N(0.04), 0.004, 0.008), rms_db=-25, lp=3000)
+# building: three soft knocks
 def knock(f):
     return mix(tone(f, f * 0.75, 0.08, (1.0, 0.15)) * env(N(0.08), 0.003, 0.018), bpf(noise(0.08), 400, 1400) * env(N(0.08), 0.003, 0.012) * 0.6)
 save('build', cat(knock(300), gap(0.09), knock(270), gap(0.09), knock(330)), rms_db=-22, lp=2000)
-save('unlock', mix(*[at(pluck(f, 0.35 if k < 4 else 0.7, 0.005, 0.09 if k < 4 else 0.25), 0.09 * k) for k, f in enumerate((523, 659, 784, 880, 1047))]),
-     rms_db=-20, lp=3200)
 
 # ================================================================== monster voices: low and creature-like
 # skitter: a small crawling thing, a quick soft chitter over a purr
@@ -415,3 +362,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_combat
 sfx_combat.build()
 print('combat sounds written')
+
+# ================================================================== capture
+# scan_pop: the capsule closing at the end of a scan: a quick rising shimmer, then a bright two-note pop
+# (added last, so the sounds above keep the same random stream).
+d = 0.75; n = N(d)
+save('scan_pop', mix(tone(500, 1500, 0.3, (1.0, 0.15)) * swell(N(0.3), 0.25, 0.1) * 0.35,
+                     at(bell(988, 0.5, 0.004, 0.14), 0.28), at(bell(1318, 0.6, 0.004, 0.2), 0.34) * 0.8,
+                     at(bpf(noise(0.12), 1500, 5000) * env(N(0.12), 0.002, 0.03), 0.28) * 0.5), rms_db=-19, lp=5000)
+print('capture sounds written')

@@ -7,7 +7,7 @@ extends Node3D
 ##   --arch-heads    every race's head under every archetype's headgear (fit and ears), close up
 ## Optional: --arch-yaw=<radians> turns everyone.
 
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
+const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 var anims: Array = []
 
 func _arg(prefix: String, def: String) -> String:
@@ -56,12 +56,13 @@ func _label(text: String, at: Vector3, size := 34) -> void:
 func _lineup() -> void:
 	var yaw := float(_arg("--arch-yaw=", str(PI * 0.88)))
 	var i := 0
-	for arch in HeroKit.ARCH_ORDER:
-		var race: int = [3, 0, 5, 1, 2, 4][i]
-		var lk: Dictionary = {"race": race, "hair": [0, 1, 2, 3, 0, 1][i], "hair_v": 2, "hair_col": [0, 5, 3, 6, 10, 7][i], "skin": int(Models.RACES[race]["skin"]) if race > 0 else 2,
-			"gender": i % 2, "face": [4, 0, 6, 8, 7, 3][i], "body": 1, "outfit": [1, 2, 3, 4, 7, 6][i]}
+	var list: Array = HeroKit.ARCH_ORDER if _arg("--arch-only=", "") == "" else Array(_arg("--arch-only=", "").split(","))
+	for arch in list:
+		var race: int = [3, 0, 5, 1, 2, 4][i % 6]
+		var lk: Dictionary = {"race": race, "hair": [0, 1, 2, 3, 0, 1][i % 6], "hair_v": 2, "hair_col": [0, 5, 3, 6, 10, 7][i % 6], "skin": int(Models.RACES[race]["skin"]) if race > 0 else 2,
+			"gender": i % 2, "face": [4, 0, 6, 8, 7, 3][i % 6], "body": 1, "outfit": [1, 2, 3, 4, 7, 6][i % 6]}
 		var h := _hunter(arch, lk, i % 2)
-		h.position = Vector3((i - 2.5) * 1.75, 0, 0)
+		h.position = Vector3((i - (list.size() - 1) * 0.5) * 1.75, 0, 0)
 		h.rotation.y = yaw
 		_label("%s · %s" % [HeroKit.ARCHES[arch]["name"], Models.LOOK_RACES[race]], h.position + Vector3(0, 0.05, 1.0), 22)
 		i += 1
@@ -70,7 +71,7 @@ func _lineup() -> void:
 	if "--arch-top" in OS.get_cmdline_user_args():
 		cam.position = Vector3(0, 13.0, 7.0); cam.rotation = Vector3(-1.08, 0, 0); cam.fov = 40
 	elif "--arch-close" in OS.get_cmdline_user_args():
-		cam.position = Vector3(0, 1.7, 6.6); cam.rotation = Vector3(-0.12, 0, 0); cam.fov = 52
+		cam.position = Vector3(0, 1.7, 6.6 if list.size() > 3 else 3.6); cam.rotation = Vector3(-0.12, 0, 0); cam.fov = 52
 	else:
 		cam.position = Vector3(0, 4.2, 8.6); cam.rotation = Vector3(-0.42, 0, 0); cam.fov = 48
 	cam.make_current()
@@ -129,13 +130,14 @@ func _heads() -> void:
 ##   --showcase-top    the same hunters from the match camera (Supervive preset: 65°, 25 m, fov 35);
 ##                     --showcase-zoom halves the field of view to inspect what reads at that angle
 ##   --showcase-poses  each archetype frozen in idle, run, attack, RMB cast and ultimate
-## Optional: --showcase-arch=thief|juggernaut (only that one), --showcase-outfit=<index>.
+## Optional: --showcase-arch=thief|juggernaut (only that one), --showcase-one (one look each), --showcase-outfit=<index>.
 var frozen := false
 func _showcase() -> void:
 	var args := OS.get_cmdline_user_args()
 	var only := _arg("--showcase-arch=", "")
 	# --showcase-arch=archer or a list (mage,bulwark); --showcase-six: all six, one look each
 	var six := "--showcase-six" in args
+	var single := six or "--showcase-one" in args      # (--showcase-one: one look per hero, so the whole character reads)
 	var arches: Array = (["thief", "juggernaut"] if only == "" else Array(only.split(","))) if not six else HeroKit.ARCH_ORDER.duplicate()
 	var looks := {
 		"thief": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 0, "skin": 2, "face": 4, "outfit": 1},
@@ -153,10 +155,17 @@ func _showcase() -> void:
 		"gunslinger": [{"race": 0, "gender": 1, "hair": 0, "hair_col": 1, "skin": 2, "face": 8, "outfit": 4, "detail": 4},
 			{"race": 1, "gender": 0, "hair": 6, "hair_col": 5, "skin": 2, "face": 5, "outfit": 5},
 			{"race": 4, "gender": 1, "hair": 2, "hair_col": 3, "skin": 12, "face": 7, "outfit": 7}],
+		"dolm": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 2, "skin": 4, "face": 3, "outfit": 6},
+			{"race": 2, "gender": 1, "hair": 1, "hair_col": 10, "skin": 19, "face": 2, "outfit": 1},
+			{"race": 4, "gender": 0, "hair": 0, "hair_col": 6, "skin": 12, "face": 1, "outfit": 3}],
+		"ostra": [{"race": 0, "gender": 1, "hair": 4, "hair_col": 8, "skin": 2, "face": 2, "outfit": 2},
+			{"race": 3, "gender": 0, "hair": 1, "hair_col": 7, "skin": 11, "face": 6, "outfit": 0},
+			{"race": 5, "gender": 1, "hair": 2, "hair_col": 11, "skin": 2, "face": 8, "outfit": 4}],
 		"bulwark": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 3, "skin": 4, "face": 7, "outfit": 6},
 			{"race": 2, "gender": 1, "hair": 1, "hair_col": 10, "skin": 19, "face": 1, "outfit": 0},
 			{"race": 5, "gender": 0, "hair": 0, "hair_col": 8, "skin": 2, "face": 0, "outfit": 2}],
 	}
+	for a0 in arches: looks[a0] = looks.get(a0, looks["bulwark"])     # newer archetypes borrow the Bulwark look set
 	var oo := int(_arg("--showcase-outfit=", "-1"))
 	var cam := Camera3D.new()
 	add_child(cam)
@@ -180,12 +189,12 @@ func _showcase() -> void:
 		return
 	var i := 0
 	for arch in arches:
-		for lk0 in ((looks[arch] as Array).slice(0, 1) if six else looks[arch]):
+		for lk0 in ((looks[arch] as Array).slice(0, 1) if single else looks[arch]):
 			var lk: Dictionary = (lk0 as Dictionary).duplicate()
 			lk["hair_v"] = 2; lk["body"] = 1
 			if oo >= 0: lk["outfit"] = oo
 			var h := _hunter(arch, lk, i % 2)
-			var n := arches.size() * (1 if six else 3)
+			var n := arches.size() * (1 if single else 3)
 			h.position = Vector3((i - (n - 1) * 0.5) * 1.55, 0, 0)
 			h.rotation.y = PI * 0.86
 			i += 1
@@ -195,7 +204,7 @@ func _showcase() -> void:
 		cam.position = Vector3(0, sin(p) * 25.0, cos(p) * 25.0); cam.rotation = Vector3(-p, 0, 0)
 		cam.fov = 17.5 if "--showcase-zoom" in args else 35.0
 	else:
-		var nn := arches.size() * (1 if six else 3)
+		var nn := arches.size() * (1 if single else 3)
 		cam.position = Vector3(0, 1.55, 3.8 + 0.6 * nn); cam.rotation = Vector3(-0.1, 0, 0); cam.fov = 40 if nn <= 3 else 46
 	cam.make_current()
 

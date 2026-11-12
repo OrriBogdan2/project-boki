@@ -1,0 +1,29 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "buffer", "source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."},
+			"rmb": {"mode": "fire", "source": "Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is)."},
+			"e": {"mode": "fire", "source": "Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it."},
+			"x": {"mode": "fire", "source": "Data: Slugwave has no dash lock. Footage: not shown from a dash. Ours: the charge starts at once (he walks slowly through it)."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the lunge like his abilities."}
+		},
+		"air": {
+			"lmb": {"mode": "buffer", "source": "Data: Brute Dash (Air) is its own slot, further. Footage: not shown. Ours: as on the ground, the shot goes as the pounce ends."},
+			"rmb": {"mode": "fire", "source": "Data: no dash lock. Footage: not shown. Ours: the arm is thrown from the pounce, his height held while it is out (item 31)."},
+			"e": {"mode": "fire", "source": "Data: Primal Slam slams down (it pushes you down, never over the abyss). Owner note: in the air E is a straight-down smash; from the pounce it drops at once."},
+			"x": {"mode": "fire", "source": "Data: no dash lock. Footage: not shown. Ours: the charge starts at once."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the pounce."}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Footage: he walks and dashes between shots (0.5 s apart). Ours: the barge goes between shots."},
+		"rmb": {"mode": "fire", "source": "Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls; data: the arm pierces terrain. Ours: the barge goes during the hook's flight and the reel, and the reel continues."},
+		"e": {"mode": "fire", "source": "Data: Primal Slam has no dash lock, and the dash-into-slam close-in is the hero's engage; footage (0221-0236) shows one 0.4s beat but no rule against a dash in it. Ours: Shift in the planted wind-up barges at once and the slam runs on, the fist still raised, landing where the barge arrives; in the air smash the pounce goes and the smash drops again from where it ends."},
+		"x": {"mode": "fire", "source": "Data: Slugwave has no dash lock; footage (ult f22-f43) shows him standing through it but no rule against a dash. Ours: he already walks slowly through the charge and the waves, so Shift barges at once and the Broadside runs on, the fan and the waves following him."},
+		"q": {"mode": "fire", "source": "No source glove; the barge goes and the glove's effect stays."}
+	},
+	"into_jump": {
+		"rmb": {"mode": "lock", "reason": "Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).", "source": "Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout."}
+	}
+}

@@ -191,12 +191,12 @@ static func owner_stat(stat: String, v: float) -> String:
 		"armor": return "armor wears %s slower" % pct(v)
 		"damage_reduction": return "-%s damage taken" % pct(v)
 		"knockback_resist": return "half knockback" if is_equal_approx(v, 0.5) else "-%s knockback" % pct(v)
-		"shield": return "%s shield" % n(v)
 		"regen": return "%s hp/s regen" % n(v)
 		"damage": return "+%s damage" % pct(v)
 		"fire_rate": return "+%s fire rate" % pct(v)
 		"reload": return "%s faster reload" % pct(v)
 		"reveal_radius": return "reveals rivals within %sm" % n(v)
+		"cooldown": return "abilities recharge %s faster" % pct(v)
 	return stat
 
 static func passives(list: Array, k := 1.0) -> String:
@@ -216,9 +216,9 @@ static func on_shot(os: Dictionary) -> String:
 	if int(os.get("chain", 0)) > 0: out.append("arc to %d more" % int(os["chain"]))
 	return "your shots: " + ", ".join(out)
 
-const CARRY_NAMES := {"shoulder": "Rides your shoulder", "perch": "Perches on your pack", "mount": "You ride it"}
+const CARRY_NAMES := {"shoulder": "Return: rides your shoulder", "perch": "Return: perches on your pack", "mount": "Return: guards at your side"}
 
-## How it's carried and what that gives you: "You ride it (Anchor): -15% damage taken, half knockback".
+## How it's carried and what that gives you: "Return: guards at your side (Anchor): -15% damage taken, half knockback".
 static func carry(ks: KinSpec) -> String:
 	if ks == null:
 		return ""
@@ -229,9 +229,19 @@ static func carry(ks: KinSpec) -> String:
 	var t := "%s%s" % [CARRY_NAMES.get(ks.carry_style, ks.carry_style), (" (%s)" % ks.carry_name) if ks.carry_name != "" else ""]
 	if not bits.is_empty(): t += ": " + "; ".join(bits)
 	match ks.carry_style:
-		"mount": t += ". It curls up on your back while you glide; you can't glide riding it"
+		"mount": t += ". It curls up on your back while you glide"
 		"perch": t += ". Thrown, it dives on the spot from above"
 	return t
+
+## What you lose while it is out beside you: "Off you: no -15% damage taken" ("" if its carry gives nothing).
+static func carry_off(ks: KinSpec) -> String:
+	if ks == null:
+		return ""
+	var bits := PackedStringArray()
+	if not ks.carry_passives.is_empty(): bits.append("no " + passives(ks.carry_passives).replace(", ", ", no "))
+	var os := on_shot(ks.carry_on_shot)
+	if os != "": bits.append("no " + os)
+	return ("Off you: " + "; ".join(bits)) if not bits.is_empty() else ""
 
 const OWNER_POINTS := {"owner_max_hp": "+%s max health", "owner_armor": "armor wears %s slower", "owner_shield": "%s shield that refills out of a fight",
 	"owner_regen": "+%s hp/s regen", "owner_move_speed": "+%s move speed"}
@@ -246,24 +256,13 @@ static func owner_bonus(bonus: Dictionary) -> String:
 		out.append(String(OWNER_POINTS.get(key, key + " %s")) % vs)
 	return ", ".join(out)
 
-## The class dodge's kin rider: "Venom Trail: what you dodge through takes 3 damage, ...".
-static func rider(ks: KinSpec) -> String:
-	if ks == null or ks.dodge_rider.is_empty():
-		return ""
-	var r: Dictionary = ks.dodge_rider
-	var bits := PackedStringArray()
-	if String(r.get("as", "dash")) == "blink": bits.append("on the ground your dodge is a blink: there in an instant")
-	if not (r.get("on_pass", []) as Array).is_empty(): bits.append("what you dodge through: " + effects(r["on_pass"]))
-	for st in r.get("on_start", []): bits.append("where you start: " + stage(st))
-	for st in r.get("on_end", []): bits.append("where you stop: " + stage(st))
-	for md in r.get("modifiers", []):
-		if (md as PartSpec).type == "repeat": bits.append("a beat later it dodges again at %s" % pct(float(md.params["falloff"])))
-	return "; ".join(bits)
-
 ## A merge in a few lines: [what it gives, what its shots do, what it does over time].
 static func merge(ms: MergeSpec, giant := false) -> Array:
 	if ms == null:
 		return []
+	var fd: Dictionary = Content.merge_form(ms.id)
+	if not fd.is_empty():
+		return form_lines(ms, fd)
 	var out: Array = []
 	var head := "%ss: %s" % [n(ms.duration), passives(ms.passives)]
 	if giant: head = "Your mount grows huge for " + head
@@ -273,12 +272,31 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	if os != "": out.append(os.substr(0, 1).to_upper() + os.substr(1))
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
+	var fdash: Dictionary = MergeForm.data()["fallback"]["dash"]
+	out.append("%s, %s: your dash leaves your Boki type's trail (its rider on what you pass), then %ss of haste."
+		% [Settings.key_cap("dash"), String(fdash["name"]), n(float(fdash["haste_s"]))])
+	out.append("%s again: a basic burst that ends the Fusion." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]
 		var bits := PackedStringArray()
 		for k in pt.get("scale", {}): bits.append("%s x%s" % [k, n(float(pt["scale"][k]))])
 		for mp in pt.get("add_modifiers", []): bits.append(modifier(mp))
-		out.append("Merged %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+		out.append("Fused %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+	return out
+
+## A merge with a form (content/merge_forms): what you become, its shell, what it adds to your own abilities, its ultimate (the same for everyone).
+static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
+	var f := MergeForm.kit_form(ms.id)
+	var out: Array = []
+	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the Fusion ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
+	var a: Dictionary = fd["aug"]
+	out.append("You keep your own abilities and they get stronger:")
+	out.append("Left click, %s: %s" % [a["lmb"]["name"], a["lmb"]["desc"]])
+	out.append("Right click, %s: %s" % [a["rmb"]["name"], a["rmb"]["desc"]])
+	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
+	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
+	out.append("%s again, %s: %s It ends the Fusion with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
+	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until it ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].

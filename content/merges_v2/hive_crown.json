@@ -2,15 +2,13 @@
 	"grammar": 1,
 	"id": "hive_crown",
 	"name": "Hive Crown",
-	"flavor": "Hivara crowns you with its hive for 7s: 30% more damage, and every shot stings, poisons and slows.",
+	"flavor": "Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.",
 	"theme": "swarm",
 	"duration": 7,
-	"grow_duration": 1.0,
-	"grow_strength": 0.1,
 	"passives": [
 		{
 			"stat": "damage",
-			"amount": 0.3
+			"amount": 0.2
 		}
 	],
 	"on_shot": {

@@ -1,6 +1,0 @@
-boxes_world.png: A teammate's box (left: their squad colour, face, name, soul timer) and a rival's (red)
-boxes_minimap.png: The minimap: the teammate's box in their colour (bright rim: it can still be revived), the rival's in red, beacons as mint diamonds
-boxes_full_map.png: The full map, zoomed in: the teammate's box with their name, the rival's in red
-revive_ring.png: Bringing the teammate back: the ring round the box and the one over the reviver, the prompt bar, the VULNERABLE tell
-beacon_notice.png: A rival lights a beacon far away: the toast with the direction, the edge arrow with the distance, the pulsing diamond and arrow on the minimap
-beacon_full_map.png: The full map: the lit beacon pulses; the others and the boxes show too

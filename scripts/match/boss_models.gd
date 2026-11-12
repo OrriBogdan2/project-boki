@@ -365,6 +365,7 @@ static func rare_egg(col: Color) -> Node3D:
 	Models.part(root, Models.cyl(0.5, 0.42, 0.18, 14), nest, Vector3(0, 0.09, 0))
 	var beam := Models.part(root, Models.cyl(0.18, 0.4, 14.0, 12), Models.glow_mat(Color(1.0, 0.85, 0.35, 0.32)), Vector3(0, 7.0, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	beam.name = "Beam"      # (its own light shaft, apart from the loot pile's)
 	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(2.2)
 	ring.material_override = Models.ring_mat(Color("ffd36a"), 0.1); ring.position.y = 0.05
 	root.add_child(ring)

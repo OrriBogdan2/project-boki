@@ -155,7 +155,7 @@ func blast(at: Vector3, rad: float, base: float, kb := 7.0, lift := 4.0, extra :
 	m.fx.ring(at, rad, c.lightened(0.3), 0.32)
 	m.fx.burst(at + Vector3(0, 0.4, 0), c, int(clampf(rad * 8.0, 10.0, 34.0)), 6.0, 0.5, 6.0, 1.3)
 	m.fx.dust(at, 12)
-	m.shake(0.35 if rad < 3.0 else 0.55, at)
+	Shake.incoming_big(m, at, 0.35 if rad < 3.0 else 0.55)
 	for f in m.foes_of(team):
 		if f is Mob: continue
 		if _hits(f, at, rad):
@@ -452,7 +452,7 @@ func _atk_fissure() -> void:
 			var q := a + Vector3(d.x, 0, d.y) * (1.0 + i * 2.0)
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
-		m.shake(0.5, a)
+		Shake.incoming_big(m, a, 0.5)
 		m.sfx("k_gravity", a, 0.0, 0.5))
 
 # ---- Stormcoil
@@ -650,7 +650,7 @@ func _phase_up(p: int) -> void:
 	md["windup"] = 1.2
 	m.fx.ring(pos, 6.0, col(), 0.5)
 	m.fx.burst(pos + Vector3(0, 1.5, 0), col(), 40, 8.0, 0.7, 2.0, 1.6)
-	m.shake(0.7, pos)
+	Shake.incoming_big(m, pos, 0.7)
 	m.sfx("v_warden", pos, 4.0, 0.5)
 	m.sfx("boom", pos, 0.0, 0.5)
 	for f in foes_inside():

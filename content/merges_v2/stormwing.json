@@ -2,61 +2,8 @@
 	"grammar": 1,
 	"id": "stormwing",
 	"name": "Stormwing",
-	"flavor": "Zephyrak coils round you as living storm for 7s: 35% faster, every dodge back, and each shot arcs to a second foe.",
+	"flavor": "Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.",
 	"theme": "tempest",
-	"duration": 7,
-	"grow_duration": 1.0,
-	"grow_strength": 0.1,
-	"passives": [
-		{
-			"stat": "move_speed",
-			"amount": 0.35
-		},
-		{
-			"stat": "damage",
-			"amount": 0.2
-		},
-		{
-			"stat": "dodge_regen",
-			"amount": 1.0
-		}
-	],
-	"on_shot": {
-		"chain": 1
-	},
-	"on_start": [
-		{
-			"delivery": {
-				"type": "beam",
-				"origin": "owner",
-				"range": 9,
-				"seek": true
-			},
-			"effects": [
-				{
-					"type": "damage",
-					"amount": 14
-				},
-				{
-					"type": "stun",
-					"duration": 0.7
-				}
-			],
-			"modifiers": [
-				{
-					"type": "chain",
-					"count": 4,
-					"range": 5
-				}
-			]
-		}
-	],
-	"merged": {
-		"active": {
-			"stage": 0,
-			"scale": {
-				"speed": 1.2
-			}
-		}
-	}
+	"duration": 10,
+	"passives": []
 }

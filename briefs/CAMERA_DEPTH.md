@@ -21,12 +21,12 @@ Owner feedback: height, ledges and drop depth are hard to read; Supervive reads 
 ## What we lacked (before shots)
 | Suspect | Finding | Cost |
 |---|---|---|
-| Abyss falloff | Beyond an edge was the same mid purple haze as the ground: no value drop (before_a_edge). **Done (round 2)**: cloud sea and cloud layers multiplied by 0.55 (`abyss_dim`). | one multiply per cloud pixel |
+| Abyss falloff | Beyond an edge is the same mid purple haze as the ground: no value drop (before_a_edge). NOT done: needs an environment/void colour change that touches every look; suggested next. | env tweak, free |
 | Cliff-face contrast | Faces were only mid-toned (strata), sheer slate had no depth shading; at 66 deg faces are thin, so the drop read as a line. **Done.** | shader maths, no new draws |
 | Lit cliff lip | Edge of the ground was not brighter than the field. **Done** (4 height taps on ground pixels). | shader |
 | Blob shadow under characters | None; only the sun shadow (off on low/medium). A body at a ledge or airborne had no ground anchor. **Done**, DepthCues disc per hunter. | 1 quad per hunter, no allocation per frame |
-| Height tint of tiers | Lower tiers were not darker. **Done (round 2)**: terrace ground 20% darker at y=0 up to full at y=3.2 m (procedural levels run 0..4 x 0.8 m; higher authored perches clamp to full). | one clamp, no taps |
-| Projectile drop shadows | **Done (round 3)**: a smaller, fainter disc under every flying shot (pooled, no per-frame allocation). | one quad per shot (120 shots + hunters: ~0.3 ms headless) |
+| Height tint of tiers | Lower tiers are not darker (only AO at the foot). Not done: absolute y varies per island, needs per-island reference. | shader |
+| Projectile drop shadows | Not done; same disc idea, one more quad per projectile. | per projectile |
 
 ## Built (setting Settings > Accessibility > Height cues, `depth_cues`, default on; applies from the next expedition)
 Cliff faces: brightened at the lip, darkening toward the foot by drop height (full dark at 3.2 m).
@@ -35,9 +35,3 @@ ground's own height (hidden over void). Gameplay, camera, aim and ranges untouch
 
 Before/after, same seed and spot: briefs/camera_depth/{before,after}_{a_edge,b_step,c_low}.png
 (a: at a cliff edge over the abyss, b: top of a terrace step with a hunter below, c: the step from below).
-
-Round 2 (job 20261107-141502-a4): abyss darkening (cloud sea/layers, x0.55) and tier tint (up to -20% on low terraces), same setting. `after_*` now include both; `after1_*` are the round-1 shots (cliff faces, lip, blob shadow only). 
-
-Round 3 (job 20261108-121501-a4): drop shadows under flying shots (DepthCues, same setting), `--depth-cue-check` (headless: terrain ledge light on and the map has ledges, abyss dimmed, a disc under every hunter and shot at the ground's height, hidden over void, cost under 2 ms/frame with no new nodes once warm, setting off reads as off) and `--depth-shots` gains `--cues=off` for before shots plus `depth_d_shots` (shots along a ledge). Shots: briefs/camera_depth/{before,after}_d_shots.png.
-
-Decision on a darker tint for lower tiers and the abyss: **no more**. In the round-2 shots the abyss is already the darkest value on screen (x0.55) and a cliff foot reads as a dark band under a lit lip; the lower tier is a distinct shade (-20%) but darkening ground further would start to hide loot, grass and enemies on the low tiers, which matters more than a bigger value step. Both stay behind the one `depth_cues` toggle. Revisit if playtests still lose the tier in flat light.

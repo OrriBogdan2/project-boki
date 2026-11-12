@@ -1,0 +1,26 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "fire", "source": "Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide')."},
+			"rmb": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"e": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"x": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"q": {"mode": "fire", "source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."}
+		},
+		"air": {
+			"lmb": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"e": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"x": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"q": {"mode": "fire", "source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88)."},
+		"rmb": {"mode": "fire", "source": "Not shown in the data or footage. Ours: the Burr Charge is a tap (owner, sync89), already thrown, so Shift slides at once."},
+		"e": {"mode": "fire", "source": "Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is."},
+		"x": {"mode": "fire", "source": "Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once."},
+		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	}
+}

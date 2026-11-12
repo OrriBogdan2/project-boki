@@ -1,6 +1,6 @@
 extends Node
 ## Everything players share: island snapshots others can visit, gifts, guilds and their projects,
-## and the town's market and notice board. Backed by the page's shared store in the web version
+## and the town's market (seeds and crops; Boki are never sold) and notice board. Backed by the page's shared store in the web version
 ## (see tools/shell.html); unavailable in desktop builds, where these features say so instead.
 ##
 ## Everything read from the store was written by other players, so it is untrusted: every read
@@ -169,7 +169,7 @@ static func profile_doc() -> Dictionary:
 	for r in KinBox.farm().slice(0, 12):       # visitors see the kin out on your farm
 		Evo.ensure(r)
 		roster.append({"uid": r["uid"], "species": r["species"], "name": r["name"], "level": int(r["level"]),
-			"trust": int(r["trust"]), "forms": r["forms"], "muts": r["muts"], "shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)})
+			"trust": int(r["trust"]), "zone": GardenZones.zone_of(r), "forms": r["forms"], "muts": r["muts"], "shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)})
 	var d := {
 		"name": Save.d.get("name", "Hunter"), "cls": Data.class_of_save(), "weapon": Save.d.get("weapon", ""),
 		"active": Save.d.get("active", ""), "roster": roster,
@@ -178,7 +178,9 @@ static func profile_doc() -> Dictionary:
 		"extracts": int(Save.d.get("extracts", 0)), "matches": int(Save.d.get("matches", 0)),
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
 		"decor": Save.d.get("decor", {}).get("house", []),
+		"showcase": Save.d.get("showcase", []),
 	}
+	d.merge(VisitZones.doc())
 	return d
 
 ## cb gets [{id, d}] with d already cleaned (see clean_island).
@@ -414,14 +416,6 @@ static func price_range(kind: String, key: String) -> Vector2i:
 	var base := int(Data.CROPS[key]["price"]) * (2 if kind == "crop" else 1)
 	return Vector2i(maxi(1, base / 2), base * 3)
 
-## A kin's asking price range, by level: listings outside it are ignored by everyone.
-static func kin_price_range(level: int) -> Vector2i:
-	var base := 40 + clampi(level, 1, 30) * 20
-	return Vector2i(base / 2, base * 3)
-
-static func kin_price(level: int) -> int:
-	return 40 + clampi(level, 1, 30) * 20
-
 ## Only the parts of a kin that are safe to pass between players: species, name, level, how it's
 ## grown, its personality. Anything else is rebuilt fresh for the new owner.
 static func clean_kin(v) -> Dictionary:
@@ -454,34 +448,8 @@ static func clean_kin(v) -> Dictionary:
 	if not rm.is_empty(): out["mutations"] = rm
 	return out
 
-## A full kin record for its new owner, built from a cleaned one.
-static func kin_for_buyer(c: Dictionary, seller_name: String) -> Dictionary:
-	var rec := Save.new_kin(c["species"], c["name"])
-	rec["level"] = int(c["level"])
-	rec["shimmer"] = c["shimmer"]
-	if c.has("mutations"): rec["mutations"] = (c["mutations"] as Array).duplicate()
-	for k in c["traits"]: rec["traits"][k] = c["traits"][k]
-	Evo.ensure(rec)
-	rec["forms"] = (c["forms"] as Array).duplicate()
-	for a in c["aff"]: rec["aff"][a] = c["aff"][a]
-	if c.has("acc"): rec["acc"] = c["acc"]
-	rec["trust"] = 25.0           # it doesn't know you yet
-	rec["origin"] = {"how": "market", "where": {"place": "market"}, "from": seller_name}
-	Save.remember(rec, "market", "was bought from %s at the market" % seller_name, 0.0)
-	return rec
-
 static func clean_listing(d: Dictionary) -> Dictionary:
 	var kind := txt_of(d.get("kind"))
-	if kind == "kin":
-		var ck := clean_kin(d.get("kin"))
-		var sel := txt_of(d.get("seller"))
-		if ck.is_empty() or sel == "" or ck["species"] != txt_of(d.get("key")):
-			return {}
-		var kp := int_of(d.get("price"))
-		var kr := kin_price_range(int(ck["level"]))
-		if kp < kr.x or kp > kr.y:
-			return {}
-		return {"kind": "kin", "key": ck["species"], "n": 1, "price": kp, "seller": sel, "seller_name": say_of(d.get("seller_name")), "t": num_of(d.get("t")), "kin": ck}
 	var key := txt_of(d.get("key"))
 	var seller := txt_of(d.get("seller"))
 	if not (kind == "seed" or kind == "crop") or not Data.CROPS.has(key) or seller == "" or int_of(d.get("n")) != 1:
@@ -524,34 +492,6 @@ func sell(kind: String, key: String, price: int, cb: Callable) -> void:
 		Save.save_game()
 		cb.call(true))
 
-## Puts one of your kin up for sale. It leaves your farm while it's listed (it waits at the
-## market) and comes back if you take the listing down.
-func sell_kin(uid: String, price: int, cb: Callable) -> void:
-	var rec := Save.kin(uid)
-	if rec.is_empty() or busy("market") or Save.d["roster"].size() <= 1:
-		cb.call(false)
-		return
-	var ck := clean_kin(rec)
-	var pr := kin_price_range(int(ck["level"]))
-	if price < pr.x or price > pr.y:
-		cb.call(false)
-		return
-	_busy["market"] = true
-	Save.d["roster"].erase(rec)
-	if String(Save.d.get("active", "")) == uid: Save.d["active"] = ""
-	if String(Save.d.get("active2", "")) == uid: Save.d["active2"] = ""
-	add_doc("market", {"seller": me, "seller_name": Save.d.get("name", "Hunter"), "kind": "kin", "key": ck["species"], "n": 1, "price": price, "kin": ck, "t": now_ms()}, func(id: String):
-		_busy.erase("market")
-		if id == "":
-			Save.d["roster"].append(rec)
-			Save.save_game()
-			cb.call(false)
-			return
-		# the full record waits in your save, so taking it back returns exactly your kin
-		_save_dict("listings")[id] = {"price": price, "kind": "kin", "key": ck["species"], "rec": rec, "t": now_ms()}
-		Save.save_game()
-		cb.call(true))
-
 func buy(listing_id: String, cb: Callable) -> void:
 	if busy("market"):
 		cb.call("")
@@ -559,15 +499,13 @@ func buy(listing_id: String, cb: Callable) -> void:
 	_busy["market"] = true
 	claim("market/" + listing_id, func(raw: Dictionary):
 		var l := clean_listing(raw)
-		if l.is_empty() or l["seller"] == me or int(Save.d["gems"]) < int(l["price"]) or (l["kind"] == "kin" and KinBox.full()):
+		if l.is_empty() or l["seller"] == me or int(Save.d["gems"]) < int(l["price"]):
 			_busy.erase("market")
 			cb.call("")
 			return
 		var price: int = l["price"]
 		Save.d["gems"] = int(Save.d["gems"]) - price          # held until the listing is gone
-		var what := ""
-		if l["kind"] == "kin": what = "%s the %s" % [l["kin"]["name"], Data.KIN[l["key"]]["name"]]
-		else: what = ("%s seed" if l["kind"] == "seed" else "%s") % Data.CROPS[l["key"]]["name"]
+		var what: String = ("%s seed" if l["kind"] == "seed" else "%s") % Data.CROPS[l["key"]]["name"]
 		# the payout goes first: the seller only honours it once the listing has disappeared
 		add_doc("payouts", {"to": l["seller"], "lid": listing_id, "gems": price, "t": now_ms()}, func(pid: String):
 			if pid == "":
@@ -578,12 +516,7 @@ func buy(listing_id: String, cb: Callable) -> void:
 			del_doc("market/" + listing_id, func(okk: bool):
 				_busy.erase("market")
 				if okk:
-					if l["kind"] == "kin":
-						var nk := kin_for_buyer(l["kin"], String(l["seller_name"]))
-						Save.d["roster"].append(nk)
-						KinBox.route_new(nk)
-						Care.dex_got(nk)
-					elif l["kind"] == "seed": Save.add_seed(l["key"], 1)
+					if l["kind"] == "seed": Save.add_seed(l["key"], 1)
 					else: Save.d["crops"][l["key"]] = int(Save.d["crops"].get(l["key"], 0)) + 1
 				else:
 					Save.d["gems"] = int(Save.d["gems"]) + price
@@ -614,12 +547,7 @@ func _refund(listing_id: String) -> void:
 	var m: Dictionary = listings.get(listing_id, {})
 	listings.erase(listing_id)
 	var key := String(m.get("key", ""))
-	if m.get("kind", "") == "kin":
-		var rec = m.get("rec", {})
-		if typeof(rec) == TYPE_DICTIONARY and not rec.is_empty():
-			Save.d["roster"].append(rec)
-			KinBox.route_back(rec)
-	elif Data.CROPS.has(key):
+	if Data.CROPS.has(key):
 		if m.get("kind", "") == "seed": Save.add_seed(key, 1)
 		else: Save.d["crops"][key] = int(Save.d["crops"].get(key, 0)) + 1
 	Save.save_game()
@@ -722,7 +650,7 @@ static func clean_island(d: Dictionary) -> Dictionary:
 			if Evo.PART_NAMES.has(mid) and Evo.AFF.has(aff):
 				muts.append({"id": mid, "lv": clampi(int_of(m.get("lv"), 1), 1, 5), "aff": aff})
 		roster.append({"uid": txt_of(r.get("uid"), "", 24), "species": sp, "name": say_of(r.get("name"), "Kin", 14),
-			"level": clampi(int_of(r.get("level"), 1), 1, 999), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
+			"level": clampi(int_of(r.get("level"), 1), 1, 999), "zone": txt_of(r.get("zone"), GardenZones.start(), 24), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
 			"forms": forms.slice(0, 50), "muts": muts.slice(0, 40), "traits": Data.KIN[sp]["traits"].duplicate(), "memory": [],
 			"shimmer": r.get("shimmer", false) == true, "mutations": arr_of(r.get("mutations")).map(func(x): return txt_of(x)).filter(func(x): return not Mutations.info(x).is_empty()).slice(0, 4)})
 		if roster.size() >= 12:
@@ -746,7 +674,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 	return {"name": say_of(d.get("name"), "Hunter", 16), "active": txt_of(d.get("active"), "", 24), "roster": roster,
 		"cls": cl if Data.CLASSES.has(cl) else "medium", "buildings": pick.call(d.get("buildings"), Data.BUILDINGS),
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
-		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor"))}
+		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
+		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
 
 static func _clean_decor(src) -> Array:
 	var out: Array = []

@@ -1,0 +1,19 @@
+{
+	"id": "sentrikat",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/sentrikat.json.",
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#6cc6cc",
+		"belly": "#c4eaf2",
+		"glow": "#6a81ff"
+	},
+	"work": {
+		"spark": 3,
+		"tide": 2,
+		"haul": 1
+	}
+}

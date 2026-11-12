@@ -210,40 +210,6 @@ static func _spend(p: Ent, want: float, now: float) -> float:
 	_budget[p.get_instance_id()] = b
 	return got
 
-# ---- §5.5 camera shake ----
-## Event -> [you did it, it happened to you, nearby within the given radius] trauma, radius.
-const SHAKE := {
-	"dash": [0.0, 0.0, 0.0, 0.0],
-	"cast": [0.05, 0.0, 0.0, 0.0],
-	"t2": [0.08, 0.12, 0.0, 0.0],
-	"t3": [0.15, 0.3, 0.0, 0.0],
-	"t4": [0.25, 0.35, 0.05, 8.0],
-	"knock": [0.35, 0.0, 0.08, 10.0],
-	"bonded": [0.4, 0.15, 0.1, 12.0],
-	"leap": [0.2, 0.25, 0.1, 8.0],
-}
-## Oomph budget by ability tier (§5.7): [max hitstop tier, max own-cast shake].
-const OOMPH := {1: [3, 0.15], 2: [4, 0.25], 3: [5, 0.4]}
-
-static func shake(m: Node, ev: String, by: Ent, at: Vector3, victim: Ent = null, tier_cap := 3) -> void:
-	if m == null or m.get("player") == null or m.get("cam") == null:
-		return
-	var p: Ent = m.player
-	var row: Array = SHAKE.get(ev, SHAKE["cast"])
-	var cap := float(OOMPH.get(tier_cap, OOMPH[3])[1])
-	var amt := 0.0
-	if by == p:
-		amt = minf(float(row[0]), cap)
-	elif victim == p:
-		amt = float(row[1])
-	elif float(row[3]) > 0.0 and p.flat_dist(at) < float(row[3]):
-		amt = float(row[2])
-	if amt > 0.0:
-		m.cam.add_trauma(amt)
-
-static func shake_for_tier(t: int) -> String:
-	return ["", "cast", "t2", "t3", "t4", "bonded"][clampi(t, 0, 5)]
-
 # ---- §5.6 sound layering (placeholder sounds from the existing Sfx set) ----
 ## Layer 1, the tell, by delivery: [sound, pitch].
 const DELIVERY_TELL := {
@@ -267,6 +233,7 @@ const SWEETENER := {"venom": "k_venom", "spore": "k_spore", "gravity": "k_gravit
 const DASH_SOUND := {
 	"thief": [["swipe", 1.7, 0.0]], "archer": [["throw", 1.4, 0.0], ["whoosh", 1.3, 0.12]], "mage": [["portal", 1.7, 0.0]],
 	"gunslinger": [["dash", 1.1, 0.0], ["reload", 1.6, 0.08]], "juggernaut": [["charge", 0.6, 0.0]], "bulwark": [["shield", 0.7, 0.0], ["whoosh", 0.7, 0.05]],
+	"dolm": [["thump", 0.6, 0.0], ["charge", 0.8, 0.04]], "ostra": [["swap", 1.3, 0.0], ["hover", 1.6, 0.05]],
 }
 const MAX_VOICES := 4
 static var _voices := {}       # event key -> voices started this frame
@@ -310,8 +277,11 @@ static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = n
 		"impact": vol -= 3.0
 	m.sfx(String(row[0]), at, vol - 4.0, float(row[1]))
 
-## The dash's own sound per archetype (plus the kin's sweetener, played by the rider).
+## The dash's own sound per archetype (plus the kin's sweetener, played by the rider). A Hunter with its
+## own <arch>_dash (HeroSfx, played with the dash itself) needs none of these shared layers.
 static func dash_sound(m: Node, arch: String, at: Vector3, by: Ent) -> void:
+	if by is Hunter and HeroSfx.of(by as Hunter, "dash", "") != "":
+		return
 	for s in DASH_SOUND.get(arch, [["dash", 1.0, 0.0]]):
 		var sn := String(s[0]); var pt := float(s[1]); var dl := float(s[2])
 		if dl <= 0.0:

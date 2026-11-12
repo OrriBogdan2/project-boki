@@ -1,0 +1,24 @@
+{
+	"id": "coilcaster",
+	"name": "Coilcaster",
+	"classes": [
+		"light"
+	],
+	"primary": {
+		"dmg": 12.0,
+		"rate": 0.648,
+		"speed": 37,
+		"kb": 0.8,
+		"spread": 0.0,
+		"range": 13.0,
+		"size": 0.18,
+		"color": "#7ff0ff",
+		"sfx": "vv_bolt",
+		"fire_slow": 0.9,
+		"desc": "No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range.",
+		"kick": 0.08,
+		"tracer": 1.4,
+		"aim": "max"
+	},
+	"utility": ""
+}

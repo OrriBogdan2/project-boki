@@ -1,8 +1,7 @@
 extends RefCounted
 ## --airheal-check: heals and abilities in the air, and the cost of drinking.
-##  1. In the opening drop, pressing a heal breaks out of it: the glider folds, you fall free with
-##     your speed, and the tonic finishes and heals while you're still airborne.
-##  2. Pressing an ability mid-drop breaks out of it too (a human's; bots never do).
+##  1. In the opening drop a heal does nothing: the drop is steering only (item 162, AirLimits).
+##  2. Nor does an ability press (the rest of the drop's keys: --air-limits-check).
 ##  3. Gliding normally, a heal folds the glider and the drink keeps going.
 ##  4. Drinking leaves you vulnerable: a hit does CONSUME_VULN times the damage and spills the
 ##     drink (the tonic is kept); the same for an armor kit.
@@ -25,7 +24,7 @@ func _start_drop(m: Match, P: Hunter, at: Vector3) -> void:
 	P.dropping = true
 	P.diving = false
 	P.gliding = true
-	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
 		P.inp[k] = false
 	_steps(m, 3)
 
@@ -52,22 +51,17 @@ func run(main: Node) -> void:
 	P.hp = P.max_hp * 0.5
 	P.tonics = 2
 	var hp0 := P.hp
-	P.inp["tonic"] = true
+	P.inp["util1"] = true
 	_steps(m, 1)
-	ok(not P.dropping and not P.gliding, "a heal mid-drop breaks out of it and folds the glider")
-	ok(P.drink_t > 0.0, "and the drink starts in the air")
-	ok(not P.grounded, "still airborne")
-	var frames := int(ceil(Hunter.DRINK_TIME / Match.DT)) + 3
-	_steps(m, frames)
-	ok(P.hp > hp0 + 1.0 and P.tonics == 1, "the tonic finishes and heals in the air (hp %.0f -> %.0f, tonics left %d)" % [hp0, P.hp, P.tonics])
-	ok(not P.grounded, "it finished before landing (%.1fm up)" % (P.pos.y - m.world.ground_at(P.pos.x, P.pos.z)))
+	ok(P.dropping and P.gliding, "a heal mid-drop leaves the drop and its glider as they are")
+	ok(P.drink_t <= 0.0 and P.tonics == 2 and P.hp == hp0, "and nothing is drunk (tonics %d)" % P.tonics)
 	# ---- 2. an ability mid-drop
 	_start_drop(m, P, g0)
 	P.inp["sec"] = true
 	_steps(m, 1)
-	ok(not P.dropping, "an ability press mid-drop breaks out of it too")
+	ok(P.dropping, "an ability press mid-drop does nothing either")
 	# ---- 3. gliding normally: a heal folds the glider and keeps drinking
-	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
 		P.inp[k] = false
 	P.teleport(g0 + Vector3(0, 30, 0))
 	P.fly_t = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.vel = Vector3.ZERO
@@ -85,7 +79,7 @@ func run(main: Node) -> void:
 	P.drink_t = 0.0
 	_steps(m, 2)
 	ok(P.gliding, "gliding (normal, not the drop)")
-	P.inp["tonic"] = true
+	P.inp["util1"] = true
 	_steps(m, 5)
 	ok(not P.gliding and P.drink_t > 0.0, "a heal while gliding folds the glider and drinks")
 	P.inp["glide"] = false
@@ -106,7 +100,7 @@ func run(main: Node) -> void:
 	P.hp = P.max_hp * 0.6
 	P.armor = 0.0
 	P.tonics = 2
-	P.inp["tonic"] = true
+	P.inp["util1"] = true
 	_steps(m, 2)
 	ok(P.drink_t > 0.0, "drinking on the ground")
 	var h2 := P.hp
@@ -120,10 +114,54 @@ func run(main: Node) -> void:
 	P.armor_kits = 1
 	P.hp = P.max_hp * 0.6
 	_steps(m, 2)
-	P.inp["kit"] = true
+	P.inp["util2"] = true
 	_steps(m, 2)
 	ok(P.kit_t > 0.0, "repairing armor")
 	P.hurt(6.0, Q, {"src": "abil"})
 	ok(P.kit_t <= 0.0 and P.armor_kits == 1, "a hit spills the repair and keeps the kit")
+	_consumables(m, P)
 	print("AIRHEAL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## The drink's numbers against docs/CONSUMABLES.md: the Vive Brew drinks for 1 s with no slow and heals
+## a flat amount; only damage is sourced as a cancel. Our dash and stun cancels are kept (unsourced).
+func _consumables(m: Match, P: Hunter) -> void:
+	P.gliding = false
+	P.armor = P.max_armor
+	P.roll_t = 0.0
+	P.stun_t = 0.0
+	P.tonics = 3
+	P.hp = P.max_hp * 0.3
+	P.inp["util1"] = false
+	_steps(m, 2)
+	var before := P.hp
+	P.inp["util1"] = true
+	_steps(m, 1)
+	P.inp["util1"] = false
+	ok(P.drink_t > 0.0 and P.drink_t <= 1.0, "the tonic drinks for the Brew's 1 s (%.2f left)" % P.drink_t)
+	ok(UtilityUse.channel_move(P) == 1.0, "and does not slow you (the Brew lists no slow)")
+	_steps(m, int(1.0 / Match.DT) + 2)
+	var healed := P.hp - before
+	ok(P.drink_t <= 0.0 and absf(healed - 42.0) < 1.5 and P.tonics == 2,
+			"it heals a flat 42 (%.1f) and spends one" % healed)
+	P.armor = 0.0
+	P.armor_kits = 2
+	P.inp["util2"] = true
+	_steps(m, 1)
+	P.inp["util2"] = false
+	ok(P.kit_t > 0.0 and absf(UtilityUse.channel_move(P) - 0.45) < 0.001,
+			"an armor kit slows to 0.45 (unsourced, in data)")
+	P.kit_t = 0.0
+	P.hp = P.max_hp * 0.5
+	for cancel in ["dash", "stun"]:
+		P.inp["util1"] = true
+		_steps(m, 1)
+		P.inp["util1"] = false
+		var started := P.drink_t > 0.0
+		P.roll_t = 0.2 if cancel == "dash" else 0.0
+		P.stun_t = 0.3 if cancel == "stun" else 0.0
+		_steps(m, 1)
+		ok(started and P.drink_t <= 0.0 and P.tonics == 2, "a %s ends the drink and keeps the tonic" % cancel)
+		P.roll_t = 0.0
+		P.stun_t = 0.0
+		_steps(m, 2)

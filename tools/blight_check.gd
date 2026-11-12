@@ -53,6 +53,7 @@ func run(main: Node) -> void:
 	_noise_and_fights(main)
 	_warden(main)
 	_bots(main)
+	_tide(main)
 	print("BLIGHT DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -222,7 +223,10 @@ func _noise_and_fights(main: Node) -> void:
 	print("BLIGHT fleeing an early Skitter: it gave up after %.1fs (target %s, %.1f tiles), the hunter lost %.0f" % [t, str(runner.tgt), runner.flat_dist(P), hp0 - P.hp - P.armor])
 	ok(runner.tgt == null or runner.flat_dist(P) > 8.0, "a level-1 hunter can outrun an early Skitter")
 	ok(hp0 - P.hp - P.armor < P.max_hp * 0.3, "... without losing much")
-	# idle ones far from everyone burrow away
+	# idle ones far from everyone burrow away (if the chase above ended with the Skitter off an edge,
+	# a fresh one stands in: this tests the burrowing, not where the chase went)
+	if runner.dead:
+		runner = B.spawn("bl_skitter", _open_spot(m, P.pos + Vector3(2.5, 0, 0), 3.0), l)
 	runner.tgt = null; runner.st = "idle"; runner.heard = Vector3.INF
 	runner.idle_t = 25.0
 	P.teleport(_open_spot(m, P.pos + Vector3(0, 0, 0)))
@@ -234,6 +238,8 @@ func _noise_and_fights(main: Node) -> void:
 		ok(true, "(burrow: the spots are too close on this map, skipped)")
 	else:
 		B._despawn_tick()
+		if not runner.gone:
+			print("BLIGHT burrow dead=%s gone=%s far_spot %s " % [runner.dead, runner.gone, str(far_spot)] + ": runner at %s st %s heard %s idle %.1f, hunters %s" % [str(runner.pos), runner.st, str(runner.heard), runner.idle_t, str(m.hunters.filter(func(o): return not o.out).map(func(o): return snappedf(o.flat_dist(runner), 0.1)))])
 		ok(runner.dead and runner.gone, "an idle Skitter far from everyone burrows away")
 	# the network: a Blight's snapshot carries its light, alert and strength, and builds a Blight
 	var wd := B.spawn("bl_warden", _open_spot(m, base + Vector3(-6, 0, 0), 4.0), 0.5)
@@ -344,4 +350,53 @@ func _bots(main: Node) -> void:
 	s3.cd = 99.0
 	var fl: Vector3 = Bot.new()._blight_flee(m, bot)
 	ok(fl != Vector3.INF and Vector2(fl.x - s3.pos.x, fl.z - s3.pos.z).length() > s3.flat_dist(bot), "a hurt bot picks a spot away from the Blight")
+	m.queue_free()
+
+# ------------------------------------------------------------------ 6. the tide's damage
+## The source's death circle per stage, flat, scaled by our medium health over theirs (heart.json).
+const TIDE_SRC := [3.0, 6.0, 50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0]
+
+func _tide(main: Node) -> void:
+	var m := _match(main, 7105, "clear", {"heart": true})
+	_quiet(m)
+	var H: Heart = m.heart
+	var rl := Heart.rules()
+	var k := float(Data.CLASSES["medium"]["hp"]) / float(rl["tide_src_hp"])
+	var t0 := float(rl["tide_start_s"])
+	var close := float(rl["tide_close_s"])
+	m.time = t0 - 1.0 - m.sess_t0
+	ok(Heart.tide_stage(m) == -1, "no tide stage before the tide starts")
+	var stages_ok := true
+	for st in Heart.TIDE_STAGES:
+		m.time = t0 + close * (st + 0.5) / Heart.TIDE_STAGES - m.sess_t0
+		var want: float = TIDE_SRC[st] * k
+		stages_ok = stages_ok and Heart.tide_stage(m) == st and is_equal_approx(Heart.tide_dmg(st), want)
+		var ttk := ""
+		for c in ["light", "medium", "heavy"]:
+			var ticks := ceili(float(Data.CLASSES[c]["hp"]) / Heart.tide_dmg(st))
+			ttk += " %s %ds" % [c, ticks * int(rl["tide_tick_s"])]
+		var from := t0 + close * st / Heart.TIDE_STAGES
+		print("BLIGHT tide stage %d from %.0fs: %.2f a tick (source %.0f), full health dies in%s"
+			% [st, from, Heart.tide_dmg(st), TIDE_SRC[st], ttk])
+	ok(stages_ok, "the close runs the source's 11 stages, each at its damage scaled by health")
+	m.time = t0 + close * 3.0 - m.sess_t0
+	ok(Heart.tide_stage(m) == Heart.TIDE_STAGES - 1, "the last stage holds once the ring is closed")
+	# a live tick: stage 2, the player outside the ring loses the stage's damage, the armor stays
+	m.time = t0 + close * 2.5 / Heart.TIDE_STAGES - m.sess_t0
+	var P: Hunter = m.player
+	var far := H.site + Vector3(Heart.tide_r(m) + 20.0, 0, 0)
+	P.teleport(m.world.free_spot_near(far, [], 1.0, 0.45, 15.0))
+	var outside := Vector2(P.pos.x - H.site.x, P.pos.z - H.site.z).length() > Heart.tide_r(m)
+	var hp0 := P.hp
+	var ar0 := P.armor
+	_run(m, float(rl["tide_tick_s"]) * 2.0 + 0.1)
+	var lost := hp0 - P.hp
+	print("BLIGHT tide live: outside %s, lost %.2f health in two ticks, armor %.0f -> %.0f"
+		% [outside, lost, ar0, P.armor])
+	var two_ticks := absf(lost - Heart.tide_dmg(2) * 2.0) < 0.5
+	ok(outside and two_ticks and P.armor == ar0, "outside the ring: the stage's damage a tick, past armor")
+	P.teleport(m.world.free_spot_near(H.site, [], 1.0, 0.45, 6.0))
+	hp0 = P.hp
+	_run(m, float(rl["tide_tick_s"]) * 2.0 + 0.1)
+	ok(P.hp >= hp0, "inside the ring the tide doesn't hurt")
 	m.queue_free()

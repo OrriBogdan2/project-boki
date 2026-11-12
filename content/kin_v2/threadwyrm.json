@@ -1,0 +1,117 @@
+{
+	"grammar": 1,
+	"id": "threadwyrm",
+	"name": "Knotwyrm",
+	"animals": [
+		"Slow worm",
+		"Knotted hemp rope"
+	],
+	"theme": "spore",
+	"flavor": "A rope snake with mushroom caps growing from its knots; lay it across a path and whoever steps over it gets rooted. Quiet, thoughtful, an old soul; likes damp shade and long naps.",
+	"colors": {
+		"body": "#8a6a4a",
+		"belly": "#e0d0b0",
+		"glow": "#3fe0c0"
+	},
+	"look": {
+		"ears": "none",
+		"body": "drop",
+		"tail": "zig",
+		"feet": "none",
+		"aura": "spores"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 5.95,
+			"hop_height": 0.04,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 6,
+		"kin_damage": 2,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.45,
+		"loyalty": 0.75,
+		"temper": 0.15,
+		"curiosity": 0.65
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Mycelium Web",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.9
+			}
+		]
+	},
+	"active": "puffcap_mines",
+	"auto": "thorn_patch",
+	"merge": "thornwake",
+	"evolution": {
+		"root": "Thread",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "quiet and thoughtful",
+		"syllables": [
+			"Thread",
+			"wyrm"
+		]
+	},
+	"egg": {
+		"name": "Threadwyrm Egg",
+		"temper": "Thoughtful",
+		"desc": "Something thoughtful is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}
