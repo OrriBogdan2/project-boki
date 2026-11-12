@@ -63,14 +63,15 @@ float vis_fog(vec3 wp) {
 	return 1.0 - lit;
 }
 
-// Outside sight: darker and a deep cool blue (85% toward a blue with almost no red, then x vis_dark), but
-// the ground, walls and grass still read. Inside: a touch brighter, so the lit space pops. What's hidden
+// Outside sight: darker and a cool blue (75% toward a blue with little red, then x vis_dark), but the
+// ground, walls and grass still read. Tuned on GPU shots (docs/specs/VISION_LOOK.md): a greyer blue
+// turns purple on warm ground, a deeper one goes near black. Inside: a touch brighter, so the lit space pops. What's hidden
 // stays hidden either way: rival hunters and Boki out of sight aren't drawn at all
 // (Match._update_vision), this only shades the world.
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 blue = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.10, 0.46, 0.88) + vec3(0.0, 0.01, 0.04);
-	vec3 dark = mix(c, blue, 0.85) * vis_dark;
+	vec3 blue = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.2, 0.75, 1.3) + vec3(0.0, 0.01, 0.04);
+	vec3 dark = mix(c, blue, 0.75) * vis_dark;
 	return mix(c * 1.05, dark, fog);
 }
 
