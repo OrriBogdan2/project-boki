@@ -28,6 +28,7 @@ void fragment() {
 	c += base * smoothstep(0.7, 1.0, tipk) * 0.1;
 	c = vis_apply(c, vis_fog(wpos));
 	ALBEDO = c;
+	EMISSION = vis_edge(wpos);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

@@ -31,7 +31,8 @@ facts below come from the written play notes in `supervive_kits.md`.
 ## 2. Ours on main [ours]
 
 - **Yes, we hide Hunters.** `Match.sees()` (match.gd ~2917) is the one rule: a team shares sight; each member sees
-  everything inside a 3.2 m circle (1.6 m crouched), plus a forward cone (dot > 0.6, about 106 degrees) out to
+  everything inside a 2.0 m circle (1.0 m crouched), plus a forward wedge (dot > 0.087, 170 degrees; was 106 until
+  2026-11-12, see VISION_LOOK.md) out to
   `VIEW_RANGE` 24 m (14 m crouched), x1.25 while crouching, x gear `sight`, x raid `sight_k`.
   Needs `world.los()`: rocks and higher ground block it; dynamic sight-blocking walls too.
 - **Grass and smoke** hide a target from anyone outside (`in_bush`, `in_smoke`) unless revealed.
@@ -42,7 +43,9 @@ facts below come from the written play notes in `supervive_kits.md`.
   captor of a Boki (match.gd:2839). `muzzle_t` (firing) also gives you away. Replicated as flag 4096 (match.gd:5559).
 - **Output:** `_update_vision()` runs every 0.05 s and sets `Hunter.unseen` for the local player's view only; unseen
   hunters are not drawn, get no plate, nameplate, cast tells, or map dot (hud.gd, full_map.gd:506 "the map is no wallhack").
-  A shader dims ground outside your cone (`vis_*` globals, up to 3 allies).
+  A shader dims ground outside your wedge to a cool grey-blue and draws its sides as a thin cyan line (`vis_*` globals,
+  up to 3 allies; look and measurements in VISION_LOOK.md). A seen rival who is crouched or in grass/smoke shows no
+  plate (`HudPlate.hidden`).
 - **Blight** (blight.gd:80) uses the same `reveal_t`/`muzzle_t` as "lit" for its senses.
 - **Tiers and abyss:** `los()` samples every 0.4 m and blocks on `ground_at > y + 0.2`, so higher tiers block sight
   from below and the abyss does not block (not verified for void cells).
