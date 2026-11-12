@@ -160,7 +160,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
 	net_ring(at, blast, Color("3a7cff"))
-	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
+	var slow := {}
+	if src == "dash":
+		slow = {"slow": float(dash_def()["slow_t"]), "slow_k": float(dash_def()["slow_k"])}
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
@@ -169,8 +171,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			s["dmg"] = spine.capped(e, float(s["dmg"]))
 			_ult_rock_landed(e, ult_cast)
-		x["slow"] = slow_t
-		x["slow_k"] = float(rd["slow_k"])
+		x.merge(slow)
 		if e is Hunter:
 			launch_pay += 1
 			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
@@ -180,13 +181,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			f_dmg = spine.capped(f, f_dmg)
 			_ult_rock_landed(f, ult_cast)
-		f.hurt(
-			f_dmg, h,
-			{
-				"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]),
-				"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0
-			}
-		)
+		var splash := {"src": "abil", "ab": "rock", "kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0}
+		splash.merge(slow)
+		f.hurt(f_dmg, h, splash)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
 
 ## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so

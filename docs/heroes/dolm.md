@@ -197,7 +197,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
-| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
+| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then slam | rocks in the ring fly outward | `combo: Stone Row > slam launches the rocks` |
 | Stone Row, then walk into a rock | he rises onto it and walks over (0.58s to cross, no jump); anyone else is stopped | `rock (item 25): walking into her own rock lifts her...`, `rock (item 25): an ally / a foe walking or jumping into her rock is stopped`, `rock: dropped onto a rock, she stands on its top` |
 | Punch into a wall | 0.9s stun with stars | `combo: punch into a wall = stun, with stars over the head` |
@@ -220,7 +220,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
-| Punched rocks explode, slow (0.8s) and shred armour | patch 2.00 notes (Steam news feed, appid 1283700) | yes (fireballs on the dummy) | built: 0.8s slow, Shred +15% |
+| Punched rocks explode and shred armour (no slow) | card and guide: "explode and shred Armor" (`breah.md`, `supervive_kits.md`); the Landslide rock alone is "160 and SLOWED" | yes (fireballs on the dummy) | built: Shred +15%, no slow; only the Rock Hop's rolling rock slows (1.5s) |
 | Repeat rock explosions on one target within 0.8s deal 30% less | patch 2.00 notes | no | built (`repeat_t`, `repeat_k`) |
 | Mid-air LMB carries momentum, with a penalty (air impulse penalty 15% -> 50%) | patch 2.00 notes | no | built: the punch step in the air is half as long |
 | Punch cooldown starts at cast, not on release | patch 2.01 / 2.04 notes | no | built (`fire_cd` set when the punch fires) |

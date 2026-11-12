@@ -320,10 +320,14 @@ func _breah() -> void:
 		"combo: launched rocks are flaming boulder shots (Match shots in the rock skin)",
 		KitLooks.of(m).skins_live("rock") >= 1 or K.launches - l0 == 3
 	)
+	ok(
+		"data: rocks carry no slow, only the Rock Hop's rolling rock does",
+		not K.rock_def().has("slow_t") and float(K.dash_def()["slow_t"]) > 0.0
+	)
 	step(m, 0.6)
 	ok(
-		"combo: launched rocks burst on the foe, shred and slow it (ROCKFALL)",
-		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0 and K.launch_pay >= 1,
+		"combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL)",
+		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t <= 0.0 and K.launch_pay >= 1,
 		"took %.1f vuln %.1f slow %.2f pay %d" % [dmg(T), T.vuln_t, T.slow_t, K.launch_pay]
 	)
 	ok(
