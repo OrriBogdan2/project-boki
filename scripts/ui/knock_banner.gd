@@ -57,13 +57,14 @@ func _process(delta: float) -> void:
 	modulate.a = _fade() * clampf(t / (float(r["pop_s"]) * 0.5), 0.0, 1.0)
 	queue_redraw()
 
-## Draws the banner on show, under any toasts that were up when it opened.
+## Draws the banner on show, under any toasts that were up when it opened (but never lower than max_top_frac).
 func _draw() -> void:
 	if kind == "":
 		return
 	var r := rules()
 	if _top < 0.0:
-		_top = maxf(size.y * float(r["top_frac"]), _hud.msgs.bottom() + 8.0)
+		var under_toasts := maxf(size.y * float(r["top_frac"]), _hud.msgs.bottom() + 8.0)
+		_top = minf(under_toasts, size.y * float(r["max_top_frac"]))
 	var centre := Vector2(size.x * 0.5, _top + FACE_R + RING_W - float(r["rise_px"]) * (1.0 - _fade()))
 	draw_set_transform(centre, 0.0, Vector2.ONE * _scale(r))
 	_draw_face()

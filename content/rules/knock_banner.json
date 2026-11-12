@@ -14,5 +14,7 @@
  "combo_s": 0.3,
  "_combo_s": "a second knock of the same kind this soon after the last one shows x2 (x3 ...) instead of a fresh banner",
  "top_frac": 0.13,
- "_top_frac": "where the banner's top sits, of the screen height (it drops below any toasts on show when it opens)"
+ "_top_frac": "where the banner's top sits, of the screen height (it drops below any toasts on show when it opens)",
+ "max_top_frac": 0.2,
+ "_max_top_frac": "the lowest its top goes for toasts (past it, it sits over them): the name pill stays above ~37%, clear of your Hunter"
 }

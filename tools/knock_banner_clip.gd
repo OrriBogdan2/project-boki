@@ -1,16 +1,17 @@
 extends RefCounted
 ## --knock-banner-clip --shots-dir=<dir> [--media-size=1920x1080]: the knock banners (KnockBanner) in a real
-## squad fight, recorded by the movie writer at 30 fps: your squad knocks a rival (KNOCK), a rival knocks your
-## teammate (ALLY KNOCKED, and their squad row's KNOCKED tag), then two rivals go down at once (KNOCK x2).
+## squad fight, recorded by the movie writer at 30 fps: two rivals go down at once (KNOCK x2, early, before
+## the bots knock anyone themselves), a rival knocks your teammate (ALLY KNOCKED, and their squad row's KNOCKED
+## tag), then your squad knocks that rival (KNOCK).
 ## Writes <dir>/clip1.avi and a still while each banner holds (<dir>/knock.png, ally.png, knock_x2.png).
 ## Run it on a GPU worker (jobq --needs gpu); the match rig and the recording are tools/gameplay_media.gd's.
 ## Never writes the save.
 
-const SECS := 8.0                # s of fight filmed
+const SECS := 7.0                # s of fight filmed
 const STILL_AFTER := 0.3         # s after a knock its still is saved (the pop is over, the banner holds)
-# [s into the fight, who goes down (squad, index), who knocked them (squad, index), the still's name]
-const BEATS := [[1.5, "b", 0, "a", 0, "knock"], [4.0, "a", 1, "b", 1, "ally"], [6.0, "b", 1, "a", 0, ""],
-	[6.15, "b", 2, "a", 2, "knock_x2"]]
+# [s into the fight, the squad that loses someone, the still's name]; the bots fight too, so each beat takes
+# whoever is still up (never you: your own knock has no banner) and credits the other squad's first one up
+const BEATS := [[1.5, "b", ""], [1.65, "b", "knock_x2"], [3.2, "a", "ally"], [5.0, "b", "knock"]]
 
 var main: Node
 var media: RefCounted            # tools/gameplay_media.gd
@@ -65,15 +66,26 @@ func _fight() -> void:
 ## Knocks whoever is due at `t` and saves each banner's still once it holds.
 func _beat(t: float) -> void:
 	var m: Match = media.m
-	var squads := {"a": media.squad_a, "b": media.squad_b}
 	for i in BEATS.size():
 		var b: Array = BEATS[i]
 		if not _done.has(i) and t >= float(b[0]):
 			_done[i] = true
-			m.knock(squads[b[1]][b[2]], squads[b[3]][b[4]], {})
-			media._mark("knock_%d %s" % [i, m.hud.knocks.word()])
-		var still := String(b[5])
+			var losers: Array = media.squad_a if b[1] == "a" else media.squad_b
+			var winners: Array = media.squad_b if b[1] == "a" else media.squad_a
+			var victim := _first_up(losers, m.player)
+			var by := _first_up(winners, null)
+			if victim != null:
+				m.knock(victim, by if by != null else winners[0], {})
+			media._mark("knock_%d %s x%d" % [i, m.hud.knocks.word(), m.hud.knocks.count])
+		var still := String(b[2])
 		if still != "" and not _done.has(still) and t >= float(b[0]) + STILL_AFTER:
 			_done[still] = true
 			main.get_viewport().get_texture().get_image().save_png(String(media.dir).path_join(still + ".png"))
 			media._mark("still " + still)
+
+## The first hunter of `squad` still up, other than `skip`.
+func _first_up(squad: Array, skip: Hunter) -> Hunter:
+	for h in squad:
+		if h != skip and not (h as Hunter).downed and not (h as Hunter).out:
+			return h
+	return null
