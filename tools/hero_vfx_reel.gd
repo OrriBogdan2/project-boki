@@ -10,8 +10,7 @@ extends "res://tools/combo51_shots.gd"
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
-const HERO_PARTS := {
-	"juggernaut": ["lmb", "chain", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
+const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
@@ -173,21 +172,6 @@ func _juggernaut_lmb() -> void:
 			"LMB Greatsword: a slash, the arc burning away, tip burst on the dummy; the next slash "
 			+ "back the other way",
 			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]), 1.5)
-	await _go(GAP)
-
-## The slash chain at the footage's own taps (hero-ref 0023-0034 at 5 fps: swings on 0026, 0029, 0033), a frame
-## every 0.2 s to lay beside those frames.
-func _juggernaut_chain() -> void:
-	await _reset(3.3)
-	var taps := func(t: float):
-		P.inp["fire"] = [0.5, 1.1, 1.9].any(func(at: float) -> bool:
-			return t >= at and t < at + DT * 2.0)
-		_aim(T.pos)
-	var times: Array = []
-	for i in 12:
-		times.append(i * 0.2)
-	await _go(2.4, taps, _sheet("chain", "LMB chain at the footage's taps (0023-0034 at 5 fps, swings on 0026, 0029, "
-			+ "0033): no step into a swing, the sides alternate, the blade back between swings", times), 1.5)
 	await _go(GAP)
 
 func _juggernaut_wave() -> void:

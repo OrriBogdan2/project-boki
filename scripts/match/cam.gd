@@ -215,7 +215,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		if shake_left <= 0.0:
 			shake_amp = 0.0
 	_apply(shake)
-	Sfx.set_ears(p, yaw + Record.orbit_yaw)      # the ears sit on the followed Hunter, not the cursor-led focus
+	Sfx.listener = focus
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)

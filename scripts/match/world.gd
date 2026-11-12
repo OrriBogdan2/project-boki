@@ -32,6 +32,7 @@ var chest_spots: Array = []
 var camp_spots: Array = []
 var wild_spots: Array = []
 var no_deco := {}
+var scatter_chunk := 0       # tiles: scatter batches are at least this wide (a home sets its whole map: all on screen)
 var paint := {}          # tile index -> colour for paths and soil, blended at the corners
 var clouds: Array = []
 var sheer := {}          # tile index -> true: a smooth cliff rim you can't grab (authored maps)
@@ -146,11 +147,11 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and faces taller than a step-up don't block.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
-	if not dyn_walls.is_empty():
-		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y, "phase" if ghost else "body")
+	if not dyn_walls.is_empty() and not ghost:
+		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y)
 		if wb > 0.0:
 			return wb
 	# rocks, trees and walls use a slimmer body than the terrain does, so you slide past their
@@ -164,12 +165,13 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		var g := ground_at(x + o.x, z + o.y)
-		if g > y + STEP:
-			worst = maxf(worst, g)
-			hit = true
-	if hit and not (ghost and worst > y + LEVEL + 0.05):
+	if not ghost:
+		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
+			var g := ground_at(x + o.x, z + o.y)
+			if g > y + STEP:
+				worst = maxf(worst, g)
+				hit = true
+	if hit:
 		return maxf(worst, WALL_MIN)
 	if guard:
 		# don't let a walking hunter step off into the abyss; dashes and knockback ignore this
@@ -1381,6 +1383,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
 			# mean far fewer draws (and shadow draws) for a few more off-screen instances
 			chunk = maxi(chunk, 32)
+	chunk = maxi(chunk, scatter_chunk)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin

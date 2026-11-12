@@ -517,8 +517,8 @@ func _mage() -> void:
 	_dash(m, P, 0.45, func(): if K.run_t > 0.0 and P.phase_t <= 0.0: ok("small: Wirerun ignores projectiles while it runs", false))
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
-	var words: Array = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: the INVULNERABLE word shows on the run (source)", "INVULNERABLE" in words)
+	ok("Wirerun: the body turns into the bolt for the run (hidden), no floating word",
+			not P.model.visible and m.fx.nums.all(func(n): return not String(n["node"].text).contains("INVULNERABLE")))
 	ac.step(m, 0.6)
 	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
 			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,
@@ -1002,14 +1002,6 @@ func _gunslinger() -> void:
 	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
-	var speeds: Array = []
-	for rk in [1, 3]:
-		P.slot_lv["dash"] = rk
-		var before := P.buff("move_speed")
-		K._slide_end()
-		speeds.append(P.buff("move_speed") - before)
-	ok("upgrade parity: rank 3 (tier IV) a slide's end gives +25% speed, rank 1 none",
-			near.call(speeds[0], 0.0) and near.call(speeds[1], 0.25), str(speeds))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1

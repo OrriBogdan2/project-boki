@@ -9,13 +9,10 @@ const C_REACH := 7.0          # m: a C cast without a stated range
 const THROW_CHANCE := 0.3     # chance per look to throw at something that isn't a hunter or a brute
 const MERGE_NEAR := 7.0       # m: a rival this close is worth the merge
 const LOW_HP := 0.3           # share of health: a bot or Boki below this goes back on the bot (Return)
-const SUMMON_RANGE := 12.0    # m: a rival or brute this close is a fight the bot takes (Summon)
-const SUMMON_MATE_R := 15.0   # m: a downed teammate this close calls the Boki out
-const SUMMON_HP := 0.45       # share of health: below this the bot is losing, not fighting (no Summon)
-const SUMMON_DELAY := 0.3     # s: a quick bot waits this long after the moment starts (easy: up to 5x)
-const SUMMON_BASE := 0.5      # chance a bot with no ability skill presses it when the wait is up (skill 1: always)
-const SUMMON_RETRY := 3.0     # s: before a bot that skipped the moment looks again
-const SIC_REACH := 9.0       # m: how far a Sic can reach (Kin throw range)
+const SIC_REACH := 9.0        # m: how far a Sic can reach (Kin throw range)
+const SCAN_NEAR := 9.0        # m: a knocked-out Boki this close is scanned before any lair, seat or exit run
+const SCAN_FAR := 14.0        # m: how far a bot with nothing better to do walks to a knocked-out Boki
+const SCAN_KEEP := 4.0        # m: slack for the Boki it is already walking to (no flip-flop at the edge)
 
 ## Called while the bot has a target: Return when it is low, Sic at the target, cast C, Call back.
 static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
@@ -51,39 +48,6 @@ static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
 			k.throw_to(Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z))       # Sic
 			a["throw_cd"] = randf_range(3, 6)
 
-## The Summon key (the Boki rides as a wisp, KinSummon): press it on entering a fight the bot will take (a
-## rival or a brute in range, health above SUMMON_HP) or when a teammate is downed close by. Never while
-## fleeing or hexed, never on cooldown, never while the Boki is already out. Easy bots wait longer and skip
-## the moment more often (abil is the bot's ability skill). Tutorial bots wait for a beat to set "summon_ok".
-static func summon(m: Match, h: Hunter, tgt: Ent, abil: float, dt: float) -> void:
-	var k: Kin = h.kin
-	var a := h.ai
-	var muted: bool = m.opts.get("tutorial", false) and not a.get("summon_ok", false)
-	if k == null or k.summon == null or not k.wisp or k.summon.cd > 0.0 or muted:
-		a["sum_wait"] = -1.0
-		return
-	if not _summon_moment(m, h, tgt):
-		a["sum_wait"] = -1.0
-		return
-	if float(a.get("sum_wait", -1.0)) < 0.0:
-		a["sum_wait"] = SUMMON_DELAY * (1.0 + (1.0 - abil) * 4.0) * randf_range(0.8, 1.3)
-	a["sum_wait"] = float(a["sum_wait"]) - dt
-	if float(a["sum_wait"]) > 0.0:
-		return
-	if randf() < SUMMON_BASE + (1.0 - SUMMON_BASE) * abil:
-		KinSummon.press(h)
-	a["sum_wait"] = SUMMON_RETRY
-
-## A fight worth the Boki, and the bot is not running from it.
-static func _summon_moment(m: Match, h: Hunter, tgt: Ent) -> bool:
-	if h.downed or h.hp < h.max_hp * SUMMON_HP or Hex.active(h) or String(h.ai.get("goal_kind", "")) == "flee":
-		return false
-	if tgt and not tgt.dead and tgt.hittable() and h.flat_dist(tgt) < SUMMON_RANGE:
-		if (tgt is Hunter and not tgt.downed) or (tgt is Mob and tgt.mkind == "brute"):
-			return true
-	return m.hunters.any(func(x: Hunter) -> bool: return x != h and x.team == h.team and x.downed and not x.out \
-			and h.flat_dist(x) < SUMMON_MATE_R)
-
 ## The Merge, once the bond is full and a fight is worth it. With the Boki out it leaps back and merges.
 static func merge(h: Hunter, tgt: Ent, d: float) -> void:
 	var plan := KinMerge.plan(h)
@@ -110,3 +74,13 @@ static func upkeep(h: Hunter) -> void:
 		k.recall()
 	elif k.state == "shoulder" and k.cmd == "return" and h.hp > h.max_hp * 0.6 and k.hp > k.max_hp * 0.6 and float(h.ai.get("throw_cd", 0.0)) <= 0.0:
 		KinCommand.order(h, "follow")
+
+## The spot of a knocked-out Boki this bot can scan within `reach` (a little further for the one it is
+## already heading to, `cur`), or INF.
+static func scan_goal(m: Match, h: Hunter, cur: Vector3, reach: float) -> Vector3:
+	if not Capture.room(h):
+		return Vector3.INF
+	for k in m.kins:
+		if KinLoss.scannable_by(h, k) and h.flat_dist(k) < reach + (SCAN_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
+			return k.pos
+	return Vector3.INF
