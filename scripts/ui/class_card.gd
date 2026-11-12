@@ -85,14 +85,13 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	row.tooltip_text = "%s\nReward: %s%s" % [String(g["text"]), reward, " (earned)" if done else ""]
 	return row
 
-## A Hunter's kit in one tooltip: its name, then dash, passive, RMB, E and R.
+## A Hunter's kit in one tooltip: its name, then dash, passive, and the right click, signature and fusion keys.
 static func kit_tip(id: String) -> String:
 	var adf := Arch.def(id)
-	var names := [Arch.name_of(id)]
-	for slot in ["dash", "passive", "rmb", "e"]:
-		names.append(String(adf[slot]["name"]))
-	names.append(Settings.key_cap("ultimate"))
-	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Fusion" % names
+	var nm := func(slot: String) -> String: return String(adf[slot]["name"])
+	var head := "%s\nDash: %s  ·  Passive: %s\n" % [Arch.name_of(id), nm.call("dash"), nm.call("passive")]
+	var keys := [Settings.key_cap("secondary"), nm.call("rmb"), Settings.key_cap("signature"), nm.call("e")]
+	return head + "%s: %s  ·  %s: %s  ·  %s: Boki Fusion" % (keys + [Settings.key_cap("ultimate")])
 
 ## The results screen's Hunter line: mastery goals this expedition finished, and a Hunter unlock that
 ## became ready.

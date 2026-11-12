@@ -125,3 +125,8 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
   message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.
+
+## Key caps
+- Every key the UI names comes from `Settings.key_cap(action)` (the live main key) or `key_caps(action)` (main / alternate), both built on `Settings.cap_text`: letters upper-case, mouse buttons `LMB RMB MMB M4 M5 WHEEL-UP WHEEL-DN`, no spaces inside a cap (`UI.key_hints` splits on spaces). Never type a key letter in a label, tooltip or kit text; ability descriptions in `content/` say "press the key again".
+- Fixed keys that are not in `Settings.ACTIONS` (arena Loadout L, duel setup B, Alt+key rank-up) may stay as text.
+- Check: `--key-caps-check` rebinds the ability actions to mouse buttons and reads the kit card, recast badge, class tooltip and Fusion form text.
