@@ -1,0 +1,12 @@
+# Scripts and scenes nothing names on purpose (tools/unref_check.gd, --unref-check). One res-relative
+# path per line, then # and why. Drop a line when its file goes or gets wired in.
+tests/feel_sim.gd      # godot -s tests/feel_sim.gd: headless sim of the scripts/feel prototype (docs/CODE_HEALTH.md)
+tests/glider_gallery.tscn      # screenshot gallery, run by its path with -- --shot=
+tests/portrait_gallery.tscn      # screenshot gallery, run by its path with -- --shot=
+tests/net/match_probe.gd      # godot -s: a scripted online client for relay tests
+tests/net/net_probe.gd      # godot -s: a bare relay connection probe
+tools/unstable_mix_check.gd      # lost its main.gd hook in a merge and is red on main (docs/CODE_HEALTH.md)
+tools/vfx_reel/ashwick.gd      # hero_vfx_reel.gd loads tools/vfx_reel/<hero>.gd by a built path
+tools/vfx_reel/bulwark.gd      # same
+tools/vfx_reel/rimewright.gd      # same
+tools/vfx_reel/tender.gd      # same
