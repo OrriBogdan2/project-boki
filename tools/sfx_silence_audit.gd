@@ -275,7 +275,8 @@ func _raid_rows() -> void:
 		rd.gates.show_marks()
 		run.call(int(0.6 / Match.DT)))
 	var n_ticks := ticks.count("raid_gate_tick")
-	ok(n_ticks >= rd.gates.marks.size(), "raid: every marked gate ticks (%d for %d gates)" % [n_ticks, rd.gates.marks.size()])
+	var gates_n := rd.gates.marks.size()
+	ok(n_ticks >= gates_n, "raid: every marked gate ticks (%d for %d gates)" % [n_ticks, gates_n])
 	var wave := _cues_of(func():
 		rd.wave += 1
 		rd.audio.update())
