@@ -38,12 +38,19 @@ func _gliders() -> void:
 
 ## Whether a canopy material mixes the skin's cloth, stripe and edge colours (for this team and hero).
 func _wears(mat: ShaderMaterial, g: Dictionary, team: Color, hero: Color) -> bool:
-	if mat.get_shader_parameter("vertex_weights") != true:
+	if not _weighs(mat):
 		return false
 	for w in [["weight_r", "cloth"], ["weight_g", "stripe"], ["weight_b", "edge"]]:
 		if mat.get_shader_parameter(w[0]) != Gliders.col(String(g[w[1]]), team, hero):
 			return false
 	return true
+
+## Whether a material reads its vertex colours as colour weights: set, and declared by the shader it is on
+## now (a material keeps parameters its shader lacks, and Models.hero_look moves a Hunter's to another).
+func _weighs(mat: ShaderMaterial) -> bool:
+	var declared := mat.shader.get_shader_uniform_list().map(func(u): return String(u["name"]))
+	return mat.get_shader_parameter("vertex_weights") == true \
+			and ["vertex_weights", "weight_r", "weight_g", "weight_b"].all(func(nm): return nm in declared)
 
 func _asked(p: String) -> bool:
 	return ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
@@ -92,8 +99,8 @@ func _bodies(main: Node) -> void:
 	var shared: bool = g1[0].mesh == g2[0].mesh and g1[1].mesh == g2[1].mesh
 	_ok("Hunters on one skin share its canopy's and strings' meshes", shared)
 	var mat1: ShaderMaterial = g1[0].material_override
-	var own: bool = mat1 != g2[0].material_override and mat1.get_shader_parameter("vertex_weights") == true
-	_ok("each colours the canopy with its own material", own)
+	_ok("each colours the canopy with its own material", mat1 != g2[0].material_override)
+	_ok("a Hunter's canopy shader mixes the weights (%s)" % mat1.shader.resource_path, _weighs(mat1))
 	m.free()
 	m2.free()
 	WardenGlb.set_model(a, false)
