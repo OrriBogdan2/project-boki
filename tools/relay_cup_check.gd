@@ -8,7 +8,10 @@ extends RefCounted
 ##   4. duo friends hand off cleanly even on a miss and beat strangers; rivals fumble unless the press is great
 ##   5. the visitors are at least the cup round's strength, so a win counts for the cup: prizes, gems,
 ##      memories and the next round from garden_prizes.json "relay"; a loss starts the run over
-##   6. on the base: the relay stand by the Dash loop starts a relay of three against three that ends on a
+##   6. body language (RelayBeats): a hand-off is a 0.3 s contact (bump and brace, or one matched hop for duo
+##      friends), the next runner's gait bursts for 0.4 s (friends swell it, strangers step it), the winners
+##      cheer and the losers sulk with the species' clip or, without it, a hop and a head drop
+##   7. on the base: the relay stand by the Dash loop starts a relay of three against three that ends on a
 ##      result card, and the visitors leave
 ## Never touches the real save.
 
@@ -34,6 +37,7 @@ func run(m: Node) -> void:
 	_order()
 	_duo_rivals()
 	_cup()
+	_beats()
 	await _on_base()
 	print("RELAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -150,6 +154,59 @@ func _cup() -> void:
 	ok(not res["won"] and res["prize"]["reset"] and GardenPrizes.stage(anchor, "relay") == 0,
 			"a loss starts the cup run over")
 
+## A stand-in runner with the clips `have`.
+func _runner(have: Array) -> Node3D:
+	var n := Node3D.new()
+	var p := AnimationPlayer.new()
+	var lib := AnimationLibrary.new()
+	for c in have:
+		lib.add_animation(c, Animation.new())
+	p.add_animation_library(&"", lib)
+	n.add_child(p)
+	return n
+
+func _beats() -> void:
+	var B := RelayBeats.rules()
+	var all := ["nudge", "brace", "stonehop", "win", "sulk"]
+	var a := _runner(all)
+	var b := _runner(all)
+	var beats := RelayBeats.new()
+	beats.hand_off(a, b, 10.0, 0.25, false)
+	ok(a.get_meta("kact") == "nudge" and b.get_meta("kact") == "brace", "beats: strangers bump and brace")
+	beats.step(10.0 + float(B["contact_s"]) + 0.01)
+	ok(not a.has_meta("kact") and not b.has_meta("kact"),
+			"beats: the contact ends after %.1f s" % float(B["contact_s"]))
+	beats.step(10.25 + float(B["burst_s"]) * 0.1)
+	var stranger := float(b.get_meta("kburst", 1.0))
+	ok(is_equal_approx(stranger, float(B["burst_rate"])),
+			"beats: a stranger's burst steps straight to %.1fx" % stranger)
+	beats.step(10.25 + float(B["burst_s"]) + 0.01)
+	ok(not b.has_meta("kburst"), "beats: the burst ends after %.1f s" % float(B["burst_s"]))
+	var c := _runner(all)
+	var d := _runner(all)
+	beats.hand_off(c, d, 20.0, 0.0, true)
+	ok(c.get_meta("kact") == "stonehop" and d.get_meta("kact") == "stonehop", "beats: duo friends hop together")
+	beats.step(20.0 + float(B["burst_s"]) * 0.1)
+	var early := float(d.get_meta("kburst", 1.0))
+	beats.step(20.0 + float(B["burst_s"]) * 0.5)
+	var peak := float(d.get_meta("kburst", 1.0))
+	ok(early > 1.0 and early < stranger and is_equal_approx(peak, float(B["burst_rate"])),
+			"beats: friends' burst swells (%.2f then %.2f) where strangers' steps" % [early, peak])
+	RelayBeats.finish([a, b], true)
+	ok(a.get_meta("kact") == "win" and b.get_meta("kact") == "win", "beats: winners play their win clip")
+	RelayBeats.finish([c, d], false)
+	ok(c.get_meta("kact") == "sulk" and is_zero_approx(c.rotation.x), "beats: losers play their sulk clip, head up")
+	var bare := _runner(["stonehop"])
+	RelayBeats.finish([bare], true)
+	ok(bare.get_meta("kact") == "stonehop", "beats: no win clip is a hop")
+	RelayBeats.finish([bare], false)
+	ok(is_equal_approx(bare.rotation.x, float(B["sulk_drop"])), "beats: no sulk clip is a head drop")
+	beats.clear([a, b, c, d, bare])
+	ok(bare.rotation.x == 0.0 and not bare.has_meta("kact") and not d.has_meta("kburst"),
+			"beats: clear resets the runners")
+	for n in [a, b, c, d, bare]:
+		n.free()
+
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	var d := Save.fresh()
@@ -185,15 +242,25 @@ func _on_base() -> void:
 		press.pressed = true
 		var t := 0.0
 		var nodes: Array = relay.visitors.map(func(v): return v["node"])
+		var runners: Array = nodes + relay.mine.map(func(k): return k["node"])
+		var acted := false
+		var burst := false
+		var finished := false
 		while relay.run != null and t < MAX_S:
 			if relay.run.can_press():
 				relay.bar.m = relay.bar.zone        # a press right on the gold
 				home.hrace.input(press)
 			home.hrace.tick(DT)
 			t += DT
+			acted = acted or runners.any(func(n): return n.has_meta("kact"))
+			burst = burst or runners.any(func(n): return float(n.get_meta("kburst", 1.0)) > 1.0)
+			finished = finished or relay.finish_left >= 0.0
 		ok(relay.run == null and is_instance_valid(home.hrace.card) and home.hrace.card.name == "GameResultCard",
 				"on: the relay ends with the shared result card (%.1f s)" % t)
 		await main.get_tree().process_frame
+		ok(acted and burst, "on: the runners play contact reacts and burst off the baton")
+		ok(finished and runners.all(func(n): return not is_instance_valid(n) or not n.has_meta("kact")),
+				"on: the teams show the finish, then are reset")
 		ok(nodes.all(func(n): return not is_instance_valid(n)), "on: the visitors leave")
 		ok(home.kins.all(func(k): return not k.get("busy", false)), "on: your three are free again")
 	rules["base_mode"] = false
