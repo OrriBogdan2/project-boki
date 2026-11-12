@@ -24,9 +24,13 @@ unminded egg sits in the Nook, one Boki with the Ember knack that comes over to 
 stall, Burrow, games board) are a template kept as `Save.d["hub_layout"]` (absent in older saves: built on
 first use, so no migration); the Dash's showcase wall hangs by the games board (by the race post
 before the hub opens) and the board lists this week's twist; build mode there offers only the Garden tab. With the garden on and the
-first day's tutorial done, a plain `Game.goto("home")` lands in the hub (`GardenZones.landing`); before
-that it lands in Bramblebank, where the tutorial runs. The garden's own house, Nook, stall and Burrow
-stay until the zones are rebuilt (steps 7 and 11).
+first day's tutorial done or skipped, a plain `Game.goto("home")` lands in the hub (`GardenZones.landing`);
+before that it lands in Bramblebank, where the tutorial runs. One set (DECISIONS 2026-11-10, the hub at the
+centre): with the garden on, the house, Nook (with its Incubator and the one egg, `Save.d["egg"]`), stall and
+Burrow are the hub's. `HubLayout.holds` keeps a farm-start Bramblebank from building them: no nodes, blockers,
+build-mode tiles or auto-placed stall, so the first-day "pair two Boki in the Nook" and the Ember Boki's minding
+happen at the hub's Nook. An older layout's entries stay on the save (the farm with the garden off still uses
+them), so no migration.
 
 ## Consequences
 Step 10: the profile doc gains "hub_layout" and "zones" ({id: layout} for each open zone that has one) and each
