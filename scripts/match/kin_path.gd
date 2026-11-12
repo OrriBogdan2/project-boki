@@ -7,11 +7,13 @@ extends RefCounted
 ## (rules follow.path_every_s), never every step.
 
 const STEP := 1.7          # m: the most height one move may climb or drop (as in Bot._grid_path)
-const MAX_NODES := 900     # nodes expanded per search: the cost cap
+const MAX_NODES := 1800    # nodes expanded per search: the cost cap (x2 with the Hollow Crown's 2x land:
+                           # a cross-island trip round its rocks)
 const DIAG := 1.41421356
 
-## Is the straight walk a to b (tile-space metres, x/z) free of blocks and the abyss?
-static func clear_line(W: World, a: Vector2, b: Vector2, width := 0.3) -> bool:
+## Is the straight walk a to b (tile-space metres, x/z) free of blocks and the abyss (and, `flat`, does
+## the body stay on a's own level, off stairs)?
+static func clear_line(W: World, a: Vector2, b: Vector2, width := 0.3, flat := false) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * width
@@ -19,14 +21,22 @@ static func clear_line(W: World, a: Vector2, b: Vector2, width := 0.3) -> bool:
 		var p := a + d * (float(i) / n)
 		if W.is_block(p.x, p.y) or W.is_block(p.x + side.x, p.y + side.y) or W.is_block(p.x - side.x, p.y - side.y) or W.is_void(p.x, p.y):
 			return false
+		if flat and not (_same_level(W, a, p) and _same_level(W, a, p + side) and _same_level(W, a, p - side)):
+			return false
 	return true
+
+## Flat-only walkers (the Shrubling: too wide to climb a stair under World.STEP, and no jump) keep to one
+## level and off stairs.
+static func _same_level(W: World, a: Vector2, p: Vector2) -> bool:
+	var i := W.idx(int(floor(p.x)), int(floor(p.y)))
+	return W.level[i] == W.level[W.idx(int(floor(a.x)), int(floor(a.y)))] and not W.stairs.has(i)
 
 static func _walkable(W: World, x: int, z: int) -> bool:
 	return W.inb(x, z) and W.kind[W.idx(x, z)] == World.T_GROUND
 
 ## The tile centres from a to b (excluding a's own tile), or [] when there is no way on foot inside
 ## the window. `pad` widens the search window round the two points.
-static func find(W: World, a: Vector3, b: Vector3, pad := 12) -> Array:
+static func find(W: World, a: Vector3, b: Vector3, pad := 12, flat := false) -> Array:
 	var s := Vector2i(int(floor(a.x)), int(floor(a.z)))
 	var g := Vector2i(int(floor(b.x)), int(floor(b.z)))
 	if s == g:
@@ -62,6 +72,11 @@ static func find(W: World, a: Vector3, b: Vector3, pad := 12) -> Array:
 					continue         # no cutting a corner
 				if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - cg) > STEP:
 					continue
+				if flat:
+					var s2 := Vector2(s)
+					if not (_same_level(W, s2, Vector2(nx)) and _same_level(W, s2, Vector2(cur.x + dx, cur.y)) \
+							and _same_level(W, s2, Vector2(cur.x, cur.y + dz))):
+						continue
 				var c := float(cost[cur]) + (DIAG if dx != 0 and dz != 0 else 1.0)
 				if not cost.has(nx) or c < float(cost[nx]):
 					cost[nx] = c
