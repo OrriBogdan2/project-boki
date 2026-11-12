@@ -10,7 +10,7 @@ Usage:
 The old code has a lot of these, so the rule is a ratchet: a file may not get worse than its baseline,
 and a new file starts at zero. Clean a file up, then run --update so it can't slip back.
 """
-import json, os, re, sys
+import argparse, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASELINE = os.path.join(ROOT, "tools", "style_baseline.json")
@@ -67,15 +67,19 @@ def counts():
 
 
 def main():
-    args = sys.argv[1:]
-    if "--file" in args:
-        p = args[args.index("--file") + 1]
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--strict", action="store_true", help="exit 1 when any file is worse than tools/style_baseline.json")
+    ap.add_argument("--update", action="store_true", help="rewrite the baseline (only after cleaning up)")
+    ap.add_argument("--file", metavar="PATH", help="list every problem in one file, with line numbers")
+    args = ap.parse_args()
+    if args.file:
+        p = args.file
         for rule, ls in problems(p).items():
             if ls:
                 print(f"{rule}: lines {', '.join(map(str, ls[:40]))}{' ...' if len(ls) > 40 else ''}")
         return
     now = counts()
-    if "--update" in args:
+    if args.update:
         with open(BASELINE, "w", encoding="utf-8") as f:
             json.dump({p: {k: v for k, v in c.items() if v} for p, c in now.items() if any(c.values())}, f, indent=0, sort_keys=True)
         print(f"style baseline written for {len(now)} files")
@@ -94,7 +98,7 @@ def main():
         for w in worse[:30]:
             print("  " + w)
         print("  (run `python3 tools/style_lint.py --file <path>` for line numbers)")
-        if "--strict" in args:
+        if args.strict:
             sys.exit(1)
     else:
         print("STYLE OK")
