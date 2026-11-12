@@ -102,7 +102,7 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | hivara | 66% → 27% 3.2 steps/s | 66% → 36% 3.6 steps/s | 63% → 33% 6.0 steps/s | 75% → 56% 6.0 steps/s (7.0) | 1.3 / 1.0 / 1.0 | 0.9 |
 | kestrike | 81% → 28% 6.0 steps/s | 81% → 49% 6.0 steps/s | 85% → 68% 6.0 steps/s | 91% → 81% 6.0 steps/s (7.4) | 0.6 / 1.5 / 1.2 | 1.0 |
 | kindlewren | 77% → 30% 6.0 steps/s | 77% → 43% 6.0 steps/s | 84% → 69% 6.0 steps/s | 90% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 / 1.4 | 0.9 |
-| lodestick | 99% → 62% 6.0 steps/s | 99% → 48% 6.0 steps/s | 90% → 70% 6.0 steps/s | 94% → 82% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
+| lodestick | 99% → 44% 6.0 steps/s | 99% → 53% 6.0 steps/s | 90% → 74% 6.0 steps/s | 94% → 85% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 1.0 |
 | marchleaf | ?% → 48% 4.0 steps/s | ?% → 41% 3.0 steps/s | ?% → 41% 5.4 steps/s | ?% → 46% 6.0 steps/s (6.6) | 0.5 / 1.0 / 0.9 | 0.9 |
 | mossgrade | 96% → 51% 6.0 steps/s | 96% → 35% 4.4 steps/s | 77% → 41% 6.0 steps/s | 82% → 57% 6.0 steps/s (6.0) | 1.5 / 1.1 / 1.2 | 1.6 |
 | nettlynx | 80% → 26% 3.8 steps/s | 80% → 33% 4.8 steps/s | 82% → 51% 6.0 steps/s | 87% → 67% 6.0 steps/s (6.6) | 1.3 / 1.1 / 1.3 | 0.9 |

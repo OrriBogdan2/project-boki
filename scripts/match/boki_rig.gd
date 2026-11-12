@@ -124,7 +124,7 @@ const STRIDE := {
 	"glomwort": [1.50, 2.90],
 	"kestrike": [0.30, 0.42],
 	"kindlewren": [0.39, 0.50],
-	"lodestick": [0.22, 0.62],
+	"lodestick": [0.19, 0.60],
 	"marchleaf": [0.51, 2.02],
 	"mossgrade": [0.12, 0.74],
 	"nettlynx": [0.54, 1.07],
