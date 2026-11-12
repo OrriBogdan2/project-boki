@@ -7934,3 +7934,4 @@ READY ext/feel-fall-no-carry a2bc1b646 (DECISIONS 11-11 falling never becomes ho
 READY ext/vfx-zone-fill-meeko-sable 46f983e55 (Meeko seed disc + thrown Hearthlight + vortex core: lit rim, soft inside <=0.25; Sable R already a thin ring, now measured; strips in docs/shots/vfx-zone-fill-meeko-sable)
 READY ext/sable-knife-audit 2aa8b791bf (Shadow Knife audit vs Farstep Dagger in docs/heroes/thief.md; no number changed, dmg/slow time/range/cooldown [?]; speed, slow, ghosts locked in kit_parity.json)
 READY ext/grimble-barge-chain 3b599ef6d (Barge chain as a burst of Brute Dash: gap 0.22->0.1 s, a press between shoves held not dropped, LMB after the last shove next step; move-feel rows)
+READY ext/neve-skate-speed 62584033d (Rimewright skate 11.5 -> 10.5 m/s, the footage mean of 450-600 px/s = 5.83 bh/s; asserted in --rimewright-combo-check; Rimelock carry text 6.3 -> 5.9 m; refund 0.6 untouched)
