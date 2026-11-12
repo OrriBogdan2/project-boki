@@ -48,6 +48,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
+- Two kinds skip SFX for a bus of their own: voices (a Hunter set's `grunt` sounds, the `v_*` monster cries, the Boki cries in `Sfx.BOKI_CRIES`) play on **Voice**, near or far; the Interface set (`ui.json`) played with no position plays on **UI**. Each bus has a volume slider in Settings > Audio (Master, Music, Effects = SFX, Voices, Ambience, UI; `Settings.BUSES`), and letting go of a slider plays `ping` through its bus. A settings file from before Voices and UI starts both at its Effects level. `--bus-sliders-check` asserts the routing, each slider's bus, the save and load, and the old file.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
 ## Ultimate cast cues

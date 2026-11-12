@@ -19,6 +19,8 @@ const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
+## The Boki's cries (their set mixes them with throws and catches, so they are named here).
+const BOKI_CRIES := ["kin_happy", "kin_unsure", "kin_alert"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,
 	"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
@@ -47,6 +49,7 @@ var next := 0
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
+var sound_bus := {}         # sound -> "Voice" or "UI" when it skips the SFX bus (see _load_reach)
 var last_played := {}
 var rng := RandomNumberGenerator.new()
 
@@ -62,7 +65,7 @@ var _duck_tw: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for bn in ["Music", "SFX", "Ambience", "SFXFar"]:
+	for bn in ["Music", "SFX", "Ambience", "SFXFar", "Voice", "UI"]:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
@@ -95,7 +98,11 @@ func _ready() -> void:
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
+## The same pass sorts out the sounds with a bus (and a volume setting) of their own: a Hunter's wordless
+## voice lines (category "grunt") and the monster and Boki cries go on Voice, the Interface set on UI.
 func _load_reach() -> void:
+	for sname in BOKI_CRIES:
+		sound_bus[sname] = "Voice"
 	for f in DirAccess.get_files_at("res://content/sfx"):
 		if not f.ends_with(".json"):
 			continue
@@ -103,6 +110,12 @@ func _load_reach() -> void:
 		if d is Dictionary:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
+			var sounds: Dictionary = (d as Dictionary).get("sounds", {})
+			for sname in sounds:
+				if sounds[sname] == "grunt":
+					sound_bus[sname] = "Voice"
+				elif d.get("group") == "ui":
+					sound_bus[sname] = "UI"
 
 ## The effects on the buses: SFX gets a soft compressor, a little room and a limiter; far-away sounds
 ## are low-passed on their way into it; the master has a last safety limiter.
@@ -412,7 +425,7 @@ func _distance_db(pos, reach := 0.0) -> float:
 	return db + linear_to_db(maxf(edge, 0.001))
 
 ## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer:
+func _voice(pos, sname := "") -> AudioStreamPlayer:
 	var p: AudioStreamPlayer = null
 	for k in POOL:
 		var c := players[(next + k) % POOL]
@@ -423,9 +436,32 @@ func _voice(pos) -> AudioStreamPlayer:
 	if p == null:
 		p = players[next]
 		next = (next + 1) % POOL
-	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
+	p.bus = _bus_for(sname, pos)
 	return p
+
+## The bus a pool sound plays on: a voice on Voice (near or far), an Interface sound with no position on
+## UI, the rest on SFX, or the muffled SFXFar past FAR.
+func _bus_for(sname: String, pos) -> String:
+	var own: String = sound_bus.get(sname, "")
+	if own == "Voice" or sname.begins_with("v_"):
+		return "Voice"
+	if own == "UI" and pos == null:
+		return "UI"
+	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
+	return "SFXFar" if far else "SFX"
+
+## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
+const SAMPLE := "ping"
+func play_sample(bus_name: String) -> void:
+	if not streams.has(SAMPLE) and not _lazy(SAMPLE):
+		return
+	var p := _voice(null)
+	var st = streams[SAMPLE]
+	p.stream = _once(st[0] if st is Array else st)
+	p.bus = bus_name
+	p.volume_db = 0.0
+	p.pitch_scale = 1.0
+	p.play()
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
@@ -449,7 +485,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	var p := _voice(pos)
+	var p := _voice(pos, sname)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
