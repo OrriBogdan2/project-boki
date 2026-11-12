@@ -43,6 +43,9 @@ func _react(main: Node, id: String) -> void:
 	var m := await _model(main, id)
 	var sync := m.get_node("Warden/Sync")
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:     # (a Hero with no clip table yet: Gil)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var st: Dictionary = clips.d["states"]
 	var hd: Dictionary = st["hit"]

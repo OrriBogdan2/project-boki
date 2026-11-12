@@ -1,8 +1,8 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
-## attacks at the match camera (--close: a side view at hip height, to read the arms and feet; --fov=<deg> widens or
-## tightens it, a 2 m Hunter needs about 26), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its
-## before/after strips.
+## attacks at the match camera (--close: a side view at hip height, to read the arms and feet; it pulls back with
+## the Hunter's height, --fov=<deg> widens or tightens it), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md)
+## and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced). --react instead strips how he takes a hit (docs/art/REACT_AUDIT.md): hit_f and hit_b as the game hands
@@ -19,6 +19,10 @@ const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
 const POST_COUNT := 14
 const DT := 1.0 / 30.0
+const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
+
+var close := false
+var close_fov := 14.0       # deg: the --close camera's field of view (--fov=)
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -35,8 +39,6 @@ func run(main: Node) -> void:
 	var out := ""
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
-	var close := false
-	var close_fov := 14.0
 	for a in OS.get_cmdline_user_args():
 		if a == "--react": react = true
 		if a.begins_with("--fov="): close_fov = float(a.substr(6))
@@ -95,6 +97,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
+	if close:
+		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
 	if react:
 		await _react(model, sync, clips, dir, frames)
 		model.queue_free()
@@ -146,6 +150,14 @@ func _knock(model: Node3D, sync: Node, dir: String, vel: Vector3, frames: int) -
 		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
+
+## The side view at the Hunter's own scale: the head's height over CLOSE_REF_H scales the camera out and up.
+func _close_cam(sk: Skeleton3D) -> void:
+	var head := sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin.y
+	head *= sk.global_transform.basis.get_scale().y
+	var k := maxf(head / CLOSE_REF_H, 1.0)
+	cam.position = Vector3(0, 1.0 * k, 12.0 * k)
+	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
 func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
