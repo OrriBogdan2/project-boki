@@ -1,5 +1,5 @@
 {
-	"doc": "Grimble's hand-keyed clips (art/wardens/dredge/dredge.glb; id and files stay dredge) and which game state plays which (scripts/heroes/warden_clips.gd).",
+	"doc": "Grimble's hand-keyed clips (art/wardens/dredge/dredge.glb; id and files stay dredge) and which game state plays which (scripts/heroes/warden_clips.gd). \"dash\": true marks the moves that are his dash (the barge on the ground and in the air) for --anim-coverage-check.",
 	"skinned_weapon": true,
 	"extra_bones": {
 		"foot.L": "shin.L",
@@ -86,10 +86,10 @@
 			"clip": "quake"
 		},
 		"dr_lunge": {
-			"clip": "lunge"
+			"clip": "barge", "dash": true
 		},
 		"dr_pounce": {
-			"clip": "pounce"
+			"clip": "barge_air", "dash": true
 		},
 		"dr_flex": {
 			"clip": "flex",

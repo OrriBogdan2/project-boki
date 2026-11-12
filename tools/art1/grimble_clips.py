@@ -1,7 +1,7 @@
 """ART-1 Grimble's animation set (keyed as targets, solved on tools/art1/posekit.py). Times are the kit's: scripts/match/kmoves_pair.gd
 and content/archetypes/dredge.json. Personality: greedy, delighted, twitchy; a long-limbed scuttle, the hoard slung after him, a
 grin that never leaves. The hook is his right hand; the left is the scrap fist; the blunderbuss swivels on his hip and the fist
-slaps onto its stock to fire. Dashes are the junk ball. He rears up on one foot to gloat.
+slaps onto its stock to fire. The dash is a shoulder barge; the air dive is the junk ball. He rears up on one foot to gloat.
 Run: blender -b --python tools/art1/grimble_clips.py -- <grimble_art1.blend> <out.glb> [clip,clip]"""
 import math
 import os
@@ -278,17 +278,23 @@ def clips():
     o.append(C("dive", 0.3, [(0.0, END), (0.12, dv, "out"), (0.3, dict(dv, pel=(0.01, 0.0, 0.115)))]))
     o.append(C("quake", 0.75, [(0.0, dict(hit, LP=(-0.06, 0.62, 0.22), pel=(0, 0.10, -0.32))), (0.3, dict(hit, pel=(0, 0.10, -0.26), LP=(-0.1, 0.60, 0.26), hd=(-0.05, 0, 0)), "out"), (0.55, dict(hit, pel=(0, 0.06, -0.17), prt=(0.32, 0, 0), tor=(0.34, 0, 0), LP=(-0.26, 0.42, 0.46))), (0.75, END)]))
 
-    # the junk ball: he folds up inside it (a dash is 0.16 s of travel, the clip tucks fast and opens as he stops). Hands and feet in the root's frame
+    # the barge (dash: 3.2 m in 0.16 s, the next one 0.22 s on): dropped onto the back foot, he drives off it with the scrap-fist shoulder
+    # first, the hook and gun trailing, head down; he plants wide on the stop (0.16) with all of it, the hoard swung on past him, and is
+    # back up by 0.38 for the next one (briefs/hero-ref/dredge.md: pitched forward, gun trailing, upright with almost no skid)
+    bg0 = {"pel": (0, -0.04, -0.16), "prt": (0.30, -0.20, 0), "tor": (0.50, -0.40, 0), "hed": (-0.30, 0.30, 0), "LP": (-0.16, 0.30, 0.92), "Lh": (0.2, 0, 0), "fing": 1.0,
+           "G": (0.42, -0.20, 0.66), "BE": be(-160, -20, FLAT), "FL": (-0.20, 0.30, A_Z), "FR": (0.20, -0.36, A_Z), "FRp": 0.4, "hd": (0.10, 0, 0), "brow": 1.0, "lid": -0.15, "jaw": 0.4, "gw": 0.0}
+    bg1 = dict(bg0, pel=(0, 0.06, -0.12), prt=(0.45, -0.30, 0), tor=(0.62, -0.50, -0.05), LP=(-0.10, 0.42, 1.00), G=(0.44, -0.32, 0.70),
+               FL=(-0.18, 0.42, A_Z + 0.10), FLp=-0.3, FR=(0.22, -0.46, A_Z + 0.04), FRp=0.7, hd=(0.20, 0, 0), jaw=0.7)
+    bg2 = dict(bg1, pel=(0, 0.10, -0.30), prt=(0.55, -0.25, 0), tor=(0.50, -0.40, 0), hed=(-0.50, 0.30, 0), LP=(-0.14, 0.48, 0.86),
+               FL=(-0.26, 0.36, A_Z), FLp=0.0, FR=(0.26, -0.30, A_Z), FRp=0.0, hd=(-0.22, 0, 0.04), skirt=0.5, jaw=0.9)
+    bg3 = dict(bg2, pel=(0, 0.06, -0.24), prt=(0.36, -0.12, 0), tor=(0.42, -0.22, 0), hed=(-0.42, 0.14, 0), hd=(0.08, 0, -0.02), skirt=0.2, jaw=0.5)
+    o.append(C("barge", 0.38, [(0.0, END), (0.03, bg0, "out"), (0.10, bg1, "lin"), (0.16, bg2, "out"), (0.24, bg3), (0.38, END)]))
+    # the junk ball, the air dive: he folds up inside it and only the ball turns (the root never spins, so a crossfade can't swing him off
+    # his line). Hands and feet in the root's frame
     tuck = {"rel": 1.0, "prt": (0.0, 0, 0), "tor": (0.85, 0, 0), "hed": (-0.42, 0, 0), "pel": (0, 0.0, -0.14), "G": (0.15, 0.24, 0.74), "BE": be(-5, -40, FLAT), "LP": (-0.15, 0.24, 0.74), "Lh": (0.2, 0, 0), "fing": 1.0,
             "FL": (-0.12, 0.20, 0.44), "FR": (0.12, 0.20, 0.44), "FLp": -0.5, "FRp": -0.5, "hs": 0.42, "hl": (0, 0.18, -0.10), "hd": (0.0, 0, 0), "bs": 4.2, "bl": 1.0, "jaw": 0.9, "lid": -0.3, "brow": 0.8, "gw": 0.0}
-    # (only the ball turns: he is folded still inside it, the root never spins, so a crossfade can't swing him off his line)
-    t0 = dict(tuck, prt=(0.45, 0, 0), spin=0.3)
-    t1 = dict(t0, spin=2 * math.tau)
-    t2 = dict(t0, spin=2.8 * math.tau)
     start = dict(END, hs=0.8, bs=2.0, bl=0.6, rel=0.5, pel=(0, 0, -0.12), tor=(0.5, 0, 0))
-    o.append(C("lunge", 0.38, [(0.0, start), (0.04, t0, "out"), (0.18, t1, "lin"), (0.30, t2, "out"), (0.38, dict(END, spin=3 * math.tau))]))
-    # the pounce: the same ball in the air, a slower turn
-    a0 = dict(t0, pel=(0, 0, 0.0))
+    a0 = dict(tuck, prt=(0.45, 0, 0), spin=0.3, pel=(0, 0, 0.0))
     o.append(C("pounce", 0.38, [(0.0, start), (0.05, a0, "out"), (0.24, dict(a0, spin=1.5 * math.tau), "lin"), (0.38, dict(END, spin=2 * math.tau))]))
 
     # the Salvage flex: rocks his whole pile and cackles
@@ -308,6 +314,13 @@ def clips():
     o.append(C("jump", 0.55, [(0.0, jm), (0.1, ju, "out"), (0.4, dict(ju, hd=(0.08, 0, 0))), (0.55, dict(ju, FL=(-0.15, 0.12, 0.30), FR=(0.16, -0.04, 0.26)))]))
     fa = dict(ju, tor=(0.12, 0, 0), hd=(0.12, 0, 0), LP=(-0.46, 0.12, 1.02), G=(0.50, 0.10, 1.02), FL=(-0.15, 0.08, 0.27), FR=(0.16, -0.08, 0.24), FLp=0.3, FRp=0.3, jaw=0.2)
     o.append(C("fall", 0.6, [(0.0, fa), (0.3, dict(fa, LP=(-0.47, 0.12, 1.05), G=(0.50, 0.10, 1.05))), (0.6, fa)]))
+    # the air barge (3.7 m in 0.18 s, felt): the same shoulder first, flattened out with the legs flung up behind; he brakes upright, the
+    # hoard swinging on, and drops into the fall
+    ba0 = dict(bg0, pel=(0, 0, -0.02), prt=(0.50, -0.25, 0), tor=(0.55, -0.45, 0), LP=(-0.12, 0.40, 1.00), G=(0.42, -0.30, 0.80), BE=be(-160, -10, FLAT),
+               FL=(-0.16, -0.10, 0.40), FR=(0.18, -0.30, 0.46), FLp=0.6, FRp=0.8, hd=(0.16, 0, 0), jaw=0.6)
+    ba1 = dict(ba0, prt=(0.62, -0.30, 0), tor=(0.60, -0.50, -0.06), LP=(-0.08, 0.48, 1.02), hd=(0.22, 0, 0))
+    ba2 = dict(ba1, prt=(0.20, -0.10, 0), tor=(0.20, -0.10, 0), hed=(-0.30, 0.10, 0), FL=(-0.15, 0.10, 0.30), FR=(0.16, -0.06, 0.28), FLp=0.2, FRp=0.3, hd=(-0.20, 0, 0.04), jaw=0.8)
+    o.append(C("barge_air", 0.4, [(0.0, END), (0.04, ba0, "out"), (0.18, ba1, "lin"), (0.28, ba2, "out"), (0.4, fa)]))
     ld = {"pel": (0, 0.03, -0.31), "prt": (0.46, 0, 0), "tor": (0.42, 0, 0), "hed": (-0.62, 0, 0), "LP": (-0.36, 0.34, 0.26), "G": (0.42, 0.36, 0.34), "hd": (0.20, 0, 0), "FL": (-0.20, 0.20, A_Z), "FR": (0.22, -0.14, A_Z), "FLp": 0, "FRp": 0, "jaw": 0.3}
     o.append(C("land", 0.4, [(0.0, ld), (0.14, dict(ld, pel=(0, 0.03, -0.33), hd=(-0.10, 0, 0)), "out"), (0.4, END)]))
     # the glide: both arms up on the glider's grips, the pile hanging under him

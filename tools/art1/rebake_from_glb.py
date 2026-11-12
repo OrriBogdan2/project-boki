@@ -1,7 +1,7 @@
 """Re-keys clips of a shipped Warden on the game .glb itself, with no .blend: imports the .glb (bone axes as exported, the same way v95_swap.py does),
-drops its actions and runs the hero's clip script on that armature (the keys in vex_clips.py / ostra_clips.py), writing a .glb with only the clips asked for.
+drops its actions and runs the hero's clip script on that armature (the keys in vex_clips.py / ostra_clips.py / grimble_clips.py), writing a .glb with only the clips asked for.
 Unchanged keys come back to within 1e-6, so a re-timed clip is the keys and nothing else. Then copy the clip onto the game .glb:
-  blender -b --python tools/art1/rebake_from_glb.py -- <vex|ostra> <game.glb> <out.glb> <clip,clip>
+  blender -b --python tools/art1/rebake_from_glb.py -- <vex|ostra|dredge> <game.glb> <out.glb> <clip,clip>
   python3 tools/art1/glb_add_clips.py <game.glb> <out.glb> =<clip>[,=<clip>] [new.glb]   (a key without "=" is a prefix: it would also replace swap_aim for swap)
 (A track that never moves is left out of the baked clip: the bone stays at its rest pose, as in the clips already shipped.)"""
 import os
@@ -9,7 +9,7 @@ import sys
 import bpy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCRIPTS = {"vex": "vex_clips.py", "ostra": "ostra_anim.py"}
+SCRIPTS = {"vex": "vex_clips.py", "ostra": "ostra_anim.py", "dredge": "grimble_clips.py"}
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     bpy.context.scene.frame_start, bpy.context.scene.frame_end = 0, 600
     path = os.path.join(HERE, SCRIPTS[hero])
     src = open(path).read()
-    if hero == "vex":                                 # (the script opens its own .blend; the armature is already here)
+    if hero in ("vex", "dredge"):                     # (the script opens its own .blend; the armature is already here)
         sys.argv = ["blender", "--", glb, out, clips]
         src = src.replace("bpy.ops.wm.open_mainfile(filepath=a[0])", "pass")
     else:                                             # (reads the armature "Armature"; --export writes the .glb)
