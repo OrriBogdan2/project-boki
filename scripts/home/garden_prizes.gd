@@ -1,6 +1,6 @@
 class_name GardenPrizes
 extends RefCounted
-## Prizes and cups for the four garden games (content/rules/garden_prizes.json, GARDEN_MODERN.md 4.4).
+## Prizes and cups for the garden games (content/rules/garden_prizes.json, GARDEN_MODERN.md 4.4).
 ## A win by the Boki you backed rolls the game's prize table, adds the day's first-win item, and moves that
 ## Boki along the weekly cup: Sprout, Bloom, Crown, three wins in a row against rivals the data calls stronger.
 ## The Crown gives the game's Cup Ribbon (rec.ribbons) and the cup prize, once a game a week for each Boki.
@@ -68,7 +68,8 @@ static func stage(rec: Dictionary, id: String) -> int:
 static func _runs(id: String) -> Dictionary:
 	return Save.d.get_or_add("cups", {}).get_or_add(id, {})
 
-static func _bank(e: Dictionary) -> void:
+## Banks one prize entry: an item to the garden bag, a snack to the pantry.
+static func bank(e: Dictionary) -> void:
 	if String(e["kind"]) == "snack":
 		var crops: Dictionary = Save.d["crops"]
 		crops[e["id"]] = int(crops.get(e["id"], 0)) + 1
@@ -98,7 +99,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 		out["first"] = true
 		got.append({"kind": "item", "id": game(id)["first"]})
 	for e in got:
-		_bank(e)
+		bank(e)
 	out["items"] = got
 	_cup(out, mine, foe, now)
 	return out
@@ -131,7 +132,7 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	out["crown"] = true
 	out["ribbon"] = true
 	var prize := {"kind": "item", "id": g["cup_prize"]}
-	_bank(prize)
+	bank(prize)
 	(out["items"] as Array).append(prize)
 	Save.remember(mine, "cup", "won the %s Crown cup and wears the %s" % [g["name"], g["ribbon"]], 2.0)
 

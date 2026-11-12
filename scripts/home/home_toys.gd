@@ -5,11 +5,13 @@ extends RefCounted
 ## farm_build.json base_mode is on.
 ## An idle Boki with room to be happier picks a toy by its lean and traits (a Flying or Rock Boki likes
 ## the post, Water and Ice the tub, Fire the stone, Grass and Bug the patch), walks to it, plays, and gains
-## the toy's stat through Care.add_stat.
+## the toy's stat through Care.add_stat. Its most-used toy becomes its favourite, picked first (FavToy).
 ## A second Boki may join the first; two hot tempers squabble and the newcomer huffs off.
 ## k["play"] = {u: toy uid, phase: "go" | "play", t: seconds}. home.gd calls pick, step and pose.
 
 const SPOT_R := 1.15          # tiles from a toy's centre to where a Boki stands
+const SPOT_GAP := 0.9         # m: a toy's standing place keeps this far from a Boki lying down
+const CROWD := 1.9            # m: a toy with a Boki lying this close to it is left alone (it would push through them)
 const ARRIVE := 0.7           # tiles: close enough to start
 const HUFF_SECS := 1.5        # the growl after a squabble
 const BALL_R := 0.28          # the ball's resting height (its radius)
@@ -60,19 +62,21 @@ func players(u: int) -> Array:
 	return h.kins.filter(func(o): return o.has("play") and int(o["play"]["u"]) == u)
 
 ## The element this Boki leans to: its strongest lean (Evo.lean), else its species' element.
-func _lean(rec: Dictionary) -> String:
+static func lean_of(rec: Dictionary) -> String:
 	var top := String(Evo.lean(rec)[0])
 	if top == "":
 		top = BokiLines.element_of(String(rec.get("species", "")))
 	return top.to_lower()
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
-func weight(rec: Dictionary, toy_id: String) -> float:
+static func weight(rec: Dictionary, toy_id: String) -> float:
 	var R := rules()
 	var def: Dictionary = R["toys"][toy_id]
 	var w := 1.0 + float(R["trait_weight"]) * float(rec["traits"].get(String(def["trait"]), 0.5))
-	if (def["likes"] as Array).has(_lean(rec)):
+	if (def["likes"] as Array).has(lean_of(rec)):
 		w += float(R["like_weight"])
+	if FavToy.of(rec) == toy_id:
+		w *= float(R["fav_weight"])
 	return w
 
 ## An idle Boki looks for a toy: true when it has set off for one. want: it is bored or curious (BaseLife.choose),
@@ -91,7 +95,8 @@ func pick(k: Dictionary, want := false) -> bool:
 	var total := 0.0
 	for t in toys():
 		var tp: Vector3 = t["pos"]
-		if h.world.island_of(tp.x, tp.z) != here or players(int(t["u"])).size() >= int(R["max_players"]):
+		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
+		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp):
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
 		weights[int(t["u"])] = weight(rec, String(t["id"])) * company
@@ -123,12 +128,28 @@ func _busy(k: Dictionary) -> bool:
 			or Care.need(rec, "food") < 30.0 or Care.need(rec, "energy") < 22.0
 
 func _spot(k: Dictionary, t: Dictionary) -> Vector3:
-	var tp: Vector3 = t["pos"]
-	var a := 0.8 + float(k["play"]["slot"]) * PI
+	return stand(k, t["pos"], 0.8 + float(k["play"]["slot"]) * PI)
+
+## A place to stand beside the toy at `tp`, on its side `a` (rad): open ground, clear of any Boki parked there.
+func stand(k: Dictionary, tp: Vector3, a: float) -> Vector3:
 	var p := tp + Vector3(cos(a), 0, sin(a)) * SPOT_R
-	if h.world.is_void(p.x, p.z) or h.world.occupy(p.x, p.z, 0.3, 0.0, true) != 0.0:
-		return h.world.free_spot_near(p, [], 1.0)
+	var parked := parked_at(k, KinAvoid.parked)
+	if k.has("play"):
+		for o in players(int(k["play"]["u"])):
+			if o != k:
+				parked.append(o["goal"])      # the place a Boki on its way to this toy has taken
+	var taken := parked.any(func(q): return Vector2(q.x - p.x, q.z - p.z).length() < SPOT_GAP)
+	if taken or h.world.is_void(p.x, p.z) or h.world.occupy(p.x, p.z, 0.3, 0.0, true) != 0.0:
+		return h.world.free_spot_near(p, parked, SPOT_GAP)
 	return p
+
+## Where the Boki (other than k) that `stays` (KinAvoid.lying or .parked) are.
+func parked_at(k: Dictionary, stays: Callable) -> Array:
+	return h.kins.filter(func(o): return o != k and stays.call(o)).map(func(o): return o["pos"])
+
+## Is a Boki lying right by the toy at `tp`, so playing there would mean pushing through it?
+func crowded(k: Dictionary, tp: Vector3) -> bool:
+	return parked_at(k, KinAvoid.lying).any(func(q): return Vector2(q.x - tp.x, q.z - tp.z).length() < CROWD)
 
 ## Per frame, from home.gd's _care_step: walk to the toy, play, finish. True while it owns the Boki.
 func step(k: Dictionary, d: float) -> bool:
@@ -136,7 +157,8 @@ func step(k: Dictionary, d: float) -> bool:
 		return false
 	var p: Dictionary = k["play"]
 	var t := _toy(int(p["u"]))
-	if t.is_empty() or not FarmUnlocks.base_mode() or _busy(k):
+	var blocked: bool = p["phase"] == "go" and not t.is_empty() and (crowded(k, t["pos"]) or KinAvoid.shut(k))
+	if t.is_empty() or not FarmUnlocks.base_mode() or _busy(k) or blocked:
 		_stop(k)
 		return false
 	var pos: Vector3 = k["pos"]
@@ -175,6 +197,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 	FarmTutorial.event("play")
 	var secs: Array = R["play_secs"]
 	p["t"] = randf_range(float(secs[0]), float(secs[1]))
+	p["secs"] = p["t"]
 	if others.size() >= 1:
 		h._emote(k, "★", true)
 		_bond(k, others[0], "bond_share")      # sharing one builds friendship
@@ -192,13 +215,15 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var def: Dictionary = R["toys"][t["id"]]
 	var stat := String(def["stat"])
-	var gained := Care.add_stat(rec, stat, int(R["stat_gain"]))
+	var gained := Care.add_stat(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])))
+	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])
 		Save.add_item(item, 1)
 		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
+	GardenFirstDay.mark("toy", h)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)

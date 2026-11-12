@@ -227,6 +227,8 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	var bm := birth_short(rec)
 	if bm != "": _row(parent, "Birthmark", bm, UI.INK, null, "burst")
 	_row(parent, "Food", food_short(rec), UI.INK, null, "tonic")
+	var toy := FavToy.of(rec)
+	if toy != "": _row(parent, "Fav toy", String(HomeLayout.CATALOG[toy]["name"]), UI.INK, null, toy)
 	PrizeBoard.add_ribbons(parent, rec)
 
 ## Where it came from (Save.register), one short line each.
@@ -263,8 +265,8 @@ static func block(rec: Dictionary, parent: Control, compact := false) -> void:
 		ol.custom_minimum_size.x = 260
 		parent.add_child(ol)
 		return
-	parent.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Who it is"))
 	looks(rec, parent)
 	parent.add_child(UI.spacer(4))
-	parent.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Where it's from"))
 	history(rec, parent)

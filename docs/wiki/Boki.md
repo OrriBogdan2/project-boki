@@ -24,7 +24,7 @@ You bring **one Boki** per expedition. It walks beside you and fights with you; 
   landing staggers whatever it lands on. With it away, tap to **Call back**: it leaps to your side and hits
   anything along the path (only within a set range; farther out it comes back on its own). **Hold G** for the
   order wheel and flick toward one: **Chase** (go for what is under the cursor), **Guard** (hold this spot),
-  **Return** (back onto you: perch, or you ride it) or **Follow** (the default: beside you). A Boki you are
+  **Return** (back onto you: shoulder or pack; a big Boki guards at your side, never under you) or **Follow** (the default: beside you). A Boki you are
   carrying only gives its carried bonuses on **Return**, so choose between a fighting partner and a perk.
   It never leaves you behind: if it is stuck or too far it leaps back to your side, and on a glide or a
   long drop it hops onto you and hops off again once you are steady. In a fight it never turns down an
