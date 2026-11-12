@@ -26,7 +26,10 @@ cuts are the source's seconds (our base cooldowns equal the source's tier-I ones
 
 ## Design
 Weight Medium (145 hp), floats: body 0.9 (content "body"), hovering about 0.3m over his ground point with a slow
-+-0.03m bob at 0.6 Hz, legs at a tenth of a step (no step cycle, no footsteps), the hem trailing. The hover is visual
++-0.03m bob at 0.6 Hz, legs at a tenth of a step (no step cycle, no footsteps), the hem trailing. Silent float: source Void's passive "floats: no
+footstep noise" [D] (supervive_kits.md) and no footsteps in the footage (briefs/hero-ref/ostra.md, Sound); his gait
+(KMovesStone.HOVER_GAIT 0.1) keeps the Hunter footstep emitter quiet for him and for a Motley another game moves;
+--ostra-combo-check counts zero step sounds over 3 s of floating walk, both ways, against a footed Hunter that steps. The hover is visual
 only: his hitbox and ring stay on the ground, so it never dodges low shots. Fixed weapon Tether Lantern (`content/weapons/tether_lantern.json`): a pale crook with a curled
 hook, a brass-caged lantern with a teal flame round a void-glass core, two violet shards beside it (hero_arms.gd). Palette
 pearl and sea teal `#7fe0d0`, with void violet `#b06bff` for what he throws and pink `#ff4fd8` for Swollen. Payoff COLLAPSE.
