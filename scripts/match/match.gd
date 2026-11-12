@@ -5691,6 +5691,8 @@ func _tips() -> void:
 		return
 	ult_hint.tick(self)
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	var ways := WaysHints.due(self)
+	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])

@@ -91,3 +91,8 @@ outcome are the same for both seats: any Heart exit is an extraction, so the hau
 says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
 Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
 the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
+## First-time hints (a new player's first match)
+`WaysHints` (scripts/match/ways_hints.gd) gives the three moments that teach the mode one plain line each in the
+message lane, the shortened tutorials' hint pattern (Match._tip: once per save in Save.d["tutorial"] as
+"ways_<id>", tips setting, no tutorial step, nothing blocks): the Blight's tide first closes, a quest seat first
+opens, the Heart wakes. Texts: heart.json "hints". No save-format or Net change. Check: --ways-hints-check.
