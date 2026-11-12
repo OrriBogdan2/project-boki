@@ -241,7 +241,7 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | | R | cone, fixed | fixed | match |
 | Vex (venator) | LMB | full, past the cursor | full | match |
 | | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
-| | E Longneedle | fixed long lane | full, 18 m | match |
+| | E Palm Lance | fixed long lane | full, 18 m | match |
 | | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
 | Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
 | | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |

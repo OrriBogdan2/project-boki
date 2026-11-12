@@ -190,17 +190,18 @@ re-rendered with it so far (xvfb opengl3 on rpc3; GPU job 20261112-030437-07461 
 [gunslinger.mp4](gunslinger.mp4)
 
 Still differs:
-- RMB Burr Charge: a launcher shot on the press along a fixed 10.5 m lane, no hold lane, no throw (owner item
-  112); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
+- RMB Coin Blast (was Burr Charge): a coin flicked from her cyborg hand on the press along a fixed 10.5 m lane, no
+  hold lane (owner item 112, 11-08); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
   still sticks and blows the cone (the "always procs in the air" bug); `ext/vex-rmb-1111` makes it a dud.
-- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Longneedle 11.5 vs 12 / 10,
+- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Palm Lance 11.5 vs 12 / 10,
   Cinderfall 42 vs 55 (gap 10, owner call).
 - Cinderfall's burn lasts 3 s; the footage's zone ticks about 4 s [F 0245].
-- The Coin Blast rename and coin look (DECISIONS 11-08) are not built.
+- The Coin Blast and Palm Lance names, the coin and the palm origin (DECISIONS 11-08) are built on
+  `ext/vex-coin-palm-1108`; the beam and the coin's trail are still ember (the green-fire recolour is `ext/vex-greenfire-1108`).
 - Her light is ember orange (our palette); the source's is green and cyan with a purple slide trail [F 0118].
 
 Seen in the reel: the rifle hits the dummy from 7 m; RMB is a red tracer to the dummy, which reads DAZED with a gold
-pip; Longneedle is a long orange line through the rock and past the frame, like the footage's beam through terrain
+pip; Palm Lance is a long orange line through the rock and past the frame, like the footage's beam through terrain
 [F 0182] but thin, with none of its green-white thickness or smoke ring [F 0170]; Cinderfall shoots a light column
 up, then a ticked orange disc and a burning patch with SLOWED, the footage's beats [F 0197, 0203]; the slide shows
 a pale ring at her feet for a few frames at the start, which the owner's "no rings on dashes" rule (gunslinger.md row 10)
