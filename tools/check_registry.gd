@@ -257,6 +257,7 @@ const CHECKS := {
 	# the per-Hunter parity reels (docs/parity_reel)
 	"--parity-reel": ["res://tools/parity_reel.gd", "parity_reel", null],
 	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],      # every look, side by side
+	"--ring-shots": ["res://tools/ring_shots.gd", "ring_shots", null],      # Fx.ring bursts and team markers
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],      # Brimseed growth
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
