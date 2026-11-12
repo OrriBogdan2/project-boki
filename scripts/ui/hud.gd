@@ -565,21 +565,7 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
-	# top right, as in Supervive: squads left, your kills, your knocks, your gems
-	var teams := {}
-	for h in m.hunters:
-		if not h.out and not h.extracted: teams[h.team] = true
-	var cells := [["paw", str(teams.size()), INK], ["knock", str(m.player.kills if m.player else 0), Color("ff9a8a")],
-		["burst", str(m.player.knocks if m.player else 0), Color("ffd27a")], ["gem", str(m.player.gems if m.player else 0), GOLD]]
-	var cw := 58.0
-	var cr := Rect2(Vector2(sz.x - 18 - cw * cells.size(), 18), Vector2(cw * cells.size(), 34))
-	_rounded(cr, Color(0.04, 0.05, 0.08, 0.86), 8)
-	for i in cells.size():
-		var cx := cr.position.x + cw * i
-		Icons.draw(c, String(cells[i][0]), Vector2(cx + 17, cr.position.y + 17), 7.0, Color(cells[i][2], 0.85))
-		_text(Vector2(cx + 28, cr.position.y + 23), String(cells[i][1]), 15, cells[i][2], big)
-		if i > 0: c.draw_line(Vector2(cx, cr.position.y + 7), Vector2(cx, cr.end.y - 7), Color(1, 1, 1, 0.1), 1.0)
-	feed_top = cr.end.y + 10.0
+	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
 func _draw_duel(sz: Vector2) -> void:

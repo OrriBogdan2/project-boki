@@ -46,7 +46,7 @@ as gems stays; a live h.rift_keys never reached the save. Outposts stay as they 
 until task 4 reworks them; alternative considered: switch off non-tutorial outposts now. --extract-check keeps
 only its uplink sections.
 
-UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out strip (four pips, Squads left) top centre
+UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out strip (four pips) top centre
 and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
 outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
 --ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.
