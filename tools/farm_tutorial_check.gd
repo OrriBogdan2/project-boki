@@ -439,6 +439,12 @@ func _tutorial_rules() -> void:
 			"the owner's decision: the farm tutorial is not skippable (a data option)")
 	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "free_order", "skippable"]:
 		ok(FarmTutorial.rules()["options"].has(key), "option '%s' is data" % key)
+	# the first construction site says once that Boki build it while you are home
+	Save.d = _new_save()
+	var first := FarmTutorial.site_hint()
+	ok(first.begins_with("Boki build it while you are home"), "the first site gets the home-only line")
+	ok(FarmTutorial.site_hint() == "", "the second site gets none")
+	ok(bool(Save.d["tutorial"]["site_hint"]), "the line is seen once per profile")
 	# a test save that says the first day is done never sees it
 	Save.d = _new_save()
 	Save.d["tutorial"]["day1_done"] = true
