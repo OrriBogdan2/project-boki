@@ -4,7 +4,10 @@ extends RefCounted
 ## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
 ## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
 ## Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals SimLod.THINK_FAR_K times less often;
-## a bot aboard the sky ship picks nothing.
+## a bot aboard the sky ship picks nothing. Poses (SimLod.pose_every): a rival far on screen at the widest match
+## view (the sky ship ride's camera) is posed every SimLod.POSE_FAR frames, off screen every POSE_OFF_SCREEN, hidden every POSE_UNSEEN, and
+## every frame once on the player's squad or in a fight with it; one that comes on screen is posed that frame, and
+## a Hero's clips and skeleton (WardenGlb.Sync) hold with it and catch up the time.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -28,6 +31,7 @@ func run(main_node: Node) -> void:
 	_mob_naps()
 	_far_bots()
 	_far_mobs()
+	await _pose_rates()
 	_shadows()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
@@ -73,6 +77,7 @@ func _far_bots() -> void:
 		return
 	b.teleport(m.player.pos + Vector3(SimLod.FAR_M + 15.0, 0, 0))
 	b.grounded = true
+	b.gliding = false      # (calm is on the ground: a glide carried over from the steps before would spoil it)
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
 	var every := SimLod.EVERY
@@ -109,6 +114,7 @@ func _far_bots() -> void:
 	ok(SimLod.think_k(m, b) == 1.0, "inside %.0f m it chooses at the usual pace" % SimLod.THINK_FAR_M)
 	b.teleport(m.player.pos + Vector3(SimLod.THINK_FAR_M + 15.0, 0, 0))
 	b.grounded = true
+	b.gliding = false
 	var far_m := SimLod.THINK_FAR_M
 	var k := SimLod.THINK_FAR_K
 	ok(SimLod.think_k(m, b) == k, "past %.0f m and calm it chooses %.0fx less often" % [far_m, k])
@@ -123,6 +129,81 @@ func _far_bots() -> void:
 	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
 	b.grounded = true
 	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")
+
+func _pose_rates() -> void:
+	var b: Hunter = null
+	for h in m.hunters:
+		if h.ctrl == "bot":
+			b = h
+	var P: Hunter = m.player
+	m.cam.focus = P.pos
+	m.cam.zoom = Match.RIDE_CAM_DIST / m.cam.dist
+	m.cam.chase = 1.0
+	m.cam._apply(Vector3.ZERO)
+	var far_at := Vector3.INF
+	for i in 36:
+		var at := P.pos + Vector3(SimLod.POSE_FAR_M + 4.0, 0, 0).rotated(Vector3.UP, TAU * i / 36.0)
+		if m.cam.on_screen(at):
+			far_at = at
+			break
+	ok(far_at != Vector3.INF, "setup: a spot past %.0f m on screen from the ride's camera" % SimLod.POSE_FAR_M)
+	b.ai["tgt"] = null
+	b.hurt_at = -9.0
+	b.teleport(P.pos + Vector3(4.0, 0, 0))
+	ok(SimLod.pose_every(m, b) == 1, "a rival near the player is posed every frame")
+	b.teleport(far_at)
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_FAR, "far on screen at the wide view: every %d frames" % SimLod.POSE_FAR)
+	b.unseen = true
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_UNSEEN, "hidden by sight: every %d frames" % SimLod.POSE_UNSEEN)
+	b.unseen = false
+	b.ai["tgt"] = P
+	ok(SimLod.pose_every(m, b) == 1, "far but after the player: every frame")
+	b.ai["tgt"] = null
+	b.last_hit_by = P
+	b.hurt_at = m.time
+	ok(SimLod.pose_every(m, b) == 1, "far but just hit by the player: every frame")
+	b.last_hit_by = null
+	b.hurt_at = -9.0
+	P.last_hit_by = b
+	P.hurt_at = m.time
+	await main.get_tree().process_frame      # (who hit the squad is gathered once a frame)
+	ok(SimLod.pose_every(m, b) == 1, "far but just hit the player: every frame")
+	P.hurt_at = -9.0
+	await main.get_tree().process_frame
+	var team := b.team
+	b.team = P.team
+	ok(SimLod.pose_every(m, b) == 1, "the player's squad: every frame")
+	b.team = team
+	b.teleport(P.pos + m.cam.global_transform.basis.x * 150.0)      # (square to the side of the view)
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_OFF_SCREEN, "off screen: every %d frames" % SimLod.POSE_OFF_SCREEN)
+	var held := false
+	for i in SimLod.POSE_UNSEEN:
+		b.render(Match.DT, 1.0)
+		held = held or bool(b.model.get_meta(WardenGlb.POSE_HELD, false))
+	ok(held, "off screen some frames are not posed")
+	b.render(Match.DT, 1.0)
+	if not b.model.get_meta(WardenGlb.POSE_HELD, false):
+		b.render(Match.DT, 1.0)      # (now one frame into its wait)
+	b.teleport(far_at)
+	b.render(Match.DT, 1.0)
+	ok(not b.model.get_meta(WardenGlb.POSE_HELD, false), "coming on screen it is posed that frame")
+	var sync: WardenGlb.Sync = null
+	for h in m.hunters:
+		if h.model.get_node_or_null("Warden/Sync"):
+			sync = h.model.get_node("Warden/Sync")
+	ok(sync != null, "setup: a Hero model")
+	if sync:
+		sync.held_dt = 0.0
+		sync.root.set_meta(WardenGlb.POSE_HELD, true)
+		sync._process(Match.DT)
+		sync._process(Match.DT)
+		var waited := sync.held_dt
+		sync.root.set_meta(WardenGlb.POSE_HELD, false)
+		sync._process(Match.DT)
+		ok(is_equal_approx(waited, 2.0 * Match.DT) and sync.held_dt == 0.0,
+			"a Hero's clips hold with the Hunter and catch up the time")
+	m.cam.zoom = 1.0
+	m.cam.chase = 0.0
 
 ## Plans n sim steps; returns [steps the bot ran, sim steps of time it was given].
 func _lod_steps(b: Hunter, n: int) -> Array:
