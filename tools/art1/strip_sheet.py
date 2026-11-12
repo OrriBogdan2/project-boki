@@ -1,5 +1,6 @@
 """Lays frame strips out as one review sheet: a row per strip, its label at the left, the frames in order.
 Run: python3 tools/art1/strip_sheet.py <out.jpg> <label>=<dir-of-fNNN.png> [<label>=<dir> ...] [--every=N] [--h=160]"""
+
 import glob
 import sys
 

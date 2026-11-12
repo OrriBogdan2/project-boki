@@ -5,6 +5,7 @@ Run: python3 tools/art1/glb_react.py <glb> <clip> scale <factor> [<bone>,...]
      python3 tools/art1/glb_react.py <glb> <clip> nudge <bone> <x,y,z deg> <peak_s> [<ease>]
        a rotation bump on the bone's own axes: nothing at 0, full at peak_s, back to nothing by the end along
        1 - u^ease (ease 2: a heavy body carries the hit a while; 0.5: a light one snaps back)"""
+
 import math
 import sys
 
@@ -15,15 +16,31 @@ from glb_retime import STEP, append, floats, slerp
 
 def _quat(deg):
     x, y, z = (math.radians(d) for d in deg)
-    cx, sx, cy, sy, cz, sz = math.cos(x / 2), math.sin(x / 2), math.cos(y / 2), math.sin(y / 2), math.cos(z / 2), math.sin(z / 2)
-    return [sx * cy * cz + cx * sy * sz, cx * sy * cz - sx * cy * sz, cx * cy * sz - sx * sy * cz, cx * cy * cz + sx * sy * sz]
+    cx, sx, cy, sy, cz, sz = (
+        math.cos(x / 2),
+        math.sin(x / 2),
+        math.cos(y / 2),
+        math.sin(y / 2),
+        math.cos(z / 2),
+        math.sin(z / 2),
+    )
+    return [
+        sx * cy * cz + cx * sy * sz,
+        cx * sy * cz - sx * cy * sz,
+        cx * cy * sz - sx * sy * cz,
+        cx * cy * cz + sx * sy * sz,
+    ]
 
 
 def _mul(a, b):
     ax, ay, az, aw = a
     bx, by, bz, bw = b
-    return [aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx,
-            aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz]
+    return [
+        aw * bx + ax * bw + ay * bz - az * by,
+        aw * by - ax * bz + ay * bw + az * bx,
+        aw * bz + ax * by - ay * bx + az * bw,
+        aw * bw - ax * bx - ay * by - az * bz,
+    ]
 
 
 def _tracks(j, b, anim, times):
@@ -43,7 +60,7 @@ def _tracks(j, b, anim, times):
             k = max(i for i in range(n_in) if ts[i] <= o + 1e-9)
             k1 = min(k + 1, n_in - 1)
             f = 0.0 if k1 == k else (o - ts[k]) / (ts[k1] - ts[k])
-            a, c = vs[k * w:k * w + w], vs[k1 * w:k1 * w + w]
+            a, c = vs[k * w : k * w + w], vs[k1 * w : k1 * w + w]
             vals.append(slerp(a, c, f) if w == 4 else [x + (y - x) * f for x, y in zip(a, c)])
         out.append((ch, names[ch["target"]["node"]], typ, vals))
     return out
@@ -78,6 +95,7 @@ def scale(factor, bones):
         v0 = vals[0]
         for i, v in enumerate(vals):
             vals[i] = slerp(v0, v, factor) if typ == "VEC4" else [a + (c - a) * factor for a, c in zip(v0, v)]
+
     return edit
 
 
@@ -88,6 +106,7 @@ def nudge(bone, deg, peak, ease):
         for i, t in enumerate(times):
             k = t / peak if t < peak else 1.0 - ((t - peak) / max(length - peak, 1e-6)) ** ease
             vals[i] = _mul(vals[i], _quat([d * max(k, 0.0) for d in deg]))
+
     return edit
 
 
@@ -97,7 +116,11 @@ if __name__ == "__main__":
     if op == "scale":
         edit = scale(float(sys.argv[4]), sys.argv[5].split(",") if len(sys.argv) > 5 else [])
     else:
-        edit = nudge(sys.argv[4], [float(x) for x in sys.argv[5].split(",")], float(sys.argv[6]),
-                     float(sys.argv[7]) if len(sys.argv) > 7 else 2.0)
+        edit = nudge(
+            sys.argv[4],
+            [float(x) for x in sys.argv[5].split(",")],
+            float(sys.argv[6]),
+            float(sys.argv[7]) if len(sys.argv) > 7 else 2.0,
+        )
     print(op, clip, "length", rekey(glb, binary, clip, edit))
     write(path, glb, binary)

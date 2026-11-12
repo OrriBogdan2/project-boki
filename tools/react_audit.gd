@@ -7,18 +7,19 @@ extends "res://tools/anim_audit.gd"
 ##  - through all of them: the weapon bone stays on its hand, no arm stands out in a T-pose.
 ## The gate: FAIL lines and exit code 1, except the pairs in OPEN (known, filed, not fixed yet).
 
-const READ_T := 0.1          # s: a hit must read by then (DECISIONS: getting hit reads instantly)
-const MIN_READ := 0.03       # share of the Hunter's height a point has moved at READ_T
-const MIN_SQUASH := 0.02     # share of height the hips drop in the first READ_T of the landing
-const MAX_SEAM := 0.02       # share of height between a loop's last and first frame
-const MAX_GRIP := 0.03       # m the weapon bone may leave its hand
-const SETTLED := 0.25        # the flinch is over when it is back under this share of its peak
+const READ_T := 0.1  # s: a hit must read by then (DECISIONS: getting hit reads instantly)
+const MIN_READ := 0.03  # share of the Hunter's height a point has moved at READ_T
+const MIN_SQUASH := 0.02  # share of height the hips drop in the first READ_T of the landing
+const MAX_SEAM := 0.02  # share of height between a loop's last and first frame
+const MAX_GRIP := 0.03  # m the weapon bone may leave its hand
+const SETTLED := 0.25  # the flinch is over when it is back under this share of its peak
 ## The settle time a body of each weight should show (s): light snaps back, heavy carries the hit, medium between.
 const WEIGHT := {"light": [0.14, 0.30], "medium": [0.18, 0.38], "heavy": [0.24, 0.45]}
 ## The bone that holds the weapon, where it is not skinned straight into the hand mesh.
 const WEAPON := {"bulwark": "x_weapon", "archer": "bow", "dredge": "hook", "mage": "rod.0", "gunslinger": "gatling"}
-const ELBOW_STRAIGHT := 0.35     # rad: the forearm runs on with the upper arm
-const OPEN := {}             # "id:test": why it still fails (docs/art/REACT_AUDIT.md)
+const ELBOW_STRAIGHT := 0.35  # rad: the forearm runs on with the upper arm
+const OPEN := {}  # "id:test": why it still fails (docs/art/REACT_AUDIT.md)
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -27,8 +28,10 @@ func run(main: Node) -> void:
 	var ids: Array = Arch.ORDER.duplicate()
 	var json := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--json="): json = a.substr(7)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--json="):
+			json = a.substr(7)
 	for id in ids:
 		await _react(main, String(id))
 	if json != "":
@@ -36,6 +39,7 @@ func run(main: Node) -> void:
 		f.store_string(JSON.stringify(rows, "\t"))
 	print("REACT_AUDIT_DONE ", rows.size(), " FAIL ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _react(main: Node, id: String) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -46,7 +50,7 @@ func _react(main: Node, id: String) -> void:
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
-	if clips == null:      # (no clips yet, as Gil: the rig's poses drive it)
+	if clips == null:  # (no clips yet, as Gil: the rig's poses drive it)
 		m.queue_free()
 		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -71,36 +75,67 @@ func _react(main: Node, id: String) -> void:
 	rows[id] = row
 	var f: Dictionary = row["hit_f"]
 	var b: Dictionary = row["hit_b"]
-	print("REACT %-10s %-6s hit_f read %.3f peak %.3f at %.2fs settles %.2fs away %.3f" % [
-			id, row["weight"], f["read"], f["peak"], f["peak_t"], f["settle_t"], f["away"]],
-			" | hit_b read %.3f settles %.2fs away %.3f" % [b["read"], b["settle_t"], b["away"]],
-			" | stun seam %.3f move %.3f | fall seam %.3f | land squash %.3f | grip %.3f m | T-pose %s" % [
-			row["stun"]["seam"], row["stun"]["move"], row["fall"]["seam"], row["land"]["squash"], row["grip_m"],
-			row["t_pose"] if row["t_pose"] != "" else "none"])
+	print(
+		(
+			"REACT %-10s %-6s hit_f read %.3f peak %.3f at %.2fs settles %.2fs away %.3f"
+			% [id, row["weight"], f["read"], f["peak"], f["peak_t"], f["settle_t"], f["away"]]
+		),
+		" | hit_b read %.3f settles %.2fs away %.3f" % [b["read"], b["settle_t"], b["away"]],
+		(
+			" | stun seam %.3f move %.3f | fall seam %.3f | land squash %.3f | grip %.3f m | T-pose %s"
+			% [
+				row["stun"]["seam"],
+				row["stun"]["move"],
+				row["fall"]["seam"],
+				row["land"]["squash"],
+				row["grip_m"],
+				row["t_pose"] if row["t_pose"] != "" else "none"
+			]
+		)
+	)
 	_gate(id, row)
 	m.free()
+
 
 var grip := {}
 var t_frames := 0
 var frames := 0
 
+
 func _gate(id: String, row: Dictionary) -> void:
 	var band: Array = WEIGHT[row["weight"]]
 	for side in ["hit_f", "hit_b"]:
 		var h: Dictionary = row[side]
-		_want(id, side + " reads", h["read"] >= MIN_READ,
-				"moved %.3f of his height at %.1f s (min %.3f)" % [h["read"], READ_T, MIN_READ])
-		_want(id, side + " weight", h["settle_t"] >= band[0] and h["settle_t"] <= band[1],
-				"a %s body settles in %.2f s (wanted %.2f to %.2f)" % [row["weight"], h["settle_t"], band[0], band[1]])
+		_want(
+			id,
+			side + " reads",
+			h["read"] >= MIN_READ,
+			"moved %.3f of his height at %.1f s (min %.3f)" % [h["read"], READ_T, MIN_READ]
+		)
+		_want(
+			id,
+			side + " weight",
+			h["settle_t"] >= band[0] and h["settle_t"] <= band[1],
+			"a %s body settles in %.2f s (wanted %.2f to %.2f)" % [row["weight"], h["settle_t"], band[0], band[1]]
+		)
 	for loop in ["stun", "fall"]:
 		var seam: float = row[loop]["seam"]
 		_want(id, loop + " seam", seam <= MAX_SEAM, "%.3f of his height (max %.3f)" % [seam, MAX_SEAM])
 	var squash: float = row["land"]["squash"]
-	_want(id, "land squash", squash >= MIN_SQUASH,
-			"hips drop %.3f of his height by %.1f s (min %.3f)" % [squash, READ_T, MIN_SQUASH])
-	_want(id, "grip", row["grip_m"] <= MAX_GRIP,
-			"the weapon bone leaves the hand by %.3f m (max %.3f)" % [row["grip_m"], MAX_GRIP])
+	_want(
+		id,
+		"land squash",
+		squash >= MIN_SQUASH,
+		"hips drop %.3f of his height by %.1f s (min %.3f)" % [squash, READ_T, MIN_SQUASH]
+	)
+	_want(
+		id,
+		"grip",
+		row["grip_m"] <= MAX_GRIP,
+		"the weapon bone leaves the hand by %.3f m (max %.3f)" % [row["grip_m"], MAX_GRIP]
+	)
 	_want(id, "T-pose", row["t_pose"] == "", "both arms stand out straight and sideways (%s)" % row["t_pose"])
+
 
 func _want(id: String, test: String, good: bool, what: String) -> void:
 	var key := "%s:%s" % [id, test]
@@ -112,6 +147,7 @@ func _want(id: String, test: String, good: bool, what: String) -> void:
 	elif not good:
 		print("FAIL %s %s: %s" % [id, test, what])
 		bad += 1
+
 
 ## One frame of the live hand-off: the pose, plus the grip and T-pose tallies.
 func _frame(sync: Node, sk: Skeleton3D, dt: float) -> Dictionary:
@@ -129,18 +165,22 @@ func _frame(sync: Node, sk: Skeleton3D, dt: float) -> Dictionary:
 			grip["worst"] = maxf(grip["worst"], rest.distance_to(now))
 	return p
 
+
 func _straight(p: Dictionary, side: String) -> bool:
 	var up: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
 	var fore: Vector3 = (p["hand." + side] as Vector3) - (p["forearm." + side] as Vector3)
 	return up.angle_to(fore) < ELBOW_STRAIGHT
+
 
 ## The share of the frames tallied since `_begin` that stood in a T-pose.
 func _begin() -> void:
 	t_frames = 0
 	frames = 0
 
+
 func _t_share() -> float:
 	return float(t_frames) / maxi(frames, 1)
+
 
 ## A hit while he stands, as the game plays it: hit_t runs 0 to dur. hit_dir is hunter.gd's, from the attacker to him:
 ## at face 0 he looks down -Z, so (0, 1) is a hit from the front and (0, -1) one from behind.
@@ -175,8 +215,15 @@ func _hit(m: Node3D, sync: Node, sk: Skeleton3D, hit_dir: Vector2, dur: float, h
 		if disp[i] < SETTLED * peak:
 			settle = i * DT
 			break
-	return {"read": disp[mini(int(READ_T / DT), disp.size() - 1)], "peak": peak, "peak_t": peak_i * DT,
-			"settle_t": settle, "away": away, "t_pose": _t_share()}
+	return {
+		"read": disp[mini(int(READ_T / DT), disp.size() - 1)],
+		"peak": peak,
+		"peak_t": peak_i * DT,
+		"settle_t": settle,
+		"away": away,
+		"t_pose": _t_share()
+	}
+
 
 ## A keyed loop: its seam (last frame against the first) and how far it moves at all.
 func _loop(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
@@ -185,8 +232,13 @@ func _loop(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: fl
 	var move := 0.0
 	for p in fr:
 		move = maxf(move, _dist(p, fr[0]))
-	return {"seam": _dist(fr[0], fr[-1]) / hgt, "move": move / hgt, "length": clips.lib.get_animation(clip).length,
-			"t_pose": _t_share()}
+	return {
+		"seam": _dist(fr[0], fr[-1]) / hgt,
+		"move": move / hgt,
+		"length": clips.lib.get_animation(clip).length,
+		"t_pose": _t_share()
+	}
+
 
 ## The landing, keyed: how far below his standing height the hips dip in the first READ_T (the squash that sells it).
 func _land(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float, idle_hips: float) -> Dictionary:
@@ -198,6 +250,7 @@ func _land(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: fl
 		if length * i / 23.0 <= READ_T + 0.001:
 			drop = maxf(drop, idle_hips - (fr[i]["hips"] as Vector3).y)
 	return {"squash": drop / hgt, "length": length, "t_pose": _t_share()}
+
 
 ## `_clip_frames` through `_frame`, so the grip and T-pose tallies see every sample.
 func _frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, n: int) -> Array:
