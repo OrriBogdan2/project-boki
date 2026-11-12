@@ -665,6 +665,8 @@ func _sync_water() -> void:
 	if sig == _water_sig:
 		return
 	_water_sig = sig
+	if h.wade.marks:
+		h.wade.marks.clip_to(wt)      # the Boki's water marks stay on the new water
 	for c in water_root.get_children():
 		c.queue_free()
 	if wt.is_empty():
@@ -672,8 +674,12 @@ func _sync_water() -> void:
 	var wm := HomeBuild.water_mat()
 	var fm := HomeBuild.foam_mat()
 	var rim := Models.toon(Color("8d8a86"))
-	var plane := PlaneMesh.new(); plane.size = Vector2(1.02, 1.02); plane.subdivide_width = 3; plane.subdivide_depth = 3
-	var strip := PlaneMesh.new(); strip.size = Vector2(1.0, 0.26)
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(1.02, 1.02)
+	plane.subdivide_width = 3
+	plane.subdivide_depth = 3
+	var strip := PlaneMesh.new()
+	strip.size = Vector2(1.0, 0.26)
 	var tiles: Array = []
 	var foam: Array = []
 	var stones: Array = []

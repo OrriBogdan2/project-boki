@@ -64,7 +64,11 @@ check: `--base-life-check`.
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
 - Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
-  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  (middle) of its dry pace, splashes going in and shakes off coming out. While in, it leaves marks
+  (`scripts/home/boki_wake.gd`, `shaders/boki_wake.gdshader`): a ripple ring under it (a wave every `ripple_secs`)
+  and a short V wake while it moves, sized by its body and faded out at the bank by a water-tile mask; every Boki's
+  marks are one MultiMesh (one draw call), made when the first Boki steps in and never on Very Low. Water, Ice and
+  Crystal
   types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
   `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
   The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
