@@ -38,6 +38,10 @@ const RIVAL := 1
 static func rules() -> Dictionary:
 	return Content.rules("base_echo")
 
+## A dancer's spin lasts two beats.
+static func spin_s() -> float:
+	return 2.0 * 60.0 / float(rules()["bpm"])
+
 static func _focus(rec: Dictionary) -> float:
 	return clampf(float(rec.get("stats", {}).get("focus", 0)) / 100.0, 0.0, 1.0)
 
@@ -316,6 +320,7 @@ var bed: AudioStreamPlayer = null
 var run: Run = null
 var dancers: Array = []        # the home's kin entries: you, the rival ({} solo)
 var hops: Array = []           # per side: [from, to, start s on the clock]
+var acts: Array = [["", 0.0], ["", 0.0]]   # per side: the rig clip it plays and the clock s it ends
 var clock := 0.0               # s since the bed started, from its playback position
 var bed_pos := 0.0             # the bed's last playback position (to count its loops)
 var bed_loops := 0
@@ -386,7 +391,7 @@ func use() -> void:
 	cued = -1
 	_sound_up()
 	_open_readout()
-	Sfx.play("garden_start", null, float(rules()["cue_db"]))
+	GardenSfx.cue("garden_go", null)
 
 ## The notes and the bed: generated once a dance; the bed's position is the dance's clock.
 func _sound_up() -> void:
@@ -474,20 +479,24 @@ func _show(e: Array, now: float) -> void:
 				h._emote(dancers[side], "!", true)
 				cue.hit(_stone_at(stone), _col(side, stone))
 		"hit":
+			GardenSfx.cue("echo_hit", null)
 			cue.hit(_stone_at(stone), _col(side, stone))
 			if not dancers[side].is_empty() and run.streak[side] % int(rules()["cheer_every"]) == 0:
+				GardenSfx.cue("echo_streak", null)
 				h._emote(dancers[side], "♪", true)
 		"kept":
 			cue.miss(_stone_at(stone))
 			h._emote(dancers[side], "♫", true)
+			_act(side, "spin", spin_s(), now)
 		"miss":
+			GardenSfx.cue("echo_miss", null)
 			cue.miss(_stone_at(stone))
-			Sfx.play("garden_miss", null, float(rules()["miss_db"]))
 			if not dancers[side].is_empty():
 				h._emote(dancers[side], "?", true)
 	lbl.text = _line()
 
 func _hop(side: int, stone: int, now: float) -> void:
+	_act(side, "stonehop", float(rules()["hop_s"]), now)
 	hops[side] = [_at(side, now), _stone_at(stone) if stone >= 0 else _spot(side), now]
 
 ## A stone's middle; the stones' middle for a beat you left empty in your lead.
@@ -513,6 +522,13 @@ func _beat_cue(now: float) -> void:
 	else:
 		cue.beat(_stone_at(run.pattern[i]), _col(RIVAL, run.pattern[i]))
 
+## The dancer plays a rig clip for `secs` (a spin is not cut short by a hop).
+func _act(side: int, clip: String, secs: float, now: float) -> void:
+	if dancers[side].is_empty() or (acts[side][0] == "spin" and now < float(acts[side][1])):
+		return
+	(dancers[side]["node"] as Node3D).set_meta("kact", clip)
+	acts[side] = [clip, now + secs]
+
 ## Where side waits off the stones.
 func _spot(side: int) -> Vector3:
 	return middle.position + Vector3(SIDE.x * (-1.0 if side == YOU else 1.0), 0, SIDE.z)
@@ -532,6 +548,8 @@ func _place(now: float) -> void:
 			continue
 		var n: Node3D = dancers[side]["node"]
 		n.position = _at(side, now)
+		if now >= float(acts[side][1]):
+			n.remove_meta("kact")
 		var look: Vector3 = middle.position - n.position
 		n.rotation.y = atan2(look.x, look.z)
 		dancers[side]["pos"] = n.position
@@ -586,13 +604,15 @@ func _end(finished: bool) -> void:
 		if not k.is_empty():
 			k["busy"] = false
 			k["t"] = float(rules()["rest_s"])
+			(k["node"] as Node3D).remove_meta("kact")
+	acts = [["", 0.0], ["", 0.0]]
 	bed.stop()
 	cue.clear()
 	cue = null
 	if is_instance_valid(readout):
 		readout.queue_free()
 	if finished:
-		Sfx.play("garden_finish", null, float(rules()["cue_db"]))
+		GardenSfx.cue("garden_finish", null)
 		_card(res)
 		if res.has("win"):
 			h._emote(h._kin_entry(res["win"]), "♥", true)

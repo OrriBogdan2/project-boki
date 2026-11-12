@@ -24,14 +24,27 @@ const JUMP_H := 0.6                          # m, the top of the jump's arc
 const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
 const TRACK_W := 1.4                         # m, the track's width (four lanes)
 const REACH := 1.6                           # m from the post to start a race
-const GARDEN_DB := -6.0                      # dB: the garden sounds sit under the Boki voices
-const SULK_DELAY := 0.7                      # s after the win sting until the loser huffs
 const STRETCH_COL := {
 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
 }
 
 static func rules() -> Dictionary:
 	return Content.rules("base_race")
+
+## Weeks since 1970 by the real clock.
+static func week_now() -> int:
+	return int(Time.get_unix_time_from_system() / float(rules()["week_s"]))
+
+## The weekly event format for a week number (default this week): {id, game, name, note, plus its tweak:
+## mult?, wobble?, swap?, night?, to_win?}.
+static func twist(week := -1) -> Dictionary:
+	var list: Array = rules()["twists"]
+	return list[(week if week >= 0 else week_now()) % list.size()]
+
+## This week's format when it is for this game ("dash", "seek", "volley"), else {}: the game plays as usual.
+static func tweak(game: String) -> Dictionary:
+	var f := twist()
+	return f if String(f["game"]) == game else {}
 
 static func lap() -> float:
 	var out := 0.0
@@ -54,14 +67,23 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
 static func winged(rec: Dictionary) -> bool:
 	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
 
+## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
+static func stretches(tw := {}) -> Array:
+	var out: Array = rules()["stretches"]
+	if tw.has("swap"):
+		out = out.duplicate(true)
+		out[int(tw["swap"]["at"])].merge(tw["swap"], true)
+	return out
+
 ## Its pace on stretch i before the wobble and your cheers (m/s).
-static func stretch_pace(rec: Dictionary, i: int) -> float:
+static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
 	var R := rules()
-	var s: Dictionary = R["stretches"][i]
+	var s: Dictionary = stretches(tw)[i]
 	var speed := float(rec.get("stats", {}).get("speed", 0))
 	var mood: Array = R["mood"]
 	var p := float(R["pace"]) * float(s["mult"]) * (1.0 + speed * float(R["speed_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
+	p *= float(tw.get("mult", {}).get(String(s["kind"]), 1.0))
 	var lean: Dictionary = rec.get("lean", {})
 	match String(s["kind"]):
 		"water":
@@ -73,11 +95,11 @@ static func stretch_pace(rec: Dictionary, i: int) -> float:
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
-static func expected_time(rec: Dictionary) -> float:
+static func expected_time(rec: Dictionary, tw := {}) -> float:
 	var out := 0.0
-	var st: Array = rules()["stretches"]
+	var st := stretches(tw)
 	for i in st.size():
-		out += float(st[i]["len"]) / stretch_pace(rec, i)
+		out += float(st[i]["len"]) / stretch_pace(rec, i, tw)
 	return out
 
 ## The race itself: runners' distance along the lap, stepped in time.
@@ -86,6 +108,7 @@ class Run:
 	var recs: Array
 	var backed := 0                 # index in recs: the Boki you cheer for
 	var rng: RandomNumberGenerator
+	var tw: Dictionary              # this week's format tweak for the Dash (empty when it is another game's)
 	var t := 0.0
 	var dist: Array = []            # m along the lap
 	var stretch: Array = []         # which stretch each one is on
@@ -98,8 +121,9 @@ class Run:
 	var bumped := {}                # "i-j-stretch": rivals already bumped there
 	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
 
-	func _init(runners: Array, back: int, r: RandomNumberGenerator) -> void:
+	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
 		R = BaseRace.rules()
+		tw = twist
 		recs = runners
 		backed = back
 		rng = r
@@ -116,8 +140,8 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(R["wobble"])
-		var p := BaseRace.stretch_pace(recs[i], int(stretch[i])) * rng.randf_range(1.0 - w, 1.0 + w)
+		var w := float(tw.get("wobble", R["wobble"]))
+		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
 			cheer_mult = 1.0
@@ -210,6 +234,7 @@ static func settle(run: Run) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
 	nudge_bond(win, lose, -float(R["rival_step"]))
@@ -248,6 +273,7 @@ static func settle_solo(rec: Dictionary, grades: Array) -> int:
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
 var post: Node3D = null
+var wall: Node3D = null        # the showcase wall (BaseShowcase) by the post, when there is no hub
 var start := Vector3.ZERO      # the loop's start line
 var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
@@ -256,10 +282,9 @@ var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
-var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
-var cue: GardenCues.DashCue = null   # the cheer marks and finish line while a lap runs
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
+var cue: GardenCues.DashCue = null   # the cheer marks and finish line while a lap runs
 
 func _init(home) -> void:
 	h = home
@@ -267,19 +292,25 @@ func _init(home) -> void:
 
 ## The post and loop beside the Training post (none without one); called when fixtures move.
 func place() -> void:
-	if is_instance_valid(post):
-		post.queue_free()
+	for n in [post, wall]:
+		if is_instance_valid(n):
+			n.queue_free()
 	post = null
+	wall = null
 	if h.YARD_AT.x < -100.0:
 		relay.place()
 		return
+	var at: Vector3 = h.YARD_AT + POST_OFF
+	if h.zone == "":       # with the hub on, the wall hangs by its games board (HubWaystone)
+		wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, Save.d.get("showcase", []))
+		h.add_child(wall)
 	post = Node3D.new()
 	post.name = "RacePost"
-	post.position = h.YARD_AT + POST_OFF
+	post.position = at
 	h.add_child(post)
 	start = post.position + LOOP_OFF
 	_post_model()
-	var st: Array = rules()["stretches"]
+	var st: Array = stretches(tweak("dash"))
 	for i in st.size():
 		var a := _corner(i)
 		var b := _corner(i + 1)
@@ -314,6 +345,13 @@ func _post_model() -> void:
 	flag.material_override = mat(UI.ACCENT)
 	flag.position = Vector3(0.32, ground(post.position) + 1.4, 0)
 	post.add_child(flag)
+	var sign_t := Label3D.new()
+	sign_t.text = "This week, %s: %s\n%s" % [String(twist()["game"]).capitalize(), twist()["name"], twist()["note"]]
+	sign_t.font_size = 28
+	sign_t.pixel_size = 0.004
+	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sign_t.position = Vector3(0.3, ground(post.position) + 1.85, 0)
+	post.add_child(sign_t)
 
 static func mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -337,7 +375,9 @@ func find(p2: Vector2) -> Dictionary:
 	return {"kind": "race"}
 
 func label() -> String:
-	return "Start a Dash (back %s)" % Save.active_kin().get("name", "your partner")
+	var fmt := String(tweak("dash").get("name", ""))
+	var back := "back %s" % Save.active_kin().get("name", "your partner")
+	return "Start a Dash, %s (%s)" % [fmt, back] if fmt else "Start a Dash (%s)" % back
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
@@ -355,7 +395,6 @@ func entrants() -> Array:
 	return out.slice(0, 4)
 
 func use() -> void:
-	release()
 	var ks := entrants()
 	if ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
@@ -364,7 +403,6 @@ func use() -> void:
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
-	release()
 	var k: Dictionary = h._kin_entry(rec)
 	var T: Dictionary = rules()["train"]
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
@@ -386,7 +424,7 @@ func _begin(ks: Array) -> void:
 		k["busy"] = true
 		recs.append(k["rec"])
 	var back := maxi(0, recs.find(Save.active_kin()))
-	run = Run.new(recs, back, RandomNumberGenerator.new())
+	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"))
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
@@ -394,12 +432,12 @@ func _begin(ks: Array) -> void:
 	_place_runners()
 	var marks: Array = []
 	for i in range(1, 4):
-		marks.append(_corner(i) + Vector3(0, ground(_corner(i)), 0))
-	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, ground(_corner(0)), 0), TRACK_W)
+		marks.append(_corner(i) + Vector3(0, _ground(_corner(i)), 0))
+	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, _ground(_corner(0)), 0), TRACK_W)
 	heard = []
 	heard.resize(runners.size())
 	heard.fill(0)
-	Sfx.play("garden_start", start, GARDEN_DB)
+	GardenSfx.countdown(h, start)
 
 func _bar_label(last: String) -> void:
 	var who: String = run.recs[run.backed]["name"]
@@ -420,8 +458,7 @@ func input(event: InputEvent) -> bool:
 		var r := bar.press()
 		run.cheer(r)
 		cheers.append(r)
-		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", runners[run.backed]["pos"], GARDEN_DB,
-				0.04, 1.2 if r == "great" else 1.0)
+		GardenSfx.crowd(r, runners[run.backed]["pos"])
 		if r != "miss" and "verbs" in h:
 			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
@@ -433,9 +470,6 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
-		if card_t <= 0.0:
-			let_go(held)
-			held = []
 	relay.tick(d)
 	if run == null:
 		return
@@ -457,20 +491,19 @@ func _hear_laps() -> void:
 			continue
 		heard[i] = mark
 		if mark < stretches:
-			Sfx.play("garden_lap", runners[i]["pos"], GARDEN_DB)
+			GardenSfx.cue("garden_lap", runners[i]["pos"])
 			continue
-		Sfx.play("garden_finish", runners[i]["pos"], GARDEN_DB)
+		GardenSfx.cue("garden_finish", runners[i]["pos"])
 		if heard.filter(func(m): return m >= stretches).size() == 1:
-			Sfx.play("garden_crowd", runners[i]["pos"], GARDEN_DB)
+			GardenSfx.cue("garden_crowd", runners[i]["pos"])
 
 func _place_runners() -> void:
-	var st: Array = rules()["stretches"]
+	var st: Array = stretches(run.tw)
 	var lane := float(rules()["lane"])
 	for i in runners.size():
 		var s := int(run.stretch[i])
 		var into := float(run.dist[i]) - (float(run.ends[s - 1]) if s > 0 else 0.0)
 		var p := track_at(s, clampf(into / float(st[s]["len"]), 0.0, 1.0), lane * (i - (runners.size() - 1) * 0.5))
-		gait(runners[i], "leap" if String(st[s]["kind"]) == "jump" else "")
 		var n: Node3D = runners[i]["node"]
 		n.position = p
 		n.rotation.y = heading(s)
@@ -503,23 +536,37 @@ func _end(finished: bool) -> void:
 	for k in runners:
 		k["busy"] = false
 		k["t"] = 1.5
-		gait(k, "")
 	bar.close()
 	cue.clear()
 	cue = null
 	if finished:
+		GardenFirstDay.mark("race", h)
 		if solo_rec.is_empty():
-			_race_card(res)
-			result_sounds(h, res)
+			_race_card(res, pin(res["win"], "dash"))
+			GardenSfx.result(h, res)
 			h._emote(h._kin_entry(res["win"]), "♥", true)
 			h._emote(h._kin_entry(res["lose"]), "…", true)
-			held = hold(h, res)
 		else:
 			_solo_card(settle_solo(solo_rec, _grades()))
 		Save.save_game()
 	run = null
 	runners = []
 	solo_rec = {}
+
+## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
+## Shared with Seek and Spark Volley. False when this week's format is another game's.
+func pin(win: Dictionary, game: String) -> bool:
+	var fmt := tweak(game)
+	if fmt.is_empty():
+		return false
+	var node: Node3D = h._kin_entry(win)["node"]
+	BaseShowcase.add(win, fmt, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))
+	if wall == null:
+		return true
+	wall.queue_free()
+	wall = BaseShowcase.build(post.position + BaseShowcase.WALL_OFF, Save.d["showcase"])
+	h.add_child(wall)
+	return true
 
 ## The three marks' grades: a mark with no press is a miss.
 func _grades() -> Array:
@@ -528,14 +575,18 @@ func _grades() -> Array:
 		out.append("miss")
 	return out
 
-func _race_card(res: Dictionary) -> void:
+func _race_card(res: Dictionary, pinned: bool) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	var why := " for backing the winner" if res["backed_won"] else ""
 	show_card("%s wins the Dash!" % win["name"], [
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + GardenPrizes.rows(res["prize"]))
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned) + GardenPrizes.rows(res["prize"]))
+
+## The result-card row for a win that went on the wall (none when it did not).
+static func pin_rows(pinned: bool) -> Array:
+	return [["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]] if pinned else []
 
 func _solo_card(gained: int) -> void:
 	var speed := int(solo_rec["stats"]["speed"])
@@ -556,52 +607,6 @@ func show_card(title: String, lines: Array) -> void:
 		rows.append([l[0], 14, l[1]])
 	card = result_card(h, rows)
 	card_t = float(rules()["card_s"])
-
-## Plays a BokiRig clip (win, sulk, push, bat; "" stops it) on a kin's Boki: rigged ones only, the rest ignore it.
-static func act(k: Dictionary, which: String) -> void:
-	tag(k, "kact", which)
-
-## Sets the gait a rigged Boki moves in (sniff, leap; "" for its own walk and run).
-static func gait(k: Dictionary, which: String) -> void:
-	tag(k, "kgait", which)
-
-static func tag(k: Dictionary, key: String, which: String) -> void:
-	var n := k["node"] as Node3D
-	if which == "":
-		n.remove_meta(key)
-	else:
-		n.set_meta(key, which)
-
-## The result of a minigame ({win, lose}): the winner shows it, the loser sulks, both stay put until `let_go`.
-static func hold(home, res: Dictionary) -> Array:
-	var ks: Array = []
-	for who in [["win", "win"], ["lose", "sulk"]]:
-		var k: Dictionary = home._kin_entry(res[who[0]])
-		k["busy"] = true
-		act(k, who[1])
-		ks.append(k)
-	return ks
-
-## A new Dash, lap or Shove ends the last result pose early, so its winner and loser can play again.
-func release() -> void:
-	let_go(held)
-	held = []
-	for game in [h.get("hshove"), h.get("hvolley"), h.get("hseek")]:
-		if game != null:
-			let_go(game.held)
-			game.held = []
-
-static func let_go(ks: Array) -> void:
-	for k in ks:
-		k["busy"] = false
-		k["t"] = 1.5
-		act(k, "")
-
-## The win sting at the winner and, a beat later, the loser's huff. Shared with the Stump Shove.
-static func result_sounds(home, res: Dictionary) -> void:
-	Sfx.play("garden_win", home._kin_entry(res["win"])["pos"], GARDEN_DB)
-	var huff := func(): Sfx.play("garden_sulk", home._kin_entry(res["lose"])["pos"], GARDEN_DB)
-	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
 
 ## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove,
 ## Seek and Spark Volley.

@@ -167,8 +167,6 @@ func _on_base() -> void:
 		sh.use()
 		ok(sh.run != null and sh.pair.size() == 2, "on: a bout starts with two Boki")
 		ok(sh.cue != null and sh.cue.power == 0.0, "cue: a level push meter appears over the stump")
-		var duo: Array = sh.pair.duplicate()
-		ok(duo.all(func(k): return k["node"].get_meta("kact", "") == "push"), "on: both Boki push")
 		var t := 0.0
 		var peak := 0.0
 		var leans_to_stronger := true
@@ -181,11 +179,6 @@ func _on_base() -> void:
 		ok(sh.run == null and is_instance_valid(sh.card), "on: the bout ends with a result card (%.1f s)" % t)
 		ok(peak > 0.0 and leans_to_stronger, "cue: the meter filled (%.2f) toward the stronger Boki" % peak)
 		ok(sh.cue == null, "cue: the meter is gone when the bout ends")
-		var acts: Array = duo.map(func(k): return k["node"].get_meta("kact", ""))
-		ok(acts.has("win") and acts.has("sulk") and duo.all(func(k): return k["busy"]),
-				"on: the winner shows it and the loser sulks, both held")
-		sh.tick(float(BaseShove.rules()["card_s"]) + 0.1)
-		ok(duo.all(func(k): return not k["busy"] and k["node"].get_meta("kact", "") == ""), "on: both are let go")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

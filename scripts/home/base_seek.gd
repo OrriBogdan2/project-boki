@@ -136,6 +136,7 @@ static func settle(hunt: Hunt) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]) * (float(R["friend_sulk"]) if friends else 1.0))
+	MinigameHub.record("seek", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
@@ -154,7 +155,6 @@ var scent: MeshInstance3D = null
 var hunt: Hunt = null
 var pair: Array = []           # the home's kin entries: a, b
 var card: Control = null
-var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var cue: GardenCues.SeekCue = null   # the scent trail while a hunt runs
 
 func _init(home) -> void:
@@ -217,7 +217,6 @@ func label() -> String:
 
 func use() -> void:
 	if state == S.IDLE:
-		h.hrace.release()
 		if h.hrace.entrants().size() < 2:
 			h._toast("Seek needs two rested Boki out on the base")
 			return
@@ -243,13 +242,13 @@ func _hide(at: Vector2) -> void:
 	go(S.HUNT)
 	for k in pair:
 		k["busy"] = true
-	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, HomeWork.is_night(h.day_t),
-			RandomNumberGenerator.new(), _walkable)
+	var night: bool = BaseRace.tweak("seek").get("night", HomeWork.is_night(h.day_t))
+	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, night, RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
+	GardenSfx.countdown(h, scent.position)
 	cue = GardenCues.SeekCue.new(h)
-	Sfx.play("whoosh", null, -8.0)
 
 func _walkable(p: Vector2) -> bool:
 	return h._ground_h(p.x, p.y) > -50.0
@@ -276,6 +275,8 @@ func tick(d: float) -> void:
 		S.HUNT:
 			hunt.step(d)
 			_move_pair(d)
+			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
+			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
 			_lay_trails(d)
 			if hunt.over():
 				_end(true)
@@ -283,8 +284,6 @@ func tick(d: float) -> void:
 			if state_t >= float(rules()["card_s"]):
 				if is_instance_valid(card):
 					card.queue_free()
-				BaseRace.let_go(held)
-				held = []
 				go(S.IDLE)
 
 func _move_pair(d: float) -> void:
@@ -292,7 +291,6 @@ func _move_pair(d: float) -> void:
 		var n: Node3D = pair[i]["node"]
 		var p: Vector2 = hunt.pos[i]
 		n.position = Vector3(p.x, _ground(p), p.y)
-		BaseRace.gait(pair[i], "sniff")
 		var want := atan2(hunt.head[i].x, hunt.head[i].y)
 		n.rotation.y = lerp_angle(n.rotation.y, want, minf(1.0, TURN * d))
 		pair[i]["pos"] = n.position
@@ -307,15 +305,15 @@ func _end(finished: bool) -> void:
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
-		BaseRace.gait(k, "")
 	if is_instance_valid(scent):
 		scent.queue_free()
+	GardenSfx.sniff_stop()
 	cue.clear()
 	cue = null
 	if finished:
-		held = BaseRace.hold(h, res)
 		go(S.RESULT)
-		_card(res)
+		_card(res, h.hrace.pin(res["win"], "seek"))
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
@@ -324,7 +322,7 @@ func _end(finished: bool) -> void:
 	hunt = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, pinned: bool) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	var sulk := "%s is a good sport" if res["friends"] else "%s sulks"
@@ -334,4 +332,4 @@ func _card(res: Dictionary) -> void:
 		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
+		["+%d gems" % res["gems"], 14, UI.GOLD]] + BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))

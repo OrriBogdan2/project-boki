@@ -53,9 +53,30 @@ check: `--base-life-check`.
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
+- Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
+  grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
+  (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none
+  recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
+  `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
+- Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
+  Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
+  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
+  `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
+  The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
+  lane** (none exist yet; the walk just slows and the shake is a Body wobble): `wade` (a slow knee-high walk loop),
+  `shake` (a shake-off, 0.6 s), `paddle` (a longer water-play loop; `splash` stands in).
+- Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
+  stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
+  is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
+  tub, held, at a toy or bowl; they also hold their ground in `_separate_kin`), steps a boxed-in walker out and
+  drops its errand (toy walk, chore) if that repeats; `HomeToys.stand` keeps a toy's standing place off anyone parked
+  or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
+  0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
+  tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
 - Game cues (`scripts/home/garden_cues.gd`): each garden game builds one small world cue set when it starts and
   frees it when it ends; nothing goes on the HUD. Dash marks, Shove meter, Seek trail and Volley ring are teal and
   magenta. The newer four share two pools (`Bursts` rings, `PopCue` labels) and use the Boki's type colour
@@ -67,4 +88,4 @@ check: `--base-life-check`.
   taken, and bursts at the next runner on every hand-off (bright when the pass lost no time). Show Ring: each
   round's score pops over your Boki as the round ends ("Look 7.4"), and both totals pop after the Bond walk.
   Check: `--garden-games-vfx-check` (each cue on the frame of its beat, at its spot, in its colour).
-  Clips: `--echo-steps-clip`, `--gameplay-media --media-clip=5` (Tumble), `6` (Relay) and `7` (Show Ring).
+  Clips: `--gameplay-media` clips 6 (Echo Steps), 7 (Show Ring) and 8 (Relay Cup) show them.

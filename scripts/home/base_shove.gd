@@ -110,6 +110,7 @@ static func settle(run: Run) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("shove", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
@@ -126,23 +127,28 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
-var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var creaked := false           # the lean creak has played this bout
 var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bout runs
 
 func _init(home) -> void:
 	h = home
 
-## The stump beside the Training post (none without one); called when fixtures move.
+## This zone's own stump spot (base_shove.json "spots", tiles x and z), or [].
+static func spot() -> Array:
+	return rules()["spots"].get(GardenZones.here, [])
+
+## The stump beside the Training post, or on the zone's own spot (none without either); called when
+## fixtures move.
 func place() -> void:
 	if is_instance_valid(stump):
 		stump.queue_free()
 	stump = null
-	if h.YARD_AT.x < -100.0:
+	var S := spot()
+	if S.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	stump = Node3D.new()
 	stump.name = "Stump"
-	stump.position = h.YARD_AT + STUMP_OFF
+	stump.position = h.YARD_AT + STUMP_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
 	h.add_child(stump)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -174,7 +180,6 @@ func label() -> String:
 	return "Start a Stump Shove (back %s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
-	h.hrace.release()
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
 		h._toast("The Stump Shove needs two rested Boki out on the base")
@@ -182,7 +187,6 @@ func use() -> void:
 	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
-		BaseRace.act(k, "push")
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
 	run.rng.randomize()
@@ -191,8 +195,8 @@ func use() -> void:
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
 	_place_pair()
 	creaked = false
+	GardenSfx.countdown(h, stump.position)
 	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
-	Sfx.play("garden_start", stump.position, BaseRace.GARDEN_DB)
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -206,8 +210,7 @@ func input(event: InputEvent) -> bool:
 	if run.can_shove():
 		var r := bar.press()
 		run.shove(r)
-		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", stump.position, BaseRace.GARDEN_DB,
-				0.04, 1.2 if r == "great" else 1.0)
+		GardenSfx.crowd(r, stump.position)
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -217,9 +220,6 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
-		if card_t <= 0.0:
-			BaseRace.let_go(held)
-			held = []
 	if run == null:
 		return
 	run.step(d)
@@ -234,10 +234,10 @@ func tick(d: float) -> void:
 ## The strain loop while they push (louder and higher the nearer the stump is to going), one creak as it first leans.
 func _hear_strain() -> void:
 	var lean := absf(run.balance)
-	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, BaseRace.GARDEN_DB, 0.9 + 0.3 * lean)
+	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, GardenSfx.DB, 0.9 + 0.3 * lean)
 	if lean >= CREAK_AT and not creaked:
 		creaked = true
-		Sfx.play("garden_creak", stump.position, BaseRace.GARDEN_DB)
+		GardenSfx.cue("garden_creak", stump.position)
 
 ## The pair slide along the push and the stump leans toward whoever is losing.
 func _place_pair() -> void:
@@ -258,7 +258,6 @@ func _end(finished: bool) -> void:
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
-		BaseRace.act(k, "")
 	bar.close()
 	cue.clear()
 	cue = null
@@ -266,12 +265,11 @@ func _end(finished: bool) -> void:
 	Sfx.loop_stop("shove_strain")
 	if finished:
 		if absf(run.balance) >= 1.0:
-			Sfx.play("garden_thud", stump.position, BaseRace.GARDEN_DB)
+			GardenSfx.cue("garden_thud", stump.position)
 		_card(res)
-		BaseRace.result_sounds(h, res)
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
-		held = BaseRace.hold(h, res)
 		Save.save_game()
 	run = null
 	pair = []

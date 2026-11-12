@@ -8,10 +8,13 @@ const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird"]
+	"nettlynx", "thrumbird", "caecilith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend", "win", "sulk", "push", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "sniff", "leap", "bat"]
+	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
+const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
+const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
+const T_FRAMES := 8            # frames sampled over a game clip
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
@@ -52,6 +55,7 @@ func _contents(rig: BokiRig) -> void:
 		ok(a != null and a.length > 0.1, "clip %s" % c)
 	for c in BokiRig.LOOPED:
 		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+	_game_clips(rig)
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -64,6 +68,40 @@ func _contents(rig: BokiRig) -> void:
 	_lods(rig)
 	var skel := rig.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	ok(skel.get_bone_count() <= MAX_BONES, "%d bones, budget %d" % [skel.get_bone_count(), MAX_BONES])
+
+## Tumble's and Echo Steps' clips last as long as their beat data says, play once, and never show the bind pose.
+func _game_clips(rig: BokiRig) -> void:
+	var impact := float(BaseTumble.rules()["impact_s"])
+	var hop := float(EchoSteps.rules()["hop_s"])
+	for c in GAME_CLIPS:
+		var a := rig.player.get_animation(c)
+		var want := EchoSteps.spin_s()
+		if c in ["rush", "brace", "dodge"]: want = impact
+		elif c == "stonehop": want = hop
+		ok(is_equal_approx(a.length, want), "%s lasts %.2f s, its game's beat data says %.2f" % [c, a.length, want])
+		ok(a.loop_mode == Animation.LOOP_NONE, "%s plays once" % c)
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	for m in BaseTumble.rules()["moves"].values():
+		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])
+
+## True when some frame of the clip leaves every bone within T_POSE of its bind pose.
+func _t_pose(rig: BokiRig, clip: String) -> bool:
+	var skel := rig.skeleton()
+	rig.manual = true
+	rig.set_clip(clip, 0.0)
+	var length := rig.player.get_animation(clip).length
+	var worst := 99.0
+	for f in T_FRAMES + 1:
+		rig.seek(length * float(f) / float(T_FRAMES))
+		var far := 0.0
+		for b in skel.get_bone_count():
+			var q := skel.get_bone_pose_rotation(b)
+			far = maxf(far, q.angle_to(skel.get_bone_rest(b).basis.get_rotation_quaternion()))
+		worst = minf(worst, far)
+	print("BOKIRIG %s %s closest frame to bind pose: %.3f rad" % [kin_id, clip, worst])
+	rig.manual = false
+	rig.set_clip("idle", 0.0)
+	return worst < T_POSE
 
 ## The coat has generated LODs (the art budget), the face stays whole (BokiRig.FACE_LOD_BIAS).
 func _lods(rig: BokiRig) -> void:
@@ -88,19 +126,10 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._shot_left = 0.0
 	ok(_clip_for(rig, "kstate", "sleep") == "nap", "then naps")
 	rig._asleep = false
-	for act in ["munch", "nudge", "climb", "splash"]:
+	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS:
 		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
-	for c in ["sulk", "push", "win"]:
-		ok(_clip_for(rig, "kact", c) == c, "kact %s" % c)
-	rig.root.set_meta("kact", "win")
-	rig._pick_clip(0.016)
-	rig.player.stop()
-	rig._pick_clip(0.016)
-	ok(rig.clip != "win", "a win plays once, then it hops or idles")
-	rig.root.remove_meta("kact")
-	ok(rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE, "win does not loop")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")
@@ -113,7 +142,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 1.2
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
-	_games(rig)
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
@@ -137,33 +165,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig.seek(0.5)
 	w = rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("closed"))
 	ok(w > 0.99, "asleep the eyes are shut")
-
-## The garden games' body: the race gait keeps its feet in step with the ground, Seek sniffs on the move, a leap
-## and a bat have their clips, and only a moving Boki changes gait.
-func _games(rig: BokiRig) -> void:
-	for sp in [1.4, 1.9, 2.4, 2.6, 3.0, 3.8]:
-		rig._speed = sp
-		rig._pick_clip(0.016)
-		var stride := BokiRig.RUN_STRIDE if rig.clip == "run" else BokiRig.WALK_STRIDE
-		ok(absf(rig.player.speed_scale * stride / sp - 1.0) < 0.05,
-				"%.1f m/s plays %s at ground speed (%.2f of feet)" % [sp, rig.clip, rig.player.speed_scale * stride])
-	ok(rig.player.get_animation("sniff").loop_mode == Animation.LOOP_LINEAR, "sniff loops")
-	ok(rig.player.get_animation("leap").loop_mode == Animation.LOOP_LINEAR, "leap loops")
-	rig.root.set_meta("kgait", "sniff")
-	rig._speed = 1.0
-	rig._pick_clip(0.016)
-	var feet: float = rig.player.speed_scale * BokiRig.WALK_STRIDE
-	ok(rig.clip == "sniff" and absf(feet - 1.0) < 0.05, "kgait sniff while it walks")
-	rig._speed = 0.0
-	rig._pick_clip(0.016)
-	ok(rig.clip == "idle", "standing, a sniffer stands")
-	rig.root.set_meta("kgait", "leap")
-	rig._speed = 2.4
-	rig._pick_clip(0.016)
-	ok(rig.clip == "leap", "kgait leap while it runs")
-	rig.root.remove_meta("kgait")
-	ok(_clip_for(rig, "kact", "bat") == "bat", "kact bat")
-	rig._speed = 0.0
 
 ## Home's work poses rock Body and hold their item over its head; while it works the rig owns both.
 func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
