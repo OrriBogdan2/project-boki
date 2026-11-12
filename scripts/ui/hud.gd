@@ -125,7 +125,7 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = m.player != null and m.time - m.player.hurt_at < MSG_FIGHT_S
-	msgs.top = 84.0
+	msgs.top = HudStyle.safe_pad(c.size).y + 66.0      # under the timer / Ways Out strip
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
@@ -524,6 +524,7 @@ func _draw_pings(sz: Vector2) -> void:
 			c.draw_colored_polygon(PackedVector2Array([edge + d * 14, edge - d * 8 + n * 10, edge - d * 8 - n * 10]), col)
 
 func _draw_top(sz: Vector2) -> void:
+	var pad := HudStyle.safe_pad(sz)
 	if m.duel:
 		_draw_duel(sz)
 		return
@@ -541,12 +542,12 @@ func _draw_top(sz: Vector2) -> void:
 		var left: Array = all_rows.filter(func(t): return not m.train.has(t[0]))
 		var n_done := all_rows.size() - left.size()
 		if guide_hidden:
-			var pill := Rect2(Vector2(sz.x - 196, 16), Vector2(180, 30))
+			var pill := Rect2(Vector2(sz.x - pad.x - 180, pad.y), Vector2(180, 30))
 			_panel(pill, Color(0.06, 0.07, 0.1, 0.8), 10)
 			_text(pill.position + Vector2(12, 20), "Guide %d/%d  ·  H to show" % [n_done, all_rows.size()], 13, MUTED)
 			return
 		var shown: Array = left.slice(0, 6)
-		var box := Rect2(Vector2(sz.x - 346, 16), Vector2(330, 58 + maxi(1, shown.size()) * 24))
+		var box := Rect2(Vector2(sz.x - pad.x - 330, pad.y), Vector2(330, 58 + maxi(1, shown.size()) * 24))
 		_panel(box, Color(0.06, 0.07, 0.1, 0.82), 12)
 		_text(box.position + Vector2(14, 24), "Try everything", 15, GOLD, big)
 		_text(box.position + Vector2(box.size.x - 120, 24), "%d / %d done" % [n_done, all_rows.size()], 12, MUTED)
@@ -570,7 +571,7 @@ func _draw_top(sz: Vector2) -> void:
 	var cells := [["paw", str(teams.size()), INK], ["knock", str(m.player.kills if m.player else 0), Color("ff9a8a")],
 		["burst", str(m.player.knocks if m.player else 0), Color("ffd27a")], ["gem", str(m.player.gems if m.player else 0), GOLD]]
 	var cw := 58.0
-	var cr := Rect2(Vector2(sz.x - 18 - cw * cells.size(), 18), Vector2(cw * cells.size(), 34))
+	var cr := Rect2(Vector2(sz.x - pad.x - cw * cells.size(), pad.y), Vector2(cw * cells.size(), 34))
 	_rounded(cr, Color(0.04, 0.05, 0.08, 0.86), 8)
 	for i in cells.size():
 		var cx := cr.position.x + cw * i
@@ -581,11 +582,12 @@ func _draw_top(sz: Vector2) -> void:
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
 func _draw_duel(sz: Vector2) -> void:
+	var pad := HudStyle.safe_pad(sz)
 	var d: Duel = m.duel
-	var rr := Rect2(Vector2(sz.x * 0.5 - 260, 12), Vector2(520, 58))
+	var rr := Rect2(Vector2(sz.x * 0.5 - 260, pad.y), Vector2(520, 58))
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
-	_ctext(Vector2(sz.x * 0.5, 32), "DUEL ROOM  ·  ROUND %d" % d.round_n, 12, Color("ff9a8a"))
-	_ctext(Vector2(sz.x * 0.5, 56), "%s bot  ·  %s class  ·  %s  ·  %s  ·  %s" % [d.pick_text("diff"), d.pick_text("cls"), d.pick_text("weapon"), d.pick_text("glove") if d.glove != "" else "no glove", d.pick_text("mode")], 15, INK)
+	_ctext(Vector2(sz.x * 0.5, rr.position.y + 20), "DUEL ROOM  ·  ROUND %d" % d.round_n, 12, Color("ff9a8a"))
+	_ctext(Vector2(sz.x * 0.5, rr.position.y + 44), "%s bot  ·  %s class  ·  %s  ·  %s  ·  %s" % [d.pick_text("diff"), d.pick_text("cls"), d.pick_text("weapon"), d.pick_text("glove") if d.glove != "" else "no glove", d.pick_text("mode")], 15, INK)
 	if guide_hidden or Record.clean():
 		return
 	var st: Dictionary = d.stats
@@ -597,7 +599,7 @@ func _draw_duel(sz: Vector2) -> void:
 		["Shots dodged", "%d / %d" % [int(st["dodged"]), int(st["bot_shots"])], Color("9af0ff")],
 		["Knocks", "%d  -  %d" % [int(st["knocks"]), int(st["knocked"])], GOLD],
 	]
-	var box := Rect2(Vector2(sz.x - 286, 16), Vector2(270, 40 + rows.size() * 24 + 28))
+	var box := Rect2(Vector2(sz.x - pad.x - 270, pad.y), Vector2(270, 40 + rows.size() * 24 + 28))
 	_panel(box, Color(0.06, 0.07, 0.1, 0.82), 12)
 	_text(box.position + Vector2(14, 24), "Your numbers", 15, GOLD, big)
 	for i in rows.size():
@@ -611,7 +613,7 @@ var feed_top := 18.0
 ## The kill feed under the counters: each line a banner plate, red when it's about an enemy squad's
 ## loss you caused, blue for your own side, gold for everything else.
 func _draw_feed(sz: Vector2) -> void:
-	var y := feed_top
+	var y := maxf(feed_top, HudStyle.safe_pad(sz).y)
 	var mine: Array = []
 	if m.player:
 		for h in m.hunters:
@@ -626,7 +628,7 @@ func _draw_feed(sz: Vector2) -> void:
 			if at >= 0 and (first == "" or at < s.find(first)): first = String(nm)
 		ours = first != "" and s.begins_with(first)
 		var col := Color("5fb6ff") if ours else (Color("ff6a5a") if first != "" else GOLD)
-		var br := Rect2(Vector2(sz.x - 18 - w - 26, y), Vector2(w + 26, 24))
+		var br := Rect2(Vector2(sz.x - HudStyle.safe_pad(sz).x - w - 26, y), Vector2(w + 26, 24))
 		_rounded(br, Color(0.04, 0.05, 0.08, 0.82 * a), 6)
 		c.draw_rect(Rect2(br.position, Vector2(4, br.size.y)), Color(col, a))
 		_text(br.position + Vector2(14, 17), s, 13, Color(INK, a), big)
@@ -636,7 +638,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
 	var s := 340.0 if riding else 196.0
-	var r := Rect2(Vector2(18, 18), Vector2(s, s))
+	var r := Rect2(HudStyle.safe_pad(sz), Vector2(s, s))
 	mm_bottom = r.end.y
 	var w := m.world
 	var inner := Rect2(r.position + Vector2(8, 8), r.size - Vector2(16, 16))
@@ -1031,8 +1033,10 @@ func _hud_tick(delta: float) -> void:
 
 ## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
 const HUD_PORTRAIT := Vector2(112, 132)
+const HUD_REACH := 16.0      # px the level coin and the name line reach past the portrait (left and below)
 func _hud_origin(sz: Vector2) -> Vector2:
-	return Vector2(18, sz.y - 18 - HUD_PORTRAIT.y)
+	var pad := HudStyle.safe_pad(sz)
+	return Vector2(pad.x + HUD_REACH, sz.y - pad.y - HUD_REACH - HUD_PORTRAIT.y)
 
 var lvl_pop := 0.0
 var lvl_seen := -1
@@ -1254,7 +1258,8 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 ## loot counter, and the weapon card with ammo underneath.
 func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var w := 270.0
-	var r := Rect2(Vector2(sz.x - w - 18, sz.y - 18 - 62), Vector2(w, 62))
+	var pad := HudStyle.safe_pad(sz)
+	var r := Rect2(Vector2(sz.x - w - pad.x, sz.y - pad.y - HudStyle.KEY_REACH - 62.0), Vector2(w, 62))
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
@@ -1395,7 +1400,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			continue
 		var st := _mate_state(h)
 		var lbl := String(st[0])
-		var r := Rect2(Vector2(16, y), Vector2(w, 60))
+		var r := Rect2(Vector2(HudStyle.safe_pad(sz).x, y), Vector2(w, 60))
 		var down := lbl == "WISP"
 		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
 		_rounded(r, Color(0.05, 0.06, 0.09, 0.84), 10, Color(st[1], 0.7 if down else 0.35), 2 if down else 1)
@@ -1684,7 +1689,8 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var dh := body.get_multiline_string_size(String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12).y
 		hs.append(26.0 + dh + 8.0)
 		total += 26.0 + dh + 8.0
-	var bottom := sz.y - 176.0
+	var pad := HudStyle.safe_pad(sz)
+	var bottom := sz.y - pad.y - 158.0
 	var compact := false
 	if not m.opts.get("training", false) and total > bottom - 230.0:
 		# too tall to sit under the kill feed: names only
@@ -1692,12 +1698,12 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		hs = []
 		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
-	var box := Rect2(Vector2(sz.x - w - 16, bottom - total), Vector2(w, total))
+	var box := Rect2(Vector2(sz.x - w - pad.x, bottom - total), Vector2(w, total))
 	if m.opts.get("training", false):
 		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
 		# on a short screen it drops the descriptions rather than run into your kin card
-		box.position = Vector2(16, 240)
-		if total > sz.y - 240 - 196:
+		box.position = Vector2(pad.x, pad.y + 222.0)
+		if total > sz.y - box.position.y - pad.y - 178.0:
 			compact = true
 			hs = []
 			for l in lines: hs.append(28.0)
@@ -1726,7 +1732,7 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 		if not seen.has(pk): seen.append(pk)
 	var bs := 26.0
 	var x := sz.x * 0.5 - (seen.size() * (bs + 6.0)) * 0.5
-	var y := sz.y - 50.0
+	var y := sz.y - HudStyle.safe_pad(sz).y - 26.0
 	for pk in seen:
 		var pd: Dictionary = Data.PERKS[pk]
 		var r := Rect2(Vector2(x, y), Vector2(bs, bs))
@@ -2269,8 +2275,9 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	for i in range(1, lines.size()):
 		h2 += _wrapped_h(String(lines[i][0]), w - 24, 13) + 3.0
 	var pos := mp + Vector2(22, 18)
-	if pos.x + w > sz.x - 8: pos.x = mp.x - w - 22
-	if pos.y + h2 > sz.y - 160: pos.y = mp.y - h2 - 18
+	var safe := HudStyle.safe_rect(sz)
+	if pos.x + w > safe.end.x: pos.x = mp.x - w - 22
+	if pos.y + h2 > safe.end.y - 160.0: pos.y = mp.y - h2 - 18
 	var box := Rect2(pos, Vector2(w, h2))
 	_rounded(box, Color(0.05, 0.06, 0.09, 0.9), 10, Color(lines[0][1], 0.5), 2)
 	_text(pos + Vector2(12, 24), String(lines[0][0]), 16, lines[0][1], big)
@@ -2423,7 +2430,7 @@ func open_hold(row: Dictionary) -> void:
 	await get_tree().process_frame
 	if is_instance_valid(loot_hold) and loot_panel:
 		var vs := loot_hold.get_viewport_rect().size
-		loot_hold.position = Vector2(vs.x - loot_hold.size.x - 16.0, loot_panel.position.y)    # where your inventory was
+		loot_hold.position = Vector2(vs.x - loot_hold.size.x - HudStyle.safe_pad(vs).x, loot_panel.position.y)    # where your inventory was
 
 func _close_hold() -> void:
 	if loot_hold and is_instance_valid(loot_hold):
@@ -2640,8 +2647,9 @@ func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) ->
 	if not is_instance_valid(pc):
 		return
 	var vs := pc.get_viewport_rect().size
-	var top := 64.0
-	var bottom := vs.y - 172.0          # clear of the weapon card and the consumable slots
+	var pad := HudStyle.safe_pad(vs)
+	var top := pad.y + 46.0
+	var bottom := vs.y - pad.y - 154.0          # clear of the weapon card and the consumable slots
 	var want := rows.get_combined_minimum_size().y
 	var rest := pc.get_combined_minimum_size().y - sc.get_combined_minimum_size().y
 	sc.custom_minimum_size.y = clampf(bottom - top - rest, 60.0, want)
@@ -2649,7 +2657,7 @@ func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) ->
 	await get_tree().process_frame
 	if not is_instance_valid(pc):
 		return
-	pc.position = Vector2(vs.x - pc.size.x - 16.0, clampf(vs.y * 0.42 - pc.size.y * 0.5, top, maxf(top, bottom - pc.size.y)))
+	pc.position = Vector2(vs.x - pc.size.x - pad.x, clampf(vs.y * 0.42 - pc.size.y * 0.5, top, maxf(top, bottom - pc.size.y)))
 
 func open_swap(wp: Dictionary) -> void:
 	close_pack()
@@ -3065,7 +3073,7 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 		return
 	var col: Color = Lairs.color_of(b.lair)
 	var w := minf(560.0, sz.x * 0.46)
-	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 30), Vector2(w, 16))
+	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, HudStyle.safe_pad(sz).y + 22.0), Vector2(w, 16))
 	_rounded(Rect2(r.position - Vector2(14, 22), r.size + Vector2(28, 50)), Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
 	_text(r.position + Vector2(0, -6), String(b.md["name"]).to_upper(), 15, col, big)
 	var ph := "PHASE %d" % (b.phase + 1)

@@ -23,7 +23,7 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	if pop > 0.0:
 		grow = 1.0 + 0.35 * sin(k * PI)
 	var col: Color = p.armor_col()
-	var at := pr.position + Vector2(pr.size.x - 6, pr.size.y - 6)
+	var at := pr.end - Vector2(RADIUS, RADIUS)      # inside the portrait corner: the badge stays in the safe area
 	var r := RADIUS * grow
 	if pop > 0.0:
 		c.draw_style_box(HudStyle.box(Color(0, 0, 0, 0), 16, Color(col, 1.0 - k), 4), pr.grow(4.0 + k * 18.0))

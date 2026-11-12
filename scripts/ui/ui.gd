@@ -674,8 +674,8 @@ static func hold(body: Control, h: float) -> void:
 		_hold[key] = h
 
 ## Wraps a VBox of content: it sits at a steady height (the menu's held height, or the tallest it
-## has been while open) and, only if the window is too small for it, scrolls. margin: room left for
-## the rest of the screen. Returns the wrapper to add where the content would have gone.
+## has been while open) and, only if the window is too small for it, scrolls. margin: room the panel
+## needs besides the body (on top of the HudStyle safe margin it keeps clear above and below). Returns the wrapper to add where the content would have gone.
 static func paged(content: VBoxContainer, margin: float, key: String, head: Control = null, width_hint := 600.0, foot: Control = null) -> VBoxContainer:
 	var wrap := vbox(8)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -691,7 +691,7 @@ static func paged(content: VBoxContainer, margin: float, key: String, head: Cont
 			return
 		state["busy"] = true
 		var vp := content.get_viewport_rect().size
-		var maxh := maxf(160.0, vp.y - margin - (head.get_combined_minimum_size().y if head else 0.0) - (foot.get_combined_minimum_size().y + float(GAP_BIG) if foot and foot.visible else 0.0))
+		var maxh := maxf(160.0, vp.y - margin - HudStyle.safe_pad(vp).y * 2.0 - (head.get_combined_minimum_size().y if head else 0.0) - (foot.get_combined_minimum_size().y + float(GAP_BIG) if foot and foot.visible else 0.0))
 		var h := content.get_combined_minimum_size().y
 		# never shrink while it's open, so the menu doesn't hop as its contents change. Sizes are
 		# only trusted once the layout has settled (wrapped text measures tall at first).
@@ -809,6 +809,8 @@ static func scroll_box(content: Control, margin := 120.0) -> Control:
 	return content
 
 # ---------------------------------------------------------------- the panel shell
+const MENU_CHROME := 56.0      # px a menu panel needs besides its body, title and footer (padding, gaps)
+
 ## A menu panel, the same everywhere: a title (and an optional subtitle) with a close X at the top
 ## right, an optional row of tabs, the body, and an optional footer of actions at the bottom right.
 ## The body pages (or, with scroll, scrolls) whenever it's taller than the window, so nothing ends up
@@ -877,14 +879,16 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var fit := func() -> void:
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
-				sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 110.0 - chrome)
+				var vp := sc.get_viewport_rect().size
+				var room := vp.y - MENU_CHROME - HudStyle.safe_pad(vp).y * 2.0 - chrome
+				sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, room)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())
 		sc.tree_entered.connect(func(): fit.call_deferred())
 		body.set_meta("scroll", sc)
 	else:
-		outer.add_child(paged(body, 110.0, title_txt, top, width - PAD * 2.0, foot))
+		outer.add_child(paged(body, MENU_CHROME, title_txt, top, width - PAD * 2.0, foot))
 	outer.add_child(foot)
 	body.set_meta("shell", p)
 	p.set_meta("key", title_txt)
@@ -892,7 +896,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	p.set_meta("tabs", tabs_slot); p.set_meta("foot", foot); p.set_meta("foot_left", foot_left); p.set_meta("foot_right", foot_right)
 	var fitw := func():
 		if is_instance_valid(p) and p.is_inside_tree():
-			p.custom_minimum_size.x = minf(width, p.get_viewport_rect().size.x - 32.0)
+			var vp := p.get_viewport_rect().size
+			p.custom_minimum_size.x = minf(width, vp.x - HudStyle.safe_pad(vp).x * 2.0)
 	p.tree_entered.connect(func(): fitw.call_deferred())
 	p.custom_minimum_size.x = width
 	# keyboard and pad users start on the first thing they can press

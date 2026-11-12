@@ -54,6 +54,21 @@ const PLATE_NAME_FS := 13
 const PLATE_ICON_ROW := 22.0
 const SLOT_RAD := 9            # ability slot corner radius
 const KEY_FS := 12             # key label size
+## The one screen-edge margin: the share of the window's width and height kept clear on every side
+## (strict title-safe, 64 x 36 px at 1280x720, 96 x 54 at 1080p). The HUD, the tip card, the lobby and
+## the menu panels all read it; decision: docs/UI_FIRST15.md section 3 (the alternative, a fixed
+## 24 px margin, keeps the blocks inside the 5% band).
+const SAFE_FRAC := 0.05
+const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+
+## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
+static func safe_pad(sz: Vector2) -> Vector2:
+	return (sz * SAFE_FRAC).round()
+
+## The window less its safe margin: everything that matters sits inside this rect.
+static func safe_rect(sz: Vector2) -> Rect2:
+	var pad := safe_pad(sz)
+	return Rect2(pad, sz - pad * 2.0)
 
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:

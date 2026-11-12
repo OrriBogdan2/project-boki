@@ -10,7 +10,6 @@ enum St {LOCKED, OPEN, USE, TAKEN, LOST}
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
 const SQUADS_W := 112.0
-const TOP_Y := 8.0
 const PIP_R := 7.0
 const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
 const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
@@ -107,6 +106,10 @@ static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
 # ------------------------------------------------------------------ the strip
+## Where the strip starts: the top of the window's safe area.
+static func top_y(sz: Vector2) -> float:
+	return HudStyle.safe_pad(sz).y
+
 ## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
 ## is not drawn (no Heart, a tutorial, training or a duel): what sits under it at the top-centre starts lower.
 static func bottom(m: Match) -> float:
@@ -114,7 +117,7 @@ static func bottom(m: Match) -> float:
 		return 0.0
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return 0.0
-	return TOP_Y + CELL.y + 20.0 + 11.0
+	return top_y(m.get_viewport().get_visible_rect().size) + CELL.y + 20.0 + 11.0
 
 static func draw(hud) -> void:
 	var m: Match = hud.m
@@ -123,7 +126,7 @@ static func draw(hud) -> void:
 	var c: Control = hud.c
 	var sd := seats(m)
 	var w := CELL.x * 4.0 + SQUADS_W
-	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
+	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, top_y(c.size)), Vector2(w, CELL.y))
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)

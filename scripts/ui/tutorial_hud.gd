@@ -18,10 +18,11 @@ static var _ring_at := Rect2()      # the pick ring's slot, as last drawn
 static func lanes(sz: Vector2) -> Dictionary:
 	var banner := TutorialStrip.rect(sz)
 	var bh := banner.size.y
+	var safe := HudStyle.safe_rect(sz)
 	return {
 		"banner": banner,
 		"check": Rect2(Vector2(banner.position.x - bh - 10.0, banner.position.y), Vector2(bh, bh)),
-		"toast": Rect2(Vector2(sz.x * 0.72, sz.y * 0.02), Vector2(sz.x * 0.28 - 12.0, sz.y * 0.21)),
+		"toast": Rect2(Vector2(sz.x * 0.72, safe.position.y), Vector2(safe.end.x - sz.x * 0.72, sz.y * 0.21)),
 		"intro": Rect2(Vector2(sz.x * 0.3, sz.y * 0.36), Vector2(sz.x * 0.4, sz.y * 0.28)),
 	}
 
