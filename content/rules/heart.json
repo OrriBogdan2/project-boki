@@ -118,7 +118,9 @@
   "_seat_delay_s": "bots start a seat this long after it opens",
   "early_seats_cap_per_bot_squads": 3,
   "early_seats_cap_max": 2,
-  "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"
+  "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats",
+  "end_edge_m": 5.0,
+  "_end_edge_m": "in the end phase (0051) a bot this far inside the ring's edge (design map metres, times ways_scale) drops everything and walks in, so a rival's knock-back in the last fight leaves it inside"
  },
  "demo_charge": 1.0
 }

@@ -202,12 +202,22 @@ static func keep_inside(m: Match, p: Vector3) -> Vector3:
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return c
 
-## Near the ring's edge or out in the tide: the spot to walk back in to (INF: fine where it is). Not
-## while sealed in a lair (its walls hold the bot in; Lairs.bot_goal leads).
+## How far from the Heart a tile path from p may lead: the tide ring, or p's own distance when it stands
+## farther out (INF: no ring). A path round a cliff to a ramp never runs out into the Blight.
+static func path_r(m: Match, p: Vector3) -> float:
+	var tr := Heart.tide_r(m)
+	if tr <= 0.0 or not on(m):
+		return INF
+	return maxf(tr, Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length())
+
+## Near the ring's edge (in the end phase farther in: heart.json bots end_edge_m) or out in the tide: the
+## spot to walk back in to (INF: fine where it is). Not while sealed in a lair (its walls hold the bot in;
+## Lairs.bot_goal leads).
 static func ring_back(m: Match, h: Hunter) -> Vector3:
 	var tr := Heart.tide_r(m)
 	if tr <= 0.0 or (m.lairs and not m.lairs.sealed_lair(h).is_empty()):
 		return Vector3.INF
-	if h.flat_dist(m.heart.site) < tr - RING_EDGE * m.heart.ways_scale:
+	var edge := maxf(RING_EDGE, knob("end_edge_m")) if Heart.end_phase(m) else RING_EDGE
+	if h.flat_dist(m.heart.site) < tr - edge * m.heart.ways_scale:
 		return Vector3.INF
 	return keep_inside(m, h.pos)

@@ -872,7 +872,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if _banned(m, a, goal):
 		var dt: Vector3 = a.get("detour", Vector3.INF)
 		if dt == Vector3.INF or _banned(m, a, dt) or h.flat_dist(dt) < 2.0:
-			dt = m.world.random_ground()
+			dt = BotWays.keep_inside(m, m.world.random_ground())      # (a detour too stays out of the tide)
 			a["detour"] = dt
 		goal = dt; gk = "roam"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
@@ -983,7 +983,8 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		return h.dir_to(goal)
 	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
 		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
-		wp = {"goal": gt, "t": m.time, "aim": 0, "path": _grid_path(m, at, gt)}
+		var wide: bool = String(h.ai.get("goal_kind", "")) in RING_GOALS
+		wp = {"goal": gt, "t": m.time, "aim": 0, "path": _grid_path(m, at, gt, wide)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
@@ -1038,21 +1039,27 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 			return false
 	return true
 
-## Tiles of slack round the trip a tile path may use: a tight window first, then one wide enough to
-## reach a ramp beside a cliff (The Crown's raised Heart has two, 23 m out east and west).
-const PATH_SLACK := [8, 24]
+## Tiles of slack round the trip a tile path may use. Heading for the Heart ring or back in out of the
+## Blight (BotWays) a bot may also try a wide window, enough to reach a ramp beside a cliff (The Crown's
+## raised Heart has two, 23 m out east and west); everywhere a wide window had bots turning between detours.
+const PATH_SLACK := 8
+const PATH_SLACK_RING := 24
+const RING_GOALS := ["ring", "ring_in"]
 
-## A walkable tile path from a to b (tile centres), [] when none: in the tight window, else the wide one.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
-	for slack: int in PATH_SLACK:
-		var p := _grid_path_in(m, a, b, slack)
-		if not p.is_empty():
-			return p
-	return []
+## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
+## No path leads deeper into the Blight's tide than the ring or where the bot stands (BotWays.path_r).
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, wide: bool) -> Array:
+	var cap := BotWays.path_r(m, Vector3(a.x + 0.5, 0.0, a.y + 0.5))
+	var p := _grid_path_in(m, a, b, PATH_SLACK, cap)
+	if p.is_empty() and wide:
+		p = _grid_path_in(m, a, b, PATH_SLACK_RING, cap)
+	return p
 
-## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, returning tile centres.
-func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, slack: int) -> Array:
+## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
+## `cap` from the Heart, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, slack: int, cap: float) -> Array:
 	var W: World = m.world
+	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
 	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
 	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
 	var prev := {a: a}
@@ -1071,7 +1078,7 @@ func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, slack: int) -> Array:
 			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not W.inb(nx.x, nx.y):
 				continue
 			var i := W.idx(nx.x, nx.y)
-			if W.kind[i] != World.T_GROUND:
+			if W.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
 				continue
 			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue
