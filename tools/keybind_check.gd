@@ -46,6 +46,12 @@ func run(main: Node) -> void:
 			"glove 2 (match) and play (home) are separate contexts: no clash between them (%s %s)" % [str(vg), str(vp)])
 	var vd: Array = S.conflicts(_key(KEY_V), "dash")
 	ok(vd.any(func(x): return x[0] == "gear2") and vd.any(func(x): return x[0] == "play"), "giving another action V still warns about both (%s)" % str(vd))
+	# C: the Boki Summon in a match, a Boki's details at home; G stays the orders key
+	ok(S.slots("summon")[0] == "key:%d" % KEY_C and S.slots("details")[0] == "key:%d" % KEY_C,
+			"Summon ships on C, and C still opens a Boki's details at home")
+	var cs: Array = S.conflicts(_key(KEY_C), "summon")
+	ok(cs.is_empty(), "Summon (match) and details (home) are separate contexts: no clash (%s)" % str(cs))
+	ok(S.slots("throw")[0] == "key:%d" % KEY_G, "the orders key (throw) stays on G: C is Summon on the wisp line")
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))
