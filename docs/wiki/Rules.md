@@ -133,6 +133,8 @@ Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN
 | gems_ran | 1 |
 | gems_doc | Gems to you when your Boki wins (or dances a good solo), or for any other dance. |
 | card_s | 6 |
+| practice | {"bpm": 70, "rounds": [4], "phrases": 1, "score_beats": 1} |
+| practice_doc | The first dance on a save opens with this slow phrase (these keys over the ones above): the lead hops 4 beats at 70 bpm and you answer once; no prize. Skip it with interact; round one follows either way. |
 
 ## base_life (`content/rules/base_life.json`)
 
