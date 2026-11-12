@@ -551,7 +551,8 @@ const MOVES := {
 			}
 		]]},
 	# the lob: from low behind, the hand sweeps up and out high (0.14, it leaves), the body rising with
-	# it on its toes, a floaty follow-through
+	# it on its toes, a floaty follow-through; it lasts the Trade's 1.8 s flight: a bob up (1.52) and the
+	# squash as he drops into the box (1.70), ready for the arrive
 	"ostra_swap": {"keys": [
 		[0.00, {"gp": -0.7, "p": 0.12, "y": -0.25, "sq": 0.1, "fr": Vector3(0.28, -0.42, 0.28), "rw": 1.0}],
 		[0.06, {"gp": -0.9, "p": -0.18, "sq": 0.18, "lift": -0.04, "fr": Vector3(0.24, -0.5, 0.12), "rw": 1.0}],
@@ -563,7 +564,10 @@ const MOVES := {
 			}
 		],
 		[0.40, {"gp": 0.8, "p": 0.2, "lift": 0.14, "fr": Vector3(0.1, 0.6, -0.45), "rw": 0.7}],
-		[0.85, {}]]},
+		[0.85, {}],
+		[1.52, {"lift": 0.05, "sq": -0.08}],
+		[1.70, {"lift": -0.03, "sq": 0.14}],
+		[1.80, {"sq": 0.1}]]},
 	# the lob from the air (her air dash): the crook hand swung across her body low (0.08), then slung up and over
 	# in a wide arc as she stretches (0.18, it leaves); she settles into a drift, leaning into it with the hands
 	# and legs trailing back under the streaming hem, swaying gently side to side (a loop from 0.45) until she

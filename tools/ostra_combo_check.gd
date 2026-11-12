@@ -720,11 +720,15 @@ func _dash_moves(K: OstraKit) -> void:
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))
 			and not others.any(func(t): return ids.any(func(id): return (t as Dictionary).has(id)))
 	)
+	# (the ground lob is keyed to the whole flight, launch to the box shut; a Swollen Trade's arrive cuts it short)
 	var quickest := float(K.dash_def()["time_swollen"])
+	var flight := float(K.dash_def()["time"])
 	var lengths := ids.map(func(id): return float((KMovesStone.MOVES[id]["keys"] as Array)[-1][0]))
 	ok(
-		"item 35: each dash move's keyed length fits inside the quickest Trade (%.2fs)" % quickest,
-		lengths.all(func(l): return l > 0.2 and l <= quickest), str(lengths)
+		"item 35: the ground lob lasts the Trade's %.2fs flight, the air drift fits inside the quickest (%.2fs)"
+			% [flight, quickest],
+		absf(float(lengths[0]) - flight) < 0.034 and float(lengths[1]) > 0.2 and float(lengths[1]) <= quickest,
+		str(lengths)
 	)
 
 ## Items 17 and 75: while the lantern flies he drifts slowly (30% of run speed), holds his height even over the abyss,

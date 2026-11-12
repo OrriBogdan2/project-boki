@@ -1,6 +1,6 @@
 """Motley's hand-keyed clips: the table ostra_anim.py samples. Key = (t, {channels}, easing into it). ostra_pose.NEUTRAL lists the channels.
 The action clips run on the kit's clock: lengths and beats are those of the moves in scripts/match/kmoves_stone.gd (the Snap's release is its
-t = 0; an orb leaves at t = 0, a Trade's lantern at 0.14, the Well commits at 0.25). The Rig keeps the lift, squash and spins those moves key,
+t = 0; an orb leaves at t = 0, a Trade's lantern at 0 (the lob clip runs its whole 1.8 s flight), the Well commits at 0.25). The Rig keeps the lift, squash and spins those moves key,
 so here the box and body only answer them: the root bone isn't keyed. Everything is a jack-in-the-box: compress, release, overshoot, wobble."""
 import math
 
@@ -220,16 +220,22 @@ CLIPS = {
     # ---------------------------------------------------------------- Shift: Lantern Trade
     # holding Shift: the spring compresses, the smoke winds on
     "swap_aim": {"len": 0.66, "base": STILL, "add": lambda P, t: t > 0.16 and twitch(0.35, 30.0)(P, t), "keys": [(0.00, {}), (0.167, AIM_LOW, "out"), (0.66, AIM_LOW)]},
-    # the launch: the spring lets go with the lob (0.14 it leaves)
-    "swap": {"len": 0.85, "base": AIM_LOW, "keys": [
+    # the Trade's whole 1.8 s flight (dash.time; Swollen's 1.25 s cuts it at the arrive). Launch: the lantern leaves with the press, so the
+    # lob stroke is done by 0.033 (the coil is swap_aim's hold). Hang: he floats on (the hover is the Rig's, 0.3 m: the box stays up, only
+    # the jack moves) and his eyes ride the lantern up to its top (0.9) and down onto the spot, a sly narrowing as it falls. Landing: a
+    # last bob up, then he drops into the box and the lid shuts (1.70), the pose arrive bursts out of on the landing frame
+    "swap": {"len": 1.80, "base": AIM_LOW, "keys": [
         (0.00, {}),
-        (0.067, {"hR": (0.28, -0.32, 0.86), "spine": (6.0, 24.0, 4.0), "lift": (0.0, 0.0, -0.28)}),
-        (0.133, {"hR": (0.14, 0.26, 1.60), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 0.9, -0.4), "eR": (1.0, -0.2, -0.3), "cR": 0.05, "sR": 1.0, "hL": (-0.34, -0.05, 0.98), "fL": (-0.4, -0.3, -0.8), "pL": (0.5, 0.3, -0.3),
+        (0.033, {"hR": (0.14, 0.26, 1.60), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 0.9, -0.4), "eR": (1.0, -0.2, -0.3), "cR": 0.05, "sR": 1.0, "hL": (-0.34, -0.05, 0.98), "fL": (-0.4, -0.3, -0.8), "pL": (0.5, 0.3, -0.3),
                   "spine": (-10.0, -12.0, -5.0), "head": (-26.0, 8.0, -4.0), "jaw": 10.0, "cheek": 1.0, "lift": (0.0, 0.04, 0.16), "smoke": 0.0, "box": (0.0, 0.0)}, "smooth"),
         (0.30, {"lift": (0.0, 0.0, -0.05)}),
         (0.43, {"hR": (0.2, 0.22, 1.46), "fR": (0.3, 0.5, 0.8), "cR": 0.2, "head": (-20.0, 8.0, 6.0), "jaw": 5.0, "lift": (0.0, 0.0, 0.03)}),
-        (0.60, {"lift": (0.0, 0.0, -0.01)}),
-        (0.85, dict(STILL, jaw=0.0, lift=(0.0, 0.0, 0.0))),
+        (0.70, {"head": (-34.0, 4.0, 2.0), "spine": (-6.0, -6.0, 0.0), "hR": (0.30, 0.20, 1.30), "cR": 0.3, "jaw": 8.0, "brow": 0.6, "lift": (0.0, 0.0, 0.05)}),
+        (1.00, {"head": (-36.0, 0.0, -4.0), "lift": (0.0, 0.0, 0.04)}),
+        (1.35, {"head": (-16.0, -2.0, 6.0), "spine": (6.0, -4.0, 2.0), "hR": (0.36, 0.14, 1.20), "hL": (-0.36, 0.16, 1.18), "brow": -0.4, "lid": 0.5, "jaw": 3.0, "lift": (0.0, 0.0, 0.0)}),
+        (1.52, {"lift": (0.0, 0.0, 0.08), "body": 1.04, "hR": (0.40, 0.10, 1.40), "hL": (-0.40, 0.10, 1.40), "spine": (-8.0, 0.0, 0.0), "head": (-22.0, 0.0, 0.0), "lid": 0.2, "smoke": 0.4}),
+        (1.70, {"body": 0.02, "lidb": 1.0, "lift": (0.0, 0.0, -0.47), "hR": (0.12, 0.06, 1.68), "hL": (-0.12, 0.06, 1.68), "fR": (0.0, 0.1, 1.0), "fL": (0.0, 0.1, 1.0), "smoke": 0.0}, "in"),
+        (1.80, {"body": 0.02, "lidb": 1.0}),
     ]},
     # the same from the air, then drifting after his lantern (about 1.4 m/s): the box leads, tipped into the drift, the body strung out behind (loops from 0.47)
     "swap_air": {"len": 1.27, "base": STILL, "keys": [

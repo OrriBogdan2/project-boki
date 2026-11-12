@@ -140,8 +140,8 @@ func _snap(m: Match, P: Hunter, K: OstraKit, T: Hunter, home: Vector3) -> void:
 	_settle(m, P, K, home, 0.8)
 
 ## Shift: the aim pose holds while the key is down; the lantern leaves on the release (the lob clip's hand lets go
-## at its 0.14 key) and the flight takes 1.8 s (source: cast 0158, teleport 0168, "about 1.8 s"); he arrives on the
-## landing frame.
+## at its 0.033 key) and the flight takes 1.8 s (source: cast 0158, teleport 0168, "about 1.8 s"); the lob clip
+## holds him the whole flight (launch, hang, down into the box) and he bursts out of it on the landing frame.
 func _swap(m: Match, P: Hunter, K: OstraKit, T: Hunter, home: Vector3) -> void:
 	T.teleport(home + Vector3(6.0, 0, 0))
 	C.fresh(T)
@@ -155,7 +155,7 @@ func _swap(m: Match, P: Hunter, K: OstraKit, T: Hunter, home: Vector3) -> void:
 			cast[0] = t
 	K.on_dash(false)
 	var landed := func() -> bool: return K.swaps > s0
-	var r := _time(m, P, K, ["ostra_swap_aim", "ostra_swap", "ostra_arrive"], 3.0, landed, hold)
+	var r := _time(m, P, K, ["ostra_swap_aim", "ostra_swap", "ostra_arrive"], 3.6, landed, hold)
 	print("TIME swap cast %.2f" % cast[0])
 	C.ok("Shift: the aim pose owns the body by %.2f s and the lantern leaves on the key's release" % BLEND_IN,
 		float(r["in"]) >= 0.0 and float(r["in"]) <= BLEND_IN + 0.001 and cast[0] >= 0.5 and cast[0] <= 0.5 + 0.05,
@@ -163,8 +163,10 @@ func _swap(m: Match, P: Hunter, K: OstraKit, T: Hunter, home: Vector3) -> void:
 	var flight: float = float(r["hit"]) - float(cast[0])
 	C.ok("Shift: the flight takes the source's 1.8 s from the throw to the landing (and he lands then)",
 		absf(flight - 1.8) < 0.05, "%.2f" % flight)
-	C.ok("Shift: the body is back with the legs during the flight, before the landing frame",
-		float(r["out"]) > cast[0] and float(r["out"]) < float(r["hit"]), "out %.2f" % r["out"])
+	var arrive_len: float = _clips(P).lib.get_animation("arrive").length
+	C.ok("Shift: the lob clip holds the body through the flight and hands it to the arrive, legs back after that",
+		float(r["out"]) > float(r["hit"]) and float(r["out"]) <= float(r["hit"]) + arrive_len + HAND_BACK + 0.05,
+		"out %.2f hit %.2f" % [r["out"], r["hit"]])
 	_settle(m, P, K, home, 0.8)
 
 ## E: the seed is down on the press and the palm turns over it by 0.2 s; the recast pops it, the fists clench in.
