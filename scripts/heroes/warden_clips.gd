@@ -76,6 +76,7 @@ var air_w := 0.0
 var glide_w := 0.0
 var dive_w := 0.0
 var tilt: WardenAirTilt      # the whole body pitched and banked in the air
+var knock: WardenKnockLean   # the hips tipped where a knock sends him
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
@@ -186,6 +187,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
 	tilt = WardenAirTilt.new(glb, sk, d["air"])
+	knock = WardenKnockLean.new(sk, d["loco"])
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
@@ -639,6 +641,7 @@ func step(dt: float) -> void:
 		_recoil(s, dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	knock.step(s, not proc, dt)
 	stride.step(dt, s, self)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
