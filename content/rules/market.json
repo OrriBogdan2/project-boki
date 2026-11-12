@@ -38,7 +38,7 @@
 		"ink_storm": {"name": "Storm Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "f0d040", "desc": "A vial of Storm Ink. Some Boki evolve when it is used on them."},
 		"ink_frost": {"name": "Frost Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "9ae0f0", "desc": "A vial of Frost Ink. Some Boki evolve when it is used on them."},
 		"ink_shadow": {"name": "Shadow Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "4a3a6a", "desc": "A vial of Shadow Ink. Some Boki evolve when it is used on them."},
-		"ink_lunar": {"name": "Lunar Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "d8d0ff", "desc": "A vial of Lunar Ink. Some Boki evolve when it is used on them."},
+		"ink_lunar": {"name": "Fairy Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "d8d0ff", "desc": "A vial of Fairy Ink. Some Boki evolve when it is used on them."},
 		"ink_prism": {"name": "Prism Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "f08ae0", "desc": "A vial of Prism Ink. Some Boki evolve when it is used on them."},
 		"ink_wyrm": {"name": "Wyrm Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "8a3a3a", "desc": "A vial of Wyrm Ink. Some Boki evolve when it is used on them."}
 	},
