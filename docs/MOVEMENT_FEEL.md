@@ -60,8 +60,6 @@ Nothing here comes from SUPERVIVE's files.
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
 | dash_curve_<hero>_peak_u / _peak_k (gunslinger, juggernaut, archer: where the speed peaks, peak / mean) | flat | 0.11 / 1.86, 0.29 / 1.74, 0.44 / 1.86 | the fit ± ~0.08 / ± ~0.1 | [footage] docs/SUPERVIVE_FEEL.md "Dash speed curves" |
 | dash_curve_dist / dash_curve_exit_run (distance against the kit's, hand-over / run) | n/a | 1.00–1.01x / 0.31–1.0x | 0.95–1.05x / <= 1.05x | the curve's mean is 1; the skid falls through run speed |
-| flue_lift_hold_s / flue_hover_m (Cinder's Flue Flight: the hang at the ember ring, the height by its end) | 0s / 0.45m | 0.167s / 0.45m | 0.13–0.2s / 0.4–0.5m | [footage] Felix hangs 0.13–0.2s at the ring (15 fps, casts 1–2), flies low |
-| flue_turn_deg_s (the flight's heading, cursor swung a right angle) | 120 deg/s | 90 deg/s | 85–95 deg/s | [footage] Felix's jetpack peaks at ~85–100 deg/s (cast 2's end; cast 1 holds 52–67) |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
