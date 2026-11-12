@@ -700,7 +700,6 @@ func _plain_dash() -> void:
 	for airborne in [false, true]:
 		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
 		m.fields.clear()      # (a Boki's patch sparkles on its own clock)
-		P.xp = 0.0            # (the long glide-dive rows feed the xp trickle: no level-up ring mid-dash)
 		var radial0: int = m.fx.radial
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
