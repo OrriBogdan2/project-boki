@@ -55,9 +55,15 @@ top of the signature colour. Any new hard-coded colour in a kit needs a comment 
 | Tenzo's kit hard-coded molten red/orange | recoloured to cobalt in `dolm_kit`, `breah_*`, `rock_look` (FX only; the rock body stays sandstone) |
 | The reel had no held-LMB part | `hold` part in `tools/hero_vfx_reel.gd` |
 
+
+Soft edges (ext/vfx-soft-dots): the camera-facing effect shaders (`fx_dot`, LDFx's upright looks, HeroVfx's upright
+looks and motes) include `shaders/soft_fade.gdshaderinc` and fade out over 0.25 m where they meet the ground instead of
+cutting a hard line into it. One include, picked by renderer: Forward+/Mobile fade by the scene depth behind the
+fragment; Compatibility (no depth texture to spare) fades by height over the match's tile ground (`fx_ground`, shared by
+`FxGround` on the World; off outside a match). Flat looks (scorch, rings, ground decals) lie on the ground and don't
+fade. `--hero-vfx-check` asserts each shader takes the include and the match world shares its ground map.
+
 Still open (shared, not done here):
-- `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
-  breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
@@ -87,7 +93,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 8 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
 | 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
-| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
+| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: hold-blade glow (the ground clipping is done: soft edges above) |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
