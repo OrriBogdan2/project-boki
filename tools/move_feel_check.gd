@@ -980,10 +980,16 @@ func _wall2() -> Dictionary:
 					var hs: Vector2i = hi + side * sd
 					for k in range(0, 3):
 						var hk: Vector2i = hs + d * k
-						if not w.inb(hk.x, hk.y) or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 or w.sheer.has(w.idx(hk.x, hk.y)): good = false
+						if not w.inb(hk.x, hk.y) \
+								or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND \
+								or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 \
+								or w.sheer.has(w.idx(hk.x, hk.y)): good = false
 					for back in range(0, 4):
 						var lb: Vector2i = Vector2i(x, z) + side * sd - d * back
-						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0 or w.stairs.has(w.idx(lb.x, lb.y)): good = false
+						if not w.inb(lb.x, lb.y) \
+								or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND \
+								or int(w.level[w.idx(lb.x, lb.y)]) != l0 \
+								or w.stairs.has(w.idx(lb.x, lb.y)): good = false
 				if not good: continue
 				var n := Vector2(d)
 				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5
