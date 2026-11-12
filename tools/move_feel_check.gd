@@ -66,6 +66,12 @@ const T := {
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
+	"coyote_jump_050ms":       [">=", 1.0, "yes", "ran off a rim, jump 0.05s later: inside the 0.12s coyote [est]"],
+	"coyote_jump_100ms":       [">=", 1.0, "yes", "ran off a rim, jump 0.10s later: inside the 0.12s coyote [est]"],
+	"coyote_jump_150ms":       ["<=", 0.0, "yes", "ran off a rim, jump 0.15s later: past the coyote, no jump [est]"],
+	"buffer_jump_050ms":       [">=", 1.0, "yes", "jump 0.05s before landing goes off on landing: 0.12s buffer [est]"],
+	"buffer_jump_100ms":       [">=", 1.0, "yes", "jump 0.10s before landing goes off on landing: 0.12s buffer [est]"],
+	"buffer_jump_150ms":       ["<=", 0.0, "yes", "jump 0.15s before landing (3m): past the buffer, no jump [est]"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -386,11 +392,39 @@ func _jump() -> void:
 		if jumped and not P.gliding: bb = k
 		else: break
 	rec("jump_buffer_frames", bb)
+	_jump_grace(land_f)
 	# free fall for 1s from rest
 	_reset(flat + Vector3(0, 30.0, 0), false)
 	var y0 := P.pos.y
 	_steps(60)
 	rec("freefall_1s_depth", y0 - P.pos.y)
+
+## Jump grace (docs/MOVEMENT_FEEL.md "Jump grace"): run off a rim and press jump 0.05 / 0.10 / 0.15 s after
+## the last grounded step; fall from 3 m and press it 0.05 / 0.10 / 0.15 s before the landing step (land_f).
+## A ground jump leaves at Hunter.JUMP_V; a glider opening or nothing doesn't.
+func _jump_grace(land_f: int) -> void:
+	var rim := _find_rim()
+	for ms in [50, 100, 150]:
+		var late := roundi(ms / 1000.0 / DT)
+		if not rim.is_empty():
+			var rg: Vector3 = rim["at"]
+			var rd: Vector2 = rim["dir"]
+			_reset(Vector3(rg.x - rd.x * 1.0, rg.y, rg.z - rd.y * 1.0))
+			P.inp["move"] = rd
+			for i in 120:
+				m.step(DT)
+				if not P.grounded: break
+			_steps(late - 1)
+			P.inp["jump"] = true
+			m.step(DT)
+			rec("coyote_jump_%03dms" % ms, 1.0 if P.vel.y > Hunter.JUMP_V * 0.9 else 0.0)
+		_reset(flat + Vector3(0, 3.0, 0), false)
+		var jumped := false
+		for i in land_f + 4:
+			P.inp["jump"] = (i + 1) == land_f - late
+			m.step(DT)
+			if i + 1 >= land_f and P.vel.y > Hunter.JUMP_V * 0.9: jumped = true
+		rec("buffer_jump_%03dms" % ms, 1.0 if jumped else 0.0)
 
 ## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
 ## turn takes in the air).
