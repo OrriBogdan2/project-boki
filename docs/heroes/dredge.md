@@ -301,7 +301,7 @@ Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follo
 
 | Ability | Source (data > wiki > footage) | Ours | Assert (`--dredge-combo-check`) |
 |---|---|---|---|
-| Anchor Drop (E) | [wiki Kingpin Primal Slam]: "the downward force is not applied if Kingpin is over the abyss"; edge not stated | cast from the lip, the cone is cast anyway (it is round him, not at the cursor) and hits a foe hanging over the abyss (double at rank 3); over the abyss there is no downward push (existing rows) | `abyss: ...` rows of tools/abyss_cast.gd (`dredge()`) |
+| Anchor Drop (E) | [wiki Kingpin Primal Slam]: "the downward force is not applied if Kingpin is over the abyss"; edge not stated | cast from the lip, the cone is cast anyway (it is round him, not at the cursor) and hits a foe hanging over the abyss (double at rank 3); over the abyss there is no downward push (existing rows); cast at a lip, the ~1 bh hop (footage 0222) stops short of the edge so he stays on the island [?] (source silent on the hop at an edge; 0.24.6 combat-b) | `abyss: ...` rows of tools/abyss_cast.gd (`dredge()`) |
 
 ## Ability shot rules (parity: what each ability's shot or lane stops on)
 

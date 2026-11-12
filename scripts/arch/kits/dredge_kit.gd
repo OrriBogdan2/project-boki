@@ -56,6 +56,7 @@ var wind := 0.0                 # hold: the Anchor's wind-up left
 var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the telegraph is that exact cone)
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
+var hopping := false           # the Anchor hop is moving him (planted at its end)
 var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
@@ -570,15 +571,27 @@ func _tick_wind(dt: float) -> void:
 
 ## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
 ## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
-## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
+## far end of it and stays there (no ground slide on top: Hunters pass through Hunters, so no body stops it).
+## Skipped mid-barge or in the air (the barge and the dive own the motion there).
 func _hop(ed: Dictionary, t: float) -> void:
+	if hopping and (t >= float(ed["hop_from"]) + float(ed["hop_t"]) or _hop_at_lip()):
+		hopping = false
+		h.vel.x = 0.0
+		h.vel.z = 0.0
 	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
 		return
 	if not h.grounded or h.roll_t > 0.0:
 		return
+	if _hop_at_lip():
+		return     # at a lip the hop stops short: he stays on the island (abyss row, docs/heroes/dredge.md)
 	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
 	h.vel.x = v.x
 	h.vel.z = v.y
+	hopping = true
+
+func _hop_at_lip() -> bool:
+	var ahead := h.pos + Vector3(slam_dir.x, 0.0, slam_dir.y) * (h.r + 0.3)
+	return m.world.is_void(ahead.x, ahead.z)
 
 ## The slam's telegraph at fill `k`: the same cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
