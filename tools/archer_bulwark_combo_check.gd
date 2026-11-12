@@ -452,11 +452,17 @@ func _archer_combos() -> void:
 		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
 	)
 	var in0 := K.spirit.passed
-	var mk := [0.0]
+	var mk := [0.0, 0.0]      # the spirit walk's move_k inside something, and out in the open
 	step(m, 1.2, func():
 		P.inp["move"] = Vector2(1, 0)
-		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
-	var mk_in: float = mk[0]
+		var slot := 1 if K.spirit.inside else 0
+		mk[slot] = maxf(mk[slot], K.move_k()))
+	var mk_in: float = mk[1]
+	ok(
+		"pin cast-move: the Spirit Walk runs at 1.1 (footage 117-126 px/s against a 113 run: 1.04-1.12)",
+		absf(mk[0] - 1.1) < 0.01,
+		"move_k outside %.2f" % mk[0]
+	)
 	ok(
 		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
 		absf(mk_in - 1.1) < 0.01,
