@@ -57,7 +57,6 @@
   "pay_rage": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "revive_done": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "armor_hit": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
-  "train_hit": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "ab_charge": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass"
  },
  "_gain_db": "dB Sfx adds when it plays the sound: brings an old file that sits off its category's median back to it (tools/sfx_loudness.py measures them); a positive gain may not push its peak past peak_db",
