@@ -162,6 +162,14 @@
 		"dash": "Rank 3: recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s.",
 		"kin": "Rank 3: cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength."
 	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown"},
+		"x": {"early": "locked", "late": "locked", "source": "briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65)"},
+		"x_recast": {"early": "locked", "late": "free", "source": "briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out"}
+	},
 	"tells": {
 		"half": "a frost glow on foes that grows with each dart",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",

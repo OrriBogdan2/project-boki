@@ -130,8 +130,11 @@ func move_k() -> float:
 	if not swap.is_empty():
 		return (swap["hold"] as CastHold).slow_k
 	var casting := not snap.is_empty() or snap_rec > 0.0
-	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
-	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
+	return 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
+
+## Snap rank 3's burst of speed ([game data] +50 on the cast, +100 on a hit).
+func speed_bonus() -> float:
+	return boost_k if boost_t > 0.0 else 0.0
 
 ## Snap rank 3: a burst of speed on the cast, a bigger one when it hits (the later one replaces it).
 func _boost(k: float) -> void:
@@ -199,8 +202,8 @@ func _tick_weapon() -> void:
 		var hand := hand_pos(true)
 		KitLooks.of(m).hold_on("os_charge", "mote", h, hand, lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
 		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: magenta motes and smoke drawn into his hand
-			m.fx.burst(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
-			m.fx.burst(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
+			m.fx.debris(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
+			m.fx.debris(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
 ## fire stays plain orbs), then a straight build to 1 at lmb.idle.
@@ -354,9 +357,9 @@ func _tick_swap(dt: float) -> void:
 	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
 	KitLooks.of(m).hold_on("os_star", "star", h, p, TRADE_LOOK_K)
 	# a violet trail and dark void wisps off the lantern, and wisps curling off his hem while he hovers
-	m.fx.burst(p, Color(TRADE_COL, 0.8), 1, 0.8, 0.35, 0.0, 1.1 * TRADE_LOOK_K)
-	m.fx.burst(p, SMOKE, 1, 0.6, 0.6, -1.0, 1.6 * TRADE_LOOK_K)
-	m.fx.burst(from + Vector3(0, 0.3, 0), SMOKE, 1, 0.9, 0.6, -2.0, 1.4 * TRADE_LOOK_K)
+	m.fx.debris(p, Color(TRADE_COL, 0.8), 1, 0.8, 0.35, 0.0, 1.1 * TRADE_LOOK_K)
+	m.fx.debris(p, SMOKE, 1, 0.6, 0.6, -1.0, 1.6 * TRADE_LOOK_K)
+	m.fx.debris(from + Vector3(0, 0.3, 0), SMOKE, 1, 0.9, 0.6, -2.0, 1.4 * TRADE_LOOK_K)
 	var r := float(dd["radius"])
 	var ends := {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TRADE_COL, "col2": TRADE_EDGE}
 	AimKit.swap(h, "swap_fly", ends)
@@ -533,9 +536,10 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 # ------------------------------------------------------------------ E: Brimseed
 func cast_e() -> bool:
 	var ed := e_def()
-	var pw := HeroZones.walk(m, h.pos, aim(), float(ed["reach"]))
+	var from := HeroZones.footing(m, h)
+	var pw := HeroZones.walk(m, from, aim(), float(ed["reach"]))
 	var p: Vector3 = pw["pos"]
-	if not pw["ok"] or not HeroZones.fits(m, p, h.pos.y, false):
+	if not pw["ok"] or not HeroZones.fits(m, p, from.y, false):
 		seed_denied += 1
 		if h.is_local() and m.hud: m.hud.toast_small("No ground to plant on", col_of(ed))
 		return false
@@ -591,7 +595,8 @@ func _tick_seed(dt: float) -> void:
 		if float(seed["burn"]) <= 0.0:
 			seed["burn"] = float(ed["burn_every"])
 			for f in foes_in(seed["pos"], seed_radius()):
-				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
+				var burn := float(ed["burn"]) * float(ed["burn_every"]) * power("kin")
+				f.hurt(burn, h, {"src": "abil", "ab": "e", "tick": true})
 	if h.downed:
 		_pop(false)
 

@@ -1,7 +1,7 @@
 class_name HunterController
 extends CharacterBody3D
 ## Supervive-style top-down hunter movement: snappy WASD, jump, hold-to-glide
-## with heat, abyss lift, mini-dash / ex-dash, mantling, jump-pad launches.
+## with heat, abyss lift, mini-dash / ex-dash, mantling.
 ## Body origin is at the FEET (offset the collision shape up by half height).
 
 signal dashed(is_ex: bool)
@@ -110,16 +110,6 @@ func try_spike() -> bool:
 		return false
 	spike()
 	return true
-
-## Jump pads, knockbacks. Keeps horizontal momentum; dashing in adds a boost.
-func launch(impulse: Vector3) -> void:
-	var h := _flat(velocity)
-	if state == State.DASH:
-		h = _dash_dir * _dash_speed * cfg.jump_pad_dash_carry
-	velocity = h + impulse
-	_air_time = 0.0
-	_ground_lock = 0.1
-	_set_state(State.AIR)
 
 func respawn(at: Vector3) -> void:
 	global_position = at

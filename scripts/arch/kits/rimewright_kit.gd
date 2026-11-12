@@ -502,7 +502,7 @@ func _rinkrun_end(into_rime := false) -> void:
 		# ended in the air: she keeps the skate's speed the way any air dash does (Loco's air drag bleeds it)
 		h.vel.x = h.roll_dir.x * h.roll_speed
 		h.vel.z = h.roll_dir.y * h.roll_speed
-	play("tm_skate_stop")
+	play("tm_skate_stop" if h.grounded else "")      # the braced stop is a ground pose
 	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead
@@ -620,7 +620,9 @@ func _release_spear() -> void:
 	var dir := h.aim_dir()
 	var start := _spear_at(0.0)
 	var spd := float(ld["speed"])
-	var dist := AimMode.dist(h, float(ld["range"]))
+	# from her palms to the held ring's centre: a far cursor lands on the range edge, not SPEAR_AHEAD past it
+	var to := AimMode.point(h, float(ld["range"]))
+	var dist := Vector2(to.x - start.x, to.z - start.z).length()
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
 	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
@@ -918,8 +920,8 @@ func has_ult() -> bool: return true
 
 
 ## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside. Cast from
-## a skate, her momentum carries her on as the shell closes (x.carry_t, slowing evenly from the skate's speed
-## to a stop, so she travels speed * carry_t / 2), the rink riding with her; then she is rooted.
+## a skate, her momentum carries her on as the shell closes (x.carry_t, easing out as speed x (1 - (t/carry_t)^2),
+## so she travels speed * carry_t * 2/3), the rink riding with her; then she is rooted.
 func _start_rime() -> bool:
 	var carry := {}
 	if not rinkrun.is_empty():

@@ -42,6 +42,7 @@ func _try(kind: String) -> float:
 		h.inp["glide"] = true
 		if kind == "feather":
 			h.inp["glide"] = fmod(t, 0.9) < 0.6
+		h.inp["glide_btn"] = h.inp["glide"]     # (the glide button: a held Space never opens it)
 		if h._in_abyss() or h.out:
 			break
 		m.step(DT); t += DT

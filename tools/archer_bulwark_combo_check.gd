@@ -3,6 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -17,19 +19,24 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var aegis = load("res://tools/bjorn_aegis_input_check.gd").new()
+	aegis.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
 		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await HOLD.albert(self)
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails
+		await aegis.bjorn()
+	n += ult.n + own.n + launch.n + tall.n + aegis.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + aegis.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -280,8 +287,9 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	P.inp["fire"] = true
-	m.step(DT)
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+		P.inp["fire"] = true
+		m.step(DT)
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok(
@@ -458,7 +466,7 @@ func _archer_combos() -> void:
 		P.inp["move"] = Vector2(1, 0)
 		K.fx._process(0.0)
 		wash[0] = maxf(wash[0], P.wash)
-		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k() + K.speed_bonus()))
 	ok(
 		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
 		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,

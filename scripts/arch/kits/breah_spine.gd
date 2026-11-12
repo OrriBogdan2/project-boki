@@ -62,6 +62,8 @@ func drop() -> void:
 		phase = ""
 		k.cd["x"] = 0.0
 		AimKit.hide(k.h, "x")
+		if k.anim_id == "breah_spine_aim":
+			k.anim_id = ""        # the aim pose goes with the hold
 
 func tick(dt: float) -> void:
 	match phase:

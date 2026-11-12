@@ -118,8 +118,10 @@ func _follow() -> void:
 	while P.vel.y > 0.0 and not P.grounded:     # open at the top: the glider opens falling (decision 0027)
 		_walk(P, Vector2(-1, 0), Match.DT, watch)
 	P.inp["glide"] = true
+	P.inp["glide_btn"] = true     # (the glide button: a held Space never opens it)
 	_walk(P, Vector2(-1, 0), 1.4, watch)
 	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
 	_walk(P, Vector2(-1, 0), 2.0, watch)
 	_walk(P, Vector2(0, 1), 2.0, watch)
 	ok(float(st["max"]) <= 10.0, "never more than 10m from you through walk, dash, jump and glide (a dash outruns it for a moment) (max %.2fm)" % float(st["max"]))

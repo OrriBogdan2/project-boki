@@ -27,6 +27,10 @@ func run(main_node: Node, who: String) -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
 		await _growth()
 		await ults.mage()
+		var before: Array = [ac.n, ac.fails]
+		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
+		n += ac.n - before[0]
+		fails += ac.fails - before[1]
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
@@ -61,6 +65,15 @@ func _last_shot(m: Match, P: Hunter) -> Dictionary:
 	for i in range(m.shots.size() - 1, -1, -1):
 		if m.shots[i]["by"] == P: return m.shots[i]
 	return {}
+
+## How far a shot flies past its muzzle: its sweep starts at the body (ShotOrigin), so the muzzle lead is off.
+func _flight(sd: Dictionary) -> float:
+	var lead := 0.0
+	if sd.has("muzzle"):
+		var mz: Vector3 = sd["muzzle"]
+		var st: Vector3 = sd["start"]
+		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+	return float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length() - lead
 
 func _dash(m: Match, P: Hunter, hold_s: float, each := Callable()) -> void:
 	P.inp["dash_down"] = true
@@ -119,8 +132,7 @@ func _mage() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
-			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
+			not sd.is_empty() and absf(_flight(sd) - 13.0) < 0.5, "%.1f m" % _flight(sd))
 	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
@@ -693,7 +705,7 @@ func _gunslinger() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
+			not sd.is_empty() and absf(_flight(sd) - 11.0) < 0.6, "%.1f m" % _flight(sd))
 	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
@@ -826,6 +838,29 @@ func _gunslinger() -> void:
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
+	# yaw lock: a 180 deg cursor flip mid-charge turns the line <= its turn row (deg/s) * charge; the beam goes along it
+	ac.fresh(T)
+	KitStatus.clear_rattled(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(3, 0, 0))      # near enough that the lock's small turn still sweeps over it
+	ac.step(m, 0.1)
+	K.cd["e"] = 0.0
+	ac.aim_at(P, T.pos)
+	P.ak.use_e()
+	ac.step(m, 0.05)
+	var d0: Vector2 = P.aim_dir()
+	ac.aim_at(P, home + Vector3(-8, 0, 0))
+	ac.step(m, 0.5)
+	var cap: float = K.turn_deg_s("e", "early") * float(K.e_def()["charge"])
+	var turned: float = rad_to_deg(absf(d0.angle_to(P.aim_dir())))
+	ok("Longneedle yaw lock: a 180 deg flip turns it <= cap * charge",
+			turned > 1.0 and turned <= cap + 0.5, "%.1f of %.1f deg" % [turned, cap])
+	ac.step(m, 0.2)
+	var locked_now: Vector2 = K.needle_dir
+	var off := rad_to_deg(absf(d0.angle_to(locked_now)))
+	ok("Longneedle yaw lock: the beam fires along the locked line, not the cursor",
+			off <= cap + 0.5 and locked_now.x > 0.0 and ac.dmg(T) >= 30.0, "%.1f deg off" % off)
+	T.teleport(home + Vector3(8, 0, 0))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0

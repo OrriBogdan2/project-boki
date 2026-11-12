@@ -185,7 +185,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	vfx("knock")
 	_stoke_pose()
 	if h.dashes < h.max_dashes():
-		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
+		h.dashes = minf(h.max_dashes(), h.dashes + 1.0)     # one ram charge back; the recharge keeps its time
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
@@ -296,8 +296,11 @@ func _drop_holds() -> void:
 	jet.drop()
 
 func move_k() -> float:
-	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
-	return (0.6 if after_t > 0.0 else 1.0) * boost
+	return 0.6 if after_t > 0.0 else 1.0
+
+## Rank 3 Pyro Pounce: a burst of speed after a hit ([game data] +75 move speed).
+func speed_bonus() -> float:
+	return float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 0.0
 
 ## Rank 3 Cinder Shot holds a second charge.
 func rmb_charges() -> int:
@@ -314,6 +317,8 @@ func ignite_pct(f: Ent) -> float:
 	return 0.0 if lvl == 0 else float(d["ignite_bonus"]["tick_pct"][lvl - 1])
 
 # ------------------------------------------------------------------ LMB: Torch Lance
+func lmb_holding() -> bool: return was_held
+
 func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_key_was
 	lmb_key_was = held
@@ -358,7 +363,11 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
 	HeroVfx.of(m).hold(h, "lance")
-	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt, tip() - nozzle())
+	# the fire's rules start at her body (ShotOrigin), the same reach out; it's still drawn from the palm
+	var nz := nozzle()
+	var from := ShotOrigin.body(h, nz)
+	var reach := float(ld["range"]) + nz.distance_to(from)
+	hose.emit(from, h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), reach, dt, tip() - from)
 	flame_acc += dt
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
@@ -490,7 +499,6 @@ func _cinder_hit(f: Ent) -> void:
 	# the impact: a red flash and an ember shower (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
-	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
 	if cur > 0:
 		# a burning foe: upgrade, and the burn the foe had spreads to the ones around
 		spreads += 1
@@ -631,7 +639,6 @@ func _bash_impact(f: Ent) -> void:
 		_ram_reward()
 	vfx("ram_hit", (h.pos + f.pos) * 0.5, dir)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 
 ## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:

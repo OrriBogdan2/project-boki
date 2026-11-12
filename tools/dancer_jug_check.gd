@@ -10,6 +10,7 @@ const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
+const HOLD := preload("res://tools/hold_release_check.gd")      # how Kael's RMB hold ends
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -21,6 +22,7 @@ func run(main_node: Node, who := "all") -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
+		await HOLD.kael(A)
 	await combos(A)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
@@ -36,7 +38,8 @@ func thief(a) -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: ThiefKit = P.ak
-	T2.teleport(home + Vector3(0, 0, 5.5))
+	# parked clear of the Vault landing (~4.9 m): a shot now hits a body touching her
+	T2.teleport(home + Vector3(0, 0, 8.0))
 	A.ok("dancer: kit, model, Arc Bolts",
 			K != null and P.model.get_meta("arch") == "thief" and P.wid == "arc_bolts"
 			and Arch.name_of("thief") == "The Silver Thief",
@@ -183,7 +186,7 @@ func thief(a) -> void:
 					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
 	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
 	A.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
-			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
+			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.speed_bonus() > 0.15
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
 	var gold: Dictionary = AimKit.entry(P, "aim")
@@ -376,7 +379,7 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 	var dd: Dictionary = Arch.def("thief")["dash"]
 	var feel_t := float(K.dash_feel()["time"])
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES]
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]
 	var own := true
 	for mv in ThiefKit.CARTWHEELS:
 		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))
@@ -721,6 +724,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB hold: lane = contact width (body + %.1f m a side), drawn = hit" % K.LUNGE_REACH,
 			is_equal_approx(float(ln.get("width", 0.0)), 2.0 * (P.r + K.LUNGE_REACH))
 			and is_equal_approx(K.lunge_w(), 2.0 * (P.r + K.LUNGE_REACH)), "%.2f" % float(ln.get("width", 0.0)))
+	A.ok("juggernaut RMB hold: walks at 0.8 of a run while charging (source: the hold stretches run slower)",
+			is_equal_approx(K.move_k(), 0.8), "move_k %.2f" % K.move_k())
 	_crimson_soft(A, P, ln, "hold lane")
 	P.do_jump()
 	m.step(A.DT)
@@ -733,6 +738,8 @@ func juggernaut(a) -> void:
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
 	A.step(m, 0.5)
+	A.ok("juggernaut RMB hold: released, the walk is back to full",
+			is_equal_approx(K.move_k(), 1.0), "move_k %.2f" % K.move_k())
 	A.ok("juggernaut RMB hold: release flings you forward into them",
 			K.last_variant == "hold" and A.dmg(T) >= 18.0 and P.flat_dist(home) > 3.5,
 			"took %.0f moved %.1f" % [A.dmg(T), P.flat_dist(home)])

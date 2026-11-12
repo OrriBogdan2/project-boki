@@ -57,6 +57,14 @@ static func _under(e: Ent, p: Vector3, g: float) -> bool:
 	var near := Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.r + 0.15
 	return near and absf(e.pos.y - g) < 2.0
 
+## Where a zone cast measures its ground from: the caster, or the terrain under them in the air or a glide (a
+## cast needs ground at the target, not at the caster's height). Over the abyss it stays the caster.
+static func footing(m: Node, h: Hunter) -> Vector3:
+	var g: float = m.world.ground_at(h.pos.x, h.pos.z)
+	if h.grounded or g <= World.VOID + 1.0:
+		return h.pos
+	return Vector3(h.pos.x, minf(h.pos.y, g), h.pos.z)
+
 ## Walk from `from` toward `aim` up to `reach` and return the last legal spot:
 ## {ok, pos, stopped: "" | "reach" | "wall" | "abyss", over_abyss: the aim itself is over the abyss}.
 static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictionary:

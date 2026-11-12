@@ -242,6 +242,8 @@ func _all() -> void:
 		P.inp["move"] = Vector2.ZERO
 		ak.aim_at(P, T.pos)
 		ak.step(m, 0.05)
+		for mb in m.mobs: mb.queue_free()      # (one spawned on that last step would count as a third foe)
+		m.mobs.clear()
 	var hold_fire := func(secs: float):
 		var t := 0.0
 		while t < secs:
@@ -379,16 +381,17 @@ func _all() -> void:
 		"lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)",
 		absf(flash - (cold * 1.4 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * 1.4 + chip2]
 	)
-	# a burning foe builds Char as fast as a cold one (the old halving is gone)
+	# a burning foe builds Char as fast as a cold one (the old halving is gone). 0.8 s: the fire leaves from
+	# her body (ShotOrigin), so it reaches the foe ~0.08 s later than from the old 1.3 m nozzle
 	reset.call()
 	K.relight_t = 0.0
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	var char_cold: float = K.char_of(T)
 	P.inp["fire"] = false
 	reset.call()
 	K.relight_t = 0.0
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	ok(
 		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
 		"cold %.1f burning %.1f" % [char_cold, K.char_of(T)]
@@ -606,11 +609,11 @@ func _all() -> void:
 	)
 	ok(
 		"ram rank 3: a hit gives +16% speed and a 11.6% shield, and no instant burn",
-		P.shield >= P.max_hp * 0.11 and absf(K.move_k() - 1.16) < 0.02 and K.burning(T) == 0,
-		"shield %.1f move_k %.2f burning %d" % [P.shield, K.move_k(), K.burning(T)]
+		P.shield >= P.max_hp * 0.11 and absf(K.speed_bonus() - 0.16) < 0.02 and K.burning(T) == 0,
+		"shield %.1f bonus %.2f burning %d" % [P.shield, K.speed_bonus(), K.burning(T)]
 	)
 	ak.step(m, 2.5)
-	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
+	ok("ram rank 3: the boost ends after 2s", K.speed_bonus() <= 0.0, "bonus %.2f" % K.speed_bonus())
 	P.slot_lv["dash"] = 1
 	# --- Furnace Cloak: fires on the press frame, centred on Cinder whatever the cursor
 	reset.call()

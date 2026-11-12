@@ -1,5 +1,5 @@
 """ART-1 Hem's animation set (keyed as targets, solved here on tools/art1/posekit.py). Times match the kit's kmove tables
-(scripts/match/kmoves_pin_bjorn.gd) and longbow.json: the draw is one steady pull to Supercharged (1.15 s, no pose pop at
+(scripts/match/kmoves_pin.gd) and longbow.json: the draw is one steady pull to Supercharged (1.15 s, no pose pop at
 Empowered, 0.6 s) so it reads with item 55b's filling line; the perfect-timing circle has no pose of its own.
 Personality: cold, poised, economical, feet planted; every release is a flick, not a heave. She stands with a hand on
 her hip, chin up. The bow never leaves her left hand. Tasteful: confidence, not display.

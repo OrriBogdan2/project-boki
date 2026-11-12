@@ -38,6 +38,7 @@ const SNAP_T := 0.14                   # s the stretched arm takes to snap back 
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
+const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
@@ -324,9 +325,10 @@ func fire_rmb(c: Dictionary) -> void:
 	flying = true
 	scoop = []
 	# thrown mid-jump the hold keeps the speed he brought (up to his run: a dash's or launch's extra bleeds
-	# under the air drag), so a jump back carries on at its height; from a standstill it is the slow walk
-	hook_aloft = not h.grounded
-	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if hook_aloft else 0.0
+	# under the air drag), so a jump back carries on at its height; from a standstill it is the slow walk,
+	# steered as on the ground (item 31: the air's low control would leave him almost still)
+	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if not h.grounded else 0.0
+	hook_aloft = carry > float(rdf["fly_slow"])
 	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
 	m.sfx("dr_throw", h.pos, -2.0, 1.0)
@@ -435,7 +437,8 @@ func _grab(f: Ent, ally := false) -> void:
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
 	# the reel (Displace: a player online is hauled on their own game, the same way); wisps it scooped on the
 	# way come along without the swing
-	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": float(rdf["gap"])}
+	# the body stops adjacent, in front of him (footage 0130): `stop_gap` m of air left between the two bodies
+	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": h.r + f.r + float(rdf["stop_gap"])}
 	drag["dur"] = float(rdf["pull_max"])
 	var tow := drag.duplicate()
 	tow["swing"] = SWING
@@ -454,11 +457,16 @@ func _grab(f: Ent, ally := false) -> void:
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
 
+## The Anchor's wind-up holds him on its line (the "turn" e row) and the reel keeps him turned to the catch wherever
+## the cursor goes (footage 0147; the rmb row); the barge faces where it goes.
+func face_locked() -> bool:
+	return (wind > 0.0 or not pull.is_empty()) and h.roll_t <= 0.0
+
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
 ## Displace moves it ("haul"); here the arm follows it and the reel ends with it.
-func _tick_pull(_dt: float) -> void:
+func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
 	var state_changed: bool = not gone and f is Hunter and (f as Hunter).downed != bool(pull.get("wisp", false))
@@ -466,6 +474,9 @@ func _tick_pull(_dt: float) -> void:
 		_end_pull(false)
 		return
 	var fe := f as Ent
+	var to := Vector2(fe.pos.x - h.pos.x, fe.pos.z - h.pos.z)
+	if to.length() > 0.05 and face_locked():
+		h.face = lerp_angle(h.face, atan2(-to.x, -to.y), minf(1.0, dt * REEL_TURN))      # (face_locked)
 	if tells_visible():
 		_draw_arm(fe.pos + Vector3(0, 0.95, 0), _arm_thick())
 	for w in scoop.duplicate():
@@ -635,7 +646,7 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	m.displace.spike(f, -16.0, h)
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
+	Feel.hitstop(m, h, f, 30.0, {"melee": true, "ab": "k1"})      # (the anchor's spike deals no hit of its own)
 	stunned.append({"e": f, "until": m.time + stun})
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
@@ -785,6 +796,8 @@ func _tick_stop(dt: float) -> void:
 	if stop_t > 0.0 or h.roll_t > 0.0:
 		return
 	stop_t = 0.0
+	if not h.grounded:
+		return             # a barge off a ledge falls on with the shared dash exit
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(STOP_CARRY)
 	h.vel.x = flat.x
 	h.vel.z = flat.y
@@ -800,13 +813,13 @@ func _barge_trail(dt: float) -> void:
 
 func own_dash_trail() -> bool: return true
 
-## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (no burst: a dash never
-## explodes).
+## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (debris, not a burst: a dash
+## never explodes).
 func _clawed_turf(dir: Vector2) -> void:
 	if not h.grounded:
 		return
 	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
-	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
+	m.fx.debris(at, Color("6a5236"), 6, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
 ## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.

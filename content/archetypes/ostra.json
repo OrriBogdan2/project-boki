@@ -171,5 +171,12 @@
 		"half": "a ring of teal motes closes around him",
 		"full": "the lantern burns white and his ribbons lift",
 		"dash_spent": "a pale ripple where he stood"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:40 'she turns to the aim'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown"},
+		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248)"}
 	}
 }

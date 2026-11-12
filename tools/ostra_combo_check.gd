@@ -226,7 +226,7 @@ func _ostra() -> void:
 		"data: a full orb is 34% harder (353 vs 263)",
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
-	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -505,11 +505,11 @@ func _ostra() -> void:
 			elif K.snaps > 0: cast_k[0] = maxf(cast_k[0], K.boost_k))
 	ok(
 		"data rank 3: Snap speeds him up 11% on the cast and 22% on a hit",
-		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.move_k() - 1.215) < 0.01,
-		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.move_k()]
+		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.speed_bonus() - 0.215) < 0.01,
+		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.speed_bonus()]
 	)
 	step(m, 2.2)
-	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
 	P.slot_lv["sec"] = 1
 	# ---- data pass, Trade rank 3: allies beside him get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
 	P.slot_lv["dash"] = 3
@@ -714,7 +714,7 @@ func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))

@@ -82,7 +82,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `arch.gd` | Class data: lookups, weapon families, Boki infusion into sockets |
 | `arch_kit.gd` | One hunter's kit at run time; base class for the six kits |
 | `kits/*.gd` | `thief_kit`, `archer_kit`, `mage_kit`, `gunslinger_kit`, `juggernaut_kit`, `bulwark_kit` |
-| `hex.gd`, `kit_status.gd` | The Mage's Hex; kit statuses sent over the network |
+| `kit_status.gd` | Kit statuses sent over the network |
 | `oomph.gd`, `feel.gd` | Combat weight; the global feel spec |
 | `arch_demo.gd` | Screenshot tooling |
 
@@ -140,7 +140,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 ## scripts/feel/
 
 A stand-alone movement and camera lab (`--feel-lab`): `hunter_controller.gd`, `top_down_camera.gd`,
-`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `jump_pad.gd`, `kinfall_input.gd`. The
+`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `kinfall_input.gd`. The
 match's real movement is in `scripts/match/hunter.gd`.
 
 ## scripts/server/ and scripts/social/

@@ -827,6 +827,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	for pc in [[gset[0], Gliders.canopy_material(gskin, team_col, hero_col)],
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
+		gmi.name = "Lines" if glider.has_node("Canopy") else "Canopy"      # the sheet first: GliderHeat tints it
 		gmi.mesh = pc[0]
 		gmi.material_override = pc[1]
 		ShadowPolicy.judge(gmi)

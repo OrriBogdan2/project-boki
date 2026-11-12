@@ -308,6 +308,8 @@ func wave_k() -> float:
 	var ld := lmb_def()
 	return clampf((lmb_t - float(ld["tap"])) / maxf(0.05, float(ld["full"]) - float(ld["tap"])), 0.0, 1.0)
 
+func lmb_holding() -> bool: return lmb_t >= 0.0
+
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
@@ -701,6 +703,11 @@ func _end_held_poses() -> void:
 	if over:
 		anim_id = ""
 
+## Stunned or downed holding the Lunge: the charge ends with no lunge (its pose goes with _end_held_poses).
+func _rmb_dropped() -> void:
+	lunge_full = false
+	perfect_flashed = -1
+
 ## The RMB variants by state: docs/heroes/juggernaut.md "RMB: the interaction table".
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
@@ -729,7 +736,7 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
-	if h.stun_t > 0.0 or h.downed or Hex.active(h):
+	if h.stun_t > 0.0 or h.downed:
 		slam_w = {}          # interrupted
 		return
 	# the short crimson strike cone ahead of him, filling as the wind-up runs (everyone sees it)
@@ -768,7 +775,6 @@ func _slam(pin := Vector2.ZERO) -> void:
 		var sw: Array = sl["sweet"]
 		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
 		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
-		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
 			# the data's "edge hits do more": the far tip lands sweet_k harder
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["sweet_k"]) * power("sec"), h,

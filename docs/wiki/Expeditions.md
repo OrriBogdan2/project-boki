@@ -25,8 +25,8 @@ want to land (bots ping too). Then the skyship crosses the map.
 
 ## Moving around
 
-- **Jump and glide.** Hold Space in the air (or press Mouse 5, which opens the glider at once without
-  a jump). Speed is what keeps you up: fast gliders barely sink. Steer hard against your heading to
+- **Jump and glide.** Press Space again in the air and hold it (or hold Mouse 5, which opens the glider
+  at once without a jump); holding Space from the jump never glides. Speed is what keeps you up: fast gliders barely sink. Steer hard against your heading to
   brake. The glider heats up (about 14 seconds of level gliding); it cools fastest on the ground.
 - **Feathering.** Opening and closing the glider is instant with no penalty. With it closed in the air
   it cools a little, and for a moment after closing you keep the glide's speed and steering, so

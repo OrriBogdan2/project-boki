@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Dancer: ThiefKit.fires_in_dash reads dash.*.lmb.mode and ThiefKit._empowers reads dash.*.lmb.variant; a move another press starts mid-cartwheel waits out the flip (ThiefKit.play). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Dancer: ThiefKit.fires_in_dash reads dash.*.lmb.mode and ThiefKit._empowers reads dash.*.lmb.variant; a move another press starts mid-cartwheel waits out the flip (ThiefKit.play). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). window.source: the footage evidence for the buffer window (DashFlow.BUFFER_S), shown in docs/heroes/dash_interactions.md. dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "fire", "variant": "empowered", "source": "Data: Quickflip dashes and empowers the next Arcslinger (+214 damage); landing it resets Quickflip. Footage 0193: the Cartwheel and the empowered shot leave on the same frame, so the bolt goes mid-flip."},
@@ -22,5 +22,43 @@
 		"e": {"mode": "fire", "source": "Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to."},
 		"x": {"mode": "fire", "source": "Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	},
+	"window": {"source": "Sable (dancer.md 131-136, 452; 10 fps): hit at 0187, Cartwheel at 0193 and the empowered shot out in the same frame (it hits at 0194): LMB fires inside the 0.3 s dash (fire row); no gap resolves."},
+	"glide_rows": [
+		{
+			"pair": "air dash -> glide press",
+			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
+			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. Her air Shift is the 0.9 s Cartwheel glide-dash: the press ends it. Asserted in --airdash-glide-check."
+		},
+		{
+			"pair": "ability -> glide press",
+			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
+			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.68 s; RMB 0.73 s; E 0.43 s; X 0.38 s; Q at once (n/a: the press did not go off in the air in the check)."
+		},
+		{
+			"pair": "hold -> glide press",
+			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
+			"ours": "glide pressed 0.3 s into a hold: LMB shut while held; RMB 0.47 s; E 0.68 s; X 0.12 s; Q at once."
+		}
+	],
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:97); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:98); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:100); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:101); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"}
+	},
+	"dash_jump": {
+		"ground": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Shiv): the one jump is a jump into a Cartwheel (dancer.md:431-440); no Space inside a Cartwheel.", "verdict": "[?]"},
+		"air": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Shiv): the one jump is a jump into a Cartwheel (dancer.md:431-440); no Space inside a Cartwheel.", "verdict": "[?]"},
+		"rise": {"ours": "dash", "source": "Footage 0129-0134 (dancer.md:431-440): she jumps at 303.8 s and cartwheels from 304.0 s, still rising (0130 airborne, 0131 the Cartwheel card up): the flip goes at once off the jump, flat, 'no extra float or hang'.", "verdict": "match"},
+		"same": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Shiv): the one jump is a jump into a Cartwheel (dancer.md:431-440); no Space inside a Cartwheel. The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open."},
+		"e": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open."},
+		"x": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open. The source has air dashes (supervive_kits.md:10-11, :58-59); ours: Shift in a glide is the air dash and hands its speed back to the glider."}
 	}
 }
