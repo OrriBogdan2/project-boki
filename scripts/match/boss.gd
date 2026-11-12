@@ -38,6 +38,8 @@ var anim_kind := ""          # what the model is doing: slam, throw, roar, spit,
 var anim_k := 0.0
 var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
+var add_k := 0               # egg-sac adds hatched so far: the next one's kind cycles BROOD_ADDS, no dice
+const BROOD_ADDS := ["skitter", "skitter", "bomber", "spitter"]   # phase 0 cycles the first two, then +1 a phase
 
 const COL := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
 
@@ -601,8 +603,10 @@ func _atk_brood() -> void:
 	_begin("brood", w + 2.4, "roar")
 	var n := 2 + phase
 	for i in n:
-		var a := TAU * i / n + randf() * 0.6
+		var a := TAU * i / n + 0.3 * float(add_k % 3)      # fixed spots round it (they turn a little each brood)
 		var at := clamp_in(pos + Vector3(cos(a), 0, sin(a)) * 3.0, 0.8)
+		var kind: String = BROOD_ADDS[add_k % (2 + mini(phase, 2))]
+		add_k += 1
 		at.y = centre().y
 		# egg sacs: glowing eggs that wobble, then burst into adds
 		var egg := Node3D.new()
@@ -616,7 +620,7 @@ func _atk_brood() -> void:
 		_at(w + 2.2, func():
 			m.fx.burst(at + Vector3(0, 0.4, 0), Color("e0b040"), 16, 4.0, 0.5, 6.0)
 			m.sfx("die_small", at, -2.0, 1.3)
-			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][randi() % (2 + mini(phase, 2))], at))
+			m.lairs.spawn_add(lair, kind, at))
 
 func _atk_burrow() -> void:
 	_begin("burrow", 3.6, "burrow")
