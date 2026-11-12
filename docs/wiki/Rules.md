@@ -254,8 +254,8 @@ Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd
 | rival_team_doc | The visiting team's name on the card. Each of its Boki matches one of yours in species and has that Boki's stats times the cup round's min_ratio (garden_prizes.json cup.rounds), so the cup counts every win. |
 | close_step | 0.05 |
 | close_step_doc | A great or duo hand-off brings the two runners this much closer (rec bonds). |
-| beats | {"contact_s": 0.3, "burst_s": 0.4, "burst_rate": 1.6, "sulk_drop": 0.35, "finish_s": 2.0} |
-| beats_doc | Body language (scripts/home/relay_beats.gd). contact_s: s both runners play their react at a hand-off. burst_s and burst_rate: the next runner's run clip plays at this times its pace for this long as it launches (a duo pair swells and eases it). sulk_drop: rad a loser without a sulk clip pitches its head down. finish_s: s the teams show their cheer or sulk before the result card. |
+| beats | {"contact_s": 0.3, "burst_s": 0.4, "burst_rate": 1.6, "sulk_drop": 0.35, "finish_s": 2.0, "fallback": {"win": "hop", "sulk": "idle"}} |
+| beats_doc | Body language (scripts/home/relay_beats.gd). contact_s: s both runners play their react at a hand-off. burst_s and burst_rate: the next runner's run clip plays at this times its pace for this long as it launches (a duo pair swells and eases it). sulk_drop: rad a loser without a sulk clip pitches its head down. finish_s: s the teams show their cheer or sulk before the result card. fallback: the rig clip a runner plays when its species has no clip of that name (win hops; sulk stands, its head drops by sulk_drop). |
 | gems_win | 8 |
 | gems_ran | 2 |
 | gems_doc | Gems to you when your team wins, or for any other relay. |

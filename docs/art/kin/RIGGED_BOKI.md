@@ -190,3 +190,46 @@ Worst stop slip in metres, origin/main 88b06b9e7 → this change. The same measu
 
 Every other legged Boki ends at 0.13 m or less. What is left is the blend-out: the held stride's planted paws drag
 to the idle stance (up to ~0.1 m). Removing that takes baked stop clips that lift the paws (`docs/DEBT.md`).
+## State coverage
+`--boki-anim-audit` also drives all 22 rigged Boki through every state the game plays (`tools/boki_state_cover.gd`)
+with the metas and speeds the game sets, and fails if a state does not resolve to the clip its row names, to a clip
+the Boki lacks, or to one that never leaves the bind pose or holds a single pose. Every Boki lands on the same clip
+in every state, so the table is per state (22 Boki x 36 states, 0 gaps). Kinds: **authored** (baked in the glb by the
+species' `*_anim.py`), **retargeted** (`BokiHomeClips`: the species' own idle or sleep with body-plan deltas),
+**fallback** (the state has no clip of its own: the best existing one of the same rig plays), **proc** (a spring layer
+on top, no clip).
+| State | Where | Clip | Kind |
+|---|---|---|---|
+| idle, perch (on a shoulder) | home, garden, match | idle | authored |
+| walk / run / summon recall / Relay run | home, match, garden | walk / run (rate from speed) | authored |
+| joy (cheer) | home, match | hop | authored |
+| attack, ability | match | attack, ability | authored |
+| chop, mine, carry, tend | home jobs | same name | authored |
+| hit | match | whatever plays + `KinFlinch` | proc |
+| stun | match | idle (sad face, spins) | fallback, authored |
+| summon throw (in the air) | match | run | fallback, authored |
+| faint, then held, then revive | match | settle, nap, wake | fallback, retargeted |
+| settle, nap, wake | home | same name | retargeted |
+| munch, ball (nudge), post (climb), tub / wade (splash) | home, garden | same name | retargeted |
+| Tumble rush, brace, dodge; Echo hop (stonehop), spin | garden | same name | retargeted |
+| Relay bump (nudge), brace, duo tap (stonehop) | garden | same name | retargeted |
+| Relay win | garden | hop | fallback, authored |
+| Relay sulk | garden | idle, head dropped | fallback, authored |
+Gaps found and filled without new art: a **fainted** Boki (a match `downed` state) lay on its side but kept playing
+idle (or the walk, sliding); `Kin.render` now sets the `kdown` meta and `BokiRig` treats it like home sleep: settle
+down, nap (curled, slow breathing), wake on revive. The Relay's **win** and **sulk** names have no clip on any rig, so
+both played a happy `stonehop`; the data in `content/rules/base_relay.json` "beats"."fallback" now gives win its
+hop and sulk its idle (with the head drop). `eat` and `pet` are baked but no game state plays them.
+Shared base: where a species did not write its own clip, it plays the shared one from `boki_clips.py` with only
+its sway layer on top. Those are, per species, cindle, puddlet, burrlet, glintmole, rimeshrew, nettlynx: idle, walk,
+run, hop, pet, carry, tend; pebbit: idle, run, hop, pet, carry, tend; cairnback: idle, hop, pet, carry, tend; hivara:
+idle, walk, hop, pet, carry, tend; mossgrade: idle, hop, tend; gloamshell: pet, tend; glomwort: tend. The other
+twelve Boki write all of theirs.
+### States that truly need authored clips
+None of these is a gap (each resolves to a real clip); each is a stand-in an animator should replace:
+1. **faint / downed** (fall, lie, get up): today settle then nap; a fall onto the side and a get-up on revive.
+2. **hit** (stagger): a spring layer only; a short flinch clip per body plan would read better.
+3. **stun / dazed**: idle with a sad face and a spin; a woozy sway.
+4. **summon throw** (flying): the run clip; a tucked tumble or glide (`ext/anim-boki-hop-air` plays hop in the air).
+5. **Relay win** and **sulk**: a hop and a stand; a cheer jump and a slump.
+6. The shared idle, walk, run, hop, pet, carry and tend of the species listed above under "Shared base".

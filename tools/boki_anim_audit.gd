@@ -5,9 +5,11 @@ extends RefCounted
 ## pop, the paws' slip over a stop (gated on the STARTERS) and the turn on the spot. Fails a slide over MAX_SLIDE
 ## (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
 ## BokiRig.STRIDE must also match what the clips measure. Table: docs/art/kin/RIGGED_BOKI.md "Gait audit".
+## Then every Boki in every state the game plays resolves to a clip (boki_state_cover.gd, "State coverage").
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
+const Cover := preload("res://tools/boki_state_cover.gd")
 ## m/s: a stroll, a home wander, a home fetch (home.gd); the match speed is added per species.
 const HOME_SPEEDS := [1.5, 2.4, 4.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
@@ -58,6 +60,10 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	for id in Check.SPECIES_LIST:
 		await _species(main, id)
+	var cover := Cover.new()
+	for id in Check.SPECIES_LIST:
+		await cover.species(main, id)
+	bad += cover.bad
 	print("BOKIGAIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
