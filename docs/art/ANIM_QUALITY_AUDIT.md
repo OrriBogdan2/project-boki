@@ -6,7 +6,7 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 
 ## How this was measured
 
-- **`godot -- --anim-audit [--wardens=a,b] [--json=file]`** (tools/anim_audit.gd, headless, 19 s for all 12). It drives the
+- **`godot -- --anim-audit [--wardens=a,b] [--json=file]`** (tools/anim_audit.gd, headless, about a minute for all 12: 3 s of warm-up a row). It drives the
   game's own locomotion hand-off (the state carries the speed; WardenClips blends and scales) at 2.2 and 4.65 m/s and
   reads the bones.
   - **slide**: how far a foot in the lowest 30 % of its height range moves against the floor, |move speed - foot
