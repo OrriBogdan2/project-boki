@@ -311,7 +311,9 @@ Still differs:
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
 - Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Molten Guard: the shield per punch matches; the charge scaling is ours.
+- Molten Guard: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+  a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
+  damage and knockback only.
 
 Seen in the reel: the boulder trails an orange dotted line and bursts small, where the footage's bursts in a big
 fire flash with the damage number [F]; the punch shows its pale chevron lane but little impact, the footage a

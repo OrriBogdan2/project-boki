@@ -589,6 +589,32 @@ func _breah() -> void:
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
 		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
 	)
+	# PARITY: the same punch at the lowest charge (released just past the 0.28 s tap) gives the same flat shield
+	var full_shield := P.shield
+	reset.call()
+	K.use_e()
+	step(m, 0.3)
+	var rst := rocks(m)
+	var tx := K.rock_mid(rst[1]).x if rst.size() > 1 else home.x + 3.4
+	var tz := K.rock_mid(rst[0]).z if not rst.is_empty() else home.z
+	P.teleport(Vector3(tx - 0.25, home.y, tz - 1.6))
+	P.vel = Vector3.ZERO
+	T.teleport(Vector3(tx, home.y, tz + 14.0))
+	aim_at(P, Vector3(tx - 0.25, home.y, tz + 10.0))
+	P.fire_cd = 0.0
+	P.shield = 0.0
+	K.shield_stacks = 0
+	gp0 = K.guard_punches
+	P.inp["fire"] = true
+	step(m, 0.36, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"PARITY: Molten Guard is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
+		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - full_shield) < 0.01
+		and absf(P.shield - float(K.d["passive"]["guard"]["shield"])) < 0.01,
+		"tap %.1f full %.1f stacks %d" % [P.shield, full_shield, K.shield_stacks]
+	)
 	reset.call()
 	P.shield = 0.0
 	K.shield_stacks = 0

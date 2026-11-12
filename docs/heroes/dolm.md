@@ -66,7 +66,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | Shift ground (n/a), Shift air shove (LOW) | (c) | the owner's leap stays; the air dash has no source (owner question if wanted) |
 | Dash -> LMB air buffer (LOW) | (c) | the source-buffering finding keeps modes (coordinator) |
 | LMB punch auto-release (LOW) | (b) | held as long as you like, full stays full, one punch on release; asserted |
-| LMB damage ratios (LOW) | (c) | the charge scaling is ours (noted) |
+| LMB damage ratios (LOW) | (c) | the charge scaling of damage and knockback is ours (noted); the Molten Guard shield is not scaled by it |
 | X Basalt Spine, X auto-cast after 3 s (LOW) | (c) | documented; the 3 s cap keeps a forgotten hold from blocking the ult |
 | Hunter viewer moves (MED) | (b) | RMB `breah_crouch`, `breah_slam`; X `breah_spine_aim`, `breah_spine`; asserted |
 | Player-facing wiki name (MED) | (c) | the Tenzo rename is main's (done there) |
@@ -76,7 +76,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|
-| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
+| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks or the charge (a tap-charge punch gives the same 18 as a full one; asserted) | none | none |
 | Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 16m, 25 deg widening to 40 over 2s | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
 | LMB tap: boulder | tap (under 0.28s) | the shared aim line; flies its full 11m (AimMode.MAX) | 9 dmg, a molten tumbling boulder with an ember trail; bursts with a red ground ring, splashing foes within 0.9m for half | `breah_throw` | `br_throw`, `br_boulder_hit` |
 | LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held as long as you like (no timeout): full stays full until you let go | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
