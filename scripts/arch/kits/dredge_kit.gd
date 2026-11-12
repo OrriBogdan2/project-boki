@@ -325,7 +325,6 @@ func fire_rmb(c: Dictionary) -> void:
 	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if hook_aloft else 0.0
 	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
-	m.sfx("dr_throw", h.pos, -2.0, 1.0)
 	coil = float(rdf["windup"])
 
 ## The coil-back: the readable cue before a slow hook. A stun or a knock down in it cancels the throw.
@@ -366,6 +365,7 @@ func _launch_hook() -> void:
 			(sn as Node3D).visible = false          # the hook and the chain are drawn by the kit
 			hook_sd["node"] = null
 	vfx("hook_throw")
+	m.sfx("dr_throw", h.pos, -2.0, 1.0)      # when the hook leaves his hand, the clip's strike
 
 ## The hook in flight: the chain pays out slack from his hand and pulls straighter as it reaches. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.

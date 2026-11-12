@@ -18,9 +18,10 @@ const SYNC_MAX := 0.05         # s a sound may sit off its strike or hit before 
 const STRIKE_MIN := 8.0        # m/s: a hand slower than this at its fastest has no strike to see (a rifle's aim)
 const WIND := ["wind", "aim", "draw", "charge", "tell", "summon", "place", "count", "whirl", "hum", "creak",
 	"shield_up", "pilot", "spin", "leap", "prime"]
-## arch -> move -> [the sound fixed to play from its own event, that event: "strike", "hit" or "rise" (a Stone Row's
-## first rock up)]
-const FIXED := {"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"]}}
+## arch -> move -> [the sound fixed to play from its own event, that event: "strike", "hit", "rise" (a Stone Row's
+## first rock up) or "launch" (Grimble's hook leaves his hand after its coil-back)]
+const FIXED := {"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"]},
+	"dredge": {"rmb": ["dr_throw", "launch"], "hold": ["dr_throw", "launch"]}}
 
 var A
 var bad := 0
@@ -62,7 +63,7 @@ static func _wind(sname: String) -> bool:
 	return false
 
 ## s from sound `sname`'s first play to the nearest of the `events` (INF: it never played or none happened).
-static func _offset(r: Dictionary, sname: String, events := ["strike", "hit", "rise"]) -> float:
+static func _offset(r: Dictionary, sname: String, events := ["strike", "hit", "rise", "launch"]) -> float:
 	for s: Array in r["snd"]:
 		if s[0] == sname:
 			var best := INF
@@ -113,7 +114,7 @@ func measure(arch: String, mv: String) -> Dictionary:
 		if sk and sk.find_bone(nm) >= 0:
 			hands.append(sk.find_bone(nm))
 	var prev := {}
-	var out := {"snd": [], "hit": [], "strike": -1.0, "clip": "", "rise": -1.0}
+	var out := {"snd": [], "hit": [], "strike": -1.0, "clip": "", "rise": -1.0, "launch": -1.0}
 	var rocks := (P.ak as DolmKit).rocks_made if P.ak is DolmKit else 0
 	var fastest := STRIKE_MIN
 	var hp := T.hp
@@ -141,6 +142,8 @@ func measure(arch: String, mv: String) -> Dictionary:
 		hp = T.hp
 		if P.ak is DolmKit and (P.ak as DolmKit).rocks_made > rocks and float(out["rise"]) < 0.0:
 			out["rise"] = t
+		if P.ak is DredgeKit and not (P.ak as DredgeKit).hook_sd.is_empty() and float(out["launch"]) < 0.0:
+			out["launch"] = t
 		var c := _clips(P)
 		var v := 0.0
 		for bi: int in hands:
