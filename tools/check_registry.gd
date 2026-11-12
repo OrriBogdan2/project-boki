@@ -6,7 +6,7 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
-	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP and the 30 m squad share
+	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],  # last-hit XP, 30 m share
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
