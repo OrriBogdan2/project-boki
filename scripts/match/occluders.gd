@@ -88,7 +88,8 @@ func _box_tiles(x0: int, z0: int, s: int, lv: int) -> void:
 	var bottom := -INF
 	for z in range(z0 - 1, z0 + s + 1):
 		for x in range(x0 - 1, x0 + s + 1):
-			if _solid(x, z):
+			# (bridge and stair tiles too: a corner on their border is judged by their underside)
+			if _w.inb(x, z) and _w.kind[_w.idx(x, z)] != World.T_VOID:
 				bottom = maxf(bottom, _w.under[_w.idx(x, z)])
 	bottom += BOTTOM_GAP
 	if top - bottom < MIN_DEPTH:

@@ -40,7 +40,7 @@ var rolled := false
 const REVISIT_S := 0.25       # s between two looks at the same spot
 var _share := 0.0             # spots owed a look this frame (fractional)
 var _next := -1
-var _teams := {}              # squads still in the match, refilled each tick
+var _teams := {}              # team -> its hunters on the ground, refilled each tick
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -177,6 +177,8 @@ func roll(seed_val: int) -> void:
 		var pool: Array = of(cat)
 		var pk: Array = cats[cat].get("pick", [1, 1])
 		var n := clampi(r.randi_range(int(pk[0]), int(pk[1])), 0, pool.size())
+		if cat == "cache":
+			n = KeyChest.kept(n)      # caches are chests too: the same share as the map's
 		# shuffle with our own generator (Array.shuffle uses the global one)
 		for i in range(pool.size() - 1, 0, -1):
 			var j := r.randi_range(0, i)
@@ -234,7 +236,10 @@ func tick(dt: float) -> void:
 		return
 	_teams.clear()
 	for h in m.hunters:
-		if not (h.out or h.extracted or h.riding): _teams[h.team] = true
+		if h.out or h.extracted or h.riding:
+			continue
+		if not _teams.has(h.team): _teams[h.team] = []
+		_teams[h.team].append(h)
 	_share += cands.size() * dt / REVISIT_S
 	while _share >= 1.0:
 		_share -= 1.0
@@ -246,7 +251,7 @@ func _look(c: Dictionary) -> void:
 		c["taken"] = _is_taken(c)
 	var known: Dictionary = c["known"]
 	for t in _teams:
-		if known.has(t) or not _team_sees(int(t), c["pos"]):
+		if known.has(t) or not _team_sees(int(t), _teams[t], c["pos"]):
 			continue
 		known[t] = true
 		if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
@@ -254,13 +259,19 @@ func _look(c: Dictionary) -> void:
 			if not def.get("announce", false):
 				m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
 
-func _team_sees(team: int, p: Vector3) -> bool:
-	for h in m.hunters:
-		if h.team != team or h.out or h.extracted or h.riding:
-			continue
+## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
+## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map
+## made spots x squads x hunters the biggest step spike.
+const SIGHT_BOUND_K := 1.25 * 1.5    # sneak range bonus x headroom for sight gear
+func _team_sees(team: int, members: Array, p: Vector3) -> bool:
+	var dmin := INF
+	for h: Hunter in members:
 		var d := Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 		if d < (DROP_REVEAL_R if h.dropping else REVEAL_R):
 			return true
+		dmin = minf(dmin, d)
+	if dmin > (Match.VIEW_RANGE + 2.0) * maxf(m.sight_k, 1.0) * SIGHT_BOUND_K:
+		return false
 	return m.sees(team, p + Vector3(0, 0.4, 0))
 
 func _is_taken(c: Dictionary) -> bool:

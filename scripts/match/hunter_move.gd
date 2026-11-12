@@ -1,14 +1,11 @@
 class_name HunterMove
 extends RefCounted
-## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the step, ground stop, dash exit, air,
+## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
-const HOLD_DRIFT := 6.0          # m/s^2: a kit or tow holding your keys off (knock_t, no knock): momentum drifts down
-
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
-static var step: float = _phys["step"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]
@@ -30,18 +27,13 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
-static var knock_launch: float = _phys["knock_launch"]
-static var knock_max: float = _phys["knock_max"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
 	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
 	return parsed
 
-## (loads on demand: a class whose own static vars read these, as GlideSpike, can be set up before ours are)
 static func rules() -> Dictionary:
-	if _rules.is_empty():
-		_rules = _load()
 	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
@@ -73,6 +65,21 @@ static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
 
+## A knock (one that sets knock_t) or a stun landing on an air Shift dash after its i-frames ends the dash on the
+## spot, as a glide press does: the knock's push or the stun's stop takes over (source: a stun is "no movement",
+## a knockback pushes you). A kit's rush, and a dash on the ground, ride on (MOVEMENT_FEEL "Knocked in the air").
+static func cut_air_dash(h: Hunter) -> void:
+	if h.roll_t <= 0.0 or h.grounded or h.move_kind != "dash":
+		return
+	h.roll_t = 0.0
+	h.shove = {}
+
+## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
+## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An
+## air dash needs none: it carries its own speed through the step, under air drag after.)
+static func dash_rest(dash_v: Vector2, run_v: Vector2, left: float) -> Vector2:
+	return (dash_v - run_v) * maxf(0.0, left)
+
 ## A dash's speed at u (0..1 through it) against its mean, on a piecewise-linear curve of [u, k] knots
 ## (content/rules/dash_feel.json "curve": mean 1, so the dash still covers its distance).
 static func dash_k(curve: Array, u: float) -> float:
@@ -100,30 +107,6 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 		else:
 			hi = mid
 	return hi
-
-## A knocked hunter's horizontal speed for one step, as the source's movement takes a launch. On the ground
-## over run speed, UE's over-max brake: ground_friction * v + brake_decel, the keys can't add to it, and keys
-## along it hold run speed. In the air, the falling rules' drag over run speed (Loco.air_drag). Either way
-## the keys bend it by the attack's knock_steer ([patch] Jun 2025: WASD steers knockback, high or medium
-## influence). Back on the ground at run speed the knock is over and the walk takes you. A knock_t with no
-## knock (a kit or a tow holding your keys off for a frame) only lets the momentum drift down at HOLD_DRIFT.
-static func knock_step(h: Hunter, hv: Vector2, mv: Vector2, run: float, dt: float) -> Vector2:
-	h.knock_slide = h.knock_slide and h.knock_t > 0.0
-	if not h.knock_slide:
-		return hv.move_toward(Vector2.ZERO, HOLD_DRIFT * dt)
-	var s := hv.length()
-	var s2 := s if s <= run else run + (s - run) * exp(-Loco.air_drag * dt)
-	if h.grounded:
-		s2 = maxf(0.0, s - (ground_friction * s + brake_decel) * dt)
-		if s2 <= run:
-			h.knock_t = 0.0
-			h.knock_slide = false
-			if mv.dot(hv) > 0.0:
-				s2 = minf(s, run)
-	var v := hv * (s2 / s) if s > 0.0 else hv
-	if mv.length() > 0.1:
-		v = (v + mv * s2 * h.knock_steer * 4.0 * dt).limit_length(s2)
-	return v
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
