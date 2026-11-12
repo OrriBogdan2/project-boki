@@ -121,6 +121,20 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 - **Rimelock and Shift (owner item 27):** the source data says nothing about dashing out, so Shift ends it the way X again does (a late press still cracks it open at two thirds) and starts the skate at once at full speed. She is rooted while sealed, so the speed she carries out is the skate's own; any planar speed she still had (a knock) is kept for 0.5s. In the air the skate starts at once (item 62).
 - **Rimelock and the bond:** `HeroUlt.landed` for each hunter the crash stuns; the cast pays once, for its best event ("hit", "knock" if a hunter went down, "kill" if one was eliminated), through `KinBond.from_ult` with one cast id per cast. Monsters pay nothing (the shared base counts hunters only). The sheet's 0.4 per hunter up to 0.8 is replaced by the main session's per-cast amounts (boki_system.json). An early break pays nothing.
 
+## Rimelock movement, settled (Nov 10)
+Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/tamsin.md). The source roots her for the whole ult [D]
+[F] f25-f61; the carry is the owner's (DECISIONS: "skating into it carries her forward a decent distance, then she's
+encased"). Nothing changed but a wrong code comment (it said the carry slows evenly, speed x carry_t / 2; the code and the
+card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `ledge` / `abyss` rows of `--rimewright-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | none: the carry runs along the skate; WASD and the cursor never turn it, facing locked | [O] items 64/65 |
+| Speed curve | from the skate's speed, speed x (1 - (t/0.8)^2) over 0.8 s, about 6.1 m at 11.5 m/s; cast standing she is rooted at once | [O] carry_t 0.8 |
+| End | the crash (or X early) frees her the same step, with no momentum; Shift out skates straight away at full speed | [F] f61 free; [O] item 27 |
+| Ledges | the carry slides off a terrace (never blocked) sinking at the skate's air fall (1.5 m/s), then she drops to the ground rooted | [O] items 62/64; DECISIONS "walking off ledges is always allowed" |
+| Abyss | the carry runs on over the void; sealed she cannot glide and falls; X (or Shift) frees her, and held glide opens 0.30 s later, the step her break move ends (the shared rule: no glider during an ability move) | [O] item 27, item 162b |
+
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
 |---|---|
