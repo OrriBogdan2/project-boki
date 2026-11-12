@@ -281,6 +281,32 @@ Asked: what happens to a Hunter under the glider who is shot, knocked, stunned o
 
 Kept: holding Space never opens the glider (DECISIONS 11-08; every reopen above is a fresh press), and an overheated glider still lifts out of the abyss at half strength (`--abyss-check`, `--glider-heat-check`). A glider that is still shut waits out a hard knock (0.4 s, [est]) before it opens. Still open for the owner: the older wiki note "most hits on a glider deal double damage" (ours keeps 1.0's normal damage), and "spiking a below-ground glider" (a hit on the balloon under the lip, at any heat; ours spikes only when the heat runs out).
 
+## Knocked in the air (`--glide-hit-check` rows "ACHECK row ..."; PARITY FIRST)
+
+Asked: what a knock or a stun does to a Hunter who is gliding, in an air dash or falling, for Lace, Kael, Vex and Albert. Source: `supervive_physics.md` has only Knockback/KnockbackResist 1.0 for every hunter and Mass 100 (no knock distances, no glider-hit values: the glide and heat constructor defaults are encrypted); the hero-ref frames show no hit on a glider; `docs/SUPERVIVE_DATA.md` sections 4-5: a hit doesn't knock you out of the air, a knockback pushes you and you can steer it, a stun is "no movement, no air control, no abilities". Dash protection stays short (0.14 s i-frames, `docs/DASHES_AND_ABILITY_FEEL.md`).
+
+Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6, or Albert's full Crushing Blow, kb 13 and a 0.4 s stun; stun = 0.5 s, no push. Knock speed is kb / mass (Lace 0.85, Vex 1.0, Kael and Albert 1.35). Each cell: how far the hit carried the Hunter, measured as the x gap to the same run with no hit at the end of a 1.3 s run, and when a press opened the glider after the hit ("-" means it never shut). Hit 0.05 s in; in an air dash, on the first step its i-frames are over. Measured 2026-11-12, 60 Hz.
+
+| State | Hit | Glider | Lace | Kael | Vex | Albert |
+|---|---|---|---|---|---|---|
+| Gliding | light | stays open | 1.81 m, - | 1.30 m, - | 1.24 m, - | 1.30 m, - |
+| Gliding | heavy (Kael RMB) | stays open (main folded it 0.43 s, decision 0055) | 6.80 m, - | 3.38 m, - | 5.17 m, - | 3.38 m, - |
+| Gliding | heavy (Crushing Blow) | shut by its stun | 12.74 m, 0.43 s | 8.32 m, 0.43 s | 10.99 m, 0.43 s | 8.36 m, 0.43 s |
+| Gliding | stun | shut | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s |
+| Air dash | light | (shut) | 2.35 m, 0.20 s | 0 m, 0.03 s | 1.97 m, 0.20 s | 0 m, 0.03 s |
+| Air dash | heavy (Kael RMB) | (shut) | 5.05 m, 0.43 s | 3.44 m, 0.57 s | 2.19 m, 0.43 s | 3.09 m, 0.43 s |
+| Air dash | heavy (Crushing Blow) | (shut) | 11.10 m, 0.43 s | 8.15 m, 0.57 s | 4.57 m, 0.43 s | 7.22 m, 0.43 s |
+| Air dash | stun | (shut) | 0 m, 0.53 s | 0 m, 0.57 s | 0 m, 0.53 s | 0 m, 0.53 s |
+| Falling | light | (shut) | 1.84 m, 0.20 s | 1.33 m, 0.03 s | 1.27 m, 0.20 s | 1.33 m, 0.03 s |
+| Falling | heavy (Kael RMB) | (shut) | 6.06 m, 0.43 s | 3.42 m, 0.43 s | 5.10 m, 0.43 s | 3.42 m, 0.43 s |
+| Falling | heavy (Crushing Blow) | (shut) | 12.74 m, 0.43 s | 8.32 m, 0.43 s | 10.99 m, 0.43 s | 8.36 m, 0.43 s |
+| Falling | stun | (shut) | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s |
+
+- **Fixed (air dash):** on main a knock or a stun that landed after the i-frames did nothing to an air dash: the dash kept driving (Vex 14 m/s, Albert 20 m/s straight on), the push was 0 m and was gone when the dash ended, and a stunned Hunter dashed on. Now a knock (one of 2.5 m/s or more, the one that sets `knock_t`) or a stun ends an air Shift dash that step, as a glide press does (`HunterMove.cut_air_dash`): the push comes in at its full speed and keeps the dash's leftover momentum (why Vex's sideways carry is shorter), a stun stops the drive and the momentum coasts under air drag. A hit inside the i-frames still misses. Kael's air Rampage spends its first 0.07 s in a wind-up, so his row is a hit in the wind-up: a knock or a stun cancels the Rampage.
+- **Fixed (gliding, decision 0055, stacked):** a knock carries an open glider instead of folding it for 0.4 s.
+- **Matches, not changed:** a stun shuts the glider and a fresh press opens it the step the stun ends (0.5 s stun: 0.53 s with the press). A shut glider waits out a shove over 4 m/s for 0.4 s ([est], kept: `--abyss-check` asserts it at the rim). A lighter knock (Lace and Vex, 2.6-3.1 m/s) keeps it shut for its 0.16-0.2 s slide. A nudge under 2.5 m/s (Kael and Albert, LMB) is not a knock: it neither ends a dash nor holds the glider.
+- **Not changed:** Kael's 0.57 s reopen after an air Rampage is AirLimits (the glider stays shut while his kit move runs, items 162). Ground dashes and kit rushes (move kind "rush") still ride through a knock: not asked here, not measured. An overheated glider still lifts you out of the abyss at half strength (`--glider-heat-check`).
+
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
