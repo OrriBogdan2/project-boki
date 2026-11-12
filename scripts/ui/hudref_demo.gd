@@ -69,13 +69,20 @@ static func tick(m) -> void:
 			m.set_meta("hudref_up_done", true)
 			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
-		if st: st.slow_t = maxf(st.slow_t, 1.0)
+		if st:
+			st.stun_t = maxf(st.stun_t, 3.0)         # the whole CC row, timers held at a readable length
+			st.root_t = maxf(st.root_t, 2.5)
+			st.slow_t = maxf(st.slow_t, 2.0)
+			KitStatus.apply(st, "gnd", 1.5, 0.0, false, "demo")
+			KitStatus.apply(st, "rat", 2.2, 0.0, false)
 
 static func _stand(m, h: Hunter, at: Vector3) -> void:
 	var g: Vector3 = m.world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 	for i in 8:
 		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
 		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
+	if m.world.is_void(g.x, g.z):                         # (near an edge: look further out, not into the void)
+		g = m.world.free_spot_near(at, [], 0.6, 0.5, 12.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
 	h.ctrl = "idle"
 	h.vel = Vector3.ZERO
