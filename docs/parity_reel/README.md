@@ -278,7 +278,9 @@ Still differs:
   (ours). The channel is 5 s where the footage's tether runs about 2.4 s [F 0249-0271].
 - Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
-  steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
+  steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
+  footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
+  "Ally-pass refund").
 - Bearer: the Carrier shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
   updated. Which hits drop a carried teammate was not traced.
 - Body 0.66 of a medium (owner item 108).
