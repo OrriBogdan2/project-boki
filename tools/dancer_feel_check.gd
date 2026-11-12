@@ -8,6 +8,7 @@ const GROUND_M := 4.5        # m: the ground Cartwheel (sheet: 105-144 px, about
 const GROUND_S := 0.48       # s: start to upright (sheet: 0.45-0.5s)
 const PEAK_MS := [14.0, 17.0]        # m/s: the sheet's peak, 15-16.5 m/s ...
 const PEAK_AT := [0.08, 0.27]        # s: ... at +0.1 to 0.27s
+const PEAK_WINDOW := 4           # steps (1/15 s): the Shiv track's sample, the peak is averaged over it
 const AIR_CARRY := 1.2       # m: from a jump, at most this past the ground Cartwheel (the air's drag to the landing)
 const EMP_K := 2.34          # the empowered bolt over a plain one (data: +214 on a 160 bolt)
 const LOOP_S := 1.4          # s: the footage's reset loop (0187 -> 0194); ours keeps up with it
@@ -33,19 +34,22 @@ func _calm(m: Match, P: Hunter, K: ThiefKit) -> void:
 	P.dashes = P.max_dashes()
 	P.fire_cd = 0.0
 
-## Runs a Cartwheel already started, noting where and when it ends and its fastest step.
+## Runs a Cartwheel already started, noting where and when it ends and its fastest PEAK_WINDOW steps (the
+## footage's speeds are averages over a sample, so a single step's peak would read above them).
 func _track(m: Match, P: Hunter, from: Vector3, secs: float) -> Dictionary:
-	var s := {"last": P.pos, "t": 0.0, "peak": 0.0, "peak_at": 0.0, "end": -1.0, "dist": 0.0}
+	var s := {"trail": [P.pos], "t": 0.0, "peak": 0.0, "peak_at": 0.0, "end": -1.0, "dist": 0.0}
 	A.step(m, secs, func():
-		var last: Vector3 = s["last"]
-		var v: float = Vector2(P.pos.x - last.x, P.pos.z - last.z).length() / A.DT
+		var trail: Array = s["trail"]
+		trail.append(P.pos)
+		if trail.size() > PEAK_WINDOW + 1:
+			trail.pop_front()
+		var v: float = P.flat_dist(trail[0]) / ((trail.size() - 1) * A.DT)
 		if s["end"] < 0.0 and v > s["peak"]:
 			s["peak"] = v
-			s["peak_at"] = s["t"]
+			s["peak_at"] = float(s["t"]) - (trail.size() - 1) * A.DT * 0.5
 		if s["end"] < 0.0 and P.roll_t <= 0.0:
 			s["end"] = s["t"]
 			s["dist"] = P.flat_dist(from)
-		s["last"] = P.pos
 		s["t"] = float(s["t"]) + A.DT)
 	return s
 
