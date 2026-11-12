@@ -5,6 +5,8 @@ extends RefCounted
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## And TellCue: a rival's ground telegraph plays tell_foe where it lands, sized by its area; not yours, an
+## ally's, an ultimate's, an aim mark's or a telegraph that is only being refreshed.
 
 var main: Node
 var fails := 0
@@ -51,6 +53,7 @@ func run(main_node: Node) -> void:
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
 	_ult_cues(m, P)
+	_tell_cues(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
@@ -101,6 +104,48 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+
+func _tell_cues(m: Match, P: Hunter) -> void:
+	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team and x.ak != null)[0]
+	Sfx.listener = P.pos
+	R.pos = P.pos + Vector3(40, 0, 0)                 # past hearing: only a cue at the landing spot can be heard
+	var spot := P.pos + Vector3(3, 0, 0)
+	ok(_tell(func(): R.ak.tele_circle(spot, 1.0, Color.RED, 0.5)),
+			"a rival's circle 40 m off, landing 3 m from you, is heard where it lands")
+	var small := _last_voice()
+	_tell(func(): R.ak.tele_circle(spot, 4.0, Color.RED, 0.5))
+	var big := _last_voice()
+	ok(big.volume_db > small.volume_db + 3.0 and big.pitch_scale < small.pitch_scale,
+			"...a bigger area is louder and lower (%.1f dB / %.2f vs %.1f dB / %.2f)" % [
+				big.volume_db, big.pitch_scale, small.volume_db, small.pitch_scale])
+	ok(_tell(func(): R.ak.tele_lane(P.pos + Vector3(-30, 0, 0), Vector2(1, 0), 60.0, 2.0, Color.RED, 0.5)),
+			"a rival's lane is heard at its middle (starting 30 m off)")
+	ok(_tell(func(): AimKit.circle(R, "tell_check", {"at": spot, "r": 2.0, "all": true})),
+			"a rival's AimKit area everyone sees is heard when it starts")
+	ok(not _tell(func(): AimKit.circle(R, "tell_check", {"at": spot, "r": 2.0, "all": true})),
+			"...and not again while the kit refreshes it")
+	ok(not _tell(func(): AimKit.lane(R, "tell_aim", {"from": spot, "len": 4.0})), "a rival's own-aim lane is silent")
+	ok(not _tell(func(): AimKit.circle(R, "x_check", {"at": spot, "r": 2.0, "all": true})),
+			"a rival's ultimate area is silent (UltCue has it)")
+	R.ak.fuse = {"t": 1.0}
+	ok(not _tell(func(): R.ak.tele_circle(spot, 2.0, Color.RED, 0.5)), "...and so is the R fuse ring")
+	R.ak.fuse = {}
+	ok(not _tell(func(): P.ak.tele_circle(spot, 2.0, Color.RED, 0.5)), "your own telegraph is silent")
+	var team: int = R.team
+	R.team = P.team
+	ok(not _tell(func(): R.ak.tele_circle(spot, 2.0, Color.RED, 0.5)), "an ally's telegraph is silent")
+	R.team = team
+	AimKit.clear(R)
+
+## Runs `cast` with the gap and stacking windows clear; whether it played tell_foe.
+func _tell(cast: Callable) -> bool:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	cast.call()
+	return Sfx.last_played.has("tell_foe")
+
+func _last_voice() -> AudioStreamPlayer:
+	return Sfx.players[posmod(Sfx.next - 1, Sfx.POOL)]
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on

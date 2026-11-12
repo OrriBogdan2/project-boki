@@ -9,7 +9,9 @@ extends RefCounted
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
-##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
+##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts;
+##      the rival telegraph wind-up (TellCue, tell_foe) exists, has a repeat gap, sits under the ult cues and is
+##      wired into the telegraph systems (ArchKit.tele_circle/tele_lane, AimDraw.put)
 ##   8. dash_air per Hunter and the no-charge tick
 ##   9. the garden's ambience (HomeAmbience): every bed has its file, the parts of the day and the rain each
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
@@ -190,6 +192,11 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+	var arch_src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
+	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
+	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
+	tell_ok = tell_ok and arch_src.count("TellCue.start(") == 2 and draw_src.contains("TellCue.aim(")
+	ok(tell_ok, "the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to both systems")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
