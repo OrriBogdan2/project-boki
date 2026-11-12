@@ -200,6 +200,8 @@ func _outline(id: String, look: Dictionary) -> void:
 	ok(pmat != null and node.get_meta("plume") == pmat and pmat.get_shader_parameter("col") == Color.RED,
 		tag + "the plume is the side colour")
 	ok(pmat.shader.code.contains("blend_mix") and float(look["plume"]["alpha"]) < 0.9, tag + "the plume is see-through")
+	var cut: bool = pmat.get_shader_parameter("hole") == float(look["body"]["radius"])
+	ok(cut, tag + "the body is cut out of the plume (never tinted)")
 	var bottom := WispLook.hover(look) + box.position.y
 	var sits: bool = bottom <= 0.0 and bottom > -0.08 and box.size.y < 0.65
 	ok(sits, tag + "it sits on the ground, about knee high (bottom %.2f m)" % bottom)
