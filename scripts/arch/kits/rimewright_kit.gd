@@ -49,6 +49,7 @@ const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the 
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
+const RINK_BAND := 0.25        # m: the width of the Rimelock ring, its outer edge on the hit radius
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -1042,13 +1043,15 @@ func rime_slow_of(f: Ent) -> float:
 	return float((rime["slow"] as Dictionary).get(f.get_instance_id(), 0.0))
 
 
-## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees
-## and the creaks; her body is IceBody's.
+## The rink (snaps out in snap_t, its cracks brighter as it builds), the frost bud at her feet, the thin
+## lit ring at the hit radius everyone sees (brighter as it builds: the countdown) and the creaks; her
+## body is IceBody's.
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
 	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
-	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
+	ulk().keep("bud", "frostbud", at, {"grow": snap, "crack": k})
+	AimKit.circle(h, "x", {"at": at, "r": radius, "band": RINK_BAND, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:
 		rime["creak"] = lerpf(0.8, 0.35, k)
@@ -1102,6 +1105,7 @@ func _rime_clear() -> void:
 		ice.thaw()
 	if ult_look != null:
 		ult_look.drop("rink")
+		ult_look.drop("bud")
 		if anim_id == "tm_rime_hold":
 			anim_id = ""
 
