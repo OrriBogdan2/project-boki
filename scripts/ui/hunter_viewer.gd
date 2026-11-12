@@ -339,7 +339,7 @@ func tick(dt: float) -> void:
 	anim.update(dt, s)
 	# powering up: the Hunter's light builds and the body thrums; the burst pops it
 	glow.light_energy = 6.0 * power_k + (5.0 * maxf(0.0, 1.0 - burst_t / 0.6) if burst_t >= 0.0 else 0.0)
-	var shake := 0.018 * power_k * power_k
+	var shake := 0.018 * power_k * power_k * float(Settings.get_v("screen_shake"))   # 0 holds it still
 	model.position = Vector3(sin(spin_t * 61.0) * shake, 0.04 * power_k, cos(spin_t * 47.0) * shake)
 	if burst_t >= 0.0:
 		burst_t += dt

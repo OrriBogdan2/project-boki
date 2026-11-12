@@ -10,6 +10,15 @@ extends UiFrame
 ## Drawn as canvas polygons and lines, recorded only when the control redraws; the shape of each
 ## rect is cached, so a menu costs no more per frame than with plain boxes.
 
+const STEP_PX := 18.0                       # spacing of the outline's points
+const BAND_PX := 34.0                       # depth of the border band that carries the speckle
+const GLOW_PASSES := [[26.0, 0.05], [14.0, 0.12], [7.0, 0.3], [3.0, 1.0]]   # [width px, alpha] outer to inner
+const CACHE_MAX := 48                       # shapes kept per box (rects in use on screen)
+const RUNE_CELL := Vector2(13.0, 20.0)      # px, one scratched glyph
+const TALLY := 5                            # strokes in a chalk tally group
+const CRACK_INK := Color(0.0, 0.0, 0.02, 0.62)
+const CRACK_LIT := Color(0.85, 0.75, 1.0, 0.1)
+
 @export var jag := 4.0                      # px the outline wanders inward (0: a clean rectangle)
 @export var glow := 0.0                     # neon edge strength (0 none, 1 normal, ~1.6 hovered)
 @export var glow_w := 1.0                   # neon edge thickness (1 buttons, ~2 panels)
@@ -19,15 +28,6 @@ extends UiFrame
 @export var ticket := false                 # cut a notch into the left and right sides
 @export var nails := false                  # two nails pinning the top corners (parchment strips)
 @export var tilt := 0                       # varies the tear pattern so boxes side by side differ
-
-const STEP_PX := 18.0                       # spacing of the outline's points
-const BAND_PX := 34.0                       # depth of the border band that carries the speckle
-const GLOW_PASSES := [[26.0, 0.05], [14.0, 0.12], [7.0, 0.3], [3.0, 1.0]]   # [width px, alpha] outer to inner
-const CACHE_MAX := 48                       # shapes kept per box (rects in use on screen)
-const RUNE_CELL := Vector2(13.0, 20.0)      # px, one scratched glyph
-const TALLY := 5                            # strokes in a chalk tally group
-const CRACK_INK := Color(0.0, 0.0, 0.02, 0.62)
-const CRACK_LIT := Color(0.85, 0.75, 1.0, 0.1)
 
 var _cache := {}
 
@@ -95,12 +95,13 @@ func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 
 func _draw_nails(to_canvas_item: RID, rect: Rect2) -> void:
 	var rs := RenderingServer
-	var rad := clampf(rect.size.y * 0.09, 3.2, 5.5)
-	for x in [rect.position.x + rad * 4.5, rect.end.x - rad * 4.5]:
-		var at := Vector2(x, rect.position.y + rad * 2.1)
-		rs.canvas_item_add_circle(to_canvas_item, at + Vector2(1.0, 1.6), rad + 0.8, Color(0, 0, 0, 0.4))
-		rs.canvas_item_add_circle(to_canvas_item, at, rad, Color("3e3a46"))
-		rs.canvas_item_add_circle(to_canvas_item, at - Vector2(rad * 0.3, rad * 0.3), rad * 0.45, Color("c8c4d0"))
+	var nail_r := clampf(rect.size.y * 0.09, 3.2, 5.5)
+	for x in [rect.position.x + nail_r * 4.5, rect.end.x - nail_r * 4.5]:
+		var at := Vector2(x, rect.position.y + nail_r * 2.1)
+		rs.canvas_item_add_circle(to_canvas_item, at + Vector2(1.0, 1.6), nail_r + 0.8, Color(0, 0, 0, 0.4))
+		rs.canvas_item_add_circle(to_canvas_item, at, nail_r, Color("3e3a46"))
+		var glint := at - Vector2(nail_r * 0.3, nail_r * 0.3)
+		rs.canvas_item_add_circle(to_canvas_item, glint, nail_r * 0.45, Color("c8c4d0"))
 
 func _build_shape(r: Rect2) -> Dictionary:
 	var pts := _outline(r)
@@ -165,12 +166,12 @@ func _add_blotches(shape: Dictionary, r: Rect2, light: bool) -> void:
 	var cols := PackedColorArray()
 	for i in count:
 		var at := r.position + Vector2(_h(i * 5 + 70) * r.size.x, _h(i * 5 + 71) * r.size.y)
-		var rad := 24.0 + 50.0 * _h(i * 5 + 72)
+		var blot_r := 24.0 + 50.0 * _h(i * 5 + 72)
 		var tone := Color(0.3, 0.2, 0.1, 0.025) if light else Color(0.7, 0.5, 1.0, 0.02)
 		if _h(i * 5 + 73) > 0.4:
 			tone = Color(0, 0, 0.02, 0.03)
 		for ring in 4:
-			specks.append(Vector3(at.x, at.y, rad * (1.0 - ring * 0.22)))
+			specks.append(Vector3(at.x, at.y, blot_r * (1.0 - ring * 0.22)))
 			cols.append(tone)
 	shape.specks.append_array(specks)
 	shape.speck_cols.append_array(cols)
@@ -187,8 +188,8 @@ func _add_specks(shape: Dictionary, r: Rect2, light: bool) -> void:
 		var t := _h(i * 3 + 11) * perimeter
 		var depth := jag + 2.0 + pow(_h(i * 3 + 12), 1.6) * band
 		var p := _on_perimeter(r, t, depth)
-		var rad := 0.7 + 2.2 * pow(_h(i * 3 + 13), 2.0)
-		specks.append(Vector3(p.x, p.y, rad))
+		var speck_r := 0.7 + 2.2 * pow(_h(i * 3 + 13), 2.0)
+		specks.append(Vector3(p.x, p.y, speck_r))
 		cols.append(pale if i % 4 == 0 else dark)
 	shape.specks.append_array(specks)
 	shape.speck_cols.append_array(cols)
