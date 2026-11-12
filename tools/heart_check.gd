@@ -285,6 +285,7 @@ func _early_seat(main: Node) -> void:
 	ok(int(Save.d["goods"].get("heartwood", 0)) >= 1 and int(Save.d["goods"].get("starstone", 0)) >= 1,
 		"the materials reach the stash")
 	ok(out.has("heart"), "and the results screen's data carries the bundle")
+	_reward_gap(H3, m3.hunters[1], hb, major)
 	# ---- online requests (offline game: this one is the host)
 	var m4 := _match(main, 7304)
 	var H4: Heart = m4.heart
@@ -302,6 +303,23 @@ func _early_seat(main: Node) -> void:
 		_free(mm)
 
 # ------------------------------------------------------------------ 2. the Gate takes the squad, and the state order
+## The early exit paid the minor set, the end exit pays the major set, and the gap between them is the rules'
+## (0051 names no ratio; heart.json: gems 40 vs 150, so the gap is the egg and a 3x-4x bundle).
+func _reward_gap(h: Heart, who: Hunter, early_paid: Dictionary, final_paid: Dictionary) -> void:
+	var rw: Dictionary = Heart.rules()["reward"]
+	var minor: Dictionary = rw["minor"]
+	var major: Dictionary = rw["major"]
+	ok(early_paid["goods"] == minor["goods"] and early_paid["seeds"] == minor["seeds"]
+		and int(early_paid["gems"]) == int(minor["gems"]), "an early Heart exit paid exactly the minor set")
+	ok(final_paid["goods"] == major["goods"] and final_paid["seeds"] == major["seeds"]
+		and int(final_paid["gems"]) == int(major["gems"]), "the end exit pays exactly the major set")
+	var ratio := float(major["gems"]) / float(minor["gems"])
+	ok(ratio >= 3.0 and ratio <= 5.0, "the gem gap is %.2fx (3x to 5x; 0051 leaves the ratio open)" % ratio)
+	ok(not bool(minor["egg"]) and bool(major["egg"]), "only the end exit carries the Rare Egg")
+	var g0 := who.gems
+	h.pay(who, Heart.HOW_FINAL)
+	ok(who.gems - g0 == int(major["gems"]), "the end exit's gems land on the Hunter")
+
 func _gate_squad(main: Node) -> void:
 	var m := _match(main, 8101, 2)
 	var H: Heart = m.heart
