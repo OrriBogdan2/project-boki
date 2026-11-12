@@ -53,7 +53,7 @@ func run(main: Node) -> void:
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("AIRCAST DONE, failures: %d" % bad)
-	main.get_tree().quit()
+	main.get_tree().quit(1 if bad > 0 else 0)
 
 ## Runs forward, jumps, and at the top presses `slot` ("" for none), keys held forward throughout. t: per step
 ## after the press, [horizontal speed, height above the top]; cast: "air" (it went off in the window), "landing" (it

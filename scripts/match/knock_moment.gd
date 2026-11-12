@@ -19,6 +19,7 @@ static func cut(m: Match, h: Hunter) -> void:
 			h.vel.x = 0.0
 			h.vel.z = 0.0
 	if h.ak:
-		h.ak.rmb_down = false      # a held RMB is dropped, never released into its cast; its aim ring shuts
+		if h.ak.rmb_down:
+			h.ak._drop_rmb()       # a held RMB is dropped, never released: its aim ring shuts, its pose ends (kit hook)
 		h.ak.flow.held.clear()     # presses waiting for a dash's end never replay
 		h.ak.flow.landing.clear()
