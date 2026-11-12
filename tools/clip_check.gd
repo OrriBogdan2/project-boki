@@ -5,6 +5,7 @@ extends RefCounted
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
 
+const PondWalk := preload("res://tools/pond_walk.gd")
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
@@ -109,6 +110,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	await _pond(id, m, sync, clips)
 	m.free()
 	await _flinch(id)
 
@@ -400,3 +402,104 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 		t += DT
 	m.free()
 	return out
+
+## The pond walk (tools/pond_walk.gd): the right move for each depth. Wading is the run with the knees hauled up (higher
+## than the rig's plain walk at that speed); swimming is a flutter kick and, in a hand the kit lets go of, a stroke,
+## both at the pace of the swim (slower treading water); the weapon stays in its hand; the clips stand aside.
+func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var bi := {}
+	for b in ["hand.L", "upper_arm.L", "shin.L", "shin.R"]:
+		bi[b] = WardenSkeleton.find(sk, b)
+	var tip := sync.get("blade_tip") as Node3D
+	var muzzle := sync.get("muzzle") as Node3D
+	var hb := int(sync.get("blade_bone"))
+	var rest := tip.position.length()
+	var height := 1.6 * absf(m.scale.y)
+	var anim := HunterAnim.new(m)
+	var walk_speed: float = PondWalk.DRY_SPEED * HomeWater.WADE_SPEED
+	clips.force = {"proc": true}
+	var plain := 0.0      # the rig's plain walk at the wading speed: its highest knee
+	for i in 45:
+		anim.update(DT, {"vel": Vector3(0, 0, -walk_speed), "face": 0.0, "grounded": true, "fired": 99.0})
+		sync.call("_process", DT)
+		if i > 15:
+			plain = maxf(plain, maxf(_pos(sk, m, bi["shin.L"]).y, _pos(sk, m, bi["shin.R"]).y))
+	clips.force = {}
+	var rows: Array = []
+	var held := [0.0, 0.0]      # worst Muzzle-off-the-tip, blade-off-the-hand in the water (the callback fills it)
+	var sample := func(info: Dictionary) -> void:
+		var row := {"phase": info["phase"], "depth": info["depth"], "proc": clips.proc_w, "state": info["state"]}
+		for b in bi:
+			row[b] = _pos(sk, m, bi[b])
+		row["hand.L"] -= row["upper_arm.L"]      # (the hand about its shoulder: the body's bob stays out of the stroke)
+		rows.append(row)
+		if info["depth"] > 0:
+			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
+			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
+			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
+			held[0] = maxf(held[0], muzzle.global_position.distance_to(sees))
+			held[1] = maxf(held[1], absf(hand.distance_to(sees) / body_k - rest))
+	await PondWalk.new().walk(holder.get_tree(), m, sync, anim, sample)
+	var flags_ok := true
+	var peak := {"wade": 0.0}
+	for r in rows:
+		var st: Dictionary = r["state"]
+		flags_ok = flags_ok and bool(st["wade"]) == (r["depth"] == 1) and bool(st["swim"]) == (r["depth"] == 2)
+		if r["phase"] == "wade" and float(r["proc"]) >= 1.0:
+			peak["wade"] = maxf(peak["wade"], maxf((r["shin.L"] as Vector3).y, (r["shin.R"] as Vector3).y))
+	ok(flags_ok, "%s: pond walk: wade in the shallows, swim in the deep, neither on the bank" % id)
+	var legs := KMovesStone.gait(id) > 0.5      # (a hoverer's legs barely walk: it floats through the water)
+	ok(not legs or peak["wade"] >= plain + 0.02 * height,
+			"%s: wading hauls the knees up (%.2f m vs %.2f m plain at the same speed)" % [id, peak["wade"], plain])
+	var kick := [_rate(rows, "swim", "shin.L", 1), _rate(rows, "tread", "shin.L", 1)]
+	var kick_swim := absf(kick[0] - HunterSwim.KICK_PER_STROKE * HunterSwim.HZ_FULL) < 0.5
+	var kick_tread := absf(kick[1] - HunterSwim.KICK_PER_STROKE * HunterSwim.HZ_TREAD) < 0.5
+	ok(not legs or (kick_swim and kick_tread and kick[1] < kick[0]),
+			"%s: swim kicks at the swim pace (%.1f Hz swimming, %.1f treading)" % [id, kick[0], kick[1]])
+	var stroke := [_rate(rows, "swim", "hand.L", 2), _rate(rows, "tread", "hand.L", 2)]
+	var strokes := _range(rows, "swim", "hand.L", 2) >= 0.1 * height      # (a hand on the weapon barely moves)
+	var stroke_swim := absf(stroke[0] - HunterSwim.HZ_FULL) < 0.5
+	var stroke_tread := absf(stroke[1] - HunterSwim.HZ_TREAD) < 0.5
+	ok(not strokes or (stroke_swim and stroke_tread),
+			"%s: %s (%.1f strokes/s swimming, %.1f treading)" % [id,
+			"its free hand strokes at the swim pace" if strokes else "both hands stay on the weapon",
+			stroke[0], stroke[1]])
+	ok(held[0] <= FX_ON_BLADE and held[1] <= 2.0 * HunterAnim.WEAPON_SLACK,
+			"%s: the weapon stays in its hand in the water (%.3f m off the tip, %.3f m off the hand)" % [
+			id, held[0], held[1]])
+	var ends: Array = rows.filter(func(r): return r["phase"] in ["swim", "tread", "wade"])
+	ok(ends.slice(int(ends.size() / 4.0)).all(func(r): return float(r["proc"]) >= 1.0),
+			"%s: the clips stand aside while it wades and swims" % id)
+	ok(float(rows[rows.size() - 1]["proc"]) <= 0.0, "%s: and take the body back on dry ground" % id)
+
+func _pos(sk: Skeleton3D, m: Node3D, bone: int) -> Vector3:
+	return sk.global_transform * sk.get_bone_global_pose(bone).origin - m.global_position
+
+## How far one limb signal travels over a phase.
+func _range(rows: Array, phase: String, bone: String, axis: int) -> float:
+	var lo := 9.0
+	var hi := -9.0
+	for r in rows:
+		if r["phase"] == phase:
+			lo = minf(lo, (r[bone] as Vector3)[axis])
+			hi = maxf(hi, (r[bone] as Vector3)[axis])
+	return hi - lo
+
+## Cycles a second of one limb signal over a phase, after the ease-in (a swing up through the middle of its range
+## and back down past a quarter of it counts once, so a jitter does not).
+func _rate(rows: Array, phase: String, bone: String, axis: int) -> float:
+	var sel: Array = rows.filter(func(r): return r["phase"] == phase)
+	sel = sel.slice(mini(18, sel.size() - 1))
+	var vals: Array = sel.map(func(r): return (r[bone] as Vector3)[axis])
+	var lo := float(vals.min())
+	var hi := float(vals.max())
+	var cycles := 0
+	var up := false
+	for v in vals:
+		if float(v) > lerpf(lo, hi, 0.65) and not up:
+			up = true
+			cycles += 1
+		elif float(v) < lerpf(lo, hi, 0.35):
+			up = false
+	return cycles / maxf(0.01, vals.size() * DT)
