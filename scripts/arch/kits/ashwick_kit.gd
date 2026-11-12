@@ -226,7 +226,7 @@ func _tick(dt: float) -> void:
 		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
-## The cloak's shield on her body: a lit swirl round her for each foe it caught (up to SHIELD_RINGS), in her ability colours.
+## The cloak's shield on her body: a lit swirl round her per foe it caught (up to SHIELD_RINGS), in her colours.
 func _shield_swirls() -> void:
 	var vx := HeroVfx.of(m)
 	for i in mini(int(st.get("shield_foes", 1)), SHIELD_RINGS):

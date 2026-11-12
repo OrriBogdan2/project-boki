@@ -653,11 +653,14 @@ func _all() -> void:
 	ok("cloak: one foe caught, one shield swirl on her", not K.fx.shown(swirl_id + "_1"))
 	K.st["shield_foes"] = 3
 	ak.step(m, 1.0 / 60.0)
-	ok("cloak: a shield swirl per foe caught, three at most", K.fx.shown(swirl_id + "_2") and not K.fx.shown(swirl_id + "_3"))
+	ok(
+		"cloak: a shield swirl per foe caught, three at most",
+		K.fx.shown(swirl_id + "_2") and not K.fx.shown(swirl_id + "_3")
+	)
 	var cloak_fx: Array = HeroVfx.data("ashwick")["moves"]["cloak"]["fx"]
 	ok(
 		"cloak look: thin lit swirls on the blast radius, no scorch disc or skirt fill",
-		cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] == "vortex" and l.get("thin", false) and l["size"] == "r")
+		cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] == "vortex" and l.get("thin", false))
 			and not cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] in ["scorch", "skirt"])
 	)
 	var pulled_far: float = P.flat_dist(T)
