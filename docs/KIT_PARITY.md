@@ -255,6 +255,19 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 - Albert: the Shield Slam stun 0.6 s and the Crushing Blow stun 0.4 s have no source row.
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s.
 
+## Stomp break sweep: every CC against a stomper (ext/verify-stomp-break-sweep, 2026-11-12)
+
+Rule (briefs/DECISIONS.md, Owner 2026-11-11 "stomping"): a stomp ends only when it finishes or the stomper is stunned or hard-CC'd; the wisp then lives. `Stomp.breaks` (stomp.gd) is `Capture.controlled` (stun, root, a real knock or launch, Grounded, hex, grapple, pad flight) plus a Displace pull or push. `--stomp-break-sweep-check` casts every slot (LMB, RMB, E, R, Shift) of all 13 kits at a bot that is mid-stomp (3 m away, key tapped; a second table of pinned casts uses a held key) and asserts: the stomp broke if and only if a hard CC had landed by then, and the wisp lived. A slow, Daze or plain damage must not break it.
+
+**Result: no row breaks the rule.** Every cast that landed a stun, root, Ground, pull or launch broke the stomp (Albert's Crush and R stun, Grimble's hook and anchor, Ostra's Snap and Nightwell, Ryzz's Skycall, Sable's Bola, Cinder's Soot Ram, Tarek's Rock Hop, Zedran's Rampage); every slow-only, Daze-only or damage-only cast left it running (Vex's Burr Charge Daze, Hem's Hail Wall slow, Tarek's Quakefall slow, Claire's Ice Spear slow, Cinderfall slow, Shadow Knife slow). Pinned in the check's `EXPECT` list so a CC tag lost from a move turns its row red. **No data fix was needed:** none of these moves lost its CC tag.
+
+**Classes settled (the alternative is written next to each):**
+- **Daze does not break.** Our Daze is a damage window with no slow and no loss of control (`kit_status.gd`), and the DECISIONS words are "stunned/hard-CC'd". Alternative: break on Daze too (one more term in `Stomp.breaks`); the task brief listed Daze with the breakers, so the owner can flip it.
+- **A short knock does not break.** Only a shove of 8 m/s or faster (`Capture.HARD_KNOCK`, about 1.5 m of slide) or a launch breaks it; the small shove most hits carry (Hem's and Zedran's LMB, Ryzz's Storm Rod hit: they showed a shove and nothing else) leaves it running. Alternative: any knock over `Hunter.impulse`'s 4 m/s floor breaks it (the pre-rules Life behaviour); then a bullet's nudge would cancel stomps.
+- **Slow and Disoriented do not break** (`--stomp-check` also pins both).
+
+**Not reached by a generic cast (so not pinned, not a failure):** Pip's Burrseed root (it bursts 3 s after the cast, as long as a stomp: seen in some runs, not stable enough to pin), Hem's Heavy Shot and Starpiercer (nothing landed on the stomper in any press style tried), Zedran's Warchain and Smash stuns, Tarek's Quakefall slam stun, Claire's Rimelock stun (only the slow lands inside 2.5 s; the stun comes after a delay), Sable's pair stun (needs a second foe), and every wall stun (Vex, Hem, Tarek, Albert, Ryzz: a pinned stomper cannot be slid into a wall; the knock that would slide it is a break already). They stay checked by their own combo checks.
+
 ## Felt dash per kit (gap 4)
 
 `content/rules/dash_feel.json` defaults to ×1 / ×1: a kit whose dash is the source's measured one runs it as-is. The owner's "slower and shorter" (×.85 distance, ×1.15 time) stays only where no source number exists; Ryzz gets the time part only (his lane is the owner's, item 70). Felt = raw × feel, measured in `--move-feel-check` (`felt dash` rows, ±5% / ±0.035 s) to the moment the dash ends: the step it ends in runs the dash for the time it had left, then the hand-over (on the ground the run, in the air the dash's speed carried on under drag, owner 11-08), and that tail isn't counted.

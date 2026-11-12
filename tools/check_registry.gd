@@ -325,6 +325,7 @@ const CHECKS := {
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # docs/decisions/0061
+	"--stomp-break-sweep-check": ["res://tools/stomp_break_sweep_check.gd", "stomp_break_sweep_check", null],
 	"--stomp-film": ["res://tools/stomp_film.gd", "stomp_film", null],      # GPU, --shots-dir=
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
