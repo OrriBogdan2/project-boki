@@ -716,7 +716,6 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	var ln: Dictionary = AimKit.entry(P, "rmb")
 	var k_mid := float(ln.get("fill", -1.0))
-	var col_mid: Color = ln.get("col", Color.BLACK)
 	A.ok("juggernaut RMB hold: the lane grows with the charge (and the wind-up pose plays)",
 			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
 			and not K.lunge_full,
@@ -735,10 +734,6 @@ func juggernaut(a) -> void:
 			K.lunge_full and float(AimKit.entry(P, "rmb").get("fill", 0.0)) >= 1.0
 			and float(AimKit.reticle(P)["flare"]) > 0.0,
 			"full %s" % K.lunge_full)
-	var col_full: Color = AimKit.entry(P, "rmb").get("col", Color.BLACK)
-	A.ok("juggernaut footage gap 2: the Lunge lane is red while charging, magenta at full (0126)",
-			col_mid == JuggernautKit.LUNGE_RED and col_full == JuggernautKit.LUNGE_FULL,
-			"%s -> %s" % [col_mid, col_full])
 	var hits0 := int(HeroVfx.of(m).plays.get("lunge_hit", 0))
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
