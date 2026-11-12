@@ -2260,7 +2260,8 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
+		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote \
+				and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
@@ -3136,7 +3137,8 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
+			and not riding and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)

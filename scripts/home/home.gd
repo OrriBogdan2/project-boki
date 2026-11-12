@@ -984,25 +984,14 @@ func _spawn_kin() -> void:
 		hb.assign_beds()
 		PlaceClearance.free_trapped(self)
 
-## One kin on the farm: its model, mood label and entry in kins, on island `isl`; `slot` (its place in the
-## roster, -1 for none) picks its bed.
+## One kin on the farm, on island `isl`, somewhere open (not wedged against a building, not on top of
+## another kin); `slot` (its place in the roster, -1 for none) picks its bed.
 func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
-	var n := Models.kin(rec["species"], rec)
-	add_child(n)
-	# somewhere open, not wedged against a building and not on top of another kin
 	var taken: Array = kins.map(func(o): return o["pos"])
 	taken.append(ppos)
-	var at := world.free_spot_near(world.random_ground(isl), taken, 1.3)
-	n.position = at
-	var lbl := Label3D.new()
-	lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
-	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
-	lbl.position.y = 1.25; lbl.visible = false
-	n.add_child(lbl)
-	var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
+	var kd := _add_kin(rec, world.free_spot_near(world.random_ground(isl), taken, 1.3))
 	if isl == 0 and slot >= 0 and slot < 6:
 		kd["bed"] = Vector3(32.9 + (slot % 3) * 1.6, 0, 27.2 + (slot / 3) * 1.6)
-	kins.append(kd)
 	return kd
 
 ## One Boki out on the island at a spot: its model, its emote bubble and its walking state.
