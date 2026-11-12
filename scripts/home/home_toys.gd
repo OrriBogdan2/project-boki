@@ -5,7 +5,7 @@ extends RefCounted
 ## farm_build.json base_mode is on.
 ## An idle Boki with room to be happier picks a toy by its lean and traits (a Flying or Rock Boki likes
 ## the post, Water and Ice the tub, Fire the stone, Grass and Bug the patch), walks to it, plays, and gains
-## the toy's stat through Care.add_stat.
+## the toy's stat through Care.add_stat. Its most-used toy becomes its favourite, picked first (FavToy).
 ## A second Boki may join the first; two hot tempers squabble and the newcomer huffs off.
 ## k["play"] = {u: toy uid, phase: "go" | "play", t: seconds}. home.gd calls pick, step and pose.
 
@@ -62,19 +62,21 @@ func players(u: int) -> Array:
 	return h.kins.filter(func(o): return o.has("play") and int(o["play"]["u"]) == u)
 
 ## The element this Boki leans to: its strongest lean (Evo.lean), else its species' element.
-func _lean(rec: Dictionary) -> String:
+static func lean_of(rec: Dictionary) -> String:
 	var top := String(Evo.lean(rec)[0])
 	if top == "":
 		top = BokiLines.element_of(String(rec.get("species", "")))
 	return top.to_lower()
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
-func weight(rec: Dictionary, toy_id: String) -> float:
+static func weight(rec: Dictionary, toy_id: String) -> float:
 	var R := rules()
 	var def: Dictionary = R["toys"][toy_id]
 	var w := 1.0 + float(R["trait_weight"]) * float(rec["traits"].get(String(def["trait"]), 0.5))
-	if (def["likes"] as Array).has(_lean(rec)):
+	if (def["likes"] as Array).has(lean_of(rec)):
 		w += float(R["like_weight"])
+	if FavToy.of(rec) == toy_id:
+		w *= float(R["fav_weight"])
 	return w
 
 ## An idle Boki looks for a toy: true when it has set off for one. want: it is bored or curious (BaseLife.choose),
@@ -195,6 +197,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 	FarmTutorial.event("play")
 	var secs: Array = R["play_secs"]
 	p["t"] = randf_range(float(secs[0]), float(secs[1]))
+	p["secs"] = p["t"]
 	if others.size() >= 1:
 		h._emote(k, "★", true)
 		_bond(k, others[0], "bond_share")      # sharing one builds friendship
@@ -212,13 +215,15 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var def: Dictionary = R["toys"][t["id"]]
 	var stat := String(def["stat"])
-	var gained := Care.add_stat(rec, stat, int(R["stat_gain"]))
+	var gained := Care.add_stat(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])))
+	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])
 		Save.add_item(item, 1)
 		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
+	GardenFirstDay.mark("toy", h)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)

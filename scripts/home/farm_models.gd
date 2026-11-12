@@ -231,8 +231,9 @@ static func toy(id: String) -> Node3D:
 const STONE_DARK := "4a4f45"     # a locked zone's standing stone: dark and grown over
 const RING_R := 1.6              # m, the Waystone's ring; its standing stones stand just outside it
 
-## The Waystone: a flat stone ring with one standing stone per zone round it. stones: [{colour, open}],
-## a lit stone glows in its zone's colour, a locked one is dark with moss on it.
+## The Waystone: a flat stone ring with one standing stone per zone round it. stones: [{colour, open, keys}].
+## A lit stone glows in its zone's colour and wears a glowing cap. A locked one is dark, grown over with
+## moss, and has its two keys drawn on its face: a seed mark and a Boki mark, each dull until you hold it.
 static func waystone(stones: Array) -> Node3D:
 	var n := Node3D.new()
 	_piece(n, Models.cyl(RING_R, RING_R + 0.1, 0.14, 24), "9c968a", Vector3(0, 0.07, 0), "Ring")
@@ -241,13 +242,25 @@ static func waystone(stones: Array) -> Node3D:
 		var a := TAU * float(i) / float(stones.size())
 		var at := Vector3(sin(a), 0, cos(a)) * (RING_R + 0.45)
 		var lit: bool = stones[i]["open"]
-		var col: String = stones[i]["colour"] if lit else STONE_DARK
-		var st := Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(Color(col), true, 0.6 if lit else 0.0),
+		var col := Color(stones[i]["colour"] if lit else STONE_DARK)
+		var st := Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, 0.6 if lit else 0.0),
 				at + Vector3(0, 0.62, 0), Vector3.ONE, Vector3(0, a, 0), "Stone%d" % i)
 		st.set_meta("open", lit)
-		if not lit:
-			_piece(n, Models.box(0.4, 0.22, 0.28), "5f7a3e", at + Vector3(0, 0.12, 0), "Moss%d" % i, false,
-					Vector3(0, a, 0))
+		if lit:
+			var cap := Models.toon(col.lightened(0.4), false, 1.0)
+			var top := at + Vector3(0, 1.34, 0)
+			Models.part(n, Models.sphere(0.13, 8), cap, top, Vector3.ONE, Vector3.ZERO, "Cap%d" % i)
+			continue
+		var moss_at := at + Vector3(0, 0.12, 0)
+		_piece(n, Models.box(0.4, 0.22, 0.28), "5f7a3e", moss_at, "Moss%d" % i, false, Vector3(0, a, 0))
+		var face := Basis(Vector3.UP, a)
+		var keys: Dictionary = stones[i].get("keys", {})
+		for j in 2:
+			var held: bool = keys.get(["seed", "lean"][j], false)
+			var mark := Color(stones[i]["colour"]) if held else Color("2c302a")
+			var spin := Vector3(0, a, PI * 0.25 * float(1 - j))      # seed mark: diamond; Boki mark: square
+			Models.part(n, Models.box(0.09, 0.09, 0.02), Models.toon(mark, false, 0.8 if held else 0.0),
+					at + face * Vector3(-0.07 + 0.14 * j, 0.8, 0.125), Vector3.ONE, spin, "Key%d_%d" % [i, j])
 	return n
 
 ## A zone's return pad: a small flat stone in the zone's colour, the way back to the hub.
@@ -256,4 +269,17 @@ static func return_pad(colour: String) -> Node3D:
 	_piece(n, Models.cyl(0.85, 0.95, 0.12, 18), "9c968a", Vector3(0, 0.06, 0), "Pad")
 	Models.part(n, Models.cyl(0.6, 0.6, 0.03, 18), Models.toon(Color(colour), false, 0.6), Vector3(0, 0.135, 0),
 			Vector3.ONE, Vector3.ZERO, "Glow")
+	return n
+
+## The hub's games board: a wooden board on two posts with a coloured tab per zone.
+static func games_board() -> Node3D:
+	var n := Node3D.new()
+	for sx in [-0.9, 0.9]:
+		_piece(n, Models.box(0.14, 1.7, 0.14), "7a5a38", Vector3(sx, 0.85, 0), "Post")
+	_piece(n, Models.box(2.1, 1.0, 0.1), "a98456", Vector3(0, 1.35, 0.05), "Board")
+	var ids := GardenZones.ids()
+	for i in ids.size():
+		var tab := Color(String(GardenZones.info(ids[i])["colour"]))
+		Models.part(n, Models.box(0.3, 0.6, 0.04), Models.toon(tab, false, 0.4 if GardenZones.is_open(ids[i]) else 0.0),
+				Vector3(-0.8 + 0.4 * i, 1.35, 0.12), Vector3.ONE, Vector3.ZERO, "Tab%d" % i)
 	return n

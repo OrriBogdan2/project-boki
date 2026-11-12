@@ -34,7 +34,7 @@ func _new_save() -> Array:
 	recs[0]["starter"] = true
 	d["roster"] = recs.slice(0, 3)
 	d["active"] = recs[0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	Save.d = d
 	HomeLayout.ensure(d)
 	return recs
