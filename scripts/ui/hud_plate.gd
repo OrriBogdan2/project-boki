@@ -33,7 +33,7 @@ var shown := {}
 static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
-## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate: you see a
+## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
 ## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
 static func hidden(m: Match, h: Hunter) -> bool:
 	if m.player == null or h.team == m.player.team or h.downed or h.reveal_t > 0.0:

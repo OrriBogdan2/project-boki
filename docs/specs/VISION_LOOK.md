@@ -19,14 +19,14 @@ above, player controls below, found by row brightness). Numbers below are scaled
 | Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | `VIS_LINE` (0.32, 0.86, 1.0), solid to 0.0175 m and gone at 0.035 m (~3 px solid at 82 px/m) |
 | Edge glow | 4-6 px into the lit side, none on the dim side | lit side only, 0.45 strength, 1/e at 0.083 m (~7 px) |
 | Lit ground | about (78-89, 105-121, 157-174), luma ~105 | the ground's own colour x 1.05 |
-| Dim ground (behind and out of range) | about (2-7, 34-37, 76-79), luma ~30: ~0.3 of lit, blue | 75% toward a blue-tinted grey (x 0.5, 0.74, 1.12), x `vis_dark` 0.7: ~0.5 of lit |
+| Dim ground (behind and out of range) | about (2-7, 34-37, 76-79), luma ~30: ~0.3 of lit, blue | 75% toward a blue-tinted grey (x 0.5, 0.74, 1.12), x `vis_dark` 0.6 (`RaidLook.VIS_DARK`, was 0.7): ~0.45 of lit |
 | Range circle | lit area ends ~520-550 px out; an ally marker labelled 27 m sits ~600 px out: ~22 px/m, circle ~23-25 m | `VIEW_RANGE` 24 m, soft edge over the last 3 m |
 | Camera scale | ~22 px/m (~87 m of ground across: the sneak camera, zoomed out) | 82 px/m standing (23.5 m across), 56 px/m crouched (zoom 1.45) |
-| Rival hiding in a bush | no plate, only a faint name tag on your own | rivals crouched / in grass / in smoke: no plate (name, level, bars, gloves); revealed, downed and teammates keep theirs |
+| Rival hiding in a bush | no plate, only a faint name tag on your own | rivals crouched / in grass / in smoke: no plate (name, level, bars, gloves) and no hover card; revealed, downed and teammates keep theirs |
 | HUD | unchanged by hiding | unchanged |
 
 ## Where we differ, and why
-- **Dim is lighter (~0.5 of lit, not ~0.3).** Our camera sits 2.5-3.7x closer, so the dim side fills most of the screen;
+- **Dim is a little lighter (~0.45 of lit, not ~0.3).** Our camera sits 2.5-3.7x closer, so the dim side fills most of the screen;
   at 0.3 the ground and walls behind you went near black (the earlier 42% look was dropped for that reason). The
   hue now matches the reference (blue, desaturated); `RaidLook.VIS_DARK` still darkens it at night.
 - **The range circle is off screen.** Measured in the world it is the same size as ours (24 m), but our closer

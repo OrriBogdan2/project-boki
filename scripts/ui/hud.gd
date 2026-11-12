@@ -2194,7 +2194,8 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	for k in m.kins:
 		if not k.dead and k.visible and k.state != "shoulder": cands.append(k)
 	for h in m.hunters:
-		if h != p and not h.out and not h.extracted and not h.unseen and h.visible: cands.append(h)
+		if h != p and not h.out and not h.extracted and not h.unseen and h.visible and not HudPlate.hidden(m, h):
+			cands.append(h)      # (a hiding rival has no card either)
 	for e in cands:
 		var ep: Vector3 = (e as Node3D).position + Vector3(0, 0.7, 0)
 		if cam.is_position_behind(ep):
