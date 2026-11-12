@@ -308,7 +308,9 @@ func _tick_lmb() -> void:
 	m.later(0.06, _fingertip.bind(left))
 	# (the round flies from where her unscaled hand would be; the drawn bolt leaves the drawn fingertip, which
 	# hunter_scale puts further out, and eases onto the round's line, so hits and reach stay the match's)
-	var tip: Node3D = WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle") if h.model else null
+	var tip: Node3D = null
+	if h.model:
+		tip = WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
 	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos), tip)
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.

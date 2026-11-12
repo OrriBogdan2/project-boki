@@ -65,7 +65,8 @@ func _style(tag: String, style: String, views: Array, video: bool) -> void:
 
 func _build(expedition := false) -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "no_drop": true, "god": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": 3, "squad": 2, "total": 6, "no_drop": true, "god": true, "demo_kin": "cindle",
+		"seed": 4101}, true)
 	if not expedition:
 		o["autoplay"] = true
 	o.erase("demo_match")
@@ -156,7 +157,9 @@ func _starts() -> void:
 	Settings.v["cam_style"] = "supervive"
 	Settings.v["lobby_enabled"] = false      # (straight into the match, as after the lobby)
 	_label()
-	for run in [["before", 1.0, "BEFORE: expedition starts at zoom 1.00"], ["after", 0.0, "AFTER: a new player's expedition"]]:
+	var runs := [["before", 1.0, "BEFORE: expedition starts at zoom 1.00"],
+		["after", 0.0, "AFTER: a new player's expedition"]]
+	for run in runs:
 		Settings.v["cam_zoom"] = float(run[1])
 		await _build(true)
 		print("WIDECAM START %s: expedition %s, zoom %.2f" % [run[0], Prematch.expedition(m.opts), m.cam.user_zoom])
