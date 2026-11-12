@@ -33,7 +33,7 @@ var played := {}             # arch -> casts that played any move
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
-var retimes: Array = []      # [unix ms, s] each time the watched move's clock jumps earlier with the id kept (a re-time)
+var retimes: Array = []      # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
 var last_at := [ "", 0.0 ]   # the watched kit's move id and anim_at at the last frame
 
 func _init() -> void:
@@ -161,7 +161,8 @@ func _ram_retime() -> void:
 	await _reply()
 	var theirs: Array = replies[0].get("rt", []) if not replies.is_empty() else []
 	var detail := "host %s guest %s" % [str(mine), str(theirs)]
-	ok(mine.size() == 1 and float(mine[0][1]) < -0.1, "ashwick ram hit: the host's as_leap jumps to its squash key", detail)
+	ok(mine.size() == 1 and float(mine[0][1]) < -0.1,
+		"ashwick ram hit: the host's as_leap jumps to its squash key", detail)
 	var shown := false
 	for r in theirs:
 		if not mine.is_empty() and absf(float(r[1]) - float(mine[0][1])) <= NET_SNAP_TOL:
