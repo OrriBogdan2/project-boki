@@ -12,7 +12,7 @@ const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
 	"revive_radius": 1.6,       # [est] a teammate this close revives you
 	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
+	"revive_hp": 0.25,          # [design] a quarter of your health (a per-tick heal scaled to ours gives 12-35%)
 	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
 	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
