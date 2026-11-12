@@ -445,6 +445,7 @@ func _all() -> void:
 	ak.aim_at(P, home + Vector3(20.0, 0, 0))
 	ak.tap(m, P)
 	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
+	_orb_look(K, m)
 	ak.step(m, 0.8)
 	var e2: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
 	var far_d := Vector2((e2[0] as Vector3).x - home.x, (e2[0] as Vector3).z - home.z).length()
@@ -743,3 +744,31 @@ func _all() -> void:
 	P.merge_cd = 0.0
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Cinder Shot in flight reads as fire: the orb is her flame orange (the archetype colour) round a white-hot core in a
+## deep-red glow, at its old size, with the data's flicker trail following it.
+func _orb_look(K: AshwickKit, m: Node) -> void:
+	var r: Dictionary = {}
+	for e: Dictionary in K.fx.riders:
+		if e["kind"] == "cinder": r = e
+	var n: Node3D = r.get("node")
+	var hd := n.get_node_or_null("Head") as MeshInstance3D if n else null
+	var hl := n.get_node_or_null("Halo") as MeshInstance3D if n else null
+	var body: Color = (hd.material_override as ShaderMaterial).get_shader_parameter("color") if hd else Color.BLACK
+	var core: Color = (hd.material_override as ShaderMaterial).get_shader_parameter("color2") if hd else Color.BLACK
+	var glow: Color = (hl.material_override as ShaderMaterial).get_shader_parameter("color") if hl else Color.BLUE
+	var hero := Arch.color("ashwick")
+	ok(
+		"cinder: the orb is her flame orange #%s round a white-hot core" % hero.to_html(false),
+		hd != null and body.is_equal_approx(hero) and core.s < 0.3 and core.v > 0.95,
+		"body %s core %s" % [body.to_html(false), core.to_html(false)]
+	)
+	ok(
+		"cinder: its glow is fire (red-orange, not violet), sizes kept (glow 1.15, head 0.62)",
+		hl != null and (glow.h < 0.12 or glow.h > 0.95) and glow.s > 0.6 and is_equal_approx(hl.scale.x, 1.15)
+		and is_equal_approx(hd.scale.x, 0.62), "glow %s" % glow.to_html(false)
+	)
+	var trails := 0
+	for e: Dictionary in HeroVfx.of(m).ribbons:
+		if is_same(e.get("follow"), n): trails += 1
+	ok("cinder: the flicker trail (shot_trail, 2 ribbons) follows the orb", trails == 2, "%d ribbons" % trails)
