@@ -6,7 +6,8 @@ extends ArchKit
 ## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
-## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
+## or the ground at the end, or on a placed wall or shield (it rides it, and drops if it goes): a cone shows
+## back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
@@ -24,6 +25,7 @@ const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats abov
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
 const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
+const BURR_R := 0.15                 # m: the coin's own radius when it meets a placed wall
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
@@ -48,6 +50,7 @@ const E_RECOVER := 0.6               # s she is held after the beam: the source'
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
+# (a coin on a placed wall also holds on, spot, lout; one falling holds vy: BurrRide)
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
 var knocked := {}
@@ -487,6 +490,7 @@ func _tick_burrs(dt: float) -> void:
 		if float(b["fuse"]) >= 0.0:
 			# stuck: blinks faster, the cone shows back toward the thrower for everyone
 			b["fuse"] = float(b["fuse"]) - dt
+			BurrRide.tick(b, m.verbs.walls, m.world, dt)
 			var k := 1.0 - float(b["fuse"]) / float(b["fuse0"])
 			if is_instance_valid(n):
 				n.global_position = b["pos"]
@@ -523,6 +527,10 @@ func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 			return
 		var gy := ground(q).y
 		q.y = maxf(lerpf(float(b["y0"]), gy + BURR_RIDE, u * u) + 0.6 * sin(PI * u), gy + BURR_RIDE)
+		var obj: Dictionary = m.verbs.stopper(q, h.team, BURR_R)      # a shield, barricade, rink wall or rock
+		if not obj.is_empty():
+			_stick(b, at, true, obj)
+			return
 		var victim := _burr_victim(at, q)
 		if victim != null:
 			burrs.erase(b)
@@ -614,14 +622,17 @@ func daze(foe: Ent, seconds: float) -> void:
 	daze_for[foe.get_instance_id()] = seconds
 	fx().swirl(foe, Color("ff4fb0"), HOT, seconds)
 
-## It meets a wall (or the ground at the lane's end) and sticks: the cone points back the way it came.
-func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
+## It meets a wall (or the ground at the lane's end) and sticks: the cone points back the way it came. On a
+## placed wall `on` it rides that wall (BurrRide).
+func _stick(b: Dictionary, at: Vector3, wall: bool, on := {}) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	b["pos"] = at
 	b["wall"] = wall
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
+	if not on.is_empty():
+		BurrRide.pin(b, on, at, b["out"])
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
 	m.fx.burst(at, SCRAPE, 6, 2.5, 0.4, 6.0, 0.8)       # the miss: a dull dust puff, no flash, nothing on a foe
