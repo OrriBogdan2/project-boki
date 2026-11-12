@@ -73,11 +73,11 @@ static func glint(inc: HomeIncubator, d: float) -> void:
 	_glint_t = 0.0
 	var q := Incubator.shelf()
 	for i in mini(inc.shelf_eggs.size(), q.size()):
-		if q[i].get("wild", false) and is_instance_valid(inc.shelf_eggs[i]):
+		if q[i].has("visitor") and is_instance_valid(inc.shelf_eggs[i]):
 			_sparkle(inc, inc.shelf_eggs[i], q[i])
 	for e in Incubator.eggs():
 		var en: Node3D = inc.egg_nodes.get(String(e["id"]), null)
-		if e.get("wild", false) and is_instance_valid(en):
+		if e.has("visitor") and is_instance_valid(en):
 			_sparkle(inc, en, e)
 
 static func _sparkle(inc: HomeIncubator, egg: Node3D, e: Dictionary) -> void:

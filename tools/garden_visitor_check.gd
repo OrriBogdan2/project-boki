@@ -204,7 +204,9 @@ func _egg_part() -> void:
 	var egg: Dictionary = (Incubator.shelf() + Incubator.eggs()).back() if Incubator.count() > eggs else {}
 	ok(Incubator.count() == eggs + 1 and egg.get("sp") == sp, "it left an egg of its kind (%s)" % sp)
 	ok(CareJournal.arrival().any(func(l): return "left a" in l and "Egg" in l), "the away card says it left an egg")
-	ok(egg.get("wild", false) and egg.get("sp") == sp, "the egg is marked as a visitor's")
+	var from: Dictionary = egg.get("visitor", {})
+	var told: bool = from.get("sp") == sp and from.get("zone") == "bramblebank" and int(from.get("day", 0)) >= 1
+	ok(told, "the egg remembers who, where and which day")
 	if home.hinc != null:
 		var flashes: int = home.fx.flashes.size()
 		home.hinc.refresh()
