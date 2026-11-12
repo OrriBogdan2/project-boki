@@ -180,6 +180,9 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
 ## 4. Guide for kit agents
 - **Call per step from your kit's tick or hold callbacks** (`rmb_hold_tick`, `lmb_override`, `_tick`).
   Use a stable id per ability (`"rmb"`, `"e_drag"`). Don't call from `_process`.
+  An ultimate's ids start with `x` or `ult` (`"x_aim"`, `"ult_rim"`) and no other ability's do: a rival's
+  `all` area plays the TellCue wind-up where it lands when it first shows (docs/AUDIO.md), and ultimates are
+  left to UltCue by that prefix.
 - **Hold telegraphs need no cleanup code.** When the hold ends, stop calling and it goes within 0.1 s.
   Call `AimKit.hide` if it must vanish on the release frame.
 - **Merge start is handled.** Whatever starts a merge, a merged or transforming hunter
