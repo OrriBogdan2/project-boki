@@ -235,6 +235,8 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
+	m.queue_free()
+	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
