@@ -75,3 +75,10 @@ NEW-RED vs ext/release-integ-0245 272368589 (6):
 Not in the chosen set: --merge-form-check fails 2 on f23d91db7 (and the same 2 with the fix above): "says 'Rescue
 Gravadillo to fuse'" and "a tick ring each second" (it waits for the Fx child count to rise; rings are pooled since
 perf-fight-pools, so a ring adds no node).
+
+GPU --perf-bench for that fix (rp1-2 RTX 4090, Medium, 1920x1080, 40 s match; match wall avg / script avg, ms), two
+pairs in swapped order: before f23d91db7 73.3 / 31.3 (run 1, jobq 20261111-213800-28846) and 59.8 / 26.4 (run 4,
+20261111-223839-18742); after 58.1 / 26.3 (run 2, 20261111-214020-21888) and 64.1 / 29.1 (run 3,
+20261111-223820-23870). Means 66.6 -> 61.1 wall, 28.9 -> 27.7 script: inside this worker's run-to-run spread (the
+untouched farm/base/hub parts move as much), so no regression and no measurable gain; the fix's effect is the 26 beam
+nodes a flurry no longer builds.
