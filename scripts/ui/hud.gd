@@ -706,6 +706,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
+	AirMap.minimap(self, to_map, on_map, hold)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:

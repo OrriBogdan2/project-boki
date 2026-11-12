@@ -71,7 +71,7 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 **Exits:** 2 uplink outposts.
 
-**Getting around:** 9 bridges, 14 glide routes, a sky train with 10 stops (Lark Halt, Frost Halt, Watch Halt, Eyrie Halt, Storm Halt, Moor Halt, Bramble Halt, Salt Halt, Ash Halt, Cinder Halt).
+**Getting around:** 9 bridges, 13 glide routes, 6 updrafts, a sky train with 10 stops (Lark Halt, Frost Halt, Watch Halt, Eyrie Halt, Storm Halt, Moor Halt, Bramble Halt, Salt Halt, Ash Halt, Cinder Halt).
 
 ### Rolled each match
 

@@ -3471,7 +3471,7 @@ func _simtest(opts: Dictionary) -> void:
 	for b in m.breaks: nb += int(b["dead"])
 	var wr: Array = []
 	for h in m.hunters: wr.append(h.gear.filter(func(g): return not g.is_empty()).size())
-	print("SIMSTAT breaks %d/%d pickups left %d gear worn %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
+	print("SIMSTAT breaks %d/%d pickups left %d gear worn %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.air_rings.n, m.world.pads.size()])
 	print("SIMTEST done in %dms, sim time %d, result %s" % [Time.get_ticks_msec() - t0, m.time, str(m.result)])
 	print("SIMKIN %s lost=%s" % [str(m.kstat), str(m._resolve_lost().map(func(L): return [L["fate"], L["holder"]]))])
 	if m.blight:
