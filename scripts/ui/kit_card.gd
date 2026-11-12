@@ -14,10 +14,6 @@ const PORTRAIT := Vector2(76, 76)    # px: the Hunter's portrait in the header
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## The order the card lists them in: the kit as it is played, then the ultimate and the Fusion.
 const ROWS := ["passive", "lmb", "rmb", "e", "dash", "x", "r"]
-## Icons the kits name that the icon set draws under another id (weapons and four stray names).
-const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow": "sniper", "flamethrower": "fireball",
-	"tower_shield": "bulwark", "rubble_fists": "haymaker", "tether_lantern": "tether", "hoar_fan": "wave",
-	"lantern_crook": "mend", "earthshatter": "quake", "bolt": "fireball", "shield": "bulwark", "dash2": "dash"}
 ## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
 ## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
@@ -274,7 +270,6 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
 				]
-	out["icon"] = ICON_FIX.get(out["icon"], out["icon"])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
