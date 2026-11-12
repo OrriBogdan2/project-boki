@@ -1,5 +1,5 @@
 class_name GardenXp
-## XP a kin earns on the farm: feeding, petting, fetch, the training yard and the garden games. Numbers in
+## XP a kin earns on the farm: feeding, petting, fetch and the training yard. Numbers in
 ## content/rules/garden_xp.json. Level ups and evolutions go through Game.add_xp like a run's.
 
 static var _rules: Dictionary = {}
@@ -16,13 +16,3 @@ static func give(rec: Dictionary, action: String, love := false, points := 0) ->
 	if action != "drill":
 		xp = int(r[action + "_love"]) if love else int(r[action])
 	Game.add_xp(rec, xp, {})
-
-## A garden game played: game XP, game_win on a win, times first_win_mult on the day's first win in that
-## game. Returns the XP given.
-static func played(rec: Dictionary, won: bool, first: bool) -> int:
-	var r := rules()
-	var xp := int(r["game_win"]) if won else int(r["game"])
-	if won and first:
-		xp *= int(r["first_win_mult"])
-	Game.add_xp(rec, xp, {})
-	return xp

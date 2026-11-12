@@ -10,7 +10,7 @@ static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Calla
 	var any := false
 	for id in GardenItems.ids():
 		var n := int(Save.d["items"].get(id, 0))
-		if n <= 0:
+		if n <= 0 or not GardenItems.fed(id):
 			continue
 		any = true
 		var title := "%s  ×%d" % [GardenItems.item_name(id), n]

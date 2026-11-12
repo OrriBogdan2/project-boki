@@ -39,7 +39,7 @@ func run(m: Node) -> void:
 	_rules()
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
-	for id in GardenItems.ids():
+	for id in GardenItems.ids().filter(GardenItems.fed):
 		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 22 and fine, "22 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 26 and fine, "26 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -105,8 +105,9 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = 4
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 4 grows a form")
+	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
+			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")

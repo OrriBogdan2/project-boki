@@ -2,10 +2,17 @@
 	"desc": "The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed, shop or water chore.",
 	"snacks": ["emberberry", "tidebloom", "sunroot", "puffcorn"],
 	"snacks_doc": "Four Data.CROPS foods, one per lean element (lean.json foods): Fire, Water, Grass, Flying. Each one is yielded once per ripening.",
-	"zone_snacks": {"ridge": ["puffcorn", "tonicbrew", "starfruit", "chimebun"]},
-	"zone_snacks_doc": "The patch on a zone theme (home_layout.gd THEMES, GARDEN.md 10.2) grows that zone's types instead: Kitewind Ridge grows Flying, Electric, Fairy and Sound. Crops (Data.CROPS) go to the crops store and prepared foods (Care.FOODS) to the items store, as Econ.pantry reads them.",
+	"zone_snacks": {
+		"bramblebank": ["kibble", "sweetbun", "sunroot", "sapjelly", "glowcap"],
+		"glasswater": ["tidebloom", "frostdrop", "geodecandy"],
+		"cinderstep": ["emberberry", "pebblenut", "ironcrisp", "scalepepper"],
+		"hushwood": ["duskplum", "mindmint", "pricklepear"],
+		"ridge": ["puffcorn", "tonicbrew", "starfruit", "chimebun"]
+	},
+	"zone_snacks_doc": "Each zone's snack list, the foods of its group's types (GARDEN.md 10.2): Bramblebank normal, grass, bug, spore; Glasswater water, ice, crystal; Cinderstep fire, rock, steel, dragon; Hushwood dark, psychic, poison; Kitewind (theme ridge) flying, electric, fairy, sound. Every food in lean.json is in exactly one list (--lean-snacks-check). A patch on a theme with a list grows that list; the key is the home_layout THEMES id.",
 	"grow_secs": 480,
 	"grow_secs_doc": "Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time.",
 	"reach": 0.35,
-	"reach_doc": "Tiles beyond the patch's edge from which your feet pick the snacks."
+	"reach_doc": "Tiles beyond the patch's edge from which your feet pick the snacks.",
+	"rotate_doc": "The start garden's patch grows its four snacks and one more every ripening: the next food, in the order of the zone lists, that is not one of its four. rot on the patch's deco entry counts the ripenings."
 }
