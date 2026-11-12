@@ -46,7 +46,9 @@ static func suits(zone: String, species: String, toy_ids: Array) -> bool:
 
 ## A species that could visit `zone` now and has a rigged model, or "".
 static func pick(zone: String, toy_ids: Array) -> String:
-	var fits: Array = Data.common_kin().filter(func(sp): return BokiRig.has(sp) and suits(zone, sp, toy_ids))
+	var open := GardenZones.ids().filter(func(id): return GardenZones.is_open(String(id))).size()
+	var pool := ModeBoki.offer(Data.common_kin(), "garden_visitors", open)
+	var fits: Array = pool.filter(func(sp): return BokiRig.has(sp) and suits(zone, sp, toy_ids))
 	return "" if fits.is_empty() else String(fits[_rng.randi() % fits.size()])
 
 ## A visitor of `species` arrives in `zone` at unix time `now`: its record, a Boki that shows what it loves.

@@ -13,14 +13,14 @@ mode's harder difficulties.
   tiers with species in each, and each tier's gate is above the one before it. The legendaries are the rare kin
   (`Data.is_rare`), and their roll is under 30%.
 
-## This is a seed, not live yet
+## Wired behind a flag, off by default
 
-No spawn reads the table yet, so nothing in the game changes:
+`"live": false` in `content/rules/mode_boki.json` is the switch. While it is off nothing in the game changes:
 - Expedition still spawns every non-legendary species at every difficulty (`Data.common_kin`).
 - Garden visitors still come from every common species that has a rigged model.
 - Each boss still drops its own egg when it is killed.
 
-Wiring the table into spawning is a separate task, once the owner approves the split below.
+Flip it to `true` once the owner approves the split below, and `ModeBoki.offer` cuts each pool to its mode's species whose tier gate is open: Expedition wild kin (`Match` wild spots, `SpawnPlan._spawn_rare`) by the tier index, garden visitors (`GardenVisitor.pick`) by the zones open. `--mode-boki-check` asserts both states.
 
 ## How it was seeded
 
