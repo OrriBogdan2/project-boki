@@ -135,8 +135,10 @@ def breaker(rig):
     mantle = [
         (0.00, key(d.hand("L", 0.50, 0.30, 0.02), drag, 0.00, 4), "smooth"),
         (0.25, key(d.hand("L", 0.40, 0.34, 0.02), drag, -0.03, 14, hips=(6, 0, 0), head=-12, roll=-3), "smooth"),
-        (0.55, key(d.hand("L", 0.18, 0.34, 0.02), d.hand("R", 0.30, 0.20, 0.06), 0.04, 24, hips=(10, 0, 0), head=-16, roll=3), "smooth"),
-        (0.80, key(d.hand("L", 0.10, 0.30, 0.04), d.hand("R", 0.14, 0.24, 0.08), 0.05, 16, hips=(4, 0, 0), head=-8), "smooth"),
+        (0.55, key(d.hand("L", 0.18, 0.34, 0.02), d.hand("R", 0.30, 0.20, 0.06), 0.04, 24, hips=(10, 0, 0), head=-16, roll=3,
+                     rf=f("R", 0.22, 0.20)), "smooth"),     # the right knee drives up the face (he never just hangs)
+        (0.80, key(d.hand("L", 0.10, 0.30, 0.04), d.hand("R", 0.14, 0.24, 0.08), 0.05, 16, hips=(4, 0, 0), head=-8,
+                     rf=f("R", 0.12, 0.16)), "smooth"),
         (1.00, key(d.hand("L", 0.30, 0.20, 0.02), d.hand("R", 0.26, 0.04, 0.04), 0.01, 4, head=-4), "out"),
     ]
     mantle = [(t * MANTLE_S, p, e) for t, p, e in mantle]
