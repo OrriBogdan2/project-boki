@@ -22,6 +22,8 @@ pitch-reel --when-live [--build REF]
 - The tool encodes H.264 (CRF 17, +faststart) and checks each clip: 1920x1080, 60 fps, black and frozen stretches.
   Debug text, FPS counters and watermarks are checked by eye on the frames.
 - A shot a build cannot show (shot 3 until a form has art) prints `PITCH_FAIL`, exits 1 and is left out of the index.
+- `godot --headless --path . -- --pitch-check` plays shots 2, 3, 6, 7 and 10 without the movie writer (a few minutes on
+  a CPU box), so a game change that breaks a driver shows before a GPU job is spent on it.
 
 ## Shots
 | # | Shot | Takes (full list) | Who | Driver |
@@ -31,8 +33,8 @@ pitch-reel --when-live [--build REF]
 | 3 | Evolution T1 -> T2 | 2 | agent | farm: a Boki one level short, the farm's own evolution scene; when the demo roster has no line with art, its first Boki becomes a species that has one |
 | 4 | Farm loop, 60 s | 1 | agent | care preset: trough, pat, fetch, brush, drill pressed in the gold |
 | 5 | Build process, 20 s | 1 | agent | `term_shot.py`: four terminal tiles, output scrubbed (emails, tokens, home paths, names in remotes) |
-| 6 | Hunter select, 15 s | 1 | agent | the Hunters screen steps through all 12, lands on `--hunter` and picks it (the screen stays up) |
-| 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot, attack held, right click, utility on a rota; each take another Hunter |
+| 6 | Hunter select, 15 s | 1 | agent | the Hunters screen steps through all 12, lands on `--hunter` (default gunslinger) and picks it (the screen stays up) |
+| 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot 4.5 m away, attack held, right click, utility on a rota; each take another Hunter (or `--hunter`) |
 | 8 | Extraction drop | 2 | agent | the real loading screen and drop; loading cut at the `drop` mark |
 | 9 | Loot + fight, 3 min | 3 | owner / bot backup | autoplay match of three duos, no drop |
 | 10 | Escape | 3 | owner / scripted backup | a Hunter at an uplink yard as it finishes charging walks in and rides out |

@@ -25,7 +25,9 @@ const SECS := {4: 60.0, 7: 24.0, 8: 22.0, 9: 180.0, 10: 34.0}
 const RAID_DUOS := 3             # shot 9: teams of two
 const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 starts
 const CLOCK_LEFT_S := 840.0      # s on the match clock when a stepped shot starts (1e9 reads as junk)
-const KIT_FOE_REACH := 11.0      # m: a foe that has walked further than this from the Hunter is put back at the fight
+const KIT_GAP_M := 4.5          # m between the Hunter and its foe in the kit shot (both well inside the frame)
+const KIT_ZOOM := 0.85           # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on the frame's edges)
+const KIT_FOE_REACH := 7.0       # m: a foe that has walked further than this from the Hunter is put back at the fight
 const DROP_PLAN_MAX_S := 25.0    # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5       # s of the ride out kept after the Hunter is extracted
 
@@ -235,13 +237,13 @@ func _kit() -> void:
 	P.ctrl = "idle"
 	var base := _ground(P.pos)
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
-	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(FIGHT_GAP, 0, 0)))
+	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(KIT_GAP_M, 0, 0)))
 	foe.ai = m.bot_brain.new_mind(m.rng, KIT_FOE_SKILL, m.bot_cfg)
 	squad_a = [P]
 	squad_b = [foe]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(0.55)
+	_zoom(KIT_ZOOM)
 	mark("kit")
 	var t := 0.0
 	while t < SECS[7]:
@@ -256,7 +258,7 @@ func _kit_press(t: float, P: Hunter, foe: Hunter) -> void:
 	P.hp = P.max_hp      # neither of them goes down or walks off: the shot is about the kit
 	foe.hp = foe.max_hp
 	if P.flat_dist(foe) > KIT_FOE_REACH:
-		foe.teleport(_ground(P.pos + (foe.pos - P.pos).normalized() * FIGHT_GAP))
+		foe.teleport(_ground(P.pos + (foe.pos - P.pos).normalized() * KIT_GAP_M))
 	P.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
 	var beat := fmod(t, KIT_ROTA_S * 3.0) / KIT_ROTA_S
 	P.inp["fire"] = beat < 1.0
