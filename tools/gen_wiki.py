@@ -545,9 +545,7 @@ def gen_maps():
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
-        if m.get("docks"): ex.append("%d skiff docks" % len(m["docks"]))
         if m.get("outposts"): ex.append("%d uplink outposts" % len(m["outposts"]))
-        if m.get("hatches"): ex.append("%d rift hatches" % len(m["hatches"]))
         if ex: body += "**Exits:** " + ", ".join(ex) + ".\n\n"
         trav = []
         for key, label in (("bridges", "bridges"), ("glides", "glide routes"), ("pads", "jump pads"), ("updrafts", "updrafts"), ("winds", "wind roads")):
@@ -560,6 +558,9 @@ def gen_maps():
         if sp:
             cat = {"rare_kin": "Rare Boki", "vault": "Vaults", "cache": "Item caches", "boss": "Live boss lairs"}
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
+        if m.get("legendaries"):
+            chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
+            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []
