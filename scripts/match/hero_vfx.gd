@@ -522,6 +522,16 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
+	if not bool(rec.get("round", true)):
+		_unlit_round(follow)
+
+## A shot's own glow and halo go dark under a trail that is the whole round ("round": false). The node stays shown,
+## so the trail keeps following it and the pool doesn't hand it out; spawn_shot repaints both when it is reused.
+func _unlit_round(node: Node3D) -> void:
+	for part: Node in [node, node.get_node_or_null("Halo")]:
+		var mt := (part as MeshInstance3D).material_override as ShaderMaterial if part is MeshInstance3D else null
+		if mt:
+			mt.set_shader_parameter("color", Color(0, 0, 0, 0))
 
 func _mote_node(kind: String) -> Node3D:
 	var p := GPUParticles3D.new()

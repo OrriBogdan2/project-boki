@@ -18,7 +18,7 @@
 			{"p": "smoke", "n": 2, "way": "fwd", "speed": 1.2, "spread": 0.5, "grav": -1.0, "life": 0.45, "size": 0.16,
 				"c": "smoke", "c3": "soot", "near": true}
 		]},
-		"shot_trail": {"net": false, "fx": [
+		"shot_trail": {"net": false, "round": false, "fx": [
 			{"p": "ribbon", "streak": true, "size": 0.6, "life": 2.0, "tail": 0.04, "c": "char", "c2": "deep", "c3": "char"},
 			{"p": "ribbon", "streak": true, "size": 0.3, "life": 2.0, "tail": 0.04, "c": "main", "c2": "fire", "c3": "deep"},
 			{"p": "ribbon", "streak": true, "size": 0.12, "life": 2.0, "tail": 0.036, "c": "white", "c2": "white", "c3": "hot"}

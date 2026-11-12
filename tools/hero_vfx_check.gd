@@ -235,8 +235,8 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 
 ## Vex's rifle rounds are HeroVfx data (content/vfx/gunslinger.json): through a held string every live round of hers
 ## carries a tracer riding it, drawn 2-4.5 m long once the round has flown a few steps at the weapon's speed and wide
-## enough to follow at match zoom, with a flash at the gun for each round and a spark where one lands. The round nodes
-## and the looks are stepped with the match here, as a 60 fps frame would draw them.
+## enough to follow at match zoom, the stock round glow dark under it, with a flash at the gun for each round and a
+## spark where one lands. The round nodes and the looks are stepped with the match here, as a 60 fps frame draws them.
 func _vex_tracer(main: Node) -> void:
 	var m: Match = flow._match(main, "gunslinger")
 	await main.get_tree().process_frame
@@ -249,6 +249,7 @@ func _vex_tracer(main: Node) -> void:
 	var bare := 0                  # steps a live round had no full tracer riding it
 	var born := {}                 # round sid -> the step it was first seen
 	var thin := 0.0
+	var lit := 0                   # steps a tracer rode a round whose stock glow still showed
 	var spd := float(P.wpn["speed"])
 	for i in 150:
 		m.step(1.0 / 60.0)
@@ -272,10 +273,14 @@ func _vex_tracer(main: Node) -> void:
 			var age := i - int(born[sd["sid"]])          # steps since it was fired (the kit picks it up a step on)
 			if (mine.is_empty() and age > 0) or (age >= TRACER_FULL and (drawn < 2.0 or drawn > 4.5)):
 				bare += 1
+			var glow: Color = ((sd["node"] as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("color")
+			if not mine.is_empty() and glow.a > 0.0:
+				lit += 1
 	P.inp["fire"] = false
 	ok(born.size() >= 15, "a held string fires its rounds (%d)" % born.size())
 	ok(bare == 0, "every live round has a tracer riding it, drawn 2-4.5 m long (%d bare)" % bare)
 	ok(thin >= 0.3, "the tracer is wide enough for the match camera (%.2f m)" % thin)
+	ok(lit == 0, "the tracer is the whole round: the stock glow is dark under it (%d lit)" % lit)
 	var flashes := int(V.plays.get("shot", 0))
 	var tracers := int(V.plays.get("shot_trail", 0))
 	ok(flashes >= born.size(), "a muzzle flash for every round (%d of %d)" % [flashes, born.size()])

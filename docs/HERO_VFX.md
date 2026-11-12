@@ -17,7 +17,8 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
   ended. Particle layers only, and local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
-  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. `"round": false` on the recipe darkens
+  the shot's own glow and halo, so the ribbons are the whole round.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
   cones and delivery sounds) stays out, so only the Hero's own look shows.
 
