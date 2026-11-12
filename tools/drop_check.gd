@@ -170,6 +170,21 @@ func _quiet_map() -> void:
 	ok(card.size.x > 0.0 and safe.encloses(card), "the key card sits inside 1280x720 (%s)" % str(card))
 	ok(InputMap.has_action("map_info") and Settings.key_cap("map_info") != "?", "the map-info key is bound")
 
+## Tutorial: no chest shows before you land (however many the level has), and every one does once you have.
+func _tutorial_chests_wait() -> void:
+	var seen := m.chests.size() - _hidden_chests()
+	var t := 0.0
+	while t < 30.0 and (m.player.riding or m.player.dropping):
+		if m.player.riding:
+			m.ship_jump(m.player, true)
+		m.step(Match.DT)
+		t += Match.DT
+	var landed: bool = not (m.player.riding or m.player.dropping)
+	var n := m.chests.size()
+	var info := "%d of %d visible before landing, %d now, landed %s" % [seen, n, n - _hidden_chests(), landed]
+	ok(seen == 0 and landed and _hidden_chests() == 0,
+			"tutorial: no chest shows before you land, the level's chests do once you have (%s)" % info)
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -184,10 +199,9 @@ func run(mn: Node) -> void:
 		ok(why == "", "normal match, steer %s: your Boki rides with you and is untouched for 12 s" % str(steer))
 		_chests_wait("normal match, steer %s" % str(steer), hid)
 	_start({"tutorial": true, "teams": 1, "length": 1500.0})
-	var thid := _hidden_chests()
 	var tw := _watch_boki(12.0)
 	print("  tutorial ", tw)
 	ok(tw == "", "tutorial: your Boki rides with you and is untouched for 12 s")
-	_chests_wait("tutorial", thid)
+	_tutorial_chests_wait()
 	print("DROP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

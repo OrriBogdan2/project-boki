@@ -182,7 +182,7 @@ func draw(sz: Vector2) -> void:
 	if m.exits:
 		var ek := clampf(0.9 + kk * 0.12, 1.0, 1.8)
 		for x in m.exits.list:
-			var pv := to_screen(x.get("berth", x["pos"]))
+			var pv := to_screen(x["pos"])
 			if rect.grow(-4.0).has_point(pv):
 				hud._draw_exit_icon(pv, x, ek)
 				var st := _exit_word(x)
@@ -193,6 +193,8 @@ func draw(sz: Vector2) -> void:
 	ReviveHud.full_map(self)
 	if m.biomes:
 		m.biomes.hot.full_map(self, kk)
+	HeartHud.full_map(self)
+	WaysOutMap.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
@@ -231,11 +233,8 @@ func _map_title() -> String:
 
 func _exit_word(x: Dictionary) -> String:
 	match String(x["state"]):
-		"called": return "Skiff %s" % hud._fmt(float(x["t"]))
-		"boarding": return "BOARDING"
 		"charging": return "Uplink %d%%" % int(float(x["prog"]) * 100.0)
 		"open": return "OPEN"
-		"closed": return "Closed"
 	return ""
 
 ## A faint grid with letters and numbers along the edges, for callouts ("dropping C4").
@@ -615,18 +614,14 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var exit_rows := 3 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
 	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
-		var ex := [["dock", "Skiff dock (loud)"], ["outpost", "Uplink outpost"], ["hatch", "Rift hatch (needs a key)"]]
-		for i in ex.size():
-			var fake := {"kind": ex[i][0], "state": "idle", "prog": 0.0}
-			var col := Exits.color_of(fake)
-			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
-		var row_y := r2.position.y + 42 + 3 * 22
+		OutpostGlyph.draw(c, Vector2(r2.position.x + 26, r2.position.y + 42), 1.0, ExitModels.UPLINK, Color(0.55, 0.58, 0.64, 0.9), 0.0)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Uplink outpost", 12, INK)
+		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
@@ -634,16 +629,6 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		if not m.beacons.is_empty():
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
-
-func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
-	match kind:
-		"dock":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-6, 1), pv + Vector2(6, 1), pv + Vector2(4, 5), pv + Vector2(-4, 5)]), col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 0), pv + Vector2(0, 0)]), col)
-		"hatch":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), col)
-		"outpost":
-			OutpostGlyph.draw(c, pv, 1.0, col, Color(0.55, 0.58, 0.64, 0.9), 0.0)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
