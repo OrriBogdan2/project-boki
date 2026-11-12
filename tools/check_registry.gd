@@ -357,7 +357,7 @@ const CHECKS := {
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
-	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],      # first-evolution card, toast, waiting line
+	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
