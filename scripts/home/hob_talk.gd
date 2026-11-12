@@ -5,27 +5,23 @@ extends RefCounted
 ## camera eases toward him. What he says:
 ##   - the first time on a new farm: who he is, the stall, the house spot and the axe (the farm tutorial's start)
 ##   - while the tutorial runs: the step you're on, pointing at where it happens
-##   - once the farm tutorial is done and the second Relic is on offer (ClassUnlock.second_pending): "By the way..." and
+##   - once the house is down and the second Mask is on offer (ClassUnlock.second_pending): "By the way..." and
 ##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
-## When a line is about something (a "show"), he points at it. The camera holds ONE framing for the whole
-## talk (a soft ease in at the start and out at the end); it only drifts (slowly, part way) toward a "show" that
-## is off screen. On the first arrival he waves and calls you over without moving the camera.
+## When a line is about something (a "show"), he points at it and the camera looks there for a moment. On the
+## first arrival the camera also swings over to him for a moment while he waves and calls you over.
 
 const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
-const FACE_K := 0.3            # how far the camera's focus moves from you toward him while you talk
-const SHOW_PAN_K := 0.5        # how far toward an off-screen "show" it drifts (half way: it comes into view)
-const SHOW_EASE_S := 1.1       # s the drift to an off-screen "show" takes, and the drift back (slow)
-## Screen fractions a "show" counts as seen in (above the talk box).
-const SHOW_SAFE := Rect2(0.08, 0.08, 0.84, 0.6)
+const TALK_ZOOM := 0.8         # the home camera's zoom while you talk (Home.HOME_ZOOM after)
+const EASE_S := 0.6            # s the camera takes to swing over to him and back on the first arrival
+const FACE_K := 0.45           # how far the camera's focus moves from you toward him while you talk
 
 var hob: FarmHob
 var box: TalkBox = null
 var offer: HobOffer = null
-var intro_t := -1.0            # s into the first-arrival wave and call, -1 when none
-var show_t := -1.0             # s into a line's pointing at something, -1 when none
+var intro_t := -1.0            # s into the first-arrival camera swing, -1 when none
+var show_t := -1.0             # s into a line's look at something, -1 when none
 var show_at := Vector3.INF
-var show_far := false          # the line's "show" is off screen (or under the talk box): the camera drifts to it
 
 func _init(owner_hob: FarmHob) -> void:
 	hob = owner_hob
@@ -36,13 +32,13 @@ func rules() -> Dictionary:
 func talking() -> bool:
 	return box != null and is_instance_valid(box)
 
-## Talking, or waving on the first arrival (he holds his own pose then).
+## Talking, or swinging the camera over on the first arrival (he holds his own pose then).
 func busy() -> bool:
 	return talking() or intro_t >= 0.0
 
-## The second Relic is his to offer: it's on offer, and the farm tutorial is over (all its steps done, or none).
+## The second Mask is his to offer: it's on offer, and the house is down (or there is no tutorial).
 func offer_due() -> bool:
-	return ClassUnlock.second_pending() and not FarmTutorial.active()
+	return ClassUnlock.second_pending() and (not FarmTutorial.active() or FarmTutorial.did("house"))
 
 ## Starts a conversation: what he has to say now (see the file's doc).
 func start() -> void:
@@ -53,16 +49,17 @@ func start() -> void:
 	var ids := FarmBuilder.draw_up()
 	FarmTutorial.event("hob")
 	Save.save_game()
-	h.panel_open = TALK      # (the camera keeps your zoom: no zoom in or out per talk)
+	h.panel_open = TALK
+	h.cam.zoom_to = TALK_ZOOM
 	_screen_clear(false)
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
 	if offer_due():
 		box.say(_offer_lines(), _show_offer)
-	elif first and FarmTutorial.active():
+	elif first and FarmTutorial.active() and not FarmTutorial.base():      # the base tutorial is the Boki's to lead
 		box.say(rules()["intro"], box.close)
-	elif FarmTutorial.current() != "":
+	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
 	else:
 		box.say(_blueprint_lines(ids, first), _menu_choice)
@@ -96,7 +93,8 @@ func _menu_choice() -> void:
 	box.show_extra(row)
 
 func _show_offer() -> void:
-	offer = HobOffer.new(self)
+	offer = HobOffer.new((ClassUnlock.state().get("second", []) as Array).duplicate(), rules(), "offer_title",
+			ClassUnlock.choose_second, taken, later)
 	box.show_extra(offer.build())
 
 ## The Mask is chosen (HobOffer): he hands it over and the short Mask moment plays.
@@ -127,6 +125,7 @@ func _after_beat(id: String) -> void:
 	var h = hob.h
 	if h.panel_open == TALK:
 		h.panel_open = ""
+	h.cam.zoom_to = h.HOME_ZOOM
 	_screen_clear(true)
 	h._refresh_top()
 
@@ -134,17 +133,8 @@ func _on_line(_i: int, line: Dictionary) -> void:
 	var at: Vector3 = line.get("at", _where(String(line.get("show", ""))))
 	show_at = at
 	show_t = 0.0 if at.x != INF else -1.0
-	show_far = at.x != INF and not _on_screen(at)
 	hob.node.point_at = at
 	hob.node.pose = "point" if at.x != INF else String(line.get("pose", "talk"))
-
-## Is this spot in plain view right now (inside SHOW_SAFE, so not under the talk box)?
-func _on_screen(at: Vector3) -> bool:
-	var c3: Camera3D = hob.h.get_viewport().get_camera_3d()
-	if c3 == null or c3.is_position_behind(at):
-		return c3 == null
-	var screen: Vector2 = hob.h.get_viewport().get_visible_rect().size
-	return SHOW_SAFE.has_point(c3.unproject_position(at) / screen)
 
 ## Where a line's "show" is on this farm (INF when it isn't there).
 func _where(what: String) -> Vector3:
@@ -168,6 +158,7 @@ func _closed() -> void:
 	show_t = -1.0
 	if h.panel_open == TALK:
 		h.panel_open = ""
+	h.cam.zoom_to = h.HOME_ZOOM
 	_screen_clear(true)
 	if h.guide:
 		h.guide.refresh()
@@ -200,38 +191,43 @@ func tick(dt: float) -> void:
 				hob.node.pose = "talk"
 	_intro(dt)
 
-## The first arrival: once the screen is clear, he waves and calls you over (the camera stays put).
+## The first arrival: once the screen is clear, the camera swings over to him while he waves and calls you over.
 func _intro(dt: float) -> void:
 	var h = hob.h
 	if intro_t < 0.0:
 		var tut: Dictionary = Save.d["tutorial"]
 		var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
 		var met := bool(FarmBuilder.state().get("met", false))
-		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active():
+		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active() or FarmTutorial.base():
 			return
 		tut["hob_intro"] = true
 		intro_t = 0.0
+		h.cam.zoom_to = TALK_ZOOM
 		hob.node.pose = "wave"
 		hob.node.face_to = h.ppos
 		hob.node.shout(String(rules()["call"]))
 		Sfx.play("ping", hob.node.position, -6.0)
 		return
 	intro_t += dt
-	if intro_t > float(rules()["intro_s"]):
+	if intro_t > float(rules()["intro_pan_s"]) + EASE_S * 2.0:
 		intro_t = -1.0
+		h.cam.zoom_to = h.HOME_ZOOM
 
-## The camera's focus: on you, drawn a little toward Hob while you talk, and softly toward a "show" that is too
-## far away to be on screen.
+## The camera's focus: on you, drawn toward Hob while you talk (and toward what he points at), and over to him
+## on the first arrival.
 func frame(focus: Vector3) -> Vector3:
 	if not is_instance_valid(hob.node):
 		return focus
+	var him := Vector3(hob.node.position.x, focus.y, hob.node.position.z)
 	var at := focus
-	if talking() or offer != null:
-		at = focus.lerp(Vector3(hob.node.position.x, focus.y, hob.node.position.z), FACE_K)
+	if intro_t >= 0.0:
+		var hold := float(rules()["intro_pan_s"])
+		var k := smoothstep(0.0, EASE_S, intro_t) * (1.0 - smoothstep(EASE_S + hold, EASE_S * 2.0 + hold, intro_t))
+		at = focus.lerp(him, k)
+	elif talking() or offer != null:
+		at = focus.lerp(him, FACE_K)
 	if show_t >= 0.0 and show_at.x != INF:
-		var there := Vector3(show_at.x, focus.y, show_at.z)
-		if show_far:
-			var span := float(rules()["show_s"])
-			var k := smoothstep(0.0, SHOW_EASE_S, show_t) * (1.0 - smoothstep(span - SHOW_EASE_S, span, show_t))
-			at = at.lerp(there, k * SHOW_PAN_K)
+		var span := float(rules()["show_s"])
+		var k := smoothstep(0.0, 0.4, show_t) * (1.0 - smoothstep(span - 0.4, span, show_t))
+		at = at.lerp(Vector3(show_at.x, focus.y, show_at.z), k)
 	return at

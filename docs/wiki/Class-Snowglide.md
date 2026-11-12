@@ -66,7 +66,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ice controller: homing darts, a freezing spear and a sliding ice wall. |
 | Passive: Hoarfrost | Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them. |
-| Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly straight and thick. |
+| Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly straight and thick, and hit twice as hard. |
 | LMB | Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one. |
 | RMB: Ice Spear | Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later. |
 | E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
@@ -77,7 +77,7 @@ What the in-game kit card (K) says.
 
 **Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
 
-**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
+**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
 
 **Ice Spear (RMB, 10.2s cooldown, 2 charges).**
 
@@ -93,9 +93,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 10.2s -> 8.7s, damage +15%. | cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder. |
-| Dash (Shift) | recharge 13s -> 11.5s. | recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
-| E | cooldown 17s -> 14.9s. | cooldown 17s -> 12.8s; the wall is 40 points tougher. |
+| RMB | cooldown 10.2s -> 9.2s, damage +15%. | cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder. |
+| Dash (Shift) | recharge 13s -> 11s. | recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
+| E | cooldown 17s -> 15.3s, wall strength +15%. | cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

@@ -56,6 +56,9 @@ def cue_dolm():       # stone grinding, then a slab dropping
 def cue_dredge():     # a brass bell swung heavy, then struck
     return body([rise(110, 220) * 0.6, air(400, 1200, 800, 2400) * 0.3], 90, S.fm(220, 1.41, 3.0, 0.8, 0.5) * 0.7)
 
+def cue_gil():        # surf swelling up, then the wave breaking
+    return body([air(150, 600, 600, 2200) * 0.9, rise(70, 150) * 0.6], 60, tail(0.5, 2500, 0.35) * 0.6, 0.4)
+
 def cue_gunslinger(): # a falling whistle, then the blast
     return body([S.sweep(2400, 380, 0.6, curve=1.5) * (0.3 + 0.7 * np.arange(N(0.6)) / N(0.6)) * 0.5], 50, None, 0.45)
 
