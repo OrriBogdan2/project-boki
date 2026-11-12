@@ -30,6 +30,7 @@ var m: Match = null
 var home := Vector3.ZERO
 var replies: Array = []      # what the guest said back: {"c", "pos"}
 var stop := false
+var building := false        # the guest is building its match (the host says start until it hears from it)
 var stun_max := 0.0          # the longest stun seen on the watched body since its last place (guest: its own)
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
@@ -88,10 +89,14 @@ func _host_up() -> Hunter:
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := Time.get_ticks_msec()
+	var said := t1
 	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
+		if Time.get_ticks_msec() - said > 3000:      # a slow guest may not have heard the first start: say it again
+			said = Time.get_ticks_msec()
+			Net.lobby_emit("dn", {"c": "start", "d": d})
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
 	return G
 
 func _host() -> void:
@@ -409,7 +414,10 @@ func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "dn":
 		return
 	match String(data.get("c", "")):
-		"start": _build(data["d"])
+		"start":
+			if m == null and not building:
+				building = true
+				_build(data["d"])
 		"done": stop = true
 		"place":
 			if m and m.player:
