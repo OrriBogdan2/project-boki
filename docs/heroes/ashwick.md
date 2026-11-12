@@ -272,7 +272,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 | Furnace Cloak (E) | `as_cloak` | 0.24s on the press: a quick tuck, then chest out and the arms flung wide with the blast (up on his toes, the flamer swung up on its strap), held a beat, settle |
 | Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
 | Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |
-| Flue Flight (X) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
+| Flue Flight (X) | `lw_jet` (held; `bank`), `lw_land` (`owns_land`, `upper: moving`) | a crouch as the ember ring bursts (0.08s), then she springs up into the hover (0.22s: palms out and down, the fire gathering in both hands), and holds one steady lean into the jet, legs trailing; the whole body rolls into the flight's turns like the glider (up to 25 degrees); the landing is `jet_land`, 0.2s, and the generic `land` clip no longer follows it, so the settle ends when control is back (legs keep walking if she moves) |
 
 ## Animation timing
 Measured against the footage (briefs/hero-ref/linwick.md on ext/agent-briefs, a frame = 0.2 s) and the kit's own timings; "ours" is
@@ -289,9 +289,9 @@ cadence override. Checked by `--ashwick-combo-check` (timing rows, the ram row) 
 | Soot Ram into a foe (3 m) | reaches in ~0.12, knocked back and upright within ~0.1 | hit at 0.20 (the 2.9 m / 0.32 s dash_feel ram, under half a frame off), but the clip stayed stretched to 0.36, upright 0.42, done 0.55 (+0.35 after the hit) | squash on the hit frame, upright +0.06, done +0.19 |
 | Soot Ram, no foe | upright at once after the slide | squash 0.36, upright 0.42, done 0.55 | same |
 | Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.13, done 0.24 | same |
-| Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
+| Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same; palm embers gather in both hands over the 0.22 s (`liftoff`) |
 | Flue Flight flight | 1.3-1.4 (owner item 20: 1.8) | 1.8 | same |
-| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke |
+| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke; the 0.4 s `land` clip used to run after it (settle 0.6 s): fixed |
 | Run cadence (footfall) | every 0.15-0.2 | every 0.35 (0.7 s cycle at 4.65 m/s) | every 0.19 (0.339 s clip, half on the ground, played at 0.88: 0.384 s cycle), feet planted |
 | Stop / turn | instant | loco blend 12/s (every warden) | same |
 | Stoke, hop, jump, hit, death | no source footage | our beats | same |
@@ -356,3 +356,8 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+Flue Flight clips still wanted (Blender host; the game plays `jet` 1.0 s, hold from 0.22, and `jet_land` 0.2 s today):
+- `jet_up` 0.22 s: the take-off hover with both palms turned down and out, fingers spread, the fire gathering (the shipped `jet` keeps
+  the hands at her sides, so only the new palm embers show it). The map takes one clip per kit move, so the kit would need a `lw_jet_up` move for it.
+- `jet_bank_l` / `jet_bank_r` (optional): a lean of the whole pose into a turn; the procedural roll (`bank`) covers it until then.

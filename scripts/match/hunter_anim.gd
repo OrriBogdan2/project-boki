@@ -187,6 +187,7 @@ var flipping := false
 var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
+var bank_k := 0.0              # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
@@ -563,6 +564,7 @@ func update(dt: float, s: Dictionary) -> void:
 	air_k = _ease(air_k, 0.0 if grounded or gliding or diving else 1.0, 14.0, dt)
 	glide_k = _ease(glide_k, 1.0 if gliding and not diving else 0.0, 7.0, dt)
 	dive_k = _ease(dive_k, 1.0 if diving else 0.0, 6.0, dt)
+	bank_k = _ease(bank_k, 1.0 if (gliding and not diving) or km_bank else 0.0, 7.0, dt)
 	crouch_k = _ease(crouch_k, float(s.get("crouch", 0.0)), 12.0, dt)
 	var ledge: bool = s.get("ledge", false)
 	var mant := float(s.get("mantle", -1.0))
@@ -1127,6 +1129,7 @@ var km_id := ""
 var km_prev_t := 99.0
 var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
 var km_blend := KM_BLEND
+var km_bank := false           # the move rolls the body into the turns it flies (its "bank" key)
 var km_stance := false         # the move's legs are a standing stance: running, the legs keep running
 var km_swing := -1             # the weapon swing the move throws (its "swing" key), -1: the weapon's combo step
 const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
@@ -1134,12 +1137,13 @@ const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
 ## The whole body's turn in the air, about the hips: nose-down by the dive (DIVE_PITCH), and under the glider a roll
 ## into its turns by the turn rate (times the speed: the sideways pull), GLIDE_BANK at full steer, the glider's whole
-## steering pull (HunterMove.glide_accel); it leans toward the inside of the turn about the way it flies (the body
-## faces the aim, which need not be where it flies). Handed to a Hero's clips as AIR_TILT (WardenClips._air_tilt),
-## so the body you see, its glider and a Boki riding on it turn as one.
+## steering pull (HunterMove.glide_accel); a move keyed "bank" (Flue Flight) rolls the same; it leans toward the
+## inside of the turn about the way it flies (the body faces the aim, which need not be where it flies). Handed to a
+## Hero's clips as AIR_TILT (WardenClips._air_tilt), so the body you see, its glider and a Boki riding on it turn
+## as one.
 func _air_tilt(dt: float, turn: float, mf: float, ms: float, spd: float) -> Basis:
 	var steer := clampf(turn * spd / HunterMove.glide_accel, -1.0, 1.0)
-	glide_bank = _ease(glide_bank, steer * GLIDE_BANK * glide_k, GLIDE_BANK_EASE, dt)
+	glide_bank = _ease(glide_bank, steer * GLIDE_BANK * bank_k, GLIDE_BANK_EASE, dt)
 	var tilt := Basis(Vector3.RIGHT, -DIVE_PITCH * dive_k)
 	if absf(glide_bank) > 0.0005:
 		# (about the way it flies, reversed: a positive roll leans the head to the left of it)
@@ -1154,6 +1158,7 @@ func _update_km(id: String, tt: float, dt: float) -> void:
 		km_blend = 0.0
 	if id != km_id:
 		km_stance = bool(km_def(id).get("stance", false))
+		km_bank = bool(km_def(id).get("bank", false))
 		km_swing = int(km_def(id).get("swing", -1))
 	km_id = id
 	km_prev_t = tt

@@ -79,6 +79,11 @@ func _flight() -> void:
 		"ult: flies low, off the ground", P.pos.y - m.world.ground_at(P.pos.x, P.pos.z) > 0.2,
 		"height %.2f" % (P.pos.y - home.y)
 	)
+	ak.step(m, 0.4, func():
+		ak.aim_at(P, P.pos + Vector3(0, 0, 10.0))
+		P.render(Match.DT, 1.0))
+	ok("ult: steering rolls the body into the turn (the flight is keyed bank)",
+			absf(P.anim.glide_bank) > deg_to_rad(10.0), "bank %.1f deg" % rad_to_deg(P.anim.glide_bank))
 	HunterKeys.ult_pressed(P)
 	var start := P.pos
 	ok(
