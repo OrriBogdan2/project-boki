@@ -672,6 +672,31 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
 	P.vel = Vector3.ZERO     # (she ends the charges still moving and teleport keeps that: it carried into the Slipstep)
 
+## The fired beam at match zoom (footage 0170/0182, about 0.3 s after it fires): a body about 0.5 bh across round a
+## white-hot core on the strip of the hit width, a smoke ring at her cyborg palm, the light gone in about 0.8 s.
+func _gunslinger_beam_look(V: HeroVfx, K: GunslingerKit) -> void:
+	var bolt_nodes: Array = V.pools.get("bolt", [])
+	var body := 0.0
+	var strip := 0.0
+	var lasts := 0.0
+	for e: Dictionary in V.live:
+		if not bolt_nodes.has(e["node"]):
+			continue
+		var w := (e["b"] as Basis).y.length()
+		strip = maxf(strip, w)
+		body = maxf(body, float((e["mat"] as ShaderMaterial).get_shader_parameter("core_w")) * w)
+		lasts = maxf(lasts, float(e["dur"]))
+	ok("Longneedle look: the beam's body is %.2f m across (0.5 bh = 0.9 m) on the %.2f m hit width" % [body, strip],
+			body >= 0.9 and absf(strip - K.beam_width()) < 0.01)
+	ok("Longneedle look: the beam fades out over about 0.8 s", lasts >= 0.7 and lasts <= 0.9, "%.2f s" % lasts)
+	var fire: Array = HeroVfx.data("gunslinger")["moves"]["e_fire"]["fx"]
+	var ring := fire.any(func(l: Dictionary) -> bool: return l["p"] == "ring" and l.get("at") == "palm")
+	var palm: Dictionary = HeroVfx.data("gunslinger")["anchors"]["palm"]
+	var ring_nodes: Array = V.pools.get("ring", [])
+	var ring_live := V.live.any(func(e: Dictionary) -> bool: return ring_nodes.has(e["node"]))
+	ok("Longneedle look: a smoke ring opens at the open palm of her cyborg (left) hand on release",
+			ring and ring_live and palm["bone"] == "hand.L")
+
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]
@@ -827,6 +852,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.4)
 	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
+	_gunslinger_beam_look(V, K)
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
