@@ -1,12 +1,14 @@
 extends RefCounted
-## --dash-streak-shots --shots-dir=<dir> [--dash-only=<id>,<id>]: one strip per Hunter's ground dash at match zoom
-## (run under xvfb with a renderer): the Hunter on flat ground dashes along the screen, a crop round them at each mark.
-## Files go into <dir> as dash_<hero>.png, and dash_all.png stacks the 12 strips.
+## --dash-streak-shots --shots-dir=<dir> [--dash-only=<id>,<id>]: one strip per Hunter's ground dash and one per air
+## dash at match zoom (run under xvfb with a renderer): the Hunter on flat ground dashes along the screen, then jumps
+## and dashes at the top of the jump, a crop round them at each mark. Files go into <dir> as dash_<hero>.png (ground
+## row over air row), and dash_all.png stacks them.
 
 const DT := 1.0 / 60.0
 const MARKS := [0.04, 0.1, 0.16, 0.22, 0.3, 0.4, 0.55]      # s after the press
 const CROP := Vector2i(230, 150)          # px round the Hunter for a frame
 const ZOOM := 1.6
+const AIR_RISE := 0.25                   # s from the jump press to the air dash's press (near the top, as the reel)
 
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -22,19 +24,25 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var strips: Array = []
 	for hero in only:
-		var strip := await _strip(main, hero)
-		strip.save_png(dir.path_join("dash_%s.png" % hero))
-		strips.append(strip)
+		for air in [false, true]:
+			var strip := await _strip(main, hero, air)
+			strips.append(strip)
+		_stack(strips.slice(strips.size() - 2)).save_png(dir.path_join("dash_%s.png" % hero))
+	_stack(strips).save_png(dir.path_join("dash_all.png"))
+	print("DASHSTREAKSHOTS %d strips in %s" % [strips.size(), dir])
+	main.get_tree().quit(0)
+
+## The strips one under another.
+func _stack(strips: Array) -> Image:
 	var w: int = strips[0].get_width()
 	var hh: int = strips[0].get_height()
 	var sheet := Image.create(w, hh * strips.size(), false, strips[0].get_format())
 	for i in strips.size():
 		sheet.blit_rect(strips[i], Rect2i(Vector2i.ZERO, strips[i].get_size()), Vector2i(0, i * hh))
-	sheet.save_png(dir.path_join("dash_all.png"))
-	print("DASHSTREAKSHOTS %d strips in %s" % [strips.size(), dir])
-	main.get_tree().quit(0)
+	return sheet
 
-func _strip(main: Node, hero: String) -> Image:
+## A dash on the ground, or (air) a jump and a dash AIR_RISE s after it: frames at MARKS s after the dash press.
+func _strip(main: Node, hero: String, air: bool) -> Image:
 	var m: Match = flow._match(main, hero)
 	m.set_process(false)
 	var st := DashStreak.of(m)
@@ -49,6 +57,15 @@ func _strip(main: Node, hero: String) -> Image:
 	flow._ready_up(m)
 	h.inp["move"] = Vector2(1, 0)
 	h.inp["aim"] = h.pos + Vector3(6, 0.9, 0)
+	if air:
+		h.inp["jump"] = true
+		for i in int(AIR_RISE / DT):
+			m.step(DT)
+			h.inp["jump"] = false
+			m.cam.snap(h.pos + Vector3(2.0, 0, 0))
+			for x in m.hunters:
+				x.render(DT, 1.0)
+			await main.get_tree().process_frame
 	h.inp["dash"] = true
 	var frames: Array = []
 	var marks := MARKS.duplicate()
