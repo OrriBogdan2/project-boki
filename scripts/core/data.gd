@@ -211,6 +211,8 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
+			sp["trade_to"] = String(home["trade_to"])      # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare

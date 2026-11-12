@@ -716,7 +716,7 @@ func _ready_rest() -> void:
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
-		pass
+		ClanBase.draw(self, world, kins, visit.get("clan_base", {}))
 	elif play_hub:
 		MinigameHub.open(self)
 	elif hb.needs_making():
@@ -728,6 +728,9 @@ func _ready_rest() -> void:
 	if visit.is_empty() and Social.available():
 		Social.publish_profile(true)
 		Social.collect_gifts(func(lines: Array):
+			if lines.size() > 0 and is_inside_tree():
+				_show_when_free(lines))
+		Sleepover.collect(func(lines: Array):
 			if lines.size() > 0 and is_inside_tree():
 				_show_when_free(lines))
 		Social.collect_payouts(func(total: int):
@@ -2515,6 +2518,9 @@ func open_build() -> void:
 func _refresh_top() -> void:
 	if _visiting():
 		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
+		if visit.has("clan_base"):
+			topbar.text = "%s's clan base   ·   Every member has a corner   ·   The portal takes you home" \
+					% visit["name"]
 		topbar.visible = true
 		return
 	topbar.visible = false
@@ -3945,7 +3951,8 @@ func _use_visiting(it: Dictionary) -> void:
 				_emote(it["k"], "♥")
 				return
 			petted[rec["uid"]] = true
-			Social.send_gift(visit_id, "pet", String(rec["uid"]))
+			# a clan base's Boki each have their own owner
+			Social.send_gift(String(rec.get("owner", visit_id)), "pet", String(rec["uid"]))
 			_emote(it["k"], "♥")
 			Sfx.play("kin_happy")
 			_toast("%s will remember your visit" % rec["name"])
@@ -3960,6 +3967,9 @@ func _open_gift_panel(owner_name: String) -> void:
 	var v := _new_panel("Leave a gift for %s" % owner_name, 520)
 	v.add_child(UI.primary("Go inside %s's house" % owner_name, func(): Game.goto("interior", {"room": "house", "visit": visit, "visit_id": visit_id}), 300))
 	v.add_child(UI.label("They'll find it next time they're home.", 14, UI.MUTED))
+	SleepoverPanel.fill(v, visit_id, owner_name, func(text: String):
+		_close_panel()
+		_toast(text))
 	var any := false
 	for kind in ["seed", "crop"]:
 		var store: Dictionary = Save.d["seeds"] if kind == "seed" else Save.d["crops"]
