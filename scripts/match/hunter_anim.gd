@@ -1029,8 +1029,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var leg_ref := LEG
 	if gait != null:      # the Empty's soles, not a point foot, meet the ground; its planted feet carry the hips
-		var sole_l := FootPlant.reach(hl, kl, wl)
-		var sole_r := FootPlant.reach(hr, kr, wr)
+		var sole_l := FootPlant.reach(hl, kl, wl, leg_l.scale.z)
+		var sole_r := FootPlant.reach(hr, kr, wr, leg_r.scale.z)
 		dl2 = gait.hip_reach(sole_l, sole_r, maxf(sole_l, sole_r))
 		dr2 = dl2
 		leg_ref = FootPlant.HIP
