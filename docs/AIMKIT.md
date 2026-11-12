@@ -205,8 +205,10 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
-- **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
-  Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
+- **Kit telegraphs go through AimKit only.** The old one-node-per-telegraph `ArchKit.tele_circle`/`tele_lane`
+  are gone (the R fuse circle and Gil were the last callers). For a one-off that fills over time (a thrown
+  potion's landing circle, a moving line), give it its own id and refresh it from the kit's tick with
+  `"fill": k`, as `GilKit` does.
 
 ## 5. Cursor past max range: source rule vs ours (parity audit, 2026-11-09)
 
