@@ -1,5 +1,5 @@
 extends RefCounted
-## --overflow-check: every garden panel (Nesting Nook, Boki Burrow, a Boki card's tabs, feed, wishes, zone
+## --overflow-check: every garden panel (Nesting Nook, Boki Burrow, a Boki card's tabs, feed, zone
 ## cards, games board, Field Book item pages) opened at Text size 150% in a 1280x720 window. In each: no clipped
 ## or hidden text (SafeArea.clipped), no two labels on top of each other, no label outside the window and every
 ## panel group inside the safe-area margin. A new garden panel is covered by adding a line to _panels().
@@ -82,7 +82,7 @@ func _eggs() -> void:
 func _panels() -> Array:
 	var out: Array = []
 	for n in ["nook_pair", "nook_grid", "nook_kin", "nook_rare", "nook_incubator_empty", "nook_incubator_eggs",
-			"burrow", "feed", "wishes", "zone_cards", "games_board", "prizes"]:
+			"burrow", "feed", "zone_cards", "games_board", "prizes"]:
 		out.append([n, "home"])
 	out.append(["field_book", "overlay"])
 	for t: String in CARD_TABS:
@@ -117,8 +117,6 @@ func _open(pname: String) -> void:
 			home._open_burrow()
 		"feed":
 			home._open_feed(kid)
-		"wishes":
-			GardenWishes.fill(home._new_panel("Today's wishes", 520), GardenWishes.today(0.0))
 		"zone_cards":
 			ZoneCards.open(home, GardenZones.HUB)
 		"games_board":

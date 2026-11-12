@@ -5,11 +5,12 @@ extends RefCounted
 ## silhouette, one you've never met is a "?". Each tile carries a small type badge, and a soft
 ## sparkle when you've found its shimmer form. Clicking a tile opens its page: the Boki turning on a
 ## stand, its number, name and type, a field note, its size range, where it lives, its quirk and how
-## its sexes work (BokiQuirks), the forms you've found and the ones you're raising.
+## its sexes work (BokiQuirks), where it's found and how rare it is (DexFound), the forms you've found
+## and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
-## percentage, no rarity colours.
+## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
 ## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
 const TYPES := {
@@ -92,6 +93,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 	var nl := UI.label(num_text(key), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
+	top.add_child(DexFound.Pip.new(spk, is_seen))
 	if is_seen:
 		top.add_child(TypeIcon.new(type_of(spk), 16.0))
 	col.add_child(top)
@@ -198,6 +200,8 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
+	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
 	if BokiQuirks.quirk(spk) != "":
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
@@ -258,7 +262,7 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	var r := UI.hbox(8)
 	r.add_child(UI.IconDot.new(icon, UI.MUTED, 15.0))
 	var kl := UI.label(k, UI.T_SMALL, UI.MUTED, UI.semi)
-	kl.custom_minimum_size.x = 48
+	kl.custom_minimum_size.x = 64
 	r.add_child(kl)
 	var vl := UI.label(val, UI.T_SMALL, UI.INK)
 	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
