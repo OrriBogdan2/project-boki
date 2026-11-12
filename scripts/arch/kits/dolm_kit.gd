@@ -483,7 +483,7 @@ func _punch(k: float) -> void:
 		f.hurt(dmg, h, o)
 		landed += 1
 		_punch_impact(f.pos, dir, k)
-		if terrain_behind(f, dir, 1.6):
+		if KnockWall.behind(m, f, dir, 1.6):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
