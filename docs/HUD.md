@@ -138,4 +138,8 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
 - The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
   message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
-- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.
+- The glide dive is taught in that strip: `FirstMatchGuide`'s "dive" line ("Gliding: hold <crouch key> to dive")
+  shows once per save in any real Extraction, the first time the glider has been open for 1.5 s above 15 m (not
+  in the opening drop). It clears at the first dive and never returns (`Save.d tutorial glide_dive`).
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
+  never again after a dive), `--tutorial-strip-shots`.
