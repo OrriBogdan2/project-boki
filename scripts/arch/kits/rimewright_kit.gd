@@ -620,7 +620,9 @@ func _release_spear() -> void:
 	var dir := h.aim_dir()
 	var start := _spear_at(0.0)
 	var spd := float(ld["speed"])
-	var dist := AimMode.dist(h, float(ld["range"]))
+	# from her palms to the held ring's centre: a far cursor lands on the range edge, not SPEAR_AHEAD past it
+	var to := AimMode.point(h, float(ld["range"]))
+	var dist := Vector2(to.x - start.x, to.z - start.z).length()
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
 	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
