@@ -22,7 +22,7 @@ Its JSON carries each cell's ground speed and clip rate: a ring's planted-sole s
 rate, and `loco.foot_mps` and `crouch.speed` are the median of the 8 directions.
 
 `--loco-dir-shots --shots-dir=<dir>` films 8 copies of a Hunter, one per direction, each on a checker floor that
-scrolls at the ground speed (a slide shows against the squares). Before/after MP4: `~/meshy/anim-dir-1112/` on hetzner.
+scrolls at the ground speed (a slide shows against the squares). Before/after MP4: `~/meshy/anim-dir-1112/` on hetzner; Grimble, Sparkle and Albert run, sprint and crouch walk for the last 30 cells: `~/meshy/anim-loco-dir-last/loco_dir_before_after_v3.mp4` on rpc1 (jobs 20261112-103748-11485 before, 20261112-103907-24157 after).
 
 ## Grid: failing cells of 8, before -> after
 Before is the 0.24.5 integ with the READY dirloops, crouch-rest-2 and run-aim-twist branches (cfa684194b), read by
