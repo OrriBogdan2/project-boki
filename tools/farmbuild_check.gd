@@ -9,7 +9,7 @@ extends RefCounted
 ##   4. Boki build it: swings, progress, skill makes swings quicker, the finished building works
 ##   5. upgrades: tier 2 and 3 cost materials and labour, need farm level, show on the model and
 ##      speed the station up; a station keeps working while it is upgraded
-##   6. save and load of sites and tiers (JSON round trip), and an old save with none of it
+##   6. save and load of sites and tiers (JSON round trip), the paused line after a run, and an old save with none of it
 ## Never touches the real save.
 
 var bad := 0
@@ -410,6 +410,27 @@ func run(m: Node) -> void:
 	var n2: Node3D = home2.hb.nodes.get(int(chest2["u"]))
 	ok(is_instance_valid(n2) and n2.get_node_or_null("Bar") != null and is_instance_valid(home2.hb.nodes.get(int(camp2["u"]))) and home2.hb.nodes[int(camp2["u"])].get_node_or_null("Tier") != null,
 			"both come back drawn: scaffold with its bar, and the tier 3 look")
+	# after a run the site says it was paused, until the first panel has closed
+	var it := {"kind": "site", "u": int(chest2["u"])}
+	var hob: FarmHob = home2.hob
+	var before := hob.label(it)
+	hob.note_return(3600.0, true)
+	var shown := hob.label(it)
+	hob.tick(0.0)
+	home2.panel_open = "While you were away"
+	hob.tick(0.0)
+	var while_open := hob.label(it)
+	home2.panel_open = ""
+	hob.tick(0.0)
+	var after_close := hob.label(it)
+	hob.note_return(5.0, true)
+	var label_note := "label before run '%s' / after run '%s' / panel open still shown=%s" % [
+			before, shown, while_open.ends_with(FarmHob.PAUSED_LINE)]
+	print("FARMBUILD paused line: %s / after close '%s' / short trip shown=%s" % [
+			label_note, after_close, hob.label(it).ends_with(FarmHob.PAUSED_LINE)])
+	var line := " · " + FarmHob.PAUSED_LINE
+	ok(shown == before + line and while_open == shown and after_close == before and hob.label(it) == before,
+			"a site left standing by a run says so until the first panel closes; a short trip does not")
 	# a finished build carries on
 	home2.hw.scan_t = 0.0
 	home2.hw.scan()
