@@ -89,6 +89,15 @@ static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
 # ------------------------------------------------------------------ the strip
+## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
+## is not drawn (no Heart, a tutorial, training or a duel): what sits under it at the top-centre starts lower.
+static func bottom(m: Match) -> float:
+	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
+		return 0.0
+	if m.heart == null or m.heart.site == Vector3.INF:
+		return 0.0
+	return TOP_Y + CELL.y + 20.0 + 11.0
+
 static func draw(hud) -> void:
 	var m: Match = hud.m
 	if m.heart == null or m.heart.site == Vector3.INF:

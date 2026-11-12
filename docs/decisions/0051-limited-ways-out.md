@@ -97,3 +97,10 @@ only the Sealed Lair's own fight puts it in use, and a won Lair or a ridden Upli
 empties once its winners land, a ridden Uplink seat goes to "closed"). Check: --ways-out-map-ui-check section 9.
 Shots: --ways-out-vfx-shots, each state at 8, 20, 40 and 60 m at the match camera with a fight beside the player, per
 --quality (docs/shots/vfx-ways-out-read/).
+## Heart reward gap (ext/combat-heart-reward-gap)
+Owner 2026-11-10: the early seat pays MINOR, the final seat MAJOR. Code pays exactly heart.json "reward" (`Heart.pay`: gems, seeds,
+materials and Boki trust at the exit; the Rare Egg and materials home through `Game.apply_result`). Loot kept and the Boki
+outcome are the same for both seats: any Heart exit is an extraction, so the haul and Bokis come home. The results screen
+says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
+Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
+the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
