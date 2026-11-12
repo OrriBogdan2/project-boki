@@ -284,16 +284,21 @@ func _on_screen(cam: Camera3D, at: Vector3) -> bool:
 func _to_view(cam: Camera3D, at: Vector3) -> Vector2:
 	return cam.unproject_position(at) / cam.get_viewport().get_visible_rect().size * FRAME_VIEW
 
-## How tall a thing is drawn: a sign faces the camera, so its line's height; anything else, from the foot
-## of its box to the top.
+## How tall a thing is drawn on screen: a sign faces the camera, so its line's height; anything else, the
+## height of its box's outline (seen from above, a flat monster's back counts, not just how high it stands).
 func _tall_px(cam: Camera3D, node: Node3D) -> float:
 	if node is Label3D:
 		var lab := node as Label3D
 		var half := cam.global_transform.basis.y * lab.font_size * lab.pixel_size * 0.5
 		return absf(_to_view(cam, lab.global_position + half).y - _to_view(cam, lab.global_position - half).y)
 	var box := _box(node)
-	var foot := Vector3(box.get_center().x, box.position.y, box.get_center().z)
-	return absf(_to_view(cam, foot).y - _to_view(cam, foot + Vector3(0, box.size.y, 0)).y)
+	var lo := INF
+	var hi := -INF
+	for i in 8:
+		var y := _to_view(cam, box.get_endpoint(i)).y
+		lo = minf(lo, y)
+		hi = maxf(hi, y)
+	return hi - lo
 
 ## The world box a node draws in: all its visible meshes.
 func _box(node: Node3D) -> AABB:
