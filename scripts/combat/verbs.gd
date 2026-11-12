@@ -305,6 +305,23 @@ func decoy_of(h: Hunter) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ shots
+## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only;
+## cls is the shot's crosser class, Blockers: a "pierce" shot passes rocks.)
+func _stops(w: Dictionary, team: int, p: Vector3, r: float, cls := "solid") -> bool:
+	if (w["block"] != "all" and int(w["team"]) == team) or not Blockers.wall_stops(w, cls):
+		return false
+	if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		return false
+	var p2 := Vector2(p.x, p.z)
+	return p2.distance_to(Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])) <= float(w["th"]) + r
+
+## The barrier that stopped a shot of `team` that ended at p ({} if none: terrain did).
+func stopper(p: Vector3, team: int, r: float) -> Dictionary:
+	for w in walls:
+		if _stops(w, team, p, r):
+			return w
+	return {}
+
 ## Called for every step of every shot. Returns "" (carry on), "end" (stopped by a wall) or
 ## "bounce" (reflected: it now belongs to the reflector).
 func shot_check(s: Dictionary, p: Vector3) -> String:
@@ -314,13 +331,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	var p2 := Vector2(p.x, p.z)
 	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
-		if (w["block"] != "all" and int(w["team"]) == int(s["team"])) or not Blockers.wall_stops(w, cls):
-			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
-		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
-			continue
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
 			var ab: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
 			var nrm := Vector2(-ab.y, ab.x).normalized()

@@ -16,7 +16,7 @@
   "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"},
   "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"},
   "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"},
-  "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls and objects, not terrain ledges)"},
+  "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls, objects and raised terrain; only the edge guard stops it)"},
   "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}
  }
 }
