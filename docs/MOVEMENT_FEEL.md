@@ -870,7 +870,21 @@ Re-measured on the 0.24.6 parity base (ext/w0246-feel + ext/w0246-combat-a, with
 every row above is still 0 / 0 for all 12 hunters. The 0.24.5 landing stays as it is: a fast fall squashes, puffs and thuds
 (`MoveSfx.land`) and never locks input, which is what the source shows; the branch only measures it. A long drop's
 heavier squash and dust (`hunter.gd`, 12 m/s and up) were kept, and the dead `land_t` they used to set is gone with the
-drop-parity change. `hard_landing.gd` (ext/early-hard-landing) is not on this base.
+drop-parity change.
+
+**The Hard Landing is the one landing that locks, and it stays** (decision 0050; `scripts/match/hard_landing.gd`,
+`DropFeel.land`, the `hard_landing` block of `content/rules/drop.json`). It is not on this base: it rides in
+ext/early-hard-landing on top of ext/early-drop-height (the 110 m drop with `drop.json`), and both come in with
+ext/w0246-ui, while ext/drop-parity (in w0246-combat-a) rebuilt the drop without them. Where the two sides differ the
+Hard Landing wins over "no lock": a drop with your own dive key held to the ground still locks attack and ability
+keys for `lock_s` 0.4 s and slows you by `slow_k` 0.5 (walking is never locked), and stuns and hurts the monsters
+around it. Every other landing keeps the source's 0 / 0 above. For the 0.24.6 combine:
+
+- `Hunter.land_t` comes back as the Hard Landing's lock only (drop-parity deleted it; `HardLanding.land` sets it and
+  `HardLanding.gate` reads it). Nothing else sets it.
+- The `drop` row above drops from 3 m with no key held, so it is a soft landing on either drop and stays 0 / 0. A
+  `land_hard_act_lag` row (expect `lock_s` in frames, `land_hard_move_lag` 0) belongs with the Hard Landing once the
+  combine has settled which drop it keeps; it was not written here because no base has both the code and these rows.
 
 ## Not touched
 

@@ -381,7 +381,9 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
 | 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 55 dash-flow rows are `[?]` (no source, or "Not determinable"), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
+
 **Status** (Nov 9, checked against origin/main d255acbee): `closed <sha>` is on main, `pending ext/<branch>` is a READY branch not yet merged, `open` has neither. The Grimble, Neve, Motley, Albert, Sparkle and Sable tables above were re-checked the same day (canon names, ids unchanged).
+
 | # | Gap | Fix | Files | Effort | Status |
 |---|---|---|---|---|---|
 | 1 | Kael has no authored animation: `kael.glb` 0 clips, 20 moves procedural | Rig and author clips, add the map | art/wardens/kael, content/rules/warden_anim/kael.json | L | closed `ca52dc648` (Kael v2 model, 49 clips, `warden_anim/kael.json`; `ext/parity-kael-clips` is superseded) |
@@ -403,6 +405,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 17 | Motley's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S | closed `5b9a528d2` |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M | closed `45f26a5b5` (dive numbers asserted; key is ours) |
 | 19 | Ours-only riders: Chill slow, Shred, Meeko's shield | Remove, or owner keeps | kit JSON, kits | S, owner | closed `3bcb50eca` (Chill slow, Meeko's shield out; Shred was already gone) |
+| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 55 dash-flow rows are `[?]` (no source, or "Not determinable"), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S | closed `0f70d1a8a` (jump pinned, 6.8 kept on purpose); source notes on the hold rows pending `ext/flow-rows-source` dd2c83be5 |
 
 ## Item 20: jump speed and the unsourced flow rows
 
@@ -463,7 +466,7 @@ Every knock, pull, push, root, slow, stun and Grounded the 12 kits apply goes to
 Where the source lets a move touch an ally (`supervive_kits.md`), the check excuses exactly that slot:
 
 | Move | Source | Ours |
-|---|---|---|---|---|
+|---|---|---|
 | Grimble's Abyssal Grasp | "pulling in the first target hit (enemy or ally)" | hook pulls the first hunter hit, ally included |
 | Motley's Swap (dash) | "swaps you and all units to its location" | foes, allies and Boki in the circle are sent back; allies get the shield |
 | Meeko's ult | "reviving them and pulling them to" her | a downed ally is called to her side |
