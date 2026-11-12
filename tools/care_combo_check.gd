@@ -864,6 +864,10 @@ func _spear_rank3() -> void:
 			absf(got - want) < 0.1 and float(rim[1]) == 0.0 and float(rim[3]) == 0.0,
 			"x%.2f want x%.2f, edge foe %.0f/%.0f" % [got, want, float(rim[1]), float(rim[3])])
 
+## No ground disc ("scorch" look) up in the Hero looks: a dash leaves a trail, never a disc.
+func _no_disc(m: Match) -> bool:
+	return HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch")
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await sc.main.get_tree().process_frame
@@ -1788,7 +1792,7 @@ func rimewright() -> void:
 			"tm Shift: full skating speed within about 0.2 s, a trail of ice plates, no ground disc",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
 				and K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time) >= 4
-				and HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch"),
+				and _no_disc(m),
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",
@@ -1803,7 +1807,7 @@ func rimewright() -> void:
 	ok(
 			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
-				and HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch"), "dashes %.2f" % P.dashes)
+				and _no_disc(m), "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()
