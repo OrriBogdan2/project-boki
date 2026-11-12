@@ -1,10 +1,10 @@
 class_name GripHud
 extends RefCounted
-## The right side of the bottom HUD, beside the utility belt and the weapon card: three boxes, the
-## way the grips sit in the game we take after.
-##   Q   glove 1: its icon, a frame in its rarity colour, the cooldown sweep, the key cap
+## The right end of the bottom row, right of the utility belt: three tall cards, the item cards of the
+## owner's 11-12 reference (scripts/ui/HUD_SPEC.md), each standing on a base in its colour.
+##   Q   glove 1: its icon, the base in its rarity colour, the cooldown sweep, the key cap
 ##   V   glove 2: the same
-##   Merge  your Boki: its type badge in the type colour and a ring for the bond meter (full = the
+##   Merge  your Boki: its type badge in the type colour; its base is the bond meter (full = the
 ##          Merge is ready; it brightens a moment when an ultimate fills it), grey with a "down" mark while it's
 ##          knocked out. Until the Merge unlocks and while merged it is BokiHud.r_slot (the lock, the time left).
 ##          Its key is the Merge action's ("ultimate"); the Boki's own ability and orders sit on the Boki button.
@@ -12,19 +12,27 @@ extends RefCounted
 ## (Hunter.gear / gear_cd, Kin.runner, Kin.state, KinMerge.ready); draws on the HUD's canvas.
 ## Look: HudStyle (the same slot frames and key pills as the ability row).
 
-const BOX := 54.0             # px, each box
-const GAP := 8.0              # px between boxes
-const EDGE := 12.0            # px between the last box and the weapon card
-const BOND_FLASH_S := 0.8     # s: how long the bond ring brightens after an ultimate fills it (KinBond)
+const W := 36.0               # px, each card's width (ref 55 at 1080p)
+const H := 42.0               # px, its height (ref 65 at 1080p)
+const GAP := 4.0              # px between cards (ref pitch 62 at 1080p)
+const BASE_H := 12.0          # px: the coloured base at the card's foot (ref ~20 at 1080p)
+const BOND_FLASH_S := 0.8     # s: how long the bond base brightens after an ultimate fills it (KinBond)
 
-## Draws the three boxes left of the weapon card `wr`, bottom-aligned with it. Returns their rect.
-static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
-	var y := wr.end.y - BOX
-	var x0 := wr.position.x - EDGE - 3.0 * BOX - 2.0 * GAP
+## Draws the three cards ending at x `right`, standing on y `bottom`. Returns their rect.
+static func draw(hud, p: Hunter, right: float, bottom: float) -> Rect2:
+	var y := bottom - H
+	var x0 := right - 3.0 * W - 2.0 * GAP
 	for i in Gloves.SLOTS:
-		_glove(hud, p, i, Rect2(Vector2(x0 + i * (BOX + GAP), y), Vector2(BOX, BOX)))
-	boki(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
-	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
+		_glove(hud, p, i, Rect2(Vector2(x0 + i * (W + GAP), y), Vector2(W, H)))
+	boki(hud, p, Rect2(Vector2(x0 + 2.0 * (W + GAP), y), Vector2(W, H)))
+	return Rect2(Vector2(x0, y), Vector2(3.0 * W + 2.0 * GAP, H))
+
+## The card's coloured foot, `frac` of it lit (a glove's rarity: all of it; the Boki: its bond).
+static func _base(c: CanvasItem, r: Rect2, col: Color, frac := 1.0) -> void:
+	var br := Rect2(Vector2(r.position.x, r.end.y - BASE_H), Vector2(r.size.x, BASE_H)).grow(-2.0)
+	c.draw_rect(br, Color(col.darkened(0.6), 0.9))
+	if frac > 0.0:
+		c.draw_rect(Rect2(br.position, Vector2(br.size.x * clampf(frac, 0.0, 1.0), br.size.y)), col)
 
 static func rar_col(g: Dictionary) -> Color:
 	return Data.RARITY[clampi(int(g.get("rar", 0)), 0, Data.RARITY.size() - 1)]["color"]
@@ -36,7 +44,7 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
 		hud.hover_spots.append([r, id])
 		HudStyle.slot_frame(hud.c, r, HudStyle.MUTED, "off")
-		Icons.draw(hud.c, "glove", r.get_center() + Vector2(0, -3), BOX * 0.2, Color(HudStyle.MUTED, 0.35))
+		Icons.draw(hud.c, "glove", r.get_center() + Vector2(0, -3), W * 0.2, Color(HudStyle.MUTED, 0.35))
 		HudStyle.key_pill(hud.c, Vector2(r.get_center().x, r.end.y), key, HudStyle.MUTED)
 		return
 	var gid := String(g["id"])
@@ -45,9 +53,8 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var active := Gear.active(gid)
 	hud._ab_slot(id, r, Gear.icon_of(gid), key if active else "", gd["col"], Gloves.cd_frac(p, i), cd, active
 			and cd <= 0.0 and not p.downed)
-	# the rarity frame (passive gloves say so instead of a key)
-	var rar_frame := HudStyle.box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(rar_col(g), 0.95), 2)
-	hud.c.draw_style_box(rar_frame, r.grow(2.0))
+	# the rarity base (passive gloves say so instead of a key)
+	_base(hud.c, r, rar_col(g))
 	if not active:
 		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 8, Color(HudStyle.INK, 0.6))
 
@@ -70,18 +77,11 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var down := k.state == "downed"
 	var ctr := r.get_center()
 	HudStyle.slot_frame(hud.c, r, tc, "off" if down else "ready")
-	DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
-	# the bond meter as a thin ring; bright and pulsing once the Merge is ready
-	var bond := clampf(p.ult, 0.0, 1.0)
-	hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
-	if bond > 0.0:
-		var full := KinMerge.ready(p)
-		var a := 0.7 + 0.3 * sin(float(hud.m.time) * 6.0) if full else 0.85
-		hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * bond, 36, Color(HudStyle.GOLD, a),
-				3.0 if full else 2.0, true)
+	DexView.draw_type(hud.c, t, ctr + Vector2(0, -6), W * 0.3, 0.35 if down else 1.0)
+	# the bond meter as the base; bright and pulsing once the Merge is ready, a white flash when an ultimate fills it
+	var a := 0.7 + 0.3 * sin(float(hud.m.time) * 6.0) if KinMerge.ready(p) else 0.85
 	var flash := 1.0 - (float(hud.m.time) - float(p.get_meta("bond_flash_at", -9.0))) / BOND_FLASH_S
-	if flash > 0.0:
-		hud.c.draw_arc(ctr, BOX * 0.5 + 5.0, 0, TAU, 36, Color(1.0, 0.85, 0.3, 0.9 * flash), 3.0, true)
+	_base(hud.c, r, Color(HudStyle.GOLD.lerp(Color.WHITE, maxf(0.0, flash) * 0.7), a), p.ult)
 	if down:
 		hud.c.draw_style_box(HudStyle.box(Color(0.2, 0.2, 0.22, 0.55), HudStyle.SLOT_RAD, Color(0, 0, 0, 0), 0), r)
 		HudStyle.ctext(hud.c, ctr + Vector2(0, 5), "DOWN", 12, HudStyle.HURT)

@@ -2,11 +2,11 @@ class_name HudSlot
 extends RefCounted
 ## One ability or item slot on the bottom bar: the frame (HudStyle.slot_frame), the icon, and while
 ## it isn't ready a dimmed icon, a dark sweep over the part still cooling (clipped to the slot) and
-## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
+## a big pink-red countdown in the middle; charge pips along the bottom edge, the key on a tab under it, a
 ## pop when a press lands, one red pulse of the frame when it can't (PressDeny), a ring when it comes
 ## back, and ResetPop's swell when a reset hands it straight back. skill_slot adds
-## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
-## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
+## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), a rank numeral
+## badge on its top edge, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
 ## Hud._skill_slot call these (the Boki slots in BokiHud go through the same two, so every slot on the bar looks alike).
 ## Per-slot animation state lives on Hud (slot_fx, ready_was, ready_flash, hover_spots) and the last
 ## countdown text shown per slot on Hud.slot_text (checks read it).
@@ -51,8 +51,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready
 	var frame_state := "cooling" if cooling else "off"
 	HudStyle.slot_frame(c, rect, col, "ready" if ready else frame_state)
-	var icol: Color = col if ready else Color(col.lerp(HudStyle.MUTED, 0.65), 0.45)
-	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, icol)
+	var icol: Color = Color.WHITE.lerp(col, 0.2) if ready else Color(col.lerp(HudStyle.MUTED, 0.65), 0.45)
+	Icons.draw(c, icon, ctr, rect.size.x * 0.34, icol)
 	H.slot_text.erase(id)
 	if cd_frac > 0.0:
 		# a charge coming back while another is ready (dashes): a light sweep and no number, so it never reads as locked
@@ -61,8 +61,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		if cooling:
 			var t := cd_text(cd_secs)
 			var fs := int(rect.size.x * (0.46 if t.length() < 3 else 0.38))
-			var tcol := HudStyle.INK if cd_secs >= 1.0 else HudStyle.COOLING
-			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, tcol, 6)
+			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, HudStyle.CD_TEXT, 4)
 			H.slot_text[id] = t
 	if max_ch > 1:
 		var pw := minf(10.0, (rect.size.x - 12.0) / float(max_ch) - 2.0)
@@ -74,7 +73,9 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if label != "":
 		HudStyle.ctext(c, Vector2(ctr.x, rect.position.y - 6), label, 11, Color(HudStyle.INK, 0.85), 3, HudStyle.BODY)
 	shown_keys[id] = key
-	if key != "": HudStyle.key_pill(c, Vector2(ctr.x, rect.end.y), key, col if ready else HudStyle.MUTED)
+	if key != "":
+		var kc := HudStyle.INK if ready else HudStyle.MUTED
+		HudStyle.key_pill(c, Vector2(ctr.x, rect.end.y + HudStyle.KEY_DROP), key, kc)
 	deny_pulse(H, id, rect)
 	if pop > 0.0:
 		var pop_edge := Color(col.lerp(Color.WHITE, 0.5), pop)
@@ -109,7 +110,8 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 		H._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
 		HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), tag, 10, Color(HudStyle.INK, 0.9), 0)
 	shown_keys[id] = key
-	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
+	var kc := lcol if can else Color(HudStyle.MUTED, 0.6)
+	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y + HudStyle.KEY_DROP), key, kc)
 
 ## A refused press on slot `id` (PressDeny): its frame swells red and back once over DENY_T.
 static func deny_pulse(H, id: String, r: Rect2) -> void:
