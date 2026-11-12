@@ -104,12 +104,23 @@ func _rare(v: VBoxContainer) -> void:
 func _rare_card(e: Dictionary) -> Control:
 	var key := String(e["key"])
 	var egg := key.begins_with("egg:")
+	var wayseed := BlackMarket.is_seed(key)
 	var card := UI.card(UI.CARD, 10, 12)
 	card.custom_minimum_size = Vector2(404, 0)
 	var hr := UI.hbox(10)
 	card.add_child(hr)
-	var col: Color = Data.KIN[BlackMarket.id_of(key)]["color"] if egg else Goods.col_of(key)
-	var b := UI.badge("egg" if egg else Goods.icon_of(key), col, 32.0, UI.R_CTRL)
+	var col: Color = Goods.col_of(key)
+	var icon := ""
+	var blurb := Goods.desc_of(key)
+	if egg:
+		col = Data.KIN[BlackMarket.id_of(key)]["color"]
+		icon = "egg"
+		blurb = "Hatches a rare Boki on the Incubator"
+	elif wayseed:
+		col = Color(String(GardenZones.info(BlackMarket.id_of(key))["colour"]))
+		icon = "seed"
+		blurb = "One key to wake the zone, once a week"
+	var b := UI.badge(icon if icon != "" else Goods.icon_of(key), col, 32.0)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(b)
 	var nv := UI.vbox(0)
@@ -120,10 +131,12 @@ func _rare_card(e: Dictionary) -> Control:
 	top.add_child(nm)
 	if egg:
 		top.add_child(UI.tag("Rare Egg", Color("c08cff")))
+	elif wayseed:
+		top.add_child(UI.tag("This week", col))
 	else:
 		top.add_child(UI.tag(Goods.rarity_name(key), Goods.rarity_col(key)))
 	nv.add_child(top)
-	var sub := UI.label("Hatches a rare Boki on the Incubator" if egg else Goods.desc_of(key), 12, UI.MUTED)
+	var sub := UI.label(blurb, 12, UI.MUTED)
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sub.clip_text = true
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
