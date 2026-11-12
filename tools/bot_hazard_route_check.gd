@@ -154,7 +154,7 @@ func _leave(bot: Hunter, kind: String) -> void:
 	ok("%s: a field to be knocked into" % kind, ai >= 0)
 	if ai < 0: return
 	# water drowns after 6 s: a spot a bot can swim out of in time
-	var want: int = mini(int(deep.values().max()), 4 if kind == "deep_water" else 9)
+	var want: int = mini(int(deep.values().max()), 4 if kind == "deep_water" else 20)
 	var at := Vector2i.ZERO
 	for c in deep:
 		if int(deep[c]) == want:

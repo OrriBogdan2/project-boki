@@ -1092,7 +1092,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := 
 		if h == null:
 			return []
 		# a way round a big field in a wider window
-		return _grid_path(m, a, b, h, PATH_WIDE) if margin == PATH_MARGIN else []
+		return _grid_path(m, a, b, h, PATH_WIDE, leave) if margin == PATH_MARGIN else []
 	var out: Array = []
 	var c := b
 	while c != a:
