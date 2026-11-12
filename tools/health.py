@@ -14,7 +14,7 @@ BUDGETS = {
     "scripts/match/match.gd": 6950,
     "scripts/home/home.gd": 5950,
     "scripts/main.gd": 4100,
-    "scripts/ui/hud.gd": 2781,
+    "scripts/ui/hud.gd": 2753,
     "scripts/match/models.gd": 3500,
     "scripts/match/hunter.gd": 3500,
     "scripts/match/world.gd": 2850,
