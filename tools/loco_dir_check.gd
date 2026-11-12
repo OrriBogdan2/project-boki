@@ -12,6 +12,9 @@ extends RefCounted
 ##  - SNAP: starting and stopping (and crouch-walk to crouch idle) at the game's own rates (HunterMove accel to the
 ##    speed, HunterMove.brake to a stop) no point jumps: a frame's change of velocity of the
 ##    hips, head, hands or ankles at most SNAP_K x the steady loop's worst, and at least SNAP_MIN.
+##  - PLANT: moving off from idle at walk and run (START_STATES), the first foot down lands within PLANT_TOL frames
+##    of the frame the ring passes that foot's contact key (WardenStart picks where the rings pick up); each cell's
+##    JSON "start" also carries the first-pose gap and the ring's phase (_start).
 ## Prints a grid (one row per Hunter and state, one cell per direction: "ok" or the first failed test). A ratchet: the
 ## cells in KNOWN fail today (docs/art/LOCO_DIR.md, docs/DEBT.md) and print KNOWN; any other failed cell prints FAIL
 ## and exits 1, a known one that passes prints FIXED. --update rewrites KNOWN from this run (after a fix, never to
@@ -43,6 +46,10 @@ const IDLE_SLIP := 0.25      # m/s: crouched still, a foot drifts at most this (
 const PLANT_BAND := 0.1     # a sole is planted in the lowest 10 % of its height range (the sole sits on the floor)
 const FLAT := ["ostra"]      # Motley rides his spring: no steps to read
 const KNOWN := "res://tools/loco_dir_known.txt"     # "<hunter> <state> <dir>" a line: the cells failing today
+const START_STATES := ["walk", "run"]   # moving off from idle: the first pose and the first plant (START)
+const START_S := 1.0         # s after a start searched for the first touchdown
+const LIFT_K := 0.5          # of a sole's height range: over this it is swinging (its next time down is a touchdown)
+const PLANT_TOL := 2         # frames: the first touchdown lands this close to the ring's contact key
 const POINTS := ["hips", "head", "hand.L", "hand.R", "heel.L", "heel.R", "toe.L", "toe.R"]
 
 var bad := 0
@@ -50,6 +57,7 @@ var holder: Node3D
 var rows := {}
 var known := {}             # "<hunter> <state> <dir>" -> true
 var now_failing: Array = []
+var contact := {}            # "<rel> <ring>" -> {foot: phase}: a Hunter's contact keys, per direction and ring
 var soles := {}              # side -> [bone index, heel, toe (in that bone's frame)]: the sole at rest
 
 func run(main: Node) -> void:
@@ -102,6 +110,7 @@ func _hero(main: Node, id: String) -> void:
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var clips: WardenClips = sync.get("clips")
 	_soles(sk)
+	contact = {}
 	var top := float(HunterMove.of(id)["speed"])
 	var accel := float(HunterMove.of(id)["accel"])
 	var walk := float(clips.d["loco"].get("walk_speed", 2.2))
@@ -127,8 +136,18 @@ func _hero(main: Node, id: String) -> void:
 				print("FIXED %s (--update drops it)" % key)
 		row[st] = cells
 		print("LOCO_DIR %-10s %-12s %s" % [id, st, " ".join(line)])
+		if st in START_STATES:
+			print("LOCO_START %-10s %-12s %s" % [id, st, _start_line(cells)])
 	rows[id] = row
 	m.free()
+
+## A start row: per direction "<dir>:<first-pose gap %>/<first plant off its key, frames>/<ring phase>".
+func _start_line(cells: Dictionary) -> String:
+	var out: Array = []
+	for k in cells:
+		var c: Dictionary = cells[k]["start"]
+		out.append("%s:%d%%/%+d/%.2f" % [k, roundi(100.0 * float(c["gap"])), int(c["err"]), float(c["phase"])])
+	return " ".join(out)
 
 ## One state and direction: start from a standstill at `accel` m/s^2, hold the move, brake to a stop.
 ## `rel`: rad off the facing (+ his left).
@@ -137,8 +156,10 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 	var ck := 1.0 if st.begins_with("crouch") else 0.0
 	var swing := AIM_SWING if st in ["strafe", "aim_walk"] else 0.0
 	var t := 0.0
+	var cl: WardenClips = sync.get("clips")
 	for k in int(0.6 / DT):     # stand (or crouch) still first
 		_tick(m, a, sync, Vector3.ZERO, 0.0, ck)
+	var idle := _read(m, sk, Vector3.ZERO)
 	var fr: Array = []
 	var v := 0.0
 	for k in int((WARM_S + SAMPLE_S) / DT):
@@ -146,8 +167,8 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 		v = move_toward(v, spd, accel * DT)
 		_tick(m, a, sync, _vel(face + rel, v), face, ck)
 		fr.append(_read(m, sk, _vel(face + rel, v)))
+		fr[-1]["ring"] = _ring_at(cl)
 		t += DT
-	var cl: WardenClips = sync.get("clips")
 	var rate: float = cl.tree.get("parameters/%s/scale" % ("crouch_rate" if ck > 0.0 else "loco_rate"))
 	var stop: Array = []
 	for k in int((SETTLE_S + 1.0) / DT):
@@ -161,6 +182,8 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 	var out := _gait(steady, spd)
 	out["rate"] = rate
 	out["speed"] = spd
+	if st in START_STATES:
+		out["start"] = _start(fr, steady, idle, cl, sync, sk, rel)
 	var calm: float = _jerk(steady)[0]
 	var start := _jerk(fr.slice(0, int(SETTLE_S / DT)))
 	var halt := _jerk(stop.slice(0, int(SETTLE_S / DT)))
@@ -187,6 +210,11 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 			slip_bar])
 	_judge(out, snap > out["snap_bar"], "SNAP", "%s jumps %.3f (bar %.3f, steady %.3f)" % [out["snap_at"], snap,
 			out["snap_bar"], calm])
+	if out.has("start"):
+		var sp: Dictionary = out["start"]
+		_judge(out, absi(int(sp["err"])) > PLANT_TOL, "PLANT", "moving off, the first foot down lands %s" % (
+				"nowhere near a contact key" if int(sp["err"]) == 99 else "%+d frames off its contact key (bar %d)"
+				% [int(sp["err"]), PLANT_TOL]))
 	return out
 
 func _judge(out: Dictionary, failed: bool, verdict: String, why: String) -> void:
@@ -286,3 +314,99 @@ func _drift(fr: Array) -> float:
 			sum += Vector2(d.x, d.z).length() / DT
 			n += 1
 	return sum / maxi(n, 1)
+
+## The ring that owns the legs ("walk" or "run") and its phase 0..1, and how much the rings show over the idle.
+func _ring_at(cl: WardenClips) -> Dictionary:
+	var nm := "run" if cl.run_w >= 0.5 else "walk"
+	var at := "parameters/%s/current_" % nm
+	return {"nm": nm, "ph": float(cl.tree.get(at + "position")) / maxf(float(cl.tree.get(at + "length")), 0.001),
+			"w": cl.move_w}
+
+## Moving off from idle (START): "gap", the ring's first pose against the idle's, worst point over the height;
+## "phase", the ring's phase at the start; "keys", the phases a sole touches down at in the steady loop (per foot,
+## kept per direction and ring in `contact`, so a run start's walk-ring frames read the walk cell's keys);
+## "plant_f", the frame of the first plant: a foot that lifted coming down, or one down since the start that the ring
+## carries through its own key; "key_f", the frame the ring passes that foot's key nearest it ("err" the two
+## apart, frames: early is the idle pulling a swinging foot down, late a foot held off the floor).
+func _start(fr: Array, steady: Array, idle: Dictionary, cl: WardenClips, sync: Node, sk: Skeleton3D,
+		rel: float) -> Dictionary:
+	var band := {}
+	var lift := {}
+	var keys := {}
+	for f in ["foot.L", "foot.R"]:
+		var lo := INF
+		var hi := -INF
+		for p in steady:
+			lo = minf(lo, (p[f] as Vector3).y)
+			hi = maxf(hi, (p[f] as Vector3).y)
+		band[f] = lo + PLANT_BAND * maxf(hi - lo, 0.02)
+		lift[f] = lo + LIFT_K * maxf(hi - lo, 0.02)
+		var sum := Vector2.ZERO
+		for i in range(1, steady.size()):
+			if (steady[i][f] as Vector3).y <= band[f] and (steady[i - 1][f] as Vector3).y > band[f]:
+				sum += Vector2.from_angle(TAU * float(steady[i]["ring"]["ph"]))
+		keys[f] = fposmod(sum.angle() / TAU, 1.0) if sum.length() > 0.001 else -1.0
+	contact["%.2f %s" % [rel, steady[0]["ring"]["nm"]]] = keys
+	var r0: Dictionary = fr[0]["ring"]
+	var out := {"phase": r0["ph"], "ring": r0["nm"], "keys": [keys["foot.L"], keys["foot.R"]], "plant_f": -1,
+			"key_f": -1, "err": 99}
+	var n := mini(int(START_S / DT), fr.size())
+	for f in band:
+		var cross: Array = []     # the frames the ring passes this foot's contact key
+		for i in range(1, n):
+			var a: Dictionary = fr[i - 1]["ring"]
+			var b: Dictionary = fr[i]["ring"]
+			var key: float = contact.get("%.2f %s" % [rel, b["nm"]], {}).get(f, -1.0)
+			if a["nm"] == b["nm"] and key >= 0.0 \
+					and fposmod(key - float(a["ph"]), 1.0) < fposmod(float(b["ph"]) - float(a["ph"]), 1.0):
+				cross.append(i)
+		var held := true      # down since the start: planted on its key if the ring passes it before the foot lifts
+		var up := false
+		for i in range(1, n):
+			var down: bool = (fr[i][f] as Vector3).y <= band[f]
+			if held and not cross.is_empty() and i == cross[0] + PLANT_TOL:
+				_plant(out, f, cross[0], cross[0])
+				break
+			held = held and down
+			up = up or (fr[i][f] as Vector3).y > lift[f]
+			if up and down:
+				var near := -1
+				for c in cross:
+					near = c if near < 0 or absi(c - i) < absi(near - i) else near
+				_plant(out, f, i, near)
+				break
+	out["gap"] = _first_gap(idle, cl, sync, sk, String(r0["nm"]), rel, float(r0["ph"]))
+	return out
+
+## The first plant of a start so far (the earliest frame wins): the frame a foot came down, the frame of its key.
+func _plant(out: Dictionary, f: String, at: int, key: int) -> void:
+	if out["plant_f"] >= 0 and at >= int(out["plant_f"]):
+		return
+	out["plant_f"] = at
+	out["key_f"] = key
+	out["foot"] = f
+	out["err"] = at - key if key >= 0 else 99
+
+## The worst point's distance between the idle and the ring's loop for this direction at `ph`, over his height
+## (-1: no loop keyed for the direction).
+func _first_gap(idle: Dictionary, cl: WardenClips, sync: Node, sk: Skeleton3D, ring: String, rel: float,
+		ph: float) -> float:
+	var dir := ""
+	for k in DIRS:
+		if absf(angle_difference(deg_to_rad(DIRS[k]), rel)) < 0.01:
+			dir = k
+	var loops: Dictionary = cl.d["loco"][ring]
+	if not loops.has(dir):
+		return -1.0
+	var length := cl.lib.get_animation(String(loops[dir])).length
+	cl.force = {"clip": String(loops[dir]), "t": 0.0}
+	for k in 6:
+		sync.call("_process", DT)
+	cl.force = {"clip": String(loops[dir]), "t": ph * length}
+	sync.call("_process", DT)
+	var p := _read(cl.root, sk, Vector3.ZERO)
+	cl.force = {}
+	var worst := 0.0
+	for b in POINTS:
+		worst = maxf(worst, ((p[b] as Vector3) - (idle[b] as Vector3)).length())
+	return worst / maxf((idle["head"] as Vector3).y, 0.5)
