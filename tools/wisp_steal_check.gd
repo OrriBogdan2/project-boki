@@ -91,7 +91,7 @@ func _steal() -> void:
 	_frames(0.1)
 	ok(not f.kin_carry_on() and f.owner_stat(stat) == 0.0, "...and its revived owner has none")
 	ok(not KinSummon.press(f) and fk.wisp, "...nor its summon")
-	f.teleport(f.pos + Vector3(40, 0, 0))      # (out of the stolen summon's leash: it would down its own owner)
+	f.teleport(_ground_away(f.pos, 40.0))      # (out of the stolen summon's leash: it would down its own owner)
 	p.kin.summon.cd = 40.0
 	ok(KinSummon.press(p) and not fk.wisp and p.kin.wisp, "summon: own Boki resting, Summon bursts the stolen one")
 	var win := maxf(5.0, ceilf(fk.summon.dur * 0.5))
@@ -145,3 +145,12 @@ func _steal() -> void:
 	row[KinNet.KIN_AT + 10] = ""
 	KinNet.apply_kin(fk, row)
 	ok(fk.owner_h == f, "...and an empty carrier sends it home")
+
+## A spot on solid ground dist m from here (the first of 8 directions not over the abyss: a hunter
+## teleported over it falls out of the match).
+func _ground_away(from: Vector3, dist: float) -> Vector3:
+	for i in 8:
+		var to := from + Vector3(dist, 0, 0).rotated(Vector3.UP, i * TAU / 8.0)
+		if not m.world.is_void(to.x, to.z):
+			return Vector3(to.x, m.world.ground_at(to.x, to.z), to.z)
+	return from + Vector3(dist, 0, 0)
