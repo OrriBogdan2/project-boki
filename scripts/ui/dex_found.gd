@@ -42,7 +42,13 @@ class Pip extends Control:
 		custom_minimum_size = Vector2(D * 6.0 + 4.0, D * 2.0)
 		size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		tooltip_text = DexFound.tier_name(spk) if met else "Rarity unknown"
-		if not met: add_child(UI.label("?", UI.T_SMALL, UI.FAINT, UI.semi))
+		if met: return
+		var q := UI.label("?", UI.T_SMALL, UI.FAINT, UI.semi)
+		q.set_anchors_preset(Control.PRESET_FULL_RECT)       # level with the number, in the badge's corner
+		q.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		q.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		q.grow_vertical = Control.GROW_DIRECTION_BOTH          # taller than the pip: spill evenly up and down
+		add_child(q)
 	func _draw() -> void:
 		if filled < 0: return
 		for i in DexFound.TIERS.size():
