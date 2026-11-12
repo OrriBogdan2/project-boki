@@ -275,6 +275,7 @@ func zedran(a) -> void:
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
+	await _recovery_exits()
 	await A.done(m)
 
 ## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
@@ -416,3 +417,75 @@ func _burst(hero: String, sp: String) -> float:
 	var left := 0.0 if T.downed or T.hp <= 0.0 else T.hp / T.max_hp
 	await A.done(m)
 	return left
+
+# ------------------------------------------------------------------ Kael: leaving the recovery
+const TRACE := 12                # physics frames traced from the press
+
+## One fresh cast, then `key` ("jump" or "dash") held for one physics step on recovery frame `frame` (1 = the
+## first step after the cleave landed; 0: no ult, the control from rest). Walks forward throughout. Returns the
+## recovery's state at the press (`phase`), whether it was over after that same step (`left`), the first traced
+## frame the jump or dash showed (`moved`, 1 = the press frame), the frames with no travel (`still`), the travel
+## (`reach`) and the top speed (`top`) over the trace, and with no key how many steps the recovery lasts (`n`).
+func _exit_trial(frame: int, key: String) -> Dictionary:
+	var r = A.setup("juggernaut", 9.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: JuggernautKit = P.ak
+	var U: JuggernautUlt = K.riposte
+	_open(P)
+	P.inp["move"] = Vector2(0, 1)
+	var seen := {"n": 0, "phase": "", "left": false, "moved": 0, "still": 0, "reach": 0.0, "top": 0.0}
+	if frame > 0:
+		HunterKeys.ult_pressed(P)
+		while String(U.st.get("phase", "")) != "recover":
+			m.step(A.DT)
+		if key == "":
+			while U.running():
+				m.step(A.DT)
+				seen["n"] += 1
+		for i in frame - 1:
+			m.step(A.DT)
+	seen["phase"] = String(U.st.get("phase", ""))
+	var y0 := P.pos.y
+	var d0 := P.dashes
+	for i in TRACE:
+		var from := P.pos
+		P.inp[key] = key != "" and i == 0
+		m.step(A.DT)
+		P.inp[key] = false
+		var dx := Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+		seen["reach"] += dx
+		seen["still"] += 1 if dx < 0.001 else 0
+		seen["top"] = maxf(float(seen["top"]), Vector2(P.vel.x, P.vel.z).length())
+		var went := P.pos.y > y0 + 0.01 if key == "jump" else P.dashes < d0 - 0.01
+		if went and int(seen["moved"]) == 0:
+			seen["moved"] = i + 1
+		if i == 0:
+			seen["left"] = not U.running()
+	await A.done(m)
+	return seen
+
+## The recovery (0.35s, half speed) is left by a jump or Shift on the very physics frame it is pressed, from its
+## first frame to its last: it is over that frame, and nothing of the 50% walk goes into the jump (it reaches full
+## run speed) or the dash (its travel and stops are the plain dash's, the control from rest).
+func _recovery_exits() -> void:
+	var n: int = (await _exit_trial(1, ""))["n"]
+	A.ok("juggernaut X recovery: 0.35s is %d physics frames" % n, n == roundi(0.35 / A.DT), "%d frames" % n)
+	for key in ["jump", "dash"]:
+		var control: Dictionary = await _exit_trial(0, key)
+		for frame in [1, 10, n]:
+			var got: Dictionary = await _exit_trial(frame, key)
+			var same: bool = int(got["moved"]) == 1 and bool(got["left"]) and got["phase"] == "recover"
+			var plain: bool
+			if key == "jump":
+				plain = int(got["still"]) == 0 and float(got["top"]) >= float(control["top"]) - 0.01
+			else:
+				plain = int(got["still"]) == int(control["still"]) and _near(got["reach"], control["reach"])
+			var info := "phase %s, moved on frame %d, left %s, still %d (control %d)" % [got["phase"], got["moved"],
+					got["left"], got["still"], control["still"]]
+			A.ok("juggernaut X recovery: %s on frame %d of %d goes that frame, no stop, no 50%% cap" % [key, frame, n],
+					same and plain, info + ", reach %.2f (%.2f), top %.2f (%.2f)" % [got["reach"], control["reach"],
+							got["top"], control["top"]])
+
+func _near(a: float, b: float) -> bool:
+	return absf(a - b) < 0.02
