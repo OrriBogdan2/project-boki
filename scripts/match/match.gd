@@ -1821,9 +1821,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
-		# getting knocked hits hard: slow time, flash red, pull the camera in
-		_slow(0.55, 0.3)
-		if hud: hud.flash(Color("ff3a2a"), 0.3)
+		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
+		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
 		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
@@ -1868,10 +1867,10 @@ func _armor_up(h: Hunter) -> void:
 		sfx("revive", null, -6.0)
 		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
 
+## A knock you landed: the short freeze, ring, burst and confirm sound. No slow-mo, no full-screen
+## flash, so offline and online keep one rhythm (docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment).
 func _reward_moment(at: Vector3) -> void:
-	_slow(0.22, 0.35)
 	freeze_frame(0.07)
-	if hud: hud.flash(Color.WHITE, 0.25)
 	fx.ring(at, 3.0, Color(1, 0.95, 0.8, 0.9), 0.35)
 	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
 	Sfx.duck(0.25)
