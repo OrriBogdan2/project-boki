@@ -171,7 +171,10 @@ func run(main: Node) -> void:
 		dn += 1
 		if r["mantled"]: grabbed += 1
 		if r["fell"]: dgood += 1
-		worst_drop = maxf(worst_drop, _ref(Vector3(e["ex"], top, e["ez"])) - float(r["low"]))
+		# the kill line (Hunter.abyss_kill_y) reads the lowest lip around where the hunter is, not the edge tile
+		var lip := _ref(Vector3(e["ex"], top, e["ez"]))
+		if r.has("low_at"): lip = minf(lip, _ref(Vector3(r["low_at"].x, top, r["low_at"].z)))
+		worst_drop = maxf(worst_drop, lip - float(r["low"]))
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
 	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [Hunter.MANTLE_REACH_ABYSS + 0.1, grabbed])
