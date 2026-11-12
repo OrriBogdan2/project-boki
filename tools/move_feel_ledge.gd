@@ -10,6 +10,9 @@ const DT := 1.0 / 60.0
 const EXIT_MIN := 0.75         # x run speed: the least a dash may leave you in the air (the old barge plant left 0.65)
 ## A fitted dash curve (decision 0025: Vex, Kael, Lace) bleeds off through run speed by design, so for those the
 ## least is the lower of EXIT_MIN and the curve's own end (u = 1): only a cut on top of the curve fails.
+## Rock Hop's least speed at the lip, a share of run speed: a hop off a drop flies longer to clear the rock it springs
+## off (BreahHop._flight_to, the dash-slope fix), so it crosses the lip slower than a run (0.68-0.75x) yet still lands
+const HOP_LIP_K := 0.6
 const AIR_WAIT := 24           # steps (0.4 s): Grimble's barges go "a beat apart" (dash gap)
 const RUNS := [
 	["gunslinger", "tap", 0.8], ["gunslinger", "hold", 2.5], ["juggernaut", "tap", 0.8], ["ashwick", "tap", 0.8],
@@ -122,9 +125,9 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 	var exit_k := float(o["exit_v"]) / P.base_speed
 	var least_k := EXIT_MIN if float(o["tail_v"]) <= 0.0 else minf(EXIT_MIN, float(o["tail_v"]) / P.base_speed)
 	if id == "dolm":
-		# Rock Hop is a chain of hops (arcs, not a slide): it must leave the terrace at speed, never crash in the
+		# Rock Hop is a chain of hops (arcs, not a slide): it must leave the terrace moving, never crash in the
 		# air (the crash and the next hop wait for the ground below) and come down there
-		c.ok(bool(o["landed"]) and float(o["lip_v"]) >= P.base_speed and int(o["air_crash"]) == 0,
+		c.ok(bool(o["landed"]) and float(o["lip_v"]) >= P.base_speed * HOP_LIP_K and int(o["air_crash"]) == 0,
 			"ledge_dash %s: lip %.1f m/s, crashes in the air %d, lands below %s" % [
 			what, float(o["lip_v"]), int(o["air_crash"]), str(o["landed"])])
 		return

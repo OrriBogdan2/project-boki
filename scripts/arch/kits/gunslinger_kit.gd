@@ -69,6 +69,7 @@ var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
+	last_shot = h.shot_n      # rounds fired under another kit are not hers: no firing pose on a kit swap
 
 func fx() -> VVFx:
 	return VVFx.of(m)

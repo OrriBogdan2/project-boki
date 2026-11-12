@@ -601,6 +601,11 @@ func aims_in_dash() -> bool:
 func dash_left() -> float:
 	return hop.left() if hop.chaining() else super.dash_left()
 
+## The crouch while the first rock bursts up under him is the Rock Hop's wind-up: Space pressed with Shift jumps
+## off the rock a step later, as Space just after Shift does, not from the floor inside the rising rock.
+func dash_winding() -> bool:
+	return hop.crouching() or super.dash_winding()
+
 ## Her dash moves (breah_hop, breah_skate, breah_exdash) are the whole dash pose: no shared roll under them.
 func dodge_anim() -> String:
 	return "kit"

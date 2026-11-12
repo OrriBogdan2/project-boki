@@ -42,6 +42,10 @@ func dd() -> Dictionary: return k.dash_def()
 func chaining() -> bool:
 	return not st.is_empty() and String(st["phase"]) != "roll"
 
+## On the first rock, before the first hop goes (CROUCH).
+func crouching() -> bool:
+	return not st.is_empty() and String(st["phase"]) == "crouch"
+
 ## s to the chain's end if nobody presses again.
 func left() -> float:
 	var skid := 0.0 if int(st["n"]) >= int(dd()["hops"]) else float(dd()["window"]) - float(st["T"])

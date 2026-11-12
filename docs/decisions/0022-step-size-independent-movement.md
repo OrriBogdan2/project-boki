@@ -1,6 +1,6 @@
 # 0022: Movement that doesn't depend on the step size
 
-- **Status:** accepted
+- **Status:** accepted; amended 2026-11-11 (anchored to the 60 Hz step, below)
 - **Date:** 2026-11-09
 - **Area:** movement
 
@@ -17,3 +17,6 @@ Option 2, in `HunterMove`: `fall` (trapezoid gravity) and `dash_end_step` / `set
 ## Consequences
 - `--fps-feel-check` runs Vex, Kael, Albert and Sable at 1/30, 1/60, 1/144: apex, dash tap and hold, glide sink, knock agree within 3%; the apex matches JUMP_V^2/2g and the high glide sink the [game data] 3.5 m/s.
 - At 60 Hz the apex goes 1.52 -> 1.57 m and a 1 s free fall to 7.10 m (the source's 7.1 m). No Net or save change.
+
+## Amendment (2026-11-11, docs/MERGE_0246_FEEL.md)
+The exact version moved the 60 Hz game itself (apex 1.52 -> 1.57 m), and it was taken out twice for that (perf-train-0245, the 0.24.6 feel wave: feel-golden and the 60 Hz feel rows). The game only ever steps at 1/60 (`Match._process`), so the 60 Hz step is the reference. `HunterMove.fall` adds back what a step of another size gains or loses against the 60 Hz arc. That is 0 at 1/60, so 60 Hz is unchanged, and the apex is 1.52 m at every step; the check's apex target is that arc's. Ground dashes already split their last step (0.24.5 `HunterMove.dash_rest`). The dash and knock spread the check saw came from mobs the map respawns by the spawn, which the check now clears. The steer and turn rates are left as they are. Owner alternative: exact gravity (UE's midpoint step) gives 1.57 m at 60 Hz and changes every jump and fall.

@@ -241,6 +241,7 @@ func _clear_inp() -> void:
 
 ## A clean, standing hunter at p.
 func _reset(p: Vector3, grounded := true) -> void:
+	_no_mobs()          # the map spawns more over the run (exits, lairs): one wandering in knocks a row off
 	P.out = false; P.gone = false; P.downed = false
 	P.teleport(p)
 	P.vel = Vector3.ZERO
@@ -280,6 +281,10 @@ func _flat_spot(r: float) -> Vector3:
 	return w.random_ground()
 
 ## A quiet match with one local hunter (P), everything unlocked, and the flat spot found.
+func _no_mobs() -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+
 func _begin(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -288,8 +293,7 @@ func _begin(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	m.set_process(false)
 	w = m.world
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
+	_no_mobs()
 	P = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -622,7 +626,7 @@ func _glide() -> void:
 		m.step(DT)
 		P.inp["glide"] = true
 		if f < 0 and P.gliding: f = i + 1
-		if P.gliding and i >= 10: held += DT
+		if i >= 10 and (P.gliding or P.grounded): held += DT      # a landing closes it; only a close in the air counts
 	rec("glide_open_press_frames", f)
 	# opened while still rising from the jump: the canopy never carries the rise on
 	_reset(flat)

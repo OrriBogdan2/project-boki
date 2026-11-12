@@ -88,6 +88,7 @@ func _through_rock(flat: Vector3) -> void:
 	ok(m.pickups.size() == 1, "a tonic %.2f m away behind a rock stays there" % P.flat_dist(theirs))
 	ok(m.interact.is_empty(), "gear %.2f m away behind the rock is not offered (%s)"
 		% [P.flat_dist(gear_at), str(m.interact.get("kind", ""))])
+	w.kind[w.idx(int(rock.x), int(rock.z))] = World.T_GROUND
 	# the same distances with nothing between: both come
 	_clear_ground()
 	_reset(flat + Vector3(-1.0, 0, 0))
@@ -150,27 +151,16 @@ func _clear_rect(x: float, z: float, half_x: float, half_z: float) -> bool:
 				return false
 	return true
 
-## The middle of a rock cell with two clear flat cells on each side along x, at the rock's ground height.
+## A rock cell raised in the middle of open flat ground, two clear cells on each side along x, at that ground's
+## height (the map's own rocks move with every regen: 0.24.6's map had none with room round it near the spawn).
+## _through_rock lowers it again.
 func _rock_with_room() -> Vector3:
-	var c := P.pos
-	for ring in range(1, 80):
-		for k in 16:
-			var d := Vector2.RIGHT.rotated(TAU * k / 16.0) * float(ring)
-			var cx := floorf(c.x + d.x) + 0.5
-			var cz := floorf(c.z + d.y) + 0.5
-			if not w.is_block(cx, cz):
-				continue
-			var g := w.ground_at(cx - 1.0, cz)
-			var room := true
-			for ox: float in [-2.0, -1.0, 1.0, 2.0]:
-				for oz: float in [-1.0, 0.0, 1.0]:
-					var px := cx + ox
-					var pz := cz + oz
-					if w.is_block(px, pz) or w.is_void(px, pz) or absf(w.ground_at(px, pz) - g) > 0.05:
-						room = false
-			if room:
-				return Vector3(cx, g, cz)
-	return Vector3.INF
+	var at := _flat_spot(2.5, 1.5)
+	if at == Vector3.INF:
+		return at
+	var rock := Vector3(floorf(at.x) + 0.5, at.y, floorf(at.z) + 0.5)
+	w.kind[w.idx(int(rock.x), int(rock.z))] = World.T_BLOCK
+	return rock
 
 func _reset(at: Vector3) -> void:
 	P.teleport(Vector3(at.x, w.ground_at(at.x, at.z), at.z))

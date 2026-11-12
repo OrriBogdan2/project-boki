@@ -809,7 +809,8 @@ func do_jump() -> void:
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
 		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
-		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
+		var dash_v := Loco.dash_hv(roll_dir * roll_speed, arch) if inp["dash"] else Vector2(vel.x, vel.z)     # Shift's own step: not moved yet
+		var keep := dash_v * Loco.dash_jump_keep
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
@@ -2184,7 +2185,7 @@ func _physics(dt: float) -> void:
 	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
-		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
+		HunterMove.fall(self, dt)
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
 	# take over); only bots keep an edge guard, so walking can't carry one into the abyss by accident
 	var guard := ctrl == "bot" and grounded and roll_t <= 0.0 and hv.length() <= spd * 1.25
@@ -2199,7 +2200,7 @@ func _physics(dt: float) -> void:
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
 	dash_rest = Vector2.ZERO
-	var pw := Vector3(tgt.x, tgt.y, 0.0) if spirit_t > 0.0 else HunterMove.push_out_walls(self, m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y))
+	var pw := Vector3(tgt.x, tgt.y, 0.0) if spirit_t > 0.0 else HunterMove.push_out_swept(self, tgt)
 	var po := Vector2(pw.x, pw.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
