@@ -561,7 +561,7 @@ func cast_e() -> bool:
 
 func seed_radius() -> float:
 	if seed.is_empty(): return 0.0
-	return float(seed["rmax"]) * clampf(float(seed["t"]) / float(seed["grow"]), 0.08, 1.0)
+	return HeroZones.seed_r(float(seed["rmax"]), float(seed["grow"]), float(seed["t"]))
 
 func seed_k() -> float:
 	return clampf(float(seed["t"]) / float(seed["grow"]), 0.0, 1.0) if not seed.is_empty() else 0.0
@@ -570,6 +570,7 @@ func _tick_seed(dt: float) -> void:
 	var ed := e_def()
 	seed["t"] = float(seed["t"]) + dt
 	var p: Vector3 = seed["pos"]
+	HeroZones.seed_size(seed["vis"], seed_radius())
 	# the cast: a small orb drops from his hand onto the spot
 	var drop := float(ed["drop"])
 	if float(seed["t"]) < drop:
