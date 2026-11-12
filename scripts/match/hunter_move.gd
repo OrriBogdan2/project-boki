@@ -65,6 +65,15 @@ static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
 
+## A knock (one that sets knock_t) or a stun landing on an air Shift dash after its i-frames ends the dash on the
+## spot, as a glide press does: the knock's push or the stun's stop takes over (source: a stun is "no movement",
+## a knockback pushes you). A kit's rush, and a dash on the ground, ride on (MOVEMENT_FEEL "Knocked in the air").
+static func cut_air_dash(h: Hunter) -> void:
+	if h.roll_t <= 0.0 or h.grounded or h.move_kind != "dash":
+		return
+	h.roll_t = 0.0
+	h.shove = {}
+
 ## The step a dash ends in (ground or air) runs the dash for the `left` seconds it still had, then the hand-over:
 ## the metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate.
 static func dash_rest(dash_v: Vector2, run_v: Vector2, left: float) -> Vector2:
