@@ -14,7 +14,7 @@ const SOUND_RANGE_DB := 4.0     # the transformation is louder than a normal abi
 
 static func _snd(form: Dictionary) -> Dictionary:
 	var d: Dictionary = form["def"]
-	return d.get("sound", {"xform": "ult", "pitch": 1.0, "ult": "boom"})
+	return d.get("sound", {"xform": "ult", "pitch": 1.0})
 
 static func begin(h: Hunter, form: Dictionary) -> void:
 	var m := h.m
@@ -190,7 +190,8 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 	match p[0]:
 		"ult":
 			m.fx.word(h.pos + Vector3(0, 3.0, 0), "ULTIMATE", col, true)
-			m.sfx("warn", h.pos, -2.0, 0.7)
+			if not MergeSfx.play(h, "cast"):
+				m.sfx("warn", h.pos, -2.0, 0.7)
 			if rad > 0.5:
 				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9))
 				var tw := tele.create_tween()
@@ -200,6 +201,5 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 			m.fx.ring(h.pos, maxf(1.2, rad), Color(col, 0.7), 0.25)
 		"rmb":
 			m.fx.ring(h.pos, 1.4, Color(col, 0.7), 0.3)
-		"blink":
-			m.fx.bolt(h.pos + Vector3(0, 1.0, 0), tgt + Vector3(0, 1.0, 0), col)
-			m.sfx("zap", tgt, -4.0, 1.5)
+		"dash":
+			MergeSfx.play(h, "travel")

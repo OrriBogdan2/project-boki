@@ -307,8 +307,13 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var r := float(e.get("radius", 2.0))
 			m.fx.ring(at, r, col, 0.3)
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
-			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
-			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
+			# (a Fusion form plays its own hit here, MergeSfx.hit_ctx, not the shared ones)
+			var own_hit: Dictionary = ctx.get("hit_snd", {})
+			if own_hit.is_empty():
+				m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
+			else:
+				m.sfx(String(own_hit["name"]), at, float(own_hit["db"]))
+			if not caster is Kin: AbilityFx.land(m, caster, at, r, col, own_hit.is_empty())
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
 					var rel := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -402,8 +407,12 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				(caster as Hunter).launch_to(to, float(e.get("time", 0.5)))
 				if e.has("on_land"):
 					var land: Array = e["on_land"]
+					var lc := {"slot": ctx.get("slot", ""), "ability": ctx.get("ability", ""), "level": ctx.get("level", 1),
+							"hit_snd": ctx.get("hit_snd", {})}
 					m.later(float(e.get("time", 0.5)), func():
-						if is_instance_valid(caster): run(land, caster, {"at": caster.pos, "slot": ctx.get("slot", ""), "ability": ctx.get("ability", ""), "level": ctx.get("level", 1)}))
+						if is_instance_valid(caster):
+							lc["at"] = caster.pos
+							run(land, caster, lc))
 		"dash":
 			if caster is Hunter:
 				(caster as Hunter).dash_with(e)

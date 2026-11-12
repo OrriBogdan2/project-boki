@@ -102,7 +102,8 @@ static func _addon(h: Hunter, key: String) -> void:
 	if a.is_empty():
 		return
 	var form := MergeForm.of(h)
-	Effects.run(a.get("effects", []), h, {"slot": key, "ability": "%s_%s_aug" % [form["id"], key], "level": 1})
+	var ctx := {"slot": key, "ability": "%s_%s_aug" % [form["id"], key], "level": 1, "hit_snd": MergeSfx.hit_ctx(h)}
+	Effects.run(a.get("effects", []), h, ctx)
 	var k := float(a.get("cd_k", 1.0))
 	if k < 1.0:
 		if h.ak != null:
@@ -129,17 +130,17 @@ static func _dash(h: Hunter) -> void:
 	var st := _state(h)
 	var kind := String(d["kind"])
 	st["dash"] = {"kind": kind, "t": float(d["window"]), "last": h.pos, "hit": {}, "mirror": {}}
+	if not MergeSfx.play(h, "travel"):
+		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
+	_announce(h, "dash", 0.0)
 	if kind == "trail":
 		h.haste_t = maxf(h.haste_t, float(d["haste_s"]))
-		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
 		return
 	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(d.get("name", "")).to_upper(), col)
 	match kind:
 		"sweep":
-			h.m.sfx("zap", h.pos, -3.0, 1.5)
 			h.m.fx.bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * 4.0 + Vector3(0, 1.0, 0), col)
 		"charge":
-			h.m.sfx("ab_slam", h.pos, -4.0, 0.8)
 			h.m.fx.dust(h.pos, 8)
 		"reflect":
 			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]), "dmg_k": float(d["dmg_k"]), "color": col.to_html(false)})
@@ -253,6 +254,7 @@ static func _tick_dash(h: Hunter, dsh: Dictionary, dt: float) -> void:
 			var dir := seg.normalized() if seg.length() > 0.01 else h.aim_dir()
 			f.impulse(dir * float(d["shove"]) * f.mass())
 			h.m.fx.dust(f.pos, 3)
+		MergeSfx.play(h, "hit", f.pos)
 		f.hurt(dmg, h, o)
 
 # ------------------------------------------------------------------ the HUD's views

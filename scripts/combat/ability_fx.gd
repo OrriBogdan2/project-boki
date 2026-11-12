@@ -149,7 +149,8 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 
 ## An area landing (a slam, a mine going off, an ability's burst): a shockwave the size of what it
 ## covers, rubble and dust, and a shake that fades with distance (§5.5 leap landing / big area).
-static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> void:
+## `sound` false: the caller plays its own (a Fusion form's hit, MergeSfx).
+static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color, sound := true) -> void:
 	if m == null or m.get("fx") == null or _far(m, at):
 		return
 	var fx: Fx = m.fx
@@ -160,7 +161,8 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 	fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, int(10 + r * 6), 6.0 + r * 2.0, 65.0, 0.35, 14.0, 1.0 + r * 0.15)
 	fx.dust(at, int(8 + r * 4))
 	if r >= 1.5:
-		m.sfx("ab_slam", at, (-2.0 if r > 2.0 else -5.0) + _vol(m, caster, at), clampf(1.25 - r * 0.08, 0.85, 1.2))
+		if sound:
+			m.sfx("ab_slam", at, (-2.0 if r > 2.0 else -5.0) + _vol(m, caster, at), clampf(1.25 - r * 0.08, 0.85, 1.2))
 		if r >= 3.0 and caster is Ent and not _mine(m, caster):
 			Shake.incoming_big(m, at, 0.5, caster as Ent)
 
