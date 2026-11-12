@@ -4,6 +4,7 @@ extends RefCounted
 ## rimewright.md: where shots land, the telegraph shown while holding, the timings, the payoffs, the
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
+const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -800,6 +801,7 @@ func tender() -> void:
 	var A: Hunter = r[2]
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
+	var home: Vector3 = r[4]
 	ok(
 			"mm: renamed Meeko, kit sounds load",
 			Arch.name_of("tender") == "The Dawnfox"
@@ -1073,6 +1075,7 @@ func tender() -> void:
 	step(m, 1.2)
 	ok("mm RMB: a stun in the wind-up loses the throw, not the charge",
 			not K.seed_aim and K.ch_rmb >= 1.0 and _mine(m, P).size() == n3)
+	TTIME.new(self).run(m, P, K, A, home)
 	await _free(m)
 	await growth()
 	await burr_ranks()
@@ -1687,6 +1690,10 @@ func rimewright() -> void:
 			and K.anim_id == "tm_wall"
 			and AimKit.shown(P, "e")
 			and bool(AimKit.entry(P, "e").get("all", false)))
+	var shove_t := float(KMovesCare.MOVES["tm_wall"]["keys"][2][0])
+	var tell_t := float(K.e_def()["tell"])
+	ok("tm E: the palm shove lands as the wall erupts (the move's 'out' key = the tell)",
+			absf(shove_t - tell_t) < 0.01, "shove %.2f s, tell %.2f s" % [shove_t, tell_t])
 	step(m, 0.25)
 	var w0: Dictionary = K.wall.get("w", {})
 	var mid0 := ((w0.get("a", Vector2.ZERO) as Vector2) + (w0.get("b", Vector2.ZERO) as Vector2)) * 0.5

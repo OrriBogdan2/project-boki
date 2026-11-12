@@ -19,5 +19,7 @@
    "type": "haste",
    "time": 6.0
   }
- ]
+ ],
+ "move": "drink",
+ "cast": 0.6
 }
