@@ -23,6 +23,7 @@ var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
 var sight_t := 0.0
+var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
 var shield_at := -99.0
@@ -274,11 +275,9 @@ func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
 		sneak_t += dt
 		if h.is_local():
-			var pd: Dictionary = d["passive"]
-			AimKit.cone(
-				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
-			)
+			_sight_p["len"] = sight_len()
+			_sight_p["deg"] = sight_deg()
+			AimKit.cone(h, "sight", _sight_p)
 			sight_t -= dt
 			if sight_t <= 0.0:
 				sight_t = 0.5
@@ -287,9 +286,17 @@ func _tick_sight(dt: float) -> void:
 		sight_t = 0.0
 		sneak_t = 0.0
 
+func sight_grow() -> float:
+	return clampf(sneak_t / float(d["passive"]["grow"]), 0.0, 1.0)
+
 func sight_deg() -> float:
 	var pd: Dictionary = d["passive"]
-	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
+	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), sight_grow())
+
+## The cone's reach: passive.len at the start of a sneak, passive.len_max after `grow` seconds of it.
+func sight_len() -> float:
+	var pd: Dictionary = d["passive"]
+	return lerpf(float(pd["len"]), float(pd["len_max"]), sight_grow())
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
 ## Rock Hop (AimKit's telegraphs go with them through drop_holds).
@@ -308,11 +315,11 @@ func _drop_holds() -> void:
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
-	var pd: Dictionary = d["passive"]
+	var reach := sight_len()
 	for o in m.hunters:
 		if o.team == h.team or not is_instance_valid(o) or o.dead or o.downed: continue
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
+		if to.length() > reach or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
 		m.fx.ring(o.pos, 0.9, Color("3a7cff"), 0.55)
 		m.fx.ring(o.pos, 0.5, Color("d8ecff"), 0.4)

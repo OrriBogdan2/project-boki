@@ -47,6 +47,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Tenzo | RMB radius, core | 4.5 (3.82 tap), 0.9-1.8 | 2.5 bh (4.5), 0.5-1 bh | match |
 | Tenzo | E ahead, span | 3.4, 5 | 2 bh (3.6), 3 bh (5.4) | match |
 | Tenzo | R ridge length, cast range | 12, 11 | 10-12 bh (18-21.6), - | differ ~40%, kept: f2b60dc70 narrowed it 19.8 to 12 on purpose, no DECISIONS line either way; [?] |
+| Tenzo | Passive cone length (Tremor Sense, sneaking) | 18 growing to 25 over the 2 s `grow` that widens it 25 to 40 deg (`passive.len`, `len_max`) | 10-14 bh (18-25), lengthens with the hold (breah.md 0693-0725); closes dolm.md row 9 | match |
 | Grimble | RMB range | 11.5 | 6-7 bh (10.8-12.6) | match |
 | Grimble | E depth, angle | 3.0, 110 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | within footage error [?] |
 | Grimble | R fan, depth | 105, 5.9 | 100-110, 3.3 bh (5.9) | match |

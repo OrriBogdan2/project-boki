@@ -699,13 +699,26 @@ func _breah() -> void:
 	var c1 := AimKit.entry(P, "sight")
 	step(m, 2.1, func(): P.inp["crouch"] = true)
 	var c2 := AimKit.entry(P, "sight")
-	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 15.0)
+	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 18.0)
+	ok(
+		"passive: the cone lengthens 18 -> 25 m over the same 2s",
+		float(c1.get("len", 0.0)) < 19.5 and absf(float(c2.get("len", 0.0)) - 25.0) < 0.1,
+		"%.1f -> %.1f" % [float(c1.get("len", 0)), float(c2.get("len", 0))]
+	)
 	ok(
 		"passive: the cone widens 25 -> 40 degrees over 2s of sneaking",
 		float(c1.get("deg", 0.0)) < 28.0 and absf(float(c2.get("deg", 0.0)) - 40.0) < 0.5,
 		"%.1f -> %.1f" % [float(c1.get("deg", 0)), float(c2.get("deg", 0))]
 	)
 	var s_front := K.stonesight()
+	T.teleport(home + Vector3(23.0, 0, 0))
+	var s_far := K.stonesight()
+	T.teleport(home + Vector3(27.0, 0, 0))
+	var s_out := K.stonesight()
+	ok(
+		"passive: Tremor Sense reaches 25 m grown, not 27", s_far == 1 and s_out == 0,
+		"23 m %d, 27 m %d" % [s_far, s_out]
+	)
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
 	ok(
