@@ -40,7 +40,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **No silent dynamic calls.** Avoid `has_method`, `call("name")` and `get_script_method_list` for things you control. Use typed references or signals (`CombatBus`).
 - **Constants with a unit and a reason.** Put tuning numbers in `content/rules` or a named `const` with a one-line comment (units, what it controls), not magic numbers inline.
 - **Networking:** anything synced between players goes through `Net`. Bump `Net.VERSION` when the sync shape changes. Never rename Net functions, the `"st"`/`"hit"`/`"ev"` topics, or the `--relay`/`--server=`/`--token=` args.
-- **Saves:** every save-format change comes with a migration. Old saves must load.
+- **Saves:** every save-format change comes with a migration. Old saves must load; add a golden file (`docs/SAVES.md`; `--save-compat-check`). A build that grows more than 5% needs its baseline bumped in the same PR (`docs/SIZE_BUDGET.md`).
 - **Player-facing text:** write it in our own words and use our own names. Never copy text, names or assets from other games.
 
 ## 5. Testing (cheap and meaningful)
