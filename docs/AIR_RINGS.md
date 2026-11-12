@@ -26,7 +26,10 @@ Colour-blind safe: the two kinds differ in outline, not only in hue (both on the
   next ring (to the landing, for the last ring), so from the ring you are in you see where the next one is.
 - **Lift ring:** a *round* hoop lying flat, with three *cones* pointing up over it.
 Three meshes a ring; the hoop's cel material, the arrowhead trail (by length) and the cone stack are shared.
-Stills: `--air-rings-shots` (match camera and Cam.skydive), `docs/shots/vfx-air-rings-read/`.
+Stills: `--air-rings-shots` (match camera and Cam.skydive), `docs/shots/vfx-air-rings-read/` (`before/` = plain
+round hoops, `after/` = this look; GPU jobs 20261112-002053-05974 and 20261112-022515-12660). At the match camera a
+glide ring stands edge-on, so the arrowheads carry the read there; on a lane at 45 degrees to the screen they show
+as L corners pointing downstream (a narrower V would read as an arrow at any heading: not done, needs another GPU look).
 
 ## Map data (content/maps/hollowcrown.json, written by tools/make_hollowcrown.py)
 Re-placing the routes for a new layout means editing two lists in the generator, nothing in code:

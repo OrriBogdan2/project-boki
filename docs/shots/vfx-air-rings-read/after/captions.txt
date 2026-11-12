@@ -1,0 +1,5 @@
+glide_match.jpg: gliding past ring 2 of the longest lane, match camera
+glide_far.jpg: at the take-off of the longest lane, match camera
+lift_match.jpg: on the ground beside a lift ring, match camera
+skydive_lane.jpg: Cam.skydive 25 m over the lane
+skydive_lift.jpg: Cam.skydive over a lift ring
