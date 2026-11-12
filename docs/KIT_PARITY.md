@@ -223,7 +223,8 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Q | none | glove | ours |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, from a jump the same then the air's drag (item 183), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash curve | Shiv's ground Cartwheel, 8 samples per 1/15 s, peak 16.2 m/s [F] (SUPERVIVE_FEEL) | the fitted curve, dash_feel.json "thief" (0: 0, 0.36: 1.84, 1: 0.25), ground and air; `VAULT_CURVE` (rms 27%) gone | **done** `ext/parity-sable-cartwheel-curve`: rms 13% (`--move-feel-check` dash_curve_thief_rms <= 20%) |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
