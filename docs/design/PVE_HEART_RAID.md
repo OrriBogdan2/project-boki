@@ -32,7 +32,9 @@ Scripted, timed and telegraphed; nothing random in where or when (`HeartRaidGate
   Skitters from N, one from NE; ...; wave 8: SE and S). A group's monsters stand 1.4 m apart round the gate.
 - **Telegraph.** 10 s before a wave its gates are marked: an ember ring on the ground with a seconds countdown
   over it, a badge with a filling arc on the minimap, and the raid strip reads "Wave 4 out of the marks in 0:08".
-  Clients work the marks out from the synced wave number (no new net traffic).
+  Clients work the marks out from the synced wave number (no new net traffic). Sound (docs/AUDIO.md, Heart Raid cues):
+  a soft tick at each marked gate in the last 3 s, a sting as the wave opens, one as the boss rises, a boss
+  phase cue and the Nightmare rockfall warning.
 - Idle wave monsters still go for the nearest Hunter within 32 m (who to chase is not a spawn).
 
 ## Difficulty: Normal / Hard / Nightmare

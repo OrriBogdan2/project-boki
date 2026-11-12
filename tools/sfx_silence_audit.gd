@@ -255,7 +255,39 @@ func _fixes() -> void:
 	ok("hit" in plain, "a hit between two others has an impact cue")
 	ok("crit" in crit, "...and a crit its crit cue")
 	ok("pickup" in _cues_of(func(): Juice.rival_pickup(_m, a)), "another hunter's pickup is heard")
+	_raid_rows()
 	ok(missing.is_empty(), "no cue the match asked for lacks a sound file (%s)" % [missing.keys()])
+
+## Heart Raid's events (scripts/match/raid_sfx.gd), each on a Nightmare raid of its own: the cue its event plays.
+func _raid_rows() -> void:
+	var o := HeartRaid.opts(1, "nightmare")
+	o.merge({"seed": 23, "tier": 0, "no_drop": true, "sim_keep": true})
+	var rm := Match.new()
+	_m.get_parent().add_child(rm)
+	rm.start(o)
+	rm.set_process(false)
+	var rd: HeartRaid = rm.heart_raid
+	rd.audio.update()      # (the first look only notes the state)
+	var run := func(n: int): for i in n: rm.step(Match.DT)
+	var ticks := _cues_of(func():
+		rd.next_wave_t = rm.sess_time() + float(RaidSfx.TICK_S) - 0.5
+		rd.gates.mark(0, rd.next_wave_t)
+		rd.gates.show_marks()
+		run.call(int(0.6 / Match.DT)))
+	var n_ticks := ticks.count("raid_gate_tick")
+	ok(n_ticks >= rd.gates.marks.size(), "raid: every marked gate ticks (%d for %d gates)" % [n_ticks, rd.gates.marks.size()])
+	var wave := _cues_of(func():
+		rd.wave += 1
+		rd.audio.update())
+	ok("raid_wave_open" in wave, "raid: a wave opening has its sting")
+	var rise := _cues_of(func():
+		rd._spawn_boss()
+		rd.audio.update())
+	ok("raid_boss_rise" in rise, "raid: the boss rising has its sting")
+	var b := rd.boss as Boss
+	ok("raid_phase" in _cues_of(func(): b._phase_up(1)), "raid: a boss phase change has its cue")
+	ok("raid_rockfall_warn" in _cues_of(func(): b._atk_rockfall()), "raid: the Nightmare rockfall warns")
+	rm.queue_free()
 
 func _bad(t: Dictionary) -> int:
 	return int(t["none"]) + int(t["shared"])

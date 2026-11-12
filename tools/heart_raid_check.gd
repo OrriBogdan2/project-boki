@@ -12,6 +12,9 @@ extends RefCounted
 ##   4. the boss: Nightmare's has one more attack (the Colossus's rockfall, telegraphed), Normal's not.
 ##   5. the win: the boss down opens the Heart's final seat, the squad holds the ring and leaves with the
 ##      raid's reward (an egg of the raid's Boki at its difficulty), and the results line says so.
+##   6. its sounds (scripts/match/raid_sfx.gd): a wave opens once per wave sent, the boss rises once, each wave's
+##      gates tick in the last RaidSfx.TICK_S s, the Nightmare boss's rockfall warns and a phase change cues;
+##      every cue has its sound file and Normal's boss has no rockfall warn.
 ## --heart-raid-check=sim runs only part 3 (and --seed=N picks the raids' seed).
 
 const SIMS := [[1, "normal"], [4, "normal"], [4, "hard"], [4, "nightmare"]]
@@ -166,6 +169,7 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
 		tag, str(m.result.get("why", "?")), _clock(ended_at)])
 	var ended := rd.phase in [HeartRaid.P.WON, HeartRaid.P.LOST]
 	ok(ended, "squad %s: the raid is %s" % [tag, HeartRaid.P.keys()[rd.phase]])
+	_sounds(rd, tag)
 	var sm := rd.summary()
 	ok(bool(sm["won"]) == (rd.phase == HeartRaid.P.WON),
 		"squad %s: the summary agrees: %s" % [tag, HeartRaid.result_line(sm)])
@@ -193,6 +197,19 @@ func _wave_out(rd: HeartRaid, marked_at: Dictionary, late: Array) -> void:
 		if not near:
 			late.append("%d: a %s out at %s, off its gates" % [i + 1, mb.mkind, str(mb.pos.round())])
 
+## Part 6, for one finished raid: the cues it played (RaidSfx.cues) against what the director did.
+func _sounds(rd: HeartRaid, tag: String) -> void:
+	var cues: Array = rd.audio.cues
+	var ticks := 0
+	for i in rd.wave:
+		ticks += (HeartRaid.rules()["waves"][i] as Array).size() * RaidSfx.TICK_S
+	var boss := 1 if rd.boss != null else 0
+	ok(cues.count("raid_wave_open") == rd.wave and cues.count("raid_boss_rise") == boss and
+		cues.count("raid_gate_tick") >= ticks and (rd.difficulty == "nightmare" or not cues.has("raid_rockfall_warn")),
+		"squad %s: sounds: %d waves, %d boss rise, %d gate ticks (>= %d)" % [tag, cues.count("raid_wave_open"),
+		cues.count("raid_boss_rise"), cues.count("raid_gate_tick"), ticks])
+	ok(cues.all(func(n): return Sfx.ensure(n)), "squad %s: every raid cue has its sound file" % tag)
+
 # ------------------------------------------------------------------ 4. the boss's extra attack
 func _boss_extra(main: Node) -> void:
 	for diff in ["normal", "nightmare"]:
@@ -207,6 +224,9 @@ func _boss_extra(main: Node) -> void:
 		if diff == "nightmare":
 			b._atk_rockfall()
 			ok(b.teles.size() >= 4, "Nightmare's rockfall marks its circles first (%d)" % b.teles.size())
+			ok(rd.audio.cues == ["raid_rockfall_warn"], "Nightmare's rockfall warns: %s" % str(rd.audio.cues))
+			b._phase_up(1)
+			ok(rd.audio.cues.back() == "raid_phase", "a boss phase change cues: %s" % str(rd.audio.cues))
 			var k := float(HeartRaid.rules()["difficulty"][diff]["dmg"])
 			ok(is_equal_approx(b.dmg_mult, k * (1.0 + (float(m.T.get("mob", 1.0)) - 1.0) * 0.6)),
 				"Nightmare's boss hits %.2fx" % k)
