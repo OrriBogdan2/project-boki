@@ -102,15 +102,14 @@ func _old_name_in(text: String) -> String:
 func _all_titles() -> Array:
 	return Arch.ids().map(func(id): return HeroTitle.title(id))
 
-## The results screen shows the player name and the Relic's full name apart ("Hunter  ·  Vex the Hired Gun"),
-## never the player name as if it were a title ("Hunter the Hired Gun").
+## The results screen puts the player's own name in the headline ("Hunter made it out"), never as a Relic title ("Hunter the Hired Gun").
 func _results_name_line(main: Node) -> void:
 	var screen: Control = load("res://scripts/ui/results.gd").new()
 	main.add_child(screen)
-	screen.show_result({"extracted": true, "knocks": 1, "armor_tier": 1, "time": 60.0})
+	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
 	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	var player := String(Save.d.get("name", "Hunter"))
-	var want := "%s  ·  %s" % [player, HunterViewer.display_name(Arch.of_save())]
-	ok(texts.has(want), "results: the name line is '%s'" % want)
+	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
 	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
+	ok(texts.has("Foes downed"), "results: the strip says Foes downed")
 	screen.queue_free()
