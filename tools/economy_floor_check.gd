@@ -73,7 +73,7 @@ func _stray_match() -> void:
 	Save.d["roster"] = []; Save.d["active"] = ""; Save.d["gems"] = 0
 	Lifeline.check()
 	ok(Save.d["roster"].size() == 1, "with no Boki, a stray turns up and is the one you play with")
-	Save.d["items"]["tonic"] = 5; Save.d["items"]["rift_key"] = 2
+	Save.d["items"]["tonic"] = 5; Save.d["items"]["chest_key"] = 2
 	var m := Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 12, "no_drop": true, "belt_items": Equal.take_belt(2)})
@@ -81,7 +81,7 @@ func _stray_match() -> void:
 	var P := m.player
 	var k: Kin = P.kin
 	ok(k != null and String(k.rec["uid"]) == String(Save.d["roster"][0]["uid"]), "the stray goes with you like any other Boki")
-	ok(P.tonics == 5 and P.armor_kits == 2 and P.rift_keys == 0,
+	ok(P.tonics == 5 and P.armor_kits == 2 and P.chest_keys == 0,
 			"tonics from the stash (cap 5 on the Hollow) and the issued kits (%d, %d); keys never come from home" % [P.tonics,
 			P.armor_kits])
 	P.lives = 1
