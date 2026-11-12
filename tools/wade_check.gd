@@ -76,6 +76,7 @@ func _cross(zc: int) -> void:
 	var deep := 0.0
 	var wet_steps := 0
 	var stalled := false
+	var paddled := false
 	var far := Vector3(x, 0, zc - 5.0)
 	for i in 400:
 		var sp := _step(k, far)
@@ -86,6 +87,7 @@ func _cross(zc: int) -> void:
 			shallow = sp      # the last step in the near edge, once the speed has settled
 		elif dep == 2:
 			deep = sp
+			paddled = paddled or _paddling(k)
 		if dep > 0:
 			wet_steps += 1
 			stalled = stalled or sp < 0.3
@@ -99,6 +101,13 @@ func _cross(zc: int) -> void:
 	ok(deep > 0.0 and deep < slow, "deep: %.2f m/s against %.2f dry" % [deep, dry])
 	ok(not stalled and k["pos"].z <= zc - 4.5, "never stuck: out the far side at z %.1f" % k["pos"].z)
 	ok(home.wade.kind(k["rec"]) == "wade", "a Zapple wades through")
+	ok(paddled, "in the deep middle it paddles, lifted off the bed (BokiRig)")
+
+## The rig takes the water this step put on the node: true while it paddles afloat.
+func _paddling(k: Dictionary) -> bool:
+	var rig := (k["node"] as Node3D).get_node("Body/Flex/BokiRig") as BokiRig
+	rig._process(DT)
+	return rig.clip == "paddle" and rig.model.position.y > 0.0
 
 func _fire(zc: int) -> void:
 	var k := _kin(1)
@@ -128,7 +137,7 @@ func _paddle(zc: int) -> void:
 		if float(k.get("wade", {}).get("stay", 0.0)) > 0.0:
 			lingered += DT
 			played = played or (k["node"] as Node3D).get_meta("kact", "") == "splash"
-	ok(home.wade.kind(k["rec"]) == "paddle", "a Puddlet paddles")
+	ok(home.wade.kind(k["rec"]) == "swim", "a Puddlet swims")
 	ok(lingered > 3.0 and played, "it lingered %.1f s in the water playing the splash clip" % lingered)
 	ok(Care.need(k["rec"], "joy") > joy0 + 2.0, "and its joy rose %.1f -> %.1f" % [joy0, Care.need(k["rec"], "joy")])
 

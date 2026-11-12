@@ -2,13 +2,15 @@ class_name BokiWade
 extends RefCounted
 ## Boki wading (briefs/design/GARDEN.md section 4, content/rules/wade.json): a Boki in pond or stream water
 ## sinks into it, walks slower, leaves a ripple and a splash going in and shakes off coming out. With base_mode
-## on, Water, Ice and Crystal Boki paddle (a free roaming one lingers in the water playing the splash clip, and
-## gains joy), Fire Boki hurry out to the nearest dry ground, and everyone else wades through.
-## k["wade"] = {in, rip, stay, out, shake_t}. home.gd calls speed() for the walk and step() after each move.
+## on, Water, Ice and Crystal Boki swim (a free roaming one lingers in the water playing the splash clip, and
+## gains joy), Fire Boki hurry out to the nearest dry ground, and everyone else wades through. A rigged Boki finds
+## a pond's deep middle swim_depth deep, and the root meta "kwater" tells BokiRig how deep the water is over its feet.
+## k["wade"] = {in, rip, stay, out, shake_t, bed, rig}. home.gd calls speed() for the walk and step() after each move.
 ## Missing clips (anim lane): "wade" (a slow knee-high walk loop) and "shake" (a shake-off); until then the walk
 ## simply slows and the shake is a quick wobble of the Body node.
 
 const SINK := {1: 0.12, 2: 0.3}   # m a Boki sits below the ground in shallow and deep water
+const BED_RATE := 2.0             # m/s it sinks to (or rises with) the bed between shallow and deep water
 const OUT_RINGS := 8              # directions tried round a Fire Boki when it looks for dry ground
 const WOBBLE := 0.3               # rad of side-to-side shake at its fullest
 
@@ -20,11 +22,11 @@ func _init(home) -> void:
 static func rules() -> Dictionary:
 	return Content.rules("wade")
 
-## "paddle", "fire" or "wade": how this Boki takes to water (its lean or species theme).
+## "swim", "fire" or "wade": how this Boki takes to water (its lean or species theme).
 func kind(rec: Dictionary) -> String:
 	var key: String = HomeToys.lean_of(rec)
-	if (rules()["paddle"] as Array).has(key):
-		return "paddle"
+	if (rules()["swim"] as Array).has(key):
+		return "swim"
 	return "fire" if (rules()["fire"] as Array).has(key) else "wade"
 
 ## Walk-speed multiplier at `pos`: 1 on dry ground, slower in water, faster for a Fire Boki leaving it.
@@ -39,21 +41,31 @@ func speed(k: Dictionary, pos: Vector3) -> float:
 
 ## One Boki in (or leaving) the water this frame: the sink, ripples, the splash, the shake, and what its kind does.
 func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:
-	var w: Dictionary = k.get("wade", {"in": false, "rip": 0.0, "stay": 0.0, "out": false, "shake_t": 0.0})
+	var w: Dictionary = k.get("wade", {"in": false, "rip": 0.0, "stay": 0.0, "out": false, "shake_t": 0.0, "bed": 0.0})
 	k["wade"] = w
 	var dep: int = h.water.depth(pos.x, pos.z)
 	if dep > 0:
-		n.position.y -= float(SINK[dep]) - sin(float(k["hop"]) * 0.7) * 0.03
 		if not w["in"]:
 			_enter(k, w, pos)
+		w["bed"] = move_toward(float(w["bed"]), _bed(w, dep), BED_RATE * d)
+		n.position.y -= float(w["bed"]) - sin(float(k["hop"]) * 0.7) * 0.03
+		if w["rig"]:
+			n.set_meta("kwater", HomeBuild.POND_Y - n.position.y)
 		_ripple(k, w, pos, d)
 		_play(k, w, pos, d)
 	elif w["in"]:
 		_leave(k, w, pos)
 	_shake(w, n, d)
 
+## m below the ground the bed lies: swim_depth under the surface in the deep middle for a rigged Boki.
+func _bed(w: Dictionary, dep: int) -> float:
+	if dep == 2 and w["rig"]:
+		return float(rules()["swim_depth"]) - HomeBuild.POND_Y
+	return float(SINK[dep])
+
 func _enter(k: Dictionary, w: Dictionary, pos: Vector3) -> void:
 	w["in"] = true
+	w["rig"] = (k["node"] as Node3D).has_node("Body/Flex/BokiRig")
 	Sfx.play("splash", pos, -18.0, 0.1, 1.4)
 	if not FarmUnlocks.base_mode():
 		return
@@ -61,7 +73,7 @@ func _enter(k: Dictionary, w: Dictionary, pos: Vector3) -> void:
 	var how := kind(k["rec"])
 	if how == "fire":
 		_step_out(k, w, pos)
-	elif how == "paddle" and _free(k) and randf() < float(R["linger_chance"]):
+	elif how == "swim" and _free(k) and randf() < float(R["linger_chance"]):
 		var secs := randf_range(float((R["linger_secs"] as Array)[0]), float((R["linger_secs"] as Array)[1]))
 		w["stay"] = secs
 		k["t"] = maxf(float(k.get("t", 0.0)), secs)
@@ -71,6 +83,7 @@ func _leave(k: Dictionary, w: Dictionary, pos: Vector3) -> void:
 	w["in"] = false
 	w["stay"] = 0.0
 	w["out"] = false
+	w["bed"] = 0.0
 	if (k["node"] as Node3D).has_meta("kact_wade"):
 		(k["node"] as Node3D).remove_meta("kact_wade")
 		(k["node"] as Node3D).set_meta("kact", "")
@@ -87,7 +100,7 @@ func _ripple(k: Dictionary, w: Dictionary, pos: Vector3, d: float) -> void:
 		w["rip"] = float(rules()["ripple_secs"])
 		h.fx.ring(pos + Vector3(0, 0.08, 0), 0.5 if moving else 0.4, Color(0.85, 0.95, 1.0, 0.45), 0.5)
 
-## A lingering paddler stays put playing, gaining joy, until its time is up or something else claims it.
+## A lingering swimmer stays put playing, gaining joy, until its time is up or something else claims it.
 func _play(k: Dictionary, w: Dictionary, pos: Vector3, d: float) -> void:
 	if float(w["stay"]) <= 0.0:
 		return

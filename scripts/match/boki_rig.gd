@@ -4,7 +4,8 @@ extends Node
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and "kburst" (a factor on the gait's
 ## cadence), and plays the face on top of whatever the body does.
-## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
+## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
+## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
@@ -147,8 +148,11 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
+## Share of its height under the water when it floats: water deeper than that at its feet lifts it off the bed and it
+## swims (a Water type) or paddles (the rest). One that hovers stays over the water as over the ground.
+const SWIM_LINE := 0.5
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin"]
+	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -173,7 +177,7 @@ const CLIP_FACE := {
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
-	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy", "swim": "cheer", "paddle": "focus",
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
@@ -212,11 +216,17 @@ var _idle := BokiIdle.new()    # its breathing loop's fidgets, see BokiIdle
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
+var _swimmer := false          # a Water type: swims level rather than paddling
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
+static func swimmer(kin_id: String) -> bool:
+	return (BokiWade.rules()["swim"] as Array).has(BokiLines.element_of(kin_id))
 
 ## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
 ## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
@@ -278,6 +288,7 @@ func _ready() -> void:
 	BokiSwing.add_clips(player)
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
+	_swimmer = swimmer(species)
 	_copy_coat()
 	BokiIdle.build(player, skeleton(), species)
 	_idle.rest(_rng)
@@ -314,6 +325,9 @@ func _process(dt: float) -> void:
 	if not seen:
 		return
 	_flinch.update(root, dt)
+	_water = float(root.get_meta("kwater", 0.0))
+	if _water > 0.0:
+		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
@@ -333,9 +347,12 @@ func _keep_flex() -> void:
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
-	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
+	var lift := _float_lift()
+	model.position.y = 0.0
+	if clip == "hop" or lift > 0.0:
+		model.position.y = lift / flex.global_basis.y.length() - body.position.y     # the clip hops or floats, not home
 	if _shadow:
-		_shadow.global_position.y = root.global_position.y + SHADOW_LIFT
+		_shadow.global_position.y = root.global_position.y + _water + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
@@ -381,6 +398,9 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
+	var swim := _swim_clip()
+	if swim != "":
+		return swim
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
@@ -396,6 +416,22 @@ func _state_clip() -> String:
 	if _speed >= RUN_SPEED:
 		return "run"
 	return "walk" if _speed >= WALK_SPEED else "idle"
+
+## "swim" or "paddle" while the water is deeper than SWIM_LINE of its height, else "".
+func _swim_clip() -> String:
+	if _water <= _afloat() or FRAME[species].get("hover", false):
+		return ""
+	return "swim" if _swimmer else "paddle"
+
+## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
+func _afloat() -> float:
+	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
+
+## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
+func _float_lift() -> float:
+	if FRAME[species].get("hover", false):
+		return _water
+	return maxf(0.0, _water - _afloat())
 
 func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))

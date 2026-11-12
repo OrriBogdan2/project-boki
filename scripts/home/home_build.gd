@@ -51,6 +51,7 @@ var popped := -1                       # uid of the deco just placed (its node g
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
 
 const CUT_WIDTH := 0.5    # m: clear room either side of a corner-cutting shortcut, so a Boki never clips a corner
+const POND_Y := 0.05       # m: the ponds' water surface above the ground
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
 
 func _init(home) -> void:
@@ -650,7 +651,7 @@ func _sync_water() -> void:
 	var stones: Array = []
 	for k in wt:
 		var c := HomeLayout.unkey(k)
-		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, 0.05, c.y + 0.5)))
+		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, POND_Y, c.y + 0.5)))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			if wt.has(HomeLayout.key(c.x + dv.x, c.y + dv.y)): continue
 			# foam along the bank (the strip's UV.y runs from the bank out onto the water)

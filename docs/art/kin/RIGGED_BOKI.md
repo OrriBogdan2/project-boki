@@ -28,10 +28,24 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. In a match the attack and the ability play as `lunge` (0.42 s, release at 0.12 s) and `cast` (0.56 s, release at 0.2 s),
-retimed at load from the keyed ones (`BokiSwing`; decision 0040): `Kin` holds the bite or the skill until the release
-frame. A Blender pass should key these two per species (same names and release times) and drop the retime.
-Faces (`BokiRig.FACES`): neutral,
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, swim, paddle, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
+loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
+`TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
+`kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
+Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
+`impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
+asserts every rigged species has all fourteen, with the five game clips timed to those beats and no T-pose frame.
+Look at them with `--boki-home-shots`.
+
+Water: the root meta `kwater` is the water over its feet this frame (m; `BokiWade` sets it every step in a pond,
+the rig takes it, so a Boki lifted out or taken by a game is dry at once). Deeper than `SWIM_LINE` (half) of its
+height, the rig lifts the model off the bed to float with half its height under and plays `swim` (a Water type,
+`BokiRig.swimmer`: body level, legs tucked back, a wave down the tail, fins sculling) or `paddle` (the rest: nose and
+head up, front legs or wings stroking in turn, hind legs kicking); both bob with each stroke. One that hovers stays
+over the surface. A pond's deep middle is `swim_depth` (1 m, wade.json) deep under a rigged Boki. A glb clip of the
+same name wins over the built one. `--boki-rig-check` has the 1 m and puddle rows, `--wade-check` a Zapple paddling
+across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
