@@ -121,8 +121,8 @@ static func sweet(h: Hunter, id: String, p := {}) -> void:
 
 ## A curved wall concentric to `center`, centred on the aim, at the cursor distance by default.
 ## p: center (the hunter), dir, radius (cursor distance clamped to rmin..rmax), rmin (2), rmax (9),
-##    deg (120), thick (0.9 m band), panels (7), fill (0..1: a bright band spreading from the aim out to both
-##    ends; hot at 1, like a lane at full)
+##    deg (120), thick (0.9 m band), panels (7), fill (0..1: a bright band in col2 spreading from the aim out
+##    to both ends; hot at 1, like a lane at full)
 static func arc_wall(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "arc_wall", p)
 	var c: Vector3 = p.get("center", h.pos)
