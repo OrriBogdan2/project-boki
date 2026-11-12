@@ -72,6 +72,7 @@
 		"cooldown": 8.0,
 		"charges": 1,
 		"hold": 1.0,
+		"walk_k": 0.0,
 		"min_t": 0.33,
 		"coil": {
 			"dmg": [

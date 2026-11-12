@@ -11,6 +11,8 @@ extends RefCounted
 var k: DolmKit
 var leapt := false             # jumped during this charge (the leap forward)
 var lunges := 0                # punches during this charge
+var charge_on := false         # the charge (past the tap window) has started
+var run_v := Vector2.ZERO      # the run he charged from: the planted charge brakes him, the hop keeps `carry` of it
 var was_ground := true
 var leaps := 0                 # (checks)
 var extends_n := 0
@@ -34,13 +36,13 @@ func charging() -> bool:
 func radius(c: float) -> float: return lerpf(float(sd()["radius"][0]), float(sd()["radius"][1]), c)
 func core(c: float) -> float: return lerpf(float(sd()["core"][0]), float(sd()["core"][1]), c)
 
-## Where the slam will land: a hop ahead of him toward the aim, plus what the hop keeps of his run.
+## Where the slam will land: a hop ahead of him toward the aim, plus what the hop keeps of the run he charged from.
 func center() -> Vector3:
 	var h := k.h
 	var d := h.aim_dir()
 	var c := h.pos + Vector3(d.x, 0, d.y) * float(sd()["hop"])
 	if h.grounded:
-		c += Vector3(h.vel.x, 0, h.vel.z) * float(sd()["carry"]) * _flight(float(sd()["hop_up"]))
+		c += Vector3(run_v.x, 0, run_v.y) * float(sd()["carry"]) * _flight(float(sd()["hop_up"]))
 	return c
 
 ## The tap's spot: just in front of him.
@@ -50,6 +52,8 @@ func tap_spot() -> Vector3:
 
 func _flight(up: float) -> float: return 2.0 * up / Hunter.H_GRAV
 
+## `walk_k`: his share of the run while the charge is held (0 = planted, as the source: she stands through
+## every charge seen).
 func move_k() -> float:
 	return float(sd()["walk_k"]) if charging() else 1.0
 
@@ -62,6 +66,10 @@ func tick(_dt: float) -> void:
 	if not k.rmb_down:
 		leapt = false
 		lunges = 0
+		charge_on = false
+	elif charging() and not charge_on:
+		charge_on = true
+		run_v = Vector2(k.h.vel.x, k.h.vel.z)
 	was_ground = k.h.grounded
 	_tick_hop()
 
@@ -157,7 +165,7 @@ func fire(c: Dictionary) -> void:
 	k.play("breah_slam")
 	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground he leaves
 	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
-	var run := Vector2(h.vel.x, h.vel.z) * float(sd()["carry"])
+	var run := run_v * float(sd()["carry"])
 	arc(float(sd()["hop"]), float(sd()["hop_up"]), h.aim_dir(), run)
 	hop_v = Vector2(h.vel.x, h.vel.z)
 	hop_on = true

@@ -274,6 +274,34 @@ func _mage() -> void:
 			absf(kb - 1.8) < 0.3, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
+	# 6b. hold walk (footage vireo 0043-0048, 0057-0062, 0078-0083, 5 fps): she stands through the Storm Rod hold with
+	# a move key down, and walks again once the rod has left
+	ac.fresh(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(8, 0, 0))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ac.aim_at(P, T.pos)
+	var walk_in := func(): P.inp["move"] = Vector2(0, 1)
+	var rod_walk := func():
+		P.inp["sec_hold"] = true
+		walk_in.call()
+	ac.step(m, 0.3, walk_in)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	ac.step(m, 0.15, rod_walk)   # the brake
+	var rod_hold_dz := P.pos.z
+	ac.step(m, 0.6, rod_walk)
+	rod_hold_dz = P.pos.z - rod_hold_dz
+	P.inp["sec_hold"] = false
+	m.step(DT)
+	var rod_walk_dz := P.pos.z
+	ac.step(m, 0.6, walk_in)
+	rod_walk_dz = P.pos.z - rod_walk_dz
+	P.inp["move"] = Vector2.ZERO
+	ok("Storm Rod hold (footage 0043-0083): she stands through the hold with a move key down (rmb.walk_k 0)",
+			absf(rod_hold_dz) < 0.02, "%.2f m" % rod_hold_dz)
+	ok("Storm Rod: once the rod has left she walks again", rod_walk_dz > 1.0, "%.2f m in 0.6 s" % rod_walk_dz)
 	P.slot_lv["dash"] = 3
 	ok("Rank 3: Wirerun's own hit doubles (rank 1: 1.0)", is_equal_approx(K.run_rank_k(), 2.0), "%.2f" % K.run_rank_k())
 	P.slot_lv["dash"] = 1
