@@ -2,7 +2,7 @@ extends "res://tools/archetype_check.gd"
 ## --recast-cue-check: every two-step ability reports its open recast to RecastCue (DECISIONS 2026-11-08 "two-step
 ## abilities must be obvious and in your face"): after the first step the kit's recast_window() names the slot,
 ## a time left and a total, the world spot for the marker, and the local hunter's cue state carries it (so the slot
-## pulse, "<KEY> AGAIN", the ring and the marker draw). Then: a window that runs out leaves "EXPIRED", an early
+## pulse, "<KEY> AGAIN", the ring and the marker draw). Then: a timed window that runs out leaves "EXPIRED", an early
 ## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges.
 
 const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
@@ -61,18 +61,17 @@ func _window(hero: String, slot: String) -> void:
 			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
 	await done(m)
 
-## Ostra's seed left alone: the window runs out and the E slot shows EXPIRED (never closes silently).
+## Dolm's dash left alone: the window runs out and the slot shows EXPIRED (never closes silently). Ostra's
+## seed no longer runs out (it waits at full size for the recast), so a timed, non-auto window stands in.
 func _expired() -> void:
-	var s := setup("ostra", 6.0)
+	var s := setup("dolm", 6.0)
 	var m: Match = s[0]
 	var P: Hunter = s[1]
 	aim_at(P, s[2].pos)
-	P.ak.use_e()
-	var w := _open(m, P, "e")
-	ok("ostra e: no world marker on the seed, the slot still pulses",
-			not bool(w.get("marker", true)) and String(w.get("slot", "")) == "e", str(w))
-	step(m, P.ak.e_t + 0.3)
-	ok("ostra e: an unused window shows EXPIRED", String(P.ak.cue.get("exp_slot", "")) == "e"
+	_first(m, P, "dash")
+	var w := _open(m, P, "dash")
+	step(m, float(w.get("left", 0.0)) + 0.3)
+	ok("dolm dash: an unused window shows EXPIRED", String(P.ak.cue.get("exp_slot", "")) == "dash"
 			and float(P.ak.cue.get("exp_t", 0.0)) > 0.0, str(P.ak.cue.get("exp_slot", "")))
 	await done(m)
 
@@ -84,7 +83,9 @@ func _buffered() -> void:
 	var K := P.ak as OstraKit
 	aim_at(P, s[2].pos)
 	P.ak.use_e()
-	_open(m, P, "e")
+	var w := _open(m, P, "e")
+	ok("ostra e: no world marker on the seed, the slot still pulses",
+			not bool(w.get("marker", true)) and String(w.get("slot", "")) == "e", str(w))
 	var min_t := float(K.e_def()["min_recast"])
 	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - ArchKit.RECAST_BUFFER * 0.6:
 		m.step(DT)
