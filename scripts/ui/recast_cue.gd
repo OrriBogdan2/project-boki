@@ -31,6 +31,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		cue["col"] = slot_col(k, String(w["slot"]))
 		cue["tick"] = 0
 		Sfx.play("ab_ready", null, -3.0, 0.0, 1.35)
+		_first_hint(k, String(w["slot"]))
 	elif w.is_empty() and was != "":
 		if float(cue.get("last", 1.0)) < RAN_OUT and not bool((cue.get("w", {}) as Dictionary).get("auto", false)):
 			cue["exp_slot"] = was
@@ -54,6 +55,24 @@ static func track(k: ArchKit, dt: float) -> void:
 	if not pop.is_empty():
 		pop["t"] = float(pop["t"]) - dt
 		if float(pop["t"]) <= 0.0: cue["pop"] = {}
+
+## The line "<KEY> again to <verb>" for a slot: the verb is the archetype's own "recast_hint" ("" when it has none).
+static func hint_line(k: ArchKit, slot: String) -> String:
+	var verb := String((k.d.get("recast_hint", {}) as Dictionary).get(slot, ""))
+	return "" if verb == "" else "%s again to %s" % [key_of(slot), verb]
+
+## The first time this Hunter's recast opens in a real match: that line as a hint, never again (the lane skips it
+## while recording a clean take; the tutorial, training, the arena and autoplay teach it their own way).
+static func _first_hint(k: ArchKit, slot: String) -> void:
+	var seen: Dictionary = Save.d["tutorial"]
+	var o: Dictionary = k.m.opts
+	var line := hint_line(k, slot)
+	if line == "" or k.m.hud == null or seen.get("recast_" + k.id, false) or not Settings.get_v("tips"):
+		return
+	if o.get("tutorial", false) or o.get("training", false) or o.get("arena", false) or o.get("autoplay", false):
+		return
+	seen["recast_" + k.id] = true
+	k.m.hud.tip(line)
 
 ## The payoff landed on `victim`: its badge bursts (ArchKit.payoff_fx and the payoffs that don't go through it).
 static func payoff(k: ArchKit, victim: Ent) -> void:

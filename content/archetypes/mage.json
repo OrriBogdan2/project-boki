@@ -1,5 +1,6 @@
 {
 	"id": "mage",
+	"recast_hint": {"x": "strike down at your cursor"},
 	"title": "Storm Chaser",
 	"base_name": "Sparkle",
 	"gender": "female",

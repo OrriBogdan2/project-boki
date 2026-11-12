@@ -26,6 +26,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
+	await _hint()
 	await _expired()
 	await _buffered()
 	await _badges()
@@ -59,7 +60,29 @@ func _window(hero: String, slot: String) -> void:
 	var key := RecastCue.key_of(slot)
 	ok("%s %s: the local cue carries it (slot, AGAIN key)" % [hero, slot],
 			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
+	var line := RecastCue.hint_line(P.ak, slot)
+	ok("%s %s: the first-time hint reads '<KEY> again to <verb>'" % [hero, slot],
+			line.begins_with(key + " again to ") and line.length() > key.length() + 12 and line.length() <= 40, line)
 	await done(m)
+
+## The first-time hint shows once per Hunter, in a real match only (not training, not the tutorial).
+func _hint() -> void:
+	var flag := "recast_ostra"
+	var seen: Dictionary = Save.d["tutorial"]
+	for real in [false, true]:
+		seen.erase(flag)
+		var s := setup("ostra", 6.0)
+		var m: Match = s[0]
+		var P: Hunter = s[1]
+		m.opts["training"] = not real
+		aim_at(P, s[2].pos)
+		_first(m, P, "e")
+		_open(m, P, "e")
+		m.step(DT)
+		ok("ostra e: the hint is %s" % ("marked seen in a real match" if real else "held back in training"),
+				bool(seen.get(flag, false)) == real, str(seen.get(flag)))
+		await done(m)
+	seen.erase(flag)
 
 ## Dolm's dash left alone: the window runs out and the slot shows EXPIRED (never closes silently). Ostra's
 ## seed no longer runs out (it waits at full size for the recast), so a timed, non-auto window stands in.

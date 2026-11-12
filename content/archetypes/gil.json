@@ -1,5 +1,6 @@
 {
 	"id": "gil",
+	"recast_hint": {"e": "let the waterspout go"},
 	"title": "Novice Mage",
 	"base_name": "Gil",
 	"gender": "male",
