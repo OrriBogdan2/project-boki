@@ -113,7 +113,7 @@ var crouch_pos := Vector2.ZERO
 var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
 var heart_w := 0.0           # how far the Heartspark carry layer (WardenCarry.hold_mote) holds the mote
 var stowed := false          # "carry_stow" bones are put away
-var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" hand
+var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" bone
 var fired_prev := 99.0       # the state's s since the last shot, last frame
 var recoil_deg := 0.0        # the arms' kick now
 var stride: WardenStride      # the run start and stop laid over the loops (scripts/heroes/warden_stride.gd)

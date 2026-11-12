@@ -36,21 +36,14 @@ const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
 const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
-## Rows only a re-key in Blender closes (docs/DEBT.md): "<id>:<clip or move>" -> what. Reported, not failed, and
+## Rows only an art or code change docs/DEBT.md names closes: "<id>:<clip or move>" -> what. Reported, not failed, and
 ## failed once the row passes, so the entry goes with the fix. The standing loops are docs/art/IDLE_AUDIT.md's.
 const OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
-	"bulwark:drink": "keyed 1.10 s", "tender:drink": "keyed 1.10 s", "dolm:drink": "keyed 1.10 s",
-	"dredge:drink": "keyed 1.10 s", "rimewright:drink": "keyed 1.10 s", "mage:drink": "keyed 1.10 s",
-	"thief:drink": "keyed 1.10 s", "ostra:drink": "keyed 1.10 s",
-	"ashwick:as_cloak": "the baked clip is 0.233 s, cinder_clips.py keys 0.36 s",
-	"juggernaut:jug_riposte:pop": "its first key sits far off the guard",
-	"dredge:dr_lunge:pop": "its first key sits far off dr_shot's last",
-	"mage:mage_lmb_l:pop": "its first key sits far off the run",
-	"thief:carry_drop": "the v95 body blends the pistols' weights (0.8 on the hand at most): no rigid piece to drop",
+	"mage:mage_lmb_l:pop": "the free arm leaves the run's wide swing in a 0.067 s fade (first key: the idle's arm)",
 }
 
 var bad := 0

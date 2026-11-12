@@ -329,6 +329,8 @@ out to locomotion 0.16 s, under one footage frame) and in `--ashwick-combo-check
 Clip re-keys (tools/art1/cinder_clips.py, baked from stage_p2/cinder.blend through `jobq --app blender` and merged with
 glb_add_clips.py; the other clips are unchanged byte for byte):
 - `cloak`: the wide key moved 0.13 to 0.26 and the end 0.24 to 0.36 (the procedural `as_cloak` keys and CLOAK_POSE_T follow).
+  The appeal3/appeal4 v95 swaps exported their pre-swap copy's 0.233 s cloak; f613ca01a's bake was copied on again
+  (same keys, same skeleton; ext/anim-w0246-blender-rows).
 
 Suggestions (ours, not built): the free ram shows its struck pose (0.36) with nothing struck; a separate free-ram tail
 (upright straight from the ram pose) would read cleaner. glb_add_clips leaves the replaced clips' old samples in the

@@ -3,7 +3,7 @@ extends RefCounted
 ## The rescue carry on a Hero's .glb (KinDowned, pose id "rs_carry"): one upper-body layer over whatever the legs play
 ## (the walk and run clips at the carry's 90% speed). Both arms come in to cradle the Boki at a chest socket, the
 ## torso leans back a little under the weight, and the weapon bones the Hero's data names ("carry_stow") are put away
-## where the hands are needed; a weapon modelled straight into a hand ("carry_drop": the hands) leaves the shown mesh
+## where the hands are needed; a weapon modelled into a hand ("carry_drop": the bones it rides) leaves the shown mesh
 ## for the carry (held, hold). Two-bone arm IK on the contract bones (RIG_CONTRACT), so one layer fits all 12 bodies;
 ## no clip is authored for it. The socket (world position) is left on the model for KinDowned.scoop_pose.
 
