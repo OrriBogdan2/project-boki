@@ -56,7 +56,7 @@ What the in-game kit card (K) says.
 
 - *Tap:* A 0.32s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s.
 
-**Brimseed (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. Left unpopped 10s at full size, it fizzles out harmlessly. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
+**Brimseed (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. It stays at full size until you pop it. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
 
 **Nightwell (hunter ultimate, from level 6, 70s cooldown).** Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast while the dome fills (no moving, no turning after the first 0.25s, nothing else); when it opens you are free to move, fight or leave while it keeps pulling (a stun or knock frees you early). Swollen: 5.1m wide. 70s.
 
