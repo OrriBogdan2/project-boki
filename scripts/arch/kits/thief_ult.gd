@@ -41,11 +41,11 @@ func data() -> Dictionary:
 func running() -> bool:
 	return not st.is_empty()
 
-## The ring's radius now: it grows from r0 to reach over `grow`, then holds.
+## The ring's radius now: it grows evenly from r0 to reach over `grow` (half-size at half the time), then holds.
 func radius() -> float:
 	var d := data()
 	var gk := clampf(float(st.get("t", 0.0)) / float(d["grow"]), 0.0, 1.0)
-	return lerpf(float(d["r0"]), float(d["reach"]), 1.0 - pow(1.0 - gk, 2.0))
+	return lerpf(float(d["r0"]), float(d["reach"]), gk)
 
 ## X pressed: the ring starts growing (a ring with nobody in it still runs).
 func start() -> void:
@@ -84,8 +84,9 @@ func tick(dt: float) -> void:
 		st["n"] = int(st["n"]) - 1
 		st["next"] = float(st["next"]) + float(d["time"]) / float(d["shots"])
 		_volley(d)
-	_draw_ring(d)
-	_orbit(d)
+	var centre := h.pos + h.vel * dt         # where she stands once this step's move lands (the kit ticks before it)
+	_draw_ring(d, centre)
+	_orbit(d, centre)
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 
@@ -102,20 +103,19 @@ func _keep_dancing(d: Dictionary) -> void:
 
 ## The ring everyone sees: a thin line that grows out from her, then rides with her, its outer edge exactly the
 ## radius the blades reach; a finer line marks the outer band. It brightens on every beat.
-func _draw_ring(d: Dictionary) -> void:
+func _draw_ring(d: Dictionary, centre: Vector3) -> void:
 	var r := radius()
-	AimKit.circle(k.h, "ult", {"self": true, "r": r, "band": RING_W, "col": RING_COL, "col2": RIM_COL, "all": true,
+	AimKit.circle(k.h, "ult", {"at": centre, "r": r, "band": RING_W, "col": RING_COL, "col2": RIM_COL, "all": true,
 			"alpha": 1.2 + 0.8 * pulse})
-	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "band": RING_W * 0.4,
+	AimKit.circle(k.h, "ult_rim", {"at": centre, "r": r * float(d["rim"]), "band": RING_W * 0.4,
 			"col": Color(RIM_COL, 0.7), "all": true, "alpha": 0.7})
 
 ## The blades circling her while it runs (pooled looks, placed every step).
-func _orbit(d: Dictionary) -> void:
-	var h := k.h
+func _orbit(d: Dictionary, centre: Vector3) -> void:
 	var a0 := float(st["t"]) * 7.0
 	for i in ORBITERS:
 		var a := a0 + TAU * float(i) / float(ORBITERS)
-		var at := h.pos + Vector3(cos(a) * ORBIT_R, 1.1 + 0.15 * sin(a * 2.0), sin(a) * ORBIT_R)
+		var at := centre + Vector3(cos(a) * ORBIT_R, 1.1 + 0.15 * sin(a * 2.0), sin(a) * ORBIT_R)
 		var vel := Vector2(-sin(a), cos(a)) * 6.0
 		k.fx().place("enc_orb%d" % i, "blade", at, vel, RING_COL, BLADE_TIP, 0.5, 0.18)
 	if float(st["t"]) >= float(d["grow"]) + float(d["time"]) - 0.05:

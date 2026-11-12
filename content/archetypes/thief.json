@@ -25,7 +25,7 @@
 		"desc": "Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
 	"x": {"name": "Encore", "short": "Encore", "icon": "dance", "col": "#ff8ac8", "cooldown": 24.0, "unlock": 6,
-		"grow": 0.4, "r0": 2.3, "reach": 5.4, "rim": 0.75, "time": 2.0, "shots": 10, "dmg": 4.0, "rim_dmg": 2.0, "rim_blight": 6.0,
+		"grow": 0.4, "r0": 0.3, "reach": 5.4, "rim": 0.75, "time": 2.0, "shots": 10, "dmg": 4.0, "rim_dmg": 2.0, "rim_blight": 6.0,
 		"desc": "A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4 each, 6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched."},
 	"order": ["sec", "dash", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank_cd": {"sec": [1, 1, 0.6923], "dash": [1, 1, 1], "kin": [1, 0.7143, 0.7143]},
