@@ -16,10 +16,12 @@ var m: Match
 var lair: QuestSeat = null
 var uplink: QuestSeat = null
 var built := false
+var audio: QuestSfx
 var _warned := {}
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	audio = QuestSfx.new(self)
 
 static func q(k: String) -> float:
 	return float((Heart.rules().get("quest", {}) as Dictionary).get(k, 0.0))
@@ -84,6 +86,7 @@ func tick(_dt: float) -> void:
 			if m.hud and m.player and not m.player.out and not m.player.extracted:
 				var col: Color = ExitModels.UPLINK if s.kind == "uplink" else Lairs.color_of(s.ref)
 				m.hud.toast_small("%s shuts in %ds" % [s.title().capitalize(), int(s.shut_s - t)], col)
+	audio.update()
 
 # ------------------------------------------------------------------ the host's moves
 func _move(s: QuestSeat, to: QuestSeat.S, why: String, team := -1) -> void:
