@@ -301,6 +301,53 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## Dash into a rim: the dash hands over to the mantle (`MantleCarry`, `--mantle-check` rows)
+
+Nobody had measured a dash meeting a rim. `tools/mantle_dash_rows.gd` (part of `--mantle-check`) dashes each starter (Lace, Kael, Vex, Albert), from the ground and from a standstill in the air, head-on into a rim 0.6, 1.0, 1.5 and 2.0 m above the feet, keys held in. Each row is its own match, next to the same dash on flat ground: time lost is the time to reach 1.5 m past the face on top, minus the flat run's time to cover the same 3 m.
+
+- **Ground rows use the terrain's heights.** Terraces are 0.8 m. The floor between them is a stair tile running across the dash, but a stair stands one step higher at the body's edge, which walls the body in. So the 0.6 and 1.5 m ground rows run at the nearest heights the terrain can make: 0.8 m (one terrace) and 1.6 m (two). 2.0 m runs at 1.9.
+- **Source.** `supervive_physics.md` mantle rows: the suction lifts you at most `MantleSuctionUpwardsForceZSpeedCap` 2.5 m/s up to `MantleSuctionUpwardsForceHeightMax` 1.5 m (2.4 m for the `bCanWallJump` pair, Lace and Kael). A Z impulse launches you (`MantleZImpulseMin/Max`; the values are encrypted), and the mini-mantle holds 0.6x your XY speed (minimum 3.5 m/s) for 0.75 s. The footage (MANTLE_185b: `owner_mantle_clip.mp4` 17.9-18.6 s, a dash at the island from the abyss) takes ~0.2 s from rim to top, with no stop and still at dash-trail speed. `briefs/hero-ref` has no dash-into-ledge frames: Tamsin 0199 runs off a ledge, not into one.
+- **Before (origin/main 53e2fe7f3).** The ledge catch skips a grounded player, so a ground dash into anything a step can't take stopped dead (Albert 1.0 m, Kael 1.6 m). It reached the top only when the dash happened to leave the ground first: Kael's Rampage, or Vex slipping off the stair. An air dash was caught, then rose from a standstill at the 2.5 m/s suction cap against the face: 0.3-0.5 s lost. The dash's rest was already dropped at the catch, and 0.6x its speed already came over the lip (item 185b).
+- **The hand-over (decision 0062).** A dash (`MantleCarry.dashing`: any `roll_t` move except a Spirit Walk, which climbs faces itself) counts as pushing into the rim it meets, from the ground as well. On the ground that means a rim higher than a step-up (0.85 m) and within the source's reach (1.5 m, 2.4 m for a tall climber). The rest of the dash is dropped. The rise starts with the lift that throws you to the lip at the suction cap (`MantleCarry.dash_lift`, standing in for the source's Z impulse), so the dash doesn't stall at the face. Over the lip you keep 0.6x the dash's speed, as before. Rims a step-up takes (0.8 m) still run straight up and keep the dash. Lace's Spirit Walk still climbs every face.
+- **Asserted:** every rim in reach is topped. No row loses more than its own rise plus 0.12 s (the rise is 0.19 s for a 0.6 m rim, 0.26 s for 1.0 m, 0.33 s for 1.5 m and 0.39 s for 2.0 m). At least 0.6x the dash speed comes over the lip. A rim out of reach is never climbed. The before code fails the first two asserts (2 of 4).
+- **Out of reach (Vex and Albert at 1.6-2.0 m):** the wall's own handling. Albert stops. Vex slides along the face or bounces back a little (the corner slip and the 0.1x wall reflect). That isn't part of the hand-over, so it is listed here but not asserted.
+
+| Hunter | from | rim (m) | before: what, time lost (s) | after: what, time lost (s) | after: speed in -> over the lip (m/s) |
+|---|---|---|---|---|---|
+| Lace | ground | 0.80 | climb, 0.05 | climb, 0.05 | - |
+| Lace | ground | 1.00 | climb, 0.27 | climb, 0.27 | - |
+| Lace | ground | 1.60 | climb, 0.05 | climb, 0.05 | - |
+| Lace | ground | 1.90 | climb, 0.13 | climb, 0.13 | - |
+| Lace | air | 0.60 | mantle, 0.13 | mantle, 0.13 | 11.0 -> 9.4 |
+| Lace | air | 1.00 | mantle, 0.13 | mantle, 0.13 | 11.0 -> 8.7 |
+| Lace | air | 1.50 | mantle, 0.13 | mantle, 0.13 | 11.0 -> 8.0 |
+| Lace | air | 2.00 | mantle, 0.12 | mantle, 0.12 | 11.0 -> 6.8 |
+| Kael | ground | 0.80 | step, 0.03 | step, 0.03 | - |
+| Kael | ground | 1.00 | mantle, 0.48 | mantle, 0.28 | 27.2 -> 16.3 |
+| Kael | ground | 1.60 | slide, never | mantle, 0.35 | 27.2 -> 16.3 |
+| Kael | ground | 1.93 | mantle, 0.42 | mantle, 0.40 | 27.2 -> 16.3 |
+| Kael | air | 0.60 | mantle, 0.30 | mantle, 0.23 | 27.2 -> 16.3 |
+| Kael | air | 1.00 | mantle, 0.47 | mantle, 0.28 | 27.2 -> 16.3 |
+| Kael | air | 1.50 | mantle, 0.33 | mantle, 0.33 | 27.2 -> 16.3 |
+| Kael | air | 2.00 | mantle, 0.40 | mantle, 0.40 | 27.2 -> 16.3 |
+| Vex | ground | 0.80 | step, 0.02 | step, 0.02 | - |
+| Vex | ground | 1.00 | mantle, 0.47 | mantle, 0.28 | 19.3 -> 11.6 |
+| Vex | ground | 1.60 | slide, never | slide, never | - |
+| Vex | ground | 1.92 | bounce, never | bounce, never | - |
+| Vex | air | 0.60 | mantle, 0.32 | mantle, 0.23 | 14.1 -> 8.5 |
+| Vex | air | 1.00 | mantle, 0.47 | mantle, 0.32 | 14.1 -> 8.5 |
+| Vex | air | 1.50 | mantle, 0.38 | mantle, 0.38 | 14.1 -> 8.5 |
+| Vex | air | 2.00 | stop, never | stop, never | - |
+| Albert | ground | 0.80 | step, 0.00 | step, 0.02 | - |
+| Albert | ground | 1.00 | stop, never | mantle, 0.32 | 20.5 -> 12.3 |
+| Albert | ground | 1.60 | stop, never | stop, never | - |
+| Albert | ground | 1.95 | stop, never | stop, never | - |
+| Albert | air | 0.60 | mantle, 0.32 | mantle, 0.23 | 20.5 -> 12.3 |
+| Albert | air | 1.00 | mantle, 0.47 | mantle, 0.32 | 20.5 -> 12.3 |
+| Albert | air | 1.50 | mantle, 0.37 | mantle, 0.37 | 20.5 -> 12.3 |
+| Albert | air | 2.00 | stop, never | stop, never | - |
+
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

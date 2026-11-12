@@ -2506,22 +2506,28 @@ func _try_ledge_grab(dt: float) -> void:
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
 	var max_rise := MANTLE_REACH + (TALL_CLIMB_EXTRA if HunterMove.climbs_tall(self) else 0.0)
+	var dash_in := MantleCarry.dashing(self)
 	if grounded:
-		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
-		# Bots still lean their way up so their paths work.
-		if mv.length() < 0.5 or grap_cd > 0.0 or ctrl == "local":
+		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top. A dash into a
+		# rim a step can't take hands over (MantleCarry). Bots still lean their way up so their paths work.
+		if dash_in:
+			mv = roll_dir
+		if mv.length() < 0.5 or grap_cd > 0.0 or (ctrl == "local" and not dash_in):
 			push_t = 0.0
 			return
 		var probe := Vector2(pos.x, pos.z) + mv.normalized() * (r + 0.35)
 		var g2 := w.ground_at(probe.x, probe.y)
-		if w.is_block(probe.x, probe.y) or g2 <= pos.y + World.STEP or g2 - pos.y > World.LEVEL * 2.0 + 0.05:
+		var low := World.LEVEL + 0.05 if dash_in else World.STEP     # (a dash runs up what a step takes)
+		var high := max_rise if dash_in else World.LEVEL * 2.0 + 0.05
+		if w.is_block(probe.x, probe.y) or g2 <= pos.y + low or g2 - pos.y > high:
 			push_t = 0.0
 			return
 		push_t += dt
-		if push_t < 0.08:
+		if push_t < 0.08 and not dash_in:
 			return
 		reach = r + 0.6
-		max_rise = World.LEVEL * 2.0 + 0.1
+		if not dash_in:
+			max_rise = World.LEVEL * 2.0 + 0.1
 	else:
 		push_t = 0.0
 		# a hard launch carries you a moment before you can catch anything
@@ -2607,7 +2613,9 @@ func _try_ledge_grab(dt: float) -> void:
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
 		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
-	if grounded:
+	if dash_in:
+		vel.y = maxf(vel.y, MantleCarry.dash_lift(float(best["gz"]) - pos.y))
+	elif grounded:
 		vel.y = maxf(vel.y, LRISE_MIN)     # walking into it: under way at once
 	grounded = false
 	grap = {}

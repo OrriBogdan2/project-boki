@@ -9,6 +9,9 @@ extends RefCounted
 ##    0.6), never above it, and never under the usual mantle launch (HunterMove.mantle_launch). For
 ##    MINI_S after it (SV MiniMantlePostLaunchDuration) that speed is held while you're still in the air
 ##    and your keys don't pull back, so air drag doesn't take it straight back off you.
+##  - A dash meeting a rim hands over the same way (ledges are always responsive): from the ground too, past
+##    what a step takes; the rest of the dash is dropped and its speed comes over the lip as above. The rise
+##    starts with the lift that clears the lip at the suction cap (dash_lift), so it never stalls at the face.
 ## The speed you came in with is a decaying peak (carry_v), so the wall that stopped you a step
 ## before the catch doesn't count as having stopped you.
 
@@ -17,6 +20,7 @@ const APPROACH_DOT := 0.45     # keys or momentum this far into the face (cos ~6
 const PUSH_SPEED := 2.0        # m/s into the face: momentum alone is a push
 const PEAK_DECAY := 6.0        # m/s per s: how fast the remembered approach speed fades
 const MINI_S := 0.75           # [game data] MiniMantlePostLaunchDuration
+const LIP_CLEAR := 0.12        # m over the lip a rise aims for (Hunter._ledge_rise tops out there)
 
 ## Every step, before the move: hold a fresh mantle's speed, and remember how fast you're going (a
 ## decaying peak). Returns the horizontal velocity to move with.
@@ -35,6 +39,16 @@ static func step(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 	if hv.length() > 0.5:
 		h.carry_dir = hv.normalized()
 	return hv
+
+## Is this hunter dashing into whatever it meets? (A Spirit Walk climbs faces itself: Hunter.SPIRIT_CLIMB.)
+static func dashing(h: Hunter) -> bool:
+	return h.roll_t > 0.0 and h.spirit_t <= 0.0
+
+## The up speed a dash caught by a ledge `left` metres under its lip rises with: thrown to clear it at the
+## suction cap (HunterMove.rise_vy then carries it), as a jump's momentum would; the source's mantle Z impulse.
+static func dash_lift(left: float) -> float:
+	var cap := HunterMove.mantle_vy_cap
+	return sqrt(cap * cap + 2.0 * Hunter.H_GRAV * (left + LIP_CLEAR))
 
 ## A teleport (a blink, a respawn, a portal) starts you with no momentum to carry.
 static func forget(h: Hunter) -> void:
