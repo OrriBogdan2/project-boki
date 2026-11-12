@@ -36,9 +36,9 @@ const GOAL_KINDS := {
 ## Keys that would make a reward more than a look ("stat" in a goal is what it counts, not a reward).
 const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd", "perk", "ability", "rank",
 		"armor", "power", "mult", "bonus", "level", "xp", "glide", "lift", "drag", "fall"]
-## The only ways gameplay code may touch a glider skin: draw it (mesh, or its merged sheet and paint), trail it,
+## The only ways gameplay code may touch a glider skin: draw it (its canopy and that canopy's material), trail it,
 ## play its sound.
-const GLIDER_CALLS := ["Gliders.mesh", "Gliders.sheet", "Gliders.paint", "Gliders.trail",
+const GLIDER_CALLS := ["Gliders.dress", "Gliders.canopy_material", "Gliders.canopy", "Gliders.trail",
 		"Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
 
 var bad := 0
