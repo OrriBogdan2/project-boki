@@ -32,7 +32,7 @@ today's audit.
 |---|---|---|---|---|---|---|---|---|
 | Lace (archer) | 1 → 0 | 1 → 0 | 4 → 0 | 4 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 15 → 0 |
 | Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 0 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 0 |
-| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 2 | 25 → 22 |
+| Albert (bulwark) | 2 → 1 | 8 → 1 | 1 → 1 | 7 → 6 | 3 → 5 | 2 → 2 | 2 → 2 | 25 → 18 |
 | Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
 | Grimble (dredge) | 5 → 0 | 5 → 3 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 1 | 5 → 0 | 28 → 6 |
 | Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
@@ -41,7 +41,7 @@ today's audit.
 | Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
 | Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
 | Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
-| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 4 | 31 → 2 | **271 → 30** |
+| **all 11** | 28 → 1 | 65 → 6 | 47 → 3 | 47 → 6 | 6 → 5 | 47 → 3 | 31 → 2 | **271 → 26** |
 
 By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 20.
 
@@ -67,10 +67,16 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
 ## Left (docs/DEBT.md)
-- Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
-  copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
-  Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
-  flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
+- Albert (18, ext/anim-loco-dir-albert took 4: run, sprint, strafe fr and crouch walk fr). His run_fl/fr clips planted
+  their soles 120-150 % of the loco speed and slipped 2-4 m/s, so they are gone from the run ring (the ring blends
+  f with l/r there: fr passes, fl still slips 1.9-2.6 against bars of 1.5-2.2) and crouch_fr is crouch_r turned 45
+  deg (`hunter_dir_gait.py crouch fr~r`; crouch_l turned the same way popped his hammer hand at every start and
+  stop, so crouch fl stays a blend). His crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs). The hammer
+  hand pops (crouch_walk r/b/l, crouch_idle r/br/b/bl/l: 8 cells, 0.76-1.08 per frame^2 whatever the arm keys: a
+  quaternion sign fix and a forearm angle clamp left them unchanged) come from somewhere else than the arm keys.
+  Re-baking his walk/run ring does not work on the current model: the mesh in breaker.glb is 1.69 m tall against 1.31
+  when the loops were baked (same bones), and `hunter_dir_gait.py` on it plants no sole (0.00 m/s, 8 cm pelvis dip).
+  Back diagonals cannot go: without walk/run bl/br the planted feet travel 50-83 deg off the move.
 - Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
   rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
   steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,
