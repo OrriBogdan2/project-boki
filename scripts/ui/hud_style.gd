@@ -14,7 +14,7 @@ const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
 const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
-const SELF := Color("9be36e")             # your own health (leaf green)
+const SELF := Color("a8f26e")             # your own health (lime)
 const ALLY := Color("63c7ff")             # your squad's health (sky blue)
 const FOE := Color("ff5a4a")              # rivals' health (coral red)
 const LOW := Color("ffa13c")              # health shifts toward this as it runs low (yours and allies')
@@ -33,13 +33,21 @@ const HURT := Color("ff6a5a")             # damage you take
 const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
-const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
+const KEY_BG := Color(0.03, 0.04, 0.06, 0.95)
+const FRAME := Color(0.02, 0.06, 0.1, 0.92)     # the leaning frames behind the vitals bars (near-black blue)
+const XP := Color("d33efd")               # progress to your next run level
+const RES := Color("ffb729")              # the class resource bar under it
+const SHIELD_BAR := Color("7edaf0")       # a shield, as its own strip under health
+const CD_TEXT := Color("ff3d6e")          # a slot's countdown while it cools
+const RANK := Color("f4a3e6")             # a slot's rank badge
 
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
 
-# ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
+# ------------------------------------------------------------------ sizes (px of the 1280x720 layout)
+const LEAN_K := 0.5            # x shift per px down of every leaning frame and bar (vitals, squad rows)
+const LEAN_TXT := -0.22        # x shear per px of leaning text (big numbers, state words)
 const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
 const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0           # px between segments
@@ -52,8 +60,9 @@ const PLATE_NAME_FS := 13
 ## Where the row of small icons under a plate starts, below the plate's anchor point (the
 ## loadout icons go here): the bars end at +PLATE_HP_H + PLATE_AR_H + pads, then the dash pips.
 const PLATE_ICON_ROW := 22.0
-const SLOT_RAD := 9            # ability slot corner radius
-const KEY_FS := 12             # key label size
+const SLOT_RAD := 4            # ability slot corner radius
+const KEY_FS := 10             # key label size
+const KEY_DROP := 14.0         # px from a slot's bottom edge down to its key label's centre
 
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
@@ -125,32 +134,80 @@ static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> v
 	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # in steps: few cached boxes
 	c.draw_style_box(sb, r)
 
-## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
-## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
+## An ability or item slot's frame. `state`: "ready" (filled in the slot colour under a dark edge,
+## a light top gloss), "cooling" (dark, a pink-red edge), "off" (dark, barely edged: locked, empty, or
+## can't be used now).
 static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") -> void:
-	var edge := Color(0.75, 0.6, 1.0, 0.16)
+	var bg := Color(0.04, 0.05, 0.08, 0.92)
+	var edge := Color(0.75, 0.8, 1.0, 0.16)
 	if state == "ready":
-		edge = col
+		bg = Color(col.darkened(0.5), 0.95)
+		edge = Color(0.1, 0.13, 0.17, 0.95)
 	elif state == "cooling":
-		edge = Color(COOLING, 0.55)
-	c.draw_style_box(box(Color(0.07, 0.045, 0.11, 0.92), SLOT_RAD, edge, 2), r)
+		edge = Color(CD_TEXT.darkened(0.25), 0.9)
+	c.draw_style_box(box(bg, SLOT_RAD, edge, 2), r)
 	if state == "ready":
-		var gloss := Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42))
-		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), gloss)
+		var gloss := Rect2(r.position + Vector2(2, 2), Vector2(r.size.x - 4, r.size.y * 0.42))
+		c.draw_style_box(box(Color(1, 1, 1, 0.12), SLOT_RAD - 1, Color(0, 0, 0, 0), 0), gloss)
 
-## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
+## The key label under a slot: a dark rounded tab centred on `center`, the key in `col`.
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
 	var kw := BIG.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS).x
-	var kr := Rect2(center - Vector2(kw * 0.5 + 6, 9), Vector2(kw + 12, 18))
-	c.draw_style_box(box(KEY_BG, 9, Color(col, 0.8), 1), kr)
-	c.draw_string(BIG, Vector2(kr.position.x + 6, kr.position.y + 14), key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
+	var kr := Rect2(center - Vector2(maxf(kw * 0.5 + 4, 7), 6.5), Vector2(maxf(kw + 8, 14), 13))
+	c.draw_style_box(box(KEY_BG, 3, Color(0, 0, 0, 0), 0), kr)
+	var at := Vector2(center.x - kw * 0.5, kr.position.y + 10.5)
+	c.draw_string(BIG, at, key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
 
-## A small count badge (charges, stack sizes) centred on `at`.
-static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
-	var s := str(n)
-	var w := maxf(16.0, BIG.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0)
-	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
-	ctext(c, at + Vector2(0, 4.5), s, 11, col)
+## A parallelogram `w` wide and `h` tall whose top-left is `at`, its bottom LEAN_K * h further left.
+static func slant(c: CanvasItem, at: Vector2, w: float, h: float, col: Color) -> void:
+	if w <= 0.0:
+		return
+	c.draw_colored_polygon(slant_pts(at, w, h), col)
+
+## The corners of that parallelogram, clockwise from the top-left.
+static func slant_pts(at: Vector2, w: float, h: float) -> PackedVector2Array:
+	var d := LEAN_K * h
+	return PackedVector2Array([at, at + Vector2(w, 0), at + Vector2(w - d, h), at + Vector2(-d, h)])
+
+## A leaning segmented bar (the vitals' armour and health): track, chip, fill, a lit top edge, then a
+## leaning gap every `step` of `maxv`. `chip` is a fraction of max (<= the fill draws nothing).
+static func slant_bar(c: CanvasItem, at: Vector2, w: float, h: float, val: float, maxv: float, col: Color,
+		step: float, chip := 0.0) -> void:
+	var f := clampf(val / maxf(1.0, maxv), 0.0, 1.0)
+	slant(c, at, w, h, Color(col.darkened(0.78), 0.9))
+	if chip > f:
+		slant(c, at, w * minf(chip, 1.0), h, CHIP)
+	slant(c, at, w * f, h, col)
+	slant(c, at, w * f, maxf(1.0, h * 0.2), Color(1, 1, 1, 0.3))
+	if step <= 0.0 or maxv <= step:
+		return
+	var pts := PackedVector2Array()
+	var i := 1
+	while i * step < maxv - step * 0.5:
+		var x := at.x + w * (i * step / maxv)
+		pts.append(Vector2(x, at.y))
+		pts.append(Vector2(x - LEAN_K * h, at.y + h))
+		i += 1
+	c.draw_multiline(pts, SHADE_EDGE, SEG_GAP)
+
+## A texture cut to a disc of radius `r` round `ctr` (round portraits).
+static var _disc := PackedVector2Array()
+static func round_tex(c: CanvasItem, ctr: Vector2, r: float, tex: Texture2D, tint := Color.WHITE) -> void:
+	if _disc.is_empty():
+		for i in 40:
+			_disc.append(Vector2.from_angle(TAU * i / 40.0))
+	var pts := PackedVector2Array()
+	var uv := PackedVector2Array()
+	for v in _disc:
+		pts.append(ctr + v * r)
+		uv.append(Vector2(0.5, 0.5) + v * 0.5)
+	c.draw_colored_polygon(pts, tint, uv, tex)
+
+## Outlined text leaning like the frames (LEAN_TXT), left-aligned at `p` (baseline).
+static func lean_text(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4) -> void:
+	c.draw_set_transform_matrix(Transform2D(Vector2(1, 0), Vector2(LEAN_TXT, 1), p))
+	text(c, Vector2.ZERO, s, font_size, col, ol)
+	c.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 ## Outlined text, left-aligned at `p` (baseline). `ol` is the outline width in px.
 static func text(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
