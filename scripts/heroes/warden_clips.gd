@@ -7,16 +7,18 @@ extends RefCounted
 ## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
-## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
-## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
-## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
-## so one move hands to the next without a pop (item 32).
+## The tree: loco (Blend2: the idle under the rings, a Blend2 of a walk ring and a run ring, each a BlendSpace2D of the
+## directions; every weight rides a spring, so a start, stop or ring change never kinks a foot's path) > air (Blend2
+## onto a BlendSpace1D of fall and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep
+## the legs running) > full (Blend2: moves that own the body). The action, and the upper-body move, are each two
+## seekable channels crossfaded, so one move hands to the next without a pop (item 32).
 ##
 ## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
 ## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
 ## A Hero with no "crouch" key stands through a crouch, as the clips have no pose for it.
 
 const DIR := "res://content/rules/warden_anim/"
+const DIAGONALS := ["fl", "fr", "bl", "br"]
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
@@ -29,12 +31,18 @@ const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
+const TWIST_HYST := 0.1      # rad: the legs turn round this far past 90 deg off the aim and back this far inside it
+const TWIST_MAX := PI / 2.0 + TWIST_HYST   # rad (~96 deg): the most the torso twists off the legs, forwards or back
 const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl)
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
-const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const CROUCH_RATE_MAX := 2.0 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const RUN_FROM := 1.3        # of walk_speed: faster than this shows the run ring (the two rings are never held
+const RUN_BACK := 1.2        # half and half: out of step they cancel the feet); slower than RUN_BACK hands back
+const BLEND_W := 18.0        # 1/s: the loco and sneak weights' critically damped spring (~0.2 s to a new goal)
+const RATE_EASE := 10.0      # 1/s: the loops' playback rate eases to its goal (a step in it steps every foot's speed)
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -58,7 +66,14 @@ var air_w := 0.0
 var glide_w := 0.0
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
-var loco_pos := Vector2.ZERO
+var on_run := false          # the run ring is showing, not the walk
+var loco_rate := 1.0         # the loops' playback rate now
+var move_w := 0.0            # how much the rings show over the idle (0..1 of walk_speed)
+var move_v := 0.0            # its rate (1/s)
+var run_w := 0.0             # how much the run ring shows over the walk ring
+var run_v := 0.0
+var dir_pos := Vector2.ZERO  # the rings' blend position: the move off the facing (x his right, y forward)
+var dir_v := Vector2.ZERO
 var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
@@ -66,8 +81,13 @@ var air_t := 0.0
 var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
-var legs_was := false        # the turn on now is a legs_heading one
-var head_turn := 0.0         # rad the root is turned toward his heading
+var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
+var head_v := 0.0            # its rate (rad/s) while the aim twist turns it
+var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
+var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
+var twist_goal := 0.0        # rad the legs turn off the aim this frame (0 when he is not running)
+var twist_back := false      # past the twist limit the legs turn round and run backwards
+var twist_face := 0.0        # rad: the facing last frame, so the legs can hold their way while the aim swings
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -84,6 +104,7 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var crouch_v := Vector2.ZERO
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -140,6 +161,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
@@ -194,6 +216,9 @@ func _is_loop(nm: String) -> bool:
 		return true
 	return nm in ["fall", "glide", "stun"]
 
+func _length(nm: String) -> float:
+	return lib.get_animation(nm).length
+
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
 	n.animation = nm
@@ -201,22 +226,24 @@ func _anim(nm: String) -> AnimationNodeAnimation:
 
 func _build() -> AnimationNodeBlendTree:
 	var lc: Dictionary = d["loco"]
-	var bs := AnimationNodeBlendSpace2D.new()
-	bs.min_space = Vector2(-1, -1)
-	bs.max_space = Vector2(1, 1)
-	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
-	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
-	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
-	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
-		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
 	var t := AnimationNodeBlendTree.new()
-	t.add_node("loco", bs)
+	var in_step := bool(lc.get("in_step", false))     # (a ring on one length and strike key: every loop keeps time)
+	t.add_node("walk", _ring(lc["walk"], in_step))
+	t.add_node("run", _ring(lc["run"], in_step))
+	t.add_node("rings", AnimationNodeBlend2.new())
+	t.connect_node("rings", 0, "walk")
+	t.connect_node("rings", 1, "run")
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
-	t.connect_node("loco_rate", 0, "loco")
+	t.connect_node("loco_rate", 0, "rings")
+	t.add_node("idle", _anim(String(lc["idle"])))
+	t.add_node("idle_seek", AnimationNodeTimeSeek.new())
+	t.connect_node("idle_seek", 0, "idle")
+	t.add_node("loco", AnimationNodeBlend2.new())
+	t.connect_node("loco", 0, "idle_seek")
+	t.connect_node("loco", 1, "loco_rate")
 	t.add_node("stance", _anim(String(lc["stance"])))
 	t.add_node("stance_w", AnimationNodeBlend2.new())
-	t.connect_node("stance_w", 0, "loco_rate")
+	t.connect_node("stance_w", 0, "loco")
 	t.connect_node("stance_w", 1, "stance")
 	var ai: Dictionary = d["air"]
 	var space := AnimationNodeBlendSpace1D.new()
@@ -280,18 +307,33 @@ func _build_flinch(t: AnimationNodeBlendTree) -> void:
 	t.connect_node("flinch", 0, "upper")
 	t.connect_node("flinch", 1, "flinch_delta")
 
-## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
-func _build_crouch(t: AnimationNodeBlendTree) -> String:
-	var cr: Dictionary = d["crouch"]
+## A ring of loops on the unit circle, one per direction off the facing (x his right, y forward): a Hero with its own
+## diagonal loops gets them, else a diagonal blends its two neighbours. `centre`: a clip in the middle (the crouch
+## idle; the walk and run rings have none, the idle lies under them on its own weight).
+func _ring(loops: Dictionary, in_step: bool, centre := "") -> AnimationNodeBlendSpace2D:
 	var bs := AnimationNodeBlendSpace2D.new()
 	bs.min_space = Vector2(-1, -1)
 	bs.max_space = Vector2(1, 1)
 	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
-	bs.add_blend_point(_anim(String(cr["idle"])), Vector2.ZERO)
+	bs.sync = in_step
+	if centre != "":
+		bs.add_blend_point(_anim(centre), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
-		bs.add_blend_point(_anim(String(cr["walk"][k])), dirs[k])
-	t.add_node("crouch_loco", bs)
+		bs.add_blend_point(_anim(String(loops[k])), dirs[k])
+	for k in DIAGONALS:
+		if loops.has(k):
+			bs.add_blend_point(_anim(String(loops[k])), (dirs[k[0]] + dirs[k[1]]).normalized())
+	return bs
+
+## The crouch layer over stance_w: its own ring (the crouch idle at the centre, the sneak ring), the dip's seek channel.
+func _build_crouch(t: AnimationNodeBlendTree) -> String:
+	var cr: Dictionary = d["crouch"]
+	# (loops of one length keep time: a ring from hunter_dir_gait.py crouch shares a strike key too)
+	var lengths := {}
+	for k in cr["walk"]:
+		lengths[_length(String(cr["walk"][k]))] = true
+	t.add_node("crouch_loco", _ring(cr["walk"], lengths.size() == 1, String(cr["idle"])))
 	t.add_node("crouch_rate", AnimationNodeTimeScale.new())
 	t.connect_node("crouch_rate", 0, "crouch_loco")
 	t.add_node("crouch_anim", _anim(String(cr["in"])))
@@ -459,26 +501,65 @@ func step(dt: float) -> void:
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
 ## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel
 ## travelling forward turns its side to the way he goes).
-## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
-## and the arm on the aim keep their pose.
+## "legs_heading" (Vex's slide, aims_in_dash) and the aim twist: only the legs go: the hips take the turn back, so the
+## torso and the arm on the aim keep their pose. The torso eases between the two, so a roll out of a twisted run turns
+## him whole without a snap.
 func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var face := float(s.get("face", 0.0))
 	var goal := 0.0
+	var twisting := false
 	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
-		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
+		goal = wrapf(atan2(-vel.x, -vel.z) - face + float(want.get("heading_off", 0.0)), -PI, PI)
 		var most := LEGS_MAX if legs_only else float(want.get("turn_max", HEADING_MAX))
 		goal = clampf(goal, -most, most)
-	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
-	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
-	if absf(head_turn) < 0.002:
+	elif twist_on:
+		legs_only = true
+		twisting = true
+		goal = twist_goal * (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w)
+		if twist_goal != 0.0:
+			# running: the legs hold their way while the aim swings, but never twist him past the limit
+			var held := head_turn - wrapf(face - twist_face, -PI, PI)
+			head_turn = clampf(held, minf(head_turn, -TWIST_MAX), maxf(head_turn, TWIST_MAX))
+	twist_face = face
+	var follow := 1.0 - exp(-dt * HEADING_RATE)     # how far the turn eases toward its goal this frame
+	if twisting:
+		# (the twist swings the legs across his front, never round his back; on a spring, so a stop or a turn of the
+		# legs round to run backwards never flicks them)
+		var sp := _spring(head_turn, head_v, goal, dt)
+		head_turn = sp[0]
+		head_v = sp[1]
+	else:
+		head_turn = lerp_angle(head_turn, goal, follow)
+		head_v = 0.0
+	torso_turn = lerp_angle(torso_turn, 0.0 if legs_only else goal, follow)
+	if absf(head_turn) < 0.002 and absf(torso_turn) < 0.002:
 		return
 	var bi := WardenSkeleton.find(skel, "root")
 	var was := skel.get_bone_pose_rotation(bi)
 	var turn := Quaternion(Vector3.UP, head_turn)
 	skel.set_bone_pose_rotation(bi, turn * was)
-	if legs_only or legs_was:
+	# (and the clip's own sway of the root turns with it: kept on the old axis it pushes a planted foot sideways)
+	skel.set_bone_pose_position(bi, turn * skel.get_bone_pose_position(bi))
+	if absf(torso_turn - head_turn) >= 0.002:     # the hips take back what the torso does not turn
 		var hb := WardenSkeleton.find(skel, "hips")
-		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+		var back := Quaternion(Vector3.UP, torso_turn - head_turn)
+		skel.set_bone_pose_rotation(hb, was.inverse() * back * was * skel.get_bone_pose_rotation(hb))
+
+## The source's run-and-aim: the legs play the run forward and turn to where he goes while the torso stays on the aim,
+## up to TWIST_MAX; beyond it the legs turn round and run backwards, so the torso never twists past TWIST_MAX.
+## Returns the rings' direction (forward or back) and sets `twist_goal` for _turn_to_heading.
+func _aim_twist(flat: Vector2, face: float) -> Vector2:
+	var rel := wrapf(atan2(-flat.x, -flat.y) - face, -PI, PI)
+	twist_back = absf(rel) > (PI - TWIST_MAX if twist_back else TWIST_MAX)
+	twist_goal = rel - signf(rel) * PI if twist_back else rel
+	return Vector2(0.0, -1.0 if twist_back else 1.0)
+
+## One step of a critically damped spring (BLEND_W) of `x` (a float or a Vector2) at rate `v` toward `goal`: its
+## path has no corner, so nothing it blends ever jumps speed. Returns [x, v].
+func _spring(x: Variant, v: Variant, goal: Variant, dt: float) -> Array:
+	v += (BLEND_W * BLEND_W * (goal - x) - 2.0 * BLEND_W * v) * dt
+	return [x + v * dt, v]
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -493,14 +574,37 @@ func _loco(s: Dictionary, dt: float) -> void:
 	# (the model faces -Z at yaw 0: forward and right of the facing)
 	var fw := Vector2(-sin(face), -cos(face))
 	var rt := Vector2(cos(face), -sin(face))
-	var run := float(lc.get("run_speed", 4.6))
-	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
-	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
-	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
-	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
-	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
+	var walk := float(lc.get("walk_speed", 2.2))
+	var moving := spd >= STILL
+	on_run = spd >= walk * (RUN_BACK if on_run else RUN_FROM)
+	twist_goal = 0.0
+	var dir := dir_pos     # (standing: the rings keep their way, unseen)
+	if moving:
+		dir = _aim_twist(flat, face) if twist_on else Vector2((flat / spd).dot(rt), (flat / spd).dot(fw))
+	# (the idle under the rings eases in to a stop, the walk ring over it up to walk_speed; the run ring shows, or the
+	# walk ring: never held half and half, out of step they cancel the feet)
+	var w := _spring(move_w, move_v, minf(spd / walk, 1.0) if moving else 0.0, dt)
+	move_w = w[0]
+	move_v = w[1]
+	var r := _spring(run_w, run_v, 1.0 if on_run else 0.0, dt)
+	run_w = r[0]
+	run_v = r[1]
+	if move_w > 0.001:
+		var p := _spring(dir_pos, dir_v, dir, dt)
+		dir_pos = p[0]
+		dir_v = p[1]
+	else:
+		dir_pos = dir     # (nothing of the rings shows: they turn at once)
+		dir_v = Vector2.ZERO
+	if move_w >= 0.999:
+		_p("idle_seek/seek_request", 0.0)     # (a stop starts the idle from its top, never mid-fidget)
+	_p("loco/blend_amount", clampf(move_w, 0.0, 1.0))
+	_p("rings/blend_amount", clampf(run_w, 0.0, 1.0))
+	_p("walk/blend_position", dir_pos)
+	_p("run/blend_position", dir_pos)
+	var rate := gait.plan(spd, lc, clampf(run_w, 0.0, 1.0))
+	loco_rate = lerpf(loco_rate, rate, 1.0 - exp(-dt * RATE_EASE))
+	_p("loco_rate/scale", loco_rate)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -565,6 +669,8 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var speed := float(cr.get("speed", 2.4))
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
-	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
+	var c := _spring(crouch_pos, crouch_v, pos, dt)
+	crouch_pos = c[0]
+	crouch_v = c[1]
 	_p("crouch_loco/blend_position", crouch_pos)
 	_p("crouch_rate/scale", clampf(spd / speed, 0.7, CROUCH_RATE_MAX) if spd >= STILL else 1.0)

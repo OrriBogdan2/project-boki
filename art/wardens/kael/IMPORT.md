@@ -46,3 +46,10 @@ Checks (2026-11-11): `--warden-glb-check` 183/0 failed, `--warden-model-check` 1
 --wardens=juggernaut` still flags all 49 clips (worst 7.45x in fusion, idle 2.56x, run_f 4.09x, mostly hips and
 thighs), against 31.06x (death), idle 10.39x and run_f 16.72x for the old v2 build: better, but not under 1.3x. No
 tearing or arm, chest or cape clipping shows in the turnaround, idle, run or kit poses.
+
+walk and run b, l, r, fl, fr, bl, br (2026-11-11, ext/anim-dirloops-lace-kael): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/kael/kael.glb OUT.glb 1.62 4.35`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/kael/kael.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`.
+The speeds are the forward loops' `loco.foot_mps`, not the loco speeds: walk_f/run_f are the old clips and stay, so
+the ring keeps `stride`/`foot_mps` and the game's rate and stride lift every direction to loco speed the way they lift
+forward. The blind Fable judge kept the old walk_b, walk_r, run_l (tie or loss), so those are
+the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops/JUDGE.md).

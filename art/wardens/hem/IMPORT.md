@@ -22,3 +22,10 @@ Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/arc
 
 Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
 through the chest; the bow passes through her open left hand.
+
+walk and run b, l, r, fl, fr, bl, br (2026-11-11, ext/anim-dirloops-lace-kael): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/hem/hem.glb OUT.glb 1.18 3.72`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/hem/hem.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`.
+The speeds are the forward loops' `loco.foot_mps`, not the loco speeds: walk_f/run_f are the old clips and stay, so
+the ring keeps `stride`/`foot_mps` and the game's rate and stride lift every direction to loco speed the way they lift
+forward. The blind Fable judge kept the old walk_r, run_l (tie or loss), so those are
+the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops/JUDGE.md).
