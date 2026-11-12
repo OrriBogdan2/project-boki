@@ -22,8 +22,8 @@ Our own world props as 3D models, made from the approved concepts (job 20261112-
 |---|---|---|---|---|
 | `jump_pad` | 1.5 m wide, 0.5 m tall (Meshy's z x0.6: low enough to run onto, the spring still shows) | 7k | Base, Spring (bottom), Top = glow plate with chevrons (bottom centre) | `Models.jump_pad`: world pads and duel pads; chevrons point -Z (the landing) |
 | `gust_fan` | 1.3 m tall | 9k | Body, Blades = glow (hub; spin about local Z) | scene only: no world fan yet |
-| `updraft_vent` | 3.2 m wide (updraft r 1.6) | 7k | Rim, Grate, Glow (floor) | scene only: updrafts sit over the void at island edges |
-| `chest` | 1.16 m wide (the sculpted chest) | 9k | Body, Lid (back hinge on the seam), Lock | scene only: `Models.chest` stays the sculpted chest |
+| `updraft_vent` | 3.2 m wide (updraft r 1.6), rim 0.55 m tall | 7k | Rim, Grate, Glow (floor) | scene only: updrafts sit over the void at island edges |
+| `chest` | 1.16 m wide (the sculpted chest), 1.12 m tall with its domed lid | 9k | Body, Lid (back hinge on the seam), Lock | scene only: `Models.chest` stays the sculpted chest |
 
 Left to do: the pad compresses only through match.gd's existing plate pulse (no squash on launch); placing a
 fan and ground vents needs world features that don't exist; swapping the chest needs KeyChest's padlock and
