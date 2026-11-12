@@ -50,6 +50,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	var inp := h.inp
 	inp["fire"] = false
 	inp["interact"] = false
+	inp["crouch"] = false
 	if h.downed:
 		_crawl(m, h)
 		return
@@ -63,7 +64,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / DropFeel.canopy_fall * DropFeel.canopy_speed)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -77,6 +78,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			land = best
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
+		inp["crouch"] = DropSquad.bot_dive(m, h, to)
 		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
@@ -276,6 +278,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
 		if heal_ok:
+			BotShop.think(m, h)
 			BotBelt.think(m, h, a, inp)       # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -769,6 +772,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		var og := PerkOrbs.bot_goal(m, h, cur)
 		if og != Vector3.INF:
 			goal = og; gk = "orb"
+	if goal == Vector3.INF:
+		var sg := BotShop.goal(m, h)       # spare gems and a vendor close: go shopping
+		if not sg.is_empty():
+			goal = sg[0]
+			gk = String(sg[1])
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]

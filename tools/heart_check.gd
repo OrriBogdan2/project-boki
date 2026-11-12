@@ -30,6 +30,10 @@ func _run(m: Match, secs: float) -> void:
 		m.step(Match.DT)
 
 func _calm(m: Match) -> void:
+	for h in m.hunters:      # (idle hunters on a random spot: a hazard there must not down one while the Heart charges)
+		if not h.downed and not h.out:
+			h.hp = h.max_hp
+			h.burn_t = 0.0
 	for mb in m.mobs:
 		if mb is Blight:
 			(mb as Blight).burrow()

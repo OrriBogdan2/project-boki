@@ -8,16 +8,19 @@ extends RefCounted
 ##   ice         low grip, a push slides far             / frost: full grip, it stops short
 ##   static      the next shock hurts and stuns          / storm: no damage, no stun
 ##   bramble     slowed and scratched                    / bloom: neither
-## each with its counter Boki and with its hazard perk (Lava-walker, Tidewader, Iceboots; plain Boki + perk),
-## plus the big fields (tagged regions, safe paths and stones, perk loot near them), the HUD's underfoot
-## reading, the Boki's hint near one (risk or safe, naming it), and bots: they
+## each with its counter Boki and with its ward perk (plain Boki + perk), the big fields (tagged regions,
+## safe paths and stones, ward loot near them),
+## the ward rule (content/rules/terrain_hazards.json "ward"): the best single protection applies, no
+## doubling. Every kind (the five grounds and the four biome traps) with none / its perk / its Boki / both,
+## a carried second Boki, a downed Boki and a Fusion; the grounds also in play with both.
+## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## Steps the real match at Match.DT; never touches the save. Prints "TERRAIN ..." lines and
 ## "TERRAIN CHECK DONE, N checks, failures: F".
 
 const COUNTER := {"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike",
 	"bramble": "heatherhorn"}
-const PERK := {"lava": "lavawalker", "deep_water": "tidewader", "ice": "iceboots"}      # the immunity perks
+const FIELDS := {"lava": 0.5, "deep_water": 0.3, "ice": 0.3}      # the big fields: the least share of their region
 const PLAIN := "cindle"          # venom: counters none of them
 var main: Node
 var m: Match
@@ -48,11 +51,10 @@ func run(main_node: Node) -> void:
 			ok("%s: an area on the map" % kind, ai >= 0)
 			if ai < 0: continue
 			for via in ["none", "boki", "perk"]:
-				if via == "perk" and not PERK.has(kind): continue
 				var safe: bool = via != "none"
 				_kin(COUNTER[kind] if via == "boki" else PLAIN)
 				P.perks.clear()
-				if via == "perk": P.perks.append(PERK[kind])
+				if via == "perk": P.perks.append(TerrainHazards.ward_for(kind))
 				match kind:
 					"lava": await _lava(ai, safe)
 					"deep_water": await _deep_water(ai, safe)
@@ -64,9 +66,71 @@ func run(main_node: Node) -> void:
 					hud.get("safe", null) == safe)
 				_hint(kind, safe)
 		_fields()
+		await _stack()
 		_bots()
 	print("TERRAIN CHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
+
+# ------------------------------------------------------------------ the ward rule
+func _stack() -> void:
+	var W: Dictionary = TerrainHazards.rules()["ward"]
+	var trap_of := {}
+	for trap in W["traps"]: trap_of[W["traps"][trap]] = trap
+	var perk_of := {}
+	for id in Data.PERKS:
+		if Data.PERKS[id].has("ward"): perk_of[Data.PERKS[id]["ward"]] = id
+	ok("one ward perk per ground, five in all", perk_of.size() == COUNTER.size() and trap_of.size() == 4,
+		str(perk_of.keys()))
+	for kind in COUNTER:
+		var perk: String = perk_of.get(kind, "")
+		var has_perk := perk != ""
+		var got := []
+		for combo in ["none", "perk", "boki", "both"]:
+			_kin(COUNTER[kind] if combo in ["boki", "both"] else PLAIN)
+			P.perks = [perk] if has_perk and combo in ["perk", "both"] else []
+			var expect: bool = (combo in ["perk", "both"] and has_perk) or combo in ["boki", "both"]
+			got.append(TerrainHazards.shield(P, kind))
+			ok("%s %s: protected = %s" % [kind, combo, expect], TerrainHazards.guards(P, kind) == expect)
+			if has_perk and expect and combo != "boki" and trap_of.has(kind):
+				ok("%s %s: its trap kind is warded too" % [kind, combo], BiomeRun.warded(P, String(trap_of[kind])))
+		var best_single: bool = got[3] == maxf(got[1], got[2]) and got[3] <= 1.0
+		ok("%s: both counts once, the best single (shield %s)" % [kind, got], best_single)
+		P.perks = [perk] if has_perk else []
+		var ai := _first(kind)
+		await _both(kind, ai)
+	_kin(PLAIN)
+	P.perks = []
+	var rec: Dictionary = (P.kin as Kin).rec.duplicate()
+	rec["species"] = COUNTER["ice"]
+	var other := Kin.new()
+	other.init_kin(m, "ward_check_k2", COUNTER["ice"], rec, P)
+	m.add_child(other)
+	other.bench()
+	P.kin2 = other
+	ok("a carried second Boki of the counter type adds nothing", not TerrainHazards.guards(P, "ice"))
+	_kin(COUNTER["ice"])
+	ok("with the counter out and a second one carried it counts once", TerrainHazards.shield(P, "ice") == 1.0)
+	P.kin2 = null
+	other.queue_free()
+	_kin(COUNTER["ice"])
+	var was: String = (P.kin as Kin).state
+	(P.kin as Kin).state = "downed"
+	ok("a downed counter Boki protects nothing", not TerrainHazards.guards(P, "ice"))
+	(P.kin as Kin).state = "fused"
+	ok("a Fusion keeps its counter", TerrainHazards.guards(P, "ice"))
+	(P.kin as Kin).state = was
+	P.perks = []
+
+## Both a perk and the counter Boki on the ground itself behave exactly as one of them does (no twice-over).
+func _both(kind: String, ai: int) -> void:
+	if ai < 0: return
+	_kin(COUNTER[kind])
+	match kind:
+		"lava": await _lava(ai, true)
+		"deep_water": await _deep_water(ai, true)
+		"ice": await _ice(ai, true)
+		"static": await _static(ai, true)
+		"bramble": await _bramble(ai, true)
 
 # ------------------------------------------------------------------ setup
 func _first(kind: String) -> int:
@@ -78,14 +142,14 @@ func _who(safe: bool) -> String:
 	return "with its counter" if safe else "without"
 
 ## The big fields: the map's regions are tagged with their hazard and its share of the ground; a safe path
-## (a lane or an islet) is ground, and a field's loot leans to the perk that walks it.
+## (a lane or an islet) is ground, and loot beside a field can be the ward perk that walks it (nowhere else).
 func _fields() -> void:
 	var seen := {}
 	for R in World.load_layout("hollowcrown")["regions"]:
 		if R.has("hazard"): seen[R["hazard"]] = float(R["share"])
-	for kind in PERK:
-		ok("%s: a region built round it with 30%%+ of its ground" % kind, seen.get(kind, 0.0) >= 0.3,
-			str(seen.get(kind)))
+	for kind in FIELDS:
+		ok("%s: a region built round it with %d%%+ of its ground" % [kind, FIELDS[kind] * 100],
+			seen.get(kind, 0.0) >= FIELDS[kind], str(seen.get(kind)))
 	var ai := _first("lava")
 	var A: Dictionary = tz.areas[ai]
 	ok("the lava field is big (500+ tiles)", (A["cells"] as Array).size() >= 500, str((A["cells"] as Array).size()))
@@ -101,10 +165,10 @@ func _fields() -> void:
 	var n_near := 0
 	var n_far := 0
 	for i in 300:
-		n_near += 1 if PerkOrbs.roll(rng, "chest", null, [], near) == "lavawalker" else 0
-		n_far += 1 if PerkOrbs.roll(rng, "chest") == "lavawalker" else 0
-	ok("the field names its perk, and chests beside it drop it 5x more",
-		near == "lavawalker" and n_near > 5 * maxi(n_far, 1), "%d vs %d of 300" % [n_near, n_far])
+		n_near += 1 if PerkOrbs.roll(rng, "chest", null, [], near) == "ember_walk" else 0
+		n_far += 1 if PerkOrbs.roll(rng, "chest") == "ember_walk" else 0
+	ok("the lava field names Emberwalk, chests beside it drop it, chests elsewhere never",
+		near == "ember_walk" and n_near >= 30 and n_far == 0, "%d vs %d of 300" % [n_near, n_far])
 
 ## The player's active Boki becomes this species (its type is what counters a hazard).
 func _kin(species: String) -> void:
@@ -151,7 +215,7 @@ func _lava(ai: int, safe: bool) -> void:
 func _deep_water(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(0.3)
-	var spd := P.slow_mult(0.65) * (1.35 if P.haste_t > 0.0 else 1.0)
+	var spd := P.slow_mult() * (1.35 if P.haste_t > 0.0 else 1.0)
 	var hits := TerrainHazards.hit_mult(m, P)
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
 	var lost := P.max_hp - P.hp
@@ -197,7 +261,7 @@ func _static(ai: int, safe: bool) -> void:
 func _bramble(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(2.0)
-	var spd := P.slow_mult(0.65)
+	var spd := P.slow_mult()
 	var lost := P.max_hp - P.hp
 	if safe:
 		ok("bramble with a bloom Boki: not slowed, not scratched", is_equal_approx(spd, 1.0) and lost < 0.5,

@@ -70,20 +70,18 @@ func _danger(p: Vector3) -> int:
 ## The monsters for a camp, from its region's table: base monster kinds, weighted. Empty when the
 ## camp isn't in a biome (the match's own mix is used then).
 func camp_comp(c: Dictionary) -> Array:
-	var B := _biome(c["pos"])
-	var mobs: Array = B.get("mobs", [])
+	var kind := String(c.get("kind", "normal"))
+	var n: int = {"heavy": 4, "light": 2}.get(kind, 3)
+	return camp_comp_n(c["pos"], n, "brute" if kind == "heavy" else "")
+
+## A camp of n monsters from the region's table: its big one (if any) and small ones (no Brute or
+## Sentinel, so a camp size always pays the same XP). Empty when the spot isn't in a biome.
+func camp_comp_n(p: Vector3, n: int, big: String) -> Array:
+	var mobs: Array = _biome(p).get("mobs", [])
+	mobs = mobs.filter(func(e): return not String(e["kind"]) in ["brute", "sentinel"])
 	if mobs.is_empty():
 		return []
-	var n := 3
-	match String(c.get("kind", "normal")):
-		"heavy": n = 4
-		"light": n = 2
-	var out: Array = []
-	if String(c.get("kind", "")) == "heavy":
-		# a heavy camp always has its region's big one
-		for e in mobs:
-			if String(e["kind"]) in ["brute", "sentinel"]:
-				out.append(String(e["kind"])); break
+	var out: Array = [big] if big != "" else []
 	while out.size() < n:
 		out.append(String(_pick(mobs)["kind"]))
 	return out
@@ -100,7 +98,7 @@ func _pick(entries: Array) -> Dictionary:
 ## Makes a freshly spawned monster belong to its region: the region's version of it (name, colour,
 ## stats), a rarity, and mutations from the region's list. Rarity climbs with the tier and with how
 ## dangerous the island is; rarer monsters roll more mutations.
-func dress(mb: Mob) -> void:
+func dress(mb: Mob, lift_rar := 0) -> void:
 	if mb == null or mb.mkind in ["warden", "glimmer"]:
 		return
 	var B := _biome(mb.pos)
@@ -124,6 +122,7 @@ func dress(mb: Mob) -> void:
 	for i in 4:
 		roll -= maxf(1.0, wts[i])
 		if roll <= 0.0: ri = i; break
+	ri = mini(ri + lift_rar, RARITY.size() - 1)     # (a Camp Chief's Brute is a tier up)
 	var R: Dictionary = RARITY[ri]
 	# mutations
 	var muts: Array = []
@@ -255,7 +254,7 @@ func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 		return
 	var t := target as Ent
 	if muts.has("frozen"):
-		t.slow_t = maxf(t.slow_t, 1.4)
+		t.add_slow(1.4)
 		m.fx.burst(t.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 8, 2.5, 0.4, 2.0)
 	if muts.has("molten") or muts.has("toxic"):
 		t.burn_t = maxf(t.burn_t, 2.5); t.burn_dps = maxf(t.burn_dps, 3.0)
@@ -442,15 +441,19 @@ func _add_hazard(kind: String, p: Vector3) -> void:
 			n.add_child(rim)
 	hazards.append(hz)
 
-## How much grip the ground has at p for h (1 normal, low on ice; a frost Boki keeps its hunter's
-## footing on ice sheets and patches alike).
+## How much grip the ground has at p for h (1 normal, low on ice; a frost Boki or an ice ward keeps
+## its hunter's footing on ice sheets and patches alike).
 func grip(p: Vector3, h: Hunter = null) -> float:
-	if h != null and terrain.guards(h, "ice"):
+	if h != null and TerrainHazards.guards(h, "ice"):
 		return 1.0
 	for hz in hazards:
 		if hz["kind"] == "ice_patch" and Vector2(p.x - hz["pos"].x, p.z - hz["pos"].z).length() < float(hz["r"]) and absf(p.y - hz["pos"].y) < 0.3:
 			return float(TerrainHazards.kind_def("ice")["effect"]["grip"])
 	return terrain.grip(p, h)
+
+## Does this body's ward perk or Boki keep this biome trap kind off it (TerrainHazards.shield: the best one counts)?
+static func warded(body, trap: String) -> bool:
+	return TerrainHazards.guards(body, String(TerrainHazards.rules()["ward"]["traps"].get(trap, "")))
 
 func _near_hunter(p: Vector3, d: float) -> Hunter:
 	var best: Hunter = null; var bd := d
@@ -462,9 +465,11 @@ func _near_hunter(p: Vector3, d: float) -> Hunter:
 
 ## Hazards run on every game, each on its own clock: a game only hurts, pulls or slows the bodies it owns, so
 ## a player online is hit once (by their own game), not once per game.
-func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary) -> void:
+func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary, ward: String) -> void:
 	for f in m.foes_of(-3):
-		if not f.remote and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
+		if f.remote or warded(f, ward):
+			continue
+		if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
 			var oo := o.duplicate(); oo["tags"] = ["mut", "hazard"]; oo["src"] = "hazard"
 			f.hurt(dmg * float(m.T.get("mob", 1.0)), null, oo)
 
@@ -494,7 +499,7 @@ func _tick_hazards(dt: float) -> void:
 						_zap(p + Vector3(0, 3.3, 0), at2 + Vector3(0, 0.3, 0))
 						m.fx.burst(at2 + Vector3(0, 0.4, 0), Color("fff9c0"), 30, 7.0, 0.35, 2.0, 1.2)
 						m.sfx("boom", at2, -4.0, 1.5)
-						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true})
+						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true}, "lightning_rod")
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"lava_vent":
 				hz["t"] = float(hz["t"]) - dt
@@ -510,8 +515,8 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("ff9a3a"), 34, 7.5, 0.7, 9.0, 1.4)
 						m.sfx("boom", p, -4.0, 0.8)
-						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0})
-						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
+						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0}, "lava_vent")
+						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true, "ward": "lava_vent"}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
 						if core: core.scale = Vector3.ONE
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"spore_pod":
@@ -530,7 +535,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("d88aff"), 28, 4.0, 0.8, -1.0, 1.4)
 						m.sfx("thump", p, -4.0, 0.7)
-						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true, "ward": "spore_pod"}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
 						if pod: pod.visible = false
 						hz["phase"] = "spent"; hz["t"] = 14.0
 				else:

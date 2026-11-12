@@ -338,7 +338,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_km = km
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
-		var length := lib.get_animation(clip).length
+		# ("scale": the clip runs that much faster, "cut": it ends there (clip seconds): to fit the kit's cadence)
+		var length := minf(lib.get_animation(clip).length, float(mv.get("cut", 1e9)))
+		tt *= float(mv.get("scale", 1.0))
 		# (a lead clip holds its last frame rather than ending before the move does)
 		if mv.has("lead"):
 			tt = minf(tt, length - 0.001)

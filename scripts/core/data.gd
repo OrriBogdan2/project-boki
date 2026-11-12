@@ -45,7 +45,7 @@ const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds 
 
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
-	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
+	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0,
 		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "rifle", "color": Color("d9ff66"), "size": 0.12},
 }
 
@@ -126,13 +126,6 @@ const PERKS := {
 	"focus": {"name": "Clear Mind", "desc": "Abilities recharge 12% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 2, "stats": {"cdr": 0.12}},
 	"tailwind": {"name": "Tailwind", "desc": "Glide 15% faster.", "icon": "gust", "col": Color("9fe8ff"), "max": 1, "stats": {"glide_speed": 0.15}},
 	"remedy": {"name": "Remedy", "desc": "Tonics heal 40% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1},
-	# hazard perks (TerrainHazards): full footing on one kind of hazard ground, wherever your Boki's type is
-	"lavawalker": {"name": "Lava-walker", "desc": "Lava can't burn you: walk the lava fields.", "icon": "fireball",
-		"col": Color("ff8a3a"), "max": 1},
-	"tidewader": {"name": "Tidewader", "desc": "Deep water doesn't slow or drown you: you swim fast.", "icon": "wave",
-		"col": Color("6ab8ff"), "max": 1},
-	"iceboots": {"name": "Iceboots", "desc": "Spiked soles: full footing on the ice sheets.", "icon": "snare",
-		"col": Color("bff0ff"), "max": 1},
 	# the old kit passives, now found as orbs (the same numbers they had as kit gear)
 	"field_kit": {"name": "Field Surgeon", "desc": "Needle and thread: tonics heal 35% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1, "stats": {"tonic": 0.35}},
 	"magpie": {"name": "Magpie Pouch", "desc": "Shiny things stick: gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 1, "stats": {"gems": 0.25}},
@@ -141,7 +134,7 @@ const PERKS := {
 	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
 	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
-	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
+	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds in the drum.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
 	"longreach": {"name": "Long Reach", "desc": "12% more range (and reach, for blades).", "icon": "gust", "col": Color("9fe8ff"), "max": 2, "wup": {"range": 0.12}},
 	"brand_fire": {"name": "Ember Brand", "desc": "Your hits burn: 5 damage a second for 3s.", "icon": "fireball", "col": Color("ff8a3a"), "max": 1, "wup": {"brand": "fire"}},
@@ -149,6 +142,18 @@ const PERKS := {
 	"brand_storm": {"name": "Storm Brand", "desc": "Every 4th hit arcs to 2 more foes.", "icon": "chain", "col": Color("fff27a"), "max": 1, "wup": {"brand": "storm"}},
 	"brand_venom": {"name": "Venom Brand", "desc": "Your hits poison and slow.", "icon": "burst", "col": Color("9aff6a"), "max": 1, "wup": {"brand": "venom"}},
 	"brand_void": {"name": "Hollow Brand", "desc": "Your hits heal you for 8% of the damage.", "icon": "shadowstep", "col": Color("b08aff"), "max": 1, "wup": {"brand": "void"}},
+	# hazard wards (TerrainHazards.shield): "ward" is the hazard kind that can't touch you, fields and the
+	# biome traps of the same ground alike. Sold in shops (content/rules/shops.json); an orb next to the field rolls one
+	"ember_walk": {"name": "Emberwalk", "desc": "Lava fields and vents don't burn you.", "icon": "fireball",
+		"col": Color("ff8a3a"), "max": 1, "ward": "lava"},
+	"sure_foot": {"name": "Sure Foot", "desc": "Ice sheets and patches don't make you slide.", "icon": "fortify",
+		"col": Color("bff0ff"), "max": 1, "ward": "ice"},
+	"grounded": {"name": "Grounded", "desc": "Static flats and storm rods can't shock you.", "icon": "chain",
+		"col": Color("fff27a"), "max": 1, "ward": "static"},
+	"spore_mask": {"name": "Spore Mask", "desc": "Bramble and spore pods don't hurt or slow you.", "icon": "gust",
+		"col": Color("c06ad0"), "max": 1, "ward": "bramble"},
+	"tidewader": {"name": "Tidewader", "desc": "Deep water doesn't slow or drown you: you swim fast.", "icon": "wave",
+		"col": Color("6ab8ff"), "max": 1, "ward": "deep_water"},
 }
 
 ## Bot hunter difficulty. "auto" (the default) picks one from the run tier and how experienced you
@@ -204,7 +209,7 @@ func _init() -> void:
 	load_kin_content()
 
 ## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
-## (content/kin/<id>.json: rare, boss).
+## (content/kin/<id>.json: rare, boss, legendary_tier).
 func load_kin_content() -> void:
 	KIN.clear()
 	var ids: Array = []
@@ -218,6 +223,8 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("legendary_tier"):
+			sp["legendary_tier"] = String(home["legendary_tier"])
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare

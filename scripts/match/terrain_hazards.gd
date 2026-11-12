@@ -214,33 +214,52 @@ func area_at(p: Vector3) -> int:
 		return -1
 	return a
 
-## Whether h walks this kind of ground safely: its active Boki's type or species counters it, or it
-## holds the matching hazard perk (Lava-walker, Tidewader, Iceboots).
-func guards(h: Hunter, kind: String) -> bool:
-	var C: Dictionary = kind_def(kind).get("counter", {})
-	if _boki_guards(h, C):
-		return true
-	for pk in C.get("perks", []):
-		if h.perk_n(pk) > 0:
-			return true
-	return false
+## How well h is protected from this kind of ground: the best single source, never added up
+## (content/rules/terrain_hazards.json "ward"). Sources: the ward perk for the kind, or the Boki that is
+## out with a counter type or species (a downed or carried one counts for nothing).
+static func shield(h, kind: String) -> float:
+	if not h is Hunter:
+		return 0.0
+	var S: Dictionary = rules()["ward"]["strength"]
+	var best := 0.0
+	if ward_held(h, kind) != "":
+		best = float(S["perk"])
+	if _boki_guards(h, kind):
+		best = maxf(best, float(S["boki"]))
+	return best
 
-func _boki_guards(h: Hunter, C: Dictionary) -> bool:
+## Does h walk this kind of ground safely (a full shield)?
+static func guards(h, kind: String) -> bool:
+	return shield(h, kind) >= 1.0
+
+## The ward perk h holds against this kind of ground (Data.PERKS ward), or "".
+static func ward_held(h: Hunter, kind: String) -> String:
+	for id in h.perks:
+		if String(Data.PERKS[id].get("ward", "")) == kind:
+			return String(id)
+	return ""
+
+## The ward perk for this kind of ground, or "" (none sold or dropped for it).
+static func ward_for(kind: String) -> String:
+	for id in Data.PERKS:
+		if String(Data.PERKS[id].get("ward", "")) == kind:
+			return String(id)
+	return ""
+
+static func _boki_guards(h: Hunter, kind: String) -> bool:
 	var k := h.kin as Kin
 	if k == null or k.state == "downed":
 		return false
+	var C: Dictionary = kind_def(kind).get("counter", {})
 	return String(k.sp.get("theme", "")) in C.get("themes", []) or k.species in C.get("kin", [])
 
 ## Who keeps h safe here, for the HUD: the Boki's name, else the perk's; "" when nothing does.
 func protector(h: Hunter, kind: String) -> String:
-	var C: Dictionary = kind_def(kind).get("counter", {})
-	if _boki_guards(h, C):
+	if _boki_guards(h, kind):
 		var k := h.kin as Kin
 		return String(k.rec.get("name", k.sp.get("name", "Your Boki")))
-	for pk in C.get("perks", []):
-		if h.perk_n(pk) > 0:
-			return String(Data.PERKS[pk]["name"])
-	return ""
+	var pk := ward_held(h, kind)
+	return String(Data.PERKS[pk]["name"]) if pk != "" else ""
 
 ## Footing at p for h: low on an ice sheet unless its Boki is a frost one.
 func grip(p: Vector3, h: Hunter) -> float:
@@ -261,8 +280,8 @@ static func avoid(mm: Node, h: Hunter, x: float, z: float) -> bool:
 	var a := tz.cell[tz.w.idx(xi, zi)] - 1
 	return a >= 0 and tz.area_at(h.pos) < 0 and not tz.guards(h, String(tz.areas[a]["kind"]))
 
-## The perk that counters the hazard nearest p, if one lies within `near_m` of it ("" otherwise): loot
-## dropped by a lava field leans to the Lava-walker (PerkOrbs).
+## The ward perk for the hazard nearest p, if one lies within `near_m` of it ("" otherwise): loot
+## dropped by a lava field leans to Emberwalk (PerkOrbs).
 static func perk_near(mm: Node, p: Vector3, near_m: float) -> String:
 	var tz := of(mm)
 	if tz == null:
@@ -270,12 +289,12 @@ static func perk_near(mm: Node, p: Vector3, near_m: float) -> String:
 	var best := ""
 	var best_d := near_m
 	for A in tz.areas:
-		var perks: Array = A["def"]["counter"].get("perks", [])
+		var ward := ward_for(String(A["kind"]))
 		var box: Rect2 = A["box"]
 		var off := Vector2(box.position.x - p.x, box.position.y - p.z).max(Vector2(p.x - box.end.x, p.z - box.end.y))
 		var d := off.max(Vector2.ZERO).length()
-		if not perks.is_empty() and d < best_d:
-			best = String(perks[0])
+		if ward != "" and d < best_d:
+			best = ward
 			best_d = d
 	return best
 

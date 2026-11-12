@@ -49,17 +49,17 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 57 |  |
-| Stormcrown Gaol | camp | Storm | dangerous | 10 |  |
+| The Crown | heart | Gloom | dangerous | 53 |  |
+| Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
 | Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 18 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 23 |  |
-| Thornwood | nest | Bloom | contested | 76 | Bramble Rise |
-| Larkhollow | landing | Meadow | quiet | 44 | The Hollow |
-| Highwatch | landing | Frost | quiet | 3 | The Lookout |
-| Duskmoor | landing | Storm | quiet | 21 | Moor Chapel |
-| Saltmere | landing | Bloom | quiet | 16 | Salt River |
+| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 24 |  |
+| Thornwood | nest | Bloom | contested | 74 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 39 | The Hollow |
+| Highwatch | landing | Frost | quiet | 6 | The Lookout |
+| Duskmoor | landing | Storm | quiet | 17 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 17 | Salt River |
 
 ### Boss lairs
 
@@ -79,9 +79,9 @@ Ground that changes the way across a region. Your active Boki's type (or, for de
 
 | Hazard | Where | Does | Safe with |
 |---|---|---|---|
-| Lava Field | Cinder Steps | Burning | Ember type, Lava-walker perk |
-| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak, Tidewader perk |
-| Ice Sheet | Frostgate | No footing | Frost type, Iceboots perk |
+| Lava Field | Cinder Steps | Burning | Ember type |
+| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak |
+| Ice Sheet | Frostgate | No footing | Frost type |
 | Static Flats | Stormbreak | Shocks | Storm type, Tempest type |
 | Bramble | Thornwood | Slow, scratches | Bloom type, Spore type |
 
@@ -143,6 +143,8 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+
+**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnback turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## First Flight

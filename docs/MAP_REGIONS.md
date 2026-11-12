@@ -4,6 +4,8 @@ One line per region: landmark (what you name it by from afar) · terrain · cove
 Built by `tools/make_hollowcrown.py` (purposes and loot leans in its `regions` list); checked by `--hot-zone-check`.
 Each match also picks one region (not the Crown) as the **hot drop zone**: loot there rolls a rarity step better, it's ringed on the drop map and minimap, and one bot squad usually heads there (`scripts/match/hot_zone.gd`).
 
+The drop map shows every monster camp as a campfire (1, 2 or 3 flames by size, a crown on a Chief), "N camps: to level L" under each region's name, and the hot zone as "HOT: bigger camps, better loot" (`scripts/ui/camp_map.gd`, decision 0048). Cleared camps dim for the squads that were near them. Thin smoke columns mark the camps during the drop (`scripts/match/camp_smoke.gd`). `--camp-map-check` covers it; `--region-shots` writes `drop_map.png` and `dive_smoke.png` (copies in `docs/shots/early-camps-map-ui/`).
+
 - **The Crown** (gloom): rune ring over the vault · broken stone crown, a lv 4 terrace round the lv 8 Throne, two Gaol lair rocks · sparse gloom grass on the terrace edges · the vault, the two boss Gaols, the richest chests, the most Blight · the Heart (center vault).
 - **Frostgate** (frost): hooded ice statue · the Keep's high ground (lv 6) over the Gate Span, open Rimefield below · almost bare, cover is the Keep's walls · best armor on the map (armor ×1.6) · base camp.
 - **Cinder Steps** (ember): forge chimney · a lv 2 mesa with the lv 6 Kilns plateau over the Forge Yard · a few scorched clumps by the camp and stairs · gloves and weapon tunings (glove ×1.6), a camp to level on · forge / outpost.
@@ -14,11 +16,27 @@ Each match also picks one region (not the Crown) as the **hot drop zone**: loot 
 - **Duskmoor** (storm): standing-stone ring · low moor with the raised (lv 2) ruined Moor Chapel floor and its broken walls · grass in the ruins' lee · relics (passive ×2.0), a skiff dock out · ruins / vault-lite.
 - **Saltmere** (bloom): white salt obelisk · a dry salt river between two lv 2 banks · grass along both banks · salt caches (the outer ring's most chests), an uplink out · riverside landing.
 
-**Terrain hazards** (`HAZARD_AREAS` in `tools/make_hollowcrown.py`; `TerrainHazards`, values in `content/rules/terrain_hazards.json`, decision 0060): ground that changes the way across a region, each with a bright edge, clear of every spot, stair foot and exit, never cutting an island off. Your active Boki's type or a hazard perk (Lava-walker, Tidewader, Iceboots: perk orbs, likelier near their field) walks it safely; a shield chip on the HUD says so, also when you are next to it. The Boki tells you when one is near and whether it can handle it, and bots go round what theirs can't.
+## Shops
+
+Each region lists its vendors in `regions[].shops` ([x, z, stock], `tools/make_hollowcrown.py`, written to `content/maps/hollowcrown.json`); the stocks are themes in `content/rules/shops.json`, the same every match, bought with the gems picked up this run. Re-placing a shop for a new layout is one edit of its region's list: a spot that lands off the region's open ground moves to the nearest open tile of that region within `snap_tiles` (`Shops.spot`), and `--region-shops-check` fails if a region ends with none, more than two, or a shop on someone else's land. Vendors show on the drop map, the full map (legend) and the minimap (a detail kind: on a hold, or once in view). Bots buy belt items and repairs, and upgrades (armor tier, rarer gear, perks) once they hold more than the upgrade reserve.
+
+- **The Crown**: Crown Exchange (premium: prices ×1.5, Epic gear): Mirror, Vortex and Skyhook gloves, the Gale Cloak, Hollow and Storm Brands, Keen Edge.
+- **Frostgate**: Frostgate Armory: armor tiers, repairs, the three armor pieces, Shield cell, Plating, Sure Foot (ice ward).
+- **Cinder Steps**: Kiln Forge (gloves: Power, Rocket, Blink, Fissure, Hook; Shatter Charge; Emberwalk, the lava ward) and Tuning Bench (weapon tunings, Ember Brand, Tinker's Roll, Quick Hands).
+- **Stormbreak**: Stormbreak Outfitters: backpack, Quickstep and Windstep boots, the movers (Spring pad, Stim, Cloud Raft, Gust Fan), Grounded (lightning ward).
+- **Thornwood**: Thornwood Snares: Smoke, Thorn Wall, Blight Flask, Pilfer Pouch, Venom Brand, Spore Mask (spore ward).
+- **Larkhollow**: Larkhollow Provisions: the heals (Medkit, Deep Draught, Hearth Lamp, Toss Satchel) and healing perks.
+- **Highwatch**: Lookout Post: scouting (Scanner, Lookout Lantern, Hawk Whistle, Omen Draught), Skylark boots, Brass Spyglass, Featherfall.
+- **Duskmoor**: Chapel Relics: the passive gloves (Focus, Cooling, Glider, Hover), Twin Gate, Warp Seed, Clear Mind, Overcharge.
+- **Saltmere**: Salt Market: Lostway Scroll, Bounty Banner, Skyfall Charge, Magpie Pouch, Wayfarer's Satchel, Second Wind, Tidewader (deep-water ward).
+
+Every shop also sells Tonic and Armor kit. The ward perks (`Data.PERKS` `ward` = the hazard kind) keep that ground off you, its big fields and its biome traps alike (`TerrainHazards.shield`): Emberwalk (lava), Sure Foot (ice), Grounded (static), Spore Mask (bramble), Tidewader (deep water). Perk orbs only drop one within 40 m of its field.
+
+**Terrain hazards** (`HAZARD_AREAS` in `tools/make_hollowcrown.py`; `TerrainHazards`, values in `content/rules/terrain_hazards.json`, decision 0060): ground that changes the way across a region, each with a bright edge, clear of every spot, stair foot and exit, never cutting an island off. Your active Boki's type or the kind's ward perk (bought in the region's shop, or from a perk orb next to the field) walks it safely; the best single source counts, they never add up; a shield chip on the HUD says so, also when you are next to it. The Boki tells you when one is near and whether it can handle it, and bots go round what theirs can't.
 
 **Big fields** (owner 11-11): a region built round a hazard is tagged `hazard` (kind) and `share` (its ground under it) in the map's `regions`, so another layout can reuse the tags. A field is an outline with `safe` shapes cut out (`lane()` causeways and fords, `stones()` islets); every spot the field reaches gets a stone islet (`carve_islets`), and `check_hazards` fails a region under its `hazard_min` or a field that cuts an island off.
-- **Cinder Steps** (lava, 44%): the Forge Yard is a lava lake with causeways south from the Kilns stair, moats beside the Kilns and pools on its top. Ember Boki or Lava-walker: walk it.
-- **Frostgate** (ice, 37%): the Rimefield, the strip south of the Keep and the Keep's yard are ice sheets with packed-snow lanes: no footing, you slide. Frost Boki or Iceboots: full footing.
-- **Saltmere** (deep water, 41%): the river is wide channels with two fords and a sandbar for the uplink: slow, weaker hits, you drown once your breath runs out. Swimmers or Tidewader: swim fast.
+- **Cinder Steps** (lava, 53%): the Forge Yard is a lava lake up to the foot of the Kilns' cliff, crossed by causeways from the Kilns stair; the Kilns' top is two lava pools either side of the spine; the north lowland is a lava field with one path from the glides. Ember Boki or Emberwalk: walk it.
+- **Frostgate** (ice, 37%): the Rimefield, the strip south of the Keep and the Keep's yard are ice sheets with packed-snow lanes: no footing, you slide. Frost Boki or Sure Foot: full footing.
+- **Saltmere** (deep water, 32%): the river is wide channels with two fords and a sandbar: slow, weaker hits, you drown once your breath runs out. Swimmers or Tidewader: swim fast.
 - **Stormbreak**: static flats south-east of the shrine stair charge up and shock (damage, short stun) every few seconds. Storm and Tempest Boki: no shock.
 - **Thornwood**: a bramble patch by the north camp slows and scratches. Bloom and Spore Boki: untouched.
