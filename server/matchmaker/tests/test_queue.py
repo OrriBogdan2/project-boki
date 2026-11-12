@@ -45,11 +45,12 @@ class QueueTest(unittest.TestCase):
         self.assertEqual(len(self.q.pick("arena", 160)), 1)
 
     def test_trio_takes_up_to_the_match_size_and_leaves_the_rest(self):
-        for i in range(32):
+        n = self.cfg.trio_slots
+        for i in range(n + 2):
             self.q.add(ticket("trio", f"p{i}", 100 + i))
         picked = self.q.pick("trio", 100)
-        self.assertEqual(len(picked), self.cfg.trio_slots)
-        self.assertEqual([t.name for t in self.q.waiting["trio"]], ["p30", "p31"])
+        self.assertEqual(len(picked), n)
+        self.assertEqual([t.name for t in self.q.waiting["trio"]], [f"p{n}", f"p{n + 1}"])
 
     def test_position_and_eta(self):
         first, second = ticket("duel", "a", 100), ticket("duel", "b", 105)
@@ -109,13 +110,14 @@ class PartyPickTest(unittest.TestCase):
         self.q = TicketQueue(cfg.modes(), cfg.fill_timeout)
 
     def test_a_party_never_straddles_two_batches(self):
-        for i in range(29):
+        n = Config().trio_slots
+        for i in range(n - 1):
             self.q.add(ticket("trio", f"s{i}", 100 + i))
         trio = [ticket("trio", f"t{i}", 200, "TTTTT") for i in range(3)]
         for t in trio:
             self.q.add(t)
         first = self.q.pick("trio", 100)
-        self.assertEqual(len(first), 29)
+        self.assertEqual(len(first), n - 1)
         self.assertFalse(any(t.party for t in first))
         self.assertEqual(self.q.waiting["trio"], trio)   # kept its place for the next batch
 
@@ -125,9 +127,10 @@ class PartyPickTest(unittest.TestCase):
         self.assertEqual(len(self.q.pick("trio", 120)), 1)
 
     def test_one_party_per_team_at_most(self):
-        for i in range(11):
+        teams = Config().trio_slots // 3
+        for i in range(teams + 1):
             self.q.add(ticket("trio", f"p{i}", 100 + i, f"PARTY{i:03d}"))
-        self.assertEqual(len(self.q.pick("trio", 125)), 10)
+        self.assertEqual(len(self.q.pick("trio", 125)), teams)
         self.assertEqual(len(self.q.waiting["trio"]), 1)
 
 

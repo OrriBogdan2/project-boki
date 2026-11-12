@@ -73,7 +73,7 @@ class LifecycleTest(unittest.TestCase):
         self.core.tick()
         ready_all(self.core)
         proc = self.core.launcher.started[0]
-        self.assertEqual((proc.extra["slots"], proc.extra["team_size"]), (30, 3))
+        self.assertEqual((proc.extra["slots"], proc.extra["team_size"]), (18, 3))
         self.assertEqual({self.core.status(t)["state"] for t in (a, b)}, {"ready"})
 
     def test_version_mismatch_is_rejected(self):

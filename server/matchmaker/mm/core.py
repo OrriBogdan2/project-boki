@@ -8,6 +8,7 @@ from .config import Config
 from .launcher import Launcher, PortPool, new_token
 from .log import log
 from .party import Parties
+from .picks import PickPhase
 from .queue import MAX_START_TRIES, TicketQueue, Ticket, assign_slots, new_ticket
 
 FORGET_GONE_S = 300.0   # a gone ticket answers `gone` for this long, then is dropped from memory
@@ -23,6 +24,7 @@ class Match:
         self.parties = parties       # codes of the parties seated in this match
         self.ready = False
         self.proc = None
+        self.picks = None     # PickPhase: the Hunter picks, once the server is spawned
 
 
 class Matchmaker:
@@ -86,6 +88,21 @@ class Matchmaker:
             self._gone(ticket, "cancelled")
             return True
 
+    def pick(self, ticket_id: str, hunter: str) -> dict:
+        """A Hunter pick for this ticket's slot ("" only reads): `{"ok", "picks"}` or `{"error": ...}`.
+        Works after the ticket's token is spent (joined): picking happens once everyone is in."""
+        with self.lock:
+            ticket = self.tickets.get(ticket_id)
+            match = self.matches.get(ticket.match_id) if ticket is not None else None
+            if match is None:
+                return {"error": "no_match"}
+            now = self.clock()
+            why = match.picks.choose(ticket.slot, hunter, now) if hunter else ""
+            out = {"ok": why == "", "picks": match.picks.state(now)}
+            if why:
+                out["error"] = why
+            return out
+
     # -- periodic -----------------------------------------------------------------------------------
 
     def tick(self) -> None:
@@ -93,6 +110,7 @@ class Matchmaker:
             now = self.clock()
             for match in list(self.matches.values()):
                 self._drain(match, now)
+                match.picks.tick(now)
             self._expire(now)
             self.parties.tick(now)
             for mode in self.modes:
@@ -129,6 +147,7 @@ class Matchmaker:
             tokens[ticket.token] = {"name": ticket.name, "slot": slot, "team": slot // shape.team_size}
             by_slot[slot] = ticket
         match = Match(match_id, mode, port, by_slot, now, {t.party for t in picked if t.party})
+        match.picks = PickPhase(shape.slots, shape.team_size, set(by_slot), secrets.randbits(32), now)
         extra = {"slots": shape.slots, "team_size": shape.team_size, "expires": now + self.cfg.token_ttl_s}
         match.proc = self.launcher.start(match_id, mode, port, tokens, extra)
         self.matches[match_id] = match
@@ -164,6 +183,7 @@ class Matchmaker:
     def _joined(self, match: Match, slot: int) -> None:
         ticket = match.by_slot.get(slot)
         log("player_joined", match=match.id, slot=slot, name=ticket.name if ticket else "bot")
+        match.picks.join(slot)
         if ticket is not None and ticket.state != "gone":
             self._gone(ticket, "joined")   # the token is spent: this ticket never hands it out again
 

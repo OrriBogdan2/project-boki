@@ -107,7 +107,7 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 	if H.lvl_pop > 0.0:
 		H._rounded(pr.grow(6.0 + k * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
 		H._rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
-	var bc := pr.position + Vector2(6, pr.size.y - 6)
+	var bc := pr.position + Vector2(14, pr.size.y - 14)      # inset: the ring reaches 30 px out, keep it in the window
 	var r := 26.0 * sc
 	# the coin sits in a notch of the frame: ringed in the frame's colour, a dark gap between
 	c.draw_circle(bc, r + 4.0, Color(p.accent(), 0.9))
