@@ -770,7 +770,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not needle.is_empty() or rmb_down:
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5 and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5:
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return

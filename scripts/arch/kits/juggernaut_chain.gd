@@ -142,11 +142,11 @@ func _miss(at: Vector3) -> void:
 	k.vfx("chain_snap", at)
 
 ## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
-func snap(loud := true) -> void:
+func snap(quiet := false) -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
-		if loud:
+		if not quiet:
 			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
 	elif state == "pulling":
 		_stop("stopped", false)
@@ -267,7 +267,7 @@ func _tick_hooked(dt: float) -> void:
 		snap()
 		return
 	if tether_t <= 0.0:
-		snap(false)
+		snap(true)
 		return
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most

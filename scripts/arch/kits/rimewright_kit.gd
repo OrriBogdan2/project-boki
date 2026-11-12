@@ -49,6 +49,7 @@ const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the 
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
+const RINK_BAND := 0.25        # m: the width of the Rimelock ring, its outer edge on the hit radius
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -216,7 +217,9 @@ func _throw_dart() -> void:
 	var bow := 0.0 if skating else deg_to_rad(float(wd.get("bow_deg", 18.0))) * side
 	var v := dir.rotated(bow)
 	var start := Vector3(h.pos.x + v.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + v.y * 0.6)
-	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy)
+	# dash.skate_dart_dmg_k: damage multiplier (unitless, x plain) of a dart fired from the skate (wiki: 2x)
+	var skate_k := float(dash_def()["skate_dart_dmg_k"]) if skating else 1.0
+	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy) * skate_k
 	var spd := (float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])) * _heavy_k("speed_k", heavy)
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
@@ -1025,13 +1028,15 @@ func rime_slow_of(f: Ent) -> float:
 	return float((rime["slow"] as Dictionary).get(f.get_instance_id(), 0.0))
 
 
-## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees
-## and the creaks; her body is IceBody's.
+## The rink (snaps out in snap_t, its cracks brighter as it builds), the frost bud at her feet, the thin
+## lit ring at the hit radius everyone sees (brighter as it builds: the countdown) and the creaks; her
+## body is IceBody's.
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
 	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
-	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
+	ulk().keep("bud", "frostbud", at, {"grow": snap, "crack": k})
+	AimKit.circle(h, "x", {"at": at, "r": radius, "band": RINK_BAND, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:
 		rime["creak"] = lerpf(0.8, 0.35, k)
@@ -1085,6 +1090,7 @@ func _rime_clear() -> void:
 		ice.thaw()
 	if ult_look != null:
 		ult_look.drop("rink")
+		ult_look.drop("bud")
 		if anim_id == "tm_rime_hold":
 			anim_id = ""
 

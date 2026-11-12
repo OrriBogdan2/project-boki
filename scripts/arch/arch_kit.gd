@@ -958,8 +958,7 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 
 ## The payoff becoming armed: the body glow, the ready ping (the owner's slot pings too).
 func armed_fx(slot := "sec") -> void:
-	var rc := res_col()
-	m.fx.body_glow(h.pos, rc)
+	m.fx.body_glow(h.pos, res_col())
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 

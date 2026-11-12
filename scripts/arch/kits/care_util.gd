@@ -92,4 +92,3 @@ static func carried_tick(m: Node, o: Hunter) -> bool:
 	o.set_meta("stomped", false)
 	o.set_meta("revivers", [])
 	return true
-

@@ -145,6 +145,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		if m.time - _stab_at > 1.2:
 			_stab_at = m.time
 			backstabs += 1
+			m.fx.ring(t.pos, 0.9, res_col(), 0.2)         # the back bonus has no word: a ring on the foe
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg
 
@@ -424,6 +425,7 @@ func _grab(f: Ent, ally := false) -> void:
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
 		hook_hold = null
+		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul: a dull warning, no word
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
@@ -474,6 +476,7 @@ func _tick_pull(_dt: float) -> void:
 		"arrived": _end_pull(true)
 		"walled":
 			snags += 1
+			m.fx.dust(fe.pos, 8)
 			_end_pull(false)
 		"": pass
 		_: _end_pull(false)
@@ -492,7 +495,6 @@ func _arm_thick() -> float:
 func _end_pull(arrived: bool) -> void:
 	var f = pull.get("t")
 	var ally: bool = pull.get("ally", false)
-	var wisp: bool = pull.get("wisp", false)
 	var tow: Dictionary = pull.get("tow", {})
 	if is_instance_valid(f):
 		_snap_back((f as Ent).pos + Vector3(0, 0.95, 0))
@@ -510,9 +512,8 @@ func _end_pull(arrived: bool) -> void:
 	if arrived and is_instance_valid(f) and not (f as Ent).dead:
 		arrivals += 1
 		var rdf := rmb_def()
-		if ally:
-			return
-		payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
+		if not ally:
+			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
@@ -822,7 +823,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():
 		return
 	var tf := tgt as Ent
-	if HeroUlt.ready(self) and los and dist < 3.5:
+	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.8:      # (the fan's slugs reach its range)
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return

@@ -62,16 +62,17 @@ func _window(hero: String, slot: String) -> void:
 			String(cw.get("slot", "")) == slot and float(cw.get("left", 0.0)) > 0.0, str(cw))
 	await done(m)
 
-## Ostra's seed left alone: the window runs out and the E slot goes dark (never closes silently).
+## Dolm's dash left alone: the window runs out and the slot goes dark (never closes silently). Ostra's
+## seed no longer runs out (it waits at full size for the recast), so a timed, non-auto window stands in.
 func _expired() -> void:
-	var s := setup("ostra", 6.0)
+	var s := setup("dolm", 6.0)
 	var m: Match = s[0]
 	var P: Hunter = s[1]
 	aim_at(P, s[2].pos)
-	P.ak.use_e()
-	_open(m, P, "e")
-	step(m, P.ak.e_t + 0.3)
-	ok("ostra e: an unused window darkens the slot", String(P.ak.cue.get("exp_slot", "")) == "e"
+	_first(m, P, "dash")
+	var w := _open(m, P, "dash")
+	step(m, float(w.get("left", 0.0)) + 0.3)
+	ok("dolm dash: an unused window darkens the slot", String(P.ak.cue.get("exp_slot", "")) == "dash"
 			and float(P.ak.cue.get("exp_t", 0.0)) > 0.0, str(P.ak.cue.get("exp_slot", "")))
 	await done(m)
 

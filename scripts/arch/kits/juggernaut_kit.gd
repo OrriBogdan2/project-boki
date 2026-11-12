@@ -8,10 +8,10 @@ extends ArchKit
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
-## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a magenta strike lane (more to
+## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a crimson strike cone (more to
 ##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
-##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
+##   wind-up, a crimson lane that grows, its rim hot at full, a rising whine; you can jump while charging;
 ##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop straight down, its hit
 ##   circle just ahead (everyone in it knocked down, the airborne spiked; while it rests, an air press is the
 ##   ground Smash), during the Warchain's pull a Cinder Spin.
@@ -21,9 +21,8 @@ extends ArchKit
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
-const SLASH_OUT := Color("ff3df0")     # the Slam's magenta strike lane
-const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
-const LUNGE_FULL := Color("ff3df0")    # ... at full
+const SLASH_OUT := Color("ff3df0")     # the greatsword slash's magenta edge
+const LUNGE_FULL := Color("ff8a6a")    # the cursor ring at a full Lunge: his crimson gone hot
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
@@ -223,6 +222,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		knock_healed += h.hp - hp0
 		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
 		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
+		m.fx.number(h.pos + Vector3(0, 2.7, 0), h.hp - hp0, Color("7fe08a"), true, "+")
 		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
@@ -290,7 +290,7 @@ func _drop_holds() -> void:
 	slam_w = {}
 	haul = {}
 	meteor.cancel()
-	warchain.snap(false)
+	warchain.snap(true)
 	rmb_queued_at = -9.0
 	e_held = false
 	dash_held = false
@@ -554,20 +554,20 @@ func rmb_hold_tick(t: float) -> void:
 	var sd := rmb_def()
 	if not lunge_charging():
 		return
-	# the Lunge charging: a lane grows ahead of you with a fill, magenta and flashing at full; the cursor ring
+	# the Lunge charging: a crimson lane grows ahead, filling toward the far end, its rim hot at full; the cursor ring
 	# fills; a rising whine on the way in, a ping at full
 	var k := lunge_k(t)
 	var ld: Dictionary = sd["lunge"]
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
-			"width": lunge_w(), "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
+			"width": lunge_w(), "soft": true, "tip": true}
 	if _aims_down_chain():
 		var to := warchain.to_anchor()
 		lane["dir"] = to
 		lane["len"] = to.length()
 		lane["len0"] = lane["len"]
 	AimKit.lane(h, "rmb", lane)
-	AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
+	AimKit.charge(h, k, {"col": AimKit.hero_col(h), "col2": LUNGE_FULL})
 	HeroVfx.of(m).hold(h, "lunge_charge", k)
 	if anim_id != "jug_lunge_wind":
 		play("jug_lunge_wind")
@@ -728,11 +728,11 @@ func _tick_slam(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
 		return
-	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
+	# the short crimson strike cone ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
+	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "soft": true,
 			"all": true}
 	if pin != Vector2.ZERO:
 		cone["dir"] = pin

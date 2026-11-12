@@ -141,6 +141,7 @@ func add_spark(f: Ent, n := 1) -> void:
 		var top := f.position + Vector3(0, 9.0, 0)
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
 		m.sfx("vv_static_full", f.pos, -2.0)
+		# the word goes above the marker so the two never print over each other
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
 	elif int(s["n"]) > was:
@@ -817,7 +818,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not wire.is_empty() or rmb_down or ult.busy():
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]):
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return

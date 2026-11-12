@@ -578,12 +578,15 @@ func _reset_fx(t: Ent) -> void:
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
+	var hp0 := h.hp
 	h.heal(h.max_hp * float(rd.get("heal_knock", 0.15) if mine else rd.get("heal_assist", 0.25)))
+	var got := h.hp - hp0
 	if is_instance_valid(t):
 		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, Color(1, 0.9, 0.9))
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
+	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ RMB: Bola
