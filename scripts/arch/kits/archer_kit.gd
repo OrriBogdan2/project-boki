@@ -214,7 +214,7 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
-	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check); its clip runs on the hold's clock
+	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check); its clip: the hold's clock
 
 func rmb_hold_tick(t: float) -> void:
 	if t > float(rmb_def()["hold"]) and not pin_aim:
@@ -318,7 +318,6 @@ func _pin(a: Vector3, k: float) -> void:
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
@@ -330,7 +329,6 @@ func _pin(a: Vector3, k: float) -> void:
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
-					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
