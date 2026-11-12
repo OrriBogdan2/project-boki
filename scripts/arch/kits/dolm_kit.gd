@@ -250,7 +250,7 @@ func _tick_dive() -> void:
 		slam.land(dive_k)
 	elif dive_fall and h.over_void() and h.pos.y <= h.lip_y - float(slam_def()["void_drop"]):
 		_end_plunge()
-	elif dive_fall:
+	elif dive_fall and h.lfloat.is_empty():      # caught on a ledge's face, he rises over it and slams on top
 		h.vel.y = minf(h.vel.y, -dive_speed())
 
 ## Over the abyss the plunge takes him `void_drop` under the nearest lip and no further (low, never

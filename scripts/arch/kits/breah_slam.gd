@@ -162,6 +162,7 @@ func fire(c: Dictionary) -> void:
 	if h.gliding:
 		# the source's slam out of a glide: the glider folds at once and she plunges at its dive speed
 		h.gliding = false
+		h.auto_glide = false  # an updraft's auto-glide folds with it
 		h.fly_t = 0.0
 		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
 		k.m.sfx("glide", h.pos, -6.0, 0.7)
