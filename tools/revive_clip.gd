@@ -75,5 +75,6 @@ func _beat(t: float, P: Hunter, mate: Hunter, foe: Hunter) -> void:
 	for still: Array in [["down", STILL_DOWN], ["revive", STILL_REVIVE]]:
 		if not _stills.has(still[0]) and t >= float(still[1]):
 			_stills[still[0]] = true
-			main.get_viewport().get_texture().get_image().save_png(String(media.dir).path_join(String(still[0]) + ".png"))
+			var file := String(media.dir).path_join(String(still[0]) + ".png")
+			main.get_viewport().get_texture().get_image().save_png(file)
 			media._mark("still " + String(still[0]))

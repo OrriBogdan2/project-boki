@@ -1743,7 +1743,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := sz.y - 222.0
 	if not it.is_empty():
-		var prog := 0.0
+		var prog := -1.0       # no bar for a plain "press to open"
 		match it["kind"]:
 			"revive": prog = it["ent"].revive
 			"finish": prog = p.finish_t / Life.R["stomp_commit"]
@@ -1756,12 +1756,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
 			"heart": prog = float(it.get("prog", 0.0))
 		if not WaysOutHud.gate_prompt(self, sz, y, it):
-			var s: String = it["label"]
-			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
-			if prog > 0.0:
-				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
+			PromptBar.draw(c, Vector2(sz.x * 0.5, y), String(it["label"]), it.get("col", GOLD), prog)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)

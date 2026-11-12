@@ -51,9 +51,9 @@ func run(main: Node) -> void:
 		f.teleport(P.pos + Vector3(-12.0, 0, 0))
 	if ally.kin: (ally.kin as Kin).stow()
 	m.knock(ally, foes[0], {})
-	var f0 := DownedMarks.bleed_frac(ally)
+	var f0 := ally.down_hp / float(Data.MATCH["down_hp"])
 	_run(m, 1.0)
-	var f1 := DownedMarks.bleed_frac(ally)
+	var f1 := ally.down_hp / float(Data.MATCH["down_hp"])
 	ok(f0 > 0.95 and f1 < f0, "the bleed-out drains (%.2f -> %.2f)" % [f0, f1])
 	var k: Kin = ally.kin
 	ok(k != null, "the downed teammate has a Boki")
