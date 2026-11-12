@@ -5,6 +5,7 @@ extends RefCounted
 ## full-health light hunter). Runs inside tools/hero_combo_check.gd and reports through its ok().
 
 const BURST := preload("res://tools/ult_burst.gd")
+const EXIT := preload("res://tools/ult_exit.gd")
 const KIN := "pebbit"            # a Boki to bond with (the bond only fills while one is ready)
 
 var hc: RefCounted                # tools/hero_combo_check.gd
@@ -117,6 +118,9 @@ func mage() -> void:
 	await _mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
+	var got: Dictionary = await EXIT.run(ac, "mage")
+	ok("Kitefall exit: Shift, LMB and jump pressed 0.1s before the strike go on its first free step",
+		EXIT.on_time(got), EXIT.said(got))
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
 	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",

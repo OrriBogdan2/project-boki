@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const EXIT := preload("res://tools/ult_exit.gd")
+
 var A
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
@@ -276,6 +278,9 @@ func zedran(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
 	await A.done(m)
+	var got: Dictionary = await EXIT.run(A, "juggernaut")
+	A.ok("juggernaut X exit: Shift, LMB and jump pressed 0.1s before the cleave lands go on its first free step",
+			EXIT.on_time(got), EXIT.said(got))
 
 ## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
 func _cleave_fits(d: Dictionary) -> void:

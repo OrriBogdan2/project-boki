@@ -6,6 +6,7 @@ extends "res://tools/archer_bulwark_combo_check.gd"
 ## hunter down). Prints AKCHECK lines like --archetype-check.
 
 const BURST_KIN := "cindle"
+const EXIT := preload("res://tools/ult_exit.gd")
 const MERGE_OPEN := 1.0        # s of the merge counted after the ult: its landing and its first attacks
 
 ## Holds LMB on `at` for `secs`.
@@ -303,6 +304,9 @@ func bjorn() -> void:
 	await done(m)
 	await _bjorn_more()
 	await _bjorn_burst()
+	var got: Dictionary = await EXIT.run(self, "bulwark")
+	ok("bjorn ult exit: Shift, LMB and jump pressed 0.1s before the plant ends go on its first free step",
+		EXIT.on_time(got), EXIT.said(got))
 
 ## A miss, the wall stop, an interrupt, a merge in the wind-up.
 func _bjorn_more() -> void:
