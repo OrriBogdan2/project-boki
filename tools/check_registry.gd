@@ -426,6 +426,7 @@ const CHECKS := {
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 	"--camera-fast-check": ["res://tools/camera_fast_check.gd", "camera_fast_check", "check"],      # locked follow
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
+	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],      # mashing LMB never beats holding
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

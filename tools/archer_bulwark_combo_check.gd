@@ -280,8 +280,9 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	P.inp["fire"] = true
-	m.step(DT)
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+		P.inp["fire"] = true
+		m.step(DT)
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok(

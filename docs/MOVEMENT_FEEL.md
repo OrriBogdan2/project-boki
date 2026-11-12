@@ -329,6 +329,27 @@ Asked: what the source does when a Hunter is knocked off an island. Evidence rea
 | Motley's Trade | Swaps a foe and Motley. | Owner override: hover-swap over the abyss. Foes land at Motley's spot, so a swap from over the abyss drops them. | Matches. |
 
 Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
+## LMB: mash vs hold (`--lmb-spam-check`)
+The source: mashing the mouse never beats holding. The weapon's cadence caps both, and a charge weapon restarts or ignores an early tap. Measured headless in the training strip, 3 s per run against an idle dummy pinned 3 m off (damage counted through `CombatBus.hit_landed`, plus 1 s after the key comes up). **held** is the key down the whole 3 s. **best** is the best play of the weapon as meant: the hold, hold-and-release cycles (0.7/1.0/1.3 s), or 50 ms taps in a steady 0.2-0.6 s rhythm (for a weapon whose tap is its own move). **clicks** are 20 Hz clicks (1 or 2 frames down out of 3, the worse of the two). The check fails when clicks beat best by more than one shot (the most damage landed in one frame), or when a draw weapon looses anything to the clicks. Hits / damage (2026-11-10):
+
+| Hunter | held | best (how) | clicks | one shot | |
+|---|---|---|---|---|---|
+| Vex | 23 / 86 | 23 / 86 held | 20 / 76 | 6 | ok |
+| Kael | 1 / 20 | 9 / 115 taps every 0.2 s | 10 / 128 | 13 | ok: the clicks are the slash series at its 0.34 s cadence |
+| Cinder | 27 / 376 | 27 / 376 held | 0 / 0 | 29 | ok: the flame needs its warm-up |
+| Meeko | 8 / 82 | 8 / 82 held | 8 / 82 | 12 | ok |
+| Tenzo | 1 / 24 | 3 / 49 cycle 1.0 s | 5 / 45 | 24 | ok: boulders at their 0.6 s cadence |
+| Lace | 1 / 30 | 2 / 90 cycle 1.3 s | **0 / 0** (was 6 / 90) | 60 | fixed |
+| Grimble | 22 / 59 | 22 / 59 held | 22 / 59 | 11 | ok |
+| Neve | 19 / 212 | 19 / 212 held | 16 / 120 | 60 | ok: a release restarts the dart rhythm before its heavies |
+| Sparkle | 5 / 60 | 5 / 60 held | 5 / 60 | 12 | ok |
+| Albert | 1 / 66 | 3 / 141 cycle 1.0 s | 10 / 120 | 59 | ok: throw and recall at their cadence |
+| Sable | 7 / 118 | 8 / 140 cycle 0.7 s | 8 / 140 | 22 | ok: a click is kept one bolt interval, never more |
+| Motley | 5 / 48 | 5 / 49 taps every 0.3 s | 5 / 48 | 12 | ok |
+
+- **Fixed, Lace's draw (the shared bow path, `Hunter._loose`):** a release inside the weapon's `draw_min` (longbow 0.08 s) looses nothing and the next press draws afresh. 20 Hz clicks used to loose a 15-damage tap arrow on every 0.5 s cooldown (6 arrows, 90, as much as the best hold). A deliberate tap (0.1 s or more) still looses the 15 tap shot.
+- In no other kit do the clicks get past the weapon's cadence: no clicks run beat the best play by more than one shot, so the shared press path (hunter.gd's `trigger`, DashFlow) needed no change.
+- Kael's 3 s hold is one Searing Wave (20). His clicks are the slash series, a separate move (source: press = series, hold = blast), at the same cadence as deliberate taps. How the series' damage compares with the wave's is a numbers question, not an input one.
 ## Walking while attacking (fire-move parity, 2026-11-09)
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in
