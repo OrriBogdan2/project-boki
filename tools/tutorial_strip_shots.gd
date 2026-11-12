@@ -19,6 +19,12 @@ func _shot(what: String) -> void:
 	var img := tree.root.get_viewport().get_texture().get_image()
 	img.save_jpg(dir.path_join("%dx%d_%s.jpg" % [win.x, win.y, what]), 0.9)
 
+## The farm strip's rect in window pixels (the farm's UI root is scaled up on big screens).
+func _on_screen(sv: StripView) -> Rect2:
+	var r := sv.rect()
+	var xf := sv.get_global_transform_with_canvas()
+	return Rect2(xf * r.position, r.size * xf.get_scale())
+
 func _check(what: String, r: Rect2, notice: Rect2) -> void:
 	var sz := Vector2(win)
 	var margin := maxf(24.0, sz.y * 0.04)
@@ -45,6 +51,7 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	tree.root.size = win
 	await _wait(1.0)
+	if main.fade: main.fade.reveal(0.05)      # the boot splash stays up for a screen a tool starts
 	await _match()
 	await _farm()
 	print("TUTSTRIP DONE, failures: ", bad)
@@ -88,10 +95,14 @@ func _farm() -> void:
 		await _wait(0.5)
 	await _wait(1.0)
 	var h = main.screen_node()
+	if String(h.panel_open) == "Welcome home":
+		h._close_panel()      # its dim would hide the strip; closed as its "Let's go" does
+		await _wait(0.5)
 	print("TUTSTRIP farm tutorial active: ", FarmTutorial.active(), " step ", FarmTutorial.current())
 	h.guide.tick(0.6)
 	await _wait(0.25)
 	await _shot("farm_pulse")
 	await _wait(3.0)
-	_check("farm strip", h.guide.hint_box.rect(), Rect2(Vector2(win.x * 0.72, 0), Vector2(win.x * 0.28, win.y * 0.04)))
+	var notice := Rect2(Vector2(win.x * 0.72, 0), Vector2(win.x * 0.28, win.y * 0.04))
+	_check("farm strip", _on_screen(h.guide.hint_box), notice)
 	await _shot("farm_calm")
