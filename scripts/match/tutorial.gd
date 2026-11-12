@@ -498,6 +498,8 @@ func _stall(dt: float) -> void:
 		if d < best_d - 1.0:
 			best_d = d
 			stall_t = 0.0
+	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
+		stall_t = 0.0      # (holding the circle while the capture runs is the progress)
 	if stall_t >= NAG_T and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)

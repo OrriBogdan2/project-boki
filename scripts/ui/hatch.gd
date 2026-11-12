@@ -404,7 +404,9 @@ func _show_create() -> void:
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
+	if sub_lbl:
+		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round." % [
+				Settings.key_cap("left"), Settings.key_cap("right")]
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
 	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
 	look_at_t = CREATE_LOOK
