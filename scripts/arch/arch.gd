@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Kael, Cinder, Meeko, Tenzo, Lace, Grimble, Neve, Motley, Mossy, Sparkle, Sable
+const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright", "mage", "thief", "ostra", "gil"]   # canonical Hunter order (display and unlock order everywhere): Lace, Kael, Vex, Albert, then Cinder, Meeko, Tenzo, Grimble, Neve, Sparkle, Sable, Motley, Gil
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -73,11 +73,15 @@ static func of_save() -> String:
 	return fix(String(Save.d.get("arch", "")), Data.class_of_save())
 
 ## A bot's archetype from a key (its id and the match seed): its own random stream, so picking one
-## never shifts the match's (seeded maps, loot and tests stay as they were).
-static func pick_for(cls: String, key: String) -> String:
+## never shifts the match's (seeded maps, loot and tests stay as they were). One already in `taken`
+## (its squad's) is skipped while the class has another.
+static func pick_for(cls: String, key: String, taken := []) -> String:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
-	return pick(cls, r)
+	var pool := of_class(cls).filter(func(a): return not taken.has(a))
+	if pool.is_empty():
+		return pick(cls, r)
+	return String(pool[r.randi_range(0, pool.size() - 1)])
 
 ## A random archetype of a class (bots).
 static func pick(cls: String, rng: RandomNumberGenerator) -> String:
