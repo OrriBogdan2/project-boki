@@ -57,4 +57,8 @@ static func _passes(m: Match, mover: Ent, other: Ent) -> bool:
 	if friendly(m, mover, other):
 		return true
 	var src := mover_of(m, mover)
-	return src != null and is_instance_valid(src) and (src == other or friendly(m, src, other))
+	if src == null or not is_instance_valid(src):
+		return false
+	# a hauled body slides through its hauler; a knocked one still meets the hunter who hit it (the dash that
+	# knocks it, the leap that lands on it), only its caster's side is pass-through
+	return friendly(m, src, other) or (src == other and not m.displace.towing(mover).is_empty())
