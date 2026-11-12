@@ -2446,8 +2446,8 @@ func on_wall_slam(e: Ent) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.6          # about 106 degrees wide
-const NEAR_SENSE := 3.2
+const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same wedge)
+const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
 	if target.team == team_i or target.downed:
@@ -2456,7 +2456,7 @@ func can_see(team_i: int, target: Hunter) -> bool:
 
 func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool:
 	var in_grass := world.in_bush(p.x, p.z) or in_smoke(p)
-	var near := 1.6 if crouched else NEAR_SENSE
+	var near := NEAR_SENSE * (0.5 if crouched else 1.0)
 	# (muzzle flashes and a Warden's light give you away at full range, whatever the raid condition)
 	var rng := VIEW_RANGE + 2.0 if revealed else view_range(crouched)
 	for h in hunters:
