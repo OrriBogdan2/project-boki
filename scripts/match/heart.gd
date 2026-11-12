@@ -550,9 +550,11 @@ func _build() -> void:
 	_root.add_child(h)
 	Models.part(h, Models.cyl(1.5, 1.7, 0.3, 14), Models.toon(Color("cfc6c8")), Vector3(0, 0.15, 0))
 	Models.part(h, Models.cyl(1.1, 1.25, 0.2, 14), Models.toon(Color("e6dde0")), Vector3(0, 0.4, 0))
-	var glass := Models.toon(GLASS, false, 0.45)
-	Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
-	Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
+	# the sculpted glass heart; without its model, a glass egg
+	if ItemArt.add(h, "heart", 0.5, Color.WHITE, 0.3) == null:
+		var glass := Models.toon(GLASS, false, 0.45)
+		Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
+		Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
 	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(COL, 0.1)), Vector3(0, 1.6, 0))
 	_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new()
