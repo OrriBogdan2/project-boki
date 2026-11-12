@@ -1,5 +1,14 @@
 # Merge candidate 20261110-0630 (built by cron, no Claude usage)
 
+## Merged onto origin/main fb360f614 (deep job 20261112-152524-a3, 2026-11-12)
+Main's tutorial rewrite wins (1915516a1, after the owner rated the old course 4/10). The match and farm
+tutorials, their checks and the Hob/farm flow are main's, as ext/mc-20261109-2230 resolved them. Dropped
+from this candidate with the code they leave orphaned: the short-tutorials bundle (37dc18d84: Pell guide,
+TutorialRival, NpcDialogue, FirstTimeHint/MatchHints/FarmHints, Save v13 hints step), combat v2 / beats 7-8,
+and farm batch 1108 + axe at start (779560546, 1c6fdf4dd: HungerGate, spotlight phases, --farm-place-check).
+Everything else is kept: main + the candidate. Net.VERSION is 0.33.0. Save stays at main's v13.
+The NEW-RED / WORSE rows below were measured against d255acbe and were not re-gated against main.
+
 Headline: NEW-RED 5, WORSE 2, FIXED 0 of 239 checks; 234 merged, 578 skipped; release exports FAIL; GPU jobs not finished: 2
 
 Base: origin/main d255acbe. Health: HEALTH FAIL: style ratchet (docs/STYLE.md) (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)
