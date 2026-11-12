@@ -53,8 +53,7 @@ static func drive(m: Match) -> void:
 				if sid == "glide": p.inp["glide"] = true
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
-			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
-				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
+			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
@@ -77,6 +76,13 @@ static func drive(m: Match) -> void:
 			p.inp["jump"] = true       # a ledge in the way: jump it, as a player would
 	if still_t > 1.5 and go != Vector2.ZERO:
 		p.inp["jump"] = true       # (stuck against something: hop)
+
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
