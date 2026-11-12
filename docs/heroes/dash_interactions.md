@@ -172,7 +172,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | tender | ult (X) -> dash | Data: cancelled only by stun, knock or moving too far. Footage: she walks through the channel. Ours: Shift goes at once and the tether holds while she stays in the ring. | the dash goes, the ability keeps running |
 | tender | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
 | tender | jump -> LMB |  | fires mid-jump (default) |
-| tender | jump -> RMB | Ours: owner items 118 and 118b, the wind-up and snap release. | **exception:** buffered to the landing (Burrseed's fixed 1 s wind-up outlasts the hop, so the seed leaves after she lands) |
+| tender | jump -> RMB | Ours: owner items 118 and 118b, the wind-up and snap release. | **exception:** buffered to the landing (Burrseed's fixed 0.6 s wind-up outlasts the hop, so the seed leaves after she lands) |
 | tender | jump -> E |  | fires mid-jump (default) |
 | tender | jump -> ult (X) |  | fires mid-jump (default) |
 | tender | jump -> Q glove |  | fires mid-jump (default) |

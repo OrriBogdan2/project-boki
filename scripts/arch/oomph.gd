@@ -93,6 +93,20 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 			halo = 0.18
 	return [vis_col, vis_size, halo]
 
+## A shot's bolt this frame: between its last and current step (`alpha`), turned along its flight and stretched by
+## its tracer. Match draws every shot with it; tools that step the match by hand (the reels) call it too.
+static func place_shot(s: Dictionary, alpha: float) -> void:
+	var mi: MeshInstance3D = s["node"]
+	if mi == null:
+		return
+	mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
+	var v: Vector2 = s["vel"]
+	if v.length() > 1.0:
+		mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
+		var r: float = s.get("vr", s["r"])
+		var tracer := float((s["x"] as Dictionary).get("tracer", 1.0))
+		mi.scale = Vector3(r * 2.0, r * 2.0, tracer_len(r, v.length(), tracer))
+
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:
 	if legacy:
