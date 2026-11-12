@@ -101,16 +101,22 @@ var card_t := 0.0
 func _init(home) -> void:
 	h = home
 
-## The kite stand beside the Training post, on a ridge island only; called when fixtures move.
+## This zone's own stand spot (base_kite.json "spots", tiles x and z), or [].
+static func spot() -> Array:
+	return rules()["spots"].get(GardenZones.here, [])
+
+## The kite stand on the zone's own spot, else beside the Training post on a ridge island only; called when
+## fixtures move.
 func place() -> void:
 	if is_instance_valid(stand):
 		stand.queue_free()
 	stand = null
-	if h.YARD_AT.x < -100.0 or String(HomeLayout.of(Save.d)["theme"]) != String(rules()["theme"]):
+	var S := spot()
+	if S.is_empty() and (h.YARD_AT.x < -100.0 or String(HomeLayout.of(Save.d)["theme"]) != String(rules()["theme"])):
 		return
 	stand = Node3D.new()
 	stand.name = "KiteStand"
-	stand.position = h.YARD_AT + STAND_OFF
+	stand.position = h.YARD_AT + STAND_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
 	var g: float = h._ground_h(stand.position.x, stand.position.z)
 	stand.position.y = g if g > -50.0 else 0.0
 	h.add_child(stand)

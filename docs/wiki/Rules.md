@@ -142,6 +142,8 @@ Kite Tow, part 1 (briefs/design/GARDEN_MODERN.md 4.2 game 7, scripts/home/base_k
 |---|---|
 | theme | ridge |
 | theme_doc | The island theme (home_layout.gd THEMES) whose garden has the kite stand. |
+| spots | {"ridge": [40.0, 45.0]} |
+| spots_doc | A garden zone's own stand spot (tiles x and z), for a zone with no Training post: Kitewind Ridge. Elsewhere the stand sits by the Training post on a home of the theme above. |
 | rings | 12 |
 | loop_r | 6.5 |
 | glide_h | 3 |
