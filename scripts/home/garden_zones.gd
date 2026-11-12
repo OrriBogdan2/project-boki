@@ -49,7 +49,7 @@ static func landing(opts: Dictionary) -> String:
 	var visiting: Dictionary = opts.get("visit", {})
 	if not visiting.is_empty():
 		return HUB if VisitZones.has(visiting) else ""
-	if not FarmUnlocks.base_mode():
+	if not FarmUnlocks.base_mode() or bool(opts.get("play_hub", false)):     # the games stand in the start zone
 		return ""
 	if opts.has("spawn"):
 		return here
