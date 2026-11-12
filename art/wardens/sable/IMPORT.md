@@ -40,3 +40,5 @@ walk_b, run_b, run_l (2026-11-11, second pass; the judge kept only these): the h
 `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- sable.glb B.glb 1.39 2.9 b+,l+`, then
 `glb_add_clips.py sable.glb B.glb walk_b,run_b,run_l` and the diagonals walk_bl, walk_br, run_bl, run_br copied back
 after it (prefix match: walk_b replaces walk_bl/walk_br too).
+
+walk_f on the ring's recipe (2026-11-12, ext/anim-dir-all-1112; the hand-keyed walk_f carried 40% of the speed in game): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/sable/sable.glb OUT.glb 1.39 2.9 f 0 0 1 1,1 40 walk`, then `glb_add_clips.py sable.glb OUT.glb walk_f` and walk_fl, walk_fr copied back from the old file.

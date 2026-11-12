@@ -160,6 +160,7 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 	var steady := fr.slice(int(WARM_S / DT))
 	var out := _gait(steady, spd)
 	out["rate"] = rate
+	out["speed"] = spd
 	var calm: float = _jerk(steady)[0]
 	var start := _jerk(fr.slice(0, int(SETTLE_S / DT)))
 	var halt := _jerk(stop.slice(0, int(SETTLE_S / DT)))

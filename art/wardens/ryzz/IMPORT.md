@@ -17,3 +17,5 @@ Source art: briefs/art-refs/ryzz_FINAL_sheet.png (master), ryzz_turnaround_apose
 The face and corset are projected from the art: the corset from the master (registered by its neon), the face from the first ryzz_head.png (git 3e988ae8 of ext/agent-briefs, her grin; kept as ~/meshy/ryzz_f/ryzz_head_nogum.png, because the later sheet paints the bubble and the bubble is geometry here).
 
 Run it all with INSTALL=1 ~/meshy/ryzz_f/build.sh [source]. No weapon: fingertips carry the FX points (weapon_muzzle, anchor_finger_L); rods anchor_rod_0..3.
+
+walk and run b, l, r, fl, fr, bl, br (2026-11-12, ext/anim-dir-all-1112): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/ryzz/ryzz.glb OUT.glb 1.22 3.87` (walk_f's and run_f's own planted sole speed), then `python3 tools/art1/glb_add_clips.py art/wardens/ryzz/ryzz.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`. The ring is in step; `loco.stride` is gone and `foot_mps` is the ring's in-game sole median (docs/art/LOCO_DIR.md).
