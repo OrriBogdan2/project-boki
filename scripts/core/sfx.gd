@@ -401,9 +401,10 @@ func _process(delta: float) -> void:
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
 
 var _step_i := 0
-func step(pos = null, vol := -16.0) -> void:
+## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
+func step(pos = null, vol := -16.0, reach := 0.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12)
+	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
 
 func has(sname: String) -> bool:
 	return streams.has(sname)
@@ -452,8 +453,9 @@ func play_sample(bus_name: String) -> void:
 	sample_voice.play()
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter.
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
+## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the
+## sound's own "reach", else hear_range).
+func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0) -> void:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	if sname in CUES:
@@ -468,7 +470,8 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
+	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
+	var v := vol_db + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
