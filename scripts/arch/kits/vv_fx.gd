@@ -20,6 +20,7 @@ extends Node3D
 ##   marker   immediate style: Sparkle's Static marker over a head (pips, a count, sparks that grow)
 
 const SHADER: Shader = preload("res://shaders/vv_fx.gdshader")
+const LOOK_BLEND := 1.0       # m of a rider's flight its tail eases from the emitter onto its trail
 const M_ARC := 0
 const M_PILLAR := 1
 const M_RING := 2
@@ -40,7 +41,7 @@ const NO_EDGE := Color(0, 0, 0, 0)
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
 var live: Array = []           # one-shot effects: {node, t, dur, kind, s0, follow, spin}
-var riders: Array = []         # looks riding on a shot: {node, sd, kind, len, width, on_end, last, vel}
+var riders: Array = []         # looks riding on a shot: {node, sd, kind, len, width, on_end, emitter, last, vel, born}
 var markers := {}              # id -> {node, t, n}
 var trails := {}               # id -> {last, t}: hand trails being drawn
 # cosmetic jitter only: never draws on the global RNG (seeded sims stay the same)
@@ -408,8 +409,10 @@ static func _shown_under(node: Node3D, model: Node3D) -> bool:
 # ------------------------------------------------------------------ riders
 ## A look riding on a match shot (the dictionary in m.shots) until it ends; then on_end(at, hit) runs.
 ## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail).
+## emitter (optional, returns a world point or Vector3.INF): where the look leaves the caster, as drawn; its tail
+## starts there and blends into the round's true trail over the first LOOK_BLEND metres (the round itself never moves).
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable(), emitter := Callable()) -> void:
 	var n: Node3D
 	if kind == "tracer":
 		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
@@ -419,7 +422,8 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, 
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):
 		mi.visible = false            # the stock orb goes: this look is the round
-	var rider := {"node": n, "sd": sd, "kind": kind, "len": length, "width": width, "on_end": on_end}
+	var rider := {"node": n, "sd": sd, "kind": kind, "len": length, "width": width,
+		"on_end": on_end, "emitter": emitter}
 	rider["last"] = sd["pos"]
 	rider["vel"] = sd["vel"]
 	riders.append(rider)
@@ -619,6 +623,18 @@ func _tick_follow(e: Dictionary, n: Node3D, mt: ShaderMaterial, u: float) -> voi
 	else:
 		mt.set_shader_parameter("strength", 1.0 - smoothstep(0.8, 1.0, u))
 
+## Where a rider's tail is drawn: pinned to its emitter on leaving, easing onto its own trail tail over LOOK_BLEND.
+func _look_tail(r: Dictionary, tail: Vector3, travelled: float) -> Vector3:
+	var emitter: Callable = r["emitter"]
+	if not emitter.is_valid() or travelled >= LOOK_BLEND:
+		return tail
+	var at: Vector3 = emitter.call()
+	if at == Vector3.INF:
+		return tail
+	if not r.has("born"):
+		r["born"] = at
+	return at.lerp(tail, travelled / LOOK_BLEND)
+
 func _tick_rider(r: Dictionary) -> void:
 	var n: Node3D = r["node"]
 	var sd: Dictionary = r["sd"]
@@ -633,7 +649,7 @@ func _tick_rider(r: Dictionary) -> void:
 		var back := Vector3(-v.x, 0, -v.y).normalized() if v.length() > 0.1 else Vector3.BACK
 		var travelled := p.distance_to(sd.get("start", p))
 		var trail := minf(float(r["len"]), travelled + 0.2)
-		_lay(n, p, p + back * trail, float(r["width"]))
+		_lay(n, p, _look_tail(r, p + back * trail, travelled), float(r["width"]))
 		return
 	n.visible = false
 	riders.erase(r)
