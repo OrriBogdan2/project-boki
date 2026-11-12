@@ -694,13 +694,9 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
+## A filling ground circle everyone sees, in the viewer's side lean (SideColor.fx). Returns the node.
 func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, h, col), 0.9))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
@@ -708,11 +704,7 @@ func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
 
 ## A filling lane (dash arrows, beams, charge lines).
 func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
+	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(SideColor.fx(m, h, col), 0.9))
 	if t > 0.0:
 		var tw := tele.create_tween()
 		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -1132,9 +1124,7 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var rc := col
-		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
+		var rc := SideColor.fx(m, h, col)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
 		if charge_orb():

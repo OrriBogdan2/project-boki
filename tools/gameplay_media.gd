@@ -4,7 +4,9 @@ extends RefCounted
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
-##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
+##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
+##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
+##                   (1.0: the match camera's own, the combat-clarity films in docs/COMBAT_CLARITY.md)
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
 ##   3 extraction    the squad holds an uplink's yard as it finishes charging, then rides the lift out
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
@@ -19,6 +21,8 @@ const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps v
 const FRAME := 2.0 * STEP        # s per rendered frame
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
+const FIGHT := "ashwick,juggernaut,gunslinger/archer,bulwark,mage"     # clip 1's squads, yours first
+const FIGHT_KIN := ["cindle", "pebbit", "zapple", "wisplet", "burrlet", "puddlet"]     # ... their Boki, in that order
 const CHARGE_LEFT := 2.5         # s of the uplink's charge left when the clip starts
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
 const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
@@ -36,6 +40,8 @@ var still_at := -1.0             # s into the scene the still is saved (negative
 var squad_a: Array = []
 var squad_b: Array = []
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
+var fight := FIGHT               # --media-fight=
+var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -53,6 +59,10 @@ func run(main_node: Node) -> void:
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
+		if arg.begins_with("--media-fight="):
+			fight = arg.substr(14)
+		if arg.begins_with("--media-zoom="):
+			fight_zoom = float(arg.substr(13))
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -203,20 +213,22 @@ func _assist(t: float, hs: Array, foes: Array) -> void:
 
 # ------------------------------------------------------------------ 1: squad fight
 func _fight(secs: float) -> void:
-	await _start("ashwick", "cindle")
+	var a := fight.get_slice("/", 0).split(",")
+	var b := fight.get_slice("/", 1).split(",")
+	await _start(a[0], FIGHT_KIN[0])
 	var P := m.player
 	P.ctrl = "bot"
 	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 	var base := _ground(P.pos)
 	var foe_at := _ground(base + Vector3(FIGHT_GAP, 0, 0))
-	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", _ground(base + Vector3(-1.4, 0, 1.6))),
-			_hunter("a2", 0, "gunslinger", "zapple", _ground(base + Vector3(-1.4, 0, -1.6)))]
-	squad_b = [_hunter("b0", 1, "archer", "wisplet", foe_at),
-			_hunter("b1", 1, "bulwark", "burrlet", _ground(foe_at + Vector3(1.4, 0, 1.6))),
-			_hunter("b2", 1, "mage", "puddlet", _ground(foe_at + Vector3(1.4, 0, -1.6)))]
+	squad_a = [P, _hunter("a1", 0, a[1], FIGHT_KIN[1], _ground(base + Vector3(-1.4, 0, 1.6))),
+			_hunter("a2", 0, a[2], FIGHT_KIN[2], _ground(base + Vector3(-1.4, 0, -1.6)))]
+	squad_b = [_hunter("b0", 1, b[0], FIGHT_KIN[3], foe_at),
+			_hunter("b1", 1, b[1], FIGHT_KIN[4], _ground(foe_at + Vector3(1.4, 0, 1.6))),
+			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(0.55)
+	_zoom(fight_zoom)
 	still_at = 4.0
 	_mark("start")
 	await _go(secs, func(t: float):

@@ -478,7 +478,7 @@ func _draw_bubbles() -> void:
 		if not is_instance_valid(b["ent"]):
 			continue
 		var k: Kin = b["ent"]
-		if k.dead:
+		if k.dead or not BokiChatter.heard(m, k):
 			continue
 		var at := k.bubble_at()
 		if cam.is_position_behind(at):
