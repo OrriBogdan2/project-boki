@@ -82,8 +82,10 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
   (tools/perf_fight.gd) casts each Hunter's E and R alone at a dummy, then puts three trios with their Boki out in one
   camp beside a monster camp, every Hunter casting E and R in waves. It prints particles and nodes made per kit, the
   busiest moment's particles by owner, and the nodes made during the fight by who made them; `--perf-budget-check`
-  fails at 4,000 particles. At High the busiest moment is ~1,400 (770 of them the regions' ambient motes); a kit's
-  E and R add 13-85. Effects made mid-fight come from pools (Fx's FxPool, HeroVfx, VVFx, Thief's Mark pips).
+  fails at 4,000 particles. On a real GPU at High (jobq 11-12) the busiest moment is 1,761 (770 of them the regions'
+  ambient motes; 1,847 before the pools); a kit's E and R alone add 0-195 (noisy run to run). Nodes made in the
+  camp fight went 5,294 -> 2,351 (Fx 2,830 -> 132). Effects made mid-fight come from pools (Fx's FxPool, HeroVfx,
+  VVFx, Thief's Mark pips).
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
