@@ -27,16 +27,12 @@ static func build() -> Theme:
 	_toggles_and_sliders(t)
 	return t
 
-## The stock focus ring: a 2 px teal outline just outside the control (keyboard and pad only).
-static func ring(rad := UI.R_CTRL + 3) -> StyleBoxFlat:
-	var f := UiFrame._flat(Color(0, 0, 0, 0), rad)
-	f.draw_center = false
-	f.border_color = Color(UI.NEON_A, 0.95)
-	f.set_border_width_all(2)
-	f.expand_margin_left = 3
-	f.expand_margin_right = 3
-	f.expand_margin_top = 3
-	f.expand_margin_bottom = 3
+## The stock focus mark (keyboard and pad): a faint accent wash and an accent underline, drawn inside
+## the control's own rect so it never pokes past a panel edge.
+static func ring(rad := UI.R_CTRL) -> StyleBoxFlat:
+	var f := UiFrame._flat(Color(UI.ACCENT, 0.14), rad)
+	f.border_color = UI.ACCENT_HI
+	f.border_width_bottom = 2
 	return f
 
 ## A raised button face with its lip; `down` is the pressed face (sunk onto the lip, the label
@@ -213,13 +209,7 @@ static func _front_menu(t: Theme) -> void:
 	var main_n := _menu_main(TICKET, 1.1, false)
 	var main_h := _menu_main(TICKET.lightened(0.08), 1.8, false)
 	_states(t, "MenuMain", main_n, main_h, _menu_main(TICKET.darkened(0.2), 1.4, true), main_n)
-	var main_f := ring(17)
-	main_f.border_color = Color(UI.NEON_A, 0.9)
-	main_f.expand_margin_left = 4
-	main_f.expand_margin_right = 4
-	main_f.expand_margin_top = 4
-	main_f.expand_margin_bottom = 4
-	t.set_stylebox("focus", "MenuMain", main_f)
+	t.set_stylebox("focus", "MenuMain", ring(17))
 	t.set_font("font", "MenuMain", UI.big)
 	t.set_font_size("font_size", "MenuMain", 28)
 	_font_cols(t, "MenuMain", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))

@@ -468,7 +468,8 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 244)
+	lt.custom_minimum_size = Vector2(500, 150)      # shrinks on a short window; the list below never leaves it
+	lt.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
 	logo.name = "Logo"
