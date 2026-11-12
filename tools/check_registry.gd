@@ -137,7 +137,7 @@ const CHECKS := {
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans slice 1: roster, join, leave, old saves
+	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans slice 1
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
