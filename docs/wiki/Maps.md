@@ -54,8 +54,8 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
 | Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
 | Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 24 |  |
-| Thornwood | nest | Bloom | contested | 68 | Bramble Rise |
+| Stormbreak | shrine | Storm | contested | 23 |  |
+| Thornwood | nest | Bloom | contested | 67 | Bramble Rise |
 | Larkhollow | landing | Meadow | quiet | 46 | The Hollow |
 | Highwatch | landing | Frost | quiet | 6 | The Lookout |
 | Duskmoor | landing | Storm | quiet | 18 | Moor Chapel |
