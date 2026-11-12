@@ -29,8 +29,9 @@ static func hit(m: Match, at: Vector3, dmg: float, dir := Vector2.ZERO) -> void:
 	m.fx.spark(up, fwd, BLUE, int(8 + 14 * w), 7.0 + 5.0 * w, spread, 0.3, 9.0, 1.3)
 	m.fx.burst(up, BLUE, int(8 + 12 * w), 3.5 + 3.0 * w, 0.45, 10.0, 1.2, fwd, spread)
 
-## A Stone Row or Tetraform rock breaking the ground at `at`: a blue ring and flash at its foot, so each rock's rise
-## reads. (The Rock Hop's rocks are a dash's, and a dash draws no ring.)
-static func rise(m: Match, at: Vector3) -> void:
-	m.fx.ring(at, RISE_RING, BLUE, 0.3)
+## A Stone Row or Basalt Spine rock breaking the ground at `at`: a blue ring and flash at its foot, so each rock's
+## rise reads. The ring's radius is the rise's own reach when it hurts (the Spine's slow_r). (The Rock Hop's rocks
+## are a dash's, and a dash draws no ring.)
+static func rise(m: Match, at: Vector3, ring_r := RISE_RING) -> void:
+	m.fx.ring(at, ring_r, BLUE, 0.3)
 	m.fx.flash(at + Vector3(0, 0.4, 0), BLUE, RISE_FLASH, 0.12)

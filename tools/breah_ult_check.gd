@@ -76,7 +76,13 @@ func _cast_and_rise() -> void:
 			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1,
 		"axis %s" % str(S.axis)
 	)
-	step(m, 1.0)
+	var audit := {"ids": {}, "bad": 0}
+	step(m, 1.0, func(): _audit_rings(m, S, audit))
+	ok(
+		"ult rings: only at a rock's foot, as wide as the rise's slow_r, every frame (no cast ring)",
+		(audit["ids"] as Dictionary).size() == S.spots.size() and int(audit["bad"]) == 0,
+		"rings %d of %d rocks, bad frames %d" % [(audit["ids"] as Dictionary).size(), S.spots.size(), int(audit["bad"])]
+	)
 	var first := S.first_rise_t - released
 	ok("ult beats: the first rock rises 0.2s after the release (the cracks)", absf(first - 0.2) < 0.05, "%.2f" % first)
 	var ult_rocks := rocks(m).filter(func(w): return w.has("ult"))
@@ -142,6 +148,20 @@ func _drag_slow_shove() -> void:
 	step(m, 1.0)
 	ok("ult bond: paid once per cast, nothing more while it stands", paid(P) == paid0)
 	await done(m)
+
+## Each frame, every ground ring in the fx pool bar the ones at his own feet (the full-resource pulse, not this cast's):
+## on a rock's spot, radius the rise's slow_r (the hit's reach).
+func _audit_rings(m: Match, S: BreahSpine, audit: Dictionary) -> void:
+	var reach := float(S.xd()["slow_r"])
+	var feet := S.k.h.pos
+	for rg in m.fx.rings:
+		var at: Vector3 = (rg["node"] as Node3D).global_position
+		if Vector2(at.x - feet.x, at.z - feet.z).length() < 2.0:
+			continue
+		(audit["ids"] as Dictionary)[(rg["node"] as Node3D).get_instance_id()] = true
+		var on_rock: bool = S.spots.any(func(sp): return Vector2(at.x - sp["at"].x, at.z - sp["at"].z).length() < 0.05)
+		if not on_rock or absf(float(rg["r"]) - reach) > 0.001:
+			audit["bad"] = int(audit["bad"]) + 1
 
 func _punch_and_bond() -> void:
 	var r := setup_ult("dolm", 16.0)
