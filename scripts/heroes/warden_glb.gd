@@ -240,6 +240,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	sync.mood = WardenMood.make(root, glb, skel, art(arch))
+	WardenBlink.make(glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
