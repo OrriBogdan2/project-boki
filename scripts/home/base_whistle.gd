@@ -11,9 +11,15 @@ var R: Dictionary           # base_life.json "whistle"
 var held := -1.0            # s the key has been down, -1 when it is up or the hold call is made
 var _other: Dictionary = {}   # the Boki a long hold will call
 
+const TAP := "garden_whistle_tap"
+const HOLD := "garden_whistle_hold"
+const ANSWER_DB := -12.0      # dB: a Boki's answer sits under the whistle
+
 func _init(home, rules: Dictionary) -> void:
 	h = home
 	R = rules["whistle"]
+	Sfx.streams[TAP] = Synth.whistle()
+	Sfx.streams[HOLD] = Synth.whistle(true)
 
 ## How readily a Boki answers, 0 to 1: trust counts most, then its overall condition.
 func eagerness(rec: Dictionary) -> float:
@@ -26,6 +32,7 @@ func sulky(rec: Dictionary) -> bool:
 ## The key went down: the partner is called now, the nearest other Boki if it stays down.
 func press() -> void:
 	held = 0.0
+	GardenSfx.cue(TAP, h.ppos)
 	var partner := _partner()
 	_call(partner, 0.4)
 	_other = _nearest(partner)
@@ -41,6 +48,7 @@ func step(d: float) -> void:
 	held += d
 	if held >= float(R["hold_s"]):
 		held = -1.0
+		GardenSfx.cue(HOLD, h.ppos)
 		_call(_other, 0.4 + PI)
 		_other = {}
 
@@ -70,9 +78,11 @@ func _call(k: Dictionary, angle: float) -> void:
 	if k.is_empty() or _busy(k):
 		return
 	var rec: Dictionary = k["rec"]
+	var asleep := HomeChimes.asleep(k)
 	if sulky(rec):
-		if float(k.get("nap_t", 0.0)) <= 0.0 and not k.has("indoors"):
+		if not asleep and not k.has("indoors"):
 			h._emote(k, "…")
+			_answer(k, "garden_sulk_" + GardenSfx.size_word(rec))
 			k["hold_t"] = float(R["look_s"])
 		return
 	k["call_slot"] = Vector3(cos(angle), 0, sin(angle)) * float(R["slot_m"])
@@ -85,8 +95,13 @@ func _call(k: Dictionary, angle: float) -> void:
 		k.erase(key)
 	k["called_t"] = float(R["give_up_s"])
 	h._emote(k, "!")
-	Sfx.play("kin_alert", k["pos"], -12.0, 0.15, Unique.voice(rec))
+	if not asleep:
+		_answer(k, "kin_happy" if eagerness(rec) >= float(R["happy_at"]) else "kin_unsure")
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var mine: int = h.world.island_of(h.ppos.x, h.ppos.z)
 	if mine >= 0 and here != mine:
 		h._start_leap(k, h.ppos + k["call_slot"])
+
+## The called Boki's voice at its own spot, in its own pitch.
+func _answer(k: Dictionary, sname: String) -> void:
+	GardenSfx.cue(sname, k["pos"], Unique.voice(k["rec"]), ANSWER_DB)
