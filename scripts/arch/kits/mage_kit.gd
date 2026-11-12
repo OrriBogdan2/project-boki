@@ -18,12 +18,14 @@ const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal th
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
+const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
+var run_exit := false          # the streak's hand-over at run speed is still to come (_exit_run)
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
@@ -84,6 +86,18 @@ func ult_running() -> bool:
 func ult_recast() -> bool:
 	return ult.recast()
 
+func recast_window() -> Dictionary: return ult.window()
+
+## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var rd := res_def()
+	for key in sparks:
+		var sp: Dictionary = sparks[key]
+		if is_instance_valid(sp["e"]):
+			var n := int(sp["n"])
+			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
+
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -140,15 +154,19 @@ func add_spark(f: Ent, n := 1) -> void:
 		# the 4th stack: a bolt drops out of the sky onto them
 		var top := f.position + Vector3(0, 9.0, 0)
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
-		fx().arc(top + Vector3(0.4, 0, -0.3), f.position + Vector3(0, 1.0, 0), TEAL, PINK, 0.5, 0.2)
-		m.fx.flash(f.position + Vector3(0, 1.1, 0), PINK, 1.1, 0.1)
 		m.sfx("vv_static_full", f.pos, -2.0)
 		# the word goes above the marker so the two never print over each other
-		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
 	elif int(s["n"]) > was:
 		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+
+func combo_read(f: Ent) -> Dictionary:
+	var s = sparks.get(f.get_instance_id())
+	if s == null:
+		return {}
+	return {"icon": "shock", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
+			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -191,6 +209,8 @@ func _tick(dt: float) -> void:
 		_tick_wire(dt)
 	if run_t > 0.0:
 		_tick_run(dt)
+	if run_exit and h.roll_t <= 0.0:
+		_exit_run()
 	if rmb_down:
 		_tick_rod()
 	elif rod != null and rod.visible:
@@ -282,11 +302,10 @@ func _tick_lmb() -> void:
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
 	# a teal thrust from the shoulder to the fingertip, then (at the release key, 0.06 s) the fingertip
-	# crackles; pink sparks pop at her feet, a jagged bolt rides the round
+	# crackles, a jagged bolt rides the round
 	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
 	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, PINK, 0.3, 0.12)
 	m.later(0.06, _fingertip.bind(left))
-	m.fx.spark(h.pos + Vector3(0, 0.1, 0), Vector3.UP, PINK, 4, 3.0, 80.0, 0.2, 6.0, 0.7)
 	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
@@ -399,9 +418,10 @@ func _jitter(across: float, low: float, high: float) -> Vector3:
 	var r := fx().rng
 	return Vector3(r.randf_range(-across, across), r.randf_range(low, high), r.randf_range(-across, across))
 
-## The drift you carry: your ground speed right now (it bleeds off while you hold).
+## The drift you carry: your ground speed right now (it bleeds off while you hold), never more than a run's,
+## so a launch, a glide or a knock doesn't fling the run past its ring.
 func _drift() -> Vector2:
-	return Vector2(h.vel.x, h.vel.z) * float(dash_def().get("drift_k", 1.0))
+	return (Vector2(h.vel.x, h.vel.z) * float(dash_def().get("drift_k", 1.0))).limit_length(h.base_speed)
 
 func _tick_wire(dt: float) -> void:
 	var dd := dash_def()
@@ -450,6 +470,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	h.roll_speed = v.length()
 	h.phase_t = maxf(h.phase_t, time + 0.05)
 	run_t = time
+	run_exit = true
 	last_dash_kind = "wire"
 	play("mage_dash_go")
 	var dmg := float(dd["dmg"]) * run_rank_k()
@@ -473,6 +494,17 @@ func _tick_run(dt: float) -> void:
 	if run_t <= 0.0 and h.model:
 		h.model.visible = true
 
+## The step after the streak: she lands on the ring, handing over at run speed in the air too (a ground dash's
+## exit), so its 40 m/s never carries on as an air slide or into the next Wirerun's drift. The kit
+## ticks before the move, so nothing of the streak's speed slips into the air step; a jump out of it keeps its own.
+func _exit_run() -> void:
+	run_exit = false
+	if run_t > 0.0:
+		return
+	var hv := HunterMove.dash_exit(Vector2(h.vel.x, h.vel.z), h.base_speed)
+	h.vel.x = hv.x
+	h.vel.z = hv.y
+
 func _arrive() -> void:
 	if not is_instance_valid(h): return
 	run_t = 0.0
@@ -487,7 +519,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	var was_live := live(f)
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
-	m.fx.burst(f.pos + Vector3(0, 0.9, 0), TEAL, 10, 3.5, 0.3)
+	fx().crackle(f.pos + Vector3(0, 0.9, 0), TEAL, PINK, 0.8, 3, 0.12)       # a hit on the way, not a burst
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -496,11 +528,12 @@ func _blowout(f: Ent) -> void:
 	var dmg := (float(rd["blow_dmg"]) + float(rd["blow_pct"]) * f.max_hp) * power("dash")
 	clear_sparks(f)
 	blowouts += 1
+	ComboMark.payoff(m, h, f)
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	payoff_fx(f.pos, "BLOWOUT", PINK, "", h.dir_to(f), f)
+	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	# the refund tell on her: copper coil columns and a starburst (our own look)
 	var me := ground(h.pos)
@@ -610,10 +643,6 @@ func fire_rmb(c: Dictionary) -> void:
 	else:
 		_coil(k)
 
-## Rank 3 of the Storm Rod: its throw hits harder (rmb.rank3_mult).
-func rod_rank_k() -> float:
-	return float(rmb_def()["rank3_mult"]) if rank("sec") >= 3 else 1.0
-
 ## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
 func run_rank_k() -> float:
 	return float(dash_def()["rank3_mult"]) if rank("dash") >= 3 else 1.0
@@ -625,7 +654,6 @@ func _coil(k: float) -> void:
 	var rng := float(cd_["range"])                       # a fixed lane: the charge never changes the range
 	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
 	last_push = push
-	dmg *= rod_rank_k()
 	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
 	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
 	var stg := stage("rmb", {"delivery": delivery, "effects": effects})
@@ -646,7 +674,6 @@ func _coil(k: float) -> void:
 
 func _rod_end(at: Vector3) -> void:
 	fx().star(at, TEAL, PINK, 1.0, 0.16)
-	m.fx.burst(at, PINK, 14, 4.0, 0.35, 2.0, 1.4)
 
 func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	if not is_instance_valid(f) or f.dead:
@@ -654,9 +681,8 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
 	m.sfx("mage_rod_hit", f.pos, -2.0)
-	# the pink blast, a teal crackle and a shock ring round them
+	# the pink flash, a teal crackle and the source's shock ring round them
 	m.fx.flash(f.position + Vector3(0, 1.0, 0), PINK, 1.6, 0.12)
-	m.fx.burst(f.position + Vector3(0, 1.0, 0), PINK, 18, 4.5, 0.45, 1.0, 1.8)
 	fx().crackle(f.position + Vector3(0, 1.0, 0), TEAL, PINK, 1.0, 5, 0.18)
 	fx().ring(ground(f.pos), 2.2, TEAL, PINK, 0.35)
 	# thrown into a wall or another foe: stunned (so is the one it hits)
@@ -671,8 +697,6 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
-		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
-		fx().ring(ground(f.pos), 1.6, PINK, COPPER, 0.25)
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
@@ -812,7 +836,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not wire.is_empty() or rmb_down or ult.busy():
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]):
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return
