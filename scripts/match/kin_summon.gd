@@ -55,21 +55,21 @@ func leash(aggression: float) -> float:
 
 ## The Summon key: out of the wisp when ready, back early when out. False (and says why) when it can't.
 static func press(h: Hunter) -> bool:
-	var k: Kin = h.kin
+	var kin: Kin = h.kin
 	if h.downed or h.out or h.riding or h.dropping:
 		return false
-	if k == null or k.summon == null or k.owner_h != h:
+	if kin == null or kin.summon == null or kin.owner_h != h:
 		return KinSteal.press(h)  # (your own Boki is gone or stolen: a stolen wisp's one summon)
-	var s := k.summon
+	var s := kin.summon
 	if s.left > 0.0:
 		s.end()
 		return true
-	if not k.wisp:
+	if not kin.wisp:
 		return KinSteal.press(h)
 	if s.cd > 0.0:
 		if KinSteal.press(h):
 			return true
-		KinCommand.say(h, "%s gathers itself: %d s" % [k.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
+		KinCommand.say(h, "%s gathers itself: %d s" % [kin.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
 		return false
 	s.burst(s.dur)
 	return true
