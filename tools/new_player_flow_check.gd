@@ -133,6 +133,8 @@ func _hatch() -> void:
 	_press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
 	ok(_button(hx, "Random") != null, "with a Random button as well")
+	ok(not hx.looks_open and _button(hx, "More") != null,
+		"a new save's creator starts on its first rows, the rest under More")
 	_press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
@@ -152,6 +154,8 @@ func _hatch() -> void:
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
 	ok(_button(hx, "Skip the tutorial") != null, "the naming card offers 'Skip the tutorial' as well")
+	var boxes: Array = hx.ui.find_children("*", "LineEdit", true, false)
+	ok(boxes.size() == 1, "and one name box: the Boki's (yours is in the creator)")
 	_press(hx, "Head out together")
 	await _relic(hx)
 

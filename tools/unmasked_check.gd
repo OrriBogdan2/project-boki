@@ -6,7 +6,9 @@ extends RefCounted
 ## shader, all the way round), no skin showing, an aura of big bright specks, no hair; its soles stay on the
 ## ground at every height and build, idle and walking; height visibly changes the body's height, build its
 ## mass, and a woman's silhouette and stance differ from a man's; it animates with HunterAnim and shows kept
-## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
+## mask marks; a match and the Hunter screens use the Hunter's look, never yours. The creator (UI_FIRST15 5.6):
+## a new save sees Sex, Height, Build and Shroud colour, every other row is under one More fold that scrolls
+## and fits 1280x720; the Mirror (Change your look) and a returning player open it.
 
 const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
 
@@ -44,6 +46,7 @@ func run(main: Node) -> void:
 	await _feet(main)
 	_who_shows()
 	_blend(main)
+	await _creator_fold(main)
 	print("UNMASKED CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
@@ -335,3 +338,59 @@ func _aura() -> void:
 func _shape_of(m: Node3D) -> String:
 	var b := _bounds(m)
 	return "%d:%.3f:%.3f" % [_verts(m), b.size.x, b.size.z]
+
+## The creator's first rows and its More fold, on a new save, a returning one and the Mirror.
+func _creator_fold(main: Node) -> void:
+	var tree := main.get_tree()
+	tree.root.size = Vector2i(1280, 720)
+	var labels: Array = Unmasked.ROWS.map(func(r): return String(r[1]))
+	var first: Array = labels.filter(func(t): return Unmasked.FIRST_ROWS.has(_key_of(t)))
+	ok(first == ["Sex", "Height", "Build", "Shroud colour"], "the creator's first rows: %s" % str(first))
+	Save.d = Save.fresh()
+	var hx = await _creator(main, false)
+	var shown := _shown(hx, labels)
+	ok(shown == first and _btn(hx, "More") != null, "a new save sees only those, and More (%s)" % str(shown))
+	_btn(hx, "More").pressed.emit()
+	for i in 3: await tree.process_frame
+	ok(_shown(hx, labels) == labels and _btn(hx, "Fewer") != null, "More opens every row, Fewer folds them")
+	var fold: Control = hx.create_box.find_children("*", "ScrollContainer", true, false).front()
+	ok(fold != null and fold.find_children("*", "Label", true, false).any(func(l): return l.text == "Aura"),
+		"the fold's rows sit in a scroll box, so more rows scroll instead of growing the card")
+	var r: Rect2 = hx.create_box.get_global_rect()
+	ok(r.position.y >= 0.0 and r.end.y <= 720.0, "the open creator fits 1280x720 (y %d-%d)" % [r.position.y, r.end.y])
+	hx.queue_free()
+	Save.d = Save.fresh()
+	Save.d["tutorial"]["hatched"] = true
+	hx = await _creator(main, false)
+	ok(_shown(hx, labels) == labels, "a returning player (hatched, no look yet) opens every row")
+	hx.queue_free()
+	Save.d["look"] = Unmasked.default_look()
+	hx = await _creator(main, true)
+	ok(_shown(hx, labels) == labels and _btn(hx, "Fewer") != null, "the Mirror (Change your look) opens every row")
+	hx.queue_free()
+	await tree.process_frame
+
+func _creator(main: Node, mirror: bool):
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	hx.edit_only = mirror
+	main.add_child(hx)
+	for i in 3: await main.get_tree().process_frame
+	if not mirror:
+		hx._end_intro()
+	for i in 3: await main.get_tree().process_frame
+	return hx
+
+func _key_of(label: String) -> String:
+	for row in Unmasked.ROWS:
+		if row[1] == label: return row[0]
+	return ""
+
+## The creator's row labels on screen, in ROWS order.
+func _shown(hx, labels: Array) -> Array:
+	var on: Array = hx.create_box.find_children("*", "Label", true, false).map(func(l): return l.text)
+	return labels.filter(func(t): return on.has(t))
+
+func _btn(hx, text: String) -> Button:
+	for b in hx.create_box.find_children("*", "Button", true, false):
+		if b.text == text: return b
+	return null

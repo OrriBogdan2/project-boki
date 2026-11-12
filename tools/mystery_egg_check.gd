@@ -96,7 +96,7 @@ func _scene(main: Node) -> void:
 	hx.egg_defs[m]["rec"]["mutations"] = ["giant"]
 	hx.kin_node = Models.kin(hx.egg_defs[m]["species"], {"level": 1})
 	hx.add_child(hx.kin_node)
-	hx._finish(hx.egg_defs[m]["species"], "Nyx", "Orri", true)
+	hx._finish(hx.egg_defs[m]["species"], "Nyx", true)
 	ok(Mutations.of(Save.d["roster"][0]) == ["giant"], "the hatchling keeps the mutation it was born with")
 	hx.queue_free()
 	await tree.process_frame
