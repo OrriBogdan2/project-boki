@@ -3,7 +3,8 @@ extends RefCounted
 ## The Boki summon (DECISIONS 2026-11-09, briefs/boki-art/WISP_DESIGN_OPEN.md Q1/Q3/Q5/Q7, decision 0039).
 ## With Boki riding as wisps (KinWisp) the Summon key bursts the wisp into the full Boki for its species'
 ## window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
-## never ends the window; being knocked down does: it turns straight back into a wisp with a longer cooldown.
+## never ends the window; being knocked down does: it faints where it stands (FAINT_S: the settle/nap clips, inert
+## and untouchable), then folds back into a wisp with a longer cooldown.
 ## The burst out of the wisp and the fold back in are BokiWispPop (soft light only: no explosion, ring or disc).
 ## At the end it folds back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
@@ -12,6 +13,7 @@ extends RefCounted
 ## Online: the kin snapshot carries the seconds and the guardian flag (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
+const FAINT_S := 0.9      # s: a knock-down lies there before the fold; it rides in `shrink` (Net: no new field)
 const CALL_AT := "summon_call_at"   # meta on the Hunter: match time of the burst that last called
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 
@@ -23,6 +25,7 @@ var shrink := 0.0     # s of the shrink back left
 var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var back_cd := 0.0    # s: the cooldown the wisp gets once a knock-down has fainted (own game only)
 var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
 var beat := -1        # the last guardian ring pulse drawn (drawing only)
 
@@ -46,6 +49,10 @@ static func times(ks: KinSpec) -> Vector2:
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
+
+## Lying knocked out before the fold? (`shrink` runs FAINT_S + SHRINK_S, so the snapshot carries it unchanged.)
+func fainting() -> bool:
+	return shrink > SHRINK_S
 
 ## How far it may wander from its hunter while summoned: short and fixed, a little longer for bold ones.
 func leash(aggression: float) -> float:
@@ -90,12 +97,24 @@ func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
 
-## Knocked down while summoned (Kin.go_down): back into a wisp at once, the longer cooldown. True if it was out.
+## Knocked down while summoned (Kin.go_down): it faints where it stands, then folds into a wisp with the longer
+## cooldown (tick). True if it was out.
 func knocked() -> bool:
 	if not out():
 		return false
+	if fainting():
+		return true
+	k.hp = maxf(k.hp, 1.0)
+	k.fly = {}
+	k.vel = Vector3.ZERO
+	k.state = "active"
 	KinCommand.say(k.owner_h, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
-	_back(cd_base * float(rules()["knocked_cd_mult"]))
+	guardian = false
+	left = 0.0
+	_drop_pop()
+	_folding = false
+	shrink = FAINT_S + SHRINK_S
+	back_cd = cd_base * float(rules()["knocked_cd_mult"])
 	return true
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
@@ -119,8 +138,11 @@ func tick(dt: float) -> void:
 			return
 		if o == null or o.out or KinLoss.guarding(k):
 			shrink = 0.0          # left behind: the walking Boki's rules from here (KinWisp.ride)
+			if back_cd > 0.0:
+				k.hp = k.max_hp
+				back_cd = 0.0
 		else:
-			_back(cd_base)
+			_back(back_cd if back_cd > 0.0 else cd_base)
 
 ## The burst (into the Boki) or the fold (back into the wisp), on every game (KinWisp.set_wisp). A fold already
 ## playing through the shrink carries on; one that never shrank (knocked down, or a late snapshot) folds from here.
@@ -182,6 +204,7 @@ func _back(cool: float) -> void:
 	guardian = false
 	left = 0.0
 	shrink = 0.0
+	back_cd = 0.0
 	cd = cool
 	cd_full = cool
 	k.hp = k.max_hp
@@ -189,10 +212,10 @@ func _back(cool: float) -> void:
 	k.stow()
 	k.scale = Vector3.ONE
 
-## The fold starts with the shrink (here, so other games start it from the snapshot too), and the wisp is dim
-## while it rests.
+## The fold starts with the shrink, after any faint (here, so other games start it from the snapshot too), and the
+## wisp is dim while it rests.
 func render() -> void:
-	if shrink > 0.0 and not k.wisp and not _folding:
+	if shrink > 0.0 and not fainting() and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
 	elif _folding and shrink <= 0.0 and not k.wisp:

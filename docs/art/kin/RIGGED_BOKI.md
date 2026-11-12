@@ -58,6 +58,24 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+### A summoned Boki (out of the wisp)
+
+The Boki bursting out of its wisp (decision 0039) is the same `Kin` and rig, so it plays the clips above; the burst
+and the fold are `BokiWispPop`, the hit jolt is `KinFlinch` (no second flinch).
+
+| AI does | Clip |
+|---|---|
+| chase, follow, return | `run` / `walk` from the rig's measured speed |
+| melee strike (`lunge_t`, kstate attack) | `lunge` |
+| any ability (`Kin._cast` pulse) | `cast` |
+| blink, swap, burst, re-bloom (`Kin.teleport` bumps the `tp` meta) | none: `BokiRig._track_speed` skips that frame, so it stands |
+| takes a hit | `KinFlinch` over the running clip |
+| knocked down (`KinSummon.knocked`) | `FAINT_S` 0.9 s lying (kstate sleep: `settle` then `nap`, untouchable, still), then the `BokiWispPop` fold |
+
+`--boki-rig-check` runs `tools/boki_summon_clips.gd` for one species per body plan (hivara, cindle, wisplet,
+zephyrak) in a headless summoned fight. `--summon-clips-shots --shots-dir=<dir>` (GPU) draws `summon_<id>.png`:
+burst, run, attack, cast, hit, faint, fold.
+
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
 Hit flinch: the glbs carry no hit clip. Every damage event to a Boki (owned, wild, summoned; not burn or other

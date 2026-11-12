@@ -319,12 +319,23 @@ func _summon() -> void:
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
 	s.cd = 0.0
 	KinSummon.press(p)
+	_frames(0.3)
+	var fell := k.pos
 	k.hurt(k.max_hp * 5.0, null)
-	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: knocked down, it turns back into a wisp, 75 s cooldown")
+	k.render(DT, 1.0)
+	ok(not k.wisp and s.fainting() and k.get_node_or_null(KinSummon.POP) == null and not k.hittable(),
+		"summon: knocked down, it faints first (%.1f s, untouchable, no fold yet)" % KinSummon.FAINT_S)
+	_frames(KinSummon.FAINT_S - 0.1)
+	ok(not k.wisp and s.fainting() and k.pos.is_equal_approx(fell), "...lying where it fell")
+	k.render(DT, 1.0)
+	ok(k.get_node_or_null(KinSummon.POP) == null, "...still no fold while it lies")
+	_frames(0.1 + KinSummon.SHRINK_S * 0.5)
+	k.render(DT, 1.0)
 	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding from where it fell up to the shoulder")
-	pop._process(BokiWispPop.DURATION + 0.01)
+	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...then folds from where it fell up to the shoulder")
+	_frames(KinSummon.SHRINK_S * 0.5 + 0.05)
+	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.2,
+		"...into a wisp, 75 s cooldown (%.1f s)" % s.cd)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp rides on")
 	s.cd = 0.0
 	p.set_meta(KinSummon.CALL_AT, -99.0)

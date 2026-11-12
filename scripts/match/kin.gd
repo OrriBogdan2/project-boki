@@ -102,6 +102,7 @@ var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var tp_n := 0                    # teleports so far (the "tp" model meta; BokiRig ignores the jump)
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -179,7 +180,8 @@ func is_wild() -> bool:
 	return owner_h == null
 
 func hittable() -> bool:
-	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
+	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] \
+		and not (state == "flying" and fly.get("leap", false)) and not fainting()
 
 func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
@@ -225,7 +227,18 @@ func slot_open(_slot: String) -> bool:
 func ready_to_fight() -> bool:
 	if wisp:
 		return false          # (a wisp casts nothing: KinWisp)
-	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
+	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"] and not fainting()
+
+## Put somewhere (the summon bursting or re-blooming, a blink, a swap): the rig must not read the jump as speed.
+func teleport(p: Vector3) -> void:
+	super.teleport(p)
+	tp_n += 1
+	if model:
+		model.set_meta("tp", tp_n)
+
+## A summoned Boki lying knocked out before it folds back into its wisp (KinSummon.FAINT_S)?
+func fainting() -> bool:
+	return summon != null and summon.fainting()
 
 ## Resting after the merge ultimate (docs/decisions/0004)?
 func resting() -> bool:
@@ -635,6 +648,8 @@ func sim(dt: float) -> void:
 		if not remote:
 			KinRegen.tick(self, dt)
 		return
+	if summon != null and summon.fainting() and not remote:
+		return          # (lying knocked out: no thinking, no moving, until it folds)
 	if remote:
 		if state != "shoulder":
 			net_follow(dt)
@@ -1084,7 +1099,7 @@ func _sim_dazed(dt: float) -> void:
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused", "downed"] or wisp:
+	if state in ["dazed", "bench", "fused", "downed"] or wisp or fainting():
 		return 0.0
 	var bh := BokiHit.take(self, d, opts)
 	d = float(bh[0])
@@ -1154,7 +1169,10 @@ func render(delta: float, alpha: float) -> void:
 		return
 	var on_you := state == "shoulder" and not beside
 	var striking := lunge_t > 0.0 or wind_do.is_valid()
-	model.set_meta("kstate", "perch" if on_you else ("attack" if striking else ""))
+	var kst := "attack" if striking else ""
+	if fainting():
+		kst = "sleep"          # (a summon knocked out: home's settle and nap, eyes shut)
+	model.set_meta("kstate", "perch" if on_you else kst)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else KinWildPose.pose(state, angry_at != null, t("bravery") < 0.45,
 			scan_by != null and Capture.active(scan_by), m.time - angry_since)
@@ -1205,7 +1223,7 @@ func render(delta: float, alpha: float) -> void:
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
-	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0 or fainting())
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)

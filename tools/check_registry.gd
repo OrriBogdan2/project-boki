@@ -223,6 +223,7 @@ const CHECKS := {
 	"--nook-moment-check": ["res://tools/nook_moment_check.gd", "nook_moment_check", "check"],
 	"--nook-moment-shots": ["res://tools/nook_moment_check.gd", "nook_moment_check", "shots"],
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
+	"--summon-clips-shots": ["res://tools/boki_summon_clips.gd", "boki_summon_clips", null],      # summoned Boki clips
 	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],      # rigged Boki gait gate
 	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],      # rigged Boki gait strips
 	"--boki-idle-check": ["res://tools/boki_idle_check.gd", "boki_idle_check", null],    # rigged Boki idles and fidgets
