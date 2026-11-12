@@ -69,8 +69,12 @@ Still open (shared, not done here):
   ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
   rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
   is per kit (backlog).
-- Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
-  moves them to teal. The alternative (keep void violet) would clash with Sable.
+- Motley's kit drew its well and orbs in indigo/violet, but his slot colours and signature are teal. Done on
+  ext/vfx-motley-port: orbs (shard and void orb, trail, hit), charge glow, weapon colour, Snap, Brimseed globe, column,
+  Nightwell dome and whirlpool are sea teal `#2ee6c0` over near-black; the Trade lantern stays violet (owner 11-08,
+  docs/heroes/ostra.md) and Swollen pink. His zones follow the rim rule: the globe and the dome are void glass faint
+  face-on, the whirlpool's centre is alpha 0.2 (asserted in --ostra-combo-check). The alternative (keep void violet)
+  would clash with Sable.
 
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
