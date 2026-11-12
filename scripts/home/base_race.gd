@@ -6,6 +6,7 @@ extends RefCounted
 ## Boki out on the base run one lap; you back your partner and cheer at three marks with the
 ## Training post's timing bar (TimingBar). Pace comes from trained Speed, joy, and a lean on its own
 ## stretch (the Tide knack swims, wings glide the gap); friends run side by side, rivals bump.
+## Kitewind Ridge runs its own course (base_race.json "tracks": two glide gaps and an updraft climb).
 ## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
@@ -24,8 +25,10 @@ const JUMP_H := 0.6                          # m, the top of the jump's arc
 const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
 const TRACK_W := 1.4                         # m, the track's width (four lanes)
 const REACH := 1.6                           # m from the post to start a race
+const UPDRAFT_H := 1.2                       # m, the top of the updraft climb
 const STRETCH_COL := {
 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
+	"updraft": Color("9fe6f2"),
 }
 
 static func rules() -> Dictionary:
@@ -48,7 +51,7 @@ static func tweak(game: String) -> Dictionary:
 
 static func lap() -> float:
 	var out := 0.0
-	for s in rules()["stretches"]:
+	for s in stretches():
 		out += float(s["len"])
 	return out
 
@@ -67,9 +70,20 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
 static func winged(rec: Dictionary) -> bool:
 	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
 
-## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
+## 0..1 how well it rides air: a winged species fully, else its strongest lean among types.
+static func air(rec: Dictionary, types: Array) -> float:
+	if winged(rec):
+		return 1.0
+	var best := 0.0
+	for t in types:
+		best = maxf(best, float(rec.get("lean", {}).get(t, 0.0)))
+	return clampf(best, 0.0, 1.0)
+
+## The lap's stretches: this island's theme track (home_layout.gd THEMES "track", else "garden"), then a
+## weekly tweak's 'swap' changes one stretch's kind and mult (a second water stretch).
 static func stretches(tw := {}) -> Array:
-	var out: Array = rules()["stretches"]
+	var theme: Dictionary = HomeLayout.THEMES.get(String(HomeLayout.of(Save.d)["theme"]), {})
+	var out: Array = rules()["tracks"][String(theme.get("track", "garden"))]
 	if tw.has("swap"):
 		out = out.duplicate(true)
 		out[int(tw["swap"]["at"])].merge(tw["swap"], true)
@@ -90,8 +104,9 @@ static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
 			var tide := maxf(Work.level(rec, "tide"), 4.0 * float(lean.get("water", 0.0)))
 			p *= 1.0 + float(R["swim_per_tide"]) * tide
 		"jump":
-			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
-			p *= lerpf(1.0, float(R["glide"]), g)
+			p *= lerpf(1.0, float(R["glide"]), air(rec, ["flying"]))
+		"updraft":
+			p *= lerpf(1.0, float(R["rise"]), air(rec, R["updraft_types"]))
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
@@ -128,7 +143,7 @@ class Run:
 		backed = back
 		rng = r
 		var at := 0.0
-		for s in R["stretches"]:
+		for s in BaseRace.stretches():
 			at += float(s["len"])
 			ends.append(at)
 		for i in recs.size():
@@ -363,7 +378,7 @@ func ground(p: Vector3) -> float:
 
 ## Corner i of the loop: 0 the start, then round the 6 x 3 rectangle back to it.
 func _corner(i: int) -> Vector3:
-	var deep := float(rules()["stretches"][1]["len"])
+	var deep := float(stretches()[1]["len"])
 	return start + [Vector3.ZERO, Vector3(LOOP_W, 0, 0), Vector3(LOOP_W, 0, -deep), Vector3(0, 0, -deep)][i % 4]
 
 func find(p2: Vector2) -> Dictionary:
@@ -507,7 +522,7 @@ func track_at(s: int, f: float, side: float) -> Vector3:
 	var a := _corner(s)
 	var fwd := (_corner(s + 1) - a).normalized()
 	var p := a.lerp(_corner(s + 1), f) + Vector3(-fwd.z, 0, fwd.x) * side
-	p.y = ground(p) + _lift(String(rules()["stretches"][s]["kind"]), f)
+	p.y = ground(p) + _lift(String(stretches()[s]["kind"]), f)
 	return p
 
 ## The facing (rotation.y) of a runner on stretch s.
@@ -518,6 +533,7 @@ func heading(s: int) -> float:
 func _lift(kind: String, f: float) -> float:
 	match kind:
 		"climb": return CLIMB_H * sin(PI * f)
+		"updraft": return UPDRAFT_H * sin(PI * f)
 		"jump": return JUMP_H * sin(PI * f)
 		"water": return -SWIM_DIP
 	return 0.0

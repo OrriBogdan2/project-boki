@@ -60,7 +60,7 @@
 		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "loves": {"types": ["dark", "psychic"], "nature": "Mischievous"}, "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"],
 			"build": {"theme": "hushwood", "seed": 7731, "sk": 0.9, "deco": [["training_post", 38, 32, 0], ["toy_dig", 42, 37, 0], ["snack_patch", 33, 37, 0]], "clear": [16, 16, 62, 56], "scatter": {"seed": 31, "mushroom": 40, "fern": 50, "pebble": 30}}},
 		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "loves": {"types": ["flying", "electric"], "nature": "Daring"}, "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"],
-			"build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}
+			"build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["toy_vent", 38, 37, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}
 	},
 	"lair_biomes_doc": "A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists).",
 	"budget": {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5},

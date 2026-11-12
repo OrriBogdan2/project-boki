@@ -19,7 +19,7 @@ static func rules() -> Dictionary:
 
 ## Seconds `rec` takes over leg `leg` with no wobble.
 static func leg_time(rec: Dictionary, leg: int) -> float:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.stretches()
 	var out := 0.0
 	for s in rules()["legs"][leg]:
 		out += float(st[s]["len"]) / BaseRace.stretch_pace(rec, int(s))
@@ -80,7 +80,7 @@ class Run:
 		teams = [mine, theirs]
 		rng = r
 		var at := 0.0
-		for s in BaseRace.rules()["stretches"]:
+		for s in BaseRace.stretches():
 			at += float(s["len"])
 			ends.append(at)
 		for team in 2:
@@ -345,7 +345,7 @@ func _nodes(ents: Array) -> Array:
 	return ents.map(func(e): return e["node"])
 
 func _place_runners() -> void:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.stretches()
 	var lane := float(BaseRace.rules()["lane"])
 	for team in 2:
 		var side := lane * (team - 0.5)
@@ -392,7 +392,7 @@ func _end(finished: bool) -> void:
 	visitors = []
 
 func _card(res: Dictionary) -> void:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.stretches()
 	var legs: Array = []
 	for i in run.legs.size():
 		legs.append("%s the %s" % [run.teams[0][i]["name"], st[run.legs[i][0]]["kind"]])

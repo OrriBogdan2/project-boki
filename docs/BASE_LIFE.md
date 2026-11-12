@@ -77,3 +77,7 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+
+## Kitewind Ridge (GARDEN.md 10.2, step 7d)
+
+A zone is a home theme (`HomeLayout.THEMES`, `"zone": true`, not sold in the Island tab); the zone system will point a zone at its theme. `"ridge"` carries the ground colours, `style` (`storm`: the world's MultiMesh flora set for its trees, rocks and undergrowth, set on the island by `HomeBuild._apply_theme`) and `track` (the Dash course). On a ridge island: the Updraft vent toy (`toy_vent`, liked by Flying, Electric, Fairy and Sound leans), the snack patch grows `puffcorn`, `tonicbrew`, `starfruit` and `chimebun` (snack_patch.json `zone_snacks`; prepared foods go to the items store, `SnackPatch.shelve`), and the Dash runs `base_race.json` `tracks.ridge` (two glide gaps, an updraft climb that every ridge type rides). `--garden-nav-check` sweeps both themes, `--race-check` both courses, `--snack-patch-check` the ridge patch, `--ridge-shots --shots-dir=<dir>` makes day, night and course shots, and `--perf-bench --bench-secs=0 --bench-theme=ridge` benches the zone part.
