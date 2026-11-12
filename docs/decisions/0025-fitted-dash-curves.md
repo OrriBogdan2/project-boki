@@ -24,3 +24,9 @@ ground dash calls `travel(..., {"curved": true})` and `ArchKit._tick_curve` sets
 ## Consequences
 Distances and times are unchanged (`--move-feel-check` dash_curve_dist), the peaks move to the source's share
 of the dash. Rampage's short time makes its peak ~34 m/s. Fits and errors: docs/SUPERVIVE_FEEL.md.
+
+## Addendum (2026-11-12)
+Two more curves from the sheets' samples: Albert's 360 Smash (Oath, 1/30 s rise to the 0.17 s peak) and Meeko's air
+glide (Elluna, 0.1 s track of the 731.1 s dash), the glide replacing tender.json's hand shape (ramp / burst / out_k).
+The curve is now the hero's one fitted dash, not always the ground one. Meeko's ground hop and Albert's lumber have
+no per-frame samples: [?], constant.

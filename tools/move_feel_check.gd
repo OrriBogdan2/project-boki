@@ -44,7 +44,7 @@ const T := {
 	"air_reverse_dv":          [">=", 5.0, "m/s", "[owner 11-08] strong WASD air control"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
-	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
+	# the fitted dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
 	"dash_curve_gunslinger_peak_u":   ["~", [0.04, 0.18], "", "[footage] Ghost slide peaks 0.04-0.06s into 0.47s"],
 	"dash_curve_gunslinger_peak_k":   ["~", [1.65, 1.9], "x", "[footage] Ghost peak 18.4 m/s, mean 10.2 (fit 1.81)"],
@@ -52,6 +52,10 @@ const T := {
 	"dash_curve_juggernaut_peak_k":   ["~", [1.6, 1.8], "x", "[footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73)"],
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
+	"dash_curve_bulwark_peak_u":      ["~", [0.28, 1.0], "", "[footage] Oath's Smash is at its top 0.05s in and holds it to 0.17s"],
+	"dash_curve_bulwark_peak_k":      ["~", [1.05, 1.25], "x", "[footage] Oath 19.9 m/s, mean 17.2 (fit 1.16)"],
+	"dash_curve_tender_peak_u":       ["~", [0.08, 0.22], "", "[footage] Elluna's air glide peaks 0.15s into 1.1s"],
+	"dash_curve_tender_peak_k":       ["~", [1.3, 1.55], "x", "[footage] Elluna peak 19.5 m/s, mean 13.4 (fit 1.45)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
@@ -656,16 +660,20 @@ func _dash_exit() -> void:
 	rec("dash_exit_slide_m", P.pos.x - x_end)
 	P.set_arch(kit_was)
 
-## Each fitted hero's plain ground dash, keys held the way it goes: the speed of every step on the curve, where
-## it peaks, the distance against the kit's, and the speed it hands the walk.
+## Each fitted hero's fitted dash (a plain ground dash; Meeko's is her air glide), keys held the way it goes: the
+## speed of every step on the curve, where it peaks, the distance against the kit's, and the speed it hands the walk.
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "tender"]:
+		var airborne: bool = id == "tender"
 		P.reclass(Arch.weight(id), id)
-		_reset(flat + Vector3(-3.0, 0, 0))
+		_reset(flat + Vector3(-3.0, 3.0 if airborne else 0.0, 0), not airborne)
 		P.inp["move"] = Vector2(1, 0)
-		P.inp["dash"] = true
+		if airborne:
+			P.ak.on_dash(true)
+		else:
+			P.inp["dash"] = true
 		var speeds: Array[float] = []
 		var x0 := 0.0
 		for i in 90:
@@ -687,8 +695,10 @@ func _dash_curves() -> void:
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		rec("dash_curve_dist", (P.pos.x - x0) / (float(dd.get("roll", dd.get("dist"))) * float(feel["dist"])))
-		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
+		var want := float(dd["air"]["dist"]) if airborne else float(dd.get("roll", dd.get("whirl", dd.get("dist"))))
+		rec("dash_curve_dist", (P.pos.x - x0) / (want * float(feel["dist"])))
+		if not airborne:          # the glide's hand-off is the air's (--airdash-glide-check)
+			rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
 	P.reclass(cls_was, kit_was)
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn

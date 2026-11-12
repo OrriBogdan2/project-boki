@@ -794,11 +794,11 @@ func on_dash(use_ex: bool) -> bool:
 		for i in 4:
 			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
-	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
+	# 360 Smash: a short fixed dash in the aim (or move) direction on Oath's fitted curve, then ONE full spin hit
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd, "curved": true})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")

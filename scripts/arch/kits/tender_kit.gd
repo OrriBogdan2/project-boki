@@ -277,11 +277,12 @@ func on_dash(use_ex: bool) -> bool:
 	var air: Dictionary = dd.get("air", {})
 	var dist := float(air["dist"]) if use_ex else float(dd["dist"])
 	var tt := float(air["time"]) if use_ex else float(dd["time"])
-	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()})
-	# the ground hop goes through the global dash feel (its data is set so the result is the source's 2 bh in
-	# 0.2 s); the glide is the source's own measured curve (dash.air), so the feel doesn't touch it
+	# the ground hop runs a constant speed (no clean footage of it); the glide runs Elluna's fitted curve
+	# (dash_feel.json "curve") on dash.air's distance and time, not the class long dash's
+	h.ex_next = false
+	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir(), "curved": use_ex})
 	if use_ex:
-		_start_glide(dist, tt)
+		_start_glide(tt)
 	play("mm_float" if use_ex else "mm_skip")
 	m.sfx("tend_hop", h.pos, -3.0, 1.05 if use_ex else 1.2)
 	vfx("hop", null, dash_dir())        # a few stars off her heels
@@ -291,17 +292,10 @@ func on_dash(use_ex: bool) -> bool:
 			if is_instance_valid(h) and h.grounded: m.fx.dust(h.pos, PUFF_N))
 	return true
 
-## The air dash is her long glide (dash.air): a quick ramp to a flat burst, then a float out at a share of
-## that speed while barely sinking, then down. The peak speed is set so the whole glide covers `dist`.
-func _start_glide(dist: float, tt: float) -> void:
-	var air: Dictionary = dash_def().get("air", {})
-	var ramp := float(air.get("ramp", 0.1))
-	var burst := float(air.get("burst", 0.4))
-	var out_k := float(air.get("out_k", 0.45))
-	var span := ramp * 0.5 + burst + maxf(0.0, tt - ramp - burst) * (1.0 + out_k) * 0.5
-	glide = {"t": 0.0, "top": dist / maxf(0.05, span), "time": tt}
-	h.roll_t = tt
-	h.roll_speed = float(glide["top"]) * 0.5
+## The air dash is her long glide (dash.air): its speed is the fitted curve (ArchKit.travel "curved"); here
+## she barely sinks while it floats, then comes down, and the move keys steer it.
+func _start_glide(tt: float) -> void:
+	glide = {"t": 0.0, "time": tt}
 	h.vel.y = maxf(h.vel.y, 0.0)
 
 func _tick_glide(dt: float) -> void:
@@ -313,16 +307,11 @@ func _tick_glide(dt: float) -> void:
 	if h.roll_t <= 0.0 or h.move_kind != "dash" or h.downed or h.stun_t > 0.0:
 		glide = {}
 		return
-	var ramp := float(air.get("ramp", 0.1))
-	var burst := float(air.get("burst", 0.4))
-	var top := float(glide["top"])
 	# air control (owner): the move keys bend the glide's heading at a capped rate (dash.air.steer rad/s)
 	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
 	if mv.length() > 0.1:
 		var steer := float(air.get("steer", 3.0)) * dt
 		h.roll_dir = h.roll_dir.rotated(clampf(h.roll_dir.angle_to(mv.normalized()), -steer, steer))
-	var k := clampf((t - ramp - burst) / maxf(0.05, float(glide["time"]) - ramp - burst), 0.0, 1.0)
-	h.roll_speed = top * lerpf(0.5, 1.0, clampf(t / ramp, 0.0, 1.0)) * lerpf(1.0, float(air.get("out_k", 0.45)), k)
 	# held up while it floats; the last 0.15 s lets her come down
 	if float(glide["time"]) - t > 0.15:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
