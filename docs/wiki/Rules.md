@@ -1282,6 +1282,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | xform_contact_s | 0.45 |
 | ult_lock_s | 1.5 |
 | warn_s | 3 |
+| form_sfx | {"db": {"cast": -1.0, "travel": -4.0, "hit": -3.0}, "other_db": -6.0, "note": "a form's own cast (its ultimate), travel (its form dash) and hit (where its moves land) sounds, named in the form file's sound block (MergeSfx): db = the level you hear your own at, dB; other_db = how much quieter a teammate's or a rival's plays, from where it is"} |
 | release_rest_s | 6 |
 | timeout_rest_s | 10 |
 | afterglow | {"secs": 3.0, "move_speed": 0.15, "shield_frac": 0.08} |
