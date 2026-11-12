@@ -45,7 +45,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | LMB tap cadence, speed, range | 0.6 s [data card; footage 1 per 2-3 frames]; a slow molten boulder, about 10-12 bh/s; a small burst with a red ground ring [footage] | 0.6 s, 20 m/s, 11 m, a red ring and a 0.9 m splash | matches; asserted |
 | LMB hold beats | the gauntlet drawn back in a deep crouch, a straight drive that steps her about 0.5 bh; about 0.75 s hold [footage 0118-0121] | `breah_wind` (held) then `breah_punch`, out at 0.05 s; a 0.6 m step (0.8 m measured) | matches; asserted |
 | LMB hold tracking | the lane points at the cursor, fixed length [footage] | the lane and her body follow a moved cursor during the hold; 4.2 m by 1.8 m | matches; asserted |
-| LMB hold walk | she stands while the lane is up: 0 px between 0118 and 0119 (hero bar against a still ground, 4 fps), the punch step is the next frame; 0128-0150 are rock punches with walking between them, no lane frame resolved [footage] | planted once the lane is up (`lmb.walk_k` 0, share of the run; was the weapon's 0.85); the tap window and the recovery still walk (`fire_slow` 0.85) | matches; asserted (2026-11-12) |
+| LMB hold walk | she stands while the lane is up: 0 px between 0118 and 0119 (hero bar against a still ground, 4 fps), the punch step is the next frame; 0128-0150 are rock punches with walking between them, no lane frame resolved [footage] | planted once the lane is up (`lmb.walk_k` 0, share of the run; was the weapon's 0.85); the tap window and the recovery still walk (`fire_slow` 0.85); on the ground only, a hold up in a jump or air dash keeps its carry (the air-punch rule) | matches; asserted (2026-11-12) |
 | RMB charge walk | she stands through every charge: 0-2 px a frame over 0253-0256, 0265-0268 and 0315-0320 (1.0-1.5 s each), one 29 px shift at 0256-0257 (a step at the rock chips, not a walk) [footage] | planted from the tap window's end (`slam.walk_k` 0, was 0.55); the hop still keeps `carry` of the run he charged from (owner item 61, `BreahSlam.run_v`) | matches; asserted; owner 61b says the same (locked) |
 | RMB Volcano Crusher | hold, crouch with glowing fists, hop forward and smash; jump while charging leaps forward [data, footage] | Quakefall: the same (Quakefall review, item 14) | matches |
 | E Rockwave | three rocks about 2 bh ahead, a slight curve, a red flash first [footage] | Stone Row: the same | matches |
@@ -257,7 +257,6 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 
 ## Assumptions (the footage is silent; easy to change in content/archetypes/dolm.json)
 - The tap boulder flies its full range rather than stopping at the cursor, and its burst splashes 0.9m for half damage.
-- She can walk while charging Quakefall, at 55% speed.
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
 - The KNOCK beam on the dunk is our DUNKED word plus a vertical light (a generic knock look in the source, it seems).

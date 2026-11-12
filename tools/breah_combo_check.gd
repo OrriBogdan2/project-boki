@@ -161,6 +161,17 @@ func _breah() -> void:
 		absf(held_dz) < 0.02 and tap_dz > 0.5, "held %.2f m, tap window %.2f m" % [held_dz, tap_dz]
 	)
 	ok("lmb hold: once the punch lands she walks again", walk_dz > 1.0, "%.2f m in 0.6 s" % walk_dz)
+	P.inp["fire"] = true
+	step(m, 0.35, hold_walk)     # the lane up, then a jump with it held
+	P.inp["jump"] = true
+	step(m, 0.15, hold_walk)
+	P.inp["jump"] = false
+	ok("lmb hold: in the air the hold does not brake her (planted on the ground only, the air-punch rule)",
+			not P.grounded and is_equal_approx(P.ak.move_k(), 1.0),
+			"grounded %s move_k %.2f" % [P.grounded, P.ak.move_k()])
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	step(m, 1.0)
 	# hold walk (footage 0253-0258, 0265-0268, 0315-0320): he stands through the Quakefall charge too; the hop still
 	# keeps the run he charged from (item 61, _hop_item61)
 	reset.call()

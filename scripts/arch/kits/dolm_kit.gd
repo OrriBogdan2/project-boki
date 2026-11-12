@@ -617,9 +617,10 @@ func rmb_hold_tick(t: float) -> void:
 	slam.hold_tick(t)
 
 ## The punch hold (its lane up) and the Quakefall charge are planted, as the source: `lmb.walk_k` and `slam.walk_k`,
-## shares of the run (0 = stands).
+## shares of the run (0 = stands). The punch hold only on the ground: an air punch never slows her below the speed
+## she flies, so a hold up in a jump or air dash keeps its carry.
 func move_k() -> float:
-	if lmb_t > float(lmb_def()["tap"]):
+	if lmb_t > float(lmb_def()["tap"]) and h.grounded:
 		return float(lmb_def()["walk_k"])
 	return slam.move_k()
 
