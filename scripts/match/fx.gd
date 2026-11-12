@@ -269,13 +269,13 @@ func body_glow(at: Vector3, col: Color) -> void:
 	g["dur"] = GLOW_DUR
 	g["rise"] = GLOW_RISE
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", small := false) -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
 	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
 	# number that sits on it and grows with each hit, then floats off once the hits stop
 	for n in nums:
-		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.6:
+		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and bool(n["small"]) == small and (n["base"] as Vector3).distance_to(at) < 1.6:
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -288,7 +288,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			elif not n.get("crit", false):
 				ln.modulate = col
 			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), small)
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
@@ -300,12 +300,12 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
 	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	l.font_size = _num_size(v, crit, small)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "small": small})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
@@ -324,9 +324,9 @@ func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_size = 20 if crit else 14
 
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
-func _num_size(v: float, crit: bool) -> int:
+func _num_size(v: float, crit: bool, small := false) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
+	return int((lerpf(36.0, 46.0, k) + (8 if crit else 0)) * (Juice.BOKI_NUM_K if small else 1.0))
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
