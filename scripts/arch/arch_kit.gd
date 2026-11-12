@@ -122,6 +122,7 @@ func drop_holds() -> void:
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
+func _rmb_dropped() -> void: pass                    # the hold was dropped (stun, down): clear what it showed
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
 func rmb_auto_t() -> float: return 9.0               # a hold this long fires by itself
 func full_ready() -> bool: return false              # the resource-full RMB variant is ready
@@ -210,7 +211,9 @@ func tick(dt: float) -> void:
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
 	if rmb_down:
-		if held("rmb") and not h.downed and h.stun_t <= 0.0:
+		if h.downed or h.stun_t > 0.0:
+			_drop_rmb()
+		elif held("rmb"):
 			rmb_t += dt
 			rmb_hold_tick(rmb_t)
 			if rmb_t >= rmb_auto_t():
@@ -299,6 +302,14 @@ func _release_rmb() -> void:
 	c["hold"] = rmb_t >= float(rmb_def().get("hold", 0.3)) and not c.get("air", false)
 	c["variant"] = describe_rmb_variant(c)
 	fire_rmb(c)
+
+## Stunned or downed mid-hold: the hold ends with no release and nothing is spent, so no charged move leaves a
+## hunter who can't act (docs/heroes/hold_release_rules.md). Kits clean up what the hold showed in _rmb_dropped().
+func _drop_rmb() -> void:
+	rmb_down = false
+	rmb_t = 0.0
+	AimKit.clear(h)
+	_rmb_dropped()
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:

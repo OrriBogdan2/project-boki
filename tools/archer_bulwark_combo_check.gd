@@ -3,6 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -19,11 +21,13 @@ func run(main_node: Node) -> void:
 	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
 		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await HOLD.albert(self)
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()

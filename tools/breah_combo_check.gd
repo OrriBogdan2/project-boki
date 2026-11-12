@@ -9,6 +9,7 @@ func run(main_node: Node) -> void:
 	await _breah()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
+	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
 	n += ult_check.n
 	fails += ult_check.fails
 	var flow = load("res://tools/dash_flow_check.gd").new()
