@@ -20,7 +20,8 @@
 	"color": "#8ae6ff",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
-	"card": {"role_word": "Controller", "loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "dash": "Hold to skate where you move; your darts fly straight and thick.", "passive": "Hits Chill; 8 darts or a knock on a Chilled foe Shatters.", "rmb": "Ice spear: hits and slows where it lands, then bursts after 1.8s.", "e": "An ice wall slides to the cursor, shoving foes; E freezes it.", "x": "Sealed, invulnerable and rooted; cracks open at 3.5s to stun foes.", "weapons": {"hoar_fan": "Hold for a barrage of slow darts that curve onto your target."}, "chips": {"rmb": ["18 hit", "60 burst"], "x": ["40 dmg"]}},
+
+	"card": {"role_word": "Controller", "loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "dash": "Hold to skate where you move; darts fly straight, hit twice as hard.", "passive": "Hits Chill; 8 darts or a knock on a Chilled foe Shatters.", "rmb": "Ice spear: hits and slows where it lands, then bursts after 1.8s.", "e": "An ice wall slides to the cursor, shoving foes; E freezes it.", "x": "Sealed, invulnerable, rooted in a slowing rink; cracks open at 3.5s to stun.", "weapons": {"hoar_fan": "Hold for slow homing darts; big ones every few shots."}, "chips": {"rmb": ["18 hit", "60 burst"], "x": ["40 dmg"]}},
 	"signature": "hoar_fan",
 	"resource": {
 		"id": "chill",
@@ -51,8 +52,9 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
 		"steer": 3.6,
+		"skate_dart_dmg_k": 2.0,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
 		"ice_len": 3.6,
