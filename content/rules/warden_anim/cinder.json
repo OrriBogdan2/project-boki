@@ -19,11 +19,12 @@
 		"as_lance_end": {"clip": "lance_end", "upper": "moving"},
 		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving"}, "as_shot": {"clip": "shot", "upper": "moving"},
 		"as_leap": {"clip": "leap", "heading": true, "turn_max": 3.2}, "lw_hop": {"clip": "hop", "heading": true, "turn_max": 3.2},
-		"as_cloak": {"clip": "cloak"}, "lw_stoke": {"clip": "stoke", "upper": true},
+		"as_cloak": {"clip": "cloak", "upper": "moving"}, "lw_stoke": {"clip": "stoke", "upper": true},
 		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land"},
 		"lw_jump": {"clip": "jump"},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "x_breath"]

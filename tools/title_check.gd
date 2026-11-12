@@ -1,6 +1,7 @@
 extends RefCounted
 ## --title-check: the title screen. It builds; its menu has the items it should (Continue or New
-## game, Training Grounds, Play with friends when online play is there, Save files, Settings, Quit off the web) and
+## game, Training Grounds, Play with your Boki with a save, Play with friends when online play is there, Save files,
+## Settings, Quit off the web) and
 ## nothing called "The story so far"; the tagline is there; the key art has its squad of six with
 ## their Boki, the Wyrm and the logo; and the scene stays inside a frame budget, on the High preset
 ## and again on Low (which must build a cheaper scene). Headless, so the budget is the CPU side of a
@@ -51,7 +52,7 @@ func _pass(preset: String) -> Dictionary:
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
 	var want: Array = ["Continue" if has else "New game", "Training Grounds"]
-	if has: want.append("Demo match")
+	if has: want.append_array(["Demo match", "Play with your Boki"])
 	if Net.available(): want.append("Play with friends")
 	want.append_array(["Save files", "Settings"])
 	if not OS.has_feature("web"): want.append("Quit")
