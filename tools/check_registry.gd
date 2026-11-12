@@ -31,6 +31,7 @@ const CHECKS := {
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],      # GARDEN_MODERN 1.2
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
 	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
+	"--base-check": ["res://tools/base_check.gd", "base_check", null],      # B: hold wheel, channel, cancels
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--stat-budget-check": ["res://tools/stat_budget_check.gd", "stat_budget_check", null],      # decision 0022
 	"--duo-check": ["res://tools/duo_check.gd", "duo_check", null],      # GARDEN_MODERN 5 rank 4 duo bonus
