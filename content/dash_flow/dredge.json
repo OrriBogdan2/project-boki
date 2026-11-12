@@ -25,5 +25,40 @@
 	},
 	"into_jump": {
 		"rmb": {"mode": "lock", "reason": "Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).", "source": "Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout."}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "Grasp, then Iron Smash on the target stunned at your feet is the source combo (briefs/hero-ref/dredge.md:98,140): ours fires. Matches."},
+			"x": {"windup": "drop", "recovery": "drop", "source": "[?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."},
+			"x": {"windup": "drop", "recovery": "fire", "source": "[?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129)."}
+		},
+		"x": {
+			"at": [0.05, 1.9],
+			"lmb": {"windup": "queue", "windup_wait": 1.03, "recovery": "drop", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."},
+			"lmb_hold": {"windup": "queue", "windup_wait": 1.03, "recovery": "fire", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."},
+			"rmb": {"windup": "drop", "recovery": "drop", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."},
+			"e": {"windup": "drop", "recovery": "drop", "source": "[?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266)."}
+		}
 	}
 }

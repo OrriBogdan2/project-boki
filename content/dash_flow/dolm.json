@@ -34,5 +34,40 @@
 			"air": {"mode": "keep"},
 			"jump": {"mode": "keep"}
 		}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."}
+		},
+		"x": {
+			"at": [0.05, 0.8],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "Tetraform wall, then a held Quake Punch through its rocks is the source combo (briefs/hero-ref/breah.md:401): ours fires. Matches."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."}
+		}
 	}
 }

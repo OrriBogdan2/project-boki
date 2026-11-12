@@ -28,5 +28,40 @@
 			"air": {"mode": "keep"},
 			"jump": {"mode": "keep"}
 		}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"x": {
+			"at": [0.05, 2.6],
+			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
+			"lmb_hold": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
+			"e": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."}
+		}
 	}
 }

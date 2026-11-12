@@ -33,5 +33,40 @@
 			"air": {"mode": "keep"},
 			"jump": {"mode": "keep"}
 		}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."}
+		},
+		"x": {
+			"at": [0.05, 1.0],
+			"lmb": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches."},
+			"lmb_hold": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches."},
+			"rmb": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out (footage: no other press in the crystal, briefs/hero-ref/tamsin.md:218-227). Fixed: ours spent an RMB charge and dropped the spear; now refused like LMB and E."},
+			"e": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches."}
+		}
 	}
 }
