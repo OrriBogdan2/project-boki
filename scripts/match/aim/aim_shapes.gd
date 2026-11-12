@@ -179,6 +179,9 @@ static func _arc_wall(g: AimGeo, e: Dictionary) -> void:
 	for s in [-1.0, 1.0]:
 		var ed := Vector2.from_angle(a + h * s)
 		g.ribbon(ctr + ed * (r - th * 0.5), ctr + ed * (r + th * 0.5), lw, _rim(e))
+	var f := float(e["fill"])
+	if f > 0.0:
+		g.sector(ctr, r - th * 0.5, r + th * 0.5, a - h * f, a + h * f, _hot(e, 0.6), _hot(e))
 
 static func _swap(g: AimGeo, e: Dictionary) -> void:
 	var a: Vector2 = e["a"]; var b: Vector2 = e["b"]; var r := float(e["r"])

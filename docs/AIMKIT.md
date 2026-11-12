@@ -134,10 +134,12 @@ Params: as for the circle (`r` defaults to 4.5 m), plus `k`, `core0` (0.9) and `
 ### Curved arc wall
 ```gdscript
 AimKit.arc_wall(h, "e", {"rmax": reach})       # Lace's Rain of Arrows: at the cursor distance, 120 deg
+AimKit.arc_wall(h, "lmb", {"radius": 3.1, "deg": 175.0, "thick": 0.18, "panels": 1, "fill": k})  # Kael's hold arc
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
-`deg` (120), `thick` (0.9), `panels` (7).
+`deg` (120), `thick` (0.9), `panels` (7), `fill` (0..1: a bright band spreading from the aim out to both ends,
+drawn in `col2`; hot at 1).
 
 ### Two-end swap marker
 ```gdscript
@@ -154,8 +156,8 @@ AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform:
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
 The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
-rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
-`"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Sparkle's E is a
+rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is a one-panel
+`arc_wall` filling with the charge. A target highlight ring at someone's feet is a small `circle` at their position. Sparkle's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
 drag arrow.
 
