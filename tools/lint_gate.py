@@ -98,7 +98,8 @@ def run_ruff(files):
     return {"ruff": lint, "ruff-format": fmt}
 
 
-PRIVATE_NAME = re.compile("super" + "vive", re.I)
+# The outside game's name, and its game-file table and blueprint ids (split so this file does not match itself).
+PRIVATE_NAME = re.compile("super" + "vive|\\b(?:CT|BP|GE|DA)_Lo" + "ki", re.I)
 PRIVATE_SUFFIXES = (".gd", ".tscn", ".tres", ".gdshader", ".gdshaderinc", ".json", ".md", ".py", ".sh", ".cfg", ".txt")
 
 
