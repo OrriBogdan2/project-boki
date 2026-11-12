@@ -443,9 +443,10 @@ func _all() -> void:
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	ak.aim_at(P, home + Vector3(20.0, 0, 0))
+	var old_ribbons: Array = HeroVfx.of(m).ribbons.duplicate()      # the miss's, untouched by m.step
 	ak.tap(m, P)
 	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
-	_orb_look(K, m)
+	_orb_look(K, m, old_ribbons)
 	ak.step(m, 0.8)
 	var e2: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
 	var far_d := Vector2((e2[0] as Vector3).x - home.x, (e2[0] as Vector3).z - home.z).length()
@@ -747,7 +748,7 @@ func _all() -> void:
 
 ## Cinder Shot in flight reads as fire: the orb is her flame orange (the archetype colour) round a white-hot core in a
 ## deep-red glow, at its old size, with the data's flicker trail following it.
-func _orb_look(K: AshwickKit, m: Node) -> void:
+func _orb_look(K: AshwickKit, m: Node, old_ribbons: Array) -> void:
 	var r: Dictionary = {}
 	for e: Dictionary in K.fx.riders:
 		if e["kind"] == "cinder": r = e
@@ -770,5 +771,5 @@ func _orb_look(K: AshwickKit, m: Node) -> void:
 	)
 	var trails := 0
 	for e: Dictionary in HeroVfx.of(m).ribbons:
-		if is_same(e.get("follow"), n): trails += 1
+		if is_same(e.get("follow"), n) and not old_ribbons.has(e): trails += 1
 	ok("cinder: the flicker trail (shot_trail, 2 ribbons) follows the orb", trails == 2, "%d ribbons" % trails)
