@@ -3,21 +3,18 @@ extends RefCounted
 ## A downed Hunter shows as a Wisp instead of the hero (docs/decisions/0019-downed-wisp.md). Purely
 ## presentation: it follows Hunter.downed and Hunter.out and changes nothing about timers, speed, revive
 ## or targeting. Per hunter, tick() runs a small state machine:
-##   hero --down--> pop in (hero hidden, Wisp puffs out) -> on (bob, flicker, lean and trail when moving)
+##   hero --down--> pop in (hero hidden, Wisp puffs out) -> on (slow bob, trails heavily behind the hunter
+##   and settles when they stop, a quiet hum)
 ##   on --revive--> pop out (Wisp brightens and fades, hero grows back from the look's hero_from with a squash) -> hero
 ##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
-## The look (colours, effects, timing) is WispLook's data. State lives in the hunter's meta "wisp".
+## The look (colours, body, drift, hum, timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
 const IN := "in"
 const ON := "on"
 const OUT := "out"
-const LEAN_RATE := 8.0        # 1/s: how fast the tilt and stretch follow the speed
-const MOVE_SPEED := 0.8       # m/s above which the Wisp counts as moving (starts the trail)
-const FULL_LEAN_SPEED := 6.0  # m/s at which the lean and stretch are full
 const POP_OVERSHOOT := 1.70158   # the "back" ease's overshoot: the pop swells a little past full size
 const POP_FROM := 0.3         # fraction of full size the Wisp pops in from
 const FLASH_BOOST := 3.0      # extra glow at the instant of a pop
-const EYES_AHEAD := 0.4       # how far the eyes turn from the camera toward the facing
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
 ## size (a pop-out) and the Wisp.
@@ -29,7 +26,7 @@ static func tick(h: Hunter, dt: float) -> void:
 		return
 	st["t"] = float(st["t"]) + dt
 	match mode:
-		IN: _pose_in(h, st)
+		IN: _pose_in(h, st, dt)
 		ON: _pose_on(h, st, dt)
 		OUT: _pose_out(h, st, dt)
 
@@ -45,10 +42,14 @@ static func node_of(h: Hunter) -> Node3D:
 static func mode_of(h: Hunter) -> String:
 	return String(_state(h)["mode"])
 
+## The key of this hunter's hum loop in Sfx.
+static func hum_key(h: Hunter) -> String:
+	return "wisp%d" % h.get_instance_id()
+
 static func _state(h: Hunter) -> Dictionary:
 	if not h.has_meta("wisp"):
 		var fresh := {"mode": "", "t": 0.0, "node": null, "look": {}}
-		fresh.merge({"last": Vector3.ZERO, "lean": 0.0, "base": Vector3.ONE})
+		fresh.merge({"last": Vector3.ZERO, "lag": Vector3.ZERO, "base": Vector3.ONE})
 		h.set_meta("wisp", fresh)
 	return h.get_meta("wisp")
 
@@ -85,7 +86,7 @@ static func _pop_in(h: Hunter, st: Dictionary) -> void:
 	st["mode"] = IN
 	st["t"] = 0.0
 	st["last"] = h.position
-	st["lean"] = 0.0
+	st["lag"] = Vector3.ZERO
 	_pop_fx(h, look["pop_in"], float(look["hover"]))
 
 static func _pop_out(h: Hunter, st: Dictionary) -> void:
@@ -93,6 +94,7 @@ static func _pop_out(h: Hunter, st: Dictionary) -> void:
 	st["mode"] = OUT
 	st["t"] = 0.0
 	st["base"] = h.model.scale if h.model else Vector3.ONE
+	Sfx.loop_stop(hum_key(h))
 	_pop_fx(h, look["pop_out"], 0.5)
 
 ## Ring, burst and sound of a pop; a Wisp nobody can see makes none.
@@ -111,6 +113,7 @@ static func _snuff(h: Hunter, st: Dictionary) -> void:
 	var at := h.position + Vector3(0, float((st["look"] as Dictionary)["hover"]), 0)
 	h.m.fx.burst(at, _team_col(h).lightened(0.4), int(spec["burst"]), 5.0, 0.7, 4.0, 1.0)
 	h.m.sfx(String(spec["sfx"]), h.position, -8.0)
+	Sfx.loop_stop(hum_key(h))
 	_free_node(st)
 	st["mode"] = ""
 
@@ -135,57 +138,58 @@ static func _back(k: float) -> float:
 	return 1.0 + (POP_OVERSHOOT + 1.0) * u * u * u + POP_OVERSHOOT * u * u
 
 static func _set_glow(node: Node3D, flash: float, fade: float) -> void:
-	for mat in node.get_meta("mats", []):
-		(mat as ShaderMaterial).set_shader_parameter("flash", flash)
-		(mat as ShaderMaterial).set_shader_parameter("fade", fade)
+	var mat := node.get_meta("mat") as ShaderMaterial
+	mat.set_shader_parameter("flash", flash)
+	mat.set_shader_parameter("fade", fade)
 
-static func _pose_in(h: Hunter, st: Dictionary) -> void:
+static func _pose_in(h: Hunter, st: Dictionary, dt: float) -> void:
 	var node := st["node"] as Node3D
 	var look: Dictionary = st["look"]
 	var k := clampf(float(st["t"]) / float(look["pop_in"]["time"]), 0.0, 1.0)
 	var grow := lerpf(POP_FROM, 1.0, _back(k))
 	node.scale = Vector3.ONE * grow
 	_set_glow(node, 1.0 + FLASH_BOOST * (1.0 - k), 1.0)
-	_pose_body(h, st, 0.0)
+	_pose_body(h, st, dt)
+	_hum(h, st)
 
 static func _pose_on(h: Hunter, st: Dictionary, dt: float) -> void:
 	var node := st["node"] as Node3D
 	node.scale = Vector3.ONE
 	_set_glow(node, 1.0, 1.0)
 	_pose_body(h, st, dt)
+	_hum(h, st)
 
-## Bob, lean toward the way it moves, stretch along it, and the trail while moving.
+## Slow and heavy: a slow bob, and the body stays behind in the world when the hunter moves (up to the
+## look's drag), leaning back a little, then catches up over the look's settle time once they stop.
 static func _pose_body(h: Hunter, st: Dictionary, dt: float) -> void:
 	var node := st["node"] as Node3D
 	var look: Dictionary = st["look"]
 	var t := float(st["t"])
 	var moved := (h.position - (st["last"] as Vector3)) * Vector3(1, 0, 1)
 	st["last"] = h.position
-	var speed := moved.length() / maxf(dt, 0.0001) if dt > 0.0 else 0.0
-	var follow := 1.0 - exp(-LEAN_RATE * dt)
-	st["lean"] = lerpf(float(st["lean"]), clampf(speed / FULL_LEAN_SPEED, 0.0, 1.0), follow)
-	var lean := float(st["lean"])
-	node.position.y = float(look["hover"]) + sin(t * TAU * float(look["bob_hz"])) * float(look["bob"])
-	var tilt := node.get_node("Tilt") as Node3D
-	var forward := moved.normalized() if speed > MOVE_SPEED else Vector3.ZERO
-	if forward != Vector3.ZERO:
-		tilt.basis = Basis(Vector3.UP.cross(forward).normalized(), -lean * float(look["lean"]))
-	elif lean < 0.05:
-		tilt.basis = Basis.IDENTITY
-	var stretch := float(look["stretch"]) * lean
-	tilt.scale = Vector3(1.0 - stretch * 0.5, 1.0 + stretch, 1.0 - stretch * 0.5)
-	_aim_eyes(h, tilt.get_node_or_null("Eyes") as Node3D)
-	(node.get_node("Trail") as CPUParticles3D).emitting = speed > MOVE_SPEED
+	var drag := float(look["drag"])
+	var lag: Vector3 = (st["lag"] as Vector3) + moved
+	lag *= exp(-dt / float(look["settle"]))
+	lag = lag.limit_length(drag)
+	st["lag"] = lag
+	var bob := sin(t * TAU * float(look["bob_hz"])) * float(look["bob"])
+	node.position = Vector3(-lag.x, float(look["hover"]) + bob, -lag.z)
+	var body := node.get_node("Body") as Node3D
+	var pull := lag.length() / drag
+	if pull > 0.01:
+		var forward := lag / lag.length()      # the way the hunter went; the body hangs back and leans back
+		body.basis = Basis(Vector3.UP.cross(forward).normalized(), -pull * float(look["lean"]))
+	else:
+		body.basis = Basis.IDENTITY
 
-## The eyes look up at the camera (from the top-down view they would sit on the Wisp's edge), a little
-## toward where the hunter faces.
-static func _aim_eyes(h: Hunter, eyes: Node3D) -> void:
-	var cam := h.get_viewport().get_camera_3d() if eyes else null
-	if cam == null:
+## The quiet hum, held each frame so it stops on its own if the Wisp goes away any other way; a Wisp
+## nobody can see keeps quiet.
+static func _hum(h: Hunter, st: Dictionary) -> void:
+	if not h.visible:
+		Sfx.loop_stop(hum_key(h))
 		return
-	var to_cam := (cam.global_position - eyes.global_position).normalized()
-	var ahead := Basis(Vector3.UP, h.face) * Vector3.FORWARD
-	eyes.look_at(eyes.global_position + to_cam + ahead * EYES_AHEAD, Vector3.UP)
+	var hum: Dictionary = (st["look"] as Dictionary)["hum"]
+	Sfx.loop_hold(hum_key(h), String(hum["sfx"]), h.pos, float(hum["db"]))
 
 static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
 	var look: Dictionary = st["look"]
