@@ -52,14 +52,14 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | The Crown | heart | Gloom | dangerous | 53 |  |
 | Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
-| Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
+| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
 | Stormbreak | shrine | Storm | contested | 24 |  |
-| Thornwood | nest | Bloom | contested | 68 | Bramble Rise |
-| Larkhollow | landing | Meadow | quiet | 46 | The Hollow |
+| Thornwood | nest | Bloom | contested | 74 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 39 | The Hollow |
 | Highwatch | landing | Frost | quiet | 6 | The Lookout |
-| Duskmoor | landing | Storm | quiet | 18 | Moor Chapel |
-| Saltmere | landing | Bloom | quiet | 34 | Salt River |
+| Duskmoor | landing | Storm | quiet | 17 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 17 | Salt River |
 
 ### Boss lairs
 
@@ -72,6 +72,18 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 **Exits:** 2 uplink outposts.
 
 **Getting around:** 9 bridges, 14 glide routes, a sky train with 10 stops (Lark Halt, Frost Halt, Watch Halt, Eyrie Halt, Storm Halt, Moor Halt, Bramble Halt, Salt Halt, Ash Halt, Cinder Halt).
+
+### Terrain hazards
+
+Ground that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) or a hazard perk (found as a perk orb, more often near its field) walks it safely; bots go round what theirs can't handle. Big fields make up half a region's ground with paths, fords and stepping stones through them.
+
+| Hazard | Where | Does | Safe with |
+|---|---|---|---|
+| Lava Field | Cinder Steps | Burning | Ember type |
+| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak |
+| Ice Sheet | Frostgate | No footing | Frost type |
+| Static Flats | Stormbreak | Shocks | Storm type, Tempest type |
+| Bramble | Thornwood | Slow, scratches | Bloom type, Spore type |
 
 ### Rolled each match
 
@@ -131,6 +143,8 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+
+**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnback turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## First Flight

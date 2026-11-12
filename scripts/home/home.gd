@@ -3121,7 +3121,7 @@ func _open_kin(rec: Dictionary) -> void:
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
-	hx.add_child(VoidPortrait.of(rec, get_tree(), 84.0))
+	hx.add_child(VoidPortrait.of(rec, get_tree(), 128.0))
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
 	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
@@ -3445,11 +3445,9 @@ func _open_expedition() -> void:
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
-		left.add_child(UI.section("Boki you bring"))
-		left.add_child(_kin_pick_row("Partner", ak, "active"))
-		left.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
+		left.add_child(RidePick.build(self, "", _open_expedition))
 		if Match.TWO_KIN and Save.d["roster"].size() > 1:
-			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
+			left.add_child(_second_pick_row(Save.second_kin()))
 		if float(ak["trust"]) < 30.0:
 			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
 	if Save.d.get("treat", "") != "":
@@ -3524,19 +3522,19 @@ func _open_kit_card() -> void:
 func _open_loadout() -> void:
 	_open_expedition()
 
-## One row of the expedition loadout: which kin, with ‹ › to change it.
-func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
+## The benched second Boki (Match.TWO_KIN), with ‹ › to change it. The rider itself: RidePick.
+func _second_pick_row(rec: Dictionary) -> Control:
 	var card := UI.card(UI.CARD, 10, 10)
 	var row := UI.hbox(10); card.add_child(row)
 	var roster: Array = Save.d["roster"]
-	var other := str(Save.d.get("active2" if key == "active" else "active", ""))
+	var other := str(Save.d.get("active", ""))
 	var choices: Array = roster.filter(func(r): return r["uid"] != other)
-	var cur := str(Save.d.get(key, ""))
+	var cur := str(Save.d.get("active2", ""))
 	var cycle := func(dir: int) -> void:
 		var ids: Array = choices.map(func(r): return r["uid"])
-		if key == "active2": ids.append("none")
+		ids.append("none")
 		var i := ids.find(cur)
-		Save.d[key] = ids[(i + dir + ids.size()) % ids.size()] if ids.size() > 0 else cur
+		Save.d["active2"] = ids[(i + dir + ids.size()) % ids.size()] if ids.size() > 0 else cur
 		Save.save_game()
 		_open_expedition()
 	var prev_b := UI.icon_button("back", func(): cycle.call(-1), "Previous Boki", 12.0)
@@ -3550,7 +3548,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		row.add_child(dot)
 	var info := UI.vbox(1); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if rec.is_empty():
-		info.add_child(UI.label("%s: none" % label_t, 16, UI.MUTED, UI.big))
+		info.add_child(UI.label("Second: none", 16, UI.MUTED, UI.big))
 		info.add_child(UI.label("Bring only your partner. Nothing else at risk.", 12, UI.MUTED))
 	else:
 		var sp: Dictionary = Data.KIN[rec["species"]]
@@ -3558,7 +3556,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		nl.clip_text = true
 		info.add_child(nl)
-		var sl := UI.label("%s  ·  level %d  ·  trust %d%s" % [label_t, int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Boki Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
+		var sl := UI.label("Second  ·  level %d  ·  trust %d%s" % [int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Boki Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
 		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		info.add_child(sl)
 		var names: Array = []
@@ -3566,7 +3564,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 			var ad := KinLib.ability(String(aid))
 			if ad: names.append(ad.display_name)
 		var ud := KinLib.merge(String(sp.get("ultimate", "")))
-		var keys := "auto" if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
+		var keys := "swap in with %s" % Settings.key_cap("swap_kin")
 		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
 		al.autowrap_mode = TextServer.AUTOWRAP_OFF
 		al.clip_text = true

@@ -34,6 +34,7 @@ static func stamp_ramp(w: World, R: Dictionary, ii: int) -> void:
 
 ## A hand-made layout's places, exactly where it lists them (World.hand): landings, chests, camps,
 ## wild Boki, breakables, weapons, the shrine, Warden posts and trap spots. Nothing is rolled here.
+## (Vendors stand where their region lists them: Shops.spot.)
 static func place_spots(w: World, defs: Array) -> void:
 	w.shrine_spots.clear(); w.break_spots.clear(); w.weapon_spots.clear()
 	w.heart_spot = Vector3.INF

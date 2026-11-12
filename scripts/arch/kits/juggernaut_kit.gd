@@ -368,7 +368,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	return true
 
 ## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
-## going gold-hot at full, and the cursor ring fills.
+## going gold-hot at full, and the charge ring fills round his body (the source's thin white arc round the hero
+## while the blast charges; hero-ref juggernaut item 8), flaring at full.
 func _wave_preview() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
@@ -376,7 +377,7 @@ func _wave_preview() -> void:
 			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
 			"col": WAVE_RED, "col_full": WAVE_FULL}
 	AimKit.lane(h, "lmb", lane)
-	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
+	AimKit.charge(h, k, {"col": Color.WHITE, "col2": WAVE_FULL, "at": "body"})
 	HeroVfx.of(m).hold(h, "wave_charge", k)
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
@@ -764,7 +765,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
-	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var o := {"no_floor": true, "hit_extra": {"heavy": true}}      # an empowered hit (Juice.number, Feel.tier)
+	o["on_foe"] = func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
@@ -784,7 +786,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 			sweet_spots += 1
 			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
 			vfx("slam_sweet", f.pos, dd)
-		slam_hit[f.get_instance_id()] = m.time}))
+		slam_hit[f.get_instance_id()] = m.time
+	run_own(stg, cx("rmb", "finishing_slam", at, o))
 	AimKit.hide(h, "slam")
 	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
 

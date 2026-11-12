@@ -45,8 +45,9 @@ static func kind_of(id: String) -> String:
 	return ""
 
 ## One perk id for a source, favouring the kinds that source leans to. h (who earned it) skips perks
-## they have maxed; exclude skips ids already in the same drop. "" when nothing is left.
-static func roll(rng: RandomNumberGenerator, source: String, h = null, exclude := []) -> String:
+## they have maxed; exclude skips ids already in the same drop; favour is the ward perk of a field
+## next to the drop, rolled at hazard_near weight. "" when nothing is left.
+static func roll(rng: RandomNumberGenerator, source: String, h = null, exclude := [], favour := "") -> String:
 	var rs: Dictionary = rules()
 	var lean: Dictionary = (rs.get("sources", {}).get(source, {}) as Dictionary).get("lean", {})
 	var wts: Dictionary = rs.get("weights", {})
@@ -61,6 +62,10 @@ static func roll(rng: RandomNumberGenerator, source: String, h = null, exclude :
 			if not Data.PERKS.has(id) or exclude.has(id) or (h != null and not h.perk_open(id)):
 				continue
 			var w := float(lean.get(k, 1.0)) * float(wts.get(id, 1.0))
+			if id == favour:
+				w = float(rs["hazard_near"]["weight"])      # the ward for the field this drops next to
+			if w <= 0.0:
+				continue        # weight 0: never from an orb (the hazard wards away from their field)
 			ids.append(id); ws.append(w); tot += w
 	if ids.is_empty():
 		return ""
@@ -85,8 +90,9 @@ static func drop(m, source: String, pos: Vector3, n := 0, h = null) -> Array:
 		var span: Array = src.get("n", [1, 1])
 		n = rng.randi_range(int(span[0]), int(span[1]))
 	var picks: Array = []
+	var favour := TerrainHazards.perk_near(m, pos, float(rs["hazard_near"]["m"]))      # lava's loot: Emberwalk
 	for i in n:
-		var id := roll(rng, source, h, picks)
+		var id := roll(rng, source, h, picks, favour)
 		if id == "":
 			id = roll(rng, source, null, picks)      # everything open to them is taken: any perk still shows up
 		if id == "":

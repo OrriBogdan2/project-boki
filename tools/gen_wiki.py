@@ -492,9 +492,9 @@ def gen_gear():
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
         users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
-        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
+        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
-    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
+    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Range", "Notes"], rows)
     body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
@@ -520,6 +520,20 @@ def gen_gear():
     page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/hunter_abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 
 # ------------------------------------------------------------------ maps
+def _terrain_hazards(hz_at):
+    """The map's terrain hazard areas (content/rules/terrain_hazards.json): what each does, where, and
+    which Boki walks it safely."""
+    R = json.load(open(os.path.join(ROOT, "content", "rules", "terrain_hazards.json"), encoding="utf-8"))["kinds"]
+    kin = content("kin_v2")
+    rows = []
+    for kind, D in R.items():
+        where = sorted({nm for k, nm in hz_at if k == kind})
+        C = D["counter"]
+        safe = [t.title() + " type" for t in C.get("themes", [])] + [kin.get(k, {}).get("name", k) for k in C.get("kin", [])]
+        safe += [(gd_const("core/data.gd", "PERKS") or {}).get(pk, {}).get("name", pk) + " perk" for pk in C.get("perks", [])]
+        rows.append([D["name"], ", ".join(where), D["hurts"].capitalize(), ", ".join(safe)])
+    return "### Terrain hazards\n\nGround that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) or a hazard perk (found as a perk orb, more often near its field) walks it safely; bots go round what theirs can't handle. Big fields make up half a region's ground with paths, fords and stepping stones through them.\n\n" + table(["Hazard", "Where", "Does", "Safe with"], rows) + "\n\n"
+
 def gen_maps():
     try:
         src = open(os.path.join(ROOT, "scripts", "match", "world.gd"), encoding="utf-8").read()
@@ -552,12 +566,18 @@ def gen_maps():
             if m.get(key): trav.append("%d %s" % (len(m[key]), label))
         if m.get("train"): trav.append("a sky train with %d stops (%s)" % (len(m["train"].get("stations", [])), ", ".join(m["train"].get("names", []))))
         if trav: body += "**Getting around:** " + ", ".join(trav) + ".\n\n"
+        hz_at = [(A["kind"], i.get("name", i["id"])) for i in isl for A in i.get("hazard_areas", [])]
+        if hz_at:
+            body += _terrain_hazards(hz_at)
         if m.get("chokepoints"):
             body += "**Chokepoints:** " + ", ".join(c if isinstance(c, str) else c.get("name", "") for c in m["chokepoints"]) + ".\n\n"
         sp = m.get("spawn_points", {})
         if sp:
             cat = {"rare_kin": "Rare Boki", "vault": "Vaults", "cache": "Item caches", "boss": "Live boss lairs"}
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
+        if m.get("legendaries"):
+            chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
+            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []

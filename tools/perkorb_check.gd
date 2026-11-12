@@ -68,7 +68,7 @@ func _pool() -> void:
 	rng.seed = 5
 	var share := {}
 	for src in ["shrine", "chest", "boss"]:
-		var c := {"flat": 0, "weapon": 0, "kit": 0}
+		var c := {"flat": 0, "weapon": 0, "kit": 0, "hazard": 0}
 		for i in 600:
 			c[PerkOrbs.kind_of(PerkOrbs.roll(rng, src))] += 1
 		share[src] = c

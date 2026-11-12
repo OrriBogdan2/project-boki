@@ -79,6 +79,13 @@ func add_chill(t: Ent) -> void:
 	if fresh:
 		vfx("chill", t.pos)
 
+## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+func combo_read(t: Ent) -> Dictionary:
+	if not chilled(t):
+		return {}
+	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
+			"total": float(d["passive"].get("chill_t", 4.0))}
+
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
 	return int((fan_hits.get(t.get_instance_id(), {}) as Dictionary).get("n", 0))
@@ -112,7 +119,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
-		m.sfx("rimewright_dart_hit", t.pos, -5.0, 1.0)
 		var key := t.get_instance_id()
 		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": FAN_HOLD, "t": t})
 		e["n"] = int(e["n"]) + 1
@@ -132,6 +138,8 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
+	if skip != null and is_instance_valid(skip):
+		ComboMark.payoff(m, h, skip)     # the Chill payoff: the Shattered foe flashes
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
 	play_soft("tm_shatter")
@@ -668,8 +676,7 @@ func _tick_zones(dt: float) -> void:
 				h, key,
 				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": Color("bff7ef")})
 		for f in foes_in(at, float(ld["zone_r"])):
-			f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, float(ld["zone_slow"]))
-			f.slow_t = maxf(f.slow_t, 0.2)
+			f.add_slow(0.2, float(ld["zone_slow"]))
 			add_chill(f)
 		if float(z["left"]) <= 0.0:
 			zones.erase(z)
@@ -941,7 +948,7 @@ func _start_rime() -> bool:
 func _rime_hold_body() -> void:
 	h.face = float(rime["face"])        # a statue: facing and pose locked from the cast frame
 	h.inv_t = maxf(h.inv_t, 0.12)
-	h.root_t = maxf(h.root_t, 0.12)
+	h.add_root(0.12)
 	if _rime_carrying():
 		var carry: Dictionary = rime["carry"]
 		h.roll_dir = carry["dir"]
@@ -1032,8 +1039,7 @@ func _rime_slow(at: Vector3, radius: float, dt: float) -> void:
 		var key: int = f.get_instance_id()
 		slow[key] = float(slow.get(key, 0.0)) + dt
 		var k := minf(float(xd["slow_max"]), float(xd["slow_base"]) + float(xd["slow_per_s"]) * float(slow[key]))
-		f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, k)
-		f.slow_t = maxf(f.slow_t, 0.2)
+		f.add_slow(0.2, k)
 		add_chill(f)
 
 
