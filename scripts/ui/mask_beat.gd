@@ -1,6 +1,6 @@
 class_name MaskBeat
 extends Node
-## Putting on a Relic, staged as one short beat of about a second and a half (the put-on beat in
+## Putting on a Relic, staged as one beat of about five seconds, slow enough to read (the put-on beat in
 ## briefs/LORE_MASKS.md): you touch the Relic, a ghostly porcelain face flickers over yours, and the fallen
 ## Hunter settles over you.
 ##   1. reach:   the Empty's hand reaches out and touches the Relic, which glides to the face (REACH_S)
@@ -11,7 +11,7 @@ extends Node
 ## Its sounds follow the beats, never the clock: a porcelain chime on each flicker of the ghost face, a swell
 ## that rises over the fade, a soft settle at the end (so a longer beat only stretches them).
 ## With `swap` false (the farm: you stay yourself) it ends after the flicker; the name and title come up at the
-## end of the flicker. Once a player has seen one
+## end of the flicker and stay up long enough to read (name_hold). Once a player has seen one
 ## (Save.d.tutorial.mask_seen) any key skips it. `finished` gets the body standing there at the end.
 ##
 ##   MaskBeat.play(relic, you, func(body): ...)
@@ -19,16 +19,17 @@ extends Node
 
 signal finished(body: Node3D)
 
-const REACH_S := 0.4           # s the hand takes to touch the Relic
-const FLICKER_S := 0.6         # s the porcelain face flickers over yours
-const FADE_S := 0.5            # s the Hunter takes to fade in from the feet up
+const REACH_S := 1.0           # s the hand takes to touch the Relic
+const FLICKER_S := 2.1         # s the porcelain face flickers over yours (0.7 s a flicker)
+const FADE_S := 1.9            # s the Hunter takes to fade in from the feet up
 const FLICKERS := 3            # how many times the ghost face lights
 const FACE_GAP := 0.27         # m in front of the head where the Relic settles (times the body's scale)
 const GHOST_GAP := 0.12        # m in front of the head where the ghost face hangs (times the body's scale)
 const GHOST_ALPHA := 0.7       # the ghost face at its brightest
 const ARM_RAD := 1.5           # rad the reaching arm swings forward from the shoulder
 const SPREAD := 0.35           # share of the fade each part takes: the parts come in one after another
-const NAME_S := 1.6            # s the name and title stay up (they outlast the beat)
+const READ_MIN_S := 3.0        # s the name and title stay up at the least (they outlast the beat)
+const READ_CHAR_S := 0.06      # s of reading per character, for a longer name and title
 const CHIME_AT := 0.17         # share of each flicker gone when its chime sounds (the ghost face is lighting)
 const CHIME_RISE := 1.26       # pitch step from one flicker's chime to the next (a major third)
 const SWELL_PITCH := Vector2(0.7, 1.5)   # pitch_scale of the swell at the start and the end of the fade
@@ -226,7 +227,8 @@ func _show_name() -> void:
 	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	box.offset_top = -170
 	box.set_meta("mask_name", id)
-	var nm := UI.title(HunterViewer.display_name(id), 46, Arch.color(id).lightened(0.15))
+	var text := HunterViewer.display_name(id)
+	var nm := UI.title(text, 46, Arch.color(id).lightened(0.15))
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.add_theme_constant_override("outline_size", 12)
 	nm.add_theme_color_override("font_outline_color", Color(0.03, 0.02, 0.06))
@@ -235,9 +237,13 @@ func _show_name() -> void:
 	get_tree().root.add_child(layer)
 	UI.pop_in(box)
 	var tw := layer.create_tween()
-	tw.tween_interval(NAME_S)
+	tw.tween_interval(name_hold(text))
 	tw.tween_property(box, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(layer.queue_free)
+
+## How long a name and title stay up: long enough to read them.
+static func name_hold(text: String) -> float:
+	return maxf(READ_MIN_S, READ_CHAR_S * text.length())
 
 func _unhandled_input(event: InputEvent) -> void:
 	var press := event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton

@@ -2,7 +2,8 @@ extends RefCounted
 ## --relic-puton-check: putting on a Relic is one short beat (MaskBeat):
 ##   1. the first time, played through: reach (the arm comes up, the Relic glides to the face), flicker (the
 ##      ghost face lights three times), fade (the Hunter comes in from the feet up while the Empty goes the same
-##      way, then idles), in that order and under 2 s in all; the name and title come up
+##      way, then idles), in that order and about 5 s in all (BEAT_S); the name and title come up and stay up
+##      long enough to read (3 s or more)
 ##   2. the farm's cut (no swap) ends after the flicker and keeps the body you had
 ##   3. the next time any key skips it straight to the end
 ##   4. its sounds follow the beats, never the clock: a chime on each of the three flickers (at the flicker's
@@ -11,7 +12,7 @@ extends RefCounted
 ##      without the swell; a skip makes no sound
 ## With --shots-dir=<dir>: puton_1_reach, _2_flicker, _3_fade_feet, _4_fade_half, _5_done (a renderer is needed).
 
-const LIMIT_S := 2.0           # s: the whole beat
+const BEAT_S := Vector2(4.5, 5.5)   # s: the whole beat, slow enough to read
 
 var main: Node
 var bad := 0
@@ -76,7 +77,8 @@ func _first_time() -> void:
 	var beat := MaskBeat.play(relic, you, func(b): got[0] = b)
 	ok(not MaskBeat.seen() and beat.skip_hint == null, "the first time: no skip hint")
 	var planned := MaskBeat.REACH_S + MaskBeat.FLICKER_S + MaskBeat.FADE_S
-	ok(planned < LIMIT_S, "the planned beats add up to under %.0f s" % LIMIT_S)
+	ok(planned >= BEAT_S.x and planned <= BEAT_S.y, "the planned beats add up to %.1f s (%.1f-%.1f)" % [planned,
+			BEAT_S.x, BEAT_S.y])
 	var order: Array = []
 	var lit := 0
 	var was_lit := false
@@ -86,6 +88,7 @@ func _first_time() -> void:
 	var anim: HunterAnim = beat._anim
 	var parts_h: Array = beat._to_tiers
 	var t0 := 0
+	var name_t0 := 0
 	var shot_done := {}
 	while is_instance_valid(beat) and beat.phase != "done":
 		await tree.process_frame
@@ -101,13 +104,16 @@ func _first_time() -> void:
 			if a > 0.3 and not was_lit:
 				lit += 1
 			was_lit = a > 0.3
+		if name_t0 == 0 and _has_name():
+			name_t0 = Time.get_ticks_msec()
 		if beat.phase == "fade" and not feet_first:
 			feet_first = _feet_first(parts_h)
 		await _strip(beat, shot_done)
 	await tree.process_frame
 	var total_s := (Time.get_ticks_msec() - t0) / 1000.0
 	ok(order == ["reach", "flicker", "fade"], "the beats run in order: %s" % str(order))
-	ok(total_s < LIMIT_S or shots != "", "all of it in %.2f s (frame grabs slow a strip)" % total_s)
+	ok((total_s >= BEAT_S.x and total_s <= BEAT_S.y + 0.3) or shots != "",
+			"all of it in %.2f s (frame grabs slow a strip)" % total_s)
 	ok(arm_top > arm_rest + 1.0, "the hand reaches out (arm up %.2f rad)" % (arm_top - arm_rest))
 	ok(lit == MaskBeat.FLICKERS, "the ghost face flickers %d times" % lit)
 	ok(feet_first, "the Hunter comes in from the feet up")
@@ -117,6 +123,11 @@ func _first_time() -> void:
 			"every part of the Hunter is solid at the end")
 	ok(anim != null and MaskBeat.seen() and _has_name(), "idling, the name is up, and the beat is marked seen")
 	await _snap("puton_5_done")
+	while _has_name():
+		await tree.process_frame
+	var name_s := (Time.get_ticks_msec() - name_t0) / 1000.0
+	ok(name_t0 > 0 and name_s >= MaskBeat.READ_MIN_S,
+			"the name and title stay up %.1f s, long enough to read (%.0f s or more)" % [name_s, MaskBeat.READ_MIN_S])
 	host.queue_free()
 	await tree.process_frame
 
@@ -221,8 +232,9 @@ func _sounds() -> void:
 
 ## Frames for the strip, once each as the beat reaches the time.
 func _strip(beat: MaskBeat, done: Dictionary) -> void:
-	var want := {"puton_1_reach": ["reach", 0.25], "puton_2_flicker": ["flicker", 0.1],
-			"puton_3_fade_feet": ["fade", 0.1], "puton_4_fade_half": ["fade", 0.28]}
+	var want := {"puton_1_reach": ["reach", 0.6 * MaskBeat.REACH_S],
+			"puton_2_flicker": ["flicker", 0.17 * MaskBeat.FLICKER_S],
+			"puton_3_fade_feet": ["fade", 0.2 * MaskBeat.FADE_S], "puton_4_fade_half": ["fade", 0.56 * MaskBeat.FADE_S]}
 	for file in want:
 		if not done.has(file) and beat.phase == want[file][0] and beat.t >= want[file][1]:
 			done[file] = true
