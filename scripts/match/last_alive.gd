@@ -11,7 +11,9 @@ const MEND_PER_S := 1.0      # hp/s of self-heal once REGEN_WAIT has passed with
 const BUFF_HOLD := 0.3       # s each tick's speed buff lasts (renewed every step, gone shortly after the end)
 const NODE := "LastAura"
 const SHELL_R := 0.95        # m, the soft body glow
-const SHELL_A := 0.2         # peak opacity of that glow
+const SHELL_A := 0.34        # peak opacity of that glow
+const HALO_R := 1.5          # m, the wide faint halo around the shell
+const HALO_A := 0.12         # peak opacity of the halo
 const PULSE_HZ := 0.8
 
 ## Is `h` the last one up on a squad that started with a teammate?
@@ -58,6 +60,9 @@ static func _glow(m: Match, h: Hunter, on: bool) -> bool:
 		var glow := Models.glow_mat(Color(col, SHELL_A))
 		var shell := Models.part(n, Models.sphere(SHELL_R, 12), glow, Vector3(0, 0.95, 0), Vector3(0.8, 1.2, 0.8))
 		shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var halo_mat := Models.glow_mat(Color(col, HALO_A))
+		var halo := Models.part(n, Models.sphere(HALO_R, 12), halo_mat, Vector3(0, 0.95, 0), Vector3(0.8, 1.2, 0.8))
+		halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var ring := Models.part(n, Models.flat_quad(2.2), Models.ring_mat(Color(col, 0.9), 0.07), Vector3(0, 0.06, 0))
 		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.add_child(n)
