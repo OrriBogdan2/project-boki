@@ -499,8 +499,6 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
-## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
-## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
 ## A knock tips the hips so the head goes with the blow and the feet trail: back from a hit on the front, forward from
 ## one behind, over to the side from a hit on the flank. The knock is read off the state (no flag): a hit not long ago
 ## and a body moving faster than he runs, or in the air.
@@ -523,6 +521,8 @@ func _lean_into_knock(s: Dictionary, proc: bool, dt: float) -> void:
 	var tip := Quaternion(Vector3.UP.cross(toward).normalized(), KNOCK_LEAN * toward.length())
 	skel.set_bone_pose_rotation(hb, tip * skel.get_bone_pose_rotation(hb))
 
+## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
+## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
 func _air_tilt() -> void:
 	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
 	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
