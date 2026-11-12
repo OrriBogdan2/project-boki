@@ -1,19 +1,19 @@
 class_name BeltKeys
 extends RefCounted
-## Keys on the utility belt (docs/decisions/0005-equal-footing.md): a Rift Key and a chest key each
-## take one belt slot while you carry any, with the count on the icon, so you always see whether you
-## carry one and carrying one costs a slot. The counts stay where they live (h.rift_keys, and
-## h.chest_keys through KeyChest); the belt shows them (sync) and spends through KeyChest.take.
-##   F at a lock      still opens it (Exits for hatches, Match._open_chest for chests)
-##   its belt key     beside a matching lock opens it; anywhere else pings the nearest one on your map
-##   caps             Rift Keys 1 (content/utility/rift_key.json "max"), chest keys KeyChest.cap()
+## Keys on the utility belt (docs/decisions/0005-equal-footing.md): chest keys take one belt slot
+## while you carry any, with the count on the icon, so you always see whether you carry one and
+## carrying one costs a slot. The count stays where it lives (h.chest_keys through KeyChest); the
+## belt shows it (sync) and spends through KeyChest.take.
+##   F at a lock      still opens it (Match._open_chest)
+##   its belt key     beside a locked chest opens it; anywhere else pings the nearest one on your map
+##   caps             KeyChest.cap()
 ##   a full belt      the key stays on the ground and a prompt offers a swap: press a slot's key to
 ##                    drop that slot's items for it (swap). Keys are never thrown away by the game
-##   death            they go in your deathbox (its "keys" and "chest_keys")
+##   death            they go in your deathbox (its "chest_keys")
 ##   never            brought in from home, sold, or taken home
 
-const KIND := {"rift_key": "rift", "chest_key": "chest"}
-const PICKUP := {"rift_key": "key", "chest_key": "ckey"}      # their ground pickup kinds
+const KIND := {"chest_key": "chest"}
+const PICKUP := {"chest_key": "ckey"}      # their ground pickup kinds
 const PROMPT_GAP := 2.5          # seconds between repeats of the "belt full" prompt
 const SWAP_R := 2.2              # how close a pickup must be to swap for it (the pickup grab range)
 const DROP_HOLD := -1.0          # a dropped stack's pickup clock starts here: it can't be grabbed back at once
@@ -27,20 +27,15 @@ static func held(h, id: String) -> int:
 	return KeyChest.count(h, String(KIND[id]))
 
 ## The most of a key one hunter carries.
-static func cap(id: String) -> int:
-	if id == "chest_key":
-		return KeyChest.cap()
-	return int(UtilityBelt.def(id).get("max", 1))
+static func cap(_id: String) -> int:
+	return KeyChest.cap()
 
 ## Adds up to n keys, as many as the cap and the belt allow. Returns how many went on.
 static func give(h, id: String, n: int) -> int:
 	var put := mini(n, UtilityBelt.room_for(h, id))
 	if put <= 0:
 		return 0
-	if id == "chest_key":
-		put = KeyChest.give(h, put)
-	else:
-		h.rift_keys += put
+	put = KeyChest.give(h, put)
 	sync(h)
 	return put
 
@@ -67,16 +62,13 @@ static func sync(h) -> void:
 		h.belt[i]["n"] = n
 
 # ------------------------------------------------------------------ pressing a key's slot
-## Beside a matching lock: open it (the lock spends the key). Elsewhere: ping the nearest one.
+## Beside a locked chest: open it (the lock spends the key). Elsewhere: ping the nearest one.
 ## Returns whether anything happened.
 static func use(h, id: String) -> bool:
 	var m = h.m
 	var lock := _near_lock(m, h, id)
 	if not lock.is_empty():
-		if id == "rift_key":
-			m.exits.act(lock, "open", h)
-		else:
-			m._open_chest(h, lock)
+		m._open_chest(h, lock)
 		sync(h)
 		return true
 	var spots: Array = _locks(m, id).map(func(x): return x["pos"])
@@ -87,24 +79,21 @@ static func use(h, id: String) -> bool:
 		if h.flat_dist(p) < h.flat_dist(best):
 			best = p
 	if h == m.player:
-		var col: Color = ExitModels.HATCH if id == "rift_key" else UtilityBelt.col_of(id)
+		var col: Color = UtilityBelt.col_of(id)
 		m.ping(best, col)
 		if m.hud:
 			var what := UtilityBelt.name_of(id).to_lower()
 			m.hud.toast_small("Nearest %s lock pinged" % what, col)
 	return true
 
-## The locks a key opens that are still shut: sealed hatches, or locked chests.
-static func _locks(m, id: String) -> Array:
-	if id == "rift_key":
-		return [] if m.exits == null else m.exits.of_kind("hatch").filter(func(x): return x["state"] == "sealed")
+## The locks a key opens that are still shut: locked chests.
+static func _locks(m, _id: String) -> Array:
 	return m.chests.filter(func(c): return not c["open"] and not bool(c.get("free", false)))
 
 static func _near_lock(m, h, id: String) -> Dictionary:
 	for x in _locks(m, id):
 		var at: Vector3 = x["pos"]
-		var reach := Exits.HATCH_R if id == "rift_key" else CHEST_R
-		if h.flat_dist(at) <= reach and absf(h.pos.y - at.y) <= 1.2:
+		if h.flat_dist(at) <= CHEST_R and absf(h.pos.y - at.y) <= 1.2:
 			return x
 	return {}
 

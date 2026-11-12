@@ -14,7 +14,8 @@
  ],
  "price": 60,
  "desc": "Read it for 4s: you are carried to a random spot on the map. A hit spills it.",
- "time": 4.0,
- "heal": 0.0,
- "warp": true
+ "warp": true,
+ "channel": {
+  "time": 4.0
+ }
 }

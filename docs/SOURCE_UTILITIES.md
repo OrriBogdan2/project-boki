@@ -128,8 +128,8 @@ Behaviour brought in line with the source, each number in the item's JSON `src` 
 
 - Six belt slots: 1 and 2 pinned to the tonic and the armor kit (`slot` in their JSON), 3 to 6 open.
   Pinned items stack to 8. The home belt picks the open slots only (`UtilityBelt.free_slot`).
-- Tonic: 1.0 s drink, no slow, a flat 42 health (`heal_hp`; the source's 300 over our HP ratio).
-- Armor kit: 1.6 s at 45% speed, repairs 80 / 40 / 30% of the armor bar by armor tier (`repair`).
+- Tonic: 1.0 s drink, no slow, a flat 42 health (`channel.heal`; the source's 300 over our HP ratio).
+- Armor kit: 1.6 s at 45% speed, repairs 80 / 40 / 30% of the armor bar by armor tier (`channel.repair`).
 - Deep Draught slows you to 40% for its 5 s. Thorn Wall stacks to 10.
 - Skyfall Charge: 5 s fuse, a lethal blast (690) then a 3 s fire patch on the spot.
 - Bounty Banner: knocked under it you are out at once (no wisp, no spare life) and the knocker

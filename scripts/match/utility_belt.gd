@@ -7,7 +7,7 @@ extends RefCounted
 ## live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per slot, bring[] = the most
 ## you can bring in by difficulty tier, price).
 ##
-## Keys (Rift Keys, chest keys) are belt items too: one slot per key type, found in the match only,
+## Chest keys are belt items too: one slot per key type, found in the match only,
 ## never brought or sold (BeltKeys).
 ##
 ## What a hunter holds: h.belt = six slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
@@ -54,11 +54,11 @@ static func ids() -> Array:
 static func is_item(id: String) -> bool:
 	return ALL.has(id)
 
-## The pickup kinds the match already used ("armor" was the armor kit, "key" is a Rift Key).
+## The pickup kinds the match already used ("armor" was the armor kit, "ckey" is a chest key).
 static func item_of(kind: String) -> String:
 	return String(OLD_KINDS.get(kind, kind))
 
-const OLD_KINDS := {"armor": "armor_kit", "key": "rift_key", "ckey": "chest_key"}
+const OLD_KINDS := {"armor": "armor_kit", "ckey": "chest_key"}
 
 ## Keys sit on the belt but are never brought in, bought or taken home.
 static func is_key(id: String) -> bool:
