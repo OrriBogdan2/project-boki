@@ -781,6 +781,8 @@ func cell_reason(c: Vector2i, self_tag := "") -> String:
 		return "Something's in the way"
 	if reserved.has(i) or _near_feeder(c) or _near_plot(c):
 		return "That spot is kept clear"
+	if h.hob != null and h.hob.crowds(c):
+		return HobSpot.REASON
 	return ""
 
 ## Tiles flooded from the house door, with free_cells opened up and solid_cells shut. Packed bytes, 1 = reached.
@@ -905,6 +907,9 @@ func fits(item: Dictionary, at: Array) -> bool:
 			if not w.inb(dt.x, dt.y) or w.kind[w.idx(dt.x, dt.y)] != World.T_GROUND or occ.has(w.idx(dt.x, dt.y)):
 				why = "Its door would face something"
 				return false
+	if door != Vector3.INF and h.hob != null and h.hob.crowds_point(door):
+		why = HobSpot.REASON
+		return false
 	if solid or door != Vector3.INF:
 		if not keeps_paths(free_cells, at if solid else [], skip_b, door):
 			why = PlaceClearance.why(trapped)
@@ -1345,6 +1350,9 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		return false
 	if w.kind[i] != World.T_GROUND and o != tag: why = "Something's in the way"; return false
 	if reserved.has(i) or _near_plot(t): why = "That spot is kept clear"; return false
+	if h.hob != null and h.hob.crowds(t):
+		why = HobSpot.REASON
+		return false
 	var p := Vector3(t.x + 0.5, 0, t.y + 0.5)
 	for f in Econ.feeders():
 		if String(f["id"]) == from: continue
