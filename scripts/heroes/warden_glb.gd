@@ -253,19 +253,20 @@ static func will_dress(arch: String) -> bool:
 static var _misfits := {}      # .glb path -> the bones that don't fit the rig ([] when it fits)
 static func misfits(arch: String) -> Array:
 	var p := path(arch)
-	if not _misfits.has(p):
+	var held = SharedCache.read(_misfits, p)
+	if held == null:
 		var scene := _scene(arch)
 		var glb: Node3D = scene.instantiate() as Node3D if scene else null
 		var skel := skeleton(glb)
 		var bad: Array = ["no armature"]
 		if skel:
 			bad = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch))
-		_misfits[p] = bad
+		held = SharedCache.put(_misfits, p, bad)
 		if glb:
 			glb.free()
 		if not bad.is_empty():
 			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
-	return _misfits[p]
+	return held
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
@@ -546,7 +547,7 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
+	if not uses_model(arch) or SharedCache.read(_scenes, p) != null or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
@@ -568,19 +569,20 @@ static func fetch_for(opts: Dictionary) -> void:
 static func fetched(arch: String) -> bool:
 	fetch(arch)
 	var p := path(arch)
-	return not uses_model(arch) or _scenes.has(p) \
+	return not uses_model(arch) or SharedCache.read(_scenes, p) != null \
 			or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
 
 ## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
 static func has_rest(arch: String) -> bool:
-	return _neutral.has(arch) or not uses_model(arch)
+	return SharedCache.read(_neutral, arch) != null or not uses_model(arch)
 
 static func _scene(arch: String) -> PackedScene:
 	var p := path(arch)
-	if not _scenes.has(p):
+	var held = SharedCache.read(_scenes, p)
+	if held == null:
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
-	return _scenes[p] as PackedScene
+		held = SharedCache.put(_scenes, p, BackgroundWork.take(p) if asked else load(p))
+	return held as PackedScene
 
 ## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).
 static func extra_bones(arch: String) -> Dictionary:
@@ -604,10 +606,11 @@ static func _skinned_weapon(root: Node3D) -> void:
 
 ## The rig rest of the Warden's model in the neutral look: baked (WardenRest), else measured once a session.
 static func neutral_rest(arch: String) -> Dictionary:
-	if not _neutral.has(arch):
+	var held = SharedCache.read(_neutral, arch)
+	if held == null:
 		var baked := WardenRest.baked(arch)
-		_neutral[arch] = baked if not baked.is_empty() else measure_rest(arch)
-	return _neutral[arch]
+		held = SharedCache.put(_neutral, arch, baked if not baked.is_empty() else measure_rest(arch))
+	return held
 
 ## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
 static func measure_rest(arch: String) -> Dictionary:
@@ -720,13 +723,14 @@ static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag:
 		else:
 			var own_ink: Dictionary = own.get("ink", {})
 			var key := [ink, JSON.stringify(own_ink)]
-			if not _far_inks.has(key):
-				var far := ink.duplicate() as ShaderMaterial
+			var far = SharedCache.read(_far_inks, key)
+			if far == null:
+				far = ink.duplicate() as ShaderMaterial
 				far.set_shader_parameter("far_cut", INK_FAR_CUT)
 				for k in own_ink:
 					far.set_shader_parameter(k, _param(own_ink[k]))
-				_far_inks[key] = far
-			m.next_pass = _far_inks[key]
+				far = SharedCache.put(_far_inks, key, far)
+			m.next_pass = far
 	if slot == "glow" and m.next_pass == null:
 		var cfg: Dictionary = GLOW_SHELL.merged(own.get("glow_shell", {}), true)
 		if float(cfg["glow_px"]) > 0.0:

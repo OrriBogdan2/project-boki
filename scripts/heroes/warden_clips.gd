@@ -94,11 +94,12 @@ var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
-	if not _data.has(art_name):
-		var p := DIR + art_name + ".json"
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(p)) if FileAccess.file_exists(p) else null
-		_data[art_name] = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
-	return _data[art_name]
+	var held = SharedCache.read(_data, art_name)
+	if held != null:
+		return held
+	var p := DIR + art_name + ".json"
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(p)) if FileAccess.file_exists(p) else null
+	return SharedCache.put(_data, art_name, parsed if typeof(parsed) == TYPE_DICTIONARY else {})
 
 ## Clips for this model, or null when the .glb brought none.
 ## A hunter just eliminated whose Hero has a death clip: it stays visible until the clip has played.

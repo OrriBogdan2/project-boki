@@ -64,21 +64,21 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 		sg = maxi(sg, int(clampf(r * 170.0, 16.0, 48.0)))
 	sg += sg % 2
 	var key := "%.4f|%d" % [r, sg]
-	if _spheres.has(key):
-		return _spheres[key]
+	var hit = SharedCache.read(_spheres, key)
+	if hit:
+		return hit
 	var s := SphereMesh.new()
 	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, sg / 2)
-	_spheres[key] = s
-	return s
+	return SharedCache.put(_spheres, key, s)
 
 static func capsule(r: float, h: float) -> CapsuleMesh:
 	var key := "cap|%.4f|%.4f" % [r, h]
-	if _spheres.has(key):
-		return _spheres[key]
+	var hit = SharedCache.read(_spheres, key)
+	if hit:
+		return hit
 	var c := CapsuleMesh.new()
 	c.radius = r; c.height = h; c.radial_segments = int(clampf(r * 380.0, 20.0, 48.0)); c.rings = 16
-	_spheres[key] = c
-	return c
+	return SharedCache.put(_spheres, key, c)
 
 static var _rbox := {}
 
@@ -92,11 +92,11 @@ static func box(x: float, y: float, z: float) -> Mesh:
 		b.size = Vector3(x, y, z)
 		return b
 	var key := "%.4f|%.4f|%.4f" % [x, y, z]
-	if _rbox.has(key):
-		return _rbox[key]
+	var hit = SharedCache.read(_rbox, key)
+	if hit:
+		return hit
 	var am := rounded_box(Vector3(x, y, z), r, 4 if mn > 0.1 else (3 if mn > 0.03 else 2))
-	_rbox[key] = am
-	return am
+	return SharedCache.put(_rbox, key, am)
 
 ## A rounded box: every face is a grid whose outer rows are bent around the edges and corners on a
 ## radius r, with `steps` grid lines per 45 degrees of the bend.
@@ -173,8 +173,9 @@ static var _lathes := {}
 ## with radius 0 close the shape on the axis. Normals come from the profile's own curve, so it
 ## shades as one soft surface. Cached by `key` when one is given.
 static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMesh:
-	if key != "" and _lathes.has(key):
-		return _lathes[key]
+	var hit = SharedCache.read(_lathes, key)
+	if hit:
+		return hit
 	var n := profile.size()
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var idx: Array = []
 	var total := 0.0
@@ -202,8 +203,7 @@ static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMes
 			var b0 := (i + 1) * (seg + 1) + j
 			_quad(verts, norms, idx, a0, a0 + 1, b0 + 1, b0)
 	var am := _commit(verts, norms, uvs, idx)
-	if key != "": _lathes[key] = am
-	return am
+	return SharedCache.put(_lathes, key, am) if key != "" else am
 
 ## A smooth curve through the given points (Catmull-Rom), `sub` steps per span. The ends are kept.
 static func smooth_curve(pts: PackedVector2Array, sub := 4) -> PackedVector2Array:
@@ -266,8 +266,9 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 		c.top_radius = top; c.bottom_radius = bottom; c.height = h; c.radial_segments = maxi(seg + 2, 8); c.rings = 1
 		return c
 	var key := "%.4f|%.4f|%.4f|%d" % [top, bottom, h, radial]
-	if _cyls.has(key):
-		return _cyls[key]
+	var hit = SharedCache.read(_cyls, key)
+	if hit:
+		return hit
 	var hh := h * 0.5
 	var poly: Array = []
 	poly.append(Vector2(bottom, -hh) if bottom > 0.0005 else Vector2(0.0, -hh))
@@ -278,8 +279,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 	var loop := _fillet(poly, bev, 5)
 	var prof := _right_half(loop)
 	var am := lathe(prof, radial)
-	_cyls[key] = am
-	return am
+	return SharedCache.put(_cyls, key, am)
 
 ## The x >= 0 half of a closed, counter-clockwise outline that is mirror-symmetric about x = 0,
 ## from where it crosses the axis at the bottom to where it crosses back at the top.
@@ -315,8 +315,9 @@ static func _right_half(loop: Array) -> PackedVector2Array:
 ## bottom, a little fuller a third of the way down (a muscle, a sleeve). Centred like a capsule.
 static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var key := "limb|%.4f|%.4f|%.4f|%.3f" % [r0, r1, h, bulge]
-	if _lathes.has(key):
-		return _lathes[key]
+	var hit = SharedCache.read(_lathes, key)
+	if hit:
+		return hit
 	var hh := h * 0.5
 	var pts := PackedVector2Array()
 	# bottom cap
@@ -332,8 +333,7 @@ static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var prof := smooth_curve(pts, 3)
 	prof[0] = Vector2(0, -hh); prof[prof.size() - 1] = Vector2(0, hh)
 	var am := lathe(prof, int(clampf(maxf(r0, r1) * 380.0, 24.0, 40.0)))
-	_lathes[key] = am
-	return am
+	return SharedCache.put(_lathes, key, am)
 
 static var _eyes := {}
 
@@ -373,8 +373,9 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 ## toward the hem (their normals follow the folds, so they catch the light like painted drapery).
 static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07) -> ArrayMesh:
 	var key := "skirt|%.4f|%.4f|%.4f|%d|%.3f" % [r_top, r_bot, h, folds, amp]
-	if _lathes.has(key):
-		return _lathes[key]
+	var hit = SharedCache.read(_lathes, key)
+	if hit:
+		return hit
 	var seg := 72
 	var rows := 12
 	var hh := h * 0.5
@@ -413,16 +414,16 @@ static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07)
 		if fn.dot(Vector3.DOWN) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 		else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, idx)
-	_lathes[key] = am
-	return am
+	return SharedCache.put(_lathes, key, am)
 
 static var _crystals := {}
 
 ## A cut crystal: a faceted prism with a pointed top, flat-shaded on purpose so it glints.
 static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 	var key := "%.4f|%.4f|%d" % [r, h, sides]
-	if _crystals.has(key):
-		return _crystals[key]
+	var hit = SharedCache.read(_crystals, key)
+	if hit:
+		return hit
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var y0 := -h * 0.5; var y1 := h * 0.18; var y2 := h * 0.5
@@ -450,8 +451,7 @@ static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 			st.set_normal(-fn)
 			st.add_vertex(p)
 	var am := st.commit()
-	_crystals[key] = am
-	return am
+	return SharedCache.put(_crystals, key, am)
 
 ## A glossy material: metal, gems, polished things catch a crisp highlight.
 static func shiny(c: Color, gloss := 0.6) -> ShaderMaterial:
@@ -606,13 +606,13 @@ static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material,
 ## ribs, broad at the shoulders and rounded over into the neck. About 0.62 tall, centred.
 static func torso_mesh() -> ArrayMesh:
 	var key := "torso"
-	if _lathes.has(key):
-		return _lathes[key]
+	var hit = SharedCache.read(_lathes, key)
+	if hit:
+		return hit
 	var pts := PackedVector2Array([Vector2(0.0, -0.31), Vector2(0.13, -0.305), Vector2(0.2, -0.27), Vector2(0.218, -0.17), Vector2(0.205, -0.05),
 		Vector2(0.212, 0.05), Vector2(0.236, 0.14), Vector2(0.248, 0.205), Vector2(0.236, 0.255), Vector2(0.19, 0.293), Vector2(0.11, 0.312), Vector2(0.0, 0.318)])
 	var am := lathe(smooth_curve(pts, 4), 56)
-	_lathes[key] = am
-	return am
+	return SharedCache.put(_lathes, key, am)
 
 ## A hunter: the class sets the size and hit radius, the archetype (HeroKit.ARCHES; by default the
 ## class's own) the silhouette and gear, and the look the person inside it: a player's look
@@ -1356,9 +1356,8 @@ static func bake_part_y(n: Node) -> void:
 					and (mi.material_override as ShaderMaterial).shader == TOON \
 					and not (mi.mesh is ArrayMesh and ((mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_TEX_UV2)):
 				var id := mi.mesh.get_instance_id()
-				if not _part_y_cache.has(id):
-					_part_y_cache[id] = _with_part_y(mi.mesh)
-				mi.mesh = _part_y_cache[id]
+				var baked = SharedCache.read(_part_y_cache, id)
+				mi.mesh = baked if baked else SharedCache.put(_part_y_cache, id, _with_part_y(mi.mesh))
 		for ch in c.get_children(): stack.append(ch)
 
 ## Sets a toon material's painted structure: its brushwork (see toon.gdshader's `surface`), the
