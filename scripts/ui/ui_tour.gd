@@ -20,8 +20,6 @@ static func run(home: Node, prefix: String) -> void:
 		steps.append(["settings_" + tab_name.to_lower(), open_tab])
 	steps.append(["tooltip", func(): Overlay.shot_demo(PackedStringArray(["tooltip"]))])
 	steps.append(["confirm", func(): Overlay.shot_demo(PackedStringArray(["confirm"]))])
-	steps.append(["controls", func(): Overlay.shot_demo(PackedStringArray(["controls"]))])
-	steps.append(["controls_rebound", func(): Overlay.shot_demo(PackedStringArray(["controls", "rebound"]))])
 	await tree.create_timer(3.0).timeout
 	for step in steps:
 		(step[1] as Callable).call()

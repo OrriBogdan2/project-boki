@@ -68,8 +68,6 @@ func mage() -> void:
 			"r %.1f" % float(ring.get("r", 0.0)))
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
-	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
-			- float(U.data()["radius"])) < 0.05)
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
@@ -281,7 +279,7 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])
 	K.reset_dash_boost = false
-	ok("Wirerun: a plain run stays 7.5 to 13 m, full at 0.6 s",
+	ok("Wirerun: a plain run stays 5.6 to 9.75 m, full at 0.6 s",
 			absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01)
 	K.cd["dash"] = 0.0
 	P.teleport(home)

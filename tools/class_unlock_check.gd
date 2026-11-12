@@ -20,7 +20,7 @@ extends RefCounted
 ## "HUNTERCHECK DONE, n checks, failures: n".
 
 const FIRST := "gunslinger"
-const STARTERS := ["gunslinger"]
+const STARTERS := ["archer", "juggernaut", "gunslinger"]      # the first-Relic pick, in offer order: Lace, Kael, Vex
 const SECOND := ["juggernaut", "ashwick", "tender"]      # the second-Relic choices, in offer order: Kael, Cinder, Meeko
 const CHALLENGE_ONLY := ["ostra", "tender", "dolm"]      # (tender is also a second-Relic choice)
 ## Which stats count as which kind of goal (the owner's mix: kit feats, team play, exploration,
@@ -36,8 +36,10 @@ const GOAL_KINDS := {
 ## Keys that would make a reward more than a look ("stat" in a goal is what it counts, not a reward).
 const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd", "perk", "ability", "rank",
 		"armor", "power", "mult", "bonus", "level", "xp", "glide", "lift", "drag", "fall"]
-## The only ways gameplay code may touch a glider skin: draw it, trail it, play its sound.
-const GLIDER_CALLS := ["Gliders.mesh", "Gliders.trail", "Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
+## The only ways gameplay code may touch a glider skin: draw it (its canopy and that canopy's material), trail it,
+## play its sound.
+const GLIDER_CALLS := ["Gliders.dress", "Gliders.canopy_material", "Gliders.canopy", "Gliders.trail",
+		"Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
 
 var bad := 0
 var n := 0
@@ -106,20 +108,24 @@ func run(m: Node) -> void:
 
 # ---------------------------------------------------------------- 1. the data
 func _rules() -> void:
-	ok(ClassUnlock.starters() == STARTERS, "Vex is the one starter, by id: %s" % str(ClassUnlock.starters()))
-	ok(ClassUnlock.picks_needed() == 1, "the starter pick is 1 of them")
+	ok(ClassUnlock.starters() == STARTERS,
+		"the starters are Lace, Kael and Vex, by id: %s" % str(ClassUnlock.starters()))
+	ok(ClassUnlock.picks_needed() == 1 and Arch.ids().slice(0, 4) == ["archer", "juggernaut", "gunslinger", "bulwark"],
+		"the starter pick is 1 of them; the roster runs Lace, Kael, Vex, Albert, then the rest")
 	ok(ClassUnlock.second_picks() == SECOND,
 		"the second Relic is a pick of Kael, Cinder or Meeko: %s" % str(ClassUnlock.second_picks()))
 	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.starters().has(a)),
 			"%s are challenge-only" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
 	var stats: Dictionary = ClassUnlock.rules()["stats"]
-	var no_challenge := Arch.ids().filter(func(a): return a != FIRST and not _challenge_ok(String(a), stats))
+	var no_challenge := Arch.ids().filter(func(a):
+		return a != FIRST and a != "archer" and not _challenge_ok(String(a), stats))
 	ok(no_challenge.is_empty(), "every other Hunter has one challenge (a known stat, a target, one line); missing: %s"
 			% str(no_challenge))
-	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is a starter)" % Arch.name_of(FIRST))
-	var easy_ids := ["ashwick", "archer", "juggernaut"]
+	ok(["gunslinger", "archer"].all(func(a): return ClassUnlock.challenge(a).is_empty()),
+		"Vex and Lace have no unlock challenge (a starter not taken opens after the first expedition)")
+	var easy_ids := ["ashwick", "juggernaut", "gil"]
 	ok(easy_ids.all(func(a): return ClassUnlock.tier(a) == "easy"),
-			"Lace (an early unlock), Kael and Cinder are easy challenges")
+			"Kael, Cinder and Gil are easy challenges")
 	var others := Arch.ids().filter(func(a):
 		return not STARTERS.has(a) and not easy_ids.has(a) and not CHALLENGE_ONLY.has(a))
 	ok(others.all(func(a): return ClassUnlock.tier(String(a)) == "medium"), "the other Hunters are medium")
@@ -243,7 +249,7 @@ func _creation_rules() -> void:
 	ok(not ClassUnlock.choose_starters(["gunslinger", "gunslinger"]), "the same Hunter twice is not a pick")
 	var outside := Arch.ids().filter(func(a): return not STARTERS.has(a))
 	var refused := outside.all(func(a): return not ClassUnlock.choose_starters([String(a)]))
-	ok(refused and ClassUnlock.needs_starters(), "nothing but Vex can be the first Relic")
+	ok(refused and ClassUnlock.needs_starters(), "nothing but Lace, Kael or Vex can be the first Relic")
 	ok(ClassUnlock.choose_starters([FIRST]) and ClassUnlock.picks() == [FIRST], "taking Vex works")
 	ok(ClassUnlock.open_ids() == [FIRST], "only Vex is open at first (%s)" % str(ClassUnlock.open_ids()))
 	ok(not ClassUnlock.choose_starters([FIRST]) and ClassUnlock.open_ids() == [FIRST], "the pick is made once")
@@ -253,11 +259,12 @@ func _creation_rules() -> void:
 	ok(ClassUnlock.take_fresh() == "", "nothing is announced before then")
 	# the first finished expedition (any finish) puts the second pick on offer; nothing opens by itself
 	Game.apply_result(result(FIRST, false))
-	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == [FIRST],
-			"a knocked-out first expedition offers the second Relic, nothing opens (%s)" % str(ClassUnlock.open_ids()))
-	var refused_second := ["archer", "thief", FIRST].all(func(a): return not ClassUnlock.choose_second(a))
+	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", FIRST]
+			and ClassUnlock.take_fresh() == "Lace is open now",
+			"a knocked-out first expedition offers the second Relic and opens Lace (%s)" % str(ClassUnlock.open_ids()))
+	var refused_second := ["archer", "thief", "dolm", FIRST].all(func(a): return not ClassUnlock.choose_second(a))
 	ok(refused_second, "only Kael, Cinder or Meeko can be the second Relic")
-	ok(ClassUnlock.choose_second("tender") and ClassUnlock.open_ids() == [FIRST, "tender"]
+	ok(ClassUnlock.choose_second("tender") and ClassUnlock.open_ids() == ["archer", FIRST, "tender"]
 			and ClassUnlock.pending_reveal() == ["tender"],
 				"Meeko opens, with her reveal queued (%s)" % str(ClassUnlock.open_ids()))
 	ok(not ClassUnlock.second_pending() and not ClassUnlock.choose_second("juggernaut"), "the second pick is made once")
@@ -270,18 +277,30 @@ func _creation_rules() -> void:
 		new_save()
 		ok(ClassUnlock.choose_starters([FIRST]), "Vex first")
 		Game.apply_result(result(FIRST, true))
-		ok(ClassUnlock.choose_second(second) and ClassUnlock.open_ids().size() == 2 and ClassUnlock.is_open(second),
+		ok(ClassUnlock.choose_second(second) and ClassUnlock.open_ids().size() == 3 and ClassUnlock.is_open(second),
 				"%s can be the second Relic" % Arch.name_of(second))
 		Game.apply_result(result(second, true))
-		ok(ClassUnlock.open_ids().size() == 2 and not ClassUnlock.second_pending(), "and nothing else opens after it")
+		ok(ClassUnlock.open_ids().size() == 3 and not ClassUnlock.second_pending(), "and nothing else opens after it")
+	# any of the three can be the first: the other two open or wait in the second pick
+	for first in STARTERS:
+		new_save()
+		ok(ClassUnlock.choose_starters([first]) and ClassUnlock.open_ids() == [first],
+			"%s can be the first Relic" % Arch.name_of(first))
+		var waits: Array = ClassUnlock.state()["bonus"] + ClassUnlock.state()["second"]
+		ok(waits.size() == 4 and not waits.has(first)
+			and ClassUnlock.state()["second"] == SECOND.filter(func(a): return a != first),
+			"the rest wait for the first expedition: %s" % str(waits))
+		Game.apply_result(result(first, true))
+		ok(ClassUnlock.second_pending() and STARTERS.all(func(a): return ClassUnlock.is_open(a) or SECOND.has(a)),
+			"then the other starters are open or on offer")
 	# a save that picked before keeps what it has: nothing waits, nothing is announced
 	new_save(["juggernaut"])
-	ok(ClassUnlock.open_ids() == [FIRST,
-		"juggernaut"] and not ClassUnlock.is_bonus("archer") and not ClassUnlock.second_pending(),
+	ok(ClassUnlock.open_ids() == ["juggernaut",
+		FIRST] and not ClassUnlock.is_bonus("archer") and not ClassUnlock.second_pending(),
 			"an older save keeps its two")
 	Game.apply_result(result("juggernaut", true))
-	ok(ClassUnlock.open_ids() == [FIRST,
-		"juggernaut"] and ClassUnlock.take_fresh() == "" and not ClassUnlock.second_pending(),
+	ok(ClassUnlock.open_ids() == ["juggernaut",
+		FIRST] and ClassUnlock.take_fresh() == "" and not ClassUnlock.second_pending(),
 			"and gains nothing from the first expedition")
 
 ## A second-Relic choice that waits for the first expedition and says so.
