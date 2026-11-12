@@ -136,19 +136,44 @@ static func upgrade_entries(hb: HomeBuild) -> Array:
 		var nm := String(HomeLayout.CATALOG[id]["name"])
 		if FarmSites.is_upgrading(e):
 			out.append({"name": nm, "note": "Upgrading %d%%" % int(FarmSites.progress(e) * 100.0), "glyph": "hammer",
-				"cb": func(): pass, "off": true, "tip": "Boki are building the next tier"})
+				"cb": func(): pass, "off": true, "tip": "Boki are building the next tier", "uid": uid})
 			continue
 		var cost := FarmSites.upgrade_cost(id, t + 1)
 		if cost.is_empty():
 			out.append({"name": nm, "note": "Tier %d (best)" % t, "glyph": "hammer", "cb": func(): pass, "off": true,
-				"tip": "Fully upgraded"})
+				"tip": "Fully upgraded", "uid": uid})
 			continue
 		var lock := FarmUnlocks.gated() and FarmUnlocks.level() < int(cost.get("level", 1))
 		var note := "Tier %d to %d" % [t, t + 1]
 		if lock:
 			note = "Needs farm level %d" % int(cost.get("level", 1))
-		out.append({"name": nm, "note": note, "glyph": "hammer", "cb": func(): hb.upgrade(uid), "off": lock,
+		out.append({"name": nm, "note": note, "glyph": "hammer", "cb": func(): hb.upgrade(uid), "off": lock, "uid": uid,
 			"cost": {} if lock else cost,
 			"tip": "Upgrade the %s to tier %d: %s. Boki do the building; it keeps working meanwhile." % [
 				nm.to_lower(), t + 1, FarmSites.cost_text(cost)]})
 	return out
+
+# ------------------------------------------------------------------ the hover shortcut
+## What the cursor card says about a placed building (tag "d:<uid>"): its level and "Upgrade", "Upgrading" or "Max".
+## Empty for anything that has no tiers.
+static func hover_state(tag: String) -> Dictionary:
+	if not tag.begins_with("d:"):
+		return {}
+	var e := FarmSites.entry(int(tag.substr(2)))
+	if e.is_empty() or FarmSites.is_site(e) or not (FarmSites.rules()["upgradable"] as Array).has(String(e["id"])):
+		return {}
+	var left := "Upgrade"
+	if FarmSites.is_upgrading(e):
+		left = "Upgrading"
+	elif FarmSites.upgrade_cost(String(e["id"]), FarmSites.tier(e) + 1).is_empty():
+		left = "Max"
+	return {"level": FarmSites.tier(e), "upgrade": left}
+
+## The Upgrade key over a building: opens the Upgrades tab on its row. True if it did.
+static func show_upgrade(hb: HomeBuild, tag: String) -> bool:
+	if hover_state(tag).get("upgrade", "") != "Upgrade":
+		return false
+	hb.cat = "Upgrades"
+	hb._build_bar()
+	hb.bar.show_uid(int(tag.substr(2)))
+	return true
