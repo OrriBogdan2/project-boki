@@ -1,22 +1,33 @@
 {
-	"_doc": "Wisp looks (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into. Add a look = add an entry under 'looks'; any key left out comes from 'default'. A look is chosen by its id in Save.d['look']['wisp']. Every look keeps the round outline (round = Hunter, critter = Boki). Colours: 'team' (the hunter's side colour, SideColor: you, ally, foe) or a hex string. core.rim_width is the fraction of the radius in the rim colour. body: radius and squash of the round body, head the radius of the head on top. hover is the body centre's height; drag how far the body trails behind the hunter, settle the seconds it takes to catch up (heavy), lean the tilt in radians at full drag. Times in seconds, sizes in metres, sfx names from Sfx.NAMES, hum.db the hum's level.",
+	"_doc": "Wisp skins (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into, a chubby round body sitting on the ground with a tiny face, under a see-through plume in the viewer's relation colour (SideColor: you green, your squad blue, rivals red). Add a skin = add an entry under 'looks'; any key left out comes from 'default'. A skin is chosen by its id in Save.d['look']['wisp']. A skin changes the body only: the plume and the rim always carry the relation colour, so every skin reads the same at a glance. body: radius and squash (height over width) of the round body, sunk 'sink' metres into the ground. core: 'color' the body, 'shade' its underside, 'face' the eyes and mouth (hex strings), 'style' plain, glitch (hue bands sliding, rows jumping sideways) or ember (cracks glowing 'glow_col' under a dark crust), rim_width the fraction of the outline in the relation colour. plume: height and width in metres, rising up the screen from the body's bottom edge, alpha how solid its heart is, speed how fast it licks upward. bob is the breathing squash (fraction), drag how far the body trails behind the hunter, settle the seconds it takes to catch up (heavy), lean the tilt in radians at full drag. Times in seconds, sfx names from Sfx.NAMES, hum.db the hum's level.",
 	"default": "default",
 	"looks": {
 		"default": {
 			"name": "Wisp",
-			"desc": "A round soul-light in your team's colour with a white heart, slow and heavy.",
-			"core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3},
-			"body": {"radius": 0.3, "squash": 0.85, "head": 0.16},
-			"hover": 0.4,
+			"desc": "A plain cream soul with a tiny face, under a plume in its side's colour.",
+			"core": {"style": "plain", "color": "f1e8d6", "shade": "b9a98f", "face": "2b2330", "glow_col": "ffffff", "rim_width": 0.18},
+			"body": {"radius": 0.3, "squash": 0.88, "sink": 0.03},
+			"plume": {"height": 1.3, "width": 1.2, "alpha": 0.85, "speed": 1.0},
 			"bob": 0.04,
 			"bob_hz": 0.45,
 			"drag": 0.45,
 			"settle": 0.5,
-			"lean": 0.35,
+			"lean": 0.3,
 			"hum": {"sfx": "wisp_hum", "db": -14.0},
 			"pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"},
 			"pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25},
 			"snuff": {"burst": 24, "sfx": "hit"}
+		},
+		"glitch": {
+			"name": "Glitch",
+			"desc": "A soul that never quite loaded: hue bands slide over it and rows of it skip sideways.",
+			"core": {"style": "glitch", "color": "ff5fd2", "shade": "3b2a7a", "face": "101018"}
+		},
+		"ember": {
+			"name": "Ember",
+			"desc": "A coal with a crust gone dark, still glowing through its cracks.",
+			"core": {"style": "ember", "color": "2a2226", "shade": "120d10", "face": "ffd27a", "glow_col": "ff7a1f"},
+			"plume": {"speed": 1.6}
 		}
 	}
 }

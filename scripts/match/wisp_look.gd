@@ -1,15 +1,17 @@
 class_name WispLook
 extends RefCounted
-## What a downed Hunter turns into: a Wisp, built from data. A look is an entry in
-## content/rules/wisp_looks.json (colours, body size, hover, drift, hum, pop effects), picked by its id in
-## Save.d["look"]["wisp"]; a look only lists what it changes from "default". Adding a Wisp needs no code.
-## Every Wisp keeps the owner's outline rule: a round "person" (a round body with a head), team colour rim,
-## white core, steady glow (round = Hunter, critter = Boki). HunterWisp plays it; this file reads the data
-## and builds the body: one mesh, one material, so thirty of them stay cheap.
+## What a downed Hunter turns into: a Wisp, built from data. A skin is an entry in
+## content/rules/wisp_looks.json (body colours and surface, size, plume, drift, hum, pop effects), picked by
+## its id in Save.d["look"]["wisp"]; a skin only lists what it changes from "default". A new skin needs no
+## code. Every Wisp is a chubby round body sitting on the ground with a tiny face (round = Hunter, critter =
+## Boki) under a see-through plume; the plume and the body's outline are the viewer's relation colour
+## (SideColor), whatever the skin. HunterWisp plays it; this file reads the data and builds it: two meshes,
+## two materials, so thirty of them stay cheap.
 
 const RULES_PATH := "res://content/rules/wisp_looks.json"
 const SHADER := preload("res://shaders/wisp_core.gdshader")
-const SEGMENTS := 24      # sphere radial segments; the rim shader does the work, the mesh stays light
+const PLUME := preload("res://shaders/wisp_plume.gdshader")
+const SEGMENTS := 24      # sphere radial segments; the shader does the work, the mesh stays light
 const RINGS := 12
 
 static var _rules := {}
@@ -52,22 +54,29 @@ static func equip(id: String) -> bool:
 	Save.d["look"]["wisp"] = id
 	return true
 
-## A colour spec from the data: "team" is the hunter's team colour, anything else a hex string.
-static func colour(spec: String, team_col: Color) -> Color:
-	return team_col if spec == "team" else Color(spec)
+## The body shader's surfaces, by its `style` index (an unknown name is plain).
+const STYLES := ["plain", "glitch", "ember"]
 
-## The body of a Wisp (a Node3D at its hover point) with one child, Body: a single mesh in a single
-## material. The material is in the node's meta "mat" so HunterWisp can flash and fade it.
-static func build(look: Dictionary, team_col: Color) -> Node3D:
+## Where the body's centre sits over the hunter's feet: on the ground, sunk in a little.
+static func hover(look: Dictionary) -> float:
+	var body: Dictionary = look["body"]
+	return float(body["radius"]) * float(body["squash"]) - float(body["sink"])
+
+## A Wisp (a Node3D at the body's centre) with two children: Body, the round soul in the skin's material,
+## and Plume, the see-through flame over it. Both carry the relation colour `side_col` (recolour() changes
+## it); the materials are in the node's metas "mat" and "plume" so HunterWisp can flash and fade them.
+static func build(look: Dictionary, side_col: Color) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Wisp"
 	var core: Dictionary = look["core"]
 	var mat := ShaderMaterial.new()
 	mat.shader = SHADER
-	mat.set_shader_parameter("rim_col", colour(String(core["rim"]), team_col))
-	mat.set_shader_parameter("core_col", colour(String(core["color"]), team_col))
+	mat.set_shader_parameter("body_col", Color(String(core["color"])))
+	mat.set_shader_parameter("shade_col", Color(String(core["shade"])))
+	mat.set_shader_parameter("face_col", Color(String(core["face"])))
+	mat.set_shader_parameter("glow_col", Color(String(core["glow_col"])))
+	mat.set_shader_parameter("style", maxi(0, STYLES.find(String(core["style"]))))
 	mat.set_shader_parameter("rim", float(core["rim_width"]))
-	mat.set_shader_parameter("glow", float(core["glow"]))
 	var body := MeshInstance3D.new()
 	body.name = "Body"
 	body.mesh = _mesh(look["body"])
@@ -75,30 +84,45 @@ static func build(look: Dictionary, team_col: Color) -> Node3D:
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(body)
 	root.set_meta("mat", mat)
+	root.add_child(_plume(look, root))
+	recolour(root, side_col)
 	return root
 
-## The round "person": a squashed round body with a smaller head sunk into its top, merged into one
-## mesh and shared by every Wisp with the same body spec.
-static func _mesh(spec: Dictionary) -> ArrayMesh:
-	var key := JSON.stringify(spec)
-	if _meshes.has(key):
-		return _meshes[key]
-	var radius := float(spec["radius"])
-	var squash := float(spec["squash"])
-	var head := float(spec["head"])
-	var tool := SurfaceTool.new()
-	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	tool.append_from(_sphere(radius), 0, Transform3D(Basis.from_scale(Vector3(1.0, squash, 1.0)), Vector3.ZERO))
-	var head_at := Vector3(0.0, radius * squash + head * 0.6, 0.0)
-	tool.append_from(_sphere(head), 0, Transform3D(Basis.IDENTITY, head_at))
-	var mesh := tool.commit()
-	_meshes[key] = mesh
-	return mesh
+## Tints a built Wisp's outline and plume (the viewer's relation to its hunter).
+static func recolour(node: Node3D, side_col: Color) -> void:
+	(node.get_meta("mat") as ShaderMaterial).set_shader_parameter("rim_col", side_col)
+	(node.get_meta("plume") as ShaderMaterial).set_shader_parameter("col", side_col)
 
-static func _sphere(radius: float) -> SphereMesh:
-	var mesh := SphereMesh.new()
-	mesh.radius = radius
-	mesh.height = radius * 2.0
-	mesh.radial_segments = SEGMENTS
-	mesh.rings = RINGS
-	return mesh
+## The flame: one quad that faces the camera (the shader turns it), its base at the body's bottom edge on
+## screen, with the body cut out of it so the body sits in the flame.
+static func _plume(look: Dictionary, root: Node3D) -> MeshInstance3D:
+	var spec: Dictionary = look["plume"]
+	var body: Dictionary = look["body"]
+	var mat := ShaderMaterial.new()
+	mat.shader = PLUME
+	mat.set_shader_parameter("alpha", float(spec["alpha"]))
+	mat.set_shader_parameter("speed", float(spec["speed"]))
+	mat.set_shader_parameter("rise", float(spec["height"]) * 0.5 - float(body["radius"]) * float(body["squash"]))
+	mat.set_shader_parameter("lift", float(body["radius"]))
+	mat.set_shader_parameter("hole", float(body["radius"]))
+	var quad := QuadMesh.new()
+	quad.size = Vector2(float(spec["width"]), float(spec["height"]))
+	var plume := MeshInstance3D.new()
+	plume.name = "Plume"
+	plume.mesh = quad
+	plume.material_override = mat
+	plume.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.set_meta("plume", mat)
+	return plume
+
+## The chubby round body: one squashed sphere, shared by every Wisp with the same body spec.
+static func _mesh(spec: Dictionary) -> SphereMesh:
+	var key := JSON.stringify(spec)
+	if not _meshes.has(key):
+		var mesh := SphereMesh.new()
+		mesh.radius = float(spec["radius"])
+		mesh.height = mesh.radius * 2.0 * float(spec["squash"])
+		mesh.radial_segments = SEGMENTS
+		mesh.rings = RINGS
+		_meshes[key] = mesh
+	return _meshes[key]

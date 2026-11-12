@@ -36,8 +36,9 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
 
 ## How to add a Wisp
 Add an entry under `looks` in `wisp_looks.json` with only the keys that differ from `default`
-(nested keys merge): colours, body size, hover, drift, hum, pop effects. No code. `--wisp-check` covers
-every entry, including the outline rule (round body with a head, team rim, white core, low, steady).
+(nested keys merge): body colours and surface style, size, plume, drift, hum, pop effects. No code (a new surface
+style is a branch in `shaders/wisp_core.gdshader`). `--wisp-check` covers every entry, including the body/plume
+rule (chubby round body on the ground, side-colour outline and see-through plume; see "The Wisp look" below).
 
 ## Consequences
 - The local player's Wisp look is not sent to other players (they see `default`, tinted by their side colour, SideColor). Sending it
@@ -51,3 +52,50 @@ species: its own palette (the shiny one when it shimmers), its ears and tail tip
 for the hand-built bodies), one baked mesh on one shared unlit material (`shaders/boki_wisp.gdshader`), a quick
 hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the wisp prototype wires it into
 matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
+
+## Clarity pass and Boki riding the downed Hunter (owner 2026-11-11)
+Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how Supervive does this ... their
+pets always come back to them and go into wisp form when they're downed".
+- **Marks (`DownedMarks`):** the always-on ground ring the size of the revive range is gone. A downed Hunter shows
+  a compact ring hugging their Wisp in their side colour (ally or rival): the bleed-out drains round it, revive
+  progress fills inside it, it flashes over the last 5 s and turns red and pulses while stomped. Only a teammate
+  within 9 m sees the revive reach on the ground (thin, filling as they revive) and one HUD line, "Step onto
+  <name>'s wisp to revive" (screen space: no words on world objects, owner 11-11). The squad's offscreen arrows
+  carry the same ring. The plate, squad frame and own-screen "You're down" stay as they were.
+- **Boki (`KinWispForm`, Kin state `wisp`, which replaces `reviving`):** when its Hunter is knocked every Boki of
+  theirs that is up zips back (blinks from beyond 14 m or when it can't walk there) and circles the Hunter Wisp as
+  its Boki wisp (`BokiWispLook`, round = Hunter, critter = Boki). It does not fight, cast or take orders and
+  can't be hit. It still pulls its Hunter up as the old kin revive did (same wait and `kin_revive_time`, bleed
+  paused meanwhile); a stomp stops the pull (as Supervive's stomp blocks self-revives). Revived: back on the
+  shoulder with its old order. Dead: `KinLoss` as before. A Boki that is down itself stays down (KinDowned).
+  The old guard (attacking whoever stood on the Wisp) is removed.
+- **Net:** `wisp` takes `reviving`'s slot in `Match.KIN_STATES`, so the snapshot shape is unchanged.
+- **Open (DECISIONS 2026-11-09):** wisp stealing on a knock is not built yet; when it is, it starts from the
+  Boki already riding the Hunter in this form.
+- Checks: `--kin-wisp-form-check`, `--clarity-check`. Frames: `--wisp-clarity-shots --shots-dir=<dir>`.
+
+## The Wisp look (owner 11-12: "look and read like their wisp form", our own art and names)
+Supersedes the outline rule above for the Hunter Wisp (round body with a head, white core, floating):
+- **Body:** a chubby round soul (a squashed sphere, 0.6 m across, about knee high) sitting on the ground with a
+  tiny face (two dot eyes and a smile drawn by `shaders/wisp_core.gdshader` on its +Z side, turned to the camera
+  and up to 0.6 rad toward the way the hunter faces). It breathes (a slow squash) instead of bobbing; the heavy
+  drag and lean when it creeps stay. Procedural, not a Meshy mesh: a ball is a primitive, and drawing the face and
+  skins in the shader keeps every skin on one shared mesh (0 credits).
+- **Plume:** a see-through flame round it (`shaders/wisp_plume.gdshader`, one camera-facing quad rising up the
+  screen from the body's bottom edge, with the body cut out so it sits in the flame, and a thin dark rim so it
+  reads on any ground), in the viewer's relation colour (SideColor: you, ally, rival = the nameplate colours). The body's thin outline takes the same
+  colour. `HunterWisp` re-tints both whenever the viewer's relation changes, so online every game colours a Wisp
+  by its own local player, never by the owner's team.
+- **Skins:** `wisp_looks.json` is the skin registry (`Save.d["look"]["wisp"]` is the wisp-skin slot, as before):
+  `default` (cream), `glitch` (hue bands sliding, rows skipping sideways) and `ember` (a dark crust glowing through
+  cracks). A skin changes only the body; the plume and outline always carry the relation colour. Your own hunter
+  wears your skin; bots and other players wear `default` (see DEBT). Picker: a "Wisp skins" row in the glider
+  rack's panel at home (`WispPicker`), all free for now.
+- **Marks at game zoom:** the compact ring now lies on the ground round the Wisp's base (`DownedMarks.HUG`), not
+  over the body, so the body and face stay in view; the depth-cue shadow under a Wisp is Wisp-sized
+  (`DepthCues.WISP_DISC`), not a hero's 2 m disc.
+- **Plate:** a downed Hunter's plate sits on the Wisp at the plume's tip (`HudPlate.WISP_OFFSET`); under it a teammate in cue range
+  sees "JUMP TO REVIVE" (`DownedMarks.cued`), replacing the old HUD line. Revive rules are unchanged: a teammate
+  in the air over the Wisp counts like one standing on it.
+- Checks: `--kin-wisp-form-check` part 7 (form swap, skin, colour for three viewers, prompt for allies only,
+  the jump revive, the picker), `--wisp-check` (every skin keeps the body/plume rule). Video: `--wisp-clarity-shots`.

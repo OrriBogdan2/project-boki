@@ -19,6 +19,8 @@ const BURST_T := 1.1           # s of the knock burst over someone who just went
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
 const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
+const WISP_OFFSET := 2.1       # m over the feet: a downed Hunter's plate sits on their Wisp, at its plume's tip
+const PROMPT := "JUMP TO REVIVE"   # under a downed teammate's plate when you can bring them back (DownedMarks.cued)
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}
 var st := {}
@@ -28,9 +30,12 @@ var _prune_at := 0.0
 ## downed, word, chip}
 var shown := {}
 
-## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
-## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
+## How high over this hunter's feet their plate sits: on their Wisp while it stands in (WISP_OFFSET), else
+## the archetype's optional `plate_offset` (in its content/archetypes JSON, so taller and shorter heroes
+## clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
+	if HunterWisp.hides(h):
+		return WISP_OFFSET
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
@@ -265,8 +270,9 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 	HudStyle.ctext(c, ctr + Vector2(0, 4.5 * sc), txt, int(12.0 * sc), tcol, 3)
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
-## filling over it in green, a cross in place of the level, and what's happening under it. The
-## moment a rival goes down a burst of rays and a "DOWN" word pop over them.
+## filling over it in green, a cross in place of the level, and what's happening under it ("JUMP TO
+## REVIVE" for a teammate close by who could bring them back). The moment a rival goes down a burst of
+## rays and a "DOWN" word pop over them.
 func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictionary, role: Color) -> void:
 	var stomped: bool = h.get_meta("stomped", false)
 	var pulse := 0.5 + 0.5 * sin(H.m.time * 14.0)
@@ -294,7 +300,10 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	elif h.revive > 0.0 and not revs.is_empty():
 		line = "%s reviving  %d%%" % [(revs[0] as Hunter).pname, int(h.revive * 100.0)]
 		lcol = HudStyle.REVIVE
-	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 11, lcol, 3)
+	elif DownedMarks.cued(H.m.player, h):
+		line = PROMPT
+		lcol = Color(HudStyle.REVIVE, 0.75 + 0.25 * pulse)
+	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 13 if line == PROMPT else 11, lcol, 3)
 	if H.m.player == null or h.team != H.m.player.team:
 		_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)      # (a teammate's fall stays quiet: MateAlerts)
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,

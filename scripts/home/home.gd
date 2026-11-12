@@ -1803,6 +1803,7 @@ func _open_rack() -> void:
 			tc.tooltip_text = ("%d gems" % int(sk["cost"])) if not sk.has("unlock") else "Earned, not bought"
 		grid.add_child(tc)
 	v.add_child(grid)
+	WispPicker.add_to(v, _open_rack)
 	# footer: hear it, and the one thing you can do with the picked skin
 	UI.footer_left(v).add_child(UI.ghost("Hear it", func(): _rack_sound(rack_pick), 0, "wave"))
 	var own := Gliders.owned(rack_pick)

@@ -32,7 +32,8 @@ func _check_match(main: Node) -> void:
 	Settings.set_v("depth_cues", true, false)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	# squads of two, so a knock downs the player instead of wiping their team
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	var dc: DepthCues = m.get_node_or_null("DepthCues")
 	ok(dc != null, "the DepthCues node is in the match")
@@ -42,6 +43,7 @@ func _check_match(main: Node) -> void:
 	_check_abyss(m)
 	_check_hunter_discs(m, dc)
 	_check_shot_discs(m, dc)
+	_check_wisp_disc(m, dc)
 	m.queue_free()
 
 func _find_material(root: Node, shader_file: String) -> ShaderMaterial:
@@ -89,6 +91,23 @@ func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 		var y := m.world.ground_at(h.global_position.x, h.global_position.z)
 		ok(_on_ground(disc, y), "hunter %d's disc lies on the ground (y %.2f)" % [i, y])
 	ok(live > 0, "at least one hunter's disc is visible on the ground")
+
+## A downed Hunter's disc shrinks to their Wisp and lies under its body (which trails the hunter).
+func _check_wisp_disc(m: Match, dc: DepthCues) -> void:
+	var P: Hunter = m.player
+	m.knock(P, null, {})
+	for f in FRAMES:
+		P.render(1.0 / 60.0, 1.0)
+	dc._process(0.0)
+	var disc: MeshInstance3D = dc._discs.get(P)
+	var wisp := HunterWisp.node_of(P)
+	var sized := disc != null and absf(disc.scale.x - DepthCues.WISP_DISC / DepthCues.DISC) < 0.001
+	var under := false
+	if disc != null and wisp != null:
+		var off := disc.global_position - wisp.global_position
+		under = Vector2(off.x, off.z).length() < 0.01
+	var why := "downed %s, sized %s, under %s" % [P.downed, sized, under]
+	ok(wisp != null and sized and under, "a downed Hunter's disc is Wisp-sized and under the Wisp (%s)" % why)
 
 func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var P: Hunter = m.player

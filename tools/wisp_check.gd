@@ -4,7 +4,7 @@ extends RefCounted
 ## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
 ## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out breaks it. The downed
 ## gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
-## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
+## (a chubby round body on the ground, side-colour outline and see-through plume, two meshes): every
 ## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
 ## few keys builds, and the saved id round-trips. Prints PASS/FAIL.
 
@@ -162,43 +162,49 @@ func _looks() -> void:
 		_outline(String(id), look)
 	ok(WispLook.get_look("no_such_wisp") == default_look, "an unknown id gives the default Wisp")
 	var rules_looks: Dictionary = rules["looks"]
-	rules_looks["check_ember"] = {"core": {"rim": "ff6a00"}, "hover": 0.3}      # a new Wisp is data only
+	rules_looks["check_ember"] = {"core": {"color": "ff6a00"}, "plume": {"speed": 2.0}}      # a new skin is data only
 	var ember := WispLook.get_look("check_ember")
-	var kept: bool = ember["body"]["radius"] == default_look["body"]["radius"]
-	ok(ember["core"]["rim"] == "ff6a00" and kept, "a look lists only what it changes")
+	var kept: bool = ember["body"]["radius"] == default_look["body"]["radius"] \
+		and ember["plume"]["height"] == default_look["plume"]["height"]
+	ok(ember["core"]["color"] == "ff6a00" and kept, "a look lists only what it changes")
 	var body2 := WispLook.build(ember, Color.RED)
 	var mat: ShaderMaterial = body2.get_node("Body").material_override
-	ok(mat.get_shader_parameter("rim_col") == Color("ff6a00"), "...and builds with its own rim colour")
+	ok(mat.get_shader_parameter("body_col") == Color("ff6a00"), "...and builds with its own body colour")
 	body2.free()
 	ok(WispLook.equip("check_ember") and WispLook.equipped() == "check_ember", "the saved Wisp id round-trips")
 	rules_looks.erase("check_ember")
 	var fell_back: bool = WispLook.equipped() == "default" and not WispLook.equip("check_ember")
 	ok(fell_back, "a missing look falls back to the default")
 
-## The outline rule (briefs/DECISIONS.md 2026-11-09): a round body with a head, team colour rim, white
-## core, low to the ground, a steady glow, and one mesh in one material so thirty stay cheap.
+## The outline rule (DECISIONS 2026-11-09, owner 11-12): a chubby round body with a tiny face sitting on
+## the ground, its outline and the see-through plume over it in the side colour whatever the skin, and two
+## meshes in two materials so thirty stay cheap.
 func _outline(id: String, look: Dictionary) -> void:
 	var tag := "look '%s': " % id
-	var body := WispLook.build(look, Color.RED)
-	var mesh := body.get_node_or_null("Body") as MeshInstance3D
-	ok(mesh != null and body.get_child_count() == 1 and mesh.get_child_count() == 0, tag + "one mesh, nothing else")
-	if mesh == null:
-		body.free()
+	var node := WispLook.build(look, Color.RED)
+	var mesh := node.get_node_or_null("Body") as MeshInstance3D
+	var plume := node.get_node_or_null("Plume") as MeshInstance3D
+	ok(mesh != null and plume != null and node.get_child_count() == 2, tag + "a body and a plume, nothing else")
+	if mesh == null or plume == null:
+		node.free()
 		return
 	var box := mesh.mesh.get_aabb()
-	var round_body: bool = absf(box.size.x - box.size.z) < 0.01 and box.size.x > 0.3
+	var round_body: bool = absf(box.size.x - box.size.z) < 0.01 and box.size.x > 0.4
 	var shape := "%.2f wide, %.2f tall" % [box.size.x, box.size.y]
-	ok(round_body and box.size.y > box.size.x * 1.1, tag + "a round body with a head on top (" + shape + ")")
+	var chubby: bool = box.size.y <= box.size.x and box.size.y > box.size.x * 0.7
+	ok(round_body and chubby, tag + "a chubby round body (" + shape + ")")
 	var mat := mesh.material_override as ShaderMaterial
-	ok(mat != null and body.get_meta("mat") == mat, tag + "one material, the one HunterWisp flashes")
-	ok(mat.get_shader_parameter("rim_col") == Color.RED, tag + "the rim is the team colour")
-	ok(mat.get_shader_parameter("core_col") == Color.WHITE, tag + "the core is white")
-	var steady := true
-	for uniform in mat.shader.get_shader_uniform_list():
-		steady = steady and not String(uniform["name"]).contains("flicker")
-	ok(steady, tag + "the glow is steady: the shader has no flicker")
-	var low: bool = float(look["hover"]) <= 0.5 and float(look["hover"]) + box.position.y > 0.05
-	ok(low, tag + "it floats low, clear of the ground (centre %.2f m)" % float(look["hover"]))
+	ok(mat != null and node.get_meta("mat") == mat, tag + "one body material, the one HunterWisp flashes")
+	ok(mat.get_shader_parameter("rim_col") == Color.RED, tag + "the outline is the side colour")
+	var pmat := plume.material_override as ShaderMaterial
+	ok(pmat != null and node.get_meta("plume") == pmat and pmat.get_shader_parameter("col") == Color.RED,
+		tag + "the plume is the side colour")
+	ok(pmat.shader.code.contains("blend_mix") and float(look["plume"]["alpha"]) < 0.9, tag + "the plume is see-through")
+	var cut: bool = pmat.get_shader_parameter("hole") == float(look["body"]["radius"])
+	ok(cut, tag + "the body is cut out of the plume (never tinted)")
+	var bottom := WispLook.hover(look) + box.position.y
+	var sits: bool = bottom <= 0.0 and bottom > -0.08 and box.size.y < 0.65
+	ok(sits, tag + "it sits on the ground, about knee high (bottom %.2f m)" % bottom)
 	var heavy: bool = float(look["settle"]) >= 0.3 and float(look["bob_hz"]) <= 0.7
-	ok(heavy, tag + "slow and heavy: settle %.1f s, bob %.2f Hz" % [look["settle"], look["bob_hz"]])
-	body.free()
+	ok(heavy, tag + "slow and heavy: settle %.1f s, breath %.2f Hz" % [look["settle"], look["bob_hz"]])
+	node.free()
