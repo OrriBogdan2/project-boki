@@ -1,9 +1,28 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Motley's reel (tools/hero_vfx_reel.gd): Nightwell from the dome to the quiet close, then a dash and a glide with the
-## well gone (nothing of it may be left on screen), for the parity strips at the match camera.
+## Motley's reel (tools/hero_vfx_reel.gd): the generic LMB, held LMB and Trade; the Shard Snap's wind-up, flight and
+## stun; the Brimseed planted, grown and popped; Nightwell from the dome to the quiet close, then a dash and a glide
+## with the well gone (nothing of it may be left on screen), for the strips at the match camera.
 
 func parts() -> Array:
-	return ["r", "after"]
+	return ["lmb", "hold", "rmb", "dash", "e", "r", "after"]
+
+func _part_rmb() -> void:
+	await _reset(7.0)
+	var cast := func(t: float):
+		P.inp["sec"] = _at(t, 0.1)
+		_aim(T.pos)
+	await _go(1.6, cast, _sheet("rmb", "RMB, Shard Snap: the wind-up, the bundle in flight, the stun",
+		[0.15, 0.3, 0.42, 0.46, 0.52, 0.6, 0.75, 1.0, 1.4], func(): return (P.pos + T.pos) * 0.5), 2.0)
+	await _go(GAP)
+
+func _part_e() -> void:
+	await _reset(6.0)
+	var cast := func(t: float):
+		P.inp["sig"] = _at(t, 0.1) or _at(t, 6.9)
+		_aim(T.pos)
+	await _go(7.8, cast, _sheet("e", "E, Brimseed: the drop, the globe growing to full, E again: the pop",
+		[0.2, 0.5, 1.5, 3.0, 4.6, 6.6, 6.95, 7.1, 7.5], func(): return T.pos), 2.5)
+	await _go(GAP)
 
 func _part_r() -> void:
 	await _reset(6.0)
