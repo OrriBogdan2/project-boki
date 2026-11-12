@@ -376,7 +376,8 @@ func use_r() -> void:
 		return
 	# the fuse: a readable wind-up (pose, energy gathering, a sting, a ring enemies can see), then the
 	# effect fires with a big impact. The cooldown starts now, so the slot reads as spent.
-	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": String(r_def().get("fuse_guard", "none")), "fx": 0.0}
+	var guard := String(r_def().get("fuse_guard", "none"))
+	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": guard, "fx": 0.0, "at": h.pos}
 	cd["r"] = r_cooldown()
 	h._ab_feedback("r", "cast")
 	_fuse_start(will_bond)
@@ -401,7 +402,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
@@ -431,6 +431,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "r_fuse", {"at": fuse["at"], "r": 2.4, "col": col, "fill": k, "all": true})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -689,31 +690,6 @@ static func behind(t: Ent, attacker: Ent, rear_deg := 120.0) -> bool:
 func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
-
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
 
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
