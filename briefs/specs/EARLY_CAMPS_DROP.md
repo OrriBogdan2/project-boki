@@ -279,14 +279,15 @@ No XP comes from time, so catch-up is built from things you do.
 
 | Lever | Rule | Number |
 |---|---|---|
-| **Pace bonus** (owner call 3) | Monster XP is multiplied by how your level sits against the pace level (6.2). Monsters only, never knocks | 3 or more behind x1.75; 2 behind x1.5; 1 behind x1.25; level or 1 ahead x1; 2 ahead x0.75; 3 or more ahead x0.5 |
+| **Comeback bonus** (DECISIONS 2026-11-10; built: `XpRules.comeback_k`) | A squad whose average run level is 2 or more under the top squad still in the match gets more XP from the camp monsters it kills (the camp's whole clear). Camps only: never from time, never from knocking or hitting Hunters. A small green "comeback" tag sits under each live camp on that squad's map and minimap only. The squad at the top, and anyone within 2 of it, gets the plain XP | x1.5 (`content/rules/xp.json` `comeback`: gap 2, k 1.5; tuned by `--camp-pace-check`). Replaces the pace-table bonus first drafted here (x1.25 to x1.75 behind, x0.75/x0.5 ahead), which is not built |
 | **Gap bonus on knocks** | Knocking a Hunter above your level pays more; farming one far below pays less | +30 per level the victim is above you; half XP when the victim is 2 or more below you |
 | **Comeback camps** (2.3) | A cleared camp returns once, one size up, 150 s later, none after 7:00 | A beaten squad's region is worth more the second time: 230 becomes 410 on the rim |
 | **Revive floor** | A Hunter brought back (revive box or beacon) keeps level, XP, ability ranks, weapon steps and armor tier, and is lifted to 2 levels under their squad's highest living member if they were lower | No XP is ever lost to a down or a death. Gear follows today's revive rules |
 | **Finite farm** | First clears hold about 300 XP a squad; one comeback each; the Blight eats the rim first | The leader cannot farm its way further ahead: past level 5 the XP is other Hunters |
 | **Soft cap** | Health and ability growth halves from level 7; steps cost more each level | 8 against 10 is a smaller edge than 3 against 5 |
 
-- Worked case: a squad wiped to one Hunter at 2:00, level 2. The two come back at the beacon at level 2. At 3:00 the pace is 4, so they are 2 behind: their old Camp, back as a Great Camp (190), pays each of them 285: level 2 to level 4 in one clear. By 6:00 they are within 2 of the median, with an ultimate one beat late. Knocking one level 6 Hunter at level 4 pays 130 + 60 = 190.
+- Worked case: a squad wiped to one Hunter at 2:00, level 2. The two come back at the beacon at level 2. At 3:00 the top squad averages 4, so they are 2 behind and their camps show the comeback tag: their old Camp, back as a Great Camp (190), pays each of them 285: level 2 to level 4 in one clear. By 6:00 they are within 2 of the median, with an ultimate one beat late. Knocking one level 6 Hunter at level 4 pays 130 + 60 = 190.
+- Comeback limits the sim asserts (`--camp-pace-check`, 10 bot trios): every time a squad falls 2 levels under the top squad it is back within 2 after at most 4 camp clears, at least one squad does, trailing squads are paid comeback XP, and the top squad is paid none. `--camps-check` asserts one clear each way: x1.5 trailing, plain at the top.
 - Limits the sim asserts: the top squad is at most 2 levels above the median squad at 4:00 and at most 3 at 8:00; a squad behind by 2 at 3:00 gains on the leaders by 6:00 if it clears two camps.
 - What we do **not** do: no XP loss on death, no shared squad level, no rubber-band on knocks beyond the gap bonus, no hidden rules. Every lever above is shown on screen (6.7).
 
@@ -304,11 +305,11 @@ A steal is a last hit by a squad that did not do most of the damage. It is allow
 | Where | What | Detail |
 |---|---|---|
 | **Bottom-left vitals** (`hud_vitals.gd`) | Your level on the coin, and a gold **XP bar** to the next level under the armor strip, the full 318 px width | Replaces the thin ring round the coin. On every gain the bar's new part shows lighter and settles in 0.4 s, and "+60" rises from its end and fades in 0.8 s. At 10 the bar is full and reads MAX. The level-up burst stays as it is |
-| By the bar | The pace tag | "Catch-up +25%" in green when monsters pay you more, "Slow -25%" in grey when they pay you less, nothing at par. This is the farm-or-fight light: green says farm, grey says go and hunt |
+| On the map | The comeback tag | A small green "comeback" under each live camp, on your squad's map and minimap only, while your squad trails the top squad by 2+ levels; hover: "Comeback: +50% XP for your squad". Nothing otherwise. Green says farm (the earlier "Catch-up +25%" / "Slow -25%" bar tag went with the pace-table bonus) |
 | At the kill | One gold "+30 XP" floater | Yours only, merged when several land within 0.5 s. Squadmates' gains are not shown |
 | Squad rows (`team_boki.gd`) | Each squadmate's level badge (there today) | A broken-link mark on a squadmate more than 30 m away: you are not sharing XP |
 | Enemy nameplates (`hud_plate.gd`) | The level badge (there today), now coloured by the gap to you | Grey: 2 or more below you (pays half). White: within 1. Amber: 2 or 3 above. Red: 4 or more above. Amber and red are worth more to knock and worse to fight |
-| Full map | Hover or ping a camp: "Great Camp, 190 XP" after your pace bonus; a region: "2 camps left, 300 XP" | The planning number for "rotate or stay" |
+| Full map | Hover or ping a camp: "Great Camp, 190 XP"; the comeback line when your squad trails; a region: "2 camps left, 300 XP" | The planning number for "rotate or stay" |
 | Results screen (later) | XP by source, per minute | Camps, knocks, bosses |
 
 No new HUD group: the bar lives in the vitals block, the colours on badges that exist.
@@ -316,7 +317,7 @@ No new HUD group: the bar lives in the vitals block, the colours on badges that 
 **Reading it as a player:** green tag and white or amber plates around you: farm, and avoid the amber squad unless you can third-party it. No tag: play the clock (Sealed Lair at 2:00, the Heart at 4:00). Grey tag: camps are a waste of your time, you are the strongest squad nearby, go and take a fight before the others catch up. One short of 6 at 5:00: one more Camp before the Heart is worth being late. A link mark on a squadmate: regroup before the next kill.
 
 ### 6.8 Bots
-Bots use the same XP path as Hunters: no bot-only XP, the same last hit, range, pace bonus, gap bonus and revive floor.
+Bots use the same XP path as Hunters: no bot-only XP, the same last hit, range, comeback bonus, gap bonus and revive floor.
 - **Farm:** a bot squad at or below the pace level detours to a live camp that is safe for 60 s and within 60 m, smallest first; above the pace it does not.
 - **Fight:** it avoids a squad 2 or more levels above it unless that squad is already fighting; it presses a squad 2 or more below. A squad one short of an even level or of 6 prefers a camp to a fight.
 - **Steal:** a bold bot within 25 m of a prize monster in its kill window tries the last hit 35% of the time. A bot squad that has seen a rival within 30 m in the last 5 s holds its burst at 30% and uses it in the reel.
