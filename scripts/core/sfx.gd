@@ -8,7 +8,7 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
 	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
-	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
+	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "elim_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
 	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
@@ -16,6 +16,9 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
 	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
+## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
+## the combat crowd never steal it, and no gap or stack cap thins it.
+const CUES := ["knock_confirm", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
@@ -44,6 +47,8 @@ var recent := {}          # sound -> start times (ms) still inside the stacking 
 var streams := {}
 var players: Array[AudioStreamPlayer] = []
 var next := 0
+var cue_voice: AudioStreamPlayer
+var cue_plays := {}           # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
@@ -92,6 +97,9 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+	cue_voice = AudioStreamPlayer.new()
+	cue_voice.bus = "SFX"
+	add_child(cue_voice)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -431,6 +439,13 @@ func _voice(pos) -> AudioStreamPlayer:
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
+		return
+	if sname in CUES:
+		cue_plays[sname] = int(cue_plays.get(sname, 0)) + 1
+		cue_voice.stream = streams[sname]
+		cue_voice.volume_db = vol_db
+		cue_voice.pitch_scale = pitch
+		cue_voice.play()
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
