@@ -142,8 +142,6 @@ func _house_look() -> void:
 	ok("panels: the clean frame, R_PANEL corners, a hairline rim", hairline and pc.rad == UI.R_PANEL)
 	var pr := UI.theme().get_stylebox("normal", "Primary") as UiFrame
 	ok("the primary button is filled with the accent", pr != null and pr.fill == UI.ACCENT)
-	ok("the tutorial card and what-next line: house glass, the accent", TutorialHud.PANEL == UI.GLASS
-			and TutorialHud.ACCENT == UI.ACCENT)
 
 ## docs/UI_STYLE.md pop-up budget: floating words over the fight are capped.
 func _popup_budget() -> void:

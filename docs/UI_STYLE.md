@@ -27,7 +27,7 @@ hierarchy. HUD and menus used different violets and inks.
 | Full map | place labels overprint each other ("STORMCROWN GAOL" over "Sealed Gate"); the HUD's top strip and guide line show through above the title | one label pass (`FullMap.label`): place names move a line up or down, or a little sideways, never off their island, to clear the markers, the Ways Out seats with their words and the hot zone's caption (at the opening zoom 10 of the 11 region names sat under a marker; now only Stormcrown Gaol can, a name wider than its crowded island); a halt or gate name that would print over another is left off (the hover card names it); countdowns step to a free line (`--map-names-check`); the darker backdrop is `ext/map-clear-1111`'s |
 | Results | neon frame; the Boki card cuts a line at the scroll edge | look only |
 | Settings | neon tabs and slabs; pink eyebrows | look only (calm tabs with an accent underline, teal switches) |
-| Tutorial | its card is a third style (black box, mint 2 px edge, all-bold Lilita body text) | on the house look (`TutorialHud`): glass panel, hairline rim that lights in the accent only while a step is new or nagging, cream Lilita step line, Rubik detail; the first-match guide line shares it (its square mint outline is gone) |
+| Tutorial | its card is a third style (black box, mint 2 px edge, all-bold Lilita body text) | main's `TutorialStrip` (one strip, mint accent, the plain-words detail in the message lane) now draws the step line and the first-match guide line; the earlier house-look card was dropped for it |
 
 ## 2. Type
 

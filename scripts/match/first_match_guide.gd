@@ -8,7 +8,6 @@ extends RefCounted
 
 const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
-const STRIP_GAP := 10.0       # px (HUD units) between the ways-out strip and the guide line under it
 
 var m: Match
 var line := ""                # the one line on screen ("" for none)
@@ -118,16 +117,11 @@ func _done(lid: String, p: Hunter) -> bool:
 		"chest": return int(p.stats.get("chests", 0)) > 0
 	return false
 
-## The line in the banner lane at the top-centre (the tutorial's lane: the two never show together).
+## The line in the tutorial's strip at the top-centre (the two never show together), under the Ways Out strip.
 func draw(h, sz: Vector2) -> void:
 	if line == "":
 		return
-	var r: Rect2 = TutorialHud.lanes(sz)["banner"]
-	r.position.y = maxf(r.position.y, WaysOutHud.TOP_Y + WaysOutHud.CELL.y + STRIP_GAP)    # under the ways-out strip
-	var a := clampf(_t / 0.25, 0.0, 1.0)
-	h._panel(r, Color(TutorialHud.PANEL, TutorialHud.PANEL.a * a), UI.R_PANEL)
-	var w := TutorialText.wrap(h.big, line, int(r.size.y * 0.42), r.size.x - 28.0, 2)
-	var y: float = r.get_center().y - (w["lines"].size() - 1) * float(w["px"]) * 0.6 + float(w["px"]) * 0.36
-	for ln in w["lines"]:
-		h._ctext(Vector2(r.get_center().x, y), String(ln), int(w["px"]), Color(UI.INK, a), h.big)
-		y += float(w["px"]) * 1.2
+	var below := WaysOutHud.bottom(h.m)
+	if h.m.skydrop and h.m.skydrop.planning:
+		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
+	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t, below), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
