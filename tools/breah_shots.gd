@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "rocks", "dash", "spine", "climb", "glide"]
+const PARTS := ["lmb", "rmb", "rocks", "dash", "spine", "climb", "glide"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -75,6 +75,22 @@ func _save_strip(file: String) -> void:
 	out.save_png(dir.path_join(file))
 
 ## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
+func _breah_lmb() -> void:
+	await _reset(7.0)
+	_aim(T.pos)
+	var tap := func(t: float): P.inp["fire"] = t < 0.06
+	var marks := [[0.36, "full", "lmb_boulder_a", "Boulder (LMB tap) as it lands: the blue flash and debris", _on_target],
+		[0.42, "full", "lmb_boulder_b", "Boulder burst, a few frames on", _on_target]]
+	await _go(0.7, tap, marks)
+	await _reset(2.4)
+	_aim(T.pos)
+	var hold := func(t: float): P.inp["fire"] = t < 0.95
+	marks = [[1.0, "full", "lmb_punch_a", "Punch (LMB hold and release) on the hit frame: the blue flash and debris", _on_target],
+		[1.06, "full", "lmb_punch_b", "Punch hit, a few frames on", _on_target],
+		[1.14, "full", "lmb_punch_c", "Punch hit, settling", _on_target]]
+	await _go(1.4, hold, marks)
+	P.inp["fire"] = false
+
 func _breah_rmb() -> void:
 	await _reset(6.0)
 	_aim(home + Vector3(6.0, 0, 0))
