@@ -48,6 +48,15 @@ func run(main: Node) -> void:
 	ok(st != null, "the map has a sky train")
 	if st == null:
 		print("TRAIN CHECK DONE, failures: ", bad); main.get_tree().quit(); return
+	# every stop's deck is level with its pier (the lowest ground 1.6-3 m off the track), so you step off
+	for s in m.world.train_route["stations"]:
+		var at: Vector3 = m.world.train_at(float(s))
+		var pier := INF
+		for a in 24:
+			var q := at + Vector3(cos(a * TAU / 24.0), 0, sin(a * TAU / 24.0)) * 2.2
+			if not m.world.is_void(q.x, q.z): pier = minf(pier, m.world.ground_at(q.x, q.z))
+		var where := str(Vector2(at.x, at.z).snapped(Vector2.ONE))
+		ok(pier < INF and absf(pier - at.y) < 0.05, "the stop at %s: deck %.1f m, pier %.1f m" % [where, at.y, pier])
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
@@ -215,7 +224,19 @@ func run(main: Node) -> void:
 	ok(Game._why("train") == "was hit by the Sky Train" and Match.out_text("X", "train") == "X was hit by the Sky Train", "the death recap names the train")
 	ok(st.hits.any(func(x): return x["e"] == Q), "the train recorded the hit")
 	var bx := Life.box_of(m, Q)
-	ok(not bx.is_empty() and Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() < 16.0, "the deathbox drops by where they were hit (%.1fm away)" % (Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() if not bx.is_empty() else -1.0))
+	# (over the abyss: on the nearest ground to the hit, give or take room for the box)
+	var land := hit_pos
+	var land_d := 0.0
+	while m.world.is_void(land.x, land.z) and land_d < Life.TRAIN_BOX_REACH:
+		land_d += 0.5
+		for a in 48:
+			var q := hit_pos + Vector3(cos(a * TAU / 48.0), 0, sin(a * TAU / 48.0)) * land_d
+			if not m.world.is_void(q.x, q.z):
+				land = q
+				break
+	var box_d := Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() if not bx.is_empty() else -1.0
+	var box_ok := not bx.is_empty() and box_d < maxf(16.0, land_d + 4.0)
+	ok(box_ok, "the deathbox drops by where they were hit (%.1f m away, ground %.1f m)" % [box_d, land_d])
 	ok(Q.has_meta("fling"), "the body is flung")
 	# ---- 3. the cars' frames hit anything below the deck; nobody on top
 	var t2: Transform3D = st.cur[2]
@@ -232,5 +253,45 @@ func run(main: Node) -> void:
 		mb.pos = mpin; mb.vel = Vector3.ZERO; mb.grounded = true
 		m.step(Match.DT)
 	ok(mb.dead and st.hits.any(func(x): return x["e"] == mb), "a brute on the rails is run over (%.1fs)" % (m.time - t0))
+	_halts(m, P)
 	print("TRAIN CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## The halts: a beacon at every pier, and the pier glow follows the stop state.
+func _halts(m: Match, P: Hunter) -> void:
+	var st: SkyTrain = m.skytrain
+	var hl: TrainHalts = st.halts
+	var per_halt := []
+	per_halt.resize((m.world.train_route["stations"] as Array).size())
+	per_halt.fill(0)
+	var on_ground := true
+	for b in hl.beacons:
+		per_halt[int(b["halt"])] += 1
+		on_ground = on_ground and not m.world.is_void(b["pos"].x, b["pos"].z)
+	ok(per_halt.all(func(n): return n > 0), "a beacon at each of %d halts %s" % [per_halt.size(), str(per_halt)])
+	ok(on_ground, "every beacon stands on pier ground")
+	var meshes := hl.get_child_count()
+	ok(meshes <= 6, "the %d posts are merged into %d meshes" % [hl.beacons.size(), meshes])
+	var lite := TrainHalts.new()
+	lite.setup(st, true)
+	var kept := lite.beacons.size() == hl.beacons.size() and lite.glow_nodes.is_empty()
+	ok(kept and not hl.glow_nodes.is_empty(), "Low keeps the beacons and drops the glow")
+	lite.free()
+	P.teleport(m.world.random_ground())
+	_set_time(m, _leg_time(st, 1, 0.0) - st.dwell + 0.5)
+	for i in 90: m.step(Match.DT)
+	var lit: Array = hl.glow_nodes.filter(func(g): return g.visible)
+	var car: Vector3 = (st.cur[1] as Transform3D).origin
+	var by_train := lit.all(func(g): return (g.position - car).length() < 14.0)
+	var stopped := st.head_v < 0.3 and hl.glow > 0.95 and not lit.is_empty()
+	ok(stopped, "stopped at halt %d: the pier glow is on (%.2f)" % [hl.halt, hl.glow])
+	ok(hl.halt >= 0 and by_train, "and it sits at the pier the train is at")
+	_set_time(m, _leg_time(st, 1, 0.5))
+	for i in 150: m.step(Match.DT)
+	lit = hl.glow_nodes.filter(func(g): return g.visible)
+	var off := st.head_v > 3.0 and hl.glow < 0.02 and lit.is_empty()
+	ok(off, "moving (%.1f m/s): the pier glow is off (%.2f)" % [st.head_v, hl.glow])
+	ok(st.lamp.trail_node.visible, "moving: the headlight trail shows")
+	_set_time(m, _leg_time(st, 2 % st.legs.size(), 0.0) - st.dwell + 0.5)
+	for i in 60: m.step(Match.DT)
+	ok(st.head_v < 0.3 and not st.lamp.trail_node.visible, "standing: no trail")
