@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -1063,7 +1063,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 7,
+"long_line": 6,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {

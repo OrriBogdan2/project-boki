@@ -505,7 +505,7 @@ involved, plus a softer 50% version for the kin owner.
 | T2 | a hit ≥ 8%, or push/pull ≥ 8 m/s, or a reflect returning | 35ms melee / 0 ranged | 45ms | 3 |
 | T3 | CC landing (stun, root, hook yank, swap, lift), or ≥ 15% | 50ms melee / 0 ranged | 65ms | 4 |
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
-| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms + 0.2s slow-mo at ×0.35 (offline only, existing `_reward_moment`) | — | 6 |
+| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms + 0.2s slow-mo at ×0.35 (offline only, `Juice.knock_landed`) | — | 6 |
 
 Rules:
 
@@ -514,6 +514,11 @@ Rules:
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
 - Cap: 110ms in any 0.5s per player.
+- **The knock moment** (`Juice.knock_landed`, the same beat on every knock, no chance in it): you knock a
+  rival, so the fight freezes 0.07 s, then runs 0.22 s at ×0.35 with a white screen flash, and your dash
+  is already back (`DashReset.takedown` runs first, so its cue and the Shift pop land in the beat). You get
+  knocked: 0.55 s at ×0.3 and a red flash. Online the clock can't slow, so only the flash and effects play.
+  `--kill-reset-check` (a), (b), (m) hold it; `--knock-moment-reel` records it.
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
 

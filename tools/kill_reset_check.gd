@@ -58,10 +58,12 @@ func run(main: Node) -> void:
 			and is_equal_approx(m.slow_k, Juice.KNOCK_SLOW_K), "(a) the knock moment: freeze then slow-mo (%s)" % str(beat))
 	ok(m.hud == null or (m.hud.flash_t == 1.0 and m.hud.flash_col == Color(Color.WHITE, Juice.KNOCK_FLASH)),
 			"(a) and a white screen flash")
-	ok(P.dashes >= P.max_dashes() - 0.001 and P.max_dashes() >= 1.0, "(a) the knock brings back every dash charge (%.2f / %.2f)" % [P.dashes, P.max_dashes()])
+	ok(P.dashes >= P.max_dashes() - 0.001 and P.max_dashes() >= 1.0,
+			"(a) the knock brings back every dash charge (%.2f / %.2f)" % [P.dashes, P.max_dashes()])
 	ok(P.ex_cd == 0.0, "(a) the long-dash cooldown is cleared")
 	ok(absf(P.hp - (100.0 + 200.0 * DashReset.HEAL)) < 0.01, "(a) +5%% of max health (%.1f, want 110)" % P.hp)
-	ok(cues.size() == 1 and cues[0][0] == P and cues[0][1] == "takedown", "(a) the reset cue event fired once for the local hunter (%d)" % cues.size())
+	ok(cues.size() == 1 and cues[0][0] == P and cues[0][1] == "takedown",
+			"(a) the reset cue event fired once for the local hunter (%d)" % cues.size())
 
 	# (b) the heal never passes max health
 	P.hp = P.max_hp - 3.0
