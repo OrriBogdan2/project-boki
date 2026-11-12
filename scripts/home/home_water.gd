@@ -4,10 +4,10 @@ extends RefCounted
 ## (you wade, slower); the middle is deep (you swim: sunk to the shoulders, slower still, tipped into
 ## a stroke while you move, no dash, no tools; Space kicks you up out of the water). Going in splashes, a dash
 ## through the shallows sprays and running leaves a wake (WaterFx), swimming plays strokes and ripples, climbing
-## out drips; a Boki paddles low in it. Water is never void.
+## out drips. Water is never void.
 ##
-## home.gd calls: depth(x, z) each step, step(...) with it, speed_mul(...), drop_y(), tilt(...) and
-## paddle(...) for a Boki; home_gather.gd asks swimming.
+## home.gd calls: depth(x, z) each step, step(...) with it, speed_mul(...), drop_y() and tilt(...) for a hunter;
+## home_gather.gd asks swimming. Boki in the water are BokiWade's.
 
 const WADE_SPEED := 0.68     # walk-speed multiplier in the shallow edge
 const SWIM_SPEED := 0.5      # walk-speed multiplier in the deep middle
@@ -104,18 +104,3 @@ func breach(jump_v: float) -> float:
 		h.fx.burst(at + Vector3(0, 0.3, 0), Color("e8f7ff"), 18, 3.6, 0.55, 12.0, 1.0, Vector3.UP, 40.0)
 		h.fx.ring(at, 1.1, Color(0.85, 0.95, 1.0, 0.8), 0.45)
 	return jump_v * BREACH_V
-
-## A Boki in the pond: low in the water, bobbing, a ripple now and then; a splash going in.
-func paddle(kd: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:
-	var kw := depth(pos.x, pos.z)
-	if kw > 0:
-		n.position.y -= (0.12 if kw == 1 else 0.3) - sin(float(kd["hop"]) * 0.7) * 0.03
-		kd["swim_t"] = float(kd.get("swim_t", 0.0)) - d
-		if float(kd["swim_t"]) <= 0.0 and h.fx:
-			kd["swim_t"] = 0.9
-			h.fx.ring(pos + Vector3(0, 0.08, 0), 0.4, Color(0.85, 0.95, 1.0, 0.45), 0.5)
-		if not kd.get("wet", false):
-			kd["wet"] = true
-			Sfx.play("splash", pos, -18.0, 0.1, 1.4)
-	elif kd.get("wet", false):
-		kd.erase("wet")
