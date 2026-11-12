@@ -4346,8 +4346,8 @@ func _update_interact(dt: float) -> void:
 					h.set_meta("loot_hold", true)
 					var b0: Dictionary = best["box"]
 					if hud.loot_is(b0):
-						var got := LootFull.smart(self, h, b0)
-						if b0["empty"] or got > 0: hud.close_loot()
+						LootFull.smart(self, h, b0)
+						hud.close_loot()      # the second press always leaves the window, even with nothing taken
 					else:
 						hud.open_loot(b0)
 			"boxrev":
