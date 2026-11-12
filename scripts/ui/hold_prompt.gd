@@ -51,7 +51,7 @@ static func row(c: CanvasItem, center: Vector2, label: String, fill: float, col:
 	if not is_hold(label):
 		return false
 	var parts := label.split(" ", true, 2)
-	var key: String = parts[1] if parts.size() > 1 else "?"
+	var key: String = (parts[1] if parts.size() > 1 else "?").trim_suffix(":")  # "Hold F: leave now"
 	var rest: String = parts[2] if parts.size() > 2 else ""
 	var f := HudStyle.BODY
 	var hw := f.get_string_size("Hold", HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_FS).x
