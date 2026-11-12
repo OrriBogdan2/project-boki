@@ -52,7 +52,7 @@ const T := {
 	"dash_curve_juggernaut_peak_k":   ["~", [1.6, 1.8], "x", "[footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73)"],
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
-	"dash_curve_bulwark_peak_u":      ["~", [0.28, 1.0], "", "[footage] Oath's Smash is at its top 0.05s in and holds it to 0.17s"],
+	"dash_curve_bulwark_peak_u":      ["~", [0.28, 1.0], "", "[footage] Oath's Smash tops out 0.05s in, held to 0.17s"],
 	"dash_curve_bulwark_peak_k":      ["~", [1.05, 1.25], "x", "[footage] Oath 19.9 m/s, mean 17.2 (fit 1.16)"],
 	"dash_curve_tender_peak_u":       ["~", [0.08, 0.22], "", "[footage] Elluna's air glide peaks 0.15s into 1.1s"],
 	"dash_curve_tender_peak_k":       ["~", [1.3, 1.55], "x", "[footage] Elluna peak 19.5 m/s, mean 13.4 (fit 1.45)"],
