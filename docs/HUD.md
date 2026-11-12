@@ -109,6 +109,8 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
   toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
   2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
   --shots-dir=<dir>` takes the same screens with a real renderer.
+  HUD size shots (1280x720, GPU via jobq, `--hud-scale=0.8/1.0/1.3`): `docs/shots/hud-size/s80`, `s100`, `s130`
+  (`_hud` = drop map over the match HUD, `_drop`, `_farm`).
 - The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
   eight states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
   uplink far off (edge marker), the last way out (alive, and dead with the "Ways out left" line), the Gate prompt,
