@@ -55,7 +55,11 @@ func _film(main: Node, id: String, st: String, out: String, tag: String) -> void
 	var ck := 1.0 if st.begins_with("crouch") else 0.0
 	var top := float(HunterMove.of(id)["speed"])
 	var walk := float(WardenClips.data(WardenGlb.art(id))["loco"].get("walk_speed", 2.2))
-	var spd := top * CHECK.CROUCH_K if ck > 0.0 else (walk + top) / 2.0 if st == "run" else walk
+	var spd := walk
+	if ck > 0.0:
+		spd = top * CHECK.CROUCH_K
+	elif st == "run":
+		spd = (walk + top) / 2.0     # (as --loco-dir-check's run: halfway to full stick)
 	var copies: Array = []     # [model, HunterAnim, sync, velocity, floor material]
 	var gap := CELL
 	for i in ORDER.size():

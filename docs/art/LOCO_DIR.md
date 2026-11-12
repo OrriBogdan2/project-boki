@@ -82,22 +82,27 @@ at in the steady loop). PLANT fails a cell whose first foot down lands over 2 fr
 - **Before -> after,** 176 start cells: first plant on its key 161 -> 166; first-pose gap mean 24.6 % -> 21.3 %,
   worst 49 % -> 39 %; starts over the snap bar 13 -> 7 (all snaps 22 -> 17); `--loco-dir-check` known cells 30 -> 35
   with PLANT new (9 cells left the list, 14 joined: 10 PLANT, 4 SNAP). Video: `~/meshy/anim-loco-starts/`.
+- **The way he goes (ext/anim-loco-snap-startstop):** the rings' direction rode a spring from the last way he went,
+  also from idle, so a start to the right after a stop going forward swept the rings forward-right-right over the
+  first 0.2 s: the clips of three directions blended while the idle faded out, and a run arm that swings hard (Grimble's
+  hook arm, 58 deg in two frames in run_fr) popped as the weights crossed. Grimble's "bone layer after the tree" was
+  this (the gait, turn and free-arm layers off changed nothing). From idle (no ring showing) the rings now take the
+  way he goes at once, as they already did with the ring weight at zero. Left known: 30 cells of 616 (was 35):
+  Grimble run/sprint/strafe r, Albert run r, Kael walk bl, Vex walk f/fl gone; Albert aim_walk bl and Sable walk r
+  in (the new first pose is another stride phase: Albert's walk_bl has a 57 deg shin key step at 0.52 s that a start
+  now lands on, Sable's first foot comes down 3 frames late). Per-direction start phases and a phase summed over all
+  eight loops were tried: 14 and 14 new fails (the PLANT test reads the forward loop's key), not kept.
+- **Stops:** not in this pass. `ext/anim-stop-on-stride` (READY, WardenStride) owns the run stop; Albert's crouch stops
+  (hand.R) are his half-turn rest below.
 
 ## Left (docs/DEBT.md)
 - Starts still off (tools/loco_dir_known.txt): PLANT Albert walk fr/r/b/bl (-4..-9 frames), Vex walk f/fl (-9: her
   first swing never clears half its height, so the next foot is the first plant read), Sable run fr/fl (+4..6), Kael
-  walk bl / run b (no plant read in 1 s). SNAP Grimble sprint r / strafe r: a bone layer after the tree throws his
-  left hand 0.14 m in the frame his speed tops out (the walk_r and run_r clips are smooth there; the same pop was his
-  known run r start before); Albert run r: a one-frame heel spike at 23 % ring weight (his half-turn rest, below);
-  Albert run bl stop: the stop now lands on another phase (the stop is ext/anim-stop-start's).
+  walk bl / run b (no plant read in 1 s). SNAP Albert walk bl / aim_walk bl start (a toe spike on his walk_bl shin key
+  step, above), run bl stop (the stop is ext/anim-stop-on-stride's), walk br / aim_walk br stop.
 - Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
   copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
   Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
   flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
-- Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
-  rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
-  steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,
-  but turned Albert's arms with their legs in `--anim-audit` (his walk loop holds two strides): it needs each ring's
-  strides per loop in the data first.
 - Vex's rebuilt run_f has a shorter stance than the old one, so its kept arm keys swung with the legs; `arm_swing`
   now drives both arms off the legs (0.5 each), as it did her right one.
