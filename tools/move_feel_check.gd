@@ -54,6 +54,10 @@ const T := {
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
+	# Flue Flight: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Flue Flight lift-off"
+	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
+	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
+	"flue_turn_deg_s":         ["~", [85.0, 95.0], "deg/s", "[footage] peaks ~85-100 deg/s (cast 1: 52-67)"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
@@ -231,6 +235,7 @@ func run(main: Node) -> void:
 	_dash_curves()
 	_plain_dash()
 	_kit_dashes()
+	_flue_flight()
 	_abyss_updraft()
 	_feather()
 	_ledge()
@@ -782,6 +787,37 @@ func _felt_dash(air: bool) -> Array:
 			var end := Vector2(P.pos.x, P.pos.z) - _hv(P) * (DT - left)
 			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
+
+## Cinder's Flue Flight (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
+## ring, rising to her low hover, before the flight moves; then, the cursor swung a right angle, the heading turns
+## at its capped rate.
+func _flue_flight() -> void:
+	var was := [P.cls, P.arch, P.lvl]
+	P.reclass(Arch.weight("ashwick"), "ashwick")
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
+	_reset(flat)
+	var jet: AshwickJet = (P.ak as AshwickKit).jet
+	P.ak.cd["x"] = 0.0
+	P.inp["aim"] = flat + Vector3(10, 0.9, 0)
+	HunterKeys.ult_pressed(P)
+	var hold := -1.0
+	var top := 0.0
+	for i in 30:
+		m.step(DT)
+		if hold < 0.0 and Vector2(P.pos.x - flat.x, P.pos.z - flat.z).length() > 0.05:
+			hold = i * DT          # this step moved her: she hung for the steps before it
+			top = P.pos.y - flat.y
+	rec("flue_lift_hold_s", hold)
+	rec("flue_hover_m", top)
+	var d0: Vector2 = jet.flight["dir"]
+	var n := 12
+	for i in n:
+		P.inp["aim"] = P.pos + Vector3(0, 0.9, 10)
+		m.step(DT)
+	rec("flue_turn_deg_s", rad_to_deg(absf(d0.angle_to(jet.flight["dir"]))) / (n * DT))
+	jet.recast()
+	P.lvl = was[2]
+	P.reclass(was[0], was[1])
 
 ## Tarek's Rock Hop is an arc off a rock: its reach and flight as the hop reads them.
 func _dolm_hop() -> Array:
