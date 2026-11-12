@@ -18,6 +18,10 @@ static func rules() -> Dictionary:
 	return Content.rules("garden_visitor")
 
 ## The wild Boki here now ({} for none).
+## The chance a look brings a visitor in the zone you are in (higher with a Wild welcome, DecorComfort).
+static func chance() -> float:
+	return float(rules()["chance"]) * DecorComfort.value("wild", "visit", 1.0)
+
 static func rec() -> Dictionary:
 	return Save.d.get("visitor", {}).get("rec", {})
 
@@ -105,7 +109,7 @@ static func _look(h, dt: float, now: float) -> void:
 	if _look_t < float(rules()["check_s"]) or now < float(Save.d.get("visitor", {}).get("next", 0.0)):
 		return
 	_look_t = 0.0
-	if _rng.randf() >= float(rules()["chance"]):
+	if _rng.randf() >= chance():
 		return
 	var zone := GardenZones.current()
 	var sp := pick(zone, h.toys.toys().map(func(t): return t["id"]))

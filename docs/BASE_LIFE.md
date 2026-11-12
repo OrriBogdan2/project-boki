@@ -77,3 +77,13 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+
+## Decor with a purpose (comfort tags)
+Every decoration in the build catalog has one comfort tag (`HomeLayout.CATALOG` `"comfort"`: cosy, bright, wild,
+quiet). A zone holding three of one tag (`content/rules/decor_comfort.json` `need`) gets that tag's named effect,
+shown in gold on its Waystone card (`ZoneCards.open_lines`). `DecorComfort` counts and caches the tags; each effect
+is one number read where it acts: Snug naps (cosy) restore joy while napping (`BaseLife._nap_tick`), Sunny patch
+(bright) ripens the snack patch faster (`SnackPatch.grow_secs`), Wild welcome (wild) raises the visitor chance
+(`GardenVisitor.chance`), Calm air (quiet) lowers the squabble chance (`BaseLife._clash`). A built zone counts its
+fixed pieces; every other zone counts the save's island. No scores: an effect is on or off. Check:
+`--decor-tags-check`.
