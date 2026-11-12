@@ -2,7 +2,7 @@ extends RefCounted
 ## --shrink-zone-check: the closing zone (scripts/match/shrink_zone.gd). On the Hollow Crown each
 ## seed gives 3-5 closes, each circle inside the one before and smaller, all done before the clock
 ## runs out, round a final area with an exit in it; the same seed gives the same zone and seeds vary;
-## the docks close as the edge passes them; outside hurts (more each close, through armor), inside
+## outside hurts (more each close, through armor), inside
 ## doesn't; the islands outside the last circle fall; bots come in and stay in. Never touches the save.
 
 const SEEDS := [3, 5, 9, 12, 21, 33, 47, 58]
@@ -31,9 +31,10 @@ func run(main: Node) -> void:
 	print("SHRINKZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
-## Phases close in, nest, finish in time, end on an exit; same seed same zone; docks follow the edge.
+## Phases close in, nest, finish in time, end on an exit; same seed same zone.
 func _shape(main: Node) -> void:
 	var finals := {}
+	var picks := 0
 	for s in SEEDS:
 		var m := _match(main, s)
 		var z := m.zone
@@ -61,15 +62,12 @@ func _shape(main: Node) -> void:
 		ok(again.cs == z.cs and again.rs == z.rs and again.t0 == z.t0, "seed %d: the same seed gives the same zone" % s)
 		finals[z.exit_at] = true
 		var open_in := m.exits.of_kind("outpost").any(func(x): return _in_final(z, x["pos"]))
-		for x in m.exits.of_kind("dock"):
-			if float(x["close_at"]) < 1e8:
-				var dock := [s, x["name"], x["close_at"]]
-				ok(not _in_final(z, x["pos"]), "seed %d: %s closes (%.0f s) as the edge passes it" % dock)
-			else:
-				open_in = open_in or _in_final(z, x["pos"])
 		ok(open_in, "seed %d: an exit that stays open is in the final area" % s)
+		picks = m.exits.of_kind("outpost").size()
 		m.free()
-	ok(finals.size() >= 3, "the final area varies between matches (%d exits)" % finals.size())
+	# the 0.24.5 Hollow Crown has two outposts and no docks: the seeds must reach every one (3 when there are more)
+	var want := mini(3, picks)
+	ok(finals.size() >= want, "the final area varies between matches (%d exits of %d)" % [finals.size(), picks])
 
 ## Outside hurts (by the close's share, through armor), inside doesn't; the outer islands fall.
 func _hurt(main: Node) -> void:
