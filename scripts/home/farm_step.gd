@@ -85,7 +85,7 @@ func walk(hv: Vector2, keys: Vector2, d: float) -> Vector2:
 	if keys.length() < 0.001:
 		return HunterMove.brake(hv, 1.0, d)
 	var wish: Vector2 = keys * float(row["speed"])
-	return Loco.accel_to(hv, wish, float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
+	return HunterMove.walk(hv, wish, float(row["accel"]), 1.0, d)
 
 ## Whether `action` was pressed for this step. A press reaches exactly one step: not lost on a frame with no
 ## step (144 fps), not seen twice on a frame with two (30 fps).
