@@ -31,8 +31,8 @@ var seats: QuestSeats = null  # Limited Ways Out: the Sealed Lair and the Uplink
 
 func setup(match_node: Match) -> void:
 	m = match_node
-	if m.opts.get("training", false) or m.opts.get("duel", false):
-		return
+	if m.opts.get("training", false) or m.opts.get("duel", false) or HeartRaid.on(m.opts):
+		return      # (a raid's only way out is the Heart ring once its boss is down)
 	var tut: bool = m.opts.get("tutorial", false)
 	if Heart.enabled(m.opts): seats = QuestSeats.new(m)      # (the Heart itself is built after the exits)
 	var defs: Array = m.world.exit_defs if not m.world.exit_defs.is_empty() else _default_defs()

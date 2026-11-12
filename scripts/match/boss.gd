@@ -212,7 +212,8 @@ func sim(dt: float) -> void:
 	var inside := foes_inside()
 	if inside.is_empty():
 		empty_t += dt
-		if empty_t > 12.0:
+		# (the Heart Raid's boss holds the Heart: it never sleeps)
+		if empty_t > 12.0 and not lair.get("heart_raid", false):
 			m.lairs.reset_boss(self)
 			return
 	else:

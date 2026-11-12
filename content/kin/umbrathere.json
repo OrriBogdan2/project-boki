@@ -1,6 +1,7 @@
 {
 	"id": "umbrathere",
 	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/umbrathere.json.",
+	"only_in": "heart_raid",
 	"size": {
 		"cm": 60,
 		"kg": 30.0,
