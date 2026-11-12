@@ -119,6 +119,7 @@ No global CC immunity or diminishing returns; only items grant immunity [patch].
 - **Heat rises** from gliding, from taking damage while gliding, and inside abyss storm clouds.
 - **Overheat from normal gliding:** slower glide + damage over time + spikeable.
 - **Damage that pushes heat to 100%:** instant spike.
+- **A dunk** (a hit that slams you down) spikes a glider at any heat; stuns, knock-ups and knockbacks only heat it through their damage (ours: GlideSpike, decision 0022).
 - **Heat drops** from touching ground, flying through **wind rings**, and **spiking someone**.
 - Monsters can't spike.
 - Glide Boots give +40% heat capacity.
