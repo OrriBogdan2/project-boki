@@ -109,9 +109,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	await _flinch(id)     # (before the carry: the flinch pairs of Ostra drift with the frames already run)
 	await _carry(id, m, sync, clips, dd)
 	m.free()
-	await _flinch(id)
 
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
