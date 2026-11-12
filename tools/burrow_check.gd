@@ -20,7 +20,7 @@ func _kin(sp: String, nm: String, lvl: int) -> Dictionary:
 ## The record with the sleep markers taken off, to compare before and after a swap.
 func _core(rec: Dictionary) -> Dictionary:
 	var c: Dictionary = rec.duplicate(true)
-	for key in ["boxed", "box_slot", "needs_t", "needs"]: c.erase(key)
+	for key in ["boxed", "box_slot", "needs_t", "needs", "zone"]: c.erase(key)
 	return c
 
 func _walk(h: Node, secs: float) -> void:
