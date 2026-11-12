@@ -6,7 +6,6 @@ extends RefCounted
 
 var bad := 0
 const BAND := Vector2(0.85, 1.15)
-const SHOT_LIFE := 0.2      # s: 8 m at 40 m/s, 4 m before to 4 m past the hunter, inside the flattened patch
 
 func ok(cond: bool, what: String) -> void:
 	print("HBCHECK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -28,20 +27,18 @@ func _flatten(m: Match, h: Hunter) -> void:
 			for d in [W.stairs, W.walls, W.props, W.bush]:
 				d.erase(i)
 
-## Fires one level bullet (radius `rad`) along +x, `side` metres off h's centre and `up` metres over its
-## feet; true if it hit h.
-func _fire(m: Match, shooter: Hunter, h: Hunter, side: float, rad := 0.1, up := 0.95) -> bool:
+## Fires one level bullet (radius 0.1) along +x, `side` metres off h's centre; true if it hit h.
+func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
 	h.hp = h.max_hp
-	h.armor = h.max_armor
-	var y := h.pos.y + up
-	m.spawn_shot(shooter, Vector3(h.pos.x - 4.0, y, h.pos.z + side), Vector2(40.0, 0), 5.0, SHOT_LIFE, rad, Color.WHITE)
+	var y := h.pos.y + 0.95
+	m.spawn_shot(shooter, Vector3(h.pos.x - 4.0, y, h.pos.z + side), Vector2(40.0, 0), 5.0, 0.4, 0.1, Color.WHITE)
 	for i in 30:
 		h.teleport(h.pos)
 		h.vel = Vector3.ZERO
 		m.step(Match.DT)
 		if m.shots.is_empty(): break
 	m.shots.clear()
-	return h.hp < h.max_hp or h.armor < h.max_armor      # (armor takes a hit first)
+	return h.hp < h.max_hp
 
 func run(main: Node) -> void:
 	Save.no_write = true

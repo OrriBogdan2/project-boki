@@ -297,7 +297,7 @@ func _draw_all() -> void:
 		_draw_overhead(p)
 		_draw_glider_heat(p)
 	if p:
-		dmg_dir.draw(c, m, sz)
+		_draw_hurt_dirs(sz)
 		if not p.riding:
 			_draw_kit(sz, p)
 		elif not map_open():
@@ -975,7 +975,17 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
-var dmg_dir := DamageDir.new()
+var hurt_dirs: Array = []  # {ang, t}
+
+func hurt_from(at: Vector3) -> void:
+	var p := m.player
+	if p == null:
+		return
+	var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
+	if d.length() < 0.3:
+		return
+	hurt_dirs.append({"ang": atan2(d.y, d.x), "t": 0.0})
+	if hurt_dirs.size() > 6: hurt_dirs.pop_front()
 
 ## A less urgent message: it waits behind the others, and goes if it waits too long.
 func toast_small(text: String, col: Color) -> void:
@@ -1015,7 +1025,9 @@ func _hud_tick(delta: float) -> void:
 		guide_hidden = not guide_hidden
 	_h_down = hd
 	HudSlot.decay(self, delta)
-	dmg_dir.tick(delta)
+	for h in hurt_dirs.duplicate():
+		h["t"] = float(h["t"]) + delta
+		if float(h["t"]) > 1.2: hurt_dirs.erase(h)
 
 ## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
 const HUD_PORTRAIT := Vector2(112, 132)
@@ -1024,12 +1036,15 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
-## A level just went up (Hunter.gain_xp): the badge pops, the screen washes gold and the lane names
-## the skill point to rank an ability with (the growth itself is quiet, LevelGrowth).
-func level_up(lv: int) -> void:
-	lvl_pop = 0.35
-	flash(Color("ffd27a"), 0.16)
-	msgs.push("LEVEL %d  ·  +1 skill point" % lv, Color("ffd27a"), MsgLane.HIGH)
+## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
+## weapon's step on even levels, which also get a gold wash).
+func level_up(lv: int, info := {}) -> void:
+	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
+	var line := "LEVEL %d  ·  +1 skill point" % lv
+	if lv % 2 == 0:
+		flash(Color("ffd27a"), 0.16)
+		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
+	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1142,7 +1157,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
-	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), float(info.get("charge_f", info["charges"])) if int(info["max_charges"]) > 1 else -1.0, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
+	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), int(info["charges"]) if int(info["max_charges"]) > 1 else -1, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
 	if info.get("full", false) and int(p.slot_lv["sec"]) > 0:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1192,7 +1207,7 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
+func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
 	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
@@ -1227,9 +1242,9 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
-		"reviving": st = "reviving you!"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
-	if k.state in ["active", "downed", "reviving", "fused", "returning"] or not k.giant.is_empty():
+	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
 		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
@@ -1501,9 +1516,21 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var side := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
 		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
-		if String(st[0]) == "WISP": lbl = "%s DOWN %dm" % [h.pname.substr(0, 10), dist]
+		if String(st[0]) == "WISP": DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ALLY, m.time, 10.0)
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
 		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
+
+## Red arcs around the middle of the screen pointing at whoever just hit you.
+func _draw_hurt_dirs(sz: Vector2) -> void:
+	var ctr := sz * 0.5
+	for h in hurt_dirs:
+		var a := clampf(1.0 - float(h["t"]) / 1.2, 0.0, 1.0)
+		var ang: float = h["ang"]
+		var rad := minf(sz.x, sz.y) * 0.22
+		c.draw_arc(ctr, rad, ang - 0.32, ang + 0.32, 18, Color(1.0, 0.25, 0.2, 0.75 * a), 7.0, true)
+		var tip := ctr + Vector2(cos(ang), sin(ang)) * (rad + 12.0)
+		var nrm := Vector2(-sin(ang), cos(ang))
+		c.draw_colored_polygon(PackedVector2Array([tip, tip - Vector2(cos(ang), sin(ang)) * 12.0 + nrm * 9.0, tip - Vector2(cos(ang), sin(ang)) * 12.0 - nrm * 9.0]), Color(1.0, 0.25, 0.2, 0.8 * a))
 
 ## Aboard the skyship: when to jump.
 func _draw_ship_prompt(sz: Vector2) -> void:
@@ -1812,7 +1839,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.32 + 58), Vector2(280, 8)), p.revive, GOOD)
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%  ·  %.1fs" % [(revs[0] as Hunter).pname, int(p.revive * 100.0), Life.revive_secs(p)], 15, GOOD, big)
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -1994,7 +2021,8 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(p.ak.res_col(), 0.9), 12])
+		var rd := p.ak.res_def()
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 

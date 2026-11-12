@@ -126,7 +126,7 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 func _lands(p: Vector3, g: float) -> bool:
 	var asking := StoneStand.mover
 	StoneStand.mover = h
-	var fits: bool = m.world.occupy(p.x, p.z, h.hull_r(), maxf(g, h.pos.y), false) == 0.0
+	var fits: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
 	StoneStand.mover = asking
 	return fits
 

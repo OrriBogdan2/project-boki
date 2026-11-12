@@ -100,15 +100,6 @@ w("- **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries mel
 w("- **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).")
 w("- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).")
 w("- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).\n")
-w("## Blockers and crossers\n")
-w("One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Abyssal Hand (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).\n")
-bl = j("content/rules/blockers.json")
-kinds = ["shield", "rock", "ice", "wall", "guard"]
-w("| Crosser | Class | " + " | ".join(kinds) + " |\n|---|---|" + "---|" * len(kinds))
-for cid, c in bl["crossers"].items():
-    row = bl["classes"][c["class"]]
-    w(f"| {c['what']} | {c['class']} | " + " | ".join("-" if row[k] == "na" else row[k] for k in kinds) + " |")
-w("")
 w("## Readability\n")
 w("- Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).")
 w("- Enemy area casts get a 0.32s filling ground marker before they land; leaps show their landing circle to everyone; fissures show their lane filling.")

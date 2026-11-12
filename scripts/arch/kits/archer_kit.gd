@@ -220,10 +220,6 @@ func rmb_hold_tick(t: float) -> void:
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
-## [est] down_hp a rival Wisp loses per point of Hail Wall tick damage. The source drain is unknown; this is the
-## same multiplier a stomp puts on the bleed (Life.R stomp_mult), so a wall tick (5) takes 12.5 of the 100 pool.
-const WISP_DRAIN_K := 2.5
-
 ## The Heavy Shot held: a thick orchid bar out of the bow that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player). Reaching full flashes the bow and
 ## plays the taut-thread cue once.
@@ -309,9 +305,8 @@ func _pin(a: Vector3, k: float) -> void:
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
-		if KnockWall.behind(m, f, dir, float(pd["wall"])):
+		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
@@ -321,7 +316,6 @@ func _pin(a: Vector3, k: float) -> void:
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
-					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
@@ -329,6 +323,16 @@ func _pin(a: Vector3, k: float) -> void:
 	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
+
+func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
+	var g0: float = f.pos.y
+	var k := 0.4
+	while k <= reach:
+		var q := f.pos + Vector3(dir.x, 0, dir.y) * k
+		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > g0 + 0.8:
+			return true
+		k += 0.3
+	return false
 
 # ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at
@@ -338,9 +342,8 @@ func _pin(a: Vector3, k: float) -> void:
 func in_e() -> bool:
 	return not rain.is_empty()
 
-## The Hail Wall's arc; rank 3 (the source's tier IV) widens it by "deg_r3_k".
-func arc_deg() -> float:
-	return float(e_def()["deg"]) * (float(e_def()["deg_r3_k"]) if rank("kin") >= 3 else 1.0)
+func _arc_deg() -> float:
+	return float(e_def().get("deg", 120.0)) * (1.3 if rank("kin") >= 3 else 1.0)
 
 func cast_e() -> bool:
 	var ed := e_def()
@@ -350,9 +353,9 @@ func cast_e() -> bool:
 	var tell := float(ed["tell"])
 	var center := h.pos
 	# the arrows go up first (everyone sees the arc), then the rain starts
-	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed)})
+	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": _arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed)})
 	for i in 5:
-		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(arc_deg()) * 0.4
+		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(_arc_deg()) * 0.4
 		var dv := d.rotated(u)
 		# (cosmetic: small and orchid so the five don't stack into one white blob at the bow; PinFx.lob draws
 		# the arrows going up)
@@ -368,7 +371,7 @@ func cast_e() -> bool:
 
 func _in_rain(f: Ent) -> bool:
 	var ed := e_def()
-	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), arc_deg(), float(ed["width"]), f.pos, f.r) and absf(f.pos.y - (rain["c"] as Vector3).y) < 2.5
+	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]), f.pos, f.r) and absf(f.pos.y - (rain["c"] as Vector3).y) < 2.5
 
 func _tick_rain(dt: float) -> void:
 	var ed := e_def()
@@ -380,14 +383,14 @@ func _tick_rain(dt: float) -> void:
 	if float(rain["start"]) > 0.0:
 		rain["start"] = float(rain["start"]) - dt
 		if float(rain["start"]) <= 0.0:
-			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), arc_deg(), float(rain["t"]))
+			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(rain["t"]))
 			m.sfx("pin_rain", rain["c"], -3.0)
 		return
 	rain["patter"] = float(rain["patter"]) - dt
 	if float(rain["patter"]) <= 0.0:
 		rain["patter"] = randf_range(0.08, 0.14)
 		m.sfx("pin_patter", rain["c"], -12.0, randf_range(0.85, 1.25))
-	HeroVfx.of(m).hold(h, "rain", 0.0, {"at": rain["center"], "radius": rain["radius"], "deg": arc_deg(),
+	HeroVfx.of(m).hold(h, "rain", 0.0, {"at": rain["center"], "radius": rain["radius"], "deg": _arc_deg(),
 			"dir_x": (rain["d"] as Vector2).x, "dir_y": (rain["d"] as Vector2).y})
 	var inside: Array = []
 	for f in m.foes_of(h.team):
@@ -402,9 +405,6 @@ func _tick_rain(dt: float) -> void:
 	for f in inside:
 		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
-	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
-		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
-			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

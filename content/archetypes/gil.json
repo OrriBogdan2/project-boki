@@ -7,7 +7,7 @@
 	"weight": "light",
 	"color": "#4aa8ff",
 	"plate_offset": 2.1,
-	"body": {"size": 1.0, "head": 0.71, "legs": 1.03, "torso": 1.0, "shoulder": 1.14, "arms": 0.92, "hit_r": 0.375, "hit_h": 1.375, "body_r": 0.38},
+	"body": {"size": 1.0, "head": 0.71, "legs": 1.03, "torso": 1.0, "shoulder": 1.14, "arms": 0.92, "hit_r": 0.38},
 	"fantasy": "The fish out of water. Fences with a swordfish, throws whatever bottle comes out of the bag, and chains crowd control until a foe is Beached.",
 	"silhouette": "the floppy polka-dot wizard hat, the swordfish rapier and the potion bag on his hip",
 	"clip": {"lines": {"dash": "Dive into the ground and swim.", "lmb": "Three rapier thrusts, stepping in.", "rmb": "Throw the next potion from the bag.", "e": "Spin, then send a waterspout.", "x": "Surf a tidal wave down a line."}},
@@ -53,13 +53,5 @@
 	"rank2": {"sec": "Rank 2: cooldown 5s -> 4.5s per charge, damage +15%.", "dash": "Rank 2: cooldown 8s -> 7s, surfacing radius +0.3m.", "kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%."},
 	"rank3": {"sec": "the next two potions in the bag show", "dash": "surfacing also slows 30% for 1s", "kin": "the spout pulls foes to its line"},
 	"rank_next": {"sec": "Rank 3: cooldown 5s -> 4s, damage +30%.", "dash": "Rank 3: cooldown 8s -> 6s.", "kin": "Rank 3: cooldown 12s -> 9.6s, damage +30%."},
-	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"},
-	"src": {
-		"lmb": "[?] ours (Gil is our own Hunter: no source kit; his numbers are the line's, not yet checked against a sheet)",
-		"rmb": "[?] ours (Gil is our own Hunter: no source kit; his numbers are the line's, not yet checked against a sheet)",
-		"e": "[?] ours (Gil is our own Hunter: no source kit; his numbers are the line's, not yet checked against a sheet)",
-		"x": "[?] ours (Gil is our own Hunter: no source kit; his numbers are the line's, not yet checked against a sheet)",
-		"dash": "[?] ours (Gil is our own Hunter: no source kit; his numbers are the line's, not yet checked against a sheet)",
-		"passive": "[?] ours (Gil is our own Hunter: no source kit; his numbers are the line's, not yet checked against a sheet)"
-	}
+	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"}
 }

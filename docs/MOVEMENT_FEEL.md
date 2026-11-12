@@ -101,11 +101,11 @@ Nothing here comes from SUPERVIVE's files.
 | dive_swoop_speed (let go of Ctrl high up) | n/a | <= cruise | <= 6 | owner 11-08: pulling out of a dive adds no speed |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
-| drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] |
-| drop_dive_steer_t (90% of the glide speed, in the dive) | 0.783s | 1.117s | 0.9–1.3s | [game data] a quarter of the glide's force (GlideDiveXYForceMultiplier) |
+| drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
+| drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
 | drop_deploy_frames | 1 | 1 | <= 1 | |
-| drop_deploy_settle_t | 0.267s | 0.200s | <= 0.3s | [est] |
-| drop_glide_steer_t | 0.583s | 0.283s | <= 0.35s | [game data] GlideTargetXYForce 162,500 / 100 kg toward MaxGlide 5 m/s |
+| drop_deploy_settle_t | 0.267s | 0.217s | <= 0.3s | [est] |
+| drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
@@ -265,6 +265,48 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
+## Hits on the glider (`--glide-hit-check`, decision 0055; PARITY FIRST)
+
+Asked: what happens to a Hunter under the glider who is shot, knocked, stunned or pulled, and when they can open it again. Evidence read: `docs/SUPERVIVE_DATA.md` sections 4 (crowd control) and 5 (glider rules at 1.0), the 1.0 rules in `docs/KINFALL_CLASSES.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, `supervive_physics.md` (only the names `GliderHeatInboundDamageCoefficient` and `GliderFullHeatInboundDamageCoefficient`, no values), sync64 in `docs/ROADMAP.md`, and the hero-ref footage sheets. None of the footage shows a glider being hit, so the rows below come from the data.
+
+| Case | Source | Glider | Reopen | Ours (measured) |
+|---|---|---|---|---|
+| Shot, heat left | 1.0: a hit doesn't knock you out of the air, you take normal damage, it heats the glider (sync64: 3x) | stays open, extra heat | never shut | a 10 shot: 0.261 heat (`Hunter.GLIDER_HIT_HEAT`), 10 damage, still open 0.5 s later; heat then builds 2x for 1 s (`hit_heat_t`, [est]) |
+| Shot that fills the heat, or any shot on an overheated glider | 1.0: "damage that pushes heat to 100%: instant spike"; a spike is stun + plummet, 0.7 s stun over ground [wiki] | shut, plummets with the body | not in the air: on landing, after the 0.7 s stun (`glide_cd` 2.5 s [est] still runs into the next jump) | shut, -6 m/s, lands stunned 0.70 s |
+| A monster's shot | 1.0: "Monsters can't spike" | stays open, extra heat | never shut | heat stops at 2% |
+| Knocked (a shove, no stun) | 1.0: damage doesn't knock you out of the air; Knockback: "you can steer it" (you keep control) | stays open, shoved with the body | never shut | **changed:** a shove over 4 m/s used to fold it for 0.4 s. A 12 m/s knock now keeps it open and carries it 5.3 m in 0.5 s; WASD bends it as on foot (`knock_steer`); only the knock's damage heats it |
+| Stunned | Stun: "no movement, no air control, no abilities" | shut at once, falls with the body | a fresh press, the step the stun ends | shut, -4.6 m/s after 0.2 s, opens on the first press after |
+| Pulled by Grimble's arm | the target is stunned for the whole pull | shut (the stun row) | after the reel and its stun | as the stun row |
+| Pulled or pushed by any other move (Cinder's cloak, Neve's carry, Ostra's draw, Mossy's push, Sparkle's slide) | not in the data or the footage | open stays open unless the move stuns | | not changed, not asserted |
+
+Kept: holding Space never opens the glider (DECISIONS 11-08; every reopen above is a fresh press), and an overheated glider still lifts out of the abyss at half strength (`--abyss-check`, `--glider-heat-check`). A glider that is still shut waits out a hard knock (0.4 s, [est]) before it opens. Still open for the owner: the older wiki note "most hits on a glider deal double damage" (ours keeps 1.0's normal damage), and "spiking a below-ground glider" (a hit on the balloon under the lip, at any heat; ours spikes only when the heat runs out).
+
+## Knocked in the air (`--glide-hit-check` rows "ACHECK row ..."; PARITY FIRST)
+
+Asked: what a knock or a stun does to a Hunter who is gliding, in an air dash or falling, for Lace, Kael, Vex and Albert. Source: `supervive_physics.md` has only Knockback/KnockbackResist 1.0 for every hunter and Mass 100 (no knock distances, no glider-hit values: the glide and heat constructor defaults are encrypted); the hero-ref frames show no hit on a glider; `docs/SUPERVIVE_DATA.md` sections 4-5: a hit doesn't knock you out of the air, a knockback pushes you and you can steer it, a stun is "no movement, no air control, no abilities". Dash protection stays short (0.14 s i-frames, `docs/DASHES_AND_ABILITY_FEEL.md`).
+
+Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6, or Albert's full Crushing Blow, kb 13 and a 0.4 s stun; stun = 0.5 s, no push. Knock speed is kb / mass (Lace 0.85, Vex 1.0, Kael and Albert 1.35). Each cell: how far the hit carried the Hunter, measured as the x gap to the same run with no hit at the end of a 1.3 s run, and when a press opened the glider after the hit ("-" means it never shut). Hit 0.05 s in; in an air dash, on the first step its i-frames are over. Measured 2026-11-12, 60 Hz.
+
+| State | Hit | Glider | Lace | Kael | Vex | Albert |
+|---|---|---|---|---|---|---|
+| Gliding | light | stays open | 1.81 m, - | 1.30 m, - | 1.24 m, - | 1.30 m, - |
+| Gliding | heavy (Kael RMB) | stays open (main folded it 0.43 s, decision 0055) | 6.80 m, - | 3.38 m, - | 5.17 m, - | 3.38 m, - |
+| Gliding | heavy (Crushing Blow) | shut by its stun | 12.74 m, 0.43 s | 8.32 m, 0.43 s | 10.99 m, 0.43 s | 8.36 m, 0.43 s |
+| Gliding | stun | shut | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s |
+| Air dash | light | (shut) | 2.35 m, 0.20 s | 0 m, 0.03 s | 1.97 m, 0.20 s | 0 m, 0.03 s |
+| Air dash | heavy (Kael RMB) | (shut) | 5.05 m, 0.43 s | 3.44 m, 0.57 s | 2.19 m, 0.43 s | 3.09 m, 0.43 s |
+| Air dash | heavy (Crushing Blow) | (shut) | 11.10 m, 0.43 s | 8.15 m, 0.57 s | 4.57 m, 0.43 s | 7.22 m, 0.43 s |
+| Air dash | stun | (shut) | 0 m, 0.53 s | 0 m, 0.57 s | 0 m, 0.53 s | 0 m, 0.53 s |
+| Falling | light | (shut) | 1.84 m, 0.20 s | 1.33 m, 0.03 s | 1.27 m, 0.20 s | 1.33 m, 0.03 s |
+| Falling | heavy (Kael RMB) | (shut) | 6.06 m, 0.43 s | 3.42 m, 0.43 s | 5.10 m, 0.43 s | 3.42 m, 0.43 s |
+| Falling | heavy (Crushing Blow) | (shut) | 12.74 m, 0.43 s | 8.32 m, 0.43 s | 10.99 m, 0.43 s | 8.36 m, 0.43 s |
+| Falling | stun | (shut) | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s | 0 m, 0.53 s |
+
+- **Fixed (air dash):** on main a knock or a stun that landed after the i-frames did nothing to an air dash: the dash kept driving (Vex 14 m/s, Albert 20 m/s straight on), the push was 0 m and was gone when the dash ended, and a stunned Hunter dashed on. Now a knock (one of 2.5 m/s or more, the one that sets `knock_t`) or a stun ends an air Shift dash that step, as a glide press does (`HunterMove.cut_air_dash`): the push comes in at its full speed and keeps the dash's leftover momentum (why Vex's sideways carry is shorter), a stun stops the drive and the momentum coasts under air drag. A hit inside the i-frames still misses. Kael's air Rampage spends its first 0.07 s in a wind-up, so his row is a hit in the wind-up: a knock or a stun cancels the Rampage.
+- **Fixed (gliding, decision 0055, stacked):** a knock carries an open glider instead of folding it for 0.4 s.
+- **Matches, not changed:** a stun shuts the glider and a fresh press opens it the step the stun ends (0.5 s stun: 0.53 s with the press). A shut glider waits out a shove over 4 m/s for 0.4 s ([est], kept: `--abyss-check` asserts it at the rim). A lighter knock (Lace and Vex, 2.6-3.1 m/s) keeps it shut for its 0.16-0.2 s slide. A nudge under 2.5 m/s (Kael and Albert, LMB) is not a knock: it neither ends a dash nor holds the glider.
+- **Not changed:** Kael's 0.57 s reopen after an air Rampage is AirLimits (the glider stays shut while his kit move runs, items 162). Ground dashes and kit rushes (move kind "rush") still ride through a knock: not asked here, not measured. An overheated glider still lifts you out of the abyss at half strength (`--glider-heat-check`).
+
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
@@ -300,45 +342,63 @@ source number either way.
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
-## Edge knocks against the source (`--abyss-check` section 8; PARITY FIRST, decisions 2026-11-07)
 
-Asked: what the source does when a Hunter is knocked off an island. Evidence read: `supervive_physics.md` (Abyss rows), `supervive_kits.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, the hero-ref sheets (Kael, Grimble, Breah, Motley). **The source data answers almost none of it.** The footage sheets show only that an Air Slam or a dunk over the abyss ends in a KNOCK callout (juggernaut.md 0291-0292, breah.md 0989). So most rows below are [est] ours, kept as they are and measured; only the last fix changes behaviour.
+## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
-| Question | Source | Ours (measured) | Verdict |
-|---|---|---|---|
-| Glider open at once off a knock, mid-knock or after? At what heat? | Nothing published (`bAllowsMantlingFromAbyss` true; hits on a glider drain heat, wiki). | A shove over 4 m/s shuts the glider for 0.4 s (`kb_t`); the longest knock is 0.35 s, so a held glide opens 0.42 s in, after the knock. A shove of 2.5 to 4 m/s opens it mid-knock (0.12 s). Heat never gates it: an overheated glider opens the same. | [est] kept; asserted for hard knocks at 0% and 100% heat. |
-| Overheated glider out of the abyss | Owner decision: lifts at half strength while it burns. | Peak lift 6.1 vs 11.5 m/s from 7 m, 8.7 vs 16.7 from 12 m (0.53x, 0.52x); back at the lip in 1.2 to 1.6 s. | Matches; now asserted (it had no check). |
-| Ledge grab or mantle while knocked | `bAllowsMantlingFromAbyss` true; no knock rule. | A knocked Hunter catches a rim from below; only a launch over 8 m/s within 0.3 s of the knock waits, and a stun, root or a fresh knock ends a rise. | [est] kept (section 2). |
-| Kill credit after a knock-off | Not published. | The last attacker keeps the abyss kill for 4.0 s after a hard knock (`Match.on_fell`, `kb_t`), then the fall is nobody's. | [est] kept. Gap, not changed: Grimble's reel, Motley's Trade and a soft shove (under 4 m/s) never start the 4 s, so a fall after them credits nobody. Fixing it needs the tow and the swap to carry the caster over Net (`Net.VERSION`). |
-| Walking or being shoved off | Source `bCanWalkOffLedges` false; owner: always allowed. | A person is never blocked. **Fixed:** a bot's edge guard held a bot at the rim after a 2.5 to 5.8 m/s shove, so the knock-off failed on bots only. The guard now ignores a knock (`knock_t`) and 0.6 s after a hard one. | Asserted: 4.5 m/s at the rim carries player and bot over. |
-| Grimble's arm | Pierces terrain, pulls the first target, which is STUNNED all the pull; Grimble is GROUNDED. | Stun kept on the foe through the reel (so no glider), dragged over rocks and cliffs, the abyss takes it. Hover over the abyss while the arm flies is an owner ask (items 31, 75). | Matches. |
-| Kael's chain | Attaches to a foe or wall; recast pulls him about 5 bh in 0.4 s. | A dash toward the anchor: it ends over the abyss like any dash and the glider and lift take over. | Matches. |
-| Motley's Trade | Swaps a foe and Motley. | Owner override: hover-swap over the abyss. Foes land at Motley's spot, so a swap from over the abyss drops them. | Matches. |
+Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held
+into it, from the ground and from the air (hanging with the lip that far above the feet). Lace's rows are her travel dash,
+the flick: with charges her Shift is the Spirit Walk, which climbs faces by design. The terrain grid builds ground rims in
+whole 0.8 m terraces, so a ground row builds the terrace nearest its height. Columns: what happened, press to over the
+top, time lost against the same press with no rim, time stood still at the face, speed leaving the face.
 
-Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
-## The expedition drop against the source (`--drop-feel-check`; ext/drop-parity)
+**Source.** `supervive_physics.md`: the suction pulls you up at most 1.5 m (MantleSuctionUpwardsForceHeightMax; Lace
+and Kael climb taller, bCanWallJump) and the mini-mantle sets your speed over the lip to 0.6x what you came in with,
+held 0.75 s. Footage (MANTLE_185b.md, owner_mantle_clip 17.9-18.6 s): a dash at a rim is on top ~0.2 s later, still at
+dash-trail speed, no stop. No hero-ref brief has dash-into-ledge frames.
 
-Tags as in docs/KIT_PARITY.md: [D] game data (briefs/supervive-data/supervive_physics.md), [F] footage (briefs/hero-ref),
-[O] owner note, [est] ours. The hero-ref footage never shows the opening drop itself (it is cut from ability clips and
-the practice range), so the dive, the opening and the steering rest on the game data and the owner's item 163; the
-landing rows come from each Hunter's "Jump and landing" section. Measured with seed 4242, 60 Hz steps.
+**Before** (origin/main 53e2fe7f3), an air dash did catch the ledge, but the grab threw away the dash and the rise
+started from a standstill at the suction's 2.5 m/s cap: 0.37-0.60 s to the top, up to 0.20 s stood dead at the face.
+**Now** the dash hands over: what is left of it is still dropped (the mini-mantle sets the speed from the lip, 0.6x the
+dash, unchanged), but its speed, capped at the 14 m/s fastest rise, takes you up the face. Ground dashes are unchanged:
+a single terrace steps you up mid-dash, a higher face needs a jump (the walking rule). Alternative not taken: keep the
+rest of the dash and resume it on top (more than the source's 0.6x would come over).
 
-| What | Source | Ours before | Ours now | Tag | Where |
-|---|---|---|---|---|---|
-| Dive fall speed | the glider's plunge 32.5 m/s at 35 m/s² [D]; the drop: a 2-3 s rocket lock, then a long readable glide from a high start, 18-22 s to the ground [O] | 13 m/s [est], ~12 s | 5.0 m/s for the launch and the tutorial's skydive: the lock ends 57 m up, the ground comes 19.4 s after the ship | [O] | `Hunter.DIVE_FALL` |
-| Dive steering | the keys keep 0.25 of the glide's force [D] | 45 m/s² toward 14 m/s (90% in 0.23 s) | 4.06 m/s² toward 5 m/s (90% in 1.12 s) | [D] | `DropFeel.steer`, `HunterMove.dive_steer` |
-| Glider opens: when | the lock's end at 2.5 s, or Separate after 1.5 s [O]; a plunge ends 3.5 m up and the glide catches you [D] | lock 2.5 s; by itself 8 m up [est] | lock 2.5 s (unchanged); by itself 3.5 m up (3.40 measured, one step late) | [O] [D] | `DropLaunch.LOCK_S`, `Hunter.DEPLOY_H` |
-| Glider opens: how | no number: GlideStartFallSpeedMin -0.85 and the exit -0.4 m/s are thresholds, not a catch | the fall checks to 1.6 m/s, settles to the sink in 0.2 s | the same | [est] | `Hunter.DEPLOY_POP`, `DROP_VY_RATE` |
-| Glide steering | GlideTargetXYForce 162,500 / 100 kg = 16.25 m/s² toward MaxGlide 5 m/s [D]; "slower, heavier, steering has inertia" [O] | 26 m/s² toward 8 m/s, a 30 m/s² brake | 16.25 m/s² toward 5.0 m/s (90% in 0.28 s); letting go brakes with the same force (the source's braking forces are locked) | [D] | `DropFeel.steer` on `Hunter.GLIDE_ACCEL` / `GLIDE_SPEED` |
-| Sink under the canopy | high over the ground the glider is pulled down at up to 3.5 m/s [D] | 4.2 m/s [est] | 3.5 m/s | [D] | `Hunter.DROP_FALL` |
-| Flare over the last metres | none known: under 8.5 m the source holds height and the landing is the player's | 2.2 m/s over the last 4 m | the same | [est] | `DropFeel.FLARE_*` |
-| Landing recovery | a plain landing is a low crouch ~0.1 s and up in ~0.05 s, no lockout (dancer); big moves end in a ~0.4-0.5 s low crouch (bjorn, juggernaut) [F] | no lockout; a `land_t` timer that nothing read | no lockout: moving 0.03 s after touchdown; the landing clip plays 0.36-0.42 s; `land_t` deleted | [F] | `warden_anim/*.json` "land" |
-| Landing pose | a low crouch; the deepest onto the knees (juggernaut); none for a hoverer (ostra) or Linwick's jetpack set-down [F] | squash 0.45 | the same: 0.45, a low crouch | [F] | `DropFeel.LAND_SQUASH` |
+| Hunter | from | rim (m) | before | after |
+|---|---|---|---|---|
+| Lace | air | 0.6 | mantle, top 0.37s, lost 0.23s, stall 0.02s, off 10.5 m/s | mantle, top 0.20s, lost 0.08s, stall 0.00s, off 10.5 m/s |
+| Lace | air | 1.0 | mantle, top 0.53s, lost 0.40s, stall 0.17s, off 10.5 m/s | mantle, top 0.22s, lost 0.10s, stall 0.00s, off 10.5 m/s |
+| Lace | air | 1.5 | mantle, top 0.42s, lost 0.30s, stall 0.08s, off 10.5 m/s | mantle, top 0.25s, lost 0.12s, stall 0.02s, off 10.5 m/s |
+| Lace | air | 2.0 | mantle, top 0.48s, lost 0.37s, stall 0.15s, off 10.5 m/s | mantle, top 0.30s, lost 0.17s, stall 0.03s, off 10.5 m/s |
+| Kael | air | 0.6 | mantle, top 0.45s, lost 0.28s, stall 0.02s, off 16.3 m/s | mantle, top 0.25s, lost 0.08s, stall 0.00s, off 16.3 m/s |
+| Kael | air | 1.0 | mantle, top 0.60s, lost 0.43s, stall 0.10s, off 16.3 m/s | mantle, top 0.27s, lost 0.10s, stall 0.00s, off 16.3 m/s |
+| Kael | air | 1.5 | mantle, top 0.48s, lost 0.32s, stall 0.03s, off 16.3 m/s | mantle, top 0.30s, lost 0.13s, stall 0.02s, off 16.3 m/s |
+| Kael | air | 2.0 | mantle, top 0.55s, lost 0.38s, stall 0.08s, off 16.3 m/s | mantle, top 0.35s, lost 0.18s, stall 0.02s, off 16.3 m/s |
+| Vex | air | 0.6 | mantle, top 0.42s, lost 0.27s, stall 0.03s, off 8.5 m/s | mantle, top 0.25s, lost 0.08s, stall 0.00s, off 8.5 m/s |
+| Vex | air | 1.0 | mantle, top 0.57s, lost 0.40s, stall 0.20s, off 8.5 m/s | mantle, top 0.27s, lost 0.10s, stall 0.00s, off 8.5 m/s |
+| Vex | air | 1.5 | mantle, top 0.47s, lost 0.32s, stall 0.12s, off 8.5 m/s | mantle, top 0.28s, lost 0.13s, stall 0.02s, off 8.5 m/s |
+| Vex | air | 2.0 | stop (beyond reach), never tops | stop (beyond reach), never tops |
+| Albert | air | 0.6 | mantle, top 0.37s, lost 0.25s, stall 0.02s, off 12.3 m/s | mantle, top 0.20s, lost 0.08s, stall 0.00s, off 12.3 m/s |
+| Albert | air | 1.0 | mantle, top 0.53s, lost 0.42s, stall 0.17s, off 12.3 m/s | mantle, top 0.22s, lost 0.10s, stall 0.00s, off 12.3 m/s |
+| Albert | air | 1.5 | mantle, top 0.43s, lost 0.32s, stall 0.08s, off 12.3 m/s | mantle, top 0.25s, lost 0.13s, stall 0.02s, off 12.3 m/s |
+| Albert | air | 2.0 | stop (beyond reach), never tops | stop (beyond reach), never tops |
+| Lace | ground | 0.6 (0.8 built) | same | step, top 0.13s, lost 0.00s, stall 0.00s, off 17.5 m/s |
+| Lace | ground | 1.0 (0.8 built) | same | step, top 0.13s, lost 0.00s, stall 0.00s, off 17.5 m/s |
+| Lace | ground | 1.5 (1.6 built) | same | stop at the face, never tops (stall 2.22s) |
+| Lace | ground | 2.0 (2.4 built) | same | stop at the face, never tops (stall 2.22s) |
+| Kael | ground | 0.6 (0.8 built) | same | step, top 0.18s, lost 0.02s, stall 0.00s, off 23.3 m/s |
+| Kael | ground | 1.0 (0.8 built) | same | step, top 0.18s, lost 0.02s, stall 0.00s, off 23.3 m/s |
+| Kael | ground | 1.5 (1.6 built) | same | slide at the face, never tops (stall 2.25s) |
+| Kael | ground | 2.0 (2.4 built) | same | slide at the face, never tops (stall 2.25s) |
+| Vex | ground | 0.6 (0.8 built) | same | step, top 0.15s, lost 0.02s, stall 0.00s, off 15.5 m/s |
+| Vex | ground | 1.0 (0.8 built) | same | step, top 0.15s, lost 0.00s, stall 0.00s, off 15.5 m/s |
+| Vex | ground | 1.5 (1.6 built) | same | slide at the face, never tops (stall 2.10s) |
+| Vex | ground | 2.0 (2.4 built) | same | slide at the face, never tops (stall 2.10s) |
+| Albert | ground | 0.6 (0.8 built) | same | step, top 0.13s, lost 0.02s, stall 0.00s, off 20.5 m/s |
+| Albert | ground | 1.0 (0.8 built) | same | step, top 0.12s, lost 0.00s, stall 0.00s, off 20.5 m/s |
+| Albert | ground | 1.5 (1.6 built) | same | stop at the face, never tops (stall 2.30s) |
+| Albert | ground | 2.0 (2.4 built) | same | stop at the face, never tops (stall 2.30s) |
 
-Kept as built: the planning phase, the drop leader, the squad's rocket launch in formation (followers now cap against the
-leader's own speed, so the 14 m/s launch and the 5 m/s glide both hold the slots), and Separate only once the drop is
-made (ext/drop-solo-after). Open: Ostra's hover and Linwick's set-down have no crouch in the source; that is the warden
-clips' business, not the drop's.
+The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
 ## Not touched
 
