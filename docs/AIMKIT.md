@@ -151,6 +151,7 @@ AimKit.line(h, "aim")                                        # the thin aim line
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lace stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform: a long line, inward chevrons, centre ring
+AimKit.span(h, "x", {"len": 12.0, "width": 3.2})              # Basalt Spine: the line over the band it slows
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
 The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R

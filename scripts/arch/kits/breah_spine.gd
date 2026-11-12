@@ -120,10 +120,12 @@ func _erupt() -> void:
 		k.m.fx.spark(p, Vector3.UP, Color("9ad0ff"), 3, 3.0, 30.0, 0.2, 2.0, 0.8)
 	k.net_ring(center, 1.2, CRACK_COL)
 
-## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him.
+## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him, over the band the rise
+## slows (slow_r each side of the line).
 func _span_p(extra: Dictionary) -> Dictionary:
 	var side := _bow() if phase == "aim" else bow
 	extra.merge({"at": center, "dir": axis, "len": float(xd()["len"]), "bend": _bend(), "bow": side})
+	extra["width"] = float(xd()["slow_r"]) * 2.0
 	return extra
 
 func _bend() -> float: return deg_to_rad(float(xd()["bend"]))
