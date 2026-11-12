@@ -22,6 +22,7 @@ extends ArchKit
 ##   Anti-Heal (DredgeBlast).
 
 const BONE := Color("e0d4c0")          # the bone hook
+const ARM_COL := Color("8a5aff")       # the Abyssal Hand: the bruised-purple flesh of the stretched arm (the miss puff)
 const BRASS := Color("e0a040")
 const IRON := Color("3a3f48")
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim, its telegraphs and its stun
@@ -440,7 +441,6 @@ func _grab(f: Ent, ally := false) -> void:
 	# still works
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
-	fx.orb(f.pos + Vector3(0, 1.0, 0), ARM_COL, BRASS_HOT, 1.1, 0.15)
 	bite_at = m.time
 	vfx("hook_bite", f.pos + Vector3(0, 1.0, 0), h.aim_dir())
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)

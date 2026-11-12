@@ -214,6 +214,9 @@ func _belt_items(m: Match, P: Hunter) -> void:
 		if h != P and h.kin:
 			h.kin.dead = true
 			m.kins.erase(h.kin)
+		if h != P:                    # and a rival's ult or shot does the same: park them far off the user
+			h.downed = true
+			h.pos = P.pos + Vector3(300.0, 0.0, 300.0)
 	for id in BeltSfx.items():
 		var start := BeltSfx.cue(id, "start")
 		Sfx.last_played.erase(start)

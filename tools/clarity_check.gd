@@ -1,7 +1,8 @@
 extends RefCounted
 ## --clarity-check: the one colour rule and the downed picture. In a 2v2: your ring is the "you" colour,
 ## your teammate's the ally colour and both rivals' the foe colour, and every Boki's ring matches its
-## Hunter's, and a Vex telegraph or shot keeps Vex's fill with a side-coloured edge. With your teammate knocked: their bleed-out drains, their Boki rides on them as a wisp with
+## Hunter's, and a Vex telegraph or shot keeps Vex's fill with a side-coloured edge. With your teammate
+## knocked: their bleed-out drains, their Boki rides on them as a wisp with
 ## no icon (one down itself shows the knock) and only your squad's Boki get tethers. Never touches the save.
 
 const DT := 1.0 / 60.0
