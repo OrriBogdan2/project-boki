@@ -2,10 +2,12 @@ extends RefCounted
 ## --garden-whistle-check (scripts/home/base_whistle.gd): on a base_mode farm, tapping the whistle brings your
 ## partner to you, holding it also brings the nearest other Boki, and trust and mood set how it answers: a
 ## trusting one reaches you within REACH_SECS on the farm's own steering (HomeBuild.steer, no rendering), a
-## trusting one is quicker than a lukewarm one, a sulky one looks over and stays. In a match the whistle does
-## nothing (match code never reads it). Never touches the real save.
+## trusting one is quicker than a lukewarm one, a sulky one turns its head, waits a beat and walks slowly. Every
+## answer makes a 0.3-0.5 s beat (perk, turn, then run) that costs a Boki already facing you under 0.15 s. In a
+## match the whistle does nothing (match code never reads it). Never touches the real save.
 
 const DT := 0.25              # s per farm step
+const BEAT_DT := 0.02         # s per step while timing an answer beat
 const REACH_SECS := 6.0       # s a trusting Boki may take to reach you
 const FAR := Vector3(22.0, 0.0, 8.0)      # m from the landing where the called Boki start
 const CAST := ["zapple", "burrlet", "cindle"]
@@ -83,16 +85,37 @@ func _partner_run(trust: float, joy: float) -> float:
 	print("WHISTLE   %.0f m away, trust %.0f, joy %.0f: arrives in %.2f s" % [from, trust, joy, t])
 	return t
 
-func _sulky_run(trust: float, joy: float, what: String) -> void:
+## Boki 0 stands FAR away facing `yaw` (rad) off you and hears the whistle; the time (s) its answer beat lasts.
+func _beat(yaw: float) -> float:
+	_reset()
+	var k := _stand(0, FAR, 90.0, 80.0)
+	(k["node"] as Node3D).rotation.y = atan2(-(home.ppos.x - k["pos"].x), -(home.ppos.z - k["pos"].z)) + yaw
+	home.life.whistle.press()
+	home.life.whistle.release()
+	var t := 0.0
+	while t < 2.0 and k.has("answer"):
+		for o in home.kins:
+			o["t"] = 1e9
+		home._move_kin(BEAT_DT)
+		t += BEAT_DT
+	return t
+
+func _sulky_run(trust: float, joy: float, what: String, quick: float) -> void:
 	_reset()
 	var k := _stand(0, FAR, trust, joy)
 	var start: Vector3 = k["pos"]
 	home.life.whistle.press()
 	home.life.whistle.release()
-	ok(not k.has("called_t") and float(k.get("hold_t", 0.0)) > 0.0, "%s looks over and does not run" % what)
-	_until_close(k, REACH_SECS)
+	var waits: bool = k.has("called_t") and float(k.get("hold_t", 0.0)) > 0.0 and float(k["call_pace"]) < 0.5
+	ok(waits, "%s waits a beat, then walks slowly" % what)
+	home._move_kin(DT)
+	var first := Vector2(k["pos"].x - start.x, k["pos"].z - start.z).length()
+	ok(first < 0.3, "%s has not set off after %.2f s" % [what, DT])
+	var t := _until_close(k, REACH_SECS)
 	var moved := Vector2(k["pos"].x - start.x, k["pos"].z - start.z).length()
-	ok(moved < 0.5 and _dist(k) > 4.0, "%s stays put for %.0f s" % [what, REACH_SECS])
+	var slow_m := 4.4 * 0.5 * (REACH_SECS - 0.5)      # m: the farthest a slow walk (half the call run) can cover
+	ok(moved > 3.0 and moved < slow_m, "%s walks over slowly (%.1f m in %.0f s)" % [what, moved, REACH_SECS])
+	ok(t == INF or t > quick, "%s is slower than the lukewarm one (%.2f s)" % [what, quick])
 
 func _hold_run() -> void:
 	_reset()
@@ -142,8 +165,12 @@ func run(m: Node) -> void:
 	ok(trusted <= REACH_SECS, "a trusting, happy partner reaches you in %.2f s (limit %.0f s)" % [trusted, REACH_SECS])
 	var lukewarm := _partner_run(35.0, 45.0)
 	ok(lukewarm < INF and lukewarm > trusted, "a lukewarm partner still comes, slower (%.2f s)" % lukewarm)
-	_sulky_run(90.0, 10.0, "a sulky partner (joy low)")
-	_sulky_run(10.0, 80.0, "a partner that does not trust you yet")
+	var facing := _beat(0.0)
+	var behind := _beat(PI)
+	ok(facing <= 0.15, "a Boki already facing you answers in %.2f s (limit 0.15 s)" % facing)
+	ok(behind >= 0.3 and behind <= 0.5, "one facing away takes %.2f s to perk up and turn (0.3 to 0.5 s)" % behind)
+	_sulky_run(90.0, 10.0, "a sulky partner (joy low)", lukewarm)
+	_sulky_run(10.0, 80.0, "a partner that does not trust you yet", lukewarm)
 	_hold_run()
 	await _in_a_match()
 	FarmUnlocks.rules()["base_mode"] = false
