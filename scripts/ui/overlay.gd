@@ -43,6 +43,8 @@ func _ready() -> void:
 	fps_lbl.position.y = 4
 	fps_lbl.offset_right = -8
 	root.add_child(fps_lbl)
+	Social.clan_removed.connect(func(clan_name: String):
+		UI.toast(root, "You're no longer in %s: its founder or an officer removed you." % clan_name, UI.MUTED))
 
 func _process(_d: float) -> void:
 	Record.tick(get_tree(), _d)

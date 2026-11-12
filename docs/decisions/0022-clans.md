@@ -44,3 +44,12 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
   member's game sees it on its next `refresh_guild` and leaves (row deleted), and its Join refuses. A forged
   write can at worst put a name back on the roll. No save change (the rank was already in `Save.d["clan"]`),
   no Net change. Alternative not taken: a removal list in the guild doc (officers would share its writes).
+- Roles (ext/clans-roles, on slice 3 ranks): a founder who leaves hands the clan on before deleting their row:
+  `Social.successor_of` picks the longest-serving officer, else the longest-serving member (earliest `joined`
+  on the cleaned roll, removed members never; ties to the lower id), and `_crown` moves the guild doc's founder
+  field (shared with `hand_founder`). The last one out leaves the doc idle. A removed member's refresh emits
+  `Social.clan_removed(name)`; the Overlay shows it as one line on any screen (a refused Join too).
+  `--clan-roles-check` holds the rank rows (moved from `--clan-check`) plus these. Known limit: `joined` is
+  self-reported, so a member can claim the most seniority; at worst they inherit a founder who leaves.
+  Alternative not taken: every client derives a successor when the founder's row is gone (a founder whose
+  game never comes back); it trusts row absence, which any forged delete could fake.
