@@ -36,6 +36,9 @@ loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body 
 Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
 asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
+The Show Ring (`ShowRing`) sets `kact` strut (the walk clip's cycle with chin up, knees lifted, steps `STRUT_CADENCE` quicker) over
+the Bond walk, pose (`POSE_S` 1.0 s: a quad plants and lifts its head, a bird flares its wings, a legless body rises) when the
+judges look, then hop for the winner and bow (`BOW_S`) for the other when the placing is read; the same check covers all three.
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.

@@ -85,11 +85,12 @@ func _game_clips(rig: BokiRig) -> void:
 	for c in BokiHomePoses.SHOW_CLIPS:
 		var a := rig.player.get_animation(c)
 		var want := ShowRing.BOW_S if c == "bow" else ShowRing.POSE_S
+		var walk_s := rig.player.get_animation("walk").length
 		if c == "strut":
-			ok(a.loop_mode == Animation.LOOP_LINEAR and is_equal_approx(a.length, rig.player.get_animation("walk").length),
-					"strut loops over the walk")
+			ok(a.loop_mode == Animation.LOOP_LINEAR and is_equal_approx(a.length, walk_s), "strut loops over the walk")
 		else:
-			ok(is_equal_approx(a.length, want) and a.loop_mode == Animation.LOOP_NONE, "%s plays once for %.1f s" % [c, want])
+			var once := a.loop_mode == Animation.LOOP_NONE
+			ok(is_equal_approx(a.length, want) and once, "%s plays once for %.1f s" % [c, want])
 		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
 	for m in BaseTumble.rules()["moves"].values():
 		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])

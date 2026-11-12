@@ -26,7 +26,7 @@ const TWEAK := {
 const STIFF := {"cairnback": 0.6, "glomwort": 0.7, "lodestick": 0.7, "mossgrade": 0.7, "gloamshell": 0.75}
 ## Tumble's and Echo Steps' clips (BaseTumble, EchoSteps): one shot each, timed by the games' beat data.
 const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin"]
-## The Show Ring's clips (ShowRing): a proud strut that loops over the walk, a pose at the mark and a bow (one shot each).
+## The Show Ring's clips (ShowRing): a strut that loops over the walk, a pose at the mark and a bow (one shot each).
 const SHOW_CLIPS := ["strut", "pose", "bow"]
 const WING_JOINTS := ["wing1", "wing", "fwing"]
 const WING_TIPS := ["wing2", "hwing"]
