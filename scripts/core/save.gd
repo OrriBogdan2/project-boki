@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 13
+const VERSION := 14
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
@@ -16,7 +16,7 @@ const LOG_CAP := 200
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
-		11: "_migrate_11_to_12", 12: "_migrate_12_to_13"}
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -314,6 +314,10 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 	GardenZones.migrate(data)
 	for r in data.get("roster", []):
 		Care.ensure(r)
+
+## v13 -> v14: the two XP first-time lines have their "seen" flags (XpHints).
+func _migrate_13_to_14(data: Dictionary) -> void:
+	XpHints.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
