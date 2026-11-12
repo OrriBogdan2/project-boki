@@ -1,7 +1,7 @@
 class_name QuestSeats
 extends RefCounted
 ## The two quest seats of Limited Ways Out (spec section 11 task 4, docs/decisions/0051): the Sealed
-## Lair (one lair by the match seed, open 2:00 to 5:30) and the Uplink (the outpost farther from that
+## Lair (one lair fixed by the map, open 2:00 to 5:30) and the Uplink (the outpost farther from that
 ## lair, 6:00 to 8:00). One squad each, used once. Exits owns them (Exits.seats; null outside the mode,
 ## so the tutorial and endless-clock tests keep the old exits). This is the schedule; each seat is one
 ## QuestSeat state machine. Times: content/rules/heart.json "quest".
@@ -31,7 +31,7 @@ func seats() -> Array:
 	return [lair, uplink].filter(func(s): return s != null)
 
 ## Picks the two seats. On the first tick, not in Exits.setup: the lairs are built after the exits.
-## The pick is the match seed's alone (every game makes the same one): the Sealed Lair is one of all
+## The pick is the map's alone (SpawnTable.map_key: every match of the map makes the same one): the Sealed Lair is one of all
 ## the lairs (woken if the spawn plan left it asleep), the Uplink the outpost farthest from it; any
 ## other outpost stays dark.
 func build() -> void:
@@ -39,7 +39,7 @@ func build() -> void:
 		return
 	built = true
 	var rng := RandomNumberGenerator.new()
-	rng.seed = int(m.seed_val) * 31 + 977
+	rng.seed = SpawnTable.map_key(m.world) * 31 + 977
 	var at := Vector3.INF
 	if m.lairs and not m.lairs.list.is_empty():
 		var L: Dictionary = m.lairs.list[rng.randi_range(0, m.lairs.list.size() - 1)]

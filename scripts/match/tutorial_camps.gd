@@ -7,6 +7,7 @@ extends RefCounted
 ## the next pick step says (Hunter.can_level asks lets_level), until the ranks step opens them all.
 
 const PICK_LVL := {"sec": 1, "dash": 2, "kin": 3, "ult": 6}     # the level each pick step is at
+const CAMP_ANGLE := 0.8            # radians round the player where a step's camp stands (the same every time)
 
 var tu: Tutorial
 var granting := false        # the tutorial is paying XP right now (any other XP is ignored)
@@ -77,7 +78,7 @@ func spawn(sid: String) -> void:
 		return
 	ledger.clear()
 	count = kinds.size()
-	var ang := randf() * TAU
+	var ang := CAMP_ANGLE
 	for i in kinds.size():
 		var at := Vector3.INF
 		if c.get("row", false):
