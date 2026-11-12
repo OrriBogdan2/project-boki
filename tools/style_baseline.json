@@ -479,7 +479,6 @@
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
-"history_comment": 1,
 "long_line": 3,
 "semicolon": 5
 },
@@ -634,9 +633,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
+"long_line": 214,
 "nested_ternary": 19,
-"semicolon": 142,
+"semicolon": 140,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {
@@ -799,7 +798,7 @@
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 34,
+"long_line": 32,
 "nested_ternary": 4,
 "semicolon": 10,
 "shadow": 1
@@ -823,7 +822,7 @@
 "scripts/ui/hud.gd": {
 "history_comment": 2,
 "long_line": 174,
-"nested_ternary": 33,
+"nested_ternary": 32,
 "semicolon": 43,
 "shadow": 2
 },
