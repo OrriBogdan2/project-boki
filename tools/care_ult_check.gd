@@ -262,6 +262,9 @@ func rimewright() -> void:
 	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
 		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
 		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	var rink_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
+	var flash0 := float((rink_sm as ShaderMaterial).get_shader_parameter("flash"))
+	ok("tm X: the frost edge flashes as the rink opens", flash0 > 0.5, "flash %.2f" % flash0)
 	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
 		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
@@ -286,11 +289,13 @@ func rimewright() -> void:
 			float(AimKit.entry(P, "x").get("fill", 0.0)) > fill1 + 0.3)
 	# care_disc's body alpha at the centre is fill * 0.18 * 1.6; the zone rule caps it at 0.25 (docs/VFX_QUALITY.md)
 	var rink_fill := UltLook.RINK_FILL + UltLook.RINK_FILL_CRACK
-	var disc := (K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D
-	var live := float((disc.material_override as ShaderMaterial).get_shader_parameter("fill"))
+	var disc_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
+	var live := float((disc_sm as ShaderMaterial).get_shader_parameter("fill"))
+	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
 	ok("tm X: the rink is a lit rim over a soft inside, its hit ring a thin band (no screen-wide cyan)",
 			rink_fill * 0.18 * 1.6 <= 0.25 and live <= rink_fill + 0.001 and float(AimKit.entry(P, "x")["band"]) > 0.0,
 			"fill %.2f (max %.2f)" % [live, rink_fill])
+	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
 	step(m, 1.3)
 	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
