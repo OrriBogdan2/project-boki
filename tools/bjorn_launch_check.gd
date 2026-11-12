@@ -36,7 +36,6 @@ func _ready_swing(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	P.dashes = P.max_dashes()
 	P.glide_cd = 0.0
 	K.lmb_t = -1.0
-	K.hold_blocked = false
 	T.teleport(home + FAR)
 	fresh(T)
 
