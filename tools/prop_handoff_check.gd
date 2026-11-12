@@ -96,19 +96,41 @@ func _albert() -> void:
 			"%s at %.3f s" % [cp[0], float(cp[1])])
 	m.queue_free()
 
+## Grimble's hook: the hand keeps it through the coil-back (`rmb.windup`) and it goes on the step the arm's shot
+## spawns; three throws: a miss (the arm snaps back), a grab (the reel), a stun in the coil-back (it never leaves).
 func _grimble() -> void:
 	var r: Array = A.setup("dredge", 9.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var K: DredgeKit = P.ak
-	A.aim_at(P, r[4] + Vector3(0, 0, -8.0))
-	P.inp["sec_hold"] = false
+	var spawn := float(K.rmb_def()["windup"])
+	var sample := func(): return [not bool(P.model.get_meta(WardenGlb.CHAIN_OUT, false)),
+			int(not K.hook_sd.is_empty() or K.snap_t > 0.0 or not K.pull.is_empty())]
+	var throws := {"miss": r[4] + Vector3(0, 0, -8.0), "reel": (r[2] as Hunter).pos}
+	for how in throws:
+		A.aim_at(P, throws[how])
+		K.ch_rmb = 1.0
+		P.inp["sec_hold"] = false
+		P.ak.press_rmb()
+		var rows := trace(m, 3.0 if how == "reel" else 1.3, sample)
+		judge("Grimble hook (%s)" % how, rows, spawn, 0.0, true)
+		_one_hook("Grimble hook (%s)" % how, rows)
+	K.ch_rmb = 1.0
 	P.ak.press_rmb()
-	var rows := trace(m, 1.0,
-			func(): return [not bool(P.model.get_meta(WardenGlb.CHAIN_OUT, false)),
-					int(not K.hook_sd.is_empty() or K.snap_t > 0.0 or not K.pull.is_empty())])
-	judge("Grimble hook", rows, 0.14, 0.0, true)     # (dr_throw plays from its start through the 0.2 s coil-back)
+	var stun_mid := func(t):
+		if absf(t - spawn * 0.5) < DT * 0.5:
+			P.stun_t = 0.4
+	var cancel := trace(m, 0.5, sample, stun_mid)
+	_one_hook("Grimble hook (stunned in the coil-back)", cancel)
+	ok.call("Grimble hook (stunned in the coil-back): it never leaves the hand",
+			K.ch_rmb < 1.0 and cancel.all(func(row): return bool(row[1])), "charge %.2f" % K.ch_rmb)
 	m.queue_free()
+
+## Every step shows exactly one hook: the hand's or the one in the air (no step with both or neither).
+func _one_hook(who: String, rows: Array) -> void:
+	var bad := rows.filter(func(row): return int(row[1]) + int(row[2]) != 1)
+	ok.call("%s: one hook on every step, hand or air" % who, bad.is_empty(),
+			"" if bad.is_empty() else "%d steps, first at %.3f s" % [bad.size(), float(bad[0][0])])
 
 func _kael() -> void:
 	var r: Array = A.setup("juggernaut", 9.0)

@@ -305,11 +305,12 @@ func _tick_looks(dt: float) -> void:
 		)
 
 ## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the hook: while the kit's arm is stretched out
-## the model's hook shrinks into his wrist (hide_while_chain), so the one hook on screen is the arm's end.
+## the model's hook shrinks into his wrist (hide_while_chain), so the one hook on screen is the arm's end. Through the
+## coil-back the hook stays in his hand; it goes on the step the arm's shot spawns (hook_sd) and is back once it ends.
 func _tick_model(_dt: float) -> void:
 	if h.model == null:
 		return
-	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty() or snap_t > 0.0)
+	h.model.set_meta(WardenGlb.CHAIN_OUT, not hook_sd.is_empty() or not pull.is_empty() or snap_t > 0.0)
 	coins.tick(h, m.time, tells_visible())
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
