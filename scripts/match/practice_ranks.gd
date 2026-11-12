@@ -22,17 +22,14 @@ static func reset(h: Hunter) -> void:
 		h.slot_lv[s] = 1
 	h.skill_pts = 0
 
-## Fills the page body: one line per ability with its rank, then the controls. `again` redraws it.
+## Fills the page body: Max all, one Pick your max button per ability with its rank, Reset. `again` redraws it.
 static func fill(body: VBoxContainer, h: Hunter, again: Callable) -> void:
 	UI.subtitle(body, "Set your ranks to try them")
-	for s in Hunter.SLOTS:
-		var line := "%s: rank %d / %d" % [_name(h, s), int(h.slot_lv[s]), int(Hunter.SLOT_MAX[s])]
-		body.add_child(UI.label(line, 15))
-	body.add_child(UI.spacer(6))
 	body.add_child(UI.button("Max all", _then.bind(max_all.bind(h), again), WIDE, "next"))
 	body.add_child(UI.label("Pick your max:", 14, UI.MUTED))
 	for s in Hunter.SLOTS:
-		var b := UI.button("Max %s" % _name(h, s), _then.bind(pick_max.bind(h, s), again), WIDE, "check")
+		var txt := "Max %s (rank %d / %d)" % [_name(h, s), int(h.slot_lv[s]), int(Hunter.SLOT_MAX[s])]
+		var b := UI.button(txt, _then.bind(pick_max.bind(h, s), again), WIDE, "check")
 		var ranks := Arch.next_ranks(h.arch, s, 1)
 		if not ranks.is_empty():
 			b.tooltip_text = String(ranks[-1][1])      # what the top rank unlocks (the kit's data bonus)

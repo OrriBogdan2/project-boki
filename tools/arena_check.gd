@@ -363,20 +363,25 @@ func _practice_page(m: Match) -> void:
 	var maxed := await _press("Max all") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s])
 	ok("practice: Max all", maxed, str(P.slot_lv))
 	ok("practice: max rank shortens the cooldown", is_equal_approx(P.rank_cd_k("sec"), 0.8), str(P.rank_cd_k("sec")))
-	var dash := String(P.slot_info("dash")["name"])
+	var dash := "Max %s " % P.slot_info("dash")["name"]
 	var bonus := String(Arch.next_ranks(P.arch, "dash", 1)[-1][1])
-	ok("practice: Pick your max shows its bonus", _button("Max " + dash).tooltip_text == bonus, bonus)
+	ok("practice: Pick your max shows its bonus", _button(dash).tooltip_text == bonus, bonus)
 	ok(
 		"practice: Pick your max maxes that ability only",
-		await _press("Max " + dash) and P.ak.rank("dash") == 3
+		await _press(dash) and P.ak.rank("dash") == 3
 			and P.slot_lv["sec"] == 1 and P.slot_lv["kin"] == 1 and P.slot_lv["ult"] == 1,
 		str(P.slot_lv)
 	)
 	await _practice_shot()
 	var buttons: Array = Overlay.host.find_children("*", "Button", true, false)
 	ok("practice: one-line labels", buttons.all(func(b): return not String(b.text).contains("\n")))
-	var r := Rect2(Vector2.ZERO, main.get_viewport().get_visible_rect().size)
-	ok("practice: the page fits the screen", buttons.all(func(b): return r.encloses(b.get_global_rect())), str(r.size))
+	var sc: Control = Overlay.host.find_children("*", "ScrollContainer", true, false)[0]
+	var r := Rect2(Vector2.ZERO, main.get_viewport().get_visible_rect().size).intersection(sc.get_global_rect())
+	var cut: Array = sc.find_children("*", "Button", true, false).filter(
+		func(b): return not r.encloses(b.get_global_rect())
+	)
+	var names: Array = cut.map(func(b): return b.text)
+	ok("practice: the page fits the screen, no scrolling", cut.is_empty(), "%s cut: %s" % [r.size, names])
 	var rank1 := await _press("Reset to rank 1") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1)
 	ok("practice: Reset", rank1 and P.skill_pts == 0, str(P.slot_lv))
 	ok("practice: the dummies keep their ranks", D.slot_lv == dummy_ranks, str(D.slot_lv))
@@ -400,15 +405,16 @@ func _practice_shot() -> void:
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("practice_page.png"))
 
-func _button(text: String) -> Button:
+## The open page's button whose text starts with `start` (null when none).
+func _button(start: String) -> Button:
 	for b in Overlay.host.find_children("*", "Button", true, false):
-		if (b as Button).text == text and not b.is_queued_for_deletion():
+		if (b as Button).text.begins_with(start) and not b.is_queued_for_deletion():
 			return b
 	return null
 
-## Presses the open page's button with this text; false when there is none.
-func _press(text: String) -> bool:
-	var b := _button(text)
+## Presses the open page's button whose text starts with `start`; false when there is none.
+func _press(start: String) -> bool:
+	var b := _button(start)
 	if b == null:
 		return false
 	b.pressed.emit()
