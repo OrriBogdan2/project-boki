@@ -20,7 +20,7 @@ const HEIGHT_PX := 1080
 const MJPEG_QUALITY := 0.85      # 1.0 is huge at 1080p60; 0.85 holds up to the H.264 encode
 const CHILD_LOG_LINES := 300     # lines of a take's own output (past its PITCH_ lines) the recorder keeps
 const STALL_X := 3.0             # a take whose movie has not grown for this x its length is hung and killed ...
-const STALL_MIN_S := 600.0       # ... but never sooner than this many s (loading, and the shots that run to their script's end)
+const STALL_MIN_S := 600.0       # ... but never sooner than this many s (loading; the shots that run to their end)
 const KIT_ROTA_S := 2.1          # s between a Hunter's ability presses in the kit shot
 const KIT_FOE_SKILL := 0.5       # the foe bot's skill (0..1): it fights back but does not hunt the Hunter down
 ## s of each shot that runs for a set time (the others run to the end of their script: 2, 3, 6)

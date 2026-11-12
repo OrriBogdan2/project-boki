@@ -42,7 +42,8 @@ func _watchdog() -> void:
 	OS.set_environment("PITCH_POLL_S", "1")
 	var out: Array = []
 	var rc := OS.execute("bash", [filter, movie, "2", "10", "sleep", "60"], out)
-	ok(rc == 124 and String(out[0]).contains("PITCH_STALL"), "watchdog: a take with no new frames is killed (rc %d)" % rc)
+	var killed := rc == 124 and String(out[0]).contains("PITCH_STALL")
+	ok(killed, "watchdog: a take with no new frames is killed (rc %d)" % rc)
 	out.clear()
 	rc = OS.execute("bash", [filter, movie, "2", "10", "echo", "PITCH_DONE"], out)
 	ok(rc == 0 and String(out[0]).contains("PITCH_DONE"), "watchdog: a take that ends passes its rc and lines")
