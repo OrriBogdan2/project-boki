@@ -2,19 +2,20 @@ extends RefCounted
 ## Sable's animation timing against the source (ext/anim-time-sable), run inside --dancer-combo-check
 ## (tools/dancer_jug_check.gd). The kit's wind-ups sit in the footage's windows (the bola's 0.4-0.6 s lane, the
 ## cartwheel's 0.37-0.57 s, the knife in the air one frame after its spin), each clip lasts its kit move, and the
-## blend into a move never hides its release: on a standing Sable the skinned clip owns the body, as the new
-## channel, by the move's first key. Source numbers and the table: docs/heroes/thief.md, "Animation timing".
+## quick moves start on their first pose (ext/anim-sable-first-pose): the clip's frame 0 is the move's first key, not
+## the settled pose, so the default blend in shows the move from its first frame. Source numbers and the table:
+## docs/heroes/thief.md, "Animation timing".
 
-const DT := 1.0 / 60.0
 const BOLA_CAST := [0.4, 0.6]       # s: footage, the lane's wind-up window
 const VAULT := [0.37, 0.57]         # s: footage, the cartwheel (the Vault's flip)
 const KNIFE_OUT := 0.2              # s: the dagger is in the air by one frame (0.2 s) of the spin
-const SEEN := 0.9                   # share of the clip on show by the move's first key
 const LEN_TOL := 0.06               # s: a clip's length against its kit move's last key
-## move -> the s by which the blend must have shown the clip (its first key or release)
-const BY := {"thf_lmb_r": 0.04, "thf_lmb_l": 0.04, "thf_primed": 0.04, "thf_vault_r": 0.05, "thf_vault_l": 0.05,
-		"thf_vault_f": 0.05, "thf_vault_b": 0.05, "thf_vault_twist": 0.05, "thf_exdash": 0.05, "thf_land": 0.04,
-		"thf_knife": 0.09, "thf_reset": 0.05, "thf_bola": 0.42, "thf_encore": 0.4}
+## the quick moves (they had a short per-move blend in on ext/anim-time-sable): each clip's frame 0 is its first pose
+const QUICK := ["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b",
+		"thf_vault_twist", "thf_exdash", "thf_land", "thf_knife", "thf_reset"]
+const MOVED := 60.0                 # deg: frame 0 turns some bone this far from the settled pose
+const SETTLED := "lmb_r"            # its last frame: the settled pose (END in sable_clips.py) the quick moves end on
+const WHOLE := ["root", "hips"]     # bones the flips turn whole: the rest of the body keeps its own pose
 var A
 
 func run(a, m: Match, K: ThiefKit) -> void:
@@ -29,7 +30,7 @@ func run(a, m: Match, K: ThiefKit) -> void:
 	var clips: WardenClips = sync.clips
 	A.ok("dancer timing: the skinned clip tree was built", clips != null)
 	if clips != null:
-		_blend(mdl, sync, clips)
+		_first_pose(clips)
 	holder.queue_free()
 
 ## The kit's own clocks, against the footage.
@@ -49,35 +50,45 @@ func _kit(K: ThiefKit) -> void:
 	A.ok("dancer timing: the knife leaves the hand by %.2f s of its spin (footage: one frame)" % out_t,
 			out_t <= KNIFE_OUT)
 
-## A standing Sable from rest: how much of the move's clip is on show at each move's first key, and each clip's
-## length against the kit move's.
-func _blend(mdl: Node3D, sync: WardenGlb.Sync, clips: WardenClips) -> void:
-	var an := HunterAnim.new(mdl)
-	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
+## Each quick move's clip against its kit move: frame 0 is already the move (some bone MOVED off the settled pose, so
+## the blend in shows the move from its first frame), and the clip lasts the kit move.
+func _first_pose(clips: WardenClips) -> void:
 	var moves: Dictionary = WardenClips.data("sable")["kmoves"]
-	var late: Array = []
+	var settled: Array = []
 	var odd: Array = []
-	for k in BY:
-		_play(an, sync, st, 40)
-		var s2 := st.duplicate()
-		s2["kmove"] = k
-		var seen := 0.0
-		var at := 0.0
-		while at < float(BY[k]) - 0.0001:
-			s2["kmove_t"] = at
-			_play(an, sync, s2, 1)
-			at += DT
-		seen = clips.act_w * (clips.xf if clips.chan == 1 else 1.0 - clips.xf)
-		if seen < SEEN:
-			late.append("%s %.2f" % [k, seen])
-		var cl: String = (moves[k] as Dictionary)["clip"]
+	var faded: Array = []
+	var shown: Array = []
+	var rest := clips.lib.get_animation(SETTLED)
+	for k in QUICK:
+		var mv := moves[k] as Dictionary
+		var a := clips.lib.get_animation(String(mv["clip"]))
+		var off := _apart(a, 0.0, rest, rest.length)
+		shown.append("%s %.0f" % [k, off])
+		if off < MOVED:
+			settled.append("%s %.0f deg" % [k, off])
+		if mv.has("fade"):
+			faded.append(k)
 		var end := float(HunterAnim.km_def(k)["keys"][-1][0])
-		if not (moves[k] as Dictionary).has("hold_from") and absf(clips.lib.get_animation(cl).length - end) > LEN_TOL:
-			odd.append("%s %.2f vs %.2f" % [k, clips.lib.get_animation(cl).length, end])
-	A.ok("dancer timing: each move's clip is on show by its first key (%s)" % str(late), late.is_empty())
+		if not mv.has("hold_from") and absf(a.length - end) > LEN_TOL:
+			odd.append("%s %.2f vs %.2f" % [k, a.length, end])
+	print("dancer timing: frame 0 off the settled pose, deg: ", ", ".join(shown))
+	A.ok("dancer timing: each quick move's clip starts on its first pose, not settled (%s)" % str(settled),
+			settled.is_empty())
+	A.ok("dancer timing: the quick moves blend in at the default fade (%s)" % str(faded), faded.is_empty())
 	A.ok("dancer timing: each clip lasts its kit move (%s)" % str(odd), odd.is_empty())
 
-func _play(an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
-	for i in n:
-		an.update(DT, s)
-		sync._process(DT)
+## The largest bone turn (deg) between clip a at t0 and clip b at t1, the whole-body bones left out.
+func _apart(a: Animation, t0: float, b: Animation, t1: float) -> float:
+	var worst := 0.0
+	for i in a.get_track_count():
+		if a.track_get_type(i) != Animation.TYPE_ROTATION_3D:
+			continue
+		if String(a.track_get_path(i).get_concatenated_subnames()) in WHOLE:
+			continue
+		var q0 := a.rotation_track_interpolate(i, t0)
+		var j := b.find_track(a.track_get_path(i), Animation.TYPE_ROTATION_3D)
+		if j < 0:
+			continue
+		var q1 := b.rotation_track_interpolate(j, t1)
+		worst = maxf(worst, rad_to_deg(q0.angle_to(q1)))
+	return worst
