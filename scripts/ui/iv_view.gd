@@ -318,8 +318,9 @@ static func pass_on(a: Dictionary, b: Dictionary) -> VBoxContainer:
 		var m := maxi(int(va[k]), int(vb[k]))
 		if m >= 26: best.append("%s %d" % [Care.IVS[k]["name"], m])
 		if m > top_v: top_v = m; top_k = k
-	var pct := int(round(100.0 * Care.IV_INHERIT / Care.IV_KEYS.size()))
-	v.add_child(UI.para("An egg takes %d of these 5 from its parents (each from either one) and rolls %d fresh: every stat has a %d%% chance to come from them." % [Care.IV_INHERIT, Care.IV_KEYS.size() - Care.IV_INHERIT, pct], 12, UI.MUTED))
+	var take: int = NestItems.plan(a, b)["inherit"]
+	var pct := int(round(100.0 * take / Care.IV_KEYS.size()))
+	v.add_child(UI.para("An egg takes %d of these 5 from its parents (each from either one) and rolls %d fresh: every stat has a %d%% chance to come from them." % [take, Care.IV_KEYS.size() - take, pct], 12, UI.MUTED))
 	if not best.is_empty():
 		v.add_child(UI.para("Could pass on: %s." % ", ".join(best), 12, UI.GOOD))
 	else:
