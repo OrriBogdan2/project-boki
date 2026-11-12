@@ -11,7 +11,8 @@ static var _hooked := false
 ## thread's material setup for the render thread. Headless, the dummy texture store is not thread-safe. On a
 ## RenderingDevice renderer (Vulkan, D3D12, Metal) Godot 4.6 sets a new material's shader right on the loader thread
 ## (material_create_from_shader), racing the main thread's materials: a heap crash as a match builds, or an endless
-## material_set_shader loop at quit (docs/DEBT.md, GPU bench flakes). Callers that only read ahead then load on first use.
+## material_set_shader loop at quit (docs/DEBT.md, model read-ahead). Callers that only read ahead then load on
+## first use.
 static func can_read_ahead() -> bool:
 	return DisplayServer.get_name() != "headless" and RenderingServer.get_rendering_device() == null
 

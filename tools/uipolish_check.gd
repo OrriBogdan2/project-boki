@@ -7,8 +7,8 @@ extends RefCounted
 ##      with a box from it (or UiFrame)
 ##   4. no stray hard-coded panel styles: no StyleBoxFlat.new(), UI._box() or per-screen theme
 ##      outside the style module (the in-match HUD and reserved files excepted, see ALLOWED)
-##   5. building the theme logs no engine error (a startup error print raced worker threads on the
-##      GPU bench and crashed it: docs/DEBT.md, GPU bench flakes)
+##   5. building the theme logs no engine error (every startup logged one, so it was the last line
+##      of each GPU bench crash and read as its cause)
 
 var main: Node
 var fails := 0
