@@ -187,7 +187,6 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
-		ResetCue.play(h, "ashwick_knock_ram")
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1

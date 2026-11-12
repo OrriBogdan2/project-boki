@@ -56,11 +56,6 @@ static func _row(rec: Dictionary, s: String, lit: Dictionary) -> Control:
 	tw.tween_property(strip, "self_modulate:a", 0.0, FADE_S)
 	return strip
 
-## Under a stat's bar: its last change and what caused it (StatCause.last).
-static func _cause(rec: Dictionary, s: String) -> Label:
-	var why := StatCause.last(rec, s)
-	return UI.label(why, 12, UI.MUTED) if why != "" else UI.label("No training yet", 12, UI.FAINT)
-
 static func _draw_marks(c: Control, rec: Dictionary, cap_max: float) -> void:
 	for b in StatBudget.rules()["bands"]:
 		if float(b[0]) < cap_max:

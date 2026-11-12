@@ -11,7 +11,7 @@ extends RefCounted
 
 ## Each toy and a species whose lean it is made for (ember = Fire; bloom = Grass; swarm = Bug).
 const FITTING := [["toy_ball", "zapple"], ["toy_post", "kestrike"], ["toy_tub", "rimeshrew"],
-	["toy_stone", "kilnbadger"], ["toy_vent", "kestrike"], ["toy_dig", "lilybara"], ["toy_dig", "moundvark"]]
+	["toy_stone", "kilnbadger"], ["toy_dig", "lilybara"], ["toy_dig", "moundvark"]]
 
 var bad := 0
 var main: Node
@@ -49,7 +49,7 @@ func run(m: Node) -> void:
 	var in_base := func(id: String) -> bool:
 		return HomeLayout.CATALOG[id]["cat"] == "Base" and Care.STATS.has(String(R["toys"][id]["stat"]))
 	ok(ids.all(in_base),
-			"every toy is in the Base category, each training a Care stat")
+			"all five toys are in the Base category, each training a Care stat")
 	ok(not FarmUnlocks.rules()["base_mode"], "base_mode is off in the shipped rules")
 	Save.d = _new_save()
 	var lay := HomeLayout.ensure(Save.d)
@@ -69,9 +69,6 @@ func run(m: Node) -> void:
 			and toys.weight(stone, "toy_post") > toys.weight(stone, "toy_ball")
 	ok(likes_post,
 			"flying and rock leans weigh the post up")
-	var vent_up: bool = toys.weight(storm, "toy_vent") > toys.weight(storm, "toy_ball")
-	var vent_flat: bool = toys.weight(stone, "toy_vent") <= toys.weight(stone, "toy_ball") + 0.01
-	ok(vent_up and vent_flat, "a flying lean weighs the vent up, a rock lean does not")
 	var likes_tub: bool = toys.weight(frost, "toy_tub") > toys.weight(frost, "toy_post") \
 			and toys.weight(wet, "toy_tub") > toys.weight(wet, "toy_post") \
 			and toys.weight(glass, "toy_tub") > toys.weight(glass, "toy_post")
@@ -94,7 +91,7 @@ func run(m: Node) -> void:
 	home.hb.toggle()
 	ok(home.hb._tabs().has("Base"), "base_mode on: the build bar has a Base tab")
 	home.hb.cat = "Base"
-	ok(home.hb._tab_items().size() == 6, "and it offers all six toys")
+	ok(home.hb._tab_items().size() == 5, "and it offers all five toys")
 	home.hb.toggle()
 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
 	var first_t := -1.0

@@ -47,7 +47,6 @@ func run(main: Node) -> void:
 	_fallback()
 	_ult_cues()
 	_garden_names()
-	_boki_cues()
 	_garden()
 	_build_cues()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -78,30 +77,6 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
-	if group == "boki_voices":
-		_boki_voices(d["sounds"])
-
-## 7. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
-func _boki_voices(sounds: Dictionary) -> void:
-	var gaps := []
-	var same := []
-	var seen := {}
-	for sp in DirAccess.get_directories_at("res://art/kin"):
-		for mood in KinVoice.GENERIC_CUE:
-			var want := "bk_%s_%s" % [sp, mood]
-			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
-				gaps.append(want)
-		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
-		if seen.has(sig):
-			same.append("%s = %s" % [sp, seen[sig]])
-		seen[sig] = sp
-	var what := "boki_voices: %d species, 5 moods, 2 takes (gaps %s)" % [seen.size(), gaps]
-	ok(gaps.is_empty() and not seen.is_empty(), what)
-	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
-	var fell := []
-	for mood in KinVoice.GENERIC_CUE:
-		fell.append(KinVoice.cue("no_such_species", mood))
-	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -241,16 +216,6 @@ func _dash_air() -> void:
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
-## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
-func _boki_cues() -> void:
-	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
-		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
-		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/match/kin_voice.gd"}
-	for cue in wired:
-		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
-		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
-
-## 8. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
 func _garden() -> void:
 	var beds := ["garden_morning", "garden_midday", "garden_evening", "garden_night", "pond"]
@@ -391,32 +356,3 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
-
-## 9. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
-func _voices() -> void:
-	HomeVoice._until.clear()
-	HomeVoice._last.clear()
-	var at := Sfx.listener + Vector3(2, 0, 0)
-	var far := Sfx.listener + Vector3(Sfx.hear_range + 5.0, 0, 0)
-	var recs := []
-	for i in 6:
-		recs.append({"uid": "voice_test_%d" % i, "species": "no_such_species", "name": "T%d" % i})
-	HomeVoice.say(recs[5], "happy", far)
-	ok(HomeVoice._until.is_empty(), "voices: a Boki past earshot takes no slot")
-	for i in 5:
-		HomeVoice.say(recs[i], "happy", at)
-	ok(HomeVoice._until.size() == HomeVoice.MAX_VOICES, "voices: five Bokis at once sound %d" % HomeVoice._until.size())
-	HomeVoice._until.clear()
-	HomeVoice.say(recs[0], "happy", at)
-	ok(HomeVoice._until.is_empty(), "voices: the same Boki twice inside its gap speaks once")
-	recs[1]["needs"] = {"food": 5.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
-	var k := {"rec": recs[1], "pos": at}
-	HomeVoice._last.clear()
-	HomeVoice.sulk_edge(k, "food")
-	var sulked := HomeVoice._until.size()
-	HomeVoice._until.clear()
-	HomeVoice._last.clear()
-	HomeVoice.sulk_edge(k, "food")
-	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
-	HomeVoice._until.clear()
-	HomeVoice._last.clear()

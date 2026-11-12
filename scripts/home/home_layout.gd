@@ -46,8 +46,7 @@ const THEMES := {
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
 ## brushes). size: footprint in tiles before turning. block: kin and you walk around it. line: dragged
 ## out in a line that joins up (fences). brush: painted on tiles (path / clear / water). colour: you
-## pick its colour. light: glows at night. bed: kin sleep on it. comfort: the decoration's comfort tag
-## (cosy, bright, wild or quiet; three of one tag in a zone switch on its effect, DecorComfort).
+## pick its colour. light: glows at night. bed: kin sleep on it.
 const CATALOG := {
 	"fence": {"name": "Wood fence", "cat": "Fences", "gems": 3, "line": true, "block": true},
 	"picket": {"name": "Picket fence", "cat": "Fences", "gems": 4, "line": true, "block": true},
@@ -61,24 +60,23 @@ const CATALOG := {
 	"river": {"name": "River", "cat": "Paths", "gems": 2, "brush": "water", "block": true,
 		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
-	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8, "comfort": "bright"},
+	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
 	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
 		"desc": "Grows four element snacks every few minutes. Walk over it to pick them. For feeding only."},
-	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true, "comfort": "wild"},
-	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true, "comfort": "wild"},
-	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true, "comfort": "wild"},
-	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true, "comfort": "wild"},
-	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true, "comfort": "bright"},
-	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true, "comfort": "bright"},
-	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "comfort": "cosy"},
-	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true, "comfort": "cosy"},
-	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true, "comfort": "cosy"},
-	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true, "comfort": "cosy"},
-	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true, "comfort": "bright"},
-	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true, "comfort": "quiet"},
-	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true, "comfort": "quiet"},
-	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true,
-		"comfort": "quiet"},
+	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
+	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true},
+	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true},
+	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true},
+	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true},
+	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true},
+	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true},
+	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true},
+	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true},
+	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true},
+	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true},
+	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true},
+	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true},
+	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true},
 	# the Boki base's playthings (HomeToys, content/rules/toys.json); the Base tab shows only while base_mode is on
 	"toy_ball": {"name": "Play ball", "cat": "Base", "gems": 12, "toy": true,
 		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},

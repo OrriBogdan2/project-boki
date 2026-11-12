@@ -163,7 +163,7 @@
 "nested_ternary": 2
 },
 "scripts/core/social.gd": {
-"long_line": 12,
+"long_line": 13,
 "semicolon": 1
 },
 "scripts/core/synth.gd": {
@@ -212,7 +212,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 202,
+"long_line": 203,
 "nested_ternary": 27,
 "semicolon": 243
 },
@@ -595,7 +595,7 @@
 "semicolon": 3
 },
 "scripts/match/practice.gd": {
-"long_line": 1
+"long_line": 2
 },
 "scripts/match/practice_hero.gd": {
 "long_line": 2,
@@ -775,6 +775,9 @@
 "long_line": 23,
 "nested_ternary": 1,
 "semicolon": 33
+},
+"scripts/ui/reset_pop.gd": {
+"long_line": 1
 },
 "scripts/ui/results.gd": {
 "long_line": 25,

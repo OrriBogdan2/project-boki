@@ -19,7 +19,7 @@ static func rules() -> Dictionary:
 
 ## Seconds `rec` takes over leg `leg` with no wobble.
 static func leg_time(rec: Dictionary, leg: int) -> float:
-	var st: Array = BaseRace.stretches()
+	var st: Array = BaseRace.rules()["stretches"]
 	var out := 0.0
 	for s in rules()["legs"][leg]:
 		out += float(st[s]["len"]) / BaseRace.stretch_pace(rec, int(s))
@@ -80,7 +80,7 @@ class Run:
 		teams = [mine, theirs]
 		rng = r
 		var at := 0.0
-		for s in BaseRace.stretches():
+		for s in BaseRace.rules()["stretches"]:
 			at += float(s["len"])
 			ends.append(at)
 		for team in 2:
@@ -277,7 +277,6 @@ func use() -> void:
 		var n := Models.kin(String(rec["species"]), rec)
 		h.add_child(n)
 		visitors.append({"rec": rec, "node": n})
-	cue = GardenCues.BatonCue.new(h)
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s before each mark to hand off" % Settings.key_cap("interact"))
 	_bar_label("")
@@ -346,7 +345,7 @@ func _nodes(ents: Array) -> Array:
 	return ents.map(func(e): return e["node"])
 
 func _place_runners() -> void:
-	var st: Array = BaseRace.stretches()
+	var st: Array = BaseRace.rules()["stretches"]
 	var lane := float(BaseRace.rules()["lane"])
 	for team in 2:
 		var side := lane * (team - 0.5)
@@ -369,16 +368,6 @@ func _place_runners() -> void:
 			n.rotation.y = race.heading(s)
 			ents[i]["pos"] = p
 
-## Each team's baton over its runner, blinking while the runner takes it; a burst where it changes hands.
-func _baton_cue(d: float) -> void:
-	cue.step(d)
-	for team in 2:
-		var ents: Array = mine if team == 0 else visitors
-		var leg := int(run.leg[team])
-		var lost: Array = run.lost[team]
-		cue.update(team, ents[leg]["pos"], leg, GardenCues.type_colour(ents[leg]["rec"]), float(run.wait[team]) > 0.0,
-				lost.is_empty() or float(lost[-1]) == 0.0)
-
 func _end(finished: bool) -> void:
 	var res := {}
 	if finished:
@@ -390,8 +379,6 @@ func _end(finished: bool) -> void:
 	for v in visitors:
 		v["node"].queue_free()
 	bar.close()
-	cue.clear()
-	cue = null
 	if finished:
 		_card(res)
 		var k: Dictionary = h._kin_entry(anchor)
@@ -405,7 +392,7 @@ func _end(finished: bool) -> void:
 	visitors = []
 
 func _card(res: Dictionary) -> void:
-	var st: Array = BaseRace.stretches()
+	var st: Array = BaseRace.rules()["stretches"]
 	var legs: Array = []
 	for i in run.legs.size():
 		legs.append("%s the %s" % [run.teams[0][i]["name"], st[run.legs[i][0]]["kind"]])

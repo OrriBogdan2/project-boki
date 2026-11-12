@@ -222,7 +222,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 ## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
-	if rank("sec") >= 3 and ch_rmb < rmb_charges():
+	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
 	m.sfx("vn_stim", h.pos, -3.0)
@@ -776,8 +776,6 @@ func _fire_needle() -> void:
 		var cut := float(ed["shave"])
 		if rank("kin") >= 3:
 			cut = float(ed["shave_rank3"]) * hits       # rank 3: 30% for every hunter hit
-		if float(cd["e"]) > 0.0:
-			ResetCue.play(h, "gunslinger_needle_shave")
 		cd["e"] = maxf(0.0, float(cd["e"]) - maxcd * cut)
 
 # ------------------------------------------------------------------ bots

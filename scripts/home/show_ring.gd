@@ -21,8 +21,6 @@ const LURE_SIDE := 0.9                        # m from the walk line to each lur
 const STRAY_S := 1.2                          # s either side of a lure over which it veers toward it
 const ROUND_MAX := 10.0                       # points a round gives at most
 const TRICK_PRESSES := 3
-const TOTAL_DELAY := 1.4                      # s after the Bond score that both totals pop: as it fades
-const TOTAL_SPREAD := 0.8                     # m each total sits out from the pair's middle, so they never overlap
 
 static func rules() -> Dictionary:
 	return Content.rules("show_ring")
@@ -367,7 +365,6 @@ func use() -> void:
 	if is_instance_valid(marks):
 		marks.queue_free()
 	board.text = board_text(week)
-	cue = GardenCues.PopCue.new(h)
 	_enter()
 	GardenSfx.countdown(h, stage.position)
 
@@ -388,7 +385,7 @@ func input(event: InputEvent) -> bool:
 		run.press_trick(r)
 		_cheer(r)
 		if not run.can_trick():
-			_after_step(Run.Phase.TRICK)
+			_after_step()
 	elif run.phase == Run.Phase.BOND:
 		var i := run.call_out()
 		if i >= 0:
@@ -408,42 +405,19 @@ func tick(d: float) -> void:
 		return
 	var was := run.phase
 	run.step(d)
-	cue.step(d)
 	if run.phase != was:
-		_after_step(was)
+		_after_step()
 		return
 	if run.phase == Run.Phase.TRICK:
 		bar.step(d)
 	_place_pair(d)
 
-## The judges' score for the round that just ended pops over your Boki; after the walk both totals follow
-## where the two stand to be judged.
-func _pop(ended: Run.Phase) -> void:
-	var shown: Dictionary = run.recs[run.backed]
-	var at: Vector3 = pair[run.backed]["pos"]
-	var col := GardenCues.type_colour(shown)
-	match ended:
-		Run.Phase.LOOK:
-			cue.pop(at, "Look %.1f" % sum(look(shown)), col)
-		Run.Phase.TRICK:
-			cue.pop(at, "Trick %.1f" % trick(shown, run.grades), col)
-		Run.Phase.BOND:
-			cue.pop(at, "Bond %.1f" % bond(shown, run.calls), col)
-			var s := run.scores()
-			var mid: Vector3 = (pair[0]["pos"] + pair[1]["pos"]) * 0.5
-			for i in 2:
-				var out: Vector3 = (pair[i]["pos"] - mid).normalized() * TOTAL_SPREAD
-				var tone := GardenCues.type_colour(run.recs[i])
-				cue.pop(pair[i]["pos"] + out, "%.1f" % float(s[i]["total"]), tone, TOTAL_DELAY)
-
-## After the round `ended`: the show ends, or the next round is set up (the Boki in place) and the
-## ended round's score pops over them.
-func _after_step(ended: Run.Phase) -> void:
+## After the round changes: set up the next one, or end the show.
+func _after_step() -> void:
 	if run.over():
 		_end(true)
-		return
-	_enter()
-	_pop(ended)
+	else:
+		_enter()
 
 ## Sets up the round the run is in: its card, the bar or the walk.
 func _enter() -> void:
@@ -589,8 +563,6 @@ func _end(finished: bool) -> void:
 	if bar != null:
 		bar.close()
 	_clear_lures()
-	cue.clear()
-	cue = null
 	if is_instance_valid(card):
 		card.queue_free()
 	if finished:
