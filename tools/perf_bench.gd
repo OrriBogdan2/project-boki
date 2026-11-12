@@ -395,8 +395,10 @@ func _vfx_inventory(part: String) -> void:
 	for k in ks:
 		print("BENCH vfx %s %s x%d" % [part, k, by[k]])
 
-const FX_SHADERS := ["glow", "ring", "mote", "spark", "light_shaft", "waterfall", "updraft", "wind", "seat_beam", "exit_beam",
-	"glowball", "fx_dot", "care_glow", "care_disc", "care_ice", "cloud_puff", "kin_aura", "boki_wisp", "wisp_core", "blob_shadow"]
+const FX_SHADERS := [      # the see-through light and glow shaders ("card" lines of the vfx inventory)
+	"glow", "ring", "mote", "spark", "light_shaft", "waterfall", "updraft", "wind", "seat_beam", "exit_beam",
+	"glowball", "fx_dot", "care_glow", "care_disc", "care_ice", "cloud_puff", "kin_aura", "boki_wisp", "wisp_core",
+	"blob_shadow"]
 
 func _vfx_kind(n: Node3D) -> String:
 	if n is GPUParticles3D or n is CPUParticles3D:
@@ -407,8 +409,10 @@ func _vfx_kind(n: Node3D) -> String:
 		return ""
 	var mats: Array[Material] = [(n as GeometryInstance3D).material_override]
 	var mesh: Mesh = null
-	if n is MeshInstance3D: mesh = (n as MeshInstance3D).mesh
-	elif n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh != null: mesh = (n as MultiMeshInstance3D).multimesh.mesh
+	if n is MeshInstance3D:
+		mesh = (n as MeshInstance3D).mesh
+	elif n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh != null:
+		mesh = (n as MultiMeshInstance3D).multimesh.mesh
 	for i in (mesh.get_surface_count() if mesh != null else 0):
 		mats.append(mesh.surface_get_material(i))
 	for m in mats:
