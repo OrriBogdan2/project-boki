@@ -103,11 +103,25 @@ func _tutorial() -> void:
 	m.queue_free()
 
 ## The NPC's mesh bounds in the world, at rest.
+## The skinned mesh's real bounds in the world (each vertex through its bones, as the renderer draws it).
 static func _world_aabb(n: Node3D) -> AABB:
 	var out := AABB()
 	var first := true
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
-		var ab: AABB = (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
-		out = ab if first else out.merge(ab)
-		first = false
+		var inst := mi as MeshInstance3D
+		var sk := inst.get_node(inst.skeleton) as Skeleton3D
+		var arr := inst.mesh.surface_get_arrays(0)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
+		var wts: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+		var per := bones.size() / verts.size()
+		var skinned: Array[Transform3D] = []
+		for b in inst.skin.get_bind_count():
+			skinned.append(sk.global_transform * sk.get_bone_global_pose(b) * inst.skin.get_bind_pose(b))
+		for i in verts.size():
+			var p := Vector3.ZERO
+			for j in per:
+				p += wts[i * per + j] * (skinned[bones[i * per + j]] * verts[i])
+			out = AABB(p, Vector3.ZERO) if first else out.expand(p)
+			first = false
 	return out

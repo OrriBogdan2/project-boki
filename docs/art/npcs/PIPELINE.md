@@ -33,4 +33,6 @@ Sheets (not in git): `/home/boki/meshy/npc-hob-guide-1111/` `options.jpg` (3 fro
 5. A row in `content/rules/npcs.json`; `NpcModel.new("<id>")` (or a subclass, like `HobModel`).
 
 Meshy task ids: Hob 01a1cc6a-dcbc-7294-931b-58221c420800, Pell 01a1cc6a-dce0-777c-b6be-636f72364352.
+A Meshy rig is a 0.01 armature over a 100x bind pose, so NpcModel sizes the model from its mesh bounds times the bind scale
+(`_rest_aabb`) and `--npc-check` measures the skinned vertices. `--npc-shots` renders the clip (game camera, then a close-up).
 Known gaps: docs/DEBT.md ("The NPCs' Meshy models").
