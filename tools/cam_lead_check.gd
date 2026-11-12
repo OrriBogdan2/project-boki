@@ -55,8 +55,8 @@ func _area(label: String, opts: Dictionary) -> void:
 	for i in 30:
 		_step(m, cam, P)
 	var sz := cam.get_viewport().get_visible_rect().size
-	var edge := maxf(cam.cursor_pan(Vector2(sz.x - 1.0, sz.y * 0.5)).length(),
-		cam.cursor_pan(Vector2(sz.x * 0.5, 1.0)).length())
+	var edge := maxf(cam.cursor_pan(Vector2(sz.x - 1.0, sz.y * 0.5), P.pos).length(),
+		cam.cursor_pan(Vector2(sz.x * 0.5, 1.0), P.pos).length())
 	ok(edge <= LEAD_EDGE_MAX_M, "%s: the view leans %.2f m with the cursor at the screen's edge (at most %.2f)"
 		% [label, edge, LEAD_EDGE_MAX_M])
 	var moved := 0.0
