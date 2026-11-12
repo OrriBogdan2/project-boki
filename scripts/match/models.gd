@@ -828,6 +828,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
+		if pc[0] == gset[0]: gmi.name = "Canopy"      # GliderHeat sets its heat on this material
 		gmi.material_override = pc[1]
 		ShadowPolicy.judge(gmi)
 		glider.add_child(gmi)

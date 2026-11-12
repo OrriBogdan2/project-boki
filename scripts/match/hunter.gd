@@ -3217,6 +3217,7 @@ func render(delta: float, alpha: float) -> void:
 		var ek := 1.0 + 2.7 * gk * gk * gk + 1.7 * gk * gk      # pops open with a little overshoot
 		gl.scale = Vector3(ek * (1.0 + sin(m.time * 9.0) * 0.02), ek, ek)
 		gl.rotation.x = 0.35 * ek - 0.1
+		GliderHeat.tick(self, gl, delta)
 	var halo := torso.get_node_or_null("Halo")
 	if halo:
 		halo.rotation.y += delta * 2.0
