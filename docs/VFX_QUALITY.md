@@ -97,6 +97,8 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: hold-blade glow (the ground clipping is done: soft edges above) |
+| 10 | Neve | rimewright | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | reads well (shards, shatter burst). Done (ext/vfx-neve-ice-path): the skate's ice path was up to 24 pooled flat untextured boxes (a node and material each); now one MultiMesh strip (`IceStrip`, `shaders/ice_strip.gdshader`): cel-lit pale ice, a faint frost rim, a lighter facet step, a ragged cel fade at the tail; same plate size, form-in, spacing, 24-plate length and 3 s life. Left: the plates are still laid flat (no relief on slopes) |
+| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after

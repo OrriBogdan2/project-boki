@@ -5,8 +5,8 @@ extends RefCounted
 ##   Pip: the starlit comet, the burr orb, the Burrseed root disc, light column and root beam, the lantern
 ##   plus, the Hearthlight disc with its floating lantern and the Kindle foot glow.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
-##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, the skate's
-##   ice plates, her air dash's frost streaks and the Rink Wall's ice pillars.
+##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, her air dash's
+##   frost streaks and the Rink Wall's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.
 ## Shots: skin(s, kind) hides the shared round (its drawn radius only; the hit radius is unchanged) and
 ## rides a pooled node on it; when the shot ends the node goes back and the kind's impact plays.
@@ -27,6 +27,7 @@ var skins: Array = []         # {s: shot, n: Node3D, kind}
 var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
 var made := 0                 # nodes built (tests: stays flat while firing)
+var strip: IceStrip = null    # the skate's ice plates, one MultiMesh (built on the first plate)
 
 func _init(match_node: Node, hunter: Hunter) -> void:
 	m = match_node
@@ -43,6 +44,7 @@ func teardown() -> void:
 	live.clear()
 	held.clear()
 	free_pool.clear()
+	strip = null
 
 # ------------------------------------------------------------------ materials
 static func ice_mat(c: Color, a := 0.75, glow := 0.0, edge := Color(0, 0, 0, 0)) -> ShaderMaterial:
@@ -215,11 +217,6 @@ func _build(kind: String) -> Node3D:
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
 		"frost":
 			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
-		"slab":
-			# a plate of ice laid under her blades
-			_off(Models.part(
-					n, Models.box(1.0, 0.05, 0.7), ice_mat(Color("bff7ef"), 0.7, 0.35, Color("e8ffff")),
-					Vector3(0, 0.04, 0)))
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
@@ -438,12 +435,6 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * lerpf(
 					0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
-		"slab":
-			var dv4: Vector2 = p.get("dir", Vector2(0, -1))
-			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)
-			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
-			n.scale = Vector3(r * forms, 1.0, r * forms)
-			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
 		_:
 			n.scale = Vector3.ONE * r
 			_tint(n, col, fade)
@@ -571,9 +562,17 @@ func _place_wall(n: Node3D, p: Dictionary) -> void:
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
+	if strip != null:
+		strip.tick(m.time)
 	_tick_skins(dt)
 	_tick_live(dt)
 	_tick_held()
+
+## The skate's ice strip, built the first time a plate is laid.
+func ice_strip(cap: int) -> IceStrip:
+	if strip == null:
+		strip = IceStrip.new(root, cap)
+	return strip
 
 ## Live nodes right now (tests: pooled, so this stays bounded).
 func node_count() -> int:

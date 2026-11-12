@@ -170,7 +170,7 @@ In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 | X crash (f57-f61) | `tm_rime_crash` | 0.04 deeper, 0.1 flung wide, 0.2 overshoot, 0.4 recovery | everything flung out as the shell bursts |
 | X early break | `tm_rime_break` | 0.08 / 0.3 | a shrug that pushes the shell off |
 
-The skate leaves a ribbon of ice chips, ice plates under her blades (CareLook "slab") that fade behind her, and spray off the outside edge on a carve; not the shared after-image pill. No ring or burst on the push-off.
+The skate leaves a ribbon of ice chips, ice plates under her blades (`IceStrip`, `ice_strip.gd`: one MultiMesh ring of 24 instances, the oldest reused, `shaders/ice_strip.gdshader` cel-lit with a frost rim; each plate fades over its last 2 s of 3) that fade behind her, and spray off the outside edge on a carve; not the shared after-image pill. No ring or burst on the push-off.
 
 Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult|ultskate|skateult> --arena-shot=<dir>/x.png [--care-close]`.
 

@@ -44,6 +44,7 @@ var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
 const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
+const SLAB_CAP := 24           # plates the strip holds; the 25th reuses the oldest (the trail's length while skating)
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
@@ -545,17 +546,17 @@ func _tick_trails(dt: float) -> void:
 		HeroVfx.of(m).hold(h, "skate")
 		_lay_slabs(dt)
 
-## Plates of ice that form under her blades as she skates and fade behind her, each with a frost sheen
-## where the blade bites.
+## Plates of ice that form under her blades as she skates and fade behind her, each with a frost rim; all of them
+## one MultiMesh (IceStrip).
 func _lay_slabs(dt: float) -> void:
 	rinkrun["slab"] = float(rinkrun.get("slab", 0.0)) - dt
 	if float(rinkrun["slab"]) > 0.0:
 		return
 	rinkrun["slab"] = SLAB_GAP
-	var span := randf_range(0.9, 1.3)
 	# laid just under the leading blade, so the newest plate is always under her feet
 	var under := h.position + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * SLAB_LEAD
-	lk().burst("slab", under, {"r": span, "dur": SLAB_LIFE, "dir": h.roll_dir.rotated(randf_range(-0.25, 0.25))})
+	lk().ice_strip(SLAB_CAP).lay(
+			under, randf_range(0.9, 1.3), h.roll_dir.rotated(randf_range(-0.25, 0.25)), m.time, SLAB_LIFE)
 	rinkrun["frost"] = int(rinkrun.get("frost", 0)) + 1
 	if int(rinkrun["frost"]) % FROST_EVERY == 0:
 		vfx("skate_frost", h.position, h.roll_dir)       # a frost patch that lingers, then melts
