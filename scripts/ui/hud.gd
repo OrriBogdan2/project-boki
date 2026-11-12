@@ -633,7 +633,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		# on the ground the map is a disc with a thin rim, the match clock on a tab at its top
 		inner = Rect2(r.position + Vector2(5, 5), r.size - Vector2(10, 10))
 		mm_circ = Vector3(r.get_center().x, r.get_center().y, inner.size.x * 0.5)
-		c.draw_circle(r.get_center(), s * 0.5 + 2.0, Color(0.02, 0.02, 0.04, 0.9))
+		c.draw_circle(r.get_center(), s * 0.5, Color(0.02, 0.02, 0.04, 0.9))
 		c.draw_circle(r.get_center(), inner.size.x * 0.5, Color(0.07, 0.07, 0.14, 0.92))
 	# riding in or dropping: the whole map. On the ground: a close view that follows you.
 	var view := Rect2(Vector2.ZERO, Vector2(w.w, w.h))
@@ -812,9 +812,9 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	WaysOutHud.draw(self)
 	var left := m.length - m.time
 	var late := left < 30.0
-	var tab := Rect2(Vector2(mm.get_center().x - 20, mm.position.y - 15), Vector2(40, 13))
+	var tab := Rect2(Vector2(mm.get_center().x - 20, mm.position.y - 12), Vector2(40, 10))
 	_rounded(tab, Color(0.71, 0.79, 0.78, 0.85) if not late else Color(BAD, 0.9), 3)
-	_ctext(Vector2(tab.get_center().x, tab.end.y - 2.5), _fmt(left), 11, Color(0.06, 0.08, 0.1), big)
+	_ctext(Vector2(tab.get_center().x, tab.end.y - 1.5), _fmt(left), 9, Color(0.06, 0.08, 0.1), big)
 	var r := Rect2(Vector2(5, mm.end.y + 4), Vector2(MM_D + 6, 16))
 	mm_bottom = r.end.y
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
@@ -830,9 +830,9 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		var lw := big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		HudStyle.lean_text(c, Vector2(r.end.x - lw - 2, r.position.y + 11), lt, 10, INK, 3)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
-	var bar := Rect2(Vector2(r.position.x + 2, r.end.y - 2), Vector2(r.size.x - 4, 3))
+	var bar := Rect2(Vector2(r.position.x + 7.7, r.end.y - 3), Vector2(r.size.x - 15.4, 4))
 	c.draw_rect(bar, Color("242f3e"))
-	c.draw_rect(Rect2(bar.position, Vector2(bar.size.x * prog, 3)), BAD if late else Color("0863d4"))
+	c.draw_rect(Rect2(bar.position, Vector2(bar.size.x * prog, bar.size.y)), BAD if late else Color("0863d4"))
 	if m.rolling:
 		SessionRow.draw(self, Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 42)))
 

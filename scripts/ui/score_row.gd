@@ -6,7 +6,7 @@ extends RefCounted
 ## capture box, the backpack) in a small line under it. Right-anchored; positions are layout px.
 
 const ICON_Y := 17.0         # icon centres (ref y 27 of the game picture at 2000 wide)
-const ICON_S := 6.5          # Icons scale (ref icons ~15 px at 1080p)
+const ICON_S := 7.5          # Icons scale (ref icons ~15 px at 1080p)
 const PITCH := 28.0          # px between counters
 const FIRST_R := 108.0       # px from the right edge to the rightmost counter's centre
 const RULE_Y := 29.5         # the thin rule between icons and counts
@@ -17,6 +17,7 @@ const CUR_R := 38.0          # px from the right edge to the currency number's r
 const CUR_Y := 23.0          # its baseline
 const CUR_FS := 20
 const CUR_COL := Color("e8f8d0")    # sampled
+const COIN_D := 17.0         # px: the coin behind the gem (ref dia 26 at 1080p)
 const COIN_R := 22.0         # px from the right edge to the gem's centre
 const RULE_COL := Color("9cb8ce")   # sampled
 const CARRY_Y := 60.0        # the carry line's baseline
@@ -47,7 +48,8 @@ static func draw(H, sz: Vector2) -> float:
 	var gems := "%d" % p.gems
 	var gw := TextCache.width(HudStyle.BIG, gems, CUR_FS)
 	HudStyle.text(c, Vector2(sz.x - CUR_R - gw, CUR_Y), gems, CUR_FS, CUR_COL if p.gems > 0 else HudStyle.MUTED)
-	Icons.draw(c, "gem", Vector2(sz.x - COIN_R, CUR_Y - 7.0), 9.0, HudStyle.GOLD)
+	c.draw_circle(Vector2(sz.x - COIN_R, CUR_Y - 7.0), COIN_D * 0.5, Color(HudStyle.GOLD, 0.35))
+	Icons.draw(c, "gem", Vector2(sz.x - COIN_R, CUR_Y - 7.0), 6.0, HudStyle.GOLD)
 	_carry(H, sz, p)
 	return CARRY_Y + 8.0
 

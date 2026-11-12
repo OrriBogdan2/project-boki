@@ -5,8 +5,8 @@ extends RefCounted
 ## line over the column. Hover
 ## a slot for what it does. Drawn by Hud with its own helpers (state: only the cached upgrade line).
 
-const CELL := 26.0             # px, each round slot (ref ~35 at 1080p; a little bigger to hover)
-const GAP := 4.0
+const CELL := 23.0             # px, each round slot (ref 34 at 1080p)
+const GAP := 2.5               # px between them (ref pitch 38)
 const PAD := 14.0              # px from the right edge
 const BOTTOM := 696.0          # px: the column's foot (bottom-anchored, level with BeltHud's row)
 

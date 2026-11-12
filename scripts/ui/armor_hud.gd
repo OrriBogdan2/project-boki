@@ -7,7 +7,7 @@ extends RefCounted
 ## Look: HudStyle.
 
 const POP := 0.5               # seconds the badge pops after a level-up
-const RADIUS := 17.5           # px: the badge at rest
+const RADIUS := 16.0           # px: the badge at rest (ref dia 52 at 1080p, outline included)
 
 ## The badge centred on `at`: a shield in the tier's colour ringed by progress.
 static func badge(hud, at: Vector2, p: Hunter) -> void:

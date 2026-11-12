@@ -4,7 +4,7 @@ extends RefCounted
 ## owner's 11-12 reference puts it, scripts/ui/HUD_SPEC.md), with the magazine, the reload or the
 ## melee combo under it. Hover it for the weapon's card. Bottom-anchored like HudVitals.
 
-const AT := Vector2(210, 666)        # px: the silhouette's centre (ref: x 171..250, y 650..682)
+const AT := Vector2(210, 662.5)        # px: the silhouette's centre (ref: x 171..250, y 650..682)
 const ICON_S := 42.0                 # Icons scale: a rifle spans about 76 px
 const SIL := Color("eef6fb")         # the silhouette: near-white with a cool tint, like the ref
 const ELEM_MIX := 0.35               # how far an element tints the silhouette
