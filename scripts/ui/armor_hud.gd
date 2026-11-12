@@ -2,15 +2,15 @@ class_name ArmorHud
 extends RefCounted
 ## Armor levelling on the HUD. Everyone starts on the same base armor; it levels up as you deal
 ## damage to rival hunters (Hunter.armor_gain: monsters count a third, a knock adds a big chunk), and
-## each level adds plates. HudVitals shows the tier word and a progress hairline by the armour strip;
-## this adds a shield badge on the portrait, ringed by that progress, that pops on a level-up.
+## each level adds plates. HudVitals shows the armour itself; this is the round shield badge beside
+## the portrait, in the tier's colour, ringed by progress to the next tier, that pops on a level-up.
 ## Look: HudStyle.
 
 const POP := 0.5               # seconds the badge pops after a level-up
-const RADIUS := 19.0           # px: the badge at rest
+const RADIUS := 17.5           # px: the badge at rest
 
-## The badge at the portrait's bottom-right corner: a shield in the tier's colour ringed by progress.
-static func badge(hud, pr: Rect2, p: Hunter) -> void:
+## The badge centred on `at`: a shield in the tier's colour ringed by progress.
+static func badge(hud, at: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = hud.c
 	var seen: int = int(hud.get_meta("armor_seen", -1))
 	if seen >= 0 and p.armor_tier > seen:
@@ -23,10 +23,9 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	if pop > 0.0:
 		grow = 1.0 + 0.35 * sin(k * PI)
 	var col: Color = p.armor_col()
-	var at := pr.position + Vector2(pr.size.x - 6, pr.size.y - 6)
 	var r := RADIUS * grow
 	if pop > 0.0:
-		c.draw_style_box(HudStyle.box(Color(0, 0, 0, 0), 16, Color(col, 1.0 - k), 4), pr.grow(4.0 + k * 18.0))
+		c.draw_arc(at, RADIUS + 4.0 + k * 18.0, 0, TAU, 40, Color(col, 1.0 - k), 4.0, true)
 	c.draw_circle(at, r, HudStyle.SHADE)
 	c.draw_arc(at, r, 0, TAU, 40, HudStyle.SHADE_EDGE, 1.0, true)
 	c.draw_arc(at, r - 2.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)

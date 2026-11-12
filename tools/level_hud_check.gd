@@ -1,8 +1,9 @@
 extends RefCounted
-## --level-hud-check: the run level reads at a glance. The portrait carries a big level number with
-## an XP ring that fills toward the next level; a level-up pops the badge, washes the screen gold and
+## --level-hud-check: the run level reads at a glance. A level badge sits by the XP bar that fills
+## toward the next level; a level-up pops the badge, washes the screen gold and
 ## plays its own sound (audio/level_up.wav, made by tools/gen_sfx_ui.py); R shows locked (a
-## padlock and "6") until level 6, and can't be cast or ranked before then. Never touches the save.
+## padlock and "6") until level 6, and can't be cast or ranked before then; the vitals and ability row
+## keep the sizes measured from the owner's reference. Never touches the save.
 
 var bad := 0
 
@@ -61,5 +62,18 @@ func run(main: Node) -> void:
 	ok(P.lvl == 6 and P.can_level("ult") and hud.r_lock_text(P) == "UNLOCK", "level 6: R is ready to unlock ('%s')" % hud.r_lock_text(P))
 	P.level_slot("ult")
 	ok(int(P.slot_lv["ult"]) == 1 and hud.r_lock_text(P) == "", "unlocked: no lock on R any more")
+	# ---------------------------------------------------------------- 5. the measured layout (scripts/ui/HUD_SPEC.md)
+	# reference px (game picture 2000 wide, top at y 108) to layout px: x 0.64, y (y - 108) * 0.64
+	var near := func(ours: float, ref_px: float, what: String) -> void:
+		ok(absf(ours - ref_px * 0.64) <= 1.5, "%s: %.1f, reference %.1f" % [what, ours, ref_px * 0.64])
+	near.call(HudVitals.HP_H, 24.0, "health bar height")
+	near.call(HudVitals.HP_Y, 1115.0 - 108.0, "health bar top")
+	near.call(HudVitals.SLOT, 57.0, "ability slot size")
+	near.call(HudVitals.SLOT + HudVitals.SLOT_GAP, 69.0, "ability slot pitch")
+	near.call(HudVitals.SLOT_X, 407.0, "first ability slot x")
+	near.call(HudVitals.SLOT_Y, 1127.0 - 108.0, "ability slots top")
+	near.call(hud.MM_D, 262.0, "minimap size")
+	near.call(HudVitals.XP_Y, 1182.0 - 108.0, "XP bar top")
+	ok(RankMarks.NUMERALS[3] == "III", "a rank shows as a numeral on the slot")
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
