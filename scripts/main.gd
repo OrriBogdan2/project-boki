@@ -113,6 +113,9 @@ func _ready() -> void:
 				if String(a2).begins_with("--farm-seed="): fseed = int(String(a2).substr(12))
 			Save.no_write = true
 			Save.d = HomeGather.demo_save(a.substr(12) if a.length() > 12 else "empty", fseed)
+		if a == "--base-demo":      # a made-up base to show (GARDEN.md 9.8), never the real save
+			Save.no_write = true
+			Save.d = BaseDemo.save()
 		if a.begins_with("--test-kin="):
 			# test: a save with one kin "species:level:trust", ready to play at home
 			var tk := a.substr(11).split(":")
@@ -858,6 +861,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("visit", opts.get("visit", {}))
 			current.set("visit_id", String(opts.get("visit_id", "")))
 			current.set("spawn", String(opts.get("spawn", "")))
+			current.set("zone", GardenZones.landing(opts))
+			current.set("play_hub", bool(opts.get("play_hub", false)))
 			add_child(current)
 		"interior":
 			var In = load("res://scripts/home/interior.gd")
@@ -1152,11 +1157,16 @@ func _economy_check() -> void:
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
 	var sick: Dictionary = Save.d["roster"][0]
-	ok.call(not died and Care.starve_stage(sick) == "sick", 
-			"natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
-	for meal in 12: Care.feed(sick, "kibble"); Care.feed(sick, "kibble"); Care.tick(sick, 1200.0)
-	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"], 
-			"four hours of regular meals bring it back from sick (%s, %.0fh)" % [Care.starve_stage(sick), Care.starve_h(sick)])
+	var stage := Care.starve_stage(sick)
+	ok.call(not died and stage == "sick",
+		"natural_death off: 14 days unfed is sick at worst, never dead (%s)" % stage)
+	for meal in 12:
+		Care.feed(sick, "kibble")
+		Care.feed(sick, "kibble")
+		Care.tick(sick, 1200.0)
+	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"],
+		"four hours of regular meals bring it back from sick (%s, %.0fh)"
+		% [Care.starve_stage(sick), Care.starve_h(sick)])
 	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
 	# 6. the Soul Shrine brings one back, changed
