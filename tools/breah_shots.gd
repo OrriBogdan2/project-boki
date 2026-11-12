@@ -75,21 +75,38 @@ func _save_strip(file: String) -> void:
 	out.save_png(dir.path_join(file))
 
 ## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
+## The boulder's burst and the punch's blow, each shot on the frames after the dummy is first hurt.
 func _breah_lmb() -> void:
 	await _reset(7.0)
 	_aim(T.pos)
-	var tap := func(t: float): P.inp["fire"] = t < 0.06
-	var marks := [[0.36, "full", "lmb_boulder_a", "Boulder (LMB tap) landing: blue flash, debris", _on_target],
-		[0.42, "full", "lmb_boulder_b", "Boulder burst, a few frames on", _on_target]]
-	await _go(0.7, tap, marks)
+	var tap := func(t: float):
+		P.inp["fire"] = t < 0.06
+		_after_hit("lmb_boulder", "Boulder (LMB tap)")
+	await _go(0.8, tap)
 	await _reset(2.4)
 	_aim(T.pos)
-	var hold := func(t: float): P.inp["fire"] = t < 0.95
-	marks = [[1.0, "full", "lmb_punch_a", "Punch (LMB hold, release) hit frame: blue flash, debris", _on_target],
-		[1.06, "full", "lmb_punch_b", "Punch hit, a few frames on", _on_target],
-		[1.14, "full", "lmb_punch_c", "Punch hit, settling", _on_target]]
-	await _go(1.4, hold, marks)
+	var hold := func(t: float):
+		P.inp["fire"] = t < 0.95
+		_after_hit("lmb_punch", "Punch (LMB hold, release)")
+	await _go(1.5, hold)
 	P.inp["fire"] = false
+
+var _hit_frame := -1
+var _frames := 0
+
+## A close-up on the target 1, 3 and 6 frames after it is first hurt (the hit flash, then its debris).
+func _after_hit(file: String, what: String) -> void:
+	_frames += 1
+	if _hit_frame < 0 and T.hp < T.max_hp:
+		_hit_frame = _frames
+	if _hit_frame < 0:
+		return
+	for n in [1, 3, 6]:
+		if _frames - _hit_frame == n:
+			_take("full", "%s_%d" % [file, n], "%s, %d frames after the hit" % [what, n], _on_target)
+	if _frames - _hit_frame >= 6:
+		_hit_frame = -1
+		T.hp = T.max_hp
 
 func _breah_rmb() -> void:
 	await _reset(6.0)
