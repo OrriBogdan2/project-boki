@@ -27,6 +27,8 @@ const MUTATIONS := {
 var m: Node = null                  # the Match
 var w: World = null
 var defs := {}                      # biome id -> its data
+const HAZARD_FIRST := 2.0         # seconds: a trap's first strike (+0..4 s by its number, so they don't all go at once)
+const HAZARD_EVERY := 6.5         # seconds between a trap's strikes
 var hazards: Array = []             # {kind, pos, node, t, phase, tele, ...}
 var pending: Array = []             # delayed effects {t, fn}
 var hz_ent: Ent = null              # stands in for "the environment" as a damage source (never credited)
@@ -68,7 +70,7 @@ func _danger(p: Vector3) -> int:
 # ------------------------------------------------------------------ spawning
 ## The monsters for a camp, from its region's table: base monster kinds, weighted. Empty when the
 ## camp isn't in a biome (the match's own mix is used then).
-func camp_comp(c: Dictionary) -> Array:
+func camp_comp(c: Dictionary, ci := 0) -> Array:
 	var B := _biome(c["pos"])
 	var mobs: Array = B.get("mobs", [])
 	if mobs.is_empty():
@@ -84,13 +86,14 @@ func camp_comp(c: Dictionary) -> Array:
 			if String(e["kind"]) in ["brute", "sentinel"]:
 				out.append(String(e["kind"])); break
 	while out.size() < n:
-		out.append(String(_pick(mobs)["kind"]))
+		out.append(String(_pick(mobs, fposmod(float(ci * 7 + out.size()) * 0.618034, 1.0))["kind"]))
 	return out
 
-func _pick(entries: Array) -> Dictionary:
+## The entry at fraction u (0..1) of the weights: the same u, the same monster.
+func _pick(entries: Array, u: float) -> Dictionary:
 	var tot := 0.0
 	for e in entries: tot += float(e.get("w", 1.0))
-	var r := rng.randf() * tot
+	var r := u * tot
 	for e in entries:
 		r -= float(e.get("w", 1.0))
 		if r <= 0.0: return e
@@ -379,8 +382,10 @@ func place_hazards() -> void:
 
 func _hazard_spot(ii: int, taken: Array) -> Vector3:
 	var cells: Array = w.islands[ii]["cells"]
+	var spots := RandomNumberGenerator.new()
+	spots.seed = SpawnTable.map_key(w) + ii * 31 + taken.size()      # (the map's own dice, not the match's)
 	for _t in 60:
-		var c: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
+		var c: Vector2i = cells[spots.randi_range(0, cells.size() - 1)]
 		var i := w.idx(c.x, c.y)
 		if w.kind[i] != World.T_GROUND or w.edge_dist(c.x, c.y, 3) < 3 or w.stairs.has(i):
 			continue
@@ -396,7 +401,8 @@ func _add_hazard(kind: String, p: Vector3) -> void:
 	var n := Node3D.new()
 	m.add_child(n)
 	n.global_position = p
-	var hz := {"kind": kind, "pos": p, "node": n, "t": rng.randf_range(2.0, 6.0), "phase": "idle", "tele": null}
+	var first := HAZARD_FIRST + float(hazards.size() % 5)
+	var hz := {"kind": kind, "pos": p, "node": n, "t": first, "phase": "idle", "tele": null, "strikes": 0}
 	match kind:
 		"ice_patch":
 			var r := rng.randf_range(2.2, 3.4)
@@ -472,8 +478,9 @@ func _tick_hazards(dt: float) -> void:
 				if hz["phase"] == "idle" and float(hz["t"]) <= 0.0:
 					# pick a spot near the rod (near a hunter if one's close), mark it, then strike
 					var h := _near_hunter(p, 9.0)
-					var at := p + Vector3(rng.randf_range(-3, 3), 0, rng.randf_range(-3, 3))
-					if h: at = Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
+					hz["strikes"] = int(hz["strikes"]) + 1
+					var at := SpawnTable.ring_spot(p, int(hz["strikes"]) % 6, 6, 2.5)      # (a fixed round of six marks)
+					if h: at = Vector3(h.pos.x, h.pos.y, h.pos.z)
 					if w.is_void(at.x, at.z): at = p
 					at.y = w.ground_at(at.x, at.z)
 					hz["at"] = at
@@ -489,7 +496,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(at2 + Vector3(0, 0.4, 0), Color("fff9c0"), 30, 7.0, 0.35, 2.0, 1.2)
 						m.sfx("boom", at2, -4.0, 1.5)
 						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true})
-						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
+						hz["phase"] = "idle"; hz["t"] = HAZARD_EVERY
 			"lava_vent":
 				hz["t"] = float(hz["t"]) - dt
 				var core := n.get_node_or_null("Core") as MeshInstance3D
@@ -507,7 +514,7 @@ func _tick_hazards(dt: float) -> void:
 						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0})
 						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
 						if core: core.scale = Vector3.ONE
-						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
+						hz["phase"] = "idle"; hz["t"] = HAZARD_EVERY
 			"spore_pod":
 				var pod := n.get_node_or_null("Pod") as Node3D
 				if hz["phase"] == "idle":
@@ -557,7 +564,7 @@ func _tick_hazards(dt: float) -> void:
 								if to.length() > 0.6: f.impulse(to.normalized() * 3.2, 0.0)
 								if to.length() < 1.3: f.hurt(3.0 * float(m.T.get("mob", 1.0)), null, {"src": "hazard", "tags": ["mut", "hazard"]})
 					if float(hz["t"]) <= 0.0:
-						hz["phase"] = "idle"; hz["t"] = rng.randf_range(7.0, 10.0)
+						hz["phase"] = "idle"; hz["t"] = HAZARD_EVERY + 2.0
 
 # ------------------------------------------------------------------ loot
 ## Slot weights for gear found at p (by slot name): the biome and the map region lean toward

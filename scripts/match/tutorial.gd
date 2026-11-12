@@ -337,7 +337,7 @@ func _foes(kinds: Array) -> void:
 func _keep_foe(kind: String) -> void:
 	if m.mobs.any(func(x): return not x.dead) or int(m.time * 4.0) % 4 != 0:
 		return
-	var at := spot(5.5, randf() * TAU)
+	var at := spot(5.5, 0.8)
 	if at != Vector3.INF:
 		_tank(m.spawn_mob(kind, at))
 

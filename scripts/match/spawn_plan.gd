@@ -1,8 +1,8 @@
 class_name SpawnPlan
 extends RefCounted
-## Randomised spawns on a fixed map. The layout of an expedition map never changes, but each match
-## rolls which of a fixed set of candidate points are live: where the rare kin are, which vaults hold
-## a hoard, where the item caches lie, (later) which boss lair is awake. The full map (M) shows every
+## Fixed spawns on a fixed map. The layout of an expedition map never changes, and neither does which
+## of its candidate points are live (SpawnTable.spread): where the rare kin are, which vaults hold
+## a hoard, where the item caches lie, which boss lair is awake. The full map (M) shows every
 ## candidate of every category, so you can plan a drop around them.
 ##
 ## What the map tells you (the SUPERVIVE way of doing it):
@@ -115,21 +115,21 @@ func _derive() -> void:
 	var heart := w.heart_spot if w.heart_spot != Vector3.INF else Vector3.INF
 	var vault_isl: Array = [0] + order.filter(func(ii): return String(w.islands[ii]["role"]) in ["camp", "shrine"]).slice(0, 4)
 	for ii in vault_isl:
-		var p := _cell_on(ii, r, taken, 3)
+		var p := cell_on(ii, r, taken, 3)
 		if p != Vector3.INF and (heart == Vector3.INF or p.distance_to(heart) > 3.0):
 			add_candidate("vault", p, String(w.islands[ii].get("name", "")))
 	# rare kin: the quieter islands (groves and nests first), one spot each
 	var kin_isl: Array = order.filter(func(ii): return String(w.islands[ii]["role"]) in ["grove", "nest"]) + order.filter(func(ii): return not String(w.islands[ii]["role"]) in ["grove", "nest"])
 	for ii in kin_isl.slice(0, 8):
-		var p := _cell_on(ii, r, taken, 2)
+		var p := cell_on(ii, r, taken, 2)
 		if p != Vector3.INF: add_candidate("rare_kin", p, String(w.islands[ii].get("name", "")))
 	# caches: anywhere, two on each big island
 	for ii in order.slice(0, 6):
 		for _k in 2:
-			var p := _cell_on(ii, r, taken, 2)
+			var p := cell_on(ii, r, taken, 2)
 			if p != Vector3.INF: add_candidate("cache", p, String(w.islands[ii].get("name", "")))
 
-func _cell_on(ii: int, r: RandomNumberGenerator, taken: Array, min_edge: int) -> Vector3:
+func cell_on(ii: int, r: RandomNumberGenerator, taken: Array, min_edge: int) -> Vector3:
 	var w := m.world
 	var cells: Array = w.islands[ii]["cells"]
 	if cells.is_empty():
@@ -165,29 +165,22 @@ func _ground_near(at: Vector2) -> Vector3:
 	return best
 
 # ------------------------------------------------------------------ the roll
-## Which candidates are live this match. Seeded by the match seed (the same for everyone online),
-## on its own generator so it never shifts the rest of the match's dice.
-func roll(seed_val: int) -> void:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed_val * 92821 + 4099
+## Which candidates are live: the same ones in every match of the map, spread evenly through the
+## list (SpawnTable.spread). No dice.
+func roll() -> void:
 	for cat in shown_cats():
 		var pool: Array = of(cat)
-		var pk: Array = cats[cat].get("pick", [1, 1])
-		var n := clampi(r.randi_range(int(pk[0]), int(pk[1])), 0, pool.size())
+		var n := mini(int((cats[cat].get("pick", [1, 1]) as Array)[0]), pool.size())
 		if cat == "cache":
 			n = KeyChest.kept(n)      # caches are chests too: the same share as the map's
-		# shuffle with our own generator (Array.shuffle uses the global one)
-		for i in range(pool.size() - 1, 0, -1):
-			var j := r.randi_range(0, i)
-			var t = pool[i]; pool[i] = pool[j]; pool[j] = t
-		for i in n:
-			pool[i]["active"] = true
+		for c in SpawnTable.spread(pool, n):
+			c["active"] = true
 	rolled = true
 
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
 ## whatever a registered spawner brings.
 func spawn_all() -> void:
-	var wr := RandomNumberGenerator.new(); wr.seed = m.seed_val * 53 + 11
+	var wr := RandomNumberGenerator.new(); wr.seed = SpawnTable.map_key(m.world) + 11
 	for c in cands:
 		if not c["active"]:
 			continue
@@ -205,19 +198,19 @@ func spawn_all() -> void:
 				m.spawn_gear(String(gg["id"]), int(gg["rar"]), wp, "sc%d" % int(c["i"]), false)
 			"rare_kin":
 				if not m.net_on or m.is_host:
-					c["ref"] = _spawn_rare(p, wr)
+					c["ref"] = _spawn_rare(p, int(c["i"]), wr)
 			_:
 				var fn: Callable = spawners.get(String(c["cat"]), Callable())
 				if fn.is_valid():
 					c["ref"] = fn.call(self, c)
 
-func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
+func _spawn_rare(p: Vector3, idx: int, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
 	var pool: Array = Data.common_kin()
-	var sp: String = pool[r.randi_range(0, pool.size() - 1)]
+	var sp: String = pool[idx % pool.size()]
 	var rec := Save.new_kin(sp, "", m.kin_seed("rare"))
 	var lv: Array = m.T.get("kin_lvl", [1, 3])
-	rec["level"] = int(lv[1]) + r.randi_range(2, 4)
+	rec["level"] = int(lv[1]) + 3
 	Evo.simulate(rec, r)
 	rec["shimmer"] = Shiny.roll_wild(r, m.tier, true)   # a rare colour: twice the odds out in the open
 	Mutations.roll_wild(rec, r, m.tier, true)  # and rare mutations, five times as often

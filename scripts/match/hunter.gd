@@ -1031,7 +1031,7 @@ func do_dash() -> void:
 		use_ex = false           # a merge's dodge in the air: a normal dodge, once per airtime
 		air_dashed = true
 	if m.blight:
-		m.blight.noise(pos, "dash", self)     # a dash is loud enough for the Blight nearby
+		m.blight.noise(pos, "dash")     # a dash is loud enough for the Blight nearby
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
 		ak.dash_press_at = m.time      # its moves from here are the dash's (AirLimits)

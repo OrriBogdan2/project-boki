@@ -2537,7 +2537,8 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 			var bc := Vector2(float(bz[0]), float(bz[1])); var rad := float(bz[2])
 			for z in range(int(bc.y - rad - 1), int(bc.y + rad + 2)):
 				for x in range(int(bc.x - rad - 1), int(bc.x + rad + 2)):
-					if Vector2(x + 0.5, z + 0.5).distance_to(bc) > rad + rng.randf_range(-0.2, 0.3): continue
+					var edge := rad - 0.2 + 0.5 * float(hash(Vector2i(x, z)) % 100) / 100.0   # (same every match)
+					if Vector2(x + 0.5, z + 0.5).distance_to(bc) > edge: continue
 					if inb(x, z) and kind[idx(x, z)] == T_GROUND and island[idx(x, z)] == ii and edge_dist(x, z, 2) >= 2:
 						bush[idx(x, z)] = true
 		# hand-placed cover: boulder blocks, single trees, camp supply piles

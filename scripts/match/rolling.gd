@@ -50,6 +50,7 @@ const WIPE_PER_MIN := 0.03         # (earlier arrivals, simulated) chance a squa
 const XP_PER_MIN := 200.0          # (earlier arrivals) XP a bot makes in a minute out there. Was a 105 guess; --rolling-sim
                                    # --seed=5 measured a median 243/min on the map, 12.8% of it catch-up: ~215 base, less on a picked-over map
 const CAMP_RESPAWN := 240.0        # a cleared monster camp comes back after 4 minutes with nobody near
+const CAMP_TELE := 8.0             # ... and a ring on the camp shows it for the last 8 seconds
 const METEOR_EVERY := 360.0        # meteor showers (fresh gems) every 6 minutes of the session
 const LAND_CROWD_R := 30.0
 
@@ -281,13 +282,15 @@ func after_setup() -> void:
 		if rng.randf() < frac:
 			_empty_chest(c); opened += 1
 	var cleared := 0
-	for cp in camps:
-		if rng.randf() < frac:
+	for ci in camps.size():
+		var cp: Dictionary = camps[ci]
+		var turn := fposmod(float(ci) * 0.618034, 1.0)      # (which camps are picked over: the same ones every session)
+		if turn < frac:
 			for mb in cp["mobs"]:
 				if is_instance_valid(mb) and not mb.dead:
 					mb.hp = 0.0; mb.dead = true; mb.visible = false
 			# cleared some time ago: some come back soon after you land
-			cp["cleared_at"] = -rng.randf_range(0.0, CAMP_RESPAWN)
+			cp["cleared_at"] = -turn / maxf(frac, 0.01) * CAMP_RESPAWN
 			cleared += 1
 	if m.blight:
 		for team in team_land:
@@ -414,7 +417,7 @@ func tick(dt: float) -> void:
 		_track()
 	_camp_t -= dt
 	if _camp_t <= 0.0:
-		_camp_t = 5.0
+		_camp_t = 1.0
 		_camp_respawns()
 
 func _wave_in_air(w: Dictionary) -> bool:
@@ -594,7 +597,8 @@ func on_knock(h: Hunter, credit) -> void:
 func _camp_respawns() -> void:
 	if m.net_on and not m.is_host:
 		return
-	for cp in camps:
+	for ci in camps.size():
+		var cp: Dictionary = camps[ci]
 		var all_dead := true
 		for mb in cp["mobs"]:
 			if is_instance_valid(mb) and not mb.dead: all_dead = false; break
@@ -603,7 +607,8 @@ func _camp_respawns() -> void:
 		if float(cp["cleared_at"]) <= -1e8:
 			cp["cleared_at"] = m.time
 			continue
-		if m.time - float(cp["cleared_at"]) < CAMP_RESPAWN:
+		var left := CAMP_RESPAWN - (m.time - float(cp["cleared_at"]))
+		if left > CAMP_TELE:
 			continue
 		var p: Vector3 = cp["pos"]
 		var near := false
@@ -611,17 +616,13 @@ func _camp_respawns() -> void:
 			if not h.out and not h.extracted and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 22.0:
 				near = true; break
 		if near:
+			m.spawn_table.hide("camp%d" % ci)
 			continue
-		var made: Array = []
-		for kk in cp["comp"]:
-			var q := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
-			if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
-				q = p
-			q.y = m.world.ground_at(q.x, q.z)
-			var smb := m.spawn_mob(String(kk), q)
-			if m.biomes: m.biomes.dress(smb)
-			made.append(smb)
-		cp["mobs"] = made
+		if left > 0.0:
+			m.spawn_table.show("camp%d" % ci, p, left, CAMP_TELE, 2.5, Color("ffd86a"))
+			continue
+		m.spawn_table.hide("camp%d" % ci)
+		cp["mobs"] = SpawnTable.spawn_camp(m, p, cp["comp"])
 		cp["cleared_at"] = -1e9
 		stats["camp_respawns"] += 1
 

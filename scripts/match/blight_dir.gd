@@ -1,38 +1,34 @@
 class_name BlightDir
 extends RefCounted
 ## Runs the Blight for a match (docs/TONE_AND_THREATS.md §1, §1b): where Wardens stand, when and
-## where Skitters claw out of the ground, what they hear, and how strong they are.
+## where Skitters claw out of the ground (fixed nests on timers: SpawnTable), what they hear, and how
+## strong they are.
 ##
 ## Pacing (the owner's rule): you drop at level 1 with one ability and level up fast on monster
 ## camps, so the Blight starts weak and ramps. Its strength (lvl, 0 weakest .. 1 full) comes from:
 ##   - how long YOUR squad has been down on the islands (per squad, so late arrivals get a soft start)
 ##   - the region: the outer islands are safer than the core (an island's "danger" 0/1/2)
 ##   - the raid condition (RaidLook.BLIGHT: night and storms are worse)
-## and how many come depends on that and on noise: gunfire, blasts, opened chests, dashing and
-## running add "heat" to your squad, and enough heat brings Skitters out near you, hunting the
-## noise. Early on that's a lone Skitter now and then; Wardens' shrieks are only warnings.
+## and noise (gunfire, blasts, opened chests, dashing, running) sends the Blight already out there to
+## look. Nothing new spawns because of noise: Skitters come out of their nests on the nests' timers,
+## six seconds after a ring shows where. Wardens' shrieks are only warnings early on.
 ## Health and damage: early Blight die fast and hit soft (hp_k, dmg_k); later ones are the real thing.
 ##
 ## The host (or the offline game) spawns and runs them; everyone hears them and hides the ones
 ## out of sight. Their state reaches other players through Match's mob snapshots (Net).
 
 const LVL_MAX := 1.6
-const GRACE := 45.0               # seconds after a squad lands before anything comes for it
 const RAMP := 420.0               # seconds (per squad) from the soft start to full strength
-const HEAT_SPAWN := 1.0
 const CAP_BASE := 5               # Blight alive at once (all squads), on top of the Wardens
 const CAP_MAX := 18
 const LOUD := {"shot": 15.0, "boom": 24.0, "revive": 9.0, "kin": 8.0, "chest": 13.0, "dash": 7.0, "step": 4.5, "shriek": 16.0, "scan": 12.0}
-const HEAT := {"shot": 0.04, "boom": 0.15, "revive": 0.05, "kin": 0.02, "chest": 0.12, "dash": 0.03, "step": 0.0, "shriek": 0.25, "scan": 0.05}
 
 var m: Match
 var rng := RandomNumberGenerator.new()
 var raid_k := 1.0
 var host := true
 var land_at := {}                 # team -> match time its squad landed
-var heat := {}                    # team -> spawn heat
 var noises: Array = []            # {pos, loud, t, kind} the last few seconds of noise (for tests and the HUD)
-var _src_t := {}                  # noise source -> last time it added heat (rate limit)
 var _tick_t := 0.0
 var _vis_t := 0.0
 var _step_t := 0.0
@@ -107,15 +103,16 @@ func setup() -> void:
 		return
 	var w := m.world
 	for ii in w.islands.size():
+		rng.seed = SpawnTable.map_key(w) + ii * 977       # (the map's own dice: the same Wardens every match)
 		var dg := int((w.islands[ii] as Dictionary).get("danger", -1))
 		if dg < 0:
 			var c: Dictionary = w.islands[ii]
 			dg = 2 if region_k(Vector3(float(c.get("cx", 0.0)), 0, float(c.get("cz", 0.0)))) > 1.2 else (1 if region_k(Vector3(float(c.get("cx", 0.0)), 0, float(c.get("cz", 0.0)))) > 0.8 else 0)
 		var n := 0
 		match dg:
-			2: n = 1 + (1 if rng.randf() < 0.5 * raid_k else 0)
+			2: n = 1 + (1 if rng.randf() < 0.5 else 0)
 			1: n = 1 if rng.randf() < 0.8 else 0
-			_: n = 1 if rng.randf() < 0.22 * raid_k else 0
+			_: n = 1 if rng.randf() < 0.22 else 0
 		for _i in n:
 			var at := _warden_spot(ii)
 			if at != Vector3.INF:
@@ -159,8 +156,8 @@ func _warden_spot(ii: int) -> Vector3:
 		return p
 	return Vector3.INF
 
-## A random ground tile on an island, from the Blight's own dice (World.random_ground rolls the
-## world's, and the rest of the match shouldn't shift because the Blight is on).
+## A ground tile on an island, from the Blight's own dice (World.random_ground rolls the world's,
+## and the rest of the match shouldn't shift because the Blight is on).
 func _rand_ground(ii: int) -> Vector3:
 	var w := m.world
 	for _t in 500:
@@ -199,25 +196,14 @@ func skitters_alive() -> int:
 
 # ------------------------------------------------------------------ noise
 ## Something loud happened (Match.note_sound, chests, dashes, running). The Blight in earshot
-## come to look, and the squad that made it gets closer to drawing more.
-func noise(at: Vector3, kind: String, by = null) -> void:
+## come to look.
+func noise(at: Vector3, kind: String) -> void:
 	var loud: float = float(LOUD.get(kind, 10.0))
 	noises.append({"pos": at, "loud": loud, "t": m.time, "kind": kind})
 	if noises.size() > 48:
 		noises.pop_front()
 	if not host:
 		return
-	var src := ""
-	var team := -1
-	if by is Kin and (by as Kin).owner_h:
-		by = (by as Kin).owner_h
-	if by is Hunter:
-		team = (by as Hunter).team
-		src = (by as Hunter).nid + kind
-	if team >= 0 and m.time - float(_src_t.get(src, -9.0)) >= 0.5:
-		_src_t[src] = m.time
-		if squad_time(team) > GRACE:
-			heat[team] = float(heat.get(team, 0.0)) + float(HEAT.get(kind, 0.03)) * (0.6 + 0.6 * level(at, team))
 	for b in m.mobs:
 		if b is Blight and not b.dead:
 			var bb: Blight = b
@@ -241,8 +227,7 @@ func on_shriek(w: Blight, at_h: Ent) -> void:
 	var n := 1 + int(round(minf(l, 1.4) * 1.5)) + (1 if m.raid == "night" and l > 0.6 else 0)
 	n = mini(n, cap() - skitters_alive())
 	for i in n:
-		var a := TAU * float(i) / maxf(1.0, float(n)) + rng.randf() * 0.6
-		var p := w.pos + Vector3(cos(a), 0, sin(a)) * rng.randf_range(1.6, 3.0)
+		var p := SpawnTable.ring_spot(w.pos, i, n, 2.2)
 		if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
 			p = w.pos
 		var s := spawn("bl_skitter", Vector3(p.x, m.world.ground_at(p.x, p.z), p.z), l)
@@ -259,6 +244,7 @@ func tick(dt: float) -> void:
 		_vis_t = 0.1
 		_update_seen()
 		_cues()
+		if m.spawn_table: m.spawn_table.tick(self)
 	if not host:
 		return
 	_step_t -= dt
@@ -269,7 +255,7 @@ func tick(dt: float) -> void:
 				land_at[h.team] = m.time       # (matches without a skydrop start on the ground)
 			# running (not sneaking) is a little noise of its own; Blight right by you hear it
 			if h.grounded and not h.crouch and not h.out and not h.extracted and not h.downed and Vector2(h.vel.x, h.vel.z).length() > 3.6:
-				noise(h.pos, "step", h)
+				noise(h.pos, "step")
 	_lvl_t -= dt
 	if _lvl_t <= 0.0:
 		_lvl_t = 3.0
@@ -278,7 +264,6 @@ func tick(dt: float) -> void:
 	if _tick_t > 0.0:
 		return
 	_tick_t = 1.0
-	_spawn_tick(1.0)
 	_despawn_tick()
 
 ## Blight on the map grow with the match (Wardens, and Skitters between fights).
@@ -300,73 +285,31 @@ func _squads() -> Dictionary:
 		out[h.team].append(h)
 	return out
 
-func _spawn_tick(dt: float) -> void:
-	var sq := _squads()
-	var n_alive := skitters_alive()
-	var cp := cap()
-	for team in sq:
-		var t := squad_time(team)
-		if t < GRACE:
-			continue
-		var hs: Array = sq[team]
-		var anchor: Hunter = hs[0]
-		if not anchor.grounded or anchor.over_void():
-			continue
-		if m.lairs and not m.lairs.lair_of(anchor.pos, 2.0).is_empty():
-			continue
-		var l := level(anchor.pos, team)
-		# a slow trickle on its own, much faster with noise (noise())
-		heat[team] = float(heat.get(team, 0.0)) + dt * (0.012 + 0.05 * l)
-		if float(heat[team]) < HEAT_SPAWN:
-			continue
-		var near := 0
-		for b in m.mobs:
-			if b is Blight and not b.dead and b.mkind == "bl_skitter" and anchor.flat_dist(b) < 26.0:
-				near += 1
-		var near_cap := 1 + int(round(4.0 * minf(l, 1.2)))
-		if near >= near_cap or n_alive >= cp:
-			heat[team] = minf(float(heat[team]), HEAT_SPAWN * 1.5)
-			continue
-		heat[team] = float(heat[team]) - HEAT_SPAWN
-		var pack := 1 if l < 0.3 else (2 if l < 0.7 else 3)
-		if m.raid == "night" and l > 0.5: pack += 1
-		pack = mini(pack, mini(near_cap - near, cp - n_alive))
-		var at := _burrow_spot(anchor, team)
-		if at == Vector3.INF:
-			continue
-		for i in pack:
-			var p := at + Vector3(rng.randf_range(-1.2, 1.2), 0, rng.randf_range(-1.2, 1.2))
-			if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
-				p = at
-			var s := spawn("bl_skitter", Vector3(p.x, m.world.ground_at(p.x, p.z), p.z), l)
-			s.hear(anchor.pos, 20.0)
-			n_alive += 1
-		m.fx.dust(at, 12)
+## A nest's turn (SpawnTable): its pack claws out of the ground and heads for the nearest hunter,
+## as many as the Blight's cap has room for.
+func burrow_out(at: Vector3, n: int) -> void:
+	if not host:
+		return
+	var l := level_here(at)
+	var pack := n + (1 if m.raid == "night" and l > 0.5 else 0)
+	var target := _nearest_hunter(at)
+	for i in mini(pack, cap() - skitters_alive()):
+		var p := SpawnTable.ring_spot(at, i, pack, 1.2)
+		if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
+			p = at
+		var s := spawn("bl_skitter", Vector3(p.x, m.world.ground_at(p.x, p.z), p.z), l)
+		s.hear(target, 20.0)
+	m.fx.dust(at, 12)
 
-## Where Skitters claw out of the ground: out of the squad's sight, 13-20 tiles off, on solid
-## ground (preferably their island), never in a lair.
-func _burrow_spot(anchor: Hunter, team: int) -> Vector3:
-	var w := m.world
-	var isl := w.island_of(anchor.pos.x, anchor.pos.z)
-	var fallback := Vector3.INF
-	for _t in 18:
-		var a := rng.randf() * TAU
-		var d := rng.randf_range(13.0, 20.0)
-		var p := anchor.pos + Vector3(cos(a), 0, sin(a)) * d
-		if w.is_void(p.x, p.z) or w.is_block(p.x, p.z) or w.in_bush(p.x, p.z):
-			continue
-		p.y = w.ground_at(p.x, p.z)
-		if absf(p.y - anchor.pos.y) > 3.0:
-			continue
-		if m.lairs and not m.lairs.lair_of(p, 3.0).is_empty():
-			continue
-		if m.sees(team, p):
-			continue
-		if w.island_of(p.x, p.z) == isl:
-			return p
-		if fallback == Vector3.INF:
-			fallback = p
-	return fallback
+func _nearest_hunter(at: Vector3) -> Vector3:
+	var best := at
+	var bd := INF
+	for h in m.hunters:
+		var d := Vector2(h.pos.x - at.x, h.pos.z - at.z).length()
+		if not h.out and not h.extracted and d < bd:
+			bd = d
+			best = h.pos
+	return best
 
 ## Idle Skitters far from everyone burrow away, so the map doesn't fill up.
 func _despawn_tick() -> void:

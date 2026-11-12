@@ -473,11 +473,11 @@ func _call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 	var room := GUARD_CAP - _guards_alive(L)
 	var pool: Array = ["skitter", "skitter", "spitter", "bomber"] + (["brute"] if m.tier >= 1 else [])
 	for i in mini(n, room):
-		var a := randf() * TAU
-		var p: Vector3 = at + Vector3(cos(a), 0, sin(a)) * randf_range(2.5, 4.5)
+		var p := SpawnTable.ring_spot(at, i, n, 3.5)
 		if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z) or inside(L, p, 0.5):
 			p = at + Vector3(L["out"].x, 0, L["out"].y) * 2.5
-		var g := m.spawn_mob(String(pool[randi() % pool.size()]), Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
+		var kind := String(pool[(L["guards"].size() + i) % pool.size()])
+		var g := m.spawn_mob(kind, Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 		g.camp = at
 		g.st = "chase"
 		g.tgt = L["user"] if L["user"] != null else null
