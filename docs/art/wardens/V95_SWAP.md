@@ -73,3 +73,6 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Body6 picks (2026-11-11): Cinder, Vex, Lace, Sparkle; Sable on her body5 pick
+Specs point at the pick (`~/meshy/v95/<Name>/r2/body6/pick.txt`: Cinder B, Vex A, Lace B, Sparkle B; Sable `r2/body5/cand_3.glb`) and were re-swapped. Cinder and Lace use cut masters (`cinder_v95_body6_body.glb`, `lace_v95_body6_body.glb`). Cinder, Vex and Lace come from ext/hunters3d-0246 c1c338c19; Sparkle was re-swapped from her pre-swap glb with the 2d5a5d20d tools (see her IMPORT.md); all with every clip of the 0.24.5 line copied on by `glb_add_clips.py`. Start a re-swap from the pre-swap game .glb, never from the swapped one (Sparkle's gum bone moved twice in c1c338c19).

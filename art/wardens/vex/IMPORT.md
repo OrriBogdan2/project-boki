@@ -41,3 +41,6 @@ FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_mu
 Head: a separate Meshy scan of a v2 head sheet, placed on the body by its eye line and chin (H_EYE, H_CHIN in build.sh, read on the scan's
 gridded front render); the scan's braid is cut and rebuilt on the spring chain. Gun length elbow to muzzle 0.55 m = 31% of her height
 (the turnaround: about 30%).
+
+## Body6 (2026-11-11, patch 0.24.6)
+Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/vex_v95.json`) onto the body6 pick cand_A from `~/meshy/v95/Vex/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick). The 0.24.5 line's clips (all of them, incl. cheer, give, pet) were copied onto the new body by node name (tools/art1/glb_add_clips.py; same skeleton).

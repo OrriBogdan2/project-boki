@@ -593,7 +593,8 @@ def main():
         bake()
     bpy.ops.wm.open_mainfile(filepath=os.path.join(WORK, "bake.blend"))
     bpy.context.scene.render.fps = FPS
-    low, kept = bpy.data.objects["Low"], bpy.data.objects["Kept"]
+    low = bpy.data.objects["Low"]
+    kept = next(o for o in bpy.data.objects if o.name.startswith("Kept"))      # ("Kept.001" when the game glb has an object of that name)
     img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
     img.name = "atlas"
     sole = bpy.context.scene["sole"]
