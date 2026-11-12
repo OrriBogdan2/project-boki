@@ -4,12 +4,13 @@ extends "res://tools/glide_shots.gd"
 ## early landing and the settle. <dir>/{back,side}/f000.png... at 15 fps (the glide shots' match and camera), one
 ## FLUE_SHOT line a frame with the move, the bank and the body's tilt. Needs a renderer.
 
-const FLY_AT := 0.2        # s: the cast
-const LEFT_AT := 0.8       # s: the aim swings left of the heading
-const RIGHT_AT := 1.3      # s: and right of it
-const LAND_AT := 1.8       # s: X again
-const END_AT := 2.6        # s: the settle is long over
+const FLY_AT := 0.6        # s: the cast (the title splash is gone)
+const LEFT_AT := 1.2       # s: the aim swings left of the heading
+const RIGHT_AT := 1.7      # s: and right of it
+const LAND_AT := 2.2       # s: X again
+const END_AT := 3.0        # s: the settle is long over
 const SWING := 1.5         # rad: how far the aim sits off the heading in a turn
+const REACH := 24.0        # m: the flight's ground she looks for (about 22.7 m flown), so the landing is on land
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -32,7 +33,7 @@ func _flight(main: Node, dir: String) -> void:
 	h.lvl = 6
 	var sync := _sync(h)
 	var k := h.ak as AshwickKit
-	var heading := Vector3(1, 0, 0)
+	var heading := _over_ground(m, h.pos)
 	var step := 0
 	while step * Match.DT < END_AT:
 		var t := step * Match.DT
@@ -55,8 +56,24 @@ func _flight(main: Node, dir: String) -> void:
 			print("FLUE_SHOT f%03d %-8s bank=%5.1f %s" % [i, k.anim_id, rad_to_deg(h.anim.glide_bank), _body(h)])
 			_aim(h, 180.0, 0.25)
 			await _grab(dir.path_join("back/f%03d.png" % i))
-			_aim(h, 90.0, 0.1)
+			_aim(h, 90.0, 0.35)     # (above the grass)
 			await _grab(dir.path_join("side/f%03d.png" % i))
 		step += 1
 	m.queue_free()
 	await tree.process_frame
+
+## Of 16 headings, the one with the most ground under the next REACH metres (no abyss under the flight).
+func _over_ground(m: Match, from: Vector3) -> Vector3:
+	var best := Vector3.RIGHT
+	var most := -1
+	for i in 16:
+		var d := Vector3.RIGHT.rotated(Vector3.UP, TAU * i / 16.0)
+		var n := 0
+		for r in int(REACH):
+			var p := from + d * float(r + 1)
+			if m.world.ground_at(p.x, p.z) > World.VOID + 1.0:
+				n += 1
+		if n > most:
+			most = n
+			best = d
+	return best

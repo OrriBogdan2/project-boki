@@ -361,4 +361,5 @@ Flue Flight clips still wanted (Blender host; the game plays `jet` 1.0 s, hold f
 - `jet_up` 0.22 s: the take-off hover with both palms turned down and out, fingers spread, the fire gathering (the shipped `jet` keeps
   the hands at her sides, so only the new palm embers show it). The map takes one clip per kit move, so the kit would need a `lw_jet_up` move for it.
 - `jet_bank_l` / `jet_bank_r` (optional): a lean of the whole pose into a turn; the procedural roll (`bank`) covers it until then.
-- Strip: `--flue-flight-shots` (docs/shots/cinder-flue-clips/flight_strip.jpg, back row over side row: cast, hover, flight, turn left, turn right, early landing; bank -24 to +24 degrees).
+- Strip: `--flue-flight-shots` (docs/shots/cinder-flue-clips/flight_strip.jpg, xvfb; back row over side row: cast, hover, flight, turn left, turn right, early landing, settle; the shown body rolls -15 to +22 degrees into the turns and is upright again 0.2 s after the landing; she touches down 0.25 s after X, `--ashwick-combo-check` times it).
+- The glb still holds a weapon in her right hand in these clips (DECISIONS 2026-11-07: no weapons); that is the art pass, not the clip map.
