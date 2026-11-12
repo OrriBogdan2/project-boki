@@ -354,55 +354,70 @@ On the wide match camera Hunters are drawn 2.1x bigger, but a round starts at a 
 0.95 m), so a Lace arrow was drawn 1.3 m from her bow. Now the round's look leaves the drawn weapon's muzzle:
 `content/archetypes/<id>.json` "muzzle" maps a slot (lmb, rmb, e, r, x, or a kit's own `lmb_l` / `lmb_r` hand) to the
 model's anchor empties (first one found; "default" is `weapon_muzzle`, which every .glb has on its weapon, so it
-scales with the Hunter and follows its pose). Neve's palms (her blade tip is 2 m out), Meeko's palm for the seed and
-Sable's hands for Encore are the ones that differ.
-- Looks only. `Match.spawn_shot` gives a round tagged `extra.muz` (the Hunter's weapon, `KinExec` projectiles, the
-  kits' own throws tag their slot) `s["vis"]`: the offset from its gameplay start to the point of the camera's view
-  ray through the muzzle at the round's own height (`CamRig.view_dir`). The looks (the plain round and its trail,
-  `KitLooks`, `CareLook`, `PinFx`, `DjFx` and `LdFx` skins, the muzzle flash) are drawn at `Muzzle.drawn`: at the
-  muzzle, easing onto the round's line over 3 m. The round (start, aim, speed, reach, hits, Net) is untouched:
-  the combo checks hold at 0 fails, as they did. An earlier try that moved the round itself broke them (a weapon
-  held 1 m off the aim line sends a close shot past a foe).
-- Sparkle's bolt keeps its own `VVFx.ride` from-the-fingertip ease (the previous job); the check counts it by its
-  muzzle points. A look that is not one of the listed skins (a kit's own mesh drawn from `s["pos"]`) still starts at
-  the body: Gunslinger's burr lane, Kael's chain rope, Albert's hammer, cones and zones.
-- `--muzzle-live-check`: each of the 13 Hunters presses LMB, RMB, E, R and X in a real match; the look of each round
-  must start within 0.15 m (on screen) of that slot's weapon point two frames later. It replaces Sparkle's
-  fingertip row. `--muzzle-shots` records each Hunter firing at the match camera (GPU); `tools/muzzle_sheet.sh` makes the
-  sheet. docs/shots/muzzle-fire/ has the table and the sheet from software GL (very low quality: Hunters are blobs, rounds
-  barely show); the real-GPU take is jobq 20261112-150251-22092, queued at the time of writing.
-- Not a round, so not covered (a cone, zone, hook, dash, melee swing or beam is drawn by its own effect, not
-  `spawn_shot`): Cinder LMB/E/R/X, Albert everything, Tenzo RMB/E/R/X, Grimble E/R, Vex RMB/E/R/X, Kael LMB/RMB/R/X,
-  Sparkle E/R/X, Motley E/R/X, Neve E/R/X, Meeko E/R/X, Sable RMB/R, Lace R/X, Gil (no kit moves). The Boki Q glove and
-  Boki's own shots are not Hunter rounds. The other player's game gets the round from the net event without the
-  offset, so their view of your rounds still starts at the body offset (a Net change; not done).
+scales with the Hunter and follows its pose). Neve's palms (her blade tip is 2 m out), Meeko's palm for the seed,
+Sable's right hand for the Bola and her hands for Encore are the ones that differ.
+- Looks only. `Muzzle.leave` tags a round (`Match.spawn_shot` for any `extra.muz`: the Hunter's weapon, `KinExec`
+  projectiles, the kits' own throws; Sable's alternating pistols and her Bola directly) with its anchor. The looks
+  (the plain round and its trail, `KitLooks`, `CareLook`, `PinFx`, `DjFx` and `LdFx` skins, the muzzle flash, the
+  Bola) are drawn at `Muzzle.drawn`: at the point of the camera's view ray through the anchor as it is drawn this
+  frame (`CamRig.view_dir`), at the round's own height, easing onto the round's line over 3 m. Following the anchor
+  matters: Meeko's lantern swings 0.2-0.5 m a frame through her shot clips, so a point read at release missed it.
+  The round (start, aim, speed, reach, hits) is untouched: the combo checks hold at 0 fails. An earlier try that
+  moved the round itself broke them (a weapon held 1 m off the aim line sends a close shot past a foe).
+- The other player's game: the "s" event carries the shooter's nid and slot (decision 0061, Net 0.24.6), and that
+  game tags its copy from its own model of the shooter, so your rounds leave your weapon on their screen too. Sable's
+  left-pistol shots go out tagged `lmb`, so another game draws them from her right pistol.
+- Already drawn from a model socket by their own kit (not rounds): Cinder's flame stream (her palm, `tip()`), Kael's
+  Warchain (`anchor_chain` on his wrist), Vex's Burr Charge (the launcher's fire spot), Albert's hammer
+  (`anchor_hammer_head`), Meeko's Hearth Call tether (her hand).
+- Not leaving the weapon, so not covered: dashes, melee swings, zones and fields placed at the aim point, rings round
+  the body (Cinder E/R/X, Albert's slams, Tenzo RMB/E/R/X, Grimble E/R, Vex E/R/X, Sparkle E/R/X, Motley E/R/X,
+  Neve E/R/X, Meeko E/R/X, Lace R), Gil (no kit moves). The Boki Q glove and Boki's own shots are not Hunter rounds.
+- `--muzzle-live-check`: each of the 13 Hunters presses LMB, RMB, E, R, X and LMB again right after X (Lace's
+  Starpiercer arrows, the other ults' empowered shots) in a real match; each round's look must start within 0.15 m
+  (on screen) of that slot's weapon point two frames later, and the other game's copy of an LMB round must get the
+  same offset. Since the look follows its anchor, a tagged round reads 0.000: what the check catches is a round
+  that is not tagged (the Starpiercer arrows read 1.373 m before this change) or a slot mapped to the wrong anchor.
+  `--muzzle-shots` records each Hunter firing at the match camera (GPU); `tools/muzzle_sheet.sh` makes the sheet
+  (docs/shots/muzzle-fire/).
 
 On-screen distance (m) of the round's look start from the weapon point, per press, in `--muzzle-live-check` (before =
-the round's start, as drawn before this change; same weapon points):
+the look drawn at the round's gameplay start, as before this change; same weapon points). Sable's X before is the
+previous job's number (this branch's Encore already throws from her hands).
 
 | Hunter | key | rounds | before (m) | after (m) |
 |---|---|---|---|---|
-| Lace (Hem) | LMB | 1 | 1.335 | 0.013 |
+| Lace (Hem) | LMB | 1 | 1.335 | 0.000 |
 | Lace (Hem) | RMB | 1 | 1.294 | 0.000 |
 | Lace (Hem) | E | 5 | 1.002 | 0.000 |
+| Lace (Hem) | X, then LMB | 1 | 1.373 | 0.000 |
 | Cinder | RMB | 1 | 0.911 | 0.000 |
 | Tenzo (Tarek) | LMB | 1 | 0.747 | 0.000 |
-| Grimble | LMB | 7 | 1.147 | 0.107 |
+| Tenzo (Tarek) | X, then LMB | 1 | 0.748 | 0.000 |
+| Grimble | LMB | 7 | 1.147 | 0.000 |
 | Grimble | RMB | 1 | 1.204 | 0.000 |
 | Grimble | X | 6 | 1.202 | 0.000 |
+| Grimble | X, then LMB | 7 | 1.147 | 0.000 |
 | Vex | LMB | 1 | 0.359 | 0.000 |
+| Vex | X, then LMB | 1 | 0.363 | 0.000 |
 | Kael | E | 1 | 2.155 | 0.000 |
-| Sparkle (Ryzz) | LMB | 1 | 0.725 | 0.000 |
+| Sparkle (Ryzz) | LMB | 1 | 0.441 | 0.000 |
 | Sparkle (Ryzz) | RMB | 1 | 0.702 | 0.000 |
+| Sparkle (Ryzz) | X, then LMB | 1 | 0.613 | 0.000 |
 | Motley | LMB | 1 | 0.666 | 0.000 |
 | Motley | RMB | 1 | 0.666 | 0.000 |
+| Motley | X, then LMB | 1 | 0.666 | 0.000 |
 | Neve (Claire) | LMB | 1 | 1.153 | 0.000 |
 | Neve (Claire) | RMB | 1 | 1.299 | 0.000 |
-| Meeko (Pip) | LMB | 1 | 2.367 | 0.068 |
+| Neve (Claire) | X, then LMB | 1 | 1.335 | 0.000 |
+| Meeko (Pip) | LMB | 1 | 2.484 | 0.000 |
 | Meeko (Pip) | RMB | 1 | 0.666 | 0.000 |
+| Meeko (Pip) | X, then LMB | 1 | 2.122 | 0.000 |
 | Sable | LMB | 1 | 0.253 | 0.000 |
+| Sable | RMB | 1 | 0.792 | 0.000 |
 | Sable | E | 1 | 0.352 | 0.000 |
 | Sable | X | 1 | 0.331 | 0.000 |
+| Sable | X, then LMB | 1 | 0.524 | 0.000 |
 
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
