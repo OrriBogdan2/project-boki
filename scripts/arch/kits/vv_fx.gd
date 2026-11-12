@@ -36,6 +36,8 @@ const ECHO_CAP := 10           # after-images per hunter at most (each copies th
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
 const NO_EDGE := Color(0, 0, 0, 0)
+const DISC_CORE_A := 0.1       # alpha at a disc's centre (a zone is a lit rim, a soft inside; VFX_QUALITY)
+const DISC_EDGE := 0.9         # the DISC rim radius on its unit quad (shader edge_r): scaled so the rim sits on r
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -252,13 +254,14 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "ring", dur)
 
-## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
+## A disc on the ground, its rim on radius r (the hitbox edge): a jagged crackling rim in `rim`, a thin inside
+## (DISC_CORE_A at the centre), veins.
 ## Returns the node, so a long one can be ended early with cut().
 func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	_look(n, col, col2, rim)
+	_look(n, col, col2, rim).set_shader_parameter("core_a", DISC_CORE_A)
 	n.global_position = at + Vector3(0, 0.08, 0)
-	n.scale = Vector3(r, 1.0, r)
+	n.scale = Vector3(r / DISC_EDGE, 1.0, r / DISC_EDGE)
 	_play(n, "disc", dur)
 	return n
 

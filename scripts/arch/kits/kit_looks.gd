@@ -23,6 +23,7 @@ extends Node3D
 
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
+const WELL_RIM := Color(0.55, 0.25, 1.0, 0.95)     # the Nightwell's lit rim (its inside fades to 0 at the centre)
 ## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
 ## so a rock's crack pattern must not change what a bot decides).
 static var vis_rng := RandomNumberGenerator.new()
@@ -322,10 +323,16 @@ func _build_mask(n: Node3D) -> void:
 		var grin_at := Vector3(sin(a) * 0.1, 0.04, 0.07 + 0.035 * cos(a))
 		Models.part(mask, Models.box(0.045, 0.02, 0.018), slit, grin_at, Vector3.ONE, Vector3(0, -a * 0.6, 0))
 
-## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
-## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
+## Ostra's Nightwell, radius 1 (scaled to the well): a lit violet rim with a soft inner falloff, four spiral arms
+## of light turning on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
 func _build_well(n: Node3D) -> void:
-	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.14, 0.03, 0.3, 0.88)), Vector3.ZERO)
+	var floor_mat := Models.ring_mat(WELL_RIM, 0.1)
+	floor_mat.set_shader_parameter("fill", 0.0)
+	floor_mat.set_shader_parameter("wash", 1.0)
+	floor_mat.set_shader_parameter("halo", 0.6)
+	var floor_mesh := PlaneMesh.new()
+	floor_mesh.size = Vector2(2, 2)
+	Models.part(n, floor_mesh, floor_mat, Vector3(0, 0.015, 0)).name = "Floor"
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
