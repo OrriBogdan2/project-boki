@@ -114,7 +114,8 @@ func _live(m: Match, P: Hunter, hud) -> void:
 	var left := UtilityMore.gate_wait(P)
 	ok(left > 6.0 and left <= 8.0 and float(BeltHud.shown[tg]["recast"]) > 0.0,
 		"Twin Gate's slot counts down to its second press while the gates are open (%.1f s)" % left)
-	m.get_meta("gate_%d" % P.get_instance_id())["t0"] -= 8.0
+	m.get_meta("gate_%d" % P.get_instance_id())["t0"] -= 8.0      # 8 s on: armed, its 3 s cooldown long over
+	P.belt[tg]["cd"] = 0.0
 	await _frames(12)
 	ok(float(BeltHud.shown[tg]["recast"]) == 0.0, "once armed, Twin Gate's pill reads '%s' alone" % BeltHud.RECAST_MARK)
 	var n := int(P.belt[tg]["n"])
