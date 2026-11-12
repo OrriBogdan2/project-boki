@@ -44,7 +44,7 @@ static func draw(H) -> void:
 
 static func _tracked(H, sz: Vector2) -> void:
 	var pulse := 0.5 + 0.5 * sin(H.m.time * 5.0)
-	var c := Vector2(sz.x * 0.5, 96.0 + H.alerts_h)
+	var c := Vector2(sz.x * 0.5, 96.0)
 	var r := Rect2(c - Vector2(58, 14), Vector2(116, 28))
 	H._rounded(r, Color(0.05, 0.03, 0.03, 0.8), 14, Color(1.0, 0.35, 0.3, 0.6 + 0.4 * pulse), 2)
 	H.c.draw_arc(c + Vector2(-38, 0), 7.0, 0, TAU, 20, Color(1.0, 0.45, 0.35), 2.0, true)

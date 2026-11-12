@@ -15,10 +15,15 @@ const LEAN_RAMP := 0.3       # s a start takes to build the run speed on screen
 const EASE := 12.0           # 1/s: the weight shift and the lean ease in and out
 const RELEASE := 12.0        # 1/s: the foot pins let go of the legs
 const REACH_AT := 0.85       # of the slide: the swinging foot is over its spot, and comes down in place from there
+const FLIGHT_FROM := 0.12   # of a foot's way: it lifts before it travels (the sole is off the floor by then)
+const FLIGHT_TO := 0.88     # and has landed before the last of it
 const FREEZE_AT := 0.96      # of the slide: its spot stops following the body (the drawn body lags its speed a little)
 const CROUCH_MAX := 0.3      # a sneak or slide dip is not a stop
 
 static var _rules = null
+# (loaded when first used, not named as a type: a type reference would compile HunterMove ahead of Hunter and
+# GlideSpike's static init would then read HunterMove's rules before they exist)
+static var _move: GDScript = null
 
 var root: Node3D
 var skel: Skeleton3D
@@ -49,6 +54,8 @@ var stop_w := 0.0            # 0..1: the weight shifted back
 var lean_w := 0.0            # 0..1 of the start lean
 
 static func make(model: Node3D, sk: Skeleton3D, art_name: String) -> WardenStride:
+	if _move == null:
+		_move = load("res://scripts/match/hunter_move.gd")
 	if _rules == null:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
 	var st := WardenStride.new()
@@ -123,7 +130,7 @@ func _begin(vel: Vector3, spd: float) -> void:
 	low = spd
 	from_pos = root.global_position
 	dir = Vector3(vel.x, 0.0, vel.z).normalized()
-	slide_m = maxf(HunterMove.slide(spd), 0.01)
+	slide_m = maxf(_move.slide(spd), 0.01)
 	feet0 = _feet()
 	# (the trailing foot swings through; the leading one plants)
 	swing = 0 if _ahead(feet0[0]) < _ahead(feet0[1]) else 1
@@ -132,7 +139,7 @@ func _begin(vel: Vector3, spd: float) -> void:
 ## The idle spots at the end of what is left of the slide (HunterMove.slide of the speed now).
 func _aim(spd: float) -> void:
 	var end := root.global_transform
-	end.origin += dir * (HunterMove.slide(spd) + lead * spd)
+	end.origin += dir * (_move.slide(spd) + lead * spd)
 	if u < FREEZE_AT:
 		aimed = [end.origin, spd]
 	var kept: Vector3 = feet_to[swing]
@@ -158,7 +165,7 @@ func _stop(dt: float, spd: float) -> void:
 	shown = spd
 	var want := 1.0
 	if phase == 1:
-		u = clampf(1.0 - HunterMove.slide(spd) / slide_m, 0.0, 1.0)
+		u = clampf(1.0 - _move.slide(spd) / slide_m, 0.0, 1.0)
 		_aim(spd)
 		if u >= 1.0 or spd < WardenClips.STILL:
 			phase = 2
@@ -211,7 +218,7 @@ func _pose() -> void:
 			from.y = at.y
 			reach = 0.0 if phase == 1 else step_p
 			arc_p = reach if phase != 1 else 0.0
-		var goal := from.lerp(at, smoothstep(0.0, 1.0, reach)) + Vector3.UP * (arc * sin(PI * arc_p))
+		var goal := from.lerp(at, smoothstep(FLIGHT_FROM, FLIGHT_TO, reach)) + Vector3.UP * (arc * sin(PI * arc_p))
 		_plant(i, goal, pin_w)
 
 func _feet() -> Array:
