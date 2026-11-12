@@ -258,6 +258,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Char past 31; Char left alone | discarded; falls off after 5s | "passive: Char past 31 is discarded (burn, then 0)"; "passive: Char falls off all at once after 5s" |
 | Carpet over the abyss | never forms | "abyss: the carpet never forms over the void" |
 | A Boki merge mid-lance or mid-flight | the hose and the flight drop, nothing fires or is laid | "merge hold: linwick's lance is dropped, no fire mid-merge"; "merge hold: linwick's flight is dropped, nothing more is laid" |
+| LMB, RMB, G or the Merge key mid-flight, then landing | none fires in the flight (the Merge key and G's tap were leaking, now gated in the kit); nothing queued fires in the 0.3 s after landing; E fires, X lands on the press frame | "ult 66: in the flight LMB, RMB, G and the Merge key fire nothing"; "ult 66: nothing queued in the flight fires in the 0.3s after landing"; "ult 66: E fires in the flight"; "ult 66: X lands on the press frame" |
 
 ## Cancels (ability to ability)
 

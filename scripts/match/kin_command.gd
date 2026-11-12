@@ -69,7 +69,7 @@ static func is_engaged(k: Kin) -> bool:
 ## G tap toggles: beside you it goes (Sic at the cursor); out or fighting it comes back.
 static func tap(h: Hunter) -> void:
 	var k: Kin = h.kin
-	if k == null or h.downed or h.dropping or h.riding:
+	if k == null or h.downed or h.dropping or h.riding or (h.ak != null and h.ak.gate_kin_tap()):
 		return
 	if k.resting():
 		say(h, resting_text(k), Color("a2a8bb"))

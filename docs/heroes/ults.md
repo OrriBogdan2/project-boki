@@ -18,6 +18,7 @@ Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the cas
 | Sable (Shiv, Death Blossom) | 0.4 s ring grow, then 2 s of blades; moves, shoots and dashes freely | No lock; ring rides with her, free to move, shoot and dash | match; ring, cadence and damage measured in thief.md "Death Blossom: source vs ours" | thief.md Ultimate; `dj_ult_check` "she walks and fires freely", `dancer_ring` rows |
 
 ## Fixed
+- Cinder, Nov 12: the Merge key and G's tap still got through in the flight (a merge or a Sic started). Both gated in the kit (`AshwickJet.LOCKED`, `ArchKit.gate_kin_tap`); asserted by `ashwick_ult_check` "ult 66: in the flight LMB, RMB, G and the Merge key fire nothing".
 - Cinder: the card text (`ashwick.json` `x.desc`) still said the Cinder Shot works in the flight and Shift speeds it up. The kit, the hero sheet and the owner rule (Nov 5, item 66) say only the Furnace Cloak works. Text changed; asserted in the Cinder combo check. The hero sheet's cooldown cell said 32 s against the data's 36 s: fixed too.
 
 ## Left as they are
