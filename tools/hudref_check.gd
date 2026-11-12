@@ -312,7 +312,9 @@ func _mate_down(m: Match, hud, P: Hunter) -> void:
 func _frames(m: Match, hud, P: Hunter) -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x != P and x.team == P.team)[0]
 	mate.downed = false
-	m.knock(mate, m.hunters.filter(func(x): return x.team != P.team)[0], {})
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	m.knock(mate, foe, {})
+	mate.last_hit_by = foe      # (a hit does this; knock() alone does not)
 	await main.get_tree().process_frame
 	await hud.panels.draw
 	var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
@@ -329,6 +331,8 @@ func _frames(m: Match, hud, P: Hunter) -> void:
 	row = SquadFrames.shown.get(mate.nid, {})
 	ok(row.get("state", "") == "DEAD" and float(row.get("hp", 1.0)) == 0.0 and float(row.get("bleed", 1.0)) == 0.0,
 		"a dead teammate's row shows DEAD and no bars (%s)" % str(row))
+	ok(row.get("killer", "") == foe.nid and SquadFrames.shown.get(P.nid, {}).get("killer", "x") == "",
+		"the dead row carries the finisher's face (%s); live rows carry none" % str(row.get("killer", "")))
 	var teams := {}
 	for h in squad:
 		teams[h] = h.team

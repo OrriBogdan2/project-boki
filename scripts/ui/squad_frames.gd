@@ -4,7 +4,8 @@ extends RefCounted
 ## A row: a round portrait with the run level on its lower-left, a state label over the name, and a thin
 ## armour bar over the health bar in one slanted frame. Knocked: a red label, the portrait tinted red,
 ## the bleed-out in the health row, and a marker beside the row whose tail points at them (their world
-## ping is DownedMarks.ally_ping). Dead: the portrait greyed and cracked, no bars.
+## ping is DownedMarks.ally_ping). Dead: the portrait greyed and cracked, no bars, and the finisher's face
+## in a red disc at the row's end.
 ## Every size here is measured off the reference capture (scripts/ui/SQUAD_FRAMES_SPEC.md), in HUD
 ## units (the HUD is laid out at 1280x720 and scaled: 1 unit = 1.5 px at 1920x1080).
 
@@ -28,6 +29,9 @@ const LEAN := -0.22            # the label's lean (x shear per unit up)
 const CONDENSE := 0.82         # the label's width squeeze
 const MARK_DX := 106.0         # units from the portrait centre to the knocked marker's centre
 const MARK_R := 13.0           # units: the marker's round body (its tail reaches 2x further)
+const KILL_R := 11.5           # units: the killer disc (ref: a red disc at the marker's spot, 23 px across)
+const KILL_RIM := 2.5          # units: the red ring around the killer's face
+const KILL_COL := Color("e8304a")
 const FRAME := Color(0.01, 0.0, 0.02, 0.92)
 const NAME_COL := Color("eef4f2")
 const HP_COL := Color("f2ef10")      # health (yours and theirs)
@@ -42,7 +46,7 @@ const MARK_FILL := Color("e2faeb")
 const MARK_X := Color("e84b5b")
 const PORTRAIT_PX := 64        # px: the round portrait's texture cut
 
-## nid -> {"state", "row", "hp", "armor", "bleed"}: what the last draw showed (checks read it)
+## nid -> {"state", "row", "hp", "armor", "bleed", "killer"}: what the last draw showed (checks read it)
 static var shown := {}
 ## nid -> the level number on that row
 static var levels := {}
@@ -85,7 +89,7 @@ static func _row(hud, at: Vector2, h: Hunter, i: int) -> void:
 		st = String(hud._mate_state(h)[0])
 	var dead := st in ["DEAD", "DEATHBOX"]
 	_portrait(hud, at, h, st)
-	var rec := {"state": st, "row": i, "hp": 0.0, "armor": 0.0, "bleed": 0.0}
+	var rec := {"state": st, "row": i, "hp": 0.0, "armor": 0.0, "bleed": 0.0, "killer": ""}
 	if not dead and st != "EXTRACTED":
 		levels[h.nid] = h.lvl
 	HudStyle.text(c, at + Vector2(-R + 1.0, R - 0.5), str(h.lvl), LVL_PX,
@@ -109,6 +113,10 @@ static func _row(hud, at: Vector2, h: Hunter, i: int) -> void:
 			_bars(c, top, 0.0, rec["bleed"], col, 0.0)
 			if h != m.player:
 				_marker(hud, at + Vector2(MARK_DX, 0.0), h)
+	var by: Hunter = hud.mates.killer.get(h.nid)
+	if dead and by != null:
+		rec["killer"] = by.nid
+		_killer(hud, at + Vector2(MARK_DX, 0.0), by)
 	hud.mates.draw_row(hud, Rect2(at - Vector2(R, R), Vector2(MARK_DX + MARK_R, 2.0 * R)), h)
 	shown[h.nid] = rec
 
@@ -214,6 +222,13 @@ static func face(hud, h: Hunter, grey: bool) -> Texture2D:
 	if Portraits.has_art(ak):
 		return Portraits.cut(ak, Portraits.art_path(ak), Vector2i(PORTRAIT_PX, PORTRAIT_PX), grey)
 	return hud.portrait_grey(h) if grey else hud.portrait(h)
+
+## Beside a dead teammate's row: the Hunter who finished them, their face in a red disc.
+static func _killer(hud, at: Vector2, by: Hunter) -> void:
+	var c: CanvasItem = hud.c
+	c.draw_circle(at, KILL_R + 1.0, Color(0, 0, 0, 0.6))
+	c.draw_circle(at, KILL_R, KILL_COL)
+	disc(c, at, KILL_R - KILL_RIM, face(hud, by, false), SideColor.of(hud.m, by).darkened(0.4))
 
 ## Beside a knocked teammate's row: a pale burst with a red X, its long point toward where they lie.
 static func _marker(hud, at: Vector2, h: Hunter) -> void:

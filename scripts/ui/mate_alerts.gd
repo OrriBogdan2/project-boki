@@ -4,6 +4,7 @@ extends RefCounted
 ##   - their squad row (SquadFrames) carries it: the state label and portrait tint
 ##   - one short, faint line beside that row as it happens (LINE_S, at most LINE_A opacity)
 ##   - a sound cue
+##   - for a teammate lost to a Hunter, who finished them (`killer`, drawn on their squad row)
 ## The way to them is the squad arrow at the screen edge (Hud._draw_squad_markers) and their world ping
 ## (DownedMarks.ally_ping, which pops in from the moment in `since`).
 
@@ -15,6 +16,7 @@ const FADE := 0.4              # s: the line fades out over its last FADE
 var last := {}                 # nid -> the teammate's last squad state (Hud._mate_state label)
 var lines := {}                # nid -> {"text", "col", "t"}
 var since := {}                # nid -> the match time the teammate went down
+var killer := {}               # nid -> the Hunter who finished a fallen teammate (their row's killer disc)
 
 ## Watches the squad for changes of state (a line and a sound for each) and ages the lines.
 func track(H, p: Hunter, delta: float) -> void:
@@ -33,6 +35,10 @@ func track(H, p: Hunter, delta: float) -> void:
 		if now != was:
 			if now == "WISP":
 				since[h.nid] = H.m.time
+			if now in ["DEATHBOX", "DEAD"] and was in ["WISP", "ALIVE"]:
+				killer[h.nid] = _finisher(h)
+			elif now == "ALIVE":
+				killer.erase(h.nid)
 			_changed(h, was, now)
 
 ## The squad row's part: the line beside the row `r`.
@@ -55,6 +61,13 @@ func _changed(h: Hunter, was: String, now: String) -> void:
 		Sfx.play("warn", null, -8.0, 0.0, 0.6)
 	elif was == "DEATHBOX" and now == "DEAD":
 		_say(h, "soul lost", HudStyle.MUTED)
+
+## The Hunter whose hit last landed on `h` (a Boki's counts for its owner); null for a monster or the Blight.
+func _finisher(h: Hunter) -> Hunter:
+	var by: Ent = h.last_hit_by
+	if by is Kin and (by as Kin).owner_h:
+		by = (by as Kin).owner_h
+	return by as Hunter if by is Hunter and by != h and is_instance_valid(by) else null
 
 func _say(h: Hunter, text: String, col: Color) -> void:
 	lines[h.nid] = {"text": text, "col": col, "t": 0.0}

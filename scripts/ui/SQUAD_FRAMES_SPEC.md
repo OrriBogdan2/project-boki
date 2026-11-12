@@ -46,6 +46,7 @@ the lower half with 38% black (`SHADE`).
 | Name | near white | `NAME_COL` eef4f2 |
 | Knocked portrait tint | portrait averages #b57d8b | `TINT_KNOCK` (0.95, 0.2, 0.32) at 50% |
 | Dead portrait | light grey #cac9ca with a soft white 4-ray burst past the rim and a dark crack | grey cut under `TINT_DEAD` (60% light grey), `_burst`: four diagonal rays to 1.3 r (a soft wide one under a bright thin one), a dark crack line |
+| Killer disc (dead row, at the marker's spot) | red disc with a white emblem, ~23 px across, centre 188 px right of the portrait | `KILL_R` 11.5 units, `KILL_COL` e8304a; the finisher's face in it inside a `KILL_RIM` 2.5 ring (the ref's emblem is a class icon, ours is the Hunter portrait) |
 | Marker body / X | #e2faeb / #e84b5b | `MARK_FILL` / `MARK_X` |
 
 ## Ally ping (world)
@@ -63,7 +64,8 @@ the lower half with 38% black (`SHADE`).
   0.25 s (`PING_POP`, overshoot 1.3x, fades in over 0.08 s) from the knock (MateAlerts.since); its white
   inner arc drains with the bleed-out.
 - Dead: label (with the deathbox soul timer while they can still be brought back), grey cracked portrait,
-  no bars. The level number stays, as in the ref.
+  no bars. The level number stays, as in the ref. A killer disc at `MARK_DX` when a Hunter (or a Hunter's Boki) landed the last hit
+  (`MateAlerts.killer`, set on the ALIVE/WISP -> DEAD change, cleared on revive); a deathbox row (DEAD with the timer) carries it too.
 - Order: teammates, then you last. 2 or 3 rows; none in solo.
 - Timing of the ref's own transitions is not visible in a still: the pop and fades are ours.
 
