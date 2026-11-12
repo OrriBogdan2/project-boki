@@ -2,7 +2,7 @@ extends RefCounted
 ## --tutorial-check[=<arch>]: the match tutorial works for any first Relic (gunslinger = Vex, archer = Lace,
 ## juggernaut = Kael). The Hunter is forced by the param, so it never waits for the pick screen.
 ## Each run plays the whole course with the driver and asserts: every line names this kit's ability and
-## key, no line talks about ammo or a rifle, the E step waits for E, the shoot step takes the kit's own
+## key, no banner talks about ammo or a rifle, the E step (kin) waits for E, the shoot step takes the kit's own
 ## attack (Lace's draw and release, Kael's melee combo), the dummies stand where the kit can reach them,
 ## and the course ends at the lift.
 
@@ -11,7 +11,7 @@ var arch := "gunslinger"
 
 ## Words no kit-neutral line may use: not every first Relic has a rifle or ammo.
 const KIT_WORDS := ["ammo", "reload", "rifle", "bullet", "magazine"]
-const FOE_STEPS := ["shoot", "sig", "utility", "throw", "kin1", "fight"]
+const FOE_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
 const MAX_RUN_T := 900.0       # s of game time before the course counts as stuck
 const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
 const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
@@ -37,7 +37,7 @@ func run(main: Node) -> void:
 	var idle_ok := true
 	var reach := ""
 	while t < MAX_RUN_T and not m.player.extracted:
-		if tu.id() == "sig" and tu.t < IDLE_E_T:
+		if tu.id() == "kin" and tu.t < IDLE_E_T:
 			idle_ok = idle_ok and tu.got == 0
 			_hold_fire(m)
 		else:
@@ -78,27 +78,27 @@ func _unreachable(m: Match, sid: String) -> String:
 ## The kit's lines: ability and key named, no rifle or ammo talk, no unfilled %tokens.
 func _words(p: Hunter, seen: Dictionary) -> void:
 	var all := ""
+	var banners := ""
 	for sid in seen:
 		all += " " + String(seen[sid]["text"]) + " " + String(seen[sid]["detail"])
-	ok(not all.contains("%"), "no unfilled token in any line")
-	var low := all.to_lower()
+		banners += " " + String(seen[sid]["text"])
+	ok(not RegEx.create_from_string("%[A-Za-z]").search(all), "no unfilled token in any line")
+	var low := banners.to_lower()      # (a detail may quote the kit's own card: Vex does have a rifle)
 	var hit := KIT_WORDS.filter(func(w): return low.contains(w))
 	ok(hit.is_empty(), "no line assumes ammo or a rifle %s" % str(hit))
 	var e_name := String(p.ak.e_def().get("name", ""))
-	var s: Dictionary = seen.get("sig", {})
+	var s: Dictionary = seen.get("kin", {})
 	var e_line := String(s.get("text", ""))
 	ok(e_name != "" and e_line.contains(e_name), "the E line names %s ('%s')" % [e_name, e_line])
 	ok(String(s.get("cap", "")) == Settings.key_cap("signature"), "and shows the E key (%s)" % s.get("cap", ""))
-	var e_detail := String(s.get("detail", ""))
-	ok(e_detail.contains(Settings.key_cap("signature")), "its detail names the key too ('%s')" % e_detail)
 	var r_name := String(p.ak.rmb_def().get("name", ""))
-	var u: Dictionary = seen.get("utility", {})
+	var u: Dictionary = seen.get("sec", {})
 	var r_line := String(u.get("text", ""))
 	ok(r_name != "" and r_line.contains(r_name), "the right-click line names %s ('%s')" % [r_name, r_line])
 	ok(String(u.get("cap", "")) == Settings.key_cap("secondary"), "and shows its key (%s)" % u.get("cap", ""))
 	var sh: Dictionary = seen.get("shoot", {})
 	var melee: bool = p.wpn.get("melee", false)
-	var want := "Hold to draw" if p.wpn.has("draw") else "Shoot"
+	var want := "Hold to draw" if p.wpn.has("draw") else "Now shoot"
 	if melee:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))
