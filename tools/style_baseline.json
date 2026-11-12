@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 28,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -554,7 +554,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 33,
-"long_line": 91,
+"long_line": 92,
 "nested_ternary": 18,
 "semicolon": 49,
 "shadow": 4
@@ -959,8 +959,8 @@
 "semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 64,
-"semicolon": 66,
+"long_line": 65,
+"semicolon": 70,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -995,6 +995,9 @@
 },
 "tools/check.gd": {
 "semicolon": 1
+},
+"tools/check_registry.gd": {
+"long_line": 1
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,

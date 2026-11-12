@@ -1,6 +1,6 @@
 class_name BjornLunge
 extends RefCounted
-## Breaker's swing lunge (docs/heroes/bulwark.md, docs/decisions/0022-breaker-swing-lunge.md): every hammer swing
+## Breaker's swing lunge (docs/heroes/bulwark.md, docs/decisions/0061-breaker-swing-lunge.md): every hammer swing
 ## pulls him forward along the aim from the swing's start to its impact. The pull is added on top of the speed he
 ## already runs at along the aim (capped at his run speed), so a running swing travels further than a standing one.
 ## The Crushing Blow pulls "lunge.d" m (a part charge the short end, a full charge the long end), the 360 Smash's

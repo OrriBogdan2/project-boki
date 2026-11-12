@@ -90,7 +90,7 @@ func _hit(b: Dictionary) -> void:
 		any = true
 	var mid := (a + c) * 0.5
 	if any:
-		k.fx.bash(h.pos, n, reach, false)
+		k.fx.aegis_hit = 1.0          # (the wall flashes as it thrusts)
 		m.fx.ring(Vector3(mid.x, float(k.wall["y"]) + 0.3, mid.y), 0.9, Color("ffd27a"), 0.18)
 		m.sfx("bjorn_boop", h.pos, -3.0)
 	else:

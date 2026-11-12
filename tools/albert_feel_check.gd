@@ -1,5 +1,5 @@
 extends "res://tools/bjorn_launch_check.gd"
-## Breaker's feel pass (docs/decisions/0022-breaker-swing-lunge.md, docs/heroes/bulwark.md), run from
+## Breaker's feel pass (docs/decisions/0061-breaker-swing-lunge.md, docs/heroes/bulwark.md), run from
 ## --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the counts): the 0.9 body with its hitbox
 ## kept, the aegis boop, the Faultline hop and wider lane, the rope's auto-return and the swing lunges.
 ## Prints AKCHECK lines.
