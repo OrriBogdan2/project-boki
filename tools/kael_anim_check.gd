@@ -139,7 +139,7 @@ func _rig() -> Dictionary:
 
 func _fresh(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> void:
 	A.step(m, 2.2)                 # (the Searing Wave's burn ticks for 2 s)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	K.riposte.drop()
 	K.res = 0.0
 	K.enraged_t = 0.0           # (an Enrage would play jug_roar over the move)
@@ -196,8 +196,10 @@ func _hold(km: String, held: bool, what: String) -> void:
 	A.ok("kael anim: %s %s" % [km, "shows under the hold" if held else "never shows on a " + what],
 			shown.has(km) == held, ", ".join(shown.keys()))
 
-## Running flat out, the run clip steps at the source's cadence: a stride cycle at about 2.26 Hz, 4.5 footfalls a
-## second (briefs/hero-ref/juggernaut.md "Cadence"; 4.0-5.0 here, the footage is 5 fps).
+## Running flat out: WardenGait (main) sets the clip rate from the move speed over the run clip's foot speed, so the
+## planted feet stay put. The source's cadence (briefs/hero-ref/juggernaut.md "Cadence", ~4.5 footfalls/s) is not
+## chased any more (that was `loco.cadence`, retired for the gait layer): this asserts the gait layer's rate is in
+## charge and the run is no slower than the clip as keyed (3.0 footfalls/s), and prints the footfalls against 4.5.
 func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> void:
 	_fresh(m, P, K, home, T)
 	T.teleport(home + Vector3(0, 0, 30.0))
@@ -211,8 +213,10 @@ func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> vo
 	var length := cl.lib.get_animation(String(cl.d["loco"]["run"]["f"])).length
 	var per_s := rate * run_steps / length
 	print("RUN at %.2f m/s: clip rate %.2f, %.2f footfalls/s (%.2f Hz stride)" % [spd, rate, per_s, per_s * 0.5])
-	A.ok("kael anim: running, 4.0-5.0 footfalls a second (source about 4.5)", per_s >= 4.0 and per_s <= 5.0,
-			"%.2f/s at %.2f m/s" % [per_s, spd])
+	var foot: Array = cl.d["loco"].get("foot_mps", [1.0, 1.0])
+	A.ok("kael anim: running, the clip rate is the gait layer's (speed over foot speed) and no slower than keyed",
+			absf(rate - spd / float(foot[1])) <= 0.05 and per_s >= 3.0,
+			"rate %.2f, %.2f/s at %.2f m/s" % [rate, per_s, spd])
 	P.inp["move"] = Vector2.ZERO
 
 func kit() -> void:
@@ -312,9 +316,10 @@ func kit() -> void:
 	for f in ["dive", "recover"]:
 		print("EVENT meteor %-15s at %.3f into %s" % [f, ph.get(f, [-1.0, "?"])[0], ph.get(f, [-1.0, "?"])[1]])
 	var dv: Array = ph.get("dive", [-1.0, "?"])
+	var dive_clip := float(beats["jug_meteor"]["peak"]) - float(leads["jug_meteor"])
 	A.ok("kael anim: jug_meteor's dive starts on the kit's dive (the hang is the held pose)",
-			dv[1] == "jug_meteor" and absf(float(dv[0]) - float(beats["jug_meteor"]["peak"])) <= 0.04,
-			"kit dive at %.3f, clip %.2f" % [dv[0], beats["jug_meteor"]["peak"]])
+			dv[1] == "jug_meteor" and absf(float(dv[0]) - dive_clip) <= 0.04,
+			"kit dive at %.3f, clip %.2f - lead %.2f" % [dv[0], beats["jug_meteor"]["peak"], leads["jug_meteor"]])
 	_ev("meteor free", _until(m, K, func(): return K.meteor.phase == "", 1.0))
 	# dash (Rampage)
 	_fresh(m, P, K, home, T)

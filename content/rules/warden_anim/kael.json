@@ -79,7 +79,8 @@
 		},
 		"jug_meteor": {
 			"clip": "meteor",
-			"hold_from": 0.3
+			"hold_from": 0.3,
+			"lead": 0.14
 		},
 		"jug_meteor_land": {
 			"clip": "meteor_land",

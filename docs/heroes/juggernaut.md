@@ -391,7 +391,7 @@ holds the first frame (docs/art/wardens/CLIPS.md). Kit numbers untouched.
 | `jug_slam` | 0.6 s wind-up, blade cocked low, then the strike [f155-158] | 0.60 / 0.583 / 1.13 | same | matches; asserted |
 | `jug_lunge_wind` (held) | lane grows 0.6-0.8 s to full [f121-127] | pose from the hold threshold (0.3), held from 0.45 | same | matches; asserted (never on a tap) |
 | `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.03 / 0.217 (arrival) / 0.60 | lead -0.17: the coiled frame 0 holds through the travel, thrust 0.20 | fixed; asserted |
-| `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.217 | same | matches; asserted |
+| `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.217 (the old 0.2 s hang) | lead 0.14: the kit\'s hang is now <= 0.1 s (owner spec 11-10), dive 0.083 | fixed; asserted |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.25 / 0.233 / 0.40 | same | matches; asserted |
 | `jug_chain` / `jug_reel` | throw; pull about 0.4 s [f303-333] | throw 0.02 (hook at 0.183); reel 0.03 / pull from 0.017, arrive 0.283 | same | matches |
@@ -400,7 +400,7 @@ holds the first frame (docs/art/wardens/CLIPS.md). Kit numbers untouched.
 | `jug_spin` `jug_chainlunge` `jug_exdash` | spin on arrival [f333-336] | spin runs on the press (0.000); chainlunge 0.03 / 0.20 | same | left alone (the chain lunge is unlisted) |
 | `jug_lunge` perfect release (owner) | no source (the owner's window, not on film) | first window at 0.80 s of hold, the wind-up pose still from 0.75 s; thrust 0.20 / hit 0.217 | same | matches; asserted (pose still before the window, strike on the hit) |
 | Riposte phases | guard 0.4-1.0 s [f425-436]; strike and recover not on film (0.2 s frames) | guard 0.65 / strike 0.117 / recover 0.35; clip ends 0.08 s after the hand-off | same, the tail plays under the 0.16 s blend to the legs | matches the card; asserted per phase |
-| Run cadence (`run_f`) | stride ~2.26 Hz, ~4.5 footfalls/s [f12-17] | `run_f` 0.67 s loop, 2 plants: 3.0 footfalls/s (1.5 Hz) at 4.55 m/s | `loco.cadence` 1.5 (blended in over walk-to-run): 4.5/s (2.25 Hz) | fixed; asserted 4.0-5.0/s. The stride shortens to ~1.0 m, so the feet may slide a little at top speed (hero-ref §2 asks for the faster cadence anyway) |
+| Run cadence (`run_f`) | stride ~2.26 Hz, ~4.5 footfalls/s [f12-17] | `run_f` 0.67 s loop, 2 plants: 3.0 footfalls/s (1.5 Hz) at 4.55 m/s | main's WardenGait data (`stride`, `foot_mps`): rate 1.08, 3.2 footfalls/s at 4.6 m/s, feet planted | the `cadence` 1.5 key (4.5/s, feet slide) was dropped for the gait layer when merging main; for the footage cadence set `foot_mps` run to about 3.1 (rate 1.5), at the cost of foot slide. Asserted: rate = speed / foot_mps, 3.0+/s |
 
 Left alone: the tap-RMB overhead strike (ext/kael-tap-ult-1108 is unmerged; the Finishing Slam above is main's tap).
 An Enrage on a hit plays `jug_roar` over the move's clip (`_enrage_fx`), so a hit that fills Rage shows the roar, not
