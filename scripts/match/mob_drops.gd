@@ -4,7 +4,7 @@ extends RefCounted
 ## (MobDissolve.begin says when), so the body reads first and the loot after.
 
 ## Everything `mb` leaves where it fell: a carried chest key and the big ones' perk orbs always, and when
-## `loot` (not in the void, not its own blast) gems, armor, gear tunings, valuables, seeds and a Rift Key.
+## `loot` (not in the void, not its own blast) gems, armor, gear tunings, valuables and seeds.
 static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:
 	if not is_instance_valid(mb):
 		return
@@ -50,7 +50,3 @@ static func _loot(m: Match, mb: Mob, credit: Ent) -> void:
 		seed_odds = 0.0
 	if m.rng.randf() < seed_odds:
 		m.drop("seed", at + Vector3(0, 0.6, 0), 1, Data.pick_seed())
-	# a Rift Key: always from the Warden, sometimes from an elite (one that can be staggered, or a rare one)
-	var elite: bool = (mb.md.get("stag", false) or mb.rarity >= 3) and mb.mkind != "glimmer"
-	if m.exits and not m.exits.list.is_empty() and (mb.mkind == "warden" or (elite and m.rng.randf() < 0.06)):
-		m.exits.drop_key(at)

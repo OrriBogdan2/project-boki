@@ -198,6 +198,69 @@ func run(main: Node) -> void:
 	if not H.is_empty() and m.hud:
 		_kill(H, P, C)
 		ok(m.lairs.sealed_lair(P) == H and H.get("victory", false), "after the third kill you're locked in %s, the victory banner up" % String(H["name"]))
+	# ---------------------------------------------------------------- 5. the Sealed Lair quest seat
+	# (Limited Ways Out, QuestSeats)
+	# a match in the mode: one lair by the seed, locked before 2:00, then the first squad to kill its
+	# boss takes it and leaves by its updraft (a rival there doesn't); unused, it shuts at 5:30
+	m.over = true
+	m.queue_free()
+	await main.get_tree().process_frame
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 720.0, "seed": 21, "no_drop": true})
+	m.set_process(false)
+	P = m.player
+	P.set_arch("")
+	C = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
+	Q = m.hunters.filter(func(x): return x.team != P.team)[0]
+	keep = [P, Q]
+	for h in m.hunters:
+		h.ctrl = "idle" if h != P else "local"
+		h.inp["move"] = Vector2.ZERO
+	m.time = 10.0
+	_run(0.1)
+	var S: QuestSeats = m.exits.seats
+	ok(S != null and S.lair != null, "the mode's exits have the Sealed Lair seat")
+	if S != null and S.lair != null:
+		var K: QuestSeat = S.lair
+		var L: Dictionary = K.ref
+		var S2 := QuestSeats.new(m)
+		S2.build()
+		ok(is_same(S2.lair.ref, L) and L.get("seat", false), "the seed picks %s (again the same)" % L["name"])
+		m.lairs.open(L, P, "dial")
+		_run(0.1)
+		var locked: bool = K.state == QuestSeat.S.LOCKED and L["state"] == "sealed" and _gate_shut(L)
+		ok(locked and m.lairs.seat_wait(L).contains("opens in"),
+			"before 2:00 it's LOCKED: cracking the gate leaves it shut ('%s')" % m.lairs.seat_wait(L))
+		m.time = K.open_s - m.sess_t0 + 0.5
+		_run(0.2)
+		ok(K.state == QuestSeat.S.OPEN and L["state"] != "sealed" and not _gate_shut(L),
+			"at 2:00 it's OPEN and the gate cracked earlier opens (%s)" % L["state"])
+		_spot(Q, L["gate_c"] + Vector3(L["out"].x, 0, L["out"].y) * 4.0)
+		_kill(L, P, C)
+		ok(K.state == QuestSeat.S.TAKEN and K.team == P.team and not K.out,
+			"P kills the boss: TAKEN by team %d" % K.team)
+		m.knock(C, Q, {})
+		_spot(P, L["up"])
+		_run(0.3)
+		var how := String(m.result.get("how", ""))
+		ok(K.out and P.extracted and C.extracted and how == QuestSeats.HOW_LAIR and not Q.extracted,
+			"P steps into the updraft: P and downed C leave (how=%s), the rival stays" % how)
+		ok(K.refused == 0, "trail %s" % str(K.trail))
+		# a seat nobody takes: a second lair run on a seat of its own, shut at 5:30 and sealed again
+		for o in m.lairs.list: m.lairs.activate(o)
+		var L2: Dictionary = {}
+		for o in m.lairs.list: if not is_same(o, L) and o["state"] == "sealed": L2 = o
+		if not L2.is_empty():
+			var K2 := QuestSeat.new(m, "lair", L2, K.open_s, K.shut_s)
+			S._host_lair(K2, K.open_s + 1.0)
+			m.lairs.open(L2, Q, "dial")
+			var was := String(L2["state"])
+			S._host_lair(K2, K.shut_s + 0.1)
+			S._apply(K2)
+			var resealed: bool = L2["state"] == "sealed" and _gate_shut(L2)
+			ok(K2.state == QuestSeat.S.SHUT and was != "sealed" and resealed and K2.refused == 0,
+				"unused at 5:30 it's SHUT and its gate seals again; trail %s" % str(K2.trail))
 	print("LAIR LOCK CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
