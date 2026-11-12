@@ -211,6 +211,9 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
+- **Bots dodge them.** A shape shown with `all` (a circle, lane or cone) is a hostile area to the other
+  team's bots: `BotDodge` (scripts/match/bot_dodge.gd) walks a bot out of it, or dashes with a real charge,
+  after the difficulty's `react` time x 2. Check: `--bot-dodge-check` (normal out at least 70%, easy under 40%).
 - **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
   Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
 
