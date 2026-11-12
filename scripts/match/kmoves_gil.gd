@@ -77,7 +77,7 @@ const MOVES := {
 		[0.24, {"p": 0.05, "sq": 0.05, "lift": 0.3, "lw": 1.0, "legs": [0.9, -1.5, 0.7, -1.3],
 				"fl": Vector3(-0.5, 0.5, 0.0), "hw": 0.8, "blade": Vector3(-0.6, 0.6, 0.6), "bw": 0.8, "rad": 0.4}],
 		[0.34, {"p": -0.15, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.6, 0.8, -1.5]}],
-		[0.55, {}]]},
+		[0.467, {}]]},      # (ends with the surface clip, 14 frames at 30 fps)
 	# Grab Bag: the free hand whips a bottle overhand from behind the hat, the shoulders turning into it
 	"gil_toss": {"stance": true, "keys": [
 		[0.0, {}],
@@ -100,7 +100,7 @@ const MOVES := {
 				"legs": [0.3, -0.8, 0.4, -0.8]}],
 		[0.07, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.95, "p": -0.5, "y": -0.55, "sq": -0.2,
 				"fl": Vector3(-0.3, 0.5, 0.4), "hw": 1.0, "lw": 1.0, "legs": [-0.8, -0.1, 1.1, -1.0]}],
-		[0.45, {}]]},
+		[0.4, {}]]},      # (ends with the spout clip, 12 frames at 30 fps)
 	# Tidal Wave: up on the crest in a low surfer's crouch, side on, the arms out, rocking with the water
 	"gil_surf": {"hold": true, "loop": 0.15, "keys": [
 		[0.0, {"sq": 0.25, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.9, -1.4]}],
@@ -116,5 +116,5 @@ const MOVES := {
 				"legs": [0.3, -0.4, 0.3, -0.4], "fl": Vector3(-0.6, 0.4, 0.0), "hw": 1.0}],
 		[0.1, {"sq": 0.45, "lift": -0.15, "p": -0.2, "lw": 1.0, "legs": [1.0, -1.7, 0.9, -1.6],
 				"fl": Vector3(-0.7, -0.2, 0.0), "hw": 1.0}],
-		[0.42, {}]]},
+		[0.467, {}]]},      # (ends with the wave_land clip, 14 frames at 30 fps)
 }

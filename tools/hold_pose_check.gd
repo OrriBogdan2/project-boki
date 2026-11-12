@@ -19,7 +19,7 @@ const KEYS := {"lmb": ["fire"], "rmb": ["sec", "sec_hold"], "e": ["sig"], "x": [
 const NOT_HELD := [
 	"jug_meteor", "jug_guard", "lw_jet", "mm_call_hold", "tm_rime_hold", "mage_x", "mage_x_air", "bul_ult_wind",
 	"thf_encore_dance", "thf_exdash", "pin_walk", "dr_reel", "dr_dive", "breah_skate", "breah_dive",
-	"ostra_swap_air", "ostra_snap_wind", "ostra_well",
+	"ostra_swap_air", "ostra_snap_wind", "ostra_well", "gil_spin", "gil_surf",
 ]
 
 var reached := {}               # hold clip ids the trials brought up at all, key down or up

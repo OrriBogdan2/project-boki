@@ -1,5 +1,5 @@
 {
-	"doc": "Gil's hand-keyed clips (art/wardens/gil/gil.glb, tools/art1/gil_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). The swordfish is skinned to hand.R in the .glb: the procedural swordfish (HeroArmsGil) hides and the Gun node is only the invisible aim and FX reference, kept on the blade empties (anchor_blade_root on hand.R, weapon_muzzle at the bill tip) so thrusts, potions and the spout leave the weapon you see. The Fencer thrusts take the whole body standing; while the lunge slides him, the legs keep the run under them (upper: moving), and so does the Grab Bag toss. Ground Swim's dive is the rig's keyed pose (KMovesGil gil_dive: the whole body under the ground; the swim clip only sinks him to the fin) and the surfacing is a clip; the Tidal Wave surf holds its loop (hold_from) until the kit plays the landing; Riptide's twirl is one clip through the longest spin.",
+	"doc": "Gil's hand-keyed clips (art/wardens/gil/gil.glb, tools/art1/gil_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). The swordfish is skinned to hand.R in the .glb: the procedural swordfish (HeroArmsGil) hides and the Gun node is only the invisible aim and FX reference, kept on the blade empties (anchor_blade_root on hand.R, weapon_muzzle at the bill tip) so thrusts, potions and the spout leave the weapon you see. The Fencer thrusts take the whole body standing; while the lunge slides him, the legs keep the run under them (upper: moving), and so does the Grab Bag toss. Ground Swim's dive is the rig's keyed pose (KMovesGil gil_dive: the whole body under the ground; the swim clip only sinks him to the fin) and the surfacing is a clip; the Tidal Wave surf holds its loop (hold_from) until the kit plays the landing; Riptide's twirl is one clip through the longest spin (a held move: past the clip's end it would loop from hold_from).",
 	"skinned_weapon": true,
 	"extra_bones": {"foot.L": "shin.L", "foot.R": "shin.R"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle", "bone": "hand.R"},
@@ -22,7 +22,7 @@
 		"gil_thrust_b": {"clip": "thrust_b", "upper": "moving"},
 		"gil_lunge": {"clip": "lunge", "upper": "moving"},
 		"gil_toss": {"clip": "toss", "upper": "moving"},
-		"gil_spin": {"clip": "spin"},
+		"gil_spin": {"clip": "spin", "hold_from": 0.1333},
 		"gil_spout": {"clip": "spout"},
 		"gil_surface": {"clip": "surface"},
 		"gil_surf": {"clip": "surf", "hold_from": 0.1333},
