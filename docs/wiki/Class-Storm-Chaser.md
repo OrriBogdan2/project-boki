@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 
 **Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health.
 
-**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.
+**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 5.6 to 9.75m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.
 
 **Storm Rod (RMB, 8s cooldown).**
 
@@ -88,9 +88,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; +50% damage on top. |
-| Dash (Shift) | recharge 8s -> 7.2s. | recharge 8s -> 6.4s; the run's own hit deals double. |
-| E | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 5.4s (3s off), damage +30%. |
+| RMB | cooldown 8s -> 7.2s, damage +20%. | cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top). |
+| Dash (Shift) | recharge 8s -> 7.3s. | recharge 8s -> 6.7s; the run's own hit deals double. |
+| E | damage +25%. | cooldown 10.5s -> 7.9s (a quarter off), damage +50%. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 
