@@ -4,7 +4,7 @@ extends RefCounted
 ## and the controls outside the safe margin. Run once per size with a real renderer:
 ## godot -- --prematch-shots --size=1280x720 --shots-dir=out (--size resizes the window).
 
-const MOMENTS := [["full", 30.0], ["chat", 30.0], ["red", 4.0], ["locked", 0.0]]
+const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]      # [name, s left on your turn]
 
 ## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
 ## margin, as "Class at rect".
@@ -45,7 +45,10 @@ func run(main: Node) -> void:
 	await main.fade.reveal(0.01)      # the boot splash stays up when a tool opens a screen by hand
 	await tree.create_timer(0.5).timeout      # let the window settle at its size
 	for m in MOMENTS:
-		view.pm.left = m[1]
+		if m[0] == "locked":
+			view.pm.tick(Prematch.TURN + 0.01)      # your turn runs out, the bots pick, the picks lock
+		else:
+			view.pm.turn_left = m[1]
 		if m[0] == "chat":
 			if view.chat == null:      # offline lobby: put the squad chat up by hand for the shot
 				view.chat = SquadChat.new()
