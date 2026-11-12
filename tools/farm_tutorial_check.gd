@@ -101,8 +101,8 @@ func _base_tutorial() -> void:
 	Save.d = _new_save()
 	HomeLayout.ensure(Save.d)
 	_stats()
-	ok(FarmTutorial.steps().size() == 12 and not FarmTutorial.skippable() and FarmTutorial.current() == "hob",
-			"base_mode off: the twelve old steps, no Skip, Hob first (untouched)")
+	ok(FarmTutorial.steps().size() == 12 and FarmTutorial.skippable() and FarmTutorial.current() == "hob",
+			"base_mode off: the twelve old steps, Skip visible, Hob first")
 	rules["base_mode"] = true
 	var ids: Array = FarmTutorial.steps().map(func(st): return String(st["id"]))
 	ok(ids == ["meet", "eat", "toy", "out"] and FarmTutorial.skippable(),
