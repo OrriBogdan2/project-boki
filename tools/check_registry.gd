@@ -383,6 +383,8 @@ const CHECKS := {
 	"--npc-shots": ["res://tools/npc_shots.gd", "npc_shots", null],      # --shots-dir=<dir> (a renderer, GPU)
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
+	"--camera-follow-check": ["res://tools/camera_follow_check.gd", "camera_follow_check", "check"],      # dash trail
+	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

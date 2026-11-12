@@ -180,7 +180,7 @@ Other checks:
   - A move into a rock is pushed straight out and slides along it. Only the part of your speed going into it is dropped.
   - This ends the corner snag that held you until you dashed ("magnetizing").
 - **Camera and scale:**
-  - Follow across: 8 → 15 per second (about 0.07s).
+  - Follow across (`CamRig._trail_xz`, numbers in `content/rules/camera.json` "trail", decision 0050): the view closes on you at min(15 x gap, sqrt(2 x 28 x gap)) m/s, so a run sits ~0.3 m behind and stops with you, while a dash leaves it behind and it eases in as the source does (Grimble's 4.6 m in 0.12 s: the pan peaks ~700 px/s and stops ~0.45 s after the dash; source ~700 px/s and ~0.5 s, `dredge.md`). It trails 3.5 m at most (a 40 m/s Wirerun keeps you on screen) and cuts on a teleport (faster than 90 m/s: Motley's Lantern Trade, as in `ostra.md`). The cursor ray uses the camera as drawn, so it still aims at what is under the cursor. `--camera-follow-check` logs the gap per frame and asserts catch-up per dash type (Vex tap 0.25 s, Vex slide 0.28 s, Wirerun 0.48 s, Grimble's barges 0.28 s; before: 1584 px/s and 0.20 s on the source dash).
   - Glide lead: 0.2s of glide velocity (max 1.8m).
   - The Supervive preset sits at 20.5m (was 25m): about 23m of ground across a 16:9 screen (was 28m).
   - Hunters are drawn 12% larger (`Hunter.VIS_SCALE`, visual only; hitboxes and rings unchanged).
