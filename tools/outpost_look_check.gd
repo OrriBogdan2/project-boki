@@ -2,7 +2,7 @@ extends RefCounted
 ## --outpost-look-check: an outpost is a built object that shows its state itself (OutpostLook), with a
 ## quiet ground edge. Checks, in a real match: the structure exists (mast, crystal, banner, four lamps, no
 ## particle emitters and no charging column anywhere on it); neutral = unlit crystal and lamps, banner low
-## and grey; capturing = crystal and lamps fill with the charge, banner raised in the holder's side colour (SideColor);
+## and grey; capturing = crystal and lamps fill with the charge, banner raised in the holder's team colour;
 ## owned/open = everything lit; the charge ring is hidden unless you stand in the yard or it is contested
 ## (the yard's edge itself is always there, see ExitSignal and --exit-signal-check); and the minimap
 ## glyph draws without error for each state. Never touches the save.
@@ -93,7 +93,7 @@ func run(main_node: Node) -> void:
 	ok(o["state"] == "charging" and float(o["prog"]) > 0.05, "capturing: charge %d%%" % int(float(o["prog"]) * 100.0))
 	var want_glow: float = OutpostLook.CRYSTAL_GLOW * float(o["prog"])
 	ok(absf(g1 - want_glow) < 0.05, "the crystal glow follows the charge (%.2f)" % g1)
-	var team_col: Color = SideColor.of_team(P.team, P.team)      # (your own squad: SideColor, the colour-vision palette)
+	var team_col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
 	var cloth_col: Color = _param(n, "Mast/Banner/Cloth", "albedo")
 	var raised := is_equal_approx(banner.position.y, OutpostLook.BANNER_HIGH)
 	ok(raised and cloth_col.is_equal_approx(team_col), "banner raised in the holder's team colour")

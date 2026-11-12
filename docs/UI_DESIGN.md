@@ -4,23 +4,16 @@ How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that 
 in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it
 shares the colours and fonts.
 
-**Look: "Void & Masks"** (spec: `briefs/UI_STYLE.md` on ext/agent-briefs, November 2026; refs
-`briefs/art-refs/ui/ui_style_void_A2_base.png` and `A1_alt`). Panels are deep violet with a rough torn
-outline, a painted fill (soft blotches), ink speckle, scratched runes and chalk tally marks in the border
-band, black cracks running in from the edges, and a chunky neon edge running teal (`NEON_A`) on the left
-to magenta (`NEON_B`) on the right. Panel titles hang a little crooked on a nailed parchment banner
-(`banner()`). The one primary button is a magenta "ticket" with notched sides, set in display type.
-Info rows are nailed parchment strips with a black mask badge (`strip()`); big ink stamps (`stamp()`,
-"LOGGED", "VOID-TOUCHED") are decoration in a panel's corners. Floating glass (`UI.glass`, `UI.GLASS`)
-is a brighter violet so it stays purple over grass; the hub bar and the Goals card also light the neon
-edge. Section headers are pink spaced caps (`UI.PINK`), state tags (`UI.tag`) are small tilted stamps,
-`UI.badge` is a jagged black badge. Behind a modal the world is blurred, pulled to violet and painted
-dark at the edges, with `VoidSpecks` drifting over it (the title's key art too). A Boki's page shows a
-big `VoidPortrait` (starfield, nebula, cracks with a teal glint); a new Boki's reveal (`KinReveal`) is
-one big card: the live Boki in a `VoidPortrait.window` on the left, its name banner, its moves as
-strips (`BokiMoves` in strip mode) and the ticket button on the right. The title's menu entries are
-stacked torn strips. The in-match HUD only takes the palette and edges and stays minimal; its one big
-box (the tutorial's intro card) is `HudStyle.torn_panel`.
+**Look: "Void & Masks"** (spec: `briefs/UI_STYLE.md` on ext/agent-briefs, November 2026). Panels are
+deep violet with a rough torn outline, faint ink speckle and scratched runes in the border band, and a
+neon edge running teal (`NEON_A`) on the left to magenta (`NEON_B`) on the right. Panel titles sit on a
+nailed parchment tab (`title_tab()`). The one primary button is a magenta "ticket" with notched sides.
+Floating glass (`UI.glass`, `UI.GLASS`) is a brighter violet so it stays purple over grass; the hub bar
+and the Goals card also light the neon edge. Section headers are pink spaced caps (`UI.PINK`), state
+tags (`UI.tag`) are tilted rubber stamps, `UI.badge` is a jagged black badge, and a Boki's page shows a
+`VoidPortrait` (starfield, teal cracks). A new Boki's reveal card is the theme panel with its name on a
+parchment tab and its type as a stamp. `VoidSpecks` drift over the title's key art. The in-match HUD
+only takes the palette and edges and stays minimal.
 
 ## 1. Audit (October 2026, before this pass)
 
@@ -80,19 +73,16 @@ What made the menus feel blocky, samey and hard to get through:
 
 ## 2. Rules
 
-1. **One strong title per panel**, with at most one short subtitle line under it, and only when the
-   title alone doesn't say what the screen is for (the Esc menu, Save files, the Market and the
-   Inventory have none). No ornaments.
-2. **Three type sizes.** `T_TITLE` 34 (Lilita One) for the panel title, `T_HEAD` 20 (Lilita One) for
-   card and item names, `T_BODY` 16 (Rubik) for everything you read, `T_SMALL` 14 for secondary
+1. **One strong title per panel**, with at most one short subtitle line under it (what the screen is
+   for, or the one number that matters). No ornaments.
+2. **Three type sizes.** `T_TITLE` 30 (Lilita One) for the panel title, `T_HEAD` 19 (Lilita One) for
+   card and item names, `T_BODY` 15 (Rubik) for everything you read, `T_SMALL` 13 for secondary
    lines. Section eyebrows are `section()` (12, bold, spaced caps).
-3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`). Panels,
+3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`). Panels, cards,
    buttons, tiles, popups and tooltips use its subclass `UiTorn` (`scripts/ui/ui_torn.gd`): a torn
-   outline (`jag`), optional blotches, speckle, runes, tally marks and cracks (`grain`), a teal-to-magenta
-   neon edge (`glow`, its thickness `glow_w`), the `ticket` notches and parchment `nails`. Shapes are
-   cached per rect, so a box costs no more per frame than a plain one. Cards (`card()`), wells, tracks
-   and pills stay plain `UiFrame`: only the panel around them is torn, so a list never reads as torn
-   boxes inside a torn box (UI_SIMPLIFY_1110.md).
+   outline (`jag`), optional speckle and runes (`grain`), a teal-to-magenta neon edge (`glow`), the
+   `ticket` notches and parchment `nails`. Outlines are cached per rect, so a box costs no more per frame
+   than a plain one. Wells, tracks and pills stay plain `UiFrame` (`UiFrame.sunk`).
    Radii come from `R_PANEL` 18, `R_CARD` 12, `R_CTRL` 10, `R_SMALL` 6, `R_PILL`. Cards have no
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (the magenta ticket, pink text): the one thing the screen is for,
@@ -106,9 +96,7 @@ What made the menus feel blocky, samey and hard to get through:
    right, tabs under the title, body, footer actions bottom right with the primary last and an Enter
    keycap on it. Esc always closes or goes back.
 7. **Tabs, not long lists.** Group options into tabs (`shell_tabs`) and groups (`section`). Tabs are a
-   segmented control, visibly different from buttons. Five tabs at most: Settings is Gameplay (with
-   the camera), Controls, Audio, Video, Accessibility (Demo only for the owner); the inventory is
-   Items, Farm, Kin, Field Book.
+   segmented control, visibly different from buttons.
 8. **Sensible defaults.** The panel opens with the primary focused (or the first control), the last
    tab you used, and the current choice highlighted.
 9. **Confirm only what can't be undone** (delete a save, leave a match, sell or salvage an Epic or
@@ -172,11 +160,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `set_card_border(card, col, w)` - only for the selected or the warning card.
 - `tile_card(on, cb, pad=12, col=ACCENT)` - a selectable card (hover, focus, click, Enter); add your
   content to it. For tiers, skins, items.
-- `title_tab()` - the nailed parchment tab a panel title sits on; `banner(text, px, tilt_deg)` - a
-  title on it, hung crooked (the shell uses it; the reveal uses a big one).
-- `strip(icon, head, line, col, minw)` - a nailed parchment info strip with a mask badge, a caps head
-  and one line in dark ink (a Boki's moves on the reveal).
-- `stamp(text, col, px, tilt_deg)` - a big worn ink stamp, set crooked; decoration only.
+- `title_tab()` - the nailed parchment tab a panel title sits on (the shell uses it).
 - `glass(pad, rad)` - dark glass for things over the world (prompts, hint rows, hover cards, hub).
 - `sheet(width)` - a plain panel without the shell.
 - `chip(icon, text, col, tip, size=14)` - a pill with an icon and a value (gems, scrap, counts).

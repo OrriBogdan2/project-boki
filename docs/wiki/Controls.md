@@ -71,13 +71,10 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | 2 | Utility belt slot 2 (an armor kit to start) | `util2` | yes |
 | 3 | Utility belt slot 3 | `util3` | yes |
 | 4 | Utility belt slot 4 | `util4` | yes |
-| 5 | Utility belt slot 5 | `util5` | yes |
-| 6 | Utility belt slot 6 | `util6` | yes |
 | Q | Glove 1 | `gear1` | yes |
 | V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
-| C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |

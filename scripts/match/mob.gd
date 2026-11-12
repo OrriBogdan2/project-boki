@@ -12,7 +12,6 @@ var atk_dir := Vector2.ZERO
 var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
-var damage_by := {}          # team -> damage dealt to it, for credit (a lair boss's XP, StealCall)
 var wander := Vector3.INF
 var lunge_hit := {}
 var anim := 0.0
@@ -84,11 +83,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
-	if dealt > 0.0:
-		calm_t = 0.0
-		var from: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
-		if from is Hunter:
-			damage_by[from.team] = float(damage_by.get(from.team, 0.0)) + dealt
+	if dealt > 0.0: calm_t = 0.0
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
@@ -103,7 +98,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
-	add_stun(stagger_t)
+	stun_t = maxf(stun_t, stagger_t)
 	stag_open = 0.0
 	stag_next = randf_range(10.0, 14.0)
 	_cancel_tele()
@@ -185,7 +180,7 @@ func sim(dt: float) -> void:
 		if calm_t > 30.0:
 			m.on_mob_escaped(self)
 			return
-	var spd: float = md["speed"] * slow_mult()
+	var spd: float = md["speed"] * slow_mult(0.55)
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
 		if stun_t > 0.0 and st == "windup":
@@ -271,7 +266,7 @@ func sim(dt: float) -> void:
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		add_stun(1.0)
+		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})

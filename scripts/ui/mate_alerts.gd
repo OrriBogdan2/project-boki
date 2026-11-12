@@ -54,7 +54,7 @@ func _changed(h: Hunter, was: String, now: String) -> void:
 		_say(h, "back up", HudStyle.REVIVE)
 		Sfx.play("revive", null, -6.0)
 	elif now in ["DEATHBOX", "DEAD"] and was in ["WISP", "ALIVE"]:
-		_say(h, "eliminated", SideColor.foe())
+		_say(h, "eliminated", HudStyle.FOE)
 		Sfx.play("warn", null, -8.0, 0.0, 0.6)
 	elif was == "DEATHBOX" and now == "DEAD":
 		_say(h, "soul lost", HudStyle.MUTED)

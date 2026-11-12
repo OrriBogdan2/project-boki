@@ -107,16 +107,21 @@ static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
 # ------------------------------------------------------------------ the strip
+## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
+## is not drawn (no Heart, a tutorial, training or a duel): what sits under it at the top-centre starts lower.
+static func bottom(m: Match) -> float:
+	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
+		return 0.0
+	if m.heart == null or m.heart.site == Vector3.INF:
+		return 0.0
+	return TOP_Y + CELL.y + 20.0 + 11.0
+
 static func draw(hud) -> void:
 	var m: Match = hud.m
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return
 	var c: Control = hud.c
 	var sd := seats(m)
-	if not HudReveal.on(m, "seat_pips"):
-		if not _any_open(sd):
-			return
-		HudReveal.see("seat_pips")      # the first open seat: the strip stays from now on
 	var w := CELL.x * 4.0 + SQUADS_W
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
@@ -127,12 +132,6 @@ static func draw(hud) -> void:
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
-
-static func _any_open(sd: Array) -> bool:
-	for s in sd:
-		if int(s["st"]) == St.OPEN:
-			return true
-	return false
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]

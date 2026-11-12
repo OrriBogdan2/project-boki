@@ -73,7 +73,7 @@ func full_map(fm, kk: float) -> void:
 		fm.hud.c.draw_arc(pv, float(zone[k]["r"]) * kk, 0.0, TAU, 48, Color(COL, 0.85), 3.0)
 		if k == 0:
 			var top := pv - Vector2(0, float(zone[k]["r"]) * kk + 8.0)
-			fm.hud._ctext(top, CampMap.HOT_LABEL, 13, COL, fm.hud.big)
+			fm.hud._ctext(top, "HOT ZONE  ·  better loot", 13, COL, fm.hud.big)
 
 ## The hot zone on the minimap: a ring round each of its islands in view.
 func minimap(hud, to_map: Callable, on_map: Callable) -> void:

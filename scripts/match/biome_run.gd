@@ -69,18 +69,20 @@ func _danger(p: Vector3) -> int:
 ## The monsters for a camp, from its region's table: base monster kinds, weighted. Empty when the
 ## camp isn't in a biome (the match's own mix is used then).
 func camp_comp(c: Dictionary) -> Array:
-	var kind := String(c.get("kind", "normal"))
-	var n: int = {"heavy": 4, "light": 2}.get(kind, 3)
-	return camp_comp_n(c["pos"], n, "brute" if kind == "heavy" else "")
-
-## A camp of n monsters from the region's table: its big one (if any) and small ones (no Brute or
-## Sentinel, so a camp size always pays the same XP). Empty when the spot isn't in a biome.
-func camp_comp_n(p: Vector3, n: int, big: String) -> Array:
-	var mobs: Array = _biome(p).get("mobs", [])
-	mobs = mobs.filter(func(e): return not String(e["kind"]) in ["brute", "sentinel"])
+	var B := _biome(c["pos"])
+	var mobs: Array = B.get("mobs", [])
 	if mobs.is_empty():
 		return []
-	var out: Array = [big] if big != "" else []
+	var n := 3
+	match String(c.get("kind", "normal")):
+		"heavy": n = 4
+		"light": n = 2
+	var out: Array = []
+	if String(c.get("kind", "")) == "heavy":
+		# a heavy camp always has its region's big one
+		for e in mobs:
+			if String(e["kind"]) in ["brute", "sentinel"]:
+				out.append(String(e["kind"])); break
 	while out.size() < n:
 		out.append(String(_pick(mobs)["kind"]))
 	return out
@@ -97,7 +99,7 @@ func _pick(entries: Array) -> Dictionary:
 ## Makes a freshly spawned monster belong to its region: the region's version of it (name, colour,
 ## stats), a rarity, and mutations from the region's list. Rarity climbs with the tier and with how
 ## dangerous the island is; rarer monsters roll more mutations.
-func dress(mb: Mob, lift_rar := 0) -> void:
+func dress(mb: Mob) -> void:
 	if mb == null or mb.mkind in ["warden", "glimmer"]:
 		return
 	var B := _biome(mb.pos)
@@ -121,7 +123,6 @@ func dress(mb: Mob, lift_rar := 0) -> void:
 	for i in 4:
 		roll -= maxf(1.0, wts[i])
 		if roll <= 0.0: ri = i; break
-	ri = mini(ri + lift_rar, RARITY.size() - 1)     # (a Camp Chief's Brute is a tier up)
 	var R: Dictionary = RARITY[ri]
 	# mutations
 	var muts: Array = []
@@ -253,7 +254,7 @@ func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 		return
 	var t := target as Ent
 	if muts.has("frozen"):
-		t.add_slow(1.4)
+		t.slow_t = maxf(t.slow_t, 1.4)
 		m.fx.burst(t.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 8, 2.5, 0.4, 2.0)
 	if muts.has("molten") or muts.has("toxic"):
 		t.burn_t = maxf(t.burn_t, 2.5); t.burn_dps = maxf(t.burn_dps, 3.0)

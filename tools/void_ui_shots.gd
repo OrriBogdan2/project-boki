@@ -3,8 +3,7 @@ extends RefCounted
 ## (UI_STYLE.md on ext/agent-briefs), for the before/after grid in the PR: the title, save slots,
 ## settings, the pause menu, the creator, the hatch intro card, the egg pick, a new Boki's reveal card, the
 ## welcome box, the farm (Goals tracker and hub bar), the Job Board, the Kin Burrow, a Boki's page
-## (its care card), the Market, the Black Market, the build menu, the pause menu, the inventory, the
-## pre-match lobby, the match HUD and the results screen. Run with a real renderer
+## (its care card), the Market, the Black Market and the build menu. Run with a real renderer
 ## (xvfb-run, --rendering-driver opengl3, --resolution WxH). Never touches the real save. Writes
 ## <name>.png and prints "VSHOT <name>".
 
@@ -27,7 +26,6 @@ func run(m: Node) -> void:
 	_fill_save()
 	await _front_screens()
 	await _farm_screens()
-	await _match_screens()
 	print("VSHOT DONE")
 	main.get_tree().quit()
 
@@ -89,27 +87,6 @@ func _farm_screens() -> void:
 	Overlay.open_pause("home")
 	await _shot("14_pause")
 	Overlay.close()
-	Overlay.open_inventory()
-	await _shot("15_inventory")
-	Overlay.close()
-
-## The screens around an expedition: the pre-match lobby, the match HUD and the results.
-func _match_screens() -> void:
-	main.show_screen("prematch", {"teams": 10, "squad": 2, "tier": 0})
-	await _shot("16_prematch", 2.0)
-	main.show_screen("match", {"no_drop": true, "teams": 3, "squad": 3, "seed": 4242})
-	for i in 3000:
-		var cur = main.current
-		if cur is Match and cur.player != null and cur.time > 3.0:
-			break
-		await main.get_tree().process_frame
-	await _shot("17_hud", 0.5)
-	main.show_screen("results", {"extracted": true, "gems": 42, "seeds": {"sunroot": 1},
-		"caught": [Save.new_kin("zapple")], "knocks": 3, "damage": 512, "taken": 388, "kills": 1, "downs": 1,
-		"deaths": 0, "revives": 2, "armor_tier": 3, "time": 201.0, "kin_trust": 57.0, "tonics": 1,
-		"kin_events": [{"kind": "refused", "trust": -1.0,
-			"text": "refused to jump into a fight that looked too dangerous"}]})
-	await _shot("18_results", 3.0)
 
 ## A played farm: the starter partner and four grown Boki, gems and a few goods.
 func _fill_save() -> void:

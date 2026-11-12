@@ -19,9 +19,6 @@ var target: Node3D = null
 var shake_amp := 0.0          # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
-var dip_depth := 0.0          # m: how far a heavy landing dropped the view (dip)
-var dip_secs := 1.0           # s: how long that dip takes to spring back
-var dip_left := 0.0           # s left of it
 var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
@@ -66,7 +63,6 @@ var cast_left := 0.0
 var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
 
 var style_id := ""
-var dive_tilt := 0.0          # rad the view tips further down in the drop's dive (dive_view)
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
 var dist_mul := 1.0
@@ -84,12 +80,6 @@ func use_style(id: String) -> void:
 	dist = float(st["dist"])
 	fov = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
-
-## The drop's dive view (DropView): `widen` degrees more field of view than the style's, tipped `tilt`
-## degrees further down. (0, 0) is the usual view.
-func dive_view(widen: float, tilt: float) -> void:
-	fov = float(STYLES.get(style_id, STYLES["supervive"])["fov"]) + widen
-	dive_tilt = deg_to_rad(tilt)
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame.
@@ -121,13 +111,6 @@ func snap(p: Vector3) -> void:
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
 func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
-
-## A heavy landing (a Hard Landing): the view drops `depth` metres at once and springs back over `secs`.
-## Straight down and up again, no shake (item 50).
-func dip(depth: float, secs: float) -> void:
-	dip_depth = depth
-	dip_secs = secs
-	dip_left = secs
 
 ## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
 func punch(_a: float) -> void:
@@ -231,7 +214,6 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		shake_left = maxf(0.0, shake_left - delta)
 		if shake_left <= 0.0:
 			shake_amp = 0.0
-	dip_left = maxf(0.0, dip_left - delta)
 	_apply(shake)
 	Sfx.listener = focus
 
@@ -243,14 +225,13 @@ func _apply(shake: Vector3) -> void:
 	var c := chase * chase * (3.0 - 2.0 * chase)
 	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
 	# the skyship for the ride
-	var p := minf(lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c) + dive_tilt, deg_to_rad(88.0))
+	var p := lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
 	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
 	# (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden)
 	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
 	# (camcal) aim at the body rather than the feet, so you sit a touch low on screen [footage];
 	# faded out toward the bird's-eye and ship views
-	var sunk := dip_depth * pow(dip_left / dip_secs, 2.0)      # fast out of the bottom, settling at the top
-	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c) - sunk, 0)
+	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)
 	position = aim + back * d + shake
 	look_at(aim + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
 

@@ -171,7 +171,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector
 		if KitStatus.grounded(T):
 			seen["gnd"] = true
 			seen["slow"] = maxf(float(seen["slow"]), T.slow_t)
-			seen["mult"] = T.slow_mult())
+			seen["mult"] = T.slow_mult(0.5))
 	A.ok("dancer Bola: one foe caught is Grounded and slowed 30% for the Ground's 1.5s, no stun",
 			bool(seen["gnd"]) and absf(float(seen["slow"]) - 1.5) < 0.2 and float(seen["stun"]) <= 0.0
 			and absf(float(seen["mult"]) - (1.0 - BOLA_SLOW)) < 0.01, str(seen))

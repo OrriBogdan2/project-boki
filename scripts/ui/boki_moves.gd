@@ -1,10 +1,9 @@
 class_name BokiMoves
-extends BoxContainer
-## A Boki's moves as a row of icon tiles, name only, or (`strips`) stacked parchment strips with
-## the icon in a mask badge, the name and what the move does. Hovering a tile, or focusing it with
-## a keyboard or controller, shows a small tip with what the move does, its numbers and how it is
-## used. The bond move (its Fusion) gets its own gold tile. Used on the new-Boki screen (KinReveal,
-## strips) and the Boki page's Training tab (tiles).
+extends HBoxContainer
+## A Boki's moves as a row of icon tiles, name only. Hovering a tile, or
+## focusing it with a keyboard or controller, shows a small tip with what the move does, its numbers
+## and how it is used. The bond move (its Fusion) gets its own gold tile. Used on the new-Boki screen
+## (KinReveal) and the Boki page's Training tab.
 ##
 ##   v.add_child(BokiMoves.new(species_id, rec))
 
@@ -12,19 +11,15 @@ const TILE := Vector2(96, 86)          # px, one move tile
 const ICON_PX := 30.0
 const TIP_W := 300.0                   # px, the tip's text width
 const BOND_COL := Color("ffd84a")      # the Fusion's colour (same gold as the Boki page)
-const SHORT_CHARS := 48                # a strip says this much of a move; the tip says the rest
 
 var tiles: Array[Control] = []
 var tips: Array[String] = []           # per tile: the tip's text, in plain lines
 var shown := -1                        # the tile whose tip is open
 var tip: PanelContainer
 var tip_box: VBoxContainer
-var strips := false                    # parchment strips stacked, instead of tiles in a row
 
-func _init(species: String, rec := {}, as_strips := false) -> void:
-	strips = as_strips
-	vertical = strips
-	add_theme_constant_override("separation", 10 if strips else 8)
+func _init(species: String, rec := {}) -> void:
+	add_theme_constant_override("separation", 8)
 	var sp: Dictionary = Data.KIN.get(species, {})
 	var kspec := KinLib.kin(species)
 	var abl: Array = sp.get("abilities", [])
@@ -60,50 +55,15 @@ func _when(ad: AbilitySpec, slot: String) -> String:
 	return w if w != "" else "Uses it on its own"
 
 func _add(nm: String, icon: String, col: Color, lines: Array, bond: bool) -> void:
-	var t: PanelContainer
-	var sb: StyleBox
-	var focus_sb: StyleBox
-	if strips:
-		t = UI.strip(icon, "Bond move" if bond else "Ability", "%s  –  %s" % [nm, _short(String(lines[0]))], col)
-		t.mouse_filter = Control.MOUSE_FILTER_STOP
-		sb = t.get_theme_stylebox("panel")
-		focus_sb = (sb.duplicate() as UiTorn)
-		(focus_sb as UiTorn).glow = 1.0
-	else:
-		t = _tile(nm, icon, col, bond)
-		sb = t.get_theme_stylebox("panel")
-		focus_sb = UI.frame(Color(col, 0.16 if bond else 0.08), 10, UI.ACCENT_HI, 2, 6, 6, 0.0)
-	t.focus_mode = Control.FOCUS_ALL
-	var i := tiles.size()
-	t.mouse_entered.connect(func(): show_tip(i))
-	t.focus_entered.connect(func():
-		show_tip(i)
-		t.add_theme_stylebox_override("panel", focus_sb))
-	t.mouse_exited.connect(func(): if not t.has_focus(): hide_tip(i))
-	t.focus_exited.connect(func():
-		hide_tip(i)
-		t.add_theme_stylebox_override("panel", sb))
-	tiles.append(t)
-	tips.append("\n".join([nm] + lines.filter(func(s): return String(s) != "")))
-	add_child(t)
-
-## The first clauses of what a move does, cut at a comma once it is past SHORT_PX; the strip's
-## tip still has the whole of it.
-static func _short(text: String) -> String:
-	var out := ""
-	for part in text.split(","):
-		if out != "" and out.length() + part.length() > SHORT_CHARS:
-			return out + " …"
-		out += ("," if out != "" else "") + part
-	return out
-
-## One move as a tile: its icon over its name, the bond move captioned and edged in gold.
-func _tile(nm: String, icon: String, col: Color, bond: bool) -> PanelContainer:
 	var t := PanelContainer.new()
 	var fill := Color(col, 0.16 if bond else 0.08)
+	var edge_w := 2 if bond else 1
 	var edge := Color(col, 0.85 if bond else 0.35)
-	t.add_theme_stylebox_override("panel", UI.frame(fill, 10, edge, 2 if bond else 1, 6, 6, 0.0))
+	var sb := UI.frame(fill, 10, edge, edge_w, 6, 6, 0.0)
+	t.add_theme_stylebox_override("panel", sb)
+	var focus_sb := UI.frame(fill, 10, UI.ACCENT_HI, 2, 6, 6, 0.0)
 	t.custom_minimum_size = TILE
+	t.focus_mode = Control.FOCUS_ALL
 	t.mouse_filter = Control.MOUSE_FILTER_STOP
 	var v := UI.vbox(2)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -120,7 +80,18 @@ func _tile(nm: String, icon: String, col: Color, bond: bool) -> PanelContainer:
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nl.custom_minimum_size.x = TILE.x - 12.0
 	v.add_child(nl)
-	return t
+	var i := tiles.size()
+	t.mouse_entered.connect(func(): show_tip(i))
+	t.focus_entered.connect(func():
+		show_tip(i)
+		t.add_theme_stylebox_override("panel", focus_sb))
+	t.mouse_exited.connect(func(): if not t.has_focus(): hide_tip(i))
+	t.focus_exited.connect(func():
+		hide_tip(i)
+		t.add_theme_stylebox_override("panel", sb))
+	tiles.append(t)
+	tips.append("\n".join([nm] + lines.filter(func(s): return String(s) != "")))
+	add_child(t)
 
 ## Opens tile i's tip just above it (below it when there is no room above).
 func show_tip(i: int) -> void:

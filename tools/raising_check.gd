@@ -4,7 +4,7 @@ extends RefCounted
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
 ## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
 ## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. A new bond rank
-## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't. Home after an hour
+## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't, panel up or not. Home after an hour
 ## away, it runs over to say hello (KinWelcome); after a minute it doesn't. Never touches the real
 ## save.
 
@@ -114,9 +114,9 @@ func _welcome(home, k: Dictionary) -> void:
 func _care_line(rec: Dictionary) -> void:
 	var kept: Dictionary = (rec["needs"] as Dictionary).duplicate()
 	rec["needs"] = {"food": 95.0, "energy": 95.0, "joy": 95.0, "clean": 95.0}
-	var good := RidePick.care_line(rec)
+	var good := Care.care_line(rec)
 	rec["needs"] = {"food": 10.0, "energy": 10.0, "joy": 10.0, "clean": 10.0}
-	var poor := RidePick.care_line(rec)
+	var poor := Care.care_line(rec)
 	rec["needs"] = kept
 	ok(good.contains("+10% health") and poor.contains("-18% damage"),
 		"the expedition panel says what raising does: \"%s\" / \"%s\"" % [good, poor])
@@ -131,9 +131,15 @@ func run(m: Node) -> void:
 	var k: Dictionary = home._kin_entry(rec)
 	ok(not k.is_empty(), "the Boki is out on the farm")
 	await _welcome(home, k)
+	home._close_panel()
+	rec.erase("bond_seen")
+	home.panel_open = "away"      # the away report is up after an hour: the rank is still noted
 	KinBondMoment.tick(home)
-	ok(home.panel_open == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
-		"the rank it arrives with is where it starts: no moment (%s)" % Care.bond(rec)[1])
+	ok(int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
+		"the rank it arrives with is where it starts, even under a panel (%s)" % Care.bond(rec)[1])
+	home._close_panel()
+	KinBondMoment.tick(home)
+	ok(home.panel_open == "", "and once the panel is gone it plays no moment for it")
 	var t0 := float(rec["trust"])
 	home._pet_kin(k)
 	var t1 := float(rec["trust"])

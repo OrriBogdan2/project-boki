@@ -28,12 +28,8 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
-	hits.main = main_node
-	if both:
-		await hits.audit()
-	n += ult.n + own.n + launch.n + tall.n + hits.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + hits.fails
+	n += ult.n + own.n + launch.n + tall.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -70,6 +66,7 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
+	P.reload_t = 0.0
 	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
@@ -179,6 +176,7 @@ func _archer_combos() -> void:
 	var od0 := K.draw.overdraws
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
+	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
@@ -206,6 +204,7 @@ func _archer_combos() -> void:
 	)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
+	P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
@@ -280,6 +279,7 @@ func _archer_combos() -> void:
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
+	P.reload_t = 0.0
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -453,9 +453,17 @@ func _archer_combos() -> void:
 	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
+	var wash := [0.0]
 	step(m, 1.2, func():
 		P.inp["move"] = Vector2(1, 0)
+		K.fx._process(0.0)
+		wash[0] = maxf(wash[0], P.wash)
 		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+	ok(
+		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
+		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
+		"wash %.2f %s" % [wash[0], P.wash_col]
+	)
 	var mk_in: float = mk[0]
 	ok(
 		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
@@ -486,6 +494,10 @@ func _archer_combos() -> void:
 	)
 	# ...and ending inside it puts her back where she went in (no cost: there is no Focus)
 	K.spirit.end("time")
+	for _i in 8:
+		K.fx._process(0.0)
+		step(m, 0.05)
+	ok("pin tint: the body is back to normal when the walk ends", P.wash < 0.01, "wash %.2f" % P.wash)
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -626,6 +638,7 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
+	P.reload_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	aim_at(P, T.pos)
@@ -1310,7 +1323,7 @@ func _bulwark_combos() -> void:
 	step(m, 4.0)
 	ok("bulwark: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the holds: no Crushing Blow when LMB is let go, the raised shield comes down
-	
+
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes

@@ -183,7 +183,7 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
-	nd["joy"] = clampf(float(nd["joy"]) - joy_loss, 0.0, 100.0)
+	nd["joy"] = clampf(float(nd["joy"]) - joy_loss + ZoneAffinity.joy_per_min(rec) * mins, 0.0, 100.0)
 	if raining and not sleeping:
 		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
@@ -327,6 +327,22 @@ static func play_train(rec: Dictionary, play: String) -> int:
 	if not PLAY_TRAINS.has(play) or need(rec, "energy") < PLAY_TRAIN_ENERGY:
 		return 0
 	return add_stat(rec, String(PLAY_TRAINS[play]), 1)
+
+## What its raising does for it on an expedition, in one line (the expedition panel): match_mods
+## as percentages, so the care at home shows up where you pick your Boki.
+static func care_line(rec: Dictionary) -> String:
+	var mm := match_mods(rec)
+	var bits: Array = []
+	for pair in [["dmg", "damage"], ["hp", "health"], ["speed", "speed"]]:
+		var pct := roundi((float(mm[pair[0]]) - 1.0) * 100.0)
+		if pct != 0:
+			bits.append("%+d%% %s" % [pct, pair[1]])
+	var faster := roundi((1.0 - float(mm["cd"])) * 100.0)
+	if faster != 0:
+		bits.append("skills recharge %d%% faster" % faster)
+	if bits.is_empty():
+		return "Care, training and trust at home make it stronger out there."
+	return "From how you've raised it: %s." % ", ".join(bits)
 
 ## Trained points can't run too far ahead of its level (StatBudget: also 100 a stat, 240 in all).
 static func stat_cap(rec: Dictionary) -> int:
@@ -653,6 +669,8 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
 	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
+	if egg.has("visitor"):
+		baby["lineage"] = {"parents": [], "names": [], "gen": 0, "visitor": egg["visitor"]}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby
@@ -692,9 +710,6 @@ static func dex_mark(species: String, what: String, extra := "") -> void:
 		"form":
 			if extra != "" and not (e["forms"] as Array).has(extra): e["forms"].append(extra)
 		"shimmer": e["shimmer"] = true
-		"echo":           # a stolen wisp's soul echo (KinSteal)
-			e["seen"] = true
-			e["echo"] = int(e.get("echo", 0)) + 1
 		"mutation":
 			if extra != "" and not (e["mutations"] as Array).has(extra): e["mutations"].append(extra)
 

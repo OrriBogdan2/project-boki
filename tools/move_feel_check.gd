@@ -153,7 +153,7 @@ func _hv(h: Hunter) -> Vector2:
 	return Vector2(h.vel.x, h.vel.z)
 
 func _clear_inp() -> void:
-	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
@@ -166,7 +166,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.pad = {}; P.grap = {}; P.grap_cd = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.fly_t = 0.0
 	P.gliding = false; P.glide_fuel = 1.0; P.glide_cd = 0.0; P.dropping = false; P.diving = false
 	P.stun_t = 0.0; P.root_t = 0.0; P.kb_t = -9.0; P.mantle_cd = 0.0; P.shot_down = false; P.air_t = 0.0
-	P.coyote = 0.0; P.jump_buf = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
+	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
 	P.drop_follow = null
@@ -699,7 +699,7 @@ func _plain_dash() -> void:
 	for airborne in [false, true]:
 		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
 		m.fields.clear()      # (a Boki's patch sparkles on its own clock)
-		P.xp = 0.0            # (no level-up ring mid-dash)
+		P.xp = 0.0            # (the long glide-dive rows feed the xp trickle: no level-up ring mid-dash)
 		var radial0: int = m.fx.radial
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
@@ -1057,23 +1057,22 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
-		if tvy < 0.0 and -P.vel.y >= 0.9 * DropFeel.dive_fall: tvy = (i + 1) * DT
-		if tst < 0.0 and P.vel.x >= 0.9 * DropFeel.dive_speed: tst = (i + 1) * DT
+		if tvy < 0.0 and -P.vel.y >= 0.9 * Hunter.DIVE_FALL: tvy = (i + 1) * DT
+		if tst < 0.0 and P.vel.x >= 0.9 * Hunter.DIVE_SPEED: tst = (i + 1) * DT
 		if not P.diving: break
 	rec("drop_dive_vy_t", tvy if tvy > 0.0 else 9.0)
 	rec("drop_dive_steer_t", tst if tst > 0.0 else 9.0)
 	# deploy on a press (well above the auto height)
 	_reset(flat + Vector3(0, 40.0, 0), false)
 	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
-	P.vel = Vector3(0, -DropFeel.dive_fall, 0)
+	P.vel = Vector3(0, -Hunter.DIVE_FALL, 0)
 	_steps(5)
 	P.inp["jump"] = true
 	var fd := -1; var ts := -1.0
 	for i in 60:
 		m.step(DT)
 		if fd < 0 and not P.diving: fd = i + 1
-		if ts < 0.0 and not P.diving and absf(-P.vel.y - DropFeel.canopy_fall) <= 0.1 * DropFeel.canopy_fall:
-			ts = (i + 1) * DT
+		if ts < 0.0 and not P.diving and absf(-P.vel.y - Hunter.DROP_FALL) <= 0.1 * Hunter.DROP_FALL: ts = (i + 1) * DT
 	rec("drop_deploy_frames", fd)
 	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
 	# steer under the canopy
@@ -1082,12 +1081,12 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(0, 1)
 		m.step(DT)
-		if tg < 0.0 and P.vel.z >= 0.9 * DropFeel.canopy_speed: tg = (i + 1) * DT
+		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.DROP_SPEED: tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
 	# land and move off straight away
 	_reset(flat + Vector3(0, 3.0, 0), false)
 	P.dropping = true; P.diving = false; P.gliding = true
-	P.vel = Vector3(0, -DropFeel.canopy_fall, 0)
+	P.vel = Vector3(0, -Hunter.DROP_FALL, 0)
 	var landed := false
 	for i in 120:
 		m.step(DT)

@@ -81,7 +81,6 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--record-check` | Recording mode hides and restores the HUD and debug nodes correctly |
 | `--hair-check` | Every race and hair style grows a mesh that shows outside the head and touches it (nothing hidden or floating) |
 | `--speak-test` | Prints how Boki talk at each stage |
-| `--ride-pick-check` | The Boki riding with you (RidePick): one rides, swap list = garden minus held Boki, a swap is what the match brings, carry and summon lines from the species, lobby swap row gone once locked or online |
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |

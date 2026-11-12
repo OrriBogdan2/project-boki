@@ -9,14 +9,13 @@
   glider_crackle  the glider catching fire (overheat): a hiss of sparks and pops
   glider_burn     loop: the overheated canopy burning, low roar with pops
   glider_fold     the canopy folding shut on landing or when you let go
-  hard_landing    a Hard Landing (the opening drop's dive held to the ground): a low boom, then grit falling
 Original synthesis, no samples.
 """
 import os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, crack, grains, shape, soft_in, sub, tail
+from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, crack, grains, shape, soft_in
 
 S.reseed(9411)
 
@@ -91,14 +90,6 @@ def fold():
     return soft_in(mix(swish, at(flap, 0.05)), 1.0)
 
 
-def hard_landing():
-    boom = sub(95, 38, 0.7, 0.2) * 1.6
-    thump = crack(0.12, 80, 900, 0.03) * 0.9
-    earth = tail(0.9, 420, 0.22, delay=0.01) * 0.8
-    grit = at(grains(0.9, 55, 900, 5200, 0.002, 0.009, 0.3), 0.14) * 0.5
-    return soft_in(mix(boom, thump, earth, grit), 1.0)
-
-
 def build():
     S.save_cat('glider_snap', snap(), 'cast')
     S.save_loop('glider_wind', wind(), 'loop')
@@ -107,7 +98,6 @@ def build():
     S.save_cat('glider_crackle', crackle(), 'fire')
     S.save_loop('glider_burn', burn(), 'loop')
     S.save_cat('glider_fold', fold(), 'dash')
-    S.save_cat('hard_landing', hard_landing(), 'heavy_impact')
 
 
 if __name__ == '__main__':

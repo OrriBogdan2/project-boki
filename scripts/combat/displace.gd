@@ -167,7 +167,7 @@ func _toward(e: Ent, dir: Vector2, step: float) -> String:
 func _reel(rec: Dictionary, e: Ent, to: Vector2, dist: float, gap: float, dt: float) -> String:
 	var p: Dictionary = rec["p"]
 	if float(p.get("stun", 0.0)) > 0.0:
-		e.add_stun(float(p["stun"]))
+		e.stun_t = maxf(e.stun_t, float(p["stun"]))
 	var want := to / dist * float(p["spd"])
 	var sw := float(p.get("swing", 0.0))
 	var v: Vector2 = (rec["v"] as Vector2).lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 else want

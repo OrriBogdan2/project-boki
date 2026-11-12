@@ -86,7 +86,6 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
-		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],

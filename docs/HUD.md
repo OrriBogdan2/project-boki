@@ -10,10 +10,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
-| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
-| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
-| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
+| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
@@ -23,18 +21,12 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
-| `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
-| `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
-| `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`); `push` takes an optional icon. Check: `--msg-queue-check` |
-| `steal_call.gd` (`StealCall`, scripts/match) | the stolen-kill line through the lane: for a lair boss, elite or key carrier the squad that did most of the damage reads "<Hunter> stole the <monster>", the squad that got the last hit reads "Stolen: <monster>" (key mark if it carried one); uncontested kills say nothing. Credit is the existing one (Match.on_mob_dead). Local to the machine that runs the death, no Net change. Check: `--steal-call-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
-| `knock_callout.gd` (`KnockCallout`, made on the HUD at the first call) | "KNOCKED / ELIMINATED <name>" just under your hunter (clear of the alerts and message lane) for 1 s when you knock or eliminate a rival (pink-magenta / rival red), up to 3 stacked; called from `Juice.knock` / `Juice.kill` and the client knock and out events; the confirm sound is Juice's knock_confirm / kill, played by `say(..., true)` on an online client. Check: `--hudref-check` section 7 |
-| `hudref_demo.gd` | `--hudref-demo=plates|fight|busy|callout` screenshot scenes |
 
 Rules of the look:
 - Colours are roles: `SELF` / `ALLY` / `FOE` for health, `LOW` as yours and allies' runs low, armour in
   its tier colour (`Hunter.armor_col()`), `SHIELD`, `CHIP`, `COOLING` for slots that aren't ready.
-- Segments are a fixed amount of health (`HP_PER_SEG` = 17, doubling past `MAX_SEGS` = 12), so a bigger
+- Segments are a fixed amount of health (`HP_PER_SEG` = 25, doubling past `MAX_SEGS` = 12), so a bigger
   pool shows more segments.
 - Bars are a handful of draws each (track, chip, fill, highlight, shield, one multiline for every gap),
   no nodes per segment, so 40 plates on screen stay cheap.
@@ -86,27 +78,11 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
-## Safe area
-
-- `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
-  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
-  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
-  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
-- The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
-  the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
-  margin (4% of the height) for the countdown banner.
-- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
-  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
-  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
-  --shots-dir=<dir>` takes the same screens with a real renderer.
 
 ## Looting with a full inventory
 
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) at the right edge, where your inventory was: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
-- The box window rows (`LootHold.box_row`): name in its rarity colour, slot and effect on one line, a green "▲ better" or red "▼ worse" arrow for gear against what you wear (the tip says what you wear), worth for backpack things, then Take / Swap / Full. Take is a click; there is no per-row key. "Take best" (key from `Settings.key_cap("interact")`) is `LootFull.smart`. You can walk and aim with the window open; it closes beyond 2.4 m. Shots: `docs/ui_loot_panel/` (before/after at 1280x720 and 1920x1080, software-rendered).
-- Take best (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
-- A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) left of the box: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
@@ -137,45 +113,15 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
-## Hit feedback (OWNER_REVIEW_1103 item 96.4)
-One path for every Hunter: `Match.on_damage` plays the hit, `Juice.number` picks the damage number's look
-(`Fx.NUM_SMALL / PLAIN / HEAVY / CRIT`, colours in `HudStyle.dmg_col`), `Juice.hit` adds the impact and the
-sound layers, `Feel.hitstop` holds the bodies, `Ent.flash_t` flashes the body (the toon shaders' `flash`).
-A kit marks an empowered hit with `"heavy": true` in its hit options (a shot's `x["heavy"]`, a stage's
-`hit_extra`); a payoff (`"payoff"`) reads the same. No screen shake from any of it (Shake: big hits on you only).
 
-- **Numbers**: yours are the base (cream); an empowered hit is orange, a size up, deep red outline; a crit gold,
-  two sizes up, ember outline; your Boki's hits are dimmer and a size down; the hits you take red and a size down.
-  Only hits that involve you show numbers.
-- **Sound**: each Hunter's weapon has its own hit, `<arch>_hit` (`HeroSfx.hit_sound`, `tools/gen_sfx_hits.py`;
-  Neve's is her dart hit), in place of the shared tick; a crit plays the crit tick; an empowered or 28+ hit
-  adds `hit_heavy`, armour `armor_hit`. A Hunter without its own falls back to `slash_hit` (melee) or `hit`.
-- **Hit-stop**: an empowered hit is at least Feel tier 3 (target 0.065 s; your ranged shots never freeze you),
-  a further hit on the same pair inside 0.25 s no longer cuts it to a third, and a small hit no longer cuts a
-  running hold short (`Ent.damage` keeps the larger). A shotgun volley with 70% of its slugs on one body
-  (`Feel.POINT_BLANK`) is an empowered hit.
-- Check: `--hit-feedback-check` (also inside `--hero-combo-check`): each Hunter's LMB at 2.2 m / 6 m (flash,
-  number, its own sound, no shake), Grimble's point-blank and Sable's empowered bolt, and the number looks.
-
-| Hunter | LMB hit sound before -> after | Heavy hit | Number before -> after | Hold before -> after |
-|---|---|---|---|---|
-| Lace | shared `hit` (+`hit_heavy` 28+) -> `archer_hit` | wall pin | already `heavy`; plain -> orange | 0.05 / pin stun tier 4 (unchanged) |
-| Cinder | shared `hit` -> `ashwick_hit` | - | plain | unchanged |
-| Albert | `hit` (on_damage and the swing's own) + `slash_hit` -> `bulwark_hit` + `hit_heavy` | perfect swing | charged swing already `heavy`; plain -> orange | perfect: payoff (unchanged) |
-| Tenzo | `hit` + `slash_hit` -> `dolm_hit` | - | his `heavy` fist hits now orange | unchanged |
-| Grimble | shared `hit` -> `dredge_hit` | point-blank | not marked -> orange at 70% of a volley | 0.03 (pellets cut it to a third) -> 0.065 |
-| Vex | shared `hit` -> `gunslinger_hit` | - | plain | unchanged |
-| Kael | `hit` + `slash_hit` -> `juggernaut_hit` | finishing slam | not marked -> orange (execute stays crit gold) | by damage -> at least tier 3; sweet spot payoff unchanged |
-| Sparkle | shared `hit` -> `mage_hit` | - | plain | unchanged |
-| Motley | shared `hit` -> `ostra_hit` | - | plain | unchanged |
-| Neve | `hit` + kit's `rimewright_dart_hit` (2 sounds) -> `rimewright_hit` once | - | plain | unchanged |
-| Meeko | shared `hit` -> `tender_hit` | - | plain | unchanged |
-| Sable | shared `hit` -> `thief_hit` | empowered bolt | not marked (looked plain) -> orange + `hit_heavy` | 0.05 -> 0.065 |
-
-Every Hunter already had the body flash (0.12 s, Lace's heavy 0.2 s) and no shake from a plain hit. Your Boki's
-numbers looked like yours and the hits you took were the same size; now both are a size down.
-## Tab squad board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
-The source shows no scoreboard: only a squads-left counter, your squad's list and "SQUAD ELIMINATED" cards. So the Tab-hold board follows
-that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
-levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
-Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
+## Tutorial objective strip (one banner for both tutorials)
+- `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
+  title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
+  pulses for 1.6 s whenever the objective changes, then keeps a steady rim. The message lane starts at 72% of the
+  width, so the strip never touches it. In the match tutorial the Ways Out strip, the match clock and the ship's
+  planning countdown are off; in a real match (`FirstMatchGuide`) the strip drops under `WaysOutHud.bottom()`
+  (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
+- The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
+  Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.

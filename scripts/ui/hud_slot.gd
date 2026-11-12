@@ -105,7 +105,7 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
 	elif tag != "":
 		var tw := HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
-		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 14), Vector2(tw, 14))
+		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
 		H._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
 		HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), tag, 10, Color(HudStyle.INK, 0.9), 0)
 	shown_keys[id] = key
@@ -149,7 +149,6 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
 		deny_pulse(H, id, r)
 		if can:
-			RankMarks.beam(H, r, slot)
 			RankMarks.mark(slot, r)
 		return
 	ab_slot(H, id, r, icon, key, col, cdf, cds, ready, ch, mx)

@@ -76,7 +76,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
     - XP for knocking a hunter who is a higher level than you;
     - bots prefer bounty targets.
   - **Session events:**
-    - Cleared camps come back once, one size up, 150 s after the clear (Camps, decision 0048).
+    - Cleared camps come back after 240 s if nobody is near.
     - Meteor showers come every 6 session minutes.
   - **Per-squad stay:** bots leave based on their squad's planned stay (`Match.bot_time_left`,
     `Match.bot_past`).
@@ -86,8 +86,8 @@ The feature is behind the match option `rolling`. The default fixed-length match
   - New `board()`.
   - New: `ship_of(h)` and `ship_pos_of(s)`.
   - `plan_jump`, `ship_jump` and `_update_one_ship` now handle several ships.
-  - Hooks call into Rolling from: plan in `_start`, the spawn,
-    `after_setup` (camps: `Camps.picked_over`), `step` (`tick`/`demo`), `on_drop_landed`, `knock`, the meteor and event timing,
+  - Hooks call into Rolling from: plan in `_start`, the spawn, `_spawn_mobs` (`note_camp`),
+    `after_setup`, `step` (`tick`/`demo`), `on_drop_landed`, `knock`, the meteor and event timing,
     `_check_last` and `_finish` (`r["rolling"]`).
   - `opts.sim_keep` stops the match from ending when the player is done.
 - **Map:** `World.widen_layout()` builds the rolling-only map `skyreach_wide`:
@@ -142,7 +142,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
 | Bot stay | 8-16 min. They leave past 30% of that if they have more than 40 gems |
 | Earlier squads | wiped at 3%/min; each squadmate has an 18% chance of having died |
 | `XP_PER_MIN` | **200** (was a 105 guess). The sim measured a median 243 XP/min for bots on the map, 12.8% of it catch-up |
-| Camps | come back once, one size up, 150 s after the clear (Camps) |
+| Camps | come back after 240 s |
 | Meteor showers | every 360 s |
 
 ## The 30-minute sim and the tuning

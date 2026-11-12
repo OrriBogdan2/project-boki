@@ -408,6 +408,7 @@ func _all() -> void:
 	ak.step(m, 1.0)
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
+	P.reload_t = 0.0
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
 	var wear := []
 	var armor0: float = T.armor

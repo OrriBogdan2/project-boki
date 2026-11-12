@@ -234,33 +234,14 @@
 				"leech": 0.07
 			}
 		},
-		"ghost": {
+		"shadow": {
 			"style": "spiral",
 			"parts": [
 				"horns",
 				"wings",
 				"tail"
 			],
-			"word": "GHOST",
-			"rider": {
-				"slow_k": 0.2,
-				"slow_s": 1.2,
-				"leech": 0.04
-			},
-			"dash": {
-				"dmg": 8.0,
-				"slow_k": 0.25,
-				"slow_s": 1.2
-			}
-		},
-		"dark": {
-			"style": "spiral",
-			"parts": [
-				"horns",
-				"wings",
-				"tail"
-			],
-			"word": "DARK",
+			"word": "SHADOW",
 			"rider": {
 				"slow_k": 0.2,
 				"slow_s": 1.2,

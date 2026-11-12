@@ -51,12 +51,10 @@
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r",
-			"scale": 1.38
+			"clip": "slash_r"
 		},
 		"jug_slash_l": {
-			"clip": "slash_l",
-			"scale": 1.38
+			"clip": "slash_l"
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
@@ -85,8 +83,7 @@
 			"clip": "meteor_land"
 		},
 		"jug_dash": {
-			"clip": "dash",
-			"cut": 0.24
+			"clip": "dash"
 		},
 		"jug_exdash": {
 			"clip": "exdash"

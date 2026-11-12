@@ -32,15 +32,10 @@ static func forms_of(species: String) -> Array:
 static func entry_key(species: String) -> String:
 	return forms_of(species)[0]
 
-## Every Field Book entry, in species order with the legendaries last, lowest tier first (DexView.TIERS): a
-## branch pair is one.
+## Every Field Book entry, in species order: a branch pair is one. The boss-egg Boki come last.
 static func entries() -> Array:
-	var ids: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
-	var legend := func(k): return Legendary.is_legendary(k) or DexView.tier_of(k) != ""
-	var legends: Array = ids.filter(legend)
-	var rank := func(k): return DexView.TIERS.find(DexView.tier_of(k))
-	legends.sort_custom(func(a, b): return rank.call(a) < rank.call(b))
-	return ids.filter(func(k): return not legend.call(k)) + legends
+	var all: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
+	return all.filter(func(s): return not Data.is_rare(s)) + all.filter(func(s): return Data.is_rare(s))
 
 ## One species on its own (caught ones count as seen).
 static func form_seen(species: String) -> bool:

@@ -5,13 +5,14 @@ extends RefCounted
 ## silhouette, one you've never met is a "?". Each tile carries a small type badge, and a soft
 ## sparkle when you've found its shimmer form. Clicking a tile opens its page: the Boki turning on a
 ## stand, its number, name and type, a field note, its size range, where it lives, its quirk and how
-## its sexes work (BokiQuirks), the forms you've found and the ones you're raising.
+## its sexes work (BokiQuirks), where it's found and how rare it is (DexFound), the forms you've found
+## and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
-## percentage, no rarity colours.
+## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
-## Each type's badge colour and name (the glyphs are drawn by TypeIcon); "ink" tints the glyph (white if unset).
+## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
 const TYPES := {
 	"spore": {"name": "Spore", "col": Color("9ccf6a")},
 	"titan": {"name": "Titan", "col": Color("cbb48a")},
@@ -22,10 +23,7 @@ const TYPES := {
 	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
 	"echo": {"name": "Echo", "col": Color("6fb6ff")},
 	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
-	"ghost": {"name": "Ghost", "col": Color("bcebdf"), "ink": Color("5a4aa8")},
-	"dark": {"name": "Dark", "col": Color("4a4a9a"), "ink": Color("ffb454")},
 }
-const SILHOUETTE := Color(0.05, 0.06, 0.1, 0.92)       # a Boki you haven't met, drawn as a dark shape
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
 
@@ -38,24 +36,8 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
-## The type pill: the type's icon and "<Name> type", in its colour.
-static func type_chip(t: String) -> PanelContainer:
-	var chip := PanelContainer.new()
-	var fill := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
-	chip.add_theme_stylebox_override("panel", fill)
-	var h := UI.hbox(6); chip.add_child(h)
-	h.add_child(TypeIcon.new(t, 18.0))
-	h.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
-	return chip
-
-## Legendary tiers, lowest first: the order legendaries close the Field Book in (docs/decisions/0002).
-const TIERS := ["minor", "boss", "ultra", "blight"]
-
-static func tier_of(spk: String) -> String:
-	return String(Data.KIN.get(spk, {}).get("legendary_tier", ""))
-
-## Its number in the Field Book: the order entries are listed in (FieldBook.entries: the starters first, the
-## legendaries last by tier); both forms of a branching line share one.
+## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
+## forms of a branching line share one.
 static func number(spk: String) -> int:
 	return FieldBook.entries().find(FieldBook.entry_key(spk)) + 1
 
@@ -70,21 +52,26 @@ static func entry(spk: String) -> Dictionary:
 static func counts() -> Vector2i:
 	return Vector2i(FieldBook.seen_count(), FieldBook.caught_count())
 
-## [seen, caught] per type id, over the species of that type.
-static func type_counts() -> Dictionary:
-	var out := {}
-	for spk in Data.KIN:
-		var c: Vector2i = out.get(type_of(spk), Vector2i.ZERO)
-		c.x += int(FieldBook.form_seen(spk))
-		c.y += int(FieldBook.form_caught(spk))
-		out[type_of(spk)] = c
-	return out
-
-## The grid, under the filter bar (DexFilter: Seen N · Caught N, status, types). on_open(species) opens a tile's page.
+## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	Care.dex_sync()
 	demo()
-	v.add_child(DexFilter.Browser.new(tree, on_open))
+	var c := counts()
+	var head := UI.hbox(14)
+	head.add_child(UI.chip("eye", "Seen %d" % c.x, UI.INK))
+	head.add_child(UI.chip("paw", "Caught %d" % c.y, UI.INK))
+	var hint := UI.label("Field notes on every Boki you've met. Click one to read its page.", UI.T_SMALL, UI.MUTED)
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(hint)
+	v.add_child(head)
+	var g := GridContainer.new()
+	g.columns = 6
+	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
+	v.add_child(g)
+	for key in FieldBook.entries():
+		g.add_child(tile(key, tree, on_open))
 
 ## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
 static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
@@ -106,9 +93,8 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 	var nl := UI.label(num_text(key), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
+	top.add_child(DexFound.Pip.new(spk, is_seen))
 	if is_seen:
-		if tier_of(spk) != "":
-			top.add_child(UI.label(tier_of(spk).capitalize(), 10, UI.MUTED, UI.semi))
 		top.add_child(TypeIcon.new(type_of(spk), 16.0))
 	col.add_child(top)
 	var pic := CenterContainer.new()
@@ -121,7 +107,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		var pv := KinPortrait.view({"species": spk, "level": 5}, tree, PORTRAIT)
 		pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		if not is_caught:
-			pv.modulate = SILHOUETTE      # seen, not caught: a dark silhouette
+			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)      # seen, not caught: a dark silhouette
 		holder.add_child(pv)
 		if is_caught and bool(entry(spk).get("shimmer", false)):
 			var sp := Sparkle.new()
@@ -180,7 +166,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	else:
 		var dc := CenterContainer.new(); stage.add_child(dc)
 		var d := KinPortrait.view({"species": spk}, tree, 160)
-		if not is_caught: d.modulate = SILHOUETTE
+		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		dc.add_child(d)
 	var info := UI.vbox(7)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -191,7 +177,13 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(nrow)
 	var trow := UI.hbox(8)
 	var t := type_of(spk)
-	trow.add_child(type_chip(t))
+	var tchip := PanelContainer.new()
+	var chip_box := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
+	tchip.add_theme_stylebox_override("panel", chip_box)
+	var th := UI.hbox(6); tchip.add_child(th)
+	th.add_child(TypeIcon.new(t, 18.0))
+	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
+	trow.add_child(tchip)
 	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
 	if FieldBook.both_forms(spk):
 		trow.add_child(UI.tag("★ Both forms", UI.GOLD))
@@ -208,11 +200,12 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
+	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
 	if BokiQuirks.quirk(spk) != "":
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
 		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
-	info.add_child(summon_row(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
@@ -223,7 +216,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var fc := UI.vbox(2)
 		fc.custom_minimum_size.x = 64
 		var fp := KinPortrait.view(_form_rec(spk, String(fname)), tree, 46.0)
-		if not is_caught: fp.modulate = SILHOUETTE
+		if not is_caught: fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		var fcc := CenterContainer.new(); fcc.add_child(fp)
 		fc.add_child(fcc)
 		var fn := UI.label(String(fname), 11, UI.MUTED)
@@ -269,7 +262,7 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	var r := UI.hbox(8)
 	r.add_child(UI.IconDot.new(icon, UI.MUTED, 15.0))
 	var kl := UI.label(k, UI.T_SMALL, UI.MUTED, UI.semi)
-	kl.custom_minimum_size.x = 48
+	kl.custom_minimum_size.x = 64
 	r.add_child(kl)
 	var vl := UI.label(val, UI.T_SMALL, UI.INK)
 	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -277,21 +270,6 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	vl.custom_minimum_size.x = 200
 	r.add_child(vl)
 	parent.add_child(r)
-
-## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
-## itself reads), a ring icon and the Burst / Steady tag.
-static func summon_text(spk: String) -> String:
-	var t := KinSummon.times(KinLib.kin(spk))
-	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
-
-static func summon_row(spk: String) -> Control:
-	var r := UI.hbox(8)
-	r.add_child(UI.IconDot.new("ring", type_col(type_of(spk)), 15.0))
-	var l := UI.label(summon_text(spk), UI.T_SMALL, UI.INK)
-	l.name = "SummonText"
-	r.add_child(l)
-	r.add_child(UI.tag(KinSummon.tag(KinSummon.times(KinLib.kin(spk)).x), UI.MUTED))
-	return r
 
 ## One or two lines about the species (its flavour text, cut at the second sentence).
 static func _field_note(spk: String) -> String:
@@ -360,8 +338,7 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 	ci.draw_circle(c, r, Color(col.darkened(0.45), alpha))
 	ci.draw_circle(c, r - 1.2, Color(col.darkened(0.15), alpha))
 	var s := r * 0.62
-	var ink: Color = TYPES.get(t, {}).get("ink", Color.WHITE)
-	ink.a = 0.95 * alpha
+	var ink := Color(1, 1, 1, 0.95 * alpha)
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
 	var w := maxf(1.2, r * 0.16)
 	match t:
@@ -397,26 +374,6 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
 		"tempest":     # a bolt
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
-		"ghost":       # a sheet ghost: round head, wavy hem, two eyes
-			var body := PackedVector2Array()
-			for i in 13:
-				var a := PI + PI * i / 12.0
-				body.append(P.call(cos(a) * 0.7, -0.1 + sin(a) * 0.75))
-			for hem in [[0.7, 0.9], [0.35, 0.55], [0.0, 0.9], [-0.35, 0.55], [-0.7, 0.9]]:
-				body.append(P.call(hem[0], hem[1]))
-			ci.draw_colored_polygon(body, ink)
-			for ex in [-0.27, 0.27]:
-				ci.draw_circle(P.call(ex, -0.2), s * 0.13, Color(col.darkened(0.55), alpha))
-		"dark":        # a slit eye open in the night
-			var lid := PackedVector2Array()
-			for i in 15:
-				var x := -0.95 + 1.9 * i / 14.0
-				lid.append(P.call(x, -0.6 * (1.0 - x * x / 0.9025)))
-			for i in range(13, 0, -1):
-				var x := -0.95 + 1.9 * i / 14.0
-				lid.append(P.call(x, 0.6 * (1.0 - x * x / 0.9025)))
-			ci.draw_colored_polygon(lid, ink)
-			ci.draw_circle(P.call(0.0, 0.0), s * 0.3, Color(col.darkened(0.15), alpha))
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 

@@ -7,7 +7,7 @@ extends RefCounted
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
-const GATED_FILES := ["res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd", "res://scripts/ui/full_map.gd"]
+const GATED_FILES := ["res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd"]
 
 var bad := 0
 

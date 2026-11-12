@@ -1,11 +1,10 @@
 extends RefCounted
-## --empty-shots --shots-dir=<dir> [--shot-size=1920x1080]: review screenshots of the Empty creator (Male / Female,
-## three heights, builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer).
-## Add --only=creator|first|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg pick, then the
-## black mystery egg picked; shroud: the creator from front, side and back, the aura levels and shroud styles; feet:
-## the soles at the shortest and tallest height, standing and walking; farm: the Empty at home from every side and
-## above; gait: three bodies running past floor posts, not run by default). The second Relic, from Hob: --hob-check
-## --shots-dir=.
+## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
+## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
+## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg pick, then the black
+## mystery egg picked; shroud: the creator from front, side and back,
+## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
+## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default).
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
@@ -31,9 +30,6 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 		elif String(a).begins_with("--only="):
 			only = String(a).substr(7)
-		elif String(a).begins_with("--shot-size="):
-			var wh := String(a).substr(12).split("x")
-			main.get_tree().root.size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var tree := main.get_tree()
@@ -41,8 +37,6 @@ func run(main_node: Node) -> void:
 		main.fade.reveal(0.05)
 	if only in ["", "creator"]:
 		await _creator(tree)
-	if only in ["", "first"]:
-		await _first_screens(tree)
 	if only in ["", "viewer"]:
 		await _viewer(tree)
 	if only in ["", "mask"]:
@@ -79,22 +73,16 @@ func _creator(tree: SceneTree) -> void:
 	hx.queue_free()
 	await tree.process_frame
 
-## What a new player sees: the hatch card, the creator with its first rows, then with More looks... open.
-func _first_screens(tree: SceneTree) -> void:
-	Save.d = Save.fresh()
+func _eggs(tree: SceneTree) -> void:
+	_fresh()
+	Save.d["look"] = Unmasked.default_look()
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
-	await _shot(tree, "hatch_card", 2.0)
-	hx._end_intro()
-	await _shot(tree, "creator_first", 2.0)
-	var buttons: Array = hx.create_box.find_children("*", "Button", true, false)
-	var more: Array = buttons.filter(func(b): return (b as Button).text == "More looks...")
-	if not more.is_empty():
-		(more[0] as Button).pressed.emit()
-		await _shot(tree, "creator_more", 1.0)
-		hx.create_box.use_preset("Fierce")
-		hx.zoom = 1.0
-		await _shot(tree, "creator_face", 2.5)
+	await tree.process_frame
+	hx._looks_good()
+	await _shot(tree, "hatch_eggs", 2.5)
+	hx._pick(3)
+	await _shot(tree, "hatch_mystery_picked", 1.2)
 	hx.queue_free()
 	await tree.process_frame
 
@@ -143,26 +131,6 @@ func _mask(tree: SceneTree) -> void:
 	await _shot(tree, "mask_5_flash", 0.4)
 	await _shot(tree, "mask_6_you_as_vex", 0.6)
 	await _shot(tree, "mask_7_vex_intro", 2.2)
-	hx.queue_free()
-	await tree.process_frame
-
-func _eggs(tree: SceneTree) -> void:
-	_fresh()
-	Save.d["look"] = Unmasked.default_look()
-	tree.root.size = Vector2i(1280, 720)
-	var holder := Node.new()       # the portraits' home (the root is busy starting up)
-	holder.name = "KinPortraits"
-	tree.root.add_child.call_deferred(holder)
-	for i in 4: await tree.process_frame
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	for i in 4: await tree.process_frame
-	hx._looks_good()
-	await _shot(tree, "eggs_pick_none", 2.5)
-	hx._pick(1)
-	await _shot(tree, "eggs_pick_starter", 0.6)
-	hx._pick(3)
-	await _shot(tree, "eggs_pick_mystery", 0.6)
 	hx.queue_free()
 	await tree.process_frame
 

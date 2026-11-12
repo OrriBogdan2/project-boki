@@ -5,8 +5,7 @@ extends RefCounted
 ##   3. bots still spend their points on their own
 ##   4. the bar shows tier pips and a gold "+" on every slot that can rank, with a click target over it;
 ##      clicking the "+" spends the point; with no points left the "+" and its click target go away
-##   5. a quiet beam shows over each slot that can rank, and clears after the pick
-##   6. a new point shows the ALT+key hint for a few seconds
+##   5. a new point shows the ALT+key hint for a few seconds
 ## Runs a real match headless with the real HUD. Never touches the save.
 
 var bad := 0
@@ -86,8 +85,6 @@ func _bar(m: Match, P: Hunter) -> void:
 	ok(RankMarks.spot("sec").has_area() and RankMarks.spot("dash").has_area(),
 		"locked RMB and rank-1 dash both take a click")
 	ok(not RankMarks.spot("kin").has_area(), "maxed E shows no +")
-	ok(RankMarks.beam_on("sec") and RankMarks.beam_on("dash"), "the level-up beam shows over each slot that can rank")
-	ok(not RankMarks.beam_on("kin"), "maxed E has no beam")
 	ok(RankMarks._hint_until > m.time, "the new point shows the ALT+key hint for a while")
 	var rc: RankClick = null
 	for n in clicks:
@@ -105,7 +102,6 @@ func _bar(m: Match, P: Hunter) -> void:
 	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
-	ok(not RankMarks.beam_on("sec") and not RankMarks.beam_on("dash"), "after the pick the beam is cleared")
 
 func _frames(n: int) -> void:
 	for i in n:

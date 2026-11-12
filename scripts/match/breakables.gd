@@ -26,10 +26,6 @@ func _init(match_node: Match) -> void:
 	_fx = BreakFx.new(rules()["debris"])
 	_m.add_child(_fx)
 
-## Loose chunks of `mat_name` thrown up at `at` with nothing broken (a Hard Landing), from the debris pool.
-func debris(at: Vector3, mat_name: String, chunks: int) -> void:
-	_fx.shatter(at, mat_name, chunks)
-
 ## The rules, read once.
 static func rules() -> Dictionary:
 	if _rules.is_empty():

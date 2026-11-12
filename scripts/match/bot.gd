@@ -13,6 +13,8 @@ const ARRIVE_R := 1.5          # bots ease off and stop turning this close to wh
 const GOAL_KEEP := 4.0         # metres of extra reach for a goal we're already heading to
 const GOAL_STICK := 5.0        # seconds a bot sticks to a goal before it may flip back to the last one
 const LAND_SPREAD := 16.0      # metres: another squad landing this close counts as a crowded spot
+const ULT_LOOK_S := 0.3         # s: ult ready in a fight with a Hunter: the next ability look comes this soon
+const ULT_EAGER_ABIL := 0.5     # abil at least this (medium and up) looks that soon; easy keeps its own pace
 const FRESH_T := 20.0          # seconds after landing a hunter is left alone unless they start it
 
 ## How many hunters of other squads are coming down (or standing) within r of p: where they mean to
@@ -50,7 +52,6 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	var inp := h.inp
 	inp["fire"] = false
 	inp["interact"] = false
-	inp["crouch"] = false
 	if h.downed:
 		_crawl(m, h)
 		return
@@ -64,7 +65,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / DropFeel.canopy_fall * DropFeel.canopy_speed)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -78,7 +79,6 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			land = best
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
-		inp["crouch"] = DropSquad.bot_dive(m, h, to)
 		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
@@ -222,6 +222,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
 		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
 			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
+			if abil >= ULT_EAGER_ABIL and tgt is Hunter and h.ak and HeroUlt.ready(h.ak):
+				a["abil_t"] = ULT_LOOK_S
 			if MergeKit.is_live(h):
 				MergeKit.bot_use(h)       # merged: the ultimate when foes are in range or the window is closing (its hero kit plays as usual below)
 			if h.ak:
@@ -278,7 +280,6 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
 		if heal_ok:
-			BotShop.think(m, h)
 			BotBelt.think(m, h, a, inp)       # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -710,10 +711,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		for o in m.hunters:
 			if o.team != h.team and o.downed and not o.out and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)):
 				best = o; break
-	# angry wild kin also count
+	# angry wild kin also count (a calm one only when no knocked-out Boki is close enough to scan)
 	if best == null:
+		var scan_near: bool = BotKin.scan_goal(m, h, a["goal"], BotKin.SCAN_NEAR) != Vector3.INF
 		for k in m.kins:
-			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or randf() < 0.5):
+			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
 	a["tgt"] = best
 	if best:
@@ -772,11 +774,6 @@ func _choose(m: Match, h: Hunter) -> void:
 		var og := PerkOrbs.bot_goal(m, h, cur)
 		if og != Vector3.INF:
 			goal = og; gk = "orb"
-	if goal == Vector3.INF:
-		var sg := BotShop.goal(m, h)       # spare gems and a vendor close: go shopping
-		if not sg.is_empty():
-			goal = sg[0]
-			gk = String(sg[1])
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]
@@ -794,6 +791,10 @@ func _choose(m: Match, h: Hunter) -> void:
 			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
+	# a knocked-out Boki within a few strides: scan it before any lair, seat or exit run
+	if goal == Vector3.INF and not holding_yard:
+		goal = BotKin.scan_goal(m, h, cur, BotKin.SCAN_NEAR)
+		if goal != Vector3.INF: gk = "catch"
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
 	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
@@ -821,9 +822,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not g.is_empty():
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
-		for k in m.kins:
-			if KinLoss.scannable_by(h, k) and Capture.room(h) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
-				goal = k.pos; gk = "catch"; break
+		goal = BotKin.scan_goal(m, h, cur, BotKin.SCAN_FAR)
+		if goal != Vector3.INF: gk = "catch"
 	if goal == Vector3.INF:
 		var kg := BotKeys.goal(m, h, cur)      # no key yet: fight for one first
 		if not kg.is_empty():

@@ -338,9 +338,7 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	elif x.get("draining", false) and x["state"] == "charging":
 		lit *= 0.45 + 0.35 * sin(m.time * 7.0)
 	var raised := OutpostLook.held(x)
-	var col := OutpostLook.NEUTRAL
-	if raised:
-		col = SideColor.of_team(m.player.team if m.player else -1, int(x["team"]))
+	var col: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if raised else OutpostLook.NEUTRAL
 	var key := [snappedf(lit, 0.01), raised, col]
 	if key != x.get("look"):
 		x["look"] = key

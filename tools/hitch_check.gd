@@ -76,9 +76,7 @@ func _ready() -> void:
 		if a.begins_with("--hitch-seed="): seed_v = int(a.substr(13))
 		if a.begins_with("--hitch-squad="): squad = int(a.substr(14))
 		if a == "--hitch-trace": trace = true; PerfLog.trace_slices = true
-		if a.begins_with("--load-shots="):
-			shots_dir = a.substr(13)
-			DirAccess.make_dir_recursive_absolute(shots_dir)
+		if a.begins_with("--load-shots="): shots_dir = a.substr(13)
 		if a == "--load-check": load_only = true
 		if a == "--load-check=home": load_only = true; home_only = true
 		if a == "--load-check=training":

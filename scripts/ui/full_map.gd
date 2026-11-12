@@ -184,7 +184,6 @@ func draw(sz: Vector2) -> void:
 				if st != "":
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
-	ShopLegend.markers(self, c)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
 	if m.biomes:
@@ -269,9 +268,6 @@ func _labels(c: Control, kk: float) -> void:
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
 			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
-			var camp_line := _region_line(nm)
-			if camp_line != "":
-				_name(camp_line, pv + Vector2(0, 5 + sz * 0.8), int(11 * big_k), Color(CampMap.FLAME, 0.95), taken, true)
 		else:
 			later.append([lb, pv])
 	for e in later:
@@ -301,17 +297,6 @@ func _labels(c: Control, kk: float) -> void:
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
 
-## The drop map's line under a region's name ("3 camps: to level 4"); "" outside the planning phase.
-func _region_line(label: String) -> String:
-	if not (m.skydrop and m.skydrop.planning) or m.camps == null or m.biomes == null:
-		return ""
-	var ri := -1
-	for ii in m.world.islands.size():
-		if String(m.world.islands[ii].get("name", "")) == label:
-			ri = m.biomes.hot.region_of[ii]
-	var n := m.camps.list().filter(func(e): return e["region"] == ri).size()
-	return CampMap.region_line(n, m.camps.region_xp(ri)) if ri >= 0 and n > 0 else ""
-
 ## Draws a centred name unless it would overlap one already drawn (force draws it anyway).
 ## Returns whether it drew.
 func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force := false) -> bool:
@@ -336,9 +321,10 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var pv := to_screen(cnd["pos"])
 		if not rect.grow(-6.0).has_point(pv):
 			continue
-		spawn_marker(c, cnd, pv, s, team)
-		if m.guide and m.guide.target == cnd["pos"]:
-			CampMap.pulse(c, pv, s)
+		var def: Dictionary = sp.cats.get(cnd["cat"], {})
+		var st := sp.state_for(cnd, team)
+		var col: Color = def.get("col", Color.WHITE)
+		marker(c, String(def.get("shape", "star")), pv, s, col, st)
 		if pv.distance_to(mp) < s + 4.0:
 			_hover = cnd
 	if not _hover.is_empty():
@@ -346,10 +332,7 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var st := sp.state_for(_hover, team)
 		var line := String(def.get("name", "?"))
 		if String(_hover["name"]) != "": line += "  ·  " + String(_hover["name"])
-		var what: String = {
-			"unknown": "Might be here: scout it to find out", "active": "Here this match",
-			"empty": "Nothing here this match", "taken": "Already taken",
-			"cleared": "Cleared", "returning": "Cleared: it comes back bigger"}[st]
+		var what: String = {"unknown": "Might be here: scout it to find out", "active": "Here this match", "empty": "Nothing here this match", "taken": "Already taken"}[st]
 		var pv := to_screen(_hover["pos"])
 		var wv := maxf(hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x, hud.body.get_string_size(what, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 20.0
 		var r := Rect2(pv + Vector2(14, -42), Vector2(wv, 44))
@@ -358,37 +341,15 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		hud._text(r.position + Vector2(10, 19), line, 14, def.get("col", Color.WHITE), hud.big)
 		hud._text(r.position + Vector2(10, 36), what, 12, INK)
 
-## One of the match's spawns as this squad sees it, in its category's shape and colour.
-func spawn_marker(c: Control, cnd: Dictionary, pv: Vector2, s: float, team: int) -> void:
-	var sp: SpawnPlan = m.spawn_plan
-	var st := sp.state_for(cnd, team)
-	var col: Color = sp.cats.get(cnd["cat"], {}).get("col", Color.WHITE)
-	marker(c, sp.shape_of(cnd), pv, s, col, st, sp.comeback_frac(cnd) if st == "returning" else 0.0)
-
-## The spawns the minimap shows: what the squad knows is there (vaults from the start, the rest once
-## scouted) and every camp in whatever state the squad sees, inside the minimap (on_map, as HUD's).
-func minimap_spawns(team: int, hold: bool, to_map: Callable, on_map: Callable) -> Array:
-	var sp: SpawnPlan = m.spawn_plan
-	return sp.cands.filter(func(cnd):
-		var camp: bool = cnd["cat"] == "camp"
-		if not camp and sp.state_for(cnd, team) != "active":
-			return false
-		var known: bool = camp or (cnd["known"] as Dictionary).has(team)
-		return MapDetail.shows("cache", hold, known) and on_map.call(to_map.call(cnd["pos"]), 5.0))
-
 ## A spawn marker in one of its states: "unknown" (faint, with a ?), "active", "empty" (a cross),
-## "taken" (a tick), "cleared" (a camp, dim) or "returning" (dim, a ring that fills to its comeback,
-## fill 0..1). Shared with the legend and the minimap.
-func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: String, fill := 0.0) -> void:
+## "taken" (a tick). Shared with the legend.
+func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: String) -> void:
 	var a := 1.0
 	var ic := col
 	match st:
 		"unknown": a = 0.5; ic = Color(col, 0.55)
 		"empty": a = 0.4; ic = Color(0.6, 0.62, 0.68, 0.5)
 		"taken": a = 0.55; ic = Color(0.7, 0.72, 0.78, 0.7)
-		"cleared", "returning":
-			a = 0.45
-			ic = Color(col, 0.4)
 	if st == "active":
 		var ph := fmod(Time.get_ticks_msec() / 1000.0 * 0.8, 1.0)
 		c.draw_arc(pv, s * (1.5 + ph * 0.9), 0, TAU, 28, Color(col, 0.6 * (1.0 - ph)), 2.0, true)
@@ -396,8 +357,6 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 	c.draw_arc(pv, s * 1.35, 0, TAU, 24, Color(ic, 0.9 if st == "active" else 0.45), 1.5, true)
 	icon(c, shape, pv, s * 0.78, ic)
 	match st:
-		"returning":
-			CampMap.comeback_ring(c, pv, s, fill)
 		"unknown":
 			hud._ctext(pv + Vector2(s * 1.15, -s * 0.55), "?", int(s * 1.5), Color(1, 1, 1, 0.85), hud.big)
 		"empty":
@@ -406,11 +365,8 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 		"taken":
 			c.draw_polyline(PackedVector2Array([pv + Vector2(-s * 0.7, 0), pv + Vector2(-s * 0.15, s * 0.6), pv + Vector2(s * 0.85, -s * 0.7)]), Color("8fe0a0"), 2.5, true)
 
-## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), a campfire (camps).
+## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), else a star.
 func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) -> void:
-	if CampMap.is_shape(shape):
-		CampMap.icon(c, shape, p, s, col)
-		return
 	match shape:
 		"paw":
 			Icons.draw(c, "paw", p, s, col)
@@ -552,7 +508,7 @@ func _enemies(c: Control, team: int) -> void:
 			continue
 		var allied: bool = m.truce != null and m.truce.allied(team, h.team)
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
+		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else BAD)
 
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:
@@ -634,10 +590,6 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			elif st == "taken": gone += 1
 		var announce: bool = def.get("announce", false)
 		marker(c, String(def.get("shape", "star")), Vector2(r.position.x + 26, y), 8.0, col, "active" if announce or found > 0 else "unknown")
-		if cat == "camp":
-			hud._text(Vector2(r.position.x + 48, y + 5), CampMap.LEGEND_ROW, 13, col, hud.big)
-			y += 46.0
-			continue
 		hud._text(Vector2(r.position.x + 48, y - 2), String(def.get("name", cat)), 15, col, hud.big)
 		var line := ("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]) if announce else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
 		hud._text(Vector2(r.position.x + 48, y + 15), line, 11, INK)
@@ -682,9 +634,6 @@ func _side(c: Control, sz: Vector2) -> void:
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
-	var lr := ShopLegend.place(m, x0, wv, r.end.y)
-	if lr.end.y < sz.y - 10:
-		ShopLegend.draw(self, c, lr)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "YOUR SQUAD", 16, GOLD, hud.big)
 	var y := r.position.y + 50.0

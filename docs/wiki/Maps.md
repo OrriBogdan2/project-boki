@@ -49,17 +49,17 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 57 |  |
+| The Crown | heart | Gloom | dangerous | 53 |  |
 | Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
 | Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
 | Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 28 |  |
-| Thornwood | nest | Bloom | contested | 69 | Bramble Rise |
-| Larkhollow | landing | Meadow | quiet | 39 | The Hollow |
+| Stormbreak | shrine | Storm | contested | 24 |  |
+| Thornwood | nest | Bloom | contested | 68 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 46 | The Hollow |
 | Highwatch | landing | Frost | quiet | 6 | The Lookout |
-| Duskmoor | landing | Storm | quiet | 17 | Moor Chapel |
-| Saltmere | landing | Bloom | quiet | 35 | Salt River |
+| Duskmoor | landing | Storm | quiet | 18 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 34 | Salt River |
 
 ### Boss lairs
 
@@ -131,8 +131,6 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
-
-**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnback turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## First Flight

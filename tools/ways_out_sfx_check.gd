@@ -45,10 +45,6 @@ func _match(main: Node, seed_v: int) -> Match:
 	return m
 
 func _calm(m: Match) -> void:
-	for h in m.hunters:      # (idle hunters on a random spot: a hazard there must not down one between cues)
-		if not h.downed and not h.out:
-			h.hp = h.max_hp
-			h.burn_t = 0.0
 	for mb in m.mobs:
 		if mb is Blight:
 			(mb as Blight).burrow()

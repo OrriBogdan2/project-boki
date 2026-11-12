@@ -4,10 +4,8 @@
  "script": "tools/gen_sfx_glider.py",
  "sounds": {
   "glider_snap": "cast", "glider_wind": "loop", "glider_dive": "cast",
-  "glider_crackle": "fire", "glider_burn": "loop", "glider_hiss": "loop", "glider_fold": "dash",
-  "hard_landing": "heavy_impact"
+  "glider_crackle": "fire", "glider_burn": "loop", "glider_hiss": "loop", "glider_fold": "dash"
  },
- "reach": {"hard_landing": 60},
  "signature": [],
  "loops": ["glider_wind", "glider_burn", "glider_hiss"]
 }

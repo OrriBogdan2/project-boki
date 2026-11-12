@@ -105,7 +105,7 @@ func _box_case(G: Hunter) -> void:
 		return
 	ok((b["pos"] as Vector3).distance_to(_v(g["box"])) < 0.1, "the marker stands where the guest's box is")
 	P.teleport(b["pos"])
-	var need := BoxRevive.time_for()
+	var need := BoxRevive.time_for(G)
 	var t := await _hold(P, G, need + 4.0)
 	g = await _say_do("ask", 0.5)
 	ok(absf(t - need) < 0.6, "the host's channel brings the guest back in the box-revive time",

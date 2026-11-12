@@ -10,12 +10,11 @@ class_name Life
 
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
-	"revive_radius": 1.6,       # [est] a teammate this close revives you (source silent)
-	"revive_time": 4.0,         # [wiki "a few seconds"] [est] one teammate (docs/decisions/0022)
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health (wiki: "X%")
-	# 1 to 4 on a wisp: 1, 1.5, 1.75, 1.875x in all, for teammates reviving and enemies stomping alike
-	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] each of n Hunters on one wisp works at crowd[n-1] (0022)
-	"stomp_mult": 2.5,          # [design] one enemy on a wisp drains it this much faster and blocks the revive [wiki]
+	"revive_radius": 1.6,       # [est] a teammate this close revives you
+	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
+	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
+	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
+	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
 	"execute_time": 3.0,        # [footage] (old: hold interact on an enemy wisp; now the stomp below)
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
@@ -29,6 +28,7 @@ const R := {
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
 }
 
+const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
 const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
 const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
@@ -64,11 +64,6 @@ static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
 
 # ------------------------------------------------------------------ wisps
-## How much faster n Hunters on one wisp revive (or stomp) it than one: the source's curve.
-static func crowd(n: int) -> float:
-	var c: Array = R["crowd"]
-	return n * float(c[mini(n, c.size()) - 1])
-
 ## Every frame, for each wisp: teammates on it revive it, enemies on it stomp it, otherwise it
 ## bleeds out.
 static func tick_wisps(m: Match, dt: float) -> void:
@@ -105,17 +100,17 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			o.set_meta("crush_t", st)
 		var kin_on := false
 		for kk in [o.kin, o.kin2]:
-			if kk and not (kk as Kin).dead and (kk as Kin).state == "reviving" and (kk as Kin).flat_dist(o) < 1.4:
-				kin_on = true
+			if kk and not (kk as Kin).dead and KinWispForm.pulling(kk):
+				kin_on = true          # its Boki, riding as a wisp, is pulling it up: no bleed meanwhile
 		if foes > 0 and not o.get_meta("stomped", false) and o == m.player and m.hud:
 			m.hud.toast("%s is on you! Drift away" % stompers[0].pname, Color("ff5a4a"))
 		o.set_meta("stomped", foes > 0)
 		if foes > 0:
 			# stomped: drains fast and nobody can pick you up
-			o.down_hp -= base * R["stomp_mult"] * crowd(foes) * dt
+			o.down_hp -= base * R["stomp_mult"] * dt
 			o.revive = maxf(0.0, o.revive - dt * 0.5)
 		elif allies > 0:
-			o.revive += dt / R["revive_time"] * crowd(allies)
+			o.revive += dt / R["revive_time"] * (1.0 + R["extra_reviver"] * (allies - 1))
 			if o.revive >= 1.0:
 				trace(m, "wisp revive %s" % o.pname)
 				for rv in revivers: (rv as Hunter).revives += 1
@@ -160,7 +155,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		if o == null or o.out or not o.downed:
 			end_stomp(m, h, "gone")
 			continue
-		h.add_root(0.12)
+		h.root_t = maxf(h.root_t, 0.12)
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
 		var t0 := float(h.stomp["t"])
@@ -255,7 +250,7 @@ static func owner_col(m: Match, b: Dictionary) -> Color:
 	var o: Hunter = b["owner"]
 	if m.player != null and o.team == m.player.team:
 		return m.mate_col(o)
-	return SideColor.foe()
+	return RIVAL_BOX
 
 ## The box's body takes its owner's colour and a ring round it, so whose box it is reads at a glance
 ## (the beam and trim keep the value colour).
@@ -313,7 +308,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
 			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
-			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up, "vs": _worn_text(cur)})
+			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
 	var pack_row := Backpacks.box_row(h, b)
 	if not pack_row.is_empty():
 		out.append(pack_row)
@@ -323,14 +318,6 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		out.append({"key": "pack", "i": i, "name": Loot.name_of(it), "sub": Loot.sub_of(it), "icon": Loot.icon_of(it), "col": Loot.col_of(it),
 			"upgrade": Pack.wants(h, it), "value": Loot.value(it), "el": String(it.get("el", "")), "full": not Pack.room(h)})
 	return out
-
-## "You wear: ..." for a gear slot, the tip behind a box row's better or worse arrow.
-static func _worn_text(cur: Dictionary) -> String:
-	if cur.is_empty():
-		return "Nothing in this slot yet"
-	var id := String(cur["id"])
-	var rar := int(cur["rar"])
-	return "You wear: %s  ·  %s" % [Loot.name_of(Loot.gear(id, rar)), Gear.stat_text(id, rar)]
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.
 static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> void:

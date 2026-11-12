@@ -246,7 +246,7 @@ static func tick(A: Arena, dt: float) -> void:
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
 			# (keep it pinned for the frame)
-			if t > 0.35 and t < 2.0: D.add_root(0.8)
+			if t > 0.35 and t < 2.0: D.root_t = maxf(D.root_t, 0.8)
 			at_t = 1.9
 		_ when w.begins_with("hero_"):
 			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Sparkle and Vex (scripts/arch/hero_demo.gd)
