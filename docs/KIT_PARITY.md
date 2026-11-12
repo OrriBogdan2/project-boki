@@ -410,9 +410,9 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 
 **Jump speed.** Source: JumpZVelocity 750 uu/s = 7.5 m/s at gravity 14.7 m/s² (supervive_physics.md:45, [D]). Ours: `Hunter.JUMP_V` 6.8 m/s. Kept on purpose (`docs/MOVEMENT_FEEL.md`, "Jump 9 → 6.8"): 7.5 lets jump plus mantle top four terraces. It is a map-grammar deviation, not a source value; the owner can flip it once the terraces change. `--move-feel-check` now asserts `jump_speed_vs_source` (lift-off over 7.5, must sit in 0.85 to 1.0), so the source number is pinned and the gap cannot drift.
 
-**Dash-flow rows with no `source` field `[?]`.** No source or footage settles these; they run as the kit's default (`keep`, or `fire` for Q). Not guessed.
+**Dash-flow rows marked `[?]`.** A row in `content/dash_flow` that exists but has no `source`, or whose `source` starts "Not determinable". No source or footage settles these; they run as the kit's default (`keep` for holds, `fire` for Q and the silent dash rows). Not guessed. `tools/gen_wiki.py` puts `[?]` at the start of each one's Source cell in `docs/heroes/dash_interactions.md` (a pair with no row stays empty), so both places list the same 55 rows (names as of 2026-11-09; `*` = already says "Not determinable"):
 
-| Hero | Rows `[?]` |
+| Hero (id) | Rows `[?]` |
 |---|---|
 | Hem (`archer`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
 | Ryzz (`mage`) | `hold.rmb.{ground,air,jump}` (3, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`, ours) |
@@ -564,3 +564,18 @@ Sources: `supervive_kits.md` (tooltips: charges, "reactivate", "-x% CD on hit"),
 - Every multi-charge dash card reads "0.4 s between uses" (`DASH_UI.md` for Brall's 3 charges; `pin.md` reads a 0.4 s card next to a 9.5 s real cooldown). Ours has no such floor beyond the dash's own length (Rampage 0.17 s plus 0.07 s wind-up). Likely a global minimum gap; not built, it touches every dash.
 - Our air dash is a second cooldown slot for every Hunter (`h.ex_cd`), and it also fires when the ground charges are out; the tooltips give a separate air slot only to Pip and Grimble. That is the air-dash rule (owner item 183, `ext/airdash-rule-audit`); left to that branch.
 - Rock Hop's "nothing recharges during the chain" is ours; the source's Landslide recharges from the press.
+
+## Allies and forced movement (PARITY FIRST pass, ext/feel-ally-safe)
+
+Every knock, pull, push, root, slow, stun and Grounded the 12 kits apply goes to `foes_of(team)` (or `foes_in`), so a teammate is never moved or given a status. `--ally-cc-check` (`tools/ally_cc_check.gd`) proves it: each hero presses LMB, RMB tap and hold, E, X and the dash, on the ground and in the air, with a teammate standing on the aim line at 2, 3.5, 6 and 9 m; the teammate must not move, be towed, or gain stun, root, slow, knock, Shred, Blight, burn, Grounded, Dazed or Disoriented. Over the relay, `--displace-net-check` aims Cinder's cloak, Sparkle's Skycall and Albert's aegis at a teammate on the guest's game: no move is sent and the guest stays put.
+
+Where the source lets a move touch an ally (`supervive_kits.md`), the check excuses exactly that slot:
+
+| Move | Source | Ours |
+|---|---|---|
+| Grimble's Abyssal Grasp | "pulling in the first target hit (enemy or ally)" | hook pulls the first hunter hit, ally included |
+| Motley's Swap (dash) | "swaps you and all units to its location" | foes, allies and Boki in the circle are sent back; allies get the shield |
+| Meeko's ult | "reviving them and pulling them to" her | a downed ally is called to her side |
+| Tenzo's rocks | "allies can hop over friendly walls" (owner-decided) | allies hop; not a move |
+
+Not in the source, kept: Tenzo's Basalt Spine never raises a rock inside a body, so anyone on the line (ally included) steps to their side of it. That is a collision fix, not a status; the check allows a move there and nothing else. A dash or lunge that runs into a teammate shoves it like any two bodies (`Match._separate`); the check ignores that sideways shove but still fails on any status or tow. No leak was found in the kits, so no gameplay code changed.

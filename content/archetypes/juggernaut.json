@@ -51,5 +51,12 @@
 		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (briefs/supervive-data/supervive_physics.md:51)"},
+		"rmb": {"early": "free", "late": "locked", "source": "briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:202-205 planted guard, the strike goes 'in the facing / cursor direction': feet planted, body free"}
 	}
 }

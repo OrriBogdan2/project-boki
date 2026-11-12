@@ -14,17 +14,13 @@
 "semicolon": 6
 },
 "scripts/arch/feel.gd": {
-"long_line": 10,
-"nested_ternary": 2,
+"long_line": 9,
+"nested_ternary": 1,
 "semicolon": 5
 },
 "scripts/arch/hero_demo.gd": {
 "long_line": 1,
 "semicolon": 13
-},
-"scripts/arch/hex.gd": {
-"long_line": 1,
-"semicolon": 1
 },
 "scripts/arch/kit_status.gd": {
 "long_line": 2,
@@ -32,11 +28,11 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 11,
+"long_line": 12,
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 8,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -388,9 +384,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 365,
+"long_line": 366,
 "nested_ternary": 7,
-"semicolon": 380,
+"semicolon": 381,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -471,7 +467,7 @@
 "long_line": 4
 },
 "scripts/match/cam.gd": {
-"history_comment": 3,
+"history_comment": 1,
 "long_line": 2
 },
 "scripts/match/capture.gd": {
@@ -552,10 +548,10 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 24,
-"long_line": 88,
-"nested_ternary": 15,
-"semicolon": 46,
+"history_comment": 27,
+"long_line": 92,
+"nested_ternary": 14,
+"semicolon": 47,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -565,8 +561,7 @@
 },
 "scripts/match/juice.gd": {
 "long_line": 1,
-"nested_ternary": 2,
-"semicolon": 1
+"nested_ternary": 2
 },
 "scripts/match/kin.gd": {
 "long_line": 29,
@@ -632,10 +627,10 @@
 "semicolon": 3
 },
 "scripts/match/match.gd": {
-"history_comment": 4,
-"long_line": 216,
-"nested_ternary": 19,
-"semicolon": 142,
+"history_comment": 3,
+"long_line": 215,
+"nested_ternary": 18,
+"semicolon": 141,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {
@@ -724,7 +719,7 @@
 },
 "scripts/match/sky_train.gd": {
 "long_line": 11,
-"semicolon": 10
+"semicolon": 9
 },
 "scripts/match/spawn_plan.gd": {
 "long_line": 8,
@@ -821,7 +816,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 172,
+"long_line": 173,
 "nested_ternary": 33,
 "semicolon": 43,
 "shadow": 2
@@ -1104,8 +1099,8 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 30,
-"semicolon": 67
+"long_line": 12,
+"semicolon": 65
 },
 "tools/music_leave_check.gd": {
 "long_line": 13,
@@ -1144,6 +1139,12 @@
 "semicolon": 25,
 "shadow": 1
 },
+"tools/rig_shots.gd": {
+"long_line": 1
+},
+"tools/rig_standard_check.gd": {
+"long_line": 1
+},
 "tools/rolling_check.gd": {
 "history_comment": 1,
 "long_line": 44,
@@ -1181,7 +1182,7 @@
 },
 "tools/train_check.gd": {
 "long_line": 10,
-"semicolon": 7
+"semicolon": 6
 },
 "tools/unique_check.gd": {
 "long_line": 49,

@@ -41,5 +41,12 @@
 		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"passive": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:72 'she faces the cursor while firing', :413 the torso snaps to the cursor"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:26 a lane shows 0.4-0.6 s toward the cursor, then the throw; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:22 Phantom Dagger, a skillshot toward the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:22 reactivate steps to the dagger; no turn limit shown (ours snaps to face the foe on arrival, then turns freely)"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:22 Death Blossom is a self-centred ring; no turn limit shown"}
 	}
 }

@@ -63,5 +63,11 @@
 		"x": "[D] [O] (owner item 15 said rocks only) (cd/dmg/range/timing: KIT_PARITY row)",
 		"dash": "[D] [O] (owner item 111) (cd/dmg/range/timing: KIT_PARITY row)",
 		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:79 the lane points at the cursor; :427 'she faces the cursor at once'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:27 a row placed in front, across the aim; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:379 'she can move while aiming', the cast is instant on release"}
 	}
 }

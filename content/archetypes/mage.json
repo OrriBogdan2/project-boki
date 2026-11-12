@@ -178,5 +178,12 @@
 		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"dash": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
 		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor"},
+		"x_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown"}
 	}
 }
