@@ -1365,3 +1365,8 @@ Batch 1112 (ext/mc-integ-1112a + b2 + c2, 36 members) merged to main. Do NOT re-
 - **Player gets:** downed Hunters show a compact wisp mark and their Boki ride them as wisps; ally and enemy views read apart. Tools: --wisp-clarity-shots.
 - **Gate:** main now equals the gated stack tree byte for byte; --check and --kin-wisp-form-check green after merge. --revive-net-check not run (Godot queue jam); rerun it once the queue is cleared.
 - **Held for Friday:** ext/pve-raid-1111 (see the next note). Branches stacked on it (combat-raid-balance, sfx-raid-cues) wait with it.
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) HELD ext/pve-raid-1111 (5cd2aef05) for Friday, not merged
+- **NEW-RED --feel-golden-check:** `gil crouch_walk: max drift 0.8-1.1 m` (main: 0.000 m). Bisected: pve-raid alone shows it, health-lint and wisp-clarity alone don't; the stack without pve-raid matches main (84/84). If the Series Boki modes change what gil runs with on purpose, re-record the golden row in the branch and say so in the READY.
+- **--heart-raid-check is too slow for the suite:** it passes alone (rc 0) but takes 3370 s on this box; suite-fast stops every check at 1200 s, so it is a timeout in every suite. Cut it under ~10 min (fewer or shorter SIMS by default, the long ones behind a flag like --sweep).
+- To re-offer: merge main in (DEBT.md conflicts again: keep both sides' rows), fix both, READY again. ext/combat-raid-balance and ext/sfx-raid-cues are stacked on it and wait with it.
