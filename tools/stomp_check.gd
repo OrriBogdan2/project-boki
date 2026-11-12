@@ -1,9 +1,13 @@
 extends RefCounted
 ## --stomp-check: the stomp (docs/decisions/0061-stomp-lock.md, Owner 2026-11-11).
-##  1. Holding interact on an enemy wisp for Stomp.COMMIT commits you; letting go, moving, dashing or
-##     firing does nothing after that, and neither stomper nor wisp moves, shoves and knocks included.
+##  1. Holding interact on an enemy wisp for Stomp.COMMIT commits you; letting go, moving, dashing,
+##     firing or any ability does nothing after that, and neither stomper nor wisp moves, a shove on the
+##     stomper and a knock on the wisp included.
 ##  2. The stomper takes damage as usual while locked, and it doesn't break the stomp.
-##  3. A stun on the stomper cancels it at once; the wisp lives and can drift again.
+##  3. A stun on the stomper cancels it at once; the wisp lives and can drift again. So does every hard
+##     crowd control (a root, a knock or launch, which still throws the stomper, Grounded, a hex, a push),
+##     and the wisp is still alive past Stomp.TIME; a slow, Daze or Disoriented doesn't break it, and the
+##     hold can't commit while the stomper is under hard crowd control.
 ##  4. Left alone, the stomp kills the wisp at Stomp.TIME, not before.
 ##  5. Online: the stomper's game sends "go" and how it ended; a "go" from another game pins this
 ##     game's wisp, "broken" lets it go, "done" eliminates it here.
@@ -102,6 +106,7 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	if m.biomes: m.biomes.hazards.clear()      # a lightning rod's stun would break stomps the rows expect to hold
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
@@ -110,6 +115,8 @@ func run(main: Node) -> void:
 	W = m.hunters.filter(func(x): return x.team == m.player.team and x != m.player)[0]
 	var home := m.world.random_ground()
 	_check_lock(home)
+	_check_cc(home + Vector3(6, 0, 0))
+	_check_soft_cc(home + Vector3(6, 0, 0))
 	_check_stun(home + Vector3(6, 0, 0))
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
@@ -124,23 +131,85 @@ func _check_lock(at: Vector3) -> void:
 	ok(not foe.stomp.is_empty() and took <= Stomp.COMMIT + 0.1, "a %.2fs hold commits the stomp" % took)
 	var f0 := foe.pos
 	var w0 := W.pos
+	var ammo0 := foe.ammo
+	var acts: Array[String] = []
+	var acted := func(by: Node, _id: String, slot: String) -> void:
+		if by == foe: acts.append(slot)
+	CombatBus.ability_used.connect(acted)
 	for i in 40:
 		foe.inp["move"] = Vector2(1, 0)
-		foe.inp["dash"] = true
-		foe.inp["fire"] = true
+		for key in Stomp.LOCKED_INPUTS:
+			foe.inp[key] = true
 		W.inp["move"] = Vector2(-1, 0)
 		if i == 10: foe.impulse(Vector2(6, 0))       # a hit's shove
 		if i == 20: W.impulse(Vector2(0, 12))        # a knock on the wisp
 		_run(Match.DT)
-	ok(not foe.stomp.is_empty(), "letting go, moving, dashing and firing don't end it")
+	CombatBus.ability_used.disconnect(acted)
+	ok(not foe.stomp.is_empty(), "letting go, moving, dashing, firing and every ability button don't end it")
 	ok(foe.pos.distance_to(f0) < 0.05, "the stomper stays on the spot (moved %.3f m)" % foe.pos.distance_to(f0))
 	ok(W.pos.distance_to(w0) < 0.05, "the wisp stays on the spot (moved %.3f m)" % W.pos.distance_to(w0))
 	ok(foe.roll_t <= 0.0, "no dodge mid-stomp")
+	ok(acts.is_empty() and foe.ammo == ammo0, "no shot, ability or glove goes off mid-stomp (%s)" % [acts])
 	var hp0 := foe.hp
 	foe.hurt(20.0, m.player, {})
 	_run(Match.DT)
 	ok(foe.hp < hp0 - 10.0 and not foe.stomp.is_empty(),
 		"damage lands on the stomper (%.0f -> %.0f) and the stomp holds" % [hp0, foe.hp])
+	Stomp.end(m, foe, "gone")
+
+## Every hard crowd control on the stomper (Stomp.breaks) breaks the stomp: the wisp is let go and is still
+## alive when the stomp would have killed it, and a knock or push still moves the stomper.
+func _check_cc(at: Vector3) -> void:
+	var push := {"mode": "push", "dir": [1.0, 0.0], "dist": 1.0, "spd": 10.0, "dur": 0.2}
+	var hard := {
+		"a stun": func() -> void: foe.hurt(5.0, m.player, {"stun": 0.4}),
+		"a root": func() -> void: foe.hurt(5.0, m.player, {"root": 0.4}),
+		"a knock": func() -> void: foe.hurt(5.0, m.player, {"kb": Vector2(2.0 * Capture.HARD_KNOCK * foe.mass(), 0)}),
+		"a launch": func() -> void: foe.hurt(5.0, m.player, {"lift": 4.0 * foe.mass()}),
+		"Grounded": func() -> void: KitStatus.apply(foe, "gnd", 0.4),
+		"a hex": func() -> void: Hex.apply(foe, 0.4),
+		"a push": func() -> void: m.displace.tow(foe, null, push),
+	}
+	for kind in hard:
+		_setup(at)
+		_commit()
+		var t0 := m.time        # the stomp started this step
+		_run(0.5)
+		var f0 := foe.pos
+		(hard[kind] as Callable).call()
+		_run(2 * Match.DT)
+		ok(foe.stomp.is_empty() and W.downed and not W.out and not W.has_meta("stomped_by"),
+			"%s on the stomper breaks the stomp and lets the wisp go" % kind)
+		if kind in ["a knock", "a push"]:
+			ok(foe.pos.distance_to(f0) > 0.1, "...and still moves the stomper (%.2f m)" % foe.pos.distance_to(f0))
+		_spot(foe, f0)
+		_run(t0 + Stomp.TIME + 0.2 - m.time)
+		ok(W.downed and not W.out, "...and the wisp is still alive past Stomp.TIME")
+
+## A slow, Daze or Disoriented on the stomper doesn't break the stomp, and the hold can't commit while the
+## stomper is rooted.
+func _check_soft_cc(at: Vector3) -> void:
+	var soft := {
+		"a slow": func() -> void: foe.hurt(5.0, m.player, {"slow": 0.6, "slow_k": 0.5}),
+		"Daze": func() -> void: KitStatus.apply(foe, "rat", 0.6),
+		"Disoriented": func() -> void: KitStatus.apply(foe, "dsr", 0.6, 0.4),
+	}
+	_setup(at)
+	_commit()
+	for kind in soft:
+		(soft[kind] as Callable).call()
+		_run(0.2)
+		ok(not foe.stomp.is_empty(), "%s on the stomper doesn't break the stomp" % kind)
+	Stomp.end(m, foe, "gone")
+	foe.hurt(1.0, m.player, {"root": 0.5})
+	var filled := 0.0
+	for i in 24:
+		foe.inp["interact"] = true
+		_run(Match.DT)
+		filled = maxf(filled, foe.finish_t)
+	ok(filled == 0.0 and foe.stomp.is_empty(), "the hold doesn't fill while the stomper is rooted")
+	var took := _commit()
+	ok(not foe.stomp.is_empty() and took < 0.5, "...and commits once the root is gone (%.2fs later)" % took)
 	Stomp.end(m, foe, "gone")
 
 func _check_stun(at: Vector3) -> void:

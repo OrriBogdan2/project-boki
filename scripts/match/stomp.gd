@@ -19,10 +19,19 @@ const NET_GRACE := 2.0     # s past TIME a stomp from another game may wait for 
 const LOCKED_INPUTS := ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
 		"gear1", "gear2", "fire", "throw", "kin_ab"]
 
-## Hard crowd control that breaks a stomp: a stun, a hex, or a real knock or launch. Plain damage and
-## the small shove most hits carry don't (the stomper stays put through them).
-static func breaks(h: Hunter) -> bool:
-	return h.stun_t > 0.0 or Hex.active(h) or h.m.time - h.launched_at < Capture.LAUNCH_AGE
+## Hard crowd control on the stomper breaks a stomp: everything Capture.controlled counts (a stun, a root,
+## a real knock or launch, Grounded, a hex) and a pull or push by Displace, which the pin would swallow.
+## Slows, Daze, plain damage and the small shove most hits carry don't (the stomper stays put through them).
+static func breaks(m: Match, h: Hunter) -> bool:
+	return Capture.controlled(h) or not m.displace.towing(h).is_empty()
+
+## The interact hold on an enemy wisp: COMMIT seconds of it start the stomp. It doesn't fill under hard
+## crowd control, which would only break the stomp the moment it started.
+static func hold(m: Match, h: Hunter, o: Hunter, dt: float) -> void:
+	h.set_hold("windup")
+	h.finish_t = 0.0 if breaks(m, h) else h.finish_t + dt
+	if h.finish_t >= COMMIT:
+		start(m, h, o)
 
 ## Where the stomp is in beats (0..BEATS), -1 when not stomping: HunterAnim's "stomp".
 static func beat(h: Hunter) -> float:
@@ -38,7 +47,7 @@ static func start(m: Match, h: Hunter, o: Hunter, style_id := "") -> void:
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	StompSfx.commit(m, h)
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Only a stun on them saves you" % h.pname, Color("ff6a5a"))
+		m.hud.toast("%s is stomping you! A stun, root or knock on them saves you" % h.pname, Color("ff6a5a"))
 	if m.net_on and not h.remote:
 		m.net_event(["stomp", h.nid, o.nid, "go", sid])
 
@@ -71,11 +80,15 @@ static func guard_inputs(h: Hunter) -> void:
 		h.inp["move"] = Vector2.ZERO
 		h.inp["dash"] = false
 
-## Every frame, after the bodies moved: hold both to their spots, play the slams, and (on the
-## stomper's own game) end it when it's broken, gone or done.
+## Every frame, after the bodies moved: on the stomper's own game a break ends it first, before the pin,
+## so a knock that breaks it still throws the stomper. Otherwise hold both to their spots, play the slams,
+## and end it there when it's gone or done.
 static func tick(m: Match, dt: float) -> void:
 	for h in m.hunters:
 		if h.stomp.is_empty():
+			continue
+		if not h.remote and (h.downed or h.out or breaks(m, h)):
+			end(m, h, "broken")
 			continue
 		var o: Hunter = h.stomp["o"]
 		if not h.remote: _pin(h, h.stomp["at"])
@@ -87,9 +100,7 @@ static func tick(m: Match, dt: float) -> void:
 		if h.remote:
 			if float(h.stomp["t"]) > TIME + NET_GRACE: end(m, h, "gone")      # its game went quiet
 			continue      # its own game says how it ends
-		if h.downed or h.out or breaks(h):
-			end(m, h, "broken")
-		elif not is_instance_valid(o) or o.out or not o.downed:
+		if not is_instance_valid(o) or o.out or not o.downed:
 			end(m, h, "gone")
 		elif float(h.stomp["t"]) >= TIME:
 			end(m, h, "done")

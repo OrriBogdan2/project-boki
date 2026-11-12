@@ -4323,12 +4323,7 @@ func _update_interact(dt: float) -> void:
 					else:
 						take_pick(h, best["wp"])
 			"finish":
-				# a short hold commits you to the stomp (Stomp.start): no cancelling after that
-				var o: Hunter = best["ent"]
-				h.set_hold("windup")
-				h.finish_t += dt
-				if h.finish_t >= Stomp.COMMIT:
-					Stomp.start(self, h, o)
+				Stomp.hold(self, h, best["ent"], dt)      # a short hold commits you: no cancelling after that
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
