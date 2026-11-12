@@ -160,10 +160,13 @@ func run(main_node: Node) -> void:
 	var arch_was := P.arch
 	P.arch = "gunslinger"
 	var no_offset := not Arch.def(P.arch).has("plate_offset")
-	ok(no_offset and HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
-		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(P))
+	var drawn: float = P.m.cam.hunter_scale      # (the plate clears a Hunter drawn bigger)
+	var fallback: float = HudPlate.PLATE_OFFSET * drawn
+	ok(no_offset and is_equal_approx(HudPlate.plate_offset(P), fallback) and HudPlate.PLATE_OFFSET == 2.35,
+		"an archetype without plate_offset puts the plate at the 2.35 m fallback x%.2f, the drawn size (%.2f)"
+		% [drawn, HudPlate.plate_offset(P)])
 	P.arch = ""
-	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
+	ok(is_equal_approx(HudPlate.plate_offset(P), fallback), "a hunter with no archetype falls back too")
 	P.arch = arch_was
 	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)

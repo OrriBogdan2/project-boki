@@ -80,6 +80,10 @@ static func style_reach(id: String) -> float:
 	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
 	return maxf(1.0, float(st["dist"]) / float(RULES["reach_ref_m"]))
 
+## Settings "draw" (how far small parts are drawn) grown with the style's view.
+static func draw_k() -> float:
+	return float(Settings.q("draw")) * style_reach(String(Settings.get_v("cam_style")))
+
 static func _load_rules() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/camera.json"))
 	assert(parsed is Dictionary, "content/rules/camera.json did not parse")

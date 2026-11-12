@@ -42,7 +42,7 @@ func run(main_node: Node) -> void:
 	print("WIDECAM DONE")
 	main.get_tree().quit()
 
-## A fresh match under one camera style (its draw and shadow distances are set when it is built), then each of its views.
+## A fresh match under one camera style (its draw and shadow distances are set when it is built), then its views.
 func _style(tag: String, style: String, views: Array, video: bool) -> void:
 	Settings.v["cam_style"] = style
 	Settings.v["cam_zoom"] = 1.0
@@ -88,14 +88,14 @@ func _tick(steps := 1) -> Dictionary:
 	await main.get_tree().process_frame
 	return bench.frame("wide", 0, (Time.get_ticks_usec() - last) / 1000.0, script_ms)
 
-func _view(name: String, tag: String) -> void:
+func _view(view: String, tag: String) -> void:
 	for spot in ["mid", "edge"]:
 		if spot == "edge":
 			_to_edge()
 		for i in SETTLE:
 			await _tick()
 		await RenderingServer.frame_post_draw
-		main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%s.png" % [name, spot]))
+		main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%s.png" % [view, spot]))
 	var fl: Array = []
 	for i in TIMED:
 		fl.append(await _tick())
@@ -104,8 +104,9 @@ func _view(name: String, tag: String) -> void:
 	var low := 0.0
 	for k in 3:
 		low += float(w[w.size() - 1 - k]) / 3.0
-	print("WIDECAM %s (style %s, zoom %.2f, reach %.2f): avg %.2f ms = %.0f fps, 1%% low %.0f fps, gpu %.2f ms, draws %.0f, tris %.0fk" % [
-		name, tag, m.cam.zoom, m.cam.reach(), bench.avg(fl, "wall"), 1000.0 / bench.avg(fl, "wall"),
+	var line := "WIDECAM %s (style %s, zoom %.2f, reach %.2f): avg %.2f ms = %.0f fps, 1%% low %.0f fps, "
+	line += "gpu %.2f ms, draws %.0f, tris %.0fk"
+	print(line % [view, tag, m.cam.zoom, m.cam.reach(), bench.avg(fl, "wall"), 1000.0 / bench.avg(fl, "wall"),
 		1000.0 / maxf(low, 0.001), bench.avg(fl, "gpu"), bench.avg(fl, "draws"), bench.avg(fl, "tris") / 1000.0])
 
 ## The player on the shore of the island furthest from the map's middle, the camera jumped there.
@@ -123,7 +124,7 @@ func _to_edge() -> void:
 	m.player.teleport(at)
 	m.cam.snap(at)
 
-## The new default's live fight as frames: the wheel scrolled out to its furthest, back in to its closest, then to the default.
+## The new default's live fight as frames: the wheel scrolled out to its furthest, in to its closest, then back.
 func _video() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 100

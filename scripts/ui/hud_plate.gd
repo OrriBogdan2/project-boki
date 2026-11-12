@@ -32,7 +32,8 @@ var shown := {}
 ## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET; times the
 ## camera's hunter_scale, so the plate clears a Hunter drawn bigger.
 static func plate_offset(h: Hunter) -> float:
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET)) * (h.m.cam.hunter_scale if h.m and h.m.cam else 1.0)
+	var drawn: float = h.m.cam.hunter_scale if h.m and h.m.cam else 1.0
+	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET)) * drawn
 
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:

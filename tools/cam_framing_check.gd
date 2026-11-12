@@ -12,7 +12,7 @@ extends RefCounted
 
 const VIEW := Vector2i(1920, 1080)
 const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
-const ZOOMS := [0.7, 1.0, 1.54, 1.7]  # the wheel's closest, the usual view, sneaking (CamWheel.final's floor), wheel out + sneak
+const ZOOMS := [0.7, 1.0, 1.54, 1.7]  # the wheel's closest, the usual view, sneaking (the floor), wheel out + sneak
 const SHOTS := [
 	["framing_default", 1.0, Vector2(0.5, 0.5)],
 	["framing_sneak_lean_up", 1.54, Vector2(0.5, 0.01)],
@@ -83,17 +83,20 @@ func _source_style(cam: CamRig) -> void:
 	ok(Settings.DEFAULTS["cam_style"] == "supervive", "the Supervive view is the default (the Settings camera is %s)"
 			% Settings.DEFAULTS["cam_style"])
 	var across := CamRig.style_across("supervive")
-	ok(_inside(across, src["across_m"]), "it shows %.1f m across, inside the source's %s" % [across, str(src["across_m"])])
-	ok(cam.hunter_scale > 1.5, "it draws Hunters %.2fx bigger (the source's Hunter size at that distance)" % cam.hunter_scale)
+	ok(_inside(across, src["across_m"]), "it shows %.1f m across, inside the source's %s"
+			% [across, str(src["across_m"])])
+	ok(cam.hunter_scale > 1.5, "it draws Hunters %.2fx bigger (the source's Hunter size)" % cam.hunter_scale)
 	var r: Dictionary = CamWheel.rules()["match"]
 	var old := CamRig.style_across("supervive_close")
 	var closest := across * float(r["min"])
-	ok(absf(closest - old) <= old * 0.12, "the wheel's closest view is %.1f m across, about the old %.1f m" % [closest, old])
-	ok(float(r["max"]) >= 1.3, "its furthest is %.2fx the default, %.1f m across" % [float(r["max"]), across * float(r["max"])])
+	ok(absf(closest - old) <= old * 0.12, "the wheel's closest view is %.1f m across, about the old %.1f m"
+			% [closest, old])
+	ok(float(r["max"]) >= 1.3, "its furthest is %.2fx the default, %.1f m across"
+			% [float(r["max"]), across * float(r["max"])])
 	cam.zoom = 1.0
 	var at_default := cam.reach()
 	cam.zoom = float(r["max"])
-	ok(at_default > 1.5 and cam.reach() > at_default * 1.3, "reach (draw, LOD and shadow distances) grows with the view: %.2f, %.2f out"
+	ok(at_default > 1.5 and cam.reach() > at_default * 1.3, "reach (draw, LOD, shadows) grows: %.2f, %.2f out"
 			% [at_default, cam.reach()])
 	cam.zoom = 1.0
 
