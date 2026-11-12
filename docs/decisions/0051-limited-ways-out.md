@@ -124,16 +124,24 @@ The rule (heart.json `end_*`; `Heart.ring_at`, `tick_dmg`, `end_phase`):
 - **At zero (12:00)**, squads still in and the final seat not taken: the islands fall on all of them. Both lose: no
   winner, no MAJOR, a tie for place (WaysResult), as LIMITED_WAY_OUTS rev 2 section 6 says. Not sudden death (the
   circle closing to nothing, last one standing wins): the Heart ring picks the winner.
-- **Bots.** BotWays drops the spark seat once the Blight closes over the Gate; `Bot._grid_path` retries a failed tight
-  window in a wide one (`PATH_SLACK` 8, then 24 tiles), so a bot below the raised ground finds a ramp.
+- **Bots.** BotWays drops the spark seat once the Blight closes over the Gate. Heading for the Heart ring or back in
+  out of the Blight, `Bot._grid_path` retries a failed tight window (8 tiles) in a wide one (24), so a bot below the
+  raised ground finds a ramp; for every goal the wide window had bots turning between detours (--bot-sanity-check).
+  No tile path leads farther from the Heart than the ring or the bot itself (`BotWays.path_r`): the wide window had
+  bots walking round the cliff out through the Blight. A detour (a goal given up on) is kept inside the ring like
+  every other goal (it was random ground: bots roamed out to the edge and back). In the end phase a bot walks in
+  from `bots.end_edge_m` (5 m, 7 m on The Crown) inside the edge, not 2 m, so a rival's knock-back leaves it inside.
 
-Result, same seeds: `--final=4` 10 of 10 settled within 90 s (11-87 s), no timeout, every final seat taken, longest
-apart 14 s; one Blight down in the safe-ring window while a final was fought (a bot 20 m out in the Blight 5 s after
-it stood inside), no squad died to the Blight in the safe ring. Real 10 trios: 10 of 10 settled within 90 s (9 before
-10:00, one +3 s), no timeout, nobody apart, no such down. Left (DEBT): a lone last squad does not always take the
-rush final (one real run fell at 12:00 with it on the low ground). Checks: --heart-check (the ring through the end),
---blight-check (the ramp, the downed), --ways-out-map-ui-check (the dashed ring), --bot-ways-check (the Gate),
---ways-out-sim (`WAYS end` lines and sum; the sim does not repeat a match run to run).
+Result. The first build looked fine on seeds 1-10, but 20 more (`--final=4`, seeds 11-30) had 10 Blight downs of
+bots that stood in the ring 5 s before, 2 timeouts and 3 finals over 90 s: bots on a detour out to the edge, a path
+round the cliff through the Blight, knock-back at the 28 m edge. With the three bot fixes above, `--final=4` seeds
+1-30: 30 of 30 settled within 90 s (4-85 s), no timeout, no no-winner final, longest apart 9 s, no Blight down at
+all. Real 10 trios (seeds 1-10): 7 down to one squad before 10:00 (at 7:04-9:55),
+3 with 2 squads at 10:00 settled +5, +15 and +19 s; no timeout, longest apart 14 s, one tide down 41 m out in the
+Blight (not in the ring), one no-winner (seed 3: the lone squad, the DEBT below). --bot-sanity-check 0 flagged. Left (DEBT): a lone last squad does not
+always take the rush final (one real run fell at 12:00 with it on the low ground). Checks: --heart-check (the ring
+through the end), --blight-check (the ramp, the downed), --ways-out-map-ui-check (the dashed ring), --bot-ways-check
+(the Gate), --ways-out-sim (`WAYS end` lines and sum; the sim does not repeat a match run to run).
 
 ## Seat looks (ext/vfx-ways-out-seats)
 Every seat reads from across the island with one of five looks: locked (dim stub, countdown glyph), open (tall clear
