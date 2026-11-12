@@ -326,6 +326,13 @@ func rimewright() -> void:
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
 	ok("tm X: the crash plays its own move", K.anim_id == "tm_rime_crash", K.anim_id)
+	var fxs: Array = K.ulk().live.map(func(e): return String(e["fx"]))
+	var lances := 0
+	for e in K.ulk().live:
+		if String(e["fx"]) == "lances":
+			lances = (e["n"] as Node3D).get_child_count()
+	ok("tm X: the crash throws 30+ long ice shards and a light column", lances >= 30 and "pillar" in fxs,
+		"%d shards, %s" % [lances, fxs])
 	ok("tm X: the crash pays the bond as a hit and the meter fills by 0.6",
 		_bond_kind(K) == "hit" and P.ult - meter0 > 0.59,
 		"%s +%.2f" % [_bond_kind(K), P.ult - meter0])
