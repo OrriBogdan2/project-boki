@@ -123,6 +123,7 @@ var box_rev_at := -9.0         # last time we were channelling a deathbox revive
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var react_at := -9.0           # last staggering hit (Oomph): the hit clip plays from it
+var net_cc := 0                # a remote copy: the owner's stun and knock bits (HunterNet), shown by its clips only
 var extracted := false
 var extract_prog := 0.0
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
@@ -3090,14 +3091,15 @@ func _anim_state(stretch: float) -> void:
 	KinDowned.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["react_t"] = m.time - react_at
-	s["knock_t"] = m.time - kb_t if knock_t > 0.0 else -1.0     # sliding under a knockback: the hit pose holds
+	var knocked := knock_t > 0.0 or net_cc & HunterNet.KNOCKED != 0
+	s["knock_t"] = m.time - kb_t if knocked else -1.0     # sliding under a knockback: the hit pose holds
 	# a hit-stop: this body's own hold, or offline the whole game's (only a running match counts it down)
 	s["frozen"] = freeze_t > 0.0 or (m.hitstop > 0.0 and not m.net_on and m.is_processing())
 	s["held"] = held_s
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
 		s["hit_dir"] = Vector2(pos.x - last_hit_by.pos.x, pos.z - last_hit_by.pos.z)
-	s["stun"] = stun_t > 0.0
+	s["stun"] = stun_t > 0.0 or net_cc & HunterNet.STUNNED != 0
 	s["base"] = (1.0 - base_t / BASE_TIME) if base_t > 0.0 else -1.0
 	s["squash"] = squash
 	s["stretch"] = stretch

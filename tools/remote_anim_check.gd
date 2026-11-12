@@ -4,7 +4,9 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## id and HunterAnim's), compared per cast. Then the host's hunter is stunned and knocked back: the copy's clips
+## must show the stun and hold the hit pose while it slides within LAG_TOL (HunterNet's flag bits).
+## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -26,6 +28,8 @@ var log_rows: Array = []     # [unix ms, the kit's move id, HunterAnim's move id
 var last_row := ["?", "?"]
 var last_prev_t := 0.0
 var unlike := {}             # arch -> casts whose copy differs
+var cc_rows: Array = []      # [unix ms, stunned, knocked] as the watched hunter's anim state shows them; one per change
+var last_cc := [false, false]
 var played := {}             # arch -> casts that played any move
 
 func _init() -> void:
@@ -49,7 +53,42 @@ func _host() -> void:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
+	await _cc()
 	_finish()
+
+## The host's hunter stunned for 0.8 s, then knocked back: the guest's copy shows each within LAG_TOL of the host.
+func _cc() -> void:
+	var P := m.player
+	_kit("juggernaut")
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "kit", "arch": "juggernaut"})
+	await _reply()
+	await _run(0.3)
+	cc_rows.clear()
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.2)
+	P.hurt(1.0, null, {"src": "primary", "stun": 0.8})
+	await _run(1.2)
+	P.hurt(1.0, null, {"src": "primary", "kb": Vector2(16.0, 0.0)})
+	await _run(1.0)
+	var mine := cc_rows.duplicate()
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Array = replies[0].get("cc", []) if not replies.is_empty() else []
+	for k in [1, 2]:
+		var what := "stun" if k == 1 else "knockback"
+		var at := _cc_on(mine, k)
+		var seen_at := _cc_on(theirs, k)
+		ok(at >= 0.0 and seen_at >= 0.0 and seen_at - at <= (LAG_TOL + SKEW) * 1000.0,
+			"the copy shows the host's %s (%.2f s after it)" % [what, (seen_at - at) / 1000.0], "rows %s / %s" % [mine, theirs])
+
+## The unix ms of the first row with column k on, -1 when none.
+func _cc_on(rows: Array, k: int) -> float:
+	for r in rows:
+		if bool(r[k]):
+			return float(r[0])
+	return -1.0
 
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var P := m.player
@@ -152,8 +191,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 			"mark":
 				log_rows.clear()
 				last_row = ["?", "?"]
+				cc_rows.clear()
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "cc": cc_rows})
 		return
 	super._on_msg(topic, data, from)
 
@@ -171,6 +211,10 @@ func _sample() -> void:
 		return
 	var H := _copy()
 	H.render(DT, 1.0)      # (Match's own render pass is off in the checks)
+	var cc := [bool(H.anim_s.get("stun", false)), float(H.anim_s.get("knock_t", -1.0)) >= 0.0]
+	if cc != last_cc:
+		last_cc = cc
+		cc_rows.append([int(Time.get_unix_time_from_system() * 1000.0), cc[0], cc[1]])
 	if H.ak == null or H.anim == null:
 		return
 	var row := [H.ak.anim_id, H.anim.km_id]
