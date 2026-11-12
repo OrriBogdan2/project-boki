@@ -8,7 +8,8 @@ extends RefCounted
 ##      hunter and the Boki are never under the banner
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
-##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
+##   5. the strip's new-objective chime: once per step, none on a re-pulse, ducked in a fight
+##   6. the course: every stop is walkable from the one before it on its island, and the lookout takes a
 ##      wall kick (taller than a jump, within a jump and a kick's climb)
 
 var bad := 0
@@ -93,9 +94,20 @@ func _course() -> void:
 	var under := 0
 	var texts := {}
 	var counters := {}
+	var chimed := 0
+	var stray := 0
+	var changes := 0
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
+		var before := tu.step
+		Sfx.last_played.erase(TutorialStrip.CHIME)
+		Sfx.recent.clear()      # (headless steps outrun the wall clock the stacking limit counts in)
 		m.step(Match.DT)
+		if Sfx.last_played.has(TutorialStrip.CHIME):
+			if tu.step != before: chimed += 1
+			else: stray += 1
+		if tu.step != before:
+			changes += 1
 		t += Match.DT
 		if tu.step != last:
 			if last >= 0:
@@ -118,6 +130,13 @@ func _course() -> void:
 			shown_after += 1
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
+	var once := changes > 3 and chimed == changes and stray == 0
+	ok(once, "one chime per new objective, none otherwise (%d steps, %d chimes, %d stray)" % [changes, chimed, stray])
+	var calm_db := TutorialStrip.chime_db(m)
+	m.player.hurt_at = m.time
+	var fight_db := TutorialStrip.chime_db(m)
+	var ducked := calm_db < -6.0 and fight_db <= calm_db - 6.0
+	ok(ducked, "the chime is quiet (%.0f dB), ducked in a fight (%.0f dB)" % [calm_db, fight_db])
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
