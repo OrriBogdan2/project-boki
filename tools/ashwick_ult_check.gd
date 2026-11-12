@@ -194,6 +194,9 @@ func _carpet() -> void:
 	P.ak.use_e()
 	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
 	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
+	var card := String(K.x_def()["desc"])
+	ok("ult card: only the Furnace Cloak works in the flight",
+		card.contains("only the Furnace Cloak works") and not card.contains("Shift) speeds"))
 	K.ch_rmb = float(K.rmb_charges())
 	var em0: int = K.hose.emitted
 	var denied0: int = K.lmb_denied
@@ -388,6 +391,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	K.lmb_override(false, ak.DT)
 	P.wid = wid0
 	m.hud.slot_fx.erase("base")
+	PressDeny.last.clear()      # the press above was denied too, well inside the mash throttle (PressDeny.THROTTLE_S)
 	K.lmb_override(true, ak.DT)
 	ok("ult 66: a press answers on the LMB slot with the deny cue",
 			String((m.hud.slot_fx.get("base", {}) as Dictionary).get("kind", "")) == "deny")

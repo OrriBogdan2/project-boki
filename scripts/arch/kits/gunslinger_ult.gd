@@ -9,6 +9,8 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
+const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
+                                 # the source's raise, then fire
 const DROP_T := 0.8              # s: the shell is seen falling for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
@@ -41,14 +43,13 @@ func cast() -> bool:
 	if not kit.needle.is_empty():
 		return false
 	var xd := data()
-	var at := AimMode.point(h, float(xd["range"]))
+	var at := AimMode.place(h, float(xd["range"]))
 	casts += 1
-	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0}
+	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0, "fired": false}
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
-	# the shot goes straight up off the raised barrel; the reticle shows at once (_fall_tick)
-	kit.vfx("x_cast", at)
+	# the reticle shows at once (_fall_tick); the shot leaves the raised barrel on the clip's kick (_fire)
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
 
@@ -67,10 +68,18 @@ func _take_node() -> Node3D:
 func tick(dt: float) -> void:
 	for s in shells.duplicate():
 		s["t"] = float(s["t"]) + dt
+		if not bool(s["fired"]) and float(s["t"]) >= FIRE_T:
+			_fire(s)
 		if String(s["phase"]) == FALL:
 			_fall_tick(s)
 		else:
 			_burn_tick(s, dt)
+
+## The shot: straight up off the raised barrel (content/vfx/gunslinger.json x_cast, with the fall's whistle at
+## the target), on the clip's kick key.
+func _fire(s: Dictionary) -> void:
+	s["fired"] = true
+	kit.vfx("x_cast", s["at"])
 
 ## The disc fills toward the impact, its hot centre glows, a rivet ring closes in, and the shell drops for the
 ## last part of the fall.
@@ -130,8 +139,6 @@ func _impact(s: Dictionary) -> void:
 		if core:
 			centre += 1
 	last = {"at": at, "hits": n, "centre": centre}
-	if centre > 0:
-		kit.m.fx.word(at + Vector3(0, 2.6, 0) + kit.fx().screen_up() * 1.2, "DEAD CENTRE", GunslingerKit.HOT, true)
 
 ## The impact: a white-hot bloom, a wall of lime flame thrown out to the rim, embers, debris and smoke, a boom,
 ## and the cracked, see-through scorch the burning patch keeps under its lit rim.

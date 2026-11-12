@@ -12,6 +12,7 @@
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"card": {
+		"role_word": "Skirmisher",
 		"loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.",
 		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",
 		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
@@ -48,14 +49,14 @@
 		"reset_charge": 0.75,
 		"reset_window": 5.0,
 		"dist": [
-			7.5,
-			13.0
+			5.6,
+			9.75
 		],
 		"hold": 0.6,
 		"speed": 40.0,
 		"dmg": 20.0,
 		"width": 0.9,
-		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
+		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 5.6 to 9.75m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
 		"auto": 0.9,
 		"full_mult": 2.0,
 		"end_r": 2.25,
@@ -80,8 +81,8 @@
 			"range": 13.0,
 			"speed": 55.0,
 			"push": [
-				6.0,
-				9.0
+				4.4,
+				6.6
 			],
 			"stun": 0.8,
 			"slam_r": 1.4,
@@ -99,8 +100,7 @@
 			"ctrl_cap": "soft",
 			"mod": "add"
 		},
-		"auto": 1.2,
-		"rank3_mult": 1.5
+		"auto": 1.2
 	},
 	"e": {
 		"delivery": "burst",
@@ -161,21 +161,11 @@
 		"dash",
 		"kin"
 	],
-	"rank3": {
-		"sec": "+50% damage",
-		"kin": "cooldown 3s shorter",
-		"dash": "the run's own hit deals double"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
-		"dash": "Rank 2: recharge 8s -> 7.2s.",
-		"kin": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; +50% damage on top.",
-		"kin": "Rank 3: cooldown 10.5s -> 5.4s (3s off), damage +30%.",
-		"dash": "Rank 3: recharge 8s -> 6.4s; the run's own hit deals double."
-	},
+	"rank_cd": {"sec": [1, 0.9, 0.8], "dash": [1, 0.9167, 0.8333], "kin": [1, 1, 0.75]},
+	"rank_dmg": {"sec": [1, 1.2, 1.9], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
+	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
+	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
+	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",

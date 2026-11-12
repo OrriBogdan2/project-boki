@@ -1,7 +1,7 @@
 class_name KinExec
 extends RefCounted
 ## The kin grammar's runtime executor (docs/KIN_GRAMMAR.md, Phase 2). It runs any AbilitySpec,
-## merge stage, dodge rider or throw from its parts, inside a match, for players, bots and kin AI.
+## merge stage or throw from its parts, inside a match, for players, bots and kin AI.
 ## Nothing here knows about a particular kin: a delivery puts a shape in the world, the effects
 ## land on whatever it touches, modifiers change how the delivery behaves, followups ("then") start
 ## on the delivery's events. World things that stay (walls, mirrors, traps, tethers, zones) are the
@@ -19,6 +19,13 @@ extends RefCounted
 ##   depth    followup depth                                hits   {n}: units touched by this delivery (MAX_HITS)
 
 const MOVERS := ["dash", "leap", "blink"]
+
+## Does the ability move the body that casts it (a dash, leap or blink)? A Boki on you does those itself.
+static func moves_caster(ab: AbilitySpec) -> bool:
+	for st: StageSpec in ab.stages:
+		if st.delivery.type in MOVERS:
+			return true
+	return false
 
 ## A fresh context for a cast.
 static func make_cx(m: Node, caster: Ent, kin: Ent, owner: Ent, aim: Vector3, power: float, slot: String, ability_id: String, chain: Array = []) -> Dictionary:
@@ -830,28 +837,6 @@ static func _post(e: PartSpec, f: Ent, cx: Dictionary, center: Vector3, k: float
 			KinRules.mark(f, String(pr["mode"]), float(pr["duration"]), float(pr["amount"]))
 			if String(pr["mode"]) == "reveal":
 				m.fx.ring(f.pos, 1.2, KinRules.cat_color("utility"), 0.6)
-		"signature":
-			if String(pr["id"]) == "swap":
-				_swap(cx, f, String(pr.get("who", "owner")))
-
-static func _swap(cx: Dictionary, tgt: Ent, who_s: String) -> void:
-	var m: Node = cx["m"]
-	var who = cx.get("owner") if who_s == "owner" else cx["caster"]
-	if not _alive(who): who = cx["caster"]
-	if not (_alive(tgt) and tgt.mass() < 6.0 and who is Ent) or tgt == who:
-		return
-	var col := KinRules.cat_color("utility")
-	var a: Vector3 = who.pos; var b: Vector3 = tgt.pos
-	m.fx.ghost(who.position, who.face, col, 1.0)
-	m.fx.burst(a + Vector3(0, 0.9, 0), col, 16, 4.0, 0.4)
-	m.fx.burst(b + Vector3(0, 0.9, 0), col, 16, 4.0, 0.4)
-	m.fx.bolt(a + Vector3(0, 1.0, 0), b + Vector3(0, 1.0, 0), col)
-	who.teleport(b); tgt.teleport(a)
-	who.vel = Vector3.ZERO; tgt.vel = Vector3.ZERO
-	if who is Hunter: (who as Hunter).gliding = false
-	if tgt is Hunter: (tgt as Hunter).gliding = false
-	tgt.grounded = false; who.grounded = false
-	m.sfx("cloak", b, -1.0, 1.5)
 
 ## The friendly effects of a delivery event: on the owner, the kin itself or allies near it.
 static func apply_friends(effs: Array, cx: Dictionary, center: Vector3, radius: float) -> void:

@@ -13,12 +13,13 @@ extends Node3D
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
-const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7}
+const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
+	"ring": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
+	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -50,6 +51,7 @@ var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
+var scarves := HeroScarf.new(self)   # the cloth ends some Heroes trail (data "scarf")
 
 static func of(match_node: Node) -> HeroVfx:
 	if match_node.has_meta("hero_vfx"):
@@ -314,7 +316,7 @@ func _surface_node(kind: String) -> Node3D:
 			strip.size = Vector2.ONE
 			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
-		"vortex":
+		"vortex", "ring":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
 			mi.mesh = disc
@@ -366,6 +368,7 @@ func prewarm(at: Vector3) -> void:
 			_warming.append(_prewarm_node(kind))
 	for node: Node3D in _warming:
 		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
+	scarves.prewarm(at)
 
 func prewarm_end() -> void:
 	for node: Node3D in _warming:
@@ -373,6 +376,7 @@ func prewarm_end() -> void:
 		if node is GPUParticles3D:
 			(node as GPUParticles3D).emitting = false
 	_warming.clear()
+	scarves.prewarm_end()
 
 func _prewarm_node(kind: String) -> Node3D:
 	if not MODES.has(kind):
@@ -443,7 +447,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		"flare":
 			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
-		"vortex":
+		"vortex", "ring":
 			s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
@@ -721,6 +725,7 @@ func _model_has(h: Hunter, node_name: String) -> bool:
 # ------------------------------------------------------------------ the running looks
 func _process(delta: float) -> void:
 	_tick_holds()
+	scarves.tick(delta)
 	for i in range(live.size() - 1, -1, -1):
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta

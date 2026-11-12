@@ -25,7 +25,6 @@ static var air_counter := 0.0
 static var air_side := 0.0
 static var air_drag := 0.0
 static var air_idle_drag := 0.0
-static var glide_accel := 0.0
 static var glide_turn := 0.0
 static var glide_turn_fast := 0.0
 static var glide_brake := 0.0
@@ -55,7 +54,6 @@ static func load_tuning() -> bool:
 	air_drag = a["drag"]
 	air_idle_drag = a["idle_drag"]
 	var g: Dictionary = T["glide"]
-	glide_accel = g["accel"]
 	glide_turn = g["turn"]
 	glide_turn_fast = g["turn_fast"]
 	glide_brake = g["brake"]
@@ -83,21 +81,15 @@ static func glide_carry(arch: String) -> float:
 	var c: Dictionary = T["glide_carry"]
 	return float(c.get(arch, c["default"]))
 
-## A dash's speed share at `u` (0..1 through it) for this hunter, and how much longer it runs (speed scale
-## and ease from tuning.json dash_ease; flat 1.0 for a hunter not listed). The ease averages 1 over the dash.
-static func dash_k(arch: String, u: float) -> float:
-	var e: Dictionary = T["dash_ease"].get(arch, {})
-	if e.is_empty():
-		return 1.0
-	return float(e["speed"]) * (1.0 - float(e["ease"]) * cos(TAU * u))
+## A dash's speed scale for this hunter (tuning.json dash_speed; 1.0 for a hunter not listed): its time
+## stretches by the inverse so the distance stays. The dash's shape is its source curve (HunterMove.dash_k).
+static func dash_speed(arch: String) -> float:
+	return float(T["dash_speed"].get(arch, 1.0))
 
-static func dash_time_k(arch: String) -> float:
-	return 1.0 / float(T["dash_ease"].get(arch, {}).get("speed", 1.0))
-
-## A dash's velocity with `left` of its `total` s to go: `v` (its direction x its flat speed) through the hunter's
-## ease. The farm avatar and a match hunter both dash through this, so a Shift feels the same everywhere.
-static func dash_hv(v: Vector2, arch: String, left: float, total: float) -> Vector2:
-	return v * dash_k(arch, 1.0 - left / maxf(total, left))
+## A dash's velocity: `v` (its direction x its speed) at the hunter's dash_speed. The farm avatar and a match
+## hunter both dash through this, so a Shift feels the same everywhere.
+static func dash_hv(v: Vector2, arch: String) -> Vector2:
+	return v * dash_speed(arch)
 
 ## Momentum-preserving ground acceleration: under the wanted speed, move toward it; over it (a dash, a pad, a
 ## knock) bleed the extra at `over` while still steering, and steering back against it brakes properly.
@@ -140,6 +132,11 @@ static func air_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vecto
 	across = across.move_toward(Vector2.ZERO, a * air_side)
 	return (wd * along + across).limit_length(maxf(s, cap))
 
+## Vertical speed the step the glider opens: falling at least HunterMove.glide_start_vy ([game data]
+## GlideStartFallSpeedMin), so a rising jump is cut and an open never adds speed.
+static func glide_start(vy: float) -> float:
+	return minf(vy, -HunterMove.glide_start_vy)
+
 ## One glide step. `wish` = keys x cruise speed `gs`; `carry` = the most this hunter carries from Shift. Speed
 ## above cruise bleeds back within ~1.5 s (glide_drag; glide_drag_steer while steering), faster above `carry`;
 ## at or under cruise the glider pulls toward where you steer; a let-go coasts. Turns in wider arcs when fast.
@@ -155,7 +152,7 @@ static func glide_step(hv: Vector2, wish: Vector2, gs: float, carry: float, dt: 
 	if ws < 0.05:
 		return hv if s > gs else hv.move_toward(Vector2.ZERO, glide_coast * dt)
 	if s <= gs + 0.05:
-		return hv.move_toward(wish, glide_accel * dt)
+		return hv.move_toward(wish, HunterMove.glide_accel * dt)
 	var d := hv / s
 	var ang := d.angle_to(wish / ws)
 	if absf(ang) > deg_to_rad(glide_brake_deg):

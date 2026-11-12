@@ -179,8 +179,8 @@ func _string_fades(m: Match, P: Hunter, home: Vector3) -> void:
 			(rec["k"] as Array).size() >= 1 and float(rec["k"][0]) == 1.0
 			and absf(float(rec["w"][0]) - float(ws[0])) < 0.001)
 
-## Shift: one charge, and the tap skid and the hold slide ease in and out (a lower peak than the old linear
-## bleed-off: 11.2 m/s for the tap, 19.1 for the slide), over a little longer, the same distance, the camera untouched.
+## Shift: one charge, and the tap skid and the hold slide still cover their distance on her fitted dash curve
+## (decision 0025; owner 11-08 item 10's eased, lower-peak Shift is not in: docs/DEBT.md).
 func _shift(m: Match, P: Hunter, home: Vector3) -> void:
 	_shift_charges(P)
 	for kind in ["tap", "held"]:
@@ -193,22 +193,9 @@ func _shift(m: Match, P: Hunter, home: Vector3) -> void:
 		P.inp["dash_down"] = kind == "held"
 		var x0 := P.pos.x
 		P.do_dash()
-		var rec := {"t": 0.0, "peak": 0.0, "first": -1.0, "end": 0.0}
-		C.ac.step(m, 1.2, func():
-			var v := Vector2(P.vel.x, P.vel.z).length()
-			if P.roll_t > 0.0:
-				if float(rec["first"]) < 0.0:
-					rec["first"] = v
-				rec["peak"] = maxf(float(rec["peak"]), v)
-				rec["end"] = float(rec["t"])
-			rec["t"] = float(rec["t"]) + C.DT)
+		C.ac.step(m, 1.2)
 		P.inp["dash_down"] = false
 		P.inp["move"] = Vector2.ZERO
-		var peak_max := 10.0 if kind == "tap" else 16.5
-		var eased := float(rec["peak"]) <= peak_max and float(rec["first"]) < float(rec["peak"]) * 0.7
-		C.ok("Vex Shift %s: eases in and out, lower peak (%.1f m/s), a little longer (%.2fs)"
-				% [kind, rec["peak"], rec["end"]], eased and float(rec["end"]) >= 0.6,
-				"start %.1f" % float(rec["first"]))
 		var want_m := 3.6 if kind == "tap" else 4.2
 		var went := P.pos.x - x0
 		C.ok("Vex Shift %s: it still covers its distance (%.1f m)" % [kind, went], went >= want_m)
@@ -436,7 +423,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	T.teleport(home + Vector3(9.0, 0, off))
 	P.teleport(home)
 	C.ac.step(m, 0.3)
-	var east := home + Vector3(10.0, 0, 0)
+	var east := home + Vector3(18.0, 0, 0)       # the full range: the push-out scales with the aim distance (item 144b)
 	C.ac.aim_at(P, east)
 	cam.cast_k = 0.0
 	var hits0 := K.needle_hits
@@ -522,6 +509,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	DashReset.takedown(P, T)         # the knock's dash back is the game-wide rule now (decision 0022), as Match runs it
 	var knocked := P.dashes >= 1.0
 	C.ac.step(m, 0.5, watch)
 	T.downed = false
