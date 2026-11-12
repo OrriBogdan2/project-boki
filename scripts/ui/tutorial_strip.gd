@@ -18,19 +18,22 @@ const PULSE_HZ := 2.5           # beats a second while it pulses
 const POP_T := 0.25             # s the strip takes to drop in on a new objective
 const GLOW_PX := 10.0           # how far the soft glow reaches past the rim at its brightest
 
-## Where the strip sits for a screen size.
-static func rect(sz: Vector2) -> Rect2:
+const GAP := 8.0                # px kept under whatever already sits at the top-centre (`below`)
+
+## Where the strip sits for a screen size: under the safe margin, and under `below` (the bottom of the
+## Ways Out strip in a real match, WaysOutHud.bottom) when that is lower, so it never covers the zone clocks.
+static func rect(sz: Vector2, below := 0.0) -> Rect2:
 	var w := sz.x * WIDTH_FRAC
-	var margin := maxf(SAFE_MIN, sz.y * SAFE_FRAC)
-	return Rect2(Vector2((sz.x - w) * 0.5, margin), Vector2(w, sz.y * HEIGHT_FRAC))
+	var top := maxf(maxf(SAFE_MIN, sz.y * SAFE_FRAC), below + GAP if below > 0.0 else 0.0)
+	return Rect2(Vector2((sz.x - w) * 0.5, top), Vector2(w, sz.y * HEIGHT_FRAC))
 
 ## 1 the moment the objective changes, easing to 0 over PULSE_T.
 static func glow(age: float) -> float:
 	return 1.0 - clampf(age / PULSE_T, 0.0, 1.0)
 
 ## The strip's rect this frame: dropping in from above for POP_T, then still.
-static func shown(sz: Vector2, age: float) -> Rect2:
-	var r := rect(sz)
+static func shown(sz: Vector2, age: float, below := 0.0) -> Rect2:
+	var r := rect(sz, below)
 	var k := clampf(age / POP_T, 0.0, 1.0)
 	r.position.y -= pow(1.0 - k, 3.0) * (r.end.y + 4.0)
 	return r

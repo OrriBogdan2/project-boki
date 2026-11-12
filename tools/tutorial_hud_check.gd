@@ -56,6 +56,13 @@ func _lanes() -> void:
 					clash += " %s/%s" % [names[i], names[j]]
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
+		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
+		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
+		var gb := TutorialStrip.rect(sz, wo_b)
+		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
+		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
 
 # ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:

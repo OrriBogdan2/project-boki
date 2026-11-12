@@ -118,8 +118,11 @@ func _done(lid: String, p: Hunter) -> bool:
 		"chest": return int(p.stats.get("chests", 0)) > 0
 	return false
 
-## The line in the tutorial's strip at the top-centre (the two never show together).
+## The line in the tutorial's strip at the top-centre (the two never show together), under the Ways Out strip.
 func draw(h, sz: Vector2) -> void:
 	if line == "":
 		return
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
+	var below := WaysOutHud.bottom(h.m)
+	if h.m.skydrop and h.m.skydrop.planning:
+		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
+	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t, below), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
