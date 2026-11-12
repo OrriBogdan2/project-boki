@@ -19,7 +19,11 @@ dark at the edges, with `VoidSpecks` drifting over it (the title's key art too).
 big `VoidPortrait` (starfield, nebula, cracks with a teal glint); a new Boki's reveal (`KinReveal`) is
 one big card: the live Boki in a `VoidPortrait.window` on the left, its name banner, its moves as
 strips (`BokiMoves` in strip mode) and the ticket button on the right. The title's menu entries are
-stacked torn strips. The in-match HUD only takes the palette and edges and stays minimal; its one big
+stacked torn strips. Behind the title and the loading screen, `SplashGallery` rotates the painted art in
+`content/rules/splash_gallery.json` (every Hunter's splash and the approved alternates, the Bokidex key art,
+Bokidex hero cutouts): one piece at a time, whole and centred, never stretched, drawn at its own pixels on a
+1440p screen, held 8 s with a 2.5 s crossfade; the loading screen opens on your own Hunter's splash. The art
+is 2560x1440, made from the approved sources by `tools/splash_art.py` (it also makes the boot splash canvas). The in-match HUD only takes the palette and edges and stays minimal; its one big
 box (the tutorial's intro card) is `HudStyle.torn_panel`.
 
 ## 1. Audit (October 2026, before this pass)
