@@ -719,6 +719,8 @@ func _ready_rest() -> void:
 		pass
 	elif play_hub:
 		MinigameHub.open(self)
+	elif GardenHatch.needed():
+		GardenHatch.place(self, ppos)      # a new save: the first Boki hatches here
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
@@ -3437,6 +3439,9 @@ func _weapon() -> String:
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
+	if ClassUnlock.needs_starters():
+		Game.goto("hatch")      # your first Relic, before the first expedition (Hatch)
+		return
 	var v := _new_panel("Expedition", 940, true)
 	UI.subtitle(v, "Pick your Hunter and where to drop.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)

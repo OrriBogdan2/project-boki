@@ -76,10 +76,8 @@ func _creator(tree: SceneTree) -> void:
 func _eggs(tree: SceneTree) -> void:
 	_fresh()
 	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx := GardenHatch.new()      # (on its own: --hunter-unlock-check --shots-dir= shoots it on the farm)
 	main.add_child(hx)
-	await tree.process_frame
-	hx._looks_good()
 	await _shot(tree, "hatch_eggs", 2.5)
 	hx._pick(3)
 	await _shot(tree, "hatch_mystery_picked", 1.2)
@@ -111,17 +109,15 @@ func _mask(tree: SceneTree) -> void:
 	_fresh()
 	Save.d["look"] = Unmasked.default_look()
 	Save.d["look"].merge({"gender": 0, "glow": 0, "ghost": 1}, true)
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var rec := Save.new_kin("cindle", "Ember")
+	Save.d["roster"] = [rec]
+	Save.d["active"] = rec["uid"]
+	var hx = load("res://scripts/ui/hatch.gd").new()      # (a Boki and no Relic: the first-Relic pick)
 	main.add_child(hx)
 	await tree.process_frame
-	hx._looks_good()
-	var kin := Models.kin("cindle", {"level": 1})
-	kin.position = Vector3(0, 0, 0.6)
-	hx.add_child(kin)
-	hx.kin_node = kin
-	for e in hx.eggs:
-		(e["holder"] as Node3D).visible = false
-	hx._mask_moment(func(): pass)
+	for c in hx.ui.get_children():
+		if c is ColorRect: c.queue_free()      # (the pick of three, skipped: Vex)
+	hx._put_on_first("gunslinger", func(): pass)
 	var moment: MaskMoment = hx.get_children().filter(func(c): return c is MaskMoment)[0]
 	await _shot(tree, "mask_1_arrives", 1.2)
 	await _shot(tree, "mask_2_boki_looks", 1.6)

@@ -45,6 +45,7 @@ var bad := 0
 var n := 0
 var main: Node
 var shots := ""
+const HOME_GD := preload("res://scripts/home/home.gd")
 
 func ok(cond: bool, what: String) -> void:
 	n += 1
@@ -480,45 +481,114 @@ func _migration() -> void:
 			"stuns") == 3, "a new save read back keeps its Hunters and its counts")
 	DirAccess.remove_absolute(path)
 
-# ---------------------------------------------------------------- 7. the new-game flow and the second Relic
-## Straight after the prologue: one card, making yourself, then the egg pick. No Relic pick anywhere before the
-## egg (the first Relic comes after naming the Boki: --hatch-check covers that moment).
+# ---------------------------------------------------------------- 7. the new-game flow and the first Relic
+## One first hour (reviews/DESIGN_REVIEW_1110.md change 2): after the prologue one card and making yourself, then
+## the farm opens on the hatch (GardenHatch: three starter eggs in front, the black one in its basket at the back),
+## with no Relic pick before the Boki. The first Relic is picked at the portal (Lace, Kael or Vex, with the one-line
+## Relic sentence), and only then the combat tutorial, which can be skipped with nothing lost.
 func _new_game_flow(tree: SceneTree) -> void:
+	tree.root.size = Vector2i(1280, 720)
 	new_save()
+	Save.d["roster"] = []
+	Save.d.erase("active")
 	Save.d["tutorial"] = {}
 	Save.d.erase("look")
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	for i in 8: await tree.process_frame
+	Game.goto("hatch")
+	var hx = await _screen(tree, func(s): return s.get("card_box") != null)
 	ok(hx.stage == "intro" and hx.card_box != null, "the first screen after the prologue is the card (stage %s)"
 			% hx.stage)
 	var card_text := _texts(hx.card_box)
 	ok(card_text.size() == 2 and _any_text(hx.card_box, hx.CARD_TEXT), "one line and one button (%s)" % str(card_text))
+	await shot(tree, "first_hour_1_card", 40)
 	var enter := InputEventAction.new()
 	enter.action = "ui_accept"
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
 	ok(hx.stage == "create" and hx.create_box != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
+	await shot(tree, "first_hour_2_creator", 30)
 	hx._looks_good()
-	for i in 6: await tree.process_frame
-	ok(hx.stage == "pick" and ClassUnlock.needs_starters(),
-			"then straight to the egg pick, with no Relic pick before it (stage %s)" % hx.stage)
-	ok(_find_meta(hx, "starter_pick") == null and not _any_text(hx.root_ui, "Choose your first Relic"),
-			"there is no Relic pick screen at all")
-	ok(hx.create_box == null and hx.preview == null and Unmasked.is_look(Save.d["look"]),
-			"the creator is behind us and the save holds your Empty look")
-	await shot(tree, "egg_pick", 30)
-	hx.queue_free()
-	for i in 3: await tree.process_frame
-	new_save()
-	Save.d["tutorial"] = {}
-	hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	for i in 8: await tree.process_frame
-	await shot(tree, "new_game_card", 40)
-	hx.queue_free()
-	for i in 3: await tree.process_frame
+	var hm = await _screen(tree, func(s): return s.get_script() == HOME_GD and not s.building)
+	var gh: GardenHatch = null
+	for c in hm.get_children():
+		if c is GardenHatch: gh = c
+	ok(gh != null and ClassUnlock.needs_starters() and Unmasked.is_look(Save.d["look"]),
+			"then the farm opens on the eggs, with your Empty look saved and no Relic yet")
+	if gh == null:
+		return
+	ok(not _any_text(gh.root_ui, "Choose your first Relic") and _find_meta(hm, "mask_card") == null,
+			"there is no Relic pick before the Boki")
+	var m: int = gh.egg_defs.find_custom(func(d): return d.get("mystery", false))
+	var front: Array = gh.eggs.slice(0, 3).map(func(e): return (e["holder"] as Node3D).position.z)
+	var back: float = (gh.eggs[m]["holder"] as Node3D).position.z
+	ok(m == 3 and gh.egg_defs.slice(0, 3).map(func(d): return d["species"]) == GardenHatch.STARTERS
+			and front.all(func(z): return z > back + 2.0), "three starter eggs in front, the black one at the back")
+	ok(_cards(gh.bottom) == 3, "the black egg's card waits until you find it (%d cards)" % _cards(gh.bottom))
+	ok(hm.panel_open == GardenHatch.PANEL and gh.cam.current, "you stand still and the eggs have the camera")
+	await shot(tree, "first_hour_3_garden_eggs", 40)
+	gh._pick(m)
+	await shot(tree, "first_hour_4_mystery_egg", 20)
+	gh._pick(0)
+	gh._pick(0)
+	await shot(tree, "first_hour_5_knock", 40)
+	ok(gh.stage == "warm", "picking an egg twice starts the knocking (stage %s)" % gh.stage)
+	gh._show_name()
+	await shot(tree, "first_hour_6_name", 30)
+	gh.finish("cindle", "Ember")
+	hm = await _screen(tree, func(s): return s.get_script() == HOME_GD and not s.building and s != hm)
+	ok(Save.d["roster"].size() == 1 and String(Save.d["roster"][0]["name"]) == "Ember" and ClassUnlock.needs_starters()
+			and hm.get_children().filter(func(c): return c is GardenHatch).is_empty(),
+			"naming it brings you to the farm with Ember, still with no Relic")
+	ok(FarmTutorial.active(), "and the farm tutorial starts")
+	await shot(tree, "first_hour_7_farm", 40)
+	hm._open_expedition()
+	hx = await _screen(tree, func(s): return s.get("stage") == "mask")
+	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
+			func(c): return c.has_meta("mask_card"))
+	var offered: Array = cards.map(func(c): return String(c.get_meta("mask_card")))
+	ok(offered == ["archer", "juggernaut", "gunslinger"] and _any_text(hx.ui, "Choose your first Relic.")
+			and _any_text(hx.ui, MaskMoment.TEXT),
+			"the portal asks for your first Relic: Lace, Kael or Vex (%s)" % str(offered))
+	var toggle: Array = hx.ui.find_children("*", "CheckBox", true, false)
+	ok(toggle.size() == 1 and (toggle[0] as CheckBox).button_pressed and hx.tutorial,
+			"with the combat tutorial next unless you untick it")
+	ok(hx.kin_node != null and hx.kin_node.is_inside_tree(), "your Boki came through the portal with you")
+	await shot(tree, "first_hour_8_first_relic", 40)
+	(toggle[0] as CheckBox).button_pressed = false
+	ok(not hx.tutorial, "unticked, the tutorial is skipped")
+	cards[2].mouse_entered.emit()      # (Vex's card in focus: the Take button takes him)
+	var picker: Array = hx.ui.find_children("*", "Button", true, false).filter(
+			func(b): return (b as Button).text == "Take Vex")
+	ok(picker.size() == 1, "Vex's card has its Take button")
+	if picker.is_empty():
+		return
+	picker[0].emit_signal("pressed")
+	var moment: Array = hx.get_children().filter(func(c): return c is MaskMoment)
+	ok(moment.size() == 1 and Arch.of_save() == "gunslinger" and not ClassUnlock.needs_starters(),
+			"taking Vex makes him your first Relic and plays the Relic moment")
+	await shot(tree, "first_hour_9_relic_moment", 120)
+	hx._head_out(hx.tutorial)
+	hm = await _screen(tree, func(s): return s.get_script() == HOME_GD and not s.building)
+	ok(bool(Save.d["tutorial"].get("match", false)) and Save.d["roster"].size() == 1 and Arch.of_save() == "gunslinger",
+			"skipping the tutorial goes home with your Boki and your Relic kept")
+	hm._open_expedition()
+	await tree.process_frame
+	ok(main.screen_node() == hm and hm.panel_open == "Expedition", "and the portal now opens the expedition panel")
+	hm._close_panel()
+
+## Waits until the current screen passes `ready` (a few seconds at most).
+func _screen(tree: SceneTree, ready: Callable) -> Node:
+	for i in 900:
+		await tree.process_frame
+		var s: Node = main.screen_node()
+		if is_instance_valid(s) and s.is_inside_tree() and not s.is_queued_for_deletion() and ready.call(s):
+			for k in 4: await tree.process_frame
+			return s
+	return main.screen_node()
+
+func _cards(n: Node) -> int:
+	var cards := n.find_children("*", "PanelContainer", true, false)
+	return cards.filter(func(c): return c.get_parent() is HBoxContainer).size()
 
 # ---------------------------------------------------------------- 8. the viewer: abilities shown working
 func _viewer(tree: SceneTree) -> void:

@@ -4,8 +4,8 @@ extends RefCounted
 ## around, turns to look at you and bounces, all inside 2.5 s after the pop, and the shell throws no bursts, rings or flashes. The closer look after
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,
 ## and only then can it be named. A shimmer shows as a faint sparkle on the Boki itself, a rare one
-## gets a plain provenance line. Then the first Relic: after naming the
-## Boki, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
+## gets a plain provenance line. Then the first Relic: through the farm portal with a Boki and no
+## Relic, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
 ## Relic" (the interact key) puts it on and you become that Hunter; a short look at their
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). Never touches the real save.
 
@@ -122,24 +122,19 @@ func run(m: Node) -> void:
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()
-	Save.d["tutorial"] = {"intro": true}
+	Save.d["tutorial"] = {"intro": true, "hatched": true}
 	Save.d["look"] = Unmasked.default_look()
+	var rec := Save.new_kin("cindle", "Ember")
+	Save.d["roster"] = [rec]
+	Save.d["active"] = rec["uid"]
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
 	for i in 4: await tree.process_frame
-	hx._looks_good()
-	ok(hx.stage == "pick" and ClassUnlock.needs_starters(), "the eggs come before any Relic (stage %s)" % hx.stage)
-	var kin := Models.kin("cindle", {"level": 1})
-	hx.add_child(kin)
-	hx.kin_node = kin
-	hx.chosen = 0
-	hx._finish("cindle", "Ember", "Orri", true)
-	await tree.process_frame
 	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	var offered: Array = cards.map(func(c): return String(c.get_meta("mask_card")))
 	ok(hx.stage == "mask" and offered == ["archer", "juggernaut", "gunslinger"] and ClassUnlock.needs_starters(),
-		"naming the Boki leads to the pick of Lace, Kael and Vex (%s)" % str(offered))
+		"a Boki and no Relic: the pick of Lace, Kael and Vex (%s)" % str(offered))
 	var worn: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
 		"nothing is worn before the pick, and no one else can be picked")

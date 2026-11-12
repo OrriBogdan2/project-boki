@@ -1,7 +1,8 @@
 extends RefCounted
 ## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels]: every screen of the first 15 minutes on a
-## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
-## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
+## fresh save (title, prologue, hatch card, creator, eggs on the farm, name, the portal's first Relic, tutorial
+## steps, results, farm, expedition panel, Hunter pick, first expedition HUD, pause), one .jpg each plus
+## <dir>/layout.txt with, per shot:
 ## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
 ## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics)
 ## plays one part alone from a made-up save.
@@ -98,21 +99,43 @@ func _front() -> void:
 	await _wait(2.0)
 	await _shot("creator")
 	hx._looks_good()
+	await _home()
+	var gh: GardenHatch = null
+	for c in _screen().get_children():
+		if c is GardenHatch: gh = c
 	await _wait(1.5)
 	await _shot("hatch_eggs")
-	hx._pick(0)
+	gh._pick(0)
 	await _wait(0.8)
-	hx._pick(0)
+	gh._pick(0)
 	await _wait(1.5)
 	await _shot("hatch_knock")
-	hx._show_name()
+	gh._show_name()
 	await _wait(1.0)
 	await _shot("hatch_name")
-	hx._finish(String(hx.egg_defs[0]["species"]), "", "", true)
-	await _wait(2.5)
+	gh.finish(String(gh.egg_defs[0]["species"]), "")
+	await _home()
+	await _wait(2.0)
+	await _shot("farm_with_boki")
+	_screen()._open_expedition()
+	await _wait(3.0)
 	await _shot("first_mask")
-	hx.queue_free()
+	var rx := _screen()
+	for c in rx.ui.get_children():
+		if c is ColorRect: c.queue_free()      # (the pick of three: Vex)
+	ClassUnlock.choose_starters(["gunslinger"])
+	rx._put_on_first("gunslinger", func(): pass)
+	await _wait(4.0)
+	await _shot("first_mask_moment")
+	rx.queue_free()      # (the tutorial below is played by hand, not through the portal)
 	await _frames(2)
+
+## Waits for the farm to be up.
+func _home() -> void:
+	var guard := 0
+	while guard < 600 and (_screen() == null or _screen().get("player") == null or _screen().get("building")):
+		guard += 1
+		await _wait(0.5)
 
 func _tutorial() -> void:
 	m = Match.new()
