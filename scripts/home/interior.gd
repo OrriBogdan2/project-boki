@@ -213,7 +213,7 @@ func _blocked(x: float, z: float) -> bool:
 
 # ------------------------------------------------------------------ kin
 func _spawn_kin() -> void:
-	var roster: Array = (visit.get("roster", []) if not visit.is_empty() else KinBox.farm())    # kin in the Kin Burrow stay asleep there
+	var roster: Array = (visit.get("roster", []) if not visit.is_empty() else GardenZones.out_here())    # Burrow and other zones' Boki stay put
 	var active: String = (visit.get("active", "") if not visit.is_empty() else Save.d.get("active", ""))
 	var here: Array = []
 	for rec in roster:

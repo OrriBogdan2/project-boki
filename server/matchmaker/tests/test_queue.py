@@ -8,8 +8,8 @@ from mm.launcher import PortPool
 from mm.queue import TicketQueue, assign_slots, new_ticket
 
 
-def ticket(mode: str, name: str, at: float, party=()):
-    return new_ticket(mode, name, "v", list(party), at)
+def ticket(mode: str, name: str, at: float, party: str = ""):
+    return new_ticket(mode, name, "v", party, at)
 
 
 class QueueTest(unittest.TestCase):
@@ -79,21 +79,59 @@ class SlotTest(unittest.TestCase):
 
     def test_party_shares_a_team(self):
         arena = Config().modes()["arena"]
-        a = ticket("arena", "a", 1, party=["b"])
-        b = ticket("arena", "b", 2, party=["a"])
-        c = ticket("arena", "c", 3)
-        slots = assign_slots([c, a, b], arena)
+        a, b = ticket("arena", "a", 1, "AAAAA"), ticket("arena", "b", 1, "AAAAA")
+        c, d = ticket("arena", "c", 3, "CCCCC"), ticket("arena", "d", 4)
+        slots = assign_slots([d, c, a, b], arena)
         self.assertEqual(slots[a] // 4, slots[b] // 4)
         self.assertNotEqual(slots[a] // 4, slots[c] // 4)
-        self.assertEqual(sorted(slots.values()), sorted(set(slots.values())))
+        self.assertEqual(slots[d] // 4, slots[a] // 4)   # the solo packs the fullest team (the duo)
+        self.assertEqual(len(set(slots.values())), 4)
 
-    def test_oversized_party_is_split_not_dropped(self):
+    def test_duo_gets_a_stranger_before_a_new_team_opens(self):
         trio = Config().modes()["trio"]
-        names = ["p0", "p1", "p2", "p3"]
-        party = [ticket("trio", n, i, party=[m for m in names if m != n]) for i, n in enumerate(names)]
-        slots = assign_slots(party, trio)
-        self.assertEqual(len(slots), 4)
-        self.assertEqual(len({s // 3 for s in slots.values()}), 2)
+        duo = [ticket("trio", "d1", 1, "DDDDD"), ticket("trio", "d2", 1, "DDDDD")]
+        solos = [ticket("trio", f"s{i}", 2 + i) for i in range(2)]
+        slots = assign_slots(solos + duo, trio)
+        self.assertEqual({slots[t] // 3 for t in duo + solos[:1]}, {slots[duo[0]] // 3})
+        self.assertNotEqual(slots[solos[1]] // 3, slots[duo[0]] // 3)
+
+    def test_parties_get_empty_teams_largest_first(self):
+        trio = Config().modes()["trio"]
+        small = [ticket("trio", "s", 1, "SSSSS")]
+        big = [ticket("trio", f"b{i}", 5, "BBBBB") for i in range(3)]
+        slots = assign_slots(small + big, trio)
+        self.assertEqual({slots[t] for t in big}, {0, 1, 2})
+        self.assertEqual(slots[small[0]], 3)
+
+
+class PartyPickTest(unittest.TestCase):
+    def setUp(self):
+        cfg = Config()
+        self.q = TicketQueue(cfg.modes(), cfg.fill_timeout)
+        self.slots = cfg.trio_slots
+
+    def test_a_party_never_straddles_two_batches(self):
+        for i in range(self.slots - 1):
+            self.q.add(ticket("trio", f"s{i}", 100 + i))
+        trio = [ticket("trio", f"t{i}", 200, "TTTTT") for i in range(3)]
+        for t in trio:
+            self.q.add(t)
+        first = self.q.pick("trio", 100)
+        self.assertEqual(len(first), self.slots - 1)
+        self.assertFalse(any(t.party for t in first))
+        self.assertEqual(self.q.waiting["trio"], trio)   # kept its place for the next batch
+
+    def test_start_rule_counts_tickets_not_units(self):
+        self.q.add(ticket("trio", "a", 100, "AAAAA"))
+        self.assertEqual(self.q.pick("trio", 119), [])
+        self.assertEqual(len(self.q.pick("trio", 120)), 1)
+
+    def test_one_party_per_team_at_most(self):
+        teams = self.slots // 3
+        for i in range(teams + 1):
+            self.q.add(ticket("trio", f"p{i}", 100 + i, f"PARTY{i:03d}"))
+        self.assertEqual(len(self.q.pick("trio", 125)), teams)
+        self.assertEqual(len(self.q.waiting["trio"]), 1)
 
 
 class PortPoolTest(unittest.TestCase):
