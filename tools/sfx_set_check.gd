@@ -18,12 +18,15 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
-## Reads the files only; never touches the save.
+##  11. Sable's Encore: the blade whirr is a keyed loop that starts once the ring has grown, follows her
+##      through a dash and is gone in the frame the ring ends
+## Reads the files only (11 runs one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
+const FRAME := 1.0 / 60.0      # s: one simulation frame
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
@@ -49,6 +52,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	await _encore_loop(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -356,3 +360,45 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 11. Encore's whirr is held at Sable: off while the ring grows, on after, riding with her through a dash,
+## and stopped in the frame the ring ends (ThiefUlt.tick/drop, Sfx.loop_hold).
+func _encore_loop(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+			"cls": Arch.weight("thief"), "arch": "thief", "weapon": Arch.signature("thief")})
+	m.set_process(false)
+	var p: Hunter = m.player
+	p.lvl = 6
+	p.slot_lv["ult"] = 1
+	p.ak.cd["x"] = 0.0
+	var ring: ThiefUlt = (p.ak as ThiefKit).encore
+	var key := ring.whirr_key()
+	var grow := float(ring.data()["grow"])
+	HunterKeys.ult_pressed(p)
+	var cast_at := p.pos
+	_run(m, grow * 0.5)
+	ok(ring.running() and not Sfx.loop_on(key), "encore: no whirr while the ring is still growing")
+	_run(m, grow * 0.5 + 0.1)
+	ok(Sfx.loop_on(key), "encore: the whirr starts once the ring has grown")
+	p.dashes = p.max_dashes()
+	p.inp["move"] = Vector2(1, 0)
+	p.do_dash()
+	_run(m, 0.5)
+	p.inp["move"] = Vector2.ZERO
+	var away := Vector2(p.pos.x - cast_at.x, p.pos.z - cast_at.z).length()
+	var at_her: Vector3 = Sfx.loops[key]["pos"]
+	var off := Vector2(at_her.x - p.pos.x, at_her.z - p.pos.z).length()
+	ok(away > 2.0 and off < 0.3, "encore: dashed %.1f m off the cast point, the whirr %.2f m from her" % [away, off])
+	var late := 0
+	while ring.running() and late < 600:
+		m.step(FRAME)
+		late += 1
+	ok(not ring.running() and not Sfx.loop_on(key), "encore: the whirr is gone as the ring ends (%d frames in)" % late)
+	m.queue_free()
+	await main.get_tree().process_frame
+
+func _run(m: Match, secs: float) -> void:
+	for i in int(ceil(secs / FRAME)):
+		m.step(FRAME)
