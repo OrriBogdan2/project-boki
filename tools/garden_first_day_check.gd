@@ -5,7 +5,11 @@ extends RefCounted
 ##   3. ticks are once-only, an unknown id does nothing, the reward is paid once, then the list is gone
 ##   4. a bot plays a fresh base: feeds a Boki, plays at a toy, runs a race, naps in a pile and pairs two
 ##      Boki in the hub's Nook (the base has none of its own), and the list finishes by itself
+##   5. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
+##      arrival card; day 5 (a journal, today's wishes) shows one arrival card, the wishes riding on the away card
 ## Never touches the real save.
+
+const HudGroups := preload("res://tools/garden_hud_groups.gd")
 
 const STEP_S := 0.05      # s of farm time per step
 const MAX_STEPS := 4800   # a toy is picked up within 60 s of farm time (toy_check)
@@ -38,8 +42,22 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_list()
 	await _bot()
+	await _screens()
 	print("FIRSTDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _screens() -> void:
+	var gh := HudGroups.new()
+	gh.main = main
+	for day in [1, 5]:
+		for zone in [""] + HudGroups.ZONES:
+			var scr: Dictionary = await gh.screen(day, zone)
+			var what := "day %d %s" % [day, zone if zone != "" else "hub"]
+			var groups := int(scr["groups"].size())
+			if day == 1:
+				ok(groups <= HudGroups.DAY1_MAX, "%s: %d HUD groups (at most %d)" % [what, groups, HudGroups.DAY1_MAX])
+			var cards: Array = scr["cards"]
+			ok(cards.size() <= 1, "%s: %d arrival cards (%s)" % [what, cards.size(), ", ".join(cards)])
 
 func _list() -> void:
 	var ids := _ids()
