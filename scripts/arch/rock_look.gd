@@ -125,8 +125,8 @@ static func cool(n: Node3D) -> void:
 		return
 	var tw := n.create_tween().set_parallel()
 	for mi in cracks.get_children():
-		var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
+		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+		tw.tween_property(mat, "shader_parameter/color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
 ## A rock coming up: a burst of dust and earth at its foot and one short rumble.
