@@ -9,6 +9,9 @@ extends RefCounted
 ##   7. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
 ##      (read the log for errors; two predate clans: the startup OptionButton theme line and the farm's
 ##      exit leak of HomeBuild/HomeMarket/HomeTrade)
+##   8. breeding loans (section 7): only a clan member lends, not the lead, one at a time; the Boki leaves the
+##      roster but not the save; the clanmate sees the offer (forged ones dropped), takes it in, and the
+##      Nook's side panel shows it; after the day it comes home with a memory line and the offer is gone
 
 const OLD_SAVE := "user://clan_check_old.json"
 var docs := {}
@@ -188,6 +191,61 @@ func _base(main: Node) -> void:
 	for i in 30:
 		await tree.process_frame
 
+func _loans(main: Node) -> void:
+	Save.d = Save.fresh()
+	Social.me = "alice"
+	var lead := Save.new_kin("zapple", "Lead")
+	var pip := Save.new_kin("burrlet", "Pip")
+	var moss := Save.new_kin("burrlet", "Moss")
+	for r in [lead, pip, moss]:
+		Save.d["roster"].append(r)
+	Save.d["active"] = lead["uid"]
+	ok(ClanLoan.why_not(pip) != "", "outside a clan no Boki can be lent")
+	Save.d["guild_id"] = "g9"
+	for who in ["alice", "bob"]:
+		docs["profiles/" + who] = {"name": who.capitalize(), "guild": "g9", "roster": []}
+	ok(ClanLoan.why_not(lead) != "" and not ClanLoan.offer(lead, "bob", "Bob", 0.0), "the lead Boki is not lent")
+	var t0 := Time.get_unix_time_from_system()
+	ok(ClanLoan.offer(pip, "bob", "Bob", t0), "a member lends Pip to Bob")
+	ok(Save.kin(pip["uid"]).is_empty() and ClanLoan.away()["rec"] == pip, "Pip leaves the roster, not the save")
+	ok(not ClanLoan.offer(moss, "bob", "Bob", t0), "one loan at a time")
+	ok(docs.get("clanloan/g9_alice", {}).get("to") == "bob", "the offer is in the lender's own doc")
+	var kin := {"uid": "x", "species": "burrlet", "name": "X"}
+	var forged := [_row("g9_mallory", {"guild": "g9", "to": "bob", "kin": kin, "t": t0}),
+		_row("g9_alice", {"guild": "g8", "to": "bob", "kin": kin, "t": t0}),
+		_row("g9_alice", {"guild": "g9", "to": "bob", "kin": kin, "t": (t0 - Sleepover.DAY_SECS)}),
+		_row("g9_alice", {"guild": "g9", "to": "bob", "kin": kin, "t": (t0 + 3600.0)}),
+		_row("g9_alice", {"guild": "g9", "to": "bob", "kin": {"species": "no_such"}, "t": t0})]
+	var kept := forged.filter(func(r): return not ClanLoan.clean_offer(r, "g9", "bob", ["alice", "bob"], t0).is_empty())
+	ok(kept.is_empty(), "offers from a stranger, another clan, a past or future day or a bad Boki are dropped")
+	Social.me = "bob"
+	var got := {}
+	ClanLoan.for_me(func(g): got.merge(g, true))
+	ok(got["guest"].is_empty() and got["offers"].size() == 1 and got["offers"][0]["kin"]["name"] == "Pip",
+		"Bob sees Alice's offer")
+	ClanLoan.accept(got["offers"][0], func(_s): pass)
+	ClanLoan.for_me(func(g): got.merge(g, true))
+	ok(got["guest"].get("from") == "alice" and got["offers"].is_empty(), "Bob takes Pip in")
+	var dv := VBoxContainer.new()
+	main.add_child(dv)
+	ClanLoanPanel.side_rows(dv, func(): pass)
+	var texts := dv.find_children("*", "Label", true, false).map(func(l): return String(l.text))
+	ok(texts.any(func(t): return "Pip" in t and "staying with you" in t), "Pip shows in Bob's Nook")
+	dv.queue_free()
+	Social.me = "alice"
+	var said: Array = []      # lambdas capture by value: the lines come back through an array
+	ClanLoan.come_home(ClanLoan.away(), func(l): said.append(l))
+	var line: String = said[-1] if said else ""
+	var back := Save.kin(pip["uid"])
+	ok("garden day in Bob's Nook" in line and not back.is_empty() and ClanLoan.away().is_empty(), "Pip comes home")
+	ok(String(back["memory"][-1]["text"]).contains("Bob's Nook") and not docs.has("clanloan/g9_alice"),
+		"it has the memory line and the offer is gone")
+	ClanLoan.offer(moss, "bob", "Bob", t0 - Sleepover.DAY_SECS - 1.0)
+	Sleepover.collect(func(l): said.append(" ".join(l)))
+	line = said[-1]
+	var home := not Save.kin(moss["uid"]).is_empty()
+	ok("waited a day for Bob" in line and home, "an untaken loan comes home after its day")
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -202,5 +260,6 @@ func run(main: Node) -> void:
 	_showcase()
 	Save.d = Save.fresh()
 	await _base(main)
+	_loans(main)
 	print("CLAN DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

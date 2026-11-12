@@ -27,7 +27,7 @@ Rule (same as guilds today): **your save is the truth for what you own; the stor
 | `clanroster/<gid>_<me>` (new) | `{role, joined, corner: {decor, toys, kin slots}, last_seen}` | the member; role changes by an officer writing `role_set` that the member's client applies |
 | `clanbase/<gid>` (new) | shared middle: race-loop times, nest egg progress, showcase wall slots (each entry `{owner, uid, species, form snapshot}`) | any member, one slot per member per field (no shared-field overwrite, same trick as `contrib`) |
 | `clanleague/<gid>_<season>` (new) | each member's score doc `{me, pts}` | the member (own doc) |
-| `clanloan/<gid>_<me>` (new, section 7) | my one open loan: `{guild, to, from_name, uid, kin, t}` | the lender |
+| `clanloan/<gid>_<me>` (new, section 7) | my one open loan: `{guild, to, from_name, kin, t}` | the lender |
 | `clanguest/<gid>_<me>` (new, section 7) | the one loan I took in: `{guild, from, uid, t}` | the host |
 
 Why per-member docs: the store has no transactions; `contribute` already solves this by one doc per member plus a summed read. Keep that.
@@ -89,7 +89,7 @@ DECISIONS 11-09: breeding is a main garden path, and some members stay home and 
 - **One day:** the loan runs one garden day (`Sleepover.DAY_SECS`) from the offer. The clanmate takes it in (accepts) any time in that day. If nobody does, it waits out the day and comes home anyway.
 - **Comes home with a memory line:** "Pip spent a garden day in Mara's Nook." or "Pip waited a day for Mara, then came home." `Save.remember` writes it, as sleepovers do.
 - **No permanent loss:** the Boki never leaves the lender's save. While away it sits in `Save.d["sleepovers"]` (the entry carries `clan: <gid>`) and comes home from there on the lender's own clock, whatever the store or the clanmate does. The host never gets a copy in their save: their Nook shows the offer doc's snapshot while the day lasts. Leaving the clan changes nothing for a Boki already away.
-- **Store docs** (one per member, each written only by its owner, all cleaned on read): `clanloan/<gid>_<lender>` `{guild, to, from_name, uid, kin, t}` (kin in the profile snapshot shape, read with `Social.clean_snap_kin`; `t` in ms). The host keeps an offer only if the guild is theirs, `to` is them, the lender is a current member and `t` is within the last day. `clanguest/<gid>_<host>` `{guild, from, uid, t}` says which offer the host took in. The lender reads it on the way home and believes it only if `from` and `uid` match its loan and `t` is inside the loan day. The lender deletes its `clanloan` doc when the Boki is home.
+- **Store docs** (one per member, each written only by its owner, all cleaned on read): `clanloan/<gid>_<lender>` `{guild, to, from_name, kin, t}` (kin in the profile snapshot shape, read with `Social.clean_snap_kin`; `t` in s, as `Social.num_of` clamps at 1e12). The host keeps an offer only if the guild is theirs, `to` is them, the lender is a current member and `t` is within the last day. `clanguest/<gid>_<host>` `{guild, from, uid, t}` says which offer the host took in. The lender reads it on the way home and believes it only if `from` and `uid` match its loan and `t` is inside the loan day. The lender deletes its `clanloan` doc when the Boki is home.
 - **Save:** no new top-level field and no version step. A sleepover entry may now carry `clan`; older entries have none and stay plain sleepovers, so old saves load as they are (`--save-check`).
 - **Net:** no Net message, so `Net.VERSION` stays as it is.
 

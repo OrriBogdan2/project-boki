@@ -4856,6 +4856,7 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	br.add_child(UI.fill())
 	br.add_child(UI.ghost("Details", func(): _open_kin(rec)))
 	dv.add_child(br)
+	ClanLoanPanel.lend_rows(dv, rec, _open_nook)
 
 ## The side panel with two picked: both, their IVs side by side, what an egg could take.
 func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
@@ -4903,6 +4904,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 	elif not egg_in:
 		dv.add_child(UI.spacer(4))
 		dv.add_child(UI.label("Click a Boki to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
+	ClanLoanPanel.side_rows(dv, _open_nook)
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour

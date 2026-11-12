@@ -75,7 +75,7 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
-		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan (gid) on a clan loan (Sleepover, ClanLoan)
+		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
 		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},

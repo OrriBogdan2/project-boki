@@ -174,9 +174,7 @@ func publish_profile(force := false) -> void:
 static func profile_doc() -> Dictionary:
 	var roster: Array = []
 	for r in KinBox.farm().slice(0, 12):       # visitors see the kin out on your farm
-		Evo.ensure(r)
-		roster.append({"uid": r["uid"], "species": r["species"], "name": r["name"], "level": int(r["level"]),
-			"trust": int(r["trust"]), "zone": GardenZones.zone_of(r), "forms": r["forms"], "muts": r["muts"], "shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)})
+		roster.append(snap_kin(r))
 	var d := {
 		"name": Save.d.get("name", "Hunter"), "cls": Data.class_of_save(), "weapon": Save.d.get("weapon", ""),
 		"active": Save.d.get("active", ""), "roster": roster,
@@ -189,6 +187,13 @@ static func profile_doc() -> Dictionary:
 	}
 	d.merge(VisitZones.doc())
 	return d
+
+## What others see of one of your Boki (read back with clean_snap_kin).
+static func snap_kin(r: Dictionary) -> Dictionary:
+	Evo.ensure(r)
+	return {"uid": r["uid"], "species": r["species"], "name": r["name"], "level": int(r["level"]),
+		"trust": int(r["trust"]), "zone": GardenZones.zone_of(r), "forms": r["forms"], "muts": r["muts"],
+		"shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)}
 
 ## cb gets [{id, d}] with d already cleaned (see clean_island).
 func list_islands(cb: Callable) -> void:

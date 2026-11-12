@@ -39,11 +39,11 @@ static func due(now: float) -> Array:
 	return list().filter(func(s): return now - float(s["t"]) >= DAY_SECS)
 
 ## Brings one home. host is the friend's cleaned island ({} if unreachable: only the memory line).
-## Returns {line, gift} (gift is a crop key or "").
-static func come_home(stay: Dictionary, host: Dictionary) -> Dictionary:
+## opening replaces the first sentence (a clan loan's line). Returns {line, gift} (gift is a crop key or "").
+static func come_home(stay: Dictionary, host: Dictionary, opening := "") -> Dictionary:
 	var rec: Dictionary = stay["rec"]
 	var who := String(stay["name"])
-	var line := "%s had a sleepover at %s's." % [rec["name"], who]
+	var line := opening if opening != "" else "%s had a sleepover at %s's." % [rec["name"], who]
 	var gift := ""
 	var lead: Array = host.get("roster", [])
 	if not lead.is_empty():
@@ -92,6 +92,11 @@ static func _next(stays: Array, lines: Array, cb: Callable) -> void:
 		cb.call(lines)
 		return
 	var stay: Dictionary = stays[0]
+	var then := func(line: String):
+		lines.append(line)
+		_next(stays.slice(1), lines, cb)
+	if stay.has("clan"):
+		ClanLoan.come_home(stay, then)
+		return
 	Social.get_doc("profiles/" + String(stay["to"]), func(p: Dictionary):
-		lines.append(come_home(stay, Social.clean_island(p))["line"])
-		_next(stays.slice(1), lines, cb))
+		then.call(come_home(stay, Social.clean_island(p))["line"]))
