@@ -154,6 +154,11 @@ func _carpet() -> void:
 		J.trail.size() >= 14 and absf(linger - 5.2) < 0.01 and left > linger - 0.5 and left <= linger,
 		"pieces %d left %.1f" % [J.trail.size(), left]
 	)
+	var look_w := 0.0
+	for e in K.fx.live:
+		if e["kind"] == "lava": look_w = (e["s0"] as Vector3).z * 2.0
+	ok("ult look: the carpet is drawn as wide as it burns (trail_w)", absf(look_w - float(K.x_def()["trail_w"])) < 0.01,
+		"look %.2f m, burns %.2f m" % [look_w, float(K.x_def()["trail_w"])])
 	ak.step(m, 0.7)
 	var char_t := K.char_of(T) + 31.0 * float(K.burning(T))
 	ok(
@@ -194,6 +199,9 @@ func _carpet() -> void:
 	P.ak.use_e()
 	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
 	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
+	var card := String(K.x_def()["desc"])
+	ok("ult card: only the Furnace Cloak works in the flight",
+		card.contains("only the Furnace Cloak works") and not card.contains("Shift) speeds"))
 	K.ch_rmb = float(K.rmb_charges())
 	var em0: int = K.hose.emitted
 	var denied0: int = K.lmb_denied
@@ -388,6 +396,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	K.lmb_override(false, ak.DT)
 	P.wid = wid0
 	m.hud.slot_fx.erase("base")
+	PressDeny.last.clear()      # the press above was denied too, well inside the mash throttle (PressDeny.THROTTLE_S)
 	K.lmb_override(true, ak.DT)
 	ok("ult 66: a press answers on the LMB slot with the deny cue",
 			String((m.hud.slot_fx.get("base", {}) as Dictionary).get("kind", "")) == "deny")
@@ -436,10 +445,11 @@ func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	ak.step(m, 0.1)
 	P.inp["jump"] = false
 	var flat := Vector2(P.vel.x, P.vel.z).length()
+	# 0.1 s later the air drag above run speed (Loco.air_step, owner 11-08) has had its share: 0.8, not 0.9
 	ok(
 		"ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air (item 51)",
 		not J.running() and J.leaps >= 1 and P.pos.y > y0 + 0.2 and P.vel.y > 0.0
-				and flat >= sp * Hunter.DASH_JUMP_CARRY * 0.9,
+				and flat >= sp * Loco.dash_jump_keep * 0.8,
 		"rose %.2f m, %.1f m/s of %.1f" % [P.pos.y - y0, flat, sp]
 	)
 	ak.step(m, 1.5)

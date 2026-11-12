@@ -1,6 +1,7 @@
 extends RefCounted
 ## --title-check: the title screen. It builds; its menu has the items it should (Continue or New
-## game, Play with friends when online play is there, Save files, Settings, Quit off the web) and
+## game, Training Grounds, Play with your Boki with a save, Play with friends when online play is there, Save files,
+## Settings, Quit off the web) and
 ## nothing called "The story so far"; the tagline is there; the key art has its squad of six with
 ## their Boki, the Wyrm and the logo; and the scene stays inside a frame budget, on the High preset
 ## and again on Low (which must build a cheaper scene). Headless, so the budget is the CPU side of a
@@ -36,6 +37,7 @@ func run(m: Node) -> void:
 	var labels: Array = ts.menu_labels() if ts and ts.has_method("menu_labels") else []
 	ok(not labels.is_empty() and String(labels[0]) == "Continue", "with a save in progress the first item is Continue (%s)" % [labels])
 	ok(ts != null and ts.lead_boki != null, "your partner stands with the lead hunter")
+	await _try_card_check()
 	print("TITLE CHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -50,8 +52,8 @@ func _pass(preset: String) -> Dictionary:
 		return {"parts": 0, "meshes": 0}
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
-	var want: Array = ["Continue" if has else "New game", "Arena"]
-	if has: want.append("Demo match")
+	var want: Array = ["Continue" if has else "New game", "Training Grounds"]
+	if has: want.append_array(["Demo match", "Play with your Boki"])
 	if Net.available(): want.append("Play with friends")
 	want.append_array(["Save files", "Settings"])
 	if not OS.has_feature("web"): want.append("Quit")
@@ -94,3 +96,20 @@ func _count(n: Node) -> int:
 	var c := 1
 	for ch in n.get_children(): c += _count(ch)
 	return c
+
+## The "What to try today" card: shown until dismissed, gone after, back when the card's id changes.
+func _try_card_check() -> void:
+	var id0 = Settings.v.get("try_dismissed", "")
+	Settings.v["try_dismissed"] = ""
+	main.show_screen("title", {})
+	for i in 4: await main.get_tree().process_frame
+	var ts: Node = main.screen_node()
+	var card: Node = ts.find_child("TryCard", true, false)
+	ok(card != null and _texts(ts).has(TryCard.rules()["title"]), "the What to try today card shows")
+	ok(not _texts(ts).any(func(s): return String(s).to_lower().contains("gems")), "the card names no currency")
+	if card:
+		TryCard.dismiss(card as Control)
+	ok(not TryCard.due(), "dismissing it hides it for this id")
+	Settings.v["try_dismissed"] = "older"
+	ok(TryCard.due(), "a new card id shows it again")
+	Settings.v["try_dismissed"] = id0

@@ -1,0 +1,34 @@
+{
+ "group": "mob",
+ "name": "Mobs and bosses",
+ "script": "tools/gen_sfx_mob.py",
+ "sounds": {
+  "mob_skitter_atk": "fire",
+  "mob_skitter_hit": "impact",
+  "mob_spitter_atk": "fire",
+  "mob_spitter_hit": "impact",
+  "mob_brute_atk": "fire",
+  "mob_brute_hit": "impact",
+  "mob_bomber_atk": "fire",
+  "mob_bomber_hit": "impact",
+  "mob_sentinel_atk": "fire",
+  "mob_sentinel_hit": "impact",
+  "mob_warden_atk": "fire",
+  "mob_warden_hit": "impact",
+  "boss_colossus_tell": "cast",
+  "boss_serpent_tell": "cast",
+  "boss_brood_tell": "cast",
+  "boss_slam": "heavy_impact",
+  "boss_throw": "fire",
+  "boss_boulder": "heavy_impact",
+  "boss_spit": "fire",
+  "boss_glob": "impact"
+ },
+ "signature": [],
+ "reach": {
+  "boss_colossus_tell": 32,
+  "boss_serpent_tell": 32,
+  "boss_brood_tell": 32,
+  "boss_slam": 32
+ }
+}

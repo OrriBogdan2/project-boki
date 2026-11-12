@@ -29,6 +29,7 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	root.add_child(MoveReadout.new())
 	# behind every overlay menu: the screen blurred and darkened, fading in and out
 	dim = UI.backdrop()
 	root.add_child(dim)
@@ -107,6 +108,14 @@ func shot_demo(which: PackedStringArray) -> void:
 	match which[0]:
 		"pause":
 			open_pause(ctx)
+		"controls":
+			if arg == "rebound":
+				var acts := ["fire", "signature", "dash", "jump", "throw", "crouch"]
+				for i in acts.size():
+					var ev := InputEventKey.new()
+					ev.physical_keycode = KEY_J + i as Key      # J K L M N O
+					Settings.rebind(acts[i], ev)
+			open_controls()
 		"settings":
 			if arg != "":
 				tab = arg
@@ -182,10 +191,12 @@ func back() -> void:
 		page = ""
 		match prev:
 			"pause": open_pause(ctx)
+			"controls": open_controls()
 			"settings": open_settings()
 			"saves": open_saves()
 			"inventory": open_inventory()
 			"dex": open_dex(dex_open)
+			"bowl": open_bowl()
 			_: close()
 	else:
 		close()
@@ -226,13 +237,13 @@ func open_pause(where: String) -> void:
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
+		item.call("Training Grounds", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
 	item.call("Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
+	item.call("Controls", "dash", open_controls)
 	if where != "match":
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
@@ -260,7 +271,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = item.call("Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -276,6 +287,15 @@ func open_pause(where: String) -> void:
 			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
+
+## The quick-reference card under Esc; "Change keys" goes on to the rebinding list.
+func open_controls() -> void:
+	var v := _page("controls", "Controls", 720)
+	var psc = Game.main.screen_node() if ctx == "match" and Game.main else null
+	var hero: String = (psc.player.arch if psc is Match and psc.player.arch != "" else Arch.of_save())
+	ControlsCard.fill(v, hero)
+	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
+	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
 # ------------------------------------------------------------------ settings
 func open_settings() -> void:
@@ -326,7 +346,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
-		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 90 s lobby before each expedition. Off: plain loading")
+		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
 func _tab_controls(v: VBoxContainer) -> void:
@@ -334,12 +354,14 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
+	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
+	_toggle(v, "Movement readout", "move_readout", readout_tip)
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
-		]],
+		] + KinKeys.ids()],
 		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
@@ -476,7 +498,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 func _group(v: VBoxContainer, txt: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(4))
-	v.add_child(UI.section(txt, UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
@@ -504,6 +526,9 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
+		elif Settings.unbound(an):
+			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
+			b.tooltip_text = "No key: this action can't be used until you set one"
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -590,38 +615,39 @@ func _finish_rebind(ev: InputEvent) -> void:
 		Settings.rebind(an, ev, slot)
 		_show_settings()
 		return
-	# already someone else's key: say whose, and offer to swap (they get what this slot had)
+	# already someone else's key: say whose, and offer to swap (they take what this slot had) or cancel
 	var named := {}
-	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
-	var other: String = cf[0][0]; var oslot: int = cf[0][1]
+	for a in Settings.ACTIONS: named[String(a[0])] = "\"%s\"" % a[1]
+	var owners: Array = cf.map(func(c): return named.get(c[0], c[0]))
 	var mine: String = Settings.slots(an)[slot]
-	var key_txt := Settings.code_text(Settings.ev_code(ev))
-	var oname := "\"%s\"" % named.get(other, other)
-	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
+	var txt := "%s is already the key for %s.\nSwap: they take %s, and this action gets %s." % [
+			Settings.code_text(Settings.ev_code(ev)), " and ".join(owners),
+			Settings.code_text(mine) if mine != "" else "no key (they are marked red until you set one)",
+			Settings.code_text(Settings.ev_code(ev))]
 	_show_settings()
-	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
-		Settings.swap_bind(an, slot, ev, other, oslot)
-		_show_settings(), false)
-	set_meta("bind_conflict", layer)
-	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
-	var both := UI.ghost("Use for both", func():
-		layer.queue_free()
-		Settings.rebind(an, ev, slot)
-		_show_settings())
-	row.add_child(both)
-	row.move_child(both, 1)
+	set_meta("bind_conflict", UI.confirm(root, "Key already in use", txt, "Swap", func():
+		Settings.swap_bind(an, slot, ev, cf)
+		_show_settings(), false))
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
 const INV_H := 404.0          # the inventory's body height on every tab (fits a 720p window)
-var dex_open := ""            # the species whose Field Book page is open
+var dex_open := ""            # the species (or shaping item) whose Field Book page is open
 
-## A Boki's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
+## A Boki's or shaping item's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
 func open_dex(spk: String) -> void:
 	dex_open = spk
 	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
-	DexView.detail(v, spk, get_tree())
+	if GardenItems.has(spk):
+		ItemPages.detail(v, spk)
+	else:
+		DexView.detail(v, spk, get_tree(), open_dex)
+
+## The Mixing Bowl, from the Items tab (a sub-page of the inventory).
+func open_bowl() -> void:
+	var v := _page("bowl", "Mixing Bowl", 760, true)
+	MixingBowl.fill(v, open_bowl)
 
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
@@ -639,7 +665,7 @@ func open_inventory() -> void:
 		c.custom_minimum_size = Vector2(222, 0)
 		var cv := UI.vbox(6); c.add_child(cv)
 		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
+		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
@@ -662,6 +688,13 @@ func open_inventory() -> void:
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
 				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+			for id in GardenItems.ids():
+				var held := int(Save.d["items"].get(id, 0))
+				if held > 0:
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+			if FarmUnlocks.base_mode():
+				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
+						"Open", open_bowl)
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
 				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
@@ -681,8 +714,7 @@ func open_inventory() -> void:
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
-					for af in Evo.AFF:
-						if Evo.AFF[af]["food"] == ck: Evo.add(ak, af, 6.0)
+					CareJournal.fed(ak, ck, Evo.eat(ak, ck))
 					Save.remember(ak, "fed", "was fed a %s" % Data.CROPS[ck]["name"].to_lower(), 4.0)
 					Sfx.play("kin_happy")
 					Save.save_game()
@@ -702,6 +734,7 @@ func open_inventory() -> void:
 			empty = false
 			grid.queue_free()
 			DexView.grid(v, get_tree(), func(spk: String): open_dex(spk))
+			ItemPages.grid(v, func(id: String): open_dex(id))
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
@@ -829,7 +862,7 @@ func open_admin() -> void:
 	add.call("Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
-			k["level"] = int(k["level"]) + 1
+			Evo.level_up(k)
 			Game._evolve(k, {}))
 	add.call("Partner full trust", func():
 		var k := Save.active_kin()

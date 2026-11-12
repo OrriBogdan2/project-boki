@@ -19,7 +19,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
 | Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
-| Takedown reward | Knocking or killing an enemy hunter (not a mob) heals 5% of max health and brings every dash charge back at once (`DashReset`); the local hunter gets the reset cue and a pop on the Shift icon | +250 HP, +1 dash | [patch] |
+| Takedown reward | Knocking or killing an enemy hunter (not a mob): the knocker and every teammate whose damage or CC landed on the victim in the last 4 s get their dash back (a one-charge dash refills, a multi-charge dash gains one charge) and the long-dash cooldown clears; only the knocker heals 5% of max health (`DashReset`, docs/decisions/0022). The local hunter gets the reset cue (softer for an assist) and a pop on the Shift icon. A hero's `dash.knock_refresh: false` opts out (none do) | +250 HP, +1 dash; multi-charge +1 | [patch] / owner (159) |
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |
 | Box colour | Grey / blue / purple / gold by value | 500 / 2k / 5k | [patch] (colour by value) |
@@ -75,7 +75,7 @@ All names and multipliers are placeholders.
 
 **Other kin rules in every tier:**
 - **Knocked out while you're alive:** a kin comes back to you after `kin_recall_time` (25s).
-- **While you're downed:** your kin guards your wisp (`kin_guards_wisp`).
+- **While you're downed:** your kin rides round your wisp as a Boki wisp and pulls you up (`KinWispForm`).
 - **However you come back:** a kin that's still loose returns to you, so kin don't need beacons of their own.
 
 **Worth deciding before launch:**
@@ -128,9 +128,10 @@ All names and multipliers are placeholders.
 
 ## Revive readability
 
-- Every visible wisp has a ring on the ground the size of the revive range. Teammates see it green, enemies orange.
-- While a teammate revives, the ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
-- A teammate near your wisp but outside the range gets "Step in to revive · 1.3m".
+- Every visible wisp has a compact ring hugging it in its side colour (ally or rival): the bleed-out drains round it, revive progress fills inside it, it flashes over the last 5 s and goes red while stomped (`DownedMarks`, docs/decisions/0019). No big ground circle.
+- While a teammate revives, the inner ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
+- A teammate within 9 m sees the revive reach on the ground (thin, filling as they revive) and "Step onto <name>'s wisp to revive" on the HUD.
+- Your Boki come back to you and ride round your wisp as Boki wisps (no fighting, can't be hit); they pull you up after a short wait unless an enemy stands on you, and pop back onto your shoulder when you're up (`KinWispForm`).
 - The downed player sees "<name> is reviving you" under their revive bar.
 - Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.

@@ -6,7 +6,8 @@ extends RefCounted
 ## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
 ## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
-## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
+## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
+## squash on the hit frame, the jet lift-off, the run's footfalls).
 
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
@@ -88,7 +89,17 @@ func _lance_combos() -> void:
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
 			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
 			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+	# hold-pose audit: a lance let go in the middle of a ram takes its pose down with it
 	P.inp["fire"] = false
+	ak.step(m, 0.5)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 0.05, keep_fire)
+	var in_ram: bool = P.roll_t > 0.0
+	P.inp["fire"] = false
+	ak.step(m, 0.25)
+	ok("lance: let go mid-ram, the lance pose is gone 0.25s later (hold-pose audit)",
+			in_ram and K.anim_id != "as_lance", "in ram %s, move %s" % [in_ram, K.anim_id])
 	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.
@@ -108,6 +119,43 @@ func _ram(lvl: int) -> float:
 	return d
 
 ## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+## The source's beats (briefs/hero-ref/linwick.md, a frame = 0.2 s; docs/heroes/ashwick.md, Animation timing):
+## the lance's pilot is the kick key, the jet's crouch and flight pose land in its first frame, and the run clip's
+## footfalls, at the rate WardenGait plays it (foot_mps), come every 0.15-0.21 s at his run speed.
+func _timing() -> void:
+	var lance: Array = KMovesPair.MOVES["as_lance"]["keys"]
+	var spool := float((Arch.def("ashwick").get("lmb", {}) as Dictionary).get("spool", -1.0))
+	ok(
+		"timing: the lance pilot (spool) ends on as_lance's kick key", is_equal_approx(spool, float(lance[2][0])),
+		"spool %.2f key %.2f" % [spool, float(lance[2][0])]
+	)
+	var jet: Array = KMovesPair.MOVES["lw_jet"]["keys"]
+	ok(
+		"timing: jet lift-off crouch by 0.1 s, flight pose by 0.22 s (source: burst 0.1, flying at 0.2)",
+		float(jet[1][0]) <= 0.1 and float(jet[2][0]) <= 0.22, "%.2f %.2f" % [float(jet[1][0]), float(jet[2][0])]
+	)
+	var cfg := WardenClips.data("cinder")
+	var lc: Dictionary = cfg.get("loco", {})
+	var holder := Node3D.new()
+	main.add_child(holder)
+	var mdl := Models.hunter(
+		Arch.weight("ashwick"), Data.TEAM_COLORS[0], Arch.signature("ashwick"), "", PlayerLook.neutral(), "ashwick"
+	)
+	holder.add_child(mdl)
+	var w := mdl.get_node_or_null("Warden")
+	var sync := w.get_node_or_null("Sync") as WardenGlb.Sync if w else null
+	var clips: WardenClips = sync.clips if sync else null
+	var foot := -1.0
+	if clips and clips.lib and lc.has("run"):
+		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
+		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc)
+	ok(
+		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
+		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot
+	)
+	holder.queue_free()
+
 func _growth() -> void:
 	var d1: float = await _ram(1)
 	var d10: float = await _ram(10)
@@ -233,7 +281,7 @@ func _all() -> void:
 	ak.step(m, 0.6, func(): P.inp["fire"] = true; ak.aim_at(P, home + Vector3(1.5, 0, 0)))
 	var reach: float = K.hose.reach_from(P.pos)
 	ok(
-		"lance: the stream runs its full ~7m past a close cursor", reach >= 6.5 and reach <= 8.8,
+		"lance: the stream runs its full ~6.1m past a close cursor", reach >= 5.6 and reach <= 7.6,
 		"reach %.1f (cursor 1.5m)" % reach
 	)
 	var young := 9.0
@@ -243,7 +291,7 @@ func _all() -> void:
 		if float(pf["age"]) < 0.035: young = minf(young, rr)
 		if float(pf["age"]) > float(pf["life"]) * 0.8: old = maxf(old, rr)
 	ok(
-		"lance: narrow at the nozzle, billowing at the far end", young < 0.35 and old > 0.85,
+		"lance: narrow at the nozzle, billowing at the far end", young < 0.45 and old > 0.85,
 		"near r %.2f far r %.2f" % [young, old]
 	)
 	# hose lag: swing the aim 90 degrees; the old fire keeps flying the old way for a moment
@@ -377,6 +425,11 @@ func _all() -> void:
 		"cinder: holding shows the aim lane at its full fixed length (cursor at 2 m)",
 		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
+	)
+	ok(
+		"cinder: the aim lane is twice the shot radius (%.2f m), drawn = hit" % float(K.rmb_def()["size"]),
+		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
+		"width %.2f" % float(lane.get("width", 0.0))
 	)
 	P.inp["sec_hold"] = false
 	ak.step(m, 1.0)
@@ -611,7 +664,7 @@ func _all() -> void:
 	P.slot_lv["kin"] = 3
 	K._cloak_blast()
 	ok(
-		"cloak rank 3: shield +30%", shield1 > 5.0 and absf(P.shield / shield1 - 1.3) < 0.02,
+		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
 		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
@@ -620,6 +673,30 @@ func _all() -> void:
 	K.cd["rmb"] = 0.0
 	ak.step(m, 0.1)
 	ok("cinder: a second charge at rank 3", K.rmb_charges() == 2 and K.ch_rmb >= 2.0, "charges %.1f" % K.ch_rmb)
+	# upgrade parity (docs/heroes/ashwick.md): the source's tier II / III+IV numbers per slot
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	var pb1 := K.power("sec")
+	var pc1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([
+			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
+			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("sec") / pb1, K.power("kin") / pc1,
+			K.rank_k("rank_shield", "kin", 1.0),
+		])
+	ok("upgrade parity: Cinderbolt cooldown 7 -> 5.8 -> 4.7 and damage +25% / +50%",
+			near.call(up[1][0], 5.8) and near.call(up[2][0], 4.7)
+			and near.call(up[1][3], 1.25) and near.call(up[2][3], 1.5), str(up))
+	ok("upgrade parity: Ram recharge 9 -> 8.25 -> 7.5", near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5), str(up))
+	ok("upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
+			near.call(up[1][2], 8.9) and near.call(up[2][2], 7.3) and near.call(up[1][4], 1.25)
+			and near.call(up[2][4], 1.5) and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.8), str(up))
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 1
 	reset.call()

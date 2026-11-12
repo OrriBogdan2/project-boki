@@ -32,6 +32,7 @@ var chest_spots: Array = []
 var camp_spots: Array = []
 var wild_spots: Array = []
 var no_deco := {}
+var scatter_chunk := 0       # tiles: scatter batches are at least this wide (a home sets its whole map: all on screen)
 var paint := {}          # tile index -> colour for paths and soil, blended at the corners
 var clouds: Array = []
 var sheer := {}          # tile index -> true: a smooth cliff rim you can't grab (authored maps)
@@ -45,8 +46,8 @@ var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed 
 var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
 var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
 var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
-## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
-## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
+## The uplink outposts an authored layout places (see Exits): {kind: "outpost", at: Vector2, walled: bool}.
+## Empty: Exits works them out.
 var exit_defs: Array = []
 ## Boss lairs (see Lairs): walled arenas with one gate, each holding a boss and its Rare Egg.
 ## {id, name, boss, c: Vector2 (centre), half (tiles from the centre to the wall), gate ("n"/"s"/"e"/"w"),
@@ -146,7 +147,7 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees and ability barriers don't block, terrain still does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
 	if not dyn_walls.is_empty() and not ghost:
@@ -164,11 +165,12 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		var g := ground_at(x + o.x, z + o.y)
-		if g > y + STEP:
-			worst = maxf(worst, g)
-			hit = true
+	if not ghost:
+		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
+			var g := ground_at(x + o.x, z + o.y)
+			if g > y + STEP:
+				worst = maxf(worst, g)
+				hit = true
 	if hit:
 		return maxf(worst, WALL_MIN)
 	if guard:
@@ -1315,78 +1317,33 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 	for r in roots:
 		(r as Node).free()
 
-## How far from the camera (m) each kind of scatter draws, at High (Settings q("draw") scales it):
-## grass, flowers, pebbles and undergrowth fade out of the high drop and skyship views, where they'd
-## be a few pixels each; tall grass (cover you can hide in) reaches further; trees, boulders and
-## pillars always draw (their far versions are cheaper level-of-detail meshes instead).
-const DRAW_SMALL := 130.0
-const DRAW_BUSH := 160.0
-const DRAW_BIG_LOW := 230.0     # Low and Medium only: trees and boulders past this are dropped
-
-func _scatter_class(label: String, chunk: int) -> String:
-	if label.begins_with("Bushes"):
-		return "bush"
-	if label.begins_with("Grass") or label.begins_with("Flowers") or label.begins_with("Pebbles") or chunk >= 32:
-		return "small"
-	return "big"
-
-## Big scatter meshes get level-of-detail versions (fewer triangles far away), made once per mesh.
-static var _lod_cache := {}
-static func with_lods(m: Mesh) -> Mesh:
-	if not (m is ArrayMesh) or "--no-lod" in OS.get_cmdline_user_args():
-		return m
-	if _lod_cache.has(m):
-		return _lod_cache[m]
-	var am := m as ArrayMesh
-	var out: Mesh = m
-	var tris := 0
-	for si in am.get_surface_count():
-		tris += am.surface_get_array_index_len(si) / 3
-	if tris >= 240 and am.get_blend_shape_count() == 0:
-		var im := ImporterMesh.new()
-		for si in am.get_surface_count():
-			im.add_surface(am.surface_get_primitive_type(si), am.surface_get_arrays(si), [], {}, am.surface_get_material(si), am.surface_get_name(si))
-		if im.get_method_argument_count("generate_lods") >= 3:
-			im.call("generate_lods", 25.0, 60.0, [])
-		else:
-			im.call("generate_lods", 25.0, [])
-		out = im.get_mesh()
-	_lod_cache[m] = out
-	return out
-
-## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
-static func _thin(items: Array, keep: float, seed_i: int) -> Array:
-	if keep >= 0.999:
-		return items
-	var r := RandomNumberGenerator.new(); r.seed = seed_i
-	return items.filter(func(_it): return r.randf() < keep)
-
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
-func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
+func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16, far := "") -> void:
 	if shadows:
 		# rocks and trees under the caster size go in batches of their own that don't cast (item 94)
 		var parts := ShadowPolicy.split_instances(items, mesh)
 		if not (parts[1] as Array).is_empty():
-			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk)
+			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk, far)
 		items = parts[0]
 		if items.is_empty():
 			return
-	var cls := _scatter_class(label, chunk)
-	var draw_k := float(Settings.q("draw"))
-	var vis_end := 0.0
-	match cls:
-		"small":
-			vis_end = DRAW_SMALL * draw_k
-			items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
-		"bush": vis_end = DRAW_BUSH * draw_k
-		"big":
-			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
-			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
-			# crystal shards and thin ledges vanish in the simplified versions
-			if label.begins_with("tree"): mesh = with_lods(mesh)
-			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
-			# mean far fewer draws (and shadow draws) for a few more off-screen instances
-			chunk = maxi(chunk, 32)
+	var cls := FarRanges.class_of(label, chunk, far)
+	var vis_end := FarRanges.end_of(cls)
+	if cls == "small" or cls == "bush":
+		# clutter thinned per preset (Clutter.KEEP); 32-tile batches: a quarter of the draws
+		items = Clutter.thin(items, Clutter.keep(cls), hash(label) + rng.seed)
+		chunk = maxi(chunk, 32)
+	elif cls in FarRanges.BIG_CLASSES:
+		# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
+		# crystal shards and thin ledges vanish in the simplified versions
+		if label.begins_with("tree"): mesh = FarRanges.with_lods(mesh)
+		# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
+		# mean far fewer draws (and shadow draws) for a few more off-screen instances
+		chunk = maxi(chunk, 32)
+		if cls == "cliff":
+			var near := FarRanges.add_far_cliffs(parent, items, mesh, mat, label)
+			if near > 0.0: vis_end = near
+	chunk = maxi(chunk, scatter_chunk)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
@@ -1404,9 +1361,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if vis_end > 0.0:
-			mi.visibility_range_end = vis_end
-			mi.visibility_range_end_margin = 8.0
+		FarRanges.limit(mi, vis_end)
 		mi.name = "%s_%d_%d" % [label, key.x, key.y]
 		parent.add_child(mi)
 
@@ -1636,7 +1591,7 @@ func _decorate() -> void:
 	await _stage("world.scatter_plan")
 	for key in packed:
 		var g: Dictionary = packed[key]
-		await _chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
+		await _chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)), String(g.get("far", "")))
 	await _stage("world.scatter_batches")
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
@@ -1750,6 +1705,7 @@ func _decorate() -> void:
 		cm.set_shader_parameter("deep", (clouds[0] as Color).lightened(0.1))
 		cm.set_shader_parameter("light", (clouds[1] as Color).lightened(0.28))
 		cm.set_shader_parameter("glow_amount", 0.25)
+	cm.set_shader_parameter("abyss_dim", DepthCues.abyss_dim())
 	sea.material_override = cm
 	sea.position = Vector3(w / 2.0, -18.0, h / 2.0)
 	sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -1832,9 +1788,6 @@ func _undergrowth(groups: Dictionary, x: int, z: int, r: RandomNumberGenerator) 
 ## clean cut. Purely visual: they sit in the air beside the edge, below the ground you stand on, and
 ## stay clear of bridges, stairs, pads, updrafts and the sky train's loop.
 func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
-	var tc := Vector2.INF; var tr := 0.0
-	if not train_route.is_empty():
-		tc = train_route["center"]; tr = float(train_route["r"])
 	for z in h:
 		await _slice()
 		for x in w:
@@ -1842,7 +1795,8 @@ func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
 			if kind[i] == T_VOID or bridge.has(i) or stairs.has(i) or edge_dist(x, z, 1) != 1 or r.randf() > 0.16:
 				continue
 			var cp := Vector2(x + 0.5, z + 0.5)
-			if tc != Vector2.INF and absf(cp.distance_to(tc) - tr) < 4.5:
+			var tn := TrainRoute.near(self, cp.x, cp.y)
+			if tn != Vector3.INF and absf(tn.y) < 4.5:
 				continue
 			var clear := true
 			for pd in pads:
@@ -1956,10 +1910,17 @@ func _flora_prop(groups: Dictionary, what: String, i: int, p: Vector3, r: Random
 		var fcols := [Color("ffffff"), Color("ffb0d8"), Color("fff0a0"), Color("c8b8ff"), Color("ffc890"), Color("a8e0ff")]
 		col = fcols[r.randi_range(0, fcols.size() - 1)]
 	var key := "flora/%s/%s/%d" % [kind, style, v]
-	if not groups.has(key):
-		var big := kind in ["tree", "rock", "pillar"] and what != "cliff"
-		groups[key] = {"mesh": am, "mat": Flora.material(kind, kind in ["rock", "pillar", "crystal"] and what != "cliff"), "items": [], "label": "%s_%s_%d" % [kind, style, v],
-			"shadows": big, "chunk": 32 if small else 16}
+	if what == "cliff":
+		# its own batch (it gets a far version), looking like the boulder batch it used to share
+		var shared: Dictionary = groups.get(key, {})
+		key += "/cliff"
+		if not groups.has(key):
+			groups[key] = {"mesh": am, "mat": shared.get("mat", Flora.material(kind, false)), "items": [], "label": "cliff_%s_%d" % [style, v],
+				"shadows": shared.get("shadows", false), "chunk": 16, "far": "cliff"}
+	elif not groups.has(key):
+		var big := kind in ["tree", "rock", "pillar"]
+		groups[key] = {"mesh": am, "mat": Flora.material(kind, kind in ["rock", "pillar", "crystal"]), "items": [], "label": "%s_%s_%d" % [kind, style, v],
+			"shadows": big, "chunk": 32 if small else 16, "far": FarRanges.hint(kind)}
 	_last_item = [tr, col]
 	_last_top = (tr.basis * Vector3(0, am.get_aabb().end.y, 0)).y
 	groups[key]["items"].append(_last_item)
@@ -2011,7 +1972,8 @@ func _pack_prop_variant(groups: Dictionary, what: String, i: int, p: Vector3, r:
 	var key := String(v["m"]) + str(cfg)
 	if not groups.has(key):
 		groups[key] = {"mesh": am, "mat": Assets.material(Assets.pack_of(String(v["m"])), cfg), "items": [],
-			"label": String(v["m"]).get_file(), "shadows": not what in ["pebble", "cliff", "under"]}
+			"label": String(v["m"]).get_file(), "shadows": not what in ["pebble", "cliff", "under"],
+			"far": {"tree": "tree", "rock": "rock", "ruin": "rock", "cliff": "cliff"}.get(what, "")}
 	_last_item = [tr, col]
 	_last_top = (tr.basis * Vector3(0, ab.size.y, 0)).y
 	groups[key]["items"].append(_last_item)
@@ -2268,7 +2230,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
 			"region_fixed": int(D.get("region", 0)), "poi_at": poi, "drop": bool(D.get("drop", false)), "sheer_arcs": D.get("sheer", []),
-			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", [])})
+			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", []), "landmark": D.get("landmark")})
 		if String(D.get("biome", "")) != "":
 			var bj := load_biome(String(D["biome"]))
 			if bj.has("colors"):
@@ -2479,12 +2441,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		authored_portals.append(_v2(ap))
 	exit_defs.clear()
 	await _slice()
-	for ek in [["docks", "dock"], ["outposts", "outpost"], ["hatches", "hatch"]]:
-		await _slice()
-		for ap in L.get(ek[0], []):
-			authored_portals.append(_v2(ap))
-			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
-				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
+	for ap in L.get("outposts", []):
+		authored_portals.append(_v2(ap))
+		exit_defs.append({"kind": "outpost", "at": _v2(ap), "walled": (ap as Array).size() >= 3 and bool(ap[2])})
 	await _slice()
 	if hand:
 		HandLayout.place_spots(self, defs)
@@ -2511,6 +2470,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:
 				weapon_spots.append(Vector3(wx + 0.5, level[idx(wx, wz)] * LEVEL, wz + 0.5))
+	if bool(L.get("calm", false)):      # the tutorial: nothing random, only what the course places itself
+		for spots: Array in [chest_spots, shrine_spots, wild_spots, break_spots, weapon_spots, camp_spots]:
+			spots.clear()
 	await _slice()
 	_place_stairs()
 

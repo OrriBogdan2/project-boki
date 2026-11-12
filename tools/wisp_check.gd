@@ -1,28 +1,33 @@
 extends RefCounted
 ## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
-## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, the Wisp
-## trails when it moves, a revive brings the hero back (scaled up from the pop) and frees the Wisp, and a
-## bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
-## look data: every look has all its keys and real sounds, an unknown id gives the default Wisp, a look
-## that lists only a few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
+## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, it hums, it
+## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
+## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out breaks it. The downed
+## gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
+## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
+## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
+## few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
 ## off by default (the Boki walks); on, every Boki rides as a critter-outline wisp orbiting its hunter at
 ## shoulder height, carry passives on, no orders or hits, the AI not ticking, and the snapshot flag turns a
 ## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
 ## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
 ## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
-## a dim wisp, a resting summon refuses, the snapshot carries it. Also the outline rule (round body with a
-## head, team rim, white core, low hover, no flicker, one mesh in one material). Prints PASS/FAIL.
+## a dim wisp, a resting summon refuses, the snapshot carries it. The stolen-wisp looks (StolenWisp): loose
+## wisps bob and pulse, a grab puts a thin side-colour ring and a tether on it, a scatter sends each wisp its own
+## way, the flight home trails and arrives, all within the particle budget. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
 var bad := 0
 var m: Match
 var main: Node
+var _spot: Vector3       # each hero cycle starts here: the drift rows walk the Wisp 1.4 m a cycle, toward the abyss
 
 func run(main_node: Node) -> void:
 	main = main_node
 	_looks()
 	_start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	_spot = m.player.pos
 	for a in Arch.ids():
 		_hero_cycle(a)
 	_bleed_out()
@@ -30,6 +35,7 @@ func run(main_node: Node) -> void:
 	_boki_wisps()
 	_summon_data()
 	_summon()
+	_stolen()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -69,6 +75,7 @@ func _frames(secs: float, drift := Vector3.ZERO) -> void:
 func _hero_cycle(arch_id: String) -> void:
 	var p: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	p.pos = _spot
 	p.reclass(Arch.weight(arch_id), arch_id)
 	p.hp = p.max_hp
 	var tag := "[%s] " % arch_id
@@ -255,8 +262,7 @@ func _summon() -> void:
 	k.hurt(k.max_hp * 0.6, null)
 	_frames(0.2)
 	ok(s.left > 0.0 and not k.wisp, "...damage does not end it")
-	p.pos += Vector3(30, 0, 0)
-	p.prev = p.pos
+	p.teleport(_ground_away(p.pos, 30.0))
 	_frames(0.1)
 	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")
 	_frames(8.0 + KinSummon.SHRINK_S)
@@ -287,6 +293,89 @@ func _summon() -> void:
 	ok(not other.wisp and absf(other.summon.left - s.left) < 0.11,
 		"online: the snapshot shows the summoned Boki and its seconds")
 
+func _stolen() -> void:
+	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true})
+	var thief: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != thief.team)[0]
+	var at := thief.position + Vector3(6, 1.3, 0)
+	var a := StolenWisp.spawn(m, "cindle", {}, at)
+	var b := StolenWisp.spawn(m, "puddlet", {}, at)
+	var body := a.model.get_node("Body") as Node3D
+	var lo := 9.0
+	var hi := -9.0
+	for i in 240:
+		a.tick(1.0 / 60.0)
+		lo = minf(lo, body.position.y)
+		hi = maxf(hi, body.position.y)
+	ok(a.state == StolenWisp.State.LOOSE and a.position == at and hi - lo > StolenWisp.BOB_M,
+			"stolen: a loose wisp bobs in place (%.2f m)" % (hi - lo))
+	var dims := []
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		dims.append(float(body.get_instance_shader_parameter("dim")))
+	ok(dims.min() < StolenWisp.PULSE_LOW + 0.05 and dims.max() > 0.98 and dims.min() >= StolenWisp.PULSE_LOW - 0.01,
+			"...and pulses softly (%.2f to %.2f)" % [dims.min(), dims.max()])
+	a.grab(thief, 0)
+	b.grab(thief, 1)
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	ok(a.col.is_equal_approx(SideColor.of(m, thief)) and not a.col.is_equal_approx(SideColor.FOE),
+			"stolen: the ring takes the thief's side colour")
+	var torus := a._ring.mesh as TorusMesh
+	ok(torus.outer_radius - torus.inner_radius <= 0.03 and (a._tether.mesh as CylinderMesh).top_radius <= 0.02,
+			"...thin ring and thin tether")
+	var ring_body_y := (a.model.get_node("Body") as Node3D).global_position.y
+	ok(a.position.y - thief.position.y > 1.0 and absf(a._ring.global_position.y - ring_body_y) < 0.01,
+			"...round the wisp, up at shoulder height, never on the ground")
+	ok(a.position.distance_to(b.position) > 0.5, "...two stolen wisps float apart")
+	var run := thief.position
+	for i in 30:
+		thief.position += Vector3(0.3, 0, 0)
+		a.tick(1.0 / 60.0)
+	var chest := thief.position + Vector3(0, StolenWisp.CHEST_Y, 0)
+	var tl := a._tether.global_transform
+	var held_body := (a.model.get_node("Body") as Node3D)
+	ok(a._ring.position == held_body.position, "...the ring rides the body's bob")
+	ok(tl.basis.y.length() > 1.5 and tl.origin.distance_to((chest + held_body.global_position) * 0.5) < 0.05,
+			"...a running thief drags the tether out (%.1f m)" % tl.basis.y.length())
+	ok(a.get_children().all(func(n): return not n is CPUParticles3D),
+			"...no particles of its own beyond the body's sparkles")
+	thief.position = run
+	var from := a.global_position
+	m.fx.radial = 0
+	a.scatter(0, 2)
+	b.scatter(1, 2)
+	ok(a._ring == null or a._ring.is_queued_for_deletion(), "scatter: the ring and tether let go")
+	for i in int(StolenWisp.SCATTER_S * 60.0) + 2:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	var da := a.position - from
+	var db := b.position - from
+	ok(a.state == StolenWisp.State.LOOSE and b.state == StolenWisp.State.LOOSE, "...each settles loose again")
+	ok(da.length() > 3.0 and db.length() > 3.0 and absf(da.angle_to(db)) > 0.6,
+			"...and darted its own way (%.0f deg apart)" % rad_to_deg(da.angle_to(db)))
+	ok(m.fx.radial >= 2, "...a small burst marks each")
+	var sparkles := 0
+	for w in [a, b]:
+		sparkles += (w.model.get_node("Trail") as CPUParticles3D).amount
+	ok(sparkles + 8 * BokiWispLook.TRAIL_AMOUNT < 300,
+			"particles: ten wisps stay under the 300 budget (%d now)" % sparkles)
+	var homed := [false]
+	a.arrived.connect(func(): homed[0] = true)
+	a.go_home(foe)
+	for i in 5:
+		a.tick(1.0 / 60.0)
+	ok(a._ribbon != null and (a._ribbon.mesh as ImmediateMesh).get_surface_count() == 1,
+			"home: a ribbon trails behind the flight")
+	for i in 400:
+		if homed[0]:
+			break
+		a.tick(1.0 / 60.0)
+	ok(homed[0] and a.is_queued_for_deletion(),
+			"...it arrives at its owner within %.1f s and folds in" % StolenWisp.HOME_S.y)
+	b.queue_free()
+
 ## The outline rule (briefs/DECISIONS.md 2026-11-09): a round body with a head, team colour rim, white
 ## core, low to the ground, a steady glow, and one mesh in one material so thirty stay cheap.
 func _outline(id: String, look: Dictionary) -> void:
@@ -314,3 +403,11 @@ func _outline(id: String, look: Dictionary) -> void:
 	var heavy: bool = float(look["settle"]) >= 0.3 and float(look["bob_hz"]) <= 0.7
 	ok(heavy, tag + "slow and heavy: settle %.1f s, bob %.2f Hz" % [look["settle"], look["bob_hz"]])
 	body.free()
+
+## A spot on solid ground dist m from here (the first of 8 directions that is not over the abyss).
+func _ground_away(from: Vector3, dist: float) -> Vector3:
+	for i in 8:
+		var to := from + Vector3(dist, 0, 0).rotated(Vector3.UP, i * TAU / 8.0)
+		if not m.world.is_void(to.x, to.z):
+			return Vector3(to.x, m.world.ground_at(to.x, to.z), to.z)
+	return from + Vector3(dist, 0, 0)
