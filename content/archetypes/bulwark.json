@@ -107,7 +107,6 @@
 	"rmb": {
 		"delivery": "cone",
 		"name": "Aegis",
-		"card_range": "slam.radius",
 		"short": "Aegis",
 		"icon": "wall",
 		"col": "#9ad8ff",
