@@ -350,7 +350,7 @@ const CHECKS := {
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],      # --shots-dir=<dir>
 	"--train-halts-shots": ["res://tools/train_halts_shots.gd", "train_halts_shots", null],      # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],      # shields never hide a Hunter
-	"--receiver-cue-check": ["res://tools/receiver_cue_check.gd", "receiver_cue_check", null],      # heal and shield receiver cue
+	"--receiver-cue-check": ["res://tools/receiver_cue_check.gd", "receiver_cue_check", null],  # heal, shield cue
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki

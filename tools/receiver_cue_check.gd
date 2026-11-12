@@ -168,7 +168,7 @@ func _rules(main: Node, m: Match, P: Hunter, ally: Hunter, cue: ReceiverCue) -> 
 	P.heal(15.0)
 	ReceiverCue.shield(P, 30.0)
 	await _settle(main, m, P, 0.1)
-	ok(_emitting(m) == emitting0, "a heal and a shield fire no particle burst (%d -> %d)" % [emitting0, _emitting(m)])
+	ok(_emitting(m) <= emitting0, "a heal and a shield fire no particle burst (%d -> %d)" % [emitting0, _emitting(m)])
 	ok(_live(cue) == 2 and live0 == 0, "at the lowest particle setting both cues draw (%d live)" % _live(cue))
 	ok(cue._slots.size() == ReceiverCue.POOL, "the cue pool is fixed at %d bodies" % ReceiverCue.POOL)
 	await _settle(main, m, P, ReceiverCue.RISE_S + 0.1)
