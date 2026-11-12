@@ -90,7 +90,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
-7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
+7. **Safe area: done** (ext/ui-safe-area-one). One margin, `HudStyle.SAFE_FRAC` = 5% of the window width and height (64 x 36 px at 1280x720, 96 x 54 at 1080p), read through `HudStyle.safe_pad` / `safe_rect` by the HUD blocks, the tip card (`HudTip`), the tutorial strip, the pre-match lobby and the menu panels (`UI.scroll_panel`). The alternative (a fixed 24 px margin) was not taken: it leaves every block inside the 5% band. `--hudref-check` section 9 holds it. Shots: `docs/shots/ui-safe-area-one/`.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
 
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
