@@ -1070,6 +1070,7 @@ class Cover:
         with that much margin."""
         tiles = _disc(cx, cz, r); keep = set(); lvl = None
         for q in _disc(cx, cz, r, 0.32):
+            if q in self.solid: return None      # (a boulder in a clump: the engine would grass the rock's tile)
             if not self.tile_ok(q, iid): continue
             if q in self.hard: return None
             l = self.lv[q]

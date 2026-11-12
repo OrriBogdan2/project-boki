@@ -49,7 +49,7 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 61 |  |
+| The Crown | heart | Gloom | dangerous | 57 |  |
 | Stormcrown Gaol | camp | Storm | dangerous | 10 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
 | Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
