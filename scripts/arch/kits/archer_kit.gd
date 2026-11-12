@@ -314,16 +314,18 @@ func _pin(a: Vector3, k: float) -> void:
 			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
-		if _wall_behind(f, dir, float(pd["wall"])):
+		var face := _wall_face(f, dir, float(pd["wall"]))
+		if face.is_finite():
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
-			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir, {"k": k})
+			vfx("heavy_pin", face + Vector3(0, 1.0, 0), dir, {"k": k})
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
+					vfx("heavy_stun", f.pos, dir, {"k": k})
 					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
@@ -339,15 +341,16 @@ func _pin(a: Vector3, k: float) -> void:
 func bow_mouth() -> Vector3:
 	return HeroVfx.of(m).anchor_pos(h, "bow_root")
 
-func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
+## Where the shove meets terrain within reach of the foe, on its face (Vector3.INF: none).
+func _wall_face(f: Ent, dir: Vector2, reach: float) -> Vector3:
 	var g0: float = f.pos.y
 	var k := 0.4
 	while k <= reach:
 		var q := f.pos + Vector3(dir.x, 0, dir.y) * k
 		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > g0 + 0.8:
-			return true
+			return Vector3(q.x - dir.x * 0.15, g0, q.z - dir.y * 0.15)
 		k += 0.3
-	return false
+	return Vector3.INF
 
 # ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at

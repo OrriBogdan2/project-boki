@@ -264,7 +264,7 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
-	_impact_looks()
+	_impact_looks(float(K.rmb_def()["pin"]["stun"]))
 	var pd: Dictionary = K.rmb_def()["pin"]
 	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
 	ok(
@@ -705,8 +705,9 @@ func _archer_combos() -> void:
 	await done(m)
 
 ## The Heavy Shot's hit burst grows with its charge, the wall pin's is larger, both have a white core, and
-## neither leaves a ring on the ground (a flash only, not an explosion).
-func _impact_looks() -> void:
+## neither leaves a ring on the ground (a flash only, not an explosion); the stunned foe wears a mark over its head
+## for the whole stun.
+func _impact_looks(stun_s: float) -> void:
 	var mv: Dictionary = HeroVfx.data("archer")["moves"]
 	var hit := _flare_reach(mv["heavy_hit"], 1.0)
 	var tap := _flare_reach(mv["heavy_hit"], 0.0)
@@ -720,6 +721,8 @@ func _impact_looks() -> void:
 			core = core or (layer["p"] == "flare" and layer["c"] == "white" and layer["c2"] == "white")
 			ground = ground or layer["p"] in ["ring", "vortex", "scorch", "skirt"]
 		ok("pin look: %s has a white-core flare and no ground ring" % move, core and not ground)
+	var stun_fx: Array = mv["heavy_stun"]["fx"]
+	ok("pin look: the stun mark rides over the head for the whole stun", stun_fx[0]["p"] == "ring" and float(stun_fx[0]["y"]) >= 1.8 and float(stun_fx[0]["life"]) >= stun_s)
 
 ## The widest flare layer of a recipe at charge k (m across).
 func _flare_reach(rec: Dictionary, k: float) -> float:
