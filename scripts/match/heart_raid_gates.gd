@@ -58,7 +58,8 @@ func show_marks() -> void:
 		(_markers[gate]["node"] as Node3D).visible = false
 	if not up:
 		return
-	for mk in marks:
+	for i in marks.size():
+		var mk: Dictionary = marks[i]
 		var mr: Dictionary = _markers[mk["gate"]]
 		var n: Node3D = mr["node"]
 		n.visible = true
@@ -66,6 +67,8 @@ func show_marks() -> void:
 		if int(mr["clock"]) != s:
 			mr["clock"] = s
 			(mr["glyph"] as Label3D).text = str(s)
+			if s <= RaidSfx.TICK_S:
+				rd.audio.gate_tick(mk["at"], i)
 
 func _build() -> void:
 	_root = Node3D.new()

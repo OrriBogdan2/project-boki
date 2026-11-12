@@ -386,6 +386,8 @@ func _rockfall(n: int) -> void:
 
 func _atk_rockfall() -> void:
 	_begin("rockfall", 2.2, "roar")
+	if m.heart_raid:
+		m.heart_raid.audio.rockfall(pos)
 	_rockfall(4 + phase * 2)
 
 func _wave(at: Vector3, max_r: float, speed: float) -> void:
@@ -683,6 +685,8 @@ func _phase_up(p: int) -> void:
 		if flat_dist(f) < 5.5:
 			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})
 	m.lairs.on_boss_phase(self, p)
+	if m.heart_raid and lair.get("heart_raid", false):
+		m.heart_raid.audio.boss_phase(pos)
 	_begin("phase", 2.4, "roar")
 	var c: Vector3 = centre()
 	var hf := float(lair.get("half", 7)) - 2.0

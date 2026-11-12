@@ -79,6 +79,7 @@ var cleared_t := -1.0          # session time the last wave was cleared (-1 unti
 var squad_n := 1               # Hunters in the squad (1-4): the scale row
 var difficulty := "normal"     # rules "difficulty" key
 var gates: HeartRaidGates      # where and when each wave comes out, and its marks
+var audio: RaidSfx             # the raid's cues (waves, boss, gate ticks)
 var boss: Mob = null           # the boss (a Boss on the host; a client mirrors a plain Mob)
 var lair := {}                 # the boss's fight square round the Heart, in Lairs' lair shape
 var foes: Array[Mob] = []      # wave monsters alive
@@ -96,6 +97,7 @@ func _init(match_node: Match) -> void:
 	squad_n = clampi(m.hunters.filter(func(h): return h.team == 0).size(), 1, 4)
 	difficulty = String(m.opts.get("raid_diff", "normal"))
 	gates = HeartRaidGates.new(self)
+	audio = RaidSfx.new(self)
 	m.heart.locked = true
 	_note("start, squad of %d, %s" % [squad_n, difficulty])
 
@@ -134,6 +136,7 @@ func tick(dt: float) -> void:
 		_sync_t -= THINK_S
 		if _sync_t <= 0.0:
 			_broadcast()
+	audio.update()
 	_check_end()
 
 func _direct() -> void:
@@ -179,7 +182,6 @@ func _send_wave() -> void:
 			if _spawn_foe(String(kinds[i % kinds.size()]), at, bool(mk["guard"])):
 				made += 1
 	m.add_feed("Wave %d of %d" % [wave + 1, waves_n()])
-	m.sfx("warn", null, -4.0, 0.8)
 	if m.hud and m.player and not m.player.out:
 		m.hud.toast("WAVE %d" % (wave + 1), COL)
 	_note("wave %d: %d monsters" % [wave + 1, made])
@@ -268,7 +270,6 @@ func _spawn_boss() -> void:
 	boss = b
 	phase = P.BOSS
 	m.add_feed("%s rises at the Heart" % bd["name"])
-	m.sfx("warn", site, 3.0, 0.5)
 	m.fx.ring(site + Vector3(0, 0.3, 0), float(bd["half"]), COL, 1.0)
 	if m.hud and m.player and not m.player.out:
 		m.hud.toast("%s RISES" % String(bd["name"]).to_upper(), COL)
