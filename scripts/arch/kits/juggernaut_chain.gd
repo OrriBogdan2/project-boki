@@ -35,6 +35,7 @@ var e_pressed_at := -9.0            # an E pressed while the hook flew (becomes 
 var pull_dir := Vector2.ZERO        # the pull's heading now (it turns toward the anchor, bent by input and facing)
 var pull_speed := 0.0               # m/s of the pull (the reel speed plus the slingshot)
 var pull_t := 0.0                   # s left before the pull gives up (a wall in the way)
+var pull_at := -9.0                 # when the pull started (a jump after it breaks off)
 var sling := 0.0                    # (tests) m/s the slingshot added to the last pull
 var line := Vector2.ZERO            # the chain's line when the pull started (the steer is sideways to it)
 var reach := 0.0                    # m of chain when the pull started (the swing is a share of it, so the arc's angle
@@ -101,7 +102,7 @@ func _throw() -> void:
 	var h := k.h
 	state = "throwing"
 	e_pressed_at = -9.0
-	if k.slam_w.is_empty() and k.lunge.is_empty():      # a heavy move keeps its own body (E goes on top of it)
+	if not k.smash_running():          # a heavy move keeps its own body (E goes on top of it)
 		k.play("jug_chain")
 	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
@@ -141,10 +142,6 @@ func _hook(f: Ent, at: Vector3) -> void:
 	tightened = false
 	hooks += 1
 	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
-	if f:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
-	else:
-		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
 	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
 		pull()                      # E was pressed a hair before it bit
 
@@ -153,10 +150,9 @@ func _miss(at: Vector3) -> void:
 	misses += 1
 	k.start_e_cd()                  # hooked nothing: the chain breaks, its cooldown starts
 	k.vfx("chain_snap", at)
-	k.m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)
 
 ## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
-func snap(word := "CHAIN BROKE") -> void:
+func snap(quiet := false) -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
@@ -164,10 +160,8 @@ func snap(word := "CHAIN BROKE") -> void:
 			snap_t = SNAP_T
 			snap_end = anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 			k.vfx("chain_snap", _chain_from().lerp(snap_end, 0.5))
-		elif word != "":
+		elif not quiet:
 			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
-		if word != "":
-			k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
 	elif state == "pulling":
 		_stop("stopped", false)
 	state = "ready"
@@ -190,6 +184,7 @@ func pull() -> void:
 	var h := k.h
 	k.start_e_cd()
 	state = "pulling"
+	pull_at = k.m.time
 	if (k.busy() and k.riposte.move_k() > 0.0) or h.root_t > 0.0:
 		_stop("stopped", false)
 		return
@@ -288,7 +283,7 @@ func _tick_hooked(dt: float) -> void:
 		snap()
 		return
 	if tether_t <= 0.0:
-		snap("")
+		snap(true)
 		return
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
@@ -408,8 +403,8 @@ func _tick_pull(dt: float) -> void:
 	if h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.downed:
 		_stop("stopped", false)
 		return
-	if not h.grounded and h.vel.y > 0.5:
-		_jump_out()
+	if h.jump_at > pull_at:
+		_jump_out()                 # (a pull from the air, still rising from an earlier jump, carries on)
 		return
 	if h.roll_t <= 0.0 or h.move_kind != "rush":
 		_stop("stopped", false)     # something else took over the movement

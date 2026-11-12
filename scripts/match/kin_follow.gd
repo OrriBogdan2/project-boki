@@ -39,7 +39,7 @@ static func in_combat(k: Kin, p: Vector3) -> bool:
 	if o != null and k.m.time - o.hurt_at < 3.0:
 		return true
 	var rad := _r("combat_radius")
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		if f.dead or not f.hittable() or Shrubling.hidden(f):
 			continue
 		if (o != null and f.flat_dist(o) < rad) or f.flat_dist(p) < rad:
@@ -55,7 +55,7 @@ static func owner_focus(k: Kin) -> Ent:
 	var best: Ent = null
 	var bd := 3.0
 	var near := _r("engage_range") + 4.0
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		var d := Vector2(f.pos.x - aim.x, f.pos.z - aim.z).length()
 		if d >= bd or f.dead or not f.hittable() or Shrubling.hidden(f) or f.flat_dist(o) > near:
 			continue

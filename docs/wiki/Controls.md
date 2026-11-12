@@ -77,9 +77,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse / Mouse 4 | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
-| K | Boki order: attack my target | `kin_attack` | yes |
-| N | Boki order: come back to me | `kin_return` | yes |
-| L | Boki order: hold this position | `kin_hold` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift / Mouse 5 | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
@@ -91,7 +88,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Play fetch with a Boki | `play` | yes |
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
-| H | Whistle for your Boki (at home) | `whistle` | yes |
+| H | Whistle at home: your partner comes, hold for the nearest Boki | `whistle` | yes |
 | J | Relics: change your Relic (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |

@@ -493,15 +493,23 @@ func _archer_combos() -> void:
 	var roll_t0 := K.anim_at
 	step(m, 0.18, func(): P.inp["move"] = Vector2(1, 0))
 	ok(
-		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.24, footage: no landing beat)",
-		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.24) < 0.03,
+		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.27, footage: no landing beat)",
+		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.27) < 0.03,
 		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
 	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
+	var wash := [0.0]
 	step(m, 1.2, func():
 		P.inp["move"] = Vector2(1, 0)
+		K.fx._process(0.0)
+		wash[0] = maxf(wash[0], P.wash)
 		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+	ok(
+		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
+		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
+		"wash %.2f %s" % [wash[0], P.wash_col]
+	)
 	var mk_in: float = mk[0]
 	ok(
 		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
@@ -532,6 +540,10 @@ func _archer_combos() -> void:
 	)
 	# ...and ending inside it puts her back where she went in (no cost: there is no Focus)
 	K.spirit.end("time")
+	for _i in 8:
+		K.fx._process(0.0)
+		step(m, 0.05)
+	ok("pin tint: the body is back to normal when the walk ends", P.wash < 0.01, "wash %.2f" % P.wash)
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -943,6 +955,14 @@ func _bulwark_combos() -> void:
 			absf(K.fx.crescent.scale.x * BjornFx.CRES_OUT - float(K.lmb_def()["smash_reach"])) < 0.01,
 			"drawn %.2f vs reach %.2f" % [K.fx.crescent.scale.x * BjornFx.CRES_OUT, float(K.lmb_def()["smash_reach"])])
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
+	var hv := HeroVfx.of(m)
+	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
+	var sweep_arc := func(move: String) -> float:
+		return float(vmoves[move]["fx"].filter(func(l): return l["p"] == "sweep")[0]["arc"])
+	ok("bjorn vfx: the release plays the swing, its crescent drawn at the hit's arc",
+		int(hv.plays.get("swing", 0)) == 1
+		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
+		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -1164,16 +1184,10 @@ func _bulwark_combos() -> void:
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
 		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
-	var sl: Dictionary = K.rmb_def()["slam"]
-	# the slam's look is HeroVfx data (content/vfx/bulwark.json shield_slam): its sweep is sized to the slam's
-	# radius ("r", passed by the kit) and spans the cone's angle
-	var sweep: Dictionary = {}
-	for layer in HeroVfx.data("bulwark")["moves"]["shield_slam"]["fx"]:
-		if layer.get("p", "") == "sweep":
-			sweep = layer
-	ok("bulwark telegraph: the Shield Slam's fan is the cone it hits (its radius, its angle)",
-			sweep.get("size", "") == "r" and absf(float(sweep.get("arc", 0.0)) - float(sl["angle"])) < 0.01,
-			"sweep %s, cone %.0f" % [sweep, float(sl["angle"])])
+	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
+		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
+		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
@@ -1286,7 +1300,7 @@ func _bulwark_combos() -> void:
 		"Mate",
 		"idle",
 		{},
-		P.pos + Vector3(0, 0, 2.7),
+		P.pos + Vector3(0, 0, 1.8),
 		{"arch": "none"}
 	)
 	T.teleport(home + Vector3(0, 0, -5.0))

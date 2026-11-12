@@ -86,7 +86,7 @@ func _boki_rig(k: Kin) -> void:
 func _pace(m: Match, k: Kin) -> void:
 	var me := m.player
 	var you := Hunter.new()
-	you.pos = me.pos + Vector3(Bot.FAR_M + 30.0, 0.0, 0.0)
+	you.pos = me.pos + Vector3(SimLod.FAR_M + 30.0, 0.0, 0.0)
 	m.player = you
 	k.state = "active"
 	k.target = null

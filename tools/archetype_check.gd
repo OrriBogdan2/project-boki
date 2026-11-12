@@ -100,7 +100,8 @@ func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
 	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
 		m.step(DT)
 		t += DT
-		out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+		if P.roll_t > 0.0:      # the dash itself: its exit (HunterMove.dash_exit) brakes on the ground, not in the air
+			out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
 	P.inp["move"] = Vector2.ZERO
 	return out
 
@@ -189,8 +190,10 @@ func run(main_node: Node) -> void:
 const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
 		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
 
+const NO_SOURCE := ["gil"]      # our own Hunters: no source Base HP row, left out of the share
+
 func _health() -> void:
-	var ids := Arch.ids()
+	var ids := Arch.ids().filter(func(x): return not NO_SOURCE.has(x))
 	var ours := {}
 	var sum_o := 0.0
 	var sum_s := 0.0
@@ -228,16 +231,21 @@ func _controls() -> void:
 
 func _data() -> void:
 	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
-	# ability of every archetype has a concrete rank 2
+	# ability of every archetype has a concrete rank 2: a cooldown "a -> b" or a damage "+N%" (the source's
+	# upgrade numbers, rank_cd / rank_dmg: many are damage only)
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
 			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
-			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	var rmb: Dictionary = Arch.def("archer")["rmb"]
+	var push: Array = rmb["pin"]["push"]
+	var push_text := "push %d -> %d" % [push[0], push[1]]
+	ok("Lace: Heavy Shot card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -278,10 +286,10 @@ func _data() -> void:
 func _thief() -> void:
 	await _dj().thief(self)
 
-## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
+## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Tidal Wave is 90s), opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
-	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 80.0 and int(rd.get("unlock", 6)) == 6
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 90.0 and int(rd.get("unlock", 6)) == 6
 
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
@@ -460,8 +468,14 @@ func _gunslinger() -> void:
 	var dazed := KitStatus.rattled(T) and K.direct_hits >= 1
 	ok("venator RMB: a direct hit hurts and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
+	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
+	ok("venator Dazed: the bonus gets its own pink +9 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
+	_burr_terrain(m, P, T, K, home, r[5])
+	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
@@ -476,6 +490,44 @@ func _gunslinger() -> void:
 	ok("venator dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
+
+## Burr Charge over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
+## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short.
+## Puts the strip back after.
+func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, lv: int) -> void:
+	var W: World = m.world
+	var x0 := int(home.x); var z0 := int(home.z)
+	var shape := func(lv_of: Callable, stair_at: Array, kind_at: int) -> void:
+		for dz in range(-3, 4):
+			for dx in range(1, 12):
+				var i: int = W.idx(x0 + dx, z0 + dz)
+				W.level[i] = lv + int(lv_of.call(dx))
+				W.kind[i] = World.T_BLOCK if dx == kind_at else World.T_GROUND
+				W.stairs.erase(i)
+				if dx in stair_at: W.stairs[i] = Vector2i(1, 0)
+	var shoot := func(at: Vector3) -> int:
+		fresh(T); KitStatus.clear_rattled(T); T.teleport(at); P.teleport(home); step(m, 0.2)
+		aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+		var hits := K.direct_hits
+		tap(m, P)
+		step(m, 0.8)
+		return K.direct_hits - hits
+	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
+	var climbed: int = shoot.call(top)
+	var info := "hits %d took %.0f" % [climbed, dmg(T)]
+	ok("venator RMB: rides a ramp up to a foe on high ground", climbed == 1 and dmg(T) >= 12.0, info)
+	shape.call(func(dx: int) -> int: return 3 if dx == 4 else 0, [], -1)      # a 2.4 m face, one tile thick
+	var walled: int = shoot.call(home + Vector3(6.5, 0, 0))
+	var stuck := K.burrs.size() == 1 and absf(float(K.burrs[0]["pos"].x) - (home.x + 3.5)) < 0.6
+	info = "hits %d burrs %d" % [walled, K.burrs.size()]
+	ok("venator RMB: a vertical wall stops it, the foe behind is safe", walled == 0 and stuck, info)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], 4)
+	var rocked: int = shoot.call(home + Vector3(6.5, 0, 0))
+	ok("venator RMB: a rock stops it too", rocked == 0 and K.burrs.size() == 1, "hits %d" % rocked)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], -1)
 
 # ------------------------------------------------------------------ Juggernaut: tools/dancer_jug_check.gd
 func _juggernaut() -> void:
@@ -696,7 +748,8 @@ func _feel() -> void:
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
-	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-80s cooldown (the game data runs to 80s)",
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
+			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0

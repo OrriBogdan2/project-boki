@@ -634,9 +634,9 @@
 "semicolon": 3
 },
 "scripts/match/match.gd": {
-"history_comment": 3,
+"history_comment": 4,
 "long_line": 221,
-"nested_ternary": 18,
+"nested_ternary": 19,
 "semicolon": 145,
 "shadow": 9
 },
@@ -704,13 +704,6 @@
 "semicolon": 5,
 "shadow": 1
 },
-"scripts/match/rolling.gd": {
-"history_comment": 1,
-"long_line": 13,
-"nested_ternary": 1,
-"semicolon": 19,
-"shadow": 1
-},
 "scripts/match/ruin_walls.gd": {
 "long_line": 19,
 "nested_ternary": 1,
@@ -750,11 +743,6 @@
 },
 "scripts/match/weapon_ups.gd": {
 "long_line": 1
-},
-"scripts/match/wide_layout.gd": {
-"long_line": 7,
-"semicolon": 3,
-"shadow": 1
 },
 "scripts/match/world.gd": {
 "long_line": 78,
@@ -816,10 +804,6 @@
 "scripts/ui/hero_grid.gd": {
 "long_line": 2,
 "semicolon": 3
-},
-"scripts/ui/hold_skip.gd": {
-"long_line": 2,
-"nested_ternary": 1
 },
 "scripts/ui/hub_bar.gd": {
 "long_line": 2,
@@ -905,10 +889,6 @@
 "nested_ternary": 1,
 "semicolon": 8,
 "shadow": 1
-},
-"scripts/ui/session_row.gd": {
-"long_line": 4,
-"semicolon": 1
 },
 "scripts/ui/title.gd": {
 "long_line": 21,
@@ -1152,16 +1132,6 @@
 "long_line": 11,
 "semicolon": 25,
 "shadow": 1
-},
-"tools/rolling_check.gd": {
-"history_comment": 1,
-"long_line": 44,
-"semicolon": 18
-},
-"tools/rolling_sim.gd": {
-"long_line": 25,
-"nested_ternary": 2,
-"semicolon": 7
 },
 "tools/shot_vertical_check.gd": {
 "long_line": 4,

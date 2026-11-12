@@ -1,12 +1,13 @@
 // One Hero VFX GPU particle, a camera-facing quad (the motion: hero_vfx_motes.gdshader; its velocity, size and age
-// arrive in the instance transform). Embers are hot streaks along their velocity that cool to col3; smoke is a soft
-// noisy puff that grows and thins. Premultiplied like shaders/hero_vfx.gdshader. A mote fades out over its last
-// SOFT_M above the ground, so a quad that dips into it never shows a hard cut (a soft particle by height, not by
-// the depth texture, which gl_compatibility can't read).
+// arrive in the instance transform). Embers are hot streaks along their velocity that cool to col3; smoke is a cel
+// puff (lit col, shaded col3) that grows and is eaten away. Premultiplied like shaders/hero_vfx.gdshader. A mote
+// fades out over its last SOFT_M above the ground, so a quad that dips into it never shows a hard cut (a soft
+// particle by height, not by the depth texture, which gl_compatibility can't read).
 shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
 #include "res://shaders/noise.gdshaderinc"
+#include "res://shaders/cel.gdshaderinc"
 
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);
@@ -22,8 +23,11 @@ const float SOFT_M = 0.15;      // m above the ground a mote fades in over
 
 varying float above;
 
+const vec2 SMOKE_LIGHT = vec2(-0.45, 0.89);   // on screen, where a cel puff is lit from (up and a little left)
+
 varying float age;
 varying float pick;
+varying vec2 light_uv;   // SMOKE_LIGHT turned into the quad's own UV frame (smoke quads spin)
 
 void vertex() {
 	vec3 vel = MODEL_MATRIX[0].xyz;
@@ -51,6 +55,7 @@ void vertex() {
 		float ang = pick * 6.28 + turn;
 		float ca = cos(ang);
 		float sa = sin(ang);
+		light_uv = vec2(SMOKE_LIGHT.x * ca + SMOKE_LIGHT.y * sa, SMOKE_LIGHT.x * sa - SMOKE_LIGHT.y * ca);
 		vec2 qq = q;
 		if (look == 4 || look == 5) { qq.x *= cos(age * 14.0 + pick * 9.0); }   // flipping over as it tumbles
 		if (look == 8) { qq.x *= 0.35 + 0.65 * abs(cos(age * 7.0 + pick * 9.0)); }   // a slow flutter
@@ -75,10 +80,17 @@ void fragment() {
 		ALBEDO = c * a * gain;
 		ALPHA = a * 0.9 * gain;
 	} else if (look == 1) {
-		float n = fbm3(p * 1.6 + pick * 31.0 + vec2(0.0, age * 1.4));
-		float puff = (1.0 - smoothstep(0.35, 1.0, d + (n - 0.5) * 0.9));
-		a = puff * smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.35, 1.0, age)) * 0.38;
-		ALBEDO = mix(col.rgb, col3.rgb, smoothstep(0.0, 0.35, age)) * a * gain;
+		// lumpy billows with a hard edge, two flat tones lit from above, eaten away by noise as the puff ages
+		vec2 nuv = p * 0.24 + vec2(pick * 0.71, pick * 0.37 + age * 0.05);
+		vec4 nz = texture(vfx_noise, nuv);
+		vec2 slope = vec2(texture(vfx_noise, nuv + vec2(0.01, 0.0)).r, texture(vfx_noise, nuv + vec2(0.0, 0.01)).r) - nz.r;
+		float body = 0.75 - d + (nz.r - 0.5) * 0.45;     // lumps stay inside the quad
+		float eat = mix(0.0, 0.95, pow(age, 1.5)) + (nz.g - 0.5) * 0.35;
+		float cut = body - eat;
+		a = hard(cut) * smoothstep(0.0, 0.06, age) * 0.8;
+		float shade = dot(p + slope * 6.0, light_uv) + 0.2;
+		float lit = hard(shade);
+		ALBEDO = mix(col3.rgb, col.rgb, lit) * a * gain;
 		ALPHA = a * gain;
 	} else if (look == 3) {
 		// a crystal: a sharp diamond with a bright facet edge

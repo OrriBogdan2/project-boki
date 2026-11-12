@@ -2,11 +2,22 @@ extends Node
 ## Every tunable definition in the game lives here: classes, weapons, kin, monsters, crops.
 ## Distances are in tiles (1 unit), speeds in tiles per second, times in seconds.
 
+## One per squad (MATCH_PLAYERS solos repeat none). The first eight are the old palette; the rest are
+## picked farthest-first in OKLab among mid-light, mid-chroma colours, so no two sit closer than
+## TEAM_COLOR_GAP (--team-colors checks it). Past ~40, colour alone runs out: add marks, not shades.
 const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("8fd16a"), Color("b48cf2"), Color("f0d45a"),
-	Color("4ad8c8"), Color("ff8ad8"), Color("c8a07a"), Color("9ab4ff"), Color("ff6a4a"), Color("b8e05a"), Color("e6e6f0"),
-	Color("7a8cff"), Color("ffb8a0"), Color("5ae08a"), Color("d07aff"), Color("ffe08a"), Color("6ac0ff"), Color("ff9a5a")]
-## The expedition's one format, the owner's call: always SQUADS squads of SQUAD_SIZE, bots filling the
-## spots no player takes. No solo or duo queue.
+	Color("4ad8c8"), Color("ff8ad8"), Color("227722"), Color("4455cc"), Color("995522"), Color("993399"),
+	Color("779977"), Color("ccccff"), Color("227788"), Color("8877aa"), Color("cc7700"), Color("bb2255"),
+	Color("66aa00"), Color("0088dd"), Color("44ffaa"), Color("cc99aa"), Color("ffccbb"), Color("aaeedd"),
+	Color("00bb88"), Color("bb55bb"), Color("bbaa00"), Color("885577"), Color("ff7755"), Color("777733"),
+	Color("0099aa"), Color("009955"), Color("cc4422"), Color("8855cc"), Color("bbbb88"), Color("bbee55"),
+	Color("aa7766"), Color("7788ff"), Color("77ddff"), Color("00ffee")]
+## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
+## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
+const TEAM_COLOR_GAP := 0.08
+## The trio expedition's format: SQUADS squads of SQUAD_SIZE, bots filling the spots no player takes.
+## 30 hunters on the 305 m Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216²
+## = 1.99), but a 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
 const SQUADS := 10
 const SQUAD_SIZE := 3
 const MATCH_PLAYERS := SQUADS * SQUAD_SIZE
@@ -374,6 +385,7 @@ const TIERS := [
 ]
 
 ## Home islands beyond the first one. Build a bridge to reach them. Rects are in home grid tiles.
+## Retired in the Boki base (base_mode hides the unbuilt bridges); delete after sign-off, GARDEN.md 10.7 step 11.
 const ISLES := {
 	"orchard": {"name": "Orchard Isle", "cost": 100, "need": 1, "c": Vector2(69, 11), "r": Vector2(8.5, 6.5),
 		"bridge": [62, 14, 63, 29], "sign": Vector2(60.6, 29.4), "desc": "A sunny isle with room for a greenhouse."},
@@ -414,8 +426,6 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"length": 360.0,       # seconds until the islands fall
-	"portal_open": 150.0,  # first exit portals open this many seconds in
 	"extract_time": 4.0,   # seconds standing in an exit's circle to leave; a hit from another hunter resets it
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,

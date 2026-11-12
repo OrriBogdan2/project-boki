@@ -11,7 +11,7 @@ const FALL := "fall"
 const BURN := "burn"
 const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
                                  # the source's raise, then fire
-const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
+const DROP_T := 0.8              # s: the shell is seen falling for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
 
@@ -75,7 +75,8 @@ func tick(dt: float) -> void:
 		else:
 			_burn_tick(s, dt)
 
-## The shot: straight up off the raised barrel on the clip's kick key, with its sounds (content/vfx x_cast).
+## The shot: straight up off the raised barrel (content/vfx/gunslinger.json x_cast, with the fall's whistle at
+## the target), on the clip's kick key.
 func _fire(s: Dictionary) -> void:
 	s["fired"] = true
 	kit.vfx("x_cast", s["at"])
@@ -138,8 +139,6 @@ func _impact(s: Dictionary) -> void:
 		if core:
 			centre += 1
 	last = {"at": at, "hits": n, "centre": centre}
-	if centre > 0:
-		kit.m.fx.word(at + Vector3(0, 2.6, 0) + kit.fx().screen_up() * 1.2, "DEAD CENTRE", GunslingerKit.HOT, true)
 
 ## The impact: a white-hot bloom, a wall of lime flame thrown out to the rim, embers, debris and smoke, a boom,
 ## and the cracked, see-through scorch the burning patch keeps under its lit rim.

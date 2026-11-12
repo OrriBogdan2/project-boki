@@ -55,8 +55,8 @@ What the in-game kit card (K) says.
 **Quakefall (RMB, 11s cooldown).**
 
 - *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.
-- *Hold:* Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
-- *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
+- *Hold:* Hold up to 0.45s (it goes by itself at the end): hop about 2.5m forward and up, keeping your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
+- *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
 **Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 

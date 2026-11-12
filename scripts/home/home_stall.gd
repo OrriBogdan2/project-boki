@@ -11,7 +11,7 @@ const SEARCH_R := 14        # tiles out from the landing
 static func ensure(home) -> bool:
 	var d: Dictionary = home._d()
 	var lay := HomeLayout.of(d)
-	if not HomeLayout.fs(d) or HomeLayout.count_of("market_stall", d) > 0:
+	if not HomeLayout.fs(d) or HomeLayout.count_of("market_stall", d) > 0 or not ZoneLayout.live.is_empty():
 		return false
 	var spot := _spot(home.hb)
 	if spot.is_empty():

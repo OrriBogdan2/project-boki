@@ -224,6 +224,47 @@ func _every_shift() -> void:
 				% [arch, r[0], r[1], later])
 	h.reclass(cls0, "")
 
+## Owner 11-09 (Sable): every Hunter's reach holding W from a standing start on the open lane to the landing:
+## "jump > Shift" (Shift 0.2 s into the jump) and "Shift > jump" (the jump-out 0.1 s into a ground Shift).
+## Sable's jump > Shift stays within SABLE_REACH_K of the rest of the cast's median (it was 1.8x).
+const SABLE_REACH_K := 1.5
+func _jump_shift_reach() -> void:
+	var at := _open_lane()
+	var cls0 := h.cls
+	var lines := []
+	var others := []
+	var sable := 0.0
+	for arch in Arch.ORDER:
+		h.reclass(Arch.weight(arch), arch)
+		var row := [arch]
+		for order in [[0, 12], [6, 0]]:
+			_reset(at, Vector3.ZERO)
+			for i in 30: m.step(Match.DT)
+			h.dashes = h.max_dashes()
+			h.ex_cd = 0.0
+			h.inp["move"] = Vector2(1, 0)
+			h.inp["aim"] = h.pos + Vector3(8, 0.9, 0)
+			var from := h.pos
+			for i in 150:
+				h.inp["jump"] = i == order[0]
+				h.inp["dash"] = i == order[1]
+				m.step(Match.DT)
+				if i > 20 and h.grounded:
+					break
+			row.append(h.pos.x - from.x)
+		lines.append("%s %.1f/%.1f" % row)
+		if arch == "thief":
+			sable = row[1]
+		else:
+			others.append(row[1])
+	h.inp["move"] = Vector2.ZERO
+	h.reclass(cls0, "")
+	print("ACHECK note reach m (jump > Shift / Shift > jump): %s" % ", ".join(lines))
+	others.sort()
+	var median: float = others[others.size() / 2]
+	ok(sable <= median * SABLE_REACH_K, "Sable's jump > Shift reach %.1f m is within %.1fx the cast's median %.1f m"
+		% [sable, SABLE_REACH_K, median])
+
 ## The same keys in the air at home and in a match (a fresh save's hero both places): vx every 0.1s holding D
 ## from a 3 m/s backward drift, and the step a fresh glide press opens the glider.
 func _parity(main: Node) -> void:
@@ -240,6 +281,8 @@ func _parity(main: Node) -> void:
 	main.add_child(hm)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
+	while hm.building:      # (built under a still-covered fade, the farm comes in slices)
+		await main.get_tree().process_frame
 	hm.set_process(false)
 	hm.ppos = Vector3(hm.ppos.x, 0, hm.ppos.z)
 	hm.py = hm._ground_h(hm.ppos.x, hm.ppos.z) + 6.0
@@ -330,6 +373,7 @@ func run(main: Node) -> void:
 	_match_items()
 	_chain()
 	await _parity(main)
+	_jump_shift_reach()      # after the parity: it re-classes the hunter through every Hunter
 	m.queue_free()
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()

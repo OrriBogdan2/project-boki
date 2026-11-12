@@ -5,7 +5,8 @@ extends ArchKit
 ## are pooled in CareLook and UltLook; the moves are KMovesCare "mm_" entries.
 ## Passive Carrier: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
 ## alternating hands Kindle foes.
-## RMB Burrseed sticks, then roots. Shift Relay Step. E Hearthlight heals; press again to toss it.
+## RMB Burrseed sticks and vines a foe to her; 2 s in reach roots them. Shift Relay Step.
+## E Hearthlight heals; press again to toss it.
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
@@ -14,9 +15,10 @@ const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's 
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 const AFTERGLOW_T := 0.7       # s a heal pulse's soft glow lingers over the Hearthlight
 const ZONE_FILL := 0.5         # care_disc body of her ground zones: ~0.15 alpha at the centre, under the 0.25 cap
+const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
-var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
+var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
 var burr_n := 0
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
@@ -72,7 +74,6 @@ func add_kindle(t: Ent, n := 1) -> void:
 	e["t"] = t
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
-		m.fx.word(t.pos + Vector3(0, 2.5, 0), "KINDLED", res_col(), true)
 		vfx("kindled", t.pos)
 		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
 		play_soft("mm_kindled")
@@ -256,7 +257,6 @@ func _foes_near(r: float) -> bool:
 
 func pick_up(o: Hunter) -> void:
 	CareUtil.set_carry(m, o, h.nid)
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
 	if rank("dash") >= 3:
@@ -272,7 +272,6 @@ func drop_all(broken: bool) -> void:
 	lock_t = maxf(lock_t, 1.5)          # set down: not picked straight back up
 	if broken:
 		lock_t = float(d["passive"].get("lock", 4.0))
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "DROPPED", Color("ff8a6a"), false)
 		m.sfx("knock", h.pos, -4.0, 1.2)
 
 # ------------------------------------------------------------------ dash: Relay Step
@@ -415,37 +414,51 @@ func burst_radius() -> float:
 	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
 
 func _stick(e: Ent) -> void:
-	var sd: Dictionary = rmb_def()["seed"]
 	burr_n += 1
-	burrs.append({"t": e, "left": float(sd["delay"]), "total": float(sd["delay"]), "id": burr_n})
-	# the area shows at once: a disc the size of the burst under them, and a light column falling
-	lk().burst("column", e.pos, {"col": leaf, "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
+	burrs.append({"t": e, "build": 0.0, "id": burr_n})
+	lk().burst("column", e.pos, {"col": leaf, "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
+## A stuck seed builds toward the root while the foe stays in her reach (`leash`), and roots at `build`
+## seconds (about 2 s, so it can be escaped: owner playtest). Out of reach, or with her down, it unwinds at
+## `unwind` times the rate; empty there, the seed falls off. The vine from her to them and the disc
+## under them show how far it has built, for everyone.
 func _tick_burrs(dt: float) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
+	var need := float(sd["build"])
 	for b in burrs.duplicate():
 		var tv = b["t"]     # untyped first: a freed foe can't be assigned to a typed var
 		var t: Ent = tv if is_instance_valid(tv) else null
 		var key := "burr%d" % int(b["id"])
-		if t == null or t.dead:
-			burrs.erase(b)
+		var gone := t == null or t.dead
+		var held := not gone and not (h.dead or h.downed) and h.pos.distance_to(t.pos) <= float(sd["leash"])
+		b["build"] = float(b["build"]) + (dt if held else -dt * float(sd["unwind"]))
+		if gone or (float(b["build"]) <= 0.0 and not held):
+			_burr_off(b)
 			continue
-		b["left"] = float(b["left"]) - dt
-		var k := 1.0 - float(b["left"]) / maxf(0.01, float(b["total"]))
-		# the area rides on the foe (Assumption: it sticks to them), filling toward the root
+		var k := clampf(float(b["build"]) / need, 0.0, 1.0)
 		lk().keep(
 				key, "disc", t.pos,
 				{
 					"r": burst_radius(), "col": deep(), "rim": pale(), "fill": ZONE_FILL,
 					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9, "glow": 1.0})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": pale()})
-		if float(b["left"]) <= 0.0:
-			burrs.erase(b)
-			lk().drop(key)
-			AimKit.hide(h, key)
+		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
+		ulk().keep(
+				key, "tether", h.pos + Vector3(0, 0.9, 0),
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else Color("ff8a6a"),
+				"a": lerpf(0.3, 0.9, k) if held else 0.25})
+		if k >= 1.0:
+			_burr_off(b)
 			_burst(t)
+
+func _burr_off(b: Dictionary) -> void:
+	var key := "burr%d" % int(b["id"])
+	burrs.erase(b)
+	lk().drop(key)
+	ulk().drop(key)
+	AimKit.hide(h, key)
 
 func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
@@ -464,7 +477,6 @@ func _burst(t: Ent) -> void:
 					"tags": ["utility", "burrseed"]})
 		# the root holds in the control-status violet (docs/VFX_QUALITY.md), readable over her leaf
 		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
-	m.fx.word(at + Vector3(0, 2.2, 0), "ROOTED", col, false)
 	stats["flares"] += 1
 	play_soft("mm_tug")
 
@@ -574,7 +586,7 @@ func _tick_hearth(dt: float) -> void:
 		vfx("hearth_motes", c, null, {"r": hearth_r()})
 	hearth["boost"] = maxf(0.0, float(hearth["boost"]) - dt)
 	if float(hearth["left"]) <= 0.0:
-		_hearth_end(true, "FLARE")
+		_hearth_end(true)
 
 ## The extra healing for the second after a throw; rank 3 doubles it (the source's level-4 upgrade).
 func throw_boost() -> float:
@@ -604,7 +616,7 @@ func _mend(o: Hunter, amt: float, wisp_k := 5.0) -> void:
 	CareUtil.heal(m, o, amt, wisp_k)
 	vfx("heal_stars", o.pos)
 
-func _hearth_end(flare: bool, word: String) -> void:
+func _hearth_end(flare: bool) -> void:
 	var ed := e_def()
 	var c := hearth_center()
 	var rr := hearth_r()
@@ -623,7 +635,6 @@ func _hearth_end(flare: bool, word: String) -> void:
 			else:
 				_mend(o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
 	else:
-		m.fx.word(c + Vector3(0, 2.0, 0), word, Color("ff8a6a"), false)
 		m.sfx("knock", c, -6.0, 1.4)
 	lk().drop("hearth")
 	hearth = {}
@@ -632,15 +643,13 @@ func _hearth_end(flare: bool, word: String) -> void:
 ## The light's last heal reads as a heal, not a blast: a slow swirl of starlight to its own edge (no wider), stars
 ## rising off it with the lantern plus over the middle, a soft chime; no ring, burst or shake.
 func _bloom(c: Vector3, rr: float) -> void:
-	var ed := e_def()
-	m.fx.word(c + Vector3(0, 2.4, 0), "HEARTH", col_of(ed), false)
 	lk().burst("plus", c + Vector3(0, 1.6, 0), {"r": 0.8, "dur": 0.5})
 	vfx("bloom", c, null, {"r": rr})
 	m.sfx("tend_flare", c, BLOOM_DB, 1.0)
 
 func _e_end() -> void:
 	if not hearth.is_empty():
-		_hearth_end(true, "FLARE")
+		_hearth_end(true)
 
 func in_e() -> bool: return not hearth.is_empty()
 
@@ -735,7 +744,6 @@ func _start_call() -> bool:
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
 	vfx("call")
 	vfx("call_land", who.pos)
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
 	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), leaf)
 	return true
 
@@ -813,22 +821,18 @@ func _call_end(done: bool) -> void:
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
 	KinBond.from_ult(h, "kill" if rescue else "hit", HeroUlt.cast_id(self))
 	var at := who.pos if not rescue else h.pos
-	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
-	if not rescue:
-		m.fx.word(at + Vector3(0, 2.7, 0), "MENDED", Color("9cf07a"), true)
 	m.sfx("tend_arrive", at, 0.0, 1.0)
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)
 	play("mm_call_end")
 
 
-## The tether snaps where everyone can see it: coral sparks at her hand and at the far end, and the word.
+## The tether snaps where everyone can see it: coral sparks at her hand and at the far end.
 func _call_snap(who: Hunter) -> void:
 	var snap := Color("ff8a6a")
 	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
 	if who != null:
 		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", snap, false)
 	m.sfx("knock", h.pos, -8.0, 1.5)
 
 
