@@ -282,7 +282,7 @@ so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` gr
 kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
 (content/rules/warden_anim/vex.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
 
-The gatling muzzle is the point that jumps standing (1.0 to 1.07 m: idle and rest stance hold it low, the shots start with it levelled); walking the arms already swing near the aim, 0.63 to 0.85 m at the muzzle. `gunslinger_e` and `mf_xform` start slower; every move eases back over 0.40 s.
+The gatling muzzle is the point that jumps standing (1.0 to 1.07 m: idle and rest stance hold it low, the shots start with it levelled); walking the arms already swing near the aim, 0.63 to 0.85 m at the muzzle. `gunslinger_e` and `mf_xform` start slower; every move eases back over 0.40 s. That settle is 0.24 s later than the Nov 8 timing pass measured against the footage (`--gunslinger-combo-check` "Vex timing" rows now wait each move's own `fade_out`); trim `fade_out` per move if the parity matters more than the hand-back pop.
 
 | Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
 |---|---|---|---|---|---|---|
