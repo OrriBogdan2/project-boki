@@ -6,7 +6,8 @@ extends RefCounted
 ## World.occupy's ghost). Through a face she keeps the height she went in at (floor_under), so she comes out
 ## the far side at her own level or walks on inside it; walking off a ledge drops her as usual. Damage ends
 ## it. If it ends while she is inside something she is put back where she last stood clear on solid ground
-## (never the top of a face she walked into, never over the abyss). Inside something her screen goes dark blue.
+## (never the top of a face she walked into, never over the abyss). Inside something her screen goes dark blue;
+## the whole walk her body is darkened (PinFx wash) on every game.
 
 var k: ArcherKit
 var h: Hunter
@@ -29,6 +30,15 @@ func _init(kit: ArcherKit) -> void:
 
 func active() -> bool:
 	return t > 0.0
+
+## True from the roll until the walk is over, on every game: the owner's walk (spirit_t), or a remote copy's
+## kit move: pin_roll for the roll, pin_walk for the base walk (the wire carries the move, not the rank).
+func phasing() -> bool:
+	if h.spirit_t > 0.0:
+		return true
+	var dd := k.dash_def()
+	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
+	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
 
 func start() -> void:
 	var dd := k.dash_def()

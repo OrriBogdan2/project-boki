@@ -110,7 +110,6 @@ func _tick(dt: float) -> void:
 			shield_hp = 0.0
 			lock_t = _shield_stat("lock")
 			down_t = 0.0
-			m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHIELD BROKEN", Feel.cat_color("damage"), false)
 			var d0 := h.aim_dir()
 			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
 			play("bul_break")
@@ -288,7 +287,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		var crush_stun := float(pd["crush_stun"])
 		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
 			"stun": crush_stun, "dr": true})
-		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
+		payoff_fx(tgt.pos, res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		vfx("crush", tgt.pos, dir))
 
@@ -737,7 +736,6 @@ func on_dash(use_ex: bool) -> bool:
 		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": dist})
 		st["last_dash"] = "charge"
 		play("bul_charge")
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
 		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
 	use_ex = use_ex and h.dashes < 1.0         # a charge in the air is the same 360 Smash (item 183)
@@ -893,13 +891,14 @@ func _bot_hammer(dist: float, los: bool) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
-		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
-	_bot_hammer(dist, los)
-	if HeroUlt.ready(self) and los and dist > 4.0 and dist < 13.0:
+	# the Faultline first: its lane starts at his feet, so a foe up close is on it too
+	if HeroUlt.ready(self) and los and dist > 1.5 and dist < 13.0:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
+		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
+	_bot_hammer(dist, los)
 	if int(h.slot_lv["sec"]) > 0:
 		var shot_at: bool = m.time - h.hurt_at < 0.6 and dist > 3.0
 		if shot_at and lock_t <= 0.0 and shield_hp > 30.0:

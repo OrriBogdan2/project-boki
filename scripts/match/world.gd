@@ -32,6 +32,7 @@ var chest_spots: Array = []
 var camp_spots: Array = []
 var wild_spots: Array = []
 var no_deco := {}
+var scatter_chunk := 0       # tiles: scatter batches are at least this wide (a home sets its whole map: all on screen)
 var paint := {}          # tile index -> colour for paths and soil, blended at the corners
 var clouds: Array = []
 var sheer := {}          # tile index -> true: a smooth cliff rim you can't grab (authored maps)
@@ -1385,6 +1386,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
 			# mean far fewer draws (and shadow draws) for a few more off-screen instances
 			chunk = maxi(chunk, 32)
+	chunk = maxi(chunk, scatter_chunk)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
