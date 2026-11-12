@@ -344,7 +344,8 @@ func _hot(main: Node) -> void:
 	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
 
 ## Squad A (the player's) deals 95% of a Camp Chief's Brute, the camp's last monster; squad B lands
-## the last hit and takes the chief's XP and the clear, A gets nothing, and the feed names B's killer.
+## the last hit and takes the chief's XP (its squadmate in the share too) and the clear, A gets nothing,
+## and the feed names B's killer.
 func _steal_chief(main: Node) -> void:
 	var m: Match = null
 	var c: Dictionary = {}
@@ -361,25 +362,31 @@ func _steal_chief(main: Node) -> void:
 		return
 	var P: Hunter = m.player
 	var thief: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var p_mate: Hunter = m.hunters.filter(func(h): return h.team == P.team and h != P)[0]
+	var t_mate: Hunter = m.hunters.filter(func(h): return h.team == thief.team and h != thief)[0]
 	for h in m.hunters:
 		h.pos = Vector3(-1e4, 0, -1e4)
 	P.pos = (c["pos"] as Vector3) + Vector3(1, 0, 0)
+	p_mate.pos = (c["pos"] as Vector3) + Vector3(0, 0, 5)
 	thief.pos = (c["pos"] as Vector3) + Vector3(-1, 0, 0)
+	t_mate.pos = (c["pos"] as Vector3) + Vector3(0, 0, -5)      # (well inside the 30 m share)
 	var chief: Mob = _camp_mobs(c).filter(func(mb): return mb.has_meta("chief"))[0]
 	for mb in _camp_mobs(c):
 		if mb != chief: mb.hurt(1e6, P)
 	chief.hurt(chief.max_hp * 0.95, P)
 	var a_dealt := float(chief.damage_by.get(P.team, 0.0))
 	ok(not chief.dead and a_dealt > chief.max_hp * 0.9, "squad A has dealt over 90% of the Chief")
-	var px := P.xp
-	var tx := thief.xp
+	var before: Array = [P, p_mate, thief, t_mate].map(func(h): return h.xp)
 	var got := []
 	m.camps.cleared.connect(func(id, sq): got.append(sq))
 	chief.hurt(1e6, thief)
 	var want := XpRules.kill_xp(chief)
-	ok(chief.dead and absf(thief.xp - tx - want) < 0.01 and absf(P.xp - px) < 0.001,
-		"squad B's last hit takes the Chief's %d XP, squad A gets none (%.1f, %.1f)"
-		% [int(want), thief.xp - tx, P.xp - px])
+	var gain: Array = [P, p_mate, thief, t_mate].map(func(h): return h.xp - float(before.pop_front()))
+	ok(chief.dead and absf(gain[2] - want) < 0.01 and absf(gain[3] - want) < 0.01,
+		"squad B's last hit takes the Chief's %d XP, for the killer and the squadmate 5 m off (%.1f, %.1f)"
+		% [int(want), gain[2], gain[3]])
+	ok(absf(gain[0]) < 0.001 and absf(gain[1]) < 0.001,
+		"squad A, with 95%% of the damage, gets none (%.1f, %.1f)" % [gain[0], gain[1]])
 	ok(got == [thief.team], "the camp's clear (its bundle and toast) goes to squad B")
 	var named := "%s stole the Camp Chief from %s" % [thief.pname, m.truce.squad_name(P.team)]
 	ok(String(m.feed_all[-1]).ends_with(named), "the feed calls out the steal (%s)" % String(m.feed_all[-1]))

@@ -1,6 +1,6 @@
 extends RefCounted
 ## --xp-share-check: a monster's XP goes to the Hunter who lands the last hit and to their squadmates
-## within XpRules' share_r of the killer, nothing for damage alone. A squad that deals 95% of a lair boss
+## within XpRules' share_r of the killer, nothing for damage alone. A squad that deals 95% of each lair boss
 ## and loses the last hit to a rival gets no XP; the kill's other rewards (stat and gear) go to the
 ## killer too, and so does its Boon of the Hunt (HuntBoon), so the rival squad takes it all, and the
 ## feed names the stealer (KillSteal). Never touches the save.
@@ -90,53 +90,66 @@ func run(main: Node) -> void:
 	_kill(spot, [[Q, 9.0], [P, 1.0]])
 	ok(is_equal_approx(P.xp, want) and is_equal_approx(C.xp, want) and Q.xp == 0.0 and Q2.xp == 0.0,
 		"the squad that lands the last hit takes the XP, the squad that did 90% gets none")
-	# ---- 3. a lair boss: A deals 95%, B last-hits
+	# ---- 3. every lair boss: A deals 95%, B last-hits
 	for L in m.lairs.list:
 		m.lairs.activate(L)
-	var F: Dictionary = m.lairs.list[0]
+	var kinds := {}
 	for L in m.lairs.list:
-		if String(L["boss"]) == "colossus":
-			F = L
+		if not kinds.has(String(L["boss"])):
+			kinds[String(L["boss"])] = true
+			_steal_boss(L, [Q, Q2], [P, C], boss_xp)
+	ok(kinds.size() >= 3, "every lair boss kind is fought (%s)" % ", ".join(kinds.keys()))
+	var steals: Array = m.feed_all.filter(func(f): return " stole " in String(f))
+	ok(steals.size() == kinds.size(),
+		"a stolen skitter carries no kill bonus, so only the bosses are called out (%d)" % steals.size())
+	print("XPSHARE done, %d fail" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## Lair `F`'s boss: squad `A` deals 95% of it, squad `B`'s first Hunter lands the last hit. B (its
+## killer and the squadmate beside them) gets the boss's XP and Boon of the Hunt, the boss stat goes to
+## the killer, A gets nothing, and the feed names the stealer.
+func _steal_boss(F: Dictionary, A: Array, B: Array, boss_xp: float) -> void:
+	var kind := String(F["boss"])
 	for g in F["guards"]:
 		if is_instance_valid(g) and not g.dead:
 			g.dead = true
 			g.visible = false
 	if F["state"] == "sealed":
-		m.lairs.open(F, Q, "dial")
+		m.lairs.open(F, A[0], "dial")
 	var c: Vector3 = F["c"]
 	var out := Vector3(F["out"].x, 0, F["out"].y)
 	var side := Vector3(-F["out"].y, 0, F["out"].x)
-	_spot(Q, c + out * 3.0)
-	_spot(Q2, c + side * 3.0)
-	_spot(P, c - out * 3.0)
-	_spot(C, c - side * 3.0)
+	_spot(A[0], c + out * 3.0)
+	_spot(A[1], c + side * 3.0)
+	_spot(B[0], c - out * 3.0)
+	_spot(B[1], c - side * 3.0)
 	m.step(Match.DT)
 	var b: Boss = F["boss_mob"]
 	if b.buried:
 		b._clear_attack()
 	b.stagger_t = 0.0
-	b.hurt(b.hp * 0.95, Q, {"src": "shot"})
+	b.hurt(b.hp * 0.95, A[0], {"src": "shot"})
 	b.stagger_t = 0.0
-	ok(float(b.damage_by.get(Q.team, 0.0)) > b.max_hp * 0.9 and not b.dead,
-		"squad A has dealt over 90% of the boss and it still stands")
+	ok(float(b.damage_by.get(A[0].team, 0.0)) > b.max_hp * 0.9 and not b.dead,
+		"%s: squad A has dealt over 90%% of it and it still stands" % kind)
 	_zero_xp()      # (nothing steps between here and the kill)
-	b.hurt(b.hp + b.max_hp, P, {"src": "shot"})
-	ok(b.dead, "squad B's last hit kills it")
-	ok(is_equal_approx(P.xp, boss_xp) and is_equal_approx(C.xp, boss_xp),
-		"squad B gets the boss's %d XP (%.2f, %.2f)" % [int(boss_xp), P.xp, C.xp])
-	ok(Q.xp == 0.0 and Q2.xp == 0.0,
-		"squad A, with 95%% of the damage, gets none (%.2f, %.2f)" % [Q.xp, Q2.xp])
-	ok(int(P.stats.get("bosses", 0)) == 1 and int(Q.stats.get("bosses", 0)) == 0,
-		"the boss kill itself is credited to B, not A")
+	var bosses: Array = (A + B).map(func(h): return int(h.stats.get("bosses", 0)))
+	for h in A + B:
+		h.set_meta("bon_until", 0.0)
+	b.hurt(b.hp + b.max_hp, B[0], {"src": "shot"})
+	ok(b.dead, "%s: squad B's last hit kills it" % kind)
+	ok(is_equal_approx(B[0].xp, boss_xp) and is_equal_approx(B[1].xp, boss_xp),
+		"%s: squad B, killer and squadmate, gets the %d XP (%.2f, %.2f)" % [kind, int(boss_xp), B[0].xp, B[1].xp])
+	ok(A[0].xp == 0.0 and A[1].xp == 0.0,
+		"%s: squad A, with 95%% of the damage, gets none (%.2f, %.2f)" % [kind, A[0].xp, A[1].xp])
+	var won: Array = (A + B).map(func(h): return int(h.stats.get("bosses", 0)))
+	ok(won[2] == bosses[2] + 1 and won[0] == bosses[0] and won[1] == bosses[1],
+		"%s: the boss kill itself is credited to B, not A" % kind)
 	var boon := float(XpRules.rules()["boon"]["secs"])
-	var b_got := absf(HuntBoon.left(P) - boon) < 0.01 and absf(HuntBoon.left(C) - boon) < 0.01
-	ok(b_got and HuntBoon.left(Q) == 0.0 and HuntBoon.left(Q2) == 0.0,
-		"squad B also takes the boss's Boon of the Hunt (%.0f s), squad A none" % boon)
+	var b_got := absf(HuntBoon.left(B[0]) - boon) < 0.01 and absf(HuntBoon.left(B[1]) - boon) < 0.01
+	ok(b_got and HuntBoon.left(A[0]) == 0.0 and HuntBoon.left(A[1]) == 0.0,
+		"%s: squad B also takes its Boon of the Hunt (%.0f s), squad A none" % [kind, boon])
 	var line := String(m.feed_all[-1]) if not m.feed_all.is_empty() else ""
-	var named := "%s stole %s from %s" % [P.pname, b.md["name"], m.truce.squad_name(Q.team)]
-	ok(line.ends_with(named), "the feed calls out the steal, naming the stealer (%s)" % line)
-	var steals: Array = m.feed_all.filter(func(f): return " stole " in String(f))
-	ok(steals.size() == 1,
-		"a stolen skitter carries no kill bonus, so only the boss is called out (%d)" % steals.size())
-	print("XPSHARE done, %d fail" % bad)
-	main.get_tree().quit(1 if bad > 0 else 0)
+	var named := "%s stole %s from %s" % [B[0].pname, b.md["name"], m.truce.squad_name(A[0].team)]
+	ok(line.ends_with(named), "%s: the feed calls out the steal, naming the stealer (%s)" % [kind, line])
