@@ -1552,7 +1552,7 @@ func _emit_shot() -> void:
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
 	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
-	Juice.shot(self, start, Vector2(cos(a), sin(a)))
+	Juice.shot(self, m.shots[-1]["start"], Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
 	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false) or not wpn.has("reload"):

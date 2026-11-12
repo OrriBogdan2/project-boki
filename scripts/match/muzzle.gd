@@ -40,8 +40,9 @@ static func start(h: Hunter, slot: String, at: Vector3) -> Vector3:
 	return Vector3(s.x, at.y, s.z)
 
 ## A round of h's leaving `at` with velocity `v2` for `life` s, moved to the `slot` muzzle: [start, velocity, life].
-## It keeps its height, its speed and the point where its flight ends (a slowing round, one with "decel", keeps its line and life) (the cursor, the range), so the reach and the
-## hit stay what they were: from the muzzle it flies the straight line to that point.
+## It keeps its height, its speed and the point where its flight ends (the cursor, the range), so the reach and the
+## hit stay what they were: from the muzzle it flies the straight line to that point. With `brakes` (a slowing round,
+## "decel") only the start moves.
 static func leave(h: Hunter, slot: String, at: Vector3, v2: Vector2, life: float, brakes := false) -> Array:
 	var s := start(h, slot, at)
 	if s == at or v2.length() < 0.1 or brakes:

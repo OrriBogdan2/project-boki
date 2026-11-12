@@ -1,14 +1,14 @@
 extends RefCounted
 ## --muzzle-live-check: every Hunter's shots leave the drawn weapon. Each of the 13 Hunters, in a real match with
 ## its model dressed and drawn at the match camera's size, presses LMB, RMB, E, R and X; the round each press spawns
-## starts within MAX_OFF (on screen: off the camera's ray through it) of that slot's weapon point on the model (Muzzle) as the
+## starts within MAX_OFF (on screen: off the camera's ray through it) of that slot's weapon point (Muzzle) as the
 ## arm stands a few frames later. One MUZZLE line per press, a table to paste. A press that spawns no round
 ## (a dash, a melee swing, a field) is n/a, a round ring (a nova) leaves the body, not the weapon.
-## Never touches the save.
+## --only=<archetype> runs one. Never touches the save.
 
 const DT := 1.0 / 60.0
 const MAX_OFF := 0.15         # m: how far a round may start from its weapon point
-const WAIT := 6               # frames after the round spawns, for the arm to stand
+const WAIT := 2               # frames after the round spawns, for the arm to stand
 const RING := 0.4             # m: rounds of one press starting this far apart are a ring, not a muzzle
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gil", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
@@ -29,6 +29,11 @@ func _frame(m: Match, h: Hunter) -> void:
 		sync.set_process(false)
 		sync.call("_process", DT)
 
+func _collect(m: Match, P: Hunter, sid0: int, group: Array) -> void:
+	for s in m.shots:
+		if s["by"] == P and int(s["sid"]) > sid0 and not (s["x"] as Dictionary).get("melee", false):
+			group.append(s["start"])
+
 ## Presses `slot` and returns {"n": rounds, "off": m} for the first round(s) it spawns, off -1 when none or a ring.
 func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 	var sid0: int = m.shot_n
@@ -44,7 +49,8 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 		"x": HunterKeys.ult_pressed(P)
 	P.inp["sec_hold"] = held
 	var group: Array = []
-	var seen := -1
+	_collect(m, P, sid0, group)      # (a round that spawns on the press may hit and be gone after one step)
+	var seen := 0 if not group.is_empty() else -1
 	for f in 120:
 		if f == 1:
 			P.inp["fire"] = false
@@ -53,9 +59,7 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 			P.inp["sec_hold"] = false
 		_frame(m, P)
 		if seen < 0:
-			for s in m.shots:
-				if s["by"] == P and int(s["sid"]) > sid0 and not (s["x"] as Dictionary).get("melee", false):
-					group.append(s["start"])
+			_collect(m, P, sid0, group)
 			if not group.is_empty():
 				seen = f
 		elif f == seen + WAIT:
@@ -78,11 +82,28 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 		worst = maxf(worst, best)
 	return {"n": group.size(), "off": worst}
 
+## The round moved to the muzzle keeps what is gameplay: its height, its speed and the point its flight ends at.
+func _reach_kept(P: Hunter) -> void:
+	var at := P.pos + Vector3(0.6, 0.95, 0)
+	var v2 := Vector2(20.0, 0.0)
+	var out: Array = Muzzle.leave(P, "lmb", at, v2, 0.5)
+	var end0 := Vector2(at.x, at.z) + v2 * 0.5
+	var end1 := Vector2(out[0].x, out[0].z) + (out[1] as Vector2) * float(out[2])
+	var kept: bool = is_equal_approx(out[0].y, at.y) and is_equal_approx((out[1] as Vector2).length(), v2.length())
+	var off := end0.distance_to(end1)
+	ok(kept and off < 0.01, "%s: the round keeps its height, speed and flight end (end off %.3f m)" % [P.arch, off])
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	var A = load("res://tools/archetype_check.gd").new()
 	A.main = main
+	var only := ""
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--only="):
+			only = String(a).substr(7)
 	for arch in ARCHS:
+		if only != "" and only != arch:
+			continue
 		var r: Array = A.setup(arch, 11.0, "", true)
 		var m: Match = r[0]
 		var P: Hunter = r[1]
@@ -96,13 +117,22 @@ func run(main: Node) -> void:
 			var got := _press(m, P, slot, false)
 			if slot == "rmb" and got["n"] == 0:
 				got = _press(m, P, slot, true)
+			if got["n"] == 0:      # (some casts want a foe in the lane)
+				r[2].teleport(r[4] + Vector3(6.0, 0, 0))
+				A.aim_at(P, r[2].pos)
+				got = _press(m, P, slot, slot == "rmb")
+				r[2].teleport(r[4] + Vector3(0, 0, 9.0))
+				A.aim_at(P, aim)
 			var off: float = got["off"]
-			var what := "n/a (no round)" if got["n"] == 0 else ("ring" if off < 0.0 else "%.3f m" % off)
+			var what := "%.3f m" % off
+			if got["n"] == 0 or off < 0.0:
+				what = "n/a (no round)" if got["n"] == 0 else "ring"
 			print("MUZZLE %s %s %d rounds: %s  [%s]" % [arch, slot, got["n"], what, P.ak.anim_id])
 			worst = maxf(worst, off)
 			A.step(m, 1.0)
 			A.aim_at(P, aim)
 		ok(worst < MAX_OFF, "%s: every round leaves its weapon point (worst %.3f m)" % [arch, worst])
+		_reach_kept(P)
 		m.queue_free()
 	print("MUZZLE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

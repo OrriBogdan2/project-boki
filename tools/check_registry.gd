@@ -167,8 +167,8 @@ const CHECKS := {
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
 	"--cinder-art-check": ["res://tools/cinder_art_check.gd", "cinder_art_check", null],
-	"--muzzle-live-check": ["res://tools/muzzle_live_check.gd", "muzzle_live_check", null],      # every Hunter's rounds leave its drawn weapon
-	"--muzzle-shots": ["res://tools/muzzle_shots.gd", "muzzle_shots", null],      # each Hunter firing, game camera frames
+	"--muzzle-live-check": ["res://tools/muzzle_live_check.gd", "muzzle_live_check", null],
+	"--muzzle-shots": ["res://tools/muzzle_shots.gd", "muzzle_shots", null],      # each Hunter firing
 	"--ryzz-live-check": ["res://tools/ryzz_live_check.gd", "ryzz_live_check", null],
 	"--clip-live-claire-check": ["res://tools/clip_live_claire_check.gd", "clip_live_claire_check", null],
 	"--claire-skate-shots": ["res://tools/claire_skate_shots.gd", "claire_skate_shots", null],

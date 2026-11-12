@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -340,7 +340,7 @@
 },
 "scripts/kin/kin_exec.gd": {
 "history_comment": 1,
-"long_line": 31,
+"long_line": 30,
 "nested_ternary": 3,
 "semicolon": 27,
 "shadow": 2
@@ -635,7 +635,7 @@
 "scripts/match/match.gd": {
 "history_comment": 4,
 "long_line": 217,
-"nested_ternary": 19,
+"nested_ternary": 18,
 "semicolon": 142,
 "shadow": 7
 },

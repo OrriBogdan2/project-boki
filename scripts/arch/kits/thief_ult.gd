@@ -149,7 +149,9 @@ func _volley(d: Dictionary) -> void:
 ## A cosmetic blade flies from her hand; the hit lands when it arrives.
 func _blade(f: Ent, rim: bool, right: bool) -> void:
 	var h := k.h
-	var from := k.hand_pos(right)
+	var from := Muzzle.point(h, "x_r" if right else "x_l")
+	if from == Vector3.INF:
+		from = k.hand_pos(right)
 	var to := f.pos + Vector3(0, 1.0, 0)
 	var dv := Vector2(to.x - from.x, to.z - from.z)
 	var dist := dv.length()

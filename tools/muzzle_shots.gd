@@ -1,7 +1,8 @@
 extends RefCounted
-## --muzzle-shots --shots-dir=<dir> [--only=<archetype>] (GPU: jobq --needs gpu): each Hunter firing LMB, RMB, E, R and X
-## at the match camera (the default view, Hunters drawn 2.1x), as numbered jpg frames cropped round the Hunter
-## [--bench-view=1920x1080] (<dir>/<archetype>_NNN.jpg, 20 fps, a label with the key pressed). Encode with ffmpeg. Never writes the save.
+## --muzzle-shots --shots-dir=<dir> [--only=<archetype>] [--bench-view=1920x1080] (GPU: jobq --needs gpu): each Hunter
+## firing LMB, RMB, E, R and X at the match camera (the default view, Hunters drawn 2.1x), as numbered jpg frames
+## cropped round the Hunter (<dir>/<archetype>_NNN.jpg, 20 fps, a label with the key pressed). Encode with ffmpeg.
+## Never writes the save.
 
 const LiveCheck := preload("res://tools/muzzle_live_check.gd")
 const DT := 1.0 / 60.0
@@ -49,9 +50,9 @@ func _frame(P: Hunter, save: bool) -> void:
 	m.step(DT)
 	m._process(DT)
 	if save and n % EVERY == 0:
-		var size: Vector2 = main.get_viewport().get_visible_rect().size
+		var view: Vector2 = main.get_viewport().get_visible_rect().size
 		var at: Vector2 = m.cam.unproject_position(P.position + Vector3(0, 1.6, 0))
-		var k: Vector2 = Vector2(main.get_window().size) / size
+		var k: Vector2 = Vector2(main.get_window().size) / view
 		label.position = at - Vector2(CROP) / k * 0.5 + Vector2(10, 8) / k
 	await main.get_tree().process_frame
 	if save and n % EVERY == 0:

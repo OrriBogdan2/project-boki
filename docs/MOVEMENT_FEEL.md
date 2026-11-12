@@ -306,6 +306,57 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## Rounds leave the weapon (`Muzzle`, `--muzzle-live-check`; owner 11-12: "does Lace's RMB come from her bow?")
+
+On the wide match camera Hunters are drawn 2.1x bigger, but rounds still started at fixed body offsets (0.6 m ahead at
+0.95 m), so a Lace arrow started 1.3 m from her bow on screen. Now every round a Hunter fires leaves the muzzle of the
+drawn weapon: `content/archetypes/<id>.json` "muzzle" maps a slot (lmb, rmb, e, r, x, or a kit's own `lmb_l` / `lmb_r`
+hand) to the model's anchor empties (first one found; "default" is `weapon_muzzle`, which every .glb has on its
+weapon, so it scales with the Hunter and follows its pose). Lace's bow, Cinder's gun, Vex's cannon, Sparkle's two
+fingers, Sable's two blades, Neve's palms (her blade tip is 2 m out), Meeko's palm for the seed.
+- `Muzzle.leave` (called by `Match.spawn_shot` for a round tagged `extra.muz`; the Hunter's weapon, `KinExec` projectiles
+  and the kits' own throws tag their slot) puts the start on the camera's view ray through the muzzle at the round's own
+  height (`CamRig.view_dir`), so it reads as leaving the muzzle, and aims the round at the same end point.
+- Gameplay is kept: height (shot bands), speed and the end of the flight (cursor or range) are unchanged
+  (`--muzzle-live-check` asserts it); what moves is the start, by up to ~1 m along the aim and a little sideways, so a
+  round at point-blank can reach a body 0.1 s sooner than it did. Slowing rounds ("decel": Grimble's shotgun) move the
+  start only.
+- `--muzzle-live-check`: each of the 13 Hunters presses LMB, RMB, E, R and X in a real match; the round(s) it spawns
+  must start within 0.15 m (on screen) of that slot's weapon point. It replaces Sparkle's fingertip row.
+  `--muzzle-shots` records each Hunter firing at the match camera.
+- Not covered (no round: a cone, zone, hook, dash, melee swing or beam is drawn by its own effect, not
+  `spawn_shot`): Cinder LMB/E/R/X, Albert everything, Tenzo RMB/E/R/X, Grimble E/R, Vex RMB/E/R/X, Kael LMB/RMB/R/X,
+  Sparkle E/R/X, Motley E/R/X, Neve E/R/X, Meeko E/R/X, Sable RMB/R, Lace R/X, Gil (no kit moves). The Boki Q glove and
+  Boki's own shots are not Hunter rounds. Remote copies see the round start as it was fired (the net event carries
+  the start), so they see it from the shooter's weapon too.
+
+Start-to-weapon distance on screen (m), per press; each row is one press of that key in `--muzzle-live-check`
+(measured two frames after the round spawns, before = the branch tip before this change, same weapon points):
+
+| Hunter | key | rounds | before (m) | after (m) |
+|---|---|---|---|---|
+| Lace (Hem) | LMB | 1 | 1.335 | 0.013 |
+| Lace (Hem) | RMB | 1 | 1.294 | 0.000 |
+| Lace (Hem) | E | 5 | 1.002 | 0.000 |
+| Cinder | RMB | 1 | 0.911 | 0.000 |
+| Tenzo (Tarek) | LMB | 1 | 0.747 | 0.000 |
+| Grimble | LMB | 7 | 1.147 | 0.107 |
+| Grimble | RMB | 1 | 1.204 | 0.000 |
+| Grimble | X | 6 | 1.202 | 0.000 |
+| Vex | LMB | 1 | 0.359 | 0.000 |
+| Kael | E | 1 | 2.155 | 0.000 |
+| Sparkle (Ryzz) | LMB | 1 | 0.725 | 0.000 |
+| Sparkle (Ryzz) | RMB | 1 | 0.702 | 0.000 |
+| Motley | LMB | 1 | 0.666 | 0.000 |
+| Motley | RMB | 1 | 0.666 | 0.000 |
+| Neve (Claire) | LMB | 1 | 1.153 | 0.000 |
+| Neve (Claire) | RMB | 1 | 1.299 | 0.000 |
+| Meeko (Pip) | LMB | 1 | 2.367 | 0.068 |
+| Meeko (Pip) | RMB | 1 | 0.666 | 0.000 |
+| Sable | LMB | 1 | 0.253 | 0.000 |
+| Sable | E | 1 | 0.352 | 0.000 |
+| Sable | X | 1 | 0.331 | 0.000 |
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
