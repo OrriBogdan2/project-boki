@@ -81,9 +81,16 @@ func _take(take: String, stun: bool) -> void:
 			(kk as Kin).dead = true
 			(kk as Kin).visible = false
 	var at := _roomy()
+	var park := _roomy()      # the others wait on solid ground out of shot (at + 40 m could be the void)
+	for k in 50:
+		if Vector2(park.x - at.x, park.z - at.z).length() > 30.0:
+			break
+		park = _roomy()
+	var n := 0
 	for h in m.hunters:
 		if h != P and h != W and h != E and not h.out:
-			h.teleport(m.world.free_spot_near(at + Vector3(40, 0, 0), [], 1.0, 0.4, 20.0))
+			h.teleport(park + Vector3(1.5 * n, 0, 0))
+			n += 1
 	P.max_hp *= 3.0      # the hits must not knock P down mid-take
 	P.hp = P.max_hp
 	W.teleport(at)
