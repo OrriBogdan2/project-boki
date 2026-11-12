@@ -359,6 +359,7 @@ func thief(a) -> void:
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
+	await ULT.new().dancer_ring(A)
 
 
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).

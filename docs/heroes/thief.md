@@ -187,13 +187,33 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | A dagger in an enemy at the top rank resets Quickflip; terrain refunds 25%, characters 50% | owner's game data (Farstep rank IV) | n/a | Built on the Knife's rank 3 (it was on Vault's); asserted |
 | Quickflip: +20% empowered damage twice, then +50% speed boost | owner's game data | n/a | Built: +20% at rank 2, +40% in all at rank 3 with the speed boost half again as big |
 | The ult fires after a short delay (the ring growing) | wiki R | yes (ult f27-f31) | Built: 0.4s, no blade before it; asserted |
-| Up to 5 shots at each nearby enemy over 2s | wiki R | yes | Built; asserted (10 blades on two foes) |
+| Up to 5 shots at each nearby enemy over 2s | wiki R | yes (hits 122, 127, 114, 236 within 0.6s) | Built as 10 at 0.2s: the footage's cadence, owner item 54, differs on purpose from the card's 5; measured below |
 | The ult's outer ring deals bonus damage and anti-heals 6s | wiki R | yes (ult f121, f127) | Built on the outer 25% (blight 6s); asserted |
 | Every ult shot refreshes all stacks | wiki R | n/a | Built; asserted |
 | LMB keeps firing during the ult, and she moves freely with the ring attached | wiki R, gamerblurb | yes (ult f41-f47) | Built; asserted |
 | The ult resets Cartwheel (the wiki: dashes while active) | in-game card, wiki R | yes (0193) | Built as the Vault back on the cast; asserted |
 | The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
 | A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
+
+## Death Blossom: source vs ours (measured, nov 12)
+
+Measured by `dancer_ring` in tools/dj_ult_check.gd (run by `--dancer-combo-check`): dummies standing still in the band,
+in the middle and just out of reach, then one dummy the ring passes over while she walks at full speed. bh = 1.8 m.
+
+| Row | Source [where] | Ours (measured) | Verdict |
+|---|---|---|---|
+| Ring grow | 1.3 bh to 3 bh in about 0.4s [footage f27-f31]; the older overview row says about 3.5 bh, the frame read wins | 2.3 m (1.28 bh) to 5.4 m (3.00 bh) at 0.4s | match |
+| Blades | 2s after the grow, "up to 5 shots at each nearby enemy" [card], about every 0.2-0.4s per target [footage] | 10 landings per foe, one every 0.2s (gaps 0.18-0.22 from the flight), the first at 0.55s (volley at 0.4s plus 0.15s of flight), the last at 2.35s | cadence matches the footage; the cap is 10 not 5 on purpose (item 54). Alternative: `shots` 5 and `time` 2.0 gives 0.4s |
+| Hit reach | every enemy inside the ring [footage] | a foe is hit when its centre is within the radius plus its own body radius (`foes_in`), so about 0.4 m past the drawn line; an out-of-reach dummy 0.3 m past that takes none | accepted: a body touching the line is inside |
+| Damage, middle | 114-127 on a 137 bolt, so 0.83-0.93 of a bolt [footage]; 36 + 19% [card] | 4 of a 13 bolt, 0.31 | lower, left: item 54 kept the cast totals (40 inside, 60 in the band) and the bolt was raised from 9 to 13 afterwards |
+| Damage, band | +18 + 9.5% (+50%) and the Anti-Heal icon [card, f121]; 236 seen [footage] | 6 (+50%), blight 6s | the +50% matches the card; 236 is not read as a rule |
+| Per cast, one foe in reach | 5 shots: about 4.4 bolts inside | 10 blades: 3.1 bolts inside, 4.6 in the band | 0.7 of the source, left (owner balance, not a sourced value) |
+| Standing dummy | n/a | 10 landings, 40 in the middle, 60 in the band; none past the radius | asserted |
+| Walking, ring passes a dummy that starts 8 m ahead | the ring rides with her, shots follow whoever is inside [card, f41-f47] | 9 of 10 beats landed (the first beat found it out of reach), 2 of those in the band, 40 damage, equal to the beats' geometry | asserted: every beat's blade follows where the foe is then |
+| Moves, shoots, dashes | free [footage] | free | match (see the rows above) |
+
+No data row was changed: nothing in `x` contradicts a single sourced value; the two gaps are the cap and the damage, both owner balance calls
+filed above. The old `--dj-ult-check` and `--dancer-parity-check` names are sections of `--dancer-combo-check`.
 
 ## Combinations
 
