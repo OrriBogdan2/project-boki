@@ -5,7 +5,8 @@ extends RefCounted
 ## is doing (pulling them up, down too, defending) and only your squad's Boki get tethers. Never touches
 ## the save. Who and what on the body (docs/COMBAT_CLARITY.md): other Hunters' silhouettes carry their side's edge,
 ## other people's ability looks lean to their side (SideColor.fx), crowd control stays on the body it holds (stars,
-## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster.
+## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster. Less text: in a fight only your own
+## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only.
 
 const DT := 1.0 / 60.0
 
@@ -52,6 +53,7 @@ func run(main: Node) -> void:
 		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == P else _side(m, h), edge])
 	_side_fx(m, P, ally, foes[0])
 	_body_tell(m, foes[0])
+	_boki_text(m, P, ally, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -174,6 +176,31 @@ func _body_tell(m: Match, f: Hunter) -> void:
 	ok(m.fx.radial > rings0, "... and rings their feet")
 	_run(m, BodyTell.GLINT_T)
 	ok(BodyTell.tint_of(f).a == 0.0, "the glint fades")
+
+## Boki text over a fight: every Boki's line is drawn out of a fight, only your own in one; an ability name floats
+## over your own Boki, not a rival's.
+func _boki_text(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var mine: Kin = P.kin if P.kin else m.give_kin(P, Save.new_kin("puddlet"))
+	ok(ally.kin != null and foe.kin != null, "your ally and the rival each have a Boki")
+	if ally.kin == null or foe.kin == null:
+		return
+	m.music_dir.last_fight = -99.0
+	ok(BokiChatter.heard(m, foe.kin) and BokiChatter.heard(m, ally.kin), "no fight: every Boki's line is drawn")
+	m.music_dir.last_fight = m.time
+	ok(BokiChatter.heard(m, mine), "in a fight: your own Boki's line is drawn")
+	ok(not BokiChatter.heard(m, foe.kin) and not BokiChatter.heard(m, ally.kin), "... the others' are not")
+	m.music_dir.last_fight = -99.0
+	for k: Kin in [mine, foe.kin]:
+		k.unseen = false
+		k.teleport(P.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))
+	var words := func():
+		return m.fx.nums.filter(func(n): return n.get("word", false) and float(n["t"]) == 0.0).size()
+	var w0: int = words.call()
+	m.on_kin_ability(foe.kin, (foe.kin as Kin).runner.def_of("k1"), false)
+	ok(words.call() == w0, "a rival's Boki casting: no name over it")
+	m.on_kin_ability(mine, mine.runner.def_of("k1"), false)
+	ok(words.call() == w0 + 1, "your own Boki casting: its name floats")
+	mine.stow()
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)

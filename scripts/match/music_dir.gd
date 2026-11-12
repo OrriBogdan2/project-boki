@@ -17,6 +17,10 @@ var started := false
 var ended := false            # the run-end sting has played
 var last_said := false        # the last-squad sting has played
 
+## Is a fight on for the player (a shot traded within FIGHT_HOLD)? Never in training or the tutorial.
+func fight_on(m: Match) -> bool:
+	return m.time - last_fight < FIGHT_HOLD
+
 func start(m: Match) -> void:
 	if m.tier >= 2:
 		Sfx.play_music("hollow")
