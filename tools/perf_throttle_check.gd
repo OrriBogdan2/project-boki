@@ -5,9 +5,9 @@ extends RefCounted
 ## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
 ## Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals SimLod.THINK_FAR_K times less often;
 ## a bot aboard the sky ship picks nothing. Poses (SimLod.pose_every): a rival far on screen at the widest match
-## view (the sky ship ride's camera) is posed every SimLod.POSE_FAR frames, off screen every POSE_OFF_SCREEN, hidden every POSE_UNSEEN, and
-## every frame once on the player's squad or in a fight with it; one that comes on screen is posed that frame, and
-## a Hero's clips and skeleton (WardenGlb.Sync) hold with it and catch up the time.
+## view (the sky ship ride's camera) is posed every SimLod.POSE_FAR frames, off screen every POSE_OFF_SCREEN,
+## hidden every POSE_UNSEEN, every frame once on the player's squad or in a fight with it; one that comes on
+## screen is posed that frame, and a Hero's clips and skeleton (WardenGlb.Sync) hold with it and catch up the time.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
