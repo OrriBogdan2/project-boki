@@ -12,19 +12,14 @@ const THINK_SECS := 0.4          # s until each Boki's first choice, so a greeti
 const JOY := 60.0                # joy need: under toys.json joy_below, so a Boki goes to play on its own
 const SNACKS := {"emberberry": 3, "tidebloom": 3, "sunroot": 2, "puffcorn": 2}
 const TOYS := {"toy_ball": Vector3(-3.5, 0, -3.0), "toy_post": Vector3(4.0, 0, -4.0), "toy_tub": Vector3(-6.0, 0, 2.0)}
-## A zone theme's own playthings instead of TOYS (GARDEN.md 10.2), as [id, offset from the landing]: Kitewind
-## Ridge's post, two vents and its snack patch (ripe).
-const ZONE_TOYS := {"ridge": [["toy_post", Vector3(4.0, 0, -4.0)], ["toy_vent", Vector3(-3.5, 0, -3.0)],
-	["toy_vent", Vector3(-6.0, 0, 2.0)], ["snack_patch", Vector3(-7.0, 0, -6.0)]]}
 const NOOK_AT := Vector3(8.0, 0, -8.0)
 const EGG_SPECIES := "burrlet"
 ## name -> [species, offset from the landing, temper]. Moss and Pip are friends, Ash and Rocky rivals.
 const CAST := {"Pip": ["zapple", Vector3(2.0, 0, 2.0), 0.1], "Moss": ["burrlet", Vector3(3.2, 0, 2.0), 0.1],
 	"Ash": ["cindle", Vector3(-3.0, 0, 4.0), 0.95], "Rocky": ["pebbit", Vector3(-0.8, 0, 4.0), 0.95]}
 
-## The demo's save: base_mode on, a farm-start island (of the given theme), the four Boki, their bonds, the snacks and
-## the ready egg.
-static func save(theme := "meadow") -> Dictionary:
+## The demo's save: base_mode on, a farm-start island, the four Boki, their bonds, the snacks and the ready egg.
+static func save() -> Dictionary:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
 	var recs := {}
@@ -43,7 +38,6 @@ static func save(theme := "meadow") -> Dictionary:
 	d["crops"] = SNACKS.duplicate()
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	HomeLayout.new_fs(d, SEED)
-	HomeLayout.ensure(d)["theme"] = theme
 	Save.d = d
 	Incubator.ensure()
 	var egg := Incubator.add(EGG_SPECIES)
@@ -54,18 +48,16 @@ static func save(theme := "meadow") -> Dictionary:
 func stage(h) -> void:
 	var land := HomeLayout.LANDING
 	h.day_t = 0.42
-	var plain: Array = TOYS.keys().map(func(id): return [id, TOYS[id]])
-	for t in ZONE_TOYS.get(String(HomeLayout.of(Save.d)["theme"]), plain):
-		var e: Dictionary = h.hg.demo_place(String(t[0]), land + t[1])
-		if String(t[0]) == SnackPatch.ID and not e.is_empty():
-			e["t"] = 0.0      # ripe
-			HomeLayout.of(Save.d)["inv"].erase(SnackPatch.ID)      # the one patch is out of storage
+	for id in TOYS:
+		h.hg.demo_place(id, land + TOYS[id])
 	h.hg.demo_place("nesting_nook", land + NOOK_AT)
 	h._sync_fixtures()
 	h.hinc.refresh()
 	h.ppos = land + Vector3(0, 0, 1.0)
 	h.player.position = h.ppos
 	for k in h.kins:
+		if not CAST.has(String(k["rec"]["name"])):
+			continue       # a Boki a caller added (the perf bench's two extras) stays where the farm put it
 		k["pos"] = h.world.free_spot_near(land + CAST[String(k["rec"]["name"])][1], [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 		k["goal"] = k["pos"]

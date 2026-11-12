@@ -5,7 +5,7 @@
 DECISIONS 2026-11-09: the game must be playable without extraction. Before this, a Boki got XP only
 from expeditions (`Game.apply_result`, plus the dojo's rest XP after a run), so a garden-only player
 never reached a first form. Now the farm gives kin XP too: `content/rules/garden_xp.json`, applied by
-`GardenXp.give` through `Game.add_xp` (the same level table, forms and mutations as a run).
+`GardenXp.give` through `Game.gain_xp` (the same level table, forms and mutations as a run).
 
 | Action | XP |
 |---|---|

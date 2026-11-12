@@ -158,6 +158,69 @@
 				}
 			]
 		},
+		"show": {
+			"name": "Show Ring",
+			"first": "sunsap",
+			"ribbon": "Show Ring Cup Ribbon",
+			"colour": "#f08ac0",
+			"cup_prize": "keepstone",
+			"table": [
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 30
+				},
+				{
+					"kind": "snack",
+					"id": "sunroot",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "unwind_tea",
+					"w": 20
+				},
+				{
+					"kind": "item",
+					"id": "rinse_melon",
+					"w": 15
+				},
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 10
+				}
+			]
+		},
+		"relay": {
+			"name": "Relay Cup",
+			"first": "zipseed",
+			"ribbon": "Relay Cup Ribbon",
+			"colour": "#4ad6b0",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 40
+				},
+				{
+					"kind": "snack",
+					"id": "puffcorn",
+					"w": 30
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 15
+				},
+				{
+					"kind": "snack",
+					"id": "tidebloom",
+					"w": 15
+				}
+			]
+		},
 		"kite": {
 			"name": "Kite Tow",
 			"first": "zipseed",

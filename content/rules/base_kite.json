@@ -2,6 +2,8 @@
 	"desc": "Kite Tow (briefs/design/GARDEN_MODERN.md 4.2 game 7, scripts/home/base_kite.gd). Only with farm_build.json base_mode on, and only on Kitewind Ridge. Your Boki glides on a kite round one loop through twelve rings, steered with A and D; Speed sets the pace and a missed ring costs a second. Space flaps the kite up over the high rings; flaps are limited and updraft vents give one back. A lap is raced against a visiting kite whose stats are yours times the cup round's min_ratio (garden_prizes.json kite), so prizes, the first win of the day and the cup come with it. Units: metres, seconds, metres a second; joy is 0-100 points.",
 	"theme": "ridge",
 	"theme_doc": "The island theme (home_layout.gd THEMES) whose garden has the kite stand.",
+	"spots": {"ridge": [40.0, 45.0]},
+	"spots_doc": "A garden zone's own stand spot (tiles x and z), for a zone with no Training post: Kitewind Ridge. Elsewhere the stand sits by the Training post on a home of the theme above.",
 	"rings": 12,
 	"loop_r": 6.5,
 	"glide_h": 3.0,
