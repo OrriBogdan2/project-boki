@@ -36,13 +36,9 @@ static func result(home, res: Dictionary) -> void:
 
 ## result() for two entries that need not be yours ({rec, pos}: a visitor, a rival team's runner).
 static func fanfare(home, win: Dictionary, lose: Dictionary) -> void:
-	won(win["rec"], win["pos"])
+	cue("garden_win_" + _size(win["rec"]), win["pos"])
 	var huff := func(): cue("garden_sulk_" + _size(lose["rec"]), lose["pos"])
 	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
-
-## The win fanfare alone, in the Boki's size (a game with no loser, like the Kite Tow).
-static func won(rec: Dictionary, pos) -> void:
-	cue("garden_win_" + _size(rec), pos)
 
 ## Tumble: the exchange lands with the move that decided it, then the loser scuffs back unless it was dead level.
 static func clash(home, move: String, pos, pushed: bool) -> void:

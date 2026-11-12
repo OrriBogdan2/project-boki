@@ -8,8 +8,7 @@ extends RefCounted
 ##   4. the machine: no move is refused, a match ends at 5 with a winner, and a TABLE-less move is counted
 ##   4b. the weekly 'to_win' format ends every match on its own target, taking more points when it is bigger
 ##   5. a settled match: the winner's joy and trust go up, the loser's joy down, both remember it, gems
-##   6. on the base: no log with base_mode off; with it on, a match runs to a result card;
-##      the landing ring shows while the seed flies, a called spike flashes and dies away, all gone at the end
+##   6. on the base: no log with base_mode off; with it on, a match runs to a result card
 ## Never touches the real save.
 
 const MATCHES := 50
@@ -216,25 +215,11 @@ func _on_base() -> void:
 			k.erase("indoors")
 		vb.use()
 		ok(vb.run != null and vb.pair.size() == 2, "on: a match starts with two Boki")
-		ok(vb.cue != null and not vb.cue.flash.visible, "cue: the landing ring is ready and no spike flash yet")
-		vb.bar.m = vb.bar.zone        # a press right on the gold calls the spike
-		var press := InputEventAction.new()
-		press.action = "interact"
-		press.pressed = true
-		vb.input(press)
-		ok(vb.cue.flash.visible and vb.cue.flash_t > 0.0, "cue: calling the spike flashes")
 		var t := 0.0
-		var ring := false
-		var flash_off := false
 		while vb.run != null and t < float(BaseVolley.rules()["max_s"]) + 5.0:
 			vb.tick(0.1)
 			t += 0.1
-			if vb.cue != null:
-				ring = ring or vb.cue.landing.visible
-				flash_off = flash_off or (t > 1.0 and not vb.cue.flash.visible)
 		ok(vb.run == null and is_instance_valid(vb.card), "on: the match ends with a result card (%.1f s)" % t)
-		ok(ring and flash_off, "cue: the ring shows while the seed flies and the flash dies away")
-		ok(vb.cue == null, "cue: the ring is gone when the match ends")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

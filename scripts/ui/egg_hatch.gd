@@ -14,7 +14,6 @@ signal popped(kin: Node3D)     # the kin has just appeared
 signal done                    # the kin has hopped out and the shell is gone
 
 const STEP := TAU / 36.0       # spacing of the zigzag crack around the middle
-const CHIRP_TYPES := ["venom", "prism", "spore"]    # the starter types that have their own first chirp
 
 var species := "cindle"
 var rec: Dictionary = {}
@@ -40,8 +39,6 @@ var running := false
 var shell_col := Color(0, 0, 0, 0)     # set to override the species colours
 var look_at_pos := Vector3.INF         # who it imprints on (default: the camera, i.e. you)
 var spot_col := Color(0, 0, 0, 0)
-var _tweens: Array[Tween] = []         # the hatching's own tweens, so skip() can speed them up
-var mystery := false                   # the black mystery egg: its own darker, curious sounds
 
 func _init(sp_id: String, fx_ref: Fx, radius := 0.32, middle := 0.42, kin_size := 1.0, kin_rec := {}) -> void:
 	species = sp_id; fx = fx_ref; r = radius; cy = middle; kin_scale = kin_size; rec = kin_rec
@@ -131,22 +128,8 @@ func _gp(local: Vector3) -> Vector3:
 	return global_transform * local
 
 func _sfx(n: String, vol := 0.0, pitch := 1.0) -> void:
-	if n.begins_with("kin_") or n.contains("chirp"): pitch *= Unique.voice(rec)     # the hatchling's own voice
+	if n.begins_with("kin_"): pitch *= Unique.voice(rec)     # the hatchling's own voice
 	Sfx.play(n, null, vol, 0.08, pitch)
-
-## A hatch stage's sound: wobble, crack_1, crack_2, pop (the mystery egg has its own set).
-func _cue(stage: String, vol := 0.0, pitch := 1.0) -> void:
-	_sfx("hatch_%s%s" % ["mystery_" if mystery else "", stage], vol, pitch)
-
-## The first chirp: one per starter type, the mystery egg's own, any other Boki says its happy sound.
-func _first_chirp() -> void:
-	var type := String(Data.KIN[species].get("type", ""))
-	if mystery:
-		_sfx("hatch_mystery_chirp", -4.0)
-	elif type in CHIRP_TYPES:
-		_sfx("hatch_chirp_" + type, -4.0)
-	else:
-		_sfx("kin_happy", -6.0, 1.05)
 
 # ------------------------------------------------------------------ the hatch
 func start() -> void:
@@ -154,10 +137,9 @@ func start() -> void:
 		return
 	running = true
 	var tw := create_tween()
-	_tweens.append(tw)
 	# 1: two curious wiggles
 	for dir in [1.0, -1.0]:
-		tw.tween_callback(_cue.bind("wobble", -6.0, 0.9 + 0.1 * dir))
+		tw.tween_callback(_sfx.bind("hover", -8.0, 0.8 + 0.2 * dir))
 		tw.tween_property(body, "rotation:z", 0.2 * dir, 0.24).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		tw.tween_property(body, "rotation:z", 0.0, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_interval(0.3)
@@ -166,7 +148,7 @@ func start() -> void:
 	tw.tween_callback(func():
 		_crack(-2, 2)
 		_chips(_zig(0), 5)
-		_cue("crack_1"))
+		_sfx("build", -4.0, 1.9))
 	tw.tween_interval(0.6)
 	_shiver(tw, 4, 0.05, 0.05)
 	tw.tween_interval(0.45)
@@ -178,7 +160,7 @@ func start() -> void:
 		_crack(-6, -2); _crack(2, 6)
 		_seg(_zig(1), _surf(PI * 0.5 + 1.4 * STEP, 0.36)); _seg(_surf(PI * 0.5 + 1.4 * STEP, 0.36), _surf(PI * 0.5 + 0.7 * STEP, 0.55))
 		_chips(_zig(-4), 4); _chips(_zig(4), 4)
-		_cue("crack_2"))
+		_sfx("build", -2.0, 1.6))
 	tw.tween_interval(0.7)
 	# 4: a chip pops out and someone peeks through
 	tw.tween_callback(_open_peek)
@@ -195,15 +177,11 @@ func start() -> void:
 	tw.tween_interval(0.35)
 	# 5: the crack runs all the way round
 	tw.tween_callback(func():
-		_crack(6, 30))
+		_crack(6, 30)
+		_sfx("build", -3.0, 1.3))
 	_shiver(tw, 6, 0.07, 0.055)
 	tw.tween_property(body, "scale", Vector3(1.12, 0.84, 1.12), 0.16).set_trans(Tween.TRANS_SINE)
 	tw.tween_callback(_pop)
-
-## Plays the rest of the hatching faster (a key press); the kin still hops out and says hello.
-func skip(speed: float) -> void:
-	for t in _tweens:
-		if t.is_valid(): t.set_speed_scale(speed)
 
 func _hop(tw: Tween, h: float) -> void:
 	tw.tween_callback(_sfx.bind("jump", -10.0, 1.7))
@@ -258,6 +236,7 @@ func _open_peek() -> void:
 	cyt.tween_property(chip, "scale", Vector3.ZERO, 0.3)
 	cyt.tween_callback(chip.queue_free)
 	_chips(_surf(a, lat), 4)
+	_sfx("build", -2.0, 2.2)
 	_sfx("kin_unsure", -10.0, 1.35)
 
 func _blink() -> void:
@@ -287,7 +266,7 @@ func _pop() -> void:
 	var k := r / 0.32
 	# a few bits of shell, nothing more
 	_chips(Vector3(0, cy, 0), 6)
-	_cue("pop")
+	_sfx("build", -4.0, 1.05)
 	# the top tips off to one side and the whole shell shrinks away: gone about 0.8s after the pop
 	var side := Vector3(-0.75, 0, 0.25) * k
 	ct_tip(cap, side, k)
@@ -307,7 +286,6 @@ func _pop() -> void:
 	kin_node.scale = Vector3.ONE * 0.8 * ks
 	var out := global_position + Vector3(0.0, 0.0, hop_out) * k * 1.3
 	var kt := create_tween()
-	_tweens.append(kt)
 	# 0.0: pops up, stretching, out of the cup and onto the ground
 	kt.tween_callback(_sfx.bind("jump", -10.0, 1.6))
 	kt.tween_property(kin_node, "scale", Vector3(0.95, 1.12, 0.95) * ks, 0.12).set_trans(Tween.TRANS_SINE)
@@ -325,7 +303,7 @@ func _pop() -> void:
 	kt.tween_property(kin_node, "rotation:y", face_you, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	kt.tween_callback(func():
 		_look_up(0.28)
-		_first_chirp()
+		_sfx("kin_happy", -6.0, 1.05)
 		popped.emit(kin_node))
 	_bounce(kt, ks, out.y, 0.22)
 	_bounce(kt, ks, out.y, 0.14)

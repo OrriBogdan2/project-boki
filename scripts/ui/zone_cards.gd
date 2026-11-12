@@ -21,7 +21,7 @@ static func open(h, here: String) -> void:
 	for id in GardenZones.ids():
 		var z := GardenZones.info(id)
 		if GardenZones.is_open(id):
-			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), open_lines(id), func(): h.hway.hop(id),
+			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), _open_lines(id), func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
 			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
@@ -67,7 +67,7 @@ static func move_to(h, k: Dictionary) -> void:
 	for id in GardenZones.ids():
 		var z := GardenZones.info(id)
 		var why := GardenZones.why_not(rec, id)
-		var lines: Array = open_lines(id) if GardenZones.is_open(id) else []
+		var lines: Array = _open_lines(id) if GardenZones.is_open(id) else []
 		if why != "":
 			lines.append(UI.para(why, 12, UI.MUTED))
 		var col := Color(String(z["colour"])) if GardenZones.is_open(id) else UI.FAINT
@@ -86,8 +86,7 @@ static func key_lines(id: String) -> Array:
 static func _tick(have: bool) -> String:
 	return "[x]" if have else "[ ]"
 
-## An open zone's lines: who lives there and how they feel, today's game, its decor effects (DecorComfort).
-static func open_lines(id: String) -> Array:
+static func _open_lines(id: String) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)
 	if res.is_empty():
@@ -98,8 +97,6 @@ static func open_lines(id: String) -> Array:
 	if not founder.is_empty():
 		out.append(UI.para("Woken by %s" % founder["name"], 12, UI.MUTED))
 	out.append(UI.para("Today: " + String(GardenZones.info(id)["game"]), 12, UI.INK))
-	for line in DecorComfort.card_lines(id):
-		out.append(UI.para(line, 12, UI.GOLD))
 	return out
 
 static func _mood(rec: Dictionary) -> String:

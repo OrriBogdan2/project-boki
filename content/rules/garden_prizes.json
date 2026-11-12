@@ -220,59 +220,6 @@
 					"w": 15
 				}
 			]
-		},
-		"kite": {
-			"name": "Kite Tow",
-			"first": "zipseed",
-			"ribbon": "Kite Tow Cup Ribbon",
-			"colour": "#8fd3f4",
-			"cup_prize": "galeribbon",
-			"table": [
-				{
-					"kind": "item",
-					"id": "zipseed",
-					"w": 55
-				},
-				{
-					"kind": "item",
-					"id": "windfloss",
-					"w": 45
-				}
-			]
-		},
-		"lantern": {
-			"name": "Lantern Match",
-			"first": "hush_truffle",
-			"ribbon": "Lantern Match Cup Ribbon",
-			"colour": "#b48cff",
-			"cup_prize": "puzzlenut",
-			"table": [
-				{
-					"kind": "item",
-					"id": "peekbox",
-					"w": 35
-				},
-				{
-					"kind": "item",
-					"id": "hush_truffle",
-					"w": 25
-				},
-				{
-					"kind": "item",
-					"id": "glowmoss_sprig",
-					"w": 15
-				},
-				{
-					"kind": "snack",
-					"id": "glowcap",
-					"w": 15
-				},
-				{
-					"kind": "item",
-					"id": "hushpearl",
-					"w": 10
-				}
-			]
 		}
 	}
 }

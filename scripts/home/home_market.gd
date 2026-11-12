@@ -153,7 +153,7 @@ func _boki_food() -> Array:
 	for f in Care.FOODS:
 		var fd: Dictionary = Care.FOODS[f]
 		var fk: String = f
-		var desc := "Boki eat this. Feed it from a Boki's card. " + FoodJournal.line(f)
+		var desc := "Boki eat this. Feed it from a Boki's card. " + String(fd["desc"])
 		goods.append(["food:" + f, fd["name"], desc, int(fd["price"]), Color("ffb36a"),
 			func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
 	return goods

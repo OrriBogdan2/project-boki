@@ -37,7 +37,7 @@ var why := ""                   # why a piece can't go where it was tried
 var blocker := -1               # index of the piece in the way
 
 func _ready() -> void:
-	CursorMode.menu()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	R = Data.ROOMS.get(room, Data.ROOMS["house"])
 	W = int(R["w"]); D = int(R["d"])
 	_build_env()

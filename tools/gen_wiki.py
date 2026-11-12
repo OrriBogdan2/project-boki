@@ -284,7 +284,7 @@ def gen_classes():
     starters = ", ".join(the(ARCH[a]["title"]) for a in cu["starters"] if a in ARCH)
     unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) after naming your first Boki and plays the tutorial as it. After your first expedition the other starters open, and you pick a second Relic from Kael, Cinder and Meeko (whichever you do not hold). " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
-    unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Area, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
+    unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
     unlock += "\n\n### Mastery\n\nEach Hunter has its own mastery goals, counted only in expeditions played as that Hunter. Each one done is a mastery level and a cosmetic reward; playing a Hunter longer never gives power.\n\n"
     unlock += table(["Hunter", "Goal", "Target", "Reward"], m_rows)
@@ -578,7 +578,7 @@ def gen_rules():
     if mt:
         # only the keys the game still reads (the rest of Data.MATCH predates Life.R and the exits)
         live = [k for k in ("length", "down_hp") if k in mt]
-        rows = [["players", num(gd_const("core/data.gd", "MATCH_PLAYERS") or "?"), "hunters in an expedition (solo or trios)"]]
+        rows = [["players", num(gd_const("core/data.gd", "MATCH_PLAYERS") or "?"), "hunters in an expedition (solos, duos or trios)"]]
         rows += [[k, num(mt[k]), mc.get(k, "")] for k in live]
         body += "\n\n## Match\n\n" + table(["Setting", "Value", "Meaning"], rows)
     lr = gd_const("match/life.gd", "R") or {}
