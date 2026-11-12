@@ -54,10 +54,10 @@ static func end(m: Match, h: Hunter, why: String) -> void:
 		m.net_event(["stomp", h.nid, o.nid if is_instance_valid(o) else "", why])
 	if why == "broken":
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
-		StompSfx.crack(m, h)
+		StompSfx.crack(m, h, o)
 	elif why == "done" and is_instance_valid(o) and o.downed and not o.out:
 		m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-		StompSfx.snuff(m, o)
+		StompSfx.crush(m, o)
 		if not o.remote:
 			m.eliminate(o, h, "executed")
 
@@ -101,7 +101,7 @@ static func _pin(h: Hunter, at: Vector3) -> void:
 static func _slam(m: Match, h: Hunter, o: Hunter) -> void:
 	m.fx.dust(h.pos, 10)
 	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, Color(1, 0.8, 0.7, 0.6), 0.25)
-	StompSfx.strike(m, h)
+	StompSfx.strike(m, h, int(beat(h)))
 	if is_instance_valid(o):
 		m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.5, -4.0)
 

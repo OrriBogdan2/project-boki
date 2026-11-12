@@ -3,7 +3,8 @@
   stomp_commit  the 0.2 s hold commits: a heel scuff and a short low latch that says "locked in"
   stomp_strike  one foot slam on the wisp (3 takes); StompSfx pitches it and adds the shared thump
                 under it per the Hunter's weight class, so one file covers light, medium and heavy
-  stomp_snuff   the finish: a breathy puff with a soft falling tone, a light put out, not a blast
+  stomp_crush   the finish on the last slam: a deep crushing slam, a crunch and the wisp's light
+                squeezed out under the foot (a falling tone choked off)
   stomp_crack   CC breaks the stomp: a bright crack and a short rising ring as the wisp is let go
 The wisp's strain while pinned is its own hum (wisp_hum), bent by StompSfx.strain, not a file here.
 """
@@ -28,11 +29,12 @@ def strike(i):
     return mix(thud, crunch, press, S.tail(0.25, 600, 0.07) * 0.3)
 
 
-def snuff():
-    d = 0.6
-    puff = lpf(noise(d), 1600) * S.shape(d, 0.02, 0.04, 0.35)
-    fall = S.sweep(520, 180, d) * env(N(d), 0.02, 0.18) * 0.35
-    return lpf(mix(puff, fall), 2500)
+def crush():
+    slam = S.kick(110, 34, 0.7, drop=0.035, decay=0.2, drive=3.2)
+    body = S.sub(70, 38, 0.6, 0.22) * 0.6
+    crunch = at(S.grains(0.22, 420, 300, 4200, fall=0.1), 0.008) * 0.7
+    squeeze = at(S.sweep(640, 110, 0.3) * env(N(0.3), 0.005, 0.07), 0.03) * 0.35
+    return mix(slam, body, crunch, squeeze, S.tail(0.6, 450, 0.18) * 0.35)
 
 
 def crack_free():
@@ -44,6 +46,6 @@ def crack_free():
 
 S.save_cat('stomp_commit', commit(), 'cast')
 S.takes_cat('stomp_strike', strike, 3, 'heavy_impact')
-S.save_cat('stomp_snuff', snuff(), 'cast')
+S.save_cat('stomp_crush', crush(), 'heavy_impact')
 S.save_cat('stomp_crack', crack_free(), 'impact')
 print('stomp sounds written')

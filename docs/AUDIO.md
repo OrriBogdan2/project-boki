@@ -59,11 +59,11 @@ Four short one-shots in the expedition score's key (A minor, `tools/compose.py` 
 ## Stomp sounds (`content/sfx/stomp.json`, `tools/gen_sfx_stomp.py`)
 `scripts/match/stomp_sfx.gd` (`StompSfx`), numbers in `content/rules/stomps.json` "sound". Stomp calls it from `start`, each beat and `end`, which run in every game (the stomper's own, the others through the `"stomp"` event), so everyone in range hears it at the spot, the downed player included:
 - **Commit** at the 0.2 s hold: `stomp_commit`, a heel scuff and a low latch.
-- **Strike** per beat: `stomp_strike` (3 takes), pitched by the stomper's weight class (`Arch.weight`: light 1.3, medium 1.0, heavy 0.8), with the shared `thump` under it for medium and heavy. One file for every Hunter.
+- **Strike** per beat: `stomp_strike` (3 takes), pitched by the stomper's weight class (`Arch.weight`: light 1.3, medium 1.0, heavy 0.8), with the shared `thump` under it for medium and heavy, and louder each slam (`ramp_db` -5, -2.5, 0 dB for the 1st, 2nd, 3rd), so a stomp builds to its last blow. One file for every Hunter; at most two voices a slam, inside `Sfx.STACK_MAX`.
 - **Strain**: the pinned wisp's own `wisp_hum` (`HunterWisp._hum`) rises from 1.1 to 1.45 pitch over the stomp with a 7 Hz tremble, 5 dB up (`StompSfx.strain`).
-- **Finish**: `stomp_snuff`, a breathy puff with a soft falling tone, not a blast.
-- **Broken** by crowd control: `stomp_crack`, a bright crack and a short rising ring, carrying 30 m so the rescuer hears it worked.
-`--stomp-check` counts each: one commit, a strike per beat, the hum's strain, a snuff on "done" and a crack on "broken" (never both), the same from another game's events, and the strike per weight class.
+- **Finish** on the last slam: `stomp_crush`, a deep slam, a crunch and a falling tone choked off: the wisp crushed under the foot.
+- **Broken** by crowd control: `stomp_crack`, a bright crack and a short rising ring, carrying 30 m so the rescuer hears it worked. The saved wisp and its squad hear it with no position (a cue of their own, wherever they are): "you're free".
+`--stomp-check` counts each: one commit, a strike per beat each louder than the last, the hum's strain, a crush on "done" and a crack on "broken" (never both), the squad hearing the crack 80 m off and a rival's not, the same from another game's events, and the strike per weight class.
 
 ## Capture sounds (`content/sfx/capture.json`, `tools/gen_sfx_capture.py`)
 All wired in `scripts/match/capture.gd`, so a rival's game plays them from the same net events (`scan_start`, `scan_stop`, `scan_done`) as the local one:

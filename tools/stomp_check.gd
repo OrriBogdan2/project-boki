@@ -11,8 +11,10 @@ extends RefCounted
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
 ##  7. Sounds (StompSfx), counted at the spot in this game, the stomper's and the wisp's alike: one
-##     commit, one strike per beat, the wisp's hum straining while pinned, a snuff on "done" and a
-##     crack on "broken" (never both); a strike's pitch falls and its body grows from light to heavy.
+##     commit, one strike per beat and each louder than the last, the wisp's hum straining while
+##     pinned, a crush on "done" and a crack on "broken" (never both); the saved wisp's squad hears
+##     the crack from anywhere, a rival's stays at the spot; a strike's pitch falls and its body grows
+##     from light to heavy.
 ## Never touches the save.
 
 var bad := 0
@@ -68,6 +70,19 @@ func _heard(sname: String) -> bool:
 	Sfx.last_played.erase(sname)
 	Sfx.recent.erase(sname)
 	return was
+
+## The level (dB) the newest `sname` started at in a pool voice; the voice is cleared so the next
+## read finds the next one.
+func _level(sname: String) -> float:
+	var takes = Sfx.streams.get(sname)
+	if not takes is Array:
+		takes = [takes]
+	for p in Sfx.players:
+		if p.stream != null and (takes as Array).has(p.stream):
+			p.stop()
+			p.stream = null
+			return p.volume_db
+	return NAN
 
 ## Hold interact until the stomp commits; the seconds it took.
 func _commit() -> float:
@@ -132,10 +147,11 @@ func _check_stun(at: Vector3) -> void:
 	_setup(at)
 	_commit()
 	_run(1.0)
+	Sfx.listener = at + Vector3(80, 0, 0)      # past the crack's reach: the squad hears it anyway
 	foe.hurt(5.0, m.player, {"stun": 0.6})
 	_run(Match.DT)
 	ok(foe.stomp.is_empty(), "a stun cancels the stomp")
-	ok(_heard("stomp_crack") and not _heard("stomp_snuff"), "the break cracks (no snuff)")
+	ok(_heard("stomp_crack") and not _heard("stomp_crush"), "the break cracks (no crush), heard by the squad 80 m off")
 	ok(W.downed and not W.out and not W.has_meta("stomped_by"), "the wisp survives the cancelled stomp and is let go")
 	_spot(foe, at + Vector3(30, 0, 0))
 	var w0 := W.pos
@@ -150,17 +166,26 @@ func _check_finish(at: Vector3) -> void:
 	ok(_heard("stomp_commit"), "the commit plays its sound")
 	var t0 := m.time
 	var strikes := 0
+	var levels := []
+	while not is_nan(_level("stomp_strike")):      # clear the strikes the earlier stomps left in the pool
+		pass
 	var strain := 0.0
 	while not W.out and m.time - t0 < Stomp.TIME + 1.0:
 		_run(Match.DT)
-		if _heard("stomp_strike"): strikes += 1
+		if _heard("stomp_strike"):
+			strikes += 1
+			levels.append(_level("stomp_strike"))
 		HunterWisp.tick(W, Match.DT)      # the hum is held from the render pass, which the check doesn't run
 		if Sfx.loop_on(HunterWisp.hum_key(W)):
 			strain = maxf(strain, (Sfx.loops[HunterWisp.hum_key(W)]["p"] as AudioStreamPlayer).pitch_scale)
 	var took := m.time - t0
 	ok(strikes == Stomp.BEATS, "a strike per beat (%d of %d)" % [strikes, Stomp.BEATS])
+	var rising := levels.size() == Stomp.BEATS
+	for i in range(1, levels.size()):
+		rising = rising and levels[i] > levels[i - 1]
+	ok(rising, "each strike lands louder than the last (%s dB)" % [levels])
 	ok(strain > 1.3, "the pinned wisp's hum strains (pitch up to %.2f)" % strain)
-	ok(_heard("stomp_snuff") and not _heard("stomp_crack"), "the finish snuffs (no crack)")
+	ok(_heard("stomp_crush") and not _heard("stomp_crack"), "the finish crushes (no crack)")
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "left alone the stomp executes the wisp")
 	ok(absf(took - Stomp.TIME) <= 0.05, "at %.2fs (Stomp.TIME %.1fs)" % [took, Stomp.TIME])
 	ok(foe.stomp.is_empty(), "and the stomper is free again")
@@ -174,7 +199,11 @@ func _check_net(at: Vector3) -> void:
 	m.net_on = true
 	Net.out_events.clear()
 	Stomp.start(m, foe, W)
+	Sfx.listener = at + Vector3(80, 0, 0)
+	_heard("stomp_crack")
 	Stomp.end(m, foe, "broken")
+	ok(not _heard("stomp_crack"), "a rival wisp's break cracks at the spot, unheard 80 m off")
+	Sfx.listener = at
 	var sent: Array = Net.out_events.filter(func(e): return e[0] == "stomp")
 	m.net_on = false
 	ok(sent.size() == 2 and sent[0][3] == "go" and sent[0][4] == StompLook.style_id(foe) and sent[1][3] == "broken",
@@ -200,7 +229,7 @@ func _check_net(at: Vector3) -> void:
 	ok(_heard("stomp_strike"), "another game's stomp strikes here on its beat")
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "done"])
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "a \"done\" executes this game's wisp")
-	ok(_heard("stomp_snuff"), "...with the snuff")
+	ok(_heard("stomp_crush"), "...with the crush")
 	foe.remote = false
 
 func _check_styles() -> void:
@@ -242,7 +271,7 @@ func _check_weights() -> void:
 		foe.arch = Arch.ids().filter(func(id): return Arch.weight(id) == w)[0]
 		_heard("stomp_strike")
 		_heard(String(rows["body"]))
-		StompSfx.strike(m, foe)
+		StompSfx.strike(m, foe, 0)
 		var body := _heard(String(rows["body"]))
 		ok(_heard("stomp_strike") and body == rows[w].has("body_db"),
 			"a %s Hunter's strike (%s, body %s)" % [w, foe.arch, body])
