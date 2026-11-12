@@ -1,21 +1,21 @@
 extends RefCounted
 ## --tutorial-hud-check: the tutorial shows one voice at a time, in its own lanes.
-##   1. the lanes at 1280x720 and 1920x1080: the step panel is at most 35% of the width and 10% of the
-##      height and, even with its second line, stays in the top fifth; no two lanes (panel, check,
+##   1. the lanes at 1280x720, 1920x1080 and 3440x1440: the step strip is one line, at most 42% of the width
+##      and 6% of the height, at the top-centre inside the safe margin; no two lanes (strip, check,
 ##      toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
-##   4. the panel counter, the right click taught from its kit data, the Boki step by its state
-##   5. the lookout: every course stop is climbable from the one before it with plain movement
+##   4. the panel counter, the right click taught from its kit data, the Boki step's words
+##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
+##      wall kick (taller than a jump, within a jump and a kick's climb)
 
 var bad := 0
 var m: Match
 var main: Node
 
-const DETAIL_MAX := 100      # characters: the longest plain-words line under a step (it was 157)
-const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
+const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -36,11 +36,14 @@ func _lanes() -> void:
 		var ln := TutorialHud.lanes(sz)
 		var b: Rect2 = ln["banner"]
 		var tag := "%dx%d" % [sz.x, sz.y]
-		var small: bool = b.size.x <= sz.x * 0.35 + 0.5 and b.size.y <= sz.y * 0.10 + 0.5
-		ok(small, "%s: the banner is at most 35%% x 10%% of the screen (%s)" % [tag, str(b.size)])
-		var tall_end := b.position.y + b.size.y * TutorialHud.DETAIL_K
-		var top_fifth := "%s: the panel with its second line stays in the top fifth (%.0f)" % [tag, tall_end]
-		ok(tall_end <= sz.y * 0.2 + 0.5, top_fifth)
+		var small: bool = b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
+		ok(small, "%s: the strip is at most 42%% x 6%% of the screen (%s)" % [tag, str(b.size)])
+		var margin := maxf(24.0, sz.y * 0.04)
+		var in_safe := b.position.y >= margin - 0.5 and b.position.x >= margin
+		ok(in_safe, "%s: the strip is inside the safe margin (%.0f)" % [tag, b.position.y])
+		ok(absf(b.get_center().x - sz.x * 0.5) < 1.0, "%s: the strip is at the top-centre" % tag)
+		var pulse_ok := TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
+		ok(pulse_ok, "%s: the glow starts full on a new objective and is calm after PULSE_T" % tag)
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
 		var clash := ""
@@ -53,6 +56,13 @@ func _lanes() -> void:
 					clash += " %s/%s" % [names[i], names[j]]
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
+		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
+		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
+		var gb := TutorialStrip.rect(sz, wo_b)
+		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
+		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
 
 # ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
@@ -83,7 +93,6 @@ func _course() -> void:
 	var under := 0
 	var texts := {}
 	var counters := {}
-	var details := {}
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -98,7 +107,6 @@ func _course() -> void:
 				asked += 1
 			texts[tu.id()] = tu.text
 			counters[tu.id()] = tu.progress_text()
-			details[tu.id()] = tu.detail
 		step_t += Match.DT
 		if m.hud == null:
 			continue
@@ -118,21 +126,17 @@ func _course() -> void:
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
-	var rank := String(details.get("rank", ""))
-	var jargon := ["skill point", "ultimate", "rank up"].filter(func(w): return rank.to_lower().contains(w))
-	var plain := rank != "" and rank.length() <= DETAIL_MAX and jargon.is_empty()
-	ok(plain, "the level-up line is short plain words (%d chars, jargon %s)" % [rank.length(), str(jargon)])
-	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
+	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak
 	if ak != null:
 		var hold := float(ak.rmb_def().get("hold", 0.0)) > 0.0
 		var why := "(%s hold %s)" % [ak.id, str(hold)]
 		ok(tu.rmb_has_hold() == hold, "the right click step follows the kit's hold variant " + why)
-		var line := String(texts.get("utility", ""))
+		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
-	var tl := String(texts.get("throw", ""))
-	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+	var tl := String(texts.get("gkey", "")).to_lower()
+	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
@@ -177,7 +181,7 @@ func _under_banner() -> int:
 func _reach() -> void:
 	var tu: Tutorial = m.tut
 	var jump_apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
-	var order := ["land", "move", "dash", "exdash", "glide", "crouch", "pickup", "yard", "chest"]
+	var order := ["land", "dash", "exdash", "glide", "crouch", "pickup", "yard"]
 	var worst := 0.0
 	var worst_at := ""
 	for i in range(1, order.size()):
@@ -187,6 +191,8 @@ func _reach() -> void:
 			continue
 		if m.world.island_of(a.x, a.z) != m.world.island_of(b.x, b.z):
 			continue      # (a gap: the dash, jump and glide steps and the bridges, which the run above plays)
+		if order[i] == "crouch":
+			continue      # (the lookout: climbed with a wall kick, checked below)
 		var prev := a.y
 		var n := int(a.distance_to(b) / 0.4) + 1
 		for k in range(1, n + 1):
@@ -199,4 +205,5 @@ func _reach() -> void:
 	var msg := "every walk between stops climbs at most 60%% of a jump (%.2fm of %.2fm, %s)"
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
 	var cr := tu.stop("crouch")
-	ok(cr.y <= jump_apex * 0.6, "the lookout top is %.2fm up, under 60%% of a jump (%.2fm)" % [cr.y, jump_apex])
+	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
+	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
