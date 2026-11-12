@@ -61,6 +61,7 @@ var interact := {}          # what F would do right now for the local player
 var paused := false
 var duel: Duel = null
 var arena: Arena = null   # the Arena (opts "arena") or the Training Grounds's practice tools
+var duo: DuoTutorial = null     # the 2v2 tutorial (scripts/match/duo_tutorial.gd)
 var shot_n := 0          # the duel room: you and one sparring bot (opts "duel")
 var slowmo := 0.0
 var slow_k := 0.35
@@ -310,7 +311,7 @@ func _start(o: Dictionary) -> void:
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	elif o.get("arena", false):
-		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
+		layout = World.load_layout(String(o.get("arena_map", "arena")))     # the practice arena (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
@@ -454,7 +455,10 @@ func _start(o: Dictionary) -> void:
 		duel.setup(self)
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
-	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
+	if opts.get("duo_tut", false):
+		duo = DuoTutorial.new(self)
+	elif player and duel == null and not opts.get("tutorial", false) \
+			and (opts.get("arena", false) or opts.get("practice", false)):
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
@@ -3316,8 +3320,8 @@ func cam_lead_vel() -> Vector3:
 	return Vector3(player.vel.x, 0.0, player.vel.z) * ahead
 
 func _gather_input() -> void:
-	if player == null or player.out or opts.get("tut_test", false):
-		return       # (the tutorial test drives the player itself)
+	if player == null or player.out or opts.get("tut_test", false) or opts.get("duo_test", false):
+		return       # (the tutorial tests drive the player themselves)
 	var mv := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 	if mv.length() > 1.0:
 		mv = mv.normalized()
@@ -3899,6 +3903,7 @@ func step(dt: float) -> void:
 	if arena:
 		arena.after_think()
 		arena.tick(dt)
+	if duo: duo.tick(dt)
 	_prof("train")
 	for h in hunters: h.sim(SimLod.step_dt(h, dt))
 	_prof("hunters")
@@ -4272,8 +4277,9 @@ func _update_interact(dt: float) -> void:
 			if h != player:              # nobody reads a bot's prompt: skip the scans (40 hunters)
 				if exits: exits.let_go(h)
 				continue
-		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
-		if best.is_empty() and not opts.get("training", false):
+		# 2. scan a knocked-out wild kin (Capture; not in training, where practice kin go home with nobody, but
+		# in the 2v2 tutorial's capture beat)
+		if best.is_empty() and (not opts.get("training", false) or duo != null):
 			for k in kins:
 				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
@@ -4378,7 +4384,7 @@ func _update_interact(dt: float) -> void:
 				lairs.hold(h, best, dt)
 
 func _catch(h: Hunter, k: Kin) -> void:
-	if opts.get("training", false):
+	if opts.get("training", false) and duo == null:
 		return
 	if net_on and not is_host:
 		if k.catch_prog < 5.0:

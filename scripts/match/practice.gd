@@ -23,7 +23,9 @@ var hover_arch := ""           # the card under the mouse (K opens its kit)
 var _layer: CanvasLayer = null
 
 static func is_practice(opts: Dictionary) -> bool:
-	return opts.get("training", false) or opts.get("tutorial", false) or opts.get("arena", false) or opts.get("duel", false)
+	var any: bool = opts.get("training", false) or opts.get("tutorial", false) or opts.get("arena", false) \
+		or opts.get("duel", false)
+	return any and not opts.get("duo_tut", false)      # (the 2v2 tutorial is a match, not a practice area)
 
 static func of(match_node: Match) -> Practice:
 	return match_node.get_node_or_null(NAME) as Practice
