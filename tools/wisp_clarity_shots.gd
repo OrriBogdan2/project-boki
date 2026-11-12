@@ -1,13 +1,18 @@
 extends RefCounted
-## --wisp-clarity-shots --shots-dir=<dir>: a short frame sequence (30 fps PNGs, for ffmpeg) of the downed
-## picture from the game camera, in a live 2v2 under xvfb with a renderer:
-##   ally view   your teammate is knocked with their Boki out beside them; you walk over and stand on
-##               their Wisp until they are back up
-##   enemy view  a rival is knocked with their Boki out; you stand on their Wisp until it is stomped out
-## Never touches the save.
+## --wisp-clarity-shots --shots-dir=<dir>: a short frame sequence (30 fps JPGs, for ffmpeg) of the downed
+## picture from the game camera, in a live 3v3 under xvfb with a renderer. Prints the frame each part
+## starts on (video captions):
+##   side by side  you (in the glitch skin), a teammate and a rival are knocked in a row: three Wisps,
+##                 plumes in the you / ally / rival colours
+##   jump revive   your other teammate runs in and jumps onto your Wisp until you are back up
+##   ally revive   you walk to your teammate's Wisp (its plate says JUMP TO REVIVE, the rival's does not)
+##                 and jump onto it until they are up
+## Their Boki ride as wisps but hold off their own pull, so the revives in the clip are the jumps. Never
+## touches the save.
 
 const DT := 1.0 / 60.0
 const SAVE_EVERY := 2          # sim steps per saved frame: 30 fps
+const GAP := 2.6               # m between the Wisps in the row (more than the revive reach)
 
 var main: Node
 var m: Match
@@ -15,6 +20,7 @@ var P: Hunter
 var dir := ""
 var frame := 0
 var step_n := 0
+var focus := Vector3.ZERO      # where the camera looks
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -25,35 +31,43 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
+	WispLook.equip("glitch")
 	await _setup()
-	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
-	var foe: Hunter = foes[0]
-	# ---- ally view: the teammate goes down with their Boki out a few metres off
-	mate.teleport(P.pos + Vector3(4.5, 0, -1.0))
-	_pet_out(mate, Vector3(-3.0, 0, 3.5))
-	await _go(0.8)
-	m.knock(mate, foe, {})
+	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
+	var mate: Hunter = mates[0]
+	var runner: Hunter = mates[1]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	mate.teleport(m.world.free_spot_near(P.pos + Vector3(GAP, 0, 0), [], 0.5, 0.4, 3.0))
+	foe.teleport(m.world.free_spot_near(P.pos + Vector3(GAP * 2.0, 0, 0), [], 0.5, 0.4, 3.0))
+	runner.teleport(m.world.free_spot_near(P.pos + Vector3(-9.0, 0, 3.0), [], 0.5, 0.4, 3.0))
+	focus = mate.pos
+	await _go(0.6)
+	print("WISPCLARITY side by side from frame %d" % frame)
+	for h in [P, mate, foe]:
+		m.knock(h, null, {})
+		h.down_hp = 1e6
+		h.reveal_t = 60.0
+	await _go(DT)
+	for k in m.kins:
+		k.revive_wait = 1e6        # (their own pull would bring them up mid-clip)
+	await _go(3.5)
+	print("WISPCLARITY jump revive from frame %d" % frame)
+	await _walk(runner, P, 4.0)
+	await _jump_until_up(runner, P)
+	await _go(1.0)
+	print("WISPCLARITY ally revive from frame %d" % frame)
+	await _walk(P, mate, 4.0, 1.6)
+	await _go(1.2)
+	await _walk(P, mate, 2.0)
+	await _jump_until_up(P, mate)
 	await _go(2.0)
-	await _walk_to(mate, 3.0)
-	await _go(5.0)
-	# ---- enemy view: a rival goes down with their Boki out, and you stomp them out
-	print("WISPCLARITY enemy view from frame %d" % frame)
-	var rival: Hunter = foes[1]
-	rival.teleport(P.pos + Vector3(-4.0, 0, -2.0))
-	_pet_out(rival, Vector3(4.0, 0, 2.5))
-	await _go(0.8)
-	m.knock(rival, P, {})
-	await _go(1.5)
-	await _walk_to(rival, 3.0)
-	await _go(7.0)
 	print("WISPCLARITY %d frames in %s" % [frame, dir])
 	main.get_tree().quit(0)
 
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
@@ -71,31 +85,30 @@ func _setup() -> void:
 		if h != P:
 			h.teleport(m.world.free_spot_near(P.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 8.0))
 
-## Gives the hunter a Boki if they have none, and sets it down on foot `off` metres from them.
-func _pet_out(h: Hunter, off: Vector3) -> void:
-	if h.kin == null:
-		m.give_kin(h, m.bot_kin_record())
-	var k: Kin = h.kin
-	k.cmd = "follow"
-	k.state = "active"
-	k.teleport(m.world.free_spot_near(h.pos + off, [], 0.6, 0.4, 4.0))
-
-## You walk onto the hunter (at most `secs`).
-func _walk_to(o: Hunter, secs: float) -> void:
+## `h` walks toward `o` until within `stop` metres (at most `secs`).
+func _walk(h: Hunter, o: Hunter, secs: float, stop := 0.5) -> void:
 	var t := 0.0
-	while t < secs and P.flat_dist(o) > 0.6:
-		var to := Vector2(o.pos.x - P.pos.x, o.pos.z - P.pos.z).normalized()
-		P.inp["move"] = to
+	while t < secs and h.flat_dist(o) > stop:
+		h.inp["move"] = Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z).normalized()
 		await _go(DT)
 		t += DT
-	P.inp["move"] = Vector2.ZERO
+	h.inp["move"] = Vector2.ZERO
+
+## `h` hops onto downed `o` again and again until `o` is back up (at most 8 s).
+func _jump_until_up(h: Hunter, o: Hunter) -> void:
+	var t := 0.0
+	while o.downed and t < 8.0:
+		if h.grounded:
+			h.do_jump()
+		await _go(DT)
+		t += DT
 
 func _go(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
-		m.cam.snap(P.pos)
+		m.cam.snap(focus)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		for k in m.kins:
