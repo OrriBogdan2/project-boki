@@ -116,7 +116,8 @@ static func lead_ring(H, p: Hunter, r: Rect2) -> void:
 	if k == null or not is_instance_valid(k):
 		return
 	if int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p):
-		DexView.draw_type(H.c, DexView.type_of(k.species), r.get_center() + Vector2(0, -r.size.y * 0.24), r.size.y * LEAD_MARK)
+		var at := r.get_center() + Vector2(0, -r.size.y * 0.24)
+		DexView.draw_type(H.c, DexView.type_of(k.species), at, r.size.y * LEAD_MARK)
 	if KinMerge.active(p) or not k.ready_to_fight():
 		return
 	var cd := float(Content.rules("kin_ai").get("recall_cooldown", 1.0))

@@ -9,7 +9,7 @@ extends RefCounted
 ##   7. stealing from a deathbox: one stolen slot, at most 4 Boki on one hunter
 ##   8. bots bring two
 ##   9. the HUD's second-Boki badge has an icon for every passive stat (the box itself: --carry-two-clip shots)
-## --carry-two-shots --shots-dir=<dir>: three stills of the Boki box (--view=1280x720 or --view=2560x1440 sets the window).
+## --carry-two-shots --shots-dir=<dir> [--view=WxH]: three stills of the Boki box (720p, 1440p: set the window).
 ## --carry-two-clip --shots-dir=<dir>: the swap and the carry-out HUD as numbered JPGs (frame_0000.jpg ...) for an MP4.
 
 const SHOT_AT := [1.0, 2.5, 4.0]       # s: ready, mid swap cooldown, after the claim (--carry-two-shots)
