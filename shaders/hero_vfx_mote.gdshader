@@ -11,7 +11,8 @@ uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);
 uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);
 // 0 ember, 1 smoke, 2 chunk (a dark tumbling shard of ground), 3 shard (a crisp crystal), 4 card (a tumbling card
-// that burns from its edges), 5 coin (a spinning metal glint), 6 star (a twinkling four-point star), 7 drop (water)
+// that burns from its edges), 5 coin (a spinning metal glint), 6 star (a twinkling four-point star), 7 drop (water),
+// 8 plus (an upright healing cross)
 uniform int look = 0;
 uniform float stretch = 0.05;  // s of velocity an ember's streak spans
 uniform float gain = 1.0;
@@ -45,7 +46,7 @@ void vertex() {
 		float grow = look == 1 ? sz * (0.6 + age * 1.6) : sz * (1.0 - age * 0.3);
 		float turn = look == 1 ? age * 0.7 : age * 9.0;
 		if (look == 6) { turn = age * 1.5; }
-		float ang = pick * 6.28 + turn;
+		float ang = look == 8 ? 0.0 : pick * 6.28 + turn;   // a plus stays upright, so it reads as a heal
 		float ca = cos(ang);
 		float sa = sin(ang);
 		light_uv = vec2(SMOKE_LIGHT.x * ca + SMOKE_LIGHT.y * sa, SMOKE_LIGHT.x * sa - SMOKE_LIGHT.y * ca);
@@ -125,6 +126,14 @@ void fragment() {
 		a = drop * (1.0 - smoothstep(0.6, 1.0, age)) * 0.75;
 		ALBEDO = mix(col.rgb, col2.rgb, smoothstep(0.4, 0.9, d)) * a * gain;
 		ALPHA = a * gain;
+	} else if (look == 8) {
+		// a plus: a flat cross with a hard edge and a hot core, popping in and fading as it rises
+		float bar = min(max(abs(p.x) - 0.24, abs(p.y) - 0.8), max(abs(p.y) - 0.24, abs(p.x) - 0.8));
+		float body = hard(-bar);
+		float core = hard(-bar - 0.12);
+		a = body * smoothstep(0.0, 0.1, age) * (1.0 - smoothstep(0.6, 1.0, age));
+		ALBEDO = mix(col.rgb, col2.rgb, core) * a * gain;
+		ALPHA = a * 0.9 * gain;
 	} else {
 		float rock = step(abs(p.x) + abs(p.y) * (0.7 + pick * 0.6), 0.85);
 		a = rock * (1.0 - smoothstep(0.8, 1.0, age));
