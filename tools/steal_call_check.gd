@@ -74,17 +74,17 @@ func _sounds(m: Match, me: Hunter, rival: Hunter) -> void:
 	var mb: Mob = m.spawn_mob("warden", me.pos + Vector3(8, 0, 0))
 	var cry := StealSfx.cry_name(mb)
 	ok(cry == "steal_cry_warden", "a warden cries in its own voice (%s)" % cry)
-	mb.hurt(mb.max_hp * 0.7, rival)
+	mb.hp = mb.max_hp * 0.3     # set, not hurt: damage scaling would move the line
 	ok(not _heard(mb, cry), "no cry above a quarter of its health")
-	mb.hurt(mb.max_hp * 0.1, me)
+	mb.hp = mb.max_hp * 0.2
 	ok(_heard(mb, cry), "the cry plays as it crosses a quarter")
-	mb.hurt(mb.max_hp * 0.05, me)
+	mb.hp = mb.max_hp * 0.1
 	ok(not _heard(mb, cry), "...once: a later hit under the line is quiet")
 	mb.stagger_t = 2.0
 	ok(_heard(mb, "steal_reel"), "its reel lands a heavy thud")
 	ok(not _heard(mb, "steal_reel"), "...once a reel")
 	var skit: Mob = m.spawn_mob("skitter", me.pos + Vector3(4, 0, 0))
-	skit.hurt(skit.max_hp * 0.9, me)
+	skit.hp = skit.max_hp * 0.1
 	ok(not _heard(skit, StealSfx.cry_name(skit)), "an ordinary monster does not cry")
 	var sides := {"steal_won": _fight(m, "warden", rival, 0.7, me), "steal_lost": _fight(m, "warden", me, 0.7, rival)}
 	for sname in sides:
