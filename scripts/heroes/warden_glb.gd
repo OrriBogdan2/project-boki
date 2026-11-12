@@ -206,7 +206,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var rest := neutral_rest(arch)
 	var glb := _scene(arch).instantiate() as Node3D
 	var skel := skeleton(glb)
-	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
 	var sync := Sync.new()
@@ -607,15 +606,6 @@ static func measure_rest(arch: String) -> Dictionary:
 	var rest: Dictionary = m.get_meta("rig_rest")
 	m.free()
 	return rest
-
-## Hides the procedural body's meshes, leaving the KEEP pieces.
-static func _hide_body(n: Node) -> void:
-	for ch in n.get_children():
-		if String(ch.name) in KEEP:
-			continue
-		if ch is MeshInstance3D:
-			(ch as MeshInstance3D).visible = false
-		_hide_body(ch)
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
 ## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon
