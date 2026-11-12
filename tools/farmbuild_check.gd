@@ -324,7 +324,7 @@ func run(m: Node) -> void:
 	ok(lvs.size() >= 1 and sorted_ok, "a higher building skill makes a swing quicker (%d builders seen)" % lvs.size())
 	var bj := {"kind": "build", "el": "craft", "u": cu}
 	ok(Work.level(rk, "craft") == 2 and Work.level(Save.d["roster"][0], "craft") == 0 and FarmSites.level(Save.d["roster"][0], bj) == 1 and FarmSites.level(rk, bj) == 2 and Work.speed(2) > Work.speed(1),
-			
+
 		"a Boki with no Craft knack still builds at skill 1; a Craft 2 Boki builds at 2, which is quicker (x%.2f)" % (Work.speed(2) / Work.speed(1)))
 	# a site whose builders are not allowed (Craft Off on the Job Board): nobody builds it
 	Work.set_prio("craft", 0)

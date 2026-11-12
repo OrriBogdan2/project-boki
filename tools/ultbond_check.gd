@@ -197,7 +197,7 @@ func _bond() -> void:
 	var shares_ok := is_equal_approx(float(rules["hit"]), 0.6) and is_equal_approx(float(rules["knock"]), 0.7)
 	shares_ok = shares_ok and is_equal_approx(float(rules["kill"]), 0.8)
 	ok(shares_ok,
-		
+
 		"bond_from_ult is hit 0.6, knock 0.7, kill 0.8 (%s)" % str(rules))
 	P.ult = 0.0
 	ok(is_equal_approx(KinBond.add(P, 0.25, "test"), 0.25) and is_equal_approx(P.ult, 0.25),
@@ -256,7 +256,7 @@ func _release() -> void:
 	var glow_ok := is_equal_approx(float(ag["secs"]), 3.0) and is_equal_approx(float(ag["move_speed"]), 0.15)
 	glow_ok = glow_ok and is_equal_approx(float(ag["shield_frac"]), 0.08)
 	ok(glow_ok,
-		
+
 		"afterglow data: 3s, +15% speed, 8%% max health shield (%s)" % str(ag))
 	ok(_glowing(P) and P.buff("move_speed") >= 0.15 - 0.001,
 		"the hunter has the afterglow: +%.0f%% speed" % (P.buff("move_speed") * 100.0))
