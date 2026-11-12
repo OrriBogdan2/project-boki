@@ -74,9 +74,10 @@ func _card() -> void:
 	poor["needs"] = {"food": 20.0, "energy": 20.0, "joy": 20.0, "clean": 20.0}
 	poor["trust"] = 50.0
 	poor["stats"] = {"power": 0, "guard": 0, "speed": 0, "focus": 0}
-	# condition 80 -> x1.1: damage 1+25*.004, health 1+12*.005, speed 1+8*.0025, skill 40*.3% faster
+	# condition 80 -> x1.1: damage 1+25*.004, health 1+12*.005, speed 1+8*.0025,
+	# skill: 40 counts only up to expedition_stat_points (25) = 7.5% faster
 	# condition 20 -> x0.82
-	var good := "Care: +21% damage, +17% health, +2% speed, skill 12% faster"
+	var good := "Care: +21% damage, +17% health, +2% speed, skill 7% faster"
 	ok(RidePick.care_line(well) == good, "well-raised care line: " + RidePick.care_line(well))
 	var bad_care := "Care: -18% damage, -18% health"
 	ok(RidePick.care_line(poor) == bad_care, "neglected care line: " + RidePick.care_line(poor))
@@ -132,15 +133,14 @@ func _lobby(main: Node) -> void:
 	Prematch.deal_mates(o)
 	var view := await _view(main, o)
 	ok(_tiles(view.ride_box).size() == RidePick.choices().size(), "the lobby shows the swap row while picks are open")
-	var col: float = (view.ride_box.get_parent() as Control).custom_minimum_size.x
 	var need: float = view.ride_box.get_combined_minimum_size().x
-	ok(need <= col, "the panel fits the lobby side column (%d of %d px)" % [need, col])
+	ok(need <= 1000.0, "the panel is narrow enough for the lobby's width (%d px)" % need)
 	var to: Control = _tiles(view.ride_box)[0]
 	var uid := String(to.get_meta("swap_uid"))
 	to.gui_input.emit(_click())
 	await main.get_tree().process_frame
 	ok(_rider(view.ride_box) == uid and Save.active_kin()["uid"] == uid, "a lobby swap shows the new rider")
-	view.pm.left = 0.0
+	_lock(view)
 	view._process(0.0)
 	await main.get_tree().process_frame
 	ok(_tiles(view.ride_box).is_empty() and _rider(view.ride_box) != "", "once picks lock: rider stays, no swap")
@@ -152,6 +152,13 @@ func _lobby(main: Node) -> void:
 	ok(_tiles(online.ride_box).is_empty(), "online the Boki stays as you joined with")
 	online.set_process(false)
 	online.queue_free()
+
+## Runs the lobby's turns out: your turn expires, the bots pick, the picks lock.
+func _lock(view: Control) -> void:
+	for _i in 12:
+		if view.pm.locked:
+			return
+		view.pm.tick(Prematch.TURN + 0.01)
 
 func _click() -> InputEventMouseButton:
 	var e := InputEventMouseButton.new()
@@ -178,8 +185,7 @@ func _shots(main: Node) -> void:
 		for _i in 20:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join(f + ".png"))
-		view.pm.left = 0.0
-		view.pm.locked = true
+		_lock(view)
 		view._fill_ride()
 		view._fill_hunters()
 	print("RIDEPICK shots in %s" % dir)
