@@ -5,6 +5,9 @@ extends RefCounted
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
 
+## s from Brute Dash's arrival to aiming and walking (briefs/hero-ref/dredge.md:306, 493.32 -> 493.6 s)
+const SRC_RECOVER_S := 0.28
+
 var main: Node
 var fails := 0
 var n := 0
@@ -188,7 +191,8 @@ func _slam_tell() -> void:
 	await ak.done(m)
 
 ## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
-## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.
+## hero; each lands by the end of its 0.18 s dash and recovers no slower than the source, aiming and walking
+## 0.28 s after it arrives (briefs/hero-ref/dredge.md:306). A chained shove cuts the recovery and restarts it.
 func _dash_moves() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", false)
 	var m: Match = r[0]
@@ -213,7 +217,6 @@ func _dash_moves() -> void:
 		if hero != "dredge":
 			for mv in (viewer[hero] as Dictionary).get("dash", []):
 				others[mv] = hero
-	var gap := float(K.dash_def()["gap"])
 	var fits := true
 	for mv in [ground_move, air_move]:
 		var keys: Array = KMovesPair.MOVES.get(mv, {"keys": [[99.0, {}]]})["keys"]
@@ -222,7 +225,7 @@ func _dash_moves() -> void:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
 				lands = float(kf[0])          # the squash he lands in
 				break
-		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + SRC_RECOVER_S
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
 		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
@@ -767,7 +770,8 @@ func _all() -> void:
 		half_d > one * 0.3 and half_d < one * 0.8 and absf(ground_d - one) < 0.6 and dash_t < 0.25,
 		"at %.2fs %.1f, settled %.1f of %.1f" % [dash_t * 0.5, half_d, ground_d, one]
 	)
-	# a run of barges: three charges, a short gap between them
+	# a run of barges: three charges, a short gap between them; a press inside a shove is held, never dropped,
+	# and goes by itself the step the gap ends
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(12.0, 0, 0))
@@ -775,16 +779,15 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	ak.step(m, 0.05)
 	P.ak.on_dash(false)
-	var in_gap := charges0 - P.dashes
+	var held := charges0 - P.dashes
 	ak.step(m, dash_t + float(K.dash_def()["gap"]))
-	P.ak.on_dash(false)
-	ak.step(m, dash_t + float(K.dash_def()["gap"]))
+	var went_on := charges0 - P.dashes
 	P.ak.on_dash(false)
 	ak.step(m, 0.5)
 	ok(
-		"barge: three in a row, a short gap between (a press inside the gap does nothing)",
-		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
-		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
+		"barge: three in a row, a short gap between (a press inside a shove waits for the gap's end, then goes)",
+		absf(held - 1.0) < 0.1 and absf(went_on - 2.0) < 0.1 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
+		"spent while held %.1f, after the gap %.1f, left %.2f went %.1f" % [held, went_on, P.dashes, P.pos.x - home.x]
 	)
 	# audit: the barge touches nobody (Brute Dash hits nobody); the gun's bloom resets only from rank 3
 	reset.call()
