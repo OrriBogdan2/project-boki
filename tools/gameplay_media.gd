@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-5> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -8,6 +8,7 @@ extends RefCounted
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
 ##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
+##   5 creator       the Empty's creator: the bare void body, Female and Male frames, then dressing up
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -57,6 +58,7 @@ func run(main_node: Node) -> void:
 		2: await _boki_combat(secs)
 		3: await _extraction(secs)
 		4: await _hatch(secs)
+		5: await _creator(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -281,3 +283,52 @@ func _hatch(secs: float) -> void:
 			still_at = -1.0
 		t += FRAME
 		frame += 1
+
+# ------------------------------------------------------------------ 5: creator
+const CREATOR_BEAT := 0.9        # s between the clip's creator steps
+
+## The real creator on the new-game card: the preview turns all the while, a step runs every CREATOR_BEAT seconds.
+func _creator(secs: float) -> void:
+	Save.d = Save.fresh()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	hx.edit_only = true
+	main.add_child(hx)
+	for _i in 4:
+		await main.get_tree().process_frame
+	await main.fade.reveal(0.01)
+	var panel: CreatorPanel = hx.create_box
+	var steps := _creator_steps(panel)
+	still_at = secs * 0.9
+	_mark("start")
+	var t := 0.0
+	while t < secs:
+		await main.get_tree().process_frame
+		if hx.preview:
+			hx.preview.rotation.y += 0.035
+		var k := int(t / CREATOR_BEAT)
+		if k < steps.size() and t - k * CREATOR_BEAT < FRAME:
+			steps[k].call()
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## Bare body, the frame female then male then built different, then a layer at a time with colours.
+func _creator_steps(p: CreatorPanel) -> Array:
+	var frame_to := func(sex: int, shoulders: float, hips: float, height: float):
+		p.look["gender"] = sex
+		p.look["frame"].merge({"shoulders": shoulders, "hips": hips, "height": height}, true)
+		p._changed()
+	return [
+		func(): pass, func(): pass, func(): pass,
+		func(): frame_to.call(0, 0.5, 0.5, 0.5), func(): pass, func(): pass,
+		func(): frame_to.call(1, 0.5, 0.5, 0.5), func(): pass, func(): pass,
+		func(): frame_to.call(1, 0.9, 0.2, 0.9), func(): frame_to.call(0, 0.2, 0.9, 0.3), func(): frame_to.call(0, 0.5, 0.5, 0.5),
+		func(): p.show_tab("Outfit"),
+		func(): p.pick_item("top", 2), func(): p.pick_colour("top", 0, 3),
+		func(): p.pick_item("bottom", 1), func(): p.pick_colour("bottom", 0, 1),
+		func(): p.pick_item("shoes", 2), func(): p.pick_item("gloves", 1),
+		func(): p.pick_item("head", 2), func(): p.pick_colour("head", 0, 5),
+		func(): p.pick_item("back", 0), func(): p.pick_item("accessory", 2), func(): pass, func(): pass,
+	]
