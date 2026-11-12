@@ -67,11 +67,11 @@ the game. Counts come from `content/` and `scripts/` on `main` at 53e2fe7f35.
 
 | Prop | Where | Variants | Built from | Gap |
 |---|---|---|---|---|
-| Jump pad ("Spring pad") | `Models.jump_pad` (`models.gd`), `content/utility/jump_pad.json` | 1 | 2 cylinders + 3 chevron boxes | placeholder shape |
-| Gust | `content/gear/gust_fan.json` (worn gear), launch in `match.gd` | 1 | particle burst only | **no world fan exists** |
-| Updraft | `World.updraft_visual` (`world.gd`), `shaders/updraft.gdshader` | 1 column + motes | shader column | **nothing on the ground marks the source** |
+| Jump pad ("Spring pad") | `Models.jump_pad` (`models.gd`), `content/utility/jump_pad.json` | 1 | 3D model `art/props/jump_pad` (PropGlb, docs/art/PROPS_3D.md); primitive under `--prim-art` | plate pulses only, no compress on launch yet |
+| Gust | `content/gear/gust_fan.json` (worn gear), launch in `match.gd` | 1 | particle burst only; 3D fan `art/props/gust_fan` exists, unplaced | **no world fan exists** |
+| Updraft | `World.updraft_visual` (`world.gd`), `shaders/updraft.gdshader` | 1 column + motes | shader column; 3D vent `art/props/updraft_vent` exists, unplaced | **nothing on the ground marks the source** (edge updrafts sit over the void) |
 | Wind road, air ring | `world.gd` (`winds`), `Models.air_ring` | 1 each | ribbons, torus | effect only |
-| Chest | `Models.chest`, `scripts/match/props_sculpt.gd`, `key_chest.gd` | 1 (locked) | sculpted in code; an imported kit chest also exists | one tier only; no rarity read |
+| Chest | `Models.chest`, `scripts/match/props_sculpt.gd`, `key_chest.gd` | 1 (locked) | sculpted in code; an imported kit chest and 3D `art/props/chest` (Body/Lid/Lock) also exist | one tier only; no rarity read |
 | Padlock and key | `scripts/match/key_models.gd` | 1 each | primitives | |
 | Breakables | `props_sculpt.gd` (`breakable`), `content/rules/breakables.json` | 4 (crate, pot, barrel, keg) | sculpted in code | ok |
 | Shrine | `Models.shrine` + bless badge | 1 | primitives | one look for every blessing |
