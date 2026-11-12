@@ -173,10 +173,10 @@ const SIGS := {
 	"fortify": {"name": "Fortify", "cd": 16.0, "desc": "A 60 point shield for 5s. Nothing can knock you back."},
 }
 
-## Kin species, built from the kin grammar (content/kin_v2, see KinLib.species): name, colours,
-## stats from its points, abilities, merge, carry style. content/kin/<id>.json now only holds
+## Kin species, built from the kin grammar (content/kin, see KinLib.species): name, colours,
+## stats from its points, abilities, merge, carry style. content/kin_home/<id>.json now only holds
 ## home and economy data for a species (rare/boss egg, work elements, shiny palette); a new kin
-## needs only its kin_v2 file.
+## needs only its kin file.
 var KIN := {}
 
 ## Things a kin can wear. Bought at the stall, put on from the kin's card, worn into matches too.
@@ -197,7 +197,7 @@ func _init() -> void:
 	load_kin_content()
 
 ## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
-## (content/kin/<id>.json: rare, boss).
+## (content/kin_home/<id>.json: rare, boss).
 func load_kin_content() -> void:
 	KIN.clear()
 	var ids: Array = []
@@ -207,14 +207,14 @@ func load_kin_content() -> void:
 		if not ids.has(id): ids.append(id)
 	for id in ids:
 		var sp: Dictionary = KinLib.species(id)
-		var home: Dictionary = Content._load("kin", id)
+		var home: Dictionary = Content._load("kin_home", id)
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
-## kin (content/kin/*.json "rare": true), which only ever hatch from a boss's Rare Egg.
+## kin (content/kin_home/*.json "rare": true), which only ever hatch from a boss's Rare Egg.
 ## The six that shipped first lead the list (code reads common_kin()[0] and [i % size]), then the rest by id.
 const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple"]
 
@@ -225,7 +225,7 @@ func common_kin() -> Array:
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
 
-## What a species' egg is called ("Venom Egg"), from content/kin/<id>.json "egg".
+## What a species' egg is called ("Venom Egg"), from content/kin_home/<id>.json "egg".
 func egg_name(sp_id: String) -> String:
 	var sp: Dictionary = KIN.get(sp_id, {})
 	var e: Dictionary = sp.get("egg", {})

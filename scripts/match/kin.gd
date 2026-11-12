@@ -6,7 +6,7 @@ extends Ent
 ## Three separate pieces talk through CombatBus signals and plain calls:
 ##   this body (movement, states, visuals), KinTactics (who to chase, when to use an ability by
 ##   itself) and a KinRunner holding its two grammar abilities (k1 = the active on E, k2 = the auto
-##   active it casts itself) from content/kin_v2. KinExec runs them from their parts; KinMerge runs
+##   active it casts itself) from content/kin. KinExec runs them from their parts; KinMerge runs
 ##   its bond ultimate. How it's carried (shoulder, perch or mount) comes from its KinSpec.
 
 var species := "cindle"
@@ -82,7 +82,7 @@ var st_throws := 0
 var st_skills := 0
 var cd_mult := 1.0
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
-var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
+var ks: KinSpec = null            # its species in the grammar (content/kin)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
 var melee_n := 0                  # its own melee hits, for "on_hit" triggers
 var low_fired := {}               # on_low_hp triggers already fired this dip

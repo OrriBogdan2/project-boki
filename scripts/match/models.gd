@@ -1863,14 +1863,14 @@ static func kin_shell(c: Color) -> Node3D:
 	return root
 
 ## A kin. Every species has its own body shape, tail, feet and ears (from its "look" in
-## content/kin), a rim of light in its glow colour, a soft aura shell and a few drifting particles,
+## content/kin_home), a rim of light in its glow colour, a soft aura shell and a few drifting particles,
 ## so you can tell them apart at a glance and see them against busy ground.
 static func kin(species: String, rec := {}) -> Node3D:
 	var sp: Dictionary = Data.KIN[species]
 	var look: Dictionary = sp.get("look", {})
 	var shimmer: bool = rec.get("shimmer", false)
 	var ghost: bool = rec.get("ghost", false)       # brought back by the Soul Shrine: pale and glowing
-	# a shimmer wears its species' own alternate palette (Shiny.palette, hand-picked in content/kin)
+	# a shimmer wears its species' own alternate palette (Shiny.palette, hand-picked in content/kin_home)
 	var glow_c: Color = Shiny.col(species, rec, "glow") if (shimmer or ghost) else sp.get("glow", sp["color"])
 	var body_c: Color = Shiny.col(species, rec, "color")
 	var root := Node3D.new()

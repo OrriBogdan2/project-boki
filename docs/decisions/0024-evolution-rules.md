@@ -10,7 +10,7 @@ It must evolve into the next species of its line at that species' own level, wit
 trade, stop at level 100, and never take a shape that has no model yet.
 
 ## Options
-1. An `evolve` key in each `content/kin_v2/<id>.json`. Clashes with the roster-109 branch adding
+1. An `evolve` key in each `content/kin/<id>.json`. Clashes with the roster-109 branch adding
    the same files, and the entries for species without data would have nowhere to live.
 2. One table, `content/rules/evolve.json`: species id -> `level` and `into` options (`path` by
    leading affinity, `item` an Ink, `trade`). Ids without data are the roster names in lower case.

@@ -4,7 +4,7 @@ class_name Unique
 ##
 ##   size     a bell curve (z-score, sd SIZE_SD of height); the tails are tagged XS and XL. Giant and
 ##            Tiny (Mutations) are the rarer extreme tier on top. Shown as cm / kg from the species'
-##            base size (content/kin/<id>.json "size": {cm, kg}).
+##            base size (content/kin_home/<id>.json "size": {cm, kg}).
 ##   girth    stocky or slender (weight, and a touch of width on the model)
 ##   head, limb, tail, ear   proportions, each a scalar about 1 (at most +-PROP_MAX)
 ##   hue, sat, val           a small shift of the species palette
@@ -82,7 +82,7 @@ const QUIRK_NAMES := {"tail_chase": "Chases its tail", "head_tilt": "Tilts its h
 const BIRTH_SHAPES := [["star", 1], ["heart", 1], ["crescent", 1], ["diamond", 1], ["dot", 1], ["swirl", 1]]
 const BIRTH_PLACES := [["left cheek", 1], ["right cheek", 1], ["brow", 1], ["left flank", 1], ["right flank", 1],
 	["back", 1], ["chest", 1]]
-## A species with no "size" in content/kin/<id>.json.
+## A species with no "size" in content/kin_home/<id>.json.
 const DEFAULT_SIZE := {"cm": 30.0, "kg": 3.0}
 
 ## Normalized matches: size stops changing health, speed and the hitbox (looks stay).
@@ -216,7 +216,7 @@ static func inherit(a: Dictionary, b: Dictionary, child_seed: int) -> Dictionary
 static func base_size(species: String) -> Dictionary:
 	if _sizes.has(species):
 		return _sizes[species]
-	var j: Dictionary = Content._load("kin", species)
+	var j: Dictionary = Content._load("kin_home", species)
 	var s = j.get("size", null)
 	var out := DEFAULT_SIZE.duplicate()
 	if typeof(s) == TYPE_DICTIONARY:

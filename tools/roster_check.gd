@@ -1,7 +1,7 @@
 extends RefCounted
-## --roster-check: the 50-species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin_v2
+## --roster-check: the 50-species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin
 ## loads through the grammar (KinLib), there are exactly 50 with no clashing display names, each has home data
-## in content/kin, and the big ones split into the 4-6 rideables the owner capped (a rideable is a large kin
+## in content/kin_home, and the big ones split into the 4-6 rideables the owner capped (a rideable is a large kin
 ## whose mount speed is at least RIDEABLE_SPEED; the other large kin have non-ridden roles kept in the doc).
 ## Never touches the save.
 
@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 		ok(not names.has(key), "%s: name %s is not used by %s" % [id, k.display_name, names.get(key, "anyone")])
 		names[key] = id
 		ok(Data.KIN.has(id), "%s is in Data.KIN" % id)
-		ok(FileAccess.file_exists("res://content/kin/%s.json" % id), "%s has home data" % id)
+		ok(FileAccess.file_exists("res://content/kin_home/%s.json" % id), "%s has home data" % id)
 		sizes[_size_class(k)] += 1
 		var n := Models.kin(id, Save.new_kin(id))
 		var kind := "model" if n.find_child("BokiRig", true, false) else "placeholder"

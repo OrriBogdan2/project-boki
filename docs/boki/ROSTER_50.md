@@ -4,8 +4,8 @@ Status: **proposal, for owner review before any art.** Revised after the owner's
 "a bunch of original Boki to play with that have good 3D modelling I can later change": 50 species in
 total, a range of sizes, and some big rideable ones (revised: big Boki get roles, at most about 6 mounts). Today's 9 count toward the 50, so this adds 41.
 
-- Stubs: `content/kin_v2/<id>.json`, one per new species, in the real kin grammar (docs/KIN_GRAMMAR.md), with home data in
-  `content/kin/<id>.json`. All 50 are **loaded by the game** (see "Where the stubs live" below). A species with no model yet
+- Stubs: `content/kin/<id>.json`, one per new species, in the real kin grammar (docs/KIN_GRAMMAR.md), with home data in
+  `content/kin_home/<id>.json`. All 50 are **loaded by the game** (see "Where the stubs live" below). A species with no model yet
   is drawn by the `KinModels` primitives of its `look`; the 21 with `art/kin/<id>/<id>.glb` use their rig.
 - Check: `godot --headless -- --roster-check` (tools/roster_check.gd): 50 species, no name clashes, home data present, 4-6 rideables.
 - Big-Boki roles and riding: docs/boki/RIDING_SPEC.md (specs only, waiting for the owner's OK).
@@ -720,7 +720,7 @@ dark hyena (Mightyena), boar mount (Rushoar), deer or elk mount (Eikthyrdeer, Sa
 
 ## Where the stubs live
 
-All 41 new stubs are switched on (ext/boki-50-integ): `content/kin_v2/<id>.json` plus home data `content/kin/<id>.json`
+All 41 new stubs are switched on (ext/boki-50-integ): `content/kin/<id>.json` plus home data `content/kin_home/<id>.json`
 (`size` cm/kg by size class; `rare`/`boss` only for the three boss-egg species). `KinLib` loads them, `Data.KIN` holds all 50, and
 `Data.common_kin()` (everything not boss-egg rare, so 47) feeds wild spawns (`spawn_plan.gd`), the mystery starter egg (`hatch.gd`),
 rivals, the shelter, the town and the Field Book. A species without a model draws as the `KinModels` primitives of its `look`

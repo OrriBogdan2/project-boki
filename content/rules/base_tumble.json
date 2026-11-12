@@ -29,7 +29,7 @@
 	"lean_centre": {"temper": 0.36, "loyalty": 0.72, "curiosity": 0.55},
 	"lean_floor": 0.34,
 	"lean_min": 0.05,
-	"lean_doc": "How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin_v2, birth noise included.",
+	"lean_doc": "How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin, birth noise included.",
 	"honest": [0.7, 0.5],
 	"honest_doc": "Chance the tell you see is the move the other side really plans: for the side with the higher Focus, and for the other (and on equal Focus).",
 	"rival_read": 0.35,

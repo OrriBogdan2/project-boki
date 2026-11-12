@@ -1,7 +1,7 @@
 class_name KinLib
 extends RefCounted
 ## The live game's kin library (docs/KIN_GRAMMAR.md, Phase 2). Loads every grammar file under
-## res://content once (abilities_v2, merges_v2, evolution_v2, kin_v2) through the checker, keeps
+## res://content once (abilities_v2, merges_v2, evolution_v2, kin) through the checker, keeps
 ## only files that passed it, and builds what the match needs from them:
 ##
 ##   species(id)      the Data.KIN entry (name, colours, stats from points, slots, carry...)
@@ -27,7 +27,7 @@ static func _load() -> void:
 	_reports = {}
 	var raw := KinGrammar.load_root(ROOT, _reports)
 	var out := {"abilities": {}, "merges": {}, "evolution": {}, "kin": {}}
-	var folder_of := {"abilities": "abilities_v2", "merges": "merges_v2", "evolution": "evolution_v2", "kin": "kin_v2"}
+	var folder_of := {"abilities": "abilities_v2", "merges": "merges_v2", "evolution": "evolution_v2", "kin": "kin"}
 	for kind in out:
 		for id in raw[kind]:
 			var rep: GrammarReport = _reports.get("%s/%s.json" % [folder_of[kind], id], null)

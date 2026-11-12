@@ -7,9 +7,9 @@ extends RefCounted
 ##   godot --headless -- --grammar-check=res://tests/grammar_fixtures/broken
 ##   godot --headless -- --grammar-vocab                       the vocabulary as markdown tables
 ##
-## A root holds abilities_v2/, merges_v2/, evolution_v2/ and kin_v2/ (any may be missing).
+## A root holds abilities_v2/, merges_v2/, evolution_v2/ and kin/ (any may be missing).
 
-const FOLDERS := [["abilities_v2", "abilities"], ["merges_v2", "merges"], ["evolution_v2", "evolution"], ["kin_v2", "kin"]]
+const FOLDERS := [["abilities_v2", "abilities"], ["merges_v2", "merges"], ["evolution_v2", "evolution"], ["kin", "kin"]]
 
 ## Parses every file under root. Returns {abilities, merges, evolution, kin} (id -> spec) and
 ## fills `reports` (file -> GrammarReport).
@@ -46,7 +46,7 @@ static func load_root(root: String, reports: Dictionary) -> Dictionary:
 			elif sid != "":
 				lib[pair[1]][sid] = spec
 	for kid in lib["kin"]:
-		var rep: GrammarReport = reports["kin_v2/%s.json" % kid]
+		var rep: GrammarReport = reports["kin/%s.json" % kid]
 		(lib["kin"][kid] as KinSpec).check_refs(lib, rep)
 	return lib
 

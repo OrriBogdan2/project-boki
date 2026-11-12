@@ -1,19 +1,119 @@
 {
+	"grammar": 1,
 	"id": "tuatrune",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/tuatrune.json.",
-	"size": {
-		"cm": 44,
-		"kg": 9.0,
-		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	"name": "Lockatara",
+	"animals": [
+		"Tuatara",
+		"Iron padlock"
+	],
+	"theme": "titan",
+	"flavor": "A lizard with a padlock shackle for a crest and a keyhole for a third eye; its tail is the key. Ancient, calm, faintly amused; watches you through the keyhole when you are not looking.",
+	"colors": {
+		"body": "#5a6a4a",
+		"belly": "#d8c89a",
+		"glow": "#ffd36a"
 	},
-	"shiny": {
-		"color": "#49486c",
-		"belly": "#9ac8d8",
-		"glow": "#6a96ff"
+	"look": {
+		"ears": "horn",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "pebbles"
 	},
-	"work": {
-		"haul": 3,
-		"stone": 2,
-		"timber": 1
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 7.65,
+			"hop_height": 0.12,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 10,
+		"kin_damage": 3,
+		"kin_speed": 3,
+		"owner_armor": 2,
+		"owner_max_hp": 2
+	},
+	"personality": {
+		"bravery": 0.75,
+		"loyalty": 0.75,
+		"temper": 0.2,
+		"curiosity": 0.5
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Third Eye",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.1
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.4
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "boulder_heave",
+	"auto": "rock_guard",
+	"merge": "cairn_colossus",
+	"evolution": {
+		"root": "Tuat",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "ancient, dry humour",
+		"syllables": [
+			"Tuat",
+			"rune"
+		]
+	},
+	"egg": {
+		"name": "Tuatrune Egg",
+		"temper": "Ancient",
+		"desc": "Something ancient is in here.",
+		"play": "Stands in front and soaks the hits."
 	}
 }

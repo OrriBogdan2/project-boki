@@ -21,7 +21,7 @@
 		"lunar": ["spore", "venom", "gravity"],
 		"venom": ["bloom", "swarm", "tempest"]
 	},
-	"beats_doc": "Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way.",
+	"beats_doc": "Species themes (content/kin 'theme'); a theme missing from this table has no edge either way.",
 	"rate": 1.0,
 	"rate_doc": "Balance moved a second for a net push of 1.0 (push over hold, one side minus the other).",
 	"wobble": 0.7,

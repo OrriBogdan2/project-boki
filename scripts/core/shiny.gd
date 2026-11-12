@@ -1,6 +1,6 @@
 class_name Shiny
 ## Shimmering kin, the shinies: very rare, and each species has its own hand-picked alternate
-## colours (content/kin/<id>.json "shiny": {color, belly, glow, wing?}), not just a hue turn.
+## colours (content/kin_home/<id>.json "shiny": {color, belly, glow, wing?}), not just a hue turn.
 ## A shimmer that appears (in the wild, out of an egg) arrives with a burst of stars and a chime.
 ##
 ## Odds, very rare (owner's call: lower than Pokémon, and eggs barely helped by shiny parents):
@@ -54,7 +54,7 @@ static func palette(species: String) -> Dictionary:
 		return _pal[species]
 	var sp: Dictionary = Data.KIN.get(species, {})
 	var raw: Dictionary = {}
-	var j: Dictionary = Content._load("kin", species)
+	var j: Dictionary = Content._load("kin_home", species)
 	if typeof(j.get("shiny")) == TYPE_DICTIONARY:
 		raw = j["shiny"]
 	elif FALLBACK.has(species):

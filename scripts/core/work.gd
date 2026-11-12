@@ -1,6 +1,6 @@
 class_name Work
 ## Kin at work on the farm. Every kin has a few work elements, its natural knacks for farm jobs,
-## each at a level from 1 to 4 (content/kin/<id>.json "work": {"ember": 3, "forage": 1}). Farm kin
+## each at a level from 1 to 4 (content/kin_home/<id>.json "work": {"ember": 3, "forage": 1}). Farm kin
 ## pick up jobs on their own: the best-suited kin takes each job (level x the job's priority, less
 ## for a long walk), walks there, works for a while (faster at higher levels) and leaves what it
 ## made in your stores. Hungry or worn-out kin stop to eat and nap; one pushed too hard (a High
@@ -82,7 +82,7 @@ static func base(species: String) -> Dictionary:
 	if _base.has(species):
 		return _base[species]
 	var out := {}
-	var j: Dictionary = Content._load("kin", species)
+	var j: Dictionary = Content._load("kin_home", species)
 	var raw = j.get("work", FALLBACK.get(species, null))
 	if typeof(raw) == TYPE_DICTIONARY:
 		for el in raw:

@@ -1,20 +1,120 @@
 {
+	"grammar": 1,
 	"id": "zapple",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/zapple.json.",
-	"work": {
-		"spark": 3,
-		"haul": 2,
-		"forage": 1
+	"name": "Echolop",
+	"animals": [
+		"Hare",
+		"Bat"
+	],
+	"theme": "echo",
+	"flavor": "A long-eared hare with bat wings. It hears everything coming and fires ringing pulses of sound.",
+	"colors": {
+		"body": "#4a5aa8",
+		"belly": "#c9d2ff",
+		"glow": "#7fe8ff",
+		"wing": "#5a4a8a"
 	},
-	"shiny": {
-		"color": "#2f8a5a",
-		"belly": "#d8ffd0",
-		"glow": "#f0ff6a",
-		"wing": "#1f5a4a"
+	"look": {
+		"ears": "none",
+		"body": "echolop",
+		"tail": "none",
+		"feet": "none",
+		"aura": "rings"
 	},
-	"size": {
-		"cm": 38,
-		"kg": 2.8,
-		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	"body": {
+		"size": "small",
+		"reach": 1.3,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 8.0,
+			"hop_height": 0.16,
+			"pace": 1.0
+		}
+	},
+	"stats": {
+		"kin_hp": 2,
+		"kin_damage": 2,
+		"kin_speed": 13,
+		"owner_move_speed": 3
+	},
+	"personality": {
+		"bravery": 0.65,
+		"loyalty": 0.4,
+		"temper": 0.6,
+		"curiosity": 0.9
+	},
+	"ai": {
+		"aggression": 0.65,
+		"loyalty": 0.35,
+		"caution": 0.35,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "shoulder",
+		"name": "Tempo",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.2
+			},
+			{
+				"stat": "reload",
+				"amount": 0.2
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.9
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "echolocate",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "Zap",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form",
+					"zapple_overtone"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "hyper, easily distracted, loves winning",
+		"syllables": [
+			"Zap",
+			"ple"
+		]
+	},
+	"egg": {
+		"name": "Echo Egg",
+		"temper": "Hyper",
+		"desc": "Deep blue and humming. Tap it and it taps back. Something restless is in here.",
+		"play": "Fast, loud and everywhere. Chains sound pulses between foes."
 	}
 }

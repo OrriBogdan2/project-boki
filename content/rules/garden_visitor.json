@@ -17,5 +17,5 @@
 		"hushwood": ["shadow", "lunar", "venom"],
 		"ridge": ["storm", "tempest", "echo"]
 	},
-	"groups_doc": "Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json."
+	"groups_doc": "Species themes (content/kin theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json."
 }

@@ -321,7 +321,7 @@ Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.
 | edge | 1.1 |
 | edge_doc | Push multiplier for a Boki whose species theme beats the other's in 'beats' (a 10% edge, never both ways). |
 | beats | {"ember": ["frost", "bloom", "swarm"], "frost": ["storm", "tempest", "gravity"], "bloom": ["stone", "echo", "spore"], "stone": ["ember", "venom", "shadow"], "storm": ["swarm", "prism", "titan"], "shadow": ["lunar", "prism", "echo"], "lunar": ["spore", "venom", "gravity"], "venom": ["bloom", "swarm", "tempest"]} |
-| beats_doc | Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way. |
+| beats_doc | Species themes (content/kin 'theme'); a theme missing from this table has no edge either way. |
 | rate | 1 |
 | rate_doc | Balance moved a second for a net push of 1.0 (push over hold, one side minus the other). |
 | wobble | 0.7 |
@@ -376,7 +376,7 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 | lean_centre | {"temper": 0.36, "loyalty": 0.72, "curiosity": 0.55} |
 | lean_floor | 0.34 |
 | lean_min | 0.05 |
-| lean_doc | How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin_v2, birth noise included. |
+| lean_doc | How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin, birth noise included. |
 | honest | [0.7, 0.5] |
 | honest_doc | Chance the tell you see is the move the other side really plans: for the side with the higher Focus, and for the other (and on equal Focus). |
 | rival_read | 0.35 |
@@ -920,7 +920,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | gap_s | 300 |
 | gap_s_doc | Seconds after one leaves before the next may come (one garden day). |
 | groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
-| groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
+| groups_doc | Species themes (content/kin theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
 
 ## garden_xp (`content/rules/garden_xp.json`)
 
