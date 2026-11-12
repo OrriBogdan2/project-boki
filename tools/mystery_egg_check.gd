@@ -26,13 +26,13 @@ func run(main: Node) -> void:
 
 func _pool() -> void:
 	var w := MysteryEgg.weights()
-	var tiers: Dictionary = MysteryEgg.rules()["pool"]
-	ok(w.size() == tiers.size(), "every pool species is in the game (%d of %d)" % [w.size(), tiers.size()])
+	var listed: Array = MysteryEgg.rules()["pool"]
+	ok(w.size() == listed.size(), "every pool species is in the game (%d of %d)" % [w.size(), listed.size()])
 	ok(w.size() >= 20, "the pool is many early species, not just a few (%d)" % w.size())
 	var wrong: Array = w.keys().filter(func(sp): return Data.is_rare(sp) or sp in HATCH.STARTERS)
 	ok(wrong.is_empty(), "no starter or boss kin in the pool %s" % str(wrong))
-	var rares: Array = w.keys().filter(func(sp): return tiers[sp] == "rare")
-	var commons: Array = w.keys().filter(func(sp): return tiers[sp] == "common")
+	var rares: Array = w.keys().filter(func(sp): return BokiModes.of(sp)["rarity"] == "very_rare")
+	var commons: Array = w.keys().filter(func(sp): return BokiModes.of(sp)["rarity"] == "common")
 	ok(rares.size() >= 3, "rares are in the pool (%d)" % rares.size())
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
