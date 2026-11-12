@@ -75,7 +75,6 @@ func fresh() -> Dictionary:
 		"active": "",
 		"roster": [],
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
-		"tools": ["axe", "pickaxe"],   # a new farm starts with both (HomeGather); the Market sells them to older saves
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},

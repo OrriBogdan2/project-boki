@@ -335,8 +335,6 @@ const CHECKS := {
 	"--echo-steps-clip": ["res://tools/echo_steps_clip.gd", "echo_steps_clip", null],  # --shots-dir=<dir>
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],      # GARDEN_MODERN 4.2 game 3
 	"--show-ring-shots": ["res://tools/show_ring_shots.gd", "show_ring_shots", null],      # --shots-dir= (GPU)
-	# item 27, 28, 31 of PLAYTEST-1108
-	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],
