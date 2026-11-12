@@ -9,8 +9,8 @@ extends RefCounted
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
-## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
-## next without a pop (item 32).
+## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
+## so one move hands to the next without a pop (item 32).
 ##
 ## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
 ## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
@@ -34,6 +34,7 @@ const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
+const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -47,8 +48,12 @@ var alt_t := 0.0
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
+var cur_u := ""              # the clip on the live upper-body channel
+var chan_u := 0              # which upper-body channel is live, 0 or 1
+var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
 var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
+var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less its first frame) rides on the upper body
 var air_w := 0.0
 var glide_w := 0.0
 var proc_w := 1.0            # how much of the procedural rig is shown
@@ -63,7 +68,10 @@ var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
+var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -110,6 +118,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
+	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	var names := player.get_animation_library_list()
 	if names.is_empty():
@@ -138,6 +147,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
+	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
 
@@ -188,7 +199,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun", "downed"]
+	return nm in ["fall", "glide", "stun"]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
@@ -240,16 +251,41 @@ func _build() -> AnimationNodeBlendTree:
 	for b in d.get("upper", []):
 		up.set_filter_path(_track(String(b)), true)
 	t.add_node("upper", up)
-	t.add_node("anim_u", _anim(String(lc["idle"])))
-	t.add_node("seek_u", AnimationNodeTimeSeek.new())
-	t.connect_node("seek_u", 0, "anim_u")
+	for ch in ["ua", "ub"]:
+		t.add_node("anim_" + ch, _anim(String(lc["idle"])))
+		t.add_node("seek_" + ch, AnimationNodeTimeSeek.new())
+		t.connect_node("seek_" + ch, 0, "anim_" + ch)
+	t.add_node("act_u", AnimationNodeBlend2.new())
+	t.connect_node("act_u", 0, "seek_ua")
+	t.connect_node("act_u", 1, "seek_ub")
 	t.connect_node("upper", 0, "air")
-	t.connect_node("upper", 1, "seek_u")
+	t.connect_node("upper", 1, "act_u")
+	_build_flinch(t)
 	t.add_node("full", AnimationNodeBlend2.new())
-	t.connect_node("full", 0, "upper")
+	t.connect_node("full", 0, "flinch")
 	t.connect_node("full", 1, "act")
 	t.connect_node("output", 0, "full")
 	return t
+
+## The flinch layer over "upper": the hit clip less its own first frame, added on the spine and arms, so the run
+## under it keeps swinging and the legs never leave the loco clip.
+func _build_flinch(t: AnimationNodeBlendTree) -> void:
+	for nm in ["hit", "hit0"]:
+		t.add_node("anim_" + nm, _anim(String(d["loco"]["idle"])))
+		t.add_node("seek_" + nm, AnimationNodeTimeSeek.new())
+		t.connect_node("seek_" + nm, 0, "anim_" + nm)
+	var sub := AnimationNodeSub2.new()
+	var add := AnimationNodeAdd2.new()
+	for node in [sub, add]:
+		node.filter_enabled = true
+		for b in d.get("upper", []):
+			node.set_filter_path(_track(String(b)), true)
+	t.add_node("flinch_delta", sub)
+	t.connect_node("flinch_delta", 0, "seek_hit")
+	t.connect_node("flinch_delta", 1, "seek_hit0")
+	t.add_node("flinch", add)
+	t.connect_node("flinch", 0, "upper")
+	t.connect_node("flinch", 1, "flinch_delta")
 
 ## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
 func _build_crouch(t: AnimationNodeBlendTree) -> String:
@@ -301,7 +337,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
+		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
+		var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
@@ -309,6 +346,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
+		# (a lead clip holds its last frame rather than ending before the move does)
+		if mv.has("lead"):
+			tt = minf(tt, length - 0.001)
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
@@ -323,9 +363,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
+				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
+				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
+	var act: Dictionary = d.get("act", {})
+	if act.has(String(s.get("act", ""))):
+		var clip := String(act[s["act"]])
+		return {"clip": clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(clip).length - 0.001)}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
@@ -342,7 +387,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if hit < float(hd.get("dur", 0.0)):
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
+		var vel: Vector3 = s.get("vel", Vector3.ZERO)
+		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
+		var running := Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true))
+		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
+		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
 	return {}
 
 func step(dt: float) -> void:
@@ -352,9 +401,25 @@ func step(dt: float) -> void:
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
-	if not proc and bool(want.get("upper", false)):
-		_node("anim_u").animation = String(want["clip"])
-		_p("seek_u/seek_request", float(want.get("t", 0.0)))
+	var flinching := not proc and bool(want.get("flinch", false))
+	if flinching:
+		for nm in ["hit", "hit0"]:
+			_node("anim_" + nm).animation = String(want["clip"])
+		_p("seek_hit/seek_request", float(want["t"]))
+		_p("seek_hit0/seek_request", 0.0)
+	flinch_w = move_toward(flinch_w, 1.0 if flinching else 0.0, dt / FADE)
+	if flinching:
+		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
+		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
+	elif not proc and bool(want.get("upper", false)):
+		var clip_u := String(want["clip"])
+		if clip_u != cur_u:
+			cur_u = clip_u
+			chan_u = 1 - chan_u
+			_node("anim_u" + "ab"[chan_u]).animation = clip_u
+			if up_w <= 0.0:
+				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
+		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
 		up_w = move_toward(up_w, 1.0, dt / FADE)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
@@ -380,16 +445,23 @@ func step(dt: float) -> void:
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
 	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
+	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
 	_p("act/blend_amount", xf)
+	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
+	_p("flinch/add_amount", flinch_w)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	if d.has("crouch"):
 		_crouch(s, dt)
 	tree.advance(dt)
+	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	var legs := bool(want.get("legs_heading", false))
-	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
+	_turn_to_heading(s, want, legs, dt)
+	_air_tilt()
 	_out(dt)
+	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
 	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 
@@ -421,15 +493,18 @@ func _heart(on: bool, dt: float) -> void:
 	root.set_meta(WardenCarry.MOTE, WardenCarry.hold_mote(skel, root, heart_w, String(d.get("heart_hand", "L")), fwd))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
-## his velocity on top of the clip, so the clip's lean follows it.
+## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
+## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel
+## travelling forward turns its side to the way he goes).
 ## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
 ## and the arm on the aim keep their pose.
-func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> void:
+func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var goal := 0.0
-	if on and Vector2(vel.x, vel.z).length() > HEADING_MIN:
-		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)), -PI, PI)
-		goal = clampf(goal, -LEGS_MAX, LEGS_MAX) if legs_only else clampf(goal, -HEADING_MAX, HEADING_MAX)
+	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
+		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
+		var most := LEGS_MAX if legs_only else float(want.get("turn_max", HEADING_MAX))
+		goal = clampf(goal, -most, most)
 	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
 	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
 	if absf(head_turn) < 0.002:
@@ -442,6 +517,21 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
+## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
+## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
+func _air_tilt() -> void:
+	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+		return
+	var b := Basis(q)
+	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
+
+func _moving(s: Dictionary) -> bool:
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	return Vector2(vel.x, vel.z).length() >= STILL
+
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -452,14 +542,13 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var fw := Vector2(-sin(face), -cos(face))
 	var rt := Vector2(cos(face), -sin(face))
 	var run := float(lc.get("run_speed", 4.6))
-	var walk := float(lc.get("walk_speed", 2.2))
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
+	var rate := gait.plan(spd, lc)
+	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -526,4 +615,4 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
 	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, 1.4) if spd >= STILL else 1.0)
+	_p("crouch_rate/scale", clampf(spd / speed, 0.7, CROUCH_RATE_MAX) if spd >= STILL else 1.0)
