@@ -221,7 +221,7 @@ func _throw_dart() -> void:
 	var spd := (float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])) * _heavy_k("speed_k", heavy)
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
-	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy}
+	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy, "muz": "lmb"}
 	m.spawn_shot(
 			h, start, v * spd, dmg, rng / spd * (1.0 if skating else 1.15),
 			float(wd["size"]) * (1.6 if skating else 1.0) * _heavy_k("size_k", heavy), wd["color"], extra)
@@ -620,7 +620,7 @@ func _release_spear() -> void:
 	var spd := float(ld["speed"])
 	var dist := AimMode.dist(h, float(ld["range"]))
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
-	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
+	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "muz": "rmb", "kx": on_land}
 	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
 	m.spawn_shot(
 			h, start, dir * spd, 0.0, dist / spd, float(ld["hit_r"]) * 0.5,

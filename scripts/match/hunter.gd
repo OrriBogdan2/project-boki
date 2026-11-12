@@ -1513,7 +1513,7 @@ func _emit_shot() -> void:
 	if wpn.has("sustain_loss"):
 		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
 	sus_n += 1
-	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
+	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0)), "muz": "lmb"}
 	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d

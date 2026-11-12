@@ -228,6 +228,9 @@ static func _foes_near(cx: Dictionary, at: Vector3, r: float, dy := 2.2) -> Arra
 			out.append(f)
 	return out
 
+## The ability slot (cx "slot") -> the muzzle slot (content/archetypes/<id>.json "muzzle").
+const MUZZLE_SLOT := {"utility": "rmb", "k1": "e", "ult": "r", "x": "x"}
+
 static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
 	var p := st.delivery.params
@@ -248,7 +251,10 @@ static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 		var dv := Vector2(cos(a), sin(a))
 		var lead := 0.6 if unit else 0.2
 		var start := Vector3(from.x + dv.x * lead, y, from.z + dv.y * lead)
-		_shoot(st, cx, start, dv, spd, rng, size, col, {"hits": 0, "bounce": int(bounce.params["count"]) if bounce else 0, "seen": {}}, hits)
+		var state := {"hits": 0, "bounce": int(bounce.params["count"]) if bounce else 0, "seen": {}}
+		if unit != null and unit == cx["caster"]:
+			state["muz"] = MUZZLE_SLOT.get(String(cx["slot"]), "")      # a Hunter's own projectile leaves its weapon
+		_shoot(st, cx, start, dv, spd, rng, size, col, state, hits)
 	if not cx.get("silent", false):
 		m.sfx("throw", from, -3.0, 1.15)
 
@@ -257,6 +263,7 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 	var p := st.delivery.params
 	var extra := {"kx_dmg": _instant_damage(st.effects, cx), "kin": cx["caster"] is Kin, "ab": cx["slot"]}
 	extra["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _shot_event(st, cx, s, at, e, why, state, hits)
+	extra["muz"] = state.get("muz", "")
 	if st.has_modifier("pierce") or st.has_modifier("return"):
 		extra["hitset"] = {}
 		extra["pierce"] = st.has_modifier("pierce")

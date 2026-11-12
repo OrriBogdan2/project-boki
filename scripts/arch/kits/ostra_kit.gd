@@ -505,7 +505,7 @@ func _snap_release() -> void:
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
 	m.spawn_shot(
 		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), VOID_COL,
-		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
+		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "muz": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
 	)
 	KitLooks.of(m).skin(m.shots[-1], "spear")
 	m.sfx("os_snap", h.pos, -2.0, 1.0)

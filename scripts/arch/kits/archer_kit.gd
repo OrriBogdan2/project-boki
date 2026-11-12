@@ -362,7 +362,7 @@ func cast_e() -> bool:
 		# (cosmetic: small and orchid so the five don't stack into one white blob at the bow; PinFx.lob draws
 		# the arrows going up)
 		var lob_v := dv * maxf(4.0, radius / tell)
-		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true})
+		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true, "muz": "e"})
 	fx.lob(h.pos + Vector3(0, 1.6, 0), d)
 	vfx("hail_go", h.pos, d)
 	play("arc_hail")

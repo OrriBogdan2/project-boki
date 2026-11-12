@@ -392,7 +392,7 @@ func _throw_seed() -> void:
 	var on_hit := func(_s: Dictionary, _at: Vector3, e: Ent, _why: String):
 		if e != null and e.team != h.team and not e.dead:
 			_stick(e)
-	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": on_hit}
+	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "muz": "rmb", "kx": on_hit}
 	m.spawn_shot(
 			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)

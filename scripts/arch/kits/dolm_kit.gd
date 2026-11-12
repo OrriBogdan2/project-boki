@@ -412,7 +412,7 @@ func _boulder() -> void:
 	var rng := AimMode.dist(h, float(bd["range"]), AimMode.MAX)
 	m.spawn_shot(
 		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("9ad0ff"),
-		{"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
+		{"kb": float(bd["kb"]), "tracer": 0.4, "muz": "lmb", "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
 	)
 	KitLooks.of(m).skin(m.shots[-1], "boulder")
 	m.sfx("br_throw", h.pos, -3.0, 1.0)

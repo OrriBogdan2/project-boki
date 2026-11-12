@@ -170,5 +170,9 @@
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",
 		"dash_spent": "a fading lightning streak where the run went"
+	},
+	"muzzle": {
+		"lmb_l": ["anchor_finger_L"],
+		"lmb_r": ["weapon_muzzle"]
 	}
 }

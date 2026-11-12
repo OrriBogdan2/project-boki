@@ -236,18 +236,28 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	_apply(shake)
 	Sfx.listener = focus
 
+## The pitch now: the style's angle, tipped toward straight down for a bird's-eye view, or low behind the skyship
+## for the ride.
+func _pitch_now() -> float:
+	var k := top * top * (3.0 - 2.0 * top)
+	var c := chase * chase * (3.0 - 2.0 * chase)
+	return lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
+
+## The way the camera looks (a unit vector, down into the world), from its pitch and yaw alone, so it is the same
+## before the camera has moved. (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden.)
+func view_dir() -> Vector3:
+	var p := _pitch_now()
+	return -Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
+
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
 	var z := zoom * (1.0 + pull) * cast_wide()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
-	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
-	# the skyship for the ride
-	var p := lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
+	var p := _pitch_now()
 	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
-	# (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden)
-	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
+	var back := -view_dir()
 	# (camcal) aim at the body rather than the feet, so you sit a touch low on screen [footage];
 	# faded out toward the bird's-eye and ship views
 	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)

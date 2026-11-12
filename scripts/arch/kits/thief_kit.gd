@@ -20,7 +20,6 @@ extends ArchKit
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
-const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
 const BOLT_GOLD := Color("ffc04a")
 const BOLT_CORE := Color("fff2c0")
 const FIZZLE := Color("6a48ff")    # a bolt running out at the cursor: a blue-violet puff
@@ -371,9 +370,7 @@ func _bolt() -> void:
 	bolts += 1
 	hand = 1 - hand
 	var d := h.aim_dir()
-	var right := Vector2(-d.y, d.x)
-	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
-	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
+	var start := Muzzle.start(h, "lmb_r" if hand == 1 else "lmb_l", sd["pos"])
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)

@@ -2668,6 +2668,11 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
+	if String(extra.get("muz", "")) != "" and by is Hunter:
+		var out := Muzzle.leave(by as Hunter, String(extra["muz"]), at, v2, life, extra.has("decel"))
+		at = out[0]
+		v2 = out[1]
+		life = out[2]
 	var mi: MeshInstance3D = null
 	var vr := size          # the drawn radius (Oomph.shot_look), kept for the tracer stretch
 	for s in shot_pool:

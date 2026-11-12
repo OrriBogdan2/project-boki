@@ -15,8 +15,6 @@ const COPPER := Color("e08a46")
 const VIOLET := Color("3a1c8c")
 const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
 const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal that reads on bright grass
-const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
-const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
@@ -289,17 +287,14 @@ func _tick_lmb() -> void:
 	lmb_n += 1
 	var left := lmb_n % 2 == 1
 	var d := h.aim_dir()
-	# (from the fingertip of the hand that fires: the arm is still coming up, so where that fingertip will be. The round
-	# has already flown a tick from the old muzzle: it gets that time back, so her reach stays what it was)
-	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE)
-	var was_at: Vector3 = sd["pos"]
-	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD
-	var speed := (sd["vel"] as Vector2).length()
-	if speed > 0.1:
-		sd["life"] = float(sd["life"]) + Vector2(was_at.x - p.x, was_at.z - p.z).length() / speed
-	sd["pos"] = p
-	sd["prev"] = p
-	sd["start"] = p
+	# (from the fingertip of the hand that fires: the round has already flown a tick from the other one, and keeps
+	# the end of its flight, so her reach stays what it was)
+	var out := Muzzle.leave(h, "lmb_l" if left else "lmb_r", sd["pos"], sd["vel"], sd["life"])
+	sd["pos"] = out[0]
+	sd["prev"] = out[0]
+	sd["start"] = out[0]
+	sd["vel"] = out[1]
+	sd["life"] = out[2]
 	play("mage_lmb_l" if left else "mage_lmb_r")
 	# a teal thrust from the shoulder to the fingertip, then (at the release key, 0.06 s) the fingertip
 	# crackles, a jagged bolt rides the round
