@@ -1635,8 +1635,8 @@ func dmg_mult(h: Hunter) -> float:
 	var bot_k := float((h.ai.get("diff", {}) as Dictionary).get("dmg", 1.0)) if h.ctrl == "bot" and h != player else 1.0
 	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0)
 
-func sfx(n: String, p = null, vol := 0.0, pitch := 1.0) -> void:
-	Sfx.play(n, p, vol, 0.07, pitch)
+func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
+	Sfx.play(n, p, vol, 0.07, pitch, mine)
 
 ## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
 func shake(a: float, at: Vector3) -> void:
@@ -1786,7 +1786,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
+		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
@@ -3149,6 +3149,7 @@ func _process(delta: float) -> void:
 		return
 	_tips()
 	if music_dir: music_dir.tick(self, delta)
+	Sfx.voices.keep_squad(hunters, player)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()

@@ -73,11 +73,11 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	if credit == p and target != p:
 		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
 		if melee:
-			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
+			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0, 1.0, true)
 		if armor:
-			m.sfx("armor_hit", target.pos, -9.0)
+			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
 		if d >= 28.0 and not melee:
-			m.sfx("hit_heavy", target.pos, -7.0)
+			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
 
