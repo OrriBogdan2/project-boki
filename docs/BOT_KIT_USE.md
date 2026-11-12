@@ -73,3 +73,73 @@ A stomp is a 3 s finisher that can't be cancelled; the stomper can be hit, and a
 - **The breaker** (`BotStomp.breaker`): of RMB and E, the shortest-cooldown slot whose quick tap puts a hard CC (`stun`, `knockup`, `root`, `grounded`) on a foe. The CC sits at the slot's top level or one block down. Excluded: a press held over 0.3 s, a `windup`/`spin_t` of 0.5 s or more, a block with `max_hold` (a charged hold), a block with its own `cooldown` (another mode), and a block tagged `"on"` for a variant other than the tap. Reach = the block's range/reach + half its core (else radius). Today that gives Tenzo Quakefall (2.1 m), Grimble Anchor Drop (1.5 m), Sparkle Skycall (Grounded, 11.8 m) and Motley Shard Snap (13 m). Left out by those rules: Lace's pin (hold), Kael (wind-up, drop/haul modes), Albert's slam (`"on": "full"`: the Guard 50 Shield Charge), Gil's Riptide (2 s spin), Meeko's Burrseed (1 s wind-up). X ultimates aren't used (bond meter).
 
 Check: `--stomp-check` rows 7, two bots and one wisp. A lone bot stomps the downed rival. A bot with two rivals standing 10 m off (inside the threat range, outside the reach at which a bot picks a fight early in a match) doesn't. For every Hunter with a breaker read from its kit, a bot breaks the stomp on its teammate within 1 s while the stomper's own bot mind runs (Tenzo 0.18 s, Grimble 0.48 s, Sparkle 0.83 s, Motley 0.70 s), and the wisp lives. A row fails if the stomp never started. With the breaker on cooldown the bot leaves it.
+## Ultimate and Boki in a match
+
+The duels above count presses; they don't say whether a bot fires its ultimate when it matters or brings its Boki to a fight. `--bot-kit-use --kit-use-match` (tools/bot_ult_use.gd) plays **one seeded 10-trio match per seed (3 and 5, 300 s each, bot difficulty "medium", every Hunter a bot)** with every Hunter raised to level 6 at the start, so the ultimate is open from the first fight. It takes about 3.5 minutes a seed.
+
+Run: `godot --headless --path . -- --bot-kit-use --kit-use-match [--kit-use-t=300] [--kit-use-seeds=3,5] [--kit-use-diff=medium]` (with a temp `XDG_DATA_HOME`).
+
+**What counts.** A *fight* is a bot targeting a rival Hunter within 12 m; it ends 3 s after that stops, and it is *real* once the two traded 2 hits. The ult is *ready and useful* while it is off cooldown, the rival is in sight and inside the ult's own reach (its data's range, reach, length or radius, 4 to 10 m). A *wait* is one stretch of ready-and-useful time; it is *on time* when it ends in a cast within 3 s, *late* when it runs past 3 s (cast or not); a wait the fight closes sooner is neither. A cast in a fight *lands* when the caster hits a rival Hunter while the ult runs or 3 s after (a trail or a well keeps hurting; any hit in that span: a long ult such as Lace's arrows counts its own shots). A cast *into nothing* has no foe or rival Hunter within 15 m. *Boki sends* are throws off the shoulder (`kin_thrown`); the Boki is *out* in a fight when it is ever off the shoulder in it (beside the bot, flying in, or merged), counted over the fights where it could be (not downed, reviving, resting, benched or dead).
+
+**Targets** (the check fails a Hunter that misses one; Hunters with under 20 s of ready time are listed, not judged):
+
+| Target | Value |
+|---|---|
+| Ready useful ult cast within 3 s | 60% or more of on-time + late waits |
+| Casts in a fight that land | 50% or more (from 4 casts) |
+| Casts into nothing | none |
+| Real fights with the Boki out | 80% or more (from 5 fights) |
+
+Meeko's Hearth Call heals a teammate below 35% (or downed), so its ready time against a rival is not judged; its row is shown.
+
+Columns: fights (real), casts, casts in a fight, casts per minute of ready-and-useful time, landed (share of casts in a fight), into nothing, mean wait (s), on time, fights the ult sat ready 3 s or more with no cast, Boki sends, fights with the Boki out / fights it could be.
+
+### Before (origin/main 53e2fe7f3)
+
+| Hunter | Fights | Casts | In a fight | Per ready min | Landed | Into nothing | Mean wait s | On time | Ult left | Boki sends | Boki out |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Lace (`archer`) | 5 | 5 | 2 | 7.3 | 1 (50%) | 0 | 4.1 | 50% | 0 | 0 | 5/5 (100%) |
+| Kael (`juggernaut`) | 12 | 15 | 9 | 38.0 | 5 (55%) | 0 | 0.6 | 100% | 0 | 8 | 10/10 (100%) |
+| Vex (`gunslinger`) | 11 | 5 | 4 | 6.8 | 4 (100%) | 0 | 2.4 | 57% | 4 | 2 | 10/11 (90%) |
+| Albert (`bulwark`) | 24 | 17 | 8 | 3.6 | 7 (87%) | 0 | 2.6 | 23% | 6 | 13 | 22/22 (100%) |
+| Cinder (`ashwick`) | 8 | 11 | 5 | 50.4 | 3 (60%) | 0 | 0.7 | 100% | 0 | 7 | 7/7 (100%) |
+| Meeko (`tender`) | 8 | 1 | 1 | 0.7 | 0 (0%) | 0 | 1.9 | 8% | 5 | 2 | 7/7 (100%) |
+| Tenzo (`dolm`) | 9 | 2 | 2 | 1.4 | 2 (100%) | 0 | 2.4 | 10% | 6 | 5 | 8/8 (100%) |
+| Grimble (`dredge`) | 10 | 14 | 6 | 9.2 | 5 (83%) | 0 | 1.3 | 60% | 2 | 5 | 9/10 (90%) |
+| Neve (`rimewright`) | 3 | 2 | 2 | 18.4 | 1 (50%) | 0 | 1.1 | 100% | 1 | 3 | 3/3 (100%) |
+| Sparkle (`mage`) | 6 | 4 | 3 | 12.5 | 2 (66%) | 0 | 2.4 | 66% | 0 | 1 | 5/5 (100%) |
+| Sable (`thief`) | 5 | 6 | 5 | 18.3 | 5 (100%) | 0 | 0.8 | 80% | 0 | 6 | 5/5 (100%) |
+| Motley (`ostra`) | 14 | 5 | 4 | 1.9 | 3 (75%) | 0 | 2.8 | 23% | 5 | 12 | 11/11 (100%) |
+| Gil (`gil`) | 10 | 5 | 2 | 19.1 | 1 (50%) | 0 | 0.9 | 50% | 0 | 1 | 8/9 (88%) |
+
+Misses: below gunslinger: 57% of ready ults cast within 3 s (target 60%); FAIL bulwark: 23% of ready ults cast within 3 s; FAIL dolm: 10% of ready ults cast within 3 s; FAIL ostra: 23% of ready ults cast within 3 s. Tenzo cast 2 ults in 9 fights and left a ready one unused in 6; Motley and Albert sat on a ready ult for 2.6 to 2.8 s on average. The Boki was already out in nearly every real fight (90 to 100%), so the Boki brain is unchanged.
+
+### After
+
+| Hunter | Fights | Casts | In a fight | Per ready min | Landed | Into nothing | Mean wait s | On time | Ult left | Boki sends | Boki out |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Lace (`archer`) | 6 | 2 | 1 | 10.3 | 1 (100%) | 0 | 1.0 | 50% | 1 | 1 | 5/5 (100%) |
+| Kael (`juggernaut`) | 10 | 10 | 8 | 75.0 | 7 (87%) | 0 | 0.5 | 100% | 0 | 2 | 8/8 (100%) |
+| Vex (`gunslinger`) | 14 | 12 | 12 | 26.8 | 10 (83%) | 0 | 1.2 | 83% | 1 | 8 | 12/12 (100%) |
+| Albert (`bulwark`) | 24 | 32 | 19 | 40.3 | 14 (73%) | 0 | 0.9 | 94% | 1 | 21 | 23/23 (100%) |
+| Cinder (`ashwick`) | 9 | 10 | 6 | 37.6 | 5 (83%) | 0 | 1.0 | 100% | 0 | 4 | 8/8 (100%) |
+| Meeko (`tender`) | 7 | 1 | 1 | 1.2 | 0 (0%) | 0 | 2.1 | 0% | 5 | 5 | 6/6 (100%) |
+| Tenzo (`dolm`) | 25 | 18 | 14 | 33.8 | 14 (100%) | 0 | 0.7 | 100% | 0 | 5 | 18/18 (100%) |
+| Grimble (`dredge`) | 10 | 9 | 7 | 22.1 | 4 (57%) | 0 | 0.7 | 100% | 0 | 1 | 9/9 (100%) |
+| Neve (`rimewright`) | 3 | 2 | 2 | 19.5 | 2 (100%) | 0 | 0.7 | 100% | 0 | 3 | 2/2 (100%) |
+| Sparkle (`mage`) | 7 | 4 | 4 | 36.0 | 2 (50%) | 0 | 1.1 | 100% | 0 | 5 | 6/6 (100%) |
+| Sable (`thief`) | 6 | 6 | 4 | 15.2 | 4 (100%) | 0 | 0.8 | 80% | 0 | 6 | 5/5 (100%) |
+| Motley (`ostra`) | 16 | 13 | 4 | 58.8 | 4 (100%) | 0 | 0.7 | 100% | 0 | 7 | 14/14 (100%) |
+| Gil (`gil`) | 5 | 4 | 1 | 67.9 | 1 (100%) | 0 | 0.9 | 100% | 0 | 1 | 5/5 (100%) |
+
+No failures. Runs differ (the bots roll unseeded random numbers), so a row can move 20 points between runs; across five runs while tuning, every Hunter stayed above the floors except one 42% landed row (Neve, 3 of 7) and one 66% Boki row (Kael, 6 of 9), which is why the check fails only under the floor (on time 50%, landed 35%, Boki 70%) and marks "below" between floor and target.
+
+### What changed (bot code only; no kit numbers, no Net or save change)
+
+- **Every bot** (`bot.gd`): after an ability look, a bot whose ult is ready while it fights a Hunter looks again in 0.3 s instead of 0.4 to 2.8 s. Only bots with `abil` 0.5 or more (medium and up): **easy bots, the tutorial's, keep their pace**, and `Data.BOT_DIFF` is untouched.
+- **Tenzo** (`dolm_kit.gd`) and **Motley** (`ostra_kit.gd`): no 10% dice on top of the conditions (a ready ult waited about 10 looks); Motley aims the Nightwell half a tell ahead of where the rival walks.
+- **Vex** (`gunslinger_kit.gd`) and **Sparkle** (`mage_kit.gd`): no 35% dice on top of the conditions.
+- **Gil** (`gil_kit.gd`): aims the Tidal Wave at the rival (it rolled along whatever the bot was facing).
+- **Albert** (`bulwark_kit.gd`): the Faultline before the E and from 1.5 m (its lane starts at his feet; a rival closer than 4 m never got one).
+- **Grimble** (`dredge_kit.gd`): the Broadside from 0.8 of its range (4.7 m) instead of 3.5 m.
+- Meeko's Hearth Call is unchanged (it waits for a hurt teammate); Lace, Kael, Cinder, Neve, Sable were already on time.
