@@ -824,10 +824,10 @@ static func glide_fall(_speed: float) -> float:
 
 ## Feathering [est] (SUPERVIVE players tap the glider on and off instead of holding it): opening and
 ## closing are instant with no penalty for quick toggles; only the ground cools the glider ([footage]
-## "it only really cools on the ground"); for FEATHER_KEEP after a close you keep its speed and steering, so
-## skilled taps (short lifts out of the abyss, coasting the gaps) cover more ground per heat than
-## holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
-const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its speed and steering carry
+## "it only really cools on the ground"); after a close you fall like any jump (Loco.air_step: the glide's
+## extra over run speed bleeds off), so skilled taps (short lifts out of the abyss, coasting the gaps) cover
+## more ground per heat than holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
+const FEATHER_KEEP := 0.6      # [est] seconds after a glider close that count as just off it (ledges, wall shove)
 const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
 const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
 const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
@@ -2121,10 +2121,6 @@ func _physics(dt: float) -> void:
 				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
-		elif glide_off_t < FEATHER_KEEP and not dropping:
-			# (feathering) just after letting go of the glider you keep its speed and steering
-			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
-			hv = Loco.glide_step(hv, mv * gsf, gsf, Loco.glide_carry(arch), dt)
 		elif not lfloat.is_empty():
 			hv = Loco.accel_to(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
 		else:
