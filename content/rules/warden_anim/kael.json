@@ -132,6 +132,7 @@
 			"clip": "fusion"
 		}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
