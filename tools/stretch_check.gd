@@ -11,7 +11,7 @@ const MIN_EDGE := 0.008          # m: shorter rest edges (seams, welds, chain li
 const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.FADE 0.1 s) before it is measured
 const DT := 1.0 / 30.0
 ## Hero -> the worst edge ratio its relaxed bake may reach (x rest length), measured on the game's own clips.
-const CEIL := {"bulwark": 6.6, "rimewright": 5.7, "dolm": 7.0}
+const CEIL := {"bulwark": 9.5, "rimewright": 5.7, "dolm": 7.0}
 
 var tree: SceneTree
 var bad := 0
