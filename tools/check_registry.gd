@@ -276,6 +276,8 @@ const CHECKS := {
 	"--tut-first-capture-check": ["res://tools/tut_first_capture_check.gd", "tut_first_capture_check", null],      # the first-time capture hint
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],      # one voice
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment
+	# no span without a prompt or a marker
+	"--tutorial-dead-air-check": ["res://tools/tutorial_dead_air_check.gd", "tutorial_dead_air_check", null],
 	# fight beats per starter
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
 	"--duo-tutorial-check": ["res://tools/duo_tutorial_check.gd", "duo_tutorial_check", null],      # 2v2 tutorial
