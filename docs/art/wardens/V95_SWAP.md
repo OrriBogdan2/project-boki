@@ -73,3 +73,14 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Face lock (2026-11-12): a body pass never changes a hunter's face
+The /3d/v95 masters are promoted by `v95-promote` (boki-tools; model-room-sync runs `--auto`). It used to copy the
+whole GLB, so a body pass built on an older head put that head live: Cinder's body5/body6/prop1111 chain started from
+appeal4 cand_5 (rebuilt from appeal3 cand_b) and lost the owner's appeal4 cand_3 face. Now a promote keeps the head
+of the current v95.glb (top 13% of the Meshy body: positions, UVs, base-colour texture, plus the eye/head parts in
+that box) unless the pass is declared a face pass: `FACE: <what>` in its pick/applied file, the word `face` after
+the glb in CURRENT_OVERRIDES.txt, or `--face` by hand. An undeclared head change with the same topology and UVs is
+put back (`<stem>_keephead.glb`); anything else is refused. `v95-promote --check` fails if a lock-era promote changed
+a head without a face pass (`--selftest` covers the lock). Swap specs here should name the promoted master
+(`current.json` "glb"), not an r2 candidate, so the game gets the same face.
