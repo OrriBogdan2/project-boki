@@ -624,6 +624,7 @@ func _end_stale_hold() -> void:
 
 # ------------------------------------------------------------------ bots
 const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
+const BOT_SWIM_MIN := 3.5  # m: closer than this a bot fences instead of swimming in
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
@@ -635,7 +636,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if spin_t >= 0.0:
 		if spin_t > 1.2 or dist > 3.5: use_e()
 		return
-	if float(cd["e"]) <= 0.0 and dist < 2.8:
+	var swim := float(dash_def()["dist"])
+	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > BOT_SWIM_MIN and dist < swim + 1.0 \
+			and randf() < 0.3:
+		# Ground Swim in: he surfaces on top of them and knocks them up
+		h.inp["aim"] = tgt.pos
+		h.ai["dash_dir"] = h.dir_to(tgt)
+		h.inp["move"] = h.dir_to(tgt)
+		h.inp["dash"] = true
+	elif float(cd["e"]) <= 0.0 and dist < 2.8:
 		use_e()
 	elif rmb_ready() and los and dist < float(rmb_def()["range"]) + 1.0:
 		bot_hold["rmb"] = BOT_TAP
