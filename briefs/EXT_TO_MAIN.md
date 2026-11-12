@@ -7640,3 +7640,4 @@ READY ext/anim-dir-all-1112 d061dd82a (locomotion every Hunter x 8 directions: -
 READY ext/main-checks-registry-b 8cfc0ad68 (10 inline checks out of main.gd into the registry: economy, ability, grammar-runtime, duel, extract, truce, bot-sanity, drop, home-build, rolling; main.gd 3858 -> 2060, budget 2061; before/after counts identical; --check, health --strict, gen_wiki --check OK)
 READY ext/vfx-show-ring-ribbon 6b2f0e8ce (Show Ring result: three judge-mark pip plates then a gold/silver/bronze/green ribbon on the Boki; data in show_ring.json; --show-ring-check 39 ok)
 READY ext/anim-whistle-react 6649ff2f7e (whistle answer beat: perk, head+body turn to you, then run; sulky waits and walks slowly; --garden-whistle-check green, strip docs/shots/whistle-react)
+READY ext/sfx-build-ui 64af562765 (build/decorate UI cues: pick, rotate, place wood/stone, move, store, blocked knock; --sfx-set-check sec 10; health+wiki green)
