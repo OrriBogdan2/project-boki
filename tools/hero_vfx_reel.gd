@@ -7,8 +7,8 @@ extends "res://tools/combo51_shots.gd"
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
-## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (--reel-w wide, 960 by default), for a clip made off the
-## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
+## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (960 px wide; --reel-w=<px>), for a clip made
+## off the box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],

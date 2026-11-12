@@ -93,7 +93,7 @@ func run(main: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 ## Sable's crossbow hits read on the struck body: it flashes in her violet for the hit's 3 full frames, then the
-## flash is white again for the next Hunter's hit (the bolt's own starburst is content/vfx/thief.json, --hero-vfx-check).
+## flash is white again for the next Hunter's hit (the starburst is content/vfx/thief.json: --hero-vfx-check).
 func _sable_hit(main: Node) -> void:
 	var a := ARCH_CHECK.new()
 	a.main = main
