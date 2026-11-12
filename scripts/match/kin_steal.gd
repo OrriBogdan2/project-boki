@@ -8,7 +8,8 @@ extends RefCounted
 ##     rest at the carry cap, Hunter._refresh_kin_stats) and one summon this match (summon_k of its window, at
 ##     least summon_min_s) on the Summon key while their own Boki is resting or not riding with them.
 ##   - A thief who goes down or dies scatters what they carry: loose again where they fell.
-##   - Grabbing someone else's wisp leaves a soul echo: its species in your Field Book (Care "echo").
+##   - A thief who extracts carrying stolen wisps gets extract_gems for each and keeps a soul echo of it
+##     (SoulEcho, decision 0097); the wisps go home.
 ##   - At match end every loose or stolen wisp goes home (match_end). The save never moved it: nothing is lost.
 ## The Kin keeps its own hunter in home_h; owner_h is whoever it rides with now (the thief while stolen), so the
 ## orbit, the summon's leash and the hit credit follow the carrier.
@@ -66,7 +67,9 @@ static func ride(k: Kin, dt: float) -> bool:
 	var o := k.owner_h
 	if k.remote or o == null or k.home_h == null or k.state != "shoulder":
 		return false
-	if stolen(k) and (o.downed or o.out or o.extracted):
+	if stolen(k) and o.extracted:
+		go_home(k)                     # the thief got out (KinSteal.extracted on their game)
+	elif stolen(k) and (o.downed or o.out):
 		break_loose(k, o.pos)          # the thief fell: what they carry scatters
 	elif not stolen(k) and o.downed and not k.back_home:
 		break_loose(k, o.pos)
@@ -140,7 +143,7 @@ static func grab(k: Kin, h: Hunter) -> bool:
 	_grabbed(k, h)
 	return true
 
-## Every game: the catch moment, and the soul echo for a local thief.
+## Every game: the catch moment.
 static func _grabbed(k: Kin, h: Hunter) -> void:
 	var glow: Color = k.sp.get("glow", k.sp["color"])
 	k.m.fx.ring(h.pos, 1.4, Color(glow, 0.8), 0.3)
@@ -148,8 +151,6 @@ static func _grabbed(k: Kin, h: Hunter) -> void:
 	if h == k.home_h:
 		return
 	k.m.add_feed("%s grabbed %s's %s" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki")])
-	if h == k.m.player:
-		Care.dex_mark(k.species, "echo")
 
 ## Summon with your own Boki resting or away: the first stolen wisp you carry that still has its one summon
 ## bursts out (KinSummon.press). False when there is none.
@@ -201,6 +202,22 @@ static func apply_net(k: Kin, loose_s: float, carrier: String, used: bool) -> vo
 static func render(k: Kin) -> void:
 	k.global_position = k.pos + Vector3(0, sin(k.m.time * BOB_HZ * TAU) * BOB_M, 0)
 	BokiWispLook.pose(k.model, k.m.time)
+
+## A hunter extracts (Match._extract, their own game): each stolen wisp they carry pays extract_gems and goes
+## home (its own game sends it, KinSteal.ride); the player keeps a soul echo of it in the match result.
+static func extracted(m: Match, h: Hunter) -> void:
+	for k in m.kins:
+		if k.owner_h != h or not stolen(k) or k.dead:
+			continue
+		var gems := int(SoulEcho.rules()["extract_gems"])
+		h.gems += gems
+		m.add_feed("%s got out with %s's %s: +%d gems" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki"), gems])
+		if h == m.player:
+			if not m.result.has("soul_echoes"):
+				m.result["soul_echoes"] = []
+			m.result["soul_echoes"].append(SoulEcho.of_rec(k.rec))
+		if not k.remote:
+			go_home(k)
 
 ## Match end: every loose or stolen wisp goes home to its own hunter.
 static func match_end(m: Match) -> void:

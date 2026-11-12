@@ -310,6 +310,10 @@ static func _habitat(spk: String) -> String:
 	var sighted: Array = FieldBook.places(spk)
 	if not sighted.is_empty():
 		out += " Last seen at %s." % ", ".join(sighted.slice(-2))      # (logged on sight, newest last)
+	var echoes := SoulEcho.count(spk)
+	if echoes > 0:
+		var plural := "" if echoes == 1 else "es"
+		out += " You hold %d soul echo%s of it: your eggs take after one more often." % [echoes, plural]
 	return out
 
 ## A look-only record wearing a found form (an old save's form name: the root plus an affinity's suffix).

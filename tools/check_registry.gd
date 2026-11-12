@@ -355,6 +355,7 @@ const CHECKS := {
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--wisp-rules-check": ["res://tools/wisp_rules_check.gd", "wisp_rules_check", null],      # docs/decisions/0045
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
+	"--soul-echo-check": ["res://tools/soul_echo_check.gd", "soul_echo_check", null],      # docs/decisions/0097
 	"--wisp-hit-rules-check": ["res://tools/wisp_hit_rules_check.gd", "wisp_hit_rules_check", null],
 	# docs/decisions/0044
 	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],

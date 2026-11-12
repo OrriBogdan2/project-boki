@@ -4896,7 +4896,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
-	var esp: String = rec["species"] if randf() < 0.5 else ok["species"]
+	var esp := SoulEcho.egg_species(rec, ok, randf())      # (a parent you hold soul echoes of is likelier)
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_t"] = Time.get_unix_time_from_system()
 	ok["bred_t"] = rec["bred_t"]
@@ -5022,6 +5022,7 @@ func _hatch_incubator(id := "") -> void:
 
 ## A new kin out of an egg: into the roster, then the hatch in stages, the reveal and naming.
 func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: Node3D) -> void:
+	SoulEcho.hatched(baby)      # maybe a stolen shimmer or mutation
 	# it's yours from the moment it hatches; the naming card only renames it
 	baby["name"] = Data.default_kin_name(String(baby["species"]))
 	if rare:

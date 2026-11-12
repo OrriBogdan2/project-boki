@@ -19,9 +19,10 @@ Option 2, in `KinSteal`. Numbers in `content/rules/boki_summon.json` "steal": lo
 2 m, carry 2, passives at 50 % clamped at the carry cap, one summon at half the window (min 5 s) when your own Boki
 is resting or gone. The wisp pops 2.5 m off its fallen hunter so the grab never fights the stomp/revive prompt.
 A thief who goes down (not only dies) scatters: the same moment that frees the owner's wisp. Ungrabbed wisps go
-back to their hunter, who keeps them for that down. Soul echo: the dex entry's optional `echo` count (seen = true);
-no save migration (an old entry without it is 0). Left out: guardian interplay (ext/wisp-guardian), killed-summon
-loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-boki-box-summon, ext/vfx-stolen-wisps).
+back to their hunter, who keeps them for that down. Soul echo: the dex entry's `echo` count (seen = true), now
+written when the thief extracts, with the hatch odds and the extract bonus (decision 0097). Left out: guardian
+interplay (ext/wisp-guardian), killed-summon loose rule, bots grabbing, HUD icons (ext/ui-boki-box-summon,
+ext/vfx-stolen-wisps).
 
 ## Consequences
 - Net.VERSION 0.30.0: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the

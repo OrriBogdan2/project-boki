@@ -3,8 +3,8 @@ extends RefCounted
 ## breaks loose and floats; holding interact beside it grabs it (the prompt shows the key cap); the thief gets its
 ## carry passive at half strength (clamped) and the owner loses it; one stolen summon at half the window; at most
 ## two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an
-## ungrabbed wisp goes home and stays; match end sends every stolen wisp home with a soul echo in the Field Book;
-## the kin snapshot carries the carrier. Prints PASS/FAIL.
+## ungrabbed wisp goes home and stays; match end sends every stolen wisp home (the soul echo waits for an extract:
+## --soul-echo-check); the kin snapshot carries the carrier. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -76,11 +76,11 @@ func _steal() -> void:
 	ok(label.contains(Settings.key_cap("interact")) and String(m.interact.get("kind", "")) == "wisp",
 		"grab: the prompt names the interact key (%s)" % label)
 	ok(KinSteal.loose(fk), "...a short hold is not a grab")
+	var echoes := SoulEcho.count(fk.species)
 	_hold(p, fk, 0.7)
 	ok(KinSteal.stolen(fk) and fk.owner_h == p and fk.team == p.team and not KinSteal.loose(fk) and fk.wisp,
 		"grab: held 0.6 s, the wisp rides with the thief")
-	ok(int(Care.dex_entry(fk.species).get("echo", 0)) >= 1 and bool(Care.dex_entry(fk.species).get("seen", false)),
-		"...a soul echo: the species is in the Field Book")
+	ok(SoulEcho.count(fk.species) == echoes, "...no soul echo yet: that waits for the extract (--soul-echo-check)")
 	_frames(0.1)
 	var cap := float(KinParts.OWNER_STATS[stat][2])
 	var want := minf(cap, mine + amount * 0.5)

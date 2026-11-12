@@ -1525,6 +1525,19 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 | price | 16 |
 | foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
 
+## soul_echo (`content/rules/soul_echo.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Soul echoes from stolen Boki wisps (SoulEcho, decision 0097). extract_gems = gems per stolen wisp you extract carrying; hatch_per_echo = extra weight per echo of a parent's species when a nest egg picks which parent it takes after (base 1), counting at most hatch_echo_cap echoes; trait_chance = chance the next hatch gets one stolen shimmer or rare mutation; traits_kept = stolen traits waiting for that hatch, newest kept. |
+| extract_gems | 25 |
+| hatch_per_echo | 0.25 |
+| hatch_echo_cap | 4 |
+| trait_chance | 0.05 |
+| traits_kept | 4 |
+
 ## status_looks (`content/rules/status_looks.json`)
 
 The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STATUS_LOOKS.md). Each status names its look (a builder in the script), its colours (the owning Hunter's ability colours where one Hunter owns the status), `y` (m, where the look sits on a 2 m body; scaled with the Hunter), `size` (scale) and `pace` (animation speed). Every look has its own shape, place and motion, so two statuses never read alike even in grey.

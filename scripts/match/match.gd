@@ -4931,6 +4931,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.extracted(self, h)      # stolen wisps: the extract bonus and the player's soul echoes
 	_check_last()
 
 func _update_rules(_dt: float) -> void:

@@ -1,0 +1,8 @@
+{
+	"_doc": "Soul echoes from stolen Boki wisps (SoulEcho, decision 0097). extract_gems = gems per stolen wisp you extract carrying; hatch_per_echo = extra weight per echo of a parent's species when a nest egg picks which parent it takes after (base 1), counting at most hatch_echo_cap echoes; trait_chance = chance the next hatch gets one stolen shimmer or rare mutation; traits_kept = stolen traits waiting for that hatch, newest kept.",
+	"extract_gems": 25,
+	"hatch_per_echo": 0.25,
+	"hatch_echo_cap": 4,
+	"trait_chance": 0.05,
+	"traits_kept": 4
+}

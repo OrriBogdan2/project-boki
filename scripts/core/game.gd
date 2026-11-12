@@ -189,6 +189,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			Care.dex_got(nk)
 			out["caught"].append(nk)
 	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
+	SoulEcho.settle(r)             # soul echoes of the stolen wisps you got out with (soul_echo.gd)
 	WaysResult.settle(r, out)      # a squad that did not leave: placement pay
 	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
 	Backpacks.settle(r)        # and the backpack you wore out
