@@ -21,6 +21,8 @@ suite, headless runs (the dedicated server) and any build made without the DSN.
 - **What is sent:** the SDK defaults. Those are crashes (crashpad), script errors and `push_error` events,
   and errors and warnings as logs and breadcrumbs. Tracing is off. Script stack traces need
   `debug/settings/gdscript/always_track_call_stacks=true`, which project.godot sets.
+- **macOS 12.0 or newer:** the addon needs it, so the macOS preset's minimum versions are 12.00 (they were
+  10.13 / 11.00; the alternative is to exclude `addons/sentry/*` from the macOS preset).
 - `--sentry-check` guards all of this: no DSN committed, no auto-start, the start rule, the release name.
 
 ## One-time setup (owner)
