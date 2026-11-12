@@ -74,16 +74,18 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
+		"game_board": {},     # garden minigame results (MinigameHub); older saves start empty
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {},
+		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -296,18 +298,20 @@ func _migrate_10_to_11(data: Dictionary) -> void:
 
 ## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
 ## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
-## rec["bonds"] = {}). Each step only adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden
-## dev v12 (bonds, no Evo) both load.
+## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
 func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
 	for r in data.get("roster", []):
 		if not r.has("bonds"):
 			r["bonds"] = {}
 
-## v12 -> v13: shaping items (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save
-## from either line gets the other half of v12 first.
+## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
 func _migrate_12_to_13(data: Dictionary) -> void:
 	_migrate_11_to_12(data)
+	GardenZones.migrate(data)
 	for r in data.get("roster", []):
 		Care.ensure(r)
 

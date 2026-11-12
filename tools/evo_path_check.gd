@@ -77,12 +77,12 @@ func _examples() -> void:
 			"ribbons": {"dash": {"n": 1, "week": 0}}})
 	lash["traits"]["temper"] = 0.8
 	_expect(lash, "care1|stat3 lean2 tokens2 ribbons1", 1, "Vespyx: hot-headed fox, Dark, Galeribbons, Dash: Lashyx")
-	var tub := _boki("glassolotl", 14, {"focus": 40, "guard": 20}, {"toy_use": {"toy_tub": 5, "toy_ball": 2}})
+	var tub := _boki("glassolotl", 14, {"focus": 40, "guard": 20}, {"habit": {"toy": "toy_tub"}})
 	_expect(tub, "stat3 care1|", 0, "Prismander: a tub lover drifts to Chandelotl")
 	tub["lean"] = {"fairy": Evo.LEAN_FULL}
 	_expect(tub, "stat3 lean2 care1|", 0, "Prismander: Starfruit adds 2")
 	var geo := _boki("glassolotl", 14, {"focus": 20, "guard": 40},
-			{"lean": {"rock": Evo.LEAN_FULL}, "path": ["keepstone", "keepstone"], "toy_use": {"toy_stone": 4}})
+			{"lean": {"rock": Evo.LEAN_FULL}, "path": ["keepstone", "keepstone"], "habit": {"toy": "toy_stone"}})
 	_expect(geo, "|stat3 lean2 tokens2 care1", 1, "Prismander: Cinderstep stone, Rock, Keepstones: Geodelotl")
 	var chime := _boki("zapple", 6, {},
 			{"lean": {"fairy": Evo.LEAN_FULL}, "ribbons": {"echo_steps": {"n": 1, "week": 0}}})
