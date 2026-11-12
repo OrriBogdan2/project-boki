@@ -6,12 +6,12 @@
 	"trait_gap": 0.5,
 	"traits": {"temper": ["hot-headed", "mellow"], "bravery": ["bold", "timid"]},
 	"types": {
-		"ember": "Fire", "tide": "Water", "bloom": "Grass", "storm": "Electric", "frost": "Ice", "venom": "Poison",
-		"swarm": "Bug", "stone": "Rock", "tempest": "Flying", "wild": "Normal", "titan": "Steel", "wyrm": "Dragon",
-		"shadow": "Dark", "lunar": "Fairy", "prism": "Crystal", "spore": "Spore", "echo": "Sound", "gravity": "Psychic"
+		"fire": "Fire", "water": "Water", "grass": "Grass", "electric": "Electric", "ice": "Ice", "poison": "Poison",
+		"bug": "Bug", "rock": "Rock", "flying": "Flying", "wild": "Normal", "steel": "Steel", "wyrm": "Dragon",
+		"dark": "Dark", "fairy": "Fairy", "crystal": "Crystal", "spore": "Spore", "sound": "Sound", "psychic": "Psychic"
 	},
 	"clashes": [
-		["ember", "frost"], ["ember", "tide"], ["ember", "bloom"], ["tide", "storm"], ["storm", "stone"],
-		["bloom", "venom"], ["shadow", "lunar"], ["shadow", "gravity"], ["frost", "wyrm"], ["wyrm", "lunar"]
+		["fire", "ice"], ["fire", "water"], ["fire", "grass"], ["water", "electric"], ["electric", "rock"],
+		["grass", "poison"], ["dark", "fairy"], ["dark", "psychic"], ["ice", "wyrm"], ["wyrm", "fairy"]
 	]
 }

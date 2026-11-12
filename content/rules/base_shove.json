@@ -12,14 +12,14 @@
 	"edge": 1.1,
 	"edge_doc": "Push multiplier for a Boki whose species theme beats the other's in 'beats' (a 10% edge, never both ways).",
 	"beats": {
-		"ember": ["frost", "bloom", "swarm"],
-		"frost": ["storm", "tempest", "gravity"],
-		"bloom": ["stone", "echo", "spore"],
-		"stone": ["ember", "venom", "shadow"],
-		"storm": ["swarm", "prism", "titan"],
-		"shadow": ["lunar", "prism", "echo"],
-		"lunar": ["spore", "venom", "gravity"],
-		"venom": ["bloom", "swarm", "tempest"]
+		"fire": ["ice", "grass", "bug"],
+		"ice": ["electric", "flying", "psychic"],
+		"grass": ["rock", "sound", "spore"],
+		"rock": ["fire", "poison", "dark"],
+		"electric": ["bug", "crystal", "steel"],
+		"dark": ["fairy", "crystal", "sound"],
+		"fairy": ["spore", "poison", "psychic"],
+		"poison": ["grass", "bug", "flying"]
 	},
 	"beats_doc": "Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way.",
 	"rate": 1.0,

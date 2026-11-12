@@ -106,9 +106,9 @@ func _stats() -> void:
 	var by_theme := {}
 	for id in Data.KIN:
 		by_theme[String(Data.KIN[id].get("theme", ""))] = id
-	var a := _kin(by_theme["ember"], "A", 10, 10, 50.0, 50.0)
-	var b := _kin(by_theme["frost"], "B", 10, 10, 50.0, 50.0)
-	var plain := _kin(by_theme["stone"], "P", 10, 10, 50.0, 50.0)
+	var a := _kin(by_theme["fire"], "A", 10, 10, 50.0, 50.0)
+	var b := _kin(by_theme["ice"], "B", 10, 10, 50.0, 50.0)
+	var plain := _kin(by_theme["rock"], "P", 10, 10, 50.0, 50.0)
 	var ratio := BaseVolley.strength(a, b) / BaseVolley.strength(a, plain)
 	ok(absf(ratio - float(BaseVolley.rules()["edge"])) < 0.001, "the type edge is x%.3f of strength" % ratio)
 	var happy := _kin("zapple", "H", 10, 10, 100.0, 100.0)

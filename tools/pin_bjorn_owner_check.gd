@@ -697,7 +697,8 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
 
-## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
+## Owner item 146: Spirit Walk has 2 charges (the HUD slot too) and rolls 15% further than the footage's
+## 3 m (3.45 m); a third press waits for the recharge.
 func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
 	step(m, 1.0)
 	K.spirit.end("time")
@@ -705,9 +706,9 @@ func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
 	P.slot_lv["dash"] = 1
 	var info := P.slot_info("dash")
 	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
-	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
+	ok("pin dash: 2 charges, both on the HUD slot (data roll 3.45 m)",
 		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
-		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
+		and absf(float(K.dash_def()["roll"]) - 3.45) < 0.001, got)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.inp["move"] = Vector2(-1, 0)

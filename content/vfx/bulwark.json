@@ -36,6 +36,8 @@
 
 		"crush": {"fx": [{"p": "star", "y": 1.9, "n": 6, "shape": "disc", "radius": 0.5, "way": "up", "speed": 0.3, "spread": 0.2, "grav": 0.0, "drag": 2.0, "life": 1.0, "size": 0.11, "c": "hot", "c2": "main"},
 				{"p": "smoke", "n": 6, "way": "up", "speed": 1.2, "spread": 0.9, "grav": -0.4, "life": 0.7, "size": 0.6, "radius": 0.5, "c": "dust"}]},
+		"mend": {"fx": [{"p": "ember", "shape": "arc", "arc": 360, "radius": "r", "w": 0.25, "way": "up", "n": 40, "speed": 1.1, "spread": 0.12, "grav": -1.0, "life": 0.9, "size": 0.06},
+				{"p": "star", "shape": "disc", "radius": "r", "radius_x": 0.85, "way": "up", "n": 12, "speed": 0.7, "spread": 0.3, "grav": -0.5, "life": 1.0, "size": 0.12, "c": "heal", "near": true}]},
 		"mend_call": {"fx": [{"p": "skirt", "size": 1.1, "from": 0.7, "tall": 6.0, "life": 1.0, "c": "plate"},
 				{"p": "star", "shape": "disc", "radius": "r", "radius_x": 0.7, "y": 4.5, "way": "up", "n": 18, "speed": 0.3, "grav": 7.0, "life": 1.0, "burst": 0.0, "size": 0.14},
 				{"p": "flare", "y": 0.6, "size": 3.4, "life": 0.3, "delay": 0.95}]},

@@ -11,11 +11,11 @@
 	"gap_s": 300.0,
 	"gap_s_doc": "Seconds after one leaves before the next may come (one garden day).",
 	"groups": {
-		"bramblebank": ["bloom", "swarm", "spore"],
-		"glasswater": ["prism", "frost"],
-		"cinderstep": ["ember", "stone", "titan", "gravity"],
-		"hushwood": ["shadow", "lunar", "venom"],
-		"ridge": ["storm", "tempest", "echo"]
+		"bramblebank": ["grass", "bug", "spore"],
+		"glasswater": ["crystal", "ice"],
+		"cinderstep": ["fire", "rock", "steel", "psychic"],
+		"hushwood": ["dark", "fairy", "poison"],
+		"ridge": ["electric", "flying", "sound"]
 	},
 	"groups_doc": "Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json."
 }

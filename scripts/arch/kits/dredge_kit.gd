@@ -22,6 +22,7 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
+const HOOK_R := 0.24                   # m: the bone hook's hit radius (the shot's size)
 const ARM_COL := Color("8a5aff")       # the Abyssal Hand: the bruised-purple flesh of the stretched arm
 const SLUDGE := Color("4a2278")        # the purple-black drips off the arm
 const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
@@ -294,7 +295,7 @@ func _tick_coil(dt: float) -> void:
 ## The arm shoots out once the coil-back is over, at a steady `speed` a foe can sidestep.
 func _launch_hook() -> void:
 	var rdf := rmb_def()
-	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
+	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": HOOK_R}
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
 	var n0: int = m.shots.size()
@@ -325,7 +326,7 @@ func _tick_hook() -> void:
 	if hook_sd.is_empty():
 		return
 	var p: Vector3 = hook_sd["pos"]
-	var reach := float(rmb_def()["size"]) + ALLY_SLACK
+	var reach := HOOK_R + ALLY_SLACK
 	for o in m.hunters:
 		if o == h or not is_instance_valid(o) or o.dead or o.out or absf(o.pos.y + 0.9 - p.y) > 1.6:
 			continue

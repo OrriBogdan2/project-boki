@@ -110,10 +110,10 @@ func _edge() -> void:
 	var by_theme := {}
 	for id in Data.KIN:
 		by_theme[String(Data.KIN[id].get("theme", ""))] = id
-	var a := _kin(by_theme["ember"], "A", 10, 10, 50.0, 50.0)
-	var b := _kin(by_theme["frost"], "B", 10, 10, 50.0, 50.0)
+	var a := _kin(by_theme["fire"], "A", 10, 10, 50.0, 50.0)
+	var b := _kin(by_theme["ice"], "B", 10, 10, 50.0, 50.0)
 	ok(BaseShove.has_edge(a, b) and not BaseShove.has_edge(b, a), "ember beats frost and not the other way")
-	var plain := _kin(by_theme["stone"], "P", 10, 10, 50.0, 50.0)
+	var plain := _kin(by_theme["rock"], "P", 10, 10, 50.0, 50.0)
 	var ratio := BaseShove.push(a, b) / BaseShove.push(a, plain)
 	ok(absf(ratio - 1.1) < 0.001, "the edge is 10%% of push (x%.3f)" % ratio)
 

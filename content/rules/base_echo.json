@@ -18,7 +18,7 @@
 	"sound_saves": 1,
 	"sound_lean": 0.3,
 	"sound_doc": "A Boki of the Sound type (species theme in sound_themes) or with a Sound lean of at least sound_lean (Evo.lean strength 0..1) keeps its streak through this many misses a round.",
-	"sound_themes": ["echo"],
+	"sound_themes": ["sound"],
 	"rival_miss": [0.35, 0.05],
 	"rival_doc": "Chance the rival misses a step it copies, at Focus 0 and at Focus 100 (linear between).",
 	"hit_pts": 10,

@@ -99,7 +99,7 @@ Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN
 | sound_saves | 1 |
 | sound_lean | 0.3 |
 | sound_doc | A Boki of the Sound type (species theme in sound_themes) or with a Sound lean of at least sound_lean (Evo.lean strength 0..1) keeps its streak through this many misses a round. |
-| sound_themes | ["echo"] |
+| sound_themes | ["sound"] |
 | rival_miss | [0.35, 0.05] |
 | rival_doc | Chance the rival misses a step it copies, at Focus 0 and at Focus 100 (linear between). |
 | hit_pts | 10 |
@@ -281,7 +281,7 @@ Seek, the Boki base's third minigame (briefs/design/GARDEN.md section 5.3, scrip
 | aim | 0.25 |
 | aim_doc | A right sniff points at the scent within +-aim radians. |
 | night_right | 0.2 |
-| night_themes | ["spore", "shadow"] |
+| night_themes | ["spore", "dark"] |
 | night_doc | At night (HomeWork.is_night, the base's day clock) a Boki whose species theme is in night_themes, or whose species is in Work.NOCTURNAL, adds night_right to its chance of sniffing the right way. |
 | friend_share | 0.15 |
 | friend_doc | Friends (bond at or above base_race friend_at) hunt as a pair: when a friend's last sniff was right, a Boki's chance goes up by friend_share. |
@@ -321,7 +321,7 @@ Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.
 | trust_doc | Push multiplier at trust 100 (linear from 1.0 at trust 0). |
 | edge | 1.1 |
 | edge_doc | Push multiplier for a Boki whose species theme beats the other's in 'beats' (a 10% edge, never both ways). |
-| beats | {"ember": ["frost", "bloom", "swarm"], "frost": ["storm", "tempest", "gravity"], "bloom": ["stone", "echo", "spore"], "stone": ["ember", "venom", "shadow"], "storm": ["swarm", "prism", "titan"], "shadow": ["lunar", "prism", "echo"], "lunar": ["spore", "venom", "gravity"], "venom": ["bloom", "swarm", "tempest"]} |
+| beats | {"fire": ["ice", "grass", "bug"], "ice": ["electric", "flying", "psychic"], "grass": ["rock", "sound", "spore"], "rock": ["fire", "poison", "dark"], "electric": ["bug", "crystal", "steel"], "dark": ["fairy", "crystal", "sound"], "fairy": ["spore", "poison", "psychic"], "poison": ["grass", "bug", "flying"]} |
 | beats_doc | Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way. |
 | rate | 1 |
 | rate_doc | Balance moved a second for a net push of 1.0 (push over hold, one side minus the other). |
@@ -777,16 +777,16 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 
 ## farm_tutorial (`content/rules/farm_tutorial.json`)
 
-The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Five steps, one prompt at a time, with a Skip always on show (owner, Nov 8: shorter tutorials; skipping loses nothing: the house goes up, the starter food and the end gems are given). What the cut steps taught (stone, hammer, a job, the Market, Hob) is a one-time hint now (FirstTimeHint, content/rules/hints.json 'farm'). Every owner-confirmable choice is under 'options' so it is a one-line change.
+The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Short, one prompt at a time, not skippable on a new save (owner, Nov 3 DECISIONS.md). Every owner-confirmable choice is under 'options' so it is a one-line change.
 
 | Setting | Value |
 |---|---|
-| options | {"tracker_replaces_day1": true, "player_swing": true, "crop_stage_s": 6, "end_gems": 30, "skippable": true, "house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)", "free_order": true} |
-| options_doc | tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30); a skip gets it too. free_order: after the house is down feed and crop can come in either order (false: strictly in the listed order). skippable: shows a Skip button beside the hint line (owner, Nov 8: always). |
+| options | {"tracker_replaces_day1": true, "player_swing": true, "crop_stage_s": 6, "end_gems": 30, "skippable": false, "house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)", "free_order": true, "free_tools": true, "market_gems": true} |
+| options_doc | tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck. |
 | house_spot | {"from": "landing", "x": 0.0, "z": -7.0} |
 | start_food | {"kibble": 3} |
 | build_wait_s | 30 |
-| steps | [{"id": "chop", "needs": [], "title": "Chop trees for the house", "hints": {"go": "Hold {interact} at a tree to chop. The house takes {house_cost}."}, "world": {"go": "Chop a tree"}}, {"id": "house", "needs": ["chop"], "title": "Place your house", "hints": {"place": "Press {build}, pick House and click the marked spot ({house_cost})."}, "world": {"place": "Your house goes here"}, "spot": {"place": {"hub": "build", "tile": "house", "click": "Click here"}}}, {"id": "feed", "needs": ["house"], "title": "Feed your Boki", "hints": {"place": "Press {build} and set a trough down for your Boki.", "fill": "Press {interact} at the trough to fill it."}, "world": {"place": "", "fill": "Fill the trough"}, "spot": {"place": {"hub": "build", "tile": "feeder_trough", "click": "Click here"}}}, {"id": "crop", "needs": ["house"], "title": "Grow a crop", "hints": {"patch": "Press {build} and place a crop patch by the water.", "patch_dry": "Press {build} and place a crop patch.", "plant": "Press {interact} at the patch to plant a seed.", "water": "Press {interact} at the patch to water it.", "grow": "Your seed is growing: ripe in {secs}s.", "pick": "It's ripe! Press {interact} to pick it."}, "world": {"patch": "Place the patch by the water", "patch_dry": "", "plant": "Plant a seed", "water": "Water it", "grow": "Growing", "pick": "Pick it"}, "spot": {"patch": {"hub": "build"}, "patch_dry": {"hub": "build"}}, "waits": ["grow"]}, {"id": "expedition", "needs_all": true, "title": "Head out", "hints": {"go": "Press {interact} at the portal to head out on your first expedition."}, "world": {"go": "Portal"}}] |
+| steps | [{"id": "axe", "needs": ["hob"], "title": "Get an axe", "hints": {"go": "Here, take this axe. Trees give wood, and wood builds things."}, "world": {"go": ""}, "gives_tool": "axe"}, {"id": "chop", "needs": ["axe"], "title": "Chop trees for the house", "hints": {"go": "Walk up to a tree and hold {interact} to chop. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."}, "world": {"go": "Chop a tree"}}, {"id": "stone", "needs": ["chop"], "title": "Mine rocks for the house", "hints": {"go": "Rocks give stone. Take this pickaxe and hold {interact} at a rock."}, "world": {"go": "Mine this rock"}, "gives_tool": "pickaxe", "gets": "stone"}, {"id": "house", "needs": ["chop", "stone"], "title": "Place your house", "hints": {"place": "Now for a house. Press {build}, choose House, then click the marked spot. Marking it out is free. The {house_cost} are spent while it goes up.", "wait": "Hold {interact} at the house to hammer. Your Boki come to help, and it uses up the wood and stone as it goes."}, "world": {"place": "Your house goes here", "wait": "Building..."}, "spot": {"place": {"hub": "build"}}}, {"id": "hammer", "needs": ["house"], "title": "Swing a hammer", "hints": {"go": "Hold {interact} at the house to take up a hammer and build."}, "world": {"go": "Help build"}}, {"id": "task", "needs": ["house"], "title": "Give your Boki a job", "hints": {"go": "Click {boki}, or press {details} next to it, to open its page. Or press 2 (Boki on the bar below) for all your Boki.", "page": "Pick a job here: try '{job}'. Or assign it at a work station."}, "world": {"go": "Your Boki"}, "spot": {"go": {"world": true}}, "after_built": true}, {"id": "feed", "needs": ["house"], "title": "Feed your Boki", "hints": {"place": "A hungry Boki is a slow Boki. Press {build} and set the trough down", "fill": "Press {interact} at the trough to fill it from your pantry."}, "world": {"place": "", "fill": "Fill the trough"}, "spot": {"place": {"hub": "build"}}}, {"id": "crop", "needs": ["house"], "title": "Grow a crop", "hints": {"patch": "Crops grow in patches. Press {build} and place a patch by the water. The water keeps it wet for you.", "patch_dry": "Crops grow in patches. Press {build} and place one. Away from water, you water it yourself.", "plant": "Press {interact} at the patch to plant a seed.", "water": "Press {interact} at the patch to water it.", "grow": "Your seed is growing. Ripe in {secs}s. Wait by the patch, then pick it ({interact}).", "pick": "It's ripe! Press {interact} to pick it."}, "world": {"patch": "Place the patch by the water", "patch_dry": "", "plant": "Plant a seed", "water": "Water it", "grow": "Growing", "pick": "Pick it"}, "spot": {"patch": {"hub": "build"}, "patch_dry": {"hub": "build"}}, "waits": ["grow"]}, {"id": "buy", "needs": ["house"], "title": "Buy a seed", "hints": {"stall": "Go to the market stall and press {interact}. Open the Seeds tab and buy one seed.", "bar": "Click Market on the bar below. Open the Seeds tab and buy one seed."}, "world": {"stall": "Market stall", "bar": ""}, "spot": {"bar": {"hub": "shop"}}}, {"id": "sell", "needs": ["crop", "buy"], "title": "Sell a crop", "hints": {"stall": "Back at the stall, press {interact}. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals.", "bar": "Click Market on the bar below. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals."}, "world": {"stall": "Sell here", "bar": ""}, "spot": {"bar": {"hub": "shop"}}}, {"id": "hob", "needs": [], "title": "Meet the builder", "hints": {"go": "Hob is calling you over at the market stall: walk up and press {interact}."}, "world": {"go": "Talk to Hob"}}, {"id": "expedition", "needs_all": true, "title": "Head out", "hints": {"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."}, "world": {"go": "Portal"}}] |
 | base | {"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.", "lead": {"wait_m": 6.0, "stop_m": 1.8}, "start_food": {"emberberry": 3}, "skip_toy": "toy_ball", "near": 3.0, "steps": [{"id": "meet", "title": "Meet your Boki", "hints": {"go": "This is your Boki. Walk up and say hello."}, "world": {"go": "Your Boki"}, "boki": "Hi! Hi! Over here!"}, {"id": "eat", "needs": ["meet"], "title": "Feed it", "hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."}, "world": {"go": "Feed your Boki"}, "boki": "Is that a berry? For me?"}, {"id": "toy", "needs": ["eat"], "title": "Place a toy", "hints": {"place": "Press {build}, open Base and set a toy down.", "watch": "Watch your Boki go and play with it."}, "world": {"place": "", "watch": "Toy"}, "boki": "Can we have something to play with?"}, {"id": "out", "needs": ["toy"], "title": "Head out or stay", "hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing. Later, the Waystone in your hub wakes the next zone."}, "world": {"go": "Portal"}, "boki": "Out there, or more play? Your call!"}]} |
 | skip_ask | Skip the tutorial? |
 | done_toast | Tutorial done! +{gems} gems |
@@ -794,8 +794,10 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Fiv
 | stay_label | Stay |
 | first_day | {"reward_gems": 15, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile"}, {"id": "pair", "text": "Pair two Boki in the Nook"}]} |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
+| tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
+| gems_toast | Hob gives you %d gems to buy seeds |
 | picked_say | {"go": "Off to work!", "wait": "Ready when there's work!"} |
-| steps_doc | needs: steps that must be done first; needs_all: everything else; waits: hint stages that are only waiting (the next open step is shown meanwhile); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring. |
+| steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring. |
 
 ## feel_golden (`content/rules/feel_golden.json`)
 
@@ -945,7 +947,7 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 | hour_s | 12.5 |
 | say | {"pet": "%s loved the scratches: trust up", "food": "%s loves %s: trust up", "win": "%s won with you: trust up"} |
 | default_food | kibble |
-| food_by_element | {"ember": "emberberry", "frost": "frostdrop", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "pebblenut", "gravity": "ironcrisp", "titan": "scalepepper", "shadow": "duskplum", "lunar": "mindmint", "venom": "pricklepear", "echo": "chimebun", "prism": "geodecandy", "spore": "glowcap", "swarm": "sapjelly", "tempest": "tonicbrew"} |
+| food_by_element | {"fire": "emberberry", "ice": "frostdrop", "grass": "puffcorn", "electric": "tonicbrew", "rock": "pebblenut", "psychic": "ironcrisp", "steel": "scalepepper", "dark": "duskplum", "fairy": "mindmint", "poison": "pricklepear", "sound": "chimebun", "crystal": "geodecandy", "spore": "glowcap", "bug": "sapjelly", "flying": "tonicbrew"} |
 | _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
 
 ## garden_visitor (`content/rules/garden_visitor.json`)
@@ -964,7 +966,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | feeds_doc | Favourite meals it takes before it leaves an egg or asks to stay. |
 | gap_s | 300 |
 | gap_s_doc | Seconds after one leaves before the next may come (one garden day). |
-| groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
+| groups | {"bramblebank": ["grass", "bug", "spore"], "glasswater": ["crystal", "ice"], "cinderstep": ["fire", "rock", "steel", "psychic"], "hushwood": ["dark", "fairy", "poison"], "ridge": ["electric", "flying", "sound"]} |
 | groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
 
 ## garden_xp (`content/rules/garden_xp.json`)
@@ -1368,34 +1370,6 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | mutation_mult | 5 |
 | pool | {"wisplet": "common", "zapple": "common", "kindlewren": "common", "glintmole": "common", "rimeshrew": "common", "mossgrade": "common", "gloamshell": "common", "marchleaf": "common", "glomwort": "common", "sentrikat": "common", "basaltoad": "common", "murmurling": "common", "kestrike": "uncommon", "nettlynx": "uncommon", "thrumbird": "uncommon", "lodestick": "uncommon", "opalisk": "uncommon", "kilnbadger": "uncommon", "hoarheron": "uncommon", "orchisloth": "uncommon", "caecilith": "uncommon", "velvorm": "uncommon", "gibbelle": "uncommon", "moonloris": "uncommon", "threadwyrm": "uncommon", "selenfin": "rare", "casquebill": "rare", "nacrolin": "rare", "tuatrune": "rare"} |
 
-## npc_talk (`content/rules/npc_talk.json`)
-
-How every NPC talks (NpcDialogue, NpcBeacon, FarmTalk): a box at the bottom with a front-facing portrait, a name plate and text that types out, a '...' bubble before the first line, a voice blip per few letters, and the camera easing in on the speaker's head. A speaker's painted portraits, when they land, go at 'portrait' with {mood} for neutral, happy or warning; until then the box shows a close-up rendered from the speaker's model.
-
-| Setting | Value |
-|---|---|
-| type_cps | 42 |
-| type_cps_desc | Letters per second the text types out at. |
-| dots_s | 0.7 |
-| dots_s_desc | Seconds the '...' bubble shows before the first line. |
-| pause_s | {".": 0.22, "!": 0.22, "?": 0.22, ",": 0.1} |
-| pause_s_desc | Extra seconds the typing holds after these letters, so sentences breathe. |
-| blip_every | 2 |
-| blip_every_desc | A voice blip every this many letters (spaces and punctuation are silent). |
-| blip_db | -14 |
-| cam_zoom | 0.5 |
-| cam_zoom_desc | The camera's zoom while someone talks (the farm's own is about 0.9). |
-| cam_ease | 3 |
-| cam_ease_desc | 1/s: how fast the camera eases onto the speaker and back. |
-| cam_lift | 1.6 |
-| cam_lift_desc | Metres the view slides toward the camera, so the speaker sits above the box instead of behind it. |
-| arrow_margin | 46 |
-| arrow_margin_desc | Pixels in from the screen edge that the off-screen arrow sits. |
-| moods | {"neutral": "a9b0bf", "happy": "f2c84a", "warning": "ff6a5a"} |
-| moods_desc | The portrait frame's colour per expression (and the expressions a line may ask for). |
-| speakers_desc | Each NPC: name, short (the edge arrow's label), role (under the name), voice_hz (blip pitch), head and tag (m above the feet: the camera's aim and the name tag), portrait_at and portrait_dist (m: the rendered close-up's aim height and distance), glow (outline colour). |
-| speakers | {"hob": {"name": "Hob Brackenridge", "short": "Hob", "role": "Builder", "voice_hz": 150.0, "head": 2.2, "tag": 3.2, "portrait": "res://art/portraits/hob_{mood}.png", "portrait_at": 2.0, "portrait_dist": 2.2, "glow": "ffd79a"}, "pell": {"name": "Pell", "short": "Pell", "role": "Freed soul, your guide", "voice_hz": 420.0, "head": 1.4, "tag": 2.1, "portrait": "res://art/portraits/pell_{mood}.png", "portrait_at": 1.15, "portrait_dist": 2.4, "glow": "9fd8ff"}} |
-
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
 
@@ -1561,7 +1535,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | trait_weight | 1 |
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
-| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal", "prism", "frost"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
+| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "electric", "steel", "psychic"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "spore"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
 ## try_today (`content/rules/try_today.json`)
 
@@ -1621,8 +1595,8 @@ When two Boki are paired in the Nesting Nook the pair is an unstable mix if thei
 | fine_condition | 50 |
 | trait_gap | 0.5 |
 | traits | {"temper": ["hot-headed", "mellow"], "bravery": ["bold", "timid"]} |
-| types | {"ember": "Fire", "tide": "Water", "bloom": "Grass", "storm": "Electric", "frost": "Ice", "venom": "Poison", "swarm": "Bug", "stone": "Rock", "tempest": "Flying", "wild": "Normal", "titan": "Steel", "wyrm": "Dragon", "shadow": "Dark", "lunar": "Fairy", "prism": "Crystal", "spore": "Spore", "echo": "Sound", "gravity": "Psychic"} |
-| clashes | [["ember", "frost"], ["ember", "tide"], ["ember", "bloom"], ["tide", "storm"], ["storm", "stone"], ["bloom", "venom"], ["shadow", "lunar"], ["shadow", "gravity"], ["frost", "wyrm"], ["wyrm", "lunar"]] |
+| types | {"fire": "Fire", "water": "Water", "grass": "Grass", "electric": "Electric", "ice": "Ice", "poison": "Poison", "bug": "Bug", "rock": "Rock", "flying": "Flying", "wild": "Normal", "steel": "Steel", "wyrm": "Dragon", "dark": "Dark", "fairy": "Fairy", "crystal": "Crystal", "spore": "Spore", "sound": "Sound", "psychic": "Psychic"} |
+| clashes | [["fire", "ice"], ["fire", "water"], ["fire", "grass"], ["water", "electric"], ["electric", "rock"], ["grass", "poison"], ["dark", "fairy"], ["dark", "psychic"], ["ice", "wyrm"], ["wyrm", "fairy"]] |
 
 ## wade (`content/rules/wade.json`)
 
@@ -1634,9 +1608,9 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | deep_speed | 0.45 |
 | ripple_secs | 0.6 |
 | shake_secs | 0.6 |
-| paddle | ["water", "ice", "prism", "frost", "crystal"] |
+| paddle | ["water", "ice", "crystal"] |
 | paddle_doc | Lean or species-theme keys (HomeToys.lean_of) that paddle: the Water, Ice and Crystal types (themes prism and frost today). |
-| fire | ["fire", "ember"] |
+| fire | ["fire"] |
 | fire_doc | Lean or species-theme keys that step out fast: the Fire type (theme ember today). |
 | out_speed | 1.5 |
 | out_reach | 8 |

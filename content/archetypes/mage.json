@@ -52,8 +52,8 @@
 			5.6,
 			9.75
 		],
-		"hold": 0.9,
-		"speed": 34.0,
+		"hold": 0.6,
+		"speed": 40.0,
 		"ramp": 0.15,
 		"ramp_from": 0.35,
 		"exit_cap": 1.5,

@@ -430,7 +430,7 @@ func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
 	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
 	AimKit.lane(h, "aegis_push", {
 		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
-		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
+		"width": float(w["len"]), "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
 		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
 
 # ------------------------------------------------------------------ Purify
