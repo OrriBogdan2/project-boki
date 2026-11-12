@@ -42,7 +42,6 @@ func run(main: Node) -> void:
 	_duel(m, me, foe)
 	_no_refill(m, me)
 	_revive(m, me)
-	_clean_shot(me, foe)
 	print("ARMOR DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -151,16 +150,3 @@ func _revive(m: Match, me: Hunter) -> void:
 	_set_tier(me, 3)
 	Life.bring_back(m, me, me.pos, 0.5, false)
 	ok(me.armor_tier == 0 and me.armor_xp == 0.0 and me.armor == 0.0, "back from the dead on a broken Common piece")
-
-func _clean_shot(me: Hunter, foe: Hunter) -> void:
-	var gun: Dictionary = Data.weapon_stats("shotgun")
-	ok(is_equal_approx(float(gun.get("clean_armor_k", 0.0)), 1.66),
-			"Grimble's scattergun: +66% armour damage without spread")
-	_set_tier(me, 0)
-	me.armor = me.max_armor
-	var plain: Array = _hit(me, foe, 40.0, {"src": "shot"})
-	me.armor = me.max_armor
-	var clean: Array = _hit(me, foe, 40.0, {"src": "shot", "armor_k": 1.66})
-	ok(absf(float(clean[1]) / float(plain[1]) - 1.66) < 0.01,
-			"a no-bloom slug wears 1.66x the armour (%.1f vs %.1f)" % [clean[1], plain[1]])
-	ok(absf(float(clean[0]) - float(plain[0])) < 0.01, "and the same health")

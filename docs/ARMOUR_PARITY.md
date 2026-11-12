@@ -26,7 +26,7 @@ source found: ours is kept as is and marked. Code: `Hunter._mitigate` and `Hunte
 | Repairs | Basecamps, the Forge, repairs dropped by kills, powers, Armor Soul | armor kit on the belt (+20), breakable drops | `[?]` partial: no kill drops / base repair yet | wiki Armor |
 | Revived from death | "damaged Common Armor in most instances" | kept the tier, durability 0 | **fixed**: back on a broken Common piece, progress reset (amount of "damaged" not published, so 0) | wiki Armor; check `broken Common piece` |
 | Death box keeps the armour | your armour goes in your box, lootable | no armour items in matches (Equal) | n/a (design) | wiki Armor |
-| Grimble: bonus armour damage without spread | Scattergun "deals 66% increased damage to Armor when fired without spread" | not built | **fixed**: a shot fired at 0 bloom wears durability 1.66x, health unchanged (`clean_armor_k` in content/weapons/shotgun.json) | wiki Kingpin; check `no-bloom slug` |
+| Grimble: bonus armour damage without spread | Scattergun "deals 66% increased damage to Armor when fired without spread" | not built | **fixed**: a zero-bloom volley wears the foe's durability 1.66x, health unchanged (`gun.armor_k` in content/archetypes/dredge.json, `DredgeKit._shred_armor`, tier-aware) | wiki Kingpin; `--dredge-combo-check` |
 
 ## Progress (content/rules/armor_xp.json, 2026-11-11)
 
