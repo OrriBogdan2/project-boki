@@ -123,3 +123,5 @@ so they do not read as each other's or as loot. Asserted in `--tender-combo-chec
 
 Not rings, left as they are: Albert's swing and slam crescents (`bulwark.json` `sweep`, ember to red; real hit
 arcs; ext/vfx-albert-ivory-arcs already recolours them) and Meeko's violet Burrseed discs.
+
+GPU strips (jobq rp1/pc, `--hero-vfx-reel`): docs/shots/vfx-gold-ground-rings/ (Hearthlight, the 360 Smash, Mending Ground).
