@@ -1,400 +1,615 @@
 class_name BaseRace
 extends RefCounted
-## The Dash (briefs/design/GARDEN.md section 5): two to four of your Boki race a short loop from the
-## start post beside the Training post: a straight, a pond, a climb and a gap to jump. Pace comes from
-## Care stats, the element lean (a lean speeds up the stretch that suits it) and mood, plus a random
-## wobble. You cheer for one Boki with three timed presses on the Training post's drill bar
-## (TimingDrill). The winner gets a heart, joy and trust; losers sulk and remember; you get a few gems.
-## Tuning lives in content/rules/race.json.
+## The Dash (briefs/design/GARDEN.md 5.1 and 9.4), the Boki base's first minigame; only with
+## farm_build.json base_mode on. A race post stands by the Training post with a 6 x 3 m loop beside
+## it: a straight, a water stretch, a climb and a jump. Press interact at the post and 2 to 4 rested
+## Boki out on the base run one lap; you back your partner and cheer at three marks with the
+## Training post's timing bar (TimingBar). Pace comes from trained Speed, joy, and a lean on its own
+## stretch (the Tide knack swims, wings glide the gap); friends run side by side, rivals bump.
+## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
+## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
+## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
+## on, "Train" runs a solo lap of the same loop (solo()); each cheer adds to Speed, see settle_solo().
+## The Relay Cup (BaseRelay) runs on the same loop from its own stand; this script hosts it.
+## Tuning: content/rules/base_race.json. Run is the race itself (no nodes), so --race-check
+## (tools/race_check.gd) runs it headless.
 ##
-## The race itself (new_run, step, cheer, settle) is plain data, so --race-check runs it headless.
-## home.gd calls build(), tick(d), input(event), near(p2), prompt() and start().
+## On the save: rec["bonds"] = {uid: -1..1} (missing = 0, so old saves need no migration).
 
-const POST_OFF := Vector3(1.9, 0, 1.6)      # the start post, from the Training post (metres)
-const POST_REACH := 1.6                     # how close you stand to use the post (metres)
-const LANE_W := 0.55                        # metres between runners side by side
-const CLIMB_H := 0.7                        # top of the climb (metres); the gap drops back to the ground
-const HOP_H := 0.8                          # extra height of the jump over the gap (metres)
-const CARD_S := 6.0                         # how long the result card stays up (seconds)
-const MAX_RUNNERS := 4
+const POST_OFF := Vector3(2.2, 0, 0.4)      # m from the Training post to the race post
+const LOOP_OFF := Vector3(0.9, 0, -0.6)     # m from the race post to the loop's start line
+const LOOP_W := 6.0                          # m, the loop's long side (the straight and the climb)
+const CLIMB_H := 0.7                         # m, the top of the climb
+const JUMP_H := 0.6                          # m, the top of the jump's arc
+const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
+const TRACK_W := 1.4                         # m, the track's width (four lanes)
+const REACH := 1.6                           # m from the post to start a race
+const STRETCH_COL := {
+	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
+}
 
-static var _rules := {}
-static var _course: Array = []              # stretches with "a", "b" (Vector2), "len", "start"
-static var _loop_len := 0.0
+static func rules() -> Dictionary:
+	return Content.rules("base_race")
 
-var h                                       # the Home screen
-var node: Node3D = null                     # the start post and the course, placed off the yard
-var run := {}                               # the race in progress (empty when there is none)
-var kins_in: Array = []                     # home kin entries, in the same order as run["runners"]
-var drill := {}                             # the cheer bar in progress, a TimingDrill state plus "t"
-var bar: Control = null
-var bar_draw: Control = null
+## Weeks since 1970 by the real clock.
+static func week_now() -> int:
+	return int(Time.get_unix_time_from_system() / float(rules()["week_s"]))
+
+## The weekly event format for a week number (default this week): {id, game, name, note, plus its tweak:
+## mult?, wobble?, swap?, night?, to_win?}.
+static func twist(week := -1) -> Dictionary:
+	var list: Array = rules()["twists"]
+	return list[(week if week >= 0 else week_now()) % list.size()]
+
+## This week's format when it is for this game ("dash", "seek", "volley"), else {}: the game plays as usual.
+static func tweak(game: String) -> Dictionary:
+	var f := twist()
+	return f if String(f["game"]) == game else {}
+
+static func lap() -> float:
+	var out := 0.0
+	for s in rules()["stretches"]:
+		out += float(s["len"])
+	return out
+
+static func bond(a: Dictionary, b: Dictionary) -> float:
+	return float(a.get("bonds", {}).get(String(b["uid"]), 0.0))
+
+## Both ways: bonds are mutual.
+static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
+	for pair in [[a, b], [b, a]]:
+		var me: Dictionary = pair[0]
+		if not me.has("bonds"):
+			me["bonds"] = {}
+		var uid := String(pair[1]["uid"])
+		me["bonds"][uid] = clampf(float(me["bonds"].get(uid, 0.0)) + amt, -1.0, 1.0)
+
+static func winged(rec: Dictionary) -> bool:
+	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
+
+## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
+static func stretches(tw := {}) -> Array:
+	var out: Array = rules()["stretches"]
+	if tw.has("swap"):
+		out = out.duplicate(true)
+		out[int(tw["swap"]["at"])].merge(tw["swap"], true)
+	return out
+
+## Its pace on stretch i before the wobble and your cheers (m/s).
+static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
+	var R := rules()
+	var s: Dictionary = stretches(tw)[i]
+	var speed := float(rec.get("stats", {}).get("speed", 0))
+	var mood: Array = R["mood"]
+	var p := float(R["pace"]) * float(s["mult"]) * (1.0 + speed * float(R["speed_per_point"]))
+	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
+	p *= float(tw.get("mult", {}).get(String(s["kind"]), 1.0))
+	var lean: Dictionary = rec.get("lean", {})
+	match String(s["kind"]):
+		"water":
+			var tide := maxf(Work.level(rec, "tide"), 4.0 * float(lean.get("water", 0.0)))
+			p *= 1.0 + float(R["swim_per_tide"]) * tide
+		"jump":
+			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
+			p *= lerpf(1.0, float(R["glide"]), g)
+	return p
+
+## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
+static func expected_time(rec: Dictionary, tw := {}) -> float:
+	var out := 0.0
+	var st := stretches(tw)
+	for i in st.size():
+		out += float(st[i]["len"]) / stretch_pace(rec, i, tw)
+	return out
+
+## The race itself: runners' distance along the lap, stepped in time.
+class Run:
+	var R: Dictionary
+	var recs: Array
+	var backed := 0                 # index in recs: the Boki you cheer for
+	var rng: RandomNumberGenerator
+	var tw: Dictionary              # this week's format tweak for the Dash (empty when it is another game's)
+	var t := 0.0
+	var dist: Array = []            # m along the lap
+	var stretch: Array = []         # which stretch each one is on
+	var pace: Array = []            # m/s rolled for its stretch
+	var bump_t: Array = []          # s of bump left
+	var done_t: Array = []          # finish time, -1 while running
+	var ends: Array = []            # m along the lap where each stretch ends
+	var cheered := 0                # marks cheered for (or missed), 0..3
+	var cheer_mult := 1.0           # your last cheer, for the backed Boki's next stretch
+	var bumped := {}                # "i-j-stretch": rivals already bumped there
+	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
+
+	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
+		R = BaseRace.rules()
+		tw = twist
+		recs = runners
+		backed = back
+		rng = r
+		var at := 0.0
+		for s in R["stretches"]:
+			at += float(s["len"])
+			ends.append(at)
+		for i in recs.size():
+			dist.append(0.0)
+			stretch.append(0)
+			pace.append(0.0)
+			bump_t.append(0.0)
+			done_t.append(-1.0)
+			_roll(i)
+
+	func _roll(i: int) -> void:
+		var w := float(tw.get("wobble", R["wobble"]))
+		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
+		if i == backed and int(stretch[i]) > 0:
+			p *= cheer_mult
+			cheer_mult = 1.0
+			cheered = maxi(cheered, int(stretch[i]))      # a mark passed with no press is a miss
+		var mate := _duo_mate(i) if int(stretch[i]) > 0 else -1
+		if mate >= 0:
+			p *= float(BaseDuo.rules()["handoff_pace"])
+			duo[i] = mate
+		pace[i] = p
+
+	## One press a mark, while your Boki runs the stretch before it.
+	func can_cheer() -> bool:
+		return float(done_t[backed]) < 0.0 and cheered == int(stretch[backed]) and cheered < ends.size() - 1
+
+	func cheer(grade: String) -> void:
+		cheer_mult = float(R["cheer"][grade])
+		cheered += 1
+
+	func over() -> bool:
+		return not done_t.has(-1.0)
+
+	## Indices, first home first.
+	func order() -> Array:
+		var out: Array = range(recs.size())
+		out.sort_custom(func(a, b): return float(done_t[a]) < float(done_t[b]))
+		return out
+
+	func friends(i: int, j: int) -> bool:
+		return BaseRace.bond(recs[i], recs[j]) >= float(R["friend_at"])
+
+	## A duo friend running alongside runner i (-1 if none): the hand-off into the next stretch is clean.
+	func _duo_mate(i: int) -> int:
+		for j in recs.size():
+			if j != i and _running(j) and _gap(i, j) < float(R["friend_near"]) and BaseDuo.friends(recs[i], recs[j]):
+				return j
+		return -1
+
+	func rivals(i: int, j: int) -> bool:
+		return BaseRace.bond(recs[i], recs[j]) <= float(R["rival_at"])
+
+	func step(dt: float) -> void:
+		t += dt
+		var eff: Array = []
+		for i in recs.size():
+			eff.append(float(pace[i]) * (float(R["bump_slow"]) if float(bump_t[i]) > 0.0 else 1.0))
+			bump_t[i] = maxf(0.0, float(bump_t[i]) - dt)
+		var pulled := eff.duplicate()
+		for i in recs.size():
+			for j in recs.size():
+				if i != j and _running(i) and _running(j) and friends(i, j) and _gap(i, j) < float(R["friend_near"]):
+					pulled[i] = lerpf(float(pulled[i]), float(eff[j]), float(R["friend_pull"]))
+		for i in recs.size():
+			if _running(i):
+				_advance(i, float(pulled[i]), dt)
+		_bumps()
+
+	func _running(i: int) -> bool:
+		return float(done_t[i]) < 0.0
+
+	func _gap(i: int, j: int) -> float:
+		return absf(float(dist[i]) - float(dist[j]))
+
+	func _advance(i: int, p: float, dt: float) -> void:
+		dist[i] = float(dist[i]) + p * dt
+		while _running(i) and float(dist[i]) >= float(ends[stretch[i]]):
+			if int(stretch[i]) == ends.size() - 1:
+				done_t[i] = t - (float(dist[i]) - float(ends[-1])) / maxf(p, 0.01)
+				dist[i] = float(ends[-1])
+			else:
+				stretch[i] = int(stretch[i]) + 1
+				_roll(i)
+
+	func _bumps() -> void:
+		for i in recs.size():
+			for j in range(i + 1, recs.size()):
+				var key := "%d-%d-%d" % [i, j, int(stretch[i])]
+				if _running(i) and _running(j) and stretch[i] == stretch[j] and not bumped.has(key) \
+						and rivals(i, j) and _gap(i, j) < float(R["bump_near"]):
+					bumped[key] = true
+					bump_t[i] = float(R["bump_s"])
+					bump_t[j] = float(R["bump_s"])
+
+## Pays out a finished race: joy, trust, memories, gems and bonds. Returns what the card shows.
+static func settle(run: Run) -> Dictionary:
+	var R := rules()
+	var order := run.order()
+	var win: Dictionary = run.recs[order[0]]
+	var lose: Dictionary = run.recs[order[-1]]
+	for rec in run.recs:
+		Care.change(rec, "energy", -float(R["energy"]))
+	Care.change(win, "joy", float(R["win_joy"]))
+	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
+	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
+	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
+	nudge_bond(win, lose, -float(R["rival_step"]))
+	for n in range(1, order.size()):
+		var a: Dictionary = run.recs[order[n - 1]]
+		var b: Dictionary = run.recs[order[n]]
+		var close := float(run.done_t[order[n]]) - float(run.done_t[order[n - 1]]) < float(R["close_s"])
+		if close and bond(a, b) > float(R["rival_at"]) and not (a == win and b == lose):
+			nudge_bond(a, b, float(R["friend_step"]))
+	for i in run.duo:
+		BaseDuo.note_first(run.recs[i], run.recs[run.duo[i]], "handed off cleanly with")
+	var backed_won: bool = order[0] == run.backed
+	if backed_won: ClanBoard.add("cup")       # the garden cup for the clan board (until cups land)
+	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	Save.d["gems"] = int(Save.d["gems"]) + gems
+	var mine: Dictionary = run.recs[run.backed]
+	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine), backed_won)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
+
+## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
+static func settle_solo(rec: Dictionary, grades: Array) -> int:
+	var T: Dictionary = rules()["train"]
+	var pts := 0
+	for g in grades:
+		if g != "miss":
+			pts += int(T[g]) + (int(T["dojo"]) if Save.has_building("dojo") else 0)
+	var mult := float(T["happy_mult"]) if Care.need(rec, "joy") >= float(T["happy_at"]) else 1.0
+	var gained := Care.add_stat(rec, "speed", int(round(pts * mult)))
+	Care.change(rec, "energy", -float(rules()["energy"]))
+	Care.change(rec, "food", -float(T["food"]))
+	Care.change(rec, "joy", float(T["joy_great"]) if grades.has("great") else float(T["joy_else"]))
+	Evo.add(rec, "swift", 2.0)
+	if gained > 0:
+		Save.remember(rec, "trained", "ran a training lap of the Dash with you", 1.0)
+	return gained
+
+# ------------------------------------------------------------------ on the base
+var h                          # the Home screen
+var post: Node3D = null
+var wall: Node3D = null        # the showcase wall (BaseShowcase) by the post, when there is no hub
+var start := Vector3.ZERO      # the loop's start line
+var run: Run = null
+var runners: Array = []        # the home's kin entries, in run order
+var bar: TimingBar = null
+var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
+var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
+var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
+var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
 
 func _init(home) -> void:
 	h = home
+	relay = BaseRelay.new(self)
 
-# ------------------------------------------------------------------ the rules and the course
-static func rules() -> Dictionary:
-	if _rules.is_empty():
-		_rules = Content.rules("race")
-	return _rules
-
-static func course() -> Array:
-	if _course.is_empty():
-		var at := Vector2.ZERO
-		for s in rules()["stretches"]:
-			var st: Dictionary = (s as Dictionary).duplicate()
-			var to := Vector2(float(s["to"][0]), float(s["to"][1]))
-			st["a"] = at
-			st["b"] = to
-			st["len"] = at.distance_to(to)
-			st["start"] = _loop_len
-			_loop_len += float(st["len"])
-			_course.append(st)
-			at = to
-	return _course
-
-static func loop_len() -> float:
-	course()
-	return _loop_len
-
-static func stretch_at(dist: float) -> Dictionary:
-	for s in course():
-		if dist < float(s["start"]) + float(s["len"]):
-			return s
-	return course()[-1]
-
-## The element a Boki leans to: its strongest food lean (rec["lean"], GARDEN.md 9.1) once it has
-## one, otherwise its species' type.
-static func lean_of(rec: Dictionary) -> String:
-	var best := ""
-	var most := 0.0
-	var lean: Dictionary = rec.get("lean", {})
-	for el in lean:
-		if float(lean[el]) > most:
-			most = float(lean[el])
-			best = String(el)
-	return best if best != "" else BokiLines.element_of(String(rec.get("species", "")))
-
-## Metres a second on one stretch, before the wobble and cheers.
-static func pace(rec: Dictionary, s: Dictionary) -> float:
-	var r := rules()
-	var stats: Dictionary = rec.get("stats", {})
-	var pts := 0.0
-	for k in s["stats"]:
-		pts += float(stats.get(k, 0)) * float(s["stats"][k])
-	var v := float(r["base_mps"]) + pts * float(r["stat_mps"])
-	if (s["lean"] as Array).has(lean_of(rec)):
-		v *= 1.0 + float(r["lean_edge"])
-	var mood := (Care.condition(rec) - 50.0) / 50.0
-	return v * (1.0 + float(r["mood_edge"]) * mood)
-
-## Seconds a lap should take with no wobble or cheers (lower is the favourite).
-static func expected_time(rec: Dictionary) -> float:
-	var t := 0.0
-	for s in course():
-		t += float(s["len"]) / pace(rec, s)
-	return t
-
-# ------------------------------------------------------------------ one race, as data
-## A fresh race: runner 0 is the Boki you cheer for.
-static func new_run(recs: Array, seed_n: int) -> Dictionary:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_n
-	var runners: Array = []
-	for i in recs.size():
-		Care.ensure(recs[i])
-		runners.append({"rec": recs[i], "d": 0.0, "wob": 0.0, "wob_t": 0.0, "boost": 0.0, "boost_t": 0.0,
-			"lane": float(i) - (recs.size() - 1) * 0.5, "done": -1.0})
-	return {"rng": rng, "t": 0.0, "runners": runners, "order": [], "mark": 0}
-
-## Moves the race on by dt. Returns the cheer mark the backed Boki just reached, or -1.
-static func step(rn: Dictionary, dt: float) -> int:
-	var r := rules()
-	var rng: RandomNumberGenerator = rn["rng"]
-	rn["t"] = float(rn["t"]) + dt
-	for ru in rn["runners"]:
-		if float(ru["done"]) >= 0.0:
-			continue
-		ru["wob_t"] = float(ru["wob_t"]) - dt
-		if float(ru["wob_t"]) <= 0.0:
-			ru["wob_t"] = float(r["wobble_s"])
-			ru["wob"] = rng.randf_range(-1.0, 1.0) * float(r["wobble"])
-		ru["boost_t"] = maxf(0.0, float(ru["boost_t"]) - dt)
-		var boost := float(ru["boost"]) if float(ru["boost_t"]) > 0.0 else 0.0
-		var v := pace(ru["rec"], stretch_at(float(ru["d"]))) * (1.0 + float(ru["wob"]) + boost)
-		ru["d"] = float(ru["d"]) + v * dt
-		if float(ru["d"]) >= loop_len():
-			ru["d"] = loop_len()
-			ru["done"] = rn["t"]
-			(rn["order"] as Array).append(ru["rec"])
-	var marks: Array = r["cheer_marks"]
-	var m := int(rn["mark"])
-	if m < marks.size() and float(rn["runners"][0]["d"]) >= float(marks[m]) * loop_len():
-		rn["mark"] = m + 1
-		return m
-	return -1
-
-static func finished(rn: Dictionary) -> bool:
-	return (rn["order"] as Array).size() == (rn["runners"] as Array).size()
-
-## A cheer press for the backed Boki, graded like the Training post drill.
-static func cheer(rn: Dictionary, grade: String) -> void:
-	var ru: Dictionary = rn["runners"][0]
-	ru["boost"] = float(rules()["cheer_boost"][grade])
-	ru["boost_t"] = float(rules()["cheer_s"])
-
-## The whole race at once (the check). cheers: the grade for each mark, in order.
-static func sim(recs: Array, seed_n: int, cheers: Array = []) -> Dictionary:
-	var rn := new_run(recs, seed_n)
-	while not finished(rn):
-		var m := step(rn, 1.0 / 30.0)
-		if m >= 0 and m < cheers.size():
-			cheer(rn, String(cheers[m]))
-	return rn
-
-## Pays out a finished race: joy and trust for the winner, a sulk and a memory for each loser,
-## rivalry nudged where rec["bonds"] exists, gems for you. Returns what the result card shows.
-static func settle(rn: Dictionary) -> Dictionary:
-	var r := rules()
-	var order: Array = rn["order"]
-	var win: Dictionary = order[0]
-	var backed: Dictionary = rn["runners"][0]["rec"]
-	Care.change(win, "joy", float(r["win_joy"]))
-	Save.remember(win, "race", "won the Dash", float(r["win_trust"]))
-	for i in range(1, order.size()):
-		var lo: Dictionary = order[i]
-		Care.change(lo, "joy", float(r["lose_joy"]))
-		Save.remember(lo, "race", "lost the Dash to %s" % win["name"])
-		_rival(lo, win)
-		_rival(win, lo)
-	var gems := int(r["gems_backed_win"]) if win == backed else int(r["gems_other_win"])
-	if win == backed: ClanBoard.add("cup")       # the garden cup for the clan board
-	Save.d["gems"] = int(Save.d["gems"]) + gems
-	var line := "%s will remember winning the Dash." % win["name"]
-	if win != backed:
-		line = "%s will remember losing the Dash to %s." % [backed["name"], win["name"]]
-	return {"order": order, "gems": gems, "memory": line}
-
-static func _rival(rec: Dictionary, other: Dictionary) -> void:
-	if not rec.has("bonds"):
+## The post and loop beside the Training post (none without one); called when fixtures move.
+func place() -> void:
+	for n in [post, wall]:
+		if is_instance_valid(n):
+			n.queue_free()
+	post = null
+	wall = null
+	if h.YARD_AT.x < -100.0:
+		relay.place()
 		return
-	var bonds: Dictionary = rec["bonds"]
-	var was := float(bonds.get(other["uid"], 0.0))
-	bonds[other["uid"]] = clampf(was - float(rules()["rival_nudge"]), -1.0, 1.0)
+	var at: Vector3 = h.YARD_AT + POST_OFF
+	if h.zone == "":       # with the hub on, the wall hangs by its games board (HubWaystone)
+		wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, Save.d.get("showcase", []))
+		h.add_child(wall)
+	post = Node3D.new()
+	post.name = "RacePost"
+	post.position = at
+	h.add_child(post)
+	start = post.position + LOOP_OFF
+	_post_model()
+	var st: Array = stretches(tweak("dash"))
+	for i in st.size():
+		var a := _corner(i)
+		var b := _corner(i + 1)
+		var strip := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		var span := Vector3(absf(b.x - a.x), 0.04, absf(b.z - a.z))
+		if span.x > span.z:
+			span.z = TRACK_W
+		else:
+			span.x = TRACK_W
+		bm.size = span
+		strip.mesh = bm
+		strip.material_override = mat(STRETCH_COL[String(st[i]["kind"])])
+		strip.position = (a + b) * 0.5 - post.position + Vector3(0, ground(a) + 0.02, 0)
+		post.add_child(strip)
+	relay.place()
 
-# ------------------------------------------------------------------ on the farm
-func build() -> void:
-	node = _course_model()
-	node.visible = false
-	h.add_child(node)
+func _post_model() -> void:
+	var pole := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.06
+	cm.bottom_radius = 0.08
+	cm.height = 1.6
+	pole.mesh = cm
+	pole.material_override = mat(Color("8a6a4a"))
+	pole.position = Vector3(0, ground(post.position) + 0.8, 0)
+	post.add_child(pole)
+	var flag := MeshInstance3D.new()
+	var fm := BoxMesh.new()
+	fm.size = Vector3(0.6, 0.36, 0.03)
+	flag.mesh = fm
+	flag.material_override = mat(UI.ACCENT)
+	flag.position = Vector3(0.32, ground(post.position) + 1.4, 0)
+	post.add_child(flag)
+	var sign_t := Label3D.new()
+	sign_t.text = "This week, %s: %s\n%s" % [String(twist()["game"]).capitalize(), twist()["name"], twist()["note"]]
+	sign_t.font_size = 28
+	sign_t.pixel_size = 0.004
+	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sign_t.position = Vector3(0.3, ground(post.position) + 1.85, 0)
+	post.add_child(sign_t)
 
-func near(p2: Vector2) -> bool:
-	return node.visible and run.is_empty() and p2.distance_to(Vector2(node.position.x, node.position.z)) < POST_REACH
+static func mat(c: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	return m
 
-func prompt() -> String:
-	return "Start a Dash race"
+func ground(p: Vector3) -> float:
+	var g: float = h._ground_h(p.x, p.z)
+	return g if g > -50.0 else 0.0
 
-## Lines up the Boki out on the farm (the one you have out first) and starts the race.
-func start() -> void:
+## Corner i of the loop: 0 the start, then round the 6 x 3 rectangle back to it.
+func _corner(i: int) -> Vector3:
+	var deep := float(rules()["stretches"][1]["len"])
+	return start + [Vector3.ZERO, Vector3(LOOP_W, 0, 0), Vector3(LOOP_W, 0, -deep), Vector3(0, 0, -deep)][i % 4]
+
+func find(p2: Vector2) -> Dictionary:
+	if run != null or relay.run != null or not is_instance_valid(post):
+		return {}
+	if p2.distance_to(Vector2(post.position.x, post.position.z)) > REACH:
+		return relay.find(p2)
+	return {"kind": "race"}
+
+func label() -> String:
+	var fmt := String(tweak("dash").get("name", ""))
+	var back := "back %s" % Save.active_kin().get("name", "your partner")
+	return "Start a Dash, %s (%s)" % [fmt, back] if fmt else "Start a Dash (%s)" % back
+
+## Up to 4 rested Boki out on the base, your partner first.
+func entrants() -> Array:
+	var R := rules()
+	var out: Array = []
 	var ak := Save.active_kin()
-	var out: Array = h.kins.filter(func(k): return _can_run(k))
-	out.sort_custom(func(a, b): return a["rec"] == ak and b["rec"] != ak)
-	kins_in = out.slice(0, MAX_RUNNERS)
-	if kins_in.size() < 2:
-		h._toast("The Dash needs two Boki out on the farm")
+	for k in h.kins:
+		var rec: Dictionary = k["rec"]
+		if k.get("busy", false) or k.has("indoors") or Care.need(rec, "energy") < float(R["min_energy"]):
+			continue
+		if rec == ak:
+			out.push_front(k)
+		else:
+			out.append(k)
+	return out.slice(0, 4)
+
+func use() -> void:
+	var ks := entrants()
+	if ks.size() < 2:
+		h._toast("The Dash needs two rested Boki out on the base")
 		return
-	var recs: Array = []
-	for k in kins_in:
+	_begin(ks)
+
+## The Training post: your Boki runs the loop alone while you cheer at the three marks.
+func solo(rec: Dictionary) -> void:
+	var k: Dictionary = h._kin_entry(rec)
+	var T: Dictionary = rules()["train"]
+	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
+		h._toast("%s is not out on the base" % rec["name"])
+	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(T["min_food"]):
+		h._toast("%s is too tired or hungry to train. Nap or feed it first" % rec["name"])
+	elif int(rec["stats"]["speed"]) >= Care.stat_cap(rec):
+		h._toast("%s can't train Speed any further until it levels up" % rec["name"])
+	else:
 		h._care_start(k)
+		solo_rec = rec
+		_begin([k])
+
+func _begin(ks: Array) -> void:
+	runners = ks
+	cheers = []
+	var recs: Array = []
+	for k in ks:
 		k["busy"] = true
 		recs.append(k["rec"])
-	run = new_run(recs, randi())
+	var back := maxi(0, recs.find(Save.active_kin()))
+	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"))
+	run.rng.randomize()
+	bar = TimingBar.new()
+	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
+	_bar_label("")
 	_place_runners()
-	h._toast("Cheer %s on: press %s at each of the three marks" % [recs[0]["name"], Settings.key_cap("interact")])
-	Sfx.play("whoosh", null, -8.0)
+	heard = []
+	heard.resize(runners.size())
+	heard.fill(0)
+	GardenSfx.countdown(h, start)
 
-func _can_run(k: Dictionary) -> bool:
-	var n: Node3D = k["node"]
-	return not k.has("indoors") and not k.has("leap") and n.visible and not k.get("busy", false)
+func _bar_label(last: String) -> void:
+	var who: String = run.recs[run.backed]["name"]
+	bar.lbl.text = "Cheer for %s  ·  mark %d of 3%s" % [who, mini(run.cheered + 1, 3), last]
 
-## A press while racing goes to the cheer bar (or closes the card); true when it was used.
+## A press: true when the race took it.
 func input(event: InputEvent) -> bool:
-	if run.is_empty() and card == null:
+	if relay.input(event):
+		return true
+	if run == null:
 		return false
-	if not event.is_action_pressed("interact"):
+	if event.is_action_pressed("menu"):
+		_end(false)
+		return true
+	if not TimingBar.is_press(event):
 		return false
-	if not drill.is_empty():
-		_cheer_hit(TimingDrill.grade(drill))
-	elif card != null:
-		_close_card()
+	if run.can_cheer():
+		var r := bar.press()
+		run.cheer(r)
+		cheers.append(r)
+		GardenSfx.crowd(r, runners[run.backed]["pos"])
+		if r != "miss" and "verbs" in h:
+			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
+		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
+		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
 	return true
 
 func tick(d: float) -> void:
-	var at: Vector3 = h.YARD_AT + POST_OFF
-	node.position = at
-	node.visible = at.x > -100.0
-	if card != null:
+	if card_t > 0.0:
 		card_t -= d
-		if card_t <= 0.0:
-			_close_card()
-	if run.is_empty():
+		if card_t <= 0.0 and is_instance_valid(card):
+			card.queue_free()
+	relay.tick(d)
+	if run == null:
 		return
-	if not drill.is_empty():
-		TimingDrill.sweep(drill, d)
-		drill["t"] = float(drill["t"]) - d
-		bar_draw.queue_redraw()
-		if float(drill["t"]) <= 0.0:
-			_cheer_hit("miss")
-	if step(run, d) >= 0:
-		_open_bar()
+	run.step(d)
+	bar.step(d)
 	_place_runners()
-	if finished(run):
-		_finish()
+	_hear_laps()
+	if run.over():
+		_end(true)
+
+## A pat as a runner starts each stretch, a swish at the line, and the crowd for the first one home.
+func _hear_laps() -> void:
+	var stretches: int = run.ends.size()
+	for i in runners.size():
+		var mark: int = int(run.stretch[i]) + (stretches if float(run.done_t[i]) >= 0.0 else 0)
+		if mark == heard[i]:
+			continue
+		heard[i] = mark
+		if mark < stretches:
+			GardenSfx.cue("garden_lap", runners[i]["pos"])
+			continue
+		GardenSfx.cue("garden_finish", runners[i]["pos"])
+		if heard.filter(func(m): return m >= stretches).size() == 1:
+			GardenSfx.cue("garden_crowd", runners[i]["pos"])
 
 func _place_runners() -> void:
-	for i in kins_in.size():
-		var ru: Dictionary = run["runners"][i]
-		var n: Node3D = kins_in[i]["node"]
-		var p := node.position + _course_pos(float(ru["d"]), float(ru["lane"]))
-		var dir := p - n.position
-		if Vector2(dir.x, dir.z).length() > 0.001:
-			n.rotation.y = atan2(-dir.x, -dir.z)
+	var st: Array = stretches(run.tw)
+	var lane := float(rules()["lane"])
+	for i in runners.size():
+		var s := int(run.stretch[i])
+		var into := float(run.dist[i]) - (float(run.ends[s - 1]) if s > 0 else 0.0)
+		var p := track_at(s, clampf(into / float(st[s]["len"]), 0.0, 1.0), lane * (i - (runners.size() - 1) * 0.5))
+		var n: Node3D = runners[i]["node"]
 		n.position = p
+		n.rotation.y = heading(s)
+		runners[i]["pos"] = p
 
-## Where on the loop a runner is, from the post: along its stretch, out to its lane, up the climb,
-## over the gap and wading low through the pond.
-static func _course_pos(dist: float, lane: float) -> Vector3:
-	var s := stretch_at(dist)
-	var a: Vector2 = s["a"]
-	var b: Vector2 = s["b"]
-	var f := clampf((dist - float(s["start"])) / float(s["len"]), 0.0, 1.0)
-	var side := (b - a).normalized().orthogonal() * lane * LANE_W
-	var p := a.lerp(b, f) + side
-	var y := 0.0
-	match String(s["id"]):
-		"water": y = -0.12
-		"climb": y = CLIMB_H * f
-		"jump": y = CLIMB_H * (1.0 - f) + sin(PI * f) * HOP_H
-	return Vector3(p.x, y, p.y)
+## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
+func track_at(s: int, f: float, side: float) -> Vector3:
+	var a := _corner(s)
+	var fwd := (_corner(s + 1) - a).normalized()
+	var p := a.lerp(_corner(s + 1), f) + Vector3(-fwd.z, 0, fwd.x) * side
+	p.y = ground(p) + _lift(String(rules()["stretches"][s]["kind"]), f)
+	return p
 
-func _open_bar() -> void:
-	drill = {"m": 0.0, "dir": 1.0, "speed": 1.1, "zone": randf_range(0.3, 0.7), "t": float(rules()["cheer_window_s"])}
-	var b := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
-	b.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	b.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	b.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	b.offset_top = -64
-	b.offset_bottom = -64
-	b.custom_minimum_size.x = 420.0
-	var col := UI.vbox(8)
-	b.add_child(col)
-	var title := "Cheer for %s!  (%s)" % [kins_in[0]["rec"]["name"], Settings.key_cap("interact")]
-	col.add_child(UI.label(title, 15, UI.GOLD))
-	bar_draw = Control.new()
-	bar_draw.custom_minimum_size = Vector2(0, 26)
-	bar_draw.draw.connect(_draw_bar)
-	col.add_child(bar_draw)
-	h.root_ui.add_child(b)
-	bar = b
+## The facing (rotation.y) of a runner on stretch s.
+func heading(s: int) -> float:
+	var fwd := (_corner(s + 1) - _corner(s)).normalized()
+	return atan2(-fwd.x, -fwd.z)
 
-func _draw_bar() -> void:
-	if not drill.is_empty():
-		TimingDrill.draw(bar_draw, drill)
+func _lift(kind: String, f: float) -> float:
+	match kind:
+		"climb": return CLIMB_H * sin(PI * f)
+		"jump": return JUMP_H * sin(PI * f)
+		"water": return -SWIM_DIP
+	return 0.0
 
-func _cheer_hit(grade: String) -> void:
-	cheer(run, grade)
-	h._emote(kins_in[0], {"great": "★", "good": "♪", "miss": "?"}[grade], true)
-	if grade != "miss":
-		Sfx.play("jump", (kins_in[0]["node"] as Node3D).position, -8.0)
-	drill = {}
-	if is_instance_valid(bar):
-		bar.queue_free()
-	bar = null
-
-func _finish() -> void:
-	if not drill.is_empty():
-		_cheer_hit("miss")
-	var res := settle(run)
-	for k in kins_in:
+func _end(finished: bool) -> void:
+	var res := {}
+	if finished and solo_rec.is_empty():
+		res = settle(run)
+	for k in runners:
 		k["busy"] = false
-		k["t"] = 2.0
-		var n: Node3D = k["node"]
-		k["pos"] = Vector3(n.position.x, 0, n.position.z)
-		n.position = k["pos"]
-		h._emote(k, "♥" if k["rec"] == res["order"][0] else "…", true)
-	Sfx.play("pickup", null, -6.0)
-	Save.save_game()
-	_show_card(res)
-	run = {}
-	kins_in = []
+		k["t"] = 1.5
+	bar.close()
+	if finished:
+		GardenFirstDay.mark("race", h)
+		if solo_rec.is_empty():
+			_race_card(res, pin(res["win"], "dash"))
+			GardenSfx.result(h, res)
+			h._emote(h._kin_entry(res["win"]), "♥", true)
+			h._emote(h._kin_entry(res["lose"]), "…", true)
+		else:
+			_solo_card(settle_solo(solo_rec, _grades()))
+		Save.save_game()
+	run = null
+	runners = []
+	solo_rec = {}
 
-func _show_card(res: Dictionary) -> void:
-	_close_card()
-	var c := UI.card(Color(0.06, 0.07, 0.1, 0.94), 16, 14)
-	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	c.offset_top = 70
-	c.custom_minimum_size.x = 340.0
-	var col := UI.vbox(6)
-	c.add_child(col)
-	var order: Array = res["order"]
-	col.add_child(UI.label("%s wins the Dash!" % order[0]["name"], 20, UI.GOLD))
-	for i in order.size():
-		var mood := "♥" if i == 0 else "sulks"
-		col.add_child(UI.label("%d.  %s   %s" % [i + 1, order[i]["name"], mood], 15, UI.INK if i == 0 else UI.MUTED))
-	col.add_child(UI.label("+%d gems" % int(res["gems"]), 15, UI.ACCENT))
-	col.add_child(UI.para(String(res["memory"]), 12, UI.FAINT))
-	h.root_ui.add_child(c)
-	UI.pop_in(c)
-	card = c
-	card_t = CARD_S
+## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
+## Shared with Seek and Spark Volley. False when this week's format is another game's.
+func pin(win: Dictionary, game: String) -> bool:
+	var fmt := tweak(game)
+	if fmt.is_empty():
+		return false
+	var node: Node3D = h._kin_entry(win)["node"]
+	BaseShowcase.add(win, fmt, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))
+	if wall == null:
+		return true
+	wall.queue_free()
+	wall = BaseShowcase.build(post.position + BaseShowcase.WALL_OFF, Save.d["showcase"])
+	h.add_child(wall)
+	return true
 
-func _close_card() -> void:
+## The three marks' grades: a mark with no press is a miss.
+func _grades() -> Array:
+	var out := cheers.duplicate()
+	while out.size() < 3:
+		out.append("miss")
+	return out
+
+func _race_card(res: Dictionary, pinned: bool) -> void:
+	var win: Dictionary = res["win"]
+	var lose: Dictionary = res["lose"]
+	var why := " for backing the winner" if res["backed_won"] else ""
+	show_card("%s wins the Dash!" % win["name"], [
+		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
+		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned) + GardenPrizes.rows(res["prize"]))
+
+## The result-card row for a win that went on the wall (none when it did not).
+static func pin_rows(pinned: bool) -> Array:
+	return [["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]] if pinned else []
+
+func _solo_card(gained: int) -> void:
+	var speed := int(solo_rec["stats"]["speed"])
+	var marks := ""
+	for g in _grades():
+		marks += {"great": " ★", "good": " ●", "miss": " ✕"}[g]
+	var line := "No gain this time. Try again after a rest"
+	if gained > 0:
+		line = "+%d Speed  (%d of %d)" % [gained, speed, Care.stat_cap(solo_rec)]
+	show_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [line, UI.GOLD]])
+
+## The result card at the top of the screen: a headline and a coloured line each.
+func show_card(title: String, lines: Array) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
-	card = null
+	var rows := [[title, 18, UI.ACCENT_HI]]
+	for l in lines:
+		rows.append([l[0], 14, l[1]])
+	card = result_card(h, rows)
+	card_t = float(rules()["card_s"])
 
-# ------------------------------------------------------------------ the look
-## The start post (a striped pole and a banner) and simple course pieces: a dirt strip for the
-## straight, a pond, a ramp up the climb and two ledges either side of the gap.
-static func _course_model() -> Node3D:
-	var n := Node3D.new()
-	n.name = "DashCourse"
-	var wood := Models.toon(Color("a8794a"))
-	Models.part(n, Models.cyl(0.07, 0.08, 1.6), wood, Vector3(0, 0.8, 0), Vector3.ONE, Vector3.ZERO, "Post")
-	Models.part(n, Models.box(0.7, 0.36, 0.04), Models.toon(Color("f2c24a")), Vector3(0.38, 1.4, 0))
-	var tag := Label3D.new()
-	tag.text = "The Dash"
-	tag.font = UI.big
-	tag.font_size = 40
-	tag.pixel_size = 0.008
-	tag.outline_size = 10
-	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	tag.position = Vector3(0, 2.0, 0)
-	n.add_child(tag)
-	var looks := {
-		"straight": Color("b99a6a"), "water": Color("4ab0ff"), "climb": Color("8a7458"), "jump": Color("6b4a2e"),
-	}
-	for s in course():
-		var a: Vector2 = s["a"]
-		var b: Vector2 = s["b"]
-		var mid := (a + b) * 0.5
-		var length := float(s["len"])
-		var rot := Vector3(0, atan2(-(b - a).y, (b - a).x), 0)
-		var y := 0.02
-		if s["id"] == "climb":
-			# a ramp up to the top of the climb
-			y = CLIMB_H * 0.5
-			rot.z = atan2(CLIMB_H, length)
-			length = Vector2(length, CLIMB_H).length()
-		elif s["id"] == "jump":
-			# only the landing pad: the gap is the open ground before it
-			mid = a.lerp(b, 0.85)
-			length *= 0.3
-		var mat := Models.toon(looks.get(s["id"], Color("b99a6a")))
-		var piece := Models.box(length, 0.05, LANE_W * MAX_RUNNERS)
-		Models.part(n, piece, mat, Vector3(mid.x, y, mid.y), Vector3.ONE, rot, String(s["id"]).capitalize())
-	return n
+## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove,
+## Seek and Spark Volley.
+static func result_card(home, rows: Array) -> Control:
+	var c := UI.card(Color(0.06, 0.07, 0.1, 0.92), 14, 14)
+	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.offset_top = 90
+	var v := UI.vbox(6)
+	c.add_child(v)
+	for r in rows:
+		v.add_child(UI.label(r[0], r[1], r[2]))
+	home.root_ui.add_child(c)
+	return c
