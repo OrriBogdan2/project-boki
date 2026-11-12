@@ -1,0 +1,22 @@
+{
+  "_doc": "Fixed spawns (docs/design/CLARITY_PASS.md). Nothing here is rolled: same map, same schedule. Times are session seconds.",
+  "camp_comps": {
+    "heavy": [["brute", "spitter", "skitter", "sentinel"]],
+    "light": [["skitter", "skitter"], ["spitter", "skitter"], ["bomber", "skitter"]],
+    "normal": [["brute", "skitter", "bomber"], ["skitter", "bomber", "spitter"], ["sentinel", "skitter", "skitter"], ["spitter", "skitter", "bomber"]]
+  },
+  "wild_every": 4,
+  "burrow": {
+    "what": "bl_skitter",
+    "skip_roles": ["landing", "perch"],
+    "tele": 6.0,
+    "radius": 1.8,
+    "awake_range": 70.0,
+    "stagger": 11.0,
+    "by_danger": [
+      {"first": 150.0, "every": 150.0, "n": 1},
+      {"first": 110.0, "every": 120.0, "n": 1},
+      {"first": 80.0, "every": 90.0, "n": 2}
+    ]
+  }
+}

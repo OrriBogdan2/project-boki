@@ -1083,7 +1083,9 @@ func render(delta: float, alpha: float) -> void:
 		shell.visible = float(shell.get_meta("a", 0.0)) > 0.02
 	var parts: Node = model.get_node_or_null("Aura")
 	if parts:
-		(parts as CPUParticles3D).emitting = visible and state not in ["shoulder", "bench", "fused"] and not unseen
+		# (the species' specks say nothing in a fight and crowd every Boki's outline: only a rare one shows them)
+		var shown := visible and has_meta("rare") and not unseen
+		(parts as CPUParticles3D).emitting = shown and state not in ["shoulder", "bench", "fused"]
 	if state == "fused" and owner_h and owner_h.model:
 		if MergeXform.boki_pose(self):
 			return           # (the transformation: it flies in on a spiral)

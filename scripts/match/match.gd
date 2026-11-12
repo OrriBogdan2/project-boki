@@ -77,6 +77,7 @@ var muzzle_light: OmniLight3D
 var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
 var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
 var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
+var spawn_table: SpawnTable = null   # the fixed timed spawns and their telegraphs (SpawnTable)
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
@@ -399,7 +400,7 @@ func _start(o: Dictionary) -> void:
 		spawn_plan = SpawnPlan.new(self)
 		spawn_plan.build(layout)
 		if lairs: lairs.plug_into(spawn_plan)     # which boss lairs are live this match
-		spawn_plan.roll(seed_val)
+		spawn_plan.roll()
 		if opts.has("live_lair"):
 			# a fixed roll for a filmed match (the Demo match): this lair is live, in place of another
 			var keep: Array = spawn_plan.of("boss").filter(func(c): return String(c["name"]) == String(opts["live_lair"]))
@@ -409,7 +410,9 @@ func _start(o: Dictionary) -> void:
 				keep[0]["active"] = true
 		await spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
+	spawn_table = SpawnTable.new(self)
 	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
+		spawn_table.build()       # (the Blight's nests: only where there's a Blight)
 		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
 		blight = BlightDir.new(self)
 		blight.setup()
@@ -976,38 +979,15 @@ func _apply_treat(k: Kin) -> void:
 func _spawn_mobs() -> void:
 	if net_on and not is_host:
 		return
-	for c in world.camp_spots:
+	for ci in world.camp_spots.size():
 		await _slice()
+		var c: Dictionary = world.camp_spots[ci]
 		var p: Vector3 = c["pos"]
-		var comp: Array
-		match String(c.get("kind", "normal")):
-			"heavy": comp = ["brute", "spitter", "skitter", "sentinel"]
-			"light":
-				var lr := rng.randf()
-				comp = ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
-			_:
-				var nr := rng.randf()
-				if nr < 0.15 * tier + 0.2:
-					comp = ["brute", "skitter", "bomber"]
-				elif nr < 0.5:
-					comp = ["skitter", "bomber", "spitter"]
-				elif nr < 0.75:
-					comp = ["sentinel", "skitter", "skitter"]
-				else:
-					comp = ["spitter", "skitter", "bomber"]
+		var comp := SpawnTable.camp_comp(String(c.get("kind", "normal")), ci, int(tier))
 		# a camp in a biome region spawns from that region's table instead
-		var bcomp: Array = biomes.camp_comp(c) if biomes else []
+		var bcomp: Array = biomes.camp_comp(c, ci) if biomes else []
 		if not bcomp.is_empty(): comp = bcomp
-		var made: Array = []
-		for kk in comp:
-			var q := p
-			for _t in 20:
-				var cand := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
-				if not world.is_void(cand.x, cand.z) and not world.is_block(cand.x, cand.z):
-					q = Vector3(cand.x, world.ground_at(cand.x, cand.z), cand.z); break
-			var smb := spawn_mob(kk, q)
-			if biomes: biomes.dress(smb)
-			made.append(smb)
+		var made := SpawnTable.spawn_camp(self, p, comp)
 		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
 
 func spawn_mob(kk: String, at: Vector3) -> Mob:
@@ -1024,7 +1004,7 @@ func spawn_mob(kk: String, at: Vector3) -> Mob:
 var sound_pings: Array = []    # {pos, t, kind, key}
 func note_sound(by, at: Vector3, kind: String) -> void:
 	if blight:
-		blight.noise(at, kind, by)       # the Blight hunts by noise
+		blight.noise(at, kind)       # the Blight hunts by noise
 	if player == null or player.out:
 		return
 	if by is Ent and (by as Ent).team == player.team:
@@ -1525,35 +1505,26 @@ func _collide_breaks() -> void:
 				e.pos.x += push.x; e.pos.z += push.y
 
 ## Wild Boki are scarce on purpose (owner's call): catching one should feel like a goal, not a
-## given. Only about a quarter of the map's wild spots are live in a match (at least 2), picked with
-## a generator of their own so the match's random stream (and every seeded test) is unchanged; the
-## rare Boki spots (SpawnPlan) are separate and stay as they were.
-const WILD_LIVE := 0.25
-const WILD_MIN := 2
+## given. Only every fourth wild spot is live (content/rules/spawn_tables.json "wild_every"), the same
+## ones in every match of the map, each with its own species; the rare Boki spots (SpawnPlan) are separate.
 
 func _spawn_wild() -> void:
 	if net_on and not is_host:
 		return
 	var spots: Array = world.wild_spots
-	var pick := RandomNumberGenerator.new()
-	pick.seed = hash([seed_val, "wild_live"])
-	var order: Array = range(spots.size())
-	for i in range(order.size() - 1, 0, -1):
-		var j := pick.randi_range(0, i)
-		var tmp = order[i]; order[i] = order[j]; order[j] = tmp
-	var live := {}
-	for i in mini(spots.size(), maxi(WILD_MIN, int(round(spots.size() * WILD_LIVE)))):
-		live[order[i]] = true
+	var every := int(SpawnTable.rules()["wild_every"])
+	var kin_ids: Array = Data.common_kin()
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
+		var sp: String = kin_ids[si % kin_ids.size()]
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
-		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
+		var lv: Array = T["kin_lvl"]
+		rec["level"] = int(lv[0]) + si % (int(lv[1]) - int(lv[0]) + 1)
 		Evo.simulate(rec, rng)
 		rec["shimmer"] = Shiny.roll_wild(rng, tier)   # a rare colour you'll want to catch (1 in 4096, x1.5 in the Hollow)
 		Mutations.roll_wild(rec, rng, tier)          # and now and then a rare mutation (more in harder tiers)
 		# (every spot still rolls, so the draws match; only the live ones get a Boki)
-		if live.has(si):
+		if si % every == 0:
 			await _slice()
 			spawn_wild(rec, p)
 
@@ -4413,7 +4384,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if c["open"] or (not from_net and not KeyChest.spend(h, c)):
 		return      # (opening costs exactly one key; another game's open already paid in that game)
 	c["open"] = true
-	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
+	if blight: blight.noise(c["pos"], "chest")      # a chest lid is loud
 	if h: h.add_stat("chests")
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])

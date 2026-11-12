@@ -601,8 +601,7 @@ func _atk_brood() -> void:
 	_begin("brood", w + 2.4, "roar")
 	var n := 2 + phase
 	for i in n:
-		var a := TAU * i / n + randf() * 0.6
-		var at := clamp_in(pos + Vector3(cos(a), 0, sin(a)) * 3.0, 0.8)
+		var at := clamp_in(SpawnTable.ring_spot(pos, i, n, 3.0), 0.8)
 		at.y = centre().y
 		# egg sacs: glowing eggs that wobble, then burst into adds
 		var egg := Node3D.new()
@@ -616,7 +615,7 @@ func _atk_brood() -> void:
 		_at(w + 2.2, func():
 			m.fx.burst(at + Vector3(0, 0.4, 0), Color("e0b040"), 16, 4.0, 0.5, 6.0)
 			m.sfx("die_small", at, -2.0, 1.3)
-			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][randi() % (2 + mini(phase, 2))], at))
+			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][i % (2 + mini(phase, 2))], at))
 
 func _atk_burrow() -> void:
 	_begin("burrow", 3.6, "burrow")

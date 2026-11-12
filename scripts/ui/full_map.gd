@@ -185,6 +185,7 @@ func draw(sz: Vector2) -> void:
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
+	SpawnMarks.draw(hud, m, to_screen, func(p, r): return rect.grow(-r).has_point(p))
 	ReviveHud.full_map(self)
 	if m.biomes:
 		m.biomes.hot.full_map(self, kk)
@@ -576,7 +577,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 138))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
-	hud._text(r.position + Vector2(14, 44), "Same map every time, different spawns", 11, MUTED)
+	hud._text(r.position + Vector2(14, 44), "Same map, same spawns, same timers", 11, MUTED)
 	var y := r.position.y + 72.0
 	for cat in cats:
 		var def: Dictionary = sp.cats[cat]

@@ -389,7 +389,7 @@ func _waves(x: Dictionary, dt: float) -> void:
 	var ii := m.world.island_of(focus.x, focus.z)
 	var spawned := 0
 	for k in n:
-		var at := _wave_spot(focus, ii)
+		var at := _wave_spot(focus, ii, int(x["waves"]) * 8 + k)
 		if at == Vector3.INF:
 			continue
 		var kinds: Array = ["skitter"] if x.get("tut", false) else []
@@ -397,7 +397,7 @@ func _waves(x: Dictionary, dt: float) -> void:
 			kinds = m.biomes.camp_comp({"pos": at, "kind": "normal" if int(x["waves"]) >= 3 else "light"})
 		if kinds.is_empty():
 			kinds = ["skitter", "spitter", "bomber", "skitter"] + (["brute"] if int(x["waves"]) >= 3 else [])
-		var mb: Mob = m.spawn_mob(String(kinds[m.rng.randi() % kinds.size()]), at)
+		var mb: Mob = m.spawn_mob(String(kinds[(int(x["waves"]) + k) % kinds.size()]), at)
 		if m.biomes: m.biomes.dress(mb)
 		mb.set_meta("exit", int(x["i"]))
 		mb.camp = focus          # they press in on the outpost
@@ -415,11 +415,13 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if m.player and not m.player.out and m.player.flat_dist(focus) < 24.0 and m.hud:
 			m.hud.toast_small("Monsters incoming!", Color("ff9a6a"))
 
-func _wave_spot(focus: Vector3, ii: int) -> Vector3:
+## Where the slot-th wave monster stands: round the berth by the golden angle, 7-13 tiles out (4-8 if the
+## outer ring is blocked): the same spots in the same order every time.
+func _wave_spot(focus: Vector3, ii: int, slot: int) -> Vector3:
 	var W := m.world
 	for k in 40:
-		var a := m.rng.randf() * TAU
-		var d := m.rng.randf_range(7.0, 13.0) if k < 30 else m.rng.randf_range(4.0, 8.0)
+		var a := float(slot + k) * SpawnTable.GOLDEN
+		var d := (7.0 + float((slot + k) % 4) * 2.0) if k < 30 else (4.0 + float(k % 5))
 		var x := focus.x + cos(a) * d; var z := focus.z + sin(a) * d
 		if W.is_void(x, z) or W.is_block(x, z) or (ii >= 0 and W.island_of(x, z) != ii):
 			continue

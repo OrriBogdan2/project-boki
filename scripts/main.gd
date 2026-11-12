@@ -2958,6 +2958,7 @@ func _boss_check() -> void:
 	R1.ctrl = "bot"
 	var tr1 := 0.0
 	while tr1 < 11.0 and (m4.lairs.inside(A, R1.pos, 0.5) or not R1.grounded):
+		m4.boxes.clear()      # (the dead hunters' loot: bots going for it is another test)
 		run4.call(Match.DT); tr1 += Match.DT
 	var r1_out: bool = (A["flown"] as Array).has(R1) and not m4.lairs.inside(A, R1.pos, 0.5) and A.get("locked", false)
 	R1.ctrl = "idle"; R1.inp["move"] = Vector2.ZERO
@@ -2967,6 +2968,7 @@ func _boss_check() -> void:
 	R2.ctrl = "bot"
 	var tr2 := 0.0
 	while tr2 < 10.0 and A.get("locked", false):
+		m4.boxes.clear()
 		run4.call(Match.DT); tr2 += Match.DT
 	ok.call(String(gR1[1]) == "lair_updraft" and r1_out and String(gR2[1]) == "lair_lever" and not A.get("locked", false) and String(A.get("opened_by_lever", "")) == R2.pname,
 		"bots sealed in: with a rival camping the gate one rides the updraft out (%.1fs); with nobody there the other pulls the lever (%.1fs)" % [tr1, tr2])
@@ -3355,17 +3357,17 @@ func _drop_check() -> void:
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")
 	m.unping(P)
 	if not m.my_ping().is_empty() or bot.ai.has("ping_goal"): ok = false; print("DCHECK FAIL right click didn't take the ping down")
-	# the spawns: the same candidates every match, a different live subset per seed
+	# the spawns: the same candidates and the same live ones every match, whatever the seed
 	var layout := World.load_layout(World.layout_for_tier(0))
 	var subsets := {}
 	for sd in [4101, 4102, 4103]:
 		var plan := SpawnPlan.new(m)
 		plan.build(layout)
-		plan.roll(sd)
+		plan.roll()
 		subsets[sd] = plan.active_ids()
 	print("DCHECK candidates %s; live by seed: %s" % [str(sp.shown_cats().map(func(cc): return "%s %d/%d" % [cc, sp.active_of(cc).size(), sp.of(cc).size()])), str(subsets)])
 	if subsets[4101] != sp.active_ids(): ok = false; print("DCHECK FAIL the same seed rolled differently")
-	if subsets[4101] == subsets[4102] and subsets[4102] == subsets[4103]: ok = false; print("DCHECK FAIL seeds roll the same spawns")
+	if subsets[4101] != subsets[4102] or subsets[4102] != subsets[4103]: ok = false; print("DCHECK FAIL a seed moved the spawns")
 	# a generated map (no authored list): candidates come from its islands, the same for the same map
 	var gm := Match.new()
 	gm.world = World.new()

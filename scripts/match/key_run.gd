@@ -133,11 +133,12 @@ func _count_mobs() -> void:
 			rg["centre"] /= float((rg["mobs"] as Array).size())
 
 # ------------------------------------------------------------------ the Shrublings
-## 1-3 of them, in bloom, meadow, gloom or storm country with 3 or more grass patches in sprinting
-## range, preferably in regions with fewer monsters than chests; never more in a region than it has chests.
+## The middle of 1-3 (always that many, in the same spots: no dice), in bloom, meadow, gloom or storm
+## country with 3 or more grass patches in sprinting range, preferably in regions with fewer monsters than
+## chests; never more in a region than it has chests.
 func spawn_shrublings() -> void:
 	var sr: Dictionary = rules()["shrubling"]
-	var want := rng.randi_range(int(sr["count"][0]), int(sr["count"][1]))
+	var want := (int(sr["count"][0]) + int(sr["count"][1])) / 2
 	var spots := _shrub_spots()
 	for _i in want:
 		var pick := _pick_spot(spots)
@@ -210,13 +211,7 @@ func _pick_spot(spots: Array) -> Dictionary:
 		wts.append(3.0 if (rg["mobs"] as Array).size() + int(rg["shrubs"]) < int(rg["chests"]) else 1.0)
 	if pool.is_empty():
 		return {}
-	var tot := 0.0
-	for x in wts: tot += float(x)
-	var r := rng.randf() * tot
-	for i in pool.size():
-		r -= float(wts[i])
-		if r <= 0.0: return pool[i]
-	return pool[-1]
+	return pool[wts.find(wts.max())]      # (the best-weighted spot, the first of equals)
 
 # ------------------------------------------------------------------ the carriers
 func assign_carriers() -> void:
