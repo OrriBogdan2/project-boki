@@ -61,7 +61,7 @@ const CHECKS := {
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
 	"--glide-hit-check": ["res://tools/glide_hit_check.gd", "glide_hit_check", null],
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
-	"--armor-parity-check": ["res://tools/armor_parity_check.gd", "armor_parity_check", null],      # docs/ARMOUR_PARITY.md
+	"--armor-parity-check": ["res://tools/armor_parity_check.gd", "armor_parity_check", null],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
