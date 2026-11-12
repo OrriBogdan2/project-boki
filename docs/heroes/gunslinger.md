@@ -3,9 +3,9 @@
 Internal design note (may cite the source for traceability; nothing in the game does).
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
 sheet: briefs/hero-ref/venator.md, from the source's real segment; owner notes override the footage).
-Our hero is an original character, the ember-rifle skirmisher: a visored cap, a cropped jacket, a long
+Our hero is an original character, the lime-rifle skirmisher: a visored cap, a cropped jacket, a long
 streaming scarf, a bandolier of spiked charges, one bronze pauldron and a long-shrouded drum rifle.
-Palette: ember orange, bronze and hot white. Payoff word: SKEWERED.
+Palette (DECISIONS 11-08, Vex = green fire): signature lime `#b8f03c` (rifle, Slipstep, afterimages) with pale-lime hot cores `#eaffa8`; green fire `#5dff45` on the Coin Blast, Palm Lance and Cinderfall (the kit's `LIME`/`FIRE`), deep green `#4f8a12`, a dark-green char `#1c2a0e`. The Daze stays pink and the Burr Charge's ball stays bronze. Payoff word: SKEWERED.
 
 ## Kit card (L picker)
 - Role: Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.
@@ -56,7 +56,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Dash -> E (LOW) | (c) | Kept "fire" (item 51); the footage's braced stand is the plain cast |
 | Passive, E numbers, X (-) | (c) | Match the data |
 | She/her in the shown text (LOW) | (b) | `gunslinger.json` fantasy ("her rifle"), this page and the kit comments |
-| Stale `dash_spent` tell (LOW) | (b) | "an ember afterimage and faint skid streaks" |
+| Stale `dash_spent` tell (LOW) | (b) | "a lime afterimage and faint skid streaks" |
 
 ## Parity pass (LMB first)
 

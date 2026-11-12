@@ -197,7 +197,7 @@ Still differs:
   Cinderfall 42 vs 55 (gap 10, owner call).
 - Cinderfall's burn lasts 3 s; the footage's zone ticks about 4 s [F 0245].
 - The Coin Blast rename and coin look (DECISIONS 11-08) are not built.
-- Her light is ember orange (our palette); the source's is green and cyan with a purple slide trail [F 0118].
+- Her light is lime and green fire (DECISIONS 11-08; the reel frames below were shot before the recolour and still show ember orange); the source's is green and cyan with a purple slide trail [F 0118].
 
 Seen in the reel: the rifle hits the dummy from 7 m; RMB is a red tracer to the dummy, which reads DAZED with a gold
 pip; Longneedle is a long orange line through the rock and past the frame, like the footage's beam through terrain

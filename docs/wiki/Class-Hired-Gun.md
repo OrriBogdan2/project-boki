@@ -48,7 +48,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
+| Fantasy | The lime-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
 | Silhouette | the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle |
 | Resource | Fever (max 1) |
 
@@ -99,6 +99,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|
 | Building up | a lit Fever pip over the bar while the lifesteal runs |
 | Armed / full | the same lit pip and a heat shimmer |
-| Dash spent | an ember afterimage and faint skid streaks |
+| Dash spent | a lime afterimage and faint skid streaks |
 
 <!-- /gen:kit -->
