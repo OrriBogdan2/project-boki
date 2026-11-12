@@ -25,6 +25,8 @@ static func open(h, here: String) -> void:
 					"You are here" if id == here else "Go", id != here))
 		else:
 			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
+			if here == GardenZones.HUB and h.hhints != null:
+				lines.append_array(HubFirstVisit.card_line(id))
 			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
 			var keys := GardenZones.keys_for(id)
 			var ready: bool = keys["seed"] and keys["lean"]
