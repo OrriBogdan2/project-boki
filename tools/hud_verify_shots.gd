@@ -1,8 +1,9 @@
 extends RefCounted
 ## --hud-verify-shots --shots-dir=<dir>: the match HUD in a fixed state (level 7, half XP, armour partly spent, a
-## shield, full health) saved as hud_<W>x<H>.png, plus hud_<W>x<H>_bare.png of the same frame with the HUD hidden
-## (GPU, run once per --size=WxH). tools/hud_measure.py diffs the pair and measures each element against
-## scripts/ui/HUD_SPEC.md.
+## shield, full health): look_<W>x<H>.png is the game as it plays; hud_<W>x<H>.png is the HUD over a flat grey (3D
+## off) and hud_<W>x<H>_bare.png the same without the HUD (GPU, run once per --size=WxH). tools/hud_measure.py diffs
+## the flat pair and measures each element against scripts/ui/HUD_SPEC.md.
+const FLAT := Color(0.47, 0.47, 0.47)
 
 func run(main: Node) -> void:
 	var dir := "shots"
@@ -13,6 +14,7 @@ func run(main: Node) -> void:
 			var wh := String(a).substr(7).split("x")
 			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
+	Settings.set_v("tips", false, false)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
@@ -45,6 +47,11 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 	var sz := main.get_viewport().get_visible_rect().size * main.get_window().content_scale_factor
 	var stem := "hud_%dx%d" % [int(sz.x), int(sz.y)]
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("look_" + stem.substr(4) + ".png"))
+	main.get_viewport().disable_3d = true
+	RenderingServer.set_default_clear_color(FLAT)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(stem + ".png"))
 	m.hud.visible = false
 	await main.get_tree().process_frame

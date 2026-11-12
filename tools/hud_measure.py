@@ -166,7 +166,7 @@ def measure(s):
     w = s.br(1676, 940, 1724, 1060)
     cc = [r for r in runs(s.mask[w].any(axis=1)) if r[1] - r[0] > 20 * f]
     R["item card top y"] = (982, 940 + cc[0][0] / f)
-    g = runs(s.mask[s.br(1880, 860, 1881, 1060)[0], s.colpx(1880, True)])
+    g = runs(s.mask[s.br(1872, 860, 1888, 1060)].any(axis=1))       # the strip over the icons' middles
     g = [(a / f + 860, b / f + 860) for a, b in g]
     R["gear icon dia"] = (34, float(np.mean([b - a for a, b in g[-3:]])))
     R["gear icon pitch"] = (38, (g[-1][0] - g[-3][0]) / 2)
