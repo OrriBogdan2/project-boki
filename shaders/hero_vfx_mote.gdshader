@@ -6,6 +6,7 @@ render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shado
 
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/cel.gdshaderinc"
+#include "res://shaders/soft_fade.gdshaderinc"
 
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);
@@ -132,4 +133,7 @@ void fragment() {
 		ALBEDO = mix(col3.rgb, col.rgb, lit * (1.0 - age)) * a * gain;
 		ALPHA = a * gain;
 	}
+	float soft = soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);     // premultiplied: both
+	ALBEDO *= soft;
+	ALPHA *= soft;
 }
