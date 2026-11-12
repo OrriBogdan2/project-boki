@@ -568,6 +568,9 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
+	if bash.get("hop", false) and h.gliding:
+		bash = {}      # a glide press cancelled the poof (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dir: Vector2 = bash["dir"]
 	if bash.has("t0") and not bash.get("hit", false) and h.roll_t > 0.0:
 		var into := float(bash["t0"]) - float(bash["t"])
