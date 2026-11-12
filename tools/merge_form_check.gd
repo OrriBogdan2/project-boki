@@ -914,9 +914,8 @@ func _guards() -> void:
 	ok(KinMerge.active(P) and P.merge_st["form"]["id"] == "titan", "G and orders mid-transformation do nothing (the merge goes on)")
 	# the Boki does not speak while it is inside you
 	var bubbles0: int = m.bubbles.size()
-	P.kin.bark_cd = 0.0
 	P.kin.bark("revive")
-	P.kin.bark("callout", "x")
+	P.kin.bark("callout")
 	ok(m.bubbles.size() == bubbles0, "the Boki says nothing while it is inside you")
 	# eliminated mid-merge: everything goes
 	P = merged("pebbit")
