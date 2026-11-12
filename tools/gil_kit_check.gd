@@ -3,7 +3,8 @@ extends "res://tools/hero_pair_check.gd"
 ## dummy through the real match code: the Fencer chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each
 ## vial's effect, hold range, the air drop), Fish Out of Water (three marks Beach), Ground Swim (hittable, surfacing
 ## knocks up), Riptide (spin damage, the spout's knockup, longer spin = wider spout) and Tidal Wave (untargetable,
-## knockup then slow, lands with a shield).
+## knockup then slow, lands with a shield). Last, his sound set: every move and phase that ran plays a sound of
+## its own (content/vfx/gil.json, made by tools/gen_sfx_gil.py), none shared with another move or the stock set.
 
 var m: Match
 var P: Hunter
@@ -22,12 +23,14 @@ func run(main_node: Node) -> void:
 	_data()
 	_bag()
 	_fencer()
+	_tide()
 	_vials()
 	_hold_and_air()
 	_beach()
 	_swim()
 	_riptide()
 	_wave()
+	_sounds()
 	await done(m)
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -43,6 +46,8 @@ func _reset(dist := 6.0) -> void:
 	K.beach_at.clear()
 	K.spin_t = -1.0
 	K.swim_t = 0.0
+	K.tide = {}
+	K.combo_n = 0
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true
@@ -108,18 +113,51 @@ func _bag() -> void:
 func _fencer() -> void:
 	_reset(3.2)
 	var x0 := P.pos.x
-	var top := {"n": 0, "slow": 0.0}
-	P.inp["fire"] = true
+	var top := {"n": 0, "slow": 0.0, "t": 0.0, "pose": false}
+	var thrusts := int(HeroVfx.of(m).plays.get("thrust", 0))
 	step(m, 1.1, func():
-		P.inp["fire"] = true
+		top["t"] += DT
+		P.inp["fire"] = fmod(top["t"], 0.12) < 0.05      # clicking (holding is the Tide Lunge)
+		top["pose"] = top["pose"] or K.anim_id == "gil_thrust_1"
 		top["slow"] = maxf(top["slow"], T.slow_t)
 		top["n"] = K.combo_n)
 	P.inp["fire"] = false
+	ok("Fencer: a thrust plays its own thrust pose and look (no slash arc)",
+		top["pose"] and int(HeroVfx.of(m).plays.get("thrust", 0)) > thrusts)
 	ok("Fencer: a three-hit chain lands on the dummy", int(top["n"]) >= 3 and dmg(T) >= 20.0,
 		"swings %d dmg %.1f" % [top["n"], dmg(T)])
 	ok("Fencer: each swing steps him forward", P.pos.x - x0 > 0.8, "moved %.2f" % (P.pos.x - x0))
 	ok("Fencer: the third, longer thrust slows (30% for 0.5 s)", top["slow"] > 0.2 and top["slow"] <= 0.55,
 		"slow_t %.2f" % top["slow"])
+
+## Held LMB: the Tide Lunge. A short click is one thrust; held, he slows and draws back, and on release drives
+## down the line hitting everyone on it; a full charge soaks them (a splash mark toward Beached).
+func _tide() -> void:
+	_reset(3.0)
+	P.inp["fire"] = true
+	step(m, 0.1)
+	P.inp["fire"] = false
+	step(m, 0.4)
+	ok("Tide Lunge: a click is one thrust, no lunge", K.combo_n == 1 and K.lmb_t < 0.0 and K.tide.is_empty(),
+		"thrusts %d" % K.combo_n)
+	_reset(4.0)
+	var x0 := P.pos.x
+	P.inp["fire"] = true
+	step(m, 1.2, func(): P.inp["fire"] = true)
+	ok("Tide Lunge: held, he charges it (slowed, drawn back), full by 0.8 s",
+		K.lmb_t >= 0.0 and K.tide_k() >= 1.0 and K.move_k() < 1.0 and K.anim_id == "gil_tide_wind",
+		"k %.2f anim %s" % [K.tide_k(), K.anim_id])
+	var before := dmg(T)
+	P.inp["fire"] = false
+	step(m, 0.5)
+	var td: Dictionary = K.lmb_def()["tide"]
+	ok("Tide Lunge: let go, he drives about 5 m down the line", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5,
+		"%.2f m" % (P.pos.x - x0))
+	ok("Tide Lunge: full charge hits the foe on the line for 22", dmg(T) - before >= float(td["dmg"][1]) * 0.9,
+		"%.1f" % (dmg(T) - before))
+	ok("Tide Lunge: full charge soaks (one splash mark)", K.marks_on(T) == 1, "%d" % K.marks_on(T))
+	ok("Tide Lunge: the release plays its pose and look",
+		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
 
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
@@ -127,9 +165,13 @@ func _vials() -> void:
 		_reset(6.0)
 		K.bag.append(v)
 		var x0 := T.pos.x
+		var looks := int(HeroVfx.of(m).plays.get("shatter_" + v, 0))
 		tap(m, P)
+		var thrown := K.anim_id == "gil_throw"
 		var top := _land()
 		var hit := dmg(T) > 0.0
+		ok("%s: the toss pose, and the bottle breaks in its own look" % v,
+			thrown and int(HeroVfx.of(m).plays.get("shatter_" + v, 0)) == looks + 1)
 		match v:
 			"thunder": ok("Thunder: damage and a stun in the centre", hit and top["stun"] >= 0.4,
 				"dmg %.1f stun %.2f" % [dmg(T), top["stun"]])
@@ -196,16 +238,29 @@ func _beach() -> void:
 func _swim() -> void:
 	_reset(5.0)
 	var x0 := P.pos.x
+	var dives := int(HeroVfx.of(m).plays.get("dive", 0))
 	K.on_dash(false)
 	m.step(DT)
 	var under := K.swim_t > 0.0
 	var hit_on := float(K.incoming(T, 10.0, {})[0]) == 10.0
-	var top := {"stun": 0.0, "y": 0.0}
+	ok("Ground Swim: the dive and its wake play, no shared dash pill over the ground",
+		int(HeroVfx.of(m).plays.get("dive", 0)) == dives + 1 and K.own_dash_trail())
+	step(m, 0.15)
+	# owner 11-11: the swim didn't take him under. Mid-swim the dive pose has the whole body (hat and all,
+	# plate_offset up from the feet) below the surface.
+	var age := m.time - K.anim_at
+	var lift := float(HunterAnim.km_sample(K.anim_id, age).get("lift", 0.0))
+	ok("Ground Swim: mid-swim his whole body is under the ground",
+		K.anim_id == "gil_dive" and lift + float(K.d["plate_offset"]) < 0.0, "%s lift %.2f" % [K.anim_id, lift])
+	var top := {"stun": 0.0, "y": 0.0, "out": false}
 	var y0 := T.pos.y
 	step(m, 0.8, func():
+		top["out"] = top["out"] or K.anim_id == "gil_surface"
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
 	ok("Ground Swim: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
+	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
+		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
 	ok("Ground Swim: he stays hittable underground", under and hit_on)
 	ok("Ground Swim: surfacing knocks nearby foes up 0.5 s", top["stun"] >= 0.4 and top["y"] > 0.2,
 		"stun %.2f lift %.2f" % [top["stun"], top["y"]])
@@ -214,14 +269,21 @@ func _swim() -> void:
 func _riptide() -> void:
 	_reset(1.6)
 	K.use_e()
-	ok("Riptide: E starts the spin", K.spin_t >= 0.0)
+	ok("Riptide: E starts the spin (the spin pose)", K.spin_t >= 0.0 and K.anim_id == "gil_spin")
 	step(m, 1.0)
 	var spin_dmg := dmg(T)
 	ok("Riptide: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
+	var w := K.recast_window()
+	ok("Riptide: RecastCue's ring runs over the 2 s spin and the spout goes by itself (no EXPIRED)",
+		float(w.get("total", 0.0)) == 2.0 and float(w.get("left", 0.0)) < 1.1 and bool(w.get("auto", false)), str(w))
+	ok("Riptide: the recast opens and ticks in Gil's own sounds",
+		HeroSfx.of(P, "recast_open", "") == "gil_recast_open" and HeroSfx.of(P, "recast_tick", "") == "gil_recast_tick")
 	_reset(7.0)
 	K.use_e()
 	step(m, 0.3)
 	K.e_recast()
+	ok("Riptide recast: the spin stops on the spout thrust, the spout's look plays",
+		K.anim_id == "gil_spout" and int(HeroVfx.of(m).plays.get("spout", 0)) > 0)
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
 	step(m, 1.2, func(): top["stun"] = maxf(top["stun"], T.stun_t))
@@ -245,8 +307,9 @@ func _wave() -> void:
 	P.lvl = 6
 	ok("Tidal Wave: casts", K.cast_ult())
 	m.step(DT)
-	ok("Tidal Wave: Gil is untargetable while he surfs",
-		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0)
+	ok("Tidal Wave: Gil is untargetable while he surfs (the surf pose, the wave's look)",
+		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0 and K.anim_id == "gil_surf"
+		and int(HeroVfx.of(m).plays.get("wave", 0)) > 0)
 	var top := {"stun": 0.0, "slow": 0.0, "k": 0.0}
 	step(m, 1.2, func():
 		top["stun"] = maxf(top["stun"], T.stun_t)
@@ -256,6 +319,62 @@ func _wave() -> void:
 		top["stun"] >= 0.9 and top["slow"] >= 2.5 and absf(top["k"] - 0.5) < 0.05,
 		"stun %.2f slow %.2f k %.2f" % [top["stun"], top["slow"], top["k"]])
 	ok("Tidal Wave: lands with a shield and is hittable again",
-		P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
+		K.anim_id != "gil_surf" and int(HeroVfx.of(m).plays.get("wave_land", 0)) > 0
+		and P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
+	_wave_way(Vector2(-1, 0))
+	_wave_way(Vector2(0, 1))
+
+## Owner 11-11: the ult pushed him the wrong way. Cast while running another way (back, or sideways), he surfs the
+## wave's own line toward the cursor, the whole 14 m, and stays on it.
+func _wave_way(run: Vector2) -> void:
+	_reset(6.0)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	P.inp["move"] = run
+	var p0 := P.pos
+	var aim := P.aim_dir()
+	K.cast_ult()
+	step(m, 1.1, func(): P.inp["move"] = run)
+	P.inp["move"] = Vector2.ZERO
+	var moved := P.pos - p0
+	var along := Vector2(moved.x, moved.z).dot(aim)
+	var off := absf(Vector2(moved.x, moved.z).cross(aim))
+	ok("Tidal Wave: running %s, he surfs toward the cursor" % str(run), along > 10.0 and off < 1.0,
+		"along %.2f off-line %.2f" % [along, off])
+	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
+		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)
+
+## Each move or phase of the kit -> the sound it plays (the thrusts and the dash pick theirs by "k" and HeroSfx).
+const OWN_SOUNDS := {
+	"thrust": ["gil_thrust", "gil_thrust_low"], "lunge": ["gil_lunge"], "thrust_hit": ["gil_thrust_hit"],
+	"lunge_hit": ["gil_lunge_hit"], "tide_wind": ["gil_tide_wind"], "tide_full": ["gil_tide_full"],
+	"tide_lunge": ["gil_tide_lunge"], "tide_hit": ["gil_tide_hit"], "throw": ["gil_toss"],
+	"shatter_thunder": ["gil_pop_thunder"], "shatter_slime": ["gil_pop_slime"], "shatter_air": ["gil_pop_air"],
+	"shatter_fire": ["gil_pop_fire"], "shatter_zeep": ["gil_pop_zeep"], "mark": ["gil_mark"],
+	"beached": ["gil_beached"], "surface": ["gil_surface"], "spin": ["gil_spin"], "spout": ["gil_spout"],
+	"wave": ["gil_wave"], "wave_land": ["gil_wave_land"],
+}
+
+func _sounds() -> void:
+	var moves: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/gil.json"))["moves"]
+	var set_names: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/gil.json"))["sounds"]
+	var wrong := []
+	var silent := []
+	for mv in OWN_SOUNDS:
+		var names := (moves[mv].get("sfx", []) as Array).map(func(e): return String(e["n"]))
+		if names != OWN_SOUNDS[mv] or not names.all(func(n): return set_names.has(n) and Sfx.ensure(n)):
+			wrong.append("%s %s" % [mv, names])
+		if int(HeroVfx.of(m).plays.get(mv, 0)) == 0:
+			silent.append(mv)
+	ok("sounds: every move and phase plays its own levelled gil_* sound (wrong: %s)" % [wrong], wrong.is_empty())
+	ok("sounds: every one of those moves ran in this check (never ran: %s)" % [silent], silent.is_empty())
+	ok("sounds: the dive is the dash sound alone (no second layer)", not moves["dive"].has("sfx"))
+	P.grounded = true
+	var ground := HeroSfx.dash_name(P)
+	P.grounded = false
+	var air := HeroSfx.dash_name(P)
+	P.grounded = true
+	ok("sounds: Ground Swim dives in gil_dash, the air dash plays gil_dash_air",
+		ground == "gil_dash" and air == "gil_dash_air", "%s / %s" % [ground, air])
