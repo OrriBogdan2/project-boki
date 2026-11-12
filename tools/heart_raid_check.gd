@@ -52,7 +52,7 @@ func run(main: Node, part := -1) -> void:
 		return
 	var sim_only := args.has("--heart-raid-check=sim")
 	for a in args:
-		if String(a).begins_with("--sweep="):    # --sweep=SQUAD:diff:arch: one raid, one HRSWEEP line (the balance table)
+		if String(a).begins_with("--sweep="):    # --sweep=SQUAD:diff:arch: one raid, one HRSWEEP line
 			var p := String(a).substr(8).split(":")
 			await _sim(main, int(p[0]), p[1], seed_v, p[2], true)
 			main.get_tree().quit(0)
