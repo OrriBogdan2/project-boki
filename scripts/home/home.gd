@@ -1317,7 +1317,7 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
-	var jump_now := can_act and Input.is_action_just_pressed("jump") and not (hkite and hkite.flying())
+	var jump_now := can_act and Input.is_action_just_pressed("jump") and not (hkite != null and hkite.flying())
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true

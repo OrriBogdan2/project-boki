@@ -260,7 +260,7 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	if Input.is_action_just_pressed("jump") and run.flap():
-		Sfx.play("jump", flier["pos"], BaseRace.GARDEN_DB)
+		GardenSfx.cue("jump", flier["pos"])
 	var passed := run.step(d, Input.get_axis("left", "right"))
 	if passed == "vent":
 		h._toast("Updraft! A flap back (%d left)" % run.flaps)
