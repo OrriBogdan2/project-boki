@@ -18,8 +18,8 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
-##  11. footsteps: a Hunter walked over every surface of the Hollow Crown (a skiff dock's pier, the
-##      sky train's car deck) plays the cue for it: its own set on grass, stone, wood and snow, the
+##  11. footsteps: a Hunter walked over every surface of the Hollow Crown (the sky train's car deck; a plank
+##      bridge tile laid on it) plays the cue for it: its own set on grass, stone, wood and snow, the
 ##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
 ## Reads the files only; never touches the save.
 
@@ -363,7 +363,7 @@ func _data(path: String) -> PackedByteArray:
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
 
-## 9. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
+## 11. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
 const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
 const STEP_VOL := -13.0       # dB: the player's own step in Juice.footstep
 
@@ -374,16 +374,19 @@ func _steps(main: Node) -> void:
 	m.set_process(false)
 	ok(m.world.layout_id == "hollowcrown", "step check runs on the Hollow Crown (%s)" % m.world.layout_id)
 	var spots := _surface_tiles(m)
-	var dock := _dock_spot(m)
-	ok(StepSurface.at(m, dock) == "wood", "a skiff dock's pier is wood")
-	spots["wood"] = dock
+	ok(m.world.bridge.is_empty(), "the Hollow Crown has no plank bridges (its docks are gone)")
 	ok(m.skytrain != null, "the Hollow Crown has a sky train")
 	if m.skytrain != null:
 		var car: Transform3D = m.skytrain.cur[1]
 		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
 		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
 		spots["metal"] = deck
-	for surf in ["grass", "stone", "wood", "snow", "metal"]:
+	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
+	for surf in ["grass", "stone", "snow", "metal", "wood"]:
+		if surf == "wood":      # last: lays a plank tile on the grass one
+			m.world.bridge[m.world.idx(int(plank.x), int(plank.z))] = true
+			ok(StepSurface.at(m, plank) == "wood", "a plank bridge tile is wood")
+			spots["wood"] = plank
 		if spots.has(surf):
 			_walk(m, m.player, surf, spots[surf])
 		else:
@@ -392,15 +395,6 @@ func _steps(main: Node) -> void:
 		var wade := "step_water_" + StepSurface.weight_of(WEIGHT_ARCH[cls])
 		ok(wade == "step_water_" + cls and Sfx.ensure(wade), "farm wading: %s plays %s" % [cls, wade])
 	m.queue_free()
-
-## The middle of the first skiff dock's pier, beside its berth.
-func _dock_spot(m: Match) -> Vector3:
-	for x: Dictionary in m.exits.list:
-		if x["kind"] == "dock":
-			var b: Vector3 = x["berth"]
-			var out: Vector2 = x["out"]
-			return b + Vector3(out.x, 0.0, out.y) * 1.2
-	return Vector3.ZERO
 
 ## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
 ## shared steps get quieter to heavier, and the sound has its takes loaded.

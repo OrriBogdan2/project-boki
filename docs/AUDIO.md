@@ -44,26 +44,26 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
  "kit_files": ["gunslinger_ult.gd"], "replaces": ["vn_rifle", "..."],
  "reach": {"gunslinger_fire": 45}, "loops": ["gunslinger_spin"]}
 ```
-`--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; a Hunter of each weight class walked over every surface of the Hollow Crown (ground, a skiff dock's pier, a sky train car's deck) plays the expected step, and farm wading has its step per class; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 22 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 11 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
+`--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; a Hunter of each weight class walked over every surface of the Hollow Crown (ground, a laid plank tile, a sky train car's deck) plays the expected step, and farm wading has its step per class; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 22 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 11 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
 ## Footsteps
-`Juice.footstep` asks `StepSurface.at` what is underfoot: a sky train car's deck is **metal**, a skiff dock's pier (or a plank bridge, `World.bridge`) **wood**, stairs, painted paths, rims and lair floors **stone**, the frost biome **snow**, any other ground **grass** (earth). Grass, stone, wood and snow play the Hunter's own `<arch>_step_<surface>`; metal and water play the shared `step_<surface>_<light|medium|heavy>` by weight class. On the Hollow Crown (2x), by region:
+`Juice.footstep` asks `StepSurface.at` what is underfoot: a sky train car's deck is **metal**, a plank bridge (`World.bridge`, the farm's isles) **wood**, stairs, painted paths, rims and lair floors **stone**, the frost biome **snow**, any other ground **grass** (earth). Grass, stone, wood and snow play the Hunter's own `<arch>_step_<surface>`; metal and water play the shared `step_<surface>_<light|medium|heavy>` by weight class. On the Hollow Crown (2x), by region:
 
 | Region | Ground tiles by surface (seed 77; stone = stairs, painted rims and paths, its land bridges, lair floors) |
 |---|---|
 | The Crown (gloom) | grass 4559, stone 440 |
 | Ashen Gaol (ember), Stormbreak Gaol (storm) | grass 1183 / 1033, stone 407 / 370 (lair flagstones) |
-| Frostgate (frost) | snow 4712, stone 461, wood: the north skiff dock |
+| Frostgate (frost) | snow 4712, stone 461 |
 | Cinder Steps (ember) | grass 4437, stone 412 |
 | Stormbreak (storm) | grass 3153, stone 425 |
 | Thornwood (bloom) | grass 3856, stone 603 |
-| Larkhollow (meadow) | grass 2064, stone 372, wood: skiff dock |
+| Larkhollow (meadow) | grass 2064, stone 372 |
 | Highwatch (frost) | snow 1820, stone 412 |
-| Duskmoor (storm) | grass 2031, stone 244, wood: skiff dock |
-| Saltmere (bloom) | grass 1987, stone 352, wood: skiff dock (the dry salt river is drawn as grass: no sand) |
-| Sky train | metal: the three flat cars' decks (planks on an iron car, brass rails); the engine is a wall; a halt's pier is its region's ground |
+| Duskmoor (storm) | grass 2031, stone 244 |
+| Saltmere (bloom) | grass 1987, stone 352, (the dry salt river is drawn as grass: no sand) |
+| Sky train | metal: the three flat cars' decks (planks on an iron car, brass rails); the engine is a wall; a halt is its region's ground |
 
-No match map has water or sand, so there is no sand set; shallow water is the farm's ponds (`HomeWater`: wading plays `step_water_<class>` for your Hunter's weight, deep water `swim`). The flat cars are drawn as planks but take metal (the hollow iron car under them rings, and it tells a ride apart from a dock); `wood` is the one-line alternative in `StepSurface.at` if it reads wrong by ear. Before this the train decks read stone over the void (grass or snow at a halt), the docks their region's ground and farm wading grass.
+No match map has water or sand, so there is no sand set; shallow water is the farm's ponds (`HomeWater`: wading plays `step_water_<class>` for your Hunter's weight, deep water `swim`). The flat cars are drawn as planks but take metal (the hollow iron car under them rings, and it tells a ride apart from a plank bridge); `wood` is the one-line alternative in `StepSurface.at` if it reads wrong by ear. The Hollow Crown has no wood underfoot since the skiff docks went with the Ways Out; wood stays for plank bridges. Before this the train decks read stone over the void (grass or snow at a halt) and farm wading grass.
 
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
