@@ -57,6 +57,8 @@ const MEDIAN_BAR := "roster median"      # source name of a Hunter with no sourc
 const SHARE_ONLY := {"rimewright": {"rmb": 346.0, "x": 155.0}}
 const ULT_WAIT := 4.5
 
+const OURS_ONLY := ["gil"]      # Hunters with no source hero: our time to knock only, verdict "ours"
+
 ## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
 const OVERRIDES := {}
 
@@ -206,6 +208,12 @@ func _abilities(P: Hunter, slots: Array) -> void:
 func _fmt(v: float) -> String:
 	return "never" if v < 0.0 else "%.2f" % v
 
+func _share_text(src: float) -> String:
+	return "%.3f" % src if src > 0.0 else "n/a"
+
+func _share_ratio(ours: float, src: float) -> String:
+	return "%.2f" % (ours / src) if src > 0.0 else "n/a"
+
 func _ratio_text(ratio: float) -> String:
 	return "%.2f" % ratio if ratio > 0.0 else "n/a"
 
@@ -213,7 +221,7 @@ func _ratio_text(ratio: float) -> String:
 func _cell(hero: Array, label: String, ours: float, src: float) -> Dictionary:
 	var row := {"hero": hero[0], "name": hero[1], "label": label, "ours": ours, "src": src}
 	row["ratio"] = -1.0
-	row["state"] = "n/a"
+	row["state"] = "ours" if hero[0] in OURS_ONLY else "n/a"
 	if src <= 0.0:
 		return row
 	row["ratio"] = ours / src if ours > 0.0 else 99.0
@@ -276,7 +284,8 @@ func _write() -> void:
 	lines.append_array(["", "| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |"])
 	lines.append("|---|---|---|---|---|")
 	for h in hits:
-		lines.append("| %s (%s) | %s | %.3f | %.3f | %.2f |" % [h[0], h[1], h[2], h[3], h[4], h[3] / h[4]])
+		lines.append("| %s (%s) | %s | %.3f | %s | %s |" % [
+			h[0], h[1], h[2], h[3], _share_text(h[4]), _share_ratio(h[3], h[4])])
 	var path := "res://docs/TTK.md"
 	var parts := FileAccess.get_file_as_string(path).split(TABLE_MARK)
 	var f := FileAccess.open(path, FileAccess.WRITE)
