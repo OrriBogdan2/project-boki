@@ -5,7 +5,7 @@ extends RefCounted
 ## kit keys. Items live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per
 ## slot, bring[] = the most you can bring in by difficulty tier, price).
 ##
-## Keys (Rift Keys, chest keys) are belt items too: one slot per key type, found in the match only,
+## Chest keys are belt items too: one slot per key type, found in the match only,
 ## never brought or sold (BeltKeys).
 ##
 ## What a hunter holds: h.belt = four slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
@@ -52,11 +52,11 @@ static func ids() -> Array:
 static func is_item(id: String) -> bool:
 	return ALL.has(id)
 
-## The pickup kinds the match already used ("armor" was the armor kit, "key" is a Rift Key).
+## The pickup kinds the match already used ("armor" was the armor kit, "ckey" is a chest key).
 static func item_of(kind: String) -> String:
 	return String(OLD_KINDS.get(kind, kind))
 
-const OLD_KINDS := {"armor": "armor_kit", "key": "rift_key", "ckey": "chest_key"}
+const OLD_KINDS := {"armor": "armor_kit", "ckey": "chest_key"}
 
 ## Keys sit on the belt but are never brought in, bought or taken home.
 static func is_key(id: String) -> bool:
@@ -177,18 +177,6 @@ static func pickup(h, id: String, n := 1) -> void:
 	var got := grant(h, id, n)
 	if got > 0 and h == h.m.player and h.m.hud:
 		h.m.hud.toast_small("+%d %s" % [got, name_of(id).to_lower()], col_of(id))
-		h.m.hints.belt_picked(id)
-
-## The one-time hint line for an item on this hunter's belt ("" if it is not there): its name, its
-## slot's key cap and the first sentence of its desc (content/rules/hints.json belt_line).
-static func hint_line(h, id: String) -> String:
-	var slot := slot_of(h, id)
-	if slot < 0:
-		return ""
-	var effect := String(def(id).get("desc", "")).split(". ")[0].trim_suffix(".")
-	var line := String(FirstTimeHint.rules()["belt_line"])
-	line = line.replace("{name}", name_of(id)).replace("{effect}", effect)
-	return line.replace("{key}", Settings.key_cap(KEYS[slot]))
 
 ## Removes charges (issued ones go first). Returns how many were taken.
 static func take(h, id: String, n := 1) -> int:

@@ -1,9 +1,12 @@
 extends RefCounted
-## --hot-zone-check: each match has exactly one hot drop zone (HotZone, content/rules/hot_zone.json).
-## The pick is seeded, skips perches and never repeats the previous match's zone; the zone's loot
-## is exactly the tier-up better and every other area is untouched; a region id in the match opts
-## (the lobby's "start" message online) makes every game build the same zone. Never touches the save.
-## --hot-zone-shots --shots-dir=<dir>: the drop map, the minimap in the ship and on the ground.
+## --hot-zone-check: The Hollow Crown's regions (docs/MAP_REGIONS.md) and the hot drop zone
+## (scripts/match/hot_zone.gd). Every region has a landmark, raised terrain, tall grass and a
+## reason to go; region loot leans multiply into the biome's; each match picks one hot region
+## from its seed (same seed, same zone; it varies between seeds; never the Crown), loot there rolls
+## a rarity step better, and bot squads drop there without piling in. Never touches the save.
+
+const SEEDS := [3, 5, 9, 12, 21, 33, 47, 58]
+const LANDMARK_ROLES := ["heart", "camp", "nest", "shrine", "grove"]
 
 var bad := 0
 
@@ -11,113 +14,96 @@ func ok(cond: bool, what: String) -> void:
 	print("HOTZONE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func _match(main: Node, opts: Dictionary) -> Match:
+func _match(main: Node, seed_v: int, no_drop := true) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	var o := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "no_drop": true}
-	o.merge(opts, true)
-	m.start(o)
+	m.start({"teams": 6, "squad": 3, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": no_drop})
 	m.set_process(false)
 	return m
 
-func _shot(main: Node, dir: String, file: String) -> void:
-	for i in 4:
-		await main.get_tree().process_frame
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
-	print("HOTZONE shot ", file)
-
-func shots(main: Node) -> void:
+func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
-	var dir := ""
-	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="):
-			dir = String(a).substr(12)
-	DirAccess.make_dir_recursive_absolute(dir)
-	var m := Match.new()
-	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 31})
-	var fade = main.get("fade")
-	if fade != null:
-		await fade.reveal(0.01)
-	await main.get_tree().create_timer(1.0).timeout
-	print("HOTZONE zone ", m.hot.id, " planning ", m.skydrop.planning)
-	m.hud.full_map.open(true)
-	await _shot(main, dir, "drop_map")
-	m.hud.full_map.close()
-	await _shot(main, dir, "minimap_ship")
-	m.player.teleport(m.hot.center() + Vector3(0, 6, 0))
-	await _shot(main, dir, "minimap_ground")
-	main.get_tree().quit(0)
+	Econ.ensure()
+	_regions(main)
+	_hot(main)
+	_bots(main)
+	print("HOTZONE DONE, failures: %d" % bad)
+	main.get_tree().quit(0 if bad == 0 else 1)
 
-func run(main: Node, mode := "check") -> void:
-	if mode == "shots":
-		await shots(main)
-		return
-	Save.no_write = true
-	var d := Save.fresh()
-	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
-	Save.d = d
-	var layout := World.load_layout(World.layout_for_tier(0))
-	var isl: Array = layout["islands"]
-	# (a) the pick: seeded, no perches, never the last one
-	HotZone.last_id = ""
-	var p7 := HotZone.pick(isl, 7)
-	ok(p7 == HotZone.pick(isl, 7) and p7 != "", "(a) the same seed picks the same zone")
-	var perch := {}
-	for i in isl:
-		if String(i.get("role", "")) == "perch":
-			perch[String(i["id"])] = true
-	var seen := {}
-	var repeats := 0
-	var on_perch := 0
-	for sd in 120:
-		var pid := HotZone.pick(isl, sd)
-		if pid == HotZone.last_id: repeats += 1
-		if perch.has(pid): on_perch += 1
-		seen[pid] = true
-		HotZone.last_id = pid
-	ok(repeats == 0, "(a) never the same zone twice in a row over 120 matches")
-	ok(on_perch == 0 and seen.size() >= 4, "(a) no perch; %d different zones came up" % seen.size())
-	# (b) one zone per match, loot raised only there
-	HotZone.last_id = ""
-	var m := _match(main, {"seed": 31})
-	ok(m.hot != null and m.hot.active(), "(b) the match has a hot zone (%s)" % (m.hot.id if m.hot else "-"))
-	if m.hot == null:
-		print("HOTZONE DONE, failures: ", bad)
-		main.get_tree().quit()
-		return
-	var tier_up := int(HotZone.rules()["tier_up"])
-	var hot_n := 0
-	var wrong := 0
-	for ii in m.world.islands.size():
-		var cells: Array = m.world.islands[ii]["cells"]
-		var cell: Vector2i = cells[cells.size() / 2]
-		var p := Vector3(cell.x + 0.5, 0.0, cell.y + 0.5)
-		var with_zone := ChestLoot.rarity_bonus(m, p)
-		var zone := m.hot
-		m.hot = null
-		var without := ChestLoot.rarity_bonus(m, p)
-		m.hot = zone
-		var raised := with_zone - without
-		if ii == m.hot.isl:
-			if raised == tier_up: hot_n += 1
-		elif raised != 0:
-			wrong += 1
-	ok(hot_n == 1, "(b) exactly one area is raised, by %d step (%s)" % [tier_up, m.hot.zone_name()])
-	ok(wrong == 0, "(b) no other area's loot changes")
-	var first := m.hot.id
-	m.queue_free()
-	# (c) the next match picks another; an id from the opts is used as given
-	var m2 := _match(main, {"seed": 31})
-	var second := m2.hot.id if m2.hot else "-"
-	ok(second != first and second != "-", "(c) the next match's zone differs (%s -> %s)" % [first, second])
-	m2.queue_free()
-	var want := first if first != "" else "crown"
-	var m3 := _match(main, {"seed": 5, "hot": want})
-	ok(m3.hot != null and m3.hot.id == want, "(c) a region id in the opts (the lobby start) is the zone")
-	m3.queue_free()
-	var m4 := _match(main, {"seed": 5, "hot": "no_such_area"})
-	ok(m4.hot == null, "(c) an unknown id leaves the match without a zone")
-	print("HOTZONE DONE, failures: ", bad)
-	main.get_tree().quit()
+## Each region: a landmark (its own, or its role's), a raised tier, tall grass, a stated reason.
+func _regions(main: Node) -> void:
+	var m := _match(main, 3)
+	var w := m.world
+	ok(w.regions.size() >= 9, "the map has its regions (%d)" % w.regions.size())
+	for R in w.regions:
+		var nm := String(R.get("name", ""))
+		var marked := false
+		var raised := false
+		var grass := 0
+		for ii in w.islands.size():
+			var I: Dictionary = w.islands[ii]
+			if not String(I.get("id", "")) in R.get("islands", []):
+				continue
+			var own = I.get("landmark")
+			var by_role: bool = own == null and String(I.get("role", "")) in LANDMARK_ROLES
+			marked = marked or (own is String and own != "") or by_role
+			for x in range(int(I["c"].x) - int(I["r"]), int(I["c"].x) + int(I["r"]) + 1):
+				for z in range(int(I["c"].y) - int(I["r"]), int(I["c"].y) + int(I["r"]) + 1):
+					if w.island_of(x + 0.5, z + 0.5) != ii:
+						continue
+					raised = raised or w.level[w.idx(x, z)] >= 2
+					grass += 1 if w.bush.has(w.idx(x, z)) else 0
+		ok(marked, "%s has a landmark" % nm)
+		ok(raised, "%s has raised ground" % nm)
+		ok(grass > 0, "%s has tall grass (%d tiles)" % [nm, grass])
+		ok(String(R.get("purpose", "")).length() > 20, "%s has a reason to go" % nm)
+	# region loot multiplies into the biome's lean: Frostgate leans armor harder than the frost alone
+	var fg: Dictionary = w.regions.filter(func(R): return R["id"] == "frostgate")[0]
+	var fi: Dictionary = w.islands.filter(func(I): return I.get("id") == "frostgate")[0]
+	var at := Vector3(fi["c"].x + 0.5, 0, fi["c"].y + 0.5)
+	var biome_lean: Dictionary = m.biomes._biome(at).get("loot", {}).get("slots", {})
+	var want := float(biome_lean.get("armor", 1.0)) * float(fg["loot"]["slots"]["armor"])
+	var got := float(m.biomes.slot_lean_at(at).get("armor", 1.0))
+	ok(is_equal_approx(got, want), "Frostgate armor lean = biome x region (%.2f)" % want)
+	m.free()
+
+## The hot zone: from the seed, varied, never the Crown, a rarity step better, on its own islands.
+func _hot(main: Node) -> void:
+	var picked := {}
+	for s in SEEDS:
+		var m := _match(main, s)
+		var hz: HotZone = m.biomes.hot
+		ok(hz.hot >= 0 and not hz.zone.is_empty(), "seed %d: a hot zone (%s)" % [s, m.world.regions[hz.hot]["name"]])
+		picked[hz.hot] = true
+		ok(HotZone.new(m.world, s).hot == hz.hot, "seed %d: the same seed picks the same zone" % s)
+		for ii in m.world.islands.size():
+			if hz.region_of[ii] == hz.hot:
+				ok(String(m.world.islands[ii].get("role", "")) != "heart", "seed %d: the hot zone isn't the Crown" % s)
+		var c: Vector3 = hz.zone[0]["c"]
+		var own := int(m.world.regions[hz.hot].get("loot", {}).get("rarity_bonus", 0))
+		ok(hz.rarity_bonus(c) == own + HotZone.RARITY, "seed %d: hot zone loot rolls a step better" % s)
+		ok(hz.region_at(hz.landing()) == hz.hot, "seed %d: the bots' landing is in the hot zone" % s)
+		m.free()
+	ok(picked.size() >= 3, "the hot zone varies between matches (%d regions)" % picked.size())
+
+## Bot squads weigh the hot zone when they plan the drop, and never two squads into it.
+func _bots(main: Node) -> void:
+	var into := 0
+	for s in SEEDS:
+		var m := _match(main, s, false)
+		var guard := 0
+		while m.skydrop != null and m.skydrop.planning and guard < 4000:
+			m.step(Match.DT)
+			guard += 1
+		var hz: HotZone = m.biomes.hot
+		var squads := 0
+		for t in m.skydrop.leads:
+			var l: Hunter = m.skydrop.leader(int(t))
+			if l and l.ctrl == "bot" and hz.region_at(l.ai.get("land", Vector3.INF)) == hz.hot \
+					and l.ai.get("land", Vector3.INF).distance_to(hz.landing()) < 14.0:
+				squads += 1
+		ok(squads <= 1, "seed %d: at most one bot squad heads for the hot zone's landing (%d)" % [s, squads])
+		into += squads
+		m.free()
+	ok(into >= 2, "bot squads pick the hot zone over %d matches (%d times)" % [SEEDS.size(), into])

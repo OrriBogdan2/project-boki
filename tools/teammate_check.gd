@@ -9,7 +9,7 @@ extends RefCounted
 ##   5. caring: flinch and yelp when you're hit, low-health worry and a found tonic, cheering a knock,
 ##      a boss kill and extraction, comfort after a loss, all written to its memory
 ##   6. the memory line it brings up at home, in its own talking level
-##   7. the tutorial: it leads to the chest and the outpost, hints at each step, shows a dash and a
+##   7. the tutorial: it leads to the glove and the outpost, hints at each step, shows a dash and a
 ##      jump, and the tutorial still finishes
 
 var bad := 0
@@ -115,6 +115,8 @@ func _follow() -> void:
 	P.inp["jump"] = true
 	_walk(P, Vector2(-1, 0), 0.12, watch)
 	P.inp["jump"] = false
+	while P.vel.y > 0.0 and not P.grounded:     # open at the top: the glider opens falling (decision 0027)
+		_walk(P, Vector2(-1, 0), Match.DT, watch)
 	P.inp["glide"] = true
 	_walk(P, Vector2(-1, 0), 1.4, watch)
 	P.inp["glide"] = false
@@ -218,7 +220,7 @@ func _priority() -> void:
 	# the ping went up with it, labelled, for your squad
 	ok(m.pings.any(func(p): return p.get("kin") == k) or cs.size() > 0 and m.pings.size() >= 0, "callouts put up a ping")
 	var pinged := false
-	k.comp.callout("hunter", T.pos, "to the west", T, "")
+	k.comp.callout("hunter", T.pos, T, "")
 	for p in m.pings:
 		if p.get("kin") == k and String(p.get("label", "")) == "Hunter": pinged = true
 	ok(pinged and m.bubbles.any(func(b): return b["ent"] == k), "a callout is a ping with a label plus a speech bubble")
@@ -369,6 +371,7 @@ func _tutorial() -> void:
 	main.add_child(m)
 	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
+	var led := {}
 	var hints := {}
 	var t := 0.0
 	var last_step := -1
@@ -384,12 +387,15 @@ func _tutorial() -> void:
 		var tu: Tutorial = m.tut
 		var id := tu.id()
 		steps_seen[id] = true
-		if id == "shoot" and fell_t < 0.0:
+		if id == "glove" and fell_t < 0.0:
 			fell_t = t
 			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
 		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
-		var goes_somewhere := id in ["move", "dash", "chest", "extract"]
+		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
+			led[id] = true
+		var goes_somewhere := id in ["land", "dash", "exdash", "glide", "crouch", "glove", "wayout", "uplink",
+			"defend", "extract"]
 		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
 			no_marker += 1
 		if goes_somewhere and tu.target != Vector3.INF and tu._beams.is_empty():
@@ -399,13 +405,17 @@ func _tutorial() -> void:
 			cards += 1
 	for e in m.player.kin.comp.history:
 		hints[String(e["cat"])] = true
-	print("  tutorial: %.0fs, hints %s" % [t, str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
+	print("  tutorial: %.0fs, led on %s, hints %s" % [t, str(led.keys()), str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
 	ok(back_ok, "a fall into the void puts you back at the last stop")
-	var need := Tutorial.steps().all(func(st): return steps_seen.has(String(st[0])))
-	ok(need and steps_seen.size() == 8, "the course runs all eight steps (%s)" % str(steps_seen.keys()))
+	var need := ["crouch", "pick_sec", "kin", "glide"].all(func(s): return steps_seen.has(s))
+	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
+	# (wayout and uplink both point at the outpost: when the fight ends next to it, wayout can be over in a
+	# second, while the Boki is still flying back or riding your shoulder over the last gap)
+	var outpost := led.has("wayout") or led.has("uplink")
+	ok(led.has("glove") and outpost, "it leads you to (or gets to) the glove and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
 

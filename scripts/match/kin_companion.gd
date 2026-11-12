@@ -6,7 +6,7 @@ extends RefCounted
 ##   * calls things out: a rival behind you, a sniper, a monster pack ahead, a boss fight, a Rare Egg,
 ##     loot, a wild Boki, your low health, the way out. Each callout is a world ping (your squad sees
 ##     it, and online it goes out as an "ev" event), body language (it turns, points, growls or
-##     whines) and a short bark in its own talking level (KinVoice.callout: a hatchling only says its
+##     whines) and a short bark in its own talking level (BokiChatter.line: a hatchling only says its
 ##     name, with what it's doing in brackets; a grown Boki uses words).
 ##     Callouts have a priority, a cooldown per kind and a quiet gap between them, so it never
 ##     chatters over itself; the "Boki chattiness" setting (quiet / normal / chatty) and its
@@ -14,7 +14,7 @@ extends RefCounted
 ##   * cares: flinches when you're hit, frets and nudges you at low health (and once a run, if it
 ##     trusts you, brings you a tonic it found), stands over you when you're down, cheers knocks,
 ##     boss kills and extraction with you, and stays close after a loss. The big moments are written
-##     to its memory (Kin.note), so back home it brings them up (KinSpeak.recall_line).
+##     to its memory (Kin.note), so back home it brings them up (BokiLines "back_" lines).
 ##   * keeps close: the spot at your heel or flank it walks to (heel_spot), stepping between you and
 ##     a threat or covering your back, and leading the way in the tutorial (tut).
 ##
@@ -67,8 +67,10 @@ var noted := {}             # memory kinds already written this match
 var ping_ref: Dictionary = {}
 var ping_follow: Ent = null
 var side := 1.0             # which flank it walks on
-var guide := {}             # the tutorial step it's cheering you through: {id, to, t, said, demo_t}
+var guide := {}             # the tutorial step it's leading: {id, to, t, said, demo_t}
 var demo := {}              # a little demonstration it's doing: {kind, t}
+var lead_dir := Vector2.ZERO
+var lead_t := 0.0
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -163,7 +165,7 @@ func tick(dt: float) -> void:
 	var best := _best_callout()
 	if best.is_empty():
 		return
-	callout(String(best["cat"]), best["at"], String(best.get("extra", "")), best.get("follow", null), String(best.get("key", "")))
+	callout(String(best["cat"]), best["at"], best.get("follow", null), String(best.get("key", "")))
 
 ## Cosmetic timers only (remote copies tick this too).
 func _decay(dt: float) -> void:
@@ -182,7 +184,7 @@ func _find_threat() -> void:
 	threat = null
 	var o := h()
 	var bd := 10.0
-	for f in m.foes_of(o.team):
+	for f in m.foes_of(o.team, false):
 		if f == k or (f is Kin and (f as Kin).owner_h == o) or Shrubling.hidden(f):
 			continue
 		if f is Mob and not ((f as Mob).tgt == o or (f as Mob).tgt == k or o.flat_dist(f) < 5.0):
@@ -191,7 +193,7 @@ func _find_threat() -> void:
 		if d < bd:
 			bd = d; threat = f
 
-## What's worth saying right now, if anything: {cat, at, extra, follow, key}.
+## What's worth saying right now, if anything: {cat, at, follow, key}.
 func _best_callout() -> Dictionary:
 	var o := h()
 	var now: float = m.time
@@ -219,7 +221,7 @@ func _best_callout() -> Dictionary:
 			cat = "behind"
 		elif float(f.wpn.get("range", 0.0)) >= 14.0 and d > 11.0:
 			cat = "sniper"
-		cands.append({"cat": cat, "at": f.pos, "extra": m.direction_word(o.pos, f.pos), "follow": f, "key": key})
+		cands.append({"cat": cat, "at": f.pos, "follow": f, "key": key})
 	# a monster pack ahead that isn't on you yet
 	var near_mobs: Array = []
 	for mb in m.mobs:
@@ -238,7 +240,7 @@ func _best_callout() -> Dictionary:
 				c /= n
 				var key: String = "p%d_%d" % [int(c.x / 8.0), int(c.z / 8.0)]
 				if not _seen_recent(key, 45.0) and Vector2(c.x - o.pos.x, c.z - o.pos.z).normalized().dot(fwd) > -0.2:
-					cands.append({"cat": "pack", "at": c, "extra": m.direction_word(o.pos, c), "key": key})
+					cands.append({"cat": "pack", "at": c, "key": key})
 				break
 	# a boss fight close by
 	if m.lairs:
@@ -247,7 +249,7 @@ func _best_callout() -> Dictionary:
 				var lc: Vector3 = L["c"]
 				var key: String = "L" + String(L.get("name", ""))
 				if o.flat_dist(lc) < 34.0 and not _seen_recent(key, 90.0):
-					cands.append({"cat": "boss", "at": lc, "extra": String(L.get("name", "")), "key": key})
+					cands.append({"cat": "boss", "at": lc, "key": key})
 	# Rare Eggs and good loot
 	var lr := 9.0 + (5.0 if curious else 0.0) + k.t("curiosity") * 2.0
 	for wp in m.wpicks:
@@ -258,33 +260,33 @@ func _best_callout() -> Dictionary:
 		if wp.get("egg", false) and o.flat_dist(wpos) < 22.0:
 			cands.append({"cat": "egg", "at": wpos, "key": key})
 		elif int(wp.get("rar", 0)) >= 3 and o.flat_dist(wpos) < lr:
-			cands.append({"cat": "loot", "at": wpos, "extra": "weapon", "key": key})
+			cands.append({"cat": "loot", "at": wpos, "key": key})
 	for i in m.chests.size():
 		var c: Dictionary = m.chests[i]
 		if c["open"] or c.has("ride"):
 			continue
 		var key: String = "c%d" % i
 		if not seen.has(key) and o.flat_dist(c["pos"]) < lr:
-			cands.append({"cat": "loot", "at": c["pos"], "extra": "chest", "key": key})
+			cands.append({"cat": "loot", "at": c["pos"], "key": key})
 	# wild Boki
 	for wk in m.kins:
 		if wk.is_wild() and not wk.dead and wk.state == "wild" and not seen.has("k" + wk.nid) and o.flat_dist(wk) < reach * 0.8:
-			cands.append({"cat": "wild", "at": wk.pos, "extra": String(Data.KIN[wk.species]["name"]), "follow": wk, "key": "k" + wk.nid})
+			cands.append({"cat": "wild", "at": wk.pos, "follow": wk, "key": "k" + wk.nid})
 	# the way out
 	if m.exits and not m.opts.get("tutorial", false):
 		var left: float = m.length - m.time
 		var best_x: Dictionary = {}
 		var bxd := 1e9
 		for x in m.exits.list:
-			var usable: bool = m.exits.callable(x) or m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
+			var usable: bool = m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
 			if usable and o.flat_dist(x["pos"]) < bxd:
 				bxd = o.flat_dist(x["pos"]); best_x = x
 		if not best_x.is_empty():
 			var xp: Vector3 = best_x["pos"]
 			if left < 45.0:
-				cands.append({"cat": "collapse", "at": xp, "extra": m.direction_word(o.pos, xp), "key": "collapse"})
+				cands.append({"cat": "collapse", "at": xp, "key": "collapse"})
 			elif bxd < 30.0 and not seen.has("x%d" % m.exits.list.find(best_x)):
-				cands.append({"cat": "exit", "at": xp, "extra": m.direction_word(o.pos, xp), "key": "x%d" % m.exits.list.find(best_x)})
+				cands.append({"cat": "exit", "at": xp, "key": "x%d" % m.exits.list.find(best_x)})
 	# looking after you
 	if not o.downed and o.hp < o.max_hp * 0.35:
 		cands.append({"cat": "low_hp", "at": o.pos, "key": ""})
@@ -316,7 +318,7 @@ func _seen_recent(key: String, ttl: float) -> bool:
 
 # ------------------------------------------------------------------ doing it
 ## Says and shows one callout: a ping for its squad, its body turning to it, and a bark.
-func callout(cat: String, at: Vector3, extra := "", follow = null, key := "") -> void:
+func callout(cat: String, at: Vector3, follow = null, key := "") -> void:
 	var now: float = m.time
 	if key != "": seen[key] = now
 	cds[cat] = now + _cd_of(cat)
@@ -325,12 +327,12 @@ func callout(cat: String, at: Vector3, extra := "", follow = null, key := "") ->
 	history.append({"t": now, "cat": cat, "pri": _pri_of(cat) if CATS.has(cat) else 0})
 	if cat == "low_hp":
 		_care_low_hp()
-	_show(cat, at, extra, follow)
+	_show(cat, at, follow)
 	if m.net_on and h() and not h().remote:
 		m.net_event(["kc", k.nid, cat, snappedf(at.x, 0.1), snappedf(at.y, 0.1), snappedf(at.z, 0.1)])
 
 ## The visible part of a callout (also what a remote copy does when it hears one online).
-func _show(cat: String, at: Vector3, extra := "", follow = null) -> void:
+func _show(cat: String, at: Vector3, follow = null) -> void:
 	pose = String(POSES.get(cat, "alert"))
 	pose_t = 1.8
 	if cat != "low_hp" and cat != "goad":
@@ -341,7 +343,7 @@ func _show(cat: String, at: Vector3, extra := "", follow = null) -> void:
 	if LABELS.has(cat) and m.player and h() and h().team == m.player.team:
 		ping_ref = m.kin_ping(k, at, COLS[grp], String(LABELS[cat]))
 		ping_follow = follow if follow is Ent else null
-	var txt := KinVoice.callout(k, cat, extra)
+	var txt := BokiChatter.line(k, cat)
 	if txt != "":
 		m.kin_bark(k, txt, cat)
 	if grp == "threat" and m.fx:
@@ -352,7 +354,7 @@ func heard(cat: String, at: Vector3) -> void:
 	if not CATS.has(cat):
 		return
 	history.append({"t": m.time, "cat": cat, "pri": int(CATS[cat][0]), "net": true})
-	_show(cat, at, m.direction_word(h().pos, at) if h() else "")
+	_show(cat, at)
 
 func _care_low_hp() -> void:
 	var o := h()
@@ -363,7 +365,7 @@ func _care_low_hp() -> void:
 		history.append({"t": m.time, "cat": "tonic", "pri": 0})
 		pose = "nudge"; pose_t = 2.0
 		if m.fx: m.fx.burst(o.pos + Vector3(0, 1.0, 0), Color("ff9be0"), 10, 2.0, 0.5)
-		var txt := KinVoice.callout(k, "tonic")
+		var txt := BokiChatter.line(k, "tonic")
 		if txt != "":
 			m.kin_bark(k, txt, "tonic")
 		gap_t = maxf(gap_t, 2.6)
@@ -392,7 +394,7 @@ func _react(kind: String, p: String, secs: float, bark_cat := "", at := Vector3.
 	if at != Vector3.INF:
 		look = at; look_t = secs
 	if bark_cat != "":
-		var txt := KinVoice.callout(k, bark_cat)
+		var txt := BokiChatter.line(k, bark_cat)
 		if txt != "":
 			m.kin_bark(k, txt, bark_cat)
 
@@ -407,7 +409,7 @@ func on_owner_hit(d: float, by: Ent) -> void:
 	if d >= o.max_hp * 0.12 and yelp_cd <= 0.0 and not o.downed:
 		yelp_cd = 7.0
 		history.append({"t": m.time, "cat": "yelp", "pri": 0})
-		var txt := KinVoice.callout(k, "yelp")
+		var txt := BokiChatter.line(k, "yelp")
 		if txt != "":
 			m.kin_bark(k, txt, "yelp")
 
@@ -455,7 +457,7 @@ func _almost_home() -> void:
 	if noted.has("almost_home") or m.exits == null:
 		return
 	var x: Dictionary = m.exits.active_for(h().team)
-	if x.is_empty() or not String(x["state"]) in ["open", "boarding"] or h().flat_dist(x["pos"]) > 7.0:
+	if x.is_empty() or String(x["state"]) != "open" or h().flat_dist(x["pos"]) > 7.0:
 		return
 	noted["almost_home"] = true
 	cheer_cd = 3.0
@@ -514,7 +516,7 @@ static func demo_tick(m, mode: String) -> void:
 			p.inp["aim"] = p.pos + Vector3(4, 0.9, 1)
 			if t > 1.0 and not st.has("said"):
 				st["said"] = true
-				k.comp.callout("behind", foe2.pos, m.direction_word(p.pos, foe2.pos), foe2, "h" + foe2.nid)
+				k.comp.callout("behind", foe2.pos, foe2, "h" + foe2.nid)
 				print("TMDEMO callout at t=%.1f foe %s" % [m.time, str(foe2.pos)])
 			if st.has("said"):
 				k.comp.pose = "growl"
@@ -532,9 +534,9 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
-						m.kin_bark(k, KinVoice.line(k, "owner_down"), "owner_down")
+						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)
 
 static func _hold_bubble(m, k: Kin) -> void:
@@ -553,6 +555,12 @@ func heel_spot() -> Vector3:
 	var fwd := aim_dir()
 	var sd := Vector2(-fwd.y, fwd.x) * side
 	var offs: Array = []
+	if guide.size() > 0 and lead_dir != Vector2.ZERO:
+		var gto: Vector3 = guide.get("to", Vector3.INF)
+		var gd := Vector2(gto.x - o.pos.x, gto.z - o.pos.z).length() if gto != Vector3.INF else 99.0
+		var ahead := clampf(gd - 1.2, 1.2, 8.0)
+		for kk in [1.0, 0.75, 0.5, 0.3]:
+			offs.append(lead_dir * ahead * kk)
 	if threat and is_instance_valid(threat) and not threat.dead:
 		var to := Vector2(threat.pos.x - o.pos.x, threat.pos.z - o.pos.z)
 		if to.length() > 0.5:
@@ -574,37 +582,64 @@ func _ground_ok(p: Vector3, y0: float) -> bool:
 		return false
 	return absf(w.ground_at(p.x, p.z) - y0) < 0.75
 
+## Is it leading the way right now (tutorial)? Then the HUD can drop its own arrow.
+func leading() -> bool:
+	if guide.size() == 0 or lead_dir == Vector2.ZERO or h() == null or k.state not in ["shoulder", "active"]:
+		return false
+	var kp := k.seen_pos()
+	var rel := Vector2(kp.x - h().pos.x, kp.z - h().pos.z)
+	return rel.length() < 9.0 and rel.dot(lead_dir) > 0.8
+
 # ------------------------------------------------------------------ the tutorial guide
-## Tutorial.update tells it every step what the step is about and where it wants you (Pell leads the way;
-## the Boki says it in its own voice, looks there and shows you the moves).
+## Match._update_tutorial tells it every step what the step is about.
 func tut(id: String, to: Vector3) -> void:
 	if guide.get("id", "") != id:
 		guide = {"id": id, "to": to, "t": 0.0, "said": false, "demo_t": 0.4}
+		lead_dir = Vector2.ZERO
+		lead_t = 0.0
+		if to != Vector3.INF and h() and Tutorial.leads(id):
+			# off it goes straight away, the straight way first (the walked path comes on the next look)
+			guide["dir"] = Vector2(to.x - h().pos.x, to.z - h().pos.z).normalized()
+			lead_dir = guide["dir"]
+			lead_t = 0.4
 	guide["to"] = to
 
-## Stalled: it says the step again (the card and marker pulse too).
+## Stalled: it runs back to you and says the step again (the card and marker pulse too).
 func nag() -> void:
 	if guide.size() == 0:
 		return
 	guide["said"] = false
+	guide["back_t"] = 2.5
 	pose = "beckon"
 	pose_t = 2.0
 
 func _tut_tick() -> void:
+	var o := h()
 	var id := String(guide["id"])
 	var to: Vector3 = guide["to"]
 	guide["t"] = float(guide["t"]) + 0.4
+	# which way to go: straight there, or the way a bot would walk it (bridges, gaps)
+	lead_dir = Vector2.ZERO
+	guide["back_t"] = maxf(0.0, float(guide.get("back_t", 0.0)) - 0.4)
+	var back := float(guide["back_t"]) > 0.0       # (just nagged: it runs back to you first)
+	if to != Vector3.INF and not back and o.flat_dist(to) > 2.5 and Tutorial.leads(id):
+		lead_t -= 0.4
+		if lead_t <= 0.0:
+			lead_t = 0.8
+			var pd: Vector2 = m.bot_brain._path_dir(m, o, to)
+			guide["dir"] = pd if pd.length() > 0.1 else Vector2(to.x - o.pos.x, to.z - o.pos.z).normalized()
+		lead_dir = guide.get("dir", Vector2.ZERO)
 	# a hint in its own voice when the step starts, and again if you seem stuck
 	var t := float(guide["t"])
 	if not guide["said"] and not (m.tut and m.tut.card_up()):
 		guide["said"] = true
-		var txt := KinVoice.tut_hint(k, id)
+		var txt := BokiChatter.tut_hint(k, id)
 		if txt != "":
 			history.append({"t": m.time, "cat": "tut_" + id, "pri": 0})
 			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "growl" if id in ["shoot", "throw", "fight"] else "point"
+			pose = "point" if Tutorial.leads(id) else ("growl" if id in Tutorial.FOE_STEPS else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
@@ -612,7 +647,7 @@ func _tut_tick() -> void:
 		guide["demo_t"] = 3.6
 		match id:
 			"dash": demo = {"kind": "dash", "t": 0.0, "dir": aim_dir()}
-			"glide": demo = {"kind": "jump", "t": 0.0, "dir": aim_dir()}
+			"glide", "exdash": demo = {"kind": "jump", "t": 0.0, "dir": aim_dir()}
 			"move": demo = {"kind": "hop", "t": 0.0, "dir": aim_dir()}
 		if demo.size() > 0:
 			history.append({"t": m.time, "cat": "demo_" + String(demo["kind"]), "pri": 0})

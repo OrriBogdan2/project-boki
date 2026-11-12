@@ -1,86 +1,84 @@
+## Regions' own loot and the match's hot drop zone. Each region of an authored map may lean its
+## chests and drops toward some gear ("loot": slot weights that multiply the biome's, rarity steps
+## that add). Every match also picks one region, from the shared match seed (so every player sees
+## the same one, and it changes match to match), as the hot zone: loot there rolls a step better.
+## It's ringed on the drop map and the minimap, and bot squads weigh it when they pick where to land.
+## Owned by BiomeRun, which folds it into its loot answers.
 class_name HotZone
 extends RefCounted
-## The match's hot drop zone: one named area per match whose loot is one rarity step better, drawn
-## on the drop map and the minimap in one colour with a label. content/rules/hot_zone.json.
-## The region id is picked once (by the host online, in the lobby's "start" message) and every
-## game builds the same zone from it.
 
-## The zone the previous match used in this game, so the same one never comes up twice in a row.
-static var last_id := ""
-static var _rules := {}
+## Extra rarity steps for everything found in the hot zone (chests, drops, bosses).
+const RARITY := 1
+## Chance (0..1) a bot squad leader with no human ping heads for the hot zone, if no other squad is.
+const BOT_PICK := 0.35
+## How near (m) another squad must be to the hot zone's landing for a bot leader to look elsewhere.
+const CROWD_R := 25.0
+const COL := Color("ff8a3a")
 
-var id := ""
-var isl := -1                    # the island's index in World.islands
-var _w: World
+var w: World = null
+var region_of := PackedInt32Array()   # island index -> region index (-1: none)
+var hot := -1                         # the hot region's index in w.regions (-1: none)
+var zone: Array = []                  # the hot region's islands: {c: Vector3 centre, r: radius in m}
 
-static func rules() -> Dictionary:
-	if _rules.is_empty():
-		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hot_zone.json"))
-		_rules = d if d is Dictionary else {}
-	return _rules
+func _init(world: World, seed_val: int) -> void:
+	w = world
+	region_of.resize(w.islands.size())
+	region_of.fill(-1)
+	var picks: Array = []
+	for ri in w.regions.size():
+		var heart := false
+		for ii in w.islands.size():
+			if String(w.islands[ii].get("id", "")) in w.regions[ri].get("islands", []):
+				region_of[ii] = ri
+				heart = heart or String(w.islands[ii].get("role", "")) == "heart"
+		if not heart:
+			picks.append(ri)     # (the Crown already pays best: a hot Crown would pull every squad in)
+	if not picks.is_empty():
+		hot = picks[posmod(hash([seed_val, "hot_zone"]), picks.size())]
+	for ii in region_of.size():
+		if hot >= 0 and region_of[ii] == hot:
+			var I: Dictionary = w.islands[ii]
+			zone.append({"c": Vector3(I["c"].x + 0.5, 0, I["c"].y + 0.5), "r": float(I.get("r", 8))})
 
-static func color() -> Color:
-	return Color(String(rules()["color"]))
+func region_at(p: Vector3) -> int:
+	var ii := w.island_of(p.x, p.z)
+	return region_of[ii] if ii >= 0 else -1
 
-## A region id from a layout's islands (JSON dicts): any named area but the perches, by seed.
-## Empty when the layout has none.
-static func pick(layout_islands: Array, seed_val: int) -> String:
-	var ids: Array = []
-	for d in layout_islands:
-		if String(d.get("name", "")) != "" and String(d.get("role", "")) != "perch" and String(d["id"]) != last_id:
-			ids.append(String(d["id"]))
-	if ids.is_empty():
-		return ""
-	var r := RandomNumberGenerator.new()
-	r.seed = hash("%d|hot_zone" % seed_val)
-	return ids[r.randi_range(0, ids.size() - 1)]
+## The region's slot weights at p, multiplied into the biome's (`lean`).
+func slot_lean(p: Vector3, lean: Dictionary) -> Dictionary:
+	var ri := region_at(p)
+	var own: Dictionary = w.regions[ri].get("loot", {}).get("slots", {}) if ri >= 0 else {}
+	if own.is_empty():
+		return lean
+	var out := lean.duplicate()
+	for sn in own:
+		out[sn] = float(out.get(sn, 1.0)) * float(own[sn])
+	return out
 
-func _init(w: World, region_id: String) -> void:
-	_w = w
-	for i in w.islands.size():
-		if String(w.islands[i].get("id", "")) == region_id:
-			id = region_id
-			isl = i
-	if isl >= 0:
-		last_id = id
+## Extra rarity steps at p from its region's own loot and the hot zone.
+func rarity_bonus(p: Vector3) -> int:
+	var ri := region_at(p)
+	if ri < 0:
+		return 0
+	return int(w.regions[ri].get("loot", {}).get("rarity_bonus", 0)) + (RARITY if ri == hot else 0)
 
-func active() -> bool:
-	return isl >= 0
+## Where a bot squad heading for the hot zone lands: near the middle of its main island.
+func landing() -> Vector3:
+	return w.free_spot_near(zone[0]["c"], [], 1.0, 0.5, 12.0) if not zone.is_empty() else Vector3.INF
 
-func zone_name() -> String:
-	return String(_w.islands[isl]["name"])
+## The hot zone on the drop map / full map (FullMap.draw).
+func full_map(fm, kk: float) -> void:
+	for k in zone.size():
+		var pv: Vector2 = fm.to_screen(zone[k]["c"])
+		fm.hud.c.draw_arc(pv, float(zone[k]["r"]) * kk, 0.0, TAU, 48, Color(COL, 0.85), 3.0)
+		if k == 0:
+			var top := pv - Vector2(0, float(zone[k]["r"]) * kk + 8.0)
+			fm.hud._ctext(top, "HOT ZONE  ·  better loot", 13, COL, fm.hud.big)
 
-func contains(p: Vector3) -> bool:
-	return isl >= 0 and _w.island_of(p.x, p.z) == isl
-
-## Rarity steps this spot's loot gains: the tier-up inside the zone, nothing anywhere else.
-func bonus_at(p: Vector3) -> int:
-	return int(rules()["tier_up"]) if contains(p) else 0
-
-func center() -> Vector3:
-	var c: Vector2 = _w.islands[isl]["c"]
-	return Vector3(c.x, 0.0, c.y)
-
-func radius() -> float:
-	return float(_w.islands[isl]["r"])
-
-## One marker, shared by both maps: a tinted disc, a pulsing ring and the label above it.
-## px_r is the disc's radius on screen; a small one (the close minimap) is just a ring and a dot.
-func paint(hud, at: Vector2, px_r: float, labelled: bool) -> void:
-	var col := color()
-	var pulse := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) * 0.004)
-	if px_r >= 14.0:
-		hud.c.draw_circle(at, px_r, Color(col, 0.16))
-	hud.c.draw_arc(at, maxf(px_r, 7.0), 0.0, TAU, 40, Color(col, 0.55 + 0.4 * pulse), 2.5, true)
-	hud.c.draw_circle(at, 3.0, col)
-	if labelled:
-		hud._ctext(at + Vector2(0, -maxf(px_r, 7.0) - 14.0), String(rules()["label"]), 13, col, hud.big)
-
-## On the minimap: the whole zone while riding or dropping; on the ground a ring at its centre
-## when it is in view, else an arrow at the rim pointing to it.
-func paint_mini(hud, inner: Rect2, to_map: Callable, on_map: Callable, whole: bool) -> void:
-	var pv: Vector2 = to_map.call(center())
-	if not on_map.call(pv, 4.0):
-		hud._edge_arrow(inner, inner.get_center(), pv, color())
-		return
-	paint(hud, pv, radius() * (inner.size.x / _w.w) if whole else 0.0, whole)
+## The hot zone on the minimap: a ring round each of its islands in view.
+func minimap(hud, to_map: Callable, on_map: Callable) -> void:
+	for I in zone:
+		var pv: Vector2 = to_map.call(I["c"])
+		if on_map.call(pv, 0.0):
+			var edge: Vector2 = to_map.call(I["c"] + Vector3(float(I["r"]), 0, 0))
+			hud.c.draw_arc(pv, (edge - pv).length(), 0.0, TAU, 32, Color(COL, 0.7), 1.5)
