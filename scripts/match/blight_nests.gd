@@ -329,7 +329,7 @@ func demo() -> void:
 		if b is Blight and not b.dead and b.mkind == "bl_skitter":
 			b.cd = maxf(b.cd, 1.0)          # (they swarm and circle, but hold the bite for the shot)
 			if b.flat_dist(P) < 3.0:
-				var back := -b.dir_to(P) * (3.0 - b.flat_dist(P))
+				var back: Vector2 = -b.dir_to(P) * (3.0 - b.flat_dist(P))
 				b.pos += Vector3(back.x, 0, back.y)
 			if tgt == null or P.flat_dist(b) < P.flat_dist(tgt):
 				tgt = b
