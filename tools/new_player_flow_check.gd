@@ -151,8 +151,8 @@ func _hatch() -> void:
 		return rv != null and rv.met, "the new Boki meets you")
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
-	ok(_button(hx, "Skip the tutorial") != null, "the naming card offers 'Skip the tutorial' as well")
-	_press(hx, "Head out together")
+	ok(_button(hx, "Tend the garden") != null, "the naming card offers 'Tend the garden' beside 'Learn to fight'")
+	_press(hx, "Learn to fight")
 	await _relic(hx)
 
 ## Vex's card on the starter pick (HobOffer), or null before it shows.
@@ -179,7 +179,7 @@ func _relic(hx) -> void:
 # ------------------------------------------------------------------ 3. the tutorial match
 func _tutorial_match():
 	_begin("tutorial match: load")
-	await _wait(_match_running, "'Head out together' opens the tutorial match")
+	await _wait(_match_running, "'Learn to fight' opens the tutorial match")
 	var m: Match = main.current
 	m.set_process(false)
 	ok(bool(m.opts.get("tutorial", false)), "it is the tutorial course")
@@ -350,13 +350,12 @@ func _skip_paths() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	_press(hx, "Skip the tutorial")
-	await _relic(hx)
+	_press(hx, "Tend the garden")
 	_begin("skip paths: farm")
-	await _wait(func(): return _is_screen("home.gd"), "'Skip the tutorial' goes straight to the farm")
+	await _wait(func(): return _is_screen("home.gd"), "'Tend the garden' goes straight to the farm, no Relic first")
 	var home = main.current
 	await _wait(func(): return home.panel_host != null, "the farm builds")
-	home._close_panel()
+	ok(ClassUnlock.needs_starters(), "the Relic pick waits")
 	var tut: Dictionary = Save.d["tutorial"]
 	ok(bool(tut.get("match", false)) and int(Save.d.get("matches", 0)) == 0, "the match tutorial is done, not played")
 	ok(FarmTutorial.active(), "the farm tutorial still starts")
@@ -368,4 +367,17 @@ func _skip_paths() -> void:
 	ok(not FarmTutorial.active() and FarmSites.is_site(FarmHob.house_entry()), "skipping leaves the house to build")
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "and the axe and the pickaxe")
 	ok(int(Save.d["gems"]) >= gems, "nothing was taken")
+	await _portal_relic(home)
 	_end()
+
+## The garden path's first Relic: the first portal use asks for it, it is put on, then the expedition opens.
+func _portal_relic(home) -> void:
+	home._open_expedition()
+	ok(home.panel_open == FirstRelic.PANEL, "the first portal use offers the Relic pick, not the expedition")
+	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
+			func(c): return c.has_meta("mask_card"))
+	ok(cards.size() == 3, "three Relics to pick from")
+	cards[2].mouse_entered.emit()
+	_press(home.panel_host, "Take Vex")
+	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
+	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

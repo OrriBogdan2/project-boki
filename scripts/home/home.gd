@@ -3437,6 +3437,9 @@ func _weapon() -> String:
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
+	if ClassUnlock.needs_starters():
+		FirstRelic.offer(self, _open_expedition)      # (the garden path's first Relic waits for the portal)
+		return
 	var v := _new_panel("Expedition", 940, true)
 	UI.subtitle(v, "Pick your Hunter and where to drop.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)
