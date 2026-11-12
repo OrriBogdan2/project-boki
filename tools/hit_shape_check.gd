@@ -195,7 +195,14 @@ func _secs_for(kind: String, hold: float) -> float:
 		"e": return 1.2
 		"x": return 1.5
 		"lmb": return 0.5
+		"rmb", "rmb_hold": return maxf(hold + 0.5, 0.6) + _flight_s()
 	return hold + 0.5 if hold > 0.0 else 0.6
+
+## Seconds a thrown RMB (Gil's flask) spends in the air before it lands: its flight plus the flight per metre.
+func _flight_s() -> float:
+	var rd := P.ak.rmb_def()
+	var far := float(rd.get("range", 0.0)) * float(rd.get("hold_range", 1.0))
+	return float(rd.get("flight", 0.0)) + float(rd.get("flight_per_m", 0.0)) * far
 
 func _hold_for(kind: String) -> float:
 	match kind:

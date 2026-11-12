@@ -609,6 +609,8 @@ func _end_stale_hold() -> void:
 		anim_id = ""
 
 # ------------------------------------------------------------------ bots
+const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
@@ -622,4 +624,5 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if float(cd["e"]) <= 0.0 and dist < 2.8:
 		use_e()
 	elif rmb_ready() and los and dist < float(rmb_def()["range"]) + 1.0:
+		bot_hold["rmb"] = BOT_TAP
 		press_rmb()

@@ -227,6 +227,22 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
+## Gil (`gil`, no source hero) · 13th Hunter, 0.24.4
+
+Ours only: there is no source row to compare, so every verdict is `ours` and the numbers below are the content values (`content/archetypes/gil.json`, measured shapes in docs/HITBOX_SIZE.md, time to knock in docs/TTK.md, bot use in docs/BOT_KIT_USE.md). `content/rules/kit_parity.json` has no Gil row for the same reason.
+
+| Slot | Source | Ours | Verdict |
+|---|---|---|---|
+| LMB | none | Fencer: two thrusts 7 and a lunge 11 (reach 2.5/2.5/3.2), rate 0.32 s, each steps forward, the third slows 30% 0.5 s | ours |
+| RMB | none | Grab Bag: 5 potions (thunder 10 + stun 0.5 s, slime slow, gust, fire, Super Zeep), 2 charges, cd 5 s, tap 8 m, hold 12 m | ours |
+| E | none | Riptide: 2 s spin (radius 2.2, tick 2 to 5), press again for a spout, 10 damage + 1 s knockup, cd 12 s | ours |
+| R | none | Tidal Wave: 14 m, 18 damage, 1 s knockup then slow 50% 2 s, 40 shield, cd 90 s, unlock rank 6 | ours |
+| Dash | none | Ground Swim: 6 m in 0.4 s, 4 damage, 0.5 s knockup, cd 8 s | ours |
+| Passive | none | Fish Out of Water: three different potion marks in 5 s Beach a foe (stun 0.75 s, once per 8 s) | ours |
+| Health | none | 124 (light weight), 0.80 of the roster mean | ours |
+
+Measured outliers, not retuned: the swordfish chain reads one dummy at 0.8 m in `--hit-shape-check` against a 3.1 m content reach (as Kael and Tenzo read low too); his combo knocks in 5.0 to 7.7 s (the bag is shuffled, so it varies) against 1.3 to 4.2 s for the other combos with a source row, only Motley slower (docs/TTK.md); bots use Ground Swim about once per duel.
+
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
 
 Read from `content/archetypes/*.json` and the kit code. Source = the card text in `supervive_kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Ostra's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except Oath's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
