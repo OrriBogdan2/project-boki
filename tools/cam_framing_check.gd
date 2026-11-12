@@ -3,7 +3,9 @@ extends RefCounted
 ## --cam-framing-check, on a 1920x1080 view:
 ##   1. the Supervive style takes its numbers from content/rules/camera.json and sits inside the source's
 ##      bands there: pitch, lens, and your feet a little below the screen's centre
-##   2. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
+##   2. the source_scale test style (off by default) shows the source's ground across and scales Hunters; the
+##      home keeps the Supervive view under it
+##   3. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
 ##      directions, at the sneak, normal and close zooms) you stay on screen, feet and head
 ## --cam-framing-shots (GPU, --shots-dir=<dir>): a live match at the default view, then the cursor held at
 ## the screen's top and bottom edge while sneaking (the widest grounded zoom), one PNG each.
@@ -34,6 +36,7 @@ func run(main: Node, what: String) -> void:
 	var cam := CamRig.new()
 	vp.add_child(cam)
 	_style(cam)
+	_source_style(cam)
 	_lean(cam)
 	vp.queue_free()
 	print("CAMFRAME CHECK DONE, failures: ", bad)
@@ -74,6 +77,23 @@ func _lean(cam: CamRig) -> void:
 		ok(worst >= 20.0, "zoom %.2f: at full lean every way you stay on screen (%.0f px to the nearest edge)"
 				% [z, worst])
 	cam.zoom = 1.0
+
+func _source_style(cam: CamRig) -> void:
+	var src: Dictionary = CamRig.RULES["source"]
+	ok(Settings.DEFAULTS["cam_style"] != "source_scale", "source_scale is off by default (the Settings camera is %s)"
+			% Settings.DEFAULTS["cam_style"])
+	cam.use_style("source_scale")
+	var across := CamRig.style_across("source_scale")
+	ok(_inside(across, src["across_m"]), "source_scale shows %.1f m across, inside the source's %s"
+			% [across, str(src["across_m"])])
+	ok(cam.hunter_scale > 1.5, "source_scale draws Hunters %.2fx bigger" % cam.hunter_scale)
+	var was = Settings.get_v("cam_style")
+	Settings.set_v("cam_style", "source_scale", false)
+	cam.apply_settings()
+	ok(cam.style_id == "supervive" and is_equal_approx(cam.hunter_scale, 1.0),
+			"the home keeps the Supervive view under source_scale")
+	Settings.set_v("cam_style", was, false)
+	cam.use_style("supervive")
 
 func _inside(v: float, band: Array) -> bool:
 	return v >= float(band[0]) - 0.001 and v <= float(band[1]) + 0.001
