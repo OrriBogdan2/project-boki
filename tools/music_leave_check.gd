@@ -11,6 +11,7 @@ const DT := 1.0 / 60.0
 const AUDIBLE_DB := -45.0      # a player quieter than this (and fading) isn't heard
 const SETTLE_SPEED := 4.0      # time scale while settling
 const SETTLE := 6.0            # seconds: longer than the slowest crossfade (home 2.5s, layers 3s)
+const ROWS := 18               # rows a full run asserts: fewer means a step errored out and skipped its rows
 
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
@@ -54,22 +55,27 @@ func run(main_node: Node) -> void:
 	await _training_duel_leave()
 	await _match_to_title()
 	await _farm_to_title()
+	ok("all %d rows ran" % ROWS, n == ROWS, "%d ran" % n)
 	print("MUSICLEAVE DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## Opens a screen the way the game does (Game.goto) and waits for it to be up.
+## Opens a screen the way the game does (Game.goto) and waits for it to be up. With fades on (any
+## display, xvfb too) the old screen stays current until the 0.3 s ink has covered it, so this waits
+## for a new current screen, not a fixed frame count.
 func go(screen: String, opts := {}) -> Node:
+	var was: Node = main.current
 	Game.goto(screen, opts)
 	for i in 6:
+		await main.get_tree().process_frame
+	while main.current == was or not is_instance_valid(main.current) or not main.current.is_inside_tree():
 		await main.get_tree().process_frame
 	return main.current
 
 func start_match(opts: Dictionary, live := false) -> Match:
 	if live:
 		# the real way in: the loading screen, then the match running on its own for a while
-		var was: Node = main.current      # (the old screen stays current until the 0.3 s fade has covered it)
 		var m0: Match = await go("match", opts)
-		while m0 == was or not is_instance_valid(m0) or not m0.is_inside_tree() or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
+		while not is_instance_valid(m0) or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
 			await main.get_tree().process_frame
 			m0 = main.current
 		return m0
