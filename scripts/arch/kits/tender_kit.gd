@@ -766,6 +766,7 @@ func _tick_call(dt: float) -> void:
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
+	vfx("call_plus", who.pos)           # a couple of mint pluses rise off whoever the tether heals
 	if who == h:
 		_mend(h, amt * float(e_def().get("self_k", 0.33)))
 	else:
@@ -784,8 +785,6 @@ func _call_look(who: Hunter, dt: float) -> void:
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22
-		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
-		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
 		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
 
 

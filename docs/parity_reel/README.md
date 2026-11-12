@@ -290,7 +290,8 @@ thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan d
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
 cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271],
-ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
+ours showed no plus sparkles there (since the reel: two small mint pluses rise off the ally on each 0.5 s heal tick,
+HeroVfx `call_plus`, also on other players' screens); at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
 ## Tenzo the Stone Seer (`dolm`, source Tetra)

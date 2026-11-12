@@ -78,6 +78,7 @@ func tender() -> void:
 	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos
+	var pluses0 := int(HeroVfx.of(m).plays.get("call_plus", 0))
 	P.inp["move"] = Vector2(-1, 0)
 	step(m, 1.5)
 	P.inp["move"] = Vector2.ZERO
@@ -87,6 +88,10 @@ func tender() -> void:
 	ok("mm X: the tether and the reach ring show for everyone", K.ulk().showing("tether")
 		and bool(AimKit.entry(P, "x").get("all", false)) and K.anim_id == "mm_call_hold", K.anim_id)
 	ok("mm X: the tether heals the teammate", A.hp > a_hp0 + 5.0, "%.0f -> %.0f" % [a_hp0, A.hp])
+	var pluses := int(HeroVfx.of(m).plays.get("call_plus", 0)) - pluses0
+	var rec: Dictionary = HeroVfx.data("tender")["moves"]["call_plus"]
+	ok("mm X: mint pluses rise off the teammate on each heal tick, sent to other games", pluses >= 2 and pluses <= 4
+		and bool(rec.get("net", true)) and String(rec["fx"][0]["c"]) == "mint", "%d in 1.5 s" % pluses)
 	# --- she can cast other things while it runs (wiki): Hearthlight goes up
 	P.inp["sig"] = true
 	step(m, 0.05)
