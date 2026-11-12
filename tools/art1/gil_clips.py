@@ -520,15 +520,31 @@ C.bake("fuse", 0.8, [(0, LOOSE), (0.2, m(FUSE_GASP, e="out")), (0.42, m(FUSE_TIG
                      (0.6, m(FUSE_GASP, hips=(-4, 0, 0), e="out")), (0.8, LOOSE)], over=tiptoe)
 
 # ---------------------------------------------------------------------- Grab Bag, Riptide, Ground Swim, Tidal Wave
-# Grab Bag (rmb): an eager overhand lob from the free hand, the potion gone on the press (the kit throws it then), a
-# hop of the front boot after it, the hand left waving it off
-TOSS_COCK = m(LOOSE, hips=(2, 0, -18), head=(8, 0, 14), hl=lhand(0.08, -0.14, 0.28), wl=(0, 0, 30), tail=(0, 0, 14),
-              hr=hand(0.06, 0.06, -0.3))
-TOSS = m(LOOSE, pos=(0.0, 0.03, -0.02), hips=(-10, 0, 16), head=(10, 0, -10), hl=lhand(-0.06, 0.36, 0.12),
-         wl=(0, 0, -30), tail=(0, 0, -16), hr=hand(0.1, -0.02, -0.32), fl=(-AX - 0.02, 0.1, AZ))
-C.bake("toss", 0.4, [(0, LOOSE), (0.04, m(TOSS_COCK, e="out")), (0.1, m(TOSS, e="snap")),
-                     (0.22, m(TOSS, hl=lhand(-0.04, 0.32, 0.02), wl=(0, 0, 20))), (0.4, LOOSE)],
-       over=lambda t, p: add(p, "wl", (0, 0, 30.0 * bump(t, 0.18, 0.4, 9.0) * cyc(t, 8, 0.4))))
+# Grab Bag (rmb): he digs in the satchel on his right hip with the free hand and yanks the potion up out of it, high
+# on his free side over the hat brim (so it reads from the match camera), the swordfish swung wide out of the way. The
+# yank is the throw (a lob from the shoulder) and lands on TOSS_KEY, the frame the kit lets the potion go (gil.json rmb
+# draw), after the clip's 0.1 s blend-in so the snap is all on screen; then a short settle, the hand waving it off.
+BAG = Vector((0.16, 0.14, 0.7))        # m, model space: the wrist over the satchel's mouth (the bag is 0.37-0.78 m up)
+TOSS_IN, TOSS_KEY = 0.1, 4 / 30        # s: the fist closes in the bag; the yank lands (the clip blends in over 0.1 s)
+
+
+def at_bag(k, dz=0.0):
+    """The wrist on the bag for key k: the model-space point back into the torso's rest frame the key's hands use."""
+    gr = A.qe(k["rot"])
+    ph = Vector(k["pos"]) + gr @ REST["hips"]
+    return tuple(REST["hips"] + (gr @ A.qe(k["hips"])).inverted() @ (Vector(k["pos"]) + BAG + Vector((0, 0, dz)) - ph))
+
+
+REACH = m(LOOSE, pos=(0.0, 0.0, -0.04), hips=(-16, -10, -26), head=(-14, 0, -12), tail=(0, 0, 18),
+          hr=hand(0.16, 0.16, -0.22), br=(0.8, 0.6, -0.25), wl=(0, 0, 40), el=(-0.2, -0.9, -0.3))
+REACH = m(REACH, hl=at_bag(REACH))
+GRASP = m(REACH, pos=(0.0, 0.0, -0.05), hips=(-18, -11, -28))
+GRASP = m(GRASP, hl=at_bag(GRASP, -0.05))
+TOSS = m(LOOSE, pos=(0.0, 0.03, -0.01), hips=(-4, 0, 14), head=(16, 0, 12), hl=lhand(0.1, 0.2, 0.3),
+         wl=(0, 0, -30), tail=(0, 0, -16), hr=hand(0.12, 0.06, -0.3), fl=(-AX - 0.02, 0.1, AZ))
+C.bake("toss", 0.4, [(0, LOOSE), (0.06, m(REACH, e="out")), (TOSS_IN, m(GRASP, e="in")), (TOSS_KEY, m(TOSS, e="snap")),
+                     (0.24, m(TOSS, hl=lhand(-0.03, 0.3, 0.02), wl=(0, 0, 20))), (0.4, LOOSE)],
+       over=lambda t, p: add(p, "wl", (0, 0, 30.0 * bump(t, 0.2, 0.4, 9.0) * cyc(t, 8, 0.4))))
 
 # Riptide (e): he winds the other way, then twirls on his toes, the swordfish out at arm's length, the free hand out
 # for balance, his head thrown back and the tail flying; a turn every SPIN_REV through the longest spin (gil.json e

@@ -36,4 +36,8 @@ ART-1 pipeline (docs/art/wardens/PIPELINE.md steps 5-9). Raw files in ~/meshy/gi
   (mf_xform), and his casts, kit moves with a clip and no procedural keys: toss (Grab Bag, upper while moving), spin
   (Riptide: five turns on his toes, the longest spin), spout, swim (Ground Swim: a dive, then only the back fin and the
   tail fork cut the ground), surface, surf (Tidal Wave, side-on on the crest) and wave_land.
+- **Toss re-keyed (2026-11-12):** the Grab Bag toss is a reach into the satchel on his right hip (the swordfish
+  swung wide) and a yank of the potion up over his hat brim on 4/30 s, the frame the kit lets it go (gil.json rmb
+  `draw`, `--clip-check` row), then a settle to 0.4 s. Baked with pip `bpy` 4.5 (no Blender on the worker) and copied
+  on with `glb_add_clips.py toss`, so the rest of the file is byte for byte the same.
 - **Import:** `meshes/generate_lods=false`, `force_disable_compression=true` in gil.glb.import.
