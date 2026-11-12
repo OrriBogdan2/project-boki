@@ -67,9 +67,19 @@ The Empty pats, feeds and cheers with its feet where they stand (HunterVerbs, `s
   the free hand braces over the knee. Feed 1.0 s: a small rise, hands gather the snack at the belly, go out past
   the mouth and settle, one nudge in, open and come back. Cheer 0.8 s: a dip to load with the arms swung back,
   sprung up past straight, two alternating pumps with a give in the knees, down.
+- **Pick-up** (ext/anim-empty-care): holding interact on a Boki (`HomeCarry.press_hold`) plays `lift`, 0.8 s on the
+  match pickup's beat (hands down by 0.28 s, up by 0.55, settled by 0.8). The Boki comes to your hands; both hands
+  close on its flanks (`HunterVerbs.aim`: 40 % up it, each hand 0.13 m to a side, on the round of its body) with the
+  squat and a fold over it, hold a beat, then it rides them up (`HunterVerbs.lifted`) and the lift ends on the carry
+  hold. A Boki for the back is then swung over the shoulder (0.25 s). You stand still for the lift. HunterAnim eases
+  one hold into the next over 0.2 s (`SWAP_S`), so lift to carry or pack has no pop.
 - **Check**: `--home-verbs-check` plays pat and feed at a 0.5 m and a 1.25 m Boki stand-in: the hand on its surface
   (worst 6.9 cm), hips 13 cm lower feeding the small one, the pat hand 50 cm higher on the big one, sole points on
-  the floor slide 0.07 cm (cheer too). The strip: `--home-verbs-check --home-verbs-shots=<dir>` (glomwort, zapple).
+  the floor slide 0.07 cm (cheer too). The lift at both: each hand 1.9 cm from its grip, 0.9-1.3 cm off the Boki,
+  feet 0.13 cm; the pick-up path keeps the Boki on the ground until the grip and hands over to the carry hold.
+  `--clip-check` repeats the reach (shared `reach()`): the Empty's hand within 0.15 m of its target at the peak of
+  pet, feed and lift, small and big. The strip: `--home-verbs-check --home-verbs-shots=<dir>` (glomwort, zapple;
+  columns pat, feed, lift, cheer, toss).
 
 ## Left open
 - Crouch-walking adds HunterAnim's knee bend after the solve, so a crouched walk slides a little (DEBT).

@@ -92,8 +92,9 @@ func _rig() -> void:
 			"pat":
 				ok(bob > 0.05 and seen["fwd_r"] < -LIFT, "pat: the right hand reaches out and bobs (%.2f)" % bob)
 			"lift":
-				ok(seen["lo"] < rest[1].y - DOWN and seen["hi"] > rest[1].y + 0.02, "lift: the hands go down to it, then up"
-						+ " to the chest (%.2f to %.2f, rest %.2f)" % [seen["lo"], seen["hi"], rest[1].y])
+				var lift := "lift: the hands go down to it, then up to the chest (%.2f to %.2f, rest %.2f)"
+				var down_up: bool = seen["lo"] < rest[1].y - DOWN and seen["hi"] > rest[1].y + 0.02
+				ok(down_up, lift % [seen["lo"], seen["hi"], rest[1].y])
 			"toss":
 				ok(seen["back_r"] > 0.1 and seen["fwd_r"] < -LIFT, "toss: the hand goes back then through")
 			"cheer":
@@ -137,7 +138,8 @@ func _empty_reach() -> void:
 	for size in BOKI:
 		for verb in CARE:
 			var g: Dictionary = got["%s.%s" % [verb, size]]
-			print("HOMEVERBS %s %s Boki: hand %.1f cm off at %.2f m, %.1f cm from its aim, hips %.2f m, feet slid %.2f cm"
+			print(("HOMEVERBS %s %s Boki: hand %.1f cm off at %.2f m, %.1f cm from its aim,"
+					+ " hips %.2f m, feet slid %.2f cm")
 					% [verb, size, g["off_cm"], g["hand"], 100.0 * g["aim_m"], g["hip"], g["feet_cm"]])
 			ok(g["off_cm"] <= TOUCH_CM, "%s, %s Boki: the hand touches it (%.1f cm off)" % [verb, size, g["off_cm"]])
 			ok(g["feet_cm"] <= FEET_CM, "%s, %s Boki: the feet stay planted (%.2f cm)" % [verb, size, g["feet_cm"]])
@@ -267,7 +269,8 @@ func _paths() -> void:
 func _pick_up(home, ke: Dictionary) -> void:
 	home.carry.press_hold(ke)
 	ok(home.carry.carrying() and home.verbs.act == "lift", "picking a Boki up plays the lift")
-	ok(home.carry.speed_mul() == 0.0 and home.carry.anim_state().is_empty(), "you stand still for the lift, no carry hold yet")
+	var still: bool = home.carry.speed_mul() == 0.0 and home.carry.anim_state().is_empty()
+	ok(still, "you stand still for the lift, no carry hold yet")
 	var n: Node3D = ke["node"]
 	var ground := n.position.y
 	var y_grip := INF

@@ -63,7 +63,8 @@ func _empty_care(main: Node) -> void:
 	for size in hv.BOKI:
 		for verb in hv.CARE:
 			var off := float(got["%s.%s" % [verb, size]]["aim_m"])
-			ok(off <= CARE_TARGET_M, "the Empty: %s, %s Boki, hand %.3f m from its target at the peak" % [verb, size, off])
+			var what := "the Empty: %s, %s Boki, hand %.3f m from its target at the peak" % [verb, size, off]
+			ok(off <= CARE_TARGET_M, what)
 
 ## A Hero's own .glb, wearing its clips: a bad merge of WardenGlb falls back to the procedural body in silence.
 func _own_model(id: String, art_name: String) -> void:

@@ -4,8 +4,9 @@ extends RefCounted
 ## down. A small Boki rides in both arms, a middling one on your back, and a big one stays on the ground and follows
 ## beside you (hold again to let go). You walk at SPEED_K while you carry or lead. It reacts to its traits: a brave one
 ## wriggles happily, a timid one clings, a grumpy one squirms free after SQUIRM_S. Picking one up plays the lift
-## (HunterVerbs): it comes to your hands, you bend and close them on its flanks, and it rides them up to the hold. Carrying a Close-or-better bond
-## for TRUST_S adds a little trust, once a day. Home only (never in a match). A tap on a Boki is still a pat.
+## (HunterVerbs): it comes to your hands, you bend and close them on its flanks, and it rides them up to the hold.
+## Carrying a Close-or-better bond for TRUST_S adds a little trust, once a day. Home only (never in a match).
+## A tap on a Boki is still a pat.
 ## home.gd calls tick() each frame, speed_mul() in its walk speed and anim_state() for the hunter's pose.
 
 const HOLD_S := 0.45          # s the interact key is held on a Boki to pick it up (a shorter press pats)
