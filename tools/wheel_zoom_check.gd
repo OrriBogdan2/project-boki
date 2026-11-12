@@ -168,6 +168,30 @@ func _match(main: Node) -> void:
 	var zoomed := CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_UP))
 	ok(not zoomed and m.cam.user_zoom == was, "match: a wheel bound to an action stays theirs")
 	InputMap.action_erase_event("emote", bind)
+	_hint(m)
 	Settings.set_v("cam_zoom", 1.0, false)      # (a later check starts from the default)
 	m.queue_free()
 	await tree.process_frame
+
+## The first-match hint: one line with the bound sneak key, once, and never after the wheel has zoomed.
+func _hint(m: Match) -> void:
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(CamWheel.HINT)
+	var n: int = m.hud.msgs.count()
+	CamWheel.hint(m)
+	ok(m.hud.msgs.count() == n + 1 and seen.get(CamWheel.HINT, false), "hint: one line the first time")
+	CamWheel.hint(m)
+	ok(m.hud.msgs.count() == n + 1, "hint: not a second time")
+	seen.erase(CamWheel.HINT)
+	CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_UP))
+	n = m.hud.msgs.count()
+	CamWheel.hint(m)
+	ok(m.hud.msgs.count() == n, "hint: zooming marks it seen")
+	seen.erase(CamWheel.HINT)
+	var bind := InputEventMouseButton.new()
+	bind.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	InputMap.action_add_event("emote", bind)
+	CamWheel.hint(m)
+	ok(m.hud.msgs.count() == n and not seen.has(CamWheel.HINT), "hint: not shown when the wheel is bound to an action")
+	InputMap.action_erase_event("emote", bind)
+	seen.erase(CamWheel.HINT)
