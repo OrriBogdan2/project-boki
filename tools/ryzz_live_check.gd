@@ -89,17 +89,24 @@ func run(main: Node) -> void:
 		var left := K.lmb_n % 2 == 1
 		sides.append("L" if left else "R")
 		var sd: Dictionary = m.get("shots")[-1] if not (m.get("shots") as Array).is_empty() else {}
-		var from: Vector3 = sd.get("start", Vector3.ZERO)
+		var round_at: Vector3 = sd.get("start", Vector3.ZERO)
+		var rider: Dictionary = {}
+		for each in K.fx().riders:
+			if each["sd"] == sd:
+				rider = each
 		_run(m, P, 5, seen)         # (the release key: the arm is out)
 		var tip := WardenGlb.anchor(P.model, "anchor_finger_L" if left else "weapon_muzzle")
-		if fired and tip != null:
+		if fired and tip != null and not rider.is_empty():
+			# (the drawn bolt leaves the drawn fingertip; the round itself keeps the match's start, hits and reach)
+			var from: Vector3 = round_at + VVFx.drawn_from(rider)
 			var off := Vector2(from.x - tip.global_position.x, from.z - tip.global_position.z).length()
-			print("LIVE shot %s: %.3f m from its fingertip" % [sides[-1], off])
+			var gap := Vector2(round_at.x - tip.global_position.x, round_at.z - tip.global_position.z).length()
+			print("LIVE shot %s: drawn %.3f m from its fingertip (the round starts %.3f m off)" % [sides[-1], off, gap])
 			worst = maxf(worst, off)
 		else:
 			worst = 99.0
 	ok(sides == ["L", "R", "L", "R"] or sides == ["R", "L", "R", "L"], "the bolts alternate hands: %s" % str(sides))
-	ok(worst < 0.2, "each bolt leaves its firing fingertip (worst %.3f m)" % worst)
+	ok(worst < 0.2, "each drawn bolt leaves its firing fingertip (worst %.3f m)" % worst)
 	var calm := _flare(P)
 	P.grounded = true          # (in the air the rod goes on the press, with no hold)
 	P.gliding = false

@@ -36,11 +36,12 @@ const ECHO_CAP := 10           # after-images per hunter at most (each copies th
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
 const NO_EDGE := Color(0, 0, 0, 0)
+const FROM_BLEND_M := 3.0       # m a rider takes to ease from the drawn hand onto its shot's own line
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
 var live: Array = []           # one-shot effects: {node, t, dur, kind, s0, follow, spin}
-var riders: Array = []         # looks riding on a shot: {node, sd, kind, len, width, on_end, last, vel}
+var riders: Array = []         # looks riding on a shot: {node, sd, kind, len, width, on_end, last, vel, from}
 var markers := {}              # id -> {node, t, n}
 var trails := {}               # id -> {last, t}: hand trails being drawn
 # cosmetic jitter only: never draws on the global RNG (seeded sims stay the same)
@@ -407,9 +408,11 @@ static func _shown_under(node: Node3D, model: Node3D) -> bool:
 
 # ------------------------------------------------------------------ riders
 ## A look riding on a match shot (the dictionary in m.shots) until it ends; then on_end(at, hit) runs.
-## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail).
+## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail). from: a node on the drawn model
+## (a fingertip) the look leaves from, easing onto the shot's own line over FROM_BLEND_M; only the look moves, the
+## shot (its hits, timing and reach) is the match's.
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable(), from: Node3D = null) -> void:
 	var n: Node3D
 	if kind == "tracer":
 		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
@@ -419,7 +422,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, 
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):
 		mi.visible = false            # the stock orb goes: this look is the round
-	var rider := {"node": n, "sd": sd, "kind": kind, "len": length, "width": width, "on_end": on_end}
+	var rider := {"node": n, "sd": sd, "kind": kind, "len": length, "width": width, "on_end": on_end, "from": from}
 	rider["last"] = sd["pos"]
 	rider["vel"] = sd["vel"]
 	riders.append(rider)
@@ -619,6 +622,14 @@ func _tick_follow(e: Dictionary, n: Node3D, mt: ShaderMaterial, u: float) -> voi
 	else:
 		mt.set_shader_parameter("strength", 1.0 - smoothstep(0.8, 1.0, u))
 
+## How far a rider's drawn start (its "from" node, followed live) sits off its shot's start; zero without one.
+static func drawn_from(r: Dictionary) -> Vector3:
+	var at = r.get("from")
+	var sd: Dictionary = r["sd"]
+	if at == null or not is_instance_valid(at) or not (at as Node3D).is_inside_tree():
+		return Vector3.ZERO
+	return (at as Node3D).global_position - (sd.get("start", sd["pos"]) as Vector3)
+
 func _tick_rider(r: Dictionary) -> void:
 	var n: Node3D = r["node"]
 	var sd: Dictionary = r["sd"]
@@ -633,7 +644,8 @@ func _tick_rider(r: Dictionary) -> void:
 		var back := Vector3(-v.x, 0, -v.y).normalized() if v.length() > 0.1 else Vector3.BACK
 		var travelled := p.distance_to(sd.get("start", p))
 		var trail := minf(float(r["len"]), travelled + 0.2)
-		_lay(n, p, p + back * trail, float(r["width"]))
+		var head := p + drawn_from(r) * (1.0 - smoothstep(0.0, FROM_BLEND_M, travelled))
+		_lay(n, head, head + back * trail, float(r["width"]))
 		return
 	n.visible = false
 	riders.erase(r)

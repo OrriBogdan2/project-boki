@@ -306,7 +306,10 @@ func _tick_lmb() -> void:
 	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
 	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, PINK, 0.3, 0.12)
 	m.later(0.06, _fingertip.bind(left))
-	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
+	# (the round flies from where her unscaled hand would be; the drawn bolt leaves the drawn fingertip, which
+	# hunter_scale puts further out, and eases onto the round's line, so hits and reach stay the match's)
+	var tip: Node3D = WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle") if h.model else null
+	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos), tip)
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
 func _fingertip(left: bool) -> void:
