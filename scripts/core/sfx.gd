@@ -225,7 +225,11 @@ const MIN_GAP := {
 	"steal_lost": 400,
 	"training_dummy_hit": 70,
 	"hostile_cast": 100,
-	"armor_up": 120
+	"armor_up": 120,
+	"boki_downed": 150,
+	"boki_revive": 300,
+	"boki_eat": 150,
+	"boki_sleep": 400,
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3

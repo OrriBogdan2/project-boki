@@ -5,10 +5,12 @@ extends RefCounted
 ##   3. the Guard and Follow orders (the G wheel's picks; the wheel itself is in --boki-follow-check)
 ##   4. C: the Boki's own ability from where it stands (out), or through you (on the shoulder)
 ##   5. a downed Boki: stays where it fell, no C / merge while down, the owner rescues it by touch,
-##      else it comes round alone after 15-20s at low health; a fall into the abyss only has the timer
+##      else it comes round alone after 15-20s at low health; a fall into the abyss only has the timer;
+##      going down plays boki_downed once and coming back (rescued or alone) boki_revive once
 ##   6. nobody steals or hurts a downed Boki while its owner is in the map
 ##   7. the Merge: gated by the bond meter, changes your look (form) by Boki type (no tiers), leaps
-##      back from out and merges mid-air, and without a Boki it is only a weak surge
+##      back from out and merges mid-air, and without a Boki it is only a weak surge; it plays its type's
+##      boki_fuse_<cue> once as it starts and boki_fuse_tired once as it runs out
 ##   8. the net snapshot round trip (KinNet): a Boki out, carried, downed and fused survive the wire; the kcmd event
 ##   9. the net version moved for the new snapshot shape
 
@@ -17,6 +19,7 @@ var m: Match
 var main: Node
 var tags_seen: Dictionary = {}
 var keep: Array = []       # the mobs a case spawned itself; any others the world makes are cleared each step
+var heard := {}            # sound -> match steps it started on (_tally)
 
 func ok(cond: bool, what: String) -> void:
 	print("BOKISYS %s %s" % ["PASS" if cond else "FAIL", what])
@@ -97,6 +100,21 @@ func run_for(secs: float, each := Callable()) -> void:
 		if each.is_valid(): each.call()
 		_clear_mobs()
 		m.step(Match.DT); t += Match.DT
+
+## Counts which of `names` started since the last call into `heard`, one a step at most. It clears Sfx's own last
+## start: the steps run faster than real time, so the real-time MIN_GAP would hide a repeat.
+func _tally(names: Array) -> void:
+	for n in names:
+		if Sfx.last_played.has(n):
+			heard[n] = int(heard.get(n, 0)) + 1
+			Sfx.last_played.erase(n)
+			Sfx.recent.erase(n)
+
+## A fresh count of `names`, heard from where the player stands.
+func _listen(names: Array) -> void:
+	Sfx.move_listener(m.player.pos)
+	_tally(names)
+	heard.clear()
 
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
@@ -237,23 +255,28 @@ func _downed() -> void:
 	var k: Kin = P.kin
 	var origin := P.pos
 	var spot := P.pos + Vector3(9.0, 0, 0)
+	var cues := ["boki_downed", "boki_revive"]
 	k.pos = spot; k.state = "active"; k.fly = {}
+	_listen(cues)
 	k.go_down()
 	ok(k.state == "downed" and k.down_total >= 14.9 and k.down_total <= 20.1, "a Boki that goes down is down for 15-20s (%.1fs)" % k.down_total)
-	run_for(1.5)
+	run_for(1.5, _tally.bind(cues))
 	ok(k.state == "downed" and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 1.0, "it stays where it fell")
 	ok(not KinCommand.cast_c(P), "no ability cast while down")
 	ok(not KinMerge.can_cast(P) and not KinMerge.boki_with_you(P), "no Merge with it while down")
 	ok(BokiHud.squad_downed(m).has(k), "it is marked for your squad (HUD / minimap / full map)")
 	# rescue by touch
 	P.teleport(Vector3(spot.x, spot.y, spot.z))
-	run_for(0.25)
+	run_for(0.25, _tally.bind(cues))
 	ok(k.state == "downed" and k.rescue_t > 0.0 and k.rescue_on, "running into it starts the rescue (%.2fs, no key)" % k.rescue_t)
 	ok(float(KinDowned.rules()["rescue_s"]) == 3.5, "the rescue takes 3.5s (data: rescue_s)")
-	run_for(1.5)
+	run_for(1.5, _tally.bind(cues))
 	ok(k.state == "downed" and k.rescue_t > 1.0, "...it is not a scoop: 1.7s in it is still going (%.2fs)" % k.rescue_t)
-	run_for(2.2)
+	run_for(2.2, _tally.bind(cues))
+	_tally(cues)
 	ok(k.state != "downed" and k.hp >= k.max_hp * 0.55, "...and at 3.5s it is back with a good chunk of health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
+	ok(heard == {"boki_downed": 1, "boki_revive": 1},
+			"...one boki_downed as it went down, one boki_revive as you got it back (%s)" % [heard])
 	# you carry it while it fills: walking at 90%, nothing fires, no jump or glide (Shift or interact puts it down);
 	# hard crowd control or a launch drops it
 	P.teleport(origin)
@@ -350,12 +373,16 @@ func _downed() -> void:
 
 	# self-recovery
 	k.pos = P.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
+	_listen(cues)
 	k.go_down()
 	var t_total := k.down_total
-	run_for(t_total - 1.0)
+	run_for(t_total - 1.0, _tally.bind(cues))
 	ok(k.state == "downed", "alone, it is still down just before its time")
-	run_for(2.0)
+	run_for(2.0, _tally.bind(cues))
+	_tally(cues)
 	ok(k.state != "downed" and k.hp > 0.0 and k.hp <= k.max_hp * 0.3, "it comes round on its own at low health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
+	ok(heard == {"boki_downed": 1, "boki_revive": 1},
+			"...one boki_downed and one boki_revive, nothing in the %.0fs between (%s)" % [t_total, heard])
 	# a fall into the abyss: only the timer
 	k.pos = P.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
 	k.go_down(true)
@@ -410,13 +437,20 @@ func _merge() -> void:
 	m.player.kin.stow()
 	var base_cdr: float = _cdr(m.player)
 	m.player.ult = 1.0
+	var fuse := ["boki_fuse_" + String(MergeForm.for_boki(m.player.kin)["cue"]), "boki_fuse_end", "boki_fuse_tired"]
+	_listen(fuse)
 	KinMerge.press(m.player)
+	_tally(fuse)
 	ok(_cdr(m.player) > base_cdr, "merged: your abilities cool down faster (cooldown stat %.2f -> %.2f)" % [base_cdr, _cdr(m.player)])
 	var torso: Node3D = m.player.model.get_node_or_null("Rig/Torso") if m.player.model else null
-	run_for(float(MergeForm.data()["xform_s"]) + 0.1)       # (the silhouette pops in when the Boki lands in you, 0.45s into the transformation)
+	# (the silhouette pops in when the Boki lands in you, 0.45s into the transformation)
+	run_for(float(MergeForm.data()["xform_s"]) + 0.1, _tally.bind(fuse))
 	if torso:
 		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) != null, "merged: the form's silhouette parts ride the torso")
-	run_for(float(m.player.merge_st.get("T", 10.0)) + float(MergeForm.data()["xform_s"]) + 1.0)
+	run_for(float(m.player.merge_st.get("T", 10.0)) + float(MergeForm.data()["xform_s"]) + 1.0, _tally.bind(fuse))
+	_tally(fuse)
+	ok(heard == {fuse[0]: 1, "boki_fuse_tired": 1},
+			"the Fusion plays %s once as it starts and boki_fuse_tired once as it runs out (%s)" % [fuse[0], heard])
 	if torso:
 		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) == null or torso.get_node(MergeLook.PARTS_NAME).is_queued_for_deletion(), "the merge's parts are removed when it ends (no leftovers stacking up)")
 	ok(not KinMerge.active(m.player) and m.player.kin.state == "shoulder", "the merge ends and the Boki is back on the shoulder (state %s)" % m.player.kin.state)
