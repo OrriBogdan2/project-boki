@@ -37,10 +37,11 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 func tabs() -> Array:
 	var lv := Stalls.level()
 	var no_exchange := FarmUnlocks.base_mode()
-	var handed := not TransferPost.inbox.is_empty()     # a Boki waiting for you opens the Shelter at any level
-	return TABS.filter(func(t): return (int(t[1]) <= lv or handed and t[0] == "Shelter")
-			and not (no_exchange and t[0] == "Exchange")) \
+	var out := TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
+	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
+		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
+	return out
 
 ## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.
 static func vendor_tabs() -> Array:
