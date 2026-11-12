@@ -145,6 +145,7 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 	var p: Hunter = H.m.player
 	var lv := int(p.slot_lv.get(slot, 1))
 	var can := p.can_level(slot)
+	RankMarks.note_face(slot, r)
 	if lv <= 0:
 		H.hover_spots.append([r, id])
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown

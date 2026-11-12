@@ -3,12 +3,14 @@ extends RefCounted
 ## real renderer, e.g. xvfb-run --rendering-driver opengl3 --resolution 1280x720): the intro card,
 ## the drop, the landing, and each beat after it: the point, every forced pick (its gold ring), each camp
 ## and the move it teaches, the wall kick, the lookout, the glove, the fuse, the ranks and the way out.
-## Files are <dir>/<WxH>_NN_<what>.png.
+## --size=WxH sets the window (1280x720, 1920x1080); --picks keeps only the pick steps (the ring on each
+## ability slot). Files are <dir>/<WxH>_NN_<what>.png.
 
 var main: Node
 var m: Match
 var dir := "/tmp/tuthud_shots"
 var n := 0
+var picks_only := false
 
 const WATCHED := ["points", "pick_sec", "sec", "shoot", "pick_dash", "dash", "wallkick", "crouch", "gkey",
 		"pick_kin", "kin", "glove", "hook", "pick_ult", "ult", "ranks", "wayout", "uplink"]
@@ -20,6 +22,12 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
+			main.get_viewport().size = Vector2i(int(wh[0]), int(wh[1]))
+		elif String(a) == "--picks":
+			picks_only = true
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
@@ -27,9 +35,10 @@ func run(main_node: Node) -> void:
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
-	await _shot("intro")
-	await _frames(30)
-	await _shot("intro_late")
+	if not picks_only:
+		await _shot("intro")
+		await _frames(30)
+		await _shot("intro_late")
 	m.tut.ack()
 	var seen := {}
 	var times := [0.4, 1.2, 2.5]
@@ -42,12 +51,12 @@ func run(main_node: Node) -> void:
 		m.cam.snap(m.player.pos)
 		var tu: Tutorial = m.tut
 		var sid := tu.id()
-		if not times.is_empty() and m.time >= float(times[0]):
+		if not times.is_empty() and m.time >= float(times[0]) and not picks_only:
 			await _shot("t%04.1f_%s" % [float(times.pop_front()), sid])
 		var ats := [0.25] if sid.begins_with("pick_") or sid == "sec" else [0.7, 2.6]   # (a pick is made by 0.4 s)
 		for at in ats:
 			var key := "%s_%.1f" % [sid, at]
-			if sid in WATCHED and tu.t >= at and not seen.has(key):
+			if sid in WATCHED and (sid.begins_with("pick_") or not picks_only) and tu.t >= at and not seen.has(key):
 				seen[key] = true
 				await _shot("%s_%.1fs" % [sid, at])
 		if guard % 4 == 0:
