@@ -137,7 +137,8 @@ AimKit.arc_wall(h, "e", {"rmax": reach})       # Lace's Rain of Arrows: at the c
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
-`deg` (120), `thick` (0.9), `panels` (7).
+`deg` (120), `thick` (0.9), `panels` (7). With `"lace": true` (Lace's Hail Wall) the band's fill is two
+strands criss-crossing between its rims instead.
 
 ### Two-end swap marker
 ```gdscript
@@ -153,7 +154,9 @@ AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor 
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
-The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
+`"lace": true` on a line or a lane (Lace's draw reticle and Heavy Shot bar, owner 11-11) draws two strands
+criss-crossing along it, one cross every 0.5 m, the one passing under darker: a laced cord, not a plain
+line or fill. The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
 `"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Sparkle's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the

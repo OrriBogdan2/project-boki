@@ -11,6 +11,8 @@ extends ArchKit
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit          # Shift: Spirit Walk
+const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
+
 var fx: PinFx                  # Hem's pooled effects
 var ult: PinUlt                # X: Starpiercer
 var perfects: int:
@@ -55,7 +57,7 @@ func _tick(dt: float) -> void:
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if pin_aim and rmb_down and tells_visible():
-		needle.hold(h.position, h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
+		needle.hold(HeroVfx.of(m).anchor_pos(h, "nock"), h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
 	elif needle.visible:
 		needle.put_away()
 	if not rain.is_empty():
@@ -98,7 +100,7 @@ func own_aim_line() -> bool:
 func charge_orb() -> bool:
 	return false
 
-## Her dash after-image: orchid fletch streaks instead of the shared ghost.
+## Her dash after-image: red fletch streaks instead of the shared ghost.
 func dash_afterimage() -> bool:
 	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
 	return true
@@ -123,7 +125,7 @@ func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
 ## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
-## loosed, the Heavy Shot's big orchid arrow.
+## loosed, the Heavy Shot's big red arrow.
 func _tag_shots() -> void:
 	for s in m.shots:
 		if s["by"] != h or (s["x"] as Dictionary).has("pin"):
@@ -155,7 +157,7 @@ func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():
 		spirit.end("hit")
 
-## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in an orchid X-star.
+## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in an red X-star.
 func _arrow_hit(t: Ent) -> void:
 	fx.note_hit(t.pos)
 	var kind := ""
@@ -213,22 +215,22 @@ func press_rmb() -> void:
 
 func rmb_hold_tick(t: float) -> void:
 	if t > float(rmb_def()["hold"]) and not pin_aim:
-		# the Heavy Shot's draw: the needle on the bow, an orchid bar growing from it (its own creak)
+		# the Heavy Shot's draw: the needle on the bow, a red bar growing from it (its own creak)
 		play("arc_heavy_wind")
 		anim_at = m.time - t          # on the hold's clock: the clip's full-draw key (1.1) lands with "full" (1.1)
 		pin_aim = true
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
-## The Heavy Shot held: a thick orchid bar out of the bow that
+## The Heavy Shot held: a thick red bar out of the bow that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player). Reaching full flashes the bow and
 ## plays the taut-thread cue once.
 func _heavy_tele() -> void:
 	var hk := heavy_k()
-	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5, "fill": hk, "tip": true,
-		"col": PinFx.THREAD, "col2": PinFx.PALE})
+	AimKit.lane(h, "rmb_bar", {"from": bow_mouth(), "len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5,
+		"fill": hk, "tip": true, "lace": true, "hot": 0.0, "col": PinFx.THREAD, "col2": PinFx.PALE})
 	AimKit.charge(h, hk, {"col": PinFx.THREAD, "col2": PinFx.PALE})
-	fx.bow_glint_at(draw.bow_at(), 1.0 if hk >= 0.99 else 0.0, PinFx.THREAD)
+	fx.bow_glint_at(bow_mouth(), 1.0 if hk >= 0.99 else 0.0, PinFx.THREAD)
 	if hk >= 0.99 and not heavy_full_cued:
 		heavy_full_cued = true
 		vfx("heavy_full")
@@ -252,7 +254,7 @@ func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"].get("max_hold", 3.0))
 
 ## A Boki merge ends every hold and channel of this kit with no shot: the bow draw (Hunter.draw_t, cleared by
-## MergeKit.drop_class_holds; its reticle here), the Heavy Shot's hold and its orchid telegraph, and Spirit Walk
+## MergeKit.drop_class_holds; its reticle here), the Heavy Shot's hold and its red telegraph, and Spirit Walk
 ## (Hunter.spirit_t; ending inside something still puts her back where she entered).
 func _drop_holds() -> void:
 	rmb_down = false
@@ -291,10 +293,15 @@ func _pin(a: Vector3, k: float) -> void:
 	var push := lerpf(float(pd["push"][0]), float(pd["push"][1]), k)
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": reach * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
 		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]})
-	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
-	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
+	var bow := bow_mouth()
+	var to := Vector2(a.x - bow.x, a.z - bow.z)
+	# toward the cursor from the bow (a cursor between her and the bow keeps her aim, never a backward shot)
+	var dir := to.normalized() if to.dot(h.aim_dir()) > 0.3 else h.aim_dir()
+	var extra := {"muzzle": bow, "dir_fixed": dir}
+	if k >= 0.99:
+		extra["hit_extra"] = {"heavy": true}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
-		# the impact: an orchid-white burst, a white dust cloud as it's driven back, a white ring round it
+		# the impact: an red-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
 		vfx("heavy_hit", f.pos, dir, {"k": k})
@@ -318,11 +325,17 @@ func _pin(a: Vector3, k: float) -> void:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
-	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
-	# the release burst's pale fletch core sits on the aim line at the bow, bigger than any bow cue (heavy_go
-	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
-	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
+	# its scorch runs from the ground under the bow (heavy_go's bursts sit on the bow itself)
+	vfx("heavy_go", AimMode.ground(m, bow), dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
+	# the release burst's pale fletch core just off the bow along the shot (kept small enough that the bow, not her
+	# body, is what it lights), still wider than any bow cue, and a screen kick along the shot
+	fx.fletch_burst(bow + Vector3(dir.x, 0, dir.y) * HEAVY_BURST_AHEAD, 1.2 + 0.4 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
+
+## Where the Heavy Shot leaves: the bow's mouth on the model (HeroVfx "bow_root", riding the bow bone in the
+## draw pose), so the shot, its bar and its bursts come off the bow, not her middle.
+func bow_mouth() -> Vector3:
+	return HeroVfx.of(m).anchor_pos(h, "bow_root")
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
 	var g0: float = f.pos.y
@@ -353,11 +366,11 @@ func cast_e() -> bool:
 	var tell := float(ed["tell"])
 	var center := h.pos
 	# the arrows go up first (everyone sees the arc), then the rain starts
-	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": _arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed)})
+	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": _arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed), "lace": true})
 	for i in 5:
 		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(_arc_deg()) * 0.4
 		var dv := d.rotated(u)
-		# (cosmetic: small and orchid so the five don't stack into one white blob at the bow; PinFx.lob draws
+		# (cosmetic: small and red so the five don't stack into one white blob at the bow; PinFx.lob draws
 		# the arrows going up)
 		var lob_v := dv * maxf(4.0, radius / tell)
 		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true})
@@ -383,7 +396,8 @@ func _tick_rain(dt: float) -> void:
 	if float(rain["start"]) > 0.0:
 		rain["start"] = float(rain["start"]) - dt
 		if float(rain["start"]) <= 0.0:
-			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(rain["t"]))
+			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]),
+					float(rain["t"]))
 			m.sfx("pin_rain", rain["c"], -3.0)
 		return
 	rain["patter"] = float(rain["patter"]) - dt

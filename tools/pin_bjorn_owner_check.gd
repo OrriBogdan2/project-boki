@@ -107,13 +107,13 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
 	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
-	var eye_ahead := func() -> float:
-		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
-	var eye0: float = eye_ahead.call()
+	var nock := HeroVfx.of(m).anchor_pos(P, "nock")
+	ok("114 needle: its eye rides the bow's nock point (the model's nock anchor), not a body offset",
+		n.eye.distance_to(nock) < 0.01, "eye %s nock %s" % [str(n.eye), str(nock)])
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var end: Vector3 = n.points[-1]
 	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
-	ok("114 needle: the orchid thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
+	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
 	var p0 := P.pos
 	step(m, 0.4, hold)
 	var held_v := p0.distance_to(P.pos) / 0.4
@@ -121,14 +121,13 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
 		"free %.2f held %.2f" % [free_v, held_v])
 	step(m, 0.6, hold)
-	var eye1: float = eye_ahead.call()
 	var glow1: float = n.shell_mat.get_shader_parameter("color").a
 	var hot: Color = n.steel.get_shader_parameter("albedo")
-	# (hot toward her orchid thread: the steel loses its green as it heats)
-	ok("114 needle: it draws back and glows up with the charge, the silver going orchid-hot",
-		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3
-			and hot.g < PinNeedle.SILVER.g - 0.3,
-		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	# (hot toward her red thread: the steel loses its green and blue as it heats)
+	ok("114 needle: it glows up with the charge, the silver going red-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and glow1 > glow0 + 0.3
+			and hot.g < PinNeedle.SILVER.g - 0.3 and hot.r > hot.b + 0.3,
+		"glow %.2f -> %.2f k %.2f" % [glow0, glow1, K.heavy_k()])
 	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -399,8 +398,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
-	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
-		burst != null and off_line(P.pos, d, burst.global_position) < 0.05 and burst.scale.x >= 1.4
+	ok("pin heavy: a release burst at the bow's mouth, wider than the bow cues, with a screen kick",
+		burst != null and burst.global_position.distance_to(K.bow_mouth()) < 0.6 and burst.scale.x >= 1.2
 			and K.heavy_kicks == kicks0 + 1,
 		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
 	var flashed := 0.0

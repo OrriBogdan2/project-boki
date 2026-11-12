@@ -24,6 +24,8 @@ extends RefCounted
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big
+##   lace    bool    lines, lanes and arc walls: two strands criss-crossing like laces instead of the plain
+##                   line or the fill (Lace's own look)
 
 const BH := 1.8           # m in one body height (the hero sheets measure in bh)
 
@@ -252,7 +254,7 @@ static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
 		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)), "soft": bool(p.get("soft", false)),
 		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
-		"fletch": float(p.get("fletch", 0.0))}
+		"fletch": float(p.get("fletch", 0.0)), "lace": bool(p.get("lace", false))}
 
 ## At full charge: hot unless the kit set it, and the full colour if it gave one.
 static func _full(e: Dictionary, p: Dictionary, k: float) -> void:
