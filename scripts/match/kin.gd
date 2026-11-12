@@ -1144,6 +1144,7 @@ func render(delta: float, alpha: float) -> void:
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("kdown", state == "downed")
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
