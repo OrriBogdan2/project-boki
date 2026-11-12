@@ -98,3 +98,8 @@ cliff wall, tower cluster, walled maze) and **how you get in** (one long bridge;
 ## Not in this pass (noted, not built)
 - Skiffs: the old map only named "skiff docks" in text; there is no skiff system. The train and glides are the travel.
 - In-match shops (separate order): no region uses a shop as its reason yet.
+
+## Checks (rpc3, temp XDG, branch on release-integ-0245 272368589)
+- `--train-check` 0 failures (6 reds fixed in the check: the rider stretch is now open air both sides, so the edge test runs, and only bots keep the edge guard, so it runs on a bot), `--keys-check` 90/0, `--cover-check` 85/0, `--arena-check` 106/0, `--ways-out-map-check` 0, `--minimap-check` 0, `--obstacle-check` 0, `--cliff-mantle-check` 0, import 0 errors, `health --strict` OK.
+- `--simtest --teams=10 --squad=3 --god` headless: no script errors (two seeds: 160 s sim to "finished"; the other ended "team wiped" at 56 s, as base does at 138 s).
+- GPU frame time (`--perf-bench --bench-secs=60 --bench-view=1920x1080`): base 272368589 = jobq 20261112-005356-06135, this branch = 20261112-005528-29609. Both sat in the GPU queue (70 jobs) for over an hour when this was written; the numbers go in the READY post when they return.
