@@ -97,7 +97,7 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## variant's name, art()).
 const SETTING := "warden_models"
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
-const POSE_HELD := "pose_held"   # root meta: the frame the Hunter skipped its pose in (SimLod.pose_every); Sync waits too
+const POSE_HELD := "pose_held"   # root meta: the frame the Hunter skipped its pose in (SimLod.pose_every)
 const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
