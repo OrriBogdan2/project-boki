@@ -8,7 +8,7 @@ extends RefCounted
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
-const SKY_ALT := 40.0          # m over the lane for the skydive stills
+const SKY_ALT := 25.0          # m over the lane for the skydive stills
 const SKY_FRAMES := 120        # camera steps for the skydive view to settle
 
 var main: Node
@@ -34,7 +34,7 @@ func run(main_node: Node) -> void:
 	await _take("glide_far", "at the take-off of the longest lane, match camera")
 	await _stand(lift["pos"] + Vector3(4, -lift["pos"].y, 0))
 	await _take("lift_match", "on the ground beside a lift ring, match camera")
-	await _sky(lane[1]["pos"] - fwd * 10.0, fwd)
+	await _sky(lane[1]["pos"] - fwd * 8.0, fwd)
 	await _take("skydive_lane", "Cam.skydive %d m over the lane" % SKY_ALT)
 	await _sky(lift["pos"] + Vector3(0, 0, 14), Vector3(0, 0, -1))
 	await _take("skydive_lift", "Cam.skydive over a lift ring")
@@ -100,7 +100,7 @@ func _settle(sky: bool, fwd: Vector3) -> void:
 	m.cam.yaw = 0.0
 	for i in SKY_FRAMES:
 		if sky:
-			m.cam.skydive(P.pos, atan2(fwd.x, fwd.z), SKY_ALT, DT)
+			m.cam.skydive(P.pos, atan2(-fwd.x, -fwd.z), SKY_ALT, DT)
 		else:
 			m.cam.follow(P.pos, DT, false)
 		for h in m.hunters:

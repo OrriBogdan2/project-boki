@@ -16,7 +16,7 @@ const HEX_SCALE := 1.1                 # a glide ring's hexagon circumradius, of
 const ARROW_START := 2.5               # m: first arrowhead of a glide ring's trail, from the ring
 const ARROW_STEP := 3.2                # m between arrowheads on the trail
 const ARROW_LEN := 1.3                 # m: one arm of an arrowhead
-const ARROW_SWEEP := 0.75              # rad: how far an arm sweeps back from the lane
+const ARROW_SWEEP := 0.75              # rad: the angle between an arm and the lane behind the tip
 const CONE_R := 0.7                    # m: base radius of the lowest cone over a lift ring
 const CONE_H := 0.9                    # m: height of each cone
 const CONE_STEP := 1.1                 # m between cones, rising over the ring
@@ -185,7 +185,8 @@ static func _trail(ahead: float) -> Mesh:
 		for k in count:
 			var z := ARROW_START + ARROW_STEP * k
 			for side in [-1.0, 1.0]:
-				var t := Transform3D(Basis(Vector3.UP, side * ARROW_SWEEP), Vector3(-side * ARROW_LEN * 0.4, 0.0, z))
+				var arm := Vector3(side * sin(ARROW_SWEEP), 0.0, -cos(ARROW_SWEEP)) * ARROW_LEN * 0.5
+				var t := Transform3D(Basis(Vector3.UP, PI / 2.0 - side * ARROW_SWEEP), Vector3(0.0, 0.0, z) + arm)
 				st.append_from(bar, 0, t)
 		_marks[count] = st.commit()
 	return _marks[count]
