@@ -2546,6 +2546,7 @@ func _update_vision() -> void:
 			RenderingServer.global_shader_parameter_set("vis_ally%d" % n, Vector4(h.pos.x, h.pos.z, ad.x, ad.y))
 			n += 1
 		RenderingServer.global_shader_parameter_set("vis_allies", float(n))
+		RevealLight.push(self)
 	_vis_t -= get_process_delta_time()
 	if _vis_t > 0.0:
 		return
