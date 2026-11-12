@@ -1072,7 +1072,8 @@ func update(dt: float, s: Dictionary) -> void:
 	torso.scale = Vector3(1.0 - tb * 0.006, 1.0 + tb * 0.012, 1.0 - tb * 0.006)
 	# aiming across terraces: the spine takes its share (not in `pitch`: the gun rides it), the arms the rest in _upper
 	var aim_w := maxf(maxf(aim_k, cast_k), 0.0 if km.is_empty() else 1.0)
-	aim_w *= 1.0 - maxf(maxf(maxf(dash_k, glide_k), maxf(dive_k, down_k)), maxf(maxf(ledge_k, roll_k), tuck))
+	var off_k := maxf(maxf(dash_k, glide_k), maxf(dive_k, 1.0 if s.get("downed", false) else 0.0))
+	aim_w *= 1.0 - maxf(off_k, maxf(maxf(ledge_k, roll_k), tuck))
 	aim_pitch = _ease(aim_pitch, float(s.get("aim_pitch", 0.0)) * aim_w, 10.0, dt)
 	model.set_meta(WardenAim.PITCH, aim_pitch)
 	torso.rotation = Vector3(pitch + dz + aim_pitch * AimPitch.SPINE, yaw, roll)
@@ -1505,6 +1506,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
+	else:
+		ap += aim_pitch * (1.0 - AimPitch.SPINE) * 0.91     # (a melee hold: the arms take their share on the aim node)
 	# the Warden's signature carry while standing (it comes up to the aim the moment they fire)
 	var carried := ws.carry(Transform3D(gbas, gpos))
 	gbas = carried.basis
