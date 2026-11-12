@@ -130,6 +130,9 @@ const STRIDE := {
 	"nettlynx": [0.54, 1.07],
 	"thrumbird": [1.50, 2.90],
 }
+## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
+## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
+const CONTACT := {"cindle": 0.333, "puddlet": 0.367, "burrlet": 0.367}
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
@@ -199,6 +202,8 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _shot_rate := 1.0          # the speed the shot plays at
+var _attacking := false
 var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
@@ -345,8 +350,10 @@ func _pick_clip(dt: float) -> void:
 	if p != _pulse:
 		_pulse = p
 		_start_shot("ability")
-	if String(root.get_meta("kstate", "")) == "attack":
-		_start_shot("attack")
+	var attacking := String(root.get_meta("kstate", "")) == "attack"
+	if attacking and not _attacking:
+		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
+	_attacking = attacking
 	_shot_left -= dt
 	var asleep := String(root.get_meta("kstate", "")) == "sleep"
 	if asleep != _asleep:
@@ -355,7 +362,7 @@ func _pick_clip(dt: float) -> void:
 			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
 	set_clip(want)
-	player.speed_scale = 1.0
+	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
@@ -363,9 +370,11 @@ func _pick_clip(dt: float) -> void:
 			* model.global_basis.z.length())
 	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
-func _start_shot(which: String) -> void:
+## Plays a one-off clip, at `rate` times its speed.
+func _start_shot(which: String, rate := 1.0) -> void:
 	_shot = which
-	_shot_left = player.get_animation(which).length
+	_shot_rate = rate
+	_shot_left = player.get_animation(which).length / rate
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
