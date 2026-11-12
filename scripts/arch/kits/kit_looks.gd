@@ -33,6 +33,7 @@ const ORB_RIM := [Color("2ee6c0"), Color("eafffa")]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
 const ORB_HELD_K := 0.5       # charge from which Motley's shot is the void orb, not the quick shard
 const ORB_SMOKE := Color(0.118, 0.078, 0.188, 0.8)   # the void orb's smoke tail (the UI's #1e1430)
+const DARK_RIM_POWER := 0.9    # the held black orbs (Snap wind-up, Nightwell): a broad lit rim (the glass default 2.2 is a thin line)
 const ORB_EDGE := Color("2ee6c0")    # the void orb's rim shell: Motley's sea teal (docs/VFX_QUALITY.md)
 const WELL_RIM := Color(0.18, 0.9, 0.75, 0.95)     # the Nightwell's lit rim (its inside fades to 0 at the centre)
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
@@ -129,7 +130,9 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
 		"dark":
-			Models.part(n, Models.sphere(0.22, 16), glass_mat(Color("02100d"), Color("b8fff0"), 1.0, 1.0), Vector3.ZERO)
+			var shell := glass_mat(Color("02100d"), ORB_EDGE, 1.0, 1.0)
+			shell.set_shader_parameter("power", DARK_RIM_POWER)
+			Models.part(n, Models.sphere(0.22, 16), shell, Vector3.ZERO)
 		"star":
 			_build_star(n)
 		"sigil":

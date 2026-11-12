@@ -254,7 +254,7 @@ func _orb_fired() -> void:
 ## His orb lands (a weapon shot, not an ability's): a teal flash and shards, a ring and smoke from half charge.
 ## The orb flies 0.41s (12.25m at 30m/s), under the 0.6s fire rate, so the one that hit is the last one fired.
 func _orb_hit(t: Ent) -> void:
-	vfx("orb_hit", t.pos, h.dir_to(t), {"k": last_orb_c, "hot": last_orb_c >= KitLooks.ORB_HELD_K})
+	vfx("orb_hit", t.pos, h.dir_to(t), {"k": last_orb_c, "r": last_orb_r, "hot": last_orb_c >= KitLooks.ORB_HELD_K})
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:

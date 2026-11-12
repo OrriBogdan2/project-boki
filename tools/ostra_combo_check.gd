@@ -112,6 +112,10 @@ func _ostra() -> void:
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
 	ok("lmb: the hit draws its impact on the foe (orb_hit)", int(HeroVfx.of(m).plays.get("orb_hit", 0)) == hits0 + 1)
+	var layers: Array = HeroVfx.data("ostra")["moves"]["orb_hit"]["fx"]
+	ok("lmb: the impact is sized by the orb's hit radius (%.2f m) and has two shard layers" % K.last_orb_r,
+		K.last_orb_r >= 0.28 and layers.filter(func(l): return l["p"] == "shard").size() >= 2
+		and layers.any(func(l): return l["p"] == "flare" and l["size"] == "r"))
 	reset.call()
 	step(m, 1.6)
 	ok(
@@ -687,6 +691,10 @@ func _zone_looks(m: Match) -> void:
 		HeroZones.SEED_A * (HeroZones.SEED_BODY + 0.1) <= CORE_A and sm.get_shader_parameter("rim") == OstraKit.SEA)
 	HeroZones.seed_pop(m, "zone_test")
 	var looks := KitLooks.of(m)
+	var held := (looks.hold_on("zone_dark", "dark", m, Vector3.ZERO, 1.0).get_child(0) as MeshInstance3D)
+	var hm := held.material_override as ShaderMaterial
+	ok("zones: the black orbs (Nightwell, Snap) have a broad lit sea-teal rim",
+		hm.get_shader_parameter("rim") == OstraKit.SEA and float(hm.get_shader_parameter("power")) < 1.5)
 	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 3.6)
 	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
 	ok("zones: the open well has no floor fill, a lit rim",
