@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips.",
- "master": "~/meshy/v95/Sparkle/r2/final/sparkle_final.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-12 (current.json prop1111/cand_A: body6/cand_B with the bust depth squeezed to the ref; the round-2 face). Earlier: Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips.",
+ "master": "~/meshy/v95/Sparkle/r2/prop1111/cand_A.glb",
  "game": "art/wardens/ryzz/ryzz.glb",
  "tris": 13000,
  "head": {

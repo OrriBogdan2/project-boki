@@ -1,5 +1,9 @@
 # Vex (gunslinger): import note
 
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+`~/meshy/v95/Vex/r2/prop1111/cand_A.glb` (CURRENT_OVERRIDES 11-12), the muzzles still on forearm.R (anchor_bones). Was appeal3 body b below. 13.1k tris, one 2048 atlas, 39 clips.
+Spec `art/wardens/src/vex_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
+
 ## v95 swap, appeal3 body b (2026-11-10, ext/vex-appeal-b): the current vex.glb
 
 The mesh is the v95 master in the owner's appeal3 look, body variant b (owner pick 11-10: fuller bust, waist 3% narrower,

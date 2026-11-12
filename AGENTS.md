@@ -34,6 +34,11 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **Report the cost.** Your final report lists lines added and removed (`git diff --stat`) and any new files, assets or settings, with why each one is needed.
 
 ## 4. Rules while coding
+- **Follow the official [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)** (our additions and the 120-character line are in docs/STYLE.md):
+  - Naming: `snake_case` for files, functions and variables; `PascalCase` for classes and nodes; `CONSTANT_CASE` for constants and enum members; a leading `_` for private or unused names.
+  - Code order: `class_name`/`extends`, the doc comment, signals, enums, constants, static vars, `@export` vars, other vars, `@onready` vars, then `_init`/`_ready`/other built-ins, public functions, private functions.
+  - Spacing: tabs, two blank lines between functions, one space around operators and after commas.
+  - Enforcement: `gdformat --line-length 120` and `gdlint` (`gdlintrc`) run in `tools/check.sh`. A branch formats every `.gd` it changes (`tools/check.sh --changed`). Old files get formatted in batches (`tools/README.md`), never in one sweep.
 - **One responsibility per file and per function.** Split rather than append. Aim for files under ~800 lines and functions under ~60.
 - **No duplicate systems or versions.** Don't add `foo_v2` next to `foo`. Migrate, delete the old one, and update the callers in the same change.
 - **Delete what you replace.** Remove dead code, old flags, unused content and compatibility shims when you supersede something. If removing something risks too much, file it in `docs/DEBT.md`.
@@ -56,6 +61,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
   - the system's doc in `docs/`
   - `docs/DEBT.md` if you knowingly left debt
 - Run `python3 tools/health.py --strict`. It must pass: god-file budgets and the style ratchet (`tools/style_lint.py`: no file may get worse; fix what you touch and lock it in with `--update`).
+- Run `tools/check.sh` (health + style + the lint ratchet: gdlint, gdformat, ruff, vulture, glTF validation of every `.glb`, Godot unused-code and shadowing warnings). Old debt is in `tools/lint_baseline.json` and may not grow; new files must be clean (`gdformat --line-length 120`, `ruff format`). After cleaning a file up, `tools/check.sh --update` lowers its count. `pre-commit install` runs it on staged files.
 - Report: what changed, which files, the checks run and their results, and any debt you left (with the `docs/DEBT.md` entry).
 
 ## 7. Review before merge
