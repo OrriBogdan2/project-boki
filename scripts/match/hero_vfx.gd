@@ -13,8 +13,13 @@ extends Node3D
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
-const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8, "sheen": 9}
+## The shader's `mode` ids, by name and in order (hero_vfx.gdshader's M_* repeat them, --hero-vfx-check compares).
+## Add a mode at the end here and as the same M_ line in the shader: one list, so no two branches take a number.
+enum Mode {SWEEP, SCORCH, SKIRT, FLARE, RIBBON, THREAD, BOLT, VORTEX, RING, SHEEN, CHAIN}
+## The surface looks a recipe layer names (a chain is no layer kind: a hold's chain draws on a mesh-trail node).
+const MODES := {"sweep": Mode.SWEEP, "scorch": Mode.SCORCH, "skirt": Mode.SKIRT, "flare": Mode.FLARE,
+	"ribbon": Mode.RIBBON, "thread": Mode.THREAD, "bolt": Mode.BOLT, "vortex": Mode.VORTEX, "ring": Mode.RING,
+	"sheen": Mode.SHEEN}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
@@ -38,7 +43,6 @@ const SHEEN_LIFE := 0.4        # s the armour tier-up sheen takes to sweep up th
 const SHEEN_SIZE := 2.2        # m square, facing the camera: the band climbs a body-shaped capsule inside it
 const SHEEN_LIFT := 0.95       # m above the feet the square is centred (a Hunter's mid-body)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
-const CHAIN_MODE := 10         # the shader's M_CHAIN: a hold's chain, drawn on a mesh-trail node
 const CHAIN_SEG := 0.12        # m between a chain's strip points (its sway bends smoothly)
 const CHAIN_WAVES := 2.0       # waves of sway along a slack chain
 const CHAIN_SWAY_HZ := 16.0    # rad/s the slack sway travels
@@ -670,7 +674,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		var kind := String(layer["p"])
 		if kind == "string" or kind == "chain":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
-				var mode: int = CHAIN_MODE if kind == "chain" else MODES["ribbon"]
+				var mode: int = Mode.CHAIN if kind == "chain" else MODES["ribbon"]
 				layers.append({"node": _strip_node(layer, h, mode), "layer": layer, "n": 0})
 			continue
 		var node: GPUParticles3D = _take(kind, _mote_node.bind(kind))
@@ -728,7 +732,7 @@ func _end_hold(e: Dictionary) -> void:
 			node.visible = false
 
 ## A strip drawn fresh each frame on a mesh trail node: a thin glowing line through named anchors (a bowstring),
-## or a chain (CHAIN_MODE).
+## or a chain (Mode.CHAIN).
 func _strip_node(layer: Dictionary, h: Hunter, mode: int) -> Node3D:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	_paint(mi.material_override, layer, h)

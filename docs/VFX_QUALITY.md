@@ -179,4 +179,7 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 7. Cinder: flame-coloured Ignite orb.
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
 9. Lace tap shots and Sparkle LMB: thicker trails.
-10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
+10. ~~Merge-time fixes~~ done on this line: `HeroVfx.Mode` is one enum (chain is 10, ring 8, no `dome` here), and
+    `--hero-vfx-check` asserts unique ids, shader `M_*` lines equal to them and no shader name declared twice. Still
+    open when `ext/vfx-bulwark` lands: it takes mode 8 for `dome` and adds a `shine` uniform; add `DOME` at the enum's
+    end (a new `M_DOME` number) and name the uniform `pane_shine`.

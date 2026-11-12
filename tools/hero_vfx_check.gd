@@ -46,6 +46,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	_ids()
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
 	var m: Match = flow._match(main, "juggernaut")
@@ -68,6 +69,32 @@ func run(main: Node) -> void:
 	await _scarf(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Mode ids and shader names: every HeroVfx.Mode has its own number and the shader's M_ line of the same number; the
+## shader declares no name twice (a merge that took a number or a uniform/function name twice fails here).
+func _ids() -> void:
+	var text := FileAccess.get_file_as_string("res://shaders/hero_vfx.gdshader")
+	var ids := {}
+	for name: String in HeroVfx.Mode:
+		ids[HeroVfx.Mode[name]] = true
+	ok(ids.size() == HeroVfx.Mode.size(), "no two HeroVfx modes share an id")
+	var consts := RegEx.create_from_string("(?m)^const int M_(\\w+)\\s*=\\s*(\\d+);")
+	var seen := {}
+	for r in consts.search_all(text):
+		seen[r.get_string(1)] = int(r.get_string(2))
+	ok(seen.size() == HeroVfx.Mode.size(), "the shader has one M_ line per mode (%d)" % seen.size())
+	for name: String in HeroVfx.Mode:
+		ok(seen.get(name, -1) == HeroVfx.Mode[name], "shader M_%s is mode %d" % [name, HeroVfx.Mode[name]])
+	var kinds := "const\\s+\\w+|uniform\\s+\\w+(?:\\s+\\w+)?|float|vec[234]|int|bool|void|varying\\s+\\w+"
+	var decls := RegEx.create_from_string("(?m)^(?:%s)\\s+(\\w+)\\s*[=(;:\\[]" % kinds)
+	var names := {}
+	var dup := []
+	for r in decls.search_all(text):
+		var n := r.get_string(1)
+		if names.has(n):
+			dup.append(n)
+		names[n] = true
+	ok(dup.is_empty(), "no shader name declared twice %s" % str(dup))
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
