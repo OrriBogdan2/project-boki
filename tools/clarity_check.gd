@@ -87,14 +87,14 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	ok(HudPlate.statuses(a).is_empty() and HudPlate.statuses(b).is_empty(), "nothing active: no CC row")
 	a.stun_t = 2.0
 	b.slow_t = 3.0
-	var sa := _icon(a, "concussion")
-	var sb := _icon(b, "snare")
+	var sa := _icon(a, "status_stunned")
+	var sb := _icon(b, "status_slowed")
 	var stun_ok: bool = sa.size() == 1 and absf(float(sa[0][3]) - 2.0) < 0.01 and sa[0][2] == "STUNNED"
 	var slow_ok: bool = sb.size() == 1 and absf(float(sb[0][3]) - 3.0) < 0.01 and sb[0][2] == "SLOWED"
 	ok(stun_ok, "stunned dummy: one STUNNED icon, 2.0 s left")
 	ok(slow_ok, "slowed dummy: one SLOWED icon, 3.0 s left")
 	_run(m, 1.0)
-	var left := float(_icon(a, "concussion")[0][3])
+	var left := float(_icon(a, "status_stunned")[0][3])
 	ok(left > 0.9 and left < 1.1, "the stun timer shrinks (%.2f s left after 1 s)" % left)
 	a.root_t = 1.5
 	KitStatus.apply(a, "gnd", 4.0, 0.0, false, "check")
@@ -102,10 +102,11 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	KitStatus.apply(b, "rat", 2.5, 0.0, false)
 	b.remote = false
 	var kinds: Array = HudPlate.statuses(a).map(func(x): return x[0])
-	ok(kinds == ["concussion", "binding", "bolas"], "stun, root and Ground each get an icon, in order (%s)" % [kinds])
-	var g := float(_icon(a, "bolas")[0][3])
+	var in_order := kinds == ["status_stunned", "status_rooted", "status_grounded"]
+	ok(in_order, "stun, root and Ground each get an icon, in order (%s)" % [kinds])
+	var g := float(_icon(a, "status_grounded")[0][3])
 	ok(g > 3.9 and g <= 4.0, "Ground shows its time left (%.2f s)" % g)
-	var daze := _icon(b, "burst")
+	var daze := _icon(b, "status_dazed")
 	var daze_ok: bool = daze.size() == 1 and float(daze[0][3]) > 2.4 and HudPlate.statuses(b).size() == 2
 	ok(daze_ok, "a remote body's Daze and Slow: two icons, Daze 2.5 s left")
 	a.stun_t = 0.0
@@ -119,7 +120,7 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		mob = m.spawn_mob("skitter", a.pos + Vector3(4, 0, 0))
 	if mob:   # the monster plate draws the same row (hud._status_row)
 		mob.stun_t = 1.2
-		var ms := _icon(mob, "concussion")
+		var ms := _icon(mob, "status_stunned")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
 

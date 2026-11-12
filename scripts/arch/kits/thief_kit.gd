@@ -134,7 +134,8 @@ func combo_read(t: Ent) -> Dictionary:
 	var n := marks_on(t)
 	if n <= 0:
 		return {}
-	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
+	var left := float((t.get_meta("marks") as Dictionary)[h.nid][1])
+	return {"icon": "mark_thief", "n": n, "max": pip_count(), "left": left,
 			"total": float(res_def()["dur"])}
 
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.

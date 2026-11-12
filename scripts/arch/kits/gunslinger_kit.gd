@@ -186,7 +186,7 @@ func combo_read(t: Ent) -> Dictionary:
 	if not KitStatus.rattled(t):
 		return {}
 	var bd := rmb_def()["burr"] as Dictionary
-	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
+	return {"icon": "mark_daze", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
 			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
 ## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.

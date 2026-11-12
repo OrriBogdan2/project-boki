@@ -100,16 +100,17 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", e.stun_t])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", e.root_t])
-	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
-	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", e.slow_t])
-	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
+	if e.stun_t > 0.0: out.append(["status_stunned", Color("fff27a"), "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["status_rooted", Color("8fe0a0"), "ROOTED", e.root_t])
+	if KitStatus.grounded(e):
+		out.append(["status_grounded", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.rattled(e): out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
+	if e.slow_t > 0.0: out.append(["status_slowed", Color("9ae8ff"), "SLOWED", e.slow_t])
+	if e.burn_t > 0.0: out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
-	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
-	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])
-	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
+	if hunter and hunter.weak_t > 0.0: out.append(["status_weakened", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.shield > 0.0: out.append(["status_shielded", Color("d8ecff"), "", -1.0])
+	if e.guard_t > 0.0: out.append(["status_guarded", Color("f2e6cf"), "", -1.0])
 	return out
 
 ## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with

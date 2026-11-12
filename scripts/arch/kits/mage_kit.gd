@@ -164,7 +164,7 @@ func combo_read(f: Ent) -> Dictionary:
 	var s = sparks.get(f.get_instance_id())
 	if s == null:
 		return {}
-	return {"icon": "shock", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
+	return {"icon": "mark_static", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
 			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
 
 func clear_sparks(f: Ent) -> void:
