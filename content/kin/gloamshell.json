@@ -1,0 +1,19 @@
+{
+	"id": "gloamshell",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/gloamshell.json.",
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#494533",
+		"belly": "#c7c8a8",
+		"glow": "#dfff6a"
+	},
+	"work": {
+		"forage": 3,
+		"craft": 2,
+		"haul": 1
+	}
+}

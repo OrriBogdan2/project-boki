@@ -16,3 +16,5 @@ const NAMES := [
 	"os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap", "os_seed",
 	"os_pop", "os_empower", "br_spine", "br_rumble", "br_crumble", "os_well", "os_well_hum",
 ]
+## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs).
+const MIN_GAP := {}

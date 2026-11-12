@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	var ev := InputEventAction.new(); ev.action = "hero"; ev.pressed = true
 	hm._unhandled_input(ev)
 	await tree.process_frame
-	ok(hm.panel_open == "Masks", "J opens the Masks screen on the farm")
+	ok(hm.panel_open == "Relics", "J opens the Relics screen on the farm")
 	var grid: GridContainer = hm.get_meta("hero_grid")
 	var cards: Array = grid.get_children()
 	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))
@@ -53,7 +53,7 @@ func run(main: Node) -> void:
 	var old_model: Node3D = hm.player
 	HomeHero.pick(hm, "archer")
 	await tree.process_frame
-	ok(String(Save.d["cls"]) == "light" and Arch.of_save() == "archer" and String(Save.d["weapon"]) == Arch.signature("archer"), "picking Lisette saves it as your expedition pick (cls %s, arch %s, weapon %s)" % [Save.d["cls"], Arch.of_save(), Save.d["weapon"]])
+	ok(String(Save.d["cls"]) == "light" and Arch.of_save() == "archer" and String(Save.d["weapon"]) == Arch.signature("archer"), "picking Lace saves it as your expedition pick (cls %s, arch %s, weapon %s)" % [Save.d["cls"], Arch.of_save(), Save.d["weapon"]])
 	ok(hm.player != old_model and is_instance_valid(hm.player) and hm.panel_open == "", "and the farm hunter turns into it in place")
 	hm._open_expedition()
 	await tree.process_frame

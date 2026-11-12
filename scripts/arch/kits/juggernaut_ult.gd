@@ -4,9 +4,12 @@ extends RefCounted
 ## Retaliation, briefs/hero-ref/juggernaut.md "Ultimate (on X)"). Press: he plants in a guard for 0.65s,
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
-## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals, and knocking a
-## hunter with it makes it ready again at once. Landing it on a rival hunter fills the bond meter
-## (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). Owned by JuggernautKit.
+## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals. Taking a hunter
+## down with it (the source's "killing a living enemy": our lethal hit is a knock; a hunter already down takes
+## nothing from it, and a monster or a wisp doesn't count) makes it ready again at once. Landing it on a
+## rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain
+## still held pulls him through it: E in the guard or the cleave hauls him along the chain, the guard up, and
+## the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
 const LANE_COL := Color("ffb820")      # the strip ahead: his gold
@@ -49,8 +52,16 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.vfx("guard_tell")
+
+## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
+## takes it as the cleave lands.
+func pull_through() -> void:
+	if guarding():
+		k.warchain.pull()
+		k.play("jug_guard")
+	else:
+		st["pull_next"] = true
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
@@ -86,13 +97,21 @@ func _tick_guard(d: Dictionary) -> void:
 	if h.vel.y > 0.0:
 		h.vel.y = 0.0          # no jumping off the guard (it lands straight back)
 	var aim := h.aim_dir()
+	var chain := k.warchain
+	if chain.pulling():
+		aim = chain.to_anchor()      # hauled in: the strip looks down the chain
 	if aim.length() > 0.1:
 		st["dir"] = aim.normalized()
 	var gk := clampf(float(st["t"]) / float(d["guard"]), 0.0, 1.0)
 	AimKit.lane(h, "ult", {"dir": st["dir"], "len": float(d["len"]), "width": float(d["width"]), "fill": gk,
 			"col": LANE_COL, "col2": GOLD, "all": true, "alpha": 1.3})
 	HeroVfx.of(k.m).hold(h, "guard", gk)
-	if float(st["t"]) >= float(d["guard"]):
+	# a hooked foe coming up in the pull is struck in reach, however long the guard has run; the guard holds until
+	# then, so the cleave doesn't go off in the air short of them
+	var hauled: bool = chain.pulling() and chain.target != null
+	if hauled and chain.to_anchor().length() <= float(d["len"]) * 0.8:
+		_strike(d)
+	elif not hauled and float(st["t"]) >= float(d["guard"]):
 		_strike(d)
 
 ## The guard ends: he lunges along the strip and the blade comes up through it.
@@ -105,17 +124,20 @@ func _strike(d: Dictionary) -> void:
 	_show_glow(false)
 	AimKit.hide(h, "ult")
 	k.play("jug_riposte")
-	k.travel(float(d["lunge"]), float(d["strike_t"]), {"invuln": 0.0, "trail": "dust", "dir": dir})
+	if not k.warchain.pulling():         # (the pull is his lunge)
+		k.travel(float(d["lunge"]), float(d["strike_t"]), {"invuln": 0.0, "trail": "dust", "dir": dir})
 	k.vfx("riposte_go", h.pos, dir, {"len": float(d["lunge"])})
 
 ## The cleave lands: everyone in the strip (from where the guard stood) is hit once.
 func _land(d: Dictionary) -> void:
 	var h := k.h
 	var dir: Vector2 = st["dir"]
-	var from: Vector3 = st["from"]
+	var pulled: bool = k.warchain.pulling()
+	var from: Vector3 = h.pos if pulled else st["from"]
 	st["phase"] = "recover"
 	st["t"] = 0.0
-	h.roll_t = 0.0
+	if not pulled:
+		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
 	var dmg := float(d["dmg"]) * (1.0 + float(d["block_k"]) * float(blocks)) * k.power("x")
 	k.vfx("riposte_land", from, dir, {"len": float(d["len"]), "w": float(d["width"])})
@@ -131,9 +153,8 @@ func _land(d: Dictionary) -> void:
 			continue
 		last_dealt += dealt
 		_impact(f, dir, dealt)
-		if f is Hunter and ((f as Hunter).downed or f.hp <= 0.0):
+		if HeroUlt.landed(k, f) in ["knock", "kill"]:
 			_reset()
-		HeroUlt.landed(k, f)
 	if last_dealt > 0.0:
 		strikes += 1
 		var hp0 := h.hp
@@ -141,6 +162,8 @@ func _land(d: Dictionary) -> void:
 		last_healed = h.hp - hp0
 		if last_healed >= 1.0:
 			k.vfx("riposte_heal")
+	if st.get("pull_next", false) and k.warchain.hooked():
+		k.warchain.pull()
 
 ## On someone hit: the gold impact cloud, the hit-stop and a heavy shake.
 func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
@@ -149,11 +172,10 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
 	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
-## A hunter knocked by the cleave: it is ready again at once.
+## A hunter who was up and went down to the cleave: it is ready again at once.
 func _reset() -> void:
 	resets += 1
-	k.cd["x"] = 0.0
-	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
+	HeroUlt.reset(k)
 	k.vfx("riposte_reset")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
@@ -171,7 +193,6 @@ func block(by: Ent, o: Dictionary) -> bool:
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
 		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
 				{"pitch": 0.08 * float(st["blocks"])})
-		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).

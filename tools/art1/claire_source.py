@@ -1,7 +1,8 @@
-"""ART-1 Claire, stage A: the Meshy scan of the owner's A-pose turnaround (horns, ears, wings, tail, bow and blades edited out, the neckline closed) ->
-the contract's rest pose. Recipe: kael_source.py (soft weights by distance to the bones, then each bone moves its vertices onto the rig).
-Her own: the head and hood are the scan's sculpt, kept on the head bone with the density on the face; the capelet hangs off the torso, not the arms;
-the skirt is lengthened to mid-thigh over the stocking tops and hangs from the pelvis, its hem following the thighs a little; the boots stand on the blades.
+"""ART-1 Claire (v2, the owner's snow-bunny redesign: briefs/art-refs/claire_v2/nivi_v2_turnaround.jpg): stage A, the Meshy scan of the sheet
+(ears, braid, scarf ends, tail and blades edited out, the sheer skirt made opaque frost) -> the contract's rest pose.
+Recipe: kael_source.py (soft weights by distance to the bones, then each bone moves its vertices onto the rig).
+Her own: the head and hair are the scan's sculpt, kept on the head bone with the density on the face; the shoulder ruffs ride the arms a little;
+the skirt hangs from the pelvis, its hem following the thighs a little; the skates stand on the blades.
 Run: blender -b --factory-startup --python tools/art1/claire_source.py -- <scan.glb> <rig.json> <out.blend>"""
 import sys, os, json
 import bpy, bmesh
@@ -17,10 +18,10 @@ LOW_TRIS = 11850
 SOLE = -0.95                    # the scan's sole (z)
 K_ = 0.92                       # scan metres -> rig metres, where a bone's length doesn't set it
 SOLE_Z, ANKLE = 0.052, 0.19     # the rig: the boot's sole on the blade, the foot bone
-S_J = {"neck": (0, 0, 1.50), "pelvis": (0, 0, 0.90), "shoulder.R": (0.125, 0, 1.38), "elbow.R": (0.244, 0, 1.206), "wrist.R": (0.364, 0, 1.056),
-       "shoulder.L": (-0.125, 0, 1.38), "elbow.L": (-0.244, 0, 1.206), "wrist.L": (-0.364, 0, 1.056), "hip.R": (0.10, 0, 0.86), "knee.R": (0.09, 0, 0.51),
+S_J = {"neck": (0, 0, 1.50), "pelvis": (0, 0, 0.90), "shoulder.R": (0.135, 0, 1.39), "elbow.R": (0.27, 0, 1.22), "wrist.R": (0.385, 0, 1.04),
+       "shoulder.L": (-0.135, 0, 1.39), "elbow.L": (-0.27, 0, 1.22), "wrist.L": (-0.385, 0, 1.04), "hip.R": (0.10, 0, 0.86), "knee.R": (0.09, 0, 0.51),
        "ankle.R": (0.085, 0, 0.15), "sole.R": (0.085, 0, 0.0), "hip.L": (-0.10, 0, 0.86), "knee.L": (-0.09, 0, 0.51), "ankle.L": (-0.085, 0, 0.15),
-       "sole.L": (-0.085, 0, 0.0), "crown": (0, 0, 1.92)}
+       "sole.L": (-0.085, 0, 0.0), "crown": (0, 0, 1.86)}
 rig = json.load(open(RIG))["bones"]
 
 
@@ -30,7 +31,7 @@ def r_j(b):
 
 
 T = {"pelvis": r_j("hips"), "neck": r_j("head")}
-T["crown"] = T["neck"] + np.array([0, 0, (1.92 - 1.50) * K_])
+T["crown"] = T["neck"] + np.array([0, 0, (S_J["crown"][2] - 1.50) * K_])
 for sd in "RL":
     T["shoulder." + sd], T["elbow." + sd], T["wrist." + sd] = r_j("upper_arm." + sd), r_j("forearm." + sd), r_j("hand." + sd)
     T["hip." + sd], T["knee." + sd] = r_j("thigh." + sd), r_j("shin." + sd)
@@ -62,26 +63,15 @@ src.matrix_world = Matrix.Identity(4)
 P = np.stack([-co[:, 0], -co[:, 1], co[:, 2] - SOLE], 1)        # to +Y facing, sole on 0
 print("scan", n, P.min(0).round(3), P.max(0).round(3))
 
-# ---- a grown woman's face: a little longer below the eyes, a slimmer jaw (the sheet's face is a touch round for her)
-EYE_Z = 1.69
-fm = (P[:, 2] > 1.5) & (P[:, 2] < EYE_Z) & (P[:, 1] > 0.0) & (np.abs(P[:, 0]) < 0.115)
-fk = smooth(0.115, 0.085, np.abs(P[:, 0])) * smooth(0.0, 0.05, P[:, 1]) * fm
-low = smooth(EYE_Z, 1.60, P[:, 2]) * fk
-P[:, 2] -= low * (EYE_Z - P[:, 2]) * 0.09
-P[:, 0] *= 1 - 0.06 * low
-
-# ---- the skirt: everything round the thighs that isn't the thigh, down to the hem; lengthened over the stocking tops to mid-thigh
+# ---- the skirt: everything round the thighs that isn't the thigh, down to the hem (the scan's own length, the sheet's)
 rt = np.minimum(np.hypot(P[:, 0] - 0.097, P[:, 1]), np.hypot(P[:, 0] + 0.097, P[:, 1]))
 sk = smooth(0.082, 0.102, rt) * smooth(0.76, 0.80, P[:, 2]) * smooth(1.16, 1.12, P[:, 2]) * (np.abs(P[:, 0]) < 0.36)
 for s_ in (1.0, -1.0):
-    e_, w_ = np.array([s_ * 0.244, 0, 1.206]), np.array([s_ * 0.40, 0, 1.02])
+    e_, w_ = np.array([s_ * 0.27, 0, 1.22]), np.array([s_ * 0.42, 0, 0.98])
     u_ = w_ - e_
     h_ = np.clip(((P - e_) @ u_) / (u_ @ u_), 0, 1)
     sk *= 1 - smooth(0.115, 0.095, np.linalg.norm(P - (e_ + h_[:, None] * u_), axis=1)) * ((P[:, 2] > 0.985) | (np.abs(P[:, 0]) > 0.345))      # (the cuff and glove, not the hem beside them)
-ZT = 1.10
-stretch = sk * smooth(ZT, ZT - 0.08, P[:, 2])
 Z0 = P[:, 2].copy()
-P[:, 2] = ZT - (ZT - P[:, 2]) * (1 + 0.34 * stretch)
 print("hem z", round(float(P[sk > 0.5, 2].min()), 3))
 
 # ---- soft weights by distance to the segments
@@ -116,7 +106,7 @@ for i, (nm, j0, j1, rad, _) in enumerate(SEG):
         D[z < 0.85, i] = 9.0
         D[sk > 0.5, i] = 9.0
         if nm.startswith("upper"):
-            D[(z > 1.3) & (d > 0.06), i] = 9.0         # the capelet stays on the torso
+            D[(z > 1.3) & (d > 0.06), i] = 9.0         # the scarf stays on the torso
 W = np.exp(-(D - D.min(1, keepdims=True)) / 0.014)
 W /= W.sum(1, keepdims=True)
 
@@ -175,7 +165,7 @@ for sd, sg in (("R", 1.0), ("L", -1.0)):
     hand = smooth(1.04, 1.1, h) * GROUP["forearm." + sd]
     GROUP["hand." + sd] = hand
     GROUP["forearm." + sd] = GROUP["forearm." + sd] - hand
-    # the capelet's edge lifts a little with the arm
+    # the shoulder ruff lifts a little with the arm
     cape = 0.32 * smooth(0.13, 0.25, sg * x) * smooth(1.26, 1.32, Z0) * smooth(1.52, 1.44, Z0) * GROUP["hips"]
     GROUP["hips"] = GROUP["hips"] - cape
     GROUP["upper_arm." + sd] = GROUP["upper_arm." + sd] + cape
@@ -193,7 +183,6 @@ for b, w in GROUP.items():
     ids = np.nonzero(w > 0.01)[0]
     for vi, wv in zip(ids.tolist(), w[ids].tolist()):
         g.add([vi], wv, "REPLACE")
-# (what the paint needs later: which scan vertices were the bare thigh above the stocking tops)
 src["sole_z"] = SOLE_Z
 src.name = "Src"
 low = src.copy()
@@ -267,7 +256,7 @@ def decimate(pick, target):
 
 
 def is_face(c):
-    return (np.abs(c[:, 0]) < 0.092) & (c[:, 1] > 0.035) & (c[:, 2] > HN[2] + 0.085) & (c[:, 2] < HN[2] + 0.31)
+    return (np.abs(c[:, 0]) < 0.1) & (c[:, 1] > 0.035) & (c[:, 2] > HN[2] + 0.085) & (c[:, 2] < HN[2] + 0.31)
 
 
 decimate(is_face, FACE_TRIS)

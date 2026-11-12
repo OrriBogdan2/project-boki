@@ -1,6 +1,6 @@
 class_name HeroArmsVV
 extends RefCounted
-## The signature weapons of Ryzz (Coilcaster: no gun, a copper wrist coil and a pointed, lit finger)
+## The signature weapons of Sparkle (Coilcaster: no gun, a copper wrist coil and a pointed, lit finger)
 ## and Vex (Quill Rifle: a long-shrouded auto rifle with a drum), built on the gun node (HeroArms
 ## asks first). The barrel runs along -Z, the hand holds near the origin.
 

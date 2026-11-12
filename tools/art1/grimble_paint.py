@@ -9,7 +9,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
 import grimble_sculpt as G
-from hem_sdf import fbm, smooth, vnoise, worley
+from hem_sdf import fbm, smooth, worley
 
 F = np.float32
 
@@ -65,105 +65,7 @@ def ramp(n, sh, base, hi, cav=None, gain=0.55, a=0.16, b=0.52, c=0.64, d=0.97, t
     return o
 
 
-def seg_d(p, a, b):
-    a, b = np.array(a, F), np.array(b, F)
-    ab = b - a
-    t = np.clip(((p - a) @ ab) / float(ab @ ab), 0, 1)
-    return np.linalg.norm(p - (a + ab * t[:, None]), axis=1), t * float(np.linalg.norm(ab))
-
-
-def stitch(c, p, pts, w=0.0032, per=0.021, tick=0.0115):
-    """A dark scar along a polyline, with short cross stitches: reads at the viewer camera, gone (quietly) at match zoom."""
-    best = np.full(len(p), 9.0, F)
-    along = np.zeros(len(p), F)
-    run = 0.0
-    for a, b in zip(pts[:-1], pts[1:]):
-        d, s = seg_d(p, a, b)
-        m = d < best
-        best[m] = d[m]
-        along[m] = s[m] + run
-        run += float(np.linalg.norm(np.array(b, F) - np.array(a, F)))
-    near = best < tick * 1.4
-    line = smooth(w, w * 0.45, best)
-    t = np.abs(((along / per) % 1.0) - 0.5) * per
-    ticks = smooth(0.0028, 0.0014, t) * smooth(tick, tick * 0.75, best)
-    a = np.maximum(line, ticks) * near
-    return mix(c, C["stitch"], a * 0.92)
-
-
 # scars on the body and limbs, model space, read off the turnaround
-SCARS = [
-    [(-0.150, 0.100, 1.085), (-0.060, 0.128, 1.020), (0.05, 0.113, 0.940), (0.135, 0.070, 0.880)],      # (mostly under the strap)
-    [(0.238, 0.040, 1.170), (0.170, 0.095, 1.120), (0.11, 0.125, 1.105)],
-    [(-0.275, 0.042, 0.945), (-0.240, 0.040, 0.905), (-0.300, 0.028, 0.885)],
-    [(0.105, 0.052, 0.560), (0.163, 0.074, 0.548), (0.225, 0.042, 0.555)],
-    [(-0.105, 0.052, 0.500), (-0.163, 0.072, 0.490), (-0.225, 0.040, 0.495)],
-    [(0.118, 0.018, 0.255), (0.163, 0.040, 0.245), (0.205, 0.015, 0.25)],
-    [(0.060, -0.205, 1.215), (0.150, -0.160, 1.235)],
-]
-
-
-def skin(p, n, lab, f):
-    cav = cavity(f, p, n, 0.010)
-    oc = ao(f, p, n, 0.045)
-    c = ramp(n, C["skin_sh"], C["skin"], C["skin_hi"], cav, 0.62)
-    # stone mottling, broad, and a warm flush low on the limbs and in the creases, the art's
-    mot = fbm(p[:, 0], p[:, 1], p[:, 2], 6.0, 3)
-    c = c * (0.93 + 0.14 * mot)[:, None]
-    c = mix(c, C["skin_warm"], smooth(0.2, 0.8, cav) * 0.30)
-    c = c * (1 - 0.34 * smooth(0.25, 1.0, oc))[:, None]
-    for s in SCARS:
-        c = stitch(c, p, s)
-    return np.clip(c, 0, 1)
-
-
-def head(p, n, lab, f):
-    c = skin(p, n, lab, f)
-    h = p - G.HEAD_C
-    # the forehead seam, a short cross seam, a crack down his left cheek
-    c = stitch(c, p, [tuple(G.HEAD_C + (-0.006, 0.070, 0.095)), tuple(G.HEAD_C + (0.004, 0.012, 0.117)), tuple(G.HEAD_C + (0.0, -0.06, 0.112))], 0.0024, 0.0145, 0.0078)
-    c = stitch(c, p, [tuple(G.HEAD_C + (-0.052, 0.074, 0.083)), tuple(G.HEAD_C + (-0.018, 0.09, 0.094)), tuple(G.HEAD_C + (0.010, 0.082, 0.098))], 0.0022, 0.0145, 0.0065)
-    c = stitch(c, p, [(-0.075, 0.10, 1.262), (0.0, 0.03, 1.24)], 0.0, 0.016, 0.0)
-    # the other socket, stitched shut: one dark seam, heavy cross stitches
-    c = stitch(c, p, [tuple(G.HEAD_C + (-0.074, 0.070, 0.016)), tuple(G.HEAD_C + (-0.052, 0.092, 0.010)), tuple(G.HEAD_C + (-0.030, 0.100, 0.014))], 0.0030, 0.0120, 0.0115)
-    # the socket's shade, so the monocle sits in a pit
-    d = np.linalg.norm(p - G.EYE_C, axis=1)
-    c = c * (1 - 0.5 * smooth(0.062, 0.042, d))[:, None]
-    # dark under the lips
-    m = lab == G.MOUTH
-    k = np.clip((h[:, 1] - 0.03) / 0.08, 0, 1)
-    c[m] = mix(C["throat"], C["gum"], smooth(0.35, 1.0, k[m]))
-    m = lab == G.LIP
-    c[m] = ramp(n[m], C["throat"], C["lip"], rgb("a85058"))
-    m = lab == G.DARK
-    c[m] = C["dark"]
-    return c
-
-
-def tooth(p, n, lab, f):
-    k = form(n)
-    c = mix(C["tooth_sh"], C["tooth"], smooth(0.18, 0.55, k))
-    h = p - G.HEAD_C
-    # yellowed and dirty toward the gum
-    g = np.abs(h[:, 2] - G.grin_z(h[:, 0])) / np.maximum(G.grin_h(h[:, 0]), 1e-4)
-    return mix(c, rgb("8a6a3a"), smooth(0.55, 1.05, g) * 0.75)
-
-
-def eye(p, n):
-    """The one eye: green glass depth, a dark rim, a thin cat's slit, a hot crescent of light."""
-    d = p - G.EYE_C
-    ax = np.array(G.MONO_AX, F)
-    u = np.cross((0, 0, 1), ax)
-    u /= np.linalg.norm(u)
-    v = np.cross(ax, u)
-    x, y = d @ u, d @ v
-    r = np.sqrt(x * x + y * y)
-    c = mix(rgb("6fe88a"), rgb("14b858"), smooth(0.004, 0.018, r))
-    c = mix(c, rgb("076a36"), smooth(0.018, 0.032, r))
-    c = mix(c, rgb("053a22"), smooth(0.030, 0.036, r))
-    c = mix(c, rgb("05070a"), smooth(0.0044, 0.0028, np.abs(x)) * smooth(0.0225, 0.0185, np.abs(y)))
-    c = mix(c, rgb("f4fff0"), smooth(0.0085, 0.0045, np.sqrt((x - 0.011) ** 2 + (y - 0.014) ** 2)))
-    return c
 
 
 def _iron(p, n, f, lab, rust=0.28):
@@ -289,11 +191,54 @@ def gear(p, n, lab, f):
     return c
 
 
-def loincloth(p, n, lab, f):
-    c = gear(p, n, lab, f)
-    # grimy toward the torn hem
-    return mix(c, C["loin_sh"], smooth(0.56, 0.44, p[:, 2]) * 0.55)
-
-
 def flat(p, n, key):
     return ramp(n, C[key + "_sh"], C[key], C[key + "_hi"])
+
+
+# ------------------------------------------------------------------ v2's scan paint, fixed where it blurs (canon: grimble_v2/index.md)
+VEIN_KEY = rgb("a648f0")     # the corruption veins' painted colour: warden_look's paint_glow keys on it
+SQUINT_R = (0.030, 0.020)    # (m) the smug squint's lid, half width and half height round his left eye
+MOUTH_TOP = 1.205            # (m) the grin's top on the fitted head (above it: cheeks, pale like the teeth)
+
+
+def scan_face(p, c):
+    """His left eye a smug squint (a heavy lid over its top), the scan's blurred teeth silver scrap metal, the yellow one gold,
+    the gums a deep purple. p: texel positions on the fitted body, c: the scan's paint there (both n x 3)."""
+    lum = c @ np.array((0.3, 0.59, 0.11), F)
+    face = face_mask(p)
+    white = face & (lum > 0.62) & (p[:, 0] < -0.02) & (p[:, 2] > G.EYE_C[2] - 0.04)
+    if white.any():
+        e = p[white].mean(0)
+        d = ((p[:, 0] - e[0]) / SQUINT_R[0]) ** 2 + ((p[:, 2] - e[2]) / SQUINT_R[1]) ** 2
+        lid_z = e[2] + 0.004
+        pupil = white & ((p[:, 0] - e[0] - 0.004) ** 2 + (p[:, 2] - e[2] + 0.001) ** 2 < 0.0065 ** 2)
+        c[pupil] = C["throat"]
+        lid = face & (d < 1.0) & (p[:, 2] > lid_z)
+        c[lid] = mix(C["skin_sh"], C["skin"], smooth(lid_z, e[2] + SQUINT_R[1], p[lid, 2]))
+        c[face & (d < 1.1) & (np.abs(p[:, 2] - lid_z) < 0.002)] = C["skin_sh"] * 0.6
+    mouth = face & (p[:, 2] < MOUTH_TOP) & (np.abs(p[:, 0]) < 0.12)
+    r, g, b = c[:, 0], c[:, 1], c[:, 2]
+    gold = mouth & (r - b > 0.14) & (g - b > 0.08)
+    tooth = mouth & (lum > 0.45) & ~gold
+    gum = mouth & (b - g > 0.06) & (lum < 0.45)
+    c[tooth] = mix(C["iron"], C["iron_hi"] * 1.15, smooth(0.45, 0.75, lum[tooth]))
+    c[gold] = mix(C["gold_sh"], C["gold_hi"], smooth(0.35, 0.75, lum[gold]))
+    c[gum] = mix(c[gum], rgb("6a2a6e"), 0.6)
+    return c
+
+
+def face_mask(p):
+    return (p[:, 1] > G.HEAD_C[1] + 0.06) & (p[:, 2] > G.HEAD_C[2] - 0.12)
+
+
+def vein_key(img, mask, r=6):
+    """The purple veins on his skin, found by contrast (more purple than the skin round them, so the purple arm's own colour
+    stays) and painted VEIN_KEY, which glows."""
+    pur = (img[..., 0] - img[..., 1]) + (img[..., 2] - img[..., 1])
+    m = mask.astype(F)
+    k = np.ones(2 * r + 1, F)
+    blur = lambda a: np.apply_along_axis(lambda v: np.convolve(v, k, "same"), 0, np.apply_along_axis(lambda v: np.convolve(v, k, "same"), 1, a))
+    local = blur(pur * m) / np.maximum(blur(m), 1)
+    vein = mask & (pur > 0.2) & (pur - local > 0.05)
+    img[vein] = mix(img[vein], VEIN_KEY, 0.85)
+    return int(vein.sum())

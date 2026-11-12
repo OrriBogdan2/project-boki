@@ -6,7 +6,8 @@ extends RefCounted
 const PATH := "res://art/kin/%s/%s_fusion.glb"
 const HIP_Y := 0.54        # m: the torso height the parts are modelled for; 3D Hunters carry theirs higher
 ## A kit form's id, or a fallback form's type -> the species whose parts it wears.
-const SPECIES := {"venom": "cindle", "tidal_shell": "puddlet", "spore": "burrlet"}
+const SPECIES := {"venom": "cindle", "tidal_shell": "puddlet", "spore": "burrlet", "stormwing": "zephyrak",
+	"lunar": "wisplet"}
 
 ## The form key of a species, for tools ("" when it has no Fusion parts).
 static func key_of(kin_id: String) -> String:

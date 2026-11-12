@@ -13,7 +13,7 @@ It follows the archetype model in `docs/ARCHETYPES.md`:
 - the **weight class** (light, medium, heavy) sets dash **charges, recharge, air dash and mass**;
 - the **archetype** (Thief, Archer, Mage, Gunslinger, Juggernaut, Bulwark) sets the dash's **shape
   and input**;
-- the **kin** adds its `dodge_rider` (KIN_GRAMMAR.md) on top.
+- the **kin** adds nothing: dodge riders are retired (§3.4).
 
 Until archetypes ship, the three current class dashes stay as they are. Phase Step grows into the
 Thief's Flicker, Combat Roll into the Gunslinger's Slide Reload, and Shoulder Charge into the
@@ -295,7 +295,9 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 
-### 3.4 How kin riders hook into each shape
+### 3.4 How kin riders hook into each shape (RETIRED)
+
+> **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
 General rules, so any rider, including a community one, maps onto any shape:
 
@@ -310,7 +312,9 @@ General rules, so any rider, including a community one, maps onto any shape:
 Riders are priced in Phase 3 like any other part. A rider can't change a dash's input, charges or
 protection. Those belong to the archetype and weight class.
 
-### 3.5 Every archetype + kin dash
+### 3.5 Every archetype + kin dash (RETIRED)
+
+> **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
 Riders today (content/kin_v2):
 
@@ -421,7 +425,7 @@ making displacement fair.
 
 | Ability | Tell | Cast / Impact | Sound | Cat | HS | Shake | Cohesion and part changes |
 |---|---|---|---|---|---|---|---|
-| **Moon Swap** (projectile 9m, swap with owner, stun 0.4) | 0.15s wing flare and silver glint; the moon disc has a long tail | on hit, a **0.12s silver thread** joins the two bodies, both flash, then swap. The victim's screen gets a direction flash showing where they went | tell: chime; body: hum; impact: control hard hit + a reverse-whoosh swap | control | T3 both | 0.35 victim, 0.2 owner | swap counts as hard CC (5.3). Slow the disc from 30 to 22 m/s (0.41s at 9m) so it's dodgeable at range |
+| **Moon Mark** (projectile 9m, stun 0.4, reveal + vulnerable 15% for 4s; replaced Moon Swap, which moved the owner) | 0.15s wing flare and silver glint; the moon disc has a long tail | on hit, the foe flashes silver and keeps a soft silver rim for the 4s mark | tell: chime; body: hum; impact: control hit + a soft bell on the mark | control | T3 both | 0.35 victim | Slow the disc from 30 to 22 m/s (0.41s at 9m) so it's dodgeable at range |
 | **Moonlift** (auto, lift owner 14) | 0.2s column-of-light tell under you | the owner rises in a moonbeam | rising chime | utility | T0 | 0.1 owner | — |
 | **Moon Blink** (dodge rider) | — | blinks with a silver streak (the streak rule) | sweetener | utility | T0 | 0 | — |
 | **Eclipse** (merge) | 0.35s darkening of a 5.5m ring around you (enemies see the ring tighten) | on_start burst 4m: damage 12, lift 9; pulses every 0.6s: pull 7 in 5.5m | a low eclipse drone; each pulse is a soft "thrum" | control | T3 start; T0 pulses | 0.3 start | pull pulses every 0.6s with no break are hard to read. Add an edge ring that tightens with each pulse, and drop the pull to 6 so walking out against it is possible (counterplay) |

@@ -11,7 +11,7 @@
 		"free_tools": true,
 		"market_gems": true
 	},
-	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
 	"house_spot": {
 		"from": "landing",
 		"x": 0.0,
@@ -24,7 +24,9 @@
 	"steps": [
 		{
 			"id": "axe",
-			"needs": [],
+			"needs": [
+				"hob"
+			],
 			"title": "Get an axe",
 			"hints": {
 				"go": "Here, take this axe. Trees give wood, and wood builds things."
@@ -76,6 +78,11 @@
 			"world": {
 				"place": "Your house goes here",
 				"wait": "Building..."
+			},
+			"spot": {
+				"place": {
+					"hub": "build"
+				}
 			}
 		},
 		{
@@ -104,6 +111,11 @@
 			"world": {
 				"go": "Your Boki"
 			},
+			"spot": {
+				"go": {
+					"world": true
+				}
+			},
 			"after_built": true
 		},
 		{
@@ -119,6 +131,11 @@
 			"world": {
 				"place": "",
 				"fill": "Fill the trough"
+			},
+			"spot": {
+				"place": {
+					"hub": "build"
+				}
 			}
 		},
 		{
@@ -143,6 +160,14 @@
 				"grow": "Growing",
 				"pick": "Pick it"
 			},
+			"spot": {
+				"patch": {
+					"hub": "build"
+				},
+				"patch_dry": {
+					"hub": "build"
+				}
+			},
 			"waits": [
 				"grow"
 			]
@@ -160,6 +185,11 @@
 			"world": {
 				"stall": "Market stall",
 				"bar": ""
+			},
+			"spot": {
+				"bar": {
+					"hub": "shop"
+				}
 			}
 		},
 		{
@@ -176,19 +206,22 @@
 			"world": {
 				"stall": "Sell here",
 				"bar": ""
+			},
+			"spot": {
+				"bar": {
+					"hub": "shop"
+				}
 			}
 		},
 		{
 			"id": "hob",
-			"needs": [
-				"house"
-			],
+			"needs": [],
 			"title": "Meet the builder",
 			"hints": {
-				"go": "Come and say hello: press {interact}. I'll show you what you can build."
+				"go": "Hob is calling you over at the market stall: walk up and press {interact}."
 			},
 			"world": {
-				"go": "Hob the builder"
+				"go": "Talk to Hob"
 			}
 		},
 		{
@@ -196,20 +229,76 @@
 			"needs_all": true,
 			"title": "Head out",
 			"hints": {
-				"go": "This Mask holds a fallen Hunter. Put it on and you become them. Press {interact} at the portal to start your first expedition."
+				"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."
 			},
 			"world": {
 				"go": "Portal"
 			}
 		}
 	],
+	"base": {
+		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
+		"lead": {"wait_m": 6.0, "stop_m": 1.8},
+		"start_food": {"emberberry": 3},
+		"skip_toy": "toy_ball",
+		"near": 3.0,
+		"steps": [
+			{
+				"id": "meet",
+				"title": "Meet your Boki",
+				"hints": {"go": "This is your Boki. Walk up and say hello."},
+				"world": {"go": "Your Boki"},
+				"boki": "Hi! Hi! Over here!"
+			},
+			{
+				"id": "eat",
+				"needs": ["meet"],
+				"title": "Feed it",
+				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
+				"world": {"go": "Feed your Boki"},
+				"boki": "Is that a berry? For me?"
+			},
+			{
+				"id": "toy",
+				"needs": ["eat"],
+				"title": "Place a toy",
+				"hints": {
+					"place": "Press {build}, open Base and set a toy down.",
+					"watch": "Watch your Boki go and play with it."
+				},
+				"world": {"place": "", "watch": "Toy"},
+				"boki": "Can we have something to play with?"
+			},
+			{
+				"id": "out",
+				"needs": ["toy"],
+				"title": "Head out or stay",
+				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing. Later, the Waystone in your hub wakes the next zone."},
+				"world": {"go": "Portal"},
+				"boki": "Out there, or more play? Your call!"
+			}
+		]
+	},
 	"skip_ask": "Skip the tutorial?",
 	"done_toast": "Tutorial done! +{gems} gems",
 	"skip_label": "Skip tutorial",
+	"stay_label": "Stay",
+	"first_day": {
+		"reward_gems": 15,
+		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.",
+		"rows": [
+			{"id": "feed", "text": "Feed your Boki"},
+			{"id": "toy", "text": "Play with a toy"},
+			{"id": "race", "text": "Run your first race"},
+			{"id": "nap", "text": "See a nap pile"},
+			{"id": "pair", "text": "Pair two Boki in the Nook"}
+		]
+	},
 	"tracker": {
 		"title": "Goals",
 		"max": 5,
 		"per_source": {
+			"first_day": 5,
 			"unlock": 2,
 			"mastery": 1,
 			"milestone": 1,
@@ -218,10 +307,13 @@
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {
-		"axe": "Someone left a spare axe by the house.",
+		"axe": "Hob hands you an axe.",
 		"pickaxe": "And a pickaxe for the rocks, too."
 	},
 	"gems_toast": "Hob gives you %d gems to buy seeds",
-	"voice": "Hob",
-	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect)."
+	"picked_say": {
+		"go": "Off to work!",
+		"wait": "Ready when there's work!"
+	},
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
 }

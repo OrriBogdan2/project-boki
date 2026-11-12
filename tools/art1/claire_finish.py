@@ -1,4 +1,4 @@
-"""ART-1 Claire, stage C: join, unwrap, paint, skin, export. The recipe is kael_finish.py / cinder_finish.py.
+"""ART-1 Claire (v2, the snow-bunny sheet), stage C: join, unwrap, paint, skin, export. The recipe is kael_finish.py / cinder_finish.py.
 Run: blender -b --factory-startup --python tools/art1/claire_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 import bpy, bmesh
@@ -10,16 +10,15 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import meshkit as M, claire_pieces as K, claire_paint as P
 from meshkit import smooth, Piece
-from kael_paint import hexc, mix
+from paintkit import hexc, mix
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
-HEADS = a[3]
 ATLAS = 2048
 MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "ice-horn", "ice-wing", "ice-bright"]
-SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
-         "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
+SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.8, "tailpuff": 0.6, "braid": 0.8, "flake": 0.5,
+         "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0}
 FACE_K = 4.6                # texel density on the face against the body
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
@@ -113,26 +112,52 @@ def lid_piece(s):
     return p
 
 
+def body(q):
+    """The scan's torso (its metres, sole at 0) -> rig: pelvis to neck."""
+    x, y, z = q
+    return np.array([x * K.HK, y * K.HK, K.HIPS_Z + (z - 0.90) * (K.NECK_Z - K.HIPS_Z) / 0.60])
+
+
+def clear_of_body(path, gap):
+    """Each point pushed out along the surface's normal until it sits `gap` off the scan, then smoothed (a plait lies on her, not in her)."""
+    path = np.array(path, float)
+    for _ in range(3):
+        for i, q in enumerate(path):
+            h = tree.find_nearest(Vector(q))
+            if h[0] is None:
+                continue
+            hp, hn = np.array(h[0]), np.array(h[1])
+            if (q - hp) @ hn < gap[i]:
+                path[i] = hp + hn * gap[i]
+        path[1:-1] = path[1:-1] * 0.5 + (path[:-2] + path[2:]) * 0.25
+    return path
+
+
 el, er = K.ear(1.0), K.ear(-1.0)
 bell_ = json.loads(src["bell"])
 panels = [K.skirt_panel(1.0, bell_), K.skirt_panel(-1.0, bell_)]
-tl = K.tail()
-tail_end = tl.path[-1]
-tail_dir = M.norm(tl.path[-1] - tl.path[-3])
-TAILC = tail_end + tail_dir * 0.056
-th = K.heart_solid("tailheart", "ice-bright", TAILC, tail_dir, M.norm(np.cross(tail_dir, (0, 0, 1.0))), 0.066, 0.017)
-bw = K.bow()
-rr, rl = K.ribbon(1.0), K.ribbon(-1.0)
+# the tail: on the skirt's back a hand under the sash (the sheet's back view)
+tz_ = body((0, 0, 1.06))[2]
+h_ = tree.ray_cast(Vector((0, -0.6, tz_)), Vector((0, 1.0, 0)), 1.0)
+TAILC = np.array([0.0, (h_[0].y if h_[0] is not None else -0.13) - 0.03, tz_])
+tl = K.tail_puff(TAILC)
+# the braid: behind her left ear, over the shoulder and the scarf, down her front past the sash
+BRAID = [K.hs((-0.09, -0.04, 1.63)), K.hs((-0.115, 0.0, 1.53)), body((-0.12, 0.07, 1.41)), body((-0.105, 0.11, 1.28)), body((-0.095, 0.12, 1.14)),
+         body((-0.10, 0.115, 1.0)), body((-0.105, 0.105, 0.87))]
+bp_ = M.catmull(np.array(BRAID), 26)
+bp_ = clear_of_body(bp_, np.linspace(0.04, 0.03, 26))
+br = K.braid(bp_)
+bu_ = 0.8
+bi_ = int(round(bu_ * (len(br.path) - 1)))
+FLAKE_C = br.path[bi_] + np.array([0, 0.03, 0])
+fl = K.snowflake(FLAKE_C, (0, 1.0, 0.0), br.path[bi_ - 1] - br.path[bi_ + 1]).rigid("hips")
 sp = K.spear()
-wr, wr_rods = K.wing(1.0)
-wl, wl_rods = K.wing(-1.0)
 lids = [lid_piece(1.0), lid_piece(-1.0)]
 hR = K.hand("R", K.GRIP_K, (1.3, 1.45, 0.95))
 hL = K.hand("L", (0.0, 1.0, -0.15), (0.32, 0.42, 0.3), 0.07)
-hornR, hornL = K.horn(1.0), K.horn(-1.0)
-for q_ in hR + hL + [wr, wl] + wr_rods + wl_rods:
+for q_ in hR + hL:
     q_.room = 0.2        # (a full ink line round each finger is a black mitt at the match camera)
-pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")] + panels
+pieces = [el, er, tl, br, fl, K.blade(1.0), K.blade(-1.0)] + [K.fur_cuff("R"), K.fur_cuff("L")] + K.candy_laces("R", tree) + K.candy_laces("L", tree) + sp + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")] + panels
 
 
 def chain_w(p, pts, names, tip_free=True):
@@ -169,28 +194,14 @@ for sg, p_, sd in ((1.0, el, "R"), (-1.0, er, "L")):
     nm = ["spring_ear%s_%d" % (sd, i) for i in range(len(pts))]
     ear_chain[sd] = (nm, pts)
     chain_w(p_, pts, nm)
-wing_chain = {}
-for sg, p_, rods, sd in ((1.0, wr, wr_rods, "R"), (-1.0, wl, wl_rods, "L")):
-    pts = K.wing_points(sg)
-    nm = ["spring_wing%s_%d" % (sd, i) for i in range(len(pts))]
-    wing_chain[sd] = (nm, pts)
-    chain_w(p_, pts, nm)
-    for q in rods:
-        chain_w(q, pts, nm)
-tail_pts = [tuple(tl.path[int(round(t * (len(tl.path) - 1)))]) for t in np.linspace(0.05, 1.0, K.TAIL_N - 1)] + [tuple(tail_end + tail_dir * 0.1)]
-tail_nm = ["spring_scarftail_tail_%d" % i for i in range(K.TAIL_N)]
-chain_w(tl, tail_pts, tail_nm)
-chain_w(th, tail_pts, tail_nm)
-rib_chain = {}
-for p_, sd in ((rr, "R"), (rl, "L")):
-    pts = K.ribbon_points(p_)
-    nm = ["spring_scarftail_rib%s_%d" % (sd, i) for i in range(len(pts))]
-    rib_chain[sd] = (nm, pts)
-    chain_w(p_, pts, nm)
+braid_pts = K.braid_points(br)
+braid_nm = ["spring_scarftail_braid_%d" % i for i in range(len(braid_pts))]
+chain_w(br, braid_pts, braid_nm)
+chain_w(fl, braid_pts, braid_nm)
 
 for p_ in pieces:
     n_ = p_.name
-    if n_.startswith(("wing", "tailheart", "heart", "blade")) and not n_.startswith("wingarm") and not n_.startswith("wingrod"):
+    if n_.startswith(("flake", "heart", "blade")):
         continue                       # (built wound; two faced)
     if n_.startswith("skirtpanel"):
         continue
@@ -216,8 +227,8 @@ for p in me0.polygons:
 HEAD = np.array(verts)
 DEFORM = {}
 for sg, sd in ((1.0, "R"), (-1.0, "L")):
-    DEFORM["brow." + sd] = (K.hs([sg * 0.047, 0.106, 1.748]), 0.026)
-    DEFORM["mouth." + sd] = (K.hs([sg * 0.0255, 0.118, 1.597]), 0.015)
+    DEFORM["brow." + sd] = (K.hs([sg * 0.055, 0.088, 1.705]), 0.026)
+    DEFORM["mouth." + sd] = (K.hs([sg * 0.024, 0.1, 1.60]), 0.015)
 for b, (c_, r_) in DEFORM.items():
     d_ = np.linalg.norm((HEAD - c_) * [1, 0.6, 1.1], axis=1)
     k_ = np.exp(-(d_ / r_) ** 2) * (HEAD[:, 1] > 0.06)
@@ -287,7 +298,7 @@ bm.faces.ensure_lookup_table()
 uvl = bm.loops.layers.uv["UV"]
 PARTS = {"upper_arm.R": "armR", "forearm.R": "armR", "hand.R": "armR", "upper_arm.L": "armL", "forearm.L": "armL", "hand.L": "armL", "thigh.R": "legR", "shin.R": "legR", "foot.R": "legR",
          "thigh.L": "legL", "shin.L": "legL", "foot.L": "legL", "head": "head", "brow.R": "head", "brow.L": "head", "mouth.R": "head", "mouth.L": "head"}
-FACE_C = K.hs([0, 0.0, 1.685])
+FACE_C = K.hs([0, 0.0, 1.668])
 region, face_i = {}, set()
 for i in range(nf):
     if names[faces_pid[i]] != "Low":
@@ -299,7 +310,7 @@ for i in range(nf):
             tally[p_] = tally.get(p_, 0) + w_
     part = max(tally, key=tally.get) if tally else "torso"
     c = np.mean([verts[v] for v in faces_v[i]], axis=0)
-    if part == "head" and c[1] > 0.035 and abs(c[0]) < 0.092 and abs(c[2] - FACE_C[2]) < 0.112:
+    if part == "head" and c[1] > 0.035 and abs(c[0]) < 0.1 and abs(c[2] - FACE_C[2]) < 0.112:
         face_i.add(i)
         region[i] = ("face", True)
     else:
@@ -472,42 +483,17 @@ bl = smooth(0.05, 0.2, b_ - r_) * smooth(0.25, 0.5, sat) * smooth(0.72, 0.6, col
 lum_ = col.mean(1, keepdims=True)
 vivid = np.clip((col - lum_) * 1.5 + lum_, 0, 1) * np.array([0.9, 1.06, 1.32])
 col = col * (1 - bl[:, None]) + vivid * bl[:, None]
-# bare thigh above the stocking tops: she's in stockings to the shorts' line, in the dress's blue under the skirt
-pink = smooth(0.02, 0.1, r_ - b_) * (pp[:, 2] < 1.0)
-stock = np.array([0.90, 0.93, 0.98]) * (0.72 + 0.34 * np.clip(AO[ys, xs], 0, 1))[:, None]
-col = col * (1 - pink[:, None]) + stock * pink[:, None]
-under = smooth(K.J("thigh.R")[2] - 0.03, K.J("thigh.R")[2] - 0.06, 2 * K.J("thigh.R")[2] - pp[:, 2] - 0.0)  # (0 above the seat, kept for clarity)
-shorts = pink * smooth(0.78, 0.84, pp[:, 2])
-col = col * (1 - shorts[:, None]) + np.array([0.2, 0.36, 0.66]) * shorts[:, None]
-# the white fur and capelet held under the light (a pure white blows out at the match camera), cooled toward the sheet's ice blue
+# the white fur and scarf held under the light (a pure white blows out at the match camera), cooled toward the sheet's ice blue
 mx_ = col.max(1)
 lt = smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 2] < K.NECK_Z + 0.12) + smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 1] < 0.0) * (pp[:, 2] >= K.NECK_Z + 0.12)
+lt = lt * ~np.isin(FID[ys, xs], list(face_i))     # (not her face: the neck line crosses it)
 col = col * (1 - lt[:, None]) + col * np.array([0.8, 0.87, 0.97]) * lt[:, None]
 OUTC[ys, xs] = col
 # hair round the face: the sheet's ice blue over the scan's slate, its shading kept
 hair_ = is_hair[FID[ys, xs]]
 hc = OUTC[ys[hair_], xs[hair_]].astype(np.float64)
 OUTC[ys[hair_], xs[hair_]] = P.ramp(np.clip((hc.mean(1) - 0.2) / 0.5, 0, 1), P.HAIR)
-# the face: the owner's head sheet (claire_head.png, hood up, front), warped onto the sculpt's own landmarks; eyes, brows, mouth, blush, fringe
-face_m = np.array([p_.material_index for p_ in me.polygons])[FID[ys, xs]] == mat_i["skin-face"]
-fx, fz = pp[:, 0], pp[:, 2] - K.eye_c(1.0)[2]
-sx_, sy_ = P.sheet_xy(fx, fz)
-r_ = np.hypot((sx_ - 325.0) / 150.0, (sy_ - 695.0) / 158.0)
-sheet_k = smooth(1.0, 0.88, r_) * (pp[:, 1] > 0.02) * (pp[:, 2] > K.NECK_Z + 0.05)
-head_img = P.load_sheet(HEADS)
-pc = P.sample_sheet(head_img, sx_, sy_)
-# (the slate left inside the hood round the sheet's patch goes to the same ice blue)
-cur_ = OUTC[ys, xs].astype(np.float64)
-inner = (r_ < 1.5) & (pp[:, 1] > -0.03) & (pp[:, 2] > K.NECK_Z + 0.05) & (cur_.max(1) < 0.8)
-cur_[inner] = P.ramp(np.clip((cur_[inner].mean(1) - 0.2) / 0.5, 0, 1), P.HAIR)
-OUTC[ys, xs] = cur_ * (1 - sheet_k[:, None]) + pc * sheet_k[:, None]
-# a soft slit in each glowing iris (the master's close-up): blue, not black, so the eyes stay gentle
-for s_ in (1.0, -1.0):
-    ec = K.eye_c(s_)
-    dx, dz = (pp[:, 0] - ec[0]) / 0.0030, (pp[:, 2] - ec[2]) / 0.0125
-    slit = np.exp(-dx * dx) * smooth(1.0, 0.7, np.abs(dz)) * (pp[:, 1] > 0.03) * face_m
-    OUTC[ys, xs] = mix(OUTC[ys, xs].astype(np.float64), hexc("#2f7fd0"), slit * 0.85)
-
+# (the face is the scan's own paint: the v2 sheet's face came through the scan whole)
 
 def paint(pred, fn):
     ids = [i for i, n in enumerate(names) if pred(n)]
@@ -531,18 +517,15 @@ def panel_paint(p_, n_, ao_, th_=0.72):
 
 
 paint(lambda n: n.startswith("skirtpanel"), panel_paint)
-paint(lambda n: n == "earR", lambda p, n, ao: P.ear(p, n, ao, el.path, 1.0))
-paint(lambda n: n == "earL", lambda p, n, ao: P.ear(p, n, ao, er.path, -1.0))
-paint(lambda n: n == "hornR", lambda p, n, ao: P.horn(p, n, ao, hornR.path))
-paint(lambda n: n == "hornL", lambda p, n, ao: P.horn(p, n, ao, hornL.path))
-paint(lambda n: n == "wingR", lambda p, n, ao: P.wing(p, n, ao, wr.tips, wr.wrist))
-paint(lambda n: n == "wingL", lambda p, n, ao: P.wing(p, n, ao, wl.tips, wl.wrist))
-paint(lambda n: n.startswith(("wingarm", "wingrod")), P.wingarm)
-paint(lambda n: n == "tail", lambda p, n, ao: P.tail(p, n, ao, tl.path))
-paint(lambda n: n == "tailheart", lambda p, n, ao: P.heart(p, n, ao, TAILC, 0.066))
-paint(lambda n: n.startswith(("bow", "ribbon")), P.ribbon)
+paint(lambda n: n == "earR", lambda p, n, ao: P.ear(p, n, ao, el.path, el.wd))
+paint(lambda n: n == "earL", lambda p, n, ao: P.ear(p, n, ao, er.path, er.wd))
+paint(lambda n: n == "tailpuff", lambda p, n, ao: P.puff(p, n, ao, TAILC))
+paint(lambda n: n == "braid", lambda p, n, ao: P.braid(p, n, ao, br.path))
+paint(lambda n: n == "flake", P.flake)
 paint(lambda n: n.startswith("blade"), P.blade)
 paint(lambda n: n == "shaft", P.shaft)
+paint(lambda n: n.startswith("lace"), P.lace)
+paint(lambda n: n.startswith("bootcuff"), P.puff_cuff)
 paint(lambda n: n in ("head", "butt") or n.startswith("prong"), P.crystal)
 paint(lambda n: n == "heart", lambda p, n, ao: P.heart(p, n, ao, K.sp(0.683), 0.082))
 paint(lambda n: n == "heartcore", lambda p, n, ao: P.heart(p, n, ao, K.sp(0.68), 0.07) * 0.9 + 0.1)
@@ -635,9 +618,7 @@ thm = np.array([-K.SH, 0.03, K.HAND_Z - 0.012])
 bone("thumb.L", "hand.L", thm, thm + [0, 0.02, -0.05])
 for sd in "RL":
     spring(*ear_chain[sd], "head")
-    spring(*wing_chain[sd], "hips")
-    spring(*rib_chain[sd], "root")
-spring(tail_nm, tail_pts, "root")
+spring(braid_nm, braid_pts, "head")
 bpy.ops.object.mode_set(mode="OBJECT")
 ob.parent = arm
 md = ob.modifiers.new("arm", "ARMATURE")
@@ -650,11 +631,11 @@ for vi, d in enumerate(vw):
 
 # ---- anchors and FX points: empties on the bones (RIG_CONTRACT, item 76b)
 b_, e_ = K.spear_frame()
-A = {"anchor_head_top": ("head", (0, 0.0, K.NECK_Z + 0.37)), "anchor_chest": ("hips", (0, 0.1, K.SHOULDER_Z - 0.09)),
+A = {"anchor_head_top": ("head", (0, 0.0, K.NECK_Z + 0.33)), "anchor_chest": ("hips", (0, 0.1, K.SHOULDER_Z - 0.09)),
      "weapon_muzzle": ("hand.R", tuple(K.sp(K.TIP_U))), "anchor_blade_root": ("hand.R", tuple(K.sp(0.74))), "anchor_blade_mid": ("hand.R", tuple(K.sp(0.88))),
      "anchor_eye_r": ("head", tuple(K.eye_c(1.0))), "anchor_eye_l": ("head", tuple(K.eye_c(-1.0))),
      "anchor_skate_r": ("foot.R", (K.THIGH_X, 0.0, 0.01)), "anchor_skate_l": ("foot.L", (-K.THIGH_X, 0.0, 0.01)),
-     "anchor_tail_tip": (tail_nm[K.TAIL_N - 2], tuple(TAILC)), "anchor_clasp": ("hips", tuple(K.hs([0, 0.115, 1.48])))}
+     "anchor_tail_tip": ("root", tuple(TAILC + [0, -0.05, 0])), "anchor_clasp": (braid_nm[3], tuple(FLAKE_C))}
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

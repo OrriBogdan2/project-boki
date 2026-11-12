@@ -1,8 +1,9 @@
-"""ART-1 Grimble, fine-detail pass: the Meshy scans -> Low meshes on the rig plus their paint sources.
-In WORK (~/meshy/grimble): runB (the body, hoard and gear edited out), runF (the head sheet, the monocle edited out), runH (the hoard alone).
-The body moves bone by bone onto the rig (tools/art1/kael_source.py's method: length along the bone, girth across it). The head and hoard are
-placed rigidly. Out: WORK/source.blend (objects Low_body, Low_head, Low_hoard, with vertex groups) and src_{B,F,H}.npz (the dense scans, placed,
-for the nearest-surface paint), tex_{B,F,H}.png.
+"""ART-1 Grimble v2 (the owner's locked redesign, briefs/art-refs/grimble_v2/): the Meshy scan -> the Low mesh on the rig plus its paint source.
+In WORK (~/meshy/grimble_v2): runA, one scan of the FINAL turnaround's front, left and back views with the hoard, the blunderbuss, the
+loupe and the sludge edited out (edit.sh). The scan keeps its own head, the bone-hook right arm and the gauntlet. It moves bone by bone
+onto the rig (kael_source.py's method: a length along the bone, a girth across it); past a bone's ends the scan keeps its own scale, so
+the hook and the gauntlet keep their shape. The hunch stays: the neck and the head keep the scan's lean ahead of the hips.
+Out: WORK/low_body.blend (object Low_body, with vertex groups), src_A.npz (the dense scan, placed, for the nearest-surface paint), tex_A.png.
 Run: blender -b --factory-startup --python tools/art1/grimble_source.py -- WORK"""
 import json
 import os
@@ -16,20 +17,22 @@ from mathutils.kdtree import KDTree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import grimble_sculpt as G
 from meshkit import smooth
 
 WORK = sys.argv[sys.argv.index("--") + 1]
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 F = np.float32
-BODY_TRIS, HEAD_TRIS, HOARD_TRIS = 3000, 2500, 3000
+BODY_TRIS = 7800
 SRC_FACES = 350000
-SOLE = -0.949
-# the body scan's joints: flipped to face +Y, his right +X, z from the sole; measured on the grids and slices
-S_J = {"pelvis": (0, -0.30, 1.00), "neck": (0, -0.17, 1.60)}
-for sd, sx in (("R", 1), ("L", -1)):
-    S_J.update({"shoulder." + sd: (sx * 0.33, -0.17, 1.52), "elbow." + sd: (sx * 0.615, -0.18, 1.24), "wrist." + sd: (sx * 0.82, -0.08, 0.96),
-                "hip." + sd: (sx * 0.125, -0.30, 1.03), "knee." + sd: (sx * 0.215, -0.22, 0.54), "ankle." + sd: (sx * 0.235, -0.36, 0.14)})
+SOLE = -0.950
+# the scan's joints: flipped to face +Y, his right +X, z from the sole; measured on the grids (~/meshy/tools/grid.py)
+S_J = {"pelvis": (-0.035, -0.20, 0.77), "neck": (-0.03, 0.12, 1.45), "crown": (-0.03, 0.30, 1.77), "face": (-0.03, 0.40, 1.55),
+       "shoulder.R": (0.29, -0.06, 1.48), "elbow.R": (0.46, -0.14, 1.05), "wrist.R": (0.50, -0.10, 0.67),
+       "shoulder.L": (-0.32, -0.06, 1.48), "elbow.L": (-0.47, -0.05, 1.09), "wrist.L": (-0.58, 0.08, 0.83),
+       "hip.R": (0.10, -0.20, 0.79), "knee.R": (0.13, -0.20, 0.41), "ankle.R": (0.20, -0.20, 0.08),
+       "hip.L": (-0.17, -0.20, 0.79), "knee.L": (-0.20, -0.20, 0.41), "ankle.L": (-0.29, -0.20, 0.08)}
+LOIN_X, LOIN_Z = 0.28, (0.55, 1.15)
+LEG_R = (0.095, 0.075)                  # the right thigh's and shin's core (scan m): the hook's crescent passes just outside        # the loincloth's box on the scan: the colour test only counts in here
 rig = json.load(open(os.path.join(REPO, "art/wardens/src/dredge_rig.json")))["bones"]
 
 
@@ -38,16 +41,26 @@ def r_j(b):
     return np.array([x, -z, y], float)
 
 
-T = {"pelvis": r_j("hips"), "neck": r_j("head")}
+# the scan's scale: the legs land on the rig's. The limbs keep the scan's spread and lean (x, y) and take the rig's joint heights:
+# moved onto the rig's narrow arms and wide hips, the hook arm hung through his right leg.
+K = r_j("hips")[2] / S_J["pelvis"][2]
+
+
+def on_rig(j, z):
+    return (np.array(S_J[j]) - (S_J["pelvis"][0], S_J["pelvis"][1], 0)) * (K, K, 0) + (0, 0, z)
+
+
+T = {"pelvis": r_j("hips"), "neck": on_rig("neck", r_j("head")[2])}
+T["crown"] = T["neck"] + (np.array(S_J["crown"]) - S_J["neck"]) * K
 for sd in "RL":
-    T["shoulder." + sd], T["elbow." + sd], T["wrist." + sd] = r_j("upper_arm." + sd), r_j("forearm." + sd), r_j("hand." + sd)
-    T["hip." + sd], T["knee." + sd] = r_j("thigh." + sd), r_j("shin." + sd)
-    T["ankle." + sd] = np.array([T["knee." + sd][0], 0, G.ANKLE])
-# name, joints, reach radius (scan m), girth (scan -> rig)
-SEG = [("torso", "pelvis", "neck", 0.30, 0.66)]
+    for j, b in (("shoulder", "upper_arm"), ("elbow", "forearm"), ("wrist", "hand"), ("hip", "thigh"), ("knee", "shin")):
+        T[j + "." + sd] = on_rig(j + "." + sd, r_j(b + "." + sd)[2])
+    T["ankle." + sd] = on_rig("ankle." + sd, S_J["ankle." + sd][2] * K)
+# name, joints, reach radius (scan m), girth (x the scan's scale)
+SEG = [("torso", "pelvis", "neck", 0.30, 1.0), ("headseg", "neck", "crown", 0.12, 1.0)]
 for sd in "RL":
-    SEG += [("upper_arm." + sd, "shoulder." + sd, "elbow." + sd, 0.10, 0.60), ("forearm." + sd, "elbow." + sd, "wrist." + sd, 0.09, 0.60),
-            ("thigh." + sd, "hip." + sd, "knee." + sd, 0.13, 0.68), ("shin." + sd, "knee." + sd, "ankle." + sd, 0.10, 0.68)]
+    SEG += [("upper_arm." + sd, "shoulder." + sd, "elbow." + sd, 0.10, 1.0), ("forearm." + sd, "elbow." + sd, "wrist." + sd, 0.09, 1.0),
+            ("thigh." + sd, "hip." + sd, "knee." + sd, 0.13, 1.0), ("shin." + sd, "knee." + sd, "ankle." + sd, 0.10, 1.0)]
 
 
 def load(glb):
@@ -167,7 +180,9 @@ def seg_weights(P):
         if nm.endswith(".L"):
             D[P[:, 0] > 0.02, i] = 9.0
         if nm.startswith(("thigh", "shin")):
-            D[P[:, 2] > 1.12, i] = 9.0
+            D[P[:, 2] > S_J["pelvis"][2] + 0.12, i] = 9.0
+        if nm == "headseg":
+            D[P[:, 2] < S_J["neck"][2] - 0.04, i] = 9.0
     W = np.exp(-(D - D.min(1, keepdims=True)) / 0.03)
     return W / W.sum(1, keepdims=True)
 
@@ -184,7 +199,9 @@ def fit(P, W):
         sa = np.linalg.norm(q1 - q0) / ln
         r = P - p0
         ax = r @ u
-        Q += W[:, i, None] * (q0 + ax[:, None] * sa * v + ((r - ax[:, None] * u) * girth) @ R.T)
+        inside = np.clip(ax, 0, ln)
+        ax2 = inside * sa + (ax - inside) * K          # (past the ends: the scan's own scale, the hook keeps its shape)
+        Q += W[:, i, None] * (q0 + ax2[:, None] * v + ((r - ax[:, None] * u) * girth * K) @ R.T)
     return Q
 
 
@@ -203,69 +220,80 @@ def set_groups(ob, W):
 
 
 def body():
-    ob = load(os.path.join(WORK, "runB", "glb.glb"))
+    ob = load(os.path.join(WORK, "runA", "glb.glb"))
     P = verts(ob) + (0, 0, -SOLE)
-    W0 = seg_weights(P)
-    Q = fit(P, W0)
+    Q = fit(P, hook_weights(P))
     low = dup(ob, "Low_body")
-    P = verts(low) + (0, 0, -SOLE)
-    # the cuts: past the wrists (gauntlet and hook are rebuilt), and the head-and-hump lump (the head scan sits there)
-    bm = bmesh.new()
-    bm.from_mesh(low.data)
-    bm.verts.ensure_lookup_table()
-    kill = []
-    for sd, sx in (("R", 1.0), ("L", -1.0)):
-        je, jw = np.array(S_J["elbow." + sd]), np.array(S_J["wrist." + sd])
-        u = jw - je
-        h = ((P - je) @ u) / (u @ u)
-        kill.append((h > 0.97) & (P[:, 0] * sx > 0.45))
-    kill.append(P[:, 2] > 1.60 + 0.42 * np.abs(P[:, 0]))
-    kill.append((P[:, 2] > 1.34) & (P[:, 1] > 0.10) & (np.abs(P[:, 0]) < 0.36))      # (the scan's own face and muzzle, on the front of the lump)
-    gone = np.any(kill, axis=0)
-    bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero(gone)[0].tolist()], context="VERTS")
-    bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=0)
-    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
-    bm.to_mesh(low.data)
-    bm.free()
-    cl0, p0 = cloth_mask(low, "B"), verts(low)
-    decimate(low, BODY_TRIS)
+    cl0 = cloth_mask(low, "A")
+    p0 = verts(low)
+    decimate(low, BODY_TRIS, face_keep)
     Pl = verts(low) + (0, 0, -SOLE)
-    W = seg_weights(Pl)
-    set_verts(low, fit(Pl, W))
-    names = [s[0] for s in SEG]
-    gr = {nm: W[:, i].copy() for i, nm in enumerate(names) if nm != "torso"}
-    tw = W[:, 0]
-    k = smooth(1.08, 1.26, Pl[:, 2])
-    gr["root"], gr["hips"] = tw * (1 - k) + 1e-5, tw * k
-    for sd in "RL":
-        f = smooth(0.24, 0.16, Pl[:, 2])
-        gr["foot." + sd] = gr["shin." + sd] * f
-        gr["shin." + sd] = gr["shin." + sd] * (1 - f)
-    # the hide and the belt ride the hips: the loincloth is found by its colour
     kd = KDTree(len(p0))
     for i, q in enumerate(p0.tolist()):
         kd.insert(q, i)
     kd.balance()
+    W = hook_weights(Pl)
+    set_verts(low, fit(Pl, W))
+    gr = {nm: W[:, i].copy() for i, (nm, *_) in enumerate(SEG) if nm not in ("torso", "headseg")}
+    tw = W[:, 0]
+    k = smooth(0.85, 1.03, Pl[:, 2])
+    gr["root"], gr["hips"], gr["head"] = tw * (1 - k) + 1e-5, tw * k, W[:, 1]
+    # past the wrists: the bone hook rides `hook`, the gauntlet hand.L
+    for sd, bone in (("R", "hook"), ("L", "hand.L")):
+        gr[bone] = gr["forearm." + sd] * smooth(0.92, 1.04, along(Pl, "elbow." + sd, "wrist." + sd))
+        gr["forearm." + sd] -= gr[bone]
+    for sd in "RL":
+        f = smooth(0.15, 0.07, Pl[:, 2])
+        gr["foot." + sd] = gr["shin." + sd] * f
+        gr["shin." + sd] = gr["shin." + sd] * (1 - f)
+    # the hide and the belt ride the hips: the loincloth is found by its colour
     cl = np.array([cl0[kd.find(q)[1]] for q in (Pl - (0, 0, -SOLE)).tolist()], F)
+    cl *= (np.abs(Pl[:, 0] - S_J["pelvis"][0]) < LOIN_X) * (Pl[:, 2] > LOIN_Z[0]) * (Pl[:, 2] < LOIN_Z[1])      # (the bone hook is tan too)
     for nm in list(gr):
         gr[nm] = gr[nm] * (1 - cl)
-    zk = smooth(0.98, 0.84, Pl[:, 2])
+    zk = smooth(1.0, 0.88, Pl[:, 2])
     gr["skirt"] = cl * zk + 1e-6
     gr["root"] = gr["root"] + cl * (1 - zk)
     set_groups(low, gr)
-    print("cloth verts", int((cl > 0.5).sum()), flush=True)
-    # (the paint source loses the scan's face too, or the cap under the head paints itself with teeth)
-    Pa = verts(ob) + (0, 0, -SOLE)
+    print("cloth verts", int((cl > 0.5).sum()), "hook verts", int((gr["hook"] > 0.5).sum()), flush=True)
     set_verts(ob, Q)
-    bm = bmesh.new()
-    bm.from_mesh(ob.data)
-    bm.verts.ensure_lookup_table()
-    away = (Pa[:, 2] > 1.60 + 0.42 * np.abs(Pa[:, 0])) | ((Pa[:, 2] > 1.34) & (Pa[:, 1] > 0.10) & (np.abs(Pa[:, 0]) < 0.36))
-    bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero(away)[0].tolist()], context="VERTS")
-    bm.to_mesh(ob.data)
-    bm.free()
-    save_src(ob, "B")
+    save_src(ob, "A")
     return low
+
+
+def seg_dist(P, j0, j1):
+    a0, a1 = np.array(S_J[j0], float), np.array(S_J[j1], float)
+    u = a1 - a0
+    h = np.clip(((P - a0) @ u) / (u @ u), 0, 1)
+    return np.linalg.norm(P - (a0 + h[:, None] * u), axis=1)
+
+
+def hook_weights(P):
+    """seg_weights, but the hook's crescent, which curls in by his right leg and foot, is all the arm's: below the right wrist,
+    whatever is not the leg's core (a capsule round the thigh and shin, a box round the foot) or the loincloth."""
+    W = seg_weights(P)
+    a = np.array(S_J["ankle.R"])
+    leg = (seg_dist(P, "hip.R", "knee.R") < LEG_R[0]) | (seg_dist(P, "knee.R", "ankle.R") < LEG_R[1])
+    leg |= (P[:, 2] < a[2] + 0.06) & (np.abs(P[:, 0] - a[0]) < 0.075) & (P[:, 1] > a[1] - 0.09) & (P[:, 1] < a[1] + 0.26)
+    loin = (P[:, 2] > LOIN_Z[0]) & (P[:, 0] < S_J["hip.R"][0] + 0.12)
+    hk = (P[:, 0] > 0.0) & (P[:, 2] < S_J["wrist.R"][2]) & ~leg & ~loin
+    names = [s[0] for s in SEG]
+    W[hk] = np.eye(len(SEG))[names.index("forearm.R")]
+    # the head hangs far ahead of the neck (the hunch): all of it, ears and jaw, rides the head
+    hw = smooth(S_J["neck"][1] - 0.02, S_J["neck"][1] + 0.08, P[:, 1]) * smooth(S_J["neck"][2] - 0.14, S_J["neck"][2] - 0.05, P[:, 2])
+    return W * (1 - hw[:, None]) + np.eye(len(SEG))[1] * hw[:, None]
+
+
+def along(P, j0, j1):
+    a0, a1 = np.array(S_J[j0], float), np.array(S_J[j1], float)
+    u = a1 - a0
+    return ((P - a0) @ u) / (u @ u)
+
+
+def face_keep(v):
+    """The decimator spares the face (the grin, the squint and the ears read at the close camera)."""
+    p = v + (0, 0, -SOLE)
+    return np.clip(0.1 + np.exp(-(np.linalg.norm(p - S_J["face"], axis=1) / 0.16) ** 2), 0.02, 1)
 
 
 def set_verts(ob, v):
@@ -274,7 +302,7 @@ def set_verts(ob, v):
 
 
 def cloth_mask(ob, tag):
-    """Olive hide against grey skin, from the scan's paint under each vertex."""
+    """The brown hide against grey-mauve skin, from the scan's paint under each vertex."""
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", os.path.join(WORK, "run" + tag, "tex0_base_color.png"), "-vf", "scale=512:512", "-f", "rawvideo", "-pix_fmt", "rgb24",
                     os.path.join(WORK, "t512.rgb")], check=True)
     t = np.fromfile(os.path.join(WORK, "t512.rgb"), np.uint8).reshape(512, 512, 3).astype(F) / 255
@@ -289,74 +317,14 @@ def cloth_mask(ob, tag):
     c = t[py, px]
     vc = np.zeros((len(me.vertices), 3), F)
     vc[lv] = c
-    return ((vc[:, 1] - vc[:, 2]) > 0.05).astype(F)
-
-
-# the head: the scan's own numbers, flipped
-H_EYE = np.array((0.227, 0.55, 0.30))        # the hollow, on the scan
-H_K = 0.190
-
-
-def head_xf(p):
-    return (np.asarray(p) - H_EYE) * H_K + (G.EYE_C[0], G.EYE_C[1] + 0.012, G.EYE_C[2])
-
-
-def head():
-    ob = load(os.path.join(WORK, "runF", "glb.glb"))
-    low = dup(ob, "Low_head")
-    S0 = verts(low)
-    bm = bmesh.new()
-    bm.from_mesh(low.data)
-    bm.verts.ensure_lookup_table()
-    bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero(S0[:, 2] < -0.66)[0].tolist()], context="VERTS")
-    bm.to_mesh(low.data)
-    bm.free()
-
-    def face(p):
-        return np.clip(0.12 + 1.0 * smooth(0.0, 0.35, p[:, 1]) * smooth(-0.40, -0.25, p[:, 2]) * smooth(0.62, 0.48, p[:, 2]), 0.02, 1)
-    decimate(low, HEAD_TRIS, face)
-    S = verts(low)
-    jw = smooth(-0.075, -0.125, S[:, 2]) * smooth(0.0, 0.14, S[:, 1]) * smooth(-0.46, -0.36, S[:, 2])
-    br = np.exp(-(np.linalg.norm((S - (0.24, 0.52, 0.48)) * (0.7, 1, 1.2), axis=1) / 0.17) ** 2)
-    # (neck and collar ride the head: the head hangs far ahead of the chest, and a neck tied to the chest stretched to his belt in the hunch)
-    set_groups(low, {"head": (1 - jw) * (1 - br) + 1e-4, "jaw": jw, "brow": br * (1 - jw)})
-    set_verts(low, head_xf(S))
-    set_verts(ob, head_xf(verts(ob)))
-    save_src(ob, "F")
-    return low
-
-
-def hoard():
-    ob = load(os.path.join(WORK, "runH", "glb.glb"))
-    S = verts(ob)
-    k = np.array((0.50, 0.46, 0.555))
-
-    def xf(p):
-        return p * k + (0.0, -0.40, 1.245)
-    set_verts(ob, xf(S))
-    low = dup(ob, "Low_hoard")
-    # (a pile of thin chain and loose bits stalls the decimator near 10k: a voxel remesh first; the paint comes from the scan anyway)
-    bpy.ops.object.select_all(action="DESELECT")
-    low.select_set(True)
-    bpy.context.view_layer.objects.active = low
-    m = low.modifiers.new("r", "REMESH")
-    m.mode = "VOXEL"
-    m.voxel_size = 0.009
-    bpy.ops.object.modifier_apply(modifier="r")
-    print("remeshed", tris(low), flush=True)
-    decimate(low, HOARD_TRIS)
-    set_groups(low, {"hoard": np.ones(len(low.data.vertices), F)})
-    save_src(ob, "H")
-    return low
+    r, g, b = vc[:, 0], vc[:, 1], vc[:, 2]
+    return ((r - b > 0.07) & (g - b > -0.02)).astype(F)
 
 
 def main():
     os.makedirs(WORK, exist_ok=True)
     out = []
-    only = os.environ.get("ONLY", "").split(",") if os.environ.get("ONLY") else []
-    for fn, nm in ((hoard, "hoard"), (head, "head"), (body, "body")):
-        if only and nm not in only:
-            continue
+    for fn, nm in ((body, "body"),):
         fn()
         p = os.path.join(WORK, "low_%s.blend" % nm)
         for o in list(bpy.data.objects):

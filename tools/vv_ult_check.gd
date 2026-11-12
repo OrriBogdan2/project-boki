@@ -35,7 +35,7 @@ func _gate(m: Match, P: Hunter, K: ArchKit) -> void:
 			not pressed and float(K.cd["x"]) == 0.0 and int(P.used.get("x", 0)) == 0)
 	P.lvl = int(Hunter.ULT_AT[0])
 
-# ------------------------------------------------------------------ Ryzz: Kitefall
+# ------------------------------------------------------------------ Sparkle: Kitefall
 func mage() -> void:
 	var r: Array = ac.setup("mage", 6.0, KIN, true)
 	var m: Match = r[0]
@@ -119,7 +119,7 @@ func mage() -> void:
 	await _mage_burst()
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
-	ok("Ryzz item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held through every move",
+	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",
 			bad == 0, "%d failing (the DASHFLOW lines)" % bad)
 
 ## A cast that strikes empty ground: comes down by itself at the cursor when the hover runs out, pays no bond.
@@ -279,7 +279,7 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])
 	K.reset_dash_boost = false
-	ok("Wirerun: a plain run stays 7.5 to 13 m, full at 0.6 s",
+	ok("Wirerun: a plain run stays 5.6 to 9.75 m, full at 0.6 s",
 			absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01)
 	K.cd["dash"] = 0.0
 	P.teleport(home)

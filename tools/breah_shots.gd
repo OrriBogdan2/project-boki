@@ -1,6 +1,6 @@
 extends "res://tools/vv_shots.gd"
 ## --breah-shots --shots-dir=<dir> [--breah-only=<part>]: Tarek's review screenshots in a live Arena match
-## (xvfb with a renderer), reusing the Ryzz/Vex shot rig (tools/vv_shots.gd). Strips are a 3-wide grid
+## (xvfb with a renderer), reusing the Sparkle/Vex shot rig (tools/vv_shots.gd). Strips are a 3-wide grid
 ## of crops round her at gameplay zoom; <dir>/captions.txt gets "file: caption" per file.
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)

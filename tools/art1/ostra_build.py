@@ -216,9 +216,7 @@ def main():
     for p in ps:
         add(p)
     joints.append(("x_boxlid", (hinge, tuple(np.array(hinge) + (0.1, 0, 0)), "x_box")))
-    ps, axle = P.crank()
-    for p in ps:
-        add(p)
+    axle = P.CRANK_AXLE
     joints.append(("x_crank", (axle, tuple(axle + (0.1, 0, 0)), "x_box")))
     add(P.spring())
     add(P.smoke_wrap())
@@ -268,9 +266,9 @@ def main():
     joints.append(("x_fan", (fc, fc + (0, 0, -0.1), "hand.L")))
     for side in (1, -1):
         n = "R" if side > 0 else "L"
-        joints.append(("x_brow." + n, ((side * 0.05, 0.14, 1.72), (side * 0.05, 0.2, 1.72), "head")))
-        joints.append(("x_cheek." + n, ((side * 0.085, 0.12, 1.62), (side * 0.085, 0.18, 1.62), "head")))
-    joints.append(("x_jaw", ((0, -0.04, 1.66), (0, 0.06, 1.58), "head")))
+        joints.append(("x_brow." + n, (tuple(P.headpt((side * 0.05, 0.14, 1.72))), tuple(P.headpt((side * 0.05, 0.2, 1.72))), "head")))
+        joints.append(("x_cheek." + n, (tuple(P.headpt((side * 0.085, 0.12, 1.62))), tuple(P.headpt((side * 0.085, 0.18, 1.62))), "head")))
+    joints.append(("x_jaw", (tuple(P.headpt((0, -0.04, 1.66))), tuple(P.headpt((0, 0.06, 1.58))), "head")))
 
     atlas = PT.Atlas(2048, 1536)
     aglow = PT.Atlas(512, 256)
@@ -329,17 +327,17 @@ def main():
         pb = arm.data.bones[bone]
         e.matrix_parent_inverse = Matrix.Identity(4)
         e.location = pb.matrix_local.inverted() @ Vector(at) - Vector((0, pb.length, 0))
-    anchor("anchor_head_top", "head", (0, 0, 1.95))
+    anchor("anchor_head_top", "head", tuple(P.headpt((0, 0, 1.95))))
     anchor("anchor_chest", "hips", (0, 0.10, 1.116))
     anchor("anchor_orb", "hand.R", palm_r)
     anchor("anchor_hand_r", "hand.R", palm_r)
     anchor("anchor_hand_l", "hand.L", palm_l)
     anchor("anchor_cards", "hand.L", palm_l)
     anchor("weapon_muzzle", "hand.R", (palm_r[0], palm_r[1], palm_r[2] - 0.14))
-    anchor("anchor_grin", "head", (0, 0.14, 1.6))
-    anchor("anchor_box", "x_box", (0, 0, 0.36))
+    anchor("anchor_grin", "head", tuple(P.headpt((0, 0.14, 1.6))))
+    anchor("anchor_box", "x_box", (0, 0, P.BOX_T + 0.01))
     anchor("anchor_box_base", "x_box", (0, 0, 0.02))
-    anchor("anchor_spring_base", "x_box", (0, 0, 0.33))
+    anchor("anchor_spring_base", "x_box", (0, 0, P.BOX_T - 0.02))
     anchor("anchor_spring_top", "hips", (0, 0, P.SPRING_TOP))
     anchor("anchor_lid", "x_boxlid", (0, -0.31, 0.75))
     anchor("anchor_crank", "x_crank", tuple(axle + (0.1, 0, 0)))

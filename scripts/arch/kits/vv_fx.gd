@@ -1,10 +1,10 @@
 class_name VVFx
 extends Node3D
-## Ryzz's and Vex's own effects, pooled (one node per match, VVFx.of(m)). Every node is made once
+## Sparkle's and Vex's own effects, pooled (one node per match, VVFx.of(m)). Every node is made once
 ## and reused; nothing is created per frame or per shot. One shader, shaders/vv_fx.gdshader, a mode per
 ## look: each draws an alpha-blended body in the hero's colour and adds glow only on its hot core, so
 ## nothing washes out on bright ground. Kinds:
-##   arc      a jagged lightning ribbon between two points (Ryzz's bolts, the Surge streak, orb zaps)
+##   arc      a jagged lightning ribbon between two points (Sparkle's bolts, the Surge streak, orb zaps)
 ##   crackle  a burst of short arcs out of one point (the fingertip on every finger bolt)
 ##   ride     a look riding on a match shot until it ends, then its impact (the finger bolt, the rifle round)
 ##   smear    a fading hot-headed streak (the grenade's flight)
@@ -17,7 +17,7 @@ extends Node3D
 ##   shackle  crackling rings spinning round a target (Grounded by the drag)
 ##   trail    immediate style: a swoosh following a moving point (a hand through its move)
 ##   echo     a fading after-image in the hunter's own pose and silhouette, flat in one colour
-##   marker   immediate style: Ryzz's Static marker over a head (pips, a count, sparks that grow)
+##   marker   immediate style: Sparkle's Static marker over a head (pips, a count, sparks that grow)
 
 const SHADER: Shader = preload("res://shaders/vv_fx.gdshader")
 const M_ARC := 0
@@ -431,7 +431,7 @@ func _alive(sd: Dictionary) -> bool:
 	return false
 
 # ------------------------------------------------------------------ marker (immediate style)
-## Ryzz's Static marker at height `top` over `target`: `max_n` pips round a bold count on a dark
+## Sparkle's Static marker at height `top` over `target`: `max_n` pips round a bold count on a dark
 ## backing (lit pips in col, all of them in col2 when full), and sparks on the body, 2 per stack.
 ## Call every step while it should show; it goes KEEP s after the last call.
 func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color, top: float) -> void:

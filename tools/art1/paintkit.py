@@ -1,4 +1,4 @@
-"""ART-1 paint helpers (from Kael's kael_paint.py): texel arrays in, sRGB out."""
+"""ART-1 paint helpers (first written for Kael): texel arrays in, sRGB out."""
 import numpy as np
 from meshkit import norm, smooth
 

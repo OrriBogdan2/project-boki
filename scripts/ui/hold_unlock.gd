@@ -39,7 +39,7 @@ func _ready() -> void:
 	set_meta("hold_unlock", id)
 	add_theme_constant_override("separation", 6)
 	alignment = BoxContainer.ALIGNMENT_CENTER
-	btn = UI.primary("Hold to unlock %s" % Arch.name_of(id), func(): pass, 300)
+	btn = UI.primary("Hold to unlock %s" % Arch.name_of(id, true), func(): pass, 300)
 	btn.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	btn.button_down.connect(press)
 	btn.button_up.connect(release)

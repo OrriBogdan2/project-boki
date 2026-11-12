@@ -1,7 +1,10 @@
 """ART-1 Kael's animation set (hand-keyed as targets, solved by posekit). Times match the kit: the kmove tables in
-scripts/match/kmoves_dj.gd and content/archetypes/juggernaut.json. Personality: enormous, grim, economical: he never
-hurries his upper body, the sword's weight drags everything after it, every stop lands heavy.
-Run: blender -b --python tools/art1/kael_clips.py -- <kael.blend> <out.glb>"""
+scripts/match/kmoves_dj.gd and content/archetypes/juggernaut.json. Personality (briefs/LORE_MASKS: grim, cold, never
+cocky; he kills out of necessity): enormous, grim, economical: he never hurries his upper body, the sword's weight drags
+everything after it, every stop lands heavy.
+The keys are solved on the first Kael's rig (the build in /home/boki/art1kael/build/kael.blend, whose numbers are inlined
+below) and played on the v2 model by tools/art1/kael_retarget.py, which also skins the x_breath leaf the idle breathes on.
+Run: blender -b --python tools/art1/kael_clips.py -- <kael.blend> <out.glb> [idle,stance]"""
 import sys, os, math
 import bpy
 import numpy as np
@@ -9,10 +12,27 @@ from mathutils import Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
-import kael_pieces as K
+
+# The first rig's measures (ext/art1-kael-2 kael_pieces): the keys below are written against them.
+SH = 0.2608 * 0.9                                   # m: shoulder half-width
+HAND_Z, SHOULDER_Z, ANKLE_Z, NECK_Z = 0.8228, 1.2678, 0.10, 1.3729   # m: rest heights, arms hanging
+GRIP_DIR = Vector((0.0, 0.76, -0.65)).normalized()  # the blade from the fist, rest pose (he faces +Y)
+_a = (Vector((0, 0, -1.0)) - GRIP_DIR * GRIP_DIR.dot(Vector((0, 0, -1.0)))).normalized()
+GRIP_AT = Vector((SH, 0.0, HAND_Z + 0.012)) + _a * 0.094 + Vector((-0.03, 0.0, 0.0))   # inside the closed fist
+
+
+def sword_frame():
+    b = GRIP_DIR                                     # along the blade
+    e = b.cross(Vector((1.0, 0, 0))).normalized()    # along the edge, upward
+    if e.z < 0:
+        e = -e
+    return b, e, b.cross(e)
+
 
 UP = (0, 0, 1)
-A_Z = K.ANKLE_Z
+A_Z = ANKLE_Z
+BREATH = 0.03          # the rib cage's scale on a full breath (IDLE_AUDIT: 1-3 %)
+BREATH_S = 3.0         # s per breath, slow and deep (6 s idle: two; 8 s stance: three of 2.67 s)
 
 
 def be(a, e, edge=UP):
@@ -35,36 +55,113 @@ def C(name, dur, keys, loop=False, base=READY):
     return Clip(name, dur, keys, base, loop)
 
 
-# ---- idle and the signature stance
+# ---- idle and the signature stance (docs/art/IDLE_AUDIT.md, Kael): every curve below is periodic in the phase u, so
+# the last frame is the first and the loop seam closes (--clip-check SEAM_DEG / SEAM_M).
+IDLE_S, STANCE_S = 6.0, 8.0
+# The base both share, so the 0.5 s cross-fade never slides a foot: a wide-but-relaxed stand, left foot forward, right
+# (sword) foot back and toed out, the weight on the back leg, knees soft, the right shoulder hung lower by the blade.
+PLANT = {"FL": (-0.19, 0.10, A_Z), "FR": (0.21, -0.12, A_Z), "FLy": 0.22, "FRy": -0.45, "FLp": 0.0, "FRp": 0.0,
+         "pel": (0.035, -0.03, -0.075), "prt": (0.03, 0.05, -0.04), "tor": (0.06, 0.04, 0.06), "hed": (-0.09, -0.09, -0.03),
+         "LP": (-0.31, 0.05, 0.60), "Lw": 0.0, "fing": 0.35, "brow": 0.75, "lid": 0.32, "skirt": 0.0, "breath": 0.0}
+# The sword rests point-down in front of his right foot, his hand round the hilt at chest height (v2's blade is 0.58 of
+# his height, so the hilt comes up to the sternum), knuckles forward, the edge toward the viewer's left.
+REST_G, REST_BE = (0.265, 0.15, 1.04), be(-20, -80, (0, 1, 0))
+# Frame lags of the overlap: the pelvis moves, the chest follows, then the head and the free hand (IDLE_AUDIT: 2-6 frames).
+LAG_CHEST, LAG_HEAD, LAG_HAND = 3.0, 5.0, 4.0
+
+
+def sstep(x):
+    x = min(1.0, max(0.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def bump(u, c, w):
+    """A smooth hump of phase half-width w centred on c, 0 outside; periodic in u."""
+    d = ((u - c + 0.5) % 1.0) - 0.5
+    return 0.5 + 0.5 * math.cos(math.pi * d / w) if abs(d) < w else 0.0
+
+
+def shift(u, a, b, r, over=0.2):
+    """Hold, ease across r into a new place, overshoot a little and settle, hold, come back the same way (a < b, b + r < 1)."""
+    s = sstep((u - a) / r) - sstep((u - b) / r)
+    return s + over * (bump(u, a + r * 1.1, r * 0.8) - bump(u, b + r * 1.1, r * 0.8))
+
+
+def dip(u, c, w):
+    """A sink that rebounds past rest and settles: 1 at c, about -0.25 at c + 1.2 w, 0 beyond."""
+    return bump(u, c, w) - 0.25 * bump(u, c + w * 1.2, w * 0.7)
+
+
+def breath(u, n):
+    """n slow breaths over the loop: a 42 % inhale, a longer exhale, 0..1, flat at both ends of each."""
+    x = (u * n) % 1.0
+    return 0.5 - 0.5 * math.cos(math.pi * x / 0.42) if x < 0.42 else 0.5 + 0.5 * math.cos(math.pi * (x - 0.42) / 0.58)
+
+
+def _lag(u, frames, dur):
+    return u - frames / (dur * FPS)
+
+
+def _breathing(p, u, dur, n):
+    """The rib cage swells on x_breath; the chest lifts a hair back, the head keeps its eyes level two frames later."""
+    b = breath(u, n)
+    p["breath"] = b
+    bc, bh = breath(_lag(u, 1.0, dur), n), breath(_lag(u, 2.0, dur), n)
+    t, h = p["tor"], p["hed"]
+    p["tor"] = (t[0] - 0.006 * bc, t[1], t[2])
+    p["hed"] = (h[0] + 0.006 * bh, h[1], h[2])
+    lp = p["LP"]
+    p["LP"] = (lp[0], lp[1], lp[2] + 0.005 * bh)
+
+
 def idle(u):
-    a = math.sin(u * 2 * math.pi)
-    b = math.cos(u * 2 * math.pi)
+    """6 s. Weight on the back leg; once per loop it eases forward onto both feet and settles back (the pelvis first,
+    the chest, head and free hand frames behind). Slow deep breaths. The fidget, once: a few degrees of neck roll and the
+    grip lifted and set down again. The head otherwise barely moves."""
     p = dict(READY)
-    p["pel"] = (0.015 + 0.006 * b, -0.015, -0.065 - 0.009 * a)
-    p["tor"] = (0.15 + 0.025 * a, 0.12, 0.03)            # the slow heave of the chest
-    p["hed"] = (-0.16 - 0.02 * a, -0.14 + 0.03 * math.sin(u * 4 * math.pi), 0.0)
-    g = READY["G"]
-    p["G"] = (g[0], g[1], g[2] - 0.006 * a)
-    p["LP"] = (-0.315 + 0.004 * a, 0.10, 0.63 - 0.008 * a)
-    p["lid"] = 1.0 if 0.40 < u < 0.43 else 0.32           # one slow blink
+    p.update(PLANT)
+    T = IDLE_S
+    sp, sc, sh, sa = (shift(_lag(u, k, T), 0.40, 0.68, 0.09) for k in (0.0, LAG_CHEST, LAG_HEAD, LAG_HAND))
+    pel, prt, tor, hed, lp = PLANT["pel"], PLANT["prt"], PLANT["tor"], PLANT["hed"], PLANT["LP"]
+    p["pel"] = (pel[0] - 0.030 * sp, pel[1] + 0.030 * sp, pel[2] + 0.008 * sp)
+    p["prt"] = (prt[0] + 0.01 * sp, prt[1], prt[2] + 0.03 * sp)
+    p["tor"] = (tor[0] + 0.015 * sc, tor[1] - 0.02 * sc, tor[2] - 0.03 * sc)
+    # the fidget: the neck rolls left then right and comes back (u 0.08..0.34), the chin dipping a touch
+    q = min(1.0, max(0.0, (u - 0.08) / 0.26))
+    roll = 0.06 * math.sin(2 * math.pi * q) * math.sin(math.pi * q)
+    p["hed"] = (hed[0] - 0.02 * sh - 0.03 * math.sin(math.pi * q) ** 2, hed[1] + 0.02 * sh, hed[2] + roll)
+    # the grip resettles: the hand comes up a finger's width and sets down (u 0.20..0.32), the shoulder with it
+    q2 = min(1.0, max(0.0, (u - 0.20) / 0.12))
+    lift = math.sin(math.pi * q2) ** 2
+    g = REST_G
+    p["G"], p["BE"] = (g[0], g[1], g[2] + 0.012 * lift), REST_BE
+    p["tor"] = (p["tor"][0], p["tor"][1], p["tor"][2] - 0.02 * lift)
+    p["LP"] = (lp[0] - 0.005 * sa, lp[1] + 0.015 * sa, lp[2] + 0.004 * sa)
+    p["fing"] = 0.35 + 0.4 * lift
+    p["lid"] = 1.0 if 0.86 < u < 0.885 else 0.32
+    _breathing(p, u, T, round(T / BREATH_S))
     return p
 
 
 def stance(u):
-    """The sword laid back over his right shoulder, the left fist loose, chin down, staring you out."""
-    a = math.sin(u * 2 * math.pi)
+    """8 s, on the idle's feet. The sword up on his right shoulder, long holds; once per loop the shoulder sinks under
+    its weight and resettles. The head stays level, nothing showy."""
     p = dict(READY)
+    p.update(PLANT)
     p.update(SHOULDER)
-    p["pel"] = (0.02, 0.0, -0.05 - 0.008 * a)
-    p["prt"] = (0.06, 0.26, -0.05)
-    p["tor"] = (0.12 + 0.02 * a, -0.22, 0.05)
-    p["hed"] = (0.05, -0.04, -0.05)
-    p["FL"], p["FR"] = (-0.17, 0.17, A_Z), (0.19, -0.11, A_Z)
-    p["FLy"], p["FRy"] = 0.3, -0.5
-    p["G"] = (0.30, 0.13 + 0.004 * a, 1.20 - 0.006 * a)
-    p["LP"] = (-0.33, 0.12, 0.66 - 0.008 * a)
+    T = STANCE_S
+    pel, tor, hed = PLANT["pel"], PLANT["tor"], PLANT["hed"]
+    sway = math.sin(2 * math.pi * u)
+    p["pel"] = (pel[0] + 0.004 * sway, pel[1] + 0.005, pel[2] - 0.005)
+    dp, dc, dh = (dip(_lag(u, k, T), 0.50, 0.08) for k in (0.0, LAG_CHEST, LAG_HEAD))
+    p["prt"] = (PLANT["prt"][0] + 0.01, PLANT["prt"][1], PLANT["prt"][2] - 0.01 * dp)
+    p["tor"] = (tor[0] + 0.02 + 0.01 * dc, tor[1] - 0.02, tor[2] + 0.04 * dc)
+    p["hed"] = (hed[0] - 0.01 - 0.01 * dh, hed[1] + 0.02 + 0.02 * sway, hed[2] - 0.02 * dh)
+    g = SHOULDER["G"]
+    p["G"] = (g[0], g[1] - 0.005 * dc, g[2] - 0.025 * dc)
     p["fing"] = 0.5
-    p["brow"], p["lid"] = 1.0, 0.42
+    p["brow"], p["lid"] = 0.9, 0.36
+    _breathing(p, u, T, round(T / BREATH_S))
     return p
 
 
@@ -154,8 +251,8 @@ def slash(side):
 
 def clips():
     out = []
-    out.append(FnClip("idle", 3.2, idle))
-    out.append(FnClip("stance", 4.0, stance))
+    out.append(FnClip("idle", IDLE_S, idle))
+    out.append(FnClip("stance", STANCE_S, stance))
     for nm, sp, T in (("walk", 0.45, 1.1), ("run", 1.0, 0.68)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sp, hd, T)))
@@ -338,16 +435,34 @@ def extras(P):
     out["fingers.L"] = (Quaternion((1, 0, 0), -0.9 * f), None)
     out["thumb.L"] = (Quaternion((1, 0, 0), -0.4 * f), None)
     out["skirt"] = (Quaternion((1, 0, 0), 0.35 * P.get("skirt", 0.0)), None)
+    k = 1.0 + BREATH * P.get("breath", 0.0)
+    out["x_breath"] = (None, None, Vector((k, k, k)))
     return out
+
+
+def add_breath_bone(arm):
+    """x_breath: the leaf under hips the idle breathes on. Here only a carrier for its scale keys (no deform); the v2 model
+    gets its own, skinned to the rib cage, from kael_retarget.py."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    hips = arm.data.edit_bones["hips"]
+    eb.head = hips.head + Vector((0, -0.08, 0.36))
+    eb.tail = eb.head + Vector((0, 0, 0.05))
+    eb.parent, eb.use_connect, eb.use_deform = hips, False, False
+    bpy.ops.object.mode_set(mode="OBJECT")
 
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
-    b_, e_, n_ = K.sword_frame()
-    rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": K.NECK_Z - 0.46, "hilt_l": 0.078, "dz": K.SHOULDER_Z - 1.151, "leg_k": 1.3, "ankle_keys": K.ANKLE_Z, "ankle": K.ANKLE_Z,
-           "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.006, 0.0, K.HAND_Z - 0.052)}}
+    add_breath_bone(arm)
+    b_, e_, n_ = sword_frame()
+    rig = {"grip_rest": tuple(GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": NECK_Z - 0.46, "hilt_l": 0.078, "dz": SHOULDER_Z - 1.151, "leg_k": 1.3, "ankle_keys": ANKLE_Z, "ankle": ANKLE_Z,
+           "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-SH + 0.006, 0.0, HAND_Z - 0.052)}}
     bpy.context.scene.render.fps = FPS
     sol = Solver(arm, rig)
     bpy.context.view_layer.objects.active = arm

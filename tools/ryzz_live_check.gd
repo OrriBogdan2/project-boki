@@ -1,5 +1,5 @@
 extends RefCounted
-## --ryzz-live-check: Ryzz's clips through the real match code (tools/clip_live_check.gd for her kit): a Match,
+## --ryzz-live-check: Sparkle's clips through the real match code (tools/clip_live_check.gd for her kit): a Match,
 ## the kit's own presses and the render path. Each ability plays its clip, the rods blaze in Kitefall and at no
 ## other time, and a knock-out plays the death clip.
 ## Never touches the save.
@@ -39,7 +39,7 @@ func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 		var c := _clips(P)
 		seen[c.cur] = true
 		if c.up_w > 0.5:
-			seen[String(c._node("anim_u").animation)] = true
+			seen[c.cur_u] = true
 		top = maxf(top, _flare(P))
 	return top
 
@@ -54,7 +54,7 @@ func run(main: Node) -> void:
 	var home: Vector3 = r[4]
 	var seen := {}
 	_run(m, P, 10, seen)
-	ok(_clips(P) != null, "Ryzz wears her clips in a match")
+	ok(_clips(P) != null, "Sparkle wears her clips in a match")
 	var K: MageKit = P.ak
 	T.teleport(home + Vector3(0, 0, -9.0))
 	A.aim_at(P, T.pos)

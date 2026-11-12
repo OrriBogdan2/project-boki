@@ -7,8 +7,7 @@ import math
 
 import numpy as np
 
-import hem_sdf as S
-from hem_sdf import Field, Prim, box, cap, cyl, ell, fbm, path, smooth, sph
+from hem_sdf import Field, Prim, box, cap, cyl, ell, path, smooth, sph
 
 F = np.float32
 
@@ -17,9 +16,10 @@ SKIN, LIP, MOUTH, TOOTH, IRON, RUST, BRASS, LEATHER, LOIN, WOOD, BURLAP, GOLD, G
 HOARD_BASE = 100
 HOARD = []          # {id, kind, c, R}: the painter reads an item's own frame from here
 
-HEAD_C = np.array((0.0, 0.268, 1.174), F)      # the head's middle; it hangs ahead of the neck joint, the art's hunch
-EYE_C = np.array((0.040, 0.345, 1.200), F)     # the eye (one, on his right), the monocle round it
-EYE_R = 0.037
+# v2's scan head, fitted (grimble_source.py): it hangs far ahead of the neck joint, the art's hunch
+HEAD_C = np.array((0.004, 0.426, 1.237), F)     # the head's middle
+HEAD_TOP = np.array((0.0, 0.42, 1.41), F)
+EYE_C = np.array((0.086, 0.525, 1.277), F)      # his right eye, behind the loupe's big lens
 ANKLE = 0.075
 
 
@@ -58,94 +58,6 @@ def L(c, R, p):
     return tuple(np.array(c, F) + R @ np.array(p, F))
 
 
-# ------------------------------------------------------------------ the figure: trunk, arms and legs, one skin
-def _arm(J, s, n, vox):
-    sx, sz, ez, wz = float(J["upper_arm." + n][0]), float(J["upper_arm." + n][2]), float(J["forearm." + n][2]), float(J["hand." + n][2])
-    a = Field((sx - 0.15, -0.16, wz - 0.06), (sx + 0.15, 0.16, sz + 0.14), vox)
-    up, fo = "upper_arm." + n, "forearm." + n
-    a.add(ell((sx - s * 0.004, -0.004, sz + 0.012), (0.086, 0.092, 0.088)), 0.0, SKIN, up)                  # deltoid
-    a.add(ell((sx + s * 0.018, 0.0, sz - 0.056), (0.044, 0.054, 0.062)), 0.03, SKIN, up)
-    a.add(cap((sx, 0, sz), (sx, 0, ez + 0.02), 0.046, 0.040), 0.02, SKIN, up)
-    a.add(ell((sx - s * 0.002, 0.024, ez + 0.104), (0.047, 0.047, 0.082)), 0.014, SKIN, up)                 # biceps
-    a.add(ell((sx + s * 0.004, -0.028, ez + 0.092), (0.047, 0.045, 0.092)), 0.012, SKIN, up)                # triceps
-    a.add(sph((sx, -0.006, ez), 0.041), 0.02, SKIN, fo)
-    a.add(ell((sx + s * 0.006, 0.010, ez - 0.075), (0.054, 0.052, 0.082)), 0.018, SKIN, fo)                 # the forearm's belly
-    a.add(cap((sx, 0, ez - 0.02), (sx, 0, wz + 0.02), 0.042, 0.036), 0.016, SKIN, fo)
-    return a
-
-
-def _leg(J, s, n, vox):
-    hx, hz, kz = float(J["thigh." + n][0]), float(J["thigh." + n][2]), float(J["shin." + n][2])
-    a = Field((hx - 0.15, -0.14, -0.01), (hx + 0.15, 0.27, hz + 0.12), vox)
-    th, sh, ft = "thigh." + n, "shin." + n, "foot." + n
-    a.add(cap((hx - s * 0.02, 0.0, hz + 0.03), (hx, 0.004, kz + 0.03), 0.090, 0.056), 0.0, SKIN, th)
-    a.add(ell((hx + s * 0.022, 0.024, kz + 0.17), (0.060, 0.064, 0.125)), 0.018, SKIN, th)                  # quad
-    a.add(ell((hx - s * 0.002, -0.036, kz + 0.15), (0.062, 0.056, 0.120)), 0.014, SKIN, th)                 # hamstring
-    a.add(sph((hx, 0.022, kz + 0.004), 0.050), 0.018, SKIN, sh)                                             # knee
-    a.add(cap((hx, 0.004, kz), (hx, 0.0, ANKLE + 0.02), 0.047, 0.031), 0.018, SKIN, sh)
-    a.add(ell((hx + s * 0.006, -0.030, kz - 0.095), (0.054, 0.057, 0.098)), 0.016, SKIN, sh)                # calf
-    a.add(sph((hx, -0.030, 0.045), 0.036), 0.016, SKIN, ft)                                                 # heel
-    a.add(ell((hx, 0.042, 0.042), (0.040, 0.095, 0.036)), 0.018, SKIN, ft)
-    a.add(ell((hx - s * 0.006, 0.112, 0.030), (0.054, 0.052, 0.024)), 0.014, SKIN, ft)
-    for i, (dx, ln, r) in enumerate(((-0.040, 0.066, 0.018), (-0.014, 0.058, 0.0145), (0.008, 0.050, 0.0135), (0.028, 0.042, 0.0125), (0.046, 0.034, 0.0115))):
-        x = hx + s * dx
-        a.add(cap((x, 0.135, 0.024), (x + s * dx * 0.2, 0.135 + ln, 0.016), r, r * 0.94), 0.004, SKIN, ft)
-    return a
-
-
-def figure(J, vox=0.0042):
-    """Skinny and ropey: a narrow waist, a sunken belly, a big hunched yoke of shoulder and trapezius. It stands upright on
-    the rig; the hunch is the head hung forward, the hump, and the pose."""
-    t = Field((-0.47, -0.32, -0.01), (0.47, 0.34, 1.34), vox)
-    # pelvis and belly
-    t.add(ell((0, 0.0, 0.71), (0.150, 0.108, 0.085)), 0.0, SKIN, "root")
-    t.add(cap((0, 0.0, 0.73), (0, -0.012, 0.86), 0.104, 0.112), 0.03, SKIN, "root")
-    # the ribcage and the hump
-    t.add(ell((0, -0.016, 0.985), (0.160, 0.112, 0.155)), 0.04, SKIN, "hips")
-    t.add(ell((0, -0.085, 1.075), (0.170, 0.128, 0.135)), 0.05, SKIN, "hips")
-    t.add(ell((0, -0.050, 1.170), (0.245, 0.118, 0.066)), 0.05, SKIN, "hips")               # the yoke, shoulder to shoulder
-    for s in (1, -1):
-        t.add(ell((s * 0.082, 0.082, 1.058), (0.083, 0.044, 0.056), (0.18, s * 0.26, 0)), 0.016, SKIN, "hips")     # pecs
-        t.add(ell((s * 0.140, -0.040, 0.935), (0.046, 0.082, 0.105)), 0.03, SKIN, "hips")        # lats
-        t.add(cap((s * 0.055, 0.02, 1.215), (s * 0.25, -0.02, 1.145), 0.042, 0.032), 0.03, SKIN, "hips")     # traps
-    # the abs: three pairs, sunken
-    for i, z in enumerate((0.905, 0.850, 0.797)):
-        for s in (1, -1):
-            t.add(ell((s * 0.038, 0.098 - i * 0.002, z), (0.036, 0.018, 0.024)), 0.009, SKIN, "root" if i == 2 else "hips")
-    for i in range(3):
-        for s in (1, -1):
-            t.add(cap((s * (0.145 - i * 0.012), 0.070, 0.975 - i * 0.042), (s * (0.112 - i * 0.012), 0.094, 0.960 - i * 0.042), 0.010), 0.012, SKIN, "hips")     # ribs
-    t.grp = 0
-    arms = {}
-    for i, (s, n) in enumerate(((1, "R"), (-1, "L"))):
-        a = _arm(J, s, n, vox)
-        full = t.like()
-        full.grp = 1 + i
-        _copy(full, a)
-        ax = float(J["upper_arm." + n][0])
-        arms[n] = full
-        t.merge(full, kfn=lambda x, y, z: 0.05 * smooth(0.97, 1.08, z))
-    for i, (s, n) in enumerate(((1, "R"), (-1, "L"))):
-        a = _leg(J, s, n, vox)
-        full = t.like()
-        full.grp = 3 + i
-        _copy(full, a)
-        t.merge(full, kfn=lambda x, y, z: 0.06 * smooth(0.60, 0.70, z))
-    return t
-
-
-def _copy(dst, src):
-    """A small field onto a large grid of the same voxel size (snapped to the voxels)."""
-    off = np.rint((src.lo - dst.lo) / dst.vox).astype(int)
-    a = np.maximum(off, 0)
-    b = np.minimum(off + src.n, dst.n)
-    s0 = tuple(slice(int(a[i]), int(b[i])) for i in range(3))
-    s1 = tuple(slice(int(a[i] - off[i]), int(b[i] - off[i])) for i in range(3))
-    dst.d[s0] = src.d[s1]
-    dst.lab[s0] = src.lab[s1]
-    dst.prims += [(p, bn, dst.grp) for p, bn, _ in src.prims]
-
-
 # ------------------------------------------------------------------ the head: the grin is the character
 MOUTH_W = 0.089
 
@@ -157,101 +69,6 @@ def grin_z(x):
 
 def grin_h(x):
     return 0.0395 * np.clip(1 - (x / MOUTH_W) ** 2, 0, 1) ** 0.62
-
-
-def face_y(x, z):
-    """The muzzle's front, head space (used to sit the teeth just behind the lips)."""
-    return 0.062 + 0.066 * np.sqrt(np.clip(1 - (x / 0.098) ** 2 - ((z + 0.04) / 0.11) ** 2, 0.0, 1))
-
-
-def head(vox=0.0017):
-    c = HEAD_C
-    h = Field((-0.135, 0.0, 0.99), (0.135, 0.365, 1.315), vox)
-
-    def P(x, y, z):
-        return (float(x), float(c[1] + y), float(c[2] + z))
-    h.add(ell(P(0, -0.012, 0.030), (0.094, 0.108, 0.086)), 0.0, SKIN)
-    h.add(ell(P(0, 0.052, -0.030), (0.092, 0.078, 0.062)), 0.03, SKIN)
-    h.add(ell(P(0.004, 0.046, -0.088), (0.069, 0.066, 0.038)), 0.022, SKIN)                 # the chin
-    for s in (1, -1):
-        h.add(ell(P(s * 0.070, 0.066, -0.012), (0.032, 0.034, 0.026)), 0.016, SKIN)         # cheeks, shoved up by the grin
-    h.add(cap(P(0.074, 0.076, 0.056), P(-0.004, 0.100, 0.048), 0.016, 0.0125), 0.012, SKIN)    # the heavy brow over the eye
-    h.add(cap(P(-0.024, 0.096, 0.040), P(-0.070, 0.074, 0.038), 0.0125, 0.0105), 0.012, SKIN)
-    h.add(cap(P(0, -0.06, -0.012), P(0, -0.165, -0.022), 0.066, 0.090), 0.03, SKIN)         # the neck, back into the yoke
-    # the nose: no bridge, two slits
-    for s in (1, -1):
-        h.sub(ell(P(s * 0.012 - 0.002, 0.118, 0.0065), (0.0045, 0.012, 0.0030), (0, s * 0.5, 0)), 0.002, LIP)
-    # the other socket: empty, sunk, stitched shut (paint: grimble_paint.head)
-    h.sub(ell(P(-0.052, 0.112, 0.012), (0.026, 0.020, 0.012)), 0.012, SKIN)
-    # the socket
-    h.sub(sph(tuple(EYE_C), EYE_R + 0.0035), 0.004, DARK)
-    # the mouth: a crescent carved in deep, walled in red
-    def grin(x, y, z):
-        lx, ly, lz = x - c[0], y - c[1], z - c[2]
-        dz = np.abs(lz - grin_z(lx)) - grin_h(lx)
-        dx = np.abs(lx) - MOUTH_W
-        return np.maximum(np.maximum(dz, dx), 0.022 - ly)
-    h.sub(custom(grin, (c[0] - 0.10, c[1] + 0.0, c[2] - 0.10), (c[0] + 0.10, c[1] + 0.15, c[2] + 0.05)), 0.003, MOUTH)
-    # the lips: thin, dark, drawn along the crescent
-    for sgn in (1, -1):
-        xs = np.linspace(-MOUTH_W - 0.002, MOUTH_W + 0.002, 15)
-        pts = [P(x, face_y(x, float(grin_z(x))) + 0.0015, float(grin_z(x) + sgn * grin_h(x)) + sgn * 0.0025) for x in xs]
-        h.add(path(pts, [0.0048] * len(pts)), 0.004, LIP)
-    return h
-
-
-def jaw_points(x):
-    return None
-
-
-def teeth(vox=0.0013):
-    """Big, crooked and few, one gap in the top row (the art's)."""
-    c = HEAD_C
-    t = Field((-0.11, 0.17, 1.03), (0.11, 0.35, 1.23), vox)
-    rng = np.random.RandomState(7)
-    tp = []
-
-    def tooth(x, top, ln, w, lean):
-        zc = float(grin_z(x))
-        hh = float(grin_h(x))
-        z0 = zc + (hh + 0.003) * top
-        y0 = float(face_y(x, zc)) - 0.0115
-        a = (c[0] + x, c[1] + y0, c[2] + z0)
-        b = (c[0] + x + lean, c[1] + y0 + 0.002, c[2] + z0 - top * ln)
-        t.add(cap(a, b, w, w * 0.26), 0.0, TOOTH)
-        tp.append((a, top))
-    xs = np.linspace(-0.070, 0.070, 11)
-    for i, x in enumerate(xs):
-        if i == 6:          # the gap
-            continue
-        ln = float(grin_h(x)) * rng.uniform(0.95, 1.18)
-        tooth(float(x + rng.uniform(-0.002, 0.002)), 1, ln + 0.006, 0.0088, rng.uniform(-0.004, 0.004))
-    for i, x in enumerate(np.linspace(-0.062, 0.062, 9)):
-        ln = float(grin_h(x)) * rng.uniform(0.70, 1.0)
-        tooth(float(x + rng.uniform(-0.002, 0.002)), -1, ln + 0.005, 0.0080, rng.uniform(-0.004, 0.004))
-    return t
-
-
-def eye(vox=0.0012):
-    e = Field(EYE_C - 0.045, EYE_C + 0.045, vox)
-    e.add(sph(tuple(EYE_C), EYE_R), 0.0, EYE)
-    return e
-
-
-def lid(vox=0.0012):
-    """The upper lid: a shell over the eyeball, turned by bone `lid`. Rest: the eye a little over half open, the art's slit."""
-    e = Field(EYE_C - 0.052, EYE_C + 0.052, vox)
-
-    def fn(x, y, z):
-        px, py, pz = x - EYE_C[0], y - EYE_C[1], z - EYE_C[2]
-        r = np.sqrt(px * px + py * py + pz * pz)
-        sh = np.abs(r - (EYE_R + 0.0032)) - 0.0020
-        # keep what lies above a plane tipped back about X, so the lid's edge crosses the eye
-        cut = -(pz * 0.97 + py * -0.10 - 0.0095)
-        back = -(py + 0.008)
-        return np.maximum(np.maximum(sh, cut), back)
-    e.add(custom(fn, EYE_C - 0.05, EYE_C + 0.05), 0.0, SKIN)
-    return e
 
 
 MONO_AX = np.array((0.04, 1.0, 0.06), F) / np.linalg.norm((0.04, 1.0, 0.06))
@@ -287,182 +104,6 @@ def monocle(vox=0.0012):
     return m
 
 
-# ------------------------------------------------------------------ gear on the body
-def belt(vox=0.0028):
-    b = Field((-0.20, -0.17, 0.42), (0.20, 0.19, 0.82), vox)
-
-    def ring(x, y, z):
-        q = np.sqrt((x / 0.160) ** 2 + (y / 0.128) ** 2)
-        return np.maximum(np.abs(q - 1.0) * 0.128 - 0.012, np.abs(z - 0.742 + 0.03 * x) - 0.030)
-    b.add(custom(ring, (-0.19, -0.16, 0.66), (0.19, 0.16, 0.82)), 0.0, LEATHER)
-    fr = (0.0, 0.142, 0.742)
-    b.add(box(fr, (0.042, 0.010, 0.033), 0.004), 0.0, IRON)
-    b.sub(box((0.0, 0.156, 0.742), (0.024, 0.012, 0.017), 0.002), 0.002, LEATHER)
-    b.add(box((0.0, 0.142, 0.742), (0.030, 0.005, 0.013), 0.002), 0.001, LEATHER)
-    # a little pouch on the right
-    b.add(ell((0.150, 0.075, 0.700), (0.040, 0.030, 0.052)), 0.0, LEATHER)
-    b.add(ell((-0.166, -0.010, 0.690), (0.024, 0.042, 0.056)), 0.0, LEATHER)
-    return b
-
-
-def _flap(front):
-    """A torn hanging flap of hide, as a thin sheet wrapped on the hips."""
-    sgn = 1.0 if front else -1.0
-
-    def fn(x, y, z):
-        wrap = 0.125 - 0.85 * x * x + 0.20 * np.maximum(0.70 - z, 0) * (0 if front else 1) * 0
-        sheet = np.abs(y * sgn - wrap - 0.012 - 0.045 * np.maximum(0.72 - z, 0)) - 0.0042
-        top = z - 0.725
-        width = 0.150 if front else 0.175
-        zb = 0.455 + (0.040 * np.sin(x * 37.0 + 0.9) + 0.030 * np.sin(x * 83.0 + sgn) + 0.024 * np.abs(np.sin(x * 141.0))) \
-            - 1.2 * np.abs(x) * (0.20 if front else 0.05) + (0.0 if front else 0.012)
-        tip = -(0.38 / 0.15) * 0
-        return np.maximum(np.maximum(sheet, top), np.maximum(zb - z, np.abs(x) - width + 0.14 * np.maximum(0.72 - z, 0)))
-    return custom(fn, (-0.2, -0.22, 0.38), (0.2, 0.22, 0.75))
-
-
-def loincloth(vox=0.0026):
-    l = Field((-0.20, -0.22, 0.38), (0.20, 0.24, 0.76), vox)
-    l.add(_flap(True), 0.0, LOIN)
-    l.add(_flap(False), 0.0, LOIN)
-    return l
-
-
-def straps(vox=0.003):
-    """The pack's harness: over both shoulders, the broad diagonal across his chest."""
-    s = Field((-0.27, -0.20, 0.80), (0.27, 0.22, 1.28), vox)
-    for sd in (1, -1):
-        s.add(path([(sd * 0.135, -0.13, 1.195), (sd * 0.145, -0.03, 1.238), (sd * 0.150, 0.075, 1.170), (sd * 0.168, 0.094, 1.03), (sd * 0.208, 0.0, 0.915)],
-                    [0.0135] * 5), 0.0, LEATHER)
-    s.add(path([(-0.10, 0.122, 1.122), (-0.02, 0.138, 1.040), (0.08, 0.128, 0.955), (0.18, 0.084, 0.885)], [0.0125] * 4), 0.0, LEATHER)
-    s.add(box((0.012, 0.142, 1.016), (0.022, 0.009, 0.024), 0.003, (0, 0.6, 0)), 0.0, IRON)
-    return s
-
-
-def cuff(J, n, s, vox=0.0024):
-    """The riveted iron cuff on each wrist."""
-    sx, wz = float(J["hand." + n][0]), float(J["hand." + n][2])
-    c = Field((sx - 0.11, -0.11, wz - 0.11), (sx + 0.11, 0.11, wz + 0.15), vox)
-
-    def fn(x, y, z):
-        r = np.sqrt((x - sx) ** 2 + y ** 2)
-        k = np.clip((z - (wz - 0.055)) / 0.15, 0, 1)
-        rad = 0.074 + 0.012 * k
-        return np.maximum(np.abs(r - rad) - 0.0115, np.abs(z - (wz + 0.020)) - 0.078)
-    c.add(custom(fn, (sx - 0.1, -0.1, wz - 0.07), (sx + 0.1, 0.1, wz + 0.11)), 0.0, RUST)
-    c.add(cyl((sx, 0, wz + 0.092), (0, 0, 1), 0.092, 0.012, 0.004), 0.0, IRON)
-    c.add(cyl((sx, 0, wz - 0.056), (0, 0, 1), 0.082, 0.012, 0.004), 0.0, IRON)
-    # a torn lip on the top edge
-    for i, a in enumerate((0.4, 1.9, 3.5, 5.0)):
-        c.add(ell((sx + 0.094 * math.cos(a), 0.094 * math.sin(a), wz + 0.108), (0.020, 0.020, 0.016)), 0.002, IRON)
-    return c
-
-
-# the gauntlet (left): a heavy scrap fist. Fingers on bones: fingers.L (knuckle), fingers2.L (the rest); thumb.L
-def gauntlet_joints(J):
-    x, z = float(J["hand.L"][0]), float(J["hand.L"][2])
-    return {"wrist": np.array((x, 0, z), F), "knuckle": np.array((x - 0.004, 0.006, z - 0.122), F),
-            "mid": np.array((x - 0.004, 0.030, z - 0.190), F), "thumb": np.array((x + 0.052, 0.040, z - 0.052), F),
-            "thumb2": np.array((x + 0.068, 0.070, z - 0.122), F)}
-
-
-def gauntlet(J, vox=0.0024):
-    g = gauntlet_joints(J)
-    x, z = float(g["wrist"][0]), float(g["wrist"][2])
-    p = {"palm": Field((x - 0.14, -0.11, z - 0.34), (x + 0.14, 0.15, z + 0.03), vox)}
-    a = p["palm"]
-    a.add(box((x, 0.004, z - 0.074), (0.058, 0.066, 0.058), 0.018), 0.0, IRON, "hand.L")
-    a.add(ell((x - 0.044, 0.004, z - 0.080), (0.030, 0.060, 0.060)), 0.012, RUST, "hand.L")                 # the back of the hand
-    kx = (-0.046, -0.022, 0.003, 0.027)
-    fy = (-0.040, -0.014, 0.014, 0.042)
-    lens = (0.74, 0.92, 1.0, 0.86)
-    for i in range(4):
-        y = fy[i]
-        l = lens[i]
-        k0 = np.array((x - 0.006, y, z - 0.126), F)
-        k1 = k0 + (0.006, 0.0, -0.062 * l)
-        k2 = k1 + (0.022, 0.0, -0.046 * l)
-        k3 = k2 + (0.032, 0.0, -0.028 * l)
-        a.add(sph(tuple(k0), 0.0185), 0.004, RUST, "fingers.L")
-        a.add(cap(k0, k1, 0.0165, 0.0155), 0.0, IRON, "fingers.L")
-        a.add(sph(tuple(k1), 0.0170), 0.0, RUST, "fingers2.L")
-        a.add(cap(k1, k2, 0.0150, 0.0138), 0.0, IRON, "fingers2.L")
-        a.add(cap(k2, k3, 0.0130, 0.0062), 0.003, IRON, "fingers2.L")
-    t0, t1 = g["thumb"], g["thumb2"]
-    a.add(sph(tuple(t0), 0.024), 0.008, IRON, "thumb.L")
-    a.add(cap(t0, t1, 0.0185, 0.0135), 0.0, IRON, "thumb.L")
-    return a
-
-
-def hook_frame(J):
-    """The hook's own frame on the right wrist: shank straight down, the curve in the sagittal plane, the point forward and up."""
-    w = np.array((float(J["hand.R"][0]), 0, float(J["hand.R"][2])), F)
-    return w
-
-
-HOOK_SCALE = 1.30           # past the art: from above this has to read as THE hook
-
-
-def hook_curve():
-    """Centre line in (y, z) from the socket's ball to the point, wrist at the origin, metres."""
-    k = HOOK_SCALE
-    pts = [(0.0, -0.100), (0.0, -0.15), (-0.003, -0.20)]
-    cz = -0.275
-    R = 0.088
-    for a in np.radians(np.linspace(180 + 8, 360 + 55, 11)):
-        pts.append((R * math.cos(a) + R, cz + R * math.sin(a)))
-    return np.array([(y * k, z * k) for y, z in pts], F)
-
-
-def hook(J, vox=0.0028):
-    """A gaff: socket, ball, a flat tapered J with a barb. In the wrist's frame, moved onto the wrist at build time by hook_xf."""
-    x = float(J["hand.R"][0])
-    wz = float(J["hand.R"][2])
-    k = HOOK_SCALE
-    h = Field((x - 0.07, -0.13, wz - 0.74), (x + 0.07, 0.34, wz - 0.03), vox)
-    c = hook_curve()
-    n = len(c)
-    rx = np.interp(np.arange(n), (0, 4, n - 1), (0.024 * k, 0.019 * k, 0.0035))        # across: flat
-    ry = np.interp(np.arange(n), (0, 4, n - 1), (0.029 * k, 0.026 * k, 0.004))         # in the plane
-    pts = np.stack((np.full(n, x, F), c[:, 0], wz + c[:, 1]), 1)
-
-    def blade(px, py, pz):
-        best = np.full(np.broadcast(px, py, pz).shape, 9.0, F)
-        for i in range(n - 1):
-            a, b = pts[i], pts[i + 1]
-            ab = b[1:] - a[1:]
-            l2 = float(ab @ ab)
-            t = np.clip(((py - a[1]) * ab[0] + (pz - a[2]) * ab[1]) / l2, 0, 1)
-            dy = py - a[1] - ab[0] * t
-            dz = pz - a[2] - ab[1] * t
-            ri = ry[i] + (ry[i + 1] - ry[i]) * t
-            xi = rx[i] + (rx[i + 1] - rx[i]) * t
-            d = np.sqrt((dy * dy + dz * dz) / (ri * ri) + ((px - x) / xi) ** 2) - 1.0
-            best = np.minimum(best, d * np.minimum(ri, xi))
-        return best
-    h.add(custom(blade, (x - 0.05, -0.13, wz - 0.74), (x + 0.05, 0.34, wz - 0.1)), 0.0, IRON)
-    # the barb, inside the point
-    t = pts[-3]
-    u = pts[-1] - pts[-3]
-    u = u / np.linalg.norm(u)
-    h.add(cap(t, t + np.array((0, -0.040, 0.0), F) * k + u * -0.03, 0.012, 0.003), 0.003, IRON)
-    # the socket bell and ball (the art's: a bell, a ball, then the shank)
-    bell = lambda px, py, pz: np.maximum(np.sqrt((px - x) ** 2 + py ** 2) - (0.066 - 0.32 * (wz - 0.052 - pz) * 0.5), np.abs(pz - (wz - 0.095)) - 0.046)
-    h.add(custom(bell, (x - 0.08, -0.08, wz - 0.15), (x + 0.08, 0.08, wz - 0.04)), 0.0, RUST)
-    h.add(sph((x, 0.0, wz - 0.150), 0.026), 0.004, IRON)
-    h.add(cyl((x, 0, wz - 0.140), (0, 0, 1), 0.066, 0.006, 0.003), 0.0, IRON)
-    return h
-
-
-def hook_tip(J):
-    c = hook_curve()[-1]
-    return np.array((float(J["hand.R"][0]), float(c[0]), float(J["hand.R"][2]) + float(c[1])), F)
-
-
-def hook_mouth(J):
-    c = hook_curve()
-    m = c[len(c) // 2 + 1]
-    return np.array((float(J["hand.R"][0]), float(m[0]) * 0.75, float(J["hand.R"][2]) + float(m[1]) * 0.9), F)
 
 
 # the blunderbuss: lies across his left hip on a swivel, a flared mouth. Local: +Y to the muzzle; the swivel at the origin
@@ -601,7 +242,8 @@ def door(h, c, hw, hh, R):
         h.add(fixed(c, R, strap, math.hypot(hw, hh) + 0.05), 0.0, LEATHER)
 
 
-HB = np.array((0.0, -0.30, 1.12), F)      # the hoard bone's head
+HOARD_SHIFT = np.array((0.0, -0.06, 0.0), F)     # v1's hoard onto v2's back: its front inside his lower back, resting on the hump
+HB = np.array((0.0, -0.30, 1.12), F) + HOARD_SHIFT      # the hoard bone's head
 
 
 def hoard(vox=0.0052):
@@ -654,38 +296,6 @@ def hoard(vox=0.0052):
     return h
 
 
-def frames(vox=0.0052):
-    """What the scan hoard doesn't carry: the coin heap behind his head, the timbers and iron arms for the bells and lanterns, the top hook."""
-    h = Field((-0.56, -0.40, 1.08), (0.56, 0.0, 1.86), vox)
-    # the coin heap behind his head, spilling to his left (the gold is the pile's bright spot from above)
-    coin = lambda x, y, z: 0.0
-    coin = lambda x, y, z: 0.018 * np.sin(x * 37 + y * 11) * np.sin(y * 29 + z * 13)
-    h.add(ell((0.125, -0.135, 1.265), (0.150, 0.095, 0.085), (0.10, 0.10, 0)), 0.02, GOLD, None, coin)
-    h.add(ell((-0.085, -0.150, 1.285), (0.115, 0.085, 0.070), (0.0, -0.2, 0)), 0.02, GOLD, None, coin)
-    h.add(ell((-0.245, -0.125, 1.205), (0.085, 0.080, 0.062)), 0.03, GOLD, None, coin)
-    rng = np.random.RandomState(3)
-    for i in range(24):
-        a = rng.uniform(0, math.tau)
-        c = (0.02 + rng.uniform(-0.29, 0.25), -0.135 + rng.uniform(-0.08, 0.07), 1.33 + rng.uniform(-0.07, 0.03))
-        ax = np.array((rng.uniform(-0.5, 0.5), rng.uniform(-0.5, 0.5), 1.0), F)
-        ax /= np.linalg.norm(ax)
-        h.add(cyl(c, ax, 0.040, 0.0075, 0.002), 0.0, GOLD)
-    # the frames: timbers fanning out of the pile to carry the bells and lanterns
-    for s in (1, -1):
-        h.add(path([(s * 0.10, -0.22, 1.30), (s * 0.255, -0.22, 1.56), (s * 0.30, -0.22, 1.62)], [0.024, 0.021, 0.019]), 0.0, _item("beam", (0, 0, 0), np.eye(3, dtype=F)) if s > 0 else HOARD[-1]["id"])
-        h.add(path([(s * 0.42, -0.21, 1.33), (s * 0.325, -0.215, 1.57), (s * 0.30, -0.215, 1.625)], [0.021, 0.020, 0.018]), 0.0, HOARD[-1]["id"])
-        h.add(path([(s * 0.14, -0.215, 1.46), (s * 0.40, -0.21, 1.42)], [0.0175, 0.0175]), 0.0, HOARD[-1]["id"])
-        h.add(sph((s * 0.303, -0.215, 1.640), 0.024), 0.0, IRON)
-        # iron arm out from the apex, the lantern's chain hangs from it
-        h.add(path([(s * 0.305, -0.215, 1.635), (s * 0.395, -0.215, 1.69), (s * 0.475, -0.215, 1.645)], [0.0115, 0.0105, 0.0095]), 0.0, IRON)
-    # the hook on top, the art's crown
-    h.add(path([(0.075, -0.385, 1.68), (0.095, -0.395, 1.79)], [0.010, 0.010]), 0.0, IRON)
-    h.add(_ring((0.095, -0.395, 1.805), (0, 1, 0), 0.020, 0.0068), 0.0, IRON)
-    return h
-
-
-
-
 BELL_R = 0.082
 BELL_H = 0.135
 
@@ -729,7 +339,7 @@ def lantern(vox=0.0020):
 # the junk ball: built at true size round the origin, the mesh is shrunk into the sack at rest (bone `ball`); the roll scales it back up
 BALL_R = 0.52
 BALL_REST = 1.0 / 3.8        # (at rest it hides inside the sack)
-BALL_AT = np.array((0.0, -0.29, 1.04), F)
+BALL_AT = np.array((0.0, -0.29, 1.04), F) + HOARD_SHIFT
 
 
 def ball(vox=0.030):

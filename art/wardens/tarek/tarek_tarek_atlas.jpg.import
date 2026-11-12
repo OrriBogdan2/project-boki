@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cx8jg3c80f0wr"
+uid="uid://lpsonxtw700d"
 path.bptc="res://.godot/imported/tarek_tarek_atlas.jpg-418c78b60aace3c432b8ba8bc06e83ed.bptc.ctex"
 path.astc="res://.godot/imported/tarek_tarek_atlas.jpg-418c78b60aace3c432b8ba8bc06e83ed.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "13f9db7f5a655d488c5329d01312d686"
+"md5": "9c7c6875d3b7622099bf2a731d5eb2b2"
 }
 
 [deps]

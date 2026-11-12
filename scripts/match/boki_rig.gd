@@ -2,14 +2,15 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and "kburst" (a factor on the gait's
+## cadence), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
-## gets a soft shadow on the ground under it.
+## gets a soft shadow on the ground under it. "coat" overrides COAT_LOOK (a matte skin: less fresnel, rim and top
+## light, no sheen).
 const FRAME := {
 	"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72, "carry": Vector3(0, 0.3, -0.34),
 		"ear_tip": Vector3(0.218, 0.838, -0.081), "tail_tip": Vector3(0, 0.77, 0.10), "tip_bone": "tail7", "hip": 0.22,
@@ -27,13 +28,113 @@ const FRAME := {
 		"ear_tip": Vector3(0.15, 0.41, -0.15), "tail_tip": Vector3(0, 0.19, 0.43), "tip_bone": "tail2", "hip": 0.11,
 		"marks": {"left flank": Vector3(-0.25, 0.22, 0.1), "right flank": Vector3(0.25, 0.22, 0.1),
 			"back": Vector3(0, 0.4, 0.26), "chest": Vector3(0, 0.17, -0.22)}},
+	"rimeshrew": {"head": Vector3(0, 0.29, -0.32), "top": 0.43, "carry": Vector3(0, 0.5, 0.05),
+		"ear_tip": Vector3(0.11, 0.43, -0.16), "tail_tip": Vector3(0, 0.345, 0.59), "tip_bone": "tail5", "hip": 0.13,
+		"marks": {"left flank": Vector3(-0.145, 0.22, 0.08), "right flank": Vector3(0.145, 0.22, 0.08),
+			"back": Vector3(0, 0.33, 0.12), "chest": Vector3(0, 0.17, -0.16)}},
+	"zephyrak": {"head": Vector3(0, 0.36, -0.4), "top": 0.5, "carry": Vector3(0, 0.36, 0.06),
+		"ear_tip": Vector3(0.261, 0.414, -0.113), "tail_tip": Vector3(0, 0.225, 0.369), "tip_bone": "tail6", "hip": 0.0,
+		"hover": true,
+		"marks": {"left flank": Vector3(-0.078, 0.158, 0.054), "right flank": Vector3(0.078, 0.158, 0.054),
+			"back": Vector3(0, 0.244, 0.054), "chest": Vector3(0, 0.16, -0.08)}},
+	"pebbit": {"head": Vector3(0, 0.295, -0.41), "top": 0.52, "carry": Vector3(0, 0.54, 0.05),
+		"ear_tip": Vector3(0.125, 0.45, -0.28), "tail_tip": Vector3(0, 0.057, 0.48), "tip_bone": "tail4", "hip": 0.15,
+		"marks": {"left flank": Vector3(-0.245, 0.28, 0.03), "right flank": Vector3(0.245, 0.28, 0.03),
+			"back": Vector3(0, 0.49, 0.05), "chest": Vector3(0, 0.18, -0.21)}},
+	"cairnback": {"head": Vector3(0, 0.30, -0.39), "top": 0.56, "carry": Vector3(0, 0.47, 0.23),
+		"ear_tip": Vector3(0.24, 0.345, -0.25), "tail_tip": Vector3(0, 0.095, 0.375), "tip_bone": "tail2", "hip": 0.15,
+		"marks": {"left flank": Vector3(-0.235, 0.26, 0.05), "right flank": Vector3(0.235, 0.26, 0.05),
+			"back": Vector3(0, 0.45, 0.22), "chest": Vector3(0, 0.19, -0.2)}},
+	"wisplet": {"head": Vector3(0, 0.44, -0.24), "top": 0.64, "carry": Vector3(0, 0.68, -0.02), "hip": 0.14,
+		"ear_tip": Vector3(0.204, 0.665, -0.038), "tail_tip": Vector3(0, 0.114, 0.257), "tip_bone": "tail1",
+		"marks": {"left flank": Vector3(-0.18, 0.22, 0.03), "right flank": Vector3(0.18, 0.22, 0.03),
+			"back": Vector3(0, 0.3, 0.18), "chest": Vector3(0, 0.25, -0.17)}},
+	"gloamshell": {"head": Vector3(0, 0.33, -0.35), "top": 0.6, "carry": Vector3(0, 0.56, 0.1),
+		"ear_tip": Vector3(0.085, 0.56, -0.29), "tail_tip": Vector3(0, 0.04, 0.42), "tip_bone": "tail2", "hip": 0.0,
+		"marks": {"left flank": Vector3(-0.15, 0.09, -0.05), "right flank": Vector3(0.15, 0.09, -0.05),
+			"back": Vector3(0, 0.16, 0.26), "chest": Vector3(0, 0.2, -0.3)}},
+	"selenfin": {"head": Vector3(0, 0.5, -0.27), "top": 0.66, "carry": Vector3(0, 0.74, 0.04),
+		"ear_tip": Vector3(0.19, 0.36, -0.03), "tail_tip": Vector3(0, 0.5, 0.43), "tip_bone": "tail3", "hip": 0.0,
+		"hover": true,
+		"marks": {"left flank": Vector3(-0.09, 0.42, 0.06), "right flank": Vector3(0.09, 0.42, 0.06),
+			"back": Vector3(0, 0.57, 0.04), "chest": Vector3(0, 0.33, -0.12)}},
+	"zapple": {"head": Vector3(0, 0.43, -0.32), "top": 0.6, "carry": Vector3(0, 0.42, 0.06),
+		"ear_tip": Vector3(0.135, 0.86, -0.087), "tail_tip": Vector3(0, 0.285, 0.295), "tip_bone": "tail2", "hip": 0.2,
+		"marks": {"left flank": Vector3(-0.165, 0.19, 0.07), "right flank": Vector3(0.165, 0.19, 0.07),
+			"back": Vector3(0, 0.32, 0.06), "chest": Vector3(0, 0.2, -0.16)}},
+	"hivara": {"head": Vector3(0, 0.43, -0.34), "top": 0.6, "carry": Vector3(0, 0.27, -0.3),
+		"ear_tip": Vector3(0.16, 0.72, -0.3), "tail_tip": Vector3(0, 0.21, 0.4), "tip_bone": "tail2", "hip": 0.17,
+		"marks": {"left flank": Vector3(-0.145, 0.26, 0.15), "right flank": Vector3(0.145, 0.26, 0.15),
+			"back": Vector3(0, 0.39, 0.16), "chest": Vector3(0, 0.24, -0.14)}},
+	"caecilith": {"head": Vector3(0, 0.465, -0.263), "top": 0.555, "carry": Vector3(0, 0.17, 0.09),
+		"ear_tip": Vector3(0.059, 0.535, -0.13), "tail_tip": Vector3(0, 0.027, 0.234), "tip_bone": "tail6", "hip": 0.0,
+		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
+		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
+			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
+	"glomwort": {"head": Vector3(0, 0.26, -0.22), "top": 0.42, "carry": Vector3(0, 0.5, 0.08),
+		"ear_tip": Vector3(0.085, 0.42, 0.07), "tail_tip": Vector3(0, 0.12, 0.28), "tip_bone": "hips", "hip": 0.0,
+		"marks": {"left flank": Vector3(-0.21, 0.13, 0.04), "right flank": Vector3(0.21, 0.13, 0.04),
+			"back": Vector3(0, 0.28, 0.14), "chest": Vector3(0, 0.1, -0.2)}},
+	"kestrike": {"head": Vector3(0, 0.46, -0.22), "top": 0.59, "carry": Vector3(0, 0.5, 0.16), "hip": 0.11,
+		"ear_tip": Vector3(0.147, 0.57, 0.124), "tail_tip": Vector3(0, 0.057, 0.342), "tip_bone": "tail2",
+		"marks": {"left flank": Vector3(-0.135, 0.15, 0.03), "right flank": Vector3(0.135, 0.15, 0.03),
+			"back": Vector3(0, 0.3, 0.125), "chest": Vector3(0, 0.275, -0.152)}},
+	"kindlewren": {"head": Vector3(0, 0.4, -0.22), "top": 0.6, "carry": Vector3(0, 0.64, -0.04), "hip": 0.12,
+		"ear_tip": Vector3(0.027, 0.616, -0.067), "tail_tip": Vector3(0, 0.49, 0.255), "tip_bone": "tail2",
+		"marks": {"left flank": Vector3(-0.165, 0.15, -0.02), "right flank": Vector3(0.165, 0.15, -0.02),
+			"back": Vector3(0, 0.33, 0.1), "chest": Vector3(0, 0.22, -0.175)}},
+	"lodestick": {"head": Vector3(0, 0.35, -0.45), "top": 0.47, "carry": Vector3(0, 0.33, 0.05),
+		"ear_tip": Vector3(0.19, 0.608, -0.437), "tail_tip": Vector3(0, 0.276, 0.523), "tip_bone": "tail3", "hip": 0.18,
+		"marks": {"left flank": Vector3(-0.048, 0.19, 0.076), "right flank": Vector3(0.048, 0.19, 0.076),
+			"back": Vector3(0, 0.24, 0.076), "chest": Vector3(0, 0.16, -0.1)}},
+	"marchleaf": {"head": Vector3(0, 0.35, -0.3), "top": 0.47, "carry": Vector3(0, 0.42, 0.18),
+		"ear_tip": Vector3(0.19, 0.61, -0.34), "tail_tip": Vector3(0, 0.29, 0.32), "tip_bone": "tail1", "hip": 0.15,
+		"marks": {"left flank": Vector3(-0.12, 0.24, 0.19), "right flank": Vector3(0.12, 0.24, 0.19),
+			"back": Vector3(0, 0.35, 0.18), "chest": Vector3(0, 0.19, -0.1)}},
+	"mossgrade": {"head": Vector3(0, 0.29, -0.33), "top": 0.43, "carry": Vector3(0, 0.53, 0.05),
+		"ear_tip": Vector3(0.125, 0.42, -0.19), "tail_tip": Vector3(0, 0.22, 0.3), "tip_bone": "hips", "hip": 0.1,
+		"marks": {"left flank": Vector3(-0.205, 0.24, 0.05), "right flank": Vector3(0.205, 0.24, 0.05),
+			"back": Vector3(0, 0.37, 0.22), "chest": Vector3(0, 0.15, -0.22)}},
+	"nettlynx": {"head": Vector3(0, 0.32, -0.32), "top": 0.46, "carry": Vector3(0, 0.47, 0.05),
+		"ear_tip": Vector3(0.175, 0.62, -0.143), "tail_tip": Vector3(0, 0.363, 0.322), "tip_bone": "tail3", "hip": 0.15,
+		"marks": {"left flank": Vector3(-0.14, 0.22, 0.055), "right flank": Vector3(0.14, 0.22, 0.055),
+			"back": Vector3(0, 0.34, 0.1), "chest": Vector3(0, 0.2, -0.17)}},
+	"thrumbird": {"head": Vector3(0, 0.84, -0.2), "top": 0.96, "carry": Vector3(0, 0.24, -0.03),
+		"ear_tip": Vector3(0.034, 0.6, 0.133), "tail_tip": Vector3(0, 0.133, 0.261), "tip_bone": "tail1", "hip": 0.12,
+		"hover": true,
+		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
+			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
+}
+## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
+const STRIDE := {
+	"cindle": [0.80, 1.60],
+	"puddlet": [0.58, 1.15],
+	"burrlet": [0.50, 1.02],
+	"glintmole": [0.49, 1.04],
+	"rimeshrew": [0.56, 1.09],
+	"zephyrak": [1.50, 2.90],
+	"pebbit": [0.48, 1.10],
+	"cairnback": [0.29, 0.90],
+	"wisplet": [0.45, 0.42],
+	"gloamshell": [1.50, 2.90],
+	"selenfin": [1.50, 2.90],
+	"zapple": [0.75, 1.74],
+	"hivara": [0.63, 1.42],
+	"caecilith": [0.14, 0.35],
+	"glomwort": [1.50, 2.90],
+	"kestrike": [0.30, 0.42],
+	"kindlewren": [0.39, 0.50],
+	"lodestick": [0.22, 0.62],
+	"marchleaf": [0.51, 2.02],
+	"mossgrade": [0.12, 0.74],
+	"nettlynx": [0.54, 1.07],
+	"thrumbird": [1.50, 2.90],
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
-const RUN_SPEED := 3.2        # m/s: from here it gallops
-const RUN_STRIDE := 2.9       # m/s the run clip covers at speed 1 (Vespyx: reach 1.3, pace 1.06)
-const WALK_STRIDE := 1.5
+const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
+const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -46,7 +147,8 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -68,6 +170,10 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -93,6 +199,7 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -101,11 +208,31 @@ var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
+var _flinch := KinFlinch.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
+## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
+static func fetch_common() -> void:
+	if not BackgroundWork.can_read_ahead():
+		return
+	for sp in Data.common_kin():
+		var p := PATH % [sp, sp]
+		if has(String(sp)) and not _scenes.has(p) \
+				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			BackgroundWork.request(p)
+
+static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
+static func _scene(kin_id: String) -> PackedScene:
+	var p := PATH % [kin_id, kin_id]
+	if not _scenes.has(p):
+		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+	return _scenes[p] as PackedScene
 
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
 static func work_clip(k: Dictionary) -> String:
@@ -121,7 +248,7 @@ static func work_clip(k: Dictionary) -> String:
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	var model_root := _scene(kin_id).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()
@@ -142,9 +269,11 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
+	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
 
@@ -178,17 +307,19 @@ func _process(dt: float) -> void:
 	player.active = seen
 	if not seen:
 		return
+	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
+## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = Vector3.ZERO
-	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
-	flex.position = Vector3(0, _flex_y, 0)
+	flex.rotation = _flinch.rot
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
@@ -217,13 +348,21 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
-	if want == "run":
-		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
-	elif want == "walk" or want == "carry":
-		player.speed_scale = clampf(_speed / WALK_STRIDE, 0.6, 1.6)
+	if want != "run" and want != "walk" and want != "carry":
+		return
+	# the world scale: a size roll's bigger Boki takes longer steps
+	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
+			* model.global_basis.z.length())
+	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
+	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:
 	_shot = which
@@ -231,7 +370,7 @@ func _start_shot(which: String) -> void:
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work
@@ -321,8 +460,9 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("albedo_tex", (src as BaseMaterial3D).albedo_texture)
 	for k in WardenGlb.PAINTED:
 		m.set_shader_parameter(k, WardenGlb.PAINTED[k])
-	for k in COAT_LOOK:
-		m.set_shader_parameter(k, COAT_LOOK[k])
+	var look: Dictionary = COAT_LOOK.merged(FRAME[species].get("coat", {}), true)
+	for k in look:
+		m.set_shader_parameter(k, look[k])
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
 	if id == "boki_coat":
 		_coat = m

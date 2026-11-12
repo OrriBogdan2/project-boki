@@ -2,15 +2,15 @@ class_name LDFx
 extends Node3D
 ## Cinder's and Dredge's own effects, pooled (one node per match, LDFx.of(m)). Every node is made once
 ## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look) plus
-## the see-through rope shader (shaders/ld_rope.gdshader).
+## the see-through arm shader (shaders/ld_arm.gdshader).
 ##
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
-##                         "pip", "spiral", "pilot", "anchor", "glow", "hand" (the Abyssal Hand); stop calling
+##                         "pip", "spiral", "pilot", "anchor", "glow", "hook" (the bone hook); stop calling
 ##                         and they hide
-## - rope(id, a, b)        the Abyssal Hand's arm (twisting strands), drawn through walls
-## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff, wisp, volley
+## - arm(id, a, b)         Grimble's stretched arm (purple flesh, a bone ridge), drawn through walls
+## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, puff, wisp, volley
 ##   (a Broadside slug)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
@@ -19,7 +19,7 @@ extends Node3D
 const SHADER: Shader = preload("res://shaders/ld_fx.gdshader")
 const GLOW_SHADER: Shader = preload("res://shaders/ld_fx_glow.gdshader")
 const ANCHOR_SHADER: Shader = preload("res://shaders/ld_anchor.gdshader")
-const ROPE_SHADER: Shader = preload("res://shaders/ld_rope.gdshader")
+const ARM_SHADER: Shader = preload("res://shaders/ld_arm.gdshader")
 const LAVA_SHADER: Shader = preload("res://shaders/ld_lava.gdshader")     # alpha-blended: dark rims stay dark
 const M_FLAME := 0
 const M_ORB := 1
@@ -46,7 +46,11 @@ const VOLLEY_HALO := 0.8
 const VOLLEY_SMEAR := 1.1
 const VOLLEY_WIDTH := 0.55
 const CINDER_HALO := Color("6a5aff")
-const ROPE_DARK := Color(0.42, 0.3, 0.22)    # the tarred strand of the braid (a vertex colour multiplier)
+const HOOK_R := 0.42          # m, the bone hook's curl
+const HOOK_BITS := 7          # pieces of the curl
+const ARM_SIDES := 6          # faces round the stretched arm
+const ARM_STEP := 0.3          # m between the arm's rings
+const ARM_BONE_FROM := 0.78   # how far along the arm (0..1) its flesh starts turning to bone
 const ANCHOR_IRON := Color("3a3f48")
 const ANCHOR_RIM := Color("5cffd8")     # seafoam: "harbour", and it stands off yellow-green grass
 const ANCHOR_DROP := 3.2       # m the anchor falls from (times its scale)
@@ -60,8 +64,7 @@ var live: Array = []           # one-shot effects: {node, t, dur, kind, s0, mat}
 var riders: Array = []         # looks riding on a shot: {node, sd, kind, last, on_end}
 var placed := {}               # id -> {node, kind, t}
 var flames := {}               # id -> {node, t}
-var ropes := {}                # id -> {node, mesh, t}
-var emitters: Array = []       # ember fountains: {at, t, dur, acc, col}
+var arms := {}                # id -> {node, mesh, t}
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _quad: QuadMesh
 var _plane: PlaneMesh
@@ -231,28 +234,27 @@ func _anchor_node() -> Node3D:
 		add.call(Models.box(0.34, 0.5, 0.34), Vector3(1.2 * sx, 1.0, 0), Vector3(0, 0, 0.3 * sx))
 	return n
 
-## The Abyssal Hand's head: a big open hand reaching ahead, palm down, four long fingers splayed and hooked at
-## the tips and a thumb, drawn through walls like the arm (+z is back toward Dredge).
-func _hand_node(col: Color) -> Node3D:
+## Grimble's bone hook, the end of the stretched arm: a knuckle, the jagged hook curling to one side, a short split
+## prong on the other and two spurs on top, drawn through walls like the arm (-z is the way it reaches).
+func _hook_node(_col: Color) -> Node3D:
 	var n := Node3D.new()
 	var mt := ShaderMaterial.new()
-	mt.shader = ROPE_SHADER
-	_param(mt, "color", col)
-	_param(mt, "color2", Color(1, 1, 1, 1))
-	_param(mt, "twist", 0.0)
-	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
-		var p := _mi(mesh, mt)
-		p.position = pos
-		p.rotation = rot
-		n.add_child(p)
-	add.call(Models.box(0.36, 0.1, 0.3), Vector3(0, 0, 0.08))                  # the palm, the wrist behind it
-	add.call(Models.box(0.2, 0.12, 0.18), Vector3(0, 0, 0.3))
-	for i in 4:
-		var x := -0.14 + 0.095 * float(i)
-		var spread := (float(i) - 1.5) * 0.16
-		add.call(Models.box(0.07, 0.07, 0.24), Vector3(x, 0, -0.16), Vector3(0, -spread, 0))
-		add.call(Models.box(0.06, 0.06, 0.16), Vector3(x * 1.35, -0.06, -0.34), Vector3(-0.7, -spread, 0))
-	add.call(Models.box(0.07, 0.07, 0.2), Vector3(0.22, 0, 0.0), Vector3(0, 0.8, 0))     # the thumb
+	mt.shader = ARM_SHADER
+	var bit := func(from: Vector3, to: Vector3, r0: float, r1: float) -> void:
+		var mi := _mi(Models.cyl(r1, r0, from.distance_to(to), 6), mt)
+		mi.transform = Transform3D(
+			Basis.looking_at(from.direction_to(to), Vector3.UP) * Basis(Vector3.RIGHT, -PI / 2), (from + to) * 0.5)
+		n.add_child(mi)
+	bit.call(Vector3(0, 0, 0.2), Vector3(0, 0, -0.12), 0.24, 0.2)
+	var prev := Vector3(0, 0, -0.1)
+	for i in HOOK_BITS:
+		var phi := 1.25 * PI * float(i + 1) / HOOK_BITS
+		var at := Vector3(HOOK_R * (1.0 - cos(phi)), 0.06 * phi, -0.1 - HOOK_R * sin(phi))
+		bit.call(prev, at, lerpf(0.17, 0.02, float(i) / HOOK_BITS), lerpf(0.17, 0.02, float(i + 1) / HOOK_BITS))
+		prev = at
+	bit.call(Vector3(-0.1, 0, -0.1), Vector3(-0.3, 0.02, -0.62), 0.11, 0.015)
+	bit.call(Vector3(0.05, 0.14, 0.12), Vector3(0.1, 0.4, 0.0), 0.07, 0.01)
+	bit.call(Vector3(-0.06, 0.15, 0.0), Vector3(-0.12, 0.38, -0.14), 0.06, 0.01)
 	return n
 
 # ------------------------------------------------------------------ the hose
@@ -457,10 +459,6 @@ func anchor_drop(at: Vector3, fall: float, scl := 1.2) -> Dictionary:
 func stop(e: Dictionary) -> void:
 	if not e.is_empty(): e["t"] = float(e["dur"])
 
-## Embers sprayed up and out of a spot for `dur` (Cinder Shot's impact).
-func embers(at: Vector3, dur := 0.6, col := Color("ff5a3a")) -> void:
-	emitters.append({"at": at, "t": 0.0, "dur": dur, "acc": 0.0, "col": col})
-
 # ------------------------------------------------------------------ immediate looks
 func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 	match kind:
@@ -470,7 +468,7 @@ func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 		"spiral": return _mi(_quad_mesh(), _mat(M_SPIRAL, col, col2, true))
 		"pilot", "glow": return _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
 		"anchor": return _anchor_node()
-		"hand": return _hand_node(col)
+		"hook": return _hook_node(col)
 		"skull": return _skull_node(col, col2)
 	return Node3D.new()
 
@@ -592,20 +590,21 @@ func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> 
 		var sp := clampf(vel.length() / 20.0, 0.15, 1.0)
 		tr.scale = Vector3(width, width, trail * sp)
 
-## The Abyssal Hand's arm from a to b this step, sinew strands twisting round each other (seen through walls).
-## Stop calling and it goes.
-func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
-	var e: Dictionary = ropes.get(id, {})
+## Grimble's arm stretched from a to b this step: a tube of purple flesh, thick at the shoulder end, thin and
+## sinewy between, swelling at the forearm and turning to bone at the hook; it sags a little and its flesh
+## pulses (seen through walls). Stop calling and it goes.
+func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
+	var e: Dictionary = arms.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
 		var im := ImmediateMesh.new()
 		var mt := ShaderMaterial.new()
-		mt.shader = ROPE_SHADER
+		mt.shader = ARM_SHADER
 		var mi := _mi(im, mt)
 		mi.top_level = true
 		add_child(mi)
 		made += 1
 		e = {"node": mi, "mesh": im}
-		ropes[id] = e
+		arms[id] = e
 	e["t"] = m.time
 	var mi2: MeshInstance3D = e["node"]
 	mi2.visible = true
@@ -621,23 +620,30 @@ func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void
 	if side.length() < 0.01: side = Vector3.RIGHT
 	side = side.normalized()
 	var up := side.cross(fwd).normalized()
-	var n := maxi(4, int(length / 0.15))
-	var w := thick * 0.42
-	for s in 3:
+	var n := maxi(3, int(length / ARM_STEP))
+	var rings: Array = []
+	for i in n + 1:
+		var k := float(i) / n
+		var r := thick * 0.5 * lerpf(1.0, 0.5, sin(minf(k * 1.6, 1.0) * PI * 0.5))     # thick shoulder to thin sinew
+		r *= 1.0 + 0.55 * smoothstep(0.7, 1.0, k)                                      # the forearm swells at the hook
+		r *= 1.0 + 0.1 * sin(k * length * 4.0 - float(m.time) * 9.0)                   # the flesh pulses
+		rings.append([a.lerp(b, k) + Vector3.UP * sin(k * PI) * length * 0.035, r, k])
+	for j in ARM_SIDES:
+		var ang0 := TAU * j / ARM_SIDES
+		var ang1 := TAU * (j + 1) / ARM_SIDES
 		im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
-		im2.surface_set_color(ROPE_DARK if s == 1 else Color.WHITE)
-		for i in n + 1:
-			var k := float(i) / n
-			var ph: float = k * length * 4.2 + TAU * s / 3.0 - float(m.time) * 3.0
-			var c := a.lerp(b, k) + (side * cos(ph) + up * sin(ph)) * thick * 0.32
-			im2.surface_set_uv(Vector2(k * length, 0))
-			im2.surface_add_vertex(c - up * w)
-			im2.surface_set_uv(Vector2(k * length, 1))
-			im2.surface_add_vertex(c + up * w)
+		for ring: Array in rings:
+			var k: float = ring[2]
+			im2.surface_set_color(Color(1, 1, 1, smoothstep(ARM_BONE_FROM, 1.0, k)))
+			for ang: float in [ang0, ang1]:
+				var dir := side * cos(ang) + up * sin(ang)
+				im2.surface_set_normal(dir)
+				im2.surface_set_uv(Vector2(k * length, ang / TAU))
+				im2.surface_add_vertex((ring[0] as Vector3) + dir * float(ring[1]))
 		im2.surface_end()
 
-func rope_shown(id: String) -> bool:
-	return ropes.has(id) and is_instance_valid(ropes[id]["node"]) and (ropes[id]["node"] as Node3D).visible
+func arm_shown(id: String) -> bool:
+	return arms.has(id) and is_instance_valid(arms[id]["node"]) and (arms[id]["node"] as Node3D).visible
 
 # ------------------------------------------------------------------ per step
 var _tracked_at := -1.0
@@ -703,17 +709,6 @@ func _process(_delta: float) -> void:
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)
-	for em in emitters.duplicate():
-		em["t"] = float(em["t"]) + delta
-		em["acc"] = float(em["acc"]) + delta
-		if float(em["acc"]) >= 0.07 and m.get("fx") != null:
-			em["acc"] = 0.0
-			m.fx.spark(
-				(em["at"] as Vector3) + Vector3(0, 0.9, 0),
-				Vector3(randf_range(-0.3, 0.3), 1.0, randf_range(-0.3, 0.3)), em["col"], 6, 5.0, 60.0, 0.45, 9.0, 1.3
-			)
-		if float(em["t"]) >= float(em["dur"]):
-			emitters.erase(em)
 	track()
 	for r in riders:
 		_pose(r["node"], r["sd"]["pos"], r["sd"]["vel"], float(r["trail"]), float(r["width"]))
@@ -725,7 +720,7 @@ func _process(_delta: float) -> void:
 	for id in flames.keys():
 		if m.time - float(flames[id].get("t", 0.0)) > KEEP:
 			flame_off(id)
-	for id in ropes.keys():
-		var e: Dictionary = ropes[id]
+	for id in arms.keys():
+		var e: Dictionary = arms[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP and is_instance_valid(e["node"]):
 			(e["node"] as Node3D).visible = false

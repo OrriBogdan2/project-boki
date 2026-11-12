@@ -21,7 +21,7 @@ static func _load(kind: String, id: String) -> Dictionary:
 	return out
 
 static func ability(id: String) -> AbilityDef:
-	var d := _load("abilities", id)
+	var d := _load("hunter_abilities", id)
 	return AbilityDef.from_dict(d) if not d.is_empty() else null
 
 static func weapon(id: String) -> WeaponDef:

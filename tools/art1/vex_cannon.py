@@ -1,11 +1,12 @@
-"""ART-1 Vex: the hybrid arm-cannon as data. She has NO human right arm: the riveted shoulder plate and the strut are upper_arm.R, the
-cannon itself is rigid on forearm.R (aim = arm pose), the barrels spin on `gatling`, and the makeshift launcher swings on `launcher`.
-The launcher rests bell-up past her shoulder as the master sheet draws it, and swings over the top onto the sleeve, bell forward, to
-throw (a post at its middle, the weapon sheet's mount). Cannon space: s along the cannon toward the barrels' tips (from the elbow pivot),
-u outward (+X at rest), f forward at rest (the TOP once she aims). Blender frame: Z up, she faces +Y, her right hand is +X."""
+"""ART-1 Vex v2: the minigun arm as data (briefs/art-refs/vex_v2/). Her right forearm IS the gun from the elbow down (no hand): the brass
+cuff over the elbow, the receiver with its side boss, six barrels on `gatling`, the ammo drum under the receiver, the ribbed belt loop
+over the top, the chain with the bullet charm. All rigid on forearm.R, so aim = arm pose. v2 has no launcher tube: the `launcher` bone
+stays (the clip set swings it) and carries nothing; its FX points sit on its pivot at the drum's mouth, where the charge leaves.
+Cannon space: s along the forearm from the elbow toward the muzzle, u outward (+X at rest), f forward at rest (the TOP once she aims).
+Blender frame: Z up, she faces +Y, her right hand is +X."""
 import json, os
 import numpy as np
-from meshkit import Piece, catmull, norm, smooth, sweep, frames
+from meshkit import Piece, norm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 _rig = json.load(open(os.path.join(HERE, "..", "..", "art", "wardens", "src", "vex_rig.json")))["bones"]
@@ -17,13 +18,15 @@ def J(b):
 
 
 E = J("forearm.R")                # the pivot
-OUT = 0.085                       # the cannon axis sits this far outside the elbow, clear of the hip
-SLEEVE_F, SLEEVE_R = 0.05, 0.072
-GATLING_F = -0.052
-TUBE_F, TUBE_R = 0.15, 0.041      # the launcher: its axis ahead of the sleeve; radius of the scrap pipe
-POST_S = -0.24                    # the launcher's pivot along the cannon
-BELL_S, BREECH_S = -0.52, -0.11    # bell mouth and breech at rest
-TIP_S = 0.535                      # the gatling's mouths
+OUT = 0.03                        # the gun's axis this far outside the elbow, clear of the hip
+CUFF_R = 0.056                    # the brass cuff over the elbow (sheet: cuff width = a third of the gun's length to the muzzle)
+REC_S0, REC_S1 = 0.12, 0.25       # the receiver along the gun
+REC_U, REC_F = 0.055, 0.06        # its half width (side) and half height (top)
+GATLING_F = 0.0                   # the barrels' axis
+TIP_S = 0.55                      # the barrels' mouths: elbow to muzzle 0.55 m = 31% of her height (the sheet: about 30%)
+DRUM_F, DRUM_R = -0.105, 0.058    # the ammo drum under the receiver (the bottom once she aims)
+DRUM_S0, DRUM_S1 = 0.10, 0.26
+PIVOT_S = DRUM_S1 + 0.02          # the charge's mouth, ahead of the drum
 
 
 def C(s, u=0.0, f=0.0):
@@ -34,8 +37,8 @@ def ring(n, phase=0.0):
     return [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, n, endpoint=False) + phase]
 
 
-def lathe(name, mat, centre_u, centre_f, prof, n=12, axis_s=None, bone="forearm.R", room=1.0, cap=True):
-    """A solid of revolution round the cannon axis: prof [(s, r)]. Open ends are closed with a fan (or left open, cap=False)."""
+def lathe(name, mat, centre_u, centre_f, prof, n=12, bone="forearm.R", cap=True):
+    """A solid of revolution round the gun's axis: prof [(s, r)]. Open ends are closed with a fan (or left open, cap=False)."""
     v, f = [], []
     sec = ring(n)
     for s, r in prof:
@@ -56,7 +59,7 @@ def lathe(name, mat, centre_u, centre_f, prof, n=12, axis_s=None, bone="forearm.
     return Piece(name, mat, np.array(v), f).rigid(bone)
 
 
-def box(name, mat, c, ax, ay, az, bone, room=1.0):
+def box(name, mat, c, ax, ay, az, bone="forearm.R"):
     """A box: centre, half-axis vectors."""
     c, ax, ay, az = [np.asarray(q, float) for q in (c, ax, ay, az)]
     v = [c + sx * ax + sy * ay + sz * az for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
@@ -64,208 +67,43 @@ def box(name, mat, c, ax, ay, az, bone, room=1.0):
     return Piece(name, mat, np.array(v), f).rigid(bone)
 
 
-def sleeve():
-    out = []
-    # the big sleeve: cap at the shoulder end, swelling through its brass bands to the wide grey mouth; hollow mouth
-    prof = [(-0.30, 0.0), (-0.30, 0.058), (-0.285, 0.076), (-0.255, 0.078), (-0.25, SLEEVE_R), (-0.17, SLEEVE_R), (-0.165, 0.078), (-0.135, 0.078), (-0.13, SLEEVE_R),
-            (0.10, SLEEVE_R), (0.105, 0.078), (0.135, 0.078), (0.14, SLEEVE_R), (0.175, SLEEVE_R), (0.18, 0.086), (0.235, 0.088), (0.245, 0.074), (0.245, 0.052), (0.15, 0.046), (0.15, 0.0)]
-    out.append(lathe("sleeve", "metal-vex", 0.0, SLEEVE_F, prof, n=14, cap=False))
+def body():
+    """The brass cuff (lipped at the elbow, banded at its foot), the receiver block and its side boss, the drum and its face."""
+    cuff = [(-0.035, 0.0), (-0.035, CUFF_R - 0.012), (-0.03, CUFF_R + 0.004), (-0.005, CUFF_R + 0.004), (0.0, CUFF_R), (0.11, CUFF_R),
+            (0.112, CUFF_R + 0.005), (0.13, CUFF_R + 0.005), (0.13, 0.0)]
+    out = [lathe("cuff", "brass-vex", 0.0, 0.0, cuff, n=14)]
+    sc_ = (REC_S0 + REC_S1) / 2
+    out.append(box("receiver", "brass-vex", C(sc_), (REC_U, 0, 0), (0, REC_F, 0), (0, 0, (REC_S1 - REC_S0) / 2)))
+    out.append(box("boss", "metal-vex", C(sc_, REC_U + 0.008), (0.008, 0, 0), (0, 0.036, 0), (0, 0, 0.04)))
+    out.append(lathe("drum", "brass-vex", 0.0, DRUM_F, [(DRUM_S0, 0.0), (DRUM_S0, DRUM_R - 0.006), (DRUM_S0 + 0.006, DRUM_R), (DRUM_S1 - 0.006, DRUM_R),
+                                                         (DRUM_S1, DRUM_R - 0.006), (DRUM_S1, 0.0)], n=14))
+    out.append(lathe("drumface", "metal-vex", 0.0, DRUM_F, [(DRUM_S1, 0.0), (DRUM_S1, 0.03), (DRUM_S1 + 0.008, 0.026), (DRUM_S1 + 0.008, 0.0)], n=10, cap=False))
     return out
 
 
 def gatling():
-    """Six barrels round a spindle, on the spin bone; two brass-and-iron collars. The collars read at the match camera."""
-    out = []
-    cu, cf = 0.0, GATLING_F
-    hub = lathe("gcollar0", "metal-vex", cu, cf, [(0.02, 0.0), (0.02, 0.05), (0.06, 0.056), (0.15, 0.056), (0.2, 0.05), (0.2, 0.0)], n=10, bone="forearm.R")
-    out.append(hub)
-    out.append(lathe("gspindle", "metal-vex", cu, cf, [(0.15, 0.022), (TIP_S - 0.02, 0.022)], n=6, bone="gatling", cap=False))
-    for s0, s1, r in ((0.36, 0.395, 0.058), (0.49, 0.52, 0.057)):
-        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 < 0.45 else "metal-vex", cu, cf, [(s0, 0.03), (s0, r), (s1, r), (s1, 0.03)], n=10, bone="gatling", cap=False))
+    """Six barrels round a spindle on the spin bone, the rear collar, a middle band and the muzzle plate."""
+    out = [lathe("gcollar", "metal-vex", 0.0, GATLING_F, [(REC_S1 - 0.005, 0.0), (REC_S1 - 0.005, 0.046), (REC_S1 + 0.03, 0.05), (REC_S1 + 0.045, 0.042), (REC_S1 + 0.045, 0.0)], n=12)]
+    out.append(lathe("gspindle", "metal-vex", 0.0, GATLING_F, [(REC_S1 + 0.04, 0.018), (TIP_S - 0.01, 0.018)], n=6, bone="gatling", cap=False))
+    for s0, s1, r in ((0.41, 0.43, 0.05), (TIP_S - 0.03, TIP_S - 0.005, 0.052)):
+        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 > 0.45 else "metal-vex", 0.0, GATLING_F, [(s0, 0.02), (s0, r), (s1, r), (s1, 0.02)], n=12, bone="gatling", cap=False))
     for i in range(6):
         t = i / 6 * 2 * np.pi
-        bu, bf = cu + 0.036 * np.cos(t), cf + 0.036 * np.sin(t)
-        out.append(lathe("barrel%d" % i, "metal-vex", bu, bf, [(0.15, 0.0165), (TIP_S, 0.0165), (TIP_S + 0.012, 0.019), (TIP_S + 0.022, 0.019), (TIP_S + 0.022, 0.0)], n=6, bone="gatling", cap=False))
+        bu, bf = 0.033 * np.cos(t), GATLING_F + 0.033 * np.sin(t)
+        out.append(lathe("barrel%d" % i, "metal-vex", bu, bf, [(REC_S1 + 0.04, 0.0125), (TIP_S, 0.0125), (TIP_S, 0.006), (TIP_S - 0.02, 0.006)], n=6, bone="gatling", cap=False))
     return out
 
 
-def launcher():
-    """On `launcher`: the scrap pipe, tape, the flared brass bell, the ring sight on its stalk, the clamp at the post."""
-    b = "launcher"
-    B0 = BELL_S + 0.09
-    prof = [(BREECH_S, 0.0), (BREECH_S, 0.03), (BREECH_S - 0.006, TUBE_R + 0.008), (BREECH_S - 0.04, TUBE_R + 0.008), (BREECH_S - 0.046, TUBE_R), (-0.385, TUBE_R), (-0.39, TUBE_R + 0.007), (-0.42, TUBE_R + 0.007), (-0.425, TUBE_R), (B0, TUBE_R)]
-    out = [lathe("tube", "metal-vex", 0.0, TUBE_F, prof, n=11, bone=b, cap=False)]
-    bell = [(B0, TUBE_R), (B0 - 0.03, TUBE_R + 0.004), (B0 - 0.055, TUBE_R + 0.016), (BELL_S + 0.008, TUBE_R + 0.042), (BELL_S, TUBE_R + 0.062), (BELL_S - 0.002, TUBE_R + 0.056), (BELL_S + 0.02, TUBE_R + 0.022), (BELL_S + 0.07, 0.024), (BELL_S + 0.07, 0.0)]
-    out.append(lathe("bell", "brass-vex", 0.0, TUBE_F, bell, n=13, bone=b, cap=False))
-    out.append(lathe("clamp", "metal-vex", 0.0, TUBE_F, [(POST_S - 0.05, TUBE_R + 0.002), (POST_S - 0.05, TUBE_R + 0.016), (POST_S + 0.05, TUBE_R + 0.016), (POST_S + 0.05, TUBE_R + 0.002)], n=9, bone=b, cap=False))
-    # the post: fixed to the sleeve
-    out.append(box("post", "metal-vex", C(POST_S, 0, (SLEEVE_F + TUBE_F) / 2), (0.014, 0, 0), (0, 0.032, 0), (0, 0, 0.035), "forearm.R"))
-    out.append(lathe("hub", "metal-vex", 0, 0, [(0, 0)], n=3, bone=b, cap=False)) if False else None
-    # the ring sight: a stalk off the tube's outer side, a flat ring
-    st = C(-0.36, TUBE_R * 0.4, TUBE_F + TUBE_R * 0.9)
-    tip = C(-0.36, 0.075, TUBE_F + 0.10)
-    out.append(sweep("stalk", "metal-vex", [st, (st + tip) / 2, tip], ring(4), np.full(3, 0.005), side_hint=np.array([0, 0, 1.0]), tip=False).rigid(b))
-    th = np.linspace(0, 2 * np.pi, 11)
-    c0 = tip + norm(tip - st) * 0.034
-    u_, v_ = norm(tip - st), np.array([0, 0, 1.0])
-    pts = [c0 + u_ * np.cos(t) * 0.034 + v_ * np.sin(t) * 0.034 for t in th]
-    out.append(sweep("sightring", "metal-vex", pts, ring(4), np.full(11, 0.0048), side_hint=np.cross(u_, v_), tip=False).rigid(b))
-    # the tape's loose tail: a thin strip, double-faced
-    a, n_ = C(-0.445, TUBE_R * 0.9, TUBE_F - 0.02), np.array([0, 1.0, 0])
-    strip = np.array([a, a + [0.012, 0.004, -0.022], a + [0.03, 0.002, -0.05], a + [0.052, -0.006, -0.07]])
-    v = np.vstack([strip - n_ * 0 - [0, 0.0, 0] + [0, 0.012, 0], strip + [0, -0.012, 0]])
-    f = [[i, i + 1, i + 5, i + 4] for i in range(3)] + [[i + 4, i + 5, i + 1, i] for i in range(3)]
-    out.append(Piece("tapetail", "cloth-vex", v, f).rigid(b))
-    return [p for p in out if p is not None]
-
-
-def poster():
-    """The wanted poster, its own sheet on the sleeve (top of the cannon when she aims): a curved patch, torn edges, the pin. The art is the weapon sheet's."""
-    rows, cols = 7, 6
-    r = SLEEVE_R + 0.0035
-    rng = np.random.RandomState(7)
-    v, uv = [], []
-    S0, S1 = -0.125, 0.092
-    A = 0.78
-    for i in range(rows):
-        k = i / (rows - 1)
-        for j in range(cols):
-            q = j / (cols - 1)
-            a, s_ = (q - 0.5) * 2 * A, S0 + (S1 - S0) * k
-            if i in (0, rows - 1):
-                s_ += rng.uniform(-0.009, 0.009)
-            if j in (0, cols - 1):
-                a += rng.uniform(-0.09, 0.09)
-            v.append(C(s_, np.sin(a) * r, SLEEVE_F + np.cos(a) * r))
-            uv.append((q, k))
-    v = np.array(v)
-    f = []
-    for i in range(rows - 1):
-        for j in range(cols - 1):
-            a = i * cols + j
-            f.append([a, a + 1, a + 1 + cols, a + cols])
-    p = Piece("poster", "cloth-vex", v, f).rigid("forearm.R")
-    p.orient(tuple(C(0, 0, SLEEVE_F)))
-    p.pu = np.array(uv)
-    pin = lathe("posterpin", "metal-vex", 0.0, SLEEVE_F + r + 0.002, [(S0 + 0.012, 0.0), (S0 + 0.012, 0.009), (S0 + 0.019, 0.009), (S0 + 0.019, 0.0)], n=6, cap=False)
-    return [p, pin]
-
-
-def pumpkin(name, s, u, f, r, h):
-    """A fat ribbed grenade with a steel lid."""
-    n = 10
-    prof = [(s - h * 0.5, 0.0), (s - h * 0.5, r * 0.55), (s - h * 0.3, r * 0.92), (s, r), (s + h * 0.3, r * 0.92), (s + h * 0.5, r * 0.55), (s + h * 0.5, 0.0)]
-    p = lathe(name, "metal-vex", u, f, prof, n=n, cap=False)
-    return p
-
-
-def drum():
-    """The grenade drum outside the sleeve: two stacked grenades, the lid, the bracket."""
-    u, f = SLEEVE_R + 0.052, SLEEVE_F - 0.016
-    out = [pumpkin("gren0", 0.03, u, f, 0.046, 0.075), pumpkin("gren1", -0.05, u, f, 0.046, 0.075)]
-    out.append(lathe("dlid", "metal-vex", u, f, [(-0.10, 0.0), (-0.10, 0.05), (-0.085, 0.054), (-0.085, 0.0)], n=10, cap=False))
-    out.append(lathe("dfoot", "metal-vex", u, f, [(0.07, 0.0), (0.07, 0.044), (0.082, 0.044), (0.082, 0.0)], n=8, cap=False))
-    out.append(box("dbrkt", "brass-vex", C(0.0, SLEEVE_R + 0.008, SLEEVE_F), (0.016, 0, 0), (0, 0.024, 0), (0, 0, 0.1), "forearm.R"))
-    return out
-
-
-def plate():
-    """The riveted shoulder plate, the socket: a curved shell over the shoulder and down the strut, its back edge lobed as the weapon sheet."""
-    S = J("upper_arm.R")
-    rows, cols = 7, 10
-    v_out, v_in = [], []
-    for i in range(rows):
-        k = i / (rows - 1)
-        for j in range(cols):
-            a = (j / (cols - 1) - 0.5) * 3.5                       # round the arm, front to back through the outside
-            w = (0.105 - 0.03 * k) * (1.0 - 0.28 * smooth(0.7, 1.0, abs(a) / 1.75))
-            cz = S[2] + 0.07 - 0.27 * k
-            top = smooth(0.0, 0.22, k) * 0.7 + 0.3
-            x = S[0] + 0.022 + np.cos(a) * w * top * 1.02 + 0.03 * k
-            y = np.sin(a) * w * 1.05
-            v_out.append((x, y, cz))
-            v_in.append((S[0] + 0.022 + np.cos(a) * (w * top - 0.012) * 1.02 + 0.03 * k, np.sin(a) * (w - 0.012) * 1.05, cz))
-    v = np.array(v_out + v_in)
-    f = []
-    n = rows * cols
-    for i in range(rows - 1):
-        for j in range(cols - 1):
-            a = i * cols + j
-            f.append([a, a + 1, a + 1 + cols, a + cols])
-            f.append([n + a, n + a + cols, n + a + 1 + cols, n + a + 1])
-    for j in range(cols - 1):
-        f.append([j + 1, j, n + j, n + j + 1])
-        a = (rows - 1) * cols + j
-        f.append([a, a + 1, n + a + 1, n + a])
-    for i in range(rows - 1):
-        a = i * cols
-        f.append([a, a + cols, n + a + cols, n + a])
-        b = a + cols - 1
-        f.append([b + cols, b, n + b, n + b + cols])
-    return Piece("plate", "metal-vex", v, f).rigid("upper_arm.R")
-
-
-def strut():
-    """The upper arm: a hydraulic strut from the socket to the elbow pivot, and the pivot's drum through the cannon."""
-    S = J("upper_arm.R")
-    a = S + [0.018, 0, -0.14]
-    out = [sweep("strut", "metal-vex", [a, (a + E) / 2, E + [0, 0, 0.01]], ring(7), np.array([0.05, 0.043, 0.038]), side_hint=np.array([0, 1.0, 0]), tip=False).rigid("upper_arm.R")]
-    d = np.array([1.0, 0, 0])
-    ctr = E + [OUT * 0.5, 0, 0]
-    t = np.array([ctr - d * 0.05, ctr + d * 0.05])
-    out.append(sweep("pivot", "brass-vex", [t[0], t[0] + d * 0.002, t[1] - d * 0.002, t[1]], ring(10), np.array([0.03, 0.047, 0.047, 0.03]), side_hint=np.array([0, 1.0, 0]), tip=False).rigid("forearm.R"))
-    return out
-
-
-def hose(name, pts, r=0.0125, n=9, bones=None, sec=5):
-    path = catmull(np.array(pts, float), n)
-    p = sweep(name, "metal-hose", path, ring(sec), np.full(n, r), side_hint=np.array([0.3, 0.3, 0.9]), tip=False)
-    t = np.repeat(np.linspace(0, 1, n), sec)
-    bones = bones or ["hips"]
-    if len(bones) == 1:
-        p.rigid(bones[0])
-    else:
-        b0, b1 = bones
-        q = smooth(0.25, 0.75, t)
-        p.w = {b0: 1 - q, b1: q}
-    p.t = t
-    return p
-
-
-def gear_pack(z_top, back_y):
-    """The gear pack: the brass-rimmed round magazine high on her left shoulder blade (it leaves the spine bare), the belt loop round it, the feed hose over the
-    neck to the socket. -> pieces, the belt's start."""
-    c = np.array([-0.12, back_y - 0.05, z_top + 0.06])
-    d = np.array([0, 1.0, 0.12])
-    d = norm(d)
-    a = norm(np.cross(d, (1.0, 0, 0)))
-    b = np.cross(d, a)
-
-    def lat(name, mat, prof, n=14):
-        v, f = [], []
-        for s, r in prof:
-            for t in np.linspace(0, 2 * np.pi, n, endpoint=False):
-                v.append(c + d * s + a * np.cos(t) * r + b * np.sin(t) * r)
-        for i in range(len(prof) - 1):
-            for j in range(n):
-                p, q = i * n + j, i * n + (j + 1) % n
-                f.append([p, q, q + n, p + n])
-        return Piece(name, mat, np.array(v), f).rigid("hips")
-    out = [lat("packdisc", "metal-vex", [(0.03, 0.0), (0.03, 0.07), (0.0, 0.076), (-0.036, 0.076), (-0.042, 0.062), (-0.042, 0.0)]),
-           lat("packrim", "brass-vex", [(-0.052, 0.07), (-0.058, 0.058), (-0.044, 0.044), (-0.037, 0.044), (-0.036, 0.078), (-0.046, 0.078)])]
-    return out, c, a, b
-
-
-def belt_path_tile(name, path, width=0.021, uvrect=(0, 0, 1, 1), hint=None):
-    """The ammunition belt: a saw-tooth ribbon, each cartridge a raised step, with a tiled paint."""
+def belt_path_tile(name, path, width=0.021, uvrect=(0, 0, 1, 1), up=None):
+    """A ribbed belt: a saw-tooth ribbon, each link a raised step, with a tiled paint. up: the ribs' outward side per point."""
     p = np.asarray(path, float)
     t = norm(np.gradient(p, axis=0))
-    n = norm(p * [1, 1, 0] - [0, -0.02, 0])
+    n = norm(up if up is not None else p * [1, 1, 0] - [0, -0.02, 0])
     s = norm(np.cross(t, n))
     n = norm(np.cross(s, t)) * np.sign(np.sum(np.cross(s, t) * n, axis=1, keepdims=True))
     v, f, uv = [], [], []
     for i in range(len(p)):
-        h = 0.021 if i % 2 == 0 else 0.007
+        h = 0.016 if i % 2 == 0 else 0.004
         v.append(p[i] + s[i] * width)
         v.append(p[i] + n[i] * h)
         v.append(p[i] - s[i] * width)
@@ -280,16 +118,49 @@ def belt_path_tile(name, path, width=0.021, uvrect=(0, 0, 1, 1), hint=None):
     return Piece(name, "metal-belt", np.array(v), f, uv, room=0.3)
 
 
+def belt_loop():
+    """The ammo belt's loop: out of the cuff's top, arching over the gun, back into the receiver (the sheet's ribbed loop), on the outer side."""
+    th = np.linspace(0.0, np.pi, 23)
+    c_s, c_f, rs, rf = 0.11, REC_F + 0.005, 0.105, 0.13
+    pts = np.array([C(c_s - rs * np.cos(a), 0.035, c_f + rf * np.sin(a)) for a in th])
+    up = pts - C(c_s, 0.035, c_f)
+    p = belt_path_tile("ammoloop", pts, width=0.026, up=up)
+    return p.rigid("forearm.R")
+
+
+def charm():
+    """The chain off the drum's mouth and the bullet on its end, a green charm beside: hanging toward the ground once she aims (-f)."""
+    out, top = [], C(DRUM_S1 - 0.02, 0.0, DRUM_F - DRUM_R)
+    for i in range(4):
+        c = top + np.array([0, -0.017 * i - 0.01, 0])
+        wide, thin = ((0.006, 0, 0), (0, 0, 0.0015)) if i % 2 == 0 else ((0, 0, 0.006), (0.0015, 0, 0))
+        out.append(box("chain%d" % i, "metal-vex", c, wide, (0, 0.009, 0), thin))
+    bt = top + np.array([0, -0.075, 0])
+    v = []
+    prof = [(0.0, 0.0), (0.0, 0.0095), (0.03, 0.0095), (0.042, 0.007), (0.05, 0.0)]
+    for d, r in prof:
+        for a, b in ring(8):
+            v.append(bt + np.array([a * r, -d, b * r]))
+    f = [[i * 8 + j, i * 8 + (j + 1) % 8, (i + 1) * 8 + (j + 1) % 8, (i + 1) * 8 + j] for i in range(len(prof) - 1) for j in range(8)]
+    out.append(Piece("bullet", "brass-vex", np.array(v), f).rigid("forearm.R"))
+    g = top + np.array([0, -0.035, -0.02])
+    gv = np.array([g + np.array([np.cos(a) * np.sin(b), np.cos(b), np.sin(a) * np.sin(b)]) * 0.013 for b in np.linspace(0, np.pi, 5) for a in np.linspace(0, 2 * np.pi, 8, endpoint=False)])
+    gf = [[i * 8 + j, i * 8 + (j + 1) % 8, (i + 1) * 8 + (j + 1) % 8, (i + 1) * 8 + j] for i in range(4) for j in range(8)]
+    out.append(Piece("gren0", "metal-vex", gv, gf).rigid("forearm.R"))
+    return out
+
+
 def all_pieces():
-    return sleeve() + gatling() + launcher() + drum() + [plate()] + strut()
+    return body() + gatling() + [belt_loop()] + charm()
 
 
 def empties():
     """FX points in rest space: (bone, position)."""
+    mouth = tuple(C(PIVOT_S, 0, DRUM_F))
     return {"weapon_muzzle": ("gatling", tuple(C(TIP_S + 0.03, 0, GATLING_F))),
             "gatling_muzzle": ("gatling", tuple(C(TIP_S + 0.03, 0, GATLING_F))),
-            "launcher_muzzle": ("launcher", tuple(C(BELL_S - 0.02, 0, TUBE_F))),
-            "launcher_fire": ("forearm.R", tuple(C(2 * POST_S - BELL_S + 0.02, 0, TUBE_F))),      # the bell's place once swung forward: fixed on the cannon, right at the press
-            "anchor_gatling_root": ("forearm.R", tuple(C(0.17, 0, GATLING_F))),
-            "anchor_sleeve_mouth": ("forearm.R", tuple(C(0.25, 0, SLEEVE_F))),
-            "anchor_grenade_drum": ("forearm.R", tuple(C(-0.01, SLEEVE_R + 0.052, SLEEVE_F - 0.016)))}
+            "launcher_muzzle": ("launcher", mouth),          # on the launcher's pivot: the clip's swing leaves it in place
+            "launcher_fire": ("forearm.R", mouth),
+            "anchor_gatling_root": ("forearm.R", tuple(C(REC_S1 + 0.04, 0, GATLING_F))),
+            "anchor_sleeve_mouth": ("forearm.R", tuple(C(-0.035, 0, 0))),
+            "anchor_grenade_drum": ("forearm.R", tuple(C((DRUM_S0 + DRUM_S1) / 2, 0, DRUM_F)))}

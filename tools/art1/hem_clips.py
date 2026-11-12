@@ -14,12 +14,14 @@ from mathutils import Quaternion, Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
-import hem_sculpt as H
+import hem_pieces as H
 import crouchkit
+import gardenkit
 from posekit import Clip, FnClip, Solver, ang_dir as D, frame_of, two_bone
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 J = H.joints(os.path.join(REPO, "art/wardens/src/hem_rig.json"))
+LIFT = Vector((0, 0, float(J["hips"][2]) - 0.777))   # the poses below were keyed on a hips at 0.777: hers stand this much taller
 A_Z = 0.082
 FPS = 30
 UP = (0, 0, 1)
@@ -55,12 +57,12 @@ class HemSolver(Solver):
     Rw 1: the right hand on the string's nock, drawn dr (0..1) from its rest to the anchor at her jaw; Rw 0: free at RF."""
 
     def __init__(self, arm, pinch):
-        super().__init__(arm, {"pelvis": 0.777, "blade_rest": GA, "edge_rest": GS})
+        super().__init__(arm, {"pelvis": float(J["hips"][2]), "blade_rest": GA, "edge_rest": GS})
         self.bow_rest = frame_of(GA, GS)
         self.hand_rest = frame_of((0, 0, -1), (-1, 0, 0))
         self.pinch = Vector(pinch)
         self.nock0 = Vector(H.bow_to_model(_v3((0, H.STRING_Y, 0)), J))
-        self.anchor = Vector((-0.012, 0.140, 1.412))
+        self.anchor = Vector((-0.012, 0.140, float(J["head"][2]) - 0.027))    # her jaw, just under the head bone
         self.last = {}
 
     def solve(self, P):
@@ -80,7 +82,7 @@ class HemSolver(Solver):
         q_head = q_hips @ _eul(P["hed"])
         Q = {"root": q_root, "hips": q_hips, "head": q_head}
         # the bow hand
-        G = Vector(P["G"])
+        G = Vector(P["G"]) + LIFT
         BA, BS = Vector(P["BA"]).normalized(), Vector(P["BS"])
         q_bow = frame_of(BA, BS) @ self.bow_rest.inverted()
         WL = G - q_bow @ (Vector(GC) - H0["hand.L"])
@@ -88,11 +90,11 @@ class HemSolver(Solver):
         Q["upper_arm.L"], Q["forearm.L"], Q["hand.L"] = qu, qf, q_bow
         # the string's nock
         n0 = G + q_bow @ (self.nock0 - Vector(GC))
-        N = n0.lerp(Vector(P["CH"]) if "CH" in P else self.anchor, P["dr"])
+        N = n0.lerp(Vector(P["CH"]) + LIFT if "CH" in P else self.anchor, P["dr"])
         # the draw hand
         q_h = frame_of(P["RD"], P["RP"]) @ self.hand_rest.inverted()
         Won = N - q_h @ (self.pinch - H0["hand.R"])
-        WR = Vector(P["RF"]).lerp(Won, P["Rw"])
+        WR = (Vector(P["RF"]) + LIFT).lerp(Won, P["Rw"])
         qu, qf, _ = self.arm_ik("R", D_hips(H0["upper_arm.R"]), WR, Vector(P["Rpole"]), q_hips)
         Q["upper_arm.R"], Q["forearm.R"], Q["hand.R"] = qu, qf, q_h
         Q["pauldron.L"], Q["pauldron.R"] = q_hips, q_hips
@@ -229,9 +231,26 @@ def crouch_set():
     return crouchkit.quick(C, READY, STALK, STILL, hands=("G", "RF"), scan=0.22)
 
 
+# ---- the garden (DECISIONS 2026-11-09): cold and economical. She crouches to the Boki's height with the bow still low in her left hand; the right does the work, once and precisely
+# (flat palm on the head, a held-out snack with the fingers together), and the cheer is a short tight lift of the bow, the right fist at her chest, the chin up. No hop.
+TEND = dict(STALK, pel=(0.02, 0.06, -0.30), prt=(0.30, 0.16, -0.05), tor=(0.28, 0.08, 0.06), hed=(-0.52, -0.06, -0.02), G=(-0.27, 0.40, 0.56), brow=0.3, lid=0.1)
+PET_A = dict(TEND, RF=(0.06, 0.66, 0.66), RD=n3((0.0, 1.0, -0.25)), RP=n3((0.0, 0.25, -1.0)), Rpole=(1.0, -0.2, 0.2), Rw=0.0, fing=0.2)
+GIVE = dict(TEND, pel=(0.02, 0.06, -0.34), RF=(0.08, 0.64, 0.56), RD=n3((0.0, 1.0, 0.1)), RP=n3((0.0, 0.1, 1.0)), Rpole=(1.0, -0.2, 0.2), fing=0.05)
+PEAK = dict(READY, G=(-0.30, 0.30, 1.52), BA=n3((-0.1, 0.2, 1.0)), RF=(0.12, 0.2, 1.12), RD=n3((0.1, 0.4, 0.9)), RP=n3((-0.6, 0.6, 0.0)), fing=0.9, brow=0.6, lid=0.05, hed=(-0.40, -0.1, -0.04))
+
+
+def garden_set():
+    P = {"kneel": TEND, "pet_a": PET_A, "pet_b": dict(PET_A, RF=(0.06, 0.52, 0.68), tor=(0.26, 0.08, 0.06)),
+         "give": GIVE, "give_in": dict(GIVE, RF=(0.08, 0.54, 0.56)),
+         "dip": dict(READY, pel=(0.02, 0.0, -0.12), tor=(0.22, 0.10, 0.11)), "up": dict(PEAK, G=(-0.28, 0.4, 1.30), RF=(0.12, 0.3, 1.0)),
+         "peak": PEAK, "pump": dict(PEAK, G=(-0.3, 0.32, 1.44), RF=(0.12, 0.22, 1.06))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.04, "snap": 0.25})
+
+
 def clips():
     out = [F("idle", 3.6, idle), F("stance", 4.6, stance)]
     out += crouch_set()
+    out += garden_set()
     wk, rn = 1.04, 0.66
     for n, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(F("walk_" + n, wk, gait(0.45, h)))

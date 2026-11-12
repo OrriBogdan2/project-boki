@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://baiur65k8nr5w"
+uid="uid://b853ankdsroim"
 path.bptc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex"
 path.astc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "33196026e65aad4e265e0a09be6fd8b5"
+"md5": "fb1bdfe6b4d23b766e7692f2278c28a9"
 }
 
 [deps]

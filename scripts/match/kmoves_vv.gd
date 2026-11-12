@@ -1,11 +1,11 @@
 class_name KMovesVV
 extends RefCounted
-## Keyed full-body moves of Ryzz (mage) and Vex (gunslinger): same format and channels as
+## Keyed full-body moves of Sparkle (mage) and Vex (gunslinger): same format and channels as
 ## HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Each is timed to the reference sheet's beats
 ## (briefs/hero-ref/vireo.md, venator.md; 1 frame = 0.2 s there): anticipation, an exaggerated key pose
 ## on the release (squash or stretch), an overshoot past it, then the settle. fl / fr place a free hand
 ## from its shoulder (hw / rw their weight). A hand that holds the weapon moves it with wo / wa / gp
-## instead, so the weapon and the hand stay together: for Ryzz that is her right hand, the finger gun
+## instead, so the weapon and the hand stay together: for Sparkle that is her right hand, the finger gun
 ## (no gun model, a pointed finger and a wrist coil).
 
 ## Leg poses [hip_l, knee_l, hip_r, knee_r] the moves share.
@@ -20,7 +20,7 @@ const AIM_CROUCH := [0.55, -0.95, -0.2, -0.55]
 const SHOULDER := {"p": -0.08, "lift": -0.05, "sq": 0.05, "wo": Vector3(0.0, 0.0, 0.02), "legs": AIM_CROUCH, "lw": 0.7}
 
 const MOVES := {
-	# ---------------------------------------------------------------- Ryzz
+	# ---------------------------------------------------------------- Sparkle
 	# finger bolt, left hand: the hand drawn back to the chest (wound up the other way), flung straight
 	# out at the cursor with the finger pointed (a stretch), snapped up by the recoil, settled by 0.35
 	"mage_lmb_l": {"keys": [

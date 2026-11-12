@@ -44,14 +44,15 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
+const WEAPONS := {"thief": "arc_bolts", "gil": "swordfish", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
+	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind
 	rng.seed = 2026
-	low = Settings.quality() == "low"
+	low = Settings.lite()
 	fx_k = float(Settings.q("fx"))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--title-cam="):
@@ -275,7 +276,7 @@ func _skylands() -> void:
 		root.rotation.y = rr.randf() * TAU
 		root.add_child(isl)
 		add_child(root)
-		# shards that broke away in the Sundering drift underneath
+		# shards that broke away in the Hollowing drift underneath
 		for k in (3 if not low else 1):
 			var sh := Flora.node("rock", "storm", k % 3, r * rr.randf_range(0.18, 0.32))
 			sh.position = Vector3(rr.randf_range(-r, r), -r * rr.randf_range(0.8, 1.8), rr.randf_range(-r, r))
@@ -430,6 +431,7 @@ func _build_ui() -> void:
 	root.name = "TitleUI"
 	ui.add_child(root)
 	root.add_child(TitleBackdrop.new())
+	root.add_child(VoidSpecks.new())       # void specks drifting over the key art
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
@@ -481,17 +483,19 @@ func _build_ui() -> void:
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
+	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+	if has:
+		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
 	if not OS.has_feature("web"):
-		items.append(["Quit", func(): get_tree().quit(), "close"])
+		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
 		col.add_child(_menu_item(String(it[0]), it[1], String(it[2])))
 	var i := 0

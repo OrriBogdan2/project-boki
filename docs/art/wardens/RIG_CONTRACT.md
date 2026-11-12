@@ -150,11 +150,11 @@ the vertex colour (`vertex_ao`):
 | `void` | — (shaders/hero_void.gdshader: a drifting starfield over the paint, unlit) | — (Ostra's coat tears; `void-wisp` also fades out toward its tip: `WardenGlb.SOFT_TAGS`) |
 
 A material with an emissive texture (glTF `emissiveTexture`) gets the toon shader's emission layer (`use_emit`,
-`WardenGlb.EMIT`, crackling by `EMIT_FLICKER`): Ryzz's veins, Tarek's bracer cracks. The fit's `split` parts are
+`WardenGlb.EMIT`, crackling by `EMIT_FLICKER`): Sparkle's veins, Tarek's bracer cracks. The fit's `split` parts are
 pieces cut off the body as their own skinned mesh on one "<slot>-<name>" material (Tarek's `bracers`, Ostra's
 `mask`), with such a layer painted from the atlas (`emit`: the dark cracks between plates, or a colour range).
 With a `model_glow.core` colour in the archetype JSON the layer is a mask drawn in that colour (`emit_tint`), its
-texels' paint too, so a Warden's glow switches without a rebake (Ryzz's pink scar, charm, piping and veins: the
+texels' paint too, so a Warden's glow switches without a rebake (Sparkle's pink scar, charm, piping and veins: the
 fit's `emit_art` projects that layer from the art's neon onto the body's own materials).
 A .glb whose weapon is part of the body carries an empty `weapon` node (fit spec `weapon_empty`): the loader
 hides the procedural weapon and the Gun node and its Muzzle stay (Tarek's fists).
@@ -193,6 +193,9 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
   surface is on the hero toon shader with the atlas, the hit ring is unchanged, the budget holds, and the
   setting turns it procedural and back.
+- `--warden-rest-check`: the baked neutral rest (content/rules/warden_rest.json, WardenRest) equals the one
+  the procedural rig measures now, so a match builds the .glb without measuring it (0.15 to 0.7 s a Warden).
+  `-- --warden-rest-bake` rewrites the bake.
 - The Blender builds: `godot --headless -- --warden-rig-json --warden=<id>` writes the armature and landmarks
   (art/wardens/src/<name>_rig.json); `blender -b --factory-startup --python tools/blender/<name>.py` builds,
   bakes and exports (shared helpers in tools/blender/warden_kit.py; Vex first, see art/wardens/vex/IMPORT.md).

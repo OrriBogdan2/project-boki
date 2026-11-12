@@ -90,11 +90,11 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Archetype | Resource | Built by | Shape |
 |---|---|---|---|
 | Thief | **Marks** | hits from behind | stored on *targets* |
-| Archer | **Focus** | standing still or perched | stillness meter |
+| Archer | **Hawk Sense** | always on | no meter (Focus was cut, 2026-11-07) |
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
-| Bulwark | none (Crushed stun on a wall knock) | n/a | n/a |
+| Bulwark | **Guard** | blocking | defence meter |
 
   The Gunslinger's is the lightest. If playtests show six resources is too much to read, cut that one first.
 
@@ -164,14 +164,14 @@ kin part overpowered.
 
 New optional KinSpec field:
 `"infusion": {"hit": {...}, "ctrl": {...}, "guard": {...}, "util": {...}, "mod": [{...}, ...], "move": "blink"}`.
-If a kin leaves it out, it's **derived from the kin's current E active and rider**:
+If a kin leaves it out, it's **derived from the kin's current E active** (dodge riders are retired, owner 2026-11-05: dashes are the hero's own):
 
 1. `hit` ← the first damage effect with `over` > 0, or a damage-category mark.
 2. `ctrl` ← the first control effect.
 3. `guard` ← the first sustain effect.
 4. `util` ← the first utility effect.
-5. `mod` ← the active's modifiers in order, then the dodge rider's modifiers.
-6. `move` ← `dodge_rider.as`.
+5. `mod` ← the active's modifiers in order.
+6. `move`: retired with the dodge riders (no kin changes how you dash).
 
 The six kin today:
 
@@ -216,8 +216,7 @@ The six kin today:
 ## 5. Merge vs R: resolving the conflict
 
 > **Superseded (docs/decisions/0001-boki-merge-and-commands.md):** R is the Merge for every class. The
-> options below are kept for the record; the class's own R stays reachable behind
-> `content/rules/boki_system.json` `class_ults` until the hero-port work folds it into the kits.
+> options below are kept for the record; the class R switch (`class_ults`) is removed.
 
 Today the merge **is** R (the bond ultimate, unlocking at run level 6). The new kit gives R to the
 archetype. Options:
@@ -664,7 +663,14 @@ shape and the banner**.
 The shield's HP is 160, regenerating 20/s after 2s lowered. If it breaks, it's locked out for 3s. It
 has no cooldown; it's HP-gated.
 
-**Passive: Crushed.** Any knock of his that drives a foe into a wall or another foe stuns it 0.5s (owner decision 2026-11-07: the Guard meter was invented and is cut; there is no resource and no Guard HUD).
+**Passive: Guard.** Damage blocked by your shield, your walls or your Interpose guard becomes Guard
+(1 per 2 HP blocked, max 100). It decays 5/s out of combat. It's spent by:
+- an empowered Bash (50);
+- the Interpose ally-leap shield (20 for its +15 shield);
+- Bastion (all of it: +1s per 50).
+
+**Tells:** shield runes light in three steps (33, 66, 100); the crest glows at 100. HUD: a Guard bar
+on the shield icon.
 
 **RMB: Shield**:
 
@@ -674,6 +680,7 @@ has no cooldown; it's HP-gated.
 | tap | **Bash** (6s): a 2.5m, 90° cone, 10 damage, push 8. Stun 0.8 into a wall |
 | airborne / gliding | **Shield Surf**: hold to block from the front while gliding (frontal hits can't spike you); glider heat builds 25% faster while it's up |
 | during E (inside the Banner's radius) | the shield is +1.5m wider (it covers allies), and a Bash heals allies behind you 8 |
+| Guard 50+ | the Bash becomes **Shield Slam** (spends 50): push 12 and stun 0.6 even without a wall. A 0.3s shield flare is the tell |
 
 **E: Rally Banner** (18s, utility): plant a banner totem up to 7m away for 6s (60 HP, 4m radius).
 Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
@@ -686,12 +693,13 @@ Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
   - On start, foes inside are pushed out (12).
   - Allies inside regenerate 8/s.
   - Bodies can still walk in.
+  - It spends all Guard for +1s per 50.
 - **Counterplay:** walk in and fight up close, or reposition and wait it out.
 
-**Dash: Interpose** (DASHES §3.2): a braced step, or a leap to an ally.
+**Dash: Interpose** (DASHES §3.2): a braced step, or a leap to an ally. Both build and spend Guard.
 
-**Loop:** block → Interpose to an ally in trouble → Banner over the fight → Bash
-whoever dives → Bastion when the squad is collapsing.
+**Loop:** block → Guard → Interpose to an ally in trouble → Banner over the fight → Shield Slam
+whoever dives → Bastion when the squad is collapsing (bigger with more Guard).
 
 **Level-up order:** 1 RMB · 2 Dash · 3 E · 4 RMB · 5 E · 6 R · 7 RMB · 8 Dash · 9 R · 10 Q.
 
@@ -702,7 +710,8 @@ whoever dives → Bastion when the squad is collapsing.
 | E | the Banner's radius is 5m |
 | R rank 2 | the dome is 5.5m |
 
-**Counterplay:** flank the frontal shield. Break the Banner (60 HP). Melee inside Bastion.
+**Counterplay:** flank the frontal shield. Glowing runes mean a Shield Slam is ready, so stay off the
+front. Break the Banner (60 HP). Melee inside Bastion.
 
 **Kin modifiers:**
 
@@ -733,7 +742,7 @@ whoever dives → Bastion when the squad is collapsing.
 |---|---|
 | Rail Charge, Earthshatter, Tripwire Mine, Breach, Bulwark, Shadow Step | archetype RMB variants (above) |
 | Razor Disc, Leash Bolt, Riposte | retired as RMBs (the data stays and can return as gloves) |
-| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Swap) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
+| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Mark) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
 | `kin` slot | archetype E |
 
 ## 8. Open questions
@@ -871,7 +880,9 @@ set the bar for "oomph": one resource that the kit's own abilities build, a hunt
 changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
 `payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
 follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
-`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`):
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`).
+No kit prints a word in the world (owner 11-11): armed, landed, reset and crowd-control moments read
+through glow, ring, flash, sound and the plate's status icon; only numbers float.
 
 - **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
   while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
@@ -881,7 +892,9 @@ follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_
 - **Sounds:** `pay_deadeye`, `pay_flashpoint`, `pay_called`, `pay_slam`, synthesized by
   `tools/sfx_combat.py` (appended last, so no other sound changes).
 
-### Archer: Lisette -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
+### Archer: Lace (on a Myth-style hunter-archer baseline)
+
+**Cut 2026-11-07 (owner, parity first):** the Focus meter and the Deadeye below were invented and are gone (no meter, no +20% range, no Deadeye hit, no HUD arc). Only Hawk Sense stays. Read the Focus and Deadeye lines in this section and the Nov 1 design above as history.
 
 Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
 three empowered arrows on R. Mechanics only; names, numbers and art are ours.
@@ -889,7 +902,7 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 | Slot | What it does |
 |---|---|
 | LMB (Longbow) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
-| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 8 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
 | E | **Hail Wall**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
@@ -957,7 +970,7 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
   check 50 -> 41.
 - Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.
 
-### Bulwark: Block -> Crushed (rebuilt on an Oath-style shield-tank baseline)
+### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
 
 Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
 close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
@@ -966,16 +979,17 @@ above is superseded by this:
 | Slot | What it does |
 |---|---|
 | LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
-| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). (Owner 2026-11-07: the Guard meter and Shield Slam were cut; the kit is the source's.) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
-| Passive | **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
 | E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
-| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each) |
+| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
 
-- Loop: raise the shield into their fire -> Shield Charge them into a wall or into
+- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
-- Tells: none for a resource (he has none). Payoff: "CRUSHED", `pay_slam`, T4.
+- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
+  shield burns gold. Payoff: `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.
@@ -1048,7 +1062,7 @@ a Shadow Knife sticking in a foe resets Vault (levels 2-4); Shadow Knife rank 3:
 the cooldown, 50% in a foe (level 3). (Jackpot used to have its own rank 2; as a Mark trigger it has no
 ranks.)
 
-- Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks, Shred) resets Vault ->
+- Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks) resets Vault ->
   Vault again. Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
   and hands you a free Vault to carry on.
 - Tells: gold diamonds over the target (spinning faster as they stack, a jingle at 5); a gold glint and
@@ -1062,7 +1076,7 @@ ranks.)
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
 | LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
-| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.6m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
+| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
 | R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
@@ -1076,7 +1090,7 @@ pose, sound and VFX.
 
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
-| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.6m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
+| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
 | Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
@@ -1089,7 +1103,7 @@ pose, sound and VFX.
 | Juggernaut | rooted / Grounded -> E | no chain; a stun on you breaks a chain (its cooldown starts) | wiki (patch notes) |
 | Juggernaut | Enraged (full Rage) | +15% damage, +20% cooldown speed (every Smash, the chain), +12% dash recharge | wiki |
 | Juggernaut | Searing Wave hits | fill Rage 3x as fast | wiki |
-| Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks, Shred; Vault resets; the speed boost ends | wiki |
+| Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks; Vault resets; the speed boost ends | wiki |
 | Thief | Shadow Knife in a foe (rank 3) | Vault resets; 50% of the Knife's cooldown back (25% in a wall) | wiki (levels 3-4) |
 | Thief | Shadow Knife -> E (or wait 5s) | step to the knife (the arrival pose) | wiki |
 | Thief | Bola catches two (rank 3) | both foes' Marks pool | wiki (levels 3-4) |
@@ -1151,10 +1165,10 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 ### Couldn't reproduce (or chose not to)
 
 - Mana: none of it (costs, refunds on hit, the Lunge's double cost) exists in our game.
-- Brall: climbing double-height walls; dodging shots building Blazing Spirit (his level-4 dash
+- Brall: climbing double-height walls is now **built** (`climb_tall` for Kael `juggernaut` and the Archer in `content/rules/hunter_move.json`). Still missing (see docs/KIT_PARITY.md, Kael): dodging shots building Blazing Spirit (his level-4 dash
   upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
   knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
-- Shiv: Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
+- Shiv (Sable): the Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
@@ -1171,7 +1185,9 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
 Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top).
 
-### R removed: the ult choice (kits2-nor, Nov 2)
+### R removed: the ult choice (kits2-nor, Nov 2) — superseded
+
+> **Stale since the ult pass (server update 6):** Sable and Kael each have their own ultimate again (on X; see docs/heroes/thief.md and docs/heroes/juggernaut.md), and the Boki Merge has its own `ultimate` key. The text below is history; the R-to-Merge rule no longer holds for them (the Merge is the same for every hero, on its own key). Doomfall/Jackpot-as-Smash/Mark-trigger folds are only built where those hero docs still list them.
 
 Owner decision (Nov 1): R becomes the Boki Merge for every hero, so the Thief and Juggernaut lose
 theirs. Rather than drop the wiki's ultimates, each is folded into the kit where it already fits:
@@ -1185,17 +1201,17 @@ theirs. Rather than drop the wiki's ultimates, each is folded into the kit where
   the rim ring and its blight are gone.
 
 `docs/heroes/thief.md` and `docs/heroes/juggernaut.md` carry the per-slot tables and the checks that
-assert each combination. The class-ultimate framework (`ArchKit.use_r`, `class_ults`) stays for the
+assert each combination. The class-ultimate framework (`ArchKit.use_r`) stays for the
 other four kits; a kit with no `"r"` in its JSON refuses the press.
 
-## Hero rebuild: Ryzz (mage) and Vex (gunslinger), Nov 1
+## Hero rebuild: Sparkle (mage) and Vex (gunslinger), Nov 1
 
 The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
-heroes under the same ids: **Ryzz** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Vex**
+heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Vex**
 (id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
-`--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
+`--gunslinger-combo-check`. No kit applies `Hex` (scripts/arch/hex.gd) any more; only its `Hex.active` checks remain (hunter.gd, arch_kit.gd, kit guards), so the status is effectively unused.
 
 ## Inspired by (per hero)
 
@@ -1208,11 +1224,18 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `juggernaut` | Juggernaut | [Brall](https://supervive.wiki.gg/wiki/Brall) | Ported ability by ability (Kits2 above) |
 | `archer` | Archer | [Myth](https://supervive.wiki.gg/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
 | `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
-| `mage` | Ryzz | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
+| `mage` | Sparkle | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
 | `gunslinger` | Vex | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
 | `ashwick` | Cinder (was Ashwick) | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
 | `dredge` | Grimble | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
-| `tender` | Pip, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
-| `rimewright` | Claire, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
-| `dolm` | Tarek | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `tender` | Meeko, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
+| `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
+| `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+
+## Kit parity lock
+`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
+- Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
+- Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).

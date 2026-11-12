@@ -8,7 +8,7 @@ extends ArchKit
 ## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
 ##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
 ##   shot. At dash rank 3 pellet hits trim the barge recharge.
-## - RMB, Abyssal Hand: his abyssal arm reaches out, an open hand at its end, piercing terrain to the first body
+## - RMB, Abyssal Hand: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
 ##   takes half the cooldown off.
@@ -21,8 +21,9 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const ARM_COL := Color("8a5aff")       # the Abyssal Hand: violet abyss sinew, the hand dark with a hot rim
-const HAND_HOT := Color("d8c8ff")
+const ARM_COL := Color("8a5aff")       # the Abyssal Hand: the bruised-purple flesh of the stretched arm
+const SLUDGE := Color("4a2278")        # the purple-black drips off the arm
+const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
 const BRASS := Color("e0a040")
 const BRASS_HOT := Color("fff0b0")
 const IRON := Color("3a3f48")
@@ -31,8 +32,10 @@ const SLUG_CORE := Color("ffd0ec")
 const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
-const ARM_THICK := 0.5                 # m, the abyssal arm's girth (an arm, not a rope)
-const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
+const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
+const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
+const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
+const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
@@ -40,8 +43,13 @@ const SWING := 6.0                     # 1/s: how fast a reeled body turns onto 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
 var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
-var flying := false             # hold: the hook is in the air
+var hook_aloft := false        # the hand left mid-jump: the air steers and his run-up carries on
+var flying := false             # hold: the hook is in the air (from the coil-back on)
+var coil := 0.0                 # hold: the coil-back before the arm shoots out (`rmb.windup`): time left
 var hook_sd := {}               # the hook's shot while it flies
+var snap_t := 0.0               # the arm snapping back: time left
+var snap_tip := Vector3.ZERO    # ... and where the hook was when it began
+var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
 var wind := 0.0                 # hold: the Anchor's wind-up left
@@ -54,6 +62,8 @@ var stop_t := 0.0               # the barge under way; when it ends he stops, ke
 var next_barge := -9.0          # the short gap between barges in a run
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
+var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
+var armor_shreds := 0           # (tests) hits that shredded armor
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
 var fx: LDFx
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
@@ -84,14 +94,25 @@ func rd() -> Dictionary: return res_def()
 static func reeling(hn: Hunter) -> bool:
 	return hn.ak is DredgeKit and not (hn.ak as DredgeKit).pull.is_empty()
 
+## Where the stretched arm grows from: his right wrist, the root of bone `hook` (anchor_claw and anchor_hook_tip
+## hang off its attachment; the model's hook is shrunk into it while the arm is out).
 func _hand() -> Vector3:
-	# the 3D model throws from the hook's mouth (anchor_claw)
 	var claw := WardenGlb.anchor(h.model, "anchor_claw") if h.model else null
 	if claw and claw.is_inside_tree():
-		return claw.global_position
+		var wrist := claw.get_parent() as BoneAttachment3D
+		var sk := wrist.get_parent() as Skeleton3D if wrist else null
+		if sk == null:
+			return claw.global_position
+		# off the bone itself: the attachment only catches up at the frame's end
+		return sk.global_transform * sk.get_bone_global_pose(sk.find_bone(wrist.bone_name)).origin
 	var d2 := h.aim_dir()
 	var f := Vector3(d2.x, 0, d2.y)
 	return h.pos + Vector3(0, 1.15, 0) + f * 0.45 - f.cross(Vector3.UP) * 0.25
+
+## Where the snapping-back hook lands: the model's hook tip at rest (anchor_hook_tip), where his hook shows again.
+func _hook_rest() -> Vector3:
+	var tip := WardenGlb.anchor(h.model, "anchor_hook_tip") if h.model else null
+	return tip.global_position if tip and tip.is_inside_tree() else _hand()
 
 # ------------------------------------------------------------------ passive: Salvage
 func add_stack(n: int) -> void:
@@ -101,8 +122,7 @@ func add_stack(n: int) -> void:
 		return
 	_apply_hp()
 	if n > 0:
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "SALVAGE %d" % int(res), res_col(), res >= res_max())
-		m.sfx("dredge_coin_jingle", h.pos, -4.0, 1.0)        # (no ground ring: the word, his coins and the flex)
+		m.sfx("dredge_coin_jingle", h.pos, -4.0, 1.0)        # (no ground ring: his coins and the flex)
 		if pull.is_empty() and wind <= 0.0 and dive.is_empty(): play("dr_flex")
 
 func _apply_hp() -> void:
@@ -119,15 +139,30 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
 
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
+	_shred_armor(t, dmg, o)
 	if String(o.get("ab", "")) == "ult":
 		return dmg               # the Broadside takes no back bonus (it keeps ult into merge under a one-shot)
 	if t is Hunter and ArchKit.behind(t, h):
 		if m.time - _stab_at > 1.2:
 			_stab_at = m.time
 			backstabs += 1
-			m.fx.word(t.pos + Vector3(0, 2.2, 0), "BEHIND", res_col(), false)
+			m.fx.ring(t.pos, 0.9, res_col(), 0.2)         # the back bonus has no word: a ring on the foe
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg
+
+## A slug from a zero-bloom volley wears the foe's armor faster (the source: +66% damage to armor). Our armor is
+## a worn-down damage cut, so the bonus is extra wear on it; health damage is unchanged. Never breaks it itself.
+func _shred_armor(t: Ent, dmg: float, o: Dictionary) -> void:
+	if not (t is Hunter) or tight_pg == "" or String(o.get("pg", "")) != tight_pg:
+		return
+	var ht := t as Hunter
+	if ht.armor <= 0.0:
+		return
+	var wear := dmg * (1.0 - Hunter.ARMOR_DR) * float(gun_def()["armor_k"])
+	ht.armor = maxf(0.01, ht.armor - wear)
+	armor_shreds += 1
+
+func gun_def() -> Dictionary: return d.get("gun", {})
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) != "shot":
@@ -141,11 +176,14 @@ func extra_dashes() -> float: return 1.0
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
+func hovering() -> bool:
+	return broadside.running() or (hook_hold != null and not hook_aloft)
+
 func move_k() -> float:
 	if broadside.running():
 		return broadside.move_k()           # a slow walk through the charge and the waves
 	if flying and hook_hold != null:
-		return hook_hold.slow_k           # a slow walk while the hand flies out
+		return hook_hold.slow_k           # a slow walk while the hand flies out (mid-jump: his run-up)
 	if not pull.is_empty():
 		return float(rmb_def()["fly_slow"])   # braced side-on while he reels (footage), a shuffle that still swings it
 	return 0.7 if wind > 0.0 else 1.0
@@ -169,7 +207,9 @@ func _tick(dt: float) -> void:
 	if stop_t > 0.0: _tick_stop(dt)
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
+	if coil > 0.0: _tick_coil(dt)
 	if flying: _tick_hook()
+	if snap_t > 0.0: _tick_snap(dt)
 	if not pull.is_empty(): _tick_pull(dt)
 	_tick_hook_hold()
 	broadside.tick(dt)
@@ -179,13 +219,14 @@ func _tick(dt: float) -> void:
 	KMovesPair.air_moves(self, "dr_jump", "dr_land")
 	net_pulse(dt, res >= res_max(), 1.8)
 
-## A Boki merge ends the Anchor's wind-up, the air smash, the reel (the rope goes, no landing effect) and a
+## A Boki merge ends the Anchor's wind-up, the air smash, the reel (the arm goes, no landing effect) and a
 ## hook in the air (it grabs nothing).
 func _drop_holds() -> void:
 	wind = 0.0
 	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
+	coil = 0.0
 	hook_sd = {}
 	scoop = []
 	hook_hold = null
@@ -203,6 +244,9 @@ func _tick_gun() -> void:
 		shot_seen = h.shot_n
 		shot_at = m.time
 		volleys += 1
+		# the first shot after the bloom folded back leaves exactly one shot's worth of it
+		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
+		tight_pg = "%s_%d" % [h.nid, h.shot_n] if tight else ""
 		_dress_volley()
 	if not pull.is_empty() or h.downed:
 		return
@@ -259,12 +303,12 @@ func _tick_looks(dt: float) -> void:
 			Color("1a5a6a"), 0.6
 		)
 
-## Grimble's 3D model: the hook leaves his wrist while the kit flies and reels it (one hook on screen, 76b).
-## A hit knocks coins off the hoard.
+## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the hook: while the kit's arm is stretched out
+## the model's hook shrinks into his wrist (hide_while_chain), so the one hook on screen is the arm's end.
 func _tick_model(_dt: float) -> void:
 	if h.model == null:
 		return
-	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty())
+	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty() or snap_t > 0.0)
 	coins.tick(h, m.time, tells_visible())
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
@@ -279,8 +323,29 @@ func fire_rmb(c: Dictionary) -> void:
 	var rdf := rmb_def()
 	flying = true
 	scoop = []
-	hook_hold = CastHold.hover_slow(h, float(rdf["fly_slow"]))
+	# thrown mid-jump the hold keeps the speed he brought (up to his run: a dash's or launch's extra bleeds
+	# under the air drag), so a jump back carries on at its height; from a standstill it is the slow walk
+	hook_aloft = not h.grounded
+	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if hook_aloft else 0.0
+	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
+	m.sfx("dr_throw", h.pos, -2.0, 1.0)
+	coil = float(rdf["windup"])
+
+## The coil-back: the readable cue before a slow hook. A stun or a knock down in it cancels the throw.
+func _tick_coil(dt: float) -> void:
+	coil -= dt
+	if h.stun_t > 0.0 or h.downed:
+		coil = 0.0
+		flying = false
+		hook_hold = null
+	elif coil <= 0.0:
+		coil = 0.0
+		_launch_hook()
+
+## The arm shoots out once the coil-back is over.
+func _launch_hook() -> void:
+	var rdf := rmb_def()
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
@@ -294,8 +359,8 @@ func fire_rmb(c: Dictionary) -> void:
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
-				fx.orb(at, ARM_COL, BRASS_HOT, 0.6, 0.15)
-				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
+				_snap_back(at)
+				fx.orb(at, ARM_COL, BONE, 0.6, 0.15)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
@@ -304,15 +369,13 @@ func fire_rmb(c: Dictionary) -> void:
 		if sn is Node3D and is_instance_valid(sn):
 			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
 			hook_sd["node"] = null
-	m.sfx("dr_throw", h.pos, -2.0, 1.0)
 
-## The hand in flight: the abyssal arm from his throwing hand to the open hand, drawn through rocks. It also
+## The hook in flight: the arm stretched from his forearm to the bone hook, drawn through rocks. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
 func _tick_hook() -> void:
 	if hook_sd.is_empty():
 		return
 	var p: Vector3 = hook_sd["pos"]
-	var v: Vector2 = hook_sd["vel"]
 	for o in m.hunters:
 		if o == h or not is_instance_valid(o) or o.dead or o.out or absf(o.pos.y + 0.9 - p.y) > 1.6:
 			continue
@@ -321,16 +384,38 @@ func _tick_hook() -> void:
 		if o.downed:
 			if not scoop.has(o):
 				scoop.append(o)
-				m.fx.word(o.pos + Vector3(0, 1.6, 0), "SCOOPED", ARM_COL, false)
 		elif o.team == h.team and pull.is_empty():
 			hook_sd["life"] = 0.0
 			_grab(o, true)
 			return
 	if not tells_visible():
 		return
+	_draw_arm(p, ARM_THICK)
+
+## The stretched arm this step: the flesh from his forearm to the bone hook at `tip` (reaching away from him), and
+## a sludge drip off it now and then.
+func _draw_arm(tip: Vector3, thick: float) -> void:
 	var id := h.get_instance_id()
-	fx.rope("rope%d" % id, _hand(), p, ARM_COL, ARM_THICK)
-	fx.place("claw%d" % id, "hand", p, ARM_COL, HAND_HOT, 1.7, atan2(-v.x, -v.y))
+	var from := _hand()
+	var out := tip - from
+	fx.arm("arm%d" % id, from, tip, ARM_COL, thick)
+	fx.place("hook%d" % id, "hook", tip, ARM_COL, BONE, 1.0, atan2(-out.x, -out.z))
+	if m.time >= drip_at:
+		drip_at = m.time + DRIP_T
+		m.fx.burst(from.lerp(tip, randf()), SLUDGE, 2, 0.4, 0.7, 10.0, 0.9, Vector3.DOWN, 40.0)
+
+## The arm snaps back to his shoulder after a miss or the end of the reel, with a splash of sludge at the hook.
+func _snap_back(tip: Vector3) -> void:
+	snap_t = SNAP_T
+	snap_tip = tip
+	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
+
+func _tick_snap(dt: float) -> void:
+	snap_t = maxf(0.0, snap_t - dt)
+	if not tells_visible():
+		return
+	var k := 1.0 - snap_t / SNAP_T
+	_draw_arm(snap_tip.lerp(_hook_rest(), k * k), ARM_THICK * (1.0 - 0.4 * k))
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
@@ -341,7 +426,7 @@ func _grab(f: Ent, ally := false) -> void:
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
 		hook_hold = null
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY", Color("c0b0a0"), false)
+		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul: a dull warning, no word
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
@@ -355,7 +440,7 @@ func _grab(f: Ent, ally := false) -> void:
 	var tow := drag.duplicate()
 	tow["swing"] = SWING
 	if not ally:
-		tow["stun"] = 0.2      # carried, stunned: they can't act or walk off the rope
+		tow["stun"] = 0.2      # carried, stunned: they can't act or walk off the arm
 	pull = {"t": f, "tow": m.displace.tow(f, h, tow), "ally": ally, "wisp": wisp, "from": f.pos, "scoop": []}
 	scoop.erase(f)
 	for w in scoop:
@@ -364,23 +449,15 @@ func _grab(f: Ent, ally := false) -> void:
 	# still works
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
-	m.fx.word(
-		f.pos + Vector3(0, 2.4, 0), _grab_word(wisp, ally), col_of(rdf), true
-	)
 	fx.orb(f.pos + Vector3(0, 1.0, 0), ARM_COL, BRASS_HOT, 1.1, 0.15)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
 
-func _grab_word(wisp: bool, ally: bool) -> String:
-	if wisp:
-		return "SCOOPED"
-	return "HOLD ON" if ally else "HOOKED"
-
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
-## Displace moves it ("haul"); here the rope follows it and the reel ends with it.
+## Displace moves it ("haul"); here the arm follows it and the reel ends with it.
 func _tick_pull(_dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
@@ -390,10 +467,7 @@ func _tick_pull(_dt: float) -> void:
 		return
 	var fe := f as Ent
 	if tells_visible():
-		var id := h.get_instance_id()
-		var b := fe.pos + Vector3(0, 0.95, 0)
-		fx.rope("rope%d" % id, _hand(), b, ARM_COL, _rope_thick())
-		fx.place("claw%d" % id, "hand", b, ARM_COL, HAND_HOT, 1.7, atan2(h.pos.x - fe.pos.x, h.pos.z - fe.pos.z))
+		_draw_arm(fe.pos + Vector3(0, 0.95, 0), _arm_thick())
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
 			scoop.erase(w)
@@ -403,7 +477,7 @@ func _tick_pull(_dt: float) -> void:
 		"arrived": _end_pull(true)
 		"walled":
 			snags += 1
-			m.fx.word(fe.pos + Vector3(0, 2.2, 0), "WALLED", Color("c0b0a0"), false)
+			m.fx.dust(fe.pos, 8)
 			_end_pull(false)
 		"": pass
 		_: _end_pull(false)
@@ -414,16 +488,17 @@ func _tick_hook_hold() -> void:
 	if hook_hold != null and not h.grounded:
 		hook_hold.tick(m.world)
 
-## The arm's thickness while reeling: it swells taut on each hand-over-hand haul.
-func _rope_thick() -> float:
+## The arm's thickness while reeling: it swells on each hand-over-hand haul.
+func _arm_thick() -> float:
 	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
-	return ARM_THICK * (1.0 + 0.6 * (1.0 - smoothstep(0.0, 0.12, since)))
+	return ARM_THICK * (1.0 + 0.3 * (1.0 - smoothstep(0.0, 0.12, since)))
 
 func _end_pull(arrived: bool) -> void:
 	var f = pull.get("t")
 	var ally: bool = pull.get("ally", false)
-	var wisp: bool = pull.get("wisp", false)
 	var tow: Dictionary = pull.get("tow", {})
+	if is_instance_valid(f):
+		_snap_back((f as Ent).pos + Vector3(0, 0.95, 0))
 	hauled += int(tow.get("hauled", 0))
 	m.displace.stop(tow)
 	for rec in pull.get("scoop", []):
@@ -438,10 +513,8 @@ func _end_pull(arrived: bool) -> void:
 	if arrived and is_instance_valid(f) and not (f as Ent).dead:
 		arrivals += 1
 		var rdf := rmb_def()
-		if ally:
-			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
-			return
-		payoff_fx((f as Ent).pos, "HAULED", col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
+		if not ally:
+			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
@@ -475,6 +548,7 @@ func _tick_wind(dt: float) -> void:
 		AimKit.hide(h, "e_tell")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
+	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if tells_visible():
@@ -483,6 +557,18 @@ func _tick_wind(dt: float) -> void:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
 		_anchor()
+
+## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
+## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
+## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
+func _hop(ed: Dictionary, t: float) -> void:
+	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
+		return
+	if not h.grounded or h.roll_t > 0.0:
+		return
+	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
+	h.vel.x = v.x
+	h.vel.z = v.y
 
 ## The slam's telegraph at fill `k`: the same cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
@@ -546,12 +632,11 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	m.displace.spike(f, -16.0)
+	m.displace.spike(f, -16.0, h)
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	stunned.append({"e": f, "until": m.time + stun})
-	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:
@@ -684,11 +769,15 @@ func _air_barge(dd: Dictionary, dir: Vector2, keep_pose: bool) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["time"]) * float(feel["time"])
 	var air_dist := float(dd["dist"]) * float(dd["air_k"]) * float(feel["dist"])
-	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
+	travel(float(dd["dist"]) * float(dd["air_k"]), float(dd["time"]), {"invuln": 0.08, "trail": "", "dir": dir})
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	if not keep_pose: play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
+
+## The air pounce is its own slot (source: Brute Dash (Air), 12.5s, 2s less per rank), apart from the ground charges.
+func long_dash_cd() -> float:
+	return super.long_dash_cd() - float(dash_def()["air"]["rank_cut"]) * float(rank("dash") - 1)
 
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
 func _tick_stop(dt: float) -> void:
@@ -735,7 +824,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():
 		return
 	var tf := tgt as Ent
-	if HeroUlt.ready(self) and los and dist < 3.5:
+	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.8:      # (the fan's slugs reach its range)
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return

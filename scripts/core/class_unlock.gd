@@ -1,20 +1,22 @@
 class_name ClassUnlock
 extends RefCounted
-## Mask unlocks and mastery (docs/decisions/0005; internally Hunters, archetypes and the save key "classes").
-## A new save wears Vex first (the one starter, taken before the egg pick) and plays the tutorial as Vex. After
-## the first finished expedition (the tutorial) it picks 1 of 3 as the second Mask: Kael, Pip or Cinder
-## ("second_picks"). Every other Mask opens through its own challenge (content/rules/class_unlock.json "unlock"),
+## Relic unlocks and mastery (docs/decisions/0005; internally Hunters, archetypes and the save key "classes").
+## A new save picks 1 of 3 starters (Lace, Kael or Vex; after naming the first Boki) and plays the tutorial as
+## it. After the first finished expedition (the tutorial) it picks 1 of 3 as the second Relic: Kael, Cinder or
+## Meeko ("second_picks", minus one already taken). A starter not taken opens then too. Every other Relic opens
+## through its own challenge (content/rules/class_unlock.json "unlock"),
 ## counted across every expedition whoever you play. A done challenge never opens a Hunter by itself: it is
-## unlocked by holding the button on the Masks screen (HoldUnlock calls unlock()). Each Hunter also has
+## unlocked by holding the button on the Relics screen (HoldUnlock calls unlock()). Each Hunter also has
 ## mastery goals, counted only while you play it; each one done is a mastery level and a cosmetic reward.
 ## Nothing here ever changes stats or abilities. Locked Hunters stay playable in the Arena and the
-## training area; only the pickers that set your expedition Hunter ask this file.
+## Training Grounds; only the pickers that set your expedition Hunter ask this file.
 ##
 ## Save.d["classes"] = {all: bool, picks: [the creation pick], open: [ids], bonus: [starters that open after the
-## first expedition (old saves)], second: [the second-Mask choices still to pick from], second_ready: bool (the
+## first expedition (old saves)], second: [the second-Relic choices still to pick from], second_ready: bool (the
 ## first expedition is done, so the pick is on offer), fresh: [just opened, not announced], told: int (ready unlocks
 ## already announced), reveal: [ids], seen: [ids], stats: {stat: n} (every expedition),
 ## hunters: {id: {stat: n}} (expeditions played as that Hunter)}. No "classes" key reads as all open.
+# "mask" in code = "Relic" in game, owner 2026-11-07 (also the setting key demo_all_masks)
 
 const RULES_PATH := "res://content/rules/class_unlock.json"
 static var _rules: Dictionary = {}
@@ -71,7 +73,7 @@ static func state() -> Dictionary:
 		(c["open"] as Array).append("gunslinger")      # (a save from before the first-Hunter pick: Vex was always open)
 	return c
 
-## Settings > Demo > "All masks open": every Mask pickable while offline. The save's unlocks are not touched.
+## Settings > Demo > "All masks open": every Relic pickable while offline. The save's unlocks are not touched.
 static func demo_all() -> bool:
 	return bool(Settings.get_v("demo_all_masks")) and not Net.online()
 
@@ -80,7 +82,7 @@ static func all_open() -> bool:
 	var c := state()
 	return c.is_empty() or bool(c.get("all", false)) or Game.modding() or demo_all()
 
-## The Mask to send online: the demo setting is offline only, so one this save has not opened falls back to an
+## The Relic to send online: the demo setting is offline only, so one this save has not opened falls back to an
 ## open one of its weight (else the first open one).
 static func online_arch(id: String) -> String:
 	var opened: Array = state().get("open", [])
@@ -95,7 +97,7 @@ static func is_open(id: String) -> bool:
 static func open_ids() -> Array:
 	return Arch.ids().filter(func(a): return is_open(a))
 
-# ---- the starter pick (Vex), then the second Mask: 1 of 3 after the first expedition
+# ---- the starter pick (Lace, Kael or Vex), then the second Relic: 1 of 3 after the first expedition
 static func starters() -> Array:
 	return (rules().get("starters", []) as Array).filter(func(a): return Arch.exists(String(a)))
 
@@ -110,7 +112,7 @@ static func picks() -> Array:
 	return (state().get("picks", []) as Array).duplicate()
 
 ## Makes the starter pick (once): exactly picks_needed() different starters. Anything else is refused.
-## The other starters wait in "bonus" for the first finished expedition.
+## The other starters wait in "bonus" for the first finished expedition (unless the second pick offers them).
 static func choose_starters(ids: Array) -> bool:
 	if not needs_starters() or ids.size() != picks_needed():
 		return false
@@ -123,17 +125,17 @@ static func choose_starters(ids: Array) -> bool:
 	var c := state()
 	c["picks"] = unique.duplicate()
 	c["open"] = unique.duplicate()
-	c["bonus"] = starters().filter(func(a): return not unique.has(a))
+	c["bonus"] = starters().filter(func(a): return not unique.has(a) and not second_picks().has(a))
 	c["second"] = second_picks().filter(func(a): return not unique.has(a))
 	c["seen"] = c["open"].duplicate()
 	c["reveal"] = []
 	return true
 
-## The Masks the second pick chooses from (second_picks in the rules).
+## The Relics the second pick chooses from (second_picks in the rules).
 static func second_picks() -> Array:
 	return (rules().get("second_picks", []) as Array).filter(func(a): return Arch.exists(String(a)))
 
-## The first expedition is done and the second Mask is still to pick.
+## The first expedition is done and the second Relic is still to pick.
 static func second_pending() -> bool:
 	var c := state()
 	return bool(c.get("second_ready", false)) and not (c.get("second", []) as Array).is_empty()
@@ -165,10 +167,10 @@ static func open_bonus() -> Array:
 	c["fresh"] = ids.duplicate()
 	return ids
 
-## "Hem and Kael are open now" for starters opened and not yet announced ("" when none); marks them told.
+## "Lace and Vex are open now" for starters opened and not yet announced ("" when none); marks them told.
 static func take_fresh() -> String:
 	var c := state()
-	var names: Array = (c.get("fresh", []) as Array).map(func(a): return Arch.name_of(String(a)))
+	var names: Array = (c.get("fresh", []) as Array).map(func(a): return HeroTitle.base_name(String(a)))
 	if names.is_empty():
 		return ""
 	c["fresh"] = []
@@ -246,7 +248,7 @@ static func can_unlock(id: String) -> bool:
 		return false
 	return bool(challenge_progress(id)["done"]) and open_ids().size() >= open_needed(id)
 
-## Waiting to open after the first expedition (an old save's starter, or one of the second Mask's choices).
+## Waiting to open after the first expedition (an old save's starter, or one of the second Relic's choices).
 static func is_bonus(id: String) -> bool:
 	return (state().get("bonus", []) as Array).has(id) or (state().get("second", []) as Array).has(id)
 
@@ -271,16 +273,16 @@ static func requirement(id: String) -> String:
 	if is_open(id):
 		return ""
 	if (state().get("second", []) as Array).has(id):
-		var names := second_picks().map(func(a): return Arch.name_of(String(a)))
+		var names := second_picks().map(func(a): return Arch.name_of(String(a), true))
 		return "One of %s opens after your first expedition" % ", ".join(names)
 	if is_bonus(id):
 		return "Opens after your first expedition"
 	if can_unlock(id):
-		return "Ready: hold to unlock it on the Masks screen"
+		return "Ready: hold to unlock it on the Relics screen"
 	var gp := challenge_progress(id)
 	var line := "%s (%d/%d)" % [challenge_text(id), int(gp["have"]), int(gp["need"])]
 	if open_ids().size() < open_needed(id):
-		line += ", once %d Masks are open" % open_needed(id)
+		line += ", once %d Relics are open" % open_needed(id)
 	return line
 
 ## Unlocks a ready Hunter (the end of the hold). Returns false if it isn't ready.

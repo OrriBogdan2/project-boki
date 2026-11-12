@@ -1,4 +1,4 @@
-"""ART-1 Ryzz, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 15k tris, 8 surfaces.
+"""ART-1 Sparkle, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 15k tris, 8 surfaces.
 Run: blender -b --factory-startup --python tools/art1/ryzz_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 sys.stdout.reconfigure(line_buffering=True)
@@ -19,9 +19,9 @@ ATLAS = 2048
 FACE_K = 6.0               # the face's texel density against the body
 UNIQ_W = 0.755
 EYE_R = (0.76, 0.12, 0.875, 0.22)
-MATS = ["skin-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "glow-arcblue", "glow-wire", "cloth-gum"]      # (8: the skirt and corset share leather's surface)
-SCALE = {"lid": 2.0, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "strap": 0.7, "gum": 0.8, "Low": 1.0}
-TILE = ("cap", "fringe", "pig", "tie", "sock", "rod", "wire", "chain", "arrow", "nosering", "arc", "buckle")
+MATS = ["skin-ryzz", "leather-ryzz", "cloth-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "cloth-gum"]      # (7: the top, brief and pack share leather's surface)
+SCALE = {"lid": 2.0, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "gum": 0.8, "Low": 1.0}
+TILE = ("cap", "fringe", "pig", "tie", "sock", "rod", "wire", "spring", "nosering")
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -107,7 +107,8 @@ _sm0.loops.foreach_get("vertex_index", _vi0)
 _vc = np.zeros((len(_co0), 3), np.float32)
 _vc[_vi0] = SP[np.clip((_uv0[:, 1] % 1 * sh).astype(int), 0, sh - 1), np.clip((_uv0[:, 0] % 1 * sw).astype(int), 0, sw - 1)]
 _near = (_co0[:, 1] > 0.02) & (np.abs(_co0[:, 0]) < 0.082)
-_eye = _near & (_vc[:, 2] > _vc[:, 0] * 1.3) & (_vc[:, 2] > 0.3) & (np.abs(_co0[:, 2] - (NZ + 0.137)) < 0.03)
+_band = _near & (np.abs(_co0[:, 0]) > 0.012) & (np.abs(_co0[:, 0]) < 0.06) & (np.abs(_co0[:, 2] - (NZ + 0.15)) < 0.03)
+_eye = _band & (_vc.mean(1) < np.percentile(_vc[_band].mean(1), 8))      # (pupils and lashes: the darkest of the eye band; her irises are lilac, not blue)
 _lip = _near & (np.abs(_co0[:, 0]) < 0.03) & (_vc[:, 0] > _vc[:, 1] * 1.45) & (_vc[:, 0] > 0.45) & (_co0[:, 2] > NZ + 0.03) & (_co0[:, 2] < NZ + 0.09)
 _er, _el = _co0[_eye & (_co0[:, 0] > 0)], _co0[_eye & (_co0[:, 0] < 0)]
 EYE_X = float((_er[:, 0].mean() - _el[:, 0].mean()) / 2)
@@ -163,10 +164,8 @@ HANDS = {s: K.hand(s) for s in (1.0, -1.0)}
 for s in HANDS:
     pieces += HANDS[s]
 
-# ---- the harness on her back, from the master's back view
-Z0, Z1 = 1.175, 1.385
-OUTL = [(-0.075, Z1), (0.075, Z1), (0.118, 1.345), (0.118, 1.27), (0.082, Z0 + 0.012), (0.05, Z0), (-0.05, Z0), (-0.082, Z0 + 0.012), (-0.118, 1.27), (-0.118, 1.345)]
-INNER = [(-0.035, 1.325), (0.035, 1.325), (0.058, 1.285), (0.04, 1.225), (-0.04, 1.225), (-0.058, 1.285)]
+# ---- the copper backpack (v2 sheet's close-up): a deep box between the shoulder blades, two coil springs and the bolt on its face
+OUTL = [(-0.1, 1.43), (0.1, 1.43), (0.128, 1.405), (0.128, 1.185), (0.1, 1.125), (-0.1, 1.125), (-0.128, 1.185), (-0.128, 1.405)]
 
 
 def resample(poly, n):
@@ -176,106 +175,56 @@ def resample(poly, n):
     return np.stack([np.interp(t, s, p[:, 0]), np.interp(t, s, p[:, 1])], 1)
 
 
-NP = 20
-ro, ri = resample(OUTL, NP), resample(INNER, NP)
-rm0 = ro * 0.97 + ri * 0.03
-rm1 = ri * 0.97 + ro * 0.03
-def lift(r, off):
-    return np.array([(x, back_y(x, z) - off, z) for x, z in r])
-
-
-rings = [lift(ro, 0.002), lift(rm0, 0.014), lift(rm1, 0.014), lift(ri, 0.002)]
-vp = np.concatenate(rings)
-fp = [[i * NP + j, i * NP + (j + 1) % NP, (i + 1) * NP + (j + 1) % NP, (i + 1) * NP + j] for i in range(3) for j in range(NP)]
+NP = 24
+ro = resample(OUTL, NP)
+PACK_F = float(np.median([back_y(x, z) for x, z in ro])) + 0.012     # (its face sunk a little into her back: no gap at the sides)
+PACK_D = 0.095                                                        # m, the box's depth (side view)
+PACK_B = PACK_F - PACK_D
+ctr = ro.mean(0)
+rings = [np.array([(x, y, z) for x, z in r]) for r, y in ((ro, PACK_F), (ro, PACK_B + 0.012), (ctr + (ro - ctr) * 0.93, PACK_B))]
+vp = np.concatenate(rings + [[(ctr[0], PACK_B, ctr[1])]])
+fp = [[i * NP + j, i * NP + (j + 1) % NP, (i + 1) * NP + (j + 1) % NP, (i + 1) * NP + j] for i in range(2) for j in range(NP)]
+fp += [[2 * NP + j, 2 * NP + (j + 1) % NP, 3 * NP] for j in range(NP)]
 plate = Piece("plate", "leather-ryzz", vp, fp).rigid("hips")
-plate.rivets = lift(np.array([(-0.09, 1.355), (0.09, 1.355), (-0.1, 1.285), (0.1, 1.285), (-0.06, 1.2), (0.06, 1.2), (0, 1.355), (0, 1.2)]), 0.0155)
+plate.rivets = np.array([(x, PACK_B - 0.001, z) for x, z in ((-0.1, 1.405), (0.1, 1.405), (-0.1, 1.15), (0.1, 1.15))])
+plate.bolt = (0.0, 1.27)
 pieces.append(plate)
+for s in (1.0, -1.0):          # the coil springs: a low helix each, the turns' relief is the normal map's
+    t_ = np.linspace(0, 7 * 2 * np.pi, 7 * 6 + 1)
+    hz = np.linspace(1.165, 1.355, len(t_))
+    hx = np.array([s * 0.07 + 0.022 * np.cos(t_), PACK_B - 0.02 + 0.016 * np.sin(t_), hz]).T
+    pieces.append(sweep("spring" + ("R" if s > 0 else "L"), "metal-ryzz", hx, K.TRI, np.full(len(t_), 0.0045), side_hint=np.array([0, 0, 1.0]),
+                        uv_rect=K.COPPER_R, room=0.0).rigid("hips"))
+# the four rods stand in sockets on the box's top: the inner pair near upright, tips a hand over her head (the turnaround has
+# them at the crown, the master sheet higher: this is between, so they read over the pigtails); the outer pair fanned wide
+PACK_M = (PACK_F + PACK_B) / 2
+K.RODS = [((-0.1, PACK_M, 1.41), (-0.36, PACK_M - 0.08, 1.74)), ((-0.04, PACK_M, 1.43), (-0.14, PACK_M - 0.1, 1.9)),
+          ((0.04, PACK_M, 1.43), (0.14, PACK_M - 0.1, 1.9)), ((0.1, PACK_M, 1.41), (0.36, PACK_M - 0.08, 1.74))]
 RODB = []
 for i in range(4):
     rp, ra, rb, rd = K.rod(i)
-    # seat the sockets on the plate
-    rx, rz = ra[0], ra[2]
-    dy = (back_y(rx, rz) - 0.016) - ra[1]
-    for q in rp:
-        q.v = q.v + [0, dy, 0]
     pieces += rp
-    RODB.append((ra + [0, dy, 0], rb + [0, dy, 0], rd))
-TIP = [b for _, b, _ in RODB]
+    RODB.append((ra, rb, rd))
 
-# ---- arcs between the rods: two shapes, flickered by their bones in every clip (the model's idle read; ability lightning is S3's)
-rng = np.random.RandomState(7)
-for v_ in range(2):
-    for i in range(3):
-        A_, B_ = TIP[i] - RODB[i][2] * 0.012, TIP[i + 1] - RODB[i + 1][2] * 0.012
-        n_ = 8
-        pts = []
-        for j in range(n_):
-            t = j / (n_ - 1)
-            q = A_ * (1 - t) + B_ * t + np.array([0, 0, 0.05 * math.sin(t * math.pi)])
-            if 0 < j < n_ - 1:
-                q = q + rng.uniform(-0.024, 0.024, 3) * [1, 0.6, 1.5]
-            pts.append(q)
-        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-arcblue" if v_ else "glow-ryzz", pts, K.TRI, np.full(n_, 0.0098), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
-
-# ---- the wires, two down each arm to the copper-capped hand
-def wire_w(p):
-    z = p[:, 2]
-    x = np.abs(p[:, 0])
-    arm = smooth(K.SH + 0.015, K.SH + 0.05, x) * 0 + 1
-    return z
-
-
+# ---- the black cables, one from each side of the box over the upper arm and down the forearm to the glove (anchor_wire_*)
 for s, sd in ((1.0, "R"), (-1.0, "L")):
     Sx = K.SH * s
-    for w_i, ctl in enumerate((
-            [(s * 0.098, back_y(s * 0.098, 1.20) - 0.01, 1.20), (s * 0.175, -0.095, 1.165), (s * 0.205, -0.055, 1.10), (Sx + s * 0.058, -0.045, 1.055),
-             (Sx + s * 0.036, -0.045, 0.985), (Sx + s * 0.024, -0.024, K.HAND_Z + 0.03), (Sx + s * 0.026, -0.012, K.HAND_Z + 0.012)],
-            [(s * 0.112, back_y(s * 0.112, 1.31) - 0.01, 1.31), (s * 0.19, -0.1, 1.29), (s * 0.215, -0.05, 1.2), (Sx + s * 0.07, -0.015, 1.1),
-             (Sx + s * 0.05, -0.008, 0.99), (Sx + s * 0.03, 0.0, K.HAND_Z + 0.03), (Sx + s * 0.026, 0.006, K.HAND_Z + 0.012)])):
-        path = clear(catmull(ctl, 15), 0.010)
-        wr = K.wire("wire%d%s" % (w_i, sd), path)
-        ring = np.repeat(path, 3, axis=0)
-        z = ring[:, 2]
-        up = smooth(1.30, 1.17, z)                  # off the plate onto the arm
-        w = {"hips": 1 - up}
-        fo = smooth(K.ELBOW_Z + 0.03, K.ELBOW_Z - 0.03, z)
-        ha = smooth(K.HAND_Z + 0.05, K.HAND_Z + 0.01, z)
-        w["upper_arm." + sd] = up * (1 - fo)
-        w["forearm." + sd] = up * fo * (1 - ha)
-        w["hand." + sd] = up * fo * ha
-        wr.w = w
-        pieces.append(wr)
-
-# ---- the straps over the bare shoulders, front to the corset, with a buckle
-for s, sd in ((1.0, "R"), (-1.0, "L")):
-    ctl = [(s * 0.082, -0.10, 1.372), (s * 0.095, -0.02, 1.415), (s * 0.103, 0.06, 1.385), (s * 0.103, 0.105, 1.325), (s * 0.098, 0.135, 1.275)]
-    path = on_surface(catmull(ctl, 11), 0.004)
-    st = K.strip("strap" + sd, "leather-ryzz", path, 0.0185, 0.0024, hint=np.array([1.0, 0, 0]))
-    st.w = {"hips": np.ones(len(st.v))}
-    pieces.append(st)
-    bc = path[7]
-    pieces.append(K.strip("buckle" + sd, "metal-ryzz", [bc + [0, 0.004, 0.014], bc + [0, 0.006, -0.014]], 0.0185, 0.0035, uv=K.COPPER_R, hint=np.array([1.0, 0, 0])).rigid("hips"))
-
-# ---- the chain slung on the skirt, her left hip across, with the arrow
-ctl = [(-0.055, 0.118, 0.985), (-0.085, 0.142, 0.92), (0.02, 0.17, 0.875), (0.15, 0.16, 0.86), (0.20, 0.09, 0.91), (0.19, 0.06, 0.975)]
-path = on_surface(catmull(ctl, 14), 0.007)
-CHAIN_UV = (K.COPPER_R[0], K.COPPER_R[1], K.COPPER_R[2], K.COPPER_R[3])
-ch = K.chain_along("chain0", path, step=0.0235, uv=CHAIN_UV, ln=0.028, wid=0.016, th=0.0036).rigid("root")
-ch.mat = "metal-ryzz"
-pieces.append(ch)
-drop = on_surface(catmull([(-0.055, 0.118, 0.985), (-0.058, 0.148, 0.92), (-0.056, 0.168, 0.86)], 5), 0.007)
-c1 = K.chain_along("chain1", drop, step=0.0235, uv=CHAIN_UV, ln=0.028, wid=0.016, th=0.0036).rigid("skirt")
-c1.mat = "metal-ryzz"
-pieces.append(c1)
-tipc = drop[-1]
-pieces.append(Piece("arrow", "metal-ryzz", [tipc + [-0.018, 0.002, 0.0], tipc + [0.018, 0.002, 0.0], tipc + [0, 0.005, -0.042], tipc + [0, 0.0, 0.006]], [[0, 2, 1], [0, 1, 3]],
-                    [[(0.77, 0.34), (0.77, 0.40), (0.86, 0.37)], [(0.77, 0.34), (0.86, 0.37), (0.8, 0.40)]]).rigid("skirt"))
+    ctl = [(s * 0.128, PACK_M, 1.27), (s * 0.19, PACK_M + 0.01, 1.25), (s * 0.215, -0.05, 1.2), (Sx + s * 0.07, -0.015, 1.1),
+           (Sx + s * 0.05, -0.008, 0.99), (Sx + s * 0.03, 0.0, K.HAND_Z + 0.03), (Sx + s * 0.026, 0.006, K.HAND_Z + 0.012)]
+    path = clear(catmull(ctl, 15), 0.012)
+    wr = K.wire("wire" + sd, path)
+    z = np.repeat(path, 3, axis=0)[:, 2]
+    up = smooth(1.26, 1.17, z)                  # off the box onto the arm
+    fo = smooth(K.ELBOW_Z + 0.03, K.ELBOW_Z - 0.03, z)
+    ha = smooth(K.HAND_Z + 0.05, K.HAND_Z + 0.01, z)
+    wr.w = {"hips": 1 - up, "upper_arm." + sd: up * (1 - fo), "forearm." + sd: up * fo * (1 - ha), "hand." + sd: up * fo * ha}
+    pieces.append(wr)
 
 for p in pieces:
     if p.name in ("face", "skull", "cap") or p.name.startswith("lid"):
         p.orient(ref=K.hl((0, -0.01, 0.0)))
     elif p.name.startswith("plate"):
-        p.orient(ref=(0, 0, 1.28))
+        p.orient(ref=(0, PACK_M, 1.28))
     else:
         p.orient()
 
@@ -644,16 +593,12 @@ for k_, i in enumerate(low_faces):
     z_ = fc[k_][2]
     if z_ > K.NECK_Z + 0.03 and b_ > r_ * 1.1:
         m = "hair-ryzz"
-    elif r_ > g_ * 1.5 and b_ > g_ * 1.1 and fc[k_][1] < 0.03 and 1.0 < z_ < 1.15:
-        m = "skin-ryzz"            # the waist: the corset wraps the front only, bare back (master sheet)
-    elif r_ > 0.55 and g_ > 0.3 and b_ > 0.2 and g_ > b_ * 1.05 and r_ < g_ * 1.9 and L_ > 0.4 and not (g_ > 0.6 and b_ < 0.25):
+    elif r_ > 0.5 and g_ > 0.4 and b_ < g_ * 0.6:
+        m = "cloth-ryzz"         # the hazard jacket round her hips
+    elif r_ > 0.55 and g_ > 0.3 and b_ > 0.2 and g_ > b_ * 1.05 and r_ < g_ * 1.9 and L_ > 0.4:
         m = "skin-ryzz"
-    elif r_ > g_ * 1.5 and b_ > g_ * 1.1:
-        m = "leather-ryzz"       # the corset
-    elif 0.78 < z_ < 1.04 and abs(fc[k_][0]) < 0.34:
-        m = "leather-ryzz"       # the skirt
     else:
-        m = "leather-ryzz"
+        m = "leather-ryzz"       # the top, brief, stocking, boots
     me.polygons[i].material_index = mat_i[m]
 
 mask = PID == 0
@@ -664,45 +609,18 @@ for i_, r_ in region.items():
 col = sample_scan(POS[ys, xs].astype(np.float64), _is_arm[FID[ys, xs]])
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = np.power(np.clip(col, 0, 1), 0.9) * 1.06
-OUTC[ys, xs] *= (0.84 + 0.16 * np.clip(AO[ys, xs], 0, 1))[:, None]      # (the scan's paint is already shaded; more leaves a smudge under the chain)
+OUTC[ys, xs] *= (0.84 + 0.16 * np.clip(AO[ys, xs], 0, 1))[:, None]      # (the scan's paint is already shaded)
 ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
 lumi = OUTC.mean(2)
 z_t = POS[..., 2]
 # near-black leather lifted to charcoal with a cool cast (the toon rim reads it as gloss otherwise)
-rawL = blur(lumi, mask.astype(np.float32), 5)
 yel_ = blur(((ri > 0.6) & (gi > 0.5) & (bi < 0.4)).astype(np.float32), mask.astype(np.float32), 6)
 dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., None] * mask[..., None] * (yel_ < 0.04)[..., None]
 OUTC = OUTC + np.array([0.2, 0.18, 0.235], dtype=np.float32) * dk_k
-# the neon: bright magenta line art, corset, chest bolt, forearm veins -> the glow key (the shader's model_glow colour)
-neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t > 0.95)
-neon &= (np.abs(POS[..., 0]) < 0.125) | (z_t < 1.09)      # the corset, the chest and the forearms' veins: not the jacket's inner panels
-n_b = blur(neon.astype(np.float32), mask.astype(np.float32), 1)
-core = n_b > 0.5
+# the neon: the bright magenta line art (the top's bolt and trim, the brief's edge, the thigh straps) -> the glow key (the shader's model_glow colour)
+neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t < K.NECK_Z)      # (not the face: its blush is pink too)
+core = blur(neon.astype(np.float32), mask.astype(np.float32), 1) > 0.5
 print("neon texels", int(core.sum()))
-# the forearm's veins, caught by the sleeve hanging over it: leather has no pink
-jk = mask & (np.abs(POS[..., 0]) > 0.1) & (z_t > 1.1) & (z_t < 1.36) & (ri > gi * 1.5) & (bi > gi)
-OUTC[jk] = np.array([0.17, 0.15, 0.19], dtype=np.float32)
-core &= ~jk
-# the bare back at the waist: the turnaround's corset band out, the master's skin in
-bw = mask & (POS[..., 1] < 0.03) & (z_t > 1.0) & (z_t < 1.16) & (ri > gi * 1.35) & (bi > gi * 0.95) & (ri > 0.42)
-OUTC[bw] = P.skin(POS[bw].astype(np.float64), NOR[bw].astype(np.float64), AO[bw].astype(np.float64)).astype(np.float32)
-core &= ~bw
-# fishnets: from the top of the thigh band to the skirt's hem, repainted crisp
-yl = mask & (ri > 0.65) & (gi > 0.55) & (bi < 0.35) & (z_t < 0.8) & (z_t > 0.5) & (np.abs(POS[..., 0]) < 0.17)
-BAND = float(np.percentile(z_t[yl], 99)) if yl.any() else 0.68
-net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.122) & (rawL > 0.33)
-print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
-skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
-base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))
-OUTC[net] = P.fishnet(POS[net].astype(np.float64), base).astype(np.float32)
-# the skirt's hem: skin-coloured chips the scan left between the pleats go to the skirt's own charcoal
-chip = mask & ~net & (z_t > BAND + 0.03) & (z_t < 0.97) & (np.abs(POS[..., 0]) < 0.32) & ~_is_arm[FID]      # (her forearms hang through here at rest)
-chip &= (OUTC[..., 0] > OUTC[..., 1] * 1.25) & (OUTC[..., 1] > OUTC[..., 2] * 1.03) & (OUTC.mean(2) > 0.36)      # warm like skin: the skirt's purple isn't
-OUTC[chip] = np.array([0.2, 0.18, 0.235], dtype=np.float32)
-# the waist: the band's dark smear on the bare midriff (not the navel)
-smear = mask & (POS[..., 1] > 0.0) & (z_t > 1.022) & (z_t < 1.06) & (np.abs(POS[..., 0]) < 0.118) & (np.abs(POS[..., 0]) > 0.02) & (OUTC.mean(2) < 0.5)
-OUTC[smear] = P.skin(POS[smear].astype(np.float64), NOR[smear].astype(np.float64), np.ones(int(smear.sum())) * 0.8).astype(np.float32)
-print("hem chips", int(chip.sum()), "waist smear", int(smear.sum()))
 
 
 def bil(img, u, v):
@@ -714,48 +632,18 @@ def bil(img, u, v):
     return ((img[y0, x0] * (1 - fx) + img[y0, x0 + 1] * fx) * (1 - fy) + (img[y0 + 1, x0] * (1 - fx) + img[y0 + 1, x0 + 1] * fx) * fy)
 
 
-# ---- the master sheet projected on the corset and chest: the detail comes from the art. Registered by the neon outline's bounds, so no hand-placed numbers.
-SHEET = "/home/boki/briefs-wt/briefs/art-refs/ryzz_FINAL_sheet.png"
-sh_ = imgio.load(SHEET)
-SHH, SHW = sh_.shape[:2]
-sn = (sh_[..., 0] > 0.8) & (sh_[..., 2] > 0.55) & (sh_[..., 1] < 0.5)
-win = np.zeros_like(sn)
-win[int(SHH * 0.315):int(SHH * 0.425), int(SHW * 0.15):int(SHW * 0.32)] = True      # the front view's corset
-sy_, sx_ = np.nonzero(sn & win)
-core_f = core & (POS[..., 1] > 0.0) & (z_t > 1.0) & (z_t < 1.36) & (np.abs(POS[..., 0]) < 0.14)
-mz = z_t[core_f]
-mx = POS[..., 0][core_f]
-if len(sy_) > 200 and len(mz) > 200:
-    z0_, z1_ = np.percentile(mz, 1), np.percentile(mz, 99)
-    x0_, x1_ = np.percentile(mx, 1), np.percentile(mx, 99)
-    v0_, v1_ = np.percentile(sy_, 1), np.percentile(sy_, 99)
-    u0_, u1_ = np.percentile(sx_, 1), np.percentile(sx_, 99)
-    print("corset map: model x", round(float(x0_), 3), round(float(x1_), 3), "z", round(float(z0_), 3), round(float(z1_), 3), "sheet u", u0_, u1_, "v", v0_, v1_)
-    # (sheet u grows toward her left, -X; v grows downward)
-    pj = mask & (POS[..., 1] > 0.02) & (NOR[..., 1] > 0.15) & (z_t > z0_ - 0.012) & (z_t < z1_ + 0.012) & (np.abs(POS[..., 0]) < x1_ + 0.012) & (ri > gi * 1.3)
-    yy_, xx_ = np.nonzero(pj)
-    uu_ = u0_ + (x1_ - POS[yy_, xx_, 0]) / (x1_ - x0_) * (u1_ - u0_)
-    vv_ = v0_ + (z1_ - POS[yy_, xx_, 2]) / (z1_ - z0_) * (v1_ - v0_)
-    cc_ = bil(sh_, uu_, vv_)
-    skin_like = (cc_[:, 1] > cc_[:, 2] * 1.02) & (cc_[:, 0] > 0.6)     # the sheet's skin between the cups stays the scan's
-    keep_ = ~skin_like
-    new_neon = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.55) & (cc_[:, 1] < 0.5)
-    OUTC[yy_[keep_], xx_[keep_]] = cc_[keep_].astype(np.float32)
-    core[yy_, xx_] = False
-    core[yy_[new_neon], xx_[new_neon]] = True
-    print("projected texels", int(keep_.sum()), "neon", int(new_neon.sum()))
+REF = os.path.expanduser("~/meshy/ryzz_v2/ref/front_full.png")      # (ryzz_v2_turnaround's front view, uncropped: 1668 x 3072)
 OUTC[core] = P.KEY
 # ---- the face: its own pass. The scan's paint unsharpened (eyes, lashes, brows, lips), the art's pink shadow over the wink
 head_m = mask & (z_t > K.NECK_Z + 0.04) & (POS[..., 1] > 0.0)
 hb = blur(OUTC.mean(2), head_m.astype(np.float32), 4)
 OUTC[head_m] = np.clip(OUTC[head_m] + (OUTC.mean(2) - hb)[head_m][:, None] * 1.1, 0, 1)
-# the owner's head sheet, front view, projected on the face: eyes (pink glowing under the bolt, blue), brows, nose, grin. Scaled by its eyes and mouth.
-HEAD = "/home/boki/meshy/ryzz_f/ryzz_head_nogum.png"      # (the sheet's first version, her grin: the later one paints the bubble, and that is geometry here)
-hd_ = imgio.load(HEAD)
-HU, HE, HM = 400.8, 746.4, 840.0                 # the sheet's face centre, eye line and mouth line (px, measured)
-SU = 125.0 / (2 * EYE_X)                         # its irises are 125 px apart
+# the turnaround's front face projected on hers: eyes, brows, the scar over her left eye, nose ring, lips. Scaled by its eyes and mouth.
+hd_ = imgio.load(REF)
+HU, HE, HM = 863.0, 505.0, 610.0                 # the front view's face centre, eye line and mouth line (px, measured)
+SU = 130.0 / (2 * EYE_X)                         # its irises are 130 px apart
 SV = (HM - HE) / (EYE_Z - MOUTH_Z)
-print("head sheet px/m", round(SU), round(SV))
+print("face ref px/m", round(SU), round(SV))
 fm = mask & (POS[..., 1] > 0.0) & (NOR[..., 1] > 0.38) & (z_t > K.NECK_Z + 0.04)      # (front-facing only: the sheet has nothing for her cheeks' sides)
 yy_, xx_ = np.nonzero(fm)
 px_, pz_ = POS[yy_, xx_, 0], z_t[yy_, xx_]
@@ -768,35 +656,10 @@ not_hair = (cc_[:, 2] < cc_[:, 0] * 1.0) | (rr_ < 0.74)
 kk_ = (1 - smooth(0.86, 1.0, rr_)) * not_hair
 cc_ = np.clip(cc_ * np.array([0.965, 1.035, 1.04]), 0, 1)       # (the toon light warms skin: the sheet's rose would go red)
 OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kk_[:, None]) + cc_ * kk_[:, None]).astype(np.float32)
-hot_ = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.6) & (cc_[:, 1] < 0.45) & (kk_ > 0.5)
-hot_ &= np.hypot(px_ - EYE_X, pz_ - EYE_Z) > 0.024        # (the pink eye keeps its painted iris; its glow is the bloom on anchor_eye_glow)
-core[yy_, xx_] = False
-core[yy_[hot_], xx_[hot_]] = True
-# the chest bolt from the head sheet (crisp, a bright heart): registered by its own bounds, like the corset
-cb = core & (z_t > 1.362) & (z_t < K.NECK_Z) & (np.abs(POS[..., 0]) < 0.05) & (POS[..., 1] > 0.0)      # (above the corset's neckline, below the choker)
-hwin = np.zeros(hd_.shape[:2], bool)
-hwin[960:1100, 340:470] = True
-hn = hwin & (hd_[..., 0] > 0.8) & (hd_[..., 2] > 0.55) & (hd_[..., 1] < 0.5)
-hy, hx = np.nonzero(hn)
-if cb.sum() > 100 and len(hy) > 100:
-    # placed by its centre at the sheet's own scale, the same as her face: it can't stretch
-    xc_, zc_ = float(np.median(POS[..., 0][cb])), float(np.median(z_t[cb]))
-    hu_, hv_ = float(np.median(hx)), float(np.median(hy))
-    rx_, rz_ = 0.052, 0.066
-    pb_ = mask & (POS[..., 1] > 0.0) & (np.abs(POS[..., 0] - xc_) < rx_) & (np.abs(z_t - zc_) < rz_)
-    yy_, xx_ = np.nonzero(pb_)
-    uu_ = hu_ - (POS[yy_, xx_, 0] - xc_) * SU
-    vv_ = hv_ + (zc_ - z_t[yy_, xx_]) * SV
-    cc_ = bil(hd_, uu_, vv_)
-    bd_ = np.minimum(rx_ - np.abs(POS[yy_, xx_, 0] - xc_), rz_ - np.abs(z_t[yy_, xx_] - zc_))
-    kb_ = smooth(0.0, 0.014, bd_)[:, None]
-    OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kb_) + cc_ * kb_).astype(np.float32)
-    core[yy_, xx_] = (cc_[:, 0] > 0.86) & (cc_[:, 2] > 0.7) & (cc_[:, 1] < 0.42)
-    print("chest bolt at", round(xc_, 3), round(zc_, 3), "texels", len(yy_), "glow", int(core[yy_, xx_].sum()))
 # a soft edge on the neon: a hard magenta edge rings yellow in the atlas's JPEG
 kf_ = np.clip(blur(core.astype(np.float32), mask.astype(np.float32), 2) * 1.5, 0, 1)[..., None]
 OUTC = OUTC * (1 - kf_) + P.KEY.astype(np.float32) * kf_
-print("face projected", int((kk_ > 0.5).sum()), "glow", int(hot_.sum()))
+print("face projected", int((kk_ > 0.5).sum()))
 
 
 def paint(pred, fn):
@@ -823,8 +686,7 @@ for s in HANDS:
             def fn(p, n, ao, pc=pc):
                 return P.nail(P.skin(p, n, ao), p, pc.tip, pc.dirn, "#e0559c")
         paint(lambda n, q=pc.name: n == q, fn)
-paint(lambda n: n == "plate", lambda p, n, ao: P.harness(p, n, ao, plate.rivets))
-paint(lambda n: n.startswith("strap"), P.strap)
+paint(lambda n: n == "plate", lambda p, n, ao: P.harness(p, n, ao, plate.rivets, plate.bolt))
 gc = next(p for p in pieces if p.name == "gum").c
 paint(lambda n: n == "gum", lambda p, n, ao: P.gum(p, n, ao, gc))
 
@@ -851,10 +713,10 @@ x0, y0, x1, y1 = rect(K.COPPER_R)
 OUTC[y0:y1, x0:x1] = P.copper_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(K.GLOWC_R)
 OUTC[y0:y1, x0:x1] = P.hexc("#ff8fd8")
-x0, y0, x1, y1 = rect(K.GLOWW_R)
-OUTC[y0:y1, x0:x1] = P.hexc("#ffb27e")
+x0, y0, x1, y1 = rect(K.TIE_R)
+OUTC[y0:y1, x0:x1] = P.hexc("#b8325f")
 x0, y0, x1, y1 = rect(K.BLACK_R)
-OUTC[y0:y1, x0:x1] = P.hexc("#2c2733")
+OUTC[y0:y1, x0:x1] = P.hexc("#24202a")
 
 atlas = bpy.data.images.new("ryzz_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
@@ -958,9 +820,6 @@ bone("gum", "head", gc_, gc_ + [0, 0.06, 0])
 for i, (ra, rb, rd) in enumerate(RODB):
     bone("rod.%d" % i, "hips", ra, rb)
     bone("rodlit.%d" % i, "rod.%d" % i, ra, rb)
-arc_c = np.array([0.0, -0.32, 1.86])
-bone("arc.0", "hips", arc_c, arc_c + [0, 0, 0.05])
-bone("arc.1", "hips", arc_c, arc_c + [0, 0, 0.05])
 bpy.ops.object.mode_set(mode="OBJECT")
 ob.parent = arm
 md = ob.modifiers.new("arm", "ARMATURE")
@@ -973,7 +832,7 @@ for vi, d in enumerate(vw):
 
 # ---- anchors and FX points: empties on the bones. S3/S4 read these.
 A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hips", (0, 0.13, K.SHOULDER_Z - 0.06)),
-     "anchor_harness": ("hips", (0, back_y(0, 1.28) - 0.03, 1.28)), "anchor_gum": ("gum", tuple(gum_c))}
+     "anchor_harness": ("hips", (0, PACK_B - 0.01, 1.28)), "anchor_gum": ("gum", tuple(gum_c))}
 for s, side in ((1.0, "R"), (-1.0, "L")):
     fs = HANDS[s]
     f0 = next(p for p in fs if p.name.startswith("finger0"))
@@ -982,7 +841,7 @@ for s, side in ((1.0, "R"), (-1.0, "L")):
     A["anchor_wire_" + side] = ("hand." + side, tuple(K.wrist_at(s) + [s * 0.024, 0.0, -0.02]))
     tp = next(p for p in fs if p.name.startswith("thumb"))
     A["anchor_thumb_" + side] = ("thumb." + side, tuple(tp.tip + tp.dirn * 0.01))
-A["anchor_eye_glow"] = ("head", (EYE_X, front_y(EYE_X, EYE_Z) + 0.004, EYE_Z))
+A["anchor_eye_glow"] = ("head", (-EYE_X, front_y(-EYE_X, EYE_Z) + 0.004, EYE_Z))      # (the scarred eye: her left, as the v2 art)
 for i, (ra, rb, rd) in enumerate(RODB):
     A["anchor_rod_%d" % i] = ("rod.%d" % i, tuple(rb + rd * 0.015))
 for nm, (bn, at) in A.items():

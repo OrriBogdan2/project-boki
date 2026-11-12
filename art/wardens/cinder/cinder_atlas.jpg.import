@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxke01iylovx5"
+uid="uid://cdhmd6u7etq6q"
 path.bptc="res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.bptc.ctex"
 path.astc="res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "ab68db5c2ab403aee7e7e29dc2e8ca14"
+"md5": "49580f12bdd676e0ea01ca1e946f9434"
 }
 
 [deps]

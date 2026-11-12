@@ -1,8 +1,8 @@
-"""Ryzz the Storm Chaser (mage): every sound her kit plays, synthesised and levelled (docs/AUDIO.md).
+"""Sparkle the Storm Chaser (mage): every sound her kit plays, synthesised and levelled (docs/AUDIO.md).
 
     cd tools && python3 gen_sfx_ryzz.py      (then: godot --headless --import)
 
-Ryzz is a street kid with the Wyrm's storm inside her: hot-pink lightning thrown straight from her
+Sparkle is a street kid with the Wyrm's storm inside her: hot-pink lightning thrown straight from her
 hands, copper coils at her wrists, a leather jacket, jewellery, and bubblegum. Her palette is dry
 crackling electricity (bright, jittery, never a pure sine), copper, thunder for the big ones, and one
 cheeky rubbery pop. Her voice is a young woman's, bright and brash.

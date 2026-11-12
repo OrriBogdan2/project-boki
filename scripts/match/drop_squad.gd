@@ -28,6 +28,7 @@ var _bot_ping := {}           # hunter nid -> plan time left when it pings
 var _ack := []                # bot acknowledgements due {h, at, id}
 var clock := 0.0              # runs through the planning phase too (the match clock waits)
 var events: Array = []        # what happened, for tests
+var chests_hidden := false    # no chests show while you ride the ship and drop in (KeyChest.show_all)
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -48,6 +49,9 @@ func setup() -> void:
 		elif mem.has(m.player):
 			lead = m.player
 		leads[t] = lead
+	if m.player and (m.player.riding or m.player.dropping):
+		chests_hidden = true
+		KeyChest.show_all(m, false)      # until you're down (tick)
 	var o: Dictionary = m.opts
 	if m.big and not m.ship.is_empty() and not o.get("no_plan", false) and not o.get("tutorial", false) and not o.get("training", false) and not o.get("duel", false):
 		planning = true
@@ -109,6 +113,8 @@ func _bot_plan_ping(h: Hunter) -> void:
 		var human := _human_ping(h.team)
 		if human != Vector3.INF:
 			at = human
+		elif m.biomes and randf() < HotZone.BOT_PICK and _hot_free(h):
+			at = m.biomes.hot.landing()
 		elif m.spawn_plan and randf() < 0.3:
 			var bd := 60.0
 			for c in m.spawn_plan.active_of("vault"):
@@ -123,6 +129,11 @@ func _bot_plan_ping(h: Hunter) -> void:
 	m.squad_ping(h, at)
 	if is_lead(h):
 		_set_land(h, at)
+
+## The hot zone has a landing and no other squad is already heading there.
+func _hot_free(h: Hunter) -> bool:
+	var at: Vector3 = m.biomes.hot.landing()
+	return at != Vector3.INF and Bot.crowd_at(m, h, at, HotZone.CROWD_R) == 0
 
 func _depart() -> void:
 	events.append("depart")
@@ -225,7 +236,7 @@ func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 
 ## Break away from the squad's drop: you jump and steer on your own.
 func separate(h: Hunter, from_net := false) -> bool:
-	if is_lead(h) or h.drop_solo or not (h.riding or h.dropping):
+	if is_lead(h) or h.drop_solo or not (h.riding or h.dropping) or not DropLaunch.can_separate(h):
 		return false
 	h.drop_solo = true
 	h.drop_follow = null
@@ -293,6 +304,9 @@ func follow_vy(f: Hunter) -> float:
 func tick(dt: float) -> void:
 	clock += dt
 	_tick_acks()
+	if chests_hidden and not (m.player.riding or m.player.dropping):
+		chests_hidden = false      # landed, or fell short and came back on foot
+		KeyChest.show_all(m, true)
 	for t in leads:
 		var l := leader(int(t))
 		if l == null or not l.dropping:

@@ -1,6 +1,6 @@
 class_name Arena
 extends RefCounted
-## The Arena (opts "arena", map content/maps/arena.json) and the training area's practice tools
+## The Arena (opts "arena", map content/maps/arena.json) and the Training Grounds's practice tools
 ## (opts "training": the same controller in its "practice" layout, on the training island).
 ##
 ## What it gives you:
@@ -345,7 +345,7 @@ func _spawn_bot() -> void:
 	if bot_mode == "off":
 		return
 	var diff := "medium"
-	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
+	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch, true), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	bot.lives = 99
 	bot.tonics = 0
@@ -375,7 +375,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70     # (the training area's banner sits at the top)
+	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)

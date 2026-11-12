@@ -1,17 +1,22 @@
 // The Hero VFX surface looks (scripts/match/hero_vfx.gd), one shader, a mode per look. Premultiplied: rgb is what
 // glows on top and alpha is how much of the ground it covers, so hot edges add light while char and smoke stay
-// dark on bright ground. Every look burns away through noise instead of fading flat.
+// dark on bright ground. Every look burns away through noise instead of fading flat. Cel look: heat is drawn in
+// CEL_BANDS flat steps and shapes have hard (one-pixel, anti-aliased) edges.
 shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
 #include "res://shaders/noise.gdshaderinc"
+#include "res://shaders/cel.gdshaderinc"
 
 const int M_SWEEP = 0;      // an arc of flame: UV.x along the swing, UV.y outer edge (0) to inner (1)
 const int M_SCORCH = 1;     // the ground burning: UV across the quad
 const int M_SKIRT = 2;      // a wall of flame: UV.x round it, UV.y foot (0) to top (1)
 const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
+const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
+const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
+const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -24,6 +29,8 @@ uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
 uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
+uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
+uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
 void vertex() {
@@ -53,7 +60,7 @@ float cracks(vec2 p) {
 // Fire by heat, 0..1: char, the body colour, the hot colour, nearly white. Everything hot is drawn with high
 // coverage, so it keeps its colour on bright ground instead of washing out to white.
 vec3 ramp(float h) {
-	h = clamp(h, 0.0, 1.0);
+	h = cel(clamp(h, 0.0, 1.0));
 	if (h < 0.3) { return mix(col3.rgb, col.rgb, h / 0.3); }
 	if (h < 0.72) { return mix(col.rgb, col2.rgb, (h - 0.3) / 0.42); }
 	return mix(col2.rgb, vec3(1.0), (h - 0.72) / 0.28 * 0.5);
@@ -68,7 +75,7 @@ vec4 sweep(vec2 uv) {
 	float n = fbm3(vec2(uv.x * 9.0 - TIME * 5.0 + seed, uv.y * 4.0 + TIME * 3.0));
 	float burn = smoothstep(0.2, 1.0, life);
 	float body = thick - uv.y + (n - 0.42) * 0.55 - burn * 0.75;
-	float a = smoothstep(0.0, 0.08, body);
+	float a = hard(body - 0.02);
 	float depth = clamp(uv.y / max(thick, 0.05), 0.0, 1.0);    // 0 at the edge, 1 at the licking tips
 	float lead = 1.0 - smoothstep(0.0, 0.12, behind);
 	float heat = 0.9 - depth * 0.75 + (n - 0.5) * 0.5 - burn * 0.45 + lead * 0.4;
@@ -148,7 +155,7 @@ vec4 skirt(vec2 uv) {
 	float n = fbm3(vec2(uv.x * 22.0 + seed, uv.y * 2.5 - TIME * 3.2));
 	float tall = 1.0 - smoothstep(0.1, 1.0, life);             // the wall sinks as it spends
 	float tongue = n * 1.35 + tall * 0.75 - uv.y * 1.5 - smoothstep(0.45, 1.0, life) * 0.7;
-	float a = smoothstep(0.0, 0.14, tongue);
+	float a = hard(tongue - 0.05);
 	float heat = tongue * 1.1 + 0.15 - uv.y * 0.25;
 	return vec4(ramp(heat) * a * 0.8, a * 0.8);
 }
@@ -161,7 +168,7 @@ vec4 flare(vec2 uv) {
 	float rag = fbm3(vec2(ang * 2.4 + seed, seed * 0.7)) * 0.75 + 0.35;
 	float open = smoothstep(0.0, 0.2, life);
 	float reach = rag * mix(0.35, 1.0, open) * (1.0 - life * 0.5);
-	float body = 1.0 - smoothstep(reach * 0.45, reach, d);
+	float body = hard(reach * 0.8 - d);
 	float core = 1.0 - smoothstep(0.0, reach * 0.55, d);
 	float fade = 1.0 - smoothstep(0.35, 1.0, life);
 	float holes = smoothstep(life - 0.1, life + 0.25, fbm3(p * 3.5 + seed) + 0.25);
@@ -173,9 +180,57 @@ vec4 ribbon(vec2 uv) {
 	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
 	float n = fbm3(vec2(uv.x * 5.0 - TIME * 5.0 + seed, uv.y * 3.0));
 	float body = across * 1.4 + (n - 0.5) * 0.9 - uv.x * 0.9;
-	float a = smoothstep(0.08, 0.3, body);
+	float a = hard(body - 0.18);
 	float heat = across * across * (1.0 - uv.x) * 0.95 + (n - 0.5) * 0.3;
 	return vec4(ramp(heat) * a, a * mix(0.95, 0.35, uv.x));
+}
+
+vec4 bolt(vec2 uv) {
+	// the strike flickers to a new path a few times a second; a thread (jag 0) is a clean taut line. The strip is
+	// wide and the line thin inside it, so a jagged strike has room to wander.
+	float tick = floor(TIME * 18.0 + seed * 7.0);
+	float wander = (fbm3(vec2(uv.x * 5.0 + tick * 3.1, seed)) - 0.5) * 2.4 * jag;
+	wander += (h21(vec2(floor(uv.x * 14.0), tick + seed)) - 0.5) * 0.5 * jag;     // sharp kinks
+	wander *= sin(3.14159 * uv.x);                       // pinned at both ends
+	float off = abs(uv.y * 2.0 - 1.0 - wander);
+	float thin = jag > 0.0 ? 0.07 : 0.16;
+	float grow = smoothstep(0.0, 0.12, life) * 1.2;          // runs out from A
+	float reach = 1.0 - smoothstep(grow - 0.1, grow, uv.x);
+	float fade = 1.0 - smoothstep(0.45, 1.0, life);
+	float core = (1.0 - smoothstep(thin * 0.5, thin, off)) * reach * fade;
+	float halo = (1.0 - smoothstep(thin, thin * 4.0, off)) * reach * fade * 0.6;
+	float flick = jag > 0.0 ? 0.7 + 0.3 * step(0.5, h21(vec2(tick, seed))) : 1.0;
+	vec3 c = col.rgb * halo + mix(col2.rgb, vec3(1.0), 0.5) * core;
+	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
+}
+
+vec4 vortex(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float d = length(p);
+	float ang = atan(p.y, p.x);
+	// spiral arms pulled inward: angle bent by distance, turning over time
+	float sw = ang + d * 5.0 - TIME * spin * 6.28;
+	float arms = fbm3(vec2(sw * 1.6 + seed, d * 3.0 - TIME * spin));
+	float open = smoothstep(0.0, 0.25, life);
+	float fade = 1.0 - smoothstep(0.65, 1.0, life);
+	float edge = 1.0 - smoothstep(0.75 * open, 0.98 * open, d + (arms - 0.5) * 0.25);
+	float streak = smoothstep(0.45, 0.75, arms) * edge;
+	float hole = 1.0 - smoothstep(0.0, 0.32, d);                // the dark core
+	float a = clamp(streak * 0.85 + hole * 0.75 + edge * 0.12, 0.0, 1.0) * fade;
+	vec3 c = mix(col.rgb, col2.rgb, smoothstep(0.6, 0.9, arms) * (1.0 - hole)) * streak + col3.rgb * hole;
+	return vec4(c * fade, a);
+}
+
+vec4 ring(vec2 uv) {
+	float go = 1.0 - pow(1.0 - min(life / 0.55, 1.0), 3.0);    // races out, then slows
+	vec2 ring_v = cel_ring(uv, go, life, seed);
+	float d = length(uv * 2.0 - 1.0);
+	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flash of dust inside
+	float fade = 1.0 - smoothstep(0.75, 1.0, life);
+	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade;
+	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, vec3(1.0), 0.5), ring_v.y * (1.0 - hard(life - 0.2)));
+	c = mix(col3.rgb, c, ring_v.x);
+	return vec4(c * a, a);
 }
 
 void fragment() {
@@ -184,7 +239,10 @@ void fragment() {
 	else if (mode == M_SCORCH) { v = scorch(UV); }
 	else if (mode == M_SKIRT) { v = skirt(UV); }
 	else if (mode == M_FLARE) { v = flare(UV); }
+	else if (mode == M_BOLT) { v = bolt(UV); }
+	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
+	else if (mode == M_RING) { v = ring(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;

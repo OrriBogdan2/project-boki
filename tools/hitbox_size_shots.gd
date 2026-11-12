@@ -33,10 +33,10 @@ func run(main: Node) -> void:
 	for i in ids.size():
 		var a: String = ids[i]
 		var at := home + Vector3((float(i % 6) - 2.5) * GAP, 0, 1.0 + 2.6 * float(i / 6))
-		var h := m.make_hunter("S%d" % i, i + 1, Arch.weight(a), Arch.name_of(a), "idle", {}, at, {"arch": a})
+		var h := m.make_hunter("S%d" % i, i + 1, Arch.weight(a), Arch.bare_title(a), "idle", {}, at, {"arch": a})
 		h.face = PI
 		row.append(h)
-		names.append("%s %.3f" % [Arch.name_of(a), h.r])
+		names.append("%s %.3f" % [Arch.bare_title(a), h.r])
 	m.player.teleport(home + Vector3(0, 0, 30))
 	if m.hud:
 		m.hud.visible = false

@@ -2,7 +2,7 @@
   blender -b --factory-startup --python tools/art1/grimble_art1.py -- WORK
 Shapes: grimble_sculpt.py; paint: grimble_paint.py. Budget: 20k triangles, hoard and weapons included. The hook is skinned on bone
 `hook` (hand.R), the blunderbuss on `gun` (a swivel on root), the hoard on `hoard`, the junk ball on `ball` (shrunk into the sack at
-rest, the roll scales it up). Method: tools/art1/hem_art1.py."""
+rest, the roll scales it up). Method: tools/art1/hem_finish.py."""
 import math
 import os
 import sys
@@ -26,8 +26,9 @@ import warden_kit as K
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = sys.argv[sys.argv.index("--") + 1]
-MESHY = os.path.expanduser("~/meshy/grimble")     # grimble_source.py's output (never in git)
+MESHY = os.path.expanduser("~/meshy/grimble_v2")     # grimble_source.py's output (never in git)
 ATLAS = 2048
+GAUNTLET_CUFF = 0.82          # (m) the gauntlet's cuff top on the fitted left forearm
 F = np.float32
 
 
@@ -180,32 +181,6 @@ def chart_seams(ob, min_faces=24):
     bm.free()
 
 
-def face_chart(ob):
-    """The face as one front-projected chart (seams were cracking the cheek and lip on Lisette)."""
-    bm = bmesh.new()
-    bm.from_mesh(ob.data)
-    bm.faces.ensure_lookup_table()
-    front = np.array([f.calc_center_median().y > G.HEAD_C[1] + 0.03 and f.normal.y > 0.12 for f in bm.faces], bool)
-    for e in bm.edges:
-        fs = e.link_faces
-        if len(fs) == 2:
-            a, b = front[fs[0].index], front[fs[1].index]
-            e.seam = (a != b) or (e.seam and not a)
-    bm.to_mesh(ob.data)
-    bm.free()
-    return np.nonzero(front)[0]
-
-
-def planar_uv(ob, polys):
-    me = ob.data
-    uv = me.uv_layers.active.data
-    for pi in polys.tolist():
-        pl = me.polygons[pi]
-        for li in pl.loop_indices:
-            co = me.vertices[me.loops[li].vertex_index].co
-            uv[li].uv = (co.x, co.z)
-
-
 def add_weights(ob, W):
     names = list(W)
     a = np.stack([W[n] for n in names], 1).astype(F)
@@ -303,19 +278,47 @@ def scan_rgb(tag, pts):
     return tx[py, px]
 
 
-def tri_slots(tag, c, cen):
-    """Per triangle, by the paint's colour: gold and brass, olive hide, warm wood and leather, grey (skin on him, iron in the pile)."""
-    r, g, b = c[:, 0], c[:, 1], c[:, 2]
-    warm = r - b
-    out = np.full(len(c), "metal" if tag == "H" else "skin", dtype=object)
-    out[warm > 0.05] = "leather"
-    if tag == "B":
-        out[(g - b > 0.04) & (warm < 0.16)] = "cloth"
-    out[warm > 0.30] = "brass"
-    if tag == "F":
-        out[:] = "skin"
-        out[cen[:, 2] < G.HEAD_C[2] - 0.098] = "metal"
+def tri_slots(c, iron):
+    """Per triangle, by the scan paint's colour: gold, the brown hide and belt, grey-mauve skin (the hook and the purple arm too);
+    the gauntlet and its cuff are iron, by place (their paint is grey like his skin)."""
+    r, b = c[:, 0], c[:, 2]
+    out = np.full(len(c), "skin", dtype=object)
+    out[r - b > 0.07] = "leather"
+    out[r - b > 0.30] = "brass"
+    out[iron] = "metal"
     return out
+
+
+def group_w(ob, name):
+    gi = ob.vertex_groups[name].index
+    w = np.zeros(len(ob.data.vertices), F)
+    for v in ob.data.vertices:
+        for g in v.groups:
+            if g.group == gi:
+                w[v.index] = g.weight
+    return w
+
+
+def iron_tris(ob, tri):
+    """The gauntlet (all of hand.L) and its cuff, the forearm's lower part."""
+    v = verts(ob)
+    m = (group_w(ob, "hand.L") > 0.5) | ((group_w(ob, "forearm.L") > 0.5) & (v[:, 2] < GAUNTLET_CUFF))
+    return m[tri].sum(1) >= 2
+
+
+def hook_tip(ob):
+    """The bone hook's point: the top of the crescent's inner horn, which rises by his right shin."""
+    v = verts(ob)
+    hv = v[group_w(ob, "hook") > 0.5]
+    inner = hv[hv[:, 0] < hv[:, 0].min() + 0.06]
+    return inner[inner[:, 2].argmax()].astype(F)
+
+
+def fist(ob):
+    """The gauntlet's knuckles: the middle of its lowest part."""
+    v = verts(ob)
+    hv = v[group_w(ob, "hand.L") > 0.5]
+    return hv[hv[:, 2] < hv[:, 2].min() + 0.06].mean(0).astype(F)
 
 
 def main():
@@ -333,12 +336,6 @@ def main():
         print("part", name, round(time.time() - t0, 1), flush=True)
         return parts[-1]
 
-    def face_keep(v):
-        h = v - G.HEAD_C
-        m = np.abs(h[:, 2] - G.grin_z(h[:, 0])) - G.grin_h(h[:, 0])
-        d = np.linalg.norm(v - G.EYE_C, axis=1)
-        return np.clip(np.maximum(1.1 - np.abs(m) / 0.018, 1.0 - d / 0.08), 0.03, 1)
-
     def scan(tag, nm):
         with bpy.data.libraries.load(os.path.join(MESHY, "low_%s.blend" % nm)) as (src, dst):
             dst.objects = [n for n in src.objects if n.startswith("Low_")]
@@ -352,24 +349,19 @@ def main():
         return ob
 
     G.HOARD.clear()
-    part("skin_head", None, 0, "scan_F", 2.3, None, "scan", None, ob=scan("F", "head"))
-    part("eye", G.eye(), 80, "eye", 2.6, None, "eye", "glow")
-    part("lid", G.lid(), 90, "skin", 1.4, None, "lid", "skin")
+    body = part("body", None, 0, "scan_A", 1.0, None, "scan", None, ob=scan("A", "body"))["ob"]
+    tip, knuckle = hook_tip(body), fist(body)
     part("monocle", G.monocle(), 460, "gear", 2.2, None, "head", None)
-    part("body", None, 0, "scan_B", 1.0, None, "scan", None, ob=scan("B", "body"))
-    part("straps", G.straps(), 130, "gear", 0.9, None, "hips", None)
-    part("cuffR", G.cuff(J, "R", 1), 150, "gear", 1.0, None, "forearm.R", None)
-    part("cuffL", G.cuff(J, "L", -1), 150, "gear", 1.0, None, "forearm.L", None)
-    gt = G.gauntlet(J)
-    part("gauntlet", gt, 700, "gear", 1.4, None, "gauntlet", None)
-    part("hook", G.hook(J), 340, "gear", 1.3, None, "hook", None)
     part("gun", G.gun(), 280, "gear", 1.3, G.gun_xf, "gun", None)
-    # (the hoard scan came out a speckled brown lump at the match camera at 3k: the sculpted hoard's big shapes read far better, it stays)
-    part("hoard", G.hoard(), 3550, "hoard", 1.0, None, "hoard", None)
+    # the hoard: v1's sculpt, moved onto v2's back (a few rigid chunks on the torso bone, under the size cap)
+    hf = G.hoard()
+    hob = lowpoly("hoard", hf, 3200)
+    sh = G.HOARD_SHIFT
+    part("hoard", hf, 0, "hoard", 1.0, lambda p: p + sh, "hoard", None, ob=hob)
     bl = G.bell()
     ln = G.lantern()
-    TIP = {"R": np.array((0.475, -0.215, 1.640), F), "L": np.array((-0.475, -0.215, 1.640), F)}
-    APEX = {"R": np.array((0.303, -0.215, 1.612), F), "L": np.array((-0.303, -0.215, 1.612), F)}
+    TIP = {"R": np.array((0.475, -0.215, 1.640), F) + sh, "L": np.array((-0.475, -0.215, 1.640), F) + sh}
+    APEX = {"R": np.array((0.303, -0.215, 1.612), F) + sh, "L": np.array((-0.303, -0.215, 1.612), F) + sh}
     LAMP_LEN, BELL_LEN = 0.27, 0.052
     ends = {}
     for n in "RL":
@@ -386,71 +378,24 @@ def main():
     for i, tilt in enumerate((0.5, -0.8)):
         rg = [(math.cos(t) * G.BALL_R * 1.03, math.sin(t) * math.sin(tilt) * G.BALL_R * 1.03, math.sin(t) * math.cos(tilt) * G.BALL_R * 1.03) for t in np.linspace(0, math.tau, 41)]
         part("ballchain%d" % i, None, 0, "iron", 0.3, G.ball_xf, "ball", "metal", ob=chain_links("ballchain%d" % i, rg, 0.078, 0.042, 0.016))
-    # the chains on the weapon and the eyepiece
-    x, wz = float(J["hand.R"][0]), float(J["hand.R"][2])
-    k = G.HOOK_SCALE
-    cur = G.hook_curve()
-    heel = cur[7]
-    pr = [(x - 0.068, 0.0, wz - 0.040), (x - 0.095, -0.05, wz - 0.20), (x - 0.075, -0.075, wz - 0.42), (x - 0.03, 0.0, wz - 0.53), (x, float(heel[0]) * 0.8, wz + float(heel[1]) + 0.03)]
-    part("hookchain", None, 0, "iron", 0.5, None, "hook", "metal", ob=chain_links("hookchain", spline(pr, 24), 0.046, 0.021, 0.0066))
+    # the loupe's gold chain, on his outer side
     MC = G.MONO_C + (G.MONO_R + 0.012, -0.004, -0.008)
     MJ = spline([MC, MC + (0.004, 0.0, -0.075), MC + (-0.002, -0.004, -0.14)], 4)
     part("monochain", None, 0, "gold", 0.5, None, "monochain", "brass", ob=chain_links("monochain", spline(MJ, 12), 0.016, 0.0072, 0.0024))
-
-    # the sewn left eye: the scan's paint blurs at 2k, so real stitches, set on the head's surface
-    hd_ob = parts[0]["ob"]
-    hv = verts(hd_ob)
-    hf = np.empty(len(hd_ob.data.polygons) * 3, np.int32)
-    hd_ob.data.polygons.foreach_get("vertices", hf)
-    hb = BVHTree.FromPolygons(hv.tolist(), hf.reshape(-1, 3).tolist(), all_triangles=True)
-    sc = (float(-G.EYE_C[0] - 0.006), float(G.EYE_C[2] - 0.002))
-
-    def on_face(x, z):
-        hit = hb.ray_cast((x, 0.7, z), (0, -1, 0))
-        return np.array(hit[0], F) + np.array(hit[1], F) * 0.0016
-
-    sv, sq = [], []
-
-    def bar(a, b, wd):
-        a, b = np.array(a, F), np.array(b, F)
-        u = (b - a) / np.linalg.norm(b - a)
-        n = np.array((0, 1, 0), F)
-        s_ = np.cross(u, n)
-        s_ /= np.linalg.norm(s_)
-        k = len(sv)
-        for p_ in (a, b):
-            for o in (s_ * wd + n * 0.0006, -s_ * wd + n * 0.0006, -s_ * wd - n * 0.0022, s_ * wd - n * 0.0022):
-                sv.append(p_ + o)
-        for j in range(4):
-            j2 = (j + 1) % 4
-            sq.append((k + j, k + j2, k + 4 + j2, k + 4 + j))
-
-    pts = [on_face(sc[0] + t, sc[1] + 0.05 * t * t * 40 * 0.2) for t in np.linspace(-0.027, 0.027, 7)]
-    for a_, b_ in zip(pts[:-1], pts[1:]):
-        bar(a_, b_, 0.0022)
-    for t in (-0.022, -0.011, 0.0, 0.011, 0.022):
-        bar(on_face(sc[0] + t - 0.0015, sc[1] + 0.016), on_face(sc[0] + t + 0.0015, sc[1] - 0.015), 0.0027)
-    sewn = ob_from("sewn", np.array(sv, F), np.array(sq, np.int32))
-    bm = bmesh.new()
-    bm.from_mesh(sewn.data)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(sewn.data)
-    bm.free()
-    part("sewn", None, 0, "stitch", 0.6, None, "head", "leather", ob=sewn)
-    # the two small lenses: plain glowing discs in their rings
+    # the loupe's three lenses: plain glowing discs in their rings, the big one over his right eye
     lv_, lf_ = [], []
     au = np.cross(G.MONO_AX, (0, 0, 1))
     au /= np.linalg.norm(au)
     aw = np.cross(au, G.MONO_AX)
-    for off, r in G.LENS:
+    for off, r in (((0.0, 0.0, 0.0), G.MONO_R - 0.006),) + G.LENS:
         c = G.MONO_C + np.array(off, F) * (1, 0, 1) + G.MONO_AX * 0.0045
         k = len(lv_)
         lv_.append(c + G.MONO_AX * 0.004)
-        for j in range(10):
-            th = j / 10 * math.tau
+        for j in range(12):
+            th = j / 12 * math.tau
             lv_.append(c + (au * math.cos(th) + aw * math.sin(th)) * r * 1.02)
-        for j in range(10):
-            lf_.append((k, k + 1 + j, k + 1 + (j + 1) % 10))
+        for j in range(12):
+            lf_.append((k, k + 1 + j, k + 1 + (j + 1) % 12))
     lens = ob_from("lenses", np.array(lv_, F), np.array(lf_, np.int32))
     bm = bmesh.new()
     bm.from_mesh(lens.data)
@@ -473,7 +418,6 @@ def main():
         bpy.ops.mesh.quads_convert_to_tris()
         bpy.ops.object.mode_set(mode="OBJECT")
         chart_seams(ob, 24 if len(ob.data.polygons) > 300 else 8)
-        face = face_chart(ob) if p["name"] == "skin_head" else None
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_all(action="SELECT")
         if not ob.data.uv_layers:
@@ -481,8 +425,6 @@ def main():
         bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0, correct_aspect=False)
         bpy.ops.object.mode_set(mode="OBJECT")
         ob.select_set(False)
-        if face is not None:
-            planar_uv(ob, face)
         me = ob.data
         lv = np.empty(len(me.loops), np.int32)
         me.loops.foreach_get("vertex_index", lv)
@@ -541,26 +483,15 @@ def main():
             lab = f.label(pts).astype(np.int32)
         nm = p["paint"]
         if nm.startswith("scan_"):
-            rgb = scan_rgb(nm[-1], pts)
+            rgb = P.scan_face(pts, scan_rgb(nm[-1], pts))
             rgb = np.clip(rgb * (0.86 + 0.40 * P.form(nn))[:, None] * 1.4, 0, 1)
-            if nm == "scan_F":      # (the collar is iron: the scan's paint leaves it skin-pale)
-                col = S.smooth(1.094, 1.080, pts[:, 2])[:, None]
-                rgb = rgb * (1 - col) + rgb * np.array((0.50, 0.54, 0.62), F) * col
-            p["tri_slot"] = tri_slots(nm[-1], scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), vs[tri].mean(1))
-        elif nm == "skin":
-            rgb = P.skin(pts, nn, lab, f)
-        elif nm == "tooth":
-            rgb = P.tooth(pts, nn, lab, f)
-        elif nm == "stitch":
-            rgb = np.tile(P.C["stitch"], (len(pts), 1))
+            body_px = m.copy()
+            body_px[idx[0][P.face_mask(pts)], idx[1][P.face_mask(pts)]] = False      # (the gums are purple, not veins)
+            p["tri_slot"] = tri_slots(scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), iron_tris(ob, tri))
         elif nm == "lens":
             rgb = np.tile(P.rgb("2fd878"), (len(pts), 1))
-        elif nm == "eye":
-            rgb = P.eye(pts, nn)
         elif nm == "hoard":
             rgb = P.hoard(pts, nn, lab, f)
-        elif nm == "loin":
-            rgb = P.loincloth(pts, nn, lab, f)
         elif nm == "gear":
             rgb = P.gear(pts, nn, lab, f)
         else:
@@ -575,6 +506,7 @@ def main():
             nrm = (p["xf"](nrm) - p["xf"](np.zeros((1, 3), F)))
         p["nrm"] = nrm
         print("painted", p["name"], len(tri), flush=True)
+    print("vein texels", P.vein_key(atlas, body_px), flush=True)
     img = S.dilate(atlas, mask, 10)
     os.makedirs(WORK, exist_ok=True)
     png = os.path.join(WORK, "atlas.png")
@@ -595,12 +527,12 @@ def main():
     add_bone(arm, "brow", b0, b0 + (0, 0.03, 0), "head", (0, 0, 1))
     j0 = G.HEAD_C + (0, -0.015, -0.020)
     add_bone(arm, "jaw", j0, j0 + (0, 0.08, -0.03), "head", (0, 0, 1))
-    g = G.gauntlet_joints(J)
-    add_bone(arm, "fingers.L", g["knuckle"], g["knuckle"] + (0, 0, -0.06), "hand.L", (1, 0, 0))
-    add_bone(arm, "fingers2.L", g["knuckle"] + (0.006, 0, -0.062), g["knuckle"] + (0.05, 0, -0.13), "fingers.L", (1, 0, 0))
-    add_bone(arm, "thumb.L", g["thumb"], g["thumb2"], "hand.L", (1, 0, 0))
+    # (the gauntlet is the scan's, rigid on hand.L: the finger bones stay for the clips, unweighted)
+    add_bone(arm, "fingers.L", knuckle, knuckle + (0, 0, -0.06), "hand.L", (1, 0, 0))
+    add_bone(arm, "fingers2.L", knuckle + (0.006, 0, -0.062), knuckle + (0.05, 0, -0.13), "fingers.L", (1, 0, 0))
+    add_bone(arm, "thumb.L", knuckle + (0.03, 0.04, 0.05), knuckle + (0.05, 0.07, 0.0), "hand.L", (1, 0, 0))
     w = (float(J["hand.R"][0]), 0.0, float(J["hand.R"][2]))
-    add_bone(arm, "hook", (w[0], 0, w[2] - 0.09), (w[0], 0, w[2] - 0.2), "hand.R", (0, 1, 0))
+    add_bone(arm, "hook", (w[0], 0, w[2] - 0.02), (w[0], 0, w[2] - 0.2), "hand.R", (0, 1, 0))
     add_bone(arm, "gun", G.GUN_AT, G.GUN_AT + G.GUN_R[:, 1] * 0.2, "root", tuple(G.GUN_R[:, 2]))
     add_bone(arm, "hoard", G.HB, G.HB + (0, 0, 0.2), "hips", (0, 1, 0))
     add_bone(arm, "ball", G.BALL_AT, G.BALL_AT + (0, 0, 0.1), "root", (0, 1, 0))
@@ -620,19 +552,6 @@ def main():
     print("armature", time.time() - t0, flush=True)
 
     # ----------------------------------------------------- skin
-    def allow(pg, bone, g2, pts):
-        z = pts[:, 2]
-        m = (g2 == pg).astype(F)
-        if pg == 0:
-            return m + (g2 >= 3) * (z > 0.64) + ((g2 == 1) | (g2 == 2)) * (z > 1.02)
-        if bone.startswith("upper_arm"):
-            sx = 1 if bone.endswith("R") else -1
-            return m + (g2 == 0) * (z > 0.99) * (pts[:, 0] * sx > 0.13)
-        if bone.startswith("thigh"):
-            sx = 1 if bone.endswith("R") else -1
-            return m + (g2 == 0) * (z < 0.76) * (pts[:, 0] * sx > 0.0)
-        return m
-
     def chain_w(js, names, p2):
         pts = np.array(js, F)
         ab = pts[1:] - pts[:-1]
@@ -657,29 +576,8 @@ def main():
         one = np.ones(len(vs), F)
         if grp == "scan":
             continue        # (its weights came from grimble_source.py)
-        if nm == "skin_head":
-            h = vs - G.HEAD_C
-            neck = S.smooth(-0.125, -0.045, h[:, 1])
-            lo = h[:, 2] - (G.grin_z(h[:, 0]) - G.grin_h(h[:, 0]) * 0.1)
-            jw = S.smooth(0.0, -0.016, lo) * S.smooth(-0.015, 0.03, h[:, 1])
-            br = np.exp(-(np.linalg.norm((vs - (G.HEAD_C + (0.042, 0.098, 0.052))) * (0.62, 1, 1.25), axis=1) / 0.040) ** 2) * (h[:, 2] > 0.018) * (h[:, 1] > 0.03)
-            W = {"head": neck * (1 - jw) * (1 - br) + 1e-3, "hips": 1 - neck, "jaw": neck * jw, "brow": neck * br * (1 - jw)}
-        elif nm == "teeth":
-            h = vs - G.HEAD_C
-            lower = (h[:, 2] < G.grin_z(h[:, 0])) * 1.0
-            W = {"head": 1 - lower + 1e-4, "jaw": lower}
-        elif grp == "eye":
-            W = {"eye": one}
-        elif grp == "lid":
-            W = {"lid": one}
-        elif grp == "head":
+        if grp == "head":
             W = {"head": one}
-        elif nm == "body":
-            W = tr.weights(vs, 0.024, allow)
-            W = {k3: w3 + 1e-7 * (k3 == "hips") for k3, w3 in W.items() if w3.max() > 1e-4}
-        elif grp == "gauntlet":
-            W = gt.weights(vs, 0.006)
-            W = {k3: w3 + 1e-7 * (k3 == "hand.L") for k3, w3 in W.items() if w3.max() > 1e-4}      # (a far vert must still have a bone)
         elif grp == "skirt":
             W = {"skirt": S.smooth(0.70, 0.60, vs[:, 2]) + 1e-3, "root": S.smooth(0.60, 0.70, vs[:, 2])}
         elif grp in ("lampR", "lampL", "bellR", "bellL"):
@@ -737,8 +635,8 @@ def main():
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
 
-    ROOM = {"eye": 0.0, "lid": 0.0, "skin_head": 0.15, "monocle": 0.1, "monochain": 0.0, "hookchain": 0.0, "lampchainR": 0.0, "lampchainL": 0.0,
-            "ball": 0.0, "ballframe": 0.0, "ballchain0": 0.0, "ballchain1": 0.0, "sewn": 0.0, "lenses": 0.0, "hoard": 0.55, "body": 0.5, "hook": 0.9, "gauntlet": 0.5}
+    ROOM = {"monocle": 0.1, "monochain": 0.0, "lampchainR": 0.0, "lampchainL": 0.0, "ball": 0.0, "ballframe": 0.0, "ballchain0": 0.0,
+            "ballchain1": 0.0, "lenses": 0.0, "hoard": 0.55, "body": 0.5}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
@@ -757,21 +655,22 @@ def main():
     md = bd.modifiers.new("Armature", "ARMATURE")
     md.object = arm
     # empties: anchors, FX points
-    K.anchor(arm, "head", "anchor_head_top", (0, float(G.HEAD_C[1]), 1.285))
+    K.anchor(arm, "head", "anchor_head_top", tuple(G.HEAD_TOP))
     K.anchor(arm, "head", "anchor_eye", tuple(G.MONO_C))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.10, 1.02))
     K.anchor(arm, "gun", "weapon_muzzle", tuple(G.gun_xf(np.array((0, 0.30, 0.012), F))))
     K.anchor(arm, "gun", "anchor_gun_root", tuple(G.gun_xf(np.array((0, 0.0, 0.012), F))))
-    K.anchor(arm, "hook", "anchor_claw", tuple(G.hook_mouth(J)))
-    K.anchor(arm, "hook", "anchor_hook_tip", tuple(G.hook_tip(J)))
-    K.anchor(arm, "fingers.L", "anchor_fist", tuple(g["knuckle"] + (0.02, 0, -0.03)))
+    # (the arm IS the hook: the reach and the grab leave from its tip)
+    K.anchor(arm, "hook", "anchor_claw", tuple(tip))
+    K.anchor(arm, "hook", "anchor_hook_tip", tuple(tip))
+    K.anchor(arm, "fingers.L", "anchor_fist", tuple(knuckle + (0.0, 0.02, -0.03)))
     K.anchor(arm, "ball", "anchor_ball", tuple(G.BALL_AT))
-    K.anchor(arm, "hoard", "anchor_coins", (0.05, -0.14, 1.34))
-    K.anchor(arm, "hoard", "anchor_hoard_top", (0.0, -0.32, 1.72))
+    K.anchor(arm, "hoard", "anchor_coins", tuple(np.array((0.05, -0.14, 1.34), F) + sh))
+    K.anchor(arm, "hoard", "anchor_hoard_top", tuple(np.array((0.0, -0.32, 1.72), F) + sh))
     K.anchor(arm, "spring_hanglampR_2", "anchor_lamp_r", tuple(ends["lampR"] - (0, 0, 0.105)))
     K.anchor(arm, "spring_hanglampL_2", "anchor_lamp_l", tuple(ends["lampL"] - (0, 0, 0.105)))
     bd.data.validate(clean_customdata=False)
-    print("tris total", K.tris([bd]), time.time() - t0, flush=True)
+    print("tris total", K.tris([bd]), "hook tip", tip.round(3), "fist", knuckle.round(3), "hoard shift", sh.round(3), time.time() - t0, flush=True)
     bpy.context.scene["hook_len"] = 0.0
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "grimble_art1.blend"))
 
