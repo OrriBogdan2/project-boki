@@ -14,26 +14,31 @@ extends RefCounted
 ## orbit, the summon's leash and the hit credit follow the carrier.
 ## Online: the Boki's own game decides (loose, scatter, home, and the grabs and summons it is asked for). A grab
 ## or a stolen summon from another game is a kcmd event ("wgrab"/"wsum", extra = the Boki's id); the kin
-## snapshot carries the loose seconds, the carrier and the used summon (KinNet, Net 0.30.0).
+## snapshot carries the loose seconds, the carrier and the used summon (KinNet, Net 0.24.6).
 
-const BOB_M := 0.12      # m a loose wisp bobs up and down
-const BOB_HZ := 0.8      # bobs per second
-const POP_M := 2.5       # m from the fallen hunter it floats: clear of their stomp and revive ring (Life revive_radius)
+const BOB_M := 0.12  # m a loose wisp bobs up and down
+const BOB_HZ := 0.8  # bobs per second
+const POP_M := 2.5  # m from the fallen hunter it floats: clear of their stomp and revive ring (Life revive_radius)
+
 
 static func rules() -> Dictionary:
 	return KinSummon.rules()["steal"]
+
 
 ## Floating loose, free to grab?
 static func loose(k: Kin) -> bool:
 	return k.loose_t > 0.0
 
+
 ## Riding with someone other than its own hunter?
 static func stolen(k: Kin) -> bool:
 	return k.home_h != null and k.owner_h != k.home_h
 
+
 ## Out of its own hunter's hands: the death and loss rules leave it alone (KinLoss.on_owner_out).
 static func taken(k: Kin) -> bool:
 	return loose(k) or stolen(k)
+
 
 ## How many stolen wisps a hunter carries.
 static func count(h: Hunter) -> int:
@@ -43,6 +48,7 @@ static func count(h: Hunter) -> int:
 			n += 1
 	return n
 
+
 ## Each carried stolen wisp's carry passives at passive_k, added to a hunter's stat sums (Hunter._refresh_kin_stats).
 static func add_passives(h: Hunter, sums: Dictionary) -> void:
 	for k in h.m.kins:
@@ -51,6 +57,7 @@ static func add_passives(h: Hunter, sums: Dictionary) -> void:
 		var f := float(rules()["passive_k"])
 		for ps in k.ks.carry_passives:
 			sums[ps["stat"]] = float(sums.get(ps["stat"], 0.0)) + float(ps["amount"]) * f
+
 
 ## The step of a wisp that is loose or may break loose (KinWisp.ride). True when it handled it.
 static func ride(k: Kin, dt: float) -> bool:
@@ -67,17 +74,18 @@ static func ride(k: Kin, dt: float) -> bool:
 	if k.remote or o == null or k.home_h == null or k.state != "shoulder":
 		return false
 	if stolen(k) and (o.downed or o.out or o.extracted):
-		break_loose(k, o.pos)          # the thief fell: what they carry scatters
+		break_loose(k, o.pos)  # the thief fell: what they carry scatters
 	elif not stolen(k) and o.downed and not k.back_home:
 		break_loose(k, o.pos)
 	elif not (o.downed or o.out):
 		k.back_home = false
 	return loose(k)
 
+
 ## Its wisp breaks loose at shoulder height, popping off its fallen rider (the Boki's own game).
 static func break_loose(k: Kin, at: Vector3) -> void:
 	var thief := k.owner_h if stolen(k) else null
-	var a := float(k.m.kins.find(k) % 7) * 2.1          # (each wisp off its own way)
+	var a := float(k.m.kins.find(k) % 7) * 2.1  # (each wisp off its own way)
 	at += Vector3(cos(a), 0.0, sin(a)) * POP_M
 	if thief:
 		k.m.add_feed("%s's %s scattered from %s" % [k.home_h.pname, k.rec.get("name", "Boki"), thief.pname])
@@ -87,6 +95,7 @@ static func break_loose(k: Kin, at: Vector3) -> void:
 	k.prev = k.pos
 	k.m.fx.burst(k.pos, k.sp.get("glow", k.sp["color"]), 10, 2.5)
 
+
 ## Back to its own hunter's shoulder (loose too long, or the match is over). A downed hunter keeps it this time.
 static func go_home(k: Kin) -> void:
 	k.loose_t = 0.0
@@ -95,9 +104,11 @@ static func go_home(k: Kin) -> void:
 	k.stow()
 	k.m.fx.ring(k.home_h.pos, 1.2, Color(k.sp.get("glow", k.sp["color"]), 0.8), 0.3)
 
+
 static func _ride_with(k: Kin, h: Hunter) -> void:
 	k.owner_h = h
 	k.team = h.team
+
 
 ## The prompt for a loose wisp within reach, and the grab once interact is held long enough
 ## (Match._update_interact). Empty when none is near.
@@ -130,6 +141,7 @@ static func interact_for(m: Match, h: Hunter, want: bool, dt: float) -> Dictiona
 		label = "Hold %s to take %s back" % [key, boki]
 	return {"kind": "wisp", "ent": near, "label": label, "col": near.sp.get("glow", near.sp["color"])}
 
+
 ## Into a hunter's orbit: home if it is theirs, else stolen. Refused when it is not loose or their hands are full.
 static func grab(k: Kin, h: Hunter) -> bool:
 	if not loose(k) or h.downed or h.out or (h != k.home_h and count(h) >= int(rules()["carry_max"])):
@@ -139,6 +151,7 @@ static func grab(k: Kin, h: Hunter) -> bool:
 	k.stow()
 	_grabbed(k, h)
 	return true
+
 
 ## Every game: the catch moment, and the soul echo for a local thief.
 static func _grabbed(k: Kin, h: Hunter) -> void:
@@ -150,6 +163,7 @@ static func _grabbed(k: Kin, h: Hunter) -> void:
 	k.m.add_feed("%s grabbed %s's %s" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki")])
 	if h == k.m.player:
 		Care.dex_mark(k.species, "echo")
+
 
 ## Summon with your own Boki resting or away: the first stolen wisp you carry that still has its one summon
 ## bursts out (KinSummon.press). False when there is none.
@@ -163,6 +177,7 @@ static func press(h: Hunter) -> bool:
 			return true
 	return false
 
+
 ## Its one summon for the thief: summon_k of its window, at least summon_min_s, on its AI for the thief's side.
 static func summon(k: Kin) -> void:
 	if k.stolen_summoned or not k.wisp or not stolen(k):
@@ -170,6 +185,7 @@ static func summon(k: Kin) -> void:
 	var r := rules()
 	k.stolen_summoned = true
 	k.summon.burst(maxf(float(r["summon_min_s"]), ceilf(k.summon.dur * float(r["summon_k"]))))
+
 
 ## A "wgrab" or "wsum" event: the Boki's own game does it, and its snapshot tells the rest.
 static func on_net(m: Match, h: Hunter, kind: String, kin_id: String) -> void:
@@ -181,9 +197,11 @@ static func on_net(m: Match, h: Hunter, kind: String, kin_id: String) -> void:
 	else:
 		summon(k)
 
+
 ## The kin snapshot's steal fields (KinNet): [loose seconds, carrier id or "", its stolen summon used].
 static func net_extra(k: Kin) -> Array:
 	return [snappedf(k.loose_t, 0.1), k.owner_h.nid if stolen(k) else "", int(k.stolen_summoned)]
+
 
 static func apply_net(k: Kin, loose_s: float, carrier: String, used: bool) -> void:
 	if k.home_h == null:
@@ -197,10 +215,12 @@ static func apply_net(k: Kin, loose_s: float, carrier: String, used: bool) -> vo
 		if to != k.home_h:
 			_grabbed(k, to)
 
+
 ## Its look while loose: bobbing where it broke loose (KinWisp.render).
 static func render(k: Kin) -> void:
 	k.global_position = k.pos + Vector3(0, sin(k.m.time * BOB_HZ * TAU) * BOB_M, 0)
 	BokiWispLook.pose(k.model, k.m.time)
+
 
 ## Match end: every loose or stolen wisp goes home to its own hunter.
 static func match_end(m: Match) -> void:

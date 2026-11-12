@@ -3,8 +3,8 @@ extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
 ##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate), 1 when it rides as a wisp (KinWisp; Net 0.27.0),
-##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.28.0),
-##     loose seconds / carrier id / stolen summon used (KinSteal; Net 0.30.0)]
+##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.24.6),
+##     loose seconds / carrier id / stolen summon used (KinSteal; Net 0.24.6)]
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),

@@ -6,10 +6,11 @@ extends RefCounted
 ## gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
 ## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
 ## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
-## few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
-## off by default (the Boki walks); on, every Boki rides as a critter-outline wisp orbiting its hunter at
-## shoulder height, carry passives on, no orders or hits, the AI not ticking, and the snapshot flag turns a
-## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
+## few keys builds, and the saved id round-trips.
+## Then the Boki wisp prototype (KinWisp): off by default (the Boki walks); on, every Boki rides as a
+## critter-outline wisp orbiting its hunter at shoulder height, carry passives on, no orders or hits, the AI
+## not ticking, and the snapshot flag turns a remote Boki into a wisp and back.
+## The summon (KinSummon): every species has a window and cooldown in the
 ## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
 ## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
 ## a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
