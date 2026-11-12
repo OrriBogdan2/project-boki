@@ -3,7 +3,8 @@ extends RefCounted
 ## docs/decisions/0048-camps-and-xp.md). Camps spawn on every camp spot at their size (one up in the
 ## hot zone), tagged, with the size's XP in monsters; the Chief's Brute is a tier up. No XP for
 ## standing still or for hurting Hunters (armor only); a kill pays its XP to the last hit's squad
-## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
+## within 30 m; a knock pays 40 + 15 x the victim's level. A squad 2+ levels under the top squad gets
+## comeback XP (x1.5) on camp kills; the top squad does not. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
 ## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
 ## touches the save.
@@ -35,6 +36,7 @@ func run(main: Node) -> void:
 	_xp(m)
 	_clear(m)
 	_comeback(m)
+	_comeback_xp(m)
 	_hot(main)
 	print("CAMPS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -122,6 +124,40 @@ func _xp(m: Match) -> void:
 	m.knock(rival, P, {})
 	ok(absf(P.xp - xs[0] - kx) < 0.01 and absf(near.xp - xs[1] - kx) < 0.01 and absf(far.xp - xs[2]) < 0.001, "the knock XP goes in full to the knocker and teammates within 30 m only")
 	m.revive_hunter(rival, rival)
+
+## Comeback XP (XpRules.comeback_k): a squad 2+ levels (average) under the top squad still in gets
+## the bonus on a camp it clears; the top squad clearing one gets the plain XP.
+func _comeback_xp(m: Match) -> void:
+	var P: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var lv := {}
+	for h in m.hunters:
+		lv[h] = h.lvl
+		h.lvl = 9 if h.team == rival.team else 1       # (wide: P levels up during the clear)
+		if h != P and h != rival: h.pos = Vector3(-1e4, 0, -1e4)
+	var k := float(XpRules.rules()["comeback"]["k"])
+	ok(XpRules.comeback_k(m, P.team) == k and XpRules.comeback_k(m, rival.team) == 1.0,
+		"comeback x%.2f for a squad 8 levels under the top one, x1 for the top" % k)
+	var live: Array = m.camps.camps.filter(func(c):
+		return c["state"] == Camps.State.LIVE and not _camp_mobs(c).is_empty())
+	if live.size() < 2:
+		ok(false, "two live camps for the comeback rows")
+		return
+	var plain := 0.0
+	for mb in _camp_mobs(live[0]): plain += XpRules.kill_xp(mb)
+	var cb0 := float(m.camps.comeback_xp.get(P.team, 0.0))
+	var r := _kill_camp(m, live[0], P)
+	var cb := float(m.camps.comeback_xp.get(P.team, 0.0)) - cb0
+	ok(absf(float(r["xp"]) - plain * k) < 0.5 and cb > 0.0,
+		"the trailing squad's clear pays %d (plain %d)" % [int(r["xp"]), int(plain)])
+	P.pos = Vector3(-1e4, 0, -1e4)
+	for h in m.hunters: h.lvl = 5 if h.team == rival.team else 1
+	plain = 0.0
+	for mb in _camp_mobs(live[1]): plain += XpRules.kill_xp(mb)
+	r = _kill_camp(m, live[1], rival)
+	ok(absf(float(r["xp"]) - plain) < 0.5 and not m.camps.comeback_xp.has(rival.team),
+		"the top squad's clear pays the plain %d, no comeback XP" % int(plain))
+	for h in lv: h.lvl = lv[h]
 
 ## Clears a camp with hunter h; returns the toasts and drops it made.
 func _kill_camp(m: Match, c: Dictionary, h: Hunter) -> Dictionary:

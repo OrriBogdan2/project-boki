@@ -23,6 +23,7 @@ static var _rules: Dictionary = {}
 var m: Match
 var camps: Array = []        # {id, pos, island, size (index in sizes), state, mobs, back_t, region, paid {team: xp}}
 var comebacks := 0           # (tests and the rolling sim)
+var comeback_xp := {}        # team -> the extra camp XP its kills paid while it trailed (XpRules.comeback_k)
 var _tick_t := 0.0
 
 static func rules() -> Dictionary:
@@ -99,6 +100,7 @@ func on_mob_dead(mb: Mob, credit: Ent, xp: float) -> void:
 	var c: Dictionary = camps[int(mb.get_meta("camp"))]
 	var team: int = credit.team if credit is Hunter else -1
 	c["paid"][team] = float(c["paid"].get(team, 0.0)) + xp
+	if xp > XpRules.kill_xp(mb): comeback_xp[team] = float(comeback_xp.get(team, 0.0)) + xp - XpRules.kill_xp(mb)
 	if c["mobs"].all(func(o): return not is_instance_valid(o) or o.dead):
 		_clear(c, mb, credit as Hunter if credit is Hunter else null, team)
 

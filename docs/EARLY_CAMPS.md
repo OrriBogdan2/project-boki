@@ -18,6 +18,7 @@ Gate job 20261111-093019-a1 (rpc4). Base `origin/ext/early-base` 0f023137a, whic
 | Camp XP (sum) | Small 72, Camp 132, Great 198, Chief 258 | derived |
 | First clear per region | rim 230, mid 360, Crown 680 | derived |
 | Share radius, knock | 30 m; 32 + 12 x level, +30 a level the victim is above, half 2+ below | `xp.json` |
+| Comeback XP | a squad 2+ levels (average) under the top squad still in gets x1.5 on camp monster XP, tagged "comeback" on its maps; never from time or Hunters | `xp.json` |
 | Comeback | 150 s after the clear, one size up, nobody within 30 m, safe for 60 s, none after 7:00 (420 s), 85 camp monsters at most | `camps.json` |
 | Ship | 110 m high, 14 m/s, plan phase 12 s | `drop.json` |
 | Launch | 18 m/s, lift 8 m/s, locked 2.5 s | `drop.json` |

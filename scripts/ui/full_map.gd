@@ -350,6 +350,8 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 			"unknown": "Might be here: scout it to find out", "active": "Here this match",
 			"empty": "Nothing here this match", "taken": "Already taken",
 			"cleared": "Cleared", "returning": "Cleared: it comes back bigger"}[st]
+		var k := XpRules.comeback_k(m, team) if _hover["cat"] == "camp" and st == "active" else 1.0
+		if k > 1.0: what = CampMap.COMEBACK_HOVER % roundi((k - 1.0) * 100.0)
 		var pv := to_screen(_hover["pos"])
 		var wv := maxf(hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x, hud.body.get_string_size(what, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 20.0
 		var r := Rect2(pv + Vector2(14, -42), Vector2(wv, 44))
@@ -364,6 +366,8 @@ func spawn_marker(c: Control, cnd: Dictionary, pv: Vector2, s: float, team: int)
 	var st := sp.state_for(cnd, team)
 	var col: Color = sp.cats.get(cnd["cat"], {}).get("col", Color.WHITE)
 	marker(c, sp.shape_of(cnd), pv, s, col, st, sp.comeback_frac(cnd) if st == "returning" else 0.0)
+	if cnd["cat"] == "camp" and st == "active" and XpRules.comeback_k(m, team) > 1.0:
+		CampMap.comeback_tag(hud, pv, s)
 
 ## The spawns the minimap shows: what the squad knows is there (vaults from the start, the rest once
 ## scouted) and every camp in whatever state the squad sees, inside the minimap (on_map, as HUD's).

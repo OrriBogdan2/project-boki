@@ -7,6 +7,9 @@ extends RefCounted
 ## squad still alive is level 5.5 or more at 5:15; the top squad is at most 2 levels over the median
 ## at 4:00; at least 60% of the XP earned by 2:30 is camp clears; the squad that never fights is level 2
 ## or less at 5:15; no two bot squads ping one region (bar the surplus when squads outnumber regions).
+## Comeback XP (XpRules.comeback_k): each time a squad falls 2+ levels under the top squad it catches
+## up (the bonus stops) within TRAIL_CAMPS camp clears: no squad clears more while still trailing, and
+## at least one catches up; trailing squads are paid comeback XP; the top squad is never paid it.
 ## A squad's level is the mean of its members' levels. --pace-seeds=5,11 runs only those seeds (the
 ## seed-count line then reads against five). Never touches the save.
 
@@ -14,6 +17,7 @@ const SEEDS := [5, 11, 23, 42, 77]
 const TEAMS := 10
 const MARKS := [90.0, 150.0, 240.0, 315.0]
 const EARLY_S := 150.0
+const TRAIL_CAMPS := 4       # camp clears a trailing squad needs at most to catch up
 
 var bad := 0
 var _src := {"camp": 0.0, "knock": 0.0, "other": 0.0}      # XP earned by 2:30, by source (all seeds)
@@ -26,7 +30,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	var lv := {"150": [], "240": [], "315": [], "gap": [], "pace_ok": 0, "six": 0, "never": [], "pings": []}
+	var lv := {"150": [], "240": [], "315": [], "gap": [], "pace_ok": 0, "six": 0, "never": [], "pings": [],
+		"caught": [], "over": [], "trail_out": 0, "trail_xp": 0.0, "lead_xp": 0.0}
 	print("PACE seed team ring    L1:30 L2:30 L4:00 L5:15  XP camp knock other (whole run)")
 	var seeds: Array = SEEDS
 	for a in OS.get_cmdline_user_args():
@@ -81,6 +86,11 @@ func _seed(main: Node, seed_v: int, lv: Dictionary) -> void:
 			teams.append(h.team)
 	var idle: int = teams[-1]
 	var active: Array = teams.filter(func(t): return t != idle)
+	var trail := {}            # team -> camp clears since it fell 2+ levels under the top squad (open episodes)
+	m.camps.cleared.connect(func(_id, sq):
+		if trail.has(sq):
+			trail[sq] += 1)
+	var cb_last := {}
 	var rows := {}
 	for t in teams:
 		rows[t] = {"lvl": [], "camp": 0.0, "knock": 0.0, "other": 0.0, "region": -1}
@@ -124,6 +134,7 @@ func _seed(main: Node, seed_v: int, lv: Dictionary) -> void:
 			rows[h.team][src] += gain
 			if m.time < EARLY_S:
 				_src[src] += gain
+		_note_comeback(m, active, trail, cb_last, lv)
 		if m.time < EARLY_S and not six_early:
 			six_early = m.hunters.any(func(h): return h.lvl >= 6)
 		if not marks.is_empty() and m.time >= float(marks[0]):
@@ -139,7 +150,40 @@ func _seed(main: Node, seed_v: int, lv: Dictionary) -> void:
 		if h.team == idle:
 			idle_max = maxi(idle_max, h.lvl)
 	lv["never"].append(idle_max)
+	var cx := 0.0
+	for t in m.camps.comeback_xp:
+		cx += float(m.camps.comeback_xp[t])
+	lv["trail_xp"] += cx
+	for t in trail:
+		if int(trail[t]) > TRAIL_CAMPS: lv["over"].append(int(trail[t]))     # still trailing after too many clears
+	print("PACE %4d comeback: caught up after %s clears, still trailing at the end after %s, XP %d" % [
+		seed_v, str(lv["caught"]), str(trail.values()), int(cx)])
 	m.free()
+
+## Trailing episodes (open in trail, closed into lv caught) and the top squad's comeback XP, once a step.
+func _note_comeback(m: Match, active: Array, trail: Dictionary, cb_last: Dictionary, lv: Dictionary) -> void:
+	var levels := {}
+	for h in m.hunters:
+		if not h.out: levels[h.team] = _squad_level(m, h.team)
+	for t in active:
+		var k := XpRules.comeback_k(m, int(t))
+		if not levels.has(t):
+			if trail.has(t):
+				trail.erase(t)
+				lv["trail_out"] += 1
+		elif k > 1.0 and not trail.has(t):
+			trail[t] = 0
+		elif k == 1.0 and trail.has(t):
+			lv["caught"].append(int(trail[t]))
+			trail.erase(t)
+	var before: Dictionary = cb_last.get("levels", {})       # (the levels when this step's kills were made)
+	var top0: float = before.values().max() if not before.is_empty() else 0.0
+	for t in m.camps.comeback_xp:
+		var d: float = float(m.camps.comeback_xp[t]) - float(cb_last.get(t, 0.0))
+		cb_last[t] = m.camps.comeback_xp[t]
+		if d > 0.0 and before.has(t) and float(before[t]) >= top0 - 0.01:
+			lv["lead_xp"] += d
+	cb_last["levels"] = levels
 
 func _note_mark(m: Match, lv: Dictionary, at: float, active: Array) -> void:
 	var levels := _levels(m, active, at != 150.0)
@@ -209,3 +253,9 @@ func _verdict(lv: Dictionary) -> void:
 		extra += maxi(0, int(p["squads"]) - int(p["regions"]))
 	var shared_what := "(%d forced, %d more), one Crown" % [extra, doubled]
 	ok(doubled <= 0 and crowns_ok, "no region shared while one is free " + shared_what)
+	var caught: Array = lv["caught"]
+	var over: Array = (lv["over"] as Array) + caught.filter(func(n): return n > TRAIL_CAMPS)
+	var what := "squads 2+ levels behind catch up within %d camp clears (%d did; %s more; %d out first)"
+	ok(not caught.is_empty() and over.is_empty(), what % [TRAIL_CAMPS, caught.size(), str(over), int(lv["trail_out"])])
+	ok(float(lv["trail_xp"]) > 0.0, "trailing squads were paid %d comeback XP" % int(lv["trail_xp"]))
+	ok(float(lv["lead_xp"]) == 0.0, "the top squad was paid %d comeback XP (none allowed)" % int(lv["lead_xp"]))

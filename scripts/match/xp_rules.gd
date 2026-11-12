@@ -8,6 +8,8 @@ extends RefCounted
 ##   XpRules.pay_squad(m, by, xp)   pays xp to the killer (a Boki's kill is its Hunter's) and squad in range
 ##   XpRules.knock_xp(victim, by) -> float   what knocking this Hunter pays (by: the knocker, for the level gap)
 ##   XpRules.kill_xp(mb) -> float   what killing this monster pays (0 for a lair boss: Lairs pays it)
+##   XpRules.paid_xp(m, mb, credit) -> float   what this kill pays credit's squad (kill_xp, comeback included)
+##   XpRules.comeback_k(m, team) -> float   camp XP multiplier for a squad 2+ levels under the top squad
 ##   XpRules.pace_level(t) -> int   the level a squad that plays camps and objectives well has at match second t
 
 static var _rules: Dictionary = {}
@@ -27,6 +29,22 @@ static func pay_squad(m, by, xp: float) -> void:
 	for o: Hunter in m.hunters:
 		if o.team == h.team and not o.remote and not o.out and not o.extracted and o.flat_dist(h.pos) <= r:
 			o.gain_xp(xp)
+
+## Comeback XP (decision 0048, spec 6.5): a squad whose average run level is comeback.gap or more
+## under the top squad still in the match gets comeback.k on camp monster XP; 1.0 for everyone else.
+## Only camps pay it (paid_xp, from Match.on_mob_dead): no bonus from time and none from hitting Hunters.
+static func comeback_k(m, team: int) -> float:
+	var sums := {}            # team -> [level sum, Hunters, any still in]
+	for h: Hunter in m.hunters:
+		var s: Array = sums.get(h.team, [0.0, 0, false])
+		sums[h.team] = [s[0] + h.lvl, s[1] + 1, s[2] or not h.out]
+	if not sums.has(team):
+		return 1.0
+	var top := 0.0
+	for t in sums:
+		if sums[t][2]: top = maxf(top, sums[t][0] / sums[t][1])
+	var c: Dictionary = rules()["comeback"]
+	return float(c["k"]) if top - sums[team][0] / sums[team][1] >= float(c["gap"]) else 1.0
 
 static func pace_level(t: float) -> int:
 	var lv := 0
@@ -48,6 +66,12 @@ static func knock_xp(victim: Hunter, by: Hunter = null) -> float:
 	elif -gap >= int(k["below_gap"]):
 		xp *= float(k["below_k"])
 	return xp
+
+## What killing mb pays credit's squad: kill_xp, times comeback_k on a camp monster; 0 unless a Hunter.
+static func paid_xp(m, mb: Mob, credit) -> float:
+	if not (credit is Hunter):
+		return 0.0
+	return kill_xp(mb) * (comeback_k(m, credit.team) if Camps.is_camp(mb) else 1.0)
 
 static func kill_xp(mb: Mob) -> float:
 	if mb is Boss:

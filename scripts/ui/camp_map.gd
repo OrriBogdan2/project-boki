@@ -5,6 +5,9 @@ extends RefCounted
 ## map shows. The markers themselves are SpawnPlan's "camp" category, drawn by FullMap and the minimap.
 
 const FLAME := Color("ffb24a")
+const COMEBACK := Color("8fe0a0")
+const COMEBACK_TAG := "comeback"
+const COMEBACK_HOVER := "Comeback: +%d%% XP for your squad"
 const HOT_LABEL := "HOT: bigger camps, better loot"
 const LEGEND_ROW := "Camps: clear them to level up"
 const SHAPES := {"small": "camp1", "camp": "camp2", "great": "camp3", "chief": "camp4"}
@@ -50,6 +53,15 @@ static func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) ->
 ## A ring that fills as a cleared camp's comeback nears (frac 0..1).
 static func comeback_ring(c: Control, p: Vector2, s: float, frac: float) -> void:
 	c.draw_arc(p, s * 1.75, -PI * 0.5, -PI * 0.5 + TAU * clampf(frac, 0.0, 1.0), 28, Color(FLAME, 0.9), 2.5, true)
+
+## The small "comeback" tag under a live camp, on the maps of a squad that trails the top squad by
+## 2+ levels (XpRules.comeback_k): its camp XP is worth more.
+static func comeback_tag(hud, p: Vector2, s: float) -> void:
+	var fs := int(maxf(9.0, s * 1.1))
+	var w := TextCache.width(hud.big, COMEBACK_TAG, fs) + 8.0
+	var r := Rect2(p + Vector2(-w * 0.5, s * 1.45), Vector2(w, fs + 4.0))
+	hud._rounded(r, Color(0.03, 0.12, 0.06, 0.85), 4, Color(COMEBACK, 0.8), 1)
+	hud._ctext(Vector2(p.x, r.end.y - 3.0), COMEBACK_TAG, fs, COMEBACK, hud.big)
 
 ## The pulse on the one camp the first-match guide points at.
 static func pulse(c: Control, p: Vector2, s: float) -> void:

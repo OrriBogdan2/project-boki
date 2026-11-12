@@ -2150,7 +2150,7 @@ func S_dev_god() -> bool:
 
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
-	var xp := XpRules.kill_xp(mb) if credit is Hunter else 0.0      # (each game pays its own Hunters: XpRules)
+	var xp := XpRules.paid_xp(self, mb, credit)      # (each game pays its own Hunters: XpRules)
 	if net_on: net_event(["mobdead", mb.nid, by.nid if by else "", xp])
 	XpRules.pay_squad(self, credit, xp)
 	var own := not Camps.is_camp(mb)       # a camp's monsters drop nothing of their own: the camp pays one bundle
