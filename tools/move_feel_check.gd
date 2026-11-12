@@ -669,6 +669,7 @@ func _dash_curves() -> void:
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
 		var x0 := 0.0
+		var mean := 0.0                     # the dash's own mean speed: the curve's k is against it
 		for i in 90:
 			var x_was := P.pos.x
 			var was_rolling := P.roll_t > 0.0
@@ -676,15 +677,15 @@ func _dash_curves() -> void:
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty(): x0 = x_was
+			if speeds.is_empty():
+				x0 = x_was
+				mean = float(P.ak.curved["speed"])
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
 		print("MFEEL dash curve: %s, %d steps" % [id, speeds.size()])
 		var dd := P.ak.dash_def()
 		var feel := P.ak.dash_feel()
-		var mean := 0.0
-		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
