@@ -19,16 +19,19 @@ above, player controls below, found by row brightness). Numbers below are scaled
 | Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | `VIS_LINE` (0.32, 0.86, 1.0), solid to 0.0175 m and gone at 0.035 m (~3 px solid at 82 px/m) |
 | Edge glow | 4-6 px into the lit side, none on the dim side | lit side only, 0.45 strength, 1/e at 0.083 m (~7 px) |
 | Lit ground | about (78-89, 105-121, 157-174), luma ~105 | the ground's own colour x 1.05 |
-| Dim ground (behind and out of range) | about (2-7, 34-37, 76-79), luma ~30: ~0.3 of lit, blue | 75% toward a blue-tinted grey (x 0.5, 0.74, 1.12), x `vis_dark` 0.6 (`RaidLook.VIS_DARK`, was 0.7): ~0.45 of lit |
+| Dim ground (behind and out of range) | about (2-7, 34-37, 76-79), luma ~30: ~0.3 of lit, blue | 85% toward a deep blue with almost no red (luma x 0.10, 0.46, 0.88), x `vis_dark` 0.6 (`RaidLook.VIS_DARK`): snow map clear measured (8, 57, 110), luma ~48: ~0.25 of lit (was a grey-blue (57, 87, 125), luma ~83) |
 | Range circle | lit area ends ~520-550 px out; an ally marker labelled 27 m sits ~600 px out: ~22 px/m, circle ~23-25 m | `VIEW_RANGE` 24 m, soft edge over the last 3 m |
 | Camera scale | ~22 px/m (~87 m of ground across: the sneak camera, zoomed out) | 82 px/m standing (23.5 m across), 56 px/m crouched (zoom 1.45) |
 | Rival hiding in a bush | no plate, only a faint name tag on your own | rivals crouched / in grass / in smoke: no plate (name, level, bars, gloves) and no hover card; revealed, downed and teammates keep theirs |
 | HUD | unchanged by hiding | unchanged |
 
 ## Where we differ, and why
-- **Dim is a little lighter (~0.45 of lit, not ~0.3).** Our camera sits 2.5-3.7x closer, so the dim side fills most of the screen;
-  at 0.3 the ground and walls behind you went near black (the earlier 42% look was dropped for that reason). The
-  hue now matches the reference (blue, desaturated); `RaidLook.VIS_DARK` still darkens it at night.
+- **Dim follows the reference's hue: a deep blue with the red gone, not a grey-blue.** The reference's dim ground is
+  about R:G:B 0.02:0.47:1; ours is about 0.07:0.52:1 (snow, clear). A brighter saturated blue read as water, so the
+  blue is kept dark (luma ~48 on our brightest ground vs ~30 in the reference); the ground's own light and dark
+  patches still show through. Our camera sits 2.5-3.7x closer, so the dim side fills most of the screen; the
+  earlier grey-blue (~0.45 of lit) was dropped because it read as haze, not as "out of sight".
+  `RaidLook.VIS_DARK` still darkens it at night.
 - **The range circle is off screen.** Measured in the world it is the same size as ours (24 m), but our closer
   camera shows 11.8 m (standing) or 17 m (crouched) from the centre to the side, so the circle edge only shows when
   the camera pans. Bringing it on screen at the reference's screen proportion (radius ~26% of the width) would mean
