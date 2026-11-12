@@ -49,7 +49,7 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 - **Stomps:** no hint on main; `ext/tut-stomp-hints`.
 - **Closing zone:** the guide's `blight` line fires at 40% left; no "get inside the circle" line on main; `ext/tut-first-zone`.
 - **Hot zone / Waystone:** `ext/tut-hot-zone-line`, `ext/tut-waystone-hint`.
-- Also open on main: `--new-player-flow-check` stalls at the `glove` step (900 s, 2 FAIL rows), see DEBT.
+- Also open on main: `--new-player-flow-check` stalls at the `glove` step (900 s, 2 FAIL rows: finishes the course, no step over 45 s; not in DEBT yet).
 
 Not changed here: porting the cut is a core change to the tutorial and its checks and collides with the open `ext/tut-*`
 branches above, so it needs the owner's order (merge those hint branches first, then cut the course).
