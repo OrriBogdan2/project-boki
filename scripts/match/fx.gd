@@ -7,6 +7,10 @@ const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
 ## many times
 const WORD_STEP := 0.62
 const WORD_STACK_MAX := 4
+## One word at a spot at a time (docs/COMBAT_CLARITY.md): a word within WORD_ROOM m of another still younger than
+## WORD_HOLD s is dropped, so a fight never stacks a tower of names; what holds a body shows on it (BodyTell).
+const WORD_ROOM := 3.0
+const WORD_HOLD := 0.6
 var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
 var bursts: Array[CPUParticles3D] = []
@@ -330,6 +334,11 @@ func _num_size(v: float, crit: bool) -> int:
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
+	for n in nums:
+		var w: Label3D = n["node"]
+		if n.get("word", false) and w.visible and float(n["t"]) < WORD_HOLD \
+				and Vector2(w.global_position.x - at.x, w.global_position.z - at.z).length() < WORD_ROOM:
+			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
 	for n in nums:
@@ -338,11 +347,11 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.text = txt
 	l.modulate = col
 	_num_look(l, false)
-	l.font_size = 46 if big else 34
+	l.font_size = 40 if big else 28
 	l.global_position = _clear_spot(at)
 	l.visible = true
 	l.scale = Vector3.ONE * (1.25 if big else 1.0)
-	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
+	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0), "word": true})
 
 ## Where a new word goes so it doesn't print over a word or number still rising near `at`: stepped up
 ## the screen (along the camera's up) above whatever is there.
