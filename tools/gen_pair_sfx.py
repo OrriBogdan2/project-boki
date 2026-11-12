@@ -6,6 +6,7 @@ Pure Python (wave, math, random): no numpy or scipy. Both sounds are original.
   pay_rockfall   a deep stone thump, a crack, then a tumble of rubble falling away
   pay_collapse   a rising shimmer pulled down into a sub-bass implosion with a bright glass tail
 """
+import argparse
 import math, random, wave, struct, os
 
 SR = 22050
@@ -117,7 +118,12 @@ def collapse():
     save('pay_collapse', level(x))
 
 
-if __name__ == '__main__':
+def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     rockfall()
     collapse()
     print('wrote pay_rockfall.wav, pay_collapse.wav')
+
+
+if __name__ == '__main__':
+    main()
