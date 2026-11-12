@@ -1,37 +1,73 @@
 class_name HunterPickRow
 extends RefCounted
-## The expedition panel's "Hunter" pick (moved out of home.gd): one button per Hunter, the open ones
-## live and the locked ones greyed with their goal on hover, and the picked one's health and dashes
-## under it. No weight labels (docs/decisions/0005). Picking saves it as your expedition Hunter (its
-## weight and weapon family follow) and turns the farm hunter into it.
+## The expedition panel's Hunter pick: big cards with the portrait, the Hunter's name and its role, nothing
+## else (the abilities are on the Hunters screen, the codex and the tutorial). A locked Hunter is
+## desaturated with a lock on its portrait, can't be picked, and says how to unlock it on hover.
+## Picking saves it as your expedition Hunter (its weight and weapon family follow) and turns the farm hunter
+## into it (docs/decisions/0005: no weight labels).
 
-const CHIP_FACE := 24         # px: the Warden's face on each Hunter's chip
+const PORTRAIT_PX := 72.0     # px: the Hunter's portrait on its card
+const LOCK_PX := 26.0         # px: the lock icon over a locked portrait
+const NAME_SIZE := 22         # pt: the Hunter's name on its card
+const COLUMNS := 2            # cards per row
+
+static var _grey: ShaderMaterial
 
 ## Adds the section to `parent` and returns the Hunter you are taking.
 static func add(home: Node, parent: Control) -> String:
 	var cur := Arch.of_save()
-	var hd := UI.hbox(8)
-	hd.add_child(UI.section("Relic"))
-	hd.add_child(UI.fill())
-	hd.add_child(UI.ghost("All Relics", func(): HomeClasses.open(home, cur), 0))
-	parent.add_child(hd)
-	var flow := HFlowContainer.new()
-	flow.add_theme_constant_override("h_separation", 6)
-	flow.add_theme_constant_override("v_separation", 6)
+	parent.add_child(UI.section("Hunter"))
+	var grid := GridContainer.new()
+	grid.columns = COLUMNS
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
 	for a in Arch.ids():
-		var id: String = a
-		var b := UI.choice(Arch.name_of(id), id == cur, func(): _pick(home, id), 104)
-		b.disabled = not ClassUnlock.is_open(id)
-		var locked := "Locked: %s\n" % ClassUnlock.requirement(id) if b.disabled else ""
-		b.tooltip_text = locked + ClassCard.kit_tip(id)
-		b.set_meta("arch", id)
-		Portraits.set_icon(b, id, CHIP_FACE)
-		flow.add_child(b)
-	parent.add_child(flow)
-	var sl := UI.label(HunterViewer.stat_line(cur), UI.T_SMALL, Arch.color(cur))
-	sl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	parent.add_child(sl)
+		grid.add_child(_card(home, String(a), cur))
+	parent.add_child(grid)
 	return cur
+
+static func _card(home: Node, id: String, cur: String) -> PanelContainer:
+	var open := ClassUnlock.is_open(id)
+	var card := UI.tile_card(id == cur, (func(): _pick(home, id)) if open else Callable(), 10, Arch.color(id))
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.set_meta("arch", id)
+	var row := UI.hbox(12)
+	card.add_child(row)
+	row.add_child(_portrait(id, open))
+	var col := UI.vbox(2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(col)
+	var nm := UI.label(name_of(id), NAME_SIZE, Arch.color(id) if open else UI.FAINT, UI.big)
+	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
+	col.add_child(nm)
+	col.add_child(UI.label(role_of(id), UI.T_SMALL, UI.MUTED if open else UI.FAINT))
+	if not open:
+		card.tooltip_text = ClassUnlock.requirement(id)
+	return card
+
+## The portrait; locked, it is grey with a lock on it.
+static func _portrait(id: String, open: bool) -> Control:
+	var pic := ClassCard.portrait(id, PORTRAIT_PX)
+	if open:
+		return pic
+	if _grey == null:
+		_grey = ShaderMaterial.new()
+		_grey.shader = load("res://shaders/ui_grey.gdshader")
+	pic.material = _grey
+	var lock := UI.IconDot.new("lock", UI.INK, LOCK_PX)
+	lock.position = Vector2.ONE * (PORTRAIT_PX - LOCK_PX) * 0.5
+	pic.add_child(lock)
+	return pic
+
+## "Lace": the Hunter's own name, not its title ("Red Stitch").
+static func name_of(id: String) -> String:
+	var base := HeroTitle.base_name(id)
+	return base if base != "" else Arch.name_of(id)
+
+## "Ranged marksman": the role, the part of the kit card's one-line loop before the colon.
+static func role_of(id: String) -> String:
+	return String(Arch.def(id).get("card", {}).get("loop", "")).get_slice(":", 0)
 
 static func _pick(home: Node, id: String) -> void:
 	if not HeroGrid.save_pick(id):
