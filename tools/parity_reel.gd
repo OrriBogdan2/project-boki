@@ -14,6 +14,11 @@ const FAR := 12.0                       # m to the dummy for the moves that trav
 const KEY_LIT_S := 0.18                 # s a key cap stays lit after its press, so a one-step tap is seen
 const KEY_ON := Color(1.0, 0.82, 0.3)
 const KEY_OFF := Color(0.1, 0.1, 0.14, 0.7)
+const RIPOSTE_TD := 3.0                 # m to the dummy in Kael's R part (inside the 3.6 m cleave strip)
+const RIPOSTE_HIT_T := 0.4              # s into the part the dummy swings: in the 0.65 s guard after the 0.2 s press
+const RIPOSTE_HP_K := 0.6               # Kael's hp share at the start of his R part, so the heal shows
+const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
+const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
 
 var lit := {}                           # key cap -> s left lit
 var caps := {}                          # key cap -> its Label
@@ -140,10 +145,62 @@ func _p_e() -> void:
 
 func _p_r() -> void:
 	P.ak.cd["x"] = 0.0
-	await _seg("R, then the recast", 6.0, func(t: float) -> void:
-		if _at(t, 0.2) or _at(t, 2.6):
-			r_down = true
-			HunterKeys.ult_pressed(P))
+	if who == "juggernaut":
+		await _r_riposte()
+		return
+	if who == "tender":
+		await _r_hearth_call()
+		return
+	await _seg("R, then the recast", 6.0, _r_presses)
+
+func _r_presses(t: float) -> void:
+	if _at(t, 0.2) or _at(t, 2.6):
+		r_down = true
+		HunterKeys.ult_pressed(P)
+
+## Kael's Gilded Riposte answers a hit: he starts hurt (so the cleave's heal shows), the dummy stands inside the
+## cleave's strip and swings at him once in the guard (one plain hit, the Training Grounds dummy firing its own
+## weapon, else a direct blow), so the guard blocks it and the cleave lands and heals.
+func _r_riposte() -> void:
+	P.hp = P.max_hp * RIPOSTE_HP_K
+	var blow := [false]
+	await _seg("R: a hit on the guard, then the cleave", 6.0, func(t: float) -> void:
+		_r_presses(t)
+		T.inp["aim"] = P.pos + Vector3(0, 0.9, 0)
+		T.inp["fire"] = _in(t, RIPOSTE_HIT_T, DT * 1.5)
+		if _at(t, RIPOSTE_HIT_T + 0.15) and int(P.ak.riposte.blocked) == 0:
+			P.hurt(DUMMY_HIT, T, {"src": "melee"})       # its weapon missed or was slow: the blow itself
+			blow[0] = true
+	, RIPOSTE_TD)
+	T.inp["fire"] = false
+	var u = P.ak.riposte
+	var by := "direct blow" if blow[0] else "its weapon"
+	print("REEL_RIPOSTE blocked %d (%s) strikes %d healed %.0f" % [u.blocked, by, u.strikes, u.last_healed])
+
+## Meeko's Hearth Call needs a teammate: a downed ally dummy (the Training Grounds dummy on her team) lies in
+## reach; R tethers it, the tether heals it, and at the end it is pulled to her side and stood up.
+func _r_hearth_call() -> void:
+	var at := home + ALLY_AT
+	if T2 == null:                      # (the rig's second dummy slot: _park_others leaves it in place)
+		T2 = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, at, {"arch": "none"})
+		T2.lives = 99
+	var ally: Hunter = T2
+	ally.teleport(at)
+	ally.vel = Vector3.ZERO
+	if not ally.downed:
+		m.knock(ally, T, {})
+	var hp0: float = ally.down_hp
+	title.text = "R on a downed teammate"
+	await _reset(7.0)
+	ally.teleport(at)
+	await _go(6.0, func(t: float) -> void:
+		_aim(ally.pos)
+		_r_presses(t))
+	await _go(0.3)
+	print("REEL_CALL calls %d rescues %d downed %s down_hp %.0f" % [P.ak.stats["calls"], P.ak.stats["rescues"],
+			ally.downed, hp0])
+	ally.teleport(home + Vector3(-30, 0, 30))
+	T2 = null
 
 func _p_dash_ground() -> void:
 	var dash := func(t: float) -> void:
