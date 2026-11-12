@@ -59,6 +59,9 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
+	elif target is Kin and target.model:
+		var away := target.pos - by.pos if by and is_instance_valid(by) else Vector3.ZERO
+		KinFlinch.hit(target.model, away, frac, (target as Kin).mass())
 
 ## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
 ## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
@@ -79,8 +82,7 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
-		vis_col = col.lerp(Color("ff5a3a"), 0.35)
-		vis_col.a = 1.0
+		vis_col = Color(col.lightened(0.1), 1.0)     # (the shooter's own colour: enemy reads by size and halo)
 		vis_size *= 1.3
 		halo = 0.4
 	elif p:
