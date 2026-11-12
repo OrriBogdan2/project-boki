@@ -3,8 +3,8 @@ extends Node3D
 ## The one node per match that draws every AimKit telegraph (docs/AIMKIT.md). Entries live in a
 ## dictionary keyed by hunter and id; each frame the whole set is rebuilt into one surface of a single
 ## ImmediateMesh, so showing, moving or hiding a telegraph never creates a node. Its child AimReticle
-## draws the cursor states. Local visuals only: nothing here is synced (a remote hunter's kit draws its
-## own on its own machine).
+## draws the cursor states. `all` entries of the hunters this game runs go to the other games through
+## AimNet (Net event "tele"); a remote hunter's arrive the same way and draw here like a local one.
 
 const KEEP := 0.1          # s of match time an entry lives after its last refresh (kits refresh per step)
 
@@ -17,6 +17,7 @@ var mat := StandardMaterial3D.new()
 var reticle: AimReticle
 var built := 0             # entries drawn by the last rebuild (tests)
 var ret := {}              # hunter instance id -> the cursor states: {h, k, t, col, flare, perfect, pcol}
+var net := AimNet.new()
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -47,6 +48,8 @@ func put(h: Hunter, id: String, e: Dictionary) -> void:
 	e["h"] = h
 	e["t"] = float(m.time)
 	entries[key(h, id)] = e
+	if e["all"]:
+		net.out(m, h, id, e)
 
 func drop(h: Node, id: String) -> void:
 	entries.erase(key(h, id))
@@ -89,6 +92,7 @@ func rebuild() -> void:
 	for k in entries.keys():
 		if not live(entries[k]):
 			entries.erase(k)
+	net.sweep(m, entries)
 	mesh.clear_surfaces()
 	built = 0
 	geo.world = m.get("world")
