@@ -1745,8 +1745,8 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		var prog := 0.0
 		match it["kind"]:
 			"revive": prog = it["ent"].revive
-			"finish": prog = p.finish_t / Life.R["stomp_commit"]
-			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
+			"finish": prog = p.finish_t / Stomp.COMMIT
+			"stomping": prog = float(p.stomp.get("t", 0.0)) / Stomp.TIME
 			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
 			"loot": prog = p.box_t / Life.R["loot_time"]
 			"catch": prog = CaptureHud.progress(p)

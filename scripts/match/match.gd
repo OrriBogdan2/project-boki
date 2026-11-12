@@ -3939,7 +3939,7 @@ func step(dt: float) -> void:
 		PerkOrbs.demo(self)      # test: a couple of perks taken and a boss's fan of orbs ahead
 		if hud: hud.ability_feedback("sec", "deny")
 	Life.tick_wisps(self, dt)
-	Life.tick_stomps(self, dt)
+	Stomp.tick(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
 	if heart: heart.tick(dt)
@@ -4241,7 +4241,7 @@ func _update_interact(dt: float) -> void:
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
 						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay in the ring" % o.pname, "col": Color("9ee2a0")}
-			elif not o.remote:
+			else:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
@@ -4323,12 +4323,12 @@ func _update_interact(dt: float) -> void:
 					else:
 						take_pick(h, best["wp"])
 			"finish":
-				# a short hold commits you to the stomp (Life.start_stomp): no cancelling after that
+				# a short hold commits you to the stomp (Stomp.start): no cancelling after that
 				var o: Hunter = best["ent"]
 				h.set_hold("windup")
 				h.finish_t += dt
-				if h.finish_t >= Life.R["stomp_commit"]:
-					Life.start_stomp(self, h, o)
+				if h.finish_t >= Stomp.COMMIT:
+					Stomp.start(self, h, o)
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -4920,7 +4920,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	h.downed = false
 	var hb: Dictionary = heart.pay(h, how) if heart and how.begins_with("heart") else {}      # a Heart seat's reward
 	if heart: heart.on_leave(h, how)
-	if not h.stomp.is_empty(): Life.end_stomp(self, h, "extract")
+	if not h.stomp.is_empty(): Stomp.end(self, h, "extract")
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
@@ -5452,6 +5452,8 @@ func _net_ev(x, from: String) -> void:
 			if exits: exits.net_in(x)
 		"bcn":
 			Beacons.net_in(self, x)
+		"stomp":
+			Stomp.net_in(self, x)
 		"box", "brev", "back", "lost":
 			BoxRevive.net_in(self, x)
 		"ht":

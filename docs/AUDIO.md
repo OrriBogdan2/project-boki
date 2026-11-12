@@ -57,6 +57,15 @@ You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.p
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 
+## Stomp sounds (`content/sfx/stomp.json`, `tools/gen_sfx_stomp.py`)
+`scripts/match/stomp_sfx.gd` (`StompSfx`), numbers in `content/rules/stomps.json` "sound". Stomp calls it from `start`, each beat and `end`, which run in every game (the stomper's own, the others through the `"stomp"` event), so everyone in range hears it at the spot, the downed player included:
+- **Commit** at the 0.2 s hold: `stomp_commit`, a heel scuff and a low latch.
+- **Strike** per beat: `stomp_strike` (3 takes), pitched by the stomper's weight class (`Arch.weight`: light 1.3, medium 1.0, heavy 0.8), with the shared `thump` under it for medium and heavy, and louder each slam (`ramp_db` -5, -2.5, 0 dB for the 1st, 2nd, 3rd), so a stomp builds to its last blow. One file for every Hunter; at most two voices a slam, inside `Sfx.STACK_MAX`.
+- **Strain**: the pinned wisp's own `wisp_hum` (`HunterWisp._hum`) rises from 1.1 to 1.45 pitch over the stomp with a 7 Hz tremble, 5 dB up (`StompSfx.strain`).
+- **Finish** on the last slam: `stomp_crush`, a deep slam, a crunch and a falling tone choked off: the wisp crushed under the foot.
+- **Broken** by crowd control: `stomp_crack`, a bright crack and a short rising ring, carrying 30 m so the rescuer hears it worked. The saved wisp and its squad hear it with no position (a cue of their own, wherever they are): "you're free".
+`--stomp-check` counts each: one commit, a strike per beat each louder than the last, the hum's strain, a crush on "done" and a crack on "broken" (never both), the squad hearing the crack 80 m off and a rival's not, the same from another game's events, and the strike per weight class.
+
 ## Capture sounds (`content/sfx/capture.json`, `tools/gen_sfx_capture.py`)
 All wired in `scripts/match/capture.gd`, so a rival's game plays them from the same net events (`scan_start`, `scan_stop`, `scan_done`) as the local one:
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).

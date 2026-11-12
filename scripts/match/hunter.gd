@@ -1799,7 +1799,7 @@ var drink_t := 0.0
 var kit_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
-var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
+var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, at, o_at, style} (see Stomp)
 
 ## Channelling a deathbox revive right now (Match._update_interact keeps box_rev_at fresh).
 func box_reviving() -> bool:
@@ -1906,12 +1906,7 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: no attacks, and moving breaks it
 	if box_reviving():
 		BoxRevive.guard_inputs(self)
-	# mid-stomp you're committed: none of your own buttons do anything until it ends
-	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
-				"gear1", "gear2", "fire", "throw", "kin_ab"]:
-			inp[kk] = false
-		inp["move"] = Vector2.ZERO
+	Stomp.guard_inputs(self)         # mid-stomp you're committed; a wisp being stomped can't drift
 	# inputs
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
@@ -3041,7 +3036,8 @@ func _anim_state(stretch: float) -> void:
 	if pad.has("face"):
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
 	s["mantle"] = mk
-	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
+	s["stomp"] = Stomp.beat(self)
+	s["stomp_style"] = stomp.get("style", "")
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
 	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
 	s["recoil"] = recoil

@@ -18,8 +18,8 @@ in the refs: nobody has measured them.
 | 6 | Bjorn's Regen Field burst: allied Wisps hit begin to resurrect | [D] kits:92 | **Built** (+0.35 of the revive bar; bulwark.md 87/118) | none | none |
 | 7 | Ostra Level 4: allies and Wisps entering the outgoing zone get a shield | [W] ostra.md 145 | allies only | a shield on a Wisp has no meaning while Wisps take no damage: skip unless rule 2 lands | none |
 | 8 | Juggernaut: R no longer resets on Wisp execution (patch 22.01.25) | [W] | n/a, hunters only | none | none |
-| 9 | Stomp: standing on an enemy Wisp drains it, blocks revive; stun or knockback breaks the stomp | [W] SUPERVIVE_DATA.md 56 | **Built** (life.gd, `stomp_mult`, `stomp_slow`) | none | none |
-| 10 | Knocked-down mate pulled by a knock/launch while an enemy stomps: unknown | none in refs | Rule 1 can launch a stomped Wisp off the stomper; the stomper's channel "misses" as for a drifting Wisp | keep; check footage if a clip appears | none |
+| 9 | Stomp: standing on an enemy Wisp drains it, blocks revive; the committed stomp locks both in place and only a stun or hard CC breaks it | [W] SUPERVIVE_DATA.md 56-57, owner 2026-11-11 | **Built** (life.gd `stomp_mult`, `stomp_slow`; stomp.gd, decision 0061) | none | none |
+| 10 | Knocked-down mate pulled by a knock/launch while an enemy stomps: unknown | none in refs | A Wisp under a committed stomp is pinned (owner 2026-11-11): a knock or launch can't move it; only a stun or hard CC on the stomper frees it | owner rule replaces the guess | none |
 
 ## Open questions (owner, not built)
 - Does Lightning Strike launch **allied** Wisps too? The wiki row says "Wisps" without a team. We launch rivals only, like the rest of the strike (alternative: both teams, one condition).

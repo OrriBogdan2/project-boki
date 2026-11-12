@@ -5,6 +5,9 @@ Models and textures: see [ASSET_CREDITS.md](ASSET_CREDITS.md).
 ## Sound effects
 All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/sfx_*.py`, docs/AUDIO.md) unless a section below lists a CC0 source. Nothing is taken from SUPERVIVE or any other game.
 
+### ext/sfx-stomp, ext/sfx-stomp-1111 (stomp: commit, strikes, crush, crack)
+- Synthesised, no samples (`tools/gen_sfx_stomp.py`).
+
 ### ext/sfx-vex (gunslinger)
 - Synthesised, no samples.
 

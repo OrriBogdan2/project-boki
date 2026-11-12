@@ -1,0 +1,9 @@
+{
+ "group": "stomp",
+ "name": "Stomp",
+ "script": "tools/gen_sfx_stomp.py",
+ "sounds": {"stomp_commit": "cast", "stomp_strike": "heavy_impact", "stomp_crush": "heavy_impact", "stomp_crack": "impact"},
+ "signature": [],
+ "reach": {"stomp_crack": 30},
+ "replaces": []
+}
