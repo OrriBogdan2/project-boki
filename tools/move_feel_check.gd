@@ -187,6 +187,9 @@ func _flat_spot(r: float) -> Vector3:
 		if g.y > 2.0 and k < 3000:
 			continue
 		var okk := not w.is_void(g.x, g.z) and not w.is_block(g.x, g.z)
+		for D in w.lair_defs:     # (a lair's walls stand in the glide rows' path)
+			if Vector2(g.x - D["c"].x, g.z - D["c"].y).length() < 45.0:
+				okk = false
 		for i in 16:
 			var a := TAU * i / 16.0
 			for d in [r * 0.33, r * 0.66, r]:
