@@ -9,6 +9,7 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
+const WHIRL_TOL := 0.05         # m (neutral): BjornFx's whirl trail runs this close to the farthest the head goes
 const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
 
@@ -127,6 +128,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			% [art_name, worst, worst_mv])
 	if art_name == "breaker":
 		_whirl(m, an, sync, sk, st)
+		_slam(m, an, sync, sk, st)
 	# the weapon: one drawn; hidden when out of the hand; anchors on it
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	var drawn := 0
@@ -156,6 +158,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	var piece := WardenGlb.thrown_piece(m, "hammer")
 	ok(piece != null, "%s: the thrown hammer is the model's own mesh" % art_name)
 	if piece:
+		_thrown(m, piece.get_child(0) as MeshInstance3D)
 		piece.free()
 	_mood(m, sync, sk)
 	# the budget
@@ -223,10 +226,7 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
 ## Item 59: the kit's angle seeks the hold's loop: the head goes where the phase says, inside the slam's reach.
 func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:
 	var wp := WardenSkeleton.find(sk, "x_weapon")
-	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
-	var at := tip.get_parent() as BoneAttachment3D
-	var off := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) * tip.transform
-	var off_w := sk.get_bone_global_rest(wp).affine_inverse() * off
+	var off_w := _head_on_weapon(m, sk)
 	var worst := 0.0
 	var reach := 0.0
 	var s2: Dictionary = st.duplicate()
@@ -243,7 +243,47 @@ func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st:
 	m.remove_meta(WardenClips.PHASE)
 	_play(m, an, sync, st, 12)
 	ok(worst < 0.6, "breaker: the kit's angle turns the skinned hammer (worst %.2f rad off)" % worst)
-	ok(reach <= 2.8, "breaker: the whirl's head stays inside the slam's reach (%.2f m of 2.8)" % reach)
+	ok(reach <= _smash_reach(), "breaker: the whirl's head stays inside the slam's reach (%.2f m of %.1f)"
+			% [reach, _smash_reach()])
+	var far := reach / m.scale.x
+	ok(absf(far - BjornFx.WHIRL_HEAD_R) <= WHIRL_TOL,
+			"breaker: the whirl's trail rides the head (out %.2f m, WHIRL_HEAD_R %.2f)" % [far, BjornFx.WHIRL_HEAD_R])
+
+## The slam (bul_smash): the farthest out the head comes down to the ground stays inside the reach its crescent shows.
+func _slam(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:
+	var wp := WardenSkeleton.find(sk, "x_weapon")
+	var off_w := _head_on_weapon(m, sk)
+	var clip := String((WardenClips.data("breaker")["kmoves"]["bul_smash"] as Dictionary)["clip"])
+	var down := 0.0
+	var s2: Dictionary = st.duplicate()
+	s2["kmove"] = "bul_smash"
+	s2["kmove_t"] = 0.0
+	while float(s2["kmove_t"]) < sync.clips.lib.get_animation(clip).length:
+		_play(m, an, sync, s2, 1)
+		var head := (sk.get_bone_global_pose(wp) * off_w).origin
+		if head.y <= 0.0:
+			down = maxf(down, Vector2(head.x, head.z).length() * m.scale.x)
+		s2["kmove_t"] = float(s2["kmove_t"]) + DT
+	_play(m, an, sync, st, 12)
+	ok(down > 0.0 and down <= _smash_reach(), "breaker: the slam's head comes down inside its reach (%.2f m of %.1f)"
+			% [down, _smash_reach()])
+
+## The thrown hammer tumbles end over end along its flight: its sides (the piece's x) stay inside the hit radius.
+func _thrown(m: Node3D, mi: MeshInstance3D) -> void:
+	var box := mi.transform * mi.get_aabb()
+	var side := maxf(-box.position.x, box.end.x) * m.scale.x
+	ok(side <= BulwarkKit.MACE_HIT_R, "breaker: the thrown hammer's sides stay inside its hit radius (%.2f m of %.1f)"
+			% [side, BulwarkKit.MACE_HIT_R])
+
+## The hammer head's FX anchor in x_weapon's frame.
+func _head_on_weapon(m: Node3D, sk: Skeleton3D) -> Transform3D:
+	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
+	var at := tip.get_parent() as BoneAttachment3D
+	var off := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) * tip.transform
+	return sk.get_bone_global_rest(WardenSkeleton.find(sk, "x_weapon")).affine_inverse() * off
+
+func _smash_reach() -> float:
+	return float(Arch.def("bulwark")["lmb"]["smash_reach"])
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
