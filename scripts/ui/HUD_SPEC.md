@@ -75,6 +75,22 @@ top right, seeds / box / backpack → the line under it.
 | Currency | caps ~21 px `#e8f8d0`, coin dia 26 at the right | font 20, baseline 23 | gems + gem icon (`CUR_*`, `COIN_R`) |
 | Carry line | (a stat list in the ref) | font 10-11, baseline 60 | seeds · box, backpack used/max |
 
+## Overhead plate (`hud_plate.gd`, `HudStyle.PLATE_*`)
+Measured on the player's own frame (last-man-standing still) and the enemy's red one (turn-away still), same
+2000x1299 grid, y from 108. Own and ally plates use the role colour (lime / sky); rivals the same shape in red.
+| Part | Reference (1080p px) | Layout px | Ours |
+|---|---|---|---|
+| Health bar | w 89 (own, 6 segments) / 96 (enemy, 7), h 12.5, segment pitch ~15 | w 60 own / 64 others, h 8 | `PLATE_W_SELF` / `PLATE_W`, `PLATE_HP_H`, about 9 px a segment: one per 25 hp, at most `PLATE_MAX_SEGS` 7 |
+| Armour strip, over health | h 4, blue, segmented | h 2.5 | `PLATE_AR_H` (plain strip, the tier colour) |
+| Shield strip, under health | h 3, cyan, long | h 2 | `PLATE_SH_H`, `SHIELD_BAR` |
+| Frame | leaning, dark navy, h 25 | h 17.5, lean `LEAN_K` 0.5 | `HudStyle.plate_h()`, `PLATE_PAD` 1.5, 1 px between rows |
+| Level badge | dark tab with the number, lower-left corner of the frame | | `HudPlate.level_badge` (as before) |
+| Status / buff tiles | two leaning tiles at the right end, ~24x34 each, top level with the frame | 15x22, pitch 17 | `PLATE_TILE_W` / `PLATE_TILE_H`, `HudPlate.icon_row` (the status list: stun, root, shield ...) |
+| Name / status word | white caps ~14 px, 4 px over the frame | font 13 / 12 | unchanged |
+
+No health number over the head (the ref has none; the vitals bottom-left carry it). The round dial left
+of the enemy bar (a reveal timer, unconfirmed) is not copied. Hidden while the viewer is aboard the skyship.
+
 ## Left for later (not in this pass)
 - Squad rows and the ALLY KNOCKED world marker: `ext/squad-frames` (same reference, same `LEAN_K`
   and frame colour; its private `_slant` / `_lean_text` can switch to `HudStyle.slant` / `lean_text`).

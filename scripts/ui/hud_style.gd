@@ -51,14 +51,18 @@ const LEAN_TXT := -0.22        # x shear per px of leaning text (big numbers, st
 const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
 const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0           # px between segments
-const PLATE_W := 100.0         # overhead health bar width (rivals and allies)
-const PLATE_W_SELF := 108.0    # your own overhead bar
-const PLATE_HP_H := 9.0        # overhead health bar height
-const PLATE_AR_H := 3.0        # overhead armour strip under it
-const PLATE_PAD := 2.0         # frame around the bars
+const PLATE_W := 64.0          # overhead health bar width (rivals and allies; HUD_SPEC: ref 100 px of 2000)
+const PLATE_W_SELF := 60.0     # your own overhead bar (ref 93 px of 2000)
+const PLATE_HP_H := 8.0        # overhead health bar height
+const PLATE_AR_H := 2.5        # overhead armour strip over it
+const PLATE_SH_H := 2.0        # overhead shield strip under it
+const PLATE_PAD := 1.5         # frame around the bars (and between them: 1 px)
+const PLATE_MAX_SEGS := 7      # the plate's most segments (about 9 px each; a bigger pool shows no more)
+const PLATE_TILE_W := 15.0     # a status tile at the bar's right end: width
+const PLATE_TILE_H := 22.0     # ... and height (top level with the frame, hangs below it)
 const PLATE_NAME_FS := 13
 ## Where the row of small icons under a plate starts, below the plate's anchor point (the
-## loadout icons go here): the bars end at +PLATE_HP_H + PLATE_AR_H + pads, then the dash pips.
+## loadout icons go here): the frame ends at plate_h(), then the dash pips.
 const PLATE_ICON_ROW := 22.0
 const SLOT_RAD := 4            # ability slot corner radius
 const KEY_FS := 10             # key label size
@@ -128,11 +132,17 @@ static func strip(c: CanvasItem, r: Rect2, frac: float, col: Color, back_a := 0.
 	if frac > 0.0:
 		c.draw_rect(Rect2(r.position, Vector2(r.size.x * clampf(frac, 0.0, 1.0), r.size.y)), col)
 
-## The dark frame a plate's bars sit in: a soft-cornered backing with a hairline edge in the role
-## colour (white while `flash` is up).
-static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> void:
-	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # in steps: few cached boxes
-	c.draw_style_box(sb, r)
+## Height of a plate's leaning frame: armour strip, health, shield strip, 1 px between, a pad round.
+static func plate_h() -> float:
+	return PLATE_AR_H + PLATE_HP_H + PLATE_SH_H + 2.0 + PLATE_PAD * 2.0
+
+## The dark leaning frame a plate's bars sit in: a hairline in the role colour (white while `flash`
+## is up) round a dark backing. `at` is its top-left; `w` the bar width.
+static func plate_frame(c: CanvasItem, at: Vector2, w: float, edge: Color, flash := 0.0) -> void:
+	var w_all := w + PLATE_PAD * 2.0
+	var h := plate_h()
+	slant(c, at, w_all, h, edge.lerp(Color.WHITE, snappedf(flash, 0.25)))
+	slant(c, at + Vector2(1.0 - LEAN_K, 1.0), w_all - 2.0, h - 2.0, SHADE)
 
 ## An ability or item slot's frame. `state`: "ready" (filled in the slot colour under a dark edge,
 ## a light top gloss), "cooling" (dark, a pink-red edge), "off" (dark, barely edged: locked, empty, or

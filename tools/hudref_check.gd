@@ -56,7 +56,8 @@ func run(main_node: Node) -> void:
 	full.hp = 300.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == HudStyle.PLATE_MAX_SEGS,
+		"max health raised to 300: the plate redraws with its cap of %d segments" % HudStyle.PLATE_MAX_SEGS)
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0
@@ -203,6 +204,8 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	# ---------------------------------------------------------------- 8. overhead plate: ref sizes, hidden aboard
+	await _overhead_ref(m, hud, P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -275,6 +278,28 @@ func _check_deny(P: Hunter) -> void:
 		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
+
+## The leaning overhead plate at the measured sizes (HUD_SPEC "Overhead plate"), and hidden aboard the skyship.
+func _overhead_ref(m: Match, hud, P: Hunter) -> void:
+	var thin := HudStyle.PLATE_HP_H <= 8.5 and HudStyle.PLATE_AR_H <= 3.0 and HudStyle.PLATE_SH_H <= 2.5
+	ok(thin and absf(HudStyle.plate_h() - 17.5) < 0.1 and HudStyle.PLATE_W_SELF == 60.0 and HudStyle.PLATE_W == 64.0,
+		"the plate is thin: 64 px (own 60) wide, %.1f px frame (armour %.1f, health %.0f, shield %.0f)" % [
+			HudStyle.plate_h(), HudStyle.PLATE_AR_H, HudStyle.PLATE_HP_H, HudStyle.PLATE_SH_H])
+	var segs_ok := HudPlate.segs(1888.0) == HudStyle.PLATE_MAX_SEGS and HudPlate.segs(100.0) == 4
+	ok(segs_ok, "segments: 100 hp -> 4, a huge pool stops at %d" % HudStyle.PLATE_MAX_SEGS)
+	var up: Array = m.hunters.filter(func(x): return x.team != P.team and not x.downed and not x.unseen)
+	if up.is_empty():
+		ok(false, "a standing rival to draw a plate on")
+		return
+	var foe: Hunter = up[0]
+	await main.get_tree().process_frame
+	var seen := float(_state(hud, foe).get("at", -1.0))
+	ok(seen > hud.plates.now - 0.5, "a standing rival's plate is drawn on foot (%.2f of %.2f)" % [seen, hud.plates.now])
+	P.riding = true
+	await main.get_tree().process_frame
+	P.riding = false
+	ok(float(_state(hud, foe).get("at", -1.0)) == seen and hud.plates.now > seen,
+		"aboard the skyship no plate is drawn (last at %.2f, now %.2f)" % [seen, hud.plates.now])
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

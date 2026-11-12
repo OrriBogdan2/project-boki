@@ -1,14 +1,16 @@
 class_name HudPlate
 extends RefCounted
-## Overhead plates (one per hunter): the name or a status word, the run level on a coin, health in
-## fixed-size segments with armour as a thin strip under it and shields as a pale fill past the end
-## of health, a chip that holds then drains after a hit, a white flash on the frame when struck, an
-## armour-break crack, status icons to the right, and a downed plate with a
-## knock burst. Hud owns one of these (hud.plates) and calls draw() / draw_self() per hunter; the
+## Overhead plates (one per hunter), in the leaning look of the owner's 11-12 reference: the name or a
+## status word, the run level on a badge at the frame's lower left, health in a handful of segments
+## with armour as a thin strip over it and shields as a strip under it, a chip that holds then drains
+## after a hit, a white flash on the frame when struck, an armour-break crack, status tiles at the
+## right end, and a downed plate with a knock burst. Hidden while the viewer is aboard the skyship.
+## Hud owns one of these (hud.plates) and calls draw() / draw_self() per hunter; the
 ## same chip tracker feeds the mob and boss bars and the squad list (chip_of).
 ## Look and sizes: HudStyle. Layout around the anchor `sp` (the point over the head):
 ##   name / status word ............ sp.y - 7
-##   frame (health + armour) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
+##   frame (armour, health, shield) . sp.y .. sp.y + HudStyle.plate_h(), leaning HudStyle.LEAN_K
+##   status tiles .................. right of the frame, top level with it
 ##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW and down: left free here
 
 const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
@@ -112,18 +114,23 @@ static func statuses(e: Ent) -> Array:
 	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
 	return out
 
-## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with
-## time left shows it under its tile, shrinking.
-static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> void:
+## Status tiles in a row of leaning tiles, the first with its top-left at `at`; a status with time
+## left shows it under its tile.
+static func icon_row(c: CanvasItem, at: Vector2, icons: Array) -> void:
+	var w := HudStyle.PLATE_TILE_W
+	var h := HudStyle.PLATE_TILE_H
 	var x := at.x
 	for ic in icons:
-		var r := Rect2(Vector2(x, at.y - tile * 0.5), Vector2(tile, tile))
-		c.draw_rect(r, HudStyle.SHADE)
-		c.draw_rect(r, Color(ic[1], 0.8), false, 1.0)
-		Icons.draw(c, String(ic[0]), r.get_center(), tile * 0.36, ic[1])
+		var pts := HudStyle.slant_pts(Vector2(x, at.y), w, h)
+		c.draw_colored_polygon(pts, HudStyle.SHADE)
+		pts.append(pts[0])
+		c.draw_polyline(pts, Color(ic[1], 0.8), 1.0)
+		var mid := Vector2(x + (w - HudStyle.LEAN_K * h) * 0.5, at.y + h * 0.5)
+		Icons.draw(c, String(ic[0]), mid, w * 0.33, ic[1])
 		if float(ic[3]) > 0.0:
-			HudStyle.ctext(c, Vector2(r.get_center().x, r.end.y + 9.0), "%.1f" % float(ic[3]), 10, ic[1])
-		x += tile + 2.0
+			var under := Vector2(mid.x - HudStyle.LEAN_K * h * 0.5, at.y + h + 9.0)
+			HudStyle.ctext(c, under, "%.1f" % float(ic[3]), 10, ic[1])
+		x += w + 2.0
 
 ## Shield as a fraction of max health (what the bar draws past the end of health).
 static func shield_frac(h: Hunter) -> float:
@@ -131,49 +138,32 @@ static func shield_frac(h: Hunter) -> float:
 
 ## Another hunter's plate. `show_name`: Hud's rule (allies always; rivals near, hovered or down).
 func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
-	if not sp.is_finite() or absf(sp.x) > 20000.0 or absf(sp.y) > 20000.0:
+	if not sp.is_finite() or absf(sp.x) > 20000.0 or absf(sp.y) > 20000.0 or (H.m.player != null and H.m.player.riding):
 		return
 	sp = sp.round()
 	var c: CanvasItem = H.c
 	var dt: float = H.get_process_delta_time()
-	var viewer: Hunter = H.m.player
-	var role := HudStyle.role_col(viewer, h)
+	var role := HudStyle.role_col(H.m.player, h)
 	var s := _watch(h, dt)
-	var w := HudStyle.PLATE_W
-	var x0 := sp.x - w * 0.5
-	var frame := _frame_rect(x0, sp.y, w)
+	var f := _frame_at(sp, HudStyle.PLATE_W)
 	if h.downed:
-		_downed(H, c, sp, h, frame, s, role)
+		_downed(H, c, sp, h, f, s, role)
 		return
 	var frac := clampf(h.hp / maxf(1.0, h.max_hp), 0.0, 1.0)
 	var ch := chip_of(h, frac, dt)
-	var fl := flash_of(h)
-	HudStyle.plate_frame(c, frame, Color(role, 0.55), fl)
-	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
-	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, H.m.time), ch, shield_frac(h), fl * 0.6)
-	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
-	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
-	# the name, or what's being done to them (stunned, rooted ...) in its colour
+	var has_ar := _bars(c, f, HudStyle.PLATE_W, h, role, H.m.time, ch, s)
 	var sts := statuses(h)
-	var word := ""
-	var word_col := Color("9ae8ff")
-	for x in sts:
-		if String(x[2]) != "":
-			word = String(x[2])
-			word_col = x[1]
-			break
+	var worded := _worded(sts)
+	var word := "" if worded.is_empty() else String(worded[2])
 	if word != "":
-		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
+		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, worded[1])
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
-	if not sts.is_empty():
-		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
+	_tiles(c, f, HudStyle.PLATE_W, sts)
 	if h.ak and h.ak.tell != "":
-		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
-	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		_resource_tell(c, H.m.time, Vector2(f.x + HudStyle.PLATE_W + HudStyle.PLATE_PAD * 2.0 + 5.0, f.y - 3.0), h)
+	_shown(h, has_ar, word, ch, s)
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -185,50 +175,91 @@ static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -
 	else:
 		c.draw_circle(at, 3.0, Color(rc, 0.45))
 
-## Your own plate over your head: wider, with your health number.
+## Your own plate over your head: the same frame in your colour, a touch narrower (the vitals
+## bottom-left carry the number). Hud skips it while you ride the skyship.
 func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
 	var dt: float = H.get_process_delta_time()
 	var s := _watch(p, dt)
-	var w := HudStyle.PLATE_W_SELF
-	var x0 := sp.x - w * 0.5
-	var frame := _frame_rect(x0, sp.y, w)
-	var frac := clampf(p.hp / maxf(1.0, p.max_hp), 0.0, 1.0)
-	var ch := chip_of(p, frac, dt)
-	var fl := flash_of(p)
-	HudStyle.plate_frame(c, frame, Color(HudStyle.SELF, 0.5), fl)
-	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
-	var fill := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
-	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
-	var has_ar := _armor(c, p, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
-	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
-	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, HudStyle.SELF, pop)
+	var f := _frame_at(sp, HudStyle.PLATE_W_SELF)
+	var ch := chip_of(p, clampf(p.hp / maxf(1.0, p.max_hp), 0.0, 1.0), dt)
+	var has_ar := _bars(c, f, HudStyle.PLATE_W_SELF, p, HudStyle.SELF, H.m.time, ch, s)
 	var sts := statuses(p)
-	var word := ""
-	if not sts.is_empty():
-		icon_row(c, Vector2(sp.x - sts.size() * 8.0, frame.end.y + 18.0), sts)
-		word = String(sts[0][2])
-		if word != "":
-			HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, sts[0][1])
-	shown[p.nid] = {"segs": HudStyle.seg_count(p.max_hp), "armor": has_ar, "shield": p.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": p.lvl, "lvl_pop": float(s["lvl_pop"])}
+	var worded := _worded(sts)
+	var word := "" if worded.is_empty() else String(worded[2])
+	if word != "":
+		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, worded[1])
+	_tiles(c, f, HudStyle.PLATE_W_SELF, sts)
+	_shown(p, has_ar, word, ch, s)
 
-static func _frame_rect(x0: float, y: float, w: float) -> Rect2:
+## The worst status that has a word for the slot over the plate: [icon, colour, word, left], or [].
+static func _worded(sts: Array) -> Array:
+	for x in sts:
+		if String(x[2]) != "":
+			return x
+	return []
+
+## Top-left of the plate's leaning frame for a bar `w` wide, centred on the anchor `sp`.
+static func _frame_at(sp: Vector2, w: float) -> Vector2:
 	var pad := HudStyle.PLATE_PAD
-	var frame_h := HudStyle.PLATE_HP_H + HudStyle.PLATE_AR_H + pad * 2.0 + 1.0
-	return Rect2(Vector2(x0 - pad, y), Vector2(w + pad * 2.0, frame_h))
+	return Vector2(sp.x - (w + pad * 2.0 - HudStyle.LEAN_K * HudStyle.plate_h()) * 0.5, sp.y)
 
-## The armour strip under health: the tier's colour, an empty track once broken (it can come
-## back), and a white crack that flies apart the moment it breaks. Returns whether it's drawn.
-func _armor(c: CanvasItem, h: Hunter, r: Rect2, s: Dictionary) -> bool:
+## Top-left of a bar row `yo` px below the frame's top: it follows the lean.
+static func _row(f: Vector2, yo: float) -> Vector2:
+	return Vector2(f.x + HudStyle.PLATE_PAD - HudStyle.LEAN_K * yo, f.y + yo)
+
+## The frame and its three rows for a living hunter; returns whether the armour strip is drawn.
+func _bars(c: CanvasItem, f: Vector2, w: float, h: Hunter, role: Color, time: float, chip: float,
+		s: Dictionary) -> bool:
+	var fl := flash_of(h)
+	HudStyle.plate_frame(c, f, w, Color(role, 0.55), fl)
+	var pad := HudStyle.PLATE_PAD
+	var hp_y := pad + HudStyle.PLATE_AR_H + 1.0
+	var frac := clampf(h.hp / maxf(1.0, h.max_hp), 0.0, 1.0)
+	var hp_at := _row(f, hp_y)
+	HudStyle.slant_bar(c, hp_at, w, HudStyle.PLATE_HP_H, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, time),
+		h.max_hp / float(segs(h.max_hp)), chip)
+	if fl > 0.0:
+		HudStyle.slant(c, hp_at, w, HudStyle.PLATE_HP_H, Color(1, 1, 1, 0.33 * fl))
+	if h.shield > 0.0:
+		var sh_at := _row(f, hp_y + HudStyle.PLATE_HP_H + 1.0)
+		HudStyle.slant(c, sh_at, w * shield_frac(h), HudStyle.PLATE_SH_H, HudStyle.SHIELD_BAR)
+	_badge(c, f, h, role, s)
+	return _armor(c, h, _row(f, pad), w, s)
+
+## The level badge on the frame's lower-left corner.
+static func _badge(c: CanvasItem, f: Vector2, h: Hunter, role: Color, s: Dictionary) -> void:
+	var corner := Vector2(f.x - HudStyle.LEAN_K * HudStyle.plate_h() + 2.0, f.y + HudStyle.plate_h() - 1.0)
+	level_badge(c, corner, h.lvl, role, float(s["lvl_pop"]) / LVL_POP_T)
+
+## Status tiles at the frame's right end (top level with it).
+static func _tiles(c: CanvasItem, f: Vector2, w: float, sts: Array) -> void:
+	if not sts.is_empty():
+		icon_row(c, Vector2(f.x + w + HudStyle.PLATE_PAD * 2.0 + 2.0, f.y), sts)
+
+## What the last draw showed for this hunter (`shown`).
+func _shown(h: Hunter, has_ar: bool, word: String, chip: float, s: Dictionary) -> void:
+	shown[h.nid] = {"segs": segs(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
+		"word": word, "chip": chip, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+
+## Segments on a plate's health bar: one per 25 health, at most PLATE_MAX_SEGS.
+static func segs(max_hp: float) -> int:
+	return mini(HudStyle.seg_count(max_hp), HudStyle.PLATE_MAX_SEGS)
+
+## The armour strip over health: the tier's colour, an empty track once broken (it can come
+## back), and a white crack that flies apart the moment it breaks. `at` is its top-left, `w` its
+## length. Returns whether it's drawn.
+func _armor(c: CanvasItem, h: Hunter, at: Vector2, w: float, s: Dictionary) -> bool:
 	if h.max_armor <= 0.5:
 		return false
+	var ah := HudStyle.PLATE_AR_H
 	var col: Color = h.armor_col() if h.armor_tier > 0 or h.armor > 0.5 else HudStyle.ARMOR
-	HudStyle.strip(c, r, h.armor / h.max_armor, col)
+	HudStyle.slant(c, at, w, ah, Color(col.darkened(0.75), 0.85))
+	HudStyle.slant(c, at, w * clampf(h.armor / h.max_armor, 0.0, 1.0), ah, col)
 	var b := float(s["brk"]) / BREAK_T
 	if b > 0.0:
 		var k := 1.0 - b
+		var r := Rect2(at, Vector2(w, ah))
 		c.draw_rect(r.grow(1.0), Color(1, 1, 1, 0.8 * b))
 		var pts := PackedVector2Array()
 		for i in 5:
@@ -267,22 +298,21 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
 ## filling over it in green, a cross in place of the level, and what's happening under it. The
 ## moment a rival goes down a burst of rays and a "DOWN" word pop over them.
-func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictionary, role: Color) -> void:
+func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, f: Vector2, s: Dictionary, role: Color) -> void:
 	var stomped: bool = h.get_meta("stomped", false)
 	var pulse := 0.5 + 0.5 * sin(H.m.time * 14.0)
 	var bcol := HudStyle.STOMPED.lerp(Color.WHITE, 0.3 * pulse) if stomped else HudStyle.DOWNED
-	var w := frame.size.x - HudStyle.PLATE_PAD * 2.0
-	var x0 := frame.position.x + HudStyle.PLATE_PAD
-	HudStyle.plate_frame(c, frame, Color(bcol, 0.8))
+	var w := HudStyle.PLATE_W
+	var pad := HudStyle.PLATE_PAD
+	var bar_h := HudStyle.plate_h() - pad * 2.0
+	HudStyle.plate_frame(c, f, w, Color(bcol, 0.8))
+	var br := _row(f, pad)
 	var dmax := float(Data.MATCH["down_hp"])
-	var bar_h := HudStyle.PLATE_HP_H + HudStyle.PLATE_AR_H + 1.0
-	var br := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, bar_h))
-	HudStyle.seg_bar(c, br, h.down_hp, dmax, bcol, 0.0, 0.0, 0.0, HudStyle.HP_PER_SEG)
+	HudStyle.slant_bar(c, br, w, bar_h, h.down_hp, dmax, bcol, HudStyle.HP_PER_SEG)
 	if h.revive > 0.0:
-		var rev_w := w * clampf(h.revive, 0.0, 1.0)
-		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(rev_w, 4.0)), HudStyle.REVIVE)
-	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
+		var rev_at := br + Vector2(-HudStyle.LEAN_K * (bar_h - 4.0), bar_h - 4.0)
+		HudStyle.slant(c, rev_at, w * clampf(h.revive, 0.0, 1.0), 4.0, HudStyle.REVIVE)
+	_badge(c, f, h, role, s)
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
 	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
@@ -294,7 +324,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	elif h.revive > 0.0 and not revs.is_empty():
 		line = "%s reviving  %d%%" % [(revs[0] as Hunter).pname, int(h.revive * 100.0)]
 		lcol = HudStyle.REVIVE
-	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 11, lcol, 3)
+	HudStyle.ctext(c, Vector2(sp.x, sp.y + HudStyle.plate_h() + 13.0), line, 11, lcol, 3)
 	if H.m.player == null or h.team != H.m.player.team:
 		_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)      # (a teammate's fall stays quiet: MateAlerts)
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,
