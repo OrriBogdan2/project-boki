@@ -4,8 +4,8 @@ extends Control
 ## tutorial holds back. Every screen has one (the match HUD, the farm, the town, a house; UI.toast finds
 ## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
-## (fewer while the host's own cards take rows, see `reserved`) and the rest wait, the most important
-## first; each lives a short while. A low-priority line that waits too long is dropped as old news.
+## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
+## short while (FIGHT_LIFE at most in a fight). A low-priority line that waits too long is dropped.
 
 enum { LOW, NORMAL, HIGH }
 const MAX_SHOWN := 3
@@ -19,10 +19,12 @@ const ICON_GAP := 26.0         # px left of the text for a card's icon
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
+const FIGHT_SHOWN := 2          # lines on show at most while the player is in a fight
+const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
-var reserved := 0               ## rows the host's own cards take at the top (the ally alerts)
+var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
 var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
@@ -58,8 +60,8 @@ func push(text: String, col: Color, prio := NORMAL, life := 0.0, icon := "") -> 
 			_bump(e)
 			return
 	var life_s := life if life > 0.0 else float(LIFE[prio])
-	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "n": 1, "t": 0.0, "wait": 0.0,
-		"icon": icon})
+	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "own_life": life > 0.0, "n": 1, "t": 0.0,
+		"wait": 0.0, "icon": icon})
 	Sfx.play("ui_toast", null, -4.0, 0.03)
 	if _waiting.size() > WAIT_CAP:
 		_waiting.remove_at(_lowest())
@@ -132,7 +134,7 @@ func _process(delta: float) -> void:
 	for i in range(_shown.size() - 1, -1, -1):
 		var e: Dictionary = _shown[i]
 		e["t"] = float(e["t"]) + delta
-		if float(e["t"]) >= float(e["life"]):
+		if float(e["t"]) >= _life(e):
 			(e["box"] as Control).queue_free()
 			_shown.remove_at(i)
 	for i in range(_waiting.size() - 1, -1, -1):
@@ -145,7 +147,7 @@ func _process(delta: float) -> void:
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < maxi(1, MAX_SHOWN - reserved):
+	while not hold and not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
 		var best := 0
 		for i in _waiting.size():
 			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
@@ -172,9 +174,15 @@ func _layout(delta: float) -> void:
 		above = y + box.size.y
 		want += box.size.y + GAP
 		var t := float(e["t"])
-		box.modulate.a = clampf(t / FADE_IN, 0.0, 1.0) * clampf((float(e["life"]) - t) / FADE_OUT, 0.0, 1.0)
+		box.modulate.a = clampf(t / FADE_IN, 0.0, 1.0) * clampf((_life(e) - t) / FADE_OUT, 0.0, 1.0)
 
 ## One card: the menu's glass with a line in the message's colour.
+## How long line `e` lives now: its own life, cut to FIGHT_LIFE in a fight unless it asked for its own.
+func _life(e: Dictionary) -> float:
+	if fight and not bool(e["own_life"]):
+		return minf(float(e["life"]), FIGHT_LIFE)
+	return float(e["life"])
+
 func _card(e: Dictionary) -> PanelContainer:
 	var px: int = PX[int(e["prio"])]
 	var c := UI.glass(8, UI.R_CARD)
