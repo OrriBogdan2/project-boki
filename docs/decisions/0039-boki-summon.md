@@ -26,3 +26,9 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
 - Press timing: `--summon-press-check` (the burst on the press frame, offline and at 100 ms; G never swallowed).
+- One summon lane (Q3): a Hunter has one summoned Boki out at a time, a stolen one included
+  (`KinSummon.lane_busy`). Summon while another Boki is out, or while resting, is refused with the denied
+  cue (warn sound, red shake); Summon while your own is out stays the early recall. The leash (Q7) is in the
+  rules with its unit and reason; `--summon-leash-check` covers the lane and the leash through a chase past
+  it, a dash, a glide and a knock. The ordered chase and guard keep today's longer leashes (the 20 m re-bloom
+  still cuts them): "controlled exactly like the out Boki". Alternative: refuse the press while your own is out too.

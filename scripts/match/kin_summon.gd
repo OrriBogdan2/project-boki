@@ -49,7 +49,14 @@ func out() -> bool:
 func leash(aggression: float) -> float:
 	return float(rules()["leash"]) + (aggression - 0.5) * 2.0 * float(rules()["leash_swing"])
 
-## The Summon key: out of the wisp when ready, back early when out. False (and says why) when it can't.
+## One summon lane per hunter: is a Boki of theirs other than `except` out (a stolen one rides as theirs)?
+static func lane_busy(h: Hunter, except: Kin) -> bool:
+	for x in h.m.kins:
+		if x != except and x.owner_h == h and x.summon != null and x.summon.out():
+			return true
+	return false
+
+## The Summon key: out of the wisp when ready, back early when out. False (with the denied cue and why) when it can't.
 static func press(h: Hunter) -> bool:
 	var k: Kin = h.kin
 	if k == null or k.summon == null or h.downed or h.out or h.riding or h.dropping:
@@ -60,11 +67,17 @@ static func press(h: Hunter) -> bool:
 		return true
 	if not k.wisp:
 		return false
+	if lane_busy(h, k):
+		return _deny(h, "One Boki out at a time")
 	if s.cd > 0.0:
-		KinCommand.say(h, "%s gathers itself: %d s" % [k.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
-		return false
+		return _deny(h, "%s gathers itself: %d s" % [k.rec.get("name", "Your Boki"), ceili(s.cd)])
 	s.burst()
 	return true
+
+static func _deny(h: Hunter, why: String) -> bool:
+	KinCommand.say(h, why, Color("a2a8bb"))
+	h._ab_feedback("summon", "deny")
+	return false
 
 ## The wisp bursts into the full Boki beside its hunter, whole, for its window.
 func burst() -> void:

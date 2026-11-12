@@ -490,7 +490,7 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 
 | Setting | Value |
 |---|---|
-| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. leash: m, how far from its Hunter a summoned Boki wanders before it turns back (short and fixed, because a timed window cannot afford a Boki 17 m away: Q7); leash_swing: m, the most a bold or shy personality moves it (+-); rebloom_dist: m, past this (a dash, a glide, a pull) it re-blooms beside the Hunter instead of walking, the window still running. |
 | table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
 | fallback | [10, 60] |
 | uptime_band | [0.09, 0.2] |
