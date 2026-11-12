@@ -30,9 +30,11 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
 - The R segment of the first six MP4s is spliced from a second render of just that part (the first render pressed R
-  through the wrong key path); the timeline above is unchanged. The four slice Wardens' reels are one render each.
+  through the wrong key path); the timeline above is unchanged. The four slice Wardens' reels and Meeko's and
+  Tenzo's are one render each.
+- R stands for the ultimate in every reel; in the game it is on X (Hearth Call, Basalt Spine and the rest).
 
-## Shared by all ten
+## Shared by all twelve
 
 - **Cooldown pace:** 0.48x to 1.0x of the source's, per kit (KIT_PARITY gap 10, still open, owner call). Numbers per
   Hunter below.
@@ -246,3 +248,56 @@ like the footage [F 0024]; the RMB aim is a white lane with an arrow tip and the
 orange sunburst [F 0077]; the Cloak is a crackle of yellow sparks round her and the dummy, not the footage's
 swirling shield ring [F 0186]; Flue Flight lays a thick orange fire carpet and carries the dummy with her to the
 island rim, close to the footage's wide magma band [F 0226].
+
+## Meeko the Dawnfox (`tender`, source Elluna)
+[tender.mp4](tender.mp4)
+
+Still differs:
+- Burrseed: a fixed 1 s wind-up with a 6 m dotted lane (owner item 118), then a seed that sticks to the first foe
+  and roots after 2 s of them staying within 15 m of her, unwinding twice as fast outside it (owner 11-10). The
+  source's is a tap shot down a lane to maximum range that roots about 0.6 s after the hit [F] (2 s on the wiki).
+  Cooldown 10.5 s vs 11.5 [D] (the footage card reads about 7.2 s).
+- Hearthlight: cooldown 11 s vs 12 [D]; heals her at a third (ours); the throw latches onto the first teammate it
+  passes (owner call), where the source's lands on the cursor and no latch was seen [F].
+- Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
+  (ours), so the Training Grounds reel cannot show the tether or the pull.
+- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
+- Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
+  steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
+- Bearer: the Carrier shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
+  updated. Which hits drop a carried teammate was not traced.
+- Body 0.66 of a medium (owner item 108).
+
+Seen in the reel: the Crook's shots are small gold sparks with a Kindle glow, where the footage's are a blue comet
+flying on past the cursor [F]; the Burrseed disc is violet like the footage's but wider for her size and ringed
+with thorns, and the root shows as a white swirl where the footage has a smaller disc and a purple beam [F]; the
+thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan disc, but the ring on her before the
+throw barely shows and there is no green plus on the summon [F]; Hearth Call shows only a faint ring on her.
+
+## Tenzo the Stone Seer (`dolm`, source Tetra)
+[dolm.mp4](dolm.mp4)
+
+Still differs:
+- Stone Row (E): three rocks 3.4 m ahead, cooldown 12.5 s [D]; he climbs them by walking (owner item 25), allies hop
+  them by jumping as in the source (owner 23:55, `StoneStand`). KIT_PARITY gap 14 and dolm.md's "not built" rows
+  still say allies cannot, and should be updated.
+- Rock Hop (Shift): up to three steerable hops off rocks he raises, cooldown 12 s (owner item 111), in place of
+  Landslide's short dash with a rock riding ahead [F]; the rolling rock at the end keeps the source's slow and knock.
+- Basalt Spine (X): nine rocks erupting centre-out along a 12 m arc, a 35% slow for 1 s, a drag sets the angle,
+  cooldown 45 s [D]. The source's Tetraform is one spiked ridge about 18 to 22 m long [F]; ours was shortened from
+  19.8 m on purpose with no owner line either way (KIT_PARITY ranges, `[?]`).
+- Tremor Sense: the cone is a fixed 16 m, widening 25 to 40 degrees over 2 s; the source's also lengthens, to about
+  18 to 25 m [F] (dolm.md gap 9). `ext/tenzo-cone-length` c557c270d grows it to 25 m and is not on main. Not in the
+  reel (it needs a sneak).
+- Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
+- Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
+  only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
+- Molten Guard: the shield per punch matches; the charge scaling is ours.
+
+Seen in the reel: the boulder trails an orange dotted line and bursts small, where the footage's bursts in a big
+fire flash with the damage number [F]; the punch shows its pale chevron lane but little impact, the footage a
+bright streak and rocks bursting in fire; the Quakefall hold circle is pale blue-white where the footage's is red,
+while the dark red crater with orange cracks matches; Stone Row's molten basalt columns read like the footage's
+spiked rocks; Basalt Spine is a row of separate rocks where the footage's is one continuous orange spiked ridge
+with fire [F]; the Rock Hop shows a blue landing circle and a "SHIFT AGAIN" prompt, with no fire burst like the
+footage's Landslide.
