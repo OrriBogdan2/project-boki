@@ -171,6 +171,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 - Static lasts 4.5s, refreshed by every hit.
 - Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
+- Space in the air during a Wirerun opens the glider on that step (DECISIONS 11-08, "Shift cancels into glide instantly for every Hunter"; "Every interaction is chainable"): in the hold it cuts the Wirerun like a stun does (charge spent, no streak) and the glider opens at the drift she had; in the streak it ends the streak, the hits already landed (and a Blowout's reset) stand, and she hands over at run speed as the streak's own exit does, so the glider adds no speed. `--move-rule-guard-check`, `--glide-hold-check`.
 - Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
