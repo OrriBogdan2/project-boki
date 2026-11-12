@@ -4,10 +4,12 @@ extends "res://tools/displace_net_check.gd"
 ## desktop relay, set up like --displace-net-check: the host applies each status through the kit that owns
 ## it, asks the guest what its own hunter carries, and compares kind, stacks and seconds left (within
 ## LEFT_TOL) and the look on the body. Cinder's Ignite levels and burn, Neve's Chill and Shatter, Sparkle's
-## Static, Sable's Marks, Vex's Daze, Disoriented and hit slows, Grounded.
+## Static, Sable's Marks (and two Sables' Marks on one body, each kept per caster), Vex's Daze, Disoriented,
+## Shred and Blight (stacks, seconds and strength), hit slows, Grounded.
 ## Lines: STATNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid> (the base class reads it).
 
 const LEFT_TOL := 0.1            # s: the seconds a status has left may differ by this between the two games
+const CLEAR_S := 0.3            # s: a clear rides the next Net flush, and the question may overtake it
 const TAGS := ["ign", "chl", "sta", "mrk"]
 const LOOKS := {"ign": "Tag_ign", "chl": "Tag_chl", "sta": "Tag_sta", "mrk": "Tag_mrk",
 	"gnd": "Grounded", "rat": "Rattled"}
@@ -151,8 +153,44 @@ func _sable(G: Hunter) -> void:
 	await _run(0.2)
 	await _same("Sable Marks x3", mrk)
 	K.clear_marks(G)
-	await _run(0.1)
+	await _run(CLEAR_S)
 	await _same("Sable Marks cleared", mrk)
+	await _two_sables(G, K)
+
+## A second Sable on the host's side (a kit on a body of its own, with its own nid) marks the same player:
+## the player's game keeps each Sable's stack apart, as meta "marks" does on the casters' game.
+func _two_sables(G: Hunter, K: ThiefKit) -> void:
+	var S2 := Hunter.new()
+	S2.m = m
+	S2.nid = "P_sable2"
+	S2.team = m.player.team
+	var K2 := ArchKit.make(S2, "thief") as ThiefKit
+	var dur := float(K.res_def().get("dur", 4.0))
+	var mine := func(): return float(G.get_meta("marks", {}).get(K.h.nid, [0, 0.0])[1])
+	var t2 := float(m.time)
+	var both := func():
+		var a: int = K.marks_on(G)
+		var b2: int = int(G.get_meta("marks", {}).get(S2.nid, [0, 0.0])[0])
+		var lb := maxf(0.0, dur - (float(m.time) - t2)) if b2 > 0 else 0.0
+		var w := {"mrk": [a + b2, maxf(mine.call(), lb)]}
+		w["mrk@" + K.h.nid] = [a, mine.call()]
+		w["mrk@" + S2.nid] = [b2, lb]
+		return w
+	K2.add_mark(G, 3, true)
+	await _run(0.2)
+	K.add_mark(G, 2, true)
+	await _run(0.4)
+	await _same("two Sables' Marks on one body (3 + 2)", both)
+	K.add_mark(G, 1, true)
+	await _run(0.2)
+	await _same("two Sables: one Sable's new Mark leaves the other's stack", both)
+	K.clear_marks(G)
+	await _run(CLEAR_S)
+	await _same("two Sables: one Sable's Marks spent, the other's stay", both)
+	K2.clear_marks(G)
+	await _run(CLEAR_S)
+	await _same("two Sables: both spent", both)
+	S2.free()
 
 ## Plain statuses: the host's expected seconds left are what it put on less what has gone by.
 func _plain(G: Hunter) -> void:
@@ -176,6 +214,20 @@ func _plain(G: Hunter) -> void:
 	KitStatus.apply(G, "dsr", st_secs, 0.4)
 	await _run(0.4)
 	await _same("Disoriented slow", left.bind("dsr", {"slow": [1, st_secs - (float(m.time) - st_at)]}))
+	await _start(G, "dolm")
+	var rd: Dictionary = (m.player.ak as DolmKit).rock_def()
+	st_at = m.time
+	st_secs = float(rd.get("shred_t", 3.0))
+	var shred := float(rd.get("shred", 0.2))
+	KitStatus.apply(G, "vul", st_secs, shred)
+	await _run(0.4)
+	await _same("Shred", left.bind("vul", {"vul_k": [roundi(shred * 100.0), 0.0]}))
+	await _start(G, "ashwick")
+	st_at = m.time
+	st_secs = 3.0
+	KitStatus.apply(G, "blt", st_secs)
+	await _run(0.4)
+	await _same("Blight", left.bind("blt", {"blt_k": [60, 0.0]}))
 	await _start(G, "bulwark")
 	st_at = m.time
 	st_secs = 2.0
@@ -210,7 +262,7 @@ func _fresh(T: Hunter) -> void:
 		T.remove_meta("tag_" + k)
 	for k in ["rat_until", "dsr_until"]:
 		T.set_meta(k, 0.0)
-	for k in ["burn_t", "slow_k"]:
+	for k in ["burn_t", "slow_k", "vuln_t", "vuln_k", "blight_t", "blight_k"]:
 		T.set(k, 0.0)
 	for node in LOOKS.values():
 		var old := T.get_node_or_null(node)
@@ -225,6 +277,12 @@ func _say() -> void:
 	var st := {}
 	for k in TAGS:
 		st[k] = [KitStatus.tag_n(P, k), KitStatus.tag_left(P, k), _look(P, k)]
+		for by in P.get_meta("tag_" + k, {}):
+			st[k + "@" + String(by)] = [KitStatus.tag_n(P, k, by), KitStatus.tag_left(P, k, by), false]
+	st["vul"] = [1 if P.vuln_t > 0.0 else 0, P.vuln_t, false]
+	st["vul_k"] = [roundi(P.vuln_k * 100.0) if P.vuln_t > 0.0 else 0, 0.0, false]
+	st["blt"] = [1 if P.blight_t > 0.0 else 0, P.blight_t, false]
+	st["blt_k"] = [roundi(P.blight_k * 100.0) if P.blight_t > 0.0 else 0, 0.0, false]
 	st["rat"] = [1 if KitStatus.rattled(P) else 0, KitStatus.rattled_left(P), _look(P, "rat")]
 	var gl := maxf(0.0, float(P.get_meta("gnd_until", 0.0)) - float(m.time))
 	st["gnd"] = [1 if gl > 0.0 else 0, gl, _look(P, "gnd")]

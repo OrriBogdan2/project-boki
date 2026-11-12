@@ -8,7 +8,8 @@ extends RefCounted
 ##        source's Daze is only a damage window); stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ##   ign chl sta mrk  Ignite level (Cinder), Chill (Neve), Static (Sparkle), Marks (Sable): the caster's kit
-##        holds the stacks; the body's own game keeps a copy in meta "tag_<kind>" {n, until, by} and shows pips
+##        holds the stacks; the body's own game keeps a copy per caster in meta "tag_<kind>" {caster nid: {n, until}}
+##        (capped as the caster's game caps it, `tag_cap`) and shows pips, one row per caster
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k, caster nid] for a remote body (Net.VERSION 0.7.0; the caster nid and the
 ## tag kinds from 0.24.5), every game shows it. A tag with k = 0 ends it (Chill spent by a Shatter).
@@ -137,36 +138,100 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
-## Stack count `n` of a tag on `e`'s own game and the seconds it has left.
-static func tag_left(e: Ent, kind: String) -> float:
-	var t: Dictionary = e.get_meta("tag_" + kind, {})
-	return maxf(0.0, float(t.get("until", 0.0)) - float(e.m.time)) if int(t.get("n", 0)) > 0 else 0.0
+## A tag's stacks on `e`'s own game, summed over its casters (each caster's stack is its own, as the
+## caster's game keeps them: Sable's meta marks per dancer, Cinder's ignites per kit), and the seconds the
+## longest one has left. `by`: only that caster's.
+static func tag_left(e: Ent, kind: String, by := "") -> float:
+	var best := 0.0
+	for c in _tags(e, kind):
+		if by == "" or c == by:
+			best = maxf(best, float(_tags(e, kind)[c]["until"]) - float(e.m.time))
+	return maxf(0.0, best)
 
-static func tag_n(e: Ent, kind: String) -> int:
-	return int((e.get_meta("tag_" + kind, {}) as Dictionary).get("n", 0)) if tag_left(e, kind) > 0.0 else 0
+static func tag_n(e: Ent, kind: String, by := "") -> int:
+	var n := 0
+	var all := _tags(e, kind)
+	for c in all:
+		if (by == "" or c == by) and float(all[c]["until"]) > float(e.m.time):
+			n += int(all[c]["n"])
+	return n
 
-## Keeps the stack on the body that owns it and rings `n` pips round it for its length.
+## meta "tag_<kind>" {caster nid: {n, until}}
+static func _tags(e: Ent, kind: String) -> Dictionary:
+	return e.get_meta("tag_" + kind, {}) if e != null and is_instance_valid(e) else {}
+
+## The most stacks one caster's game lets a caster keep of `kind` (0: no cap; Sable's Marks have none).
+static func tag_cap(kind: String) -> int:
+	match kind:
+		"ign": return 2                   # AshwickKit.stoke: Ablaze, Flashover
+		"chl": return 1
+		"sta": return int(Arch.def("mage").get("resource", {}).get("max", 4))
+	return 0
+
+## Keeps one caster's stack on the body that owns it (capped as the caster's game caps it) and rings the
+## pips round it, one row per caster, until the last one runs out.
 static func _tag(e: Ent, kind: String, secs: float, n: int, by: String) -> void:
+	var all := _tags(e, kind).duplicate()
+	var cap := tag_cap(kind)
+	if cap > 0:
+		n = mini(n, cap)
+	if n <= 0 or secs <= 0.0:
+		all.erase(by)
+	else:
+		all[by] = {"n": n, "until": float(e.m.time) + secs}
+	e.set_meta("tag_" + kind, all)
+	_prune(e, kind)
+
+static func _tag_look(e: Ent, kind: String) -> void:
 	var old := e.get_node_or_null("Tag_" + kind)
 	if old:
 		old.queue_free()
 		old.name = "TagGone_" + kind
-	if n <= 0:
-		e.remove_meta("tag_" + kind)
+	var all := _tags(e, kind)
+	var now := float(e.m.time)
+	var rows := []
+	var last := 0.0
+	for c in all:
+		if float(all[c]["until"]) > now:
+			rows.append(int(all[c]["n"]))
+			last = maxf(last, float(all[c]["until"]))
+	if rows.is_empty():
 		return
-	e.set_meta("tag_" + kind, {"n": n, "until": float(e.m.time) + secs, "by": by})
 	var ring := Node3D.new()
 	ring.name = "Tag_" + kind
 	var mat := Models.glow_mat(TAG_COL[kind])
-	for i in n:
-		var pip := MeshInstance3D.new()
-		pip.mesh = Models.crystal(0.07, 0.1, 4)
-		pip.material_override = mat
-		pip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		pip.position = Vector3((i - (n - 1) * 0.5) * 0.3, TAG_TOP, 0)
-		ring.add_child(pip)
+	for r in rows.size():
+		var n: int = rows[r]
+		for i in n:
+			var pip := MeshInstance3D.new()
+			pip.mesh = Models.crystal(0.07, 0.1, 4)
+			pip.material_override = mat
+			pip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			pip.position = Vector3((i - (n - 1) * 0.5) * 0.3, TAG_TOP + 0.25 * r, 0)
+			ring.add_child(pip)
 	e.add_child(ring)
-	e.m.later(secs, func(): if is_instance_valid(ring): ring.queue_free())
+	# the next stack to run out redraws the pips (or clears them with the last one)
+	var next := last
+	for c in all:
+		if float(all[c]["until"]) > now: next = minf(next, float(all[c]["until"]))
+	var rid := ring.get_instance_id()          # ids, not the nodes: either may be freed by then
+	var eid := e.get_instance_id()
+	e.m.later(next - now + 0.01, func():
+		var r := instance_from_id(rid) as Node
+		var body := instance_from_id(eid) as Ent
+		if r != null and body != null and r.get_parent() == body and r.name == "Tag_" + kind:
+			_prune(body, kind))
+
+static func _prune(e: Ent, kind: String) -> void:
+	var all := _tags(e, kind).duplicate()
+	for c in all.keys():
+		if float(all[c]["until"]) <= float(e.m.time):
+			all.erase(c)
+	if all.is_empty():
+		e.remove_meta("tag_" + kind)
+	else:
+		e.set_meta("tag_" + kind, all)
+	_tag_look(e, kind)
 
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:
