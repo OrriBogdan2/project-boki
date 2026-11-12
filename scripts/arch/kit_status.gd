@@ -6,7 +6,7 @@ extends RefCounted
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
 ##        source's Daze is only a damage window); stars over the head
-##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a teal ring, then the slow's frost on the body (BodyTell)
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
@@ -30,8 +30,8 @@ static func grounded_left(e: Ent) -> float:
 	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
 
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
-## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
-## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
+## body belongs to one of them. `toast`: the player's toast reads this (what Grounded takes away from a Dredge
+## reeling, say).
 static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
 	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
 		return

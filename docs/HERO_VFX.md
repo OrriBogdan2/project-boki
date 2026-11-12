@@ -78,7 +78,8 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
-  and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
+  and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
+  shot halos lean to the side through `SideColor.fx`; bodies carry a side edge (docs/COMBAT_CLARITY.md).
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).

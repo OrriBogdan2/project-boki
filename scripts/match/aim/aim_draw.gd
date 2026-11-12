@@ -98,10 +98,10 @@ func rebuild() -> void:
 		var e: Dictionary = entries[k]
 		if not e["all"] and e["h"] != me:
 			continue                    # an aim reticle: only its own player sees it
-		if e["all"] and me != null and int((e["h"] as Hunter).team) != int(me.team):
-			e = e.duplicate()
-			e["col"] = (e["col"] as Color).lerp(Feel.RIM_ENEMY, 0.45)     # a foe's telegraph reads hostile
-			e["col2"] = (e["col2"] as Color).lerp(Feel.RIM_ENEMY, 0.3)
+		if e["all"] and me != null and e["h"] != me:
+			e = e.duplicate()            # someone else's telegraph: a rival's reads hostile, a teammate's cool
+			e["col"] = SideColor.fx(m, e["h"], e["col"])
+			e["col2"] = SideColor.fx(m, e["h"], e["col2"])
 		AimShapes.build(geo, e)
 		built += 1
 	if geo.v.is_empty():

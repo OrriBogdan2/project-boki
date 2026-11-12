@@ -100,11 +100,11 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", e.stun_t])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", e.root_t])
+	if e.stun_t > 0.0: out.append(["concussion", BodyTell.STUN_COL, "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["binding", BodyTell.ROOT_COL, "ROOTED", e.root_t])
 	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
 	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", e.slow_t])
+	if e.slow_t > 0.0: out.append(["snare", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
 	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
 	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
@@ -154,7 +154,8 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
-	# the name, or what's being done to them (stunned, rooted ...) in its colour
+	# the name, or what's being done to them (stunned, rooted ...) in its colour; the rest of it is on their
+	# body (BodyTell, KitStatus), so no icon tiles beside the plate
 	var sts := statuses(h)
 	var word := ""
 	var word_col := Color("9ae8ff")
@@ -168,8 +169,6 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
-	if not sts.is_empty():
-		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
