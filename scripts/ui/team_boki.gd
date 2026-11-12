@@ -27,7 +27,7 @@ static var stolen_shown := {}
 
 ## The icon's state for a teammate's Boki: "down", "rest", "wisp" (its owner is down) or "".
 static func state_of(h: Hunter, k: Kin) -> String:
-	if k.dead or k.state == "downed" or k.state == "reviving":
+	if k.dead or k.state == "downed":
 		return "down"
 	if k.resting():
 		return "rest"

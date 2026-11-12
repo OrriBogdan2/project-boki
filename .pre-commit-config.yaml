@@ -1,0 +1,11 @@
+# pip install pre-commit && pre-commit install
+# One local hook: tools/check.sh --files runs gdlint, gdformat, ruff, vulture and the glTF validator on the staged files
+# against tools/lint_baseline.json (old debt may not grow; new files must be clean). It sets up its own venv.
+repos:
+  - repo: local
+    hooks:
+      - id: boki-lint
+        name: boki lint (gdlint, gdformat, ruff, vulture, gltf-validator)
+        entry: tools/check.sh --files
+        language: system
+        files: \.(gd|py|glb|gltf)$

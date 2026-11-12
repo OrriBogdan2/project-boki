@@ -107,7 +107,7 @@ func _poll(m: Match, h: Hunter) -> void:
 		s["fight"] = f
 	f["last"] = m.time
 	var k: Kin = h.kin
-	if k != null and not k.dead and not k.resting() and k.state not in ["downed", "reviving", "bench", "away", "wild"]:
+	if k != null and not k.dead and not k.resting() and k.state not in ["downed", "wisp", "bench", "away", "wild"]:
 		f["kin_ok"] = true
 		if k.state != "shoulder":
 			f["kin_out"] = true          # out beside the bot, flying in, or merged into it
