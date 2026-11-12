@@ -13,6 +13,8 @@ extends ArchKit
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
+const CALL_LOOP_ALLY_DB := -7.0    # dB: the same loop on the ally, this much quieter
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
@@ -646,6 +648,7 @@ func teardown() -> void:
 	super.teardown()
 	hearth = {}
 	hearth_call = {}
+	_call_loops_stop()
 	burrs.clear()
 	if look != null:
 		look.teardown()
@@ -728,6 +731,7 @@ func _start_call() -> bool:
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
+	_call_loops(who)
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
@@ -755,6 +759,8 @@ func _tick_call(dt: float) -> void:
 		hearth_call["tick"] = float(hearth_call["tick"]) - every
 		_call_heal(who, float(xd["heal_ps"]) * every)
 	_call_look(who, dt)
+	Sfx.loop_set(_loop_key(true), h.pos)
+	Sfx.loop_set(_loop_key(false), who.pos)
 	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
 		play("mm_call_hold")
 	if float(hearth_call["left"]) <= 0.0:
@@ -786,7 +792,6 @@ func _call_look(who: Hunter, dt: float) -> void:
 		hearth_call["fx"] = 0.22
 		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
 		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
-		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
 
 
 ## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;
@@ -794,6 +799,7 @@ func _call_look(who: Hunter, dt: float) -> void:
 func _call_end(done: bool) -> void:
 	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call.get("who")) else null
 	hearth_call = {}
+	_call_loops_stop()
 	for id_ in ["x", "x_me", "x_pick", "x_line"]:
 		AimKit.hide(h, id_)
 	if ult_look != null:
@@ -814,6 +820,23 @@ func _call_end(done: bool) -> void:
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)
 	play("mm_call_end")
+
+
+## The channel's warm loop sounds on her and, quieter, on the ally (solo: only her). It is keyed per caster,
+## so a recast never stacks a second one, and it is stopped by the call's every end (_call_end, teardown).
+func _loop_key(on_her: bool) -> String:
+	return "call%d%s" % [h.get_instance_id(), "" if on_her else "_ally"]
+
+
+func _call_loops(who: Hunter) -> void:
+	Sfx.loop_start(_loop_key(true), "tend_call_loop", h.pos, CALL_LOOP_DB)
+	if who != h:
+		Sfx.loop_start(_loop_key(false), "tend_call_loop", who.pos, CALL_LOOP_DB + CALL_LOOP_ALLY_DB)
+
+
+func _call_loops_stop() -> void:
+	Sfx.loop_stop(_loop_key(true))
+	Sfx.loop_stop(_loop_key(false))
 
 
 ## The tether snaps where everyone can see it: coral sparks at her hand and at the far end.

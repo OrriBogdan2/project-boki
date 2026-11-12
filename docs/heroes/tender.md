@@ -193,7 +193,7 @@ Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer
   Ember Cast as soft puffs of light with a twinkle (`tend_ember`, three takes; `tend_ember_emp`), `tend_kindled`, Burrseed
   (`tend_seed_aim`, `tend_seed`, `tend_stick`, the woody `tend_root`), Hearthlight (`tend_hearth`, a warm swell, with her
   signature `tender_lantern_chime`; `tend_toss`, `tend_land`, the closing `tend_flare`), `tend_hop`, `tend_pickup`, Hearth Call
-  (`tend_call`, a soft wordless choir and the lantern; `tend_call_hum`, three takes; `tend_arrive`) and `tender_cheer` when it
+  (`tend_call`, a soft wordless choir and the lantern; `tend_call_loop`, a 2 s seamless lantern-chord loop that sounds on her and, 7 dB quieter, on the ally for as long as the channel runs and stops the frame it ends or breaks, never stacked by a recast; `tend_arrive`) and `tender_cheer` when it
   mends someone, plus her own dash, light little footsteps and a small wordless voice (`tender_hurt`, `_down` with the
   lantern flickering, `_death` with its star dimming). The old names still load through `SfxKits.NAMES`.
 
