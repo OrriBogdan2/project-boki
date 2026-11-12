@@ -2142,7 +2142,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 				lines.append(["Boki: " + Data.kin_title(String((h.kin as Kin).rec.get("name", "")), String(Data.KIN[(h.kin as Kin).species]["name"])), Data.KIN[(h.kin as Kin).species]["color"]])
 				_kit_lines(lines, h.kin)
 		if h.downed:
-			lines.append(["Down. %s" % ("Hold %s next to them to revive." % Settings.key_cap("interact") if ally else "Finish them before they're revived."), BAD if not ally else GOOD])
+			lines.append(["Down. %s" % ("Jump onto their Wisp to revive." if ally else "Finish them before they're revived."), BAD if not ally else GOOD])
 	var w := 300.0
 	var h2 := 36.0
 	for i in range(1, lines.size()):
