@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	ak.step(m, 0.5)        # the rounds _aim_modes fired: Vex's firing brackets lapse, so only the shapes below show
 	_shapes(m, P, T)
 	_seen(m, P, T)
+	_soft(P)
 	_membership()
 	_pooling(m, P, T)
 	await _reticle(m, P)
@@ -61,6 +62,14 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	ok("mode: cursor past range clamps to range", is_equal_approx(AimMode.dist(P, 12.0), 12.0))
 	_aim(P, 0.4)
 	ok("mode: point-blank still travels the minimum", is_equal_approx(AimMode.dist(P, 12.0), AimMode.MIN_D))
+	var near := AimMode.place(P, 12.0)
+	var dx := near.x - P.pos.x
+	ok("place: a zone at a 0.4 m cursor lands there, not 1.5 m out", absf(dx - 0.4) < 0.01, "%.2f" % dx)
+	AimKit.circle(P, "pl", {"r": 1.0})
+	var mark: Vector2 = AimKit.entry(P, "pl")["at"]
+	ok("place: the default circle marker sits at the cursor too", absf(mark.x - P.pos.x - 0.4) < 0.01)
+	_aim(P, 20.0)
+	ok("place: past range clamps to range", absf(AimMode.place(P, 12.0).x - P.pos.x - 12.0) < 0.01)
 	_aim(P, 5.0)
 	ok("mode: max = always the full range", is_equal_approx(AimMode.dist(P, 12.0, AimMode.MAX), 12.0))
 	var pt := AimMode.point(P, 12.0)
@@ -164,6 +173,50 @@ func _seen(m: Match, P: Hunter, T: Hunter) -> void:
 	AimKit.clear(T)
 	L.rebuild()
 	ok("clear: drops one hunter's set only", not AimKit.shown(T, "slam") and L.built == 0)
+
+## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
+func _soft(P: Hunter) -> void:
+	AimKit.lane(P, "soft_lane", {"len": 7.0, "width": 2.2, "k": 1.0, "fill": 1.0, "soft": true, "tip": true})
+	AimKit.cone(P, "soft_cone", {"len": 4.0, "deg": 70.0, "inner": 0.0, "fill": 1.0, "soft": true, "all": true})
+	var lane := measure(AimKit.entry(P, "soft_lane"), 0.6, 1.08)
+	var cone := measure(AimKit.entry(P, "soft_cone"), 0.6, 3.98)
+	ok("soft lane: inside <= %.2f at the centre, rim lit (%.2f / %.2f)" % [AimShapes.SOFT_A, lane[0], lane[1]],
+			lane[0] > 0.0 and lane[0] <= AimShapes.SOFT_A + 0.001 and lane[1] >= 0.5)
+	ok("soft cone: inside <= %.2f at the centre, arc lit (%.2f / %.2f)" % [AimShapes.SOFT_A, cone[0], cone[1]],
+			cone[0] > 0.0 and cone[0] <= AimShapes.SOFT_A + 0.001 and cone[1] >= 0.5)
+	AimKit.hide(P, "soft_lane")
+	AimKit.hide(P, "soft_cone")
+
+## [the drawn alpha at the shape's centre line `at` of the way along it, the alpha `edge` m out from the
+## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone).
+static func measure(e: Dictionary, at: float, edge: float) -> Array:
+	if e.is_empty():
+		return [-1.0, -1.0]
+	var g := AimGeo.new()
+	AimShapes.build(g, e)
+	var o: Vector2 = e["from"]
+	var u: Vector2 = e["dir"]
+	var mid := o + u * float(e["len"]) * at
+	var rim := mid + Vector2(-u.y, u.x) * edge if e["kind"] == "lane" else o + u * edge
+	return [alpha_at(g, mid), alpha_at(g, rim)]
+
+## The alpha the triangles of `g` stack to over ground point `p` (each blended over the last).
+static func alpha_at(g: AimGeo, at: Vector2) -> float:
+	var p := at + Vector2(0.0013, 0.0007)        # off the shared triangle edges, so none counts twice
+	var clear := 1.0
+	for i in range(0, g.v.size(), 3):
+		var a := Vector2(g.v[i].x, g.v[i].z)
+		var b := Vector2(g.v[i + 1].x, g.v[i + 1].z)
+		var c := Vector2(g.v[i + 2].x, g.v[i + 2].z)
+		var den := (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y)
+		if absf(den) < 1e-9:
+			continue
+		var wa := ((b.y - c.y) * (p.x - c.x) + (c.x - b.x) * (p.y - c.y)) / den
+		var wb := ((c.y - a.y) * (p.x - c.x) + (a.x - c.x) * (p.y - c.y)) / den
+		if wa < 0.0 or wb < 0.0 or wa + wb > 1.0:
+			continue
+		clear *= 1.0 - clampf(g.c[i].a * wa + g.c[i + 1].a * wb + g.c[i + 2].a * (1.0 - wa - wb), 0.0, 1.0)
+	return 1.0 - clear
 
 func _membership() -> void:
 	var o := Vector3.ZERO

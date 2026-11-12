@@ -74,8 +74,9 @@ def import_game(path):
     return next(o for o in new if o.type == "ARMATURE"), max(meshes, key=lambda o: len(o.data.vertices))
 
 
-def kept_parts(old, bones):
-    """A copy of the old mesh's faces whose vertices ride mostly `bones`, unparented, its UVs as layer "old"."""
+def kept_parts(old, bones, mats):
+    """A copy of the old mesh's faces whose vertices ride mostly `bones` or whose material is in `mats` (Kael's skinned sword),
+    unparented, its UVs as layer "old"."""
     ob = old.copy()
     ob.data = old.data.copy()
     ob.name = "Kept"
@@ -85,7 +86,9 @@ def kept_parts(old, bones):
     ob.matrix_world = mw
     ob.modifiers.clear()
     name = {g.index: g.name for g in ob.vertex_groups}
-    drop = [v.index for v in ob.data.vertices if not v.groups or name[max(v.groups, key=lambda e: e.weight).group] not in bones]
+    by_mat = {i for p in ob.data.polygons if ob.data.materials[p.material_index].name in mats for i in p.vertices}
+    drop = [v.index for v in ob.data.vertices if v.index not in by_mat
+            and (not v.groups or name[max(v.groups, key=lambda e: e.weight).group] not in bones)]
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     bm.verts.ensure_lookup_table()
@@ -165,7 +168,7 @@ def bake():
     BW.unwrap(low, hd, float(SPEC.get("head_uv", 2.0)), float(SPEC.get("uv_margin", 0.0008)), float(SPEC.get("uv_angle", 66.0)),
               int(SPEC.get("uv_smooth", 30)))
     arm, old = import_game(game)
-    kept = kept_parts(old, SPEC.get("keep", []))
+    kept = kept_parts(old, SPEC.get("keep", []), SPEC.get("keep_mats", []))
     d_low, _ = uv_density(low)
     d_kept, uv = uv_density(kept)
     kept.data.uv_layers["UVMap"].data.foreach_set("uv", (uv * np.sqrt(d_low * KEPT_DENSITY / max(d_kept, 1e-12))).ravel())
@@ -566,7 +569,8 @@ def tri_slots(ob, img, top_bone, P):
 
 
 def move_anchors(arm, T, K):
-    """The spec's anchors, through the fit (their own segment weights), in the rest pose."""
+    """The spec's anchors, through the fit (their own segment weights), in the rest pose; `anchor_bones` {anchor: bone} moves
+    one onto another bone (Kael's arm blooms onto the master's cursed left arm)."""
     names = [n for n in SPEC.get("anchors", {}) if n in bpy.data.objects]
     if not names:
         return
@@ -576,7 +580,10 @@ def move_anchors(arm, T, K):
     bpy.context.view_layer.update()
     for n, q in zip(names, Q):
         e = bpy.data.objects[n]
-        e.matrix_world = Matrix.Translation(Vector(q)) @ e.matrix_world.to_3x3().to_4x4()
+        rot = e.matrix_world.to_3x3().to_4x4()
+        e.parent_bone = SPEC.get("anchor_bones", {}).get(n, e.parent_bone)
+        bpy.context.view_layer.update()
+        e.matrix_world = Matrix.Translation(Vector(q)) @ rot
     bpy.context.view_layer.update()
     arm.data.pose_position = "POSE"
 
@@ -586,8 +593,7 @@ def main():
         bake()
     bpy.ops.wm.open_mainfile(filepath=os.path.join(WORK, "bake.blend"))
     bpy.context.scene.render.fps = FPS
-    low = bpy.data.objects["Low"]
-    kept = next(o for o in bpy.data.objects if o.name.startswith("Kept"))      # ("Kept.001" when the game glb has an object of that name)
+    low, kept = bpy.data.objects["Low"], bpy.data.objects["Kept"]
     img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
     img.name = "atlas"
     sole = bpy.context.scene["sole"]
@@ -658,6 +664,10 @@ def main():
         setattr(skin_relax, k, v)
     skin_relax.relax(arm)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
+    # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
+    for act in bpy.data.actions:
+        act.use_frame_range = True
+        act.frame_start, act.frame_end = round(act.frame_range[0]), round(act.frame_range[1])
     select([o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")], arm)
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",

@@ -297,10 +297,14 @@ def bake_colour(high, low, size, cage, ray, margin_px, src=None):
     src = src or base_image(high)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next(n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src)
-        tex.interpolation = "Cubic"
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src), None)
         em = nt.nodes.new("ShaderNodeEmission")
-        nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+        if tex:
+            tex.interpolation = "Cubic"
+            nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+        else:       # a flat-colour part (Claire's sheer skirt): its base colour, opaque
+            bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+            em.inputs["Color"].default_value = bsdf.inputs["Base Color"].default_value
         out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
         nt.links.new(em.outputs[0], out.inputs["Surface"])
     img = bpy.data.images.new("baked", size, size, alpha=False)
