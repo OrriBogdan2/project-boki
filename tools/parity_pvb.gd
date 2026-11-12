@@ -113,18 +113,19 @@ func _tarek_timing(P: Hunter, K: DolmKit) -> void:
 	ok("anim tarek: the row's clip smash (0.18) is the cast tell",
 		absf(float(K.e_def()["tell"]) - 0.2) < 0.03 and ln.call("e_row") > 0.9,
 		"tell %.2f s" % float(K.e_def()["tell"]))
-	# the run's step rate at his top speed against the sheet's cadence 1.0 (a medium's: 2.15 rad of stride a metre)
+	# the run: main's WardenGait plans it (loco.stride + loco.foot_mps: the speed shared between the clip rate and
+	# a longer stride so a planted foot stays put), which replaced this branch's loco.cadence 0.85. The cycle is the
+	# clip over that rate; it is shorter than a medium's (2.15 rad a metre) on purpose, the stride covers the ground.
+	# Pinned so a change shows.
 	var path := "res://content/rules/warden_anim/tarek.json"
 	var lc: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string(path)) as Dictionary)["loco"]
 	var v := P.base_speed
-	var walk := float(lc["walk_speed"])
-	var run := float(lc["run_speed"])
-	var gait := lerpf(walk, run, clampf((v - walk) / (run - walk), 0.0, 1.0))      # (WardenClips._loco's own rate)
-	var rate := clampf(v / gait, 0.6, 1.5) * float(lc.get("cadence", 1.0))
+	var rate := WardenGait.new(Skeleton3D.new(), {}).plan(v, lc)
 	var ours: float = ln.call("run_f") / rate
 	var medium := TAU / (2.15 * v)
-	ok("anim tarek: the run cadence is a medium's within 5% (sheet: cadence 1.0; the clip alone is 16% quick)",
-		absf(ours / medium - 1.0) < 0.05, "%.3f s a cycle at %.1f m/s, medium %.3f s" % [ours, v, medium])
+	ok("anim tarek: the run is planned by WardenGait (stride + foot_mps, no cadence); cycle 0.5-0.65 s",
+		lc.has("stride") and lc.has("foot_mps") and not lc.has("cadence") and ours > 0.5 and ours < 0.65,
+		"%.3f s a cycle at %.1f m/s, rate %.2f, a medium's %.3f s" % [ours, v, rate, medium])
 	root.free()
 
 ## The audit (Nov 3 23:40): cooldowns from the data, the Heavy Shot stops on the first foe, and an early-release
