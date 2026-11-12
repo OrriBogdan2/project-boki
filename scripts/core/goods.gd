@@ -157,16 +157,22 @@ static func mine() -> Array:
 	return out
 
 # ------------------------------------------------------------------ finding them
-## After an expedition you made it out of: a trophy per boss you helped kill, and sometimes a rare
-## material (rarer ones less often). Returns the keys found.
-static func on_result(bosses: int, rng: RandomNumberGenerator) -> Array:
+## After an expedition you made it out of: a trophy per boss you helped kill, the Ink of each boss
+## you killed that has one (counted in your match stats as "ink_<type>"), and sometimes a rare
+## material or an Ink (rarer ones less often). Returns the keys found.
+static func on_result(bosses: int, rng: RandomNumberGenerator, stats := {}) -> Array:
 	var found: Array = []
 	var fr: Dictionary = rules()["finds"]
 	var trophies := _of_kind("trophy")
 	for i in bosses * int(fr["trophy_per_boss"]):
 		found.append("good:" + String(_weighted(trophies, rng)))
+	for k in stats:
+		if String(k).begins_with("ink_") and rules()["goods"].has(String(k)):
+			for i in int(stats[k]): found.append("good:" + String(k))
 	if rng.randf() < float(fr["material"]):
 		found.append("good:" + String(_weighted(_of_kind("material"), rng)))
+	if rng.randf() < float(fr["ink"]):
+		found.append("good:" + String(_weighted(_of_kind("ink"), rng)))
 	for key in found: give(key)
 	return found
 
