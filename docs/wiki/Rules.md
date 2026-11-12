@@ -1436,7 +1436,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 
 | Setting | Value |
 |---|---|
-| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long (s) before its edge would reach them, on top of their travel time there (scripts/match/bot_zone.gd). tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs dps (share of your max health a second). |
+| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long (s) before its edge would reach them, on top of their travel time there (scripts/match/bot_zone.gd). tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs the damage of its stage: the closing-circle curve in content/rules/heart.json (tide_dmg, linear between stages 0, 1, 2 and 10) as a share of the Hunter's own max health a second, so a full-health Hunter lasts as many seconds as at the source (stage 0 nudges, the last stage kills in a few seconds). |
 | length_ref | 612 |
 | map_ref | 305 |
 | final_lean | 0.55 |
@@ -1445,7 +1445,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 | warn_s | 20 |
 | bot_lead_s | 15 |
 | tick_s | 1 |
-| phases | [{"wait": 150.0, "shrink": 50.0, "r": 150.0, "dps": 0.01}, {"wait": 80.0, "shrink": 45.0, "r": 95.0, "dps": 0.02}, {"wait": 70.0, "shrink": 40.0, "r": 58.0, "dps": 0.04}, {"wait": 55.0, "shrink": 30.0, "r": 32.0, "dps": 0.07}] |
+| phases | [{"wait": 150.0, "shrink": 50.0, "r": 150.0, "stage": 0}, {"wait": 80.0, "shrink": 45.0, "r": 95.0, "stage": 1}, {"wait": 70.0, "shrink": 40.0, "r": 58.0, "stage": 2}, {"wait": 55.0, "shrink": 30.0, "r": 32.0, "stage": 10}] |
 
 ## snack_patch (`content/rules/snack_patch.json`)
 

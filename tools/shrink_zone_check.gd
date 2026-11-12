@@ -27,6 +27,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	_shape(main)
 	_hurt(main)
+	_stages(main)
 	_bots(main)
 	print("SHRINKZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -108,6 +109,50 @@ func _hurt(main: Node) -> void:
 	m.time = z.t1[z.last()] + 0.05
 	z.tick(DT)
 	ok(z.fallen and b.out, "the last close: a hunter on an island outside the final circle falls")
+	m.free()
+
+## Seconds a bot trio standing outside each close takes to down a full-health Hunter: as long as
+## the source's closing circle takes (3 / 6 / 50 / 450 a second at stages 0 / 1 / 2 / 10 over its
+## health, 1290 for a medium Hunter): 430, 215, 26 and 3 s. Table in docs/COMBAT_NUMBERS.md.
+func _stages(main: Node) -> void:
+	var m := _match(main, 5)
+	var z := m.zone
+	var trio: Array = m.hunters.filter(func(h): return h.ctrl == "bot").slice(0, 3)
+	var want := [430.0, 215.0, 26.0, 3.0]
+	for j in range(1, z.last() + 1):
+		m.time = z.t1[j] - 0.01      # (the last close's end drops the outer islands)
+		z.tick(DT)
+		var spots: Array[Vector3] = []
+		for i in 400:
+			var p := m.world.random_ground()
+			if Vector2(p.x, p.z).distance_to(z.cur_c) > z.cur_r + 10.0:
+				spots.append(p)
+				if spots.size() == trio.size():
+					break
+		for i in trio.size():
+			var h: Hunter = trio[i]
+			h.pos = spots[i]
+			h.hp = h.max_hp
+			h.shield = 0.0
+			h.kin_shield = 0.0
+		var down_at := {}
+		var t := 0.0
+		while t < 600.0 and down_at.size() < trio.size():
+			t += 0.5
+			z.tick(0.5)
+			for h in trio:
+				if h.downed and not down_at.has(h):
+					down_at[h] = t
+		var secs := PackedStringArray()
+		var worst := 0.0
+		for h in trio:
+			secs.append("%.1f" % float(down_at[h]) if down_at.has(h) else "never")
+			worst = maxf(worst, absf(float(down_at.get(h, 1e4)) - want[j - 1]))
+		var stage := int(z.rules()["phases"][j - 1]["stage"])
+		var what := [j, stage, ", ".join(secs), want[j - 1]]
+		ok(worst <= 1.0, "close %d (stage %d): trio outside downs a full-health Hunter in %s s (want %.0f)" % what)
+		for h in trio:
+			h.downed = false
 	m.free()
 
 ## Bots come into the circle and stay in: from just after close 2 to just after close 3.

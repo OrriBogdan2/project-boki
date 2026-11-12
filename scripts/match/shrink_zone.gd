@@ -117,7 +117,7 @@ func _init(match_node: Match) -> void:
 		t0[j] = t
 		t += float(ph[j - 1]["shrink"]) * tk
 		t1[j] = t
-		dps[j] = float(ph[j - 1]["dps"])
+		dps[j] = Heart.tide_dmg(int(ph[j - 1]["stage"])) / float(Data.CLASSES["medium"]["hp"])
 	cur_c = cs[0]
 	cur_r = rs[0]
 	_build_wall()
@@ -238,7 +238,7 @@ func hud_row(hud, r: Rect2) -> float:
 	hud.c.draw_circle(r.position + Vector2(11, 10), 4.0, COL)
 	hud._text(r.position + Vector2(21, 14), _secs_text(), 10, COL, hud.big)
 	if m.player and not m.player.out and k > 0 and outside(m.player.pos):
-		var t := "OUTSIDE  -%d%%/s" % int(round(dps[k] * 100.0))
+		var t := "OUTSIDE  -%.1f%%/s" % (dps[k] * 100.0)
 		var a := 0.6 + 0.4 * sin(m.time * 8.0)
 		var tw: float = hud.big.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		hud._text(Vector2(r.end.x - 8 - tw, r.position.y + 14), t, 10, Color(hud.BAD, a), hud.big)

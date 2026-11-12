@@ -16,3 +16,5 @@ Option 2, in `scripts/match/shrink_zone.gd` (`ShrinkZone`, `Match.zone`), number
 
 ## Consequences
 New: shrink_zone.gd, shrink_zone.json, tools/shrink_zone_check.gd (`--shrink-zone-check`). Wiring: match.gd (3 lines), hud.gd (minimap + clock row, 2), full_map.gd (2), bot.gd (2 calls into scripts/match/bot_zone.gd: the goal override after the detour step, and dropping the fight outside the edge or once it is time to go in; a bot sets off for the next circle when the time before its edge reaches the bot is under its BotRoute travel time there x1.4 plus bot_lead_s; checked by `--bot-zone-check`, whole all-bot expeditions counting zone damage and deaths per close), hunter.gd ("zone" joins the armor/glider exemptions), boki_lines.json ("zone" speaks the "storm" lines). No Net.VERSION bump (nothing new is sent), no save change. The falling islands have no animation yet (nor does the clock's fall).
+
+Damage outside (parity, 11-12): each phase has a `stage` (0, 1, 2, 10) and hurts by the closing-circle curve in `heart.json`, as a share of max health a second (0.23% to 35%): a full-health Hunter downs in 430, 215, 26 and 3 s. Table in docs/COMBAT_NUMBERS.md.
