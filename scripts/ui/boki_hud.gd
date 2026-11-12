@@ -98,6 +98,45 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
 	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
+const SECOND_SIZE := 28.0       # px: the second Boki's badge on the Boki box's top-left corner
+const SECOND_OUT := Vector2(-8.0, -14.0)   # px: where its top-left sits relative to the box's
+const SECOND_RING := 3.0        # px: the swap cooldown ring sits this far outside the badge
+const PASSIVE_ICON := {         # owner stat of a carry passive -> its Icons id
+	"move_speed": "dash", "extra_jumps": "jump", "air_dashes": "dash", "dodge_charges": "dash", "dodge_regen": "dash",
+	"glide": "updraft", "armor": "fortify", "damage_reduction": "bulwark", "knockback_resist": "anvil",
+	"regen": "heart", "damage": "burst", "fire_rate": "smg", "reload": "rifle", "reveal_radius": "pulse",
+	"cooldown": "clock"}
+
+## The lead Boki's summon ring round the Boki box: the recall cooldown filling back up, then a full ring in the Boki's
+## colour while it can go out (nothing while it is fused, resting or down: the box says so).
+static func lead_ring(H, p: Hunter, r: Rect2) -> void:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k) or KinMerge.active(p) or not k.ready_to_fight():
+		return
+	var cd := float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
+	_ring(H, r.grow(RING_GROW + 3.0), 1.0 - clampf(k.throw_cd / cd, 0.0, 1.0), Color(k.sp["color"], 0.9), 3.0)
+
+## The second Boki as a small badge on the Boki box's corner: its first carry passive's icon, the swap key's cap, a ring
+## for the swap cooldown. Hover says what swapping brings out (hud id "swap").
+static func second_badge(H, p: Hunter, r: Rect2) -> void:
+	var b: Kin = p.kin2
+	if b == null or not is_instance_valid(b) or b.dead:
+		return
+	var br := Rect2(r.position + SECOND_OUT, Vector2(SECOND_SIZE, SECOND_SIZE))
+	var cd := float(Content.rules("kin_ai").get("swap_cooldown", 3.0))
+	var passives: Array = b.ks.carry_passives if b.ks else []
+	var icon: String = PASSIVE_ICON.get(String(passives[0]["stat"]), "bond") if not passives.is_empty() else "bond"
+	var col: Color = b.sp["color"]
+	var ready := p.swap_cd <= 0.0 and b.hp > 0.0
+	H._ab_slot("swap", br, icon, Settings.key_cap("swap_kin"), col, p.swap_cd / cd, p.swap_cd, ready)
+	var ctr := br.get_center()
+	var rr := SECOND_SIZE * 0.5 + SECOND_RING
+	H.c.draw_arc(ctr, rr, 0.0, TAU, 28, Color(1, 1, 1, 0.1), 2.0, true)
+	var left := 1.0 - clampf(p.swap_cd / cd, 0.0, 1.0)
+	H.c.draw_arc(ctr, rr, -PI / 2, -PI / 2 + TAU * left, 28, Color(col, 0.9), 2.0, true)
+	if b.hp <= 0.0:
+		H._ctext(Vector2(ctr.x, br.position.y - SECOND_RING - 5.0), "DOWN", 8, DOWN_COL, H.big)
+
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if frac <= 0.0:
@@ -181,27 +220,12 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
 		mode = "RESTING"
 	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
-	H._ctext(Vector2(gr.get_center().x, gr.position.y - 29.0), "LEAD", 8, Color(H.INK, 0.9), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
 	return slots_strip(H, p, x + 42.0, y, s)
 
-## The second Boki (its swap key, the swap cooldown, CARRY ON while its passive counts) and the carry-out slot
-## (claimed Boki riding home, plus a stolen one). Returns the x where the next badge starts.
+## The carry-out slot (claimed Boki riding home, plus a stolen one). Returns the x where the next badge starts.
 static func slots_strip(H, p: Hunter, x: float, y: float, s: float) -> float:
-	var b: Kin = p.kin2
-	if b != null and is_instance_valid(b) and not b.dead:
-		var br := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		var cd := float(Content.rules("kin_ai").get("swap_cooldown", 3.0))
-		H._ab_slot("swap", br, "swap", Settings.key_cap("swap_kin"), b.sp["color"], p.swap_cd / cd, p.swap_cd,
-			p.swap_cd <= 0.0 and b.hp > 0.0)
-		var on := KinSlots.second_on(p)
-		H._ctext(Vector2(br.get_center().x, br.position.y - 17.0), "CARRY ON" if on else "CARRY OFF", 8,
-			Color(b.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
-		H._ctext(Vector2(br.get_center().x, br.position.y - 5.0), String(b.rec.get("name", "")).to_upper().left(8), 8,
-			Color(H.INK, 0.8), H.big)
-		H._ctext(Vector2(br.get_center().x, br.position.y - 29.0), "SECOND", 8, Color(H.INK, 0.9), H.big)
-		x += 42.0
 	var orr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var full := not Capture.room(p)
 	H._rounded(orr, Color(0.05, 0.06, 0.09, 0.7), 8)

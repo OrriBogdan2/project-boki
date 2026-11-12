@@ -8,7 +8,11 @@ extends RefCounted
 ##   6. extracting brings the carry-out Boki home (Game.apply_result)
 ##   7. stealing from a deathbox: one stolen slot, at most 4 Boki on one hunter
 ##   8. bots bring two
+##   9. the HUD's second-Boki badge has an icon for every passive stat (the box itself: --carry-two-clip shots)
+## --carry-two-shots --shots-dir=<dir>: three stills of the Boki box (run at --resolution 1280x720 and 2560x1440).
 ## --carry-two-clip --shots-dir=<dir>: the swap and the carry-out HUD as numbered JPGs (frame_0000.jpg ...) for an MP4.
+
+const SHOT_AT := [1.0, 2.5, 4.0]       # s: ready, mid swap cooldown, after the claim (--carry-two-shots)
 
 var bad := 0
 var m: Match
@@ -23,8 +27,8 @@ func run(main: Node, mode := "") -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "weapon": "rifle",
 		"cls": "medium", "demo_kin": "cindle"})
-	if mode == "clip":
-		await _clip(main)
+	if mode == "clip" or mode == "shots":
+		await _clip(main, mode == "shots")
 		return
 	m.set_process(false)
 	_step(0.5)
@@ -32,6 +36,7 @@ func run(main: Node, mode := "") -> void:
 	_two_in(P)
 	_passives(P)
 	_swap(P)
+	_hud_icons()
 	_carry_out(P)
 	_extract(P)
 	_steal(P)
@@ -91,6 +96,10 @@ func _swap(P: Hunter) -> void:
 	P.inp["kin_swap"] = true
 	KinKeys.apply(P)
 	ok(P.kin == a and P.kin2 == b, "after the cooldown the swap works again")
+
+func _hud_icons() -> void:
+	var missing := KinParts.OWNER_STATS.keys().filter(func(st): return not BokiHud.PASSIVE_ICON.has(st))
+	ok(missing.is_empty(), "every carry passive stat has an icon on the second Boki's badge %s" % [missing])
 
 func _wild(at: Vector3, species := "puddlet") -> Kin:
 	var rec := Save.new_kin(species, "", 77)
@@ -157,8 +166,9 @@ func _steal(P: Hunter) -> void:
 	T.kin2 = null
 	ok(Capture.room(T) and not Capture.room(T, c), "with room left, the stolen slot still holds only one")
 
-## The match runs live; a swap at 1.5 s, a claim at 3 s, a swap back at 5.5 s, one JPG a frame until 8 s.
-func _clip(main: Node) -> void:
+## The match runs live; a swap at 1.5 s, a claim at 3 s, a swap back at 5.5 s, one JPG a frame until 8 s
+## (`stills`: only SHOT_AT, named by second, for the box at 720p / 1440p).
+func _clip(main: Node, stills := false) -> void:
 	var dir := "/tmp/carry_two_clip"
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
@@ -171,7 +181,7 @@ func _clip(main: Node) -> void:
 	var t0 := m.time
 	var done := {}
 	var n := 0
-	while m.time - t0 < 8.0:
+	while m.time - t0 < (float(SHOT_AT[-1]) + 0.2 if stills else 8.0):
 		var t := m.time - t0
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
@@ -185,6 +195,9 @@ func _clip(main: Node) -> void:
 			done["back"] = true
 			P.inp["kin_swap"] = true
 		await tree.process_frame
+		if stills:
+			if n >= SHOT_AT.size() or t < float(SHOT_AT[n]):
+				continue
 		tree.root.get_texture().get_image().save_jpg("%s/frame_%04d.jpg" % [dir, n], 0.9)
 		n += 1
 	print("CARRY2 clip %d frames in %s" % [n, dir])
