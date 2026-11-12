@@ -50,10 +50,10 @@ The 10 ranked rows of `briefs/hero-ref/bjorn.md` section 4, checked on main d255
 | 6 | Planted hammer, beacon | closed | `lie_t` 0.0 (6c4789d94; stays until recalled; `bjorn: the planted hammer never comes back by itself`), upright gold beacon in `bjorn_fx` |
 | 7 | E with the hammer in hand lands on him | closed | `_zone_anchor` returns `h.pos` when no hammer is out (584afbfb8, the lasting zone 6c4789d94); `bjorn E: with the hammer in hand it comes down on him, the column and circle shown`, and the zone follows a recalled hammer |
 | 8 | Shield look: curved pale-gold slab, sparks on block | partly closed; the rest in flight | curved plate wall, gold sparks on block, plate chunks and "SHIELD BROKEN" on break are built. Open: ours is a 4.2 m chord (the source's slab is about 2.2 body heights wide) in amber `c9953a`, not pale gold. `ext/vfx-bulwark` replaces the plate wall with a dome and `ext/parity-bulwark-guardcut` edits the same file, so left alone. Owner sync61 asked for a shield unique to him |
-| 9 | Bash on RMB release | open by choice (our extension) | the source has it as an augment; ours bashes on every release, documented. `ext/mossy-shield-bash` and `ext/mossy-dash-refund` change it |
+| 9 | Bash on RMB release | closed | letting go only lowers the aegis (`fire_rmb`, edfaf87cf3); the Bash is Shift behind the shield, base kit (data: Shield Bash on the dash slot, 6 s). The release knock-away is the source's Empower Shield Bash augment (sheet frame 0296), not a rank: no hero augments here, so not built. `combo bulwark: RMB tap no longer bashes` |
 | 10 | Passive heal | closed | no Crush heal on main (Crushed is a 0.5 s stun and 8 damage); the footage shows only the stun |
 
-Suggestions, not built (parity first): if the owner wants row 8 to match, narrow the wall to about 2.4 m and use a paler gold, after `ext/vfx-bulwark` lands; row 9 stays our extension unless the owner calls it.
+Suggestions, not built (parity first): if the owner wants row 8 to match, narrow the wall to about 2.4 m and use a paler gold, after `ext/vfx-bulwark` lands; row 9 could return only as that augment, if hero augments are ever built.
 
 ## Audit (Nov 3 23:40)
 Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on main 200effce). (a) already done on this branch, (b) fixed now, (c) not applied, with the reason.
