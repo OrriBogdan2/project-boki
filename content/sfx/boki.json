@@ -12,8 +12,12 @@
   "boki_fuse_psychic": "boki", "boki_fuse_flying": "boki", "boki_fuse_dragon": "boki", "boki_fuse_dark": "boki",
   "boki_fuse_poison": "boki", "boki_fuse_bug": "boki", "boki_fuse_steel": "boki", "boki_fuse_fairy": "boki",
   "boki_fuse_crystal": "boki", "boki_fuse_sound": "boki", "boki_fuse_end": "boki", "boki_fuse_tired": "boki",
-  "boki_evolve": "boki"
+  "boki_evolve": "boki",
+  "boki_form_titan_cast": "cast", "boki_form_titan_travel": "dash", "boki_form_titan_hit": "heavy_impact",
+  "boki_form_stormwing_cast": "cast", "boki_form_stormwing_travel": "dash", "boki_form_stormwing_hit": "impact",
+  "boki_form_tidal_shell_cast": "cast", "boki_form_tidal_shell_travel": "dash", "boki_form_tidal_shell_hit": "impact"
  },
+ "reach": {"boki_form_titan_cast": 30, "boki_form_stormwing_cast": 30, "boki_form_tidal_shell_cast": 30},
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",
   "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo"]

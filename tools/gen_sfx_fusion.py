@@ -5,6 +5,10 @@
   boki_fuse_end      release: the Boki lets go, a soft chord and a long sparkling afterglow tail
   boki_fuse_tired    the Fusion timed out: a sagging sigh, a dull low bell, no sparkle
   boki_evolve        a Boki evolves: a gentle rising run into a long warm bell, never a blast
+  boki_form_<form>_cast | _travel | _hit
+                     a Fusion form's own ultimate cast, its form dash and where its moves land, for the three
+                     forms in content/merge_forms (titan: stone and gravity, stormwing: wind and lightning,
+                     tidal_shell: water and crystal); the form file's sound block names them, MergeSfx plays them
 Each is one file. The cue name for a Fusion comes from content/rules/merge_forms.json (types[].cue) or the
 form file (sound.cue); MergeXform plays it.
 """
@@ -188,12 +192,106 @@ def evolve(i):
     return soft(room(mix(*run, lift, shimmer, bell), 1.0), 5200)
 
 
+# ---------------------------------------------------------------- the forms' own moves (cast, travel, hit)
+def titan_cast(i):
+    """Heavy Star gathers itself: a sub that sinks while a gravity hum climbs, grit pulled inward, a star glint."""
+    d = 0.8; n = N(d); u = np.arange(n) / n
+    hum = S.sweep(70, 140, d, curve=1.5) * np.sin(np.pi * u ** 0.5) * 0.6
+    sink = S.sub(90, 45, d, 0.5) * 0.5
+    grit = bpf(noise(d), 250, 1800) * u ** 2 * 0.25
+    glint = at(S.chime(988, 0.5, 0.25, ((1.0, 1.0), (2.76, 0.3))) * 0.2, 0.55)
+    return soft(room(mix(hum, sink, grit, glint), 0.5), 4500)
+
+
+def titan_travel(i):
+    """The armoured charge: a low stone rumble that rolls past, with gravel kicked up."""
+    d = 0.5; n = N(d); u = np.arange(n) / n
+    rumble = lpf(noise(d), 260) * np.sin(np.pi * u) ** 0.8 * 0.9
+    body = S.sweep(85, 60, d) * np.sin(np.pi * u) * 0.35
+    gravel = bpf(noise(d), 600, 3000) * env(n, 0.05, 0.25) * 0.2
+    return soft(mix(rumble, body, gravel), 3000)
+
+
+def titan_hit(i):
+    """The crater: a heavy thud with a sub drop, rock breaking apart and a dull star ring under the dust."""
+    thud = S.kick(120, 38, 0.7, 0.04, 0.25, 2.2) * 0.9
+    crunch = S.crack(0.25, 300, 2600, 0.07) * 0.5
+    debris = at(S.grains(0.6, 60, 700, 3500, 0.003, 0.009, fall=0.25) * 0.3, 0.04)
+    star = at(S.chime(330, 0.9, 0.5, ((1.0, 1.0), (2.32, 0.4))) * 0.18, 0.02)
+    return soft(room(mix(thud, crunch, debris, star), 0.6), 5000)
+
+
+def stormwing_cast(i):
+    """Stormwing calls the storm: wind that swells upward, crackle building in it, a thunder roll far off."""
+    d = 0.9; n = N(d); u = np.arange(n) / n
+    wind = bpf(noise(d), 500, 3000) * np.sin(np.pi * u ** 0.7) * 0.5
+    lift = S.sweep(400, 1200, d, curve=1.3) * np.sin(np.pi * u) * 0.12
+    crackle = S.grains(d, 50, 2500, 8000, 0.001, 0.003) * u ** 1.5 * 0.35
+    roll = lpf(noise(d), 180) * np.sin(np.pi * u) ** 2 * 0.5
+    return soft(room(mix(wind, lift, crackle, roll), 0.6), 7000)
+
+
+def stormwing_travel(i):
+    """Lightning Blink: a fast bright whoosh with an electric buzz riding it, a snap at the start."""
+    d = 0.4; n = N(d); u = np.arange(n) / n
+    rush = bpf(noise(d), 1200, 6000) * np.sin(np.pi * u ** 0.6) * 0.5
+    buzz = S.fm(320, 3.0, 4.0, d, 0.2) * np.sin(np.pi * u) * 0.25
+    snap = S.crack(0.05, 3000, 9000, 0.008) * 0.5
+    return soft(mix(rush, buzz, snap), 8000)
+
+
+def stormwing_hit(i):
+    """The strike: a sharp crack, a second split crack and the thunder rolling out after it."""
+    crack1 = S.crack(0.08, 1800, 9000, 0.012) * 0.9
+    crack2 = at(S.crack(0.06, 1200, 7000, 0.01) * 0.5, 0.035)
+    boom = S.kick(90, 40, 0.5, 0.02, 0.15, 1.8) * 0.5
+    thunder = at(lpf(noise(0.9), 300) * env(N(0.9), 0.04, 0.4) * 0.6, 0.03)
+    return soft(room(mix(crack1, crack2, boom, thunder), 0.5), 8500)
+
+
+def tidal_shell_cast(i):
+    """The shell gathers: water swirling in, glassy notes rising, the shell creaking under the pressure."""
+    d = 0.8; n = N(d); u = np.arange(n) / n
+    swirl = bpf(noise(d), 300, 1500) * np.sin(np.pi * u ** 0.8) * 0.4 * (0.7 + 0.3 * np.sin(2 * np.pi * 6 * u * d))
+    rise = chimes([784, 988, 1175, 1568], 0.12, 0.6, 0.25, 0.22, ((1.0, 1.0), (2.76, 0.35)))
+    bubs = mix(*[at(bubble(260 * (1 + 0.25 * k), 0.08, 1.8) * 0.4, 0.09 * k) for k in range(4)])
+    return soft(room(mix(swirl, at(rise, 0.2), bubs), 0.7), 6500)
+
+
+def tidal_shell_travel(i):
+    """Mirror Step: a liquid swish with a glassy shimmer across it."""
+    d = 0.45; n = N(d); u = np.arange(n) / n
+    swish = bpf(noise(d), 700, 3500) * np.sin(np.pi * u ** 0.7) * 0.45
+    shimmer = S.sweep(1800, 2600, d) * np.sin(np.pi * u) ** 2 * 0.1
+    drip = at(bubble(520, 0.07, 2.0) * 0.4, 0.05)
+    return soft(mix(swish, shimmer, drip), 7000)
+
+
+def tidal_shell_hit(i):
+    """Shatter: crystal breaking into many pieces over a splash, a cold ring left after."""
+    knock = S.kick(200, 90, 0.25, 0.01, 0.06, 1.6) * 0.5
+    glass = S.grains(0.6, 140, 3000, 9500, 0.001, 0.004, fall=0.18) * 0.55
+    splash = bpf(noise(0.5), 500, 4000) * env(N(0.5), 0.005, 0.15) * 0.4
+    ring = at(S.chime(1318, 0.9, 0.45, ((1.0, 1.0), (2.76, 0.4), (5.4, 0.2))) * 0.2, 0.02)
+    return soft(room(mix(knock, glass, splash, ring), 0.6), 8000)
+
+
+# (cast: the ultimate starting; travel: the form dash; hit: what the form's moves land, its category)
+FORM_SOUNDS = {'titan': (titan_cast, titan_travel, titan_hit, 'heavy_impact'),
+               'stormwing': (stormwing_cast, stormwing_travel, stormwing_hit, 'impact'),
+               'tidal_shell': (tidal_shell_cast, tidal_shell_travel, tidal_shell_hit, 'impact')}
+
+
 def main():
     for kind in TOPS:
         S.takes_cat('boki_fuse_' + kind, fuse(kind), 0, 'boki')
     S.takes_cat('boki_fuse_end', fuse_end, 0, 'boki')
     S.takes_cat('boki_fuse_tired', fuse_tired, 0, 'boki')
     S.takes_cat('boki_evolve', evolve, 0, 'boki')
+    for form, (cast, travel, hit, hit_cat) in FORM_SOUNDS.items():
+        S.takes_cat('boki_form_%s_cast' % form, cast, 0, 'cast')
+        S.takes_cat('boki_form_%s_travel' % form, travel, 0, 'dash')
+        S.takes_cat('boki_form_%s_hit' % form, hit, 0, hit_cat)
 
 
 if __name__ == '__main__':
