@@ -227,6 +227,14 @@ func _net(m: Match, P: Hunter, T: Hunter) -> void:
 	if drop.size() == 1:
 		AimNet.net_in(m, ["tele", T.nid, "lane"])
 	ok("net: the drop takes it off the other game", not AimKit.shown(T, "lane") and AimKit.shown(T, "cone"))
+	AimNet.sent_log.clear()
+	AimKit.circle(P, "one", {"self": true, "all": true})
+	AimKit.circle(P, "one", {"self": true, "all": true, "r": 3.0, "dur": 1.0})  # replaced inside the gap, never again
+	m.time += AimNet.SEND_GAP
+	L.rebuild()
+	var one: Array = AimNet.sent_log.filter(func(x): return x.size() == 4 and String(x[2]) == "one")
+	var late := one.size() == 2 and is_equal_approx(float(one[1][3]["r"]), 3.0)
+	ok("net: a one-off that replaces it inside the gap still goes out, at the next sweep", late, str(one.size()))
 	T.remote = false
 	AimKit.clear(P)
 	AimKit.clear(T)

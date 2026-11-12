@@ -19,31 +19,39 @@ const KINDS := ["lane", "dotted", "vee", "cone", "circle", "arc_wall", "swap", "
 static var capture := false
 static var sent_log: Array = []
 
-var sent := {}  # AimDraw key -> [hunter, id, match time of the last send]
+var sent := {}  # AimDraw key -> [hunter, id, match time of the last send, a newer state waits]
 
 
-## A local hunter's `all` entry was put: send it if it is new or the last send is SEND_GAP old.
+## A local hunter's `all` entry was put: send it now if it is new or the last send is SEND_GAP old, else
+## mark it pending, so sweep sends its latest state once the gap is up (a one-off never refreshes).
 func out(m: Node, h: Hunter, id: String, e: Dictionary) -> void:
 	if h.remote or not (capture or m.net_on):
 		return
 	var k := AimDraw.key(h, id)
 	var now := float(m.time)
 	if sent.has(k) and now - float(sent[k][2]) < SEND_GAP:
+		sent[k][3] = true
 		return
-	sent[k] = [h, id, now]
+	sent[k] = [h, id, now, false]
 	_tx(m, ["tele", h.nid, id, encode(e)])
 
 
-## After AimDraw prunes: every sent telegraph no longer up here is dropped on the other games too.
+## After AimDraw prunes: the pending ones whose gap is up go out; every sent telegraph no longer up here is
+## dropped on the other games too.
 func sweep(m: Node, entries: Dictionary) -> void:
 	if sent.is_empty():
 		return
+	var now := float(m.time)
 	for k in sent.keys():
+		var s: Array = sent[k]
 		if not entries.has(k):
-			var s: Array = sent[k]
 			sent.erase(k)
 			if is_instance_valid(s[0]):
 				_tx(m, ["tele", (s[0] as Hunter).nid, s[1]])
+		elif s[3] and now - float(s[2]) >= SEND_GAP:
+			s[2] = now
+			s[3] = false
+			_tx(m, ["tele", (s[0] as Hunter).nid, s[1], encode(entries[k])])
 
 
 static func net_in(m: Node, x: Array) -> void:
