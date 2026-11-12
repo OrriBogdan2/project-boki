@@ -248,11 +248,13 @@ static func _hit_opts(e: Dictionary, ctx: Dictionary, kb: Vector2, caster: Node)
 static func _hits(f: Ent, at: Vector3, r: float) -> bool:
 	return Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 2.2
 
-static func _heal(t: Node, n: float) -> void:
+static func _heal(t: Node, n: float, tint := Color.TRANSPARENT) -> void:
 	if t is Hunter:
-		(t as Hunter).heal(n)
+		(t as Hunter).heal(n, tint)
 	elif t is Ent and not t.dead and t.hp > 0.0:
+		var before: float = t.hp
 		t.hp = minf(t.max_hp, t.hp + n)
+		ReceiverCue.heal(t, t.hp - before, tint)
 
 static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 	var m = _m(caster)
@@ -438,14 +440,12 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				if t is Hunter: AbilityFx.cast(m, t, "launch", t.pos, Vector2.ZERO, col)
 		"heal":
 			for t in _targets(e, caster):
-				_heal(t, float(e.get("amount", 20.0)) * _heal_k(caster))
-				m.fx.burst(t.pos + Vector3(0, 1.0, 0), Color("8fe0a0"), 12, 2.5, 0.5, -3.0)
+				_heal(t, float(e.get("amount", 20.0)) * _heal_k(caster), col)
 		"shield":
 			for t in _targets(e, caster):
 				if "shield" in t:
-					t.shield = maxf(float(t.shield), float(e.get("amount", 40.0)) * _heal_k(caster))
+					ReceiverCue.shield(t, float(e.get("amount", 40.0)) * _heal_k(caster), col)
 					if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 5.0)))
-				m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", caster.pos, -3.0)
 		"haste":
 			for t in _targets(e, caster):
@@ -621,9 +621,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				var who_l: Array = [h]
 				if h.kin and h.kin.state in ["active", "giant"] and h.kin.flat_dist(at) < rad + 0.5: who_l.append(h.kin)
 				for t in who_l:
-					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster))
+					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster), col)
 					if float(e.get("shield", 0.0)) > 0.0 and "shield" in t:
-						t.shield = maxf(float(t.shield), float(e["shield"]) * _heal_k(caster))
+						ReceiverCue.shield(t, float(e["shield"]) * _heal_k(caster), col)
 						if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 4.0)))
 					if float(e.get("haste", 0.0)) > 0.0 and "haste_t" in t: t.haste_t = maxf(float(t.haste_t), float(e["haste"]))
 					if e.get("cleanse", false) and t is Ent:

@@ -86,3 +86,9 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+- **Receiving a heal or a shield:** one shared cue on the body (`ReceiverCue`), whoever gives it: a soft rise of light
+  for a heal, a thin shell flash for a shield, tinted by the giver's ability colour, plus a `+N` in the heal or shield
+  colour through `Fx.number`. No particles, bursts or rings (a ground ring means gameplay): the cue is a pooled body-sized
+  shell (`POOL` of them, 0 particles; `shaders/receiver_cue.gdshader`, mix-blended so the tint reads on bright
+  ground, where an additive glow washes out), so it reads at every quality. Sources call `Hunter.heal`, `Effects._heal` or
+  `ReceiverCue.shield`; a zone ticking again inside `GAP_S` is one rise. Checked by `--receiver-cue-check`.

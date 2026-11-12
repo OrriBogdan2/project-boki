@@ -536,7 +536,7 @@ func _start_wave() -> bool:
 
 func _land_wave() -> void:
 	var xd := x_def()
-	h.shield = maxf(h.shield, float(xd["shield"]))
+	ReceiverCue.shield(h, float(xd["shield"]), col_of(xd))
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
 	play("gil_wave_land")
 	vfx("wave_land", h.pos)

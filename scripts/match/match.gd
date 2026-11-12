@@ -4776,9 +4776,9 @@ func _update_zones(dt: float) -> void:
 					if amt > 0.0:
 						for h in hunters:
 							if h.team == z["team"] and not h.remote and not h.downed and not h.out and h.flat_dist(c) < z["r"]:
-								h.hp = minf(h.max_hp, h.hp + amt)
+								h.heal(amt)
 								if h.kin and h.kin.state == "active" and h.kin.flat_dist(c) < z["r"]:
-									h.kin.hp = minf(h.kin.max_hp, h.kin.hp + amt)
+									Effects._heal(h.kin, amt)
 						if z["kind"] == "sanctuary":
 							fx.burst(c + Vector3(randf_range(-2, 2), 0.3, randf_range(-2, 2)), Color("9ee2a0"), 3, 1.5, 0.6, -2.0, 0.8)
 				"well":
