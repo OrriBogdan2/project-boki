@@ -4,11 +4,13 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it.
+## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
+## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
+## models stays on its bone (tools/hero_vfx_emit.gd).
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
-const MAX_VORTEX := 4.5        # m radius, the largest ground swirl
+const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -24,7 +26,8 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
-			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
+			{"p": "vortex", "size": 2.0}, {"p": "ring", "size": 2.0},
+			{"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
@@ -45,6 +48,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -60,6 +64,7 @@ func run(main: Node) -> void:
 	_tier_up(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
+	await _scarf(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -99,7 +104,7 @@ func _recipes(arch: String) -> void:
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
 			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
-			var vortex_big: bool = layer["p"] == "vortex" and big > MAX_VORTEX
+			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):
 				life = minf(life, HeroVfx.TRAIL_MAX)     # a projectile trail runs as long as its shot, capped
@@ -260,6 +265,7 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V._anchors.clear()
 	_clear(V)
 	V.play(P, "all", P.pos, Vector2.RIGHT)
+	# (- 1: the tier-up sheen is drawn by HeroVfx.tier_up, never by a recipe layer)
 	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
@@ -339,3 +345,65 @@ func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
 	V.net_in(["fx", "hvfx", P.nid, "armor_up", P.pos.x, P.pos.y, P.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
 	ok(sheens.call().size() == 1, "a rival's tier-up arrives from another game")
+
+## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
+## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the
+## roots are where the anchor went; off at the Low preset, back on without new meshes.
+func _scarf(main: Node) -> void:
+	var m: Match = flow._match(main, "rimewright")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	Sfx.listener = P.pos
+	var S := V.scarves
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	S.tick(1.0 / 60.0)
+	ok(S.wearers.size() == 1 and S.wearers[0].h == P and S.wearers[0].tails.size() == 2, "Claire wears two scarf tails")
+	var w: HeroScarf.Wearer = S.wearers[0]
+	var a: Dictionary = HeroVfx.data("rimewright")["anchors"]["scarf"]
+	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
+	var neck := V.anchor_pos(P, "scarf")
+	if sk != null:
+		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, String(a["bone"])))
+		var off := Vector3(a["off"][0], a["off"][1], a["off"][2])
+		ok(neck.distance_to(sk.global_transform * (pose * off)) < 0.001, "the scarf anchor rides the neck bone")
+	ok(neck.y > P.pos.y + 1.0 and neck.y < P.pos.y + 1.8, "the scarf anchor sits at her neck (%.2f m up)"
+			% (neck.y - P.pos.y))
+	for i in 90:
+		S.tick(1.0 / 60.0)
+	var ln := float(w.cfg["len"])
+	var back := P.model.global_basis.z.normalized()
+	for tail: HeroScarf.Tail in w.tails:
+		var mesh := tail.node.mesh as ImmediateMesh
+		ok(tail.node.visible and mesh.get_surface_count() == 1, "a tail is one ribbon mesh, drawn")
+		var drop := tail.pts[0].y - tail.pts[-1].y
+		ok(drop > ln * 0.7, "at rest a tail hangs (tip %.2f m under its root)" % drop)
+		ok((tail.pts[-1] - tail.pts[0]).dot(back) > 0.0, "and hangs behind her, not through her")
+	ok(S.made == 2, "one mesh per tail (%d)" % S.made)
+	var step := Vector3(6.0, 0.0, 0.0) / 60.0
+	for i in 60:
+		P.model.global_position += step
+		S.tick(1.0 / 60.0)
+	var roots := S.roots(w)
+	for j in 2:
+		var tail: HeroScarf.Tail = w.tails[j]
+		ok(tail.pts[0].distance_to(roots[j]) < 0.001, "a tail's root follows the anchor as she moves")
+		var trail := tail.pts[0].x - tail.pts[-1].x
+		ok(trail > ln * 0.4, "running at 6 m/s it streams behind her (%.2f m back)" % trail)
+	Sfx.listener = P.pos + Vector3(HeroVfx.LOD_FAR * 2.0, 0.0, 0.0)
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible), "your own scarf shows past the LOD listener")
+	Sfx.listener = P.pos
+	Settings.v["quality"] = HeroScarf.OFF_PRESET
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return not t.node.visible), "off at the Low preset")
+	Settings.v["quality"] = "high"
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and S.made == 2, "back on, the same meshes")
+	Settings.v["quality"] = was
+	S.prewarm(P.pos)
+	S.prewarm_end()
+	S.prewarm(P.pos)
+	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
+	S.prewarm_end()
