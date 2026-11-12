@@ -264,15 +264,17 @@ func _cues(main: Node) -> void:
 	var lens: Array = []
 	var bare: Array = []
 	for ak in Arch.ids():
-		var st := load("res://audio/%s_lock.wav" % ak) as AudioStreamWAV if Sfx.ensure("%s_lock" % ak) else null
+		var has := Sfx.ensure("%s_lock" % ak)
+		var st := load("res://audio/%s_lock.wav" % ak) as AudioStreamWAV if has else null
 		if st == null:
 			bare.append(ak)
 		else:
 			lens.append(st.get_length())
 	var about_a_beat: bool = lens.all(func(t): return t > 0.5 and t < 0.7)
-	ok(lens.size() >= 12 and about_a_beat, "the 12 launch Hunters have their own lock-in sting, about 0.6 s (%s)" % [lens])
+	ok(lens.size() >= 12 and about_a_beat, "12 Hunters have their own lock-in sting, about 0.6 s (%s)" % [lens])
 	for ak in bare:
-		ok(_heard(func(): UiSfx.lobby_lock(ak, true)) == ["lobby_pick"], "%s has no sting yet: your lock-in plays the pick cue" % ak)
+		var heard := _heard(func(): UiSfx.lobby_lock(ak, true))
+		ok(heard == ["lobby_pick"], "%s has no sting yet: your lock-in plays the pick cue" % ak)
 	var o := EXPEDITION.duplicate()
 	Prematch.deal_mates(o)
 	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
