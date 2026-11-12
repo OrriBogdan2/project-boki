@@ -39,6 +39,9 @@ func run(host: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
 	var P: Hunter = m.player
+	for o in m.hunters:
+		if o != P:
+			o.ctrl = "idle"         # a bot would hit the drinker mid-draught
 	var ids: Array = BeltSfx.items().keys()
 	# drinks first, before any patch can burn the user
 	ids.sort_custom(func(a, b): return UtilityUse.use_of(a) == "drink" and UtilityUse.use_of(b) != "drink")

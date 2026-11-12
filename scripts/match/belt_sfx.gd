@@ -83,7 +83,7 @@ static func _begin(h: Hunter, id: String, at: Vector3) -> void:
 
 ## Another player's channel: its loop on this game's clock; the end or cancel comes from their game.
 static func _channel_bed(h: Hunter, id: String) -> void:
-	var secs := float(UtilityBelt.def(id).get("time", UtilityUse.CHANNEL_TIME))
+	var secs := UtilityUse.channel(id, "time")
 	_beds.append({"m": h.m, "key": loop_key(h, id), "id": id, "h": h, "at": h.pos, "left": secs,
 			"db": VOL_DB, "shield": false, "told": true})
 

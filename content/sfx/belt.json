@@ -81,8 +81,6 @@
   "belt_hearth_lamp_end": "cast",
   "belt_revive_ember_end": "cast",
   "belt_shatter_charge_end": "cast",
-  "belt_rift_key_start": "cast",
-  "belt_rift_key_end": "cast",
   "belt_chest_key_start": "cast",
   "belt_chest_key_end": "cast",
   "belt_toss_satchel_loop": "loop"
@@ -167,8 +165,6 @@
   "belt_hearth_lamp_end": 30,
   "belt_revive_ember_end": 30,
   "belt_shatter_charge_end": 30,
-  "belt_rift_key_start": 30,
-  "belt_rift_key_end": 30,
   "belt_chest_key_start": 30,
   "belt_chest_key_end": 30,
   "belt_toss_satchel_loop": 30
