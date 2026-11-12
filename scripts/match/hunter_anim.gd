@@ -1512,7 +1512,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	free_l = maxf(free_l, ws.carry_free_l())
 	# emotes: the weapon goes away, the hands do the talking
 	var gvs := gun_vis * gun_scl
-	aim.rotation = Vector3(ap, ay, ar)
+	# a melee hold's arms take their share of the aim pitch about the torso's side axis (a gun's is in gbas)
+	var melee_up := aim_pitch * (1.0 - AimPitch.SPINE) if melee else 0.0
+	aim.basis = Basis(Vector3.RIGHT, melee_up) * Basis.from_euler(Vector3(ap, ay, ar))
 	aim.position = Vector3(0, AIM_Y, 0)
 	if gun:
 		gun.transform = Transform3D(gbas * Basis.from_scale(Vector3.ONE * maxf(gvs, 0.001)), gpos)
