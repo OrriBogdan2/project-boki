@@ -1,20 +1,25 @@
 class_name BreakFx
 extends Node3D
-## The look of things breaking, all from pools made once (no node is made per hit): debris chunks in
-## the material's colours, a white flash over a struck prop, the ground ring and the swelling glow of a
-## lit powder keg, and the scorch left by a blast.
+## The look of things breaking, all from pools made once (no node is made per hit): each material's own
+## cel debris (wood splinters, clay sherds, metal glints: the shared Hero VFX particle look), a white flash
+## over a struck prop, the ground ring and the swelling glow of a lit powder keg, and the scorch left by a blast.
 
-const DEBRIS_POOL := 8
+const DEBRIS_POOL := 8           # emitters: breaks whose debris can fly at once
+const DEBRIS_CAP := 18           # bits one break throws at most (DEBRIS_POOL x this is the whole budget)
+const DEBRIS_MIN := 4            # bits even the lowest quality preset keeps, so a break still reads
+const DEBRIS_SPREAD := 0.45      # 0 straight up .. 1 every way
+const DEBRIS_GRAVITY := 16.0     # m/s^2
+const DEBRIS_DRAG := 0.6         # /s
 const RING_POOL := 4
 const SCORCH_POOL := 6
 const SCORCH_FADE := 14.0        # seconds a scorch mark takes to fade out
-const DEBRIS_LIFE := 0.7         # seconds a chunk flies
-const DEBRIS_SIZE := 0.1         # metres, a chunk's edge
 const FLASH_ALPHA := 0.7         # how white a struck prop goes
 
-var _debris: Array[CPUParticles3D] = []
-var _ramps := {}                  # material name -> colour ramp the chunks pick from
+var _debris: Array[GPUParticles3D] = []
+var _looks := {}                 # material name -> its debris rules
 var _next_debris := 0
+var flying: Array = []           # debris in the air: {node, t, n}
+var flying_n := 0                # bits in the air now (checks read it)
 var _rings: Array[MeshInstance3D] = []
 var _globes: Array[MeshInstance3D] = []
 var _scorch: Array[MeshInstance3D] = []
@@ -24,15 +29,7 @@ var _flash_mat: StandardMaterial3D
 func _init(debris_rules: Dictionary) -> void:
 	name = "BreakFx"
 	_build_flash()
-	for mat_name in debris_rules:
-		var ramp := Gradient.new()
-		ramp.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
-		var colors: Array = debris_rules[mat_name]["colors"]
-		ramp.offsets = PackedFloat32Array()
-		ramp.colors = PackedColorArray()
-		for i in colors.size():
-			ramp.add_point(float(i) / colors.size(), Color(String(colors[i])))
-		_ramps[mat_name] = ramp
+	_looks = debris_rules
 	for i in DEBRIS_POOL:
 		_debris.append(_make_debris())
 	for i in RING_POOL:
@@ -41,17 +38,46 @@ func _init(debris_rules: Dictionary) -> void:
 	for i in SCORCH_POOL:
 		_scorch.append(_make_scorch())
 
-## Chunks of `mat_name` burst out of `at`; `power` scales how many and how fast (a blast throws more).
-func shatter(at: Vector3, mat_name: String, chunks: int, power := 1.0) -> void:
+## Bits of `mat_name` burst out of `at`; `power` scales how many and how fast (a blast throws more). The
+## quality preset thins them; returns how many flew.
+func shatter(at: Vector3, mat_name: String, chunks: int, power := 1.0) -> int:
+	var look: Dictionary = _looks[mat_name]
 	var p := _debris[_next_debris]
 	_next_debris = (_next_debris + 1) % DEBRIS_POOL
+	_land(p)
+	var n := clampi(int(round(chunks * power * float(Settings.q("fx")))), DEBRIS_MIN, DEBRIS_CAP)
+	var pm := p.process_material as ShaderMaterial
+	pm.set_shader_parameter("speed", float(look["speed"]) * power)
+	pm.set_shader_parameter("size", float(look["size"]))
+	var mt := (p.draw_pass_1 as QuadMesh).material as ShaderMaterial
+	mt.set_shader_parameter("look", HeroVfx.LOOKS[look["look"]])
+	var cols: Array = look["colors"]
+	for i in 3:
+		mt.set_shader_parameter(["col", "col2", "col3"][i], Color(String(cols[i])))
+	p.lifetime = float(look["life"])
+	p.amount_ratio = float(n) / DEBRIS_CAP
 	p.global_position = at
-	p.amount = maxi(4, int(round(chunks * power)))
-	p.color_initial_ramp = _ramps[mat_name]
-	p.initial_velocity_min = 2.5 * power
-	p.initial_velocity_max = 6.0 * power
+	p.visible = true
 	p.restart()
-	p.emitting = true
+	flying.append({"node": p, "t": 0.0, "n": n})
+	flying_n += n
+	return n
+
+## Ages the debris in the air; an emitter whose bits are all down is hidden for reuse.
+func tick(dt: float) -> void:
+	for i in range(flying.size() - 1, -1, -1):
+		var e: Dictionary = flying[i]
+		e["t"] = float(e["t"]) + dt
+		if float(e["t"]) >= (e["node"] as GPUParticles3D).lifetime:
+			_land(e["node"])
+
+func _land(p: GPUParticles3D) -> void:
+	p.visible = false
+	for e in flying:
+		if e["node"] == p:
+			flying_n -= int(e["n"])
+			flying.erase(e)
+			return
 
 ## A white flash over every mesh of a prop (a struck keg), on or off.
 func flash_prop(prop: Node3D, on: bool) -> void:
@@ -113,32 +139,28 @@ func _build_flash() -> void:
 	_flash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_flash_mat.albedo_color = Color(1, 0.96, 0.85, FLASH_ALPHA)
 
-func _make_debris() -> CPUParticles3D:
-	var p := CPUParticles3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(DEBRIS_SIZE, DEBRIS_SIZE * 0.6, DEBRIS_SIZE * 1.4)
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 1.0
-	box.material = mat
-	p.mesh = box
+func _make_debris() -> GPUParticles3D:
+	var p := GPUParticles3D.new()
+	p.amount = DEBRIS_CAP
 	p.one_shot = true
 	p.emitting = false
 	p.explosiveness = 1.0
-	p.lifetime = DEBRIS_LIFE
-	p.direction = Vector3.UP
-	p.spread = 70.0
-	p.gravity = Vector3(0, -16, 0)
-	p.angle_max = 360.0
-	p.angular_velocity_min = -540.0
-	p.angular_velocity_max = 540.0
 	p.local_coords = false
-	var shrink := Curve.new()
-	shrink.add_point(Vector2(0, 1))
-	shrink.add_point(Vector2(0.7, 1))
-	shrink.add_point(Vector2(1, 0))
-	p.scale_amount_curve = shrink
+	p.visible = false
+	p.visibility_aabb = AABB(Vector3(-4, -2, -4), Vector3(8, 6, 8))
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var pm := ShaderMaterial.new()
+	pm.shader = HeroVfx.MOTES
+	pm.set_shader_parameter("spread", DEBRIS_SPREAD)
+	pm.set_shader_parameter("gravity", DEBRIS_GRAVITY)
+	pm.set_shader_parameter("drag", DEBRIS_DRAG)
+	pm.set_shader_parameter("curl", 0.0)
+	p.process_material = pm
+	var quad := QuadMesh.new()
+	var mt := ShaderMaterial.new()
+	mt.shader = HeroVfx.MOTE
+	quad.material = mt
+	p.draw_pass_1 = quad
 	add_child(p)
 	return p
 
