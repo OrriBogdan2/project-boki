@@ -44,7 +44,7 @@ static func knocked(h: Hunter, by: Ent) -> void:
 
 ## The beat a hunter is in, or null.
 static func of(h: Hunter) -> HunterFall:
-	return h.get_meta(META, null) as HunterFall
+	return h.get_meta(META) as HunterFall if h.has_meta(META) else null
 
 ## Starts the beat of a hunter that just went down (HunterWisp's pop-in).
 static func start(h: Hunter) -> HunterFall:
@@ -56,7 +56,7 @@ static func start(h: Hunter) -> HunterFall:
 	fall.thud = int(style["thud"])
 	fall.from = h.position
 	fall.facing = h.face
-	fall.dir = _away(h, h.get_meta(KNOCKER, null))
+	fall.dir = _away(h, (h.get_meta(KNOCKER) if h.has_meta(KNOCKER) else null))
 	h.remove_meta(KNOCKER)
 	fall.meshes = h.model.find_children("*", "GeometryInstance3D", true, false)
 	h.set_meta(META, fall)
