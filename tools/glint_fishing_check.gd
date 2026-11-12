@@ -13,7 +13,9 @@ extends RefCounted
 ##   8. the looks (content/rules/glint_fishing_vfx.json, glint_fx.gd): every recipe is whole, the rings stay wide until
 ##      the ears go up and close by the bite, the bite fires once, a catch's glint grows with what came up, and
 ##      each look hides itself when its life is spent
-##   9. on the rock: Glasswater has the rock and a session started there runs to a result card
+##   9. on the rock: Glasswater has the rock and a session started there runs to a result card; the Empty
+##      holds the rod and casts through it (HunterRod poses via HomeVerbs) and puts it away at the end
+## --glint-fishing-shots=<dir> makes a strip of one cast on the Empty instead (a real renderer).
 ## Never touches the real save.
 
 const SESSIONS := 120
@@ -36,6 +38,10 @@ func ok(cond: bool, what: String) -> void:
 
 func run(m: Node) -> void:
 	main = m
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--glint-fishing-shots="):
+			await load("res://tools/glint_fishing_shots.gd").new().run(m, String(a).substr(22))
+			return
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_windows()
@@ -290,11 +296,15 @@ func _on_rock() -> void:
 	ok(gf.run != null, "a session starts with your partner")
 	var t := 0.0
 	var plopped := false
+	var posed := {}              # the Empty's rod poses seen (HomeVerbs: a one-shot over the held pose)
 	while gf.run != null and t < float(GlintFishing.rules()["max_s"]) + 30.0:
 		gf.holding = fmod(t, 1.0) < 0.5
 		gf.tick(0.1)
 		plopped = plopped or (gf.run != null and gf.fx.node_of("plop").visible)
 		t += 0.1
+		posed[gw.verbs.act if gw.verbs.act != "" else gw.verbs.stance] = true
+	ok(posed.has("wait") and posed.has("cast"), "the Empty holds the rod and casts (poses seen: %s)" % [posed.keys()])
+	ok(gw.verbs.stance == "" and gw.verbs.act == "", "the rod is put away when fishing ends")
 	ok(plopped, "a cast's plop showed on the water during the session")
 	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
 	Content.rules("farm_build")["base_mode"] = false

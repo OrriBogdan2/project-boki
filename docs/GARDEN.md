@@ -38,6 +38,6 @@ recipes in `content/rules/glint_fishing_vfx.json`): a ripple where the bobber la
 that hold wide while you wait and close in as the ears go up so they meet at the bite (the same warning the ears give,
 so Focus still sets it), one sharp splash on the bite (the moment to press), and one glint on a catch, sized snack, item
 or rare (rare is gold). Each is one quad, one at a time, with no particles. `--glint-fishing-check` covers them;
-`--glint-fishing-shots --shots-dir=<dir>` (through `jobq submit --needs gpu`) writes the sheet `looks.png`.
+`--glint-fx-shots --shots-dir=<dir>` (through `jobq submit --needs gpu`) writes the sheet `looks.png`.
 Default taken: the rings' timing is tied to the ears, not to the hidden bite time, so they never warn earlier than Focus
 allows. The alternative (rings closing over the whole wait) would leak the bite to a player with no Focus.
