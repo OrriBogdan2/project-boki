@@ -213,8 +213,8 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| LMB draw (held) | RMB | not shown; one bow, and the Heavy Shot's "charge pose is like the LMB draw" | both: two draws run at once and each looses on its own release | **mismatch, not fixed**: one bow can't hold two arrows, but the source's answer (the press cancels the draw, is ignored, or waits) isn't shown. Flagged below | [F] 0264-0269, 0494 |
-| RMB held (Heavy Shot) | LMB | not shown | both, as above | **mismatch, not fixed** (same row) | |
+| LMB draw (held) | RMB | not shown: [D] has no ability tags or block lists for Myth (hold to charge, release to fire, nothing on the other button); [F] shows one reticle at a time (the gold V in place of the green one, f264-269) and no press mid-draw | cancels: the RMB press drops the draw with no arrow (its pose and reticle go); a still-held LMB stays idle until the Heavy Shot looses, then draws again | **fixed, rule ours** (one bow holds one arrow; the newer press wins, the same rule as LMB -> X). Not chosen, as nothing shows them: the press ignored while drawing, or waiting for the arrow to loose | [D] supervive_kits.md Myth; [F] 0264-0269, 0494; `--archer-combo-check` (`one bow LMB>RMB: ...`, tools/pin_one_bow_check.gd) |
+| RMB held (Heavy Shot) | LMB | not shown (as above) | cancels: the LMB press drops the hold with no shot and no charge spent (bar, needle and pose go) and the bow draws; the still-held RMB starts nothing until pressed again | **fixed, rule ours** (same row; not chosen: LMB ignored while the Heavy Shot is held) | `--archer-combo-check` (`one bow RMB>LMB: ...`) |
 | LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | unsettled | [F] 0457, 0498 |
 | LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
 | LMB draw | X | "a self-buff with no cast lock" | the draw is dropped with no arrow; a still-held LMB nocks the first empowered shot at once (0.3 s) | unsettled (the clip's cast at f33 isn't mid-draw) | [F] ult f33 |
@@ -226,8 +226,9 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 | Glide | LMB | not shown | ignored | unsettled | |
 | Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | unsettled | |
 
-Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bow source, but which way the
-source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
+Fixes made: the draw-plus-Heavy-Shot pair (11-11, ext/lace-one-bow). Neither the data nor the frames show the
+source's answer, so the newer press cancels the held draw with no shot, the rule the LMB -> X row already follows
+(`ArcherKit.drop_draw`, `lmb_override`). The X window's own nock is left out of it (the X window | RMB row stays both).
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
