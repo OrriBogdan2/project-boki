@@ -68,8 +68,9 @@ func run(mn: Node) -> void:
 		for i in mini(rivals.size(), RIVALS.size()):
 			var r: Hunter = rivals[i]
 			r.teleport(at[i])      # held where they stand, not firing (firing would reveal them)
-			r.inp["fire"] = i == SHOOTER and f >= shoot_at and f < shoot_at + REVEAL
+			r.inp["fire"] = false
 			if f < shoot_at: r.reveal_t = 0.0
+			elif i == SHOOTER and f < shoot_at + REVEAL: r.fire()      # (an idle rival leaves the fire key alone)
 		P.inp["aim"] = P.pos + Vector3(cos(t) * AIM_M, 0.9, sin(t) * AIM_M)
 		P.inp["crouch"] = f >= SETTLE + STAND + SWEEP and f < shoot_at
 		main.get_viewport().warp_mouse(m.cam.unproject_position(P.inp["aim"]))     # the reticle on your aim
