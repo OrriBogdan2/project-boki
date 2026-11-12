@@ -203,10 +203,10 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
 		"base",
 		"drink"
 	],
+	"stomp": {"style": "arena_slam", "commit": "stomp_in", "clip": "stomp"},
 	"upper": [
 		"hips",
 		"head",

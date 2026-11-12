@@ -3,7 +3,8 @@ extends RefCounted
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); a Hunter's own
+## stomp lands on the game's beats and a stun cuts it. Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -16,6 +17,7 @@ const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible 
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
+const STOMP_LIFT := 0.12       # m: the stomping foot rises at least this far in each beat's wind-up
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
@@ -109,6 +111,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	if dd.has("stomp"):
+		_stomp(id, m, sync, clips, dd["stomp"])
 	m.free()
 	await _flinch(id)
 
@@ -127,6 +131,8 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
 	out.append_array((dd.get("act", {}) as Dictionary).values())
+	if dd.has("stomp"):
+		out.append_array([dd["stomp"]["commit"], dd["stomp"]["clip"]])
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
@@ -348,6 +354,72 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+
+## The Hunter's own stomp (docs/decisions/0061-stomp-lock.md): its style, the commit clip as long as Stomp.COMMIT and
+## the finisher as long as Stomp.TIME; in each beat the foot comes up and is at its lowest on Stomp's slam; the commit
+## follows the hold's clock and the finisher the stomp's; a stun breaking it cuts the clip that frame, the kill doesn't;
+## a bought style plays on the rig. (Kael's shin ends at the ankle: his knee stands in for the foot.)
+func _stomp(id: String, m: Node3D, sync: Node, clips: WardenClips, sd: Dictionary) -> void:
+	ok(sd["style"] == StompLook.default_for(id), "%s: its stomp clip is its own style %s" % [id, sd["style"]])
+	var commit := clips.lib.get_animation(String(sd["commit"])).length
+	var fin := clips.lib.get_animation(String(sd["clip"])).length
+	ok(absf(commit - Stomp.COMMIT) <= 0.001 and absf(fin - Stomp.TIME) <= 0.001,
+			"%s: stomp clips %.3f s + %.3f s, the game's %.1f + %.1f" % [id, commit, fin, Stomp.COMMIT, Stomp.TIME])
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var foot := WardenSkeleton.find(sk, "foot.R")
+	if foot < 0:
+		foot = WardenSkeleton.find(sk, "shin.R")
+	var beat := Stomp.TIME / Stomp.BEATS
+	var worst := ""
+	clips.force = {"clip": sd["clip"], "t": 0.0}
+	for k in 10:
+		sync.call("_process", DT)
+	for i in Stomp.BEATS:
+		var low := INF
+		var high := -INF
+		for k in int(beat / DT):
+			clips.force = {"clip": sd["clip"], "t": i * beat + k * DT}
+			sync.call("_process", DT)
+			var y := sk.get_bone_global_pose(foot).origin.y
+			low = minf(low, y)
+			high = maxf(high, y)
+		clips.force = {"clip": sd["clip"], "t": (i + Stomp.SLAM) * beat}
+		sync.call("_process", DT)
+		var on := sk.get_bone_global_pose(foot).origin.y
+		if on > low + 0.01 or high - on < STOMP_LIFT:
+			worst += " beat %d: %.3f m on the slam, low %.3f, up %.3f" % [i + 1, on, low, high]
+	clips.force = {}
+	ok(worst == "", "%s: each beat lifts the foot and lands it on Stomp's slam%s" % [id, worst])
+	clips.commit_t = 0.0
+	var pick := clips._pick({"act": "windup"}, 0.1)
+	ok(pick.get("clip") == sd["commit"] and is_equal_approx(float(pick["t"]), 0.1),
+			"%s: the commit hold plays its clip on its clock" % id)
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "stomp_style": sd["style"]}
+	m.set_meta(WardenClips.STATE, s)
+	for at in [1.2, Stomp.TIME - DT]:
+		s["stomp"] = at / beat
+		s.erase("stun")
+		for k in 10:
+			sync.call("_process", DT)
+		ok(clips.cur == sd["clip"] and absf(clips.stomp_at - at) < 0.001,
+				"%s: the finisher follows the stomp's clock (%.2f s)" % [id, at])
+		s["stomp"] = -1.0
+		s["stun"] = at < 2.0
+		sync.call("_process", DT)
+		var off_live := clips.act_w * absf(clips.xf - float(clips.chan))      # (the channel that is not live)
+		var shown := clips.act_w if clips.cur == sd["clip"] else off_live
+		if at < 2.0:
+			ok(clips.cur != sd["clip"] and shown <= 0.0,
+					"%s: a stun at %.1f s cuts the stomp clip that frame (left %.2f)" % [id, at, shown])
+		else:
+			ok(shown > 0.5, "%s: the kill eases out of the stomp (%.2f shown)" % [id, shown])
+	s["stomp"] = 1.0
+	s.erase("stun")
+	s["stomp_style"] = "thunder_stomp"
+	for k in 12:
+		sync.call("_process", DT)
+	ok(clips.proc_w >= 1.0, "%s: a bought stomp style plays on the rig" % id)
+	m.remove_meta(WardenClips.STATE)
 
 ## A hit mid-run (item: additive flinch): the legs run exactly as they would unhit, the spine and arms flinch on top;
 ## standing still, or a stagger, takes the whole body. Two identical models run the same 1 s, one of them hit.
