@@ -223,7 +223,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Q | none | glove | ours |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 5 | match; i-frames 0.12 s and the 3 s empowered window are ours-only (docs/heroes/thief.md, Vault riders) |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 

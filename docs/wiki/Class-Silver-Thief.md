@@ -80,7 +80,7 @@ What the in-game kit card (K) says.
 
 **Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
+**Vault (dash, Shift, 5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
 
 **Bola (RMB, 7s cooldown).**
 

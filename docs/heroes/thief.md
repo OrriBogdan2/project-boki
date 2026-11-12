@@ -13,7 +13,7 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 | Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
 |---|---|---|---|
 | RMB Bola | +50% damage; +100 distance after the hit and -4s; tier IV: two foes caught pool their Marks | 6.3s / 5.6s, damage +15% / +30%; 1m further and pooling at 3 | 7s / 4.8s, damage +50% / +50%; 1m further and pooling at 3 |
-| Shift Vault | +20% empowered damage x2; tier IV: +50% speed boost | recharge 3.8s / 3.2s (shared -15%), empowered +20% / +40%, speed boost x1.5 at 3 | recharge 4.5s flat (the source has none), empowered +20% / +40%, speed boost x1.5 at 3 |
+| Shift Vault | +20% empowered damage x2; tier IV: +50% speed boost | recharge 3.8s / 3.2s (shared -15%), empowered +20% / +40%, speed boost x1.5 at 3 | recharge 5s flat (the source's, no cooldown upgrade), empowered +20% / +40%, speed boost x1.5 at 3 |
 | E Shadow Knife | -8s; refund 25% on terrain, doubled on foes; landing on a foe resets Quickflip | 13.5s / 12s, damage +15% / +30%; refund and reset at 3 | 10.7s / 10.7s, no damage step; refund and reset at 3 |
 
 ## Research summary
@@ -30,7 +30,7 @@ Ratios, not raw numbers: a bolt is 13 (the source basic attack, 137; raised from
 a Mark is +10% of a bolt (the data's +16 on its 160 bolt), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
 is 4 and +2 from the outer band (the source's 0.2s cadence, item 54: twice the blades of the old 8 and +4, the same
 40 and 60 over a cast; the old pair was about 0.9 of a bolt, 114-127 against 137, and the card's +50%, 36 + 19%
-against +18 + 9.5%). Cooldown ratios: Vault 4.5s (Cartwheel 4.2), Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom
+against +18 + 9.5%). Cooldown ratios: Vault 5s (Quickflip 5 at tier IV; the footage card says 4.2), Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom
 Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 
 ## Feel pass (item 7)
@@ -46,7 +46,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
 | Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
-| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
+| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | 5s, 1 charge (the data wins over the card, as for the LMB range; `--kit-parity-check` row `thief Shift dash.cd`; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
 | How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
 | Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add 10% of a bolt each, flat, as the source's +16 a stack |
@@ -58,6 +58,24 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Reset | landing the empowered shot resets Quickflip and refunds its mana [game data]; hit at 0187, the next Cartwheel at 0193 [footage] | the Vault back on the hit | unchanged, asserted on the hit's own step; a cyan star at her hip and the `thf_reset` heel snap |
 | Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
+
+## Vault riders against the source (ext/sable-vault-riders)
+
+Each number in the `dash` block of content/archetypes/thief.json against Shiv's Quickflip ([game data],
+briefs/supervive-data/supervive_kits.md) and the Cartwheel sheet ([footage], briefs/hero-ref/dancer.md). The numbers the
+source settles are rows in content/rules/kit_parity.json (`--kit-parity-check`); the rest is asserted in `--dancer-combo-check`.
+
+| Rider | Ours | Source | Call |
+|---|---|---|---|
+| Distance, time | 4.5m in 0.48s | 105-144 px, about 4.5m; upright by 0.45-0.5s [footage] | match; parity rows |
+| Cooldown | 5s | 5s at tier IV, no cooldown upgrade [game data]; the card in the footage 4.2s [footage] | was 4.5; set to the data's 5 |
+| Speed boost | +18%, x1.5 at rank 3, 2s counted from the cast (1.5s after landing) | +15-20% for about 1-1.5s after a Cartwheel [footage]; the tier IV upgrade is +50% [game data] | match; asserted (`dancer feel: +18% speed for 2s ...`) |
+| Empowered shot x1.34 | +214 on a 160 bolt, 2.34x in all | the same [game data] | match; parity row |
+| Empowered +20% / +40% | rank 2 / 3 on the bonus | +20% twice [game data] | match |
+| Marks on the empowered hit | 2 | an Arcslinger hit adds 1 stack [game data] | **owner note** (MAIN_TO_EXT 03:20, "keep 2 Marks"; see the audit row above); kept; asserted (`dancer empowered bolt: a big hit, 2 Marks`) |
+| I-frames | 0.12s | none in the data or the footage | **ours-only, not named in DECISIONS 11-07** ("Ours-only riders: keep NONE" names Chill, Shred and the carrier shield); kept, left for the owner |
+| Empowered window | 3s | none in the data; the gold line held about 0.8s before the shot [footage] | **ours-only** (an assumption); kept, left for the owner |
+| Haste ends on the empowered shot | yes | the wiki's Quickflip rule | match |
 
 ## LMB range, speed (parity pass, ext/sable-lmb-range)
 

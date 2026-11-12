@@ -147,8 +147,8 @@ func thief(a) -> void:
 			absf(float(tp[1][1]) / float(tp[0][1]) - 1.5) < 0.01
 			and absf(float(tp[2][1]) / float(tp[0][1]) - 1.5) < 0.01
 			and absf(float(tp[1][0]) - 7.0) < 0.01 and absf(float(tp[2][0]) - 4.85) < 0.05, str(tp))
-	A.ok("upgrade parity: Vault recharge stays 4.5 (the source has no Quickflip cooldown upgrade)",
-			absf(float(tp[1][2]) - 4.5) < 0.01 and absf(float(tp[2][2]) - 4.5) < 0.01, str(tp))
+	A.ok("upgrade parity: Vault recharge stays 5 (Quickflip 5s, no cooldown upgrade)",
+			absf(float(tp[1][2]) - 5.0) < 0.01 and absf(float(tp[2][2]) - 5.0) < 0.01, str(tp))
 	A.ok("upgrade parity: Shadow Knife cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step",
 			absf(float(tp[1][3]) - 10.71) < 0.05 and absf(float(tp[2][3]) - 10.71) < 0.05
 			and absf(float(tp[2][4]) / float(tp[0][4]) - 1.0) < 0.01, str(tp))

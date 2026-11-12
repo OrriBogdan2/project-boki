@@ -14,7 +14,7 @@
 	"signature": "arc_bolts",
 	"resource": {"id": "marks", "name": "Marks", "max": 8, "kind": "on_targets", "dur": 4.0, "per_mark": 0.1, "gap": 0.0, "heal_knock": 0.15, "heal_assist": 0.25, "col": "#ffd23f"},
 	"passive": {"name": "Marks", "desc": "Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%."},
-	"dash": {"id": "vault", "name": "Vault", "icon": "shadowstep", "col": "#d8c8ff", "cd": 4.5,
+	"dash": {"id": "vault", "name": "Vault", "icon": "shadowstep", "col": "#d8c8ff", "cd": 5.0,
 		"dist": 4.5, "time": 0.48, "invuln": 0.12, "haste": 0.18, "haste_r3": 1.5, "prime_rank": 0.2, "haste_t": 2.0, "primed_t": 3.0, "prime_bonus": 1.34, "prime_marks": 2,
 		"desc": "A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%."},
 	"rmb": {"delivery": "projectile", "name": "Bola", "short": "Bola", "icon": "snare", "col": "#ffd860", "cooldown": 7.0, "charges": 1, "hold": 0.0,
