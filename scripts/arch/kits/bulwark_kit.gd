@@ -832,7 +832,7 @@ func _spin_hit(wd: Vector2) -> void:
 	fx.smash_ring(h.pos, r)
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
-	net_ring(h.pos, r, Color("ff7a3a"))
+	net_ring(h.pos, r, AimKit.hero_col(h))
 
 # ------------------------------------------------------------------ E: Mending Ground
 ## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.
@@ -851,7 +851,7 @@ func cast_e() -> bool:
 	e_t = float(ed["delay"]) + float(ed["time"])
 	fx.purify(at, r, 0.0)
 	m.sfx("bjorn_purify", at, -2.0)
-	net_ring(at, r, Feel.cat_color("sustain"))
+	net_ring(at, r, AimKit.hero_col(h))
 	return true
 
 ## The light column comes down ("delay"), then the zone heals everyone inside a little every "every" s for
@@ -864,17 +864,18 @@ func _tick_mend(dt: float) -> void:
 		mend["t"] = float(mend["t"]) - dt
 		var u := 1.0 - clampf(float(mend["t"]) / float(ed["delay"]), 0.0, 1.0)
 		fx.purify(mend["pos"], r, u)
-		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true, "col": BjornFx.GREEN})
+		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true,
+			"col": AimKit.hero_col(h)})
 		if float(mend["t"]) <= 0.0:
 			mend["zone"] = float(ed["time"])
 			mend["tick"] = float(ed["every"])
-			m.fx.ring(mend["pos"], r, BjornFx.GREEN, 0.4)
+			m.fx.ring(mend["pos"], r, AimKit.hero_col(h), 0.4)
 		return
 	mend["zone"] = float(mend["zone"]) - dt
 	mend["tick"] = float(mend["tick"]) - dt
 	fx.purify_hold(mend["pos"], r)
 	AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": float(mend["zone"]) / float(ed["time"]), "all": true,
-		"col": BjornFx.GREEN})
+		"col": AimKit.hero_col(h)})
 	if float(mend["tick"]) <= 0.0:
 		mend["tick"] = float(mend["tick"]) + float(ed["every"])
 		_mend_tick()
@@ -920,10 +921,10 @@ func _mend_burst() -> void:
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
 	fx.purify_burst(at, r)
-	m.fx.ring(at, r, BjornFx.GREEN, 0.45)
+	m.fx.ring(at, r, AimKit.hero_col(h), 0.45)
 	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
 	m.sfx("bjorn_purify_burst", at, 0.0)
-	net_ring(at, r, Feel.cat_color("sustain"))
+	net_ring(at, r, AimKit.hero_col(h))
 
 # ------------------------------------------------------------------ bots
 ## The hammer: called back from where it landed, else thrown at a foe out of arm's reach.

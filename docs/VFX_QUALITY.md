@@ -97,3 +97,29 @@ row keeps its place until the integrator re-sorts the table.
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
 linked from PR #14; Kael's X pair (`before_juggernaut_r.png`, `after_juggernaut_r.png`) is there too.
+
+## Meeko and Albert ground rings (ext/vfx-gold-ground-rings)
+
+Rule (DECISIONS, Movement and combat feel): a ground ring means gameplay (a hit area, a zone, a tether range). Kept rings
+are in the Hunter's own colour (`content/archetypes` "color": Meeko `#5fdc6a`, Albert `#fff0b0`), never the shared gold,
+so they do not read as each other's or as loot. Asserted in `--tender-combo-check` and `--bulwark-combo-check`.
+
+| Hunter | Ring | Class | Now |
+|---|---|---|---|
+| Meeko | Burrseed wind-up glow, 1.4 m round her (violet, gold rim) | decoration (the dotted lane is the aim) | cut |
+| Meeko | Kindle foot glow under a foe (violet to amber per stack) | decoration (a stack, not an area; the HUD reads n/5) | cut |
+| Meeko | Burrseed disc under the foe, `burst_radius()` (violet) | gameplay, hit area | kept, violet (not gold) |
+| Meeko | Hearthlight ring on her / thrown disc, 2.6 / 2.9 m (gold, teal rim) | gameplay, heal zone | kept, leaf green |
+| Meeko | Hearthlight landing swirl (`hearth_land`) | decoration (the zone disc is already up) | cut |
+| Meeko | Hearthlight last-heal swirl (`bloom`, gold) | gameplay, the burst's area | kept, leaf green |
+| Meeko | Hearth Call reach ring 12.6 m, aim line, pick ring on the mate (gold, green) | gameplay, tether range and target | kept, leaf green |
+| Meeko | Hearth Call ring 0.7 m on herself (`x_me`) | decoration | cut |
+| Meeko | Hearth Call arrival swirls (`call_land`, `mended`, gold) | decoration (a heal marks no area) | cut |
+| Albert | 360 Smash ring at the spin's hit radius, 2.2 m (red-gold) | gameplay, hit area | kept, his pale gold (net ring too) |
+| Albert | Mending Ground column, filling ring, lasting disc, start and end pulses (heal green) | gameplay, zone | kept, his pale gold (net ring too) |
+| Albert | Aegis push chevrons in front of the wall (gold) | gameplay, push reach | kept, his pale gold |
+| Albert | Faultline remote rings at the near cell (ember, gold; 2.0 / 2.4 m circles on a 4 x 4.5 m lane) | decoration (the lane is the area and everyone sees it) | cut |
+| Albert | LMB charge ring | not a ground ring: the cursor reticle | unchanged |
+
+Not rings, left as they are: Albert's swing and slam crescents (`bulwark.json` `sweep`, ember to red; real hit
+arcs; ext/vfx-albert-ivory-arcs already recolours them) and Meeko's violet Burrseed discs.

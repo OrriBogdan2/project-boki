@@ -18,7 +18,6 @@ extends Node3D
 
 const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
-const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
 const STAR_GOLD := Color("ffd25a")
 const SWIRL_T := 0.45
@@ -118,8 +117,7 @@ func _ready() -> void:
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
 	var swirl_mesh := KitMeshes.band(SWIRL_IN, 1.0, 0.0, TAU, 48)
-	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
-	KitShaders.param(swirl, "color2", Color("ffc93a"))
+	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", GOLD, true))
 	KitShaders.param(swirl, "twist", 2.2)
 	KitShaders.param(swirl, "spin", 5.0)
 	_build_aegis()
@@ -130,10 +128,9 @@ func _ready() -> void:
 		KitShaders.param(wake, "twist", 0.0)
 		wakes.append(wake)
 		wake_life.append(0.0)
-	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GREEN))
+	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GOLD))
 	column.material_override.set_shader_parameter("speed", -1.2)
-	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
-	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
 
 ## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
 func _own_hammer() -> bool:
@@ -349,6 +346,9 @@ func _place_glint(pv: Node3D) -> void:
 # ------------------------------------------------------------------ the 360 Smash ring
 ## The 360 Smash's spin ring: a red-gold band out to the spin's hit radius `r`, sweeping out to it with the hit.
 func smash_ring(at: Vector3, r: float) -> void:
+	var own := AimKit.hero_col(h)
+	KitShaders.param(swirl, "color", own)
+	KitShaders.param(swirl, "color2", own.lightened(0.5))
 	swirl.visible = true
 	swirl.global_position = at + Vector3(0, 0.3, 0)
 	swirl_r = r
@@ -428,14 +428,21 @@ func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
 	var mid := (a + b) * 0.5
 	var t := float(h.m.time)
 	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
+	var own := AimKit.hero_col(h)
 	AimKit.lane(h, "aegis_push", {
 		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
-		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
+		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0),
+		"col": own, "col2": own.lightened(0.4),
 		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
 
 # ------------------------------------------------------------------ Purify
 ## The column coming down over the delay (u 0 -> 1), then the disc's rings.
 func purify(at: Vector3, r: float, u: float) -> void:
+	if u <= 0.0:
+		var own := AimKit.hero_col(h)
+		KitShaders.param(column, "color", own)
+		KitShaders.param(disc, "color", own)
+		KitShaders.param(disc, "color2", own.lightened(0.5))
 	column.visible = u < 1.0
 	if column.visible:
 		var g := AimMode.ground(h.m, at)

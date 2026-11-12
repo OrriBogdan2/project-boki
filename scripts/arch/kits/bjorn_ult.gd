@@ -86,7 +86,6 @@ func cast() -> bool:
 	h.vel = Vector3(0, h.vel.y, 0)
 	k.play("bul_ult_wind")
 	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
-	k.net_ring(origin + Vector3(dir.x, 0, dir.y) * cell_len() * 0.5, cell_len() * 0.5, EMBER)
 	return true
 
 func cell_len() -> float:
@@ -193,7 +192,6 @@ func _slam() -> void:
 	_streak_t = float(x.get("cell_t", 0.15)) * cells.size() + float(x.get("lead", 0.2))
 	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), GOLD, 24, 7.0, 0.4, 3.0, 1.3)
 	k.m.fx.dust(c0, 14)
-	k.net_ring(c0, cell_len() * 0.6, GOLD)
 
 ## The racing fissure reaches cell `i`: each foe in it not struck yet takes the strike and the stun.
 func _strike(i: int) -> void:

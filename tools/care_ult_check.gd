@@ -65,7 +65,7 @@ func tender() -> void:
 	var ring: Dictionary = AimKit.entry(P, "x")
 	var aiming := K.hearth_call.is_empty() and AimKit.shown(P, "x_line") and AimKit.shown(P, "x_pick")
 	ok("mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them", aiming
-		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05)
+		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05 and ring.get("col") == AimKit.hero_col(P))
 	# --- X: the tether starts, cooldown runs, the cast move; no bond for the cast alone
 	var calls0 := int(K.stats["calls"])
 	_press(P, m)

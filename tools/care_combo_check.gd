@@ -823,7 +823,7 @@ func tender() -> void:
 			"%s %d" % [K.anim_id, K.stats["swirls"]])
 	step(m, 0.6)
 	_moon_shot_parity(m, P, K)
-	# --- Kindle ramp and its foot glow; nodes stay pooled while firing
+	# --- Kindle ramp; nodes stay pooled while firing
 	sc.aim_at(P, T.pos)
 	K.cd["e"] = 8.0
 	P.inp["fire"] = true
@@ -831,9 +831,9 @@ func tender() -> void:
 	var made0: int = K.lk().made
 	step(m, 1.8)
 	P.inp["fire"] = false
-	var shown_glow: bool = K.lk().showing("kin%d" % T.get_instance_id())
 	ok(
-			"mm passive: embers Kindle the foe and a foot glow grows on them", K.kindle_on(T) >= 3 and shown_glow,
+			"mm passive: embers Kindle the foe and no ring is drawn under them (a stack is not an area)",
+			K.kindle_on(T) >= 3 and not K.lk().showing("kin%d" % T.get_instance_id()),
 			"kindle %d" % K.kindle_on(T))
 	ok("mm passive: an ember into a Kindled foe winds Hearthlight back", K.cd["e"] < 7.0, "e %.2f" % K.cd["e"])
 	ok(

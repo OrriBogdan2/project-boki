@@ -134,17 +134,6 @@ func _tick_look(dt: float) -> void:
 		var s := lk().last_shot()
 		if not s.is_empty() and String((s["x"] as Dictionary).get("src", "")) != "abil":
 			_dress_ember(s)
-	# Kindle reads on the foe: an ember-violet glow at the feet that grows per stack
-	for key in kind:
-		var e: Dictionary = kind[key]
-		var n := kindle_on(e["t"])
-		if n > 0:
-			var t: Ent = e["t"]
-			lk().keep(
-					"kin%d" % key, "kindle", t.pos,
-					{
-						"r": 0.55 + 0.12 * n, "col": Color("9a6aff").lerp(Color("ffb347"), float(n) / 5.0),
-						"a": 0.35 + 0.13 * n, "fill": 0.8, "pattern": 0.0})
 	_tick_dash_look(dt)
 	lk().tick(dt)
 	if ult_look != null:
@@ -348,8 +337,6 @@ func fire_rmb(c: Dictionary) -> void:
 	seed_wind = float(rmb_def()["windup"])
 	play("mm_seed_aim")
 	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
-	lk().burst("flare", h.pos,
-			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
 	_seed_lane()
 
 func _seed_lane() -> void:
@@ -566,10 +553,11 @@ func _tick_hearth(dt: float) -> void:
 	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
 	# to teal, a bright rim, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
+	var own := AimKit.hero_col(h)
+	var look_p := {"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": 0.45, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
@@ -686,9 +674,10 @@ func _call_preview() -> void:
 	if who == null or who == h:
 		return
 	var xd := x_def()
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
-	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffb347"), "lw": 0.1, "alpha": 1.8})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true, "alpha": 1.6})
+	var own := AimKit.hero_col(h)
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "dashed": true, "alpha": 1.2})
+	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": own, "lw": 0.1, "alpha": 1.8})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": own, "ticks": true, "alpha": 1.6})
 	# a faint tether already strung from her raised hand onto them: this is who X will reach
 	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
 
@@ -782,11 +771,10 @@ func _call_heal(who: Hunter, amount: float) -> void:
 
 func _call_look(who: Hunter, dt: float) -> void:
 	var xd := x_def()
-	var gold := Color("ffd27a")
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
-	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
+	var own := AimKit.hero_col(h)
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "all": true, "dashed": true})
 	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": own, "all": true})
 		var hand := CareUtil.hand_at(h, false)
 		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
@@ -802,7 +790,7 @@ func _call_look(who: Hunter, dt: float) -> void:
 func _call_end(done: bool) -> void:
 	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call.get("who")) else null
 	hearth_call = {}
-	for id_ in ["x", "x_me", "x_pick", "x_line"]:
+	for id_ in ["x", "x_pick", "x_line"]:
 		AimKit.hide(h, id_)
 	if ult_look != null:
 		ult_look.drop("tether")

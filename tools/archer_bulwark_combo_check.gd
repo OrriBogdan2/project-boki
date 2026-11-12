@@ -815,6 +815,9 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
+	ok("bjorn E: the zone ring and the column are in his own colour, not a heal green",
+		AimKit.entry(P, "e").get("col") == AimKit.hero_col(P)
+		and (K.fx.disc.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
 	step(m, 5.0)
 	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0
@@ -924,6 +927,8 @@ func _bulwark_combos() -> void:
 	var spin_r := float(K.dash_def().get("spin_r", 2.2))
 	ok("combo bjorn: the spin ring is drawn out to the hit radius",
 		absf(K.fx.swirl_r - spin_r) < 0.01, "%.2f" % K.fx.swirl_r)
+	ok("combo bjorn: the spin ring is in his own colour (no red-gold mix)",
+		(K.fx.swirl.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true
