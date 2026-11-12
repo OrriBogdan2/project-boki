@@ -824,7 +824,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():
 		return
 	var tf := tgt as Ent
-	if HeroUlt.ready(self) and los and dist < 3.5:
+	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.8:      # (the fan's slugs reach its range)
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
