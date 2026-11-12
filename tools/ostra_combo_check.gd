@@ -511,24 +511,34 @@ func _ostra() -> void:
 	step(m, 2.2)
 	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	P.slot_lv["sec"] = 1
-	# ---- data pass, Trade rank 3: allies beside him get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
+	# ---- data pass, Trade rank 3 (the source's tier IV): allies in his 1.5m ring as he leaves get 375 of Void's 1150
+	# health as a shield for 3s, so 32.6% of his 145 (docs/heroes/ostra.md); none at the landing or past the ring
 	P.slot_lv["dash"] = 3
 	reset.call()
-	var A: Hunter = m.make_hunter(
-		"Ally", P.team, "medium", "Ally", "idle", {}, home + Vector3(1.2, 0, 1.0), {"arch": "none"}
-	)
-	A.max_hp = 10000.0
-	A.hp = A.max_hp
+	var allies: Array[Hunter] = []
+	for at in [Vector3(0.8, 0, 0.6), Vector3(10.0, 0, 1.0), Vector3(-2.5, 0, 0)]:
+		var A: Hunter = m.make_hunter("Ally", P.team, "medium", "Ally", "idle", {}, home + at, {"arch": "none"})
+		A.max_hp = 10000.0
+		A.hp = A.max_hp
+		allies.append(A)
 	T.teleport(home + Vector3(10.0, 0, 0))
 	aim_at(P, T.pos)
 	P.ak.on_dash(false)
-	step(m, 2.2)
+	step(m, 2.0)
+	var want := P.max_hp * 375.0 / 1150.0
 	ok(
-		"data rank 3: an ally beside him gets a 26 shield for 3s", A.shield >= 25.5 and A.shield < 27.0,
-		"shield %.1f" % A.shield
+		"data rank 3: an ally in his ring as he leaves gets 32.6% of his health as a shield for 3s",
+		absf(allies[0].shield - want) < 1.0 and allies[0].shield_t > 2.5,
+		"shield %.1f want %.1f, %.1fs" % [allies[0].shield, want, allies[0].shield_t]
 	)
-	A.queue_free()
-	m.hunters.erase(A)
+	ok(
+		"data rank 3: no ally shield at the landing or past his 1.5m ring",
+		allies[1].shield <= 0.0 and allies[2].shield <= 0.0,
+		"landing %.1f, 2.5m away %.1f" % [allies[1].shield, allies[2].shield]
+	)
+	for ally in allies:
+		ally.queue_free()
+		m.hunters.erase(ally)
 	P.slot_lv["dash"] = 1
 	# ---- upgrade parity (docs/heroes/ostra.md): the source's tier II / III+IV numbers per slot
 	var op: Array = []
