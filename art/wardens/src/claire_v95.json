@@ -1,0 +1,302 @@
+{
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Claire's v95 master (appeal3 face + body variant a, owner-approved 11-10, ~/meshy/v95/claire/r2/appeal3/cand_a.glb, its separate spear left out: claire_v95_a_body.glb) onto claire.glb's skeleton, clips and anchors. claire.glb's own spear (the cloth and ice faces on hand.R) stays. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. Ears, hair and bow ride the head; the sheer cape behind her rides the hips.",
+ "master": "~/meshy/v95/claire/r2/appeal3/claire_v95_a_body.glb",
+ "game": "art/wardens/claire/claire.glb",
+ "tris": 13000,
+ "head": {
+  "centre": [
+   0.0,
+   -0.01,
+   1.49
+  ],
+  "r": 0.16
+ },
+ "head_tris": 2600,
+ "head_uv": 2.0,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "keep": [
+  "hand.R"
+ ],
+ "keep_slots": [
+  "cloth",
+  "ice"
+ ],
+ "relax": {
+  "CUTS": 0
+ },
+ "joints": {
+  "pelvis": [
+   0.0,
+   0.02,
+   0.86
+  ],
+  "neck": [
+   0.0,
+   0.02,
+   1.36
+  ],
+  "crown": [
+   0.0,
+   -0.01,
+   1.62
+  ],
+  "shoulder.R": [
+   0.135,
+   0.03,
+   1.28
+  ],
+  "elbow.R": [
+   0.23,
+   0.0,
+   1.11
+  ],
+  "wrist.R": [
+   0.33,
+   0.03,
+   0.94
+  ],
+  "shoulder.L": [
+   -0.135,
+   0.03,
+   1.28
+  ],
+  "elbow.L": [
+   -0.23,
+   0.0,
+   1.11
+  ],
+  "wrist.L": [
+   -0.33,
+   0.03,
+   0.94
+  ],
+  "hip.R": [
+   0.08,
+   0.02,
+   0.8
+  ],
+  "knee.R": [
+   0.068,
+   -0.01,
+   0.47
+  ],
+  "ankle.R": [
+   0.075,
+   -0.01,
+   0.13
+  ],
+  "hip.L": [
+   -0.08,
+   0.02,
+   0.8
+  ],
+  "knee.L": [
+   -0.068,
+   -0.01,
+   0.47
+  ],
+  "ankle.L": [
+   -0.075,
+   -0.01,
+   0.13
+  ]
+ },
+ "past_wrist": {
+  "R": "hand.R",
+  "L": "hand.L"
+ },
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {
+   "bone": "hips",
+   "box": [
+    -0.4,
+    0.4,
+    -0.3,
+    -0.07,
+    0.3,
+    1.0
+   ],
+   "except_segs": [
+    [
+     "thigh.R",
+     0.085
+    ],
+    [
+     "thigh.L",
+     0.085
+    ],
+    [
+     "shin.R",
+     0.065
+    ],
+    [
+     "shin.L",
+     0.065
+    ]
+   ]
+  },
+  {
+   "bone": "hips",
+   "box": [
+    -0.165,
+    0.0,
+    0.0,
+    0.25,
+    0.8,
+    1.28
+   ],
+   "except_segs": [
+    [
+     "upper_arm.L",
+     0.045
+    ],
+    [
+     "forearm.L",
+     0.05
+    ],
+    [
+     "thigh.L",
+     0.085
+    ]
+   ]
+  },
+  {
+   "bone": "head",
+   "box": [
+    -0.26,
+    0.26,
+    -0.26,
+    0.26,
+    1.38,
+    9
+   ]
+  }
+ ],
+ "slots": [
+  {
+   "slot": "skin",
+   "box": [
+    -0.075,
+    0.075,
+    0.04,
+    0.3,
+    1.39,
+    1.53
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    -0.26,
+    0.26,
+    -0.26,
+    0.26,
+    1.38,
+    9
+   ],
+   "s": [
+    0,
+    0.25
+   ],
+   "v": [
+    0.75,
+    1
+   ]
+  },
+  {
+   "slot": "skin",
+   "h": [
+    0.0,
+    0.1
+   ],
+   "s": [
+    0.12,
+    0.55
+   ],
+   "v": [
+    0.55,
+    1
+   ]
+  },
+  {
+   "slot": "skin",
+   "h": [
+    0.92,
+    1.0
+   ],
+   "s": [
+    0.12,
+    0.55
+   ],
+   "v": [
+    0.55,
+    1
+   ]
+  },
+  {
+   "slot": "fur",
+   "s": [
+    0,
+    0.12
+   ],
+   "v": [
+    0.8,
+    1
+   ]
+  },
+  {
+   "slot": "ice",
+   "h": [
+    0.45,
+    0.6
+   ],
+   "s": [
+    0.35,
+    1
+   ],
+   "v": [
+    0.7,
+    1
+   ]
+  }
+ ],
+ "slot_default": "cloth",
+ "room": {
+  "*": 0.5
+ },
+ "anchors": {
+  "anchor_head_top": [
+   0.0,
+   -0.01,
+   1.62
+  ],
+  "anchor_chest": [
+   0.0,
+   0.1,
+   1.2
+  ],
+  "anchor_eye_r": [
+   0.045,
+   0.1,
+   1.485
+  ],
+  "anchor_eye_l": [
+   -0.045,
+   0.1,
+   1.485
+  ],
+  "anchor_clasp": [
+   -0.07,
+   0.13,
+   0.99
+  ],
+  "anchor_tail_tip": [
+   0.0,
+   -0.16,
+   1.0
+  ]
+ }
+}

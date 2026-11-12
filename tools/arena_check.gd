@@ -272,7 +272,8 @@ func _dummy_mode_asserts(m: Match, want: String) -> void:
 		last = D.pos
 		far = maxf(far, Vector2(D.pos.x - mark.x, D.pos.z - mark.z).length())
 		if D.roll_t <= 0.0:
-			top = maxf(top, Vector2(vel.x, vel.z).length())
+			if not was_roll:      # (the step a dash ends in is part dash)
+				top = maxf(top, Vector2(vel.x, vel.z).length())
 		elif not was_roll:
 			dashes += 1
 			if first_dash < 0.0:
