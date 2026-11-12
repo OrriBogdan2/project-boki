@@ -141,6 +141,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if won: Progress.add("caught", r.get("caught", []).size())
 	if won:
 		d["extracts"] = int(d.get("extracts", 0)) + 1
+		Save.log_event("extracted", {})     # the clan's member roll shows it (ClanInfo.last_deed)
 		out["gems"] = int(r.get("gems", 0))
 		if d.get("guild_perks", []).has("hall"):
 			out["gems"] = int(round(out["gems"] * 1.1))

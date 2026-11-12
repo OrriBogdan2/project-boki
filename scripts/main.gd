@@ -3687,7 +3687,7 @@ func _social_cmd(c: String, current) -> void:
 			if p.size() > 3: Save.add_seed(p[3], 3)
 			_soc_reply(true)
 		"soc:publish": Social.publish_profile(true); _soc_reply(true)
-		"soc:create": Social.create_guild(p[2], "We test things", func(okk): _soc_reply(okk))
+		"soc:create": Social.create_guild(p[2], "We test things", "", func(okk): _soc_reply(okk))
 		"soc:join": Social.join_guild(p[2], func(okk): _soc_reply(okk))
 		"soc:leave": Social.leave_guild(func(): _soc_reply(true))
 		"soc:guilds": Social.list_guilds(func(rows): _soc_reply(rows))

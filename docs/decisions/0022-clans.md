@@ -25,7 +25,7 @@ The guild doc gains `open` (default true); the founder can close the clan to new
 content: leaving or never joining costs nothing. Size cap 24, as the spec's default.
 
 ## Consequences
-- `Save.VERSION` 11 to 12; the migration turns a saved `guild_id` into a member clan, everyone else gets `{}`.
+- `Save.VERSION` 12 to 13 (renumbered when merged after Evo took 12); the migration turns a saved `guild_id` into a member clan, everyone else gets `{}`.
 - Net.VERSION: no. This is the page store, not the match relay.
 - Closing is checked in the join button only (the store has no rules); a forged join can at worst put a name on
   a roll, never touch another save.
@@ -34,3 +34,10 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
 - Slice 2 (the shared base): the ferry on the guild isle opens `ClanBase` (scripts/home/clan_base.gd), a visit to
   an island built from the members' published snapshots plus `clanbase/<gid>` (read only, cleaned by
   `Social.clean_clanbase`: one showcase Boki per current member, 12 at most). No new writes, no save change.
+- Slice 3 (tag and member roll, `ClanInfo` in scripts/social/clan_info.gd): the guild doc gains `tag` (2-4
+  letters A-Z, blocked list in content/rules/clan_tag.json; a clan without one shows its name's initials).
+  `Save.d["clan"]["tag"]` is refreshed from the guild doc on every guild refresh (no migration: a missing key
+  reads as no tag). The profile snapshot carries `tag` and `last` (the newest extraction, raise or breed in the
+  event log, which now logs "extracted" and marks a hatched egg of two parents `bred`). The tag rides the lobby
+  presence and roster to in-match nameplates (an optional key: an older peer just shows no tag, so Net.VERSION
+  is left to the batch bump) and the island-visit top bar; the member roll shows each member's last deed.

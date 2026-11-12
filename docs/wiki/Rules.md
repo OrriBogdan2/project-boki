@@ -199,6 +199,16 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | keg | 0.0144 |
 | train_crate | 0.0288 |
 
+## clan_tag (`content/rules/clan_tag.json`)
+
+Clan tags (scripts/social/clan_info.gd): the short letters shown before a member's name on match nameplates and island visits. A tag is A-Z only, upper case, min to max letters; a tag that is in blocked is refused (whole tag only, so BASS or SHOE stay fine), and a clan with no usable tag shows none.
+
+| Setting | Value |
+|---|---|
+| min | 2 |
+| max | 4 |
+| blocked | ["ADM", "ADMN", "DEV", "DEVS", "GM", "GMS", "MOD", "MODS", "STAF", "BOKI", "HELP", "ASS", "CUM", "FAG", "FAGS", "FCK", "FUK", "FUCK", "FUX", "KKK", "NAZI", "NIG", "NIGA", "NGGR", "PISS", "POO", "POOP", "PORN", "RAPE", "SEX", "SHIT", "SLUT", "TIT", "TITS", "TWAT", "WANK", "WTF", "CUNT", "COCK", "DICK", "DIK", "HOE", "HOES", "KYS", "SS", "FU", "STFU", "GTFO", "ISIS", "HTLR", "PEDO", "SPIC", "CHNK", "COON"] |
+
 ## class_unlock (`content/rules/class_unlock.json`)
 
 Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.

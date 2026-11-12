@@ -543,7 +543,8 @@ func _open_visits() -> void:
 			list.add_child(UI.label("No other islands yet.", 14, UI.MUTED))
 		for r in rows.slice(0, 14):
 			var d: Dictionary = r["d"]
-			var row := _row(list, "%s  ·  %d Boki  ·  %d buildings" % [d["name"], d["roster"].size(), d["buildings"].size()])
+			var who := ClanInfo.tagged(d["name"], d["tag"])
+			var row := _row(list, "%s  ·  %d Boki  ·  %d buildings" % [who, d["roster"].size(), d["buildings"].size()])
 			var rid: String = r["id"]
 			row.add_child(UI.button("Visit", func(): Game.goto("home", {"visit": d, "visit_id": rid}), 100)))
 
@@ -653,14 +654,21 @@ func _open_guilds() -> void:
 		var row := UI.hbox(8)
 		var nm := LineEdit.new(); nm.placeholder_text = "Guild name"; nm.max_length = 24; nm.custom_minimum_size.x = 200
 		var mo := LineEdit.new(); mo.placeholder_text = "Motto (optional)"; mo.max_length = 60; mo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(nm); row.add_child(mo)
+		var tg := LineEdit.new()
+		tg.placeholder_text = "Tag"
+		tg.max_length = int(ClanInfo.rules()["max"])
+		tg.custom_minimum_size.x = 70
+		row.add_child(nm); row.add_child(tg); row.add_child(mo)
 		row.add_child(UI.button("Found it", func():
 			if nm.text.strip_edges().length() < 3:
 				_toast("Pick a name of at least 3 letters")
 				return
+			if tg.text.strip_edges() != "" and ClanInfo.clean_tag(tg.text.strip_edges()) == "":
+				_toast("A tag is 2 to 4 letters, A to Z (some words are kept out)")
+				return
 			_lock()
 			var gname := Social.say_of(nm.text, "Guild", 24)
-			Social.create_guild(gname, mo.text, func(okk: bool):
+			Social.create_guild(gname, mo.text, tg.text.strip_edges(), func(okk: bool):
 				if okk:
 					Sfx.play("unlock")
 					_toast("%s is founded" % gname)
@@ -674,7 +682,7 @@ func _open_guilds() -> void:
 			list.add_child(UI.label("No guilds yet. Found the first one.", 14, UI.MUTED))
 		for r in rows.slice(0, 10):
 			var g: Dictionary = r["g"]
-			var title: String = g["name"]
+			var title := ClanInfo.tagged(g["name"], g["tag"])
 			if g["motto"] != "":
 				title += "  ·  " + g["motto"]
 			if not g["open"]:
@@ -690,7 +698,8 @@ func _open_guilds() -> void:
 						_toast("Welcome to %s" % g["name"])
 						if panel_open == "Guild registry": _open_guilds()), 90)))
 
-## Who is in this clan and what rank they hold. Members who joined before ranks existed read as members.
+## Who is in this clan, what rank they hold and the last thing each did (from their island snapshot).
+## Members who joined before ranks existed read as members.
 func _open_roster() -> void:
 	var v := _new_panel("Member roll", 480)
 	var list := _loading(v)
@@ -699,15 +708,21 @@ func _open_roster() -> void:
 		var ranks := {}
 		for r in rows: ranks[r["id"]] = r["role"]
 		var names := {}
-		for m in members: names[m["id"]] = m["d"]["name"]
+		var deeds := {}
+		for m in members:
+			names[m["id"]] = m["d"]["name"]
+			deeds[m["id"]] = m["d"]["last"]
 		for id in names:
 			if not ranks.has(id): ranks[id] = "member"
 		var ids: Array = ranks.keys()
 		ids.sort_custom(func(a, b): return _rank_key(ranks, a) < _rank_key(ranks, b))
+		var now_s := int(Time.get_unix_time_from_system())
 		for id in ids:
 			var rank: String = ranks[id]
 			var col := UI.INK if rank == "member" else UI.GOLD
 			_row(list, "%s  ·  %s" % [names.get(id, "A member"), rank], col)
+			var did := ClanInfo.deed_text(deeds.get(id, {}), now_s)
+			_row(list, "    " + (did if did != "" else "nothing yet"), UI.MUTED, 13)
 		list.add_child(UI.label("%d of %d places filled." % [ids.size(), Social.CLAN_CAP], 13, UI.MUTED)))
 
 func _rank_key(ranks: Dictionary, id: String) -> String:

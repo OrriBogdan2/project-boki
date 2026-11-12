@@ -66,6 +66,7 @@ const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
+var clan_tag := ""              # shown before the name on the nameplate (ClanInfo.tagged)
 var cls := "medium"
 var cdat: Dictionary = {}
 var wid := "rifle"

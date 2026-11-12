@@ -1,0 +1,9 @@
+{
+ "desc": "Clan tags (scripts/social/clan_info.gd): the short letters shown before a member's name on match nameplates and island visits. A tag is A-Z only, upper case, min to max letters; a tag that is in blocked is refused (whole tag only, so BASS or SHOE stay fine), and a clan with no usable tag shows none.",
+ "min": 2,
+ "max": 4,
+ "blocked": ["ADM", "ADMN", "DEV", "DEVS", "GM", "GMS", "MOD", "MODS", "STAF", "BOKI", "HELP",
+  "ASS", "CUM", "FAG", "FAGS", "FCK", "FUK", "FUCK", "FUX", "KKK", "NAZI", "NIG", "NIGA", "NGGR",
+  "PISS", "POO", "POOP", "PORN", "RAPE", "SEX", "SHIT", "SLUT", "TIT", "TITS", "TWAT", "WANK", "WTF", "CUNT",
+  "COCK", "DICK", "DIK", "HOE", "HOES", "KYS", "SS", "FU", "STFU", "GTFO", "ISIS", "HTLR", "PEDO", "SPIC", "CHNK", "COON"]
+}
