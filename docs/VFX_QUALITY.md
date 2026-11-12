@@ -120,7 +120,8 @@ The hook is a gold chain of links (HeroVfx's new hold-only `chain` layer): it pa
 taut and glowing on the bite (a burst of coins, sparks and a flash on the target) and again on each haul, and throws
 sparks as it snaps back. The E and X telegraphs are gold; sparks rise along the cone's edge through the wind-up and
 charge, and each slam or wave ends in a gold sweep that burns away, a flash, debris and coins. Kept from LDFx: the bone
-hook (now a gold rim), the ghost anchor, the reel's chain ring, the stun spirals and the barge (dash not in scope).
+hook (now a gold rim), the ghost anchor, the reel's chain ring, the stun spirals and the barge (dash not in scope);
+all but the barge went to data or were deleted on ext/vfx-grimble-data (below).
 Sound is unchanged (3). Scale stays 3: the slugs read as small pale-gold dots with thin trails at match
 zoom; a gold body on sand or autumn ground has less contrast than on grass (the dark rims and char carry it).
 
@@ -184,6 +185,17 @@ weapon's slug look comes from the shared shot look (Oomph.shot_look), so it is b
 --reel-hero=dredge`, rc=0): sheets in `/home/boki/gens/vfx-grimble-wedges/gpu_after/` (`dredge_e.png`: the white front
 runs out over the wind-up and lands on the slam; `dredge_r.png`: the charge front sweeps to the rim, then the waves).
 The before reel (base `origin/ext/w0246-audio-vfx`) goes to `gpu_before/` (jobq `20261111-215953-21551`).
+
+### Grimble on data (ext/vfx-grimble-data, 2026-11-12)
+Everything his LMB, RMB, E, X and air smash show is now `content/vfx/dredge.json` on HeroVfx; no Grimble look is
+kit-drawn but the barge's after-images (dash, not in scope). The two solid props are data (`"props"`, the HeroVfx
+`prop` layer, docs/HERO_VFX.md) with LDFx's sizes and timings: the bone hook on the chain's end, the iron anchor he
+rides down through the air smash (`dive_anchor`) and that stands planted where he lands (`quake`: squash 0.25 over
+0.15 s, 0.25 s planted, 0.3 s fade). Deleted: the chain ring at his feet while he reels and the one on the air smash's
+landing spot (a ground ring means gameplay; AimKit's landing circle stays), and the kit's own stun spiral (the shared
+StatusLooks stun stars show it). Palette stays his archetype's coin gold `#ffc832` (`steel` and `bone` added for the
+props). Fans keep the wedges' lit fronts. Score not re-taken here; the GPU reel pair (`--hero-vfx-reel
+--reel-hero=dredge`, new part `dive`) is the before/after for this change.
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
