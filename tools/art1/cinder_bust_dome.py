@@ -2,6 +2,7 @@
 rig, skin weights, clips, x_breath and paint stay byte for byte. Run it again after a v95 re-swap of cinder.glb.
 The glTF frame: y up, her front -z, her left +x. Normals go through the deformation (inverse-transpose of its Jacobian).
 Run: python3 tools/art1/cinder_bust_dome.py <in.glb> <out.glb>"""
+
 import sys
 
 import numpy as np
@@ -9,13 +10,13 @@ import numpy as np
 from glb_add_clips import read, write
 from kael_retarget import get, set_
 
-LIFT = 0.028                    # m the apex moves forward (the owner's "Cinder bust bigger"; 2.6-2.8 cm reads in profile)
-APEX = (0.062, 1.145)           # m: |x| and height of each apex on the appeal4 cand_5 body
-R_OUT, R_IN = 0.095, 0.07       # m: the dome's reach out to the side / in to the cleft
-R_UP, R_DOWN = 0.13, 0.10       # m: its reach up the chest / down to the underbust
-FRONT = (0.10, 0.16)            # m in front of the spine where the dome fades in (the back and the hair behind stay)
-SIDE = (0.15, 0.18)             # m out from the middle where it fades out (the arms stay)
-DROP, OUT = 0.3, 0.15           # of LIFT: the lower curve's sag and the outward spread
+LIFT = 0.028  # m the apex moves forward (the owner's "Cinder bust bigger"; 2.6-2.8 cm reads in profile)
+APEX = (0.062, 1.145)  # m: |x| and height of each apex on the appeal4 cand_5 body
+R_OUT, R_IN = 0.095, 0.07  # m: the dome's reach out to the side / in to the cleft
+R_UP, R_DOWN = 0.13, 0.10  # m: its reach up the chest / down to the underbust
+FRONT = (0.10, 0.16)  # m in front of the spine where the dome fades in (the back and the hair behind stay)
+SIDE = (0.15, 0.18)  # m out from the middle where it fades out (the arms stay)
+DROP, OUT = 0.3, 0.15  # of LIFT: the lower curve's sag and the outward spread
 
 
 def smooth(x, a, b):
