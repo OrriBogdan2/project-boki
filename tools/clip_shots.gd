@@ -154,6 +154,7 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String) ->
 	DirAccess.make_dir_recursive_absolute(dir)
 	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true}
 	model.set_meta(WardenClips.STATE, s)
+	(sync.get("clips") as WardenClips).force = {}
 	for k in 30:
 		sync.call("_process", 1.0 / 30.0)
 	for i in int(fps * 0.6):
