@@ -98,6 +98,13 @@ const T := {
 	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
+	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
+	# decoded and no footage shows such a dash (docs/SUPERVIVE_FEEL.md), so these rows only print what ours does
+	"airdash_fall_vy_keep":    ["~", [0.0, 1.0], "x", "[?] share of a 10 m fall's speed (12 m/s) the dash keeps"],
+	"airdash_fall_speed":      [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
+	"airdash_dive_vy_keep":    ["~", [0.0, 1.0], "x", "[?] share of a glide dive's fall speed the dash keeps"],
+	"airdash_dive_hv_keep":    ["~", [0.0, 1.0], "x", "[?] share of the dive's forward speed added to the dash"],
+	"airdash_dive_speed":      [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
 	"abyss_lift_t":            ["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
 	"abyss_bounce_m":          [">=", 1.5, "m", "[est] a bouncy lift from 6m deep"],
 	"abyss_kill_depth":        ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
@@ -244,6 +251,7 @@ func run(main: Node) -> void:
 	_glide()
 	_glide_dive()
 	_dash_glide()
+	_airdash_fall()
 	_dash_exit()
 	_dash_curves()
 	_plain_dash()
@@ -678,6 +686,49 @@ func _dash_glide() -> void:
 	rec("dashglide_1s_speed", v1)
 	rec("dashglide_2s_speed", v2)
 	P.set_arch(kit_was)
+
+# ---------------------------------------------------------------- air dash out of a fast fall
+## The class dash pressed out of a 10 m free fall and out of a glide dive (keys let go): how much of the fall
+## and forward speed it keeps, and the speed it ends on.
+func _airdash_fall() -> void:
+	var kit_was := P.arch
+	P.set_arch("")
+	_reset(flat + Vector3(0, 30.0, 0), false)
+	for i in 120:
+		if flat.y + 30.0 - P.pos.y >= 10.0: break
+		m.step(DT)
+	_airdash("fall")
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	for i in 135:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i >= 60
+		P.inp["move"] = Vector2(1, 0)
+		m.step(DT)
+	_airdash("dive")
+	P.set_arch(kit_was)
+
+## An east dash from the fall the hunter is in: the airdash_<tag>_* rows.
+func _airdash(tag: String) -> void:
+	_clear_inp()
+	var before := P.vel
+	P.ex_cd = 0.0
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	m.step(DT)
+	P.inp["dash"] = false
+	ok(P.roll_t > 0.0 and not P.grounded, "airdash_%s: the air dash fires out of a %.1f m/s fall, %.1f m/s forward"
+			% [tag, -before.y, before.x])
+	rec("airdash_%s_vy_keep" % tag, P.vel.y / before.y)
+	if tag == "dive":
+		var own := P.roll_speed * Loco.dash_speed(P.arch)
+		rec("airdash_dive_hv_keep", (P.vel.x - own) / maxf(0.01, before.x))
+	for i in 120:
+		if P.roll_t <= 0.0: break
+		m.step(DT)
+	rec("airdash_%s_speed" % tag, P.vel.length())
+	_clear_inp()
 
 # ---------------------------------------------------------------- abyss lift, updrafts
 var _rim := {}

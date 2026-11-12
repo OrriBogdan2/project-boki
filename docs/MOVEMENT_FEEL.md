@@ -118,6 +118,8 @@ defaults aren't cited, since the data names no field for these windows.
 | dive_steer_ratio (the keys in the dive vs under the glider) | n/a | 0.25x | 0.2–0.3 | [game data] GlideDiveXYForceMultiplier |
 | dive_cancel_h / dive_timeout_s | n/a | 3.27m / 9.98s | 2.9–3.5 / 9.9–10.1 | [game data] GlideDiveCancelDistance 350 uu, GlideDiveTimeout 10 s |
 | dive_swoop_speed (let go of Ctrl high up) | n/a | <= cruise | <= 6 | owner 11-08: pulling out of a dive adds no speed |
+| airdash_fall_vy_keep / airdash_fall_speed (class air dash out of a 10 m fall, 12 m/s) | n/a | 0.00x / 23.0 m/s | 0–1 / reference | [?] AirDashSpeedMultiplier / AirDashSpeedClamp not decoded, not filmed (docs/SUPERVIVE_FEEL.md) |
+| airdash_dive_vy_keep / _hv_keep / _speed (out of a glide dive, 32.5 m/s down) | n/a | 0.00x / 0.00x / 23.0 m/s | 0–1 / 0–1 / reference | [?] the same: ours drops the fall and the forward speed |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
