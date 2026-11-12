@@ -3169,7 +3169,7 @@ func render(delta: float, alpha: float) -> void:
 	_anim_n += 1
 	var every := SimLod.pose_every(m, self)
 	var posed := (_anim_n + get_instance_id()) % every == 0 or _anim_dt > every * delta
-	model.set_meta(WardenGlb.POSE_HELD, not posed)
+	model.set_meta(WardenGlb.POSE_HELD, -1 if posed else Engine.get_process_frames())
 	if posed:
 		_anim_state(stretch)
 		anim.update(_anim_dt, anim_s)

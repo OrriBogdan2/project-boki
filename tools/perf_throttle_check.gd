@@ -179,14 +179,14 @@ func _pose_rates() -> void:
 	var held := false
 	for i in SimLod.POSE_UNSEEN:
 		b.render(Match.DT, 1.0)
-		held = held or bool(b.model.get_meta(WardenGlb.POSE_HELD, false))
+		held = held or _held(b.model)
 	ok(held, "off screen some frames are not posed")
 	b.render(Match.DT, 1.0)
-	if not b.model.get_meta(WardenGlb.POSE_HELD, false):
+	if not _held(b.model):
 		b.render(Match.DT, 1.0)      # (now one frame into its wait)
 	b.teleport(far_at)
 	b.render(Match.DT, 1.0)
-	ok(not b.model.get_meta(WardenGlb.POSE_HELD, false), "coming on screen it is posed that frame")
+	ok(not _held(b.model), "coming on screen it is posed that frame")
 	var sync: WardenGlb.Sync = null
 	for h in m.hunters:
 		if h.model.get_node_or_null("Warden/Sync"):
@@ -194,16 +194,20 @@ func _pose_rates() -> void:
 	ok(sync != null, "setup: a Hero model")
 	if sync:
 		sync.held_dt = 0.0
-		sync.root.set_meta(WardenGlb.POSE_HELD, true)
+		sync.root.set_meta(WardenGlb.POSE_HELD, Engine.get_process_frames())
 		sync._process(Match.DT)
 		sync._process(Match.DT)
 		var waited := sync.held_dt
-		sync.root.set_meta(WardenGlb.POSE_HELD, false)
+		sync.root.set_meta(WardenGlb.POSE_HELD, -1)
 		sync._process(Match.DT)
 		ok(is_equal_approx(waited, 2.0 * Match.DT) and sync.held_dt == 0.0,
 			"a Hero's clips hold with the Hunter and catch up the time")
 	m.cam.zoom = 1.0
 	m.cam.chase = 0.0
+
+## The Hunter model skipped its pose this frame (WardenGlb.POSE_HELD).
+func _held(model: Node3D) -> bool:
+	return int(model.get_meta(WardenGlb.POSE_HELD, -1)) == Engine.get_process_frames()
 
 ## Plans n sim steps; returns [steps the bot ran, sim steps of time it was given].
 func _lod_steps(b: Hunter, n: int) -> Array:

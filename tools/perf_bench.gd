@@ -160,8 +160,8 @@ func _pose_sample(m: Match) -> void:
 	for h in m.hunters:
 		if h.anim == null or h.out or h.model == null or not h.model.is_inside_tree():
 			continue
-		var held: bool = h.model.get_meta(WardenGlb.POSE_HELD, false)
-		h.model.set_meta(WardenGlb.POSE_HELD, false)
+		var held: int = h.model.get_meta(WardenGlb.POSE_HELD, -1)
+		h.model.set_meta(WardenGlb.POSE_HELD, -1)
 		var t0 := Time.get_ticks_usec()
 		h.anim.update(DT, h.anim_s)
 		var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
