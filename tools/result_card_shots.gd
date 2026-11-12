@@ -38,8 +38,8 @@ func run(main: Node) -> void:
 		var before := GameResultCard.snap(team)
 		Care.change(team[0], "joy", 8.0)
 		team[0]["stats"]["speed"] = int(team[0]["stats"]["speed"]) + 1
-		var card := GameResultCard.open(home, {"game": c[0], "place": c[1].replace("%s", team[0]["name"]), "prize": c[2],
-				"before": before})
+		var place: String = c[1].replace("%s", team[0]["name"])
+		var card := GameResultCard.open(home, {"game": c[0], "place": place, "prize": c[2], "before": before})
 		for i in SETTLE:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join(id + ".png"))
