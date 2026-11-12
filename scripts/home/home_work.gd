@@ -38,7 +38,7 @@ const KILN_T := 70.0                    # seconds between firings at the Kiln (a
 
 ## Base seconds for each kind of job at level 1 (a level 4 kin takes under half).
 const TIME := {"grow": 8.0, "fire": 9.0, "water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
-	"bake": 7.0, "craft": 11.0, "build": 6.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
+	"bake": 7.0, "craft": 11.0, "build": 3.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
 ## What each job is called on the hover card and the Job Board.
 const VERB := {"grow": "Raising seedlings", "fire": "Firing the kiln", "water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
 	"chop": "Felling a tree", "break": "Breaking a boulder", "log": "Splitting logs", "ore": "Mining rock", "bake": "Baking kibble",
@@ -89,9 +89,10 @@ func scan() -> void:
 	for r in Save.d["roster"]:
 		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
 	_plot_jobs()
-	_wild_jobs()
-	_station_jobs()
-	_haul_jobs()
+	if not FarmUnlocks.base_mode():
+		_wild_jobs()
+		_station_jobs()
+		_haul_jobs()
 	_mend_jobs()
 	_warm_jobs()
 	FarmSites.scan(self)
@@ -425,24 +426,30 @@ func _warm_jobs() -> void:
 
 # ------------------------------------------------------------------ choosing a job
 func _night() -> bool:
-	return sin((h.day_t - 0.25) * TAU) < -0.2
+	return is_night(h.day_t)
+
+## Is the day clock (0..1, 0.25 morning, 0.75 dusk) in the night?
+static func is_night(day_t: float) -> bool:
+	return sin((day_t - 0.25) * TAU) < -0.2
 
 ## A free kin looks for work. True if it took a job.
 func pick(k: Dictionary) -> bool:
-	if not on():
-		return false
-	var rec: Dictionary = k["rec"]
-	if not Work.can_work(rec) or k.has("break_t") or k.has("job"):
-		return false
-	if Care.need(rec, "food") < Work.START["food"] or Care.need(rec, "energy") < Work.START["energy"]:
-		return false
-	if _night() and not Work.NOCTURNAL.has(String(rec["species"])):
+	if not on() or k.has("job") or not fit_to_work(k):
 		return false
 	var best := best_job(k)
 	if best.is_empty():
 		return false
 	take(k, best)
 	return true
+
+## Is this kin able and rested enough to start a job (whatever it is doing now)?
+func fit_to_work(k: Dictionary) -> bool:
+	var rec: Dictionary = k["rec"]
+	if not Work.can_work(rec) or k.has("break_t"):
+		return false
+	if Care.need(rec, "food") < Work.START["food"] or Care.need(rec, "energy") < Work.START["energy"]:
+		return false
+	return not _night() or Work.NOCTURNAL.has(String(rec["species"]))
 
 ## The job this kin would take now ({} for none).
 func best_job(k: Dictionary) -> Dictionary:
@@ -478,6 +485,8 @@ func take(k: Dictionary, j: Dictionary) -> void:
 	J["phase"] = "go"; J["go_t"] = 0.0; J["vt"] = 1.0
 	J["lv"] = Work.level(k["rec"], String(J["el"]))
 	k["job"] = J
+	if String(J.get("kind", "")) != "build":
+		FarmTutorial.event("task")      # (a Boki that really starts working counts for the tutorial's job step)
 	taken[String(J["key"])] = String(k["rec"]["uid"])
 	k.erase("chase"); k.erase("stare"); k.erase("task")
 	if randf() < 0.4: h._emote(k, "!")
@@ -629,7 +638,7 @@ func _after_shift(k: Dictionary, el: String) -> void:
 		if not rec.get("overworked", false):
 			rec["overworked"] = true
 			h._emote(k, "!")
-			h._say(k, KinSpeak.say(rec, "sad", "energy"), 2.4, false)
+			h._say(k, BokiLines.say(rec, "want_energy"), 0.0, false)
 	else:
 		k["shift"] = 0.0
 		k["break_t"] = Work.BREAK
@@ -700,6 +709,7 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 	var lv := int(J["lv"])
 	var at: Vector3 = J["look"]
 	var nm := String(rec["name"])
+	Sfx.play("boki_work", at, -8.0, 0.1, Unique.voice(rec))
 	rec["trust"] = minf(100.0, float(rec["trust"]) + 0.15)
 	match String(J["kind"]):
 		"build":
@@ -997,7 +1007,7 @@ func open_station(e: Dictionary) -> void:
 			var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
-			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); _reassign(rr); Save.save_game(); open_station(e), 120))
+			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); _reassign(rr); Save.save_game(); open_station(e), 120))
 			v.add_child(row)
 
 ## A kin's assignment changed: it drops whatever it was doing and picks again.

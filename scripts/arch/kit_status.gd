@@ -26,6 +26,9 @@ static func clear_rattled(e: Ent) -> void:
 static func grounded(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
 
+static func grounded_left(e: Ent) -> float:
+	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
+
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
@@ -38,6 +41,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 	if e.remote:
 		if send and m.get("net_on"):
 			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01)])
+		_note_remote(e, kind, secs)
 		_show(e, kind, secs)
 		return
 	match kind:
@@ -65,6 +69,14 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			e.vuln_t = maxf(e.vuln_t, secs)
 			_show(e, kind, secs)
 
+## A remote body's own game runs the rule, so here only the time left is kept, for the plate's timer.
+static func _note_remote(e: Ent, kind: String, secs: float) -> void:
+	if kind == "gnd" or kind == "rat":
+		var key := kind + "_until"
+		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
+	elif kind == "dsr":
+		e.slow_t = maxf(e.slow_t, secs)
+
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
@@ -85,11 +97,8 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				n.add_child(c)
 			e.add_child(n)
 			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			if toast == "":
-				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
-			var line := toast if toast != "" else "no dash, jump or glide"
-			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  " + line, GROUND_COL)
+			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
 			var old2 := e.get_node_or_null("Rattled")
 			if old2: old2.queue_free(); old2.name = "RattledGone"
@@ -107,13 +116,10 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				rn.add_child(st)
 			e.add_child(rn)
 			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
-			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## A Net "kst" event: the body's own game runs the rule.

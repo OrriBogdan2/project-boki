@@ -1,7 +1,7 @@
 extends "res://tools/hero_pair_check.gd"
-## Ostra's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
+## Motley's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
 ## the cursor clamped to 10m, the 1.0s dome everyone sees, the opening, the catch (stunned until it closes and
-## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Ostra locked in the
+## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Motley locked in the
 ## cast for the 1.0s dome and then free while the well runs, the small ticks, the quiet close, the Swollen
 ## size, the bond once per cast and only on a catch, the cooldown, the merge (the placed well stays) and the burst cap.
 
@@ -119,6 +119,7 @@ func _catch_and_hold() -> void:
 		e.hp = e.max_hp
 	HeroZones.rock(m, P, c + Vector3(0, 0, -1.8), Vector2(0, 1), "wall", 2.0, 30.0, 999.0, false)
 	var paid0 := paid(P)
+	var props := _props(m, c)
 	_press(m, P, c)
 	step(m, 1.05)
 	ok(
@@ -143,7 +144,21 @@ func _catch_and_hold() -> void:
 	ok("ult payoff: small ticks every 0.1s (35 over 3.5s)", absf(dmg(T) - per * 35.0) < per * 2.0, "dmg %.2f" % dmg(T))
 	step(m, 0.3)
 	ok("ult: the stun ends when it closes", not W.running() and T.stun_t <= 0.05, "stun %.2f" % T.stun_t)
+	ok(
+		"ult plain: a well that is not Empowered breaks and lights nothing",
+		props.all(func(b): return not b["dead"] and not b.has("fuse_t"))
+	)
 	await done(m)
+
+## A crate, a pot and a keg inside the well's reach (Swollen 5.1m, plain 3.6m), 2.6m out.
+func _props(m: Match, c: Vector3) -> Array:
+	var out := []
+	for i in 3:
+		var at := c + Vector3(2.6, 0, 0).rotated(Vector3.UP, TAU * (float(i) + 0.5) / 3.0)
+		at.y = m.world.ground_at(at.x, at.z)
+		m._add_break(["crate", "pot", "keg"][i], at)
+		out.append(m.breaks[-1])
+	return out
 
 func _swollen_and_merge() -> void:
 	var r := setup_ult("ostra", 7.0)
@@ -165,6 +180,12 @@ func _swollen_and_merge() -> void:
 		"r %.1f" % W.radius
 	)
 	ok("ult Swollen: its dome shows the bigger size", absf(float(dome.get("r", 0.0)) - 5.1) < 0.05)
+	var props := _props(m, c)
+	step(m, 1.0)
+	ok(
+		"ult Swollen: Empowered ticks are Explosive, they break a crate and a pot and light a keg",
+		props[0]["dead"] and props[1]["dead"] and (props[2].has("fuse_t") or props[2]["dead"])
+	)
 	var merged := _merge(P)
 	step(m, 1.2)
 	ok(
@@ -221,7 +242,7 @@ func _burst() -> void:
 	)
 
 ## The lock (Void's footage holds the cast for the 1.0s telegraph, f23-f33, and acts freely
-## once it opens, f50): from the press until the well opens Ostra can't walk, use another ability or attack, or
+## once it opens, f50): from the press until the well opens Motley can't walk, use another ability or attack, or
 ## turn once the wind-up is over; when it opens he is free to walk out at full speed and fight while it holds.
 func _lock_and_release() -> void:
 	var r := setup_ult("ostra", 7.0)

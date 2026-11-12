@@ -63,17 +63,40 @@ func dancer(a) -> void:
 	A.ok("dancer X: its cooldown runs from the cast (24s)", absf(float(K.cd["x"]) - float(d["cooldown"])) < 0.1,
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
-	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band dashed; no blade before it",
-			absf(float(AimKit.entry(P, "ult")["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
-			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(AimKit.entry(P, "ult")["r"]))
-	A.step(m, 1.9)
+	var thin: Dictionary = AimKit.entry(P, "ult")
+	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band marked; no blade before it",
+			absf(float(thin["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
+			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(thin["r"]))
+	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
+			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
+			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
+	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
+	A.step(m, 1.9, func():
+		if U.beat > int(beat["n"]):
+			beat["n"] = U.beat
+			(beat["at"] as Array).append(m.time)
+			beat["pulse"] = maxf(float(beat["pulse"]), float(AimKit.entry(P, "ult").get("alpha", 0.0)))
+		if float(U.st.get("t", 0.0)) > 0.45:
+			beat["danced"] = bool(beat["danced"]) and K.anim_id == ThiefUlt.DANCE)
+	var gaps: Array = beat["at"]
+	var even := true
+	for i in range(1, gaps.size()):
+		even = even and absf(float(gaps[i]) - float(gaps[i - 1]) - 0.2) < 0.03
+	A.ok("dancer X: a blade at each foe every 0.2s, the ring pulsing on the beat",
+			gaps.size() >= 9 and even and float(beat["pulse"]) > 1.6,
+			"%d beats, pulse %.2f" % [gaps.size(), beat["pulse"]])
+	A.ok("dancer X: she dances from the first beat on", bool(beat["danced"]))
 	A.ok("dancer X: still running at 2.3s", U.running())
-	A.step(m, 0.25)
-	A.ok("dancer X: 2s of blades, 5 at most on each foe; ends with a plain fade",
-			U.blades == 10 and not U.running() and not AimKit.shown(P, "ult"), "blades %d" % U.blades)
+	A.step(m, 0.5)
+	A.ok("dancer X: 2s of blades, 10 at most on each foe; ends with a plain fade and the dance stops",
+			U.blades == 20 and not U.running() and not AimKit.shown(P, "ult") and K.anim_id != ThiefUlt.DANCE,
+			"blades %d" % U.blades)
 	A.ok("dancer X small mechanic: the outer band hits harder and blights 6s; the inside doesn't blight",
-			U.rim_blades == 5 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
+			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
+	var total := float(d["dmg"]) * float(d["shots"])
+	A.ok("dancer X: the faster blades keep the old totals (40 inside, 60 from the outer band)", total == 40.0
+			and (float(d["dmg"]) + float(d["rim_dmg"])) * float(d["shots"]) == 60.0, "%.0f" % total)
 	A.ok("dancer X small mechanic: every blade refreshes her Marks", K.marks_on(T) >= 2
 			and float(T.get_meta("marks")[P.nid][1]) > 3.0)
 	A.ok("dancer X: blades landing on a hunter fill the bond once a cast (a hit: 60% of the bar, KinBond.from_ult)",
@@ -88,19 +111,34 @@ func dancer(a) -> void:
 	A.step(m, 0.4)
 	var p0 := P.pos
 	var b0 := K.bolts
+	var kept := {"dance": true}
 	A.step(m, 0.5, func():
 		P.inp["move"] = Vector2(-1, 0)
-		P.inp["fire"] = true)
+		P.inp["fire"] = true
+		kept["dance"] = bool(kept["dance"]) and (K.anim_id == ThiefUlt.DANCE or float(U.st.get("t", 0.0)) < 0.45))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["fire"] = false
 	var at: Vector2 = AimKit.entry(P, "ult")["at"]
 	A.ok("dancer X small mechanic: she walks and fires freely, the ring moves with her",
 			P.pos.distance_to(p0) > 1.0 and K.bolts > b0 and at.distance_to(Vector2(P.pos.x, P.pos.z)) < 0.2
 			and K.move_k() >= 1.0, "moved %.2f bolts +%d" % [P.pos.distance_to(p0), K.bolts - b0])
-	A.step(m, 1.6)
+	A.ok("dancer X: the dance plays on through her walking and her plain bolts (a stance: the legs keep walking)",
+			bool(kept["dance"]) and bool(KMovesDJ.MOVES[ThiefUlt.DANCE]["stance"]))
+	var into := float(U.st["t"]) - float(d["grow"])
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	var flip := K.anim_id
+	A.step(m, 0.55)
+	P.inp["move"] = Vector2.ZERO
+	var off_beat := fmod(m.time - K.anim_at - into - 0.55 + 0.8, 0.8)
+	A.ok("dancer X: a Vault flips out of the dance and it picks up again on the beat", flip in ThiefKit.CARTWHEELS
+			and K.anim_id == ThiefUlt.DANCE and minf(off_beat, 0.8 - off_beat) < 0.05,
+			"%s, off %.3f" % [flip, off_beat])
+	A.step(m, 1.1)
 	A.ok("dancer X: no foe in the ring, no bond (never on the cast alone)", U.casts == 2 and not U.running()
 			and _owed(P) == 0.0, "owed %.2f" % _owed(P))
-	A.ok("dancer X: its moves are keyed (cast, throws)", ["thf_encore", "thf_encore_throw_r", "thf_encore_throw_l"]
+	A.ok("dancer X: its moves are keyed (cast, throws)", ["thf_encore", ThiefUlt.DANCE]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
 
@@ -206,9 +244,49 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
 			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
+	# the reset is for taking a hunter down: a hunter already down takes nothing from it, a plain hit resets nothing
+	A.step(m, 0.5)
+	A.fresh(T)
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	T.downed = true
+	T.hp = 0.0
+	T.down_hp = 500.0
+	K.cd["x"] = 0.0
+	var resets0 := U.resets
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: a hunter already knocked takes nothing, no kill, the cooldown keeps running",
+			U.last_dealt == 0.0 and U.resets == resets0 and float(K.cd["x"]) > 1.0,
+			"dealt %.0f resets %d cd %.1f" % [U.last_dealt, U.resets - resets0, float(K.cd["x"])])
+	A.step(m, 0.5)
+	A.fresh(T)
+	T.downed = false
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	K.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: a hit that leaves the hunter up resets nothing",
+			not T.downed and U.resets == resets0 and float(K.cd["x"]) > 1.0, "resets %d cd %.1f" % [U.resets - resets0,
+					float(K.cd["x"])])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
+	_cleave_fits(U.data())
 	await A.done(m)
+
+## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
+func _cleave_fits(d: Dictionary) -> void:
+	var sweep: Dictionary = HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"][0]
+	var ln := float(d["len"])
+	var radius := float(sweep["size_x"]) * ln
+	var tip := float(sweep["fwd_x"]) * ln + radius
+	var half := radius * sin(deg_to_rad(float(sweep["arc"])) * 0.5)
+	var w := float(d["width"])
+	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
+			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:
@@ -234,7 +312,7 @@ func _bola_encore() -> void:
 	var grounded := KitStatus.grounded(T)
 	HunterKeys.ult_pressed(P)
 	A.step(m, 2.5)
-	A.ok("combo dancer: Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 5,
+	A.ok("combo dancer: Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 10,
 			"grounded %s blades %d" % [grounded, K.encore.blades])
 	await A.done(m)
 

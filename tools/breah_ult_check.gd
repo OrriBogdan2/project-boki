@@ -1,9 +1,10 @@
 extends "res://tools/hero_pair_check.gd"
-## Tarek's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
+## Tenzo's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
 ## tap (across the aim, at the cursor) and the hold-and-drag (pivots on its centre), the preview only while
 ## held, the 0.2s cracks everyone sees, the centre-out rise over 0.4s, the slow beside it, bodies shoved off
 ## the line, the rocks standing apart from Stone Row's, a punch along the ridge launching it, the bond only on
-## a land (and inside its window), the merge drop while aiming, the cooldown and the burst cap.
+## a land (and inside its window), the merge drop while aiming, the cooldown and the burst cap; the arc and
+## width of the ridge, and the rocks standing as ground over the abyss.
 
 const BURST := preload("res://tools/ult_burst.gd")
 
@@ -14,12 +15,12 @@ func ult(main_node: Node) -> void:
 	await _drag_slow_shove()
 	await _punch_and_bond()
 	await _guards()
-	await _no_ground()
+	await _walkway()
 	await _burst()
 
 ## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
-func setup_ult(arch: String, dist: float) -> Array:
-	var r := setup(arch, dist)
+func setup_ult(arch: String, dist: float, abyss := 0) -> Array:
+	var r := setup(arch, dist, abyss)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var rec := Save.new_kin("puddlet")
@@ -70,8 +71,9 @@ func _cast_and_rise() -> void:
 	var across: bool = absf(S.axis.dot(Vector2(1, 0))) < 0.05
 	var at_cursor: bool = Vector2(S.center.x - home.x - 7.0, S.center.z - home.z).length() < 0.2
 	ok(
-		"ult telegraph: the cracks show to everyone, at the cursor, across the aim, 19.8m",
-		bool(crack.get("all", false)) and at_cursor and across and absf(float(crack.get("len", 0.0)) - 19.8) < 0.1,
+		"ult telegraph: the cracks show to everyone, at the cursor, across the aim, 12m, bent 25 degrees",
+		bool(crack.get("all", false)) and at_cursor and across and absf(float(crack.get("len", 0.0)) - 12.0) < 0.1
+			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1,
 		"axis %s" % str(S.axis)
 	)
 	step(m, 1.0)
@@ -152,22 +154,23 @@ func _punch_and_bond() -> void:
 	var spread := K.spine.last_rise_t - K.spine.first_rise_t
 	ok("ult beats: the rocks rise from the centre outward over 0.4s", absf(spread - 0.4) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
-	ok("ult: 13 rocks over 19.8m on open ground", n_up == 13, "rocks %d" % n_up)
+	ok("ult: 9 rocks over 12m on open ground", n_up == 9, "rocks %d" % n_up)
 	var rd := K.rock_def()
 	var shape_ok := true
 	for w in rocks(m).filter(func(w): return w.has("ult")):
 		var mid := K.rock_mid(w)
 		var span: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
-		var off_line := absf(mid.z - K.spine.center.z)
+		var off_line := absf(mid.z - K.spine.center.z)      # the arc sets the ends back, never more than its sag
 		shape_ok = shape_ok and bool(w["rock"]) and String(w["rid"]).begins_with(K.rid_owner()) and absf(
 			float(w["len"]) - float(rd["len"])
 		) < 0.01 and float(w["th"]) == HeroZones.ROCK_TH and float(w["top"]) == HeroZones.ROCK_TOP and absf(
 			span.normalized().dot(K.spine.axis)
-		) > 0.99 and off_line < 0.05
+		) > cos(deg_to_rad(13.0)) and off_line < 0.75
 	ok(
 		"spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep",
 		shape_ok and HeroZones.ROCK_TH * 2.0 < 1.0
 	)
+	_arc_and_width(m, K)
 	var paid0 := paid(P)
 	var l0 := K.launches
 	_punch(m, P, T)
@@ -250,28 +253,84 @@ func _guards() -> void:
 	ok("ult aim: past 11m the centre is clamped and a held still cursor stays across", reach <= 11.05 and still_across)
 	await done(m)
 
-## A line with no solid ground under it (cast over open abyss) is refused: no rocks, no walkway, the ult
-## stays ready, and the "no ground" cue's puff shows.
-func _no_ground() -> void:
-	var r := setup_ult("dolm", 6.0)
+## The ridge on open ground (laid along +x, bowing away from her): a shallow arc about 25 degrees in all,
+## its ends set back toward her, and well narrower than the old 19.8m line.
+func _arc_and_width(m: Match, K: DolmKit) -> void:
+	var u: Vector2 = K.spine.axis
+	var n: Vector2 = K.spine.bow
+	var c: Vector3 = K.spine.center
+	var along := func(w: Dictionary) -> float:
+		var p := K.rock_mid(w)
+		return Vector2(p.x - c.x, p.z - c.z).dot(u)
+	var ult_rocks := rocks(m).filter(func(w): return w.has("ult"))
+	ult_rocks.sort_custom(func(a, b): return along.call(a) < along.call(b))
+	var first: Vector2 = (ult_rocks[0]["b"] as Vector2) - (ult_rocks[0]["a"] as Vector2)
+	var last: Vector2 = (ult_rocks[-1]["b"] as Vector2) - (ult_rocks[-1]["a"] as Vector2)
+	var bend := rad_to_deg(absf(first.angle_to(last)))
+	var set_back := 99.0       # how far the ends sit back from the centre toward her (m)
+	for w in [ult_rocks[0], ult_rocks[-1]]:
+		var p := K.rock_mid(w)
+		set_back = minf(set_back, -Vector2(p.x - c.x, p.z - c.z).dot(n))
+	var extent := absf(along.call(ult_rocks[-1]) - along.call(ult_rocks[0]))
+	ok(
+		"spine arc: the ridge bends about 25 degrees (20-30), its ends curve back toward her",
+		bend >= 20.0 and bend <= 30.0 and set_back > 0.3 and set_back < 1.2,
+		"bend %.1f set back %.2f" % [bend, set_back]
+	)
+	ok(
+		"spine width: the ridge is about 60% of the old 19.8m",
+		extent < 0.65 * 19.8 and extent > 0.5 * 19.8 * 0.6, "extent %.1f" % extent
+	)
+
+## Over the abyss the rocks are ground: Tenzo and a foe land on the ridge and stand on it (no fall, no abyss
+## sink, nothing taken), walk along it, and fall as normal once the rocks crumble.
+func _walkway() -> void:
+	var r := setup_ult("dolm", 9.0, 4)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
+	var T: Hunter = r[2]
 	var home: Vector3 = r[3]
 	var K: DolmKit = P.ak
-	var W: World = m.world
-	var before := void_tiles(m)
-	for z in range(int(home.z) - 14, int(home.z) + 15):
-		for x in range(int(home.x) + 3, int(home.x) + 30):
-			if W.inb(x, z):
-				W.kind[W.idx(x, z)] = World.T_VOID
-	var carved := void_tiles(m)
-	_press(m, P, home + Vector3(10, 0, 0), false)
+	T.teleport(home + Vector3(0, 0, 5))
+	P.lvl = 6
+	_press(m, P, home + Vector3(7, 0, 0), false)
 	step(m, 1.0)
+	var gap := rocks(m).filter(func(w): return m.world.is_void(K.rock_mid(w).x, K.rock_mid(w).z))
 	ok(
-		"spine (item 15): a cast fully over the abyss is refused, unspent, with the no-ground cue; nothing raised",
-		K.spine.refused == 1 and K.spine.casts == 0 and float(K.cd["x"]) == 0.0 and rocks(m).is_empty()
-			and void_tiles(m) == carved and carved > before,
-		"refused %d casts %d cd %.1f rocks %d" % [K.spine.refused, K.spine.casts, float(K.cd["x"]), rocks(m).size()]
+		"spine walkway: the whole ridge is laid over the abyss, none refused",
+		gap.size() == 9 and K.spine.casts == 1, "over the gap %d" % gap.size()
+	)
+	var mid := K.rock_mid(gap[0])
+	var top := mid.y + HeroZones.ROCK_TOP
+	P.teleport(Vector3(mid.x, top + 0.1, mid.z))
+	P.vel = Vector3.ZERO
+	T.teleport(Vector3(mid.x, top + 0.4, mid.z + 3.0))
+	T.vel = Vector3.ZERO
+	var hp0 := P.hp
+	step(m, 1.5)
+	var stands := func(h: Hunter) -> bool:
+		return h.grounded and not h.over_void() and not h.out and not h.dead and absf(h.pos.y - top) < 0.15
+	ok(
+		"spine walkway: Tenzo stands on a rock over the abyss, no fall, no abyss sink, no damage",
+		stands.call(P) and P.hp >= hp0,
+		"y %.2f top %.2f g%d void%d hp %.0f" % [P.pos.y, top, int(P.grounded), int(P.over_void()), P.hp]
+	)
+	ok(
+		"spine walkway: a foe dropped onto the ridge stands on it too",
+		stands.call(T), "y %.2f top %.2f g%d void%d" % [T.pos.y, top, int(T.grounded), int(T.over_void())]
+	)
+	var z0 := P.pos.z
+	step(m, 0.6, func(): P.inp["move"] = Vector2(0, 1))
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"spine walkway: Tenzo walks along the ridge over the abyss and stays on it",
+		stands.call(P) and P.pos.z - z0 > 1.0, "moved %.2f y %.2f" % [P.pos.z - z0, P.pos.y]
+	)
+	step(m, 8.0)
+	ok(
+		"spine walkway: when the rocks crumble, whoever stood on them falls",
+		rocks(m).is_empty() and (P.over_void() and not P.grounded or P.out or P.dead or P.pos.y < top - 1.0),
+		"rocks %d y %.2f g%d" % [rocks(m).size(), P.pos.y, int(P.grounded)]
 	)
 	await done(m)
 

@@ -105,15 +105,21 @@ func run(m: Node) -> void:
 	var hc := _spot(hb, land + Vector3(0, 0, -8))
 	hb.cells = hc; hb._check_cells(); hb._draw_cells()
 	var green := hc.size() == 15 and hb.ghost_ok
-	for mi in hb.ghost_cells.get_children():
-		if mi is MeshInstance3D and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
+	for mi in hb.ghost_cells.get_children():      # (the redraw frees the old cells at the end of the frame)
+		if mi is MeshInstance3D and not mi.is_queued_for_deletion() and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
 	ok(green, "on open meadow it tints green")
 	var g0 := int(Save.d["gems"])
 	ok(hb.place_held() and int(Save.d["gems"]) == g0 and FarmSites.is_site(HomeLayout.of(Save.d)["deco"][-1]),
 		"the house goes down where you chose as a free construction site")
 	var house_site: Dictionary = HomeLayout.of(Save.d)["deco"][-1]
-	while FarmSites.has_site(house_site):
+	var house_cost := FarmSites.build_cost("house")
+	Work.add_mat("wood", int(house_cost["wood"]))
+	Work.add_mat("stone", int(house_cost["stone"]))
+	for i in 100:
+		if not FarmSites.has_site(house_site):
+			break
 		FarmSites.add_swing(house_site)
+	Save.d["mats"] = {}
 	hb.apply(false)
 	home._sync_fixtures()
 	ok(home.spots["house"].x > 0.0 and home.spots["house"].distance_to(HomeLayout.rect_center([hc[0].x, hc[0].y, hc[14].x, hc[14].y])) < 0.6 and is_instance_valid(home.house_node), "the farm knows where its house is now (%s)" % str(home.spots["house"]))
@@ -180,11 +186,12 @@ func run(m: Node) -> void:
 	it = hg.find(Vector2(st.x, st.z))
 	ok(hg.label(it) == "Chop the tree", "now the prompt says: %s" % hg.label(it))
 	hg.use(it)
-	var swings0: int = home.p_swing_n
-	for i in 40:
+	home.tw.test_hold = true
+	for i in 120:
 		if not hg.busy(): break
 		hg.tick(0.05)
-	ok(not hb.wild_t.has(ti) and Work.mat("wood") >= 3 and home.p_swing_n - swings0 == HomeGather.HITS, "three swings and it's down: %d wood" % Work.mat("wood"))
+	home.tw.test_hold = false
+	ok(not hb.wild_t.has(ti) and Work.mat("wood") >= 3, "holding the key, three hits and it's down: %d wood" % Work.mat("wood"))
 	var key := HomeLayout.key(ti % w.w, ti / w.w)
 	var rg: Dictionary = HomeLayout.of(Save.d)["regrow"]
 	ok(rg.has(key) and float(rg[key]["t"]) - Time.get_unix_time_from_system() > 600.0, "it grows back in %.0f minutes" % ((float(rg.get(key, {}).get("t", 0)) - Time.get_unix_time_from_system()) / 60.0))
@@ -197,22 +204,24 @@ func run(m: Node) -> void:
 	if ri >= 0:
 		home.ppos = rs; home.player.position = rs
 		hg.use(hg.find(Vector2(rs.x, rs.z)))
-		for i in 40:
+		home.tw.test_hold = true
+		for i in 120:
 			if not hg.busy(): break
 			hg.tick(0.05)
+		home.tw.test_hold = false
 	ok(ri >= 0 and Work.mat("stone") >= 3, "a pickaxe mines a boulder for %d stone" % Work.mat("stone"))
 	home.ppos = HomeLayout.LANDING; home.player.position = home.ppos
 	for k in home.kins: k["pos"] = HomeLayout.LANDING
 	var n_back: int = hb.regrow_due(Time.get_unix_time_from_system() + 4000.0)
 	ok(n_back >= 1 and hb.wild_t.has(ti) and w.is_block(ti % w.w + 0.5, ti / w.w + 0.5), "later, the tree grows back where it stood (%d came back)" % n_back)
-	# the Training Grounds isle is gone: no island of its own, and the Esc menu opens the training area instead
+	# the Training Grounds isle is gone: no island of its own, and the Esc menu opens the Grounds instead
 	ok(home.world.island_id(40.0, 56.0) != "training", "the farm has no Training Grounds isle")
 	var was: Node = main.get("current")
 	main.set("current", home)
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame
 	var btns: Array = Overlay.host.find_children("*", "Button", true, false)
-	ok(btns.any(func(b): return (b as Button).text.contains("Training area")), "the farm's Esc menu has Training area")
+	ok(btns.any(func(b): return (b as Button).text.contains("Training Grounds")), "the Esc menu has Grounds")
 	Overlay.close()
 	main.set("current", was)
 	var cl := -1

@@ -13,10 +13,12 @@ func run(a) -> void:
 	await chain_states()
 	await chain_pull()
 	await chain_steer()
+	await chain_swing()
 	await rmb_rows()
 	await dash_moves()
 	await parity_lmb()
 	await parity_rmb()
+	await load("res://tools/kael_accuracy_check.gd").new().run(A)
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(A.main, "juggernaut")
 	A.ok("jug item 51: every slot casts mid-jump, holds through a jump and a dash and lets go in the air, and a "
 			+ "jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -33,27 +35,28 @@ func meteor() -> void:
 	var K: JuggernautKit = P.ak
 	var dd: Dictionary = K.rmb_def()["drop"]
 	var D := K.meteor
-	# from about a jump's height, the cursor 9m off: it lands 5m out (the clamp), on T; T2 just outside the core
+	# from about a jump's height, facing +x: straight down; T at the hit centre (just ahead), T2 just outside the core
 	P.teleport(home + Vector3(0, 1.8, 0))
 	P.grounded = false
 	P.vel = Vector3.ZERO
 	A.fresh(T)
 	A.fresh(T2)
-	T.teleport(home + Vector3(5.0, 0, 0))
-	T2.teleport(home + Vector3(5.0, 0, float(dd["core"]) + T2.r + 0.4))
+	var ahead := float(dd["ahead"])
+	T.teleport(home + Vector3(ahead, 0, 0))
+	T2.teleport(home + Vector3(ahead, 0, float(dd["core"]) + T2.r + 0.4))
 	A.aim_at(P, home + Vector3(9.0, 0, 0))
 	var y0 := P.pos.y
 	P.ak.press_rmb()
 	var core: Dictionary = AimKit.entry(P, "drop_core")
-	A.ok("jug meteor: the hang starts on the press over a marker everyone sees (the damage disc and the stun core)",
+	A.ok("jug meteor: the hang starts on the press, the hit circle everyone sees (the damage disc and the stun core)",
 			D.phase == "hang" and K.anim_id == "jug_meteor" and AimKit.shown(P, "drop") and bool(core.get("all", false))
 			and absf(float(core.get("r", 0.0)) - float(dd["core"])) < 0.01,
 			"phase %s anim %s" % [D.phase, K.anim_id])
-	A.step(m, 0.1)
+	A.step(m, 0.05)
 	A.ok("jug meteor: he holds in the air through the hang, planted (no slam yet)",
 			absf(P.pos.y - y0) < 0.3 and D.phase == "hang" and D.drops == 0 and K.move_k() <= 0.0,
 			"dy %.2f" % (P.pos.y - y0))
-	var t := 0.1
+	var t := 0.05
 	while D.phase == "hang" and t < 0.5:
 		m.step(A.DT)
 		t += A.DT
@@ -64,22 +67,25 @@ func meteor() -> void:
 		m.step(A.DT)
 		t += A.DT
 		if D.phase == "dive" and P.pos.y < top - 0.05 and P.pos.y > D.land.y + 0.05: mid_frames += 1
-	A.ok("jug meteor: the hang lasts 0.15-0.25s (footage: the apex beat before the drive)",
-			hang_t >= 0.15 and hang_t <= 0.27, "%.2fs" % hang_t)
-	A.ok("jug meteor: a visible dive, not a teleport (frames between the top and the ground)",
-			mid_frames >= 8, "%d frames" % mid_frames)
+	A.ok("jug meteor: the hang is a short wind-up, 0.1s at most",
+			hang_t >= 0.05 and hang_t <= 0.1 + A.DT, "%.2fs" % hang_t)
+	A.ok("jug meteor: a visible drop, not a teleport (frames between the top and the ground)",
+			mid_frames >= 4, "%d frames" % mid_frames)
 	A.ok("jug meteor: the phases run wind-up (hang), dive, impact, recovery",
 			D.phases == ["hang", "dive", "impact", "recover"] and K.anim_id == "jug_meteor_land", str(D.phases))
-	A.ok("jug meteor: press to impact 0.4-0.7s (footage: apex 412.3s to impact 412.85s)",
-			D.last_air >= 0.4 and D.last_air <= 0.7, "%.2fs" % D.last_air)
+	A.ok("jug meteor: a fast drop, press to impact under 0.3s from a jump's height",
+			D.last_air <= 0.3, "%.2fs" % D.last_air)
 	var land_from := Vector2(D.last_drop.x - home.x, D.last_drop.z - home.z).length()
-	A.ok("jug meteor: it lands at the cursor clamped to its 5m reach",
-			absf(land_from - float(dd["reach"])) < 0.35 and absf(D.last_drop.z - home.z) < 0.3, "%.2fm out" % land_from)
-	A.ok("jug meteor: the shock ring is the stun's real radius; inside it stunned, just outside only slowed",
-			absf(D.last_shock_r - float(dd["core"])) < 0.001 and T.stun_t > 0.0 and T2.stun_t <= 0.0 and T2.slow_t > 0.0
-			and D.stunned_at(D.last_drop + Vector3(float(dd["core"]) + 0.4, 0, 0), 0.5, D.last_drop)
-			and not D.stunned_at(D.last_drop + Vector3(float(dd["core"]) + 0.7, 0, 0), 0.5, D.last_drop),
-			"ring %.2f T stun %.2f T2 stun %.2f slow %.2f" % [D.last_shock_r, T.stun_t, T2.stun_t, T2.slow_t])
+	var hit_off := D.last_hit - D.last_drop
+	A.ok("jug meteor: it lands straight under the press, the hit centred just ahead in his facing",
+			land_from < 0.05 and absf(hit_off.x - ahead) < 0.01 and absf(hit_off.z) < 0.01,
+			"%.2fm out, hit +%.2f" % [land_from, hit_off.x])
+	A.ok("jug meteor: the shock ring is the hit circle; the core stunned, just outside the core knocked down shorter",
+			absf(D.last_shock_r - float(dd["radius"])) < 0.001 and T.stun_t > float(dd["down"]) + 0.1
+			and T2.stun_t > 0.0 and T2.stun_t <= float(dd["down"]) + 0.01
+			and D.stunned_at(D.last_hit + Vector3(float(dd["core"]) + 0.4, 0, 0), 0.5, D.last_hit)
+			and not D.stunned_at(D.last_hit + Vector3(float(dd["core"]) + 0.7, 0, 0), 0.5, D.last_hit),
+			"ring %.2f T stun %.2f T2 stun %.2f" % [D.last_shock_r, T.stun_t, T2.stun_t])
 	A.step(m, 0.1)
 	var planted := K.move_k()
 	A.ok("jug meteor: planted at the start of the recovery", planted <= 0.0, "move_k %.2f" % planted)
@@ -125,7 +131,7 @@ func meteor() -> void:
 	A.step(m, 0.1)
 	A.ok("jug meteor: Shift early in the recovery goes within 0.1s and ends it (item 51)",
 			P.dashes < 2.5 and D.phase == "", "dashes %.1f phase %s" % [P.dashes, D.phase])
-	# Shift in the hang: the air dash goes at once, then the dive comes down onto the marker from where it took him
+	# Shift in the hang: the air dash goes at once, then the drop falls straight down from where it took him
 	A.step(m, 1.0)
 	K.cd["air"] = 0.0
 	P.teleport(home + Vector3(0, 1.8, 0))
@@ -134,7 +140,7 @@ func meteor() -> void:
 	A.aim_at(P, home + Vector3(3.0, 0, 0))
 	P.ak.press_rmb()
 	m.step(A.DT)
-	var marker := D.land
+	var pressed := P.pos
 	P.ex_cd = 0.0
 	P.dashes = 3.0
 	P.inp["move"] = Vector2(0, 1)
@@ -146,9 +152,11 @@ func meteor() -> void:
 	while D.phase != "recover" and t < 2.0:
 		m.step(A.DT)
 		t += A.DT
-	var off := Vector2(D.last_drop.x - marker.x, D.last_drop.z - marker.z).length()
-	A.ok("jug meteor: Shift in the hang air-dashes at once (the gather pose kept), then it dives onto the marker",
-			went and D.phase == "recover" and off < 0.3, "went %s phase %s %.2fm off the marker" % [went, D.phase, off])
+	var off := Vector2(D.last_drop.x - D.from.x, D.last_drop.z - D.from.z).length()
+	var carried := Vector2(D.from.x - pressed.x, D.from.z - pressed.z).length()
+	A.ok("jug meteor: Shift in the hang air-dashes at once (the gather pose kept), then it drops straight down there",
+			went and D.phase == "recover" and off < 0.05 and carried > 1.0,
+			"went %s phase %s carried %.2fm, %.2fm off in the drop" % [went, D.phase, carried, off])
 	await A.done(m)
 
 # ------------------------------------------------------------------ item 22: the Warchain's states
@@ -160,7 +168,7 @@ func _hook(m: Match, P: Hunter, K: JuggernautKit, at: Vector3, secs := 0.5) -> v
 
 func _settle(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	A.step(m, 0.6)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.stun_t = 0.0
@@ -285,7 +293,9 @@ func chain_pull() -> void:
 	K.use_e()
 	T.teleport(T.pos + Vector3(0, 0, 2.0))
 	var t := 0.0
+	var look: Vector3 = P.inp["aim"] - P.pos           # the cursor stays put on screen as the camera follows him
 	while W.state == "pulling" and t < 1.0:
+		P.inp["aim"] = P.pos + look
 		m.step(A.DT)
 		t += A.DT
 	A.ok("jug pull: it homes on a hooked foe that moves, and arrives against them",
@@ -755,6 +765,91 @@ func parity_rmb() -> void:
 			"on %.1f m, off %.1f m" % [float(on_flash["dist"]), float(off_flash["dist"])])
 	await A.done(m)
 
+# ------------------------------------------------------------------ owner item 57: the swing
+## One pull at a foe 13 m east: `aim` is where the cursor is off him, `move` the held key. Returns the landing, the
+## heading turned, the slowest step and the predicted arc's end.
+func _haul(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter, aim: Vector3, move: Vector2) -> Dictionary:
+	var W := K.warchain
+	_settle(m, P, K, home)
+	A.aim_at(P, T.pos)
+	_hook(m, P, K, T.pos, 0.5)
+	var hooked := W.hooked() and W.target == T
+	A.aim_at(P, P.pos + aim)
+	P.inp["move"] = move
+	m.step(A.DT)
+	var arc: Dictionary = K.fx().chains.get(W._fx_id() + "arc", {})
+	var shown: bool = not arc.is_empty() and (arc["node"] as Node3D).visible
+	var promised := W.preview[-1] if shown else Vector3.ZERO
+	var from := P.pos
+	K.use_e()
+	var t := 0.0
+	var slowest := 99.0
+	var was := P.pos
+	while W.state == "pulling" and t < 1.5:
+		A.aim_at(P, P.pos + aim)                    # the cursor stays put on screen as the camera follows him
+		m.step(A.DT)
+		t += A.DT
+		if W.state == "pulling":
+			slowest = minf(slowest, Vector2(P.pos.x - was.x, P.pos.z - was.z).length() / A.DT)
+		was = P.pos
+	var heading := W.pull_dir
+	var moving := Vector2(P.vel.x, P.vel.z)
+	P.inp["move"] = Vector2.ZERO
+	return {"hooked": hooked, "exit": W.exits, "end": P.pos, "z": P.pos.z - from.z, "turned": rad_to_deg(
+			absf(W.line.angle_to(heading))), "slowest": slowest, "t": t, "moving": moving, "heading": heading,
+			"shown": shown, "promised": promised, "dist": T.pos.distance_to(P.pos)}
+
+## Owner item 57: looking aside swings the pull out in a clear arc around the anchor, at full speed.
+func chain_swing() -> void:
+	var r := A.setup("juggernaut", 13.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: JuggernautKit = P.ak
+	var ed := K.e_def()
+	var east := Vector3(13.0, 0, 0)
+	var left := Vector3(0, 0, -13.0)
+	T.teleport(home + east)
+	var ahead := _haul(m, P, K, home, T, east, Vector2.ZERO)
+	var aside := _haul(m, P, K, home, T, left, Vector2.ZERO)
+	var right := _haul(m, P, K, home, T, -left, Vector2.ZERO)
+	var keys := _haul(m, P, K, home, T, east, Vector2(0, -1))
+	var both := _haul(m, P, K, home, T, left, Vector2(0, -1))
+	var against := _haul(m, P, K, home, T, left, Vector2(0, 1))
+	A.ok("jug swing: the cursor straight ahead lands direct, against the foe, no predicted arc",
+			ahead["hooked"] and ahead["exit"] == "arrived" and absf(float(ahead["z"])) < 0.3
+					and float(ahead["dist"]) < 1.6 and not ahead["shown"], str(ahead))
+	var off := absf((aside["end"] as Vector3).z - (ahead["end"] as Vector3).z)
+	A.ok("jug swing: the cursor 90 deg left lands >= 3 m left of the straight endpoint",
+			aside["exit"] == "arrived" and float(aside["z"]) <= -3.0 and off >= 3.0, "%.2f m: %s" % [off, aside])
+	A.ok("jug swing: the cursor 90 deg right swings the other way as far",
+			absf(float(right["z"]) + float(aside["z"])) < 0.3, "%.2f / %.2f" % [right["z"], aside["z"]])
+	A.ok("jug swing: at 13 m the arc turns him 35-45 deg", float(aside["turned"]) >= 35.0
+			and float(aside["turned"]) <= 45.0, "%.1f deg" % float(aside["turned"]))
+	A.ok("jug swing: speed through the curve stays >= 90% of the straight haul",
+			float(aside["slowest"]) >= float(ahead["slowest"]) * 0.9, "%.1f against %.1f m/s" % [
+					float(aside["slowest"]), float(ahead["slowest"])])
+	A.ok("jug swing: he arrives still moving along the curve", float((aside["moving"] as Vector2).length()) > 5.0
+			and (aside["moving"] as Vector2).normalized().dot(aside["heading"]) > 0.95, str(aside["moving"]))
+	A.ok("jug swing: a held key swings as far as the look, and stacks with it (capped at steer_max)",
+			absf(float(keys["z"]) - float(aside["z"])) < 0.5 and float(both["z"]) < float(aside["z"]) - 0.5
+					and absf(float(both["z"])) <= float(ed["steer_max"]) + 0.3, "keys %.2f both %.2f" % [
+					keys["z"], both["z"]])
+	A.ok("jug swing: a key against the look cancels it", absf(float(against["z"])) < 0.5, str(against["z"]))
+	A.ok("jug swing: the predicted arc shows before the press and ends where he lands (within 1 m)",
+			aside["shown"] and (aside["promised"] as Vector3).distance_to(aside["end"]) < 1.0,
+			"%s against %s" % [aside["promised"], aside["end"]])
+	# a wall on the swing's side: he doesn't grind on it, the pull ends there
+	var Wd = m.world
+	var lv: int = r[5]
+	for dx in range(6, 16):
+		Wd.level[Wd.idx(int(home.x) + dx, int(home.z) - 2)] = lv + 3
+	var walled := _haul(m, P, K, home, T, left, Vector2.ZERO)
+	A.ok("jug swing: swung into a wall the pull ends there, not grinding along it",
+			walled["exit"] == "arrived" and float(walled["t"]) < 0.8, str(walled))
+	await A.done(m)
+
 # ------------------------------------------------------------------ the pull model (steer, curve, slingshot)
 ## The pull is an impulse toward the anchor that his movement input and facing curve, and backing away first
 ## slingshots (docs/heroes/juggernaut.md "Warchain: the state machine"). Pulled to a wall 9 m east each time.
@@ -783,14 +878,16 @@ func chain_steer() -> void:
 		if how == "sling":
 			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
 		if how == "face":
-			A.aim_at(P, home + Vector3(9.0, 0, 8.0))
+			A.aim_at(P, P.pos + Vector3(0, 0, 9.0))
 		var from := P.pos
 		K.use_e()
 		var t := 0.0
 		var wide := 0.0
 		var start_z := W.pull_dir.y
+		var look: Vector3 = P.inp["aim"] - P.pos       # the cursor stays put on screen as the camera follows him
 		while W.state == "pulling" and t < 1.5:
 			P.inp["move"] = Vector2(0, 1) if how == "strafe" else Vector2.ZERO
+			P.inp["aim"] = P.pos + look
 			m.step(A.DT)
 			t += A.DT
 			wide = maxf(wide, absf(P.pos.z - home.z))
@@ -805,8 +902,8 @@ func chain_steer() -> void:
 	A.ok("jug chain pull: holding a strafe curves it, arriving well beside the anchor (>= 1.5 m)",
 			sf["exit"] == "arrived" and float(sf["end_z"]) >= 1.5, str(sf))
 	var fc: Dictionary = runs["face"]
-	A.ok("jug chain pull: looking aside bends it that way too, less than a strafe",
-			float(fc["end_z"]) > 0.5 and float(fc["end_z"]) < float(sf["end_z"]), str(fc))
+	A.ok("jug chain pull: looking aside bends it that way just as far as a strafe",
+			absf(float(fc["end_z"]) - float(sf["end_z"])) < 0.5, str(fc))
 	var sl: Dictionary = runs["sling"]
 	A.ok("jug chain pull: pulled while backing away it slingshots in faster",
 			float(sl["sling"]) > 2.5 and float(sl["speed"]) > float(ed["reel_speed"]) + 2.5

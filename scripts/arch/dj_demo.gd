@@ -13,7 +13,11 @@ const ANIM := {
 	"thf_vault": ["thief", "arc_bolts", [0.55, 0.62, 0.69, 0.86, 0.98]],
 	"thf_exdash": ["thief", "arc_bolts", [0.55, 0.7, 0.95, 1.4, 1.7]],
 	"thf_loop": ["thief", "arc_bolts", [0.53, 0.68, 0.86, 0.97, 1.03, 1.1, 1.22, 1.28, 1.36, 1.49, 1.65, 1.8]],
+	"thf_chain": ["thief", "arc_bolts", [0.6, 0.68, 0.76, 1.26, 1.32, 1.44, 1.52, 2.1, 2.16, 2.3, 2.42, 2.9, 2.96]],
+	"thf_dance": ["thief", "arc_bolts", [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0, 2.2, 2.4]],
+	"thf_dance_still": ["thief", "arc_bolts", [0.96, 1.0, 1.16, 1.2, 1.36, 1.56]],
 	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.7, 0.8, 0.92, 1.05]],
+	"thf_bola_pair": ["thief", "arc_bolts", [0.5, 0.92, 1.0, 1.1, 1.3, 1.6]],
 	"thf_knife": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.62, 0.72, 0.92]],
 	"thf_blink": ["thief", "arc_bolts", [0.99, 1.01, 1.04, 1.1, 1.25, 1.5]],
 	"thf_encore": ["thief", "arc_bolts", [0.5, 0.58, 0.7, 0.8, 0.88, 0.97]],
@@ -24,7 +28,7 @@ const ANIM := {
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
 	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
-	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
+	"jug_meteor": ["juggernaut", "greatsword", [0.55, 0.74, 0.79, 0.86, 0.94, 1.15]],
 	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],
 	"jug_pull": ["juggernaut", "greatsword", [0.82, 0.92, 1.0, 1.08, 1.16, 1.32]],
@@ -52,6 +56,7 @@ const STILLS := {
 	"pull_steer": ["juggernaut", Vector3(-10.0, 0, 0)],
 }
 
+const SLOW_STRIPS := ["thf_vault", "thf_exdash", "thf_loop", "thf_primed", "thf_chain", "thf_dance", "thf_dance_still"]
 const STRIP_SLOW := 0.15     # Engine.time_scale while Kael's strips and Sable's dash strips play
 
 static func at(t: float, dt: float, when: float) -> bool:
@@ -61,7 +66,7 @@ static func at(t: float, dt: float, when: float) -> bool:
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
-	if t < 0.05 and (mv.begins_with("jug_") or mv in ["thf_vault", "thf_exdash", "thf_loop", "thf_primed"]):
+	if t < 0.05 and (mv.begins_with("jug_") or mv in SLOW_STRIPS):
 		Engine.time_scale = STRIP_SLOW       # (a slow software render must not skip the frames a strip asks for)
 	match mv:
 		"thf_lmb":
@@ -85,6 +90,11 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			if t > 0.5 and t < 0.8: P.inp["move"] = Vector2(0, 1)
 		"thf_loop":
 			loop(P, t, dt)
+		"thf_chain":
+			chain(P, t, dt)
+		"thf_dance", "thf_dance_still":
+			if at(t, dt, 0.5): cast_ult(P)
+			if mv == "thf_dance" and t > 0.6: P.inp["move"] = Vector2(0, 1)
 		"thf_exdash":
 			# sideways, away from the dummy (toward it the hunter ends up inside its model, which filled
 			# the old strips' last frames with a big pink blur)
@@ -93,7 +103,11 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.ex_cd = 0.0
 				P.inp["move"] = Vector2(0, -1)
 				K.on_dash(true)
-		"thf_bola":
+		"thf_bola", "thf_bola_pair":
+			if mv == "thf_bola_pair" and t < 1.2:
+				if t < 0.45: P.teleport(D.pos + Vector3(-3.0, 0, 0))
+				var second: Hunter = P.m.arena.dummies[1]["h"]
+				second.teleport(D.pos + Vector3(3.0, 0, 0))       # (it strafes: held in the lane)
 			if at(t, dt, 0.5):
 				K.ch_rmb = 1.0
 				K.cd["rmb"] = 0.0
@@ -143,13 +157,13 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.bot_hold["rmb"] = 0.9
 				K.press_rmb()
 		"jug_meteor":
-			if at(t, dt, 0.4):
-				P.teleport(Vector3(D.pos.x - 4.0, P.pos.y + 2.5, D.pos.z))
-				P.grounded = false
-				P.vel = Vector3.ZERO
-			if at(t, dt, 0.5):
-				K.ch_rmb = 1.0
-				K.cd["rmb"] = 0.0
+			# a real jump, RMB near its top: the hang, the straight drop, the hit circle just ahead of him
+			if at(t, dt, 0.3):
+				P.teleport(Vector3(D.pos.x - 2.4, D.pos.y, D.pos.z))
+				P.inp["aim"] = D.pos + Vector3(0, 0.9, 0)
+			if at(t, dt, 0.4): P.do_jump()
+			if at(t, dt, 0.72):
+				K.cd["air"] = 0.0
 				K.press_rmb()
 		"jug_dash":
 			if at(t, dt, 0.5):
@@ -207,6 +221,18 @@ static func loop(P: Hunter, t: float, dt: float) -> void:
 		P.do_dash()
 	# the second click comes while the first bolt still cools: it is kept and goes mid-flip (ThiefKit.bolt_buf)
 	P.inp["fire"] = (t > 1.0 and t < 1.03) or (t > 1.36 and t < 1.39)
+
+## Three cycles of the reset chain (item 53): a Vault every 0.85s to one side and back (the routine's three flips),
+## the empowered bolt thrown as she lands, its hit giving the next Vault.
+static func chain(P: Hunter, t: float, dt: float) -> void:
+	for i in 3:
+		var t0 := 0.5 + 0.85 * float(i)
+		if at(t, dt, t0):
+			P.inp["move"] = Vector2(0, 1 if i % 2 == 0 else -1)
+			if i == 0: P.dashes = P.max_dashes()
+			P.do_dash()
+	var after := fmod(t - 0.5, 0.85)
+	P.inp["fire"] = t > 0.5 and after > 0.5 and after < 0.53
 
 ## The Warchain's pull with a steer: hooked from 10m, pulled in while holding a sideways key.
 static func pull_steer(P: Hunter, K: ArchKit, D: Hunter, t: float, dt: float) -> void:

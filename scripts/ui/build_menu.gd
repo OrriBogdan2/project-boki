@@ -1,20 +1,21 @@
 class_name BuildMenu
 extends Control
 ## The small menu that opens when you click a piece you have placed: Move, Rotate, Store and, for pieces that
-## have one, a colour row. Clicking anywhere else closes it.
+## have one, a colour row. It opens beside the click and keeps off the rects in `blocked`. Clicking anywhere
+## else closes it.
 
 signal closed
 
 ## entries: [{label, key, cb}]. colours: hex strings (empty: no row); on_colour gets the picked one.
 static func open(host: Control, at: Vector2, title: String, entries: Array, colours := [], current := "",
-		on_colour := Callable()) -> BuildMenu:
+		on_colour := Callable(), blocked := []) -> BuildMenu:
 	var menu := BuildMenu.new()
 	menu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	menu.mouse_filter = Control.MOUSE_FILTER_STOP
 	menu.gui_input.connect(func(ev: InputEvent):
 		if ev is InputEventMouseButton and ev.pressed:
 			menu.close())
-	var card := UI.card(Color(0.07, 0.08, 0.12, 0.96), 10, 12)
+	var card := UI.card(Color(UI.NIGHT, 0.96), 10, 12)
 	UI.set_card_border(card, Color(1, 1, 1, 0.14), 1)
 	var col := UI.vbox(6)
 	card.add_child(col)
@@ -44,10 +45,7 @@ static func open(host: Control, at: Vector2, title: String, entries: Array, colo
 	menu.add_child(card)
 	host.add_child(menu)
 	card.reset_size()
-	var vp := host.get_viewport().get_visible_rect().size
-	var x := clampf(at.x + 8.0, 8.0, vp.x - card.size.x - 8.0)
-	var y := clampf(at.y - 20.0, 8.0, vp.y - card.size.y - 220.0)
-	card.position = Vector2(x, y)
+	card.position = BuildKeys.place_card(card.size, at, Vector2(8.0, 0.0), blocked)
 	UI.pop_in(card)
 	return menu
 

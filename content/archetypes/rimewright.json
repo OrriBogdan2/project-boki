@@ -1,29 +1,33 @@
 {
 	"id": "rimewright",
-	"title": "Frost Siren",
-	"base_name": "Claire",
+	"title": "Snowglide",
+	"base_name": "Neve",
 	"gender": "female",
-	"personality": "A graceful ice skater who glides where others walk and leaves frost behind her.\nElegant and playful, with a cold edge when crossed.",
+	"personality": "The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her.\nShe glides on the skates that saved them and fights with a candy-cane spear from the festival.",
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
-		"size": 1.15,
-		"bulk": 0.78,
+		"size": 1.014,
+		"bulk": 1.0,
 		"hit_r": 0.38,
-		"head": 0.58,
-		"legs": 2.15,
-		"neck": -0.08
+		"head": 0.6,
+		"legs": 2.04,
+		"torso": 0.96,
+		"shoulder": 0.84,
+		"neck": -0.04
 	},
-	"color": "#5fd6c4",
+	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
+	"color": "#8ae6ff",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
-	"silhouette": "the big furred collar and the long trailing scarf, on blade skates",
+	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 	"card": {
+		"role_word": "Controller",
 		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
 		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
 		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
-		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
+		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick, and hit twice as hard.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
 			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
@@ -41,13 +45,12 @@
 	},
 	"passive": {
 		"name": "Hoarfrost",
-		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
+		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
 		"splinter_delay": 0.4,
 		"fan_splinter": 60.0,
 		"fan_hits": 8,
-		"chill_slow": 0.15,
 		"chill_t": 4.0
 	},
 	"dash": {
@@ -61,8 +64,9 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. In the air, press it to buffer the skate: it starts the moment you land.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
 		"steer": 3.6,
+		"skate_dart_dmg_k": 2.0,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
 		"ice_len": 3.6,
@@ -70,6 +74,7 @@
 		"ice_time": 5.0,
 		"ice_col": "#bff0ff",
 		"ramp": 0.2,
+		"air_fall": 1.5,
 		"stop": 0.15
 	},
 	"rmb": {
@@ -112,11 +117,11 @@
 		"icon": "dome",
 		"col": "#9af0e6",
 		"cooldown": 17.0,
-		"hp": 70.0,
+		"hp": 200.0,
 		"slide": 4.5,
 		"time": 4.5,
 		"push": 5.0,
-		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
+		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -169,9 +174,10 @@
 		"col": "#7fd8ff",
 		"unlock": 6,
 		"cooldown": 80.0,
-		"radius": 7.2,
+		"radius": 8.3,
 		"snap_t": 0.2,
-		"carry_t": 0.5,
+		"carry_t": 0.8,
+		"carry_k": 1.05,
 		"hold": 3.5,
 		"late": 0.75,
 		"late_k": 0.67,
@@ -180,6 +186,6 @@
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, your momentum carries you about 3m on as the shell closes, then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

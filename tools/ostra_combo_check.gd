@@ -1,13 +1,27 @@
 extends "res://tools/hero_pair_check.gd"
-## --ostra-combo-check: Ostra, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
+## --ostra-combo-check: Motley, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
 ## Trade's two ends), charge and wind-up timings, where each thing lands, the payoffs, the owner's notes
 ## (Shift never travels on its own, keeps his height, one Snap charge that visibly stuns the training
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
+
+const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
 
 func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
 	await _bolt_through_terrain()
+	var orb_check = load("res://tools/ostra_orb_check.gd").new()
+	await orb_check.orbs(main)
+	n += orb_check.n
+	fails += orb_check.fails
+	var globe_check = load("res://tools/ostra_globe_check.gd").new()
+	await globe_check.globe(main)
+	n += globe_check.n
+	fails += globe_check.fails
+	var arena_check = load("res://tools/ostra_arena_check.gd").new()
+	await arena_check.arena(main)
+	n += arena_check.n
+	fails += arena_check.fails
 	var ult_check = load("res://tools/ostra_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -54,8 +68,8 @@ func _ostra() -> void:
 	# ---- the reticle: a thin line to the cursor all the time
 	reset.call()
 	ok(
-		"reticle: the thin aim line to the cursor shows the whole time",
-		AimKit.shown(P, "aim") and bool(AimKit.entry(P, "aim").get("arrow", false))
+		"reticle: the thin aim line to the cursor shows the whole time, in place of the shared weapon line",
+		AimKit.shown(P, "aim") and bool(AimKit.entry(P, "aim").get("arrow", false)) and P.ak.own_aim_line()
 	)
 	# ---- Swell
 	K.on_deal(T, 10.0, {})
@@ -80,7 +94,7 @@ func _ostra() -> void:
 		"swollen %.1f" % K.swollen_t
 	)
 	ok("anim: Swollen plays ostra_empower", K.anim_id == "ostra_empower")
-	# ---- LMB: plain orbs fly to full range past the cursor; a pause primes a fast bright bolt
+	# ---- LMB: plain orbs fly to full range past the cursor (the charge: ostra_orb_check.gd)
 	reset.call()
 	aim_at(P, home + Vector3(3.0, 0, 0))
 	T.teleport(home + Vector3(12.0, 0, 0))
@@ -91,33 +105,30 @@ func _ostra() -> void:
 	P.inp["fire"] = false
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
-	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
+	ok("lmb: a plain orb flies past the cursor to full range (12.25m)", olen > 11.0 and olen < 13.0, "%.1f m" % olen)
 	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
 	reset.call()
 	step(m, 1.6)
 	ok(
-		"lmb: a pause primes the next orb (a charge held at his hand)",
-		K.primed and KitLooks.of(m).holding("os_charge"), "primed %s" % K.primed
+		"lmb: a pause charges the next orb (a glow held at his hand)",
+		K.charge >= 1.0 and KitLooks.of(m).holding("os_charge"), "charge %.2f" % K.charge
 	)
 	var spd_hot := float(P.wpn["speed"])
 	P.inp["fire"] = true
 	step(m, 0.05, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
-	ok(
-		"lmb: the Settled orb is a long bright bolt, faster (1.4x)",
-		KitLooks.of(m).skins_live("orb_hot") >= 1 and spd_hot > 40.0, "speed %.0f" % spd_hot
-	)
-	ok("anim: the Settled bolt plays ostra_orb_hot", K.anim_id == "ostra_orb_hot")
+	ok("lmb: a full orb is faster (1.4x)", spd_hot > 40.0, "speed %.0f" % spd_hot)
+	ok("anim: a full orb plays ostra_orb_hot", K.anim_id == "ostra_orb_hot")
 	step(m, 1.0)
 	ok(
-		"lmb: the Settled orb hits harder and slows", K.settled_shots == 1 and dmg(T) >= 11.0 and T.slow_t > 0.0,
+		"lmb: a full orb hits harder and slows", K.settled_shots == 1 and dmg(T) >= 11.0 and T.slow_t > 0.0,
 		"took %.1f slow %.1f" % [dmg(T), T.slow_t]
 	)
 	ok(
-		"small: the charge is stepped, not gradual (one Settled orb, then plain)",
-		not K.primed and float(P.wpn["speed"]) < 35.0, "speed %.0f" % float(P.wpn["speed"])
+		"item 60: the charge restarts from zero after a shot (plain again)",
+		K.last_orb_c >= 0.999 and K.charge < 0.9, "charge %.2f" % K.charge
 	)
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
@@ -212,7 +223,7 @@ func _ostra() -> void:
 		) < 0.01 and absf(float(K.e_def()["cooldown"]) - 10.0) < 0.01
 	)
 	ok(
-		"data: a Settled orb is 34% harder (353 vs 263)",
+		"data: a full orb is 34% harder (353 vs 263)",
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
@@ -240,6 +251,13 @@ func _ostra() -> void:
 		not K.swap.is_empty() and AimKit.shown(P, "swap_fly") and bool(AimKit.entry(P, "swap_fly").get("all", false))
 	)
 	ok("item 35: a ground Trade plays his underhand lob, ostra_swap", K.anim_id == "ostra_swap")
+	m.step(DT)
+	var lantern: Dictionary = KitLooks.of(m).held.get("os_star", {})
+	ok(
+		"owner 11-08: the Trade's lantern is drawn 1.3x (TRADE_LOOK_K), the catch circle stays dash.radius",
+		not lantern.is_empty() and absf((lantern["n"] as Node3D).scale.x - OstraKit.TRADE_LOOK_K) < 0.001
+			and absf(float(AimKit.entry(P, "swap_fly").get("r", 0.0)) - float(K.dash_def()["radius"])) < 0.001
+	)
 	var t_cast := m.time
 	var done_at := [0.0]
 	step(m, 2.0, func(): if K.swaps == 1 and done_at[0] == 0.0: done_at[0] = m.time)
@@ -291,6 +309,7 @@ func _ostra() -> void:
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
 	await _hover(m, P, T, home, K)
+	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
@@ -338,6 +357,10 @@ func _ostra() -> void:
 		"e: a full pop hits up to 3.5x an early one", late > early * 2.5 and K.pops >= 2,
 		"early %.1f late %.1f" % [early, late]
 	)
+	ok(
+		"e: a full pop is 3.5x the base 12.5 (source peak)", absf(late - 12.5 * 3.5) < 1.0,
+		"late %.2f vs %.2f" % [late, 12.5 * 3.5]
+	)
 	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
 	# the data: "reactivate to detonate": left alone at full size it waits for the recast, then the Collapse
@@ -356,10 +379,27 @@ func _ostra() -> void:
 	)
 	reset.call()
 	K.cd["e"] = 0.0
-	var hp_fizz := T.hp
-	K.cast_e()
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
-	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
+	var hp_idle := T.hp
+	K.use_e()
+	var cd_cast := float(K.cd["e"])
+	step(m, float(K.e_def()["grow"]) + 60.0)
+	ok(
+		"e: no fizzle: a full seed left a whole minute is still there at full size, harmless",
+		not K.seed.is_empty() and K.seed_k() >= 0.99 and T.hp >= hp_idle and K.e_recastable(),
+		"seed %s k %.2f" % [not K.seed.is_empty(), K.seed_k()]
+	)
+	ok(
+		"e: the cooldown starts on the plant (it has run out by the minute, the pop is not waited for)",
+		cd_cast > 0.0 and float(K.cd["e"]) <= 0.0 and K.in_e(),
+		"cd at plant %.1f now %.1f" % [cd_cast, float(K.cd["e"])]
+	)
+	ok("e: the data lists no timer: no hold_full cap in the def", not K.e_def().has("hold_full"))
+	ok("e: a merge does not take the waiting seed", _merge(P) and not K.seed.is_empty())
+	step(m, 2.0)
+	P.downed = true
+	K._tick(0.016)
+	P.downed = false
+	ok("e: going down ends the seed with no damage", K.seed.is_empty() and T.hp >= hp_idle and not K.in_e())
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -490,6 +530,29 @@ func _ostra() -> void:
 	A.queue_free()
 	m.hunters.erase(A)
 	P.slot_lv["dash"] = 1
+	# ---- upgrade parity (docs/heroes/ostra.md): the source's tier II / III+IV numbers per slot
+	var op: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		op.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.power("sec"), K.dash_def()["cd"] * K.dash_k(),
+				K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin"), K.power("dash")])
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	ok("upgrade parity: Shard Snap cooldown 10 -> 8.5 -> 7 and damage +20% / +40%",
+			near.call(op[1][0], 8.5) and near.call(op[2][0], 7.0)
+			and near.call(float(op[1][1]) / float(op[0][1]), 1.2)
+			and near.call(float(op[2][1]) / float(op[0][1]), 1.4), str(op))
+	ok("upgrade parity: Lantern Trade recharge 9.5 -> 8 -> 6.5, no damage step",
+			near.call(op[1][2], 8.0) and near.call(op[2][2], 6.5)
+			and near.call(float(op[2][5]) / float(op[0][5]), 1.0), str(op))
+	ok("upgrade parity: Brimseed cooldown 10 -> 10 -> 8 and damage +10% / +20%",
+			near.call(op[1][3], 10.0) and near.call(op[2][3], 8.0)
+			and near.call(float(op[1][4]) / float(op[0][4]), 1.1)
+			and near.call(float(op[2][4]) / float(op[0][4]), 1.2), str(op))
 	# ---- merge start drops every hold
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -516,15 +579,15 @@ func _ostra() -> void:
 	home = r[3]
 	K = P.ak
 	step(m, 1.6)
-	ok("merge hold: the orb is Settled before the merge", K.primed)
+	ok("merge hold: the orb is charged before the merge", K.charge >= 1.0)
 	K.swap_aim = 0.2
 	K.snap = {"t": 0.1, "T": 0.32}
 	ok("merge hold: a merge is under way", _merge(P))
 	step(m, 0.2)
 	ok(
-		"merge hold: the prime, the Shift aim and the Snap wind-up drop with the merge",
-		not K.primed and K.prime_until < 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
-		"primed %s" % K.primed
+		"merge hold: the orb's charge, the Shift aim and the Snap wind-up drop with the merge",
+		K.charge <= 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
+		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
 	# ---- every move, sound and look exists
@@ -533,19 +596,20 @@ func _ostra() -> void:
 		"ostra_arrive", "ostra_seed", "ostra_pop", "ostra_empower", "ostra_well", "ostra_well_snap", "ostra_well_end"
 	]
 	ok(
-		"anim: every Ostra move is keyed (KMovesStone)",
+		"anim: every Motley move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("os_"))
 	ok(
-		"sfx: every Ostra sound is loaded by Sfx", snd.size() >= 12 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Motley sound is loaded by Sfx", snd.size() >= 12 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
-## The data: the Settled orb "goes through terrain"; a plain orb is stopped by it.
+## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
+## window, capped after), every orb passes a wall between him and the foe at any charge, and a full orb slows.
 func _bolt_through_terrain() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
@@ -559,20 +623,52 @@ func _bolt_through_terrain() -> void:
 	for dz in range(-2, 3):
 		W.kind[W.idx(wx, wz + dz)] = World.T_BLOCK
 	aim_at(P, T.pos)
-	step(m, float(K.lmb_def()["idle"]) + 0.3)
-	var shots0 := P.shot_n
-	var hot_n := K.settled_shots
-	P.fire_cd = 0.0
-	# held: the first orb is the Settled bolt (primed by the pause), the next a plain orb 0.6 s later
-	step(m, 0.7, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 0.6)
-	var settled_dmg := float(P.wpn["dmg"]) * (1.0 + float(K.lmb_def()["prime_dmg"]))
+	var idle := float(K.lmb_def()["idle"])
+	var waits := [0.0, 0.35, 0.7, 1.05, idle, idle + 1.0, idle + 3.0]
+	var dmgs: Array = []
+	var spds: Array = []
+	var rads: Array = []
+	var slows: Array = []
+	var through := true
+	for w in waits:
+		fresh(T)
+		K.last_shot_t = m.time - w
+		step(m, 0.03)
+		var shots0 := P.shot_n
+		spds.append(float(P.wpn["speed"]))
+		P.fire_cd = 0.0
+		P.inp["fire"] = true
+		step(m, 0.05)
+		P.inp["fire"] = false
+		step(m, 0.9)
+		var d := dmg(T)
+		dmgs.append(d)
+		rads.append(K.last_orb_r)
+		slows.append(T.slow_t > 0.0)
+		if P.shot_n <= shots0 or d <= 0.5:
+			through = false
+		step(m, 0.6)
+	var mono := true
+	for i in range(1, waits.size()):
+		if dmgs[i] < dmgs[i - 1] - 0.01 or spds[i] < spds[i - 1] - 0.01 or rads[i] < rads[i - 1] - 0.001:
+			mono = false
 	ok(
-		"lmb data: the Settled bolt goes through terrain; the plain orb after it is stopped by the same rock",
-		P.shot_n >= shots0 + 2 and K.settled_shots == hot_n + 1 and absf(dmg(T) - settled_dmg) < 0.5,
-		"took %.1f (the Settled bolt alone is %.1f), %d shots" % [dmg(T), settled_dmg, P.shot_n - shots0]
+		"item 60: damage, speed and size grow with the wait (monotonic) from 0 to the window",
+		mono and dmgs[4] > dmgs[0] * 1.2 and rads[4] > rads[0] * 1.5 and spds[4] > spds[0] * 1.2,
+		"dmg %s speed %s r %s" % [str(dmgs), str(spds), str(rads)]
 	)
+	ok(
+		"item 60: it is smooth, not a switch (a mid wait lands between the two ends)",
+		dmgs[2] > dmgs[0] + 0.3 and dmgs[2] < dmgs[4] - 0.3 and rads[2] > rads[0] and rads[2] < rads[4]
+	)
+	ok(
+		"item 60: capped after the window",
+		absf(dmgs[5] - dmgs[4]) < 0.05 and absf(dmgs[6] - dmgs[4]) < 0.05 and absf(rads[6] - rads[4]) < 0.001,
+		str(dmgs)
+	)
+	ok("item 60: a full orb hits for the data's +34% (353 vs 263)", absf(dmgs[4] / dmgs[0] - 1.34) < 0.06, str(dmgs))
+	ok("item 60: every orb passes the wall between him and the foe at any charge", through, str(dmgs))
+	ok("item 60: only the full orb slows", slows[4] and slows[5] and not slows[0] and not slows[2], str(slows))
 	await done(m)
 
 ## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
@@ -631,7 +727,7 @@ func _dash_moves(K: OstraKit) -> void:
 		lengths.all(func(l): return l > 0.2 and l <= quickest), str(lengths)
 	)
 
-## Item 17: while the lantern flies he drifts slowly (15-25% of run speed), holds his height even over the abyss,
+## Items 17 and 75: while the lantern flies he drifts slowly (30% of run speed), holds his height even over the abyss,
 ## and the Trade sends everyone to where he is when it lands.
 func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var W = m.world
@@ -671,8 +767,8 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 17: in flight he drifts at dash.fly_slow (in the 15-25% band) of his run speed",
-		flying and run_speed > 1.0 and fly_slow >= 0.15 and fly_slow <= 0.25
+		"owner 11-10: in flight he drifts at dash.fly_slow (0.675, the old 0.35 slow halved) of his run speed",
+		flying and run_speed > 1.0 and absf(fly_slow - 0.675) < 0.001
 			and absf(speed / run_speed - fly_slow) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)

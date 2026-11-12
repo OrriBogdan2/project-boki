@@ -4,12 +4,14 @@ extends RefCounted
 ## Retaliation, briefs/hero-ref/juggernaut.md "Ultimate (on X)"). Press: he plants in a guard for 0.65s,
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
-## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals, and knocking a
-## hunter with it makes it ready again at once. Landing it on a rival hunter fills the bond meter
-## (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). Owned by JuggernautKit.
+## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals. Taking a hunter
+## down with it (the source's "killing a living enemy": our lethal hit is a knock; a hunter already down takes
+## nothing from it, and a monster or a wisp doesn't count) makes it ready again at once. Landing it on a
+## rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain
+## still held pulls him through it: E in the guard or the cleave hauls him along the chain, the guard up, and
+## the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
-const HOT := Color("ffe39a")           # the cleave's inner fill and the impact cloud: his gold, run hot
 const LANE_COL := Color("ffb820")      # the strip ahead: his gold
 const BLOCK_GAP := 0.08                # s: hits closer together than this (one shotgun blast) count once
 
@@ -50,8 +52,16 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
-	k.m.sfx("jug_guard", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
+	k.vfx("guard_tell")
+
+## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
+## takes it as the cleave lands.
+func pull_through() -> void:
+	if guarding():
+		k.warchain.pull()
+		k.play("jug_guard")
+	else:
+		st["pull_next"] = true
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
@@ -87,15 +97,21 @@ func _tick_guard(d: Dictionary) -> void:
 	if h.vel.y > 0.0:
 		h.vel.y = 0.0          # no jumping off the guard (it lands straight back)
 	var aim := h.aim_dir()
+	var chain := k.warchain
+	if chain.pulling():
+		aim = chain.to_anchor()      # hauled in: the strip looks down the chain
 	if aim.length() > 0.1:
 		st["dir"] = aim.normalized()
 	var gk := clampf(float(st["t"]) / float(d["guard"]), 0.0, 1.0)
 	AimKit.lane(h, "ult", {"dir": st["dir"], "len": float(d["len"]), "width": float(d["width"]), "fill": gk,
 			"col": LANE_COL, "col2": GOLD, "all": true, "alpha": 1.3})
-	if randf() < 0.5:
-		k.m.fx.spark(h.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 1.2, randf_range(-0.4, 0.4)), Vector3.UP,
-				GOLD, 2, 2.5, 40.0, 0.3, -2.0, 0.8)
-	if float(st["t"]) >= float(d["guard"]):
+	HeroVfx.of(k.m).hold(h, "guard", gk)
+	# a hooked foe coming up in the pull is struck in reach, however long the guard has run; the guard holds until
+	# then, so the cleave doesn't go off in the air short of them
+	var hauled: bool = chain.pulling() and chain.target != null
+	if hauled and chain.to_anchor().length() <= float(d["len"]) * 0.8:
+		_strike(d)
+	elif not hauled and float(st["t"]) >= float(d["guard"]):
 		_strike(d)
 
 ## The guard ends: he lunges along the strip and the blade comes up through it.
@@ -108,21 +124,23 @@ func _strike(d: Dictionary) -> void:
 	_show_glow(false)
 	AimKit.hide(h, "ult")
 	k.play("jug_riposte")
-	k.travel(float(d["lunge"]), float(d["strike_t"]), {"invuln": 0.0, "trail": "dust", "dir": dir})
-	k.m.sfx("jug_riposte", h.pos, -1.0 if h.is_local() else -4.0, 1.0)
+	if not k.warchain.pulling():         # (the pull is his lunge)
+		k.travel(float(d["lunge"]), float(d["strike_t"]), {"invuln": 0.0, "trail": "dust", "dir": dir})
+	k.vfx("riposte_go", h.pos, dir, {"len": float(d["lunge"])})
 
 ## The cleave lands: everyone in the strip (from where the guard stood) is hit once.
 func _land(d: Dictionary) -> void:
 	var h := k.h
 	var dir: Vector2 = st["dir"]
-	var from: Vector3 = st["from"]
+	var pulled: bool = k.warchain.pulling()
+	var from: Vector3 = h.pos if pulled else st["from"]
 	st["phase"] = "recover"
 	st["t"] = 0.0
-	h.roll_t = 0.0
+	if not pulled:
+		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
 	var dmg := float(d["dmg"]) * (1.0 + float(d["block_k"]) * float(blocks)) * k.power("x")
-	var mid := from + Vector3(dir.x, 0, dir.y) * float(d["len"]) * 0.55
-	k.fx().crescent(mid + Vector3(0, 1.0, 0), dir, 150.0, float(d["len"]) * 0.6, GOLD, HOT, 0.24, PI * 0.5)
+	k.vfx("riposte_land", from, dir, {"len": float(d["len"]), "w": float(d["width"])})
 	last_dealt = 0.0
 	for f in k.m.foes_of(h.team):
 		if not f.hittable() or absf(f.pos.y - from.y) > 2.0:
@@ -135,32 +153,30 @@ func _land(d: Dictionary) -> void:
 			continue
 		last_dealt += dealt
 		_impact(f, dir, dealt)
-		if f is Hunter and ((f as Hunter).downed or f.hp <= 0.0):
+		if HeroUlt.landed(k, f) in ["knock", "kill"]:
 			_reset()
-		HeroUlt.landed(k, f)
 	if last_dealt > 0.0:
 		strikes += 1
 		var hp0 := h.hp
 		h.heal(last_dealt * float(d["heal"]))
 		last_healed = h.hp - hp0
 		if last_healed >= 1.0:
-			k.fx().pillar(h.pos, Color("ffd27a"), 2.6, 0.5, 0.5)
+			k.vfx("riposte_heal")
+	if st.get("pull_next", false) and k.warchain.hooked():
+		k.warchain.pull()
 
 ## On someone hit: the gold impact cloud, the hit-stop and a heavy shake.
 func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	var h := k.h
-	k.fx().star(f.pos + Vector3(0, 1.2, 0), GOLD, 2.4, 0.3, HOT)
-	k.m.fx.burst(f.pos + Vector3(0, 0.8, 0), Color(HOT, 0.85), 22, 3.0, 0.6, -1.0, 1.6)
-	k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), GOLD, 12, 6.0, 0.35, 4.0, 1.0, Vector3(dir.x, 0.6, dir.y), 50.0)
+	k.vfx("riposte_hit", f.pos, dir)
 	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
 	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
-## A hunter knocked by the cleave: it is ready again at once.
+## A hunter who was up and went down to the cleave: it is ready again at once.
 func _reset() -> void:
 	resets += 1
-	k.cd["x"] = 0.0
-	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
-	k.m.sfx("unlock", k.h.pos, -4.0, 1.4)
+	HeroUlt.reset(k)
+	k.vfx("riposte_reset")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
 ## counts. Returns true when it was blocked.
@@ -175,9 +191,8 @@ func block(by: Ent, o: Dictionary) -> bool:
 		st["blocks"] = mini(int(st["blocks"]) + 1, int(data()["blocks_max"]))
 		var from := by.pos if by != null and is_instance_valid(by) else h.pos + Vector3(0, 0, -1)
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
-		k.m.fx.spark(h.pos + Vector3(0, 1.2, 0) + to * 0.5, to, HOT, 10, 9.0, 40.0, 0.2, 0.0, 1.1)
-		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
-		k.m.sfx("jug_ting", h.pos, -3.0, 1.0 + 0.08 * float(st["blocks"]))
+		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
+				{"pitch": 0.08 * float(st["blocks"])})
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).
@@ -189,16 +204,6 @@ func _show_glow(on: bool) -> void:
 	glow.visible = on
 
 func _make_glow() -> Node3D:
-	var n := Node3D.new()
-	var shell := MeshInstance3D.new()
-	# a gold shell hugging the body, alpha blended so it stays gold on grass; no light (it pooled into a pale
-	# disc on the ground round his feet)
-	shell.mesh = Models.sphere(0.7, 16)
-	shell.material_override = DJFx.solid(Color(GOLD, 0.3))
-	shell.scale = Vector3(1.0, 1.5, 1.0)
-	shell.position.y = 1.05
-	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(shell)
-	k.h.add_child(n)
+	var n := HeroVfx.of(k.m).shell(k.h, "guard_shell")
 	k.self_nodes.append(n)
 	return n

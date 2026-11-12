@@ -1,11 +1,13 @@
 class_name HeroDemo
 extends RefCounted
-## Screenshot tooling for Ryzz and Vex (used by ArenaDemo): --arena-demo=hero_<id>_<move> with
+## Screenshot tooling for Sparkle and Vex (used by ArenaDemo): --arena-demo=hero_<id>_<move> with
 ##   --arena-shot=<png>                      one frame at the moment of the move
 ##   --hero-frames=<png> --hero-times=a,b,c  a contact sheet: one cropped frame per time (seconds
 ##                                           after the ability is pressed), for the animation strips
 ## Moves: mage_live, mage_wire, mage_blowout, mage_coil, mage_sky, mage_card
-##        gunslinger_fever, gunslinger_burr, gunslinger_wall, gunslinger_needle, gunslinger_skewer, gunslinger_dash
+##        gunslinger_fever, gunslinger_burr, gunslinger_wall, gunslinger_needle, gunslinger_skewer, gunslinger_dash,
+##        gunslinger_railrest, gunslinger_railwind, gunslinger_railbeam (the Longneedle's view, item 68),
+##        <hero>_dashaim (any hero: a slide east with the cursor north, LMB held; item 109)
 
 const GO := 0.4
 
@@ -91,6 +93,24 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 			"dash":
 				if ArenaDemo._at(t, dt, GO): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1); P.inp["dash_down"] = true; P.do_dash()
 				if t > GO: P.inp["dash_down"] = t < GO + 0.6
+				at_t = GO + 0.3
+			"railrest", "railwind", "railbeam":       # item 68, at the match's own zoom: before, the wind-up, the beam
+				A.m.set_meta("zoom_hold", 1.0)
+				if t < 0.1: P.teleport(D.pos + Vector3(-7.0, 0, 1.5))
+				if ArenaDemo._at(t, dt, GO + 0.4):
+					K.cd["e"] = 0.0
+					K.use_e()
+				at_t = {"railrest": GO, "railwind": GO + 0.4 + 0.45, "railbeam": GO + 0.4 + 0.67}[mv]
+			"dashaim":       # item 109: slide across the screen, the rifle kept up the screen and firing
+				P.inp["aim"] = P.pos + Vector3(0, 0.9, -8.0)
+				P.inp["fire"] = t > 0.2
+				if ArenaDemo._at(t, dt, GO):
+					P.dashes = P.max_dashes()
+					P.inp["dash_down"] = true
+					P.do_dash()
+				if t > GO:
+					P.inp["move"] = Vector2(1, 0)
+					P.inp["dash_down"] = t < GO + 0.6
 				at_t = GO + 0.3
 	# contact sheet
 	var fr := arg("--hero-frames")

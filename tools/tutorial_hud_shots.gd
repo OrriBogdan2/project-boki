@@ -1,15 +1,18 @@
 extends RefCounted
 ## --tutorial-hud-shots --shots-dir=<dir>: the first moments of the tutorial as screenshots (run with a
 ## real renderer, e.g. xvfb-run --rendering-driver opengl3 --resolution 1280x720): the intro card,
-## the drop, the landing, and the first moments of the dash, the lookout, the shoot, the Boki and the
-## fight steps. Files are <dir>/<WxH>_NN_<what>.png.
+## the drop, the landing, and each beat after it: the point, every forced pick (its gold ring), each camp
+## and the move it teaches, the wall kick, the lookout, the glove, the fuse, the ranks and the way out.
+## Files are <dir>/<WxH>_NN_<what>.png.
 
 var main: Node
 var m: Match
 var dir := "/tmp/tuthud_shots"
 var n := 0
 
-const WATCHED := ["dash", "exdash", "crouch", "shoot", "sig", "utility", "throw", "fight"]
+const WATCHED := ["points", "pick_sec", "sec", "shoot", "pick_dash", "dash", "wallkick", "crouch", "gkey",
+		"pick_kin", "kin", "glove", "hook", "pick_ult", "ult", "ranks", "wayout", "uplink"]
+const GUARD := 24000      # ticks of 2 sim steps (800 s): the slow steps wait ~170 s, so 6000 was too few
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -29,9 +32,9 @@ func run(main_node: Node) -> void:
 	await _shot("intro_late")
 	m.tut.ack()
 	var seen := {}
-	var times := [0.4, 1.2, 2.5, 4.0, 6.0, 9.0, 13.0, 18.0]
+	var times := [0.4, 1.2, 2.5]
 	var guard := 0
-	while guard < 6000 and m.tut.step < 15 and not m.player.extracted:
+	while guard < GUARD and m.tut.step < Tutorial.steps().size() and not m.player.extracted:
 		guard += 1
 		TutorialDrive.drive(m)
 		for i in 2:
@@ -41,7 +44,8 @@ func run(main_node: Node) -> void:
 		var sid := tu.id()
 		if not times.is_empty() and m.time >= float(times[0]):
 			await _shot("t%04.1f_%s" % [float(times.pop_front()), sid])
-		for at in [0.4, 2.2, 6.0]:
+		var ats := [0.25] if sid.begins_with("pick_") or sid == "sec" else [0.7, 2.6]   # (a pick is made by 0.4 s)
+		for at in ats:
 			var key := "%s_%.1f" % [sid, at]
 			if sid in WATCHED and tu.t >= at and not seen.has(key):
 				seen[key] = true

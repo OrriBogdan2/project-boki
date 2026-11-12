@@ -28,6 +28,8 @@ static func open(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 	m.sfx("pickup", c["pos"], 0.0, 0.8)
 	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("f2c84a"), 28, 4.5, 0.6)
 	m.fx.ring(c["pos"], 2.4, Color("f2c84a", 0.9), 0.4)
+	if h == m.player and h.kin is Kin:
+		BokiChatter.say(m, h.kin, "loot")
 	drop(m, h, c, from_net)
 
 ## THE CALL SITE where a chest's contents appear (the perk orbs of ext/perkorbs go in here, at
@@ -42,8 +44,8 @@ static func drop(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 	# a crate on the sky train pops its loot gently, so it lands on the car and rides along
 	var soft = Vector3(randf_range(-0.8, 0.8), 4.5, randf_range(-0.8, 0.8)) if c.has("ride") else null
 	var gems: Array = r["gems"]
-	for i in randi_range(int(gems[0]), int(gems[1])):
-		m.drop("gem", at + Vector3(0, 0.8, 0), int(round(float(r["gem_base"]) * float(m.T["loot"]))), "", "", soft)
+	DropMerge.gems(m, at + Vector3(0, 0.8, 0), randi_range(int(gems[0]), int(gems[1])),
+			int(round(float(r["gem_base"]) * float(m.T["loot"]))), soft)
 	if randf() < float(r["seed_odds"]):
 		m.drop("seed", at + Vector3(0, 0.8, 0), randi_range(1, 2), Data.pick_seed(), "", soft)
 	if not from_net:
@@ -56,12 +58,8 @@ static func drop(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 			var a3 := randf() * TAU
 			m.spawn_val(
 					Loot.valuable(Loot.roll_valuable(rng, int(r["valuable_tier"]))), at + Vector3(cos(a3), 0, sin(a3)))
-			if bonus >= int(r["rift_key_min_bonus"]) and rng.randf() < float(r["soul_ember_odds"]):
+			if bonus >= int(r["soul_ember_min_bonus"]) and rng.randf() < float(r["soul_ember_odds"]):
 				m.spawn_val(Loot.valuable("soul_ember"), at + Vector3(-cos(a3), 0, -sin(a3)))
-		# a rich area's chest sometimes holds a Rift Key
-		if m.exits and not m.exits.list.is_empty() and bonus >= int(r["rift_key_min_bonus"]) \
-				and rng.randf() < float(r["rift_key_odds"]):
-			m.exits.drop_key(at)
 	if c.has("ride") and not from_net:
 		KeyBonus.on_break(m, at, "train_crate")      # a sky-train crate: a rare chest key
 	if not from_net:

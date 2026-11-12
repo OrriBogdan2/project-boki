@@ -1,4 +1,4 @@
-# Silver Thief
+# The Silver Thief
 
 A light duelist who picks one target and never lets go, from range. Every bolt marks them, every
 cartwheel empowers the next bolt, and landing that bolt gives the cartwheel straight back.
@@ -8,9 +8,9 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Class title | Silver Thief |
+| Class title | the Silver Thief |
 | Base character | Sable, female |
-| Personality | Quick, quiet and light-fingered. She is never where you aimed, and she smiles when you miss. She steals the moment first and the loot second. |
+| Personality | The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing. Everyone has a reason to hate her, and she knows it. She's still after the treasure. |
 
 <!-- /gen:profile -->
 
@@ -25,7 +25,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
-   on a rival hunter fills your bond meter a long way. The Boki Merge has its own key.
+   on a rival hunter fills your bond meter a long way. The Boki Fusion has its own key.
 
 ## Combos and interactions
 
@@ -57,9 +57,9 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 |  |  |
 |---|---|
 | Body | 124 health, 4.4 m/s, 1 dash charge |
-| Signature weapon | Arc Bolts (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Arc Shots (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
-| Silhouette | the hood tail and cape |
+| Silhouette | the long braid, the moth wings and the twin pistols |
 | Resource | Marks (max 8) |
 
 ### Kit card
@@ -70,26 +70,26 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
-| Dash: Vault | Cartwheel a short way (much further from a jump). Your next bolt is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
-| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
+| Dash: Vault | Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
+| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
-| Weapon: Arc Bolts | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
+| Weapon: Arc Shots | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
 
 ### Abilities in full
 
-**Marks (passive).** Every bolt that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your bolts on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
+**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (about 8m from a jump, its speed carried to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next bolt within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a bolt and puts 2 Marks on them (Marks add to it as to any bolt); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
+**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
 
 **Bola (RMB, 7s cooldown).**
 
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4 each, 6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 
@@ -97,9 +97,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
-| Dash (Shift) | recharge 4.5s -> 3.8s per charge; the empowered bonus +20%. | recharge 4.5s -> 3.2s; the empowered bonus +40% in all, and the speed boost is half again as big. |
-| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
+| RMB | damage +50%. | cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks. |
+| Dash (Shift) | the empowered bonus +20%. | the empowered bonus +40% in all, and the speed boost is half again as big. |
+| E | cooldown 15s -> 10.7s. | cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
@@ -108,7 +108,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | gold Mark diamonds over the target, one per stack |
-| Armed / full | a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next bolt is empowered; a violet ring round her and blades circling her while Encore runs |
-| Dash spent | a white cartwheel arc, dash pip dark |
+| Armed / full | a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Encore runs |
+| Dash spent | a white cartwheel arc, dash pip dark; a landed empowered shot flashes the pip back with RESET at her hand |
 
 <!-- /gen:kit -->

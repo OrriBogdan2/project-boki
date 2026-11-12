@@ -10,7 +10,7 @@ const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Acc
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
 var host: CenterContainer
-var fps_lbl: Label
+var fps_lbl: PerfOverlay
 var page := ""                  # "" when nothing is open
 var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
@@ -29,6 +29,7 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	root.add_child(MoveReadout.new())
 	# behind every overlay menu: the screen blurred and darkened, fading in and out
 	dim = UI.backdrop()
 	root.add_child(dim)
@@ -36,16 +37,16 @@ func _ready() -> void:
 	host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(host)
-	fps_lbl = UI.label("", 13, UI.MUTED)
+	fps_lbl = PerfOverlay.new()
 	fps_lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	fps_lbl.position = Vector2(-80, 4)
+	fps_lbl.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	fps_lbl.position.y = 4
+	fps_lbl.offset_right = -8
 	root.add_child(fps_lbl)
 
 func _process(_d: float) -> void:
 	Record.tick(get_tree(), _d)
-	fps_lbl.visible = bool(Settings.get_v("show_fps")) and not Record.clean()
-	if fps_lbl.visible:
-		fps_lbl.text = "%d fps" % Engine.get_frames_per_second()
+	fps_lbl.tick("" if Record.clean() else Settings.fps_mode(), _d)
 
 func is_open() -> bool:
 	return page != ""
@@ -186,6 +187,7 @@ func back() -> void:
 			"saves": open_saves()
 			"inventory": open_inventory()
 			"dex": open_dex(dex_open)
+			"bowl": open_bowl()
 			_: close()
 	else:
 		close()
@@ -198,13 +200,14 @@ func close() -> void:
 	listening = ""
 	delete_armed = -1
 	UI.show_backdrop(dim, false)
-	Sfx.play("whoosh", null, -14.0)
+	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
 ## The Esc menu: Resume on top, the places you go most next, the rare ones as quiet links, and
 ## leaving at the bottom.
 func open_pause(where: String) -> void:
 	ctx = where
+	Sfx.play("ui_open", null, -10.0)
 	stack.clear()
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
@@ -225,7 +228,7 @@ func open_pause(where: String) -> void:
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
+		item.call("Training Grounds", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
 	item.call("Settings", "gear", func():
@@ -259,7 +262,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = item.call("Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -268,11 +271,11 @@ func open_pause(where: String) -> void:
 		item.call("Save and go to the main menu", "home", func():
 			Save.save_game()
 			close()
-			Game.goto("title"))
+			RateCard.gate(root, func(): Game.goto("title")))
 	if not OS.has_feature("web"):
 		var q: Button = item.call("Save and quit the game", "close", func():
 			Save.save_game()
-			get_tree().quit(), "", "Ghost")
+			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
 
@@ -316,11 +319,13 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Expeditions")
 	_toggle(v, "Damage numbers", "damage_numbers", "Numbers pop up where your hits land")
 	_toggle(v, "Tips during expeditions", "tips", "Short hints about what's around you")
+	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
 	if admin_allowed():
 		_group(v, "Admin")
+		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
 func _tab_controls(v: VBoxContainer) -> void:
@@ -328,13 +333,15 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
+	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
+	_toggle(v, "Movement readout", "move_readout", readout_tip)
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
-		]],
-		["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
+		] + KinKeys.ids()],
+		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:
@@ -390,10 +397,11 @@ func _tab_video(v: VBoxContainer) -> void:
 		"Grass, draw distance, cloud layers and particles change from your next expedition")
 	_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]], Callable(), "Smooths jagged edges")
 	_toggle(v, "Shadows", "shadows")
-	_toggle(v, "Show frame rate", "show_fps", "In the top right corner")
+	_choice(v, "Frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
+		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
 	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
 	if not modelled.is_empty():
-		_group(v, "Warden models")
+		_group(v, "Hunter models")
 		for a in modelled:
 			var hint := "Off: the simpler built-in model. From the next match or Hunter swap"
 			var r := _row(v, String(WardenGlb.ART[a]).capitalize(), hint)
@@ -407,6 +415,7 @@ func _tab_video(v: VBoxContainer) -> void:
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
@@ -431,14 +440,44 @@ func _tab_demo(v: VBoxContainer) -> void:
 	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
 	var fresh := [["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]]
 	_choice(v, "Bots leave you be after landing", "demo_fresh", fresh)
-	_toggle(v, "All masks open (offline only)", "demo_all_masks", "Every Mask is pickable. Unlocks are untouched")
+	_toggle(v, "All Relics open (offline only)", "demo_all_masks", "Every Relic is pickable. Unlocks are untouched")
 	_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
+
+## Settings > Gameplay > Reticle: the aiming reticle's shape (with a preview), size, colour, opacity and outline.
+func _reticle_rows(v: VBoxContainer) -> void:
+	_group(v, "Reticle")
+	_choice(v, "Shape", "reticle_shape", Reticle.SHAPES, Callable(), "Default: a small broken ring with a dot")
+	var preview := Control.new()
+	preview.custom_minimum_size = Vector2(40, 40)
+	preview.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	preview.draw.connect(func():
+		preview.draw_rect(Rect2(Vector2.ZERO, preview.size), Color(0.16, 0.2, 0.17))
+		Reticle.draw(preview, preview.size * 0.5))
+	Settings.changed.connect(preview.queue_redraw.unbind(1))
+	v.get_child(v.get_child_count() - 1).add_child(preview)
+	_slider(v, "Size", "reticle_size", 0.5, 2.0)
+	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground")
+	for id in Reticle.COLORS:
+		var sw := Button.new()
+		sw.custom_minimum_size = Vector2(26, 26)
+		sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		sw.tooltip_text = String(Reticle.COLORS[id][0])
+		var chosen: bool = Settings.get_v("reticle_col") == id
+		var face := UI.frame(Reticle.COLORS[id][1], 13, UI.INK if chosen else Color(0, 0, 0, 0), 3)
+		for state in ["normal", "hover", "pressed"]:
+			sw.add_theme_stylebox_override(state, face)
+		sw.pressed.connect(func():
+			Settings.set_v("reticle_col", id)
+			_show_settings.call_deferred())
+		row.add_child(sw)
+	_slider(v, "Opacity", "reticle_alpha", 0.2, 1.0)
+	_toggle(v, "Dark outline", "reticle_outline", "Keeps it readable over bright effects")
 
 ## A small heading over a group of settings rows.
 func _group(v: VBoxContainer, txt: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(4))
-	v.add_child(UI.section(txt, UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
@@ -576,14 +615,22 @@ func _finish_rebind(ev: InputEvent) -> void:
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
 const INV_H := 404.0          # the inventory's body height on every tab (fits a 720p window)
-var dex_open := ""            # the species whose Field Book page is open
+var dex_open := ""            # the species (or shaping item) whose Field Book page is open
 
-## A Boki's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
+## A Boki's or shaping item's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
 func open_dex(spk: String) -> void:
 	dex_open = spk
 	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
-	DexView.detail(v, spk, get_tree())
+	if GardenItems.has(spk):
+		ItemPages.detail(v, spk)
+	else:
+		DexView.detail(v, spk, get_tree(), open_dex)
+
+## The Mixing Bowl, from the Items tab (a sub-page of the inventory).
+func open_bowl() -> void:
+	var v := _page("bowl", "Mixing Bowl", 760, true)
+	MixingBowl.fill(v, open_bowl)
 
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
@@ -601,7 +648,7 @@ func open_inventory() -> void:
 		c.custom_minimum_size = Vector2(222, 0)
 		var cv := UI.vbox(6); c.add_child(cv)
 		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
+		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
@@ -624,6 +671,13 @@ func open_inventory() -> void:
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
 				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+			for id in GardenItems.ids():
+				var held := int(Save.d["items"].get(id, 0))
+				if held > 0:
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+			if FarmUnlocks.base_mode():
+				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
+						"Open", open_bowl)
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
 				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
@@ -643,8 +697,7 @@ func open_inventory() -> void:
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
-					for af in Evo.AFF:
-						if Evo.AFF[af]["food"] == ck: Evo.add(ak, af, 6.0)
+					CareJournal.fed(ak, ck, Evo.eat(ak, ck))
 					Save.remember(ak, "fed", "was fed a %s" % Data.CROPS[ck]["name"].to_lower(), 4.0)
 					Sfx.play("kin_happy")
 					Save.save_game()
@@ -664,6 +717,7 @@ func open_inventory() -> void:
 			empty = false
 			grid.queue_free()
 			DexView.grid(v, get_tree(), func(spk: String): open_dex(spk))
+			ItemPages.grid(v, func(id: String): open_dex(id))
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
@@ -791,7 +845,7 @@ func open_admin() -> void:
 	add.call("Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
-			k["level"] = int(k["level"]) + 1
+			Evo.level_up(k)
 			Game._evolve(k, {}))
 	add.call("Partner full trust", func():
 		var k := Save.active_kin()

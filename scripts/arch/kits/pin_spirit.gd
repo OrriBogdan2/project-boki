@@ -2,9 +2,11 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
-## still do). Damage ends it. If it ends while she is inside something she loses "stuck_cost" Focus and
-## is put back where she last stood clear. While she is inside something her own screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
+## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
+## Damage ends it. If it ends while she is inside a rock or barrier she is put back where she last stood clear;
+## in a ledge she is set on top of it. While she is inside something her own screen goes dark blue; the whole
+## walk her body is darkened (PinFx wash) on every game.
 
 var k: ArcherKit
 var h: Hunter
@@ -27,12 +29,21 @@ func _init(kit: ArcherKit) -> void:
 func active() -> bool:
 	return t > 0.0
 
-func start(use_ex: bool) -> void:
+## True from the roll until the walk is over, on every game: the owner's walk (spirit_t), or a remote copy's
+## kit move: pin_roll for the roll, pin_walk for the base walk (the wire carries the move, not the rank).
+func phasing() -> bool:
+	if h.spirit_t > 0.0:
+		return true
+	var dd := k.dash_def()
+	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
+	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
+
+func start() -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
-	var roll := float(dd.get("roll", 3.5))
-	var rt := float(dd.get("roll_t", 0.24))
-	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"}, use_ex)
+	var roll := float(dd["roll"])
+	var rt := float(dd["roll_t"])
+	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll", "curved": true})
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
@@ -43,8 +54,7 @@ func start(use_ex: bool) -> void:
 	k.st["last_dash"] = "spirit"
 	if k.rank("dash") >= 3:
 		_share_with_allies()
-	k.m.fx.dust(h.pos, 6)           # a quiet cue, no ring or burst on a dash; the green shell shows the walk
-	k.m.sfx("pin_spirit", h.pos, -3.0 if h.is_local() else -7.0)
+	k.vfx("spirit_go", h.pos, dir)  # no ring or burst on a dash; the shell shows the walk
 
 ## Seconds of Spirit Walk after the roll: rank 3 adds "time_rank3".
 func walk_time() -> float:
@@ -61,7 +71,7 @@ func _share_with_allies() -> void:
 		var walk := walk_time()
 		x.spirit_t = walk
 		granted.append([x, walk])
-		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
 ## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
@@ -73,12 +83,12 @@ func inside_boost() -> float:
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
 func _drop_orb(at: Vector3) -> void:
-	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.GREEN))
+	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.THREAD))
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
 	orbs.append({"pos": at, "t": ORB_T, "node": n})
-	k.m.fx.ring(at, ORB_R, PinFx.GREEN, 0.3)
+	k.vfx("spirit_orb", at)
 
 ## The orbs and the walks they gave (run every step, walking or not).
 func tick_orbs(dt: float) -> void:
@@ -95,7 +105,7 @@ func tick_orbs(dt: float) -> void:
 				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
-				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
@@ -105,9 +115,11 @@ func tick_orbs(dt: float) -> void:
 		else:
 			x.spirit_t = float(g[1])
 
-func blocked_here() -> bool:
+## terrain: a ledge face still above her feet counts (the walk dims her screen); at the end it does not,
+## she is set on top of it instead (end).
+func blocked_here(terrain := true) -> bool:
 	var w: World = k.m.world
-	if w.is_block(h.pos.x, h.pos.z):
+	if w.is_block(h.pos.x, h.pos.z) or (terrain and w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP):
 		return true
 	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 
@@ -120,7 +132,9 @@ func tick(dt: float) -> void:
 	inside = blocked_here()
 	if inside and not was_in:
 		_drop_orb(entry)
-	if k.anim_id == "pin_roll" and k.m.time - k.anim_at > 0.4:
+	# footage 655.55-655.65: the roll goes straight into the crouched walk, no landing beat, so the walk's pose
+	# takes over the moment the travel ends (roll_t) and the roll clip's standing tail (0.24-0.36) never shows
+	if k.anim_id == "pin_roll" and k.m.time - k.anim_at >= float(k.dash_def().get("roll_t", 0.24)):
 		k.play("pin_walk")
 	if inside:
 		passed += 1
@@ -131,7 +145,7 @@ func tick(dt: float) -> void:
 	if t <= 0.0:
 		end("time")
 
-## Ends the walk (time, damage, a merge). Inside something: back to the entry point, Focus spent.
+## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
 	if t <= 0.0 and h.spirit_t <= 0.0:
 		return
@@ -139,15 +153,17 @@ func end(why: String) -> void:
 	h.spirit_t = 0.0
 	k.fx.aura_on(0.0)
 	k.fx.tint_to(0.0)
-	if blocked_here():
+	var top: float = k.m.world.ground_at(h.pos.x, h.pos.z)
+	if top > h.pos.y + World.STEP and not blocked_here(false):
+		h.pos.y = top      # ended mid-climb in a ledge: she stands on top of it, never inside terrain
+		h.vel.y = 0.0
+		h.grounded = true
+	if blocked_here(false):
 		snap_backs += 1
-		k.add_res(-float(k.dash_def().get("stuck_cost", 30.0)))
-		k.m.fx.burst(h.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 10, 3.0, 0.3)
 		h.teleport(entry)
 		h.vel = Vector3.ZERO
-		k.m.fx.ring(entry, 1.0, PinFx.GREEN, 0.25)
-		k.m.sfx("pin_spirit_end", entry, -4.0, 0.8)
+		k.vfx("spirit_snap", entry)
 	elif why != "merge":
-		k.m.sfx("pin_spirit_end", h.pos, -8.0)
+		k.vfx("spirit_end")
 	if k.anim_id in ["pin_roll", "pin_walk"]:
 		k.anim_id = ""

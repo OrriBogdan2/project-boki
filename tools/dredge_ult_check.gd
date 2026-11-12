@@ -1,12 +1,12 @@
 extends RefCounted
-## Dredge's ultimate on X, Brass Broadside, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
+## Grimble's ultimate on X, Brass Broadside, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
 ## the 1.1s charge behind a growing fan everyone sees (a slow walk, the fan turning with the aim), two waves 0.6s
 ## apart of six slugs each (shots through Match.spawn_shot), Anti-Heal, every slug landing up close and fewer
 ## further out, bond once per cast and only on a land, the stun that stops it, the other buttons locked while
 ## it runs, no back bonus, the merge drop, the cooldown, the reel combo and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
-const FACE_AWAY := PI / 2.0         # a target east of Dredge facing this way shows him its back
+const FACE_AWAY := PI / 2.0         # a target east of Grimble facing this way shows him its back
 
 var ak = null
 var ok_fn: Callable
@@ -25,6 +25,7 @@ func _owed(P: Hunter) -> float:
 
 func run() -> void:
 	await _charge_and_waves()
+	await _props()
 	await _guards()
 	await _burst()
 
@@ -153,6 +154,32 @@ func _charge_and_waves() -> void:
 		hits.size() == 2 and int(hits[0]) > 0 and int(hits[0]) < 6, str(hits)
 	)
 	await _reel_combo(m, P, T, home)
+	await ak.done(m)
+
+## The Broadside's slugs are Explosive (source): they break a crate and a pot and light a keg in the fan.
+func _props() -> void:
+	var r: Array = ak.setup("dredge", 1.6, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	P.lvl = 6
+	T.teleport(home + Vector3(-6.0, 0, -5.0))
+	T2.teleport(home + Vector3(-6.0, 0, 5.0))
+	var spots := {"crate": Vector3(3, 0, -1.2), "pot": Vector3(3, 0, 1.2), "keg": Vector3(4, 0, 0)}
+	var props := {}
+	for kind_s in spots:
+		var at: Vector3 = home + spots[kind_s]
+		at.y = m.world.ground_at(at.x, at.z)
+		m._add_break(kind_s, at)
+		props[kind_s] = m.breaks[-1]
+	_cast(P, home + Vector3(4, 0, 0))
+	ak.step(m, 2.2)
+	ok(
+		"ult props: the slugs break a crate and a pot and light a keg (Explosive)",
+		props["crate"]["dead"] and props["pot"]["dead"] and (props["keg"].has("fuse_t") or props["keg"]["dead"])
+	)
 	await ak.done(m)
 
 ## Abyssal Hand, the foe hauled to your feet stunned, then the Broadside: every slug lands.

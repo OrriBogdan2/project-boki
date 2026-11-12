@@ -1,5 +1,5 @@
 extends "res://tools/pin_bjorn_owner_check.gd"
-## Owner items #48, #49 and #51 for Breaker (briefs/OWNER_REVIEW_1103.md), run from --bulwark-combo-check
+## Owner items #48, #49, #51 and #59 for Breaker (briefs/OWNER_REVIEW_1103.md), run from --bulwark-combo-check
 ## (tools/archer_bulwark_combo_check.gd adds the counts): the Faultline plants him only for the wind-up and
 ## the slam, the held swing's perfect window launches him, into a glide off a ledge, and the hold pairs with a
 ## jump and a Shift dash (a perfect release out of either still launches); plus the LMB parity pass with the
@@ -18,6 +18,7 @@ func bjorn() -> void:
 	await _launch_glide()
 	await _combo_moves()
 	await _lmb_parity()
+	await _hold_spin()
 	await _audit()
 
 func _planar(P: Hunter) -> float:
@@ -119,7 +120,8 @@ func _window() -> void:
 	_ready_swing(m, P, T, home)
 	var opened := -1.0
 	var shut := -1.0
-	var flash_ringless := false
+	var flashed := false
+	var fulls := int(HeroVfx.of(m).plays.get("full", 0))
 	var hot := false
 	var held := 0.0
 	while held < full + 0.38:
@@ -129,14 +131,14 @@ func _window() -> void:
 		var now := K.launch.in_window(K.lmb_t)
 		if now and opened < 0.0:
 			opened = K.lmb_t
-			var ring = K.fx.flare.material_override.get_shader_parameter("ring")      # unset: the shader's 0
-			flash_ringless = K.fx.flare_t > 0.0 and (ring == null or float(ring) == 0.0)
+			# the full flare (content/vfx/bulwark.json)
+			flashed = int(HeroVfx.of(m).plays.get("full", 0)) == fulls + 1
 			hot = K.fx.hot
 		if not now and opened >= 0.0 and shut < 0.0:
 			shut = K.lmb_t
-	ok("bjorn #49 window: it opens at full charge (%.2f s) with the ring-free flash and the hot glint" % full,
-		absf(opened - full) < 0.03 and K.flared and flash_ringless and hot,
-		"opens at %.2f flash %s hot %s" % [opened, flash_ringless, hot])
+	ok("bjorn #49 window: it opens at full charge (%.2f s) with the one full flare and the hot glint" % full,
+		absf(opened - full) < 0.03 and K.flared and flashed and hot,
+		"opens at %.2f flash %s hot %s" % [opened, flashed, hot])
 	ok("bjorn #49 window: it shuts %.2f s after full" % win, absf(shut - (full + win)) < 0.03,
 		"shuts at %.2f (want %.2f)" % [shut, full + win])
 	step(m, 2.0, press_at.bind(P, home + Vector3(9.0, 0, 0)))
@@ -236,8 +238,8 @@ func _glide_open(m: Match, P: Hunter, hold: bool) -> float:
 	P.inp["glide_btn"] = false
 	return -1.0
 
-## #49 off a ledge: the perfect launch carries him over the edge and the glider opens by itself at >= 70% of
-## the launch's speed (the shared dash -> glide hand-off).
+## #49 off a ledge: the perfect launch carries him over the edge; the held swing never opens the glider by itself
+## a fresh glide press just after opens it at >= 70% of the launch's speed (the shared hand-off).
 func _launch_glide() -> void:
 	var r := setup("bulwark", 7.0)
 	var m: Match = r[0]
@@ -252,8 +254,11 @@ func _launch_glide() -> void:
 	_ready_swing(m, P, T, home)
 	step(m, float(K.lmb_def()["full"]) + 0.08, press_at.bind(P, home + Vector3(9.0, 0, 0)))
 	P.inp["fire"] = false
-	var open := _glide_open(m, P, false)
-	ok("bjorn #49: launched off a ledge he glides straight away at >= 70% of the launch's speed",
+	step(m, 0.4)
+	ok("bjorn 11-09: launched off a ledge with no glide press he falls on (no glider by itself)", not P.gliding,
+		"gliding %s" % P.gliding)
+	var open := _glide_open(m, P, true)
+	ok("bjorn #49: launched off a ledge, a fresh glide press glides at >= 70% of the launch's speed",
 		open >= K.launch.speed * 0.7 and P.pos.x - home.x > 3.0,
 		"glide opens at %.1f of %.1f m/s, %.1f m out" % [open, K.launch.speed, P.pos.x - home.x])
 	await done(m)
@@ -409,19 +414,140 @@ func _lmb_parity() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	var left_at := -1.0
+	var cadence := 0.0
 	for i in 20:
 		m.step(DT)
 		if left_at < 0.0 and String(K.mace.get("st", "")) == "fly":
 			left_at = m.time - t0
+			cadence = P.fire_cd
 	var wind := BulwarkKit.THROW_WIND
 	ok("bjorn parity LMB: the throw's wind-up, the hammer leaves his hand %.2f-0.15 s after the press (one frame)" %
 			wind, left_at >= wind and left_at <= 0.15 + 0.001 and K.anim_id == "bul_throw",
 		"left at %.3f anim %s" % [left_at, K.anim_id])
+	ok("bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back)",
+		absf(float(K.lmb_def()["throw_rate"]) - 0.45) < 0.001 and cadence > 0.30 and cadence <= 0.45 + 0.001,
+		"throw_rate %s fire_cd %.3f" % [K.lmb_def()["throw_rate"], cadence])
 	await _rmb_parity(m, P, K, home)
 	await done(m)
 
 ## RMB (sheet 0179-0200, data Brightshield 0.1 s): the aegis is up 0.1 s into the hold and sweeps round with
 ## the cursor at once.
+## Item 59: the hold whirls the hammer round him, at least MIN_TURNS turns a second in every stretch of it, right
+## through full charge, the perfect window and past it; he walks at the hold speed meanwhile; the whirl itself
+## hurts nobody; a jump and Shift keep it; the release puts the hammer back and still slams at the cursor.
+const MIN_TURNS := 1.0
+const SPIN_STRETCH := 0.25     # s: the turn rate is measured over each of these
+
+## The hammer's head round the circle's centre (rad, world), with the effect brought up to date.
+func _head_angle(K: BulwarkKit) -> float:
+	K.fx._tick_hold(DT)
+	var gun := (K.fx._pivot() as Node3D).get_parent() as Node3D
+	var at: Vector3 = K.fx._head_world() - gun.global_position
+	return atan2(at.x, at.z)
+
+## Holds on `at` for `secs`; the hammer's turns over it (it runs one way, a step is under half a turn).
+func _spun(m: Match, P: Hunter, K: BulwarkKit, at: Vector3, secs: float, each := Callable()) -> float:
+	var a := _head_angle(K)
+	var total := 0.0
+	for i in int(round(secs / DT)):
+		press_at(P, at)
+		if each.is_valid(): each.call()
+		m.step(DT)
+		var b := _head_angle(K)
+		total += angle_difference(a, b)
+		a = b
+	return absf(total) / TAU
+
+func _hold_spin() -> void:
+	var r := setup("bulwark", 7.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: BulwarkKit = P.ak
+	var md := K.lmb_def()
+	_ready_swing(m, P, T, home)
+	var at := home + Vector3(9.0, 0, 0)
+	T.teleport(home + Vector3(1.2, 0, 1.2))      # inside the circle, not where the release goes
+	fresh(T)
+	step(m, float(md["tap"]) + 0.1, press_at.bind(P, at))
+	# let the hammer ease into the circle
+	for i in 12: K.fx._tick_hold(DT)
+	var slowest := 99.0
+	var fastest := 0.0
+	var reach := 0.0
+	var trail := true
+	var passed_window := false
+	while K.lmb_t < float(md["full"]) + 0.7:
+		passed_window = passed_window or K.launch.in_window(K.lmb_t)
+		var turns := await _spun(m, P, K, at, SPIN_STRETCH) / SPIN_STRETCH
+		slowest = minf(slowest, turns)
+		fastest = maxf(fastest, turns)
+		var head: Vector3 = K.fx._head_world()
+		reach = maxf(reach, Vector2(head.x - P.pos.x, head.z - P.pos.z).length())
+		trail = trail and K.fx.orbit_trail.visible
+	ok("bjorn #59: held, the hammer keeps turning, >= %.1f turns/s in every %.2f s, through the window and on"
+			% [MIN_TURNS, SPIN_STRETCH],
+		slowest >= MIN_TURNS and passed_window and K.smash_k() >= 0.99, "%.2f-%.2f turns/s" % [slowest, fastest])
+	ok("bjorn #59: the whirl speeds up with the charge",
+		fastest >= slowest + 0.8 and fastest <= float(md["spin_turns"][1]) + 0.1,
+		"%.2f-%.2f turns/s" % [slowest, fastest])
+	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= 1.5 and trail,
+		"head %.2f m out, trail %s" % [reach, trail])
+	ok("bjorn #59: the whirl hurts nobody (the default for now): a foe inside its circle took nothing in 2 s",
+		dmg(T) == 0.0, "took %.0f" % dmg(T))
+	# walking: the hold's speed (55% of his run, kept from the source), the hammer still round
+	_ready_swing(m, P, T, home)
+	var run0 := P.pos.z
+	step(m, 0.5, func(): P.inp["move"] = Vector2(0, 1))
+	var run := absf(P.pos.z - run0) / 0.5
+	P.inp["move"] = Vector2.ZERO
+	_ready_swing(m, P, T, home)
+	step(m, float(md["tap"]) + 0.1, press_at.bind(P, at))
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.1, press_at.bind(P, at))
+	var z0 := P.pos.z
+	var walked := await _spun(m, P, K, at, 0.5, func(): P.inp["move"] = Vector2(0, 1)) / 0.5
+	var speed := absf(P.pos.z - z0) / 0.5
+	P.inp["move"] = Vector2.ZERO
+	ok("bjorn #59: he walks at the hold speed while it whirls (55% of his run)",
+		walked >= MIN_TURNS and absf(speed / maxf(run, 0.01) - 0.55) <= 0.1,
+		"%.2f turns/s at %.1f m/s, run %.1f" % [walked, speed, run])
+	# a jump and Shift keep the whirl going (item 51)
+	_ready_swing(m, P, T, home)
+	step(m, 0.5, press_at.bind(P, at))
+	_tap_key(m, P, "jump", at)
+	var jumped := await _spun(m, P, K, at, 0.3) / 0.3
+	ok("bjorn #59: a jump keeps the whirl", jumped >= MIN_TURNS and K.fx.held and not P.grounded,
+		"%.2f turns/s" % jumped)
+	_ready_swing(m, P, T, home)
+	step(m, 0.5, press_at.bind(P, at))
+	_tap_key(m, P, "dash", at)
+	var dashed := await _spun(m, P, K, at, 0.3) / 0.3
+	ok("bjorn #59: Shift keeps the whirl", dashed >= MIN_TURNS and K.fx.held, "%.2f turns/s" % dashed)
+	# the release: the hammer back in his hand, the trail gone, the slam at the cursor
+	var r2 := setup("bulwark", 7.0)
+	m = r2[0]
+	P = r2[1]
+	T = r2[2]
+	home = r2[4]
+	K = P.ak
+	_ready_swing(m, P, T, home)
+	T.teleport(home + Vector3(2.2, 0, 0))
+	fresh(T)
+	step(m, 0.8, press_at.bind(P, T.pos))
+	K.fx._tick_hold(DT)
+	var s0 := K.slams
+	P.inp["fire"] = false
+	m.step(DT)
+	K.fx._tick_hold(DT)
+	var pv := K.fx._pivot() as Node3D
+	ok("bjorn #59: let go, the slam goes at the cursor, the hammer back in the hand, the trail gone",
+		K.slams == s0 + 1 and pv.transform == Transform3D.IDENTITY and not K.fx.orbit_trail.visible and not K.fx.held,
+		"slams +%d trail %s" % [K.slams - s0, K.fx.orbit_trail.visible])
+	step(m, 0.1)
+	ok("bjorn #59: the slam hits", dmg(T) > 0.0, "took %.0f" % dmg(T))
+
 func _rmb_parity(m: Match, P: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	step(m, 1.0)
 	P.teleport(home)
@@ -523,6 +649,74 @@ func _audit() -> void:
 		not K.wall.is_empty() and front_ok, "hp %.0f -> %.0f wall %.0f -> %.0f" % [hp0, P.hp, w0,
 				float(K.wall.get("hp", 0.0))])
 	ok("bjorn audit: a blow from behind still lands on him", P.hp < hp0, "hp %.0f -> %.0f" % [hp0, P.hp])
+	_aegis_shots(m, P, T, T2, K)
+	_aegis_hooks(m, P, T, T2)
 	P.inp["sec_hold"] = false
 	step(m, 0.3)
 	await done(m)
+
+## A foe's shot is stopped by the raised aegis from the front (the wall takes it, he and the ally behind it
+## don't), and one fired from behind him lands on him (data: Brightshield blocks all damage from the front).
+func _aegis_shots(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: BulwarkKit) -> void:
+	var aim := Vector3(0, 1.0, 0)
+	var hp0 := P.hp
+	var w0 := float(K.wall.get("hp", 0.0))
+	m.spawn_shot(T, T.pos + aim, Vector2(-30.0, 0.0), 20.0, 1.0, 0.3, Color.WHITE, {"src": "abil"})
+	step(m, 0.4)
+	ok("bjorn audit: a shot from the front is stopped by the aegis (he takes none, it takes it)",
+		P.hp == hp0 and float(K.wall.get("hp", 0.0)) <= w0 - 19.0, "hp %.0f -> %.0f wall %.0f -> %.0f" % [hp0, P.hp, w0,
+				float(K.wall.get("hp", 0.0))])
+	hp0 = P.hp
+	m.spawn_shot(T2, T2.pos + aim, Vector2(30.0, 0.0), 20.0, 1.0, 0.3, Color.WHITE, {"src": "abil"})
+	step(m, 0.4)
+	ok("bjorn audit: a shot from behind lands on him", P.hp < hp0, "hp %.0f -> %.0f" % [hp0, P.hp])
+	var cc := {"src": "abil", "stun": 1.0, "slow": 1.0, "root": 1.0}
+	P.hurt(5.0, T, cc.duplicate())
+	ok("bjorn audit: a stun, slow and root riding a hit from the front are blocked with it",
+		P.stun_t == 0.0 and P.slow_t == 0.0 and P.root_t == 0.0,
+		"stun %.1f slow %.1f root %.1f" % [P.stun_t, P.slow_t, P.root_t])
+	P.hurt(5.0, T2, cc.duplicate())
+	ok("bjorn audit: the same from behind lands", P.stun_t > 0.0, "stun %.1f" % P.stun_t)
+	P.stun_t = 0.0
+	P.slow_t = 0.0
+	P.root_t = 0.0
+	P.cc_immune_t = 0.0
+
+## A hook is a pull and a pull is a shot: Kael's chain and Grimble's hand stop on the aegis from the front
+## (the chain doesn't anchor to it, the hand doesn't grab), and catch him from behind.
+func _hooker(m: Match, arch: String, at: Vector3) -> Hunter:
+	return m.make_hunter(arch, 5, Arch.weight(arch), arch, "idle", {}, at, {"arch": arch})
+
+func _aegis_hooks(m: Match, P: Hunter, T: Hunter, T2: Hunter) -> void:
+	var home := P.pos
+	T.teleport(home + Vector3(0, 0, 14.0))          # (the hooks mustn't find the idle dummies)
+	T2.teleport(home + Vector3(0, 0, -14.0))
+	var kael_h := _hooker(m, "juggernaut", home + Vector3(3.0, 0, 0))
+	var grim_h := _hooker(m, "dredge", home + Vector3(-30.0, 0, 6.0))
+	for t in [kael_h, grim_h]:
+		t.unlock_all()
+		t.lvl = 6
+	for i in 3: m.step(DT)
+	var kael: JuggernautKit = kael_h.ak
+	var grimble: DredgeKit = grim_h.ak
+	aim_at(kael_h, P.pos)
+	kael.warchain.press()
+	step(m, 0.6)
+	ok("bjorn audit: Kael's chain from the front stops on the aegis (no anchor, no pull)",
+		kael.warchain.state != "hooked" and kael.warchain.hooks == 0, "state %s" % kael.warchain.state)
+	kael_h.teleport(home + Vector3(0, 0, 20.0))
+	grim_h.teleport(home + Vector3(3.0, 0, 0))
+	aim_at(grim_h, P.pos)
+	grimble.fire_rmb({})
+	var thrown: bool = float(grimble.cd["rmb"]) > 0.0 or grimble.ch_rmb < 1.0
+	step(m, 0.8)
+	ok("bjorn audit: Grimble's hand from the front stops on the aegis (no grab)", thrown and grimble.grapples == 0,
+		"thrown %s grapples %d" % [thrown, grimble.grapples])
+	step(m, 1.0)
+	grim_h.teleport(home + Vector3(-3.0, 0, 0))
+	grimble.cd["rmb"] = 0.0
+	grimble.ch_rmb = 1.0
+	aim_at(grim_h, P.pos)
+	grimble.fire_rmb({})
+	step(m, 0.8)
+	ok("bjorn audit: Grimble's hand from behind catches him", grimble.grapples == 1, "grapples %d" % grimble.grapples)

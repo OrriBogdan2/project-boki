@@ -1,5 +1,5 @@
 extends RefCounted
-## --pin-bjorn-shots --shots-dir=<dir> [--before]: screenshots of Hem's and Breaker's abilities, run
+## --pin-bjorn-shots --shots-dir=<dir> [--before]: screenshots of Lisette's and Breaker's abilities, run
 ## through the real kits with scripted input on a flat stretch of island (xvfb, a renderer). Each shot is
 ## [file stem, hero, script, capture time s, camera lead m east, caption]. Writes <dir>/MANIFEST.txt as
 ## `<hero>/v2|<file>|<caption>`. --before runs only the "before/after" set, touching nothing but input
@@ -19,15 +19,30 @@ const DT := 1.0 / 60.0
 const CLOSE_ZOOM := 0.45
 
 const SHOTS := [
-	# ------------------------------------------------ Hem
+	# ------------------------------------------------ Lisette
 	[
-		"pin_draw_v",
+		"pin_draw_idle",
+		"archer",
+		"aim",
+		0.3,
+		3.0,
+		"At rest: one faint thin line to the cursor, nothing else"
+	],
+	[
+		"pin_draw_start",
 		"archer",
 		"draw",
-		0.35,
+		0.2,
 		3.0,
-		"Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring"
-			+ " filling, no glint yet"
+		"The thin line to the cursor, the bright fill just growing out of Lisette, the small circle ahead of it"
+	],
+	[
+		"pin_draw_mid",
+		"archer",
+		"draw",
+		0.5,
+		3.0,
+		"The fill most of the way to the circle (the circle still quiet)"
 	],
 	[
 		"pin_draw_empowered",
@@ -35,8 +50,15 @@ const SHOTS := [
 		"draw",
 		0.64,
 		3.0,
-		"Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green"
-			+ " fletch burst at the bow"
+		"The fill has reached the circle and the circle flashes: release now for the perfect shot"
+	],
+	[
+		"pin_draw_next",
+		"archer",
+		"draw",
+		0.95,
+		3.0,
+		"Past the perfect window: the circle has moved on to the end of the line, the fill running on toward it"
 	],
 	[
 		"pin_draw_super",
@@ -44,8 +66,7 @@ const SHOTS := [
 		"draw_tgt",
 		1.3,
 		4.0,
-		"Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at"
-			+ " the bow hand, the dummy ringed at its feet"
+		"Supercharged held: the thick white line past the cursor to max range, the dummy ringed at its feet"
 	],
 	[
 		"pin_super_ready",
@@ -53,7 +74,7 @@ const SHOTS := [
 		"draw_tgt",
 		1.18,
 		4.0,
-		"Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor"
+		"Supercharged comes up: the body flash, the fill reaching the end circle, the white line past the cursor"
 	],
 	[
 		"pin_quick_draw",
@@ -61,16 +82,23 @@ const SHOTS := [
 		"quick",
 		1.16,
 		3.0,
-		"Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint)"
+		"Quick draw after a perfect release: the next Empowered comes up in 0.38 s (the fill reaching the circle)"
 	],
-	["pin_overdraw", "archer", "draw_tgt", 1.85, 4.0, "Overdrawn: the line and the bow glint dim, the draw arm shakes"],
+	[
+		"pin_overdraw",
+		"archer",
+		"draw_tgt",
+		1.85,
+		4.0,
+		"Overdrawn: the line dims to a thin pale one, the draw arm shakes"
+	],
 	[
 		"pin_perfect",
 		"archer",
 		"perfect",
 		0.68,
 		2.5,
-		"Perfect release: Hem's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star"
+		"Perfect release: Lisette's gold fletch burst with its ring at the bow, on the aim line (0.13 s)"
 	],
 	[
 		"pin_arrow_flight",
@@ -110,7 +138,7 @@ const SHOTS := [
 		"heavy",
 		1.0,
 		3.0,
-		"Heavy Shot held (before full): the gold V closing and the gold bar growing from the bow"
+		"Heavy Shot held: the great silver needle on the bow, its red thread trailing, glowing with the charge"
 	],
 	[
 		"pin_heavy_flight",
@@ -177,7 +205,7 @@ const SHOTS := [
 		"spin",
 		0.75,
 		1.5,
-		"LMB held: side-on and crouched, the hammer dragged back low behind him, the shield arm forward,"
+		"LMB held: side-on and crouched, the hammer whirling round him with its trail, the shield arm forward,"
 			+ " the gold ring at his feet"
 	],
 	[
@@ -196,6 +224,12 @@ const SHOTS := [
 		1.5,
 		"Full charge: the big gold star flare on the hammer head and the cursor flare"
 	],
+	["o59_spin_a", "bulwark", "spin", 0.68, 1.5, "item 59: strip 1/6, the hammer eases out of the hand"],
+	["o59_spin_b", "bulwark", "spin", 0.74, 1.5, "item 59: strip 2/6, the whirl, a quarter turn on"],
+	["o59_spin_c", "bulwark", "spin", 0.8, 1.5, "item 59: strip 3/6, the whirl, a quarter turn on"],
+	["o59_spin_d", "bulwark", "spin", 1.25, 1.5, "item 59: strip 4/6, faster, the glint on the head"],
+	["o59_spin_e", "bulwark", "spin", 1.68, 1.5, "item 59: strip 5/6, full charge, the flash, still whirling"],
+	["o59_spin_f", "bulwark", "slam", 1.86, 1.5, "item 59: strip 6/6, the release: the slam forward"],
 	[
 		"bjorn_slam",
 		"bulwark",
@@ -308,7 +342,7 @@ const SHOTS := [
 		"bjorn_ult",
 		0.55,
 		6.0,
-		"Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead"
+		"Faultline wind-up: one outlined 16 m lane with a glowing crack, shown to everyone, the hammer overhead"
 	],
 	[
 		"ult_bjorn_slam",
@@ -318,14 +352,29 @@ const SHOTS := [
 		6.0,
 		"Key frame: the slam, gold light flooding the near cell, the streak setting off"
 	],
-	["ult_bjorn_impact", "bulwark", "bjorn_ult", 1.25, 6.0, "Impact: slabs heaving up cell by cell, the target thrown"],
+	[
+		"ult_bjorn_stun",
+		"bulwark",
+		"bjorn_ult",
+		0.95,
+		3.0,
+		"The racing fissure stuns the target: stun stars over its head"
+	],
+	[
+		"ult_bjorn_impact",
+		"bulwark",
+		"bjorn_ult",
+		1.25,
+		6.0,
+		"Impact: a column of light erupting cell by cell, the target thrown"
+	],
 	[
 		"ult_bjorn_scar",
 		"bulwark",
 		"bjorn_ult",
 		2.4,
 		6.0,
-		"After: the ember scar along the lane (10 s, slows foes on it)"
+		"After: the crack left as an ember scar along the lane (10 s, slows foes on it)"
 	],
 ]
 ## The owner playtest items of 2026-11-03 (--owner1103): captions open with the item number.
@@ -344,7 +393,7 @@ const OWNER := [
 		"draw_tgt",
 		0.3,
 		3.0,
-		"owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line"
+		"owner1103 #5: draw strip 2/5, the steady pull, the fill growing along the aim line"
 	],
 	[
 		"o1103_pin_draw_c",
@@ -352,7 +401,7 @@ const OWNER := [
 		"draw_tgt",
 		0.64,
 		3.0,
-		"owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line"
+		"owner1103 #5: draw strip 3/5, Empowered ready, the fill on the circle, the circle flashing"
 	],
 	[
 		"o1103_pin_draw_d",
@@ -360,7 +409,7 @@ const OWNER := [
 		"draw_tgt",
 		0.95,
 		4.0,
-		"owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged"
+		"owner1103 #5: draw strip 4/5, the fill running on toward Supercharged"
 	],
 	[
 		"o1103_pin_draw_e",
@@ -368,7 +417,7 @@ const OWNER := [
 		"draw_tgt",
 		1.3,
 		4.0,
-		"owner1103 #5: draw strip 5/5, Supercharged, the thick line from Hem past the cursor"
+		"owner1103 #5: draw strip 5/5, Supercharged, the thick line from Lisette past the cursor"
 	],
 	[
 		"o1103_pin_perfect",
@@ -384,7 +433,7 @@ const OWNER := [
 		"heavy_pin",
 		1.0,
 		3.0,
-		"owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow"
+		"owner1103 #6: the Heavy Shot held, the thick gold lane from the bow"
 	],
 	[
 		"o1103_pin_heavy_release",
@@ -424,7 +473,7 @@ const OWNER := [
 		"spirit",
 		0.54,
 		2.0,
-		"owner1103 #35: Hem's own dash, the Spirit Walk roll (strip frame 1/3)"
+		"owner1103 #35: Lisette's own dash, the Spirit Walk roll (strip frame 1/3)"
 	],
 	[
 		"o1103_pin_dash_b",
@@ -432,7 +481,7 @@ const OWNER := [
 		"spirit",
 		0.6,
 		2.0,
-		"owner1103 #35: Hem's own dash (strip frame 2/3)"
+		"owner1103 #35: Lisette's own dash (strip frame 2/3)"
 	],
 	[
 		"o1103_pin_dash_c",
@@ -440,7 +489,7 @@ const OWNER := [
 		"spirit",
 		0.7,
 		2.0,
-		"owner1103 #35: Hem's own dash, out of the roll walking as a spirit (frame 3/3)"
+		"owner1103 #35: Lisette's own dash, out of the roll walking as a spirit (frame 3/3)"
 	],
 	[
 		"o1103_bjorn_aegis_idle",
@@ -769,6 +818,8 @@ func _input(what: String, t: float) -> void:
 	var K = P.ak
 	var at := func(x: float) -> bool: return t >= x - DT * 0.5 and t < x + DT * 0.5
 	match what:
+		"aim":
+			P.inp["fire"] = false
 		"draw":
 			P.inp["fire"] = t >= 0.0
 			K.res = 0.0

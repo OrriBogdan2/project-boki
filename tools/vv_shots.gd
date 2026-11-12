@@ -1,5 +1,5 @@
 extends RefCounted
-## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Ryzz's
+## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Sparkle's
 ## and Vex's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
 ## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
@@ -129,6 +129,8 @@ func _aim(p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0)
 	P.inp["aim_y"] = p.y
 
+var cam_at := Vector3.ZERO           # a fixed camera point (zero: the camera follows the hero)
+
 ## Steps the match `secs`, rendering every frame; `each` runs before each step; `marks` is
 ## [[time, kind, file, caption, focus], ...]: kind "full" (the view plus a close-up round `focus`, a
 ## Callable giving a world point, the hero if left out) or a strip file (a crop round the hero).
@@ -144,7 +146,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		_park_others()
 		if P.roll_t <= 0.0:
 			P.face = atan2(-(P.inp["aim"].x - P.pos.x), -(P.inp["aim"].z - P.pos.z))
-		m.cam.snap(P.pos + Vector3(lead, 0, 0))
+		m.cam.snap(cam_at if cam_at != Vector3.ZERO else P.pos + Vector3(lead, 0, 0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
@@ -215,7 +217,7 @@ func _on_target() -> Vector3:
 func _above_target() -> Vector3:
 	return T.position + Vector3(0, 2.4, 0)
 
-# ------------------------------------------------------------------ Ryzz
+# ------------------------------------------------------------------ Sparkle
 func _vireo() -> void:
 	await _vireo_run()
 	await _vireo_lmb()

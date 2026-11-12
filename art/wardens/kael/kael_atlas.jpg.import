@@ -2,24 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1g5qjhe0jafw"
-path="res://.godot/imported/kael_atlas.jpg-359b2561c27c4e732945f502e216021b.ctex"
+uid="uid://c33stjgum6wam"
+path.bptc="res://.godot/imported/kael_atlas.jpg-359b2561c27c4e732945f502e216021b.bptc.ctex"
+path.astc="res://.godot/imported/kael_atlas.jpg-359b2561c27c4e732945f502e216021b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "f5d33dd80d6a1ca2abbfc11a06941da2"
+"md5": "a1f49709a3151f089a54443e91141bf4"
 }
 
 [deps]
 
 source_file="res://art/wardens/kael/kael_atlas.jpg"
-dest_files=["res://.godot/imported/kael_atlas.jpg-359b2561c27c4e732945f502e216021b.ctex"]
+dest_files=["res://.godot/imported/kael_atlas.jpg-359b2561c27c4e732945f502e216021b.bptc.ctex", "res://.godot/imported/kael_atlas.jpg-359b2561c27c4e732945f502e216021b.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -40,4 +42,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

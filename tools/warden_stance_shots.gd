@@ -16,10 +16,10 @@ const CAM_FOV := 32.0
 const ENLARGE := 2
 const YAW_34 := -PI * 0.8     # three-quarter front, the weapon hand toward the camera
 const YAW_SIDE := -PI * 0.5   # side on, facing right in the picture
-const NAMES := {"gunslinger": "Vex", "rimewright": "Claire", "dolm": "Tarek", "ashwick": "Cinder", "thief": "Sable",
-	"juggernaut": "Kael", "archer": "Hem", "mage": "Ryzz", "tender": "Pip", "bulwark": "Breaker",
-	"dredge": "Dredge",
-	"ostra": "Ostra"}
+const NAMES := {"gunslinger": "Vex", "rimewright": "Neve", "dolm": "Tenzo", "ashwick": "Cinder", "thief": "Sable",
+	"juggernaut": "Kael", "archer": "Lace", "mage": "Sparkle", "tender": "Meeko", "bulwark": "Albert",
+	"dredge": "Grimble",
+	"ostra": "Motley"}
 const BEFORE_AFTER := ["gunslinger", "archer", "juggernaut"]
 
 var holder: Node3D

@@ -24,6 +24,8 @@ var footer_fn: Callable           # (row: HBoxContainer) -> void: more for the h
 var undo_fn: Callable
 var undo_off_fn: Callable
 var done_fn: Callable
+var sweep_fn: Callable            # (on: bool) -> void: the put-away mode; unset hides the toggle
+var sweep_on_fn: Callable         # () -> bool
 var left_pad := 16.0
 var search_skip: Array = []       # tabs a search does not look into
 var hint: Label
@@ -34,6 +36,7 @@ var _tabs_row: HBoxContainer
 var _extras_row: HBoxContainer
 var _search: LineEdit
 var _undo: Button
+var _sweep_slot: HBoxContainer
 var _tiles: HBoxContainer
 var _prev: Button
 var _next: Button
@@ -41,7 +44,7 @@ var _foot: HBoxContainer
 var _thumbs := {}                 # picture key -> SubViewport
 
 func _init() -> void:
-	var look := UI.card(Color(0.06, 0.07, 0.1, 0.93), 10, 14)
+	var look := UI.card(Color(UI.NIGHT, 0.93), 10, 14)
 	add_theme_stylebox_override("panel", look.get_theme_stylebox("panel"))
 	set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -58,10 +61,12 @@ func _init() -> void:
 	_search = LineEdit.new()
 	_search.placeholder_text = "Search"
 	_search.clear_button_enabled = true
-	_search.custom_minimum_size = Vector2(130, 0)
+	_search.custom_minimum_size = Vector2(72, 0)
 	_search.text_changed.connect(_on_search)
 	_search.gui_input.connect(_on_search_key)
 	top.add_child(_search)
+	_sweep_slot = UI.hbox(0)
+	top.add_child(_sweep_slot)
 	_undo = UI.button("Undo", func(): undo_fn.call(), 76)
 	top.add_child(_undo)
 	top.add_child(UI.primary("Done", func(): done_fn.call(), 80))
@@ -97,6 +102,13 @@ func refresh() -> void:
 		for ctl in extras_fn.call():
 			_extras_row.add_child(ctl)
 	_undo.disabled = bool(undo_off_fn.call())
+	for old in _sweep_slot.get_children():
+		old.queue_free()
+	if sweep_fn.is_valid():
+		var on := bool(sweep_on_fn.call())
+		var toggle := UI.choice("Store", on, func(): sweep_fn.call(not on))
+		toggle.tooltip_text = "Click pieces to put them away"
+		_sweep_slot.add_child(toggle)
 	for old in _foot.get_children():
 		if old != hint and old != _extras_row:
 			old.queue_free()

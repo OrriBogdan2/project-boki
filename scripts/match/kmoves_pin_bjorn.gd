@@ -317,45 +317,60 @@ const MOVES := {
 		[0.176, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
 		[0.299, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
 		[0.484, {}]]},
-	# LMB held (sheet 0133-0145): side-on and crouched, the hammer dragged back low behind him (BjornFx cocks
-	# it in the hand), the shield arm forward, the body turning with the cursor; the coil deepens as it
-	# charges, and at full (1.05 s into the move, 1.25 s held) he is twisted hardest away and sunk lowest
-	# (BUL_COIL), the perfect window's pose
+	# LMB held: whirling the hammer, side-on and crouched, the hammer arm out to the side, the
+	# shield arm forward; the hammer circles him (BjornFx) while the body keeps facing the cursor. At full (1.05 s
+	# into the move, 1.25 s held) he is sunk lowest and leaning into it, the whirl still going; the release keys
+	# start from the coil (BUL_COIL), so the hammer hauls back on the swing's first frame
 	"bul_smash_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
-			0.15,
+			0.2,
 			{
-				"y": 0.8,
-				"p": 0.18,
-				"lift": -0.08,
-				"sq": 0.12,
-				"gp": 0.4,
+				"y": 0.75,
+				"p": 0.12,
+				"lift": -0.06,
+				"sq": 0.1,
+				"gp": 0.25,
 				"lw": 1.0,
-				"legs": [0.6, -0.9, -0.5, -0.55],
+				"legs": [0.55, -0.85, -0.45, -0.5],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.12, -0.45),
+				"fl": Vector3(-0.05, 0.12, -0.42),
 				"rw": 1.0,
-				"fr": Vector3(0.3, 0.0, 0.36)
+				"fr": Vector3(0.42, 0.38, 0.05)
 			}
 		],
 		[
 			0.95,
 			{
-				"y": 0.98,
-				"p": 0.24,
-				"lift": -0.12,
-				"sq": 0.18,
-				"gp": 0.45,
+				"y": 0.85,
+				"p": 0.18,
+				"lift": -0.1,
+				"sq": 0.16,
+				"gp": 0.3,
 				"lw": 1.0,
-				"legs": [0.75, -1.1, -0.55, -0.65],
+				"legs": [0.65, -0.95, -0.5, -0.55],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.11, -0.48),
+				"fl": Vector3(-0.05, 0.14, -0.45),
 				"rw": 1.0,
-				"fr": Vector3(0.3, -0.03, 0.4)
+				"fr": Vector3(0.45, 0.42, 0.05)
 			}
 		],
-		[1.05, BUL_COIL]]},
+		[
+			1.05,
+			{
+				"y": 0.9,
+				"p": 0.22,
+				"lift": -0.13,
+				"sq": 0.2,
+				"gp": 0.32,
+				"lw": 1.0,
+				"legs": [0.72, -1.05, -0.55, -0.62],
+				"hw": 1.0,
+				"fl": Vector3(-0.05, 0.14, -0.47),
+				"rw": 1.0,
+				"fr": Vector3(0.46, 0.44, 0.05)
+			}
+		]]},
 	# ... let go: the hammer arm sweeps round from behind to the front in one frame and crashes down; the
 	# shoulders turn hard with it but the body stays on its feet (the step's dash lean adds ~0.45 rad
 	# forward, so the move's own pitch stays near zero), the impact the frame after, then 0.4 s to recover
@@ -791,39 +806,6 @@ const MOVES := {
 		[0.18, {"p": -0.15, "fz": 6.28, "sq": 0.15, "lw": 1.0, "legs": [0.6, -0.9, 0.3, -0.5]}],
 		[0.32, {"fz": 6.28, "sq": -0.05}],
 		[0.42, {"fz": 6.28}]]},
-	# Deadeye (the payoff): the bow thrust out at the target, the body locked low and still, then a slow rise
-	"pin_deadeye": {"keys": [
-		[0.0, {}],
-		[
-			0.05,
-			{
-				"p": -0.12,
-				"y": 0.7,
-				"lift": -0.1,
-				"sq": 0.2,
-				"lw": 1.0,
-				"legs": [0.8, -1.2, -0.5, -0.6],
-				"hw": 1.0,
-				"fl": Vector3(0.3, 0.25, 0.4),
-				"gp": 0.1
-			}
-		],
-		[
-			0.4,
-			{
-				"p": -0.1,
-				"y": 0.68,
-				"lift": -0.1,
-				"sq": 0.18,
-				"lw": 1.0,
-				"legs": [0.8, -1.2, -0.5, -0.6],
-				"hw": 0.8,
-				"fl": Vector3(0.28, 0.22, 0.38)
-			}
-		],
-		[0.75, {}]]},
-	# ---------------------------------------------------------------- Breaker: procs, payoffs and the base dash
-	# Crushed (the payoff): the hammer swung up overhead in triumph, a stamp, the chest out
 	"bul_crush": {"keys": [
 		[0.0, {}],
 		[0.1, {"p": 0.35, "lift": 0.1, "sq": -0.2, "gp": 1.4, "lw": 1.0, "legs": [0.2, -0.3, 0.1, -0.2]}],

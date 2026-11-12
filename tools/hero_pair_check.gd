@@ -1,5 +1,5 @@
 extends RefCounted
-## --zone-check: Tarek (dolm) and Ostra placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
+## --zone-check: Tarek (dolm) and Motley placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
 ## this file: tools/breah_combo_check.gd (--dolm-combo-check), tools/ostra_combo_check.gd (--ostra-combo-check).
 ##   zone: where rocks, the seed and Trade may land: collision, walls, bodies, abyss edges (the Basalt
 ##         Spine clipped there, no walkway), and the Net placement events
@@ -169,7 +169,7 @@ func _zones() -> void:
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
 	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
-	# ---- the Basalt Spine across the abyss: rocks on the ground either side, none over the gap, no walkway
+	# ---- the Basalt Spine over the abyss: the rocks are laid on the gap as ground, no bridge tiles or event
 	var before := void_tiles(m)
 	for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
 	HeroZones.capture = true
@@ -178,25 +178,18 @@ func _zones() -> void:
 	step(m, float(P.ak.x_def()["rise"]) + 0.1)
 	HeroZones.capture = false
 	var spine := (P.ak as DolmKit).spine
-	var on_ground := true
-	var near_x := -99.0
-	var far_x := 99.0
-	for w in rocks(m):
-		for end in [w["a"], w["b"]]:
-			on_ground = on_ground and not m.world.is_void((end as Vector2).x, (end as Vector2).y)
-		var mx := (P.ak as DolmKit).rock_mid(w).x - home.x
-		if mx < 4.0: near_x = maxf(near_x, mx)
-		else: far_x = minf(far_x, mx)
+	var over_gap := rocks(m).filter(func(w):
+		var mid := (P.ak as DolmKit).rock_mid(w)
+		return m.world.is_void(mid.x, mid.z))
 	ok(
-		"spine (item 15): over the abyss no walkway: the abyss stays abyss, no bridge event",
+		"spine: over the abyss the rocks are the walkway: the abyss stays abyss, no bridge event",
 		void_tiles(m) == before and not HeroZones.sent.any(func(e): return e[1] == "bridge"),
 		"void %d -> %d" % [before, void_tiles(m)]
 	)
 	ok(
-		"spine (item 15): the line is clipped at the abyss edges (rocks on both banks, every end on ground)",
-		on_ground and rocks(m).size() > 2 and rocks(m).size() < int(P.ak.x_def()["rocks"]) and near_x < 4.0
-			and far_x >= 12.0 and spine.rocks_raised == rocks(m).size(),
-		"rocks %d near bank %.1f far bank %.1f" % [rocks(m).size(), near_x, far_x]
+		"spine: rocks stand over the gap and on the banks, every rock raised",
+		over_gap.size() >= 3 and rocks(m).size() > over_gap.size() and spine.rocks_raised == rocks(m).size(),
+		"rocks %d over the gap %d" % [rocks(m).size(), over_gap.size()]
 	)
 	await done(m)
 	# ---- a block tile and a body in the way
@@ -261,7 +254,7 @@ func _zones() -> void:
 	ok("net: a launched rock is removed on the other game", rocks(m).size() == 2 and rocks(m2).size() == 2, "a %d b %d" % [rocks(m).size(), rocks(m2).size()])
 	await done(m2)
 	await done(m)
-	# ---- Ostra: the seed and Trade respect ground, walls and the abyss
+	# ---- Motley: the seed and Trade respect ground, walls and the abyss
 	r = setup("ostra", 9.0, 5)
 	m = r[0]; P = r[1]; T = r[2]; home = r[3]
 	var O: OstraKit = P.ak

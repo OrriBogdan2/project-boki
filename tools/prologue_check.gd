@@ -1,14 +1,14 @@
 extends RefCounted
 ## --prologue-check [--shots-dir=<dir>]: plays the prologue frame by frame (add --fixed-fps 60 for even strips) and
-## checks the five slides and the owner's lines for 3 and 4, that in THE MASKS every Boki and the hunter stay
+## checks the five slides and the owner's lines for 3 and 4, that in THE RELICS every Boki and the hunter stay
 ## inside the picture (between the letterbox bars) and never stand in each other, that the relic wakes,
 ## and that it ends on the hatch. With --shots-dir (under xvfb with a renderer) it also saves a 5-frame strip
 ## per slide (start, two key beats, middle, end) as <dir>/s<slide>_<n>.png with <dir>/captions.txt.
 
-const SUNDERING := "The Wyrm broke the land and stole our essence.\n" \
+const HOLLOWING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
-const MASKS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
-	+ "Masks, each carrying the soul of a fallen Hunter of old."
+const RELICS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
+	+ "Relics, the masks of fallen Hunters.\nOnly those who wear a Hunter's Relic can save our souls."
 ## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
 	[[1.0, "start: the land whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
@@ -19,18 +19,20 @@ const STRIP := [
 		[3.5, "middle: cut wide, the sky reddening as it dives"], [4.6, "beat: fire on the towns, the frame shaking"],
 		[-0.2, "end: the Wyrm climbs away over the burning land"]],
 	[[1.0, "start: the burning land, the Wyrm circling"], [1.8, "beat: the land splits (flash, jolt, rocks)"],
-		[3.2, "middle: the Masks burst out of the Crown"], [4.4, "beat: cut low, the isles drifting apart in dust"],
+		[3.2, "middle: the Relics burst out of the Crown"], [4.4, "beat: cut low, the isles drifting apart in dust"],
 		[-0.2, "end: the isles sinking, rocks falling past"]],
 	[[1.0, "start: a hunter at sunrise, the first Boki out of the grass"],
 		[2.4, "beat: the lead Boki greets him, he kneels"],
 		[3.9, "middle: cut side-on, it rears up to nose the relic in his hands and it wakes"],
 		[5.4, "beat: the woken relic hangs glowing in Vex's colour between them"],
-		[-0.2, "end: the Boki jump for joy, the Mask rising off him"]],
+		[-0.2, "end: the Boki jump for joy, the Relic rising off him"]],
 	[[1.0, "start: behind the hunters gliding for the Heart"], [2.8, "beat: the Heart's beam ahead"],
 		[4.2, "middle: cut to the reveal over the isles"], [5.6, "beat: two eyes open far down in the clouds"],
 		[-0.2, "end: the Wyrm watching the race"]],
 ]
 const FRAME := Vector2i(1280, 720)      # px: the game's window (project.godot), the smallest it frames for
+## px: the game's window, a big one, a small one
+const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(800, 450)]
 const BOKI_GAP := 0.75          # m: the least room between two Boki, or a Boki and the hunter's feet
 
 var bad := 0
@@ -63,8 +65,10 @@ func run(m: Node) -> void:
 		tree.quit(1)
 		return
 	ok(pr.shots.size() == 5, "five slides (%d)" % pr.shots.size())
-	ok(String(pr.shots[2]["text"]) == SUNDERING, "THE SUNDERING reads the owner's line")
-	ok(String(pr.shots[3]["text"]) == MASKS, "THE MASKS reads the owner's line")
+	ok(String(pr.shots[2]["text"]) == HOLLOWING, "THE HOLLOWING reads the owner's line")
+	ok(String(pr.shots[3]["text"]) == RELICS, "THE RELICS reads the owner's line")
+	await _captions_fit(pr, tree)
+	main.get_window().size = FRAME
 	await _play(pr, tree)
 	for i in 900:
 		if main.current != pr:
@@ -72,6 +76,7 @@ func run(m: Node) -> void:
 		await tree.process_frame
 	var hatch: bool = main.current != pr and main.current.get_script().resource_path.ends_with("hatch.gd")
 	ok(hatch, "the prologue ends on the hatch")
+	await _skips(tree)
 	if dir != "":
 		var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 		for c in caps:
@@ -81,7 +86,36 @@ func run(m: Node) -> void:
 	RenderingServer.render_loop_enabled = true
 	tree.quit(1 if bad else 0)
 
-## Steps through the slides, taking the strip frames and watching THE MASKS's framing every frame.
+## The first press of a key or a pad button skips it all in a blink, and once seen a new game goes past it.
+func _skips(tree: SceneTree) -> void:
+	var key := InputEventKey.new()
+	key.keycode = KEY_X
+	key.pressed = true
+	var pad := InputEventJoypadButton.new()
+	pad.button_index = JOY_BUTTON_A
+	pad.pressed = true
+	for ev: InputEvent in [key, pad]:
+		Save.d["tutorial"]["prologue"] = false
+		await main.show_screen("prologue", {"then": "hatch"})
+		var pr = main.current
+		for i in 3:
+			await tree.process_frame
+		var t0 := Time.get_ticks_msec()
+		pr._unhandled_input(ev)
+		while main.current == pr and Time.get_ticks_msec() - t0 < 3000:
+			await tree.process_frame
+		var took := Time.get_ticks_msec() - t0
+		ok(main.current != pr and took <= 400, "one %s press skips to the hatch (%d ms)" % [ev.get_class(), took])
+	ok(bool(Save.d["tutorial"]["prologue"]), "a skip is remembered")
+	await main.show_screen("prologue", {"then": "hatch"})
+	var again = main.current
+	for i in 10:
+		if main.current != again:
+			break
+		await tree.process_frame
+	ok(main.current != again, "the next new game skips it by default")
+
+## Steps through the slides, taking the strip frames and watching THE RELICS's framing every frame.
 func _play(pr, tree: SceneTree) -> void:
 	var worst_gap := 99.0
 	var out_frames := 0
@@ -105,10 +139,10 @@ func _play(pr, tree: SceneTree) -> void:
 					if first_out == "":
 						first_out = ", first %s at %.1f s" % [out, pr.shot_t]
 			await _shot(i, n, pr)
-	ok(boki_frames > 100 and out_frames == 0, "THE MASKS: every Boki and the hunter stay inside the frame"
+	ok(boki_frames > 100 and out_frames == 0, "THE RELICS: every Boki and the hunter stay inside the frame"
 		+ " (%d of %d frames out%s)" % [out_frames, boki_frames, first_out])
-	ok(worst_gap >= BOKI_GAP, "THE MASKS: no Boki stands in the hunter or another Boki (closest %.2f m)" % worst_gap)
-	ok(pr.boki.relic_k > 0.9, "THE MASKS: the relic wakes (%.2f)" % pr.boki.relic_k)
+	ok(worst_gap >= BOKI_GAP, "THE RELICS: no Boki stands in the hunter or another Boki (closest %.2f m)" % worst_gap)
+	ok(pr.boki.relic_k > 0.9, "THE RELICS: the relic wakes (%.2f)" % pr.boki.relic_k)
 
 ## The least ground distance between any two Boki, or a Boki and the hunter, while they are out.
 func _boki_gap(pr) -> float:
@@ -159,3 +193,34 @@ func _shot(i: int, n: int, pr) -> void:
 	var file := "s%d_%d.png" % [i + 1, n + 1]
 	img.save_png(dir.path_join(file))
 	caps.append("%s: %s, %.1f s in. %s" % [file, String(pr.shots[i]["chapter"]), pr.shot_t, String(STRIP[i][n][1])])
+
+## Item 77: every slide's caption stays fully on screen (wrapped, growing upward) at the game's window, a big
+## one and a small one. With --shots-dir each is saved as <dir>/caption_<width>_s<slide>.png.
+func _captions_fit(pr, tree: SceneTree) -> void:
+	var worst := 0.0
+	var lines := 0
+	for size in WINDOWS:
+		main.get_window().size = size
+		for i in 3:
+			await tree.process_frame
+		for i in pr.shots.size():
+			pr.caption.text = String(pr.shots[i]["text"])
+			pr.caption.visible_ratio = 1.0
+			pr.caption.modulate.a = 1.0
+			for n in 2:
+				await tree.process_frame
+			# (canvas units: the window's stretch applies)
+			var view: Rect2 = pr.caption.get_viewport().get_visible_rect()
+			var box: Rect2 = pr.caption.get_global_rect()
+			var over := maxf(maxf(view.position.x - box.position.x, view.position.y - box.position.y),
+				maxf(box.end.x - view.end.x, box.end.y - view.end.y))
+			worst = maxf(worst, over)
+			lines = maxi(lines, pr.caption.get_line_count())
+			if dir != "":
+				RenderingServer.render_loop_enabled = true
+				await tree.process_frame
+				await tree.process_frame
+				tree.root.get_texture().get_image().save_png(dir.path_join("caption_%d_s%d.png" % [size.x, i + 1]))
+				RenderingServer.render_loop_enabled = false
+	ok(worst <= 0.5, "every caption stays on screen at %s (worst overhang %.1f px, up to %d lines)"
+		% [str(WINDOWS), worst, lines])

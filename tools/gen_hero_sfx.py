@@ -2,9 +2,10 @@
 
     python3 tools/gen_hero_sfx.py      (then: godot --headless --import)
 
-hero_blowout : Ryzz's payoff. A dry thunder crack, a falling thump and a rising zap with a spark ring on top.
+hero_blowout : Sparkle's payoff. A dry thunder crack, a falling thump and a rising zap with a spark ring on top.
 hero_skewer  : Vex's payoff. A thin needle sweep, a metal tick on arrival and a short low thud.
 """
+import argparse
 import math, os, random, struct, wave
 
 SR = 22050
@@ -51,17 +52,24 @@ def save(name, x, db=-19.0, tail=0.03):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1, min(1, v)) * 32767)) for v in x))
 
-# ---- Ryzz: Blowout
-save('hero_blowout', mix(
-    scale(mul(hp(noise(0.5), 2200), env(N(0.5), 0.001, 0.07)), 1.0),
-    scale(mul(tone(210, 48, 0.55), env(N(0.55), 0.002, 0.16)), 1.0),
-    scale(at(mul(tone(500, 2400, 0.22), env(N(0.22), 0.01, 0.07)), 0.05), 0.55),
-    scale(at(bell(2900, 0.45, 0.09), 0.1), 0.35)), -15)
 
-# ---- Vex: Skewered
-save('hero_skewer', mix(
-    scale(mul(tone(900, 3200, 0.14), env(N(0.14), 0.002, 0.05)), 0.6),
-    scale(at(bell(2100, 0.35, 0.07), 0.12), 0.7),
-    scale(at(mul(bp(noise(0.12), 500, 2500), env(N(0.12), 0.001, 0.025)), 0.12), 0.8),
-    scale(at(mul(tone(140, 70, 0.2), env(N(0.2), 0.002, 0.06)), 0.12), 0.9)), -17)
-print('hero sounds written')
+def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
+    # ---- Sparkle: Blowout
+    save('hero_blowout', mix(
+        scale(mul(hp(noise(0.5), 2200), env(N(0.5), 0.001, 0.07)), 1.0),
+        scale(mul(tone(210, 48, 0.55), env(N(0.55), 0.002, 0.16)), 1.0),
+        scale(at(mul(tone(500, 2400, 0.22), env(N(0.22), 0.01, 0.07)), 0.05), 0.55),
+        scale(at(bell(2900, 0.45, 0.09), 0.1), 0.35)), -15)
+
+    # ---- Vex: Skewered
+    save('hero_skewer', mix(
+        scale(mul(tone(900, 3200, 0.14), env(N(0.14), 0.002, 0.05)), 0.6),
+        scale(at(bell(2100, 0.35, 0.07), 0.12), 0.7),
+        scale(at(mul(bp(noise(0.12), 500, 2500), env(N(0.12), 0.001, 0.025)), 0.12), 0.8),
+        scale(at(mul(tone(140, 70, 0.2), env(N(0.2), 0.002, 0.06)), 0.12), 0.9)), -17)
+    print('hero sounds written')
+
+
+if __name__ == "__main__":
+    main()

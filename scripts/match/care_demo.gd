@@ -12,16 +12,14 @@ extends RefCounted
 const SPEC := {
 	"tender_lmb": {"strip": [0.34, 0.38, 0.42, 0.52, 0.66, 0.82], "keys": {"lmb": 0.42, "lmb_fly": 0.39}},
 	"tender_emp": {"strip": [1.3, 1.36, 1.42, 1.5, 1.6, 1.8], "keys": {"emp": 1.42, "emp_fly": 1.56}},
-	"tender_rmb": {
-		"strip": [0.6, 0.84, 0.9, 0.98, 1.4, 1.86],
-		"keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
+	"tender_rmb":
+	{"strip": [0.6, 0.84, 0.9, 0.98, 1.4, 1.86], "keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
 	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
 	"tender_dash": {"strip": [0.31, 0.35, 0.41, 0.47, 0.53], "keys": {"dash": 0.41}},
-	"tender_air": {
-		"strip": [0.33, 0.5, 0.8, 1.1, 1.3],
-		"keys": {"air_start": 0.28, "air": 0.46, "air_float": 0.8, "air_land": 1.3}},
-	"tender_airsteer": {
-		"strip": [0.33, 0.6, 0.85, 1.1, 1.3], "keys": {"steer_start": 0.3, "steer_mid": 0.85, "steer_end": 1.3}},
+	"tender_air":
+	{"strip": [0.33, 0.5, 0.8, 1.1, 1.3], "keys": {"air_start": 0.28, "air": 0.46, "air_float": 0.8, "air_land": 1.3}},
+	"tender_airsteer":
+	{"strip": [0.33, 0.6, 0.85, 1.1, 1.3], "keys": {"steer_start": 0.3, "steer_mid": 0.85, "steer_end": 1.3}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
 	"tender_payoff": {"strip": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2], "keys": {"payoff": 2.82}},
 	"tender_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -31,34 +29,42 @@ const SPEC := {
 	"tender_ult": {"strip": [1.5, 5.4, 5.56, 5.62, 5.72, 5.9], "keys": {"ult_end": 5.62}},
 	"rimewright_lmb": {"strip": [0.42, 0.45, 0.5, 0.56, 0.62, 0.7], "keys": {"lmb": 0.45, "lmb_fly": 0.8}},
 	"rimewright_heavy": {"strip": [0.98, 1.02, 1.06, 1.1, 1.2], "keys": {"heavy": 1.06}},
-	"rimewright_shatter": {
-		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 1.98, "shatter": 2.2}},
+	"rimewright_shatter":
+	{"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 1.98, "shatter": 2.2}},
 	"rimewright_payoff": {"strip": [0.5, 0.7, 0.9, 1.1, 1.3, 1.5], "keys": {"payoff": 1.3}},
-	"rimewright_rmb": {
-		"strip": [0.7, 0.84, 0.92, 1.05, 1.32], "side": 560,
-		"keys": {"rmb_aim": 0.7, "rmb_fly": 1.12, "rmb_land": 1.32, "rmb_boom": 3.12}},
+	"rimewright_rmb":
+	{
+		"strip": [0.7, 0.84, 0.92, 1.05, 1.32],
+		"side": 560,
+		"keys": {"rmb_aim": 0.7, "rmb_fly": 1.12, "rmb_land": 1.32, "rmb_boom": 3.12}
+	},
 	"rimewright_dash": {"strip": [0.32, 0.45, 0.62, 0.8, 1.06], "keys": {"dash": 0.7, "dash_stop": 1.06}},
 	"rimewright_skatefire": {"strip": [0.5, 0.58, 0.64, 0.7, 0.8, 0.9], "keys": {"skatefire": 0.66}},
 	"rimewright_air": {"strip": [0.3, 0.5, 0.7, 0.9, 1.1], "keys": {"air": 0.5, "air_land": 0.9}},
-	"rimewright_e": {
-		"strip": [0.34, 0.42, 0.5, 0.55, 0.62, 0.9], "keys": {"e": 0.56, "e_slide": 1.3, "e_full": 2.6}},
+	"rimewright_airgap": {"strip": [0.3, 0.55, 0.75, 0.95, 1.2], "side": 560, "keys": {"airgap": 0.75}},
+	"rimewright_e": {"strip": [0.34, 0.42, 0.5, 0.55, 0.62, 0.9], "keys": {"e": 0.56, "e_slide": 1.3, "e_full": 2.6}},
 	"rimewright_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
 	"rimewright_pose": {"strip": [0.5, 0.56, 0.62, 0.68], "keys": {"pose": 0.6}, "yaw": 3.3},
 	"rimewright_ultaim": {"strip": [0.32, 0.36, 0.42, 0.5, 1.5], "keys": {"ultaim": 0.36}},
 	"rimewright_ultkey": {"strip": [0.33, 0.37, 0.42, 0.5, 2.0, 3.0], "keys": {"ultkey": 2.0}},
 	"rimewright_ultskate": {"strip": [1.1, 1.22, 1.3, 1.4, 1.55], "keys": {"ultskate": 1.3}},
-	"rimewright_skateult": {
+	"rimewright_skateult":
+	{
 		"strip": [0.7, 0.8, 0.9, 1.05, 1.3, 2.2],
-		"keys": {"skating": 0.6, "skateult": 0.88, "carried": 1.3, "encased": 2.0}},
+		"keys": {"skating": 0.6, "skateult": 0.88, "carried": 1.3, "encased": 2.0}
+	},
 	"rimewright_ult": {"strip": [3.6, 3.81, 3.85, 3.91, 4.0, 4.25], "keys": {"ult_crash": 3.85}},
 }
+
 
 static func close() -> bool:
 	return "--care-close" in OS.get_cmdline_user_args()
 
+
 static func tick(A: Arena, dt: float, w: String) -> void:
 	var parts := w.split("_")
-	if parts.size() < 3: return
+	if parts.size() < 3:
+		return
 	var arch := String(parts[1])
 	var what := String(parts[2])
 	var spec: Dictionary = SPEC.get(arch + "_" + what, {})
@@ -72,21 +78,24 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	A.set_meta("care_t", t)
 	var D: Hunter = A.dummies[0]["h"]
 	_camera(m, spec)
-	if m.hud: m.hud.guide_hidden = true
+	if m.hud:
+		m.hud.guide_hidden = true
 	if t < 0.1:
-		Engine.time_scale = ArenaDemoPair.DEMO_TIME_SCALE      # each slow render frame steps only a sliver
+		Engine.time_scale = ArenaDemoPair.DEMO_TIME_SCALE  # each slow render frame steps only a sliver
 		# off every hover spot (no tooltip in the frames) and no Boki at her shoulder in the close-ups
 		m.get_viewport().warp_mouse(Vector2(8, 8))
 		for l in m.find_children("*", "Label3D", true, false):
-			if String((l as Label3D).text).contains("KIT CARD"): (l as Label3D).visible = false
+			if String((l as Label3D).text).contains("KIT CARD"):
+				(l as Label3D).visible = false
 	P.hp = P.max_hp
 	# far below full, so a payoff this step can't fill it: no BOND READY word or toast over the frames
 	P.ult = -100.0
 	for k in m.kins + m.mobs:
-		if is_instance_valid(k): (k as Node3D).visible = false
+		if is_instance_valid(k):
+			(k as Node3D).visible = false
 	if arch == "tender" and what in ["dash", "air"]:
-		P.kin = null           # her own dash only: a Boki's dash rider (its ring or decoy) is the Boki's look
-	var Al: Hunter = (A.get_meta("care_ally") if A.has_meta("care_ally") else null)
+		P.kin = null  # her own dash only: a Boki's dash rider (its ring or decoy) is the Boki's look
+	var Al: Hunter = A.get_meta("care_ally") if A.has_meta("care_ally") else null
 	if Al == null:
 		Al = _setup(A, arch, what)
 	if t < 0.25:
@@ -96,10 +105,12 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	_script(A, P, D, Al, arch, what, t, dt)
 	_capture(A, spec, arch, what, t, dt)
 
+
 ## The close-up looks low from the side; the gameplay camera is the real one (default zoom, pitch, north).
 static func _camera(m: Match, spec: Dictionary) -> void:
-	if not m.cam: return
-	m.cam.lead = 0.0          # the mouse sits in a corner (no hover tooltip): don't pan toward it
+	if not m.cam:
+		return
+	m.cam.lead = 0.0  # the mouse sits in a corner (no hover tooltip): don't pan toward it
 	if close():
 		m.cam.zoom = 0.32
 		m.cam.pitch = deg_to_rad(22.0)
@@ -112,6 +123,7 @@ static func _camera(m: Match, spec: Dictionary) -> void:
 	m.cam.yaw_to = m.cam.yaw
 	m.set_meta("zoom_hold", m.cam.zoom)
 
+
 ## Screen right and screen forward on the ground (the way the camera looks), from the live camera.
 static func _axes(m: Match) -> Array:
 	var cam := m.get_viewport().get_camera_3d()
@@ -120,12 +132,13 @@ static func _axes(m: Match) -> Array:
 	var b := cam.global_transform.basis
 	return [Vector3(b.x.x, 0, b.x.z).normalized(), Vector3(-b.z.x, 0, -b.z.z).normalized()]
 
+
 ## Moves that travel go to screen right (side-on in the frames); a downed teammate lies off to that side
 ## for the carry and Hearth Call; otherwise the teammate stands behind her and to the left, never between
 ## her and the camera.
 static func _place_ally(A: Arena, P: Hunter, Al: Hunter, what: String) -> void:
 	var ax := _axes(A.m)
-	var right: Vector3 = -(ax[0] as Vector3)      # travel goes screen left: the open side of the arena spot
+	var right: Vector3 = -(ax[0] as Vector3)  # travel goes screen left: the open side of the arena spot
 	var fwd: Vector3 = ax[1]
 	A.set_meta("care_right", Vector2(right.x, right.z))
 	A.set_meta("care_fwd", Vector2(fwd.x, fwd.z))
@@ -136,7 +149,8 @@ static func _place_ally(A: Arena, P: Hunter, Al: Hunter, what: String) -> void:
 	elif close():
 		Al.teleport(P.pos + fwd * 2.6 - right * 1.6)
 	else:
-		Al.teleport(P.pos - fwd * 1.8 - right * 2.2)      # below and left of her on screen, off the aim
+		Al.teleport(P.pos - fwd * 1.8 - right * 2.2)  # below and left of her on screen, off the aim
+
 
 ## The hero 7.5 m from the first dummy, and a teammate behind her (away from the close-up camera).
 static func _setup(A: Arena, arch: String, what: String) -> Hunter:
@@ -160,8 +174,10 @@ static func _setup(A: Arena, arch: String, what: String) -> Hunter:
 		D.max_hp = 5000.0
 	return Al
 
+
 static func _script(
-		A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float) -> void:
+	A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float
+) -> void:
 	var K: ArchKit = P.ak
 	var go := 0.3
 	if t < 0.2 and (what in ["skateult", "skatefire"] or (arch == "tender" and what in ["dash", "air", "airsteer"])):
@@ -189,18 +205,20 @@ static func _script(
 		"air", "airsteer":
 			P.inp["move"] = A.get_meta("care_right", Vector2(1, 0))
 			if what == "airsteer" and t > 0.55:
-				P.inp["move"] = A.get_meta("care_fwd", Vector2(0, -1))      # steer the glide round mid-flight
+				P.inp["move"] = A.get_meta("care_fwd", Vector2(0, -1))  # steer the glide round mid-flight
 			if _at(t, dt, 0.2):
 				P.vel.y = 6.0
 				if arch == "rimewright":
-					P.pos.y += 2.0          # a clear drop, so the press lands well before she does
+					P.pos.y += 2.0  # a clear drop, so the press lands well before she does
 					P.grounded = false
-			# Claire has no air dash: Shift held in the air starts the skate as she lands
+			# Claire's Shift in the air skates at once (item 62)
 			P.inp["dash_down"] = arch == "rimewright" and t >= go and t < 1.3
 			if _at(t, dt, go):
 				P.ex_cd = 0.0
 				P.dashes = P.max_dashes()
 				K.on_dash(true)
+		"airgap":
+			_air_gap(A, P, t, dt)
 		"lmb", "heavy":
 			P.inp["fire"] = t > 0.3 and t < 1.5
 		"shatter":
@@ -225,6 +243,7 @@ static func _script(
 		"skateult":
 			_skate_ult(A, P, t, dt)
 
+
 static func _dash(A: Arena, P: Hunter, arch: String, t: float, dt: float) -> void:
 	var side: Vector2 = A.get_meta("care_right", Vector2(1, 0))
 	var fwd: Vector2 = A.get_meta("care_fwd", Vector2(0, -1))
@@ -234,11 +253,12 @@ static func _dash(A: Arena, P: Hunter, arch: String, t: float, dt: float) -> voi
 		if _at(t, dt, 0.3):
 			P.do_dash()
 		return
-	P.inp["move"] = side if t < 0.62 else (side + fwd * 1.5).normalized()      # a carve partway
+	P.inp["move"] = side if t < 0.62 else (side + fwd * 1.5).normalized()  # a carve partway
 	P.inp["dash_down"] = t >= 0.3 and t < 1.0
 	if _at(t, dt, 0.3):
 		P.dashes = P.max_dashes()
 		P.do_dash()
+
 
 static func _payoff(P: Hunter, D: Hunter, Al: Hunter, K: ArchKit, arch: String, t: float, dt: float) -> void:
 	if arch == "rimewright":
@@ -252,6 +272,7 @@ static func _payoff(P: Hunter, D: Hunter, Al: Hunter, K: ArchKit, arch: String, 
 		K.cd["e"] = 0.0
 		K.use_e()
 
+
 ## The X ultimates: Pip puts the cursor on the (downed) teammate, presses X and walks while it
 ## channels; Claire seals in beside the dummy and lets the rink crack open.
 static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, dt: float) -> void:
@@ -262,7 +283,7 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 	if arch == "tender":
 		P.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
 		if what != "ultaim" and _at(t, dt, 0.5):
-			HunterKeys.ult_pressed(P)      # the aim shot keeps the cursor on the teammate: the preview telegraph
+			HunterKeys.ult_pressed(P)  # the aim shot keeps the cursor on the teammate: the preview telegraph
 		var walking := what != "ultaim" and t > 0.8 and t < 2.3
 		var away: Vector2 = -(A.get_meta("care_right", Vector2(1, 0)) as Vector2)
 		P.inp["move"] = away if walking else Vector2.ZERO
@@ -280,12 +301,38 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 			P.dashes = P.max_dashes()
 			P.inp["dash"] = true
 
+
 ## A long clear lane across the arena below the dummy (no rocks, no teammate in the way) for the dashes.
 static func _open_lane(A: Arena, P: Hunter, Al: Hunter) -> void:
 	var D: Hunter = A.dummies[0]["h"]
 	P.teleport(D.pos + Vector3(6.0, 0, 9.4))
 	if Al != null:
 		Al.teleport(D.pos + Vector3(-12.0, 0, -6.0))
+
+
+## Item 62: a jump off the near edge of a 6 m abyss gap and Shift at the top of it: she skates across.
+static func _air_gap(A: Arena, P: Hunter, t: float, dt: float) -> void:
+	var right: Vector2 = A.get_meta("care_right", Vector2(1, 0))
+	var side := Vector2(-right.y, right.x)
+	if t < 0.2:
+		_open_lane(A, P, A.get_meta("care_ally"))
+	if _at(t, dt, 0.1):
+		var W = A.m.world
+		for a in range(3, 9):
+			for b in range(-4, 5):
+				var q := Vector2(P.pos.x, P.pos.z) + right * (a + 0.5) + side * b
+				if W.inb(int(floor(q.x)), int(floor(q.y))):
+					W.kind[W.idx(int(floor(q.x)), int(floor(q.y)))] = World.T_VOID
+		W.build_meshes()
+	P.inp["move"] = right if t > 0.2 else Vector2.ZERO
+	if _at(t, dt, 0.25):
+		P.vel.y = 6.0
+		P.grounded = false
+	P.inp["dash_down"] = t >= 0.55 and t < 1.7
+	if _at(t, dt, 0.55):
+		P.dashes = P.max_dashes()
+		P.ak.on_dash(true)
+
 
 ## Claire skates (Shift held from 0.3s) inland along the clear lane, presses X at 0.75s: carried on as the bud
 ## seals, then rooted.
@@ -301,6 +348,7 @@ static func _skate_ult(A: Arena, P: Hunter, t: float, dt: float) -> void:
 	if _at(t, dt, 0.75):
 		HunterKeys.ult_pressed(P)
 
+
 ## Grabs the strip frames and the key frames at their moments; quits after the last one.
 static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: float, dt: float) -> void:
 	var m := A.m
@@ -312,27 +360,38 @@ static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: 
 	for i in strip.size():
 		last = maxf(last, float(strip[i]))
 		if _at(t, dt, float(strip[i])):
-			_grab(A, func(img: Image):
-				var fr: Array = A.get_meta("care_frames", [])
-				fr.append(_crop(m, img, int(spec.get("side", 0))))
-				A.set_meta("care_frames", fr))
+			_grab(
+				A,
+				func(img: Image):
+					var fr: Array = A.get_meta("care_frames", [])
+					fr.append(_crop(m, img, int(spec.get("side", 0))))
+					A.set_meta("care_frames", fr)
+			)
 	for k in keys:
 		last = maxf(last, float(keys[k]))
 		if _at(t, dt, float(keys[k])):
 			var path := "%s/%s_%s_%s.png" % [dir, arch, k, mode]
-			_grab(A, func(img: Image):
-				img.save_png(path)
-				print("ARENASHOT ", path))
+			_grab(
+				A,
+				func(img: Image):
+					img.save_png(path)
+					print("ARENASHOT ", path)
+			)
 	if t >= last + 0.15 and not A.has_meta("care_done"):
 		A.set_meta("care_done", true)
-		m.get_tree().process_frame.connect(func():
-			_strip(A.get_meta("care_frames", []), "%s/%s_%s_strip_%s.png" % [dir, arch, what, mode])
-			m.get_tree().quit(), CONNECT_ONE_SHOT)
+		m.get_tree().process_frame.connect(
+			func():
+				_strip(A.get_meta("care_frames", []), "%s/%s_%s_strip_%s.png" % [dir, arch, what, mode])
+				m.get_tree().quit(),
+			CONNECT_ONE_SHOT
+		)
+
 
 ## The rendered frame, once this step has drawn.
 static func _grab(A: Arena, use: Callable) -> void:
 	var m := A.m
 	m.get_tree().process_frame.connect(func(): use.call(m.get_viewport().get_texture().get_image()), CONNECT_ONE_SHOT)
+
 
 ## A square crop round the hero's middle on screen (360 px close up, 240 px at the gameplay zoom, or the
 ## spec's own `side` for a move that reaches further), scaled to 360 px.
@@ -351,11 +410,14 @@ static func _crop(m: Match, img: Image, side_px := 0) -> Image:
 	crop.resize(360, 360)
 	return crop
 
+
 static func _at(t: float, dt: float, when: float) -> bool:
 	return t >= when - 0.0001 and t - dt < when - 0.0001
 
+
 static func _strip(frames: Array, path: String) -> void:
-	if frames.is_empty(): return
+	if frames.is_empty():
+		return
 	var out := Image.create(360 * frames.size(), 360, false, Image.FORMAT_RGBA8)
 	for i in frames.size():
 		var img: Image = frames[i]

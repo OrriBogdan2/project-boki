@@ -10,9 +10,8 @@ extends RefCounted
 ##   encore / encorehit   Sable's X: the ring growing (the telegraph), then a volley landing (the impact)
 ##   riposte / ripostehit Kael's X: the guard with its strip (the telegraph), then the cleave landing
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
-##   archer      a rooted dummy, full Focus: the lens glint, the aim line, crosshairs over it
-##   deadeye     the same, ending on the Deadeye payoff
-##   hero_<id>_<move>   Ryzz (mage) and Vex (gunslinger) moments, see scripts/arch/hero_demo.gd
+##   archer      a rooted dummy: the aim line and crosshairs over it
+##   hero_<id>_<move>   Sparkle (mage) and Vex (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
@@ -53,7 +52,6 @@ const ANIM_DEMO := {
 	"arc_over_loose": ["archer", "longbow", [2.3, 2.42, 2.48, 2.56, 2.7, 2.95]],
 	"pin_walk": ["archer", "longbow", [0.5, 0.6, 0.8, 1.2, 1.8, 2.6]],
 	"pin_flick": ["archer", "longbow", [0.5, 0.54, 0.58, 0.63, 0.7, 0.85]],
-	"pin_deadeye": ["archer", "longbow", [0.5, 0.56, 0.7, 0.9, 1.1, 1.3]],
 	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.6, 0.7, 0.78, 0.92, 1.12]],
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
 	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
@@ -98,6 +96,16 @@ static func zoom_or(close: float) -> float:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--demo-zoom="): return float(String(a).substr(12))
 	return close
+
+## The pose demo's facing: --demo-face=dx,dz turns the Hunter toward that offset (default: 3/4 toward the camera,
+## her right side to it; Hem's review uses 5,3.5 so the bow in her left hand is on the camera's side).
+static func _face(fallback: Vector3) -> Vector3:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--demo-face="):
+			var f := String(a).get_slice("=", 1).split(",")
+			if f.size() == 2:
+				return Vector3(float(f[0]), 0.9, float(f[1]))
+	return fallback
 
 static func tick(A: Arena, dt: float) -> void:
 	var w := what()
@@ -229,7 +237,7 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			if _at(t, dt, 0.3): DJDemo.cast_ult(P)
 			at_t = 0.75 if w == "riposte" else 1.07
-		"archer", "deadeye":
+		"archer":
 			if t < 0.05:
 				if P.arch != "archer": A.set_arch("archer", "longbow")
 				A.set_kin("puddlet")
@@ -239,21 +247,9 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			# (keep it pinned for the frame)
 			if t > 0.35 and t < 2.0: D.root_t = maxf(D.root_t, 0.8)
-			if w == "archer":
-				if t > 0.9: P.ak.res = P.ak.res_max()
-				at_t = 1.9
-			else:
-				if _at(t, dt, 1.75):
-					P.ak.res = P.ak.res_max()
-					P.fire_cd = 0.0
-					P.ammo = maxi(P.ammo, 1)
-					P.inp["fire"] = true
-				if _at(t, dt, 1.8): P.inp["fire"] = false
-				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"):
-					A.set_meta("de_at", t)
-				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
+			at_t = 1.9
 		_ when w.begins_with("hero_"):
-			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Ryzz and Vex (scripts/arch/hero_demo.gd)
+			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Sparkle and Vex (scripts/arch/hero_demo.gd)
 		_ when w.begins_with("e_") or w.begins_with("r_") or w.begins_with("rmb_"):
 			# any archetype's E, R or RMB on the still dummy: e_<arch>, r_<arch>, rmb_<arch> (rmb holds 0.9s)
 			var ar := w.split("_")[1]
@@ -293,7 +289,7 @@ static func tick(A: Arena, dt: float) -> void:
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("dj_"):
 			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Kael stills (scripts/arch/dj_demo.gd)
-			if m.hud: m.hud.toasts.clear()
+			if m.hud: m.hud.msgs.clear()
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Tarek and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
@@ -314,7 +310,7 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			P.hp = P.max_hp
 			_anim_trigger(A, P, D, mv, t, dt)
-			if m.hud: m.hud.toasts.clear()        # the hero line from the swap would sit over the frames
+			if m.hud: m.hud.msgs.clear()        # the hero line from the swap would sit over the frames
 			var times: Array = spec[2]
 			for i in times.size():
 				if _at(t, dt, float(times[i])):
@@ -332,7 +328,7 @@ static func tick(A: Arena, dt: float) -> void:
 						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
 						A.home = P.pos
 			P.inp["move"] = Vector2.ZERO
-			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+			P.inp["aim"] = P.pos + _face(Vector3(-5.0, 0.9, 3.5))
 			at_t = 2.0
 		"bulwark", "crushed":
 			var H: Hunter = A.dummies[2]["h"]
@@ -374,7 +370,9 @@ static func tick(A: Arena, dt: float) -> void:
 				_shot_later(A, 0.7)       # the card pauses the match: shoot on a wall-clock timer
 			at_t = 99.0
 		"menu":
-			if t < 0.05: A.give_glove("blink")
+			if t < 0.05:
+				A.give_glove("blink", 0)
+				A.give_glove("grapple", 1)
 			if _at(t, dt, 0.3):
 				A.open_menu()
 				_shot_later(A, 0.7)
@@ -418,7 +416,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 		DJDemo.trigger(P, D, mv, t, dt)          # Sable and Juggernaut (scripts/arch/dj_demo.gd)
 		return
 	match mv:
-		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
@@ -431,7 +429,7 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 	var K: ArchKit = P.ak
 	var fire := false
 	if mv != "bul_slamshield":
-		K.res = 0.0            # no Focus or Guard tell in the strips (the Shield Slam needs its Guard)
+		K.res = 0.0            # no Guard tell in the strips (the Shield Slam needs its Guard)
 	# dashes go across the screen, clear of the dummy ahead (a strip used to end inside its model)
 	if mv in ["pin_roll", "pin_walk", "pin_flick", "bul_lumber", "bul_whirl", "bul_short"]:
 		P.inp["move"] = Vector2(0, 1)
@@ -497,7 +495,7 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				P.dashes = 0.0
 				P.ex_cd = 0.0
 				P.do_dash()
-		"pin_deadeye", "bul_crush", "bul_break", "bul_armed": if _at(t, dt, 0.5): K.play(mv)
+		"bul_crush", "bul_break", "bul_armed": if _at(t, dt, 0.5): K.play(mv)
 		"bul_guard":
 			P.inp["sec_hold"] = t > 0.45
 			if _at(t, dt, 0.5):
@@ -522,7 +520,7 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	P.lvl = 6
-	K.res = 0.0                # no Focus tell in the strip
+	K.res = 0.0                # no resource tell in the strip
 	var cast_at := 0.5 if mv in ["pin_ult_cast", "bul_ult_wind", "bul_ult_slam"] else 0.3
 	if _at(t, dt, cast_at):
 		K.cd["x"] = 0.0
@@ -679,7 +677,7 @@ static func _pose_clear(A: Arena, P: Hunter, t: float) -> float:
 			m.cam.snap(P.pos)
 	_clear_frame(A, P, t)
 	P.inp["move"] = Vector2.ZERO
-	P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+	P.inp["aim"] = P.pos + _face(Vector3(-5.0, 0.9, 3.5))
 	return 2.0
 
 ## --arena-demo=pose_clear: the review frame's spot, flat open ground near the start (no block, void or slope
@@ -727,7 +725,7 @@ static func _clear_frame(A: Arena, P: Hunter, t: float) -> void:
 				if off.length() < 0.05:
 					(post as MeshInstance3D).visible = false
 	if m.aim_line: m.aim_line.layers = 0
-	if P.ak: P.ak.res = 0.0        # (no resource tell over the hero: Pin's Focus star and aim line)
+	if P.ak: P.ak.res = 0.0        # (no resource tell over the hero)
 	var kit_aim := m.get_node_or_null("AimKit") as Node3D      # (a kit's own aim line and reticles)
 	if kit_aim: kit_aim.visible = false
 	if t < 0.3 or A.has_meta("demo_cleared"):

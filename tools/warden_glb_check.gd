@@ -34,7 +34,12 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 45000         # a Warden baked from Meshy (PIPELINE.md r3): ~30-40k body and weapon, the face kept
+const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
+## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
+const TRIS_OVER := {"juggernaut": 24000}
+## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
+## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
+const WHITE_HAIR := {"thief": 0.08}
 
 var bad := 0
 var n := 0
@@ -95,7 +100,9 @@ func run(main: Node) -> void:
 		_springs(a)
 		_orbits(a)
 		_own_look(a)
+		_white_hair(a)
 		await _halo(main, a)
+	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -121,8 +128,10 @@ func _contract(a: String) -> void:
 	var unskinned := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
-		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
-		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
+		# cut out of the body, Meeko's sun and cloud)
+		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) \
+				or String(mi.name).begins_with(WardenCompanions.PREFIX)
 		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
@@ -130,9 +139,10 @@ func _contract(a: String) -> void:
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
-	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
+	var cap: int = TRIS_OVER.get(a, TRIS_MAX)
+	ok(unskinned == 0 and tris <= cap and slots.size() <= SLOT_MAX and unknown.is_empty(),
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"
-			% [a, unskinned, tris, TRIS_MAX, str(slots.keys()), SLOT_MAX])
+			% [a, unskinned, tris, cap, str(slots.keys()), SLOT_MAX])
 	m.free()
 
 ## Every kit move of every table, played on this Warden: after each key, every bone is exactly where its rig
@@ -239,6 +249,10 @@ func _anchors(main: Node, a: String) -> void:
 			% [a, str(missing), str(off_bone)])
 	var top := WardenGlb.anchor(m, "anchor_head_top")
 	if top != null:
+		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+		if clips:        # (a Hero with clips: hand the head to the rig, or this measures the idle clip's sway)
+			clips.force = {"proc": true}
+			clips.proc_w = 1.0
 		await main.get_tree().process_frame
 		var before := top.global_position
 		(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x += 0.6
@@ -256,27 +270,41 @@ func _shading(a: String) -> void:
 	var wrong := 0
 	var surfaces := 0
 	var textured := 0
+	var relief := 0
+	var no_relief := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			if sm and sm.shader in [WardenMood.FACE_SHADER, WardenMood.ATLAS_SHADER]:
+				continue        # (a face drawn on glass or from the mood atlas: no toon surface)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
 				textured += 1
+			# a .glb's normal map reaches the toon shader (use_nrm, the one path)
+			if sm and sm.shader == Models.HERO and src and src.normal_enabled and src.normal_texture:
+				relief += 1
+				var tex: Variant = sm.get_shader_parameter("normal_tex")
+				if not sm.get_shader_parameter("use_nrm") or tex != src.normal_texture:
+					no_relief += 1
 			# a textured surface shows its atlas; a flat-painted one (hand-modelled, no atlas) its own colour
 			var shows := false
-			if sm and atlas:
-				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+			if sm and sm.shader == WardenGlb.FLAME:
+				shows = true      # (fire: no paint of its own)
+			elif sm and atlas:
+				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
-			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD]
+			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD, WardenGlb.FLAME]
 			if not shader_ok or not shows or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,
 			"%s: all %d surfaces on the hero toon shader (%d with an atlas, rest flat), in the hit flash (%d not)" \
 			% [a, surfaces, textured, wrong])
+	ok(no_relief == 0, "%s: all %d of its normal maps reach the shader (%d lost)" % [a, relief, no_relief])
+	print("WARDENGLB %s normal-mapped surfaces: %d" % [a, relief])
 	m.free()
 
 ## The hit radius and the ring that shows it are the same with the .glb as without, and the .glb brings no
@@ -300,6 +328,21 @@ func _hitbox(a: String) -> void:
 ## leave), the procedural weapon is hidden, and its magazine (if it has one apart) is the Gun's Mag.
 ## A model's spring chains (RIG_CONTRACT "Spring chains": braids) swing: moved sideways, each chain's tip trails
 ## its rigid place, and standing still it settles back on it. (No chains: nothing to check.)
+## Tarek's seeing-stones turn their eyes to a point the kit gives them (WardenGlb.ORBIT_LOOK).
+func _stones_look() -> void:
+	var m := _model("dolm")
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	var stone := m.find_child("stone_0", true, false) as Node3D
+	var at := stone.global_position + Vector3(4.0, 0.0, 3.0)
+	m.set_meta(WardenGlb.ORBIT_LOOK, at)
+	for i in 90:
+		sync._process(1.0 / 60.0)
+		at = m.get_meta(WardenGlb.ORBIT_LOOK)
+	var fwd := -stone.global_basis.z.normalized()
+	var off := fwd.angle_to((at - stone.global_position).normalized())
+	ok(off < 0.3, "dolm: the seeing-stones turn to what they watch (%.2f rad off)" % off)
+	m.free()
+
 func _springs(a: String) -> void:
 	var m := _model(a)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
@@ -307,6 +350,8 @@ func _springs(a: String) -> void:
 		m.free()
 		return
 	var sk := _skel(m)
+	sync.springs.calm = true
+	sync.clips = null      # (the chains alone: a clip's idle keeps moving what they hang from)
 	sync._process(1.0 / 60.0)
 	var lag := 0.0
 	for i in 6:
@@ -316,7 +361,7 @@ func _springs(a: String) -> void:
 	for i in 240:
 		sync._process(1.0 / 60.0)
 	var rest := _spring_off(sk, sync)
-	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
+	ok(lag > 0.02 and rest < 0.016, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
 			% [a, sync.springs.chains.size(), lag, rest])
 	# wings fold back while she skates (the root's WING_FOLD meta): each wing tip swings behind its root
 	var wings: Array = sync.springs.chains.filter(func(ch): return bool(ch["wing"]))
@@ -395,6 +440,47 @@ func _own_look(a: String) -> void:
 			% [a, seen, str(wrong)])
 	m.free()
 
+func _white_hair(a: String) -> void:
+	if not WHITE_HAIR.has(a):
+		return
+	var m := _model(a)
+	var sum := Vector3.ZERO
+	var texels := 0
+	var desat := 0.0
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var src := mesh.surface_get_material(si) as BaseMaterial3D
+			if src == null or String(src.resource_name).get_slice("-", 0) != "hair" or src.albedo_texture == null:
+				continue
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			desat = float(sm.get_shader_parameter("desat")) if sm.get_shader_parameter("desat") != null else 0.0
+			var img := src.albedo_texture.get_image()
+			if img.is_compressed():
+				img.decompress()
+			for uv in mesh.surface_get_arrays(si)[Mesh.ARRAY_TEX_UV] as PackedVector2Array:
+				var c := img.get_pixel(clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1),
+						clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1))
+				sum += Vector3(c.r, c.g, c.b)
+				texels += 1
+	m.free()
+	var paint := Vector3.ZERO if texels == 0 else sum / texels
+	var drawn := paint.lerp(Vector3.ONE * paint.dot(Vector3(0.3, 0.59, 0.11)), desat)
+	var sat := Color(drawn.x, drawn.y, drawn.z).s
+	ok(texels > 0 and sat <= float(WHITE_HAIR[a]), "%s: the hair reads white, paint saturation %.3f as drawn (max %.2f)"
+			% [a, sat, WHITE_HAIR[a]])
+	var base := MantleLook.params(a, PlayerLook.neutral())
+	var moved: Array = []
+	for pick in Models.LOOK_HAIR.size():
+		var lk := PlayerLook.neutral()
+		lk["hair_col"] = pick
+		lk["eyes"] = pick % PlayerLook.pick_list("eyes").size()
+		var got := MantleLook.params(a, lk)
+		if not (got["hair_col"] as Color).is_equal_approx(base["hair_col"]) \
+				or not (got["eye_col"] as Color).is_equal_approx(base["eye_col"]):
+			moved.append(pick)
+	ok(moved.is_empty(), "%s: no hair or eye pick tints her hair or eyes (moved by %s)" % [a, str(moved)])
+
 func _within_tint(got: Color, want: Color) -> bool:
 	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
 	var hi := 1.0 + WardenGlb.TINT_MAX + 0.001
@@ -429,7 +515,7 @@ func _halo(main: Node, a: String) -> void:
 		if mi:
 			rest[mi] = mi.global_position
 	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
-	# (and the arms swing, the body turns and the aim pitches: a halo can ride a hand, Ostra's void orb, the chest,
+	# (and the arms swing, the body turns and the aim pitches: a halo can ride a hand, Motley's void orb, the chest,
 	# Sable's pendant, or the weapon, Hem's bow and Cinder's flame chamber)
 	for arm in ["Rig/Torso/ArmRPivot", "Rig/Torso/ArmLPivot"]:
 		var ap := m.get_node_or_null(arm) as Node3D

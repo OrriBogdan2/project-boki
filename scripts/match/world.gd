@@ -32,6 +32,7 @@ var chest_spots: Array = []
 var camp_spots: Array = []
 var wild_spots: Array = []
 var no_deco := {}
+var scatter_chunk := 0       # tiles: scatter batches are at least this wide (a home sets its whole map: all on screen)
 var paint := {}          # tile index -> colour for paths and soil, blended at the corners
 var clouds: Array = []
 var sheer := {}          # tile index -> true: a smooth cliff rim you can't grab (authored maps)
@@ -45,8 +46,8 @@ var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed 
 var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
 var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
 var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
-## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
-## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
+## The uplink outposts an authored layout places (see Exits): {kind: "outpost", at: Vector2, walled: bool}.
+## Empty: Exits works them out.
 var exit_defs: Array = []
 ## Boss lairs (see Lairs): walled arenas with one gate, each holding a boss and its Rare Egg.
 ## {id, name, boss, c: Vector2 (centre), half (tiles from the centre to the wall), gate ("n"/"s"/"e"/"w"),
@@ -146,7 +147,7 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees and ability barriers don't block, terrain still does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
 	if not dyn_walls.is_empty() and not ghost:
@@ -164,11 +165,12 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		var g := ground_at(x + o.x, z + o.y)
-		if g > y + STEP:
-			worst = maxf(worst, g)
-			hit = true
+	if not ghost:
+		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
+			var g := ground_at(x + o.x, z + o.y)
+			if g > y + STEP:
+				worst = maxf(worst, g)
+				hit = true
 	if hit:
 		return maxf(worst, WALL_MIN)
 	if guard:
@@ -241,6 +243,7 @@ func los(a: Vector3, b: Vector3, y: float) -> bool:
 		if ground_at(px, pz) > y + 0.2:
 			return false
 	for wl in dyn_walls:
+		if not Verbs.blocks_sight(wl): continue
 		if y > float(wl["y"]) - 0.3 and y < float(wl["y"]) + Verbs.WALL_H and Geometry2D.segment_intersects_segment(Vector2(a.x, a.z), Vector2(b.x, b.z), wl["a"], wl["b"]) != null:
 			return false
 	return true
@@ -456,6 +459,9 @@ func generate(seed_val: int, size := 64, n_islands := 7) -> void:
 		_place_compounds()
 	_place_stairs()
 	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # no lone posts a shot could clip
+	_clear_strays()
+	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # (a wall piece that leaned on a stray rock)
+	BlockPrune.fill_pockets(self)                     # no ground sealed in by rocks to be trapped in (item 151)
 
 ## On the big islands the point of interest sits inside a walled compound: a square of stone walls
 ## with a gate in each side and a squat tower at each corner, so each island reads as one place
@@ -589,8 +595,18 @@ func _wall_at(q: Vector2i, ii: int) -> void:
 		kind[idx(q.x, q.y)] = T_BLOCK
 		walls[idx(q.x, q.y)] = true
 
+var strays: Array = []       # tile indices of the scattered random rocks, cleared before the map is built
+
+## Item 151: no stray rocks to snag on (they looked a step high and blocked like a wall). They're placed and then
+## cleared, so every spot, spawn and chest the generator picks around them lands where it always has.
+func _clear_strays() -> void:
+	for i: int in strays:
+		if kind[i] == T_BLOCK and not walls.has(i) and not props.has(i):
+			kind[i] = T_GROUND
+	strays.clear()
+
 func _place_blockers() -> void:
-	walls.clear(); bush.clear(); live_bush.clear()
+	walls.clear(); bush.clear(); live_bush.clear(); strays.clear()
 	for ii in islands.size():
 		var isl: Dictionary = islands[ii]
 		var cells: Array = isl["cells"]
@@ -600,6 +616,7 @@ func _place_blockers() -> void:
 				continue
 			if rng.randf() < 0.03:
 				kind[i] = T_BLOCK
+				strays.append(i)        # cleared once every spot is placed (item 151), so the spots stay put
 		# stone walls to fight around and peek past: straight runs with a doorway, corners,
 		# rows of pillars, and on big islands a broken square keep
 		var n_walls := 1 + int(cells.size() / 110) + rng.randi_range(0, 1)
@@ -1158,6 +1175,7 @@ func build_meshes() -> void:
 	mat.set_shader_parameter("height_tex", tm.height_texture())
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
+	mat.set_shader_parameter("depth_k", DepthCues.k())
 	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)
 	if Flora.on():
 		var bt := _biome_textures()
@@ -1338,23 +1356,25 @@ static func with_lods(m: Mesh) -> Mesh:
 	_lod_cache[m] = out
 	return out
 
-## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
-static func _thin(items: Array, keep: float, seed_i: int) -> Array:
-	if keep >= 0.999:
-		return items
-	var r := RandomNumberGenerator.new(); r.seed = seed_i
-	return items.filter(func(_it): return r.randf() < keep)
-
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
+	if shadows:
+		# rocks and trees under the caster size go in batches of their own that don't cast (item 94)
+		var parts := ShadowPolicy.split_instances(items, mesh)
+		if not (parts[1] as Array).is_empty():
+			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk)
+		items = parts[0]
+		if items.is_empty():
+			return
 	var cls := _scatter_class(label, chunk)
 	var draw_k := float(Settings.q("draw"))
 	var vis_end := 0.0
 	match cls:
-		"small":
-			vis_end = DRAW_SMALL * draw_k
-			items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
-		"bush": vis_end = DRAW_BUSH * draw_k
+		"small", "bush":
+			# clutter thinned per preset (Clutter.KEEP); 32-tile batches: a quarter of the draws
+			vis_end = (DRAW_SMALL if cls == "small" else DRAW_BUSH) * draw_k
+			items = Clutter.thin(items, Clutter.keep(cls), hash(label) + rng.seed)
+			chunk = maxi(chunk, 32)
 		"big":
 			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
 			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
@@ -1363,6 +1383,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
 			# mean far fewer draws (and shadow draws) for a few more off-screen instances
 			chunk = maxi(chunk, 32)
+	chunk = maxi(chunk, scatter_chunk)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
@@ -1726,6 +1747,7 @@ func _decorate() -> void:
 		cm.set_shader_parameter("deep", (clouds[0] as Color).lightened(0.1))
 		cm.set_shader_parameter("light", (clouds[1] as Color).lightened(0.28))
 		cm.set_shader_parameter("glow_amount", 0.25)
+	cm.set_shader_parameter("abyss_dim", DepthCues.abyss_dim())
 	sea.material_override = cm
 	sea.position = Vector3(w / 2.0, -18.0, h / 2.0)
 	sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -1808,9 +1830,6 @@ func _undergrowth(groups: Dictionary, x: int, z: int, r: RandomNumberGenerator) 
 ## clean cut. Purely visual: they sit in the air beside the edge, below the ground you stand on, and
 ## stay clear of bridges, stairs, pads, updrafts and the sky train's loop.
 func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
-	var tc := Vector2.INF; var tr := 0.0
-	if not train_route.is_empty():
-		tc = train_route["center"]; tr = float(train_route["r"])
 	for z in h:
 		await _slice()
 		for x in w:
@@ -1818,7 +1837,8 @@ func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
 			if kind[i] == T_VOID or bridge.has(i) or stairs.has(i) or edge_dist(x, z, 1) != 1 or r.randf() > 0.16:
 				continue
 			var cp := Vector2(x + 0.5, z + 0.5)
-			if tc != Vector2.INF and absf(cp.distance_to(tc) - tr) < 4.5:
+			var tn := TrainRoute.near(self, cp.x, cp.y)
+			if tn != Vector3.INF and absf(tn.y) < 4.5:
 				continue
 			var clear := true
 			for pd in pads:
@@ -2244,7 +2264,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
 			"region_fixed": int(D.get("region", 0)), "poi_at": poi, "drop": bool(D.get("drop", false)), "sheer_arcs": D.get("sheer", []),
-			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", [])})
+			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", []), "landmark": D.get("landmark")})
 		if String(D.get("biome", "")) != "":
 			var bj := load_biome(String(D["biome"]))
 			if bj.has("colors"):
@@ -2455,12 +2475,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		authored_portals.append(_v2(ap))
 	exit_defs.clear()
 	await _slice()
-	for ek in [["docks", "dock"], ["outposts", "outpost"], ["hatches", "hatch"]]:
-		await _slice()
-		for ap in L.get(ek[0], []):
-			authored_portals.append(_v2(ap))
-			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
-				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
+	for ap in L.get("outposts", []):
+		authored_portals.append(_v2(ap))
+		exit_defs.append({"kind": "outpost", "at": _v2(ap), "walled": (ap as Array).size() >= 3 and bool(ap[2])})
 	await _slice()
 	if hand:
 		HandLayout.place_spots(self, defs)
@@ -2487,6 +2504,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:
 				weapon_spots.append(Vector3(wx + 0.5, level[idx(wx, wz)] * LEVEL, wz + 0.5))
+	if bool(L.get("calm", false)):      # the tutorial: nothing random, only what the course places itself
+		for spots: Array in [chest_spots, shrine_spots, wild_spots, break_spots, weapon_spots, camp_spots]:
+			spots.clear()
 	await _slice()
 	_place_stairs()
 

@@ -2,13 +2,13 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b41uk6pttnmax"
+uid="uid://ce804a3sm8507"
 path="res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "cb009c171406c6bf5403519fc778fd46"
+"md5": "e3476fb3690b4e12988838ec9942c755"
 }
 
 [deps]
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

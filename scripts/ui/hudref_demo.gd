@@ -6,9 +6,12 @@ extends RefCounted
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
 ##           cooling down. Everyone else stands still.
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
+##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
+##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
 
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.35      # s of match time: close enough to a 2.5s shot that the chip still holds on slow frames
+const BUSY_AT := 2.0      # s of match time: the busy burst
 
 ## The match options for `--hudref-demo=<mode>` (Main reads the command line).
 static func opts(arg: String) -> Dictionary:
@@ -51,8 +54,11 @@ static func tick(m) -> void:
 			kn.stow()                                      # everyone's Boki rides their shoulder, out of the fight
 	m.bubbles.clear()      # no Boki chatter or callouts over the plates
 	m.pings.clear()
-	if mode == "fight":
+	if mode != "plates":
 		P.hp = maxf(P.hp, P.max_hp * 0.4)    # (you stay up for the picture)
+	if mode == "busy" and m.time >= BUSY_AT and not m.has_meta("hudref_busy"):
+		m.set_meta("hudref_busy", true)
+		_busy(m, P)
 	if mode == "plates":
 		var hit: Hunter = m.get_meta("hudref_hit", null)
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
@@ -63,13 +69,20 @@ static func tick(m) -> void:
 			m.set_meta("hudref_up_done", true)
 			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
-		if st: st.slow_t = maxf(st.slow_t, 1.0)
+		if st:
+			st.stun_t = maxf(st.stun_t, 3.0)         # the whole CC row, timers held at a readable length
+			st.root_t = maxf(st.root_t, 2.5)
+			st.slow_t = maxf(st.slow_t, 2.0)
+			KitStatus.apply(st, "gnd", 1.5, 0.0, false, "demo")
+			KitStatus.apply(st, "rat", 2.2, 0.0, false)
 
 static func _stand(m, h: Hunter, at: Vector3) -> void:
 	var g: Vector3 = m.world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 	for i in 8:
 		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
 		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
+	if m.world.is_void(g.x, g.z):                         # (near an edge: look further out, not into the void)
+		g = m.world.free_spot_near(at, [], 0.6, 0.5, 12.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
 	h.ctrl = "idle"
 	h.vel = Vector3.ZERO
@@ -114,3 +127,17 @@ static func _fight(m, P: Hunter) -> void:
 		if i % 4 == 2: h.armor = 0.0
 		i += 1
 	P.hp = P.max_hp * 0.4
+
+## Everything that pops up text at the same moment: an ally knocked, an even level, a hint and toasts.
+static func _busy(m, P: Hunter) -> void:
+	for h in m.hunters:
+		if h != P and h.team == P.team:
+			m.knock(h, m.hunters.filter(func(x): return x.team != P.team)[0], {})
+			break
+	m.hud.level_up(8, {})
+	m.hud.tip("Hold %s to scan  ·  4s, rivals hear it" % Settings.key_cap("interact"))
+	m.hud.toast("Bramble Isle", Color("f2c84a"))
+	for i in 3:
+		m.hud.toast_small("Chest key found", KeyModels.BRASS)
+	m.hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
+	m.hud.toast_small("Drop wave incoming  ·  2 squads", Color("ffd27a"))

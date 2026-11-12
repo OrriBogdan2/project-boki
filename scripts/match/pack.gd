@@ -72,7 +72,7 @@ static func stash(m, h, wp: Dictionary) -> bool:
 		_off_ground(m, wp)
 		h.pack.append(it)
 		_told(m, h, "%s  ·  in your pack (%d/%d)" % [Loot.name_of(it), h.pack.size(), h.pack_cap], Loot.col_of(it))
-		m.sfx("pickup", h.pos, -2.0, 1.1)
+		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
 		return true
 	if h == m.player and m.hud:
 		m.hud.open_swap(wp)
@@ -104,31 +104,70 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 	m.sfx("pickup", h.pos, -2.0, 0.95)
 
 ## Puts a piece of gear on; returns the one it replaced as an item ({} if the slot was empty).
-static func _wear(m, h, it: Dictionary) -> Dictionary:
-	# a glove: the same glove's slot, an empty one, or the weaker one (Gloves)
-	var slot := Gear.slot_on(h, String(it["id"]))
+## `slot` -1 picks the slot (a glove: the same glove's slot, an empty one, or the weaker one: Gloves).
+static func _wear(m, h, it: Dictionary, slot := -1) -> Dictionary:
+	if slot < 0:
+		slot = Gear.slot_on(h, String(it["id"]))
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": it["id"], "rar": int(it["rar"])}
 	h.gear_cd[slot] = 0.0
 	h.refresh_gear()
 	if h == m.player and m.hud:
 		m.hud.toast("%s  ·  %s" % [Loot.name_of(it), Gear.stat_text(String(it["id"]), int(it["rar"]))], Gear.ALL[it["id"]]["col"])
-	m.sfx("pickup", h.pos, 0.0, 0.9)
+	m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
 	if old.is_empty():
 		return {}
 	return Loot.gear(String(old["id"]), int(old["rar"]))
 
-## From the backpack window: wear this piece of gear; what you had takes its place in the pack.
-static func use_from_pack(m, h, i: int) -> void:
+## From the backpack window: wear this piece of gear (in `slot`, or where it goes when -1); what you
+## had takes its place in the pack. A piece can only go in a slot of its own kind (gloves: either glove).
+static func use_from_pack(m, h, i: int, slot := -1) -> void:
 	if i < 0 or i >= h.pack.size():
 		return
 	var it: Dictionary = h.pack[i]
 	h.pack.remove_at(i)
 	if String(it.get("t", "")) == "gear":
-		var old_g := _wear(m, h, it)
+		if slot >= 0 and not fits_slot(String(it["id"]), slot):
+			slot = -1
+		var old_g := _wear(m, h, it, slot)
 		if not old_g.is_empty(): h.pack.insert(mini(i, h.pack.size()), old_g)
 	else:
 		h.pack.insert(i, it)
+
+## Can this piece be worn in worn slot `slot` (gloves 0 and 1, armor 2, boots 3)?
+static func fits_slot(id: String, slot: int) -> bool:
+	return slot < 2 if Gear.is_glove(id) else Gear.slot_of(id) == slot
+
+## Takes off the piece in worn slot `slot` into the pack. False when there is no room or nothing there.
+static func take_off(m, h, slot: int) -> bool:
+	if (h.gear[slot] as Dictionary).is_empty() or not room(h):
+		return false
+	var g: Dictionary = h.gear[slot]
+	h.pack.append(Loot.gear(String(g["id"]), int(g["rar"])))
+	_clear_slot(h, slot)
+	return true
+
+## Puts the piece in worn slot `slot` down on the ground.
+static func drop_worn(m, h, slot: int) -> void:
+	var g: Dictionary = h.gear[slot]
+	if g.is_empty():
+		return
+	_clear_slot(h, slot)
+	spawn_item(m, Loot.gear(String(g["id"]), int(g["rar"])), _near(h))
+
+static func _clear_slot(h, slot: int) -> void:
+	h.gear[slot] = {}
+	h.gear_cd[slot] = 0.0
+	h.refresh_gear()
+
+## Swaps the two gloves (Q and V), cooldowns going with them.
+static func swap_gloves(h) -> void:
+	var g: Dictionary = h.gear[0]
+	h.gear[0] = h.gear[1]
+	h.gear[1] = g
+	var cd: float = h.gear_cd[0]
+	h.gear_cd[0] = h.gear_cd[1]
+	h.gear_cd[1] = cd
 
 static func drop_from_pack(m, h, i: int) -> void:
 	if i < 0 or i >= h.pack.size():
@@ -159,11 +198,11 @@ static func haul(h) -> Array:
 static func smart_loot(m, h, b: Dictionary) -> int:
 	var n := 0
 	for it in Life.box_items(m, h, b):
-		if String(it["key"]) in ["keys", "chest_keys", "gems", "seeds", "belt", "backpack"]:
+		if String(it["key"]) in ["keys", "chest_keys", "gems", "seeds", "belt", "backpack"] and LootFull.fits(h, it, b):
 			Life.take_item(m, h, b, it)
 			n += 1
-	# kin one at a time from the front (taking one shifts the rest down)
-	while not (b["caught"] as Array).is_empty():
+	# kin one at a time from the front (taking one shifts the rest down), while the capsule box has room
+	while not (b["caught"] as Array).is_empty() and LootFull.fits(h, {"key": "caught", "i": 0}, b):
 		Life.take_item(m, h, b, {"key": "caught", "i": 0})
 		n += 1
 	# worn: the best piece for each gear slot if it beats yours (yours goes back in the box, so it can still be packed)

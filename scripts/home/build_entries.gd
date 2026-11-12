@@ -51,8 +51,8 @@ func catalog_entry(id: String, cb: Callable) -> Dictionary:
 	if cost.is_empty() and not e.has("note") :
 		e["note"] = "free"
 	if not hb._site_cost(id).is_empty():
-		e["off"] = not FarmSites.can_pay(cost)
-		e["tip"] = String(e["tip"]) + " Boki build it: %d swings of work." % int(cost.get("labour", 0))
+		var tip := " Free to mark out. The materials are spent as it goes up: %d swings of work."
+		e["tip"] = String(e["tip"]) + tip % int(cost.get("labour", 0))
 	return e
 
 func swatch(id: String) -> Color:
@@ -170,6 +170,8 @@ func add_island_entries(out: Array) -> void:
 	for t in HomeLayout.THEMES:
 		var theme: String = t
 		var td: Dictionary = HomeLayout.THEMES[t]
+		if td.has("zone"):
+			continue
 		var own: bool = (lay["themes"] as Array).has(t)
 		var now: bool = String(lay["theme"]) == t
 		var note := "Owned" if own else ""

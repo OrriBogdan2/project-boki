@@ -197,7 +197,7 @@ ARCH = content("archetypes")
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
 WEAPONS = content("weapons")
-ABIL1 = content("abilities")
+ABIL1 = content("hunter_abilities")
 KIN2 = content("kin_v2")
 KIN1 = content("kin")
 AB2 = content("abilities_v2")
@@ -211,14 +211,46 @@ def wname(wid):
 def kname(kid):
     return KIN2.get(kid, {}).get("name", kid)
 
+# ------------------------------------------------------------------ lore
+LORE = load_json(os.path.join(ROOT, "content", "rules", "lore.json"))
+
+def hunter_name(aid):
+    return "%s, the %s" % (ARCH[aid]["base_name"], ARCH[aid]["title"])
+
+def gen_lore():
+    """The Lore page and one story file per Hunter (docs/art/gen/stories/<id>.md, for the art and voice passes)."""
+    home = {a: f for f in LORE["factions"] for a in f["hunters"]}
+    fac = table(["Faction", "Hunters", "What binds them", "What they would wish for"],
+                [[f["name"], ", ".join(ARCH[a]["base_name"] for a in f["hunters"]), f["binds"], f["wish"]] for f in LORE["factions"]])
+    relics = table(["Hunter", "Relic", "Why this one", "Status"],
+                   [[hunter_name(a), r["name"], r["why"], r["status"]] for a in ARCH_ORDER if a in ARCH
+                    for r in [LORE["hunters"][a]["relic"]]])
+    body = "\n\n".join("> " + t for t in LORE["premise"])
+    body += "\n\nFactions are lore only (voice lines, banter, key art): a squad in a match stays free-pick.\n\n### Factions\n\n" + fac
+    body += "\n\n### Relics\n\nEach fallen Hunter's self is held in the object they were most bound to. Wearing it gives you their face, form and memories. "
+    body += "A relic marked proposed is still waiting for the owner's OK.\n\n" + relics
+    body += "\n\n### Banter pairs\n\n" + "\n".join("- " + b for b in LORE["banter"])
+    page("Lore.md", "Lore", body, ["content/rules/lore.json", "content/archetypes"])
+    for aid in ARCH_ORDER:
+        if aid not in ARCH: continue
+        d, r = ARCH[aid], LORE["hunters"][aid]["relic"]
+        text = "%s\n# %s\n\n_Class: %s. Faction: %s._\n\n%s\n\n**Relic:** %s. %s (%s)" % (
+            NOTE, hunter_name(aid), aid, home[aid]["name"], d["personality"].replace("\n", "\n\n"), r["name"], r["why"], r["status"])
+        write(aid + ".md", text, os.path.join(ROOT, "docs", "art", "gen", "stories"))
+
 # ------------------------------------------------------------------ classes
+def the(title):
+    """A title shown on its own carries "the" (titles are stored without it)."""
+    return "the " + title
+
+
 def class_page_name(aid):
     return "Class-" + ARCH[aid]["title"].replace(" ", "-")
 
 def class_profile(d):
     gender = "a robot" if d["gender"] == "robot" else d["gender"]
     return table(["", ""], [
-        ["Class title", d["title"]],
+        ["Class title", the(d["title"])],
         ["Base character", "%s, %s" % (d["base_name"], gender)],
         ["Personality", d["personality"].replace("\n", " ")],
     ])
@@ -232,7 +264,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
-        rows.append([link(class_page_name(aid), d["title"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
+        rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
@@ -244,13 +276,13 @@ def gen_classes():
         when = "starter, else " if aid in cu["starters"] else ""
         after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
         if not ch:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "starter", "pick at the start, or after your first expedition", "-"])
+            cu_rows.append([link(class_page_name(aid), the(ARCH[aid]["title"])), "starter", "pick at the start, or after your first expedition", "-"])
         else:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
+            cu_rows.append([link(class_page_name(aid), the(ARCH[aid]["title"])), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
         for g in cu["mastery"].get(aid, []):
-            m_rows.append([ARCH[aid]["title"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
-    starters = ", ".join(ARCH[a]["title"] for a in cu["starters"] if a in ARCH)
-    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
+            m_rows.append([the(ARCH[aid]["title"]), g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
+    starters = ", ".join(the(ARCH[a]["title"]) for a in cu["starters"] if a in ARCH)
+    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) after naming your first Boki and plays the tutorial as it. After your first expedition the other starters open, and you pick a second Relic from Kael, Cinder and Meeko (whichever you do not hold). " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
@@ -379,8 +411,6 @@ def gen_boki():
         body += table(["", ""], info)
         body += "\n\n- E ability: " + ability_line(k.get("active", ""))
         body += "\n- Auto ability (it casts this on its own): " + ability_line(k.get("auto", ""))
-        dr = k.get("dodge_rider")
-        if dr: body += "\n- On your dash: **%s**" % dr.get("name", "")
         mg = MERGE.get(k.get("merge", ""), {})
         if mg: body += "\n- Bond ultimate (merge): **%s** (%ss). %s" % (mg.get("name", ""), num(mg.get("duration", "")), mg.get("flavor", ""))
         paths = []
@@ -390,7 +420,16 @@ def gen_boki():
     page("Boki-Species.md", "Boki species", body, ["content/kin_v2", "content/kin", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training
-    b = "## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
+    ev = load_json(os.path.join(ROOT, "content", "rules", "evolve.json"))
+    nm = lambda i: KIN2.get(i, {}).get("name", i.title())
+    b = "## Evolution lines\n\nEach species evolves into the next at its own level, with an Ink used on it, or by trade; where a line branches, the leading affinity picks. A Boki never evolves into a species without a model: it waits and evolves once the art exists. Levels stop at %d.\n\n" % ev.get("cap", 100)
+    rows = []
+    for sid, ln in ev.get("lines", {}).items():
+        for o in ln.get("into", []):
+            how = (o["item"].replace("ink_", "").title() + " Ink") if o.get("item") else ("trade" if o.get("trade") else "level %s" % ln.get("level"))
+            rows.append([nm(sid), nm(o["id"]), how, o.get("path", "").title()])
+    b += table(["Boki", "Evolves into", "When", "Branch"], rows)
+    b += "\n\n## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
     rows = []
     for nid, n in EVO.items():
         req = n.get("requires", {})
@@ -428,7 +467,7 @@ def gen_boki():
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
     page("Boki-Growth.md", "Boki growth: evolution, mutations, bonds and gifts", b,
-         ["content/evolution_v2", "content/mutations", "scripts/core/care.gd"])
+         ["content/rules/evolve.json", "content/evolution_v2", "content/mutations", "scripts/core/care.gd"])
 
 # ------------------------------------------------------------------ gear
 def gen_gear():
@@ -452,7 +491,7 @@ def gen_gear():
     rows = []
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
-        users = [ARCH[a]["title"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
+        users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
@@ -478,7 +517,7 @@ def gen_gear():
         elif users: ut.append([", ".join(users)] + row)
     body += "\n\n## Without a class kit\n\nEvery player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight's dodge and the weapon's own right-click utility.\n\n"
     body += table(["Weight", "Dodge", "Cooldown", "What it does"], dg) + "\n\n" + table(["Weapon", "Right click", "Cooldown", "What it does"], ut)
-    page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
+    page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/hunter_abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 
 # ------------------------------------------------------------------ maps
 def gen_maps():
@@ -506,9 +545,7 @@ def gen_maps():
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
-        if m.get("docks"): ex.append("%d skiff docks" % len(m["docks"]))
         if m.get("outposts"): ex.append("%d uplink outposts" % len(m["outposts"]))
-        if m.get("hatches"): ex.append("%d rift hatches" % len(m["hatches"]))
         if ex: body += "**Exits:** " + ", ".join(ex) + ".\n\n"
         trav = []
         for key, label in (("bridges", "bridges"), ("glides", "glide routes"), ("pads", "jump pads"), ("updrafts", "updrafts"), ("winds", "wind roads")):
@@ -535,7 +572,7 @@ def gen_maps():
 def gen_rules():
     tiers = gd_const("core/data.gd", "TIERS") or []
     loss_min = int((content("rules").get("boki_system") or {}).get("loss", {}).get("loss_min_tier", 2))
-    body = "## Expedition tiers\n\n" + table(["Tier", "Monsters", "Loot", "Wild Boki levels", "Unlocks after", "Boki at risk", "What happens"], [[t["name"], "x" + num(t["mob"]), "x" + num(t["loot"]), "%s to %s" % tuple(t["kin_lvl"]), "%s extractions" % t["unlock"], "no" if i < loss_min else "dropped dazed, can be scanned", t["desc"]] for i, t in enumerate(tiers)])
+    body = "## Expedition tiers\n\n" + table(["Tier", "Depth", "Monsters", "Loot", "Wild Boki levels", "Unlocks after", "Boki at risk", "What happens"], [[t["name"], t["depth"], "x" + num(t["mob"]), "x" + num(t["loot"]), "%s to %s" % tuple(t["kin_lvl"]), "%s extractions" % t["unlock"], "no" if i < loss_min else "dropped dazed, can be scanned", t["desc"]] for i, t in enumerate(tiers)])
     mt = gd_const("core/data.gd", "MATCH") or {}
     mc = gd_dict_comments("core/data.gd", "MATCH")
     if mt:
@@ -551,7 +588,8 @@ def gen_rules():
         body += table(["Rule", "Value", "Meaning"], [[k, num(v), lc.get(k, "")] for k, v in lr.items()])
     rules = content("rules")
     for rid, r in rules.items():
-        body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight"}.get(rid, rid), rid, r.get("desc", ""))
+        if rid == "lore": continue   # the Lore page
+        body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight", "boki_hit": "How kit hits land on a Boki"}.get(rid, rid), rid, r.get("desc", ""))
         body += table(["Setting", "Value"], [[k, num(v) if not isinstance(v, (dict, list)) else json.dumps(v)] for k, v in r.items() if k != "desc"])
     co = content("combos")
     body += "\n\n## Combos\n\nOne fighter sets a foe up with a status, the partner pays it off (`content/combos/`).\n\n"
@@ -678,6 +716,46 @@ def _dash_ours(row, modes):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
+# Owner item 183: each Hunter's air dash against its ground dash. [verdict, air dash (distance, time, carry, slot, clip), source]
+AIR_AUDIT = {
+    "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
+              "dancer.md and owner items 7 / 129: the air dash is longer and slower"],
+    "archer": ["same", "with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot)",
+               "pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press"],
+    "mage": ["same", "the same Wirerun (7.5 to 13 m by rank, one charge, same clip)", "vireo.md: one Wirerun, no air variant"],
+    "gunslinger": ["special", "a tap in the air slides 2/3 of the ground Slipstep (`air_k`), the same charge and clip",
+                   "venator.md: the air slide is shorter"],
+    "tender": ["special", "its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown", "mooshmoosh.md and owner item 24"],
+    "rimewright": ["same", "the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`)", "tamsin.md: one Skate"],
+    "dolm": ["same", "with a charge: the same Rock Hop (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; "
+             "out of charges the class long dash (`breah_exdash`)", "breah.md: one Landslide, no air variant. Item 183 moved the generic long dash off the charged press"],
+    "ostra": ["same", "the same Lantern Trade (1.8 s), the same charge and clip", "ostra.md: one Lantern Trade"],
+    "bulwark": ["same", "with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash",
+                "bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press"],
+    "juggernaut": ["same", "with a charge: the same Rampage (`jug_dash`, one charge); in the Meteor Smash's gather it rides the drive with no wind-up, "
+                   "the gather pose kept; out of charges the class shoulder charge (`jug_exdash`)",
+                   "juggernaut.md: one Rampage. Item 183 moved the generic long dash off the charged press"],
+    "ashwick": ["skipped", "air 8.0 m in 0.24 s (ground 3.4 m in 0.28 s)", "parity 11 (queued)"],
+    "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
+}
+
+AIR_NAMES = {"thief": "Sable", "archer": "Hem", "mage": "Vex", "gunslinger": "Ghost", "tender": "Elluna", "rimewright": "Claire",
+             "dolm": "Tarek", "ostra": "Void", "bulwark": "Oath", "juggernaut": "Kael", "ashwick": "Cinder", "dredge": "Grimble"}
+
+def _air_audit_table():
+    rows = []
+    for aid in ARCH_ORDER:
+        a = AIR_AUDIT.get(aid)
+        if not a:
+            continue
+        d = ARCH.get(aid, {}).get("dash", {})
+        dist, tm = d.get("dist"), d.get("time")
+        ground = "%s (cd %s s)" % (d.get("name", "?"), d.get("cd", "?"))
+        if isinstance(dist, (int, float)) and tm:
+            ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
+        rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
+    return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
@@ -705,12 +783,15 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
+    body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
+             "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
+             "\"special\" = a sourced difference.\n\n") + _air_audit_table()
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
 # ------------------------------------------------------------------ main
 def main():
-    for f in (gen_classes, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
+    for f in (gen_classes, gen_lore, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
         try:
             f()
         except Exception as e:  # report and keep going: one broken table shouldn't hide the rest

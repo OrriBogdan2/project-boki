@@ -39,7 +39,7 @@ func _ready() -> void:
 	set_meta("hold_unlock", id)
 	add_theme_constant_override("separation", 6)
 	alignment = BoxContainer.ALIGNMENT_CENTER
-	btn = UI.primary("Hold to unlock %s" % Arch.name_of(id), func(): pass, 300)
+	btn = UI.primary("Hold to unlock %s" % Arch.name_of(id, true), func(): pass, 300)
 	btn.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	btn.button_down.connect(press)
 	btn.button_up.connect(release)
@@ -84,7 +84,7 @@ func tick(dt: float) -> void:
 		_hum_at -= dt
 		if _hum_at <= 0.0:
 			# a rising hum: higher pitched as it fills
-			Sfx.play("charge" if Sfx.has("charge") else "hover", null, -12.0, 0.0, 0.8 + 0.8 * k)
+			Sfx.play("ui_charge", null, -12.0, 0.0, 0.8 + 0.8 * k)
 			_hum_at = 0.22
 		if k >= 1.0:
 			_complete()

@@ -72,11 +72,9 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w, 1)), Color(0, 0, 0, 0.35))
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
-	if p.ak:
+	if p.ak and p.ak.has_meter():
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
 	_hidden_tag(H, sz, p)
-	# the dash bar under the dash slot (second in the ability row), in the margin below the portrait
-	H.plates.stam.draw(c, Rect2(Vector2(x0 + 60.0 - 35.0, o.y + H.HUD_PORTRAIT.y + 7.0), Vector2(120, 6)), p, true)
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
 static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
@@ -109,7 +107,7 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 	if H.lvl_pop > 0.0:
 		H._rounded(pr.grow(6.0 + k * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
 		H._rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
-	var bc := pr.position + Vector2(6, pr.size.y - 6)
+	var bc := pr.position + Vector2(14, pr.size.y - 14)      # inset: the ring reaches 30 px out, keep it in the window
 	var r := 26.0 * sc
 	# the coin sits in a notch of the frame: ringed in the frame's colour, a dark gap between
 	c.draw_circle(bc, r + 4.0, Color(p.accent(), 0.9))

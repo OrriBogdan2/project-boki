@@ -2,7 +2,7 @@ class_name AbilityFx
 extends RefCounted
 ## How abilities look and sound, keyed by how they're delivered (the tell) and by what they do (the
 ## impact category), so any ability gets the same language without its data naming a sound or an
-## effect: a gun's right click (content/abilities), a Boki's ability, and the archetype kits (their
+## effect: a gun's right click (content/hunter_abilities), a Boki's ability, and the archetype kits (their
 ## Feel module can take its tell and impact rows from tell_row / impact_row). Presentation only:
 ## nothing in the simulation reads anything here.
 ##
@@ -90,7 +90,7 @@ static func _far(m: Node, at: Vector3) -> bool:
 ## the delivery (a rail's bolt of light, a cone's blast fan, a wall's slam, a trap's spark, a blink's
 ## implosion). o: optional {range, radius}.
 static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vector2, col: Color, o := {}) -> void:
-	if m == null or m.get("fx") == null or caster == null or _far(m, at):
+	if m == null or m.get("fx") == null or caster == null or _far(m, at) or m.fx.own_look:
 		return
 	var fx: Fx = m.fx
 	var mine := _mine(m, caster)

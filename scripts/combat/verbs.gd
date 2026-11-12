@@ -19,6 +19,7 @@ var decoys: Array = []    # {pos, team, t, node, owner}
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
+const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -56,7 +57,8 @@ func _wall_node(w: Dictionary) -> Node3D:
 	rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var base := Models.part(n, Models.box(length + 0.1, 0.1, WALL_TH * 2.4), Models.glow_mat(Color(col, 0.8)), Vector3(0, 0.05, 0))
 	base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for sx in [-0.5, 0.5]:
+	# (a wall carried in front of a Hunter has no opaque posts: the bearer always shows through it)
+	for sx in ([] if w["follow"] else [-0.5, 0.5]):
 		Models.part(n, Models.box(0.22, WALL_H + 0.2, WALL_TH * 2.6), Models.toon(col.darkened(0.25), true, 0.6), Vector3(length * sx, (WALL_H + 0.2) * 0.5, 0))
 	if w["reflect"]:
 		# a prism wall: facets that catch the light
@@ -87,6 +89,11 @@ func _break_wall(w: Dictionary) -> void:
 	m.sfx("knock", Vector3((a.x + b.x) * 0.5, float(w["y"]), (a.y + b.y) * 0.5), -4.0, 1.4)
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).queue_free()
+
+## Whether a barrier blocks sight (World.los). A wall carried in front of a Hunter (a raised aegis, a Boki's
+## Mass Guard) never does: it would hide its own bearer from everyone they face.
+static func blocks_sight(w: Dictionary) -> bool:
+	return not bool(w.get("follow", false))
 
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
 static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
@@ -153,9 +160,6 @@ func _build_mirror(arc: float, r: float, col: Color) -> Node3D:
 			var a := -half + 2.0 * half * i / 6.0
 			var pnl := Models.part(n, Models.box(r * 2.0 * half / 6.0 + 0.08, 1.7, 0.08), Models.glow_mat(Color(col, 0.55)), Vector3(sin(a) * r, 0.95, -cos(a) * r), Vector3.ONE, Vector3(0, -a, 0))
 			pnl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	else:
-		var s := Models.part(n, Models.sphere(r, 20), Models.glow_mat(Color(col, 0.22)), Vector3(0, 0.9, 0))
-		s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var rg := Models.part(n, Models.flat_quad(r * 2.0), Models.ring_mat(Color(col, 0.9), 0.08), Vector3(0, 0.08, 0))
 	rg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
@@ -300,6 +304,22 @@ func decoy_of(h: Hunter) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ shots
+## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only.)
+func _stops(w: Dictionary, team: int, p: Vector3, r: float) -> bool:
+	if w["block"] != "all" and int(w["team"]) == team:
+		return false
+	if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		return false
+	var p2 := Vector2(p.x, p.z)
+	return p2.distance_to(Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])) <= float(w["th"]) + r
+
+## The barrier that stopped a shot of `team` that ended at p ({} if none: terrain did).
+func stopper(p: Vector3, team: int, r: float) -> Dictionary:
+	for w in walls:
+		if _stops(w, team, p, r):
+			return w
+	return {}
+
 ## Called for every step of every shot. Returns "" (carry on), "end" (stopped by a wall) or
 ## "bounce" (reflected: it now belongs to the reflector).
 func shot_check(s: Dictionary, p: Vector3) -> String:
@@ -308,13 +328,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
 	for w in walls:
-		if w["block"] != "all" and int(w["team"]) == int(s["team"]):
-			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		if not _stops(w, int(s["team"]), p, float(s["r"])):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
-		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
-			continue
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
 			var ab: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
 			var nrm := Vector2(-ab.y, ab.x).normalized()
@@ -568,6 +584,8 @@ func render(_alpha: float) -> void:
 			var a := 0.18 + 0.3 * hk
 			if float(w["hit_t"]) > 0.0: c = c.lerp(Color.WHITE, 0.7); a = 0.75
 			if float(w["t"]) < 0.6: a *= 0.5 + 0.5 * sin(m.time * 30.0)
+			if w["follow"]:
+				a *= CARRIED_A
 			body.material_override.set_shader_parameter("color", Color(c, a))
 	for mr in mirrors:
 		var n2: Node3D = mr["node"]

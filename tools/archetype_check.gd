@@ -64,6 +64,47 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
 
+## Item 183: with a charge in hand, a hero's air dash is its ground dash: the same kit move and clip, the same reach
+## (within 5%), one charge spent and the long-dash slot (ex_cd) untouched. `home` is open ground; the match is
+## left with the hunter back at home.
+func air_dash_is_ground(m: Match, P: Hunter, home: Vector3) -> void:
+	var parked := {}
+	for h in m.hunters:
+		if h != P:
+			parked[h] = h.pos
+			h.teleport(h.pos + Vector3(0, 0, 60))     # a dummy in the lane would stop the ground run short
+	var ground := _dash_run(m, P, home, false)
+	var air := _dash_run(m, P, home, true)
+	for h in parked:
+		h.teleport(parked[h])
+	var label := "item 183 %s: its air dash is its ground dash (%s, reach %.2f vs %.2f)"
+	ok(label % [P.arch, ground["anim"], air["reach"], ground["reach"]],
+		air["anim"] == ground["anim"] and air["spent"] == ground["spent"] and air["spent"] > 0.5 and air["ex_cd"] == 0.0
+		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"], str([ground, air]))
+	P.teleport(home)
+
+func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
+	P.teleport(home + Vector3(0, 40.0 if air else 0.0, 0))
+	P.grounded = not air
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	var from := P.pos
+	var charges := P.dashes
+	P.do_dash()
+	var out := {"anim": P.ak.anim_id, "spent": charges - P.dashes, "ex_cd": P.ex_cd, "reach": 0.0}
+	var t := 0.0
+	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
+		m.step(DT)
+		t += DT
+		if P.roll_t > 0.0:      # the dash itself: its exit (HunterMove.dash_exit) brakes on the ground, not in the air
+			out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+	P.inp["move"] = Vector2.ZERO
+	return out
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
@@ -112,7 +153,7 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
 	for who in ["mage", "gunslinger"]:
 		if "--%s-combo-check" % who in OS.get_cmdline_user_args():
-			var hc = load("res://tools/hero_combo_check.gd").new()      # Ryzz's and Vex's cross-ability interactions
+			var hc = load("res://tools/hero_combo_check.gd").new()      # Sparkle's and Vex's cross-ability interactions
 			await hc.run(main_node, who)
 			return
 	if "--kit-combo-check" in OS.get_cmdline_user_args():
@@ -128,6 +169,7 @@ func run(main_node: Node) -> void:
 		return
 	_controls()
 	_data()
+	_health()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -141,6 +183,31 @@ func run(main_node: Node) -> void:
 	_feel()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Max health as a share of the roster average against the source's Base HP rows
+## (briefs/supervive-data/supervive_physics.md, docs/KIT_PARITY.md "Health"): no Hunter off by
+## more than 1.25x either way. The scales differ, so only the ratio is compared.
+const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
+		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+const NO_SOURCE := ["gil"]      # our own Hunters: no source Base HP row, left out of the share
+
+func _health() -> void:
+	var ids := Arch.ids().filter(func(x): return not NO_SOURCE.has(x))
+	var ours := {}
+	var sum_o := 0.0
+	var sum_s := 0.0
+	for a in ids:
+		ours[a] = float(Data.CLASSES[Arch.weight(a)]["hp"])
+		sum_o += ours[a]
+		sum_s += float(SOURCE_HP.get(a, 0))
+	ok("health: every Hunter has a source Base HP row", ids.all(func(x): return SOURCE_HP.has(x)), str(ids))
+	var off: Array = []
+	for a in ids:
+		if not SOURCE_HP.has(a): continue
+		var ratio: float = (ours[a] / (sum_o / ids.size())) / (float(SOURCE_HP[a]) / (sum_s / ids.size()))
+		if ratio > 1.25 or ratio < 0.8: off.append("%s %.3f" % [a, ratio])
+	ok("health: max health share of roster average within 1.25x of the source", off.is_empty(), str(off))
 
 # ------------------------------------------------------------------ controls and data
 func _has_key(action: String, key: int) -> bool:
@@ -157,23 +224,28 @@ func _controls() -> void:
 	ok("keys: E archetype utility", _has_key("signature", KEY_E))
 	ok("keys: X merge, R hunter ultimate, no reload",
 		_has_key("ultimate", KEY_X) and _has_key("hunter_ult", KEY_R) and not InputMap.has_action("reload"))
-	ok("keys: G send/recall + MMB alt", _has_key("throw", KEY_G) and _has_mouse("throw", MOUSE_BUTTON_MIDDLE))
+	ok("keys: G send/recall, MMB pings", _has_key("throw", KEY_G) and _has_mouse("ping", MOUSE_BUTTON_MIDDLE))
 	ok("keys: Q glove, Shift dash, RMB", _has_key("gear1", KEY_Q) and _has_key("dash", KEY_SHIFT) and _has_mouse("secondary", MOUSE_BUTTON_RIGHT))
 	ok("keys: binding version bumped", Settings.KEYS_V >= 3, "keys_v %d" % Settings.KEYS_V)
 	ok("keys: rebindable list names them", Settings.ACTIONS.any(func(a): return a[0] == "hunter_ult"))
 
 func _data() -> void:
 	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
-	# ability of every archetype has a concrete rank 2
+	# ability of every archetype has a concrete rank 2: a cooldown "a -> b" or a damage "+N%" (the source's
+	# upgrade numbers, rank_cd / rank_dmg: many are damage only)
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Ryzz and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
-			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	var rmb: Dictionary = Arch.def("archer")["rmb"]
+	var push: Array = rmb["pin"]["push"]
+	var push_text := "push %d -> %d" % [push[0], push[1]]
+	ok("Lace: Heavy Shot card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -186,7 +258,7 @@ func _data() -> void:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
-	ok("weapons: Sable bolts / Hem bow / Ryzz coil / Breaker hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
+	ok("weapons: Sable bolts / Lace bow / Sparkle coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
 	# no ammo but the source's one gun (Ghost's 30-round rifle): no magazine, no reload timer, no count on the HUD
@@ -214,10 +286,10 @@ func _data() -> void:
 func _thief() -> void:
 	await _dj().thief(self)
 
-## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
+## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Tidal Wave is 90s), opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
-	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 80.0 and int(rd.get("unlock", 6)) == 6
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 90.0 and int(rd.get("unlock", 6)) == 6
 
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
@@ -233,22 +305,27 @@ func _archer() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	var home: Vector3 = r[4]; var lv: int = r[5]
 	var K: ArcherKit = P.ak
-	# Focus builds standing still and makes the next shot instant (+20% range)
-	K.res = 0.0
+	# no Focus meter (KIT_PARITY 5, cut by the owner): standing still builds nothing
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.6)
-	ok("archer passive: Focus fills standing still", K.res >= 99.0, "%.0f" % K.res)
-	ok("archer resource tell: full", K.tell == "full")
+	ok("archer passive: no Focus meter (Hawk Sense only)",
+		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
+	# Hawk Sense stays: a rival under half health is seen through cover within 22m
+	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
+	step(m, 0.5)
+	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
-	ok("archer Focus: sniper fires at once", P.warm_t <= 0.0 and P.ammo < int(P.wpn["mag"]) and K.res < 1.0, "warm %.2f ammo %d" % [P.warm_t, P.ammo])
+	ok("archer: a sniper still winds up (no Focus to skip it)",
+		P.warm_t > 0.0 and P.shot_range_k == 1.0, "warm %.2f range_k %.1f" % [P.warm_t, P.shot_range_k])
 	P.equip("longbow")
 	step(m, 0.3)
 	# the Longbow draws: a full draw hits for 60
-	fresh(T); K.res = 0.0
+	fresh(T)
 	step(m, 0.05, func(): P.inp["fire"] = true)
-	step(m, 1.2, func(): P.inp["fire"] = true; K.res = 0.0)
+	step(m, 1.2, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer weapon: Longbow full draw", dmg(T) >= 50.0, "took %.0f" % dmg(T))
@@ -270,7 +347,6 @@ func _archer() -> void:
 			wl[i] = lv if dx < 2 else lv + 3
 	W.kind = wk; W.level = wl
 	aim_at(P, T.pos)
-	K.res = 0.0       # (a full Focus outranks the hold variant)
 	hold(m, P, 1.15)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s ground ahead %s %s %s lvl %s" % [str(T.pos), str(P.pos), W.ground_at(T.pos.x + 1.0, T.pos.z), W.ground_at(T.pos.x + 1.6, T.pos.z), W.ground_at(T.pos.x + 2.2, T.pos.z), W.level[W.idx(int(T.pos.x) + 2, int(T.pos.z))]])
 	step(m, 0.5)
@@ -278,27 +354,14 @@ func _archer() -> void:
 	ok("archer RMB hold: Heavy Shot pins to the wall", K.last_variant == "hold" and dmg(T) >= 14.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
 	# a full charge: the hold reached full (the shared charge feedback ticked)
 	ok("archer RMB hold: charge reached full", K.charge_fulls >= 1 and K.charge_last >= 0.99, "fulls %d last %.2f" % [K.charge_fulls, K.charge_last])
-	# Deadeye: a full-Focus shot into a pinned (rooted) foe pays out a gold second hit
-	var dd0 := dmg(T); var de0 := K.deadeyes
+	# a tapped arrow into a pinned foe is one ordinary arrow (it was 30+ with the Deadeye)
+	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
-	K.res = K.res_max()
-	ok("archer resource full: Deadeye armed", K.full_ready() and K.ready_label() != "" and K.pinned(T))
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
-	if "--ak-debug" in OS.get_cmdline_user_args(): print("DEADEYE dd0 %.1f now %.1f" % [dd0, dmg(T)])
-	# (audit: a full Focus no longer skips the draw, so this tapped arrow is a 15 tap plus the gold Deadeye hit)
-	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 30.0,
-		"deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
-	# ... and not into a free one
-	fresh(T); K.res = K.res_max(); de0 = K.deadeyes
-	step(m, 0.9)      # (past the pin's grace)
-	K.res = K.res_max()
-	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
-	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
-	step(m, 0.5)
-	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 10.0 and dmg(T) < 30.0,
-		"dealt %.0f" % dmg(T))
+	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
 	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
@@ -319,7 +382,7 @@ func _archer() -> void:
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
 	P.equip("longbow"); step(m, 0.4)
 	var pf0 := K.perfects
-	step(m, 1.2, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 1.2, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer bow: perfect release, Supercharged damage, a quick next draw", K.perfects == pf0 + 1 and dmg(T) >= 55.0 and dmg(T) <= 66.0 and K.draw.quick, "perfects %d took %.0f quick %s" % [K.perfects - pf0, dmg(T), K.draw.quick])
@@ -328,7 +391,7 @@ func _archer() -> void:
 	aim_at(P, T.pos)
 	P.ak.use_e()
 	ok("archer E: Hail Wall cast", K.in_e())
-	step(m, 2.0, func(): K.res = 0.0)
+	step(m, 2.0)
 	ok("archer E: Hail Wall hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
 	step(m, 3.0)
 	ok("archer E: Hail Wall ends", not K.in_e())
@@ -405,8 +468,14 @@ func _gunslinger() -> void:
 	var dazed := KitStatus.rattled(T) and K.direct_hits >= 1
 	ok("venator RMB: a direct hit hurts and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
+	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
+	ok("venator Dazed: the bonus gets its own pink +9 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
+	_burr_terrain(m, P, T, K, home, r[5])
+	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
@@ -421,6 +490,44 @@ func _gunslinger() -> void:
 	ok("venator dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
+
+## Burr Charge over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
+## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short.
+## Puts the strip back after.
+func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, lv: int) -> void:
+	var W: World = m.world
+	var x0 := int(home.x); var z0 := int(home.z)
+	var shape := func(lv_of: Callable, stair_at: Array, kind_at: int) -> void:
+		for dz in range(-3, 4):
+			for dx in range(1, 12):
+				var i: int = W.idx(x0 + dx, z0 + dz)
+				W.level[i] = lv + int(lv_of.call(dx))
+				W.kind[i] = World.T_BLOCK if dx == kind_at else World.T_GROUND
+				W.stairs.erase(i)
+				if dx in stair_at: W.stairs[i] = Vector2i(1, 0)
+	var shoot := func(at: Vector3) -> int:
+		fresh(T); KitStatus.clear_rattled(T); T.teleport(at); P.teleport(home); step(m, 0.2)
+		aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+		var hits := K.direct_hits
+		tap(m, P)
+		step(m, 0.8)
+		return K.direct_hits - hits
+	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
+	var climbed: int = shoot.call(top)
+	var info := "hits %d took %.0f" % [climbed, dmg(T)]
+	ok("venator RMB: rides a ramp up to a foe on high ground", climbed == 1 and dmg(T) >= 12.0, info)
+	shape.call(func(dx: int) -> int: return 3 if dx == 4 else 0, [], -1)      # a 2.4 m face, one tile thick
+	var walled: int = shoot.call(home + Vector3(6.5, 0, 0))
+	var stuck := K.burrs.size() == 1 and absf(float(K.burrs[0]["pos"].x) - (home.x + 3.5)) < 0.6
+	info = "hits %d burrs %d" % [walled, K.burrs.size()]
+	ok("venator RMB: a vertical wall stops it, the foe behind is safe", walled == 0 and stuck, info)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], 4)
+	var rocked: int = shoot.call(home + Vector3(6.5, 0, 0))
+	ok("venator RMB: a rock stops it too", rocked == 0 and K.burrs.size() == 1, "hits %d" % rocked)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], -1)
 
 # ------------------------------------------------------------------ Juggernaut: tools/dancer_jug_check.gd
 func _juggernaut() -> void:
@@ -531,7 +638,7 @@ func _bulwark() -> void:
 
 # ------------------------------------------------------------------ levels and the Bonded R
 func _levels_and_bond() -> void:
-	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Ryzz and Vex have none)
+	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Sparkle and Vex have none)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	# a fresh run: R locked until level 6
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
@@ -589,7 +696,7 @@ func _infusion() -> void:
 	var poison: bool = (f["effects"] as Array).any(func(e): return String(e["type"]) == "damage" and float(e.get("over", 0.0)) > 0.0)
 	ok("infusion: Vespyx poisons the Thief's Bola", poison, "; ".join(f["notes"]))
 	var fm := Arch.fill(Arch.def("mage")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "projectile")
-	ok("infusion: Gravadillo adds a control to Ryzz's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
+	ok("infusion: Gravadillo adds a control to Sparkle's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
 	var fj := Arch.fill(Arch.def("juggernaut")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "cone")
 	ok("infusion: Gravadillo lifts on a cone", (fj["effects"] as Array).any(func(e): return String(e["type"]) == "lift"), "; ".join(fj["notes"]))
 	var fz := Arch.fill(Arch.def("gunslinger")["rmb"]["sockets"], Arch.infusion(KinLib.kin("zapple")), "rmb", "projectile")
@@ -618,7 +725,7 @@ func _infusion() -> void:
 	m = r[0]; P = r[1]; T = r[2]
 	hold(m, P, 0.5)
 	step(m, 0.6)
-	ok("infusion runtime: a Boki's type rides Ryzz's Coilshot", dmg(T) > 0.0 and (T.slow_t > 0.0 or T.burn_t > 0.0 or T.stun_t > 0.0 or T.root_t > 0.0), "slow %.2f burn %.2f stun %.2f" % [T.slow_t, T.burn_t, T.stun_t])
+	ok("infusion runtime: a Boki's type rides Sparkle's Coilshot", dmg(T) > 0.0 and (T.slow_t > 0.0 or T.burn_t > 0.0 or T.stun_t > 0.0 or T.root_t > 0.0), "slow %.2f burn %.2f stun %.2f" % [T.slow_t, T.burn_t, T.stun_t])
 	await done(m)
 
 # ------------------------------------------------------------------ feel
@@ -641,7 +748,8 @@ func _feel() -> void:
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
-	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-80s cooldown (the game data runs to 80s)",
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
+			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0

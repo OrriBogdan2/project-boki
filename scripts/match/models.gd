@@ -50,6 +50,7 @@ static func part(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO,
 	mi.rotation = rot
 	if pname != "":
 		mi.name = pname
+	ShadowPolicy.judge(mi)       # small parts don't cast (item 94)
 	parent.add_child(mi)
 	return mi
 
@@ -164,9 +165,7 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_NORMAL] = norms
 	arrs[Mesh.ARRAY_TEX_UV] = uvs
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+	return MeshArrays.build([arrs])
 
 static var _lathes := {}
 
@@ -621,6 +620,12 @@ static func torso_mesh() -> ArrayMesh:
 ## person for a look from MantleLook.at_home(). outfit names a colourway that replaces the palette
 ## (galleries); "bare" leaves the head uncovered. arch "" takes the look's "arch", else the class default.
 static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
+	ShadowPolicy.keep += 1       # a Hunter's parts cast at any size
+	var root := _hunter(cls, team_col, weapon, outfit, appearance, arch)
+	ShadowPolicy.keep -= 1
+	return root
+
+static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
 	var um := Unmasked.is_look(appearance)       # your own character: the hunter rig without a hunter's gear
 	var lk: Dictionary
 	var race: Dictionary
@@ -628,7 +633,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		# the Unmasked as MantleLook's own-person params (every slider neutral), its build and colour
 		lk = MantleLook.own(PlayerLook.clean(Unmasked.legacy(appearance)))
 		lk["build"] = float(Unmasked.BUILD_WIDTH[int(Unmasked.clean(appearance)["build"])])
-		lk["skin_col"] = Unmasked.colour(appearance)
+		lk["skin_col"] = Unmasked.VOID_SKIN
 		race = Unmasked.race(appearance)
 		arch = "unmasked"
 	else:
@@ -643,6 +648,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var bare := outfit == "bare"
 	var oi: int = OUTFIT_KEYS.find(outfit)
 	var hero_col: Color = OUTFIT_COLS[oi] if oi >= 0 else lk["outfit_col"]
+	if um: hero_col = Unmasked.colour(appearance)      # the shroud's colour
 	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
 	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
 	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
@@ -729,11 +735,12 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0.0), Vector2(nr * 2.0, 0.0), Vector2(nr * 1.3, 0.035), Vector2(nr, 0.08), Vector2(nr * 0.98, 0.16), Vector2(0, 0.16)]), 3), 28, "neck%.3f" % nr), m_skin, Vector3(0, 0.58, 0))
 	var skirt_n := _pivot(torso, "Skirt", Vector3(0, 0.07, 0))
 	# the glider pack: a rolled wing on a back plate (under whatever the archetype carries)
-	part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
-	part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	for sx in [-1.0, 1.0]:
-		part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	_class_marks(torso, cls, bw, m_acc, m_trim)
+	if not um:      # (the Empty's shroud covers its back)
+		part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
+		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
+		for sx in [-1.0, 1.0]:
+			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
+	if not um: _class_marks(torso, cls, bw, m_acc, m_trim)      # (the shroud covers the back it would sit on)
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
 	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
@@ -741,7 +748,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		for sx in [-1.0, 1.0]:
 			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
 			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	if um: Unmasked.face(torso, appearance, skin_c)
+	if um: Unmasked.face(torso, appearance)
 	else: _face(torso, lk, m_dark, m_skin, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
@@ -761,18 +768,23 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# ArmXPivot (shoulder) > sleeve, Elbow > forearm "ArmX" and a cuff, Hand > a mitten glove.
 	# Rounded joints overlap at the shoulder and elbow so a bent arm never shows a gap.
 	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
-	var m_glove: Material = m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather)
+	var m_glove: Material = m_skin if um else (m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather))
 	var arms := {}
+	# (archetype body "arms": long arms as its art draws them; HunterAnim solves the same lengths)
+	var arm_k := float(Arch.body(arch).get("arms", 1.0))
+	root.set_meta("arm_k", arm_k)
 	for sx in [-1.0, 1.0]:
 		var sd := "L" if sx < 0.0 else "R"
-		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w, 0.5, 0.0)
+		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w,
+				0.5 * float(Arch.body(arch).get("torso", 1.0)), 0.0)
+		piv.position.x *= float(Arch.body(arch).get("shoulder", 1.0))
 		torso.add_child(piv)
 		part(piv, sphere(0.088, 16), m_body, Vector3(0, -0.005, 0), Vector3(1.0, 1.0, 1.0))
 		part(piv, limb(0.088, 0.064, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
-		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position = Vector3(0, -0.21, 0); piv.add_child(elbow)
+		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position.y = -0.21 * arm_k; piv.add_child(elbow)
 		part(elbow, sphere(0.064, 14), m_body)
 		part(elbow, limb(0.068, 0.05, 0.22, 0.14), m_body, Vector3(0, -0.09, 0), Vector3.ONE, Vector3.ZERO, "Arm" + sd)
-		var hand := Node3D.new(); hand.name = "Hand"; hand.position = Vector3(0, -0.235, 0); elbow.add_child(hand)
+		var hand := Node3D.new(); hand.name = "Hand"; hand.position.y = -0.235 * arm_k; elbow.add_child(hand)
 		part(hand, HeroKit.mitten(), m_glove, Vector3(0, 0.0, 0.0), Vector3(hk2, hk2, hk2) * Vector3(1.0, 1.0, 1.0))
 		part(hand, HeroKit.thumb(), m_glove, Vector3(-0.042 * sx * hk2, 0.01, -0.03 * hk2), Vector3.ONE * hk2, Vector3(0, 0, 0.35 * sx))
 		part(hand, HeroKit.cuff(0.062 * hk2, 0.078 * hk2, 0.05), m_glove if heavy_gear else m_leather, Vector3(0, 0.065, 0))
@@ -805,26 +817,26 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# a paraglider canopy that unfolds above the pack: an arched wing in stripes, with lines down to the harness
 	var glider := Node3D.new(); glider.name = "Glider"; glider.position = Vector3(0, 0.62, 0.12); glider.visible = false
 	torso.add_child(glider)
-	var canopy := MeshInstance3D.new()
 	var gskin := String(lk["glider"])
-	canopy.mesh = Gliders.mesh(gskin, team_col, hero_col)
-	canopy.material_override = vtoon_outlined()
-	canopy.position = Vector3(0, 1.05, 0.02)
-	glider.add_child(canopy)
 	glider.set_meta("skin", gskin)
 	var gtrail := Gliders.trail(gskin, team_col, hero_col)
 	if gtrail:
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
-	var m_line := toon(Color("5a4636"), false)
-	for sx in [-1.0, -0.4, 0.4, 1.0]:
-		part(glider, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
-	merge_static(glider)
+	var gset := _glider_set(gskin)
+	for pc in [[gset[0], Gliders.canopy_material(gskin, team_col, hero_col)],
+			[gset[1], toon(Color("5a4636"), false)]]:
+		var gmi := MeshInstance3D.new()
+		gmi.mesh = pc[0]
+		gmi.material_override = pc[1]
+		ShadowPolicy.judge(gmi)
+		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
 	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
-	var head := Node3D.new(); head.name = "HeadPivot"; head.position = Vector3(0, 0.68, 0)
+	var head := Node3D.new(); head.name = "HeadPivot"
+	head.position = Vector3(0, 0.68 * float(Arch.body(arch).get("torso", 1.0)), 0)
 	torso.add_child(head)
 	for ch in torso.get_children():
 		if ch is MeshInstance3D and (String(ch.name).begins_with("@") or ch.name == "Head") and (ch as Node3D).position.y > 0.72 and not ch.has_meta("stay"):
@@ -834,18 +846,19 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	for nd in [hair_n, gear]:
 		torso.remove_child(nd); head.add_child(nd)
 		(nd as Node3D).position.y -= 0.68
-	merge_static(torso)
-	merge_static(head)
-	merge_static(hair_n)
-	merge_static(gear)
+	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
+	# they drive the .glb's bones; "Focus" is kept and drawn)
+	var drop := WardenGlb.will_dress(arch)
+	for nd in [torso, head, hair_n, gear]:
+		merge_static(nd, drop)
 	for nm in ["Skirt", "Cape", "Scarf", "PauldronL", "PauldronR", "Focus"]:
-		if torso.has_node(nm): merge_static(torso.get_node(nm))
+		if torso.has_node(nm): merge_static(torso.get_node(nm), drop and nm != "Focus")
 	for nm in ["LegL", "LegR"]:
-		merge_static(legs.get_node(nm))
-		merge_static(legs.get_node(nm + "/Knee"))
+		merge_static(legs.get_node(nm), drop)
+		merge_static(legs.get_node(nm + "/Knee"), drop)
 	for sd in ["L", "R"]:
 		for nd in arms[sd]:
-			merge_static(nd)
+			merge_static(nd, drop)
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
@@ -877,6 +890,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 			for n in [ap, ap.get_node("Elbow"), ap.get_node("Elbow/Hand")]:
 				for ch in (n as Node3D).get_children():
 					if ch is MeshInstance3D: (ch as Node3D).scale = Vector3(bk, 1.0, bk)
+	if um: Shrouds.bind(root)
 	bake_part_y(root)
 	root.set_meta("mats", collect_mats(root))
 	for mm in root.get_meta("mats"):
@@ -1251,33 +1265,60 @@ static func vtoon_outlined() -> ShaderMaterial:
 	m.next_pass = _outline_mat
 	return m
 
+## A glider per canopy shape, merged once (merge_static) for every Hunter on a skin of that shape: [the canopy,
+## its vertex colours still the colour weights (Gliders.canopy_material colours each Hunter's), the strings].
+static var _glider_sets := {}
+static func _glider_set(gskin: String) -> Array:
+	var sheet := Gliders.canopy(gskin)
+	if not _glider_sets.has(sheet):
+		var g := Node3D.new()
+		var canopy := MeshInstance3D.new()
+		canopy.mesh = sheet
+		canopy.material_override = vtoon_outlined()
+		canopy.position = Vector3(0, 1.05, 0.02)
+		g.add_child(canopy)
+		var m_line := toon(Color("5a4636"), false)
+		for sx in [-1.0, -0.4, 0.4, 1.0]:
+			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE,
+					Vector3(0, 0, -0.62 * sx))
+		merge_static(g)
+		var got := {}
+		for ch in g.get_children():
+			got[(ch as MeshInstance3D).material_override == m_line] = (ch as MeshInstance3D).mesh
+		_glider_sets[sheet] = [got[false], got[true]]
+		g.free()
+	return _glider_sets[sheet]
+
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-static func merge_static(node: Node3D) -> void:
+## `discard`: those parts are only freed (a body nothing will draw).
+static func merge_static(node: Node3D, discard := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
 		if not (ch is MeshInstance3D) or ch.get_child_count() > 0 or not String(ch.name).begins_with("@"):
 			continue
+		if not ch.visible:
+			continue
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
 		if mat == null or mi.mesh == null:
 			continue
+		if discard:
+			drop.append(mi)
+			continue
 		var key := _mat_key(mat)
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "st": SurfaceTool.new(), "n": 0}
-			(groups[key]["st"] as SurfaceTool).begin(Mesh.PRIMITIVE_TRIANGLES)
-		var st: SurfaceTool = groups[key]["st"]
-		var pm := _with_part_y(mi.mesh, mi.transform)
-		for si in pm.get_surface_count():
-			st.append_from(pm, si, mi.transform)
-		groups[key]["n"] = int(groups[key]["n"]) + 1
+			groups[key] = {"mat": mat, "parts": []}
+		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
+			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
 	for key in groups:
 		var g: Dictionary = groups[key]
 		var mi := MeshInstance3D.new()
-		mi.mesh = (g["st"] as SurfaceTool).commit()
+		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
+		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
 		node.add_child(mi)
 	for d in drop:
 		node.remove_child(d)
@@ -1286,18 +1327,22 @@ static func merge_static(node: Node3D) -> void:
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
 static func _with_part_y(mesh: Mesh, xf := Transform3D.IDENTITY) -> ArrayMesh:
+	return MeshArrays.build(_part_y_surfaces(mesh, xf))
+
+## A mesh's surfaces as arrays with that height range in UV2 (and plain white colours when it has none).
+static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 	var ab := xf * mesh.get_aabb()
-	var am := ArrayMesh.new()
+	var out: Array = []
 	for si in mesh.get_surface_count():
-		var arrs := mesh.surface_get_arrays(si)
+		var arrs: Array = MeshArrays.of(mesh, si)
 		var n: int = (arrs[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		var uv2 := PackedVector2Array(); uv2.resize(n); uv2.fill(Vector2(ab.position.y, ab.end.y))
 		arrs[Mesh.ARRAY_TEX_UV2] = uv2
 		if arrs[Mesh.ARRAY_COLOR] == null:
 			var cw := PackedColorArray(); cw.resize(n); cw.fill(Color.WHITE)     # no baked occlusion: plain white
 			arrs[Mesh.ARRAY_COLOR] = cw
-		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+		out.append(arrs)
+	return out
 
 static var _part_y_cache := {}
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).
@@ -1684,7 +1729,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 		"longbow", "tower_shield":
 			PinBjornWeapons.build(gun, weapon, m_dark, m_acc)      # Hem's recurve, Breaker's war hammer and aegis
 		"coilcaster":
-			# Ryzz's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
+			# Sparkle's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
 			var cop := shiny(Color("c8793c"), 0.7)
 			part(gun, cyl(0.04, 0.05, 0.5, 12), m_dark, Vector3(0, 0.0, -0.22), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			for k in 6:
@@ -1733,6 +1778,7 @@ static func gear_drop(col: Color, rar: int) -> Node3D:
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.2)
 	ring.material_override = ring_mat(rc, 0.12); ring.position.y = 0.05
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a ground ring: no shadow, item 94)
 	root.add_child(ring)
 	return root
 
@@ -2032,6 +2078,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
 		accessory(body, acc, Goods.wear_col(rec))
+	PrizeBoard.dress(body, rec)      # a rosette for each Cup Ribbon (garden games)
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2040,6 +2087,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 		root.scale = Vector3.ONE * 0.82
 	Unique.dress(root, rec)          # this kin's own: size, palette shift, coat marks, proportions, shapes
 	Mutations.dress(root, rec)       # rare mutations: size, palette, extra parts
+	ShadowPolicy.boki(root)      # the body casts, the bits don't (item 94)
 	return root
 
 ## Moves a group's pivot to `at` without moving what's in it.
@@ -2595,11 +2643,10 @@ static func deathbox(col: Color) -> Node3D:
 # ------------------------------------------------------------------ world legend: interactable icons
 ## Everything you can use out in the world (not loot, not breakables) wears a small floating badge
 ## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
-## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
-## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
-## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "uplink": Color("4ac8f0"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
-	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
+## shrines (blessing, teal), chest keys (brass), eggs (warm gold), revive beacons (mint). Loot is
+## gold / rarity coloured with a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
+const ICON_COLS := {"bless": Color("5fd0b0"), "ckey": Color("f2c84a"), "egg": Color("ffc04a"),
+	"revive": Color("6ae8a0")}
 static var _icon_tex := {}
 
 ## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?
@@ -2607,10 +2654,7 @@ static func _icon_sym(kind: String, x: float, y: float) -> bool:
 	match kind:
 		"bless":     # a four-point sparkle
 			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
-		"hatch", "uplink", "dock":   # an arrow up and out
-			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
-			return absf(x) < 0.15 and y > -0.56 and y < 0.0
-		"key", "ckey":
+		"ckey":
 			var d := Vector2(x, y - 0.24).length()
 			if d < 0.27 and d > 0.12: return true
 			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true

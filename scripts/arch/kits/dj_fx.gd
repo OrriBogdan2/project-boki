@@ -17,6 +17,7 @@ const M_PUFF := 4
 const M_LINKS := 5
 const M_BOLT := 6
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
+const CORE_W := 0.35           # of a streak's width: its bright core
 const KEEP := 0.1              # s an immediate-style look (place / chain) stays without a refresh
 
 var m: Node
@@ -30,6 +31,8 @@ var _cres := {}                # arc degrees -> crescent mesh (unit reach)
 var _col: ArrayMesh
 var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
+var _warming: Array = []       # the loading screen's stand-ins (prewarm)
+var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -96,6 +99,28 @@ func _take(kind: String, build: Callable) -> Node3D:
 			riders.erase(r)
 			break
 	return old
+
+## The loading screen's stand-ins (Match.warm_up): each of this library's shaders on each of its mesh kinds and its two
+## plain colours, drawn once so the first dash or shot of a match doesn't compile them mid-move (item 181).
+func prewarm(at: Vector3) -> void:
+	if _warming.is_empty():
+		for mesh: Mesh in [_quad_mesh(), _ribbon_mesh(), _crescent_mesh(140.0), _column()]:
+			_warming.append(_mi(mesh, _mat(0, Color.WHITE, Color.WHITE)))
+			_warming.append(_mi(mesh, _mat(0, Color.WHITE, Color.WHITE, false, true)))
+		_solids = [solid(Color.WHITE), solid(Color(1, 1, 1, 0.5))]
+		for mesh: Mesh in [_quad_mesh(), star_mesh(4, 0.3), Models.sphere(0.1, 8), Models.capsule(0.3, 1.25)]:
+			for mt: Material in _solids:
+				_warming.append(_mi(mesh, mt))
+		for node: MeshInstance3D in _warming:
+			node.top_level = true
+			add_child(node)
+	for node: MeshInstance3D in _warming:
+		node.global_position = at
+
+func prewarm_end() -> void:
+	for node: MeshInstance3D in _warming:
+		node.queue_free()
+	_warming.clear()
 
 # ------------------------------------------------------------------ meshes
 func _quad_mesh() -> QuadMesh:
@@ -239,6 +264,17 @@ func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, 
 	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
 	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
 
+## A streak from `a` to `b` in space, hot at `b` and fading over `dur`: a trail laid in short pieces follows any path
+## (Sable's flip, whose hands and feet turn through the air).
+func seg(a: Vector3, b: Vector3, width: float, col: Color, col2: Color, dur := 0.25) -> void:
+	var d := b - a
+	if d.length() < 0.01:
+		return
+	var n := _fx("seg", M_COMET, _ribbon_mesh(), false)
+	n.global_position = b
+	n.basis = Basis.looking_at(d.normalized(), Vector3.RIGHT if absf(d.normalized().y) > 0.95 else Vector3.UP)
+	_play(n, "seg", col, col2, dur, Vector3(width, width, d.length()))
+
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
 func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
 	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
@@ -294,6 +330,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			var c := _mi(Models.sphere(0.3, 8), Models.glow_mat(Color(col2, 0.9)))
 			head.add_child(c)
 			head.scale = Vector3.ONE * 0.24
+			_add_core(n, col2)
 		"chakram_big":
 			# the empowered shot: a big blue chakram inside a crackling gold streak
 			head.add_child(_mi(star_mesh(6, 0.45), solid(col2)))
@@ -328,7 +365,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			# an Encore blade: a small spinning star in its two colours
 			head.add_child(_mi(star_mesh(3, 0.3), solid(col)))
 			head.add_child(_mi(Models.sphere(0.25, 6), solid(col2)))
-			head.scale = Vector3.ONE * 0.3
+			head.scale = Vector3.ONE * 0.4
+			_add_core(n, col2)
 		"crescent_bolt":
 			# Kael's Searing Wave: a flat 140-degree crescent of flame (1.4 m chord), red with an orange
 			# inner edge, pushed bulge first; a red glow trail behind it
@@ -355,6 +393,12 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	tr.name = "Trail"
 	n.add_child(tr)
 	return n
+
+## A thin hot line down the middle of a streak (a bolt's or blade's bright core).
+func _add_core(rider: Node3D, hot: Color) -> void:
+	var core := _mi(_ribbon_mesh(), _mat(M_COMET, hot.lightened(0.6), Color.WHITE, false, true))
+	core.name = "Core"
+	rider.add_child(core)
 
 func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
@@ -407,13 +451,16 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 			"dagger": head.rotation.z = sin(spin) * 0.15
 	var tr := n.get_node_or_null("Trail") as Node3D
 	if tr: tr.scale = Vector3(width, width, trail)
+	var core := n.get_node_or_null("Core") as Node3D
+	if core: core.scale = Vector3(width * CORE_W, width * CORE_W, trail * 0.8)
 	var bolt := n.get_node_or_null("Bolt") as Node3D
 	if bolt: bolt.scale = Vector3(width * 1.6, width * 1.6, trail * 1.4)
 
 # ------------------------------------------------------------------ chains (immediate style)
 ## Draws a chain from a to b this step. wavy 0..1: 0 = a straight striped link chain, 1 = a loose
-## zig-zag in flight. Stop calling and it goes.
-func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Color, width := 0.12) -> void:
+## zig-zag in flight. `bow`: how far its middle bends out. Stop calling and it goes.
+func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Color, width := 0.12,
+		bow := Vector3.ZERO) -> void:
 	var e: Dictionary = chains.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
 		var im := ImmediateMesh.new()
@@ -450,7 +497,7 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 		var p := a.lerp(b, k)
 		# in flight: a zig-zag of about four waves over its length, still at both ends
 		var wv := sin(k * TAU * 4.0 + m.time * 14.0) * 0.28 * wavy * sin(k * PI)
-		p += side * wv
+		p += side * wv + bow * sin(k * PI)
 		# flat to the camera above, with a little height so it reads side on too
 		var across := side * width * 0.5 + Vector3.UP * width * 0.12
 		im2.surface_set_uv(Vector2(k * links, 0))
@@ -458,6 +505,31 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 		im2.surface_set_uv(Vector2(k * links, 1))
 		im2.surface_add_vertex(p + across)
 	im2.surface_end()
+
+## A thin flat line through `pts` this step (a predicted path). Stop calling and it goes.
+func path_line(id: String, pts: PackedVector3Array, col: Color, width: float) -> void:
+	var e: Dictionary = chains.get(id, {})
+	if e.is_empty() or not is_instance_valid(e["node"]):
+		var im := ImmediateMesh.new()
+		var mi := _mi(im, solid(col))
+		mi.top_level = true
+		add_child(mi)
+		made += 1
+		e = {"node": mi, "mesh": im}
+		chains[id] = e
+	e["t"] = m.time
+	(e["node"] as Node3D).visible = true
+	var mesh: ImmediateMesh = e["mesh"]
+	mesh.clear_surfaces()
+	if pts.size() < 2:
+		return
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in pts.size():
+		var fwd := pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]
+		var across := fwd.cross(Vector3.UP).normalized() * width * 0.5
+		mesh.surface_add_vertex(pts[i] - across)
+		mesh.surface_add_vertex(pts[i] + across)
+	mesh.surface_end()
 
 func unchain(id: String) -> void:
 	var e: Dictionary = chains.get(id, {})

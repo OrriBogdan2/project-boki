@@ -1,19 +1,20 @@
 class_name PinFx
 extends Node3D
 ## Hem's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
-## coloured ones are layered (KitShaders): an alpha-blended body in her greens, teal and gold with the glow
+## coloured ones are layered (KitShaders): an alpha-blended body in her orchid, its pale half and gold with the glow
 ## on top, so they keep their colour on bright grass.
-## - fletch bursts (her own motif: feathers radiating from a core): the green stage-ready flash at the bow,
+## - fletch bursts (her own motif: feathers radiating from a core): the orchid stage-ready flash at the bow,
 ##   the gold perfect-release burst with its ring, the glint at the bow hand (only while a stage is ready:
-##   green Empowered, mint-teal Supercharged, gold for a full Heavy Shot)
-## - stars: the teal X-star on a Supercharged hit, the red-white Heavy Shot impact
-## - arrows: the look of each of her shots (Empowered green bolt, Supercharged white-teal beam, a dull
-##   overdrawn shaft, the gold Impaling arrow with violet fins), each with its own trail, drawn
+##   orchid Empowered, pale orchid Supercharged and a full Heavy Shot)
+## - stars: the orchid X-star on a Supercharged hit, the orchid-white Heavy Shot impact
+## - arrows: the look of each of her shots (Empowered orchid bolt, Supercharged white-orchid beam, a dull
+##   overdrawn shaft, the big orchid Heavy Shot with a hot core), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
-## - spent arrows: one that lands with no hit stays stuck in the ground glowing teal for 4 s
+## - spent arrows: one that lands with no hit stays stuck in the ground, thread attached, for 4 s
 ## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
 ##   burn flames on foes inside
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
+## - the Spirit Walk body tint: her whole body darkens toward her deep orchid for the roll and the walk (every game)
 
 const STARS := 8
 const BURSTS := 3
@@ -21,7 +22,7 @@ const ARROWS := 10
 const SPENT := 8
 const STREAKS := 26
 const FLAMES := 4
-## her dash after-image: green fletch streaks left at hip, chest and shoulder height, how long each lasts
+## her dash after-image: orchid fletch streaks left at hip, chest and shoulder height, how long each lasts
 ## (s), how many are pooled and how often a set is left (s)
 const WISP_T := 0.26
 const WISPS := 12
@@ -29,11 +30,17 @@ const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
-const HEAVY_SCALE := 3.5
-const GREEN := Color("8dffa8")
-const TEAL := Color("5ff2d8")
-const GOLD := Color("ffc02a")
-const VIOLET := Color("b884ff")
+const HEAVY_SCALE := 6.0
+const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
+const THREAD := Color("e04aff")     # her signature orchid (archetypes/archer.json "color"): thread, trails, glows
+const PALE := Color("f4c8ff")       # the pale half of her orchid: heads and hot cores
+const DEEP := Color("8a1aa8")       # the deep shade of her orchid: the overdrawn trail
+const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
+const SILVER := Color("dfe6f0")     # her needles
+const FLETCH := Color("c8b48c")     # the feathers
+const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
+const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
+const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
 
 var h: Hunter
 var stars: Array = []          # {node, t, dur, size, follow}
@@ -55,6 +62,7 @@ var wisp_at := -1.0
 var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
+var wash_k := 0.0              # 0..1: the body tint now
 var planted := 0               # spent arrows planted (checks)
 var staked := 0                # Heavy Shot stakes left in walls (checks)
 var fx_clock := 0.0            # the match time effects last advanced to
@@ -66,14 +74,14 @@ func _init(hunter: Hunter) -> void:
 
 func _ready() -> void:
 	for i in STARS:
-		var star_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", GREEN, true))
+		var star_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", THREAD, true))
 		KitShaders.param(star_node, "white", 0.3)
 		stars.append({"node": star_node, "t": 0.0, "dur": 0.0})
 	for i in BURSTS:
 		var burst_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", GOLD, true))
 		burst_node.sorting_offset = 2.0         # drawn over the bow hand and the body
 		bursts.append({"node": burst_node, "t": 0.0, "dur": 0.0})
-	bow_glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", GREEN, true))
+	bow_glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", THREAD, true))
 	KitShaders.param(bow_glint, "leaves", 4.0)
 	for i in ARROWS:
 		arrows.append(_arrow_node())
@@ -81,24 +89,24 @@ func _ready() -> void:
 		var n := _arrow_node()
 		spent.append({"node": n, "t": 0.0})
 	for i in 8:
-		panels.append(KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GREEN)))
+		panels.append(KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", THREAD)))
 	for i in 9:
-		var p := KitMeshes.inst(self, Models.box(0.06, 1.0, 0.06), Models.glow_mat(Color(GREEN.lightened(0.4), 0.95)))
+		var p := KitMeshes.inst(self, Models.box(0.05, 1.0, 0.05), Models.glow_mat(Color(SILVER, 0.95)))
 		var fl := MeshInstance3D.new()
 		fl.mesh = Models.prism_tip()
-		fl.material_override = Models.glow_mat(Color(GREEN, 0.9))
+		fl.material_override = Models.glow_mat(Color(THREAD, 0.9))
 		fl.scale = Vector3(0.22, 0.24, 0.05)
 		fl.position = Vector3(0, 0.62, 0)
 		fl.rotation = Vector3(PI, 0, 0)
 		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		p.add_child(fl)
 		posts.append(p)
-	glow = KitMeshes.inst(self, KitMeshes.band(1.0, 1.0, -1.0, 1.0), KitShaders.mat("swirl", GREEN))
+	glow = KitMeshes.inst(self, KitMeshes.band(1.0, 1.0, -1.0, 1.0), KitShaders.mat("swirl", THREAD))
 	for i in STREAKS:
-		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.09, 1.3), KitShaders.mat("streak", GREEN))
+		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
 		streaks.append({"node": streak_node, "t": 0.0})
 	for i in WISPS:
-		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", GREEN, true))
+		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", THREAD, true))
 		wisps.append({"node": wisp, "t": 0.0})
 	for i in FLAMES:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
@@ -113,35 +121,42 @@ func _arrow_node() -> Node3D:
 	var trail := MeshInstance3D.new()
 	trail.name = "Trail"
 	trail.mesh = KitMeshes.quad(1.0, 1.0)
-	trail.material_override = KitShaders.mat("streak", GREEN, true)
+	trail.material_override = KitShaders.mat("streak", THREAD, true)
 	trail.rotation = Vector3(-PI * 0.5, PI * 0.5, 0)     # lies flat, runs back along +Z
 	trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(trail)
 	# solid toon parts with a soft glow: they keep their colour on bright grass (no additive wash)
-	var shaft := Models.part(n, Models.box(0.035, 0.035, 0.75), Models.toon(GREEN, true, 0.6), Vector3(0, 0, 0.3),
+	var shaft := Models.part(n, Models.box(0.03, 0.03, 0.75), Models.toon(THREAD, true, 0.6), Vector3(0, 0, 0.3),
 		Vector3.ONE, Vector3.ZERO, "Shaft")
 	shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var head := Models.part(n, Models.prism_tip(), Models.toon(TEAL, true, 0.8), Vector3(0, 0, -0.1),
+	var head := Models.part(n, Models.prism_tip(), Models.toon(PALE, true, 0.8), Vector3(0, 0, -0.1),
 		Vector3(0.12, 0.2, 0.05), Vector3(-PI * 0.5, 0, 0), "Head")
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# the red thread binding the shaft behind the head and before the feathers
+	for at_z in [0.08, 0.5]:
+		var bind := Models.part(n, Models.box(0.06, 0.06, 0.09), Models.toon(THREAD, true, 0.8), Vector3(0, 0, at_z),
+			Vector3.ONE, Vector3.ZERO, "Bind%d" % int(at_z * 10.0))
+		bind.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# a bright core riding the head (the Heavy Shot's alone)
 	var core := KitMeshes.inst(n, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", GOLD, true))
 	core.name = "Core"
 	core.visible = false
 	core.position = Vector3(0, 0, 0.1)
 	for sx in [-1.0, 1.0]:
-		var f := Models.part(n, Models.box(0.16, 0.012, 0.2), Models.toon(GREEN, false, 0.6),
+		var f := Models.part(n, Models.box(0.16, 0.012, 0.2), Models.toon(THREAD, false, 0.6),
 			Vector3(sx * 0.07, 0, 0.62), Vector3.ONE, Vector3(0, sx * 0.35, 0), "Fin%d" % int(sx + 1.0))
 		f.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
 
-## Each kind's look: [shaft colour, head colour, fin colour, trail colour, trail length m, trail width m, body scale]
+## Each kind's look: [shaft colour, head colour, fin colour, trail colour, trail length m, trail width m, body scale].
+## Trails are streaks (a white-hot centre line in an orchid body): the widths hold at the match camera.
 const LOOK := {
-	"tap": [Color("cfe8b0"), Color("e8ffd0"), Color("9fe0a8"), Color(0.6, 1.0, 0.65, 0.5), 1.2, 0.07, 0.8],
-	"arrow": [GREEN, TEAL, GREEN, Color(0.45, 1.0, 0.6, 0.85), 2.4, 0.12, 1.0],
-	"super": [Color("c8fff0"), Color("e8fffa"), TEAL, Color(0.45, 1.0, 0.88, 1.0), 5.0, 0.5, 1.35],
-	"over": [Color("9fb8a0"), Color("c8d8c0"), Color("7a9a80"), Color(0.6, 0.75, 0.62, 0.35), 1.0, 0.06, 0.9],
-	"heavy": [GOLD, Color("fff0b0"), VIOLET, Color(1.0, 0.72, 0.2, 0.95), 6.0, 0.8, HEAVY_SCALE],
+	"tap": [SILVER, Color.WHITE, FLETCH, Color(THREAD, 0.7), 1.6, 0.16, 0.8],
+	"arrow": [SILVER, Color.WHITE, FLETCH, Color(THREAD, 0.85), 2.6, 0.22, 1.0],
+	"super": [Color.WHITE, Color.WHITE, THREAD, Color(THREAD, 0.95), 5.0, 0.4, 1.35],
+	"over": [Color("8fa0b4"), Color("c0c8d4"), Color("7a6a58"), Color(DEEP, 0.4), 1.0, 0.1, 0.9],
+	"ult": [Color.WHITE, Color.WHITE, THREAD, Color(THREAD, 0.95), 5.0, ULT_WIDTH, 5.0],
+	"heavy": [THREAD, PALE, THREAD, Color(THREAD, 1.0), 7.0, 0.9, HEAVY_SCALE],
 }
 
 func _dress(n: Node3D, kind: String) -> void:
@@ -158,13 +173,15 @@ func _dress(n: Node3D, kind: String) -> void:
 	tr.visible = true
 	var s := float(lk[6])
 	var core := n.get_node("Core") as MeshInstance3D
-	core.visible = kind == "heavy"
+	core.visible = false      # (the Heavy Shot is the bow's arrow, just bigger: owner Nov 4)
 	core.scale = Vector3.ONE * s * 0.5
 	KitShaders.param(core, "color", Color("fff0b0"))
 	KitShaders.param(core, "power", 2.4)
 	var thick := s * (2.2 if kind == "super" else 1.0)
 	(n.get_node("Shaft") as Node3D).scale = Vector3(thick, thick, s)
 	(n.get_node("Head") as Node3D).scale = Vector3(0.12, 0.2, 0.05) * s * (1.6 if kind == "heavy" else 1.0)
+	for b in ["Bind0", "Bind5"]:
+		(n.get_node(b) as Node3D).scale = Vector3(s, s, s)
 	for f in ["Fin0", "Fin2"]:
 		(n.get_node(f) as Node3D).scale = Vector3.ONE * s * (1.7 if kind == "heavy" else 1.0)
 
@@ -221,7 +238,7 @@ func bow_glint_at(at: Vector3, k: float, col: Color) -> void:
 
 # ------------------------------------------------------------------ shots and spent arrows
 ## Skins a shot of ours as `kind` (the match keeps moving it; we draw over it).
-func skin(s: Dictionary, kind: String) -> void:
+func skin(s: Dictionary, kind: String) -> Node3D:
 	var x: Dictionary = s["x"]
 	x["pin"] = kind
 	x["tracer"] = 0.0
@@ -231,7 +248,8 @@ func skin(s: Dictionary, kind: String) -> void:
 			_dress(n, kind)
 			n.visible = true
 			live[int(s["sid"])] = {"node": n, "kind": kind, "pos": s["pos"], "life": float(s["life"]), "s": s}
-			return
+			return n
+	return null
 
 func note_hit(at: Vector3) -> void:
 	hits.append([at, h.m.time])
@@ -268,7 +286,7 @@ func tick_shots() -> void:
 		if not hit and kind in ["tap", "arrow", "over", "heavy"]:
 			_plant(at, (e["s"]["vel"] as Vector2), kind)
 
-## A spent arrow stuck in the ground where the shot ended, glowing teal, fading over SPENT_T.
+## A spent needle stuck in the ground where the shot ended, its thread lying behind it, gone after SPENT_T.
 func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	var best: Dictionary = spent[0]
 	for c in spent:
@@ -279,7 +297,6 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	var n: Node3D = best["node"]
 	_dress(n, kind)
 	(n.get_node("Trail") as Node3D).visible = false
-	(n.get_node("Head") as MeshInstance3D).material_override.set_shader_parameter("albedo", TEAL)
 	var g: Vector3 = AimMode.ground(h.m, at)
 	if g.y < at.y - 1.6: g = at
 	n.global_position = g + Vector3(0, 0.22, 0)
@@ -287,7 +304,7 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	n.visible = true
 	best["t"] = SPENT_T
 	planted += 1
-	star(g + Vector3(0, 0.15, 0), 0.5, TEAL, 0.1)
+	HeroVfx.of(h.m).play(h, "needle_stuck", g, -v.normalized(), {"t": SPENT_T})
 
 ## The Heavy Shot's stake: a wall pin leaves its big arrow standing in the wall at `at`, pointing along `dir`
 ## (into the wall), for STAKE_T s.
@@ -308,7 +325,7 @@ func stake(at: Vector3, dir: Vector2) -> void:
 	staked += 1
 	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
 
-## Her dash after-image: three green fletch streaks at hip, chest and shoulder height, lying along the way
+## Her dash after-image: three orchid fletch streaks at hip, chest and shoulder height, lying along the way
 ## she faces and fading behind her (pooled, a set every WISP_EVERY s).
 func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 	var now := float(h.m.time)
@@ -325,7 +342,7 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 		n.scale = Vector3(1.3, 0.16, 1.0) * body_scale
 		w["t"] = WISP_T
 
-## Hail Wall's cast: green arrows streaking up out of the bow, lobbed toward `dir`.
+## Hail Wall's cast: orchid arrows streaking up out of the bow, lobbed toward `dir`.
 func lob(at: Vector3, dir: Vector2) -> void:
 	var launched := 0
 	for c in streaks:
@@ -361,6 +378,8 @@ func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, t: float)
 		var q := _arc_pt(center, yaw, radius, u)
 		(posts[i] as Node3D).global_position = q + Vector3(0, 0.5, 0)
 		(posts[i] as Node3D).visible = true
+		if i > 0:
+			_stitch(_arc_pt(center, yaw, radius, lerpf(-half, half, float(i - 1) / n)), q, t)
 	for i in n:
 		var u0 := lerpf(-half, half, float(i) / n)
 		var u1 := lerpf(-half, half, float(i + 1) / n)
@@ -376,6 +395,11 @@ func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, t: float)
 	glow.global_position = AimMode.ground(h.m, center) + Vector3(0, 0.05, 0)
 	glow.rotation = Vector3(0, yaw, 0)
 	glow.visible = true
+
+## The thread running from one needle post to the next, stitching the wall to the ground.
+func _stitch(a: Vector3, b: Vector3, t: float) -> void:
+	var to := Vector2(b.x - a.x, b.z - a.z)
+	HeroVfx.of(h.m).play(h, "rain_thread", a, to.normalized(), {"len": to.length(), "t": t})
 
 func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
 	var a := yaw + u
@@ -450,7 +474,7 @@ func _tick_streaks(dt: float) -> void:
 			n.visible = false
 			c["t"] = 0.0
 			if not c.get("up", false):
-				h.m.fx.spark(to + Vector3(0, 0.05, 0), Vector3.UP, GREEN, 3, 3.0, 70.0, 0.18, 8.0, 0.7)
+				h.m.fx.spark(to + Vector3(0, 0.05, 0), Vector3.UP, SILVER, 3, 3.0, 70.0, 0.18, 8.0, 0.7)
 
 # ------------------------------------------------------------------ Spirit Walk tint
 func tint_to(k: float) -> void:
@@ -492,6 +516,10 @@ func _process(_delta: float) -> void:
 	tick_shots()
 	_tick_rain(delta)
 	_tick_streaks(delta)
+	var phasing: bool = h.ak is ArcherKit and (h.ak as ArcherKit).spirit.phasing()
+	wash_k = move_toward(wash_k, 1.0 if phasing else 0.0, delta * WASH_RATE)
+	h.wash = wash_k * WASH_MAX
+	h.wash_col = WASH_COL
 	if tint:
 		tint_k = move_toward(tint_k, tint_want, delta * 5.0)
 		tint.material.set_shader_parameter("power", tint_k)
@@ -511,10 +539,10 @@ func _tick_bursts(delta: float) -> void:
 # ------------------------------------------------------------------ Spirit Walk aura
 var aura: MeshInstance3D = null
 
-## A soft green shell over her while she walks as a spirit (k 0 = off).
+## A soft orchid shell over her while she walks as a spirit (k 0 = off).
 func aura_on(k: float) -> void:
 	if aura == null:
-		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(GREEN, 0.9)))
+		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
 		aura.material_override.set_shader_parameter("bands", 3.0)
 	aura.visible = k > 0.01
 	if aura.visible:

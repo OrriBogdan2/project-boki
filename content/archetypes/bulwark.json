@@ -1,23 +1,27 @@
 {
 	"id": "bulwark",
-	"title": "Frozen Bulwark",
-	"base_name": "Breaker",
+	"title": "Barnacle Knight",
+	"base_name": "Albert",
 	"gender": "male",
-	"personality": "A huge, warm-hearted northern ferryman in a fur-lined coat, carrying the frozen, iron-banded prow of his old ship as a shield.\nHe laughs easily and guards everyone near him. Small things are off: frost that never melts on him, and no breath in the cold.",
+	"personality": "A ferryman who carried refugees across the ice the night of the Hollowing and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks.\nHe doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.",
 	"weight": "heavy",
-	"color": "#8fd0ff",
+	"color": "#fff0b0",
 	"body": {
-		"size": 1.335,
-		"build": 1.18,
+		"size": 2.0, "bulk": 0.8,
+		"build": 1.4,
 		"hit_r": 0.46,
-		"head": 0.52,
-		"legs": 1.3,
-		"neck": 0.1
+		"head": 0.3,
+		"legs": 0.46,
+		"torso": 1.06,
+		"shoulder": 1.35,
+		"neck": 0.0
 	},
+	"model_glow": {"core": "#1fe0cc", "edge": "#0f9a94", "compass": "#ffb347", "lure": "#8ff5e0", "strength": 1.5},
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the frozen prow shield and the long ice-cased oar",
 	"card": {
+		"role_word": "Tank",
 		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you.",
@@ -41,21 +45,22 @@
 		"wait": 3.0,
 		"slam": 50.0,
 		"crush_reach": 1.5,
-		"crush_stun": 0.5,
+		"crush_stun": 1.0,
 		"crush_dmg": 8.0,
 		"col": "#fff1b8"
 	},
 	"passive": {
 		"name": "Guard",
-		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage)."
+		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage)."
 	},
 	"lmb": {
 		"tap": 0.2,
 		"full": 1.25,
+		"spin_turns": [2.5, 4.0],
 		"throw_dmg": 12.0,
 		"throw_range": 9.0,
 		"throw_speed": 24.0,
-		"throw_rate": 0.48,
+		"throw_rate": 0.45,
 		"recall_dmg": 12.0,
 		"recall_speed": 34.0,
 		"lie_t": 0.0,
@@ -160,7 +165,7 @@
 		"cooldown": 12.0,
 		"cooldown_rank3": 8.0,
 		"reach": 0.0,
-		"radius": 3.5,
+		"radius": 2.3,
 		"delay": 1.0,
 		"time": 4.0,
 		"every": 0.5,
@@ -213,21 +218,11 @@
 		"dash",
 		"gear"
 	],
-	"rank3": {
-		"sec": "shield HP +50% in all and it repairs and regenerates faster",
-		"dash": "the 360 Smash refunds the Shield Charge when it hits",
-		"kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"
-	},
-	"rank2": {
-		"sec": "Rank 2: shield HP +25% (160 -> 200), damage +15%.",
-		"dash": "Rank 2: recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s.",
-		"kin": "Rank 2: healing +25% (burst 18 -> 22), damage +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
-		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
-		"dash": "Rank 3: recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
-	},
+	"rank_cd": {"dash": [1, 0.8125, 0.625]},
+	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1, 1]},
+	"rank3": {"sec": "shield HP +50% in all and it repairs and regenerates faster", "dash": "the 360 Smash refunds the Shield Charge when it hits", "kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"},
+	"rank2": {"sec": "Rank 2: shield HP +25% (160 -> 200).", "dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.", "kin": "Rank 2: healing +25% (burst 18 -> 22)."},
+	"rank_next": {"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.", "kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.", "dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further."},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
 		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",

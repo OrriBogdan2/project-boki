@@ -1,72 +1,48 @@
-# Kael (juggernaut; was Zedran): import note, stage 1 (2026-11-04)
+# Kael (juggernaut): import note, v95 swap of Kael appeal3, body c (2026-11-10)
 
-`kael.glb` is Kael's stage-1 model (INBOX_S2 09:20, 09:30, 10:00/10:15): a hybrid. The body is one Meshy 7.1 run
-baked to a clean low-poly and fitted to the Warden contract; the greatsword, the Warchain with its hook, the left
-cuff's broken chain and the long mane are built by script in Blender (tools/meshy/kael_parts.py). **No hand polish**
-(stage 2): no paint-over, `lift` neutral, no per-Warden shader. Raw files in ~/meshy/zedran/. Run log:
-docs/art/wardens/PIPELINE.md.
+`kael.glb`: the owner's pick (11-10), Kael v95 r2 appeal3 `cand_c.glb` (body variant c with the new appeal3 face:
+waist taper, arms and shawl 5 cm in per side), swapped onto juggernaut's own skeleton, clips and anchors by
+`tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/kael_v95.json`. Raw files in
+~/meshy/v95/Kael/r2/appeal3 (never in git); the spec reads `kael_v95_c_body.glb`, which is `cand_c.glb` without its
+own sword mesh (`kael_sword`): the game's skinned sword stays.
 
-    BP=~/tools/blender-4.5.15-linux-x64/4.5/python/bin/python3.11; B="~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python"
-    $BP -I tools/meshy/kael_crops.py tools/meshy art/zedran_turnaround.png ~/meshy/zedran/crops
-    python3 -I tools/meshy/meshy_task.py edit ...  (x4; prompts in ~/meshy/zedran/edit_*/request.json)
-    $BP -I tools/meshy/kael_prep.py tools/meshy ~/meshy/zedran
-    python3 -I tools/meshy/meshy_task.py create ~/meshy/zedran/runA in/front.png in/tq.png in/side.png in/back.png \
-        --texture-refs in/front.png in/tq.png in/side.png in/back.png --enhance off
-    $B tools/meshy/bake_warden.py -- art/wardens/src/kael_bake.json
-    godot --headless -- --warden-rig-json --warden=juggernaut       # -> art/wardens/src/kael_rig.json
-    $B tools/meshy/fit_warden.py -- art/wardens/src/kael_fit.json
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/kael_v95.json WORK art/wardens/kael/kael.glb
 
-- **Art:** generated from wardens_r3/zedran_* (the final kael_* came after the run): the same body, outfit and
-  pieces, the glow white-hot instead of orange. The body is reused; the glow is a game-side colour (below).
-- **Inputs:** each of the four views edited once: the greatsword, all chains and both hooks out, his right hand
-  hanging empty, the long mane cut to the nape (it is built as geometry). Nothing mirrored.
-- **Body:** 979k -> 30k triangles (head 9k), 4096 atlas. Archetype body: size 0.955, head 0.62, legs 1.55,
-  neck -0.02, build 0.95. Bone heat found no solution on the scan (skirt plates and scarf pass through each other):
-  fit_warden now runs it on a 12 mm voxel proxy and transfers the weights back.
-- **Glow (white-hot, switchable):** the right arm's faces (box `hot_boxes`) go on `<slot>-body-hot` copies of their
-  materials; hero_toon's `glow_key` lights only the atlas's hot texels there (the rest stays skin). Every glow piece
-  (the arm's cracks, the blade's cracks, the hook's tip) takes `model_glow` {core, edge} from
-  content/archetypes/juggernaut.json (core #fffaf0, edge #f2d48a), so orange or white is one edit, no rebake.
-  Sparks and the black demon smoke are VFX.
-- **Greatsword (weapon):** scripted slab with chipped edges and the art's jagged broken tip (from the front and 3/4
-  views), bevelled edges, two iron bands, a bar guard, a wrapped grip with chain links round it, cracks down both
-  faces as `glow-sword` over `glow-sword_edge` ribbons; built to the procedural greatsword's frame, x0.55 (the heavy
-  Gun scale 1.42 sits on top).
-- **Warchain:** links wrapped round the right forearm (rigid on forearm.R), then from the wrist by the hilt down to
-  ONE heavy hook with a hot tip, on `spring_hangwarchain_*` bones under hand.R. A `hang` chain (new in
-  WardenGlb.Springs) settles straight down from its root whichever way the arm points.
-- **Left wrist:** the scan's iron cuffs plus a short broken chain (three links and a split one) on
-  `spring_hangcuff_*` under hand.L. No second hook.
-- **Mane:** 26 chunky tapered locks rooted in the scan's short hair, draped clear of the body, in five groups
-  (back, left, right, front-left, front-right), each on a `spring_mane_*` chain under head; `hair-mane` takes the
-  ink line (INK_TAGS).
-- **Scarf:** always on (the scan's own).
-- The pieces share a small 256 px colour atlas (`kael_parts_atlas`), one cell per colour.
-- `kael.glb.import`: `generate_lods=false`, `force_disable_compression=true`; atlases lossless.
+Body: 13k triangles (head 2.6k), one 2048 atlas and the master's emission map baked beside it (`"emit": true`), both
+embedded (Godot extracts them to `kael_atlas.jpg` and `kael_emit.jpg`). The curse veins are the emission map, tinted
+by juggernaut.json `model_glow.core` as before. Slots by colour, bone and box (first match wins): leather (dark),
+metal (grey), hair (white, in the head box), skin (chest, both arms, the face's warmer parts), cloth (the crimson
+shawl, scarf and sash; the pale shawl; most of his pale face, which the cloth slot keeps warm where kael's skin slot,
+with its cool shadow tint, turns it lilac). The face has one rule ahead of hair and skin (face box, s 0.04-0.4, v
+0.35-0.95): its tones sit either side of the skin rule's s 0.08 and its ridge highlights took the hair slot, so the
+skin and hair triangles drew a pale lilac-blue streak down the nose; the white hair (s < 0.04 or v > 0.95) stays hair.
+Weights: bone heat from the spec's joints, limbs on the rig's own segments (`spread: "rig"`); the shawl rides the
+hips box, its shoulder wings the pauldrons (minus the upper arms), the head box the head. The master's wrist cuffs and
+chains ride the hands; the old spring chains (hangcuff, hangwarchain) stay in the rig, unweighted.
 
-## Stage 2 (2026-11-04, the Vex r3c recipe + the 12:40 sheets; credit-free)
-- **Slots:** the red rule tightened (dark red-brown skin was landing on cloth and took the red ramp); the harness's
-  grey-brown straps are on leather (no skin tint).
-- **Paint-over:** `smooth`, `ramps` of the art's colours (skin, red, leather, gold, iron, hair), `despeckle`;
-  `project_late` of the front art over the face and chest. The skin ramp stops below the cracks' brightness, so the
-  arm's red-orange crack rims become skin and only the hot cores light, white-hot.
-- **Blade** (kael_blade_sheet; its pommel hook ignored): a long slab with a crenellated broken end, dark stone-iron
-  edges, the WHOLE core a broad white-hot channel with thin cracks off it, chain wrapped round the blade's base and
-  the grip. The pieces' atlas now holds sRGB colours (stage 1 stored linear values: everything read near-black).
-- **Glow:** `model_glow` gains `strength` (2.4); content/rules/warden_look.json `kael` (skin and cloth up at the
-  match camera, glow 2.6).
-- **Mane** (kael_head_sheet): 48 wider, softer, wavy locks in layers past the shoulders, five spring chains of five
-  bones; no ink line on them (it drew every lock as a strip).
-- **Stance:** content/rules/warden_stance.json juggernaut: the greatsword hangs in his right hand down across his
-  front (the turnaround), the blade's face turned up so its glow reads from the match camera; the chest less
-  thrown back, the left arm hanging. Archetype size 0.975 (the sheet height with the new stance).
+**Curse side:** the v2 build mirrored the scan so the curse sat on his right (sword) arm. The appeal3 master paints it
+on his LEFT arm and chest, as the v2 turnaround does, and the swap keeps the master's paint: the bare veined arm and
+crimson hand on the left, the black glove on the right (sword) hand. The arm blooms (warden_look `kael`, on
+anchor_arm_up / _elbow / _fore) move with it: the spec's `anchor_bones` puts them on upper_arm.L / forearm.L.
+Alternative not taken: mirror the master's texture to keep the curse on the sword arm.
 
-## Stage 3 (2026-11-04, after the shared painted-look fix 16c18b4f; credit-free)
-- The shared look fix cherry-picked (the shader conflict kept both the glow heat key and the own ambient);
-  warden_look.json `kael` retuned down on top of it.
-- **Arm cracks** (kael_arm_sheet): `hot_paint` grows the arm atlas's hot texels and paints them a warm core the
-  shader keys fully hot (lit in the white-hot model_glow), with a duller rim it keys as the pale-gold edge.
-- **Collar** (kael_collar_sheet): a scripted broken gold band round the neck base, split at the front, dark rims,
-  lower at the front than the nape (kael_parts.collar).
-- **Mane:** 36 wider locks (roots lying flat on the scalp, turning out to hang), five spring chains.
-- **Blade:** faint zigzag crack lines inside the white-hot core.
+Kept from the old build (`keep_mats`): the skinned sword (glow-sword, leather-grip, metal-sword, _dk, _edge; 0.9k
+triangles, weighted to hand.R; `skinned_weapon` in content/rules/warden_anim/kael.json), with weapon_muzzle,
+anchor_blade_mid and anchor_blade_root on hand.R along the blade, unchanged. Gone: the alpha cards and their sheet
+`kael_cards.png` (the master models the torn hem and sash), the scripted wrist chains.
+
+Clips: the 49 clips of the v2 build (the swap keeps the game rig). The swap ran on main's kael.glb, before the
+docs/art/IDLE_AUDIT.md idle (6 s) and stance (8 s); the 0.24.4 merge put them back with `kael_retarget.py` (plain
+numpy: `python3 tools/art1/kael_retarget.py -- <old kael.glb> <swapped kael.glb> <out>`, the old glb's 49 clips over
+the swapped ones, rest rotation drift none), which also adds the `x_breath` leaf (3430 chest-band vertices) and prints
+the sword point at the idle's first frame (0.8 cm under the ground, as before). `anchor_head_top` and `anchor_chest`
+move onto the new mesh (the spec's `anchors`).
+
+`kael.glb.import`: unchanged (`generate_lods=false`, `force_disable_compression=true`).
+
+Shots on the game rig (`--warden-shots`): docs/shots/kael-appeal/.
+
+Checks (2026-11-11): `--warden-glb-check` 183/0 failed, `--warden-model-check` 157/0 failed. `--stretch-check
+--wardens=juggernaut` still flags all 49 clips (worst 7.45x in fusion, idle 2.56x, run_f 4.09x, mostly hips and
+thighs), against 31.06x (death), idle 10.39x and run_f 16.72x for the old v2 build: better, but not under 1.3x. No
+tearing or arm, chest or cape clipping shows in the turnaround, idle, run or kit poses.

@@ -3,19 +3,28 @@ extends RefCounted
 ## One ability or item slot on the bottom bar: the frame (HudStyle.slot_frame), the icon, and while
 ## it isn't ready a dimmed icon, a dark sweep over the part still cooling (clipped to the slot) and
 ## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
-## pop when a press lands, a red shake when it can't, a ring when it comes back, and ResetPop's swell
-## when a reset hands it straight back. skill_slot adds
+## pop when a press lands, one red pulse of the frame when it can't (PressDeny), a ring when it comes
+## back, and ResetPop's swell when a reset hands it straight back. skill_slot adds
 ## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
-## it, and a gold + to spend a point. Hud._ab_slot / Hud._skill_slot call these (the Boki slots in
-## BokiHud go through the same two, so every slot on the bar looks alike).
+## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
+## Hud._skill_slot call these (the Boki slots in BokiHud go through the same two, so every slot on the bar looks alike).
 ## Per-slot animation state lives on Hud (slot_fx, ready_was, ready_flash, hover_spots) and the last
 ## countdown text shown per slot on Hud.slot_text (checks read it).
 
 const READY_FLASH := 0.35      # s: the ring when a slot comes back
-const DENY_T := 0.35           # s: the red shake when a press can't go
+const DENY_T := 0.15           # s: the frame's one red pulse when a press can't go
 const POP_T := 0.3             # s: the pop when a press lands
 
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
+
+## Moves the per-slot animation state of host `H` on by `delta` s: presses age out, "ready" rings fade.
+static func decay(H, delta: float) -> void:
+	for id in H.slot_fx.keys():
+		H.slot_fx[id]["t"] = float(H.slot_fx[id]["t"]) + delta
+		if float(H.slot_fx[id]["t"]) > ResetPop.LEN: H.slot_fx.erase(id)
+	for id in H.ready_flash.keys():
+		H.ready_flash[id] = float(H.ready_flash[id]) - delta
+		if float(H.ready_flash[id]) <= 0.0: H.ready_flash.erase(id)
 
 ## The countdown as shown: whole seconds from 1s up, tenths under it.
 static func cd_text(secs: float) -> String:
@@ -25,16 +34,12 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
 	var c: CanvasItem = H.c
 	var sfx_d: Dictionary = H.slot_fx.get(id, {})
-	var deny := 0.0
 	var pop := 0.0
 	if not sfx_d.is_empty():
 		var ft := float(sfx_d["t"])
-		if sfx_d["kind"] == "deny":
-			deny = clampf(1.0 - ft / DENY_T, 0.0, 1.0)
-			rect.position.x += sin(ft * 70.0) * 5.0 * deny
-		elif sfx_d["kind"] == "reset":
+		if sfx_d["kind"] == "reset":
 			rect = ResetPop.scaled(rect, ft)
-		else:
+		elif sfx_d["kind"] == "cast":
 			pop = clampf(1.0 - ft / POP_T, 0.0, 1.0)
 			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
 	var ctr := rect.get_center()
@@ -70,8 +75,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		HudStyle.ctext(c, Vector2(ctr.x, rect.position.y - 6), label, 11, Color(HudStyle.INK, 0.85), 3, HudStyle.BODY)
 	shown_keys[id] = key
 	if key != "": HudStyle.key_pill(c, Vector2(ctr.x, rect.end.y), key, col if ready else HudStyle.MUTED)
-	if deny > 0.0:
-		H._rounded(rect, Color(0.9, 0.15, 0.1, 0.22 * deny), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, deny), 3)
+	deny_pulse(H, id, rect)
 	if pop > 0.0:
 		var pop_edge := Color(col.lerp(Color.WHITE, 0.5), pop)
 		H._rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), HudStyle.SLOT_RAD + 2, pop_edge, 3)
@@ -107,11 +111,20 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	shown_keys[id] = key
 	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
 
+## A refused press on slot `id` (PressDeny): its frame swells red and back once over DENY_T.
+static func deny_pulse(H, id: String, r: Rect2) -> void:
+	var fx: Dictionary = H.slot_fx.get(id, {})
+	if fx.get("kind", "") != "deny" or float(fx["t"]) >= DENY_T:
+		return
+	var k := sin(PI * float(fx["t"]) / DENY_T)
+	H._rounded(r.grow(3.0 * k), Color(0.9, 0.15, 0.1, 0.22 * k), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, k), 3)
+
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
 static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
-	if frac <= 0.001:
+	if frac <= 0.005:
 		return
+	frac = minf(frac, 0.995)      # (a full turn closes on itself: the polygon would not triangulate)
 	var ctr := r.get_center()
 	var half := r.size * 0.5
 	var pts := PackedVector2Array([ctr])
@@ -124,39 +137,21 @@ static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
 	c.draw_colored_polygon(pts, col)
 
 ## A slot with run levels: locked (padlock; UNLOCK in gold when a point can open it; R says when it
-## opens), else the ability slot with rank pips above and a gold + while a point can go in.
+## opens), else the ability slot with RankMarks' tier pips and, while a point can go in, its gold +.
 static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float,
 		cds: float, ready: bool, ch := -1, mx := 0) -> void:
-	var c: CanvasItem = H.c
 	var p: Hunter = H.m.player
 	var lv := int(p.slot_lv.get(slot, 1))
 	var can := p.can_level(slot)
-	var t: float = H.m.time
 	if lv <= 0:
 		H.hover_spots.append([r, id])
-		var sfx_d: Dictionary = H.slot_fx.get(id, {})
-		if not sfx_d.is_empty() and sfx_d["kind"] == "deny":
-			r.position.x += sin(float(sfx_d["t"]) * 70.0) * 5.0 * clampf(1.0 - float(sfx_d["t"]) / DENY_T, 0.0, 1.0)
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
 		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
+		deny_pulse(H, id, r)
+		if can:
+			RankMarks.mark(slot, r)
 		return
 	ab_slot(H, id, r, icon, key, col, cdf, cds, ready, ch, mx)
-	# rank pips above the slot
-	var mxl := int(Hunter.SLOT_MAX.get(slot, 3))
-	var pw := 9.0
-	var pg := 3.0
-	var px := r.get_center().x - (mxl * pw + (mxl - 1) * pg) * 0.5
-	for i in mxl:
-		var pr := Rect2(Vector2(px + i * (pw + pg), r.position.y - 7), Vector2(pw, 3))
-		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
-		c.draw_rect(pr, Color(col, 0.95) if i < lv else Color(1, 1, 1, 0.16))
+	RankMarks.pips(H, r, slot, lv, col)
 	if can:
-		var pulse := 0.5 + 0.5 * sin(t * 5.0)
-		# the frame glows gold while a point can go in; hovering shows the Alt+key to spend it
-		var glow := Color(1.0, 0.82, 0.48, 0.3 + 0.45 * pulse)
-		H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 2)
-		if H.hover_id == id:
-			HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 18), "ALT+" + key, 11, HudStyle.GOLD)
-		var cp := Vector2(r.end.x - 2, r.position.y + 2)
-		c.draw_circle(cp, 8.0 + pulse, HudStyle.GOLD)
-		HudStyle.ctext(c, cp + Vector2(0, 4.5), "+", 13, Color(0.1, 0.07, 0.02), 0)
+		RankMarks.plus(H, r, id, slot, key)
