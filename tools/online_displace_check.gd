@@ -15,6 +15,15 @@ const MOVE_MIN := 0.8        # m: a move shorter than this missed (its row is fl
 const END_TOL := 0.75        # m: a view ends this close to the offline end and to the mover's own end (Kael: 0.56)
 const DOUBLE := 1.5          # a path or displacement this many times the offline one is a double move
 const SNAP := 4.0            # m in one frame on the mover's own game: no move here is that fast (Ent.net_follow's jump)
+const DASH_STEP := 0.5       # m: the other game's copy of a dasher moves this far in one frame: flagged
+const DASH_OVER := 0.15      # m: ...and further than the dasher's own game moves it in a frame (a fast dash's own step)
+const STALL_S := 0.05        # s: a frame this long is a hitch of the box, not of the net (a loaded box stalls a game)
+const AIR_BACK := 7.0        # m behind home: the strip has 20 m ahead of that for the air dashes that glide on
+const DASH_END := 0.3        # m: and ends this far from where the dasher's own game ends: flagged
+const LUNGE_HOLD_STEPS := 27 # steps (0.45 s) of RMB held: past the tap's Slam, a charged Lunge
+const AIR_UP := 8.0          # m above home: where an air dash starts (it falls the whole move)
+const DASHERS := ["gunslinger", "archer", "ashwick", "tender", "bulwark", "thief", "juggernaut", "dredge", "dolm",
+	"mage", "rimewright", "ostra", "gil"]
 const BOT_AT := Vector3(-6.0, 0, 9.0)   # m from home: where the bot waits
 
 var role := ""
@@ -162,7 +171,48 @@ func _host() -> void:
 		{"mates": true, "tp": true})
 	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self", "guest"])
 	await _move("Knock into a wall", "mage", Vector3(4, 0, 2), _knock, 1.4, G, B, ["guest"])
+	await _dash_sweep(G, B)
 	await _finish()
+
+## Every Hunter's ground and air dash, then the dash-like moves, each played by the host's Hunter and read on the
+## guest's game. A copy that jumps over DASH_STEP in one frame or ends over DASH_END off is flagged (DISPNET FLAG),
+## not failed, so the table lists the open ones.
+func _dash_sweep(G: Hunter, B: Hunter) -> void:
+	for arch in DASHERS:
+		var who: String = HeroTitle.base_name(arch)
+		await _move("%s dash, ground" % who, arch, Vector3(0, 0, -6), _dash, 1.0, G, B, ["self"], _dash_opt(arch, {}))
+		await _move("%s dash, air" % who, arch, Vector3(0, 0, -6), _dash, 4.0, G, B, ["self"],
+			_dash_opt(arch, {"air": true}))
+	await _move("Kael Lunge", "juggernaut", Vector3(0, 0, -6), _lunge, 1.0, G, B, ["self"], {"dash": true})
+
+## Motley's dash is the Trade: the lantern lands where she aims and she swaps with it (a teleport).
+func _dash_opt(arch: String, opt: Dictionary) -> Dictionary:
+	opt["dash"] = true
+	if arch == "ostra": opt["tp"] = true
+	return opt
+
+## The dash key with the move keys held for one step, as a player taps it; in the air the body is up first.
+func _dash(_t: Hunter) -> void:
+	var P := m.player
+	P.ex_cd = 0.0              # (the long air dash's own cooldown: the first of the two plays would leave it cooling)
+	_aim(P.pos + Vector3(6, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	await _run(DT)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+
+## RMB held past the tap, then let go: Kael charges at the aim.
+func _lunge(_t: Hunter) -> void:
+	var P := m.player
+	_aim(P.pos + Vector3(6, 0, 0))
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	for i in LUNGE_HOLD_STEPS:
+		P.inp["sec_hold"] = true
+		await _run(DT)
+	P.inp["sec_hold"] = false
+	await _run(DT)
 
 ## One move: the same ability on a bot (the offline reference), then on the guest's hunter from the same spot.
 ## `who` lists whose path is measured: "self" (the caster, on the host) and/or "guest" (the one it moves).
@@ -176,6 +226,7 @@ func _move(
 	_fresh(B)
 	B.teleport(home + off)
 	await _run(0.2)
+	if opt.has("air"): await _lift()
 	if opt.has("mates"): await _mate(B, true)
 	var off_a := Time.get_unix_time_from_system()
 	await act.call(B)
@@ -186,15 +237,24 @@ func _move(
 	_kit(arch)
 	await _place(G, home + off)
 	if opt.has("mates"): await _mate(G, true)
+	if opt.has("air"): await _lift()
 	var on_a := Time.get_unix_time_from_system()
 	await act.call(G)
 	await _run(settle + SETTLE_VIEW)
 	var on_b := Time.get_unix_time_from_system()
 	rows.append({"name": name, "who": who, "off": [off_a, off_b], "on": [on_a, on_b], "tp": opt.has("tp"),
+		"dash": opt.has("dash"),
 		"note": "a teleport" if opt.has("tp") else note})
 	if opt.has("mates"): await _mate(G, false)
 	P.teleport(home)
 	await _place(G, home + PARK)
+
+## The mover up in the air, and the other game's copy of it there too.
+func _lift() -> void:
+	var P := m.player
+	P.teleport(home + Vector3(-AIR_BACK, AIR_UP, 0))
+	P.vel = Vector3.ZERO
+	await _run(SETTLE_VIEW * 0.5)
 
 ## Meeko's target is on her team and down (on the guest's game its own hunter goes down) or back to normal.
 func _mate(t: Hunter, on: bool) -> void:
@@ -268,19 +328,24 @@ func _load(who: String) -> Dictionary:
 		out[f[1]].append([float(f[0]), Vector3(float(f[2]), float(f[3]), float(f[4]))])
 	return out
 
-## A path inside [a, b]: its largest step between samples, its length, where it starts and ends.
+## A path inside [a, b]: its largest step between samples ("fast": leaving out a frame that took STALL_S or
+## more), its length, where it starts and ends.
 static func _walk(log: Array, a: float, b: float) -> Dictionary:
-	var r := {"max": 0.0, "len": 0.0, "start": Vector3.INF, "end": Vector3.INF}
+	var r := {"max": 0.0, "fast": 0.0, "len": 0.0, "start": Vector3.INF, "end": Vector3.INF}
 	var prev := Vector3.INF
+	var prev_t := 0.0
 	for s in log:
 		if s[0] < a or s[0] > b: continue
 		if prev != Vector3.INF:
 			var step: float = prev.distance_to(s[1])
 			r["max"] = maxf(r["max"], step)
+			if s[0] - prev_t < STALL_S:
+				r["fast"] = maxf(r["fast"], step)
 			r["len"] += step
 		else:
 			r["start"] = s[1]
 		prev = s[1]
+		prev_t = s[0]
 		r["end"] = s[1]
 	return r
 
@@ -317,6 +382,10 @@ func _report() -> void:
 			var ends := "%s: the ends agree (%.2f offline, %.2f other)" % [tag, e_own, e_oth]
 			ok(e_own < END_TOL and e_oth < END_TOL, ends)
 			ok(ratio < DOUBLE and lratio < DOUBLE, "%s: no double move (x%.2f, path x%.2f)" % [tag, ratio, lratio])
+			var jump: bool = other["fast"] > DASH_STEP and other["fast"] > own["max"] + DASH_OVER
+			if r["dash"] and not r["tp"] and (jump or e_oth > DASH_END):
+				print("DISPNET FLAG  %s: the guest's copy steps %.2f m (own %.2f), ends %.2f m off" % [
+					r["name"], other["max"], own["max"], e_oth])
 	print("ODISP table\n" + md)
 	var f := FileAccess.open(dir.path_join("table.md"), FileAccess.WRITE)
 	f.store_string(md)
