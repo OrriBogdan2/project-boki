@@ -692,10 +692,11 @@ func _zone_looks(m: Match) -> void:
 	HeroZones.seed_pop(m, "zone_test")
 	var looks := KitLooks.of(m)
 	var held := (looks.hold_on("zone_dark", "dark", m, Vector3.ZERO, 1.0).get_child(0) as MeshInstance3D)
-	var hm := held.material_override as ShaderMaterial
-	ok("zones: the black orbs (Nightwell, Snap) have a broad lit sea-teal rim",
-		hm.get_shader_parameter("rim") == OstraKit.SEA and float(hm.get_shader_parameter("power")) < 1.5)
 	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 3.6)
+	var rim_orb := (well.get_node("Spin").get_children().back() as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the black orbs (Snap wind-up, Nightwell rim) have a broad lit sea-teal rim",
+		[held.material_override, rim_orb].all(func(mt: ShaderMaterial):
+			return mt.get_shader_parameter("rim") == OstraKit.SEA and float(mt.get_shader_parameter("power")) < 1.5))
 	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
 	ok("zones: the open well has no floor fill, a lit rim",
 		float(fm.get_shader_parameter("fill")) == 0.0 and float(fm.get_shader_parameter("thickness")) > 0.0)

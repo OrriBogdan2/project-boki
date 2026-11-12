@@ -73,6 +73,12 @@ static func glass_mat(core: Color, rim: Color, a := 1.0, body := 0.35) -> Shader
 	mt.set_shader_parameter("body", body)
 	return mt
 
+## A black orb with a broad lit sea-teal rim (the held orbs, the Nightwell's rim orbs), so it reads on dark ground.
+static func dark_mat() -> ShaderMaterial:
+	var mt := glass_mat(Color("02100d"), ORB_EDGE, 1.0, 1.0)
+	mt.set_shader_parameter("power", DARK_RIM_POWER)
+	return mt
+
 ## Unlit and alpha-blended: a dark tint that stays dark on bright ground (additive glow would wash out).
 static func shade_mat(c: Color) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -130,9 +136,7 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
 		"dark":
-			var shell := glass_mat(Color("02100d"), ORB_EDGE, 1.0, 1.0)
-			shell.set_shader_parameter("power", DARK_RIM_POWER)
-			Models.part(n, Models.sphere(0.22, 16), shell, Vector3.ZERO)
+			Models.part(n, Models.sphere(0.22, 16), dark_mat(), Vector3.ZERO)
 		"star":
 			_build_star(n)
 		"sigil":
@@ -349,8 +353,8 @@ func _build_well(n: Node3D) -> void:
 		var a := TAU * i / 8.0
 		Models.part(
 			spin,
-			Models.sphere(0.07, 8),
-			Models.toon(Color("0c0414"), false, 0.0),
+			Models.sphere(0.07, 12),
+			dark_mat(),
 			Vector3(cos(a), 0.12, sin(a))
 		)
 	Models.part(
