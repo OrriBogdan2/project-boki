@@ -1,0 +1,9 @@
+{"now": "2026-11-12T03:30:00+00:00",
+ "accounts": [
+  {"name": "orribogdan@outlook.com", "weekly": 77, "reset_at": "2026-11-12T04:00:00+00:00"},
+  {"name": "bogdanorri@outlook.com", "weekly": 17, "reset_at": "2026-11-18T23:30:00+00:00", "fiveh": 100, "hold_until": "2026-11-12T06:33:00+00:00"},
+  {"name": "orri@projectboki.com", "weekly": 71, "reset_at": "2026-11-13T15:30:00+00:00"},
+  {"name": "orribogdan@gmail.com", "weekly": 75, "reset_at": "2026-11-15T03:30:00+00:00"},
+  {"name": "orri@generalcreative.ai", "weekly": 95, "reset_at": null, "note": "reset time not in the facts"},
+  {"name": "corybogdan@gmail.com", "weekly": 0, "reset_at": null, "excluded": true}
+ ]}

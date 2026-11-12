@@ -1,0 +1,24 @@
+ranking (expiring headroom = headroom% / hours-to-reset):
+  orribogdan@outlook.com       soon    wk  77% 5h   0% reset   0.5h head  20.0% score  40.00  START ok, cap 97.0% (soon)
+  orri@projectboki.com         mid     wk  71% 5h   0% reset  36.0h head  19.0% score   0.53  START ok, cap 90.0% (mid)
+  orribogdan@gmail.com         mid     wk  75% 5h   0% reset  72.0h head  15.0% score   0.21  START ok, cap 90.0% (mid)
+  bogdanorri@outlook.com       fresh   wk  17% 5h 100% reset 164.0h head   0.0% score   0.00  skip  5h hold 3.0h
+  orri@generalcreative.ai      unknown wk  95% 5h   0% reset ? head   0.0% score   0.00  skip  weekly 95% >= cap 90.0% (unknown)
+  corybogdan@gmail.com         unknown wk   0% 5h   0% reset ? head  90.0% score   0.00  skip  excluded (coordinator)
+would start now (6 slots): orribogdan@outlook.com x6
+
+usage-pacer daily: account  weekly  5h  to-reset  proj@reset  waste
+  orribogdan@outlook.com  77%  0%  0.5h  77%  23%
+  bogdanorri@outlook.com  17%  100%  164.0h  100% (early trend)  0%
+  orri@projectboki.com  71%  0%  36.0h  90%  10%
+  orribogdan@gmail.com  75%  0%  72.0h  100%  0%
+  orri@generalcreative.ai  95%  0%  ?  ?  ?
+  corybogdan@gmail.com (coord)  0%  0%  ?  ?  ?
+
+projected waste at reset, next 170h (demand 3.0%/h, 5h window 17.0%):
+  orribogdan@outlook.com       before 23%/23%    after 22%/3%
+  bogdanorri@outlook.com       before 0%         after 3%
+  orri@projectboki.com         before 10%        after 3%
+  orribogdan@gmail.com         before 0%         after 3%
+  orri@generalcreative.ai      before no reset   after no reset
+  total wasted %-points    before 55  after 34  (after: demand not served 76 %-points)
