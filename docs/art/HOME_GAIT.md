@@ -79,7 +79,9 @@ The Empty pats, feeds and cheers with its feet where they stand (HunterVerbs, `s
   feet 0.13 cm; the pick-up path keeps the Boki on the ground until the grip and hands over to the carry hold.
   `--clip-check` repeats the reach (shared `reach()`): the Empty's hand within 0.15 m of its target at the peak of
   pet, feed and lift, small and big. The strip: `--home-verbs-check --home-verbs-shots=<dir>` (glomwort, zapple;
-  columns pat, feed, lift, cheer, toss).
+  columns pat, feed, lift, cheer, toss), shot from the Boki's side (camera yaw -90°) so the fold over it faces the
+  camera, not the cloak's back or Hob. [`home_gait/verbs_sw.jpg`](home_gait/verbs_sw.jpg) is the software-GL take
+  (llvmpipe under Xvfb; the GPU take is jobq 20261112-011142-01599, queued behind the GPU backlog).
 
 ## Left open
 - Crouch-walking adds HunterAnim's knee bend after the solve, so a crouched walk slides a little (DEBT).

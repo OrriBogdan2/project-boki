@@ -33,6 +33,8 @@ func run(main: Node, dir: String) -> void:
 	home.talk_cd = 1.0e9
 	home.cam.zoom_to = 0.55
 	home.cam.zoom = 0.55
+	home.cam.yaw = -PI * 0.5      # from the Boki's side: a front three-quarter, the reach not behind the cloak or Hob
+	home.cam.yaw_to = -PI * 0.5
 	if main.fade: main.fade.reveal(0.05)
 	await main.get_tree().create_timer(1.0).timeout
 	var strip := Image.create(CROP.x * PEAK.size(), CROP.y * BOKI.size(), false, Image.FORMAT_RGBA8)
