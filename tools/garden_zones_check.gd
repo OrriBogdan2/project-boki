@@ -8,8 +8,8 @@ extends RefCounted
 ## unminded egg in the Nook, a Boki with the Ember knack comes to the hub to mind it. Hub fixtures
 ## (step 3): each one stands and works, the games board shows this week's Dash twist and has the
 ## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. One set: Bramblebank
-## builds none of the hub's house, Nook, Incubator, stall or Burrow (not even an older layout's) and a plain goto
-## lands in the hub once the first day's tutorial is done or skipped. Moving
+## builds none of the hub's house, Nook, Incubator, stall or Burrow (not an older layout's, not a classic
+## island's) and a plain goto lands in the hub once the first day's tutorial is done or skipped. Moving
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
@@ -122,7 +122,14 @@ func _one_set_part(m: Node) -> void:
 	ok(bb != null and HomeLayout.fs(Save.d), "a new save's Bramblebank loads")
 	if bb != null:
 		_start_zone_part(bb, old)
+	_new_save()
+	ok(not HomeLayout.fs(Save.d), "a classic island (a save from before the farm-start update)")
+	Game.goto("home", {"zone": GardenZones.start()})
+	bb = await _arrived(m, bb)
+	ok(bb != null and bb.house_node == null and bb.burrow_node == null and bb.spots["house"].x < -100.0
+		and bb.spots["stall"].x < -100.0 and bb.NEST_AT.x < -100.0, "a classic island builds none of them either")
 	Content.rules("farm_build")["base_mode"] = false
+	ok(not ClassicSet.held(bb), "with the garden off a classic island keeps its own")
 
 func _start_zone_part(bb, old: Array) -> void:
 	ok(old.all(func(e): return (Save.d["layout"]["deco"] as Array).has(e)), "an older layout keeps its entries")
