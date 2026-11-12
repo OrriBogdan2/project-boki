@@ -43,6 +43,7 @@ var ver := 0
 var mesh_t := -1.0
 var grid_t := 0.0
 var _reach_cache := {}
+var trapped := ""                       # who the last refused keeps_paths would have shut in
 var _fence_sig := ""
 var _water_sig := ""
 static var pending_toast := ""
@@ -791,7 +792,7 @@ func _reach(free_cells: Array, solid_cells: Array) -> PackedByteArray:
 	var shut := {}
 	for c in solid_cells: shut[w.idx(c.x, c.y)] = true
 	var seen := PackedByteArray(); seen.resize(n)
-	var dp: Vector3 = h._house_door()
+	var dp: Vector3 = PlaceClearance.start(h)
 	var s := w.idx(int(floor(dp.x)), int(floor(dp.z)))
 	var q: Array = [s]
 	seen[s] = 1
@@ -848,6 +849,9 @@ func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Ve
 		base = _reach(free_cells, [])
 		_reach_cache[ck] = base
 	var after := _reach(free_cells, solid_cells)
+	trapped = PlaceClearance.trapped(self, base, after)
+	if trapped != "":
+		return false
 	for t in _targets(skip_b):
 		if _hit(base, t) and not _hit(after, t):
 			return false
@@ -903,7 +907,7 @@ func fits(item: Dictionary, at: Array) -> bool:
 				return false
 	if solid or door != Vector3.INF:
 		if not keeps_paths(free_cells, at if solid else [], skip_b, door):
-			why = "That would cut off a door or a path"
+			why = PlaceClearance.why(trapped)
 			return false
 	return true
 
@@ -1307,7 +1311,7 @@ func _check_cells() -> void:
 		why = "" if ghost_ok else "Can't paint here"
 		if c["brush"] == "wild" and not ghost_ok: why = "Nothing wild to clear here"
 		if ghost_ok and c["brush"] == "water" and not keeps_paths([], good):
-			ghost_ok = false; why = "That would cut off a door or a path"
+			ghost_ok = false; why = PlaceClearance.why(trapped)
 		return
 	if held["kind"] == "deco" and c.has("line"):
 		var good: Array = []
@@ -1317,7 +1321,7 @@ func _check_cells() -> void:
 		ghost_ok = not good.is_empty()
 		why = "" if ghost_ok else cell_reason(cells[0])
 		if ghost_ok and not keeps_paths([], good):
-			ghost_ok = false; why = "That would cut off a door or a path"
+			ghost_ok = false; why = PlaceClearance.why(trapped)
 		return
 	if held["kind"] == "feeder":
 		ghost_ok = feeder_fits(cells[0], String(held["from"]))
@@ -1357,7 +1361,7 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		var f0: Dictionary = h.hecon._feeder(from)
 		if not f0.is_empty(): fc = [Vector2i(int(floor(float(f0["x"]))), int(floor(float(f0["z"]))))]
 	if not keeps_paths(fc, [t]):
-		why = "That would cut off a door or a path"; return false
+		why = PlaceClearance.why(trapped); return false
 	return true
 
 ## Holding a feeder to set down: a new one from storage (from = "") or one that's out (its id).

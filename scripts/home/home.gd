@@ -980,7 +980,9 @@ func _spawn_kin() -> void:
 		var isl: int = 0 if rec["uid"] == _d().get("active", "") else open_isles[ri % open_isles.size()]
 		ri += 1
 		add_kin(rec, isl, farm_kin.find(rec))
-	if hb and hb.astar: hb.assign_beds()
+	if hb and hb.astar:
+		hb.assign_beds()
+		PlaceClearance.free_trapped(self)
 
 ## One kin on the farm: its model, mood label and entry in kins, on island `isl`; `slot` (its place in the
 ## roster, -1 for none) picks its bed.
