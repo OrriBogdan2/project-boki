@@ -23,7 +23,8 @@ var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+## [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, sign of the way out]
+var arms: Array = []
 var foot := {}               # the last "footing" data (kept while it fades out)
 var foot_w := 0.0            # 0 sure footing .. 1 none
 

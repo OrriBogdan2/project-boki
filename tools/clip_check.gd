@@ -411,7 +411,8 @@ func _footing(id: String, dd: Dictionary) -> void:
 	var ice := await _run_gait(id, TerrainHazards.kind_def("ice")["moves"])
 	var legs := KMovesStone.gait(id) > 0.5      # (a hoverer's legs barely walk: no stride to shorten)
 	ok(not legs or float(ice["stride"]) < 0.9 * float(sure["stride"]),
-			"%s: on ice the stride is shorter (thigh swing %.2f rad, %.2f on sure ground)" % [id, ice["stride"], sure["stride"]])
+			"%s: on ice the stride is shorter (thigh swing %.2f rad, %.2f on sure ground)" % [
+			id, ice["stride"], sure["stride"]])
 	for side in (dd["loco"] as Dictionary).get("arm_swing", {}):
 		var gain := float(ice[side]) - float(sure[side])
 		ok(gain >= 0.1, "%s: on ice the free arm %s rides out (hand %.2f arm lengths further out)" % [id, side, gain])

@@ -28,6 +28,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too. Every Hero lists `wade` and `swim` (water, `HunterSwim`): no clip is keyed for them, so HunterAnim's wading high knees and
   swimming crawl (a flutter kick, a stroke in each hand the kit lets go of, the weapon held as on a run) play on the rig;
   `--clip-check` walks every Hero through a pond (`tools/pond_walk.gd`), `--pond-shots` films it.
+  In a match the same swim plays in a Deep Water area (HazardMoves, docs/decisions/0096-hazard-moves.md, sunk to the
+  shoulders), and on an Ice Sheet without footing the state `footing` (the ice kind's "moves") shortens the gait's stride,
+  quickens the clip and lifts the `arm_swing` arms out; `--clip-check` asserts both per Hero, `--hazard-moves-shots` shoots them.
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek

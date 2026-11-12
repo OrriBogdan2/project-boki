@@ -80,7 +80,8 @@ func _hazard_moves() -> void:
 		var theirs := [bool(got.get("swim", false)), bool(got.get("footing", false))]
 		var want := [kind == "deep_water", kind == "ice"]
 		var where := kind if kind != "" else "dry ground"
-		ok(mine == want, "hazard moves: the host's hunter on %s (swim, no footing) = %s" % [where, str(want)], str(mine))
+		ok(mine == want, "hazard moves: the host's hunter on %s (swim, no footing) = %s" % [where, str(want)],
+			str(mine))
 		ok(theirs == want, "hazard moves: the guest's copy on %s shows the same" % where, str(theirs))
 		var sunk := -float(got.get("sink", 0.0))
 		ok((sunk > 0.4) == (kind == "deep_water"), "hazard moves: the copy is sunk in only in deep water (%s)" % where,
