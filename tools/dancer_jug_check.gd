@@ -684,6 +684,7 @@ func juggernaut(a) -> void:
 			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
 	A.ok("juggernaut RMB: short cooldown (2s)",
 			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
+	_smash_drawn_is_hit(m, P, T, K, home)
 	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
 	# his plain runs (briefs/hero-ref/juggernaut.md, locomotion; docs/MOVEMENT_FEEL.md)
 	A.step(m, 1.0)
@@ -1365,3 +1366,77 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			% [what, col, got[0], AimShapes.SOFT_A, got[1]],
 			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
+
+## VFX_QUALITY 6: the crimson Smash telegraphs are the hit, read off the drawn entries (not the data): a foe whose
+## body just reaches into the drawn Slam cone (at its rim, at its tip) is hit and one just past it is not; a foe
+## just inside the drawn Lunge lane's side is hit, one just outside it is not, and the fling travels the drawn length.
+func _smash_drawn_is_hit(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home: Vector3) -> void:
+	var fwd := Vector3(1, 0, 0)
+	var side := Vector3(0, 0, 1)
+	var got := []
+	for probe in [["rim in", true], ["rim out", false], ["tip in", true], ["tip out", false]]:
+		A.step(m, 0.3)
+		P.teleport(home)
+		A.fresh(T)
+		T.teleport(home + Vector3(0, 0, 12))           # out of reach while the cone is read
+		A.aim_at(P, home + fwd * 3.0)
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		A.tap(m, P)
+		A.step(m, 0.1)
+		var e: Dictionary = AimKit.entry(P, "slam")
+		var l := float(e.get("len", 0.0))
+		var half := deg_to_rad(float(e.get("deg", 0.0))) * 0.5
+		var at := Vector3.ZERO
+		match probe[0]:
+			"rim in": at = (fwd.rotated(Vector3.UP, half - 0.03)) * l * 0.7
+			"rim out": at = (fwd.rotated(Vector3.UP, half + 0.06)) * l * 0.7
+			"tip in": at = fwd * (l + T.r - 0.1)
+			"tip out": at = fwd * (l + T.r + 0.2)
+		T.teleport(home + at)
+		A.step(m, 0.6)
+		got.append("%s %.0f" % [probe[0], A.dmg(T)])
+		var hit := A.dmg(T) > 0.0
+		var what := "%s (%.1f m, %.0f deg drawn)" % [probe[0], l, rad_to_deg(half * 2.0)]
+		A.ok("juggernaut RMB tap: drawn cone = hit, " + what,
+				K.last_variant == "tap" and l > 0.0 and hit == probe[1], ", ".join(got))
+	# the Lunge: charged to full, the drawn lane's half width (+ the foe's body, as for every edge) is the contact
+	for probe in [["side in", true], ["side out", false], ["length", false]]:
+		A.step(m, 0.5)
+		P.teleport(home)
+		A.fresh(T)
+		T.teleport(home + Vector3(0, 0, 12))
+		A.aim_at(P, home + fwd * 3.0)
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		P.inp["sec_hold"] = true
+		P.ak.press_rmb()
+		A.step(m, K.rmb_charge_full() + 0.5, func(): P.inp["sec_hold"] = true)   # full, between perfect windows
+		var e: Dictionary = AimKit.entry(P, "rmb")
+		var w := float(e.get("width", 0.0))
+		var l := float(e.get("len", 0.0))
+		if probe[0] == "side in":
+			T.teleport(home + fwd * 3.0 + side * (w * 0.5 + T.r - 0.1))
+		elif probe[0] == "side out":
+			T.teleport(home + fwd * 3.0 + side * (w * 0.5 + T.r + 0.15))
+		var from := P.pos
+		P.inp["sec_hold"] = false
+		m.step(A.DT)
+		var flung := 0.0              # where the fling's own travel ends (the slide after it is the run's brake)
+		for i in 90:
+			if K.lunge.is_empty() and flung > 0.0:
+				break
+			if not K.lunge.is_empty():
+				flung = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+			m.step(A.DT)
+		A.step(m, 1.0)
+		var moved := flung
+		if probe[0] == "length":
+			A.ok("juggernaut RMB hold: the fling travels the drawn lane (%.2f m drawn, %.2f m flung)" % [l, moved],
+					l > 0.0 and absf(moved - l) <= 0.25, "")
+		else:
+			A.ok("juggernaut RMB hold: drawn lane = hit, %s (%.2f m drawn wide)" % [probe[0], w],
+					w > 0.0 and (A.dmg(T) > 0.0) == probe[1], "took %.0f" % A.dmg(T))
+	A.step(m, 0.5)
+	P.teleport(home)
+	A.fresh(T)
