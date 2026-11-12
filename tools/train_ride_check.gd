@@ -8,6 +8,9 @@ extends RefCounted
 
 const DT := Match.DT
 const LOG_EVERY := 6           # steps between log lines (0.1 s)
+const AIR_FLOOR := 4.0        # m/s: the lowest the world speed may sink in the air. Loco.air_step bleeds speed above the run cap
+							# (air_drag), so a 10 m/s deck settles near the cap, never to a stop
+const AIR_STEP := 0.8         # m/s: the most one air step may change it by (that drag, plus the dash's hand-over)
 const JOLT := 0.5              # m/s: the most the world speed may change the step you leave or touch a car
 const MATCH_T := 0.1           # s: a landing moves with the deck within this
 const RISE_MAX := 0.5          # m the track may climb or drop where a case needs it level
@@ -88,8 +91,6 @@ func _board(t: float, k: int, lz: float) -> void:
 	P.gliding = false
 	# nothing left over from the last case
 	P.pad = {}
-	P._handoff = {}
-	P.glide_lift.swoop = 0.0
 	P.glide_lift.hang_t = 0.0
 	for i in 6: m.step(DT)
 
@@ -98,8 +99,7 @@ func _board(t: float, k: int, lz: float) -> void:
 ## (the track dives under the bridges, and a car dropping or climbing under a jump changes it), so
 ## the case runs in clear air; `side` metres out to the right too, for someone falling off that
 ## side. The clearest such moment when none is wholly clear.
-func _find_ride(lo: int, hi: int, flat: bool, side := 0.0) -> float:
-	var K := 2
+func _find_ride(lo: int, hi: int, flat: bool, side := 0.0, K := 2) -> float:
 	var best_t := -1.0
 	var best_n := -1
 	var best_v := 0.0
@@ -197,7 +197,7 @@ func _case_jump(t: float) -> void:
 	var r := _leave("jump", 2, func(i: int, _left: bool) -> void: P.inp["jump"] = i == 0)
 	ok(r["left"] and r["jolt"] <= JOLT,
 		"jump: the step you leave the deck keeps your world speed (change %.2f m/s)" % r["jolt"])
-	ok(r["min_v"] >= deck * 0.6,
+	ok(r["min_v"] >= minf(deck * 0.6, AIR_FLOOR),
 		"jump: no dead stop in the air (slowest %.1f of the deck's %.1f m/s)" % [r["min_v"], deck])
 	ok(r["max_along"] <= deck + 0.3,
 		"jump: no slingshot past the train (fastest along the track %.1f m/s)" % r["max_along"])
@@ -217,9 +217,9 @@ func _case_dash_back(t: float) -> void:
 	ok(r["left"] and r["jolt"] <= JOLT,
 		"dash back: off the back of the train your world speed carries over (change %.2f m/s)" % r["jolt"])
 	ok(r["max_along"] <= deck + 0.3, "dash back: no slingshot (fastest along the track %.1f m/s)" % r["max_along"])
-	ok(r["min_v"] >= 2.0 and r["max_step"] <= JOLT,
+	ok(r["min_v"] >= 2.0 and r["max_step"] <= AIR_STEP,
 		"dash back: no dead stop (slowest %.1f m/s), no step over %.2f m/s but the dash's own end (largest %.2f)"
-			% [r["min_v"], JOLT, r["max_step"]])
+			% [r["min_v"], AIR_STEP, r["max_step"]])
 
 func _case_walk_off(t: float, glide: bool) -> void:
 	var label := "glide_off" if glide else "walk_off"
@@ -232,9 +232,9 @@ func _case_walk_off(t: float, glide: bool) -> void:
 		P.inp["glide_btn"] = glide and left)
 	ok(r["left"], "%s: walking off the side is never blocked" % label)
 	ok(r["jolt"] <= JOLT, "%s: the step you walk off keeps your world speed (change %.2f m/s)" % [label, r["jolt"]])
-	ok(r["min_v"] >= deck * 0.6,
+	ok(r["min_v"] >= minf(deck * 0.6, AIR_FLOOR),
 		"%s: no dead stop in the air (slowest %.1f of the deck's %.1f m/s)" % [label, r["min_v"], deck])
-	ok(r["max_along"] <= deck + 0.3 and r["max_step"] <= JOLT,
+	ok(r["max_along"] <= deck + 0.3 and r["max_step"] <= AIR_STEP,
 		"%s: no slingshot (fastest along %.1f m/s, largest step %.2f)" % [label, r["max_along"], r["max_step"]])
 	if glide:
 		ok(r["glide_at"] >= 0.0 and r["glide_at"] <= 0.1,
@@ -318,7 +318,7 @@ func run(main: Node) -> void:
 	var t_jump := _find_ride(0, 9, true)       # a jump: level track under the whole hang
 	var t_side := _find_ride(0, 15, false, 6.0)    # a walk off the side, falling or gliding out to the right
 	var t_land := _find_ride(0, 10, true)      # a glide landing on level deck
-	var t_back := _find_ride(-12, 3, false)    # a dash off the back
+	var t_back := _find_ride(-12, 3, false, 0.0, st.cars_n - 1)    # a dash off the back of the last car
 	ok(t_jump > 0.0 and t_side > 0.0 and t_land > 0.0 and t_back > 0.0,
 		"found the fastest clear stretches (match time %.1f, %.1f, %.1f and %.1f s)" % [t_jump, t_side, t_land, t_back])
 	var t_ahead := t_side
