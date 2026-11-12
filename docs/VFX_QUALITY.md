@@ -148,7 +148,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Hunter | arch | before | R | S | L | T | Sc | C | Snd | after | weakest ability left |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
-| Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
+| Tenzo | dolm | 14 | 4 | 4 | 4 | 3 | 4 | 4 | 3 | **26** | (11-12, ext/vfx-tenzo-punch-hold) hold: from above the full-charge halo is a big pale blob that half-covers him |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
 | Grimble | dredge | 16 | 4 | 4 | 4 | 3 | 3 | 4 | 3 | **25** | E / RMB wedges: flat pale sectors with no leading edge; slugs small at match zoom |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
@@ -173,7 +173,10 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
 2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
 3. Vex LMB and hold: a wider, brighter tracer at match zoom.
-4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
+4. ~~Tenzo LMB and hold~~ (ext/vfx-tenzo-punch-hold): a cobalt charge on the gauntlet that grows, gathers basalt chips
+   circling tighter and throbs at full; the hit is chips, dust and stone thrown along the lane, sized to the lane
+   (0.55 of it from the shortest hold), no ground ring. Re-scored 23 -> 26 from
+   `docs/shots/vfx-tenzo-punch-hold/hold_before_after_xvfb.jpg` (xvfb opengl3; GPU jobq reels queued).
 5. Albert: ivory swing arcs for LMB/RMB.
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
