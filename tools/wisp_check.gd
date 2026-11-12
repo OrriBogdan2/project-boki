@@ -1,7 +1,8 @@
 extends RefCounted
 ## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
-## a bot teammate and the tutorial: down a hero, it is hit and falls to the floor on its death clip (on screen,
-## FALL_T), then the Wisp puffs out and the hero model hides, the Wisp trails when it moves, a revive grows the
+## a bot teammate and the tutorial: down a hero, it plays the knocked-down beat (on screen for its weight's
+## HunterWisp.BEAT time: staggered along the hit's push on its hit clip, down on a knee, its death clip to the
+## floor, then fading while the Wisp rises out of it; downed from the first frame), then the hero model hides, the Wisp trails when it moves, a revive grows the
 ## hero back as it stands up (the fall backwards) and frees the Wisp, a revive before the puff only stands it up,
 ## and a bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
 ## look data: every look has all its keys and real sounds, an unknown id gives the default Wisp, a look
@@ -28,6 +29,7 @@ func run(main_node: Node) -> void:
 	_spot = m.player.pos
 	for a in Arch.ids():
 		_hero_cycle(a)
+	_weights()
 	_revive_mid_fall()
 	_bleed_out()
 	_teammate()
@@ -96,12 +98,14 @@ func _hero_cycle(arch_id: String) -> void:
 	ok(p.model.visible and HunterWisp.node_of(p) == null, tag + "up: the hero shows, no Wisp")
 	var base: Vector3 = p.model.scale
 	var stand := _head_y(p) if _clips(p) else 0.0
+	p.hit_from = Vector2(1, 0)      # (as Oomph.react leaves it for a hit from the -x side)
 	m.knock(p, foe, {})
 	p.down_hp = 1e6
+	ok(p.downed and not p.out, tag + "downed from the knock's frame (the beat is only how it looks)")
 	_fall(p, tag, stand)
 	var wisp := HunterWisp.node_of(p)
 	var spawned: bool = wisp != null and wisp.is_inside_tree() and wisp.get_parent() == p
-	ok(p.downed and spawned, tag + "downed: a Wisp puffs out on the hunter")
+	ok(p.downed and spawned, tag + "downed: the Wisp stands in on the hunter")
 	ok(not p.model.visible, tag + "downed: the hero model is hidden")
 	_frames(0.3)
 	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
@@ -124,31 +128,73 @@ func _hero_cycle(arch_id: String) -> void:
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
 	ok(p.model.scale.is_equal_approx(base), tag + "the hero is back at full size")
 
-## The hit and fall: for FALL_T the hero stays on screen with no Wisp, its death clip running forward, and ends on
-## the floor; then the puff. A Hero with no clips (Gil) puffs at once.
+## The knocked-down beat: for its weight's BEAT time the hero stays on screen, staggered along the push on its hit
+## clip, down on a knee, then its death clip to the floor; the Wisp rises out of the body before the hero hides, and
+## the body fades as it does. A Hero with no clips (Gil) puffs at once.
 func _fall(p: Hunter, tag: String, stand: float) -> void:
 	var clips := _clips(p)
-	var dead := String(clips.d["states"]["dead"]) if clips else ""
+	var seen: Array = []      # the clips of the fall, in order
 	var t := 0.0
 	var last := 0.0
 	var shown := true
 	var forward := true
+	var slid := 0.0
+	var rise: Array = []      # the Wisp's height each frame it shows with the hero
+	var fade := 0.0
+	var skin := p.model.find_children("*", "GeometryInstance3D", true, false)
 	while t < 1.0:
 		_frames(DT)
 		t += DT
-		if HunterWisp.node_of(p) != null:
+		if HunterWisp.hides(p):
 			break
 		shown = shown and p.model.visible
-		forward = forward and HunterWisp.fall_k(p) >= last and clips != null and clips.cur == dead
+		forward = forward and HunterWisp.fall_k(p) >= last
 		last = HunterWisp.fall_k(p)
+		if clips and (seen.is_empty() or seen[-1] != clips.cur):
+			seen.append(clips.cur)
+		slid = maxf(slid, p.model.position.x)
+		if HunterWisp.node_of(p):
+			rise.append(HunterWisp.node_of(p).position.y)
+		fade = (skin[0] as GeometryInstance3D).transparency if not skin.is_empty() else 0.0
 	if clips == null:
 		ok(t <= DT * 1.5, tag + "no clips: it puffs at once (%.2f s)" % t)
 		return
-	var timed := absf(t - HunterWisp.FALL_T) <= DT * 3.0
-	ok(timed and shown, tag + "the hero falls for %.2f s, on screen, before the puff" % t)
-	ok(forward, tag + "...playing its death clip (%s) forward" % dead)
+	var beat: Dictionary = HunterWisp.BEAT[p.cls]
+	var timed := absf(t - float(beat["t"])) <= DT * 3.0
+	ok(timed and shown and forward, tag + "the %s beat: on screen %.2f s (want %.2f) before the hero hides" % [p.cls, t, beat["t"]])
+	var sd: Dictionary = clips.d["states"]
+	var hit: Array = [sd["hit"]["front"], sd["hit"]["back"]]
+	var staged: bool = seen.size() == 3 and seen[0] in hit and seen[1] == sd["reviving"] and seen[2] == sd["dead"]
+	ok(staged, tag + "...staggers on its hit clip, kneels, then its death clip: %s" % str(seen))
+	ok(slid >= float(beat["slide"]) * 0.95, tag + "...carried %.2f m along the hit's push (want %.2f)" % [slid, beat["slide"]])
+	var up: bool = rise.size() >= 3 and rise[0] < rise[-1] and float(rise[0]) < 0.5
+	ok(up, tag + "...the Wisp rises out of the body before it hides (%d frames, %s m)" % [rise.size(),
+		"%.2f -> %.2f" % [rise[0], rise[-1]] if not rise.is_empty() else "-"])
+	ok(fade > 0.8, tag + "...the body fading as it does (%.2f see-through at the hand-off)" % fade)
 	var low := _head_y(p) / stand
-	ok(low < 0.55, tag + "...to the floor: the head at %.2f of its standing height at the puff" % low)
+	ok(low < 0.55, tag + "...to the floor: the head at %.2f of its standing height at the hand-off" % low)
+
+## Heavy falls heavier, light crumples: the longer beat and the collapse gathering speed (behind a straight line
+## half-way through it) for a heavy Hunter; the shorter beat and the collapse ahead of the line for a light one.
+func _weights() -> void:
+	var p: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	var mid := (HunterWisp.KNEE_K + HunterWisp.FLOOR_K) * 0.5
+	var at := {}
+	for a in ["thief", "bulwark"]:
+		p.reclass(Arch.weight(a), a)
+		p.hp = p.max_hp
+		_frames(0.1)
+		m.knock(p, foe, {})
+		var beat: Dictionary = HunterWisp.BEAT[p.cls]
+		_frames(mid * float(beat["t"]) - DT * 0.5)
+		at[p.cls] = HunterWisp.fall_k(p)
+		m.revive_hunter(p, null)
+		_frames(0.8)
+	var heavy := float(at.get("heavy", 1.0))
+	var light := float(at.get("light", 0.0))
+	ok(heavy < mid - 0.02 and light > mid + 0.02, "the collapse half-way: heavy %.2f gathering, light %.2f crumpling (line %.2f)" % [heavy, light, mid])
+	ok(float(HunterWisp.BEAT["heavy"]["t"]) > float(HunterWisp.BEAT["light"]["t"]), "a heavy beat lasts longer than a light one")
 
 ## The rise: on screen from the first frame, the hero stands up off the floor (the death clip running back) and is
 ## up when the pop-out ends.
@@ -159,14 +205,21 @@ func _rise(p: Hunter, tag: String, stand: float) -> void:
 	var t := 0.0
 	while HunterWisp.mode_of(p) == HunterWisp.OUT and t < 1.0:
 		var k := HunterWisp.fall_k(p)
-		back = back and k <= last and p.model.visible and (clips == null or clips.cur == clips.d["states"]["dead"])
+		back = back and k <= last and p.model.visible and (clips == null or clips.cur in _fall_clips(clips))
 		last = k
 		_frames(DT)
 		t += DT
 	ok(back and HunterWisp.fall_k(p) < 0.0, tag + "the rise plays the fall backwards over %.2f s, then it clears" % t)
+	ok(Vector2(p.model.position.x, p.model.position.z).length() < 0.01, tag + "...back over the hunter, the stagger undone")
+	var skin := p.model.find_children("*", "GeometryInstance3D", true, false)
+	ok(skin.all(func(g): return (g as GeometryInstance3D).transparency == 0.0), tag + "...and solid again")
 	if clips:
 		var up := _head_y(p) / stand
 		ok(up > 0.85, tag + "...and stands it up: the head at %.2f of its standing height" % up)
+
+func _fall_clips(clips: WardenClips) -> Array:
+	var sd: Dictionary = clips.d["states"]
+	return [sd["dead"], sd["reviving"], sd["hit"]["front"], sd["hit"]["back"]]
 
 ## Revived before the puff (a beacon, a remote's flag clearing): no Wisp ever shows, the hero never shrinks, and it
 ## gets up from where its fall had got to.
@@ -213,7 +266,7 @@ func _teammate() -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	m.knock(mate, foe, {})
-	_frames(0.5)
+	_frames(0.7)      # (past the longest knocked-down beat, HunterWisp.BEAT heavy 0.48 s)
 	ok(HunterWisp.node_of(mate) != null and not mate.model.visible, "a teammate's downed state shows their Wisp")
 	var teammates_downed: bool = mate.downed
 	m.revive_hunter(mate, null)

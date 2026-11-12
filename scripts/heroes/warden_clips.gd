@@ -24,7 +24,8 @@ const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FLOOR_T := "clip_floor_t"   # root meta: s into the death clip where a downed Hero lies (0: no fall to a Wisp)
-const FALL_FADE := 0.05      # s: into the fall to a Wisp and the rise back (quick: the knock is a hit)
+const FALL_FADE := 0.05      # s: into the fall to a Wisp, between its clips, and the rise back (quick: the knock is a hit)
+const DEATH_FROM := 0.5      # of floor_t: where the death clip takes the fall over from the kneel (the body going down)
 const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides it)
@@ -406,8 +407,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
 	var fall := float(s.get("wisp_fall", -1.0))
-	if fall >= 0.0 and st.has("floor_t"):      # downed (HunterWisp): the death clip to the floor, the rise runs it back
-		return {"clip": st["dead"], "t": fall * float(st["floor_t"]), "fade": FALL_FADE}
+	if fall >= 0.0 and st.has("floor_t"):      # downed (HunterWisp): the fall to the floor, the rise runs it back
+		return _fall_pick(fall, st, s)
 	var xt := float(s.get("extract_t", -1.0))
 	if xt >= 0.0:
 		return _extract_pick(xt)
@@ -480,13 +481,32 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	if hit < float(hd.get("dur", 0.0)):
-		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
-		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
 		var running := moving or not bool(s.get("grounded", true))
 		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
+		return {"clip": _hit_clip(hd, s), "t": hit, "flinch": running and not heavy}
 	return {}
+
+## The hit clip for the side the last hit came from.
+static func _hit_clip(hd: Dictionary, s: Dictionary) -> String:
+	var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
+	var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
+	return String(hd["front" if dir.dot(fw) >= 0.0 else "back"])
+
+## The knocked-down beat from HunterWisp.fall_k: staggered by the hit (its hit clip, played through), down on a knee
+## (the kneel), then the death clip's tail to the floor; the rise runs it back. A Hero missing the hit or kneel clip
+## plays its death clip to the floor over the whole fall.
+func _fall_pick(fall: float, st: Dictionary, s: Dictionary) -> Dictionary:
+	var hd: Dictionary = st.get("hit", {})
+	var floor_t := float(st["floor_t"])
+	if not hd.has("dur") or not st.has("reviving"):
+		return {"clip": st["dead"], "t": minf(fall / HunterWisp.FLOOR_K, 1.0) * floor_t, "fade": FALL_FADE}
+	if fall < HunterWisp.STAGGER_K:
+		return {"clip": _hit_clip(hd, s), "t": fall / HunterWisp.STAGGER_K * float(hd["dur"]), "fade": FALL_FADE}
+	if fall < HunterWisp.KNEE_K:
+		return {"clip": st["reviving"], "t": 0.0, "fade": FALL_FADE}
+	var u := minf((fall - HunterWisp.KNEE_K) / (HunterWisp.FLOOR_K - HunterWisp.KNEE_K), 1.0)
+	return {"clip": st["dead"], "t": lerpf(DEATH_FROM, 1.0, u) * floor_t, "fade": FALL_FADE}
 
 ## A keyed move's clip and time ({} once a move that does not hold has played out, or an air-started move is over).
 ## "ground_clip" / "air_clip": the clip when the move starts on the ground / in the air

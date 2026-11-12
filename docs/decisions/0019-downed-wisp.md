@@ -17,11 +17,16 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
-- Going down (2026-11-11, ext/anim-downed's fall merged with the round Wisp): the hero is hit and falls to
-  the floor first, 0.3 s (`HunterWisp.FALL_T`; the source shows the wisp ~0.4 s after the knock), playing its
-  own death clip up to `states.floor_t` in `content/rules/warden_anim/<art>.json` (where the body lies still),
-  fed to the clips as the state `wisp_fall`. Then the puff (0.25 s): flash, ring, burst, sound; the hero hides
-  and the Wisp swells out. A Hero with no clips (Gil, a procedural model) puffs at once. Revive (0.3 s): the
+- Going down (2026-11-12, ext/anim-downed-fall on ext/anim-downed-wisp): a knocked-down beat before the Wisp
+  takes over, by the Hunter's weight (`HunterWisp.BEAT`: light 0.4 s, medium 0.44, heavy 0.48, plus a frame or two of hand-off; the source shows
+  the wisp ~0.4 s after the knock). The hero staggers along the last hit's push (`Hunter.hit_from`, kept by
+  Oomph.react on every game; light 0.45 m, heavy 0.22) on its hit clip, drops to a knee (its kneel clip,
+  `states.reviving`), then the tail of its death clip takes it to the floor (`states.floor_t` in
+  `content/rules/warden_anim/<art>.json`, where the body lies still): a heavy collapse gathers speed and slams
+  (more dust), a light one crumples at once. The phase is fed to the clips as the state `wisp_fall`. From 0.65
+  of the beat the Wisp rises out of the body (small, with the flash, ring and sound) while the hero fades
+  (`GeometryInstance3D.transparency`), then the hero hides and the Wisp swells to full size. Only the look
+  waits: the hunter is downed, revivable and hittable from the knock's frame. A Hero with no clips (Gil, a procedural model) puffs at once. Revive (0.3 s): the
   Wisp brightens and fades while the hero grows from 0.6 to full with a small squash and stands up, the fall
   played backwards (from where it got to, if the revive beat the puff). Death or a bleed-out snuffs the Wisp
   with a spark burst. It all follows `downed`/`out`, so remotes play it with no Net change.

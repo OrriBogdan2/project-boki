@@ -17,7 +17,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const STRIP_DT := 0.05     # s between strip frames
-const FALL_CELLS := 13     # the knock to +0.6 s: the fall (the puff at HunterWisp.FALL_T) and the pop-in
+const FALL_CELLS := 13     # the knock to +0.6 s: the beat (HunterWisp.BEAT, up to 0.5 s) and the pop-in
 const RISE_CELLS := 11     # the revive to +0.5 s: the rise and the hero settling
 const CELL := 240          # px: a strip frame in the sheet
 const CROP := 0.5          # of the screen height: the square cropped round the hero for a strip frame
@@ -57,9 +57,9 @@ func _review() -> void:
 	m.knock(P, foe, {})
 	P.down_hp = 1e6
 	await _go(0.15)
-	_take("wisp_1_fall", "The hit and fall: the hero going down on its death clip, still on screen")
-	await _go(0.23)
-	_take("wisp_2_puff", "The puff: the hero gone, ring and burst, the Wisp swelling out where it lay")
+	_take("wisp_1_fall", "The knocked-down beat: the hero staggered by the hit, going down to a knee, on screen")
+	await _go(0.4)
+	_take("wisp_2_puff", "The hand-off: the hero faded and gone, the Wisp risen out of it and swelling")
 	await _go(0.5)
 	_take("wisp_3_idle", "The Wisp idling low: round outline, team rim, white core, steady glow, the hero hidden")
 	await _go(0.5, Vector3(0.05, 0, 0.03))
@@ -88,6 +88,7 @@ func _strip(id: String) -> void:
 	await _go(0.6)
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	var sheet := Image.create(CELL * FALL_CELLS, CELL * 2, false, Image.FORMAT_RGB8)
+	P.hit_from = Vector2(1, 0)      # (a hit from the screen's left, as Oomph.react leaves it: the stagger reads across)
 	m.knock(P, foe, {})
 	P.down_hp = 1e6
 	for i in FALL_CELLS:
@@ -100,8 +101,8 @@ func _strip(id: String) -> void:
 		await _go(STRIP_DT)
 	var file := "strip_%s.jpg" % id
 	sheet.save_jpg(dir.path_join(file), 0.9)
-	var rows := "top, the knock to +%.2f s (the puff at +%.2f s); bottom, the revive to +%.2f s" % [
-			STRIP_DT * (FALL_CELLS - 1), HunterWisp.FALL_T, STRIP_DT * (RISE_CELLS - 1)]
+	var rows := "top, the knock to +%.2f s (the %s beat, the Wisp takes over at +%.2f s); bottom, the revive to +%.2f s" % [
+			STRIP_DT * (FALL_CELLS - 1), P.cls, HunterWisp.BEAT[P.cls]["t"], STRIP_DT * (RISE_CELLS - 1)]
 	lines.append("%s: %s, every %.2f s: %s" % [file, id, STRIP_DT, rows])
 
 ## The frame on screen now, cropped round the hero's middle (through the model: it leans to the camera), into the

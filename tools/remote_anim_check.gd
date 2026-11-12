@@ -4,7 +4,10 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## id and HunterAnim's), compared per cast. Then the knocked-down beat (HunterWisp): the host's hunter is hit and
+## knocked, once per weight, and the guest's copy must play the same beat off the existing knock event and snapshots
+## (no Net change): in within LAG_TOL, as long as the host's, carried along a push, the Wisp risen before the hand-off.
+## --remote-anim-check=downed runs the beat only. Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -12,6 +15,8 @@ const SKEW := 0.05           # s: clocks of two processes on one machine
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
+const DOWNED := ["thief", "gunslinger", "bulwark"]      # one Hunter per weight for the knocked-down beat
+const BEAT_TOL := 0.1        # s: the guest's beat against the host's (a frame or two of each game, the snapshot's step)
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
 
@@ -27,6 +32,9 @@ var last_row := ["?", "?"]
 var last_prev_t := 0.0
 var unlike := {}             # arch -> casts whose copy differs
 var played := {}             # arch -> casts that played any move
+## The knocked-down beat as this game showed it: unix ms "in" and "out" of the fall, the mode it went on to, the
+## widest stagger slide (m), "rose" if the Wisp came out during it.
+var beat := {}
 
 func _init() -> void:
 	tag = "RANIM"
@@ -40,6 +48,10 @@ func run(main_node: Node) -> void:
 func _host() -> void:
 	var G := await _host_up()
 	if G == null:
+		return _finish()
+	for arch in DOWNED:
+		await _downed(G, arch)
+	if "--remote-anim-check=downed" in OS.get_cmdline_user_args():
 		return _finish()
 	for arch in ARCHS:
 		for key in KEYS:
@@ -87,6 +99,45 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 		bad += 1
 	n += 1
 	print("%s %s  %d moves, worst lag %.2f s" % [tag, what, cmp["moves"], cmp["lag"]])
+
+## Knocked on the host: the beat on both games, compared.
+func _downed(G: Hunter, arch: String) -> void:
+	var P := m.player
+	P.reclass(Arch.weight(arch), arch)
+	P.hp = P.max_hp
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "kit", "arch": arch})
+	await _reply()
+	await _run(0.3)
+	beat = {}
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.2)
+	m.knock(P, G, {})
+	P.down_hp = 1e6
+	await _run(1.0)
+	var mine := beat.duplicate()
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Dictionary = replies[0].get("beat", {}) if not replies.is_empty() else {}
+	m.revive_hunter(P, null)
+	await _run(0.8)
+	var want := float(HunterWisp.BEAT[P.cls]["t"])
+	var info := "host %s, guest %s" % [str(mine), str(theirs)]
+	var whole := func(b: Dictionary) -> bool: return b.has("in") and b.has("out")
+	ok(whole.call(mine) and whole.call(theirs), "%s down: both games play the beat" % arch, info)
+	if not (whole.call(mine) and whole.call(theirs)):
+		return
+	var host_t := (float(mine["out"]) - float(mine["in"])) / 1000.0
+	var guest_t := (float(theirs["out"]) - float(theirs["in"])) / 1000.0
+	var lag := (float(theirs["in"]) - float(mine["in"])) / 1000.0
+	ok(absf(host_t - want) <= BEAT_TOL, "%s down: the host's %s beat lasts %.2f s (want %.2f)" % [arch, P.cls, host_t, want])
+	ok(lag <= LAG_TOL + SKEW and absf(guest_t - host_t) <= BEAT_TOL,
+		"%s down: the guest's copy plays it %.2f s later for %.2f s" % [arch, lag, guest_t], info)
+	var slide := float(HunterWisp.BEAT[P.cls]["slide"])
+	ok(float(theirs.get("slide", 0.0)) >= slide * 0.95 and theirs.get("rose", false) and theirs.get("mode", "") == HunterWisp.IN,
+		"%s down: on the guest it staggers %.2f m (want %.2f), the Wisp rises out, then takes over" % [
+		arch, float(theirs.get("slide", 0.0)), slide], info)
 
 ## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
 func _press(key: String, held: bool) -> void:
@@ -152,8 +203,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 			"mark":
 				log_rows.clear()
 				last_row = ["?", "?"]
+				beat = {}
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "beat": beat})
 		return
 	super._on_msg(topic, data, from)
 
@@ -171,6 +223,7 @@ func _sample() -> void:
 		return
 	var H := _copy()
 	H.render(DT, 1.0)      # (Match's own render pass is off in the checks)
+	_note_beat(H)
 	if H.ak == null or H.anim == null:
 		return
 	var row := [H.ak.anim_id, H.anim.km_id]
@@ -179,3 +232,18 @@ func _sample() -> void:
 	if row != last_row or restart:
 		last_row = row
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+
+## The knocked-down beat as this game shows it (see beat).
+func _note_beat(H: Hunter) -> void:
+	var mode := HunterWisp.mode_of(H)
+	var now := int(Time.get_unix_time_from_system() * 1000.0)
+	if mode == HunterWisp.FALL:
+		if not beat.has("in"):
+			beat["in"] = now
+		var off := Vector2(H.model.position.x, H.model.position.z).length() if H.model else 0.0
+		beat["slide"] = maxf(float(beat.get("slide", 0.0)), off)
+		if HunterWisp.node_of(H):
+			beat["rose"] = true
+	elif beat.has("in") and not beat.has("out"):
+		beat["out"] = now
+		beat["mode"] = mode
