@@ -46,8 +46,8 @@ func running() -> bool:
 ## Flue Flight: ONLY E (Heat Shield) and X (land early) work; the flight's own steering and a jump stay. Every
 ## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
-## gear, the Boki's C and a throw. A press answers with the soft "can't" tick.
-const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+## gear, the Boki's C, a throw and the Merge key. A press answers with the soft "can't" tick.
+const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw", "ult"]
 const SLOT_OF := {"gear1": "gear0", "gear2": "gear1"}      # input -> the HUD slot its deny pulses
 
 func lock_inputs() -> void:
@@ -65,6 +65,14 @@ func lock_inputs() -> void:
 		k.rmb_down = false           # a hold carried in: its release must not fire
 		k.aiming = false
 		AimKit.hide(h, "rmb")
+
+## G's tap (Sic, call back) is queued outside h.inp, so KinCommand.tap asks the kit: in the flight it is swallowed.
+func swallow_kin_tap() -> bool:
+	if not running():
+		return false
+	locked += 1
+	h._ab_feedback("throw", "deny")
+	return true
 
 ## Lift-off: an ember ring at his feet, the jet roars, the flight starts toward the cursor.
 func start() -> bool:
