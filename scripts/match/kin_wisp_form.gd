@@ -27,6 +27,8 @@ const SIZE := 1.5            # the Boki wisp's scale in a match (BokiWispLook bu
 ## A Boki of a downed Hunter that should be riding as their wisp but is not yet.
 static func wants(k: Kin) -> bool:
 	var h := k.owner_h
+	if k.summon != null and k.summon.left > 0.0:
+		return false          # (out of its wisp as a summon or the guardian: KinSummon / KinGuardian run it)
 	return h != null and h.downed and not h.out and not k.dead and k.state in JOINS
 
 ## Leaves whatever it was doing and comes back to its Hunter.

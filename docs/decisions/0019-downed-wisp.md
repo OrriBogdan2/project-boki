@@ -85,3 +85,9 @@ pets always come back to them and go into wisp form when they're downed".
 - **Open (DECISIONS 2026-11-09):** wisp stealing on a knock is not built yet; when it is, it starts from the
   Boki already riding the Hunter in this form.
 - Checks: `--kin-wisp-form-check`, `--clarity-check`. Frames: `--wisp-clarity-shots --shots-dir=<dir>`.
+
+### Wisp form x guardian summon (merge note)
+`KinWispForm.wants` skips a Boki whose summon window is open (`summon.left > 0`), so the guardian (decision 0040)
+keeps fighting over its downed Hunter; the stomper targeting main removed from `Kin._sim_active` stays only for a
+guardian summon (`_wisp_threat`). A Boki riding as a wisp by the boki_wisps setting never reaches KinWispForm
+(`KinWisp.ride` runs first), so it does not pull its Hunter up; `--wisp-guardian-check` covers the guardian.

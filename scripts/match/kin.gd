@@ -816,6 +816,10 @@ func _sim_active(dt: float) -> void:
 	if cmd == "return" and owner_h != null:
 		KinFollow.set_cmd(self, "return", null)       # Return was ordered while it was in the air: it lands, then goes onto you
 		return
+	# a guardian summon (KinGuardian) goes for whoever came to stomp or execute its downed hunter first
+	var guard: Ent = _wisp_threat() if summon and summon.guardian and owner_h and owner_h.downed else null
+	if guard:
+		target = guard
 	# a hurt, cautious Boki stays at your side and sits the fight out
 	var hang_back: bool = owner_h != null and hp < max_hp * brain.retreat_frac()
 	if hang_back:
@@ -828,7 +832,7 @@ func _sim_active(dt: float) -> void:
 	if owner_h and flat_dist(owner_h) > (brain.leash() if cmd == "follow" else KinFollow.leash(self)):
 		state = "returning"      # wandered off after a fight: run back (a hop when it cannot walk)
 		return
-	if not hang_back:
+	if guard == null and not hang_back:
 		if KinFollow.is_disengaged(self):
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
@@ -934,6 +938,15 @@ func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 		_daze()
 		return
 	go_down()
+
+## An enemy standing over your downed hunter (to stomp or execute them): a guardian summon fights them.
+func _wisp_threat() -> Ent:
+	if owner_h == null or not owner_h.downed or hp <= 0.0:
+		return null
+	for f in m.hunters:
+		if f.team != owner_h.team and not f.downed and not f.out and f.hittable() and f.flat_dist(owner_h) < 3.0:
+			return f
+	return null
 
 func fall_out() -> void:
 	if is_wild():
