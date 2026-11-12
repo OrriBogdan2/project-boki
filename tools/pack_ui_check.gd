@@ -3,7 +3,8 @@ extends RefCounted
 ## match's own input handling runs too) with a full backpack: a pick-up opens the swap window, and a
 ## mouse click at each drawn row's Drop button swaps that slot for the new thing; the backpack (I)
 ## window's Drop and Wear buttons work by click; firing is held while the cursor is over a window;
-## Esc still closes them. Never touches the save.
+## Esc still closes them. A loot-row swap and a Wear play their inventory cue (InvSfx), not the generic
+## click. Never touches the save.
 
 var bad := 0
 var main: Node
@@ -30,6 +31,14 @@ func _buttons(root: Node, txt: String) -> Array:
 		for ch in n.get_children(): stack.append(ch)
 	out.sort_custom(func(a, b): return a.global_position.y < b.global_position.y)
 	return out
+
+## Forgets when these sounds last played, so _heard can tell what the next action played.
+func _hush(names: Array) -> void:
+	for n in names: Sfx.last_played.erase(n)
+
+## The ones of `names` that played since _hush.
+func _heard(names: Array) -> Array:
+	return names.filter(func(n): return Sfx.last_played.has(n))
 
 ## Where a control's middle is in window pixels (what the OS sends), through the interface scale.
 func _screen_mid(c: Control) -> Vector2:
@@ -186,9 +195,12 @@ func run(mn: Node) -> void:
 	var takes := _buttons(hud.loot_panel, "Swap")
 	if takes.size() == 1:
 		var lrp: Control = (takes[0] as Button).get_parent().get_parent()
+		_hush(["inv_swap", "click"])
 		await _click(main.get_viewport().get_final_transform() * (lrp.get_global_transform_with_canvas() * Vector2(60.0, lrp.size.y * 0.5)))
 		await _frames(2)
 		ok(P.pack.any(func(it): return String(it.get("id", "")) == "crown_shard") and P.pack.size() == 4, "loot window: clicking the shard's row swaps it into the full pack")
+		var lheard := _heard(["inv_swap", "click"])
+		ok(lheard == ["inv_swap"], "loot window: the swap plays its cue, not the click (heard %s)" % [lheard])
 	else:
 		ok(false, "loot window: one Swap button for the shard (got %d)" % takes.size())
 	hud.close_loot()
@@ -213,10 +225,13 @@ func run(mn: Node) -> void:
 	if not eq.is_empty():
 		var w0 := P.gear.map(func(g): return String((g as Dictionary).get("id", "")))
 		var at: Vector2 = _screen_mid(eq[0])
+		_hush(["inv_equip", "ui_confirm", "click"])
 		await _click(at)
 		await _frames(3)
 		var w1 := P.gear.map(func(g): return String((g as Dictionary).get("id", "")))
 		ok(w1 != w0, "backpack: clicking Wear puts the gear on (%s -> %s, clicked %s)" % [str(w0), str(w1), at])
+		var wheard := _heard(["inv_equip", "ui_confirm", "click"])
+		ok(wheard == ["inv_equip"], "backpack: Wear plays the equip cue, not a button sound (heard %s)" % [wheard])
 	else:
 		ok(false, "backpack: a Wear button is drawn")
 	await _key(KEY_ESCAPE)

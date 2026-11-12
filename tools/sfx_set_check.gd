@@ -18,6 +18,8 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
+##  11. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
+##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -25,6 +27,7 @@ const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
 
 var bad := 0
 var levels := {}
@@ -49,6 +52,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_inv_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -317,6 +321,31 @@ func _build_cues() -> void:
 			if not src.contains(needle):
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
+## 11. The inventory cues.
+func _inv_cues() -> void:
+	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
+			"inv_swap": InvSfx.swap, "inv_take": InvSfx.take}
+	var silent := cues.keys().filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "inventory cues: %d sounds exist (silent: %s)" % [cues.size(), silent])
+	var mute := cues.keys().filter(func(n): return not _plays(n, cues[n]))
+	ok(mute.is_empty(), "inventory cues: each plays its own sound (not: %s)" % [mute])
+	var cats: Dictionary = levels["cats"]
+	var cue_db := float(cats["ui"]) + InvSfx.CUE_DB
+	var fight_db := minf(float(cats["fire"]), float(cats["impact"]))
+	ok(cue_db <= fight_db - INV_UNDER_DB, "inventory cues: %.0f dB, under a hit or shot (%.0f dB)" % [cue_db, fight_db])
+	var wiring := {"scripts/ui/loadout_panel.gd": ["grab()", "drop()", "equip()"],
+			"scripts/match/loot_full.gd": ["swap()", "take()"], "scripts/match/life.gd": ["swap()", "take()"]}
+	var missing := []
+	for f in wiring:
+		var src := FileAccess.get_file_as_string("res://" + f)
+		for cue in wiring[f]:
+			if not src.contains("InvSfx." + cue):
+				missing.append("%s InvSfx.%s" % [f.get_file(), cue])
+	ok(missing.is_empty(), "inventory cues: the inventory and loot code plays them (missing %s)" % [missing])
+	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
+	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
+	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
 
 func _takes(sname: String) -> Array:
 	var out := []
