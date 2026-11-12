@@ -2,7 +2,8 @@ extends RefCounted
 ## --sfx-set-check: the sound sets in content/sfx/*.json (docs/AUDIO.md).
 ##   1. every listed sound has a file (audio/<name>.wav or its takes <name>_1..4.wav)
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
-##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
+##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface (a
+##      Hunter with no feet, KMovesStone.gait < 0.5: no step files, a <arch>_hover loop for HoverHum instead),
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
@@ -80,11 +81,15 @@ func _check_set(path: String) -> void:
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
-	var need := ["dash"] + VOICE
-	for s in SURFACES:
-		need.append("step_" + s)
+	var floats := KMovesStone.gait(arch) < 0.5
+	var moves: Array = ["hover"] if floats else SURFACES.map(func(s): return "step_" + s)
+	var need: Array = ["dash"] + VOICE + moves
 	var missing := need.filter(func(k): return not sounds.has("%s_%s" % [arch, k]))
-	ok(missing.is_empty(), "%s: voice, dash and footsteps on every surface (missing %s)" % [arch, missing])
+	ok(missing.is_empty(), "%s: voice, dash and %s (missing %s)" % [arch, moves, missing])
+	if floats:
+		var steps := SURFACES.filter(func(s): return not _takes("%s_step_%s" % [arch, s]).is_empty())
+		ok(steps.is_empty() and d.get("loops", []).has(arch + "_hover"),
+			"%s: no feet, so no step files (%s) and %s_hover is a loop" % [arch, steps, arch])
 	ok(sounds.values().has("fire") or sounds.values().has("heavy_fire"), "%s: a weapon fire sound" % arch)
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
@@ -92,10 +97,11 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var h := Hunter.new()
 	h.arch = arch
 	var picked := []
-	for kind in ["dash", "step_wood", "hurt"]:
+	var kinds := ["dash", moves[0], "hurt"]
+	for kind in kinds:
 		picked.append(HeroSfx.of(h, kind, kind))
 	h.free()
-	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
+	var want := kinds.map(func(kind): return "%s_%s" % [arch, kind])
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
 
