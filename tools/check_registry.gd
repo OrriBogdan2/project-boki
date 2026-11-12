@@ -327,6 +327,7 @@ const CHECKS := {
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # docs/decisions/0061
 	"--stomp-film": ["res://tools/stomp_film.gd", "stomp_film", null],      # GPU, --shots-dir=
+	"--stomp-shots": ["res://tools/stomp_shots.gd", "stomp_shots", null],      # GPU: every Hunter's stomp, one beat
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold

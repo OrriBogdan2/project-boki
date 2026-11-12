@@ -10,6 +10,10 @@ extends RefCounted
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
+##  7. Per-Hunter looks (DECISIONS 2026-11-11): every style strikes on the same frames (Stomp.SLAM in
+##     each beat), so sounds and hits stay in sync; Albert's hammer and Kael's sword are swung two-handed
+##     overhead and down, Vex's heel comes down with the rifle aimed at the wisp, Motley keeps his feet
+##     still and slams with his hands; in a match the stomper's weapon really is up, then down.
 ## Never touches the save.
 
 var bad := 0
@@ -83,9 +87,11 @@ func run(main: Node) -> void:
 	var home := m.world.random_ground()
 	_check_lock(home)
 	_check_stun(home + Vector3(6, 0, 0))
+	_check_swing(home + Vector3(0, 0, -6))
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
 	_check_styles()
+	_check_looks()
 	print("STOMP CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -197,3 +203,57 @@ func _check_styles() -> void:
 	var a := StompLook.legs(StompLook.style("thunder_stomp"), 0.4)
 	var b := StompLook.legs(StompLook.style(StompLook.default_for("archer")), 0.4)
 	ok(a.distance_to(b) > 0.2, "styles pose differently mid-lift")
+
+func _check_looks() -> void:
+	var off := []
+	for id in StompLook.rules()["styles"]:
+		var st := StompLook.style(id)
+		for b in Stomp.BEATS:
+			if StompLook.strike(st, b + Stomp.SLAM) > 0.01 or StompLook.strike(st, b + Stomp.SLAM * 0.5) < 0.5:
+				off.append("%s beat %d" % [id, b])
+	ok(off.is_empty(), "every style strikes on Stomp.SLAM of each beat and is up between %s" % str(off))
+	for arch in ["bulwark", "juggernaut"]:
+		var st := StompLook.style(StompLook.default_for(arch))
+		var top: Variant = StompLook.weapon(st, Stomp.SLAM * 0.65)
+		var hit: Variant = StompLook.weapon(st, Stomp.SLAM)
+		var legs := StompLook.legs(st, Stomp.SLAM * 0.5)
+		var swung := top != null and StompLook.two_hands(st) and _point(top) > 0.3 and _point(hit) < -0.7
+		ok(swung and legs.x == legs.z, "%s swings the weapon in both hands, up (%.2f) and down (%.2f), feet planted"
+			% [arch, _point(top), _point(hit)])
+	var vex := StompLook.style(StompLook.default_for("gunslinger"))
+	var vl := StompLook.legs(vex, Stomp.SLAM * 0.5)
+	ok(StompLook.weapon(vex, 0.0) != null and _point(StompLook.weapon(vex, Stomp.SLAM)) < -0.7 and vl.z > 1.0
+		and not StompLook.two_handed(vex), "Vex: a boot heel high (hip %.2f), the rifle kept and aimed down" % vl.z)
+	var mot := StompLook.style(StompLook.default_for("ostra"))
+	var ml := StompLook.legs(mot, Stomp.SLAM * 0.5)
+	var rise := StompLook.body(mot, Stomp.SLAM * 0.5).z
+	var palm := StompLook.hand(mot, Stomp.SLAM, Vector3.ZERO, -1.0)
+	ok(ml.x == ml.z and ml.x < 0.3 and rise > 0.3 and palm.y < -0.4 and mot["arms"] == "cast",
+		"Motley floats: no foot lifts, he rises %.2f m and his palms push down on the slam" % rise)
+
+## How far a weapon transform's forward (-Z) points up (1) or down (-1); 0 for none.
+func _point(tf: Variant) -> float:
+	return -(tf as Transform3D).basis.z.y if tf != null else 0.0
+
+## A live stomp in Albert's style: HunterAnim really raises the weapon and brings it down on the slam.
+func _check_swing(at: Vector3) -> void:
+	_setup(at)
+	_commit()
+	if foe.stomp.is_empty():
+		ok(false, "a stomp commits for the live swing")
+		return
+	foe.stomp["style"] = StompLook.default_for("bulwark")
+	var gun_at := func() -> float:
+		var g := foe.anim.gun if foe.anim else null
+		return -g.transform.basis.z.normalized().y if g else 0.0
+	while float(foe.stomp.get("t", 9.0)) < (1.0 + Stomp.SLAM * 0.65) * Stomp.TIME / Stomp.BEATS:
+		_run(Match.DT)
+		foe.render(Match.DT, 1.0)
+	var top: float = gun_at.call()
+	while float(foe.stomp.get("t", 9.0)) < (1.0 + Stomp.SLAM) * Stomp.TIME / Stomp.BEATS:
+		_run(Match.DT)
+		foe.render(Match.DT, 1.0)
+	var hit: float = gun_at.call()
+	ok(foe.anim != null and top > 0.3 and hit < -0.5,
+		"in a match the stomper's weapon is up at the top (%.2f) and down on the slam (%.2f)" % [top, hit])
+	Stomp.end(m, foe, "gone")

@@ -1275,6 +1275,7 @@ func _swing_pose() -> void:
 func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pitch: float, yaw: float, cast_k: float, em_t: float, fired: float, breath: float) -> void:
 	if aim == null:
 		return
+	var blade_h := StompLook.blade_in_hand(arm_r, el_r, hand_r, aim, gun) if model.has_node("Warden") else Vector3.ZERO
 	var melee := hold in ["sword", "great", "twin"]
 	var grounded: bool = s.get("grounded", true)
 	# a new shot: kick the recoil spring
@@ -1488,6 +1489,14 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	gbas = carried.basis
 	gpos = carried.origin
 	free_l = maxf(free_l, ws.carry_free_l())
+	# a stomp style that swings the weapon (StompLook.weapon): up overhead, down on each slam
+	var st_wpn: Variant = StompLook.weapon(st_look, float(s.get("stomp", 0.0))) if stomp_k > 0.01 else null
+	if st_wpn != null:
+		gbas = gbas.orthonormalized().slerp((st_wpn as Transform3D).basis, stomp_k)
+		gpos = gpos.lerp((st_wpn as Transform3D).origin, stomp_k)
+		ap = lerpf(ap, 0.0, stomp_k)
+		ay = lerpf(ay, 0.0, stomp_k)
+		ar = lerpf(ar, 0.0, stomp_k)
 	# emotes: the weapon goes away, the hands do the talking
 	var gvs := gun_vis * gun_scl
 	aim.rotation = Vector3(ap, ay, ar)
@@ -1586,6 +1595,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if st_r != Vector3.INF:
 			fr = fr.lerp(st_r, stomp_k)
 			free_r = maxf(free_r, stomp_k)
+		if StompLook.two_hands(st_look) and gun:
+			fl = fl.lerp(at * (gun.transform * (grip_r + Vector3(0, 0, 0.16))), stomp_k)
+			free_l = maxf(free_l, stomp_k)
 	# revive: the left hand reaches down over them
 	if revive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.05, -0.32, -0.3), revive_k)
@@ -1679,6 +1691,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var bsh := Vector3(0, breath * 0.005 * still, 0)
 	_ik(arm_l, el_l, sh_l + bsh, tl2, pole_l)
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
+	var st_want := (st_wpn as Transform3D).basis if st_wpn != null else Basis.IDENTITY
+	if hand_r:
+		hand_r.basis = StompLook.wrist(blade_h, arm_r, el_r, aim, st_want, stomp_k if st_wpn != null else 0.0)
 	if hd.get("fist", false):
 		_fists_to_hands(grip_r)
 	elif gun and (free_r < 0.5 or hold == "twin"):
