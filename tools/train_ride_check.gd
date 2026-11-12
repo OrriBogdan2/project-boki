@@ -199,7 +199,8 @@ func _case_jump(t: float) -> void:
 	ok(r["min_v"] >= deck * 0.6,
 		"jump: no dead stop in the air (slowest %.1f of the deck's %.1f m/s)" % [r["min_v"], deck])
 	ok(r["max_along"] <= r["deck_max"] + 0.3,
-		"jump: no slingshot past the train (fastest along the track %.1f m/s, the deck %.1f)" % [r["max_along"], r["deck_max"]])
+		"jump: no slingshot past the train (fastest along the track %.1f m/s, the deck %.1f)"
+			% [r["max_along"], r["deck_max"]])
 	ok(r["max_step"] <= JOLT,
 		"jump: the air steering and drag ease it off, no step over %.2f m/s (largest %.2f)" % [JOLT, r["max_step"]])
 	ok(r["landed"] > 0.0 and r["landed_on_deck"],
@@ -214,7 +215,8 @@ func _case_dash_back(t: float) -> void:
 			P.dash_with({"type": "dash", "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME, "dir": back}))
 	ok(r["left"] and r["jolt"] <= JOLT,
 		"dash back: off the back of the train your world speed carries over (change %.2f m/s)" % r["jolt"])
-	ok(r["max_along"] <= r["deck_max"] + 0.3, "dash back: no slingshot (fastest along the track %.1f m/s)" % r["max_along"])
+	ok(r["max_along"] <= r["deck_max"] + 0.3,
+		"dash back: no slingshot (fastest along the track %.1f m/s)" % r["max_along"])
 	ok(r["min_v"] >= 2.0 and r["max_step"] <= JOLT,
 		"dash back: no dead stop (slowest %.1f m/s), no step over %.2f m/s but the dash's own end (largest %.2f)"
 			% [r["min_v"], JOLT, r["max_step"]])

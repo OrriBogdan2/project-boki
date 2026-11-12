@@ -23,7 +23,7 @@ const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing tou
                                    # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
-const AIR_CARRY := 1.2        # s: how long the car's speed stays your frame in the air (a jump's hang), out of the air drag
+const AIR_CARRY := 1.2        # s: the car's speed stays your frame in the air this long (a jump's hang)
 const AIR_REACH := 4.0        # m above a deck: in the air this close over a car, its frame follows the car
 
 var m: Node = null
