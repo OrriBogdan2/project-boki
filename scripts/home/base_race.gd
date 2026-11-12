@@ -432,8 +432,8 @@ func _begin(ks: Array) -> void:
 	_place_runners()
 	var marks: Array = []
 	for i in range(1, 4):
-		marks.append(_corner(i) + Vector3(0, _ground(_corner(i)), 0))
-	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, _ground(_corner(0)), 0), TRACK_W)
+		marks.append(_corner(i) + Vector3(0, ground(_corner(i)), 0))
+	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, ground(_corner(0)), 0), TRACK_W)
 	heard = []
 	heard.resize(runners.size())
 	heard.fill(0)
