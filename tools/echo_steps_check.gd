@@ -294,9 +294,21 @@ func _on_base() -> void:
 		press.action = "up"
 		press.pressed = true
 		ok(es.input(press), "on: W is taken by the dance")
+		var you: Node3D = es.dancers[EchoSteps.YOU]["node"]
+		var now := es.clock
+		es._show(["hop", EchoSteps.YOU, 0], now)
+		ok(you.get_meta("kact", "") == "stonehop", "on: a hop plays the stone hop")
+		es._place(now + float(EchoSteps.rules()["hop_s"]))
+		ok(not you.has_meta("kact"), "on: it ends with the hop")
+		es._show(["kept", EchoSteps.YOU, 0], now)
+		es._show(["hop", EchoSteps.YOU, 1], now + 0.1)
+		ok(you.get_meta("kact", "") == "spin", "on: a kept phrase spins, and a hop does not cut it short")
+		es._place(now + EchoSteps.spin_s())
+		ok(not you.has_meta("kact"), "on: the spin lasts two beats")
 		es.run.step(LEN_HIGH * 2.0)
 		es.tick(0.1)
 		ok(es.run == null and is_instance_valid(es.card), "on: the dance ends with a result card")
+		ok(not you.has_meta("kact"), "on: and nobody keeps a dance clip")
 		Save.d["tutorial"].erase("echo_practice")
 		es.use()
 		var skip := InputEventAction.new()

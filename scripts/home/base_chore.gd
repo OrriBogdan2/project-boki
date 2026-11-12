@@ -46,8 +46,8 @@ static func begin(life: BaseLife, k: Dictionary, kind: String) -> void:
 		"cheer":
 			c["to"] = glum(life, k)
 		"fetch":
-			c["spot"] = life.toy_spots()[0]
-			c["ball"] = _drop_ball(life, c["spot"])
+			c["toy"] = life.toy_spots()[0]
+			c["ball"] = _drop_ball(life, c["toy"])
 			c["carry"] = false
 	k["life_chore"] = c
 
@@ -58,7 +58,7 @@ static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 		"mind": done = _mind(life, k, m, dt)
 		"cheer": done = _cheer(life, k, c)
 		"fetch": done = _fetch(life, k, c)
-	if done or m.since >= float(life.R["max"]["chore"]):
+	if done or KinAvoid.shut(k) or m.since >= float(life.R["max"]["chore"]):
 		m.go(BaseLife.S.ROAM, "%s done" % c["kind"] if done else "%s gave up" % c["kind"])
 
 static func label(k: Dictionary) -> String:
@@ -125,7 +125,7 @@ static func _fetch(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 			c["carry"] = true
 		return false
 	ball.position = pos + Vector3(0, 0.75, 0)
-	var spot: Vector3 = c["spot"]
+	var spot: Vector3 = life.h.toys.stand(k, c["toy"], 0.0)      # asked again each step: a Boki may lie down on it
 	k["goal"] = spot
 	if Vector2(spot.x - pos.x, spot.z - pos.z).length() > AT_BALL:
 		return false
@@ -136,7 +136,8 @@ static func _fetch(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 
 ## The ball lies BALL_FAR m from the toy spot, on ground.
 static func _drop_ball(life: BaseLife, spot: Vector3) -> Node3D:
-	var at: Vector3 = life.h.world.free_spot_near(spot + Vector3(BALL_FAR, 0, 0), [], 0.5)
+	var parked: Array = life.h.toys.parked_at({}, KinAvoid.parked)
+	var at: Vector3 = life.h.world.free_spot_near(spot + Vector3(BALL_FAR, 0, 0), parked, 1.0)
 	var ball := MeshInstance3D.new()
 	ball.mesh = Models.sphere(0.16, 12)
 	ball.material_override = Models.toon(Color("ff6a5a"))
