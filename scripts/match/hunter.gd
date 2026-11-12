@@ -1375,7 +1375,7 @@ func _tick_weapon(dt: float) -> void:
 	if not strike_at_end.is_empty():
 		if roll_t > 0.0 and not downed and stun_t <= 0.0:
 			# the lunge curves to follow your aim
-			roll_dir = roll_dir.slerp(aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			roll_dir = roll_dir.slerp(aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()     # (10% a 60 Hz step)
 		else:
 			var st: Dictionary = strike_at_end
 			strike_at_end = {}
