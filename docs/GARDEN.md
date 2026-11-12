@@ -31,3 +31,7 @@ dead end. The check fails above 2.0x.
 
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
+
+## Base-only breeding
+
+`--base-breed-check` plays a fresh base_mode save that never leaves the base through every gate of the Nesting Nook (briefs/design/GARDEN.md 6) and prints the play minutes of each. Measured: hatch 0; friends 6 min (bond 0.55 after a ball and a nap, trust 62); egg ready 10 min after it is laid; a parent can lay again after 20 min. Both Grown takes about 18 h per Boki on farm XP and 10 h with runs (ratio 1.75, limit `pace.max_ratio`), so the baby comes long after two sessions (`BREED OVER`). Fixed with data: the Nesting Nook and the Training post open from the start and cost gems only (45 and 30; they wanted farm level 3 and wood, fibre and stone that base_mode cannot get). Fixed in code: `NookRules.friends` read the -1..1 bond against 50, so no pair with a recorded bond could ever be friends. Still open: a second Boki, the Grown pace and the `loose` type clash (docs/DEBT.md).
