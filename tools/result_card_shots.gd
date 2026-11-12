@@ -19,7 +19,9 @@ func run(main: Node) -> void:
 	var home = await nav._open_home()
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	var recs: Array = home.kins.slice(0, 3).map(func(k): return k["rec"])
+	while not is_instance_valid(home.root_ui):
+		await main.get_tree().process_frame
+	var recs: Array = Save.d["roster"].slice(0, 3)
 	var cards := {
 		"tumble": ["Tumble", "%s wins, out of the ring", [["+2 gems", UI.GOLD]], 1],
 		"echo_steps": ["Echo Steps", "%s wins, 84 points to 61", [["+2 gems, best streak 6", UI.GOLD]], 2],
@@ -36,7 +38,7 @@ func run(main: Node) -> void:
 		var before := GameResultCard.snap(team)
 		Care.change(team[0], "joy", 8.0)
 		team[0]["stats"]["speed"] = int(team[0]["stats"]["speed"]) + 1
-		var card := GameResultCard.open(home, {"game": c[0], "place": c[1] % team[0]["name"], "prize": c[2],
+		var card := GameResultCard.open(home, {"game": c[0], "place": c[1].replace("%s", team[0]["name"]), "prize": c[2],
 				"before": before})
 		for i in SETTLE:
 			await main.get_tree().process_frame
