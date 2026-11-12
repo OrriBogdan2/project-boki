@@ -21,8 +21,10 @@ const KEYS := ["util1", "util2", "util3", "util4"]
 
 static var ALL: Dictionary = {}
 
+
 static func _static_init() -> void:
 	_load()
+
 
 static func _load() -> void:
 	ALL = {}
@@ -32,7 +34,8 @@ static func _load() -> void:
 	var files: Array = []
 	for f in dir.get_files():
 		var fn := String(f).trim_suffix(".remap")
-		if fn.ends_with(".json"): files.append(fn)
+		if fn.ends_with(".json"):
+			files.append(fn)
 	files.sort()
 	for fn in files:
 		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/utility/" + String(fn)))
@@ -43,40 +46,51 @@ static func _load() -> void:
 		d["col"] = Color(String(d.get("col", "ffffff")))
 		ALL[id] = d
 
+
 # ------------------------------------------------------------------ definitions
 static func ids() -> Array:
 	var out: Array = ALL.keys()
 	out.sort()
 	return out
 
+
 static func is_item(id: String) -> bool:
 	return ALL.has(id)
+
 
 ## The pickup kinds the match already used ("armor" was the armor kit, "ckey" is a chest key).
 static func item_of(kind: String) -> String:
 	return String(OLD_KINDS.get(kind, kind))
 
+
 const OLD_KINDS := {"armor": "armor_kit", "ckey": "chest_key"}
+
 
 ## Keys sit on the belt but are never brought in, bought or taken home.
 static func is_key(id: String) -> bool:
 	return bool(def(id).get("key", false))
 
+
 ## The belt items a player can stock up on at home (everything but keys).
 static func stock_ids() -> Array:
 	return ids().filter(func(id): return not is_key(id))
 
+
 static func def(id: String) -> Dictionary:
 	return ALL.get(id, {})
+
 
 static func name_of(id: String) -> String:
 	return String(def(id).get("name", id))
 
+
 static func col_of(id: String) -> Color:
 	return def(id).get("col", Color.WHITE)
 
+
 static func icon_of(id: String) -> String:
 	return String(def(id).get("icon", id))
+
 
 ## Most charges one slot holds (found and bought ones can fill it).
 static func max_of(id: String) -> int:
@@ -84,13 +98,16 @@ static func max_of(id: String) -> int:
 		return BeltKeys.cap(id)
 	return int(def(id).get("max", 3))
 
+
 ## Most you can bring from home at a difficulty tier (Data.TIERS index), the stack cap by tier.
 static func bring_cap(id: String, tier: int) -> int:
 	var b: Array = def(id).get("bring", [1])
 	return mini(max_of(id), int(b[clampi(tier, 0, b.size() - 1)]))
 
+
 static func empty() -> Array:
 	return [{}, {}, {}, {}]
+
 
 # ------------------------------------------------------------------ what a hunter holds
 ## The everyday issue: the same two tonics and two armor kits for everyone (content/rules/equal.json).
@@ -101,17 +118,20 @@ static func issue(h) -> void:
 	for id in iss:
 		grant(h, String(id), int(iss[id]), true)
 
+
 static func slot_of(h, id: String) -> int:
 	for i in SLOTS:
 		if String((h.belt[i] as Dictionary).get("id", "")) == id:
 			return i
 	return -1
 
+
 static func count(h, id: String) -> int:
 	if BeltKeys.is_key(id):
 		return BeltKeys.held(h, id)
 	var i := slot_of(h, id)
 	return int(h.belt[i]["n"]) if i >= 0 else 0
+
 
 ## Charges of `id` that would fit on this belt right now.
 static func room_for(h, id: String) -> int:
@@ -127,6 +147,7 @@ static func room_for(h, id: String) -> int:
 			return max_of(id)
 	return 0
 
+
 ## A key: room up to its cap while it has a slot (or a slot is free); none past the cap.
 static func _key_room(h, id: String) -> int:
 	var left := BeltKeys.cap(id) - BeltKeys.held(h, id)
@@ -139,13 +160,16 @@ static func _key_room(h, id: String) -> int:
 			return left
 	return 0
 
+
 static func has_room(h, id: String) -> bool:
 	return room_for(h, id) > 0
+
 
 ## Can this hunter pick up a ground pickup of `kind`? (Anything that isn't a belt item always can.)
 static func can_take(h, kind: String) -> bool:
 	var id := item_of(kind)
 	return not is_item(id) or has_room(h, id)
+
 
 ## Puts charges on the belt: onto the same item's slot, else the first empty one. `issued` marks them as
 ## issued (used first, never taken home). Returns how many went on (0 when the belt is full).
@@ -167,16 +191,21 @@ static func grant(h, id: String, n := 1, issued := false) -> int:
 		h.belt_free[id] = int(h.belt_free.get(id, 0)) + put
 	return put
 
+
 ## Fills one slot outright (the match start): n charges, `issued` of them the everyday issue.
 static func set_slot(h, i: int, id: String, n: int, issued := 0) -> void:
 	h.belt[i] = {"id": id, "n": mini(n, max_of(id)), "cd": 0.0}
 	h.belt_free[id] = mini(issued, mini(n, max_of(id)))
 
-## A pickup from the ground: onto the belt, with a small toast for the local player.
+
+## A pickup from the ground: onto the belt, with a small toast and a first-time tip for the local player.
 static func pickup(h, id: String, n := 1) -> void:
 	var got := grant(h, id, n)
-	if got > 0 and h == h.m.player and h.m.hud:
-		h.m.hud.toast_small("+%d %s" % [got, name_of(id).to_lower()], col_of(id))
+	if got > 0 and h == h.m.player:
+		h.m.belt_tips.picked(id)
+		if h.m.hud:
+			h.m.hud.toast_small("+%d %s" % [got, name_of(id).to_lower()], col_of(id))
+
 
 ## Removes charges (issued ones go first). Returns how many were taken.
 static func take(h, id: String, n := 1) -> int:
@@ -192,6 +221,7 @@ static func take(h, id: String, n := 1) -> int:
 		h.belt[i] = {}
 	return got
 
+
 ## Sets how many charges of one item are held (stack up to what fits, or take away).
 static func set_count(h, id: String, n: int) -> void:
 	var cur := count(h, id)
@@ -199,6 +229,7 @@ static func set_count(h, id: String, n: int) -> void:
 		grant(h, id, n - cur)
 	elif n < cur:
 		take(h, id, cur - n)
+
 
 ## Charges that would come home: everything above the issued ones (what you brought and found).
 static func keepers(h) -> Dictionary:
@@ -212,6 +243,7 @@ static func keepers(h) -> Dictionary:
 			out[id] = n
 	return out
 
+
 ## Empties the belt and returns what was on it as [{id, n}] (for the deathbox; keys go in the box
 ## through their own counts).
 static func clear(h) -> Array:
@@ -222,6 +254,7 @@ static func clear(h) -> Array:
 	h.belt = empty()
 	h.belt_free = {}
 	return out
+
 
 # ------------------------------------------------------------------ using it
 ## Key 1 to 4 (slot 0..3). Beside a belt item that doesn't fit, the press swaps this slot for it.
@@ -244,6 +277,7 @@ static func press(h, i: int) -> void:
 	if UtilityUse.start(h, i, String(s["id"])):
 		_feedback(h, fb, "cast")
 
+
 ## Uses the first slot holding `id` (bots, tests). Returns whether it started.
 static func use_id(h, id: String) -> bool:
 	var i := slot_of(h, id)
@@ -255,8 +289,10 @@ static func use_id(h, id: String) -> bool:
 	press(h, i)
 	return true
 
+
 static func _feedback(h, key: String, kind: String) -> void:
 	h._ab_feedback(key, kind)
+
 
 ## Every step: the channelled drinks and repairs finish, slot cooldowns run.
 static func tick(h, dt: float) -> void:
@@ -265,6 +301,7 @@ static func tick(h, dt: float) -> void:
 		if not (s as Dictionary).is_empty() and float(s.get("cd", 0.0)) > 0.0:
 			s["cd"] = maxf(0.0, float(s["cd"]) - dt)
 	UtilityUse.tick(h, dt)
+
 
 # ------------------------------------------------------------------ looks
 ## A small spinning bottle for an item lying on the ground (the match's pickups).
@@ -275,6 +312,7 @@ static func pickup_model(id: String) -> Node3D:
 	Models.part(root, Models.cyl(0.05, 0.06, 0.13, 8), Models.toon(Color("e6f2ea")), Vector3(0, 0.36, 0))
 	Models.part(root, Models.cyl(0.07, 0.07, 0.04, 8), Models.toon(col.darkened(0.4)), Vector3(0, 0.44, 0))
 	return root
+
 
 ## What a belt item sells for in shops and at the farm stash market (the shop agent reads this).
 static func price_of(id: String) -> int:
