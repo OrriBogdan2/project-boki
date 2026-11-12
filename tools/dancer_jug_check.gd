@@ -666,6 +666,7 @@ func juggernaut(a) -> void:
 			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
 			and is_equal_approx(float(lane.get("deg", 0.0)), float(sl["angle"])),
 			str(lane))
+	_crimson_soft(A, P, lane, "tap cone")
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
@@ -725,6 +726,7 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB hold: lane = contact width (body + %.1f m a side), drawn = hit" % K.LUNGE_REACH,
 			is_equal_approx(float(ln.get("width", 0.0)), 2.0 * (P.r + K.LUNGE_REACH))
 			and is_equal_approx(K.lunge_w(), 2.0 * (P.r + K.LUNGE_REACH)), "%.2f" % float(ln.get("width", 0.0)))
+	_crimson_soft(A, P, ln, "hold lane")
 	P.do_jump()
 	m.step(A.DT)
 	A.ok("juggernaut RMB hold: you can jump while holding", P.vel.y > 0.5 and K.rmb_down, "vy %.1f" % P.vel.y)
@@ -1358,3 +1360,13 @@ func _fx(move: Dictionary, p: String) -> Dictionary:
 		if fx["p"] == p:
 			return fx
 	return {}
+
+## A Smash telegraph in Kael's crimson (his archetype colour, owner 11-08) with a lit rim and a faint inside.
+func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
+	var edge := float(e.get("width", 0.0)) * 0.5 if e.get("kind", "") == "lane" else float(e.get("len", 0.0))
+	var got: Array = load("res://tools/aimkit_check.gd").measure(e, 0.6, edge - 0.02)
+	var col := AimKit.hero_col(P).to_html(false)
+	A.ok("juggernaut RMB %s: crimson %s, lit rim, inside %.2f <= %.2f (rim %.2f)"
+			% [what, col, got[0], AimShapes.SOFT_A, got[1]],
+			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
+			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
