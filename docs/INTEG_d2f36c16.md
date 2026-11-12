@@ -1,0 +1,350 @@
+# Stuck-branch integration d2f36c16 (ext/stuck-integ-d2f36c16)
+
+Built on ext/mc-20261110-0630 00e1d6096 (origin/main fb360f614 + the merge candidate). Job 20261112-162014-a3 on rpc7.
+Each branch was merged at its newest READY sha (its tip when it had no READY). Conflicts were resolved only where
+no judgement is needed: docs/wiki and style_baseline take ours (then regenerated / re-locked), the check registry
+unions entries by flag, other docs/*.md keep both sides' lines. A branch with any other conflict was left out.
+
+## Merged (40)
+ability-bar-charges, air-cast-a, air-cast-b, airdash-anims-1108, anim-arm-motley, anim-boki-idle, cancel-matrix-c, checks-out-of-main, combat-friendly-fire, combat-revive-diminish, dash-interactions-refresh, dash-nd-rows-b, docs-heroes-sweep, edge-knock-parity, feel-cast-predict, feel-hitstop-input, feel-lmb-spam, feel-summon-press, flow-hold-rows, flow-rows-source, gaps-thief, heal-knock-source-rebased, hero-docs-sync-a, hero-docs-sync-b, input-latency-check, kit-parity-refresh-1, kit-parity-refresh-2, motley-seed-fizzle, online-feel-100ms, parity-no-riders-meeko, sfx-armour-break, shadow-renames-arch, snag-audit, tender-gait-rebased, tenzo-playtest-1108, train-rank-controls, ui-boki-box-summon, ui-death-recap, vfx-rescore, wisp-summon-leash
+
+## Not merged, already covered
+- **Already in the base (73):** airdash-rule-audit, anim-additive-flinch, anim-boki-home, anim-garden-actions, anim-time-grimble, anim-time-motley, anim-time-sable, arrival-declutter, blight-damage-source, blight-edge-read, boki-wisp-proto, combat-ranges-radii, dash-refresh-assist, farm-favourite-toy, farm-perf-low, farm-tut-batch-1108, garden-away-card, garden-baby-parents, garden-base-demo, garden-base-life, garden-base-life-main, garden-chores, garden-come-look, garden-elder-mentor, garden-integrated, garden-journal, garden-lean-foods, garden-nav-sweep, garden-only-pace, garden-race, garden-retire-isles, garden-seek, garden-snack-patch, garden-stump-shove, garden-train-post, garden-trust, garden-volley, garden-weekly-race, heartspark, heartspark-rebased, hot-zone, idle-ashwick, idle-dolm, idle-rimewright, kit-kael-113, lace-dash-charges, lace-tall-climb, loading-screen-1108, map-2x-flat2, map-2x-flat2-rebased, mc-fix-1109b, meeko-carry-drop, parity-phasewalk, prematch-declutter, ravel-v2-pass3, sable-bola-instant, sfx-garden-ambience, sfx-garden-games, telegraph-audit-a, train-moving-dummies, training-area-1108, tut-garden-first-day, tutorial-beats-7-8, tutorial-combat-v2, tutorial-dialogue, tutorial-garden-4, tutorial-prologue, tutorial-prologue-rebased, tutorial-prologue-rebased-rebased, tutorials-cut, ui-minimap-declutter, vfx-stolen-wisps, wisp-summon
+- **Owned by running job 20261112-161018-a3 (ext/stuck-integ-d4379965 already holds their READY sha) (54):** anim-idle-walk-gap, anim-time-mossy, anim-time-sable-rebased, anim-time-sparkle, anim-time-tenzo, body-hitbox-parity, body-hitbox-parity-rebased, boki3d-lilybara, boki3d-umbrathere, dash-buffer-window, dash-buffer-window-rebased, demo-record-ready-1109, expedition-fps-1108, expedition-fps-1108-r2, farm-tut-batch-1108-deep, farm-tut-tools-cam, farm-tut-tools-cam-rebased, fix-cinder-art-check, heal-knock-source, islands-deeper-1108, kael-tap-ult-1108, kael-ult-reset, kael-ult-reset-rebased, keybinds-1108, leave-match-warning-1108, mossy-narrow, no-rolling, no-rolling-rebased, perf-actors-1108, perf-render-presets-1108b, prologue-canon, prologue-canon-2, rank-parity-b, sable-bola-instant-rebased, scrapking-lmb, sparkle-dash-feel, telegraph-audit-b, telegraph-audit-b-rebased, telegraph-audit-c, telegraph-audit-c-rebased, tender-gait, trios-10x3-1108, types-standard-names, types-standard-names-rebased, vex-dash-parity, vfx-bulwark, vfx-cinder-polish, vfx-dolm, vfx-gunslinger, vfx-mage, vfx-ostra-abilities, vfx-tender, warden-bob-damp, warden-check-heights
+- **Superseded by their -rebased/-r2 copy (32):** albert-size-boop, anim-hand-tenzo, boki-react-clips, cinder-sable-polish, grimble-fist-vfx, grimble-stretch-v2, idle-archer, idle-bulwark, idle-dredge, idle-gunslinger, idle-mage, idle-tender, idle-thief, kael-lunge-length, meeko-rmb-motion, meeko-rmb-motion-rebased, meeko-rmb-motion-rebased-rebased, meeko-rmb-verify, move-sfx-positional, no-dash-bursts-audit, ostra-gait, parity-snowglide-rebased, release-integ-0243-rebased, reset-cue, rimewright-skate, sfx-move-weight, step-smooth, tutorial-beats-5-6, utilities-shops, vfx-meeko-weight, vfx-origin-v2, wisp-guardian
+- **Not branches to merge:** agent-briefs, agent-briefs-rebased (the briefs branch).
+- **READY sha not on origin (3):** anim-arm-sable, art1-clip-port, mc-fix-1109
+
+## Left out: conflicts in code or content (330)
+Each needs a rebase onto main by its owner (or a deep job). Branch: the files that would need a real resolution.
+
+- aim-height: tools/aimkit_check.gd
+- air-cast-poses: content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/pip.json content/rules/warden_anim/sable.json (+3 more)
+- albert-parity-verify: content/archetypes/bulwark.json scripts/arch/kits/bjorn_fx.gd scripts/arch/kits/bulwark_kit.gd tools/pin_bjorn_ult_check.gd
+- albert-size-boop-rebased: MERGE_REPORT.md art/wardens/breaker/IMPORT.md art/wardens/breaker/breaker.glb content/rules/warden_stance.json (+8 more)
+- anim-aim-lead: scripts/heroes/warden_clips.gd
+- anim-arm-kael: answer.md content/rules/tuning.json content/rules/warden_anim/kael.json scripts/arch/kits/juggernaut_kit.gd (+2 more)
+- anim-blend-snap: content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/dredge.json content/rules/warden_anim/hem.json (+8 more)
+- anim-boki-cast: scripts/match/kin.gd tools/boki_rig_check.gd tools/boki_system_check.gd
+- anim-carry-pose: content/rules/warden_anim/breaker.json content/rules/warden_anim/claire.json content/rules/warden_anim/dredge.json content/rules/warden_anim/hem.json (+4 more)
+- anim-dash-travel: content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/kael.json content/rules/warden_anim/vex.json (+1 more)
+- anim-downed: content/rules/wisp_looks.json scripts/heroes/warden_clips.gd scripts/match/hunter.gd scripts/match/hunter_wisp.gd (+2 more)
+- anim-elim-beat: scripts/match/hunter.gd scripts/match/hunter_wisp.gd tools/wisp_check.gd tools/wisp_shots.gd
+- anim-foot-plant: tools/perf_bench.gd
+- anim-fusion-states: scripts/heroes/warden_clips.gd
+- anim-garden-games: scripts/home/base_race.gd scripts/home/base_volley.gd scripts/match/boki_home_clips.gd scripts/match/boki_home_poses.gd (+2 more)
+- anim-glide-pose: content/rules/warden_anim/hem.json content/rules/warden_anim/pip.json content/rules/warden_anim/vex.json scripts/heroes/warden_clips.gd (+3 more)
+- anim-hand-albert: art/wardens/breaker/breaker.glb
+- anim-hand-tenzo-rebased: content/rules/warden_anim/tarek.json
+- anim-hunter-swim: content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/hem.json content/rules/warden_anim/ostra.json (+6 more)
+- anim-idle-walk-gap-rebased: tools/anim_shots.gd
+- anim-jump-land: tools/clip_check.gd
+- anim-key-pose-read: art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/pip/pip.glb art/wardens/ryzz/ryzz.glb
+- anim-landing-weight: content/rules/warden_anim/ryzz.json tools/clip_check.gd
+- anim-mantle-1: art/wardens/cinder/cinder.glb art/wardens/kael/kael.glb art/wardens/pip/pip.glb art/wardens/vex/vex.glb (+8 more)
+- anim-mantle-2: art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/hem/hem.glb art/wardens/tarek/tarek.glb (+7 more)
+- anim-mantle-3: art/wardens/breaker/breaker.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb (+6 more)
+- anim-mob-states: scripts/match/mob.gd
+- anim-prop-handoff: scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/dredge_kit.gd tools/dancer_jug_check.gd
+- anim-react-2: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ostra/ostra.glb (+6 more)
+- anim-react-audit: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb (+2 more)
+- anim-relic-puton: content/rules/mask_moment.json tools/hob_check.gd
+- anim-result-poses: content/rules/warden_anim/cinder.json scripts/heroes/warden_clips.gd scripts/match/exits.gd tools/clip_check.gd
+- anim-rooted-legs: scripts/heroes/warden_clips.gd
+- anim-stomp-drink-1: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb (+8 more)
+- anim-stomp-drink-2: art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/pip/pip.glb art/wardens/tarek/tarek.glb (+3 more)
+- anim-stomp-drink-3: art/wardens/breaker/breaker.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb (+7 more)
+- anim-stop-start: scripts/heroes/warden_clips.gd tools/anim_audit.gd tools/anim_shots.gd tools/clip_check.gd
+- anim-strafe-back: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/pip.json (+8 more)
+- anim-time-c: scripts/heroes/warden_clips.gd tools/archer_bulwark_combo_check.gd
+- anim-time-kael: scripts/heroes/warden_clips.gd
+- armour-parity: scripts/match/hunter.gd
+- art1-kael-2: art/kin/wisplet/wisplet_wisplet_face.webp.import art/wardens/cinder/cinder_emit.jpg.import art/wardens/kael/IMPORT.md art/wardens/kael/kael.glb (+22 more)
+- barrier-block-parity: scripts/arch/arch_kit.gd scripts/arch/kits/archer_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/combat/verbs.gd
+- boki-gait: scripts/match/boki_rig.gd
+- boki-react-clips-rebased: scripts/home/base_race.gd scripts/match/boki_rig.gd tools/boki_rig_check.gd
+- boki-type-vfx: content/abilities_v2/moon_mark.json
+- bot-boki-summon: scripts/match/bot_kin.gd
+- bot-kit-use: scripts/arch/kits/dolm_kit.gd tools/bot_kit_use_check.gd
+- bot-kit-use-b: scripts/arch/kits/archer_kit.gd
+- camp-parity: tools/perf_bench.gd
+- cancel-matrix-b: content/archetypes/dolm.json
+- cast-move-a: content/archetypes/juggernaut.json scripts/arch/kits/juggernaut_kit.gd tools/dancer_jug_check.gd
+- cc-stacking-rule: scripts/combat/fields.gd scripts/match/hunter.gd scripts/match/kin.gd scripts/ui/hudref_demo.gd
+- cinder-sable-polish-rebased: art/wardens/sable/sable.glb art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import content/rules/warden_look.json (+1 more)
+- clip-cadence-check: content/rules/warden_anim/kael.json content/rules/warden_anim/pip.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json (+1 more)
+- combat-boss-tells: scripts/core/data.gd scripts/match/boss.gd
+- combat-cc-mobs: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/mage_sky.gd
+- combo-marks-b: tools/ashwick_combo_check.gd tools/combo_mark_shots.gd tools/combo_mark_shots.gd.uid
+- cooldown-parity-verify: content/archetypes/ashwick.json content/archetypes/dredge.json content/archetypes/juggernaut.json content/archetypes/rimewright.json (+2 more)
+- cooldown-start-parity: content/archetypes/dolm.json
+- creator-polish: scripts/ui/hatch.gd tools/empty_shots.gd
+- creator-trim: scripts/ui/hatch.gd tools/empty_shots.gd
+- cursor-confine: scripts/core/settings.gd scripts/home/home.gd scripts/ui/overlay.gd scripts/ui/prologue.gd
+- damage-ratio-audit: content/archetypes/rimewright.json
+- dash-curves-b: content/rules/dash_feel.json scripts/arch/kits/thief_kit.gd tools/move_feel_check.gd
+- dash-glide-all: scripts/match/hunter.gd tools/airdash_glide_check.gd tools/gen_wiki.py
+- dash-nd-rows-a: tools/dash_flow_check.gd
+- drop-parity: scripts/match/hunter.gd tools/drop_check.gd
+- duel-ring-online: export_presets.cfg scripts/core/settings.gd scripts/home/home.gd scripts/match/match.gd (+4 more)
+- egg-picker-preview: scripts/ui/dex_view.gd tools/empty_shots.gd
+- farm-boki-sex: scripts/match/boki_rig.gd
+- farm-feed-bowl: scripts/core/evo.gd scripts/home/farm_unlocks.gd scripts/home/home.gd
+- farm-food-journal: scripts/core/save.gd scripts/home/home.gd scripts/ui/overlay.gd
+- farm-home-hatch: scripts/home/home.gd
+- farm-mood-icons: scripts/home/home.gd
+- farm-sick-recover: answer.md scripts/core/care.gd scripts/home/home.gd scripts/main.gd
+- farm-stat-causes: scripts/home/home.gd
+- feel-dash-no-input: tools/move_feel_check.gd
+- feel-dash-off-ledge: scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/rimewright_kit.gd scripts/match/hunter.gd scripts/match/hunter_move.gd (+1 more)
+- feel-facing-turn: scripts/match/hunter.gd tools/move_feel_check.gd
+- feel-first-cast-warm: scripts/arch/kits/pin_fx.gd scripts/match/match.gd
+- feel-held-fire-resume: tools/gen_wiki.py
+- feel-hurt-dir-wash: tools/hudref_check.gd
+- feel-impact-tiers: scripts/arch/kits/gil_kit.gd
+- feel-jump-forgive: scripts/match/hunter.gd tools/move_feel_check.gd
+- feel-same-frame: scripts/arch/dash_flow.gd scripts/match/hunter_keys.gd scripts/match/match.gd
+- feel-step-up: content/rules/hunter_move.json
+- feel-trigger-edge: content/archetypes/archer.json scripts/arch/kits/archer_kit.gd tools/archer_bulwark_combo_check.gd
+- feel-wall-slide: scripts/match/hunter.gd
+- feel-yaw-lock-12: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/gunslinger.json (+7 more)
+- fight-hitch: scripts/match/spawn_plan.gd tools/perf_bench.gd
+- fire-on-run-layer: content/rules/warden_anim/cinder.json content/rules/warden_anim/sable.json tools/clip_shots.gd
+- first-hints-check: content/rules/hints.json scripts/match/match_hints.gd
+- fps-feel: scripts/match/hunter.gd scripts/match/hunter_move.gd
+- fsm-m1: scripts/match/hunter.gd
+- game-rules-nov8: scripts/core/evo.gd scripts/home/home.gd scripts/kin/kin_spec.gd scripts/match/boki_rig.gd (+3 more)
+- gaps-juggernaut: tools/dancer_jug_check.gd
+- garden-save-trip: scripts/home/snack_patch.gd
+- garden-trait-drift: scripts/home/base_drift.gd scripts/home/base_life.gd tools/trait_drift_check.gd
+- garden-voice-ambience: scripts/home/home.gd scripts/match/kin_companion.gd scripts/match/kin_voice.gd tools/sfx_set_check.gd
+- glide-cast-rules: scripts/arch/hero_zones.gd scripts/arch/kits/ostra_kit.gd scripts/arch/kits/ostra_well.gd tools/gen_wiki.py
+- glide-dive-land: scripts/match/glide_dive.gd scripts/match/hunter.gd tools/move_feel_check.gd
+- glide-text-fix: content/rules/tutorial.json scripts/ui/loading.gd
+- glider-heat-parity: scripts/match/hunter.gd scripts/match/hunter_move.gd tools/glider_heat_check.gd
+- grimble-fist-vfx-rebased: content/archetypes/dredge.json content/weapons/shotgun.json scripts/arch/kits/dredge_kit.gd scripts/match/hero_vfx.gd (+2 more)
+- grimble-hook-arm-v2-rebased: tools/hero_vfx_reel.gd
+- grimble-nose-1109: art/wardens/dredge/dredge.glb art/wardens/dredge/dredge_atlas.jpg art/wardens/dredge/dredge_atlas.jpg.import
+- grimble-parity-verify: content/archetypes/dredge.json
+- grimble-stretch-v2-rebased: art/wardens/dredge/dredge.glb tools/art1/grimble_clips.py tools/art1/skin_relax.py
+- heal-shield-parity: content/archetypes/juggernaut.json
+- hit-feedback-pass: scripts/arch/kits/thief_kit.gd scripts/match/ent.gd scripts/match/match.gd tools/archer_bulwark_combo_check.gd
+- hit-spark-targets: tools/sfx_set_check.gd
+- hitstop-parity: scripts/arch/dash_flow.gd scripts/heroes/warden_clips.gd scripts/match/ent.gd tools/gen_wiki.py
+- hunter-first-hints: content/archetypes/ashwick.json content/archetypes/dredge.json content/archetypes/juggernaut.json content/archetypes/thief.json (+3 more)
+- hunter-revamp-af: art/wardens/breaker/IMPORT.md art/wardens/breaker/breaker.glb art/wardens/breaker/breaker_atlas.jpg.import art/wardens/breaker/breaker_emit.jpg.import (+17 more)
+- hunter-revamp-go: art/wardens/hem/IMPORT.md art/wardens/hem/hem.glb art/wardens/hem/hem_atlas.jpg art/wardens/hem/hem_atlas.jpg.import (+9 more)
+- hunter-revamp-pz: art/wardens/breaker/breaker_atlas.jpg.import art/wardens/breaker/breaker_emit.jpg.import art/wardens/hem/hem_atlas_1.jpg.import art/wardens/pip/IMPORT.md (+31 more)
+- idle-archer-rebased: art/wardens/hem/IMPORT.md art/wardens/hem/hem.glb tools/art1/hem_clips.py tools/art1/posekit.py
+- idle-bulwark-rebased: art/wardens/breaker/breaker.glb
+- idle-dredge-rebased: art/wardens/dredge/dredge.glb tools/art1/grimble_clips.py tools/art1/posekit.py
+- idle-gunslinger-rebased: art/wardens/vex/vex.glb tools/art1/posekit.py
+- idle-mage-rebased: art/wardens/ryzz/ryzz.glb
+- idle-ostra: art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb tools/clip_check.gd
+- idle-tender-rebased: art/wardens/pip/pip.glb content/rules/warden_anim/pip.json tools/art1/posekit.py
+- idle-thief-rebased: art/wardens/sable/sable.glb tools/art1/posekit.py
+- kael-lunge-length-rebased: content/archetypes/juggernaut.json content/rules/dash_feel.json tools/dancer_jug_check.gd
+- kael-riposte-knock: scripts/core/net.gd tools/dj_ult_check.gd
+- kael-rmb-dash-turn: scripts/arch/kits/juggernaut_kit.gd
+- kin-type-trail: content/abilities_v2/moon_mark.json scripts/match/capture.gd scripts/match/kin.gd
+- kit-error-sweep: scripts/arch/kit_status.gd scripts/arch/kits/rimewright_kit.gd scripts/arch/kits/thief_ult.gd
+- kit-number-sources: content/archetypes/ashwick.json content/archetypes/juggernaut.json content/archetypes/rimewright.json content/archetypes/thief.json
+- kit-parity-rows-a: content/rules/kit_parity.json tools/kit_parity_check.gd
+- kit-parity-rows-b: content/rules/kit_parity.json tools/kit_parity_check.gd
+- kit-text-clear-fixes: content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json content/archetypes/rimewright.json
+- kit-text-numbers: content/archetypes/archer.json content/archetypes/juggernaut.json
+- knock-mass-parity: tools/move_feel_check.gd
+- lace-hawk-sense: scripts/arch/kits/archer_kit.gd
+- lace-playtest-1108: content/rules/warden_anim/hem.json scripts/arch/kits/archer_kit.gd
+- land-squash-lean: scripts/heroes/warden_clips.gd scripts/match/boki_rig.gd tools/boki_rig_check.gd
+- landing-recovery: content/rules/hunter_move.json scripts/match/hunter.gd tools/drop_check.gd tools/move_feel_check.gd
+- legendary-spawns: content/maps/skyreach.json scripts/ui/dex_view.gd
+- level-growth-parity: content/rules/weapon_path.json
+- level-pace: scripts/match/match.gd
+- lmb-range-parity: content/weapons/shotgun.json
+- loot-rarity-vfx: scripts/match/life.gd
+- mantle-press-rules: scripts/arch/dash_flow.gd scripts/match/hunter.gd tools/gen_wiki.py
+- meeko-rmb-motion-rebased-rebased-rebased: art/wardens/pip/pip.glb tools/care_combo_check.gd
+- meeko-rmb-verify-rebased: art/wardens/pip/IMPORT.md art/wardens/pip/pip.glb art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_atlas.jpg.import (+10 more)
+- menus-more: scripts/home/home.gd scripts/ui/overlay.gd scripts/ui/title.gd tools/title_check.gd
+- misc-ready-integ: art/portraits/archer.jpg art/portraits/dolm.jpg art/portraits/dredge.jpg art/portraits/juggernaut.jpg (+16 more)
+- move-sfx-positional-rebased: scripts/core/sfx.gd tools/match_audio_check.gd
+- no-dash-bursts-audit-rebased: content/vfx/ashwick.json content/vfx/rimewright.json scripts/arch/kits/ostra_kit.gd scripts/match/hunter.gd
+- no-hardcoded-keys: scripts/core/settings.gd scripts/ui/prematch_view.gd
+- no-natural-death-1108: answer.md scripts/core/care.gd scripts/main.gd
+- no-reload-path: scripts/core/kin_speak.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/hunter_anim.gd (+3 more)
+- ostra-gait-rebased: art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb tools/anim_audit.gd tools/anim_shots.gd (+1 more)
+- overlay-typed-calls: scripts/ui/overlay.gd
+- parity-ability-abyss: tools/archer_bulwark_combo_check.gd tools/dredge_combo_check.gd
+- parity-ability-elevation: scripts/arch/arch_kit.gd scripts/arch/kits/bulwark_kit.gd
+- parity-ability-pierce: scripts/match/match.gd
+- parity-ability-speeds-a: content/archetypes/tender.json
+- parity-ability-speeds-b: content/archetypes/dredge.json content/archetypes/thief.json
+- parity-abyss-fall: content/rules/hunter_move.json scripts/match/match.gd
+- parity-ally-effects: tools/ashwick_combo_check.gd tools/dredge_combo_check.gd
+- parity-antiheal: content/archetypes/juggernaut.json content/archetypes/thief.json scripts/arch/kit_status.gd scripts/arch/kits/archer_kit.gd (+5 more)
+- parity-armour: content/weapons/shotgun.json scripts/match/hunter.gd
+- parity-body-collision: content/rules/hunter_move.json scripts/match/match.gd
+- parity-bulwark-crush: content/archetypes/bulwark.json scripts/arch/arch_kit.gd scripts/arch/kits/bjorn_fx.gd scripts/arch/kits/bulwark_kit.gd (+4 more)
+- parity-bulwark-guardcut: scripts/arch/kits/bulwark_kit.gd
+- parity-cc-lockouts: scripts/match/hunter.gd tools/air_limits_check.gd
+- parity-dot-ticks: content/archetypes/ashwick.json scripts/match/ent.gd
+- parity-downed-numbers: scripts/match/life.gd tools/revive_check.gd
+- parity-iframes: scripts/arch/kits/mage_ult.gd scripts/arch/kits/rimewright_kit.gd scripts/combat/displace.gd scripts/combat/fields.gd (+3 more)
+- parity-interrupts-a: content/archetypes/tender.json scripts/arch/kits/tender_kit.gd
+- parity-interrupts-b: tools/hero_combo_check.gd
+- parity-jump-hold: content/rules/hunter_move.json scripts/match/hunter.gd scripts/match/hunter_move.gd tools/move_feel_check.gd
+- parity-jump-pads: content/rules/hunter_move.json scripts/match/hunter.gd
+- parity-kael-clips: art/wardens/kael/IMPORT.md art/wardens/kael/kael.glb content/rules/warden_anim/kael.json content/rules/warden_look.json (+3 more)
+- parity-knock-credit: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/match/ent.gd scripts/match/match.gd (+2 more)
+- parity-motley-float: tools/ostra_combo_check.gd
+- parity-no-riders-grimble-tenzo: content/archetypes/dolm.json content/archetypes/dredge.json scripts/arch/kits/dredge_kit.gd
+- parity-passives-a: content/archetypes/dolm.json tools/support_check.gd
+- parity-passives-b: content/archetypes/dredge.json tools/care_combo_check.gd
+- parity-recast-windows: content/archetypes/rimewright.json tools/care_ult_check.gd
+- parity-reel-a: docs/parity_reel/archer.mp4 docs/parity_reel/ashwick.mp4 docs/parity_reel/bulwark.mp4 docs/parity_reel/dolm.mp4 (+9 more)
+- parity-snowglide-rebased-rebased: MERGE_REPORT.md briefs/camera_depth/after_a_edge.png.import briefs/camera_depth/after_b_step.png.import briefs/camera_depth/after_c_low.png.import (+8 more)
+- parity-status-stacking: scripts/arch/kits/rimewright_kit.gd scripts/match/ent.gd
+- particle-budget: content/rules/tuning.json scripts/combat/kin_tactics.gd scripts/core/settings.gd scripts/match/boki_rig.gd (+6 more)
+- perf-actors-1108-rebased: content/rules/tuning.json scripts/combat/kin_tactics.gd scripts/match/boki_rig.gd scripts/match/bot.gd (+5 more)
+- perf-fight-pools: scripts/match/fx.gd tools/perf_bench.gd
+- perf-model-drawcalls: tools/perf_bench.gd tools/warden_glb_check.gd
+- perf-occluders: scripts/core/settings.gd
+- portraits-unified: art/portraits/archer.jpg art/portraits/ashwick.jpg art/portraits/bulwark.jpg art/portraits/dolm.jpg (+10 more)
+- recast-buffer-expired: content/rules/tuning.json scripts/arch/arch_kit.gd scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/mage_kit.gd
+- recast-hud-cue: scripts/arch/kits/mage_kit.gd scripts/arch/kits/mage_ult.gd scripts/ui/recast_cue.gd scripts/ui/recast_cue.gd.uid (+4 more)
+- recast-marker-a: scripts/arch/kits/ostra_kit.gd scripts/arch/kits/tender_kit.gd scripts/arch/kits/thief_kit.gd
+- recast-marker-b: scripts/arch/kits/breah_hop.gd
+- recast-sounds: scripts/arch/arch_kit.gd scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/mage_kit.gd (+1 more)
+- release-integ-0243-rebased-rebased: MERGE_REPORT.md briefs/camera_depth/after_a_edge.png.import briefs/camera_depth/after_b_step.png.import briefs/camera_depth/after_c_low.png.import (+11 more)
+- remove-hex: scripts/arch/hex.gd scripts/arch/kits/tender_kit.gd scripts/core/net.gd scripts/match/hunter.gd
+- reset-cue-rebased: MERGE_REPORT.md art/wardens/breaker/IMPORT.md art/wardens/breaker/breaker.glb content/rules/warden_stance.json (+14 more)
+- revive-source-numbers: content/rules/revive.json scripts/match/box_revive.gd scripts/match/life.gd
+- rimewright-skate-rebased: art/wardens/claire/claire.glb tools/anim_audit.gd
+- sable-marks-resets: content/archetypes/thief.json
+- sable-v2-art: content/rules/portraits.json
+- secondary-motion-settle: content/rules/warden_anim/kael.json
+- sfx-ambience: tools/match_audio_check.gd tools/sfx_set_check.gd
+- sfx-belt-items: scripts/match/utility_use.gd tools/match_audio_check.gd tools/sfx_set_check.gd
+- sfx-boki-type-cues: scripts/core/sfx.gd scripts/match/boss.gd scripts/match/mob.gd tools/sfx_set_check.gd
+- sfx-boki-types: content/abilities_v2/moon_mark.json scripts/core/sfx.gd scripts/match/boss.gd scripts/match/mob.gd (+1 more)
+- sfx-boki-voices: scripts/home/home.gd scripts/match/kin_companion.gd scripts/match/kin_voice.gd tools/sfx_set_check.gd
+- sfx-boki-wire: tools/sfx_set_check.gd
+- sfx-downed-muffle: scripts/match/music_dir.gd tools/match_audio_check.gd
+- sfx-extract-cues: scripts/main.gd scripts/match/exits.gd scripts/match/hunter.gd tools/sfx_set_check.gd
+- sfx-fusion-evolve: tools/sfx_set_check.gd
+- sfx-gloves: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json (+2 more)
+- sfx-hatch: scripts/ui/hatch.gd
+- sfx-heartspark: content/sfx/heart.json scripts/match/heart.gd scripts/match/heart_sfx.gd tools/gen_sfx_heart.py (+1 more)
+- sfx-hit-targets: tools/sfx_set_check.gd
+- sfx-kit-placeholders: scripts/arch/kits/bjorn_ult.gd scripts/arch/kits/dredge_blast.gd scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/mage_kit.gd (+2 more)
+- sfx-legendary-presence: content/maps/skyreach.json scripts/ui/dex_view.gd
+- sfx-low-hp: tools/sfx_set_check.gd
+- sfx-low-hp-filter: scripts/match/music_dir.gd tools/match_audio_check.gd tools/sfx_set_check.gd
+- sfx-mix-pass: scripts/match/juice.gd tools/match_audio_check.gd tools/sfx_set_check.gd
+- sfx-mob-alert: tools/match_audio_check.gd
+- sfx-move-weight-rebased: scripts/core/sfx.gd tools/sfx_set_check.gd
+- sfx-pickups: tools/sfx_set_check.gd
+- sfx-pickups-gloves: scripts/core/loot.gd tools/sfx_set_check.gd
+- sfx-reverb-zones: content/maps/hollowcrown.json scripts/core/sfx.gd tools/make_hollowcrown.py tools/make_skyreach.py (+1 more)
+- sfx-step-surfaces: content/maps/hollowcrown.json scripts/core/hero_sfx.gd tools/make_hollowcrown.py tools/sfx_set_check.gd
+- sfx-strike-sync: scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/dolm_kit.gd
+- sfx-summon: scripts/match/kin_summon.gd tools/sfx_set_check.gd
+- sfx-utility-items: content/maps/hollowcrown.json content/utility/armor_kit.json content/utility/tonic.json scripts/arch/kits/ashwick_jet.gd (+13 more)
+- sfx-warnings-boki: scripts/match/exits.gd scripts/match/hunter.gd tools/sfx_set_check.gd
+- sfx-weapon-fire: content/weapons/flamethrower.json
+- sfx-wisps: scripts/match/kin_summon.gd tools/sfx_set_check.gd
+- side-cue-telegraphs: scripts/arch/oomph.gd scripts/match/aim/aim_kit.gd tools/clarity_check.gd
+- slam-follow-through: scripts/heroes/warden_clips.gd
+- sneak-speed-source: content/rules/hunter_move.json scripts/match/hunter.gd
+- solo-drop-20261109-2319: README.md scripts/home/home.gd scripts/match/boki_rig.gd
+- soul-link-integ: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_atlas.jpg.import art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import (+9 more)
+- soul-link-t3: scripts/core/net.gd scripts/match/kin_summon.gd tools/perf_bench.gd tools/wisp_check.gd
+- soul-link-t4: scripts/core/net.gd scripts/match/kin_summon.gd tools/perf_bench.gd tools/wisp_check.gd
+- spike-slam: content/archetypes/dolm.json content/archetypes/dredge.json scripts/arch/kits/breah_slam.gd scripts/arch/kits/dredge_kit.gd (+2 more)
+- split-exits: scripts/match/exits.gd
+- split-kmoves-pin-bjorn: tools/rig_standard_check.gd
+- split-lairs: scripts/match/lairs.gd
+- split-models: scripts/match/models.gd
+- split-ui: scripts/home/farm_guide.gd scripts/home/hob_offer.gd scripts/home/home.gd scripts/home/home_black_market.gd (+23 more)
+- split-warden-glb: scripts/heroes/warden_glb.gd
+- status-body-looks: scripts/arch/kit_status.gd scripts/arch/kits/dolm_kit.gd scripts/match/ent.gd scripts/match/match.gd (+1 more)
+- status-net-check: scripts/arch/kit_status.gd scripts/core/net.gd
+- step-smooth-rebased: scripts/match/hunter.gd scripts/match/match.gd
+- step-sounds-unified: content/maps/hollowcrown.json scripts/core/hero_sfx.gd scripts/core/sfx.gd tools/make_hollowcrown.py (+2 more)
+- strike-reach-heights: art/wardens/breaker/IMPORT.md art/wardens/breaker/breaker.glb content/rules/warden_anim/cinder.json content/rules/warden_anim/sable.json (+1 more)
+- stuck-integ-950a5444: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/mage.json content/archetypes/ostra.json (+21 more)
+- stuck-integ-cb5c1c27: content/rules/warden_stance.json scripts/arch/arch.gd scripts/match/match.gd tools/empty_shots.gd
+- stuck-integ-e2561d23: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_atlas.jpg.import art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import (+5 more)
+- stuck-integ-e28956f8: MERGE_REPORT.md content/rules/warden_stance.json scripts/arch/arch.gd scripts/match/match.gd (+1 more)
+- summon-kill-credit: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/core/net.gd scripts/match/ent.gd (+3 more)
+- summon-killed-wisp: scripts/core/net.gd scripts/match/kin_summon.gd
+- supervive-impact: scripts/arch/dash_flow.gd scripts/heroes/warden_clips.gd scripts/match/ent.gd tools/gen_wiki.py
+- telegraph-one-system: scripts/arch/arch_kit.gd
+- tenzo-cone-grow: content/archetypes/dolm.json scripts/arch/kits/dolm_kit.gd
+- tut-context-tips: scripts/ui/hud.gd scripts/ui/loading.gd
+- tut-dodge-dummy: content/maps/training.json scripts/ui/overlay.gd tools/arena_check.gd
+- tut-first-heartspark: content/rules/hints.json scripts/core/first_time_hint.gd scripts/match/match_hints.gd tools/first_time_hint_check.gd
+- tut-first-race: scripts/home/base_race.gd scripts/match/boki_rig.gd tools/boki_rig_check.gd tools/race_check.gd
+- tut-hunter-howto: scripts/ui/prematch_view.gd
+- tut-move-drills: scripts/core/save.gd scripts/match/practice.gd
+- tut-resume: scripts/core/save.gd scripts/match/tutorial.gd
+- tut-skip-check: scripts/home/farm_tutorial.gd
+- tut-start-here: scripts/home/hunter_pick_row.gd scripts/ui/prematch_view.gd tools/prematch_check.gd tools/prematch_shots.gd
+- tut-station-goals: scripts/ui/overlay.gd
+- tut-try-relic: scripts/home/hob_offer.gd scripts/match/practice.gd
+- tut-words-page: scripts/ui/overlay.gd tools/title_check.gd
+- tutorial-beats-5-6-rebased: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_atlas.jpg.import art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import (+40 more)
+- tutorial-idle-check: scripts/main.gd scripts/match/tutorial.gd tools/tutorial_idle_check.gd
+- ui-ability-text-one: content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json (+9 more)
+- ui-base-hud: scripts/home/home.gd
+- ui-dex-legendary-order: scripts/ui/dex_view.gd
+- ui-dex-summon-row: scripts/ui/dex_view.gd
+- ui-extract-widget: scripts/main.gd scripts/match/exits.gd scripts/ui/hud.gd
+- ui-gear-reveal: tools/hudref_check.gd
+- ui-knock-callout: scripts/match/juice.gd tools/hudref_check.gd
+- ui-loot-panel: scripts/ui/hud.gd tools/loot_full_check.gd
+- ui-safe-area: scripts/ui/hud.gd scripts/ui/hud_panels.gd
+- ui-settings-trim: scripts/core/game.gd scripts/core/settings.gd scripts/home/home.gd scripts/match/hunter.gd (+8 more)
+- ui-sfx-set: scripts/home/decorate.gd scripts/match/exits.gd scripts/ui/ui.gd tools/sfx_set_check.gd
+- ui-stolen-wisps: scripts/core/net.gd scripts/ui/team_boki.gd
+- ui-text-chat: scripts/core/net.gd scripts/core/settings.gd scripts/ui/prematch_view.gd tools/prematch_check.gd
+- ult-ranks: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json (+6 more)
+- ult-ready-glow: scripts/match/match.gd
+- utilities-shops-rebased: content/maps/hollowcrown.json scripts/combat/effects.gd scripts/core/net.gd scripts/match/hunter.gd (+4 more)
+- utility-parity: content/maps/hollowcrown.json content/utility/armor_kit.json content/utility/tonic.json scripts/arch/kits/ashwick_jet.gd (+11 more)
+- vex-coin-palm-1108: scripts/arch/kits/gunslinger_kit.gd tools/vex_clip_live_check.gd
+- vex-dash-parity-rebased: scripts/arch/kits/gunslinger_kit.gd
+- vex-greenfire-1108: art/wardens/vex/vex.glb content/archetypes/gunslinger.json content/rules/tuning.json scripts/arch/kits/gunslinger_kit.gd (+6 more)
+- vex-yawlock-1109-2248: content/archetypes/gunslinger.json scripts/arch/kits/gunslinger_kit.gd
+- vfx-armour-break: scripts/match/ent.gd scripts/match/juice.gd tools/hero_vfx_reel.gd
+- vfx-dredge: scripts/arch/kits/dredge_kit.gd shaders/hero_vfx.gdshader shaders/ld_fx.gdshaderinc
+- vfx-evolve-moment: scripts/home/home.gd
+- vfx-fusion-event: content/abilities_v2/moon_mark.json
+- vfx-gunslinger-strips: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/gunslinger_ult.gd
+- vfx-lace-impact: content/vfx/archer.json scripts/arch/kits/pin_fx.gd
+- vfx-lowpreset-read: content/rules/tuning.json content/vfx/archer.json content/vfx/juggernaut.json content/vfx/rimewright.json (+10 more)
+- vfx-meeko-kindle: tools/vfx_reel/tender.gd
+- vfx-meeko-weight-rebased: scripts/arch/kits/ult_look.gd
+- vfx-miss-impacts: scripts/arch/kits/dj_fx.gd
+- vfx-motley-nightwell: tools/ostra_ult_check.gd
+- vfx-neve-crash: scripts/arch/kits/ult_look.gd tools/care_ult_check.gd
+- vfx-occlusion-outline: scripts/core/settings.gd
+- vfx-origin-v2-rebased: content/archetypes/dolm.json content/archetypes/mage.json content/archetypes/tender.json content/archetypes/thief.json (+32 more)
+- vfx-pass: content/archetypes/dolm.json content/archetypes/mage.json content/archetypes/tender.json content/archetypes/thief.json (+32 more)
+- vfx-quality-motley: content/weapons/tether_lantern.json scripts/arch/hero_zones.gd scripts/arch/kits/kit_looks.gd scripts/arch/kits/ostra_kit.gd (+1 more)
+- vfx-revive-read: scripts/match/box_revive.gd
+- vfx-summon-side: scripts/core/net.gd
+- vfx-telegraph-lead: scripts/arch/kits/breah_slam.gd
+- vfx-tenzo-impacts: scripts/arch/kits/breah_slam.gd scripts/arch/kits/breah_spine.gd scripts/arch/kits/dolm_kit.gd
+- vfx-utility-read: content/maps/hollowcrown.json content/utility/armor_kit.json content/utility/tonic.json scripts/arch/kits/ashwick_jet.gd (+11 more)
+- warden-bob-damp-rebased: tools/anim_shots.gd
+- wisp-cosmetics: scripts/core/save.gd
+- wisp-gpu-ab: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_atlas.jpg.import art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import (+4 more)
+- wisp-guardian-rebased: scripts/core/net.gd scripts/match/kin_summon.gd tools/perf_bench.gd tools/wisp_check.gd
+- wisp-merge-from-wisp: tools/boki_system_check.gd
+- wisp-passive-stack: scripts/core/net.gd
+- wisp-pve-pvp: scripts/core/net.gd scripts/match/kin_summon.gd
+- wisp-steal: scripts/core/net.gd
+- wisp-summon-net: scripts/core/net.gd
+- wisp-summon-pop: scripts/match/kin_summon.gd
