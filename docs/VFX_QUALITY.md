@@ -90,6 +90,10 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
 
+Tenzo, Motley and Vex's rows are their scores before 11-12: ext/vfx-pass-triage ports ext/vfx-dolm,
+ext/vfx-ostra-abilities and ext/vfx-gunslinger onto HeroVfx data (scored 24, 25 and 26 on those branches' strips); the
+other 11-08 branches' state is in docs/VFX_PASS_TRIAGE.md.
+
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
 `vfxq-after-archer-2`, job 20261108-213129-03140); the pair is on branch `ext/vfx-archer-strips` (not for merge). Her
 row keeps its place until the integrator re-sorts the table.
