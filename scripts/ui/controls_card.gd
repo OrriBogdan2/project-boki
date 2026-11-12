@@ -37,7 +37,7 @@ static func fill(v: VBoxContainer, id: String) -> void:
 static func _column(title: String, sub: String, col: Color, rows: Array) -> VBoxContainer:
 	var c := UI.vbox(8)
 	c.custom_minimum_size.x = 330
-	c.add_child(UI.section(title if sub == "" else "%s: %s" % [title, sub], col.lerp(UI.INK, 0.4)))
+	c.add_child(UI.section(title if sub == "" else "%s: %s" % [title, sub]))
 	for r in rows:
 		c.add_child(_row(r[0], r[1], r[2], col))
 	return c
