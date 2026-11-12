@@ -63,19 +63,22 @@ the first expedition's map; `--tutorial-fight-check`: its RNG, default 11). Seed
 | `--new-player-flow-check` | seed 1 | seed 2 | seed 3 |
 |---|---|---|---|
 | Lace (archer) | 0 fail | 0 fail | 0 fail |
-| Kael (juggernaut) | 0 fail | 0 fail | 0 fail |
+| Kael (juggernaut) | 0 fail | 0 fail | 0 fail (green first, red once on the final code: glove stall, then 4 green) |
 | Vex (gunslinger) | 0 fail | 0 fail | 0 fail |
 
 Each run: prologue, hatch, starter pick, tutorial course, results, farm, Hob's second Relic and the first expedition
-to the uplink lift. All 9 teach all 23 steps the kit has, none missed, slowest step 14-20 s.
+to the uplink lift. Every green run teaches all 23 steps the kit has, none missed, slowest step 14-20 s.
 
-| `--tutorial-fight-check` (first hit, then reruns) | seed 1 | seed 2 | seed 3 |
+| `--tutorial-fight-check` (final code) | seed 1 | seed 2 | seed 3 |
 |---|---|---|---|
 | Lace | 0 fail | 0 fail | 0 fail |
-| Kael | 0 fail | 0 fail | 0 fail (1 slow-beats red once: kin step 71 s) / 1 red `kick` once |
-| Vex | `kick` row red once, then green | 0 fail | `kick` row red twice, green once; glove stall once (before the fix below) |
+| Kael | 0 fail | 0 fail | `kick` row red once, green once |
+| Vex | 0 fail | 0 fail | `kick` row red once, green once |
 
-Seeds 4, 5 and the default 11 also ran: green, except Lace seed 4 once (glove stall, did not repeat in 10 reruns).
+Before the glove fix the same grid had Vex red on seeds 2 and 3 (course never finishes, glove stall) and Kael seed 3
+once at 108 s fight beats (kin step 71 s). Seed 1 Vex was `kick`-red once and green once.
+
+Seeds 4 to 9 (Lace only for 4-9) and the default 11 also ran: green, except Lace seed 4 once (glove stall, did not repeat in 10 reruns).
 
 ### What stalled, what was fixed
 - **Stale check, all 9 flow runs (fixed):** the first-expedition stage looked for a skiff; docks are gone (Ways Out), so
@@ -84,9 +87,11 @@ Seeds 4, 5 and the default 11 also ran: green, except Lace seed 4 once (glove st
   and a hit breaks the start, both real rules and not what the check is about.
 - **Glove step stalled for Kael and Vex (fixed, tutorial data + driver):** after the Boki camp fight the bot walked
   straight at the pickup on the Range isle: into the lookout cliff on the north side, or off the lip of the Lookout
-  isle at the bridge head. Seen: Vex seeds 2 and 3, Kael seed 2 (850 s stall). Three waypoints in
-  `content/maps/tutorial.json` `course.pickup` (via1..via3: round the cliff, onto the bridge, off it) and the driver
-  follows them. A player is not affected (they see the bridge); the stall was the bot's straight line.
+  isle at the bridge head, and it tapped interact the whole way: a press beside a knocked-out camp Boki starts a scan
+  that holds the Hunter still (seen: Kael seed 3, stuck 850 s, hopping in place with no cliff in the way). Seen on Vex
+  seeds 2 and 3, Kael seeds 2 and 3. Three waypoints in `content/maps/tutorial.json` `course.pickup` (via1..via3:
+  round the cliff, onto the bridge, off it), and the driver presses interact only within 2 m of the glove. A player
+  is not affected (they see the bridge and press at the item); the stall was the bot. Kael seed 3: 5 greens after.
 - **kit-drill-check after the merge (fixed):** the walk finished the tech step with Lace's own id as "another Hunter's
   tech", and asked every Hunter's dummy to be rigged weak (Vex's rig only). Now it uses another Hunter's id and rigs the
   row for Vex only.
@@ -99,4 +104,8 @@ Seeds 4, 5 and the default 11 also ran: green, except Lace seed 4 once (glove st
   lookout (`tutorial.gd` wallkick), so the bot can get up without a kick. Seen for all three starters, about 1 run in 4.
   Same flake as noted above for 0245. Fix is a design pick (require the kick, or drop the row): left to the owner.
 - Kael seed 3 once: the Boki-camp step took 71 s (usually 15 s), over the check's 30-70 s window for the fight beats.
-- Lace seed 4 once: glove stall; not reproduced (10 reruns, seeds 4-9), no position seen.
+- Lace seed 4 once: glove stall (before the interact fix); not reproduced (10 reruns, seeds 4-9), no position seen.
+- Kael, `--new-player-flow-check` seed 3, once on the final code: stuck from the start of the glove step at (53.7, 47.8)
+  west of the lookout cliff, input applied, speed 0, hopping; 4 reruns with a debug print were green, so the cause
+  (not the cliff wall, not a scan, no hold) is not found. The bot's hop-when-stuck does not free it. Open.
+- Kael seed 2 once (after the glove fixes): stuck on the Boki-camp step for 376 s; not reproduced in 4 reruns.

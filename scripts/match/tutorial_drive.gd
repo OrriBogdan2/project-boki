@@ -67,7 +67,8 @@ static func drive(m: Match) -> void:
 						at = tu.stop("pickup", v)
 						break
 				goto.call(at)
-				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
+				if p.flat_dist(wp["pos"]) < 2.0:      # (a press near a downed Boki starts a scan that holds you)
+					p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "kin", "hook", "ult":
 			_fight(m, tu, goto)
 		"ranks":
