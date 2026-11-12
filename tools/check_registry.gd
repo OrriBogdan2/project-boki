@@ -328,6 +328,7 @@ const CHECKS := {
 	# a tap inside a hit-stop goes when it ends
 	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
 	"--mantle-press-check": ["res://tools/mantle_press_check.gd", "mantle_press_check", null],
+	"--cd-indicator-check": ["res://tools/cd_indicator_check.gd", "cd_indicator_check", null],      # HUD slot vs timers
 	"--cd-gate-check": ["res://tools/cd_gate_check.gd", "cd_gate_check", null],      # no cast on cooldown
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],  # item 185

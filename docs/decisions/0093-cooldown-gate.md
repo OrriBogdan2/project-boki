@@ -24,5 +24,5 @@ slot, with "On cooldown" over it while it is cooling (`PressDeny`, `HudSlot`, 0.
 
 ## Consequences
 The Aegis can't go up while the RMB slot is cooling after a Shield Charge. The bar showed it as not ready
-anyway. The juggernaut's bar shows the Meteor Drop's own rest while he is airborne, but a Smash charge still takes an air press (the ground Smash), so `JuggernautKit.rmb_open` lets it through. `--cd-gate-check` covers every hero and slot. hunter.gd +0 net, match.gd +5. No Net or save change:
+anyway. The juggernaut's bar shows the Meteor Drop's own rest while he is airborne, but a Smash charge still takes an air press (the ground Smash), so `JuggernautKit.rmb_open` lets it through. `--cd-gate-check` covers every hero and slot; `--cd-indicator-check` drives a real dash and RMB and compares the slots to the timers every step. hunter.gd +0 net, match.gd +5. No Net or save change:
 remote players only ever see moves their owner's kit played.
