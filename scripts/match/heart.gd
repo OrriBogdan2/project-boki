@@ -595,14 +595,14 @@ func _update_nodes() -> void:
 	var f := clampf(charge / r("charge_s"), 0.0, 1.0)
 	var t := Time.get_ticks_msec() / 1000.0
 	var pulse := 0.5 + 0.5 * sin(t * 3.0)
-	_spark.visible = state != "cooling"
-	var at := carrier_pos()
-	if state == "carried" and carrier:
+	var lying := spark_live() and carrier == null
+	_spark.visible = state == S.CHARGING or spark_live()
+	if carrier:
 		var held := carrier.model != null and carrier.model.has_meta(WardenCarry.MOTE)
 		if held:
 			_spark.position = carrier.model.get_meta(WardenCarry.MOTE)      # (in the off hand)
 		else:
-			_spark.position = at + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
+			_spark.position = carrier.pos + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
 		_spark.scale = Vector3.ONE * (HELD_SCALE if held else 0.9)
 	else:
 		var sf := 1.0 if lying else clampf(0.15 + f * 0.85, 0.15, 1.0)

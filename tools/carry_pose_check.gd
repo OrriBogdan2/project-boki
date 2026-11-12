@@ -63,8 +63,7 @@ func _hero(id: String) -> void:
 	if H == null or clips == null:
 		m.queue_free()
 		return
-	H.carrier = P
-	H._enter("carried")
+	_take(H, P)
 	P.inp["move"] = Vector2(0, -1)
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var shin := WardenSkeleton.find(sk, "shin.R")
@@ -90,16 +89,18 @@ func _hero(id: String) -> void:
 	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.fire_cd > 0.0)
 	P.inp["fire"] = false
 	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.fire_cd > 0.0)
-	ok(fired[0] and H.state == "carried", "%s: LMB still fires with the Heartspark" % id)
+	ok(fired[0] and H.state == Heart.S.CARRIED, "%s: LMB still fires with the Heartspark" % id)
+	_end_kit_move(P)
 	await _step(m, SETTLE_S)
 	for how in ["hand-off", "knock", "extract"]:
-		H.carrier = P
-		H._enter("carried")
+		_take(H, P)
+		_end_kit_move(P)
 		await _step(m, SETTLE_S)
 		ok(clips.heart_w >= 1.0, "%s: carrying again (%s)" % [id, how])
 		match how:
 			"hand-off":
 				H._drop(P.pos)
+				H._apply_carrier()
 			"knock":
 				P.downed = true
 			"extract":
@@ -112,3 +113,18 @@ func _hero(id: String) -> void:
 		P.extracted = false
 		P.out = false
 	m.queue_free()
+
+## P holds the Heartspark (the host's pick, with the slow meta the carry layer reads set at once).
+func _take(H: Heart, P: Hunter) -> void:
+	H.charge = Heart.r("charge_s")
+	H.carrier = P
+	H._force(Heart.S.CARRIED, "check")
+	H._apply_carrier()
+
+## Meeko and Neve's kits (play_soft) never clear a finished shot move, and a "lead" clip holds its last frame until
+## something else plays, so after the volley the held pose would keep the layer off for the rest of the check. The
+## match has the same thing in play; this just lets the move end, as a later move would (see the READY note).
+func _end_kit_move(P: Hunter) -> void:
+	if P.ak != null:
+		P.ak.anim_id = ""
+	P.anim_s.erase("kmove")      # (the state dict is refilled, not rebuilt)
