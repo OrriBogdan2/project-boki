@@ -377,8 +377,9 @@ func _scarf(main: Node) -> void:
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
 
-## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at every
-## rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the time is read from data.
+## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
+## every rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the
+## time is read from data.
 func _slam_fill(main: Node) -> void:
 	var m: Match = flow._match(main, "bulwark")
 	await main.get_tree().process_frame
