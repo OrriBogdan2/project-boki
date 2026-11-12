@@ -308,30 +308,33 @@ With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. 
 
 ## Rounds leave the weapon (`Muzzle`, `--muzzle-live-check`; owner 11-12: "does Lace's RMB come from her bow?")
 
-On the wide match camera Hunters are drawn 2.1x bigger, but rounds still started at fixed body offsets (0.6 m ahead at
-0.95 m), so a Lace arrow started 1.3 m from her bow on screen. Now every round a Hunter fires leaves the muzzle of the
-drawn weapon: `content/archetypes/<id>.json` "muzzle" maps a slot (lmb, rmb, e, r, x, or a kit's own `lmb_l` / `lmb_r`
-hand) to the model's anchor empties (first one found; "default" is `weapon_muzzle`, which every .glb has on its
-weapon, so it scales with the Hunter and follows its pose). Lace's bow, Cinder's gun, Vex's cannon, Sparkle's two
-fingers, Sable's two blades, Neve's palms (her blade tip is 2 m out), Meeko's palm for the seed.
-- `Muzzle.leave` (called by `Match.spawn_shot` for a round tagged `extra.muz`; the Hunter's weapon, `KinExec` projectiles
-  and the kits' own throws tag their slot) puts the start on the camera's view ray through the muzzle at the round's own
-  height (`CamRig.view_dir`), so it reads as leaving the muzzle, and aims the round at the same end point.
-- Gameplay is kept: height (shot bands), speed and the end of the flight (cursor or range) are unchanged
-  (`--muzzle-live-check` asserts it); what moves is the start, by up to ~1 m along the aim and a little sideways, so a
-  round at point-blank can reach a body 0.1 s sooner than it did. Slowing rounds ("decel": Grimble's shotgun) move the
-  start only.
-- `--muzzle-live-check`: each of the 13 Hunters presses LMB, RMB, E, R and X in a real match; the round(s) it spawns
-  must start within 0.15 m (on screen) of that slot's weapon point. It replaces Sparkle's fingertip row.
-  `--muzzle-shots` records each Hunter firing at the match camera.
-- Not covered (no round: a cone, zone, hook, dash, melee swing or beam is drawn by its own effect, not
+On the wide match camera Hunters are drawn 2.1x bigger, but a round starts at a fixed body offset (0.6 m ahead at
+0.95 m), so a Lace arrow was drawn 1.3 m from her bow. Now the round's look leaves the drawn weapon's muzzle:
+`content/archetypes/<id>.json` "muzzle" maps a slot (lmb, rmb, e, r, x, or a kit's own `lmb_l` / `lmb_r` hand) to the
+model's anchor empties (first one found; "default" is `weapon_muzzle`, which every .glb has on its weapon, so it
+scales with the Hunter and follows its pose). Neve's palms (her blade tip is 2 m out), Meeko's palm for the seed and
+Sable's hands for Encore are the ones that differ.
+- Looks only. `Match.spawn_shot` gives a round tagged `extra.muz` (the Hunter's weapon, `KinExec` projectiles, the
+  kits' own throws tag their slot) `s["vis"]`: the offset from its gameplay start to the point of the camera's view
+  ray through the muzzle at the round's own height (`CamRig.view_dir`). The looks (the plain round and its trail,
+  `KitLooks`, `CareLook`, `PinFx`, `DjFx` and `LdFx` skins, the muzzle flash) are drawn at `Muzzle.drawn`: at the
+  muzzle, easing onto the round's line over 3 m. The round (start, aim, speed, reach, hits, Net) is untouched:
+  the combo checks hold at 0 fails, as they did. An earlier try that moved the round itself broke them (a weapon
+  held 1 m off the aim line sends a close shot past a foe).
+- Sparkle's bolt keeps its own `VVFx.ride` from-the-fingertip ease (the previous job); the check counts it by its
+  muzzle points. A look that is not one of the listed skins (a kit's own mesh drawn from `s["pos"]`) still starts at
+  the body: Gunslinger's burr lane, Kael's chain rope, Albert's hammer, cones and zones.
+- `--muzzle-live-check`: each of the 13 Hunters presses LMB, RMB, E, R and X in a real match; the look of each round
+  must start within 0.15 m (on screen) of that slot's weapon point two frames later. It replaces Sparkle's
+  fingertip row. `--muzzle-shots` records each Hunter firing at the match camera (GPU).
+- Not a round, so not covered (a cone, zone, hook, dash, melee swing or beam is drawn by its own effect, not
   `spawn_shot`): Cinder LMB/E/R/X, Albert everything, Tenzo RMB/E/R/X, Grimble E/R, Vex RMB/E/R/X, Kael LMB/RMB/R/X,
   Sparkle E/R/X, Motley E/R/X, Neve E/R/X, Meeko E/R/X, Sable RMB/R, Lace R/X, Gil (no kit moves). The Boki Q glove and
-  Boki's own shots are not Hunter rounds. Remote copies see the round start as it was fired (the net event carries
-  the start), so they see it from the shooter's weapon too.
+  Boki's own shots are not Hunter rounds. The other player's game gets the round from the net event without the
+  offset, so their view of your rounds still starts at the body offset (a Net change; not done).
 
-Start-to-weapon distance on screen (m), per press; each row is one press of that key in `--muzzle-live-check`
-(measured two frames after the round spawns, before = the branch tip before this change, same weapon points):
+On-screen distance (m) of the round's look start from the weapon point, per press, in `--muzzle-live-check` (before =
+the round's start, as drawn before this change; same weapon points):
 
 | Hunter | key | rounds | before (m) | after (m) |
 |---|---|---|---|---|
