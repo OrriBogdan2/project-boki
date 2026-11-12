@@ -396,6 +396,7 @@ const CHECKS := {
 	"--fps-parity-check": ["res://tools/fps_parity_check.gd", "fps_parity_check", null],
 	# 12 Hunters, LMB/RMB/Shift held at the knock
 	"--knock-moment-check": ["res://tools/knock_moment_check.gd", "knock_moment_check", null],
+	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],      # type filter + sort
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--camera-fast-check": ["res://tools/camera_fast_check.gd", "camera_fast_check", "check"],      # locked follow
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
