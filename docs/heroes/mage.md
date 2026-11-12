@@ -160,7 +160,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
-| RMB hold (press to throw about 1.2 s) | She did not walk during the hold; side-on, spear at the shoulder, body flash at full charge | Free at full speed (no `move_k`), faces the cursor, throws at release (0.33 s earliest) or auto at 1.2 s | unmeasured: the footage cannot tell if moving is allowed (sheet open question 5) |
+| RMB hold (press to throw about 1.2 s) | She stands through every hold: 0-1 px a frame over 0044-0048, 0058-0062 and 0079-0083 (5 fps, the camera still, hero sprite against the ground); side-on, spear at the shoulder, body flash at full charge | Planted while the rod is held (`rmb.walk_k` 0, share of the run; was free), faces the cursor, throws at release (0.33 s earliest) or auto at 1.2 s | matches; asserted in `--mage-combo-check` (2026-11-12; whether the source merely chose not to move is still not shown) |
 | RMB throw and recovery (about 0.4 s) | Overarm throw, recovers in about 0.4 s | Free | unmeasured |
 | E place and strike (0.8 s) | One-arm sweep, no long wind-up; body not shown moving | Free at full speed, faces the cursor; the pull direction is chosen with the cursor | unmeasured, no data to change |
 
