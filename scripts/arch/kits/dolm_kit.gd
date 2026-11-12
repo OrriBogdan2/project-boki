@@ -616,7 +616,11 @@ func rmb_auto_t() -> float:
 func rmb_hold_tick(t: float) -> void:
 	slam.hold_tick(t)
 
+## The punch hold (its lane up) and the Quakefall charge are planted, as the source: `lmb.walk_k` and `slam.walk_k`,
+## shares of the run (0 = stands).
 func move_k() -> float:
+	if lmb_t > float(lmb_def()["tap"]):
+		return float(lmb_def()["walk_k"])
 	return slam.move_k()
 
 func fire_rmb(c: Dictionary) -> void:

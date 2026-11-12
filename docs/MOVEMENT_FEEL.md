@@ -325,19 +325,20 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 | Lace (Myth) | draw 0.70 (`draw_slow`); 0.85 after a perfect | Heavy Shot hold 0.38 (`pin.hold_move`) | full once the arrow leaves | [F] pin.md: walks slowly while drawing; [wiki] perfect shots ease the self-slow | kept |
 | Cinder (Felix) | full | Cinder Shot aim: full | 0.60 for 0.35 s after the hose (`after_t`) | [F] linwick.md gap 12: no slow seen while firing; [wiki] 0.35 s slow after release | kept (matches) |
 | Albert (Oath) | tap: full; whirl 0.55 | Brightshield 0.60 on the ground (`shield.slow`) | release: the swing's own launch | [F] bjorn.md: stands in the holds seen, can't tell if forced | kept: owner #59 (walks at the hold speed) |
-| Tenzo (Tetra) | punch hold 0.85 (`fire_slow`) | Quakefall 0.55 (`slam.walk_k`) | release: the punch / slam travel | [F] breah.md: walks while the fist recovers; jump while charging leaps | kept (silent on the hold walk) |
+| **Tenzo (Tetra)** | tap window 0.85 (`fire_slow`); **punch hold planted (`lmb.walk_k` 0, was 0.85)** | **Quakefall charge planted (`slam.walk_k` 0, was 0.55)** | release: the punch / slam travel, walking at 0.85 while the fist recovers | [F] frames (4 fps): 0 px with the lane up (0118-0119); 0-2 px a frame through three charges (0253-0256, 0265-0268, 0315-0320); walks while the fist recovers | **changed** 2026-11-12: asserted in `--dolm-combo-check`; the hop keeps the run he charged from (owner item 61) |
 | Grimble (Kingpin) | 0.80 (default) | hook out 0.15-0.25; Broadside 0.3 / 0.2 | full between shots | [F] dredge.md: walks between shots, no number | kept; Broadside: owner item 36 |
 | Vex (Ghost) | full (`fire_slow` 1.0) | Longneedle: planted (`self_slow` 1.0) | full | [F] venator.md: no fire slow; stands still through the cast | kept (matches) |
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84) | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check` |
-| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full on main | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (ext/sparkle-dash-feel adds 0.82 on its own) |
+| **Sparkle (Joule)** | 0.90 (`fire_slow`) | **Storm Rod hold planted (`rmb.walk_k` 0, was full)** | full | [F] frames (5 fps): 0-1 px a frame through all three holds (0044-0048, 0058-0062, 0079-0083), camera still | **changed** 2026-11-12: asserted in `--mage-combo-check` |
 | Motley (Void) | 0.90 (`fire_slow`) | Snap wind-up 0.75 (`cast_slow`); Trade drift 0.3 | full after the 0.15 s recovery | [patch] Snap slows Void while casting (25% less) | kept |
 | Neve (Celeste) | full (kit-fired darts; the weapon's `fire_slow` 0.9 never applies) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
 | Meeko (Elluna) | full (`fire_slow` 1.0) | Burrseed wind-up 0.5 (`wind_move`) | 0.5 until the seed leaves | [F] mooshmoosh.md: keeps walking while firing | kept |
 | Sable (Shiv) | 0.90 (`fire_slow`) | none | full | [F] dancer.md: 77-86 px/s while firing against 113 (0.68-0.76), "not confirmed" | kept (unconfirmed; see below) |
 
 Open, not built (suggestions): Sable may slow more while firing (0.7-0.75 if a straight-run clip confirms it);
-Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) and Tenzo's punch hold have no
-source number either way.
+Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) has no source number either way.
+Tenzo's punch hold and Quakefall charge and Sparkle's Storm Rod hold were measured on the frames on 2026-11-12
+(ext/holds-stand-parity): the source stands in every one, so all three are planted now (docs/KIT_PARITY.md, hold walk).
 
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 

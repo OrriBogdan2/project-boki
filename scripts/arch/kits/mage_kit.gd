@@ -548,6 +548,11 @@ func rmb_charge_full() -> float:
 func rmb_auto_t() -> float:
 	return float(rmb_def().get("auto", float(rmb_def()["hold"]) + 0.2))
 
+## `rmb.walk_k`: her share of the run while the Storm Rod is held (0 = planted, as the source: she stands
+## through every hold seen).
+func move_k() -> float:
+	return float(rmb_def()["walk_k"]) if rmb_down else 1.0
+
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:
 		_summon_rod()

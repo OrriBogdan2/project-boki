@@ -132,6 +132,55 @@ func _breah() -> void:
 	)
 	ok("lmb: the punch steps her forward about half a body", P.pos.x - x0 > 0.35, "step %.2f" % (P.pos.x - x0))
 	ok("lmb: the lane is gone after the punch", not AimKit.shown(P, "punch"))
+	# hold walk (footage breah 0118-0119, 4 fps): she stands through the punch hold, and walks again once it lands
+	reset.call()
+	aim_at(P, home + Vector3(5, 0, 0))
+	var walk_in := func(): P.inp["move"] = Vector2(0, 1)
+	var hold_walk := func():
+		P.inp["fire"] = true
+		walk_in.call()
+	var charge_walk := func():
+		P.inp["sec_hold"] = true
+		walk_in.call()
+	step(m, 0.3, walk_in)
+	var tap_dz := P.pos.z
+	P.inp["fire"] = true
+	step(m, 0.3, hold_walk)      # the tap window, then the lane comes up
+	tap_dz = P.pos.z - tap_dz
+	step(m, 0.15, hold_walk)     # the brake
+	var held_dz := P.pos.z
+	step(m, 0.35, hold_walk)
+	held_dz = P.pos.z - held_dz
+	P.inp["fire"] = false
+	var walk_dz := P.pos.z
+	step(m, 0.6, walk_in)
+	walk_dz = P.pos.z - walk_dz
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"lmb hold (footage 0118-0119): she stands through the punch hold with a move key down (lmb.walk_k 0)",
+		absf(held_dz) < 0.02 and tap_dz > 0.5, "held %.2f m, tap window %.2f m" % [held_dz, tap_dz]
+	)
+	ok("lmb hold: once the punch lands she walks again", walk_dz > 1.0, "%.2f m in 0.6 s" % walk_dz)
+	# hold walk (footage 0253-0258, 0265-0268, 0315-0320): he stands through the Quakefall charge too; the hop still
+	# keeps the run he charged from (item 61, _hop_item61)
+	reset.call()
+	aim_at(P, home + Vector3(10, 0, 0))
+	step(m, 0.3, walk_in)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.25, charge_walk)  # the tap window and the brake
+	var charge_dz := P.pos.z
+	step(m, 0.18, charge_walk)
+	charge_dz = P.pos.z - charge_dz
+	P.inp["sec_hold"] = false
+	P.inp["move"] = Vector2.ZERO
+	step(m, 1.0)                                                      # the hop lands before the next row
+	K.slams = 0                                                       # the item 61 rows count from here
+	K.slam.hops = 0
+	ok(
+		"rmb hold (footage 0253-0320): he stands through the Quakefall charge with a move key down (slam.walk_k 0)",
+		absf(charge_dz) < 0.02, "%.2f m" % charge_dz
+	)
 	# the lane is narrow: a foe beside her is not hit
 	reset.call()
 	T.teleport(home + Vector3(1.4, 0, 1.6))
@@ -352,7 +401,6 @@ func _breah() -> void:
 		) < 0.3,
 		str(e1.get("at"))
 	)
-	ok("rmb hold: she can walk slowly while charging", absf(K.move_k() - 0.55) < 0.01, "%.2f" % K.move_k())
 	ok("anim: the charge is a crouch (breah_crouch)", K.anim_id == "breah_crouch")
 	step(m, 0.17, func(): P.inp["sec_hold"] = true)
 	var e2 := AimKit.entry(P, "rmb")
