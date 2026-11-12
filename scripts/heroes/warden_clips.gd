@@ -68,6 +68,7 @@ var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -113,6 +114,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
+	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	var names := player.get_animation_library_list()
 	if names.is_empty():
@@ -360,6 +362,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
+	var act: Dictionary = d.get("act", {})
+	if act.has(String(s.get("act", ""))):
+		var clip := String(act[s["act"]])
+		return {"clip": clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(clip).length - 0.001)}
 	if bool(s.get("stun", false)) and st.has("stun"):
 		return {"clip": st["stun"], "t": -1.0}
 	var em := String(s.get("emote", ""))
@@ -449,6 +455,7 @@ func step(dt: float) -> void:
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	_air_tilt()
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 
@@ -479,6 +486,17 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 	if legs_only or legs_was:
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+
+## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
+## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
+func _air_tilt() -> void:
+	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+		return
+	var b := Basis(q)
+	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
