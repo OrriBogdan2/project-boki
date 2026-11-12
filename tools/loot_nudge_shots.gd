@@ -22,11 +22,11 @@ func run(main: Node) -> void:
 	main.get_window().size = SIZE
 	main.get_viewport().size = SIZE
 	var layer := CanvasLayer.new()
-	layer.layer = 100
+	layer.layer = 4000
 	main.add_child(layer)
 	var back := ColorRect.new()
 	back.color = Color("2a2540")
-	back.size = Vector2(SIZE)
+	back.size = main.get_viewport().get_visible_rect().size * 2.0
 	layer.add_child(back)
 	var row := UI.hbox(24)
 	row.position = Vector2(30, 30)
@@ -35,7 +35,7 @@ func run(main: Node) -> void:
 	row.add_child(_card(rec, "Before: Thumpnut ×1 in the bag", "Feed: " + preview))
 	GardenItems.use(rec, "thumpnut")
 	row.add_child(_card(rec, "After: eaten at home", "Thumpnut ×0 in the bag"))
-	for i in 6:
+	for i in 20:
 		await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(out.path_join("card.png"))
 	print("LOOT_NUDGE_SHOTS_DONE")
