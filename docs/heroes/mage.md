@@ -24,6 +24,14 @@ its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.5 m radius.
 
+**Time to knock (docs/TTK.md, 11-12).** LMB 1.00 of the source; combo 0.30 at rank 0 and 0.20 at max, kept and
+not tuned. A traced rank-0 fight: the Rod's orb gives the Wirerun back at 1.17 s, and the run at 1.27 s goes through
+a full-Static target, so it hits double and Blowouts: 64 of the 154 health in one pass, 42% of the knock. With the
+orb off the combo is 0.90 / 1.03. The source has the same loop (an orb from the spear and a dash reset through a
+full-Static foe), but gives no number for its payoff, and the check's source side leaves the loop out. Each slot
+is at the source's share of the target, so the gap is that missing payoff number, not our data. Owner options: a
+number for the source payoff, or an override for the two combo rows.
+
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 Source: Joule, `Upg:` lines. Cooldown cuts keep the source's fraction of its own cooldown (ours stay as the owner set them);
 damage steps add up. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% step is not used). The ultimate takes no
