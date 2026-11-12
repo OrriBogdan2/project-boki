@@ -35,12 +35,8 @@ static func path_for(n: int) -> String:
 func slot_info(n: int) -> Dictionary:
 	var out := {"exists": false}
 	var p := path_for(n)
-	if not FileAccess.file_exists(p):
-		return out
-	var f := FileAccess.open(p, FileAccess.READ)
-	if f == null:
-		return out
-	var parsed = JSON.parse_string(f.get_as_text())
+	var text := _whole_text(p)
+	var parsed = JSON.parse_string(text) if text != "" else null
 	if typeof(parsed) != TYPE_DICTIONARY or (parsed.get("roster", []) as Array).is_empty():
 		return out
 	var when := Time.get_datetime_dict_from_unix_time(int(FileAccess.get_modified_time(p)))
@@ -58,8 +54,9 @@ func use_slot(n: int) -> void:
 	cf.save("user://settings.cfg")
 
 func delete_slot(n: int) -> void:
-	if FileAccess.file_exists(path_for(n)):
-		DirAccess.remove_absolute(path_for(n))
+	for q in _copies(path_for(n)):
+		if FileAccess.file_exists(q):
+			DirAccess.remove_absolute(q)
 	if n == slot:
 		d = fresh()
 		newer = false
@@ -438,16 +435,10 @@ func load_game() -> void:
 func load_from(p: String) -> void:
 	d = fresh()
 	newer = false
-	if not FileAccess.file_exists(p):
+	var text := _whole_text(p)
+	if text == "":
 		return
-	var f := FileAccess.open(p, FileAccess.READ)
-	if f == null:
-		return
-	var text := f.get_as_text()
-	f.close()
 	var parsed = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return
 	var v := int(parsed.get("v", 0))
 	if v > VERSION:
 		# from a newer game: leave it alone, and never write over it
@@ -488,9 +479,28 @@ func save_game() -> void:
 	register_all()
 	if no_write or newer:
 		return
-	var f := FileAccess.open(path_for(slot), FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify(d))
+	# write a new copy, then swap it in: a game that dies at any point leaves one whole copy (0061)
+	var full := ProjectSettings.globalize_path(path_for(slot))
+	var f := FileAccess.open(full + ".tmp", FileAccess.WRITE)
+	if f == null or not f.store_string(JSON.stringify(d)):
+		return
+	f.close()
+	if FileAccess.file_exists(full):
+		DirAccess.remove_absolute(full + ".prev")
+		DirAccess.rename_absolute(full, full + ".prev")
+	DirAccess.rename_absolute(full + ".tmp", full)
+
+## A save file and the two copies a save leaves beside it while swapping (newest first).
+static func _copies(p: String) -> Array:
+	return [p, p + ".tmp", p + ".prev"]
+
+## The newest whole save among a file's copies, "" if none (docs/decisions/0061).
+static func _whole_text(p: String) -> String:
+	for q in _copies(p):
+		var text := FileAccess.get_file_as_string(q) if FileAccess.file_exists(q) else ""
+		if text != "" and typeof(JSON.parse_string(text)) == TYPE_DICTIONARY:
+			return text
+	return ""
 
 func reset() -> void:
 	d = fresh()
