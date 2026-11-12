@@ -14,6 +14,7 @@
 		"size": 0.15,
 		"color": "#ffc04a",
 		"sfx": "dj_bolt",
+		"hit": "hit_thrown",
 		"aim": "cursor",
 		"fire_slow": 0.9,
 		"desc": "A spinning shot from alternating hands every 0.45s. It flies to your cursor (8.5m at most) and fizzles there if it hits nothing.",
