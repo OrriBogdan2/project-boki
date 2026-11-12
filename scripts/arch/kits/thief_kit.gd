@@ -451,7 +451,9 @@ func _empowers(use_ex: bool) -> bool:
 		return false
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
-## The Cartwheel's speed curve, on the ground and in the air; from the air it ends where she lands.
+## The Cartwheel's speed curve, on the ground and in the air; from the air it ends where she lands. On the ground
+## its tail never drops under her (hasted) run, so the hand-over is at run speed: the source runs down into the
+## faster run with no dip (briefs/hero-ref/dancer.md: 154 -> 140 px/s into the 127-136 px/s hasted run).
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -464,6 +466,8 @@ func _tick_vault(dt: float) -> void:
 		h.roll_t = 0.0
 		return
 	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
+	if h.grounded:
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * move_k() / Loco.dash_speed(h.arch))
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
