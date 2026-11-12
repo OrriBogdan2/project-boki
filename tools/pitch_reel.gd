@@ -18,6 +18,7 @@ const FPS := 60
 const WIDTH_PX := 1920
 const HEIGHT_PX := 1080
 const MJPEG_QUALITY := 0.85      # 1.0 is huge at 1080p60; 0.85 holds up to the H.264 encode
+const CHILD_LOG_LINES := 300     # lines of a take's own output (past its PITCH_ lines) the recorder keeps
 const KIT_ROTA_S := 2.1          # s between a Hunter's ability presses in the kit shot
 const KIT_FOE_SKILL := 0.5       # the foe bot's skill (0..1): it fights back but does not hunt the Hunter down
 ## s of each shot that runs for a set time (the others run to the end of their script: 2, 3, 6)
@@ -124,13 +125,16 @@ func _film_one(s: int, k: int) -> int:
 		"--write-movie", movie, "--"]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append_array(["--pitch-child", "--pitch-shot=%d" % s, "--pitch-take=%d" % k])
+	# OS.execute keeps all of a child's output in one String, and a movie child once printed over 2 GB (the parent
+	# crashed): the child runs behind a filter that passes its PITCH_ lines and only the first of the rest.
+	var filter := "\"$0\" \"$@\" 2>&1 | awk '/^PITCH_/ {print; next} n < %d {n++; print} END {print \"PITCH_LOG lines=\" NR}'; exit ${PIPESTATUS[0]}" % CHILD_LOG_LINES
 	var out: Array = []
-	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	var rc := OS.execute("bash", ["-c", filter, OS.get_executable_path()] + args, out, true)
 	var marks := FileAccess.open(dir.path_join(stem + ".marks"), FileAccess.WRITE)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+		marks.store_line(line)
 		if line.begins_with("PITCH_") or line.contains("ERROR"):
 			print(stem, " ", line)
-			marks.store_line(line)
 	marks.close()
 	var ok := rc == 0 and FileAccess.file_exists(movie)
 	if rc != 0:

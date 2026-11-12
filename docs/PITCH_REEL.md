@@ -17,7 +17,8 @@ pitch-reel --when-live [--build REF]
   For each shot and take it starts a child Godot under the movie writer (`--write-movie`, `--fixed-fps 60`,
   `--rendering-driver vulkan`, 1920x1080): the writer hands the game exactly 1/60 s a frame, so the footage is smooth and
   looks real-time whatever the worker's speed. V-Sync is on. Recording mode "clean HUD" hides every debug overlay and tip.
-- A child writes `shot<N>_take<K>.avi` (MJPEG, quality 0.85) and `.marks` (`PITCH_MARK <part> movie_frame=<n>`): the
+- A child writes `shot<N>_take<K>.avi` (MJPEG, quality 0.85) and `.marks` (`PITCH_MARK <part> movie_frame=<n>`, then the
+  first 300 lines of its log; a filter keeps its output small, one GPU child printed over 2 GB): the
   encoder starts each clip at its first mark, so the loading before the drop and the title are cut.
 - The tool encodes H.264 (CRF 17, +faststart) and checks each clip: 1920x1080, 60 fps, black and frozen stretches.
   Debug text, FPS counters and watermarks are checked by eye on the frames.
