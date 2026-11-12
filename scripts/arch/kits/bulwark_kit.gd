@@ -513,9 +513,9 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 			if is_instance_valid(f) and not f.dead:
 				vfx("hit_trail", f.pos, dv, {"k": k}))
 
-## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
-## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
-const THROW_WIND := 0.08
+## s the hammer stays in his hand after the throw starts; with the step it's queued on (~0.04 s) it leaves
+## ~0.15 s after the press, as the arm comes through in bul_throw (its release key, 0.14 s; sheet 0033-0034)
+const THROW_WIND := 0.10
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:

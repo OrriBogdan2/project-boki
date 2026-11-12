@@ -63,6 +63,7 @@
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
+			"fade": 0.04,
 			"upper": "moving"
 		},
 		"bul_recall": {
@@ -75,7 +76,8 @@
 			"hold_from": 0.2
 		},
 		"bul_smash": {
-			"clip": "lmb_slam"
+			"clip": "lmb_slam",
+			"fade": 0.04
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -94,7 +96,8 @@
 			"upper": true
 		},
 		"bul_whirl": {
-			"clip": "shift_whirl"
+			"clip": "shift_whirl",
+			"fade": 0.04
 		},
 		"bul_charge": {
 			"clip": "shift_charge"
@@ -121,7 +124,8 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"fade": 0.04
 		},
 		"mf_xform": {
 			"clip": "fuse"
