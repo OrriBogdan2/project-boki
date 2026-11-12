@@ -123,3 +123,13 @@ static func _carry(H, row: Dictionary, box: Rect2) -> void:
 	HudStyle.text(H.c, text_at, String(rec.get("name", "Boki")), 11, name_col, 3)
 	var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 	HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 10, tag_col, 3)
+
+## `s` drawn at most `room` px wide: font 11 shrinking to 9, then cut with an ellipsis. Returns [text, size].
+static func fit(s: String, room: float) -> Array:
+	for fs in [11, 10, 9]:
+		if TextCache.width(HudStyle.BIG, s, fs) <= room:
+			return [s, fs]
+	var t := s
+	while t.length() > 1 and TextCache.width(HudStyle.BIG, t + "…", 9) > room:
+		t = t.left(t.length() - 1)
+	return [t.strip_edges() + "…", 9]

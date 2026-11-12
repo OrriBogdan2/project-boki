@@ -231,12 +231,16 @@ static func stolen_wisps(H, p: Hunter, right: float, bottom: float) -> void:
 		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
 		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
 		BokiCarry.icon(H, k.rec, k.sp["color"], SideColor.ally(), at)
-		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
+		var tag := "USED"
+		if st == "out":
+			tag = "OUT %ds" % ceili(k.summon.left)
+		var tw: float = 26.0 if st == "ready" else TextCache.width(HudStyle.BIG, tag, 11) + 10.0   # px: the key/tag
+		var line: Array = BokiCarry.fit(String(row["passive"]), STOLEN_W - STOLEN_H - 2.0 - tw)
+		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), line[0], line[1], HudStyle.INK, 3)
 		if st == "ready":
 			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
 		else:
-			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
-			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			tw -= 10.0
 			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
 			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
 		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
