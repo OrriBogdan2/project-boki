@@ -34,6 +34,9 @@ func tick(dt: float) -> void:
 		shot_seen = h.shot_n
 		shot_at = k.m.time
 		k.volleys += 1
+		# the first shot after the bloom folded back leaves exactly one shot's worth of it: its slugs shred armor
+		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
+		k.tight_pg = "%s_%d" % [h.nid, h.shot_n] if tight else ""
 		_dress_volley()
 	if not k.pull.is_empty() or h.downed:
 		return
