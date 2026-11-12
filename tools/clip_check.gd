@@ -654,6 +654,9 @@ func _flinch(id: String) -> void:
 func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
+	# (Models.hunter posed the Rig before the seed was set, on the model's instance id: the weight foot, so the Rig's
+	# height, differs between the two runs, and a hover's root bone rides the Rig (Motley's "rig_root"))
+	HunterAnim.rest_pose(m)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
