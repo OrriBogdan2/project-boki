@@ -86,6 +86,9 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
 
+The two timing checks are advisory: a fail prints `ADVISORY` and exits 0, unless `--timing-strict` is on the
+line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
+
 ## Tooling flags
 
 Not checks, but useful: `--loop-tour[=<class>]` (the core loop with a screenshot per step),
