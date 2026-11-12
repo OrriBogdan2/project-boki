@@ -74,7 +74,8 @@ func _row(main: Node, id: String) -> void:
 			why.append("no %s beat" % beats[j])
 		elif not seen[j]:
 			why.append("%s never played" % beats[j])
-		if not c.lib.has_animation(String(pose["clip"])) or float(pose["t"]) > c.lib.get_animation(String(pose["clip"])).length:
+		var pc := String(pose["clip"])
+		if not c.lib.has_animation(pc) or float(pose["t"]) > c.lib.get_animation(pc).length:
 			why.append("pose %s not in its clips" % pose["clip"])
 		elif not p["settled"] or c.cur != String(pose["clip"]) or c.xf != float(c.chan):
 			why.append("%s never settled into %s" % [beats[j], pose["clip"]])
@@ -182,7 +183,8 @@ func _shots(main: Node) -> void:
 		await tree.process_frame     # (past the boot's loading screen)
 	var flags := [{"eliminated": false}, {"eliminated": false}, {"eliminated": false}]
 	for won in [true, false]:
-		main.show_screen("results", {"extracted": won, "squad": _squad(["gunslinger", "juggernaut", "tender"], true, flags)})
+		var trio := _squad(["gunslinger", "juggernaut", "tender"], true, flags)
+		main.show_screen("results", {"extracted": won, "squad": trio})
 		for k in 90:
 			await tree.process_frame     # (past the fade)
 		var boxes: Array = main.find_children("*", "SubViewportContainer", true, false)

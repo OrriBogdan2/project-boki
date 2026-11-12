@@ -18,7 +18,7 @@ const WISP_HOVER := 1.0      # m a Wisp floats above the island
 const WISP_DIM_GLOW := 0.5   # a dimmed Wisp's rim brightness (wisp_core "glow"; the looks' own are brighter)
 const WISP_TINT := Color("5f70b0")   # a dimmed Wisp is a cool, dim blue, rim and core, whatever its team
 const STAGGER := 0.15      # s between one squad member's beat starting and the next
-const SETTLE := 0.5        # s: the beat's last frame cross-fades into the held pose (a lose beat gets up from the floor)
+const SETTLE := 0.5        # s: the beat's last frame cross-fades into the held pose (a lose one rises)
 const LEFT_THIRD := 0.28     # the squad sits this far (of the window width) left of centre, beside the card
 
 static var _poses := {}

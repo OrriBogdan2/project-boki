@@ -52,7 +52,7 @@ re-applied 18 clips the first pass had given by file date). Most idle, gait and 
 - ext/anim-nook-moment (its Nook preview card commit 119c5630e left out: the garden wave resolved it to 0245 NookRules.preview)
 - ext/anim-prop-handoff (dr_throw THROW_SKIP left out: 0245 Dredge hook has a coil-back wind-up, the hook no longer leaves on the press)
 - ext/anim-relic-puton (mask_moment.json deleted as it does; the new 1.5 s beat has no whispers, so 0245 Gil whisper line goes with it)
-- ext/anim-result-poses (its own one-Hunter results island left out: results-pose ResultsStage (squad, results_pose.json) kept; WardenBeats win/lose/board beats, the skiff board beat and checks in. Follow-up: ResultsStage could play the win/lose beats)
+- ext/anim-result-poses (its own one-Hunter results island left out: results-pose ResultsStage (squad, results_pose.json) kept; WardenBeats win/lose/board beats, the skiff board beat and checks in. Follow-up done on ext/anim-results-beats: ResultsStage plays each member's win/lose beat, staggered 0.15 s, then settles into its results pose)
 - ext/anim-stomp-drink-3 (its new stomp/revive/drink tools/anim_shots.gd clashed with the existing --anim-shots: renamed --action-shots, tools/action_shots.gd)
 - ext/anim-summon-call (brings the Boki wisp + summon system KinWisp/KinSummon (ext/wisp-summon, wisp-summon-pop) behind boki_wisps, default off; sync shape changes: the combine bumps Net.VERSION)
 - ext/anim-timing-ashwick (its 11-frame walk/run re-key lost to the 0245 Cinder appeal4 loops; 0245 RAM_IMPACT_KEY 0.36 kept over its 0.3, its check reads it)
