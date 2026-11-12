@@ -177,7 +177,7 @@ func _sight(w: World, sd: int) -> void:
 			missing.append("%s at (%d,%d) %s nearest %.1f m, %d in sight" % [ed["kind"], e.x, e.z, b, nd, nlos])
 	ok(
 			"seed %d: a patch in sight of each of the %d exits in bush biomes" % [sd, seen_n],
-			missing.is_empty() and seen_n >= 6, ", ".join(missing))
+			missing.is_empty(), ", ".join(missing))      # (Limited Ways Out: two uplinks a map, often none in bush)
 
 ## Ambush play: in the bush biomes most chests and camps have a patch beside them (within 7 m).
 func _ambush(w: World, sd: int) -> void:
