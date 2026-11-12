@@ -16,9 +16,10 @@ const STEPS := 70              # sim steps (1/60 s) watched after each trigger
 ## Hero looks (content/vfx layer kinds) that are a ring, disc or burst; a "scorch" of shape disc/cone counts too.
 const BURST_KINDS := ["flare", "vortex", "skirt"]
 ## "<hero>/<event>" pairs whose dash is itself an area move: Ostra's Lantern Trade swaps its circle, Dolm's raises a
-## rock wall, Bulwark's 360 Smash hits all round him (in the air too since item 183).
+## rock wall, Bulwark's 360 Smash hits all round him (in the air too since item 183), Gil's Ground Swim surfaces in
+## a damaging ring.
 const AREA := ["ostra/dash", "ostra/air dash", "ostra/standing dash", "dolm/dash", "dolm/standing dash",
-	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash"]
+	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash", "gil/dash", "gil/standing dash"]
 ## Moves played again and again along a path: a trail laid behind the mover (Rimewright's frost under the skate).
 const TRAILS := ["skate_frost"]
 const EVENTS := ["dash", "standing dash", "air dash", "soft landing", "hard landing", "spiked landing", "wall kick",

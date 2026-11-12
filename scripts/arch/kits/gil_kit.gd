@@ -208,7 +208,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
 	swim_t = float(dd["time"]) * float(dash_feel()["time"])
-	m.fx.burst(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)
+	m.fx.debris(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)
 	return true
 
 func _surface() -> void:
@@ -364,7 +364,7 @@ func _tick(dt: float) -> void:
 			puddles.erase(pd)
 	if swim_t > 0.0:
 		swim_t -= dt
-		m.fx.burst(ground(h.pos) + Vector3(0, 0.1, 0), col_of(dash_def()), 2, 1.5, 0.3, 4.0)
+		m.fx.debris(ground(h.pos) + Vector3(0, 0.1, 0), col_of(dash_def()), 2, 1.5, 0.3, 4.0)
 		if swim_t <= 0.0:
 			_surface()
 	if spin_t >= 0.0:
@@ -384,7 +384,7 @@ func _tick(dt: float) -> void:
 		glow_t = 0.3
 		var fw := h.aim_dir()
 		var side := Vector2(-fw.y, fw.x)
-		m.fx.burst(h.pos + Vector3(side.x * 0.35, 1.0, side.y * 0.35), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
+		m.fx.debris(h.pos + Vector3(side.x * 0.35, 1.0, side.y * 0.35), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
 
 func _drop_holds() -> void:
 	spin_t = -1.0
