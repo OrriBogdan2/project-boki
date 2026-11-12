@@ -3,7 +3,7 @@ extends RefCounted
 ## Where a rider's hands and feet are on the squad rocket, in the rocket's own frame (--drop-rocket-check and
 ## --remote-anim-check measure the ride pose with it).
 
-const GRIP_M := 0.4              # m: a hand may be this far off the grab bar (a held staff pulls one off it)
+const GRIP_M := 0.1              # m: a hand may be this far off the grab bar
 const HULL_SLACK_M := 0.02       # m: a foot may be this close to the hull's skin (it never goes inside)
 const PEG_M := 0.15              # m: a foot's height off the peg's top, up or down
 const BAR_LEN_MAX := 1.0         # the hands are no further apart than this many body sizes (arms out sideways: 1.2+)
@@ -11,12 +11,16 @@ const BAR_UP := Vector2(0.3, 1.6)      # m: the bar a rider holds is between the
 
 ## [left hand, right hand, left foot, right foot] of `h` riding `r`, as the player sees them (rocket frame).
 static func limbs(h: Hunter, r: DropRocket) -> Array:
-	var a := h.anim
 	var to_r := r.node.global_transform.affine_inverse()
+	return world(h).map(func(p: Vector3) -> Vector3: return to_r * p)
+
+## The same in the world (on the jump out, when there is no rocket to measure from).
+static func world(h: Hunter) -> Array:
+	var a := h.anim
 	var sole := Vector3(0, -HunterAnim.SHIN, 0)
-	return [to_r * DropRocket.seen_at(h, "hand.L", a.hand_l), to_r * DropRocket.seen_at(h, "hand.R", a.hand_r),
-		to_r * DropRocket.seen_at(h, "foot.L", a.knee_l if a.knee_l != null else a.leg_l, sole),
-		to_r * DropRocket.seen_at(h, "foot.R", a.knee_r if a.knee_r != null else a.leg_r, sole)]
+	return [DropRocket.seen_at(h, "hand.L", a.hand_l), DropRocket.seen_at(h, "hand.R", a.hand_r),
+		DropRocket.seen_at(h, "foot.L", a.knee_l if a.knee_l != null else a.leg_l, sole),
+		DropRocket.seen_at(h, "foot.R", a.knee_r if a.knee_r != null else a.leg_r, sole)]
 
 ## How far `p` (rocket frame) is from the bar over `h`'s peg, as drawn (it is sized to the rider's hands).
 static func off_bar(h: Hunter, r: DropRocket, p: Vector3) -> float:

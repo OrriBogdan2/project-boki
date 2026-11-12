@@ -47,7 +47,6 @@ const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go ab
 const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
-const RIDE_GRIP := 0.3                   # riding: the hands sit this share of the way from the middle to the shoulders
 const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
 
 ## How each class stands and moves.
@@ -185,6 +184,8 @@ var air_k := 0.0
 var glide_k := 0.0
 var dive_k := 0.0
 var ride_k := 0.0            # standing on a peg of the squad rocket, hands on its bar (DropRocket)
+var ride_st: Dictionary = RidePose.DEF   # its own way of riding (RidePose), read for ride_arch
+var ride_arch := ""
 var crouch_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
@@ -557,6 +558,10 @@ func update(dt: float, s: Dictionary) -> void:
 	run_k = _ease(run_k, clampf(spd / 5.5, 0.0, 1.35) if moving else 0.0, 9.0, dt)
 	var r1 := minf(run_k, 1.0)
 	ride_k = _ease(ride_k, 1.0 if s.get("ride", false) else 0.0, 8.0, dt)
+	s["ride_k"] = ride_k if ride_k > 0.01 else -1.0      # (a Hero's clips leave it to the rig till it has eased out)
+	if ride_k > 0.01 and ride_arch != arch:
+		ride_arch = arch
+		ride_st = RidePose.of(arch)
 	air_k = _ease(air_k, 0.0 if grounded or gliding or diving or ride_k > 0.01 else 1.0, 14.0, dt)
 	glide_k = _ease(glide_k, 1.0 if gliding and not diving else 0.0, 7.0, dt)
 	dive_k = _ease(dive_k, 1.0 if diving else 0.0, 6.0, dt)
@@ -574,7 +579,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var base_p := float(s.get("base", -1.0))
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
 	stun_k = _ease(stun_k, 1.0 if stun else 0.0, 8.0, dt)
-	var still := (1.0 - r1) * (1.0 - air_k) * (1.0 - glide_k)
+	var still := (1.0 - r1) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - ride_k)     # (no idle glance or fidget aboard)
 	if s.get("statue", false):
 		still = 0.0       # a statue (Rimelock): no sway, breath, glance or fidget
 	if moving or not grounded or fired < 1.0 or rolling:
@@ -813,13 +818,17 @@ func update(dt: float, s: Dictionary) -> void:
 	# skydiving: legs bent back and spread
 	hl = lerpf(hl, -0.15, dive_k); kl = lerpf(kl, -1.1, dive_k); wl = lerpf(wl, -0.3, dive_k)
 	hr = lerpf(hr, -0.15, dive_k); kr = lerpf(kr, -1.1, dive_k); wr = lerpf(wr, 0.3, dive_k)
-	# riding the rocket: braced on the peg, knees bent, the feet a little apart and level (both on the peg)
-	hl = lerpf(hl, 0.74, ride_k)
-	kl = lerpf(kl, -1.5, ride_k)
-	wl = lerpf(wl, -0.1, ride_k)
-	hr = lerpf(hr, 0.74, ride_k)
-	kr = lerpf(kr, -1.5, ride_k)
-	wr = lerpf(wr, 0.1, ride_k)
+	# riding the rocket: braced on the peg, knees bent (a bounce in them for some), the feet apart and level
+	if ride_k > 0.01:
+		var rk_knee := float(ride_st["knee"]) + sin(t * 4.0 * float(ride_st["rate"]) + seed_ph) * float(ride_st["bob"])
+		var rk_wide := float(ride_st["wide"])
+		var rk_leg := Vector3(rk_knee * 0.5, -rk_knee, rk_wide)
+		hl = lerpf(hl, rk_leg.x, ride_k)
+		kl = lerpf(kl, rk_leg.y, ride_k)
+		wl = lerpf(wl, -rk_leg.z, ride_k)
+		hr = lerpf(hr, rk_leg.x, ride_k)
+		kr = lerpf(kr, rk_leg.y, ride_k)
+		wr = lerpf(wr, rk_leg.z, ride_k)
 	# dodges
 	if dash_k > 0.01:
 		var dhl := 0.0; var dkl := 0.0; var dhr := 0.0; var dkr := 0.0
@@ -911,10 +920,13 @@ func update(dt: float, s: Dictionary) -> void:
 				pitch = lerpf(pitch, -0.35, dash_k); yaw = lerpf(yaw, 0.35, dash_k)
 	# skydive: chest down (the rig tips), back arched, head up
 	pitch = lerpf(pitch, 0.3, dive_k)
-	# riding the rocket: chest to the hull, shoulders square, the wind's buffet the only sway
-	pitch = lerpf(pitch, -0.2 + sin(t * 2.3 + seed_ph) * 0.03, ride_k)
-	yaw = lerpf(yaw, 0.0, ride_k)
-	roll = lerpf(roll, sin(t * 1.7 + seed_ph) * 0.03, ride_k)
+	# riding the rocket: chest to the hull (RidePose: how close, how it stands), the wind's buffet the only sway
+	if ride_k > 0.01:
+		var rk_rate := float(ride_st["rate"])
+		var rk_sway := float(ride_st["sway"])
+		pitch = lerpf(pitch, -float(ride_st["lean"]) + sin(t * 2.3 * rk_rate + seed_ph) * rk_sway, ride_k)
+		yaw = lerpf(yaw, 0.0, ride_k)
+		roll = lerpf(roll, float(ride_st["tilt"]) + sin(t * 1.7 * rk_rate + seed_ph) * rk_sway, ride_k)
 	# stun: the upper body sways in circles
 	if stun_k > 0.01:
 		pitch += stun_k * (sin(t * 3.1) * 0.12 - 0.12)
@@ -1102,6 +1114,7 @@ func update(dt: float, s: Dictionary) -> void:
 		head.rotation.x = -pitch * 0.55 * (1.0 - tuck) + sin(ph * 2.0 + 0.6) * 0.03 * r1 - drink_k * 0.35 + fh.x + eh.x - tuck * 0.4 + flinch.x * 0.1
 		head.rotation.z = -roll * 0.5 + sin(t * 0.9 + seed_ph) * 0.03 * still + fh.z + eh.z + stun_k * sin(t * 3.1 + 1.2) * 0.2
 		head.rotation += ws.head
+		head.rotation += Vector3(-float(ride_st["nod"]), -float(ride_st["look"]), 0.0) * ride_k     # (RidePose)
 	# ================================================================ SHOULDER PIECES
 	if pad_l and arm_l:
 		pad_l.quaternion = Quaternion.IDENTITY.slerp(arm_l.basis.get_rotation_quaternion(), PAD_FOLLOW)
@@ -1584,10 +1597,6 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if dive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(-0.32, 0.12, -0.22), dive_k)
 		fr = fr.lerp(sh_r + Vector3(0.32, 0.12, -0.22), dive_k)
-	# riding the rocket: both hands on the bar close together ahead of the chest, elbows out and down
-	if ride_k > 0.01:
-		fl = fl.lerp(Vector3(sh_l.x * RIDE_GRIP, sh_l.y - 0.1, sh_l.z - DropRocket.REACH), ride_k)
-		fr = fr.lerp(Vector3(sh_r.x * RIDE_GRIP, sh_r.y - 0.1, sh_r.z - DropRocket.REACH), ride_k)
 	# ledge and mantle: reaching up, then pushing down on the lip
 	if ledge_k > 0.01:
 		var mk := float(s.get("mantle", -1.0))
@@ -1676,14 +1685,24 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		_flag(emote_k * eh_flag)
 	elif flag:
 		flag.visible = false
+	# riding the rocket: both hands on the bar ahead of the chest (RidePose: how far apart, how high), over anything
+	# else that would move them (a kit's idle hold, a fidget, the weapon's grips)
+	if ride_k > 0.01:
+		var rk_gap := float(ride_st["grip"])
+		var rk_up := float(ride_st["high"])
+		fl = fl.lerp(Vector3(sh_l.x * rk_gap, sh_l.y + rk_up, sh_l.z - DropRocket.REACH), ride_k)
+		fr = fr.lerp(Vector3(sh_r.x * rk_gap, sh_r.y + rk_up, sh_r.z - DropRocket.REACH), ride_k)
+		free_l = maxf(free_l, ride_k)
+		free_r = maxf(free_r, ride_k)
+		arm_l_t *= 1.0 - ride_k
 	# the gun goes when it's stowed: the right hand is free then (and always with nothing held)
 	free_r = maxf(free_r, 1.0 - gun_vis)
 	free_r = maxf(free_r, ws.carry_free_r())
 	if hold == "palm":
 		free_r = 1.0
 	free_l = maxf(free_l, 1.0 - gun_vis)
-	if glide_k > 0.01 or dive_k > 0.01 or ride_k > 0.01:
-		free_r = maxf(free_r, maxf(maxf(glide_k, dive_k), ride_k))
+	if glide_k > 0.01 or dive_k > 0.01:
+		free_r = maxf(free_r, maxf(glide_k, dive_k))
 	if tuck_k > 0.0:
 		fr = fr.lerp(knee_hug_r, tuck_k)
 		free_r = maxf(free_r, tuck_k * (1.0 if not melee else 0.0))

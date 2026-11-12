@@ -23,6 +23,8 @@ const SEAT_Y := -0.7           # m along the body from its middle (local +Y is t
 const GRIP_R := 0.9            # m from the axis: the grab bar over each peg
 const BAR_PAD := 0.12          # m: the bar runs this much wider than the hands that hold it
 const REACH := 0.3             # rig units: how far ahead of the shoulder the ride pose holds the hands (HunterAnim)
+const SEAT_B := "seat_basis"   # model meta: [how the rider last stood on its peg, how much of it is left (1..0)]
+const TURN_S := 0.45           # s: on the jump out, the body turns from its peg's stance into its own over this long
 
 var m: Match
 var team := 0
@@ -146,6 +148,8 @@ func detach(h: Hunter, dive := true) -> bool:
 		return false
 	if m.skydrop.is_lead(h) and riders.size() > 1:
 		m.skydrop.pass_lead(h, riders[1] if riders[0] == h else riders[0])
+	place(1.0)
+	var at := seat_of(h, _hands(h).z if h.anim != null else REACH).origin    # (it leaves from its peg, not the middle)
 	riders.erase(h)
 	h.rocket = null
 	h.riding = false
@@ -155,7 +159,7 @@ func detach(h: Hunter, dive := true) -> bool:
 	h.glide_k = 1.0 if dive else 0.0
 	h.grounded = false
 	h.drop_from = Vector2(pos.x, pos.z)
-	h.teleport(pos)
+	h.teleport(at)
 	h.vel = vel
 	if not dive:
 		h.vel.y = Hunter.DEPLOY_POP
@@ -207,7 +211,19 @@ func seat(h: Hunter, alpha: float) -> void:
 	var t := seat_of(h, hands.z)
 	h.position = t.origin
 	h.model.basis = t.basis.scaled_local(h.model.scale)
+	h.model.set_meta(SEAT_B, [t.basis, 1.0])
 	_fit_bar(h, hands)
+
+## Off the rocket (a render, after its own stance is set): the body turns from how it stood on its peg into that
+## stance over TURN_S, eased at both ends, not in one frame.
+static func ease_off(h: Hunter, dt: float) -> void:
+	var sb: Array = h.model.get_meta(SEAT_B, [])
+	if sb.is_empty() or float(sb[1]) <= 0.0:
+		return
+	sb[1] = maxf(0.0, float(sb[1]) - dt / TURN_S)
+	var own := h.model.basis.get_rotation_quaternion()
+	var q := own.slerp((sb[0] as Basis).get_rotation_quaternion(), smoothstep(0.0, 1.0, float(sb[1])))
+	h.model.basis = Basis(q).scaled_local(h.model.scale)
 
 ## What the rider's hands do, in world metres on the model's own axes (last frame's pose): x the gap between them,
 ## y their height over the feet, z how far ahead of the feet they hold, w their middle's offset to the right.

@@ -17,6 +17,7 @@ const STEER_S := 1.5             # s the leader holds the keys in check 4
 const STEERS := [Vector2.ZERO, Vector2(1, 0), Vector2(0, -1), Vector2(-0.7, 0.7)]
 const RIDE_POP_M := 0.03         # m: the most a hand or foot moves between two frames once the pose has settled
 const BLEND_POP_M := 0.3         # m: the same while the pose eases in on the launch or out on the jump
+const JUMP_S := 0.6              # s after the jump out measured (the ride pose eases out, the skydive in)
 const RIDE_S := 1.2              # s measured once the pose has settled (it eases in over about 0.5 s)
 
 var bad := 0
@@ -194,19 +195,37 @@ func _ride_pose(arch: String) -> void:
 		worst["len"] = maxf(worst["len"], fit["len"])
 		worst["up"] = fit["up"]
 		bar_hit = true
+	var shown: bool = bar_hit and P.visible and P.anim.ride_k > 0.99
+	worst["leap"] = await _jump_off(P, r)
 	var w: Dictionary = worst
 	var fmt := " (%s: grip %.2f m, bar %.2f body sizes long, %.2f m up, hull gap %.2f m, peg %.2f m,"
-	var out := (fmt + " pop %.3f / blend %.3f m)") % [
-		arch, w["grip"], w["len"], w["up"], w["hull"], w["peg"], w["pop"], w["blend"]]
-	var shown: bool = bar_hit and P.visible and P.anim.ride_k > 0.99
+	var out := (fmt + " pop %.3f / blend %.3f / jump out %.3f m)") % [
+		arch, w["grip"], w["len"], w["up"], w["hull"], w["peg"], w["pop"], w["blend"], w["leap"]]
 	ok(shown, "%s rides the rocket on show, the pose fully in%s" % [arch, out])
 	var bar_ok: bool = w["grip"] <= RideProbe.GRIP_M and w["len"] <= RideProbe.BAR_LEN_MAX
 	bar_ok = bar_ok and w["up"] >= RideProbe.BAR_UP.x and w["up"] <= RideProbe.BAR_UP.y
 	ok(bar_ok, "%s holds the bar with both hands, no T-pose%s" % [arch, out])
 	var feet_ok: bool = w["hull"] >= -RideProbe.HULL_SLACK_M and w["peg"] <= RideProbe.PEG_M
 	ok(feet_ok, "%s's feet stand on the peg, none through the hull%s" % [arch, out])
-	var smooth: bool = w["pop"] <= RIDE_POP_M and w["blend"] <= BLEND_POP_M
-	ok(smooth, "%s's ride pose has no pop in it or on the way in%s" % [arch, out])
+	var smooth: bool = w["pop"] <= RIDE_POP_M and w["blend"] <= BLEND_POP_M and w["leap"] <= BLEND_POP_M
+	ok(smooth, "%s's ride pose has no pop in it, on the way in or on the jump out%s" % [arch, out])
+
+## The jump out: how far the body starts from where it stood on its peg (not the rocket's middle), then the most a
+## hand or foot moves in a frame round the body as the ride eases out into the skydive (no snap of the body's turn).
+func _jump_off(P: Hunter, r: DropRocket) -> float:
+	if P.rocket != r:
+		return 9.0
+	var stood := P.global_position
+	r.detach(P)
+	var worst := P.pos.distance_to(stood)
+	var was: Array = []
+	for i in int(JUMP_S / Match.DT):
+		await _frame()
+		var now := RideProbe.world(P).map(func(p: Vector3) -> Vector3: return p - P.global_position)
+		for k in 4 if not was.is_empty() else 0:
+			worst = maxf(worst, (now[k] as Vector3).distance_to(was[k]))
+		was = now
+	return worst
 
 func run(mn: Node) -> void:
 	main = mn

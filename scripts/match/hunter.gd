@@ -3120,6 +3120,7 @@ func render(delta: float, alpha: float) -> void:
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
 	if riding and rocket != null: rocket.seat(self, alpha)
+	else: DropRocket.ease_off(self, delta)
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
 		var fl: Dictionary = get_meta("fling")
