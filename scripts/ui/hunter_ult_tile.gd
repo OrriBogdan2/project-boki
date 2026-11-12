@@ -25,8 +25,8 @@ static func draw(H, p: Hunter, x: float, y: float, s: float, gap: float) -> floa
 	_track(H, _state_of(xi), float(H.m.time))
 	if state == "locked":
 		H.hover_spots.append([r, "x"])
-		HudSlot.locked(H, "x", HudSlot.shaken(H, "x", r), String(xi["icon"]), xi["col"], key, false,
-				"LV %d" % int(xi["unlock"]))
+		HudSlot.locked(H, "x", r, String(xi["icon"]), xi["col"], key, false, "LV %d" % int(xi["unlock"]))
+		HudSlot.deny_pulse(H, "x", r)
 		return x + s + gap
 	var cd_left := float(xi["cd"])
 	var frac := cd_left / maxf(0.01, float(xi["cd_max"])) if cd_left > 0.0 else 0.0
@@ -34,7 +34,8 @@ static func draw(H, p: Hunter, x: float, y: float, s: float, gap: float) -> floa
 	if state == "ready":
 		HudSlot.lit(H, r, xi["col"], String(xi["icon"]), shine(float(H.m.time)))
 	elif state == "blocked":
-		HudSlot.lock_over(H, HudSlot.shaken(H, "x", r))
+		HudSlot.lock_over(H, r)
+	RecastCue.slot(H, p, "x", r)          # X again in the ult (an early landing, the late crack)
 	return x + s + gap
 
 ## How much of the shine is left at match time `now`: 1 the moment the ultimate came back, 0 once it's steady.
