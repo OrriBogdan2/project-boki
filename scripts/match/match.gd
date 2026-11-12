@@ -1794,7 +1794,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
-		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
+		if src != "zone": sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)    # (the zone ticks instead: ZoneSfx)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 

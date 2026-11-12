@@ -1,0 +1,19 @@
+{
+ "group": "zone",
+ "name": "Closing zone",
+ "script": "tools/gen_sfx_zone.py",
+ "sounds": {
+  "zone_warn": "cast",
+  "zone_hum": "loop",
+  "zone_cross": "cast",
+  "zone_tick": "impact"
+ },
+ "reach": {
+  "zone_hum": 60
+ },
+ "loops": [
+  "zone_hum"
+ ],
+ "signature": [],
+ "replaces": []
+}
