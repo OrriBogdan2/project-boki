@@ -35,7 +35,8 @@ static func lobby_pick() -> void:
 ## Lobby: a pick is final. Yours is that Hunter's own sting; a teammate's is one quiet note.
 static func lobby_lock(arch: String, mine: bool) -> void:
 	if mine:
-		Sfx.play("%s_lock" % arch, null, -3.0, 0.02)
+		var sting := "%s_lock" % arch
+		Sfx.play(sting if Sfx.ensure(sting) else "lobby_pick", null, -3.0, 0.02)
 	else:
 		Sfx.play("lobby_mate", null, MATE_DB, 0.02)
 
