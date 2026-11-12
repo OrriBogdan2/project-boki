@@ -51,7 +51,6 @@ var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var duds := 0                  # Burr Charges that reached the lane's end on nothing (tests)
-var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
 var needle_hits := 0
@@ -555,19 +554,14 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
 	super(out)
-	for key in daze_for.keys():
-		var f := instance_from_id(key) as Ent
-		var left: float = KitStatus.rattled_left(f) if f != null else 0.0
-		if left <= 0.0:
-			daze_for.erase(key)
-		elif not f.dead:
-			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), true))
+	for f in m.foes_of(h.team):
+		if KitStatus.rattled(f):
+			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
 ## crown of stars over the head (KitStatus).
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
-	daze_for[foe.get_instance_id()] = seconds
 
 ## It meets a wall and sticks: the cone points back the way it came.
 func _stick(b: Dictionary, at: Vector3) -> void:
