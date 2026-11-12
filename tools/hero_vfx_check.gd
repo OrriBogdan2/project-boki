@@ -57,6 +57,7 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_motley_trade(m, P)
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
@@ -230,6 +231,48 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## Motley's Trade in his sea teal (VFX_QUALITY 11-12 rescore, DECISIONS 11-08: every Hunter's abilities in their
+## colour): the landing end and the lobbed lantern are teal, the hot core a lighter teal, and no ostra recipe, palette
+## entry or Swollen look is magenta or pink any more. Only his own end (TRADE_COL, the dash slot col) stays violet.
+func _teal(c: Color) -> bool:
+	return c.s < 0.25 or c.v < 0.15 or (c.h > 0.40 and c.h < 0.55)
+
+func _mat_cols(n: Node, out: Array) -> void:
+	if n is MeshInstance3D:
+		var mt: Material = (n as MeshInstance3D).material_override
+		if mt is StandardMaterial3D:
+			out.append((mt as StandardMaterial3D).albedo_color)
+		elif mt is ShaderMaterial:
+			for u: Dictionary in (mt as ShaderMaterial).shader.get_shader_uniform_list():
+				var v: Variant = (mt as ShaderMaterial).get_shader_parameter(u["name"])
+				if v is Color:
+					out.append(v)
+	for c in n.get_children():
+		_mat_cols(c, out)
+
+func _motley_trade(m: Match, P: Hunter) -> void:
+	var sea := Color("2ee6c0")
+	ok(OstraKit.TRADE_EDGE.is_equal_approx(sea),
+			"Motley Trade: the landing end is his sea teal #%s" % OstraKit.TRADE_EDGE.to_html(false))
+	var hot := OstraKit.HOT
+	ok(_teal(hot) and hot.s > 0.1 and hot.v >= sea.v and hot.s < sea.s,
+			"Motley Trade: the hot core is a lighter teal #%s" % hot.to_html(false))
+	var d := HeroVfx.data("ostra")
+	var off: Array = []
+	for k: String in d["palette"]:
+		if k == "pink" or not _teal(Color(String(d["palette"][k]))):
+			off.append(k)
+	ok(off.is_empty(), "Motley: every ostra palette colour is teal or neutral, none pink %s" % [off])
+	var looks := KitLooks.of(m)
+	for kind: String in ["star", "aura"]:
+		var cols: Array = []
+		_mat_cols(looks.hold_on("chk_" + kind, kind, P, P.pos), cols)
+		looks.release("chk_" + kind)
+		var bad: Array = cols.filter(func(c: Color): return not _teal(c)).map(func(c: Color): return c.to_html(false))
+		ok(cols.size() >= 3 and bad.is_empty(), "Motley %s: every colour is teal or neutral (%d, off %s)" % [
+				"Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad])
+	ok(_teal(OstraWell.SWOLLEN_COL), "Motley Nightwell: the Swollen core is teal, not pink")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
