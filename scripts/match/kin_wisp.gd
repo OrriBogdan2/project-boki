@@ -68,8 +68,11 @@ static func render(k: Kin) -> bool:
 	if k.wisp and KinSteal.loose(k) and k.model:
 		KinSteal.render(k)
 		return true
+	if not k.wisp:
+		WispProc.watch_carried(k)
+		return false
 	var o := k.owner_h
-	if not k.wisp or k.state != "shoulder" or o == null or o.model == null:
+	if k.state != "shoulder" or o == null or o.model == null:
 		return false
 	if k.ring:
 		k.ring.visible = false
