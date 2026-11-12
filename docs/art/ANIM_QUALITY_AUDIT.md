@@ -19,7 +19,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
     share of frames with an arm raised 60 degrees or more and sideways (T-pose).
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
-  move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
+  move speed, so a sliding foot slides against them. `--aim-runs=60,130` adds runs that many degrees off the facing
+  (the aim twist). The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
@@ -43,7 +44,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 body (not in the air, a crouch, or a move that owns the body):
 
 - **Stride and rate.** `loco.foot_mps` is the clips' measured foot speed, `loco.stride` the thigh stretch about its running
-  mean. The move speed over the foot speed sets the loco rate (0.6 to 1.4); the stretch carries the rest.
+  mean. The move speed over the foot speed sets the loco rate (0.6 to 1.8); the stretch carries the rest. A ring of
+  pinned soles (tools/art1/hunter_dir_gait.py) has no stretch: it skews its side and back loops (docs/art/LOCO_DIR.md).
 - **Arm counter-swing.** `loco.arm_swing` {"L"|"R": gain} turns that upper arm about the side axis so the
   shoulder-to-hand pitch follows minus the same side's thigh, around the arm's running mean. A static arm gets a swing
   too. It is off while an upper-body move owns the arm.

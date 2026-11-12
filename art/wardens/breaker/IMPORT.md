@@ -22,3 +22,19 @@ hatch shield kept on `x_shield` (`keep`).
   core, glossy teal glass) in its 5 moods. Mood data: warden_anim/breaker.json "mood".
 - **Old build:** the 11-08 scan-and-sculpt build (tools/art1/breaker_scan.py, breaker_art1.py, breaker_anims.py,
   `art/wardens/src/breaker_scan_joints.json`) made the skeleton and clips this swap keeps.
+
+**Gait and directional loops** (ext/anim-dirloops-albert-neve, on the clips this swap keeps): walk_f and run_f from
+`tools/art1/breaker_gait.py` (soles locked to the floor at 2.0 and 4.8 m/s), every other walk/run direction from
+`tools/art1/hunter_dir_gait.py` (docs/art/wardens/dirloops/JUDGE.md); merged into this model with `glb_add_clips.py`:
+
+    blender -b --factory-startup --python tools/art1/breaker_gait.py -- breaker.glb WORK/breaker_gait.glb
+    python3 tools/art1/glb_add_clips.py breaker.glb WORK/breaker_gait.glb walk_f,run_f
+    blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- breaker.glb WORK/breaker_dir.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55
+    python3 tools/art1/glb_add_clips.py breaker.glb WORK/breaker_dir.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br
+
+crouch_bl, crouch_br (2026-11-12, ext/anim-dir-all-1112): the recipe can't step his crouch (14 cm legs under hips 9 cm up:
+`hunter_dir_gait.py ... crouch` plants no sole), so these are crouch_b turned 45 degrees into the move, the chest on the
+source's facing: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/breaker/breaker.glb
+OUT.glb 1 1 "bl~,br~" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_bl,crouch_br`. The same
+turn of crouch_f does not help (it barely plants: its copies carry 0.2 of the speed), so fl and fr still blend f with
+l and r; a hand-made sneak is docs/DEBT.md.
