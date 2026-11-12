@@ -125,3 +125,25 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
   message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.
+
+## Hold prompts (HoldPrompt, HoldTeach)
+
+Every action that needs the key held reads **"Hold F ..."** / **"Hold Space ..."** and draws one widget,
+`HoldPrompt.ring` (`scripts/ui/hold_prompt.gd`): a dark disc with the key glyph and a ring that fills while
+the key is down. The match prompt bar (`HoldPrompt.row`, any label starting "Hold "), the farm prompt row
+(`HoldPrompt.key_hints`: trees, rocks, kin pick-up) and the glider (`HoldPrompt.air_tap`, beside you) use it.
+
+`HoldTeach` (`scripts/feel/hold_teach.gd`) answers a **tap**, a press let go within `TAP_S` 0.25 s:
+- the ring flashes to `FLASH_FILL` 35% and drains over `FLASH_S` 0.5 s, a small "Hold" pops up (`POP_S`
+  0.8 s) and a soft click plays (`CLICK_DB` -10);
+- after `HINT_AFTER` 2 taps one line says how, once per action per session: "Hold F to chop",
+  "Hold F to mine", "Hold Space to glide", "Hold F until the ring fills" (match Hold prompts). The farm
+  shows it as a toast, the match in the message lane;
+- after `DONE_N` 3 finished holds (Settings `hold_done`, kept for good) that action stops teaching: just
+  the flash, no pop, click or hint. A finished hold is 1 s of F on a tree, rock or Hold prompt (or the tree
+  coming down under a held key), or 0.6 s with the glider open and Space down.
+
+Glide keeps its rule: a fresh press in the air opens it, letting go shuts it. The jump press itself and a
+wall kick are never glide taps. Kin pick-up shows the ring but is never taught (a tap there is a pat).
+The tutorials say HOLD and wait for one: the match glide step needs 0.6 s of gliding in one go, the farm's
+chop step needs one held chop besides the wood. Check: `--hold-teach-check`.
