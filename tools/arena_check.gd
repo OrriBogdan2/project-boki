@@ -393,6 +393,9 @@ func _practice_shot() -> void:
 		return
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_window().size = Vector2i(1280, 720)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)     # the boot splash stays up when a check starts the match by hand
 	for i in 20: await main.get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("practice_page.png"))
