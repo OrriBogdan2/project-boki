@@ -4443,7 +4443,8 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press %s again in the air (or Mouse 5) and hold to glide", "jump"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"],
+	["glide", "Jump, then press %s again in the air (or Mouse 5) and hold to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
