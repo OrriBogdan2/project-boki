@@ -262,7 +262,22 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 **Open (not fixed, no source or owner line decides it):** Claire's rink skate (E held, X): the skate steers her at the wall head-on (hit within 16 degrees of the normal), so an angled bounce never shows. In `COMMITS` of the check until someone decides the skate should rebound. The case would need her skate heading to come from the keys, not the aim.
 
-**Suggestion (not built, parity):** a run is 4.4-4.9 m/s, so a plain run-and-jump bounces only when it meets the wall between 20 and about 26-35 degrees off the normal (`BOUNCE_MIN_INTO` 4 m/s and `BOUNCE_HEAD_ON_DEG` 20 are our estimates, no source number). Tenzo's and Claire's runs didn't bounce at 25 degrees (they are slowest in the air). If the source bounces off a walking jump, drop `BOUNCE_MIN_INTO` to about 3 m/s.
+**Walking jump into a wall (`walkjump@` rows, footage pass 11-11).** The question: does the source bounce a plain jump off the walk, so `BOUNCE_MIN_INTO` (4 m/s) and `BOUNCE_HEAD_ON_DEG` (20) should come down? Frames read on `ext/hero-ref-footage` (1 bh = 1.8 m), 5 fps unless noted:
+- Shiv `dancer` 0124-0135 (the jump at 303.8 s) and Brall `juggernaut` 0249-0268 (jumps and the Air Slam at 410-412.85 s): practice range, every jump starts and lands in the open, clear of the pillars and ledges. No wall contact.
+- Tetra `breah` 0869-0917 ("Wall Stacking", 4 fps, real terrain): rock walls raised against a cliff; nobody jumps into a wall.
+- Celeste `tamsin` 0489-0576 (match footage): fights among cliffs and structures; at 5 fps a jump is 2-3 frames and no plain jump is seen meeting a wall.
+- Tetra `breah` 0391 (Rockwave card): "Allies can hop over friendly Tetra walls by jumping against them". The one source line on jumping against a wall is a hop over it, not a rebound.
+
+So the footage shows no wall bounce from a walking or running jump, and no frame gives an into-speed or angle to set either constant from. Both stay as they are (estimates). `--wallmove-check` now walks Tenzo (slow kit) and Vex (fast kit) at the wall from a standstill, jumps, and holds the keys; a row fails if the bounce disagrees with `BOUNCE_MIN_INTO`:
+
+| Row | Walk speed at the jump | Into the wall | Result |
+|---|---|---|---|
+| Tenzo walkjump@25 | 4.65 m/s | 4.21 m/s | bounces |
+| Tenzo walkjump@35 | 4.65 m/s | 3.81 m/s | stops |
+| Vex walkjump@25 | 4.55 m/s | 4.12 m/s | bounces |
+| Vex walkjump@35 | 4.55 m/s | 3.73 m/s | stops |
+
+A walking jump bounces between 20 and about 30 degrees off the normal (where `cos` x 4.55-4.65 m/s drops under 4). Tenzo walks a little faster than Vex at the wall (4.65 vs 4.55 m/s), so the slow/fast split doesn't show on a walking jump. **Suggestion (not built, parity):** with no source clip either way, the 3 m/s guess would make every walking jump up to about 50 degrees off the normal ricochet. Settle it with a clip of a hunter jumping at a wall at walking speed.
 
 ## Physics pass: SUPERVIVE's game data (`physics76`)
 

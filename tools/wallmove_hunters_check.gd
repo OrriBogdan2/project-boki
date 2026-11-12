@@ -15,6 +15,10 @@ const DASH_JUMP_AT := 0.1           # s into the dash before the jump (the dash 
 const DASH_START := 2.5             # m from the wall for the dash cases (a jump out of a dash must still reach it)
 const BOUNCE_V := Vector2(6.9, 4.0) # m/s: 30 degrees off the wall's normal, into it at 6.9
 const RUN_ANGLE := 25.0             # degrees off the normal for the run bounce (a run is 4.4-4.9 m/s)
+## Walking-jump rows (docs/MOVEMENT_FEEL.md): a plain jump off the walk at these angles off the normal, for a slow
+## kit (Tenzo) and a fast one (Vex). It bounces exactly when it meets the wall at WallMoves.BOUNCE_MIN_INTO or more.
+const WALK_ROWS := ["dolm", "gunslinger"]
+const WALK_ANGLES := [25.0, 35.0]   # degrees off the wall's normal
 ## Cases a kit move is allowed to own (the move commits), per Hunter: case-name prefixes, with the cite.
 const COMMITS := {
 	# Claire's rink skate steers itself: her heading at the wall is head-on (hit within 16 degrees of the normal,
@@ -71,6 +75,8 @@ func _hunter(a: String) -> void:
 	face = hx + 9.0
 	P.set_arch(arch)        # (so P.r is this Hunter's before the first placement)
 	_runs()
+	if arch in WALK_ROWS:
+		_walk_jumps()
 	_sweeps()
 	m.queue_free()
 
@@ -252,6 +258,31 @@ func _runs() -> void:
 	P.inp["dash"] = false
 	_jump_out(ang)
 	_note("bounce:dash", _bounce_run(ang, 1.0))
+
+## Walk angled from a standstill, jump, and drift into the wall: prints "WHUNT <hunter> walkjump@<deg>" with the
+## speed into the wall, and blocks the case when the bounce disagrees with WallMoves.BOUNCE_MIN_INTO.
+func _walk_jumps() -> void:
+	for deg in WALK_ANGLES:
+		var keys := Vector2.from_angle(deg_to_rad(deg))
+		_fresh(Vector3(face - P.r - 0.02 - RUN_START + 3.0, low, z0 - 1.0), true)
+		_go(keys, 0.4)
+		var walk := Vector2(P.vel.x, P.vel.z).length()
+		P.inp["jump"] = true
+		_go(keys, DT)
+		P.inp["jump"] = false
+		var into := 0.0
+		var bounced := false
+		var t := 0.0
+		while t < 1.0 and not bounced:
+			_go(keys, DT)
+			t += DT
+			bounced = _bounced()
+			if P.wall_touch_t > 0.0 and not P.grounded:
+				into = maxf(into, P.wall_hit_v.x)
+		var case_ := "walkjump@%d" % deg
+		print("WHUNT %s %s walk %.2f into %.2f m/s %s" % [arch, case_, walk, into, "bounces" if bounced else "stops"])
+		if into <= 0.0 or bounced != (into >= WallMoves.BOUNCE_MIN_INTO):
+			blocked.append("%s {into %.2f, bounced %s}" % [case_, into, bounced])
 
 # ------------------------------------------------------------ out of each ability
 func _sweeps() -> void:
