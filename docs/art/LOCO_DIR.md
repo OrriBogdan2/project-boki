@@ -47,7 +47,9 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
 
 Then ext/anim-loco-slip: Albert's run_fl/fr turned from run_f (art/wardens/breaker/IMPORT.md): run, sprint and strafe
 fl/fr clean, 30 → 24 failing cells (Albert 22 → 16), SLIP 9 → 3 verdicts. Cells whose planted feet slip over the bar,
-whatever their first verdict: 10 → 4, all Albert's crouch diagonals (below).
+whatever their first verdict: 10 → 4, all Albert's crouch diagonals (below). Then his four crouch diagonals turned
+from crouch_f/b on their own keys (tools/art1/glb_turn_clip.py), so the sneak ring shares one length and plays synced:
+fl, fr clean, 24 → 22 failing cells (Albert 16 → 14), cells over the slip bar 4 → 1 (his crouch bl, below).
 
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
@@ -59,7 +61,7 @@ whatever their first verdict: 10 → 4, all Albert's crouch diagonals (below).
   root pushed a planted foot sideways once the legs turned (Vex: 19 cells); the turn rides the same spring now.
 - **Diagonals walked the wrong way:** Grimble, Sparkle and Meeko had only f/b/l/r walk and run loops, so a diagonal
   blended two loops out of step. hunter_dir_gait.py builds their b, l, r and diagonals on the recipe at the forward
-  loop's own sole speed; Albert's back crouch diagonals are crouch_b turned 45 deg into the move ("bl~").
+  loop's own sole speed; Albert's crouch diagonals are crouch_f/b turned 45 deg into the move (tools/art1/glb_turn_clip.py).
 - **Forward loops skated:** several shipped forward loops never planted at one speed (Tenzo's run_f 0.75..8.89 m/s, Vex's
   run_f 0.58..6.67, Neve's walk_f and run_f, Sable's and Meeko's walk_f); they are rebuilt on the ring's recipe, the
   upper body kept.
@@ -71,18 +73,18 @@ whatever their first verdict: 10 → 4, all Albert's crouch diagonals (below).
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
 ## Left (docs/DEBT.md)
-- Albert (16): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
-  copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
-  Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
-  flips it. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
-  The four slipping crouch cells, measured (slip m/s at 2.67 m/s, bar 1.20): fr 7.99 (DIR 137 deg) and fl 3.62 have
-  no loop: the ring blends crouch_f with crouch_r/l out of step. bl 1.49, br 1.45 (crouch_b turned) carry 0.6 of the
-  speed: the sneak plays at 1.62 (`crouch.speed` 1.65, measured on the x_foot-skinned body) while his soles now move
-  1.06 m/s at rate 1 (8-way median). Rate alone does not fix them: at 1.06 (rate 2.0, the cap) bl/br slip 1.31-1.32
-  and the stop out of crouch_f snaps his hammer hand (2 new SNAP); at rate 2.5 (cap 2.6) every crouch cell sits at
-  1.20-1.29, and the result swings with the rate (crouch_f's contact drifts). Turned crouch_f copies for fl/fr
-  walk 61-71 deg off at rate 1.62, 11-43 at 2.0 and 2-4 at 2.5, so in game they are not a rigid turn of crouch_f
-  (the GLB keys are: thighs identical, root turned 44 deg); not found why, not shipped.
+- Albert (14): his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and Godot 4.6 blends a bone's
+  rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop flips it (SNAP). Needs his
+  arm re-keyed or re-rested in the .glb.
+  Crouch bl slips 1.22 m/s at 2.67 m/s (bar 1.20; br, its mirror, 1.15). Measured cause, the sneak's stride against
+  the game speed: crouch_f's planted sole moves 0.55-0.65 m/s at rate 1 over a 0.19 m step (14 cm legs), so 2.67 m/s
+  (0.55 of his 4.85 run) wants rate ~4.4, past `CROUCH_RATE_MAX` 2.0; the sneak plays at 1.62 (`crouch.speed` 1.65).
+  The strike key dips the sole 1.7 cm under its stance floor at 1.4 m/s, and the planted band (lowest 10 % of the
+  foot's height) reads only those 2-3 frames of each step, so every crouch cell sits near the bar and swings with
+  the phase: `crouch.speed` 1.5 / 1.4 / 1.07 (rate 1.78 / 1.91 / 2.0) move bl to 1.14 / 1.28 / 0.75 and fl, b or br
+  over instead, 1.07 and 1.4 with new SNAP or SLIP cells. Fix: a sneak with a shorter, faster step planted flat on
+  the floor, and the crouch rate past 2.0 (ext/gait-speed-port drops `CROUCH_RATE_MAX`); then `crouch.speed` at its
+  soles' median.
 - Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
   rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
   steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,
