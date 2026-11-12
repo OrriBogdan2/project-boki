@@ -62,13 +62,13 @@ static func ostra(c: Dictionary) -> void:
 	if not bool(c["bare"]):
 		var g: Node3D = c["gear"]
 		# a wrapped headcloth rising to a soft point, with a long tail down the back
-		var wrap := func(u: float, v: float) -> Vector3:
+		var wrap_fn := func(u: float, v: float) -> Vector3:
 			var th := u * TAU
 			var w := 1.0 - v            # v runs down from the peak, as the crown of a hat does
 			var r := 0.215 * (1.0 - 0.45 * w * w)
 			return Vector3(cos(th) * r, w * 0.34, sin(th) * r * 1.05)
 		var wrap_ao := func(u: float, v: float) -> float: return lerpf(1.0, 0.8, v * v)
-		_p(g, HeroKit.surf("ostra_wrap", wrap, 28, 10, wrap_ao), pearl, HC + Vector3(0, 0.1, 0.0))
+		_p(g, HeroKit.surf("ostra_wrap", wrap_fn, 28, 10, wrap_ao), pearl, HC + Vector3(0, 0.1, 0.0))
 		_p(g, HeroKit.band("ostra_wrapband", 0.215, 0.235, 0.05, 0.015), team, HC + Vector3(0, 0.12, 0.0))
 		_p(g, HeroKit.lock_mesh("ostra_tail", [HC + Vector3(0, 0.3, 0.1), HC + Vector3(0, 0.26, 0.3), HC + Vector3(0, 0.0, 0.42), HC + Vector3(0, -0.34, 0.46)], 0.09, 0.24, Vector3.RIGHT, 0.8, 0.3), pearl)
 	# the hem: long, open at the front

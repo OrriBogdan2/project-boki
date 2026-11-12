@@ -52,11 +52,11 @@ func _init() -> void:
 	add_child(rect)
 
 ## Sets the effect's strength (0..1) and the heartbeat phase (0..1) for this frame.
-func show_danger(danger: float, beat: float) -> void:
-	k = danger
-	rect.visible = danger > 0.004
+func show_danger(amount: float, beat: float) -> void:
+	k = amount
+	rect.visible = amount > 0.004
 	if rect.visible:
-		mat.set_shader_parameter("k", danger)
+		mat.set_shader_parameter("k", amount)
 		mat.set_shader_parameter("pulse", beat)
 
 ## How deep into the abyss p is, as the tint's strength: 0 (at or above the balloon line, 0.5m under

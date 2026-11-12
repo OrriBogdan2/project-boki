@@ -186,8 +186,8 @@ static func chime() -> AudioStreamWAV:
 	for nt in notes:
 		var f := 440.0 * pow(2.0, (float(nt[0]) - 69.0) / 12.0)
 		var s0 := int(float(nt[1]) * rate)
-		var len := int(0.55 * rate)
-		for i in len:
+		var steps := int(0.55 * rate)
+		for i in steps:
 			var ti := float(i) / rate
 			var env := minf(1.0, ti / 0.003) * exp(-ti * 7.5)
 			var v := sin(TAU * f * ti) + sin(TAU * f * 2.01 * ti) * 0.25 + sin(TAU * f * 3.98 * ti) * 0.08

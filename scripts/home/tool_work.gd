@@ -32,7 +32,7 @@ func stop() -> void:
 	tool = ""
 
 ## Advances the swing. `held` is whether the key is still down.
-func tick(dt: float, held: bool) -> void:
+func tick(dt: float, is_held: bool) -> void:
 	if tool == "":
 		return
 	var period := HunterTool.period(tool)
@@ -45,7 +45,7 @@ func tick(dt: float, held: bool) -> void:
 	if swing_t >= period:
 		swing_t -= period
 		_landed = false
-		if not held:
+		if not is_held:
 			stop()
 
 ## Which way to face from `from`.
