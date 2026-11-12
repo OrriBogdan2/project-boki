@@ -15,7 +15,7 @@ four pillars to slam people into, a raised dais on the north side and two patche
 - **2-7** swap Hunter on the spot. **L** opens the loadout (Hunter, weapon, Boki, glove, toggles). **K** shows the kit card.
 - A downed player or bot is back up after a beat.
 
-## The training area
+## The Training Grounds
 
 From the Expedition menu at home. A safe island with target dummies and a checklist that walks you
 through every button: walk, dash, glide, shoot, E, your ultimate (open from the start here), right
@@ -23,9 +23,9 @@ click (tap, then hold), your glove (take one from the rack first), sneak, throw 
 combo, heal, stagger a big dummy, break a crate, take a found weapon off the ground, and dash off an
 edge and float back up.
 
-## The training area and the duel room
+## The Training Grounds and the duel room
 
-Open the training area from the portal's "Training area" button or the farm's Esc menu. Your whole kit works there
+Open the Training Grounds from the portal's "Training Grounds" button or the farm's Esc menu. Your whole kit works there
 against dummies, with ledges and boosters, and leaving it puts you back on the farm.
 
 A pad there takes you to the **duel room**: you against one sparring bot on an empty island. Pick its
