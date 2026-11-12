@@ -880,7 +880,12 @@ def gen_dash_flow():
             "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
             "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n"
             "The glide rows (`glide_rows` in the same file) say what a fresh glide press does after a dash, an ability and "
-            "during a hold; the numbers come from `--airdash-glide-check`.\n\n")
+            "during a hold; the numbers come from `--airdash-glide-check`.\n\n"
+            "An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte "
+            "guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): "
+            "it goes on the first step the lock lets it, if that comes within `DashFlow.BUFFER_S` (0.2 s) of the press; "
+            "a lock that runs on past that answers with the deny cue. The footage shows no such press dropped "
+            "(`--cast-lock-buffer-check`).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "

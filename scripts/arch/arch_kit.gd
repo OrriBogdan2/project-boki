@@ -297,8 +297,17 @@ func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
-func busy() -> bool:
+## The body can't act at all (down, out, stunned, dropping, riding). A kit's busy() beyond this is its own cast lock.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+
+func busy() -> bool:
+	return disabled()
+
+## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
+## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+func lock_refuses(_slot: String) -> bool:
+	return busy() and not disabled()
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >

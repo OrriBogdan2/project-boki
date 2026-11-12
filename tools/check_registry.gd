@@ -154,6 +154,7 @@ const CHECKS := {
 	# Space in a dash, Shift in a jump
 	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],
 	"--same-frame-check": ["res://tools/same_frame_check.gd", "same_frame_check", null],      # two presses, one step
+	"--cast-lock-buffer-check": ["res://tools/cast_lock_buffer_check.gd", "cast_lock_buffer_check", null],
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--pad-check": ["res://tools/pad_check.gd", "pad_check", null],      # jump pads and updrafts (PadFlight)
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185

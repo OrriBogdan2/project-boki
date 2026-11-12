@@ -266,6 +266,9 @@ func ult_running() -> bool:
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
 
+func lock_refuses(slot: String) -> bool:
+	return super.lock_refuses(slot) and not (slot == "e" and warchain.hooked())
+
 ## Owner 113.2: a held Smash never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
 ## beat, the recovery, is open: a glide there ends the rest of it.
 func no_glide() -> bool:

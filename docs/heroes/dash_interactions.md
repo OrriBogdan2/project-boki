@@ -13,6 +13,8 @@ LMB is a held input (source parity): held through a dash, RMB, E, the ult or a g
 
 The glide rows (`glide_rows` in the same file) say what a fresh glide press does after a dash, an ability and during a hold; the numbers come from `--airdash-glide-check`.
 
+An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `DashFlow.BUFFER_S` (0.2 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
+
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
 | archer | ground dash -> LMB | [?] Not determinable (re-checked 11-09): the roll is 0.1-0.15 s, under one 5 fps frame, and no draw shows in it or the Spirit Walk after it (pin frames 0349-0364, 0386-0407; open question pin.md:247); the data (supervive_kits.md:75-78), cancel-matrix-a's Cancels table and the patch lines on ext/agent-briefs (OWNER_REVIEW_1103.md:1824-1833) are silent. Kept: it goes mid-dash (owner item 51 default). | fires mid-dash |

@@ -26,3 +26,13 @@ and is never held. An earlier press is refused as before. A held press that is s
 `DashFlow.cc_left` / `_route_cc` and `KitStatus.grounded_left`. A kit's own refusal under a root or Grounded
 (the juggernaut's chain throw on E) is not held: only the slots above. Check `--cc-exit-buffer-check`. No Net
 or save change.
+
+## Addendum 2026-11-12: a kit's own cast lock
+A press during another ability's cast lock (`ArchKit.busy()` beyond `disabled()`: Motley's 1.0 s Nightwell cast,
+Kael's Riposte guard and cleave, Vex's Kitefall from the crouch to the landing) went to the kit, which refused it
+with the deny cue, so a press a hair before the lock's end was lost. Parity (briefs/hero-ref): Void acts freely
+through the Nightwell; Brall's guard and Ghost's recoveries are silent on presses; no footage shows one dropped.
+So the same rule holds: `DashFlow._route_lock` holds RMB and E (`LOCK_SLOTS`) the lock refuses
+(`ArchKit.lock_refuses`, which Kael's E on a held chain passes, owner 113.7) and replays them on the first step
+the lock lets them, at most `BUFFER_S` after the press; a lock that runs on past that answers with the deny cue
+then. X stays the ult's own recast, Q's glove goes through. Check `--cast-lock-buffer-check`.
