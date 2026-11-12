@@ -71,8 +71,8 @@ Still differs:
 - Skate: 11.5 m/s vs the footage's 10 to 11; an early release refunds up to 60% of the cooldown (owner); ice over the
   abyss only at rank 3.
 - Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
-  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
-  stacking slow ramp is ours.
+  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone
+  slows a flat 35% (no number in the source); its periodic Shatter stacks are not built.
 - Darts: four plain then three large, repeating; the footage shows a near-uniform stream and [D] puts the large
   three at the end of the burst only. The skating beams home late like the darts; the bend assert is pending on
   `ext/parity-neve-skate-home`.
