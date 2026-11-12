@@ -7877,3 +7877,4 @@ READY ext/sfx-wisp-hum-port c5187c076 (Hunter Wisp hum port, from origin/main; S
 READY ext/sfx-gil-dash-air 50396951c (gil_dash_air cue in his water + dash.json entry; Feel.dash_sound skips shared layers when own air dash plays; --sfx-set-check roster *_dash_air row: 146->148 ok, 0 fail; health --strict OK, gen_wiki --check 50 unchanged)
 READY ext/sfx-vex-ult-whistle 379b28b9f (Vex Cinderfall fall whistle rises over exactly 1.6 s, reach 40 m, sfx-set-check length row)
 READY ext/sfx-sparkle-ult-beats 0c16987a1f (Sparkle ult: cue on every beat, hover hum loop stops on drop, sfx_set_check rows)
+READY ext/farm-site-assign 74888ad943 (assign a Boki to one farm site from the site panel: Assign list, saved build_at, slot kept; farmbuild 74->89 rows)
