@@ -20,17 +20,25 @@ Sheets (not in git): `/home/boki/meshy/npc-hob-guide-1111/` `options.jpg` (3 fro
   Boki. Kind, patient, a little wry. Not picked: a heron (thin legs and neck vanish at the camera and mesh badly)
   and a sparrow (reads as a Boki).
 
-## Steps
+## Steps (r2, Nov 12: the hero-quality pass, `~/meshy/npc-spend-1112/`, RESULTS.txt there)
 
-1. Options and turnaround: `vertex-gen` with house-style refs (front, side, back in a relaxed A-pose); the views
-   cropped square at 1024 px.
-2. Meshy multi-image-to-3D from the three views (15k triangles, 2k texture, A-pose; 35 credits each).
+1. Options and turnaround: `vertex-gen` with house-style refs (front, side, back in a relaxed A-pose). The props
+   come off the sheet: Meshy image-to-image (nano-banana-pro, 9 credits each) redraws the turnaround without the
+   prop (Hob's mallet, Pell's lantern) and draws the prop alone in a three-quarter view; the views are cropped
+   square at 1024 px.
+2. Meshy multi-image-to-3D from the three views: meshy-7.1, 2k geometry, meshy-7 8k texture, remeshed to 16k
+   triangles, A-pose, enhancement on (40 credits a take; take several and keep one with a frontal face and whole
+   hands). The props: image-to-3D from their own drawing, 3k triangles (40).
 3. Meshy rig (`meshy_task_v9.py rig <out> <task> --height <m>`, 5 credits), then `animate <out> <rig_task> --actions`
-   (3 credits each): Idle 0, Stand and Chat 56 (talk), Big Wave Hello 28 (wave), Casual Walk 30, and for Hob
-   Call Gesture 29 (point) and Heavy Hammer Swing 128 (hammer).
-4. `blender -b --factory-startup --python tools/meshy/npc_bake.py -- <animation_glb.glb> art/npcs/<id>/<id>.glb
-   <id> Idle=idle Stand_and_Chat=talk ...`: clips renamed to poses, albedo only (1024 px JPEG), ~1.5 MB.
+   (3 credits a clip, up to 10 a call): Idle 3 (243), Talk Passionately 308 / Talk with Hands Open 313 (talk),
+   Big Wave Hello 28 / Wave One Hand 290 (wave), Casual Walk 30, Call Gesture 29 / Talk with Right Hand Open 314
+   (point), Heavy Hammer Swing 128 (Hob's hammer). The library has no plain point; the library Idle turns its back.
+4. `blender -b --factory-startup --python tools/meshy/npc_bake.py -- <src dir> art/npcs/<id>/<id>.glb <id>`: the
+   recipe in `tools/meshy/npc_recipes.json` names the animate outputs (merged), clip -> pose, the albedo size
+   (2048 px JPEG) and the props: each prop is skinned to its own bone, keyed in every clip to ride its carrier
+   (Hob's mallet on his back, in his right hand for "hammer"; Pell's lantern hangs upright from Pell's left hand).
+   About 17k triangles and 2-2.4 MB each.
 5. A row in `content/rules/npcs.json`; `NpcModel.new("<id>")` (or a subclass, like `HobModel`).
 
-Meshy task ids: Hob 01a1cc6a-dcbc-7294-931b-58221c420800, Pell 01a1cc6a-dce0-777c-b6be-636f72364352.
+Meshy task ids (r2): Hob 01a1cff2-7449-7692-a3d8-261a7018aeb0 (rig 01a1cff8-d7d3-71fa-93eb-140ea4462df4), mallet 01a1cfe9-eb6f-770e-8a4e-031f6f845995; Pell 01a1cfe9-1a8d-70d0-a575-8881baba2315 (rig 01a1cff2-7419-7537-bc15-28616b28ac5e), lantern 01a1cfe9-1a84-7455-9017-5d3fe979d3b5.
 Known gaps: docs/DEBT.md ("The NPCs' Meshy models").
