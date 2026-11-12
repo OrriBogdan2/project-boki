@@ -24,6 +24,7 @@ Every replaced sound keeps its name and take count, so no loader, set or kit cha
 ## Notes
 - About 1 clip in 13 came back silent or near-silent. Those were counted, set aside in `raw/rejected` and re-rolled; `build` now skips any clip under 1% peak.
 - The model tends to make short, fast-decaying sounds. The trim keeps the tail until its 20 ms RMS is 40 dB down, so several new sounds are shorter than the old ones (`archer_thread_twang` base 0.19 s vs 0.55 s). The ult sounds and `jug_guard` were re-rolled once with "rings out" prompts.
+- `jug_riposte` starts with 0.096 s of silence (`LEAD` in `tools/gen_sfx_el.py`) so its onset lands at the cleave's strike_t (0.1 s), the timing main gave the synthesised one (Kael ult commit ef783455b). The take has no sub-ms edge like the synth's; the A/B page is where to judge that.
 - Rerunning a group's synth script (`gen_sfx_lisette.py`, `gen_sfx_kael.py`...) overwrites these files; rerun `gen_sfx_el.py --relevel <names>` afterwards to restore them from the cached clips.
 - Licence: generated on the owner's ElevenLabs plan (docs/CREDITS.md), not CC0. AUDIO.md's CC0-only rule has an exception for this pilot.
 

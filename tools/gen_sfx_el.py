@@ -27,6 +27,11 @@ STYLE = ('Stylized cel-shaded fantasy action game sound effect, punchy, clean, c
 
 # name: (category, takes incl. the base file, seconds requested per take, prompt[, trim cap in seconds])
 # The cap is for sounds shorter than the API's 0.5 s minimum (pin_patter plays dozens of times per Hail Wall).
+# Silence put before a trimmed take, so its onset lands where the move's hit is (seconds). The Gilded
+# Riposte's cut lands at strike_t (content/archetypes/juggernaut.json x.strike_t = 0.1 s), the same rule
+# tools/gen_sfx_kael.py RIPOSTE_HIT follows; trim keeps 4 ms before the onset, so 0.096 s.
+LEAD = {'jug_riposte': 0.096}
+
 PLAN = {
     'dodge': ('dash', 4, 0.6,
         'a quick airy whoosh of a body sidestepping as an arrow zips past the ear, bright glassy shimmer at the '
@@ -175,7 +180,8 @@ def build(name, fresh):
             os.rename(raw, raw + '.silent')
             print('silent:', clip)
             continue
-        C.save(clip, trim(x, cap), rms_db=CATS[cat], peak_db=PEAK_DB)
+        y = np.concatenate([np.zeros(C.N(LEAD.get(name, 0.0))), trim(x, cap)])  # level() skips silence
+        C.save(clip, y, rms_db=CATS[cat], peak_db=PEAK_DB)
 
 
 if __name__ == '__main__':
