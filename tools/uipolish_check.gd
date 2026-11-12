@@ -32,6 +32,7 @@ func run(main_node: Node) -> void:
 	_removed(src)
 	await _migration()
 	_static_styles(src)
+	_theme_types()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -150,6 +151,23 @@ func _static_styles(src: Dictionary) -> void:
 			if line.contains("UI.section(") and line.contains(".lerp("):
 				dim_heads.append(path)
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
+
+## Collects engine errors (the theme build logs one and carries on).
+class ErrLog extends Logger:
+	var errors: Array = []
+	func _log_error(_fn: String, _file: String, _line: int, _code: String, rationale: String, _editor: bool, _type: int, _bt: Array) -> void:
+		errors.append(rationale)
+
+## Sentry PROJECT-BOKI-1: building the theme must not log an engine error (a native class like
+## OptionButton can't be a type variation); native types are styled as themselves, custom ones vary Button.
+func _theme_types() -> void:
+	var errs := ErrLog.new()
+	OS.add_logger(errs)
+	var t := UiTheme.build()
+	OS.remove_logger(errs)
+	ok("UiTheme.build logs no engine error", errs.errors.is_empty(), str(errs.errors))
+	ok("OptionButton is styled as itself", t.has_stylebox("normal", "OptionButton"))
+	ok("custom button types still vary Button", t.get_type_variation_base("Primary") == &"Button")
 
 func _theme_boxes() -> Dictionary:
 	var out := {}
