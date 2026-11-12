@@ -174,6 +174,7 @@ var t := 0.0
 var rng := 0                   # a per-character random stream (deterministic, so crowds don't sync)
 var seed_ph := 0.0
 var stepped := false
+var seen_steps := -1                     # the model's WardenSteps count when last read
 var slammed := false
 var flipping := false
 
@@ -681,8 +682,12 @@ func update(dt: float, s: Dictionary) -> void:
 	var ph0 := ph
 	if moving:
 		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95)) * float(st.get("cadence", 1.0))
-		if int(floor(ph / PI)) != int(floor(ph0 / PI)) and KMovesStone.gait(arch) > 0.5:
-			stepped = true
+	var clip_steps: int = model.get_meta(WardenSteps.STEPS, -1)     # (a Hero's clips plant the feet: WardenSteps)
+	var landed: bool = moving and floor(ph / PI) != floor(ph0 / PI)
+	if clip_steps >= 0:
+		landed = clip_steps != seen_steps
+	stepped = landed and KMovesStone.gait(arch) > 0.5
+	seen_steps = clip_steps
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
 	if spd > 0.6 and (grounded or rolling):
