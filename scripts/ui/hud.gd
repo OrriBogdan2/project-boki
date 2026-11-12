@@ -307,7 +307,7 @@ func _draw_all() -> void:
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
 		if not p.riding:
-			_draw_prompt(sz, p)
+			if TutorialHud.prompt_shows(m): _draw_prompt(sz, p)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
