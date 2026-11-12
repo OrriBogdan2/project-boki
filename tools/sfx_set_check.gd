@@ -15,8 +15,8 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
-##  10. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
-##      an unknown species falls back to the generic cues, and no two species share a happy take
+##  10. boki_voices: every rigged species (art/kin/*) and every species the set names has all five moods with two
+##      takes, KinVoice.cue picks them, an unknown species falls back to the generic cues, no two share a happy take
 ##   9. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
 ## Reads the files only; never touches the save.
@@ -82,12 +82,18 @@ func _check_set(path: String) -> void:
 	if group == "boki_voices":
 		_boki_voices(d["sounds"])
 
-## 7. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
+## 10. A voice set per rigged species and per species the set names (bk_<species>_<mood>): five moods, two
+## takes each, picked by KinVoice.cue, generic fallback.
 func _boki_voices(sounds: Dictionary) -> void:
 	var gaps := []
 	var same := []
 	var seen := {}
+	var species := {}
 	for sp in DirAccess.get_directories_at("res://art/kin"):
+		species[sp] = true
+	for sname in sounds:
+		species[String(sname).trim_prefix("bk_").rsplit("_", true, 1)[0]] = true
+	for sp in species:
 		for mood in KinVoice.GENERIC_CUE:
 			var want := "bk_%s_%s" % [sp, mood]
 			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
