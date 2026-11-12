@@ -193,17 +193,10 @@ building block and size to our match length.
 
 ## 11. If we later get exact data (legal routes only)
 
-With written permission from Theorycraft, or an official data source, the
-real values live in these tables (names seen in the asset registry, not
-their contents):
-
-- `CT_LokiCharacterAttributes`, `CT_PrimaryAttackSpeeds`,
-  `CT_LokiAbilityAttributes`, `CT_LokiPowerAttributes`,
-  per-hero `CT_*Attributes`, `CT_*DashScaling`,
-  `CT_StunDurationByDistance`.
-- Camera: `BP_LokiPlayerCameraManager`, player-controller camera
-  components, `GE_Gliding_CameraZoom`.
-- Main map bounds: the Skylands map level asset.
+With written permission from the reference's studio, or an official data source,
+the real values replace these estimates: hunter and ability stats, attack
+speeds, stun by distance, the camera and glide-zoom settings, and the main
+map bounds (which tables hold them: private reports repo sv/).
 
 Swap the estimates above for those values and re-flag this doc as
 measured. Until then: estimates.

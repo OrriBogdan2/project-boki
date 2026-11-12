@@ -180,4 +180,4 @@ Join the Discord: DISCORD_INVITE_LINK
 
 ## License
 
-Code and original assets: [GNU GPL v3](LICENSE). Forks are welcome and must stay open source. Vendored models in `art/vendor/` are CC0 and fonts in `fonts/` are OFL (see [docs/ASSET_CREDITS.md](docs/ASSET_CREDITS.md)). Project Boki is a fan-inspired original game and is not affiliated with the reference or Theorycraft Games.
+Code and original assets: [GNU GPL v3](LICENSE). Forks are welcome and must stay open source. Vendored models in `art/vendor/` are CC0 and fonts in `fonts/` are OFL (see [docs/ASSET_CREDITS.md](docs/ASSET_CREDITS.md)). Project Boki is an original game and is not affiliated with any other game, studio or publisher.
