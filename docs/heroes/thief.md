@@ -110,6 +110,39 @@ pass above.
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, X | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
 
+## Animation timing (ext/anim-time-sable)
+
+Every move of content/rules/warden_anim/sable.json measured in game: the kit's keyed time (KMovesDJ) drives the
+skinned clip, so wind-up start, release and recovery end are the kit's; what the clip adds is the blend in and out
+(`FADE` 0.1 s). [footage] is briefs/hero-ref/dancer.md at 5 fps (one frame = 0.2 s, so a release is only known to
+a frame); [game data] has no animation timings. "Shown" is the share of the move's clip on show (body weight times
+the new channel's crossfade) on a standing Sable at the move's first key, measured by `--dancer-combo-check`
+(tools/dancer_timing_check.gd, lines `dancer timing ...`).
+
+| Move | Source s | Ours before | Ours after |
+|---|---|---|---|
+| LMB throw (`thf_lmb_r/l`) | arm whipped out inside a 2-3 frame shot, a hit every 0.45 s [footage] | release 0.04 in the kit, but the clip was 25% shown at it (a 0.1 s blend in, twice, body and channel) | blend in 0.03: 100% shown at 0.04 |
+| Empowered LMB (`thf_primed`) | one big shot, same beat [footage] | 25% shown at 0.04 | 0.03: 100% |
+| Cartwheel (`thf_vault_r/l/f/b/twist`) | dash 0.37-0.57 s, 3 frames with recovery [footage] | 0.48 s in the kit (in the window), the crouch at 0.05 was 25% shown | 0.48 s; blend in 0.04: 100% at 0.05 |
+| Air Cartwheel (`thf_exdash`), landing (`thf_land`) | the same flick, then carried to the ground [footage] | 25% shown at their first key | 0.04 and 0.03: 100% |
+| Bola (`thf_bola`) | whirled through the 0.4-0.6 s lane, slung at its end [footage] | cast 0.4 s, sling at 0.42, whirl full by 0.1 | unchanged (already at the source) |
+| Knife (`thf_knife`) | dagger in the air one frame after the spin starts [footage] | released at 0.12; the spin (0.04-0.09) mostly hidden | blend in 0.04: spin on show; release 0.12 unchanged |
+| Encore ring (`thf_encore`) | ring grows 0.4 s [footage] | 0.4 s | unchanged |
+| Reset (`thf_reset`) | the heel-snap on the card, 0.4 s | 25% shown at 0.05 | blend in 0.04: 100% |
+
+Clip lengths against the kit's moves are within 0.06 s for every move (asserted), and the clips' peak motion lands on
+the kit's release frames (the lmb whip 0.00-0.03, the bola sling 0.37-0.40, the knife release 0.10-0.13), so no clip
+re-key is needed for the hit frames. The fade is a per-move `"fade"` in the clips file (default `FADE`), read by
+WardenClips on the way in only: the way out is unchanged.
+
+Clip re-keys the model would want (not done here: the GLB and tools/art1 are out of scope; for the
+ext/sable-v2-model branch): none for the hit frames. If its clips start with a settled pose, key the first pose of
+each move at 0.0 (the lmb whip, the vault crouch, the knife spin) so the blend has less to hide; with that the
+`"fade"` values in sable.json can go back to the default.
+
+Suggestions (ours, not built): a held LMB could cross-fade the two arms' clips on the release instead of the
+channel swap; a 0.03 s hit-stop on the empowered bolt.
+
 ## Per-slot table
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
@@ -130,6 +163,9 @@ pass above.
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve (off the global dash feel). In the air it is the same
   Cartwheel on the same curve (item 183), out of charges the class's long dash, and the shared air drag carries her
   on to the landing (owner 11-09: the sheet's 8.4 m held flat over 0.95 s flew far past the cast). From a jump it
+- Runs pitched far forward (about 0.57 rad at a run), the stride at the sheet's ~2.3 Hz (Animation timing).
+- Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
+  carried flat on its speed for 8.4 m over 0.95 s, ending where she lands (both off the global dash feel). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
 - Her dashes leave her own cyan streaks and stars, not the shared after-image. No ring or burst on a dash or a
   landing: the empowered bolt shows as a tight gold glint (a hot core and a turning four-point star) in the hand
@@ -230,6 +266,64 @@ Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and s
 `thf_land` (touching down from it: a low crouch for 0.1s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
 0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (X: blades raised as the
 ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats that loop, a fling on each: two side flings, a pirouette, two low sweeps, a twirl back with the crossbows overhead; the legs are a stance, so walking she keeps walking)
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+
+Every slot measured three ways: the source from briefs/hero-ref/dancer.md (one frame = 0.2 s, the ult strip 0.1 s), the
+kit's own release (the code and content/archetypes/thief.json, on the move clock `kmove_t`), and the v2 clip
+(art/wardens/sable/sable.glb, its clip map content/rules/warden_anim/sable.json) swept at 60 Hz: "strike" is its
+fastest hand frame, "end" its length, the moment it hands back to the legs. `--dancer-combo-check` asserts each
+release's strike within 0.05 s of the kit's (tools/clip_strike_check.gd, lines `thief clip timing ...`). The v2
+clips are keyed on KMovesDJ's beats, so no row needed a fix.
+
+| Slot | Source: wind-up / strike / active / recover | Ours: release / clip strike / end | Verdict |
+|---|---|---|---|
+| LMB tap (`thf_lmb_r`, `thf_lmb_l`) | one arm whipped out inside one frame, 2-3 frames a shot [0028-0039] | 0.00 / 0.03 / 0.70 (the other arm cocked by 0.45) | matches; asserted |
+| LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
+| Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
+| RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
+| Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
+| Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |
+| X (`thf_encore`, `thf_encore_dance`) | the ring grows 0.4 s with the blades raised, blades every 0.2-0.4 s for 2 s [f27-f50] | grows 0.4 (data), the spin ends 0.35 as it opens; 0.2 s fling beats for 2 s | matches |
+| R | the Boki Merge (`mf_xform`, ours) | 0.80 | no source |
+
+Suggestions (ours, not built): the release snaps (0.02-0.03 s) land inside the 0.1 s blend in, so a lone tap shows
+about half the whip; a per-move `"fade"` near 0.04 would show it whole (ext/anim-time-sable measured this on v1).
+## Animation timing (Nov 10: parity pass against the 5 fps footage)
+Measured through `WardenClips` (sable.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to
+locomotion 0.16 s) in `--thief-combo-check` (tools/thief_anim_time_check.gd, its `TIME` lines). "Hit" is the release
+key, "end" when the blend out is done. Source times from briefs/hero-ref/dancer.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `thf_lmb_r` `thf_lmb_l` | one arm whip a shot, a hit every 2-3 frames against the 0.45 card | 0.02 / shot key 0 / settled 0.26; held: a bolt every 0.467 (frame steps of 0.45), hands alternating | same | matches |
+| `thf_primed` | one frame of the glint, nothing to time | V 0.04 / recoil 0.24 / 0.55 | same | no source |
+| `thf_bola` | lane 0.4-0.6 s, then a whirl overhead and a sling with a lunge | 0.00 / thrown 0.42 on the clip's sling key 0.42 / 0.90 | same | matches |
+| `thf_knife` | thrown within a frame (0222 -> 0223) | 0.00 / release 0.13 on the clip key / 0.63 | same | matches |
+| `thf_arrive` (recast) | blink inside one frame (< 0.2 s) | there after 0.02 s | same | matches |
+| `thf_arrive` (forced return) | no auto-teleport seen in 5 s | on the window's end, a cartwheel in flight cut | same | no source (asserted as built) |
+| `thf_vault_*` | crouch 0.05, over the top 0.25-0.3, landing crouch, up by 0.45-0.5; 3.9-5.4 m | dash 0.48, clip 0.48 on it (push-off 0.1, turn 0.3, land 0.36) / out 0.63; 4.5 m | same | matches |
+| `thf_exdash` (flip) | 304.0-304.25 (0.25 s) | tuck 0.05, flip 0.08 -> 0.34 (0.26 s), then held flat | same | matches |
+| Air Cartwheel (carry) | lands ~0.5 s after the jump; 8.4 m over ~0.95 s, no float | dashed 0.1 s after a jump: 9.8 m, touchdown 1.22 s after the press (the 0.95 s carry holds her height, then 0.27 s of fall) | same | mismatch, not fixed here (below) |
+| `thf_land` | crouch ~0.1, up in ~0.05 | on the touchdown frame (1.23 vs 1.22), crouch 0.1, up by 0.18 | same | matches |
+| `thf_encore` `thf_encore_dance` | ring grows ~0.4 s, a blade about every 0.2 s for 2 s | cast on the press; beats 10 from 0.42 every 0.200; dance from 0.42 on the beat's clock; over 2.42 | same | matches |
+| `mf_xform` | - | - | same | no source |
+| Run cadence | ~2.3 Hz (4.5 steps/s) | 1.63 Hz at 4.65 m/s (`loco.run_speed` 4.6 against the 0.62 s run clip) | 2.26 Hz (`run_speed` 3.25; with haste the 1.5 rate cap holds it at 2.42) | fixed; asserted |
+
+The run fix is data only (content/rules/warden_anim/sable.json `loco.run_speed`, the speed the run clip plays at 1x):
+the planted foot also slides less. Alternative if the unmerged per-hero `loco.cadence` key in `WardenClips._loco`
+lands: set the cadence there and put `run_speed` back.
+
+The air carry: ours keeps her height for the whole 0.95 s and then falls, so she lands ~0.8 s later than the source
+and 1.4 m further. ext/move-dash-gaps-0244 already reworks the air Vault (no `air_dist`/`air_time`, the speed
+carried on to the landing), so it is left to that branch; the check asserts only the landing hand-off.
+
+Clip re-keys (tools/art1/sable_clips.py): none needed.
+
+Suggestions (ours, not built): the forced return is skipped when she is stunned or downed as the window ends, and the
+dagger is lost; holding the step until she is free would read better.
 
 ## Look and sound (all ours)
 
