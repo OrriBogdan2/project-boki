@@ -12,6 +12,8 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 const DT := 1.0 / 30.0
+const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
+const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
@@ -42,7 +44,7 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if WardenClips.data(art_name).is_empty():
+		if not WardenClips.data(art_name).has("loco"):      # (no clips yet, as Gil: the rig's poses drive it)
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
@@ -111,6 +113,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
 	m.free()
+	await _flinch(id)
 
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
@@ -263,13 +266,21 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			unmapped.append(km)
 	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
 
-## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand.
+## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand. A blade tip
+## that a floating companion carries (Meeko's sun circles her, off its bone) keeps its place on that companion instead.
 func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var hb := int(sync.get("blade_bone"))
 	var rest := tip.position.length()
+	var carrier: WardenCompanions.Part = null
+	var floating := sync.get("companions") as WardenCompanions
+	for part: WardenCompanions.Part in (floating.parts if floating else []):
+		for an in part.anchors:
+			if an[0] == tip:
+				carrier = part
+				rest = (an[1] as Vector3).length()
 	var far := 0.0
 	var drift := 0.0
 	var n := 0
@@ -285,6 +296,9 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			# (a weapon that grows and shrinks on its bone, Motley's orb, keeps its point)
 			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
+			if carrier:
+				hand = carrier.node.global_position
+				body_k = absf(sk.global_transform.basis.get_scale().x)
 			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
 			n += 1
 	clips.force = {}
@@ -381,3 +395,55 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+
+## A hit mid-run (item: additive flinch): the legs run exactly as they would unhit, the spine and arms flinch on top;
+## standing still, or a stagger, takes the whole body. Two identical models run the same 1 s, one of them hit.
+func _flinch(id: String) -> void:
+	var calm := await _run_hit(id, 99.0, 1.0, 4.0)
+	var hit := await _run_hit(id, 0.0, 1.0, 4.0)
+	ok(calm.size() > 0 and hit.size() == calm.size(), "%s: flinch run recorded (%d frames)" % [id, calm.size()])
+	var legs := 0.0
+	var arms := 0.0
+	for i in mini(calm.size(), hit.size()):
+		legs = maxf(legs, absf(float(hit[i]["legs"]) - float(calm[i]["legs"])))
+		arms = maxf(arms, float(hit[i]["hand"].distance_to(calm[i]["hand"])))
+	ok(legs <= FLINCH_LEGS_M, "%s: a hit mid-run leaves the legs on the run (foot slide off by %.4f m, limit %.3f)"
+			% [id, legs, FLINCH_LEGS_M])
+	ok(arms >= FLINCH_ARMS_M, "%s: a hit mid-run flinches the arms (hand moves %.3f m, min %.3f)"
+			% [id, arms, FLINCH_ARMS_M])
+	var still := await _run_hit(id, 0.0, 1.0, 0.0)
+	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
+	var mid := hit.size() / 3
+	ok(float(still[mid]["act"]) > 0.5, "%s: a hit standing still takes the whole body" % id)
+	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
+	ok(float(hit[mid]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)
+
+## 1 s of play at `speed` m/s, hit at the start (hit_t 99: none); per frame: leg bone sum, right hand, act_w.
+func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var clips: WardenClips = sync.get("clips")
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var s := {"vel": Vector3(0, 0, -speed), "face": 0.0, "grounded": true, "hit_t": 99.0, "hit_k": hit_k,
+			"hit_dir": Vector2(0, -1)}
+	m.set_meta(WardenClips.STATE, s)
+	for k in 30:
+		sync.call("_process", DT)
+	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
+	var out: Array = []
+	var t := 0.0
+	while t < 1.0:
+		s["hit_t"] = t if hit_t < 1.0 else 99.0
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		var legs := 0.0
+		for b in ["thigh.L", "thigh.R", "shin.L", "shin.R"]:
+			var o := sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
+			legs += o.x * 1.0 + o.y * 3.0 + o.z * 7.0
+		out.append({"legs": legs, "hand": hand.global_position, "act": clips.act_w})
+		t += DT
+	m.free()
+	return out

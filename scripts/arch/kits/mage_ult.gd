@@ -21,7 +21,6 @@ const RAY_FINE := 8              # the last step, cut this many times
 const RAY_ABOVE := 12.0          # m: the ray is walked from this far above the take-off...
 const RAY_BELOW := 12.0          # ... to this far below it
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
-const DUST := Color("c9b48a")
 
 var kit: MageKit
 var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free, disc}
@@ -193,12 +192,11 @@ func _take_off() -> void:
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
-	kit.m.fx.burst(from + Vector3(0, 0.2, 0), DUST, 18, 3.5, 0.5, 2.0, 1.4)
+	kit.m.fx.dust(from, 6)
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
 	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK, true, true)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 

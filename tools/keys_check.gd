@@ -10,7 +10,9 @@ extends RefCounted
 ##      dash) and hides again, repeats, always carries a key, a root or a slow catches it, Grounded
 ##      stops its dive, it drops the key
 ##   6. bots go for a key, then open a chest
-##   7. the Esc menu's Controls card: every cap is Settings.key_cap (a rebind shows at once), no key
+##   7. fewer chests: a match places chest.keep of the map's chests (the most crowded go first, no dice)
+##      and of the item caches; the vaults stay; the tutorial has exactly one, the chest step's
+##   8. the Esc menu's Controls card: every cap is Settings.key_cap (a rebind shows at once), no key
 ##      is written in its script, and every Hunter's five slots have an icon and a name
 
 var main: Node
@@ -41,7 +43,7 @@ func build(seed_i: int, extra := {}) -> Match:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus runs one part while iterating
+	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer runs one part while iterating
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--keys-part="): only = String(a).substr(12)
 	if only in ["", "carriers"]: await _carriers()
@@ -49,6 +51,7 @@ func run(main_node: Node) -> void:
 	if only in ["", "shrubling"]: await _shrubling()
 	if only in ["", "bots"]: await _bots()
 	if only in ["", "bonus"]: await _bonus()
+	if only in ["", "fewer"]: await _fewer()
 	if only in ["", "card"]: _controls_card()
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -100,6 +103,42 @@ func _carriers() -> void:
 		m.queue_free()
 		await main.get_tree().process_frame
 	ok("carriers change between seeds", sets[0] != sets[1] or sets[1] != sets[2])
+
+# ------------------------------------------------------------------ 7. fewer chests
+func _fewer() -> void:
+	var at := [Vector3(0, 0, 0), Vector3(40, 0, 0), Vector3(41, 0, 0), Vector3(0, 0, 40), Vector3(40, 0, 40)]
+	var spots := at.map(func(p): return {"pos": p})
+	var kept := KeyChest.thin(spots)
+	var crowded_gone := not kept.any(func(c): return c["pos"] == at[2])
+	ok("thinning keeps chest.keep of the spots, the crowded one first out",
+			kept.size() == KeyChest.kept(5) and crowded_gone)
+	ok("thinning is the same every time (no dice)", KeyChest.thin(spots) == kept)
+	for map_id in ["hollowcrown", "skyreach"]:
+		var m: Match = await build(5, {"map": map_id})
+		var spots_n: int = m.world.chest_spots.size()
+		var vaults: int = m.spawn_plan.active_of("vault").size()
+		var caches: int = m.spawn_plan.active_of("cache").size()
+		var train := m.chests.filter(func(c): return c.has("ride")).size()
+		var map_n := m.chests.size() - vaults - caches - train
+		var info := "%s: map %d of %d spots, vaults %d, caches %d, train %d, total %d" % [
+				map_id, map_n, spots_n, vaults, caches, train, m.chests.size()]
+		var pick := func(cat: String) -> int: return int(m.spawn_plan.cats[cat]["pick"][0])
+		ok("%s: chest.keep of the map's chests and caches, every vault" % map_id,
+				map_n == KeyChest.kept(spots_n) and caches == KeyChest.kept(pick.call("cache"))
+				and vaults == pick.call("vault"), info)
+		m.queue_free()
+		await main.get_tree().process_frame
+	var tr: Match = await build(5, {"training": true, "teams": 1})
+	var tr_spots: int = tr.world.chest_spots.size()
+	ok("training: chest.keep of its generated map's chests", tr.chests.size() == KeyChest.kept(tr_spots),
+			"%d of %d spots" % [tr.chests.size(), tr_spots])
+	tr.queue_free()
+	var tu: Match = await build(5, {"tutorial": true, "teams": 1})
+	# (ext/tutorial-abilities dropped the chest step, so the tutorial island has no chest at all)
+	ok("tutorial: no chests (the tutorial has no chest step)", tu.chests.is_empty(),
+			"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()])
+	tu.queue_free()
+	await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ 2, 3, 4. chest, box, ground, carrier death
 func _chest_and_keys() -> void:
@@ -161,11 +200,13 @@ func _chest_and_keys() -> void:
 	var K: KeyRun = m.keys
 	var car: Mob = K.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
 	var before := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+	var bonus0 := K.bonus_given      # (the death may also roll a bonus key: KeyBonus)
 	car.hurt(99999.0, P, {"src": "shot"})
 	var after := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+	var bonus := K.bonus_given - bonus0
 	ok(
-			"a carrier drops its key when it dies", after == before + 1 and not KeyCarry.carries(car),
-			"%d -> %d" % [before, after])
+			"a carrier drops its key when it dies", after == before + 1 + bonus and not KeyCarry.carries(car),
+			"%d -> %d (+%d bonus)" % [before, after, bonus])
 	m.queue_free()
 	await main.get_tree().process_frame
 
@@ -179,21 +220,24 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	for other in m.hunters:
 		if other != R:
 			other.teleport(R.pos + Vector3(30, 0, 30))     # (nobody else in grabbing range of the key)
-	var np := m.pickups.size()
+	var spot := R.pos
+	# only the key dropped here counts: a monster dying nearby in the wait drops its own loot (and key)
+	var ours := func() -> Array:
+		return m.pickups.filter(func(p):
+			return String(p["kind"]) == "ckey" and Vector3(p["pos"]).distance_to(spot) < 2.0)
 	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)      # (no random toss: it stays in reach)
 	step(m, 1.5)
-	var still_there := m.pickups.size() == np + 1
+	var still_there: bool = ours.call().size() == 1
 	var held := R.chest_keys
 	ok("a full stack (%d) leaves the key on the ground" % cap, still_there and held == cap, "keys %d" % held)
-	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
+	ok("belt adapter: count", KeyChest.count(R, "chest") == cap)
 	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
 	R.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
-	for pk in m.pickups:
-		if String(pk["kind"]) == "ckey":
-			R.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
+	for pk in ours.call():
+		R.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
 	step(m, 1.5)
-	ok("with room again it picks the key up", R.chest_keys == 1 and m.pickups.size() == np, "keys %d" % R.chest_keys)
+	ok("with room again it picks the key up", R.chest_keys == 1 and ours.call().is_empty(), "keys %d" % R.chest_keys)
 	P.chest_keys = 0
 	var box := Life.drop_box(m, P, "test")
 	box["chest_keys"] = cap + 2
@@ -524,7 +568,7 @@ func _never_sold() -> void:
 			listed.append(f)
 	ok("keys are never sold in shops", listed.is_empty(), ", ".join(listed))
 
-# ------------------------------------------------------------------ 7. the Controls card
+# ------------------------------------------------------------------ 8. the Controls card
 ## The key caps of a built card: [[actions, cap texts], ...] per row.
 func _card_caps(id: String) -> Array:
 	var v := VBoxContainer.new()
