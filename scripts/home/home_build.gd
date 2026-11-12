@@ -43,6 +43,7 @@ var ver := 0
 var mesh_t := -1.0
 var grid_t := 0.0
 var _reach_cache := {}
+var trapped := ""                       # who the last refused keeps_paths would have shut in
 var _fence_sig := ""
 var _water_sig := ""
 static var pending_toast := ""
@@ -268,6 +269,8 @@ func _reserve() -> void:
 		rs.call(36, 37, 40, 41)      # the portal and its sign
 		rs.call(33, 39, 35, 41)      # the glider rack
 		rs.call(41, 40, 43, 41)      # the ferry
+		if h.zone == GardenZones.HUB:
+			for rc in HubLayout.CLEAR: rs.callv(rc)      # the Waystone and the games board
 		rs.call(int(HomeLayout.LANDING.x) - 2, int(HomeLayout.LANDING.z) - 2, int(HomeLayout.LANDING.x) + 1, int(HomeLayout.LANDING.z) + 1)
 		for k in Data.ISLES:
 			var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
@@ -294,11 +297,18 @@ func _reserve() -> void:
 func _apply_theme() -> void:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), HomeLayout.THEMES["meadow"])
 	var b: Dictionary = BASE_BIOME.duplicate()
+	var own := {}
 	for k in ["top", "top2", "side", "deep", "leaf"]:
-		if t.has(k): b[k] = Color(String(t[k]))
+		if t.has(k):
+			b[k] = Color(String(t[k]))
+			own[k] = t[k]
 	h.world.biome = b
 	for isl in h.world.islands:
 		isl["region_fixed"] = int(t.get("region", 0))
+		if t.get("own_ground", false):
+			isl["biome_colors"] = own
+		if t.has("style"):
+			isl["biome"] = t["style"]
 
 func _apply_paint() -> void:
 	var w: World = h.world
@@ -532,12 +542,21 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
+			_merge_parts(n)
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
+			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)
 			h.add_child(n)
 			nodes[u] = n
 			for l in _lights_of(n): h.lamps.append(l)
 		(nodes[u] as Node3D).visible = not (held.get("kind", "") == "deco" and int(held.get("from", -1)) == int(u))
+
+## A placed piece's plain parts baked into one mesh per material in every group of it (a moving group keeps
+## moving: its parts merge among themselves), so a house or stall costs a few draws instead of dozens.
+func _merge_parts(n: Node3D) -> void:
+	var groups := n.find_children("*", "Node3D", true, false).filter(func(g): return not (g is MeshInstance3D))
+	for g in [n] + groups:
+		Models.merge_static(g)
 
 func _sig(e: Dictionary) -> String:
 	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e) + SnackPatch.sig(e)
@@ -626,27 +645,25 @@ func _sync_water() -> void:
 	var rim := Models.toon(Color("8d8a86"))
 	var plane := PlaneMesh.new(); plane.size = Vector2(1.02, 1.02); plane.subdivide_width = 3; plane.subdivide_depth = 3
 	var strip := PlaneMesh.new(); strip.size = Vector2(1.0, 0.26)
-	var stone := Models.sphere(0.13, 6)
+	var tiles: Array = []
+	var foam: Array = []
+	var stones: Array = []
 	for k in wt:
 		var c := HomeLayout.unkey(k)
-		var mi := MeshInstance3D.new(); mi.mesh = plane; mi.material_override = wm
-		mi.position = Vector3(c.x + 0.5, 0.05, c.y + 0.5)
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		water_root.add_child(mi)
+		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, 0.05, c.y + 0.5)))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			if wt.has(HomeLayout.key(c.x + dv.x, c.y + dv.y)): continue
 			# foam along the bank (the strip's UV.y runs from the bank out onto the water)
-			var fo := MeshInstance3D.new(); fo.mesh = strip; fo.material_override = fm
-			fo.position = Vector3(c.x + 0.5 + dv.x * 0.37, 0.065, c.y + 0.5 + dv.y * 0.37)
-			fo.rotation.y = atan2(-float(dv.x), -float(dv.y))
-			fo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			water_root.add_child(fo)
+			var turn := Basis(Vector3.UP, atan2(-float(dv.x), -float(dv.y)))
+			foam.append(Transform3D(turn, Vector3(c.x + 0.5 + dv.x * 0.37, 0.065, c.y + 0.5 + dv.y * 0.37)))
 			for t in [-0.3, 0.05, 0.38]:
 				var side: Vector3 = Vector3(-dv.y, 0, dv.x) * t
-				var s := MeshInstance3D.new(); s.mesh = stone; s.material_override = rim
-				s.position = Vector3(c.x + 0.5 + dv.x * 0.5, 0.07, c.y + 0.5 + dv.y * 0.5) + side
-				s.scale = Vector3(1.2, 0.6, 1.0)
-				water_root.add_child(s)
+				var at := Vector3(c.x + 0.5 + dv.x * 0.5, 0.07, c.y + 0.5 + dv.y * 0.5) + side
+				stones.append(Transform3D(Basis().scaled(Vector3(1.2, 0.6, 1.0)), at))
+	# one MultiMesh each: a pond is a few draws however many tiles it has
+	ZoneDress.batch(water_root, plane, wm, tiles, "Pond", Color.WHITE)
+	ZoneDress.batch(water_root, strip, fm, foam, "Foam", Color.WHITE)
+	ZoneDress.batch(water_root, Models.sphere(0.13, 6), rim, stones, "Rim", Color.WHITE)
 
 ## Kin beds you've put down are slept in by kin that don't have one of the six by the house.
 func assign_beds() -> void:
@@ -775,7 +792,7 @@ func _reach(free_cells: Array, solid_cells: Array) -> PackedByteArray:
 	var shut := {}
 	for c in solid_cells: shut[w.idx(c.x, c.y)] = true
 	var seen := PackedByteArray(); seen.resize(n)
-	var dp: Vector3 = h._house_door()
+	var dp: Vector3 = PlaceClearance.start(h)
 	var s := w.idx(int(floor(dp.x)), int(floor(dp.z)))
 	var q: Array = [s]
 	seen[s] = 1
@@ -832,6 +849,9 @@ func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Ve
 		base = _reach(free_cells, [])
 		_reach_cache[ck] = base
 	var after := _reach(free_cells, solid_cells)
+	trapped = PlaceClearance.trapped(self, base, after)
+	if trapped != "":
+		return false
 	for t in _targets(skip_b):
 		if _hit(base, t) and not _hit(after, t):
 			return false
@@ -887,7 +907,7 @@ func fits(item: Dictionary, at: Array) -> bool:
 				return false
 	if solid or door != Vector3.INF:
 		if not keeps_paths(free_cells, at if solid else [], skip_b, door):
-			why = "That would cut off a door or a path"
+			why = PlaceClearance.why(trapped)
 			return false
 	return true
 
@@ -982,7 +1002,7 @@ func reset_layout() -> void:
 
 # ------------------------------------------------------------------ build mode on / off
 func can_build() -> bool:
-	return h.visit.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
+	return not h._visiting() and ZoneLayout.live.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
 
 func toggle() -> void:
 	if active:
@@ -996,7 +1016,7 @@ func toggle() -> void:
 		return
 	if not can_build():
 		return
-	cat = "Buildings"      # B always opens on Buildings
+	cat = _tabs()[0]      # B always opens on the first tab
 	_enter()
 	Sfx.play("ui_open", null, -8.0)
 	_build_bar()
@@ -1036,6 +1056,7 @@ func take(id: String) -> void:
 	held = {"kind": "deco", "id": id, "r": 0, "from": -1}
 	_make_ghost()
 	_build_bar()
+	BuildSfx.picked()
 
 ## What a new one of this costs as a construction site ({} when it goes up at once, or comes from storage).
 func _site_cost(id: String) -> Dictionary:
@@ -1055,7 +1076,7 @@ func take_building(b: String) -> void:
 	_sync_buildings()
 	_make_ghost()
 	_build_bar()
-	Sfx.play("click")
+	BuildSfx.picked()
 
 func pick_up_at(c: Vector2i) -> void:
 	var w: World = h.world
@@ -1065,6 +1086,8 @@ func pick_up_at(c: Vector2i) -> void:
 ## Takes the piece an occupancy tag names into the hand, to move it.
 func pick_up_tag(tag: String) -> void:
 	_close_menu()
+	if h.zone == GardenZones.HUB and not (tag.begins_with("d:") and _dressing(tag)):
+		return
 	if tag.begins_with("b:"):
 		take_building(tag.substr(2))
 	elif tag.begins_with("f:"):
@@ -1079,7 +1102,12 @@ func pick_up_tag(tag: String) -> void:
 		_sync_fences()
 		_make_ghost()
 		_build_bar()
-		Sfx.play("click")
+		BuildSfx.picked()
+
+## Is the piece a tag names Garden decoration (the only thing you may move in the hub)?
+func _dressing(tag: String) -> bool:
+	var e := _deco_by_uid(int(tag.substr(2)))
+	return not e.is_empty() and String(HomeLayout.CATALOG[String(e["id"])]["cat"]) == "Garden"
 
 ## Starts an upgrade of the building with this deco uid (the Upgrades tab).
 func upgrade(uid: int) -> bool:
@@ -1124,7 +1152,7 @@ func rotate_held() -> void:
 		return
 	held["r"] = (int(held["r"]) + 1) % 4
 	anchor = Vector2i(-999, -999)
-	Sfx.play("click", null, -6.0, 0.1, 1.3)
+	BuildSfx.rotated()
 
 func can_rotate() -> bool:
 	if held.is_empty():
@@ -1283,7 +1311,7 @@ func _check_cells() -> void:
 		why = "" if ghost_ok else "Can't paint here"
 		if c["brush"] == "wild" and not ghost_ok: why = "Nothing wild to clear here"
 		if ghost_ok and c["brush"] == "water" and not keeps_paths([], good):
-			ghost_ok = false; why = "That would cut off a door or a path"
+			ghost_ok = false; why = PlaceClearance.why(trapped)
 		return
 	if held["kind"] == "deco" and c.has("line"):
 		var good: Array = []
@@ -1293,7 +1321,7 @@ func _check_cells() -> void:
 		ghost_ok = not good.is_empty()
 		why = "" if ghost_ok else cell_reason(cells[0])
 		if ghost_ok and not keeps_paths([], good):
-			ghost_ok = false; why = "That would cut off a door or a path"
+			ghost_ok = false; why = PlaceClearance.why(trapped)
 		return
 	if held["kind"] == "feeder":
 		ghost_ok = feeder_fits(cells[0], String(held["from"]))
@@ -1333,7 +1361,7 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		var f0: Dictionary = h.hecon._feeder(from)
 		if not f0.is_empty(): fc = [Vector2i(int(floor(float(f0["x"]))), int(floor(float(f0["z"]))))]
 	if not keeps_paths(fc, [t]):
-		why = "That would cut off a door or a path"; return false
+		why = PlaceClearance.why(trapped); return false
 	return true
 
 ## Holding a feeder to set down: a new one from storage (from = "") or one that's out (its id).
@@ -1354,7 +1382,7 @@ func take_feeder(kind: String, from := "") -> void:
 	cat = "Buildings"
 	_make_ghost()
 	_build_bar()
-	Sfx.play("click")
+	BuildSfx.picked()
 
 func _place_feeder() -> bool:
 	var kind := String(held["id"]); var from := String(held["from"])
@@ -1387,7 +1415,7 @@ func _place_feeder() -> bool:
 	held = {}
 	_clear_ghost()
 	apply(false)
-	_done(p, "%s set down" % Econ.fdef(f)["name"])
+	_done(p, "%s set down" % Econ.fdef(f)["name"], kind, from != "")
 	return true
 
 ## The ghost itself takes the tint too (green fits, red doesn't), so a big one that covers its own
@@ -1654,6 +1682,11 @@ func _centre_of(tag: String) -> Vector3:
 
 ## Turns a placed piece a quarter turn about its middle, with the turn shown, if it fits that way.
 func rotate_placed(tag: String) -> void:
+	BuildSfx.quiet = true
+	_turn_placed(tag)
+	BuildSfx.quiet = false
+
+func _turn_placed(tag: String) -> void:
 	if not _tag_turns(tag):
 		return
 	var piece := _node_of(tag)
@@ -1666,6 +1699,7 @@ func rotate_placed(tag: String) -> void:
 	cells = _cells_for(Vector2(centre.x, centre.z))
 	_check_cells()
 	if not ghost_ok:
+		BuildSfx.blocked(tag)
 		h._toast(why if why != "" else "No room to turn it here")
 		_cancel_held()
 		return
@@ -1677,7 +1711,9 @@ func rotate_placed(tag: String) -> void:
 		Placement.spin_from(_node_of(tag), old_yaw)
 
 func store_placed(tag: String) -> void:
+	BuildSfx.quiet = true
 	pick_up_tag(tag)
+	BuildSfx.quiet = false
 	if held.is_empty():
 		return
 	store_held()
@@ -1726,7 +1762,7 @@ func place_held() -> bool:
 	if held.is_empty() or cells.is_empty():
 		return false
 	if not ghost_ok:
-		Sfx.play("click", null, -6.0, 0.0, 0.6)
+		BuildSfx.blocked("%s %d" % [cells[0], int(held["r"])])
 		h._toast(why if why != "" else "Can't put that there")
 		return false
 	var id := String(held["id"])
@@ -1740,7 +1776,7 @@ func place_held() -> bool:
 		held = {}
 		_clear_ghost()
 		apply(false)
-		_done(HomeLayout.rect_center(HomeLayout.rect_of(id, h._d())), ("%s moved" if was else ("%s put up" if h._has_b(id) else "%s lot marked out: walk up to it to build")) % Data.BUILDINGS[id]["name"])
+		_done(HomeLayout.rect_center(HomeLayout.rect_of(id, h._d())), ("%s moved" if was else ("%s put up" if h._has_b(id) else "%s lot marked out: walk up to it to build")) % Data.BUILDINGS[id]["name"], id, was)
 		return true
 	var c: Dictionary = HomeLayout.CATALOG[id]
 	if c.has("brush"):
@@ -1778,7 +1814,7 @@ func place_held() -> bool:
 	apply(false)
 	if from < 0 and TOY_CATS.has(String(c["cat"])):
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
-	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact") if not site.is_empty() else "")
+	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact") if not site.is_empty() else "", id, from >= 0)
 	if nodes.has(popped): FarmBuildUi.pop(nodes[popped])
 	return true
 
@@ -1808,11 +1844,11 @@ func _paint(id: String, mode: String) -> bool:
 	drag = {}
 	if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(true)
-	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "")
+	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "", id)
 	return true
 
-func _done(at: Vector3, msg: String) -> void:
-	Sfx.play("build", null, -6.0, 0.1)
+func _done(at: Vector3, msg: String, id := "", moved := false) -> void:
+	BuildSfx.placed(id, moved)
 	if h.fx: h.fx.dust(at, 8)
 	Save.save_game()
 	h._refresh_top()
@@ -1854,7 +1890,7 @@ func store_held() -> void:
 		held = {}
 		_clear_ghost()
 		apply(false)
-		Sfx.play("pickup", null, -6.0)
+		BuildSfx.stored()
 		h._toast(("%s taken down: materials back" if was_site else "%s put in storage") % HomeLayout.CATALOG[String(e["id"])]["name"])
 		Save.save_game()
 	else:
@@ -1952,6 +1988,8 @@ func _open_ui() -> void:
 
 func _tabs() -> Array:
 	var out: Array = []
+	if h.zone == GardenZones.HUB:
+		return ["Garden"]      # the hub's fixtures stay where they are: you only dress it (HubLayout)
 	if FarmUnlocks.base_mode():
 		return ["Buildings", "Base", "Garden", "Island"]
 	for ct in HomeLayout.CATS:

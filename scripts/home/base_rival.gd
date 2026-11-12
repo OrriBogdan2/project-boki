@@ -29,8 +29,9 @@ static func flat(a: Vector3, b: Vector3) -> float:
 static func is_rival(a: Dictionary, b: Dictionary) -> bool:
 	return BaseLife.bond(a, b) <= float(Content.rules("base_life")["rival_at"])
 
-## A finished game (BaseBoard.record): the loser's tally grows, the winner's clears. A second loss to the
-## same winner marks a rivalry; a win by the one that marked it, over its rival, settles it.
+## A finished game (each game calls it with its winner and loser): the loser's tally grows, the winner's
+## clears. A second loss to the same winner marks a rivalry; a win by the one that marked it, over its
+## rival, settles it.
 static func result(game: String, win: Dictionary, lose: Dictionary) -> void:
 	var mine := _slot(lose, win)
 	var theirs := _slot(win, lose)
