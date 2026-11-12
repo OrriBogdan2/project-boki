@@ -74,7 +74,6 @@ func _save_strip(file: String) -> void:
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
 
-## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 ## The boulder's burst and the punch's blow, each shot on the frames after the dummy is first hurt.
 func _breah_lmb() -> void:
 	Sfx.listener = P.pos          # (the rig has no listening camera; HeroVfx draws nothing far from it)
@@ -109,6 +108,7 @@ func _after_hit(file: String, what: String) -> void:
 		_hit_frame = -1
 		T.hp = T.max_hp
 
+## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 func _breah_rmb() -> void:
 	await _reset(6.0)
 	_aim(home + Vector3(6.0, 0, 0))
