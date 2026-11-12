@@ -739,6 +739,7 @@ func _sim_fly(dt: float) -> void:
 		else:
 			pos.y = g
 			grounded = true
+			KinFlinch.land(model, mass())
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
