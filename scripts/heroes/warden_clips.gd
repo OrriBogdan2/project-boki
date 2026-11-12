@@ -594,6 +594,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	if moving and move_w <= 0.001:     # (moving off: the rings pick up at the pose nearest the idle, WardenStart)
 		_p("walk_seek/seek_request", float(start_ph[0]) * walk_len)
 		_p("run_seek/seek_request", float(start_ph[1]) * run_len)
+		dir_pos = dir     # (and the way he goes: from idle the rings have no way yet, never sweep in from the last one)
+		dir_v = Vector2.ZERO
 		starting = true
 	elif on_run and run_w <= 0.001:     # (a ring at no weight stands still: the run comes in on the walk's stride)
 		var walk_ph := float(tree.get("parameters/walk/current_position")) / walk_len

@@ -1,5 +1,5 @@
 extends RefCounted
-## --loco-dir-shots --shots-dir=<dir> [--wardens=a,b] [--states=walk,crouch_walk] [--tag=<text>]: the footage for
+## --loco-dir-shots --shots-dir=<dir> [--wardens=a,b] [--states=walk,run,crouch_walk] [--tag=<text>]: the footage for
 ## --loco-dir-check (docs/art/LOCO_DIR.md). Per Hunter and state, eight copies in a 4 x 2 grid move in the eight
 ## directions of the check off a facing toward the camera (a front 3/4 view), each on its own checker floor that
 ## scrolls under it at the ground speed, so a planted foot that slides or steps the wrong way shows against the squares.
@@ -54,8 +54,8 @@ func _film(main: Node, id: String, st: String, out: String, tag: String) -> void
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ck := 1.0 if st.begins_with("crouch") else 0.0
 	var top := float(HunterMove.of(id)["speed"])
-	var spd := top * CHECK.CROUCH_K if ck > 0.0 else float(WardenClips.data(WardenGlb.art(id))["loco"].get("walk_speed",
-			2.2))
+	var walk := float(WardenClips.data(WardenGlb.art(id))["loco"].get("walk_speed", 2.2))
+	var spd := top * CHECK.CROUCH_K if ck > 0.0 else (walk + top) / 2.0 if st == "run" else walk
 	var copies: Array = []     # [model, HunterAnim, sync, velocity, floor material]
 	var gap := CELL
 	for i in ORDER.size():
