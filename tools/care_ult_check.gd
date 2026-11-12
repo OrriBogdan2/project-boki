@@ -262,6 +262,7 @@ func rimewright() -> void:
 	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
 		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
 		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	_rime_ring_is_hit(K, T, ring, float(xd["radius"]))
 	var rink_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
 	var flash0 := float((rink_sm as ShaderMaterial).get_shader_parameter("flash"))
 	ok("tm X: the frost edge flashes as the rink opens", flash0 > 0.5, "flash %.2f" % flash0)
@@ -280,21 +281,14 @@ func rimewright() -> void:
 	ok("tm X: inside the shell she is invulnerable and rooted, and nothing fires", P.hp >= php - 0.01
 		and _moved(P, p0) < 0.2 and m.shots.size() == n_shots, "hp %.0f moved %.2f" % [P.hp - php, _moved(P, p0)])
 	var slow1 := T.slow_k
-	var fill1 := float(AimKit.entry(P, "x").get("fill", 0.0))
+	var hot1 := float(AimKit.entry(P, "x").get("hot", 0.0))
 	step(m, 1.6)
 	ok("tm X: the slow on a foe in the rink stacks the longer they stay (small mechanic)", T.slow_k > slow1 + 0.15
 		and T.slow_k <= float(xd["slow_max"]) + 0.001 and K.chilled(T), "%.2f -> %.2f" % [slow1, T.slow_k])
 	ok(
-			"tm X: the countdown fill (and the cracks) brighten as it builds",
-			float(AimKit.entry(P, "x").get("fill", 0.0)) > fill1 + 0.3)
-	# care_disc's body alpha at the centre is fill * 0.18 * 1.6; the zone rule caps it at 0.25 (docs/VFX_QUALITY.md)
-	var rink_fill := UltLook.RINK_FILL + UltLook.RINK_FILL_CRACK
-	var disc_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
-	var live := float((disc_sm as ShaderMaterial).get_shader_parameter("fill"))
-	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
-	ok("tm X: the rink is a lit rim over a soft inside, its hit ring a thin band (no screen-wide cyan)",
-			rink_fill * 0.18 * 1.6 <= 0.25 and live <= rink_fill + 0.001 and float(AimKit.entry(P, "x")["band"]) > 0.0,
-			"fill %.2f (max %.2f)" % [live, rink_fill])
+			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
+			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
+	var flash1 := float(((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override.get_shader_parameter("flash"))
 	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
 	step(m, 1.3)
@@ -350,6 +344,23 @@ func _rime_ice_body() -> void:
 
 
 ## X again: early (before the last 0.75 s) just breaks the shell; late cracks it open at two thirds.
+## The rink as drawn is the rink that hits: a thin lit ring (no filled disc) whose outer edge is the data
+## radius, a foe whose body reaches inside it is in, one just past it is out; the centre is the frost bud.
+func _rime_ring_is_hit(K: RimewrightKit, T: Ent, ring: Dictionary, radius: float) -> void:
+	var at: Vector3 = K.rime["at"]
+	var band := float(ring.get("band", 0.0))
+	ok("tm X: the rink is a thin ring at the hit radius, no countdown fill, the frost bud at its centre",
+		band > 0.0 and band <= 0.3 and float(ring.get("fill", -1.0)) < 0.0
+		and absf(float(ring.get("r", 0.0)) - radius) < 0.01 and K.ulk().showing("bud"), "band %.2f" % band)
+	var was := T.pos
+	T.pos = at + Vector3(radius + T.r - 0.05, 0.0, 0.0)
+	var edge_in: bool = T in K.foes_in(at, radius)
+	T.pos = at + Vector3(radius + T.r + 0.05, 0.0, 0.0)
+	var edge_out: bool = not T in K.foes_in(at, radius)
+	T.pos = was
+	ok("tm X: drawn == hit: a body touching the ring is in the rink, one just past it is out", edge_in and edge_out)
+
+
 func _rime_recasts() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]

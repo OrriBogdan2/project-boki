@@ -2,21 +2,23 @@ class_name UltLook
 extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
 ##   Pip, Hearth Call: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
-##   Claire, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
-##   crystals on its edge), the light pillar of the crash and the ice block on each stunned foe. Her
-##   body is IceBody's while sealed.
-## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted),
-## keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
+##   Claire, Rimelock: the rink (a faint sheet of ice whose cracks glow as it builds, a fringe of
+##   crystals on its edge; the lit ring at the hit radius is the kit's AimKit circle), the frost bud
+##   at her feet, the light pillar of the crash and the ice block on each stunned foe. Her body is
+##   IceBody's while sealed.
+## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted), keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
+## keep(key, "frostbud", at, {grow, crack}),
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
 
 const FRINGE := 18            # crystals round the rink's edge
-const RINK_FILL := 0.3        # the rink's body (care_disc fill): alpha about 0.09 at its centre, 0.17 by the rim
+const RINK_FILL := 0.35       # rink body strength (doubles by the crash): alpha 0.1-0.2 at the centre, the zone rule
 const RINK_PULSE_T := 0.3     # s the frost edge flashes once the rink is fully open, fading out
-const RINK_FILL_CRACK := 0.1  # added at full crack (0.12 / 0.23): the lines and lit rim carry the countdown
+const BUD_SPIKES := 6         # low ice spikes the frost bud throws out from her feet
+const BUD_REACH := 0.95       # m: how far those spikes reach, about half her height (not the rink's size)
 
 
 func _build(kind: String) -> Node3D:
-	if not kind in ["tether", "rink", "pillar", "block"]:
+	if not kind in ["tether", "rink", "frostbud", "pillar", "block"]:
 		return super._build(kind)
 	made += 1
 	var n := Node3D.new()
@@ -26,6 +28,8 @@ func _build(kind: String) -> Node3D:
 			_build_tether(n)
 		"rink":
 			_build_rink(n)
+		"frostbud":
+			_build_bud(n)
 		"pillar":
 			var col := Models.cyl(1.0, 1.0, 1.0, 16)
 			_off(Models.part(n, col, glow_mat(Color("bfeaff", 0.75), 1.0), Vector3(0, 0.5, 0)))
@@ -71,6 +75,25 @@ func _build_rink(n: Node3D) -> void:
 		c.rotation = Vector3(0.35 * cos(float(i) * 1.9), a, 0.45 * sin(a))
 
 
+## The frost bud on her ice body: six low spikes splayed out from her feet in a star and six short
+## crystals standing close round her shins, so the centre of the rink is a crystal, not a filled disc.
+func _build_bud(n: Node3D) -> void:
+	for i in BUD_SPIKES:
+		var a := TAU * (float(i) + 0.5) / BUD_SPIKES
+		var out := Vector3(cos(a), 0.35, sin(a)).normalized()
+		_bud_crystal(n, Vector3(cos(a), 0.0, sin(a)) * 0.25, out, Models.crystal(0.11, BUD_REACH, 4), Color("aee8ff"))
+		var b := TAU * float(i) / BUD_SPIKES
+		var up := Vector3(cos(b) * 0.35, 1.0, sin(b) * 0.35).normalized()
+		_bud_crystal(n, Vector3(cos(b), 0.0, sin(b)) * 0.3, up, Models.crystal(0.08, 0.6, 4), Color("e8ffff"))
+
+
+## One crystal of the bud, its foot at `foot`, pointing along `dir` (Models.crystal is centred on its middle).
+func _bud_crystal(n: Node3D, foot: Vector3, dir: Vector3, mesh: ArrayMesh, c: Color) -> void:
+	var half := mesh.get_aabb().size.y * 0.5
+	var mi := _off(Models.part(n, mesh, ice_mat(c, 0.75, 0.3), foot + dir * half))
+	mi.basis = Basis(Quaternion(Vector3.UP, dir))
+
+
 # ------------------------------------------------------------------ timed one-offs
 func _style(e: Dictionary, k: float) -> void:
 	var n: Node3D = e["n"]
@@ -92,7 +115,7 @@ func _style(e: Dictionary, k: float) -> void:
 
 # ------------------------------------------------------------------ held looks
 func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
-	if not kind in ["tether", "rink"]:
+	if not kind in ["tether", "rink", "frostbud"]:
 		super.keep(key, kind, at, p)
 		return
 	var e: Dictionary = held.get(key, {})
@@ -110,6 +133,11 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 			_place_tether(n, at, p)
 		"rink":
 			_place_rink(n, p)
+		"frostbud":
+			n.scale = Vector3.ONE * maxf(0.05, _out_back(clampf(float(p.get("grow", 1.0)), 0.0, 1.0)))
+			var glow := 0.3 + 0.9 * clampf(float(p.get("crack", 0.0)), 0.0, 1.0)
+			for c in n.get_children():
+				((c as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("glow", glow)
 
 
 func _place_tether(n: Node3D, from: Vector3, p: Dictionary) -> void:
@@ -136,7 +164,7 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		_disc(disc.get_parent() as Node3D, Color("7fd8ff"), Color("e8ffff"), float(p.get("a", 1.0)), 4.0, -1.0, 0.0)
 		var sm := disc.material_override as ShaderMaterial
 		sm.set_shader_parameter("crack", crack)
-		sm.set_shader_parameter("fill", RINK_FILL + RINK_FILL_CRACK * crack)
+		sm.set_shader_parameter("fill", RINK_FILL + RINK_FILL * crack)
 		sm.set_shader_parameter("flash", pulse)
 		sm.set_shader_parameter("rim_w", 0.08 + 0.06 * pulse)
 	var fringe := n.get_node_or_null("Fringe") as Node3D
