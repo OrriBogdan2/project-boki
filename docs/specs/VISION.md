@@ -33,6 +33,7 @@ facts below come from the written play notes in `supervive_kits.md`.
 - **Yes, we hide Hunters.** `Match.sees()` (match.gd ~2917) is the one rule: a team shares sight; each member sees
   everything inside a 3.2 m circle (1.6 m crouched), plus a forward cone (dot > 0.6, about 106 degrees) out to
   `VIEW_RANGE` 24 m (14 m crouched), x1.25 while crouching, x gear `sight`, x raid `sight_k`.
+  Holding Look ahead (`scout`, C) adds x1.25 inside a 30 degree cone along the aim (`ScoutLook`, docs/specs/LOOK_AHEAD.md).
   Needs `world.los()`: rocks and higher ground block it; dynamic sight-blocking walls too.
 - **Grass and smoke** hide a target from anyone outside (`in_bush`, `in_smoke`) unless revealed.
 - **Reveal** is one field, `Hunter.reveal_t`: while above 0 the target ignores cone, grass and crouch (range
