@@ -83,7 +83,7 @@ func _ostra() -> void:
 	for i in 40: K.on_deal(T, 10.0, {})
 	m.step(DT)
 	ok(
-		"passive: full Swell = Swollen for 9s, wrapped in the pink sphere",
+		"passive: full Swell = Swollen for 9s, wrapped in the light-teal sphere",
 		K.is_swollen() and K.swells == 1 and absf(
 			float(K.res_def()["swollen_t"]) - 9.0
 		) < 0.01 and KitLooks.of(m).holding("os_aura"),

@@ -175,7 +175,7 @@ func _swollen_and_merge() -> void:
 	m.step(DT)
 	var dome: Dictionary = AimKit.entry(P, "x")
 	ok(
-		"ult Swollen: the well is 5.1m wide, with the pink core",
+		"ult Swollen: the well is 5.1m wide, with the light-teal core",
 		absf(W.radius - 5.1) < 0.01 and W.swollen,
 		"r %.1f" % W.radius
 	)

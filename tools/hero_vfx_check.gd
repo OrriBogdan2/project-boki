@@ -234,7 +234,7 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 
 ## Motley's Trade in his sea teal (VFX_QUALITY 11-12 rescore, DECISIONS 11-08: every Hunter's abilities in their
 ## colour): the landing end and the lobbed lantern are teal, the hot core a lighter teal, and no ostra recipe, palette
-## entry or Swollen look is magenta or pink any more. Only his own end (TRADE_COL, the dash slot col) stays violet.
+## entry or Swollen look is magenta or pink, and his own end (TRADE_COL, the dash slot col) is teal too.
 func _teal(c: Color) -> bool:
 	return c.s < 0.25 or c.v < 0.15 or (c.h > 0.40 and c.h < 0.55)
 
@@ -255,6 +255,8 @@ func _motley_trade(m: Match, P: Hunter) -> void:
 	var sea := Color("2ee6c0")
 	ok(OstraKit.TRADE_EDGE.is_equal_approx(sea),
 			"Motley Trade: the landing end is his sea teal #%s" % OstraKit.TRADE_EDGE.to_html(false))
+	ok(_teal(OstraKit.TRADE_COL) and _teal(Color(String(Arch.def("ostra")["dash"]["col"]))),
+			"Motley Trade: his own end and the dash slot col are teal #%s" % OstraKit.TRADE_COL.to_html(false))
 	var hot := OstraKit.HOT
 	ok(_teal(hot) and hot.s > 0.1 and hot.v >= sea.v and hot.s < sea.s,
 			"Motley Trade: the hot core is a lighter teal #%s" % hot.to_html(false))

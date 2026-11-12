@@ -21,7 +21,7 @@ const ORB_FULL_COL := Color("d8fff6")      # the orb's shot colour at full charg
 const GLOW_COL := Color("2ee6c0")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := HOT                  # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
-const TRADE_COL := Color("c65cff")         # the Trade's violet (his end, the lob; the dash slot's col)
+const TRADE_COL := TEAL                    # the Trade's own end and aim (the dash slot's col, his pale teal)
 const TRADE_EDGE := SEA                    # its edge (the landing end) in his signature colour (VFX_QUALITY)
 const TRADE_LOOK_K := 1.3     # the Trade's lantern, times its old size (visual only:
                               # the circle's rings and sigils stay at dash.radius, the real catch)
