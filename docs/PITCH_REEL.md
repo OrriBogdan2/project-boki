@@ -13,11 +13,13 @@ pitch-reel --when-live [--build REF]
 `~/meshy/pitch-reel/<stamp>/shot<N>_take<K>.mp4`, `contact.jpg`, `INDEX.md`.
 
 ## How a game shot is filmed
-- One GPU job (`jobq submit --needs gpu`, Vulkan) runs `godot -- --pitch-reel --shots=<list> --takes=<n> --shots-dir=reel`.
+- One GPU job (`jobq submit --needs gpu --only rp1-1`: the gpu pool also has Windows and Mac boxes; `PITCH_WORKER` picks
+  another Linux Vulkan slot) runs `godot -- --pitch-reel --shots=<list> --takes=<n> --shots-dir=reel`.
   For each shot and take it starts a child Godot under the movie writer (`--write-movie`, `--fixed-fps 60`,
   `--rendering-driver vulkan`, 1920x1080): the writer hands the game exactly 1/60 s a frame, so the footage is smooth and
   looks real-time whatever the worker's speed. V-Sync is on. Recording mode "clean HUD" hides every debug overlay and tip.
-- A child writes `shot<N>_take<K>.avi` (MJPEG, quality 0.85) and `.marks` (`PITCH_MARK <part> movie_frame=<n>`): the
+- A child writes `shot<N>_take<K>.avi` (MJPEG, quality 0.85) and `.marks` (`PITCH_MARK <part> movie_frame=<n>`, then the
+  first 300 lines of its log; a filter keeps its output small, one GPU child printed over 2 GB): the
   encoder starts each clip at its first mark, so the loading before the drop and the title are cut.
 - The tool encodes H.264 (CRF 17, +faststart) and checks each clip: 1920x1080, 60 fps, black and frozen stretches.
   Debug text, FPS counters and watermarks are checked by eye on the frames.
@@ -34,9 +36,9 @@ pitch-reel --when-live [--build REF]
 | 4 | Farm loop, 60 s | 1 | agent | care preset: trough, pat, fetch, brush, drill pressed in the gold |
 | 5 | Build process, 20 s | 1 | agent | `term_shot.py`: four terminal tiles, output scrubbed (emails, tokens, home paths, names in remotes) |
 | 6 | Hunter select, 15 s | 1 | agent | the Hunters screen steps through all 12, lands on `--hunter` (default gunslinger) and picks it (the screen stays up) |
-| 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot 4.5 m away that never offers a truce, attack held, right click, utility on a rota; each take another Hunter (or `--hunter`) |
+| 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot 4.5 m away on ground with no void within 10 m (the Hunter walks back when its dashes carry it off), attack held, right click, utility on a rota; each take another Hunter (or `--hunter`) |
 | 8 | Extraction drop | 2 | agent | the real loading screen and drop; loading cut at the `drop` mark |
-| 9 | Loot + fight, 3 min | 3 | owner / bot backup | autoplay match of three duos, no drop; a take whose bot is knocked out is cut 1 s after it (`knocked_out` mark, flagged in INDEX) |
+| 9 | Loot + fight, 3 min | 3 | owner / bot backup | autoplay match of three duos, no drop |
 | 10 | Escape | 3 | owner / scripted backup | a Hunter at an uplink yard as it finishes charging walks in and rides out |
 
 Shots 7, 9 and 10 are backups: the scripted Hunter plays plainly, so cut dumb bot moments and any death in the edit.
@@ -46,6 +48,5 @@ Takes differ by seed (egg, map roll, Hunter, foe).
 - Needs a GPU worker with a Vulkan display; the queue on `--needs gpu` can be hours long.
 - Shot 3 needs a Boki species whose level evolution has art: on origin/main 53e2fe7f3 only caecilith and wisplet (T2) have
   art and their T1 forms (zipling, mothlet) are not Boki species yet, so shot 3 waits for the new models.
-- Shots 7, 9 and 10 are proven on a real GPU (two takes each on 775e5209f); shot 9 may not meet a fight in its 3 minutes.
-- Each INDEX names the GPU worker that filmed it; jobq's `--needs gpu` pool also holds non-rp1 boxes (a Mac worker filmed shots 2, 4, 6 and 8 cleanly).
+- Shots 7, 9 and 10 ran once on a real GPU (backups); shot 9 may not meet a fight in its 3 minutes.
 - If the models land before this branch is merged, the tool applies the branch's diff to the build it films.
