@@ -270,7 +270,8 @@ func _on_rock() -> void:
 		gf.holding = fmod(t, 1.0) < 0.5
 		gf.tick(0.1)
 		t += 0.1
-		posed[gw.verbs.act if gw.verbs.act != "" else gw.verbs.stance] = true
+		posed[gw.verbs.stance] = true     # the held pose and the one-shot are both seen (the one-shot masks the pose)
+		posed[gw.verbs.act] = true
 	ok(posed.has("wait") and posed.has("cast"), "the Empty holds the rod and casts (poses seen: %s)" % [posed.keys()])
 	ok(gw.verbs.stance == "" and gw.verbs.act == "", "the rod is put away when fishing ends")
 	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
