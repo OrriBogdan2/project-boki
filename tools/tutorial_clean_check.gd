@@ -8,7 +8,9 @@ extends RefCounted
 ## and Deadeye, Neve's Chill slow, Sable's empowered Shred, Meeko's carrier shield).
 
 ## Cut features and their old names (matched in any case); none may be in the tutorial, hint or drill text.
-const CUT_WORDS := "shield slam|guard (meter|pips?|bar)|deadeye|focus (meter|pips?|bar|points?)|chill\\w*[^.]{0,20}slow|slow[^.]{0,20}chill|empowered shred|shred[^.]{0,12}empower|carrier shield"
+const CUT_WORDS := [
+	"shield slam", "guard (meter|pips?|bar)", "deadeye", "focus (meter|pips?|bar|points?)",
+	"chill\\w*[^.]{0,20}slow", "slow[^.]{0,20}chill", "empowered shred", "shred[^.]{0,12}empower", "carrier shield"]
 const TEXT_FILES := ["res://content/rules/tutorial.json", "res://content/rules/first_match_guide.json"]
 
 var bad := 0
@@ -55,7 +57,7 @@ func _built(m: Match) -> void:
 
 ## No cut feature's name in the tutorial and guide text, nor in any Hunter's drill lines or ability tip.
 func _cut_text() -> void:
-	var re := RegEx.create_from_string("(?i)" + CUT_WORDS)
+	var re := RegEx.create_from_string("(?i)" + "|".join(CUT_WORDS))
 	var hits: Array = []
 	for f: String in TEXT_FILES:
 		var hit := re.search(FileAccess.get_file_as_string(f))
