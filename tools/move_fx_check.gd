@@ -5,7 +5,8 @@ extends RefCounted
 ## a mantle and a takedown reset in the shared training match; the audit lists what each spawned (Fx rings and
 ## bursts, big flashes, the Hero looks of content/vfx) and fails on any ring/disc/burst type.
 ## Dust, ghosts, trails, ribbons and little sparks are the movement language and are allowed. A move that marks a
-## real area (AREA) may draw its ring. `--move-fx-check` prints one MOVEFX line per Hunter and event.
+## real area (AREA) may draw its ring. An aim circle (AimKit) drawn while the dash runs is a disc on the dash too
+## (Kael's Meteor Drop circle in the air). `--move-fx-check` prints one MOVEFX line per Hunter and event.
 
 const SOFT_FALL := 3.0         # m dropped for a soft landing
 const HARD_FALL := 12.0         # m dropped for a hard landing
@@ -16,9 +17,10 @@ const STEPS := 70              # sim steps (1/60 s) watched after each trigger
 ## Hero looks (content/vfx layer kinds) that are a ring, disc or burst; a "scorch" of shape disc/cone counts too.
 const BURST_KINDS := ["flare", "vortex", "skirt"]
 ## "<hero>/<event>" pairs whose dash is itself an area move: Ostra's Lantern Trade swaps its circle, Dolm's raises a
-## rock wall, Bulwark's 360 Smash hits all round him (in the air too since item 183).
+## rock wall, Bulwark's 360 Smash hits all round him (in the air too since item 183), Gil's Ground Swim knocks up
+## everyone round him where he surfaces (a thin rim at that radius).
 const AREA := ["ostra/dash", "ostra/air dash", "ostra/standing dash", "dolm/dash", "dolm/standing dash",
-	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash"]
+	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash", "gil/dash", "gil/standing dash"]
 ## Moves played again and again along a path: a trail laid behind the mover (Rimewright's frost under the skate).
 const TRAILS := ["skate_frost"]
 const EVENTS := ["dash", "standing dash", "air dash", "soft landing", "hard landing", "spiked landing", "wall kick",
@@ -29,6 +31,7 @@ var rows := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 var walls := {}
 var foe_at := Vector3(1e6, 0, 0)       # where the last reset's foe stood
+var dash_discs := {}                   # AimKit circle ids put while the Hunter's dash ran, this event
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
@@ -42,6 +45,7 @@ func run(main: Node) -> void:
 		_setup(m)
 		for ev in EVENTS:
 			_event(m, hero, ev)
+		_full_tell(m, hero)
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("MOVEFX DONE, %d rows, failures: %d" % [rows, bad])
@@ -98,12 +102,35 @@ func _event(m: Match, hero: String, ev: String) -> void:
 			o.teleport(flow.get_meta("home") + FOE_SPOT)
 	var before := _snap(m)
 	var flashes0: int = m.fx.flashes.size()
+	dash_discs.clear()
 	_trigger(m, h, ev)
 	var spawned := _spawned(m, hero, before, flashes0)
+	for id: String in dash_discs:
+		spawned.append("AimKit.circle %s in the dash" % id)
 	rows += 1
 	print("MOVEFX %-10s %-14s %s" % [hero, ev, ", ".join(spawned) if not spawned.is_empty() else "-"])
 	var area: bool = "%s/%s" % [hero, ev] in AREA
 	ok(spawned.is_empty() or area, "%s: %s spawned %s" % [hero, ev, ", ".join(spawned)])
+
+## A dash with the resource full: the full tell (ArchKit._tells) pulses no ring at the feet, which every dash would
+## carry while the resource stays full (the parity reel caught one on Vex's slide).
+func _full_tell(m: Match, hero: String) -> void:
+	var h: Hunter = flow.hunter
+	flow._ready_up(m)
+	h.ak.fx_t = 0.0                # (the rows above held the tell back)
+	var rings0: int = m.fx.rings.size()
+	h.inp["move"] = Vector2(0, -1)
+	h.inp["dash"] = true
+	for i in STEPS:
+		h.ak.res = h.ak.res_max()
+		h.ak.res_wait = 1.0         # (a resource that lapses, like Vex's Fever, stays lit)
+		m.step(Match.DT)
+		h.inp["dash"] = false
+	h.inp["move"] = Vector2.ZERO
+	var rings: int = m.fx.rings.size() - rings0
+	rows += 1
+	print("MOVEFX %-10s %-14s %s" % [hero, "full tell", "Fx.ring x%d" % rings if rings > 0 else "-"])
+	ok(rings == 0 or "%s/dash" % hero in AREA, "%s: the full resource tell drew %d rings over a dash" % [hero, rings])
 
 func _trigger(m: Match, h: Hunter, ev: String) -> void:
 	h.inp["move"] = Vector2.ZERO
@@ -128,7 +155,18 @@ func _trigger(m: Match, h: Hunter, ev: String) -> void:
 			_kit_reset(m, h)
 	for i in STEPS:
 		m.step(Match.DT)
+		_dash_discs(m, h)
 	h.inp["move"] = Vector2.ZERO
+
+## The AimKit circles (a filled disc, not a thin band) the Hunter's kit put this step while their dash runs.
+func _dash_discs(m: Match, h: Hunter) -> void:
+	if h.roll_t <= 0.0 or m.get_node_or_null("AimKit") == null:
+		return
+	var pre := "%d:" % h.get_instance_id()
+	for k: String in AimKit.layer(m).entries:
+		var e: Dictionary = AimKit.layer(m).entries[k]
+		if k.begins_with(pre) and e["kind"] == "circle" and float(e["band"]) <= 0.0 and float(e["t"]) == m.time:
+			dash_discs[k.substr(pre.length())] = true
 
 func _foe(m: Match, h: Hunter) -> Hunter:
 	for o in m.hunters:

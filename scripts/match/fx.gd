@@ -380,15 +380,16 @@ func _clear_spot(at: Vector3) -> Vector3:
 		spot += up * WORD_STEP
 	return spot
 
-func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+## wash: how much the inside and the halo glow (1: a shock disc; 0: a thin rim, a hit's real area).
+func ring(at: Vector3, radius: float, col: Color, dur := 0.35, wash := 1.0) -> void:
 	if own_look:
 		return
 	radial += 1
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
 	mi.material_override = Models.ring_mat(col, 0.12)
-	mi.material_override.set_shader_parameter("wash", 1.0)
-	mi.material_override.set_shader_parameter("halo", 1.0)
+	mi.material_override.set_shader_parameter("wash", wash)
+	mi.material_override.set_shader_parameter("halo", wash)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = at + Vector3(0, 0.08, 0)

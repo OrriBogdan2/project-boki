@@ -7,6 +7,8 @@ extends ArchKit
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
+const SURFACE_RIM_T := 0.2             # s the surfacing's rim shows: the knock-up's own frames, not a lingering disc
+
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v}
@@ -210,12 +212,13 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
 	swim_t = float(dd["time"]) * float(dash_feel()["time"])
-	m.fx.burst(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)
+	m.fx.debris(h.pos, col_of(dd), 6, 3.0, 0.4, 8.0)          # the dive kicks up turf: no burst on a dash
 	return true
 
 func _surface() -> void:
 	var dd := dash_def()
-	m.fx.ring(h.pos, float(dd["radius"]), col_of(dd), 0.4)
+	# the knock-up's own area: a thin rim at its radius for the hit's frames, no disc
+	m.fx.ring(h.pos, float(dd["radius"]), col_of(dd), SURFACE_RIM_T, 0.0)
 	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col_of(dd), 22, 5.0, 0.5, 10.0)
 	m.sfx("whoosh", h.pos, -3.0, 0.8)
 	for f in foes_in(h.pos, float(dd["radius"])):
@@ -367,7 +370,7 @@ func _tick(dt: float) -> void:
 			puddles.erase(pd)
 	if swim_t > 0.0:
 		swim_t -= dt
-		m.fx.burst(ground(h.pos) + Vector3(0, 0.1, 0), col_of(dash_def()), 2, 1.5, 0.3, 4.0)
+		m.fx.debris(ground(h.pos) + Vector3(0, 0.1, 0), col_of(dash_def()), 2, 1.5, 0.3, 4.0)
 		if swim_t <= 0.0:
 			_surface()
 	if spin_t >= 0.0:
@@ -387,7 +390,7 @@ func _tick(dt: float) -> void:
 		glow_t = 0.3
 		var fw := h.aim_dir()
 		var side := Vector2(-fw.y, fw.x)
-		m.fx.burst(h.pos + Vector3(side.x * 0.35, 1.0, side.y * 0.35), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
+		m.fx.debris(h.pos + Vector3(side.x * 0.35, 1.0, side.y * 0.35), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
 
 func _drop_holds() -> void:
 	spin_t = -1.0

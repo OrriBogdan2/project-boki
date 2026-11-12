@@ -776,9 +776,8 @@ func _tells(dt: float) -> void:
 		fx_t = 0.18
 		if tell != "":
 			var rc := res_col()
+			# sparks on the body only: a ground ring means gameplay, and this one landed under every dash
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
-			if tell == "full" and int(m.time * 5.0) % 3 == 0:
-				m.fx.ring(h.pos, 0.9, Color(rc, 0.7), 0.25)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
 			var kp: Vector3 = (h.kin as Kin).position
