@@ -91,23 +91,23 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
-| the Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
+| the Red Stitch | Stun 12 enemies | 12 | Colour: Fletcher Green |
 | the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
 | the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
 | the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
-| the Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
+| the Unbroken | Knock 10 enemies into walls | 10 | Colour: Forge Red |
 | the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
 | the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
 | the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
-| the Hired Gun | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
+| the Hired Gun | Land 30 hits from 12 m or more | 30 | Colour: Dust Rider |
 | the Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
 | the Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
 | the Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
-| the Barnacle Knight | Revive 3 teammates | 3 | Colourway: Oathsteel |
+| the Barnacle Knight | Revive 3 teammates | 3 | Colour: Oathsteel |
 | the Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
 | the Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
 | the Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
-| the Ashen Kiss | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
+| the Ashen Kiss | Set 25 enemies burning | 25 | Colour: Coal and Cinder |
 | the Ashen Kiss | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
 | the Ashen Kiss | Open 6 chests | 6 | Banner: Lantern Flame |
 | the Ashen Kiss | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
@@ -121,18 +121,18 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Stone Seer | Open 10 chests | 10 | Glider: Slate Kite |
 | the Stone Seer | Make it out after being knocked down, twice | 2 | Title: Bedrock |
 | the Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
-| the Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
+| the Scrap King | Stun 10 enemies | 10 | Colour: Rust and Brine |
 | the Scrap King | Open 10 chests | 10 | Title: Salvager |
 | the Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
-| the Snowglide | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| the Snowglide | Slow 40 enemies | 40 | Colour: Hoarfrost |
 | the Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
 | the Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
 | the Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
-| the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
+| the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colour: Storm Violet |
 | the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
 | the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
 | the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
-| the Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| the Silver Thief | Land 25 hits while in the air | 25 | Colour: Midnight Silk |
 | the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
 | the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
 | the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
@@ -141,7 +141,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
 | the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
 | the Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
-| the Novice Mage | Stun 8 enemies | 8 | Colourway: Deep Tide |
+| the Novice Mage | Stun 8 enemies | 8 | Colour: Deep Tide |
 | the Novice Mage | Hit 3 enemies at once with one ability, twice | 2 | Emote: Flop |
 | the Novice Mage | Open 6 chests | 6 | Banner: Tide Pool |
 | the Novice Mage | Your Boki lands 40 hits | 40 | Title: Fishmonger |
