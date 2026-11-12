@@ -1566,7 +1566,7 @@ func _move_kin(d: float) -> void:
 			k["joy_t"] = joy - d
 			k["hop"] += d * 10.0
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * (0.26 if joy > 0.0 else (float(pers.get("hop_a", 0.14)) if hv.length() > 0.3 else 0.03))
-		_quirk(k, n, hv.length() > 0.3, d)
+		KinHabit.step(k, n, hv.length() > 0.3, d)
 		if hw: hw.pose(k, n, d)
 		toys.pose(k, n, d)
 		n.set_meta("happy", joy > 0.0)
@@ -5192,7 +5192,6 @@ func _personality(rec: Dictionary) -> Dictionary:
 	# [hop rate, hop height, pace]: heavy kinds plod, light ones skip
 	var gait: Array = {"gravity": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "lunar": [4.5, 0.2, 0.95],
 		"prism": [11.0, 0.09, 1.12], "venom": [9.5, 0.05, 1.06], "echo": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
-	var quirks := ["spin", "sniff", "hop", "sit", "look", "wiggle"]
 	return {
 		"speed": float(gait[2]) * lerpf(0.86, 1.18, (brave + hot) * 0.5) * (0.94 + float(h % 13) * 0.01),
 		"hop_f": float(gait[0]) * (0.9 + float(h % 7) * 0.035),
@@ -5203,7 +5202,7 @@ func _personality(rec: Dictionary) -> Dictionary:
 		"rest": lerpf(1.6, 0.7, hot * 0.5 + cur * 0.5),
 		"chatty": lerpf(0.35, 1.3, hot * 0.5 + cur * 0.5),
 		"haunt": h % 7,
-		"quirk": quirks[(h / 7) % quirks.size()],
+		"quirk": KinHabit.HABITS[(h / 7) % KinHabit.HABITS.size()],
 	}
 
 ## A spot in a ring around a place, different for every kin, so a crowd fans out instead of piling up.
@@ -5267,40 +5266,6 @@ func _separate_kin(d: float) -> void:
 		if world.occupy(pos.x, pos.z + push.y, 0.3, 0.0, true) == 0.0 and not world.is_void(pos.x, pos.z + push.y): pos.z += push.y
 		a["pos"] = pos
 		(a["node"] as Node3D).position = pos
-
-## Each kin's little habit when it stops: a spin, a sniff at the ground, a happy hop, sitting down,
-## looking around, or a wiggle. Rare and staggered, so it reads as character, not a dance routine.
-func _quirk(k: Dictionary, n: Node3D, moving: bool, d: float) -> void:
-	var body := n.get_node_or_null("Body") as Node3D
-	if body == null: return
-	k["qt"] = float(k.get("qt", randf_range(4.0, 12.0))) - d
-	var q := float(k.get("q_on", 0.0))
-	if moving or float(k.get("hold_t", 0.0)) > 0.0 or float(k.get("nap_t", 0.0)) > 0.0 or k.has("bath") or k.has("fetch"):
-		# interrupted: only undo our own pose, so feeding and training animations keep theirs
-		if q > 0.0:
-			k["q_on"] = 0.0
-			body.rotation = Vector3.ZERO; body.scale = Vector3.ONE
-		k["qt"] = maxf(float(k["qt"]), 3.0)
-		return
-	if q <= 0.0 and float(k["qt"]) <= 0.0:
-		k["qt"] = randf_range(7.0, 16.0) * float(k.get("pers", {}).get("rest", 1.0))
-		k["q_on"] = 1.2
-		q = 1.2
-	if q <= 0.0:
-		return
-	q -= d
-	k["q_on"] = q
-	var t := 1.0 - clampf(q / 1.2, 0.0, 1.0)      # 0 -> 1 over the habit
-	var e := sin(t * PI)
-	match String(k.get("pers", {}).get("quirk", "look")):
-		"spin": body.rotation.y = t * TAU
-		"sniff": body.rotation.x = e * 0.35; body.position.y = -e * 0.04
-		"hop": body.position.y = absf(sin(t * TAU * 1.5)) * 0.22
-		"sit": body.scale = Vector3(1.0 + e * 0.12, 1.0 - e * 0.16, 1.0 + e * 0.12)
-		"look": body.rotation.y = sin(t * TAU) * 0.7
-		"wiggle": body.rotation.z = sin(t * TAU * 3.0) * 0.18 * e
-	if q <= 0.0:
-		body.rotation = Vector3.ZERO; body.scale = Vector3.ONE
 
 # ------------------------------------------------------------------ build mode screenshots
 ## --build-demo: build mode open with a bench's ghost by the farm; --decor-demo: an island decorated
