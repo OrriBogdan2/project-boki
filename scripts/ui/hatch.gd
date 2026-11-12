@@ -467,6 +467,7 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
+		UI.pick_taken()
 		_start_hatch()
 		return
 	chosen = i

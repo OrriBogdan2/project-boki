@@ -29,6 +29,8 @@ extends RefCounted
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
+##  15. the pick-one panels' take sound (UI.pick_taken): the confirm family, not the hover tick, once per take;
+##      the egg pick, the Relic pick and the ability rank-up each call it
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -68,6 +70,7 @@ func run(main: Node) -> void:
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
+	_pick_taken()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -482,6 +485,17 @@ func _inv_cues() -> void:
 	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
 	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
+
+## 11. Pick-one panels have no confirm button, so a take plays the UI confirm family once (UI.pick_taken).
+func _pick_taken() -> void:
+	ok(Sfx.ensure("ui_confirm") and not _takes("ui_confirm").is_empty(), "pick taken: the confirm family has takes")
+	ok(_plays("ui_confirm", func(): UI.pick_taken()) and not Sfx.last_played.has("hover"),
+			"pick taken: UI.pick_taken plays ui_confirm, not the hover tick")
+	var unwired := []
+	for f in ["ui/hatch.gd", "home/hob_offer.gd", "match/hunter.gd"]:
+		if not FileAccess.get_file_as_string("res://scripts/" + f).contains("UI.pick_taken("):
+			unwired.append(f)
+	ok(unwired.is_empty(), "pick taken: egg pick, Relic pick and rank-up call it (missing %s)" % [unwired])
 
 func _takes(sname: String) -> Array:
 	var out := []
