@@ -7,6 +7,7 @@ extends RefCounted
 ##      with a box from it (or UiFrame)
 ##   4. no stray hard-coded panel styles: no StyleBoxFlat.new(), UI._box() or per-screen theme
 ##      outside the style module (the in-match HUD and reserved files excepted, see ALLOWED)
+##   5. no floating callout words in the world: fx.word is called only for Gil's n/need count
 
 var main: Node
 var fails := 0
@@ -15,6 +16,7 @@ var n := 0
 ## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its loot rows and
 ## full-pack window (LootHold, split out of hud.gd) and reserved files.
 const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/loot_hold.gd", "scripts/ui/kin_reveal.gd"]
+const WORD_ALLOWED := ["scripts/arch/kits/gil_kit.gd", "scripts/match/fx.gd"]    # the count, and the function itself
 const STYLE_MODULE := [
 	"scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd", "scripts/ui/hud_style.gd",
 ]
@@ -131,6 +133,11 @@ func _static_styles(src: Dictionary) -> void:
 		for line in String(src[path]).split("\n"):
 			if line.contains("UI.section(") and line.contains(".lerp("):
 				dim_heads.append(path)
+	var words: Array = []
+	for path in src:
+		if not path in WORD_ALLOWED and String(src[path]).contains("fx.word("):
+			words.append(path)
+	ok("no callout words float over the world (fx.word only for Gil's count)", words.is_empty(), str(words))
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
 
 func _theme_boxes() -> Dictionary:
