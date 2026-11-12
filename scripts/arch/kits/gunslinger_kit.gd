@@ -18,6 +18,10 @@ const DAZE_PINK := Color("ff4fb0")   # the Daze's own colour (stars, swirl): its
 const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
+const AIR_FIRE_W := 0.34             # m: the width of the fire ribbon a dash pressed in the air draws
+const AIR_FIRE_LIFE := 0.3           # s each stretch of that ribbon burns
+const AIR_FIRE_UP := Vector3(0.0, 0.9, 0.0)   # m: from her feet to her middle, where it burns from
+const AIR_SPARKS := 12               # sparks in the burst the air dash leaves from
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const DAZE_FLASH := 1.8              # m, the pink spark on a Dazed foe per rifle round
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
@@ -62,6 +66,7 @@ var last_shot := 0
 var puffs := 0                 # tests: launcher puffs
 var last_puff := Vector3.ZERO  # tests: where the last one went off
 var echo_t := 0.0
+var fire_id := ""              # the air dash's fire ribbon while it burns ("": none)
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
@@ -107,6 +112,7 @@ func _tick(dt: float) -> void:
 	_tick_mag(dt)
 	_tick_brackets()
 	_tick_echo(dt)
+	_tick_fire()
 	_tick_trail()
 	_tick_walk_off()
 	self_pips(int(res_def()["max"]), int(floor(res + 0.01)), false, dt, PIP_LIFT, 0.65)
@@ -138,6 +144,22 @@ func _tick_walk_off() -> void:
 	var walking := (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5
 	if walking and float(m.time) - anim_at >= float(WALK_OFF[anim_id]):
 		anim_at = float(m.time) - OVER        # the move reads as over: past its clip, the body goes back to the legs
+
+## The air dash's fire: a ribbon from her middle through the roll, in her kit colours, until the dash ends or she lands.
+func _tick_fire() -> void:
+	if fire_id == "":
+		return
+	if h.roll_t <= 0.0 or h.grounded:
+		fire_id = ""
+		return
+	fx().trail(fire_id, h.position + AIR_FIRE_UP, EMBER, HOT, AIR_FIRE_W, AIR_FIRE_LIFE)
+
+## A dash pressed in the air: her model rolls (warden_anim "air_clip"), the ribbon lights and a burst of sparks
+## flies off behind where it started.
+func _air_fire() -> void:
+	fire_id = "vf%d" % h.get_instance_id()
+	var back := Vector3(-h.roll_dir.x, 0.2, -h.roll_dir.y)
+	m.fx.spark(h.position + AIR_FIRE_UP, back, EMBER, AIR_SPARKS, 6.0, 70.0, 0.25, 4.0)
 
 func _tick_trail() -> void:
 	var tr: Array = TRAILS.get(anim_id, [])
@@ -295,6 +317,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(ad, air_t, {"invuln": float(dd["invuln"])})
 		slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0, "air": true, "len_t": air_t}
 		play("gunslinger_dash")
+		_air_fire()
 		fx().echo(h, echo_col(), 0.5, ECHO_ALPHA, ECHO_BACK)
 		m.sfx("vn_slide", h.pos, -4.0, 1.2)
 		last_dash_kind = "air_slide"
@@ -304,6 +327,8 @@ func on_dash(use_ex: bool) -> bool:
 			return true
 		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
 		play("gunslinger_dash_ex")
+		if not h.grounded:
+			_air_fire()
 		fx().echo(h, echo_col(), 0.45, ECHO_ALPHA, ECHO_BACK)
 		last_dash_kind = "air"
 		return true
@@ -359,7 +384,8 @@ func _tick_slide(dt: float) -> void:
 	slide["fx"] = float(slide["fx"]) - dt
 	if float(slide["fx"]) <= 0.0:
 		slide["fx"] = 0.06
-		m.fx.dust(h.pos, 2)            # (the after-images and the scrape are _tick_echo's)
+		if h.grounded:
+			m.fx.dust(h.pos, 2)        # (none in the air; the after-images and the scrape are _tick_echo's)
 	if not bool(slide["held"]):
 		if bool(slide.get("air", false)):
 			if t >= float(slide["len_t"]):
