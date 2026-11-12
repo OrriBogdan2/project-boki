@@ -5,15 +5,23 @@ extends RefCounted
 ##     teammate brings them up; red and pulsing while an enemy stands on them (stomp)
 ##   - over them, a small knocked mark ringed by their bleed-out timer, draining as they bleed out
 ##   - for a teammate near (not yet in) the ring, one short cue: "Revive" and how far
+##   - a knocked teammate gets a bigger ping instead of the small mark (ally_ping): their red-tinted face
+##     in a spiked ring that drains with their bleed-out, "ALLY KNOCKED" over their own plate; it pops in as
+##     they go down (sizes measured off the reference, scripts/ui/SQUAD_FRAMES_SPEC.md)
 ## Reviving is standing in the ring (Life), so there is no key to press.
 
 const MARK_UP := 2.35         # m over the feet: the knocked mark
 const MARK_R := 13.0          # px: the bleed-out ring's radius
 const CUE_RANGE := 9.0        # m: a teammate this close (and outside the ring) gets the cue
 const STOMP_RED := Color(1.0, 0.18, 0.1)
+const PING_R := 25.8          # px: the ally ping's face radius
+const PING_RISE := 90.0       # px: the ping's centre over their plate's anchor (clears the downed plate)
+const PING_POP := 0.25        # s: the ping's pop-in (overshoots, then settles)
+const PING_RING := Color("3cb8f0")
+const PING_TEXT_PX := 14      # font px: ALLY KNOCKED
 
-## Draws every visible downed Hunter's marks on the HUD canvas.
-static func draw(c: Control, m: Match) -> void:
+## Draws every visible downed Hunter's marks on the HUD canvas (`hud` gives the faces and knock times).
+static func draw(c: Control, m: Match, hud) -> void:
 	var p: Hunter = m.player
 	var rr: float = Life.R["revive_radius"]
 	for o in m.hunters:
@@ -28,7 +36,10 @@ static func draw(c: Control, m: Match) -> void:
 			ring(c, m.cam, o.pos, rr, Color(col, 0.45 + 0.2 * pulse), 2.5)
 			if o.revive > 0.0:
 				ring(c, m.cam, o.pos, rr, Color(col.lerp(Color.WHITE, 0.4), 0.95), 5.0, o.revive)
-		_mark(c, m, o, STOMP_RED if stomped else col)
+		if p != null and o != p and o.team == p.team:
+			ally_ping(c, m, hud, o, stomped)
+		else:
+			_mark(c, m, o, STOMP_RED if stomped else col)
 		if p == null or p.out or p.downed or p == o or o.team != p.team or stomped:
 			continue
 		var d := p.flat_dist(o)
@@ -62,3 +73,33 @@ static func _mark(c: Control, m: Match, o: Hunter, col: Color) -> void:
 	if f > 0.0:
 		c.draw_arc(at, MARK_R, -PI * 0.5, -PI * 0.5 + TAU * f, 32, col, 3.0, true)
 	Icons.draw(c, "knock", at, 8.0, col.lerp(Color.WHITE, 0.3))
+
+## A knocked teammate's ping over where they lie.
+static func ally_ping(c: Control, m: Match, hud, o: Hunter, stomped: bool) -> void:
+	var t := m.time - float(hud.mates.since.get(o.nid, -9.0))
+	var k := clampf(t / PING_POP, 0.0, 1.0)
+	var sc := 1.0 + 0.3 * sin(k * PI) if k < 1.0 else 1.0
+	var a := clampf(t / 0.08, 0.0, 1.0)
+	var at := m.cam.unproject_position(o.pos + Vector3(0, HudPlate.plate_offset(o), 0)) - Vector2(0, PING_RISE)
+	var r := PING_R * sc
+	var ring_col := Color(STOMP_RED if stomped else PING_RING, a)
+	# the spikes: three flames off the ring's upper left, one off its upper right
+	for sp in [[-2.4, 1.85], [-1.9, 1.5], [-2.9, 1.45], [-0.75, 1.55]]:
+		var d := Vector2.from_angle(sp[0])
+		var tip := at + d * r * float(sp[1])
+		var side := d.orthogonal() * r * 0.2
+		c.draw_colored_polygon(PackedVector2Array([at + d * r + side, tip, at + d * r - side]), ring_col)
+	c.draw_circle(at, r + 3.5, ring_col)
+	c.draw_circle(at, r, Color(0.75, 0.12, 0.25, a))
+	var face := SquadFrames.face(hud, o, false)
+	SquadFrames.disc(c, at, r * 0.94, face, Color(0.75, 0.12, 0.25), Color(1, 0.55, 0.6, 0.85 * a))
+	c.draw_arc(at, r + 1.75, -PI * 0.5, -PI * 0.5 + TAU * bleed_frac(o), 40, Color(Color.WHITE, 0.6 * a), 1.5, true)
+	for d in [Vector2(1, 1), Vector2(1, -1)]:
+		var x0 := at + Vector2(0, -r - 2.0)
+		c.draw_line(x0 - d * 5.0, x0 + d * 5.0, Color(1, 0.15, 0.3, a), 3.0, true)
+	var ty := at.y + r + 13.0
+	var w := TextCache.width(HudStyle.BIG, "ALLY KNOCKED", PING_TEXT_PX) * 0.9
+	c.draw_set_transform_matrix(Transform2D(Vector2(0.9, 0), Vector2(-0.2, 1), Vector2(at.x - w * 0.5, ty)))
+	var edge := Color(0.1, 0.35, 0.9, a)
+	TextCache.draw(c, HudStyle.BIG, Vector2.ZERO, "ALLY KNOCKED", PING_TEXT_PX, Color(1, 1, 1, a), 5, edge)
+	c.draw_set_transform_matrix(Transform2D.IDENTITY)
