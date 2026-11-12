@@ -3150,18 +3150,18 @@ func _process(delta: float) -> void:
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
-	_vprof("pre")
-	MatchCam.update(self, delta, acc / DT)      # before the cursor is read: shots leave on the drawn reticle
-	_vprof("camera")
 	_gather_input()
 	acc += d
 	var steps := 0
 	while acc >= DT and steps < 6:
+		MatchCam.steady_aim(self, delta, acc)      # the cursor against the view this frame will draw
 		acc -= DT
 		steps += 1
 		step(DT)
 	var alpha := acc / DT
 	_vprof("pre")
+	MatchCam.update(self, delta, alpha)      # after the steps: the view follows the body as drawn this frame
+	_vprof("camera")
 	if opts.has("boki_demo"):
 		BokiDemo.frame(self)
 	elif opts.has("arch_demo"):

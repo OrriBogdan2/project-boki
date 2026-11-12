@@ -149,6 +149,11 @@ func steady(m: Match, how: String) -> Dictionary:
 	var P: Hunter = m.player
 	var out := {"err": 0.0, "rounds": 0, "cam": 0.0, "moved": 0.0}
 	m.acc = 0.0
+	# the practice area's panels own the mouse (hud.ui_extra); one sits over the top of the square headless view,
+	# where the cursor is held 15 m out, and would swallow the fire button
+	for pn in m.hud.ui_extra:
+		if is_instance_valid(pn):
+			pn.visible = false
 	var release := P.wpn.has("draw")
 	for i in 60:
 		_cursor(m, P.pos + Vector3(0, 0.95, -STEADY_AT))
