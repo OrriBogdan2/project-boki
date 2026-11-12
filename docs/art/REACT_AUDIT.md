@@ -108,6 +108,19 @@ bake from the old scripts gives FAIL 10 (Mossy reads 0.01, the four light Hunter
 Sources: breaker `~/art1-breaker-v2/breaker_art1.blend`, the rest `~/meshy/<ravel_v2|claire_v2|sable_v2|ryzz_v2_hair>/stage/c/<model>.blend`.
 Mossy's `root` hit keys are still in the clip, harmless in the upper-body path.
 
+The five .glbs carry the fixes as these op lines, run on main's glbs (0.24.5 rigs) in this order; a merge that brings
+newer glbs re-runs them instead of copying the old hit clips (each line reproduces the original fix byte for byte):
+
+```
+python3 tools/art1/glb_react.py art/wardens/breaker/breaker.glb hit_f nudge hips 14,0,3 0.06 2
+python3 tools/art1/glb_react.py art/wardens/breaker/breaker.glb hit_b nudge hips -12,0,-3 0.06 2
+python3 tools/art1/glb_react.py art/wardens/hem/hem.glb hit_b scale 1.8
+python3 tools/art1/glb_retime.py art/wardens/<hem|claire|sable|ryzz>/<model>.glb <hit_f|hit_b> 0:0,0.07:0.07,0.24:0.42
+```
+
+On those rigs Mossy reads 0.32 / 0.30 (0.18 without the bump), Lace, Sable and Sparkle settle in 0.20 to 0.23 s.
+Neve settles in 0.42 s: see the docs/DEBT.md row.
+
 ## Before and after strips
 
 Close side view (`--close`, `--fov=26` for Mossy and `--fov=10` for the others), hit_f and hit_b, f000 the hit frame
