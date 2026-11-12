@@ -5,12 +5,14 @@ extends RefCounted
 ## game. The relay here holds every packet 40 ms +-20 ms one way (80 ms ping, 20 ms jitter each way)
 ## and drops 2% of snapshots, keeping ENet's unreliable-ordered rule (a late snapshot behind a newer one
 ## is dropped). The host's Hunter runs, stops, turns, dashes, is lifted 5 m (a teleport), glides and is
-## knocked; the guest records where its game puts that Hunter every frame. Both clocks are the wall clock.
+## knocked, then becomes Sparkle and casts Kitefall (its scripted 0.2 s fall onto a spot 12 m off, numbered
+## on its own); the guest records where its game puts that Hunter every frame. Both clocks are the wall clock.
 ## Numbers (the drawn path against the true one, shifted by the best-fit delay):
 ##   snaps      frames where the drawn body jumps more than SNAP_STEP; only the one teleport may
 ##   jerks      frames where the drawn speed changes by more than JERK_DV while the true one doesn't
 ##   backsteps  frames where the drawn body steps back against the way the true one moves
 ##   overshoot  frames where the drawn body is more than OFF_PATH from anywhere on the true path
+##   max step   the drawn body's biggest step in one frame (the fall: under NET_CAP, no jump)
 ## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>; the guest prints RSMOOTH guest pid=<pid>.
 
 const GODOT := "/usr/local/bin/godot"
@@ -23,6 +25,8 @@ const SNAP_STEP := 0.75       # m in one frame (45 m/s): faster than any run, da
 const JERK_DV := 1.5          # m/s change of the drawn speed in one frame that the true path doesn't make
 const OFF_PATH := 0.3         # m from the true path that counts as an overshoot
 const LIFT := 5.0             # m the glide phase teleports the Hunter up
+const NET_CAP := 4.0          # m in one frame: Ent.net_follow's snap distance, NetSmooth's SNAP_SPEED x 0.1 s
+const KITE_OFF := Vector3(12.0, 0, 0)   # m from the take-off to the Kitefall landing, inside the flat strip
 const DN := preload("res://tools/displace_net_check.gd")
 
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
@@ -166,6 +170,22 @@ func _script(truth: Array) -> void:
 	await _host_run(1.0, "glide", truth)
 	m.displace.knock(P, Vector2(0, -9.0) * P.mass())      # 9 m/s: a solid hit, lifts it off its feet
 	await _host_run(1.2, "knock", truth)
+	await _kitefall(truth)
+
+## Sparkle's Kitefall: crouch, rise, hang, then the scripted fall the snapshot reports a velocity for.
+## "move" (the reset to the strip's start and its settle) is left out of the numbers.
+func _kitefall(truth: Array) -> void:
+	var P := m.player
+	P.reclass("light", "mage")
+	P.teleport(dn.home + Vector3(-5.0, 0, 0))
+	await _host_run(0.8, "move", truth)
+	var U: MageUlt = (P.ak as MageKit).ult
+	P.inp["aim"] = P.pos + KITE_OFF
+	ok(U.cast(), "Kitefall goes off on the host")
+	await _host_run(0.9, "fall", truth)
+	ok(U.phase() == MageUlt.AIR, "Kitefall hangs", U.phase())
+	U.recast()
+	await _host_run(1.0, "fall", truth)
 
 func _host_run(secs: float, phase: String, truth: Array) -> void:
 	var t := 0.0
@@ -198,14 +218,21 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		return
 	var w0: float = truth[0][0]
 	var w1: float = truth[-1][0]
-	var lag := _best_lag(truth, drawn, w0, w1)
+	var move_w := w1                 # wall time of the reset before Kitefall, and of its cast
+	var fall_w := w1
+	for x in truth:
+		if x[4] == "move": move_w = minf(move_w, x[0])
+		if x[4] == "fall": fall_w = minf(fall_w, x[0])
+	var lag := _best_lag(truth, drawn, w0, move_w - 0.3)
 	var tele_w := 0.0                # wall time of the lift on the true path
 	for i in range(1, truth.size()):
-		if _p(truth[i]).distance_to(_p(truth[i - 1])) > LIFT * 0.8: tele_w = truth[i][0]
+		var lift: bool = truth[i][4] == "glide" and _p(truth[i]).distance_to(_p(truth[i - 1])) > LIFT * 0.8
+		if lift: tele_w = truth[i][0]
 	var tot := {}
-	var phases := ["idle", "run", "dash", "glide", "knock", "all"]
+	var phases := ["idle", "run", "dash", "glide", "knock", "all", "fall"]
 	for ph in phases:
-		tot[ph] = {"n": 0, "snaps": 0, "big": 0, "jerks": 0, "backsteps": 0, "overshoot": 0, "max_off": 0.0, "err": 0.0}
+		tot[ph] = {"n": 0, "snaps": 0, "big": 0, "jerks": 0, "backsteps": 0, "overshoot": 0, "max_off": 0.0, "err": 0.0,
+			"max_step": 0.0}
 	var j := 0
 	for i in range(2, drawn.size()):
 		var w: float = float(drawn[i][0]) - lag
@@ -213,15 +240,18 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			continue
 		while j < truth.size() - 2 and truth[j + 1][0] < w: j += 1
 		var ph: String = truth[j][4]
+		if w > move_w - 0.3 and w < fall_w:
+			continue
 		var q := _p(drawn[i])
 		var step := q - _p(drawn[i - 1])
 		var dv := (step - (_p(drawn[i - 1]) - _p(drawn[i - 2]))).length() / DT
 		var near_tele := absf(w - tele_w) < 0.35
 		var tv := _true_vel(truth, j)
 		var off := _off_path(truth, j, q)
-		for k in [ph, "all"]:
+		for k in ([ph] if ph == "fall" else [ph, "all"]):
 			var r: Dictionary = tot[k]
 			r["n"] += 1
+			r["max_step"] = maxf(r["max_step"], step.length())
 			r["err"] += q.distance_to(_true_at(truth, j, w))
 			if step.length() > SNAP_STEP: r["snaps"] += 1
 			if step.length() > LIFT * 0.8: r["big"] += 1
@@ -236,8 +266,8 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		var r: Dictionary = tot[ph]
 		var head := "RSMOOTH %-5s frames %4d  snaps %2d  jerks %3d" % [ph, r["n"], r["snaps"], r["jerks"]]
 		var err: float = r["err"] / maxf(1.0, r["n"])
-		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m" % [
-			r["backsteps"], r["overshoot"], r["max_off"], err])
+		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m  max step %.2f m" % [
+			r["backsteps"], r["overshoot"], r["max_off"], err, r["max_step"]])
 	var a: Dictionary = tot["all"]
 	ok(a["n"] > 400, "the guest drew the whole run", "%d frames" % a["n"])
 	ok(a["big"] == 1 and a["snaps"] == 1, "the lift is one snap and nothing else snaps", "%d snaps" % a["snaps"])
@@ -245,6 +275,9 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	ok(a["backsteps"] == 0, "the drawn body never steps back", "%d backsteps" % a["backsteps"])
 	ok(a["overshoot"] == 0, "the drawn body stays on the true path", "max %.2f m off" % a["max_off"])
 	ok(lag < 0.25, "drawn at most 250 ms behind", "%.0f ms" % (lag * 1000.0))
+	var f: Dictionary = tot["fall"]
+	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Kitefall's fall is drawn as a drop, not a jump",
+		"%d frames, max step %.2f m" % [f["n"], f["max_step"]])
 
 ## The delay (s) that best lines the drawn path up with the true one.
 func _best_lag(truth: Array, drawn: Array, w0: float, w1: float) -> float:
