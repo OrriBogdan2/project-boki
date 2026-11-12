@@ -119,3 +119,27 @@ is not done here; the second tip (the hover card in shot 35 sits on the tip card
 Not changed: the farm arrival (5 groups) and the garden first-day screens; the hatch screens' long cards (section 4).
 Checks: `--ways-out-hud-check` 0 fail, `--msg-queue-check` 0 fail, `--tutorial-hud-check` 0 fail (1 fail once in 4 runs, flaky, passed 3 reruns).
 `--hud-budget-check` is not on this line (it exists only on ext/ui-hud-budget, not merged), so it was not run.
+## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
+
+DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
+opens the hub, Glasswater and Cinderstep at 1280x720 with a day-1 save (new, first-day list running) and a day-5 save (an upgraded
+farm save: four Boki, a journal, today's wishes), closes the arrival cards one by one, and lists the HUD groups left (a visible block of
+the home's UI, as in section 1). `--garden-first-day-check` asserts day 1 at <= 5 groups and every screen at <= 1 arrival card.
+
+| screen | groups before | groups after | arrival cards before | after |
+|---|---|---|---|---|
+| hub, day 1 | 6 | 5 | 1 (Welcome home) | 1 |
+| Glasswater, day 1 | 6 | 5 | 1 | 1 |
+| Cinderstep, day 1 | 6 | 5 | 1 | 1 |
+| hub, day 5 | 6 | 5 | 2 (While you were away, Today's wishes) | 1 |
+| Glasswater, day 5 | 6 | 5 | 2 | 1 |
+| Cinderstep, day 5 | 6 | 5 | 2 | 1 |
+
+What changed (all first-time rules, no settings; base_mode, the garden, only):
+- **Today's wishes** was its own card on every arrival and every zone hop, right after "While you were away". It is now the end of
+  that one card, once a garden day (`GardenWishes.card_lines`, `ZoneAway.card`); with nothing new it is the wishes alone. The reward tip shows on the first card only.
+- **The dash slot** (bottom centre, on top of the F prompt) waits for the first dash in the garden; nothing there needs it.
+- **Top counters** (tonic, crops, wood, stone, fibre, coals) show only above 0 in the garden. An upgraded farm save had seven chips at 631 px, now three at 258 px.
+
+GPU shots at 1280x720 (`--garden-hud-groups`, jobq gd-before4 20261112-013050-17843 on 0.24.5 272368589 plus the tool, gd-after4 20261112-013005-02702 on this branch; the counts above are their GARDENHUD lines). Before: [hub_day1](shots/ui-garden-declutter/before_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/before_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/before_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/before_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/before_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/before_cinderstep_day5.jpg). After: [hub_day1](shots/ui-garden-declutter/after_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/after_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/after_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/after_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/after_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/after_cinderstep_day5.jpg).
+Not changed (still on screen, each one group): the key row (folds after 3 uses of each key), the hub bar, the F prompt, the one Next line.
