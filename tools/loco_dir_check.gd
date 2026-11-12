@@ -28,7 +28,8 @@ const SETTLE_S := 0.5        # s read after a start or a stop for a snap
 ## The states: speed is m/s ("walk": loco walk_speed, "run": halfway to full stick, "sprint": full stick, the
 ## archetype's HunterMove speed; there is no sprint key, full stick is the top), crouch at Hunter's 0.55 of it.
 const STATES := ["walk", "run", "sprint", "crouch_walk", "crouch_idle", "strafe", "aim_walk"]
-const DIRS := {"f": 0.0, "fr": 45.0, "r": 90.0, "br": 135.0, "b": 180.0, "bl": -135.0, "l": -90.0, "fl": -45.0}
+## The directions off the facing, deg (+ his left: the model's yaw turns him left, so his right is the facing - 90).
+const DIRS := {"f": 0.0, "fr": -45.0, "r": -90.0, "br": -135.0, "b": 180.0, "bl": 135.0, "l": 90.0, "fl": 45.0}
 const CROUCH_K := 0.55       # hunter.gd: the walking speed crouched, of the run speed
 const AIM_SWING := 0.5       # rad (~29 deg) the aim swings either side while strafing
 const AIM_HZ := 0.5          # 1/s: the swing's rate
@@ -130,7 +131,7 @@ func _hero(main: Node, id: String) -> void:
 	m.free()
 
 ## One state and direction: start from a standstill at `accel` m/s^2, hold the move, brake to a stop.
-## `rel`: rad off the facing (+ his right).
+## `rel`: rad off the facing (+ his left).
 func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel: float, spd: float,
 		accel: float) -> Dictionary:
 	var ck := 1.0 if st.begins_with("crouch") else 0.0
