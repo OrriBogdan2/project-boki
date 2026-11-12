@@ -5,9 +5,10 @@ swordfish, throwing whatever bottle comes out of the bag, swimming through the g
 
 Signatures: the swordfish thrust (gil_thrust) and the Beached flop (gil_beached). Everything is water,
 glass and a small wet body: thin blade swishes with a fin flick, glass that breaks five ways (one per
-potion), bubbles, spray and surf. Every sound is levelled to its category (docs/AUDIO.md), and none of the
-kit's old stock sounds (swipe, throw, boom, whoosh, unlock, ab_ready, click) stays in his kit.
-Original synthesis, no samples.
+potion), bubbles, spray and surf. Every move and phase has its own sound (the list is in
+content/sfx/gil.json; content/vfx/gil.json says which move plays it), each one's attack on the beat its
+keyed pose (scripts/match/kmoves_gil.gd) puts the point out or lets the bottle go. Every sound is levelled
+to its category (docs/AUDIO.md). Original synthesis, no samples.
 """
 import os, sys
 import numpy as np
@@ -100,15 +101,73 @@ def thrust_hit():
     return mix(tip, stab, at(spray(0.18, 2500, 7000, 0.05) * 0.4, 0.01))
 
 
+def thrust_low(i):
+    """The second thrust drives lower and turns the wrist over: a swish that dips, then a twist of the bill."""
+    d = 0.26
+    swish = sweep_noise(0.15, 2600 + 150 * i, 1500, 0.32) * shape(0.15, 0.02, 0.03, 0.1) * 1.2
+    twist = at(sweep_noise(0.08, 1800, 3600, 0.3) * shape(0.08, 0.01, 0.02, 0.05) * 0.6, 0.06)
+    flick = at(bpf(noise(0.04), 600, 2000) * env(N(0.04), 0.002, 0.01) * 0.45, 0.12)
+    return soft_in(mix(swish, twist, flick, at(bubble(760 + 50 * i, 0.04) * 0.12, 0.15)))[:N(d)]
+
+
+def lunge():
+    """The third: a fencer's full lunge, the front foot stamped down and the whole body behind the point
+    (the point is out at 0.06 s)."""
+    stamp = mix(kick(150, 70, 0.16, 0.006, 0.03, 1.6) * 0.6, wet_slap(0.12, 280, 1800) * 0.35)
+    drive = sweep_noise(0.24, 1500, 4800, 0.35) * shape(0.24, 0.05, 0.04, 0.15) * 1.3
+    zing = S.sweep(2600, 4400, 0.14) * env(N(0.14), 0.005, 0.05) * 0.07
+    return soft_in(mix(at(drive, 0.01), at(zing, 0.04), at(stamp, 0.05), at(spray(0.16, 2500, 7000, 0.05) * 0.3, 0.07)))
+
+
+def lunge_hit():
+    """The lunge lands: the bill drives in deeper than a thrust, a wet thump behind the tip."""
+    tip = mix(click(0.003, 2600, 8000) * 1.1, crack(0.14, 700, 4200, 0.02) * 1.5)
+    body = mix(kick(200, 80, 0.26, 0.012, 0.05, 2.2) * 0.75, lpf(noise(0.14), 1200) * env(N(0.14), 0.003, 0.04) * 0.9)
+    return mix(tip, body, at(spray(0.24, 2000, 6500, 0.07) * 0.5, 0.012))
+
+
+# ------------------------------------------------------------------ LMB held: Tide Lunge
+def tide_wind():
+    """Held past the tap: he sinks back and the water is drawn up onto the bill (a sucked-in swirl, bubbles)."""
+    d = 0.5
+    draw = sweep_noise(d, 500, 2400, 0.4) * slow(d, 14, 0.3) * shape(d, 0.18, 0.2, 0.12) * 0.9
+    lap = lpf(noise(d), 700) * slow(d, 20, 0.7) * shape(d, 0.1, 0.25, 0.15) * 0.6
+    return soft_in(mix(draw, lap, at(bubbles(0.4, 6, 350, 900, 0.3), 0.06)), 8)
+
+
+def tide_full():
+    """Full charge: the gathered water rings on the point like a tapped bottle, and a drop falls off."""
+    ring = S.chime(1320, 0.35, 0.12, ((1.0, 1.0), (2.41, 0.35), (3.93, 0.12))) * 0.45
+    return mix(click(0.002, 3000, 9000) * 0.3, ring, at(bubble(1050, 0.06, 1.9) * 0.5, 0.05))
+
+
+def tide_lunge():
+    """Let go: he drives down the lane behind the point with the water: a stamp, a long rush, the spray after."""
+    d = 0.6
+    stamp = mix(kick(130, 55, 0.22, 0.01, 0.05, 2.0) * 0.7, wet_slap(0.14, 260, 1600) * 0.4)
+    rush = sweep_noise(d, 450, 2600, 0.45) * slow(d, 16, 0.35) * shape(d, 0.03, 0.18, 0.38) * 1.2
+    pierce = sweep_noise(0.2, 2000, 5200, 0.3) * shape(0.2, 0.03, 0.04, 0.12) * 0.8
+    return soft_in(mix(at(stamp, 0.04), rush, at(pierce, 0.02), at(spray(0.45, 2200, 8000, 0.15) * 0.5, 0.1)))
+
+
+def tide_hit():
+    """The Tide Lunge runs a foe through: a deep wet stab and a sheet of water breaking over them."""
+    stab = mix(click(0.004, 2200, 7000) * 1.0, kick(170, 60, 0.32, 0.015, 0.07, 2.4) * 0.8)
+    sheet = lpf(noise(0.32), 2200) * env(N(0.32), 0.006, 0.09) * 1.3
+    return mix(stab, at(sheet, 0.01), at(spray(0.35, 2500, 8000, 0.12) * 0.5, 0.03),
+               at(bubbles(0.3, 4, 300, 800, 0.25), 0.08))
+
+
 # ------------------------------------------------------------------ RMB: Grab Bag
 def toss(i):
-    """A bottle out of the bag: glass knocking in the bag, then the bottle flung end over end."""
+    """A bottle out of the bag: glass knocking in the bag, then the bottle flung end over end as the hand
+    whips forward (0.08-0.16 s in gil_throw)."""
     d = 0.4
     knock = mix(S.chime(1900 + 120 * i, 0.12, 0.04, ((1.0, 1.0), (2.7, 0.4))) * 0.5,
                 at(S.chime(2300 + 90 * i, 0.1, 0.03, ((1.0, 1.0), (2.9, 0.3))) * 0.35, 0.03))
     fling = sweep_noise(0.26, 700, 2600, 0.35) * shape(0.26, 0.04, 0.04, 0.18) * 0.9
     slosh = lpf(noise(0.2), 900) * slow(0.2, 25, 0.8) * shape(0.2, 0.02, 0.05, 0.13) * 0.4
-    return soft_in(mix(knock, at(fling, 0.05), at(slosh, 0.06)))
+    return soft_in(mix(knock, at(fling, 0.08), at(slosh, 0.1)))
 
 
 def pop_thunder():
@@ -156,6 +215,12 @@ def pop_zeep():
     return mix(fizz, at(glass(0.8, 2500, 12), 0.1), at(blast, 0.1), at(froth, 0.18), at(spray(0.6) * 0.6, 0.12))
 
 
+def mark():
+    """Fish Out of Water counts a new mark (1/3, 2/3): a tiny tink of glass and one fat drop."""
+    tink = S.chime(2350, 0.18, 0.05, ((1.0, 1.0), (2.9, 0.3))) * 0.4
+    return mix(tink, at(bubble(880, 0.07, 2.0) * 0.6, 0.02), at(spray(0.08, 3000, 8000, 0.02) * 0.2, 0.02))
+
+
 def beached():
     """Fish Out of Water: a foe flops twice on dry land, then a bright bubbly gulp (the Beached pop)."""
     flop = mix(wet_slap(0.18, 300, 2400), at(wet_slap(0.16, 380, 2800) * 0.8, 0.14))
@@ -166,13 +231,15 @@ def beached():
 
 # ------------------------------------------------------------------ Shift: Ground Swim
 def dash(i):
-    """Diving into the ground: an earthy splash, and the fin rushing off under the surface."""
+    """Diving into the ground: a crouch, the earthy splash as his head goes in (0.07 s in gil_dive), the fin
+    rushing off under the surface."""
     d = 0.45
     dive = mix(lpf(noise(0.18), 1400) * env(N(0.18), 0.004, 0.05) * 1.4,
                kick(160 + 10 * i, 70, 0.2, 0.02, 0.04, 1.5) * 0.5)
     rush = sweep_noise(0.36, 400 + 40 * i, 1500, 0.4) * shape(0.36, 0.03, 0.08, 0.24) * 0.9
     splash = spray(0.2, 2000, 6000, 0.05) * 0.5
-    return mix(dive, at(splash, 0.005), at(rush, 0.04), at(bubbles(0.35, 4, 250, 600, 0.3), 0.08))
+    crouch = bpf(noise(0.04), 400, 1800) * env(N(0.04), 0.002, 0.012) * 0.3
+    return mix(crouch, at(dive, 0.05), at(splash, 0.055), at(rush, 0.09), at(bubbles(0.35, 4, 250, 600, 0.3), 0.13))
 
 
 def surface():
@@ -303,6 +370,15 @@ def build():
     S.takes_cat('gil_hurt', hurt, 3, 'grunt')
     S.save_cat('gil_down', down(), 'grunt')
     S.save_cat('gil_death', death(), 'grunt')
+    # the rework's moves (gil-rework-1111), after the rest so the older sounds' random draws stay the same
+    S.takes_cat('gil_thrust_low', thrust_low, 3, 'fire')
+    S.save_cat('gil_lunge', lunge(), 'fire')
+    S.save_cat('gil_lunge_hit', lunge_hit(), 'impact')
+    S.save_cat('gil_tide_wind', tide_wind(), 'cast')
+    S.save_cat('gil_tide_full', tide_full(), 'cast')
+    S.save_cat('gil_tide_lunge', tide_lunge(), 'fire')
+    S.save_cat('gil_tide_hit', tide_hit(), 'impact')
+    S.save_cat('gil_mark', mark(), 'impact')
 
 
 if __name__ == '__main__':
