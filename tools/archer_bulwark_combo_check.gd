@@ -722,7 +722,11 @@ func _impact_looks(stun_s: float) -> void:
 			ground = ground or layer["p"] in ["ring", "vortex", "scorch", "skirt"]
 		ok("pin look: %s has a white-core flare and no ground ring" % move, core and not ground)
 	var stun_fx: Array = mv["heavy_stun"]["fx"]
-	ok("pin look: the stun mark rides over the head for the whole stun", stun_fx[0]["p"] == "ring" and float(stun_fx[0]["y"]) >= 1.8 and float(stun_fx[0]["life"]) >= stun_s)
+	var mark: Dictionary = stun_fx[0]
+	ok(
+		"pin look: the stun mark rides over the head for the whole stun",
+		mark["p"] == "ring" and float(mark["y"]) >= 1.8 and float(mark["life"]) >= stun_s
+	)
 
 ## The widest flare layer of a recipe at charge k (m across).
 func _flare_reach(rec: Dictionary, k: float) -> float:
