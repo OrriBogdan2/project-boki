@@ -33,25 +33,24 @@ const SHUT_KEY := {"lair": "lair_shut_s", "uplink": "uplink_shut_s"}   # heart.j
 
 var cues: Array = []                   # every one-shot cue in order, for the check
 var used := {}                         # seat -> true once a squad left by it
-var _h: Heart
+var m: Match                          # not the Heart: it owns this, a back-reference is a cycle that leaks both
 var _state := -1
 var _opened := {}                      # seat -> true once it opened
 var _said := {}                        # call key -> match time it last played
 var _spent_t := -1.0                   # match time of the latest seat taken (the "last" sting waits behind it)
 
 func _init(heart: Heart) -> void:
-	_h = heart
+	m = heart.m
 
 func update() -> void:
-	var m := _h.m
-	if _h.state != _state:
+	if m.heart.state != _state:
 		if _state != -1:
-			_on_change(_h.state)
-		_state = _h.state
+			_on_change(m.heart.state)
+		_state = m.heart.state
 	if _state == Heart.S.CHARGING:
-		var f := clampf(_h.charge / maxf(Heart.r("charge_s"), 0.01), 0.0, 1.0)
-		Sfx.loop_hold(CHARGE_KEY, "heart_charge", _h.site, HUM_DB, lerpf(HUM_PITCH.x, HUM_PITCH.y, f))
-	if _state == Heart.S.CARRIED and _h.carrier == m.player:
+		var f := clampf(m.heart.charge / maxf(Heart.r("charge_s"), 0.01), 0.0, 1.0)
+		Sfx.loop_hold(CHARGE_KEY, "heart_charge", m.heart.site, HUM_DB, lerpf(HUM_PITCH.x, HUM_PITCH.y, f))
+	if _state == Heart.S.CARRIED and m.heart.carrier == m.player:
 		Sfx.loop_hold(BEAT_KEY, "heart_beat", null, BEAT_DB)
 	_watch_shut()
 
@@ -60,16 +59,15 @@ func _on_change(to: int) -> void:
 		Heart.S.CHARGING:
 			call_out("open", "early")
 		Heart.S.CARRIED:
-			_cue("heart_take" if _h.carrier == _h.m.player else "heart_reveal", null, 0.0)
-			_cue("heart_gate_open", _h.gate, GATE_DB)
+			_cue("heart_take" if m.heart.carrier == m.player else "heart_reveal", null, 0.0)
+			_cue("heart_gate_open", m.heart.gate, GATE_DB)
 		Heart.S.WAITING:
-			_cue("heart_extract", _h.gate, GATE_DB)
+			_cue("heart_extract", m.heart.gate, GATE_DB)
 		Heart.S.FINAL:
 			call_out("open", "final")
 
 ## The warning before an open seat shuts, and the "last way out" once one seat is left.
 func _watch_shut() -> void:
-	var m := _h.m
 	var warn := float(Heart.rules()["quest"]["warn_before_shut_s"])
 	for seat in _opened:
 		var left_s := shut_at(seat) - m.sess_time()
@@ -84,20 +82,19 @@ func _watch_shut() -> void:
 func shut_at(seat: String) -> float:
 	if SHUT_KEY.has(seat):
 		return float(Heart.rules()["quest"][SHUT_KEY[seat]])
-	var len_s := _h.m.sess_len()
+	var len_s := m.sess_len()
 	return len_s if seat == "final" and len_s < 1.0e8 else INF
 
 ## The seats still to be had: not taken, not shut by the clock, and the early seat goes with the final one.
 func ways_left() -> Array:
 	var out: Array = []
 	for seat in SEATS:
-		if not used.has(seat) and shut_at(seat) > _h.m.sess_time() and not (seat == "early" and used.has("final")):
+		if not used.has(seat) and shut_at(seat) > m.sess_time() and not (seat == "early" and used.has("final")):
 			out.append(seat)
 	return out
 
 ## One call: its cue and its words, once (see the header). team: the squad a start or a taken is about.
 func call_out(ev: String, seat: String, team := -1) -> void:
-	var m := _h.m
 	var key := "%s %s" % [ev, seat] + (" %d" % team if ev == "start" else "")
 	if _said.has(key) and (ev != "start" or m.time - float(_said[key]) < START_GAP_S):
 		return
@@ -133,13 +130,13 @@ func _left_words() -> String:
 	return "1 way out left" if n == 1 else "%d ways out left" % n
 
 func _mine(team: int) -> bool:
-	return _h.m.player != null and _h.m.player.team == team
+	return m.player != null and m.player.team == team
 
 func _squad(team: int) -> String:
 	if _mine(team):
 		return "Your squad"
-	return _h.m.truce.squad_name(team) if _h.m.truce else "a squad"
+	return m.truce.squad_name(team) if m.truce else "a squad"
 
 func _cue(sname: String, at, vol: float) -> void:
 	cues.append(sname)
-	_h.m.sfx(sname, at, vol)
+	m.sfx(sname, at, vol)

@@ -7,6 +7,8 @@ extends RefCounted
 ##   4. the Blight's tide over a seat is lost; no later seat reading flips a taken seat.
 ##   5. perf and the DECISIONS rule: no node count change over a whole match of changes, no particles, and the
 ##      code draws no burst and no expanding ring.
+##   6. the seats' look and the Heart free once the match lets go of them (a reference cycle leaks their
+##      materials, and Godot then spins on "material is null" at exit).
 ## Never touches the save.
 
 const St := WaysOutLook.St
@@ -67,6 +69,7 @@ func run(main: Node) -> void:
 	_heart(main)
 	_quest(main)
 	_source_rules()
+	_no_cycle(main)
 	print("WAYSVFX DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -215,3 +218,13 @@ func _source_rules() -> void:
 		var src := FileAccess.get_file_as_string("res://scripts/match/%s.gd" % f)
 		var bad_call := ".burst(" in src or ".ring(" in src or "Particles" in src
 		ok(not bad_call, "%s draws no burst, no expanding ring and no particles" % f)
+
+# ------------------------------------------------------------------ 6. no reference cycle
+func _no_cycle(main: Node) -> void:
+	var m := _match(main, 8201)
+	_run(m, 0.6)
+	var held := [weakref(m.ways_vfx), weakref(m.heart)]
+	m.ways_vfx = null
+	m.heart = null
+	ok(held.all(func(w: WeakRef): return w.get_ref() == null), "the seats' look and the Heart free with no cycle")
+	m.queue_free()
