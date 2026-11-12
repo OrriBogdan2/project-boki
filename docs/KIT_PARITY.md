@@ -1,6 +1,6 @@
 # Kit parity audit: 12 Hunters against the source (main 7907d9afe, 2026-11-07)
 
-PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
+PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed five numbers (data only; Sable E range on 2026-11-12).
 **Refresh 2026-11-09 (main d255acbee):** the Vex, Kael, Lace, Cinder, Meeko and Tenzo tables below were re-checked row by row against main and use the canon display names (briefs/DECISIONS.md, ids unchanged). A closed gap names the commit that closed it; `pending ext/<branch>` is a READY branch not yet on main that would close or move the row. The other six tables and the top-20 list below are still the 7907d9afe text and use the old names.
 
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only: no game code changed.
@@ -68,8 +68,10 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Sparkle | E radius, reach, slide | 1.5, 11, 3.4 | circle ~2 bh across (radius 1.8), -, ~4 bh (7.2) | differ 17% and 53%, kept: mage.md set 1.5 as the hit on purpose; [?] |
 | Sparkle | R radius, range | 2.7, 14.4 | ring 1.5 bh (2.7), 8 bh | match |
 | Sable | RMB range, lane | 7 + 3.8, **1.8 wide** (was 1.4) | lane 5.5-6 bh (9.9-10.8), 1 bh wide (1.8) | **fixed** (width) |
-| Sable | E range | 14 | landed at 9 bh (16.2), max not seen | [?] |
+| Sable | E range | **15** (was 14) | no-target dagger: 8.3 bh (15.0); it passed the cursor, so the end of its path | **fixed**, locked (tol 0.5) |
 | Sable | R ring | 5.4 (rim band outer 25%) | 3 bh (5.4); the first sheet's 3.5 bh is superseded | match |
+
+Sable E range re-read (2026-11-12, settles ext/parity-ranges-rest 16.2 vs ext/ranges-source-rest 13.5-13.8): both used the sheet's "about 9 bh" with an assumed px per bh (40 or 48); this read uses the frames (origin/ext/hero-ref-footage footage/dancer, 720x405). Throw at 0222: Sable at (379, 221) (health-bar frame centre, soles 43 px under its top edge as in 0236). The dagger lies at (122, 100) in 0222 coordinates (0226 landing, camera pan 0222->0226 fitted on 41 ground patches: 1% scale, (-5, 10) px). Distance 284 px. Body height in the same camera: 34 px head to sole at the same screen spot, standing (0235-0237; the sheet's 93-95 px at 1080p is 35), so 1 bh = 34 px = 1.8 m: 284 / 34 = 8.3 bh = **15.0 m** (33-35 px: 14.6-15.5). The cursor was 238 px (7.0 bh) out at the throw, and the dagger landed about 46 px past it, so the landing is the end of the path, not a lower bound. Not corrected for perspective (no other row is): the same distance remapped into 0236, where the throw point sits low on screen, reads 8.8 bh (15.9). 14 is below every read and 16.2 is above the throw-frame read. Ours: the knife stops at the cursor when it is nearer (thief.md item 6); in the source it flew on past the cursor.
 
 Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
 
