@@ -2,11 +2,11 @@ extends RefCounted
 ## --cast-lock-buffer-check (docs/decisions/0022-cc-exit-buffer.md, addendum): for every hero whose ult holds the
 ## body in a cast lock (ArchKit.busy() beyond disabled(): Motley's Nightwell cast, Kael's Riposte guard and cleave,
 ## Vex's Kitefall), an RMB or E pressed LATE_S before the lock ends is held (DashFlow) and goes off once the lock
-## lets it, never inside it; one pressed at the lock's start (outside DashFlow.BUFFER_S) is refused, not held for
+## lets it, never inside it; one pressed at the lock's start (outside Loco.press_buffer) is refused, not held for
 ## the whole lock. The heroes that lock are asserted (LOCKED), so a new lock gets its row here. Reuses the dash-flow
 ## check's training match and slot presses. Never touches the save.
 
-const LATE_S := 0.1             # s of lock left when the late press is made (inside DashFlow.BUFFER_S)
+const LATE_S := 0.1             # s of lock left when the late press is made (inside Loco.press_buffer)
 const EARLY_AT := 2             # steps into the lock for the press that comes too early to be held
 const SETTLE := 20              # steps the ult may take to start its lock
 const LOCK_MAX := 600           # steps a lock may run before the check gives up on it
@@ -50,7 +50,7 @@ func _hero(m: Match, hero: String) -> bool:
 		var got := _trial(m, late, slot)
 		ok(got >= 0 and got != INSIDE, "%s %s pressed %.2fs before its %.2fs lock ends: %s"
 				% [hero, slot, (lock_n - late) * Match.DT, lock_n * Match.DT, _said(got)])
-		if lock_n * Match.DT > DashFlow.BUFFER_S + LATE_S:
+		if lock_n * Match.DT > Loco.press_buffer + LATE_S:
 			got = _trial(m, EARLY_AT, slot)
 			ok(got == LOST, "%s %s pressed %.2fs before its lock ends is not held: %s"
 					% [hero, slot, (lock_n - EARLY_AT) * Match.DT, _said(got)])
