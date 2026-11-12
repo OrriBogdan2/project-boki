@@ -58,7 +58,13 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - Run `python3 tools/health.py --strict`. It must pass: god-file budgets and the style ratchet (`tools/style_lint.py`: no file may get worse; fix what you touch and lock it in with `--update`).
 - Report: what changed, which files, the checks run and their results, and any debt you left (with the `docs/DEBT.md` entry).
 
-## 7. Review before merge
+## 7. Branches
+- **One branch per task** (`ext/<short-name>`). Retries and follow-ups reuse it: never push a `-rebased` or `-v2` copy. Bring it up to date by merging `origin/main` into it.
+- The branch is deleted after it merges. Job checkpoints (`wip/cj-*`) are deleted when the job ends.
+- **Before building any system, search the repo for an existing one** and extend it (§1, §3).
+- Small, clearly labeled commits (§6).
+
+## 8. Review before merge
 The integrator (the main session) merges branches into `main`. Before merging any feature branch, a separate reviewer agent reads the diff with fresh eyes against this file, looking for:
 - god-file growth
 - bloat: features, options or abstractions nobody asked for; a net line count out of proportion to the task
