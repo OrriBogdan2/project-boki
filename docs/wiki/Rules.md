@@ -936,6 +936,8 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | fetch | 3 |
 | fetch_love | 6 |
 | drill_per_point | 1 |
+| breed_options_doc | DATA ONLY, NOT APPLIED (docs/GARDEN.md Breeding pace): what tools/garden_pace_check.gd prints a second table for. xp_mult scales every care XP above, grown_lv is the level the Nook asks for (now Care.STAGES Grown, 8). Pick one by editing the real values. |
+| breed_options | [{"id": "xp_x3", "xp_mult": 3.0, "grown_lv": 8}, {"id": "grown_5", "xp_mult": 1.0, "grown_lv": 5}, {"id": "xp_x2_grown_6", "xp_mult": 2.0, "grown_lv": 6}] |
 | pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0} |
 
 ## garden_zones (`content/rules/garden_zones.json`)
