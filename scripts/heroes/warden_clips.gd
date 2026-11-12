@@ -42,6 +42,7 @@ const CROUCH_RATE_MAX := 2.0 # the sneak clip's fastest rate: a short stride qui
 const RUN_FROM := 1.3        # of walk_speed: faster than this shows the run ring (the two rings are never held
 const RUN_BACK := 1.2        # half and half: out of step they cancel the feet); slower than RUN_BACK hands back
 const BLEND_W := 18.0        # 1/s: the loco and sneak weights' critically damped spring (~0.2 s to a new goal)
+const RING_HOLD := 0.002     # the loco weight under which the rings are held at their start
 const RATE_EASE := 10.0      # 1/s: the loops' playback rate eases to its goal (a step in it steps every foot's speed)
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
@@ -66,6 +67,8 @@ var air_w := 0.0
 var glide_w := 0.0
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
+var rings_locked := false    # the walk and run rings share a length: they keep time
+var ring_start := -1.0       # s: where the rings wait while he stands (data "ring_start"; -1: not held)
 var on_run := false          # the run ring is showing, not the walk
 var loco_rate := 1.0         # the loops' playback rate now
 var move_w := 0.0            # how much the rings show over the idle (0..1 of walk_speed)
@@ -153,6 +156,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
+	for bone in (d["loco"] as Dictionary).get("rest_bones", []):
+		_rerest(String(bone))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -166,6 +171,29 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
+
+## Data "loco.rest_bones": a bone whose clips all sit near half a turn off its rest. The tree blends a rotation as a
+## turn off the rest, so two of those clips blending flip the bone across 180 degrees: its rest becomes the mean of
+## its keys.
+func _rerest(bone: String) -> void:
+	var bi := WardenSkeleton.find(skel, bone)
+	var first := Quaternion.IDENTITY
+	var sum := Vector4.ZERO
+	for nm in lib.get_animation_list():
+		var a := lib.get_animation(nm)
+		for i in a.get_track_count():
+			var on_bone := a.track_get_path(i).get_concatenated_subnames() == bone
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D or not on_bone:
+				continue
+			for k in a.track_get_key_count(i):
+				var q: Quaternion = a.track_get_key_value(i, k)
+				first = q if sum == Vector4.ZERO else first
+				var side := 1.0 if q.dot(first) >= 0.0 else -1.0
+				sum += side * Vector4(q.x, q.y, q.z, q.w)
+	var rest := skel.get_bone_rest(bi)
+	var mean := sum.normalized()
+	rest.basis = Basis(Quaternion(mean.x, mean.y, mean.z, mean.w))
+	skel.set_bone_rest(bi, rest)
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
 ## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
@@ -230,11 +258,22 @@ func _build() -> AnimationNodeBlendTree:
 	var in_step := bool(lc.get("in_step", false))     # (a ring on one length and strike key: every loop keeps time)
 	t.add_node("walk", _ring(lc["walk"], in_step))
 	t.add_node("run", _ring(lc["run"], in_step))
-	t.add_node("rings", AnimationNodeBlend2.new())
+	# (rings of one length and strike key keep time even while one is hidden, and a start opens at "ring_start": the
+	# crossfades (idle, walk, run) then never blend arms half a stride apart: docs/art/LOCO_DIR.md)
+	rings_locked = is_equal_approx(_length(String(lc["walk"]["f"])), _length(String(lc["run"]["f"])))
+	ring_start = float(lc.get("ring_start", 0.0 if rings_locked else -1.0))
+	var rings := AnimationNodeBlend2.new()
+	rings.sync = rings_locked
+	t.add_node("rings", rings)
 	t.connect_node("rings", 0, "walk")
 	t.connect_node("rings", 1, "run")
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
-	t.connect_node("loco_rate", 0, "rings")
+	if ring_start >= 0.0:
+		t.add_node("ring_seek", AnimationNodeTimeSeek.new())
+		t.connect_node("ring_seek", 0, "rings")
+		t.connect_node("loco_rate", 0, "ring_seek")
+	else:
+		t.connect_node("loco_rate", 0, "rings")
 	t.add_node("idle", _anim(String(lc["idle"])))
 	t.add_node("idle_seek", AnimationNodeTimeSeek.new())
 	t.connect_node("idle_seek", 0, "idle")
@@ -596,6 +635,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	else:
 		dir_pos = dir     # (nothing of the rings shows: they turn at once)
 		dir_v = Vector2.ZERO
+	if ring_start >= 0.0 and move_w < RING_HOLD:
+		_p("ring_seek/seek_request", ring_start)     # (the rings wait at the start: a start opens on a strike)
 	if move_w >= 0.999:
 		_p("idle_seek/seek_request", 0.0)     # (a stop starts the idle from its top, never mid-fidget)
 	_p("loco/blend_amount", clampf(move_w, 0.0, 1.0))
