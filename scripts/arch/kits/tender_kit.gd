@@ -68,7 +68,7 @@ func add_kindle(t: Ent, n := 1) -> void:
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
 		vfx("kindled", t.pos)
-		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
+		m.sfx("tend_kindled", t.pos, -2.0, 1.0)
 		play_soft("mm_kindled")
 
 func best_kindle() -> int:

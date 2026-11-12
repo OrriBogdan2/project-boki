@@ -112,7 +112,7 @@ Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB
 Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
-badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+badges, the payoff sounds: docs/AUDIO.md); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
 
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the

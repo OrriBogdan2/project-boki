@@ -308,6 +308,7 @@ func _pin(a: Vector3, k: float) -> void:
 		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
+			m.sfx("pay_called", f.pos, 0.0, 1.0)      # the wall stun is a payoff: its own sting
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			if rank("sec") >= 3:
