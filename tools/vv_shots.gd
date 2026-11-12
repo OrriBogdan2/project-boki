@@ -149,6 +149,9 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		m.cam.snap(cam_at if cam_at != Vector3.ZERO else P.pos + Vector3(lead, 0, 0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		for shot in m.shots:            # (the match's own render is off here: shots would hang where they spawned)
+			if shot["node"]:
+				(shot["node"] as Node3D).global_position = shot["pos"]
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()

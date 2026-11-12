@@ -17,6 +17,7 @@ const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
+const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
 const FRAME_W := 960                      # px wide, each --reel-frames frame
 
 var only := ""
@@ -368,6 +369,30 @@ func _dredge_hook() -> void:
 	await _go(2.4, hook, _sheet("hook",
 			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
+	await _go(GAP)
+
+## Grimble's R over a crowd (docs/COMBAT_CLARITY.md): the dummy, a Hunter and the Boki of both stand
+## inside the fan (the Hunter on his side, so its Boki leaves him be): every body and nameplate must read through it.
+func _dredge_r() -> void:
+	await _reset(4.5)
+	if T2 == null:
+		var pip := Save.new_kin("zapple", "Pip")
+		T2 = m.make_hunter("T2", P.team, "medium", "Mate", "idle", pip, home, {"arch": "bulwark"})
+	T2.teleport(home + Vector3(2.6, 0, -1.8))
+	var spots := [Vector3(3.4, 0, 1.6), Vector3(5.2, 0, -0.6)]
+	for kin in m.kins:
+		if not spots.is_empty():
+			kin.teleport(home + spots.pop_front())
+	var cast := func(t: float):
+		if _at(t, 0.1):
+			P.ak.cd["x"] = 0.0
+			P.ak.cast_ult()
+		_aim(T.pos)
+	var fan_mid := func() -> Vector3: return home + Vector3(3.0, 0.9, 0)
+	crop_px = FAN_CROP
+	await _go(2.8, cast, _sheet("r", "R over a crowd: the dummy, a Hunter and its Boki inside the fan",
+			[0.3, 0.7, 1.1, 1.22, 1.3, 1.45, 1.82, 1.9, 2.4], fan_mid), 3.0)
+	crop_px = SHEET_CROP
 	await _go(GAP)
 
 func _archer_miss() -> void:
