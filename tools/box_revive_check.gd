@@ -75,6 +75,7 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	if m.biomes: m.biomes.hazards.clear()    # a lightning rod's stun would break the channels
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
