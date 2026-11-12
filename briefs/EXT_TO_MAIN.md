@@ -7641,3 +7641,4 @@ READY ext/main-checks-registry-b 8cfc0ad68 (10 inline checks out of main.gd into
 READY ext/vfx-show-ring-ribbon 6b2f0e8ce (Show Ring result: three judge-mark pip plates then a gold/silver/bronze/green ribbon on the Boki; data in show_ring.json; --show-ring-check 39 ok)
 READY ext/anim-whistle-react 6649ff2f7e (whistle answer beat: perk, head+body turn to you, then run; sulky waits and walks slowly; --garden-whistle-check green, strip docs/shots/whistle-react)
 READY ext/sfx-build-ui 64af562765 (build/decorate UI cues: pick, rotate, place wood/stone, move, store, blocked knock; --sfx-set-check sec 10; health+wiki green)
+READY ext/anim-show-ring-clips def733ae9 (Show Ring: strut on the Bond walk-in, 1.0 s pose when the judges look, hop/bow when the placing is read; strut/pose/bow clips per body plan; strip docs/shots/show-ring-clips via software GL)
