@@ -139,6 +139,10 @@ func _stomp_cues() -> void:
 	var p: Hunter = m.player
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	for h in m.hunters:      # no Boki: a pet's stun on the stomper would break the stomp under the check
+		for kk in [h.kin, h.kin2]:
+			if kk:
+				(kk as Kin).dead = true
 	mate.pos = p.pos + Vector3(3, 0, 0)
 	foe.pos = mate.pos + Vector3(0.8, 0, 0)
 	m.knock(mate, foe, {})

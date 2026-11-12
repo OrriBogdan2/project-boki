@@ -73,7 +73,8 @@ static func ring(c: CanvasItem, cam: Camera3D, at: Vector3, r: float, col: Color
 
 ## Who is stomping `o` right now (Stomp), or null.
 static func stomper_of(o: Hunter) -> Hunter:
-	var s = o.get_meta("stomped_by", null)
+	# not get_meta(k, null): that logs an error each frame the key is unset
+	var s = o.get_meta("stomped_by") if o.has_meta("stomped_by") else null
 	return s if is_instance_valid(s) and not (s as Hunter).stomp.is_empty() else null
 
 ## The key of `h`'s first ready move that stuns or knocks (stomps.json "savers"), or "" when none is.

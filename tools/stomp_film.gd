@@ -2,12 +2,12 @@ extends RefCounted
 ## --stomp-film --shots-dir=<dir>: the stomp at the match camera (docs/decisions/0061-stomp-lock.md), in a
 ## live extraction match under a renderer (jobq --needs gpu). Two takes, each saved as 30 fps frames in
 ## <dir>/<take>/NNNNN.jpg:
+##   mate      (shot first) a rival stomps your teammate while you stand by as Motley, Shard Snap ready: the ring
+##             fills in the rival's colour and "Stun to save" with your key shows at the stomper (DownedMarks),
+##             until a stun breaks it
 ##   full      you stomp a rival's wisp while another rival hits you: you stay locked in, take the hits,
 ##             and the wisp dies at the end
 ##   stunned   the same, but the rival stuns you halfway: the stomp breaks and the wisp drifts off alive
-##   mate      a rival stomps your teammate while you stand by as Motley, Shard Snap ready: the ring fills in
-##             the rival's colour and "Stun to save" with your key shows at the stomper (DownedMarks), until
-##             a stun breaks it
 ## Make the clips off the box: ffmpeg -framerate 30 -i <dir>/<take>/%05d.jpg -c:v libx264 -pix_fmt yuv420p <take>.mp4
 ## Never writes the save.
 
@@ -32,9 +32,9 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	await _setup()
+	await _mate_take()      # first: the other two takes use up the rivals
 	await _take("full", false)
 	await _take("stunned", true)
-	await _mate_take()
 	print("STOMPFILM done in %s" % dir)
 	main.get_tree().quit(0)
 
@@ -127,10 +127,16 @@ func _mate_take() -> void:
 	take_dir = dir.path_join("mate")
 	DirAccess.make_dir_recursive_absolute(take_dir)
 	frames = 0
+	var was := [P.cls, P.arch]
 	P.reclass(Arch.weight("ostra"), "ostra")
 	P.unlock_all()
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P and not x.out)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team and not (x.out or x.downed))[0]
+	for h in m.hunters:      # no Boki: a pet's stun would break the stomp before the word is filmed
+		for kk in [h.kin, h.kin2]:
+			if kk:
+				(kk as Kin).dead = true
+				(kk as Kin).visible = false
 	var at := _roomy()
 	mate.teleport(at)
 	foe.teleport(at + Vector3(0.8, 0, 0.3))
@@ -143,6 +149,8 @@ func _mate_take() -> void:
 	print("STOMPFILM_MARK mate halfway frame %d word '%s'" % [frames, word])
 	foe.hurt(4.0, P, {"stun": STUN_FOR})
 	await _go(1.0)
+	P.reclass(was[0], was[1])      # the other takes keep P's own Hunter
+	mate.teleport(m.world.free_spot_near(at + Vector3(-40, 0, 0), [], 1.0, 0.4, 20.0))
 
 func _go(secs: float) -> void:
 	var t := 0.0
@@ -155,5 +163,7 @@ func _go(secs: float) -> void:
 		await main.get_tree().process_frame
 		steps += 1
 		if steps % 2 == 0:
-			main.get_viewport().get_texture().get_image().save_jpg(take_dir.path_join("%05d.jpg" % frames), 0.9)
+			var img := main.get_viewport().get_texture().get_image()
+			if img:      # headless: no image, the take still runs (its STOMPFILM_MARK lines)
+				img.save_jpg(take_dir.path_join("%05d.jpg" % frames), 0.9)
 			frames += 1
