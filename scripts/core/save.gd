@@ -75,7 +75,6 @@ func fresh() -> Dictionary:
 		"active": "",
 		"roster": [],
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
-		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t} (Sleepover)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
@@ -92,7 +91,6 @@ func fresh() -> Dictionary:
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
-		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -109,7 +107,6 @@ func fresh() -> Dictionary:
 		"raid_out": [],       # loadout pieces out on an expedition right now
 		"feeders": [],        # troughs on the farm: {id, kind, x, z, food: [keys], auto}
 		"feeder_inv": {},     # feeders bought but not set down yet
-		"foods_fed": [],      # foods any Boki has eaten: their effect shows instead of "?" (FoodJournal)
 		"furniture": {"journal": 1, "gramophone": 1},   # house pieces in storage: the empty house's two useful ones
 		"graves": [],         # kin that died, with their memories (Econ.kin_dies)
 		"farm_lvl": 0,        # Kin Cottage expansions: room for 6 / 8 / 10 / 12 kin out on the farm (KinBox)
@@ -302,29 +299,21 @@ func _migrate_10_to_11(data: Dictionary) -> void:
 ## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
 ## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
 ## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
-## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load. Clans
-## (d["clan"]) ride the same step, keyed by their own field.
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
 func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
 	for r in data.get("roster", []):
 		if not r.has("bonds"):
 			r["bonds"] = {}
-	FirstBreed.migrate(data)      # a save that has already bred never sees the first-breeding prompt
-	if not data.has("clan"):
-		# clans grow out of guilds: a save in a guild becomes a plain member of the clan with that id (Social.clan_for)
-		var gid := String(data.get("guild_id", ""))
-		var who := String(data.get("profile", {}).get("id", ""))
-		data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
 
 ## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
-## (every Boki gets its worn-token slots and loose points, Care.ensure) and sleepovers. A v12 save from either
-## line gets the other half of v12 first (every step only adds what is missing).
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
 func _migrate_12_to_13(data: Dictionary) -> void:
 	_migrate_11_to_12(data)
 	GardenZones.migrate(data)
 	for r in data.get("roster", []):
 		Care.ensure(r)
-	data.get_or_add("sleepovers", [])      # no Boki away (Sleepover); a v13 save without it gets fresh()'s
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
@@ -473,7 +462,6 @@ func load_from(p: String) -> void:
 			return
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
-	FoodJournal.migrate(parsed)      # keyed by its own field, so no version bump
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]

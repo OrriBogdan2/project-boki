@@ -6,7 +6,7 @@ extends RefCounted
 ## so every species keeps its own rest shape and mover. `TWEAK` is the per species part.
 
 ## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself.
-const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5, "sniff": 0.5}
+const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5}
 ## species -> clip -> {"amp": factor on the whole motion, "bones": {bone: [rx, ry, rz] held through it}}.
 const TWEAK := {
 	"cairnback": {"nudge": {"amp": 0.6}, "climb": {"amp": 0.55}, "splash": {"amp": 0.6}},
@@ -333,59 +333,3 @@ func _spin(u: float) -> void:
 		_:
 			add("spine", 0.3 * up * amp)
 	tail(0.7 * up * amp)
-## The nose-down walk of Seek, laid over the walk: head and neck low, a nod a step, ears back, tail low.
-func _sniff(u: float) -> void:
-	var c := TAU * u * float(_n)
-	var nod := sin(c)
-	match plan:
-		"bird":
-			add("spine", -0.3 * amp)
-			add("neck", -0.45 * amp + 0.1 * nod)
-			add("head", -0.5 * amp + 0.12 * nod)
-			wings(-0.1)
-		"quad":
-			add("root", -0.1 * amp)
-			add("spine", -0.1 * amp)
-			add("neck", -0.4 * amp + 0.08 * nod)
-			add("head", -0.55 * amp + 0.14 * nod)
-			both("ear1", 0.0, 0.0, 0.12)
-		_:
-			add("spine", -0.3 * amp)
-			add("head", -0.5 * amp + 0.14 * nod)
-	tail(0.0, -0.2 * amp)
-
-## The Dash's jump over the gap, laid over the run: forelegs reach, hind legs trail, the back arches, one stretch.
-func _leap(u: float) -> void:
-	var s := sin(TAU * u)
-	match plan:
-		"bird":
-			add("root", 0.15 * amp)
-			both("hleg1", -0.5 * amp)
-			wings(0.9 * amp + 0.35 * sin(2.0 * TAU * u), 0.15)
-		"quad":
-			both("fleg1", 0.8 * amp)
-			both("hleg1", -0.7 * amp)
-			add("spine", -0.12 * amp)
-			add("head", 0.18 * amp)
-			wings(0.6 + 0.3 * s)
-		_:
-			add("spine", -0.25 * amp, 0.15 * s)
-			add("head", 0.2 * amp)
-	tail(0.1 * s, -0.25 * amp)
-
-## Spark Volley's swing over a hop: wind the near fore limb up, snap it down through the seed, body twisting with it.
-func _bat(u: float) -> void:
-	var wind := sin(PI * clampf(u / 0.5, 0.0, 1.0))
-	var hit := smoothstep(0.45, 0.6, u) * (1.0 - smoothstep(0.7, 1.0, u))
-	match plan:
-		"bird":
-			wings(1.0 * wind * amp - 0.7 * hit * amp, 0.2 * hit)
-		"quad":
-			add("fleg1.R", 1.8 * wind * amp - 1.1 * hit * amp)
-			add("fleg1.L", 0.3 * wind * amp)
-			add("spine", -0.2 * hit * amp, -0.35 * hit * amp)
-			add("head", -0.2 * hit * amp)
-		_:
-			add("spine", 0.3 * wind * amp - 0.5 * hit * amp, 0.4 * hit * amp)
-			add("head", -0.2 * hit * amp)
-	tail(0.4 * hit)

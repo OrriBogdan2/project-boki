@@ -52,7 +52,6 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.vfx("guard_tell")
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
@@ -177,8 +176,7 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 func _reset() -> void:
 	resets += 1
 	HeroUlt.reset(k)
-	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
-	ResetCue.play(k.h, "juggernaut_riposte_knock")
+	k.vfx("riposte_reset")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
 ## counts. Returns true when it was blocked.
@@ -195,7 +193,6 @@ func block(by: Ent, o: Dictionary) -> bool:
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
 		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
 				{"pitch": 0.08 * float(st["blocks"])})
-		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).

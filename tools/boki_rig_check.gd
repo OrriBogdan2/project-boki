@@ -11,8 +11,7 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"nettlynx", "thrumbird", "caecilith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend", "win", "sulk", "push", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace",
-	"dodge", "stonehop", "spin", "sniff", "leap", "bat"]
+	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip
@@ -55,8 +54,7 @@ func _contents(rig: BokiRig) -> void:
 		var a := rig.player.get_animation(c)
 		ok(a != null and a.length > 0.1, "clip %s" % c)
 	for c in BokiRig.LOOPED:
-		var a := rig.player.get_animation(c)
-		ok(a != null and a.loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
 	_game_clips(rig)
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
@@ -132,16 +130,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
-	for c in ["sulk", "push", "win"]:
-		ok(_clip_for(rig, "kact", c) == c, "kact %s" % c)
-	rig.root.set_meta("kact", "win")
-	rig._pick_clip(0.016)
-	rig.player.stop()
-	rig._pick_clip(0.016)
-	ok(rig.clip != "win", "a win plays once, then it hops or idles")
-	rig.root.remove_meta("kact")
-	ok(rig.player.has_animation("win") and rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE,
-			"win does not loop")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")
@@ -154,7 +142,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 1.2
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
-	_games(rig)
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
@@ -178,35 +165,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig.seek(0.5)
 	w = rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("closed"))
 	ok(w > 0.99, "asleep the eyes are shut")
-
-## The garden games' body: the race gait keeps its feet in step with the ground, Seek sniffs on the move, a leap
-## and a bat have their clips, and only a moving Boki changes gait.
-func _games(rig: BokiRig) -> void:
-	for sp in [1.4, 1.9, 2.4, 2.6, 3.0, 3.8]:
-		rig._speed = sp
-		rig._pick_clip(0.016)
-		var stride := rig.stride_of(rig.clip)
-		var capped := rig.player.speed_scale >= BokiRig.MAX_CADENCE * rig.player.get_animation(rig.clip).length - 0.01
-		ok(capped or absf(rig.player.speed_scale * stride / sp - 1.0) < 0.05,
-				"%.1f m/s plays %s at ground speed or its cadence cap (%.2f of feet)"
-				% [sp, rig.clip, rig.player.speed_scale * stride])
-	ok(rig.player.get_animation("sniff").loop_mode == Animation.LOOP_LINEAR, "sniff loops")
-	ok(rig.player.get_animation("leap").loop_mode == Animation.LOOP_LINEAR, "leap loops")
-	rig.root.set_meta("kgait", "sniff")
-	rig._speed = 1.0
-	rig._pick_clip(0.016)
-	var feet: float = rig.player.speed_scale * rig.stride_of("sniff")
-	ok(rig.clip == "sniff" and absf(feet - 1.0) < 0.05, "kgait sniff while it walks")
-	rig._speed = 0.0
-	rig._pick_clip(0.016)
-	ok(rig.clip == "idle", "standing, a sniffer stands")
-	rig.root.set_meta("kgait", "leap")
-	rig._speed = 2.4
-	rig._pick_clip(0.016)
-	ok(rig.clip == "leap", "kgait leap while it runs")
-	rig.root.remove_meta("kgait")
-	ok(_clip_for(rig, "kact", "bat") == "bat", "kact bat")
-	rig._speed = 0.0
 
 ## Home's work poses rock Body and hold their item over its head; while it works the rig owns both.
 func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:

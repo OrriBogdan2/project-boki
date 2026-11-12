@@ -3,8 +3,7 @@ extends RefCounted
 ## Prizes and cups for the garden games (content/rules/garden_prizes.json, GARDEN_MODERN.md 4.4).
 ## A win by the Boki you backed rolls the game's prize table, adds the day's first-win item, and moves that
 ## Boki along the weekly cup: Sprout, Bloom, Crown, three wins in a row against rivals the data calls stronger.
-## The Crown gives the game's Cup Ribbon (rec.ribbons) and the cup prize, once a game a week for each Boki, and
-## in that game's season the season keepsake (GardenSeasons).
+## The Crown gives the game's Cup Ribbon (rec.ribbons) and the cup prize, once a game a week for each Boki.
 ## State is lazy and needs no migration: Save.d cups (runs), Save.d prize_day (first win), rec.ribbons.
 
 static func rules() -> Dictionary:
@@ -29,15 +28,6 @@ static func strength(rec: Dictionary) -> int:
 	for s in Care.STATS:
 		total += int(rec["stats"].get(s, 0))
 	return total
-
-## A visiting rival for `rec`: a copy whose stats are rec's times `ratio` (rounded up, so its strength is
-## at least ratio times rec's and the win counts for a cup round of that min_ratio).
-static func rival(rec: Dictionary, ratio: float) -> Dictionary:
-	var r := rec.duplicate(true)
-	r["uid"] = "rival"
-	for s in Care.STATS:
-		r["stats"][s] = ceili(float(rec["stats"].get(s, 0)) * ratio)
-	return r
 
 ## The strongest of `recs` other than `mine`: the rival a race is judged against.
 static func strongest(recs: Array, mine: Dictionary) -> Dictionary:
@@ -87,11 +77,11 @@ static func bank(e: Dictionary) -> void:
 		Save.add_item(String(e["id"]), 1)
 
 ## Pays one finished match to the Boki you backed (`mine`) against `foe`. Returns what the card shows:
-## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset, keepsake (name or "")}.
+## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset}.
 static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now := -1.0,
 		rng: RandomNumberGenerator = null) -> Dictionary:
 	var out := {"game": id, "won": won, "items": [], "first": false, "round": "", "crown": false,
-			"ribbon": false, "reset": false, "keepsake": ""}
+			"ribbon": false, "reset": false}
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
 	if not won:
@@ -144,7 +134,6 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	var prize := {"kind": "item", "id": g["cup_prize"]}
 	bank(prize)
 	(out["items"] as Array).append(prize)
-	out["keepsake"] = GardenSeasons.keepsake(id, mine, now)
 	Save.remember(mine, "cup", "won the %s Crown cup and wears the %s" % [g["name"], g["ribbon"]], 2.0)
 
 ## The lines a result card adds under the gems: the prizes won and the cup step. font 0 leaves it out.
@@ -157,8 +146,6 @@ static func rows(res: Dictionary, font := 0) -> Array:
 		out.append(["Prize: " + ", ".join(names) + (" (first win today)" if res["first"] else ""), UI.GOLD])
 	if res["ribbon"]:
 		out.append(["Crown! The %s is yours" % game(res["game"])["ribbon"], UI.ACCENT_HI])
-		if res["keepsake"] != "":
-			out.append(["Season keepsake: " + res["keepsake"], UI.ACCENT_HI])
 	elif res["round"] != "":
 		out.append(["Cup: beat the %s round" % res["round"], UI.TEAL])
 	elif res["reset"]:

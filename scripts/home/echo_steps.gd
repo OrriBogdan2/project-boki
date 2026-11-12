@@ -330,8 +330,6 @@ var readout: Control = null
 var lbl: Label = null
 var card: Control = null
 var card_t := 0.0
-var cue: GardenCues.EchoCue = null   # the beat rings and hit/miss flashes while a dance runs
-var cued := -1                 # the grid beat the cue last marked
 
 func _init(home) -> void:
 	h = home
@@ -387,8 +385,6 @@ func use() -> void:
 	rng.randomize()
 	run = Run.new(dancers[YOU]["rec"], dancers[RIVAL].get("rec", {}), rng)
 	hops = [[_spot(YOU), _spot(YOU), 0.0], [_spot(RIVAL), _spot(RIVAL), 0.0]]
-	cue = GardenCues.EchoCue.new(h, middle.position, SPREAD + STONE_R + 0.15)
-	cued = -1
 	_sound_up()
 	_open_readout()
 	GardenSfx.cue("garden_go", null)
@@ -445,17 +441,13 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
-	if run != null:
-		step_to(_clock(), d)
-
-## One frame of the dance at `now` on its clock (the checks pass their own).
-func step_to(now: float, d: float) -> void:
+	if run == null:
+		return
+	var now := _clock()
 	run.step(now)
-	_beat_cue(now)
 	for e in run.events:
 		_show(e, now)
 	run.events.clear()
-	cue.step(d)
 	var R := rules()
 	for s in stones.size():
 		glow[s] = maxf(0.0, glow[s] - d)
@@ -477,50 +469,24 @@ func _show(e: Array, now: float) -> void:
 			glow[stone] = float(rules()["glow_s"])
 			if e[0] == "fixed":
 				h._emote(dancers[side], "!", true)
-				cue.hit(_stone_at(stone), _col(side, stone))
 		"hit":
 			GardenSfx.cue("echo_hit", null)
-			cue.hit(_stone_at(stone), _col(side, stone))
 			if not dancers[side].is_empty() and run.streak[side] % int(rules()["cheer_every"]) == 0:
 				GardenSfx.cue("echo_streak", null)
 				h._emote(dancers[side], "♪", true)
 		"kept":
-			cue.miss(_stone_at(stone))
 			h._emote(dancers[side], "♫", true)
 			_act(side, "spin", spin_s(), now)
 		"miss":
 			GardenSfx.cue("echo_miss", null)
-			cue.miss(_stone_at(stone))
 			if not dancers[side].is_empty():
 				h._emote(dancers[side], "?", true)
 	lbl.text = _line()
 
 func _hop(side: int, stone: int, now: float) -> void:
 	_act(side, "stonehop", float(rules()["hop_s"]), now)
-	hops[side] = [_at(side, now), _stone_at(stone) if stone >= 0 else _spot(side), now]
-
-## A stone's middle; the stones' middle for a beat you left empty in your lead.
-func _stone_at(stone: int) -> Vector3:
-	return middle.position + STONE_AT[stone] * SPREAD if stone >= 0 else middle.position
-
-## A cue's colour for side: its Boki's type colour, or the stone's own when the stones lead a solo.
-func _col(side: int, stone: int) -> Color:
-	return STONE_COL[stone] if dancers[side].is_empty() else GardenCues.type_colour(dancers[side]["rec"])
-
-## On the first frame at or past each grid beat of a phase: the lead's stone lights in its colour; on a beat
-## you dance, a ring round the stones keeps time without showing the stone.
-func _beat_cue(now: float) -> void:
-	var b := floori(now / run.beat_s)
-	if b == cued:
-		return
-	cued = b
-	var i := b - run.first
-	if (run.state != Run.S.CALL and run.state != Run.S.ANSWER) or i < 0 or i >= run.pattern.size():
-		return
-	if run.mine() or run.pattern[i] < 0:
-		cue.pulse(_col(YOU, 0))
-	else:
-		cue.beat(_stone_at(run.pattern[i]), _col(RIVAL, run.pattern[i]))
+	var where: Vector3 = middle.position + STONE_AT[stone] * SPREAD if stone >= 0 else _spot(side)
+	hops[side] = [_at(side, now), where, now]
 
 ## The dancer plays a rig clip for `secs` (a spin is not cut short by a hop).
 func _act(side: int, clip: String, secs: float, now: float) -> void:
@@ -607,8 +573,6 @@ func _end(finished: bool) -> void:
 			(k["node"] as Node3D).remove_meta("kact")
 	acts = [["", 0.0], ["", 0.0]]
 	bed.stop()
-	cue.clear()
-	cue = null
 	if is_instance_valid(readout):
 		readout.queue_free()
 	if finished:

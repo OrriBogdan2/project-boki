@@ -558,7 +558,7 @@ func _primed_hit(t: Ent) -> void:
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
 	chain.on_reset()
-	ResetCue.play(h, "thief_empowered_hit")
+	DashReset.cue(h)
 	_reset_fx(t)
 	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
 
@@ -573,7 +573,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
@@ -590,8 +589,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
-	var who: String = "TAKEN" if mine else "ASSIST"
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
+	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ RMB: Bola
@@ -763,7 +761,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
@@ -844,9 +841,9 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	e_t = float(ed["time"])
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
-	if f and rank("kin") >= 3 and h.dashes < h.max_dashes():
+	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
-		ResetCue.play(h, "thief_knife_foe")
+		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))

@@ -40,7 +40,6 @@ var meter: Label = null
 var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
-var grounds: Grounds = null     # the stations on the sky perches and the duel ring (arena layout only)
 
 func setup(match_node: Match, which: String) -> void:
 	m = match_node
@@ -49,7 +48,7 @@ func setup(match_node: Match, which: String) -> void:
 	if P == null:
 		return
 	if layout == "arena":
-		home = _arena_point(Grounds.v3(Grounds.data()["home"]))
+		home = _arena_point(Vector3(26.5, 0, 33.5))
 		P.teleport(home)
 		P.vel = Vector3.ZERO
 		P.face = 0.0
@@ -61,22 +60,16 @@ func setup(match_node: Match, which: String) -> void:
 	for i in Gloves.SLOTS:
 		gloves[i] = String(P.gear[i].get("id", "")) if not (P.gear[i] as Dictionary).is_empty() else ""
 	_spawn_dummies()
-	if layout == "arena":
-		bot_at = _arena_point(Grounds.v3(Grounds.data()["bot"]))
-	else:
-		bot_at = _free_near(home + Vector3(0, 0, -7.0))
+	bot_at = _arena_point(Vector3(26.5, 0, 19.5)) if layout == "arena" else _free_near(home + Vector3(0, 0, -7.0))
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
 	_build_ui()
 	_sign()
-	if layout == "arena":
-		grounds = Grounds.new(self)
-		grounds.build()
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Training Area" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
+		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -95,7 +88,7 @@ func _free_near(p: Vector3) -> Vector3:
 func _spawn_dummies() -> void:
 	var spots: Array
 	if layout == "arena":
-		spots = (Grounds.data()["dummies"] as Array).map(func(d): return [d[0], Vector3(float(d[1]), 0, float(d[2])), d[3]])
+		spots = [["still", Vector3(23.5, 0, 26.5), "light"], ["strafe", Vector3(29.5, 0, 26.0), "medium"], ["heavy", Vector3(30.2, 0, 22.8), "heavy"]]
 	else:
 		spots = [["still", home + Vector3(-2.5, 0, -4.0), "light"], ["strafe", home + Vector3(2.5, 0, -4.5), "medium"], ["heavy", home + Vector3(0, 0, -6.5), "heavy"]]
 	for sp in spots:
@@ -228,8 +221,6 @@ func tick(dt: float) -> void:
 			P.remove_meta("arena_down")
 			m.revive_hunter(P, null)
 			P.hp = P.max_hp
-	if grounds:
-		grounds.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -443,7 +434,7 @@ func _open_card() -> void:
 	var card := KitCard.make(P.arch, sp, _close_card)
 	center.add_child(card)
 	m.paused = true
-	CursorMode.menu()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _close_card() -> void:
 	if card_layer:
@@ -451,7 +442,7 @@ func _close_card() -> void:
 		card_layer = null
 		if menu_layer == null:
 			m.paused = false
-			CursorMode.aim()
+			Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 func toggle_card() -> void:
 	if card_layer: _close_card()
@@ -463,7 +454,7 @@ const MENU := Vector2(1040, 640)
 func open_menu() -> void:
 	close_menu()
 	m.paused = true
-	CursorMode.menu()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	menu_layer = CanvasLayer.new()
 	menu_layer.layer = 40
 	m.add_child(menu_layer)
@@ -604,7 +595,7 @@ func close_menu() -> void:
 		menu_layer = null
 	if card_layer == null:
 		m.paused = false
-		CursorMode.aim()
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 ## The keys (a little node so they work while the menu has the game paused).
 class ArenaKeys extends Node:

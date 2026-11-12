@@ -1,7 +1,7 @@
 extends RefCounted
 ## --toy-check: the Boki base's playthings (GARDEN.md section 4, content/rules/toys.json, HomeToys).
-##   1. data: a ball, post, tub, warm stone, updraft vent and dig patch in the Base category, each with a Care stat
-##   2. lean: Flying and Rock Boki weigh the post up, Water and Ice the tub
+##   1. data: a ball, post, tub, warm stone and dig patch in the Base category, each with a stat Care knows
+##   2. lean: Flying and Rock Boki weigh the post up, Water, Ice and Crystal the tub
 ##   3. off: with base_mode off (the shipped default) nothing plays
 ##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
 ##   5. a squabble between two hot tempers, the stat cap, and the rest pose
@@ -11,7 +11,7 @@ extends RefCounted
 
 ## Each toy and a species whose lean it is made for (ember = Fire; bloom = Grass; swarm = Bug).
 const FITTING := [["toy_ball", "zapple"], ["toy_post", "kestrike"], ["toy_tub", "rimeshrew"],
-	["toy_stone", "kilnbadger"], ["toy_vent", "kestrike"], ["toy_dig", "lilybara"], ["toy_dig", "moundvark"]]
+	["toy_stone", "kilnbadger"], ["toy_dig", "lilybara"], ["toy_dig", "moundvark"]]
 
 var bad := 0
 var main: Node
@@ -49,7 +49,7 @@ func run(m: Node) -> void:
 	var in_base := func(id: String) -> bool:
 		return HomeLayout.CATALOG[id]["cat"] == "Base" and Care.STATS.has(String(R["toys"][id]["stat"]))
 	ok(ids.all(in_base),
-			"every toy is in the Base category, each training a Care stat")
+			"all five toys are in the Base category, each training a Care stat")
 	ok(not FarmUnlocks.rules()["base_mode"], "base_mode is off in the shipped rules")
 	Save.d = _new_save()
 	var lay := HomeLayout.ensure(Save.d)
@@ -62,19 +62,18 @@ func run(m: Node) -> void:
 	var stone := {"species": "basaltoad", "traits": {}}
 	var frost := {"species": "rimeshrew", "traits": {}}
 	var wet := {"species": "kestrike", "lean": {"water": Evo.LEAN_FULL}, "traits": {}}
+	var glass := {"species": "kestrike", "lean": {"crystal": Evo.LEAN_FULL}, "traits": {}}
 	var ember := {"species": "kilnbadger", "traits": {}}
 	var bug := {"species": "moundvark", "traits": {}}
 	var likes_post: bool = toys.weight(storm, "toy_post") > toys.weight(storm, "toy_tub") \
 			and toys.weight(stone, "toy_post") > toys.weight(stone, "toy_ball")
 	ok(likes_post,
 			"flying and rock leans weigh the post up")
-	var vent_up: bool = toys.weight(storm, "toy_vent") > toys.weight(storm, "toy_ball")
-	var vent_flat: bool = toys.weight(stone, "toy_vent") <= toys.weight(stone, "toy_ball") + 0.01
-	ok(vent_up and vent_flat, "a flying lean weighs the vent up, a rock lean does not")
 	var likes_tub: bool = toys.weight(frost, "toy_tub") > toys.weight(frost, "toy_post") \
-			and toys.weight(wet, "toy_tub") > toys.weight(wet, "toy_post")
+			and toys.weight(wet, "toy_tub") > toys.weight(wet, "toy_post") \
+			and toys.weight(glass, "toy_tub") > toys.weight(glass, "toy_post")
 	ok(likes_tub,
-			"ice and water leans weigh the tub up (a lean on the record beats the species)")
+			"ice, water and crystal leans weigh the tub up (a lean on the record beats the species)")
 	var likes_warm: bool = toys.weight(ember, "toy_stone") > toys.weight(ember, "toy_dig") \
 			and toys.weight(ember, "toy_stone") > toys.weight(frost, "toy_stone")
 	ok(likes_warm, "a Fire lean weighs the warm stone up")
@@ -92,7 +91,7 @@ func run(m: Node) -> void:
 	home.hb.toggle()
 	ok(home.hb._tabs().has("Base"), "base_mode on: the build bar has a Base tab")
 	home.hb.cat = "Base"
-	ok(home.hb._tab_items().size() == 6, "and it offers all six toys")
+	ok(home.hb._tab_items().size() == 5, "and it offers all five toys")
 	home.hb.toggle()
 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
 	var first_t := -1.0

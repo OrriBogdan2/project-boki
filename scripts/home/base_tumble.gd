@@ -220,7 +220,6 @@ var score_lbl: Label = null
 var buttons: Array = []
 var card: Control = null
 var card_t := 0.0
-var cue: GardenCues.TellCue = null   # the rival's tell over its head while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -270,7 +269,6 @@ func use() -> void:
 	rng.randomize()
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
 	run.visitor = ks.size() < 2
-	cue = GardenCues.TellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
 	_open_panel()
@@ -327,7 +325,6 @@ func tick(d: float) -> void:
 	if run.state == "resolve" and bar != null and run.grade == "":
 		bar.step(d)
 	_place_pair(d)
-	cue.step(pair[1]["pos"], pair[0]["pos"], d)
 	if run.over():
 		_end(true)
 
@@ -335,12 +332,10 @@ func tick(d: float) -> void:
 func _enter(s: String) -> void:
 	seen = s
 	var moves: Dictionary = rules()["moves"]
-	cue.hide_tell()
 	match s:
 		"intro":
 			_sync_panel()
 		"tell":
-			cue.show_tell(run.tell, run.honest(0))
 			_clips("", run.tell)
 			_sync_panel()
 		"pick":
@@ -445,8 +440,6 @@ func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}
 	_clips("", "")
 	_close_bar()
-	cue.clear()
-	cue = null
 	if is_instance_valid(panel):
 		panel.queue_free()
 	for k in pair:

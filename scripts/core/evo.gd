@@ -97,8 +97,6 @@ static func leading(rec: Dictionary) -> String:
 ## The name it goes by: its species, or the form name an older save gave it (kept until it evolves).
 static func form_name(rec: Dictionary) -> String:
 	ensure(rec)
-	if String(rec.get("final", "")) != "":
-		return String(rec["final"]).capitalize()      # its branching final (EvoPath.evolve)
 	var old := String(rec.get("form_name", ""))
 	return old if old != "" else String(Data.KIN[rec.get("species", "cindle")]["name"])
 

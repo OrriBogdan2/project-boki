@@ -1,10 +1,8 @@
 {
- "_doc": "Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models.",
+ "_doc": "Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models.",
  "feed": 2, "feed_love": 5,
  "pet": 1, "pet_love": 2,
  "fetch": 3, "fetch_love": 6,
  "drill_per_point": 1,
- "game": 8, "game_win": 15, "first_win_mult": 3,
- "game_doc": "A garden minigame (brief 2.5): game to the Boki that played, game_win instead when it won, times first_win_mult on the first win of the day in that game (GardenPrizes first).",
  "pace": {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0}
 }

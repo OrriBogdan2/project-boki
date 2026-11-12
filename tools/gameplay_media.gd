@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-7> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with

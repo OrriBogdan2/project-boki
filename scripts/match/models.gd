@@ -824,7 +824,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
 	var gset := _glider_set(gskin)
-	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()],
+	for pc in [[gset[0], Gliders.canopy_material(gskin, team_col, hero_col)],
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
@@ -1265,15 +1265,14 @@ static func vtoon_outlined() -> ShaderMaterial:
 	m.next_pass = _outline_mat
 	return m
 
-## A skin's glider merged once (merge_static): [the canopy's arrays, colour weights still in them (Gliders.paint
-## colours each Hunter's), the strings' mesh (one for all)]. Merging both per Hunter was ~3.5 ms each.
+## A glider per canopy shape, merged once (merge_static) for every Hunter on a skin of that shape: [the canopy,
+## its vertex colours still the colour weights (Gliders.canopy_material colours each Hunter's), the strings].
 static var _glider_sets := {}
 static func _glider_set(gskin: String) -> Array:
-	if not _glider_sets.has(gskin):
+	var sheet := Gliders.canopy(gskin)
+	if not _glider_sets.has(sheet):
 		var g := Node3D.new()
 		var canopy := MeshInstance3D.new()
-		var sheet := ArrayMesh.new()
-		sheet.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, Gliders.sheet(gskin))
 		canopy.mesh = sheet
 		canopy.material_override = vtoon_outlined()
 		canopy.position = Vector3(0, 1.05, 0.02)
@@ -1286,9 +1285,9 @@ static func _glider_set(gskin: String) -> Array:
 		var got := {}
 		for ch in g.get_children():
 			got[(ch as MeshInstance3D).material_override == m_line] = (ch as MeshInstance3D).mesh
-		_glider_sets[gskin] = [(got[false] as Mesh).surface_get_arrays(0), got[true]]
+		_glider_sets[sheet] = [got[false], got[true]]
 		g.free()
-	return _glider_sets[gskin]
+	return _glider_sets[sheet]
 
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
@@ -1298,6 +1297,8 @@ static func merge_static(node: Node3D, discard := false) -> void:
 	var drop: Array = []
 	for ch in node.get_children():
 		if not (ch is MeshInstance3D) or ch.get_child_count() > 0 or not String(ch.name).begins_with("@"):
+			continue
+		if not ch.visible:
 			continue
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
@@ -1892,7 +1893,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	# Body moves the kin around (hops, lunges, tumbles); Flex inside it squashes and stretches (KinPuppet)
 	var body_root := Node3D.new(); body_root.name = "Body"; root.add_child(body_root)
 	var body := Node3D.new(); body.name = "Flex"; body_root.add_child(body)
-	var built := KinModels.build(species, body, {"body": m_body, "belly": m_belly, "dark": m_dark, "glow": m_glow, "eye": m_eye, "white": m_white, "rec": rec,
+	var built := KinModels.build(species, body, {"body": m_body, "belly": m_belly, "dark": m_dark, "glow": m_glow, "eye": m_eye, "white": m_white,
 		"wing_col": Shiny.palette(species).get("wing", (Shiny.col(species, rec, "belly") as Color).lerp(glow_c, 0.3)) if shimmer else sp.get("wing", (sp["belly"] as Color).lerp(glow_c, 0.3))}, mats)
 	if built.is_empty():
 		var shape := String(look.get("body", "round"))
@@ -2069,7 +2070,6 @@ static func kin(species: String, rec := {}) -> Node3D:
 	painted(m_dark, 2, 0.2, 0.2, 0.2)
 	bake_part_y(body_root)
 	Evo.dress(root, rec)
-	GardenAura.dress(root, rec)          # a worn garden aura (Glowmoss Sprig), looks only
 	if shimmer:
 		# a shimmer sparkles a little, all the time
 		for i in 3:

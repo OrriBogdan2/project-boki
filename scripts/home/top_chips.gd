@@ -2,6 +2,7 @@ class_name TopChips
 extends RefCounted
 ## The farm top bar's counters. Name and gems show from the start; each other counter shows from the first
 ## time you have any of it, and stays. A save that had already seen the farm before this existed shows all.
+## The garden (base_mode) has no gathering: there a counter shows only while it is above 0.
 
 const MAT := Color("d8b07a")      # building materials
 const COUNTERS := [
@@ -19,8 +20,10 @@ static func have(id: String) -> int:
 		"crops": return int(Save.d["crops"].values().reduce(func(a, b): return a + int(b), 0))
 	return FarmSites.have(id)
 
-## True when the counter shows: you have some, or had some before.
+## True when the counter shows: you have some, or had some before (the garden: only while you have some).
 static func shows(id: String, count: int) -> bool:
+	if count == 0 and FarmUnlocks.base_mode():
+		return false
 	var tut: Dictionary = Save.d["tutorial"]
 	if not tut.has("chips_seen"):
 		tut["chips_seen"] = {}
@@ -33,8 +36,6 @@ static func shows(id: String, count: int) -> bool:
 	return seen.has(id)
 
 static func add_to(row: Node) -> void:
-	if FarmUnlocks.base_mode():      # gems only: BaseHud shows the rest
-		return
 	for c in COUNTERS:
 		var n := have(String(c[0]))
 		if shows(String(c[0]), n):

@@ -52,7 +52,6 @@ game also falls back to them for any model that fails to load.
 ## Audio
 
 Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen_train_sfx.py` and `tools/gen_reset_sfx.py` (the dash-reset cue, three variants), `tools/gen_mask_sfx.py` (the Mask moment: swell, heartbeat, whisper, impact, sting), `tools/gen_sfx_garden.py` (the garden minigames)
-Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen_train_sfx.py` and `tools/gen_reset_sfx.py` (the dash-reset cue, three variants), `tools/gen_mask_sfx.py` (the Mask moment: swell, heartbeat, whisper, impact, sting) and `tools/gen_sfx_loot.py` (opening a chest or a deathbox: the wood-creak and latch-and-hum loops, the rare / epic / legendary stings; our own, no samples)
 (written to `audio/*.wav`; the combat layer, ability casts and impacts, and footsteps come from
 `tools/sfx_combat.py`, which `gen_sfx.py` runs last), and glider skins and the home whistle are made in code by
 `scripts/core/synth.gd`. Music and ambience are composed procedurally by `tools/gen_music.py` /

@@ -103,7 +103,7 @@ func setup(opts: Dictionary) -> void:
 	if opts.get("tutorial", false):
 		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
-		title = "Training Area"; sub = "Dummies, ledges and boosters. No danger here."
+		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
