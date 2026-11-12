@@ -1478,10 +1478,10 @@ func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> vo
 		var aa := a0 - arc * 0.5 + arc * float(i) / float(rays - 1)
 		var st := Vector3(pos.x + cos(aa) * 0.25, y, pos.z + sin(aa) * 0.25)
 		m.spawn_shot(self, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * m.dmg_mult(self), maxf(0.02, (reach - 0.25) / 40.0), 0.22, wpn["color"], extra)
-	if not o.get("own_look", false):      # a kit drawing its own swing (Gil's thrusts are no arc)
-		m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
 	Oomph.on_fire(self, true)
-	m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
+	if not o.get("own_look", false):      # a kit with its own swing look and sound (Gil's thrusts: no arc)
+		m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
+		m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
 
 func _emit_shot() -> void:
 	var dir := aim_dir()

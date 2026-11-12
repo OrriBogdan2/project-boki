@@ -104,6 +104,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	elif held and not bot and m.time - press_at >= float(lmb_def()["tide"]["after"]):
 		lmb_t = 0.0
 		play("gil_tide_wind")
+		vfx("tide_wind", h.pos)
 	return true
 
 func _thrust() -> void:
@@ -119,7 +120,7 @@ func _thrust() -> void:
 	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
 	play(THRUSTS[i])
-	var o := {"len": float(ld["reach"][i])}
+	var o := {"len": float(ld["reach"][i]), "k": float(i)}      # k 1: the second thrust's own sound
 	if i == 2: vfx("lunge", h.pos, h.aim_dir(), o)
 	else: vfx("thrust", h.pos, h.aim_dir(), o)
 
