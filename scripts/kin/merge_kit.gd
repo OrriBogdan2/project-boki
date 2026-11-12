@@ -195,7 +195,8 @@ func info() -> Dictionary:
 
 ## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel), and
 ## for a beat after the merge ends the release. A form move that has played out leaves the hero's own moves showing.
-## Other games read the pose id the owner syncs (KinNet) from the hunter's meta.
+## Other games read the pose id the owner syncs (KinNet) from the hunter's meta, the release too: worked out there
+## from the merge_end event, it would start when the event lands, after a hero move the same snapshot carried.
 static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	var id := ""
 	var at := 0.0
@@ -207,22 +208,30 @@ static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	elif hunter.remote:
 		id = String(hunter.get_meta("kpose", ""))
 		at = float(hunter.get_meta("kpose_at", -9.0))
-	if not MergeMoves.playing(id, now - at):
-		id = ""
-	var out_at := float(hunter.get_meta(MergeMoves.OUT_AT, -9.0))
-	# (the release gives way to a move the hero starts after the merge ended)
-	var since_out := now - out_at
-	var shown := String(s.get("kmove", ""))
-	var hero_move: bool = not shown.begins_with("mf_") and float(s.get("kmove_t", 99.0)) < since_out
-	if id == "" and k == null and not hero_move and MergeMoves.playing(MergeMoves.RELEASE, since_out):
+	elif releasing(hunter):
 		id = MergeMoves.RELEASE
-		at = out_at
+		at = float(hunter.get_meta(MergeMoves.OUT_AT))
+	# (the release gives way to a move the hero starts after the merge ended: wall moves too, not only the kit's)
+	var shown := String(s.get("kmove", ""))
+	var hero_move: bool = not shown.begins_with("mf_") and float(s.get("kmove_t", 99.0)) < now - at
+	if not MergeMoves.playing(id, now - at) or (id == MergeMoves.RELEASE and hero_move):
+		id = ""
 	if id != "":
 		s["kmove"] = id
 		s["kmove_t"] = now - at
 	elif String(s.get("kmove", "")).begins_with("mf_"):
 		s.erase("kmove")
 		s.erase("kmove_t")
+
+## The owner's release is showing: the merge ended under the move's length ago and the hero's kit started no move since.
+static func releasing(hunter: Hunter) -> bool:
+	if not hunter.has_meta(MergeMoves.OUT_AT) or of(hunter) != null:
+		return false
+	var out_at := float(hunter.get_meta(MergeMoves.OUT_AT))
+	var ak := hunter.ak
+	if ak != null and ak.anim_id != "" and ak.anim_at >= out_at:
+		return false
+	return MergeMoves.playing(MergeMoves.RELEASE, hunter.m.time - out_at)
 
 # ------------------------------------------------------------------ bots
 ## How a bot plays the window: the ultimate when foes are in its range or the window is about to close (its hero kit is the bot's usual play).

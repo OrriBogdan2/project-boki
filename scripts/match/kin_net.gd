@@ -50,6 +50,8 @@ static func hunter_extra(h: Hunter) -> Array:
 		pose = "%s~%d" % [k.anim_id, k.anim_n % 100]
 	if pose == "":
 		pose = KinDowned.rescue_pose(h)
+	if pose == "" and MergeKit.releasing(h):        # (in the snapshot with the hero's next move id: never over it)
+		pose = "%s~%d" % [MergeMoves.RELEASE, int(float(h.get_meta(MergeMoves.OUT_AT)) * 10.0) % 100]
 	return [encode_form(f) if shown else "", snappedf(float(h.merge_st.get("t", 0.0)), 0.1), snappedf(sh.x, 0.5), snappedf(sh.y, 0.5), pose]
 
 static func apply_hunter(h: Hunter, it: Array) -> void:
@@ -138,8 +140,6 @@ static func on_event(m: Match, x: Array) -> void:
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":
-			if e is Hunter:
-				(e as Hunter).set_meta(MergeMoves.OUT_AT, m.time)      # (the release move, MergeKit.anim_state)
 			if String(x[6]) == "shell" and e is Hunter:
 				(e as Hunter).set_meta("shell_break_at", m.time)
 				(e as Hunter).set_meta("shell_break_col", (e as Hunter).get_meta("mf_glow", Color.WHITE))
