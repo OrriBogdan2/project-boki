@@ -114,7 +114,8 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"upper": "moving"
 		},
 		"mf_xform": {
 			"clip": "fuse"
