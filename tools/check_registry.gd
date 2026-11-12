@@ -306,6 +306,7 @@ const CHECKS := {
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	# + a server, delay
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],
+	"--online-rocket-check": ["res://tools/online_rocket_check.gd", "online_rocket_check", null],      # drop, 2 games
 	# 2 games, laggy relay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
