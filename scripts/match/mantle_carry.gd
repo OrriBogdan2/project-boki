@@ -59,6 +59,23 @@ static func pushing(h: Hunter, toward: Vector2, mv: Vector2) -> bool:
 		return tn.dot(mv.normalized()) >= APPROACH_DOT
 	return h.carry_v >= PUSH_SPEED and tn.dot(h.carry_dir) >= APPROACH_DOT
 
+## Is tile (x, z) a face you press from your tile, off the void: one sharing an edge with it (the tile ahead
+## along a wall isn't the wall you press), or a lone outside corner, with no wall or prop on either tile
+## between it and yours (it is all that's in the way: --snag-check found glides stuck on such corners).
+static func faces(h: Hunter, x: int, z: int) -> bool:
+	var px := int(floor(h.pos.x))
+	var pz := int(floor(h.pos.z))
+	if absi(x - px) + absi(z - pz) <= 1:
+		return true
+	if absi(x - px) > 1 or absi(z - pz) > 1:
+		return false
+	var w: World = h.m.world
+	for t: Vector2 in [Vector2(x + 0.5, pz + 0.5), Vector2(px + 0.5, z + 0.5)]:
+		if w.is_block(t.x, t.y) or w.ground_at(t.x, t.y) > h.pos.y + World.STEP:
+			return false
+	return true
+
+
 ## The way you're heading when the keys are idle (momentum), else the keys.
 static func heading(h: Hunter, mv: Vector2) -> Vector2:
 	if mv.length() > 0.3:

@@ -2478,7 +2478,7 @@ func _update_glide(dt: float) -> void:
 	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
 	var was_btn := _glide_btn_held
 	_glide_btn_held = btn_down
-	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
+	var hold_opens: bool = lfloat.is_empty() and (auto_glide or _glide_armed or not inp.get("glide_press_only", false))
 	if gliding:
 		if not want or not can:
 			gliding = false
@@ -2498,7 +2498,7 @@ func _update_glide(dt: float) -> void:
 	elif want and can and hold_opens and loco.can(Loco.S.GLIDING) and air_t >= (0.0 if btn_down else GLIDE_ENGAGE) \
 			and jump_at != m.time and not AirLimits.glide_locked(self):      # (the press that jumped is not also a glide press)
 		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
-		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
+		# input: the glider opens. Space held since the jump never gets here (glide_press_only), nor a ledge rise
 		gliding = true
 		_glide_armed = false
 		if below_lip:
@@ -2599,8 +2599,8 @@ func _try_ledge_grab(dt: float) -> void:
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
 				# hopping down a terrace must not float you back up it
-				# and one that shares an edge with your tile: the tile ahead along a wall isn't the wall you press
-				if absi(x - int(floor(pos.x))) + absi(z - int(floor(pos.z))) > 1:
+				# and one you press: an edge neighbour or a lone outside corner (MantleCarry.faces)
+				if not MantleCarry.faces(self, x, z):
 					continue
 				var stepping_back := gz <= last_gy + World.STEP and not GlideLift.airborne_long(self)
 				if stepping_back or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
