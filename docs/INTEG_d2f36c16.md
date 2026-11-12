@@ -348,3 +348,8 @@ Each needs a rebase onto main by its owner (or a deep job). Branch: the files th
 - wisp-steal: scripts/core/net.gd
 - wisp-summon-net: scripts/core/net.gd
 - wisp-summon-pop: scripts/match/kin_summon.gd
+
+## Follow-up (job 20261112-170511-a3, role feel)
+- origin/main 449fcaf48 merged in: main's downed-Hunter Boki wisp (KinWispForm, Kin state "wisp" replaces "reviving") kept beside the branch's setting-gated KinWisp prototype; the revive label keeps the seconds with main's wisp wording; Net 0.33.1.
+- `--snag-check` green (34 -> 2): the 32 terrace stalls were outside terrace corners on the 2x Hollow Crown, not a map error (decision 0022 follow-up, docs/MOVEMENT_FEEL.md).
+- `--hitstop-input-check` had no row for Gil, so its trials crashed (the "timeout" before Gil); the row is in and Gil passes.
