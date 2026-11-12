@@ -4010,7 +4010,7 @@ const SEP_KIN_STATES := ["active", "wild", "dazed", "returning"]   # a Boki on t
 func _separate() -> void:
 	var bodies: Array = []
 	for h in hunters:
-		if h.hittable() and h.grap.is_empty(): bodies.append(h)
+		if h.hittable() and h.grap.is_empty() and not (h.net_buf and h.net_buf.guessing): bodies.append(h)
 	for mb in mobs:
 		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
