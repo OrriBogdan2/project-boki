@@ -99,7 +99,7 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
 	ok(await dn._connect(), "the host is on the relay")
-	var cmd := "cd '%s' && %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
+	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
 		ProjectSettings.globalize_path("res://"), GODOT, dn.port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
