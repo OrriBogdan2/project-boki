@@ -168,8 +168,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	var reach := StrikeReach.new()
 	await reach.hero(id, m, sync, dd, holder.get_tree())
 	bad += reach.bad
-	await _cancels(id, m, sync, clips, dd)
 	m.free()
+	await _cancels(id, dd)
 	await _flinch(id)
 
 ## The result beats (WardenBeats): win, lose and board each map to a clip the .glb plays that is its own (no two beats
@@ -587,16 +587,19 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
 
 ## Every cancel of the kit's Cancels table (data "cancels": [from, cut at s, to]): the cut move hands over with no pop,
-## and the next state owns the body within one frame of the source footage: nothing held, nothing half-faded.
-func _cancels(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+## and the next state owns the body within one frame of the source footage: nothing held, nothing half-faded. On a
+## fresh model of the Hero: the checks before leave theirs resized (the sliders) and mid-ease, which moved the rows.
+func _cancels(id: String, dd: Dictionary) -> void:
 	var rows: Array = dd.get("cancels", [])
 	if rows.is_empty():
 		return
-	# (1.5 s on the run first: whatever the checks before left easing (a lock-in's slow let-go, the stance, a landing,
-	# the air tilt) is gone, so the first row's cut meets the same model as the rest)
-	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true})
-	for k in 45:
-		sync.call("_process", DT)
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var clips: WardenClips = sync.get("clips")
+	own = {}      # (the clips' own paths, sampled again on this model)
 	var height := 1.6 * absf(m.scale.y)
 	var worst := 0.0
 	var where := ""
@@ -626,6 +629,7 @@ func _cancels(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Diction
 			% [id, rows.size(), worst, where, POP * height])
 	ok(late.is_empty(), "%s: every cancel's blend is done within %.1f s of the cut (late: %s)"
 			% [id, SOURCE_FRAME, str(late)])
+	m.free()
 
 ## True when the layers show `st` alone: the legs (or the glider) with no action left, or the move at full weight.
 func _settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
