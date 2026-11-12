@@ -366,8 +366,9 @@ func _stop_layers(fade: float) -> void:
 	layers = {}
 	layer_want = {}
 
-## Extra ambience beds on top of the main one (wind over the abyss, ruins), each faded to a level
-## by where you are; created on first use, stopped by clear_amb_layers.
+## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
+## and pond beds), each faded to a level by where you are; created on first use, freed once faded
+## to nothing, stopped together by clear_amb_layers.
 var amb_layers := {}      # name -> {p, want}
 
 func amb_layer(name: String, level: float) -> void:
@@ -394,11 +395,14 @@ func clear_amb_layers(fade := 1.0) -> void:
 func _process(delta: float) -> void:
 	if not loops.is_empty():
 		_drop_stale_holds()
-	for n in amb_layers:
+	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
 		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
+		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
+			ap.queue_free()
+			amb_layers.erase(n)
 	for i in ambs.size():
 		_amb_ramp(ambs[i], i == amb_i and amb_name != "", delta)
 	if layers.is_empty():
