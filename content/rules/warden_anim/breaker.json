@@ -143,10 +143,10 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
 		"base",
 		"drink"
 	],
+	"stomp": {"style": "anchor_drop", "commit": "stomp_in", "clip": "stomp"},
 	"upper": [
 		"hips",
 		"head",

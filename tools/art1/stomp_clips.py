@@ -7,7 +7,7 @@ Weight is per Hunter (WEIGHT): how high and how fast the foot comes up, how far 
 long it takes to come back. Kael lifts slowly and drops dead; Lace flicks a pointed heel and bounces off it.
 The keys are posekit targets (pelvis, torso, head, ankles) laid over the Hunter's own idle (frame 0), which is also
 where the arms and every other bone stay unless WEIGHT turns a shoulder; posekit's leg IK keeps the standing foot planted.
-Run: blender -b --factory-startup --python tools/art1/stomp_clips.py -- <id: kael | vex | hem> [glb, default art/wardens/<id>/<id>.glb]
+Run: blender -b --factory-startup --python tools/art1/stomp_clips.py -- <id: kael | vex | hem | breaker | claire | cinder | tarek | ryzz> [glb, default art/wardens/<id>/<id>.glb]
 (the glb is imported, the two clips baked and exported, then copied onto it by glb_add_clips: everything else stays byte for byte)."""
 import math
 import os
@@ -32,7 +32,9 @@ NAMES = ("stomp_in", "stomp")
 # times in fractions of a beat. top: when the foot peaks (a later top is a slower wind-up); settle: how long the body
 # takes to come back off a strike; toe: the lifted foot's pitch (toe down); lean: forward tilt through the stomp;
 # back: the lean back at the top; power: each beat's lift against the first; arms: shoulder turns (forward swing, out)
-# at the top and on the strike; "shin": a rig whose shin ends at the ankle (Kael v2: no foot bone).
+# at the top and on the strike; "shin": a rig whose shin ends at the ankle (Kael v2, Albert: no foot bone).
+# foot: "R" (default), "L" or "both" (a two-footed drop, the hips hop by "hop"); shift is towards the standing leg for either foot;
+# grind: the torso yaw driven into the strike; listen: (yaw, roll) of the head on the hold.
 WEIGHT = {
     # Kael (juggernaut, Arena Slam): enormous; the knee comes up slowly, the foot falls like a dropped anvil, the hips
     # sink deep and stay down; both fists swing up with the lift and hammer down with the strike
@@ -48,6 +50,31 @@ WEIGHT = {
     "hem": {"lift": 0.3, "reach": 0.16, "top": 0.4, "settle": 0.07, "drop": 0.03, "crouch": 0.0, "rise": 0.025, "shift": -0.03,
             "toe": -0.7, "lean": 0.06, "back": 0.04, "twist": 0.06, "power": (1.1, 0.9, 1.1),
             "arms": {"top": {"aL": (0.1, 0.3)}, "hit": {"aL": (0.0, 0.15)}}},
+    # Albert (bulwark, Anchor Drop): a hull on two stubs that can't lunge, so the whole ball rocks back on its heels, hops and
+    # drops both feet like an anchor; the arms heave up with it and slam down
+    "breaker": {"foot": "both", "lift": 0.07, "reach": 0.0, "top": 0.62, "settle": 0.2, "drop": 0.05, "crouch": 0.03, "hop": 0.05, "rise": 0.0,
+                "shift": 0.0, "toe": 0.0, "lean": 0.22, "back": 0.15, "twist": 0.0, "power": (1.0, 0.9, 1.25), "shin": 0.05,
+                "arms": {"top": {"aL": (1.1, 0.35), "aR": (1.1, 0.35)}, "hit": {"aL": (0.2, 0.1), "aR": (0.0, 0.1)}}},
+    # Neve (rimewright, Toe Pick): the festival's show-skater; a high pointed toe that stabs the ice, a counter-turn of the
+    # shoulders, arms wide for balance, the finish held like the end of a routine
+    "claire": {"lift": 0.34, "reach": 0.16, "top": 0.5, "settle": 0.1, "drop": 0.04, "crouch": 0.0, "rise": 0.02, "shift": -0.03,
+               "toe": -1.0, "lean": 0.2, "back": 0.04, "twist": 0.25, "power": (1.1, 0.95, 1.15),
+               "arms": {"top": {"aL": (0.1, 0.9), "aR": (0.1, 0.9)}, "hit": {"aL": (0.1, 0.5), "aR": (0.1, 0.5)}}},
+    # Cinder (ashwick, Ember Grind): certain, not mad; a slow deliberate lift of the left foot, every beat surer than the last, the
+    # heel set and ground in with a turn of the hips, bare hands open at her sides
+    "cinder": {"foot": "L", "lift": 0.3, "reach": 0.14, "top": 0.65, "settle": 0.15, "drop": 0.05, "crouch": 0.02, "rise": 0.0, "shift": -0.04,
+               "toe": -0.3, "lean": 0.12, "back": 0.04, "twist": 0.2, "grind": 0.35, "power": (1.0, 1.1, 1.25),
+               "arms": {"top": {"aL": (0.35, 0.4), "aR": (0.35, 0.4)}, "hit": {"aL": (0.15, 0.55), "aR": (0.15, 0.55)}}},
+    # Tenzo (dolm, Stone Listen): the young calm blind one; a short gentle lift and a flat foot set down like feeling for the
+    # rock, upright with the chin up, arms a little wide, and on the hold the head turns to listen to the ground
+    "tarek": {"lift": 0.3, "reach": 0.1, "top": 0.55, "settle": 0.15, "drop": 0.04, "crouch": 0.02, "rise": 0.0, "shift": -0.04,
+              "toe": 0.0, "lean": -0.05, "back": 0.05, "twist": 0.0, "power": (1.0, 1.0, 1.1), "listen": (0.35, 0.15),
+              "arms": {"top": {"aL": (0.05, 0.55), "aR": (0.05, 0.55)}, "hit": {"aL": (0.0, 0.35), "aR": (0.0, 0.35)}}},
+    # Sparkle (mage, Spark Hop): a street kid, all snap: a quick high left knee, fists thrown up with it, a bouncy strike that
+    # springs off the beat, a bigger one each time
+    "ryzz": {"foot": "L", "lift": 0.36, "reach": 0.2, "top": 0.35, "settle": 0.12, "drop": 0.07, "crouch": 0.0, "rise": 0.03, "shift": -0.03,
+             "toe": -0.5, "lean": 0.18, "back": 0.1, "twist": -0.2, "power": (1.0, 1.15, 1.3),
+             "arms": {"top": {"aL": (1.2, 0.5), "aR": (1.2, 0.5)}, "hit": {"aL": (0.5, 0.3), "aR": (0.5, 0.3)}}},
 }
 
 
@@ -112,26 +139,39 @@ def ready_of(arm, s):
 
 def clips(r, w):
     """stomp_in and stomp for the ready pose r and the weight w."""
+    feet = {"R": "R", "L": "L", "both": "LR"}[w.get("foot", "R")]
+    shift = -w["shift"] if feet == "L" else w["shift"]      # towards the standing leg (WEIGHT is written for the right foot)
+    hop = w.get("hop", 0.0)
+
     def body(pel=(0, 0, 0), tor=(0, 0, 0), hed=(0, 0, 0)):
-        return {"pel": add3(r["pel"], (w["shift"],) + pel[1:]), "tor": add3(r["tor"], tor), "hed": add3(r["hed"], hed)}
-    fr = r["FR"]
-    plant = (fr[0], fr[1] + w["reach"], fr[2])
+        return {"pel": add3(r["pel"], (shift,) + pel[1:]), "tor": add3(r["tor"], tor), "hed": add3(r["hed"], hed)}
+
+    def feet_at(dy, dz, pitch):
+        out = {}
+        for f in feet:
+            x, y, z = r["F" + f]
+            out["F" + f] = (x, y + dy, z + dz)
+            out["F" + f + "p"] = pitch
+        return out
     arms = w["arms"]
-    set_ = dict(body((0, 0, -w["crouch"]), (w["lean"] * 0.3 - w["back"] * 0.3, 0, 0)), FR=(fr[0], fr[1] + 0.02, fr[2] + 0.04), FRp=w["toe"] * 0.3)
+    twist, grind, listen = w["twist"], w.get("grind", 0.0), w.get("listen", (0.0, 0.0))
+    set_ = dict(body((0, 0, -w["crouch"]), (w["lean"] * 0.3 - w["back"] * 0.3, 0, 0)), **feet_at(0.02, 0.04, w["toe"] * 0.3))
     set_.update({k: tuple(0.3 * x for x in v) for k, v in arms["top"].items()})
     keys = [(0.0, set_)]
     for i, k in enumerate(w["power"]):
         b = float(i)
-        top = dict(body((0, -0.01, -w["crouch"] + w["rise"] * k), (w["lean"] * 0.4 - w["back"] * k, w["twist"] * k, 0), (-0.05, 0, 0)),
-                   FR=(fr[0], fr[1] + w["reach"] * 0.4, fr[2] + w["lift"] * k), FRp=w["toe"], **arms["top"])
-        hang = dict(top, FR=(fr[0], fr[1] + w["reach"] * 0.5, fr[2] + w["lift"] * k * 1.04))
-        hit = dict(body((0, 0.02, -w["crouch"] - w["drop"] * k), (w["lean"] + 0.1 * k, 0, 0), (0.15, 0, 0)), FR=plant, FRp=0.0, **arms["hit"])
-        settle = dict(hit, **body((0, 0.02, -w["crouch"] - w["drop"] * 0.45), (w["lean"], 0, 0), (0.12, 0, 0)))
+        up = -w["crouch"] + (w["rise"] + hop) * k
+        top = dict(body((0, -0.01, up), (w["lean"] * 0.4 - w["back"] * k, twist * k, 0), (-0.05, 0, 0)),
+                   **feet_at(w["reach"] * 0.4, w["lift"] * k, w["toe"]), **arms["top"])
+        hang = dict(top, **feet_at(w["reach"] * 0.5, w["lift"] * k * 1.04, w["toe"]))
+        hit = dict(body((0, 0.02, -w["crouch"] - w["drop"] * k), (w["lean"] + 0.1 * k, grind * k, 0), (0.15, 0, 0)),
+                   **feet_at(w["reach"], 0.0, 0.0), **arms["hit"])
+        settle = dict(hit, **body((0, 0.02, -w["crouch"] - w["drop"] * 0.45), (w["lean"], grind * k * 0.6, 0), (0.12, 0, 0)))
         keys += [(b + w["top"], top, "out"), (b + w["top"] + (SLAM - w["top"]) * 0.45, hang), (b + SLAM, hit, "in")]
         if i < BEATS - 1:
             keys.append((b + SLAM + w["settle"], settle, "out"))
     # the hold: weight on the wisp to the kill, head down at it
-    hold = dict(keys[-1][1], **body((0, 0.03, -w["crouch"] - w["drop"] * 0.7), (w["lean"] + 0.08, 0, 0), (0.2, 0, 0)))
+    hold = dict(keys[-1][1], **body((0, 0.03, -w["crouch"] - w["drop"] * 0.7), (w["lean"] + 0.08, grind * 0.6, 0), (0.2, listen[0], listen[1])))
     keys.append((TIME, hold, "out"))
     return [Clip("stomp_in", COMMIT, [(0.0, {}), (COMMIT, set_)], r), Clip("stomp", TIME, keys, r)]
 

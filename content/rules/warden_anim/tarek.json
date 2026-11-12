@@ -125,10 +125,10 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
 		"base",
 		"drink"
 	],
+	"stomp": {"style": "stone_listen", "commit": "stomp_in", "clip": "stomp"},
 	"upper": [
 		"hips",
 		"head",
