@@ -18,6 +18,8 @@ const HALF_W := 1.2
 const ENGINE_KILL_SPEED := 2.0
 const GLOW_N := 16
 ## The decks reach half way across the couplings, so you can walk from car to car without a gap.
+const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing touches it (a car's half-diagonal
+                                   # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
 
@@ -37,6 +39,8 @@ var old: Array = []
 var car_nodes: Array = []
 var glows: Array = []
 var light: SpotLight3D = null
+var halts: TrainHalts = null  # the beacons and pier glow
+var lamp: TrainLamp = null    # the headlight halo, beam and trail
 var horn_cd := 0.0
 var rail_cd := 0.0
 var was_moving := false
@@ -54,10 +58,9 @@ func setup(match_node: Node) -> void:
 	speed = float(spec.get("speed", 8.0))
 	dwell = float(spec.get("dwell", 6.0))
 	loop_len = float(R["len"])
-	# the engine stops a little past the pier so the middle of the train sits at it
-	var mid_off := (cars_n - 1) * CAR_GAP * 0.5
+	# the engine stops a little past the pier so the middle of the train sits at it (_mid_off)
 	for s in R["stations"]:
-		stops.append(fposmod(float(s) + mid_off, loop_len))
+		stops.append(fposmod(float(s) + _mid_off(), loop_len))
 	stops.sort()
 	period = 0.0
 	for i in stops.size():
@@ -69,6 +72,11 @@ func setup(match_node: Node) -> void:
 		period += dwell + tm
 	_build_track()
 	_build_cars()
+	halts = TrainHalts.new()
+	add_child(halts)
+	halts.setup(self, Settings.quality() == "low")
+	lamp = TrainLamp.new()
+	lamp.setup(self, car_nodes[0], light.position)
 	for i in cars_n:
 		cur.append(Transform3D()); old.append(Transform3D())
 	_place(0.0)
@@ -78,6 +86,25 @@ func setup(match_node: Node) -> void:
 	for k in cars_n:
 		(car_nodes[k] as Node3D).transform = cur[k]
 	_attach_crates()
+
+## m: how far past a station's pier the engine stops, so the middle of the train sits at the pier.
+func _mid_off() -> float:
+	return (cars_n - 1) * CAR_GAP * 0.5
+
+## Seconds until the train next pulls into the stop at the station arc `station_s` (a route station),
+## and 0 while it stands there. The schedule is a pure function of the match clock, so this is exact.
+func halt_eta(station_s: float) -> float:
+	var at := fposmod(station_s + _mid_off(), loop_len)
+	var now := fposmod(float(m.time), period)
+	var leg_start := 0.0
+	for L in legs:
+		var gap := absf(fposmod(float(L["s0"]) - at + loop_len * 0.5, loop_len) - loop_len * 0.5)
+		if gap < 1.0:
+			if now >= leg_start and now < leg_start + dwell:
+				return 0.0
+			return fposmod(leg_start - now, period)
+		leg_start += dwell + float(L["t"])
+	return INF
 
 ## Where the engine is at a given match time, and how fast it's going.
 func _schedule(t: float) -> Vector2:
@@ -155,6 +182,8 @@ func solid_at(x: float, z: float, y: float, r: float) -> float:
 	return 0.0
 
 func _car_under(p: Vector3, xf: Array, up := 0.25) -> int:
+	if not _near_train(p, xf):
+		return -1
 	for k in range(1, cars_n):
 		var t: Transform3D = xf[k]
 		if absf(p.x - t.origin.x) > CAR_LEN or absf(p.z - t.origin.z) > CAR_LEN:
@@ -163,6 +192,14 @@ func _car_under(p: Vector3, xf: Array, up := 0.25) -> int:
 		if absf(l.x) <= HALF_W + 0.1 and absf(l.z) <= CAR_LEN * 0.5 + GAP_PAD + 0.05 and l.y > -0.3 and l.y < up:
 			return k
 	return -1
+
+## Is p (x/z) within reach of the train at all: the cheap cull before the per-car tests, which every
+## hunter, monster, Boki and pickup on the map goes through each tick.
+func _near_train(p: Vector3, xf: Array) -> bool:
+	var a: Vector3 = (xf[0] as Transform3D).origin
+	var b: Vector3 = (xf[cars_n - 1] as Transform3D).origin
+	var r := (cars_n - 1) * CAR_GAP * 0.5 + REACH_PAD
+	return Vector2(p.x - (a.x + b.x) * 0.5, p.z - (a.z + b.z) * 0.5).length_squared() < r * r
 
 func _carry(k: int, p: Vector3) -> Vector3:
 	return (cur[k] as Transform3D) * ((old[k] as Transform3D).affine_inverse() * p)
@@ -265,6 +302,8 @@ func _kill_zone() -> void:
 ## track ahead; the engine's body and the cars' frames hit anything that isn't up on a deck. A rider
 ## (on a car a moment ago) is never hit by the engine's body, only by its front.
 func hit_by(p: Vector3, rider := false) -> int:
+	if not _near_train(p, cur):
+		return -1
 	var t: Transform3D = cur[0]
 	var l := t.affine_inverse() * p
 	if absf(l.x) < HALF_W + 0.3 and l.z < -CAR_LEN * 0.5 + 0.8 and l.z > -CAR_LEN * 0.5 - 1.3 and l.y > -1.8 and l.y < 2.8:
@@ -401,13 +440,12 @@ func _build_cars() -> void:
 ## One crate per flat car: early-game loot, the last car's a little better.
 func _attach_crates() -> void:
 	for k in range(1, cars_n):
-		var tier := 1 if k == cars_n - 1 else 0
-		var n := Models.chest(tier)
+		var n := Models.chest()
 		m.add_child(n)
 		var off := Vector3(0, 0, CAR_LEN * 0.18 * (1.0 if k % 2 == 0 else -1.0))
 		var at: Vector3 = (cur[k] as Transform3D) * off
 		n.position = at
-		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tier": tier, "ride": k, "off": off})
+		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true, "ride": k, "off": off})
 
 func _visuals(dt: float, moving: bool) -> void:
 	for k in cars_n:
@@ -433,6 +471,8 @@ func _visuals(dt: float, moving: bool) -> void:
 		(g.material_override as ShaderMaterial).set_shader_parameter("color", Color(1.0, 0.42 + 0.3 * (1.0 - heat), 0.18, clampf(a, 0.0, 1.0)))
 	if light:
 		light.light_energy = 1.4 + heat * 2.6
+	halts.tick(dt)
+	lamp.tick(heat, moving)
 	# sound: the horn about two seconds before it reaches anyone in its path, the rails singing when
 	# it's close
 	horn_cd -= dt; rail_cd -= dt
@@ -464,13 +504,10 @@ func eta(e) -> float:
 		return INF
 	if e is Hunter and float(m.time) - float(ride_t.get(e, -9.0)) < 1.5:
 		return INF
-	var R: Dictionary = world.train_route
-	var c: Vector2 = R["center"]
-	var rad := float(R["r"])
-	var d2 := Vector2(e.pos.x, e.pos.z) - c
-	if absf(d2.length() - rad) > HALF_W + 1.5:
+	var nr := TrainRoute.near(world, e.pos.x, e.pos.z)
+	if nr == Vector3.INF or absf(nr.y) > HALF_W + 1.5:
 		return INF
-	var s := fposmod(d2.angle(), TAU) * rad
+	var s := nr.x
 	var ahead := fposmod(s - head_s, loop_len) - CAR_LEN * 0.5
 	if ahead < -1.0:
 		return INF
@@ -481,9 +518,9 @@ func eta(e) -> float:
 
 ## Which way to step to get off the rails (away from the loop's centre line), for bots.
 func step_off_dir(e) -> Vector2:
-	var c: Vector2 = world.train_route["center"]
-	var d2 := Vector2(e.pos.x, e.pos.z) - c
-	var out := d2.normalized() * (1.0 if d2.length() >= float(world.train_route["r"]) else -1.0)
+	var out := TrainRoute.off_dir(world, e.pos.x, e.pos.z)
+	if out == Vector2.ZERO:
+		return out
 	# the side with ground to stand on, if only one has it
 	var a: Vector2 = Vector2(e.pos.x, e.pos.z) + out * 2.2
 	var b: Vector2 = Vector2(e.pos.x, e.pos.z) - out * 2.2

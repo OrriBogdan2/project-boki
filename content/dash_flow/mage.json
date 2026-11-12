@@ -1,0 +1,35 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "fire", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "fire", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"e": {"mode": "fire", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"x": {"mode": "buffer", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."},
+			"q": {"mode": "fire"}
+		},
+		"air": {
+			"lmb": {"mode": "fire", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "fire", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"e": {"mode": "fire", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"x": {"mode": "buffer", "source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."},
+			"q": {"mode": "fire"}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Partly settled. It does not wait: in footage/vireo/frames 0120-0133 the last Jolt hits at 0128 and Surge is pressed at 0130 (the bolt slamming onto her), inside the 0.8 s bolt cadence (briefs/hero-ref/vireo.md:53), and no bolt goes off during the hold (0131-0132). Not determinable: whether Surge ends a bolt still in flight, since none was in flight at the press. Data (supervive_kits.md:65) silent. Kept: the dash goes at once and the bolt keeps flying (owner item 51 default)."},
+		"rmb": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:66, Voltaic Spear: hold and release) has no rule for Surge during the hold. Footage: every spear is thrown before Surge is pressed (hold 0044-0048, briefs/hero-ref/vireo.md:81-94; footage/vireo/frames 0148-0152: thrown, 590 hit, orb, then Surge only at 0161); she never moves during a hold (vireo.md:386-387). Whether a held spear survives Surge is not shown. Kept: the dash goes and the charge carries on (owner item 51 default; hold.rmb rows keep)."},
+		"e": {"mode": "fire", "source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:68, Lightning Strike) silent. Footage: in footage/vireo/frames 0274-0289 the strike lands and flings the orb at 0283-0285 and Surge is pressed only at 0287, after it; the other casts (0181-0226, briefs/hero-ref/vireo.md:158-200) have no Surge. Whether Surge in the 0.8 s countdown ends the strike is not shown. Kept: the dash goes and the strike still lands (owner item 51 default)."},
+		"x": {"mode": "fire", "reason": "Only in the flight: once she is up, Shift is refused.", "source": "Not in the data or footage for the crouch: Shift in Kitefall's 0.3s crouch goes at once (the Wirerun charges, or the air dash goes), the crouch waits and starts over where it took her, and she launches from there. The flight (rise, hang, drop) is the ult's own move: the source launches her up and she comes down at a spot she picks (card: 'launch into the air, then pick a location on the ground to forcefully land'; footage vireo.md 0353-0383: she hangs, then streaks down, no other move). Ours holds her over the ring's centre, invulnerable, so a dash there would carry her out of the ring."}
+	},
+	"into_jump": {
+		"x": {"mode": "fire", "reason": "Only in the flight: once she is up, a jump does nothing.", "source": "Not in the data or footage for the crouch: a jump in Kitefall's 0.3s crouch goes, and she launches from up there (the climb starts at her height). The flight is the ult's own move (as into_dash.x): she is already in the air, held over the ring's centre."}
+	},
+	"hold": {
+		"rmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		}
+	}
+}

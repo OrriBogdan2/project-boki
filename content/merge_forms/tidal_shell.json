@@ -1,0 +1,152 @@
+{
+	"desc": "Prism Shell: the support-fighter that turns shots around. Units: seconds, metres, hp.",
+	"name": "Prism Shell",
+	"palette": {
+		"body": "#6fd6e8",
+		"glow": "#9ff3ff",
+		"accent": "#ffd0ff"
+	},
+	"sound": {
+		"xform": "shield",
+		"pitch": 1.3,
+		"ult": "boom"
+	},
+	"look": {
+		"scale": 1.3,
+		"part_k": 1.35,
+		"ring": 4.8,
+		"parts": [
+			"crystal_shell",
+			"prism_crest",
+			"prism_glints"
+		],
+		"why": "a crystal shell about 20% wider than you"
+	},
+	"shell_k": 1.1,
+	"shell_why": "x1.1: a little more than base",
+	"baseline": {
+		"light": {
+			"move_speed": 0.12
+		},
+		"medium": {
+			"move_speed": 0.07
+		},
+		"heavy": {
+			"move_speed": 0.03
+		},
+		"why": "run-speed bonus by weight class (a light hero keeps the most speed; merge cap +40%)"
+	},
+	"r": {
+		"name": "Shatter",
+		"icon": "burst",
+		"range": 6.8,
+		"end": 0.8,
+		"bot_range": 6.0,
+		"desc": "The shell cracks, then bursts outward, hurting foes and shielding your squad.",
+		"why": "0.55s of cracking with a 6.8m ground marker, then a burst: 40 dmg + stun to foes, a 70 hp shield for allies within 8m",
+		"beats": [
+			{
+				"at": 0.0,
+				"op": "crack",
+				"time": 0.55,
+				"effects": [
+					{
+						"type": "telegraph",
+						"at": "self",
+						"radius": 6.8,
+						"time": 0.55,
+						"color": "#ffd0ff"
+					}
+				]
+			},
+			{
+				"at": 0.55,
+				"effects": [
+					{
+						"type": "area",
+						"at": "self",
+						"radius": 6.8,
+						"dmg": 40,
+						"kb": 9.0,
+						"stun": 0.45,
+						"color": "#ffd0ff"
+					},
+					{
+						"type": "shield",
+						"target": "allies",
+						"radius": 8.0,
+						"amount": 70,
+						"time": 6.0,
+						"color": "#9ff3ff"
+					}
+				]
+			}
+		]
+	},
+	"aug": {
+		"lmb": {
+			"name": "Crystal Shards",
+			"icon": "skypierce",
+			"desc": "Every hit sends piercing crystal shards through foes and slows them.",
+			"pierce": true,
+			"slow_s": 1.2,
+			"slow_k": 0.3,
+			"color": "#9ff3ff"
+		},
+		"rmb": {
+			"name": "Prism Burst",
+			"icon": "brightshield",
+			"desc": "Your right click also throws a ring of crystals that slows foes and shields you. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 3.6,
+					"dmg": 7,
+					"slow": 1.5,
+					"slow_k": 0.35,
+					"color": "#9ff3ff"
+				},
+				{
+					"type": "shield",
+					"target": "owner",
+					"amount": 14,
+					"time": 4.0,
+					"color": "#bff6ff"
+				}
+			]
+		},
+		"e": {
+			"name": "Prism Pulse",
+			"icon": "wall",
+			"desc": "Your E also pulses a shield to your squad. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "shield",
+					"target": "allies",
+					"radius": 5.0,
+					"amount": 22,
+					"time": 4.0,
+					"color": "#9ff3ff"
+				}
+			]
+		},
+		"dash": {
+			"kind": "reflect",
+			"name": "Mirror Step",
+			"icon": "brightshield",
+			"desc": "A short reflect window while you dash: shots that hit it fly back.",
+			"window": 0.5,
+			"arc": 0.3,
+			"radius": 2.1,
+			"dmg_k": 1.2,
+			"color": "#9ff3ff"
+		},
+		"stats": {
+			"damage_reduction": 0.12
+		}
+	},
+	"aug_why": "the augment set of this Boki type, identical for every hero: LMB rider, RMB and E add-on effects, the form dash and a modest passive"
+}

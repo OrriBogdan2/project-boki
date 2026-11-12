@@ -94,6 +94,8 @@ func tick(dt: float) -> void:
 			var caster = z["caster"]
 			var by: Ent = caster if is_instance_valid(caster) and not caster.dead else null
 			for f in m.foes_of(int(z["team"])):
+				if e.get("own", false) and f.remote:
+					continue        # a hazard's patch, on every game: each game hurts only its own bodies
 				if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(z["r"]) + f.r and absf(f.pos.y - at.y) < 2.0:
 					var o := {"src": "kin" if by is Kin else "abil", "ab": String(z["ctx"].get("slot", "zone")), "tags": ["zone", String(z["ctx"].get("ability", ""))]}
 					for k in ["slow", "root", "stun", "burn"]:
@@ -101,6 +103,7 @@ func tick(dt: float) -> void:
 					if float(e.get("dmg", 0.0)) > 0.0:
 						f.hurt(float(e["dmg"]) * float(z["pw"]), by, o)
 					else:
+						if by: DashReset.note(f, by)
 						if o.has("slow"): f.slow_t = maxf(f.slow_t, float(o["slow"]))
 						if o.has("root"): f.root_t = maxf(f.root_t, float(o["root"]))
 			if float(e.get("heal", 0.0)) > 0.0:

@@ -141,7 +141,7 @@ func _engaged_on(t: Ent) -> int:
 func _find_target() -> Ent:
 	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
 	for h in m.hunters:
-		if not h.targetable():
+		if not h.targetable() or m.demo_shielded(h):
 			continue
 		var d := flat_dist(h)
 		if d > 2.6 and h.reveal_t <= 0.0 and (m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)):
@@ -165,6 +165,11 @@ func sim(dt: float) -> void:
 		st_t -= dt
 		net_follow(dt)
 		_net_telegraph()
+		return
+	dt = _far_step(dt)
+	if dt <= 0.0:
+		return
+	if _napping(dt):
 		return
 	cd -= dt
 	st_t -= dt
@@ -196,7 +201,7 @@ func sim(dt: float) -> void:
 			if wander != Vector3.INF:
 				wish = dir_to(wander) * spd * 0.3
 		"chase":
-			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or flat_dist(camp) > 13.0:
+			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > 13.0:
 				tgt = _find_target()
 				engaged = false
 				if tgt == null:
@@ -263,12 +268,63 @@ func sim(dt: float) -> void:
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
-		m.on_wall_slam(self, 1.0)
+		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
 	if look.length() > 0.2:
 		face = lerp_angle(face, atan2(-look.x, -look.y), minf(1.0, dt * 10.0))
+
+## An idle monster with no Hunter or Boki within NAP_M stops simulating (no wandering, no physics) and
+## looks again every NAP_CHECK seconds: most camps sit far from every fight, and nobody sees them wander.
+## The distance is in 3D, so the sky ship and the gliders passing high overhead don't wake the camps under
+## them, and an awake one looks again only every NAP_CHECK seconds too (80 Hunters and Boki each step was
+## most of a 40-hunter match's monster time).
+const NAP_M := 36.0          # m: anyone this close keeps it awake (beyond the match camera's view)
+const NAP_CHECK := 0.5       # s between its looks around, asleep or awake
+var _nap := 0.0              # s to its next look around
+var _asleep := false
+func _napping(dt: float) -> bool:
+	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
+		_nap = 0.0
+		_asleep = false
+		return false
+	_nap -= dt
+	if _nap <= 0.0:
+		_nap = NAP_CHECK
+		_asleep = not _anyone_near()
+	return _asleep
+
+## An awake monster more than FAR_M from the local player, fighting nobody within FAR_M of them, steps
+## every FAR_EVERY sim steps with the skipped time added in, as SimLod steps far bots: a camp a
+## far squad woke fights at 20 Hz and nobody sees it. Mid-air it keeps every step (a lunge or a fall in
+## 50 ms hops could miss the ground). Offline only: a server has no local player, so it steps them all.
+const FAR_M := 45.0          # m (3D) from the local player before an awake monster slows down
+const FAR_EVERY := 3         # sim steps per monster step when far (60 Hz -> 20 Hz)
+var _far_dt := 0.0           # s banked while skipping
+func _far_step(dt: float) -> float:
+	var me: Hunter = m.player
+	if me == null or me.out or me.extracted or not grounded:
+		_far_dt = 0.0
+		return dt
+	_far_dt += dt
+	var near_me := pos.distance_squared_to(me.pos) <= FAR_M * FAR_M
+	near_me = near_me or (tgt != null and tgt.flat_dist(me) <= FAR_M)
+	if not near_me and (int(m.time / Match.DT) + get_instance_id()) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
+		return 0.0
+	var out := _far_dt
+	_far_dt = 0.0
+	return out
+
+func _anyone_near() -> bool:
+	var r2 := NAP_M * NAP_M
+	for e in m.hunters:
+		if not e.out and pos.distance_squared_to(e.pos) < r2:
+			return true
+	for k in m.kins:
+		if not k.dead and pos.distance_squared_to(k.pos) < r2:
+			return true
+	return false
 
 func _begin_attack() -> void:
 	st = "windup"
@@ -315,7 +371,6 @@ func _strike() -> void:
 			m.fx.ring(atk_at, rad, Color("ffb070"), 0.35)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb070"])
 			m.fx.burst(atk_at + Vector3(0, 0.5, 0), Color("ffb070"), 28, 6.5, 0.55, 6.0, 1.3)
-			m.shake(0.5, atk_at)
 			m.sfx("boom", atk_at, 0.0, 1.1)
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
@@ -329,7 +384,6 @@ func _strike() -> void:
 			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
 			m.fx.dust(atk_at, 16)
-			m.shake(0.4, atk_at)
 			m.sfx("k_gravity", atk_at, -2.0, 0.9)  # a heavy stone slam
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)

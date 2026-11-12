@@ -8,12 +8,15 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 3
+const VERSION := 13
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3"}
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
+		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -68,18 +71,23 @@ func fresh() -> Dictionary:
 		"name": "Hunter",
 		"gems": 60,
 		"cls": "medium",
+		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
+		"game_board": {},     # garden minigame results (MinigameHub); older saves start empty
 		"matches": 0,
 		"extracts": 0,
-		"settings": {"volume": 0.8, "shake": 1.0, "cam_lead": 1.0},
-		"tutorial": {},
+		"settings": {"volume": 0.8, "cam_lead": 1.0},
+		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
+		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
+		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
@@ -90,19 +98,24 @@ func fresh() -> Dictionary:
 		"rivals": {},         # rival hunters you've dealt with: how greedy they are, how they feel about you
 		"offers": [],         # rivals asking to buy back kin you took from them
 		"ransom_log": [],     # what happened at the Ransom House, newest last
-		"armory": [],         # weapons and gloves brought home (Loot items); see Econ
-		"arm_lvl": 0, "pack_lvl": 0, "scrap": 0,
+		"armory": [],         # gear brought home (Loot items); see Econ
+		"arm_lvl": 0, "scrap": 0,
+		"belt_pick": ["tonic", "armor_kit", "", ""],   # the utility for the next expedition, one per belt slot (Equal)
+		"raid_belt": {},      # utility charges out on an expedition right now (put back if it never ended)
 		"loadout": {},        # what you take on the next expedition: slot -> armory uid
 		"valuables": {},      # treasure to sell, and Soul Embers
 		"raid_out": [],       # loadout pieces out on an expedition right now
 		"feeders": [],        # troughs on the farm: {id, kind, x, z, food: [keys], auto}
 		"feeder_inv": {},     # feeders bought but not set down yet
+		"furniture": {"journal": 1, "gramophone": 1},   # house pieces in storage: the empty house's two useful ones
 		"graves": [],         # kin that died, with their memories (Econ.kin_dies)
 		"farm_lvl": 0,        # Kin Cottage expansions: room for 6 / 8 / 10 / 12 kin out on the farm (KinBox)
 		"box_v": true,        # the Kin Burrow is set up (old saves get their overflow boxed once)
 		"profile": {"id": new_id("p"), "name": "Hunter"},   # this save's trainer: original trainer on every kin it registers
 		"serials": {},        # species -> the last serial handed out on this save (global once there's a server)
 		"log": [],            # append-only event log, newest last, at most LOG_CAP
+		"market": MarketSave.fresh(),   # your stall, auctions, the shelter, transfers, the Black Market's stock
+		"goods": {},          # market goods: rare materials, trophies, dyes (Goods)
 	}
 
 func _empty_plots(n: int) -> Array:
@@ -128,11 +141,13 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"traits": tr,
 		"trust": 35.0,
 		"memory": [],
+		"bonds": {},          # uid -> -1..1, friends and rivals on the base (BaseLife)
 		"matches": 0, "wins": 0, "kos": 0,
 		"born": int(Time.get_unix_time_from_system()),
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
 		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
+	BokiQuirks.set_sex(rec)
 	Care.ensure(rec)
 	return rec
 
@@ -200,7 +215,7 @@ func log_trade(rec: Dictionary, from_name: String) -> void:
 	log_event("traded", rec, {"from": from_name})
 
 const HOW_EVENT := {"wild": "caught", "taken": "caught", "egg": "hatched", "boss_egg": "hatched", "starter": "hatched",
-	"event": "caught", "market": "traded", "unknown": "registered"}
+	"event": "caught", "market": "traded", "shelter": "adopted", "transfer": "received", "unknown": "registered"}
 
 ## Gives a kin joining this collection its provenance, once: where it came from (rec["origin"],
 ## set where it was made, or `how` / `where` here), when, its original trainer, its serial within
@@ -263,6 +278,62 @@ func migrate(data: Dictionary) -> bool:
 		v += 1
 		data["v"] = v
 	return true
+
+## v5 -> v6: Hunter unlocks. A save that predates them had every Hunter, so it keeps them all (ClassUnlock).
+func _migrate_5_to_6(data: Dictionary) -> void:
+	ClassUnlock.migrate(data)
+
+## v8 -> v9: reserved for ext/mantle-look (nothing to change here).
+func _migrate_8_to_9(_data: Dictionary) -> void:
+	pass
+
+## v9 -> v10: Hob and the farm tutorial. A save that has played skips the tutorial and keeps every
+## blueprint it could already build (FarmBuilder.migrate, keyed by its own "farm_builder" field).
+func _migrate_9_to_10(data: Dictionary) -> void:
+	FarmBuilder.migrate(data)
+
+## v10 -> v11: the house starts empty; a played house keeps its furniture, now all movable (HouseSave).
+func _migrate_10_to_11(data: Dictionary) -> void:
+	HouseSave.migrate(data)
+
+## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
+## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
+## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
+func _migrate_11_to_12(data: Dictionary) -> void:
+	Evo.migrate(data)
+	for r in data.get("roster", []):
+		if not r.has("bonds"):
+			r["bonds"] = {}
+
+## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
+func _migrate_12_to_13(data: Dictionary) -> void:
+	_migrate_11_to_12(data)
+	GardenZones.migrate(data)
+	for r in data.get("roster", []):
+		Care.ensure(r)
+
+## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
+## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
+## and a one-time notice lists it all (EqualMigrate).
+func _migrate_6_to_7(data: Dictionary) -> void:
+	EqualMigrate.migrate(data)
+
+## v7 -> v8: the market. Boki are never sold for gems: open Drift Pens and web market Boki listings
+## go back to their owners' rosters, and the market's fields get their defaults (MarketSave).
+func _migrate_7_to_8(data: Dictionary) -> void:
+	MarketSave.migrate(data)
+
+## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
+## moves to five gear slots (GearSave).
+func _migrate_4_to_5(data: Dictionary) -> void:
+	GearSave.migrate(data)
+
+## v3 -> v4: the Field Book. Every species you own counts as seen, and each entry gets its "places" list.
+func _migrate_3_to_4(data: Dictionary) -> void:
+	FieldBook.migrate(data)
 
 ## v2 -> v3: every Boki's sex, written into its rolls (from its own seed, so it's what it always
 ## would have been).
@@ -389,10 +460,15 @@ func load_from(p: String) -> void:
 			if bak: bak.store_string(text)
 		if not migrate(parsed):
 			return
+	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
+	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]
+	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
 	# JSON numbers come back as floats; plots and roster are fine with that.
 	register_all()
+	Evo.catch_up(d.get("roster", []))     # Boki that were waiting for their next form's art
 
 var no_write := _tool_run()   # headless checks play with a save without touching the real file
 
@@ -400,7 +476,9 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check" or String(a).begins_with("--shot="):
+		if a == "--no-save" or a == "--archetype-check":
+			return true
+		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
 			return true
 	return false
 var newer := false            # the slot holds a save from a newer game: never overwrite it
@@ -427,9 +505,13 @@ func kin(uid: String) -> Dictionary:
 
 func active_kin() -> Dictionary:
 	var k := kin(str(d.get("active", "")))
-	if k.is_empty() and d["roster"].size() > 0:
-		k = d["roster"][0]
-		d["active"] = k["uid"]
+	if k.is_empty() or not KinLoss.selectable(k):     # (a held Boki stays home: KinLoss)
+		k = {}
+		for r in d["roster"]:
+			if KinLoss.selectable(r):
+				k = r
+				d["active"] = k["uid"]
+				break
 	return k
 
 ## The kin you bring as your second (benched, swapped in with X). "none" means bring only one.
@@ -440,11 +522,11 @@ func second_kin() -> Dictionary:
 	if b == "none":
 		return {}
 	var k := kin(b)
-	if not k.is_empty() and b != a:
+	if not k.is_empty() and b != a and KinLoss.selectable(k):
 		return k
 	var best: Dictionary = {}
 	for r in d["roster"]:
-		if r["uid"] == a: continue
+		if r["uid"] == a or not KinLoss.selectable(r): continue
 		# kin out on the farm first; one asleep in the Kin Burrow only if nobody else is around
 		var better: bool = best.is_empty() or (best.get("boxed", false) and not r.get("boxed", false)) \
 			or (best.get("boxed", false) == r.get("boxed", false) and float(r.get("trust", 0.0)) > float(best.get("trust", 0.0)))
@@ -458,7 +540,12 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 	if k.is_empty():
 		return
 	var mem: Array = k["memory"]
-	mem.append({"m": int(d.get("matches", 0)), "kind": kind, "text": text})
+	var m := int(d.get("matches", 0))
+	# the same care again since the last expedition stays one memory (the trust still counts)
+	var again := mem.slice(-6).any(func(e):
+		return int(e.get("m", -1)) == m and String(e.get("kind", "")) == kind and String(e.get("text", "")) == text)
+	if not again:
+		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
 	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)

@@ -25,8 +25,9 @@ const WEIGHTS := {"clear": 0.42, "dusk": 0.18, "night": 0.14, "ash": 0.12, "fog"
 const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.72, "fog": 0.62}
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
-## Outside-of-sight darkening (the vis shader's "dark" multiplier; 0.42 is the usual).
-const VIS_DARK := {"clear": 0.42, "day": 0.42, "dusk": 0.38, "night": 0.29, "ash": 0.36, "fog": 0.34}
+## Outside-of-sight darkening (the vis shader's "dark" multiplier; 0.7 is the usual, lightened from
+## 0.42 so scenes read on camera; the darker conditions keep the same ratios to it).
+const VIS_DARK := {"clear": 0.7, "day": 0.7, "dusk": 0.63, "night": 0.48, "ash": 0.6, "fog": 0.57}
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {
 	"clear": "Good light. You see far, and so does everything else.",
@@ -265,7 +266,7 @@ static func storm_fx(cond: String) -> Node3D:
 		return null
 	var root := Node3D.new()
 	root.name = "RaidFx"
-	var lite := Settings.quality() == "low"
+	var lite := Settings.lite()
 	if cond == "ash":
 		root.add_child(_streak(Color(0.66, 0.6, 0.55, 0.6), 340 if not lite else 140, 0.085, 1.6, false))
 		root.add_child(_streak(Color(1.0, 0.55, 0.22, 0.9), 26 if not lite else 12, 0.035, 2.2, true))

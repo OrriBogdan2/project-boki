@@ -164,7 +164,7 @@ func run(m: Node) -> void:
 	ok(String(data["egg"]["a"]) == String(by_name["Pip"]["uid"]) and String(data["egg"]["b"]) == String(by_name["Drip"]["uid"]), "the nest egg's parents point at the new ids")
 	ok(String(data["offers"][0]["uid"]) == String(by_name["Drip"]["uid"]), "a rival's buy-back offer points at the new id")
 	ok(String(data["graves"][0]["uid"]).begins_with("b") and String(data["graves"][0]["uid"]) == String(data["graves"][0]["rec"]["uid"]) and String(data["graves"][0]["legacy_uid"]) == "k424242", "a grave and its record share the new id")
-	ok(String(data["armory"][0]["uid"]) == "i1234567" and String(data["loadout"]["weapon"]) == "i1234567", "item ids are left alone")
+	ok((data["armory"] as Array).is_empty() and int(data["scrap"]) >= 1 and not (data["loadout"] as Dictionary).has("weapon"), "the old stored weapon becomes scrap and the loadout drops it")
 	var kept := true
 	for nm in by_name:
 		var r: Dictionary = by_name[nm]
@@ -213,7 +213,7 @@ func run(m: Node) -> void:
 	var base := Save.new_kin("cindle", "Mid", 3); base["dna"]["size"] = 0.0
 	var kb := _with_size(base, 2.8); var ksm := _with_size(base, -2.8)
 	var gs := GDScript.new()
-	gs.source_code = "extends Node\nvar opts := {}\nvar tier := 0\n"
+	gs.source_code = "extends Node\nvar opts := {}\nvar tier := 0\nvar seed_val := 0\n"
 	gs.reload()
 	var mn = gs.new()
 	var kins := []
@@ -273,7 +273,7 @@ func run(m: Node) -> void:
 	var texts := []
 	for o in [{"how": "wild", "where": {"island": "The Heart", "map": "Skyreach", "tier_name": "The Meadow"}}, {"how": "boss_egg", "where": {"lair": ""}}, {"how": "starter"}, {"how": "market", "from": "Wren"}, {"how": "taken", "from": "Vexa"}, {}]:
 		texts.append(AboutView.origin_text({"origin": o}))
-	ok(texts[0] == "Tamed in the wild at The Heart, Skyreach (The Meadow)" and texts[5] == "From before records were kept", "origins read well: %s" % str(texts))
+	ok(texts[0] == "Scanned in the wild at The Heart, Skyreach (The Meadow)" and texts[5] == "From before records were kept", "origins read well: %s" % str(texts))
 	ok(AboutView.parents_text(baby).begins_with("Ma and Pa"), "parents shown: %s" % AboutView.parents_text(baby))
 	box.free(); box2.free()
 	print("UNIQUE DONE, failures: %d" % bad)

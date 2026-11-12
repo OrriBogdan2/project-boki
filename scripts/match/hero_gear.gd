@@ -29,17 +29,23 @@ static func _tp(c: Dictionary, key: String, u0: float, u1: float, v0: float, v1:
 static func cover(arch: String, bare: bool) -> String:
 	if bare:
 		return ""
-	return {"thief": "hood", "archer": "", "mage": "hat", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "helm"}.get(arch, "")
+	if arch in ["dolm", "ostra"]:
+		return GearPair.cover(arch, bare)
+	return {"thief": "hood", "archer": "hood", "mage": "", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "hood", "dredge": "helm", "ashwick": "hat", "tender": "hat", "rimewright": "hat"}.get(arch, "")
 
 static func dress(arch: String, c: Dictionary) -> void:
 	_belt(c, arch)
 	match arch:
 		"thief": _thief(c)
-		"archer": _archer(c)
+		"archer": WardenArcher.dress(c)
 		"mage": _mage(c)
 		"gunslinger": _gunslinger(c)
 		"juggernaut": _juggernaut(c)
-		"bulwark": _bulwark(c)
+		"bulwark": WardenBulwark.dress(c)
+		"dredge", "ashwick": HeroGearPair.dress(arch, c)
+		"tender", "rimewright": HeroGearCare.dress(arch, c)
+		"dolm": GearPair.dolm(c)
+		"ostra": GearPair.ostra(c)
 	if not bool(c["bare"]):
 		_ear_cuffs(c, arch)
 
@@ -55,8 +61,8 @@ static func _undersuit(c: Dictionary) -> void:
 					(ch as MeshInstance3D).material_override = m["pants"]
 
 ## The team colour a shade deeper, for the big cloth or lacquered shape each archetype wears it on
-## (the thief's hood, the archer's bow, the mage's hat, the gunslinger's serape, the bulwark's
-## shield), so it reads as material rather than a flat sticker. One per hunter, cached in m.
+## (the thief's hood, the mage's hat, the gunslinger's serape), so it reads as material rather than
+## a flat sticker. One per hunter, cached in m.
 static func _deep_acc(m: Dictionary) -> ShaderMaterial:
 	if m.has("acc_deep"):
 		return m["acc_deep"]
@@ -70,7 +76,7 @@ static func _deep_acc(m: Dictionary) -> ShaderMaterial:
 static func _belt(c: Dictionary, arch: String) -> void:
 	var m: Dictionary = c["m"]
 	var bw: float = c["bw"]; var cw: float = c["cw"]
-	var heavy := arch in ["juggernaut", "bulwark"]
+	var heavy := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
 	var h := 0.1 if heavy else 0.065
 	var rx := 0.222 * maxf(cw, bw) + 0.01; var rz := 0.214 * bw + 0.008
 	_p(c["torso"], HeroKit.band("belt|%.3f|%.3f|%.3f" % [rx, rz, h], rx, rz, h, 0.016), m["leather"], Vector3(0, 0.1, 0))
@@ -235,243 +241,112 @@ static func _wraps(c: Dictionary, m_wrap: Material, m_cuff: Material) -> void:
 		for k in 2:
 			_p(el, HeroKit.band("wrap", 0.062, 0.062, 0.014, 0.006), m_wrap, Vector3(0, -0.125 - k * 0.045, 0), Vector3.ONE, Vector3(0.25 * (1 - 2 * k), 0, 0))
 
-# ------------------------------------------------------------------------------------------ archer
-## The warden of high ground, a ranger built like the archers of hero games: tall and upright, a
-## great recurve bow slung across the back with its limbs lacquered in the team colour (the shape
-## that reads from the match camera: a long curved stroke from shoulder to hip), a headband whose
-## long tails stream behind, a swept feather plume, a hood worn down over a long pointed cloak, a
-## quiver of white-fletched arrows, a big archery bracer on the bow arm and one layered pauldron.
-static func _archer(c: Dictionary) -> void:
-	var m: Dictionary = c["m"]
-	var t: Node3D = c["torso"]
-	var bw: float = c["bw"]; var cw: float = c["cw"]
-	var team := _deep_acc(m)
-	if not bool(c["bare"]):
-		var g: Node3D = c["gear"]
-		# the headband and its two long tails, streaming back
-		_p(g, HeroKit.band("archer_band", 0.243, 0.252, 0.034, 0.01), team, HC + Vector3(0, 0.075, 0.01), Vector3.ONE, Vector3(0.28, 0, 0))
-		_p(g, Models.box(0.05, 0.05, 0.03), m["gold"], HC + Vector3(0, 0.1, -0.245), Vector3.ONE, Vector3(0.28, 0, PI * 0.25))
-		for sx in [-1.0, 1.0]:
-			var ln := 0.62 if sx < 0.0 else 0.5
-			var pts := [Vector3(0.04 * sx, 0.96, 0.22), Vector3(0.08 * sx, 0.93, 0.36), Vector3(0.12 * sx, 0.86, 0.36 + ln * 0.35), Vector3(0.15 * sx, 0.76, 0.36 + ln * 0.62)]
-			_p(g, HeroKit.lock_mesh("archer_bandtail%d" % int(sx), pts, 0.065, 0.16, Vector3.UP, 0.85, 0.5), team)
-		# a swept plume of three feathers rising behind the crown
-		for k in 3:
-			var a := (k - 1) * 0.22
-			var root := HC + Vector3(sin(a) * 0.08, 0.2, 0.16)
-			var pts2 := [root, root + Vector3(sin(a) * 0.05, 0.14, 0.1), root + Vector3(sin(a) * 0.12, 0.26, 0.26), root + Vector3(sin(a) * 0.16, 0.3, 0.44)]
-			_p(g, HeroKit.lock_mesh("archer_plume%d" % k, pts2, 0.085 - absf(k - 1) * 0.015, 0.18, Vector3.BACK, 0.75, 0.25), m["feather"] if k != 1 else m["trim"])
-	# the hood worn down: a soft roll round the neck, and a long cloak cut into points
-	_p(t, HeroKit.mantle("archer_cowl", 0.21, 0.2, 0.07, 6.0), m["cloak"], Vector3(0, 0.6, 0.03))
-	var cape := Models._pivot(t, "Cape", Vector3(0, 0.56, 0.24 * bw))
-	_p(cape, HeroKit.drape("archer_cloak2", 0.26, 0.42, 0.86, 0.05, 0.45, 7.0, 0.09, 0.03, 0.12, 0.016), m["cloak"], Vector3(0, 0.0, -0.22 * bw), Vector3(cw, 1.0, bw), Vector3(0.06, 0, 0))
-	_p(cape, HeroKit.drape_hem("archer_cloak2", 0.26, 0.42, 0.86, 0.05, 0.45, 7.0, 0.09, 0.03, 0.12, 0.05), m["trim"], Vector3(0, 0.0, -0.22 * bw), Vector3(cw, 1.0, bw), Vector3(0.06, 0, 0))
-	# a leather chest guard over the left side, and the quiver strap
-	_tp(c, "archer_guard", 0.6, 0.78, 0.2, 0.6, 0.014, m["leather"], 0.014, 0.004)
-	_p(t, HeroKit.loft("archer_strap", [Vector3(0.2, 0.6, -0.12), Vector3(0.02, 0.38, -0.25), Vector3(-0.2, 0.12, -0.2)], [Vector2(0.026, 0.008), Vector2(0.028, 0.008), Vector2(0.026, 0.008)], 6, Vector3.FORWARD, 0.9), m["leather"], Vector3.ZERO, Vector3(cw, 1.0, bw))
-	for k in 3:
-		_p(t, Models.sphere(0.016, 8), m["gold"], Vector3(0.12 - k * 0.11, 0.5 - k * 0.12, -0.256 * bw))
-	# the great recurve bow across the back: its limbs bow out, then the tips curl back the other way
-	var bow := []
-	var bwid := []
-	for k in 13:
-		var sgm := float(k) / 12.0 * 2.0 - 1.0
-		bow.append(Vector3(0.0, sgm * 1.05, 0.17 * (1.0 - sgm * sgm) - 0.14 * pow(absf(sgm), 6.0)))
-		var th := lerpf(0.05, 0.018, absf(sgm))
-		bwid.append(Vector2(th * 0.85, th * 1.6))
-	var bpos := Vector3(0.0, 0.52, 0.4 * bw)
-	var brot := Vector3(0.5, 0, 0.6)          # leaning back over the shoulders, so it shows from above
-	_stay(_p(t, HeroKit.loft("archer_bow2", bow, bwid, 8, Vector3.RIGHT, 1.0, 2), team, bpos, Vector3.ONE, brot))
-	_stay(_p(t, Models.cyl(0.004, 0.004, 1.86, 4), m["shirt"], bpos + Basis.from_euler(brot) * Vector3(0, 0, -0.1), Vector3.ONE, brot))
-	_stay(_p(t, Models.cyl(0.05, 0.05, 0.16, 12), m["leather"], bpos + Basis.from_euler(brot) * Vector3(0, 0, 0.16), Vector3.ONE, brot))
-	for e in [-1.0, 1.0]:
-		var tip := Basis.from_euler(brot) * Vector3(0, 1.0 * e, -0.13) + bpos
-		_stay(_p(t, Models.sphere(0.03, 8), m["bone"], tip))
-		_stay(_p(t, Models.sphere(0.022, 8), m["gold"], Basis.from_euler(brot) * Vector3(0, 0.55 * e, 0.12) + bpos))
-	# the quiver at the right shoulder, white fletching with one in the outfit colour
-	var qb := Vector3(0.18, 0.4, 0.3 * bw)
-	var qr := Vector3(0.3, 0, -0.35)
-	_p(t, Models.lathe(Models.smooth_curve(PackedVector2Array([Vector2(0, -0.24), Vector2(0.065, -0.23), Vector2(0.075, 0.0), Vector2(0.084, 0.22), Vector2(0.09, 0.24), Vector2(0.0, 0.24)]), 2), 18, "quiver2"), m["leather"], qb, Vector3.ONE, qr)
-	_p(t, Models.cyl(0.094, 0.094, 0.03, 18), m["gold"], qb + Basis.from_euler(qr) * Vector3(0, 0.22, 0), Vector3.ONE, qr)
-	for k in 5:
-		var off := Vector3((k % 3) * 0.04 - 0.04, 0.0, (k / 3) * 0.04 - 0.02)
-		var top := qb + Basis.from_euler(qr) * (off + Vector3(0, 0.4, 0))
-		_stay(_p(t, Models.cyl(0.007, 0.007, 0.32, 4), m["wood"], qb + Basis.from_euler(qr) * (off + Vector3(0, 0.22, 0)), Vector3.ONE, qr))
-		_stay(_p(t, HeroKit.lock_mesh("arrow_fletch", [Vector3(0, -0.07, 0), Vector3(0, 0.0, 0), Vector3(0, 0.05, 0)], 0.05, 0.15, Vector3.BACK, 1.0, 0.5), m["trim"] if k == 2 else m["feather"], top, Vector3.ONE, qr + Vector3(0, k * 0.8, 0)))
-	# the bow arm: a layered pauldron and a big archery bracer with a steel plate
-	_p(c["pl"], HeroKit.dome_plate("archer_pad", 0.13, 0.5, 0.8, 0.22, 0.018), m["leather"], Vector3(-0.03, 0.035, 0), Vector3(1.0, 1.0, 1.1), Vector3(0, 0, 0.5))
-	_p(c["pl"], HeroKit.dome_plate("archer_pad2", 0.115, 0.42, 0.7, 0.2, 0.016), m["steel"], Vector3(-0.06, -0.03, 0), Vector3(1.0, 1.0, 1.05), Vector3(0, 0, 0.85))
-	_p(c["pl"], HeroKit.band("archer_padrim", 0.13, 0.14, 0.02, 0.01), m["gold"], Vector3(-0.03, 0.0, 0), Vector3(1.0, 1.0, 1.1), Vector3(0, 0, 0.5))
-	var el: Node3D = (c["arms"]["L"] as Array)[1]
-	_p(el, HeroKit.cuff(0.062, 0.09, 0.15), m["leather"], Vector3(0, -0.14, 0))
-	_p(el, HeroKit.dome_plate("archer_bracer", 0.07, 0.35, 1.4, 0.0, 0.012), m["steel"], Vector3(0, -0.13, -0.045), Vector3(1.0, 1.2, 1.0), Vector3(-PI * 0.5, 0, 0))
-	_wraps(c, m["leather"], m["leather"])
-
 # ------------------------------------------------------------------------------------------ mage
-## The runecaster, built like the arcane casters of hero games: a huge hat whose brim waves and
-## whose tall crown bends and droops, lacquered in the team colour (from the match camera: a wide
-## team-coloured disc with a point), a glowing rune band and a charm swinging from the tip, a robe
-## to the shins with a burning rune hem, a high mantle, a tome on a chain at the hip, and a
-## floating focus orb circled by two rune rings.
+## Sparkle, the storm-kite runner: no hat and no robe. Flight goggles pushed up on a swept-back head,
+## a cropped jacket over a short split kite-tail, copper coils round both forearms, a copper rod mast
+## on the back flying a pennant in the team colour, and a belt of glass insulators.
 static func _mage(c: Dictionary) -> void:
 	var m: Dictionary = c["m"]
 	var t: Node3D = c["torso"]
 	var bw: float = c["bw"]; var cw: float = c["cw"]
 	var team := _deep_acc(m)
+	var copper := Models.shiny(Color("c8793c"), 0.7)
 	if not bool(c["bare"]):
 		var g: Node3D = c["gear"]
-		var hb := HC + Vector3(0, 0.15, 0.01)
-		var hr := Vector3(-0.1, 0, 0.0)
-		_p(g, brim("mage2", 0.18, 0.56, 0.05, 0.07, 0.045, 1.05), team, hb, Vector3.ONE, hr)
-		var crown := [Vector3(0, 0.0, 0), Vector3(0, 0.18, 0.01), Vector3(0, 0.36, 0.05), Vector3(0.04, 0.5, 0.14), Vector3(0.14, 0.56, 0.3), Vector3(0.24, 0.5, 0.4)]
-		var cwid := [Vector2(0.22, 0.23), Vector2(0.17, 0.18), Vector2(0.115, 0.115), Vector2(0.07, 0.07), Vector2(0.035, 0.035), Vector2(0.01, 0.01)]
-		_p(g, HeroKit.loft("mage_crown2", crown, cwid, 22, Vector3.FORWARD, 0.85), team, hb, Vector3.ONE, hr)
-		_p(g, HeroKit.band("mage_hatband2", 0.208, 0.218, 0.055, 0.012), m["gold"], hb + Vector3(0, 0.04, 0), Vector3.ONE, hr)
-		for k in 7:
-			var a := -0.25 * PI + k * 0.25 * PI * 0.5 - PI * 0.5
-			var rp := Vector3(cos(a) * 0.222, 0.042, sin(a) * 0.232)
-			_p(g, Models.box(0.022, 0.03, 0.008), m["glow"], hb + Basis.from_euler(hr) * rp, Vector3.ONE, hr + Vector3(0, -a - PI * 0.5, 0))
-		_p(g, Models.crystal(0.034, 0.09, 6), m["glow"], hb + Basis.from_euler(hr) * Vector3(0, 0.05, -0.235), Vector3.ONE, hr)
-		# a charm swinging from the drooping tip: a short chain and a glowing star
-		var tipp := hb + Basis.from_euler(hr) * Vector3(0.24, 0.5, 0.4)
-		_p(g, Models.cyl(0.005, 0.005, 0.12, 4), m["gold"], tipp + Vector3(0, -0.06, 0))
-		_p(g, Models.crystal(0.03, 0.06, 4), m["glow"], tipp + Vector3(0, -0.14, 0))
-	# the robe: a long hem to the shins, open at the front, trimmed in gold, burning runes at the hem
+		var hb := HC + Vector3(0, 0.15, -0.02)
+		_p(g, HeroKit.band("vir_goggle_band", 0.215, 0.225, 0.05, 0.012), m["leather"], hb + Vector3(0, 0.0, 0.0), Vector3.ONE, Vector3(-0.2, 0, 0))
+		for sx in [-1.0, 1.0]:
+			_p(g, Models.cyl(0.062, 0.062, 0.04, 14), copper, hb + Vector3(0.095 * sx, 0.03, -0.2), Vector3.ONE, Vector3(PI / 2 - 0.2, 0, 0))
+			_p(g, Models.cyl(0.046, 0.046, 0.045, 14), m["glow"], hb + Vector3(0.095 * sx, 0.03, -0.205), Vector3.ONE, Vector3(PI / 2 - 0.2, 0, 0))
+		_p(g, Models.box(0.05, 0.03, 0.03), copper, hb + Vector3(0, 0.03, -0.215))
+	# the cropped jacket's tails: a short split skirt in the outfit colour, hem trimmed in copper
 	var sk: Node3D = c["skirt"]
-	var r0 := 0.232 * maxf(bw, cw * 0.95); var r1 := 0.44 * bw
-	var key := "mage_robe2|%.3f" % r0
-	_p(sk, HeroKit.drape(key, r0, r1, 0.46, 0.79, 1.71, 7.0, 0.07, 0.015, 0.1), m["body"], Vector3(0, -0.02, 0.01))
-	_p(sk, HeroKit.drape_hem(key, r0, r1, 0.46, 0.79, 1.71, 7.0, 0.07, 0.015, 0.1, 0.1), m["gold"], Vector3(0, -0.02, 0.01))
-	for k in 11:
-		var a := (0.86 + k * 0.08) * TAU
-		var p := Vector3(cos(a) * r1 * 0.93, -0.02 - 0.46 * 0.86 * (1.0 + 0.1 * clampf(sin(a), 0.0, 1.0)), sin(a) * r1 * 0.92 * 0.93)
-		_p(sk, Models.box(0.026, 0.04, 0.01), m["glow"], p + Vector3(cos(a), 0, sin(a) * 0.92) * 0.02, Vector3.ONE, Vector3(0, -a + PI * 0.5, 0.4 * (k % 2 - 0.5)))
-	# the bodice: a deep V over the shirt, gold lapels, a sash in the outfit's light shade
-	_tp(c, "mage_v", 0.71, 0.79, 0.1, 0.55, 0.008, m["shirt"], 0.01)
-	for sx in [-1.0, 1.0]:
-		_p(t, HeroKit.loft("mage_lapel%d" % int(sx), [Vector3(0.1 * sx, 0.62, -0.17), Vector3(0.05 * sx, 0.45, -0.235), Vector3(0.0, 0.26, -0.235)], [Vector2(0.02, 0.008), Vector2(0.022, 0.009), Vector2(0.016, 0.008)], 6, Vector3.FORWARD, 0.9), m["gold"], Vector3.ZERO, Vector3(cw, 1.0, bw))
-	var rx := 0.225 * maxf(cw, bw) + 0.02; var rz := 0.214 * bw + 0.018
-	_p(t, HeroKit.band("mage_sash|%.3f" % rx, rx, rz, 0.05, 0.014), m["trim"], Vector3(0, 0.04, 0), Vector3.ONE, Vector3(0, 0, 0.06))
-	_p(t, HeroKit.lock_mesh("mage_sashtail", [Vector3(0.12, 0.04, -rz), Vector3(0.14, -0.08, -rz - 0.03), Vector3(0.15, -0.26, -rz - 0.04)], 0.07, 0.15, Vector3.FORWARD, 0.85, 0.6), m["trim"])
-	# the tome on a chain at the left hip
-	var tp := Vector3(-0.27 * maxf(bw, cw), -0.02, -0.04)
-	_p(t, Models.rounded_box(Vector3(0.05, 0.15, 0.12), 0.012), m["leather"], tp, Vector3.ONE, Vector3(0, 0.3, 0.08))
-	_p(t, Models.box(0.054, 0.13, 0.1), m["shirt"], tp + Vector3(0.004, 0, 0), Vector3.ONE, Vector3(0, 0.3, 0.08))
-	_p(t, Models.box(0.012, 0.05, 0.05), m["glow"], tp + Basis.from_euler(Vector3(0, 0.3, 0.08)) * Vector3(-0.028, 0, 0), Vector3.ONE, Vector3(0, 0.3, 0.08))
-	_p(t, Models.cyl(0.005, 0.005, 0.14, 4), m["gold"], tp + Vector3(0.02, 0.1, 0.0), Vector3.ONE, Vector3(0, 0, 0.5))
-	# the mantle: a capelet over both shoulders with a high collar behind the neck
-	_p(t, HeroKit.drape("mage_mantle|%.3f" % cw, 0.2 * cw, 0.35 * cw, 0.18, 0.0, 1.0, 6.0, 0.05, 0.0, 0.12, 0.014), m["hero"], Vector3(0, 0.63, 0.0))
-	_p(t, HeroKit.drape_hem("mage_mantle|%.3f" % cw, 0.2 * cw, 0.35 * cw, 0.18, 0.0, 1.0, 6.0, 0.05, 0.0, 0.12, 0.14), m["gold"], Vector3(0, 0.63, 0.0))
-	_p(t, HeroKit.drape("mage_collar2", 0.17, 0.28, 0.26, 0.55, 0.95, 3.0, 0.0, 0.0, 0.0, 0.012), m["hero"], Vector3(0, 0.56, 0.02), Vector3(1.0, 1.0, 1.0), Vector3(PI, 0, 0))
-	# the focus: an orb floating off the left hand inside two rune rings (bobbed by HunterAnim)
-	var focus := Node3D.new(); focus.name = "Focus"; focus.position = Vector3(-0.44, 0.32, -0.12)
-	t.add_child(focus)
-	var orb := _p(focus, Models.sphere(0.085, 18), m["glow"])
-	orb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_p(focus, Models.sphere(0.13, 16), m["glow_soft"])
-	for ring_k in 2:
-		var rr := TorusMesh.new(); rr.inner_radius = 0.15 + ring_k * 0.05; rr.outer_radius = 0.164 + ring_k * 0.05; rr.rings = 36; rr.ring_segments = 6
-		var rot := Vector3(0.5 + ring_k * 0.9, ring_k * 0.7, 0.3 - ring_k * 0.6)
-		_p(focus, rr, m["glow"], Vector3.ZERO, Vector3.ONE, rot)
-		for k in 5:
-			var a := TAU * k / 5.0 + ring_k * 0.4
-			_p(focus, Models.box(0.024, 0.036, 0.008), m["glow"], Basis.from_euler(rot) * Vector3(cos(a) * (0.2 + ring_k * 0.05), 0, sin(a) * (0.2 + ring_k * 0.05)), Vector3.ONE, rot + Vector3(0, -a, 0))
-	# rune rings round both wrists, wide sleeves
+	var r0 := 0.232 * maxf(bw, cw * 0.95); var r1 := 0.36 * bw
+	for side in [[0.8, 1.235], [1.265, 1.7]]:
+		var a0: float = side[0]; var a1: float = side[1]
+		var key := "vir_tail%.3f|%.3f" % [a0, r0]
+		_p(sk, HeroKit.drape(key, r0, r1, 0.3, a0, a1, 8.0, 0.06, 0.02, 0.1), m["body"], Vector3(0, -0.02, 0.01))
+		_p(sk, HeroKit.drape_hem(key, r0, r1, 0.3, a0, a1, 8.0, 0.06, 0.02, 0.1, 0.06), copper, Vector3(0, -0.02, 0.01))
+	# a zip placket and high collar
+	_tp(c, "vir_zip", 0.71, 0.73, 0.05, 0.9, 0.01, copper, 0.01)
+	_p(t, HeroKit.drape("vir_collar", 0.17, 0.25, 0.2, 0.55, 0.95, 3.0, 0.0, 0.0, 0.0, 0.012), m["body"], Vector3(0, 0.56, 0.02), Vector3.ONE, Vector3(PI, 0, 0))
+	# the mast: a copper rod up the spine with a crossbar, flying a kite pennant in the team colour
+	var mast := Node3D.new(); mast.name = "Mast"; mast.position = Vector3(0.0, 0.5, 0.2 * bw); t.add_child(mast)
+	_p(mast, Models.cyl(0.014, 0.018, 1.0, 8), copper, Vector3(0, 0.45, 0), Vector3.ONE, Vector3(0.12, 0, 0))
+	_p(mast, Models.cyl(0.01, 0.01, 0.5, 6), copper, Vector3(0, 0.82, 0.05), Vector3.ONE, Vector3(0.12, 0, PI / 2))
+	_p(mast, Models.sphere(0.03, 8), m["glow"], Vector3(0, 0.99, 0.12))
+	_p(mast, HeroKit.lock_mesh("vir_pennant", [Vector3(0.0, 0.8, 0.08), Vector3(0.0, 0.62, 0.22), Vector3(0.0, 0.5, 0.42), Vector3(0.0, 0.42, 0.62)], 0.16, 0.02, Vector3.RIGHT, 0.8, 0.5), team)
+	# a belt of glass insulators
+	for k in 5:
+		var a := PI * (0.15 + k * 0.17)
+		_p(t, Models.cyl(0.026, 0.02, 0.06, 8), m["glow_soft"], Vector3(cos(a) * 0.23 * cw, 0.02, -sin(a) * 0.2 * bw), Vector3.ONE, Vector3(0.0, 0, 0))
+	# the shoulder: one big insulator stack on the left
+	_p(t, Models.sphere(0.075, 10), copper, Vector3(-0.3 * cw, 0.62, 0.0))
+	_p(t, Models.sphere(0.05, 10), m["glow"], Vector3(-0.3 * cw, 0.7, 0.0))
+	# the coils round both forearms, wound in copper rings round a glowing core
 	for sd in ["L", "R"]:
 		var e2: Node3D = (c["arms"][sd] as Array)[1]
-		_p(e2, HeroKit.cuff(0.06, 0.11, 0.13), m["body"], Vector3(0, -0.16, 0))
-		_p(e2, HeroKit.cuff(0.108, 0.114, 0.025), m["gold"], Vector3(0, -0.215, 0))
-		var wr := TorusMesh.new(); wr.inner_radius = 0.085; wr.outer_radius = 0.097; wr.rings = 28; wr.ring_segments = 6
-		_p(e2, wr, m["glow"], Vector3(0, -0.12, 0))
+		_p(e2, Models.cyl(0.07, 0.07, 0.26, 12), m["leather"], Vector3(0, -0.1, 0))
+		for k in 5:
+			var wr := TorusMesh.new(); wr.inner_radius = 0.07; wr.outer_radius = 0.088; wr.rings = 24; wr.ring_segments = 6
+			_p(e2, wr, copper, Vector3(0, -0.02 - k * 0.05, 0))
+		_p(e2, Models.sphere(0.04, 8), m["glow"], Vector3(0, -0.27, 0))
 
 # ------------------------------------------------------------------------------------------ gunslinger
-## The duelist, built like the gunfighters of hero games: a wide-brimmed hat with a pinched crown,
-## its band and the binding of its brim in the team colour, and over the shoulders a woven serape in
-## the team colour with a zigzag border (from the match camera: a leather hat ringed in the team
-## colour), a long split-tail duster that flares, a
-## bandolier of brass rounds, a holstered revolver, a bandana, and spurs that catch the light.
+## Vex, the burr-and-needle marksman: a snug visored cap, a cropped open jacket over a vest, a
+## long streaming scarf in the team colour, a bandolier of spiked burr charges and one big bronze
+## pauldron. No hat brim, no serape, no duster.
 static func _gunslinger(c: Dictionary) -> void:
 	var m: Dictionary = c["m"]
 	var t: Node3D = c["torso"]
 	var bw: float = c["bw"]; var cw: float = c["cw"]
 	var team := _deep_acc(m)
+	var bronze := Models.shiny(Color("b9732f"), 0.6)
 	if not bool(c["bare"]):
 		var g: Node3D = c["gear"]
-		var hb := HC + Vector3(0, 0.155, 0.01)
-		var hr := Vector3(-0.1, 0, 0.05)
-		_p(g, brim("gun2", 0.19, 0.5, 0.13, 0.04, 0.0, 1.1), m["hat"], hb, Vector3.ONE, hr)
-		var crown := func(u: float, v: float) -> Vector3:
-			var th := u * TAU
-			var r := 0.205 * (0.88 + 0.12 * v) * sin(minf(v / 0.28, 1.0) * PI * 0.5)
-			var x := cos(th) * r; var z := sin(th) * r * 1.12
-			var y := lerpf(0.23, 0.0, v) - 0.06 * exp(-x * x / 0.004) * (1.0 - smoothstep(0.0, 0.6, v)) + 0.02 * (1.0 - v) * cos(th * 2.0)
-			return Vector3(x, y, z)
-		var crown_ao := func(u: float, v: float) -> float: return lerpf(1.0, 0.8, v * v)
-		_p(g, HeroKit.surf("gun_crown2", crown, 40, 14, crown_ao), m["hat"], hb, Vector3.ONE, hr)
-		_p(g, HeroKit.band("gun_hatband2", 0.21, 0.236, 0.05, 0.012), team, hb + Vector3(0, 0.032, 0), Vector3.ONE, hr)
-		# the brim's edge is bound in the team colour too, so the hat reads as a team ring from above
-		var edge := []
-		for k in 49:
-			var th := TAU * k / 48.0
-			var y := 0.13 * pow(cos(th), 2.0) - 0.04 * maxf(-sin(th), 0.0)
-			edge.append(Vector3(cos(th) * 0.5, y, sin(th) * 0.5 * 1.1))
-		_p(g, HeroKit.loft("gun_brimedge", edge, [Vector2(0.02, 0.012), Vector2(0.02, 0.012)], 6, Vector3.UP, 1.0, 1), team, hb, Vector3.ONE, hr)
-		for k in 5:
-			var a := PI * 0.5 + (k - 2) * 0.32
-			_p(g, Models.sphere(0.013, 8), m["gold"], hb + Basis.from_euler(hr) * Vector3(cos(a) * 0.232, 0.032, -sin(a) * 0.255))
-		_p(g, HeroKit.lock_mesh("gun_hatfeather", [Vector3(0.18, 0.06, 0.04), Vector3(0.24, 0.14, 0.12), Vector3(0.27, 0.22, 0.24)], 0.05, 0.2, Vector3.RIGHT, 0.8, 0.3), m["feather"], hb, Vector3.ONE, hr)
-	# the duster: open at the front, split up the back, flaring to the knees
+		var hb := HC + Vector3(0, 0.13, 0.0)
+		var cap := _p(g, Models.sphere(0.225, 18), m["hat"], hb + Vector3(0, 0.03, 0.01), Vector3(1.0, 0.72, 1.08))
+		cap.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		_p(g, HeroKit.band("mar_capband", 0.214, 0.226, 0.05, 0.012), team, hb + Vector3(0, -0.03, 0.0))
+		_p(g, Models.box(0.3, 0.018, 0.17), m["hat"], hb + Vector3(0, -0.01, -0.24), Vector3.ONE, Vector3(0.18, 0, 0))
+		_p(g, Models.box(0.3, 0.012, 0.03), team, hb + Vector3(0, -0.012, -0.325), Vector3.ONE, Vector3(0.18, 0, 0))
+		_p(g, Models.cyl(0.012, 0.012, 0.16, 6), bronze, hb + Vector3(0.18, 0.12, 0.08), Vector3.ONE, Vector3(0.5, 0, 0.3))
+	# the cropped jacket tails
 	var sk: Node3D = c["skirt"]
-	var r0 := 0.234 * maxf(bw, cw * 0.95); var r1 := 0.42 * bw
+	var r0 := 0.234 * maxf(bw, cw * 0.95); var r1 := 0.38 * bw
 	for side in [[0.8, 1.235], [1.265, 1.7]]:
 		var a0: float = side[0]; var a1: float = side[1]
-		var key := "gun_duster2%.3f|%.3f" % [a0, r0]
-		_p(sk, HeroKit.drape(key, r0, r1, 0.5, a0, a1, 8.0, 0.08, 0.02, 0.1), m["body"], Vector3(0, -0.02, 0.01))
-		_p(sk, HeroKit.drape_hem(key, r0, r1, 0.5, a0, a1, 8.0, 0.08, 0.02, 0.1, 0.07), m["trim"], Vector3(0, -0.02, 0.01))
-	# the coat over the chest: open over a vest, broad lapels, brass buttons
-	_tp(c, "gun_vest", 0.69, 0.81, 0.16, 0.86, 0.01, m["shirt"], 0.012)
-	for k in 3:
-		_p(t, Models.sphere(0.014, 8), m["gold"], Vector3(0.0, 0.42 - k * 0.09, -0.236 * bw))
-	for sx in [-1.0, 1.0]:
-		_p(t, HeroKit.loft("gun_lapel%d" % int(sx), [Vector3(0.13 * sx, 0.62, -0.15), Vector3(0.1 * sx, 0.5, -0.235), Vector3(0.065 * sx, 0.3, -0.24), Vector3(0.06 * sx, 0.14, -0.235)], [Vector2(0.05, 0.01), Vector2(0.055, 0.012), Vector2(0.03, 0.01), Vector2(0.02, 0.008)], 6, Vector3.FORWARD, 0.85), m["body"], Vector3.ZERO, Vector3(cw, 1.0, bw))
-	# the serape: a woven cloth over both shoulders in the team colour, a zigzag border of the outfit
-	# colour and fringe at the hem
-	_p(t, HeroKit.drape("gun_serape|%.3f" % cw, 0.19 * cw, 0.37 * cw, 0.22, 0.0, 1.0, 5.0, 0.04, 0.01, 0.06, 0.016), team, Vector3(0, 0.64, 0.01))
-	_p(t, HeroKit.drape_hem("gun_serape|%.3f" % cw, 0.19 * cw, 0.37 * cw, 0.22, 0.0, 1.0, 5.0, 0.04, 0.01, 0.06, 0.06), m["shirt"], Vector3(0, 0.64, 0.01))
-	for k in 18:
-		var a := TAU * k / 18.0
-		var rr := 0.37 * cw * 0.97
-		var p := Vector3(cos(a) * rr, 0.64 - 0.22 * (1.0 + 0.06 * clampf(sin(a), 0.0, 1.0)) - 0.035, sin(a) * rr * 0.98)
-		_p(t, Models.box(0.03, 0.03, 0.008), m["trim"], p + Vector3(cos(a), 0, sin(a)) * 0.012, Vector3.ONE, Vector3(0, -a + PI * 0.5, PI * 0.25))
-	# a bandana knotted at the throat, its ends trailing behind
+		var key := "mar_tail%.3f|%.3f" % [a0, r0]
+		_p(sk, HeroKit.drape(key, r0, r1, 0.34, a0, a1, 8.0, 0.06, 0.02, 0.1), m["body"], Vector3(0, -0.02, 0.01))
+		_p(sk, HeroKit.drape_hem(key, r0, r1, 0.34, a0, a1, 8.0, 0.06, 0.02, 0.1, 0.06), m["trim"], Vector3(0, -0.02, 0.01))
+	_tp(c, "mar_vest", 0.69, 0.81, 0.16, 0.86, 0.01, m["shirt"], 0.012)
+	# the scarf: wound at the throat, two long ends streaming behind (the animation sways "Scarf")
 	var scarf := Models._pivot(t, "Scarf", Vector3(0, 0.6, 0.18 * bw))
-	_p(t, HeroKit.mantle("gun_kerchief", 0.12, 0.12, 0.035, 5.0), m["hero"], Vector3(0, 0.67, -0.01))
+	_p(t, HeroKit.mantle("mar_scarf_wrap", 0.13, 0.13, 0.05, 5.0), team, Vector3(0, 0.67, -0.01))
 	for sx in [-1.0, 1.0]:
-		_p(scarf, HeroKit.lock_mesh("gun_kerchief%d" % int(sx), [Vector3(0.02 * sx, 0.06, 0.0), Vector3(0.06 * sx, -0.02, 0.08), Vector3(0.1 * sx, -0.16, 0.12)], 0.07, 0.18, Vector3.BACK, 0.8, 0.4), m["hero"])
-	# the bandolier across the chest, loaded with brass
+		_p(scarf, HeroKit.lock_mesh("mar_scarf%d" % int(sx), [Vector3(0.03 * sx, 0.06, 0.0), Vector3(0.08 * sx, -0.04, 0.16), Vector3(0.12 * sx, -0.2, 0.36), Vector3(0.14 * sx, -0.4, 0.5)], 0.09, 0.2, Vector3.BACK, 0.8, 0.4), team)
+	# the bandolier of burr charges: small spiked spheres in a leather strap
 	var bpts := [Vector3(0.2, 0.6, -0.14), Vector3(0.05, 0.42, -0.255), Vector3(-0.12, 0.22, -0.245), Vector3(-0.22, 0.08, -0.17)]
-	_p(t, HeroKit.loft("gun_bandolier", bpts, [Vector2(0.032, 0.01), Vector2(0.034, 0.011), Vector2(0.034, 0.011), Vector2(0.032, 0.01)], 6, Vector3.FORWARD, 0.9), m["leather"], Vector3.ZERO, Vector3(cw, 1.0, bw))
+	_p(t, HeroKit.loft("mar_bandolier", bpts, [Vector2(0.032, 0.01), Vector2(0.034, 0.011), Vector2(0.034, 0.011), Vector2(0.032, 0.01)], 6, Vector3.FORWARD, 0.9), m["leather"], Vector3.ZERO, Vector3(cw, 1.0, bw))
 	var bc := HeroKit.curve3(bpts, 6)
-	for k in range(3, bc.size() - 3, 2):
+	for k in range(3, bc.size() - 3, 3):
 		var p: Vector3 = bc[k]
-		var d: Vector3 = ((bc[k + 1] as Vector3) - (bc[k - 1] as Vector3)).normalized()
-		var rr2 := atan2(-d.x, -d.y)
-		_p(t, Models.cyl(0.0105, 0.0105, 0.05, 6), m["gold"], Vector3(p.x * cw, p.y, p.z * bw - 0.012), Vector3.ONE, Vector3(0, 0, rr2 + PI * 0.5))
-	# the holster on the right hip, a revolver's grip and hammer standing out of it
+		var bp := Vector3(p.x * cw, p.y, p.z * bw - 0.03)
+		_p(t, Models.sphere(0.034, 8), bronze, bp)
+		for sa in 4:
+			var ang := sa * PI * 0.5 + 0.4
+			_p(t, Models.crystal(0.012, 0.045, 4), m["glow"], bp + Vector3(cos(ang), sin(ang), 0.3).normalized() * 0.04, Vector3.ONE, Vector3(0, 0, ang - PI * 0.5))
+	# one big bronze pauldron on the left shoulder, rimmed in the team colour
+	_p(t, Models.sphere(0.115, 14), bronze, Vector3(-0.3 * cw, 0.62, 0.0), Vector3(1.2, 0.7, 1.1))
+	_p(t, HeroKit.band("mar_pauld", 0.1, 0.13, 0.03, 0.01), team, Vector3(-0.3 * cw, 0.6, 0.0), Vector3.ONE, Vector3(0, 0, 0.1))
+	# a drum-mag pouch on the right hip
 	var hp := Vector3(0.25 * bw, -0.02, -0.03)
-	_p(t, HeroKit.loft("gun_holster", [Vector3(0, 0.07, 0), Vector3(0, -0.04, -0.01), Vector3(0, -0.14, -0.03)], [Vector2(0.034, 0.05), Vector2(0.036, 0.05), Vector2(0.02, 0.03)], 10, Vector3.RIGHT, 0.85), m["leather"], hp, Vector3.ONE, Vector3(0.12, 0, 0.12))
-	_p(t, HeroKit.loft("gun_grip", [Vector3(0, 0.06, 0.0), Vector3(0, 0.13, 0.03), Vector3(0, 0.16, 0.07)], [Vector2(0.018, 0.026), Vector2(0.02, 0.028), Vector2(0.022, 0.03)], 8, Vector3.RIGHT, 0.9), m["wood"], hp, Vector3.ONE, Vector3(0.12, 0, 0.12))
-	_p(t, Models.cyl(0.032, 0.032, 0.03, 12), m["gold"], hp + Vector3(0, 0.075, -0.004), Vector3.ONE, Vector3(0.12, 0, 0.12))
-	# spurs on the boots
+	_p(t, Models.cyl(0.07, 0.07, 0.09, 14), bronze, hp + Vector3(0, 0.0, 0), Vector3.ONE, Vector3(0, 0, PI / 2))
+	_p(t, Models.cyl(0.05, 0.05, 0.095, 14), m["leather"], hp, Vector3.ONE, Vector3(0, 0, PI / 2))
+	# knee guards
 	for sd in ["L", "R"]:
 		var kn: Node3D = c["knees"][sd]
-		_p(kn, HeroKit.band("gun_spurstrap", 0.072, 0.072, 0.016, 0.008), m["leather"], Vector3(0, -0.2, 0.015), Vector3.ONE, Vector3(0.3, 0, 0))
-		var wheel := TorusMesh.new(); wheel.inner_radius = 0.014; wheel.outer_radius = 0.028; wheel.rings = 10; wheel.ring_segments = 5
-		_p(kn, wheel, m["gold"], Vector3(0, -0.215, 0.085), Vector3.ONE, Vector3(0, 0, PI * 0.5))
-	for sd in ["L", "R"]:
-		var e2: Node3D = (c["arms"][sd] as Array)[1]
-		_p(e2, HeroKit.cuff(0.062, 0.09, 0.09), m["body"], Vector3(0, -0.165, 0))
-		_p(e2, HeroKit.cuff(0.088, 0.092, 0.02), m["trim"], Vector3(0, -0.2, 0))
+		_p(kn, Models.sphere(0.065, 10), bronze, Vector3(0, -0.02, -0.07), Vector3(1.0, 0.8, 0.7))
 
 # ------------------------------------------------------------------------------------------ juggernaut
 ## The wrecking ball, a top-heavy brute built like the great heavies of hero games: a closed great
@@ -628,120 +503,3 @@ static func _greaves(c: Dictionary, m_plate: Material, m_rim: Material) -> void:
 		_p(kn, HeroKit.cuff(0.084, 0.096, 0.13), m_plate, Vector3(0, -0.1, 0))
 		_p(kn, HeroKit.dome_plate("kneecop", 0.07, 0.45, 0.8, 0.2, 0.014), m_plate, Vector3(0, 0.0, -0.05), Vector3.ONE, Vector3(-PI * 0.5 + 0.1, 0, 0))
 		_p(kn, Models.sphere(0.016, 6), m_rim, Vector3(0, 0.0, -0.115))
-
-# ------------------------------------------------------------------------------------------ bulwark
-## The squad's shield, a paladin built like the shield-bearers of hero games and the opposite of the
-## juggernaut's dark horned brute: bright polished plate with gold edges, a tall square great helm
-## with swept steel wings, a plume and a glowing T visor, a tower shield on the back enamelled in the
-## team colour round a gold sunburst (from the match camera: a big team-coloured slab behind a
-## bright helm), square stacked pauldrons, a tabard and cape in the outfit colour, and a banner.
-static func _bulwark(c: Dictionary) -> void:
-	var m: Dictionary = c["m"]
-	var t: Node3D = c["torso"]
-	var bw: float = c["bw"]; var cw: float = c["cw"]
-	var team := _deep_acc(m)
-	var plate := Models.shiny(Color("d4d9e2"), 0.75)
-	plate.set_shader_parameter("rim_amount", 0.75)
-	Models.painted(plate, 3, 0.14, 0.12, 0.14)
-	var visor := Models.toon(Color("bff4ff"), false, 1.8)
-	visor.set_shader_parameter("rim_amount", 0.0)
-	if not bool(c["bare"]):
-		var g: Node3D = c["gear"]
-		# the great helm: square-shouldered, a little deeper in front for snouts and beaks
-		var snout := _snout(c)
-		var helm := func(u: float, v: float) -> Vector3:
-			var n := HeroKit.sdir(u, lerpf(0.0, 0.82, v))
-			var k := 3.8
-			var d := pow(pow(absf(n.x), k) + pow(absf(n.y), k) + pow(absf(n.z), k), 1.0 / k)
-			var p := (n / d).lerp(n, 0.18)
-			var p2 := Vector3(p.x * 0.262, p.y * 0.3, p.z * (0.27 + snout * clampf(-p.z, 0.0, 1.0)))
-			p2.y += 0.05
-			return p2
-		var helm_ao := func(u: float, v: float) -> float: return lerpf(1.0, 0.78, v * v)
-		_p(g, HeroKit.shell("bul_helm2|%.2f" % snout, helm, 40, 16, 0.022, helm_ao, true, 1.0, 0.3), plate, HC)
-		var fz := -0.27 - snout - 0.004
-		_p(g, Models.box(0.3, 0.036, 0.03), visor, HC + Vector3(0, 0.03, fz + 0.012))
-		_p(g, Models.box(0.036, 0.15, 0.03), visor, HC + Vector3(0, -0.05, fz + 0.012))
-		_p(g, Models.box(0.34, 0.012, 0.035), m["gold"], HC + Vector3(0, 0.07, fz + 0.01))
-		_p(g, HeroKit.band("bul_helmrim2|%.2f" % snout, 0.27, 0.28 + snout * 0.5, 0.032, 0.01), m["gold"], HC + Vector3(0, -0.2, -snout * 0.4))
-		# a raised gold ridge front to back with a plume in the outfit colour streaming from it
-		_p(g, HeroKit.loft("bul_ridge", [Vector3(0, 0.33, -0.22), Vector3(0, 0.37, -0.05), Vector3(0, 0.36, 0.14), Vector3(0, 0.29, 0.27)], [Vector2(0.018, 0.03), Vector2(0.02, 0.04), Vector2(0.02, 0.04), Vector2(0.018, 0.025)], 8, Vector3.RIGHT, 0.85, 3), m["gold"], HC + Vector3(0, -0.02, 0))
-		var plume := [HC + Vector3(0, 0.36, -0.12), HC + Vector3(0, 0.46, 0.02), HC + Vector3(0, 0.44, 0.2), HC + Vector3(0, 0.32, 0.36), HC + Vector3(0, 0.16, 0.42)]
-		_p(g, HeroKit.lock_mesh("bul_plume", plume, 0.13, 0.35, Vector3.RIGHT, 0.75, 0.3), m["hero"])
-		# swept steel wings on the sides of the helm
-		for sx in [-1.0, 1.0]:
-			for k in 3:
-				var root := HC + Vector3(0.25 * sx, 0.06 - k * 0.04, 0.02 + k * 0.02)
-				var pts := [root, root + Vector3(0.08 * sx, 0.07 - k * 0.02, 0.06), root + Vector3(0.13 * sx, 0.16 - k * 0.05, 0.16), root + Vector3(0.15 * sx, 0.24 - k * 0.08, 0.28 - k * 0.04)]
-				_p(g, HeroKit.lock_mesh("bul_wing%d_%d" % [int(sx), k], pts, 0.075 - k * 0.015, 0.2, Vector3.FORWARD, 0.85, 0.3), plate if k != 1 else m["gold"])
-	# breastplate with a tabard over it, a gorget
-	_tp(c, "bul_breast", 0.55, 0.95, 0.08, 0.75, 0.022, plate, 0.02, 0.012)
-	_tp(c, "bul_tabard", 0.69, 0.81, 0.3, 0.92, 0.04, m["hero"], 0.012)
-	_p(t, Models.box(0.1, 0.1, 0.02), m["gold"], Vector3(0, 0.38, -0.29 * bw), Vector3.ONE, Vector3(0.1, 0, PI * 0.25))
-	_p(t, Models.box(0.05, 0.05, 0.026), visor, Vector3(0, 0.38, -0.296 * bw), Vector3.ONE, Vector3(0.1, 0, PI * 0.25))
-	_p(t, HeroKit.drape("bul_gorget|%.3f" % cw, 0.13, 0.27 * cw, 0.1, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.02), plate, Vector3(0, 0.69, 0.0))
-	_p(t, HeroKit.drape_hem("bul_gorget|%.3f" % cw, 0.13, 0.27 * cw, 0.1, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.2), m["gold"], Vector3(0, 0.69, 0.0))
-	# plate skirt: three rows of tassets over a tabard flap
-	var sk: Node3D = c["skirt"]
-	var r0 := 0.25 * maxf(bw, cw * 0.9)
-	_p(sk, HeroKit.drape("bul_skirt|%.3f" % r0, r0, r0 * 1.25, 0.26, 0.0, 1.0, 7.0, 0.05, 0.0, 0.0), m["pants"], Vector3(0, -0.02, 0.0))
-	_tassets(c, sk, r0, 3, 7, plate, m["gold"])
-	_p(sk, HeroKit.sheet("bul_flap2", 0.18, 0.4, 0.4, 0.0, -0.05, 1, 0.06), m["hero"], Vector3(0, -0.02, -r0 - 0.07), Vector3.ONE, Vector3(0, PI, 0))
-	# the cape, behind the shield, in the outfit colour
-	var cape := Models._pivot(t, "Cape", Vector3(0, 0.58, 0.25 * bw))
-	_p(cape, HeroKit.drape("bul_cape2", 0.27, 0.44, 0.82, 0.04, 0.46, 6.0, 0.07, 0.02, 0.0, 0.016), m["hero"], Vector3(0, 0.0, -0.24 * bw), Vector3(cw, 1.0, bw), Vector3(0.05, 0, 0))
-	_p(cape, HeroKit.drape_hem("bul_cape2", 0.27, 0.44, 0.82, 0.04, 0.46, 6.0, 0.07, 0.02, 0.0, 0.05), m["gold"], Vector3(0, 0.0, -0.24 * bw), Vector3(cw, 1.0, bw), Vector3(0.05, 0, 0))
-	# the tower shield on the back: a tall curved slab with a pointed foot, a thick steel rim, rivets,
-	# a gold sunburst boss on a team-coloured field
-	var shield := func(u: float, v: float) -> Vector3:
-		var x := lerpf(-0.34, 0.34, u)
-		var y := lerpf(0.46, -0.56, v)
-		var foot := smoothstep(-0.2, -0.56, y)
-		x *= 1.0 - 0.75 * foot * foot
-		return Vector3(x, y, 0.09 * (1.0 - pow(x / 0.34, 2.0)))
-	var sp := Vector3(0, 0.4, 0.46 * bw)
-	var sb := Basis.from_euler(Vector3(0.42, 0, 0))     # its top leans back, so its face shows from above
-	var sr := sb.get_euler()
-	var shield_ao := func(u: float, v: float) -> float: return lerpf(0.82, 1.0, smoothstep(0.0, 0.2, minf(minf(u, 1.0 - u), minf(v, 1.0 - v))))
-	_p(t, HeroKit.shell("bul_shield2", shield, 18, 18, 0.04, shield_ao, false, -1.0), team, sp, Vector3.ONE, sr)
-	var rim := []
-	for k in 21:
-		var v := float(k) / 20.0
-		var y := lerpf(0.46, -0.56, v)
-		var foot := smoothstep(-0.2, -0.56, y)
-		rim.append(Vector3(0.345 * (1.0 - 0.75 * foot * foot), y, 0.0))
-	for sx in [-1.0, 1.0]:
-		var side := rim.map(func(q: Vector3) -> Vector3: return Vector3(q.x * sx, q.y, 0.035 * (1.0 - pow(q.x / 0.345, 2.0)) + 0.02))
-		_p(t, HeroKit.loft("bul_rim2%d" % int(sx), side, [Vector2(0.028, 0.028), Vector2(0.028, 0.028)], 8, Vector3.BACK, 1.0, 2), plate, sp, Vector3.ONE, sr)
-		for k in 4:
-			var q: Vector3 = side[2 + k * 5]
-			_p(t, Models.sphere(0.016, 6), m["gold"], sp + sb * (q + Vector3(-0.03 * sx, 0, 0.03)))
-	_p(t, HeroKit.loft("bul_rimtop2", [Vector3(-0.345, 0.46, 0.02), Vector3(0, 0.47, 0.11), Vector3(0.345, 0.46, 0.02)], [Vector2(0.028, 0.028), Vector2(0.03, 0.03), Vector2(0.028, 0.028)], 8, Vector3.BACK, 1.0), plate, sp, Vector3.ONE, sr)
-	_p(t, Models.sphere(0.1, 16), m["gold"], sp + sb * Vector3(0, 0.0, 0.11), Vector3(1.0, 1.0, 0.5), sr)
-	for k in 8:
-		var a := TAU * k / 8.0
-		_p(t, Models.box(0.03, 0.12, 0.016), m["gold"], sp + sb * Vector3(cos(a) * 0.15, sin(a) * 0.15, 0.1), Vector3.ONE, (sb * Basis.from_euler(Vector3(0, 0, a - PI * 0.5))).get_euler())
-	_p(t, Models.sphere(0.045, 10), visor, sp + sb * Vector3(0, 0.0, 0.15), Vector3(1.0, 1.0, 0.5), sr)
-	# the banner pole over the shield, its pennant in the team colour
-	var pole := _stay(_p(t, Models.cyl(0.016, 0.016, 1.3, 8), m["wood"], Vector3(-0.22, 0.7, 0.38 * bw), Vector3.ONE, Vector3(0.05, 0, 0.12)))
-	pole.set_meta("stay", true)
-	var top := Vector3(-0.22, 0.7, 0.38 * bw) + Basis.from_euler(Vector3(0.05, 0, 0.12)) * Vector3(0, 0.65, 0)
-	_stay(_p(t, Models.sphere(0.035, 10), m["gold"], top))
-	_stay(_p(t, Models.cyl(0.012, 0.012, 0.36, 6), m["wood"], top + Vector3(0.14, -0.05, 0.0), Vector3.ONE, Vector3(0, 0, PI * 0.5 - 0.12)))
-	_stay(_p(t, HeroKit.sheet("bul_banner", 0.34, 0.42, 0.3, 0.0, 0.05, 2, 0.08, 0.01), team, top + Vector3(0.14, -0.06, 0.0), Vector3.ONE, Vector3(0, PI * 0.5, -0.12)))
-	# square pauldrons: three stepped lames of polished plate with a raised gold edge
-	for sd in ["L", "R"]:
-		var sx := -1.0 if sd == "L" else 1.0
-		var pv: Node3D = c["pl"] if sd == "L" else c["pr"]
-		for k in 3:
-			var plt := HeroKit.box_plate("bul_pad%d" % k, 0.2 - k * 0.012, 0.21 - k * 0.012, 0.13, 0.024)
-			_p(pv, plt, plate, Vector3((0.035 + k * 0.045) * sx, 0.07 - k * 0.075, 0.0), Vector3.ONE, Vector3(0, 0, (-0.3 - k * 0.32) * sx))
-			_p(pv, HeroKit.box_plate("bul_padrim%d" % k, 0.21 - k * 0.012, 0.22 - k * 0.012, 0.02, 0.012, 0.25), m["gold"], Vector3((0.035 + k * 0.045) * sx, 0.07 - k * 0.075, 0.0) + Basis.from_euler(Vector3(0, 0, (-0.3 - k * 0.32) * sx)) * Vector3(0, -0.005, 0), Vector3.ONE, Vector3(0, 0, (-0.3 - k * 0.32) * sx))
-	_undersuit(c)
-	for sd in ["L", "R"]:
-		var e2: Node3D = (c["arms"][sd] as Array)[1]
-		_p(e2, HeroKit.cuff(0.07, 0.11, 0.15), plate, Vector3(0, -0.15, 0))
-		_p(e2, HeroKit.cuff(0.108, 0.114, 0.024), m["gold"], Vector3(0, -0.08, 0))
-		var ap: Node3D = (c["arms"][sd] as Array)[0]
-		_p(ap, HeroKit.cuff(0.094, 0.104, 0.1), plate, Vector3(0, -0.1, 0))
-	_greaves(c, plate, m["gold"])

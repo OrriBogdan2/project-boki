@@ -1,0 +1,16 @@
+{
+ "_doc": "Everything you can smash (scripts/match/breakables.gd). Any single hit breaks a breakable: a shot, a melee swing, an ability, a Boki strike, a blast or a dash through it; none has a health pool. 'weight' is the share of the random scatter on a map. 'material' picks the debris colours (see 'debris') and the break sound. 'loot' is rolled when it breaks: gems [min, max] worth gem_base each, odds for a tonic, armor shards (armor_amount) and a seed, and 'table' names a gear drop table. An 'explosive' kind is lit by its hit instead, burns 'fuse' seconds (or 'chain_fuse' when another blast lit it) with a ground ring showing 'radius', then blows: 'damage' at the middle falling to half at the edge, knockback and lift in m/s, 'shake' camera trauma.",
+ "debris": {
+  "wood":  {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0},
+  "clay":  {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0},
+  "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}
+ },
+ "kinds": {
+  "crate":  {"weight": 0.45, "material": "wood", "chunks": 14, "loot": {"gems": [2, 4], "gem_base": 2, "tonic": 0.3, "armor": 0.4, "armor_amount": 25, "table": "crate"}},
+  "pot":    {"weight": 0.30, "material": "clay", "chunks": 12, "loot": {"gems": [1, 2], "gem_base": 2, "seed": 0.2}},
+  "barrel": {"weight": 0.13, "material": "wood", "chunks": 16, "loot": {"gems": [1, 3], "gem_base": 2, "tonic": 0.15}},
+  "keg":    {"weight": 0.12, "material": "metal", "chunks": 18, "loot": {},
+            "explosive": {"radius": 2.6, "damage": 22.0, "knockback": 10.0, "lift": 7.5, "fuse": 0.45, "chain_fuse": 0.22,
+                          "edge_falloff": 0.5, "height": 2.0, "color": "ff7a3a"}}
+ }
+}

@@ -3,6 +3,10 @@ extends Node3D
 ## Pooled visual effects: particle bursts, damage numbers, ground rings, attack telegraphs, lightning.
 
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
+## a word that would land on another stacks this far above it (m along the camera's up), at most this
+## many times
+const WORD_STEP := 0.62
+const WORD_STACK_MAX := 4
 var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
 var bursts: Array[CPUParticles3D] = []
@@ -11,7 +15,6 @@ var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
 var rings: Array = []         # {node, t, dur, r}
 var teles: Array = []
-var lines: Array = []         # {node, t}
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
 var rng := RandomNumberGenerator.new()
@@ -53,7 +56,7 @@ func _ready() -> void:
 		p.local_coords = false
 		add_child(p)
 		bursts.append(p)
-	for i in 40:
+	for i in NUM_POOL:
 		var l := Label3D.new()
 		l.font = font
 		l.font_size = 52
@@ -68,6 +71,10 @@ func _ready() -> void:
 		add_child(l)
 		num_pool.append(l)
 	_build_sparks()
+	# no effect casts a shadow: rings, telegraphs, decals, particles, bolts (item 94, ShadowPolicy)
+	ShadowPolicy.off(self)
+	child_entered_tree.connect(ShadowPolicy.off)
+	ShadowPolicy.watch_particles(get_tree())     # and no particle system anywhere in the match does
 
 func _build_sparks() -> void:
 	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
@@ -196,8 +203,19 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 ## burying the fight under confetti.
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
+var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
+var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
-func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size := 1.0, dir := Vector3.UP, spread := 180.0) -> void:
+## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
+func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size_k := 1.0,
+		dir := Vector3.UP, spread := 180.0) -> void:
+	if own_look:
+		return
+	radial += 1
+	_emit(at, col, amount, speed, life, grav, size_k, dir, spread)
+
+func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav: float, size_k: float, dir: Vector3,
+		spread: float) -> void:
 	var p := bursts[bi]
 	bi = (bi + 1) % bursts.size()
 	p.global_position = at
@@ -208,23 +226,25 @@ func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, gra
 	p.initial_velocity_min = speed * 0.5
 	p.initial_velocity_max = speed
 	p.gravity = Vector3(0, -grav, 0)
-	p.scale_amount_min = 0.6 * size
-	p.scale_amount_max = 1.4 * size
+	p.scale_amount_min = 0.6 * size_k
+	p.scale_amount_max = 1.4 * size_k
 	p.direction = dir
 	p.spread = spread
 	p.restart()
 	p.emitting = true
 
+## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8) -> void:
-	burst(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
+	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
+## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
+## burst: those are kept for blasts that do something.
 func dash_trail(h) -> void:
-	var c: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	burst(h.pos + Vector3(0, 0.6, 0), Color(c, 0.7), 12, 1.2, 0.3, 0.0, 1.6)
 	dust(h.pos, 7)
-	ring(h.pos, 1.3, Color(c, 0.8), 0.22)
 
 var ghosts: Array = []
+const GLOW_DUR := 0.5      # s: a body glow's life
+const GLOW_RISE := 1.4     # m/s: how fast it drifts up
 var _ghost_mesh: Mesh
 
 ## A fading after-image of a dashing hunter.
@@ -239,7 +259,15 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.global_position = at + Vector3(0, 0.7 * scl, 0)
 	mi.rotation.y = yaw
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
-	ghosts.append({"node": mi, "t": 0.0, "col": col})
+	ghosts.append({"node": mi, "t": 0.0, "col": col, "dur": 0.26, "rise": 0.0})
+
+## The one world cue for a level-up or an ability coming ready: a short upward glow over the body
+## in `col`. No ground ring, no burst (a ground ring means gameplay).
+func body_glow(at: Vector3, col: Color) -> void:
+	ghost(at, 0.0, col, 1.15)
+	var g: Dictionary = ghosts[ghosts.size() - 1]
+	g["dur"] = GLOW_DUR
+	g["rise"] = GLOW_RISE
 
 func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
@@ -259,9 +287,10 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 				ln.modulate = col
 			elif not n.get("crit", false):
 				ln.modulate = col
+			_num_look(ln, bool(n.get("crit", false)))
 			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
 			ln.modulate.a = 1.0
-			ln.scale = Vector3.ONE * (1.75 if crit else 1.45)
+			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -270,21 +299,34 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
+	_num_look(l, crit)
 	l.font_size = _num_size(v, crit)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
-	l.scale = Vector3.ONE * (1.9 if crit else 1.5)
+	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
 
+const CRIT_POP := 1.7          # a crit lands this many times its size and settles
+const HIT_POP := 1.25          # ... and a normal hit this many
+const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
+const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
+const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
+
+## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
+## a yellower number (pooled labels are reused, so every number sets this).
+func _num_look(l: Label3D, crit: bool) -> void:
+	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
+	l.outline_size = 20 if crit else 14
+
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
 func _num_size(v: float, crit: bool) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(46.0, 60.0, k)) + (12 if crit else 0)
+	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -295,16 +337,45 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 			nums.erase(n); break
 	l.text = txt
 	l.modulate = col
-	l.font_size = 58 if big else 40
-	l.global_position = at
+	_num_look(l, false)
+	l.font_size = 46 if big else 34
+	l.global_position = _clear_spot(at)
 	l.visible = true
-	l.scale = Vector3.ONE * (1.5 if big else 1.1)
+	l.scale = Vector3.ONE * (1.25 if big else 1.0)
 	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
 
+## Where a new word goes so it doesn't print over a word or number still rising near `at`: stepped up
+## the screen (along the camera's up) above whatever is there.
+func _clear_spot(at: Vector3) -> Vector3:
+	var cam := get_viewport().get_camera_3d() if get_viewport() else null
+	if cam == null:
+		return at
+	var up := cam.global_basis.y
+	var across := cam.global_basis.x
+	var spot := at
+	for i in WORD_STACK_MAX:
+		var clash := false
+		for n in nums:
+			var other: Label3D = n["node"]
+			var gap := other.global_position - spot
+			var overlaps := absf(gap.dot(across)) < 1.8 and absf(gap.dot(up)) < WORD_STEP
+			if other.visible and float(n["t"]) < 0.6 and overlaps:
+				clash = true
+				break
+		if not clash:
+			return spot
+		spot += up * WORD_STEP
+	return spot
+
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+	if own_look:
+		return
+	radial += 1
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
 	mi.material_override = Models.ring_mat(col, 0.12)
+	mi.material_override.set_shader_parameter("wash", 1.0)
+	mi.material_override.set_shader_parameter("halo", 1.0)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = at + Vector3(0, 0.08, 0)
@@ -345,6 +416,7 @@ func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy :
 	tw.chain().tween_callback(mi.queue_free)
 
 static var _impact_quad: QuadMesh
+const FLASH_MIN := 0.1         # s an impact flash holds at least: ~6 frames, so the hit frame reads
 func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	# a star of rays round a white-hot core (shaders/impact.gdshader), from a pool so a firefight
 	# doesn't make and free a mesh for every shot
@@ -361,11 +433,12 @@ func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	m.set_shader_parameter("rays", float([4, 5, 6][rng.randi_range(0, 2)]))
 	m.set_shader_parameter("life", 0.0)
 	mi.scale = Vector3.ONE * size * 1.6
-	dur = maxf(dur, 0.07)
+	dur = maxf(dur, FLASH_MIN)
 	mi.visible = true
 	mi.global_position = at
 	flashes.append({"node": mi, "t": 0.0, "dur": dur, "s0": size * 1.6})
 
+## A jagged bolt of lightning from a to b: soft glowing segments that flare and fade.
 func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	var pts := [a]
 	for i in range(1, 5):
@@ -373,18 +446,12 @@ func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 		pts.append(a.lerp(b, k) + Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.2, 0.2), rng.randf_range(-0.3, 0.3)))
 	pts.append(b)
 	for i in pts.size() - 1:
-		var p0: Vector3 = pts[i]; var p1: Vector3 = pts[i + 1]
-		var mi := MeshInstance3D.new()
-		mi.mesh = Models.box(0.07, 0.07, 1.0)
-		mi.material_override = Models.glow_mat(col)
-		add_child(mi)
-		mi.global_position = (p0 + p1) * 0.5
-		mi.look_at(p1, Vector3.UP if absf((p1 - p0).normalized().y) < 0.95 else Vector3.RIGHT)
-		mi.scale = Vector3(1, 1, p0.distance_to(p1))
-		lines.append({"node": mi, "t": 0.0, "dur": 0.18})
+		beam(pts[i], pts[i + 1], col, 0.22, 0.22)
 	burst(b, col, 10, 3.0, 0.3, 4.0)
 
 func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
+	if own_look:
+		return
 	for i in 3:
 		burst(at + Vector3(d.x, 0.5, d.y) * (0.5 + i * 1.2), col, 12, 6.0, 0.4, 4.0, 1.4, Vector3(d.x, 0.2, d.y), 25.0)
 
@@ -462,7 +529,7 @@ func _process(delta: float) -> void:
 		var k: float = rg["t"] / rg["dur"]
 		var mi: MeshInstance3D = rg["node"]
 		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
-		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k, 0.0, 1.0)))
+		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
 		if k >= 1.0:
 			mi.queue_free(); rings.erase(rg)
 	for f in flashes.duplicate():
@@ -475,13 +542,10 @@ func _process(delta: float) -> void:
 			mi.visible = false; flashes.erase(f)
 	for g in ghosts.duplicate():
 		g["t"] += delta
-		var k: float = g["t"] / 0.26
+		var k: float = g["t"] / float(g["dur"])
 		var gm: MeshInstance3D = g["node"]
+		gm.global_position.y += float(g["rise"]) * delta
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
 			gm.queue_free(); ghosts.erase(g)
-	for ln in lines.duplicate():
-		ln["t"] += delta
-		if ln["t"] >= ln["dur"]:
-			ln["node"].queue_free(); lines.erase(ln)

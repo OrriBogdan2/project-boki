@@ -5,7 +5,7 @@ extends RefCounted
 ## Anyone can emote (hold the emote key for the wheel). A Truce emote (a white flag) offers peace to
 ## the nearest rival squad you can see; one of them answers within a few seconds with Accept or No.
 ## While a truce holds, bots of both squads leave each other (and each other's kin) alone, truce
-## partners share an outpost's yard without contesting the uplink, board the same skiff, and bots
+## partners share an outpost's yard without contesting the uplink, and bots
 ## escort their partners to whichever exit they're using. Nothing stops you shooting a partner, but
 ## a real attack breaks the truce for both squads, is called out in the feed, and marks the
 ## betrayer on everyone's map for a while. A truce ends by itself after a few minutes, or when one
@@ -30,6 +30,8 @@ const TRUCE_T := 180.0        # a truce lasts this long
 const BREAK_DMG := 14.0       # damage one side does to the other before it counts as an attack
 const MARK_T := 15.0          # how long a betrayer shows on everyone's map
 const SEE_R := 26.0           # bots weigh peace with squads this close that they can see
+const OFFER_SQUADS := 7.0     # squads in a 20-hunter match: with more, each waits longer between weighing offers,
+                              # so a step weighs as many (each look is members x hunters x line of sight)
 const BUBBLE_T := 2.6
 
 var m: Match
@@ -122,7 +124,7 @@ func _offer_target(h: Hunter) -> int:
 func _offer(h: Hunter) -> void:
 	var to := _offer_target(h)
 	if to < 0:
-		if h == m.player and m.hud: m.hud.toast_small("Nobody in sight to offer a truce to", Color("f4f1e6"))
+		if h == m.player and m.hud: m.hud.toast_small("No one to offer a truce", Color("f4f1e6"))
 		return
 	if allied(h.team, to):
 		return
@@ -248,7 +250,7 @@ func strength(team: int) -> float:
 			s += 0.3
 			continue
 		s += 1.0 + 1.5 * (h.hp + h.armor) / maxf(1.0, h.max_hp + h.max_armor) + 0.2 * h.armor_tier
-		if h.kin and not h.kin.dead and (h.kin as Kin).state != "fainted": s += 0.3
+		if h.kin and not h.kin.dead and (h.kin as Kin).state != "downed": s += 0.3
 	return s
 
 ## The other squads close by that this squad can see.
@@ -299,7 +301,7 @@ func _bot_offers() -> void:
 	for team in teams:
 		if not _bot_team(team) or m.time < float(_think.get(team, 0.0)):
 			continue
-		_think[team] = m.time + randf_range(1.5, 2.5)
+		_think[team] = m.time + randf_range(1.5, 2.5) * maxf(1.0, teams.size() / OFFER_SQUADS)
 		var near := _near_squads(team)
 		for other in near:
 			var o := int(other)

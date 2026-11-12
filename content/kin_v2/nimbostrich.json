@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "nimbostrich",
+	"name": "Boltstrich",
+	"animals": [
+		"Ostrich",
+		"Thunderhead and copper coil"
+	],
+	"theme": "storm",
+	"flavor": "A thundercloud ostrich in rubber boots; ride it and your hair stands up. Skittish and fast, afraid of nothing but boredom; races anything that moves.",
+	"colors": {
+		"body": "#5a5a6a",
+		"belly": "#e0e0e8",
+		"glow": "#ffe86a"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "boulder",
+		"tail": "stub",
+		"feet": "stumps",
+		"aura": "sparks"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.5,
+		"gait": {
+			"hop_rate": 7.0,
+			"hop_height": 0.08,
+			"pace": 1.1
+		}
+	},
+	"stats": {
+		"kin_hp": 8,
+		"kin_damage": 3,
+		"kin_speed": 7,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.55,
+		"loyalty": 0.6,
+		"temper": 0.6,
+		"curiosity": 0.7
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Thunder Run",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			}
+		],
+		"mount": {
+			"speed": 1.3,
+			"jump": 1.0,
+			"turn": 0.7
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.6
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "storm_arc",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "Nimbo",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "skittish and excitable",
+		"syllables": [
+			"Nimbo",
+			"strich"
+		]
+	},
+	"egg": {
+		"name": "Nimbostrich Egg",
+		"temper": "Skittish",
+		"desc": "Something skittish is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

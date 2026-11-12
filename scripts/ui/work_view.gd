@@ -4,6 +4,8 @@ extends RefCounted
 ## level pips, the chips on a kin's card, and the Job Board panel (priorities per element, who's
 ## doing what, pinning a kin to a job or keeping it to rest).
 
+const UNSET_COLOR := Color("e8a05a")      # the dropdown reads as something still to choose while no job is set
+
 static var tab := "Jobs"
 
 ## An element's round icon: its colour, with a little glyph (flame, drop, sprout, bolt...).
@@ -131,7 +133,7 @@ static func icons(rec: Dictionary, px := 12.0, most := 3) -> Control:
 # ------------------------------------------------------------------ the kin's card
 ## The Work section on a kin's card: its elements, what it's doing, and its job settings.
 static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen: Callable) -> void:
-	parent.add_child(UI.section("Work elements", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Work elements"))
 	parent.add_child(chips(rec, 22.0))
 	var k: Dictionary = h._kin_entry(rec) if h.has_method("_kin_entry") else {}
 	var doing := ""
@@ -148,28 +150,36 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	row.add_child(pin_menu(h, rec, reopen))
 	parent.add_child(row)
 
-## Any job / Rest only / Only <element>: one dropdown.
+## A pin choice in words: "Sprout jobs only".
+static func job_label(el: String) -> String:
+	return "%s jobs only" % Work.name_of(el)
+
+## Not set (it takes whatever it's best at) / Rest only / <Element> jobs only: one dropdown.
 static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton:
 	var opt := OptionButton.new()
-	opt.add_item("Any job"); opt.set_item_metadata(0, "")
+	opt.add_item("Not set"); opt.set_item_metadata(0, "")
 	opt.add_item("Rest only"); opt.set_item_metadata(1, "rest")
 	var sel := 1 if rec.get("work_rest", false) else 0
 	for it in Work.list(rec):
-		opt.add_item("Only %s" % Work.name_of(String(it[0])))
+		opt.add_item(job_label(String(it[0])))
 		opt.set_item_metadata(opt.item_count - 1, String(it[0]))
 		if Work.pin(rec) == String(it[0]): sel = opt.item_count - 1
 	opt.select(sel)
-	opt.custom_minimum_size.x = 136
+	if sel == 0:
+		opt.add_theme_color_override("font_color", UNSET_COLOR)
+	opt.custom_minimum_size.x = 170
 	opt.add_theme_font_size_override("font_size", 13)
 	opt.item_selected.connect(func(i: int):
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
 		else: Work.set_pin(rec, m)
 		_drop(h, rec)
+		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		Save.save_game()
 		reopen.call())
 	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"
 	opt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	FarmTaskGuide.mark_dropdown(opt, rec)
 	return opt
 
 static func _drop(h: Node, rec: Dictionary) -> void:
@@ -265,13 +275,9 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 		b.custom_minimum_size = Vector2(52, 26)
 		# a compact segmented control: the chosen one filled, the rest faint
 		var on := cur == i
-		var sbn := StyleBoxFlat.new()
-		sbn.set_corner_radius_all(8)
-		sbn.content_margin_top = 3; sbn.content_margin_bottom = 3; sbn.content_margin_left = 6; sbn.content_margin_right = 6
-		sbn.bg_color = Color(UI.ACCENT, 0.24) if on else Color(1, 1, 1, 0.05)
-		if on: sbn.border_color = Color(UI.ACCENT, 0.8); sbn.set_border_width_all(1)
-		var sbh := sbn.duplicate() as StyleBoxFlat
-		sbh.bg_color = Color(UI.ACCENT, 0.32) if on else Color(1, 1, 1, 0.12)
+		var edge := Color(UI.ACCENT, 0.8) if on else Color(0, 0, 0, 0)
+		var sbn := UI.frame(Color(UI.ACCENT, 0.24) if on else Color(1, 1, 1, 0.05), 8, edge, 1, 6, 3)
+		var sbh := UI.frame(Color(UI.ACCENT, 0.32) if on else Color(1, 1, 1, 0.12), 8, edge, 1, 6, 3)
 		for stn in ["normal", "focus"]: b.add_theme_stylebox_override(stn, sbn)
 		for stn in ["hover", "pressed"]: b.add_theme_stylebox_override(stn, sbh)
 		b.add_theme_color_override("font_color", UI.ACCENT_HI if on else UI.MUTED)
