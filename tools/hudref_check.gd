@@ -300,6 +300,10 @@ func _knock_banners(m: Match, hud, P: Hunter) -> void:
 	kb.knocked(P, other, P)
 	ok(kb.count == 2 and kb.who == other, "a second knock within %.1fs: the newest, x%d" % [
 		float(KnockBanner.rules()["combo_s"]), kb.count])
+	var back := float(KnockBanner.rules()["back_alpha"])
+	ok(back >= 0.45 and back <= 0.6 and not Geometry2D.triangulate_polygon(kb._slash).is_empty()
+		and not Geometry2D.triangulate_polygon(kb._slash_dark).is_empty(),
+		"the slash and pill are see-through (alpha %.2f, 0.45-0.6) and the slash blades are clean shapes" % back)
 	await _banner_closes(kb)
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.downed)
 	ok(not mates.is_empty(), "a teammate to knock (%d)" % mates.size())
