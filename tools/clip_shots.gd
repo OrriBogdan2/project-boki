@@ -131,14 +131,15 @@ func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 	var dir := out.path_join("flinch")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var heavy := OS.get_cmdline_user_args().has("--heavy")
-	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true, "hit_t": 99.0,
-			"hit_k": Oomph.HEAVY_FLINCH if heavy else 1.0, "hit_dir": Vector2(0, -1)}
+	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true, "hit_t": 99.0, "react_t": 99.0,
+			"hit_dir": Vector2(0, -1)}
 	model.set_meta(WardenClips.STATE, s)
 	for k in 30:
 		sync.call("_process", 1.0 / 30.0)
 	for i in int(fps):
 		var t := float(i) / fps
 		s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
+		s["react_t"] = s["hit_t"] if heavy else 99.0      # (--heavy: a staggering hit)
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
 

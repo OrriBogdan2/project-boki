@@ -350,10 +350,11 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
 
 ## A hit mid-run (item: additive flinch): the legs run exactly as they would unhit, the spine and arms flinch on top;
-## standing still, or a stagger, takes the whole body. Two identical models run the same 1 s, one of them hit.
+## only a staggering hit (Oomph) takes the whole body, running or standing (a chip hit standing still flinches too).
+## Two identical models run the same 1 s, one of them hit.
 func _flinch(id: String) -> void:
-	var calm := await _run_hit(id, 99.0, 1.0, 4.0)
-	var hit := await _run_hit(id, 0.0, 1.0, 4.0)
+	var calm := await _run_hit(id, 99.0, false, 4.0)
+	var hit := await _run_hit(id, 0.0, false, 4.0)
 	ok(calm.size() > 0 and hit.size() == calm.size(), "%s: flinch run recorded (%d frames)" % [id, calm.size()])
 	var legs := 0.0
 	var arms := 0.0
@@ -364,15 +365,18 @@ func _flinch(id: String) -> void:
 			% [id, legs, FLINCH_LEGS_M])
 	ok(arms >= FLINCH_ARMS_M, "%s: a hit mid-run flinches the arms (hand moves %.3f m, min %.3f)"
 			% [id, arms, FLINCH_ARMS_M])
-	var still := await _run_hit(id, 0.0, 1.0, 0.0)
-	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
+	var poke := await _run_hit(id, 0.0, false, 0.0)
+	var still := await _run_hit(id, 0.0, true, 0.0)
+	var stagger := await _run_hit(id, 0.0, true, 4.0)
 	var mid := hit.size() / 3
-	ok(float(still[mid]["act"]) > 0.5, "%s: a hit standing still takes the whole body" % id)
+	ok(float(poke[mid]["act"]) <= 0.0, "%s: a chip hit standing still only flinches (the whole body waits for a stagger)" % id)
+	ok(float(still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
 	ok(float(hit[mid]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)
 
-## 1 s of play at `speed` m/s, hit at the start (hit_t 99: none); per frame: leg bone sum, right hand, act_w.
-func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
+## 1 s of play at `speed` m/s, hit at the start (hit_t 99: none; a staggering hit when `stagger`); per frame: leg
+## bone sum, right hand, act_w.
+func _run_hit(id: String, hit_t: float, stagger: bool, speed: float) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
@@ -380,7 +384,7 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var s := {"vel": Vector3(0, 0, -speed), "face": 0.0, "grounded": true, "hit_t": 99.0, "hit_k": hit_k,
+	var s := {"vel": Vector3(0, 0, -speed), "face": 0.0, "grounded": true, "hit_t": 99.0, "react_t": 99.0,
 			"hit_dir": Vector2(0, -1)}
 	m.set_meta(WardenClips.STATE, s)
 	for k in 30:
@@ -390,6 +394,7 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	var t := 0.0
 	while t < 1.0:
 		s["hit_t"] = t if hit_t < 1.0 else 99.0
+		s["react_t"] = s["hit_t"] if stagger else 99.0
 		sync.call("_process", DT)
 		await holder.get_tree().process_frame
 		var legs := 0.0

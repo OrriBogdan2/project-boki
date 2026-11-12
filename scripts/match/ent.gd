@@ -22,6 +22,7 @@ var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
 var freeze_t := 0.0         # visual hit-pause
+var held_s := 0.0           # s of game time spent in hit-pauses so far (WardenClips plays the held time back)
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
@@ -298,7 +299,9 @@ func slide(dt: float, guard := false) -> bool:
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
-	if freeze_t > 0.0: freeze_t -= dt
+	if freeze_t > 0.0:
+		freeze_t -= dt
+		held_s += dt
 	if slow_t > 0.0:
 		slow_t -= dt
 		if slow_t <= 0.0: slow_k = 0.0

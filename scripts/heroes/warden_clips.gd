@@ -35,6 +35,8 @@ const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carr
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const CATCH_UP := 0.5        # after a hit-stop the clips run this much faster until they are back on the kit's clock
+const KNOCK_HOLD := 0.5      # share of the hit clip's "dur" a knockback plays to and holds while the body slides
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -64,7 +66,7 @@ var stance_w := 0.0
 var was_air := false
 var air_t := 0.0
 var land_t := 99.0
-var hit_seen := 99.0
+var caught := 0.0            # s of the body's hit-stops (STATE "held") the clips have played back
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
@@ -326,6 +328,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	if bool(s.get("stun", false)) and st.has("stun"):
+		return {"clip": st["stun"], "t": -1.0}       # (over any move: a stunned body can't be mid-cast)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
@@ -366,8 +370,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(clip).length - 0.001)}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
-	if bool(s.get("stun", false)) and st.has("stun"):
-		return {"clip": st["stun"], "t": -1.0}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
@@ -375,23 +377,32 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var ld: Dictionary = d.get("land", {})
 	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
 		return {"clip": ld["clip"], "t": land_t}
-	var hit := float(s.get("hit_t", 99.0))
+	# the hit clip: a staggering hit (Oomph) takes the whole body, a knockback holds it while the body slides; a chip
+	# hit only flinches the spine and arms over whatever the legs do (a rifle stream never looks stun-locked)
 	var hd: Dictionary = st.get("hit", {})
-	if hit < float(hd.get("dur", 0.0)):
+	var dur := float(hd.get("dur", 0.0))
+	var hit := float(s.get("react_t", 99.0))
+	var knock := float(s.get("knock_t", -1.0))
+	if knock >= 0.0:
+		hit = minf(knock, dur * KNOCK_HOLD)
+	var chip := float(s.get("hit_t", 99.0))
+	if hit < dur or chip < dur:
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		var vel: Vector3 = s.get("vel", Vector3.ZERO)
-		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
-		var running := Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true))
-		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
+		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit if hit < dur else chip, "flinch": hit >= dur}
 	return {}
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
+	# after a hit-stop (WardenGlb.Sync holds the pose) the clips play the held time back, never trailing by more
+	# than one window's cap (a model built mid-match starts on the kit's clock)
+	var held := float(s.get("held", 0.0))
+	caught = clampf(move_toward(caught, held, dt * CATCH_UP), held - ImpactWeight.cap("hitstop_ms") / 1000.0, held)
 	var want := force
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
+		if float(want.get("t", -1.0)) >= 0.0:
+			want["t"] = maxf(0.0, float(want["t"]) - (held - caught))
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	var flinching := not proc and bool(want.get("flinch", false))
