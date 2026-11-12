@@ -78,6 +78,9 @@ static func _store(it: Dictionary) -> void:
 		# a boss's egg goes onto the Incubator's shelf by the Nesting Nook (and into its cradle if that's empty)
 		Incubator.add(String(it.get("sp", "")), String(it.get("boss", "")))
 		return
+	if Loot.is_wayseed(it):
+		Save.add_item(String(it["id"]), 1)      # a bag item: the Waystone looks for it there (GardenZones)
+		return
 	if String(it.get("t", "")) == "val":
 		var vd: Dictionary = Save.d["valuables"]
 		vd[String(it["id"])] = int(vd.get(String(it["id"]), 0)) + 1

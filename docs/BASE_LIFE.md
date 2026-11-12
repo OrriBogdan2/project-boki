@@ -15,7 +15,7 @@ check: `--base-life-check`.
 - Bonds: `rec["bonds"] = {uid: -1..1}`, the same both ways (`BaseLife.add_bond`). Tag catches and napping side by
   side raise it; a squabble (two hot tempers meeting at a toy or in tag, or a rival at the toy) lowers it. Friends
   (`friend_at`) greet with a heart and walk over to a napping friend to pile up; rivals (`rival_at`) stare and huff.
-  Old saves get an empty map per Boki in the v12 -> v13 save migration (`Save._migrate_12_to_13`).
+  Old saves get an empty map per Boki in the v11 -> v12 save migration (`Save._migrate_11_to_12`).
 - Night: every Boki naps till dawn except `Work.NOCTURNAL` species.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
@@ -31,6 +31,7 @@ check: `--base-life-check`.
 - Sulky, never sick (care.json `sulky`, `Care.sulky()`): on base_mode every need bottoms out at its floor in both
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
+- Duo bonus (`scripts/home/base_duo.gd`, `content/rules/base_duo.json`): friends at bond 0.6 or more wake +6 joy from a shared nap (8 s asleep side by side), hand off cleanly in the Dash (x1.06 pace into a stretch with the friend alongside), show a heart pair and "Duo with X" on the Boki card in the Burrow view, and get one journal line the first time. The Show Ring joint trick waits for the Show Ring. Check: `--duo-check`.
 - Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, or an unfed Boki that never ate on its own, and writes every state change to user://garden_soak.json.
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
@@ -52,9 +53,22 @@ check: `--base-life-check`.
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
+- Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
+  grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
+  (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none
+  recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
+  `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
+- Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
+  Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
+  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
+  `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
+  The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
+  lane** (none exist yet; the walk just slows and the shake is a Body wobble): `wade` (a slow knee-high walk loop),
+  `shake` (a shake-off, 0.6 s), `paddle` (a longer water-play loop; `splash` stands in).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the

@@ -55,13 +55,9 @@ func _raise() -> void:
 	ok(_gap(_tint(m2), fire) < _gap(_tint(m1), fire) and _marks(m2) > _marks(m1),
 		"more tint and more marks (%d, then %d)" % [_marks(m1), _marks(m2)])
 	ok(_parts(m2).is_empty(), "but no part before a form")
-	var lines: Dictionary = Evo.rules()["lines"]      # Puddlet's own next form has no art yet: borrow one that has
-	var was_line = lines.get("puddlet")
-	lines["puddlet"] = {"level": 4, "into": [{"id": "caecilith"}]}
-	rec["level"] = 4
+	rec["level"] = int(Evo.rules()["lines"]["puddlet"]["level"])      # its line's form level (evolve.json)
 	var ev := Evo.on_level(rec)
-	lines["puddlet"] = was_line
-	var m3 := Models.kin(String(rec["species"]), rec)
+	var m3 := Models.kin("puddlet", rec)
 	var said := Evo.describe(ev, rec)
 	ok(ev.get("lean_part", "") == "horns" and _parts(m3) == ["part_horns"] and said.contains("fire meals grew horns"),
 		"its next form grows the Fire part: %s" % said)

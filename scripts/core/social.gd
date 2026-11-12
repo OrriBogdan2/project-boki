@@ -178,6 +178,7 @@ static func profile_doc() -> Dictionary:
 		"extracts": int(Save.d.get("extracts", 0)), "matches": int(Save.d.get("matches", 0)),
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
 		"decor": Save.d.get("decor", {}).get("house", []),
+		"showcase": Save.d.get("showcase", []),
 	}
 	d.merge(VisitZones.doc())
 	return d
@@ -673,7 +674,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 	return {"name": say_of(d.get("name"), "Hunter", 16), "active": txt_of(d.get("active"), "", 24), "roster": roster,
 		"cls": cl if Data.CLASSES.has(cl) else "medium", "buildings": pick.call(d.get("buildings"), Data.BUILDINGS),
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
-		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor"))}.merged(VisitZones.clean(d))
+		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
+		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
 
 static func _clean_decor(src) -> Array:
 	var out: Array = []

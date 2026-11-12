@@ -37,7 +37,9 @@ func place() -> void:
 	if here() == GardenZones.HUB:
 		var stones: Array = []
 		for id in GardenZones.ids():
-			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": is_open(id)})
+			var lit := is_open(id)
+			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": lit,
+				"keys": {} if lit or VisitZones.has(h.visit) else GardenZones.keys_for(id)})
 		node = FarmModels.waystone(stones)
 		node.position = HUB_AT
 		if not VisitZones.has(h.visit):
@@ -45,12 +47,32 @@ func place() -> void:
 			board.position = HubLayout.BOARD_AT
 			board.rotation.y = -PI * 0.5
 			h.add_child(board)
+			var wall := BaseShowcase.build(HubLayout.BOARD_AT + HubLayout.WALL_OFF, Save.d.get("showcase", []))
+			wall.rotation.y = board.rotation.y
+			h.add_child(wall)
+		HubHorizon.place(h, HUB_AT)
 	else:
 		node = FarmModels.return_pad(String(GardenZones.info(here()).get("colour", "c9c2b2")))
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)
 	node.name = "Waystone"
 	h.add_child(node)
 	pad = {"pos": node.position}
+
+## Wakes a locked zone with both keys: the Boki plants the Wayseed, the stone lights up (toast, sound, burst).
+func attune(id: String) -> void:
+	var r := GardenZones.attune(id)
+	if not r["ok"]:
+		h._toast(String(r["why"]))
+		return
+	h._close_panel()
+	var z := GardenZones.info(id)
+	h.fx.burst(node.position + Vector3(0, 0.8, 0), Color(String(z["colour"])), 30, 3.0, 0.8, -1.0)
+	Sfx.play("unlock")
+	if here() == GardenZones.HUB:
+		node.queue_free()
+		place()
+	Save.save_game()
+	h._toast("%s planted the Wayseed: %s is awake" % [r["founder"]["name"], z["name"]])
 
 ## Where you stand after a hop: on the pad, or just south of the Waystone. Elsewhere: where you'd be.
 func arrive_at(p: Vector3) -> Vector3:
@@ -91,7 +113,7 @@ func hop(id: String) -> bool:
 	h._close_panel()
 	var col := Color(String(GardenZones.info(id).get("colour", "c9c2b2")))
 	h.fx.burst(node.position + Vector3(0, 0.4, 0), col, 24, 3.0, 0.6, -2.0)
-	Sfx.play("whoosh")
+	Sfx.play("garden_hop")        # swells for hop_fade_s, the light-up
 	h.get_tree().create_timer(float(GardenZones.rules()["hop_fade_s"])).timeout.connect(_go)
 	return true
 

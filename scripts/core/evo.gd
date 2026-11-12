@@ -58,8 +58,10 @@ static func eat(rec: Dictionary, f: String) -> String:
 	if key == "":
 		return ""
 	var ln: Dictionary = rec.get_or_add("lean", {})
+	var held: Dictionary = rec.get("hold", {})      # a sweet's lean: other meals don't fade it (GardenItems)
 	for other in ln:
-		ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
+		if not held.has(other):
+			ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
 	ln[key] = minf(LEAN_FULL, float(ln.get(key, 0.0)) + FOOD_AFF + LEAN_FADE)
 	return key
 
@@ -85,6 +87,8 @@ static func leading(rec: Dictionary) -> String:
 		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
 		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
 	}
+	for t in rec.get("path", []):
+		score[GardenItems.aff_of(t)] += float(GardenItems.rules()["pip"])
 	var best := "fierce"; var bv := -1e9
 	for k in ["fierce", "steadfast", "curious", "swift"]:
 		if score[k] > bv: bv = score[k]; best = k
@@ -145,11 +149,7 @@ static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
-	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
-	var part := Lean.grow_part(rec)     # the meals it leaned on grow a part (Lean)
-	if part != "":
-		ev["lean_part"] = part
-	return ev
+	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
 
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
@@ -163,11 +163,16 @@ static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
 ## Called each time a kin gains a level. Returns what changed, or {} if nothing did.
 static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dictionary:
 	ensure(rec)
+	if rec.get("stay", false):
+		return {}
 	var lv := int(rec.get("level", 1))
 	if rng == null:
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
 	var ev := try_evolve(rec, "level")
 	if not ev.is_empty():
+		var part := Lean.grow_part(rec)      # a level form also grows a part from what it leans toward eating
+		if part != "":
+			ev["lean_part"] = part
 		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)

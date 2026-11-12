@@ -1,11 +1,12 @@
 extends RefCounted
 ## --toy-check: the Boki base's playthings (GARDEN.md section 4, content/rules/toys.json, HomeToys).
 ##   1. data: a ball, post, tub, warm stone and dig patch in the Base category, each with a stat Care knows
-##   2. lean: Flying and Rock Boki weigh the post up, Water and Ice the tub
+##   2. lean: Flying and Rock Boki weigh the post up, Water, Ice and Crystal the tub
 ##   3. off: with base_mode off (the shipped default) nothing plays
 ##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
 ##   5. a squabble between two hot tempers, the stat cap, and the rest pose
 ##   6. each toy placed alone: a fitting Boki uses it within 60 s and its stat rises; a dig turns up a snack
+##   7. only a ball for 3 days: it is the favourite, shown on the card, picked first, and a baby inherits it
 ## Never touches the real save.
 
 ## Each toy and a species whose lean it is made for (ember = Fire; bloom = Grass; swarm = Bug).
@@ -28,7 +29,7 @@ func _new_save() -> Dictionary:
 		k["traits"]["temper"] = 0.3
 		d["roster"].append(k)
 	d["active"] = d["roster"][0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	return d
 
 ## Everyone fed, rested and clean; joy as given, so only play can be on their minds.
@@ -61,6 +62,7 @@ func run(m: Node) -> void:
 	var stone := {"species": "basaltoad", "traits": {}}
 	var frost := {"species": "rimeshrew", "traits": {}}
 	var wet := {"species": "kestrike", "lean": {"water": Evo.LEAN_FULL}, "traits": {}}
+	var glass := {"species": "kestrike", "lean": {"crystal": Evo.LEAN_FULL}, "traits": {}}
 	var ember := {"species": "kilnbadger", "traits": {}}
 	var bug := {"species": "moundvark", "traits": {}}
 	var likes_post: bool = toys.weight(storm, "toy_post") > toys.weight(storm, "toy_tub") \
@@ -68,9 +70,10 @@ func run(m: Node) -> void:
 	ok(likes_post,
 			"flying and rock leans weigh the post up")
 	var likes_tub: bool = toys.weight(frost, "toy_tub") > toys.weight(frost, "toy_post") \
-			and toys.weight(wet, "toy_tub") > toys.weight(wet, "toy_post")
+			and toys.weight(wet, "toy_tub") > toys.weight(wet, "toy_post") \
+			and toys.weight(glass, "toy_tub") > toys.weight(glass, "toy_post")
 	ok(likes_tub,
-			"ice and water leans weigh the tub up (a lean on the record beats the species)")
+			"ice, water and crystal leans weigh the tub up (a lean on the record beats the species)")
 	var likes_warm: bool = toys.weight(ember, "toy_stone") > toys.weight(ember, "toy_dig") \
 			and toys.weight(ember, "toy_stone") > toys.weight(frost, "toy_stone")
 	ok(likes_warm, "a Fire lean weighs the warm stone up")
@@ -143,7 +146,7 @@ func run(m: Node) -> void:
 	var rec: Dictionary = a["rec"]
 	var stat := String(R["toys"][power_toy]["stat"])
 	rec["stats"][stat] = Care.stat_cap(rec)
-	a["play"] = {"u": int(toys.toys()[1]["u"]), "phase": "play", "t": 0.01, "slot": 0}
+	a["play"] = {"u": int(toys.toys()[1]["u"]), "phase": "play", "t": 0.01, "secs": 10.0, "slot": 0}
 	toys.step(a, 0.05)
 	ok(int(rec["stats"][stat]) == Care.stat_cap(rec) and not a.has("play"), "a trained-out stat stays at its cap")
 	ok(String((a["node"] as Node3D).get_meta("pose", "")) == "" and posed,
@@ -152,30 +155,87 @@ func run(m: Node) -> void:
 	await main.get_tree().process_frame
 	for f in FITTING:
 		await _alone(String(f[0]), String(f[1]))
+	await _favourite()
 	FarmUnlocks.rules()["base_mode"] = false
 	print("TOY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## One toy and one fitting Boki alone on the island: it plays within 60 s and gains the toy's stat; a dig
-## (its snack chance forced to 1) turns up a kibble.
-func _alone(id: String, species: String) -> void:
-	var R: Dictionary = HomeToys.rules()
-	var stat := String(R["toys"][id]["stat"])
+## A home with one `species` Boki and one `id` toy on open ground (base_mode on, the real save untouched).
+func _solo_home(id: String, species: String):
 	var d := Save.fresh()
 	var k := Save.new_kin(species, "Solo")
 	k["level"] = 5
 	Care.ensure(k)
 	d["roster"].append(k)
 	d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	Save.d = d
 	var at := HomeLayout.LANDING
 	var lay := HomeLayout.ensure(d)
 	lay["deco"].append({"u": HomeLayout._next_uid(lay), "id": id, "x": int(at.x), "z": int(at.z) - 6, "r": 0})
+	return await main._hb_home()
+
+## A Boki given only a ball, one play a day for 3 days: the ball is its favourite from the third day on
+## (not before), it picks the ball first, the Boki card shows it, and a baby inherits it.
+func _favourite() -> void:
+	var home = await _solo_home("toy_ball", "zapple")
+	var rec: Dictionary = home.kins[0]["rec"]
+	ok(FavToy.of(rec) == "" and not rec.has("toy_time"), "a new Boki has no favourite toy and no play record")
+	var seen := []
+	for day in 3:
+		var n0 := int(rec.get("toy_n", 0))
+		for i in 2400:
+			_calm(home, 40.0)
+			home.day_t = 0.5
+			home._move_kin(0.05)
+			if i % 200 == 0: await main.get_tree().process_frame
+			if int(rec.get("toy_n", 0)) > n0: break
+		seen.append(FavToy.of(rec))
+	ok(int(rec.get("toy_n", 0)) == 3 and float(rec["toy_time"].get("toy_ball", 0.0)) >= 24.0,
+			"three days of play are logged against the ball (%s s)" % rec.get("toy_time", {}).get("toy_ball", 0))
+	ok(seen == ["", "", "toy_ball"], "crowned after the third play, not before (%s)" % [seen])
+	var toys: HomeToys = home.toys
+	var plain := rec.duplicate(true)
+	plain["habit"].erase("toy")
+	var boost := float(HomeToys.rules()["fav_weight"])
+	ok(is_equal_approx(toys.weight(rec, "toy_ball"), toys.weight(plain, "toy_ball") * boost),
+			"it weighs its favourite up by fav_weight")
+	var row := VBoxContainer.new()
+	AboutView.looks(rec, row)
+	ok(row.get_child_count() > 0 and _has_icon(row, "toy_ball"), "the Boki card shows the ball with its icon")
+	row.free()
+	var mate := Save.new_kin("zapple", "Mate")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var baby := Care.breed(rec, mate, rng)
+	ok(FavToy.of(baby) == "toy_ball" and baby["toy_time"].has("toy_ball"), "a baby bred from it inherits the ball")
+	var other := Care.breed(mate, Save.new_kin("zapple", "Mate2"), rng)
+	ok(FavToy.of(other) == "", "and a baby of two Boki with no favourite has none")
+	var old := rec.duplicate(true)
+	for key in ["toy_time", "toy_n"]: old.erase(key)
+	old["habit"].erase("toy")
+	Care.ensure(old)
+	ok(FavToy.of(old) == "", "an older record without play keys loads with no favourite")
+	FavToy.log_play(old, "toy_post", 30.0)
+	FavToy.log_play(old, "toy_ball", 5.0)
+	FavToy.log_play(old, "toy_ball", 5.0)
+	ok(FavToy.of(old) == "toy_post", "the most-used toy wins, not the most-visited")
+	home.queue_free()
+	await main.get_tree().process_frame
+
+func _has_icon(n: Node, icon: String) -> bool:
+	if n is UI.IconDot and (n as UI.IconDot).id == icon: return true
+	return n.get_children().any(func(c): return _has_icon(c, icon))
+
+## One toy and one fitting Boki alone on the island: it plays within 60 s and gains the toy's stat; a dig
+## (its snack chance forced to 1) turns up a kibble.
+func _alone(id: String, species: String) -> void:
+	var R: Dictionary = HomeToys.rules()
+	var stat := String(R["toys"][id]["stat"])
+	var home = await _solo_home(id, species)
 	var snack: float = float(R["toys"][id].get("snack", 0.0))
 	if snack > 0.0:
 		R["toys"][id]["snack"] = 1.0
-	var home = await main._hb_home()
 	var rec: Dictionary = home.kins[0]["rec"]
 	var stat0 := int(rec["stats"][stat])
 	var kibble0 := int(Save.d["items"].get("kibble", 0))

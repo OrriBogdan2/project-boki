@@ -1,7 +1,7 @@
 extends RefCounted
 ## --journal-check: the Boki journal and the one "While you were away" card (GARDEN.md 2 and 9.7).
 ##   feed 3 snacks, leave, come back: the card lists the feed and the lean change, once
-##   a long absence brings a saved snack; new forms and parts are lines; the journal keeps its last 20
+##   a long absence brings saved snacks; new forms and parts are lines; the journal keeps its last 20
 ##   lines, shows on the Boki card, never says lost, starved or sick, and an older record gets one
 
 const FORBIDDEN := ["lost", "starv", "sick"]
@@ -53,13 +53,14 @@ func run(m: Node) -> void:
 		rec["needs"]["food"] = 20.0
 		Care.feed(rec, "emberberry")
 	ok(float(rec["aff"]["fierce"]) == fierce + 3.0 * Evo.FOOD_AFF, "three Emberberries raise its Fierce lean")
-	Save.d["away_seen"] = float(Save.d["away_seen"]) - CareJournal.GIFT_AWAY_S      # left a while ago
+	var two_gifts_s := 2.0 * 3600.0 * float(GardenAway.rules()["gift_every_h"])
+	Save.d["away_seen"] = float(Save.d["away_seen"]) - two_gifts_s      # left a while ago
 	var crops := int(Save.d["crops"].get("emberberry", 0))
 	var card := CareJournal.arrival()      # coming back
 	print("JOURNAL card: ", card)
 	ok(card.has("Pip: ate 3 × Emberberry: Fierce lean up"), "the card lists the 3 snacks and the lean change")
-	ok(card.has("Pip saved you a snack: Emberberry"), "a long absence brings a saved snack")
-	ok(int(Save.d["crops"]["emberberry"]) == crops + 1, "the saved snack is in the pantry")
+	ok(card.has("Pip saved you a snack: Emberberry"), "a long absence brings saved snacks")
+	ok(int(Save.d["crops"]["emberberry"]) == crops + 2, "the saved snacks are in the pantry")
 	ok(CareJournal.arrival().is_empty(), "the next arrival has nothing new (one card, once)")
 	CareJournal.evolved(rec, {"kind": "mutate", "aff": "fierce", "part": "horns"})
 	CareJournal.note(rec, "trained power at the yard: +3")

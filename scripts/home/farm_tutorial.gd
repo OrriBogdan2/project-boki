@@ -134,7 +134,7 @@ static func hint_text(id: String) -> String:
 	if s.is_empty():
 		return ""
 	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
-	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
 	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
@@ -212,8 +212,8 @@ static func finish() -> int:
 	return gems
 
 ## Skipping: no gems or items granted or taken, and the tools the steps would have handed over are handed over
-## (a skipper must not be worse off than a player who walked it). FarmGuide puts the house down as a site; in
-## the base it puts a toy down and the starter food is handed over.
+## (a skipper must not be worse off than a player who walked it). FarmGuide puts the house down as a site when
+## none is; in the base it puts a toy down and the starter food is handed over.
 static func skip() -> void:
 	for s in steps():
 		give_step_tool(String(s["id"]))
