@@ -4,7 +4,7 @@ extends RefCounted
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
 ## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
 ## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. A new bond rank
-## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't. Home after an hour
+## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't, panel up or not. Home after an hour
 ## away, it runs over to say hello (KinWelcome); after a minute it doesn't. Never touches the real
 ## save.
 
@@ -131,9 +131,15 @@ func run(m: Node) -> void:
 	var k: Dictionary = home._kin_entry(rec)
 	ok(not k.is_empty(), "the Boki is out on the farm")
 	await _welcome(home, k)
+	home._close_panel()
+	rec.erase("bond_seen")
+	UiFocus.panel = "away"      # the away report is up after an hour: the rank is still noted
 	KinBondMoment.tick(home)
-	ok(UiFocus.panel == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
-		"the rank it arrives with is where it starts: no moment (%s)" % Care.bond(rec)[1])
+	ok(int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
+		"the rank it arrives with is where it starts, even under a panel (%s)" % Care.bond(rec)[1])
+	home._close_panel()
+	KinBondMoment.tick(home)
+	ok(UiFocus.panel == "", "and once the panel is gone it plays no moment for it")
 	var t0 := float(rec["trust"])
 	home._pet_kin(k)
 	var t1 := float(rec["trust"])

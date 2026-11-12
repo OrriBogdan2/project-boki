@@ -16,11 +16,13 @@ static func due(kins: Array) -> Dictionary:
 			return k
 	return {}
 
-## Called once a second at home: plays the next due moment when nothing else is on screen.
+## Called once a second at home: plays the next due moment when nothing else is on screen. A Boki
+## new to the farm takes note of its starting rank even under a panel (the away report, say), so
+## trust gained after that doesn't read as a rank it arrived with.
 static func tick(home: Node) -> void:
+	var k := due(home.kins)
 	if not UiFocus.keys_free() or FarmTutorial.active():
 		return
-	var k := due(home.kins)
 	if not k.is_empty() and not k.get("busy", false):
 		play(home, k)
 
