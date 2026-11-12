@@ -183,6 +183,7 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | The bolas bounce off terrain | footage 0103-0105 | yes | Built (once); asserted |
 | The dagger sticks to any surface or character, and to shields and barricades | wiki patch 20.11.2024 | yes | Built for hunters, monsters, the ground and every placed barrier (rock walls, ice wall, raised shield): it rides a moving one, drops under it when it breaks or expires, and the recast puts her beside it on her side; asserted |
 | After 6s she teleports to the dagger anyway; recast to go early | wiki Q | yes (0237) | Built; asserted |
+| The knife leaves the hand on the throw's key pose; the recast arrives at once | frames 0222-0225 (flash, dagger already in flight at 0223), 0237 -> 0238 (5 fps: 0.2s a frame) | yes | Release at 0.12s (`ThiefKit.KNIFE_RELEASE_S`) = the clip's key pose (`sable_clips.py`, the glb's 30 fps samples put it between 0.100 and 0.133) = `thf_knife` in `kmoves_dj.gd`; the blink is instant and plays `thf_arrive` (0.6s, a low drop; every channel keyed, no T-pose); asserted |
 | A dagger in an enemy slows them 50% | wiki Q | yes (0258) | Built (2.5s, our TTK) |
 | A dagger in an enemy at the top rank resets Quickflip; terrain refunds 25%, characters 50% | owner's game data (Farstep rank IV) | n/a | Built on the Knife's rank 3 (it was on Vault's); asserted |
 | Quickflip: +20% empowered damage twice, then +50% speed boost | owner's game data | n/a | Built: +20% at rank 2, +40% in all at rank 3 with the speed boost half again as big |

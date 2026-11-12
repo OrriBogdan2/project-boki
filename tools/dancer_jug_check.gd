@@ -297,7 +297,15 @@ func thief(a) -> void:
 	var kspot := home + Vector3(5.0, 0, -2.0)
 	T2.teleport(home + Vector3(-5.0, 0, 5.0))
 	A.aim_at(P, kspot)
+	var shots0: int = m.shots.size()
 	P.ak.use_e()
+	A.step(m, ThiefKit.KNIFE_RELEASE_S - 0.03)
+	var early: bool = m.shots.size() > shots0
+	A.step(m, 0.06)
+	A.ok("dancer E: the knife leaves the hand on the throw's key pose (0.12s), not before",
+			not early and m.shots.size() > shots0 and K.anim_id == "thf_knife"
+			and absf(float(HunterAnim.km_sample("thf_knife", ThiefKit.KNIFE_RELEASE_S)["fy"]) + TAU) < 0.01,
+			"early %s shots %d" % [str(early), m.shots.size() - shots0])
 	A.step(m, 0.5)
 	A.ok("dancer E: the dagger lands at the cursor, the arrival circle shows",
 			not K.knife.is_empty() and K.knife.get("target") == null
@@ -306,8 +314,8 @@ func thief(a) -> void:
 		"%s vs %s" % [str(K.knife.get("pos", Vector3.ZERO)), str(kspot)])
 	P.ak.use_e()
 	m.step(A.DT)
-	A.ok("dancer E recast: a blink to it with an afterimage chain",
-			K.blinks == 1 and Vector2(P.pos.x - kspot.x, P.pos.z - kspot.z).length() < 1.2
+	A.ok("dancer E recast: a blink to it with an afterimage chain, arriving in her own low drop",
+			K.blinks == 1 and K.anim_id == "thf_arrive" and Vector2(P.pos.x - kspot.x, P.pos.z - kspot.z).length() < 1.2
 			and (DJFx.of(m).free_pools.get("ghost", []) as Array).size() >= 5,
 			"blinks %d" % K.blinks)
 	# ... into a foe: it sticks (slows), recast steps behind them; left alone it steps you there after 6s
