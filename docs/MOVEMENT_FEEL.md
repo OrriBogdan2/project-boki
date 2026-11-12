@@ -326,7 +326,9 @@ Sable's hands for Encore are the ones that differ.
   the body: Gunslinger's burr lane, Kael's chain rope, Albert's hammer, cones and zones.
 - `--muzzle-live-check`: each of the 13 Hunters presses LMB, RMB, E, R and X in a real match; the look of each round
   must start within 0.15 m (on screen) of that slot's weapon point two frames later. It replaces Sparkle's
-  fingertip row. `--muzzle-shots` records each Hunter firing at the match camera (GPU).
+  fingertip row. `--muzzle-shots` records each Hunter firing at the match camera (GPU); `tools/muzzle_sheet.sh` makes the
+  sheet. docs/shots/muzzle-fire/ has the table and the sheet from software GL (very low quality: Hunters are blobs, rounds
+  barely show); the real-GPU take is jobq 20261112-150251-22092, queued at the time of writing.
 - Not a round, so not covered (a cone, zone, hook, dash, melee swing or beam is drawn by its own effect, not
   `spawn_shot`): Cinder LMB/E/R/X, Albert everything, Tenzo RMB/E/R/X, Grimble E/R, Vex RMB/E/R/X, Kael LMB/RMB/R/X,
   Sparkle E/R/X, Motley E/R/X, Neve E/R/X, Meeko E/R/X, Sable RMB/R, Lace R/X, Gil (no kit moves). The Boki Q glove and
