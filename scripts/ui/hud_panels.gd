@@ -56,6 +56,7 @@ func _draw_panels() -> void:
 			WeaponHud.draw(hud, sz, p)
 			BeltHud.row(hud, p, sz)
 			GearPanel.draw(hud, sz, p)
+			BonusColumn.draw(hud, sz, p)
 			hud._draw_kin_card(sz, p)
 			hud._draw_squad(sz, p)
 			TeamBoki.draw(hud, p)

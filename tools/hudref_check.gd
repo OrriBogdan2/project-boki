@@ -9,6 +9,8 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
+##   9. the stat-bonus column (BonusColumn): one row per active bonus, read from Hunter.gear_stat, none
+##      when there is nothing to show, at the HUD_SPEC size and place, above the gear column
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -127,6 +129,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
 	await _mate_down(m, hud, P)
+	await _bonus_column(P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -304,6 +307,40 @@ func _mate_down(m: Match, hud, P: Hunter) -> void:
 	hud.mates.track(hud, P, MateAlerts.LINE_S)
 	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
 		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
+
+## 9. The stat-bonus column: rows follow the live stat code, none when nothing is active, spec geometry.
+func _bonus_column(P: Hunter) -> void:
+	var sz := Vector2(1280, 720)
+	var before := BonusColumn.rows(P)
+	for r in before:
+		var live := Gear.stat_label(r["key"], P.gear_stat(r["key"]))
+		ok(r["label"] == live, "a bonus row is the live %s stat, not recomputed" % r["key"])
+	P.add_perk("keen")
+	P.add_perk("keen")
+	P.add_perk("plating")
+	var rs := BonusColumn.rows(P)
+	var by := {}
+	for r in rs:
+		by[r["key"]] = r
+	var dmg := int(round(P.gear_stat("dmg") * 100.0))
+	var dmg_txt: String = by.get("dmg", {}).get("text", "-")
+	ok(dmg_txt == "+%d%%" % dmg and dmg >= 16, "two Keen Edge show their damage as a percent (%s)" % dmg_txt)
+	var armor_txt: String = by.get("armor", {}).get("text", "-")
+	var armor := int(round(P.gear_stat("armor")))
+	ok(armor_txt == "+%d" % armor, "Plating shows flat armor as a plain number (%s)" % armor_txt)
+	ok(rs.all(func(r): return r["text"] not in ["+0", "+0%", "-0%"]), "a stat that rounds to nothing draws no row")
+	var n := rs.size()
+	var foot := BonusColumn.plate_rect(sz, n - 1, n, "+9%")
+	var head := BonusColumn.plate_rect(sz, 0, n, "+9%")
+	ok(is_equal_approx(foot.get_center().y, 556.0) and is_equal_approx(foot.end.x, 1277.0),
+		"the lowest row sits at y 556, 3 px from the right edge (%.1f, %.1f)" % [foot.get_center().y, foot.end.x])
+	var above := BonusColumn.plate_rect(sz, n - 2, n, "+9%")
+	ok(n < 2 or is_equal_approx(foot.position.y - above.position.y, 19.0), "rows are 19 px apart")
+	ok(foot.end.y < GearPanel.cell_rect(sz, 0).position.y - 6.0 and head.position.y > 80.0,
+		"the column stays between the top counters and the gear column")
+	P.perks.clear()
+	P.refresh_gear()
+	ok(BonusColumn.rows(P).size() == before.size(), "the perks gone, the rows are back to %d" % before.size())
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

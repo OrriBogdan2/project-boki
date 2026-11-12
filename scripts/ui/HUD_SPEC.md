@@ -66,6 +66,20 @@ Every weapon has its own drawn silhouette in `icons.gd` (the 11 that had none go
 The weapon card that used to sit bottom-right is gone: weapon → silhouette above, gems → currency
 top right, seeds / box / backpack → the line under it.
 
+## Stat-bonus column, right edge (`bonus_column.gd`)
+Measured from the owner's last-man-standing frame (11-12): five rows (+9%, 370, 500, +11%, +15%) above the item column, each a number and a small icon.
+| Part | Reference (1080p px) | Layout px | Ours |
+|---|---|---|---|
+| Row pitch | ~29 | 19 | `PITCH` |
+| Lowest row | centre y 977 | 556 (14 above the item column's top) | `FOOT_Y`, the column grows up from it |
+| Number | caps ~12 px, white, heavy, right-aligned | font 11, ends 21 from the edge | `NUM_FS`, `NUM_RIGHT`, `lean_text` |
+| Icon | ~12 px wide, at the edge | 8 wide, centre 11 from the edge | `ICON_S` 4, `ICON_X` |
+| Plate | none (one row has a pale band) | 16 high leaning plate, `FRAME` at 0.55 | `PLATE_H`, `PLATE_A`, `HudStyle.slant` |
+| Values | % and flat numbers | `+N%`, flat for armor / health | `Hunter.gear_stat` per stat, never recomputed |
+
+A row exists only while its bonus is not zero; with none the column is not drawn. Hold Tab (`scores`) for a
+panel naming each bonus in words. `--hudref-check` item 9 holds the numbers above.
+
 ## Top right (`score_row.gd`)
 | Part | Reference (1080p px) | Layout px | Ours |
 |---|---|---|---|

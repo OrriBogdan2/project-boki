@@ -317,6 +317,7 @@ func _draw_all() -> void:
 			_draw_dead(sz, p)
 	if Input.is_action_pressed("scores"):
 		_draw_scores(sz)
+		if p and not p.out and not p.extracted: BonusColumn.draw_tip(self, sz, p)
 	if wheel_open:
 		_draw_wheel()
 	if p and not p.out and not p.extracted and not map_open():
