@@ -126,13 +126,9 @@ func _build_stage() -> void:
 	_turn.rotation.y = PI
 	add_child(_turn)
 	var plinth := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = 0.82
-	cyl.bottom_radius = 0.9
-	cyl.height = 0.16
-	plinth.mesh = cyl
-	plinth.material_override = Models.toon(Color("2b2238"))
-	plinth.position.y = TOP - 0.08
+	plinth.mesh = LookProps.mesh("dais")
+	plinth.material_override = LookProps.mat("dais")
+	plinth.position.y = TOP
 	_turn.add_child(plinth)
 	var ring := MeshInstance3D.new()
 	var torus := TorusMesh.new()
