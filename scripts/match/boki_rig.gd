@@ -356,7 +356,8 @@ func _ready() -> void:
 	pace = RigPace.new(get_instance_id())
 	BokiHomeClips.install(species, player, _skel)
 	for n in LOOPED:
-		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+		if player.has_animation(n):      # a species with no baked sulk or push yet (docs/DEBT.md)
+			player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_swimmer = swimmer(species)
