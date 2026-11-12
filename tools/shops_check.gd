@@ -208,7 +208,7 @@ func _items(m: Match) -> void:
 	ok("every belt item can be used without a crash", smoke.is_empty(), str(smoke))
 	# drinks
 	_fresh(h, "deep_draught")
-	var len5: bool = is_equal_approx(h.drink_t, 5.0) and is_equal_approx(h.drink_len, 5.0)
+	var len5: bool = is_equal_approx(h.drink_t, 5.0) and is_equal_approx(UtilityUse.channel(h.drink_id, "time"), 5.0)
 	UtilityUse.tick(h, 6.0)
 	var healed: bool = h.hp >= h.max_hp - 0.5 and UtilityBelt.count(h, "deep_draught") == 0
 	ok("Deep Draught takes 5s and heals to full", len5 and healed)
@@ -326,7 +326,7 @@ const SOURCE := {
 	"bounty_banner": ["perks", 1, {"time": 120.0}],                      # 2 min, one per team [W-MostWanted]
 	"toss_satchel": ["perks", 2, {"time": 30.0, "hold": 5.0, "heal": 0.68}],   # 140 HP/s x 5s [W-VivePacks]
 	"medkit": ["armor", 3, {}], "shield_cell": ["armor", 3, {}], "stim": ["move", 3, {}],   # ours only
-	"chest_key": ["", 0, {}], "rift_key": ["", 1, {}], "revive_ember": ["", 1, {}],       # never sold
+	"chest_key": ["", 3, {}], "revive_ember": ["", 1, {}],       # never sold
 }
 
 func _path(d: Variant, path: String) -> Variant:

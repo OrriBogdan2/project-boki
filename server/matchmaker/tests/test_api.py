@@ -88,6 +88,8 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(self.call("DELETE", "/queue/")[0], 404)
         self.assertEqual(self.call("GET", "/queue/unknown")[1], {"state": "gone"})
         self.assertEqual(self.call("DELETE", "/queue/unknown")[1], {"state": "gone"})
+        self.assertEqual(self.call("POST", "/queue/unknown/pick", {"hunter": "mage"}), (404, {"error": "no_match"}))
+        self.assertEqual(self.call("POST", "/queue/a.b/pick", {"hunter": "mage"})[0], 400)
 
 
 if __name__ == "__main__":
