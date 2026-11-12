@@ -12,7 +12,7 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -156,10 +156,13 @@ const ACTIONS := [
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
+	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
+	["kin_chase", "Boki quick key: Chase"], ["kin_guard", "Boki quick key: Guard"],
+	["kin_return", "Boki quick key: Return"], ["kin_follow", "Boki quick key: Follow"],
 ]
 
 var v: Dictionary = {}
