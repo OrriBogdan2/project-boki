@@ -151,7 +151,7 @@ Still differs:
 - Brimseed: peaks at 3.5x like the source, but fizzles after 10 s unpopped (ours); cooldown 10 vs 8 at the top rank.
 - Nightwell: about a 1 s cast lock (owner); the radius 3.6 m and a 12 m pull.
 - Lantern Trade: 12 m lob; faster (1.25 s) only while Swollen.
-- Footstep silence while floating is `[?]`.
+- He floats silently (matches): no step sounds, his and a remote Motley's (source passive [D], --ostra-combo-check).
 
 Seen in the reel: the reel predates `ext/parity-reel-tool`, so the Brimseed is popped at 1.8 s and its full growth
 (the footage's room-sized violet globe) is not shown; the tool now holds it to full size (not re-rendered); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
