@@ -269,7 +269,7 @@ const MOVES := {
 			}
 		],
 		[0.6, {}]]},
-	# Spirit Walk's dodge roll: one forward roll across her felt 0.386 s travel (the clip's times), then up and light on the feet
+	# Spirit Walk's dodge roll: one forward roll across her felt 0.386 s travel (the clip's times), then up light
 	"pin_roll": {"keys": [
 		[0.0, {"p": -0.35, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, 0.9, -1.3]}],
 		[
