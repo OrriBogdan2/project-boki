@@ -141,8 +141,6 @@ func _impact(s: Dictionary) -> void:
 		if core:
 			centre += 1
 	last = {"at": at, "hits": n, "centre": centre}
-	if centre > 0:
-		kit.m.fx.word(at + Vector3(0, 2.6, 0) + kit.screen_up() * 1.2, "DEAD CENTRE", GunslingerKit.HOT, true)
 
 ## The impact: a white-hot bloom, a shock ring and a wall of green flame out to the rim, embers, debris and smoke,
 ## a boom, and a cracked, see-through scorch under the patch's lit rim (_burn_tick).
