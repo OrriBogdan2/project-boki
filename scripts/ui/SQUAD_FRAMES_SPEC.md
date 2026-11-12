@@ -19,23 +19,25 @@ owner's reference capture (a private still, not in the repo). Measured 2026-11-1
 | First row centre below the minimap block (timer bar bottom) | 68 | 58.5 | 39 (`FIRST_DROP`) |
 | Text column start, right of portrait centre | 30.5 | 26 | 17.5 (`LABEL_X`) |
 | State label caps (KNOCKED/DEAD), top / baseline from centre | -22 / -11 | -19 / -9.5 | baseline -6.6 (`LABEL_Y`), 10 px font, condensed 0.82, lean 0.22 |
-| Name caps height / baseline from centre | 10 / +6 | 8.6 / +5 | baseline 3.4 (`NAME_Y`), 9 px font |
+| Name caps height / baseline from centre | 10 / +6 | 8.6 / +5 | baseline 3.4 (`NAME_Y`), 8 px body sans at weight 600 (`name_font`; the ref's name is a plain medium sans, not the display face) |
 | Level number (lower-left of portrait, no chip) height | 10.5 | 9 | 11 px font (`LVL_PX`; Lilita digits run small), centre (-8.9, +6.9) |
 | Bar frame top from centre | +11.5 | 9.9 | 6.6 (`BAR_Y`) |
 | Bar frame height | 16 | 13.8 | 9.2 (`BAR_H`) |
 | Bar frame width along the top | 76 | 65.4 | 43.6 (`BAR_W`) |
 | Slant: bottom edge left of top edge | 8 | 6.9 | 4.6 (`BAR_SKEW`) |
 | Armour row height (top) | 4 | 3.4 | 2.3 (`ARMOR_H`) |
-| Gap, then health row height | 2, 7 | 1.7, 6 | 1.1, 4.0 (`HP_H`) |
+| Gap, then health row height | 2, 6 | 1.7, 5.2 | 1.1, 3.5 (`HP_H`) |
 | Knocked marker centre, right of portrait centre | 184 | 158 | 106 (`MARK_DX`) |
-| Knocked marker size (body + tail) | 75 x 45 | 65 x 39 | body r 13 (`MARK_R`), tail 2 r |
+| Knocked marker size (body + tail) | 75 x 45 | 65 x 39 | body r 13 (`MARK_R`), long point 2 r toward the ally, three short points 1.3 r |
 
 No segment ticks: both bars are solid fills in one black slanted frame; the empty part stays black.
+Each fill is two-tone: the lower half darker (health f4f01b over 8f9a2e, armour 306fd7 over 1f5a9f), so `_fill` shades
+the lower half with 38% black (`SHADE`).
 
 ## Colours (sampled)
 | What | Ref | Ours |
 |---|---|---|
-| Health (self) | #f2ef10, lit top #e0e568 | `HP_COL` f2ef10 + a 35% white top line |
+| Health (self) | #f2ef10 top half, #8f9a2e lower half | `HP_COL` f2ef10, lower half under `SHADE` |
 | Armour | #2d71d5 | `ARMOR_COL` 2d71d5 |
 | Knocked bleed-out (in the health row, armour row empty) | #23a5f4 | `BLEED_COL` 23a5f4 |
 | Frame | #020204 | `FRAME` near black, 92% |
@@ -43,7 +45,7 @@ No segment ticks: both bars are solid fills in one black slanted frame; the empt
 | DEAD label | #bbc0c6 | `DEAD_COL` bbc0c6 |
 | Name | near white | `NAME_COL` eef4f2 |
 | Knocked portrait tint | portrait averages #b57d8b | `TINT_KNOCK` (0.95, 0.2, 0.32) at 50% |
-| Dead portrait | grey #cac9ca with a white X burst | grey cut + 45% grey + white X and splinters |
+| Dead portrait | light grey #cac9ca with a soft white 4-ray burst past the rim and a dark crack | grey cut under `TINT_DEAD` (60% light grey), `_burst`: four diagonal rays to 1.3 r (a soft wide one under a bright thin one), a dark crack line |
 | Marker body / X | #e2faeb / #e84b5b | `MARK_FILL` / `MARK_X` |
 
 ## Ally ping (world)

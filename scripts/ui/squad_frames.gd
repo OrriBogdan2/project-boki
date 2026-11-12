@@ -16,14 +16,14 @@ const LABEL_X := 17.5          # units right of the portrait centre: label, name
 const LABEL_Y := -6.6          # units: the state label's baseline, from the portrait centre
 const NAME_Y := 3.4            # units: the name's baseline
 const LABEL_PX := 10           # font px: the state label (condensed, leaning)
-const NAME_PX := 9             # font px: the name
+const NAME_PX := 8             # font px: the name (the body sans, semibold, like the ref's plain name face)
 const LVL_PX := 11             # font px: the level number
 const BAR_Y := 6.6             # units: the bar frame's top, from the portrait centre
 const BAR_W := 43.6            # units: the frame's width along its top
 const BAR_H := 9.2             # units: the frame's height
 const BAR_SKEW := 4.6          # units: how far the frame's bottom edge sits left of its top
 const ARMOR_H := 2.3           # units: the armour row
-const HP_H := 4.0              # units: the health row (1.1 under the armour row)
+const HP_H := 3.5              # units: the health row (1.1 under the armour row)
 const LEAN := -0.22            # the label's lean (x shear per unit up)
 const CONDENSE := 0.82         # the label's width squeeze
 const MARK_DX := 106.0         # units from the portrait centre to the knocked marker's centre
@@ -36,6 +36,8 @@ const BLEED_COL := Color("23a5f4")   # a knocked Hunter's bleed-out, in the heal
 const KNOCK_COL := Color("ff6fb4")   # the KNOCKED label
 const DEAD_COL := Color("bbc0c6")
 const TINT_KNOCK := Color(0.95, 0.2, 0.32, 0.5)
+const TINT_DEAD := Color(0.82, 0.82, 0.85, 0.6)    # the dead portrait goes light grey, not dark
+const SHADE := Color(0, 0, 0, 0.38)              # each bar's lower half, darker: the ref's two-tone fill
 const MARK_FILL := Color("e2faeb")
 const MARK_X := Color("e84b5b")
 const PORTRAIT_PX := 64        # px: the round portrait's texture cut
@@ -45,7 +47,15 @@ static var shown := {}
 ## nid -> the level number on that row
 static var levels := {}
 static var _ring := PackedVector2Array()
+static var name_font := _semibold()   # the name's face
 static var _uv := PackedVector2Array()
+
+## The body sans at weight 600 (its default instance is Light; the axis only answers to its OpenType tag).
+static func _semibold() -> FontVariation:
+	var f := FontVariation.new()
+	f.base_font = HudStyle.BODY
+	f.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): 600}
+	return f
 
 ## The rows, in draw order: your teammates, then you. Empty when you have no teammate.
 static func rows(m: Match, p: Hunter) -> Array:
@@ -85,7 +95,7 @@ static func _row(hud, at: Vector2, h: Hunter, i: int) -> void:
 	if lbl[0] != "":
 		_lean_text(c, Vector2(tx, at.y + LABEL_Y), String(lbl[0]), lbl[1])
 	HudStyle.text(c, Vector2(tx, at.y + NAME_Y), h.pname.substr(0, 13), NAME_PX,
-		NAME_COL if not dead else Color(NAME_COL, 0.75), 3)
+		NAME_COL if not dead else Color(NAME_COL, 0.75), 2, name_font)
 	var top := Vector2(tx + BAR_SKEW, at.y + BAR_Y)
 	match st:
 		"ALIVE":
@@ -137,13 +147,18 @@ static func _bars(c: CanvasItem, top: Vector2, armor: float, hp: float, col: Col
 	var hy := ay + ARMOR_H + 1.1
 	var k := BAR_SKEW / BAR_H     # x shift per unit down
 	if armor > 0.0:
-		_slant(c, Vector2(top.x + 1.0 - k * 1.1, ay), inner * armor, ARMOR_H, ARMOR_COL)
+		_fill(c, Vector2(top.x + 1.0 - k * 1.1, ay), inner * armor, ARMOR_H, ARMOR_COL)
 	var hx := top.x + 1.0 - k * (hy - top.y)
 	if chip > hp:
 		_slant(c, Vector2(hx, hy), inner * chip, HP_H, HudStyle.CHIP)
 	if hp > 0.0:
-		_slant(c, Vector2(hx, hy), inner * hp, HP_H, col)
-		_slant(c, Vector2(hx, hy), inner * hp, 1.0, Color(1, 1, 1, 0.35))    # a lit top edge
+		_fill(c, Vector2(hx, hy), inner * hp, HP_H, col)
+
+## A bar's fill: the colour, with its lower half shaded darker.
+static func _fill(c: CanvasItem, at: Vector2, w: float, h: float, col: Color) -> void:
+	_slant(c, at, w, h, col)
+	var half := h * 0.5
+	_slant(c, at + Vector2(-BAR_SKEW * half / BAR_H, half), w, half, SHADE)
 
 ## A parallelogram `w` wide and `h` tall whose top-left is `at`, leaning like the frame.
 static func _slant(c: CanvasItem, at: Vector2, w: float, h: float, col: Color) -> void:
@@ -151,7 +166,7 @@ static func _slant(c: CanvasItem, at: Vector2, w: float, h: float, col: Color) -
 	var quad := PackedVector2Array([at, at + Vector2(w, 0), at + Vector2(w - d, h), at + Vector2(-d, h)])
 	c.draw_colored_polygon(quad, col)
 
-## The round portrait: alive as it is, knocked tinted red, dead greyed with a crack across it.
+## The round portrait: alive as it is, knocked tinted red, dead gone light grey under a white burst.
 static func _portrait(hud, at: Vector2, h: Hunter, st: String) -> void:
 	var c: CanvasItem = hud.c
 	var dead := st in ["DEAD", "DEATHBOX"]
@@ -160,13 +175,20 @@ static func _portrait(hud, at: Vector2, h: Hunter, st: String) -> void:
 	if st == "WISP":
 		c.draw_colored_polygon(pts, TINT_KNOCK)
 	elif dead:
-		c.draw_colored_polygon(pts, Color(0.55, 0.55, 0.57, 0.45))
-		var w := Color(1, 1, 1, 0.9)
-		c.draw_line(at + Vector2(-R, -R) * 1.05, at + Vector2(R, R) * 1.05, w, 2.2, true)
-		c.draw_line(at + Vector2(R, -R) * 1.05, at + Vector2(-R, R) * 1.05, w, 2.2, true)
-		c.draw_line(at + Vector2(-2, -4), at + Vector2(3, -9), w, 1.2, true)     # the crack's splinters
-		c.draw_line(at + Vector2(2, 3), at + Vector2(8, 5), w, 1.2, true)
+		c.draw_colored_polygon(pts, TINT_DEAD)
+		_burst(c, at)
 	c.draw_arc(at, R + 0.5, 0.0, TAU, 32, Color(0, 0, 0, 0.75), 1.2, true)
+
+## The dead portrait's white burst: four soft rays on the diagonals, past the rim, a dark crack between.
+static func _burst(c: CanvasItem, at: Vector2) -> void:
+	for a in [PI * 0.25, PI * 0.75, PI * 1.25, PI * 1.75]:
+		var d := Vector2.from_angle(a)
+		var side := d.orthogonal()
+		var tip := at + d * R * 1.3
+		c.draw_colored_polygon(PackedVector2Array([at + side * 4.5, tip, at - side * 4.5]), Color(1, 1, 1, 0.4))
+		c.draw_colored_polygon(PackedVector2Array([at + side * 1.4, tip, at - side * 1.4]), Color(1, 1, 1, 0.95))
+	var crack := Color(0.1, 0.1, 0.12, 0.8)
+	c.draw_line(at + Vector2(-R * 0.7, -R * 0.75), at + Vector2(R * 0.6, R * 0.8), crack, 1.2, true)
 
 ## A face cut to a disc of radius `r` at `at` (`blank` where there is no texture); returns the disc's outline
 ## for tints over it.
@@ -193,15 +215,19 @@ static func face(hud, h: Hunter, grey: bool) -> Texture2D:
 		return Portraits.cut(ak, Portraits.art_path(ak), Vector2i(PORTRAIT_PX, PORTRAIT_PX), grey)
 	return hud.portrait_grey(h) if grey else hud.portrait(h)
 
-## Beside a knocked teammate's row: a pale marker with a red X, its tail pointing at where they lie.
+## Beside a knocked teammate's row: a pale burst with a red X, its long point toward where they lie.
 static func _marker(hud, at: Vector2, h: Hunter) -> void:
 	var c: CanvasItem = hud.c
 	var cam: Camera3D = hud.m.cam
 	var to := Vector2.LEFT
 	if not cam.is_position_behind(h.pos):
 		to = (cam.unproject_position(h.pos) - at).normalized()
-	var side := to.orthogonal() * MARK_R * 0.55
-	c.draw_colored_polygon(PackedVector2Array([at + side, at + to * MARK_R * 2.0, at - side]), MARK_FILL)
+	for a: float in [0.0, PI * 0.5, PI, PI * 1.5]:
+		var d := to.rotated(a)
+		var lead := a == 0.0                         # the long point leads to the ally; the rest are short
+		var side := d.orthogonal() * MARK_R * (0.55 if lead else 0.3)
+		var reach := 2.0 if lead else 1.3
+		c.draw_colored_polygon(PackedVector2Array([at + side, at + d * MARK_R * reach, at - side]), MARK_FILL)
 	c.draw_circle(at, MARK_R, MARK_FILL)
 	for a in [PI * 0.25, PI * 0.75]:
 		var v := Vector2.from_angle(a) * MARK_R * 0.62
