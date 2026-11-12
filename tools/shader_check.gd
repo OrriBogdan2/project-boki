@@ -144,7 +144,11 @@ func _warden_look() -> void:
 		_keys(own.get("ink", {}), ink, at + "ink")
 		_keys(own.get("glow_shell", {}), ink, at + "glow_shell")
 		for slot in own.get("slots", {}):
-			var pool := card if slot == "card" else flame if String(slot).begins_with("flame-") else toon
+			var pool := toon
+			if slot == "card":
+				pool = card
+			elif String(slot).begins_with("flame-"):
+				pool = flame
 			_keys(own["slots"][slot], pool, at + "slots." + slot)
 		for h in own.get("halos", []):
 			_keys(h, halo, at + "halos")
@@ -157,4 +161,5 @@ func _uniforms(sh: Shader) -> Dictionary:
 
 func _keys(d: Dictionary, uniforms: Dictionary, what: String) -> void:
 	for k in d:
-		ok(uniforms.has(String(k)) or String(k) in LOOK_NOT_UNIFORM, "%s \"%s\" is not a uniform of its shader" % [what, k])
+		var known := uniforms.has(String(k)) or String(k) in LOOK_NOT_UNIFORM
+		ok(known, "%s \"%s\" is not a uniform of its shader" % [what, k])
