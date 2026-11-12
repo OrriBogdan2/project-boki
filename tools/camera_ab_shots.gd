@@ -20,6 +20,7 @@ const RIVALS := [["archer", "wisplet"], ["bulwark", "burrlet"], ["mage", "puddle
 var hero := "gunslinger"
 var pool: Array = []         # the rivals, parked (out) between shots
 var used := 0
+var home := Vector3.ZERO     # open ground the fights are staged on (the glide leaves the hero over the abyss)
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -37,6 +38,7 @@ func run(main_node: Node) -> void:
 		await _start(hero, "cindle")      # a match each: the fights leave burns and slows on the hero
 		m.player.ctrl = "bot"
 		m.player.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+		home = _ground(m.player.pos)
 		_style(style)
 		await _glide_shot(style)
 		await _fight_shot(style)
@@ -101,14 +103,14 @@ func _clear(at: Vector3) -> void:
 	P.root_t = 0.0
 
 func _fight_shot(style: String) -> void:
-	var base := _ground(m.player.pos)
+	var base := home
 	_clear(base)
 	var foe := _rival(1, base + Vector3(FIGHT_GAP, 0, 0))
 	var mine: Array = [m.player]
 	await _take(FIGHT_SECS, "%s_fight_%s.png" % [hero, style], func(t: float): _assist(t, mine, [foe]))
 
 func _squads_shot(style: String) -> void:
-	var base := _ground(m.player.pos)
+	var base := home
 	_clear(base)
 	var mine: Array = [m.player, _rival(0, base + Vector3(-1.4, 0, 1.6)), _rival(0, base + Vector3(-1.4, 0, -1.6))]
 	var squads: Array = [mine]
