@@ -364,7 +364,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	return true
 
 ## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
-## going gold-hot at full, and the cursor ring fills.
+## going gold-hot at full, and the charge ring fills round his body (the source's thin white arc round the hero
+## while the blast charges; hero-ref juggernaut item 8), flaring at full.
 func _wave_preview() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
@@ -372,7 +373,7 @@ func _wave_preview() -> void:
 			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
 			"col": WAVE_RED, "col_full": WAVE_FULL}
 	AimKit.lane(h, "lmb", lane)
-	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
+	AimKit.charge(h, k, {"col": Color.WHITE, "col2": WAVE_FULL, "at": "body"})
 	HeroVfx.of(m).hold(h, "wave_charge", k)
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
