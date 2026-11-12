@@ -172,6 +172,7 @@ func _flashover_fx(f: Ent) -> void:
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, f)
+	ComboMark.payoff(m, h, f)        # the body flash and the combo chime every other mark payoff has
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
