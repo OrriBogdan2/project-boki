@@ -321,6 +321,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.
 static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> void:
+	var swapped := false      # something of yours went into the box in its place (the swap cue)
 	match String(it["key"]):
 		"gems":
 			h.gems += int(b["gems"]); b["gems"] = 0
@@ -368,6 +369,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				h.refresh_gear()
 				if not old.is_empty():
 					(b["gear"] as Array).append(old)
+					swapped = true
 		"pack":
 			# into your backpack; a full one swaps out its least valuable thing (that goes in the box)
 			var pi := int(it["i"])
@@ -382,9 +384,15 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					(b["pack"] as Array).append(h.pack[li])
 					h.pack.remove_at(li)
 					h.pack.append(pit)
+					swapped = true
 				elif h == m.player and m.hud:
 					m.hud.toast_small("Pack full", Color("ffb0a0"))
-	m.sfx("pickup", b["pos"], -4.0, 0.9)
+	if h != m.player:
+		m.sfx("pickup", b["pos"], -4.0, 0.9)
+	elif swapped:
+		InvSfx.swap()
+	else:
+		InvSfx.take()
 	_settle_box(b)
 
 ## Smart loot (press interact again with a box open): every gem, seed, kin and consumable, and the

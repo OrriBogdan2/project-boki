@@ -2365,7 +2365,7 @@ func _draw_pointer() -> void:
 	var ring := pts.duplicate(); ring.append(pts[0])
 	cursor.draw_polyline(ring, Color(0.06, 0.065, 0.1), 1.6, true)
 
-## Makes a whole item row clickable (as well as its buttons): hovering lights it up.
+## Makes a whole item row clickable (as well as its buttons): hovering lights it up. The action makes the sound.
 func _row_click(rp: Control, cb: Callable) -> void:
 	rp.mouse_filter = Control.MOUSE_FILTER_STOP
 	rp.mouse_entered.connect(func(): rp.modulate = Color(1.12, 1.12, 1.12))
@@ -2373,7 +2373,6 @@ func _row_click(rp: Control, cb: Callable) -> void:
 	rp.gui_input.connect(func(ev: InputEvent):
 		if ev is InputEventMouseButton and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and not (ev as InputEventMouseButton).pressed:
 			rp.accept_event()
-			Sfx.play("click")
 			cb.call())
 
 func open_loot(b: Dictionary) -> void:
@@ -2540,6 +2539,7 @@ func _build_loot() -> void:
 			elif (loot_open as Dictionary).get("empty", false): close_loot()
 			else: _build_loot()
 		var take := UI.button(verb, take_it, 76)
+		take.set_meta("snd", InvSfx.SILENT)
 		_row_click(rp, take_it)
 		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		if not fit:

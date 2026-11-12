@@ -161,7 +161,7 @@ func _pack_row(i: int) -> PanelContainer:
 	var it: Dictionary = _p.pack[i]
 	var buttons: Array = []
 	if String(it.get("t", "")) == "gear":
-		buttons.append(["Wear", func(): _act(func(): Pack.use_from_pack(_m, _p, i)), true])
+		buttons.append(["Wear", func(): _act(func(): _wear(i)), true, true])
 	buttons.append(["Drop", func(): _act(func(): Pack.drop_from_pack(_m, _p, i))])
 	var row := LootHold.item_row(it, buttons)
 	row.set_drag_forwarding(_drag_pack.bind(i, row), _can_take_off, _take_off)
@@ -196,9 +196,19 @@ func _input(event: InputEvent) -> void:
 
 func _wear_or_take_off(i: int) -> void:
 	if _hover["kind"] == "worn":
-		Pack.take_off(_m, _p, i)
+		_take_off_slot(i)
 	else:
-		Pack.use_from_pack(_m, _p, i)
+		_wear(i)
+
+## Wears backpack thing i (in `slot`, or where it goes when -1), with the equip cue.
+func _wear(i: int, slot := -1) -> void:
+	if Pack.use_from_pack(_m, _p, i, slot):
+		InvSfx.equip()
+
+## Takes worn piece `slot` off into the backpack, with the set-down cue.
+func _take_off_slot(slot: int) -> void:
+	if Pack.take_off(_m, _p, slot):
+		InvSfx.drop()
 
 func _drop(i: int) -> void:
 	if _hover["kind"] == "worn":
@@ -217,6 +227,7 @@ func _drag_pack(_at: Vector2, i: int, row: Control) -> Variant:
 	if String((_p.pack[i] as Dictionary).get("t", "")) != "gear":
 		return null
 	row.set_drag_preview(UI.label(Loot.name_of(_p.pack[i]), 15, Loot.col_of(_p.pack[i]), UI.semi))
+	InvSfx.grab()
 	return {"inv": "pack", "i": i}
 
 func _drag_worn(_at: Vector2, slot: int, tile: Control) -> Variant:
@@ -225,6 +236,7 @@ func _drag_worn(_at: Vector2, slot: int, tile: Control) -> Variant:
 		return null
 	var it := Loot.gear(String(g["id"]), int(g["rar"]))
 	tile.set_drag_preview(UI.label(Loot.name_of(it), 15, Loot.col_of(it), UI.semi))
+	InvSfx.grab()
 	return {"inv": "worn", "i": slot}
 
 func _can_drop_worn(_at: Vector2, data: Variant, slot: int) -> bool:
@@ -238,13 +250,14 @@ func _can_drop_worn(_at: Vector2, data: Variant, slot: int) -> bool:
 func _drop_worn(_at: Vector2, data: Variant, slot: int) -> void:
 	var from := int(data["i"])
 	if data["inv"] == "pack":
-		_act(func(): Pack.use_from_pack(_m, _p, from, slot))
+		_act(func(): _wear(from, slot))
 	else:
 		_act(func(): Pack.swap_gloves(_p))
+		InvSfx.drop()
 
 func _can_take_off(_at: Vector2, data: Variant) -> bool:
 	return data is Dictionary and data.get("inv", "") == "worn" and Pack.room(_p) \
 		and not (_p.gear[int(data["i"])] as Dictionary).is_empty()
 
 func _take_off(_at: Vector2, data: Variant) -> void:
-	_act(func(): Pack.take_off(_m, _p, int(data["i"])))
+	_act(func(): _take_off_slot(int(data["i"])))

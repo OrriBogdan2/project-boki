@@ -42,7 +42,8 @@ static func build(
 	v.add_child(UI.label("Swap it with one of yours, or drop one", 12, MUTED, UI.caps))
 	for i in p.pack.size():
 		var idx := i
-		var buttons: Array = [["Swap", func(): on_swap.call(idx), true], ["Drop", func(): on_drop.call(idx)]]
+		var buttons: Array = [["Swap", func(): on_swap.call(idx), true, true],
+				["Drop", func(): on_drop.call(idx), false, true]]
 		v.add_child(item_row(p.pack[i], buttons))
 	return pc
 
@@ -54,7 +55,8 @@ static func mark_full(row: PanelContainer) -> void:
 	rs.border_width_left = 4
 	row.add_theme_stylebox_override("panel", rs)
 
-## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary]].
+## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary, own_cue]]
+## (own_cue: the action plays its inventory cue, InvSfx, so the button itself is silent).
 ## The backpack and swap windows use it too.
 static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContainer:
 	var rp := PanelContainer.new()
@@ -95,5 +97,7 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 		var is_primary: bool = bt.size() > 2 and bt[2]
 		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if is_primary else UI.button(String(bt[0]), bt[1], 70)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if bt.size() > 3 and bt[3]:
+			b.set_meta("snd", InvSfx.SILENT)
 		row.add_child(b)
 	return rp
