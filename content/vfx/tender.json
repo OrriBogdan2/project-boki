@@ -24,6 +24,12 @@
 			{"p": "star", "n": 4, "way": "fwd", "speed": 2.0, "spread": 0.5, "drag": 2.0, "life": 0.4, "size": 0.1,
 				"c": "main", "c2": "hot"}
 		]},
+		"ember_hit": {"net": false, "fx": [
+			{"p": "chunk", "y": 0.1, "way": "back", "lift": 0.6, "n": 8, "speed": 4.5, "spread": 0.6, "grav": 14.0, "drag": 0.3,
+				"life": 0.55, "size": 0.09, "radius": 0.3, "c": "fern"},
+			{"p": "ember", "y": 0.1, "way": "back", "lift": 0.5, "n": 14, "speed": 6.0, "spread": 0.7, "grav": 6.0, "life": 0.45,
+				"size": 0.05, "radius": 0.3, "c": "main", "c2": "hot"}
+		]},
 		"cast_trail": {"fx": [
 			{"p": "ribbon", "size": 0.28, "life": 2.0, "tail": 0.18, "c": "fern", "c2": "hot", "c3": "moss"}
 		]},
@@ -104,12 +110,16 @@
 		]},
 		"call": {"fx": [
 			{"p": "flare", "at": "lantern", "size": 1.5, "grow": 1.3, "life": 0.3, "c": "gold", "c2": "cream", "c3": "pink"},
+			{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.9, "c": "gold", "c2": "cream", "c3": "fern"},
+			{"p": "vortex", "size": "r", "size_x": 0.5, "spin": 0.4, "grow": 1.05, "life": 1.0, "c": "gold", "c2": "cream", "c3": "fern"},
+			{"p": "star", "y": 0.2, "n": 24, "shape": "arc", "arc": 360, "w": 0.2, "radius": "r", "radius_x": 0.95, "speed": 1.4,
+				"spread": 0.3, "grav": -0.8, "drag": 1.5, "life": 1.0, "size": 0.14, "c": "gold", "c2": "cream"},
 			{"p": "star", "at": "lantern", "n": 12, "speed": 2.5, "spread": 0.8, "drag": 2.0, "grav": -0.5, "life": 0.8,
 				"size": 0.14, "c": "gold", "c2": "cream"}
 		]},
 		"call_land": {"fx": [
-			{"p": "vortex", "size": 1.2, "spin": 0.5, "life": 1.0, "c": "gold", "c2": "cream", "c3": "pink"},
-			{"p": "star", "y": 0.5, "n": 12, "shape": "disc", "radius": 0.7, "speed": 1.6, "spread": 0.3, "grav": -0.8,
+			{"p": "vortex", "size": 2.4, "spin": 0.5, "life": 1.0, "c": "gold", "c2": "cream", "c3": "pink"},
+			{"p": "star", "y": 0.5, "n": 12, "shape": "disc", "radius": 0.9, "speed": 1.6, "spread": 0.3, "grav": -0.8,
 				"life": 1.0, "size": 0.14, "c": "pink", "c2": "cream"}
 		]},
 		"mended": {"fx": [

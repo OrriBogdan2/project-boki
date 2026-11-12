@@ -420,7 +420,7 @@ func burst_radius() -> float:
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n, "motes": 0.0})
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
+	lk().burst("column", e.pos, {"col": field()["root"], "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
@@ -760,7 +760,7 @@ func _start_call() -> bool:
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	vfx("call")
+	vfx("call", null, null, {"r": float(x_def()["range"])})        # the ring is the tether's reach
 	vfx("call_land", who.pos)
 	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), gold_col)
 	return true

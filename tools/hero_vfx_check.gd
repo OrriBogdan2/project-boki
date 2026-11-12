@@ -16,9 +16,9 @@ const HUE_OFF := 40.0          # deg round the colour wheel from its Hunter's: p
 const PALE_S := 0.3            # saturation under which a colour is a pale tint, free on any Hunter
 const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"]}   # colours that mean something: a shield's blue, heals
 ## Hunters whose every recipe move sits on their hue (docs/HERO_VFX.md "Ability colours"), and the moves that keep a
-## colour that means something (Meeko's heals: Hearthlight, its stars and bloom, Hearth Call).
+## colour that means something (Meeko's heals: Hearthlight, its stars and bloom, Hearth Call; the root's violet).
 const MOVES_ON_HUE := {"tender": ["heal_stars", "hearth", "hearth_land", "hearth_motes", "bloom", "call", "call_land",
-	"mended"]}
+	"mended", "seed_root"]}
 const NO_HEX := ["dolm_kit", "tender_kit"]   # kits that draw only from their colour table
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
@@ -26,7 +26,7 @@ const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
 	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
-	"tender": ["tender_"], "thief": ["thief_"]}
+	"tender": ["tender_", "care_look"], "thief": ["thief_"]}
 ## The synthetic recipes the runtime parts play: one layer of every kind.
 const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008", "smoke": "#404040"},
 	"anchors": {"palm": {"bone": "hand.R", "off": [0.0, 0.05, 0.0], "body": [0.3, 1.0, 0.2]},
@@ -324,6 +324,14 @@ func _meeko_field() -> void:
 	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
 	ok(ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
 			"Meeko's root field: the burst's ring lands on the burst radius")
+	var hit: Array = d["moves"]["ember_hit"]["fx"]
+	ok(hit.any(func(l): return l["p"] == "chunk" and l["c"] == "fern")
+			and hit.any(func(l): return l["p"] == "ember" and l["c"] == "main"),
+			"Meeko's Ember Cast hit: a leaf debris and spark burst, not only a ring")
+	var call_ring: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(call_ring.size() == 1 and call_ring[0]["size"] == "r" and absf(float(call_ring[0]["size_x"]) * 0.9 - 1.0) < 0.01
+			and float(Arch.def("tender")["x"]["range"]) >= 12.6,
+			"Hearth Call: its ring is the tether's reach (the kit passes the range as r)")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
