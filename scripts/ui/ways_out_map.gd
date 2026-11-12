@@ -4,7 +4,7 @@ extends RefCounted
 ## a badge on each site (a dark ring, a countdown arc in the seat's state colour) and, for the dead and the
 ## watching, one line: "Ways out left: N" and which seat your squad is nearest.
 ## States come from WaysOutHud.seats; the dashed next Blight ring is HeartHud's. Until the quest seats are built
-## (spec task 4) the Lair seat is the first lair and the Uplink the outpost farther from it (the spec's rule).
+## the Lair and Uplink badges sit on the quest seats (QuestSeats); QuestRace draws the progress pips under them.
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
 const LINE_FS := 13
@@ -16,28 +16,16 @@ static func sites(m: Match) -> Array[Vector3]:
 	_sites.fill(Vector3.INF)
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return _sites
-	if m.lairs != null and not m.lairs.list.is_empty():
-		_sites[0] = m.lairs.list[0]["c"]
+	var seats: QuestSeats = m.exits.seats if m.exits else null
+	if seats != null:
+		seats.build()
+		if seats.lair:
+			_sites[0] = seats.lair.ref["c"]
+		if seats.uplink:
+			_sites[2] = seats.uplink.ref["pos"]
 	_sites[1] = m.heart.gate
-	_sites[2] = _uplink_site(m, _sites[0])
 	_sites[3] = m.heart.site
 	return _sites
-
-## The outpost farthest from the Lair (the only one when there is one).
-static func _uplink_site(m: Match, lair: Vector3) -> Vector3:
-	var best := Vector3.INF
-	var far := -1.0
-	if m.exits == null:
-		return best
-	for x in m.exits.list:
-		if x["kind"] != "outpost":
-			continue
-		var at: Vector3 = x["pos"]
-		var d := Vector2(at.x - lair.x, at.z - lair.z).length() if lair != Vector3.INF else 0.0
-		if d > far:
-			far = d
-			best = at
-	return best
 
 ## A badge's colour: a state tone (SideColor: locked cool blue-grey, open cream, lost dim crimson), or the using
 ## squad's colour as the viewer sees it (squad or rival; a seat taken by nobody in particular goes locked-grey).
@@ -114,7 +102,7 @@ static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now:
 	elif f > 0.0:
 		c.draw_arc(pv, r, -PI * 0.5, -PI * 0.5 + TAU * f, 32, col, w, true)
 	if st == WaysOutHud.St.USE and int(s["team"]) >= 0:
-		WaysOutHud._pip(c, pv, r * 0.35, col, WaysOutHud.rival(s), true)      # the squad's disc or a rival's diamond
+		WaysOutHud.pip(c, pv, r * 0.35, col, WaysOutHud.rival(s), true)      # the squad's disc or a rival's diamond
 	if st == WaysOutHud.St.TAKEN or st == WaysOutHud.St.LOST:
 		c.draw_line(pv + Vector2(-r, r) * 0.7, pv + Vector2(r, -r) * 0.7, col, w, true)
 
@@ -148,6 +136,7 @@ static func full_map(fm) -> void:
 		var pv: Vector2 = fm.to_screen(at[i])
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
+			QuestRace.draw(m, fm.hud.c, pv + Vector2(0, r + 9.0), QuestRace.read(m, i))
 			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
 			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))

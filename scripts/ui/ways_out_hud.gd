@@ -135,7 +135,9 @@ static func draw(hud) -> void:
 	c.draw_line(Vector2(sx, r.position.y + 7), Vector2(sx, r.end.y - 7), Color(1, 1, 1, 0.14), 1.0)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
-	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+	for i in [0, 2]:
+		QuestRace.draw(m, c, Vector2(r.position.x + CELL.x * i + 17.0, r.end.y + 7.0), QuestRace.read(m, i))
+	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 32.0))
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
@@ -157,11 +159,11 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 			c.draw_circle(pv, PIP_R, col)
 		St.USE:
 			col = squad
-			_pip(c, pv, PIP_R + 2.0, Color(col, 0.35), foe, true)
-			_pip(c, pv, PIP_R, col, foe, true)
+			pip(c, pv, PIP_R + 2.0, Color(col, 0.35), foe, true)
+			pip(c, pv, PIP_R, col, foe, true)
 		St.TAKEN:
 			col = squad.darkened(0.25)
-			_pip(c, pv, PIP_R, Color(col, 0.8), foe, false)
+			pip(c, pv, PIP_R, Color(col, 0.8), foe, false)
 			var e := PIP_R + 2.0
 			c.draw_line(pv + Vector2(-e, e), pv + Vector2(e, -e), col, 2.5, true)
 		St.LOST:
@@ -178,7 +180,7 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
 
 ## A pip: a disc for your squad or nobody, a diamond for a rival's seat; filled or an outline.
-static func _pip(c: Control, pv: Vector2, r: float, col: Color, diamond: bool, fill: bool) -> void:
+static func pip(c: Control, pv: Vector2, r: float, col: Color, diamond: bool, fill: bool) -> void:
 	if not diamond:
 		if fill:
 			c.draw_circle(pv, r, col)

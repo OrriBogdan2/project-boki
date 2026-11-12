@@ -90,3 +90,8 @@ rows of the palette table, the default row full and the others only where it wou
 Heart and Gate). Squad and rival never read by hue alone: the beacon's text (`OURS` / `RIVAL`), the strip's word and pip
 (disc / diamond), the map badge's centre mark and the minimap banner (plain / swallow-tailed). Check: --colour-vision-check
 (rows 4a, 4b); shots per palette: --ways-out-palette-shots (GPU).
+
+Quest-race pips: under the Sealed Lair and Uplink badges (strip and full map) two rows of five pips, your squad's progress on
+top (discs) and the best rival's below (diamonds), in `SideColor` squad colours. Lair progress is its boss's damage, Uplink its
+charge, a taken seat is full for its squad; locked and shut seats show nothing. It reads the mirrored seat states and the
+boss and outpost the clients already have, so it needs no new Net message. No words or key letters. Check: --quest-race-check.
