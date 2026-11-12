@@ -68,3 +68,9 @@ Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with
 `python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
 On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
 command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.
+
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `leap` (Soot Ram) re-keyed to the felt ram (3.4 m / 0.33 s, fastest at
+the start): flat out by 0.12 s, the stop on RAM_IMPACT_KEY 0.36 as before. The source .blend was not on the art worker, so
+the bake ran on this glb through `tools/art1/clip_blend.py ... palm=anchor_blade_root` (a control bake of `leap` and `hop`
+matched this glb's exactly) and was copied on with `glb_add_clips.py ... leap`. `hop` (the air poof) already fits the felt
+6.8 m / 0.28 s (the roll done at 0.25 s) and is unchanged.
