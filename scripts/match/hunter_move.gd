@@ -12,6 +12,8 @@ static var brake_decel: float = _phys["brake"]
 ## 1/s: GroundFriction x BrakingFrictionFactor, the share of the speed the walking brake sheds per second
 static var brake_friction: float = _phys["ground_friction"] * _phys["braking_friction_factor"]
 static var braking_substep: float = _phys["braking_substep"]      # s, the longest sub-step of a brake
+## 1/s, GroundFriction: bends a walk with keys held toward the keys (HunterMove.walk)
+static var turn_friction: float = _phys["ground_friction"]
 static var brake_stop_speed: float = _phys["brake_stop_speed"]    # m/s, a brake leaving less stops dead
 static var min_tick: float = _phys["min_tick"]                    # s, the shortest sub-step braked
 static var dash_exit_run: float = _phys["dash_exit_run"]
@@ -68,12 +70,20 @@ static func apply(h: Hunter) -> void:
 	h.base_speed = speed(h.arch)
 	h.ground_accel = accel(h.arch)
 
-## One step of walking on the ground, shared by the match and the farm: toward `want` (m/s) at `acc`, speed over
-## it shed under the walking brake; with no keys, the brake alone. grip < 1 on ice.
-static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float) -> Vector2:
-	if want.length() < 0.001:
+## Ground velocity after a step with keys held: UE's walking CalcVelocity. Up to the wanted speed (with UE's 1%
+## IsExceedingMaxSpeed slack) GroundFriction bends the velocity toward the keys at its own speed, the accel adds
+## on and the speed caps at the wanted speed: a reversal sheds 2 x turn_friction x speed + accel, a 90-degree
+## cut arcs round at run speed. Over it (a Slow landing, a knock, a pad's carry) the walking brake sheds it.
+static func walk(hv: Vector2, wish: Vector2, accel: float, grip: float, dt: float) -> Vector2:
+	var run := wish.length()
+	if run < 0.001:
 		return brake(hv, grip, dt)
-	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
+	var s := hv.length()
+	if s > run * 1.01:
+		return Loco.accel_to(hv, wish, accel * grip, 0.0, brake_rate(s) * grip, dt)
+	var dir := wish / run
+	var bent := hv - (hv - dir * s) * minf(turn_friction * grip * dt, 1.0)
+	return (bent + dir * accel * dt).limit_length(run)
 
 ## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
 ## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).

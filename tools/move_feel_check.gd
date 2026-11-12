@@ -31,8 +31,6 @@ const T := {
 	"ground_stop_t":           ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s"],
 	"ground_stop_dist":        ["~", [0.27, 0.4], "m", "[game data] UE's walking brake: 0.28-0.39m at 30-144 fps"],
 	"brake_vs_ue_err":         ["<=", 0.0001, "m/s", "HunterMove.brake against UE's ApplyVelocityBraking"],
-	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
-	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
 	"ground_shed_keys_m":      ["~", [0.85, 1.05], "m", "[game data] the same brake to a 5.28 m/s run, keys held: 0.955m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
@@ -366,6 +364,7 @@ func run(main: Node) -> void:
 	_screen_scale()
 	_e2e()
 	_standing_dash()          # late: it swaps the kit and model the framing rows measure
+	load("res://tools/move_feel_turns.gd").run(self)      # after it: swaps through all 12 kits (walking turn)
 	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them (and Rimewright's standing dash)
 	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
@@ -406,25 +405,6 @@ func _ground() -> void:
 			if ts < 0.0 and _hv(P).length() < 0.05: ts = (i + 1) * DT
 		rec("ground_stop_t", ts)
 		rec("ground_stop_dist", P.pos.x - x0)
-		# reversal
-		_reset(flat + Vector3(-2.5, 0, 0)); P.base_speed = top
-		P.inp["move"] = Vector2(1, 0); _steps(20)
-		P.inp["move"] = Vector2(-1, 0)
-		var tr := -1.0
-		for i in 40:
-			m.step(DT)
-			if tr < 0.0 and P.vel.x <= -0.95 * top: tr = (i + 1) * DT
-		rec("ground_reverse_t", tr)
-		# 90 degree turn
-		_reset(flat + Vector3(-2.5, 0, -2.5)); P.base_speed = top
-		P.inp["move"] = Vector2(1, 0); _steps(20)
-		P.inp["move"] = Vector2(0, 1)
-		var t90 := -1.0
-		for i in 40:
-			m.step(DT)
-			var hv := _hv(P)
-			if t90 < 0.0 and hv.length() >= 0.9 * top and absf(hv.angle_to(Vector2(0, 1))) < deg_to_rad(10.0): t90 = (i + 1) * DT
-		rec("ground_turn90_t", t90)
 		# a shove over the run (a knock, a kit step) slides out under the same brake, keys held or not
 		for keys in [Vector2.ZERO, Vector2(1, 0)]:
 			_reset(flat + Vector3(-3.0, 0, 0))

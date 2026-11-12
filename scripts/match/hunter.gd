@@ -1705,7 +1705,7 @@ func _physics(dt: float) -> void:
 			if (mv * spd).length() >= 0.001:
 				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
 				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
-				hv = Loco.accel_to(bv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				hv = HunterMove.walk(bv, wv, ground_accel * grip, grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif not lfloat.is_empty():
