@@ -801,6 +801,7 @@ func _lunge(k: float, perfect: bool) -> void:
 	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "w": lunge_w(), "perfect": perfect})
 	if perfect:
 		perfects += 1
+		CombatBus.tech.emit(h, "juggernaut")
 		AimKit.perfect(h, {"col": LUNGE_FULL})
 
 func _tick_lunge() -> void:

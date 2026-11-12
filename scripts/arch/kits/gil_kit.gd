@@ -334,12 +334,26 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 	if n >= int(pd.get("need", 3)) and m.time >= float(beach_at.get(key, -99.0)):
 		marks.erase(key)
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
+		CombatBus.tech.emit(h, "gil")
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
 		vfx("beached", f.pos)
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
+
+## The drill rig (SignatureDrill): one splash mark on `f`, of an effect that is not in the next two potions.
+func add_mark(f: Ent) -> void:
+	var next := next_vial()                   # refills an empty bag first
+	var after := String(bag[-2]) if bag.size() > 1 else ""
+	var soon := [vial_def(next).get("mark", ""), vial_def(after).get("mark", "")]
+	for v in rmb_def().get("vials", {}):
+		var mk := String(vial_def(String(v)).get("mark", v))
+		if mk not in soon:
+			var have: Dictionary = marks.get(f.get_instance_id(), {})
+			have[mk] = m.time
+			marks[f.get_instance_id()] = have
+			return
 
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:

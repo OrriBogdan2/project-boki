@@ -156,6 +156,7 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		f.burn_dps = dps
 		f.burn_by = h
 	if lvl == 2 and was < 2:
+		CombatBus.tech.emit(h, "ashwick")
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:

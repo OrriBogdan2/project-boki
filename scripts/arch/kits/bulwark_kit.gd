@@ -479,6 +479,7 @@ func _smash() -> void:
 		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
 	if perfect:
+		CombatBus.tech.emit(h, "bulwark")
 		launch.start(dv)
 	else:
 		_carry(dv, k)

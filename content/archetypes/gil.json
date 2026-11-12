@@ -9,6 +9,7 @@
 	"plate_offset": 2.1,
 	"body": {"size": 1.0, "head": 0.71, "legs": 1.03, "torso": 1.0, "shoulder": 1.14, "arms": 0.92, "hit_r": 0.38},
 	"fantasy": "The fish out of water. Fences with a swordfish, throws whatever bottle comes out of the bag, and chains crowd control until a foe is Beached.",
+	"howto": ["Play: close-range control; fence, throw potions, Beach foes.", "Combo: hit one foe with 3 different {secondary} potions in 5s.", "Avoid: {dash} as an escape; you can still be hit underground."],
 	"silhouette": "the floppy polka-dot wizard hat, the swordfish rapier and the potion bag on his hip",
 	"clip": {"lines": {"dash": "Dive into the ground and swim.", "lmb": "Three rapier thrusts, stepping in. Hold to lunge down a line.", "rmb": "Throw the next potion from the bag.", "e": "Spin, then send a waterspout.", "x": "Surf a tidal wave down a line."}},
 	"card": {"role_word": "Controller",

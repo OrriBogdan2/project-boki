@@ -131,6 +131,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
+	CombatBus.tech.emit(h, "rimewright")
 	m.sfx("rime_splinter", at, 0.0, 1.0)
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)

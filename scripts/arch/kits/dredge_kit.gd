@@ -146,6 +146,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		if m.time - _stab_at > 1.2:
 			_stab_at = m.time
 			backstabs += 1
+			CombatBus.tech.emit(h, "dredge")
 			m.fx.ring(t.pos, 0.9, res_col(), 0.2)         # the back bonus has no word: a ring on the foe
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg

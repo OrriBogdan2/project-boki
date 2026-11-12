@@ -9,6 +9,7 @@
 	"plate_offset": 2.15,
 	"body": {"size": 1.059, "head": 0.6, "legs": 2.04, "torso": 0.96, "shoulder": 0.92, "hit_r": 0.384},
 	"fantasy": "The duelist. Sticks to one mark from range, cartwheels past them, never lets go.",
+	"howto": ["Play: duelist; stick to one target from range.", "Combo: {dash} vault, then a shot that hits resets it.", "Avoid: missing the shot after {dash}; no reset."],
 	"silhouette": "the long braid, the moth wings and the twin pistols",
 	"card": {"role_word": "Duelist", "loop": "Ranged duelist: stay on one foe, cartwheel, and land the big shot.", "dash": "Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once.", "passive": "Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you.", "x": "A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge.", "rmb": "A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned.", "e": "Throw a dagger to your cursor or into a foe. Press E again to blink to it.", "weapons": {"arc_bolts": "Bolts from alternating hands every 0.45s. Each one lands at your cursor."}},
 	"signature": "arc_bolts",

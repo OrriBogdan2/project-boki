@@ -180,7 +180,7 @@ func tick(dt: float) -> void:
 		if not is_instance_valid(D):
 			continue
 		dm["quiet"] = float(dm["quiet"]) + dt
-		if D.downed or D.hp < DUMMY_HP * 0.25 or float(dm["quiet"]) > 3.0:
+		if not D.has_meta(SignatureDrill.META) and (D.downed or D.hp < DUMMY_HP * 0.25 or float(dm["quiet"]) > 3.0):
 			if D.downed:
 				m.revive_hunter(D, null)
 			D.hp = DUMMY_HP

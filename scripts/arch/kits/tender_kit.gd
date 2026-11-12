@@ -164,6 +164,7 @@ func _dress_ember(s: Dictionary) -> void:
 	stats["swirls"] += 1
 	if emp:
 		stats["emp"] += 1
+		CombatBus.tech.emit(h, "tender")
 		play("mm_shot_emp")
 		m.sfx("tend_ember_emp", h.pos, -3.0, 1.0)
 	elif not seed_aim:
