@@ -22,6 +22,7 @@ func run(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	if P.model == null or not P.model.has_node("Warden/Sync"):
 		A.ok("Sable timing: her clips are on (nothing to time)", false)
 		return
+	var t_at := T.pos
 	A.fresh(T)
 	T.teleport(home + Vector3(0, 0, -30.0))        # out of every ring and lane
 	_settle(m, P, K, home, 0.6)
@@ -33,6 +34,8 @@ func run(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	_encore(m, P, K, home)
 	_run(m, P, K, home)
 	_settle(m, P, K, home, 1.0)
+	A.fresh(T)
+	T.teleport(t_at)                               # the checks after this one find the foe where they left it
 
 func _clips(P: Hunter) -> WardenClips:
 	return P.model.get_node("Warden/Sync").get("clips") as WardenClips
@@ -306,12 +309,9 @@ func _run(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			"%.2f Hz at %.2f m/s" % [hz, speed])
 	_settle(m, P, K, home, 0.6)
 
-## Gait cycles a second at this speed: the run clip's length and the rate WardenClips plays it at (the
-## clamp(speed / gait, 0.6, 1.5) of its _loco).
+## Gait cycles a second at this speed: the run clip's length and the rate WardenClips plays it at (WardenGait.plan:
+## the speed over the clip's foot speed, clamped).
 func _stride_hz(c: WardenClips, _P: Hunter, speed: float) -> float:
 	var lc: Dictionary = c.d["loco"]
-	var run := float(lc["run_speed"])
-	var walk := float(lc["walk_speed"])
-	var gait := lerpf(walk, run, clampf((speed - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
 	var clip_len := c.lib.get_animation(String(lc["run"]["f"])).length
-	return clampf(speed / gait, 0.6, 1.5) / clip_len
+	return c.gait.plan(speed, lc) / clip_len
