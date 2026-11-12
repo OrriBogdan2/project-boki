@@ -68,8 +68,8 @@
 		"icon": "dash",
 		"col": "#ffe2a8",
 		"cd": 7.0,
-		"dist": 4.2,
-		"time": 0.174,
+		"dist": 3.6,
+		"time": 0.2,
 		"invuln": 0.12,
 		"desc": "A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).",
 		"air": {
