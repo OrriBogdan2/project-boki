@@ -1,5 +1,39 @@
 {
-	"doc": "Gil's model file (art/wardens/gil/gil.glb). The .glb carries no clips yet, so the rig's HunterAnim poses drive it (WardenClips.make returns null without an AnimationPlayer). The swordfish is skinned to hand.R in the .glb: the procedural swordfish (HeroArmsGil) hides and the Gun node is only the invisible aim and FX reference, kept on the blade empties (anchor_blade_root on hand.R, weapon_muzzle at the bill tip) so thrusts, potions and the spout leave the weapon you see.",
+	"doc": "Gil's hand-keyed clips (art/wardens/gil/gil.glb, tools/art1/gil_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). The swordfish is skinned to hand.R in the .glb: the procedural swordfish (HeroArmsGil) hides and the Gun node is only the invisible aim and FX reference, kept on the blade empties (anchor_blade_root on hand.R, weapon_muzzle at the bill tip) so thrusts, potions and the spout leave the weapon you see. The Fencer thrusts take the whole body standing; while the lunge slides him, the legs keep the run under them (upper: moving), and so does the Grab Bag toss. Ground Swim's strokes under the ground and the Tidal Wave surf hold their loop (hold_from) until the kit plays the surfacing or the landing; Riptide's twirl is one clip through the longest spin.",
 	"skinned_weapon": true,
-	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle", "bone": "hand.R"}
+	"extra_bones": {"foot.L": "shin.L", "foot.R": "shin.R"},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle", "bone": "hand.R"},
+	"loco": {
+		"idle": "idle",
+		"stance": "stance",
+		"stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.2,
+		"run_speed": 4.4,
+		"stride": [1.4, 1.25],
+		"foot_mps": [1.76, 4.44]
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.0},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide"},
+	"land": {"clip": "land", "dur": 0.36, "min_fall": 0.25},
+	"kmoves": {
+		"gil_thrust_a": {"clip": "thrust_a", "upper": "moving"},
+		"gil_thrust_b": {"clip": "thrust_b", "upper": "moving"},
+		"gil_lunge": {"clip": "lunge", "upper": "moving"},
+		"gil_toss": {"clip": "toss", "upper": "moving"},
+		"gil_spin": {"clip": "spin"},
+		"gil_spout": {"clip": "spout"},
+		"gil_swim": {"clip": "swim", "hold_from": 0.1333},
+		"gil_surface": {"clip": "surface"},
+		"gil_surf": {"clip": "surf", "hold_from": 0.1333},
+		"gil_wave_land": {"clip": "wave_land"},
+		"mf_xform": {"clip": "fuse"}
+	},
+	"states": {"reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"flow": [["gil_thrust_a", 0.32], ["gil_thrust_b", 0.32], ["gil_lunge", 0.48], ["gil_thrust_a", 0.32],
+		["gil_toss", 0.4], ["gil_spin", 0.9], ["gil_spout", 0.4], ["gil_swim", 0.4], ["gil_surface", 0.45], ["gil_surf", 1.0],
+		["gil_wave_land", 0.45]],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "tail", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R"]
 }

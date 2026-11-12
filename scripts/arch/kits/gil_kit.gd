@@ -7,6 +7,8 @@ extends ArchKit
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
+const THRUSTS := ["gil_thrust_a", "gil_thrust_b", "gil_lunge"]   # the Fencer's moves, one per combo step (KMovesDJ)
+
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v}
@@ -81,6 +83,7 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	combo_at = m.time
 	combo_n += 1
 	h.combo_i = i + 1
+	play(THRUSTS[i])
 	h._lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
 	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2})
@@ -113,6 +116,7 @@ func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c.get("variant", "tap"))
 	tele_circle(at, float(vd["radius"]), col_of(vd), ft)
 	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v})
+	play("gil_toss")
 	m.sfx("throw", h.pos, -4.0, 1.15)
 
 func rmb_hold_tick(t: float) -> void:
@@ -208,11 +212,13 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
 	swim_t = float(dd["time"]) * float(dash_feel()["time"])
+	play("gil_swim")
 	m.fx.burst(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)
 	return true
 
 func _surface() -> void:
 	var dd := dash_def()
+	play("gil_surface")
 	m.fx.ring(h.pos, float(dd["radius"]), col_of(dd), 0.4)
 	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col_of(dd), 22, 5.0, 0.5, 10.0)
 	m.sfx("whoosh", h.pos, -3.0, 0.8)
@@ -228,6 +234,7 @@ func cast_e() -> bool:
 	spin_t = 0.0
 	spin_tick = 0.0
 	e_t = float(e_def()["spin_t"])
+	play("gil_spin")
 	return true
 
 func e_recastable() -> bool:
@@ -270,6 +277,7 @@ func _release_spout() -> void:
 	var k := _spin_k()
 	spin_t = -1.0
 	e_t = 0.0
+	play("gil_spout")
 	var dir := h.aim_dir()
 	var length := lerpf(float(ed["range"][0]), float(ed["range"][1]), k)
 	var w := lerpf(float(ed["width"][0]), float(ed["width"][1]), k)
@@ -326,11 +334,13 @@ func _start_wave() -> bool:
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
+	play("gil_surf")
 	m.sfx("whoosh", h.pos, 0.0, 0.6)
 	return true
 
 func _land_wave() -> void:
 	var xd := x_def()
+	play("gil_wave_land")
 	h.shield = maxf(h.shield, float(xd["shield"]))
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
 	m.fx.ring(h.pos, 2.0, col_of(xd), 0.4)
@@ -388,6 +398,8 @@ func _tick(dt: float) -> void:
 
 func _drop_holds() -> void:
 	spin_t = -1.0
+	if anim_id == "gil_spin":
+		anim_id = ""        # (the twirl's clip holds its loop for as long as the move plays)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

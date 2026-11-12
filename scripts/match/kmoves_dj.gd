@@ -1,6 +1,6 @@
 class_name KMovesDJ
 extends RefCounted
-## Keyed full-body moves of Sable (thief) and Juggernaut (same format and channels as
+## Keyed full-body moves of Sable (thief), Juggernaut and Gil (same format and channels as
 ## HunterAnim.KMOVES; HunterAnim.km_sample looks here after KMOVES, KMovesPair and MergeMoves). Each is
 ## anticipation -> a key pose on the hit -> follow-through and recovery, keyed to the kit's own timing
 ## and to the footage frame counts in briefs/hero-ref/dancer.md and juggernaut.md (5 fps: a frame is 0.2s).
@@ -425,4 +425,26 @@ const MOVES := {
 				"lw": 1.0, "legs": [0.7, -1.2, -0.4, -0.7]}],
 		[0.7, {"blade": Vector3(-1.9, 0.1, 0.0), "bw": 1.0, "rad": 0.5, "y": 0.9, "p": 0.1, "sq": 0.25, "lift": -0.1,
 				"lw": 1.0, "legs": [0.8, -1.3, -0.45, -0.8]}]]},
+	# ---------------------------------------------------------------- Gil
+	# Fencer (gil.json lmb: 0.32s a thrust, the third 0.48s): the body for each thrust, the swordfish is the
+	# swing. Side-on with the right foot forward; the hit is on the press, so the torso turns the sword
+	# shoulder in and bows over the front knee by 0.07, holds, and finds the guard again. The lunge cocks
+	# back first (0.06), drives deep (0.1), wobbles at 0.29 and recovers. The legs are a stance.
+	"gil_thrust_a": {"stance": true, "keys": [
+		[0.0, {"y": -0.25, "p": 0.04, "sq": 0.08, "lift": -0.05, "lw": 1.0, "legs": [-0.5, -0.6, 0.7, -0.8]}],
+		[0.07, {"y": -0.55, "p": -0.25, "sq": -0.12, "lift": -0.08, "lw": 1.0, "legs": [-0.6, -0.4, 0.95, -0.7]}],
+		[0.15, {"y": -0.5, "p": -0.22, "sq": -0.05, "lift": -0.08, "lw": 1.0, "legs": [-0.6, -0.4, 0.95, -0.7]}],
+		[0.32, {"y": -0.25, "p": 0.04, "sq": 0.08, "lift": -0.05, "lw": 1.0, "legs": [-0.5, -0.6, 0.7, -0.8]}]]},
+	"gil_thrust_b": {"stance": true, "keys": [
+		[0.0, {"y": -0.25, "p": 0.04, "sq": 0.08, "lift": -0.05, "lw": 1.0, "legs": [-0.5, -0.6, 0.7, -0.8]}],
+		[0.07, {"y": -0.48, "p": -0.32, "sq": -0.12, "lift": -0.09, "lw": 1.0, "legs": [-0.6, -0.45, 0.95, -0.75]}],
+		[0.15, {"y": -0.44, "p": -0.28, "sq": -0.05, "lift": -0.09, "lw": 1.0, "legs": [-0.6, -0.45, 0.95, -0.75]}],
+		[0.32, {"y": -0.25, "p": 0.04, "sq": 0.08, "lift": -0.05, "lw": 1.0, "legs": [-0.5, -0.6, 0.7, -0.8]}]]},
+	"gil_lunge": {"stance": true, "keys": [
+		[0.0, {"y": -0.25, "p": 0.04, "sq": 0.08, "lift": -0.05, "lw": 1.0, "legs": [-0.5, -0.6, 0.7, -0.8]}],
+		[0.06, {"y": -0.1, "p": 0.12, "sq": 0.15, "lift": 0.0, "lw": 1.0, "legs": [-0.45, -0.5, 0.6, -0.6]}],
+		[0.1, {"y": -0.62, "p": -0.42, "sq": -0.2, "lift": -0.13, "lw": 1.0, "legs": [-0.75, -0.15, 1.2, -1.0]}],
+		[0.2, {"y": -0.6, "p": -0.4, "sq": -0.08, "lift": -0.13, "lw": 1.0, "legs": [-0.75, -0.15, 1.2, -1.0]}],
+		[0.29, {"y": -0.4, "p": -0.3, "r": 0.15, "lift": -0.12, "lw": 1.0, "legs": [-0.7, -0.2, 1.15, -0.95]}],
+		[0.48, {"y": -0.25, "p": 0.04, "sq": 0.08, "lift": -0.05, "lw": 1.0, "legs": [-0.5, -0.6, 0.7, -0.8]}]]},
 }
