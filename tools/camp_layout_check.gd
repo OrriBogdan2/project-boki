@@ -3,7 +3,7 @@ extends RefCounted
 ## by tools/make_hollowcrown.py). Builds the real world for a few seeds and asserts, on the camps the match
 ## would spawn: how many of each kind per region (12 light, 9 normal, 7 heavy, 79 monsters), and the placing
 ## rules: 30-70 m apart inside a region; 14 m from a train halt; 20 m from a lair gate, a vault and a way-out
-## seat (dock, outpost, hatch); cover within 12 m; a region's biggest camp (heavy, else normal) is its
+## seat (outpost, the Heart); cover within 12 m; a region's biggest camp (heavy, else normal) is its
 ## nearest to the map centre (the Crown: its three heavy camps are nearer than its normal one); within
 ## 190 m of the centre; and on flat, level, walkable ground (no slope, stair, rock or tree). Never touches the save.
 
@@ -41,8 +41,8 @@ func run(main: Node) -> void:
 	var far: Array = []         # points the camps keep clear of: [pos, min distance, what]
 	for s in L["train"]["stations"]: far.append([Vector2(s[0], s[1]), FROM_HALT, "halt"])
 	for p in L["spawn_points"]["vault"]["points"]: far.append([Vector2(p[0], p[1]), FROM_SEAT, "vault"])
-	for k in ["docks", "outposts", "hatches"]:
-		for s in L[k]: far.append([Vector2(s[0], s[1]), FROM_SEAT, k.trim_suffix("s")])
+	for s in L["outposts"]: far.append([Vector2(s[0], s[1]), FROM_SEAT, "outpost"])
+	far.append([Vector2(L["heart"][0], L["heart"][1]), FROM_SEAT, "heart"])
 	for sd in SEEDS:
 		var w := World.new()
 		w.generate_authored(L, sd)

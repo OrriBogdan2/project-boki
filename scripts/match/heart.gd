@@ -276,7 +276,7 @@ func _tide_tick(dt: float) -> void:
 	var tr := tide_r(m)
 	var d := tide_dmg(st)
 	for h in m.hunters:
-		if h.remote or h.downed or h.out or h.extracted:
+		if h.remote or h.downed or h.out or h.extracted or h.riding or h.dropping:     # (a late joiner's ride and drop)
 			continue
 		if Vector2(h.pos.x - site.x, h.pos.z - site.z).length() > tr:
 			h.hurt(d, null, {"src": "heat", "tags": ["tide"]})
