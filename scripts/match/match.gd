@@ -5621,6 +5621,7 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5682,6 +5683,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	ult_hint.tick(self)
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	if _tip_t > 14.0:
 		if player.ak:

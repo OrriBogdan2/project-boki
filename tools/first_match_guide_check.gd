@@ -7,6 +7,8 @@ extends RefCounted
 ##      it" shows alone; after landing "Clear the camp to level up" points at the nearest live camp until
 ##      your squad's first clear, then never again
 ##   4. every line fits the banner lane in at most two lines at 1280x720
+##   5. the first-ready hero ultimate hint (FirstUltHint): only when ready, never in a fight's first 2 s of
+##      damage, the key from Settings.key_cap, once per save, a short line for every hero
 var bad := 0
 var m: Match
 var main: Node
@@ -21,6 +23,7 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	_save_flag()
 	_walk()
+	_first_ult()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -178,3 +181,60 @@ func _fit() -> void:
 		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
 			px -= 1
 		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])
+
+# ------------------------------------------------------------------ 5. the first-ready ult hint
+func _first_ult() -> void:
+	var p: Hunter = m.player
+	ok(p.ak != null, "the player is a hero with a kit")
+	if p.ak == null:
+		return
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(FirstUltHint.KEY)
+	p.downed = false
+	p.dropping = false
+	p.lvl = int(Hunter.ULT_AT[0]) - 1
+	p.ak.cd["x"] = 0.0
+	m._tip_t = 2.0
+	m.time = 100.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "below the ult level: no hint")
+	p.lvl = int(Hunter.ULT_AT[0])
+	p.ak.cd["x"] = 5.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "cooling down: no hint")
+	p.ak.cd["x"] = 0.0
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != p and h.team != p.team:
+			foe = h
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m.time = 101.0
+	CombatBus.hit_landed.emit(p, foe, 5.0, ["primary"])
+	m.time = 101.9
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "ready 1.9 s into a fight: held back")
+	var before: int = m.hud.msgs.count()
+	m.time = 102.1
+	m._tips()
+	ok(bool(seen.get(FirstUltHint.KEY, false)), "ready 2.1 s into the fight, still being hit: shown")
+	ok(m.hud.msgs.count() == before + 1, "through the hint lane, one line")
+	var want := FirstUltHint.text(p.ak)
+	var cap := Settings.key_cap("hunter_ult")
+	ok(want.begins_with(cap + " is ready: " + String(p.ak.x_def()["name"]) + ", "), "the key cap and name (%s)" % want)
+	m._tips()
+	ok(m.hud.msgs.count() == before + 1, "once per save: no second line")
+	seen.erase(FirstUltHint.KEY)
+	m.time = 200.0
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "a new fight after a quiet spell holds it again")
+	seen[FirstUltHint.KEY] = true
+	for f in DirAccess.get_files_at("res://content/archetypes"):
+		if not f.ends_with(".json"):
+			continue
+		var json: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		var xd: Dictionary = json.get("x", {})
+		if xd.is_empty():
+			continue
+		var line := FirstUltHint.short_line(String(xd.get("desc", "")))
+		ok(line != "" and line.length() <= FirstUltHint.LINE_MAX + 1, "%s: a short line (%s)" % [f, line])
