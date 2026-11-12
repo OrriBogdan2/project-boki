@@ -3027,6 +3027,7 @@ func _dash_anim_kind() -> String:
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
+	s[WardenLookAt.LOOK] = WardenLookAt.aim_of(self)
 	s["grounded"] = grounded and pad.is_empty()
 	s["gliding"] = gliding and not plunging()
 	s["diving"] = plunging()

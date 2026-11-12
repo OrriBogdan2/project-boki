@@ -44,7 +44,7 @@ Each bone's head sits on its rig node's origin, Y along the limb.
 |---|---|---|
 | `root` | `Rig` | body lean, squash, dives, the downed fall |
 | `hips` | `Rig/Torso` | the torso's twist, bob and lean; everything above hangs on it |
-| `head` | `Rig/Torso/HeadPivot` | look, nod, emotes; the `head`, `jaw` sliders scale it |
+| `head` | `Rig/Torso/HeadPivot` | look, nod, emotes; the `head`, `jaw` sliders scale it; the look-at layer turns it to the aim (LOOK_AT.md) |
 | `upper_arm.L` / `.R` | `Rig/Torso/ArmLPivot` / `ArmRPivot` | arm IK (hands on grips, free hands, `fl`/`fr` keys) |
 | `forearm.L` / `.R` | `.../ArmLPivot/Elbow` / `ArmRPivot/Elbow` | elbow bend |
 | `hand.L` / `.R` | `.../Elbow/Hand` | the hand (kits read its world position: `ArchKit.hand_pos`) |
