@@ -300,6 +300,38 @@ source number either way.
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
+## Strike snaps: per-move blend-in (`--clip-check`)
+A keyed move blends in over `WardenClips.FADE` (0.1 s), but most strike and release keys sit at 0.02-0.07 s of the
+kit clock (`kmove_t`), so the strike pose showed at a third to two thirds weight on its own hit frame; the source shows
+one-frame snaps (briefs/hero-ref/pin.md f69). Measured on the clips (the key is where the fastest arm bone, hand,
+fingers or held weapon, drops back under a third of its peak; a snap peaks at 8 m/s or more), 99 moves over the 12
+Hunters strike inside the blend. Each now carries its own `"fade"` in `content/rules/warden_anim/<art>.json`: one
+frame past its key, at most 0.05 s, so it is at full weight on the key from locomotion. The upper-body path now honours
+`"fade"` too (it was always 0.1). Clips and kit numbers are unchanged. `--clip-check` asserts it per Hunter.
+Kael's wind-ups keep their slower authored fades (0.18-0.2); Ryzz's `mage_dash_land` takes 0.08 and `mage_lmb_l` 0.067 (0.05 popped the hand
+in the dash flow and over the upper-body crossfade); keys at 0.1 s or later were already full.
+
+| Hunter (art) | Moves (key s; fade 0.05 unless shown) |
+|---|---|
+| archer (hem) | `arc_draw` 0.034, `arc_tap` 0.034, `arc_loose` 0.017 (0.03), `arc_perfect` 0.017 (0.03), `arc_super` 0.034, `arc_heavy_wind` 0.067, `arc_heavy` 0.034, `arc_hail` 0.042, `pin_roll` 0.034, `pin_flick` 0.034, `pin_ult_cast` 0.034, `pin_ult_nock` 0.034, `pin_ult_final` 0.067 |
+| thief (sable) | `thf_lmb_r` 0.034, `thf_lmb_l` 0.034, `thf_primed` 0.034, `thf_vault_l` 0.034, `thf_vault_f` 0.034, `thf_exdash` 0.042, `thf_bola` 0.034, `thf_arrive` 0.034, `thf_flourish` 0.034 |
+| tender (pip) | `mm_shot_r` 0.067, `mm_shot_l` 0.067, `mm_seed` 0.025 (0.04), `mm_skip` 0.067, `mm_float` 0.034, `mm_kindled` 0.067, `mm_call` 0.067, `mm_call_end` 0.034 |
+| gunslinger (vex) | `gunslinger_dash` 0.034, `gunslinger_x` 0.067, `gunslinger_knock` 0.059 |
+| ashwick (cinder) | `lw_stoke_lance` 0.034, `as_leap` 0.034, `as_cloak` 0.034, `lw_stoke` 0.034, `lw_land` 0.034, `lw_jump` 0.034 |
+| mage (ryzz) | `mage_lmb_l` 0.067 (0.067), `mage_lmb_r` 0.042, `mage_rmb_hold` 0.067, `mage_rmb` 0.034, `mage_dash` 0.025 (0.04), `mage_dash_go` 0.075, `mage_dash_land` 0.067 (0.08), `mage_dash_ex` 0.034, `mage_e_snap` 0.034, `mage_live` 0.034, `mage_x` 0.025 (0.04), `mage_x_dive` 0.067 |
+| dolm (tarek) | `breah_wind` 0.042, `breah_punch` 0.067, `breah_crouch` 0.034, `breah_leap` 0.034, `breah_slam` 0.034, `breah_lunge` 0.067, `breah_exdash` 0.034, `breah_sense` 0.034, `breah_spine_aim` 0.034, `breah_spine` 0.067, `breah_hop` 0.034, `breah_skate` 0.042 |
+| rimewright (claire) | `tm_dart_l` 0.067, `tm_dart_heavy` 0.034, `tm_spear_aim` 0.034, `tm_spear` 0.067, `tm_skate_stop` 0.034, `tm_rime` 0.034, `tm_rime_carry` 0.034 |
+| dredge (dredge) | `dr_reel` 0.067, `dr_dive` 0.050, `dr_lunge` 0.034, `dr_pounce` 0.034, `dr_flex` 0.034, `dr_jump` 0.034 |
+| bulwark (breaker) | `bul_smash` 0.067, `bul_launch` 0.067, `bul_guard` 0.034, `bul_break` 0.034, `bul_charge` 0.067, `bul_ult_wind` 0.067, `bul_ult_slam` 0.067 |
+| ostra (ostra) | `ostra_orb` 0.067, `ostra_snap` 0.034, `ostra_swap_aim` 0.067, `ostra_well_snap` 0.034 |
+| juggernaut (kael) | `jug_slash_r` 0.034, `jug_slash_l` 0.034, `jug_wave` 0.067, `jug_lunge` 0.034, `jug_dash` 0.075, `jug_exdash` 0.034, `jug_reel` 0.034, `jug_spin` 0.075, `jug_chainlunge` 0.034, `jug_haulslam` 0.034, `jug_guard` 0.034, `jug_riposte` 0.034 |
+## Run start and stop poses (`WardenStride`, `--stride-check`, `--stride-shots`)
+Decision 0020 gave every Hunter the source's acceleration and a 0.3-0.5 m stop slide; the clips still snapped from idle to a run and back. `WardenStride` (scripts/heroes, called at the end of `WardenClips.step`, nothing in hunter.gd) adds both on top of the walk/run loops, from the speed and the brake state, never a timer:
+- **Start:** the hips lean along the way he goes by `lean_deg`, scaled by how far the *shown* speed (it climbs to the real one over 0.3 s) still lags it, so the lean settles as speed builds and is gone at a steady run.
+- **Stop:** a let-go (speed falling under its peak from a walk or run) shifts the weight back by `settle_deg` over the slide (`HunterMove.slide`). Two-bone foot pins: the trailing foot swings to its idle spot as the body halts, the leading foot stays where it was planted, then steps in over `step_s`, then the idle loop. The planted foot slides 0.7-1.8 cm in the stop (the loops alone: 20-90 cm; limit 3 cm). The idle spots are read off the standing pose; the drawn body's lead over the physics is learned off each stop.
+- **Skips:** a dash, a cast or keyed move, a hit or stun, the air, a crouch dip, a knock or kit step (speed over 1.15x run that nothing keyed) show neither, in that frame, with no ease-out.
+- **Per Hero** (content/rules/warden_stride.json): Kael, Albert and Tenzo lean less, settle 9-10 degrees and step in over 0.28-0.3 s; Vex, Neve, Sable and Pip lean 10-12 degrees, settle 3.5-4 and step in over 0.16-0.17 s.
+- `--stride-check` covers all 12 Hunters; `--stride-shots` films a stop from a run with the stride on and off (docs/shots/anim-run-start-stop/).
 
 ## Not touched
 
