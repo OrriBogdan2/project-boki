@@ -15,3 +15,10 @@ Found (before), top three fixed:
 Checked fine: every slot has icon, name and key where it has one; the compare card stays on screen at both sizes;
 the UI scales x2 at 3440x1440 (content scale), so the ultrawide layout matches 720p at the right edge.
 Not touched: loot rows themselves (ext/loot-simple-1111 rewrites that window), smart-loot double F.
+
+GPU set (`gpu_before_*`, `gpu_after_*`): jobq 20261111-234426-30321, -234437-19744 (after), -234552-31933,
+-234606-03032 (before; the 3440x1440 one wrote all three shots, then hung at quit until its timeout). They match
+the local shots. An earlier GPU run crashed on `breaker.glb`: the uploaded tree's `.godot/imported` cache came from
+0.24.5 art, and a game run never reimports, so run `godot --headless --import` before submitting a tree.
+Seen, not fixed (in before and after): the bottom-right key legend card shows faintly through the window and
+sticks out a few px under its bottom edge at 720p; the timer text over the level chip is the shot tool's endless match.
