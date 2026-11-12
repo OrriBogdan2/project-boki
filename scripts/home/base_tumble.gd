@@ -141,11 +141,9 @@ class Run:
 					_tell()
 			"result": state = "done"
 
-	## Side i's push for a stat this exchange: base plus the stat, times the type edge, the press and following.
+	## Side i's push for a stat this exchange: base plus the stat, times the press and following.
 	func push(i: int, s: String, press_grade: String) -> float:
 		var p := (float(R["base"]) + BaseTumble.stat(recs[i], s)) * float(R["press"][press_grade])
-		if BaseShove.has_edge(recs[i], recs[1 - i]):
-			p *= float(R["edge"])
 		if i == 0 and pick == want:
 			p *= float(R["follow"])
 		return p

@@ -320,18 +320,14 @@ Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.
 | Setting | Value |
 |---|---|
 | push | 1 |
-| push_doc | Push force of a Boki with no Power points, before mood, trust and the type edge. |
+| push_doc | Push force of a Boki with no Power points, before mood and trust. |
 | power_per_point | 0.005 |
 | guard_per_point | 0.005 |
-| stats_doc | Each trained Power point adds this fraction to its push; each Guard point adds this fraction to its hold (half a percent a point, like the match bonus); 20 points are worth about the 10% type edge. A side's push against the other's hold is push / hold, so the drift is attacker over defender both ways. |
+| stats_doc | Each trained Power point adds this fraction to its push; each Guard point adds this fraction to its hold (half a percent a point, like the match bonus); 20 points are worth 10% of push. A side's push against the other's hold is push / hold, so the drift is attacker over defender both ways. |
 | mood | [0.92, 1.08] |
 | mood_doc | Push multiplier at joy 0 and at joy 100 (linear in between). |
 | trust_max | 1.05 |
 | trust_doc | Push multiplier at trust 100 (linear from 1.0 at trust 0). |
-| edge | 1.1 |
-| edge_doc | Push multiplier for a Boki whose species theme beats the other's in 'beats' (a 10% edge, never both ways). |
-| beats | {"ember": ["frost", "bloom", "swarm"], "frost": ["storm", "tempest", "gravity"], "bloom": ["stone", "echo", "spore"], "stone": ["ember", "venom", "shadow"], "storm": ["swarm", "prism", "titan"], "shadow": ["lunar", "prism", "echo"], "lunar": ["spore", "venom", "gravity"], "venom": ["bloom", "swarm", "tempest"]} |
-| beats_doc | Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way. |
 | rate | 1 |
 | rate_doc | Balance moved a second for a net push of 1.0 (push over hold, one side minus the other). |
 | wobble | 0.7 |
@@ -373,9 +369,7 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 | clash_step | 0.5 |
 | clash_doc | The same move on both sides: the higher push for that stat moves the other half a step (nothing on a dead level). |
 | base | 10 |
-| base_doc | Points of push every Boki has before its stat, so the edge, press and follow multipliers count with zero trained points. |
-| edge | 1.1 |
-| edge_doc | Push multiplier when a species theme beats the other's in base_shove.json 'beats' (the Shove's 10% type edge). |
+| base_doc | Points of push every Boki has before its stat, so the press and follow multipliers count with zero trained points. |
 | follow | 1.1 |
 | follow_trust | 1 |
 | follow_doc | Going with what your own Boki wants: push multiplier for that exchange and trust (points, paid when the bout is settled). Overriding it costs nothing. |
@@ -436,8 +430,6 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | mood_doc | Strength multiplier at joy 0 and at joy 100 (linear in between). |
 | trust_max | 1.05 |
 | trust_doc | Strength multiplier at trust 100 (linear from 1.0 at trust 0). |
-| edge | 1.08 |
-| edge_doc | Strength multiplier for a Boki whose species theme beats the other's (the 'beats' table of content/rules/base_shove.json, so there is one element table). |
 | spike | {"great": 0.3, "good": 0.6, "miss": 1.0} |
 | spike_doc | Your one call: the backed Boki's next hit is a spike and the other side's chance to return it is multiplied by this. |
 | serve_s | 0.8 |
