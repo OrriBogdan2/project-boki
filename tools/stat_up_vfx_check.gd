@@ -95,7 +95,7 @@ func run(m: Node, mode: String = "check") -> void:
 func _clicks(glint: StatGlint) -> void:
 	await _settle(glint)
 	var b: Dictionary = home.kins[1]
-	Care.add_stat(home.kins[0]["rec"], "power", 1)
+	Care.add_stat(home.kins[0]["rec"], "guard", 1)
 	Care.add_stat(b["rec"], "speed", 2)
 	await _frames(2)
 	ok(glint.glints.size() == 2, "a glint over each Boki")
@@ -118,8 +118,8 @@ func _clicks(glint: StatGlint) -> void:
 		var was: int = lit.get("from", {}).get(stat, -1)
 		ok(was == now - (2 if stat == "speed" else 1) and float(lit.get("left", 0.0)) <= StatGlint.LIT_S,
 			"%s: %s is marked %d -> %d" % [rec["name"], stat, was, now])
-		var rows := home.panel_host.find_children("Lit_*", "PanelContainer", true, false)
-		ok(rows.map(func(n): return n.name) == ["Lit_" + stat],
+		var rows: Array = home.panel_host.find_children("Lit_*", "PanelContainer", true, false)
+		ok(rows.map(func(n): return String(n.name)) == ["Lit_" + stat],
 			"%s: exactly the %s row is marked on the card" % [rec["name"], stat])
 		home._close_panel()
 		await _frames(2)
