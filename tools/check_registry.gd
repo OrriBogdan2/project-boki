@@ -112,6 +112,7 @@ const CHECKS := {
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],
 	"--boki-react-check": ["res://tools/boki_react_check.gd", "boki_react_check", null],      # a Boki flinches when hit
 	"--hp-regen-check": ["res://tools/hp_regen_check.gd", "hp_regen_check", null],
+	"--summon-cc-check": ["res://tools/summon_cc_check.gd", "summon_cc_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	# level-up / ready: one body glow, no ring
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
