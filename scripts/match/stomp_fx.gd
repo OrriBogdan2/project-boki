@@ -86,8 +86,10 @@ func release(o: Hunter, why: String) -> void:
 ## How hard the wisp o is pressed down right now, 0..1: a hold that grows over the stomp and a squash
 ## at each slam that eases off. 0 when nobody is stomping it. HunterWisp squashes the Wisp by it.
 static func press(o: Hunter) -> float:
-	var s := o.get_meta("stomped_by", null) as Hunter
-	if s == null or not is_instance_valid(s) or s.stomp.is_empty():
+	if not o.has_meta("stomped_by"):
+		return 0.0
+	var s := o.get_meta("stomped_by") as Hunter
+	if not is_instance_valid(s) or s.stomp.is_empty():
 		return 0.0
 	var hold := 0.25 + 0.25 * float(s.stomp["t"]) / Stomp.TIME
 	return hold + (1.0 - hold) * _slam(s)
