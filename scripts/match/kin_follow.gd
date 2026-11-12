@@ -157,7 +157,7 @@ static func sic(k: Kin, p: Vector3) -> void:
 	if k.cmd == "return":
 		k.cmd = "follow"
 	k.hold_at = tgt if k.cmd == "guard" else Vector3.INF
-	k.m.sfx("throw", k.pos, -2.0)
+	SfxCast.hold_back(func(): k.m.sfx("throw", k.pos, -2.0))      # (the throw event plays it there)
 	KinNet.event(k.m, "throw", k, tgt)
 	CombatBus.kin_thrown.emit(k, k.owner_h)
 
