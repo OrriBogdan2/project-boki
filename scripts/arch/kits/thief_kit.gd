@@ -35,10 +35,6 @@ const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
-## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
-## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
-const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
-const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -431,7 +427,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 
 # ------------------------------------------------------------------ dash: Vault
 ## The Cartwheel: a Vault charge, the same in the air as on the ground (item 183); out of charges, the class's
-## long dash, flipped her way. Both run down VAULT_CURVE and the air's drag carries her on to the landing like
+## long dash, flipped her way. Both run down her fitted curve and the air's drag carries her on to the landing like
 ## every Hunter. The sheet's air cartwheel, 8.4m held flat over 0.95s, flew far past the cast.
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
@@ -440,8 +436,9 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	var air := use_ex or not h.grounded
 	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -452,7 +449,8 @@ func _empowers(use_ex: bool) -> bool:
 		return false
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
-## The Cartwheel's speed curve, on the ground and in the air; from the air it ends where she lands.
+## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
+## it ends where she lands.
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -463,8 +461,6 @@ func _tick_vault(dt: float) -> void:
 		return
 	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
-		return
-	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
