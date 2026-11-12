@@ -6,8 +6,8 @@ extends "res://tools/archetype_check.gd"
 ## cooldown or charge is back, LMB between. Each at rank 0 (unspent, slot_lv 1) and max.
 ## Rows outside RATIO_LO..RATIO_HI fail unless OVERRIDES cites the owner decision. --write updates docs/TTK.md.
 
-const RATIO_LO := 0.8      # ours / source time to knock: the parity bar either side (1.25 = 1 / 0.8)
-const RATIO_HI := 1.25
+const RATIO_LO := 0.85     # ours / source time to knock: the parity bar, +-15% (owner digest 1112)
+const RATIO_HI := 1.15
 const SOURCE_DR := 0.2     # Common armour reduction (docs/SUPERVIVE_DATA.md section 3; its durability outlasts it)
 const OUR_HP := 154.0      # mean of the 12 Hunters' health (light 124, medium 145, heavy 193)
 const SRC_HP := 1285.0     # mean Base HP of the 12 (supervive_physics.md attribute table)
@@ -57,11 +57,17 @@ const HEROES := [
 const ULT_HITS := {"rimewright": 155.0}
 const ULT_WAIT := 4.5
 
+## Casts whose hit hands another slot back: hero -> [slot, slot it resets]. Joule's Voltaic Spear leaves a Lightning
+## Orb that resets Surge (supervive_kits.md:66); the fight takes the orb at once, so each Spear adds one Surge.
+const RESETS := {"mage": ["rmb", "dash"]}
+
 ## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
 const OVERRIDES := {}
 
 var rows: Array = []
 var hits: Array = []      # [id, source name, slot, our share of the target, source share]
+var blowout := false      # Sparkle's Blowout live: only for the rows that show it, never judged
+var static_max := 0       # her own Static cap, put back for those rows (the parity rows lift it out of reach)
 
 ## Seconds until the [time, damage] hits add up to `need`, or -1.
 func _src_knock(shots: Array, need: float) -> float:
@@ -94,12 +100,19 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 		n += 1
 		t += float(lmb[1])
 	for slot in hero[5] if combo else {}:
-		var a: Array = hero[5][slot]
-		var dmg := float(a[0]) * (1.0 + float(a[1]) * float(max_rank))
+		var dmg := _cast_dmg(hero[5][slot], max_rank)
 		for at in _casts(hero, slot, max_rank):
 			var k := 1.0 + float(daze.get(slot, 0.0)) * float(_in_daze(dazed, daze, at))
 			shots.append([at, dmg * k])
+	var reset: Array = RESETS.get(hero[0], []) if combo else []
+	if not reset.is_empty():
+		for at in _casts(hero, reset[0], max_rank):
+			shots.append([at, _cast_dmg(hero[5][reset[1]], max_rank)])
 	return _src_knock(shots, need)
+
+## One source cast's damage at rank 0 or max.
+func _cast_dmg(a: Array, max_rank: bool) -> float:
+	return float(a[0]) * (1.0 + float(a[1]) * float(max_rank))
 
 ## The times the source casts `slot` in a fight: every charge at 0 s, then again each cooldown.
 func _casts(hero: Array, slot: String, max_rank: bool) -> Array:
@@ -133,20 +146,23 @@ func _fight(arch: String, rank: int, armoured: bool) -> Array:
 	for s in ["sec", "dash", "kin"]:
 		P.slot_lv[s] = rank
 	P.dashes = P.max_dashes()
-	_leave_out_conditionals(P)
+	_leave_out_blowout(P)
 	T.max_hp = OUR_HP
 	T.hp = OUR_HP
 	T.max_armor = round(OUR_HP * Hunter.ARMOR_DUR) if armoured else 0.0
 	T.armor = T.max_armor
 	return [r[0], P, T, T.pos]
 
-## Sparkle's Blowout (4 Static, dash through) and her Storm Rod orb (a pickup that resets the dash) are conditional
-## bonuses the source gives no number ("massive bonus", supervive_kits.md:64-66). The table leaves conditionals out of
-## the source side, so both are off here; --mage-combo-check holds the passive itself.
-func _leave_out_conditionals(P: Hunter) -> void:
-	if P.ak.res_def().get("id", "") == "sparks":
-		P.ak.res_def()["max"] = STATIC_NEVER
-		P.ak.rmb_def()["coil"]["mote_life"] = 0.0
+## Sparkle's Blowout (4 Static, run through) is a conditional bonus the source gives no number for ("massive bonus",
+## supervive_kits.md:64-67), so the parity rows leave it out of ours as the source side does; her charge orb is
+## counted on both sides (RESETS). The "+ Blowout" rows show it live; --mage-combo-check holds the passive itself.
+func _leave_out_blowout(P: Hunter) -> void:
+	var rd := P.ak.res_def()
+	if rd.get("id", "") != "sparks":
+		return
+	if static_max == 0:
+		static_max = int(rd["max"])
+	rd["max"] = static_max if blowout else STATIC_NEVER
 
 ## One step: the target stays put, the Hunter aims at it, then the world moves on.
 func _tick(m: Match, P: Hunter, T: Hunter, spot: Vector3) -> void:
@@ -272,6 +288,15 @@ func run(main_node: Node) -> void:
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
 			_add_hit(hero, slot, ours_share, src_share)
+	blowout = true
+	var mage: Array = HEROES.filter(func(h): return h[0] == "mage")[0]
+	for rank in [1, 3]:
+		var row := _cell(mage, "combo + Blowout %s" % ("rank 0" if rank == 1 else "rank max"),
+			await our_ttk(mage, true, rank), src_ttk(mage, true, rank == 3))
+		row["state"] = "shown"
+		rows.append(row)
+		print("TTK shown mage combo + Blowout ours %s s, ratio %s" % [_fmt(row["ours"]), _ratio_text(row["ratio"])])
+	blowout = false
 	for id in ULT_HITS:
 		var ult_hero: Array = HEROES.filter(func(h): return h[0] == id)[0]
 		_add_hit(ult_hero, "x", await our_hit(id, "x"), float(ULT_HITS[id]) / _src_hp(ult_hero))
