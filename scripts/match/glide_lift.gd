@@ -43,4 +43,4 @@ func open_kick(h: Hunter) -> void:
 ## Airborne long enough, gliding, or just off the glider: pressing into a wall means climbing it, not
 ## stepping back up a terrace you just left.
 static func airborne_long(h: Hunter) -> bool:
-	return h.gliding or h.glide_off_t < Hunter.FEATHER_KEEP or h.air_t > LEDGE_AIR_T
+	return h.gliding or h.moves.feathering() or h.air_t > LEDGE_AIR_T

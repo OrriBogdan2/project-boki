@@ -2714,7 +2714,7 @@ func _boss_check() -> void:
 			while tq2 < 0.5:
 				m.step(Match.DT); tq2 += Match.DT; god.call()
 				qy = maxf(qy, Q.pos.y)
-			var refused: bool = not (L["flown"] as Array).has(Q) and qy <= qy0 + 0.05 and not Q.auto_glide
+			var refused: bool = not (L["flown"] as Array).has(Q) and qy <= qy0 + 0.05 and not Q.moves.auto_glide
 			spot.call(Q, up)
 			run.call(0.2)
 			# (a person walks off an island's edge now, so an outsider shoved off the lair may fall out of the match: that counts as shoved out)

@@ -209,14 +209,10 @@ var shot_down := false         # knocked out of an overheated glide: stunned whe
 var below_lip := false         # dropped below the nearest island's edge, over the abyss
 var wall_hit_v := Vector2.ZERO  # this step's speed into an island side that stopped you (for the ledge catch)
 var lip_y := 0.0               # that edge's height: where your balloon floats
-var heat_burn := 0.0
 var in_current := false        # riding a wind road or an updraft: the glider doesn't heat up
 var glide_max := GLIDE_TIME
 var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
-var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
-var auto_glide := false        # carried by a lair's escape updraft: the glider opens and stays open
-                               # by itself until you land (hold glide yourself to take it back)
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
@@ -802,7 +798,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
 	if ak and ak.cast_locked() and not grounded and not gliding:
-		_glide_armed = true      # a cast keeps the glider shut: held, it opens as the cast ends
+		moves.armed = true       # a cast keeps the glider shut: held, it opens as the cast ends
 	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
 		return
 	if not lfloat.is_empty():
@@ -815,7 +811,7 @@ func do_jump() -> void:
 		# press jump mid-leap onto higher ground and the glider opens, keeping the leap's speed
 		if not pad.get("ledge", false) and float(pad["t"]) > 0.12 and can_glide():
 			pad = {}
-			_open_glider()
+			moves.open_glider("press")
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
 		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
@@ -841,10 +837,8 @@ func do_jump() -> void:
 		return
 	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
 	var near_ground := HunterMove.near_landing(vel.y, pos.y - ground()) and not over_void()
-	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
-		_open_glider()
+	if moves.press_glide(near_ground):
 		return
-	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = HunterMove.jump_buffer_s
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
@@ -861,8 +855,6 @@ const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its
 const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
 const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
 const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
-var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
-var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
 ## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
 ## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
@@ -878,42 +870,16 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 		return minf(vy + acc * dt, maxf(top, vy))
 	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, ABYSS_LIP_VY), ABYSS_BRAKE * dt)
 
-## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
-## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
-var _glide_armed := false
-var _glide_btn_held := false
-
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
 		and not (ak != null and ak.no_glide()) and not AirLimits.glide_locked(self)
 
-## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
-## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
-## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled.
-func _dash_into_glide() -> bool:
-	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or glide_cd > 0.0 or downed or shot_down:
-		return false
-	roll_t = 0.0
-	shove = {}
-	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
-		_glide_boost_fx()
-	return true
-
-func _open_glider() -> void:
-	if not moves.open_glider():
-		return
-	_glide_armed = false
-	grounded = false
-	glider_sfx("open")
-	vel.y = Loco.glide_start(vel.y)
-	glide_lift.open_kick(self)
-
 var boost_fx_t := 0.0               # the boost trail lasts while you're well above cruise speed (render)
 
-## Reads as a boost: a loud whoosh, a trail that stays while you're fast (see render), and for you a brief
-## camera pull-back.
-func _glide_boost_fx() -> void:
+## A dash into a glide reads as a boost (HunterLoco.dash_into_glide): a loud whoosh, a trail that stays while you're
+## fast (see render), and for you a brief camera pull-back.
+func glide_boost_fx() -> void:
 	m.sfx("whoosh", pos, -1.0 if is_local() else -9.0, 1.2)
 	m.sfx("glide", pos, -6.0 if is_local() else -14.0, 1.6)
 	boost_fx_t = 1.6
@@ -2133,7 +2099,7 @@ func _physics(dt: float) -> void:
 						HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
-		elif glide_off_t < FEATHER_KEEP and not dropping:
+		elif moves.feathering() and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
 			hv = Loco.glide_step(hv, mv * gsf, gsf, Loco.glide_carry(arch), dt)
@@ -2436,7 +2402,8 @@ func _interrupt_consume() -> void:
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
 
-## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
+## The glider each step: the opening drop here, every other glider in HunterLoco.glide_tick (it folds when you land,
+## let go, dash, are stunned or spiked).
 var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
@@ -2456,67 +2423,7 @@ func _update_glide(dt: float) -> void:
 			diving = false
 			glide_fuel = 1.0
 		return
-	if grounded:
-		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
-		glide_off_t = 9.0
-	elif not gliding:
-		glide_off_t += dt
-	if grounded:
-		shot_down = false
-	# a player takes the glider back with a fresh press of glide; a bot's own glide input (it holds
-	# glide over the void to recover) must not fold the glider it's being carried on
-	var glide_press: bool = inp.get("glide", false) and not _auto_glide_held and ctrl != "bot"
-	_auto_glide_held = inp.get("glide", false)
-	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
-		auto_glide = false
-		_glide_armed = _glide_armed or (glide_press and not grounded)
-	PadFlight.step(self)             # off a jump pad: the glider opens at the apex
-	var glider_shut_in_air := not gliding and not auto_glide and not grounded and not dropping and can_glide()
-	if glider_shut_in_air and not m.world.updraft_at(pos).is_empty():
-		auto_glide = true            # rising air off an edge opens the glider by itself and carries you up (DECISIONS)
-	# an overheated glider scorches you while it stays open
-	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
-		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)
-		if heat_burn >= 20.0:                  # (in ~20-damage ticks, ~2 a second: not a stream of numbers)
-			heat_burn -= 20.0
-			hurt(20.0, null, {"src": "heat"})
-	# an overheated glider stays open until you land or get hit again; a knock carries an open one (0055)
-	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
-	var want: bool = inp.get("glide", false) or auto_glide
-	var btn_down: bool = inp.get("glide_btn", false)
-	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
-	var was_btn := _glide_btn_held
-	_glide_btn_held = btn_down
-	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
-	if gliding:
-		if not want or not can:
-			gliding = false
-			glide_off_t = 0.0 if want == false and can else 9.0     # (feathering) a let-go, not a knock
-			glider_sfx("close")
-		elif not in_current:
-			# heat builds faster while the glider is lifting you out of the abyss
-			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
-			var lifting := below_lip and lip_y - pos.y > 0.3 and vel.y > 0.0
-			lift_t = lift_t + dt if lifting else 0.0
-			var hk := ((FEATHER_TAP_HEAT if lift_t <= FEATHER_TAP else 4.0) if lifting else 1.0) * (2.0 if hit_heat_t > 0.0 else 1.0)
-			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
-		if not dropping:
-			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif btn_down and not was_btn and _dash_into_glide():
-		_open_glider()
-	elif want and can and hold_opens and loco.can(Loco.S.GLIDING) and air_t >= (0.0 if btn_down else GLIDE_ENGAGE) \
-			and jump_at != m.time and not AirLimits.glide_locked(self):      # (the press that jumped is not also a glide press)
-		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
-		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
-		moves.open_glider()
-		_glide_armed = false
-		if below_lip:
-			m.sfx("glide", pos, -2.0, 1.4)
-			add_stat("feathers")
-		glider_sfx("open")
-		vel.y = Loco.glide_start(vel.y)
-		glide_lift.open_kick(self)
+	moves.glide_tick(dt)
 
 # Ledge float: touch the side of any ground above you while you're still alive and you float
 # back up onto it, the way Supervive does it. Walking into a step up a few terraces high does
@@ -2554,7 +2461,7 @@ func _try_ledge_grab(dt: float) -> void:
 		# no magnet: you have to be below the edge, right up against the cliff, and pushing into it
 		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
-			var shoved := over_void() or gliding or glide_off_t < FEATHER_KEEP     # thrown or glided into the face
+			var shoved := over_void() or gliding or moves.feathering()     # thrown or glided into the face
 			if shoved and wall_hit_v.length() >= 2.0:
 				mv = wall_hit_v.normalized()
 			elif carry_v >= MantleCarry.PUSH_SPEED:

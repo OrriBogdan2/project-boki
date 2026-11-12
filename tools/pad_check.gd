@@ -113,7 +113,7 @@ func _flight(m: Match, land: Vector3, move: Vector2) -> Dictionary:
 ## Back on the ground at `at`, still, glider shut.
 func _reset(m: Match, at: Vector3) -> void:
 	var h: Hunter = m.player
-	h.auto_glide = false
+	h.moves.auto_glide = false
 	h.pad_flight = {}
 	h.teleport(at)
 	h.vel = Vector3.ZERO

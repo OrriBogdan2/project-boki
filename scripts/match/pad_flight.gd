@@ -54,10 +54,10 @@ static func step(h: Hunter) -> void:
 		if h.gliding or not h.can_glide():
 			h.pad_flight = {}        # opened by hand already, or a state that can't glide: a plain fall
 			return
-		h.auto_glide = true
+		h.moves.auto_glide = true
 		return
 	var land: Vector3 = h.pad_flight["land"]
-	if not h.auto_glide or not land.is_finite():
+	if not h.moves.auto_glide or not land.is_finite():
 		h.pad_flight = {}            # a fresh press took the glider, or a pocket pad: nothing to carry to
 		return
 	var steering: bool = h.ctrl != "bot" and (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.2
@@ -68,7 +68,7 @@ static func step(h: Hunter) -> void:
 	var set_v := minf(hv.length(), h.base_speed * SET_DOWN)
 	var drop_t := sqrt(2.0 * maxf(0.0, h.pos.y - land.y) / Hunter.H_GRAV)      # s the fall from here takes
 	if to.length() <= maxf(LAND_R, set_v * drop_t):
-		h.auto_glide = false         # where the drop comes down on the landing: fold the glider and drop
+		h.moves.auto_glide = false         # where the drop comes down on the landing: fold the glider and drop
 		hv = to.normalized() * set_v
 		h.pad_flight = {}
 	h.vel.x = hv.x

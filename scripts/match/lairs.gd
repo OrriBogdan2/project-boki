@@ -852,7 +852,7 @@ func _updraft_view(L: Dictionary) -> void:
 	var p: Hunter = m.player
 	var u: Vector3 = L["up"]
 	var behind := false
-	if not inside(L, p.pos, 0.0) and not (p.auto_glide and (L["flown"] as Array).has(p)):
+	if not inside(L, p.pos, 0.0) and not (p.moves.auto_glide and (L["flown"] as Array).has(p)):
 		# from the camera, the column sits between you and the lens: you're further from the camera
 		# than the column is (along the camera's look on the ground) and not far off to its side
 		var fwd := -m.cam.global_basis.z
@@ -868,10 +868,10 @@ func _tick_flyers(L: Dictionary) -> void:
 	var u: Vector3 = L["up"]
 	var flown: Array = L["flown"]
 	for h in flown.duplicate():
-		if not is_instance_valid(h) or h.out or h.grounded and not h.auto_glide:
+		if not is_instance_valid(h) or h.out or h.grounded and not h.moves.auto_glide:
 			if not L.get("up_on", false): flown.erase(h)
 			continue
-		if not h.auto_glide or h.remote:
+		if not h.moves.auto_glide or h.remote:
 			continue
 		if Vector2(h.pos.x - u.x, h.pos.z - u.z).length() < UP_R + 0.4 and h.pos.y < u.y + UP_TOP - 0.6:
 			continue      # (still in the column)
@@ -881,7 +881,7 @@ func _tick_flyers(L: Dictionary) -> void:
 			var want := to.normalized() * minf(UP_PUSH, maxf(1.5, to.length() * 1.4)) if to.length() > 0.05 else Vector2.ZERO
 			h.vel.x = want.x; h.vel.z = want.y
 		if not inside(L, h.pos, 1.0) and not m.world.is_void(h.pos.x, h.pos.z) and to.length() < (2.5 if not steering else 0.0):
-			h.auto_glide = false      # over the landing: fold the glider and drop onto it
+			h.moves.auto_glide = false      # over the landing: fold the glider and drop onto it
 
 ## Seconds until the gate opens on its own after the kill.
 func victory_left(L: Dictionary) -> float:
@@ -920,7 +920,7 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 			continue
 		if not (L["flown"] as Array).has(h):
 			(L["flown"] as Array).append(h)
-			h.auto_glide = true
+			h.moves.auto_glide = true
 			h.glide_cd = 0.0
 			h.glide_fuel = maxf(h.glide_fuel, 0.8)
 			m.sfx("glide", h.pos, 2.0, 1.2)
@@ -1304,7 +1304,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		return [sl["c"], "lair_fight"]      # sealed in: there's only the boss
 	# riding the escape updraft out: steer for where it throws you
 	for L in list:
-		if (L.get("flown", []) as Array).has(h) and not h.grounded and h.auto_glide:
+		if (L.get("flown", []) as Array).has(h) and not h.grounded and h.moves.auto_glide:
 			return [L["up_land"], "lair_escape"]
 	for L in list:
 		var wp = L.get("egg_wp")

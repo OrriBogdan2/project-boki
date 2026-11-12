@@ -352,7 +352,7 @@ func _skid(t: float, dd: Dictionary) -> void:
 
 func _tick_slide(dt: float) -> void:
 	if h.gliding:
-		_slide_end()      # a glide press cancelled it (Hunter._dash_into_glide): the glide has its speed now
+		_slide_end()      # a glide press cancelled it (HunterLoco.dash_into_glide): the glide has its speed now
 		return
 	var dd := dash_def()
 	slide["t"] = float(slide["t"]) + dt

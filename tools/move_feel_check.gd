@@ -253,7 +253,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.squash = 0.0; P.hp = P.max_hp
 	P.drop_follow = null
 	if "lfloat" in P: P.set("lfloat", {})
-	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
+	if "moves" in P: P.moves.let_go_t = INF
 	_clear_inp()
 
 ## A spot with flat, open ground `r` metres all round, on low ground (2m or less) when the map has one:
@@ -1368,7 +1368,7 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 ## dip, let go to coast on the lift and the kept glide speed, tap again when you've dropped ~1.5m).
 ## Distance flown before the heat runs out.
 func _feather() -> void:
-	if not "glide_off_t" in P:
+	if not "moves" in P:
 		print("MFEEL (no feathering on this build)")
 		return
 	var lip := flat.y
