@@ -152,7 +152,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | 7 slugs, bloom [D]; ~30 degree fan, 20 rested, recovering between shots [F] | 20 degrees rested, +10 a shot to 35, breathes back 24/s from 0.1 s; edge lines breathe with it | match (Nov 8: the bloom never recovered while firing and rested at 30) |
-| RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain (0.1 s wind, whip 45.5 m/s slowing, 0.4 s out), hook r .36, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
+| RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain (0.2 s coil, then 17 m/s: owner 11-10), hook r .36, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, Grounded (ours) | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
