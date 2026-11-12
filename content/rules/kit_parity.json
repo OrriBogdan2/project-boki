@@ -39,6 +39,6 @@
 		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.pair_dmg", "value": 6.12, "tol": 0.15, "evidence": "D Chain Bolas: 2 targets take 94 bonus, of 2364 = 4.0% = 6.1 of 154"},
 		{"hero": "thief", "slot": "X", "field": "x.dmg", "value": 4.49, "tol": 0.1, "evidence": "D Fusillade 69 of 2364 (level 15) = 2.9% of the target = 4.5 of 154 a blade"},
 		{"hero": "thief", "slot": "X", "field": "x.rim_dmg", "value": 3.13, "tol": 0.1, "evidence": "D Fusillade +48 near the edge, of 2364 = 2.0% = 3.1 of 154"},
-		{"hero": "archer", "slot": "X", "field": "x.final_dmg", "per": "x.dmg", "value": 1.2945, "tol": 0.01, "evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"},
+		{"hero": "archer", "slot": "X", "field": "x.final_dmg", "per": "x.dmg", "value": 1.2945, "tol": 0.01, "evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"}
 	]
 }

@@ -14,6 +14,7 @@ const SRC_HP := 1285.0     # mean Base HP of the 12 (supervive_physics.md attrib
 const SRC_HP_LV := 77.1    # mean HP per level; the level 15 tooltips face a level 15 target
 const DIST := 1.5          # m to the target: inside every melee reach, short of the sweet-spot tips
 const DRAW_S := 1.1        # s a bow is held before the release (the full draw)
+const STATIC_NEVER := 99   # Static stacks Sparkle's Blowout waits for: out of reach, see _fight
 const MAX_S := 20.0        # a row that has not knocked by then counts as never
 const DT_SRC := 0.01       # s step of the source model
 
@@ -130,11 +131,20 @@ func _fight(arch: String, rank: int, armoured: bool) -> Array:
 	for s in ["sec", "dash", "kin"]:
 		P.slot_lv[s] = rank
 	P.dashes = P.max_dashes()
+	_leave_out_conditionals(P)
 	T.max_hp = OUR_HP
 	T.hp = OUR_HP
 	T.max_armor = round(OUR_HP * Hunter.ARMOR_DUR) if armoured else 0.0
 	T.armor = T.max_armor
 	return [r[0], P, T, T.pos]
+
+## Sparkle's Blowout (4 Static, dash through) and her Storm Rod orb (a pickup that resets the dash) are conditional
+## bonuses the source gives no number ("massive bonus", supervive_kits.md:64-66). The table leaves conditionals out of
+## the source side, so both are off here; --mage-combo-check holds the passive itself.
+func _leave_out_conditionals(P: Hunter) -> void:
+	if P.ak.res_def().get("id", "") == "sparks":
+		P.ak.res_def()["max"] = STATIC_NEVER
+		P.ak.rmb_def()["coil"]["mote_life"] = 0.0
 
 ## One step: the target stays put, the Hunter aims at it, then the world moves on.
 func _tick(m: Match, P: Hunter, T: Hunter, spot: Vector3) -> void:
