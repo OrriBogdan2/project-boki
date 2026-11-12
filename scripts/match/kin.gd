@@ -648,8 +648,8 @@ func sim(dt: float) -> void:
 		if not remote:
 			KinRegen.tick(self, dt)
 		return
-	if summon != null and summon.fainting() and not remote:
-		return          # (lying knocked out: no thinking, no moving, until it folds)
+	if summon != null and summon.shrink > 0.0 and not remote:
+		return          # (lying knocked out or folding: no thinking, no moving, until it is the wisp)
 	if remote:
 		if state != "shoulder":
 			net_follow(dt)

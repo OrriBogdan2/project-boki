@@ -144,7 +144,7 @@ func _step() -> void:
 	if jumped and r._speed > before + SPIKE:
 		_fault("spike")
 	var ks := String(k.model.get_meta("kstate", ""))
-	if ks == "attack" and r.clip != "lunge":
+	if ks == "attack" and not r.clip in ["lunge", "cast"]:
 		_fault("attack_clip")
 	if ks == "sleep" and not r.clip in FAINT_CLIPS:
 		_fault("faint_clip")

@@ -391,8 +391,8 @@ func _pick_clip(dt: float) -> void:
 		_pulse = p
 		_start_shot("cast")
 	var lunging := String(root.get_meta("kstate", "")) == "attack"
-	if lunging and not _lunging:
-		_start_shot("lunge")
+	if lunging and not _lunging and not (_shot == "cast" and _shot_left > 0.0):
+		_start_shot("lunge")          # (a cast's wind-up also reads as striking: the cast clip keeps it)
 	_lunging = lunging
 	_shot_left -= dt
 	var asleep := String(root.get_meta("kstate", "")) == "sleep"
