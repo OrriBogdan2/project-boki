@@ -307,7 +307,9 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 			res["vmin"] = minf(res["vmin"], hv1)
 		var past := (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3
 		var on_b := int(floor(h.pos.x)) == b.x and int(floor(h.pos.z)) == b.y
-		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0:
+		# (over the top once the ledge rise has handed over: a rise at the suction's pace reaches the top tile a
+		# few steps before its pop and carry)
+		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0 and h.lfloat.is_empty():
 			res["top"] = true
 			res["vlip"] = hv1
 			res["t"] = t - touch_t
