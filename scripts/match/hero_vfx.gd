@@ -767,6 +767,14 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 			pts.pop_back()
 	var tail := float(e["tail"])
 	while not pts.is_empty() and now - float(pts[-1][1]) > tail:
+		if pts.size() > 1 and now - float(pts[-2][1]) < tail:
+			# the oldest point is clipped back to exactly `tail` old, not dropped: a tail shorter than a frame
+			# (a fast tracer at 30 fps) keeps its length instead of vanishing
+			var newer: Array = pts[-2]
+			var oldest: Array = pts[-1]
+			var k := (now - tail - float(oldest[1])) / maxf(float(newer[1]) - float(oldest[1]), 1e-5)
+			pts[-1] = [(oldest[0] as Vector3).lerp(newer[0], k), now - tail]
+			break
 		pts.pop_back()
 	if pts.is_empty() and now > float(e["dur"]):
 		return false

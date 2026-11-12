@@ -61,10 +61,10 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
-- Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
-  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
-  how a kit reaches the bar.
-- **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
+- Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, gunslinger, juggernaut, rimewright, tender. The rest
+  draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx` (Sparkle), `pin_fx`, `bjorn_fx`, `breah_*`). Moving each
+  to `HeroVfx` data is how a kit reaches the bar.
+- **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
   rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
   is per kit (backlog).
@@ -79,7 +79,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Tenzo | dolm | 2 | 2 | 1 | 2 | 3 | 1 | 3 | 14 | E telegraph is opaque orange discs; X is a thin red line and ring; everything red/orange (now cobalt on this branch); `breah_*` draws flat rings with no debris |
 | 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
-| 3 | Vex | gunslinger | 1 | 2 | 2 | 2 | 3 | 1 | 4 | 15 | LMB and held LMB show almost no tracer or muzzle flash; RMB crescents are pink; E/X are opaque brown scorch discs |
+| 3 | Vex | gunslinger | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-11 from `vfxq-after-vex-data` (jobq 20261111-151015-29618; was 15): all HeroVfx data in green fire. Held LMB: a muzzle flash, a thin lime tracer per round and a spark on each hit; E: a three-layer needle of light with sparks along it and recoil smoke; X: a see-through countdown disc (centre about 0.25) under a lit rivet rim, a bloom, ring, flame wall, debris and smoke on impact, a see-through scorch under the patch's lit rim; RMB: a streak, a hit flare and ring, the Dazed crown. Left: the slide's chest streak reads as a flat lime band at match zoom (narrow it); the RMB blast cone was not in this strip (direct hit) |
 | 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
 | 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
 | 6 | Meeko | tender | 2 | 2 | 2 | 3 | 3 | 1 | 4 | 17 | purple orbs, gold seed rings, cyan ult dome: no signature colour; hard-edged flat discs; Hearth Call barely reads |
