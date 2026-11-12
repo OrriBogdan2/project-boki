@@ -336,7 +336,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
 	# (a merge ends the hold: letting go of it must not throw a punch mid-transformation)
-	if not h.can_fire() or KinMerge.transforming(h):
+	if not h.atk.can_fire() or KinMerge.transforming(h):
 		if lmb_t >= 0.0 and flow.pauses_hold("lmb") and not KinMerge.transforming(h):
 			# a dash whose hold row keeps the Quake Fist charge: it charges on (short of the auto punch), its
 			# lane stays up, and a release in it punches at the dash's end

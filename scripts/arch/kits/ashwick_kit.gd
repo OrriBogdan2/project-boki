@@ -328,7 +328,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if held and was_held and not merging and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
-	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
+	if not held or not h.atk.can_fire() or merging or (relight_t > 0.0 and not was_held):
 		if was_held:
 			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:

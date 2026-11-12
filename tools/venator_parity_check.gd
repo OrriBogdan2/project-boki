@@ -194,7 +194,7 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 				run["low"] = P.ammo
 		run["t"] = float(run["t"]) + C.DT)
 	P.inp["fire"] = false
-	P.start_reload()
+	P.atk.start_reload()
 	var gap := float(run["back_at"]) - float(run["dry_at"])
 	C.ok("Vex parity LMB: run dry, no reload; the trigger is dead until the drum refills (about 1.1s), then fires",
 			float(run["dry_at"]) > 0.0 and gap > 0.9 and gap < REFILL_DRY and float(run["reload"]) == 0.0

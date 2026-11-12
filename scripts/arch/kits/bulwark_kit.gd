@@ -354,7 +354,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
-	if not rides_dash and (not h.can_fire() or h.fire_cd > 0.0):
+	if not rides_dash and (not h.atk.can_fire() or h.fire_cd > 0.0):
 		return true
 	var md := lmb_def()
 	if not mace.is_empty():
@@ -476,7 +476,7 @@ func _smash() -> void:
 	slams += 1
 	slam_k = k
 	knock_until = m.time + 0.25
-	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
+	h.atk.strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
 		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
 	if perfect:
@@ -828,7 +828,7 @@ func _spin_hit(wd: Vector2) -> void:
 		cd["rmb"] = 0.0
 	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
-	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
+	h.atk.strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos, r)
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)

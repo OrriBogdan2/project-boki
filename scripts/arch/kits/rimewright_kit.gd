@@ -190,7 +190,7 @@ func own_aim_line() -> bool:
 func lmb_override(held: bool, _dt: float) -> bool:
 	if not held:
 		burst_i = 0
-	if not h.can_fire() or not rime.is_empty():
+	if not h.atk.can_fire() or not rime.is_empty():
 		return true
 	if not held or h.fire_cd > 0.0 or m.time < seq_next:
 		return true

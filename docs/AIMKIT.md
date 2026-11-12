@@ -21,7 +21,7 @@ Two modes:
 - `AimMode.CURSOR`: lands at the cursor point, clamped to `[1.5 m, max range]`.
 - `AimMode.MAX`: always flies the full range in the aim direction.
 
-Which mode a weapon shot uses (`Hunter._emit_shot`):
+Which mode a weapon shot uses (`HunterAttack.emit_shot`):
 1. **Per shot.** Set `h.shot_aim = AimMode.CURSOR` (or `MAX`) just before the shot leaves. The next
    `_emit_shot` takes it once, like `shot_range_k`. A burst's later rounds go back to the weapon's own mode.
 2. **Per weapon.** `"aim": "cursor"` or `"aim": "max"` in `content/weapons/<id>.json` `primary`.

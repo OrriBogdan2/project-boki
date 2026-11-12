@@ -81,7 +81,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
 
-## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
+## A gun going off (HunterAttack.emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
 static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var m: Match = h.m

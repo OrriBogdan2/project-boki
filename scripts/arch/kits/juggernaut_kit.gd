@@ -324,7 +324,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	lmb_was = held
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
 	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
-	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
+	if not h.atk.can_fire() or KinMerge.transforming(h) or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
@@ -399,7 +399,7 @@ func _slash() -> void:
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
 	h.wpn["color"] = SLASH_OUT
-	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
+	h.atk.strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
 	h.wpn = keep
 	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()

@@ -333,7 +333,7 @@ func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 	_kit_from_weapon()
 	wbloom = 0.0; warm_t = 0.0; spin = 0.0; spun_t = 0.0; sus_n = 0; mel_hold = 0.0; strike_at_end = {}
 	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); reload_t = 0.0; fire_cd = 0.25
-	if ammo <= 0 and not remote: start_reload()
+	if ammo <= 0 and not remote: atk.start_reload()
 	var gun: Node3D = model.find_child("Gun", true, false) if model and rebuild else null
 	if gun:
 		for ch in gun.get_children():
@@ -1168,396 +1168,22 @@ func _shove_along() -> void:
 		if float(shove.get("ws", 0.0)) > 0.0: so["wallstun"] = float(shove["ws"])
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
 
-func can_fire() -> bool:
-	if Hex.active(self) or Capture.active(self):
-		return false
-	if ak and not ak.can_shoot():
-		return false
-	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
-		return true          # shooting from a held slide
-	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
-
-const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]
+## The weapon (HunterAttack: the attack key, guns, bows, melee, reloads) and the state it builds up
+## while you fire (Supervive-style), which the animation, HUD and kits read.
+var atk := HunterAttack.new(self)
 var shot_n := 0
 var safe_pos := Vector3.INF    # the last solid ground you stood on, well away from any edge
-
-## Weapon state that builds up while you fire (Supervive-style): per-shot bloom, a sniper's
-## wind-up, a minigun's spin, a rifle's sustained-fire falloff, and a sword's charge.
 var wbloom := 0.0              # extra spread in degrees from firing; recovers once you stop
 var warm_t := 0.0              # sniper wind-up left; the shot goes when it runs out
 var spin := 0.0                # minigun spin, 0 to 1; it only fires fully spun
 var spun_t := 0.0              # how long the minigun has been firing (it tightens up)
 var sus_n := 0                 # rounds in the current string of fire
 var mel_hold := 0.0            # how long the attack key has been held with a sword
-var fire_was := false
-var swing_buf := 0.0           # a tap that came in mid-swing, played as soon as the swing ends
-var lunge_n := 0               # lunges in a row; each one in a short window goes 25% less far
-var lunge_at := -9.0
 var strike_at_end := {}        # a charged lunge's hit, which lands where the lunge ends
-
-## Called every frame with the attack key's state; decides what that means for this weapon.
-func trigger(dt: float) -> void:
-	var held: bool = inp["fire"]
-	if ak and ak.lmb_override(held, dt):
-		return          # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
-	if wpn.get("melee", false):
-		swing_buf = maxf(0.0, swing_buf - dt)
-		if swing_buf > 0.0 and fire_cd <= 0.0 and can_fire():
-			swing_buf = 0.0
-			fire()
-		if ctrl != "local" or not wpn.has("charge_time"):
-			if held: fire()
-			return
-		# tap for the combo, hold to charge
-		var ct := float(wpn["charge_time"])
-		var pressed := held and not fire_was
-		fire_was = held
-		if held:
-			if not can_fire() or fire_cd > 0.0:
-				if pressed: swing_buf = 0.3     # tapped mid-swing: it plays when this one ends
-				return
-			mel_hold += dt
-			if mel_hold >= ct + 0.35:
-				# held well past full: it goes off by itself, and keeps charging the next one
-				_charged_attack()
-		else:
-			if mel_hold >= ct and can_fire():
-				_charged_attack()
-			elif mel_hold > 0.0:
-				if fire_cd > 0.0: swing_buf = 0.3
-				else: fire()
-			mel_hold = 0.0
-		return
-	if wpn.has("draw"):
-		_trigger_bow(held, dt)
-		return
-	if wpn.has("spin_up"):
-		if held and can_fire() and ammo > 0:
-			spin = minf(1.0, spin + dt / float(wpn["spin_up"]))
-			if spin >= 1.0:
-				spun_t += dt
-				fire()
-		else:
-			spin = maxf(0.0, spin - dt / 0.5)
-			spun_t = 0.0
-			if held and ammo <= 0: start_reload()
-		return
-	if held:
-		fire()
-
-## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a cooldown
-## never looses it, and a stun or glide cancels the draw with no shot (a dash too, unless its DashFlow hold
-## row keeps it). A bot lets go by itself.
-func _trigger_bow(held: bool, dt: float) -> void:
-	if draw_t >= 0.0 and not can_fire() and ak and ak.flow.pauses_hold("lmb"):
-		if held:
-			draw_t += dt * ak.draw_rate()      # a dash whose row keeps the draw: it charges on through it,
-		return          # and a release in it looses when it ends
-	var can_draw: bool = can_fire() and ammo > 0
-	if draw_t >= 0.0 and not held:
-		_loose()
-		return
-	if draw_t >= 0.0 and not can_draw:
-		draw_t = -1.0
-		return
-	if held and can_draw and (draw_t >= 0.0 or fire_cd <= 0.0):
-		_draw_step(dt)
-	elif held and ammo <= 0:
-		start_reload()
-
-func _draw_step(dt: float) -> void:
-	var top := float((wpn["draw"][-1] as Array)[0])
-	if draw_t < 0.0:
-		draw_t = 0.0
-		m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
-	draw_t += dt * (ak.draw_rate() if ak else 1.0)
-	if ctrl == "bot" and draw_t >= top + 0.05:
-		_loose()
-
-## Looses a drawn arrow: the draw stage reached sets damage, range and speed.
-func _loose() -> void:
-	var t := draw_t
-	draw_t = -1.0
-	if not can_fire() or ammo <= 0:
-		return
-	var stages: Array = wpn.get("draw", [])
-	var dmg := float(wpn.get("draw_early", 15.0)); var rng := float(wpn["range"]); var spd := float(wpn["speed"])
-	for stg in stages:
-		if t >= float(stg[0]):
-			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
-	if ak and ak.has_method("draw_bonus"):
-		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Hem: the perfect window, overdraw, where it lands)
-	var keep := wpn
-	wpn = wpn.duplicate()
-	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd
-	_release()
-	wpn = keep
-	if t >= float((stages[-1] as Array)[0]) if not stages.is_empty() else false:
-		m.fx.flash(pos + Vector3(aim_dir().x * 0.7, 1.0, aim_dir().y * 0.7), keep["color"], 0.5, 0.06)
-
-func charge_k() -> float:
-	if not wpn.get("melee", false) or not wpn.has("charge_time") or mel_hold <= 0.12:
-		return 0.0
-	return clampf(mel_hold / float(wpn["charge_time"]), 0.0, 1.0)
-
-func _fire_slow() -> float:
-	if draw_t >= 0.0:
-		return float(wpn.get("draw_slow", 0.7))
-	var firing: bool = fire_cd > 0.0 or warm_t > 0.0 or (spin > 0.0 and inp["fire"]) or charge_k() > 0.0
-	if not firing:
-		return 1.0
-	return float(wpn.get("fire_slow", 1.0 if wpn.get("melee", false) else 0.8))
-
-func fire() -> void:
-	if not can_fire() or fire_cd > 0.0 or warm_t > 0.0:
-		return
-	if wpn.get("melee", false):
-		_swing()
-		return
-	if ammo <= 0:
-		start_reload()
-		return
-	if cloak_t > 0.0:
-		cloak_t = 0.0
-		m.sfx("cloak", pos, -8.0)
-	idle_fire = 0.0
-	reveal_t = maxf(reveal_t, 1.2)
-	if float(wpn.get("warmup", 0.0)) > 0.0:
-		# the sniper winds up with its laser showing, then fires
-		warm_t = float(wpn["warmup"])
-		fire_cd = 0.0
-		m.sfx("charge", pos, -6.0 if is_local() else -12.0, 1.3)
-		return
-	_release()
-
-## The round actually leaving the gun (straight away, or once a wind-up ends).
-func _release() -> void:
-	var rate: float = wpn["rate"] * (1.0 - minf(0.5, owner_stat("fire_rate") + buff("fire_rate")))
-	fire_cd = rate
-	idle_fire = 0.0
-	ammo -= 1
-	recoil = 1.0
-	muzzle_t = 0.05
-	burst_left = int(wpn.get("burst", 1)) - 1
-	burst_t = float(wpn.get("burst_gap", 0.07))
-	_emit_shot()
-	Oomph.on_fire(self)
-	if ammo <= 0 and burst_left <= 0:
-		start_reload()
-
-func _tick_weapon(dt: float) -> void:
-	if warm_t > 0.0:
-		warm_t -= dt
-		if not can_fire() or ammo <= 0:
-			warm_t = 0.0
-		elif warm_t <= 0.0:
-			warm_t = 0.0
-			_release()
-	# per-shot bloom recovers once you've stopped firing for a beat (an aimed-first gun snaps back to its aimed shot)
-	if wbloom > 0.0 and idle_fire > float(wpn["rate"]) + 0.2:
-		var drop: float = INF if wpn.get("aimed_first", false) else float(wpn.get("bloom_recover", 20.0)) * dt
-		wbloom = maxf(0.0, wbloom - drop)
-	if idle_fire > 0.35 or reload_t > 0.0:
-		sus_n = 0
-	if not strike_at_end.is_empty():
-		if roll_t > 0.0 and not downed and stun_t <= 0.0:
-			# the lunge curves to follow your aim
-			roll_dir = roll_dir.slerp(aim_dir(), minf(1.0, dt * 6.0)).normalized()
-		else:
-			var st: Dictionary = strike_at_end
-			strike_at_end = {}
-			if not downed and stun_t <= 0.0:
-				_strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
-
-## Burst weapons fire the rest of their burst on a short timer (see sim).
-var burst_left := 0
-var burst_t := 0.0
-func _tick_burst(dt: float) -> void:
-	if burst_left <= 0:
-		return
-	burst_t -= dt
-	if burst_t > 0.0:
-		return
-	if ammo <= 0 or not can_fire():
-		burst_left = 0
-		return
-	burst_left -= 1
-	burst_t = float(wpn.get("burst_gap", 0.07))
-	ammo -= 1
-	recoil = 1.0
-	muzzle_t = 0.05
-	_emit_shot()
-	Oomph.on_fire(self)
-	if ammo <= 0 and burst_left <= 0:
-		start_reload()
-
-## Melee: a wedge in front of you, a short step into it, and a combo whose last hit lands hardest.
-## Swing again within the combo window to keep it going. Hold to charge a heavier attack instead.
 var combo_i := 0
 var swing_at := -9.0
 var swing_t := 0.0             # for the swing animation, counts down
 var swing_n := 0
-func _swing() -> void:
-	var cd: Array = wpn.get("combo_dmg", [])
-	var cn: int = cd.size() if cd.size() > 0 else (wpn.get("combo", [1.0]) as Array).size()
-	if m.time - swing_at > float(wpn["rate"]) + float(wpn.get("combo_reset", 0.6)):
-		combo_i = 0
-	var step := combo_i % cn
-	var dmg: float = float(cd[step]) if cd.size() > 0 else float(wpn["dmg"]) * float((wpn.get("combo", [1.0]) as Array)[step])
-	var last: bool = step == cn - 1
-	combo_i += 1
-	swing_at = m.time
-	fire_cd = float(wpn["rate"]) * (1.35 if last else 1.0)
-	# a basic swing never moves you: you keep walking control (fire_slow), and gap-closers live on
-	# right click (and in a deliberate held charge where a weapon has one)
-	_strike(dmg, float(wpn["range"]), float(wpn.get("arc", 100.0)), float(wpn["kb"]) * (1.5 if last else 1.0), {"heavy": last})
-
-## A step forward with the swing. Lunges close together get 25% shorter each time.
-func _lunge(dist: float) -> void:
-	if dist <= 0.0 or not grounded:
-		return
-	if m.time - lunge_at > 1.2:
-		lunge_n = 0
-	var k := pow(0.75, lunge_n)
-	lunge_n += 1
-	lunge_at = m.time
-	# the speed that covers about dist before the ground brake takes it back (to a walk while you hold a direction)
-	var d2 := aim_dir()
-	var moving := (inp["move"] as Vector2).length() > 0.1
-	var want := HunterMove.slide_speed(dist * k, base_speed if moving else 0.0)
-	var hv := Vector2(vel.x, vel.z)
-	var along := hv.dot(d2)
-	hv += d2 * (maxf(along, want) - along)
-	vel.x = hv.x; vel.z = hv.y
-
-func _charged_attack() -> void:
-	mel_hold = 0.0
-	combo_i = 0
-	swing_at = m.time
-	fire_cd = float(wpn["rate"]) * 1.8
-	var st := {"dmg": float(wpn.get("charged_dmg", float(wpn["dmg"]) * 2.5)), "reach": float(wpn.get("charged_reach", float(wpn["range"]) * (0.85 if wpn.has("charged_lunge") else 1.0))),
-		"arc": float(wpn.get("charged_arc", float(wpn.get("arc", 100.0)) * (0.5 if wpn.has("charged_lunge") else 1.0))), "kb": float(wpn.get("charged_kb", float(wpn["kb"]) * 2.0)),
-		"stun": float(wpn.get("charged_stun", 0.0)), "heavy": true, "charged": true}
-	if wpn.has("charged_lunge"):
-		# a lunging stab: you travel, and the hit lands where the lunge ends (charged lunges don't decay)
-		var t := 0.2
-		roll_dir = aim_dir()
-		roll_t = t
-		roll_speed = float(wpn["charged_lunge"]) / t
-		dash_is_ex = false
-		shove = {}
-		strike_at_end = st
-		m.fx.dash_trail(self)
-		m.sfx("dash", pos, -4.0, 0.7)
-	else:
-		_strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
-
-func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> void:
-	idle_fire = 0.0
-	reveal_t = maxf(reveal_t, 1.2)
-	if cloak_t > 0.0:
-		cloak_t = 0.0
-	swing_t = 0.18
-	swing_n += 1
-	var dir := aim_dir()
-	var heavy: bool = o.get("heavy", false)
-	var arc := deg_to_rad(arc_deg)
-	var a0 := atan2(dir.y, dir.x)
-	var y := pos.y + 0.95 * float(cdat["scale"])
-	var extra := {"kb": kb, "swing": "%s_%d" % [nid, swing_n], "melee": true, "kbi": float(wpn.get("kb_influence", 0.3))}
-	if wpn.has("tip_bonus"):
-		extra["tip"] = [reach * 0.7, float(wpn["tip_bonus"])]
-	if float(o.get("stun", 0.0)) > 0.0: extra["stun"] = float(o["stun"])
-	if crit_t > 0.0: extra["crit"] = true
-	_kin_riders(extra)
-	Loot.rider(self, extra, dmg * m.dmg_mult(self))
-	# the swing is a fan of very short, invisible strikes, so walls and terraces block it like shots
-	var rays := 9 if arc_deg > 130.0 else 7
-	for i in rays:
-		var aa := a0 - arc * 0.5 + arc * float(i) / float(rays - 1)
-		var st := Vector3(pos.x + cos(aa) * 0.25, y, pos.z + sin(aa) * 0.25)
-		m.spawn_shot(self, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * m.dmg_mult(self), maxf(0.02, (reach - 0.25) / 40.0), 0.22, wpn["color"], extra)
-	m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
-	Oomph.on_fire(self, true)
-	m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
-
-func _emit_shot() -> void:
-	var dir := aim_dir()
-	# no dice rolls: every shot goes where you aim. Fast guns sway in a fixed, learnable pattern,
-	# wider as per-shot bloom builds up
-	shot_n += 1
-	var spread: float = float(wpn["spread"])
-	var rng_add := 0.0
-	if wpn.has("tighten_from_deg"):
-		var tk := clampf(spun_t / float(wpn.get("tighten_time", 1.5)), 0.0, 1.0)
-		spread = deg_to_rad(lerpf(float(wpn["tighten_from_deg"]), rad_to_deg(float(wpn["spread"])), tk))
-		rng_add = float(wpn.get("spun_range", 0.0)) * tk
-	var pel := int(wpn.get("pellets", 1))
-	if pel <= 1:
-		spread += deg_to_rad(wbloom)
-	var a: float = atan2(dir.y, dir.x) + spread * 0.45 * float(SWAY[shot_n % SWAY.size()])
-	var shot_y := pos.y + 0.95 * float(cdat["scale"])
-	var start := Vector3(pos.x + cos(a) * 0.6, shot_y, pos.z + sin(a) * 0.6)
-	var spd: float = wpn["speed"]
-	if has_meta("zero_spread_t") and m.time < float(get_meta("zero_spread_t")):
-		spread = 0.0            # a Thief's SMG right after a Shadow Step
-		a = atan2(dir.y, dir.x)
-	var rng: float = (float(wpn["range"]) + rng_add) * shot_range_k
-	shot_range_k = 1.0
-	var life: float = rng / spd
-	var dmg: float = float(wpn["dmg"]) * m.dmg_mult(self)
-	if wpn.has("nth"):
-		nth_n += 1
-		if nth_n % int(wpn["nth"][0]) == 0: dmg *= 1.0 + float(wpn["nth"][1])
-	if wpn.has("sustain_loss"):
-		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
-	sus_n += 1
-	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
-	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
-	if wpn.has("decel"):
-		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
-		extra["decel"] = float(wpn["decel"])
-		spd = sqrt(2.0 * float(wpn["decel"]) * rng)
-		life = spd / float(wpn["decel"]) + 0.05
-	if wpn.has("close_mult"):
-		extra["near"] = [float(wpn["close_mult"]), rng * 0.5]
-	if wpn.has("far_mult"):
-		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
-	if AimMode.take(self) == AimMode.CURSOR:
-		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
-	if wpn.get("pierce", false):      # through everyone in line (Sparkle's bolts)
-		extra["pierce"] = true
-		extra["hitset"] = {}
-	if wpn.has("boom"):
-		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
-	if crit_t > 0.0:
-		extra["crit"] = true
-	Loot.rider(self, extra, dmg)
-	_kin_riders(extra)
-	if pel > 1:
-		# a shotgun throws the same fixed fan every time, wider with each shot in a row. However
-		# few slugs land, the first one on a target still does a good share of the whole volley
-		var fan: float = deg_to_rad(float(wpn.get("fan_deg", 23.0)) + wbloom) if wpn.has("fan_deg") else float(wpn.get("fan", 0.4))
-		if wbloom == 0.0 and wpn.get("aimed_first", false):
-			fan = 0.0           # the first volley of a burst goes straight down the aim line
-		extra["pg"] = "%s_%d" % [nid, shot_n]
-		extra["pn"] = pel
-		extra["pf"] = float(wpn.get("pellet_floor", 1.0 / pel))
-		for i in pel:
-			var pa := a - fan * 0.5 + fan * float(i) / float(pel - 1)
-			m.spawn_shot(self, Vector3(pos.x + cos(pa) * 0.6, shot_y, pos.z + sin(pa) * 0.6), Vector2(cos(pa), sin(pa)) * spd, dmg, life, wpn["size"], wpn["color"], extra)
-	else:
-		m.spawn_shot(self, start, Vector2(cos(a), sin(a)) * spd, dmg, life, wpn["size"], wpn["color"], extra)
-	if wpn.has("bloom_deg"):
-		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
-	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
-	Juice.shot(self, start, Vector2(cos(a), sin(a)))
-
-func start_reload() -> void:
-	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false) or not wpn.has("reload"):
-		return
-	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload") - gear_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
-	m.sfx("reload", pos, -8.0)
 
 func use_signature() -> void:
 	use_kin_ability("k1")
@@ -1892,7 +1518,7 @@ func sim(dt: float) -> void:
 	# reload by itself once you stop shooting for a moment
 	idle_fire += dt
 	if idle_fire > 1.3 and ammo < int(wpn["mag"]) and reload_t <= 0.0 and not inp["fire"]:
-		start_reload()
+		atk.start_reload()
 	if downed:
 		# your other kin comes out of the satchel to pick you up if the active one can't
 		if kin and (kin as Kin).state == "downed" and kin2 and (kin2 as Kin).hp > 0.0:
@@ -1970,12 +1596,12 @@ func sim(dt: float) -> void:
 	for ui in UtilityBelt.SLOTS:
 		if inp[UtilityBelt.KEYS[ui]]: UtilityBelt.press(self, ui)
 	UtilityBelt.tick(self, dt)
-	_tick_burst(dt)
-	_tick_weapon(dt)
+	atk.tick_burst(dt)
+	atk.tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
 	if inp["ult"]:
 		use_ultimate()
-	trigger(dt)
+	atk.trigger(dt)
 	inp["kin_ab"] = false
 	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 		inp[k] = false
@@ -2057,7 +1683,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * atk.fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()

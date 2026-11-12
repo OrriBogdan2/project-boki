@@ -351,7 +351,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	else:
 		bolt_buf = maxf(0.0, bolt_buf - dt)
 	_fire_was = held
-	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.can_fire():
+	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.atk.can_fire():
 		bolt_buf = 0.0
 		_bolt()
 	return true
@@ -362,7 +362,7 @@ func _bolt() -> void:
 	var emp := primed_t > 0.0
 	var n0: int = m.shots.size()
 	h.shot_aim = AimMode.CURSOR
-	h.fire()
+	h.atk.fire()
 	if m.shots.size() <= n0:
 		return
 	var sd: Dictionary = m.shots[-1]

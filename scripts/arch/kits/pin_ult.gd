@@ -62,7 +62,7 @@ func cast() -> bool:
 	k.play("pin_ult_cast")
 	return true
 
-## Hunter.trigger while empowered: the bow is ours. A press (or a held button once recovered) nocks;
+## HunterAttack.trigger while empowered: the bow is ours. A press (or a held button once recovered) nocks;
 ## the nock ends in an arrow. False when not empowered (the normal bow runs).
 func lmb(held: bool, dt: float) -> bool:
 	if left <= 0:
@@ -73,7 +73,7 @@ func lmb(held: bool, dt: float) -> bool:
 			_loose()
 		return true
 	recover = maxf(0.0, recover - dt)
-	if held and recover <= 0.0 and h.can_fire():
+	if held and recover <= 0.0 and h.atk.can_fire():
 		nock_t = 0.0
 		k.play("pin_ult_nock")
 		k.vfx("ult_nock")

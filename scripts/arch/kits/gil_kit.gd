@@ -73,7 +73,7 @@ func slot_info(slot: String) -> Dictionary:
 func lmb_override(held: bool, _dt: float) -> bool:
 	if h.wid != "swordfish" or KinMerge.active(h):
 		return false
-	if not held or h.fire_cd > 0.0 or not h.can_fire():
+	if not held or h.fire_cd > 0.0 or not h.atk.can_fire():
 		return true
 	var ld := lmb_def()
 	if m.time - combo_at > float(ld["chain_reset"]): combo_n = 0
@@ -81,9 +81,9 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	combo_at = m.time
 	combo_n += 1
 	h.combo_i = i + 1
-	h._lunge(float(ld["step"][i]))
+	h.atk.lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
-	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2})
+	h.atk.strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2})
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
 	return true
 

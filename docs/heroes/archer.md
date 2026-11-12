@@ -193,7 +193,7 @@ that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_R
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
 (ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|

@@ -1819,7 +1819,7 @@ func _draw_crosshair(p: Hunter) -> void:
 		if ph and not ph.unseen:
 			_flag(mp + Vector2(-58, 30), 0.7, Color("f4f1e6"))
 			_ctext(mp + Vector2(6, 36), "Truce with %s  ·  shooting breaks it" % ph.pname, 13, Color("f4f1e6"), big)
-	var ck := p.charge_k()
+	var ck := p.atk.charge_k()
 	if ck > 0.0:
 		# a sword's charge: fills, then flashes when it's ready to release
 		var full := ck >= 1.0

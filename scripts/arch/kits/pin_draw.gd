@@ -60,14 +60,14 @@ func perfect_t() -> float:
 func over_t() -> float:
 	return stage_t().y + float(h.wpn.get("overdraw_t", 0.5))
 
-## Hunter.trigger scales the draw by this: faster after a perfect release, until stage 1.
+## HunterAttack.trigger scales the draw by this: faster after a perfect release, until stage 1.
 func rate() -> float:
 	if quick and h.draw_t >= 0.0 and h.draw_t < stage_t().x:
 		quick_used = true
 		return float(h.wpn.get("quick_k", 1.6))
 	return 1.0
 
-## Hunter._loose asks once per arrow: where it goes (h.shot_aim) and its damage factor.
+## HunterAttack._loose asks once per arrow: where it goes (h.shot_aim) and its damage factor.
 func bonus(t: float) -> float:
 	var s := stage_t()
 	var pt := perfect_t()
@@ -113,7 +113,7 @@ func tick() -> void:
 	var drawing := t >= 0.0 and h.wpn.has("draw")
 	var s := stage_t()
 	var col := Arch.color(h.arch)
-	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
+	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.atk.can_fire():
 		AimKit.line(h, "draw_rest", {"from": line_start(), "alpha": LINE_A, "col": col.lightened(0.35), "lw": REST_LW})
 	if drawing:
 		if was < s.x and t >= s.x:

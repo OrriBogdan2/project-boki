@@ -1237,7 +1237,7 @@ func _weapon_check() -> void:
 					if mode == "tap": P.inp["fire"] = int(t / 0.05) % 2 == 0
 					elif mode == "charge":
 						# hold until the charge is full, then let go for a moment
-						if P.inp["fire"] and P.charge_k() >= 1.0: P.inp["fire"] = false; P.set_meta("rel", 0.5)
+						if P.inp["fire"] and P.atk.charge_k() >= 1.0: P.inp["fire"] = false; P.set_meta("rel", 0.5)
 						elif not P.inp["fire"]:
 							P.set_meta("rel", float(P.get_meta("rel", 0.0)) - Match.DT)
 							if float(P.get_meta("rel", 0.0)) <= 0.0:
@@ -1914,7 +1914,7 @@ func _grammar_runtime_check() -> void:
 	k = _grt_kin(m, P, "cindle")
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	_ac_run(m, 0.1)
-	P._emit_shot()
+	P.atk.emit_shot()
 	_ac_run(m, 0.5)
 	_grt("shoulder: shots poison (carry rider)", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	_grt_reset(T)
@@ -3646,7 +3646,7 @@ func _cmd(c: String) -> void:
 			if t:
 				m.player.inp["aim"] = t.pos + Vector3(0, 0.9, 0)
 				m.player.fire_cd = 0.0
-				m.player.fire()
+				m.player.atk.fire()
 		elif c == "god" and m.player:
 			m.player.max_hp = 9999; m.player.hp = 9999
 	elif current and current.has_method("_open_chat"):

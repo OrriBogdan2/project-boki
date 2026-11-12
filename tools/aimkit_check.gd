@@ -1,6 +1,6 @@
 extends RefCounted
 ## --aimkit-check: the shared aiming kit (docs/AIMKIT.md, scripts/match/aim/). The aim-mode math
-## (cursor clamped to range vs always max range, the per-shot override through Hunter._emit_shot, the
+## (cursor clamped to range vs always max range, the per-shot override through HunterAttack.emit_shot, the
 ## boom default kept), every telegraph shape shown, updated, expired and hidden, who sees what, the
 ## membership tests, pooling (no node growth over 300 frames of every shape), the cursor states (charge
 ## ring, full flare, perfect star) and the merge-start cleanup through ArchKit.drop_holds().
@@ -47,7 +47,7 @@ func _aim(P: Hunter, d: float) -> void:
 ## Fire one round and read back how far it will fly (life x speed).
 func _shot_dist(m: Match, P: Hunter) -> float:
 	var before := m.shots.size()
-	P._emit_shot()
+	P.atk.emit_shot()
 	if m.shots.size() <= before:
 		return -1.0
 	var s: Dictionary = m.shots.back()

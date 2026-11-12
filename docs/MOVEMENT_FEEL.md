@@ -276,7 +276,7 @@ real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sou
 briefs/supervive-data/supervive_kits.md (none of them gives a self-slow number); `[F]` = briefs/hero-ref/<file>.md
 footage; `[wiki]` as above. Rule (briefs/DECISIONS.md 2026-11-07, parity first): a row changes only when the
 source contradicts it and no owner note covers it. Data keys: the weapon's `fire_slow`/`draw_slow`
-(content/weapons/, `Hunter._fire_slow`, non-melee default 0.8), and the kit's `move_k()`.
+(content/weapons/, `HunterAttack.fire_slow`, non-melee default 0.8), and the kit's `move_k()`.
 
 | Hunter (source) | LMB held | Charge / hold | Just after release | Source says | Verdict |
 |---|---|---|---|---|---|

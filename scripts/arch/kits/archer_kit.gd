@@ -114,11 +114,11 @@ func ult_running() -> bool:
 func lmb_override(held: bool, dt: float) -> bool:
 	return ult.lmb(held, dt)
 
-## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
+## HunterAttack.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
 	return draw.rate()
 
-## Hunter._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
+## HunterAttack._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
 func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
