@@ -36,7 +36,7 @@ const HEROES := [
 		"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1],
 		"e": [30.0, 0.0, 16.0, 6.0, 1, 0]}],
 	["ashwick", "Felix", "hold", false, [25.8, 0.1, 0.0], {
-		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [190.4, 0.0, 9.0, 1.5, 2, 0],
+		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [150.4, 0.266, 9.0, 1.5, 2, 0],
 		"e": [76.8, 0.5, 13.0, 4.0, 1, 0]}],
 	["mage", "Joule", "hold", false, [90.0, 0.8, 0.0], {
 		"rmb": [133.0, 0.9, 10.0, 2.0, 1, 0], "dash": [153.0, 1.0, 9.0, 1.5, 1, 0],
@@ -49,14 +49,16 @@ const HEROES := [
 	["tender", "Elluna", "hold", false, [], {}],
 	["dolm", "Tetra", "tap", false, [], {}],
 	["dredge", "Kingpin", "hold", false, [], {}],
-	["rimewright", "Celeste", "hold", false, [], {}],
+	["rimewright", "Celeste", "hold", false, [], {"rmb": [346.0, 0.547, 12.0, 3.5, 2, 0]}],
 ]
 
-## Owner decisions that accept a slower Hunter: hero -> [damage share given up, "DECISIONS date: what"].
-## A row above RATIO_HI passes as "override" only up to RATIO_HI / (1 - share).
-const OVERRIDES := {
-	"ostra": [0.15, "DECISIONS 2026-11-06: item 117 accepted as is, Motley loses ~15% held-fire DPS, no compensation"],
-}
+## Ults the share table lists (never in a combo): hero -> source damage of one cast. our_hit casts it, then
+## waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s).
+const ULT_HITS := {"rimewright": 155.0}
+const ULT_WAIT := 4.5
+
+## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
+const OVERRIDES := {}
 
 var rows: Array = []
 var hits: Array = []      # [id, source name, slot, our share of the target, source share]
@@ -192,9 +194,15 @@ func our_hit(arch: String, slot: String) -> float:
 	var m: Match = f[0]
 	var P: Hunter = f[1]
 	var T: Hunter = f[2]
-	_abilities(P, [slot])
+	var wait := 2.0
+	if slot == "x":
+		P.slot_lv["ult"] = 1
+		P.ak.cast_ult()
+		wait = ULT_WAIT
+	else:
+		_abilities(P, [slot])
 	var t := 0.0
-	while t < 2.0:
+	while t < wait:
 		if slot == "e":
 			_abilities(P, [slot])      # (the recast that sets a planted E off)
 		_tick(m, P, T, f[3])
@@ -263,13 +271,20 @@ func run(main_node: Node) -> void:
 		for slot in hero[5]:
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
-			hits.append([hero[0], hero[1], slot, ours_share, src_share])
-			print("TTK hit %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
-				hero[0], slot, ours_share, src_share, ours_share / src_share])
+			_add_hit(hero, slot, ours_share, src_share)
+	for id in ULT_HITS:
+		var ult_hero: Array = HEROES.filter(func(h): return h[0] == id)[0]
+		_add_hit(ult_hero, "x", await our_hit(id, "x"), float(ULT_HITS[id]) / _src_hp(ult_hero))
 	if "--write" in OS.get_cmdline_user_args():
 		_write()
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## One share-of-target row: printed and kept for the table.
+func _add_hit(hero: Array, slot: String, ours_share: float, src_share: float) -> void:
+	hits.append([hero[0], hero[1], slot, ours_share, src_share])
+	print("TTK hit %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
+		hero[0], slot, ours_share, src_share, ours_share / src_share])
 
 const TABLE_MARK := "<!-- ttk:table -->"      # docs/TTK.md keeps its tables between two of these
 
