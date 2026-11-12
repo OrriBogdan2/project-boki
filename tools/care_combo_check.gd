@@ -129,6 +129,10 @@ func _skate_only() -> void:
 			for mv in (viewer[hero] as Dictionary).get("dash", []):
 				others[mv] = hero
 	var dd: Dictionary = K.dash_def()
+	var footage_bh_s := (450.0 + 600.0) / 2.0 / 90.0   # tamsin.md: 450-600 px/s, a 90 px medium = 1.8 m = 1 bh
+	ok(
+			"tm Shift: the skate runs at the footage's mean, 10.5 m/s (5.83 body heights a second, 1 bh = 1.8 m)",
+			absf(float(dd["speed"]) - footage_bh_s * 1.8) < 0.01, "%.2f m/s" % float(dd["speed"]))
 	ok(
 			"tm Shift: her dash moves are her own skate (push-off, stride), no other hero's, fitting the skate",
 			not others.has("tm_skate_go") and not others.has("tm_skate")
