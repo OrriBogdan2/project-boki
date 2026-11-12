@@ -6,9 +6,9 @@ extends RefCounted
 ## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
 ## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
-## Data "stomp" {style, commit, clip}: the Hunter's own stomp (Stomp, StompLook), its commit clip on the 0.2 s hold
-## and its finisher seeked to the stomp's clock; any other style (a bought one) plays on the rig; a stomp that breaks
-## before its end cuts the clip at once.
+## Data "stomp" {style, commit, clip, track?}: the Hunter's own stomp (Stomp, StompLook): its commit clip
+## on the 0.2 s hold and its finisher seeked to the stomp's clock; any other style (a bought one) plays on the rig;
+## a stomp that breaks before its end cuts the clip at once.
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full

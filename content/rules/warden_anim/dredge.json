@@ -163,10 +163,10 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
 		"base",
 		"drink"
 	],
+	"stomp": {"style": "junk_jump", "commit": "stomp_in", "clip": "stomp"},
 	"upper": [
 		"hips",
 		"head",

@@ -7,7 +7,7 @@ Weight is per Hunter (WEIGHT): how high and how fast the foot comes up, how far 
 long it takes to come back. Kael lifts slowly and drops dead; Lace flicks a pointed heel and bounces off it.
 The keys are posekit targets (pelvis, torso, head, ankles) laid over the Hunter's own idle (frame 0), which is also
 where the arms and every other bone stay unless WEIGHT turns a shoulder; posekit's leg IK keeps the standing foot planted.
-Run: blender -b --factory-startup --python tools/art1/stomp_clips.py -- <id: kael | vex | hem> [glb, default art/wardens/<id>/<id>.glb]
+Run: blender -b --factory-startup --python tools/art1/stomp_clips.py -- <id: kael | vex | hem | dredge | pip | sable | ostra | gil> [glb, default art/wardens/<id>/<id>.glb]
 (the glb is imported, the two clips baked and exported, then copied onto it by glb_add_clips: everything else stays byte for byte)."""
 import math
 import os
@@ -28,11 +28,12 @@ BEATS = 3         # Stomp.BEATS: strikes in TIME
 SLAM = 0.8        # Stomp.SLAM: where in a beat the foot lands
 NAMES = ("stomp_in", "stomp")
 
-# Per Hunter, all right-footed (their stomps.json styles). lift/reach/drop/crouch/rise/shift in metres, angles in radians,
+# Per Hunter, all right-footed whatever their stomps.json style says (clip-check reads the right foot's beats). lift/reach/drop/crouch/rise/shift in metres, angles in radians,
 # times in fractions of a beat. top: when the foot peaks (a later top is a slower wind-up); settle: how long the body
 # takes to come back off a strike; toe: the lifted foot's pitch (toe down); lean: forward tilt through the stomp;
 # back: the lean back at the top; power: each beat's lift against the first; arms: shoulder turns (forward swing, out)
-# at the top and on the strike; "shin": a rig whose shin ends at the ankle (Kael v2: no foot bone).
+# at the top and on the strike; "shin": a rig whose shin ends at the ankle (Kael v2, Motley: no foot bone); "both": how far
+# the left foot leaves the ground with the right (a two-footed hop: pair it with "rise").
 WEIGHT = {
     # Kael (juggernaut, Arena Slam): enormous; the knee comes up slowly, the foot falls like a dropped anvil, the hips
     # sink deep and stay down; both fists swing up with the lift and hammer down with the strike
@@ -48,6 +49,32 @@ WEIGHT = {
     "hem": {"lift": 0.3, "reach": 0.16, "top": 0.4, "settle": 0.07, "drop": 0.03, "crouch": 0.0, "rise": 0.025, "shift": -0.03,
             "toe": -0.7, "lean": 0.06, "back": 0.04, "twist": 0.06, "power": (1.1, 0.9, 1.1),
             "arms": {"top": {"aL": (0.1, 0.3)}, "hit": {"aL": (0.0, 0.15)}}},
+    # Grimble (dredge, Junk Jump): the hoard-king; short and heavy under the pack, both feet leave the ground in a pompous
+    # hop and come down together with his weight, the bone hook raised like a gavel and brought down, the left arm flung out
+    "dredge": {"lift": 0.2, "reach": 0.1, "top": 0.55, "settle": 0.2, "drop": 0.09, "crouch": 0.04, "rise": 0.05, "shift": 0.0,
+               "toe": -0.15, "lean": 0.26, "back": 0.1, "twist": -0.1, "power": (1.1, 0.85, 1.2), "both": 0.1,
+               "arms": {"top": {"aL": (0.4, 0.55), "aR": (1.2, 0.1)}, "hit": {"aL": (0.15, 0.25), "aR": (0.25, 0.1)}}},
+    # Meeko (tender, Pounce): the shy fox-kit pouncing; low and small, a quick hop onto both feet with both fists balled
+    # in front, no weight to speak of and a bounce off every landing
+    "pip": {"lift": 0.17, "reach": 0.07, "top": 0.38, "settle": 0.1, "drop": 0.03, "crouch": 0.03, "rise": 0.05, "shift": -0.01,
+            "toe": -0.4, "lean": 0.34, "back": 0.0, "twist": 0.05, "power": (1.1, 0.9, 1.2), "both": 0.09,
+            "arms": {"top": {"aL": (0.7, 0.1), "aR": (0.7, 0.1)}, "hit": {"aL": (0.35, 0.05), "aR": (0.35, 0.05)}}},
+    # Sable (thief, Quiet Heel): cold and unbothered; a low, slow, deliberate lift and a heel that lands without a bounce
+    # (nothing settles), hunched, both flintlocks left hanging
+    "sable": {"lift": 0.24, "reach": 0.14, "top": 0.65, "settle": 0.04, "drop": 0.03, "crouch": 0.07, "rise": 0.0, "shift": -0.03,
+              "toe": -0.5, "lean": 0.24, "back": 0.0, "twist": 0.1, "power": (1.0, 1.0, 1.0),
+              "arms": {"top": {"aL": (0.1, 0.15), "aR": (0.1, 0.15)}, "hit": {"aL": (0.0, 0.1), "aR": (0.0, 0.1)}}},
+    # Motley (ostra, Jester Jig): no legs, a jack-in-the-box on a brass spring: each beat he winds the spring down, shoots
+    # up laughing, arms flung wide, head back, and comes down on it with a jolt and a bounce; "rise"/"drop" are the
+    # spring's lift in metres. Clip-check follows his hips here
+    "ostra": {"spring": True, "lift": 0.0, "reach": 0.0, "top": 0.45, "settle": 0.24, "drop": 0.12, "crouch": 0.03, "rise": 0.17, "shift": 0.0,
+              "toe": 0.0, "lean": 0.12, "back": 0.2, "twist": 0.25, "power": (1.1, 1.0, 1.2),
+              "arms": {"top": {"aL": (0.3, 0.9), "aR": (0.5, 0.9)}, "hit": {"aL": (0.1, 0.6), "aR": (0.1, 0.6)}}},
+    # Gil (gil, Fin Slap): the fish thrilled by everything; a huge eager lift, the boot swung high and slapped down flat
+    # and wet, one arm up in delight, the swordfish flung out wide, both slapping down with it
+    "gil": {"lift": 0.24, "reach": 0.1, "top": 0.5, "settle": 0.12, "drop": 0.03, "crouch": 0.0, "rise": 0.02, "shift": -0.01,
+            "toe": -0.1, "lean": -0.08, "back": 0.1, "twist": -0.1, "power": (1.1, 0.9, 1.15),
+            "arms": {"top": {"aL": (1.8, 0.5), "aR": (1.1, 1.0)}, "hit": {"aL": (0.4, 0.3), "aR": (0.3, 0.4)}}},
 }
 
 
@@ -63,6 +90,7 @@ def unq(q):
 
 class StompSolver(Solver):
     """posekit's body and legs only: the arms and everything else stay on the idle (they ride the torso)."""
+    NAMES = ("root", "hips", "head", "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R")
 
     def __init__(self, arm, shin):
         hips = arm.data.bones["hips"].head_local.z
@@ -78,6 +106,9 @@ class StompSolver(Solver):
             return pb["shin." + sd].matrix @ Vector((0, self.shin, 0))
         return pb["foot." + sd].head.copy()
 
+    def place(self, pb, P, root_at):
+        pb["root"].location = self.R0["root"].inverted() @ (root_at - self.H0["root"])
+
     def solve(self, P):
         piv = Vector((0, 0, self.rig["pelvis"]))
         q_root = eul(P["prt"])
@@ -90,6 +121,32 @@ class StompSolver(Solver):
             if sd in self.foot_q:
                 Q["foot." + sd] = Quaternion((1, 0, 0), P["F" + sd + "p"]) @ self.foot_q[sd]
         return Q, root_at
+
+
+class SpringSolver:
+    """Motley has no legs: he rides a brass spring, the hips on its top (the clips key the hips' lift and the rig keeps the root).
+    The beat is the spring: "pel" z is the hips' lift in metres, "tor" and "hed" turn them; the feet keys are never read."""
+    NAMES = ("hips", "head")
+
+    def __init__(self, arm):
+        self.R0 = {n: b.matrix_local.to_quaternion() for n, b in arm.data.bones.items()}
+        self.b = {b.name: b for b in arm.data.bones}
+
+    def solve(self, P):
+        q_hips = eul(P["tor"])
+        return {"hips": q_hips, "head": q_hips @ eul(P["hed"])}, None
+
+    def place(self, pb, P, root_at):
+        pb["hips"].location = (0.0, P["pel"][2], 0.0)       # the hips bone's own Y is up
+
+
+def spring_ready(arm, s):
+    """The idle's frame 0 for the spring: the hips' lift and turn, the arms' resting turns."""
+    pb = arm.pose.bones
+    Q = {n: pb[n].matrix.to_quaternion() @ s.R0[n].inverted() for n in ("hips", "head")}
+    p = {"pel": (0.0, 0.0, pb["hips"].location.y), "prt": (0.0, 0.0, 0.0), "tor": unq(Q["hips"]), "hed": unq(Q["hips"].inverted() @ Q["head"]),
+         "aL": (0.0, 0.0), "aR": (0.0, 0.0), "FR": (0.0, 0.0, 0.0), "FL": (0.0, 0.0, 0.0), "FRp": 0.0}
+    return p, {b.name: (b.location.copy(), b.rotation_quaternion.copy(), b.scale.copy()) for b in pb}
 
 
 def ready_of(arm, s):
@@ -114,8 +171,9 @@ def clips(r, w):
     """stomp_in and stomp for the ready pose r and the weight w."""
     def body(pel=(0, 0, 0), tor=(0, 0, 0), hed=(0, 0, 0)):
         return {"pel": add3(r["pel"], (w["shift"],) + pel[1:]), "tor": add3(r["tor"], tor), "hed": add3(r["hed"], hed)}
-    fr = r["FR"]
+    fr, fl = r["FR"], r["FL"]
     plant = (fr[0], fr[1] + w["reach"], fr[2])
+    both = w.get("both", 0.0)
     arms = w["arms"]
     set_ = dict(body((0, 0, -w["crouch"]), (w["lean"] * 0.3 - w["back"] * 0.3, 0, 0)), FR=(fr[0], fr[1] + 0.02, fr[2] + 0.04), FRp=w["toe"] * 0.3)
     set_.update({k: tuple(0.3 * x for x in v) for k, v in arms["top"].items()})
@@ -123,9 +181,9 @@ def clips(r, w):
     for i, k in enumerate(w["power"]):
         b = float(i)
         top = dict(body((0, -0.01, -w["crouch"] + w["rise"] * k), (w["lean"] * 0.4 - w["back"] * k, w["twist"] * k, 0), (-0.05, 0, 0)),
-                   FR=(fr[0], fr[1] + w["reach"] * 0.4, fr[2] + w["lift"] * k), FRp=w["toe"], **arms["top"])
+                   FR=(fr[0], fr[1] + w["reach"] * 0.4, fr[2] + w["lift"] * k), FRp=w["toe"], FL=(fl[0], fl[1], fl[2] + both * k), **arms["top"])
         hang = dict(top, FR=(fr[0], fr[1] + w["reach"] * 0.5, fr[2] + w["lift"] * k * 1.04))
-        hit = dict(body((0, 0.02, -w["crouch"] - w["drop"] * k), (w["lean"] + 0.1 * k, 0, 0), (0.15, 0, 0)), FR=plant, FRp=0.0, **arms["hit"])
+        hit = dict(body((0, 0.02, -w["crouch"] - w["drop"] * k), (w["lean"] + 0.1 * k, 0, 0), (0.15, 0, 0)), FR=plant, FRp=0.0, FL=fl, **arms["hit"])
         settle = dict(hit, **body((0, 0.02, -w["crouch"] - w["drop"] * 0.45), (w["lean"], 0, 0), (0.12, 0, 0)))
         keys += [(b + w["top"], top, "out"), (b + w["top"] + (SLAM - w["top"]) * 0.45, hang), (b + SLAM, hit, "in")]
         if i < BEATS - 1:
@@ -142,7 +200,7 @@ def bake(arm, clip, s, base, keep):
     act.use_fake_user = True
     arm.animation_data.action = act
     pb = arm.pose.bones
-    solved = [b for b in ("root", "hips", "head", "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R") if b in pb]
+    solved = [b for b in s.NAMES if b in pb]
     n = int(round(clip.dur * FPS)) + 1
     for f in range(n):
         P = clip.sample(clip.dur * f / (n - 1))
@@ -153,9 +211,9 @@ def bake(arm, clip, s, base, keep):
             pb[nm].location, pb[nm].rotation_quaternion, pb[nm].scale = loc, rot, scl
         for nm in solved:
             par = s.b[nm].parent
-            q_par = Q[par.name] if par else Quaternion()
+            q_par = Q.get(par.name, Quaternion()) if par else Quaternion()
             pb[nm].rotation_quaternion = (s.R0[nm].inverted() @ q_par.inverted() @ Q[nm] @ s.R0[nm]).normalized()
-        pb["root"].location = s.R0["root"].inverted() @ (root_at - s.H0["root"])
+        s.place(pb, P, root_at)
         bpy.context.view_layer.update()
         for sd, out in (("L", 1.0), ("R", -1.0)):
             fwd, side = P["a" + sd]
@@ -182,12 +240,12 @@ def main():
     tj, tb = read(src)
     idle = next(an for an in tj["animations"] if an["name"] == "idle")
     keep = sorted({tj["nodes"][ch["target"]["node"]]["name"] for ch in idle["channels"]} & set(arm.pose.bones.keys()))
-    s = StompSolver(arm, w.get("shin", 0.0))
+    s = SpringSolver(arm) if w.get("spring") else StompSolver(arm, w.get("shin", 0.0))
     arm.animation_data_create()
     arm.animation_data.action = next(act for act in bpy.data.actions if act.name.split("_")[0] == "idle")
     bpy.context.scene.frame_set(0)
     bpy.context.view_layer.update()
-    ready, base = ready_of(arm, s)
+    ready, base = (spring_ready if w.get("spring") else ready_of)(arm, s)
     Q, _ = s.solve(ready)
     off = {n: round(math.degrees((arm.pose.bones[n].matrix.to_quaternion() @ s.R0[n].inverted()).rotation_difference(Q[n]).angle), 1) for n in Q}
     print("ready vs idle (deg)", off)

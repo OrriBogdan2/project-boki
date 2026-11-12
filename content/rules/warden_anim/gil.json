@@ -34,6 +34,7 @@
 	"flow": [["gil_thrust_a", 0.32], ["gil_thrust_b", 0.32], ["gil_lunge", 0.48], ["gil_thrust_a", 0.32],
 		["gil_toss", 0.4], ["gil_spin", 0.9], ["gil_spout", 0.4], ["gil_swim", 0.4], ["gil_surface", 0.45], ["gil_surf", 1.0],
 		["gil_wave_land", 0.45]],
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"procedural": ["ledge", "mantle", "base", "drink"],
+	"stomp": {"style": "fin_slap", "commit": "stomp_in", "clip": "stomp"},
 	"upper": ["hips", "head", "tail", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R"]
 }
