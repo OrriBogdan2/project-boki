@@ -81,9 +81,8 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	var dark := MageKit.VIOLET.darkened(0.4)
-	kit.fx().disc(at, r, dark, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER, false, true)
-	kit.fx().pillar(at, Color(MageKit.PINK, 0.7), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
+	kit.fx().disc(at, r, MageKit.VIOLET, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER)
+	kit.fx().pillar(at, Color(MageKit.PINK, 0.45), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
 	AimKit.hide(kit.h, "e_drag")
 	kit.m.sfx("vv_sky_count", at, -4.0)
 	kit.net_ring(at, r, kit.col_of(ed))
@@ -143,7 +142,6 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.net_bolt(at + Vector3(0, 9.0, 0), at, MageKit.TEAL)
 	fx.ring(at, r, MageKit.PINK, MageKit.TEAL, 0.35)          # the hit area, at its true size
 	fx.disc(at, r * 0.9, Color("1a1420"), MageKit.PINK, 0.45, MageKit.COPPER)
-	kit.m.fx.burst(at + Vector3(0, 0.5, 0), MageKit.PINK, 22, 6.0, 0.45, 6.0, 1.2)
 	kit.m.fx.flash(at + Vector3(0, 1.0, 0), MageKit.PINK, 1.8, 0.12)
 	kit.m.sfx("vv_sky_strike", at, 0.0)
 	kit.play("mage_e_snap")

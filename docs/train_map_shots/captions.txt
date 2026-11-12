@@ -1,0 +1,4 @@
+mm_near.png: The minimap beside a halt: the loop, the halt, the train, 'Next train: 0:24'
+mm_far.png: Away from the loop the minimap shows no train
+full_map.png: The full map: the loop, every halt named, the train's marker, the countdown at the nearest halt
+full_zoom.png: Zoomed in on the nearest halt

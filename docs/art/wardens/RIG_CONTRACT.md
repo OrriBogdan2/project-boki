@@ -183,8 +183,7 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
 - **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
   bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
   triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
-  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
+  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
 - Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
   BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
   A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with

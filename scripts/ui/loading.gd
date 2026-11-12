@@ -53,6 +53,10 @@ const LORE := [
 	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
+const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
+const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
+const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
+const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
 var c: Control
@@ -99,7 +103,7 @@ func setup(opts: Dictionary) -> void:
 	if opts.get("tutorial", false):
 		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
-		title = "Training Grounds"; sub = "Dummies, a range, a movement lane and the duel room. No danger here."
+		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
@@ -137,36 +141,29 @@ func setup(opts: Dictionary) -> void:
 func _process(delta: float) -> void:
 	t += delta
 	if leaving:
-		fade = maxf(0.0, fade - delta * 2.2)
+		fade = maxf(0.0, fade - delta / FADE_OUT_T)
 		if fade <= 0.0:
 			queue_free()
 	else:
 		var was := fade
-		fade = minf(1.0, fade + delta * 3.5)
+		fade = minf(1.0, fade + delta / FADE_IN_T)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
 	prog = move_toward(prog, want, delta * maxf(0.9, (want - prog) * 6.0))
 	c.queue_redraw()
 
-## Move the bar to a stage (0..1) and wait until it gets there.
-func step(frac: float) -> void:
-	want = maxf(want, frac)
-	while prog < want - 0.01 and is_inside_tree():
-		await get_tree().process_frame
-
+## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
+## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
 func finish() -> void:
-	await step(1.0)
-	var hold := 0.35
-	while hold > 0.0 and is_inside_tree():
-		hold -= get_process_delta_time()
-		await get_tree().process_frame
-	# gone before the map shows: fading this out over the planning map blended the two for half a
-	# second, so the screen's ink sweeps over first, this goes, and the ink sweeps off the map
+	want = 1.0
+	prog = 1.0
+	# gone before the map shows: fading this out over the planning map blended the two, so the
+	# screen's ink sweeps over first, this goes, and the ink sweeps off the map
 	var sf: ScreenFade = Game.main.get("fade") if Game.main else null
 	if sf and is_inside_tree() and not sf.covered:
-		await sf.cover(0.22)
+		await sf.cover(COVER_T)
 		queue_free()
-		sf.reveal(0.4)
+		sf.reveal(REVEAL_T)
 		return
 	leaving = true
 
