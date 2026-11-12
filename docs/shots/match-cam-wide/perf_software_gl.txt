@@ -1,9 +1,0 @@
-Software GL (rpc4, xvfb + llvmpipe, 1920x1080, --match-cam-wide-shots): wall ms are CPU-raster time, NOT real-GPU fps; compare draws/tris.
-== hollowcrown
-old (style old, zoom 1.00, reach 1.00): avg 71.99 ms = 14 fps, 1% low 3 fps, gpu 50.50 ms, draws 619, tris 328k
-new (style new, zoom 1.00, reach 1.58): avg 74.92 ms = 13 fps, 1% low 4 fps, gpu 54.49 ms, draws 686, tris 384k
-max (style new, zoom 1.40, reach 2.21): avg 63.34 ms = 16 fps, 1% low 12 fps, gpu 45.72 ms, draws 580, tris 377k
-== skyreach
-old (style old, zoom 1.00, reach 1.00): avg 60.10 ms = 17 fps, 1% low 7 fps, gpu 39.54 ms, draws 732, tris 322k
-new (style new, zoom 1.00, reach 1.58): avg 67.56 ms = 15 fps, 1% low 12 fps, gpu 48.46 ms, draws 823, tris 479k
-max (style new, zoom 1.40, reach 2.21): avg 75.86 ms = 13 fps, 1% low 11 fps, gpu 57.22 ms, draws 1077, tris 675k
