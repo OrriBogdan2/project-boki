@@ -4,7 +4,8 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts. Vex's tapped RMB
+## also compares the stuck burr's cone (Net 0.24.6's "cone" fx event): the copy draws the shooter's cone.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -13,6 +14,7 @@ const SETTLE := 1.6          # s after the release for the move to play out and 
 const HOLD := 0.8            # s a held key stays down
 const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
+const CONE_TOL := 0.05       # m (and unit-vector parts): the event rounds to 0.01, the copy re-grounds it
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
@@ -32,6 +34,7 @@ var played := {}             # arch -> casts that played any move
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
+var cone := []               # the watched hunter's first burr cone since the mark: [from x, z, dir x, y, len, deg]
 
 func _init() -> void:
 	tag = "RANIM"
@@ -74,16 +77,20 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	log_rows.clear()
 	wash_rows.clear()
 	last_row = ["?", "?"]
+	cone = []
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
 	await _press(key, held)
 	var lace_walk: bool = what == "archer dash"
 	await _run(SETTLE + (WALK if lace_walk else 0.0))
 	var mine := log_rows.duplicate()
+	var my_cone := cone.duplicate()
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "log"})
 	await _reply()
 	var theirs: Array = replies[0].get("log", []) if not replies.is_empty() else []
+	if what == "gunslinger rmb":
+		_cone_ok(my_cone, replies[0].get("cone", []) if not replies.is_empty() else [])
 	if lace_walk:
 		wash_host = wash_rows.duplicate()
 		wash_guest = replies[0].get("wash", []) if not replies.is_empty() else []
@@ -142,6 +149,15 @@ func _wash_at(rows: Array, on: bool) -> float:
 			return float(r[0]) / 1000.0
 	return -99.0
 
+## Vex's stuck burr: the guest's copy draws the cone the host's game draws (and hits with): same point,
+## direction, length (6.0 m from the data, carried by the event) and degrees.
+func _cone_ok(mine: Array, theirs: Array) -> void:
+	var same := mine.size() == 6 and theirs.size() == 6
+	for i in (6 if same else 0):
+		same = same and absf(float(mine[i]) - float(theirs[i])) <= CONE_TOL
+	ok(same and is_equal_approx(float(mine[4]), 6.0), "gunslinger: a stuck burr's cone on the copy is the shooter's",
+		"host %s guest %s" % [str(mine), str(theirs)])
+
 ## The host's rows against the guest's: every move of the host's that lasted a snapshot shows on the guest
 ## in order within LAG_TOL, and the guest shows no move the host never played.
 func _compare(mine: Array, theirs: Array) -> Dictionary:
@@ -183,8 +199,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 				log_rows.clear()
 				wash_rows.clear()
 				last_row = ["?", "?"]
+				cone = []
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "cone": cone})
 		return
 	super._on_msg(topic, data, from)
 
@@ -213,3 +230,15 @@ func _sample() -> void:
 	if row != last_row or restart:
 		last_row = row
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+	if cone.is_empty():
+		_note_cone(H)
+
+## The first burr cone the hunter shows (the shooter's "burr<n>", the copy's "burr_net").
+func _note_cone(H: Hunter) -> void:
+	var pre := AimDraw.key(H, "burr")
+	var entries: Dictionary = AimKit.layer(m).entries
+	for k in entries:
+		var e: Dictionary = entries[k]
+		if String(k).begins_with(pre) and String(e["kind"]) == "cone":
+			cone = [e["from"].x, e["from"].y, e["dir"].x, e["dir"].y, e["len"], e["deg"]]
+			return
