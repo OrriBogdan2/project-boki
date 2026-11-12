@@ -378,7 +378,7 @@ func _scarf(main: Node) -> void:
 	S.prewarm_end()
 
 ## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at every
-## rank, and the slam lands on the step it closes. Also with a changed windup, so the time is read from data.
+## rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the time is read from data.
 func _slam_fill(main: Node) -> void:
 	var m: Match = flow._match(main, "bulwark")
 	await main.get_tree().process_frame
@@ -399,13 +399,13 @@ func _slam_fill(main: Node) -> void:
 		while K.ult.phase != "" and t < 2.0 and t_slam < 0.0:
 			m.step(DT_FILL)
 			t += DT_FILL
-			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 0.999:
+			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 1.0:
 				t_full = t
 			if K.ult.slams > 0:
 				t_slam = t
 		var label := "rank %d windup %.2f: fill closed at %.3f s, slam at %.3f s" % [
 			maxi(rank, 1), xd["windup"], t_full, t_slam]
-		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and absf(t_slam - t_full) <= DT_FILL * 1.5, label)
+		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and t_full == t_slam, label)
 		K.ult.slams = 0
 		K.ult.phase = ""
 		K.ult._hide_lane()
