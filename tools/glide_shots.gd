@@ -68,7 +68,7 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 	m.add_child(cam)
 	cam.make_current()
 	cam.fov = FOV
-	var sync := h.model.get_node_or_null("Warden/Sync")
+	var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	if sync:
 		sync.set_process(false)
 	for v in ["back", "side"]:
@@ -92,10 +92,11 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 		m.step(Match.DT)
 		h.render(Match.DT, 1.0)
 		if sync:
-			sync.call("_process", Match.DT)
+			sync._process(Match.DT)
 		if step % EVERY == 0:
 			var i := step / EVERY
-			print("GLIDE_SHOT %s f%03d %-5s gl=%d dv=%d %s" % [arch, i, ph, int(h.gliding), int(h.plunging()), _body(h)])
+			var on := "gl=%d dv=%d" % [int(h.gliding), int(h.plunging())]
+			print("GLIDE_SHOT %s f%03d %-5s %s %s" % [arch, i, ph, on, _body(h)])
 			_aim(h, 180.0, 0.25)
 			await _grab(dir.path_join("back/f%03d.png" % i))
 			_aim(h, 90.0, 0.1)

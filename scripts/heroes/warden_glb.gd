@@ -176,6 +176,13 @@ static func set_model(arch: String, on: bool) -> void:
 		picks[arch] = "procedural"
 	Settings.set_v(SETTING, picks)
 
+## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
+## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+static func shown_torso(model: Node3D) -> Transform3D:
+	var torso := model.get_node(^"Rig/Torso") as Node3D
+	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	return sync.shown(torso) if sync and sync.clips else torso.global_transform
+
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
 	var skels: Array = glb.find_children("*", "Skeleton3D", true, false) if glb else []
@@ -1028,6 +1035,14 @@ class Sync extends Node:
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
+
+	## A rig node's place on the body you see (world): its bone's pose back through the retarget.
+	func shown(nd: Node3D) -> Transform3D:
+		for l in links:
+			if l[1] == nd:
+				var to_rest := (l[3] as Transform3D).affine_inverse() * (l[2] as Transform3D).affine_inverse()
+				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
+		return nd.global_transform
 
 	func apply() -> void:
 		for l in links:
