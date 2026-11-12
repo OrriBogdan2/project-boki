@@ -182,7 +182,7 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
-	nd["joy"] = clampf(float(nd["joy"]) - joy_loss, 0.0, 100.0)
+	nd["joy"] = clampf(float(nd["joy"]) - joy_loss + ZoneAffinity.joy_per_min(rec) * mins, 0.0, 100.0)
 	if raining and not sleeping:
 		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
@@ -668,6 +668,8 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
 	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
+	if egg.has("visitor"):
+		baby["lineage"] = {"parents": [], "names": [], "gen": 0, "visitor": egg["visitor"]}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby
