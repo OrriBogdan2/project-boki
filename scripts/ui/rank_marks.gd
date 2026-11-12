@@ -13,6 +13,7 @@ const PLUS_HIT := 16.0         # px: half the clickable square round the "+"
 const HINT_SECS := 5.0         # s: the ALT+key hint shows on every rankable slot after a new point
 
 static var plus_spots := {}    # slot -> [Rect2 the "+" covers, HudPanels.draws when drawn] (RankClick reads it)
+static var faces := {}         # slot -> [Rect2 the slot's face, HudPanels.draws when drawn] (tutorial pointers read it)
 static var _pts_was := 0
 static var _hint_until := 0.0
 
@@ -57,6 +58,18 @@ static func mark(slot: String, at: Rect2) -> void:
 static func spot(slot: String) -> Rect2:
 	var s: Array = plus_spots.get(slot, [])
 	if s.is_empty() or int(s[1]) != HudPanels.draws:
+		return Rect2()
+	return s[0]
+
+## Note where `slot`'s face is this pass, wherever the HUD lays the ability row out.
+static func note_face(slot: String, r: Rect2) -> void:
+	faces[slot] = [r, HudPanels.draws]
+
+## `slot`'s face as the HUD last drew it, or an empty Rect2 if it wasn't drawn this pass or the one before
+## (a tutorial pointer draws before the panels' pass of the same frame, so it reads the previous pass).
+static func face(slot: String) -> Rect2:
+	var s: Array = faces.get(slot, [])
+	if s.is_empty() or int(s[1]) < HudPanels.draws - 1:
 		return Rect2()
 	return s[0]
 

@@ -10,6 +10,8 @@ extends RefCounted
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
 ##      wall kick (taller than a jump, within a jump and a kick's climb)
+##   6. the pick ring and arrow follow the slot the HUD drew (RankMarks.face) at 1280x720 and 1920x1080:
+##      on screen, in the bottom row, the same rect as the slot's hover spot
 
 var bad := 0
 var m: Match
@@ -27,6 +29,7 @@ func run(mn: Node) -> void:
 	_lanes()
 	_course()
 	_reach()
+	await _pointers()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -197,3 +200,38 @@ func _reach() -> void:
 	var cr := tu.stop("crouch")
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
 	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+
+# ------------------------------------------------------------------ 6. the pointer follows the HUD's slot
+## At each screen size, on every pick step: the ring's slot rect is the one the HUD drew that slot at.
+func _pointers() -> void:
+	var pm := Match.new()
+	main.add_child(pm)
+	pm.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	pm.set_process(false)
+	var seen := {}
+	var guard := 0
+	while guard < 20000 and pm.tut.step < Tutorial.steps().size() and not pm.player.extracted:
+		guard += 1
+		TutorialDrive.drive(pm)
+		pm.step(Match.DT)
+		var slot := TutorialCamps.pick_slot(pm.tut.id())
+		if slot == "" or seen.has(slot) or pm.tut.t < 0.1:
+			continue
+		seen[slot] = true
+		for sz: Vector2 in SIZES:
+			pm.hud.panels.size = sz
+			pm.hud.panels.queue_redraw()
+			await pm.hud.panels.draw
+			var face := RankMarks.face(slot)
+			var tag := "%dx%d %s" % [sz.x, sz.y, slot]
+			ok(face.has_area(), "%s: the pick ring finds the slot the HUD drew" % tag)
+			var rad := maxf(face.size.x, face.size.y) * 0.88      # (the ring at its biggest; its arrow sits above it)
+			var reach := Rect2(face.get_center() - Vector2(rad, rad * 2.6 + 16.0), Vector2(rad * 2.0, rad * 3.6 + 16.0))
+			ok(Rect2(Vector2.ZERO, sz).encloses(reach) and face.position.y > sz.y * 0.7,
+				"%s: the ring and arrow are on screen, in the bottom row (%s)" % [tag, str(face)])
+			var hid: String = {"kin": "k1", "ult": "r"}.get(slot, slot)
+			var spots: Array = pm.hud.hover_spots.filter(func(s): return s[1] == hid)
+			ok(spots.any(func(s): return (s[0] as Rect2).is_equal_approx(face)),
+				"%s: it is the slot's own hover rect, not a fixed spot" % tag)
+	ok(seen.size() >= 3, "the course has pick steps for %s" % str(seen.keys()))
+	pm.queue_free()
