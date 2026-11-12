@@ -271,9 +271,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# beacon: basing away from a charging uplink left its yard empty to drain)
 		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 and not a.has("ping_goal") \
 				and not String(a.get("goal_kind", "")) in STAY_GOALS:
-			var mate := m.base_target(h)
+			var mate := BaseRecall.target(m, h)
 			if mate and h.flat_dist(mate) > 30.0:
-				h.start_base(mate)
+				BaseRecall.start(h, mate)
 		if h.base_t > 0.0:
 			move = Vector2.ZERO
 		# (heals fold the glider now, so a bot only drinks with ground under it, never over the void
@@ -290,7 +290,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if not rv.is_empty() and (not rv.has("danger") or h.flat_dist(rv["o"]) < 4.0):
 		move = _revive_move(m, h, rv, dt)
 		a.erase("dash_dir")
-		if h.base_t > 0.0: h.base_t = 0.0
+		BaseRecall.cancel(h)
 		if inp.get("interact", false) and not (tgt is Hunter and (tgt as Hunter).downed): inp["interact"] = false
 		if move == Vector2.ZERO and tgt == null:
 			var o: Hunter = rv["o"]
@@ -788,7 +788,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var pp: Vector3 = pg["pos"]
 		if m.time < float(pg["until"]) and h.flat_dist(pp) > 3.5 and not m.world.is_void(pp.x, pp.z):
 			goal = pp; gk = "ping"
-			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
+			BaseRecall.cancel(h)      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
 	# a knocked-out Boki within a few strides: scan it before any lair, seat or exit run
