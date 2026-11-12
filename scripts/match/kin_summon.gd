@@ -9,18 +9,19 @@ extends RefCounted
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
-const BURST_S := 0.3      # s: the bloom from wisp to full size
-const SHRINK_S := 0.35    # s: the shrink back into the wisp
-const BURST_FROM := 0.3   # its size at the start of the bloom and the end of the shrink (x its own)
+const BURST_S := 0.3  # s: the bloom from wisp to full size
+const SHRINK_S := 0.35  # s: the shrink back into the wisp
+const BURST_FROM := 0.3  # its size at the start of the bloom and the end of the shrink (x its own)
 
 var k: Kin
-var dur := 10.0       # s: this species' window
-var cd_base := 60.0   # s: this species' cooldown
-var left := 0.0       # s of the window left (0: a wisp, or shrinking)
-var shrink := 0.0     # s of the shrink back left
-var grow := 0.0       # s of the bloom left (drawing only)
-var cd := 0.0         # s until it can be summoned again
-var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var dur := 10.0  # s: this species' window
+var cd_base := 60.0  # s: this species' cooldown
+var left := 0.0  # s of the window left (0: a wisp, or shrinking)
+var shrink := 0.0  # s of the shrink back left
+var grow := 0.0  # s of the bloom left (drawing only)
+var cd := 0.0  # s until it can be summoned again
+var cd_full := 1.0  # s: the cooldown now running (longer after a knock-down), for the HUD ring
+
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -28,8 +29,10 @@ func _init(kin: Kin) -> void:
 	dur = t.x
 	cd_base = t.y
 
+
 static func rules() -> Dictionary:
 	return Content.rules("boki_summon")
+
 
 ## [window, cooldown] in seconds for a species, from its role and size (the table in the rules).
 static func times(ks: KinSpec) -> Vector2:
@@ -39,13 +42,16 @@ static func times(ks: KinSpec) -> Vector2:
 		cell = row.get(ks.size, cell)
 	return Vector2(float(cell[0]), float(cell[1]))
 
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
 
+
 ## How far it may wander from its hunter while summoned: short and fixed, a little longer for bold ones.
 func leash(aggression: float) -> float:
 	return float(rules()["leash"]) + (aggression - 0.5) * 2.0 * float(rules()["leash_swing"])
+
 
 ## The Summon key: out of the wisp when ready, back early when out. False (and says why) when it can't.
 static func press(h: Hunter) -> bool:
@@ -53,7 +59,7 @@ static func press(h: Hunter) -> bool:
 	if h.downed or h.out or h.riding or h.dropping:
 		return false
 	if k == null or k.summon == null or k.owner_h != h:
-		return KinSteal.press(h)          # (your own Boki is gone or stolen: a stolen wisp's one summon)
+		return KinSteal.press(h)  # (your own Boki is gone or stolen: a stolen wisp's one summon)
 	var s := k.summon
 	if s.left > 0.0:
 		s.end()
@@ -68,6 +74,7 @@ static func press(h: Hunter) -> bool:
 	s.burst(s.dur)
 	return true
 
+
 ## The wisp bursts into the full Boki beside its hunter, whole, for a window (s).
 func burst(window: float) -> void:
 	k.teleport(KinFollow.side_spot(k))
@@ -79,10 +86,12 @@ func burst(window: float) -> void:
 	k.vel = Vector3.ZERO
 	left = window
 
+
 ## The window is over (timer or sent back early): the shrink starts.
 func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
+
 
 ## Knocked down while summoned (Kin.go_down): back into a wisp at once, the longer cooldown. True if it was out.
 func knocked() -> bool:
@@ -92,6 +101,7 @@ func knocked() -> bool:
 	KinCommand.say(k.owner_h, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
 	_back(cd_base * float(rules()["knocked_cd_mult"]))
 	return true
+
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
@@ -103,16 +113,17 @@ func tick(dt: float) -> void:
 		if left <= 0.0:
 			end()
 		elif o and k.flat_dist(o) > float(rules()["rebloom_dist"]):
-			k.teleport(KinFollow.side_spot(k))       # you dashed or glided off: it re-blooms beside you
+			k.teleport(KinFollow.side_spot(k))  # you dashed or glided off: it re-blooms beside you
 			popped(false)
 	elif shrink > 0.0 and k.state != "fused":
 		shrink -= dt
 		if shrink > 0.0:
 			return
 		if o == null or o.out or KinLoss.guarding(k):
-			shrink = 0.0          # left behind: the walking Boki's rules from here (KinWisp.ride)
+			shrink = 0.0  # left behind: the walking Boki's rules from here (KinWisp.ride)
 		else:
 			_back(cd_base)
+
 
 ## The bloom (into the Boki) or the puff (back into the wisp), on every game (KinWisp.set_wisp).
 func popped(to_wisp: bool) -> void:
@@ -125,6 +136,7 @@ func popped(to_wisp: bool) -> void:
 		k.m.fx.ring(k.pos, 1.4, Color(glow, 0.8), 0.3)
 		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
 
+
 func _back(cool: float) -> void:
 	left = 0.0
 	shrink = 0.0
@@ -134,6 +146,7 @@ func _back(cool: float) -> void:
 	KinWisp.set_wisp(k, true)
 	k.stow()
 	k.scale = Vector3.ONE
+
 
 ## Its size through the bloom and the shrink, and the wisp dim while it rests.
 func render() -> void:
