@@ -64,26 +64,28 @@ phase and the planted foot slid 28 to 80 % of the speed. Now (WardenClips._build
   mix of the two cycles and the stride the mix of the two strides (`foot_mps` times the cycle), and the rate (0.6 to
   1.4 as the clips feel it) keeps that stride planted. At either ring it is the old speed over `foot_mps`.
 - `ashwick`'s walk `foot_mps` is re-measured on the pure walk (2.26 to 2.57: the old value was fitted with 5 % run in the
-  blend; walk slide 14 % to 7 %, cadence 2.9 to 2.6 steps/s).
+  blend; walk slide 15 % to 7 %).
 
-Jog (3.4 m/s) slide, before to after; walk and run rows for the side effects; steps/s at the jog:
+Jog (3.4 m/s) slide, before (origin/main fb360f614) to after (this branch merged with it), measured by `--anim-audit` on
+the same audit script both times; walk and run rows for the side effects. Gil has no Warden clips (the audit stops at him
+on main too), so 12 Hunters are measured:
 
-| Hunter | Jog % | Jog m/s | Walk % | Run % | Jog steps/s |
-|---|---|---|---|---|---|
-| `archer` | 40 → 17 | 1.34 → 0.59 | 32 → 29 | 13 → 15 | 4.1 → 3.3 |
-| `ashwick` | 61 → 12 | 2.09 → 0.40 | 5 → 7 | 12 → 13 | 2.6 → 2.5 |
-| `bulwark` | 80 → 13 | 2.71 → 0.44 | 16 → 13 | 11 → 12 | 3.5 → 3.2 |
-| `dolm` | 63 → 16 | 2.14 → 0.54 | 25 → 25 | 18 → 20 | 4.3 → 3.4 |
-| `dredge` | 28 → 11 | 0.96 → 0.39 | 30 → 20 | 12 → 10 | 3.2 → 2.7 |
-| `gunslinger` | 30 → 11 | 1.01 → 0.37 | 20 → 13 | 13 → 14 | 3.5 → 3.1 |
-| `juggernaut` | 38 → 11 | 1.29 → 0.38 | 25 → 22 | 12 → 12 | 3.3 → 2.9 |
-| `mage` | 47 → 10 | 1.59 → 0.34 | 19 → 19 | 9 → 8 | 4.1 → 3.6 |
-| `ostra` | 100 → 100 | 3.40 → 3.40 | 100 → 100 | 100 → 100 | 0.0 → 0.0 |
-| `rimewright` | 92 → 90 | 3.13 → 3.05 | 93 → 91 | 90 → 91 | 2.0 → 1.7 |
-| `tender` | 50 → 28 | 1.72 → 0.97 | 39 → 37 | 17 → 17 | 7.0 → 5.4 |
-| `thief` | 44 → 21 | 1.50 → 0.72 | 39 → 33 | 17 → 16 | 4.3 → 3.6 |
+| Hunter | Jog % | Jog m/s | Walk % | Run % |
+|---|---|---|---|---|
+| `archer` | 40 → 17 | 1.34 → 0.59 | 32 → 28 | 13 → 15 |
+| `ashwick` | 68 → 10 | 2.30 → 0.34 | 15 → 7 | 17 → 22 |
+| `bulwark` | 80 → 13 | 2.71 → 0.44 | 16 → 13 | 11 → 11 |
+| `dolm` | 63 → 16 | 2.14 → 0.53 | 25 → 25 | 18 → 20 |
+| `dredge` | 28 → 11 | 0.96 → 0.38 | 30 → 20 | 12 → 10 |
+| `gunslinger` | 30 → 12 | 1.01 → 0.41 | 20 → 12 | 13 → 13 |
+| `juggernaut` | 38 → 11 | 1.29 → 0.36 | 25 → 22 | 12 → 11 |
+| `mage` | 47 → 10 | 1.59 → 0.34 | 19 → 21 | 9 → 8 |
+| `ostra` | 100 → 100 | 3.40 → 3.40 | 100 → 100 | 100 → 100 |
+| `rimewright` | 92 → 90 | 3.13 → 3.07 | 93 → 91 | 90 → 92 |
+| `tender` | 50 → 28 | 1.72 → 0.95 | 39 → 37 | 17 → 17 |
+| `thief` | 44 → 21 | 1.50 → 0.72 | 39 → 33 | 17 → 17 |
 
-Run rows move 1 to 3 points either way: the synced clips start their cycle at another frame of the 2.4 s sample.
+Run rows move up to 5 points either way and the run ring did not change (full stick is pure run): re-measured with the warm-up 0.1 and 0.2 s longer, main reads `archer` 13, 15, 16 and the branch 15, 12, 12, so it is the 2.4 s sample's phase. No Hunter's jog got worse (all 12 equal or better; `ostra` and `rimewright` have no stepping legs).
 
 ## Free arm in attacks (`WardenFreeArm`)
 
@@ -143,7 +145,7 @@ posts scroll at the move speed).
    a dragged flail, so the hammer rides low in front as keyed.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
 4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
-   2.71 m/s (80 %); now 0.44 m/s (13 %), 3.2 steps/s between his walk and run (see "The walk and run blend in step";
+   2.71 m/s (80 %); now 0.44 m/s (13 %) (see "The walk and run blend in step";
    rows walk, jog, run, before then after, in the strip below).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
