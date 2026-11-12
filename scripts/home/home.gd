@@ -1281,7 +1281,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (HunterFeel.abyss_glide_room if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1525,7 +1525,7 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 	# (ledge float) only when your keys push into it; no snap, no fixed climb: you float up the
 	# face and keep steering (see _ledge_float)
 	var n := Vector2(signf(x - ppos.x), 0.0) if absf(x - ppos.x) > absf(z - ppos.z) else Vector2(0.0, signf(z - ppos.z))
-	if _mv.length() < 0.3 or _mv.normalized().dot(n) < Hunter.LRISE_PUSH or not lfl.is_empty():
+	if _mv.length() < 0.3 or _mv.normalized().dot(n) < HunterFeel.mantle_approach_dot or not lfl.is_empty():
 		return false
 	lfl = {"lip": to.y, "n": n, "t": 0.0, "at": Vector2(ppos.x, ppos.z), "g0": Input.is_action_pressed("jump") or Input.is_action_pressed("glide")}
 	gliding = false
@@ -1608,7 +1608,7 @@ func _abyss_tint(d: float) -> void:
 	var want := 0.0
 	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
-		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (HunterFeel.abyss_glide_room if gliding else 0.0)
+		var kill: float = world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
 	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:

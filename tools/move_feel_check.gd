@@ -1292,7 +1292,15 @@ const OLD_FEEL := {
 	8.0, "feather_keep": 0.6, "feather_min": 0.05, "feather_tap": 0.3, "feather_tap_heat": 1.0, "lrise_speed": 14.0,
 	"lrise_min": 4.0, "lrise_pop": 2.6, "lrise_off": 0.9, "lrise_window": 0.6, "fling_height": 0.9, "fling_speed":
 	7.5, "fling_early_height": 0.2, "drop_accel": 26.0, "drop_dive_accel": 45.0, "drop_brake": 30.0, "drop_flare_h":
-	4.0, "drop_flare_fall": 2.2, "drop_flare_rate": 6.0, "drop_land_squash": 0.45
+	4.0, "drop_flare_fall": 2.2, "drop_flare_rate": 6.0, "drop_land_squash": 0.45,
+	# the wall kick and bounce (WallMoves), the mantle carry (MantleCarry), the glider lift (GlideLift), the abyss depth
+	"wall_kick_rise": 0.8, "wall_hop_climb_cap": 1.6, "wall_face_reach": 0.4, "wall_face_rise": 0.5, "wall_kick_press":
+	0.4, "wall_kick_away": 0.4, "wall_kick_keys_min": 0.3, "wall_kick_push": 7.5, "wall_kick_slide_keep": 0.6,
+	"wall_kick_push_jump": 0.9, "wall_bounce_keep": 0.85, "wall_bounce_head_on_deg": 20.0, "wall_bounce_min_into": 4.0,
+	"wall_bounce_knock_quiet": 0.6, "wall_bounce_steer": 25.0, "wall_bounce_window": 0.25, "mantle_carry_keep": 0.6,
+	"mantle_approach_dot": 0.45, "mantle_push_speed": 2.0, "mantle_peak_decay": 6.0, "mantle_mini_s": 0.75,
+	"lift_open_kick": 6.0, "lift_kick_heat": 0.08, "lift_hang_grav": 0.35, "lift_hang_t": 0.9, "ledge_air_t": 0.5,
+	"abyss_extra": 11.5
 }
 const OLD_TRACE_HASH := 3115338930
 

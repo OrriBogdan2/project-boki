@@ -14,7 +14,7 @@ extends RefCounted
 var bad := 0
 ## How far under the lowest lip around a hunter is lost (movefeel: the hunter's abyss is deeper than the
 ## monsters' World.ABYSS_DEPTH; it was 6m, the old checks' "< 7m")
-const KILL_DEPTH := World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA
+var kill_depth: float = World.ABYSS_DEPTH + HunterFeel.abyss_extra
 var m: Match
 var w: World
 var h: Hunter
@@ -175,7 +175,7 @@ func run(main: Node) -> void:
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
 	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [HunterFeel.mantle_reach_abyss + 0.1, grabbed])
-	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
+	ok(dgood == dn and worst_drop < kill_depth + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
 	ok(stuck < 6, "sliding down the face never snags (longest hang %d frames)" % stuck)
 	# a plain walk off the edge: how far below the lip before the abyss
 	var e0: Dictionary = edges[0]
@@ -189,7 +189,7 @@ func run(main: Node) -> void:
 	# the dash's speed carries on in the air (Loco.air_step), so measure under the lips where you fell, not the edge
 	var at0: Vector3 = r0.get("low_at", Vector3(e0["ex"], 0, e0["ez"]))
 	var ref0 := _ref(Vector3(at0.x, e0["top"], at0.z))
-	ok(r0["fell"] and ref0 - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), ref0 - float(r0["low"]), r0["t"]])
+	ok(r0["fell"] and ref0 - float(r0["low"]) < kill_depth + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), ref0 - float(r0["low"]), r0["t"]])
 	# walking (no dash, no jump) toward the edge takes a player over it: the edge doesn't hold you
 	var wgood := 0; var wn := 0; var bheld := 0
 	for e in edges.slice(0, 6):
@@ -433,7 +433,7 @@ func _home(main: Node) -> void:
 					lost_low = maxf(lost_low, top - low)
 	var near_n := n * 2 / 3
 	ok(climbed == near_n, "home: caught the island's side from below and pulled up %d of %d" % [climbed, near_n])
-	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
+	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + HunterFeel.abyss_extra + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
 	ok(inside < 0.05, "home: never inside or under the island (deepest %.2fm)" % inside)
 	# walking toward the farm island's edge takes you over it
 	var hw := 0

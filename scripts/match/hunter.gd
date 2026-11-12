@@ -2089,7 +2089,7 @@ func _physics(dt: float) -> void:
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
-		glide_lift.hang_t = GlideLift.HANG_T
+		glide_lift.hang_t = HunterFeel.lift_hang_t
 	elif gliding:
 		var sink := (HunterFeel.dive_fall if diving else HunterFeel.drop_fall) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
@@ -2295,12 +2295,11 @@ func _in_abyss() -> bool:
 	return pos.y < abyss_kill_y()
 
 ## (movefeel) The point of no return under you: below this you're lost to the abyss. World.ABYSS_DEPTH
-## (6m, shared with monsters and the home island) plus ABYSS_EXTRA for hunters, so there's real room to
+## (6m, shared with monsters and the home island) plus HunterFeel.abyss_extra for hunters, so there's real room to
 ## recover with the glider, an updraft or a ledge float; a glider with heat left gets HunterFeel.abyss_glide_room
 ## more. The HUD's abyss danger reads this (AbyssFx.danger).
-const ABYSS_EXTRA := 11.5         # [game data] AbyssHeight: lost 17.5m under ground level (with World.ABYSS_DEPTH)
 func abyss_kill_y() -> float:
-	var fl: float = m.world.abyss_floor(pos.x, pos.z, last_gy) - ABYSS_EXTRA
+	var fl: float = m.world.abyss_floor(pos.x, pos.z, last_gy) - HunterFeel.abyss_extra
 	if gliding and glide_fuel > 0.001:
 		fl -= HunterFeel.abyss_glide_room
 	return fl
@@ -2482,7 +2481,7 @@ func _try_ledge_grab(dt: float) -> void:
 			var shoved := over_void() or gliding or glide_off_t < HunterFeel.feather_keep     # thrown or glided into the face
 			if shoved and wall_hit_v.length() >= 2.0:
 				mv = wall_hit_v.normalized()
-			elif carry_v >= MantleCarry.PUSH_SPEED:
+			elif carry_v >= HunterFeel.mantle_push_speed:
 				mv = MantleCarry.heading(self, mv)       # flying in with momentum is a push (item 185b)
 			else:
 				return
@@ -2572,7 +2571,6 @@ func _try_ledge_grab(dt: float) -> void:
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
 ## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
 ## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
-const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	var lf := lfloat
 	lf["t"] = float(lf["t"]) + dt

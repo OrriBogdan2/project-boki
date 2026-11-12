@@ -148,7 +148,7 @@ func _kick_case(what: String) -> void:
 func _at_wall() -> bool:
 	# beside the face: not through it (a Spirit Walk ghosts terrain) and not up over its top
 	var gap: float = face - P.pos.x - P.r
-	return not P.grounded and gap < WallMoves.FACE_REACH and P.pos.x < face \
+	return not P.grounded and gap < HunterFeel.wall_face_reach and P.pos.x < face \
 		and P.pos.y < m.world.ground_at(face + 0.5, z0) - 0.1
 
 func _kicks() -> int:
@@ -175,7 +175,8 @@ func _bounce_run(keys: Vector2, secs: float, each := Callable()) -> int:
 		t += DT
 		if _bounced():
 			return 1
-		reached = reached or (P.wall_touch_t > 0.0 and not P.grounded and P.wall_hit_v.x >= WallMoves.BOUNCE_MIN_INTO)
+		var into := P.wall_hit_v.x >= HunterFeel.wall_bounce_min_into
+		reached = reached or (P.wall_touch_t > 0.0 and not P.grounded and into)
 	return 0 if reached else -1
 
 ## What holds the body at a blocked case, for the report.
@@ -183,7 +184,7 @@ func _why() -> String:
 	var held := {"stun": P.stun_t > 0.0, "grap": P.grap.size() > 0, "gnd": KitStatus.grounded(P),
 			"cast_locked": P.ak != null and P.ak.cast_locked(), "lfloat": not P.lfloat.is_empty(),
 			"pad": P.pad.size() > 0, "roll": P.roll_t > 0.0, "grounded": P.grounded,
-			"cap": P.pos.y > P.last_gy + WallMoves.HOP_CLIMB_CAP, "shove": not P.shove.is_empty(),
+			"cap": P.pos.y > P.last_gy + HunterFeel.wall_hop_climb_cap, "shove": not P.shove.is_empty(),
 			"charge": not P.charge.is_empty(), "glide": P.gliding, "mantling": P.mantling(),
 			"knock": P.knock_t > 0.0, "root": P.root_t > 0.0}
 	var f: Array = []

@@ -1,7 +1,7 @@
 extends RefCounted
 ## --wallmove-check: wall kick, wall bounce, ledges that always answer, and the springy abyss lift.
 ##   1. Wall kick (item 149): a jump pressed against a wall you push into adds about one terrace of height,
-##      again on every press (a wall dance), up to WallMoves.HOP_CLIMB_CAP over the take-off. Jump + kick +
+##      again on every press (a wall dance), up to wall_hop_climb_cap over the take-off. Jump + kick +
 ##      mantle tops a four-terrace wall (Cinder Steps' plateau); a five-terrace wall stays sheer however much
 ##      you hop, and the glider never opens from it.
 ##      Facing a wall with no keys, ten hops in a row, each with its scuff, and never a glider; a standing
