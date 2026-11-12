@@ -10,7 +10,7 @@ extends RefCounted
 ##      memories and the next round from garden_prizes.json "relay"; a loss starts the run over
 ##   6. body language (RelayBeats): a hand-off is a 0.3 s contact (bump and brace, or one matched hop for duo
 ##      friends), the next runner's gait bursts for 0.4 s (friends swell it, strangers step it), the winners
-##      cheer and the losers sulk with the species' clip or, without it, a hop and a head drop
+##      cheer and the losers sulk with the species' clip or, without it, the rules' fallback clip and a head drop
 ##   7. on the base: the relay stand by the Dash loop starts a relay of three against three that ends on a
 ##      result card, and the visitors leave
 ## Never touches the real save.
@@ -199,9 +199,14 @@ func _beats() -> void:
 	var bare := _runner(["stonehop"])
 	RelayBeats.finish([bare], true)
 	ok(bare.get_meta("kact") == "stonehop", "beats: no win clip is a hop")
+	var hoppy := _runner(["hop", "idle"])
+	RelayBeats.finish([hoppy], true)
+	ok(hoppy.get_meta("kact") == "hop", "beats: a rig with no win clip but a hop plays its hop")
+	RelayBeats.finish([hoppy], false)
+	ok(hoppy.get_meta("kact") == "idle", "beats: and with no sulk clip it stands")
 	RelayBeats.finish([bare], false)
 	ok(is_equal_approx(bare.rotation.x, float(B["sulk_drop"])), "beats: no sulk clip is a head drop")
-	beats.clear([a, b, c, d, bare])
+	beats.clear([a, b, c, d, bare, hoppy])
 	ok(bare.rotation.x == 0.0 and not bare.has_meta("kact") and not d.has_meta("kburst"),
 			"beats: clear resets the runners")
 	for n in [a, b, c, d, bare]:
