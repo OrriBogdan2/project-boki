@@ -36,6 +36,7 @@ const KIT_LEASH_M := 3.0         # m the Hunter may stray from the fight's centr
 const KIT_SEARCH_M := 30         # m from the start the kit shot looks for that much room
 const DROP_PLAN_MAX_S := 25.0    # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5       # s of the ride out kept after the Hunter is extracted
+const KO_TAIL_S := 1.5           # s shot 9 keeps playing after the Hunter dies (the encoder cuts 1 s after the mark)
 
 var shot := 2
 var take := 1
@@ -203,7 +204,13 @@ func _loot() -> void:
 	o.erase("blight")
 	await _raid(o)
 	mark("loot")
-	await wait(SECS[9])
+	var P := m.player
+	for _i in roundi(SECS[9] * FPS):
+		await main.get_tree().process_frame
+		if not is_instance_valid(P) or P.dead:
+			mark("knocked_out")      # the encoder cuts there and flags the take, so a run that dies is not picked
+			await wait(KO_TAIL_S)
+			return
 
 ## Shot 10: alone at an uplink yard as it finishes charging; walks in when it opens and rides out.
 func _escape() -> void:
