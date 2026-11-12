@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and "kburst" (a factor on the gait's
-## cadence), and plays the face on top of whatever the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown) and "kburst"
+## (a factor on the gait's cadence), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -381,6 +381,8 @@ func _state_clip() -> String:
 	if work != "":
 		return work
 	var act := String(root.get_meta("kact", ""))
+	if act == "hop" and not player.has_animation("hop"):
+		return "run"          # a Boki in the air (Kin.render) without a hop clip runs through it
 	if act != "":
 		return act
 	if _shot_left > 0.0:
