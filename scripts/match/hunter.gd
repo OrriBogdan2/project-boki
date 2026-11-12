@@ -39,7 +39,7 @@ const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its sid
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
-const GLIDER_HIT_HEAT := 3.0 * 0.30 / 34.5   # [sync64] glider heat per point of damage: hits heat it 3x (34.5 burns 90%)
+const GLIDER_HIT_HEAT := 3.0 * 0.30 / 34.5   # [sync64] glider heat per damage point: hits heat 3x (34.5 burns 90%)
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
 const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
@@ -766,6 +766,7 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s >= Displace.KNOCK_MIN:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 		if m is Match: (m as Match).displace.knocked(self)
+		HunterMove.cut_air_dash(self)
 	if lift >= 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
@@ -2064,6 +2065,7 @@ func _physics(dt: float) -> void:
 	var spd := HunterMove.ground_speed(base_speed, HunterMove.speed_bonus(self, mv), _move_mult())
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
+	if stun_t > 0.0: HunterMove.cut_air_dash(self)
 	HunterMove.dash_off_ledge(self)
 	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
 	if roll_t > 0.0:
@@ -2623,6 +2625,7 @@ func _try_ledge_grab(dt: float) -> void:
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
+		"dash_vy": MantleCarry.dash_rise(self),               # a dash hands over: its speed takes you up the face
 		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
 	if grounded:
 		vel.y = maxf(vel.y, LRISE_MIN)     # walking into it: under way at once
@@ -2692,7 +2695,8 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-	vel.y = HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt)
+			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
+	vel.y = maxf(HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt), float(lf["dash_vy"]))
 	return true
 
 ## Is there ground at the ledge's height within reach of your side (the face you're rising up)?
