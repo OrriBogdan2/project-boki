@@ -3708,7 +3708,8 @@
    "hero": "1b43f797bc42"
   },
   "sheet_for_card": "8bad292a8044",
-  "display_name": "Kegling"
+  "display_name": "Pinglet",
+  "old_name": "Kegling"
  },
  "Rollguin": {
   "sheet": "briefs/boki-art/turnarounds/Rollguin.jpg",
@@ -3737,7 +3738,8 @@
    "hero": "4bcfc897dcaf"
   },
   "sheet_for_card": "ac580571818a",
-  "display_name": "Pipguin"
+  "display_name": "Strikeguin",
+  "old_name": "Pipguin"
  },
  "Filefin": {
   "sheet": "briefs/boki-art/turnarounds/Filefin.jpg",

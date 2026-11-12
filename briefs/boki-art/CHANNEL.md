@@ -940,3 +940,5 @@ RELAY FOR MAIN (gameplay, not art). The owner typed these Kael notes into the ar
 2. "his slam is correct, havent tested shift slam yet"
 3. "his rmb is worse, its like a cone now (tap rmb) - that one should show where its hitting (not his held one) and be a forward sword strike / slam like brawls is"
 My reading, to be checked with the owner: (a) remove the pull toward the chain on E/RMB; (b) HELD version: no shape or indicator in front of him, he raises it over his head and is slowed; (c) TAP RMB: currently a cone, should be a forward sword strike / slam (he compares it to Brawl Stars), and this tap version is the one that shows a hit indicator; (d) slam is correct; (e) shift slam untested.
+
+OWNER 11-11 9 PM ET: penguin line renamed. Pinguin display name Kegling -> **Pinglet**, Kingpinguin display name Pipguin -> **Strikeguin** (Rollguin unchanged). File ids unchanged; LIVE_MANIFEST display_name updated, old_name kept. Game repo has no data for these yet; Bokidex branch dex-rename-guin carries the site side.

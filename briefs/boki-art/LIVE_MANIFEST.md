@@ -119,7 +119,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Kerchick | ✓ | ✓ | ✓ |
 | Kestrike | ✓ | ✓ | ✓ |
 | Kindlewren | ✓ | ✓ | ✓ |
-| Kingpinguin (Pipguin) | ✓ | ✓ | ✓ |
+| Kingpinguin (Strikeguin, was Pipguin) | ✓ | ✓ | ✓ |
 | Kintsuwyrm (Gildwyrm) | ✓ | ✓ | ✓ |
 | Kitlet | ✓ | ✓ | ✓ |
 | Klaxada | ✓ | ✓ | ✓ |
@@ -180,7 +180,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Phonodrake | ✓ | ✓ | ✓ |
 | Pickadactyl | ✓ | ✓ | ✓ |
 | Pillaroo | ✓ | ✓ | ✓ |
-| Pinguin (Kegling) | ✓ | ✓ | ✓ |
+| Pinguin (Pinglet, was Kegling) | ✓ | ✓ | ✓ |
 | Pinster | ✓ | ✓ | ✓ |
 | Pipeworth | ✓ | ✓ | ✓ |
 | Pipewurm | ✓ | ✓ | ✓ |
