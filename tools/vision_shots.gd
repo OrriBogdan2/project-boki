@@ -1,18 +1,21 @@
 extends RefCounted
 ## --vision-shots --shots-dir=<dir> [--fixed-fps 30]: the sight wedge at the match camera with the HUD. You stand
 ## aiming (a rival ahead with a plate, a crouched rival ahead with none, a rival behind you hidden), sweep your aim
-## so the wedge turns over the one behind, then crouch: <dir>/f0000.jpg... every frame from SHOOT_FROM, plus
-## stand.png and crouch.png. Run on a real GPU (jobq --needs gpu); docs/specs/VISION_LOOK.md.
+## so the wedge turns over the one behind, crouch, then stand while the one behind shoots at you (revealed in her own
+## lit circle) and stops (it fades): <dir>/f0000.jpg... every frame from SETTLE, plus stand.png, crouch.png and
+## reveal.png. Run on a real GPU (jobq --needs gpu); docs/specs/VISION_LOOK.md.
 
 const SPAWN_WAIT := 30   # frames before placing anyone (the match puts you on the map)
 const SETTLE := 45        # frames before the first one kept (the match fades in, the camera settles)
 const STAND := 60         # frames standing still
 const SWEEP := 90         # frames turning the aim 100 degrees and back
 const CROUCH := 75        # frames crouched (the camera eases out)
+const REVEAL := 45        # frames the rival behind you shoots, then as long again after she stops
 const SWEEP_DEG := 100.0
 const AIM_M := 6.0        # m: where your aim (and the reticle) sits ahead of you
 ## Rivals round you: [degrees off your aim, metres, crouched]
-const RIVALS := [[40.0, 5.0, false], [-35.0, 5.0, true], [165.0, 4.5, false]]
+const RIVALS := [[40.0, 5.0, false], [-35.0, 5.0, true], [165.0, 7.0, false]]
+const SHOOTER := 2        # the rival behind you: shoots in the reveal part
 
 var main: Node
 var dir := "user://vision_shots"
@@ -56,7 +59,8 @@ func run(mn: Node) -> void:
 	for i in mini(rivals.size(), RIVALS.size()):
 		var b := a + deg_to_rad(float(RIVALS[i][0]))
 		at[i] = P.pos + Vector3(cos(b), 0, sin(b)) * float(RIVALS[i][1])
-	var total := SETTLE + STAND + SWEEP + CROUCH
+	var shoot_at := SETTLE + STAND + SWEEP + CROUCH
+	var total := shoot_at + REVEAL * 2
 	for f in total:
 		var k := clampf(float(f - SETTLE - STAND) / SWEEP, 0.0, 1.0)
 		var t := a + deg_to_rad(SWEEP_DEG) * sin(PI * k)
@@ -65,15 +69,17 @@ func run(mn: Node) -> void:
 			var r: Hunter = rivals[i]
 			r.teleport(at[i])      # held where they stand, not firing (firing would reveal them)
 			r.inp["fire"] = false
-			r.reveal_t = 0.0
+			if f < shoot_at: r.reveal_t = 0.0
+			elif i == SHOOTER and f < shoot_at + REVEAL: r.fire()      # (an idle rival leaves the fire key alone)
 		P.inp["aim"] = P.pos + Vector3(cos(t) * AIM_M, 0.9, sin(t) * AIM_M)
-		P.inp["crouch"] = f >= SETTLE + STAND + SWEEP
+		P.inp["crouch"] = f >= SETTLE + STAND + SWEEP and f < shoot_at
 		main.get_viewport().warp_mouse(m.cam.unproject_position(P.inp["aim"]))     # the reticle on your aim
 		await main.get_tree().process_frame
 		if f >= SETTLE:
 			_save("f%04d.jpg" % (f - SETTLE))
 		if f == SETTLE + STAND - 1: _save("stand.png")
-		if f == total - 1: _save("crouch.png")
+		if f == shoot_at - 1: _save("crouch.png")
+		if f == shoot_at + REVEAL - 1: _save("reveal.png")
 	Game.god = false
 	print("VISIONSHOT DONE %d frames" % (total - SETTLE))
 	main.get_tree().quit()
