@@ -4,19 +4,20 @@ extends "res://tools/hero_pair_check.gd"
 ## damage on the dummy. Each must give at least the source footage's lead (briefs/hero-ref, the figures are
 ## in docs/TELEGRAPH_LEAD.md), show without a gap until the hit, and read in the rival colour to a rival.
 
-const EPS := 0.05            # s of slack (the 60 Hz step and the press tick)
-const MAX_T := 4.0           # s a cast gets to land
+const EPS := 0.05  # s of slack (the 60 Hz step and the press tick)
+const MAX_T := 4.0  # s a cast gets to land
+
 
 ## One entry per delayed hit: {arch, name, lead (s, the source footage), start: Callable(P, T, m), and
 ## optional dist (m to the dummy), min (damage that counts as the hit), kept (s: the lead we ship where an
 ## owner decision keeps it under the source's), each: Callable(P, t), id (only AimKit entries with this id
 ## count), prep: Callable(P, T) (stand the dummy somewhere else)}. The figures: docs/TELEGRAPH_LEAD.md.
 func _cases() -> Array:
-	var rmb := func(hold: float) -> Callable:
+	var rmb := func(hold_s: float) -> Callable:
 		return func(P: Hunter, _T: Hunter, _m: Match):
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()
-			P.set_meta("rmb_until", hold)
+			P.set_meta("rmb_until", hold_s)
 	var ult := func(P: Hunter, _T: Hunter, _m: Match): HunterKeys.ult_pressed(P)
 	var e := func(P: Hunter, _T: Hunter, _m: Match): P.ak.use_e()
 	var air_rmb := func(P: Hunter, _T: Hunter, _m: Match):
@@ -24,12 +25,14 @@ func _cases() -> Array:
 		P.grounded = false
 		P.ak.press_rmb()
 	var recast_e := func(P: Hunter, t: float):
-		if t >= 0.35 and t < 0.4: P.ak.use_e()
+		if t >= 0.35 and t < 0.4:
+			P.ak.use_e()
 	var beside := func(P: Hunter, T: Hunter):
 		T.teleport(T.pos + Vector3(-1.0, 0, 1.5))
 		aim_at(P, P.pos + Vector3(9.0, 0, 0))
 	var second_x := func(P: Hunter, t: float):
-		if t >= 0.9 and t < 0.95: HunterKeys.ult_pressed(P)
+		if t >= 0.9 and t < 0.95:
+			HunterKeys.ult_pressed(P)
 	return [
 		{"arch": "dolm", "name": "Quakefall", "lead": 1.0, "kept": 0.8, "start": rmb.call(2.0)},
 		{"arch": "dolm", "name": "Basalt Spine", "lead": 0.2, "start": ult},
@@ -49,9 +52,10 @@ func _cases() -> Array:
 		{"arch": "archer", "name": "Hail Wall", "lead": 0.35, "start": e},
 	]
 
+
 func run(main_node: Node) -> void:
 	main = main_node
-	var only := ""      # --only=<arch>: just that hero's casts (they are slow)
+	var only := ""  # --only=<arch>: just that hero's casts (they are slow)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--only="):
 			only = a.get_slice("=", 1)
@@ -60,6 +64,7 @@ func run(main_node: Node) -> void:
 			await _case(c)
 	print("PAIRCHECK telegraph-lead DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 ## The ground telegraphs P is showing to everyone right now.
 func _up(m: Match, P: Hunter, id: String) -> Array:
@@ -70,6 +75,7 @@ func _up(m: Match, P: Hunter, id: String) -> Array:
 		if e["h"] == P and bool(e["all"]) and d.live(e) and (id.is_empty() or String(k).ends_with(":" + id)):
 			out.append(e)
 	return out
+
 
 func _case(c: Dictionary) -> void:
 	var r := setup(String(c["arch"]), float(c.get("dist", 6.0)))
@@ -115,6 +121,7 @@ func _case(c: Dictionary) -> void:
 	ok(tag + ": a rival sees it in the rival colour", rival > 0.0, "gain %.3f" % rival)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 ## How much nearer to the hostile rim colour the ground telegraphs draw for a rival of their owner than
 ## for an ally of theirs (mean over the vertices of what only `all` entries draw). AimDraw tints an `all`
