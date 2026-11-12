@@ -13,6 +13,7 @@ const SAFE_MARGIN := 1.2         # metres outside a lit keg's blast a bot still 
 const CHAIN_SLACK := 0.4         # metres past the blast radius that still light a neighbour
 const BLAST_SPEED := 1.6         # debris power per metre of blast radius
 const SCORCH_SCALE := 0.9        # scorch radius as a share of the blast radius
+const HIT_R := 0.36              # metres from a prop's centre a shot or swing has to pass to hit it
 
 static var _rules: Dictionary = {}
 
@@ -67,6 +68,15 @@ func hit(b: Dictionary, by: Ent, chain := false) -> void:
 	_m.fx.flash(b["pos"] + Vector3(0, 0.5, 0), Color("fff0c0"), 0.5, 0.08)
 	_m.sfx("fuse_hiss", b["pos"], -2.0, 1.0)
 	_m.sfx("break_metal", b["pos"], -10.0, 1.6)
+
+## The live props within `reach` (flat) of `p`: what one shot can touch this step. A shot walked its
+## path in 0.25 m hops against every prop on the map, and the 2x map doubled them.
+static func near(breaks: Array, p: Vector3, reach: float) -> Array:
+	var out: Array = []
+	for b in breaks:
+		if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < reach:
+			out.append(b)
+	return out
 
 ## Runs the fuses of lit kegs.
 func tick(dt: float) -> void:

@@ -13,11 +13,13 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
+var _spot: Vector3       # each hero cycle starts here: the drift rows walk the Wisp 1.4 m a cycle, toward the abyss
 
 func run(main_node: Node) -> void:
 	main = main_node
 	_looks()
 	_start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	_spot = m.player.pos
 	for a in Arch.ids():
 		_hero_cycle(a)
 	_bleed_out()
@@ -61,6 +63,7 @@ func _frames(secs: float, drift := Vector3.ZERO) -> void:
 func _hero_cycle(arch_id: String) -> void:
 	var p: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	p.pos = _spot
 	p.reclass(Arch.weight(arch_id), arch_id)
 	p.hp = p.max_hp
 	var tag := "[%s] " % arch_id

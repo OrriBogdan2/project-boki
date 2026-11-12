@@ -184,7 +184,7 @@ func _find_threat() -> void:
 	threat = null
 	var o := h()
 	var bd := 10.0
-	for f in m.foes_of(o.team):
+	for f in m.foes_of(o.team, false):
 		if f == k or (f is Kin and (f as Kin).owner_h == o) or Shrubling.hidden(f):
 			continue
 		if f is Mob and not ((f as Mob).tgt == o or (f as Mob).tgt == k or o.flat_dist(f) < 5.0):
@@ -278,7 +278,7 @@ func _best_callout() -> Dictionary:
 		var best_x: Dictionary = {}
 		var bxd := 1e9
 		for x in m.exits.list:
-			var usable: bool = m.exits.callable(x) or m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
+			var usable: bool = m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
 			if usable and o.flat_dist(x["pos"]) < bxd:
 				bxd = o.flat_dist(x["pos"]); best_x = x
 		if not best_x.is_empty():
@@ -457,7 +457,7 @@ func _almost_home() -> void:
 	if noted.has("almost_home") or m.exits == null:
 		return
 	var x: Dictionary = m.exits.active_for(h().team)
-	if x.is_empty() or not String(x["state"]) in ["open", "boarding"] or h().flat_dist(x["pos"]) > 7.0:
+	if x.is_empty() or String(x["state"]) != "open" or h().flat_dist(x["pos"]) > 7.0:
 		return
 	noted["almost_home"] = true
 	cheer_cd = 3.0
@@ -534,7 +534,7 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
 						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)
@@ -639,7 +639,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "point" if Tutorial.leads(id) else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
+			pose = "point" if Tutorial.leads(id) else ("growl" if id in Tutorial.FOE_STEPS else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
