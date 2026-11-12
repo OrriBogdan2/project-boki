@@ -285,7 +285,7 @@ CAMPS = {
     "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
     "lark": [[40, 42, "normal"], [49, 21, "light"], [27, 22, "light"]],
     "saltmere": [[41, 178, "normal"], [16, 172, "light"], [31, 201, "light"]],
-    "highwatch": [[174, 37, "normal"], [200, 38, "light"], [181, 14, "light"]],
+    "highwatch": [[174, 37, "normal"], [200, 38, "light"], [180, 13, "light"]],
     "duskmoor": [[175, 173, "normal"], [172, 195, "light"], [197, 169, "light"]],
 }
 for _iid, _camps in CAMPS.items(): BY[_iid]["camps"] = _camps
