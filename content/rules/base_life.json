@@ -42,9 +42,12 @@
 		"hold_s": 0.5,
 		"sulky_joy": 25.0,
 		"shy_trust": 22.0,
-		"look_s": 2.5,
 		"slot_m": 1.5,
 		"pace": [0.7, 1.3],
+		"sulky_pace": 0.45,
+		"perk_s": 0.12,
+		"turn_s": 0.33,
+		"wait_s": 0.6,
 		"give_up_s": 9.0
 	},
 	"greet": {
@@ -64,5 +67,5 @@
 		"away_m": 2.5
 	},
 	"greet_doc": "arriving in a zone (scripts/home/base_greet.gd): every awake Boki within radius_m m of you reacts once, the most trusting first: notice_s s after you land, then stagger_s s between each next one. Trust at close_trust (Close) or more: it runs to a spot slot_m m from you at the whistle's run speed and hops once within reach_m m, then stays hop_s s (it gives up after give_up_s s); at soulbound_trust (Soulbound) it runs even when sulky. Sulky (the whistle's sulky_joy): it turns its back and walks away_m m off, sulk_s s. Shy (under the whistle's shy_trust): it peeks and waves (a wave_s s bounce), peek_s s. In between it runs with chance personality cling x cling_run, else it peeks. Napping Boki sleep on.",
-	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (look_s s) and stays; slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped."
+	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (a droop and a head turn), waits wait_s s and walks over at sulky_pace of the call run; an answering Boki first makes a beat: perk_s s, plus up to turn_s s to turn to face you (so one already facing you loses only perk_s); slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped."
 }
