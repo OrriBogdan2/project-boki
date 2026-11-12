@@ -285,7 +285,14 @@ func rimewright() -> void:
 			"tm X: the countdown fill (and the cracks) brighten as it builds",
 			float(AimKit.entry(P, "x").get("fill", 0.0)) > fill1 + 0.3)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
-	step(m, 1.3)
+	var ch0 := K.ch_rmb
+	P.inp["sec"] = true
+	step(m, 0.05)
+	P.inp["sec"] = false
+	step(m, 0.3)
+	ok("tm X: RMB in the shell is refused: no charge spent, no spear (item 65; the Cast into cast table)",
+		absf(K.ch_rmb - ch0) < 0.001 and K.throw_t < 0.0, "charges %.2f -> %.2f" % [ch0, K.ch_rmb])
+	step(m, 0.95)          # with the 0.35 s RMB press: 3.65 s in all, past the 3.5 s crash
 	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
