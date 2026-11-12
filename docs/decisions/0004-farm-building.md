@@ -19,7 +19,7 @@ A new farm let you buy every building at once and placing one was instant, so th
 - **Tools (item 91):** chopping, mining and hammering run on `ToolWork` (the swing clock, holding interact loops it) and `HunterTool` (axe, pickaxe and hammer poses, the tool node in the hands, the weapon stowed through `HunterAnim`'s `stow_k`). At home the Empty carries no class weapon (`holster`).
 - **Tiers:** `t` on the entry (1..3). An upgrade is a site with `up = true` (the building keeps working). Stations work 25% / 50% faster at tier 2 / 3. Tier 2/3 need farm level 3/5.
 - **Fibre** is a new material in `Save.d["mats"]`: one per harvest of two or more, and one per tile of wild cleared.
-- **Build mode:** locked entries with their requirement, cost icons (FarmIcon), an Upgrades tab, footprint outline + snapping grid + floating refusal reason, a pop when something lands.
+- **Build mode:** locked entries with their requirement, cost icons (FarmIcon), an Upgrades tab (and in build mode the cursor card over a placed building shows its level and an Upgrade key that opens the tab on its row, or "Max"), footprint outline + snapping grid + floating refusal reason, a pop when something lands.
 
 ## Consequences
 - Files: `farm_unlocks.gd`, `farm_sites.gd`, `farm_models.gd`, `farm_build_ui.gd`, `farm_icons.gd` (scripts/home); hooks in `home_build.gd`, `home_work.gd`, `home_layout.gd`, `incubator.gd` (cradles 6 to 8 need farm level 4/5/6), `lairs.gd` (boss stat), `game.gd` (counts it).
