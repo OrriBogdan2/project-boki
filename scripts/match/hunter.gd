@@ -2181,12 +2181,15 @@ func _physics(dt: float) -> void:
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
 	dash_rest = Vector2.ZERO
-	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, hull_r(), pos.y)
+	var po := tgt
+	if spirit_t <= 0.0:
+		po = m.world.push_out_blocks(tgt.x, tgt.y, hull_r(), pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
 	if po.distance_squared_to(tgt) > 1e-10:
 		block_n = (po - tgt).normalized()
-		rock_b = m.world.ground_at(tgt.x - block_n.x * hull_r() * 0.7, tgt.y - block_n.y * hull_r() * 0.7) + World.BLOCK_H
+		var inset := hull_r() * 0.7
+		rock_b = m.world.ground_at(tgt.x - block_n.x * inset, tgt.y - block_n.y * inset) + World.BLOCK_H
 		var hvb := Vector2(vel.x, vel.z)
 		var into := hvb.dot(block_n)
 		if into < 0.0:

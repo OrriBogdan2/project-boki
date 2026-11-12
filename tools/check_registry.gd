@@ -260,7 +260,8 @@ const CHECKS := {
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
-	"--hurtbox-check": ["res://tools/hurtbox_check.gd", "hurtbox_check", null],      # per-Hunter hurtbox radius and height
+	# per-Hunter hurtbox radius and height
+	"--hurtbox-check": ["res://tools/hurtbox_check.gd", "hurtbox_check", null],
 	"--hurtbox-shots": ["res://tools/hurtbox_shots.gd", "hurtbox_shots", null],      # --shots-dir=<dir>
 	# measured reach, width and arc of every input
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
