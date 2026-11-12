@@ -38,14 +38,16 @@ var vuln_k := 0.0
 var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false        # the running stun counts toward the immunity that follows it
 var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
-var marks := {}             # combo setups on this body: status -> {by, owner, until}
+var marks := {}             # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
+var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -143,7 +145,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	flash_t = 0.12
+	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
@@ -333,6 +335,9 @@ func net_follow(dt: float) -> void:
 	prev = pos
 	if net_t < 0.0:
 		return
+	if net_buf:
+		net_buf.follow(self, m.time)
+		return
 	var age := clampf(m.time - net_t, 0.0, 0.25)
 	var tgt := net_pos + net_vel * age
 	if pos.distance_to(tgt) > 4.0:
@@ -344,7 +349,10 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
+var _flash_col := Color.WHITE
 var _flash_n := -1
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -362,9 +370,15 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
+	var fc := Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n:
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
 		_flash_set = f
+		_flash_col = fc
 		_flash_n = mats.size()
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)
