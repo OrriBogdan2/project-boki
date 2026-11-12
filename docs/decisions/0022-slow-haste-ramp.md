@@ -14,15 +14,16 @@ dash-and-pad bleed constant that only matched the brake by coincidence at run sp
 
 ## Options
 1. An eased ramp over a named time (lerp the multiplier). Ours-only; the source has none.
-2. The source rule, named once: speed over the cap with keys held sheds at the walking brake
-   (`HunterMove.cap_brake`, brake_decel + ground_friction x speed), from the data already in hunter_move.json.
+2. The source rule: speed over the cap sheds at the walking brake (brake_decel + ground_friction x speed),
+   up at MaxAcceleration, from the data already in hunter_move.json.
 
 ## Decision
-Option 2. `GROUND_OVERSPEED` is deleted; the ground step and the bot lunge planner call `HunterMove.cap_brake`.
-Up to a raised cap stays `ground_accel` (MaxAcceleration). The rule is rate-based, so there is no ramp-time
-constant; the settle times are asserted instead (`--move-feel-check` slow_*/haste_* rows, one kit per weight
-class). A pad's carry with keys held now sheds by the same brake (46 m/s² at 12 m/s, was 30): also the source's law.
+Option 2. Main landed the rule itself under decision 0020 (`HunterMove.brake_rate` in the ground step,
+`HunterMove.slide_speed` in the lunge planner, `GROUND_OVERSPEED` deleted), so this note adds no code: it
+records that every Slow and haste follows that one rule and asserts the settle times (`--move-feel-check`
+slow_*/haste_* rows, one kit per weight class). There is no ramp-time constant. A pad's carry with keys
+held sheds by the same brake (46 m/s² at 12 m/s): also the source's law.
 
 ## Consequences
-hunter_move.gd (+1 function), hunter.gd (net 0 lines), move_feel_check.gd (+6 rows), docs/MOVEMENT_FEEL.md.
-No Net or save change. Kin, mobs and the boss set their speed directly (no ramp) and are out of this scope.
+move_feel_check.gd (+6 rows), docs/MOVEMENT_FEEL.md. No Net or save change. Kin, mobs and the boss set
+their speed directly (no ramp) and are out of this scope.
