@@ -26,6 +26,8 @@ const STILL_MPS := 0.02       # m/s: a foot this slow is still
 const POP_CM := 8.0           # cm: the biggest one-frame jump turning on the spot
 const CREEP_CM := 2.0         # cm: the planted feet's creep while standing
 ## [sex, height, build] of the Unmasked look: Male short slight, Male average, Male tall sturdy, Female average.
+const FLICK_M := 0.5          # m: the cast's wind-back to the flick moves the rod tip at least this far
+const ROD_HAND_CM := 8.0      # cm: the rod's grip may sit this far from the rear hand
 const BODIES := [[1, 0, 0], [1, 1, 1], [1, 2, 2], [0, 1, 1]]
 
 var bad := 0
@@ -73,6 +75,7 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	row["stop"] = _stop(m, an)
 	row["turn"] = _turn(m, an)
 	row["idle"] = _idle(m, an)
+	row["fishing"] = _fishing(m, an)
 	rows[id] = row
 	print("GAIT %-14s hip %.2f m | walk slide %.1f cm %.1f steps/s | run slide %.1f cm %.1f steps/s bob %.1f cm | "
 			% [id, row["hip_m"], row["gait_2.2"]["slide_cm"], row["gait_2.2"]["steps_hz"],
@@ -98,6 +101,16 @@ func _gate(id: String, row: Dictionary) -> void:
 			% [id, row["turn"]["pop_cm"], POP_CM])
 	ok(row["idle"]["creep_cm"] <= CREEP_CM, "%s: standing feet creep %.1f cm (limit %.0f)"
 			% [id, row["idle"]["creep_cm"], CREEP_CM])
+	var fish: Dictionary = row["fishing"]
+	ok(fish["creep_cm"] <= CREEP_CM, "%s: fishing (wait, cast, bite, reel, land) feet creep %.1f cm (limit %.0f)"
+			% [id, fish["creep_cm"], CREEP_CM])
+	ok(fish["rod_miss"] == 0, "%s: the rod is up for every fishing pose, the line leaves its tip (%d frames wrong)"
+			% [id, fish["rod_miss"]])
+	ok(fish["flick_m"] >= FLICK_M, "%s: the cast moves the rod tip %.2f m (at least %.1f)"
+			% [id, fish["flick_m"], FLICK_M])
+	ok(fish["hand_cm"] <= ROD_HAND_CM, "%s: the rod stays in the hands (%.1f cm off, limit %.0f)"
+			% [id, fish["hand_cm"], ROD_HAND_CM])
+	ok(fish["hidden"], "%s: the rod is gone once fishing ends" % id)
 
 ## The state HunterAnim reads; the body faces `face` and the tool moves the model as the farm would.
 func _state(vel: Vector3, face: float) -> Dictionary:
@@ -214,12 +227,54 @@ func _turn(m: Node3D, an: HunterAnim) -> Dictionary:
 func _idle(m: Node3D, an: HunterAnim) -> Dictionary:
 	_run_for(m, an, 1.0, 0.0, 0.0, false)
 	var fr := _run_for(m, an, IDLE_S, 0.0, 0.0, true)
+	return {"creep_cm": _creep(fr)}
+
+## The sole points' biggest move (cm) from where they first stood, while both stood on the floor.
+func _creep(fr: Array) -> float:
 	var creep := 0.0
 	for key in fr[0]:
 		if not String(key).begins_with("sole."):
 			continue
 		for f in fr:
 			var d: Vector3 = (f[key] as Vector3) - (fr[0][key] as Vector3)
-			if (f[key] as Vector3).y < PLANT_Y and (fr[0][key] as Vector3).y < PLANT_Y:
+			var down: bool = (f[key] as Vector3).y < PLANT_Y and (fr[0][key] as Vector3).y < PLANT_Y
+			if down:
 				creep = maxf(creep, Vector2(d.x, d.z).length())
-	return {"creep_cm": 100.0 * creep}
+	return 100.0 * creep
+
+## Fishing on the spot: the held pose with the cast, bite, reel and land played over it (HomeVerbs, as the game does),
+## then the rod put away. The feet creep, the rod shown (and its tip a node the line can leave from) for every frame
+## a pose is up, how far the tip flicks in the cast, the rod's grip from the rear hand, whether it hides.
+func _fishing(m: Node3D, an: HunterAnim) -> Dictionary:
+	_run_for(m, an, 1.0, 0.0, 0.0, false)
+	var verbs := HomeVerbs.new()
+	var fr: Array = []
+	var miss := 0
+	var hand := 0.0
+	var tip_lo := INF
+	var tip_hi := -INF
+	var plan := [["wait", ""], ["wait", "cast"], ["wait", "bite"], ["reel", ""], ["wait", "land"], ["wait", ""]]
+	var rod: Node3D = null
+	for step in plan:
+		verbs.hold(step[0])
+		if step[1] != "":
+			verbs.play(step[1])
+		for _k in int(1.2 / DT):
+			an.update(DT, _state(Vector3.ZERO, m.rotation.y).merged(verbs.step(DT)))
+			fr.append(_read(m))
+			rod = m.get_node_or_null("Rig/Torso/Rod")
+			if rod == null or not rod.visible or HunterRod.tip(an) == null:
+				miss += 1
+				continue
+			if step[1] == "cast" and verbs.act == "cast":
+				var y := (HunterRod.tip(an) as Node3D).global_position.y
+				tip_lo = minf(tip_lo, y)
+				tip_hi = maxf(tip_hi, y)
+			var rear := an.arm_r.transform * (an.el_r.transform * an.hand_r.position)
+			hand = maxf(hand, 100.0 * (rod.position + rod.basis.y * HunterRod.BUTT).distance_to(rear))
+	verbs.hold("")
+	for _k in int(1.0 / DT):
+		an.update(DT, _state(Vector3.ZERO, m.rotation.y).merged(verbs.step(DT)))
+	rod = m.get_node_or_null("Rig/Torso/Rod")
+	return {"creep_cm": _creep(fr), "rod_miss": miss, "flick_m": tip_hi - tip_lo, "hand_cm": hand,
+			"hidden": rod == null or not rod.visible}
