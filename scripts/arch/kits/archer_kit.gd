@@ -263,7 +263,7 @@ func _drop_holds() -> void:
 	draw.drop()
 	spirit.end("merge")
 	if ult: ult.drop()
-	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk", "pin_ult_nock"]:
+	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk"]:
 		anim_id = ""
 
 func _drop_tele() -> void:
@@ -315,7 +315,6 @@ func _pin(a: Vector3, k: float) -> void:
 		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
-			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
@@ -417,7 +416,8 @@ func _tick_rain(dt: float) -> void:
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
-		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
+		# (a tick: the hit reactions stay off, so the slow only takes speed: no squash, flinch or hold)
+		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}}), f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 
 # ------------------------------------------------------------------ bots

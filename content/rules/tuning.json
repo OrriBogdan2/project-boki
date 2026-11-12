@@ -5,5 +5,13 @@
 	"glide": {"turn": 420.0, "turn_fast": 0.45, "brake": 36.0, "brake_deg": 115.0, "drag": 2.0, "drag_steer": 1.4, "coast": 1.4, "catch": 60.0, "max": 15.0},
 	"glide_carry": {"carry_drag": 3.0, "default": 12.0, "archer": 9.0},
 	"dash": {"jump_keep": 0.75},
-	"dash_speed": {"archer": 0.7}
+	"dash_speed": {"archer": 0.7},
+	"lace": {
+		"_note": "Lace's bow feel (PinDraw), owner 11-08: perfect_window_s = how long after a draw stage comes up a release is still perfect (the source's is about 0.15 s; the owner asked for about 0.2 s more); perfect_glow_rim / perfect_glow_col = the toon rim amount and hex colour on her body and bow while the window is open; perfect_payoff_rim / perfect_payoff_s = the stronger rim and its length in s on a perfect release.",
+		"perfect_window_s": 0.35,
+		"perfect_glow_rim": 1.2,
+		"perfect_glow_col": "ffd36a",
+		"perfect_payoff_rim": 2.4,
+		"perfect_payoff_s": 0.16
+	}
 }
