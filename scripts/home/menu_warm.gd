@@ -21,11 +21,11 @@ static func draw(host: Control) -> void:
 	_done = true
 	var pb := UI.scroll_panel(HomeClasses.TITLE, 520.0, func() -> void: pass)
 	var box: VBoxContainer = pb[1]
+	var viewer := HunterViewer.make(Arch.of_save(), HomeClasses.STAGE, HomeClasses.CLIP, 3)
+	box.add_child(viewer)      # (first, on screen: a SubViewport off it never renders, so it would warm nothing)
 	for font in [UI.big, UI.body, UI.semi, UI.caps]:
 		for px in SIZES:
 			box.add_child(UI.label(SAMPLE, px, UI.INK, font))
-	var viewer := HunterViewer.make(Arch.of_save(), HomeClasses.STAGE, HomeClasses.CLIP, 3)
-	box.add_child(viewer)
 	host.add_child(pb[0])
 	var tree := host.get_tree()
 	for i in MAX_FRAMES:
