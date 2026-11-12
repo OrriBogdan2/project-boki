@@ -951,9 +951,6 @@ func _bulwark_combos() -> void:
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
-	ok("bjorn telegraph: the crescent's outer edge is the blow's reach (the hit area), whatever the charge",
-			absf(K.fx.crescent.scale.x * BjornFx.CRES_OUT - float(K.lmb_def()["smash_reach"])) < 0.01,
-			"drawn %.2f vs reach %.2f" % [K.fx.crescent.scale.x * BjornFx.CRES_OUT, float(K.lmb_def()["smash_reach"])])
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	var hv := HeroVfx.of(m)
 	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]

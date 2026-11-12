@@ -80,7 +80,8 @@ func _first_arrival() -> void:
 			"the first goal: meet him (%s)" % home.guide.hint_text())
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
 			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
-	# 2. the camera swing
+	# 2. the first arrival: no camera move
+	var zoom0: float = home.cam.zoom_to
 	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
 	var focus: Vector3 = home.ppos
 	ok(hob.chat.frame(focus) == focus and is_equal_approx(home.cam.zoom_to, zoom0) and hob.node.pose == "wave"

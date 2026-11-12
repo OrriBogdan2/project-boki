@@ -371,6 +371,7 @@ func _tutorial() -> void:
 	main.add_child(m)
 	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
+	var led := {}
 	var hints := {}
 	var t := 0.0
 	var last_step := -1
@@ -404,7 +405,7 @@ func _tutorial() -> void:
 			cards += 1
 	for e in m.player.kin.comp.history:
 		hints[String(e["cat"])] = true
-	print("  tutorial: %.0fs, hints %s" % [t, str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
+	print("  tutorial: %.0fs, led on %s, hints %s" % [t, str(led.keys()), str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
