@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
 var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
@@ -235,7 +234,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.press_buffer for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -251,7 +250,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.press_buffer
 
 func held(which: String) -> bool:
 	match which:
@@ -270,8 +269,17 @@ func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
-func busy() -> bool:
+## The body can't act at all (down, out, stunned, hexed...). A kit's busy() beyond this is its own cast lock.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+
+func busy() -> bool:
+	return disabled()
+
+## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
+## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+func lock_refuses(_slot: String) -> bool:
+	return busy() and not disabled()
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >

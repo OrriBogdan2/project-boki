@@ -400,6 +400,14 @@ rest of the dash and resume it on top (more than the source's 0.6x would come ov
 
 The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
+## Low frame rates: taps and dashes survive 30 fps and 100 ms stalls (`--low-fps-input-check`, 2026-11-12)
+
+DECISIONS 2026-11-08 targets 30+ fps on low-end PCs, so a tap must not depend on the frame rate. `tools/low_fps_input_check.gd` runs headless on the real `Match._process`: `Engine.max_fps = 30` caps the frames (the check measures it holds), and a stall hook (`OS.delay_msec(100)` one frame before the tap, so the tap's frame has delta 0.1 s and `Match` runs 6 steps) loses a frame's time. Per hero (gunslinger, mage, juggernaut; `=<id>,<id>` picks others), each of Shift, Space, LMB, E and R is pressed and released between two reads, six times per round, and must go off every time.
+
+- **Found and fixed: LMB.** It was read as `is_action_pressed`, "down now", so a click that came and went inside one frame was lost: 6/6 taps lost at 30 fps and after a stall. Shift, Space, E and R were already safe: they read `is_action_just_pressed`, which stays true for the frame in which the key went down and up, and queue the press in `Match.pending_input` until the next fixed step. `FireTap` (`scripts/match/fire_tap.gd`) now latches an LMB tap the same way: down for the next fixed step, once, then cleared (a held button is unchanged, a tap in a hitstop frame waits for its step, a paused or over-UI tap is dropped). After the fix: 0 lost in 180 taps (3 heroes x 5 keys x 2 rounds x 6).
+- **Dashes.** Fixed steps (1/60 s) do the movement, so a frame's length only changes when the press is read. Measured with `--move-feel-check`'s felt-dash rule and DASH_TOL (5 % distance, 0.035 s), the dash at 30 fps and at 60 fps with a 100 ms stall every 5th frame equals the 60 fps dash: gunslinger ground 4.81 m / 0.450 s, air 4.53 m / 0.330 s; juggernaut 3.82 m / 0.262 s; mage 5.83 m / 0.168 s at 60 fps, 5.95 m (+2 %, one step of a 2-step frame) at 30 fps. `DashPace` keeps a dash's frames (at most 2 steps a frame while it runs) so a stall doesn't skip it.
+- `--move-feel-check`: 0 failures on this branch.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
