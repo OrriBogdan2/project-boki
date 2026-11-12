@@ -8,10 +8,10 @@ extends ArchKit
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
-## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Thrust, a short lunge down a narrow magenta
+## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Thrust, a short lunge down a narrow crimson
 ##   strip (more to the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
-##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
+##   wind-up, a crimson lane that grows, its rim hot at full, a rising whine; you can jump while charging;
 ##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop straight down, its hit
 ##   circle just ahead (everyone in it knocked down, the airborne spiked; while it rests, an air press is the
 ##   ground Smash), during the Warchain's pull a Cinder Spin.
@@ -21,9 +21,8 @@ extends ArchKit
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
-const SLASH_OUT := Color("ff3df0")     # the Slam's magenta strike lane
-const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
-const LUNGE_FULL := Color("ff3df0")    # ... at full
+const SLASH_OUT := Color("ff3df0")     # the greatsword slash's magenta edge
+const LUNGE_FULL := Color("ff8a6a")    # the cursor ring at a full Lunge: his crimson gone hot
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
@@ -111,13 +110,11 @@ func extra_dashes() -> float:
 func on_perfect_dodge() -> void:
 	if rank("dash") >= 3:
 		add_res(float(dash_def().get("dodge_rage", 15.0)))
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "RAGE", res_col(), false)
 
 func _enrage_fx() -> void:
 	var rc := res_col()
 	if lunge.is_empty() and slam_w.is_empty() and not rmb_down: play("jug_roar")
 	vfx("enrage")
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "ENRAGED", rc, true)
 	if h.is_local():
 		if m.hud: m.hud.flash(rc, 0.15)
 	_make_aura()
@@ -232,7 +229,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		knock_healed += h.hp - hp0
 		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
 		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
-		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
+		m.fx.number(h.pos + Vector3(0, 2.7, 0), h.hp - hp0, Color("7fe08a"), true, "+")
 		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
@@ -246,7 +243,6 @@ func _reset_riposte() -> void:
 		return
 	HeroUlt.reset(self)
 	slam_resets += 1
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(x_def()), true)      # no ring on a reset
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
@@ -301,7 +297,7 @@ func _drop_holds() -> void:
 	slam_w = {}
 	haul = {}
 	meteor.cancel()
-	warchain.snap("")
+	warchain.snap(true)
 	rmb_queued_at = -9.0
 	e_held = false
 	dash_held = false
@@ -547,7 +543,6 @@ func _tip() -> void:
 		f.hurt(float(dd["tip_dmg"]) * power("dash"), h,
 				{"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]),
 						"melee": true, "crit": true})
-		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
 	vfx("dash_tip", h.pos, dv, {"hit": hit})
 	if hit:
 		tips += 1
@@ -566,20 +561,20 @@ func rmb_hold_tick(t: float) -> void:
 	var sd := rmb_def()
 	if not lunge_charging():
 		return
-	# the Lunge charging: a lane grows ahead of you with a fill, magenta and flashing at full; the cursor ring
+	# the Lunge charging: a crimson lane grows ahead, filling toward the far end, its rim hot at full; the cursor ring
 	# fills; a rising whine on the way in, a ping at full
 	var k := lunge_k(t)
 	var ld: Dictionary = sd["lunge"]
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
-			"width": lunge_w(), "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
+			"width": lunge_w(), "soft": true, "tip": true}
 	if _aims_down_chain():
 		var to := warchain.to_anchor()
 		lane["dir"] = to
 		lane["len"] = to.length()
 		lane["len0"] = lane["len"]
 	AimKit.lane(h, "rmb", lane)
-	AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
+	AimKit.charge(h, k, {"col": AimKit.hero_col(h), "col2": LUNGE_FULL})
 	HeroVfx.of(m).hold(h, "lunge_charge", k)
 	if anim_id != "jug_lunge_wind":
 		play("jug_lunge_wind")
@@ -741,13 +736,13 @@ func _tick_slam(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
 		return
-	# the narrow magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
+	# the narrow crimson strike strip ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
 	var dd := h.aim_dir() if pin == Vector2.ZERO else pin
 	AimKit.lane(h, "slam", {"dir": dd, "len": float(thrust_reach(dd)["len"]), "width": float(sl["width"]),
-			"fill": wk, "col": SLASH_OUT, "all": true})
+			"fill": wk, "soft": true, "all": true})
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
@@ -808,7 +803,6 @@ func _slam(dir: Vector2) -> void:
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
 		var sweet := Vector2(f.pos.x - from.x, f.pos.z - from.z).dot(dir) + f.r >= float(sl["sweet"])
 		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
@@ -818,7 +812,7 @@ func _slam(dir: Vector2) -> void:
 		if sweet and not paid.has("x"):
 			paid["x"] = true
 			sweet_spots += 1
-			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dir, f)
+			payoff_fx(f.pos, res_col(), "pay_rage", dir, f)
 			vfx("slam_sweet", f.pos, dir)
 		slam_hit[f.get_instance_id()] = m.time})
 	m.fx.own_look = true            # the Hero's own look (slam_hit): the shared hit bursts stay out
@@ -843,7 +837,6 @@ func _lunge(k: float, perfect: bool) -> void:
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t * float(dash_feel()["time"]) + 0.02, "dir": dv, "k": k}
 	play("jug_lunge")
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
 	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "w": lunge_w(), "perfect": perfect})
 	if perfect:
 		perfects += 1
@@ -862,7 +855,6 @@ func _tick_lunge() -> void:
 			if was_chain and f.hittable():
 				f.hurt(1.0, h,
 						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
-				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -880,7 +872,6 @@ func _tick_lunge() -> void:
 		if to_wall:
 			return                  # down the chain to a wall: it went where it was sent
 		cd["rmb"] = float(cd["rmb"]) * float(ld["miss_k"])        # struck nothing: the cooldown doubles
-		m.fx.word(h.pos + Vector3(0, 2.2, 0), "MISS", Color("c0b0a0"), false)
 
 ## Hooked, with the aim within lunge.chain_deg of the chain: a held Smash goes down it. Aimed elsewhere it is a
 ## plain Lunge along the aim, so the chain never takes the hold's direction from him.
@@ -911,7 +902,6 @@ func _chain_lunge(k: float) -> void:
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CHAIN LUNGE", Color("ffcf6a"), true)
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
@@ -954,7 +944,6 @@ func _haul_land(k: float) -> void:
 					{"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"],
 							"stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
 	play("jug_haulslam")
-	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only), the
@@ -990,7 +979,6 @@ func _spin() -> void:
 	run_own(stg, cx("rmb", "cinder_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
 	vfx("spin", h.pos, h.aim_dir(), {"r": float(sp["radius"])})
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", Color("ff7a3a"), false)
 
 # ------------------------------------------------------------------ E: Warchain (JuggernautChain)
 ## "During E" for the Smash is the pull and the moment after it (the Cinder Spin).
