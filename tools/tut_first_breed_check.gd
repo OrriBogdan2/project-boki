@@ -1,7 +1,7 @@
 extends RefCounted
 ## --tut-first-breed-check: the first-breeding prompt (FirstBreed). On a fixture save with two Grown friends:
 ##   1. the gates: a ready pair is found; each missing gate gets its own plain line
-##   2. the save flag: the v11 -> v12 migration marks a save that already bred, and leaves others alone
+##   2. the save flag: the v13 -> v14 migration marks a save that already bred, and leaves others alone
 ##   3. in the world: one of the pair leads to the Nook, stops and looks back when you fall behind, the card
 ##      opens when you arrive (what breeding is, the preview, one "Pair them"), the button leaves an egg,
 ##      and the prompt never shows again; a pair that is not ready is never led
@@ -63,15 +63,15 @@ func _gates() -> void:
 			"one Boki alone still gets a line: '%s'" % FirstBreed.missing_line([r[0]]))
 
 func _migration() -> void:
-	var old := {"v": 11, "tutorial": {}, "roster": [{"uid": "x"}], "egg": {}}
+	var old := {"v": 13, "tutorial": {}, "roster": [{"uid": "x"}], "egg": {}}
 	ok(Save.migrate(old) and int(old["v"]) == Save.VERSION and not old["tutorial"].has(FirstBreed.SEEN),
-			"a v11 save that never bred is not marked")
-	var bred := {"v": 11, "tutorial": {}, "roster": [{"uid": "x", "parents": ["A", "B"]}], "egg": {}}
+			"a v13 save that never bred is not marked")
+	var bred := {"v": 13, "tutorial": {}, "roster": [{"uid": "x", "parents": ["A", "B"]}], "egg": {}}
 	ok(Save.migrate(bred) and bool(bred["tutorial"].get(FirstBreed.SEEN, false)),
-			"a v11 save with a bred Boki is marked seen")
-	var egged := {"v": 11, "tutorial": {}, "roster": [], "egg": {"a": "x", "b": "y"}}
+			"a v13 save with a bred Boki is marked seen")
+	var egged := {"v": 13, "tutorial": {}, "roster": [], "egg": {"a": "x", "b": "y"}}
 	ok(Save.migrate(egged) and bool(egged["tutorial"].get(FirstBreed.SEEN, false)),
-			"a v11 save with an egg in the nest is marked seen")
+			"a v13 save with an egg in the nest is marked seen")
 
 func _home(lv_b: int):
 	Save.d = _save(lv_b)
@@ -126,6 +126,7 @@ func _world() -> void:
 	var start := Vector3(39.5, 0.0, 29.5)      # a spot on the farm island, 8 m from the Nook
 	k["pos"] = start
 	k["node"].position = start
+	k["vel"] = Vector3.ZERO
 	home.ppos = Vector3(33.5, 0.0, 47.4)      # 19 m behind it
 	await _sim(home, 5.0)
 	ok(_flat(k["pos"], start) < 1.0 and not hb.lead.is_empty(),

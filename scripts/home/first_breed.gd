@@ -4,7 +4,7 @@ extends RefCounted
 ## Boki on the farm meet every Nook gate, one of them walks to the Nesting Nook, waits when you fall behind
 ## and looks back; when you come up, a centred card says what breeding is and shows the egg preview with one
 ## "Pair them" button. It never blocks, closes like any card, and shows once: Save.d.tutorial.first_breed.
-## A save that has already bred is marked by the v11 -> v12 migration.
+## A save that has already bred is marked by the v13 -> v14 migration.
 ## Without a ready pair, the Nook's intro names the gate that is missing (missing_line).
 
 const SEEN := "first_breed"      # Save.d.tutorial key: the card has been shown (or the Nook opened)
@@ -71,7 +71,7 @@ static func _stage(a: Dictionary, b: Dictionary) -> int:
 		return 2
 	return 3 if KinBox.full() else MISSING.size()
 
-## The save moves to v12: a save that has already bred (an egg in the nest, or a kin with parents) never
+## The save moves to v14: a save that has already bred (an egg in the nest, or a kin with parents) never
 ## sees the prompt.
 static func migrate(data: Dictionary) -> void:
 	var bred: bool = not (data.get("egg", {}) as Dictionary).is_empty()
@@ -130,6 +130,7 @@ func _walk(d: float) -> void:
 		_stop(RETRY_SEC)
 		return
 	lead["t"] = 3.0      # it keeps to this walk instead of picking its own goal
+	lead.erase("chase")      # and does not run off after a friend in a game of tag
 	var pos: Vector3 = lead["pos"]
 	var spot: Vector3 = h.NEST_AT + FRONT
 	if Vector2(h.ppos.x - h.NEST_AT.x, h.ppos.z - h.NEST_AT.z).length() < NEAR_NOOK:
