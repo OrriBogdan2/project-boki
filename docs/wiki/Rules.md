@@ -27,7 +27,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | bleed_out | 15 | seconds a wisp lasts on its own |
 | revive_radius | 1.6 | a teammate this close revives you |
 | revive_time | 4 |  |
-| revive_hp | 0.25 | back on your feet with a quarter of your health |
+| revive_hp | 0.25 | a quarter of your health (a per-tick heal scaled to ours gives 12-35%) |
 | extra_reviver | 0.5 | each extra teammate on you: +50% speed |
 | stomp_mult | 2.5 | an enemy standing on a wisp drains it this much faster and blocks the revive |
 | stomp_slow | 0.4 | ...and pins it: the wisp drifts at this fraction of its normal speed |
