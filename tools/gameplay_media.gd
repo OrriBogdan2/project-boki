@@ -13,6 +13,7 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##   9 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -71,6 +72,7 @@ func run(main_node: Node) -> void:
 		6: await _echo(secs)
 		7: await _show(secs)
 		8: await _relay(secs)
+		9: await _boss_focus(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -426,3 +428,28 @@ func _relay(secs: float) -> void:
 		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
+
+# ------------------------------------------------------------------ 9: boss focus
+func _boss_focus(secs: float) -> void:
+	await _start("ashwick", "cindle", true)
+	var P := m.player
+	var L: Dictionary = m.lairs.list[0]
+	L["active"] = false      # (_start purged its sleeping boss with the other mobs: wake the lair up again)
+	m.lairs.activate(L)
+	for g in L["guards"]:
+		if is_instance_valid(g):
+			g.dead = true
+			g.visible = false
+	m.lairs.open(L, P, "dial")
+	var side := Vector3(-L["out"].y, 0, L["out"].x)
+	P.teleport(_ground(L["c"] + side * 3.0))
+	var B := _hunter("b0", 1, "juggernaut", "pebbit", _ground(L["c"] - side * 3.0))
+	var boss: Boss = m.lairs.boss_of(L)
+	_zoom(0.6)
+	still_at = 5.0
+	_mark("start")
+	var each := func(_t: float) -> void:
+		for h in [P, B]:
+			h.hp = h.max_hp
+		boss.hp = maxf(boss.hp, boss.max_hp * 0.3)      # (still up when the clip ends)
+	await _go(secs, each, func(_t: float): return (P.pos + B.pos + boss.pos) / 3.0)

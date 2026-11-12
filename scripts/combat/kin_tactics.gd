@@ -50,6 +50,11 @@ func retreat_frac() -> float:
 func idle_radius() -> float:
 	return 1.4 + (1.0 - loyalty) * 2.6
 
+## A bot's Boki in a boss fight leaves alone the rivals its bot is sparing (Lairs.spares).
+func spares(f: Ent) -> bool:
+	var own := k.owner_h
+	return f is Hunter and own != null and own.ctrl == "bot" and k.m.lairs != null and k.m.lairs.spares(own, f)
+
 func pick_target() -> Ent:
 	var reach := chase_range()
 	var own := k.owner_h
@@ -60,7 +65,7 @@ func pick_target() -> Ent:
 	if attacker is Kin and (attacker as Kin).owner_h:
 		attacker = attacker
 	for f in k.m.foes_of(k.team, false):
-		if f is Hunter and (f.downed or f.cloak_t > 0.0):
+		if f is Hunter and (f.downed or f.cloak_t > 0.0 or spares(f)):
 			continue
 		if not f.hittable() or Shrubling.hidden(f):
 			continue      # (a disguised Shrubling is not given away by its Boki)
