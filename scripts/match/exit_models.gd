@@ -1,10 +1,7 @@
 class_name ExitModels
-## The props for the three ways out of an expedition (see Exits): a skiff dock with its horn beacon
-## and the sky-skiff that answers it, a sealed rift hatch, and an outpost's uplink mast and lift.
+## The props for an outpost's way out (see Exits): the uplink mast, its lift and the yard palisade.
 ## Built from simple meshes like everything in Models.
 
-const DOCK := Color("ffb84a")      # skiff docks: warm lantern amber
-const HATCH := Color("b98aff")     # rift hatches: violet
 const UPLINK := Color("6ae0ff")    # outpost uplinks: sky cyan
 
 static func _beam(c: Color, h: float, r0: float, r1: float, a := 0.22) -> MeshInstance3D:
@@ -14,182 +11,6 @@ static func _beam(c: Color, h: float, r0: float, r1: float, a := 0.22) -> MeshIn
 	mi.position.y = h * 0.5
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
-
-static func _sparks(c: Color, amount: int, radius: float, up: float, name_s: String) -> CPUParticles3D:
-	var p := CPUParticles3D.new(); p.name = name_s
-	p.amount = amount; p.lifetime = 1.6; p.emitting = false
-	var bm := SphereMesh.new(); bm.radius = 0.07; bm.height = 0.14; bm.radial_segments = 6; bm.rings = 3
-	var pm := StandardMaterial3D.new(); pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; pm.albedo_color = c.lightened(0.3)
-	bm.material = pm
-	p.mesh = bm
-	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
-	p.emission_ring_axis = Vector3.UP; p.emission_ring_radius = radius; p.emission_ring_inner_radius = radius * 0.5; p.emission_ring_height = 0.1
-	p.direction = Vector3.UP; p.spread = 10.0; p.gravity = Vector3(0, up, 0)
-	p.initial_velocity_min = 1.0; p.initial_velocity_max = 2.6
-	p.position = Vector3(0, 0.1, 0)
-	return p
-
-## The dock: a plank pier for the skiff to settle on (local -Z points out over the abyss), mooring
-## posts with lanterns, and set back from it the horn beacon you call the skiff from.
-## Named children: Beacon/Lamp (lights up when called), Signal and Zone (ExitSignal: the sky beam everyone
-## sees and the deck ring), Sparks.
-static func dock(beacon_off: Vector3) -> Node3D:
-	var root := Node3D.new()
-	var wood := Models.toon(Color("8a6040")); var dark := Models.toon(Color("5a3c28")); var rope := Models.toon(Color("d8c49a"))
-	var brass := Models.toon(Color("e0b84a"), true, 0.25)
-	# the pier deck: planks across, two stringers along
-	if Flora.v2():
-		_deck(root, 3.0, 5.2, Color("8a6040"))
-		_stone_footing(root, Vector3(0, 0, 2.55), 3.4, 0.9)
-	else:
-		for i in 9:
-			Models.part(root, Models.box(3.0, 0.1, 0.52), wood if i % 2 == 0 else Models.toon(Color("9a6c48")), Vector3(0, 0.05, -2.2 + i * 0.56))
-	for sx in [-1.35, 1.35]:
-		Models.part(root, Models.box(0.16, 0.16, 5.2), dark, Vector3(sx, 0.12, 0))
-	# mooring posts at the corners, roped together, with a lantern on the outer pair
-	for sx in [-1.45, 1.45]:
-		for sz in [-2.4, 2.2]:
-			Models.part(root, Models.cyl(0.13, 0.15, 1.1, 8), dark, Vector3(sx, 0.55, sz))
-			Models.part(root, Models.cyl(0.17, 0.17, 0.1, 8), brass, Vector3(sx, 1.1, sz))
-			if Flora.v2():
-				# rope lashed round the post, and a rounded cap
-				for k in 3:
-					Models.part(root, Models.cyl(0.165, 0.165, 0.045, 12), rope, Vector3(sx, 0.7 + k * 0.055, sz))
-				Models.part(root, Models.sphere(0.15, 10), brass, Vector3(sx, 1.17, sz), Vector3(1.0, 0.55, 1.0))
-		Models.part(root, Models.cyl(0.035, 0.035, 4.6, 6), rope, Vector3(sx, 0.85, -0.1), Vector3.ONE, Vector3(PI / 2, 0, 0))
-		var lamp := Models.part(root, Models.sphere(0.16, 10), Models.toon(DOCK, false, 1.2), Vector3(sx, 1.32, -2.4))
-		lamp.name = "Lantern%s" % ("L" if sx < 0 else "R")
-	# the zone the skiff's deck covers (board inside it) and the sky beam: ExitSignal
-	ExitSignal.attach(root, DOCK, Exits.DECK_R * 2.0)
-	# the horn beacon: a stone foot, a tall post, a brass horn and a signal lamp on top
-	var b := Node3D.new(); b.name = "Beacon"; b.position = beacon_off; root.add_child(b)
-	var stone := Models.toon(Color("7d7f8a"))
-	if Flora.v2():
-		_stone_ring(b, 0.62, 0.32, 7, Color("8a8478"))
-	else:
-		Models.part(b, Models.cyl(0.55, 0.65, 0.3, 8), stone, Vector3(0, 0.15, 0))
-	Models.part(b, Models.cyl(0.12, 0.15, 2.4, 8), dark, Vector3(0, 1.45, 0))
-	Models.part(b, Models.cyl(0.1, 0.36, 0.7, 12), brass, Vector3(0, 2.1, -0.35), Vector3.ONE, Vector3(PI / 2 + 0.3, 0, 0))
-	Models.part(b, Models.box(0.5, 0.36, 0.3), Models.toon(Color("4a4e5c")), Vector3(0, 0.95, 0.18))
-	var lever := Models.part(b, Models.box(0.08, 0.4, 0.08), brass, Vector3(0.12, 1.15, 0.36), Vector3.ONE, Vector3(-0.5, 0, 0))
-	lever.name = "Lever"
-	var lamp2 := Models.part(b, Models.sphere(0.24, 12), Models.toon(Color("6a5a40"), true, 0.0), Vector3(0, 2.85, 0))
-	lamp2.name = "Lamp"
-	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = Models.flat_quad(2.4)
-	ring.material_override = Models.ring_mat(Color(DOCK, 0.7), 0.08); ring.position.y = 0.32
-	b.add_child(ring)
-	root.add_child(_sparks(DOCK, 30, 1.8, 2.0, "Sparks"))
-	Flora.paint_set_piece(root)
-	root.add_child(Models.icon_badge("dock", 2.2))
-	return root
-
-## The sky-skiff: a small hull with outrigger fins, a striped lift-bag and a stern propeller.
-## Local -Z is the bow. The deck is flush with y = 0 so hunters standing on the pier stand on it.
-static func skiff() -> Node3D:
-	var root := Node3D.new()
-	var wood := Models.toon(Color("7a5236")); var dark := Models.toon(Color("4e3424")); var cloth := Models.toon(Color("f2e6cf"))
-	var stripe := Models.toon(Color("e08a3a")); var brass := Models.toon(Color("e0b84a"), true, 0.3)
-	var hull := Node3D.new(); hull.name = "Hull"; root.add_child(hull)
-	# deck and gunwales
-	Models.part(hull, Models.box(2.6, 0.12, 4.6), Models.toon(Color("a07850")), Vector3(0, -0.02, 0))
-	for sx in [-1.32, 1.32]:
-		Models.part(hull, Models.box(0.14, 0.4, 4.4), dark, Vector3(sx, 0.18, 0))
-	Models.part(hull, Models.box(2.5, 0.4, 0.14), dark, Vector3(0, 0.18, 2.25))
-	# the keel below, tapering to a bow
-	if Flora.v2():
-		# a smooth carvel hull: a rounded belly under the deck, a darker strake and a keel line
-		var bowl := SphereMesh.new(); bowl.radius = 1.0; bowl.height = 1.0; bowl.is_hemisphere = true; bowl.radial_segments = 28; bowl.rings = 10
-		Models.part(hull, bowl, wood, Vector3(0, -0.06, 0.0), Vector3(1.3, 0.95, 2.5), Vector3(PI, 0, 0))
-		Models.part(hull, bowl, dark, Vector3(0, -0.04, 0.0), Vector3(1.33, 0.22, 2.53), Vector3(PI, 0, 0))
-		Models.part(hull, Models.box(0.14, 0.3, 4.2), dark, Vector3(0, -0.9, 0.0))
-	else:
-		Models.part(hull, Models.box(2.3, 0.7, 4.2), wood, Vector3(0, -0.45, 0.1))
-		var bow := PrismMesh.new(); bow.size = Vector3(2.3, 1.1, 0.7)
-		Models.part(hull, bow, wood, Vector3(0, -0.3, -2.45), Vector3.ONE, Vector3(-PI / 2, 0, 0))
-	# outrigger fins, like a glider's wings
-	for sx in [-1.0, 1.0]:
-		Models.part(hull, Models.box(1.6, 0.08, 1.4), cloth, Vector3(sx * 2.0, 0.05, 0.4), Vector3.ONE, Vector3(0, 0, sx * -0.18))
-		Models.part(hull, Models.box(1.6, 0.06, 0.18), stripe, Vector3(sx * 2.0, 0.1, -0.25), Vector3.ONE, Vector3(0, 0, sx * -0.18))
-	# two slim lift-bags on outrigger booms, one each side, so the deck stays open to the sky
-	# (and you can see who's aboard from above)
-	var bag := Node3D.new(); bag.name = "Bag"; hull.add_child(bag)
-	for sx in [-1.0, 1.0]:
-		Models.part(bag, Models.box(1.3, 0.1, 0.14), dark, Vector3(sx * 1.85, 0.9, -1.0))
-		Models.part(bag, Models.box(1.3, 0.1, 0.14), dark, Vector3(sx * 1.85, 0.9, 1.0))
-		for z in [-1.0, 1.0]:
-			Models.part(bag, Models.cyl(0.05, 0.05, 0.8, 6), dark, Vector3(sx * 1.32, 0.5, z))
-		var pod := Node3D.new(); pod.position = Vector3(sx * 2.55, 1.15, 0.0); bag.add_child(pod)
-		Models.part(pod, Models.sphere(0.62, 14), cloth, Vector3.ZERO, Vector3(0.95, 0.95, 3.6))
-		Models.part(pod, Models.sphere(0.63, 14), stripe, Vector3.ZERO, Vector3(0.25, 0.97, 3.62))
-		for z in [-1.3, 0.0, 1.3]:
-			Models.part(pod, Models.cyl(0.6 - absf(z) * 0.12, 0.6 - absf(z) * 0.12, 0.14, 14), stripe, Vector3(0, 0, z), Vector3.ONE, Vector3(PI / 2, 0, 0))
-	# a short mast and sail at the bow, a lantern at the stern, rope coils on deck
-	Models.part(hull, Models.cyl(0.07, 0.09, 2.4, 6), dark, Vector3(0, 1.2, -1.4))
-	Models.part(hull, Models.box(0.05, 1.5, 1.1), cloth, Vector3(0, 1.45, -0.95), Vector3.ONE, Vector3(0, 0.0, 0))
-	Models.part(hull, Models.cyl(0.32, 0.32, 0.1, 10), Models.toon(Color("d8c49a")), Vector3(-0.7, 0.07, 1.4))
-	Models.part(hull, Models.sphere(0.18, 10), Models.toon(DOCK, false, 1.5), Vector3(0, 0.95, 2.0))
-	Models.part(hull, Models.cyl(0.05, 0.05, 0.9, 6), dark, Vector3(0, 0.5, 2.0))
-	# the stern propeller and a pennant
-	var prop := Node3D.new(); prop.name = "Prop"; prop.position = Vector3(0, 0.6, 2.6); hull.add_child(prop)
-	Models.part(prop, Models.cyl(0.12, 0.12, 0.3, 10), brass, Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0))
-	for k in 3:
-		Models.part(prop, Models.box(0.14, 1.2, 0.04), wood, Vector3.ZERO, Vector3.ONE, Vector3(0, 0, TAU * k / 3.0))
-	Models.part(hull, Models.box(0.04, 0.4, 0.7), Models.toon(DOCK), Vector3(0, 2.3, -1.1))
-	# running lights
-	for sx in [-1.32, 1.32]:
-		Models.part(hull, Models.sphere(0.11, 8), Models.toon(DOCK, false, 1.4), Vector3(sx, 0.45, -2.1))
-	root.add_child(_sparks(DOCK, 24, 1.6, -3.0, "Wake"))
-	Flora.paint_set_piece(root)
-	return root
-
-## A rift hatch: a heavy rune-ringed stone collar set into the ground with an iron lid and a key slot.
-## Named children: Lid (slides aside when opened), Rift (the swirling way down), Runes, Sparks, Signal and Zone.
-static func hatch() -> Node3D:
-	var root := Node3D.new()
-	var stone := Models.toon(Color("6f6a7c")); var iron := Models.toon(Color("4a4858")); var rim := Models.toon(Color("8c86a0"))
-	if Flora.v2():
-		# a collar of wedge-cut stones, each chiselled and set a little unevenly
-		_stone_ring(root, 1.1, 0.24, 10, Color("7a7488"))
-	else:
-		Models.part(root, Models.cyl(1.05, 1.15, 0.2, 10), stone, Vector3(0, 0.1, 0))
-		Models.part(root, Models.cyl(0.98, 0.98, 0.06, 10), rim, Vector3(0, 0.21, 0))
-	var runes := Node3D.new(); runes.name = "Runes"; root.add_child(runes)
-	for i in 6:
-		var a := TAU * i / 6.0
-		Models.part(runes, Models.box(0.16, 0.05, 0.08), Models.toon(HATCH, false, 0.5), Vector3(cos(a) * 0.98, 0.23, sin(a) * 0.98), Vector3.ONE, Vector3(0, -a, 0))
-	# the dark well under the lid, and the rift that swirls in it once it's open
-	Models.part(root, Models.cyl(0.78, 0.78, 0.04, 16), Models.toon(Color("15121e"), false), Vector3(0, 0.2, 0))
-	var rift := Node3D.new(); rift.name = "Rift"; rift.visible = false; root.add_child(rift)
-	var disc := Models.part(rift, Models.cyl(0.74, 0.74, 0.02, 20), Models.glow_mat(Color(HATCH, 0.9)), Vector3(0, 0.24, 0))
-	disc.name = "Disc"
-	var swirl := MeshInstance3D.new(); swirl.mesh = Models.flat_quad(1.4)
-	swirl.material_override = Models.ring_mat(Color(HATCH.lightened(0.4), 0.9), 0.18); swirl.position.y = 0.26
-	rift.add_child(swirl)
-	PropAnim.on(rift, 3.0)
-	rift.add_child(_beam(HATCH, 3.5, 0.3, 0.7, 0.2))
-	# the lid: an iron disc with straps and a glowing keyhole
-	var lid := Node3D.new(); lid.name = "Lid"; root.add_child(lid)
-	Models.part(lid, Models.cyl(0.8, 0.84, 0.12, 14), iron, Vector3(0, 0.27, 0))
-	for k in [-0.35, 0.35]:
-		Models.part(lid, Models.box(1.5, 0.05, 0.14), Models.toon(Color("6a6878")), Vector3(0, 0.34, k))
-	if Flora.v2():
-		# a domed boss, rivets round the rim and on the straps
-		var rv := Models.toon(Color("8a8898"))
-		rv.set_shader_parameter("gloss", 0.4)
-		Models.part(lid, Models.sphere(0.5, 16), iron, Vector3(0, 0.3, 0), Vector3(1.0, 0.16, 1.0))
-		for i in 14:
-			var a := TAU * i / 14.0
-			Models.part(lid, Models.sphere(0.04, 6), rv, Vector3(cos(a) * 0.72, 0.34, sin(a) * 0.72))
-		for k in [-0.35, 0.35]:
-			for x in [-0.55, -0.25, 0.25, 0.55]:
-				Models.part(lid, Models.sphere(0.03, 6), rv, Vector3(x, 0.37, k))
-	var hole := Models.part(lid, Models.box(0.14, 0.05, 0.26), Models.toon(HATCH, false, 0.9), Vector3(0, 0.35, 0))
-	hole.name = "Keyhole"
-	ExitSignal.attach(root, HATCH, Exits.HATCH_R * 2.0)
-	root.add_child(_sparks(HATCH, 26, 0.7, 3.0, "Sparks"))
-	Flora.paint_set_piece(root)
-	root.add_child(Models.icon_badge("hatch", 1.5))
-	return root
 
 ## The outpost's uplink: a stone plinth with a brass console, a tall mast topped with a crystal and a
 ## banner on the mast, and four pylons that make the lift. It shows its state through the object itself
@@ -237,8 +58,7 @@ static func uplink() -> Node3D:
 		var lamp_at := Vector3(cos(a) * 1.9, 1.38, sin(a) * 1.9)
 		var lamp_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
 		Models.part(root, Models.box(0.3, 0.1, 0.3), lamp_mat, lamp_at, Vector3.ONE, Vector3(0, -a, 0), "Lamp%d" % i)
-	var charge := MeshInstance3D.new()
-	charge.name = "Charge"
+	var charge := MeshInstance3D.new(); charge.name = "Charge"
 	charge.mesh = Models.flat_quad(Exits.OUTPOST_R * 2.0 - 0.6)
 	var chm := Models.ring_mat(Color(UPLINK.lightened(0.3), 0.95), 0.08)
 	chm.set_shader_parameter("arc", 0.0)
@@ -268,25 +88,6 @@ static func palisade(half: float) -> Node3D:
 	Flora.paint_set_piece(root)
 	return root
 
-## A Rift Key: a crystal bow on a short iron shaft.
-static func rift_key() -> Node3D:
-	var root := Node3D.new()
-	var gem := Node3D.new(); gem.position.y = 0.32; root.add_child(gem)
-	var pm := PrismMesh.new(); pm.size = Vector3(0.22, 0.26, 0.12)
-	var cm := Models.toon(HATCH, true, 0.9)
-	Models.part(gem, pm, cm, Vector3(0, 0.13, 0))
-	Models.part(gem, pm, cm, Vector3(0, -0.13, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	var iron := Models.toon(Color("c8c4d8"), true, 0.2)
-	Models.part(root, Models.box(0.05, 0.34, 0.05), iron, Vector3(0, 0.02, 0))
-	Models.part(root, Models.box(0.12, 0.05, 0.05), iron, Vector3(0.06, -0.08, 0))
-	Models.part(root, Models.box(0.08, 0.05, 0.05), iron, Vector3(0.04, 0.02, 0))
-	var halo := MeshInstance3D.new(); halo.mesh = Models.flat_quad(0.9)
-	halo.material_override = Models.ring_mat(Color(HATCH, 0.7), 0.12); halo.position.y = -0.2
-	root.add_child(halo)
-	root.add_child(Models.icon_badge("key", 0.95, 0.5))
-	return root
-
-# ------------------------------------------------------------------ second art pass helpers
 ## A plank deck w wide (x) and d long (z), its top at y = 0.1: planks of slightly uneven width and
 ## length, a shade apart, nailed down, with dark gaps between them.
 static func _deck(root: Node3D, w: float, d: float, base: Color) -> void:
@@ -326,15 +127,3 @@ static func _stone_ring(root: Node3D, r: float, h: float, n: int, c: Color, inne
 	if inner <= 0.0:
 		# a solid plinth: a cap stone over the middle
 		Models.part(root, Models.cyl(r * 0.5, r * 0.52, h + 0.02, 16), ms[1], Vector3(0, (h + 0.02) * 0.5, 0))
-
-## Stone footing blocks where a pier meets the land.
-static func _stone_footing(root: Node3D, at: Vector3, w: float, d: float) -> void:
-	var rr := RandomNumberGenerator.new(); rr.seed = 4401
-	var c := Color("8a8478")
-	var x := -w * 0.5
-	while x < w * 0.5 - 0.1:
-		var bw := rr.randf_range(0.5, 0.85)
-		bw = minf(bw, w * 0.5 - x)
-		var hh := rr.randf_range(0.18, 0.28)
-		Models.part(root, PropSculpt.bx(bw - 0.04, hh, d * rr.randf_range(0.8, 1.0)), Models.toon(c.lightened(rr.randf_range(-0.06, 0.08))), at + Vector3(x + bw * 0.5, hh * 0.5 - 0.06, rr.randf_range(-0.05, 0.05)))
-		x += bw

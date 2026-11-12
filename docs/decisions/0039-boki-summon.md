@@ -25,7 +25,8 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 ## Consequences
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
-- Net.VERSION 0.28.2, all in `net.gd`: a Boki's k1/k2 cast goes out at once as `["kab", nid, ability, slot]` and plays on the
+- Net.VERSION 0.33.1 (0.28.2 before merge candidate 0630 took 0.33.0), all in `net.gd`: a Boki's k1/k2 cast goes out
+  at once as `["kab", nid, ability, slot]` and plays on the
   other games as `CombatBus.ability_used` plus the floating name; my snapshot is sent at once when my Boki blooms, shrinks or
   falls back into its wisp (not on the next 0.1 s beat); a remote Boki's summon timer counts down between snapshots.
   `--summon-net-check` (two games over the relay): burst, both casts, the kill, the shrink and the timer read the same on
