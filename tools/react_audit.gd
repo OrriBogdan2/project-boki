@@ -46,6 +46,9 @@ func _react(main: Node, id: String) -> void:
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:      # (no clips yet, as Gil: the rig's poses drive it)
+		m.queue_free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var st: Dictionary = clips.d["states"]
 	var hd: Dictionary = st["hit"]
