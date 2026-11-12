@@ -498,7 +498,7 @@ func _telegraphs() -> void:
 		"%d -> %d" % [nodes, m.fx.teles.size()])
 
 ## The moves each cast plays (KMovesGil ids, content/rules/warden_anim/gil.json), in the order they play. The dive
-## is the rig's keyed pose, not a clip: it takes the whole body under the ground (owner 11-11), the swim clip only
+## is the rig's keyed pose, not a clip: it takes the whole body under the ground, the swim clip only
 ## sinks him to the fin.
 func _moves() -> void:
 	var seen: Array = []
