@@ -18,6 +18,7 @@ const STEP := 1.0 / 60.0
 const MAX_PART := 0.2        # share of height a part or bone may leave its place in Flex space
 const MIN_SCALE := 0.65      # Flex stays inside these scales
 const MAX_SCALE := 1.35
+const MIN_SQUASH := 0.015    # a landing must shorten Flex by this share
 const CHIP := 0.05           # share of max health: a chip hit, and a big one
 const BIG := 0.35
 ## Settle time a Boki of each weight should show (s). Light under mass 1.0, medium under 1.6, then heavy.
@@ -137,8 +138,22 @@ func _case(main: Node, label: String, species: String, weight: String, mass: flo
 		ok(r["part"] <= MAX_PART, "%s: no part detaches (worst %.3f of height)" % [label, r["part"]])
 		var shaped: bool = r["scale_lo"] >= MIN_SCALE and r["scale_hi"] <= MAX_SCALE
 		ok(shaped, "%s: Flex stays in shape (scale %.2f to %.2f)" % [label, r["scale_lo"], r["scale_hi"]])
+	_land(a, mass, label)
 	a.k.queue_free()
 	ctl.k.queue_free()
+
+## A landing squashes the resting model within READ_T and leaves it in shape.
+func _land(a: Subject, mass: float, label: String) -> void:
+	for i in int(RUN_S / STEP):
+		a.step()
+	var rest := a.flex.scale.y
+	KinFlinch.land(a.k, mass)
+	var low := 9.0
+	for i in int(READ_T / STEP):
+		a.step()
+		low = minf(low, a.flex.scale.y / rest)
+	var shaped := low <= 1.0 - MIN_SQUASH and low >= MIN_SCALE
+	ok(shaped, "%s: a landing squashes it to %.2f within %.1f s" % [label, low, READ_T])
 
 ## One hit on a resting model `a`, followed for RUN_S against `ctl`. Returns read (share of height at READ_T), peak (m),
 ## settle (s), part (worst share of height a part or bone left its place) and Flex's scale range.
