@@ -91,6 +91,22 @@ static func rows(id: String, dd: Dictionary, lib: AnimationLibrary) -> Array:
 			out.append_array(_loop_rows(id, String(clip), lib.get_animation(String(clip))))
 	return out
 
+## The home verbs (data "act"): the Hero plays the verb's own clip, seeked to the verb's clock, and the clip lasts as
+## long as the verb (HunterVerbs.LENGTH).
+static func act_rows(id: String, dd: Dictionary, clips: WardenClips) -> Array:
+	var out: Array = []
+	var off := 0.0
+	for verb in dd.get("act", {}):
+		var clip := String(dd["act"][verb])
+		var pick := clips._pick({"act": verb, "act_t": 0.4}, 0.0)
+		out.append([pick.get("clip") == clip and is_equal_approx(float(pick.get("t", -1.0)), 0.4),
+				"%s: the home %s plays its own clip, seeked to the verb's clock" % [id, verb]])
+		if clips.lib.has_animation(clip):
+			off = maxf(off, absf(clips.lib.get_animation(clip).length - float(HunterVerbs.LENGTH[verb])))
+	if not dd.get("act", {}).is_empty():
+		out.append([off <= MOVE_SLACK, "%s: its garden clips last as long as the home verbs (off %.3f s)" % [id, off]])
+	return out
+
 static func _clip_faults(nm: String, an: Animation) -> Array:
 	var out: Array = []
 	if an.length < LEN_MIN or an.length > LEN_MAX:
