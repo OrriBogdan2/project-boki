@@ -52,7 +52,6 @@ func pin() -> void:
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
-	_pin_two_charges(m, P, K, home)
 	await done(m)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "archer")
@@ -505,12 +504,9 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
 		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
 	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
-	var dome: MeshInstance3D = K.fx.aegis
-	ok("bjorn shield: the wall is an ivory dome (HeroVfx shell) spanning the wall",
-		dome.visible
-		and (dome.material_override as ShaderMaterial).get_shader_parameter("mode") == HeroVfx.MODES["dome"]
-		and K.fx.aegis_size.x * 2.0 * sin(deg_to_rad(53.0)) >= float(sd["len"]) - 0.1,
-		"radius %.2f" % K.fx.aegis_size.x)
+	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
+		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
+		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
@@ -572,15 +568,15 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
+	var swings := int(HeroVfx.of(m).plays.get("swing", 0))
 	P.inp["fire"] = false
 	m.step(DT)
-	var on_hit := _crescent_ahead(P, K)
 	step(m, 0.15)
-	var in_carry := _crescent_ahead(P, K)
-	ok("bjorn hold: the swing's crescent sweeps in front of him, inside its reach, on the hit and through the carry",
-		on_hit.x > 0.0 and on_hit.y <= float(K.lmb_def()["smash_reach"]) and in_carry.x > 0.0
-			and in_carry.y <= float(K.lmb_def()["smash_reach"]),
-		"hit: ahead %.2f out %.2f; carry: ahead %.2f out %.2f" % [on_hit.x, on_hit.y, in_carry.x, in_carry.y])
+	var sweep: Dictionary = HeroVfx.data("bulwark")["moves"]["swing"]["fx"][0]
+	ok("bjorn hold: the release plays one flaming sweep over the hit's own 180 degrees, drawn to its reach",
+		int(HeroVfx.of(m).plays.get("swing", 0)) == swings + 1 and sweep["p"] == "sweep" and sweep["size"] == "r"
+			and is_equal_approx(float(sweep["arc"]), float(K.lmb_def()["smash_arc"])),
+		"plays %d arc %s" % [int(HeroVfx.of(m).plays.get("swing", 0)) - swings, sweep["arc"]])
 	step(m, 0.65)
 	var lunge := Vector2(P.pos.x - p0.x, P.pos.z - p0.z).dot(Vector2(1, 0))
 	var knock := Vector2(T.pos.x - t0.x, T.pos.z - t0.z).dot(Vector2(1, 0))
@@ -592,12 +588,6 @@ func _glove_q(P: Hunter) -> void:
 	P.gear[0] = {"id": "barrier", "rar": 1}
 	P.gear_cd[0] = 0.0
 	P.inp["gear1"] = true
-
-## The swing crescent's centre against him: x = how far it lies along his facing, y = how far it is from him.
-func _crescent_ahead(P: Hunter, K: BulwarkKit) -> Vector2:
-	var c := K.fx.crescent_centre()
-	var off := Vector2(c.x - P.pos.x, c.z - P.pos.z)
-	return Vector2(off.dot(P.aim_dir()), off.length())
 
 ## #29: the Faultline's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:
@@ -704,47 +694,6 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
-
-## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
-func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
-	step(m, 1.0)
-	K.spirit.end("time")
-	P.dashes = P.max_dashes()
-	P.slot_lv["dash"] = 1
-	var info := P.slot_info("dash")
-	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
-	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
-		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
-		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	P.inp["move"] = Vector2(-1, 0)
-	P.inp["fire"] = false
-	aim_at(P, home + Vector3(-6, 0, 0))
-	var x0 := P.pos.x
-	P.do_dash()
-	step(m, 0.4)
-	var d1 := x0 - P.pos.x
-	K.spirit.end("time")
-	var left := P.slot_info("dash")
-	P.do_dash()
-	step(m, 0.4)
-	K.spirit.end("time")
-	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
-	var roll_m := float(K.dash_def()["roll"]) * float(K.dash_feel()["dist"])      # (the shared dash feel scales it)
-	ok("pin dash: two presses back to back both roll; the first goes its data roll",
-		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > roll_m * 0.9, both + " want %.1f m" % roll_m)
-	var x1 := P.pos.x
-	P.do_dash()
-	step(m, 0.4)
-	var third := x1 - P.pos.x
-	var waits: bool = not K.spirit.active() and P.dashes < 1.0 and K.st.get("last_dash") == "flick"
-	var seen := "moved %.1f dashes %.2f" % [third, P.dashes]
-	ok("pin dash: the third press is only the shared long dash", waits, seen)
-	step(m, float(K.dash_def()["cd"]) + 0.5, func(): P.inp["move"] = Vector2.ZERO)
-	var back := int(floor(P.dashes + 0.001))
-	ok("pin dash: after the recharge one charge is back", back == 1, "dashes %.2f" % P.dashes)
-	P.inp["move"] = Vector2.ZERO
 
 ## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:

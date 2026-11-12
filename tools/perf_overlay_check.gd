@@ -1,8 +1,7 @@
 extends RefCounted
 ## --perf-overlay-check: Settings > Video > Frame rate. "Performance overlay" shows the frame rate, frame time
 ## and 1% low, draw calls and triangles, and the match step's costliest sections (and switches their timing on);
-## "Frame rate" is the rate alone; "Hidden" hides it and switches the timing off again. A frame over 33 ms goes in
-## the hitch log with what took the time.
+## "Frame rate" is the rate alone; "Hidden" hides it and switches the timing off again.
 
 var main: Node
 var fails := 0
@@ -22,9 +21,6 @@ func run(main_node: Node) -> void:
 	ok(lbl.visible and Match.prof_on, "the overlay shows and times the match step")
 	for want in ["fps", "1% low", "draws", "tris", "script", "step ms"]:
 		ok(lbl.text.contains(want), "it lists %s (%s)" % [want, lbl.text.replace("\n", " | ")])
-	lbl.tick("full", 0.05)
-	var hl := lbl._hitches[0]
-	ok(hl.begins_with("hitch 50 ms: render"), "a 50 ms frame is logged as a hitch ('%s')" % hl)
 	Settings.set_v("show_fps", 1, false)
 	await main.get_tree().create_timer(0.6).timeout
 	var alone := lbl.visible and not lbl.text.contains("draws") and not Match.prof_on

@@ -36,7 +36,7 @@ static func _notice(home: Node, k: Dictionary, slot: Vector3) -> void:
 	k["called_t"] = 7.0
 	k["welcome"] = true
 	home._emote(k, "!")
-	HomeVoice.say(k["rec"], "alert", k["pos"], -10.0)
+	Sfx.play("kin_alert", k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
 	var my_isle: int = home.world.island_of(home.ppos.x, home.ppos.z)
 	if my_isle >= 0 and home.world.island_of(k["pos"].x, k["pos"].z) != my_isle:
 		home._start_leap(k, home.ppos + slot)

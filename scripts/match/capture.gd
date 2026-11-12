@@ -12,17 +12,13 @@ extends RefCounted
 ##     blocks the scan. The capsule stays in the box for the match: it never follows you, fights, or joins
 ##     your Boki (one active Boki per hunter). It spills into your deathbox like the rest and comes home when
 ##     you extract.
-##   - the beam (in the scanner's ability colour) and the hum are in the world: rivals see and hear it
-##     (Match.note_sound), and other players
+##   - the beam and the hum are in the world: rivals see and hear it (Match.note_sound), and other players
 ##     see it through kcmd events (KinNet): scan_start (repeated about once a second, with the progress),
 ##     scan_stop, scan_done.
 ## State lives in the hunter's meta "cap": {phase: "hold"|"scan", k, hold|t, seen, remote, beam, hum, ping, beat}.
 
 const HOLD_OVER := 2.5      # s: a scan nobody has confirmed for this long lets the Boki wake up again (a rival's game vanished)
-const BEAM_A := 0.55          # alpha of the beam
-# m: beam radius when the scan is done and when it starts (thick enough to read from 20 m at match zoom)
-const BEAM_W := Vector2(0.14, 0.2)
-const FIZZLE_COL := Color("c9c2b8")     # the dull grey of a scan that was interrupted
+const BEAM_COL := Color("bff0ff")
 
 static func rules() -> Dictionary:
 	return Content.rules("capture")
@@ -39,10 +35,6 @@ static func full_note(m, h: Hunter) -> void:
 	if h.is_local() and m.hud and m.time - float(h.get_meta("cap_full_msg", -9.0)) > 1.5:
 		h.set_meta("cap_full_msg", m.time)
 		m.hud.toast("Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()], Color("ffb0a0"))
-
-## The colour of a scanner's beam and pop: their Hunter's ability colour (DECISIONS 2026-11-08).
-static func beam_col(h: Hunter) -> Color:
-	return Arch.color(h.ak.id) if h.ak else h.accent()
 
 static func state(h: Hunter) -> Dictionary:
 	return h.get_meta("cap", {})
@@ -188,11 +180,10 @@ static func cancel(m, h: Hunter, why: String) -> void:
 	if k is Kin and is_instance_valid(k):
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
-		_fizzle(m, k)
 	if why in ["dash", "cc"]:               # (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
 		if h.is_local() and m.hud:
 			m.hud.toast("Scan cancelled: hold %s beside it to try again" % Settings.key_cap("interact") if why == "dash" else "Scan interrupted: hold %s to try again" % Settings.key_cap("interact"), Color("ffd89a"))
-		m.sfx("kin_unsure", h.pos, -6.0)
+		m.sfx("scan_fail", h.pos, 0.0)
 
 ## The match is going away: stop every beam and hum (a loop key outlives the node that started it).
 static func teardown(m) -> void:
@@ -213,6 +204,7 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 		# the box filled while it ran (a deathbox looted, a net catch): it lets go, and rivals see it stop, not finish
 		_send(m, "scan_stop", h, k, 0.0)
 		full_note(m, h)
+		m.sfx("scan_fail", h.pos, 0.0)
 		return
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
@@ -260,8 +252,8 @@ static func on_net(m, h: Hunter, kind: String, extra: String) -> void:
 			if not st2.is_empty():
 				_stop_fx(m, h, st2)
 				h.remove_meta("cap")
-				if kind == "scan_stop" and k != null:
-					_fizzle(m, k)
+				if kind == "scan_stop" and k != null and not k.dead:
+					m.sfx("scan_fail", h.pos, 0.0)          # a rival's scan broke off: you hear the snap
 			if kind == "scan_done" and k != null:
 				_pop(m, h, k)
 
@@ -282,13 +274,13 @@ static func _start_fx(m, h: Hunter, k: Kin, st: Dictionary) -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.cyl(1.0, 1.0, 1.0, 12)
 	mi.rotation.x = PI / 2.0
-	mi.material_override = Models.glow_mat(Color(beam_col(h), BEAM_A))
+	mi.material_override = Models.glow_mat(Color(BEAM_COL, 0.5))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mi)
 	st["beam"] = root
 	st["hum"] = "scanhum" + h.nid
 	Sfx.loop_start(st["hum"], "revive_hum", h.pos, 0.0, float(rules()["hear_range"]))
-	m.fx.ring(k.pos, 1.4, Color(beam_col(h), 0.8), 0.4)
+	m.fx.ring(k.pos, 1.4, Color(BEAM_COL, 0.8), 0.4)
 
 static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> void:
 	var root = st.get("beam")
@@ -299,13 +291,12 @@ static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> voi
 		(root as Node3D).global_position = a + d * 0.5
 		if d.length() > 0.05:
 			(root as Node3D).look_at(b, Vector3.UP if absf(d.normalized().y) < 0.99 else Vector3.RIGHT)
-		var w := lerpf(BEAM_W.y, BEAM_W.x, frac) * (1.0 + 0.25 * sin(m.time * 22.0))
+		var w := (0.05 + 0.09 * (1.0 - frac * 0.5)) * (1.0 + 0.25 * sin(m.time * 22.0))
 		(root as Node3D).scale = Vector3(w, w, d.length())
 	var rp: Array = rules()["rise_pitch"]
 	Sfx.loop_set(String(st.get("hum", "")), h.pos, lerpf(float(rp[0]), float(rp[1]), frac))
 	if randf() < 0.5:
-		var spark := k.pos + Vector3(randf_range(-0.3, 0.3), 0.3 + frac * 1.2, randf_range(-0.3, 0.3))
-		m.fx.burst(spark, beam_col(h), 1, 1.2, 0.5, -3.0, 0.6)
+		m.fx.burst(k.pos + Vector3(randf_range(-0.3, 0.3), 0.3 + frac * 1.2, randf_range(-0.3, 0.3)), BEAM_COL, 1, 1.2, 0.5, -3.0, 0.6)
 
 static func _stop_fx(m, h: Hunter, st: Dictionary) -> void:
 	var root = st.get("beam")
@@ -316,13 +307,23 @@ static func _stop_fx(m, h: Hunter, st: Dictionary) -> void:
 		Sfx.loop_stop(String(st["hum"]))
 		st.erase("hum")
 
+## 0 common, 1 a mutated Boki, 2 a shimmer or a rare species: picks the chime in rules "pop_sounds".
+static func rarity_tier(k: Kin) -> int:
+	if bool(k.rec.get("shimmer", false)) or bool(k.sp.get("rare", false)):
+		return 2
+	return 1 if Mutations.special(k.rec) else 0
+
 ## The finish: a bright pop and the capsule flying to the hunter.
 static func _pop(m, h: Hunter, k: Kin) -> void:
 	var col: Color = Data.KIN[k.species]["color"]
-	m.sfx("scan_pop", k.pos, 0.0)
+	var tier := rarity_tier(k)
+	m.sfx(rules()["pop_sounds"][tier], k.pos, 0.0)
+	m.sfx("scan_call", k.pos, -2.0)
+	if Sfx.listener.distance_to(k.pos) < Sfx.hear_range:
+		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
-	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)
+	m.fx.ring(k.pos, 1.8, Color(BEAM_COL, 0.9), 0.45)
 	var cap := MeshInstance3D.new()
 	var sm := SphereMesh.new()
 	sm.radius = 0.16; sm.height = 0.32
@@ -334,10 +335,6 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	var tw := cap.create_tween()
 	tw.tween_property(cap, "global_position", h.pos + Vector3(0, 1.2, 0), 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(cap.queue_free)
-
-## An interrupted scan: one small dull ring on the Boki, no light and no capsule (the opposite of the pop).
-static func _fizzle(m, k: Kin) -> void:
-	m.fx.ring(k.pos, 1.0, Color(FIZZLE_COL, 0.7), 0.3)
 
 ## The Boki coming apart into light as the scan fills (Kin.render calls this last).
 static func dissolve(k: Kin) -> void:

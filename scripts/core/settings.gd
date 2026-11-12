@@ -9,12 +9,10 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 5, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
+	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -31,7 +29,7 @@ const DEFAULTS := {
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0,
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
@@ -54,27 +52,27 @@ const QUALITY := {
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -85,12 +83,6 @@ func quality() -> String:
 		return qv
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
-
-## MSAA off by default (performance pass 11-08): Medium's old 2x becomes FXAA; a hand-set 4x stays.
-func _video_v5() -> void:
-	if int(v.get("video_v", 4)) < 5:
-		if int(v.get("msaa", 0)) == 2 and quality() == "medium": v["msaa"] = 0
-		v["video_v"] = 5
 
 ## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
@@ -156,9 +148,6 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["kin_attack", "Boki order: attack my target"], ["kin_return", "Boki order: come back to me"],
-	["kin_hold", "Boki order: hold this position"],
-	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
@@ -166,12 +155,14 @@ const ACTIONS := [
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
-	["play", "Play fetch with a Boki"],
-		["whistle", "Whistle for your Boki (at home)"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
+	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
+	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
+	["kin_chase", "Boki quick key: Chase"], ["kin_guard", "Boki quick key: Guard"],
+	["kin_return", "Boki quick key: Return"], ["kin_follow", "Boki quick key: Follow"],
 ]
 
 var v: Dictionary = {}
@@ -213,7 +204,6 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
-	_video_v5()
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
@@ -313,8 +303,8 @@ func apply(k: String) -> void:
 				DisplayServer.window_set_mode(want)
 		"vsync":
 			if not OS.has_feature("web"):
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if Record.vsync(v[k]) else DisplayServer.VSYNC_DISABLED)
-		"max_fps": Engine.max_fps = Record.frame_cap(int(v[k]))
+				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
+		"max_fps": Engine.max_fps = int(v[k])
 		"msaa":
 			var m := int(v[k])
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
@@ -508,13 +498,9 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	_put(sl, slot, s)
+	sl[slot] = s
+	if sl[1 - slot] == s: sl[1 - slot] = ""
 	_set_slots(action, sl)
-
-## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
-func _put(sl: Array, slot: int, code: String) -> void:
-	sl[slot] = code
-	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -524,50 +510,33 @@ func clear_bind(action: String, slot: int) -> void:
 
 ## Other rebindable actions already using this key or button: [[action, slot], ...].
 func conflicts(ev: InputEvent, except := "") -> Array:
-	return conflicts_of_code(ev_code(ev), except)
-
-func conflicts_of_code(code: String, except := "") -> Array:
+	var s := ev_code(ev)
 	var out: Array = []
-	if code == "":
+	if s == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == code and not _shared_ok(a[0], except): out.append([a[0], i])
-	return out
-
-## Actions that clash with `action`: they hold one of its keys and could be pressed in the same place.
-func clashes(action: String) -> Array:
-	var out: Array = []
-	for c in slots(action):
-		for hit in conflicts_of_code(c, action):
-			if not out.has(hit[0]): out.append(hit[0])
+			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
-	["details", "summon"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
-## what `action` had there instead, so none of them loses a key.
-func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
+## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
+## `action` had there.
+func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
 	var mine := slots(action)
-	var old: String = mine[slot]
-	_put(mine, slot, ev_code(ev))
-	for o in owners:
-		var theirs := slots(o[0])
-		_put(theirs, o[1], old)
-		_set_slots(o[0], theirs)
+	var theirs := slots(other)
+	theirs[other_slot] = mine[slot]
+	mine[slot] = ev_code(ev)
+	_set_slots(other, theirs)
 	_set_slots(action, mine)
-
-## True when an action has no key at all (the Controls page marks it red).
-func unbound(action: String) -> bool:
-	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")

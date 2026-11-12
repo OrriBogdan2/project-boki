@@ -16,11 +16,13 @@ static func due(kins: Array) -> Dictionary:
 			return k
 	return {}
 
-## Called once a second at home: plays the next due moment when nothing else is on screen.
+## Called once a second at home: plays the next due moment when nothing else is on screen. A Boki
+## new to the farm takes note of its starting rank even under a panel (the away report, say), so
+## trust gained after that doesn't read as a rank it arrived with.
 static func tick(home: Node) -> void:
+	var k := due(home.kins)
 	if home.panel_open != "" or home.building_now or not home.train.is_empty() or FarmTutorial.active():
 		return
-	var k := due(home.kins)
 	if not k.is_empty() and not k.get("busy", false):
 		play(home, k)
 
@@ -36,7 +38,7 @@ static func play(home: Node, k: Dictionary) -> void:
 	home.fx.burst(at + Vector3(0, 0.9, 0), Color("ff8fb0"), 24, 2.6)
 	home.fx.ring(at, 2.2, Color(1.0, 0.56, 0.69, 0.9), 0.5)
 	Sfx.play("unlock")
-	HomeVoice.say(rec, "happy", null, -2.0, 0.1)
+	Sfx.play("kin_happy", null, -2.0, 0.1, Unique.voice(rec))
 	home._say(k, BokiLines.say(rec, "bond_up"))
 	var v: VBoxContainer = home._new_panel("%s is now %s" % [rec["name"], rank[1]], 520)
 	v.add_child(UI.label(String(rank[2]), 16, Color("ffb3c6")))

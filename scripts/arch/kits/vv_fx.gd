@@ -6,7 +6,7 @@ extends Node3D
 ## nothing washes out on bright ground. Kinds:
 ##   arc      a jagged lightning ribbon between two points (Sparkle's bolts, the Surge streak, orb zaps)
 ##   crackle  a burst of short arcs out of one point (the fingertip on every finger bolt)
-##   ride     a look riding on a match shot until it ends, then its impact (the finger bolt)
+##   ride     a look riding on a match shot until it ends, then its impact (the finger bolt, the rifle round)
 ##   smear    a fading hot-headed streak (the grenade's flight)
 ##   pillar   a column of light that narrows over its life (the drag disc's countdown, the refund column)
 ##   ring     an expanding ring with spark needles (arrivals, shock rings, the slide's start ring)
@@ -253,15 +253,10 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	_play(n, "ring", dur)
 
 ## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
-## `hollow` drops the dark fill and the veins for a glowing centre: a big range ring, not a dome. `hold` keeps it
-## at full strength until the last fifth, for a countdown (it otherwise fades from the first frame).
 ## Returns the node, so a long one can be ended early with cut().
-func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hollow := false,
-		hold := false) -> Node3D:
+func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	var mt := _look(n, col, col2, rim)
-	mt.set_shader_parameter("hollow", 1.0 if hollow else 0.0)
-	mt.set_shader_parameter("hold", 1.0 if hold else 0.0)
+	_look(n, col, col2, rim)
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "disc", dur)
@@ -412,10 +407,14 @@ static func _shown_under(node: Node3D, model: Node3D) -> bool:
 
 # ------------------------------------------------------------------ riders
 ## A look riding on a match shot (the dictionary in m.shots) until it ends; then on_end(at, hit) runs.
-## kind names the look for the caller; every rider draws as a jagged arc ribbon.
+## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail).
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, width := 0.3,
 		on_end := Callable()) -> void:
-	var n := _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
+	var n: Node3D
+	if kind == "tracer":
+		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
+	else:
+		n = _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
 	_look(n, col, col2)
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):
