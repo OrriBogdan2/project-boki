@@ -137,7 +137,7 @@ func _item(id: String) -> void:
 		"revive_ember":
 			mate.teleport(P.pos + Vector3(1.5, 0, 1.5))
 			mate.downed = true
-		"chest_key", "rift_key":
+		"chest_key":
 			var locks: Array = BeltKeys._locks(m, id)
 			if not locks.is_empty():
 				P.teleport(locks[0]["pos"] + Vector3(0.6, 0, 0))

@@ -44,7 +44,6 @@ does (Shatter Charge, Skyfall Charge).
 | `hearth_lamp` | the lamp beacon where it is set (its own model and 3 m ring, Beacons) | stands a revive beacon your squad can use | it stays until a squad uses it; the beacon's own look shows the revive | use |
 | `revive_ember` | the beacon it lights at your feet (Beacons) | wakes every fallen squadmate where you stand | at once: the beacon's revive look plays | use |
 | `chest_key` | the chest it opens (or a ping on the nearest locked one) | opens a locked chest beside you | at once: a gold glint at the lock, then the chest's own opening | use |
-| `rift_key` | the sealed hatch it opens (or a ping on the nearest one) | opens a sealed Rift hatch beside you | at once: a lilac glint at the lock, then the hatch's own opening | use |
 | `blight_flask` | the patch (4.5 m, gameplay) with a dark band and lime bubbles at its edge | hurts the rivals inside while it lasts | the patch shrinks away after 25 s | use |
 | `cloud_raft` | the raft of cloud tiles itself | makes walkable ground over the void for 30 s | it blinks for its last 1.5 s, then drops away | use |
 | `shatter_charge` | a 3 m ring where it bursts (gameplay) | a charge that bursts and hurts the rivals in it (it truly explodes) | at once: the burst | use |

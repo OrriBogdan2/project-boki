@@ -113,6 +113,8 @@ func _ground() -> Vector3:
 	for t in 200:
 		var clear := used.all(func(u: Vector3) -> bool: return u.distance_to(at) > SPACE)
 		var room := not m.world.is_void(at.x + 6.0, at.z) and absf(m.world.ground_at(at.x + 6.0, at.z) - at.y) < 0.4
+		for dx in [1.0, 2.0, 4.0]:
+			room = room and not m.world.is_block(at.x + dx, at.z)
 		if clear and room:
 			break
 		at = m.world.random_ground()
@@ -178,7 +180,7 @@ func _before(id: String) -> void:
 		"revive_ember":
 			mate.teleport(P.pos + Vector3(0, 0, 3.0))
 			mate.downed = true
-		"chest_key", "rift_key":
+		"chest_key":
 			var locks: Array = BeltKeys._locks(m, id)
 			ok(not locks.is_empty(), id + ": the match has a lock to open")
 			if not locks.is_empty():

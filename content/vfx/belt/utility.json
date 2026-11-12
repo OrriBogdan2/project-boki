@@ -20,7 +20,6 @@
 		"hearth_lamp": {"area": "the lamp beacon where it is set (its own model and 3 m ring, Beacons)", "does": "stands a revive beacon your squad can use", "ends": "it stays until a squad uses it; the beacon's own look shows the revive"},
 		"revive_ember": {"area": "the beacon it lights at your feet (Beacons)", "does": "wakes every fallen squadmate where you stand", "ends": "at once: the beacon's revive look plays"},
 		"chest_key": {"area": "the chest it opens (or a ping on the nearest locked one)", "does": "opens a locked chest beside you", "ends": "at once: a gold glint at the lock, then the chest's own opening"},
-		"rift_key": {"area": "the sealed hatch it opens (or a ping on the nearest one)", "does": "opens a sealed Rift hatch beside you", "ends": "at once: a lilac glint at the lock, then the hatch's own opening"},
 		"blight_flask": {"area": "the patch (4.5 m, gameplay) with a dark band and lime bubbles at its edge", "does": "hurts the rivals inside while it lasts", "ends": "the patch shrinks away after 25 s"},
 		"cloud_raft": {"area": "the raft of cloud tiles itself", "does": "makes walkable ground over the void for 30 s", "ends": "it blinks for its last 1.5 s, then drops away"},
 		"shatter_charge": {"area": "a 3 m ring where it bursts (gameplay)", "does": "a charge that bursts and hurts the rivals in it (it truly explodes)", "ends": "at once: the burst"},
@@ -198,10 +197,6 @@
 		"chest_key": {"fx": [
 			{"p": "star", "y": 0.9, "n": 6, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"},
 			{"p": "coin", "y": 0.9, "n": 4, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"}
-		]},
-		"rift_key": {"fx": [
-			{"p": "star", "y": 0.9, "n": 6, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "b98aff", "c2": "ffffff", "c3": "403059"},
-			{"p": "flare", "y": 0.9, "size": 0.8, "life": 0.14, "c": "b98aff", "c2": "ffffff", "c3": "403059"}
 		]},
 		"blight_flask": {"fx": [
 			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "c9e84a", "c2": "ffffff", "c3": "465119"}
