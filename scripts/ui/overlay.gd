@@ -707,7 +707,7 @@ func open_inventory() -> void:
 				var n := int(Save.d.get("furniture", {}).get(k, 0))
 				if n <= 0: continue
 				empty = false
-				cell.call(Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press B.", Color("c99a6a"))
+				cell.call(Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press %s." % Settings.key_cap("build"), Color("c99a6a"))
 		"Kin":
 			for rec in Save.d["roster"]:
 				empty = false

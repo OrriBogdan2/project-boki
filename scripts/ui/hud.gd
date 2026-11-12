@@ -1654,8 +1654,8 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var rv: Dictionary = ak.rmb_def().get("variants", {})
 		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
-		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Right click")), rdesc, ak.col_of(ak.rmb_def())])
-		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "E")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Ability")), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "Utility")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
 		lines.append([Settings.key_caps("hunter_ult"), String(ak.r_def().get("name", "Ultimate")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
@@ -2007,7 +2007,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			return out
 	var si := p.slot_info(id)
 	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Ability", "k1": "Utility", "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -2155,7 +2155,7 @@ func _kit_lines(lines: Array, k: Kin) -> void:
 	for slot in ["k1", "k2"]:
 		var d: AbilitySpec = k.runner.def_of(slot)
 		if d == null: continue
-		var tag := "E" if slot == "k1" else "auto"
+		var tag := Settings.key_cap("signature") if slot == "k1" else "auto"
 		lines.append(["%s  %s: %s" % [tag, d.display_name, KinText.ability(k.effective(slot))], KinText.color(d).lightened(0.2)])
 	var ms := KinMerge.def_for(k)
 	if ms:

@@ -6,7 +6,7 @@ extends RefCounted
 
 const MAT := Color("d8b07a")      # building materials
 const COUNTERS := [
-	["tonic", "tonic", "%d", Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"],
+	["tonic", "tonic", "%d", Color("ff8a9a"), "Tonics: drink one from your belt on an expedition to heal"],
 	["crops", "seed", "%d", UI.GOOD, "Crops you've harvested"],
 	["wood", "dash", "%d wood", MAT, "Wood: chop trees in the wild with an axe, or a Lumber Camp. Pays for buildings."],
 	["stone", "dash", "%d stone", MAT, "Stone: mine boulders with a pickaxe, or a Quarry. Pays for buildings."],

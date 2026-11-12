@@ -615,7 +615,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
-			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
+			var shrine := "Shrine (hold %s: a power-up)" % Settings.key_cap("interact")
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), shrine, 12, INK)
 			row_y += 22
 		if not m.beacons.is_empty():
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)

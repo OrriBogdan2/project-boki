@@ -59,7 +59,7 @@ enum DashInput { WASD_FALLBACK_TO_CURSOR, CURSOR, WASD }
 @export var abyss_death_depth := 30.0     ## [footage] ~1.5-2s of free fall before it is fatal
 @export var balloon_depth := 0.8          ## [footage] glider balloon shows ~0.25s after stepping off an edge
 
-@export_group("Dash (Shift)")
+@export_group("Dash")
 @export var dash_input := DashInput.WASD_FALLBACK_TO_CURSOR ## [guide] pro default
 @export var dash_hold_for_ex := false     ## [footage] some kits: tap = short dash, hold = longer dash + longer cooldown
 @export var dash_hold_threshold := 0.12   ## [est] seconds held during the dash to upgrade it

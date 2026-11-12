@@ -403,7 +403,8 @@ func _show_create() -> void:
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
+	var turn := "%s / %s" % [Settings.key_cap("left"), Settings.key_cap("right")]
+	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold %s) to turn round." % turn
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
 	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
 	look_at_t = CREATE_LOOK
@@ -592,7 +593,8 @@ func _start_hatch() -> void:
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
+	var knock := "Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back."
+	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()

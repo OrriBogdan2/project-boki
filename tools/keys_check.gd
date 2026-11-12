@@ -12,6 +12,7 @@ extends RefCounted
 ##   6. bots go for a key, then open a chest
 ##   7. fewer chests: a match places chest.keep of the map's chests (the most crowded go first, no dice)
 ##      and of the item caches; the vaults stay; the tutorial has exactly one, the chest step's
+##   8. --keys-part=rebind: every drawn key follows a rebind (tools/rebind_keys_check.gd)
 
 var main: Node
 var fails := 0
@@ -41,7 +42,7 @@ func build(seed_i: int, extra := {}) -> Match:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer runs one part while iterating
+	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer|rebind runs one part while iterating
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--keys-part="): only = String(a).substr(12)
 	if only in ["", "carriers"]: await _carriers()
@@ -50,6 +51,7 @@ func run(main_node: Node) -> void:
 	if only in ["", "bots"]: await _bots()
 	if only in ["", "bonus"]: await _bonus()
 	if only in ["", "fewer"]: await _fewer()
+	if only in ["", "rebind"]: await load("res://tools/rebind_keys_check.gd").new().run(self, main)
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 

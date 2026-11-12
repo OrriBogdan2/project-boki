@@ -1544,7 +1544,7 @@ func _place_text(nm: String) -> String:
 		return "%s: click and drag to lay a line  ·  %d tile%s" % [nm, n, "" if n == 1 else "s"]
 	if c.has("brush"):
 		return "%s: click and drag to paint" % nm
-	return "%s: click to place it here  ·  Hold Shift to place more" % nm
+	return "%s: click to place it here  ·  Hold %s to place more" % [nm, Settings.key_cap("dash")]
 
 func held_name() -> String:
 	var id := String(held["id"])
@@ -1611,7 +1611,7 @@ func _mouse(mb: InputEventMouseButton) -> bool:
 			drag = {"from": t, "tiles": {}, "last": t}
 			if c.has("brush") and _brush_ok(t, String(c["brush"])): drag["tiles"][t] = true
 		else:
-			click_place(Input.is_key_pressed(KEY_SHIFT))
+			click_place(Input.is_action_pressed("dash"))
 	elif not drag.is_empty():
 		tick(0.0)
 		place_held()

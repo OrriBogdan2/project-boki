@@ -144,7 +144,7 @@
 		"surf_heat": 1.25,
 		"variants": {
 			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
-			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
+			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
 		},

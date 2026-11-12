@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 **Burr Charge (RMB, 6.5s cooldown).**
 
-- *Tap:* Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
+- *Tap:* Tap the ability key: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
 - *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer.
 
 **Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
