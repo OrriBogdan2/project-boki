@@ -40,8 +40,8 @@ func _gliders() -> void:
 func _wears(mat: ShaderMaterial, g: Dictionary, team: Color, hero: Color) -> bool:
 	if not _weighs(mat):
 		return false
-	for w in [["weight_r", "cloth"], ["weight_g", "stripe"], ["weight_b", "edge"]]:
-		if mat.get_shader_parameter(w[0]) != Gliders.col(String(g[w[1]]), team, hero):
+	for w in Gliders.WEIGHTS:
+		if mat.get_shader_parameter(w) != Gliders.weight(String(g["id"]), Gliders.WEIGHTS[w], team, hero):
 			return false
 	return true
 

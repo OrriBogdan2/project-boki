@@ -126,13 +126,21 @@ static func canopy(id: String) -> ArrayMesh:
 
 ## The canopy's toon material in a skin's colours ("team" and "hero" are the Hunter's own).
 static func canopy_material(id: String, team: Color, hero: Color) -> ShaderMaterial:
-	var g := get_skin(id)
 	var shader_mat := Models.vtoon_outlined()
 	shader_mat.set_shader_parameter("vertex_weights", true)
-	shader_mat.set_shader_parameter("weight_r", col(g["cloth"], team, hero))
-	shader_mat.set_shader_parameter("weight_g", col(g["stripe"], team, hero))
-	shader_mat.set_shader_parameter("weight_b", col(g["edge"], team, hero))
+	for w in WEIGHTS:
+		shader_mat.set_shader_parameter(w, weight(id, WEIGHTS[w], team, hero))
 	return shader_mat
+
+## Shader uniform -> the skin's colour it carries (the vertex colour's red, green and blue weights).
+const WEIGHTS := {"weight_r": "cloth", "weight_g": "stripe", "weight_b": "edge"}
+
+## One of a skin's colours as its canopy material holds it: a Vector4, not a Color, because Forward+
+## turns a Color uniform from sRGB to linear (Compatibility does not) and a vertex colour is never
+## converted; a Vector4 reaches the shader as it is on both, so the canopy keeps its painted look.
+static func weight(id: String, part: String, team: Color, hero: Color) -> Vector4:
+	var c := col(String(get_skin(id)[part]), team, hero)
+	return Vector4(c.r, c.g, c.b, c.a)
 
 ## Puts a skin's canopy on `mi` in these colours.
 static func dress(mi: MeshInstance3D, id: String, team: Color, hero: Color) -> void:

@@ -8,7 +8,8 @@ uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
 // With use_vertex_color: the vertex colour's red, green and blue weigh these three colours instead of
 // being the colour, so one mesh wears many colour sets (a glider canopy: one per skin, each Hunter's
-// cloth, stripe and edge here). No source_color: they mix as a vertex colour would, unconverted.
+// cloth, stripe and edge here). Set as Vector4 (Gliders.weight), so no renderer converts them: they
+// mix as a vertex colour would.
 uniform bool vertex_weights = false;
 uniform vec4 weight_r = vec4(1.0);
 uniform vec4 weight_g = vec4(1.0);
