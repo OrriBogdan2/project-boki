@@ -51,9 +51,10 @@ static func deal_mates(o: Dictionary) -> void:
 	var r := RandomNumberGenerator.new()
 	r.randomize()
 	var taken: Array = [String(o.get("arch", Arch.of_save()))]
+	var tags := Names.bot_pool([Save.d.get("name", "Hunter")])
 	var mates: Array = []
 	for i in n:
-		var bot_name: String = Names.BOT[r.randi_range(0, Names.BOT.size() - 1)]
+		var bot_name: String = tags.pop_back()
 		var ak := free_arch(taken, r)
 		taken.append(ak)
 		mates.append({"name": bot_name, "arch": ak})

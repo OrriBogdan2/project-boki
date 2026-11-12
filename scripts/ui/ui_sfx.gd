@@ -25,14 +25,8 @@ static func press(label: String, snd := "") -> void:
 static func captured() -> void:
 	Sfx.play("ui_capture", null, -4.0, 0.02)
 
-static func extract_start() -> void:
-	Sfx.play("ui_extract_start", null, -4.0, 0.02)
-
 static func extract_success() -> void:
 	Sfx.play("extract_ok", null, -3.0)
-
-static func extract_fail() -> void:
-	Sfx.play("ui_extract_fail", null, -4.0, 0.02)
 
 ## Lobby: your Hunter chosen (not yet locked).
 static func lobby_pick() -> void:

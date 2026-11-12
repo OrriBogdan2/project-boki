@@ -18,6 +18,8 @@ Option 2. `Prematch` (scripts/match/prematch.gd) holds the rules (load wait, tur
 - Squad: online it is your roster team; offline duos and trios deal bot mates (`Prematch.deal_mates`) into `opts["mates"]`, which `Match.make_bot` uses, so the lobby, the loading screen and the match agree.
 - The locked pick is saved (`HeroGrid.save_pick`) and passed as `opts["arch"]` and, online, into the roster.
 - Chat goes over the lobby channel (`chat`), filtered to teammates. Voice is a stub: `VoiceChat.transport` is the plug-in point, none ships.
+- Screen (UI declutter, owner 11-08): one title line under the turn banner (whose turn, its big countdown, ticking and pulsing red in the last seconds of your own turn); a squad strip on top; cards are portrait + name + role word (`card.role_word` in the archetype JSON), stats and the unlock quest on hover, shut Hunters dim with a padlock; chat is one "Enter to chat" line that opens the log on the first message; hold-to-talk shows only with a voice transport and a human squadmate.
+- Loading screen: map name, mode, squad portraits, a lore line under the tip, the staged progress bar.
 
 ## Affects
 Net.VERSION 0.24.4 (`loaded` topic, `pick` carries `final`), `Game.start_match`, `Match.make_bot`/`make_hunter` (bot Hunters unique per squad), the online lobby's `_go`, loading.gd, the matchmaker API. No save-format change. Rare edge: a final pick that arrives after the grace can leave clients disagreeing on that one pick (first one heard wins).

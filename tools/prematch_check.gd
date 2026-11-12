@@ -4,7 +4,8 @@ extends RefCounted
 ## gets a random untaken one, then the lock; online picking waits for the whole lobby to load, teammates'
 ## picks only count on their turn, a lost or gone teammate is picked for. Also the admin toggle (Settings
 ## lobby_enabled) and which matches get a lobby, the squad the loading screen shows, the options the match
-## starts with, bot fill-ins never doubling a squadmate, chat lines, the voice hook, and the screen.
+## starts with, bot fill-ins never doubling a squadmate, chat lines, the voice hook, and the screen
+## (the turn banner, the declutter cards, the safe margin).
 ## Sounds (_cues): each lobby event plays its UiSfx cue once, a teammate's live pick is silent.
 
 var bad := 0
@@ -209,8 +210,20 @@ func _screen(main: Node) -> void:
 	await main.get_tree().process_frame
 	ok(view.grid.get_child_count() == Arch.ids().size(), "the screen shows every Hunter")
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
-	ok(view.hint.text.begins_with("Your turn"), "the screen says it's your turn (%s)" % view.hint.text)
+	ok(view.caption.text == "YOUR TURN", "the banner says it's your turn (%s)" % view.caption.text)
 	ok(view.timer_label.text == "0:10", "the turn counts down from 0:10 (%s)" % view.timer_label.text)
+	_declutter(view)
+	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
+	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
+	view._show_chat_line(true)
+	ok(view.chat_in.visible and not view.chat_hint.visible, "Enter opens the input in place of the line")
+	var ink: Color = view.timer_label.get_theme_color("font_color")
+	ok(ink == UI.INK, "a fresh turn: plain digits")
+	view.pm.turn_left = 2.0
+	view._tick_label()
+	ok(view.timer_label.get_theme_color("font_color") != ink, "the last seconds of your turn turn the digits red")
+	view.pm.turn_left = Prematch.TURN
+	view._tick_label()
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shots = a.substr(12)
@@ -226,6 +239,14 @@ func _screen(main: Node) -> void:
 	view._send_chat()
 	await main.get_tree().process_frame
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
+	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
+	ok(log_open, "the first message opens the log and the input folds back")
+	view._choose("bulwark")
+	view.pm.tick(Prematch.TURN + 0.01)
+	view._tick_label()
+	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
+	var note: String = view.note_label.text
+	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
 	view.set_process(false)
 	view.queue_free()
 
@@ -286,3 +307,26 @@ func _cues(main: Node) -> void:
 	t.pm.turn_left = 2.5
 	ok(_heard(t._tick_label).is_empty(), "no ticks on a teammate's turn")
 	t.queue_free()
+
+## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
+## voice button waits for a human squadmate.
+func _declutter(view: Control) -> void:
+	var padlock = view.get_script().Padlock
+	var open := 0
+	var shut_ok := true
+	for card in view.grid.get_children():
+		var ak: String = card.get_meta("arch")
+		var role := String(Arch.def(ak)["card"]["role_word"])
+		var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
+		var shut := not ClassUnlock.is_open(ak)
+		open += 0 if shut else 1
+		var quest := "Locked: " + ClassUnlock.requirement(ak)
+		var plain: bool = texts.size() == 2 and texts[0] == HeroTitle.base_name(ak) and texts[1].begins_with(role)
+		var tip: String = card.tooltip_text
+		var tip_ok := tip.contains("health") and (not shut or tip.begins_with(quest))
+		shut_ok = shut_ok and plain and lock == shut and tip_ok
+	ok(open == 2 and shut_ok, "each card is name + role word, shut ones have a padlock, hover has stats and quest")
+	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
+	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
+	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
