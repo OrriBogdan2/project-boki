@@ -26,7 +26,10 @@ const COLS := [
 
 # a Basalt Spine rock's ridge fin: one low spiked ridge that runs on from rock to rock, so the nine read as one
 # ridge. [x along the rock, height, half width at the foot]; both ends match so neighbours meet.
-const FIN_STATIONS := [[-0.7, 0.85, 0.34], [-0.38, 1.5, 0.3], [0.0, 1.0, 0.36], [0.38, 1.45, 0.3], [0.7, 0.85, 0.34]]
+const FIN_STATIONS := [
+	[-0.7, 1.7, 0.46], [-0.52, 2.3, 0.4], [-0.35, 1.4, 0.46], [-0.17, 2.1, 0.4], [0.0, 1.2, 0.46],
+	[0.17, 2.1, 0.4], [0.35, 1.4, 0.46], [0.52, 2.3, 0.4], [0.7, 1.7, 0.46]
+]
 const FIN_CRACK := Color(0.35, 0.6, 1.0, 0.95)
 
 static var _rumble_at := -9.0
@@ -62,7 +65,7 @@ static func ridge(n: Node3D) -> void:
 	var cracks := n.get_node("Cracks")
 	for side in [-1.0, 1.0]:
 		var seam := Models.part(
-			cracks, Models.box(1.4, 0.012, 0.05), KitLooks.shade_mat(FIN_CRACK), Vector3(0, 0.04, side * 0.36)
+			cracks, Models.box(1.4, 0.012, 0.05), KitLooks.shade_mat(FIN_CRACK), Vector3(0, 0.04, side * 0.5)
 		)
 		seam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
