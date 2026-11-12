@@ -56,9 +56,12 @@ func place() -> void:
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)
 	node.name = "Waystone"
 	h.add_child(node)
+	if here() == GardenZones.HUB and not VisitZones.has(h.visit):
+		ZoneReveal.play_owed(h, node)
 	pad = {"pos": node.position}
 
-## Wakes a locked zone with both keys: the Boki plants the Wayseed, the stone lights up (toast, sound, burst).
+## Wakes a locked zone with both keys: the Boki plants the Wayseed (toast, sound, burst); at the hub its stone
+## lights up (ZoneReveal), elsewhere it does when you next come to the hub.
 func attune(id: String) -> void:
 	var r := GardenZones.attune(id)
 	if not r["ok"]:
