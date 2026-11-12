@@ -2,7 +2,7 @@ class_name HomeVerbs
 extends RefCounted
 ## Times the player's garden moves at home (HunterVerbs): feed, pat, toss, cheer. The paths that
 ## already do the feeding, petting, ball tossing and drill cheering call play(); the owner passes
-## step() to HunterAnim every frame.
+## step() to HunterAnim every frame. act_t is what a Hero's own clip (warden_anim "act") seeks to.
 
 var act := ""
 var t := 0.0
@@ -19,4 +19,4 @@ func step(dt: float) -> Dictionary:
 	if t >= float(HunterVerbs.LENGTH[act]):
 		act = ""
 		return {}
-	return {"holster": true, "act": act}
+	return {"holster": true, "act": act, "act_t": t}
