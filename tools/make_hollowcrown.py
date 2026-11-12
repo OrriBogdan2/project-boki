@@ -306,56 +306,19 @@ def stones(r, *at):
 HAZARD_AREAS = {
     # Cinder Steps: the Forge Yard is a lava lake. Three causeways run south from the Kilns stair, and the
     # chests, camps and landings stand on islets; the lake's rim is stone on the east and the far south.
-    "frostgate": dict(chests=[[94, 30], [100, 62]], camps=[[80, 48, "heavy"]], landings=[[110, 28], [118, 62], [74, 46]],
-                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
-    "cinder": dict(chests=[[30, 100], [46, 93]], camps=[[34, 110, "heavy"]], landings=[[28, 84], [54, 112], [36, 116]],
-                   breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
-    "storm": dict(chests=[[190, 110], [160, 136]], camps=[[160, 116, "heavy"]], landings=[[158, 104], [190, 120], [166, 94]],
-                  breakables=[[188, 106, "crate"], [189, 106, "keg"]]),
-    "thorn": dict(chests=[[88, 184], [132, 184]], camps=[[116, 158, "heavy"]], landings=[[96, 186], [138, 166], [90, 160]],
-                  wild=[[90, 176]], breakables=[[124, 154, "crate"], [125, 154, "pot"]], wardens=[[130, 158]]),
-    "lark": dict(chests=[[44, 18]], camps=[[40, 20, "normal"]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
-    "highwatch": dict(chests=[[172, 30]], camps=[[194, 16, "normal"]], landings=[[200, 34], [186, 28]],
-                      breakables=[[200, 32, "keg"]]),
-    "duskmoor": dict(chests=[[194, 192]], camps=[[200, 176, "normal"]], landings=[[176, 172], [176, 200]]),
-    "saltmere": dict(chests=[[20, 196]], camps=[[36, 192, "normal"]], landings=[[14, 180], [40, 180]]),
-}
-for _iid, _more in MORE.items():
-    for _k, _pts in _more.items(): BY[_iid].setdefault(_k, []).extend(_pts)
-
-# Terrain hazard areas (owner 11-11: big fields, a region is half lava, deep water or ice and squads route
-# round it): ground that changes the way across a region, each on one flat terrace and clear of every spot,
-# stair foot and exit (check_hazards). A big field is an outline with `safe` shapes cut out of it: lane()
-# paths and discs of walkable ground (causeways, fords, sandbars, stepping stones); carve_islets() adds stone
-# round every spot the field reaches. The matching Boki type or hazard perk walks it safely (content/rules/
-# terrain_hazards.json). A region's `hazard` tag names the field kind it is built round and the share of its
-# ground the checks want under it (the map's regions carry it for other layouts to reuse).
-def lane(pts, w):
-    """A walkable strip along a polyline, w wide: a quad per leg and a disc at each bend."""
-    out = []
-    for (x0, z0), (x1, z1) in zip(pts, pts[1:]):
-        L = math.hypot(x1 - x0, z1 - z0); nx, nz = -(z1 - z0) / L * w / 2, (x1 - x0) / L * w / 2
-        out.append(dict(poly=[(x0 + nx, z0 + nz), (x1 + nx, z1 + nz), (x1 - nx, z1 - nz), (x0 - nx, z0 - nz)]))
-    return out + [dict(circle=[x, z], r=w / 2) for x, z in pts]
-
-def stones(r, *at):
-    """Stepping stones and sandbars: discs of walkable ground r wide."""
-    return [dict(circle=[x, z], r=r) for x, z in at]
-
-HAZARD_AREAS = {
-    # Cinder Steps: the Forge Yard is a lava lake. Three causeways run south from the Kilns stair, and the
-    # chests, camps and landings stand on islets; the lake's rim is stone on the east and the far south.
-    "cinder": [dict(kind="lava", poly=[(28.5, 91), (38, 89.5), (54, 89.5), (62, 91), (64, 98), (62.6, 108), (60.5, 117), (54, 123.5), (46, 125.5),
-                                         (38, 122.5), (31.5, 117), (28, 106), (27, 98)],
+    "cinder": [dict(kind="lava", poly=[(27.5, 91), (30.5, 85), (42.5, 84.6), (43.5, 89.5), (48.5, 89.5), (49.5, 84.6), (58.5, 84.6), (61, 87), (62, 91), (64, 98), (62.6, 108), (60.5, 117), (54, 124.2), (46, 126.8),
+                                         (38, 123), (31.5, 117), (28, 106), (27, 98)],
                     safe=lane([(46, 89), (46, 100), (44, 112), (40, 119)], 2.8) + lane([(46, 98), (56, 98), (60, 94)], 2.4) + lane([(56, 98), (59, 104)], 2.4)
-                    + lane([(42, 100), (31, 100), (29, 90), (28, 84)], 2.4) + lane([(48, 111), (54, 112), (52, 118), (46, 123)], 2.4) + lane([(54, 112), (60, 112)], 2.4)
-                    + lane([(36, 116), (33, 110)], 2.4)),
+                    + lane([(46, 100), (31, 100), (29, 90), (28, 84)], 2.4) + lane([(48, 111), (54, 112), (52, 118), (46, 123)], 2.4) + lane([(54, 112), (60, 112)], 2.4) + lane([(56, 98), (56, 92)], 2.4)
+                    + lane([(36, 116), (33, 110)], 2.4) + lane([(29, 90), (34, 90)], 2.4)),
                dict(kind="lava", poly=[(27.5, 70.5), (30.5, 69), (31.5, 75), (31, 86), (29, 88.5), (27, 86), (26.5, 78)]),
                dict(kind="lava", poly=[(59, 64.5), (62.5, 68), (64.5, 76), (64, 86), (61.5, 89), (60, 86), (61, 78), (59.5, 72)]),
-               dict(kind="lava", poly=[(32, 64), (36, 59.5), (46, 56.3), (55, 58), (59.5, 62), (55, 62.5), (46, 59), (39, 61), (35.5, 65)],
-                    safe=lane([(46, 56), (46, 61)], 2.4)),
-               dict(kind="lava", poly=[(34.5, 69), (41, 66.5), (43.5, 72), (43, 79), (38, 82.5), (35, 80), (34, 74)]),
-               dict(kind="lava", poly=[(49, 66.5), (55, 68.5), (58.5, 75), (57, 81.5), (52, 82.5), (48, 79), (48.5, 72)])],
+               dict(kind="lava", poly=[(29.8, 66), (31.5, 62.5), (36, 59), (46, 55.2), (54.5, 58.3), (60, 61), (61.5, 64.5), (58.5, 65.2), (54, 64.2), (52, 62.8),
+                                         (46, 60.4), (40, 62.9), (33, 66.2)],
+                    safe=lane([(38, 58), (34, 64), (31.5, 69)], 2.4)),
+               dict(kind="lava", poly=[(34.8, 80.5), (33.3, 77.5), (32.6, 74), (33, 71), (35, 66.5), (38, 65), (42, 64), (44.2, 64.6), (44.2, 71), (44.2, 79), (41.5, 82.6), (36.5, 82.6)],
+                    safe=lane([(40, 66), (45, 66)], 2.4)),
+               dict(kind="lava", poly=[(47.8, 71), (47.8, 65), (51, 64.4), (54, 65.6), (56.2, 68), (57.6, 72), (59.2, 76), (58.2, 80), (54, 82.6), (49.5, 82.6), (47.8, 77)])],
     "frostgate": [dict(kind="ice", poly=[(78, 36), (86, 30.5), (98, 27.5), (108, 28), (109, 36), (108.5, 50), (108, 57), (103, 62),
                                            (92, 61.5), (83, 56), (77.5, 50), (75, 41)],
                        safe=lane([(108, 42), (100, 44), (92, 44), (80, 46), (74, 44)], 2.6) + lane([(100, 44), (104, 57), (118, 60)], 2.6)
@@ -384,7 +347,7 @@ regions = [
          hazard="ice", hazard_min=0.35,
          purpose="The best armor on the map, the Keep's high ground over the Gate Span, an uplink outpost on the south edge."),
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}},
-         hazard="lava", hazard_min=0.42,
+         hazard="lava", hazard_min=0.52,
          purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on, an uplink outpost on the east rim."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
          purpose="The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."),
