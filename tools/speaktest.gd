@@ -10,4 +10,4 @@ func run() -> void:
 		for t in ["hi!", "how are you?", "are you hungry?", "let's go fight", "I love you", "you're useless", "what's up with the weather", "who are you?"]:
 			print("  > ", t, "  =>  ", KinSpeak.reply(rec, t))
 		for c in ["throw", "refuse", "scared", "kill"]:
-			print("  [", c, "] ", KinSpeak.bark(rec, c))
+			print("  [", c, "] ", BokiLines.say(rec, c, 1000.0 * (1 + randi() % 99)))
