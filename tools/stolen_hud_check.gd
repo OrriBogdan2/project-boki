@@ -53,6 +53,7 @@ func _frames(secs: float) -> void:
 
 func _steal(thief: Hunter, victim: Hunter) -> Kin:
 	var k: Kin = victim.kin
+	k.summon.cd = 40.0      # a ready summon would come out to guard its downed hunter (0040): rest it, so the wisp breaks loose
 	m.knock(victim, thief, {})
 	_frames(0.1)
 	ok(KinSteal.grab(k, thief), "%s's wisp is grabbed by %s" % [k.rec.get("name", "Boki"), thief.pname])
