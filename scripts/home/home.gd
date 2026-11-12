@@ -1454,7 +1454,8 @@ func _move_kin(d: float) -> void:
 				k["t"] = randf_range(1.5, 3.0)
 				if k["chase_t"] > 0.0:
 					_emote(k, "♪"); _emote(other, "!")
-					Sfx.play(KinVoice.cue(other["rec"]["species"], "happy"), other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					var cue := KinVoice.cue(other["rec"]["species"], "happy")
+					Sfx.play(cue, other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -2998,7 +2999,7 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				f["life"] = -1.0
 				_emote(k, "★")
 				k["joy_t"] = 0.8
-				Sfx.play("kin_happy", null, -6.0)
+				Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), null, -6.0)
 				var rec: Dictionary = k["rec"]
 				var loves_fetch: bool = rec["likes"]["play"] == "fetch"
 				Care.change(rec, "joy", 24.0 if loves_fetch else 14.0)
@@ -3684,7 +3685,7 @@ func _play_evolutions() -> void:
 		k["t"] = 3.0
 		fx.body_glow(at, tint)
 		Sfx.play("unlock")
-		Sfx.play("kin_happy")
+		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
 		building_now = false
 		cam.zoom_to = HOME_ZOOM
@@ -3947,7 +3948,7 @@ func _use_visiting(it: Dictionary) -> void:
 			petted[rec["uid"]] = true
 			Social.send_gift(visit_id, "pet", String(rec["uid"]))
 			_emote(it["k"], "♥")
-			Sfx.play("kin_happy")
+			Sfx.play(KinVoice.cue(rec["species"], "happy"))
 			_toast("%s will remember your visit" % rec["name"])
 		"house":
 			_open_gift_panel(owner_name)
@@ -4420,12 +4421,12 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
 		fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 16, 2.2)
-		Sfx.play("kin_happy", null, -2.0, 0.1)
+		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -2.0, 0.1)
 		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
 	else:
 		_emote(k, "♪")
-		Sfx.play("kin_happy", null, -8.0)
+		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -8.0)
 		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
