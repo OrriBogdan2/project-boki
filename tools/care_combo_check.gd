@@ -913,15 +913,14 @@ func tender() -> void:
 			"stuck at %.2f s" % t_stick)
 	var bid := "burr%d" % int(K.burrs[0]["id"]) if K.burrs.size() > 0 else ""
 	step(m, 0.1)
-	var tele: Dictionary = AimKit.entry(P, bid)
+	var tele: Dictionary = K.lk().held.get(bid, {}).get("p", {})
 	ok(
-			"mm RMB: the burst area shows under the foe at once, for everyone, filling",
-			AimKit.shown(P, bid)
-			and bool(tele.get("all", false))
-			and absf(float(tele.get("r", 0.0)) - 2.2) < 0.05
+			"mm RMB: the burst area shows under the foe at once, a lit rim and a soft inside (centre alpha <= 0.25)",
+			K.lk().showing(bid)
 			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
-			and K.lk().showing(bid),
-			"r %.2f" % float(tele.get("r", 0.0)))
+			and absf(float(tele.get("r", 0.0)) - 2.2) < 0.05
+			and _disc_centre(tele) <= AimShapes.SOFT_A,
+			"r %.2f centre %.2f" % [float(tele.get("r", 0.0)), _disc_centre(tele)])
 	await _burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
@@ -954,6 +953,10 @@ func tender() -> void:
 			String(K.hearth.get("mode", "")) == "ground" and land_off < 0.4
 				and absf(K.hearth_r() - 2.9) < 0.01 and K.anim_id == "mm_toss",
 			"%s at %.2f m" % [String(K.hearth.get("mode", "")), land_off])
+	var thrown: Dictionary = K.lk().held.get("hearth", {}).get("p", {})
+	ok(
+			"mm E: the thrown disc is a lit rim and a soft inside (centre alpha %.2f <= 0.25)" % _disc_centre(thrown),
+			_disc_centre(thrown) > 0.0 and _disc_centre(thrown) <= AimShapes.SOFT_A)
 	step(m, 3.0)
 	# --- Relay Step goes where you move, not at the cursor, with its own hop and a lantern trail
 	K.cd["e"] = 8.0
@@ -1278,6 +1281,10 @@ static func wav_peak_db(path: String) -> float:
 ## Owner 11-10: a stuck Burrseed roots only after about 2 s of the foe in her reach (`leash`), with a vine
 ## on them that thickens as it builds; out of reach it unwinds (2x) and, empty, the seed falls off.
 ## Called 0.1 s after the throw's seed stuck on T, about 6 m from her.
+## The alpha at the middle of a CareLook disc (shaders/care_disc.gdshader: body fill * 0.18 * 1.6, times its strength).
+func _disc_centre(p: Dictionary) -> float:
+	return float(p.get("fill", 1.0)) * 0.18 * 1.6 * float(p.get("a", 1.0))
+
 func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> void:
 	var sd: Dictionary = K.rmb_def()["seed"]
 	var need := float(sd["build"])

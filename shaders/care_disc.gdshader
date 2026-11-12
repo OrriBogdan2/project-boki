@@ -41,7 +41,7 @@ float sigil(vec2 uv, float r, float a) {
 	// thorns: little triangles on an inner ring
 	float th = pow(abs(cos(a * 6.0)), 6.0);
 	float band = smoothstep(0.6 + 0.25 * th, 0.58 + 0.25 * th, r) * smoothstep(0.52, 0.56, r);
-	return band * 0.8;
+	return band * 0.5;
 }
 
 void fragment() {

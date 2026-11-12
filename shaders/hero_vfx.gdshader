@@ -216,9 +216,11 @@ vec4 vortex(vec2 uv) {
 	float edge = 1.0 - smoothstep(0.75 * open, 0.98 * open, d + (arms - 0.5) * 0.25);
 	float streak = smoothstep(0.45, 0.75, arms) * edge;
 	float hole = 1.0 - smoothstep(0.0, 0.32, d);                // the dark core
-	float a = clamp(streak * 0.85 + hole * 0.75 + edge * 0.12, 0.0, 1.0) * fade;
+	// a zone is a lit rim and a soft inside (docs/VFX_QUALITY.md): the middle, where the target stands, stays at 0.25 or less
+	float inside = mix(0.25, 1.0, smoothstep(0.1, 0.65, d));
+	float a = clamp(streak * 0.85 + hole * 0.75 + edge * 0.12, 0.0, 1.0) * fade * inside;
 	vec3 c = mix(col.rgb, col2.rgb, smoothstep(0.6, 0.9, arms) * (1.0 - hole)) * streak + col3.rgb * hole;
-	return vec4(c * fade, a);
+	return vec4(c * fade * inside, a);
 }
 
 vec4 ring(vec2 uv) {
