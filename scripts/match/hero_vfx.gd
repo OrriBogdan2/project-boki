@@ -462,7 +462,7 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
 	mt.set_shader_parameter("seed", randf() * SEED_MAX)
-	mt.set_shader_parameter("streak", bool(layer.get("streak", false)))
+	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
 
