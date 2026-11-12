@@ -12,7 +12,7 @@ extends "res://tools/combo51_shots.gd"
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
+	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "dive", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "armour", "tierup"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
@@ -398,6 +398,21 @@ func _dredge_hook() -> void:
 	await _go(2.4, hook, _sheet("hook",
 			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
+	await _go(GAP)
+
+## Grimble's E in the air, the air smash: he rides the anchor down onto the landing circle, it stands planted there.
+func _dredge_dive() -> void:
+	await _reset(6.0)
+	var dive := func(t: float):
+		if _at(t, 0.05):
+			P.teleport(P.pos + Vector3(0, 6.0, 0))
+			P.grounded = false
+			P.vel = Vector3.ZERO
+		P.inp["sig"] = _at(t, 0.1)
+		_aim(T.pos)
+	await _go(1.8, dive, _sheet("dive",
+			"E in the air, the air smash: he rides the anchor down onto the landing circle, it stands planted there",
+			[0.12, 0.18, 0.24, 0.3, 0.38, 0.5, 0.65, 0.8, 1.2]), 2.5)
 	await _go(GAP)
 
 func _archer_miss() -> void:
