@@ -10,3 +10,6 @@ the match camera with two rivals fighting beside the player. Each frame is capti
 - `sheet_low.jpg`, `sheet_high.jpg`: with WaysOutPins. Each seat still to be had gets a pin on the edge toward it
   (the map badge: locked ring with its countdown arc, open bright ring and beam, in use in the squad's colour with
   its beam), its word and the distance; the Blight's wall within 70 m a crimson bar; won seats stay taken.
+
+Rendered with software GL (Xvfb, llvmpipe) on w2 while the GPU queue ran ~2 h deep; the same tool and build went
+to the GPU queue as jobq 20261111-225400-21031 (low) and 20261111-225403-29587 (high).
