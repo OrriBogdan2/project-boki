@@ -19,3 +19,5 @@ The face and corset are projected from the art: the corset from the master (regi
 Run it all with INSTALL=1 ~/meshy/ryzz_f/build.sh [source]. No weapon: fingertips carry the FX points (weapon_muzzle, anchor_finger_L); rods anchor_rod_0..3.
 
 walk and run b, l, r, fl, fr, bl, br (2026-11-12, ext/anim-dir-all-1112): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/ryzz/ryzz.glb OUT.glb 1.22 3.87` (walk_f's and run_f's own planted sole speed), then `python3 tools/art1/glb_add_clips.py art/wardens/ryzz/ryzz.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`. The ring is in step; `loco.stride` is gone and `foot_mps` is the ring's in-game sole median (docs/art/LOCO_DIR.md).
+
+walk_ and run_ re-timed to 0.75 s (one length, one strike key) on 2026-11-12 (ext/anim-loco-dir-last): `python3 tools/art1/glb_add_clips.py --stretch art/wardens/ryzz/ryzz.glb walk_,run_ 0.75`; `loco.foot_mps` 1.11 / 3.47 -> 1.38 / 2.77 (measured on the sole), `loco.ring_start` 0.25.

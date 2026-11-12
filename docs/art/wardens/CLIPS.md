@@ -16,7 +16,10 @@ Hero live in `tools/art1/` (Kael is the pilot).
   don't collide.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has
   them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time; `--clip-check`
-  holds each loop's pelvis to the forward loop's height at the same phase).
+  holds each loop's pelvis to the forward loop's height at the same phase). When the walk and run rings also share one length
+  they stay in step even hidden, and `ring_start` (s, 0 then) is where they wait while he stands; `ring_start` alone holds the
+  rings of two lengths there. `rest_bones`: bones whose clips sit half a turn off their rest are re-rested at the mean of
+  their keys (docs/art/LOCO_DIR.md).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean (hand-keyed loops only: on a ring of pinned soles it stretches the side and back loops
   unevenly); `foot_mps` [walk, run] is the ring's planted-sole speed at rate 1 in game (m/s: the median of the 8

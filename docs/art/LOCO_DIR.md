@@ -32,18 +32,18 @@ today's audit.
 |---|---|---|---|---|---|---|---|---|
 | Lace (archer) | 1 → 0 | 1 → 0 | 4 → 0 | 4 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 15 → 0 |
 | Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 0 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 0 |
-| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 2 | 25 → 22 |
+| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 4 | 3 → 1 | 2 → 3 | 2 → 2 | 25 → 15 |
 | Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
-| Grimble (dredge) | 5 → 0 | 5 → 3 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 1 | 5 → 0 | 28 → 6 |
+| Grimble (dredge) | 5 → 0 | 5 → 0 | 5 → 0 | 3 → 0 | 0 → 0 | 5 → 0 | 5 → 0 | 28 → 0 |
 | Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
 | Kael (juggernaut) | 1 → 0 | 6 → 0 | 5 → 0 | 3 → 0 | 1 → 0 | 4 → 0 | 2 → 0 | 22 → 0 |
-| Sparkle (mage) | 3 → 0 | 7 → 2 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 2 |
+| Sparkle (mage) | 3 → 0 | 7 → 0 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 0 |
 | Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
 | Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
 | Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
-| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 4 | 31 → 2 | **271 → 30** |
+| **all 11** | 28 → 1 | 65 → 2 | 47 → 2 | 47 → 4 | 6 → 1 | 47 → 3 | 31 → 2 | **271 → 15** |
 
-By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 20.
+By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 5.
 
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
@@ -66,15 +66,31 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
   point on his shin's line that a crouched shin swings off the boot.
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
-## Left (docs/DEBT.md)
-- Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
-  copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
-  Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
-  flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
-- Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
-  rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
-  steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,
-  but turned Albert's arms with their legs in `--anim-audit` (his walk loop holds two strides): it needs each ring's
-  strides per loop in the data first.
+## Last 30 cells (ext/anim-loco-dir-last): 30 → 15, all Albert
+Per cell: the clip, the ring blend or the foot_mps number? Grimble's and Sparkle's 8 were all one cause, **the ring
+blend**: Grimble's run_f/fl/fr (and Sparkle's) swing an arm over 100 degrees from the walk loop's, and a start,
+stop or walk/run change crossfaded a hidden ring at whatever stride it had frozen in (Godot's Blend2 does not advance a
+hidden input), so the two arms sat near half a turn apart. `Quaternion` blends take the short way round, and at the
+crossfade the forearm flipped 140-170 degrees in one frame (a hand 0.6 m away): with the walk ring only, or the run ring
+only, every cell passed; spring rates, `arm_swing` and re-resting the arm did not move it. The fix is data and a few
+lines: the run loops are re-timed to the walk loop's length (`tools/art1/glb_add_clips.py --stretch`; Grimble 0.63 →
+1.0 s, Sparkle 0.60 → 0.75 s with her walk loops, both on one strike key), `foot_mps` is re-measured on the sole
+(Grimble 1.59 / 4.71 → 1.59 / 2.98, Sparkle 1.11 / 3.47 → 1.38 / 2.77: the same cadence at speed, a longer stride per
+turn), and WardenClips keeps rings of one length advancing in step (`rings.sync`) and holds them at `loco.ring_start`
+(0 by default; Sparkle 0.25) while he stands, so a start opens on a stride the idle's arms can blend into.
+Albert's hammer forearm (`forearm.R`) sits 177-179 degrees off its rest in every crouch clip, so crouch starts and stops
+flipped it: `loco.rest_bones` re-rests it at the mean of its keys at load (`WardenClips._rerest`; the .glb's rest stays,
+WardenGlb checks it) and 7 crouch cells pass.
+
+## Left (docs/DEBT.md): Albert, 15 cells
+- Crouch (5): crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned copy
+  gives his front crouch diagonals: crouch_walk fr/fl (feet 137 deg off the move, slip 3.6 m/s), br/bl (slip 1.5 m/s
+  at 2.7), and crouch_idle b (0.44 over a 0.33 bar, a foot). The clips are the cause (a hand-made sneak).
+- Run, sprint, strafe fr/fl (6, SLIP 2.1-4.0 m/s at 3.4-4.9): the planted soles of run_fr/run_fl carry the ground
+  but travel sideways, the recipe diagonal at TURN 55; a clip fix (hunter_dir_gait.py, Blender on hetzner).
+- Start snaps (4: walk br, strafe bl, aim_walk br/bl): an idle-to-walk foot pop that depends on the stride the ring waits
+  in. `ring_start` 0.45 fixed them, but moved his `--anim-audit` arms swing to -0.5 (the audit starts on the pose), 0.1
+  left one cell; his walk loop holds two strides (0.75 s) against the run's one, so the two rings cannot be locked by
+  stretching until the run loops hold two strides too (a duplicated cycle).
 - Vex's rebuilt run_f has a shorter stance than the old one, so its kept arm keys swung with the legs; `arm_swing`
   now drives both arms off the legs (0.5 each), as it did her right one.
