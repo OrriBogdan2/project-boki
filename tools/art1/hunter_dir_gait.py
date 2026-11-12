@@ -15,7 +15,8 @@ foot_mps pair as the speeds, so every direction gets the forward loop's rate and
 A direction written "b+" keeps the shipped loop instead (restride): only its feet are pushed along the move until a
 planted sole travels at the loco speed, for a hand-keyed loop whose look wins but whose feet slide. A diagonal written
 "fl~" is the shipped f (or b) loop turned 45 degrees into the move: the root and the legs turn, the chest keeps the
-source's facing, every key as timed (for a rig the recipe can't step: Albert's crouch, 14 cm legs under hips 9 cm up).
+source's facing, every key as timed (for a rig the recipe can't step: Albert's crouch, 14 cm legs under hips 9 cm up);
+"fl~l" turns the shipped l loop (f, b, l or r) instead.
   blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED [DIRS WALK_S RUN_S SIZE CYCLES TURN GAITS]
 SIZE: game metres per model metre (Albert's breaker.glb is 2.0); the metre constants below are game metres.
 CYCLES: WALK,RUN left + right pairs a loop (Albert's 14 cm legs walk 2,1: a half-length step in the forward loop's time).
@@ -460,11 +461,12 @@ def restride(name, src, speed, planted):
           "pelvis dip %.3f m" % (name, stretch, planted * stretch, speed, worst, dip))
 
 
-def turned(name, src, k):
-    """turn: the source loop, its root (and so the legs and their steps) turned about the vertical through the armature
-    origin from the source's line onto direction k, the hips turned back so the chest keeps the source's facing."""
-    d = DIRS[k]
-    yaw = math.atan2(-d.x, d.y) if d.y > 0 else math.atan2(d.x, -d.y)   # (the f loop goes +y, the b loop -y)
+def turned(name, src, k, side):
+    """turn: the source loop (the `side` loop: f, b, l or r), its root (and so the legs and their steps) turned about
+    the vertical through the armature origin from the source's line onto direction k, the hips turned back so the
+    chest keeps the source's facing."""
+    d, line = DIRS[k], DIRS[side]
+    yaw = math.atan2(line.x * d.y - line.y * d.x, line.dot(d))
     turn = Matrix.Rotation(yaw, 4, "Z")
     keys = []
     for key in src["keys"]:
@@ -478,7 +480,7 @@ def turned(name, src, k):
         layer.update()
         keys.append({pb.name: (pb.location.copy(), pb.rotation_quaternion.copy(), pb.scale.copy()) for pb in PB})
     key_action(name, keys)
-    print("TURNED %s from the %s loop, %.0f deg" % (name, "f" if d.y > 0 else "b", math.degrees(yaw)))
+    print("TURNED %s from the %s loop, %.0f deg" % (name, side, math.degrees(yaw)))
 
 
 def measure(name, src, speed):
@@ -508,10 +510,11 @@ for gait in GAITS:
         SPEED[gait] = measure("crouch_f", fwd, 0.0)
     planted = {k: measure("%s_%s" % (gait, k), shipped[k], SPEED[gait]) for k in shipped}
     for k in BUILD:
-        if k.endswith("~"):
-            k = k[:-1]
+        if "~" in k:
+            k, _, side = k.partition("~")
+            side = side or ("f" if DIRS[k].y > 0 else "b")
             arm.animation_data.action = None
-            turned("%s_%s" % (gait, k), shipped["f" if DIRS[k].y > 0 else "b"], k)
+            turned("%s_%s" % (gait, k), shipped[side], k, side)
             made.append("%s_%s" % (gait, k))
             continue
         if k.endswith("+"):
