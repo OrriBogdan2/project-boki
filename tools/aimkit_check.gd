@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	ak.step(m, 0.5)        # the rounds _aim_modes fired: Vex's firing brackets lapse, so only the shapes below show
 	_shapes(m, P, T)
 	_seen(m, P, T)
+	_net(m, P, T)
 	_soft(P)
 	_membership()
 	_pooling(m, P, T)
@@ -103,18 +104,20 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	for s in m.shots: s["life"] = 0.0
 	m.step(DT)
 
-func _all_shapes(P: Hunter, k: float, T: Hunter) -> void:
-	AimKit.lane(P, "lane", {"len": 8.0, "len0": 2.0, "k": k, "width": 1.0, "width_to": 0.3, "chevrons": 3, "tip": true})
-	AimKit.dotted(P, "dotted", {"len": 9.0})
-	AimKit.vee(P, "vee", {"k": k, "glint": 0.4})
-	AimKit.cone(P, "cone", {"from": T.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k})
-	AimKit.circle(P, "circle", {"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)})
-	AimKit.sweet(P, "sweet", {"self": true, "k": k})
-	AimKit.arc_wall(P, "arc")
-	AimKit.swap(P, "swap", {"fill": k})
-	AimKit.line(P, "line")
-	AimKit.span(P, "span", {"len": 10.0})
-	AimKit.star(P, "star")
+func _all_shapes(P: Hunter, k: float, T: Hunter, all := false) -> void:
+	var a := {"all": all}
+	var lp := {"len": 8.0, "len0": 2.0, "k": k, "width": 1.0, "width_to": 0.3, "chevrons": 3, "tip": true}
+	AimKit.lane(P, "lane", a.merged(lp))
+	AimKit.dotted(P, "dotted", a.merged({"len": 9.0}))
+	AimKit.vee(P, "vee", a.merged({"k": k, "glint": 0.4}))
+	AimKit.cone(P, "cone", a.merged({"from": T.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k}))
+	AimKit.circle(P, "circle", a.merged({"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)}))
+	AimKit.sweet(P, "sweet", a.merged({"self": true, "k": k}))
+	AimKit.arc_wall(P, "arc", a)
+	AimKit.swap(P, "swap", a.merged({"fill": k}))
+	AimKit.line(P, "line", a)
+	AimKit.span(P, "span", a.merged({"len": 10.0}))
+	AimKit.star(P, "star", a)
 
 const IDS := ["lane", "dotted", "vee", "cone", "circle", "sweet", "arc", "swap", "line", "span", "star"]
 
@@ -173,6 +176,84 @@ func _seen(m: Match, P: Hunter, T: Hunter) -> void:
 	AimKit.clear(T)
 	L.rebuild()
 	ok("clear: drops one hunter's set only", not AimKit.shown(T, "slam") and L.built == 0)
+
+## Net (AimNet, event "tele"): every shape kind of a local hunter's `all` telegraph goes out once per
+## SEND_GAP, crosses the wire as JSON and draws on the other game under its remote copy as the caster drew
+## it; the caster's hide drops it there; aim reticles, echoes and events naming a local hunter stay put.
+func _net(m: Match, P: Hunter, T: Hunter) -> void:
+	var L := AimKit.layer(m)
+	AimNet.capture = true
+	AimNet.sent_log.clear()
+	_aim(P, 6.0)
+	_all_shapes(P, 0.5, T, true)
+	AimKit.lane(P, "aim")
+	var ids := {}
+	for ev in AimNet.sent_log: ids[String(ev[2])] = ev
+	ok("net: one \"tele\" event per all telegraph, none for the aim lane", AimNet.sent_log.size() == IDS.size()
+		and ids.size() == IDS.size() and not ids.has("aim"), "%d sent" % AimNet.sent_log.size())
+	var t := 0.0
+	while t < 0.5 - 0.001:
+		m.time += DT      # the clock only: a real step here moves the match the pool check counts
+		t += DT
+		_all_shapes(P, 0.5, T, true)
+	var per := AimNet.sent_log.size() / float(IDS.size())
+	var each := "%.1f sends each" % per
+	ok("net: refreshed every step for 0.5 s, it goes out about every 0.1 s", per >= 4.0 and per <= 7.0, each)
+	var wire: Array = []
+	for id in ids:
+		var ev: Array = (AimNet.sent_log.filter(func(x): return String(x[2]) == id) as Array).back().duplicate()
+		ev[1] = T.nid
+		wire.append(JSON.parse_string(JSON.stringify(ev)))
+	AimNet.net_in(m, wire[0])
+	ok("net: an event naming a hunter this game runs is ignored", not AimKit.shown(T, String(wire[0][2])))
+	T.remote = true
+	var before := AimNet.sent_log.size()
+	for ev in wire: AimNet.net_in(m, ev)
+	ok("net: the remote copy's entries are not sent back", AimNet.sent_log.size() == before)
+	for id in IDS:
+		var mine := AimKit.entry(P, id)
+		var theirs := AimKit.entry(T, id)
+		var off := _unlike(mine, theirs)
+		ok("net %s: shows on the other game as the caster drew it" % String(mine.get("kind", id)), off == "", off)
+	ok("net: a received one outlives its keep by AimNet.LAG", is_equal_approx(float(AimKit.entry(T, "lane")["keep"]),
+		float(AimKit.entry(P, "lane")["keep"]) + AimNet.LAG))
+	L.rebuild()
+	ok("net: both sets draw, the caster's and the remote copy's", L.built == 2 * IDS.size(), "built %d" % L.built)
+	AimNet.sent_log.clear()
+	AimKit.hide(P, "lane")
+	L.rebuild()
+	var drop: Array = AimNet.sent_log.filter(func(x): return x.size() == 3 and String(x[2]) == "lane")
+	ok("net: the caster's hide sends the drop", drop.size() == 1)
+	if drop.size() == 1:
+		AimNet.net_in(m, ["tele", T.nid, "lane"])
+	ok("net: the drop takes it off the other game", not AimKit.shown(T, "lane") and AimKit.shown(T, "cone"))
+	T.remote = false
+	AimKit.clear(P)
+	AimKit.clear(T)
+	L.rebuild()
+	AimNet.capture = false
+	AimNet.sent_log.clear()
+
+## "" when every drawn key of `b` matches `a` (to the wire's rounding), else the first that does not.
+func _unlike(a: Dictionary, b: Dictionary) -> String:
+	if a.is_empty() or b.is_empty():
+		return "missing (%s / %s)" % [a.size(), b.size()]
+	for k in a:
+		if k in AimNet.LOCAL or k == "keep":
+			continue
+		if not b.has(k):
+			return "%s: missing" % k
+		var x = a[k]
+		var y = b[k]
+		var same: bool
+		match typeof(x):
+			TYPE_VECTOR2: same = y is Vector2 and (x as Vector2).distance_to(y) < 0.002
+			TYPE_COLOR: same = y is Color and (x as Color).to_html(true) == (y as Color).to_html(true)
+			TYPE_FLOAT, TYPE_INT: same = absf(float(x) - float(y)) < 0.002
+			_: same = x == y
+		if not same:
+			return "%s: %s vs %s" % [k, x, y]
+	return ""
 
 ## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
 func _soft(P: Hunter) -> void:
