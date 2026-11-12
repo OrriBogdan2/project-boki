@@ -40,6 +40,10 @@ static func _stale_seed(key: String) -> bool:
 static func _week() -> int:
 	return int(MarketSave.now() / 86400.0 / float(_rules()["wayseed_days"]))
 
+## [days between his Wayseeds, their price in gems], for the Waystone's zone cards.
+static func seed_terms() -> Array:
+	return [int(_rules()["wayseed_days"]), int(_rules()["wayseed_price"])]
+
 static func is_seed(key: String) -> bool:
 	return key.begins_with("seed:")
 

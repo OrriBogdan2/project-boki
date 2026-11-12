@@ -24,8 +24,11 @@ static func open(h, here: String) -> void:
 			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), _open_lines(id), func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
-			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
-			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
+			var lines: Array = []
+			var hints := key_hints(id)
+			for i in 2:
+				lines.append(UI.para(key_lines(id)[i], 12, UI.MUTED))
+				lines.append(UI.para(hints[i], 11, UI.FAINT))
 			var keys := GardenZones.keys_for(id)
 			var ready: bool = keys["seed"] and keys["lean"]
 			var wake := func(): h.hway.attune(id)
@@ -82,6 +85,15 @@ static func key_lines(id: String) -> Array:
 	var types: Array = GardenZones.info(id)["types"].map(func(t): return String(t).capitalize())
 	return ["%s A Wayseed of %s" % [_tick(keys["seed"]), GardenZones.info(id)["name"]],
 		"%s A Boki leaning %s" % [_tick(keys["lean"]), ", ".join(types.slice(0, -1)) + " or " + types[-1]]]
+
+## Where to get each key, one plain line each: the Wayseed's sources and prices, and which Boki is closest.
+static func key_hints(id: String) -> Array:
+	var best := GardenZones.closest(id)
+	var lean := "Feed a Boki meals of those types."
+	if not best.is_empty():
+		lean = "Closest: %s, %s %d of %d." % [best["rec"]["name"], String(best["type"]).capitalize(), int(best["lean"]),
+				int(GardenZones.rules()["lean_key"])]
+	return ["From " + String(GardenZones.rules()["wayseed_from"]) % BlackMarket.seed_terms() + ".", lean]
 
 static func _tick(have: bool) -> String:
 	return "[x]" if have else "[ ]"

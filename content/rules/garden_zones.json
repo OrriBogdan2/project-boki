@@ -70,5 +70,5 @@
 		"low": {"hub": {"draws": 370, "objects": 560}}},
 	"ratchet_doc": "Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one.",
 	"budget_doc": "What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column.",
-	"wayseed_from": "a lair of a matching type on a run, or the Drift Trader once a week"
+	"wayseed_from": "a lair of a matching type on a run, or Old Pell at the Black Market (one every %d days, %d gems)"
 }
