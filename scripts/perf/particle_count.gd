@@ -16,7 +16,8 @@ static func by_owner(root: Node) -> Dictionary:
 		for n in root.find_children("*", cls, true, false):
 			if not n.get("emitting") or not (n as Node3D).is_visible_in_tree():
 				continue
-			var key := "%s/%s" % [String(n.get_parent().name).rstrip("0123456789@"), String(n.name).rstrip("0123456789@")]
+			var up := String(n.get_parent().name).rstrip("0123456789@")
+			var key := "%s/%s" % [up, String(n.name).rstrip("0123456789@")]
 			by[key] = int(by.get(key, 0)) + of(n)
 	return by
 

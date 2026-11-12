@@ -4,8 +4,8 @@ extends RefCounted
 ## MAX_TRIS triangles, when more than MAX_SHADOW_LIGHTS lights cast shadows, or when any frame takes
 ## longer than MAX_FRAME_MS; then the fight worst case (tools/perf_fight.gd), which fails when its busiest
 ## moment has more than MAX_PARTICLES emitting (its frames count toward frame ms too). Wall time only means
-## something on a real GPU, so run it through jobq (--needs gpu); the other numbers are the same on any renderer. Takes the bench's arguments
-## (--quality=, --bench-view=, --bench-secs=).
+## something on a real GPU, so run it through jobq (--needs gpu); the other numbers are the same on any
+## renderer. Takes the bench's arguments (--quality=, --bench-view=, --bench-secs=).
 ##   godot --path . -- --perf-budget-check --quality=low --bench-view=1920x1080
 
 const MAX_DRAWS := 1500           # draw calls in a frame
@@ -13,7 +13,7 @@ const MAX_TRIS := 1500000         # triangles in a frame
 const MAX_SHADOW_LIGHTS := 2      # visible lights with shadows on
 const MAX_FRAME_MS := 50.0        # ms, wall time of one frame
 const WARM_FRAMES := 120          # frames skipped first: shader and model builds land there
-const MAX_PARTICLES := 3999       # particles emitting at the fight's busiest moment (owner 11-08: under 4,000)
+const MAX_PARTICLES := 3999       # particles emitting at the fight's busiest moment (the owner's budget: under 4,000)
 
 func run(main: Node) -> void:
 	var bench = load("res://tools/perf_bench.gd").new()
