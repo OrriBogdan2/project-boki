@@ -16,3 +16,5 @@ Art files keep the old name for now. LIVE_MANIFEST.json carries "display_name" f
 | Bastionpet | Basticlaw | it is a crab; "pet" read odd |
 | Glomworth | Glombulus | Glomwort/Glomworth were too easy to mix up |
 | Furnacowary | Furnowary | shorter, same idea |
+| Pinguin (shown as Kegling) | Pinglet | owner 11-11 "pipguin and kegling should change names"; penguin line is now a bowling run Pinglet -> Rollguin -> Strikeguin; id pinguin stays |
+| Kingpinguin (shown as Pipguin) | Strikeguin | same owner note; stage 3 of the bowling run; id kingpinguin stays |
