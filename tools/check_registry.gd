@@ -279,6 +279,8 @@ const CHECKS := {
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--boss-anim-check": ["res://tools/boss_anim_check.gd", "boss_anim_check", null],      # boss keyed moves, strikes on the tell
 	"--boss-anim-shots": ["res://tools/boss_anim_shots.gd", "boss_anim_shots", null],      # boss move strips (GPU)
+	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
+	"--results-stage-shots": ["res://tools/results_stage_check.gd", "results_stage_check", "shots"],      # --shots-dir
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
