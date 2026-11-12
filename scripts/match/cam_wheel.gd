@@ -4,7 +4,7 @@ extends RefCounted
 ## The mouse wheel sets CamRig.user_zoom between "min" and "max". Gliding and sneaking (hold Ctrl) widen the view on
 ## top of it, and sneaking always reaches past the wheel's max; CamRig eases back when they end. An aimed cast
 ## widens in CamRig.cast_wide (Vex's Longneedle, the only ability that does). The wheel is bound to nothing else in
-## a match, and where the player left it is kept (Settings "cam_zoom"; a first-match hint teaches it, see hint()); if a player binds it to an action in
+## a match, and where the player left it is kept (Settings "cam_zoom"); if a player binds it to an action in
 ## Settings, that action wins and the wheel stops zooming.
 
 const HINT := "cam_zoom"      # Save.d["tutorial"] key: the wheel hint was shown or the wheel was used
