@@ -7,12 +7,14 @@ extends RefCounted
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
 ## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
-## length and a slow's strength reach the player's own game.
+## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
+## of the air on their own game, with the landing stun a bot gets (GlideSpike).
 ## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
 
 const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match (the queue may hold it)
+const REPLY_S := 30.0        # s of real time for the guest to answer (a busy box starves it; sim time races ahead)
 const TOL := 0.5             # m: the player's own game puts it within this of where the bot went
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
@@ -32,10 +34,12 @@ var stun_max := 0.0          # the longest stun seen on the watched body since i
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
 var seen := {}
+var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
+var guest_flag := "--displace-net-check=guest"
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
-	print("DISPNET %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
+	print("%s %s %s  %s" % [tag, "ok  " if cond else "FAIL", what, info])
 	if not cond: bad += 1
 
 func run(main_node: Node) -> void:
@@ -44,7 +48,7 @@ func run(main_node: Node) -> void:
 	Engine.max_fps = 60
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == "--displace-net-check=guest": guest = true
+		if a == guest_flag: guest = true
 		if a.begins_with("--dn-port="): port = int(a.substr(10))
 	Net.message.connect(_on_msg)
 	if guest:
@@ -53,7 +57,8 @@ func run(main_node: Node) -> void:
 		await _host()
 
 # ------------------------------------------------------------------ the host
-func _host() -> void:
+## Brings up the relay, the guest game and both matches; the guest's hunter as the host sees it, or null.
+func _host_up() -> Hunter:
 	port = 7930 + OS.get_process_id() % 60
 	dir = ProjectSettings.globalize_path("user://displace_net")
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -62,8 +67,8 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --displace-net-check=guest --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
+	var cmd := "cd '%s' && %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
+		ProjectSettings.globalize_path("res://"), GODOT, guest_flag, port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
 	var t0 := Time.get_ticks_msec()
@@ -74,7 +79,7 @@ func _host() -> void:
 		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
-		return _finish()
+		return null
 	var d := {"mid": "dn%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
 		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
 		{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
@@ -86,6 +91,10 @@ func _host() -> void:
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
+	return G
+
+func _host() -> void:
+	var G := await _host_up()
 	if G == null:
 		return _finish()
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + Vector3(-6.0, 0, 9.0), {"arch": "none"})
@@ -100,6 +109,7 @@ func _host() -> void:
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
+	await _glide_spike(G, B)
 	_finish()
 
 func _finish() -> void:
@@ -108,7 +118,7 @@ func _finish() -> void:
 	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
-	print("DISPNET DONE, %d checks, failures: %d" % [n, bad])
+	print("%s DONE, %d checks, failures: %d" % [tag, n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _read_pid() -> void:
@@ -118,7 +128,7 @@ func _read_pid() -> void:
 	if not FileAccess.file_exists(p):
 		return
 	for line in FileAccess.get_file_as_string(p).split("\n"):
-		if line.begins_with("DISPNET guest pid="):
+		if line.begins_with("%s guest pid=" % tag):
 			guest_pid = int(line.get_slice("=", 1))
 
 ## One ability, on the bot and then on the guest from the same spot: the guest's own game puts it where
@@ -286,6 +296,47 @@ func _knock_extras(G: Hunter, B: Hunter) -> void:
 		"hit: the burn's length and the slow's strength reach the player (4 s, 40%)",
 		"burn %.2f slow_k %.2f" % [_got("burn"), _got("slow_k")])
 
+## A dunk (Displace.spike at 16 m/s) on a glider 10 m up: the bot and the player are both spiked, fall and
+## land stunned for GlideSpike.land_stun; unspiked, a glider would still be in the air.
+func _glide_spike(G: Hunter, B: Hunter) -> void:
+	var P := m.player
+	var at := home + Vector3(4.0, 10.0, -3.0)
+	_fresh(B)
+	_glide(B, at)
+	await _run(0.2)
+	stun_on = B
+	stun_max = 0.0
+	m.displace.spike(B, -16.0, P)
+	await _run(1.6)
+	var bot_stun := stun_max
+	stun_on = null
+	ok(B.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: a dunk spikes a gliding bot",
+		"stun %.2f grounded %s" % [bot_stun, B.grounded])
+	B.teleport(home + Vector3(-6.0, 0, 9.0))
+	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z]})
+	var t := 0.0
+	while not G.gliding and t < 5.0:
+		await _run(0.1)
+		t += 0.1
+	ok(G.gliding, "glide spike: the host sees the player gliding")
+	m.displace.spike(G, -16.0, P)
+	await _run(1.8)
+	await _ask()
+	ok(_got("air") == 0.0 and absf(_got("stun_max") - bot_stun) < 0.15,
+		"glide spike: the dunk spikes the player out of the air on their own game, like the bot",
+		"player stun %.2f air %.0f, bot %.2f" % [_got("stun_max"), _got("air"), bot_stun])
+	await _place(G, home + PARK)
+
+## A body gliding at `at` with a cool glider and the glide held.
+static func _glide(T: Hunter, at: Vector3) -> void:
+	T.teleport(at)
+	T.grounded = false
+	T.gliding = true
+	T.inp["glide"] = true
+	T.glide_fuel = 1.0
+	T.glide_cd = 0.0
+	T.shot_down = false
+
 func _kit(arch: String) -> void:
 	var P := m.player
 	if P.arch != arch:
@@ -323,10 +374,9 @@ func _ask() -> Vector3:
 	return await _reply()
 
 func _reply() -> Vector3:
-	var t := 0.0
-	while replies.is_empty() and t < 10.0:
+	var t0 := Time.get_ticks_msec()
+	while replies.is_empty() and Time.get_ticks_msec() - t0 < REPLY_S * 1000.0:
 		await _run(0.1)
-		t += 0.1
 	if replies.is_empty():
 		return Vector3.INF
 	return _v(replies[0]["pos"])
@@ -337,9 +387,9 @@ func _got(k: String) -> float:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("DISPNET guest pid=%d" % OS.get_process_id())
+	print("%s guest pid=%d" % [tag, OS.get_process_id()])
 	if not await _connect():
-		print("DISPNET guest: no relay")
+		print("%s guest: no relay" % tag)
 		main.get_tree().quit(1)
 		return
 	var t0 := Time.get_ticks_msec()
@@ -367,13 +417,18 @@ func _on_msg(topic: String, data, _from: String) -> void:
 				m.player.teleport(Vector3(a[0], a[1], a[2]))
 				_say()
 		"ask": _say()
+		"glide":
+			if m and m.player:
+				_fresh(m.player)
+				_glide(m.player, _v(data["at"]))
 		"strike": _strike(_v(data["at"]))
 
 func _say() -> void:
 	if m and m.player:
 		var P := m.player
 		Net.lobby_emit("dn_r", {
-			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k})
+			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k,
+			"air": 0.0 if P.grounded else 1.0})
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:

@@ -8,6 +8,7 @@ extends RefCounted
 ##           frame, like an ability); a tap while it is summoned sends it back into the wisp.
 ##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow (on a wisp: it bursts, then the wheel opens)
 ##   The Boki casts its own ability by itself (KinTactics.think_abilities); bots press it through cast_c.
+##   Quick keys (unbound by default) give the wheel orders and the tap: KinKeys
 ##   X       the Merge (KinMerge.press)
 ## A tap is judged on release (so a hold can be told apart), the wisp burst on the press; the key is polled each
 ## frame (poll), the result is queued in Match.pending_input and applied on the fixed step (tap, KinSummon.press);
@@ -16,10 +17,6 @@ extends RefCounted
 
 static func rules() -> Dictionary:
 	return Content.rules("boki_system")
-
-## R runs the classes' own ultimate (ArchKit.use_r) instead of the Merge. Off: R is the Merge for every class.
-static func class_ults() -> bool:
-	return bool(rules().get("class_ults", false))
 
 ## The G key, polled every frame for the local player. Returns the Match.pending_input key to queue: "summon"
 ## on the frame it is pressed with the Boki riding as a wisp (the burst, KinSummon.press), "throw" on the frame
@@ -167,7 +164,7 @@ static func chase_pick(h: Hunter) -> Ent:
 	var aim: Vector3 = h.inp.get("aim", h.pos)
 	var best: Ent = null
 	var bd := 1e9
-	for f in h.m.foes_of(h.team):
+	for f in h.m.foes_of(h.team, false):
 		if f.dead or not f.hittable() or (f is Hunter and f.downed) or Shrubling.hidden(f):
 			continue
 		if f.flat_dist(h) > float(rules()["follow"]["engage_range"]) * 2.0:
