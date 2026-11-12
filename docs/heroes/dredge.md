@@ -69,7 +69,7 @@ Nothing was built on this branch: the only row not closed is in flight, and ever
 | 4 | Shotgun cone in the world | closed | `DredgeKit._tick_gun` draws the two edge lines to the slug range while firing and folds to one aim line idle (b1aa67fe3). Assert "gun: the spread's edge lines lie on the ground out to the slug range", "gun: idle, the cone folds into one aim line" |
 | 5 | Who is Grounded during the reel | closed | the caster gets `KitStatus` "gnd" for the reel, the foe stays stunned and lands not Grounded (b1aa67fe3). Assert "reel: Grimble is Grounded while he reels, the foe is stunned" |
 | 6 | Anchor Drop forward hop | in flight | main has the 0.38 s wind-up and the lift on the toes only, no forward travel. ext/anim-time-grimble adds `hop` 1.8 m over 0.2 s from 0.14 s (`_hop` in `dredge_kit.gd`, `dredge.json` e) with its own check; merge that, build nothing here |
-| 7 | Anchor slam "giant fist" | open | the ground slam draws the filling cone, crescent, dust and stun spirals; the translucent falling anchor (`LDFx.anchor_drop`) is only used by the air smash. Not built: `dredge_kit.gd` and `ld_fx.gd` are in flight. Suggestion for after the merges: call `anchor_drop` onto the cone centre in `_anchor` |
+| 7 | Anchor slam "giant fist" | closed | a giant translucent coin-gold fist (HeroVfx `fist` layer, `anchor_fist` in `content/vfx/dredge.json`) falls into the cone over the wind-up and lands on the slam's hit frame (0.38 s), at the cone's middle and 0.8 of its radius wide (2.4 m, inside the 2.7 m cone width there); it moves with him through the hop and a barge, and a stun in the wind-up takes it away. Asserts "anchor fist: lands inside the hit cone on the slam frame, about as wide as the cone there", "anchor fist: a stun in the wind-up takes the falling fist away, no slam" |
 | 8 | Grapnel line | closed on main, polish in flight | the hook is his stretched arm now (DECISIONS v2), drawn through rocks (`ld_arm.gdshader` depth test off; 74006733e). ext/grimble-hook-arm adjusts the arm look in `ld_fx.gd` |
 | 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
 | 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
@@ -299,7 +299,7 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
   pale-gold slugs with gold trails that hang at the stop line; the hook thrown as a gold chain of links from his hand
   (`hook_chain`, a hold): slack and swaying as it pays out, yanked taut and glowing as the hook bites (`hook_bite`, a burst
   of coins and sparks), again on each haul, sparks as it snaps back; the slam's gold telegraph cone with sparks along its
-  edge under his raised fist, then a gold sweep, cracked ground, debris and coins; the air smash's ring of fire, debris and
+  edge under his raised fist while a giant translucent gold fist falls into it (`anchor_fist`), then a gold sweep, cracked ground, debris and coins; the air smash's ring of fire, debris and
   coins. Kit-drawn in `scripts/arch/kits/ld_fx.gd`: the bone hook at the chain's end (`ld_bone.gdshader`, drawn through
   rocks), the ghost anchor (`ld_anchor.gdshader`, gold rim), the chain ring at his feet while he reels, the gold stun
   spirals, the barge's iron and brass after-images.

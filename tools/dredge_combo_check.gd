@@ -161,8 +161,11 @@ func _slam_tell() -> void:
 	ak.fresh(T)
 	ak.fresh(T2)
 	K.cd["e"] = 0.0
+	var V := HeroVfx.of(m)
+	Sfx.listener = P.pos        # the camera on him, so the fist draws
 	P.ak.use_e()
 	ak.step(m, 0.2)
+	V._process(0.2)             # (m.step leaves HeroVfx to the frame)
 	var tell: Dictionary = AimKit.entry(P, "e_tell")
 	var tdir: Vector2 = tell.get("dir", Vector2.ZERO)
 	var fill_mid := float(tell.get("fill", 0.0))
@@ -177,6 +180,10 @@ func _slam_tell() -> void:
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while K.wind > 0.03:
 		ak.step(m, ak.DT)
+		V._process(ak.DT)
+	var fist: Array = V.live.filter(func(e: Dictionary) -> bool: return e["node"] in V.pools.get("fist", []))
+	var slam_in := K.wind       # s from now to the slam frame
+	var from := P.pos           # where he is as it lands (the slam moves him on)
 	T.teleport(P.pos + in_off)
 	T2.teleport(P.pos + out_off)
 	ak.step(m, 0.1)
@@ -185,7 +192,47 @@ func _slam_tell() -> void:
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
 		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
 	)
+	_slam_fist(m, P, K, V, fist, slam_in, from)
 	await ak.done(m)
+
+## The giant fist (HeroVfx "anchor_fist") lands in the hit cone on the slam frame, as wide as the cone there, and a
+## stun in the wind-up takes it away with the move.
+func _slam_fist(m: Match, P: Hunter, K: DredgeKit, V: HeroVfx, fist: Array, slam_in: float, from: Vector3) -> void:
+	var ed := K.e_def()
+	var lands_in := 9.0         # s from the slam frame's step to the fist's landing
+	var off := Vector2.ZERO
+	var width := 0.0
+	if fist.size() == 1:
+		var e: Dictionary = fist[0]
+		var fall := float((e["mat"] as ShaderMaterial).get_shader_parameter("fall"))
+		lands_in = float(e["dur"]) * fall - float(e["t"])
+		var node := e["node"] as Node3D
+		off = Vector2(node.global_position.x - from.x, node.global_position.z - from.z)
+		width = node.global_basis.x.length()
+	var chord := 2.0 * off.length() * sin(deg_to_rad(float(ed["angle"]) * 0.5))    # the cone's width there
+	ok(
+		"anchor fist: lands inside the hit cone on the slam frame, about as wide as the cone there",
+		absf(lands_in - slam_in) < ak.DT * 1.5 and off.length() < float(ed["radius"])
+			and absf(off.angle_to(K.slam_dir)) < 0.05 and width <= chord and width > 0.6 * chord,
+		"fists %d, lands in %.2f s, slam in %.2f s, %.2f m out, %.2f m wide (cone %.2f)"
+			% [fist.size(), lands_in, slam_in, off.length(), width, chord]
+	)
+	V._process(1.0)             # the first fist has rested and faded
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.1)
+	V._process(0.1)
+	var fists: Array = V.pools.get("fist", [])
+	var up := fists.any(func(n: Node3D) -> bool: return n.visible)
+	P.stun_t = 0.6
+	ak.step(m, 0.05)
+	V._process(0.05)
+	var left := fists.any(func(n: Node3D) -> bool: return n.visible)
+	ok(
+		"anchor fist: a stun in the wind-up takes the falling fist away, no slam",
+		up and not left and K.anchors == 1,
+		"fist up %s, after the stun %s (anchors %d)" % [up, left, K.anchors]
+	)
 
 ## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
 ## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.

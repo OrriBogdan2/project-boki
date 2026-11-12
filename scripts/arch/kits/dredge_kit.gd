@@ -12,9 +12,10 @@ extends ArchKit
 ##   the first body (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he
 ##   stands braced while he reels (Grounded, a slow shuffle that swings the body), and only the barge works.
 ##   Rank 3: a foe hit takes half the cooldown off.
-## - E, Anchor Drop: the fist raised through a short wind-up (he can walk slowly), then a giant ghost anchor
-##   slams the cone in front: a long stun. In the air you smash straight down, the anchor lands with you, a ring
-##   at the landing, and the height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
+## - E, Anchor Drop: the fist raised through a short wind-up (he can walk slowly) while a giant gold fist falls
+##   into the cone in front, landing as the slam hits it: a long stun. In the air you smash straight down, the
+##   anchor lands with you, a ring at the landing, and the height adds damage. Rank 3: double damage on a foe over
+##   the abyss and a longer stun.
 ##   Just after it the barge turns badly.
 ## - Dash, Barge: a monster's low lunge the way you move, clawing the ground and hauling himself along; it
 ##   touches nobody. A pounce in the air, further. Rank 3: it resets the gun's bloom.
@@ -537,6 +538,7 @@ func cast_e() -> bool:
 	wind = float(ed["windup"])
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
+	vfx("anchor_fist", ground(h.pos), slam_dir, {"r": float(ed["radius"])})     # falls into the cone, lands on the slam
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
 	return true
 
@@ -547,7 +549,8 @@ func use_e() -> void:
 	super.use_e()
 
 ## The wind-up: the fist raised high while the slam's exact area fills on the ground in front of him (everyone
-## sees it), then the slam on the last frame.
+## sees it) and a giant gold fist falls into it (HeroVfx "anchor_fist", cut by a stun), then the slam on the
+## last frame.
 func _tick_wind(dt: float) -> void:
 	var ed := e_def()
 	wind -= dt
