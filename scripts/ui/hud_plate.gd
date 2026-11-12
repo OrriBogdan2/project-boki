@@ -29,9 +29,10 @@ var _prune_at := 0.0
 var shown := {}
 
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
-## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
+## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET; times the
+## camera's hunter_scale, so the plate clears a Hunter drawn bigger.
 static func plate_offset(h: Hunter) -> float:
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
+	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET)) * (h.m.cam.hunter_scale if h.m and h.m.cam else 1.0)
 
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:

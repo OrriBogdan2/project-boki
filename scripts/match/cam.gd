@@ -70,6 +70,16 @@ var dist_mul := 1.0
 ## style, see Hunter.fit_scale).
 var hunter_scale := 1.0
 
+## How much more ground the view shows now than at the distance the draw, LOD and shadow distances were tuned for
+## (camera.json "reach_ref_m"), never under 1. Those distances scale by it, so nothing pops in at the view's edge.
+func reach() -> float:
+	return maxf(1.0, dist * dist_mul * zoom / float(RULES["reach_ref_m"]))
+
+## The same for a style's own framing, for the distances fixed when the match is built (draw ranges, shadows).
+static func style_reach(id: String) -> float:
+	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	return maxf(1.0, float(st["dist"]) / float(RULES["reach_ref_m"]))
+
 static func _load_rules() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/camera.json"))
 	assert(parsed is Dictionary, "content/rules/camera.json did not parse")
@@ -86,13 +96,10 @@ func use_style(id: String) -> void:
 	hunter_scale = float(st.get("hunter_scale", 1.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
-## Training Grounds. Cheap enough to call every frame. A style that scales Hunters is the match's
-## alone: the home has no match Hunters to scale, so it keeps the Supervive view.
+## Training Grounds. Cheap enough to call every frame.
 func apply_settings() -> void:
 	follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
-	if (STYLES.get(sty, {}) as Dictionary).has("hunter_scale"):
-		sty = "supervive"
 	if sty != style_id:
 		use_style(sty)
 
@@ -103,6 +110,7 @@ static func style_across(id: String) -> float:
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
+	user_zoom = CamWheel.saved()
 	fov = 28.0
 	near = 1.0
 	far = 120.0

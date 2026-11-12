@@ -132,6 +132,15 @@ func _match(main: Node) -> void:
 	ok(is_equal_approx(m.cam.user_zoom, float(r["min"])), "match: stops at the closest (%.2f)" % m.cam.user_zoom)
 	for i in 100: CamWheel.input(m, _wheel(MOUSE_BUTTON_WHEEL_DOWN))
 	ok(is_equal_approx(m.cam.user_zoom, float(r["max"])), "match: stops at the furthest (%.2f)" % m.cam.user_zoom)
+	ok(is_equal_approx(float(Settings.get_v("cam_zoom")), float(r["max"])), "match: the player's zoom is kept in Settings (%.2f)"
+			% float(Settings.get_v("cam_zoom")))
+	var next := CamRig.new()
+	main.add_child(next)
+	ok(is_equal_approx(next.user_zoom, float(r["max"])), "match: the next match's camera starts there (%.2f)" % next.user_zoom)
+	next.queue_free()
+	Settings.set_v("cam_zoom", 9.0, false)
+	ok(is_equal_approx(CamWheel.saved(), float(r["max"])), "match: a saved zoom outside the range is clamped (%.2f)" % CamWheel.saved())
+	Settings.set_v("cam_zoom", float(r["max"]), false)
 	# Ctrl: past the max, then back
 	var P: Hunter = m.player
 	Input.action_press("crouch")

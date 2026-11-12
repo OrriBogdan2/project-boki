@@ -123,7 +123,7 @@ const T := {
 	# range moved up by that 0.46; the camera did not change)
 	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
-	# the source_scale test camera (off by default; bands from camera.json "source")
+	# the default Supervive camera (bands from camera.json "source")
 	"source_view_across_m":    ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
 	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
 	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
@@ -1163,7 +1163,7 @@ func _screen_scale() -> void:
 	var cam: CamRig = m.cam
 	if cam == null or P.model == null:
 		return
-	cam.use_style("supervive")
+	cam.use_style("supervive_close")        # (the older 23 m view, these bands' own; the default view is _source_scale's)
 	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
 	cam.yaw = 0.0; cam.yaw_to = 0.0;
 	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
@@ -1183,7 +1183,7 @@ func _screen_scale() -> void:
 	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
-	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
+	print("MFEEL framing: style supervive_close pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
@@ -1208,11 +1208,11 @@ func _screen_scale() -> void:
 	cam.snap(P.pos)
 	_source_scale(cam, vh, hfov)
 
-## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
-## source's ground across and its Hunter size together, then back to the Supervive style. The MFEEL source
+## The same measures under the default Supervive style (content/rules/camera.json): the source's ground
+## across and its Hunter size together, then it stays the style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
 func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
-	cam.use_style("source_scale")
+	cam.use_style("supervive")
 	P.render(DT, 1.0)      # Hunter.fit_scale picks the style's hunter_scale up
 	cam.snap(P.pos)
 	for i in 120:
