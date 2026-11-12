@@ -31,3 +31,10 @@ hatch shield kept on `x_shield` (`keep`).
     python3 tools/art1/glb_add_clips.py breaker.glb WORK/breaker_gait.glb walk_f,run_f
     blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- breaker.glb WORK/breaker_dir.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55
     python3 tools/art1/glb_add_clips.py breaker.glb WORK/breaker_dir.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br
+
+crouch_bl, crouch_br (2026-11-12, ext/anim-dir-all-1112): the recipe can't step his crouch (14 cm legs under hips 9 cm up:
+`hunter_dir_gait.py ... crouch` plants no sole), so these are crouch_b turned 45 degrees into the move, the chest on the
+source's facing: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/breaker/breaker.glb
+OUT.glb 1 1 "bl~,br~" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_bl,crouch_br`. The same
+turn of crouch_f does not help (it barely plants: its copies carry 0.2 of the speed), so fl and fr still blend f with
+l and r; a hand-made sneak is docs/DEBT.md.

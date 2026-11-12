@@ -8,7 +8,8 @@ extends RefCounted
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
 ## The tree: loco (Blend2: the idle under the rings, a Blend2 of a walk ring and a run ring, each a BlendSpace2D of the
-## directions; every weight rides a spring, so a start, stop or ring change never kinks a foot's path) > air (Blend2
+## directions, in step on one phase; every weight rides a spring, so a start, stop or ring change never kinks a foot's
+## path) > air (Blend2
 ## onto a BlendSpace1D of fall and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep
 ## the legs running) > full (Blend2: moves that own the body). The action, and the upper-body move, are each two
 ## seekable channels crossfaded, so one move hands to the next without a pop (item 32).
@@ -68,6 +69,7 @@ var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var on_run := false          # the run ring is showing, not the walk
 var loco_rate := 1.0         # the loops' playback rate now
+var run_k := 1.0             # the run ring's clock over the walk ring's (its length over the walk's): one phase
 var move_w := 0.0            # how much the rings show over the idle (0..1 of walk_speed)
 var move_v := 0.0            # its rate (1/s)
 var run_w := 0.0             # how much the run ring shows over the walk ring
@@ -161,6 +163,10 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	var lc: Dictionary = d["loco"]
+	if bool(lc.get("in_step", false)):
+		run_k = _length(String(lc["run"]["f"])) / _length(String(lc["walk"]["f"]))
+	_p("run_k/scale", run_k)
 	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
@@ -216,6 +222,9 @@ func _is_loop(nm: String) -> bool:
 		return true
 	return nm in ["fall", "glide", "stun"]
 
+func _length(nm: String) -> float:
+	return lib.get_animation(nm).length
+
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
 	n.animation = nm
@@ -227,9 +236,15 @@ func _build() -> AnimationNodeBlendTree:
 	var in_step := bool(lc.get("in_step", false))     # (a ring on one length and strike key: every loop keeps time)
 	t.add_node("walk", _ring(lc["walk"], in_step))
 	t.add_node("run", _ring(lc["run"], in_step))
-	t.add_node("rings", AnimationNodeBlend2.new())
+	# (in step, both rings run on one phase, the run ring's clock scaled by run_k: a walk-to-run blend mixes feet and
+	# arms at the same point of the stride, and the ring not shown keeps time)
+	var rings := AnimationNodeBlend2.new()
+	rings.sync = in_step
+	t.add_node("rings", rings)
 	t.connect_node("rings", 0, "walk")
-	t.connect_node("rings", 1, "run")
+	t.add_node("run_k", AnimationNodeTimeScale.new())
+	t.connect_node("run_k", 0, "run")
+	t.connect_node("rings", 1, "run_k")
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
 	t.connect_node("loco_rate", 0, "rings")
 	t.add_node("idle", _anim(String(lc["idle"])))
@@ -326,8 +341,11 @@ func _ring(loops: Dictionary, in_step: bool, centre := "") -> AnimationNodeBlend
 ## The crouch layer over stance_w: its own ring (the crouch idle at the centre, the sneak ring), the dip's seek channel.
 func _build_crouch(t: AnimationNodeBlendTree) -> String:
 	var cr: Dictionary = d["crouch"]
-	# (a ring from hunter_dir_gait.py crouch: one length and strike key, in time)
-	t.add_node("crouch_loco", _ring(cr["walk"], cr["walk"].has("fl"), String(cr["idle"])))
+	# (loops of one length keep time: a ring from hunter_dir_gait.py crouch shares a strike key too)
+	var lengths := {}
+	for k in cr["walk"]:
+		lengths[_length(String(cr["walk"][k]))] = true
+	t.add_node("crouch_loco", _ring(cr["walk"], lengths.size() == 1, String(cr["idle"])))
 	t.add_node("crouch_rate", AnimationNodeTimeScale.new())
 	t.connect_node("crouch_rate", 0, "crouch_loco")
 	t.add_node("crouch_anim", _anim(String(cr["in"])))
@@ -596,7 +614,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("rings/blend_amount", clampf(run_w, 0.0, 1.0))
 	_p("walk/blend_position", dir_pos)
 	_p("run/blend_position", dir_pos)
-	var rate := gait.plan(spd, lc, clampf(run_w, 0.0, 1.0))
+	var rate := gait.plan(spd, lc, clampf(run_w, 0.0, 1.0), run_k)
 	loco_rate = lerpf(loco_rate, rate, 1.0 - exp(-dt * RATE_EASE))
 	_p("loco_rate/scale", loco_rate)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0

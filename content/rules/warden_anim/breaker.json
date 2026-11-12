@@ -212,7 +212,9 @@
 			"f": "crouch_f",
 			"b": "crouch_b",
 			"l": "crouch_l",
-			"r": "crouch_r"
+			"r": "crouch_r",
+			"bl": "crouch_bl",
+			"br": "crouch_br"
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
