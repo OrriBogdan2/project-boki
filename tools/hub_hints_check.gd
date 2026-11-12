@@ -89,4 +89,50 @@ func _hub(m: Node) -> void:
 	hub.hhints.tick(100.0)
 	ok(lane.count() == n and seen.is_empty(), "nothing shows over an open panel")
 	hub.panel_open = ""
+	_seed(hub)
 	Content.rules("farm_build")["base_mode"] = false
+
+class FakeHud:
+	var lines: Array = []
+	func tip(text: String) -> void:
+		lines.append(text)
+
+## The Wayseed's two once-per-save hints: the line on a run, then the Waystone's pulse at home.
+func _seed(hub) -> void:
+	var tut: Dictionary = Save.d["tutorial"]
+	var hud := FakeHud.new()
+	tut.erase("wayseed_tip")
+	HubHints.seed_in_bag(hud)
+	var plain := "Wayseed: plant it at the Waystone at home to open a new garden zone."
+	ok(hud.lines == [plain], "the first Wayseed in the pack says what it is")
+	var longest := 0
+	for e in HubHints.rules()["list"]:
+		longest = maxi(longest, String(e["text"]).length())
+	ok(plain.length() <= longest, "no longer than the hub's own hints (%d of %d chars)" % [plain.length(), longest])
+	HubHints.seed_in_bag(hud)
+	ok(hud.lines.size() == 1, "once per save: the second says nothing")
+	tut.erase("wayseed_tip")
+	Settings.v["tips"] = false
+	HubHints.seed_in_bag(hud)
+	ok(hud.lines.size() == 1 and not tut.has("wayseed_tip"), "tips off: nothing, and it stays unseen")
+	Settings.v["tips"] = true
+	var seen: Dictionary = tut["hub_hints"]
+	seen.erase("seed_pulse")
+	Save.d["items"].erase("wayseed_glasswater")
+	var node: Node3D = hub.hway.node
+	hub.hhints = HubHints.new(hub)
+	hub.hhints.tick(100.0)
+	ok(not seen.has("seed_pulse") and node.scale == Vector3.ONE, "no Wayseed held: no pulse")
+	Save.add_item("wayseed_glasswater", 1)
+	hub.hhints = HubHints.new(hub)
+	hub.hhints.tick(float(HubHints.rules()["start_s"]))
+	ok(seen.has("seed_pulse"), "holding one on arrival: the Waystone pulses")
+	hub.hhints.tick(0.1)
+	ok(node.scale != Vector3.ONE and hub.panel_open == "" and not Overlay.is_open(), "it is moving and blocks nothing")
+	hub.hhints.tick(float(HubHints.rules()["pulse_s"]))
+	ok(node.scale == Vector3.ONE, "it settles back to its size")
+	hub.hhints = HubHints.new(hub)
+	hub.hhints.tick(float(HubHints.rules()["start_s"]))
+	hub.hhints.tick(0.1)
+	ok(node.scale == Vector3.ONE, "a later arrival holding one: no second pulse")
+	Save.add_item("wayseed_glasswater", -1)
