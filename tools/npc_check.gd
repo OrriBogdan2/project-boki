@@ -41,6 +41,11 @@ func _model(id: String) -> void:
 	var ab := _world_aabb(n)
 	ok(absf(ab.size.y - n.height()) < n.height() * 0.06 and absf(ab.position.y) < 0.08,
 			"%s: %.2f m tall on the ground (%.2f m, feet at %.2f)" % [id, n.height(), ab.size.y, ab.position.y])
+	var sk := n.find_child("Skeleton3D", true, false) as Skeleton3D      # (the skinned body draws at the bones' size, not the rest mesh's)
+	var top := 0.0
+	for b in sk.get_bone_count():
+		top = maxf(top, (sk.global_transform * sk.get_bone_global_pose(b)).origin.y - n.global_position.y)
+	ok(top > n.height() * 0.7 and top < n.height() * 1.1, "%s: its skeleton stands %.2f m, not 100x (the glb's armature scale)" % [id, top])
 	ok(n.tag.position.y > ab.end.y and n.tag.text != "", "%s: its name over its head" % id)
 	for pose in clips:
 		n.pose = pose

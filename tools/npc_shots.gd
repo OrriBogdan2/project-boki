@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	main.get_tree().root.size = Vector2i(1280, 720)
 	await _pell()
 	await _hob()
+	await _lineup()
 	print("NPCSHOTS %d frames in %s" % [n, dir])
 	main.get_tree().quit(0)
 
@@ -73,6 +74,43 @@ func _hob() -> void:
 		if talk_at > 0 and i - talk_at > 55:
 			break
 		await _frame()
+
+## Both NPCs side by side on a lawn: a close view, then the game camera's distance (the clip's last frames), in a
+## SubViewport world of their own (so no scene camera or splash is in the way).
+func _lineup() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 1000
+	main.add_child(layer)
+	var vp := SubViewport.new()
+	vp.size = Vector2i(1280, 720)
+	vp.own_world_3d = true
+	vp.msaa_3d = Viewport.MSAA_4X
+	var box := SubViewportContainer.new()
+	box.add_child(vp)
+	layer.add_child(box)
+	var env := WorldEnvironment.new()
+	env.environment = Environment.new()
+	env.environment.background_mode = Environment.BG_COLOR
+	env.environment.background_color = Color(0.35, 0.55, 0.3)
+	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.environment.ambient_light_color = Color("8a93b8")
+	vp.add_child(env)
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-55, 30, 0)
+	vp.add_child(sun)
+	for row in [["hob", -1.2], ["pell", 1.2]]:
+		var npc := NpcModel.new(row[0], "")
+		npc.position.x = row[1]
+		vp.add_child(npc)
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.current = true
+	for v in [[Vector3(0, 1.0, -5.0), Vector3(0, 0.9, 0)], [Vector3(0, 9.0, -8.0), Vector3.ZERO]]:
+		cam.position = v[0]
+		cam.look_at(v[1])
+		for i in 8:
+			await _frame()
+	layer.queue_free()
 
 ## The GPU workers (jobq) pass only the arguments after "--", so this runs itself again as a child Godot with an
 ## even 15 fps clock (the clips play on the frame's delta) and a 1280x720 window (as gameplay_media does).
