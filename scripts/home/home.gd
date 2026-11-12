@@ -186,6 +186,9 @@ func _ready() -> void:
 		hshow = ShowRing.new(self)
 		# in this order: Tumble's ring needs the stump placed
 		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish]
+	elif _visiting() and not visit.get("ghosts", {}).is_empty():
+		hrace = BaseRace.new(self)      # their race post: race the friend's ghost laps (RaceGhost)
+		games = [hrace]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -3951,6 +3954,8 @@ func _use_visiting(it: Dictionary) -> void:
 			_toast("%s will remember your visit" % rec["name"])
 		"house":
 			_open_gift_panel(owner_name)
+		"race":
+			hrace.use()
 		"portal", "ferry":
 			Game.goto("home")
 		_:

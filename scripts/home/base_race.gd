@@ -14,6 +14,7 @@ extends RefCounted
 ## Tuning: content/rules/base_race.json. Run is the race itself (no nodes), so --race-check
 ## (tools/race_check.gd) runs it headless.
 ##
+## Every lap is taped: the best one on each course is a ghost visiting friends can race (RaceGhost).
 ## On the save: rec["bonds"] = {uid: -1..1} (missing = 0, so old saves need no migration).
 
 const POST_OFF := Vector3(2.2, 0, 0.4)      # m from the Training post to the race post
@@ -120,6 +121,7 @@ class Run:
 	var cheer_mult := 1.0           # your last cheer, for the backed Boki's next stretch
 	var bumped := {}                # "i-j-stretch": rivals already bumped there
 	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
+	var tape := RaceGhost.Tape.new()  # each runner's distance every RaceGhost.TICK, for ghost laps
 
 	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
 		R = BaseRace.rules()
@@ -197,6 +199,7 @@ class Run:
 			if _running(i):
 				_advance(i, float(pulled[i]), dt)
 		_bumps()
+		tape.take(self, dt)
 
 	func _running(i: int) -> bool:
 		return float(done_t[i]) < 0.0
@@ -284,10 +287,12 @@ var card: Control = null
 var card_t := 0.0
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
+var ghosts: RaceGhost          # best laps; on a visit, racing the friend's ghost
 
 func _init(home) -> void:
 	h = home
 	relay = BaseRelay.new(self)
+	ghosts = RaceGhost.new(self)
 
 ## The post and loop beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -301,7 +306,7 @@ func place() -> void:
 		return
 	var at: Vector3 = h.YARD_AT + POST_OFF
 	if h.zone == "":       # with the hub on, the wall hangs by its games board (HubWaystone)
-		wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, Save.d.get("showcase", []))
+		wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, h._d().get("showcase", []))
 		h.add_child(wall)
 	post = Node3D.new()
 	post.name = "RacePost"
@@ -325,7 +330,8 @@ func place() -> void:
 		strip.material_override = mat(STRETCH_COL[String(st[i]["kind"])])
 		strip.position = (a + b) * 0.5 - post.position + Vector3(0, ground(a) + 0.02, 0)
 		post.add_child(strip)
-	relay.place()
+	if not h._visiting():
+		relay.place()
 
 func _post_model() -> void:
 	var pole := MeshInstance3D.new()
@@ -374,6 +380,8 @@ func find(p2: Vector2) -> Dictionary:
 	return {"kind": "race"}
 
 func label() -> String:
+	if h._visiting():
+		return ghosts.label()
 	var fmt := String(tweak("dash").get("name", ""))
 	var back := "back %s" % Save.active_kin().get("name", "your partner")
 	return "Start a Dash, %s (%s)" % [fmt, back] if fmt else "Start a Dash (%s)" % back
@@ -394,11 +402,14 @@ func entrants() -> Array:
 	return out.slice(0, 4)
 
 func use() -> void:
+	if h._visiting():
+		ghosts.start()
+		return
 	var ks := entrants()
 	if ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
 		return
-	_begin(ks)
+	begin(ks)
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
@@ -413,9 +424,9 @@ func solo(rec: Dictionary) -> void:
 	else:
 		h._care_start(k)
 		solo_rec = rec
-		_begin([k])
+		begin([k])
 
-func _begin(ks: Array) -> void:
+func begin(ks: Array) -> void:
 	runners = ks
 	cheers = []
 	var recs: Array = []
@@ -471,6 +482,8 @@ func tick(d: float) -> void:
 	run.step(d)
 	bar.step(d)
 	_place_runners()
+	if ghosts.play != null:
+		ghosts.tick(run)
 	_hear_laps()
 	if run.over():
 		_end(true)
@@ -523,16 +536,17 @@ func _lift(kind: String, f: float) -> float:
 	return 0.0
 
 func _end(finished: bool) -> void:
-	var res := {}
-	if finished and solo_rec.is_empty():
-		res = settle(run)
 	for k in runners:
 		k["busy"] = false
 		k["t"] = 1.5
 	bar.close()
-	if finished:
+	if ghosts.play != null:
+		ghosts.finish(run, finished)
+	elif finished:
+		var best := RaceGhost.keep_best(run)
 		GardenFirstDay.mark("race", h)
 		if solo_rec.is_empty():
+			var res := settle(run)
 			_race_card(res, pin(res["win"], "dash"))
 			GardenSfx.result(h, res)
 			h._emote(h._kin_entry(res["win"]), "♥", true)
@@ -540,6 +554,9 @@ func _end(finished: bool) -> void:
 		else:
 			_solo_card(settle_solo(solo_rec, _grades()))
 		Save.save_game()
+		if not best.is_empty():
+			h._toast("%s set the best lap on this course, %.1f s: visiting friends can race its ghost" % [
+				best["boki"], best["t"]])
 	run = null
 	runners = []
 	solo_rec = {}

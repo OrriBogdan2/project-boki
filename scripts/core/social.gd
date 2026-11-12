@@ -178,7 +178,7 @@ static func profile_doc() -> Dictionary:
 		"extracts": int(Save.d.get("extracts", 0)), "matches": int(Save.d.get("matches", 0)),
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
 		"decor": Save.d.get("decor", {}).get("house", []),
-		"showcase": Save.d.get("showcase", []),
+		"showcase": Save.d.get("showcase", []), "ghosts": Save.d.get("ghosts", {}),
 	}
 	d.merge(VisitZones.doc())
 	return d
@@ -239,6 +239,10 @@ func collect_gifts(cb: Callable) -> void:
 					pets[pkey] = today
 					Save.remember(k, "visited", "got a scratch from %s, who came to visit" % who, 1.0)
 					lines.append("%s visited and petted %s." % [who, k["name"]])
+				"race":
+					var line := RaceGhost.take_gift(g, who)
+					if line != "":
+						lines.append(line)
 		# forget old pet days so the save doesn't grow forever
 		for pk in pets.keys():
 			if today - int(pets[pk]) > 2: pets.erase(pk)
@@ -675,7 +679,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"cls": cl if Data.CLASSES.has(cl) else "medium", "buildings": pick.call(d.get("buildings"), Data.BUILDINGS),
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
-		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
+		"showcase": BaseShowcase.clean(d.get("showcase")),
+		"ghosts": RaceGhost.clean(d.get("ghosts"))}.merged(VisitZones.clean(d))
 
 static func _clean_decor(src) -> Array:
 	var out: Array = []
