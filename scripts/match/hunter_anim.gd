@@ -1507,7 +1507,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
 	else:
-		ap += aim_pitch * (1.0 - AimPitch.SPINE) * 0.91     # (a melee hold: the arms take their share on the aim node)
+		ap += aim_pitch * (1.0 - AimPitch.SPINE)    # a melee hold: the arms take their share on the aim node
 	# the Warden's signature carry while standing (it comes up to the aim the moment they fire)
 	var carried := ws.carry(Transform3D(gbas, gpos))
 	gbas = carried.basis
