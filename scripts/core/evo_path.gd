@@ -137,13 +137,7 @@ static func _care(rec: Dictionary, e: Dictionary) -> int:
 	for t in e["traits"]:
 		if float(rec.get("traits", {}).get(t, 0.5)) >= float(rules()["trait_at"]):
 			n = int(rules()["pips"]["care_trait"])
-	var top := ""
-	var most := 0
-	var use: Dictionary = rec.get("toy_use", {})
-	for toy in use:
-		if int(use[toy]) > most:
-			most = int(use[toy])
-			top = toy
+	var top := FavToy.of(rec)      # the toy it plays most (its habit)
 	if top != "" and String(HomeToys.rules()["toys"].get(top, {}).get("stat", "")) == String(e["stat"]):
 		n += int(rules()["pips"]["care_toy"])
 	return n

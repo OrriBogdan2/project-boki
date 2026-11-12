@@ -12,10 +12,10 @@
 	},
 	"default_food": "kibble",
 	"food_by_element": {
-		"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew",
-		"stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap",
-		"lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint",
-		"spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"
+		"ember": "emberberry", "frost": "frostdrop", "bloom": "puffcorn", "storm": "tonicbrew",
+		"stone": "pebblenut", "gravity": "ironcrisp", "titan": "scalepepper", "shadow": "duskplum",
+		"lunar": "mindmint", "venom": "pricklepear", "echo": "chimebun", "prism": "geodecandy",
+		"spore": "glowcap", "swarm": "sapjelly", "tempest": "tonicbrew"
 	},
 	"_units": "pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24)."
 }

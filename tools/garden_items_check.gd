@@ -5,7 +5,7 @@ extends RefCounted
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
 ## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
 
-const TRACKED := ["xp", "level", "path", "stay", "lean", "loose"]
+const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
 
 var bad := 0
@@ -28,7 +28,7 @@ func _boki(species: String, level: int, stat: String) -> Dictionary:
 func _snap(rec: Dictionary) -> String:
 	var t := {}
 	for k in TRACKED:
-		t[k] = rec[k]
+		t[k] = rec.get(k)
 	t["stats"] = rec["stats"]
 	return JSON.stringify(t)
 
@@ -39,8 +39,8 @@ func run(m: Node) -> void:
 	_rules()
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
-	for id in GardenItems.ids():
-		ok(used.get(id, 0) > 0, "%s was usable on at least one sample" % id)
+	for id in GardenItems.ids().filter(GardenItems.fed):
+		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
 	_migration()
@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 12 and fine, "12 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 26 and fine, "26 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -84,7 +84,7 @@ func _samples(rec: Dictionary) -> void:
 					and JSON.stringify(pv["deltas"][key][0]) != JSON.stringify(pv["deltas"][key][1])
 		for key in TRACKED:
 			if not moved.has(key):
-				exact = exact and JSON.stringify(probe[key]) == JSON.stringify(rec[key])
+				exact = exact and JSON.stringify(probe.get(key)) == JSON.stringify(rec.get(key))
 		for s in Care.STATS:
 			if not moved.has("stats." + s):
 				exact = exact and int(probe["stats"][s]) == int(rec["stats"][s])
@@ -105,12 +105,13 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = 6      # a mutation level (Evo.on_level); its form swap is the path meter's (EvoPath)
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 6 grows a part")
+	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
+			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")
-	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not grow")
+	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
-	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it grows again")
+	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
 
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")

@@ -58,8 +58,10 @@ static func eat(rec: Dictionary, f: String) -> String:
 	if key == "":
 		return ""
 	var ln: Dictionary = rec.get_or_add("lean", {})
+	var held: Dictionary = rec.get("hold", {})      # a sweet's lean: other meals don't fade it (GardenItems)
 	for other in ln:
-		ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
+		if not held.has(other):
+			ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
 	ln[key] = minf(LEAN_FULL, float(ln.get(key, 0.0)) + FOOD_AFF + LEAN_FADE)
 	return key
 
@@ -269,10 +271,10 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 	var a: Dictionary = AFF[ev["aff"]]
 	match String(ev["kind"]):
 		"form":
-			var out := "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
 			match String(ev.get("how", "level")):
-				"item": out = "%s became a %s! The %s did it." % [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
-				"trade": out = "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
+				"item": return "%s became a %s! The %s did it." % [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
+				"trade": return "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
+			var out := "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
 			if ev.has("lean_part"):
 				var lean_name := String(Lean.face(lean(rec)[0])["name"]).to_lower()
 				out += " Its %s meals grew %s." % [lean_name, PART_NAMES[ev["lean_part"]]]

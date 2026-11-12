@@ -43,19 +43,22 @@ func show_result(r: Dictionary) -> void:
 			sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 200.0)
 	v.minimum_size_changed.connect(func(): fit.call_deferred())
 	sc.tree_entered.connect(func(): fit.call_deferred())
-	# header: one tag, and the outcome with the Hunter's name in it
+	# header: one tag, the outcome with the Hunter's name in it, then how you left or where your squad placed
 	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
 	var hunter := String(Save.d.get("name", "Hunter")).substr(0, 16)
 	var head := UI.vbox(6)
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
-	var hows := {"skiff": "Flew out on the skiff from %s. ", "hatch": "Slipped out through a rift hatch. ",
-		"uplink": "Rode the lift out of %s. "}
-	var how_line := String(hows.get(String(r.get("how", "")), ""))
-	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
-	var how := (how_line if won else "Everything you carried stays out in the islands.").strip_edges()
+	var how := (WaysResult.how_line(r) + ("" if won else "Everything you carried stays out in the islands.")).strip_edges()
 	if how != "":
 		head.add_child(UI.para(how, UI.T_BODY, UI.MUTED))
+	if int(s.get("place_gems", 0)) > 0:
+		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
+	if WaysResult.hid_line(r) != "":
+		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
+	if won and s.has("heart"):
+		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
+		head.add_child(UI.para(WaysResult.other_line(String(r.get("how", ""))), UI.T_BODY, UI.MUTED))
 	v.add_child(head)
 	# the three numbers that matter, big and counting up, on one strip; the rest behind Details
 	var secs := int(r.get("time", 0))
@@ -102,7 +105,7 @@ func show_result(r: Dictionary) -> void:
 			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
 			if not to_box.is_empty():
 				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
-					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm().size(), KinBox.farm_cap()]], Color("cdb8ff")))
+					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
@@ -137,16 +140,7 @@ func show_result(r: Dictionary) -> void:
 		var lv := UI.vbox(6); lc.add_child(lv)
 		lv.add_child(UI.section("Left behind", Color("ffb0a0")))
 		for ln in lost_news:
-			var kk: Dictionary = ln["kin"]
-			var txt := ""
-			var col := UI.BAD
-			match String(ln["fate"]):
-				"squad": txt = "%s was carried home by your squadmate %s." % [kk["name"], ln["holder"]]; col = UI.GOOD
-				"home": txt = "%s found its own way home. It trusts you that much." % kk["name"]; col = UI.GOOD
-				"rival": txt = "%s was taken home by %s. Make them an offer at the Black Market, or find them out there and take it back." % [kk["name"], ln["holder"]]
-				_: txt = "Nobody came for %s. It's waiting at the Black Market on your farm." % kk["name"]; col = Color("ffd58a")
-			var l := UI.label(txt, 15, col); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			lv.add_child(l)
+			lv.add_child(UI.label(WaysResult.boki_line(ln), 15, UI.BAD if String(ln["fate"]) == "rival" else UI.GOOD))
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		det.add_child(_note(String(nw), Color("ffd58a")))
