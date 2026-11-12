@@ -22,6 +22,7 @@ var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
 const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
+const HOLD_POSE_T := 0.1       # s a key is down before a hold clip shows (a tap of up to 4 steps never shows one)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
 var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
@@ -814,6 +815,11 @@ static func apply_net_move(h: Hunter, it: Array) -> void:
 func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
+
+## A hold clip: it starts HOLD_POSE_T into the hold (key down `t` s), never on the press, and not again while it plays.
+func play_hold(move: String, t: float) -> void:
+	if t >= HOLD_POSE_T and anim_id != move:
+		play(move)
 
 ## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
 func own_dash_trail() -> bool: return false

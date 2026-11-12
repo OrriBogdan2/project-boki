@@ -348,13 +348,13 @@ func lmb_override(held: bool, dt: float) -> bool:
 		hose_paused = false
 		play("as_lance")        # out of the dash, hand already on the aim: back at once
 	if not was_held:
-		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		vfx("lance_pilot")              # the pilot flares cyan before the roar
 	was_held = true
 	h.idle_fire = 0.0
 	spool += dt
 	h.mel_hold = minf(spool, float(ld["spool"]))
+	play_hold("as_lance", spool)
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
 	HeroVfx.of(m).hold(h, "lance")
@@ -428,12 +428,12 @@ func _stream_looks() -> void:
 # ------------------------------------------------------------------ RMB: Cinder Shot
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
 ## drawn back.
-func rmb_hold_tick(_t: float) -> void:
+func rmb_hold_tick(t: float) -> void:
 	if KinMerge.active(h) or not rmb_ready():
 		return
 	if not aiming:
 		aiming = true
-		if not jet.running(): play("as_aim")       # (flying, the flight pose stays)
+	if not jet.running(): play_hold("as_aim", t)       # (flying, the flight pose stays)
 	HeroVfx.of(m).hold(h, "shot_aim")
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)

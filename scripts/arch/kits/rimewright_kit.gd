@@ -561,8 +561,8 @@ func rmb_hold_tick(t: float) -> void:
 				"col": Color("dffcff")})
 	if not spear_aim:
 		spear_aim = true
-		play("tm_spear_aim")
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
+	play_hold("tm_spear_aim", t)
 	HeroVfx.of(m).hold(h, "spear_aim")
 	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), -0.25)
 
