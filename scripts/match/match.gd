@@ -1381,11 +1381,7 @@ func _update_gear_fx(dt: float) -> void:
 				continue
 			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
 				gp["cd"][h.nid] = time + 1.0
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				h.vel = Vector3(d.x * maxf(hv.length(), 6.0), 17.0, d.y * maxf(hv.length(), 6.0))
-				h.grounded = false
-				h.glide_cd = 0.0
+				PadFlight.launch_up(h)
 				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
 				sfx("jump", h.pos, -2.0, 0.8)
 	for sm in smokes.duplicate():
@@ -1578,11 +1574,11 @@ func local_player() -> Hunter:
 	return player
 
 ## Where the mouse points, at the right height: on a foe under the cursor at that foe's height,
-## otherwise on the ground under the cursor. Aiming on your own height made shots at someone a
-## terrace above (or below) drift sideways past them, because the camera looks down at an angle.
-func _mouse_aim() -> Vector3:
+## otherwise on the first ground the cursor's ray meets (AimMode.ray_ground; your own height over the
+## abyss). Aiming on your own height made shots at someone a terrace above (or below) drift sideways past
+## them, because the camera looks down at an angle.
+func _mouse_aim(mp: Vector2) -> Vector3:
 	var base_y := player.pos.y + 0.95
-	var mp := get_viewport().get_mouse_position()
 	var best: Ent = null
 	var bd := 52.0
 	for e in foes_of(player.team):
@@ -1596,18 +1592,14 @@ func _mouse_aim() -> Vector3:
 		if d < bd:
 			bd = d; best = e
 	if best:
-		var q := cam.mouse_on_plane(best.hit_y() + 0.95)
+		var q := cam.screen_on_plane(mp, best.hit_y() + 0.95)
 		aim_y = best.hit_y()
 		return Vector3(q.x, base_y, q.z)
-	aim_y = player.pos.y
-	var p := cam.mouse_on_plane(base_y)
-	for _i in 2:
-		var g := world.ground_at(p.x, p.z)
-		if g <= World.VOID + 1.0 or absf(g - player.pos.y) > World.LEVEL * 3.0:
-			break
-		p = cam.mouse_on_plane(g + 0.95)
-		aim_y = g
-	return Vector3(p.x, base_y, p.z)
+	var g := AimMode.ray_ground(world, [cam.project_ray_origin(mp), cam.project_ray_normal(mp)], player.pos.y)
+	aim_y = g.y if g != Vector3.INF else player.pos.y
+	if g == Vector3.INF:
+		g = cam.screen_on_plane(mp, base_y)
+	return Vector3(g.x, base_y, g.z)
 
 ## How much grip the ground has here (ice patches in a frost region make it slippery).
 func ground_grip(p: Vector3) -> float:
@@ -1782,12 +1774,11 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		(credit as Hunter).ak.on_deal(target, d, o)
 	if target is Hunter and (target as Hunter).ak and not target.remote:
 		(target as Hunter).ak.on_take(by, d, o)
-	# impact: hitstop and shake by tier (docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5), from what the hit did
+	# impact: hitstop and shake by the hit's weight (ImpactWeight, docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5)
 	if src != "burn":
-		var tier := Feel.hitstop(self, by, target, d, o)
+		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
-		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
@@ -1806,7 +1797,7 @@ func cancel_abilities(h: Hunter) -> void:
 func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
-	cancel_abilities(h)
+	KnockMoment.cut(self, h)      # every held or buffered input stops on this step
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
@@ -1857,7 +1848,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	_check_team(h.team)
 
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, t)
+	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
 
 ## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
 func _armor_up(h: Hunter) -> void:
@@ -2473,7 +2464,6 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
-		hud.hitmarker(true, true)
 	elif h == player and hud:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
@@ -2619,7 +2609,7 @@ func _update_pickups(dt: float) -> void:
 			if dk > World.VOID + 1.0 and (g < dk or g > pos.y + 0.9): g = dk
 		var v: Vector3 = p["vel"]
 		var grabbed := false
-		if p["t"] > 0.5:
+		if p["t"] > PickupReach.settle():
 			for h in hunters:
 				if h.out or h.extracted or h.downed or h.remote:
 					continue
@@ -2627,11 +2617,9 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
-				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
-				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0 and UtilityBelt.can_take(h, String(p["kind"])):
-					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
-					v = dir.normalized() * (6.0 + (2.2 - d) * 6.0)
-					if dir.length() < 0.6:
+				if PickupReach.near(self, h, pos, "walk") and UtilityBelt.can_take(h, String(p["kind"])):
+					v = PickupReach.pull(h, pos)
+					if PickupReach.grabbed(h, pos):
 						_collect(h, p)
 						grabbed = true
 					break
@@ -2692,6 +2680,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
+	var from := ShotOrigin.hit_from(by, at, v2, extra)      # the hit sweep starts at the body; `at` is the muzzle
+	life += ShotOrigin.extra_life(at, from, v2)
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
 		var src: Hunter = by as Hunter if by is Hunter else ((by as Kin).owner_h as Hunter if by is Kin and (by as Kin).owner_h else null)
 		if src and src.inp.has("aim_y"):
@@ -2700,21 +2690,22 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 				var aimp: Vector3 = src.inp["aim"]
 				extra = extra.duplicate()
 				extra["dy"] = dyv
-				extra["dyd"] = maxf(1.0, Vector2(aimp.x - at.x, aimp.z - at.z).length())
+				extra["dyd"] = maxf(1.0, Vector2(aimp.x - from.x, aimp.z - from.z).length())
 				extra["y0"] = at.y
 				extra["gmax"] = maxf(src.pos.y, float(src.inp["aim_y"]))
 	var team := by.team
 	if duel and not extra.get("cos", false):
 		duel.note_shot(by)
 	shot_n += 1
-	var sd := {"vr": vr, "sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
+	var sd := {"vr": vr, "sid": shot_n, "pos": from, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": from, "start": from}
+	if from != at: sd["muzzle"] = at
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
-		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
+		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
 	if by is Hunter and not extra.get("melee", false):
 		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
@@ -2777,7 +2768,7 @@ func _update_shots(dt: float) -> void:
 					p = back
 					s["pos"] = p
 					hit = true; break
-				_shot_end(s, p, null, "wall")
+				_shot_end(s, p - step / n, null, "wall")      # at the face, so the miss puff is in view
 				hit = true; break
 			var vr: String = verbs.shot_check(s, p) if verbs else ""
 			if vr == "end":
@@ -3152,11 +3143,16 @@ func _process(delta: float) -> void:
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
+		if player and player.ak and player.inp["fire"] and Input.is_action_just_pressed("fire"):
+			player.ak.flow.press_frozen()      # no step sees this frame: the tap goes when the freeze ends
 		return
 	var d := DashPace.frame_dt(self, minf(delta, 0.1))
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
+	_vprof("pre")
+	MatchCam.update(self, delta, acc / DT)      # before the cursor is read: shots leave on the drawn reticle
+	_vprof("camera")
 	_gather_input()
 	acc += d
 	var steps := 0
@@ -3209,86 +3205,13 @@ func _process(delta: float) -> void:
 			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 		if s["node"]:
 			var mi: MeshInstance3D = s["node"]
-			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
+			mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 			var v: Vector2 = s["vel"]
 			if v.length() > 1.0:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
 				var r: float = s.get("vr", s["r"])
 				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
 	_vprof("verbs_shots")
-	cam.follow_mode = String(Settings.get_v("cam_follow"))
-	var sty := String(Settings.get_v("cam_style"))
-	if sty != cam_style:
-		cam_style = sty
-		cam.use_style(sty)
-	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
-	if player and player.riding:
-		# aboard the skyship: a low view from just behind and above it, looking ahead along its
-		# course over the islands, like riding the bus in a battle royale
-		var ps := ship_of(player)
-		var sd: Vector3 = ps.get("dir", Vector3.FORWARD)
-		cam.yaw_to = atan2(-sd.x, -sd.z)
-		cam.chase_to = 1.0
-		cam.top_to = 0.0
-		cam.zoom_to = RIDE_CAM_DIST / cam.dist
-		if time < 0.5:
-			# boarding: start already behind the ship rather than swinging through it
-			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
-		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
-		var fp := ship_pos_of(ps) + sd * 3.0
-		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
-	elif player and DropLaunch.locked(player):
-		# the launch: chasing the squad down its heading, the ship receding overhead (item 163)
-		var hd := Vector2(player.vel.x, player.vel.z)
-		if hd.length() > 0.5:
-			cam.yaw_to = atan2(-hd.x, -hd.y)
-		cam.chase_to = 1.0
-		cam.top_to = 0.0
-		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
-		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
-	elif player and not player.out and not player.downed:
-		cam.chase_to = 0.0
-		cam.yaw_to = 0.0
-		if player.dropping:
-			# the drop: looking down over your shoulder, pulled back while you're high up
-			var gy: float = world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else 0.0
-			var hk := clampf((player.pos.y - gy) / SHIP_Y, 0.0, 1.0)
-			cam.zoom_to = lerpf(1.05, 1.7, hk)
-			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
-		else:
-			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
-			# the camera only eases back while gliding, so jumps and falls never change the framing
-			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
-			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
-			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
-			# high up, the camera pulls back with your altitude so you can still read the ground
-			var alt := player_altitude()
-			if alt > 4.0:
-				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
-			cam.top_to = 0.0
-		cam.lead_vel = cam_lead_vel()
-		cam.follow(player.render_pos(alpha), delta, not player.dropping)
-	elif player and (player.downed or player.out):
-		# death camera: frame you and whoever got you
-		var foc := player.prev.lerp(player.pos, alpha)
-		if player.pos.y < -2.0:
-			foc = cam.focus
-		var killer: Ent = player.last_hit_by
-		if killer is Kin and killer.owner_h: killer = killer.owner_h
-		if killer is Hunter and killer != player and not killer.out and killer.flat_dist(player) < 16.0:
-			foc = foc.lerp(killer.pos, 0.5 if player.downed else 0.85)
-		cam.zoom_to = 0.8
-		# dead and waiting on your team: after a moment, watch a teammate who's still in it
-		var mate := spectating()
-		if mate:
-			foc = mate.prev.lerp(mate.pos, alpha)
-			cam.zoom_to = 1.0
-		cam.follow(foc, delta, false)
-	elif player:
-		cam.follow(cam.focus, delta, false)
-	_vprof("camera")
 	_update_aim(alpha)
 	_vprof("aim")
 	for pd in world.pads:
@@ -3333,11 +3256,11 @@ func _gather_input() -> void:
 			if d < bd: bd = d; best = sp
 		if best != Vector3.INF and bd > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
-	player.inp["aim"] = _mouse_aim()
+	player.inp["aim"] = _mouse_aim(get_viewport().get_mouse_position())
 	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
-	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
+	var over_ui: bool = (hud != null and hud.mouse_on_ui() or PanelInput.panel_up(hud)) and player.draw_t < 0.0
 	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
 	if paused and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
@@ -3385,7 +3308,7 @@ func _gather_input() -> void:
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
 			aim_hold = ""          # right click while aiming something else cancels the cast
 			continue
-		if slot_of.has(a[0]) and player and Input.is_action_just_pressed(a[0]) and not paused:
+		if slot_of.has(a[0]) and player and PanelInput.pressed(self, a[0]):
 			var sl: String = slot_of[a[0]]
 			if Input.is_key_pressed(KEY_ALT) and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
 				player.level_slot(sl)       # Alt + key: put a point into it
@@ -3402,16 +3325,16 @@ func _gather_input() -> void:
 			aimable = false       # a self-centred E goes off on the press (no cursor preview)
 		if aimable:
 			# hold to see where it will land, let go to cast it
-			if Input.is_action_just_pressed(a[0]) and not paused:
+			if PanelInput.pressed(self, a[0]):
 				aim_hold = a[0]
 			if aim_hold == a[0] and not Input.is_action_pressed(a[0]):
 				aim_hold = ""
 				pending_input[a[1]] = true
 			continue
-		if Input.is_action_just_pressed(a[0]):
+		if PanelInput.pressed(self, a[0]):
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
-		HunterKeys.ult_pressed(player)
+		HunterKeys.press(player)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
@@ -4106,11 +4029,12 @@ func _update_pads(dt: float) -> void:
 	for pd in world.pads:
 		pd["cd"] = maxf(0.0, pd["cd"] - dt)
 		for h in hunters:
-			if h.out or h.downed or h.fly_t > 0.0 or h.pad.size() > 0 or h.remote or h.vel.y > 0.5:
+			var in_flight: bool = h.fly_t > 0.0 or h.pad.size() > 0 or h.pad_flight.size() > 0 or h.vel.y > 0.5
+			if h.out or h.downed or h.remote or in_flight:
 				continue
 			var p: Vector3 = pd["pos"]
 			if Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 0.8 and h.pos.y - p.y < 0.4 and h.pos.y - p.y > -0.3:
-				h.pad_launch(pd["land"])
+				PadFlight.launch_to(h, pd["land"])
 				sfx("jump", h.pos, -2.0, 0.8)
 				fx.burst(h.pos + Vector3(0, 0.3, 0), Color("8fe3c8"), 16, 5.0, 0.5, 2.0)
 		for k in kins:
@@ -4276,15 +4200,9 @@ func _update_interact(dt: float) -> void:
 					break
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
-			var bd := 1.5
-			for wp in wpicks:
-				var d: float = h.flat_dist(wp["pos"])
-				if d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("gear"):
-					bd = d
-					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
-				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("val") and h == player:
-					bd = d
-					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
+			var wp := PickupReach.under_cursor(self, h)
+			if not wp.is_empty():
+				best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
 		# 4. open a chest
 		if best.is_empty():
 			for c in chests:
@@ -5143,7 +5061,7 @@ func net_send_hit(target: Ent, dmg: float, by: Ent, o: Dictionary) -> bool:
 		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", "")), Displace.hit_extra(o)])
 	return true
 
-const OVERHEAT_BIT := 1 << 19      # hunter flags: the glider is burning (the hold kind uses bits 15-18)
+const OVERHEAT_BIT := 1 << 24      # hunter flags: the glider overheated (hold kind bits 15-18, glider heat 19-23)
 func _flags(h: Hunter) -> int:
 	var f := 0
 	if h.downed: f |= 1
@@ -5160,6 +5078,8 @@ func _flags(h: Hunter) -> int:
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
+	if h.gliding: f |= GliderHeat.net_level(h) << 19      # the glider's heat, 4 bits, and whether it burns
+	if GliderHeat.burning(h): f |= 1 << 23
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
@@ -5314,6 +5234,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.dropping = f & 512 != 0
 			h.riding = f & 1024 != 0
 			h.diving = f & 16384 != 0
+			h.glide_fuel = GliderHeat.fuel_of((f >> 19) & 15) if h.gliding else 1.0
+			h.below_lip = f & (1 << 23) != 0
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
@@ -5394,10 +5316,6 @@ func _net_ev(x, from: String) -> void:
 		"kst":
 			# a kit status (Grounded, Blight, Shred) landed on a body: its own game runs the rule
 			KitStatus.from_net(self, x)
-		"hex":
-			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
-			who = ents_by_id.get(String(x[1]), null)
-			if who is Hunter: Hex.apply(who as Hunter, float(x[2]), false)
 		"s":
 			var col := Color.html(String(x[8]))
 			var ex := {"cos": true}
