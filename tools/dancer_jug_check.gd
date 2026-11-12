@@ -58,7 +58,7 @@ func thief(a) -> void:
 	A.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
 	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
-			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
+			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.pale_col))
 	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
 	var spot := home + Vector3(-4.0, 0, -3.0)
 	A.aim_at(P, spot)
@@ -106,8 +106,10 @@ func thief(a) -> void:
 	A.ok("dancer small mechanics: the empowered bolt flies 12% further (9.5m); firing it ends the speed",
 			K.last_bolt_emp and absf(ed - rng * 1.12) < 0.9 and haste_after <= 0.0,
 			"%.1f m haste %.2f" % [ed, haste_after])
-	A.ok("dancer LMB: each bolt has its own pooled look",
-			DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
+	var played: Dictionary = HeroVfx.of(m).plays
+	A.ok("dancer LMB: each bolt has its own pooled skin, its throw, trail and fizzle from her data",
+			DJFx.of(m).free_pools.has("ride_chakram") and played.has("bolt_throw") and played.has("bolt_trail")
+			and played.has("bolt_fizzle"), str(played.keys()))
 	# Marks: +10% per Mark on bolts only, no cap
 	A.fresh(T)
 	K.mark_gap = {}
@@ -159,23 +161,24 @@ func thief(a) -> void:
 	A.aim_at(P, T.pos)
 	var d0 := P.dashes
 	var rings0 := _dancer_rings(m)
+	var V := HeroVfx.of(m)
+	var flips0 := int(V.plays.get("flip", 0))
+	var dashes0 := int(V.plays.get("dash", 0))
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
 	var wheel := K.anim_id
 	var pop := [0.0]           # an Array: a lambda can't assign a captured local
-	var trail := {"before": 0, "mid": 0, "after": 0}      # trail pieces laid before the turn, in it and after it
-	var laid := [K.spin.pieces]
-	A.step(m, 0.55, func():
-		pop[0] = maxf(pop[0], K.glint_pop)
-		var at: float = m.time - K.anim_at
-		var key := "after"
-		if at < ThiefSpin.TURN_FROM: key = "before"
-		elif at < ThiefSpin.TURN_TO: key = "mid"
-		trail[key] = int(trail[key]) + K.spin.pieces - int(laid[0])
-		laid[0] = K.spin.pieces)
+	A.step(m, 0.55, func(): pop[0] = maxf(pop[0], K.glint_pop))
 	P.inp["move"] = Vector2.ZERO
-	A.ok("dancer dash: the flip leaves a trail that follows the turn, none before it starts or after it ends",
-			trail["before"] == 0 and trail["mid"] >= 6 and trail["after"] == 0, str(trail))
+	# the flip's trail is data (content/vfx/thief.json "flip"): ribbons on her hand and foot over the clip's turn
+	var spans: Array = HeroVfx.data("thief")["moves"]["flip"]["fx"].map(func(l): return [float(l.get("delay", 0.0)),
+			float(l.get("delay", 0.0)) + float(l["life"])])
+	A.ok("dancer dash: the flip leaves one trail on her hand and foot over the turn (0.1-0.3 s), none before or after;"
+			+ " the dash its after-images once",
+			int(V.plays.get("flip", 0)) == flips0 + 1 and int(V.plays.get("dash", 0)) == dashes0 + 1
+			and spans.all(func(sp): return sp[0] >= 0.1 - 0.001 and sp[1] <= 0.3 + 0.001),
+			"flips %d dashes %d spans %s" % [int(V.plays.get("flip", 0)) - flips0,
+					int(V.plays.get("dash", 0)) - dashes0, spans])
 	A.ok("dancer dash (item 8): no ring on the cartwheel or its landing; the glint in the throwing hand flares",
 			_dancer_rings(m) == rings0 and pop[0] > 0.5 and K.glint != null and K.glint.visible
 			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,
@@ -325,15 +328,15 @@ func thief(a) -> void:
 	A.ok("dancer E: waiting 6s steps you to it anyway",
 			P.flat_dist(T) < 1.8 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
 	_knife_in_barriers(m, A, P, T, K, home)
-	# a knock heals a fifth (15% passive, 5% from the takedown reset) in all; the crimson star and the green pillar
+	# a knock heals a fifth (15% passive, 5% from the takedown reset) in all; the violet star and the green pillar
 	P.hp = P.max_hp * 0.5
 	var php := P.hp
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
 	A.ok("dancer passive: a knock heals (20% in all), star + pillar",
-			T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.19 and DJFx.of(m).free_pools.has("pillar")
-			and DJFx.of(m).free_pools.has("star"),
+			T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.19
+			and HeroVfx.of(m).plays.has("knock_mine") and HeroVfx.of(m).plays.has("knock_heal"),
 			"hp %.0f -> %.0f" % [php, P.hp])
 	A.fresh(T)
 	T.teleport(home + Vector3(5.0, 0, 0))
@@ -364,7 +367,7 @@ func thief(a) -> void:
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
 func _dancer_rings(m: Match) -> int:
 	var res_col := Color(Arch.def("thief")["resource"]["col"])
-	var cols := [ThiefKit.AIM_LILAC, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
+	var cols := [ThiefKit.pale_col, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
 	var n := 0
 	for rg in m.fx.rings:
 		for c in cols:

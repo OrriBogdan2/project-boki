@@ -323,8 +323,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	n.add_child(head)
 	match kind:
 		"chakram":
-			# Sable's bolt: a flared four-point gold chakram about 0.45 m across with a hot centre; the
-			# orange flame tail is the trail (col: the tail, col2: the head)
+			# Sable's bolt: a flared four-point chakram about 0.45 m across with a hot centre; the short
+			# tail is the trail (col: the tail, col2: the head)
 			head.add_child(_mi(star_mesh(4, 0.42), solid(col2)))
 			head.add_child(_mi(star_mesh(4, 0.3), solid(col2.lightened(0.45))))
 			var c := _mi(Models.sphere(0.3, 8), Models.glow_mat(Color(col2, 0.9)))
@@ -332,11 +332,11 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			head.scale = Vector3.ONE * 0.24
 			_add_core(n, col2)
 		"chakram_big":
-			# the empowered shot: a big blue chakram inside a crackling gold streak
+			# the empowered shot: a big chakram (col2) inside a crackling streak (col) with a near-white core
 			head.add_child(_mi(star_mesh(6, 0.45), solid(col2)))
 			head.add_child(_mi(Models.sphere(0.35, 8), Models.glow_mat(Color(col, 1.0))))
 			head.scale = Vector3.ONE * 0.6
-			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, Color(1, 0.95, 0.6, 1), false, true))
+			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, col.lightened(0.6), false, true))
 			bolt.name = "Bolt"
 			n.add_child(bolt)
 		"bola":
@@ -410,9 +410,9 @@ func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 	return n
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends; `on_end(at)` runs when it does.
-## trail: the streak's length in m, width: its width.
+## trail: the streak's length in m, width: its width. Returns the look's node (a data trail can follow it).
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable()) -> Node3D:
 	var n := _rider(kind, col, col2)
 	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
 	if sd.get("node") != null and is_instance_valid(sd["node"]):
@@ -420,6 +420,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
+	return n
 
 ## Shows a projectile look this step (a kit-run projectile: the Bola flying on). Stop calling and it hides.
 func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0,

@@ -58,7 +58,7 @@ top of the signature colour. Any new hard-coded colour in a kit needs a comment 
 Still open (shared, not done here):
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
   breaks gl_compatibility, so it needs a mobile fallback.
-- Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
+- Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, dolm, tender (Sable's moved to her table). Move these to slot colours.
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
@@ -83,7 +83,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
 | 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
 | 6 | Meeko | tender | 2 | 2 | 2 | 3 | 3 | 1 | 4 | 17 | purple orbs, gold seed rings, cyan ult dome: no signature colour; hard-edged flat discs; Hearth Call barely reads |
-| 7 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
+| 7 | Sable | thief | 4 | 3 | 4 | 4 | 3 | 4 | 3 | 25 | re-scored 11-12 (ext/vfx-sable-data, was 18): every moment is content/vfx/thief.json in her violet table. LMB hits read (hot flare, violet blade sweep and its afterglow, stars, embers; the empowered one bigger and flash-violet), each bolt trails a violet ribbon; held LMB is violet chakrams and hits (the flat box was gone on main already); X is a violet shockwave at the blades' exact reach under the AimKit ring, violet blades (no grey discs). Left: Encore blade hits on a far foe are still small; the Marks pips draw pale hexagons round the target; sounds unchanged. Scored from local opengl3 reels (docs/shots/vfx-sable-data/*_before_after.jpg; before = main + ext/vfx-sable-palette, 21); GPU reels jobq 20261112-010859-29647 before / 20261112-012901-11737 after queued, not seen |
 | 8 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
 | 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |

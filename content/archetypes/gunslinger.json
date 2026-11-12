@@ -7,6 +7,7 @@
 	"weight": "medium",
 	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
+	"palette": {"main": "#b8f03c", "hot": "#f2ffc8", "deep": "#3d8a22", "metal": "#7a8a3a"},
 	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
@@ -32,7 +33,7 @@
 		"vamp": 0.06,
 		"wait": 3.5,
 		"rattle_k": 0.9,
-		"col": "#ff9a5c"
+		"col": "#c8f56a"
 	},
 	"passive": {
 		"name": "Hot Streak",
@@ -42,7 +43,7 @@
 		"id": "slipstep",
 		"name": "Slipstep",
 		"icon": "dash",
-		"col": "#ffc89a",
+		"col": "#dcf8a8",
 		"cd": 8.5,
 		"tap_t": 0.18,
 		"roll": 4.8,
@@ -59,7 +60,7 @@
 		"name": "Burr Charge",
 		"short": "Burr",
 		"icon": "skypierce",
-		"col": "#ffb36a",
+		"col": "#c8f56a",
 		"cooldown": 6.5,
 		"charges": 1,
 		"burr": {
@@ -92,7 +93,7 @@
 		"name": "Longneedle",
 		"short": "Needle",
 		"icon": "haymaker",
-		"col": "#ffe0a0",
+		"col": "#e6ffa8",
 		"cooldown": 11.5,
 		"charge": 0.6,
 		"turn_deg_s": 90.0,
@@ -119,7 +120,7 @@
 		"name": "Cinderfall",
 		"short": "Fall",
 		"icon": "earthshatter",
-		"col": "#ff7a3c",
+		"col": "#9ae02a",
 		"cooldown": 42.0,
 		"range": 14.0,
 		"radius": 3.4,

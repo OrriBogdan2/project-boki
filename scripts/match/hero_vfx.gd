@@ -225,9 +225,14 @@ func _num(layer: Dictionary, key: String, o: Dictionary, fallback := 1.0) -> flo
 	return n
 
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
-	var pal: Dictionary = data(h.arch).get("palette", {})
 	var key := String(name_or_hex) if name_or_hex != null else fallback
-	return Color(String(pal.get(key, key)))
+	return Color(String(palette(h.arch).get(key, key)))
+
+## A Hero's colour table: its data's "palette", else its archetype's (a kit that draws in code too keeps one table,
+## docs/HERO_VFX.md "Ability colours").
+static func palette(arch: String) -> Dictionary:
+	var d := data(arch)
+	return d["palette"] if d.has("palette") else Arch.def(arch).get("palette", {})
 
 func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
 	var from := String(layer.get("at", "here"))

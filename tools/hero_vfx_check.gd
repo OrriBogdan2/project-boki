@@ -10,6 +10,15 @@ extends RefCounted
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
+const HUE_OFF := 40.0          # deg round the colour wheel from its Hunter's: past this an ability colour is off
+const PALE_S := 0.3            # saturation under which a colour is a pale tint, free on any Hunter
+## Colours that mean something: a shield's blue, heals (Sable's knock heal in her table).
+const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"], "thief": ["palette heal"]}
+## The colour hex a kit drawing from its table still keeps: only the named colours that mean something (Sable: the
+## empowered tell's gold her card names, her knock heal's green).
+const KIT_MEANING := {"thief": ["EMP_LINE", "GLINT_CORE", "HEAL_WORD"]}
+## Heroes whose every moment is data (the check below scans their kit for inline looks).
+const DATA_MOMENTS := ["thief"]
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -46,6 +55,9 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	_colours()
+	_kit_hex()
+	_kit_moments()
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -67,12 +79,68 @@ func run(main: Node) -> void:
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
 	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	# a call may pick one of two moves: vfx("a" if flag else "b", ...)
+	var re := RegEx.create_from_string(
+			"(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"(?: if \\w+ else \"(\\w+)\")?")
+	for src: String in _kit_sources(arch):
+		for hit in re.search_all(src):
+			for g in [1, 2]:
+				if hit.get_string(g) != "":
+					called[hit.get_string(g)] = true
+	return called
+
+## The source of a Hero's kit scripts (KIT_FILES).
+func _kit_sources(arch: String) -> Array:
+	var out: Array = []
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
-			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
-				called[hit.get_string(1)] = true
-	return called
+			out.append(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f))
+	return out
+
+## Every Hunter's abilities wear its ability colour (docs/HERO_VFX.md "Ability colours"): the LMB (its weapon), each
+## slot's colour and its kit table's main colour sit on that hue, except the colours that mean something (MEANING).
+func _colours() -> void:
+	var off: Array = []
+	for arch: String in Arch.ORDER:
+		var want := Arch.color(arch)
+		var cols := {"lmb": Content.weapon(Arch.signature(arch)).primary.get("color", Color.WHITE) as Color}
+		for slot: String in ["dash", "rmb", "e", "x"]:
+			cols[slot] = Color(String((Arch.def(arch)[slot] as Dictionary).get("col", "#ffffff")))
+		for key: String in Arch.def(arch).get("palette", {}):
+			cols["palette " + key] = Arch.fx_col(arch, key)
+		for slot: String in cols:
+			var c: Color = cols[slot]
+			var gap := rad_to_deg(absf(angle_difference(c.h * TAU, want.h * TAU)))
+			if c.s >= PALE_S and gap > HUE_OFF and not slot in MEANING.get(arch, []):
+				off.append("%s %s" % [arch, slot])
+	ok(off.is_empty(), "every Hunter's LMB/RMB/E/R/dash colour is on its ability colour %s" % [off])
+	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col, ThiefKit.main_col]
+	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm"), Arch.color("thief")],
+			"Vex's, Sparkle's, Tenzo's and Sable's kits draw from their colour tables")
+
+## A kit that draws from its table keeps no colour hex in its code but the named ones that mean something
+## (KIT_MEANING): a hex anywhere else is a look gone off its table.
+func _kit_hex() -> void:
+	var re := RegEx.create_from_string("(?m)^(?:const (\\w+) := )?.*Color\\(\"#?[0-9a-fA-F]{6}")
+	for arch: String in KIT_MEANING:
+		var stray: Array = []
+		for src: String in _kit_sources(arch):
+			for hit in re.search_all(src):
+				if not hit.get_string(1) in KIT_MEANING[arch]:
+					stray.append(hit.get_string().strip_edges().left(60))
+		ok(stray.is_empty(), "%s's kit keeps no colour hex but the named ones that mean something %s" % [arch, stray])
+
+## A Hero moved onto data draws its moments only through HeroVfx: no star, puff, spark, burst, flash, streak, bolt or
+## pillar left in its kit code (its projectile skins, after-image chain and words stay in code).
+func _kit_moments() -> void:
+	var re := RegEx.create_from_string("(?:fx\\(\\)\\.(?:star|puff|streak|seg|crescent|pillar)"
+			+ "|m\\.fx\\.(?:spark|burst|flash|bolt|ring))\\(")
+	for arch: String in DATA_MOMENTS:
+		var left: Array = []
+		for src: String in _kit_sources(arch):
+			for hit in re.search_all(src):
+				left.append(hit.get_string())
+		ok(left.is_empty(), "%s's kit plays every moment from its data %s" % [arch, left])
 
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:
@@ -85,7 +153,7 @@ func _recipes(arch: String) -> void:
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
 	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
-	var pal: Dictionary = d["palette"]
+	var pal := HeroVfx.palette(arch)
 	var bad_sound: Array = []
 	var bad_col: Array = []
 	var over: Array = []
