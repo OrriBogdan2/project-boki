@@ -8349,3 +8349,4 @@ READY ext/vfx-particle-budget-fight e831a7888e (bulk-rebase: origin/main merged 
 READY ext/feel-scout-cam 5735d5cb36 (bulk-rebase: origin/main merged in mechanically, was 307193c6da; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/tut-heart-raid-hints a2369167fd (bulk-rebase: origin/main merged in mechanically, was cdd5a28e1c; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/sfx-voice-priority 55efa6eb82 (bulk-rebase: origin/main merged in mechanically, was fcc79b11cc; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/party-mm-core 17f0e62ab (merged origin/main: party core + pick routes coexist, TRIO_SLOTS 18 per decision 0021; 77 matchmaker tests pass, health --strict OK)
