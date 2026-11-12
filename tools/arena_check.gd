@@ -234,15 +234,15 @@ func _arena() -> void:
 		var mid := -1.0
 		var ring_ok := false
 		if a == "gunslinger":
-			# Vex's hold is Longneedle's charge (E): a ring, a full tick, the shot
+			# Vex's hold is Palm Lance's charge (E): a ring, a full tick, the shot
 			P.ak.cd["e"] = 0.0; P.ak.use_e()
 			step(m, 0.5)
 			ok(
-				"hold: gunslinger Longneedle winds up (ring)",
+				"hold: gunslinger Palm Lance winds up (ring)",
 				not P.ak.chg.is_empty() and is_instance_valid(P.ak.chg.get("ring"))
 			)
 			step(m, 0.7)
-			ok("hold: gunslinger Longneedle ticks full and fires", P.ak.charge_fulls > f0 and P.ak.chg.is_empty())
+			ok("hold: gunslinger Palm Lance ticks full and fires", P.ak.charge_fulls > f0 and P.ak.chg.is_empty())
 			continue
 		var t := 0.0
 		while t < 1.45:
