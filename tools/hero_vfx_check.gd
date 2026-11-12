@@ -57,6 +57,7 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_dolm_rocks(m)
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
@@ -230,6 +231,25 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## Tenzo's thrown rocks are cold basalt with a cobalt rim (DECISIONS 11-08): no heat, no material warmer than blue.
+func _dolm_rocks(m: Match) -> void:
+	var warm: Array = []
+	for kind in ["boulder", "rock", "dashrock"]:
+		var n := KitLooks.of(m)._build(kind)
+		for mi: Node in n.find_children("*", "MeshInstance3D", true, false):
+			var mat: Material = (mi as MeshInstance3D).material_override
+			if mat is ShaderMaterial:
+				var sm := mat as ShaderMaterial
+				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
+				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+					warm.append(kind)
+			elif mat is StandardMaterial3D:
+				var c := (mat as StandardMaterial3D).albedo_color
+				if c.r > c.b:
+					warm.append(kind)
+		n.free()
+	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
