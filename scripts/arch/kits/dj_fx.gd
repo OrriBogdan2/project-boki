@@ -17,6 +17,7 @@ const M_PUFF := 4
 const M_LINKS := 5
 const M_BOLT := 6
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
+const CORE_W := 0.35           # of a streak's width: its bright core
 const KEEP := 0.1              # s an immediate-style look (place / chain) stays without a refresh
 
 var m: Node
@@ -263,6 +264,17 @@ func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, 
 	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
 	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
 
+## A streak from `a` to `b` in space, hot at `b` and fading over `dur`: a trail laid in short pieces follows any path
+## (Sable's flip, whose hands and feet turn through the air).
+func seg(a: Vector3, b: Vector3, width: float, col: Color, col2: Color, dur := 0.25) -> void:
+	var d := b - a
+	if d.length() < 0.01:
+		return
+	var n := _fx("seg", M_COMET, _ribbon_mesh(), false)
+	n.global_position = b
+	n.basis = Basis.looking_at(d.normalized(), Vector3.RIGHT if absf(d.normalized().y) > 0.95 else Vector3.UP)
+	_play(n, "seg", col, col2, dur, Vector3(width, width, d.length()))
+
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
 func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
 	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
@@ -318,6 +330,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			var c := _mi(Models.sphere(0.3, 8), Models.glow_mat(Color(col2, 0.9)))
 			head.add_child(c)
 			head.scale = Vector3.ONE * 0.24
+			_add_core(n, col2)
 		"chakram_big":
 			# the empowered shot: a big blue chakram inside a crackling gold streak
 			head.add_child(_mi(star_mesh(6, 0.45), solid(col2)))
@@ -352,7 +365,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			# an Encore blade: a small spinning star in its two colours
 			head.add_child(_mi(star_mesh(3, 0.3), solid(col)))
 			head.add_child(_mi(Models.sphere(0.25, 6), solid(col2)))
-			head.scale = Vector3.ONE * 0.3
+			head.scale = Vector3.ONE * 0.4
+			_add_core(n, col2)
 		"crescent_bolt":
 			# Kael's Searing Wave: a flat 140-degree crescent of flame (1.4 m chord), red with an orange
 			# inner edge, pushed bulge first; a red glow trail behind it
@@ -379,6 +393,12 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	tr.name = "Trail"
 	n.add_child(tr)
 	return n
+
+## A thin hot line down the middle of a streak (a bolt's or blade's bright core).
+func _add_core(rider: Node3D, hot: Color) -> void:
+	var core := _mi(_ribbon_mesh(), _mat(M_COMET, hot.lightened(0.6), Color.WHITE, false, true))
+	core.name = "Core"
+	rider.add_child(core)
 
 func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
@@ -431,6 +451,8 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 			"dagger": head.rotation.z = sin(spin) * 0.15
 	var tr := n.get_node_or_null("Trail") as Node3D
 	if tr: tr.scale = Vector3(width, width, trail)
+	var core := n.get_node_or_null("Core") as Node3D
+	if core: core.scale = Vector3(width * CORE_W, width * CORE_W, trail * 0.8)
 	var bolt := n.get_node_or_null("Bolt") as Node3D
 	if bolt: bolt.scale = Vector3(width * 1.6, width * 1.6, trail * 1.4)
 
