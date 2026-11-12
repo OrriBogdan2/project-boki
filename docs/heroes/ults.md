@@ -20,6 +20,9 @@ Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the cas
 ## Fixed
 - Cinder: the card text (`ashwick.json` `x.desc`) still said the Cinder Shot works in the flight and Shift speeds it up. The kit, the hero sheet and the owner rule (Nov 5, item 66) say only the Furnace Cloak works. Text changed; asserted in the Cinder combo check. The hero sheet's cooldown cell said 32 s against the data's 36 s: fixed too.
 
+## The press at the lock's end (2026-11-12)
+A Shift, LMB or jump pressed 0.1 s before Albert's, Kael's, Motley's or Sparkle's lock ends goes on the first free step (DashFlow's 0.15 s hold, docs/decisions/0022-cc-exit-buffer.md). Before: Albert's LMB was lost and his jump went off in the plant; Kael's jump, and a Shift through the hunter's own dash buffer, went off inside the cleave; Motley's LMB and jump and all three of Sparkle's were lost. Rows: each ult check's "exit" row (`tools/ult_exit.gd`).
+
 ## Left as they are
 - Grimble's slow walk through the charge (owner item 36).
 - Kael's recovery walk, Sparkle's stillness in the air, Neve's roots: the footage does not show them, so no source to match.

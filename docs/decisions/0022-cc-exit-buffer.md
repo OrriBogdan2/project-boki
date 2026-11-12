@@ -26,3 +26,11 @@ and is never held. An earlier press is refused as before. A held press that is s
 `DashFlow.cc_left` / `_route_cc` and `KitStatus.grounded_left`. A kit's own refusal under a root or Grounded
 (the juggernaut's chain throw on E) is not held: only the slots above. Check `--cc-exit-buffer-check`. No Net
 or save change.
+
+## Addendum (2026-11-12): the end of an ult's cast lock
+The same hold covers a kit's own cast lock (docs/heroes/ults.md: in the source a Shift, LMB or jump pressed in the
+lock's last part comes out on the first free frame). `ArchKit.lock_left()` gives the seconds left (Albert's plant,
+Kael's guard and cleave, Motley's dome, Sparkle until her strike; 0 for every other kit) and `cc_left` counts it for
+`DashFlow.LOCK_SLOTS` (Shift, LMB, jump). A lock with an end is routed even while the kit's cast holds the hunter
+(`cast_locked`, Motley) or moves him in a dash (Kael's cleave lunge). No new timer. Rows in each hero's ult check
+(`tools/ult_exit.gd`).
