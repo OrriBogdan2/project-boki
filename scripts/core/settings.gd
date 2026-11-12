@@ -498,9 +498,13 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	sl[slot] = s
-	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_put(sl, slot, s)
 	_set_slots(action, sl)
+
+## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
+func _put(sl: Array, slot: int, code: String) -> void:
+	sl[slot] = code
+	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -528,15 +532,21 @@ func _shared_ok(a: String, b: String) -> bool:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
-## `action` had there.
-func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
+## what `action` had there instead, so none of them loses a key.
+func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
 	var mine := slots(action)
-	var theirs := slots(other)
-	theirs[other_slot] = mine[slot]
-	mine[slot] = ev_code(ev)
-	_set_slots(other, theirs)
+	var old: String = mine[slot]
+	_put(mine, slot, ev_code(ev))
+	for o in owners:
+		var theirs := slots(o[0])
+		_put(theirs, o[1], old)
+		_set_slots(o[0], theirs)
 	_set_slots(action, mine)
+
+## True when an action has no key at all (the Controls page marks it red).
+func unbound(action: String) -> bool:
+	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")
