@@ -5,6 +5,10 @@ extends RefCounted
 ##      way, then idles), in that order and under 2 s in all; the name and title come up
 ##   2. the farm's cut (no swap) ends after the flicker and keeps the body you had
 ##   3. the next time any key skips it straight to the end
+##   4. its sounds follow the beats, never the clock: a chime on each of the three flickers (at the flicker's
+##      own fractions, rising in pitch), the swell begins with the fade and rises through it, the settle ends
+##      it; the same fractions whether stepped in 4 ms or 50 ms frames; the farm's cut chimes and settles
+##      without the swell; a skip makes no sound
 ## With --shots-dir=<dir>: puton_1_reach, _2_flicker, _3_fade_feet, _4_fade_half, _5_done (a renderer is needed).
 
 const LIMIT_S := 2.0           # s: the whole beat
@@ -33,6 +37,7 @@ func run(m: Node) -> void:
 	await _first_time()
 	await _farm()
 	await _skip()
+	await _sounds()
 	print("PUTON DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -157,6 +162,60 @@ func _skip() -> void:
 	await tree.process_frame
 	ok(got[0] != null and got[0] != parts[0] and got[0].get_parent() == host,
 			"any key skips to the Hunter standing there")
+	host.queue_free()
+	await tree.process_frame
+
+## Steps a beat by hand in frames of `dt` s (nothing else drives it), and returns it once it is done.
+func _drive(dt: float, swap: bool, probe := {}) -> MaskBeat:
+	var parts := _stage()
+	var beat := MaskBeat.play(parts[1], parts[0], func(_b): pass, swap)
+	beat.set_process(false)
+	var rises := []
+	while beat.phase != "done":
+		beat._process(dt)
+		if beat.phase == "fade" and Sfx.loop_on("mask_swell"):
+			rises.append((Sfx.loops["mask_swell"]["p"] as AudioStreamPlayer).pitch_scale)
+	probe["swell_pitch"] = rises
+	return beat
+
+func _sounds() -> void:
+	var tree := main.get_tree()
+	Save.d["tutorial"]["mask_seen"] = false
+	var coarse := {}
+	var fine := {}
+	var a: MaskBeat = await _drive(0.05, true, coarse)
+	var b: MaskBeat = await _drive(0.004, true, fine)
+	for run in [[a, 0.05, "50 ms frames"], [b, 0.004, "4 ms frames"]]:
+		var heard: Array = run[0].heard
+		var slack: float = run[1] / MaskBeat.FLICKER_S
+		var chimes := heard.filter(func(h): return h[0] == "mask_flicker")
+		var on_beat := chimes.size() == MaskBeat.FLICKERS
+		for i in chimes.size():
+			on_beat = on_beat and chimes[i][1] == "flicker" and chimes[i][2] >= MaskBeat.chime_k(i) \
+					and chimes[i][2] <= MaskBeat.chime_k(i) + slack + 0.001
+		ok(on_beat, "%s: a chime on each of the %d flickers, at %s of the flicker" % [run[2], MaskBeat.FLICKERS,
+				str(range(MaskBeat.FLICKERS).map(func(i): return snappedf(MaskBeat.chime_k(i), 0.01)))])
+		var swell := heard.filter(func(h): return h[0] == "mask_swell")
+		var settle := heard.filter(func(h): return h[0] == "mask_settle")
+		ok(swell.size() == 1 and swell[0][1] == "fade" and swell[0][2] <= slack * 4.0 + 0.001
+				and settle.size() == 1 and settle[0][1] == "fade" and settle[0][2] == 1.0,
+				"%s: the swell begins with the fade and the settle is its last beat" % run[2])
+		var order := ["mask_flicker", "mask_flicker", "mask_flicker", "mask_swell", "mask_settle"]
+		ok(heard.map(func(h): return h[0]) == order,
+				"%s: chime, chime, chime, swell, settle, in that order" % run[2])
+	var rise: Array = fine["swell_pitch"]
+	ok(rise.size() > 20 and rise[0] < 0.75 and rise[-1] > 1.4
+			and range(1, rise.size()).all(func(i): return rise[i] >= rise[i - 1]),
+			"the swell rises through the fade (pitch %.2f to %.2f)" % [rise[0], rise[-1]])
+	ok(not Sfx.loop_on("mask_swell"), "and it is stopped when the beat ends")
+	var farm: MaskBeat = await _drive(0.02, false)
+	ok(farm.heard.map(func(h): return h[0]) == ["mask_flicker", "mask_flicker", "mask_flicker", "mask_settle"],
+			"the farm's cut: the chimes and the settle, no swell")
+	Save.d["tutorial"]["mask_seen"] = true
+	var parts := _stage()
+	var skipped := MaskBeat.play(parts[1], parts[0], func(_b): pass)
+	skipped.skip_now()
+	ok(skipped.heard.is_empty() and not Sfx.loop_on("mask_swell"), "a skip makes no sound")
 	host.queue_free()
 	await tree.process_frame
 

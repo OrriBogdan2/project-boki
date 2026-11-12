@@ -8,6 +8,8 @@ extends Node
 ##               (FLICKER_S)
 ##   3. fade:    the Hunter's model fades in from the feet up (Unmasked.blend, as Unmasked.worn) while the Empty
 ##               fades out the same way, then goes to its idle (FADE_S)
+## Its sounds follow the beats, never the clock: a porcelain chime on each flicker of the ghost face, a swell
+## that rises over the fade, a soft settle at the end (so a longer beat only stretches them).
 ## With `swap` false (the farm: you stay yourself) it ends after the flicker; the name and title come up at the
 ## end of the flicker. Once a player has seen one
 ## (Save.d.tutorial.mask_seen) any key skips it. `finished` gets the body standing there at the end.
@@ -27,10 +29,10 @@ const GHOST_ALPHA := 0.7       # the ghost face at its brightest
 const ARM_RAD := 1.5           # rad the reaching arm swings forward from the shoulder
 const SPREAD := 0.35           # share of the fade each part takes: the parts come in one after another
 const NAME_S := 1.6            # s the name and title stay up (they outlast the beat)
-const SOUNDS := {               # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
-	"mask_swell": preload("res://audio/mask_swell.wav"),
-	"mask_impact": preload("res://audio/mask_impact.wav"),
-}
+const CHIME_AT := 0.17         # share of each flicker gone when its chime sounds (the ghost face is lighting)
+const CHIME_RISE := 1.26       # pitch step from one flicker's chime to the next (a major third)
+const SWELL_PITCH := Vector2(0.7, 1.5)   # pitch_scale of the swell at the start and the end of the fade
+const SWELL_DB := Vector2(-26.0, -8.0)   # volume of the swell at the start and the end of the fade
 
 var id := ""
 var mask: MaskRelic
@@ -49,7 +51,8 @@ var _front := Vector3.FORWARD
 var _mask_from := Vector3.ZERO
 var _ghost: MeshInstance3D
 var _anim: HunterAnim
-var _swell: AudioStreamPlayer
+var _chimes := 0               # flickers whose chime has sounded
+var heard: Array = []          # [sound, phase, progress 0..1 in it] per sound made (--relic-puton-check)
 
 static func play(relic: MaskRelic, who: Node3D, done: Callable, swap_body := true) -> MaskBeat:
 	var b := MaskBeat.new()
@@ -77,12 +80,6 @@ func _ready() -> void:
 		_arm_from = _arm.rotation.x
 	if swap:
 		_build_hunter()
-	_swell = AudioStreamPlayer.new()
-	_swell.bus = "SFX"
-	_swell.stream = SOUNDS["mask_swell"]
-	_swell.volume_db = -8.0
-	add_child(_swell)
-	_swell.play()
 	if seen():
 		skip_hint = UI.label("Any key: skip", 13, Color(1, 1, 1, 0.55))
 		skip_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -177,23 +174,30 @@ func _flicker() -> void:
 	var pulse := pow(sin(PI * k * FLICKERS), 2.0) * lerpf(0.55, 1.0, k)
 	(_ghost.material_override as ShaderMaterial).set_shader_parameter("color",
 			Color(0.97, 0.95, 0.9, GHOST_ALPHA * pulse))
+	while _chimes < FLICKERS and k >= chime_k(_chimes):
+		_hear("mask_flicker", k, pow(CHIME_RISE, _chimes))
+		_chimes += 1
 	if k >= 1.0:
 		_settled()
 
+## How far through the flicker (0..1) the ghost face's n-th light gets its chime.
+static func chime_k(n: int) -> float:
+	return (n + CHIME_AT) / FLICKERS
+
+## One sound of the beat (our own, tools/gen_sfx_mask.py); Sfx lets it ring out after the beat has gone.
+func _hear(sound: String, k: float, pitch := 1.0) -> void:
+	heard.append([sound, phase, k])
+	Sfx.play(sound, null, 0.0, 0.0, pitch)
+
 ## The Relic is spent; with `swap` the Hunter starts to come in, else the beat is over.
 func _settled() -> void:
-	_swell.stop()
 	mask.queue_free()
 	_ghost.queue_free()
-	var hit := AudioStreamPlayer.new()
-	hit.bus = "SFX"
-	hit.stream = SOUNDS["mask_impact"]
-	add_child(hit)
-	hit.play()
 	_show_name()
 	if swap:
 		_next("fade")
 	else:
+		_hear("mask_settle", 1.0)
 		_finish()
 
 func _fade(dt: float) -> void:
@@ -201,7 +205,13 @@ func _fade(dt: float) -> void:
 	_wipe(_to_tiers, k, true)
 	_wipe(_from_tiers, k, false)
 	_idle(dt)
+	if not Sfx.loop_on("mask_swell"):
+		heard.append(["mask_swell", phase, k])
+	Sfx.loop_hold("mask_swell", "mask_swell", null, lerpf(SWELL_DB.x, SWELL_DB.y, k),
+			lerpf(SWELL_PITCH.x, SWELL_PITCH.y, k))
 	if k >= 1.0:
+		Sfx.loop_stop("mask_swell")
+		_hear("mask_settle", 1.0)
 		_finish()
 
 func _idle(dt: float) -> void:
@@ -239,8 +249,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func skip_now() -> void:
 	if phase == "done":
 		return
+	Sfx.loop_stop("mask_swell")
 	if phase in ["reach", "flicker"]:
-		_swell.stop()
 		mask.queue_free()
 		if is_instance_valid(_ghost):
 			_ghost.queue_free()

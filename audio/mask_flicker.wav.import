@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://bckn40vj56bou"
-path="res://.godot/imported/mask_impact.wav-a8b804cc2f8fa7223e9fbe1e2a5f3c2b.sample"
+uid="uid://gd1ba6q2v30x"
+path="res://.godot/imported/mask_flicker.wav-5523251176f88e788323acbcbbbb361c.sample"
 
 [deps]
 
-source_file="res://audio/mask_impact.wav"
-dest_files=["res://.godot/imported/mask_impact.wav-a8b804cc2f8fa7223e9fbe1e2a5f3c2b.sample"]
+source_file="res://audio/mask_flicker.wav"
+dest_files=["res://.godot/imported/mask_flicker.wav-5523251176f88e788323acbcbbbb361c.sample"]
 
 [params]
 
