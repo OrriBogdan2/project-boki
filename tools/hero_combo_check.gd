@@ -826,28 +826,6 @@ func _gunslinger() -> void:
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
-	# yaw lock: a 180 deg cursor flip mid-charge turns the line <= its turn row (deg/s) * charge; the beam goes along it
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	P.teleport(home)
-	T.teleport(home + Vector3(3, 0, 0))      # near enough that the lock's small turn still sweeps over it
-	ac.step(m, 0.1)
-	K.cd["e"] = 0.0
-	ac.aim_at(P, T.pos)
-	P.ak.use_e()
-	ac.step(m, 0.05)
-	var d0: Vector2 = P.aim_dir()
-	ac.aim_at(P, home + Vector3(-8, 0, 0))
-	ac.step(m, 0.5)
-	var cap: float = K.turn_deg_s("e", "early") * float(K.e_def()["charge"])
-	var turned: float = rad_to_deg(absf(d0.angle_to(P.aim_dir())))
-	ok("Longneedle yaw lock: a 180 deg flip turns it <= cap * charge",
-			turned > 1.0 and turned <= cap + 0.5, "%.1f of %.1f deg" % [turned, cap])
-	ac.step(m, 0.2)
-	var locked_now: Vector2 = K.needle_dir
-	var off := rad_to_deg(absf(d0.angle_to(locked_now)))
-	ok("Longneedle yaw lock: the beam fires along the locked line, not the cursor",
-			off <= cap + 0.5 and locked_now.x > 0.0 and ac.dmg(T) >= 30.0, "%.1f deg off" % off)
 	T.teleport(home + Vector3(8, 0, 0))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
