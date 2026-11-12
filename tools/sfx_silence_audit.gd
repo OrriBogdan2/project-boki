@@ -212,6 +212,18 @@ func _fixes() -> void:
 	var ordered := _cues_of(func(): KinFollow.leap(k, k.pos, "side", true))
 	ok(not "recall" in ordered, "...but not on an ordered recall (that plays its own)")
 	ok("kin_unsure" in _cues_of(func(): KinDowned.begin(k, false)), "a Boki going down cries in its voice")
+	var lc: Dictionary = KinFollow.rules()["land_cues"]
+	var kgs: Array = KinFollow.rules()["land_kg"]
+	var kg := float(Unique.size_info(k.rec)["kg"])
+	var kind := "light" if kg < float(kgs[0]) else "medium"
+	if kg > float(kgs[1]):
+		kind = "heavy"
+	var thrown := _cues_of(func(): KinFollow.land_cue(k))
+	ok(thrown == [lc[kind][0]], "a thrown Boki's landing plays its %s cue (%.1f kg)" % [kind, kg])
+	var shoulder := _cues_of(func(): KinFollow.land_cue(k, true))
+	ok(shoulder == [lc["settle"][0]], "landing back on the shoulder plays the settle tick")
+	var rival_db: float = KinFollow.rules()["land_rival_db"]
+	ok(lc["light"][1] > lc["heavy"][1] and rival_db < 0.0, "light lands higher than heavy; a rival's is quieter")
 	b.pos = _m.player.pos + Vector3(3, 0, 0)
 	var plain := _cues_of(func(): Juice.hit(_m, b, a, 10.0, {}, false, false))
 	var crit := _cues_of(func(): Juice.hit(_m, b, a, 10.0, {}, true, false))

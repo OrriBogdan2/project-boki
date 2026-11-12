@@ -737,6 +737,7 @@ func _sim_fly(dt: float) -> void:
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
+			KinFollow.land_cue(self)
 			KinStrike.land(self, hit_set, charged)       # a thrown Boki staggers what it lands on (a charging mount harder)
 		if not land.is_empty():
 			m.fx.dust(pos, 14)
@@ -779,6 +780,7 @@ func _sim_fly_home(dt: float) -> void:
 			return
 		var merge_now: bool = fly.get("merge", false)
 		_hop_on()
+		KinFollow.land_cue(self, true)
 		if merge_now and not KinMerge.cast(owner_h):
 			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 

@@ -81,12 +81,12 @@ Fixed from the top five, with sounds that already exist (no new assets):
 3. A hit between two others plays `hit` / `crit` at -13 dB at the target (`Juice.hit`; yours stay -6 / -4).
 4. Another hunter picking something up plays `pickup` at -14 dB at them (`Juice.rival_pickup`; yours stays -8).
 5. Blight skitters and watchers call as their plain cousins: `v_` + the kind without `bl_` (`Mob._begin_attack`; the file `v_bl_skitter` never existed).
+6. A full-size Boki coming down (`KinFollow.land_cue`; data `content/rules/boki_system.json` "follow" `land_*`): a thrown Boki's landing is sized by its weight class from `Unique.size_info` kg (under `land_kg[0]` a light patter, `land` pitched up; over `land_kg[1]` a heavy thump, `thump` pitched down; between, `land` as is), and one landing back on your shoulder (`Kin._sim_fly_home`) plays a lighter `settle` tick. A rival's Boki is 6 dB quieter. Existing files only (`land`, `thump`), so the audit still counts them "shared", not "none"; wisps keep their own cues. A throw ended by a Boki's own dash (a rush) is not covered: its ability plays its sound. Other players' copies of a Boki (online) get no landing cue yet: the snapshot carries no flight state, only the `throw`/`hop` events at the start.
 
 Follow-ups, left open (briefs style; owner: sound branch; several overlap READY branches that main lacks, merge those rather than redo):
 - SFX: status start cues for others (`slow` 123 + 53 + 39 + 31 none, `stun`, `burn`, `root`, `daze`) have none on main. Land ext/sfx-status-cues or ext/sfx-cc-on-you, not both.
 - SFX: your own hits play the shared `hit` on every Hunter (`hit tender>mob shot [you]` 31 of 35 shared). ext/hit-sfx-1109 and ext/sfx-hit-targets carry per-Hunter and per-target takes.
 - SFX: Boki down, revive, eat, sleep, fuse have no cue for rivals' Boki (`boki shoulder>reviving`, `reviving>active` 21 none each). ext/sfx-boki-wire and ext/sfx-boki-life-wire.
-- SFX: a thrown Boki landing (`boki flying>active`, 25 of 59 bad) and landing on a shoulder (`flying_home>shoulder`) have no landing cue; the hop above plays at the start only.
 - SFX: Boki ability hits play only shared `boom` / `click` / `combo` (`hit kin>mob k1,puffcap_mines`, `hive_swarm`, `thorn_patch`); each wants its own impact from the Boki type sets.
 - SFX: `hit ashwick>hunter flame` (38 of 88 none): flame ticks are damage-over-time hits, which return before any sound in `Juice.hit` and `Match.on_damage`; the `lw_roar` loop covers them. Decide whether a flame needs a contact bed.
 - SFX: level-ups of rivals are silent by design (ext/sfx-level-rank says the same); the only cue for them is the Hunter's own cast. No change planned.

@@ -200,6 +200,20 @@ static func land_side(k: Kin) -> void:
 	k.state = "active"
 	k.m.fx.dust(k.pos, 8)
 
+## The sound of it coming down: a thrown Boki by its weight class (a light patter, a heavy thump), or the soft
+## settle of one landing back on your shoulder. A rival's is quieter. Cues and sizes: boki_system.json "follow".
+static func land_cue(k: Kin, settle := false) -> void:
+	var kgs: Array = rules()["land_kg"]
+	var kg := float(Unique.size_info(k.rec)["kg"])
+	var kind := "settle"
+	if not settle:
+		kind = "heavy" if kg > float(kgs[1]) else "medium"
+		if kg < float(kgs[0]):
+			kind = "light"
+	var c: Array = rules()["land_cues"][kind]
+	var quiet := 0.0 if k.owner_h != null and k.owner_h.is_local() else _r("land_rival_db")
+	k.m.sfx(String(c[0]), k.pos, float(c[2]) + quiet, float(c[1]))
+
 ## Off you at once, onto your side spot (a carried Boki's own dash or leap starts from there).
 static func drop_beside(k: Kin) -> void:
 	k.fly = {"to": side_spot(k)}
