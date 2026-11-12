@@ -23,3 +23,10 @@ docs/MOVEMENT_FEEL.md, "Hits on the glider".
 ## Affects
 Knocks on gliding Hunters, from players and bots alike. This changes no Net shape and no save data.
 Asserted by `--glide-hit-check`.
+
+## Addendum 2026-11-12: knocked in an air dash
+A knock or a stun past an air dash's i-frames used to do nothing: the dash's velocity overwrote the push every
+step and a stunned Hunter dashed on. Options: let the dash ride through (no source: dashes have short i-frames,
+not knock immunity), or end it. Choice: a knock that sets `knock_t`, or a stun, ends an air Shift dash that step
+(`HunterMove.cut_air_dash`, called from `Hunter.impulse` and the dash step). Kit rushes and ground dashes are not
+changed. Table and rows: docs/MOVEMENT_FEEL.md "Knocked in the air", `--glide-hit-check`.
