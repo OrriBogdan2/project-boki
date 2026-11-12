@@ -74,7 +74,8 @@ func _fresh(home: Vector3, arch := "", wisps := false) -> void:
 		if h != mate and h != bot and h != foes[0] and h != foes[1]:
 			_put(h, _far(home))
 	if arch != "":
-		bot.set_arch(arch)
+		# its own class: set_arch keeps the bot's, and Arch.fix then drops the kit
+		bot.reclass(Arch.weight(arch), arch)
 		bot.unlock_all()
 	for f in foes:
 		f.max_hp = 1e6

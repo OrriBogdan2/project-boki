@@ -3936,7 +3936,7 @@ const SEP_CELL := 4.0
 func _separate() -> void:
 	var bodies: Array = []
 	for h in hunters:
-		if h.hittable() and h.grap.is_empty() and not CareUtil.is_carried(h): bodies.append(h)      # (a wisp on Meeko's shoulder rides, it does not shove her)
+		if h.hittable() and h.grap.is_empty() and not CareUtil.is_carried(h): bodies.append(h)  # a carried wisp rides
 	for mb in mobs:
 		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:

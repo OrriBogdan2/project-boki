@@ -372,7 +372,8 @@ const CHECKS := {
 	"--summon-side-check": ["res://tools/summon_side_check.gd", "summon_side_check", null],  # side-colour rings
 	"--stolen-hud-check": ["res://tools/stolen_hud_check.gd", "stolen_hud_check", null],      # --shots-dir=<dir>
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
-	"--bot-downed-check": ["res://tools/bot_downed_check.gd", "bot_downed_check", null],      # bots revive, carry, finish (bot_rescue.gd)
+	# bots revive, carry, finish (bot_rescue.gd)
+	"--bot-downed-check": ["res://tools/bot_downed_check.gd", "bot_downed_check", null],
 	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],  # decision 0040
