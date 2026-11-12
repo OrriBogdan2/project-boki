@@ -29,7 +29,9 @@ Sheets (not in git): `/home/boki/meshy/npc-hob-guide-1111/` `options.jpg` (3 fro
    (3 credits each): Idle 0, Stand and Chat 56 (talk), Big Wave Hello 28 (wave), Casual Walk 30, and for Hob
    Call Gesture 29 (point) and Heavy Hammer Swing 128 (hammer).
 4. `blender -b --factory-startup --python tools/meshy/npc_bake.py -- <animation_glb.glb> art/npcs/<id>/<id>.glb
-   <id> Idle=idle Stand_and_Chat=talk ...`: clips renamed to poses, albedo only (1024 px JPEG), ~1.5 MB.
+   <id> Idle=idle Stand_and_Chat=talk ...`: clips renamed to poses, albedo only (1024 px JPEG), ~1.5 MB. The bake
+   applies Meshy's 0.01 Armature scale (bones in metres): left on, Godot drew the skinned mesh 100x big (`--npc-check`
+   measures the skeleton for it; `--npc-shots` ends on a close lineup of both).
 5. A row in `content/rules/npcs.json`; `NpcModel.new("<id>")` (or a subclass, like `HobModel`).
 
 Meshy task ids: Hob 01a1cc6a-dcbc-7294-931b-58221c420800, Pell 01a1cc6a-dce0-777c-b6be-636f72364352.
