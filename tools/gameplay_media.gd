@@ -57,6 +57,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
 		1: await _fight(secs)
 		2: await _boki_combat(secs)
