@@ -88,7 +88,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
-| 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
+| 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Done (ext/sfx-kael-slash-edge): the LMB slash sound has a hard edge (snap, short shing, chop) on its contact at 0.08 s, 4-6 dB over the swish like the cleave's cut and about 4 dB under it in game; same 0.42 s, still on the press (was the swish alone, loudest at 0.22-0.27 s); the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
 `vfxq-after-archer-2`, job 20261108-213129-03140); the pair is on branch `ext/vfx-archer-strips` (not for merge). Her
