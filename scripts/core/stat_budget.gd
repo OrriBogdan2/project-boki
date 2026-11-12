@@ -2,8 +2,7 @@ class_name StatBudget
 extends RefCounted
 ## Caps and diminishing gains for a Boki's four trained stats (decision 0022, GARDEN_MODERN.md 2.2).
 ## Numbers: content/rules/care.json stat_budget. rec.stat_frac holds each stat's part-way progress to its
-## next point; rec.loose holds points a respec set free (one pool), which go back into any stat at loose_rate and
-## skip the bands.
+## next point; rec.loose holds points a respec set free, which come back at loose_rate and skip the bands.
 
 static func rules() -> Dictionary:
 	return Content.rules("care")["stat_budget"]
@@ -39,7 +38,7 @@ static func share(points: int) -> float:
 static func add(rec: Dictionary, s: String, n: int) -> int:
 	ensure(rec)
 	var gained := 0
-	var loose := int(rec["loose"])
+	var loose := int(rec["loose"].get(s, 0))
 	for i in n:
 		if room(rec, s) <= 0:
 			rec["stat_frac"][s] = 0.0
@@ -56,14 +55,14 @@ static func add(rec: Dictionary, s: String, n: int) -> int:
 			rec["stats"][s] = int(rec["stats"][s]) + 1
 			gained += 1
 		rec["stat_frac"][s] = f
-	rec["loose"] = loose
+	rec["loose"][s] = loose
 	return gained
 
 ## How many more single-unit gains (plays) until stat s's next point; 0 when it cannot grow.
 static func plays_to_next(rec: Dictionary, s: String) -> int:
 	if room(rec, s) <= 0:
 		return 0
-	if int(rec.get("loose", 0)) > 0:
+	if int(rec.get("loose", {}).get(s, 0)) > 0:
 		return 1
 	var left := 1.0 - float(rec.get("stat_frac", {}).get(s, 0.0))
 	return ceili(left / share(int(rec["stats"][s])) - 0.001)
