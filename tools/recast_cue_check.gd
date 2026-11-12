@@ -109,4 +109,7 @@ func _badges() -> void:
 		var marks: Array = P.ak.cue.get("marks", [])
 		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
 		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
+		if hero == "gunslinger" and mine.size() == 1:
+			var ring := float(mine[0]["total"])
+			ok("gunslinger: the Daze badge reads KitStatus's timer", is_equal_approx(ring, 2.0), str(ring))
 		await done(m)
