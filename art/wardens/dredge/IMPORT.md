@@ -42,3 +42,4 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   it blends the weights of stretched vertices toward their neighbours' (400 passes), then deletes the triangles still over 1.25x and caps the
   holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
 
+**Barge clips (2026-11-12):** `lunge` is re-keyed (the ball stays closed from shove to shove) and `lunge_out` is new, by `tools/art1/grimble_barge_clips.py` run on the .glb with no Blender (the .blend is not needed); `tools/art1/grimble_clips.py` still has the old `lunge` keys, so a clip rebuild from the .blend must re-run that script. Why and how it plays: docs/heroes/dredge.md, "Animation timing".
