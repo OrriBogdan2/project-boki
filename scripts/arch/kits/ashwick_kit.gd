@@ -680,7 +680,7 @@ func _cloak_blast() -> void:
 		add_char(f, float(ed["char"]))
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))
 		vfx("cloak_hit", f.pos)        # a smoke puff over the target
-		if f.mass() < 6.0:
+		if f.mass() < 6.0 and not Blockers.body_stops(f, h):
 			# dragged in toward her (Displace: a player online is pulled on their own game)
 			var drag := {"mode": "step", "spd": float(ed["pull_speed"]), "gap": float(ed["gap"]), "dur": DRAG_T}
 			m.displace.tow(f, h, drag)

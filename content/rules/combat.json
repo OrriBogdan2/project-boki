@@ -1,0 +1,4 @@
+{
+	"doc": "The one 'in combat' rule (scripts/match/in_combat.gd). A Hunter or a Boki is in combat for window_s seconds after it deals or takes damage in a fight: a hit on or from a Hunter, a Boki, a monster or Blight. Healing, falls, wall slams, heat, friendly fire and damage to yourself don't count. A Boki's fight is its owner's too. Hunter shield refill, a Boki's own mending, the drive music, the bots' slow tick, a Boki's 10 Hz think out of combat and a Boki's refused orders all read it, so they switch on the same frame. The source publishes no combat timer [gap]: 5 s is the old Hunter regen wait, kept as the one shared value. Channels (a recall, an exit call, a rune, a box revive) are not on this window: the source cancels them on the hit itself, so they read Hunter.hurt_at.",
+	"window_s": 5.0
+}

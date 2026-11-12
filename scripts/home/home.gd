@@ -1095,6 +1095,7 @@ func _process(delta: float) -> void:
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
+	Sfx.set_ears(focus, cam.yaw)        # the ears stay on you when a chat frames the camera on a Hob
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()

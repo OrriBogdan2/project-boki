@@ -29,6 +29,8 @@ const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
+const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
+                                       # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -258,6 +260,25 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
+## The source's Volcanic Rebuke (wiki R: "Knocking an enemy sends them instantly to Deathbox"): a hunter the
+## cleave knocks pops into their Wisp and is snuffed out a beat later (decision 0019's death state), into the
+## deathbox. The cleave's hit carries "box" (online too: Displace.HIT_EXTRAS), the knocked body's own game
+## runs it (Match.knock marks, Hunter's downed tick takes them out). Any other knock clears the mark.
+const BOX_AFTER := 0.2       # s: the Wisp's pop-in shows, then it is snuffed
+
+static func mark_box(t: Hunter, o: Dictionary, now: float) -> void:
+	if bool(o.get("box", false)):
+		t.set_meta("box_at", now + BOX_AFTER)
+	elif t.has_meta("box_at"):
+		t.remove_meta("box_at")
+
+## A Riposte-knocked Wisp's beat is up (once).
+static func box_due(t: Hunter, now: float) -> bool:
+	if not t.has_meta("box_at") or now < float(t.get_meta("box_at")):
+		return false
+	t.remove_meta("box_at")
+	return true
+
 ## Planted in the guard and the cleave: no other button does anything (but E on a held chain, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
@@ -271,6 +292,10 @@ func no_glide() -> bool:
 ## Haul Slam), never a dead press.
 func air_rmb() -> bool:
 	return super() and float(cd["air"]) <= 0.0
+
+## The guard stops pulls too (Blockers).
+func blocks_from(_by: Ent) -> bool:
+	return riposte.guarding()
 
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -313,8 +338,8 @@ func lmb_holding() -> bool: return lmb_t >= 0.0
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h) or riposte.move_k() <= 0.0:
-		# merged, the form owns the attack key (a charge from before must not go off); guarding, no swings
+	if riposte.move_k() <= 0.0:
+		# guarding: no swings
 		lmb_was = false
 		return true
 	var ld := lmb_def()
@@ -388,7 +413,7 @@ func _slash() -> void:
 	h.mel_hold = 0.0
 	h.fire_cd = float(ld["rate"])
 	# quick slashes, alternating right-to-left and back (no heavier third: each is the same cut)
-	if m.time - slash_at > 0.8: slash_n = 0
+	if m.time - slash_at > CHAIN_RESET: slash_n = 0
 	slash_at = m.time
 	h.combo_i = slash_n % 2 + 1
 	play("jug_slash_r" if slash_n % 2 == 0 else "jug_slash_l")

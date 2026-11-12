@@ -953,6 +953,11 @@ func tender() -> void:
 			"+%.0f%%" % (ramp * 100.0))
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
+	var res: Dictionary = Arch.def("tender")["resource"]
+	ok(
+			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
+			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),
+			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
@@ -960,7 +965,7 @@ func tender() -> void:
 	step(m, 0.05)
 	P.inp["fire"] = false
 	ok(
-			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
+			"mm LMB: after a pause the next ember is Empowered (its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
 	# --- Burrseed (item 118): a press, a fixed wind-up, the throw by itself on the aim of that moment
@@ -1047,6 +1052,14 @@ func tender() -> void:
 	ok(
 			"mm E: lit on her, a 2.6 m ring (1.4 bh) and the raise-the-lantern move",
 			K.in_e() and absf(K.hearth_r() - 2.6) < 0.01 and K.anim_id == "mm_hearth" and K.lk().showing("hearth"))
+	# parity: the source gives no self-heal factor, so she is healed by the full tick (no self_k rider)
+	var ed: Dictionary = Arch.def("tender")["passive"]
+	P.hp = P.max_hp * 0.5
+	var hp0 := P.hp
+	K._pulse(P.pos, 2.0)
+	ok(
+			"mm E: the ring heals her for the full tick, no self-heal factor in the data",
+			not ed.has("self_k") and absf(P.hp - hp0 - 2.0 * K.heal_k()) < 0.01, "healed %.2f" % (P.hp - hp0))
 	var cur := P.pos + Vector3(6.0, 0, 0)
 	sc.aim_at(P, cur)
 	step(m, 0.2)
@@ -1103,8 +1116,8 @@ func tender() -> void:
 			absf(glide_d - glide_want) < 1.0 and sink < 1.0 and K.anim_id == "mm_float",
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
-			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
-			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
+			"mm body: small (a 0.65 model) with the 0.352 m hurtbox (the chart size, --hurtbox-check)",
+			absf(P.r - 0.352) < 0.001 and P.model.scale.y < 0.9,
 			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
@@ -1477,6 +1490,15 @@ func burr_ranks() -> void:
 	var wide3 := K.burst_radius()
 	ok("mm RMB: the burst is 2.2 m wide, 4.4 m at rank 3", absf(wide1 - 2.2) < 0.01 and absf(wide3 - 4.4) < 0.01,
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
+	# rank 3 (the source's tier IV): the burst takes 1.5x the ability power bonus (none at level 1)
+	var ap3 := K.burst_ap_k()
+	P.set_meta("growth_lvl", 10)
+	var bonus := LevelGrowth.ap_pct(10)
+	var ap10 := K.burst_ap_k()
+	P.slot_lv["sec"] = 1
+	ok("mm RMB rank 3: the burst takes 1.5x the ability power bonus (x%.3f at level 10, x1 at level 1)" % ap10,
+			absf(ap3 - 1.0) < 0.001 and absf(ap10 - (1.0 + 1.5 * bonus) / (1.0 + bonus)) < 0.001
+			and bonus > 0.0 and K.burst_ap_k() == 1.0, "L1 %.3f L10 %.3f" % [ap3, ap10])
 	await _free(m)
 
 # ================================================================== Neve
@@ -1779,7 +1801,8 @@ func rimewright() -> void:
 		since += 1.0 / 60.0
 	ok(
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) - 0.5 and T.root_t <= 0.0
+				and T.slow_t > 0.0,      # burst_dmg: the damage-ratio audit's 23
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor

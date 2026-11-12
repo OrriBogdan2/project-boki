@@ -106,9 +106,10 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		var at := t.pos
 		var delay := float(pd.get("splinter_delay", 0.4))
 		lk().burst("shell", at, {"dur": delay + 0.05})     # the frost shell closes over them: the tell
+		var tid := t.get_instance_id()      # (a lambda that captured the foe errors if it is freed by then)
 		m.later(
 				delay,
-				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
+				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
 		chill.erase(t.get_instance_id())
 		return
 	add_chill(t)
@@ -126,7 +127,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
+			var tid := t.get_instance_id()
+			var fan_r := float(pd["splinter_r"]) * 0.8
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
@@ -738,7 +741,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 	var g: float = m.world.ground_at(at.x, at.z)
 	if g <= World.VOID + 1.0 or m.world.is_block(at.x, at.z):
 		at = h.pos + Vector3(dir.x, 0, dir.y) * 1.0
-	var hp := float(ed["hp"]) + (40.0 if rank("kin") >= 3 else 0.0)
+	var hp := float(ed["hp"]) + (float(ed["hp_rank3"]) if rank("kin") >= 3 else 0.0)
 	var w: Dictionary = m.verbs.add_wall(
 			h, at, dir,
 			{
@@ -747,6 +750,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 				"touch": {"kb": float(ed["push"]), "dmg": 0.5, "slow": 1.0, "slow_k": 0.3}},
 			power("kin"))
 	w["y"] = at.y
+	w["ice"] = true          # (Blockers.kind_of)
 	# her own ice look instead (CareLook "wall")
 	if is_instance_valid(w["node"]): (w["node"] as Node3D).visible = false
 	wall = {

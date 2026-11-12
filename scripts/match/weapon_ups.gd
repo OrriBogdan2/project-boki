@@ -2,8 +2,8 @@ class_name WeaponUps
 extends RefCounted
 ## In-run weapon upgrades. A hunter carries one fixed signature weapon (Arch.signature) and grows it
 ## through the run instead of swapping it: upgrade perks (Data.PERKS entries with a "wup" block) come
-## from the hero's fixed weapon path (WeaponPath, every even level), perk orbs (PerkOrbs: chests,
-## shrines, bosses), and "tuning" pickups lying on the ground. They last the expedition, like every perk.
+## from perk orbs (PerkOrbs: chests, shrines, bosses) and "tuning" pickups lying on the ground. They
+## last the expedition, like every perk.
 ##
 ## "wup" keys: dmg (+fraction of damage), mag (+fraction of magazine), rate (change to the time
 ## between shots, negative = faster), range (+fraction of range or reach), brand (an element id from

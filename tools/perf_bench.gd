@@ -12,6 +12,7 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -36,6 +37,8 @@ var out_path := ""
 var zone := ""
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
+var hunters := 6
+var wisps := false
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -67,6 +70,7 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
+		if a.begins_with("--bench-hunters="): hunters = maxi(2, int(a.substr(16)))
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -77,9 +81,9 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
-		win.size.y, win.scaling_3d_scale])
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [
+		hunters, wisps, Settings.quality(), RenderingServer.get_current_rendering_method(),
+		RenderingServer.get_video_adapter_name(), win.size.x, win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
@@ -87,8 +91,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)

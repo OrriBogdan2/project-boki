@@ -333,7 +333,7 @@ func _skid_streaks(from: Vector3, dir: Vector2) -> void:
 func _slide_end() -> void:
 	h.roll_t = 0.0
 	if rank("dash") >= 3:
-		h.add_buff("move_speed", 0.25, 2.0)
+		h.add_buff("move_speed", float(dash_def()["rank3_speed"]), float(dash_def()["rank3_speed_t"]))
 	var air := bool(slide.get("air", false))
 	if air and not h.gliding:
 		h.vel.x *= 0.25          # an air slide stops short instead of carrying on (a glide press carries it, item 4)
@@ -634,7 +634,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 		o["lift"] = 2.0
 		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
 		daze(f, float(bd["cone_rattle"]))         # the training dummy too
-		if f is Hunter and terrain_behind(f, away, 2.4):
+		if KnockWall.behind(m, f, away, 2.4):
 			wall_slams += 1
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
 			slam["dr"] = true
@@ -736,6 +736,7 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
+	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))   # placed walls stop it
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
 	# an ember body, a hot core, a bronze shimmer down its edges; the ember muzzle orb and its flare

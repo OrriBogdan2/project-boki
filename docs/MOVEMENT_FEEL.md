@@ -129,11 +129,11 @@ Nothing here comes from SUPERVIVE's files.
 | dive_release_glide_t (let go high up, back under the glider) | n/a | 0.48s | 0.3–0.7 | [game data] the canopy's usual catch, no landing |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
-| drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
-| drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
+| drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] |
+| drop_dive_steer_t (90% of the glide speed, in the dive) | 0.783s | 1.117s | 0.9–1.3s | [game data] a quarter of the glide's force (GlideDiveXYForceMultiplier) |
 | drop_deploy_frames | 1 | 1 | <= 1 | |
-| drop_deploy_settle_t | 0.267s | 0.217s | <= 0.3s | [est] |
-| drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
+| drop_deploy_settle_t | 0.267s | 0.200s | <= 0.3s | [est] |
+| drop_glide_steer_t | 0.583s | 0.283s | <= 0.35s | [game data] GlideTargetXYForce 162,500 / 100 kg toward MaxGlide 5 m/s |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
@@ -491,6 +491,45 @@ source number either way.
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
+## Edge knocks against the source (`--abyss-check` section 8; PARITY FIRST, decisions 2026-11-07)
+
+Asked: what the source does when a Hunter is knocked off an island. Evidence read: `supervive_physics.md` (Abyss rows), `supervive_kits.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, the hero-ref sheets (Kael, Grimble, Breah, Motley). **The source data answers almost none of it.** The footage sheets show only that an Air Slam or a dunk over the abyss ends in a KNOCK callout (juggernaut.md 0291-0292, breah.md 0989). So most rows below are [est] ours, kept as they are and measured; only the last fix changes behaviour.
+
+| Question | Source | Ours (measured) | Verdict |
+|---|---|---|---|
+| Glider open at once off a knock, mid-knock or after? At what heat? | Nothing published (`bAllowsMantlingFromAbyss` true; hits on a glider drain heat, wiki). | A shove over 4 m/s shuts the glider for 0.4 s (`kb_t`); the longest knock is 0.35 s, so a held glide opens 0.42 s in, after the knock. A shove of 2.5 to 4 m/s opens it mid-knock (0.12 s). Heat never gates it: an overheated glider opens the same. | [est] kept; asserted for hard knocks at 0% and 100% heat. |
+| Overheated glider out of the abyss | Owner decision: lifts at half strength while it burns. | Peak lift 6.1 vs 11.5 m/s from 7 m, 8.7 vs 16.7 from 12 m (0.53x, 0.52x); back at the lip in 1.2 to 1.6 s. | Matches; now asserted (it had no check). |
+| Ledge grab or mantle while knocked | `bAllowsMantlingFromAbyss` true; no knock rule. | A knocked Hunter catches a rim from below; only a launch over 8 m/s within 0.3 s of the knock waits, and a stun, root or a fresh knock ends a rise. | [est] kept (section 2). |
+| Kill credit after a knock-off | Not published. | The last attacker keeps the abyss kill for 4.0 s after a hard knock (`Match.on_fell`, `kb_t`), then the fall is nobody's. | [est] kept. Gap, not changed: Grimble's reel, Motley's Trade and a soft shove (under 4 m/s) never start the 4 s, so a fall after them credits nobody. Fixing it needs the tow and the swap to carry the caster over Net (`Net.VERSION`). |
+| Walking or being shoved off | Source `bCanWalkOffLedges` false; owner: always allowed. | A person is never blocked. **Fixed:** a bot's edge guard held a bot at the rim after a 2.5 to 5.8 m/s shove, so the knock-off failed on bots only. The guard now ignores a knock (`knock_t`) and 0.6 s after a hard one. | Asserted: 4.5 m/s at the rim carries player and bot over. |
+| Grimble's arm | Pierces terrain, pulls the first target, which is STUNNED all the pull; Grimble is GROUNDED. | Stun kept on the foe through the reel (so no glider), dragged over rocks and cliffs, the abyss takes it. Hover over the abyss while the arm flies is an owner ask (items 31, 75). | Matches. |
+| Kael's chain | Attaches to a foe or wall; recast pulls him about 5 bh in 0.4 s. | A dash toward the anchor: it ends over the abyss like any dash and the glider and lift take over. | Matches. |
+| Motley's Trade | Swaps a foe and Motley. | Owner override: hover-swap over the abyss. Foes land at Motley's spot, so a swap from over the abyss drops them. | Matches. |
+
+Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
+## The expedition drop against the source (`--drop-feel-check`; ext/drop-parity)
+
+Tags as in docs/KIT_PARITY.md: [D] game data (briefs/supervive-data/supervive_physics.md), [F] footage (briefs/hero-ref),
+[O] owner note, [est] ours. The hero-ref footage never shows the opening drop itself (it is cut from ability clips and
+the practice range), so the dive, the opening and the steering rest on the game data and the owner's item 163; the
+landing rows come from each Hunter's "Jump and landing" section. Measured with seed 4242, 60 Hz steps.
+
+| What | Source | Ours before | Ours now | Tag | Where |
+|---|---|---|---|---|---|
+| Dive fall speed | the glider's plunge 32.5 m/s at 35 m/s² [D]; the drop: a 2-3 s rocket lock, then a long readable glide from a high start, 18-22 s to the ground [O] | 13 m/s [est], ~12 s | 5.0 m/s for the launch and the tutorial's skydive: the lock ends 57 m up, the ground comes 19.4 s after the ship | [O] | `Hunter.DIVE_FALL` |
+| Dive steering | the keys keep 0.25 of the glide's force [D] | 45 m/s² toward 14 m/s (90% in 0.23 s) | 4.06 m/s² toward 5 m/s (90% in 1.12 s) | [D] | `DropFeel.steer`, `HunterMove.dive_steer` |
+| Glider opens: when | the lock's end at 2.5 s, or Separate after 1.5 s [O]; a plunge ends 3.5 m up and the glide catches you [D] | lock 2.5 s; by itself 8 m up [est] | lock 2.5 s (unchanged); by itself 3.5 m up (3.40 measured, one step late) | [O] [D] | `DropLaunch.LOCK_S`, `Hunter.DEPLOY_H` |
+| Glider opens: how | no number: GlideStartFallSpeedMin -0.85 and the exit -0.4 m/s are thresholds, not a catch | the fall checks to 1.6 m/s, settles to the sink in 0.2 s | the same | [est] | `Hunter.DEPLOY_POP`, `DROP_VY_RATE` |
+| Glide steering | GlideTargetXYForce 162,500 / 100 kg = 16.25 m/s² toward MaxGlide 5 m/s [D]; "slower, heavier, steering has inertia" [O] | 26 m/s² toward 8 m/s, a 30 m/s² brake | 16.25 m/s² toward 5.0 m/s (90% in 0.28 s); letting go brakes with the same force (the source's braking forces are locked) | [D] | `DropFeel.steer` on `Hunter.GLIDE_ACCEL` / `GLIDE_SPEED` |
+| Sink under the canopy | high over the ground the glider is pulled down at up to 3.5 m/s [D] | 4.2 m/s [est] | 3.5 m/s | [D] | `Hunter.DROP_FALL` |
+| Flare over the last metres | none known: under 8.5 m the source holds height and the landing is the player's | 2.2 m/s over the last 4 m | the same | [est] | `DropFeel.FLARE_*` |
+| Landing recovery | a plain landing is a low crouch ~0.1 s and up in ~0.05 s, no lockout (dancer); big moves end in a ~0.4-0.5 s low crouch (bjorn, juggernaut) [F] | no lockout; a `land_t` timer that nothing read | no lockout: moving 0.03 s after touchdown; the landing clip plays 0.36-0.42 s; `land_t` deleted | [F] | `warden_anim/*.json` "land" |
+| Landing pose | a low crouch; the deepest onto the knees (juggernaut); none for a hoverer (ostra) or Linwick's jetpack set-down [F] | squash 0.45 | the same: 0.45, a low crouch | [F] | `DropFeel.LAND_SQUASH` |
+
+Kept as built: the planning phase, the drop leader, the squad's rocket launch in formation (followers now cap against the
+leader's own speed, so the 14 m/s launch and the 5 m/s glide both hold the slots), and Separate only once the drop is
+made (ext/drop-solo-after). Open: Ostra's hover and Linwick's set-down have no crouch in the source; that is the warden
+clips' business, not the drop's.
 
 ## Dash direction with no keys (`--move-feel-check` "standing dash" rows)
 The shared rule (`ArchKit.dash_dir`, `Hunter.dash_with`): the move keys held on the press tick, else the cursor (`aim_dir`; the body's facing only if the cursor sits on the hunter). Keys released a tick before Shift count as no keys. Mid-turn the dash takes the keys held on that tick. The "Dash toward the cursor" setting always uses the cursor. Moving = WASD is DECISIONS ("Dashes follow WASD by default"). Sources: briefs/hero-ref/<hero>.md, briefs/supervive-data/supervive_kits.md. [?] = the footage doesn't show it.

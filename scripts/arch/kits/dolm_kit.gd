@@ -358,6 +358,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if h.ctrl != "local":
 		# a bot: punches up close, throws boulders from range
 		if held and h.fire_cd <= 0.0:
+			h.fire_cd = float(lmb_def()["boulder"]["rate"])
 			var tg := _bot_target()
 			if tg and h.flat_dist(tg) < 3.0: _punch(0.6)
 			else: _boulder()
@@ -367,6 +368,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if h.fire_cd > 0.0:
 				return true
 			lmb_t = 0.0
+			# the cooldown starts on the press, not the release (patch 2.01)
+			h.fire_cd = float(lmb_def()["boulder"]["rate"])
 		lmb_t += dt
 		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
@@ -403,7 +406,6 @@ func _boulder() -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	lmb_t = -1.0
 	h.mel_hold = 0.0
-	h.fire_cd = float(bd["rate"])
 	h.idle_fire = 0.0
 	boulders += 1
 	play("breah_throw")
@@ -440,7 +442,6 @@ func _punch(k: float) -> void:
 	var pd: Dictionary = lmb_def()["punch"]
 	lmb_t = -1.0
 	h.mel_hold = 0.0
-	h.fire_cd = float(pd["rate"])
 	h.idle_fire = 0.0
 	punches += 1
 	play("breah_punch")
@@ -485,7 +486,7 @@ func _punch(k: float) -> void:
 		f.hurt(dmg, h, o)
 		landed += 1
 		_punch_impact(f.pos, dir, k)
-		if terrain_behind(f, dir, 1.6):
+		if KnockWall.behind(m, f, dir, 1.6):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})

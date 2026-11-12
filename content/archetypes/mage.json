@@ -6,7 +6,7 @@
 	"personality": "A street kid struck by the Wyrm's storm in the market square. The bolt took her right eye and left the storm inside her, burning hot pink.\nShe climbs the highest spires to chase storms, throws lightning straight from her hands, and swears she'll give the Wyrm's bolt back to it someday. She has never told anyone she is also looking for Rink, the boy she lost in the storm.",
 	"weight": "light",
 	"plate_offset": 2.2,
-	"body": {"size": 1.098, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.05, "shoulder": 0.85, "build": 0.92, "hit_r": 0.4},
+	"body": {"size": 1.098, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.05, "shoulder": 0.85, "build": 0.92, "hit_r": 0.41, "hit_h": 1.87, "body_r": 0.4},
 	"model_glow": {"core": "#ff3fb4"},
 	"color": "#ff5ab4",
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
@@ -37,7 +37,7 @@
 	},
 	"passive": {
 		"name": "Static",
-		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health."
+		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back."
 	},
 	"dash": {
 		"id": "wirerun",
@@ -144,11 +144,11 @@
 		"after": 0.5,
 		"range": 14.4,
 		"radius": 2.7,
-		"dmg": 22.0,
+		"dmg": 9.0,
 		"push": 8.0,
 		"lift": 0.4,
 		"stacks": 1,
-				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 9, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",
@@ -164,12 +164,20 @@
 	"rank_cd": {"sec": [1, 0.9, 0.8], "dash": [1, 0.9167, 0.8333], "kin": [1, 1, 0.75]},
 	"rank_dmg": {"sec": [1, 1.2, 1.9], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
 	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
-	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
+	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage 20 -> 25 (+25%), cooldown unchanged."},
 	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",
 		"dash_spent": "a fading lightning streak where the run went"
+	},
+	"src": {
+		"lmb": "[D] [F] [O] (owner items 70, 116) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},

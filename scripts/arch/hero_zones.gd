@@ -54,7 +54,7 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null
 	return true
 
 static func _under(e: Ent, p: Vector3, g: float) -> bool:
-	var near := Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.r + 0.15
+	var near := Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.hull_r() + 0.15
 	return near and absf(e.pos.y - g) < 2.0
 
 ## Where a zone cast measures its ground from: the caster, or the terrain under them in the air or a glide (a

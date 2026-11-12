@@ -261,6 +261,7 @@ func _process(delta: float) -> void:
 		n.position = pos
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * 0.1
 	cam.follow(Vector3(W * 0.5, 0, D * 0.5 - 0.6).lerp(ppos, 0.2), d, false)
+	Sfx.set_ears(ppos, cam.yaw)
 	if decorating:
 		dec.tick(d)
 	else:

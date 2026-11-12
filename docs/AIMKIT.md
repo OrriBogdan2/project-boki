@@ -270,3 +270,6 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
+- **Bots dodge them.** A shape shown with `all` (a circle, lane or cone) is a hostile area to the other
+  team's bots: `BotDodge` (scripts/match/bot_dodge.gd) walks a bot out of it, or dashes with a real charge,
+  after the difficulty's `react` time x 2. Check: `--bot-dodge-check` (normal out at least 70%, easy under 40%).

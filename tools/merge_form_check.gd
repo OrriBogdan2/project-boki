@@ -211,7 +211,7 @@ func _xform() -> void:
 	P.ult = 1.0
 	var pressed := KinMerge.press(P)
 	ok(not pressed and not KinMerge.active(P) and is_equal_approx(P.ult, 1.0), "R with the Boki downed does nothing and keeps the full meter")
-	ok(KinMerge.deny_text(P) == "Rescue %s to merge" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
+	ok(KinMerge.deny_text(P) == "Rescue %s to fuse" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
 	P.ult = 0.5
 	Bond.add(P, 0.1)
 	ok(P.ult > 0.5 or before > 0.0, "the bond meter keeps filling while the Boki is down")
@@ -588,7 +588,8 @@ func _tiers() -> void:
 	var l := MergeShell.size_for("light", f2)
 	var md := MergeShell.size_for("medium", f2)
 	var hv := MergeShell.size_for("heavy", f2)
-	ok(l == roundf(80 * 1.3) and md == roundf(110 * 1.3) and hv == roundf(150 * 1.3), "Heavy Star shell by weight class: %d / %d / %d" % [l, md, hv])
+	var sk := float(Content.merge_form("titan")["shell_k"])
+	ok(l == roundf(80 * sk) and md == roundf(110 * sk) and hv == roundf(150 * sk), "Heavy Star shell by weight class: %d / %d / %d" % [l, md, hv])
 	var fs := MergeForm.kit_form("stormwing")
 	var fp := MergeForm.kit_form("tidal_shell")
 	ok(MergeShell.size_for("medium", fs) == roundf(110 * 0.8) and MergeShell.size_for("medium", fp) == roundf(110 * 1.1), "form multipliers: Stormwing x0.8 (%d), Prism Shell x1.1 (%d)" % [MergeShell.size_for("medium", fs), MergeShell.size_for("medium", fp)])

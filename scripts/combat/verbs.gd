@@ -95,10 +95,11 @@ func _break_wall(w: Dictionary) -> void:
 static func blocks_sight(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
-## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
-static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
+## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
+## crosser class (Blockers): "phase" for a Spirit Walk.
+static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		var top := wall_top(w, y)
+		var top := wall_top(w, y, cls)
 		if top <= 0.0:
 			continue
 		var p := Vector2(x, z)
@@ -108,9 +109,9 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 	return 0.0
 
 ## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
-## block movement, or the body is above or on it).
-static func wall_top(w: Dictionary, y: float) -> float:
-	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+## block movement, or is not one its class stops (Blockers), or the body is above or on it).
+static func wall_top(w: Dictionary, y: float, cls := "body") -> float:
+	if not w["move"] or not Blockers.wall_stops(w, cls) or absf(y - float(w["y"])) > 1.9:
 		return 0.0
 	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
 	var top := StoneStand.top_for(w) if w.has("top") else 3.0
@@ -337,8 +338,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
+	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
-		if not _stops(w, int(s["team"]), p, float(s["r"])):
+		if not Blockers.wall_stops(w, cls) or not _stops(w, int(s["team"]), p, float(s["r"])):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):

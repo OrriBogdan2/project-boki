@@ -1,13 +1,15 @@
 class_name LevelGrowth
 extends RefCounted
 ## Quiet growth: every level a hunter reaches makes them a little tougher (max health) and their
-## abilities a little stronger (ability power), with no banner. Levels 2-6 grow at the full rate,
-## levels 7-10 at half (content/rules/level_growth.json). The level badge flashes and its tooltip
-## shows the totals (LevelGrowth.tip). Weapon growth is separate: WeaponPath on even levels.
+## abilities a little stronger (ability power), with no banner. Both grow in a straight line, the same
+## share every level, as in the source (content/rules/level_growth.json, docs/ABILITIES.md). The level
+## badge flashes and its tooltip shows the totals (LevelGrowth.tip). Levels grow nothing else: no weapon
+## bonuses, only ability ranks.
 ##
 ##   LevelGrowth.hp_pct(lvl) / ap_pct(lvl)   the total share gained by that level (0 at level 1)
 ##   LevelGrowth.apply(h)                    brings a hunter's max health up to their level's growth
 ##   LevelGrowth.ap(h)                       the ability power multiplier (1.0 at level 1)
+##   LevelGrowth.hp(h)                       the max health multiplier, for shields that scale with it
 
 static var _rules: Dictionary = {}
 
@@ -17,18 +19,13 @@ static func rules() -> Dictionary:
 		_rules = d if d is Dictionary else {}
 	return _rules
 
-## The rate a single level adds (k = "hp" or "ap"): full up to level 6, half from level 7.
-static func step(k: String, lvl: int) -> float:
-	if lvl < 2:
-		return 0.0
-	var r := float(rules().get(k, 0.0))
-	return r * float(rules().get("half_k", 0.5)) if lvl >= int(rules().get("half_from", 7)) else r
+## The share one level adds (k = "hp" or "ap"), the same for every level past the first.
+static func rate(k: String) -> float:
+	return float(rules().get(k, 0.0))
 
+## The total share gained by a level: one rate for each level past the first.
 static func _total(k: String, lvl: int) -> float:
-	var t := 0.0
-	for l in range(2, lvl + 1):
-		t += step(k, l)
-	return t
+	return rate(k) * float(maxi(lvl - 1, 0))
 
 static func hp_pct(lvl: int) -> float:
 	return _total("hp", lvl)
@@ -40,6 +37,10 @@ static func ap_pct(lvl: int) -> float:
 ## straight on the hunter (practice, tests) grows nothing, the same as its health.
 static func ap(h) -> float:
 	return 1.0 + ap_pct(int(h.get_meta("growth_lvl", 1))) if h is Hunter else 1.0
+
+## Max health from levels gained, as a multiplier on the class's base (a shield that scales with max health).
+static func hp(h) -> float:
+	return 1.0 + hp_pct(int(h.get_meta("growth_lvl", 1))) if h is Hunter else 1.0
 
 ## Max health from levels, kept on the hunter as "growth_hp" so it never stacks; the new health is
 ## added to the bar too (levelling up never costs you health).
@@ -67,8 +68,5 @@ static func reset(h) -> void:
 static func tip(h) -> String:
 	var l := int(h.get_meta("growth_lvl", 1))
 	if l < 2:
-		var hp_gain := roundi(step("hp", 2) * 100.0)
-		var ap_pct := roundi(step("ap", 2) * 100.0)
-		var half_from := int(rules().get("half_from", 7))
-		return "Each level: +%d%% max health, +%d%% ability power (half from level %d)" % [hp_gain, ap_pct, half_from]
+		return "Each level: +%d%% max health, +%.1f%% ability power" % [roundi(rate("hp") * 100.0), rate("ap") * 100.0]
 	return "From levels: +%d%% max health, +%d%% ability power" % [roundi(hp_pct(l) * 100.0), roundi(ap_pct(l) * 100.0)]

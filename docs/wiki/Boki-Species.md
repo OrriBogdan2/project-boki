@@ -198,7 +198,7 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting 
 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
-- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
+- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 8% more damage, and your shots poison and burst.
 - Evolution paths: Fierce: Fierce > Barbed Tail; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Bellowary
@@ -419,7 +419,7 @@ _Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folde
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 5% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Skateron
@@ -579,7 +579,7 @@ _Leafcutter ant + Leaf_ (`marchleaf`). A leafcutter ant hauling a leaf ten times
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 5% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Lanterloris
@@ -639,7 +639,7 @@ _Aardvark + Termite clay spire_ (`moundvark`). An aardvark with a termite cathed
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 5% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Murmurling
@@ -659,7 +659,7 @@ _Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; eve
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 5% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Mirrolin
@@ -699,7 +699,7 @@ _Lynx kitten + Stinging nettle_ (`nettlynx`). A lynx kitten whose ear tufts and 
 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
-- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
+- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 8% more damage, and your shots poison and burst.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Boltstrich
@@ -819,7 +819,7 @@ _Shrew + Hoarfrost_ (`rimeshrew`). A tiny shrew with a frost-feathered coat that
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 5% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Chuggamus
@@ -1019,7 +1019,7 @@ _Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles fo
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 5% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Lunowl

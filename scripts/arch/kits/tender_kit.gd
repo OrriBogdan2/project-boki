@@ -20,7 +20,7 @@ var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s o
 var burr_n := 0
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
-var emp_until := 0.0           # the ember in flight left an idle gun (long range, double refund)
+var emp_until := 0.0           # the next ember left an idle gun (Empowered: look and sound only)
 var lock_t := 0.0              # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
 var carry_t := 0.0
@@ -93,8 +93,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if src == "shot":
 		var had := kindle_on(t)
 		if had > 0:
-			var emp: bool = m.time < emp_until
-			wind_back_hearth(float(res_def().get("emp_refund" if emp else "refund", 0.2)))
+			wind_back_hearth(float(res_def().get("refund", 0.2)))
 		add_kindle(t, 1)
 	elif src == "abil" and String(o.get("ab", "")) == "utility" and o.get("kindle", false):
 		add_kindle(t, 1)
@@ -111,9 +110,8 @@ func _tick(dt: float) -> void:
 		e["left"] = float(e["left"]) - dt
 		if float(e["left"]) <= 0.0 or not is_instance_valid(e["t"]) or (e["t"] as Ent).dead:
 			kind.erase(key)
-	# an idle gun: the next ember flies further (and winds Hearthlight back twice as much)
+	# an idle gun: the next ember is Empowered (the source gives no effect, so it only looks different)
 	if h.idle_fire >= 1.0 and not h.downed:
-		h.shot_range_k = 1.4
 		emp_until = m.time + 0.9
 	_tick_seed(dt)
 	_tick_burrs(dt)
@@ -150,7 +148,8 @@ func _tick_look(dt: float) -> void:
 		ult_look.tick(dt)
 
 func _dress_ember(s: Dictionary) -> void:
-	var emp: bool = float(s["life0"]) * (s["vel"] as Vector2).length() > float(h.wpn["range"]) * 1.2
+	var emp: bool = m.time < emp_until
+	emp_until = 0.0
 	var right := h.shot_n % 2 == 1
 	var d2 := h.aim_dir()
 	# the ember leaves from the casting hand's side at hand height (the hit band is the same)
@@ -237,7 +236,7 @@ func _tick_carry(dt: float) -> void:
 			break
 		pick_up(o)
 
-## Taking damage drops whoever you carry, with the lock.
+## Any damage drops whoever you carry, with the lock (data: "too much damage", no figure; the shield is cut).
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.0 and not carrying().is_empty():
 		drop_all(true)
@@ -406,6 +405,14 @@ func burst_radius() -> float:
 	var r3_k := float(seed_def.get("r3_k", 2.0))
 	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
 
+## Rank 3 (the source's tier IV): the burst takes "burst_ap_r3" times the ability power bonus the
+## hunter's level gives (1.0 at level 1, where there is none).
+func burst_ap_k() -> float:
+	var ap := LevelGrowth.ap(h)
+	if rank("sec") < 3:
+		return 1.0
+	return (1.0 + (ap - 1.0) * float(rmb_def()["seed"]["burst_ap_r3"])) / ap
+
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n})
@@ -464,7 +471,7 @@ func _burst(t: Ent) -> void:
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(
-				float(sd["burst_dmg"]) * power("sec"), h,
+				float(sd["burst_dmg"]) * power("sec") * burst_ap_k(), h,
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
@@ -584,8 +591,10 @@ func _tick_hearth(dt: float) -> void:
 func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
+## Hearthlight's healing by rank: the E row of rank_dmg (+22.5%, then +50%, the source's), grown by the
+## level's ability power (LevelGrowth.ap).
 func heal_k() -> float:
-	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1))
+	return rank_k("rank_dmg", "kin", 1.0) * LevelGrowth.ap(h)
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
@@ -596,7 +605,7 @@ func _pulse(c: Vector3, per: float) -> void:
 			continue
 		if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > hearth_r() + o.r:
 			continue
-		var amt := per * heal_k() * boost * (float(ed.get("self_k", 0.33)) if o == h else 1.0)
+		var amt := per * heal_k() * boost
 		_mend(o, amt, float(ed.get("wisp_k", 5.0)))
 
 ## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
@@ -622,7 +631,7 @@ func _hearth_end(flare: bool) -> void:
 			if o.downed:
 				_mend(o, amt, float(ed.get("wisp_k", 5.0)))
 			else:
-				_mend(o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
+				_mend(o, amt)
 	else:
 		m.sfx("knock", c, -6.0, 1.4)
 	lk().drop("hearth")
@@ -761,13 +770,13 @@ func _tick_call(dt: float) -> void:
 		_call_end(true)
 
 
-## A tick of the tether's heal on the teammate (or herself in solo, at self_k). A downed teammate is healed
+## A tick of the tether's heal on the teammate (or herself in solo). A downed teammate is healed
 ## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
 	if who == h:
-		_mend(h, amt * float(e_def().get("self_k", 0.33)))
+		_mend(h, amt)
 	else:
 		_mend(who, amt, float(e_def().get("wisp_k", 5.0)))
 
@@ -842,12 +851,19 @@ func _bot_idle(dt: float) -> void:
 	# squadmate hurt nearby: light the lantern; carrying under fire: run away from the nearest rival
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and hearth.is_empty() and not busy():
 		var need := 0.0
-		for o in CareUtil.mates(m, h, h.pos, float(e_def()["radius"]) - 0.6, true):
+		# (a hurt squadmate outside the ring gets the light thrown to them, below)
+		for o in CareUtil.mates(m, h, h.pos, float(e_def()["reach"]), true):
 			need += (o.max_hp - o.hp) if not o.downed else 40.0
 		if h.hp < h.max_hp * 0.6:
 			need += (h.max_hp - h.hp) * 0.33
 		if need > 30.0:
 			h.inp["sig"] = true
+	if e_t > 0.0 and e_recastable():
+		for o in CareUtil.mates(m, h, h.pos, float(e_def()["reach"])):
+			if h.flat_dist(o) > float(e_def()["radius"]) and o.hp < o.max_hp * 0.7:
+				h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)       # E again: the light goes to them
+				h.inp["sig"] = true
+				break
 	var cs := carrying()
 	if cs.is_empty():
 		safe_t = 0.0

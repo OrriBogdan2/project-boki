@@ -52,8 +52,6 @@ var down_t := 0.0                 # downed: seconds until it comes round on its 
 var down_total := 0.0
 var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it and carry it; a drop loses it)
 var rescue_on := false            # downed: its owner is carrying it in their arms right now
-var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
-var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
 var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
 var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
 var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a drop)
@@ -64,7 +62,7 @@ var hesitate_t := 0.0
 var hesitate_to := Vector3.INF
 var revive_wait := 0.0
 var callout_seen := {}
-var think_t := 0.0
+var think_t := 0.0                 # out of combat: seconds until it looks for a fight again (_may_think)
 var hop_ph := 0.0
 var home := Vector3.ZERO          # wild kin wander around here
 var wander_to := Vector3.INF
@@ -97,6 +95,8 @@ var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
+var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
+var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -156,7 +156,9 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	brain = KinTactics.new(self)
 	if owner_h:
 		comp = KinCompanion.new(self)
-	set_model(Models.kin(species, rec))
+	wisp = owner_h != null and KinWisp.mode(match_node)
+	summon = KinSummon.new(self) if owner_h else null
+	set_model(KinWisp.look(self))
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
@@ -265,7 +267,7 @@ func bark(cat: String) -> void:
 
 # ------------------------------------------------------------------ owner commands
 func throw_to(p: Vector3, slot := "") -> void:
-	if dead or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
+	if dead or wisp or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
 		return
 	if state == "active":
 		if slot == "":
@@ -601,6 +603,12 @@ func sim(dt: float) -> void:
 		if shield_t <= 0.0: shield = 0.0
 	if runner:
 		runner.tick(dt)
+	if summon and not remote:
+		summon.tick(dt)
+	if KinWisp.ride(self):
+		if not remote:
+			KinRegen.tick(self, dt)
+		return
 	if remote:
 		if state != "shoulder":
 			net_follow(dt)
@@ -816,7 +824,7 @@ func _sim_active(dt: float) -> void:
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
-		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+		elif _target_stale(dt) and _may_think():
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
@@ -852,6 +860,23 @@ func _sim_active(dt: float) -> void:
 			wish = Vector2.ZERO
 	_ground_move(wish, dt)
 	KinFollow.watch_stuck(self, wish, dt)
+
+## Its target is gone, out of reach, or it fancies a change (a few times a minute).
+func _target_stale(dt: float) -> bool:
+	if target == null or target.dead or not target.hittable() or (target is Hunter and target.downed):
+		return true
+	return flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5
+
+## In combat (its own or its owner's, InCombat) a Boki looks for a fight every step; out of it, at
+## InCombat.CALM_HZ only (the perf pass: companion AI ticks slower when nothing is happening).
+func _may_think() -> bool:
+	if InCombat.is_in(self) or (owner_h != null and InCombat.is_in(owner_h)):
+		think_t = 0.0
+		return true
+	if think_t > 0.0:
+		return false
+	think_t = 1.0 / InCombat.CALM_HZ
+	return true
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
@@ -901,6 +926,8 @@ func _hop_on() -> void:
 
 func go_down(fell := false) -> void:
 	_end_merge("downed")
+	if summon and summon.knocked():
+		return
 	KinDowned.begin(self, fell)
 	if owner_h:
 		note("fainted", "went down in a fight" if not fell else "fell off the island", -0.5)
@@ -972,7 +999,7 @@ func _sim_dazed(dt: float) -> void:
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused", "downed"]:
+	if state in ["dazed", "bench", "fused", "downed"] or wisp:
 		return 0.0
 	var bh := BokiHit.take(self, d, opts)
 	d = float(bh[0])

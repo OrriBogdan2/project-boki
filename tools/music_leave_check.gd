@@ -125,7 +125,7 @@ func _match_to_title() -> void:
 			if m.world.is_void(q.x, q.z):
 				edge = q; break
 		if edge != Vector3.INF: break
-	P.dmg_done += 10.0
+	P.combat_at = m.time          # a fight on, so the drive stem is up
 	step(m, 8.0)
 	Sfx.amb_layer("abyss", 1.0)     # (as music_dir does at an edge)
 	Sfx.amb_layer("ruins", 1.0)

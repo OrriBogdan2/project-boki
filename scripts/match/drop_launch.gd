@@ -8,7 +8,7 @@ extends RefCounted
 
 const LOCK_S := 2.5              # s you are locked into the launch
 const SEPARATE_AFTER_S := 1.5    # s before Separate can break you off early
-const LAUNCH_SPEED := 14.0       # m/s along the ship's heading (the dive's own top speed)
+const LAUNCH_SPEED := 14.0       # m/s along the ship's heading; the glide's force sheds it once you break off
 const LAUNCH_VY := 6.0           # m/s up out of the hatch: the arc
 
 static func start(h: Hunter, dir: Vector3) -> void:

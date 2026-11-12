@@ -15,7 +15,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Torch Lance | the Ashen Kiss | heavy | 2.7 | 0.1s | none | none | 6.1m | Hold to pour fire from your hand 6m ahead: the stream trails behind a sweep, narrow at the palm and billowing at the end. It burns as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
 | Greatsword | the Unbroken | heavy | 11 | 0.5s | none | none | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | the Snowglide | light | 4 | 0.18s | none | none | 10m | A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: four darts, then three large ones that hit twice as hard, fly faster and reach further, and round again. Eight on one foe Shatter them. While skating they fly as fast, thick beams that hit twice as hard and home in the same way. |
-| Ember Cast | the Dawnfox | medium | 8 | 0.4s | none | none | 12m | Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
+| Ember Cast | the Dawnfox | medium | 8 | 0.4s | none | none | 12m | Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one is Empowered, with its own push and chime. |
 | Longbow | the Red Stitch | light | 30 | 0.5s | none | none | 12m | Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor (a click under 0.08s looses nothing: mashing never beats the draw). You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | none | none | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | none | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |
@@ -33,18 +33,18 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 ## Weapon upgrades
 
-No weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.
+No weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.
 
 | Upgrade | Effect | Stacks |
 |---|---|---|
 | Hotload | Your weapon hits 10% harder. | 4 |
 | Deep Magazine | 20% more rounds before a reload. | 3 |
 | Quick Feed | Your weapon fires 7% faster. | 3 |
-| Long Reach | 12% more range (and reach, for blades). | 2 |
+| Long Reach | 12% more range, or reach for blades. | 2 |
 | Ember Brand | Your hits burn: 5 damage a second for 3s. | 1 |
-| Rime Brand | Your hits chill, and every 5th freezes. | 1 |
-| Storm Brand | Every 4th hit arcs to 2 more foes. | 1 |
-| Venom Brand | Your hits poison and slow. | 1 |
+| Rime Brand | Your hits slow 35% for 1s, and every 5th roots for 0.6s. | 1 |
+| Storm Brand | Every 4th hit arcs to 2 more foes for half damage. | 1 |
+| Venom Brand | Your hits poison for 3 damage a second for 3s and slow 35% for 0.35s. | 1 |
 | Hollow Brand | Your hits heal you for 8% of the damage. | 1 |
 
 ## Weapon elements
@@ -79,30 +79,30 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Perk | Effect | Stacks |
 |---|---|---|
 | Quick Hands | Reload 30% faster. | 1 |
-| Second Wind | One extra dash charge. | 1 |
-| Featherfall | Your glider lasts 60% longer. | 1 |
+| Second Wind | Dashes recharge 5% faster. | 1 |
+| Featherfall | Your glider holds 60% more heat. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
-| Tough Skin | +15 max health, healed right away. | 3 |
+| Tough Skin | +8 max health, healed right away. | 3 |
 | Overcharge | Your bond ultimate charges 30% faster. | 1 |
 | Keen Edge | 8% more damage. | 3 |
-| Fleet Foot | 6% faster on foot. | 2 |
+| Fleet Foot | 1% faster on foot. | 2 |
 | Plating | +20 max armor. | 2 |
-| Clear Mind | Abilities recharge 12% faster. | 2 |
+| Clear Mind | Abilities recharge 5% faster. | 2 |
 | Tailwind | Glide 15% faster. | 1 |
-| Remedy | Tonics heal 40% more. | 1 |
-| Field Surgeon | Needle and thread: tonics heal 35% more. | 1 |
-| Magpie Pouch | Shiny things stick: gems you pick up are worth 25% more. | 1 |
-| Wayfarer's Satchel | A deep bag: one more backpack slot. | 2 |
-| Brass Spyglass | See 12% further through grass and gloom. | 1 |
-| Tinker's Roll | A roll of small tools: reloads 15% faster. | 1 |
+| Remedy | Heals on you are 10% stronger. | 1 |
+| Field Surgeon | Tonics heal 35% more. | 1 |
+| Magpie Pouch | Gems you pick up are worth 25% more. | 1 |
+| Wayfarer's Satchel | One more backpack slot. | 2 |
+| Brass Spyglass | See 12% further while sneaking. | 1 |
+| Tinker's Roll | Reload 15% faster. | 1 |
 | Hotload | Your weapon hits 10% harder. | 4 |
 | Deep Magazine | 20% more rounds before a reload. | 3 |
 | Quick Feed | Your weapon fires 7% faster. | 3 |
-| Long Reach | 12% more range (and reach, for blades). | 2 |
+| Long Reach | 12% more range, or reach for blades. | 2 |
 | Ember Brand | Your hits burn: 5 damage a second for 3s. | 1 |
-| Rime Brand | Your hits chill, and every 5th freezes. | 1 |
-| Storm Brand | Every 4th hit arcs to 2 more foes. | 1 |
-| Venom Brand | Your hits poison and slow. | 1 |
+| Rime Brand | Your hits slow 35% for 1s, and every 5th roots for 0.6s. | 1 |
+| Storm Brand | Every 4th hit arcs to 2 more foes for half damage. | 1 |
+| Venom Brand | Your hits poison for 3 damage a second for 3s and slow 35% for 0.35s. | 1 |
 | Hollow Brand | Your hits heal you for 8% of the damage. | 1 |
 
 ## Without a class kit

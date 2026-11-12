@@ -648,11 +648,25 @@ func _all() -> void:
 		"dmg %.0f char %.0f blight %.1f shield %.1f" % [ak.dmg(T), K.char_of(T), T.blight_t, P.shield]
 	)
 	ok(
+		"cloak: Anti-Heal 3s and a shield of 6.4% + 5.1% per foe hit of max health, 3s (wiki: Heat Shield)",
+		T.blight_t > 2.0 and T.blight_t <= 3.0 and absf(P.shield - P.max_hp * 0.115) < 0.5
+			and P.shield_t > 1.5 and P.shield_t <= 3.0,
+		"blight %.1f shield %.2f of %.2f t %.1f" % [T.blight_t, P.shield, P.max_hp * 0.115, P.shield_t]
+	)
+	ok(
 		"cloak: foes in sight are dragged toward you", P.flat_dist(T) < 2.6 and K.pulled >= 1,
 		"dist %.1f" % P.flat_dist(T)
 	)
 	ok("cloak: the swirling fire shield shows while it holds", K.fx.shown("swirl%d" % P.get_instance_id()))
 	var pulled_far: float = P.flat_dist(T)
+	# the cloak's shield is a 3 s pool that drops whole at its time (0.7 s already stepped)
+	ak.step(m, float(K.e_def()["shield_t"]) - 0.9)
+	var held: bool = P.shield_t > 0.0
+	ak.step(m, 0.4)
+	ok(
+		"cloak: the shield is gone at its 3 s", held and P.shield_t <= 0.0 and P.shield == 0.0,
+		"t %.2f shield %.1f" % [P.shield_t, P.shield]
+	)
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	ak.aim_at(P, T.pos)

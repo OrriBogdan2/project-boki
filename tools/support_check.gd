@@ -86,18 +86,69 @@ func run(mn: Node, md := "all") -> void:
 	ults.sc = self
 	var anims = load("res://tools/rimewright_anim_check.gd").new()
 	anims.sc = self
+	var carry = load("res://tools/care_carry_check.gd").new()
+	carry.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
+		await _ranks("tender")
 		await combos.tender()
+		await carry.tender()
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
+		await _ranks("rimewright")
 		await combos.rimewright()
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Upgrade parity (docs/heroes/<id>.md): per rank [RMB cd, dash recharge, E cd, RMB power, E power, air dash cd]
+## against the source's tier II / III+IV numbers.
+func _ranks(arch: String) -> void:
+	var r := setup(arch)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: ArchKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
+		var pe: float = K.heal_k() if K is TenderKit else K.power("kin") / pk
+		var cd_r: float = K.rmb_def()["cooldown"] * K.cd_k("sec")
+		up.append([cd_r, P.dash_regen(), cd_e, K.power("sec") / ps, pe, K.long_dash_cd()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	if arch == "tender":
+		ok("upgrade parity: Burrseed damage +40% (rank 2), cooldown 10.5 -> 10.5 -> 7.8",
+				near.call(up[1][3], 1.4) and near.call(up[2][3], 1.4)
+				and near.call(up[1][0], 10.5) and near.call(up[2][0], 7.76), str(up))
+		ok("upgrade parity: Relay Step recharge 7 -> 6.25 -> 5.5, air glide 14 -> 12.5 -> 11",
+				near.call(up[1][1], 6.25) and near.call(up[2][1], 5.5)
+				and near.call(up[1][5], 12.5) and near.call(up[2][5], 11.0), str(up))
+		ok("upgrade parity: Hearthlight healing +22.5% / +50%, cooldown 11 -> 11 -> 8.25",
+				near.call(up[1][4], 1.225) and near.call(up[2][4], 1.5)
+				and near.call(up[1][2], 11.0) and near.call(up[2][2], 8.25), str(up))
+	else:
+		ok("upgrade parity: Ice Spear cooldown 10.2 -> 8.7 -> 7.2, damage +15% / +30%",
+				near.call(up[1][0], 8.71) and near.call(up[2][0], 7.22)
+				and near.call(up[1][3], 1.15) and near.call(up[2][3], 1.3), str(up))
+		ok("upgrade parity: Skate recharge 13 -> 11.5 -> 10",
+				near.call(up[1][1], 11.5) and near.call(up[2][1], 10.0), str(up))
+		ok("upgrade parity: Rink Wall cooldown 17 -> 14.9 -> 12.75, no rank damage on the wall",
+				near.call(up[1][2], 14.88) and near.call(up[2][2], 12.75)
+				and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
+		var hps: Array = []
+		for rk in [1, 3]:
+			P.slot_lv["kin"] = rk
+			K._raise_wall(Vector2(1, 0), 0.0)
+			hps.append(float(K.wall["hp0"]))
+		ok("upgrade parity: rank 3 (tier IV) Rink Wall is %d HP tougher" % int(K.e_def()["hp_rank3"]),
+				absf(hps[1] - hps[0] - float(K.e_def()["hp_rank3"]) * K.power("kin")) < 0.5, str(hps))
+	await _free(m)
 
 func _free(m: Match) -> void:
 	m.queue_free()
@@ -119,11 +170,11 @@ func _tender_support() -> void:
 	ok("Hearthlight: heals an ally in the ring", mid > h0 + 3.0, "%.1f -> %.1f" % [h0, mid])
 	step(m, 1.6)
 	ok("Hearthlight: flares at the end", not K.in_e() and A.hp > mid + 10.0, "-> %.1f" % A.hp)
-	# --- self heal is a third
+	# --- parity: no self-heal factor, she is healed like any ally (the source gives none)
 	P.hp = P.max_hp * 0.4; var p0 := P.hp; A.hp = A.max_hp
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.0)
-	ok("Hearthlight: heals you at a third", P.hp > p0 and (P.hp - p0) < 22.0, "+%.1f" % (P.hp - p0))
+	ok("Hearthlight: heals you in full, like an ally", (P.hp - p0) > 22.0, "+%.1f" % (P.hp - p0))
 	# --- a stun does not put it out (only the ultimate's channel breaks on a stun)
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false

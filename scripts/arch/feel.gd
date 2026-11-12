@@ -18,6 +18,10 @@ const CAT_ORDER := ["control", "damage", "sustain", "utility"]
 const RIM_ENEMY := Color("ff2d55")
 const RIM_OWN := Color(1, 1, 1, 0.9)
 
+## A rival's telegraph colour: the same colour leaned toward the hostile rim.
+static func hostile(col: Color) -> Color:
+	return col.lerp(RIM_ENEMY, 0.45)
+
 static func cat_color(cat: String) -> Color:
 	return CAT.get(cat, Color("e8f4ff"))
 

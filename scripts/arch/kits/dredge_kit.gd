@@ -426,7 +426,7 @@ func _grab(f: Ent, ally := false) -> void:
 		hook_hold = null
 		return
 	var rdf := rmb_def()
-	if f.mass() >= 6.0:
+	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
 		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul: a dull warning, no word
 		return

@@ -9,15 +9,25 @@ var st_t := 0.0
 var tgt: Ent = null
 var camp := Vector3.ZERO
 var atk_dir := Vector2.ZERO
-var atk_at := Vector3.ZERO
-var tele: Node3D = null
+var atk_at := Vector3.ZERO      # where a slam or burst lands; a lunge's start
+var atk_pad: float = MobTell.REF_R   # m, radius of who the tell is drawn for (MobTell grows its shapes by it)
+var tele: Array = []            # the ground tell: one Fx telegraph per shape
+var tele_t := 0.0               # s the filled tell still stays after the hit frame
+var glowing := false            # the wind-up body glow is on
 var cd := 0.0
 var wander := Vector3.INF
-var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
 var death_t := 0.0
+## The leash: a camp monster LEASH_M from its camp drops the fight, walks home at full speed paying
+## nobody any mind (homing) and is back to full health when it gets there.
+const AGGRO_M := 7.5         # m: an idle monster notices a Hunter this close
+const CHASE_M := 11.0        # m: a fighting monster switches to anyone this close to it
+const LEASH_M := 13.0        # m from its camp: past this it gives up the chase
+const HOME_M := 1.0          # m from its camp: home again, healed
+const HOME_T := 6.0          # s: the longest walk home (a void in the way); then it heals where it stands
+var homing := false
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
 ## hit, is stunned for a few seconds, takes extra damage the whole time, and the ability that did
@@ -26,6 +36,7 @@ const STAGGER_DMG := 2.5
 var stag_open := 0.0
 var stag_next := 0.0
 var stagger_t := 0.0
+var wallstun := 0.0                     # s the next wall slam stuns, when a hit asks for more than 1 s
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null           # a treasure kin slips away if nobody hurts it for a while
 
@@ -71,9 +82,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 	m.on_mob_dead(self, by, opts)
 
 func _cancel_tele() -> void:
-	if tele:
-		m.fx.end_telegraph(tele)
-		tele = null
+	MobTell.clear(self)
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if not remote and not dead and d > 0.0:
@@ -82,6 +91,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		elif stag_open > 0.0 and opts.has("ab"):
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
+	if opts.has("wallstun"):
+		wallstun = float(opts["wallstun"])
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0: calm_t = 0.0
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
@@ -90,7 +101,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		var real: Ent = by
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
-		if tgt == null or randf() < 0.4:
+		if not homing and (tgt == null or randf() < 0.4):
 			tgt = real
 			if st == "idle":
 				st = "chase"
@@ -139,7 +150,7 @@ func _engaged_on(t: Ent) -> int:
 	return n
 
 func _find_target() -> Ent:
-	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
+	var best: Ent = null; var bd := AGGRO_M if st == "idle" else CHASE_M
 	for h in m.hunters:
 		if not h.targetable() or m.demo_shielded(h):
 			continue
@@ -164,7 +175,7 @@ func sim(dt: float) -> void:
 	if remote:
 		st_t -= dt
 		net_follow(dt)
-		_net_telegraph()
+		_net_telegraph(dt)
 		return
 	dt = _far_step(dt)
 	if dt <= 0.0:
@@ -189,19 +200,14 @@ func sim(dt: float) -> void:
 	var wish := Vector2.ZERO
 	match st:
 		"idle":
-			if randf() < dt * 2.0:
-				tgt = _find_target()
-				if tgt:
-					st = "chase"
-			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
-				var a := randf() * TAU
-				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
-				if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
-					wander = q
-			if wander != Vector3.INF:
-				wish = dir_to(wander) * spd * 0.3
+			if homing:
+				wish = _walk_home(spd)
+			else:
+				wish = _idle_wander(dt, spd)
 		"chase":
-			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > 13.0:
+			if flat_dist(camp) > LEASH_M and not md.get("flee", false):
+				_leash_home()
+			elif tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > LEASH_M:
 				tgt = _find_target()
 				engaged = false
 				if tgt == null:
@@ -235,19 +241,11 @@ func sim(dt: float) -> void:
 				# track the target a little during the windup, then commit
 				if st_t > float(md["windup"]) * 0.4:
 					atk_dir = atk_dir.slerp(dir_to(tgt), dt * 4.0)
-					if tele:
-						m.fx.aim_telegraph(tele, pos, atk_dir)
-			if tele:
-				m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+			MobTell.update(self)
 			if st_t <= 0.0:
 				_strike()
 		"lunge":
-			vel.x = atk_dir.x * 12.0; vel.z = atk_dir.y * 12.0
-			for e in m.foes_of(team):
-				if lunge_hit.has(e.nid): continue
-				if flat_dist(e) < e.r + r + 0.3 and absf(e.pos.y - pos.y) < 1.2:
-					lunge_hit[e.nid] = true
-					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
+			vel.x = atk_dir.x * MobTell.LUNGE_SPEED; vel.z = atk_dir.y * MobTell.LUNGE_SPEED
 			if st_t <= 0.0:
 				st = "recover"; st_t = 0.45
 				vel.x *= 0.2; vel.z *= 0.2
@@ -263,13 +261,15 @@ func sim(dt: float) -> void:
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
 	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
+		stun_t = maxf(stun_t, maxf(1.0, wallstun))
+		wallstun = 0.0
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})
+	MobTell.linger(self, dt)
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
 	if look.length() > 0.2:
@@ -285,7 +285,7 @@ const NAP_CHECK := 0.5       # s between its looks around, asleep or awake
 var _nap := 0.0              # s to its next look around
 var _asleep := false
 func _napping(dt: float) -> bool:
-	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
+	if st != "idle" or homing or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
 		_asleep = false
 		return false
@@ -326,69 +326,96 @@ func _anyone_near() -> bool:
 			return true
 	return false
 
+## Looks around now and then, and ambles about its camp. Returns the wish velocity.
+func _idle_wander(dt: float, spd: float) -> Vector2:
+	if randf() < dt * 2.0:
+		tgt = _find_target()
+		if tgt:
+			st = "chase"
+	if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
+		var a := randf() * TAU
+		var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
+		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
+			wander = q
+	if wander != Vector3.INF:
+		return dir_to(wander) * spd * 0.3
+	return Vector2.ZERO
+
+func _leash_home() -> void:
+	tgt = null
+	engaged = false
+	st = "idle"
+	wander = Vector3.INF
+	homing = true
+	st_t = HOME_T
+
+## Straight home at full speed; healed on arrival.
+func _walk_home(spd: float) -> Vector2:
+	if flat_dist(camp) < HOME_M or st_t <= 0.0:
+		homing = false
+		hp = max_hp
+		return Vector2.ZERO
+	return dir_to(camp) * spd
+
 func _begin_attack() -> void:
 	st = "windup"
 	st_t = md["windup"]
 	atk_dir = dir_to(tgt)
-	match md["attack"]:
-		"lunge":
-			tele = m.fx.telegraph_rect(pos, atk_dir, 2.6, 0.8, Color("ff6a4a"))
-		"spit":
-			tele = m.fx.telegraph_rect(pos, atk_dir, 8.0, 0.45, Color("ffb04a"))
-		"slam":
-			atk_at = pos + Vector3(atk_dir.x, 0, atk_dir.y) * 0.9
-			tele = m.fx.telegraph_circle(atk_at, float(md.get("slam_r", 2.3)), Color("ff4a3a"))
-			if md.get("stag", false) and stagger_t <= 0.0:
-				if stag_open <= 0.0: m.on_stag_open(self)
-				stag_open = maxf(stag_open, float(md["windup"]) + 0.15)
-		"fuse":
-			atk_at = pos
-			tele = m.fx.telegraph_circle(atk_at, float(md.get("slam_r", 2.3)), Color("ff8a2a"))
-		"volley":
-			tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
+	MobTell.begin(self)
+	if md["attack"] == "slam" and md.get("stag", false) and stagger_t <= 0.0:
+		if stag_open <= 0.0: m.on_stag_open(self)
+		stag_open = maxf(stag_open, float(md["windup"]) + 0.15)
 	# each kind has its own call as it winds up, instead of the same alarm for everyone
 	m.sfx("v_" + mkind, pos, -9.0 if mkind != "warden" else -3.0, randf_range(0.9, 1.12))
 
 func _strike() -> void:
-	_cancel_tele()
+	tele_t = MobTell.LINGER          # the filled tell holds a moment on the hit frame
 	cd = md["cd"] * randf_range(0.85, 1.15)
 	match md["attack"]:
 		"lunge":
-			st = "lunge"; st_t = 0.2; lunge_hit = {}
+			atk_at = pos
+			st = "lunge"; st_t = MobTell.LUNGE_T
+			for e in m.foes_of(team):
+				if MobTell.hits(self, e):
+					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
 		"spit":
 			st = "recover"; st_t = 0.5
-			m.spawn_shot(self, pos + Vector3(atk_dir.x * 0.6, 0.8, atk_dir.y * 0.6), atk_dir * 8.5, md["dmg"] * dmg_mult, 8.5 / 8.5, 0.32, Color("b6ff6a"), {"mob": true, "kb": 2.0})
+			var sp: Dictionary = MobTell.SPIT
+			m.spawn_shot(self, pos + Vector3(atk_dir.x, 0.0, atk_dir.y) * MobTell.MUZZLE + Vector3(0, 0.8, 0), atk_dir * float(sp["speed"]), md["dmg"] * dmg_mult, sp["life"], sp["size"], Color("b6ff6a"), {"mob": true, "kb": 2.0})
 			m.sfx("k_spore", pos, -8.0, 1.25)      # a wet spit
 		"volley":
 			st = "recover"; st_t = 0.6
-			for k in [-0.2, 0.0, 0.2]:
+			var vo: Dictionary = MobTell.VOLLEY
+			for k in vo["fan"]:
 				var d := atk_dir.rotated(k)
-				m.spawn_shot(self, pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), d * 9.5, md["dmg"] * dmg_mult, 10.5 / 9.5, 0.28, Color("8ae8ff"), {"mob": true, "kb": 2.5})
+				m.spawn_shot(self, pos + Vector3(d.x, 0.0, d.y) * MobTell.MUZZLE + Vector3(0, 1.0, 0), d * float(vo["speed"]), md["dmg"] * dmg_mult, vo["life"], vo["size"], Color("8ae8ff"), {"mob": true, "kb": 2.5})
 			m.sfx("throw", pos, -8.0, 1.3)        # three bolts hissing out
 		"fuse":
 			# a puffbomb goes off and takes itself with it
-			var rad := float(md.get("slam_r", 2.3))
+			var rad := float(md.get("slam_r", MobTell.SLAM_R))
 			m.fx.ring(atk_at, rad, Color("ffb070"), 0.35)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb070"])
 			m.fx.burst(atk_at + Vector3(0, 0.5, 0), Color("ffb070"), 28, 6.5, 0.55, 6.0, 1.3)
 			m.sfx("boom", atk_at, 0.0, 1.1)
-			for e in m.foes_of(team):
-				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
-				if to.length() < rad + e.r and absf(e.pos.y - pos.y) < 1.6:
-					e.hurt(md["dmg"] * dmg_mult, self, {"kb": to.normalized() * 9.5, "lift": 6.5, "src": "mob"})
+			_blast(9.5, 6.5)
 			hp = 0.0
 			_on_zero(null, {"self": true})
 			return
 		"slam":
 			st = "recover"; st_t = 0.8
-			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
-			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
+			var rad := float(md.get("slam_r", MobTell.SLAM_R))
+			m.fx.ring(atk_at, rad, Color("ffb090"), 0.3)
+			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb090"])
 			m.fx.dust(atk_at, 16)
 			m.sfx("k_gravity", atk_at, -2.0, 0.9)  # a heavy stone slam
-			for e in m.foes_of(team):
-				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
-				if to.length() < float(md.get("slam_r", 2.3)) + e.r and absf(e.pos.y - pos.y) < 1.5:
-					e.hurt(md["dmg"] * dmg_mult, self, {"kb": to.normalized() * 7.0, "lift": 5.0, "src": "mob"})
+			_blast(7.0, 5.0)
+
+## A slam or burst: whoever is inside the ground tell is thrown outward (m/s) and up (m/s).
+func _blast(kb: float, lift: float) -> void:
+	for e in m.foes_of(team):
+		if MobTell.hits(self, e):
+			var out := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
+			e.hurt(md["dmg"] * dmg_mult, self, {"kb": out.normalized() * kb, "lift": lift, "src": "mob"})
 
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
@@ -423,6 +450,7 @@ func render(delta: float, alpha: float) -> void:
 	var wind := 0.0
 	if st == "windup":
 		wind = 1.0 - st_t / float(md["windup"])
+	MobTell.glow(self, wind)
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
 	# throw the weight forward on the attack, recoil when hit
 	var shiver := sin(m.time * 60.0) * 0.03 * maxf(0.0, wind - 0.6) * 2.5
@@ -554,18 +582,11 @@ func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	ap.speed_scale = rate
 
 ## Telegraphs on proxies follow the host's attack state.
-func _net_telegraph() -> void:
+func _net_telegraph(dt: float) -> void:
 	if st == "windup":
-		if tele == null:
-			match md["attack"]:
-				"lunge": tele = m.fx.telegraph_rect(pos, atk_dir, 2.6, 0.8, Color("ff6a4a"))
-				"spit": tele = m.fx.telegraph_rect(pos, atk_dir, 8.0, 0.45, Color("ffb04a"))
-				"slam": tele = m.fx.telegraph_circle(pos + Vector3(atk_dir.x, 0, atk_dir.y) * 0.9, float(md.get("slam_r", 2.3)), Color("ff4a3a"))
-				"fuse": tele = m.fx.telegraph_circle(pos, float(md.get("slam_r", 2.3)), Color("ff8a2a"))
-				"volley": tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
-		elif md["attack"] in ["lunge", "spit", "volley"]:
-			m.fx.aim_telegraph(tele, pos, atk_dir)
-		if tele:
-			m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
-	elif tele:
-		_cancel_tele()
+		if tele.is_empty():
+			MobTell.begin(self)
+		MobTell.update(self)
+		tele_t = MobTell.LINGER
+	else:
+		MobTell.linger(self, dt)

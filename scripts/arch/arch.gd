@@ -8,6 +8,7 @@ extends RefCounted
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
 const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright", "mage", "thief", "ostra", "gil"]   # canonical Hunter order (display and unlock order everywhere): Lace, Kael, Vex, Albert, then Cinder, Meeko, Tenzo, Grimble, Neve, Sparkle, Sable, Motley, Gil
+const HIT_H_DEFAULT := 1.5      # m, hurtbox height of a hunter with no archetype body (the old shared band)
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -23,6 +24,15 @@ static func body(id: String) -> Dictionary:
 ## The hitbox radius of a hunter of this archetype and class (the body's hit_r, else the class's).
 static func hit_r(id: String, cdat: Dictionary) -> float:
 	return float(body(id).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+
+## The height of a hunter's hurtbox, feet to the top of the head (m): the body's hit_h, else a medium hunter's.
+static func hit_h(id: String) -> float:
+	return float(body(id).get("hit_h", HIT_H_DEFAULT))
+
+## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
+static func apply_body(h: Hunter) -> void:
+	h.r = hit_r(h.arch, h.cdat)
+	h.body_r = float(body(h.arch).get("body_r", -1.0))
 
 static func ids() -> Array:
 	var out: Array = []

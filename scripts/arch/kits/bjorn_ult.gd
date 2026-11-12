@@ -98,11 +98,15 @@ func _reach() -> Array:
 	var out: Array = []
 	var cl := cell_len()
 	var y0 := origin.y
-	for i in int(xd().get("cells", 4)):
+	var n := int(xd().get("cells", 4))
+	var lane := Vector3(dir.x * cl * n, 0.5, dir.y * cl * n)
+	# placed walls and rocks stop it as terrain does (Blockers)
+	var walled := Blockers.cut(k.m.verbs.walls, origin + Vector3(0, 0.5, 0), origin + lane, k.h.team, "solid")
+	for i in n:
 		var a := origin + Vector3(dir.x, 0, dir.y) * cl * i
 		var c := a + Vector3(dir.x, 0, dir.y) * cl * 0.5
 		var g: float = k.m.world.ground_at(c.x, c.z)
-		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2) and i > 0:
+		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2 or cl * (i + 0.5) > walled) and i > 0:
 			break
 		out.append(Vector3(a.x, y0, a.z))
 	return out
@@ -197,7 +201,7 @@ func _slam() -> void:
 ## The racing fissure reaches cell `i`: each foe in it not struck yet takes the strike and the stun.
 func _strike(i: int) -> void:
 	var x := xd()
-	var strike: float = float(x.get("strike_dmg", 4.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
+	var strike: float = float(x.get("strike_dmg", 2.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(i):
 		if hit.has(f.get_instance_id()):
 			continue
@@ -218,7 +222,7 @@ func _erupt(i: int) -> void:
 	k.m.fx.dust(mid, 10)
 	k.m.fx.burst(mid + Vector3(0, 0.6, 0), EMBER, 12, 6.0, 0.4, 6.0, 1.1, Vector3.UP, 30.0)
 	k.m.sfx("bjorn_slam", mid, -8.0, 0.7 + 0.08 * i)
-	var dmg: float = float(x.get("dmg", 18.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
+	var dmg: float = float(x.get("dmg", 25.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(i):
 		var key: int = f.get_instance_id()
 		if thrown.has(key):

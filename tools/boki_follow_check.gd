@@ -445,6 +445,7 @@ func _bots() -> void:
 	run_for(1.0)
 	R.ai["throw_cd"] = 0.0
 	k.teleport(R.pos + Vector3(1.0, 0, 0.7)); k.state = "active"; k.fly = {}; k.throw_cd = 0.0
+	k.runner.slots["k1"]["charges"] = 0.0      # (a ready k1 is a coin flip for its ability instead: this is the Sic)
 	BotKin.fight(m, R, P, 7.0, 1.0)
 	ok(k.state == "flying" or k.hesitate_t > 0.0, "at a rival it Sics (state %s)" % k.state)
 	R.ult = 1.0; R.slot_lv["ult"] = 1

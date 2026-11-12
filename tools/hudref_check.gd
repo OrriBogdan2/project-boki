@@ -1,6 +1,6 @@
 extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
-##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
+##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
@@ -9,7 +9,6 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
-##   9. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -32,10 +31,10 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
-	var counts := [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)]
-	ok(counts == [4, 6, 12], "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%s)" % str(counts))
-	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0,
-		"a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
+	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
+	ok(counts == [8, 9, 12], "17 health a segment: the classes' 124 -> 8, 145 -> 9, 193 -> 12 (%s)" % str(counts))
+	ok(HudStyle.seg_count(600.0) == 9 and HudStyle.seg_step(600.0) == 68.0,
+		"a huge pool doubles the segment size instead of crowding (600 -> 9 of 68)")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=plates")
@@ -53,11 +52,11 @@ func run(main_node: Node) -> void:
 	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
 	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp),
 		"the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
-	full.max_hp = 300.0
-	full.hp = 300.0
+	full.max_hp = 193.0
+	full.hp = 193.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 193: the plate redraws with 12 segments")
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0
@@ -204,7 +203,6 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
-	await _check_wash(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -277,36 +275,6 @@ func _check_deny(P: Hunter) -> void:
 		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
-
-## 9. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
-## Hud.hurt_from, the real path) weights the left edge, and a second later the wash is even again.
-func _check_wash(P: Hunter) -> void:
-	var hud = P.m.hud
-	var hp_was := P.hp
-	P.hp = P.max_hp * 0.5
-	var above := HurtWash.strength(P)
-	P.hp = P.max_hp * 0.3
-	var high := HurtWash.strength(P)
-	P.hp = P.max_hp * 0.1
-	var low := HurtWash.strength(P)
-	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
-		% [int(HurtWash.BELOW * 100.0), high, low])
-	hud.hurt_dirs.clear()
-	ok(HurtWash.weight_at(hud.hurt_dirs, PI) == 0.0, "no recent hits: the wash is even all round")
-	hud.hurt_from(P.pos + Vector3(-6.0, 0.0, 0.0))
-	var left := HurtWash.weight_at(hud.hurt_dirs, PI)
-	var right := HurtWash.weight_at(hud.hurt_dirs, 0.0)
-	var top := HurtWash.weight_at(hud.hurt_dirs, -PI * 0.5)
-	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
-	ok(left > 0.9 and right == 0.0 and top < left, said)
-	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
-	var eased := HurtWash.weight_at(hud.hurt_dirs, PI)
-	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
-	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
-	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
-	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
-	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
-	P.hp = hp_was
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

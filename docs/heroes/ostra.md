@@ -66,12 +66,12 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 | X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Motley is locked in the cast for the 1.0s dome (Void's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (Void acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
-Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
+Rank 3: Snap +40% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
 allies beside him when he leaves or at the landing (26, 3s: the data's 375 shield as a share of a level-15 hunter's health,
 on 145); the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
 
 **Unfolded:** the kit pass had folded the source's Black Hole into Brimseed rank 3 (the pop dragging foes from 1.3x its radius
-to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the pop; the burn stays, as it is the source's own
+to the middle). Now that Black Hole is Nightwell on R, the pull is gone from the pop; the burn stays, as it is the source's own
 level-4 bonus.
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
@@ -123,7 +123,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Nightwell, then Seed on the middle, then pop | everyone caught sits stunned at the centre for the seed to grow on them | `ult open: ...`, `ult: the caught foe is drawn to the middle` |
 | Nightwell, then anything | he is locked in the cast for the 1.0s dome, then free (walking out at full speed, casting) while the well runs; a stun or a knock frees him early | `lock: ...`, `release: ...` (ult check) |
 | Shard Snap timing | the press, a 0.32s wind-up, the release, the flight; the damage on the impact | `item 40: ...` |
-| Trade in flight, then any ability (item 32) | the Trade's flight is his dash for DashFlow (`in_dash`); LMB, RMB, E, X and the glove fire mid-flight, ground or air (content/dash_flow/ostra.json, docs/heroes/dash_interactions.md); Shift during the Nightwell's dome is refused, or held for the step it opens and frees him when pressed in its last 0.15s | `--dash-flow-check`, `dash flow: ...` (ult check) |
+| Trade in flight, then any ability (item 32) | the Trade's flight is his dash for DashFlow (`in_dash`); LMB, RMB, E, R and the glove fire mid-flight, ground or air (content/dash_flow/ostra.json, docs/heroes/dash_interactions.md); Shift during the Nightwell's dome is refused, or held for the step it opens and frees him when pressed in its last 0.15s | `--dash-flow-check`, `dash flow: ...` (ult check) |
 | Trade, ground or air | his own dash move each (`ostra_swap`, `ostra_swap_air`), ids no other hero uses, inside the 1.25s Swollen Trade | `item 35: ...` |
 | Swollen, then Nightwell | the bigger 5.1m well | `ult Swollen: ...` |
 | Nightwell, then the merge | the target lives (burst cap) | `ult burst: the well, merge and its ultimate leave a full-health light hunter standing` |
@@ -155,11 +155,32 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 - Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass him by (`incoming`; the lightning rod's sky
   strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
   cooldown is 10s -> 8s at rank 3 (the data's -2s at rank IV).
+  cooldown is 10s -> 8s at rank 3 (the data's -2s at rank IV; see "Ranks: source tier table").
 - Kept, not in the data: the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
   data).
 - Not done: items in the swap circle (the data says "all
   units"; pickups are each game's own copies); an ice patch's slide still takes him (ground grip is not his to change).
 - Rank paths: see "Upgrade parity" (the shared rank step is gone for this hero).
+- Rank paths: now the data's own, per slot (see "Ranks: source tier table").
+
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
+(briefs/supervive-data/supervive_kits.md, Void `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in ostra.json
+(the shared -10% cooldown / +15% damage / -15% recharge steps no longer apply to him). Cooldowns match the data directly
+(Snap 10s, Trade 9.5s, seed 10s). LMB and the passive have no tiers in the data and do not rank; R (Nightwell on X) is
+decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--ostra-combo-check` |
+|---|---|---|---|---|
+| LMB orb | none [D] | - | - | - |
+| RMB Shard Snap | +20% dmg, -1.5s / +20% dmg, -1.5s / +50 move speed on cast, +100 on impact, 2s [D] | 8.5s, damage +20% | 7s, damage +40%; +11% speed on the cast, +22% on a hit, 2s | `upgrade parity: Snap ...`, `data rank 3: Snap speeds him up ...` |
+| Shift Lantern Trade | -1.5s / -1.5s / allies in the cast radius get a 375 HP shield for 3s [D] (6.5s at IV) | recharge 8s | 6.5s; allies beside him or at the landing get 26 shield for 3s | `upgrade parity: Trade ...`, `data rank 3: an ally beside him ...` |
+| E Brimseed | +10% / +10% / -2s, 250 dmg/s on overlap [D] (8s at IV) | damage +10% | damage +20%, 8s; the growing seed burns 8.2 a second | `upgrade parity: Brimseed ...`, `rank 3: the growing seed burns ...` |
+| Passive | none [D] | - | - | - |
+
+Fixed to the data in this pass: Snap 9s / 8s (shared -10%) -> 8.5s / 7s, its damage +15% / +30% (shared) -> +20% / +40%;
+Trade 8.1s / 6.7s (shared -15%) -> 8s / 6.5s; the seed's rank 2 cooldown cut (shared, not in the data) is gone and its damage
+is +10% / +20% (was +15% / +30%).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
@@ -175,7 +196,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
 | Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size; the knock heal is removed (the owner's tooltip data has none) |
-| Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on X; asserted `ult open`, `drawn to the middle`, `small ticks` |
+| Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on R; asserted `ult open`, `drawn to the middle`, `small ticks` |
 | A dome telegraph of the final size before it opens | footage | yes (f23-f32, 1.0s) | built, everyone sees it; asserted |
 | Enemies who enter during the 3.5s are caught too ("for 3.5s") | card | no | built; asserted `a foe who walks in later is caught too` |
 | Empowered: radius 350 -> 500 (and a June patch made Empowered really enlarge it) | card, patch notes (June 25) | yes (f89-f101) | built: 3.6m -> 5.1m when cast Swollen; asserted |
@@ -227,7 +248,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 | Shift (his dash, item 35) | `ostra_swap_aim` (hold), `ostra_swap` (ground: the underhand lob, 0.85s), `ostra_swap_air` (air: an overhead sling, then a leaning drift with the hands and hem trailing, swaying, held until he arrives; 0.45s to the drift), `ostra_arrive` | `anim_os_swap`, `anim_os_swap_air`, `anim_os_arrive` |
 | E | `ostra_seed`, `ostra_pop` | `anim_os_seed`, `anim_os_pop` |
 | Passive proc | `ostra_empower` | `anim_os_empower` |
-| X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
+| R | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
 
 ## Timing pass (`tools/ostra_anim_time_check.gd`, run inside `--ostra-combo-check`)
 Each keyed move played in a real match with the model rendered, read off the clips (s from the press). Source = briefs/hero-ref/ostra.md

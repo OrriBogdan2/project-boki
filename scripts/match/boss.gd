@@ -246,7 +246,7 @@ func sim(dt: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= dt
 		vel.x = dash_v.x; vel.z = dash_v.y
-		_dash_hits()
+		_dash_hits(dt)
 	else:
 		var hv := Vector2(vel.x, vel.z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * dt))
@@ -339,37 +339,44 @@ func _choose_attack() -> void:
 	if OS.get_cmdline_user_args().has("--boss-debug"): print("BOSSDBG %s t=%.1f %s from %s d=%.1f" % [mkind, awake_t, pick, str(opts), d])
 	call("_atk_" + pick)
 
-func _wind() -> float:
-	return float(md["windup"]) * (0.8 if enraged else 1.0) * (1.0 - 0.1 * phase)
+## The tell for a move, from the content; md["windup"] only tells the model how far to scrub.
+func _tell(move_id: String) -> float:
+	var w := BossMoves.tell(mkind, move_id, enraged, phase)
+	md["windup"] = w
+	return w
+
+func _mv(move_id: String) -> Dictionary:
+	return BossMoves.move(mkind, move_id)
 
 # ---- the Stone Colossus
 func _atk_slam() -> void:
-	var w := _wind()
-	md["windup"] = w
+	var w := _tell("slam")
+	var mv := _mv("slam")
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var at := clamp_in(pos + Vector3(d.x, 0, d.y) * 1.2, 0.5)
 	at.y = centre().y
 	_begin("slam", w + 0.6, "slam")
-	_tele_c(at, float(md["slam_r"]), Color("ff4a3a"), w)
+	_tele_c(at, float(mv["radius_m"]), Color("ff4a3a"), w)
 	# the purple stagger window opens on every slam
 	if stagger_t <= 0.0:
 		if stag_open <= 0.0: m.on_stag_open(self)
 		stag_open = maxf(stag_open, w + 0.15)
 	_at(w, func():
-		blast(at, float(md["slam_r"]), float(md["dmg"]), 9.0, 5.0)
+		blast(at, float(mv["radius_m"]), float(mv["dmg"]), 9.0, 5.0)
 		m.sfx("k_gravity", at, 2.0, 0.6)
-		_wave(at, 9.5, 7.5)
-		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
-		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
+		_wave(at)
+		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at))
+		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at)))
 
-func _wave(at: Vector3, max_r: float, speed: float) -> void:
+func _wave(at: Vector3) -> void:
+	var mv := _mv("wave")
 	var n := MeshInstance3D.new()
 	n.mesh = Models.flat_quad(2.0)
 	n.material_override = Models.ring_mat(Color(1.0, 0.62, 0.3, 0.95), 0.06)
 	n.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(n)
 	n.global_position = at + Vector3(0, 0.1, 0)
-	waves.append({"at": at, "r": 0.6, "speed": speed, "max": max_r, "hit": {}, "n": n})
+	waves.append({"at": at, "r": 0.6, "speed": float(mv["speed_mps"]), "max": float(mv["reach_m"]), "hit": {}, "n": n})
 
 func _tick_waves(dt: float) -> void:
 	for wv in waves.duplicate():
@@ -385,14 +392,15 @@ func _tick_waves(dt: float) -> void:
 			if absf(dd - float(wv["r"])) < 0.45 + f.r and f.pos.y - f.ground() < 0.45 and absf(f.pos.y - at.y) < 1.2:
 				if f is Hunter and ((f as Hunter).roll_t > 0.0): continue
 				wv["hit"][f.nid] = true
-				f.hurt(dmg(12.0), self, {"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 6.0, "lift": 3.5, "src": "mob"})
+				f.hurt(dmg(float(_mv("wave")["dmg"])), self, {"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 6.0, "lift": 3.5, "src": "mob"})
 		if float(wv["r"]) >= float(wv["max"]):
 			_free(n)
 			waves.erase(wv)
 
 func _atk_boulders() -> void:
-	var w := 0.85
-	md["windup"] = w
+	var w := _tell("boulders")
+	var mv := _mv("boulders")
+	var fl := float(mv["flight_s"])
 	_begin("boulders", w + 1.6, "throw")
 	var n := 1 + phase
 	var picks: Array = foes_inside()
@@ -403,8 +411,8 @@ func _atk_boulders() -> void:
 		var to := clamp_in(aim + Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)) * (0.6 * i), 0.4)
 		to.y = centre().y
 		var delay := w + i * 0.25
-		_tele_c(to, 1.9, Color("ff6a3a"), delay + 1.0)
-		_at(delay, func(): _throw(to, 1.0, 1.9, 20.0, Color("9c968a"), "boulder"))
+		_tele_c(to, float(mv["radius_m"]), Color("ff6a3a"), delay + fl)
+		_at(delay, func(): _throw(to, fl, float(mv["radius_m"]), float(mv["dmg"]), Color("9c968a"), "boulder"))
 
 func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String) -> void:
 	var n := Node3D.new()
@@ -440,14 +448,16 @@ func _tick_flying(dt: float) -> void:
 				_puddle(b, float(f["r"]), 5.0)
 
 func _atk_fissure() -> void:
-	var w := _wind() * 0.9
-	md["windup"] = w
+	var w := _tell("fissure")
+	var mv := _mv("fissure")
+	var len_m := float(mv["length_m"])
+	var wid := float(mv["width_m"])
 	_begin("fissure", w + 0.5, "slam")
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var a := Vector3(pos.x, centre().y, pos.z)
-	_tele_r(a, d, 12.0, 2.4, Color("ff4a3a"), w)
+	_tele_r(a, d, len_m, wid, Color("ff4a3a"), w)
 	_at(w, func():
-		line_hit(a, d, 12.0, 2.4, 22.0, 4.0, {"lift": 7.0})
+		line_hit(a, d, len_m, wid, float(mv["dmg"]), 4.0, {"lift": 7.0})
 		for i in 6:
 			var q := a + Vector3(d.x, 0, d.y) * (1.0 + i * 2.0)
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
@@ -457,8 +467,8 @@ func _atk_fissure() -> void:
 
 # ---- Stormcoil
 func _atk_dash() -> void:
-	var w := _wind()
-	md["windup"] = w
+	var w := _tell("dash")
+	var mv := _mv("dash")
 	var n := 1 + phase
 	_begin("dash", n * (w + 0.55) + 0.2, "dash")
 	for i in n:
@@ -466,34 +476,34 @@ func _atk_dash() -> void:
 		_at(t0, func():
 			if tgt == null: return
 			var d := dir_to(tgt)
-			var length := 13.0
 			var a := Vector3(pos.x, centre().y, pos.z)
-			_tele_r(a, d, length, 1.8, Color("7fe8ff"), w)
+			_tele_r(a, d, float(mv["length_m"]), float(mv["width_m"]), Color("7fe8ff"), w)
 			set_meta("dash_dir", d)
 			m.sfx("zap", pos, -2.0, 0.6))
 		_at(t0 + w, func():
 			var d: Vector2 = get_meta("dash_dir", Vector2(0, 1))
-			dash_v = d * 24.0
-			dash_t = 13.0 / 24.0
+			dash_v = d * float(mv["speed_mps"])
+			dash_t = float(mv["length_m"]) / float(mv["speed_mps"])
 			dash_hit = {}
 			m.sfx("whoosh", pos, 2.0, 0.7))
 
-func _dash_hits() -> void:
+func _dash_hits(dt: float) -> void:
 	m.fx.burst(pos + Vector3(0, 1.0, 0), Color("bff8ff"), 3, 2.0, 0.3, 0.0, 0.8)
+	var end := pos + Vector3(dash_v.x, 0, dash_v.y) * dt
 	for f in m.foes_of(team):
 		if f is Mob or dash_hit.has(f.nid): continue
-		if flat_dist(f) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
+		if Swept.dist(f.pos, pos, end) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
 			dash_hit[f.nid] = true
 			var d := dash_v.normalized()
 			var rel := Vector2(f.pos.x - pos.x, f.pos.z - pos.z)
 			var side := signf(rel.dot(Vector2(-d.y, d.x)))
 			if side == 0.0:
 				side = 1.0
-			f.hurt(dmg(float(md["dmg"])), self, {"kb": Vector2(-d.y, d.x) * side * 9.0 + d * 3.0, "lift": 4.0, "stun": 0.3, "src": "mob"})
+			f.hurt(dmg(float(_mv("dash")["dmg"])), self, {"kb": Vector2(-d.y, d.x) * side * 9.0 + d * 3.0, "lift": 4.0, "stun": 0.3, "src": "mob"})
 
 func _atk_storm() -> void:
-	var w := 1.1 * (0.85 if enraged else 1.0)
-	md["windup"] = w
+	var w := _tell("storm")
+	var mv := _mv("storm")
 	_begin("storm", w + 0.5, "roar")
 	var spots: Array = []
 	for f in foes_inside():
@@ -507,50 +517,51 @@ func _atk_storm() -> void:
 		var at: Vector3 = spots[i]
 		at.y = c.y
 		var delay := w + i * 0.12
-		_tele_c(at, 1.8, Color("bff4ff"), delay)
+		_tele_c(at, float(mv["radius_m"]), Color("bff4ff"), delay)
 		_at(delay, func():
 			m.fx.bolt(at + Vector3(randf_range(-1, 1), 10.0, randf_range(-1, 1)), at, Color("dffaff"))
 			m.fx.flash(at + Vector3(0, 0.6, 0), Color("dffaff"), 0.9, 0.08)
-			blast(at, 1.8, 18.0, 4.0, 2.0, {"stun": 0.45})
+			blast(at, float(mv["radius_m"]), float(mv["dmg"]), 4.0, 2.0, {"stun": 0.45})
 			m.sfx("zap", at, 2.0, 0.8))
 
 func _atk_static() -> void:
-	var w := 1.5 * (0.85 if enraged else 1.0)
-	md["windup"] = w
+	var w := _tell("static")
+	var mv := _mv("static")
+	var rad := float(mv["radius_m"])
 	_begin("static", w + 0.6, "roar")
 	var at := Vector3(pos.x, centre().y, pos.z)
-	_tele_c(at, 4.8, Color("7fe8ff"), w)
+	_tele_c(at, rad, Color("7fe8ff"), w)
 	_at(w, func():
 		var here := Vector3(pos.x, centre().y, pos.z)
-		blast(here, 4.8, 16.0, 10.0, 3.0, {"stun": 0.3})
+		blast(here, rad, float(mv["dmg"]), 10.0, 3.0, {"stun": 0.3})
 		# and it arcs to everyone else in the lair
 		for f in foes_inside():
-			if flat_dist(f) > 4.8:
+			if flat_dist(f) > rad:
 				m.fx.bolt(pos + Vector3(0, 1.4, 0), f.pos + Vector3(0, 0.8, 0), Color("bff8ff"))
 				f.hurt(dmg(8.0), self, {"stun": 0.2, "src": "mob"})
 		m.sfx("zap", pos, 4.0, 0.5))
 
 # ---- the Brood Mother
 func _atk_spit() -> void:
-	var w := _wind() * 0.85
-	md["windup"] = w
+	var w := _tell("spit")
+	var mv := _mv("spit")
 	_begin("spit", w + 0.5, "spit")
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var n := 3 + phase
 	var a := Vector3(pos.x, centre().y, pos.z)
 	for i in n:
 		var dd := d.rotated(0.22 * (i - (n - 1) * 0.5))
-		_tele_r(a, dd, 10.0, 0.5, Color("b6ff6a"), w)
+		_tele_r(a, dd, float(mv["length_m"]), float(mv["width_m"]), Color("b6ff6a"), w)
 	_at(w, func():
 		var d2 := dir_to(tgt) if tgt else d
 		for i in n:
 			var dd := d2.rotated(0.22 * (i - (n - 1) * 0.5))
-			m.spawn_shot(self, pos + Vector3(dd.x * 1.4, 0.9, dd.y * 1.4), dd * 10.0, dmg(14.0), 1.0, 0.36, Color("b6ff6a"), {"mob": true, "kb": 2.5, "slow": 1.0})
+			m.spawn_shot(self, pos + Vector3(dd.x * 1.4, 0.9, dd.y * 1.4), dd * 10.0, dmg(float(mv["dmg"])), 1.0, 0.36, Color("b6ff6a"), {"mob": true, "kb": 2.5, "slow": 1.0})
 		m.sfx("k_spore", pos, 0.0, 0.8))
 
 func _atk_lob() -> void:
-	var w := 0.7
-	md["windup"] = w
+	var w := _tell("lob")
+	var mv := _mv("lob")
 	_begin("lob", w + 1.4, "spit")
 	var picks: Array = foes_inside()
 	picks.shuffle()
@@ -559,8 +570,8 @@ func _atk_lob() -> void:
 		var f: Ent = picks[i % picks.size()] if not picks.is_empty() else tgt
 		var to := clamp_in((pos if f == null else f.pos) + Vector3(randf_range(-1.2, 1.2), 0, randf_range(-1.2, 1.2)) * (0.5 + i * 0.4), 0.6)
 		to.y = centre().y
-		_tele_c(to, 2.1, Color("b6ff6a"), w + i * 0.2 + 0.9)
-		_at(w + i * 0.2, func(): _throw(to, 0.9, 2.1, 0.0, Color("b6ff6a"), "glob"))
+		_tele_c(to, float(mv["radius_m"]), Color("b6ff6a"), w + i * 0.2 + 0.9)
+		_at(w + i * 0.2, func(): _throw(to, 0.9, float(mv["radius_m"]), 0.0, Color("b6ff6a"), "glob"))
 
 ## A puddle of acid: burns and slows anyone standing in it for a few seconds.
 func _puddle(at: Vector3, rad: float, life: float) -> void:
@@ -579,7 +590,7 @@ func _puddle(at: Vector3, rad: float, life: float) -> void:
 	n.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(n)
 	n.global_position = at + Vector3(0, 0.06, 0)
-	hazards.append({"at": at, "r": rad, "until": m.time + life, "every": 0.5, "next": m.time + 0.2, "dmg": 6.0, "slow": 0.7, "n": n})
+	hazards.append({"at": at, "r": rad, "until": m.time + life, "every": 0.5, "next": m.time + 0.2, "dmg": float(_mv("lob")["puddle_dmg"]), "slow": 0.7, "n": n})
 
 func _tick_hazards(_dt: float) -> void:
 	for hz in hazards.duplicate():
@@ -596,8 +607,7 @@ func _tick_hazards(_dt: float) -> void:
 				f.hurt(dmg(float(hz["dmg"])), self, {"slow": float(hz["slow"]), "src": "mob"})
 
 func _atk_brood() -> void:
-	var w := 1.0
-	md["windup"] = w
+	var w := _tell("brood")
 	_begin("brood", w + 2.4, "roar")
 	var n := 2 + phase
 	for i in n:
@@ -611,7 +621,7 @@ func _atk_brood() -> void:
 		egg.global_position = at
 		egg.scale = Vector3.ONE * 0.2
 		hazards.append({"at": at, "r": 0.0, "until": m.time + w + 2.2, "every": 99.0, "next": 1e9, "dmg": 0.0, "slow": 0.0, "n": egg})
-		_tele_c(at, 0.9, Color("ffe680"), w + 2.2)
+		_tele_c(at, float(_mv("brood")["radius_m"]), Color("ffe680"), w + 2.2)
 		_at(w * 0.5, func(): if is_instance_valid(egg): egg.scale = Vector3.ONE)
 		_at(w + 2.2, func():
 			m.fx.burst(at + Vector3(0, 0.4, 0), Color("e0b040"), 16, 4.0, 0.5, 6.0)
@@ -619,6 +629,8 @@ func _atk_brood() -> void:
 			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][randi() % (2 + mini(phase, 2))], at))
 
 func _atk_burrow() -> void:
+	var mv := _mv("burrow")
+	var tell := float(mv["tell_s"])
 	_begin("burrow", 3.6, "burrow")
 	_at(0.4, func():
 		buried = true
@@ -629,12 +641,12 @@ func _atk_burrow() -> void:
 		var to := clamp_in(tgt.pos if tgt else centre(), 1.0)
 		to.y = centre().y
 		mark["at"] = to
-		_tele_c(to, 3.0, Color("ff4a3a"), 1.6))
-	_at(2.1, func():
+		_tele_c(to, float(mv["radius_m"]), Color("ff4a3a"), tell))
+	_at(0.5 + tell, func():
 		var at: Vector3 = mark["at"]
 		pos = Vector3(at.x, pos.y, at.z); prev = pos
 		_surface()
-		blast(at, 3.0, 24.0, 8.0, 8.0)
+		blast(at, float(mv["radius_m"]), float(mv["dmg"]), 8.0, 8.0)
 		m.sfx("boom", at, 2.0, 0.6))
 
 func _surface() -> void:
@@ -648,16 +660,21 @@ func _phase_up(p: int) -> void:
 	invul_t = 1.6
 	anim_kind = "roar"; anim_k = 0.0
 	md["windup"] = 1.2
-	m.fx.ring(pos, 6.0, col(), 0.5)
+	var roar := BossMoves.rules()["phase_roar"] as Dictionary
 	m.fx.burst(pos + Vector3(0, 1.5, 0), col(), 40, 8.0, 0.7, 2.0, 1.6)
 	Shake.incoming_big(m, pos, 0.7)
 	m.sfx("v_warden", pos, 4.0, 0.5)
 	m.sfx("boom", pos, 0.0, 0.5)
-	for f in foes_inside():
-		if flat_dist(f) < 5.5:
-			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})
 	m.lairs.on_boss_phase(self, p)
 	_begin("phase", 2.4, "roar")
+	# the shove has its own ground ring first, like every other ground hit
+	var shove_at := Vector3(pos.x, centre().y, pos.z)
+	_tele_c(shove_at, float(roar["radius_m"]), col(), float(roar["tell_s"]))
+	_at(float(roar["tell_s"]), func():
+		m.fx.ring(shove_at, float(roar["radius_m"]), col(), 0.5)
+		for f in foes_inside():
+			if flat_dist(f) < float(roar["radius_m"]):
+				f.hurt(dmg(float(roar["dmg"])), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"}))
 	var c: Vector3 = centre()
 	var hf := float(lair.get("half", 7)) - 2.0
 	match mkind:

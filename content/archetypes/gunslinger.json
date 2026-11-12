@@ -5,7 +5,7 @@
 	"gender": "female",
 	"personality": "A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now.\nThe Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew.",
 	"weight": "medium",
-	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
+	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.411, "hit_h": 1.89, "body_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
 	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
@@ -40,6 +40,8 @@
 	},
 	"dash": {
 		"id": "slipstep",
+		"rank3_speed": 0.25,
+		"rank3_speed_t": 2.0,
 		"name": "Slipstep",
 		"icon": "dash",
 		"col": "#ffc89a",
@@ -154,6 +156,14 @@
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
 		"dash_spent": "an ember afterimage and faint skid streaks"
+	},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [F] [O] (owner, item 112) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'"},

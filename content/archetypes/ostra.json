@@ -22,7 +22,7 @@
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
-	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.412},
+	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.434, "hit_h": 2.217, "body_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {
@@ -61,6 +61,7 @@
 		"time_swollen": 1.25,
 		"radius": 1.5,
 		"ally_shield": 26.0,
+		"ally_shield_t": 3.0,
 		"ally_r": 3.0,
 		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
@@ -138,7 +139,7 @@
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",
-		"col": "#b06bff",
+		"col": "#2ee6c0",
 		"cooldown": 70.0,
 		"range": 10.0,
 		"tell": 1.0,
@@ -171,6 +172,14 @@
 		"half": "a ring of teal motes closes around him",
 		"full": "the lantern burns white and his ribbons lift",
 		"dash_spent": "a pale ripple where he stood"
+	},
+	"src": {
+		"lmb": "[D] [O] (owner items 60, data overruled) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner item 40) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:40 'she turns to the aim'"},

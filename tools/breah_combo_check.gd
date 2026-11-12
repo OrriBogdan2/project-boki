@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
+	await _ranks()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
@@ -23,6 +24,32 @@ func run(main_node: Node) -> void:
 	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Upgrade parity (docs/heroes/dolm.md): per rank [RMB cooldown, dash recharge, E cooldown, RMB power, E power, charges]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r := setup("dolm", 5.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DolmKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), K.e_def()["cooldown"] * K.cd_k("kin"),
+				K.power("sec") / ps, K.power("kin") / pk, P.max_dashes()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Quakefall cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208)",
+			near.call(up[1][0], 10.0) and near.call(up[2][0], 9.0)
+			and near.call(up[1][3], 1.24) and near.call(up[2][3], 1.48), str(up))
+	ok("upgrade parity: Rock Hop recharge 12 -> 10 -> 10, a second charge only at rank 3",
+			near.call(up[1][1], 10.0) and near.call(up[2][1], 10.0)
+			and up[1][5] == up[0][5] and up[2][5] == up[0][5] + 1.0, str(up))
+	ok("upgrade parity: Stone Row cooldown 12.5 -> 11.5 -> 10 and no rank damage",
+			near.call(up[1][2], 11.5) and near.call(up[2][2], 10.0) and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
+	await done(m)
 
 func _breah() -> void:
 	var r := setup("dolm", 5.0)
@@ -590,6 +617,23 @@ func _breah() -> void:
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
 		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
 	)
+	# Molten Guard stacks add (18 each) up to the cap of 4, share one 6 s timer, and the pool drops whole at 6 s
+	var gt: float = float(K.d["passive"]["guard"]["t"])
+	P.shield = 0.0
+	K.shield_stacks = 0
+	for i in 5:
+		K.guard_stack()
+	ok(
+		"data: Molten Guard stacks add to the cap of 4 (72)", K.shield_stacks == 4 and absf(P.shield - 72.0) < 0.5,
+		"stacks %d shield %.1f" % [K.shield_stacks, P.shield]
+	)
+	step(m, gt - 0.3)
+	var left: float = P.shield
+	step(m, 0.6)
+	ok(
+		"data: the Molten Guard shield is gone at its 6 s, not before",
+		left > 71.0 and P.shield == 0.0 and K.shield_stacks == 0, "5.7 s: %.1f, after: %.1f" % [left, P.shield]
+	)
 	reset.call()
 	P.shield = 0.0
 	K.shield_stacks = 0
@@ -604,6 +648,23 @@ func _breah() -> void:
 	ok(
 		"data: a punch with no rock of yours in the lane gives no shield",
 		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
+	)
+	# the Quake Punch cooldown starts on the press (patch 2.01), so a long hold leaves none after the release
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.fire_cd = 0.0
+	var pun0 := K.punches
+	P.inp["fire"] = true
+	step(m, 0.05, func(): P.inp["fire"] = true)
+	var cd_on_press := P.fire_cd
+	step(m, 0.9, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.05)
+	ok(
+		"cooldown: the punch's cooldown starts on the press, none left after a long hold",
+		cd_on_press > 0.4 and K.punches == pun0 + 1 and P.fire_cd <= 0.001,
+		"press %.2f after %.2f punches %d" % [cd_on_press, P.fire_cd, K.punches - pun0]
 	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
 	await _leap(m, P, T, home, K, reset)
@@ -644,8 +705,8 @@ func _breah() -> void:
 		"shield %.0f" % P.shield
 	)
 	ok(
-		"data rank 3: a second charge, recharging in 8.4s (12s x 0.7 on the shared rank step)",
-		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05,
+		"data rank 3: a second charge, recharging in 10s (the source's tier III, 12s -> 10s)",
+		P.max_dashes() == 2.0 and absf(P.dash_regen() - 10.0) < 0.05,
 		"charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
 	)
 	reset.call()
@@ -742,7 +803,7 @@ func _walk_over(m: Match, h: Hunter, home: Vector3, w: Dictionary) -> Dictionary
 	var mid2: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	var mid := Vector3(mid2.x, float(w["y"]), mid2.y)
 	var dir := (mid - home).normalized()
-	var face := float(w["th"]) + h.r * 0.8
+	var face := float(w["th"]) + h.hull_r() * 0.8
 	h.teleport(home)
 	h.vel = Vector3.ZERO
 	var out := {"t": -1.0, "peak": 0.0, "jumped": false}

@@ -8,7 +8,7 @@
 	"color": "#ff3a2a",
 	"clip": {"lines": {"dash": "Charge through foes; the tip hits hardest.", "lmb": "Wide greatsword slashes.", "rmb": "A heavy slam. Hold to charge it.", "e": "Chain a foe or a wall, then haul yourself in.", "x": "Guard, then lunge into a healing cleave."}, "fx": {"x": "swing"}},
 	"plate_offset": 2.75,
-	"body": {"size": 1.004, "head": 0.48, "legs": 2.05, "neck": -0.012, "build": 0.95, "hit_r": 0.428},
+	"body": {"size": 1.004, "head": 0.48, "legs": 2.05, "neck": -0.012, "build": 0.95, "hit_r": 0.437, "hit_h": 2.27, "body_r": 0.428},
 	"model_glow": {"core": "#ff2238", "edge": "#f4ece6", "sword": "#fffaf0", "strength": 2.4},
 	"fantasy": "The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.",
 	"silhouette": "the horned pauldrons",
@@ -20,15 +20,15 @@
 	"passive": {"name": "Rage", "desc": "Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its)."},
 	"dash": {"id": "rampage", "name": "Rampage", "icon": "ram", "col": "#ffb070", "cd": 10.4,
 		"dist": 4.5, "time": 0.17, "windup": 0.07, "hit_dmg": 9.0, "hit_kb": 5.0, "dodge_rage": 15.0, "tip_r": 1.4, "tip_dmg": 18.0, "tip_kb": 9.0,
-		"desc": "A quick dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage."},
+		"desc": "A quick dash attack of about 3.6m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage."},
 	"rmb": {"delivery": "cone", "name": "Smash", "short": "Smash", "icon": "quake", "col": "#ffb070", "cooldown": 2.0, "charges": 1, "hold": 0.3, "full_t": 0.8, "windup": 0.6,
 		"slam": {"radius": 4.0, "angle": 70.0, "dmg": 26.0, "push": 6.0, "low": 0.35, "low_k": 0.5, "sweet": [2.4, 4.2], "sweet_deg": 18.0, "sweet_k": 0.4, "reset_t": 2.0},
-		"lunge": {"walk_k": 0.8, "dist": [4.5, 7.5], "dmg": [14.0, 20.0], "speed": 24.0, "push": 7.0, "miss_k": 2.0, "perfect_every": 1.0, "perfect_w": 0.15, "perfect_k": 1.2, "chain_deg": 30.0},
+		"lunge": {"walk_k": 0.8, "dist": [4.5, 5.4], "dmg": [14.0, 20.0], "speed": 24.0, "push": 7.0, "miss_k": 2.0, "perfect_every": 1.0, "perfect_w": 0.15, "perfect_k": 1.2, "chain_deg": 30.0},
 		"drop": {"cooldown": 7.2, "r3_cut": 2.4, "ahead": 0.8, "radius": 2.4, "dmg": 18.0, "down": 0.45, "spike_vy": 16.0, "core": 1.2, "core_k": 0.5, "stun": 0.8,
 			"hang": 0.08, "dive_speed": 24.0, "dive_t": [0.12, 0.35], "recover": 0.5, "planted": 0.2},
-		"spin": {"radius": 2.2, "dmg": 18.0, "blight": 4.0},
+		"spin": {"radius": 2.2, "dmg": 18.0, "blight": 5.0},
 		"haul": {"radius": 2.8, "dmg": [16.0, 30.0], "push": 7.0, "stun": [0.25, 0.6]},
-		"variants": {"tap": "Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.", "hold": "Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, crimson, its edges flaring hot at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.", "air": "Meteor Drop: only in the air, mid-jump or falling. Press and you stop where you are, the blade hauled overhead for a split second, then slam straight down to the ground below you. It hits a 2.4m circle centred just ahead of where you land (everyone sees it from the press): 18, and everyone in it is knocked down for 0.45s (anyone in the air or gliding is spiked to the ground); the inner ring (1.2m) takes +50% and stays down 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back. While it rests, a press in the air is the Smash as on the ground (tap a Slam, or hold to charge).", "during_e": "With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.2m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25 and a short stun)."},
+		"variants": {"tap": "Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.", "hold": "Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, crimson, its edges flaring hot at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.", "air": "Meteor Drop: only in the air, mid-jump or falling. Press and you stop where you are, the blade hauled overhead for a split second, then slam straight down to the ground below you. It hits a 2.4m circle centred just ahead of where you land (everyone sees it from the press): 18, and everyone in it is knocked down for 0.45s (anyone in the air or gliding is spiked to the ground); the inner ring (1.2m) takes +50% and stays down 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back. While it rests, a press in the air is the Smash as on the ground (tap a Slam, or hold to charge).", "during_e": "With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.2m, 18, blights 5s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25 and a short stun)."},
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "hard", "mod": "add"}},
 	"e": {"delivery": "projectile", "name": "Warchain", "short": "Chain", "icon": "hook", "col": "#d8c0a0", "cooldown": 12.8, "range": 13.0, "speed": 32.0, "dmg": 8.0, "time": 5.0, "reel_speed": 22.0,
 		"tether_max": 24.0, "sling_k": 0.8, "sling_max": 10.0, "swing": 0.36, "steer_rate": 24.0, "steer_max": 6.0, "face_k": 1.0, "turn": 6.0, "steer_reach": 3.5, "carry": 0.35, "jump_carry": 0.7, "arrive_t": 0.25,
@@ -50,5 +50,13 @@
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown"},
 		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown"},
 		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/juggernaut.md:202-205 planted guard, the strike goes 'in the facing / cursor direction': feet planted, body free"}
+	},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [O] ours (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

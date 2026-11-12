@@ -371,7 +371,7 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden, ours drawn in its place.
-func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
+func aegis_show(w: Dictionary, hurt: float) -> void:
 	var nd: Node3D = w.get("node")
 	if nd and is_instance_valid(nd):
 		nd.visible = false
@@ -386,7 +386,7 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", PLATE_COL.lerp(BROKEN_COL, hurt * 0.65))
 	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", PLATE_EDGE.lerp(BROKEN_COL, hurt * 0.65))
-	var glow := aegis_hit * 1.2 + (0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0)
+	var glow := aegis_hit * 1.2
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("glow", glow)
 
 func aegis_hide() -> void:

@@ -1037,6 +1037,14 @@ func _gunslinger() -> void:
 	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
+	var speeds: Array = []
+	for rk in [1, 3]:
+		P.slot_lv["dash"] = rk
+		var before := P.buff("move_speed")
+		K._slide_end()
+		speeds.append(P.buff("move_speed") - before)
+	ok("upgrade parity: rank 3 (tier IV) a slide's end gives +25% speed, rank 1 none",
+			near.call(speeds[0], 0.0) and near.call(speeds[1], 0.25), str(speeds))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1

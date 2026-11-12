@@ -65,7 +65,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.GLIDE_SPEED)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -137,6 +137,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["seen"] = tgt
 		a["react_t"] = float(df.get("react", 0.3)) * randf_range(0.8, 1.3) * (1.6 if tgt is Hunter else 1.0)
 	a["react_t"] = float(a.get("react_t", 0.0)) - dt
+	BotKin.summon(m, h, tgt, float(df.get("abil", 0.7)), dt)
 	# ---- a decoy: the rival vanished and left a copy behind; bots keep shooting the copy
 	if tgt is Hunter and (tgt as Hunter).cloak_t > 0.0 and m.verbs:
 		var dc: Dictionary = m.verbs.decoy_of(tgt)
@@ -294,6 +295,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			inp["aim_y"] = o.pos.y
 	else:
 		a.erase("rv")
+	var carry := BotRescue.carry_move(m, h)       # a Meeko bot with a wisp on her shoulder walks it out of the fight
+	if carry != Vector2.ZERO:
+		move = carry
 	# ---- don't walk off edges (except onto the jump pad we're heading for), and keep off other pads
 	var to_pad: bool = (a.has("pad_at") and h.flat_dist(a["pad_at"]) < 2.5) or (a.has("cross") and h.flat_dist(a["cross"]["take"]) < 2.5)
 	for pd in m.world.pads:
@@ -319,6 +323,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var dd: Vector2 = a["detour_dir"]
 		if _safe(m, h, dd, 1.2):
 			move = dd
+	move = BotDodge.step(m, h, move, df, dt)       # out of a foe's telegraph, after a reaction time
 	move = _brake_at_lip(m, h, move)
 	inp["move"] = move
 	if StoneStand.hop_ahead(h, move):
@@ -432,14 +437,14 @@ const RV_ON := 1.1            # stand this close (the revive ring is Life.R["rev
 func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 	var best: Hunter = null; var bs := 1e9
 	for o in m.hunters:
-		if o == h or o.team != h.team or not o.downed or o.out or o.extracted:
+		if o == h or o.team != h.team or not o.downed or o.out or o.extracted or not BotRescue.revive_ok(m, h, o):
 			continue
 		var d := h.flat_dist(o)
 		if d > RV_RANGE or m.world.is_void(o.pos.x, o.pos.z):
 			continue
 		var sc := d - (8.0 if o == m.player else 0.0)
 		if sc < bs: bs = sc; best = o
-	if best == null:
+	if best == null or BotRescue.gives_up(m, h):
 		return {}
 	var plan := {"o": best}
 	# who's a threat: a rival on the wisp (blocks the revive), or anything hostile right next to us
@@ -460,6 +465,8 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			var d := h.flat_dist(mb)
 			if d < RV_DANGER * 0.8 and d < dd and absf(mb.pos.y - h.pos.y) < 2.0 and mb.tgt == h:
 				dz = mb; dd = d
+	if dz == null:
+		dz = BotRescue.shooter(m, h)       # under fire: beat the shooter before walking into it
 	if dz:
 		plan["danger"] = dz
 	return plan
@@ -722,7 +729,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
-		if o != h and o.team == h.team and o.downed and not o.out:
+		if o != h and o.team == h.team and o.downed and not o.out and BotRescue.revive_ok(m, h, o):
 			goal = o.pos; gk = "revive"; break
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it

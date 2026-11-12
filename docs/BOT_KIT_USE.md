@@ -14,7 +14,7 @@ Run: `godot --headless --path . -- --bot-kit-use[=<arch>] [--kit-use-t=120] [--k
 | Kael | E recast | Warchain pulled in once hooked (`chain reel`) |
 | Mossy | RMB hold | Aegis raised (hold-only: a tap does nothing) |
 | Mossy | LMB | Hammer thrown (`hammer throw`) and recalled (`hammer recall`) |
-| Mossy | Shift behind the aegis | Shield Charge (`shield charge`), a Shield Slam at 50 Guard (`shield slam`, rare in a short duel) |
+| Mossy | Shift behind the aegis | Shield Charge (`shield charge`) |
 | Neve | Shift hold | Skate (`skate`) |
 | Neve | E recast | Rink Wall frozen while it slides (`rink freeze`) |
 | Tenzo | Shift recast | Rock Hop hops after the first of a chain (`hop recast`) |

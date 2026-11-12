@@ -5,7 +5,7 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 28,
+"long_line": 27,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -28,7 +28,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 10,
+"long_line": 9,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -87,7 +87,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 52
+"long_line": 48
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -408,7 +408,6 @@
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
-"history_comment": 1,
 "long_line": 3,
 "semicolon": 5
 },
@@ -436,7 +435,7 @@
 "semicolon": 54
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 1,
 "semicolon": 25
 },
@@ -470,10 +469,10 @@
 "semicolon": 26
 },
 "scripts/match/hunter.gd": {
-"history_comment": 27,
-"long_line": 91,
+"history_comment": 24,
+"long_line": 87,
 "nested_ternary": 14,
-"semicolon": 47
+"semicolon": 46
 },
 "scripts/match/hunter_anim.gd": {
 "long_line": 40,
@@ -485,7 +484,7 @@
 "nested_ternary": 2
 },
 "scripts/match/kin.gd": {
-"long_line": 30,
+"long_line": 29,
 "nested_ternary": 7,
 "semicolon": 18
 },
@@ -528,8 +527,8 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
-"nested_ternary": 9,
+"long_line": 48,
+"nested_ternary": 8,
 "semicolon": 28
 },
 "scripts/match/landmarks.gd": {
@@ -543,7 +542,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 215,
+"long_line": 214,
 "nested_ternary": 18,
 "semicolon": 141
 },
@@ -560,7 +559,7 @@
 "long_line": 5
 },
 "scripts/match/mob.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 1,
 "semicolon": 19
 },
@@ -717,7 +716,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 173,
+"long_line": 171,
 "nested_ternary": 33,
 "semicolon": 43
 },
@@ -827,10 +826,10 @@
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 19
+"semicolon": 18
 },
 "tools/archetype_check.gd": {
-"long_line": 65,
+"long_line": 63,
 "semicolon": 70
 },
 "tools/arena_check.gd": {
@@ -893,7 +892,7 @@
 "semicolon": 12
 },
 "tools/gear_check.gd": {
-"long_line": 24,
+"long_line": 23,
 "semicolon": 1
 },
 "tools/glide_reach.gd": {
@@ -991,8 +990,8 @@
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
-"long_line": 31,
-"semicolon": 4
+"long_line": 22,
+"semicolon": 2
 },
 "tools/polish_check.gd": {
 "long_line": 4,
