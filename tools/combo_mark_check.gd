@@ -53,7 +53,7 @@ func _chain(ok: Callable, ac) -> void:
 			not d.is_empty() and d["icon"] == "chain" and float(d["left"]) > 4.0, str(d))
 	ac.step(m, 0.5)
 	ok.call("combo tag (chain): the time left shrinks", float(K.combo_read(T).get("left", 9.0)) < float(d["left"]))
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	ok.call("combo tag (chain): gone when the chain breaks", K.combo_read(T).is_empty())
 	K.warchain._hook(T, T.pos)
 	K.warchain.pull()
