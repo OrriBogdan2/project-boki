@@ -1,8 +1,8 @@
 class_name VoidSpecks
 extends Control
-## Blots of void drifting slowly upward over the title's key art and around modal panels ("Void &
-## Masks", UI_STYLE.md on ext/agent-briefs): dark violet ink with a faint magenta rim, each on its
-## own slow sway. Drawn as two circles per speck from a fixed seed; nothing is allocated per frame.
+## Blots of void drifting slowly upward over the title's key art ("Void & Masks", UI_STYLE.md on
+## ext/agent-briefs): dark violet ink with a faint magenta rim, each on its own slow sway. Drawn as
+## two circles per speck from a fixed seed; nothing is allocated per frame.
 
 const COUNT := 26                # specks on screen
 const RISE := 0.012              # screen heights per second they drift up
@@ -18,8 +18,6 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _process(delta: float) -> void:
-	if not is_visible_in_tree():
-		return
 	t += minf(delta, 0.1)
 	queue_redraw()
 

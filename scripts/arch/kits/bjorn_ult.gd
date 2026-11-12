@@ -162,7 +162,6 @@ func _interrupt() -> void:
 	phase = ""
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
-	k.m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
 	_hide_lane()
 
@@ -263,7 +262,8 @@ func _tick_scar(dt: float) -> void:
 		if not f.hittable() or absf(f.pos.y - a.y) > 1.5:
 			continue
 		if AimMode.in_lane(a, dir, length, float(x.get("scar_w", 1.4)), f.pos):
-			f.add_slow(0.25, slow)
+			f.slow_k = maxf(f.slow_k, slow) if f.slow_t > 0.0 else slow
+			f.slow_t = maxf(f.slow_t, 0.25)
 	scar["fx"] = float(scar["fx"]) - dt
 	if float(scar["fx"]) <= 0.0:
 		scar["fx"] = 0.7

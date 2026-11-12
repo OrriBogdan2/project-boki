@@ -394,8 +394,10 @@ func _build_detail() -> void:
 	var rec := Save.kin(sel)
 	if rec.is_empty():
 		detail.add_child(UI.section("The Boki Burrow"))
-		for t in ["Room for %d on the farm. The rest sleep here, safe, fed and warm." % KinBox.farm_cap(),
-				"Click a Boki to see it. Drag it between the farm and the boxes, or onto another to swap."]:
+		for t in ["Your farm has room for %d Boki. Everyone else sleeps here, safe and warm: Boki in the burrow don't get hungry, don't need looking after and don't wander." % KinBox.farm_cap(),
+				"Click a Boki to see it. Drag it to the farm, into a box, or onto another Boki to swap them. Right click sends it straight across.",
+				"New Boki go to the farm when there's room. Repeats of a kind you already have out go to the burrow, unless they shimmer or carry a rare mutation.",
+				"Your partner and your first Boki always stay out. Pick a sleeping Boki for an expedition and it comes out to go with you."]:
 			var l := UI.label(t, 13, UI.MUTED); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			l.custom_minimum_size.x = 270
 			detail.add_child(l)

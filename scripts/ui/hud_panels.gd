@@ -44,34 +44,20 @@ func _draw_panels() -> void:
 	var p: Hunter = m.player
 	if not (m.tut and m.tut.intro):
 		var sz := size
-		SafeArea.begin("top")
-		if HudReveal.on(m, "counters"): hud._draw_top(sz)
+		hud._draw_top(sz)
 		if p and m.lairs:
-			SafeArea.begin("boss")
 			hud._draw_boss_bar(sz, p)        # (these two push the feed down: before it)
 			hud._draw_lair_victory(sz, p)
-		SafeArea.begin("feed")
-		if HudReveal.on(m, "feed"): hud._draw_feed(sz)
-		SafeArea.begin("minimap")
+		hud._draw_feed(sz)
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
-			SafeArea.begin("vitals")
 			HudVitals.draw(hud, sz, p)
-			SafeArea.begin("abilities")
 			hud._draw_abilities(sz, p)
-			SafeArea.begin("weapon")
 			hud._draw_weapon(sz, p)
-			SafeArea.begin("gear")
-			if HudReveal.on(m, "gear"): GearPanel.draw(hud, sz, p)
-			SafeArea.begin("kin")
+			GearPanel.draw(hud, sz, p)
 			hud._draw_kin_card(sz, p)
-			SafeArea.begin("squad")
-			if HudReveal.on(m, "squad"): hud._draw_squad(sz, p)
+			hud._draw_squad(sz, p)
 			TeamBoki.draw(hud, p)
-			SafeArea.begin("perks")
-			if HudReveal.on(m, "perks"): hud._draw_perks(sz, p)
-		else:
-			m.spectate.draw(hud, sz)
-	SafeArea.begin("")
+			hud._draw_perks(sz, p)
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0

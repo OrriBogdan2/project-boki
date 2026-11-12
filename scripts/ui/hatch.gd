@@ -27,6 +27,8 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
+const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
+const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
@@ -351,11 +353,9 @@ func _end_intro() -> void:
 		_after_create()
 
 var turning := false
-var zoom := 0.0               # the creator's camera: 0 the whole body, 1 the face
 func _unhandled_input(event: InputEvent) -> void:
 	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn yourself round; the wheel zooms to your face
-		zoom = CreatorCam.wheel(zoom, event)
+		# drag with the mouse (or hold A / D) to turn yourself round
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
 		elif event is InputEventMouseMotion and turning:
@@ -403,21 +403,58 @@ func _show_create() -> void:
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "This is you. Drag (or hold A / D) to turn round."
+	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
-	zoom = 0.0          # the whole body first, so a change of height or build shows as one
-	var card := CreatorCard.make(look, edit_only)
+	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
+	look_at_t = CREATE_LOOK
+	var card := UI.card(UI.CARD, 14, 16)
+	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
-	card.changed.connect(func(lk: Dictionary):
-		look = lk
-		_rebuild_preview())
-	card.done.connect(func():
-		look = card.look
-		_looks_good())
+	var v := UI.vbox(8); card.add_child(v)
+	for r in Unmasked.ROWS.size():
+		var row: Array = Unmasked.ROWS[r]
+		if r == 0 or r == Unmasked.HOLLOW_ROW:
+			v.add_child(UI.section("Body" if r == 0 else "The hollow"))
+		var key: String = row[0]
+		var opts: Array = row[2]
+		var hr := UI.hbox(8)
+		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if row.size() > 3:
+			l.tooltip_text = row[3]
+			l.mouse_filter = Control.MOUSE_FILTER_STOP
+		hr.add_child(l)
+		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
+		var i := int(look[key])
+		if opts[0] is Color:
+			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
+			sw.add_theme_stylebox_override("panel", UI.frame(opts[i], 13, Color(1, 1, 1, 0.25)))
+			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			hr.add_child(sw)
+		else:
+			var val := UI.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
+			val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			hr.add_child(val)
+		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
+		v.add_child(hr)
+	var nr := UI.hbox(8)
+	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
+	nr.add_child(nl)
+	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
+	nr.add_child(ne)
+	v.add_child(nr)
+	var br := UI.hbox(10)
+	br.alignment = BoxContainer.ALIGNMENT_END
+	br.add_child(UI.ghost("Random", func():
+		look = Unmasked.random_look()
+		_show_create(), 120, "swap"))
+	br.add_child(UI.primary("Looks good", _looks_good, 200))
+	v.add_child(br)
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 30; card.offset_bottom += 30       # clear of the title
-	card.grow_vertical = Control.GROW_DIRECTION_BOTH      # More looks... grows it up and down, not off the bottom
+	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()
@@ -440,6 +477,11 @@ func _top_over(x_frac: float) -> void:
 	if top_box:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
+
+func _step_look(key: String, d: int, n: int) -> void:
+	look[key] = posmod(int(look[key]) + d, n)
+	Sfx.play("hover", null, -6.0)
+	_show_create()
 
 var preview_yaw := PI
 var preview_anim: HunterAnim
@@ -479,7 +521,6 @@ func _show_pick() -> void:
 		hr.add_child(tt)
 		hr.add_child(UI.section(d["temper"], ecol))
 		v.add_child(hr)
-		v.add_child(EggPreview.build(d["species"], mystery, get_tree()))
 		var dl := UI.label(d["desc"], 14, UI.MUTED)
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -589,9 +630,6 @@ func _process(delta: float) -> void:
 	if stage == "mask":
 		pass       # (MaskMoment moves the camera)
 	elif stage == "create":
-		var hs: float = Unmasked.HEIGHT_SCALE[int(look.get("height", 1))]
-		cam_to = CreatorCam.cam_pos(zoom, hs)
-		look_at_t = look_at_t.lerp(CreatorCam.focus(zoom, hs), minf(1.0, delta * 3.0))
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5

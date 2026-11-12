@@ -485,8 +485,7 @@ func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:
 	var hp0 := P.hp
 	var pos_y := P.pos.y
 	var l0 := J.locked
-	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",
-		"skill", "throw"]
+	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
 	for key in keys:
 		ak.step(m, 0.05, func():
 			P.inp[key] = true

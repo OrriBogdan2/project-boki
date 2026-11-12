@@ -74,9 +74,8 @@ func _settings_read(src: Dictionary) -> void:
 		if _uses(src, String(k)).is_empty():
 			unread.append(k)
 	ok("every setting is read somewhere", unread.is_empty(), str(unread))
-	var tabs := ["Gameplay", "Controls", "Audio", "Video", "Accessibility"]
-	# (Camera lives in Gameplay now; Demo is the owner's, added by settings_tabs())
-	ok("the settings menu shows the five player tabs", Overlay.SETTINGS_TABS == tabs)
+	var tabs := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+	ok("the settings menu shows the new tabs", Overlay.SETTINGS_TABS == tabs)
 
 func _removed(src: Dictionary) -> void:
 	for k in Settings.REMOVED:
@@ -133,31 +132,6 @@ func _static_styles(src: Dictionary) -> void:
 			if line.contains("UI.section(") and line.contains(".lerp("):
 				dim_heads.append(path)
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
-	_void_pieces()
-
-## The Void & Masks pieces the refs ask for: a chunky neon frame with grain on every panel, the
-## primary button in display type, and the parchment banner, info strip and ink stamp helpers.
-func _void_pieces() -> void:
-	var t := UI.theme()
-	var panel := t.get_stylebox("panel", "PanelContainer") as UiTorn
-	var heavy := panel != null and panel.glow_w >= 1.5 and panel.grain > 0.0
-	ok("panels: a torn box with a heavy neon edge and grain", heavy)
-	ok("the primary button is set in display type", t.get_font("font", "Primary") == UI.big)
-	var banner := UI.banner("Voidling", 40, -2.5)
-	ok("a title banner hangs crooked on parchment", banner.get_theme_stylebox("normal") is UiTorn
-		and (banner.get_theme_stylebox("normal") as UiTorn).nails and absf(banner.rotation_degrees) > 1.0)
-	var strip := UI.strip("bond", "Ability", "Stinger Hook  –  hook 8m", UI.ACCENT)
-	var strip_box := strip.get_theme_stylebox("panel") as UiTorn
-	ok("an info strip is nailed parchment with a badge and dark ink", strip_box != null and strip_box.nails
-		and strip_box.fill == UI.PARCHMENT and strip.find_children("*", "PanelContainer", true, false).size() == 1)
-	var stamp := UI.stamp("Logged", Color.RED)
-	var crooked := absf(stamp.rotation_degrees) > 2.0 and stamp.custom_minimum_size.x > 60.0
-	ok("a stamp is set crooked and sized to its word", crooked)
-	var moves := BokiMoves.new("cindle", {}, true)
-	var stacked := moves.vertical and moves.tiles.size() >= 2 and moves.tiles[0].get_theme_stylebox("panel") is UiTorn
-	ok("move strips stack", stacked)
-	for c in [banner, strip, stamp, moves]:
-		c.free()
 
 func _theme_boxes() -> Dictionary:
 	var out := {}
@@ -201,7 +175,7 @@ func _screens() -> void:
 	var title: Node = await _go("title")
 	ok("title screen: every box is the menu look", _off_look(title, ours).is_empty(), str(_off_look(title, ours)))
 	Overlay.ctx = "title"
-	for t in Overlay.settings_tabs():
+	for t in Overlay.SETTINGS_TABS:
 		Overlay.tab = t
 		Overlay.open_settings()
 		await main.get_tree().process_frame

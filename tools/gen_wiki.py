@@ -492,9 +492,9 @@ def gen_gear():
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
         users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
-        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
+        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
-    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Range", "Notes"], rows)
+    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
     body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
@@ -558,9 +558,6 @@ def gen_maps():
         if sp:
             cat = {"rare_kin": "Rare Boki", "vault": "Vaults", "cache": "Item caches", "boss": "Live boss lairs"}
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
-        if m.get("legendaries"):
-            chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
-            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []

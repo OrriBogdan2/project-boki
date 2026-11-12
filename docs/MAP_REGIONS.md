@@ -4,8 +4,6 @@ One line per region: landmark (what you name it by from afar) · terrain · cove
 Built by `tools/make_hollowcrown.py` (purposes and loot leans in its `regions` list); checked by `--hot-zone-check`.
 Each match also picks one region (not the Crown) as the **hot drop zone**: loot there rolls a rarity step better, it's ringed on the drop map and minimap, and one bot squad usually heads there (`scripts/match/hot_zone.gd`).
 
-The drop map shows every monster camp as a campfire (1, 2 or 3 flames by size, a crown on a Chief), "N camps: to level L" under each region's name, and the hot zone as "HOT: bigger camps, better loot" (`scripts/ui/camp_map.gd`, decision 0048). Cleared camps dim for the squads that were near them. Thin smoke columns mark the camps during the drop (`scripts/match/camp_smoke.gd`). `--camp-map-check` covers it; `--region-shots` writes `drop_map.png` and `dive_smoke.png` (copies in `docs/shots/early-camps-map-ui/`).
-
 - **The Crown** (gloom): rune ring over the vault · broken stone crown, a lv 4 terrace round the lv 8 Throne, two Gaol lair rocks · sparse gloom grass on the terrace edges · the vault, the two boss Gaols, the richest chests, the most Blight · the Heart (center vault).
 - **Frostgate** (frost): hooded ice statue · the Keep's high ground (lv 6) over the Gate Span, open Rimefield below · almost bare, cover is the Keep's walls · best armor on the map (armor ×1.6) · base camp.
 - **Cinder Steps** (ember): forge chimney · a lv 2 mesa with the lv 6 Kilns plateau over the Forge Yard · a few scorched clumps by the camp and stairs · gloves and weapon tunings (glove ×1.6), a camp to level on · forge / outpost.

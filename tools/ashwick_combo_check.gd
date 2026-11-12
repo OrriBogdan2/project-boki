@@ -6,7 +6,8 @@ extends RefCounted
 ## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
 ## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
-## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
+## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
+## squash on the hit frame, the jet lift-off, the run's footfalls).
 
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
@@ -27,7 +28,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _lance_combos()
 	await _growth()
-	await load("res://tools/combo_mark_check.gd").new().run(ok, ak, "ashwick")
+	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
@@ -76,17 +77,19 @@ func _lance_combos() -> void:
 	ak.step(m, 1.0)
 	var em3: int = K.hose.emitted
 	var slowest := 9.0
+	var reloaded := false
 	var tf := 0.0
 	while tf < 10.0:
 		keep_fire.call()
 		m.step(ak.DT)
 		tf += ak.DT
 		if tf > 0.5: slowest = minf(slowest, K.move_k())
+		reloaded = reloaded or P.reload_t > 0.0
 	var late: int = K.hose.emitted
 	m.step(ak.DT)
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
-			K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
-			"puffs %d, move_k %.2f" % [late - em3, slowest])
+			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
+			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
 	# hold-pose audit: a lance let go in the middle of a ram takes its pose down with it
 	P.inp["fire"] = false
 	ak.step(m, 0.5)
@@ -117,6 +120,43 @@ func _ram(lvl: int) -> float:
 	return d
 
 ## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+## The source's beats (briefs/hero-ref/linwick.md, a frame = 0.2 s; docs/heroes/ashwick.md, Animation timing):
+## the lance's pilot is the kick key, the jet's crouch and flight pose land in its first frame, and the run clip's
+## footfalls, at the rate WardenGait plays it (foot_mps), come every 0.15-0.21 s at his run speed.
+func _timing() -> void:
+	var lance: Array = KMovesPair.MOVES["as_lance"]["keys"]
+	var spool := float((Arch.def("ashwick").get("lmb", {}) as Dictionary).get("spool", -1.0))
+	ok(
+		"timing: the lance pilot (spool) ends on as_lance's kick key", is_equal_approx(spool, float(lance[2][0])),
+		"spool %.2f key %.2f" % [spool, float(lance[2][0])]
+	)
+	var jet: Array = KMovesPair.MOVES["lw_jet"]["keys"]
+	ok(
+		"timing: jet lift-off crouch by 0.1 s, flight pose by 0.22 s (source: burst 0.1, flying at 0.2)",
+		float(jet[1][0]) <= 0.1 and float(jet[2][0]) <= 0.22, "%.2f %.2f" % [float(jet[1][0]), float(jet[2][0])]
+	)
+	var cfg := WardenClips.data("cinder")
+	var lc: Dictionary = cfg.get("loco", {})
+	var holder := Node3D.new()
+	main.add_child(holder)
+	var mdl := Models.hunter(
+		Arch.weight("ashwick"), Data.TEAM_COLORS[0], Arch.signature("ashwick"), "", PlayerLook.neutral(), "ashwick"
+	)
+	holder.add_child(mdl)
+	var w := mdl.get_node_or_null("Warden")
+	var sync := w.get_node_or_null("Sync") as WardenGlb.Sync if w else null
+	var clips: WardenClips = sync.clips if sync else null
+	var foot := -1.0
+	if clips and clips.lib and lc.has("run"):
+		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
+		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc)
+	ok(
+		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
+		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot
+	)
+	holder.queue_free()
+
 func _growth() -> void:
 	var d1: float = await _ram(1)
 	var d10: float = await _ram(10)
@@ -229,8 +269,8 @@ func _all() -> void:
 	P.inp["fire"] = false
 	ak.step(m, 0.6, func(): ak.aim_at(P, T.pos))      # turned back to the dummy before the next part
 	var ft0: int = int(roar["ticks"])
-	ok("lance: no fuel, held 9s it still burns (no ammo count)",
-			K.flame_ticks > ft0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
+	ok("lance: no fuel or reload, held 9s it still burns (no ammo count)",
+			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
@@ -300,8 +340,7 @@ func _all() -> void:
 		"burning %d burn_t %.1f ignitions %d" % [K.burning(T), T.burn_t, K.ignitions]
 	)
 	ak.step(m, 0.02)
-	ok("burn stage: a rival Ablaze gets the tag's 1 of 2 pips, no world pips", int(K.combo_read(T).get("n", 0)) == 1
-			and K.pips_on(T) == 0, "tag %s pips %d" % [K.combo_read(T), K.pips_on(T)])
+	ok("burn stage: one flame pip over a foe Ablaze", K.pips_on(T) == 1, "pips %d" % K.pips_on(T))
 	ak.step(m, 2.6, aim_t)
 	ok(
 		"lance: kept on a burning foe it Flashes over (level 2)", K.burning(T) == 2 and K.upgrades >= 1,
@@ -309,8 +348,8 @@ func _all() -> void:
 	)
 	ak.step(m, 0.02)
 	ok(
-		"burn stage: a rival in Flashover gets the tag's 2 of 2 pips, no world pips",
-		int(K.combo_read(T).get("n", 0)) == 2 and K.pips_on(T) == 0, "tag %s pips %d" % [K.combo_read(T), K.pips_on(T)]
+		"burn stage: three flame pips and a glow over a Flashover",
+		K.pips_on(T) == 3 and K.fx.shown("pipg%d" % T.get_instance_id()), "pips %d" % K.pips_on(T)
 	)
 	# +25% on a burning foe (the burn's own ticks held off so only the hose counts)
 	reset.call()
@@ -457,11 +496,23 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	var skull := false
 	var tt := 0.0
+	var hit_t := -1.0               # s after the press the ram landed
+	var hit_key := -1.0             # s into as_leap right after the hit
 	while tt < 0.5:
 		ak.step(m, ak.DT)
 		tt += ak.DT
 		if K.fx.shown("skull%d" % P.get_instance_id()): skull = true
+		if hit_t < 0.0 and K.bash_hits == 1:
+			hit_t = tt
+			hit_key = m.time - K.anim_at
 	ok("ram: the flame skull wraps his front while it flies", skull)
+	ok(
+		"ram timing: a foe 3 m out is hit by 0.22 s, the squash key on that frame (source: back in 0.1 s)",
+		hit_t > 0.0 and hit_t <= 0.22 and hit_key >= AshwickKit.RAM_IMPACT_KEY - 0.001
+			and hit_key <= AshwickKit.RAM_IMPACT_KEY + ak.DT + 0.001
+			and m.time - K.anim_at >= _move_len("as_leap"),
+		"hit %.2f s key %.2f upright by %.2f" % [hit_t, hit_key, hit_t + _move_len("as_leap") - hit_key]
+	)
 	ok(
 		"ram: stops on the first foe and shoves it hard (doesn't pass through)",
 		K.bash_hits == 1 and P.pos.x < T.pos.x and P.flat_dist(T) < 4.0 and T.pos.x - home.x > 3.4 and ak.dmg(T2) < 1.0,

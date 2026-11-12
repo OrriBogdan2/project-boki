@@ -123,7 +123,7 @@ func sim(dt: float) -> void:
 			if ss_t <= 0.0:
 				_rehide(sr)
 	_held_last = held_now
-	var spd: float = float(sr["flee_speed"]) * slow_mult()
+	var spd: float = float(sr["flee_speed"]) * slow_mult(0.55)
 	if KitStatus.grounded(self):
 		spd *= float(sr["grounded_speed"])
 	if root_t > 0.0 or stun_t > 0.0:

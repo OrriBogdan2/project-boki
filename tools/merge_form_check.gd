@@ -135,20 +135,6 @@ func _data() -> void:
 	ok(not FileAccess.file_exists("res://scripts/kin/merge_holds.gd"), "MergeHolds (boulder, hover, prism) is gone")
 	var rules := MergeForm.data()
 	ok(not rules.has("tiers") and not rules.has("forms_bonus"), "no tiers or forms_bonus in the merge rules")
-	var no_style: Array = []
-	for id in Data.KIN:
-		if not (rules["types"] as Dictionary).has(DexView.type_of(id)):
-			no_style.append(id)
-	ok(no_style.is_empty(), "every Boki's type has a merge style: %s" % [no_style])
-	var split_ok := true
-	for id in ["duskapi", "umbrathere"]:
-		split_ok = split_ok and DexView.type_of(id) == "ghost"
-	for id in ["gloamshell", "caecilith"]:
-		split_ok = split_ok and DexView.type_of(id) == "dark"
-	ok(split_ok, "Shadow is split: Snuffapi, Umbrathere Ghost; Gloamshell, Zippelith Dark")
-	var named: bool = DexView.type_name("ghost") == "Ghost" and DexView.type_name("dark") == "Dark"
-	var tints: bool = DexView.type_col("ghost") != DexView.type_col("dark")
-	ok(named and tints, "Ghost and Dark each have a name and a colour")
 	var tiered := false
 	for f in DirAccess.get_files_at("res://content/merges_v2"):
 		var txt := FileAccess.get_file_as_string("res://content/merges_v2/" + f)
@@ -225,7 +211,7 @@ func _xform() -> void:
 	P.ult = 1.0
 	var pressed := KinMerge.press(P)
 	ok(not pressed and not KinMerge.active(P) and is_equal_approx(P.ult, 1.0), "R with the Boki downed does nothing and keeps the full meter")
-	ok(KinMerge.deny_text(P) == "Rescue %s to fuse" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
+	ok(KinMerge.deny_text(P) == "Rescue %s to merge" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
 	P.ult = 0.5
 	Bond.add(P, 0.1)
 	ok(P.ult > 0.5 or before > 0.0, "the bond meter keeps filling while the Boki is down")

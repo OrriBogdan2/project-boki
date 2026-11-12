@@ -1,9 +1,7 @@
 extends RefCounted
-## --first-match-guide-check: the "what to do next" line in a save's first Extractions.
-##   1. the save flag: only real Extractions count, two get every line, the third only the camp lines,
-##      the fourth none; old saves migrate
-##   2. a walk through the triggers: pick a camp, land, clear it, rank, send, chest, a squad, the Blight,
-##      an exit; each line shows
+## --first-match-guide-check: the "what to do next" line in a save's first two Extractions.
+##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
+##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
 ##   3. every line fits the banner lane in at most two lines at 1280x720
 var bad := 0
@@ -30,19 +28,16 @@ func _save_flag() -> void:
 	ok(skipped and int(Save.d["first_guide"]) == 0, "tutorial, duel and training get no guide and do not count")
 	var first := FirstMatchGuide.for_match(null, o)
 	var second := FirstMatchGuide.for_match(null, o)
+	ok(first != null and second != null, "the first two Extractions get the guide")
 	var third := FirstMatchGuide.for_match(null, o)
-	ok(first != null and second != null and third != null, "the first three Extractions get the guide")
-	ok(third.nth == 2 and not third._due("land", null) and not third._due("rank", null),
-		"the third gets only the camp lines")
-	var fourth := FirstMatchGuide.for_match(null, o)
-	ok(fourth == null and int(Save.d["first_guide"]) == 3, "the fourth does not; the flag stays at 3")
+	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not; the flag stays at 2")
 	var old := {"matches": 5}
 	FirstMatchGuide.migrate(old)
 	var young := {"matches": 1}
 	FirstMatchGuide.migrate(young)
 	var kept := {"matches": 5, "first_guide": 0}
 	FirstMatchGuide.migrate(kept)
-	ok(int(old["first_guide"]) == 3 and int(young["first_guide"]) == 1, "an old save skips it; one match in: one more")
+	ok(int(old["first_guide"]) == 2 and int(young["first_guide"]) == 1, "an old save skips it; one match in: one more")
 	ok(int(kept["first_guide"]) == 0, "the field is never overwritten")
 	ok(int(Save.fresh()["first_guide"]) == 0, "a new save starts at 0")
 
@@ -73,30 +68,13 @@ func _walk() -> void:
 	if m.chests.is_empty():
 		m.chests.append({"open": false, "pos": p.pos, "prog": 0.0})
 	var move0: Vector2 = p.inp["move"]
-	m.skydrop.planning = true
-	_tick(0.2)
-	ok(g.id == "pick" and g.line == "Pick a camp and ping it" and g.target != Vector3.INF,
-		"planning the drop: pick a camp and ping it (%s)" % g.line)
-	var pick: Dictionary = m.camps.list().filter(func(e): return e["pos"] == g.target)[0]
-	ok(pick["size"] == "small" and pick["region"] != m.biomes.hot.hot, "it points at a Small Camp outside the hot zone")
-	m.skydrop.planning = false
-	_tick(0.2)
-	ok(g.line == "" and g.target == Vector3.INF, "the ship has left: the prompt clears")
-	g._gap = 0.0
 	p.dropping = true
 	_tick(0.2)
 	ok(g.id == "land" and g.line.begins_with("Pick a landing spot"), "dropping: pick a landing spot (%s)" % g.line)
 	p.dropping = false
-	p.riding = false
 	_tick(0.2)
 	ok(g.line == "", "landed: the line clears and a quiet gap follows")
 	_tick(1.5)
-	ok(g.id == "camp" and g.line == "Clear the camp to level up" and g.target != Vector3.INF,
-		"on the ground: clear the camp (%s)" % g.line)
-	m.camps.cleared.emit(0, p.team)
-	_tick(0.2)
-	ok(g.line == "" and g.target == Vector3.INF, "the squad cleared a camp: it clears")
-	_tick(1.6)
 	ok(g.id == "rank" and g.line.contains("Rank up"), "a skill point: rank an ability (%s)" % g.line)
 	p.skill_pts = 0
 	_tick(0.2)
@@ -151,9 +129,11 @@ func _walk() -> void:
 	_fit()
 
 func _fit() -> void:
-	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var w := strip.size.x - strip.size.y
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle")
-		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
-		var n: int = fit["lines"].size()
-		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+		var px := int(strip.size.y * 0.5)
+		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+			px -= 1
+		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])

@@ -24,7 +24,7 @@ static func shoot_down(h: Hunter) -> void:
 	h.gliding = false
 	h.glide_cd = reopen_cd
 	h.shot_down = true
-	h.add_stun(air_stun)
+	h.stun_t = maxf(h.stun_t, air_stun)
 	h.vel = Vector3(h.vel.x * keep_hv, minf(h.vel.y, -fall_vy), h.vel.z * keep_hv)
 	h.m.fx.burst(h.pos + Vector3(0, 1.8, 0), Color("ff9a5a"), 14, 3.0, 0.45, 6.0, 0.8)
 	h.m.sfx("knock", h.pos, -2.0, 1.3)
@@ -57,7 +57,7 @@ static func credit(by: Ent) -> void:
 ## A spiked body touches the ground: the landing stun and the extra damage.
 static func land(h: Hunter) -> void:
 	h.shot_down = false
-	h.add_stun(land_stun)
+	h.stun_t = maxf(h.stun_t, land_stun)
 	h.hurt(land_dmg, h.last_hit_by, {"src": "fall"})
 	h.m.fx.dust(h.pos, 12)
 	h.m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)

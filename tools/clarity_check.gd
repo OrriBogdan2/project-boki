@@ -1,9 +1,8 @@
 extends RefCounted
 ## --clarity-check: the one colour rule and the downed picture. In a 2v2: your ring is the "you" colour,
 ## your teammate's the ally colour and both rivals' the foe colour, and every Boki's ring matches its
-## Hunter's. With your teammate knocked: their bleed-out drains, their Boki's status icon says what it
-## is doing (pulling them up, down too, defending) and only your squad's Boki get tethers. Never touches
-## the save.
+## Hunter's. With your teammate knocked: their bleed-out drains, their Boki rides on them as a wisp with
+## no icon (one down itself shows the knock) and only your squad's Boki get tethers. Never touches the save.
 
 const DT := 1.0 / 60.0
 
@@ -35,8 +34,8 @@ func run(main: Node) -> void:
 	ok(ally != null and foes.size() == 2, "a 2v2: one teammate, two rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
-	ok(SideColor.of(m, P) == SideColor.you() and SideColor.of(m, ally) == SideColor.ally(), "you and your ally")
-	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.foe()), "both rivals are the foe colour")
+	ok(SideColor.of(m, P) == SideColor.YOU and SideColor.of(m, ally) == SideColor.ALLY, "you and your ally")
+	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.FOE), "both rivals are the foe colour")
 	ok(SideColor.of_team(P.team, (foes[0] as Hunter).team) != SideColor.of_team(P.team, P.team), "foe != ally")
 	for h in m.hunters:
 		var want := SideColor.of(m, h)
@@ -58,22 +57,15 @@ func run(main: Node) -> void:
 	var k: Kin = ally.kin
 	ok(k != null, "the downed teammate has a Boki")
 	if k:
-		k.state = "reviving"
-		ok(BokiMarks.status(k) == "heart", "a Boki pulling its Hunter up shows the heart")
+		var riding := k.state == KinWispForm.STATE and BokiMarks.status(k) == ""
+		ok(riding, "its Boki rides on it as a wisp: no icon over it")
 		k.state = "downed"
 		ok(BokiMarks.status(k) == "knock", "a Boki down too shows the knock")
-		k.state = "active"
-		k.hp = k.max_hp
-		k.target = foes[0]
-		(foes[0] as Hunter).teleport(ally.pos + Vector3(1.0, 0, 0))
-		ok(BokiMarks.status(k) == "fortify", "a Boki fighting someone over its Hunter shows the guard")
-		k.target = null
-		k.hp = k.max_hp * 0.05
-		ok(BokiMarks.status(k) == "dash", "a badly hurt Boki hanging back shows the run")
+		k.state = KinWispForm.STATE
 	# ---------------------------------------------------------------- 3. tethers only for your squad
 	var tethered := _tethered(m)
 	ok(P.kin == null or P.kin.state == "shoulder" or tethered.has(P.kin), "your own Boki out: tethered to you")
-	ok(k == null or tethered.has(k), "your downed teammate's Boki: tethered to them")
+	ok(k == null or not tethered.has(k), "your downed teammate's Boki rides on them as a wisp: no tether")
 	for f: Hunter in foes:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)
 	# ---------------------------------------------------------------- 4. crowd control on the plate, with time left
@@ -140,8 +132,9 @@ func _tethered(m: Match) -> Array:
 		var h: Hunter = k.owner_h
 		if h == null:
 			continue
-		k.state = "active"
-		k.teleport(h.pos + Vector3(3.0, 0, 0))
+		if k.state != KinWispForm.STATE:       # (a downed Hunter's Boki stays in its wisp form)
+			k.state = "active"
+			k.teleport(h.pos + Vector3(3.0, 0, 0))
 		if BokiMarks.tethers(m, k):
 			out.append(k)
 	return out

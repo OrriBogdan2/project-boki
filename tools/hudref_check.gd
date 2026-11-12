@@ -1,6 +1,6 @@
 extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
-##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
+##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
@@ -9,7 +9,6 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
-##   9. your knock and elimination callout (KnockCallout) stacks, carries the name and expires
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -32,10 +31,10 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
-	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
-	ok(counts == [8, 9, 12], "17 health a segment: the classes' 124 -> 8, 145 -> 9, 193 -> 12 (%s)" % str(counts))
-	ok(HudStyle.seg_count(600.0) == 9 and HudStyle.seg_step(600.0) == 68.0,
-		"a huge pool doubles the segment size instead of crowding (600 -> 9 of 68)")
+	var counts := [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)]
+	ok(counts == [4, 6, 12], "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%s)" % str(counts))
+	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0,
+		"a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=plates")
@@ -53,11 +52,11 @@ func run(main_node: Node) -> void:
 	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
 	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp),
 		"the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
-	full.max_hp = 193.0
-	full.hp = 193.0
+	full.max_hp = 300.0
+	full.hp = 300.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 193: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0
@@ -204,53 +203,7 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
-	await _check_gear_reveal(P)
-	_check_callout(m, P, hud)
 	_done()
-
-## 7. Your knocks and eliminations put a short callout near the centre (KnockCallout): the word in its
-## colour with the victim's name, stacked for quick knocks, gone after KnockCallout.LIFE, and none for
-## a knock someone else makes.
-func _check_callout(m: Match, P: Hunter, hud) -> void:
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team and not x.downed and not x.out)
-	ok(foes.size() >= 3, "three rivals still standing for the callout (%d)" % foes.size())
-	if foes.size() < 3:
-		return
-	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team)
-	m.knock(mates[0], foes[2], {})        # a rival knocks your teammate
-	var callout := _callout_of(hud)
-	ok(callout == null or callout.lines.is_empty(), "a knock by someone else puts up no callout")
-	m.knock(foes[0], P, {})
-	m.knock(foes[1], P, {})
-	m.eliminate(foes[2], P, "shot", true)
-	callout = _callout_of(hud)
-	ok(callout != null and callout.lines.size() == 3, "two knocks and an elimination stack three lines")
-	if callout == null or callout.lines.size() != 3:
-		return
-	var words: Array = callout.lines.map(func(e): return e["word"])
-	ok(words == ["KNOCKED", "KNOCKED", "ELIMINATED"], "the words are KNOCKED, KNOCKED, ELIMINATED (%s)" % str(words))
-	var names: Array = callout.lines.map(func(e): return e["name"])
-	ok(names[0] == foes[0].pname.left(KnockCallout.NAME_MAX) and names[2] == foes[2].pname.left(KnockCallout.NAME_MAX),
-		"each line carries its victim's name")
-	ok(callout.lines[0]["col"] == KnockCallout.KNOCK_COL and callout.lines[2]["col"] == SideColor.foe(),
-		"knocked is the pink-magenta accent, eliminated the rival red")
-	callout.tick(KnockCallout.LIFE * 0.5)
-	ok(callout.lines.size() == 3, "still up half way through")
-	callout.tick(KnockCallout.LIFE)
-	ok(callout.lines.is_empty() and KnockCallout.LIFE <= 1.2, "gone after %.1fs: transient only" % KnockCallout.LIFE)
-	for i in KnockCallout.MAX_LINES + 1:
-		callout.push("KNOCKED", "N%d" % i, KnockCallout.KNOCK_COL)
-	var last: Array = callout.lines.map(func(e): return e["name"])
-	ok(last == ["N1", "N2", "N3"], "a fourth line pushes the oldest off (%s)" % str(last))
-	var low := KnockCallout.TOP + (KnockCallout.WORD_PX + KnockCallout.GAP) * (KnockCallout.MAX_LINES - 1)
-	ok(KnockCallout.TOP - KnockCallout.WORD_PX > 0.5 and low < 0.75,
-		"the stack sits under the centre, clear of the lane and bottom HUD (%.2f..%.2f)" % [KnockCallout.TOP, low])
-
-func _callout_of(hud) -> KnockCallout:
-	for ch in hud.get_children():
-		if ch is KnockCallout:
-			return ch
-	return null
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
 ## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.
@@ -322,33 +275,6 @@ func _check_deny(P: Hunter) -> void:
 		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
-
-## 8. Empty gear slots stay hidden: only filled ones are drawn (the belt shows all its slots, BeltHud); holding
-## the info key shows all the gear slots and one plain line per item.
-func _check_gear_reveal(P: Hunter) -> void:
-	var hud = P.m.hud
-	P.gear = Gear.empty_slots()
-	P.belt = UtilityBelt.empty()
-	await hud.panels.draw
-	await main.get_tree().process_frame
-	var spots := func(prefix: String) -> int:
-		return hud.hover_spots.filter(func(x): return String(x[1]).begins_with(prefix)).size()
-	ok(spots.call("gslot:") == 0, "a new hunter: no gear slots drawn")
-	var armor: String = Gear.ids_for(2)[0]
-	P.gear[2] = {"id": armor, "rar": 0}
-	Save.d["hud_reveal"]["gear"] = true      # (set straight in, no pick-up: the staged HUD's gear group, HudReveal)
-	await hud.panels.draw
-	await main.get_tree().process_frame
-	ok(GearPanel.shown(P) == [2] and spots.call("gslot:") == 1, "one armor piece: only the armor slot is drawn")
-	Input.action_press("scores")
-	var held := GearPanel.shown(P).size() == Gear.SLOTS.size()
-	var line := GearPanel._card_line(P, 2)
-	var empty_line := GearPanel._card_line(P, 0)
-	Input.action_release("scores")
-	ok(held and line.contains(Gear.desc_of(armor, 0)) and empty_line == "Glove 1: empty",
-		"holding the info key: every gear slot and a plain line per item ('%s' / '%s')" % [line, empty_line])
-	P.gear = Gear.empty_slots()
-	P.belt = UtilityBelt.empty()
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

@@ -181,7 +181,6 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "BEACHED!", res_col(), true)
 		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
 		m.sfx("unlock", f.pos, -4.0, 0.7)
 	else:
@@ -359,7 +358,8 @@ func _tick(dt: float) -> void:
 			pd["tick"] = 0.25
 			m.fx.ring(pd["at"], float(pd["r"]), Color("#7be05a", 0.5), 0.26)
 			for f in foes_in(pd["at"], float(pd["r"])):
-				f.add_slow(0.35, float(pd["k"]))
+				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
+				f.slow_t = maxf(f.slow_t, 0.35)
 		if float(pd["left"]) <= 0.0:
 			puddles.erase(pd)
 	if swim_t > 0.0:
@@ -394,6 +394,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.6:
+		h.inp["aim"] = tgt.pos          # the wave rolls along the aim
 		HunterKeys.ult_pressed(h)
 		return
 	if spin_t >= 0.0:

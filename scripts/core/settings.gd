@@ -12,9 +12,7 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
+	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -27,8 +25,7 @@ const DEFAULTS := {
 	# sounds
 	"reset_cue": "a",
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false, "hud_full": false,
-	"colour_vision": "default",      # SideColor.ORDER
+	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
@@ -151,12 +148,10 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
-	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["util5", "Utility belt slot 5"],
-	["util6", "Utility belt slot 6"], ["scores", "Scoreboard"],
+	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
@@ -209,8 +204,6 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
-	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
-		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
@@ -505,13 +498,9 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	_put(sl, slot, s)
+	sl[slot] = s
+	if sl[1 - slot] == s: sl[1 - slot] = ""
 	_set_slots(action, sl)
-
-## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
-func _put(sl: Array, slot: int, code: String) -> void:
-	sl[slot] = code
-	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -533,28 +522,21 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
-	["details", "summon"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
-## what `action` had there instead, so none of them loses a key.
-func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
+## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
+## `action` had there.
+func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
 	var mine := slots(action)
-	var old: String = mine[slot]
-	_put(mine, slot, ev_code(ev))
-	for o in owners:
-		var theirs := slots(o[0])
-		_put(theirs, o[1], old)
-		_set_slots(o[0], theirs)
+	var theirs := slots(other)
+	theirs[other_slot] = mine[slot]
+	mine[slot] = ev_code(ev)
+	_set_slots(other, theirs)
 	_set_slots(action, mine)
-
-## True when an action has no key at all (the Controls page marks it red).
-func unbound(action: String) -> bool:
-	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")

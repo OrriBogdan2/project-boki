@@ -484,8 +484,9 @@ func _build_ui() -> void:
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
-	if has and Overlay.admin_allowed():
-		# the owner's filming match (Match.demo_opts): not a player's menu item
+	if has:
+		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
+		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if has:
 		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
@@ -502,7 +503,13 @@ func _build_ui() -> void:
 		if ch == logo: continue
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
-	# bottom right: the build and the Discord link on a small chip, and how to drive the menu without a mouse
+	# bottom corners: what this is, and how to drive the menu without a mouse
+	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
+	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
+	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
+	root.add_child(ver)
+	# a small playtest chip low in the corner, clear of the splash's hero: the build and the Discord link
 	var news := UI.glass(8, 6)
 	news.name = "News"
 	news.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -524,14 +531,6 @@ func _build_ui() -> void:
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
-	var try_card := TryCard.build()
-	if try_card:
-		try_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-		try_card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		try_card.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		try_card.offset_right = -28; try_card.offset_bottom = -112
-		root.add_child(try_card)
-		UI.pop_in(try_card, 1.6)
 	b1.grab_focus()
 
 ## The menu's item labels in order (the main button first): read by --title-check.

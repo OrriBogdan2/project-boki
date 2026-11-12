@@ -6,21 +6,17 @@
  "col": "dfe9f7",
  "use": "repair",
  "cd": 0.0,
- "max": 8,
+ "max": 4,
  "bring": [
   2,
   3,
   4
  ],
  "price": 40,
- "desc": "Patches your armor: most of a Common set, less of a finer one. You are open and slow while you repair.",
- "slot": 1,
- "time": 1.6,
- "move": 0.45,
- "repair": [
-  0.8,
-  0.4,
-  0.3
- ],
- "src": "docs/SOURCE_UTILITIES.md: one press restores 80/40/30% on the first three armor grades, stack 8; slot 2 is the repair's. 1.6 s and 0.45 speed are ours (unsourced)"
+ "desc": "Repairs your armor to full. You are open while you repair.",
+ "channel": {
+  "time": 1.6,
+  "move": 0.45,
+  "src": "none: the wiki only says a short cast. Ours, kept until footage gives numbers. See docs/CONSUMABLES.md"
+ }
 }

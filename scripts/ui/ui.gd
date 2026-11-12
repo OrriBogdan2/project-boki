@@ -41,10 +41,10 @@ const R_SMALL := 6       # tags, tab segments, keycaps
 const R_PILL := 999      # chips and round buttons
 
 # ---------------------------------------------------------------- type scale
-const T_TITLE := 34      # one per panel (Lilita One, on the parchment banner)
-const T_HEAD := 20       # card titles, item names (Lilita One)
-const T_BODY := 16       # everything you read (Rubik)
-const T_SMALL := 14      # secondary lines and hints (Rubik)
+const T_TITLE := 30      # one per panel (Lilita One)
+const T_HEAD := 19       # card titles, item names (Lilita One)
+const T_BODY := 15       # everything you read (Rubik)
+const T_SMALL := 13      # secondary lines and hints (Rubik)
 const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
 # ---------------------------------------------------------------- spacing
 const GAP := 12          # between things in a group
@@ -300,10 +300,6 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 		"hammer":
 			c.draw_line(at + Vector2(-0.6, 0.75) * s, at + Vector2(0.25, -0.15) * s, col, w * 1.4, true)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.05, -0.75) * s, at + Vector2(0.75, 0.05) * s, at + Vector2(0.45, 0.35) * s, at + Vector2(-0.35, -0.45) * s]), col)
-		"die":
-			c.draw_rect(Rect2(at + Vector2(-0.75, -0.75) * s, Vector2(1.5, 1.5) * s), col, false, w)
-			for pip in [Vector2(-0.35, -0.35), Vector2(0, 0), Vector2(0.35, 0.35)]:
-				c.draw_circle(at + pip * s, 0.14 * s, col)
 		"eye":
 			c.draw_arc(at + Vector2(0, 0.55) * s, 0.95 * s, -PI * 0.78, -PI * 0.22, 14, col, w, true)
 			c.draw_arc(at + Vector2(0, -0.55) * s, 0.95 * s, PI * 0.22, PI * 0.78, 14, col, w, true)
@@ -313,9 +309,6 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 			for k in 4:
 				var p0 := at + Vector2(-0.6 + k * 0.3, 0.2 - k * 0.3) * s
 				c.draw_line(p0, p0 + Vector2(0.18, 0.18) * s, Color(0, 0, 0, 0.5), maxf(1.0, w * 0.6), true)
-		"ring":        # the summon timer: a faint full ring with a bright three-quarter arc
-			c.draw_arc(at, 0.8 * s, 0.0, TAU, 24, Color(col, 0.3), w, true)
-			c.draw_arc(at, 0.8 * s, -PI / 2.0, PI, 18, col, w, true)
 		"pin":
 			c.draw_circle(at + Vector2(0, -0.3) * s, 0.5 * s, col)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.42, -0.05) * s, at + Vector2(0.42, -0.05) * s, at + Vector2(0, 0.9) * s]), col)
@@ -471,16 +464,15 @@ static func chip(icon: String, txt: String, col := INK, tip := "", size := 14) -
 ## little crooked (the tilt follows the word, so a row of stamps doesn't all lean the same way).
 static func tag(txt: String, col: Color) -> PanelContainer:
 	var c := PanelContainer.new()
-	var f := UiTorn.make(Color(col, 0.12), 1.6)
-	f.edge = Color(col, 0.8)
-	f.edge_w = 2
-	f.padded(10, 3)
+	var f := UiTorn.make(Color(col, 0.12), 1.2)
+	f.edge = Color(col, 0.75)
+	f.padded(8, 2)
 	c.add_theme_stylebox_override("panel", f)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	c.rotation_degrees = STAMP_TILT * (1.0 if txt.length() % 2 == 0 else -1.0)
 	c.resized.connect(func(): c.pivot_offset = c.size * 0.5)
-	c.add_child(label(txt.to_upper(), 12, col.lightened(0.15), caps))
+	c.add_child(label(txt.to_upper(), 11, col.lightened(0.15), caps))
 	return c
 
 ## Fades and lifts a panel in, so menus open instead of just appearing (about 200 ms).
@@ -499,8 +491,10 @@ static func pop_in(c: Control, delay := 0.0) -> void:
 static func card(col := CARD, pad := 14, rad := R_CARD) -> PanelContainer:
 	var p := PanelContainer.new()
 	var opaque := col.a > 0.6 and rad < R_PILL
-	# a plain rounded frame: only the panel around it is torn, so cards never read as boxes in boxes
 	var sb := UiFrame.raised(col, rad, 6 if opaque else 0, RIM if opaque else Color(0, 0, 0, 0))
+	if rad < R_PILL:
+		sb = UiTorn.make(col, 2.5, 0.0, 0.35 if opaque else 0.0)      # a torn card, faint speckle at its edge
+		sb.shadow = 6 if opaque else 0
 	sb.lit = 0.05 if opaque else 0.0
 	p.add_theme_stylebox_override("panel", sb.padded(pad, pad))
 	return p
@@ -516,9 +510,8 @@ static func set_card_border(p: PanelContainer, col: Color, w := 2) -> void:
 ## `glow_k` lights a neon edge on the ones that stay on screen (the hub bar, the Goals card).
 static func glass(pad := 10, rad := 14, glow_k := 0.0) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := UiTorn.make(GLASS, 3.0, glow_k)
+	var sb := UiTorn.make(GLASS, 2.5, glow_k)
 	sb.rad = rad
-	sb.glow_w = 1.3
 	sb.shadow = 10
 	sb.edge = Color(0.75, 0.6, 1.0, 0.12)
 	sb.padded(pad + 2, pad)
@@ -632,8 +625,7 @@ static func _first_focusable(n: Node) -> Control:
 # ---------------------------------------------------------------- the modal backdrop
 static var _bd_shader: Shader = null
 
-## A full-screen layer that blurs and darkens whatever is behind a modal menu, with void specks
-## drifting over it. Starts hidden;
+## A full-screen layer that blurs and darkens whatever is behind a modal menu. Starts hidden;
 ## show_backdrop() fades it in and out.
 static func backdrop() -> ColorRect:
 	var r := ColorRect.new()
@@ -644,7 +636,6 @@ static func backdrop() -> ColorRect:
 		_bd_shader = load("res://shaders/ui_backdrop.gdshader")
 	var m := ShaderMaterial.new(); m.shader = _bd_shader
 	r.material = m
-	r.add_child(VoidSpecks.new())       # void drifting round the panel, fading with the backdrop
 	r.visible = false
 	r.modulate.a = 0.0
 	return r
@@ -840,7 +831,9 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		bb.name = "Close"
 		head.add_child(bb)
 	var tcol := vbox(2); tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var t := banner(title_txt, T_TITLE, -1.2)       # a parchment banner pinned to the panel
+	var t := title(title_txt, T_TITLE, DARK_INK)
+	t.add_theme_stylebox_override("normal", title_tab())       # a parchment tab pinned to the panel
+	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	tcol.add_child(t)
 	var sub := label("", T_SMALL + 1, MUTED)
 	sub.visible = false
@@ -924,60 +917,13 @@ static func subtitle(body: Control, txt: String) -> void:
 
 ## The panel title's parchment tab (UI_STYLE.md): a torn cream strip with two nails, dark ink on it.
 static func title_tab() -> UiTorn:
-	var f := UiTorn.make(PARCHMENT, 3.5, 0.0, 0.7)
+	var f := UiTorn.make(PARCHMENT, 2.5, 0.0, 0.6)
 	f.nails = true
-	f.shadow = 12
+	f.shadow = 8
 	f.tilt = 3
-	f.padded(36, 6)
-	f.content_margin_top = 13.0
+	f.padded(30, 3)
+	f.content_margin_top = 9.0
 	return f
-
-## A title on a nailed parchment banner, hung a little crooked (`tilt_deg`): the panel title, or
-## the big name banner over a reveal card.
-static func banner(txt: String, px := T_TITLE, tilt_deg := -1.2) -> Label:
-	var t := title(txt, px, DARK_INK)
-	t.add_theme_stylebox_override("normal", title_tab())
-	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	t.rotation_degrees = tilt_deg
-	t.resized.connect(func(): t.pivot_offset = t.size * 0.5)
-	return t
-
-## An info strip (UI_STYLE.md): a nailed parchment strip with a black mask badge holding the icon,
-## a bold head and one line in dark ink. For a Boki's abilities, a rule, a reward.
-static func strip(icon: String, head: String, line: String, col := ACCENT, minw := 0.0) -> PanelContainer:
-	var p := PanelContainer.new()
-	var f := UiTorn.make(PARCHMENT, 3.0, 0.0, 0.5)
-	f.nails = true
-	f.shadow = 10
-	f.tilt = head.length()
-	f.padded(18, 8)
-	f.content_margin_top = 12.0
-	p.add_theme_stylebox_override("panel", f)
-	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if minw > 0.0:
-		p.custom_minimum_size.x = minw
-	var row := hbox(14)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var b := badge(icon, col, 46.0)
-	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(b)
-	var words := vbox(0)
-	words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	words.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	words.add_child(label(head.to_upper(), T_CAPS, Color(DARK_INK, 0.75), caps))
-	var l := label(line, T_BODY, DARK_INK, semi)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	words.add_child(l)
-	row.add_child(words)
-	p.add_child(row)
-	return p
-
-## A big inked rubber stamp ("LOGGED", "VOID-TOUCHED"): a worn double ring and caps, set crooked.
-## Decoration on a panel, never the only place a fact is shown.
-static func stamp(txt: String, col: Color, px := 22, tilt_deg := -8.0) -> Control:
-	var c := Stamp.new(txt, col, px)
-	c.rotation_degrees = tilt_deg
-	return c
 
 ## Changes a panel's title.
 static func set_title(body: Control, txt: String) -> void:
@@ -1110,9 +1056,8 @@ static func confirm(host: Control, head: String, text: String, yes_txt: String, 
 ## A jagged black mask badge with a coloured icon (a confirm box's warning, a row's mark).
 static func badge(icon: String, col: Color, px := 44.0) -> PanelContainer:
 	var b := PanelContainer.new()
-	var f := UiTorn.make(Color(0.04, 0.02, 0.07, 0.97), px * 0.1)
-	f.edge = Color(col, 0.7)
-	f.edge_w = 2
+	var f := UiTorn.make(Color(0.04, 0.02, 0.07, 0.95), px * 0.07)
+	f.edge = Color(col, 0.55)
 	f.tilt = icon.length()
 	b.add_theme_stylebox_override("panel", f.padded(px * 0.24, px * 0.24))
 	b.add_child(IconDot.new(icon, col, px * 0.52))
@@ -1139,43 +1084,6 @@ class Modal extends Control:
 			queue_free()
 
 ## A glyph that knows the menu's own icons too (close, back, gear, home, ...).
-## The stamp's ink: two worn rings (bits of the outer one missing) and spaced caps, in one colour.
-class Stamp extends Control:
-	const GAP := 9.0                 # px of ring missing where the stamp didn't take
-	var txt := ""
-	var col := Color.WHITE
-	var px := 22
-	func _init(words: String, c: Color, font_px: int) -> void:
-		txt = words.to_upper()
-		col = c
-		px = font_px
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var f: Font = UI.caps if UI.caps else UI.body
-		var w := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-		custom_minimum_size = Vector2(w + px * 1.6, px * 2.1)
-		resized.connect(func(): pivot_offset = size * 0.5)
-	func _draw() -> void:
-		var f: Font = UI.caps if UI.caps else UI.body
-		var ink := Color(col, 0.8)
-		var outer := Rect2(Vector2(1.5, 1.5), size - Vector2(3.0, 3.0))
-		var per := 2.0 * (outer.size.x + outer.size.y)
-		var t := 0.0
-		var i := 0
-		while t < per:
-			var seg := minf(per - t, 18.0 + 30.0 * fposmod(sin(float(i) * 7.1 + txt.length()) * 437.0, 1.0))
-			var line := PackedVector2Array()
-			var d := t
-			while d < t + seg:
-				line.append(UiTorn._on_perimeter(outer, d, 0.0))
-				d += 6.0
-			line.append(UiTorn._on_perimeter(outer, t + seg, 0.0))
-			draw_polyline(line, ink, 3.0, true)
-			t += seg + GAP
-			i += 1
-		draw_rect(outer.grow(-5.0), Color(col, 0.55), false, 1.2, true)
-		var at := Vector2(px * 0.8, size.y * 0.5 + px * 0.36)
-		draw_string(f, at, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px, ink)
-
 class IconDot extends Control:
 	var id := ""
 	var col := Color.WHITE

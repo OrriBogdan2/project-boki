@@ -92,7 +92,7 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	for f in ["pad", "grap", "lfloat", "shove", "charge", "stomp", "abil_charge"]:
 		P.set(f, {})
 	for f in ["grap_cd", "mantle_cd", "roll_t", "glide_cd", "knock_t", "fly_t", "stun_t", "root_t", "wall_touch_t",
-			"fire_cd", "spirit_t"]:
+			"fire_cd", "reload_t", "spirit_t"]:
 		P.set(f, 0.0)
 	P.kb_t = -9.0
 	P.wall_hit_v = Vector2.ZERO

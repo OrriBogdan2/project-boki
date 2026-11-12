@@ -242,6 +242,10 @@ func _data() -> void:
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	var rmb: Dictionary = Arch.def("archer")["rmb"]
+	var push: Array = rmb["pin"]["push"]
+	var push_text := "push %d -> %d" % [push[0], push[1]]
+	ok("Lace: Heavy Shot card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -265,7 +269,6 @@ func _data() -> void:
 		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
 			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
 	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
-	ok("weapons: no weapon in the game has a reload time", Data.weapon_ids().all(func(w): return not Data.weapon_stats(w).has("reload")))
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
@@ -354,7 +357,7 @@ func _archer() -> void:
 	# a tapped arrow into a pinned foe is one ordinary arrow (it was 30+ with the Deadeye)
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
-	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1)
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",

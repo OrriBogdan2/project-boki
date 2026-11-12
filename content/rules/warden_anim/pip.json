@@ -32,7 +32,7 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"mm_shot_r": {"clip": "shot_r", "lead": 0.06, "upper": "moving", "scale": 1.09}, "mm_shot_l": {"clip": "shot_l", "lead": 0.06, "upper": "moving", "scale": 1.09}, "mm_shot_emp": {"clip": "shot_emp", "lead": 0.1, "upper": "moving", "scale": 1.34},
+		"mm_shot_r": {"clip": "shot_r", "lead": 0.06, "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "lead": 0.06, "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "lead": 0.1, "upper": "moving"},
 		"mm_seed_aim": {"clip": "seed_aim", "upper": "moving"}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving"},
 		"mm_hearth": {"clip": "hearth", "lead": 0.15, "upper": "moving"}, "mm_toss": {"clip": "toss", "upper": "moving"},
 		"mm_skip": {"clip": "skip", "heading": true}, "mm_float": {"clip": "float", "heading": true},

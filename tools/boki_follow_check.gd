@@ -16,7 +16,6 @@ extends RefCounted
 ##      you hit something, a foe hits it or you from within 4m, or you Sic/Chase; out of a fight nothing changes
 ## (Merge from Return is instant and from out is a leap: --boki-system-check)
 
-const SIC_TRIES := 8      # BotKin.fight calls the Sic case gets (each is a roll)
 var bad := 0
 var m: Match
 var main: Node
@@ -444,13 +443,9 @@ func _bots() -> void:
 	BotKin.upkeep(R)
 	ok(k.cmd == "follow", "healthy again, the bot brings it back out")
 	run_for(1.0)
-	# the bot's choice is a roll (its skill, or its Boki's own move first): a few tries, as a fight gives it
-	for i in SIC_TRIES:
-		R.ai["throw_cd"] = 0.0
-		k.teleport(R.pos + Vector3(1.0, 0, 0.7)); k.state = "active"; k.fly = {}; k.throw_cd = 0.0
-		BotKin.fight(m, R, P, 7.0, 1.0)
-		if k.state == "flying" or k.hesitate_t > 0.0:
-			break
+	R.ai["throw_cd"] = 0.0
+	k.teleport(R.pos + Vector3(1.0, 0, 0.7)); k.state = "active"; k.fly = {}; k.throw_cd = 0.0
+	BotKin.fight(m, R, P, 7.0, 1.0)
 	ok(k.state == "flying" or k.hesitate_t > 0.0, "at a rival it Sics (state %s)" % k.state)
 	R.ult = 1.0; R.slot_lv["ult"] = 1
 	k.teleport(R.pos + Vector3(20.0, 0, 0)); k.state = "active"; k.fly = {}

@@ -11,7 +11,6 @@ extends ArchKit
 ## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in
 ## KitLooks.
 
-const ROCK_PAY := "ROCKFALL"
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
@@ -23,7 +22,6 @@ var dive := false              # a Quakefall in the air (the hop, a leap, an air
 var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
-var dive_t := 0.0              # ...how long the plunge has run (it hangs, then speeds up: tenzo.rmb in tuning.json)
 var sight_t := 0.0
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
@@ -175,7 +173,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		x["slow_k"] = float(rd["slow_k"])
 		if e is Hunter:
 			launch_pay += 1
-			payoff_fx(e.pos, ROCK_PAY, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
+			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
 		var f_dmg := splash_dmg * _repeat_k(f)
@@ -216,7 +214,7 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
 		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("d8ecff"), 0.28)      # the Molten Guard ring
 	if dive:
-		_tick_dive(dt)
+		_tick_dive()
 	hop.tick(dt)
 	slam.tick(dt)
 	spine.tick(dt)
@@ -240,7 +238,7 @@ func _tick_stones(dt: float) -> void:
 			best = f
 	h.model.set_meta(WardenGlb.ORBIT_LOOK, best.pos + Vector3.UP if best else Vector3.INF)
 
-func _tick_dive(dt: float) -> void:
+func _tick_dive() -> void:
 	if dive_glide:
 		h.glide_cd = maxf(h.glide_cd, 0.1)
 	if h.downed:
@@ -253,13 +251,7 @@ func _tick_dive(dt: float) -> void:
 	elif dive_fall and h.over_void() and h.pos.y <= h.lip_y - float(slam_def()["void_drop"]):
 		_end_plunge()
 	elif dive_fall:
-		# a readable plunge: a beat hanging at the top, then it gathers speed up to its cap
-		dive_t += dt
-		var fd := slam.feel()
-		if dive_t < float(fd["dive_hang"]):
-			h.vel.y = 0.0
-		else:
-			h.vel.y = maxf(-dive_speed(), minf(h.vel.y, 0.0) - float(fd["dive_acc"]) * dt)
+		h.vel.y = minf(h.vel.y, -dive_speed())
 
 ## Over the abyss the plunge takes him `void_drop` under the nearest lip and no further (low, never
 ## dunked): no ground to slam, so the slam is dropped and he falls on at the abyss's own pace, glider free.
@@ -495,7 +487,6 @@ func _punch(k: float) -> void:
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
-			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
@@ -711,7 +702,7 @@ func _raise_feel() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return

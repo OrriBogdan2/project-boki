@@ -14,6 +14,9 @@ const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
 const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
+const SELF := Color("9be36e")             # your own health (leaf green)
+const ALLY := Color("63c7ff")             # your squad's health (sky blue)
+const FOE := Color("ff5a4a")              # rivals' health (coral red)
 const LOW := Color("ffa13c")              # health shifts toward this as it runs low (yours and allies')
 const DOWNED := Color("ffb36a")           # a downed hunter's bleed-out bar
 const STOMPED := Color("ff3a2a")          # ... while someone is finishing them
@@ -26,9 +29,8 @@ const HIT := Color("fff4d6")              # your hits
 const HIT_ARMOR := Color("7ac8ff")        # your hits that landed on armour
 const CRIT := Color("ffd23f")             # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
-const HEAVY := Color("ff8a3d")            # empowered hits (a wall pin, a primed bolt, a perfect swing)
-const KIN_HIT := Color("d6ccb4")          # your Boki's hits: dimmer than yours
 const HURT := Color("ff6a5a")             # damage you take
+const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
 const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
@@ -38,7 +40,7 @@ const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, nam
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
-const HP_PER_SEG := 17.0       # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
+const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
 const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0           # px between segments
 const PLATE_W := 100.0         # overhead health bar width (rivals and allies)
@@ -56,14 +58,14 @@ const KEY_FS := 12             # key label size
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
-		return SideColor.you()
-	return SideColor.ally() if h.team == viewer.team else SideColor.foe()
+		return SELF
+	return ALLY if h.team == viewer.team else FOE
 
 ## Health fill for a role at a fraction of max: yours and allies' warm toward LOW under half, and
 ## pulse under a third; rivals stay red (a low rival pulses brighter instead).
 static func hp_fill(role: Color, frac: float, time: float) -> Color:
 	var pulse := 0.5 + 0.5 * sin(time * 9.0)
-	if role == SideColor.foe():
+	if role == FOE:
 		return role.lerp(Color.WHITE, 0.25 * pulse) if frac < 0.3 else role
 	var col := role.lerp(LOW, clampf((0.55 - frac) / 0.3, 0.0, 1.0))
 	return col.lerp(Color.WHITE, 0.2 * pulse) if frac < 0.3 else col
@@ -159,28 +161,15 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
-## A damage number's colour for its look (Fx.NUM_*): the hits you take are red, your Boki's dimmer
-## than yours, then crit gold, empowered orange, armour blue.
-static func dmg_col(look: int, armor_hit: bool, on_you: bool, by_your_kin: bool) -> Color:
+## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
+static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
 	if on_you: return HURT
-	if by_your_kin: return KIN_HIT
-	if look == Fx.NUM_CRIT: return CRIT_ARMOR if armor_hit else CRIT
-	if look == Fx.NUM_HEAVY: return HEAVY
+	if on_your_kin: return HURT_KIN
+	if crit: return CRIT_ARMOR if armor_hit else CRIT
 	return HIT_ARMOR if armor_hit else HIT
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}
-static var _torn: UiTorn
-
-## The torn void panel with its neon edge, for the few big boxes the HUD puts over the world (the
-## tutorial's intro card). One shape per rect, cached by the box, so it draws as cheaply as a flat one.
-static func torn_panel(c: CanvasItem, r: Rect2) -> void:
-	if _torn == null:
-		_torn = UiTorn.make(SHADE, 6.0, 1.0, 1.0)
-		_torn.glow_w = 1.8
-		_torn.shadow = 30
-	c.draw_style_box(_torn, r)
-
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
 static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 	var key := [bg, rad, border, bw]

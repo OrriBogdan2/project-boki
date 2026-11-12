@@ -46,8 +46,8 @@ static func cradled(k: Kin) -> bool:
 ## The hunter died: safe tiers send the Boki home with them, the others drop it to guard. box_pos is
 ## where the deathbox went (Vector3.INF when there is none).
 static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
-	if guarding(k) or KinSteal.taken(k):
-		return                       # still guarding from an earlier death, or a loose or stolen wisp: nothing lost
+	if guarding(k):
+		return                       # still guarding from an earlier death: nothing new is lost
 	m.giant_free(k)
 	if not risky_match(m):
 		k.state = "away"            # never lost: it keeps out of sight and comes back if you are revived
@@ -56,7 +56,7 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 		return
 	if h.remote:
 		return                       # (their own game drops it and the snapshot tells us)
-	var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
+	var on_you: bool = k.state in ["shoulder", "bench", "away", "wisp"] or k.with_owner()
 	var at := k.pos
 	if on_you:
 		at = box_pos if box_pos != Vector3.INF else h.pos

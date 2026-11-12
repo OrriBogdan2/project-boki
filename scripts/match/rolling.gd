@@ -49,6 +49,7 @@ const STAY := Vector2(480.0, 960.0)     # how long a bot squad means to stay out
 const WIPE_PER_MIN := 0.03         # (earlier arrivals, simulated) chance a squad is wiped in a minute
 const XP_PER_MIN := 200.0          # (earlier arrivals) XP a bot makes in a minute out there. Was a 105 guess; --rolling-sim
                                    # --seed=5 measured a median 243/min on the map, 12.8% of it catch-up: ~215 base, less on a picked-over map
+const CAMP_RESPAWN := 240.0        # a cleared monster camp comes back after 4 minutes with nobody near
 const METEOR_EVERY := 360.0        # meteor showers (fresh gems) every 6 minutes of the session
 const LAND_CROWD_R := 30.0
 
@@ -66,10 +67,12 @@ var team_land := {}                # team -> match time its first hunter landed
 var team_stay := {}                # team -> seconds it means to stay out (bots)
 var median := 1.0
 var _med_t := 0.0
+var _camp_t := 0.0
+var camps: Array = []              # {pos, comp, mobs, cleared_at}
 var bounty_cd := {}                # hunter nid -> match time it may carry a bounty again
 var _names: Array = []
 var stats := {"joined": 0, "prepop": 0, "prepop_dead": 0, "landed": 0, "floors": [], "catchup_xp": 0.0, "xp_all": 0.0,
-	"bounties_posted": 0, "bounties_claimed": 0, "gap_knock_xp": 0.0, "extracts": [], "outs": [],
+	"bounties_posted": 0, "bounties_claimed": 0, "gap_knock_xp": 0.0, "camp_respawns": 0, "extracts": [], "outs": [],
 	"meteors": 0, "pop": []}
 var _seen_ext := {}
 var _seen_out := {}
@@ -277,7 +280,15 @@ func after_setup() -> void:
 			continue
 		if rng.randf() < frac:
 			_empty_chest(c); opened += 1
-	var cleared: int = m.camps.picked_over(frac, rng) if m.camps else 0      # (some come back soon: Camps)
+	var cleared := 0
+	for cp in camps:
+		if rng.randf() < frac:
+			for mb in cp["mobs"]:
+				if is_instance_valid(mb) and not mb.dead:
+					mb.hp = 0.0; mb.dead = true; mb.visible = false
+			# cleared some time ago: some come back soon after you land
+			cp["cleared_at"] = -rng.randf_range(0.0, CAMP_RESPAWN)
+			cleared += 1
 	if m.blight:
 		for team in team_land:
 			m.blight.land_at[team] = float(team_land[team])
@@ -292,6 +303,10 @@ func _empty_chest(c: Dictionary) -> void:
 			lid.rotation.x = -1.1; lid.position.y = 0.62; lid.position.z = 0.2
 	var beacon: Node3D = c["node"].get_node_or_null("Beacon")
 	if beacon: beacon.visible = false
+
+## A monster camp, so it can come back once cleared (Match._spawn_mobs).
+func note_camp(pos: Vector3, comp: Array, mobs: Array) -> void:
+	camps.append({"pos": pos, "comp": comp.duplicate(), "mobs": mobs, "cleared_at": -1e9})
 
 # ------------------------------------------------------------------ the skyships
 ## A new wave's skyship, flying over the less crowded side of the map. t_start is match time.
@@ -326,8 +341,8 @@ func new_ship(t_start: float) -> Dictionary:
 			if sc < bs: bs = sc; best_a = ang; best_o = float(off)
 	var dir3 := Vector3(cos(best_a), 0, sin(best_a))
 	var side3 := Vector3(-dir3.z, 0, dir3.x)
-	var cc := Vector3(ctr.x, DropFeel.ship_height, ctr.y) + side3 * best_o * W.w
-	var s := {"a": cc - dir3 * half, "b": cc + dir3 * half, "dur": 2.0 * half / DropFeel.ship_speed, "ride": (half + 34.0) / DropFeel.ship_speed, "dir": dir3, "t0": t_start}
+	var cc := Vector3(ctr.x, Match.SHIP_Y, ctr.y) + side3 * best_o * W.w
+	var s := {"a": cc - dir3 * half, "b": cc + dir3 * half, "dur": 2.0 * half / Match.SHIP_SPEED, "ride": (half + 34.0) / Match.SHIP_SPEED, "dir": dir3, "t0": t_start}
 	var n := Models.skyship()
 	n.rotation.y = atan2(-dir3.x, -dir3.z)
 	n.position = s["a"]
@@ -397,6 +412,10 @@ func tick(dt: float) -> void:
 		_update_median()
 		_update_bounties()
 		_track()
+	_camp_t -= dt
+	if _camp_t <= 0.0:
+		_camp_t = 5.0
+		_camp_respawns()
 
 func _wave_in_air(w: Dictionary) -> bool:
 	var teams: Array = w["teams"]
@@ -570,6 +589,41 @@ func on_knock(h: Hunter, credit) -> void:
 	m.add_feed("%s claimed the bounty on %s" % [c.pname, h.pname])
 	if m.hud and c == m.player:
 		m.hud.toast("BOUNTY CLAIMED  ·  +%d XP" % int(BOUNTY_XP + BOUNTY_XP_GAP * gap), Color("ffb64a"))
+
+# ---- monster camps come back
+func _camp_respawns() -> void:
+	if m.net_on and not m.is_host:
+		return
+	for cp in camps:
+		var all_dead := true
+		for mb in cp["mobs"]:
+			if is_instance_valid(mb) and not mb.dead: all_dead = false; break
+		if not all_dead:
+			continue
+		if float(cp["cleared_at"]) <= -1e8:
+			cp["cleared_at"] = m.time
+			continue
+		if m.time - float(cp["cleared_at"]) < CAMP_RESPAWN:
+			continue
+		var p: Vector3 = cp["pos"]
+		var near := false
+		for h in m.hunters:
+			if not h.out and not h.extracted and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 22.0:
+				near = true; break
+		if near:
+			continue
+		var made: Array = []
+		for kk in cp["comp"]:
+			var q := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
+			if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+				q = p
+			q.y = m.world.ground_at(q.x, q.z)
+			var smb := m.spawn_mob(String(kk), q)
+			if m.biomes: m.biomes.dress(smb)
+			made.append(smb)
+		cp["mobs"] = made
+		cp["cleared_at"] = -1e9
+		stats["camp_respawns"] += 1
 
 # ---- session events
 ## The next meteor shower after this match time (local), or a huge number if none is left.

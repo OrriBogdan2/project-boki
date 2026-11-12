@@ -54,7 +54,8 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 		if big and pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
 			# a stagger: a short slow, so a big hit actually interrupts the dance (unstoppable
 			# states, fortify_t, shrug it off)
-			h.add_slow(STAGGER_T, STAGGER_SLOW)
+			h.slow_k = maxf(h.slow_k, STAGGER_SLOW) if h.slow_t > 0.0 else STAGGER_SLOW
+			h.slow_t = maxf(h.slow_t, STAGGER_T)
 			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
@@ -74,15 +75,14 @@ static func render_hit(h: Hunter, delta: float) -> void:
 static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(SideColor.foe(), 0.35), 1.0), size * 2.6, 0.0]
+		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, 0.0]
 		return [Color(col, 0.5), size * 1.7, 0.0]
 	var vis_col := col
 	var vis_size := size * 2.0
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
-		vis_col = col.lerp(SideColor.foe(), 0.35)     # (mostly the shooter's colour, tinted to the rival side)
-		vis_col.a = 1.0
+		vis_col = Color(col.lightened(0.1), 1.0)     # (the shooter's own colour: enemy reads by size and halo)
 		vis_size *= 1.3
 		halo = 0.4
 	elif p:

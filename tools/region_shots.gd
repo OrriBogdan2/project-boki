@@ -2,8 +2,7 @@ extends RefCounted
 ## --region-shots --shots-dir=<dir>: review screenshots of The Hollow Crown's regions
 ## (docs/MAP_REGIONS.md), on a real GPU (jobq submit --needs gpu). For every region: from above
 ## (<dir>/region_<id>_top.png) and at eye height from its landing toward its landmark
-## (<dir>/region_<id>_ground.png); then the drop map with the match's hot zone and camps (<dir>/drop_map.png),
-## and a dive over the hot zone's camps with their smoke columns (<dir>/dive_smoke.png).
+## (<dir>/region_<id>_ground.png); then the drop map with the match's hot zone (<dir>/drop_map.png).
 
 const TOP_H := 2.6        # camera height over a region, per metre of its island's radius
 const EYE := 1.7          # m: eye height for the ground-level shot
@@ -72,26 +71,4 @@ func run(main_node: Node) -> void:
 	await _start(false)
 	m.hud.open_map(true)
 	await _grab("drop_map", 20)
-	m.hud.open_map(false)
-	await _dive()
 	main.get_tree().quit(0)
-
-## Gliding in over the hot zone's camps: their smoke columns, from 90 m up.
-func _dive() -> void:
-	var camps: Array = m.spawn_plan.of("camp").filter(func(c): return c["region"] == m.biomes.hot.hot)
-	var at: Vector3 = (camps[0] if not camps.is_empty() else m.spawn_plan.of("camp")[0])["pos"]
-	m.skydrop.planning = false
-	m.player.riding = false
-	m.player.dropping = true
-	var up_at := at + Vector3(70, 90, 90)        # 114 m out: inside the smoke's 160 m
-	m.player.pos = up_at
-	m.camp_smoke.tick(0.1)
-	m.hud.visible = false
-	var cam := Camera3D.new()
-	cam.far = 900.0
-	cam.fov = 70.0
-	main.add_child(cam)
-	cam.make_current()
-	cam.position = up_at
-	cam.look_at(at + Vector3(0, 25, 0))
-	await _grab("dive_smoke", 12)

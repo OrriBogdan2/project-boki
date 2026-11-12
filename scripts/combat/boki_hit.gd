@@ -36,10 +36,10 @@ static func held(k: Kin) -> bool:
 	return k.stun_t > 0.0
 
 ## How much of its walk a Boki keeps under control (0 when rooted or stunned).
-static func move_k(k: Kin) -> float:
+static func move_k(k: Kin, usual_slow: float) -> float:
 	if k.stun_t > 0.0 or k.root_t > 0.0:
 		return 0.0
-	return k.slow_mult()
+	return k.slow_mult(usual_slow)
 
 ## A shove on `k` (Hunter.impulse's model at the Boki's mass).
 static func knock(k: Kin, kb: Vector2, lift: float) -> void:

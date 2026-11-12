@@ -157,7 +157,7 @@ func run(main: Node, opts: Dictionary) -> void:
 		m.hunters.filter(func(h): return h.extracted).size(), m.hunters.filter(func(h): return h.out and not h.extracted).size(),
 		_band(pops), max_hunters_alive])
 	print("ROLLSIM bounties posted %d, claimed %d; catch-up XP %.0f of %.0f (%.1f%%); level-gap knock XP %.0f; camps back %d; meteor showers %d" % [int(S["bounties_posted"]), int(S["bounties_claimed"]),
-		float(S["catchup_xp"]), float(S["xp_all"]), 100.0 * float(S["catchup_xp"]) / maxf(1.0, float(S["xp_all"])), float(S["gap_knock_xp"]), m.camps.comebacks if m.camps else 0, int(S["meteors"])])
+		float(S["catchup_xp"]), float(S["xp_all"]), 100.0 * float(S["catchup_xp"]) / maxf(1.0, float(S["xp_all"])), float(S["gap_knock_xp"]), int(S["camp_respawns"]), int(S["meteors"])])
 	if m.blight:
 		print("ROLLSIM the Blight: spawned %d, knocks %d, outs %d" % [m.blight.spawned, int(m.kstat.get("bl_knock", 0)), int(m.kstat.get("bl_out", 0))])
 	var you: Hunter = m.player

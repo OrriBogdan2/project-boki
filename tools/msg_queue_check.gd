@@ -211,7 +211,7 @@ func _burst(m: Match) -> void:
 func _fire_six(m: Match) -> void:
 	m.hud.toast_small("Dropped it", Color.WHITE)                              # Boki line, LOW
 	m.hud.toast("Uplink started: hold the yard", Color.CYAN)                  # Ways Out, NORMAL
-	m.hud.msgs.push("Rook stole the Warden", StealCall.LOSER_COL, MsgLane.HIGH)  # a boss steal, HIGH
+	m.hud.msgs.push("Rook stole the Warden", Color("ff9a6a"), MsgLane.HIGH)  # a boss steal, HIGH
 	m.hud.level_up(3)                                                         # HIGH
 	m.hud.toast_small("Chest key found", Color.WHITE)                         # pickup, LOW
 	m.hud.toast("Your Boki is resting", Color.CYAN)                           # Boki status, NORMAL

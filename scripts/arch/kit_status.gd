@@ -61,7 +61,8 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
 			e.set_meta("dsr_until", maxf(float(e.get_meta("dsr_until", 0.0)), float(m.time) + secs))
-			e.add_slow(secs, k if k > 0.0 else 0.4)
+			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, k if k > 0.0 else 0.4)
+			e.slow_t = maxf(e.slow_t, secs)
 			if not was_d: _show(e, kind, secs)
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
@@ -74,7 +75,7 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 		var key := kind + "_until"
 		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
 	elif kind == "dsr":
-		e.add_slow(secs)
+		e.slow_t = maxf(e.slow_t, secs)
 
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
@@ -96,8 +97,6 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				n.add_child(c)
 			e.add_child(n)
 			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			if toast == "":
-				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
@@ -117,13 +116,10 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				rn.add_child(st)
 			e.add_child(rn)
 			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
-			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## A Net "kst" event: the body's own game runs the rule.

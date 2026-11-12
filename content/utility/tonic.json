@@ -6,17 +6,18 @@
  "col": "8ff0a0",
  "use": "drink",
  "cd": 0.0,
- "max": 8,
+ "max": 5,
  "bring": [
   3,
   4,
   5
  ],
  "price": 30,
- "desc": "Drink for a second to heal 42 health. You are open while you drink: a hit spills it.",
- "slot": 0,
- "time": 1.0,
- "move": 1.0,
- "heal_hp": 42,
- "src": "docs/SOURCE_UTILITIES.md: heals after 1 s, no slow, flat 304 HP / 7.2, stack 8; slot 1 is the heal's"
+ "desc": "Drink for a second to heal. You are open while you drink.",
+ "channel": {
+  "time": 1.0,
+  "move": 1.0,
+  "heal": 42.0,
+  "src": "Vive Brew: restores 304 HP after 1s, vulnerable while drinking, cancelled on damage; no slow listed (Hypervive lists its 60% slow). 304 / 7.2 (source hero HP over ours) = 42. See docs/CONSUMABLES.md"
+ }
 }

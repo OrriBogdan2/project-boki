@@ -5,8 +5,7 @@ extends RefCounted
 ## swells as the heat runs out, a crackle and a burn loop while it overheats, a fold as it closes.
 ## Ticked once a frame for every hunter, yours and everyone else's (theirs are positional and quieter,
 ## driven by the synced glide flag, velocity and the overheat bit), so each cue fires once on the change
-## of state, never every frame. In the opening drop the canopy is folded while you dive: it snaps sharply
-## as it opens, and the wind's pitch follows content/rules/drop.json's "wind" block.
+## of state, never every frame.
 
 const SNAP_DB := -6.0           # dB: under the skin's own open sound, which stays
 const FOLD_DB := -8.0           # dB
@@ -20,10 +19,9 @@ const WIND_HIGH := 1.6          # ...and at the dive's full speed
 const HISS_FROM := 0.35         # heat left (1 cool, 0 overheated) below which the hiss starts
 const HISS_DB := -12.0          # dB, loop, at the point of overheating
 const OTHERS_DB := -6.0         # dB under yours for another player's glider
-static var _drop_wind: Dictionary = DropFeel.rules("wind")
 const DIVE_VY_MIN := 18.0       # m/s of fall that counts as the plunge for another player (no dive flag is sent)
 
-var open := false               # the canopy was open last tick
+var open := false               # the glider was open last tick
 var hot := false                # ...and burning
 var diving := false             # ...and plunging
 var net_hot := false            # another player's overheat bit (Match._net_apply)
@@ -35,26 +33,22 @@ func tick(h: Hunter) -> void:
 	var trim := 0.0 if h.is_local() else OTHERS_DB
 	var burning := gliding and not h.dropping and (net_hot if h.remote else h.glide_fuel <= 0.001)
 	var plunging := gliding and not h.dropping and (-v.y > DIVE_VY_MIN if h.remote else h.glide_dive.on)
-	var canopy := gliding and not (h.dropping and h.diving)
-	if canopy and not open:
-		Sfx.play("glider_snap", h.pos, (float(_drop_wind["snap_db"]) if h.dropping else SNAP_DB) + trim)
-	elif open and not canopy:
+	if gliding and not open:
+		Sfx.play("glider_snap", h.pos, SNAP_DB + trim)
+	elif open and not gliding:
 		Sfx.play("glider_fold", h.pos, FOLD_DB + trim)
 	if plunging and not diving:
 		Sfx.play("glider_dive", h.pos, DIVE_DB + trim)
 	if burning and not hot:
 		Sfx.play("glider_crackle", h.pos, CRACKLE_DB + trim)
-	open = canopy
+	open = gliding
 	hot = burning
 	diving = plunging
 	var id := h.get_instance_id()
 	if gliding:
-		var k := clampf(v.length() / (DropFeel.dive_fall if h.dropping else HunterMove.dive_vy), 0.0, 1.0)
+		var k := clampf(v.length() / HunterMove.dive_vy, 0.0, 1.0)
 		var vol := lerpf(WIND_QUIET_DB, WIND_LOUD_DB, k) + trim
-		var pitch := lerpf(WIND_LOW, WIND_HIGH, k)
-		if h.dropping:
-			pitch = lerpf(_drop_wind["pitch_low"], _drop_wind["pitch_high"], k)
-		Sfx.loop_hold("glider_wind%d" % id, "glider_wind", h.pos, vol, pitch)
+		Sfx.loop_hold("glider_wind%d" % id, "glider_wind", h.pos, vol, lerpf(WIND_LOW, WIND_HIGH, k))
 	if gliding and not burning and not h.remote and h.glide_fuel < HISS_FROM:
 		var hiss_db := lerpf(HISS_DB, HISS_DB - 18.0, h.glide_fuel / HISS_FROM) + trim
 		Sfx.loop_hold("glider_hiss%d" % id, "glider_hiss", h.pos, hiss_db)
