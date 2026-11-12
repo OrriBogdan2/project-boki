@@ -1,8 +1,11 @@
 class_name ResultsStage
 extends SubViewportContainer
-## The squad behind the results card: the Hunters of the squad on a little island, each holding a pose from
-## its own GLB (content/rules/results_pose.json) with its Boki beside it, front lit, the camera drifting
-## slowly. A squad that did not get out stands as dimmed Wisps instead. Built when the results screen opens
+## The squad behind the results card: the Hunters of the squad on a little island, front lit, the camera drifting
+## slowly. Each one standing plays its own result beat once (WardenBeats: win when the squad or it got out, lose
+## when not), the squad staggered STAGGER s apart, then eases into the pose it holds from its own GLB
+## (content/rules/results_pose.json); a winner's Boki stands beside it. A Hunter without that beat goes straight to
+## its pose, a model without clips stands in its rig idle, each with a logged warning. The eliminated stand as
+## dimmed Wisps. Built when the results screen opens
 ## and freed with it; a Hunter's model is built a frame at a time (PreviewBuild) so the card never stalls.
 
 const POSES_PATH := "res://content/rules/results_pose.json"
@@ -12,14 +15,16 @@ const TURN_IN := 0.3         # rad each outer Hunter turns toward the middle
 const DRIFT_HZ := 0.12      # camera sway speed (cycles/s)
 const DRIFT_M := 0.5         # camera sway width (m)
 const WISP_HOVER := 1.0      # m a Wisp floats above the island
-const WISP_DIM_GLOW := 0.15  # a dimmed Wisp's core glow (the default look is 0.45)
-const WISP_DIM_HALO := 0.1   # ... and halo alpha (0.5)
-const WISP_TINT := Color("5f70b0")   # a dimmed Wisp is a cool, dim blue, whatever its team
+const WISP_DIM_GLOW := 0.5   # a dimmed Wisp's rim brightness (wisp_core "glow"; the looks' own are brighter)
+const WISP_TINT := Color("5f70b0")   # a dimmed Wisp is a cool, dim blue, rim and core, whatever its team
+const STAGGER := 0.15      # s between one squad member's beat starting and the next
+const SETTLE := 0.5        # s: the beat's last frame cross-fades into the held pose (a lose beat gets up from the floor)
 const LEFT_THIRD := 0.28     # the squad sits this far (of the window width) left of centre, beside the card
 
 static var _poses := {}
+static var warned: Array = []   # [arch, why] of every fallback taken (the check reads it)
 
-var members: Array = []      # [{arch, name, you, kin: {} species/rec of its Boki or empty}]
+var members: Array = []      # [{arch, name, you, kin: {} species/rec of its Boki or empty, eliminated, extracted}]
 var extracted := true
 var built := 0               # Hunter models (or Wisps) standing on the island
 var _w3: Node3D
@@ -29,6 +34,9 @@ var _todo: Array = []        # member indices still to build
 var _bodies: Array = []      # [member index, Node3D]
 var _kins: Array = []
 var _anims: Array = []       # HunterAnim of a Hunter whose model has no clips
+var _plays: Array = []       # [{clips, model, beat, len, at, pose, settled}]: each standing Hunter's beat
+var _beat_t := -1.0          # s since the first Hunter stood (the stagger's clock), -1 before
+var _standing := 0           # Hunters standing so far (each starts STAGGER after the last)
 
 ## The squad as the results carry it: the Hunters of the player's team, each with its Boki if it still has one.
 static func roster(hunters: Array, me: Hunter) -> Array:
@@ -39,7 +47,8 @@ static func roster(hunters: Array, me: Hunter) -> Array:
 		var rec := {}
 		if h.kin != null and is_instance_valid(h.kin) and not (h.kin as Kin).dead:
 			rec = (h.kin as Kin).rec.duplicate(true)
-		out.append({"arch": h.arch, "name": h.pname, "you": h == me, "kin": rec})
+		out.append({"arch": h.arch, "name": h.pname, "you": h == me, "kin": rec,
+				"eliminated": h.out and not h.extracted, "extracted": h.extracted})
 	return out
 
 static func poses() -> Dictionary:
@@ -92,12 +101,16 @@ func _process(dt: float) -> void:
 	_t += dt
 	if not _todo.is_empty():
 		_build_next()
+	if _beat_t >= 0.0:
+		_beat_t += dt
+	for p: Dictionary in _plays:
+		_play(p)
 	for a: HunterAnim in _anims:
 		a.update(dt, {"grounded": true, "vel": Vector3.ZERO, "crouch": 0.0, "downed": false})
 	for k: Node3D in _kins:
 		(k.get_node("Body") as Node3D).position.y = absf(sin(_t * 5.0 + k.position.x)) * 0.12
 	for pair: Array in _bodies:
-		if not extracted:
+		if _gone(members[pair[0]]):
 			var w: Node3D = pair[1]
 			w.position.y = WISP_HOVER + sin(_t * 1.6 + pair[0]) * 0.12
 	_drift()
@@ -113,18 +126,29 @@ func _build_next() -> void:
 	var i: int = _todo[0]
 	var m: Dictionary = members[i]
 	var arch := String(m["arch"])
-	if extracted and not PreviewBuild.turn(arch):
+	var gone := _gone(m)
+	if not gone and not PreviewBuild.turn(arch):
 		return
 	_todo.pop_front()
 	var at := _spot(i)
-	var node := _wisp(m) if not extracted else _hunter(m, i)
-	node.position = at + Vector3(0, WISP_HOVER if not extracted else 0.0, 0)
+	var node := _wisp(m) if gone else _hunter(m, i)
+	node.position = at + Vector3(0, WISP_HOVER if gone else 0.0, 0)
 	_w3.add_child(node)
 	_bodies.append([i, node])
-	if extracted:
-		_pose(node, arch)
-		_add_kin(m, at)
+	if not gone:
+		var beat := beat_of(m)
+		_stand(node, arch, beat)
+		if beat == "win":
+			_add_kin(m, at)
 	built += 1
+
+## Member m went out without getting out: it stands as a dimmed Wisp. (A squad without the flags: all of a lost one.)
+func _gone(m: Dictionary) -> bool:
+	return bool(m.get("eliminated", not extracted and not bool(m.get("extracted", false))))
+
+## The beat member m plays: its win when the squad got out or it did itself, its lose when not.
+func beat_of(m: Dictionary) -> String:
+	return "win" if extracted or bool(m.get("extracted", false)) else "lose"
 
 func _hunter(m: Dictionary, i: int) -> Node3D:
 	var arch := String(m["arch"])
@@ -140,16 +164,52 @@ func _hunter(m: Dictionary, i: int) -> Node3D:
 func _wisp(m: Dictionary) -> Node3D:
 	var look: Dictionary = WispLook.get_look(WispLook.equipped() if bool(m["you"]) else "").duplicate(true)
 	look["core"]["glow"] = WISP_DIM_GLOW
-	look["halo"]["alpha"] = WISP_DIM_HALO
+	look["core"]["color"] = WISP_TINT.to_html(false)
 	return WispLook.build(look, WISP_TINT)
 
-## Holds the Hunter's pose; a model without clips (the procedural fallback) stands in its idle.
-func _pose(node: Node3D, arch: String) -> void:
+## Puts the Hunter on its beat, due STAGGER after the last one to stand, with its pose to settle into. Fallbacks
+## (logged): no such beat in its clips, straight into the pose; no clips at all, the rig's idle.
+func _stand(node: Node3D, arch: String, beat: String) -> void:
 	var sync := node.get_node_or_null("Warden/Sync") as WardenGlb.Sync
-	if sync != null and sync.clips != null:
-		sync.clips.force = (poses().get(arch, {"clip": "idle", "t": 0.0}) as Dictionary).duplicate()
-	else:
+	if sync == null or sync.clips == null:
+		_warn(arch, "no clips: stands in its rig idle")
 		_anims.append(HunterAnim.new(node))
+		return
+	var clips: WardenClips = sync.clips
+	var pose: Dictionary = (poses().get(arch, {}) as Dictionary).duplicate()
+	if pose.is_empty() or not clips.lib.has_animation(String(pose["clip"])):
+		_warn(arch, "no results pose: holds its idle")
+		pose = {"clip": String(clips.d["loco"]["idle"]), "t": 0.0}
+	pose["fade"] = SETTLE
+	if _beat_t < 0.0:
+		_beat_t = 0.0
+	var p := {"clips": clips, "model": node, "beat": beat, "len": 0.0, "pose": pose, "settled": false,
+			"at": maxf(_beat_t, _standing * STAGGER)}
+	_standing += 1
+	if clips.beats.has(beat):
+		p["len"] = clips.lib.get_animation(String(clips.beats[beat]["clip"])).length
+	else:
+		_warn(arch, "no %s beat: goes straight to its pose" % beat)
+	_plays.append(p)
+	_play(p)
+
+## One frame of a standing Hunter: its idle until its turn, the beat once, then the pose (cross-faded, SETTLE s).
+func _play(p: Dictionary) -> void:
+	if bool(p["settled"]):
+		return
+	var t := _beat_t - float(p["at"])
+	var s := {"grounded": true, "vel": Vector3.ZERO, "crouch": 0.0, "downed": false}
+	if t >= float(p["len"]):
+		(p["clips"] as WardenClips).force = p["pose"]
+		p["settled"] = true
+	elif t >= 0.0:
+		s["beat"] = p["beat"]
+		s["beat_t"] = t
+	(p["model"] as Node3D).set_meta(WardenClips.STATE, s)
+
+static func _warn(arch: String, why: String) -> void:
+	warned.append([arch, why])
+	push_warning("ResultsStage: %s %s" % [arch, why])
 
 func _add_kin(m: Dictionary, at: Vector3) -> void:
 	var rec: Dictionary = m["kin"]
