@@ -444,7 +444,7 @@ One row per hero and slot, from `air_cast` in the same files: running, jumping a
 | ostra | RMB | Data silent on the air (supervive_kits.md:114); no cast from the air in the footage (hero-ref/ostra.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
 | ostra | E | Data: plant a bomb (supervive_kits.md:116), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air | not cast in the air (the press is dropped) | [?] |
 | ostra | R (ult) | Data: a vortex (supervive_kits.md:117), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air | not cast in the air (the press is dropped) | [?] |
-| gil | LMB |  | horizontal: no row; vertical: no row | [?] |
-| gil | RMB |  | horizontal: no row; vertical: no row | [?] |
-| gil | E |  | horizontal: no row; vertical: no row | [?] |
-| gil | R (ult) |  | horizontal: no row; vertical: no row | [?] |
+| gil | LMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| gil | RMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| gil | E | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: slows below the jump's speed; vertical: falls as from the jump (Riptide is a planted spin) | [?] |
+| gil | R (ult) | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: driven faster than the jump; vertical: holds the height (Tidal Wave: he rides the wave down its line) | [?] |

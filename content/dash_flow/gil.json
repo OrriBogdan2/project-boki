@@ -11,5 +11,11 @@
 			"reason": "Tidal Wave: he rides the wave down its line, untargetable, until it lands; the wave is his movement.",
 			"source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row."
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
+		"e": {"h": "slow", "v": "fall", "ours": "Riptide is a planted spin", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
+		"x": {"h": "push", "v": "hover", "ours": "Tidal Wave: he rides the wave down its line", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"}
 	}
 }

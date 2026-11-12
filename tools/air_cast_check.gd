@@ -1,5 +1,5 @@
 extends RefCounted
-## --air-cast-check: for all 12 Hunters, LMB, RMB, E and R cast at the top of a running jump. Each slot's effect on
+## --air-cast-check: for every Hunter, LMB, RMB, E and R cast at the top of a running jump. Each slot's effect on
 ## the horizontal and the vertical speed over the next WINDOW_S is measured against the same jump with no cast and
 ## must match the hero's air_cast row in content/dash_flow/<id>.json ("cast", "h", "v");
 ## docs/heroes/dash_interactions.md ("Cast at the top of a jump") shows the rows next to the source. Never touches
