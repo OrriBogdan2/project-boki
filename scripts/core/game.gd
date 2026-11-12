@@ -80,7 +80,7 @@ func _setup_input() -> void:
 	for a in KinKeys.ids():
 		_key(a, [])      # Boki quick keys: unbound until picked
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
-	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
+	_key("base", [KEY_B])                     # base to a teammate: hold for the wheel, a 5.5s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])

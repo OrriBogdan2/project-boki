@@ -13,6 +13,8 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##   9 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
+##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -71,6 +73,7 @@ func run(main_node: Node) -> void:
 		6: await _echo(secs)
 		7: await _show(secs)
 		8: await _relay(secs)
+		9: await _base_tp()
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -426,3 +429,58 @@ func _relay(secs: float) -> void:
 		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
+
+# ------------------------------------------------------------------ 9: base to a teammate
+const MATE_GAP := 13.0           # m from the player to each teammate (far enough that the teleport reads)
+
+func _base_tp() -> void:
+	await _start("ashwick", "cindle")
+	var P := m.player
+	P.ctrl = "local"
+	var base := _ground(P.pos)
+	var mates := [_hunter("a1", P.team, "juggernaut", "pebbit", _ground(base + Vector3(MATE_GAP, 0, -3.0))),
+			_hunter("a2", P.team, "gunslinger", "zapple", _ground(base + Vector3(-3.0, 0, MATE_GAP)))]
+	for h in mates:
+		h.ctrl = "idle"
+		h.teleport(h.pos)
+	_zoom(0.75)
+	still_at = 4.5
+	_mark("take1")
+	await _wheel_take(P, mates[0], 1.0, base)
+	await _go(1.5, func(_t: float): P.inp["move"] = Vector2.ZERO, func(_t: float): return P.pos)
+	# take 2: back where we started, a rival close by, and its hit breaks the channel 2 s in
+	P.teleport(base)
+	P.base_cd = 0.0
+	P.weak_t = 0.0
+	var foe := _hunter("b0", 1 - P.team, "archer", "wisplet", _ground(base + Vector3(-4.0, 0, -5.0)))
+	foe.ctrl = "idle"
+	foe.teleport(foe.pos)
+	_mark("take2")
+	await _wheel_take(P, mates[1], 2.0, base, foe)
+	await _go(2.5, func(_t: float): P.inp["move"] = Vector2.ZERO, func(_t: float): return P.pos)
+
+## Opens the wheel, sweeps to `to`'s slice, lets go, then films the channel; with a `foe`, it shoots the
+## player `hit_at` s in (and a hit lands then for sure), else the channel runs to the end.
+func _wheel_take(P: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunter = null) -> void:
+	var o := main.get_viewport().get_visible_rect().size * 0.5 + Vector2(0, 40)
+	var mates := BaseRecall.mates(m, P)
+	var slice := BaseWheel.dir(mates.find(to), mates.size()) * 110.0
+	var still := func(_t: float): P.inp["move"] = Vector2.ZERO
+	await _go(0.6, still, func(_t: float): return base)
+	BaseWheel.open(P, o, mates)
+	await _go(1.2, func(t: float):
+		P.inp["move"] = Vector2.ZERO
+		BaseWheel.update(P, o + slice * clampf((t - 0.3) / 0.5, 0.0, 1.0), FRAME),
+		func(_t: float): return base)
+	P.inp["base_pick"] = BaseWheel.close(P)
+	var hit := [false]
+	var span := BaseRecall.CHANNEL_S + 0.2 if foe == null else hit_at + 0.1
+	await _go(span, func(t: float):
+		P.inp["move"] = Vector2.ZERO
+		if foe and t >= hit_at - 0.35 and not hit[0]:
+			hit[0] = true
+			foe.inp["aim"] = P.pos + Vector3(0, 0.9, 0)
+			foe.ak.press_rmb()
+		if foe and t >= hit_at and P.base_t > 0.0:
+			P.hurt(6.0, foe, {"src": "media"}),
+		func(_t: float): return (P.pos + to.pos) * 0.5 if P.base_t > 0.0 else P.pos)
