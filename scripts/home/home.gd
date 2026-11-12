@@ -3633,7 +3633,7 @@ func _start_match() -> void:
 	if Save.d.get("exp_rolling", false):
 		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
 	if raid_squad > 0:
-		o = HeartRaid.opts(raid_squad)      # Heart Raid: one squad and no rivals (scripts/match/heart_raid.gd)
+		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked

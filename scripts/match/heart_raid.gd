@@ -3,26 +3,29 @@ extends RefCounted
 ## Heart Raid (prototype; docs/design/PVE_HEART_RAID.md): the PvE mode on the expedition map. One squad
 ## (team 0, 1-4 Hunters; bots fill a squad of 4 offline, the host fills one online) and no rival squads.
 ## The Blight's tide closes on the Heart as in an Expedition; this director sends the waves and the boss:
-##   WAVES  every wave_every_s a wave from content/rules/heart_raid.json: its "heart" monsters come out of the
-##          ground round the Heart and guard it, its "edge" ones come from the Blight's side of the squad.
+##   WAVES  every wave_every_s a wave from content/rules/heart_raid.json, each group out of one fixed gate
+##          round the Heart (HeartRaidGates), marked with a countdown warn_s before: inner gates' monsters guard
+##          the Heart, outer gates' come for the squad. Nothing random in where or when (principle 1).
 ##          A wave monster with nothing to fight goes for the nearest standing Hunter (steer_r).
 ##   BOSS   at boss_s (sooner once the last wave is cleared) one boss rises at the Heart: a Lair boss kit
 ##          fought in a square round the Heart instead of a walled lair (Boss needs a lair dictionary).
 ##   HOLD   the boss is down: the Heart opens its final seat (Heart.go FINAL); holding the ring takes the
 ##          squad out with the raid's reward (Heart.pay reads rules "reward"). That is the win.
 ## Lost: the squad wiped (the match's own team-wiped end) or the islands fall at match_s.
-## Everything scales with the squad's size (rules "scale"). Expeditions never build one (Match.heart_raid null),
+## Everything scales with the squad's size (rules "scale") and the difficulty picked (rules "difficulty":
+## Normal, Hard, Nightmare; Nightmare's boss has one more attack), and the raid's Boki (wild spots, the reward
+## egg) are the raid's own lines of boki_modes.json open at that difficulty (HeartRaid.boki).
+## Expeditions never build one (Match.heart_raid null),
 ## and the Heart is held shut (Heart.locked) so its timers never open it. The host runs the director and
 ## tells the others with ["hr", phase, wave, boss_nid] (on a change and every SYNC_S).
 
 enum P {WAVES, BOSS, HOLD, WON, LOST}
-const MODE := "heart_raid"    # the mode's spawn table name (Data.wild_kin, content/kin "only_in")
+const MODE := "heart_raid"    # the mode's name in content/rules/boki_modes.json (BokiModes)
 const RULES_PATH := "res://content/rules/heart_raid.json"
 const THINK_S := 0.5           # s between the director's looks (waves, steering, rally)
 const SYNC_S := 3.0            # s between the host's "hr" refreshes
 const COL := Color("ff7a5a")   # the raid's HUD accent (the Blight's ember)
-const EDGE_IN := 4.0           # m: edge monsters come out at least this far inside the tide ring (never in the tide)
-
+const SPREAD := 1.4            # m: a group's monsters stand this far apart round their gate
 static var _rules := {}
 
 static func rules() -> Dictionary:
@@ -36,13 +39,37 @@ static func r(k: String) -> float:
 static func on(o: Dictionary) -> bool:
 	return bool(o.get("heart_raid", false))
 
-## The wild spawn table this match draws from (Data.wild_kin).
-static func mode_of(o: Dictionary) -> String:
-	return MODE if on(o) else ""
+## The match options of a raid for a squad of `squad` (1 = truly solo) at a difficulty (rules "difficulty").
+static func opts(squad: int, difficulty := "normal") -> Dictionary:
+	var d := difficulty if rules()["difficulty"].has(difficulty) else "normal"
+	return {"heart_raid": true, "teams": 1, "squad": clampi(squad, 1, 4), "length": r("match_s"), "raid_diff": d}
 
-## The match options of a raid for a squad of `squad` (1 = truly solo).
-static func opts(squad: int) -> Dictionary:
-	return {"heart_raid": true, "teams": 1, "squad": clampi(squad, 1, 4), "length": r("match_s")}
+## --heart-raid=N or N:hard (with --match).
+static func from_arg(s: String) -> Dictionary:
+	var parts := s.split(":")
+	return opts(int(parts[0]), parts[1] if parts.size() > 1 else "normal")
+
+## The difficulty ladder, easiest first (boki_modes.json modes.heart_raid.difficulties).
+static func difficulties() -> Array:
+	return BokiModes.rules()["modes"][MODE]["difficulties"]
+
+static func diff_name(difficulty: String) -> String:
+	return String(rules()["difficulty"][difficulty]["name"])
+
+## The raid's Boki at a difficulty: its lines of boki_modes.json open there, as their game species, or (while a
+## line has no kin yet) its stand-in (rules "stand_ins"). Draw from it with BokiModes.draw (rarity tickets).
+static func boki(difficulty: String) -> Array:
+	var ladder := difficulties()
+	var lines: Dictionary = BokiModes.rules()["lines"]
+	var out := BokiModes.pool(MODE, ["common", "rare", "very_rare"], difficulty)
+	for line in rules()["stand_ins"]:
+		if not line.begins_with("_") and ladder.find(lines[line]["min_difficulty"]) <= ladder.find(difficulty):
+			out.append(String(rules()["stand_ins"][line]))
+	return out
+
+## The pool a wild or rare-spot Boki of this match draws from: the raid's own Boki in a raid.
+static func site_pool(o: Dictionary, site: String) -> Array:
+	return boki(String(o.get("raid_diff", "normal"))) if on(o) else BokiModes.site_pool("expedition", site)
 
 var m: Match
 var phase := P.WAVES
@@ -50,6 +77,8 @@ var wave := 0                  # waves sent so far
 var next_wave_t := 0.0         # session time of the next wave
 var cleared_t := -1.0          # session time the last wave was cleared (-1 until then)
 var squad_n := 1               # Hunters in the squad (1-4): the scale row
+var difficulty := "normal"     # rules "difficulty" key
+var gates: HeartRaidGates      # where and when each wave comes out, and its marks
 var boss: Mob = null           # the boss (a Boss on the host; a client mirrors a plain Mob)
 var lair := {}                 # the boss's fight square round the Heart, in Lairs' lair shape
 var foes: Array[Mob] = []      # wave monsters alive
@@ -65,8 +94,10 @@ func _init(match_node: Match) -> void:
 	_rng.seed = int(m.seed_val) * 31 + 7
 	next_wave_t = r("first_wave_s")
 	squad_n = clampi(m.hunters.filter(func(h): return h.team == 0).size(), 1, 4)
+	difficulty = String(m.opts.get("raid_diff", "normal"))
+	gates = HeartRaidGates.new(self)
 	m.heart.locked = true
-	_note("start, squad of %d" % squad_n)
+	_note("start, squad of %d, %s" % [squad_n, difficulty])
 
 func host() -> bool:
 	return not m.net_on or m.is_host
@@ -74,8 +105,12 @@ func host() -> bool:
 func waves_n() -> int:
 	return (rules()["waves"] as Array).size()
 
+## A squad-size scale (rules "scale") times the difficulty's (rules "difficulty") where it has one.
 func scale(k: String) -> float:
-	return float(rules()["scale"][k][squad_n - 1])
+	return float(rules()["scale"][k][squad_n - 1]) * float(diff().get("count" if k == "cap" else k, 1.0))
+
+func diff() -> Dictionary:
+	return rules()["difficulty"][difficulty]
 
 func _note(what: String) -> void:
 	trail.append("%7.2f %s" % [m.sess_time(), what])
@@ -88,6 +123,9 @@ func tick(dt: float) -> void:
 	if _think > 0.0:
 		return
 	_think = THINK_S
+	if phase == P.WAVES and m.sess_time() >= next_wave_t - r("warn_s"):
+		gates.mark(wave, next_wave_t)
+	gates.show_marks()
 	if host():
 		foes = foes.filter(func(x): return is_instance_valid(x) and not x.dead)
 		_direct()
@@ -103,7 +141,7 @@ func _direct() -> void:
 	match phase:
 		P.WAVES:
 			if wave < waves_n() and t >= next_wave_t:
-				_send_wave(rules()["waves"][wave])
+				_send_wave()
 				wave += 1
 				next_wave_t += r("wave_every_s")
 				_broadcast()
@@ -125,18 +163,20 @@ func _check_end() -> void:
 		_note("lost")
 
 # ------------------------------------------------------------------ waves
-## Spawns one wave: each group's list scaled to the squad (rules scale.count), up to the alive cap.
-func _send_wave(w: Dictionary) -> void:
+## Sends the marked wave out of its gates: each group's list scaled to the squad and difficulty, up to the cap.
+func _send_wave() -> void:
+	gates.mark(wave, next_wave_t)
 	var cap := int(scale("cap"))
 	var made := 0
-	for side in ["heart", "edge"]:
-		var kinds: Array = w.get(side, [])
+	for mk in gates.marks:
+		var kinds: Array = mk["mobs"]
 		var n := int(round(kinds.size() * scale("count")))
 		for i in n:
 			if foes.size() >= cap:
 				break
-			var mb := _spawn_foe(String(kinds[i % kinds.size()]), _spot(side), side == "heart")
-			if mb:
+			var a := TAU * i / n
+			var at: Vector3 = mk["at"] + Vector3(cos(a), 0.0, sin(a)) * (SPREAD if n > 1 else 0.0)
+			if _spawn_foe(String(kinds[i % kinds.size()]), at, bool(mk["guard"])):
 				made += 1
 	m.add_feed("Wave %d of %d" % [wave + 1, waves_n()])
 	m.sfx("warn", null, -4.0, 0.8)
@@ -145,7 +185,7 @@ func _send_wave(w: Dictionary) -> void:
 	_note("wave %d: %d monsters" % [wave + 1, made])
 
 func _spawn_foe(kind: String, at: Vector3, guard: bool) -> Mob:
-	if at == Vector3.INF or not Data.MOBS.has(kind):
+	if at == Vector3.INF or m.world.is_void(at.x, at.z) or not Data.MOBS.has(kind):
 		return null
 	var mb: Mob
 	if Data.MOBS[kind].get("blight", false):
@@ -157,45 +197,12 @@ func _spawn_foe(kind: String, at: Vector3, guard: bool) -> Mob:
 		mb.camp = m.heart.site if guard else at
 	mb.max_hp *= scale("hp")
 	mb.hp = mb.max_hp
+	if mb.md.has("dmg"):
+		mb.md = mb.md.duplicate()
+		mb.md["dmg"] = float(mb.md["dmg"]) * float(diff()["dmg"])
 	foes.append(mb)
 	sent += 1
 	return mb
-
-## Where a wave monster comes out: round the Heart, or on the Blight's side of the squad (the line from
-## the Heart through the squad's middle, on past them, but inside the tide ring). INF when there is no ground.
-func _spot(side: String) -> Vector3:
-	var site := m.heart.site
-	var p: Vector3
-	var a := _rng.randf() * TAU
-	if side == "heart":
-		var hr: Array = rules()["heart_r"]
-		p = site + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(float(hr[0]), float(hr[1]))
-	else:
-		var c := _squad_mid()
-		if c == Vector3.INF:
-			return Vector3.INF
-		var out := Vector2(c.x - site.x, c.z - site.z)
-		var d := out.normalized() if out.length() > 4.0 else Vector2(cos(a), sin(a))
-		d = d.rotated(_rng.randf_range(-0.6, 0.6))
-		var eb: Array = rules()["edge_back"]
-		p = c + Vector3(d.x, 0.0, d.y) * _rng.randf_range(float(eb[0]), float(eb[1]))
-		var off := Vector2(p.x - site.x, p.z - site.z)
-		var inside := Heart.tide_r(m) - EDGE_IN
-		if inside > 0.0 and off.length() > inside:
-			off = off.normalized() * inside
-			p = Vector3(site.x + off.x, p.y, site.z + off.y)
-	var q := m.world.free_spot_near(p, [], 1.0, 0.45, 6.0)
-	return Vector3.INF if m.world.is_void(q.x, q.z) else q
-
-## The middle of the squad's standing Hunters (INF if none stand).
-func _squad_mid() -> Vector3:
-	var s := Vector3.ZERO
-	var n := 0
-	for h in m.hunters:
-		if h.team == 0 and not h.out and not h.extracted and not h.downed:
-			s += h.pos
-			n += 1
-	return s / n if n > 0 else Vector3.INF
 
 ## Wave monsters with nobody to fight go for the nearest standing Hunter within steer_r, and keep their
 ## leash (Mob.camp) on whoever they chase. The Blight hunts by its own senses (Blight).
@@ -243,13 +250,14 @@ func _spawn_boss() -> void:
 	var site := m.heart.site
 	var tier_k := float(m.T.get("mob", 1.0))
 	lair = {"c": site, "half": float(bd["half"]), "boss": String(bd["kind"]), "adds": [], "state": "awake",
-		"name": String(bd["name"]), "heart_raid": true}
+		"name": String(bd["name"]), "heart_raid": true, "extra": String(diff().get("boss_extra", ""))}
 	var at := m.world.free_spot_near(site + Vector3(3.0, 0.0, 0.0), [site], 2.5, 1.2, 6.0)
 	var b := Boss.new()
 	b.init_boss(m, m.next_id("b"), String(bd["kind"]), at, tier_k, lair)
 	b.md["name"] = String(bd["name"])
 	b.md["enrage"] = float(bd["enrage"])
 	b.max_hp = float(bd["hp"]) * tier_k * scale("boss_hp")
+	b.dmg_mult *= float(diff()["dmg"])
 	b.hp = b.max_hp
 	b.dormant = false
 	m.add_child(b)
@@ -285,29 +293,29 @@ func boss_for(p: Hunter) -> Boss:
 	return boss if absf(p.pos.x - c.x) <= hf and absf(p.pos.z - c.z) <= hf else null
 
 ## The raid's reward bundle (Heart.pay, the final seat in a raid) and the species of its egg: one of the
-## Boki found only in raids.
+## raid's Boki open at this difficulty, by rarity tickets.
 static func reward() -> Dictionary:
 	return rules()["reward"]
 
 func egg_species() -> String:
-	var pool: Array = Data.KIN.keys().filter(func(k): return String(Data.KIN[k].get("only_in", "")) == MODE)
-	pool.sort()
-	return String(pool[_rng.randi() % pool.size()]) if not pool.is_empty() else String(Data.common_kin()[0])
+	var sp := BokiModes.draw(boki(difficulty), _rng)
+	return sp if sp != "" else String(Data.common_kin()[0])
 
 # ------------------------------------------------------------------ the end
 ## What the results screen shows (Match._finish puts it under r["heart_raid"]).
 func summary() -> Dictionary:
-	return {"won": m.heart.state == Heart.S.DONE and bool(m.result.get("extracted", false)), "wave": wave,
+	return {"won": m.heart.state == Heart.S.DONE, "wave": wave,
 		"waves": waves_n(), "boss": String(rules()["boss"]["name"]), "boss_down": boss_down,
-		"squad": squad_n, "t": m.sess_time()}
+		"squad": squad_n, "t": m.sess_time(), "difficulty": difficulty}
 
 static func result_line(rd: Dictionary) -> String:
 	var clock := "%d:%02d" % [int(rd["t"]) / 60, int(rd["t"]) % 60]
+	var mode := "Heart Raid (%s)" % diff_name(String(rd.get("difficulty", "normal")))
 	if bool(rd["won"]):
-		return "Heart Raid won: %s fell and your squad held the Heart (%s)." % [rd["boss"], clock]
+		return "%s won: %s fell and your squad held the Heart (%s)." % [mode, rd["boss"], clock]
 	if bool(rd["boss_down"]):
-		return "Heart Raid lost: %s fell, but the Heart ring was not held (%s)." % [rd["boss"], clock]
-	return "Heart Raid lost on wave %d of %d (%s)." % [int(rd["wave"]), int(rd["waves"]), clock]
+		return "%s lost: %s fell, but the Heart ring was not held (%s)." % [mode, rd["boss"], clock]
+	return "%s lost on wave %d of %d (%s)." % [mode, int(rd["wave"]), int(rd["waves"]), clock]
 
 # ------------------------------------------------------------------ online
 func _broadcast() -> void:
@@ -320,5 +328,6 @@ func net_in(x: Array) -> void:
 		return
 	phase = int(x[1]) as P
 	wave = int(x[2])
+	next_wave_t = r("first_wave_s") + wave * r("wave_every_s")     # the host's wave clock (fixed timers)
 	boss_down = phase == P.HOLD or phase == P.WON
 	boss = m.ents_by_id.get(String(x[3]), null) as Mob

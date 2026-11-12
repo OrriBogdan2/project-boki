@@ -197,7 +197,7 @@ func _init() -> void:
 	load_kin_content()
 
 ## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
-## (content/kin/<id>.json: rare, boss, only_in).
+## (content/kin/<id>.json: rare, boss).
 func load_kin_content() -> void:
 	KIN.clear()
 	var ids: Array = []
@@ -211,8 +211,6 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
-		if home.has("only_in"):
-			sp["only_in"] = String(home["only_in"])
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
@@ -223,12 +221,6 @@ const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zappl
 func common_kin() -> Array:
 	var all: Array = KIN.keys().filter(func(k): return not KIN[k].get("rare", false))
 	return LAUNCH_KIN.filter(func(k): return all.has(k)) + all.filter(func(k): return not LAUNCH_KIN.has(k))
-
-## The wild spawn table of a match mode ("" = Expeditions, "heart_raid" = Heart Raid): the common kin, less
-## those found only in another mode (content/kin/<id>.json "only_in"). Not an ownership lock: hatched or
-## traded, such a Boki goes anywhere.
-func wild_kin(mode: String) -> Array:
-	return common_kin().filter(func(k): return String(KIN[k].get("only_in", mode)) == mode)
 
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))

@@ -1548,7 +1548,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp := BokiModes.draw(BokiModes.site_pool("expedition", "wild"), rng)
+		var sp := BokiModes.draw(HeartRaid.site_pool(opts, "wild"), rng)      # this mode's Boki (a raid: its own)
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
