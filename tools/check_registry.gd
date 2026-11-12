@@ -6,6 +6,16 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
+	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],      # loot, kin keeping, the Soul Shrine
+	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],      # each ability verb at a dummy rival
+	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],      # KIN_GRAMMAR phase 2
+	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],      # the duel room smoke test
+	"--extract-check": ["res://tools/extract_check.gd", "extract_check", null],
+	"--truce-check": ["res://tools/truce_check.gd", "truce_check", null],
+	"--bot-sanity-check": ["res://tools/bot_sanity_check.gd", "bot_sanity_check", null],
+	"--drop-check": ["res://tools/drop_plan_check.gd", "drop_plan_check", null],      # the drop: planning, pings, the squad
+	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],      # build mode at home
+	"--rolling-check": ["res://tools/rolling_check.gd", "rolling_check", null],      # held on Main while it waits on frames
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go

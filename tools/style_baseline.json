@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -388,10 +388,10 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 365,
-"nested_ternary": 7,
-"semicolon": 380,
-"shadow": 3
+"long_line": 195,
+"nested_ternary": 4,
+"semicolon": 151,
+"shadow": 1
 },
 "scripts/match/abilities.gd": {
 "long_line": 1
@@ -927,6 +927,11 @@
 "semicolon": 12,
 "shadow": 2
 },
+"tools/ability_check.gd": {
+"long_line": 19,
+"semicolon": 75,
+"shadow": 1
+},
 "tools/abyss_check.gd": {
 "history_comment": 1,
 "long_line": 25,
@@ -981,6 +986,10 @@
 "semicolon": 15,
 "shadow": 1
 },
+"tools/bot_sanity_check.gd": {
+"long_line": 5,
+"semicolon": 1
+},
 "tools/capture_check.gd": {
 "long_line": 29,
 "semicolon": 9
@@ -988,13 +997,34 @@
 "tools/check.gd": {
 "semicolon": 1
 },
+"tools/check_registry.gd": {
+"long_line": 5
+},
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
 "shadow": 1
 },
+"tools/drop_plan_check.gd": {
+"long_line": 27,
+"nested_ternary": 1,
+"semicolon": 29
+},
+"tools/duel_check.gd": {
+"long_line": 3,
+"semicolon": 4
+},
+"tools/economy_check.gd": {
+"long_line": 20,
+"semicolon": 6
+},
 "tools/economy_floor_check.gd": {
 "long_line": 35,
 "semicolon": 19
+},
+"tools/extract_check.gd": {
+"long_line": 19,
+"nested_ternary": 1,
+"semicolon": 33
 },
 "tools/farm_hob_shots.gd": {
 "long_line": 7,
@@ -1027,6 +1057,11 @@
 "tools/glide_reach.gd": {
 "semicolon": 7
 },
+"tools/grammar_runtime_check.gd": {
+"long_line": 39,
+"semicolon": 28,
+"shadow": 1
+},
 "tools/hatch_check.gd": {
 "long_line": 10,
 "semicolon": 1,
@@ -1049,6 +1084,10 @@
 "long_line": 38,
 "nested_ternary": 9,
 "semicolon": 6
+},
+"tools/home_build_check.gd": {
+"long_line": 28,
+"semicolon": 26
 },
 "tools/incubator_check.gd": {
 "long_line": 23,
@@ -1183,6 +1222,11 @@
 "tools/train_check.gd": {
 "long_line": 10,
 "semicolon": 7
+},
+"tools/truce_check.gd": {
+"long_line": 9,
+"nested_ternary": 1,
+"semicolon": 27
 },
 "tools/unique_check.gd": {
 "long_line": 49,
