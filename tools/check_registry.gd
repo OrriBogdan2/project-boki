@@ -394,6 +394,7 @@ const CHECKS := {
 	"--dmg-number-check": ["res://tools/dmg_number_check.gd", "dmg_number_check", null],      # Fx.number rolls, tiers, reticle
 	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],      # --shots-dir=<dir>
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
+	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],      # --shots-dir=<dir> [--dot-hard]
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],      # the Tab squad board
 	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],      # --shots-dir=<dir>
