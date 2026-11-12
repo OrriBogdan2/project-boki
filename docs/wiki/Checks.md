@@ -57,6 +57,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
+| `--duel-ring-hint-check` | The duel ring's first-visit hint and beam, once per save; the pad opens the ring's two choices |
+| `--duel-online-check` | Two games over the relay: the lobby's duel line pairs them, both share the marks, falls and knocks count on both |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
