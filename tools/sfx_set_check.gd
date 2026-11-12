@@ -24,6 +24,7 @@ const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
+const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
@@ -46,6 +47,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_nuke_fall()
 	_garden_names()
 	_garden()
 	_build_cues()
@@ -190,6 +192,18 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
+## it carries past hearing range, and the kit plays it where the shell will land.
+func _nuke_fall() -> void:
+	var delay := float(Arch.def("gunslinger")["x"]["delay"])
+	var b := FileAccess.get_file_as_bytes("res://audio/vn_nuke_fall.wav")
+	var secs := float(_data("res://audio/vn_nuke_fall.wav").size() / 2) / float(b.decode_u32(24))
+	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
+	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
+	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
+	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
+	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
