@@ -20,7 +20,8 @@ const POOL := 24
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200, "xp_tick": 60, "steal_won": 400, "steal_lost": 400,
+const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,
+	"xp_tick": 60, "steal_won": 400, "steal_lost": 400,
 	"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
 	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
