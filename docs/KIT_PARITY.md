@@ -421,3 +421,39 @@ PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a 
 **Verdict: no outlier over 1.25x, so no health number was changed** (global scale untouched). Kael and Cinder sit at 1.249 and Neve, Sparkle and Sable at 0.802 (1/1.247): inside the bar by a hair, caused by the same thing: three weight classes against a source where 8 of 12 Hunters share 1290. No owner note on tankiness was found in DECISIONS or OWNER_REVIEW_1103, so none overrides these rows. `--archetype-check` ("health:" rows) asserts every Hunter is inside 0.8x to 1.25x.
 
 **Suggestion, not built.** The source is flatter: 1100 to 1475 (1.34x spread) against our 124 to 193 (1.56x). Lowering heavy to about 185 and raising light to about 128 would bring all five near-limit Hunters to about 1.2x/0.83x. That moves a whole weight class, so it is the owner's call. Per-archetype health (Hem and Motley a little lower, Bjorn and Grimble a little higher) would match the source more exactly but breaks the one-weight-one-health rule.
+
+## 0.24.4 main re-check: eight Hunters (2026-11-12, main 88b06b9e7)
+
+Albert (`bulwark`, section "Bjorn"), Neve (`rimewright`, "Claire"), Tenzo (`dolm`, "Tarek"), Sparkle (`mage`, "Ryzz"), Grimble (`dredge`), Meeko (`tender`, "Pip"), Sable (`thief`) and Motley (`ostra`, "Ostra"). Marks: **done** = still as the row says; **fixed since** = the row's gap is closed on main, the row text above is stale; **open** = still a gap or an owner call; **regressed** = was done, no longer. Numbers were read from `content/archetypes/*.json`, `content/weapons` and `content/dash_flow`; animation coverage and live behaviour were not re-measured, the combo checks stand for them.
+
+**Checks on 88b06b9e7:** `--bulwark-combo-check` 166/0, `--rimewright-combo-check` 116/0, `--dolm-combo-check` 172/0, `--mage-combo-check` 143/0, `--dredge-combo-check` 112/0, `--tender-combo-check` 104/0, `--dancer-combo-check` (Sable) 144/0, `--ostra-combo-check` 213/0, `--kit-parity-check` 0 failures, `--dash-flow-check` 0 failures (14 skipped), `--ttk-check` **22 failures** (the count the 0.24.4 gate already lists; 11 rows are these Hunters: mage 4, bulwark 3, ostra 4).
+
+**Regressed: none.** Health (124/145/193), cooldowns, ranges, crowd-control numbers and the felt-dash table all match the rows above.
+
+| Hunter | Row | 0.24.4 main mark |
+|---|---|---|
+| Albert | LMB | open (owner): tap whirl, carry and perfect launch stay; **fixed since**: cadence `throw_rate` 0.45 (gap 12 closed) |
+| Albert | RMB, E, R, Dash | done: aegis 4.2 at 140, slam 2.6 at 100 stun 0.6, bash cd 6; E zone r **2.3** (the row's "r 3.5" is stale), delay 1, 4 s, cd 12/8; R 4 cells x 4 m, width 4.5, stun 0.5, cd 40; whirl 3.5 m at 20.5 m/s (0.17 s), cd 8 |
+| Albert | Passive | open (owner, gap 15): Guard meter and Shield Slam still built; Crush stun 1.0 s done |
+| Albert | Dash-flow | open (gap 9): `dash.ground/air.lmb` still `buffer` (sourced from footage, not flipped to `fire`) |
+| Neve | LMB | **fixed since** (gap 16): skating beams home like darts (`rimewright_kit.gd`) |
+| Neve | RMB, E, R, Dash | done / owner as before: 2 charges cd 10.2 (owner), E 200 HP cd 17, R hold 3.5 s cd 80 rink 8.3 (7.2 +15%, owner), dash 11.5 m/s up to 1.6 s cd 13 refund 0.6 |
+| Neve | Passive, Body | open (owner, gap 19): Chill slow is ours-only. Body size is **1.014**, not 1.15: the owner's height chart (4538174a85, Neve 1.56 m) set it; the "Body ... match" row is stale and is an owner call |
+| Tenzo | LMB, RMB, Passive | done: boulder 0.6, punch 0.7, slam hold 0.2 cd 11 |
+| Tenzo | E | **fixed since** (gap 14): allies hop the rocks (`hop rocks` in `--dolm-combo-check`, owner 23:55); cd 12.5, 3.4 ahead, span 5 done |
+| Tenzo | R, Dash | open (owner): ridge 12 m (source 18-21.6, kept), 9 rocks cd 45 range 11; Rock Hop 3 x 2.8 m/0.26 s cd 12 (owner item 111) |
+| Tenzo | Dash-flow, CC | gap 9 **fixed since** (`dash.*.lmb` is `fire`); open: 6 `[?]` hold rows, ours-only rock and hop slows (CC suggestions) |
+| Sparkle | LMB, RMB, E, R | done: bolt 0.648 s range 13 (`coilcaster.json`, owner); RMB hold 1.0 cd 8; E delay 0.8, stacks 1, cd 10.5, r 1.5 reach 11 slide 3.4; R hover 1.7 cd 42 r 2.7 range 14.4 |
+| Sparkle | Dash | open (owner): lane **5.6-9.75 m** at 40 m/s, dmg 20, cd 8 (the section row's "7.5-13 m" is stale; the felt-dash table is right) |
+| Sparkle | Flow, Passive | gap 9 **fixed since** (`dash.*.lmb` is `fire`, source "not determinable" `[?]`); passive done |
+| Grimble | RMB, E, R, Passive | done: reel 11.5 m cd 12; slam windup 0.38 r 3 stun 1.1 cd 7; R charge 1.1 fan 105 cd 21; Salvage max 10 at +2.5% |
+| Grimble | Dash | **fixed since** (gap 13): the air pounce has its own 12.5 s slot (`dash.air.cd`, 10.5/8.5 at ranks 2/3; asserted in `--dredge-combo-check`); the row's "air slot missing" is stale. Open (owner): ground dash off the 0.85/1.15 feel; cooldowns 0.58x of the data |
+| Meeko | LMB, E, R, Dash, Anim | done: E 2.5 s r 2.6 cd 11, R 5 s range 12.6 cd 46, dash 3.6 m/0.2 s cd 7 and 13.3 m/0.95 s cd 14, carry 2 with 4 s lock |
+| Meeko | RMB, Passive | open: hop form root after 2 s (owner 11-10), motion `[?]`; Carrier shield is ours-only (gap 19) |
+| Sable | LMB, E, R, Dash | done: E 14 m 6 s cd 15; R r 2.3 to 5.4, 10 shots, cd 24; Vault 4.5 m/0.48 s cd 4.5, prime +1.34 (2.34x). The row's "air 8.4 m/0.95 s" is stale: the air dash is the ground cartwheel with a charge (item 183) |
+| Sable | RMB, Passive | open (owner): bola cd 7 (0.54x of the data) and the 30% slow; R cd 24 is 0.48x; Shred is ours-only `[?]`; pair stun 0.9 vs ~1.8 s |
+| Motley | LMB, RMB, R, Dash | done / owner as before: charge from 0.6 s (owner 60), RMB cd 10 (owner 40), Nightwell tell 1.0, 3.5 s, pull 12, cd 70, lob 1.8 s cd 9.5. RMB wind-up 0.32 was not located by key in the JSON (combo check passes) |
+| Motley | E | **fixed since** (gap 17): `dmg_max_k` 3.5; grow 6.5 s and r 3.2 done; the fizzle stays ours |
+| Motley | CC | open: orb slow 10% (wiki) vs 6% (card read) undecided |
+
+**Shared rows still open for these eight:** gap 2 (stopping), 3 (air control), 4 (dash carry), 10 (cooldown pace 0.48x to 1.0x), 19 (ours-only riders); health ratios unchanged (Neve, Sparkle, Sable 0.80 against the 1.25x bar); every `?` range in the ranges table stays `?`.
