@@ -2062,8 +2062,8 @@ func _find_interact() -> void:
 		if d < bd: bd = d; best = {"kind": "plot", "arr": "gh_plots", "i": i}
 	if hob:
 		var near_hob := hob.find(p2)
-		if not near_hob.is_empty():
-			bd = 0.5
+		if not near_hob.is_empty() and (best.is_empty() or float(near_hob.get("d", 0.0)) < bd):
+			bd = float(near_hob.get("d", 0.5))
 			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and _visiting()): continue
