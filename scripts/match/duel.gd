@@ -4,12 +4,15 @@ extends RefCounted
 ## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
 ## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
+## Online (a "net" match from the lobby's duel line) the bot's seat is the other player's hunter, the rival:
+## no setup menu, and each game puts its own hunter back on its mark when a round ends.
 
 const MODES := ["fight", "dodge", "still"]
 const MODE_NAMES := {"fight": "Fights back", "dodge": "Only dodges", "still": "Stands still"}
 
 var m: Match
 var bot: Hunter = null
+var rival: Hunter = null       # online: the other player's hunter, in place of the bot
 var arch := "gunslinger"       # the bot's Hunter (its weight follows)
 var weapon := ""
 var glove := ""
@@ -25,6 +28,7 @@ var _cb: Callable
 var _near: Dictionary = {}       # bot shots that came close: shot -> closest distance
 var _last_bot_hit := -9.0
 var _test_cast := -1.0
+var _foe_down := false          # the foe was down last tick (a round counts its knock once)
 
 func setup(match_node: Match) -> void:
 	m = match_node
@@ -42,7 +46,48 @@ func setup(match_node: Match) -> void:
 		if a.begins_with("--duel-mode="): mode = a.substr(12)
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
-	spawn_bot()
+	if m.net_on:
+		_meet_rival()
+	else:
+		spawn_bot()
+
+## Online: both games read the same map, so team 0 starts on its first spawn and team 1 where the bot would.
+func _meet_rival() -> void:
+	for h in m.hunters:
+		if h != m.player:
+			rival = h
+	var first: Vector3 = m.world.spawns[0]
+	var second := _spot_for_bot(first)
+	home_at = first if m.player.team == 0 else second
+	bot_at = second if m.player.team == 0 else first
+	m.player.lives = 99       # a knock or a fall ends the round, never the match
+	reset()
+
+## The opponent: the sparring bot, or online the rival.
+func _foe() -> Hunter:
+	return bot if bot else rival
+
+## The opening toast.
+func intro() -> String:
+	if rival:
+		return "Duel with %s  ·  a knock or a fall ends the round" % rival.pname
+	return "Duel room  ·  B sets up the bot  ·  Backspace resets"
+
+## A fall off the island: the bot's is a knock and a fresh round. Online yours is a knock (the rival's
+## game sees it in your snapshot) with you back on your mark. Returns true when the duel took the fall.
+func on_fell(e: Ent) -> bool:
+	if e == bot:
+		stats["knocks"] = int(stats["knocks"]) + 1
+		round_n += 1
+		m.hud.toast("Off the edge! Round to you", Color("8fe3c8"))
+		reset()
+		return true
+	if rival == null or e != m.player:
+		return e == rival
+	m.player.teleport(home_at)
+	m.player.vel = Vector3.ZERO
+	m.knock(m.player, m.player.last_hit_by, {})
+	return true
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -126,25 +171,31 @@ func heal_both() -> void:
 			h.armor = h.max_armor
 
 func tick(dt: float) -> void:
-	if bot == null or m.player == null:
+	var foe := _foe()
+	if foe == null or m.player == null:
 		return
-	# a sparring room: you and the bot always know where each other are (the view cone would
+	# a sparring room: you and the foe always know where each other are (the view cone would
 	# otherwise leave two hunters standing back to back, neither ever spotting the other)
-	bot.reveal_t = maxf(bot.reveal_t, 0.3)
+	foe.reveal_t = maxf(foe.reveal_t, 0.3)
 	m.player.reveal_t = maxf(m.player.reveal_t, 0.3)
-	if _test_cast > 0.0 and m.time >= _test_cast:
+	if bot and _test_cast > 0.0 and m.time >= _test_cast:
 		_test_cast = -1.0
 		bot.inp["aim"] = m.player.pos
 		m.use_gear(bot, 0)
-	# a knock ends the round; both come back after a beat
-	if reset_t < 0.0 and (m.player.downed or bot.downed):
+	# a knock ends the round; both come back after a beat. (Online the rival's game shows its knock a
+	# little later and stands it up on its own, so only the moment it goes down counts.)
+	var foe_down := foe.downed or foe.out
+	var foe_knocked := foe_down and not _foe_down
+	_foe_down = foe_down
+	if reset_t < 0.0 and (m.player.downed or foe_knocked):
 		reset_t = 1.4
-		if bot.downed:
+		if foe_knocked:
 			stats["knocks"] = int(stats["knocks"]) + 1
 			m.hud.toast("Knock! Round %d to you" % round_n, Color("8fe3c8"))
 		else:
 			stats["knocked"] = int(stats["knocked"]) + 1
-			m.hud.toast("Knocked. Round %d to the bot" % round_n, Color("ff8a7a"))
+			var who := "the bot" if bot else rival.pname
+			m.hud.toast("Knocked. Round %d to %s" % [round_n, who], Color("ff8a7a"))
 		round_n += 1
 	if reset_t >= 0.0:
 		reset_t -= dt
@@ -153,7 +204,7 @@ func tick(dt: float) -> void:
 	# watch the bot's shots: one that comes close and doesn't hurt you is a dodge
 	var live := {}
 	for s in m.shots:
-		if s["by"] == bot:
+		if s["by"] == foe:
 			var sid := int(s.get("sid", 0))
 			var d := Vector2(float(s["pos"].x) - m.player.pos.x, float(s["pos"].z) - m.player.pos.z).length()
 			live[sid] = true
@@ -186,16 +237,17 @@ func note_shot(by: Ent) -> void:
 		stats["shots"] = int(stats["shots"]) + 1
 
 func _on_hit(by, t, d, tags) -> void:
-	if bot == null or m.player == null:
+	var foe := _foe()
+	if foe == null or m.player == null:
 		return
 	var credit = by
 	if by is Kin and (by as Kin).owner_h:
 		credit = (by as Kin).owner_h
-	if credit == m.player and t == bot:
+	if credit == m.player and t == foe:
 		stats["dealt"] = float(stats["dealt"]) + float(d)
 		if (tags as Array).has("primary") or (tags as Array).has("shot") or (tags as Array).has("melee"):
 			stats["hits"] = int(stats["hits"]) + 1
-	elif credit == bot and t == m.player:
+	elif credit == foe and t == m.player:
 		stats["taken"] = float(stats["taken"]) + float(d)
 		_last_bot_hit = m.time
 
@@ -258,6 +310,8 @@ class DuelKeys extends Node:
 			get_viewport().set_input_as_handled()
 
 func attach_keys() -> void:
+	if rival:
+		return       # the setup menu and the reset key are the bot's
 	keys_node = DuelKeys.new(self)
 	m.add_child(keys_node)
 
