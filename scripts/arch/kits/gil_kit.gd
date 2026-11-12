@@ -9,7 +9,7 @@ extends ArchKit
 
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
-var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
+var flying: Array = []              # thrown potions: {at, t, left, v, id, out_at (it leaves his hand), from}
 var puddles: Array = []             # slime puddles: {at, r, t, left, k, tick, node, rim, inside}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
@@ -78,7 +78,7 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 # ------------------------------------------------------------------ LMB: Fencer / Tide Lunge
-const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
+const THRUSTS := ["gil_thrust_a", "gil_thrust_b", "gil_lunge"]   # one per chain step (his clips, KMovesGil keys)
 const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
 
 ## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
@@ -215,9 +215,13 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	flying.append({"at": at, "from": HeroVfx.of(m).anchor_pos(h, "hand_l"), "t": ft, "left": ft, "v": v,
-		"id": _tele_id()})
-	play("gil_throw")
+	# (the potion leaves the bag on the toss clip's pull-out key, rmb draw s after the press, and flies from there)
+	flying.append({"at": at, "t": ft, "left": ft, "v": v, "id": _tele_id(), "out_at": m.time + float(rd["draw"])})
+	play("gil_toss")
+
+## The potion leaves his hand: it flies from where the hand is now.
+func _let_go(it: Dictionary) -> void:
+	it["from"] = HeroVfx.of(m).anchor_pos(h, "hand_l")
 	vfx("throw", h.pos)
 
 func rmb_hold_tick(t: float) -> void:
@@ -520,7 +524,7 @@ func _land_wave() -> void:
 	var xd := x_def()
 	h.shield = maxf(h.shield, float(xd["shield"]))
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
-	play("gil_land")
+	play("gil_wave_land")
 	vfx("wave_land", h.pos)
 
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -528,17 +532,26 @@ func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 		return [0.0, o]
 	return [dmg, o]
 
+## The landing circle everyone sees, filling from the toss until the potion lands.
+func _landing_tele(it: Dictionary, vd: Dictionary, k: float) -> void:
+	AimKit.circle(h, it["id"], {"at": it["at"], "r": float(vd["radius"]), "col": col_of(vd), "fill": k,
+		"all": true, "alpha": TELE_A, "lw": TELE_LW})
+
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	for it in flying.duplicate():
+		var vd := vial_def(String(it["v"]))
+		if not it.has("from"):
+			# (a ms early: the step clock adds up in floats)
+			if m.time < float(it["out_at"]) - 0.001:
+				_landing_tele(it, vd, 0.0)
+				continue
+			_let_go(it)
 		it["left"] = float(it["left"]) - dt
 		var k := 1.0 - clampf(float(it["left"]) / maxf(0.01, float(it["t"])), 0.0, 1.0)
 		var p: Vector3 = (it["from"] as Vector3).lerp(it["at"], k) + Vector3(0, sin(k * PI) * 2.0, 0)
-		var vd := vial_def(String(it["v"]))
 		m.fx.burst(p, col_of(vd), 1, 0.3, 0.25, 0.0)
-		# the landing circle everyone sees, filling until the potion lands
-		AimKit.circle(h, it["id"], {"at": it["at"], "r": float(vd["radius"]), "col": col_of(vd), "fill": k,
-			"all": true, "alpha": TELE_A, "lw": TELE_LW})
+		_landing_tele(it, vd, k)
 		if float(it["left"]) <= 0.0:
 			flying.erase(it)
 			_shatter(it)

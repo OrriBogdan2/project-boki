@@ -32,7 +32,7 @@
 		"dist": 6.0, "time": 0.4, "radius": 2.2, "lift": 8.0, "knockup": 0.5, "dmg": 4.0,
 		"desc": "Dive into the ground and swim about 6m in 0.4s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for 0.5s."},
 	"rmb": {"delivery": "projectile", "name": "Grab Bag", "short": "Bag", "icon": "snare", "col": "#7fd8ff", "cooldown": 5.0, "charges": 2, "hold": 0.25,
-		"range": 8.0, "hold_range": 1.5, "flight": 0.35, "flight_per_m": 0.03,
+		"range": 8.0, "hold_range": 1.5, "draw": 0.133, "flight": 0.35, "flight_per_m": 0.03,
 		"bag": {"thunder": 2, "slime": 2, "air": 2, "fire": 2, "zeep": 1},
 		"vials": {
 			"thunder": {"name": "Thunder", "shape": "round_flask", "col": "#5ab8ff", "radius": 2.4, "dmg": 10.0, "core": 1.0, "stun": 0.5, "mark": "shock"},

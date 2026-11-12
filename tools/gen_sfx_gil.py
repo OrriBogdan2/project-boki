@@ -161,7 +161,7 @@ def tide_hit():
 # ------------------------------------------------------------------ RMB: Grab Bag
 def toss(i):
     """A bottle out of the bag: glass knocking in the bag, then the bottle flung end over end as the hand
-    whips forward (0.08-0.16 s in gil_throw)."""
+    whips forward (0.08-0.16 s in gil_toss)."""
     d = 0.4
     knock = mix(S.chime(1900 + 120 * i, 0.12, 0.04, ((1.0, 1.0), (2.7, 0.4))) * 0.5,
                 at(S.chime(2300 + 90 * i, 0.1, 0.03, ((1.0, 1.0), (2.9, 0.3))) * 0.35, 0.03))
