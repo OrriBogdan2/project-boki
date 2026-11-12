@@ -156,7 +156,7 @@ func use() -> void:
 		hoops.append(_hoop(i))
 	_paint_hoops()
 	_place_flier()
-	Sfx.play("garden_start", stand.position, BaseRace.GARDEN_DB)
+	GardenSfx.countdown(h, stand.position)
 
 ## Esc lands the kite with no result; true when the flight took the press.
 func input(event: InputEvent) -> bool:
@@ -174,7 +174,7 @@ func tick(d: float) -> void:
 		return
 	var passed := run.step(d, Input.get_axis("left", "right"))
 	if passed != "":
-		Sfx.play("garden_cheer" if passed == "hit" else "garden_miss", flier["pos"], BaseRace.GARDEN_DB)
+		GardenSfx.crowd("good" if passed == "hit" else "miss", flier["pos"])
 		_paint_hoops()
 	_place_flier()
 	if run.over():
@@ -250,7 +250,7 @@ func _end(finished: bool) -> void:
 	hoops = []
 	kite = null
 	if finished:
-		Sfx.play("garden_win", land, BaseRace.GARDEN_DB)
+		GardenSfx.crowd("great", land)
 		h._emote(flier, "♥", true)
 		_card(res)
 		Save.save_game()

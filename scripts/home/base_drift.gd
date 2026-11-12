@@ -27,8 +27,13 @@ static func _drift(rec: Dictionary, was: Dictionary, friends: Array, R: Dictiona
 		drift["day"] = 0
 		drift["moved"] = {}
 	drift["day"] = int(drift["day"]) + 1
+	_follow_friends(rec, was, friends, R)
+	_zone_pull(rec, R)
+
+static func _follow_friends(rec: Dictionary, was: Dictionary, friends: Array, R: Dictionary) -> void:
 	if friends.is_empty():
 		return
+	var drift: Dictionary = rec["drift"]
 	for t in TRAITS:
 		var mean := 0.0
 		for f in friends:
@@ -51,3 +56,16 @@ static func _band_line(rec: Dictionary, which: String, from: float, to: float, R
 	var word: String = R["words"][which][0 if b > a else 1]
 	lines.append({"t": Time.get_unix_time_from_system(), "words": "is getting " + word})
 	rec["journal"] = lines.slice(maxi(0, lines.size() - 20))
+
+## Living in a zone nudges its matching trait on, per_day, and not past stop_at (garden_zones.json trait_pull).
+static func _zone_pull(rec: Dictionary, R: Dictionary) -> void:
+	var zone := GardenZones.info(GardenZones.here)
+	if zone.is_empty() or GardenZones.zone_of(rec) != GardenZones.here:
+		return
+	var P: Dictionary = GardenZones.rules()["trait_pull"]
+	var way := -1.0 if zone.get("trait_low", false) else 1.0
+	var goal := float(P["stop_at"]) if way > 0.0 else 1.0 - float(P["stop_at"])
+	var now := float(rec["traits"].get(zone["trait"], 0.5))
+	var by := minf(float(P["per_day"]), maxf(0.0, (goal - now) * way))
+	rec["traits"][zone["trait"]] = now + by * way
+	_band_line(rec, zone["trait"], now, now + by * way, R)
