@@ -1721,8 +1721,7 @@ func _respawn_safe() -> void:
 func _glider_look() -> void:
 	if glider_node == null or not is_instance_valid(glider_node):
 		glider_node = MeshInstance3D.new()
-		glider_node.mesh = Gliders.mesh(Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
-		glider_node.material_override = Models.vtoon_outlined()
+		Gliders.dress(glider_node, Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
 		glider_node.position = Vector3(0, 2.0, 0.05); glider_node.scale = Vector3.ONE * 0.8
 		glider_node.visible = false
 		player.add_child(glider_node)
@@ -1736,8 +1735,7 @@ func _glider_rack() -> Node3D:
 		Models.part(n, Models.cyl(0.06, 0.07, 1.9, 8), wood, Vector3(0.75 * sx, 0.95, 0))
 	Models.part(n, Models.cyl(0.05, 0.05, 1.7, 8), dark, Vector3(0, 1.85, 0), Vector3.ONE, Vector3(0, 0, PI / 2))
 	var can := MeshInstance3D.new(); can.name = "Canopy"
-	can.mesh = Gliders.mesh(Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
-	can.material_override = Models.vtoon_outlined()
+	Gliders.dress(can, Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
 	can.position = Vector3(0, 1.75, 0); can.scale = Vector3.ONE * 0.75; can.rotation = Vector3(-0.35, 0, 0)
 	n.add_child(can)
 	var sign := Label3D.new(); sign.text = "Gliders"
@@ -1759,8 +1757,7 @@ func _open_rack() -> void:
 	Look.lights(w3, Color("fff1dc"), 1.0)
 	var holder := Node3D.new(); w3.add_child(holder)
 	var can := MeshInstance3D.new()
-	can.mesh = Gliders.mesh(rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
-	can.material_override = Models.vtoon_outlined()
+	Gliders.dress(can, rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
 	holder.add_child(can)
 	var tr := Gliders.trail(rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
 	if tr: tr.position = Vector3(0, -0.05, 0.3); tr.local_coords = true; tr.direction = Vector3(0, -0.2, 1); holder.add_child(tr)
@@ -1850,7 +1847,7 @@ func _rack_equip(id: String) -> void:
 	_rack_sound(id)
 	if is_instance_valid(rack_node):
 		var can := rack_node.get_node_or_null("Canopy") as MeshInstance3D
-		if can: can.mesh = Gliders.mesh(id, Data.TEAM_COLORS[0], UI.ACCENT)
+		if can: Gliders.dress(can, id, Data.TEAM_COLORS[0], UI.ACCENT)
 	_refresh_top()
 	_open_rack()
 

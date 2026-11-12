@@ -328,6 +328,7 @@ const CHECKS := {
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
+	"--glider-skin-shots": ["res://tools/glider_skin_shots.gd", "glider_skin_shots", null],
 	"--shroud-check": ["res://tools/shroud_check.gd", "shroud_check", null],
 	"--weapon-audit": ["res://tools/weapon_audit.gd", "weapon_audit", null],
 	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
