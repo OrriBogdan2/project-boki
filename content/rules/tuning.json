@@ -5,40 +5,5 @@
 	"glide": {"turn": 420.0, "turn_fast": 0.45, "brake": 36.0, "brake_deg": 115.0, "drag": 2.0, "drag_steer": 1.4, "coast": 1.4, "catch": 60.0, "max": 15.0},
 	"glide_carry": {"carry_drag": 3.0, "default": 12.0, "archer": 9.0},
 	"dash": {"jump_keep": 0.75},
-	"dash_speed": {"archer": 0.7},
-	"farm_spotlight": {
-		"_note": "The modal placing spotlight (house, trough): FarmSpotlight.",
-		"dim": 0.72,
-		"soft_px": 60.0,
-		"pulse_hz": 1.2,
-		"ramp_s": 0.2,
-		"fade_s": 0.2
-	},
-	"hunger_gate": {
-		"_note": "The 'too hungry to go' panel: HungerGate.",
-		"poll_s": 0.4
-	},
-	"kael": {
-		"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.",
-		"tap_dmg_k": 0.6,
-		"tap_range_k": 0.8,
-		"tap_windup_s": 0.45,
-		"tap_cooldown_s": 1.2,
-		"ult_carry_k": 0.8,
-		"ult_carry_decay_per_s": 1.6,
-		"ult_up_min_mps": 1.0,
-		"ult_up_bonus_mps": 2.2,
-		"chain_lunge_deg": 25.0
-	},
-	"perf": {
-		"bot_replan_s": 0.1,
-		"boki_retarget_s": 0.2,
-		"actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0},
-		"anim_far_every": 2,
-		"anim_off_every": 10,
-		"hero_anim_near_m": 48.0,
-		"hero_anim_far_every": 2,
-		"hero_anim_off_every": 4,
-		"bot_belt_s": 0.1
-	}
+	"dash_speed": {"archer": 0.7}
 }

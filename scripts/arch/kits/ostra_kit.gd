@@ -11,12 +11,9 @@ extends ArchKit
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
-const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
-const SEA := Color("2ee6c0")               # the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
-const DEEP := Color("0b5a50")              # their deep teal: the seed's and the dome's filling accent
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
@@ -102,7 +99,7 @@ func add_swell(v: float) -> void:
 	if res >= res_max():
 		swollen_t = float(res_def()["swollen_t"])
 		swells += 1
-		armed_fx("SWOLLEN", "")
+		armed_fx("")
 		play("ostra_empower")
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
@@ -482,7 +479,6 @@ func fire_rmb(c: Dictionary) -> void:
 	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
 	m.sfx("os_snap_wind", h.pos, -5.0, 1.0)
-	vfx("snap_wind", _hand())
 
 func _tick_snap(dt: float) -> void:
 	snap["t"] = float(snap["t"]) - dt
@@ -507,19 +503,21 @@ func _snap_release() -> void:
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
 	m.spawn_shot(
-		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA,
+		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), VOID_COL,
 		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
 	)
-	HeroVfx.of(m).trail(h, "snap_trail", KitLooks.of(m).skin(m.shots[-1], "spear"))
+	KitLooks.of(m).skin(m.shots[-1], "spear")
 	m.sfx("os_snap", h.pos, -2.0, 1.0)
 	_boost(float(sn["boost"]["cast"]))
-	vfx("snap", start, dir)
+	m.fx.flash(start, Color("b06bff"), 0.7, 0.07)
+	m.fx.burst(start, Color(0.45, 0.15, 0.7, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	vfx("snap_hit", AimMode.ground(m, at))
+	m.fx.burst(at, Color(0.45, 0.15, 0.7, 0.9), 14, 5.0, 0.3, 0.0, 1.2)
+	m.fx.flash(at, PINK, 0.7, 0.08)
 	if e == null:
 		return
 	var sn: Dictionary = rmb_def()["snap"]
@@ -545,15 +543,15 @@ func cast_e() -> bool:
 	var sid := "%s.s%d" % [h.nid if h.nid != "" else str(h.get_instance_id()), sid_n]
 	var grow := float(ed["grow"]) * (float(ed["grow_swollen_k"]) if is_swollen() else 1.0)
 	var rmax := float(ed["rmax_swollen"]) if is_swollen() else float(ed["rmax"])
-	var vis := HeroZones.seed_visual(m, sid, p, rmax, grow, SEA)
+	var vis := HeroZones.seed_visual(m, sid, p, rmax, grow, TEAL)
 	seed = {
 		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
 		"col": null
 	}
-	e_t = grow + float(ed["hold_full"])
+	# no timer: the source lists none, so the recast window stays open until he pops it or goes down
+	e_t = INF
 	play("ostra_seed")
 	m.sfx("os_seed", p, -3.0, 1.0)
-	m.later(float(ed["drop"]), func(): vfx("seed_plant", p))
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(
 			m, ["zone", "seed", h.nid, sid, m._r(p.x), m._r(p.y), m._r(p.z), snappedf(rmax, 0.1), snappedf(grow, 0.1)]
@@ -562,7 +560,7 @@ func cast_e() -> bool:
 
 func seed_radius() -> float:
 	if seed.is_empty(): return 0.0
-	return float(seed["rmax"]) * clampf(float(seed["t"]) / float(seed["grow"]), 0.08, 1.0)
+	return HeroZones.seed_r(float(seed["rmax"]), float(seed["grow"]), float(seed["t"]))
 
 func seed_k() -> float:
 	return clampf(float(seed["t"]) / float(seed["grow"]), 0.0, 1.0) if not seed.is_empty() else 0.0
@@ -571,16 +569,17 @@ func _tick_seed(dt: float) -> void:
 	var ed := e_def()
 	seed["t"] = float(seed["t"]) + dt
 	var p: Vector3 = seed["pos"]
+	HeroZones.seed_size(seed["vis"], seed_radius())
 	# the cast: a small orb drops from his hand onto the spot
 	var drop := float(ed["drop"])
 	if float(seed["t"]) < drop:
 		var u := float(seed["t"]) / drop
 		var from: Vector3 = seed["from"]
-		KitLooks.of(m).hold_on("os_drop", "mote", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 1.0, SEA)
+		KitLooks.of(m).hold_on("os_drop", "mote", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 1.0, VOID_COL)
 	AimKit.circle(
 		h, "seed",
 		{
-			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": SEA, "col2": DEEP,
+			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": VOID_COL, "col2": TEAL,
 			"dashed": seed_k() < 1.0
 		}
 	)
@@ -594,12 +593,6 @@ func _tick_seed(dt: float) -> void:
 			for f in foes_in(seed["pos"], seed_radius()):
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
-		_pop(false)
-
-## The source detonates only on the recast: a seed left at full size this long (e.hold_full) fizzles out
-## with no damage, so it can't be parked forever.
-func _e_end() -> void:
-	if not seed.is_empty():
 		_pop(false)
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
@@ -628,7 +621,7 @@ func _pop(hit: bool) -> void:
 	seed = {}
 	e_t = 0.0
 	AimKit.hide(h, "seed")
-	HeroZones.seed_pop(m, sid, SEA)
+	HeroZones.seed_pop(m, sid, TEAL)
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
 	if not hit:
@@ -637,24 +630,36 @@ func _pop(hit: bool) -> void:
 	play("ostra_pop")
 	var mult := 1.0 + (float(ed["dmg_max_k"]) - 1.0) * k
 	var dmg := float(ed["dmg"]) * mult * power("kin")
-	# an implosion: the void swallows the rim to a point, then teal shards and dark debris fly out
-	vfx("seed_pop", p, null, {"r": rad, "k": k})
+	# an implosion: the rim snaps inward to a bright point, then dark shards fly out
+	for i in 3:
+		var rr := rad * (1.0 - 0.3 * i)
+		m.later(0.04 * i, func(): m.fx.ring(p, rr, VOID_COL if i < 2 else Color("f2eaff"), 0.12))
+	m.fx.burst(p + Vector3(0, 0.8, 0), VOID_COL, int(14 + 22 * k), -5.0, 0.35, 0.0, 1.2)
+	m.later(
+		0.12,
+		func(): m.fx.spark(
+			p + Vector3(0, 0.6, 0), Vector3.UP, Color("2a0a3a"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
+		)
+	)
+	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
 	m.sfx("os_pop", p, -2.0, 1.0)
 	m.sfx("ostra_spring_boing", p, -3.0, 1.0)     # the jack springs out
+	net_ring(p, rad, TEAL)
 	var caught_hunter: Ent = null
 	for f in foes_in(p, rad):
 		f.hurt(dmg, h, {"src": "abil", "ab": "e", "payoff": k >= 0.99 and f is Hunter})
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
-		payoff_fx(caught_hunter.pos, PAY, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
+		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist < 9.0 and los and randf() < 0.1:
-		h.inp["aim"] = tgt.pos
+	if HeroUlt.ready(self) and dist < 9.0 and los:
+		# (aimed where they walk to in the tell)
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * float(x_def()["tell"]) * 0.5
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():

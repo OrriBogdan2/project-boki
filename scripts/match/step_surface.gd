@@ -1,6 +1,6 @@
 class_name StepSurface
 extends RefCounted
-## What a Hunter's footstep sounds like (MoveSfx.footstep): the surface underfoot and the cue for it.
+## What a Hunter's footstep sounds like (Juice.footstep): the surface underfoot and the cue for it.
 ## Surfaces: grass, stone, wood, snow (every Hunter has its own steps on these) and sand, water and
 ## metal (shared steps per weight class: step_<surface>_<light|medium|heavy>, made by
 ## tools/gen_sfx_steps.py). Sand, water and metal come from the map's "surfaces" tile rects

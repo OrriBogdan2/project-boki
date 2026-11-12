@@ -3,7 +3,7 @@ Run from tools/: python3 gen_sfx_steps.py. Writes audio/step_<surface>_<light|me
 
 Synthesised in code (no outside sound), the same short, dry level as the grass/stone/wood/snow steps so a
 run never clutters a fight. A light Hunter is quick and high, a heavy one longer and lower with a body thud.
-The Hunters have no steps of their own on these surfaces yet, so MoveSfx.footstep falls back to these.
+The Hunters have no steps of their own on these surfaces yet, so Juice.footstep falls back to these.
 """
 import numpy as np
 import sfx_lib as S

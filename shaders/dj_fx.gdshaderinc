@@ -9,6 +9,7 @@ uniform float stripes = 8.0;
 uniform float seed = 0.0;
 uniform bool billboard = false;
 #include "res://shaders/noise.gdshaderinc"
+#include "res://shaders/cel.gdshaderinc"
 
 void vertex() {
 	if (billboard) {
@@ -17,8 +18,8 @@ void vertex() {
 	}
 }
 
-// rgb: the look; a: its coverage where a mode has a solid body (the chain's links), else -1 (from brightness)
-vec4 dj_look(vec2 uv0) {
+// The look before the cel pass (dj_look).
+vec4 dj_soft_look(vec2 uv0) {
 	float k = 1.0 - life;
 	vec3 c = vec3(0.0);
 	float cov = -1.0;
@@ -61,18 +62,16 @@ vec4 dj_look(vec2 uv0) {
 		c *= 1.0 - smoothstep(0.7, 1.0, life);
 	} else if (mode == 4) {
 		vec2 uv = uv0 * 2.0 - 1.0;
-		float d = length(uv);
-		float r = 0.25 + 0.65 * life;
-		float ring = 1.0 - smoothstep(0.0, 0.18, abs(d - r));
-		float fill = (1.0 - smoothstep(0.0, r, d)) * 0.35;
-		float speck = step(0.82, vnoise(uv * 9.0 + seed)) * (1.0 - smoothstep(0.0, r + 0.1, d));
-		c = (color.rgb * (ring + fill) + color2.rgb * speck) * k;
+		vec2 ring_v = cel_ring(uv0, life, life, seed);
+		float fill = hard(life * 0.9 - length(uv)) * 0.35;
+		float speck = step(0.82, vnoise(uv * 9.0 + seed)) * fill;
+		c = (color.rgb * (ring_v.x + fill * (1.0 - ring_v.x)) + mix(color.rgb, vec3(1.0), 0.5) * ring_v.y + color2.rgb * speck) * k;
 	} else if (mode == 5) {
 		float across = 1.0 - abs(uv0.y * 2.0 - 1.0);
 		float link = fract(uv0.x * stripes);
 		float lit = step(0.5, link);
 		float bevel = smoothstep(0.0, 0.12, link) * (1.0 - smoothstep(0.38, 0.5, link)) + smoothstep(0.5, 0.62, link) * (1.0 - smoothstep(0.88, 1.0, link));
-		c = mix(color2.rgb, color.rgb, lit) * (0.6 + 0.4 * bevel) * mix(0.55, 1.0, smoothstep(0.1, 0.6, across));   // rounded: the rim is darker
+		c = mix(color2.rgb, color.rgb, lit) * (0.6 + 0.4 * bevel);
 		cov = smoothstep(0.0, 0.35, across) * k;
 	} else {
 		// lightning: a bright core that jitters across the ribbon, thin and hot
@@ -84,4 +83,12 @@ vec4 dj_look(vec2 uv0) {
 		c = (color2.rgb * core * 1.4 + color.rgb * glow * 0.6) * fade * k;
 	}
 	return vec4(c, cov);
+}
+
+// rgb: the look, in cel steps of its brightness; a: its coverage where a mode has a solid body (the chain's links),
+// else -1 (from brightness)
+vec4 dj_look(vec2 uv0) {
+	vec4 v = dj_soft_look(uv0);
+	vec2 nuv = uv0 * 0.5 + seed * 0.37;
+	return vec4(cel_glow(v.rgb, nuv), v.a >= 0.0 ? cel_cover(v.a, nuv) : v.a);
 }
