@@ -60,8 +60,8 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
   run_f 0.58..6.67, Neve's walk_f and run_f, Sable's and Meeko's walk_f); they are rebuilt on the ring's recipe, the
   upper body kept.
 - **Rates:** `loco.stride` stretched the side and back loops of a recipe ring 1.3-1.6x faster than the rest; it is off on
-  those rings (Grimble, Sparkle, Kael; Meeko keeps 1.3 on her run, whose short stride can't reach 4.55 m/s at the top
-  rate), and `foot_mps` and every `crouch.speed` are the measured sole medians
+  those rings (Grimble, Sparkle, Kael; Meeko keeps 1.12 on her run: its short stride can't reach 4.55 m/s at the top
+  rate, so her hand-keyed run_f is restrided 1.22x, `f+`, docs/art/ANIM_QUALITY_AUDIT.md), and `foot_mps` and every `crouch.speed` are the measured sole medians
   (Kael's sneak overran 1.5x at 1.55, Tenzo's 1.3x). `--crouch-check` no longer measures the plant: it read Kael at a
   point on his shin's line that a crouched shin swings off the boot.
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.

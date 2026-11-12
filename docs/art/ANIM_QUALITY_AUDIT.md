@@ -80,7 +80,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
 | `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
-| `tender` | 76 → 29 | 62 → 13 | 1.8 → 4.4 | -0.82 → +0.75 | 5 | 7.0 |
+| `tender` | 76 → 48 | 62 → 10 | 1.8 → 4.7 | -0.82 → +0.73 | 6 | 9.0 |
 | `thief` | 73 → 39 | 60 → 17 | 1.8 → 4.3 | -0.96 → +0.82 | 5 | 4.2 |
 
 Strips under each Hunter: rows are walk before, walk after, run before, run after (8 frames at 10 fps, side view, floor
@@ -168,15 +168,23 @@ posts scroll at the move speed).
 ![rimewright walk and run, before and after](anim_audit/rimewright.jpg)
 
 **Meeko (`tender`)**
-1. Feet slid 62 % of the run speed, 76 % at a walk (now 13 %, 29 %: thigh stride 2.0 walk and 2.05 run, up from 1.5). A
-   0.65 m body (appeal3 body b) takes 7.0 steps/s; the cadence is not changed (rate cap 1.4, the 0.5 s run cycle stays
-   parked in docs/heroes/tender.md).
-2. The arms paced their legs (counter -0.82, now +0.75: both arms swing, gain 0.7; more gain does not raise it).
-3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself). Foot speed is 4.4 of 4.65 m/s (was 3.9); a run stride above about
-   2.15 swings the foot forward through the planted band and the run slides 25 to 70 %, so 2.05 is the ceiling. (The
-   strip below shows the earlier tuning.)
+1. Feet slid 62 % of the run speed, 76 % at a walk (now 10 %, 48 %). Her run_f is her own hand-keyed loop restrided
+   (2026-11-12, ext/anim-meeko-stride: `hunter_dir_gait.py ... 1.19 4.4 f+`, each step 1.22x longer along the move, the
+   planted sole at one speed), so the runtime thigh stretch is 1.12 (was 1.3 on the ring, 1.5 before it) and her foot
+   speed is 4.7 of 4.65 m/s (was 3.9, 4.3 on the rebuilt ring). A 0.65 m body takes 9.0 steps/s at full stick. Her
+   walk_f, rebuilt on the ring's recipe (ext/anim-dir-all-1112), plants by the sole (--loco-dir-check ok in all 8
+   directions) but reads 48 % here: this audit reads the foot bone, which rolls heel to toe under a pinned sole.
+2. The arms paced their legs (counter -0.82, now +0.73 at a run, +0.86 at a walk): both arms swing off their legs at
+   gain 1.0 (the right arm had none). More gain swings the hand further but does not raise the counter (0.70 to 0.76
+   from 0.8 to 1.6), and the left hand already travels 0.45 m on a 0.65 m body.
+3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself).
+4. Tried and dropped: the whole run ring rebuilt on the recipe at 3.9 and 4.4 m/s (0.4 and 0.3 s loops): her 0.2 m legs
+   only reach a 0.14 to 0.22 stance share there, and the audit reads 25 to 38 % slide.
 
 ![tender walk and run, before and after](anim_audit/tender.jpg)
+
+Her run since the restride, side view at 4.65 m/s, origin/main above, after below (GPU jobq 20261112-102523-10116 /
+-102504-03138): ![tender run, before and after the restride](../shots/anim-meeko-stride/run_side_before_after.jpg)
 
 **Sable (`thief`)**
 1. Feet slid 60 % of the run speed, 73 % at a walk (now 17 %, 39 %); both arms paced their legs (counter -0.96, fixed to +0.82).
@@ -194,6 +202,5 @@ Split into backlog items per Hunter (role build):
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
-- `bulwark` and `tender`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s and 2.6 m/s (`tender` was
-  1.7 at stride 1.5: the longer stride stretches the unsynced walk and run mix too); the gate only reads the run.
+- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
