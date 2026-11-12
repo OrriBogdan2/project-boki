@@ -157,7 +157,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
-| Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
+| Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4→5 | 3 | **28→29** | (item 6 done) LMB slash sound; the faint crimson inside of his Smash telegraphs goes muddy on yellow ground |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
 
 Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
@@ -175,7 +175,13 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 3. Vex LMB and hold: a wider, brighter tracer at match zoom.
 4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
 5. Albert: ivory swing arcs for LMB/RMB.
-6. Kael: crimson Smash telegraph instead of the flat magenta box.
+6. Kael: crimson Smash telegraph instead of the flat magenta box. Done (ext/vfx-kael-smash-lane): the Lunge lane and
+   the Finishing Slam cone are AimKit "soft" shapes in his #ff3a2a (lit rim, inside at most 0.25 alpha, filling
+   toward the far end; the rim goes hot at a full Lunge). Drawn = hit: --juggernaut-combo-check places foes off the
+   drawn entries (just in/out at the cone's rim and tip, the lane's side) and the fling ends at the drawn length.
+   The 0.24.6 line still hits a 4.0 m 70 deg cone, so the cone is drawn; ext/parity-kael-slam-lane (0.72 m lane)
+   must keep "soft" on its AimKit.lane when it lands. Strips: `docs/art/vfx_rescore/juggernaut_{lunge,slam}_before_after.jpg`
+   (before on top), software GL on rpc6 (the GPU queue was ~95 deep; jobq kaelsmash-* jobs left queued).
 7. Cinder: flame-coloured Ignite orb.
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
 9. Lace tap shots and Sparkle LMB: thicker trails.

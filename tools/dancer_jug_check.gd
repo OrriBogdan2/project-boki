@@ -1368,7 +1368,7 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
 
 ## VFX_QUALITY 6: the crimson Smash telegraphs are the hit, read off the drawn entries (not the data): a foe whose
-## body just reaches into the drawn Slam cone (at its rim, at its tip) is hit and one just past it is not; a foe
+## body just reaches into the drawn Slam cone or lane (at its rim or side, at its tip) is hit and one just past it is not; a foe
 ## just inside the drawn Lunge lane's side is hit, one just outside it is not, and the fling travels the drawn length.
 func _smash_drawn_is_hit(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	var fwd := Vector3(1, 0, 0)
@@ -1387,18 +1387,21 @@ func _smash_drawn_is_hit(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home:
 		var e: Dictionary = AimKit.entry(P, "slam")
 		var l := float(e.get("len", 0.0))
 		var half := deg_to_rad(float(e.get("deg", 0.0))) * 0.5
+		var lane := String(e.get("kind", "")) == "lane"     # the source's lane (ext/parity-kael-slam-lane) or our cone
+		var rim := side * (float(e.get("width", 0.0)) * 0.5 + T.r) + fwd * l * 0.7
 		var at := Vector3.ZERO
 		match probe[0]:
-			"rim in": at = (fwd.rotated(Vector3.UP, half - 0.03)) * l * 0.7
-			"rim out": at = (fwd.rotated(Vector3.UP, half + 0.06)) * l * 0.7
+			"rim in": at = rim - side * 0.1 if lane else (fwd.rotated(Vector3.UP, half - 0.03)) * l * 0.7
+			"rim out": at = rim + side * 0.15 if lane else (fwd.rotated(Vector3.UP, half + 0.06)) * l * 0.7
 			"tip in": at = fwd * (l + T.r - 0.1)
 			"tip out": at = fwd * (l + T.r + 0.2)
 		T.teleport(home + at)
 		A.step(m, 0.6)
 		got.append("%s %.0f" % [probe[0], A.dmg(T)])
 		var hit := A.dmg(T) > 0.0
-		var what := "%s (%.1f m, %.0f deg drawn)" % [probe[0], l, rad_to_deg(half * 2.0)]
-		A.ok("juggernaut RMB tap: drawn cone = hit, " + what,
+		var what := "%s (%.1f m, %s drawn)" % [probe[0], l,
+				"%.2f m wide" % float(e.get("width", 0.0)) if lane else "%.0f deg" % rad_to_deg(half * 2.0)]
+		A.ok("juggernaut RMB tap: drawn %s = hit, %s" % [e.get("kind", "?"), what],
 				K.last_variant == "tap" and l > 0.0 and hit == probe[1], ", ".join(got))
 	# the Lunge: charged to full, the drawn lane's half width (+ the foe's body, as for every edge) is the contact
 	for probe in [["side in", true], ["side out", false], ["length", false]]:
