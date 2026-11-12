@@ -1172,7 +1172,9 @@ func build_meshes() -> void:
 	if tm == null:
 		tm = TerrainMesh.new(self)
 		tm._fill_grid()
-	mat.set_shader_parameter("height_tex", tm.height_texture())
+	var heights: ImageTexture = tm.height_texture()
+	mat.set_shader_parameter("height_tex", heights)
+	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
 	mat.set_shader_parameter("depth_k", DepthCues.k())

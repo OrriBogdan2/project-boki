@@ -73,6 +73,14 @@ vis_blocks={
 "type": "sampler2D",
 "value": ""
 }
+fx_ground={
+"type": "sampler2D",
+"value": ""
+}
+fx_ground_size={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
 vis_range={
 "type": "float",
 "value": 24.0

@@ -5,6 +5,7 @@ shader_type spatial;
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_mix, cull_disabled, fog_disabled;
 uniform float core = 0.55;
 #include "res://shaders/cel.gdshaderinc"
+#include "res://shaders/soft_fade.gdshaderinc"
 const vec2 LIGHT_UV = vec2(-0.45, -0.89);     // the key light in the dot's UV: up and to the left, as on the cast
 const float SHADE = 0.62;                     // the shaded tone's share of the lit one
 void vertex() {
@@ -22,5 +23,6 @@ void fragment() {
 	// cel: dust and smoke in two flat tones (lit and shaded), hot sparks a flat white core
 	float tone = mix(mix(SHADE, 1.0, hard(dot(uv, LIGHT_UV) + 0.2)), 1.0, hot);
 	ALBEDO = mix(COLOR.rgb * tone, vec3(1.0), c * core * hot) * (1.0 + hot * 0.6);
-	ALPHA = clamp(body * (0.75 + hot * 0.25) + c * 0.3, 0.0, 1.0) * COLOR.a;
+	ALPHA = clamp(body * (0.75 + hot * 0.25) + c * 0.3, 0.0, 1.0) * COLOR.a
+		* soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
 }
