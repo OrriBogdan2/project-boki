@@ -54,6 +54,7 @@ const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood
 
 var m: Match
 var list: Array = []
+var wayseed_given := false     # a lair's pile holds a Wayseed at most once a run (GARDEN.md 10.3)
 var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
 var _prev := {}                # hunter nid -> was interact held last tick
 var _told := {}
@@ -695,14 +696,17 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	else:
 		unlock(L)
 	# a small pile, all of it worth having (one Epic or Legendary piece of gear, a Brand upgrade for
-	# its killer's weapon, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
+	# its killer's weapon, one treasure), and the Rare Egg on its own spot a few steps away,
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
 	# (1.6 m out: at 0.9 their names ran into each other)
 	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
-	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
-		m.exits.drop_key(at + Vector3(0, 0, 1.1))
+	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
+	if zone != "" and not wayseed_given:
+		wayseed_given = true
+		if m.rng.randf() < float(GardenZones.rules()["wayseed_chance"]):
+			m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
 	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)
@@ -720,6 +724,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
+		if b.md.has("ink"): killer.add_stat("ink_" + String(b.md["ink"]))
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:

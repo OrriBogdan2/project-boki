@@ -6,7 +6,7 @@ big map of floating islands. Get out with what you found, or lose what you broug
 Pick it from the Expedition menu at home: your class, your Boki, a **tier** and a **mode**.
 
 - **Tiers:** the Meadow (Boki are never lost), the Dusk Isles (opens after 2 extractions) and the
-  Hollow (after 5). Higher tiers have tougher monsters, more loot, rarer Boki and real risk to your
+  Hollow (after 5). Each tier is a depth toward the bottom of the world (Depth 1, 2, 3; shown on the Expedition menu and the results screen). Deeper tiers have tougher monsters, more loot, rarer Boki and real risk to your
   Boki. See [Rules](Rules.md#expedition-tiers) and [Boki](Boki.md#losing-a-boki).
 - **Modes:** Solo (20 hunters), Duos (10 squads of two), Trios (7 squads of three). Bots fill the lobby.
 - **One life.** Health and armor don't regenerate. Tonics (1) heal and armor kits (2) repair armor.
@@ -69,7 +69,7 @@ heartbeat and a warning near the end. There's room to recover:
   ability (not a plain shot) in that window: a big hit, a long stun, extra damage the whole time, and
   your Boki's abilities come straight back.
 - **Truces.** Hold Y for the emote wheel; the white flag offers a truce to the nearest rival squad. A
-  truce stops both squads' bots fighting and lets you share an uplink yard or a skiff. Attacking a
+  truce stops both squads' bots fighting and lets you share an uplink yard. Attacking a
   partner breaks it, is announced, and marks you on everyone's map for a while.
 - **Basing (B).** In a squad, channel 3 seconds to teleport to a teammate. Moving, attacking or any
   hit breaks it, you arrive weakened for 3 seconds, and it has a 40 second cooldown.
@@ -126,12 +126,13 @@ rolls which lairs are live (the rest lie dormant).
 
 ## Getting out
 
-Three ways out, each with its own risk:
+Ways out are limited: the Heart's two seats, each used by one squad once (decision 0051), and the
+uplink outposts. There are no skiff docks, rift hatches or Rift Keys any more.
 
 | Exit | How | The catch |
 |---|---|---|
-| **Skiff dock** (on the outer landings) | Hold F at the horn beacon to call a sky-skiff. It arrives after about 45 s and holds at the pier for a 12 s boarding window. | The horn and a flare tell the whole map; monsters come at the dock in waves; the skiff leaves with whoever is on deck, rivals included. Docks close one by one late in the match. |
-| **Rift hatch** (all over the map) | Find a **Rift Key** (rare loot, it sits on your belt) and press F or its belt key: the hatch grinds open over 10 s. | Anyone nearby can see and hear it. Three people can drop through before it seals, and they don't have to be yours. A key you carry goes to your deathbox if you die. |
+| **The Heart, early seat** | A Heartspark charges at the Heart in plain sight. Take it (hold F), carry it to the Heart Gate and hold there: your squad near the Gate leaves (minor reward). | The carrier is revealed and slowed and drops it when downed. One squad only. |
+| **The Heart, final seat** | Late in the match the Heart ring opens. Hold it alone with your squad until it fills (faster with more of you): your squad in the ring leaves (major reward), and the islands fall soon after. | A standing rival stalls it; an empty ring drains. One squad only. |
 | **Uplink outpost** (walled yards) | Hold F at the mast to start it, then hold the yard while it charges (about 40 s alone; two or more of your squad charge it faster). The lift opens when it's done. | Starting it brings monsters. A rival in the yard stalls it, and one who holds it alone for 5 s takes it over. An empty yard drains the charge. |
 
 Extract and everything you carry goes home: weapons and gloves to the Armory, valuables to sell, Boki
@@ -203,8 +204,7 @@ four large regions around it, calm corner islands, four outer landings, a ring r
 boss lairs and a sky train. Full details on [Maps and biomes](Maps.md).
 
 **Coming next: the Hollow Crown** (branch `handmap`, set to replace Skyreach as the default). Four
-quiet outer isles with the exits (Larkhollow and Duskmoor have skiff docks, Highwatch and Saltmere
-uplinks), a mid ring of four regions each with one raised plateau reached by stairs (Frostgate,
+quiet outer isles (Highwatch and Saltmere have uplinks), a mid ring of four regions each with one raised plateau reached by stairs (Frostgate,
 Cinder Steps, Stormbreak, Thornwood), and a raised core, **the Crown**, with the vault on the Throne,
 two boss Gaols and the most loot and Blight. Every route into the Crown is a bridge or a glide over
 open air. Lairs: Stormcrown Eyrie (Stormcoil), the Sunken Forge (Stone Colossus) and the Thornhive

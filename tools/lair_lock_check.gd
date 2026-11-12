@@ -94,8 +94,8 @@ func run(main: Node) -> void:
 	var other_new: Array = dropped.filter(func(p): return not _is_loot_kind(String(p["kind"])))
 	var gem_total := 0
 	for p in gems_new: gem_total += int(p["v"])
-	ok(gems_new.size() <= Match.BOSS_GEM_DROPS and gem_total >= int(Data.MOBS["colossus"]["gems"]) * 2 and other_new.is_empty(),
-		"its gems come as %d big drops worth %d in all (not %d little ones), no armor shards or seeds (a utility item may come)" % [gems_new.size(), gem_total, int(Data.MOBS["colossus"]["gems"])])
+	ok(gems_new.size() == 1 and gem_total >= int(Data.MOBS["colossus"]["gems"]) * 2 and other_new.is_empty(),
+		"its gems come as %d pile worth %d in all (not %d little ones), no armor shards or seeds (a utility item may come)" % [gems_new.size(), gem_total, int(Data.MOBS["colossus"]["gems"])])
 	var b: Boss = F["boss_mob"]
 	var drops: Array = m.wpicks.slice(w0)
 	var egg = F.get("egg_wp")
