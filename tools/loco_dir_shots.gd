@@ -1,8 +1,8 @@
 extends RefCounted
 ## --loco-dir-shots --shots-dir=<dir> [--wardens=a,b] [--states=walk,crouch_walk] [--tag=<text>]: the footage for
 ## --loco-dir-check (docs/art/LOCO_DIR.md). Per Hunter and state, eight copies in a 4 x 2 grid move in the eight
-## directions of the check off a facing toward the camera (a front 3/4 view), each on its own checker floor that scrolls under it
-## at the ground speed, so a planted foot that slides or steps the wrong way shows against the squares.
+## directions of the check off a facing toward the camera (a front 3/4 view), each on its own checker floor that
+## scrolls under it at the ground speed, so a planted foot that slides or steps the wrong way shows against the squares.
 ## <dir>/<arch>_<state>/f000.png... at 30 fps, SECONDS long, after a WARM_S start. Needs a renderer.
 
 const CHECK := preload("res://tools/loco_dir_check.gd")
@@ -115,7 +115,7 @@ func _film(main: Node, id: String, st: String, out: String, tag: String) -> void
 	await tree.process_frame
 
 ## A checker floor under one copy; its uv1_offset scrolls with the ground.
-func _floor(holder: Node3D, at: Vector3, size: float) -> StandardMaterial3D:
+func _floor(holder: Node3D, at: Vector3, side: float) -> StandardMaterial3D:
 	var img := Image.create(2, 2, false, Image.FORMAT_RGB8)
 	img.set_pixel(0, 0, Color("5f8a4a"))
 	img.set_pixel(1, 1, Color("5f8a4a"))
@@ -124,10 +124,10 @@ func _floor(holder: Node3D, at: Vector3, size: float) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = ImageTexture.create_from_image(img)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.uv1_scale = Vector3(size / (2.0 * SQUARE), size / (2.0 * SQUARE), 1.0)
+	mat.uv1_scale = Vector3(side / (2.0 * SQUARE), side / (2.0 * SQUARE), 1.0)
 	var mi := MeshInstance3D.new()
 	var pm := PlaneMesh.new()
-	pm.size = Vector2(size * 0.95, size * 0.95)
+	pm.size = Vector2(side * 0.95, side * 0.95)
 	mi.mesh = pm
 	mi.material_override = mat
 	mi.position = at + Vector3(0, -0.01, 0)

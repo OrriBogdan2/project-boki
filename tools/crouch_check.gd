@@ -41,7 +41,7 @@ func run(main: Node) -> void:
 			n += 1
 			await _hero(main, String(id), art_name)
 		elif dd.has("loco"):      # (no clips at all yet, as Gil: nothing to crouch with)
-			ok(id in LATER, "%s: has clips and a crouch" % id)
+			ok(false, "%s: has clips and a crouch" % id)
 	ok(n > 0, "at least one Hero has a crouch (%d)" % n)
 	print("CROUCH_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -59,10 +59,10 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
 	var a := HunterAnim.new(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)     # (only the fixed steps move the clips: a real frame's dt would shift their phase)
 	for k in 3:
 		await main.get_tree().process_frame
-	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	for k in 30:
 		_tick(m, a, sync, 0.0)

@@ -14,6 +14,13 @@ juggernaut sprint fr
 juggernaut sprint b
 juggernaut sprint l
 juggernaut sprint fl
+juggernaut crouch_walk fr
+juggernaut crouch_walk r
+juggernaut crouch_walk br
+juggernaut crouch_walk b
+juggernaut crouch_walk bl
+juggernaut crouch_walk l
+juggernaut crouch_walk fl
 juggernaut strafe f
 juggernaut strafe fr
 juggernaut strafe r
@@ -49,13 +56,11 @@ bulwark run br
 bulwark run fl
 bulwark sprint fr
 bulwark sprint fl
-bulwark crouch_walk f
 bulwark crouch_walk fr
 bulwark crouch_walk r
 bulwark crouch_walk br
 bulwark crouch_walk b
 bulwark crouch_walk bl
-bulwark crouch_walk l
 bulwark crouch_walk fl
 bulwark crouch_idle r
 bulwark crouch_idle b
@@ -99,7 +104,6 @@ tender run bl
 tender run fl
 tender sprint fr
 tender sprint bl
-tender crouch_idle l
 tender strafe fr
 tender strafe br
 tender strafe b
@@ -112,6 +116,7 @@ dolm run r
 dolm run br
 dolm run b
 dolm sprint f
+dolm crouch_walk l
 dolm strafe f
 dredge walk fr
 dredge walk br

@@ -15,7 +15,8 @@ extends RefCounted
 ## Prints a grid (one row per Hunter and state, one cell per direction: "ok" or the first failed test). A ratchet: the
 ## cells in KNOWN fail today (docs/art/LOCO_DIR.md, docs/DEBT.md) and print KNOWN; any other failed cell prints FAIL
 ## and exits 1, a known one that passes prints FIXED. --update rewrites KNOWN from this run (after a fix, never to
-## hide a new fail). The steps are fixed (no frame's real dt reaches the clips), so two runs read the same. A Hunter in FLAT or with no clips is listed, skipped.
+## hide a new fail). The steps are fixed (no frame's real dt reaches the clips), so two runs read the same.
+## A Hunter in FLAT or with no clips is listed, skipped.
 ## "aim" states: the Hunter always faces his aim (the facing follows the cursor), so a walk is an aim-walk; aim_walk and
 ## strafe swing the aim AIM_SWING either side of the facing while he holds the move, so the ring crosses its neighbours.
 
@@ -48,7 +49,7 @@ var holder: Node3D
 var rows := {}
 var known := {}             # "<hunter> <state> <dir>" -> true
 var now_failing: Array = []
-var soles := {}              # side -> [bone index, heel and toe in that bone's frame]: the sole, as the rest pose stands
+var soles := {}              # side -> [bone index, heel, toe (in that bone's frame)]: the sole at rest
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -128,7 +129,8 @@ func _hero(main: Node, id: String) -> void:
 	rows[id] = row
 	m.free()
 
-## One state and direction: start from a standstill at `accel` m/s^2, hold the move, brake to a stop. `rel` rad off the facing (+ his right).
+## One state and direction: start from a standstill at `accel` m/s^2, hold the move, brake to a stop.
+## `rel`: rad off the facing (+ his right).
 func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel: float, spd: float,
 		accel: float) -> Dictionary:
 	var ck := 1.0 if st.begins_with("crouch") else 0.0
