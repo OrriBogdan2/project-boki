@@ -465,6 +465,16 @@ How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the so
 | cc | ["stun", "root", "slow", "burn", "blight"] |
 | execute | True |
 
+## boki_idle (`content/rules/boki_idle.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Standing idle of each rigged Boki, built at runtime by BokiIdle: 'breath' re-times and deepens the loop the species shares (len s, amp x on the torso, calm = ears and claws stop ticking each loop); 'fidget' is one short move every 4-9 s picked from the Bokidex quirk (content/rules/boki_quirks.json on ext/boki-quirks): starts 'at' s into the clip, lasts 'dur' s; rows are [bone, game axis x/y/z (x pitches up, y turns left, z rolls), peak rad, cycles (0 = one smooth hump), phase]; 'name*' is every bone with that prefix (a chain's swing is shared out along it, with a lag), 'name.*' both sides (mirrored on y and z). |
+| gap_s | [4.0, 9.0] |
+| species | {"cindle": {"fidget": {"note": "scrape: buries a find, paw raking", "at": 0.3, "dur": 1.5, "rows": [["head", "x", -0.4, 0, 0], ["spine", "x", -0.12, 0, 0], ["fleg1.R", "x", 0.8, 3, 0], ["fleg2.R", "x", 0.5, 3, 0.25], ["tail*", "y", 0.6, 1.5, 0]]}, "breath": {"len": 2.6, "amp": 2.5, "calm": true}}, "puddlet": {"fidget": {"note": "sun stretch: chin up, frills flared, tail high", "at": 0.3, "dur": 1.6, "rows": [["head", "x", 0.45, 0, 0], ["neck", "x", 0.15, 0, 0], ["spine", "x", 0.1, 0, 0], ["ear1.*", "z", 0.4, 0, 0], ["tail*", "x", -0.5, 0, 0]]}, "breath": {"len": 2.4, "amp": 2.5, "calm": true}}, "burrlet": {"fidget": {"note": "shake-off: compost flung from the caps", "at": 0.3, "dur": 1.0, "rows": [["spine", "y", 0.2, 4, 0], ["head", "y", -0.3, 4, 0.2], ["cap*", "z", 0.35, 4, 0], ["tail*", "y", 0.5, 4, 0], ["hips", "y", 0.12, 4, 0]]}, "breath": {"len": 3.0, "amp": 2.8, "calm": true}}, "glintmole": {"fidget": {"note": "pop-up sniff: head up, nose working, ears pricked", "at": 0.3, "dur": 1.4, "rows": [["head", "x", 0.5, 0, 0], ["head", "x", 0.12, 5, 0], ["head", "y", 0.18, 2, 0], ["neck", "x", 0.2, 0, 0], ["ear1.*", "z", 0.3, 0, 0]]}, "breath": {"len": 2.7, "amp": 2.5, "calm": true}}, "rimeshrew": {"fidget": {"note": "nibble: head down, quick chews", "at": 0.3, "dur": 1.3, "rows": [["head", "x", -0.22, 0, 0], ["head", "x", 0.18, 4, 0], ["ear1.*", "z", 0.18, 4, 0], ["tail*", "x", 0.25, 2, 0]]}, "breath": {"len": 1.8, "amp": 2.6, "calm": true}}, "zephyrak": {"fidget": {"note": "static shiver: scales prickle, wings snap", "at": 0.3, "dur": 1.1, "rows": [["spine", "z", 0.1, 6, 0], ["head", "z", 0.1, 6, 0.25], ["wing1.*", "z", 0.5, 3, 0], ["tail*", "y", 0.5, 3, 0]]}}, "pebbit": {"fidget": {"note": "weight shift: a heavy sway and a settle", "at": 0.3, "dur": 2.0, "rows": [["spine", "z", 0.1, 1, 0], ["hips", "z", -0.06, 1, 0], ["head", "z", 0.16, 1, 0.25], ["head", "y", 0.2, 1, 0], ["horn", "x", 0.2, 0, 0], ["tail*", "y", 0.35, 1, 0]]}, "breath": {"len": 3.8, "amp": 3.0, "calm": true}}, "cairnback": {"fidget": {"note": "cairn settle: the stack wobbles, head dips", "at": 0.3, "dur": 1.7, "rows": [["cairn", "z", 0.14, 2, 0], ["cairn", "x", -0.08, 1, 0.25], ["head", "x", -0.3, 0, 0], ["spine", "x", 0.05, 0, 0]]}, "breath": {"len": 4.2, "amp": 3.2, "calm": true}}, "wisplet": {"fidget": {"note": "owl swivel: head round, tufts up, a tilt", "at": 0.3, "dur": 1.7, "rows": [["head", "y", 0.9, 0, 0], ["head", "z", 0.2, 0, 0], ["ear1.*", "z", 0.25, 0, 0], ["ant.*", "z", 0.3, 2, 0], ["fwing.*", "z", 0.15, 3, 0]]}}, "gloamshell": {"fidget": {"note": "shell tuck: head draws in, tail curls, shell creaks", "at": 0.3, "dur": 1.6, "rows": [["head", "x", -0.4, 0, 0], ["neck", "x", -0.2, 0, 0], ["shell", "z", 0.1, 2, 0], ["tail*", "x", -0.4, 0, 0]]}, "breath": {"len": 3.5, "amp": 2.6, "calm": true}}, "selenfin": {"fidget": {"note": "fin ripple: a long wave down the tail, a glance aside", "at": 0.3, "dur": 1.8, "rows": [["tail*", "y", 1.0, 2, 0], ["head", "y", 0.35, 1, 0], ["spine", "y", 0.15, 1, 0.25]]}}, "zapple": {"fidget": {"note": "foot thump twice, ears snap up", "at": 0.3, "dur": 1.3, "rows": [["hleg1.R", "x", -0.7, 2, 0], ["hleg2.R", "x", 0.5, 2, 0.25], ["ear1.*", "x", 0.3, 2, 0], ["ear2.*", "x", 0.3, 2, 0.1], ["hips", "x", -0.05, 2, 0]]}, "breath": {"len": 2.4, "amp": 2.2, "calm": true}}, "hivara": {"fidget": {"note": "wing buzz: the swarm stirs", "at": 0.3, "dur": 1.3, "rows": [["wing1.*", "z", 0.8, 8, 0], ["wing2.*", "z", 0.5, 8, 0.1], ["bee*", "x", 0.3, 3, 0], ["head", "x", 0.15, 0, 0], ["tail*", "y", 0.3, 2, 0]]}, "breath": {"len": 2.2, "amp": 1.2, "calm": true}}, "glomwort": {"fidget": {"note": "lobe ripple: it feels toward a crumb", "at": 0.3, "dur": 1.7, "rows": [["lobe*", "y", 0.5, 2, 0], ["puff*", "x", 0.2, 2, 0], ["head", "z", 0.25, 1, 0]]}}, "kestrike": {"fidget": {"note": "hover flick: wings snap, crest up, tail fans", "at": 0.3, "dur": 1.4, "rows": [["wing1.*", "z", 0.6, 3, 0], ["wing2.*", "z", 0.4, 3, 0.1], ["head", "y", 0.5, 1, 0], ["crest", "x", -0.3, 0, 0], ["tfan.*", "z", 0.4, 0, 0]]}}, "kindlewren": {"fidget": {"note": "coal glance: quick look aside, a peck, tail up", "at": 0.3, "dur": 1.4, "rows": [["head", "y", 0.7, 0, 0], ["head", "z", -0.15, 0, 0], ["head", "x", -0.2, 2, 0], ["tail*", "x", -0.5, 0, 0], ["wing1.*", "z", 0.3, 2, 0]]}}, "lodestick": {"fidget": {"note": "lode sweep: nose to the ground, a slow sweep", "at": 0.3, "dur": 1.9, "rows": [["head", "x", -0.45, 0, 0], ["head", "y", 0.45, 1, 0], ["neck", "x", -0.15, 0, 0], ["tail*", "y", 0.3, 1, 0]]}}, "marchleaf": {"fidget": {"note": "snip: the leaf blades scissor", "at": 0.3, "dur": 1.2, "rows": [["leaf1", "z", 0.5, 3, 0], ["leaf2", "z", -0.5, 3, 0], ["head", "y", 0.25, 1.5, 0]]}}, "mossgrade": {"fidget": {"note": "moss shake: blooms nod, ears flap", "at": 0.3, "dur": 1.2, "rows": [["bloom*", "x", 0.25, 3, 0], ["spine", "y", 0.1, 3, 0], ["head", "y", 0.15, 3, 0.25], ["ear1.*", "z", 0.3, 3, 0]]}, "breath": {"len": 3.4, "amp": 2.8, "calm": true}}, "nettlynx": {"fidget": {"note": "ear twitch and a tail flick", "at": 0.3, "dur": 1.2, "rows": [["ear1.R", "z", 0.5, 3, 0], ["ear2.R", "z", 0.3, 3, 0], ["tail*", "y", 0.9, 2, 0], ["head", "z", 0.1, 0, 0]]}, "breath": {"len": 2.9, "amp": 2.5, "calm": true}}, "thrumbird": {"fidget": {"note": "hum: a steady note buzzes through the body", "at": 0.3, "dur": 1.5, "rows": [["head", "x", 0.2, 0, 0], ["spine", "x", 0.04, 10, 0], ["head", "x", 0.05, 10, 0.1], ["wing.*", "z", 0.25, 10, 0], ["fork.*", "z", 0.3, 5, 0]]}}} |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
@@ -490,6 +500,22 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | food_rate | {"_doc": "multiplier on how fast the food need drains (default 1.0)", "rimeshrew": 2.0} |
 | rain_joy | {"_doc": "joy gained (or lost) per minute at home while it rains", "effigeetle": -1.5, "frigatee": -1.0, "mycroll": 1.0, "barrelmander": 1.0} |
 | storm_sense | {"_doc": "seconds before rain starts that it starts warning about it", "kestrike": 25.0, "barokat": 25.0} |
+
+## boki_summon (`content/rules/boki_summon.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
+| fallback | [10, 60] |
+| uptime_band | [0.09, 0.2] |
+| knocked_cd_mult | 1.25 |
+| leash | 10 |
+| leash_swing | 2 |
+| rebloom_dist | 20 |
+| guardian | {"min_s": 8.0, "max_s": 15.0, "leash": 6.0, "damage_mult": 1.25, "pulse_s": 0.8} |
 
 ## boki_system (`content/rules/boki_system.json`)
 
@@ -1147,6 +1173,25 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | turn_rate_desc | rad/s the viewer's turntable spins |
 | moves | {"thief": {"dash": ["thf_vault_r"], "lmb": ["thf_lmb_r", "thf_lmb_l"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "x": ["thf_encore"]}, "archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_cast", "pin_ult_loose"]}, "mage": {"dash": ["mage_dash", "mage_dash_go"], "lmb": ["mage_lmb_r", "mage_lmb_l"], "rmb": ["mage_rmb_hold", "mage_rmb"], "e": ["mage_e"], "x": ["mage_x", "mage_x_land"]}, "gunslinger": {"dash": ["gunslinger_dash"], "lmb": ["gunslinger_lmb"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"], "x": ["gunslinger_x"]}, "juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_slash_r", "jug_slash_l"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "passive": ["jug_roar"], "x": ["jug_guard", "jug_riposte"]}, "bulwark": {"dash": ["bul_charge"], "lmb": ["bul_smash_wind", "bul_smash"], "rmb": ["bul_guard", "bul_slamshield"], "e": ["bul_mend"], "passive": ["bul_whirl"], "x": ["bul_ult_wind", "bul_ult_slam"]}, "dredge": {"dash": ["dr_lunge", "dr_pounce"], "lmb": ["dr_shot"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor", "dr_quake"], "x": ["dr_blast"]}, "ashwick": {"dash": ["as_leap", "lw_hop"], "lmb": ["as_lance", "as_lance_end"], "rmb": ["as_aim", "as_shot"], "e": ["as_cloak"], "x": ["lw_jet"]}, "tender": {"dash": ["mm_skip", "mm_float"], "lmb": ["mm_shot_r", "mm_shot_l"], "rmb": ["mm_seed_aim", "mm_seed"], "e": ["mm_hearth"], "x": ["mm_call", "mm_call_end"]}, "rimewright": {"dash": ["tm_skate", "tm_skate_go", "tm_skate_air"], "lmb": ["tm_dart_r", "tm_dart_l"], "rmb": ["tm_spear_aim", "tm_spear"], "e": ["tm_wall"], "x": ["tm_rime", "tm_rime_crash"]}, "dolm": {"dash": ["breah_hop", "breah_skate"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"]}, "ostra": {"dash": ["ostra_swap_aim", "ostra_swap"], "lmb": ["ostra_orb"], "rmb": ["ostra_snap_wind", "ostra_snap"], "e": ["ostra_seed"], "x": ["ostra_well"]}} |
 
+## idle_breaks (`content/rules/idle_breaks.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| juggernaut | {"line": "Kael: grim, cold, never cocky. He rolls his neck and resettles his grip, one economical motion.", "dur": 2.4, "tracks": [{"bone": "head", "rot": [-0.1, 0, 0.22], "to": 0.55}, {"bone": "head", "rot": [0, 0, -0.2], "from": 0.45}, {"bone": "hips", "rot": [0, 0.1, 0], "from": 0.5}, {"bone": "forearm.R", "rot": [0.25, 0, 0], "from": 0.55, "beats": 2}]} |
+| bulwark | {"line": "Mossy: huge, warm-hearted, laughs easily. He glances down at his lure and chuckles.", "dur": 2.6, "tracks": [{"bone": "head", "rot": [-0.4, 0.15, 0], "to": 0.85}, {"bone": "hips", "rot": [-0.06, 0, 0], "to": 0.85}, {"bone": "hips", "rot": [0.05, 0, 0], "from": 0.4, "to": 0.95, "beats": 3}]} |
+| dolm | {"line": "Tenzo: nimble, reads the ground by feel. He taps a toe and listens through the stone.", "dur": 2.4, "tracks": [{"bone": "thigh.R", "rot": [0.35, 0, 0], "to": 0.75, "beats": 3}, {"bone": "hips", "rot": [0.04, 0, 0], "to": 0.75, "beats": 3}, {"bone": "head", "rot": [0, 0, 0.14], "in": 0.35, "out": 0.35}]} |
+| ashwick | {"line": "Cinder: delighted by fire. She lets a flame lick up her wrist and smiles at it.", "dur": 2.6, "tracks": [{"bone": "upper_arm.R", "rot": [0.8, 0, -0.1], "from": 0.05, "to": 0.95}, {"bone": "forearm.R", "rot": [1.0, 0, 0], "from": 0.05, "to": 0.95}, {"bone": "head", "rot": [-0.2, -0.3, 0.1], "from": 0.1, "to": 0.95}]} |
+| mage | {"line": "Sparkle: bold, asks nobody's permission. She snaps her fingers and the air answers.", "dur": 2.2, "tracks": [{"bone": "upper_arm.R", "rot": [0.7, 0, -0.15]}, {"bone": "forearm.R", "rot": [0.9, 0, 0]}, {"bone": "forearm.R", "rot": [-0.35, 0, 0], "from": 0.4, "to": 0.8, "beats": 2}, {"bone": "head", "rot": [0.12, 0, -0.15]}]} |
+| ostra | {"line": "Motley: a grinning jester. The head tilts too far, past natural, and snaps back.", "dur": 2.4, "tracks": [{"bone": "head", "rot": [0, 0, -1.0], "to": 0.8, "in": 0.7, "out": 0.06}, {"bone": "hips", "rot": [0, 0, -0.1], "to": 0.8, "in": 0.7, "out": 0.06}]} |
+| tender | {"line": "Meeko: timid, walks into the dark anyway. She startles at a noise, looks back, then squares up.", "dur": 2.6, "tracks": [{"bone": "head", "rot": [0, 1.0, 0], "to": 0.6, "in": 0.2}, {"bone": "hips", "rot": [0, 0.35, 0], "to": 0.6, "in": 0.2}, {"bone": "hips", "rot": [0.06, 0, 0], "from": 0.6}, {"bone": "head", "rot": [0.1, 0, 0], "from": 0.6}]} |
+| rimewright | {"line": "Neve: elegant and playful. A toe-pick tap on the ice, then a half spin back to rest.", "dur": 2.8, "tracks": [{"bone": "thigh.L", "rot": [0.25, 0, 0], "to": 0.4, "beats": 2}, {"bone": "hips", "rot": [0, 0.9, 0], "from": 0.45, "in": 0.45, "out": 0.45}, {"bone": "head", "rot": [0, 0.35, 0], "from": 0.45, "in": 0.45, "out": 0.45}]} |
+| thief | {"line": "Sable: quick, light-fingered. A sleight of hand with her blade, eyes down, then gone again.", "dur": 2.2, "tracks": [{"bone": "upper_arm.R", "rot": [0.6, 0, -0.1]}, {"bone": "forearm.R", "rot": [0.8, 0, 0]}, {"bone": "hand.R", "rot": [1.2, 0, 0], "from": 0.3, "to": 0.8, "beats": 2}, {"bone": "head", "rot": [-0.25, 0, 0]}]} |
+| gunslinger | {"line": "Vex: calm, professional, always has a plan. A slow scan of the horizon, hold, return.", "dur": 2.8, "tracks": [{"bone": "head", "rot": [0, 0.7, 0], "to": 0.5, "in": 0.35, "out": 0.35}, {"bone": "head", "rot": [0, -0.9, 0], "from": 0.4, "in": 0.35, "out": 0.4}, {"bone": "hips", "rot": [0, 0.12, 0], "to": 0.5}, {"bone": "hips", "rot": [0, -0.12, 0], "from": 0.4}]} |
+| archer | {"line": "Lace: cool, patient, watches everything. She draws a red thread taut between two fingers and lets it go.", "dur": 2.6, "tracks": [{"bone": "upper_arm.L", "rot": [0.5, 0, 0.2], "in": 0.25, "out": 0.2}, {"bone": "upper_arm.R", "rot": [0.5, 0, -0.2], "in": 0.25, "out": 0.2}, {"bone": "forearm.L", "rot": [0.8, 0, 0], "in": 0.25, "out": 0.2}, {"bone": "forearm.R", "rot": [0.8, 0, 0], "in": 0.25, "out": 0.2}, {"bone": "upper_arm.L", "rot": [0, 0, -0.3], "from": 0.35, "to": 0.75}, {"bone": "upper_arm.R", "rot": [0, 0, 0.3], "from": 0.35, "to": 0.75}, {"bone": "head", "rot": [-0.3, 0, 0]}]} |
+| dredge | {"line": "Grimble: greedy, hunched, a smug squint. He holds a coin to his loupe, then bites it.", "dur": 2.8, "tracks": [{"bone": "upper_arm.R", "rot": [0.55, 0, -0.1], "in": 0.25, "out": 0.25}, {"bone": "forearm.R", "rot": [1.1, 0, 0], "in": 0.25, "out": 0.25}, {"bone": "head", "rot": [-0.15, -0.25, 0.2], "in": 0.25, "out": 0.25}, {"bone": "hips", "rot": [-0.05, 0, 0]}, {"bone": "head", "rot": [-0.2, 0, 0], "from": 0.55, "to": 0.85, "beats": 2}]} |
+
 ## keys (`content/rules/keys.json`)
 
 
@@ -1280,22 +1325,6 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | finds | {"material": 0.25, "trophy_per_boss": 1, "ink": 0.05} |
 | finds_doc | Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. ink: the chance of one Ink of any type (weighted by restock), rare on purpose; a boss with an 'ink' in its def (Data.MOBS) also gives its own Ink to the hunter who killed it. |
 
-## mask_moment (`content/rules/mask_moment.json`)
-
-Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, flashes of the fallen Hunter with a whisper, the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. After the first one the player can skip.
-
-| Setting | Value |
-|---|---|
-| full | {"build_s": 1.2, "rise_s": 1.4, "black_s": 0.7, "memory_s": [0.3, 0.28, 0.36], "reveal_s": 1.6, "push_in": 0.7} |
-| short | {"build_s": 0.5, "rise_s": 0.8, "black_s": 0.45, "memory_s": [0.38], "reveal_s": 1.5, "push_in": 0.6} |
-| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art). reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
-| music_duck_db | -30 |
-| heart_gaps_s | [0.62, 0.5, 0.4, 0.32] |
-| punch_fov | 5 |
-| whispers | {"gunslinger": "Another job. Another mark on the tally.", "juggernaut": "The blade is hungry. Feed it, or it feeds on you.", "archer": "Every mask I sewed, I will cut loose.", "bulwark": "Hold on. The shore is close.", "mage": "One day I give the storm back.", "ashwick": "Bottled Blight. Drink up.", "dredge": "Come down where it's quiet.", "tender": "Stay close to the light.", "rimewright": "Skate. Don't look down at the ice.", "dolm": "Stone remembers what eyes forget.", "ostra": "Go on, laugh. I'll keep it.", "thief": "I only meant to take a look.", "gil": "Ooh, what does this one do?"} |
-| sting_semitones | {"gunslinger": 0, "juggernaut": -5, "archer": 3, "bulwark": -7, "mage": 5, "ashwick": 2, "dredge": -9, "tender": 7, "rimewright": 4, "dolm": -3, "ostra": 1, "thief": 6, "gil": 8} |
-| sting_doc | Each Hunter's sting is the same rising motif in their own key (semitones from A3). |
-
 ## merge_forms (`content/rules/merge_forms.json`)
 
 How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dash trail; the same for everyone, no tiers), and the weak surge.
@@ -1376,6 +1405,26 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | doc | Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units. |
 | face | {"bulwark": [0.52, 0.29], "archer": [0.46, 0.33], "juggernaut": [0.58, 0.33], "thief": [0.49, 0.42], "mage": [0.47, 0.27], "dolm": [0.49, 0.31], "gil": [0.46, 0.4], "ostra": [0.44, 0.47], "ashwick": [0.55, 0.33], "gunslinger": [0.41, 0.32], "tender": [0.51, 0.36], "rimewright": [0.42, 0.47], "dredge": [0.45, 0.43]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.52, 0.22], "juggernaut": [0.68, 0.25], "thief": [0.44, 0.3], "gil": [0.36, 0.24], "mage": [0.55, 0.22], "dolm": [0.44, 0.22], "ostra": [0.71, 0.25], "ashwick": [0.52, 0.27], "rimewright": [0.22, 0.25], "dredge": [0.6, 0.22], "gunslinger": [0.64, 0.19], "tender": [0.51, 0.55]} |
+
+## results_pose (`content/rules/results_pose.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The pose each Hunter holds on the results stage (scripts/ui/results_stage.gd): one clip of its own GLB, frozen at t seconds, a held strike or an idle beat that fits it. Keyed by Hunter id; a Hunter left out stands in the plain idle. |
+| gunslinger | {"clip": "lmb", "t": 0.2} |
+| juggernaut | {"clip": "slash_r", "t": 0.25} |
+| thief | {"clip": "flourish", "t": 0.4} |
+| ashwick | {"clip": "lance", "t": 0.3} |
+| rimewright | {"clip": "spear", "t": 0.3} |
+| archer | {"clip": "draw", "t": 1.2} |
+| dredge | {"clip": "flex", "t": 0.3} |
+| ostra | {"clip": "flurry", "t": 0.5} |
+| tender | {"clip": "hearth", "t": 0.5} |
+| mage | {"clip": "rmb_hold", "t": 0.5} |
+| dolm | {"clip": "lmb_punch", "t": 0.35} |
+| bulwark | {"clip": "rmb_guard", "t": 0.5} |
 
 ## revive (`content/rules/revive.json`)
 
@@ -1579,6 +1628,9 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | glide_carry | {"carry_drag": 3.0, "default": 12.0, "archer": 9.0} |
 | dash | {"jump_keep": 0.75} |
 | dash_speed | {"archer": 0.7} |
+| _doc | The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section). |
+| vex_air_dash | {"_note": "Vex's air dash look (GunslingerKit): the lime fire ribbon her body draws through the barrel roll, and the burst of sparks it leaves from. Distance and timing stay her dash data's.", "fire_width_m": 0.34, "fire_life_s": 0.3, "fire_rise_m": 0.9, "fire_col": "b8f03c", "fire_hot_col": "eaffa8", "burst_sparks": 12} |
+| kael | {"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.", "tap_dmg_k": 0.6, "tap_range_k": 0.8, "tap_windup_s": 0.45, "tap_cooldown_s": 1.2, "ult_carry_k": 0.8, "ult_carry_decay_per_s": 1.6, "ult_up_min_mps": 1.0, "ult_up_bonus_mps": 2.2, "chain_lunge_deg": 25.0} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
@@ -1696,6 +1748,24 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | empty_f | {"gait": {"knee": 0.14, "lean": 0.02, "width": 0.07, "step": [0.36, 0.18], "stance": 0.37, "strike": -0.08, "hip": [0.43, 0.445, 0.485], "swing": 0.1}, "leg": "r", "pose": {"spine": -0.04, "tilt": 0.12, "twist": 0.08, "hip": 0.07, "knee": 0.0, "free_leg": [0.2, 0.3], "head": [0.04, 0.1, -0.1], "arm_l": [0.04, 0.06, 0.02]}, "idle": {"breath": 2.2, "breath_amp": 0.9, "shift": 8.0, "fidget": {"every": 7.0, "dur": 1.4, "wave": 1, "head": [0.0, 0.3, 0.0], "body": [0.0, 0.08, 0.04]}}} |
 | empty_m | {"gait": {"knee": 0.18, "lean": 0.04, "width": 0.12, "step": [0.36, 0.18], "stance": 0.37, "strike": -0.08, "hip": [0.43, 0.445, 0.485], "swing": 0.1}, "leg": "l", "pose": {"spine": 0.04, "tilt": 0.02, "twist": 0.04, "hip": 0.02, "knee": 0.04, "spread": 0.05, "free_leg": [0.06, 0.08], "head": [0.02, 0.0, 0.0], "arm_l": [0.0, 0.0, 0.0]}, "idle": {"breath": 2.0, "breath_amp": 1.0, "shift": 10.0, "fidget": {"every": 8.0, "dur": 1.4, "wave": 1, "head": [0.0, -0.3, 0.0], "body": [0.04, 0.0, 0.0]}}} |
 | gil | {"gait": {"knee": 0.16, "lean": 0.05, "width": 0.11, "bounce": 1.9, "arm": 1.1}, "leg": "r", "pose": {"spine": 0.02, "tilt": 0.08, "twist": 0.16, "hip": 0.04, "back": 0.0, "knee": 0.06, "spread": 0.24, "free_leg": [0.34, 0.24], "head": [0.1, 0.18, 0.12], "arm_l": [-0.1, 0.0, 0.12]}, "idle": {"breath": 2.2, "breath_amp": 1.3, "shift": 5.0, "fidget": {"every": 6.0, "dur": 1.0, "wave": 0, "head": [-0.1, -0.35, 0.2], "body": [-0.05, 0.0, 0.0]}}} |
+
+## warden_stride (`content/rules/warden_stride.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Run start and stop poses per Hero art (WardenStride). lean_deg: the forward lean of a start from standing, gone once the speed is built. settle_deg: the weight shifted back over the stop slide. step_s: seconds the second foot takes to step in after the slide. arc_m: how high a stepping foot lifts. Heavier Heroes (Kael, Albert, Tenzo) lean less, settle deeper and step slower. |
+| default | {"lean_deg": 9.0, "settle_deg": 5.0, "step_s": 0.2, "arc_m": 0.1} |
+| kael | {"lean_deg": 6.0, "settle_deg": 9.0, "step_s": 0.28, "arc_m": 0.07} |
+| breaker | {"lean_deg": 5.0, "settle_deg": 10.0, "step_s": 0.3, "arc_m": 0.06} |
+| tarek | {"lean_deg": 6.0, "settle_deg": 9.0, "step_s": 0.28, "arc_m": 0.07} |
+| dredge | {"lean_deg": 7.0, "settle_deg": 7.0, "step_s": 0.24, "arc_m": 0.08} |
+| ostra | {"lean_deg": 8.0, "settle_deg": 6.0, "step_s": 0.22, "arc_m": 0.09} |
+| vex | {"lean_deg": 11.0, "settle_deg": 4.0, "step_s": 0.17, "arc_m": 0.12} |
+| claire | {"lean_deg": 12.0, "settle_deg": 3.5, "step_s": 0.16, "arc_m": 0.13} |
+| sable | {"lean_deg": 12.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.12} |
+| pip | {"lean_deg": 10.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.11} |
 
 ## weapon_path (`content/rules/weapon_path.json`)
 

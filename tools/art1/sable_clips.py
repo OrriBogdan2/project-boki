@@ -264,6 +264,30 @@ def prowl_upper(p, u, c1, s2, d):
     p["hed"] = (-0.82 * (0.55 + 0.45 * max(d.y, 0.0)), 0.10 - 0.06 * c1, -0.04)
 
 
+# ---- the stomp, the revive kneel and the drink (item 143b): the three actions every Hunter shares. Hers are a dancer's: the stomp a high stage kick that comes down on the beat, the kneel a hand pressed to the
+# wisp with her head bowed, the drink a sip taken like a toast.
+def finish_set():
+    """stomp (0.7 s, Life.R stomp_cycle: the foot comes down at 0.49, phase 0.7), revive (a kneel loop), drink (1.1 s, Hunter.DRINK_TIME; upper body: the legs walk on)."""
+    s0 = dict(READY, pel=(-0.035, 0.0, -0.03), tor=(-0.04, -0.1, 0.05), G=(0.5, 0.14, 1.0), BE=PR(-40, 10), GL=(-0.5, 0.1, 0.95), BL=PR(40, 10), FL=(-0.09, 0.0, A_Z), FR=(0.105, -0.03, A_Z))
+    up = dict(s0, pel=(-0.07, 0.04, -0.01), prt=(-0.12, 0.09, -0.03), tor=(-0.1, -0.1, 0.05), hed=(0.06, 0.1, -0.06), FR=(0.13, 0.16, A_Z + 0.42), FRp=-0.45, FRy=-0.4, FL=(-0.09, 0.0, A_Z),
+              G=(0.58, 0.2, 1.2), BE=PR(-50, 40), GL=(-0.55, 0.0, 0.84), BL=PR(40, -30), smile=1.0, brow=0.2)
+    slam = dict(s0, pel=(-0.01, 0.1, -0.1), prt=(0.2, 0.0, 0.0), tor=(0.14, 0.0, 0.0), hed=(-0.1, 0.0, 0.0), FR=(0.13, 0.28, A_Z), FRp=0.1, FRy=-0.3, FL=(-0.09, -0.02, A_Z),
+                G=(0.4, 0.4, 0.95), BE=PR(-20, -20), GL=(-0.44, 0.3, 0.85), BL=PR(20, -30), smile=0.5, brow=0.35, lid=0.5)
+    rec = dict(s0, pel=(-0.02, 0.05, -0.05), prt=(0.1, 0.05, 0.0), FR=(0.12, 0.2, A_Z + 0.03), G=(0.45, 0.2, 1.0), GL=(-0.48, 0.15, 0.9))
+    stomp = C("stomp", 0.7, [(0.0, s0), (0.3, up), (0.4, dict(up, FR=(0.13, 0.22, A_Z + 0.3), prt=(0.0, 0.09, -0.03)), "in"), (0.49, slam, "in"), (0.56, dict(slam, pel=(-0.01, 0.1, -0.12)), "out"), (0.62, rec), (0.7, s0)])
+    # the kneel: down on the left knee, the right foot planted ahead, both pistols turned to the ground and her hands pressed at the wisp, a slow push on each breath
+    kn = dict(READY, pel=(-0.02, 0.04, -0.4), prt=(0.1, 0.0, 0.0), tor=(0.4, 0.0, 0.0), hed=(-0.3, 0.0, 0.0), FR=(0.13, 0.38, A_Z), FRy=-0.2, FRp=0.0,
+              FL=(-0.12, -0.3, A_Z - 0.0), FLp=1.1, FLy=0.1, G=(0.16, 0.66, 0.24), BE=PR(-4, -80), GL=(-0.14, 0.66, 0.24), BL=PR(4, -80), brow=-0.3, lid=0.35, smile=0.4)
+    push = dict(kn, tor=(0.46, 0.0, 0.0), hed=(-0.36, 0.0, 0.0), G=(0.16, 0.66, 0.18), GL=(-0.14, 0.66, 0.18), pel=(-0.02, 0.06, -0.41))
+    kneel = C("revive", 1.6, [(0.0, kn), (0.55, push), (0.8, push), (1.6, kn)])
+    # the drink: the left hand takes the flask up, the head tips back, the elbow high, then she wipes her mouth and is ready again
+    sip0 = dict(END, GL=(-0.3, 0.2, 1.0), BL=PR(10, 40), smile=0.8)
+    sip1 = dict(END, GL=(-0.06, 0.2, 1.34), BL=PR(0, 70), hed=(0.12, 0.0, -0.06), lid=0.0, smile=0.9, brow=0.3)
+    sip2 = dict(sip1, hed=(-0.32, 0.0, -0.06), tor=(-0.08, -0.14, 0.04), GL=(-0.06, 0.22, 1.38), BL=PR(0, 110))
+    drink = C("drink", 1.1, [(0.0, END), (0.22, sip0), (0.42, sip1), (0.62, sip2), (0.8, sip1), (0.95, dict(END, GL=(-0.28, 0.2, 1.0), smile=1.0)), (1.1, END)])
+    return [stomp, kneel, drink]
+
+
 def crouch_set():
     dip = off(PROWL, pel=(0.0, 0.02, -0.07), prt=(0.1, 0, 0), hed=(-0.08, 0, 0), G=(0.0, -0.08, -0.06), GL=(0.03, -0.06, -0.05))
     return crouchkit.clips(C, END, PROWL, prowl, SNEAK, prowl_upper, dip, up=dict(READY, pel=(0.012, 0.0, 0.006)), dip_t=0.18)
@@ -385,7 +409,7 @@ def clips():
     dn = {"pel": (-0.03, -0.1, -0.60), "prt": (0.1, 0.25, 0.14), "tor": (0.2, 0.05, 0.12), "hed": (0.2, 0, 0.1), "G": (0.3, 0.26, 0.56), "BE": PR(-10, -6), "GL": (-0.33, -0.02, 0.1), "BL": PR(30, -40), "FL": (-0.16, 0.34, A_Z - 0.09), "FR": (0.05, 0.38, A_Z - 0.09), "FLy": 1.0, "FRy": 0.8, "FLp": -0.3, "FRp": -0.3, "brow": -0.8, "cock": 0.3, "lid": 0.55, "smile": 0.1}
     d2 = dict(dn, tor=(0.25, 0.05, 0.12), pel=(-0.03, -0.1, -0.615), hed=(0.26, 0, 0.1), G=(0.3, 0.26, 0.53))
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, d2), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.1, 0.05, 0.05), hed=(-0.1, 0, 0), lid=0.3, brow=-0.4)), (0.95, dict(LAND, pel=(0, -0.05, -0.34), smile=0.5)), (1.6, END)]))
+    out += finish_set()
     # death: a stagger back, one last look, the pistols slipping, folding down onto her side
     dd0 = {"pel": (0, -0.06, -0.08), "prt": (-0.14, 0, 0), "tor": (-0.2, 0, 0), "hed": (-0.14, 0.1, 0), "lid": 0.4, "brow": -1.0, "cock": 0.0, "smile": -0.2, "G": (0.3, 0.14, 1.06), "GL": (-0.3, 0.1, 1.08)}
     dd1 = {"pel": (0, -0.02, -0.46), "prt": (0.25, 0, 0.12), "tor": (0.3, 0, 0.12), "hed": (0.3, 0.1, 0.1), "G": (0.32, 0.26, 0.42), "BE": PR(-30, -50), "GL": (-0.3, 0.14, 0.44), "BL": PR(30, -50), "FL": (-0.14, -0.14, A_Z - 0.06), "FR": (0.14, 0.24, A_Z - 0.06), "lid": 0.75}

@@ -59,6 +59,19 @@ func _contents(rig: BokiRig) -> void:
 	for c in BokiRig.LOOPED:
 		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
 	_game_clips(rig)
+	for c in BokiSwing.WIND:
+		var a := rig.player.get_animation(c)
+		var src := rig.player.get_animation(BokiSwing.FROM[c])
+		var off := 0.0
+		for t in a.get_track_count():
+			if a.track_get_type(t) == Animation.TYPE_ROTATION_3D:
+				off = maxf(off, a.rotation_track_interpolate(t, BokiSwing.WIND[c]).angle_to(
+					src.rotation_track_interpolate(t, BokiSwing.release_of(src))))
+		var once := a.loop_mode == Animation.LOOP_NONE
+		ok(a.length <= 0.6 and once, "%s is short (%.2f s) and plays once" % [c, a.length])
+		var rel := BokiSwing.release_of(src)
+		var msg := "%s: the keyed release (%.2f s of %.2f) is the pose at %.2f s (off %.3f rad)"
+		ok(off < 0.15, msg % [c, rel, src.length, BokiSwing.WIND[c], off])
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -148,10 +161,16 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
-	ok(rig.clip == "ability", "a cast pulse plays the ability")
+	ok(rig.clip == "cast", "a cast pulse plays the cast")
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
+	k.set_meta("kstate", "attack")
+	rig._pick_clip(0.016)
+	ok(rig.clip == "lunge", "an attacking Boki plays the lunge")
+	k.set_meta("kstate", "")
+	rig._shot_left = 0.0
+	rig._pick_clip(0.016)
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
 	k.remove_meta("face")
@@ -179,12 +198,12 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	k.set_meta("kwork", "carry")
 	rig._pick_clip(0.016)
 	body.rotation.z = 0.16
-	rig._keep_flex()
+	rig._keep_flex(0.0)
 	ok(is_zero_approx(body.rotation.z), "a work clip keeps Body level")
 	var carry_at: Vector3 = BokiRig.FRAME[kin_id]["carry"]
 	ok(held.position.is_equal_approx(carry_at), "carrying, the load sits where it holds it, not over its head")
 	body.position.y = 0.3
-	rig._keep_flex()
+	rig._keep_flex(0.0)
 	var hovers: bool = BokiRig.FRAME[kin_id].get("hover", false)
 	ok(hovers == (rig._shadow != null), "a Boki that hovers has a ground shadow, one on legs has none")
 	if rig._shadow:

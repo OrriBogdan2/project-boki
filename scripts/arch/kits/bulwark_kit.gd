@@ -518,6 +518,8 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 ## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
 ## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
 const THROW_WIND := 0.08
+## s into bul_recall where the free hand draws in and closes (its 0.299 key): every catch lands on that pose
+const RECALL_CATCH := 0.299
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:
@@ -598,6 +600,7 @@ func _tick_mace(dt: float) -> void:
 			if float(mace["t"]) >= THROW_WIND:
 				mace["st"] = "fly"
 				fx.in_hand(false)
+				fx.hammer_fly(p, mace["dir"], 16.0)       # (same step: no frame with an empty hand and no hammer)
 				HeroVfx.of(m).trail(h, "throw", fx.hammer)
 				m.sfx("bjorn_throw", h.pos, -2.0)      # on the release, the clip's strike
 		"fly":
@@ -655,6 +658,9 @@ func _catch(quiet := false) -> void:
 	fx.in_hand(true)
 	if quiet:
 		return
+	if anim_id in ["bul_throw", "bul_recall", "bul_armed"] or m.time - anim_at > NET_MOVE_LIFE:
+		play("bul_recall")         # the catch pose on the catch step, however long the hammer flew back
+		anim_at -= RECALL_CATCH
 	m.sfx("bjorn_catch", h.pos, -6.0)
 	vfx("catch", h.pos)
 

@@ -45,7 +45,10 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	var d: Dictionary = UtilityBelt.def(id)
 	var col: Color = d.get("col", Color.WHITE)
 	if use_of(id) == "key":
-		return BeltKeys.use(h, id)       # the lock spends the key when it opens
+		var opened := BeltKeys.use(h, id)       # the lock spends the key when it opens
+		if opened:
+			UtilityPose.start(h, id)
+		return opened
 	BeltSfx.play(h, id, "start")
 	match use_of(id):
 		"drink":
@@ -80,7 +83,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
-	# the instant ones are spent now; the channelled ones when they finish (tick)
+	# the instant ones are spent now, with a quick body beat; the channelled ones when they finish (tick)
+	UtilityPose.start(h, id)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
 	if i < UtilityBelt.SLOTS and not (h.belt[i] as Dictionary).is_empty():
@@ -102,6 +106,9 @@ static func _pad(h: Hunter, col: Color) -> void:
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
 static func tick(h: Hunter, dt: float) -> void:
+	if h.beat_t > 0.0:
+		var spilled: bool = h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out
+		h.beat_t = 0.0 if spilled else maxf(0.0, h.beat_t - dt)
 	if h.drink_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.drink_t = 0.0

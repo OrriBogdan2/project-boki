@@ -630,6 +630,87 @@ authors see what the game will do.
 - Mycroll's merge pulse: lower the root (proposed) or lengthen the interval?
 - The palette needs a colour-blind pass (the category patterns are designed to carry meaning without hue).
 
+## 7. Trigger edge: when each ability commits
+
+PARITY FIRST (briefs/DECISIONS.md, 2026-11-07): the source decides when a key commits. Owner notes win over the
+data, the data over the footage. Tags: **[O]** owner note, **[D]** `briefs/supervive-data/supervive_kits.md`
+(`kits:<line>`), **[F]** footage sheet `briefs/hero-ref/<sheet>.md:<line>`, **[?]** the source can't settle it
+(ours stays). Slots are the default binds; the HUD shows the bound key (`Settings.key_cap`).
+
+Words: **press** = goes on the key down; **release** = goes on the key up (a hold before it only aims or
+charges); **tap / hold** = a short press and a long hold do different things, so it goes on the release (or at
+the hold threshold); **at the cursor** = quick-cast at the cursor point on the press; **recast** = pressing
+again while it runs does its second part.
+
+| Hero (source) | Slot | Ours | Source | Tag |
+|---|---|---|---|---|
+| archer (Myth) | LMB | hold draws, release looses (a tap looses an early arrow) | hold to charge, release (kits:73; pin.md:20) | [D] |
+| archer | RMB | **was:** a tap under 0.15 s loosed nothing. **Now:** press starts the draw, release looses; a tap looses it uncharged (`rmb.hold` 0) | hold to charge, release; a tap fires uncharged (kits:74; pin.md:21) | [D][F] fixed |
+| archer | Shift | press: roll in the move direction | tap (kits:75; pin.md:22) | [D] |
+| archer | E | press, at the cursor distance | tap (kits:76; pin.md:23) | [D] |
+| archer | R | press (next shots empowered) | tap (kits:77; pin.md:24) | [D] |
+| ashwick (Felix) | LMB | hold streams, release stops | hold (kits:40; linwick.md:15) | [D] |
+| ashwick | RMB | hold shows the lane, release fires | "press, a lane shows, then fire": press-and-indicator or release can't be told apart (linwick.md:16, :57) | [?] |
+| ashwick | Shift | press | press, 2 charges (kits:42; linwick.md:17) | [D] |
+| ashwick | E | press | press (kits:43; linwick.md:18) | [D] |
+| ashwick | R | press | press (kits:44; linwick.md:19) | [D] |
+| bulwark (Oath) | LMB | tap (under 0.2 s) throws on the release, tap again recalls; hold charges the swing, release swings | press throws, recast recalls; hold charges, release swings (kits:88; bjorn.md:22-23) | [D] |
+| bulwark | RMB | hold raises the shield, release drops it | hold (kits:89; bjorn.md:24) | [D] |
+| bulwark | Shift | press | tap (kits:91; bjorn.md:25) | [D] |
+| bulwark | E | press, at the planted hammer | tap (kits:92; bjorn.md:26) | [D] |
+| bulwark | R | press | tap (kits:93; bjorn.md:27) | [D] |
+| dolm (Tetra) | LMB | tap (under 0.28 s) throws a boulder on the release; hold punches on the release | tap boulder; hold and release punch (kits:105; breah.md:23-24) | [D] |
+| dolm | RMB | hold charges, release slams | hold and release (kits:106; breah.md:25) | [D] |
+| dolm | Shift | press (each hop of Rock Hop on its own press) | tap (kits:107; breah.md:26) | [D] |
+| dolm | E | press | tap (kits:108; breah.md:27) | [D] |
+| dolm | R | tap places it; hold and drag sets the angle, release raises it | tap, or hold and drag (kits:109; breah.md:28) | [D] |
+| dredge (Kingpin) | LMB | press, repeats while held | burst; hold auto-repeats (kits:56; dredge.md:24) | [D][F] |
+| dredge | RMB | press | tap (kits:57; dredge.md:25) | [D] |
+| dredge | Shift | press | tap (kits:58; dredge.md:26) | [D] |
+| dredge | E | press | tap (kits:60; dredge.md:27) | [D] |
+| dredge | R | press (1.1 s charge, then two waves) | one press, two waves (kits:61; dredge.md:252) | [D][F] |
+| gunslinger (Ghost) | LMB | press, auto-fires while held | hold to fire (kits:48; venator.md:19) | [D] |
+| gunslinger | RMB | press | footage shows a lane while held, then the throw, but can't tell release from an indicator (venator.md:20, :223); owner sync89: the Burr Charge is a tap | [O] |
+| gunslinger | Shift | press slides; held past 0.18 s slides further | press short, hold longer (kits:50; venator.md:21) | [D] |
+| gunslinger | E | press, then a 0.6 s charge | press, a ~0.6 s cast (kits:51; venator.md:22) | [D][F] |
+| gunslinger | R | press, at the cursor | press, at the cursor (kits:52; venator.md:23) | [D] |
+| juggernaut (Brall) | LMB | tap (under 0.22 s) slashes on the release; hold charges the blast | press series; hold blast (kits:18; juggernaut.md:18) | [D] |
+| juggernaut | RMB | tap (under 0.3 s) Slam on the release; hold Lunge on the release; in the air on the press | press Slam; hold Lunge; airborne Slam (kits:19; juggernaut.md:19) | [D] |
+| juggernaut | Shift | press | press (kits:26; juggernaut.md:20) | [D] |
+| juggernaut | E | press, recast pulls | press, recast (kits:27; juggernaut.md:21) | [D] |
+| juggernaut | R | press | press (kits:28; juggernaut.md:22) | [D] |
+| mage (Joule) | LMB | press, repeats while held | tap or hold (kits:65; vireo.md:26) | [D] |
+| mage | RMB | hold charges, release throws | hold and release (kits:66; vireo.md:27) | [D] |
+| mage | Shift | hold charges, release dashes | press dash, hold charges a longer one (kits:67; vireo.md:28) | [D][F] |
+| mage | E | press places it at the cursor; hold and drag aims, release commits the drag | press strike; hold and drag before release (kits:68; vireo.md:29) | [D] |
+| mage | R | press launches, recast lands at the cursor | press, reactivate (kits:69; vireo.md:30) | [D] |
+| ostra (Void) | LMB | press, repeats while held | tap or hold (kits:113; ostra.md:16) | [D] |
+| ostra | RMB | press | tap; the footage shows a width indicator while aiming (ostra.md:17, :142) | [?] |
+| ostra | Shift | hold shows both ends, release lobs to the cursor | "tap", but a landing circle shows "while aiming": press-and-indicator or release can't be told apart (kits:115; ostra.md:18, :76) | [?] |
+| ostra | E | press, at the cursor; recast pops | tap, recast (kits:116; ostra.md:19) | [D] |
+| ostra | R | press, at the cursor | tap, at the cursor (kits:117; ostra.md:20) | [D] |
+| rimewright (Celeste) | LMB | hold fires the barrage | hold (kits:32; tamsin.md:17) | [D] |
+| rimewright | RMB | hold shows the landing ring, release pushes the spear | tap, lands at the cursor; press or release not visible (tamsin.md:18) | [?] |
+| rimewright | Shift | hold skates, release stops | hold, release stops (kits:34; tamsin.md:19) | [D] |
+| rimewright | E | press, recast freezes it | press, recast (kits:35; tamsin.md:20) | [D] |
+| rimewright | R | press, recast ends it early | press, reactivate to cancel (kits:36; tamsin.md:21) | [D] |
+| tender (Elluna) | LMB | press, repeats while held | tap or hold (kits:8; mooshmoosh.md:25) | [D] |
+| tender | RMB | press | "tap (aim telegraph while held)": release or an indicator can't be told apart (mooshmoosh.md:26, :152) | [?] |
+| tender | Shift | press | tap (kits:10; mooshmoosh.md:27) | [D] |
+| tender | E | press, recast throws to the cursor | press, reactivate (kits:12; mooshmoosh.md:28) | [D] |
+| tender | R | press (channel) | tap (channel) (kits:13; mooshmoosh.md:29) | [D] |
+| thief (Shiv) | LMB | press, repeats while held | hold auto-repeats (kits:97; dancer.md:25) | [D] |
+| thief | RMB | press | "press: a lane shows 0.4-0.6 s, then the throw" (dancer.md:26) | [?] |
+| thief | Shift | press | tap (kits:99; dancer.md:27) | [D] |
+| thief | E | press, recast teleports | press, reactivate (kits:100; dancer.md:28) | [D] |
+| thief | R | press | tap (kits:101; dancer.md:29) | [D] |
+
+The only clear mismatch was the archer's Heavy Shot tap; it is fixed in data (`content/archetypes/archer.json`
+`rmb.hold` 0.15 -> 0) and asserted in `tools/archer_bulwark_combo_check.gd` and `tools/archetype_check.gd`.
+The [?] rows are the "lane shown, then the shot" RMBs: the footage can't tell a release cast from a press with a
+short cast time. Ours splits them (ashwick and rimewright on the release; gunslinger, tender, thief and ostra on the press). Ostra's Shift is the same
+case (an aim circle, then the lob) and stays on the release.
+
 ---
 
 ## Sources

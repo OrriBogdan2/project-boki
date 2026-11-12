@@ -31,6 +31,7 @@ var talk_btn: Button
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 var _tick_sec := -1         # the whole second of your turn countdown last ticked
+var stage: HunterViewer          # your pick, standing: it strikes its lock-in pose each time you choose
 
 const COLUMNS := 4          # Hunter cards per row
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
@@ -79,6 +80,9 @@ func _ready() -> void:
 	title_label = UI.title("Before the drop: pick your Hunter", 34)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title_label)
+	stage = HunterViewer.make_stage(pm.pick, Vector2(380, 230))
+	stage.play_lockin()
+	head.add_child(stage)
 	var strip := UI.hbox(14)
 	root.add_child(strip)
 	strip.add_child(UI.section("Squad"))
@@ -263,6 +267,8 @@ func _choose(ak: String) -> void:
 		UiSfx.error()
 		return
 	UiSfx.lobby_pick()
+	stage.set_hunter(ak)
+	stage.play_lockin()
 	_fill_hunters()
 	_fill_squad()
 	_announce_pick(false)

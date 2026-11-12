@@ -266,9 +266,7 @@ func _drop_tele() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
-	if not c.get("hold", false):
-		return                     # a tap before the draw starts looses nothing and costs nothing
-	if not spend_rmb(): return
+	if not spend_rmb(): return     # (rmb.hold is 0: a tap looses it uncharged, as the source's Heartpiercer)
 	var pd: Dictionary = rmb_def()["pin"]
 	play("arc_heavy")
 	_pin(aim(), clampf((float(c["t"]) - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0))

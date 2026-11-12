@@ -33,6 +33,7 @@ func run(main: Node) -> void:
 	_chat_and_voice()
 	await _screen(main)
 	await _cues(main)
+	await _lockin(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -329,3 +330,50 @@ func _cues(main: Node) -> void:
 	t.pm.turn_left = 2.5
 	ok(_heard(t._tick_label).is_empty(), "no ticks on a teammate's turn")
 	t.queue_free()
+
+## The lock-in pose: every Hunter's data names a clip its model has, it runs 1-1.5 s once and the Hunter is back
+## on its idle, and choosing again mid-pose restarts it from the top.
+func _lockin(main: Node) -> void:
+	var ids := Arch.ids()
+	var stage := HunterViewer.make_stage(ids[0], Vector2(380, 230))
+	main.add_child(stage)
+	for ak in ids:
+		stage.set_hunter(ak)
+		stage.set_process(true)
+		for _i in 900:
+			if stage.model != null:
+				break
+			await main.get_tree().process_frame
+		stage.set_process(false)
+		if stage.model == null:
+			ok(false, "%s: model built for the stage" % ak)
+			continue
+		var art := WardenGlb.art(ak)
+		var clips: WardenClips = stage.model.get_node("Warden/Sync").get("clips")
+		var lk: Dictionary = WardenClips.data(art).get("lockin", {})
+		var clip := String(lk.get("clip", ""))
+		var has_clip := clips != null and clips.lib.has_animation(clip)
+		ok(has_clip, "%s: lock-in clip '%s' is in its model" % [ak, clip])
+		if not has_clip:
+			continue
+		var reach := float(lk.get("from", 0.0)) + float(lk.get("dur", 0.0)) * float(lk.get("rate", 1.0))
+		ok(reach <= clips.lib.get_animation(clip).length + 0.01, "%s: the pose's window ends inside '%s'" % [ak, clip])
+		stage.play_lockin()
+		for _i in 10:
+			stage.tick(0.05)
+		stage.play_lockin()      # chosen again half-way: from the top
+		ok(stage.lockin_t == 0.0, "%s: choosing again restarts the pose" % ak)
+		var posed := 0.0
+		for _i in 100:
+			stage.tick(0.05)
+			if not stage.model.get_meta(WardenClips.STATE).has("lockin_t"):
+				break
+			posed += 0.05
+		ok(posed >= 1.0 and posed <= 1.5, "%s: the pose runs %.2f s (1-1.5)" % [ak, posed])
+		stage.tick(0.05)
+		var state: Dictionary = stage.model.get_meta(WardenClips.STATE)
+		ok(stage.lockin_t < 0.0 and not state.has("lockin_t"), "%s: back to its idle after the pose" % ak)
+		for _i in 12:
+			stage.tick(0.05)
+		ok(clips.act_w == 0.0, "%s: settled fully into its idle 0.6 s after" % ak)
+	stage.queue_free()

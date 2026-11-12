@@ -28,7 +28,9 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_anim_time_check.gd").new(self).run(ak)
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/prop_handoff_check.gd").new(ak, ok).run("dredge")
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
 			rows_bad == 0, "%d failures" % rows_bad)
@@ -222,7 +224,9 @@ func _dash_moves() -> void:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
 				lands = float(kf[0])          # the squash he lands in
 				break
-		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+		# done by the next barge: dash + gap, plus the held squat that bridges the chained press's late frames
+		# (docs/heroes/dredge.md, "Animation timing")
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap + 0.06
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
 		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)

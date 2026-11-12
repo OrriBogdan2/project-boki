@@ -24,10 +24,12 @@ func run(main_node: Node) -> void:
 		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await load("res://tools/prop_handoff_check.gd").new(self, ok).run("bulwark")
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+		await load("res://tools/bulwark_anim_time_check.gd").new().run(self)
 	n += ult.n + own.n + launch.n + tall.n
 	fails += ult.fails + own.fails + launch.fails + tall.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
@@ -360,7 +362,7 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
-	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
+	# trigger edge (docs/DASHES_AND_ABILITY_FEEL.md 7): the source's Heartpiercer fires on a tap, uncharged
 	fresh(T)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
@@ -370,11 +372,16 @@ func _archer_combos() -> void:
 	aim_at(P, T.pos)
 	tap(m, P)
 	step(m, 0.3)
+	var tap_dmg := dmg(T)
 	ok(
-		"combo archer: RMB tap looses nothing and costs no charge (no snare, no Tripwire)",
-		dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0 and K.last_variant == "tap" and not K.d["rmb"].has("snare"),
-		"took %.0f root %.2f charges %.1f variant %s" % [dmg(T), T.root_t, K.ch_rmb, K.last_variant]
+		"combo archer: RMB tap looses an uncharged Heavy Shot on the charge (no snare, no Tripwire)",
+		tap_dmg >= 14.0 and tap_dmg < 24.0 and T.root_t <= 0.0 and K.ch_rmb < 1.0 and not K.d["rmb"].has("snare"),
+		"took %.0f root %.2f charges %.1f" % [tap_dmg, T.root_t, K.ch_rmb]
 	)
+	fresh(T)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	T.teleport(home + Vector3(7, 0, 0))
 	hold(m, P, 1.2)
 	step(m, 0.3)
 	ok(
