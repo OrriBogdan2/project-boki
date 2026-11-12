@@ -23,6 +23,7 @@ const SHOT_ART := "res://art/portraits/juggernaut_splash.jpg"
 const SHOT_BOKI := "res://art/gallery/boki/vespyx.webp"
 const CROP_AT := Vector2(0.68, 0.25)       # where the crops centre, as a share of the window (Kael's face)
 const CROP_PX := Vector2i(640, 360)
+const MENU_IN_S := 2.0                     # s: the title's menu slides in before the first shot
 
 var main: Node
 var bad := 0
@@ -74,14 +75,15 @@ func _pieces() -> void:
 # ------------------------------------------------------------------ 2. how a piece is drawn
 func _drawing() -> void:
 	for frame: Vector2 in FRAMES:
-		for px: Vector2 in [PAINTING_PX, CUTOUT_PX]:
+		for px: Vector2 in [PAINTING_PX, Vector2(OLD_PX), CUTOUT_PX]:
 			var r := SplashGallery.rect_for(px, frame)
 			var whole := Rect2(Vector2.ZERO, frame).grow(0.5).encloses(r)
 			var centred := r.get_center().distance_to(frame * 0.5) < 0.5
 			var kept := is_equal_approx(r.size.x / r.size.y, px.x / px.y)
 			ok(whole and centred and kept, "%s in %s: whole, centred, unstretched (%s)" % [px, frame, r.size])
-	var fills := SplashGallery.rect_for(PAINTING_PX, FRAMES[0]).size == FRAMES[0]
-	ok(fills and SplashGallery.rect_for(PAINTING_PX, FRAMES[1]).size == FRAMES[1], "a painting fills 16:9 windows")
+	for px: Vector2 in [PAINTING_PX, Vector2(OLD_PX)]:
+		var fills := SplashGallery.rect_for(px, FRAMES[0]).size == FRAMES[0]
+		ok(fills and SplashGallery.rect_for(px, FRAMES[1]).size == FRAMES[1], "a %s painting fills 16:9 windows" % px)
 	var at_1440 := SplashGallery.rect_for(CUTOUT_PX, FRAMES[1]).size
 	var at_1080 := SplashGallery.rect_for(CUTOUT_PX, FRAMES[0]).size
 	ok(at_1440 == CUTOUT_PX and at_1080 == CUTOUT_PX * 0.75, "a cutout: its own pixels at 1440p, 3/4 at 1080p")
@@ -148,6 +150,7 @@ func _shots() -> void:
 	var g := _gallery_in(main.screen_node())
 	g.set_process(false)
 	g.show_now(SHOT_ART)
+	await main.get_tree().create_timer(MENU_IN_S).timeout
 	var after := await _grab("title_painting")
 	ok(after.get_size() == res or res == Vector2i.ZERO, "the window is %s (asked %s)" % [after.get_size(), res])
 	var old := Image.new()

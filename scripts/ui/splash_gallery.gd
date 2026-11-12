@@ -1,15 +1,16 @@
 class_name SplashGallery
 extends Control
 ## The painted art behind the title and the loading screen (content/rules/splash_gallery.json): one piece at a
-## time, whole, centred and never stretched, held still and then crossfading slowly into the next. A piece is
-## drawn at its own pixels on a screen ART_H high, shrunk to fit: the 2560x1440 paintings fill a 16:9 window
-## and a Boki cutout stands in the middle at its own size. The next piece is read on a loader thread while one
-## shows, and a piece that has gone is let go (nothing is kept for the session).
+## time, whole, centred and never stretched, held still and then crossfading slowly into the next. A painting
+## (screen-shaped) fills the window as far as its shape allows; a Boki cutout stands in the middle at its own
+## pixels on a screen ART_H high. The next piece is read on a loader thread while one shows, and a piece that
+## has gone is let go (nothing is kept for the session).
 
 const RULES_PATH := "res://content/rules/splash_gallery.json"
 const HOLD := 8.0          # s a piece shows before the next one fades in
 const FADE := 2.5          # s of crossfade into the next: slow, so a change never reads as a cut
-const ART_H := 1440.0      # px: the screen height the art is made for; no piece draws bigger than that share
+const ART_H := 1440.0      # px: the screen height a cutout's pixels are made for
+const PAINTING_ASPECT := 1.5   # width / height from which a piece is a painting (16:9) rather than a cutout (1:1)
 
 static var _files := PackedStringArray()
 
@@ -70,7 +71,9 @@ static func files() -> PackedStringArray:
 
 ## Where a piece of `px` pixels is drawn in a frame of `frame`: whole, centred, its shape kept.
 static func rect_for(px: Vector2, frame: Vector2) -> Rect2:
-	var k := minf(minf(frame.x / px.x, frame.y / px.y), frame.y / ART_H)
+	var k := minf(frame.x / px.x, frame.y / px.y)
+	if px.x < px.y * PAINTING_ASPECT:
+		k = minf(k, frame.y / ART_H)
 	return Rect2((frame - px * k) * 0.5, px * k)
 
 ## Shows `path` at once (no crossfade) and goes on round the gallery from the piece after it, or from a
