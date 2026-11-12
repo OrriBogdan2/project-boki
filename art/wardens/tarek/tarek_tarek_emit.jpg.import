@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b853ankdsroim"
-path="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.ctex"
+path.bptc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex"
+path.astc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fb1bdfe6b4d23b766e7692f2278c28a9"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/tarek/tarek_tarek_emit.jpg"
-dest_files=["res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.ctex"]
+dest_files=["res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex", "res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
