@@ -73,6 +73,7 @@ func run(main_node: Node) -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 	await play()
 	print("PITCH_DONE shot=%d take=%d frames=%d" % [shot, take, Engine.get_frames_drawn()])
+	BackgroundWork.drain()  # while the tree is up: drained at quit instead, a running load once crashed the exit
 	main.get_tree().quit(1 if failed else 0)
 
 ## --hunter=<id>, else the take's own Hunter (so five kit takes show five Hunters).
@@ -124,7 +125,8 @@ func _film_all(shots: PackedStringArray, takes: int) -> void:
 ## One take, its child behind tools/pitch_take_filter.sh (OS.execute keeps all of a child's output in one String and a
 ## movie child once printed over 2 GB, so the filter trims it; it also kills a take whose movie stops growing for
 ## max(STALL_X x the shot's length, STALL_MIN_S) s, rc 124). Returns 1 when the child failed or wrote no movie,
-## and the next take goes on. (A script file: OS.execute runs through a shell that would expand `$` in an argument.)
+## and the next take goes on (keeps_movie: a child that crashed only after PITCH_DONE keeps its movie). (A script
+## file: OS.execute runs through a shell that would expand `$` in an argument.)
 func _film_one(s: int, k: int) -> int:
 	var stem := "shot%d_take%d" % [s, k]
 	var movie := dir.path_join(stem + ".avi")
@@ -139,16 +141,23 @@ func _film_one(s: int, k: int) -> int:
 		str(CHILD_LOG_LINES), OS.get_executable_path()]
 	var rc := OS.execute("bash", watch + args, out)  # stderr stays the job's log: the filter's PITCH_BEAT lines
 	var marks := FileAccess.open(dir.path_join(stem + ".marks"), FileAccess.WRITE)
-	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+	var marks_text := String(out[0]) if out.size() > 0 else ""
+	for line in marks_text.split("\n"):
 		marks.store_line(line)
 		if line.begins_with("PITCH_") or line.contains("ERROR"):
 			print(stem, " ", line)
 	marks.close()
-	var ok := rc == 0 and FileAccess.file_exists(movie)
-	if rc != 0:
+	var ok := keeps_movie(rc, marks_text) and FileAccess.file_exists(movie)
+	if not ok:
 		DirAccess.remove_absolute(movie)
 	print("PITCH_TAKE %s rc=%d ok=%s" % [stem, rc, ok])
 	return 0 if ok else 1
+
+## A take is kept when its child exited cleanly, or played the whole shot (PITCH_DONE, no PITCH_FAIL) and only crashed
+## on its way out; a take the watchdog killed (rc 124) never is.
+static func keeps_movie(rc: int, child_out: String) -> bool:
+	var done := child_out.contains("PITCH_DONE") and not child_out.contains("PITCH_FAIL")
+	return rc == 0 or (done and rc != 124)
 
 ## `secs` of game time (one process frame is 1/60 s under the movie writer).
 func wait(secs: float) -> void:

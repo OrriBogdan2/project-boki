@@ -4,7 +4,7 @@ extends RefCounted
 ## reaches its reveal, the evolution either plays or says why it cannot, the Hunter select lands on and saves the
 ## chosen Hunter with its screen still up, the kit shot runs its rota with neither Hunter down or fallen off the
 ## island, and the escape Hunter gets out. The take watchdog kills a child that writes no frames and passes one that
-## ends. The save file is never written.
+## ends, and a take that crashes only on its way out keeps its movie. The save file is never written.
 
 const CHOSEN := "mage"       # the Hunter shot 6 is asked to land on (not the default, so the pick is seen)
 
@@ -48,6 +48,10 @@ func _watchdog() -> void:
 	rc = OS.execute("bash", [filter, movie, "2", "10", "echo", "PITCH_DONE"], out)
 	ok(rc == 0 and String(out[0]).contains("PITCH_DONE"), "watchdog: a take that ends passes its rc and lines")
 	OS.unset_environment("PITCH_POLL_S")
+	var rig = load("res://tools/pitch_reel.gd")
+	ok(rig.keeps_movie(134, "PITCH_DONE shot=7\nhandle_crash: signal 11") and not rig.keeps_movie(134, "handle_crash")
+		and not rig.keeps_movie(124, "PITCH_DONE") and not rig.keeps_movie(1, "PITCH_FAIL x\nPITCH_DONE"),
+		"watchdog: a take that crashes only after PITCH_DONE keeps its movie, a killed or failed one does not")
 
 func _select_landed(main: Node) -> bool:
 	var grid = main.current.get_meta("classes_grid", null)
