@@ -147,10 +147,6 @@ func _wants_down(t: float, xd: Dictionary) -> bool:
 		return true
 	if hung and fire and bool(leap["fire_free"]):
 		return true
-	if hung and kit.h.ctrl == "bot":
-		# a bot strikes once the crown is on a foe
-		var crown: Vector3 = leap["land"]
-		return kit.m.foes_of(kit.h.team).any(func(f): return f.hittable() and f.flat_dist(crown) < float(xd["radius"]))
 	return t >= float(xd["hover"])
 
 ## The crouch: no steering, but a jump still goes (she takes off from up there) and any speed she had runs out
@@ -201,7 +197,6 @@ func _take_off() -> void:
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
 	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 

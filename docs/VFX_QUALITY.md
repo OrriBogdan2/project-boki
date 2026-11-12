@@ -70,10 +70,6 @@ Still open (shared, not done here):
   is per kit (backlog).
 - Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
   moves them to teal. The alternative (keep void violet) would clash with Sable.
-- `pin_draw.gd` defaults to `#e8483e`.
-- Only six kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, ostra (RMB, E, X), rimewright,
-  tender). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
-  Moving each to `HeroVfx` data is how a kit reaches the bar.
 
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
@@ -93,18 +89,6 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
-| 1 | Tenzo | dolm | 1 | 2 | 1 | 2 | 3 | 2 | 3 | 14 | hard-coded `Fx` primitives in `dolm_kit`/`breah_*`, no HeroVfx data; was red (now cobalt here). Spine lane and slam are flat rings, the hop landing has no debris |
-| 2 | Grimble | dredge | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 16 | `ld_fx` primitives; hook chain is a beam with no weight; coin gold shares the stock flash gold |
-| 3 | Albert | bulwark | 2 | 2 | 2 | 2 | 3 | 2 | 4 | 17 | `bjorn_fx` piles of rings/flashes (9 calls); shield reads as a flat disc; hard-coded gold |
-| 4 | Sable | thief | 2 | 3 | 2 | 3 | 3 | 2 | 3 | 18 | `dj_fx` slashes are thin; blink has no in/out pair; flashes hard-coded gold, not violet |
-| 5 | Sparkle | mage | 3 | 2 | 2 | 3 | 3 | 2 | 3 | 18 | `vv_fx` bolts/orbs; recoloured to pink by sparkle-dash-feel-1108; ult lacks a hot core and afterglow |
-| 6 | Vex | gunslinger | 3 | 3 | 2 | 3 | 3 | 3 | 4 | 21 | `vv_fx` tracer and muzzle flashes; was ember orange through the shared layer, now lime; reload/E have no shape of their own |
-| 7 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
-| 8 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
-| 9 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
-| 10 | Motley | ostra | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | was 14. RMB, E and X are data-driven in sea teal over a void core, each with an afterglow; Nightwell now reads as a black well with teal arms (strips: jobq vfxq-ostra-abil-before/after). Left: the dome tell is a pale grey-teal, the Snap's flight is one bundle. Dash, LMB and the Swollen pink stay violet (void-jester-dash-feel-1108) |
-| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar. Polish: soft-particle ground clipping, hold-blade glow |
-| 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar. Polish: cleave sound transient, ult shockwave scale |
 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
 `vfxq-after-archer-2`, job 20261108-213129-03140); the pair is on branch `ext/vfx-archer-strips` (not for merge). Her

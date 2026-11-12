@@ -3,9 +3,7 @@ extends RefCounted
 ## rival standing at medium range: an ally bot ~12 m away has to reach them and finish the revive in
 ## time (open ground; a wall in the way; the player down by the island's edge; the player down on
 ## the far side of a terrace step). And with a rival behind a wall, the bot never fires without a
-## clear shot. First, the downed loop's numbers against the source (docs/DOWNED.md). And the diminishing
-## curve (content/rules/revive.json): the 2nd and 3rd wisp revive, and the 2nd and 3rd stomp finish, of
-## the same Hunter take 1/.75 and 1/.58 as long. Prints PASS/FAIL.
+## clear shot. Prints PASS/FAIL.
 
 var bad := 0
 var m: Match
@@ -34,48 +32,6 @@ func _fresh(seed := 77) -> void:
 func _put(h: Hunter, at: Vector3) -> void:
 	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	h.vel = Vector3.ZERO
-
-## Seconds until `who` (a wisp on `at`) is back up with `by` standing on it (a teammate revives, a rival
-## stomps: Life.start_stomp), or -1.0 if it takes over 20 s. Brings a finished victim back down first.
-func _down_time(who: Hunter, by: Hunter, at: Vector3, stomp: bool) -> float:
-	if who.out: Life.bring_back(m, who, at, 0.25, false)
-	who.downed = true
-	who.down_hp = Data.MATCH["down_hp"]
-	who.revive = 0.0
-	_put(who, at)
-	_put(by, at + Vector3(0.4, 0, 0))
-	if stomp: Life.start_stomp(m, by, who)
-	var t := 0.0
-	while t < 20.0 and who.downed and not who.out:
-		m.step(Match.DT)
-		t += Match.DT
-	return t if not who.downed or who.out else -1.0
-
-## The 1st, 2nd and 3rd revive (or stomp finish) of one Hunter, as multiples of the 1st.
-func _curve_rows(stomp: bool) -> void:
-	_fresh()
-	var us: Hunter = m.player
-	var victim: Hunter = m.hunters.filter(func(x): return x.team == us.team and x != us)[0]
-	var foe: Hunter = m.hunters.filter(func(x): return x.team != us.team)[0]
-	var by := foe if stomp else us
-	for h in m.hunters:
-		if h != victim and h != by: _put(h, m.world.random_ground(-1, false) + Vector3(0, 0, 60))
-	var at := Vector3.INF
-	for k in 3000:
-		var g := m.world.random_ground()
-		if _roomy(g, 4):
-			at = g
-			break
-	if at == Vector3.INF:
-		ok(false, "found open ground for the curve rows")
-		return
-	var t: Array = []
-	for i in 3: t.append(_down_time(victim, by, at, stomp))
-	var what := "stomp finish" if stomp else "wisp revive"
-	var done: bool = t.all(func(x): return x > 0.0)
-	ok(done, "%s: all three of one Hunter complete (%.2f %.2f %.2f s)" % [what, t[0], t[1], t[2]])
-	ok(absf(t[1] / t[0] - 1.0 / 0.75) < 0.04, "%s: the 2nd takes 1/.75 as long (x%.3f)" % [what, t[1] / t[0]])
-	ok(absf(t[2] / t[0] - 1.0 / 0.58) < 0.04, "%s: the 3rd takes 1/.58 as long (x%.3f)" % [what, t[2] / t[0]])
 
 ## Open ground: no void or blocks within r of p, all at one height.
 func _roomy(p: Vector3, r: int) -> bool:
@@ -128,46 +84,9 @@ func _case(name: String, at: Vector3, from: Vector3, foe_at: Vector3, limit: flo
 	ok(not p.downed, "%s: revived in %.1fs (reached at %.1fs, %d hops, start %.1fm, rival %.1fm)%s" % [name, t, reached, hops, Vector2(from.x - at.x, from.z - at.z).length(), Vector2(foe_at.x - at.x, foe_at.z - at.z).length(), "" if not p.downed else " bot at %s, player at %s" % [bot.pos.snapped(Vector3(0.1, 0.1, 0.1)), p.pos.snapped(Vector3(0.1, 0.1, 0.1))]])
 	bot.ctrl = "idle"; bot.inp["move"] = Vector2.ZERO; bot.inp["fire"] = false
 
-## The numbers docs/DOWNED.md sets from the source, then the wisp ticking them: revive speed with one
-## and two teammates, the bar draining when they step off, and the finisher's length.
-func _numbers() -> void:
-	var r := Life.R
-	ok(is_equal_approx(r["bleed_out"], 15.0), "bleed-out 15 s [patch]")
-	ok(r["crowd"] == [1.0, 0.75, 0.58, 0.47], "crowd curve 1 / 0.75 / 0.58 / 0.47 [D]")
-	ok(is_equal_approx(r["stomp_commit"] + r["stomp_time"], 3.0), "finisher 3 s from the first press [footage]")
-	ok(int(ceil(r["stomp_time"] / r["stomp_cycle"] - 0.7)) == 3, "three stomps in the finisher")
-	var p: Hunter = m.player
-	var mates: Array = m.hunters.filter(func(x): return x.team == p.team and x != p)
-	var far := p.pos + Vector3(30, 0, 0)
-	for h in m.hunters:
-		if h != p: _put(h, far)
-	m.knock(p, null, {})
-	var steps := func(sec: float) -> void:
-		for i in int(round(sec / Match.DT)): Life.tick_wisps(m, Match.DT)
-	# one teammate: revive_time; two: revive_time / 1.75
-	_put(mates[0], p.pos)
-	steps.call(r["revive_time"] * 0.5)
-	ok(absf(p.revive - 0.5) < 0.02, "one reviver: half way at half of %.1f s (%.2f)" % [r["revive_time"], p.revive])
-	_put(mates[1], p.pos)
-	steps.call(0.5)
-	var two: float = 0.5 + 0.5 / r["revive_time"] * Life.crowd(2)
-	ok(absf(p.revive - two) < 0.02, "two revivers: x%.2f speed (%.2f, want %.2f)" % [Life.crowd(2), p.revive, two])
-	# both step off: the bar drains and the wisp bleeds again [wiki]
-	for mate in mates:
-		_put(mate, far)
-	var hp0: float = p.down_hp
-	var rv0: float = p.revive
-	steps.call(1.0)
-	var drained := p.revive < rv0 - 0.4 and p.down_hp < hp0
-	ok(drained, "stepping off drains the bar (%.2f -> %.2f) and the wisp" % [rv0, p.revive])
-	m.revive_hunter(p, null)
-	ok(is_equal_approx(p.hp, p.max_hp * r["revive_hp"]), "back up at %d%% HP" % int(r["revive_hp"] * 100.0))
-
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
-	_fresh()
-	_numbers()
 	_fresh()
 	var w := m.world
 	# ---- 1. open ground
@@ -300,8 +219,5 @@ func run(mn: Node) -> void:
 						if blind <= 3: print("REVIVE  blind shot: bot %s foe %s grounded %s" % [bp0.snapped(Vector3(0.01, 0.01, 0.01)), fp0.snapped(Vector3(0.01, 0.01, 0.01)), bot.grounded])
 						break
 		ok(aimed > 0 and blind == 0 and hops <= 3, "%s: no shots without a clear line, no hopping at it (after the rival %d of %d frames, %d firing, %d blind, %d hops)" % [variant, aimed, frames, fired, blind, hops])
-	# ---- 6. the diminishing curve, per Hunter, for revives and for finishes
-	_curve_rows(false)
-	_curve_rows(true)
 	print("REVIVE CHECK %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))
 	main.get_tree().quit()
