@@ -12,6 +12,7 @@ var atk_dir := Vector2.ZERO
 var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
+var damage_by := {}          # team -> damage dealt to it, for credit (a lair boss's XP, StealCall)
 var wander := Vector3.INF
 var lunge_hit := {}
 var anim := 0.0
@@ -83,7 +84,11 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
-	if dealt > 0.0: calm_t = 0.0
+	if dealt > 0.0:
+		calm_t = 0.0
+		var from: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
+		if from is Hunter:
+			damage_by[from.team] = float(damage_by.get(from.team, 0.0)) + dealt
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
