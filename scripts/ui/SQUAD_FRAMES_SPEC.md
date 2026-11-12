@@ -20,7 +20,7 @@ owner's reference capture (a private still, not in the repo). Measured 2026-11-1
 | Text column start, right of portrait centre | 30.5 | 26 | 17.5 (`LABEL_X`) |
 | State label caps (KNOCKED/DEAD), top / baseline from centre | -22 / -11 | -19 / -9.5 | baseline -6.6 (`LABEL_Y`), 10 px font, condensed 0.82, lean 0.22 |
 | Name caps height / baseline from centre | 10 / +6 | 8.6 / +5 | baseline 3.4 (`NAME_Y`), 9 px font |
-| Level number (lower-left of portrait, no chip) height | 10.5 | 9 | 9 px font, centre (-8.9, +6.9) |
+| Level number (lower-left of portrait, no chip) height | 10.5 | 9 | 11 px font (`LVL_PX`; Lilita digits run small), centre (-8.9, +6.9) |
 | Bar frame top from centre | +11.5 | 9.9 | 6.6 (`BAR_Y`) |
 | Bar frame height | 16 | 13.8 | 9.2 (`BAR_H`) |
 | Bar frame width along the top | 76 | 65.4 | 43.6 (`BAR_W`) |
@@ -28,7 +28,7 @@ owner's reference capture (a private still, not in the repo). Measured 2026-11-1
 | Armour row height (top) | 4 | 3.4 | 2.3 (`ARMOR_H`) |
 | Gap, then health row height | 2, 7 | 1.7, 6 | 1.1, 4.0 (`HP_H`) |
 | Knocked marker centre, right of portrait centre | 184 | 158 | 106 (`MARK_DX`) |
-| Knocked marker size (body + tail) | 75 x 45 | 65 x 39 | body r 11.5 (`MARK_R`), tail 2 r |
+| Knocked marker size (body + tail) | 75 x 45 | 65 x 39 | body r 13 (`MARK_R`), tail 2 r |
 
 No segment ticks: both bars are solid fills in one black slanted frame; the empty part stays black.
 

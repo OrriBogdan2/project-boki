@@ -50,7 +50,7 @@ func run(main_node: Node) -> void:
 	await _frames(120)
 	_shot(dir, "team_boki_down")
 	mates[0].down_hp = 0.01           # bleeds out: eliminated, DEAD on the row
-	await _frames(90)
+	await _frames(150)
 	_shot(dir, "team_boki_deathbox")
 	print("TEAMBOKISHOTS in ", dir)
 	main.get_tree().quit(0)
