@@ -268,6 +268,14 @@ func grip(p: Vector3, h: Hunter) -> float:
 		return 1.0
 	return float(areas[a]["def"]["effect"]["grip"])
 
+## Is h standing in a hazard it isn't warded against? (A bot's cue to head out.)
+static func harmed(mm: Node, h: Hunter) -> bool:
+	var tz := of(mm)
+	if tz == null or h.remote:
+		return false
+	var a := tz.area_at(h.pos)
+	return a >= 0 and not tz.guards(h, String(tz.areas[a]["kind"]))
+
 ## A bot keeps off hazard ground its Boki can't handle (unless it's already in it: then out is the way).
 static func avoid(mm: Node, h: Hunter, x: float, z: float) -> bool:
 	var tz := of(mm)

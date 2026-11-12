@@ -297,6 +297,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			inp["aim_y"] = o.pos.y
 	else:
 		a.erase("rv")
+	# ---- knocked into a field it isn't warded against: out by the shortest way, before anything else
+	var out := _leave_field(m, h)
+	if out != Vector2.ZERO:
+		move = out
+		a.erase("dash_dir")
 	# ---- don't walk off edges (except onto the jump pad we're heading for), and keep off other pads
 	var to_pad: bool = (a.has("pad_at") and h.flat_dist(a["pad_at"]) < 2.5) or (a.has("cross") and h.flat_dist(a["cross"]["take"]) < 2.5)
 	for pd in m.world.pads:
@@ -1024,15 +1029,37 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 			return false
 		# the abyss blocks a walk too: straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
-		if m.world.is_void(p.x, p.y) or TerrainHazards.avoid(m, h, p.x, p.y):
+		if m.world.is_void(p.x, p.y):
 			return false
+		for off in [Vector2.ZERO, side, -side]:      # (the body's width, so a path doesn't clip a field's corner)
+			if TerrainHazards.avoid(m, h, p.x + off.x, p.y + off.y):
+				return false
 	return true
 
+const EXIT_REPLAN_S := 1.0     # s before the way out of a hazard field is searched again
+
+## In a hazard field h isn't warded against (knocked in, or landed there): the aim toward the nearest tile
+## off it, from the same tile search as every other trip. Zero when h is not in such a field.
+func _leave_field(m: Match, h: Hunter) -> Vector2:
+	if not TerrainHazards.harmed(m, h):
+		h.ai.erase("exit")
+		return Vector2.ZERO
+	var ex: Dictionary = h.ai.get("exit", {})
+	if ex.is_empty() or m.time - float(ex["t"]) > EXIT_REPLAN_S:
+		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
+		var path := _grid_path(m, at, at, h, PATH_WIDE, true)
+		ex = {"t": m.time, "to": path.back() if not path.is_empty() else Vector2.ZERO}
+		h.ai["exit"] = ex
+	var to: Vector2 = ex["to"]
+	return Vector2.ZERO if to == Vector2.ZERO else _steer(m, h, Vector3(to.x, h.pos.y, to.y))
+
 ## Breadth-first search over walkable tiles (a window around the trip), returning tile centres. With
-## h, it keeps off hazard ground h can't handle (searching a wider window for a way round a big field),
-## and only crosses it when there's no way round.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := PATH_MARGIN) -> Array:
+## h, it keeps off hazard ground h can't handle (searching a wider window for a way round a big field);
+## no way round means no path (the goal is dropped), never a walk across. With `leave`, the trip ends at
+## the nearest tile off the hazard fields instead of at b.
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := PATH_MARGIN, leave := false) -> Array:
 	var W: World = m.world
+	var tz := TerrainHazards.of(m) if leave else null
 	var lo := Vector2i(mini(a.x, b.x) - margin, mini(a.y, b.y) - margin)
 	var hi := Vector2i(maxi(a.x, b.x) + margin, maxi(a.y, b.y) + margin)
 	var prev := {a: a}
@@ -1042,7 +1069,9 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := 
 	while q.size() > 0 and steps < (PATH_STEPS if margin == PATH_MARGIN else PATH_STEPS_WIDE):
 		steps += 1
 		var cur: Vector2i = q.pop_front()
-		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
+		var arrived: bool = tz.cell[W.idx(cur.x, cur.y)] == 0 if leave else \
+				cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5))
+		if arrived:
 			b = cur
 			found = true
 			break
@@ -1062,8 +1091,8 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, margin := 
 	if not found:
 		if h == null:
 			return []
-		# a way round a big field in a wider window, else across it
-		return _grid_path(m, a, b, h, PATH_WIDE) if margin == PATH_MARGIN else _grid_path(m, a, b)
+		# a way round a big field in a wider window
+		return _grid_path(m, a, b, h, PATH_WIDE) if margin == PATH_MARGIN else []
 	var out: Array = []
 	var c := b
 	while c != a:

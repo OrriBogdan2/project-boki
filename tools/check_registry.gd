@@ -10,6 +10,7 @@ const CHECKS := {
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
+	"--bot-hazard-route-check": ["res://tools/bot_hazard_route_check.gd", "bot_hazard_route_check", null],
 	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
