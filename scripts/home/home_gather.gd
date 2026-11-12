@@ -104,7 +104,7 @@ func ring_fill(_idx: int) -> float:
 	if it.get("kind", "") != "wild":
 		return 0.0
 	var i := int(it["i"])
-	var swing := h.tw.swing_t / HunterTool.period(h.tw.tool) if tile == i and h.tw.active() else 0.0
+	var swing: float = h.tw.swing_t / HunterTool.period(h.tw.tool) if tile == i and h.tw.active() else 0.0
 	return (float(damage.get(i, 0)) + clampf(swing, 0.0, 1.0)) / float(HITS)
 
 ## The wild tree or rock the prompt points at ("" for none).

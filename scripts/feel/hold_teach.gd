@@ -12,8 +12,7 @@ extends RefCounted
 const TAP_S := 0.25  # s: a press let go sooner than this is a tap, not a hold
 const HINT_AFTER := 2  # taps in a session before the one-line hint
 const DONE_N := 3  # finished holds before an action stops teaching for good
-const FLASH_S := 0.5  # s the ring flash lasts (rises fast, then drains)
-const FLASH_RISE := 0.3  # share of FLASH_S spent filling before it drains
+const FLASH_S := 0.5  # s the ring flash lasts (full on the tap frame itself, then drains)
 const FLASH_FILL := 0.35  # how far a tap's flash fills the ring (0..1)
 const POP_S := 0.8  # s the "Hold" pop rises and fades
 const CLICK_DB := -10.0  # the tap click sits under the game's sounds
@@ -142,7 +141,7 @@ static func flash(action: String) -> float:
 	var e := (now() - float(_s(action)["flash_t"])) / FLASH_S
 	if e < 0.0 or e > 1.0:
 		return 0.0
-	return FLASH_FILL * (e / FLASH_RISE if e < FLASH_RISE else (1.0 - e) / (1.0 - FLASH_RISE))
+	return FLASH_FILL * (1.0 - e)
 
 
 ## 0..1 through the "Hold" pop, or -1 when none is showing.

@@ -36,7 +36,7 @@ func run(main: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 
-static func _press(action: String, down: bool) -> void:
+static func _key(action: String, down: bool) -> void:
 	if down and not Input.is_action_pressed(action):
 		Input.action_press(action)
 	elif not down and Input.is_action_pressed(action):
@@ -56,7 +56,7 @@ func _shows(n: Node, s: String) -> bool:
 # ------------------------------------------------------------------ 1. home: chop
 func _home_frame(home, hg: HomeGather, down: bool) -> void:
 	var fresh: bool = down and not Input.is_action_pressed("interact")
-	_press("interact", down)
+	_key("interact", down)
 	if fresh:
 		hg.use(home.interact)  # what home does with a fresh press at a tree
 	HoldTeach.clock += DT
@@ -135,14 +135,14 @@ func _home_chop() -> void:
 		)
 	)
 	ok(HoldTeach.count("chop") == 1, "home: the hold counts once (saved: %s)" % str(Settings.get_v(HoldTeach.SETTING)))
-	_press("interact", false)
+	_key("interact", false)
 	home.queue_free()
 
 
 # ------------------------------------------------------------------ 2. match: glide
 func _air_frame(down: bool) -> void:
 	var was := Input.is_action_pressed("jump")
-	_press("jump", down)
+	_key("jump", down)
 	for k in ["fire", "glide_btn", "sec", "sec_hold", "dash"]:
 		h.inp[k] = false
 	h.inp["glide_press_only"] = true
@@ -214,7 +214,7 @@ func _match_glide() -> void:
 	_air_frame(false)
 	ok(open_t >= HoldTeach.GLIDE_DONE_S, "match: holding Space keeps the glider open (%.2fs)" % open_t)
 	ok(HoldTeach.count("glide") == 1, "match: the held glide counts once")
-	_press("jump", false)
+	_key("jump", false)
 	m.queue_free()
 
 
