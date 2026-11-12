@@ -783,7 +783,8 @@ func slot_info(slot: String) -> Dictionary:
 func rmb_charge_f() -> float:
 	if ch_rmb >= float(rmb_charges()):
 		return ch_rmb
-	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")), 0.0, 1.0)
+	var full_cd := maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec"))
+	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / full_cd, 0.0, 1.0)
 
 func e_recastable() -> bool: return false
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.

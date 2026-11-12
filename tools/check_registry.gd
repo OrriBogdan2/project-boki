@@ -152,11 +152,13 @@ const CHECKS := {
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],      # --shots-dir=<dir>
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],      # choose what to rank: + and pips
 	"--rank-ui-shots": ["res://tools/rank_ui_shots.gd", "rank_ui_shots", null],      # --shots-dir=<dir>
-	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],      # armour-break cues
+	# armour-break cues
+	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],      # sound sets, loudness
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
-	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],      # charges + slot timers on the bar
+	# charges + slot timers on the bar
+	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
@@ -172,7 +174,8 @@ const CHECKS := {
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	# docs/decisions/0022
 	"--cc-exit-buffer-check": ["res://tools/cc_exit_buffer_check.gd", "cc_exit_buffer_check", null],
-	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],      # a tap inside a hit-stop goes when it ends
+	# a tap inside a hit-stop goes when it ends
+	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185
 	"--wirerun-dist-check": ["res://tools/wirerun_dist_check.gd", "wirerun_dist_check", null],      # Sparkle 11-10
@@ -246,7 +249,8 @@ const CHECKS := {
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
 	"--boki-idle-check": ["res://tools/boki_idle_check.gd", "boki_idle_check", null],    # rigged Boki idles and fidgets
-	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],    # a strip of every idle and fidget
+	# a strip of every idle and fidget
+	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],
 	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],      # rigged Boki gait gate
 	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],      # rigged Boki gait strips
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
@@ -277,7 +281,8 @@ const CHECKS := {
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
-	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],      # every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
+	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
+	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--first15-shots": ["res://tools/first15_shots.gd", "first15_shots", null],      # --shots-dir=<dir> --size=WxH
@@ -380,7 +385,8 @@ const CHECKS := {
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],
 	# 2 games, laggy relay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
-	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],      # 2 games, 100 ms, 2% loss
+	# 2 games, 100 ms, 2% loss
+	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
 	"--summon-press-check": ["res://tools/summon_press_check.gd", "summon_press_check", null],      # 2 games, 100 ms
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
@@ -396,10 +402,13 @@ const CHECKS := {
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
-	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # summon ring + tags on the Boki box; --shots-dir=<dir>
-	"--summon-leash-check": ["res://tools/summon_leash_check.gd", "summon_leash_check", null],      # the summon lane and leash
+	# summon ring + tags on the Boki box; --shots-dir=<dir>
+	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],
+	# the summon lane and leash
+	"--summon-leash-check": ["res://tools/summon_leash_check.gd", "summon_leash_check", null],
 	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],      # --shots-dir=<dir>
-	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],      # down/death card, spectate cycle
+	# down/death card, spectate cycle
+	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
@@ -430,8 +439,10 @@ const CHECKS := {
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 	"--camera-fast-check": ["res://tools/camera_fast_check.gd", "camera_fast_check", "check"],      # locked follow
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
-	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],      # mashing LMB never beats holding
-	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],      # press -> first motion or shot
+	# mashing LMB never beats holding
+	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
+	# press -> first motion or shot
+	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

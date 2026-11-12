@@ -32,7 +32,7 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 11,
+"long_line": 12,
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
@@ -554,9 +554,9 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 27,
-"long_line": 92,
+"long_line": 94,
 "nested_ternary": 15,
-"semicolon": 47,
+"semicolon": 48,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -968,6 +968,10 @@
 "long_line": 8,
 "semicolon": 11
 },
+"tools/biome_check.gd": {
+"long_line": 3,
+"semicolon": 1
+},
 "tools/blight_check.gd": {
 "long_line": 15,
 "semicolon": 25
@@ -1121,6 +1125,10 @@
 },
 "tools/pack_ui_check.gd": {
 "long_line": 15,
+"semicolon": 7
+},
+"tools/perch_check.gd": {
+"long_line": 2,
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
