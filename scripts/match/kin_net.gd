@@ -3,7 +3,7 @@ extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
 ##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate)]
-##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
+##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's, release's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
 ##     mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), unbond (a captor no longer carries a Boki: KinTrack; extra = its uid; Net 0.17.0; the bond itself starts from the "caught" event, which now carries the owner's nid, and "gdrop" puts a dropped Boki back in the world), scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game runs the rescue and the recovery timer; other
@@ -35,6 +35,8 @@ static func hunter_extra(h: Hunter) -> Array:
 		pose = "%s~%d" % [k.anim_id, k.anim_n % 100]
 	if pose == "":
 		pose = KinDowned.rescue_pose(h)
+	if pose == "" and MergeKit.releasing(h):      # (never with a newer kit move id: the same snapshot carries it)
+		pose = MergeMoves.RELEASE
 	return [encode_form(f) if shown else "", snappedf(float(h.merge_st.get("t", 0.0)), 0.1), snappedf(sh.x, 0.5), snappedf(sh.y, 0.5), pose]
 
 static func apply_hunter(h: Hunter, it: Array) -> void:
@@ -123,8 +125,6 @@ static func on_event(m: Match, x: Array) -> void:
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":
-			if e is Hunter:
-				(e as Hunter).set_meta(MergeMoves.OUT_AT, m.time)      # (the release move, MergeKit.anim_state)
 			if String(x[6]) == "shell" and e is Hunter:
 				(e as Hunter).set_meta("shell_break_at", m.time)
 				(e as Hunter).set_meta("shell_break_col", (e as Hunter).get_meta("mf_glow", Color.WHITE))

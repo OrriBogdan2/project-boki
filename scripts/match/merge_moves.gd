@@ -21,7 +21,7 @@ const CROUCH := [0.8, -1.4, 0.6, -1.2]
 const TUCK := [1.1, -1.7, 1.0, -1.6]
 const STRAIGHT := [-0.3, -0.2, -0.3, -0.2]
 const RELEASE := "mf_release"
-const OUT_AT := "mf_out_at"     # hunter meta: when the merge ended (the release plays from it, here and in other games)
+const OUT_AT := "mf_out_at"     # hunter meta on the owner's game: when the merge ended (MergeKit.releasing)
 
 const MOVES := {
 	# the transformation: crouch as the Boki leaps up, spring open as it lands (0.45s), settle by 0.7
