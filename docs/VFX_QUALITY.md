@@ -151,7 +151,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25: the E / X wedges now have a lit front on the hit (ext/vfx-grimble-wedges, below). Left: LMB / X slugs still barely read at match zoom in the GPU reel (trail 0.34 m is not enough) |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25: the E / X wedges now have a lit front on the hit (ext/vfx-grimble-wedges, below); 26 again after ext/vfx-grimble-data (all looks on data, non-gameplay chain rings gone). Left: LMB / X slugs still barely read at match zoom in the GPU reel (trail 0.34 m is not enough) |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
@@ -194,8 +194,17 @@ rides down through the air smash (`dive_anchor`) and that stands planted where h
 0.15 s, 0.25 s planted, 0.3 s fade). Deleted: the chain ring at his feet while he reels and the one on the air smash's
 landing spot (a ground ring means gameplay; AimKit's landing circle stays), and the kit's own stun spiral (the shared
 StatusLooks stun stars show it). Palette stays his archetype's coin gold `#ffc832` (`steel` and `bone` added for the
-props). Fans keep the wedges' lit fronts. Score not re-taken here; the GPU reel pair (`--hero-vfx-reel
---reel-hero=dredge`, new part `dive`) is the before/after for this change.
+props). Fans keep the wedges' lit fronts.
+
+Score: **26, unchanged** (R 4, S 4, L 4, T 4, Sc 3, C 4, Snd 3). Before/after `--hero-vfx-reel --reel-hero=dredge`
+pair taken under xvfb + opengl3 (llvmpipe) on rpc7, because the GPU queue was ~70 jobs deep (jobq `20261112-024106-08856`
+before, `20261112-022905-18992` after, still queued). Before = ext/vfx-grimble-wedges 141ed7987 with this branch's reel
+tool (so it has the `dive` part); after = this branch. Side by side (before left) in
+`docs/shots/vfx-grimble-data/<part>_before_after_xvfb.jpg`. LMB, RMB, hook, E and X look the same frame for frame: the
+hook, chain and fan fronts carry over. The air smash's dashed gold chain ring round the landing spot is gone (AimKit's
+landing circle stays), and the anchor reads the same on the way down and once planted. That cleans up the dive, but no
+axis moves a whole point: Scale is still the slugs (backlog 9). Card procs (Storm Arc, Echo Chain) and damage numbers
+differ between the two runs because the cards roll on their own. They are not part of this change.
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
