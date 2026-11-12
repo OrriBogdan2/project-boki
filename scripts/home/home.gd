@@ -1117,6 +1117,8 @@ func _process(delta: float) -> void:
 			if Input.is_action_just_pressed("play"): _play_with_kin(interact["k"])
 			elif Input.is_action_just_pressed("talk"): _open_chat(interact["k"]["rec"])
 			elif Input.is_action_just_pressed("details"): _open_kin(interact["k"]["rec"])
+		elif interact["kind"] == "site" and Input.is_action_just_pressed("details"):
+			hob.open_site(interact)
 
 # ---- moving at home: walk, jump, dash (Shift, your class's dodge) and glide (press Space again in the air).
 # py is your feet's height (terraces are 0.8 each). Off the edge you can glide over to another isle;
@@ -2136,6 +2138,7 @@ func _find_interact() -> void:
 		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], [Settings.key_cap("interact") + " hold", "Pick up"]]
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
+		if best["kind"] == "site": pairs.append([Settings.key_cap("details"), "Assign Boki"])
 	# the prompt is keycaps and words, rebuilt only when what it says changes
 	var sig := str(pairs)
 	if String(prompt_box.get_meta("sig", "")) != sig:
