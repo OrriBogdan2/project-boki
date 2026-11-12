@@ -16,14 +16,14 @@ static func minimap(hud, to_map: Callable, on_map: Callable, hold: bool) -> void
 	var m: Match = hud.m
 	if m.blight == null or m.player == null:
 		return
-	var N: BlightNests = m.blight.nests
-	for n in N.list:
+	var nst: BlightNests = m.blight.nests
+	for n in nst.list:
 		var stir: bool = n["stir_at"] != INF
 		if not MapDetail.shows("nest", hold, stir or m.player.flat_dist(n["pos"]) < NEAR_M):
 			continue
 		var pv: Vector2 = to_map.call(n["pos"])
 		if on_map.call(pv, 4.0):
-			_nest(hud, pv, MapDetail.ICON_R * 0.75, n, N)
+			_nest(hud, pv, MapDetail.ICON_R * 0.75, n, nst)
 
 
 static func full_map(fm) -> void:
@@ -37,9 +37,9 @@ static func full_map(fm) -> void:
 			_nest(fm.hud, pv, ICON_S, n, m.blight.nests)
 
 
-static func _nest(hud, pv: Vector2, s: float, n: Dictionary, N: BlightNests) -> void:
+static func _nest(hud, pv: Vector2, s: float, n: Dictionary, nst: BlightNests) -> void:
 	var c: Control = hud.c
-	var cooling := N.cooling(n)
+	var cooling := nst.cooling(n)
 	var col := DIM if cooling else COL
 	if n["stir_at"] != INF and fmod(Time.get_ticks_msec() / 1000.0, 0.3) < 0.15:
 		col = Color.WHITE
@@ -48,10 +48,6 @@ static func _nest(hud, pv: Vector2, s: float, n: Dictionary, N: BlightNests) -> 
 	Icons.draw(c, "egg", pv, s * 0.8, col)
 	var k := int(n["stock"])
 	for i in k:
-		c.draw_circle(
-			pv + Vector2((i - (k - 1) * 0.5) * s * 0.45, s * 1.35 + 2.5), maxf(0.9, s * 0.14), col
-		)
+		c.draw_circle(pv + Vector2((i - (k - 1) * 0.5) * s * 0.45, s * 1.35 + 2.5), maxf(0.9, s * 0.14), col)
 	if cooling:
-		hud._ctext(
-			pv + Vector2(0, -s * 1.6), Lairs.clock(N.refill_left(n)), 10, Color.WHITE, hud.big
-		)
+		hud._ctext(pv + Vector2(0, -s * 1.6), Lairs.clock(nst.refill_left(n)), 10, Color.WHITE, hud.big)

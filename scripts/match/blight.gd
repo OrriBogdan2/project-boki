@@ -43,9 +43,7 @@ var gone := false  # burrowed away (despawned), not killed
 var unseen := false  # out of the local player's sight: not drawn
 
 
-func init_blight(
-	match_node: Node, id: String, k: String, at: Vector3, level: float, d: BlightDir
-) -> void:
+func init_blight(match_node: Node, id: String, k: String, at: Vector3, level: float, d: BlightDir) -> void:
 	init_mob(match_node, id, k, at, 1.0)
 	dir = d
 	post = at
@@ -207,11 +205,7 @@ func sim(dt: float) -> void:
 					continue
 				if flat_dist(e) < e.r + r + 0.3 and absf(e.pos.y - pos.y) < 1.2:
 					lunge_hit[e.nid] = true
-					e.hurt(
-						float(md["dmg"]) * dmg_mult,
-						self,
-						{"kb": atk_dir * 3.0, "src": "mob", "tags": ["blight"]}
-					)
+					e.hurt(float(md["dmg"]) * dmg_mult, self, {"kb": atk_dir * 3.0, "src": "mob", "tags": ["blight"]})
 			if st_t <= 0.0:
 				st = "recover"
 				st_t = 0.5
@@ -251,9 +245,7 @@ func sim(dt: float) -> void:
 	if mkind == "bl_warden" and st != "windup":
 		look = Vector2(sin(cone_a), cos(cone_a))
 	if look.length() > 0.2:
-		face = lerp_angle(
-			face, atan2(-look.x, -look.y), minf(1.0, dt * (10.0 if mkind == "bl_skitter" else 3.0))
-		)
+		face = lerp_angle(face, atan2(-look.x, -look.y), minf(1.0, dt * (10.0 if mkind == "bl_skitter" else 3.0)))
 
 
 func _skitter_think(dt: float, spd: float) -> Vector2:
@@ -321,12 +313,7 @@ func _skitter_think(dt: float, spd: float) -> Vector2:
 		wish = (to_t * clampf(d - hold, -1.0, 1.0) + side * 0.6) * spd * 0.7
 	elif d > want:
 		wish = dir_to(tgt) * spd
-	if (
-		engaged
-		and d <= float(md["range"]) + tgt.r
-		and cd <= 0.0
-		and m.world.los(pos, tgt.pos, pos.y + 0.6)
-	):
+	if engaged and d <= float(md["range"]) + tgt.r and cd <= 0.0 and m.world.los(pos, tgt.pos, pos.y + 0.6):
 		_begin_attack()
 	return wish
 
@@ -338,9 +325,7 @@ func _warden_think(dt: float, spd: float) -> Vector2:
 		# patrol a little round its post, the light sweeping side to side
 		if heard != Vector3.INF:
 			heard_t += dt
-			cone_a = lerp_angle(
-				cone_a, atan2(heard.x - pos.x, heard.z - pos.z), minf(1.0, dt * 2.0)
-			)
+			cone_a = lerp_angle(cone_a, atan2(heard.x - pos.x, heard.z - pos.z), minf(1.0, dt * 2.0))
 			if heard_t > 6.0:
 				sweep0 = cone_a
 				heard = Vector3.INF
@@ -422,11 +407,7 @@ func _in_light() -> Hunter:
 			continue
 		if rel.normalized().dot(cdir) < cos(CONE_HALF) and d > 1.6:
 			continue
-		if (
-			d > 2.5
-			and (m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos))
-			and h.reveal_t <= 0.0
-		):
+		if d > 2.5 and (m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)) and h.reveal_t <= 0.0:
 			continue
 		if m.lairs and not m.lairs.lair_of(h.pos).is_empty():
 			continue
@@ -470,9 +451,7 @@ func shriek_fx() -> void:
 
 func _begin_attack() -> void:
 	if dir and tgt:
-		var tm: int = (
-			tgt.team if tgt is Hunter else (tgt.owner_h.team if tgt is Kin and tgt.owner_h else -1)
-		)
+		var tm: int = tgt.team if tgt is Hunter else (tgt.owner_h.team if tgt is Kin and tgt.owner_h else -1)
 		dmg_mult = BlightDir.dmg_k(dir.level_vs(self, tm))
 	super._begin_attack()
 
@@ -601,17 +580,12 @@ func render(delta: float, alpha: float) -> void:
 			lg.rotation.z = sin(ph) * 0.12 * (1.0 if moving else 0.25)
 		var hood := body.get_node_or_null("Hood") as Node3D
 		if hood:
-			hood.rotation.x = (
-				-wind * 0.35 + sin(m.time * 1.3) * 0.04 + (0.25 if m.time - shriek_t < 0.8 else 0.0)
-			)
+			hood.rotation.x = (-wind * 0.35 + sin(m.time * 1.3) * 0.04 + (0.25 if m.time - shriek_t < 0.8 else 0.0))
 			hood.rotation.y = lerp_angle(hood.rotation.y, 0.0, delta * 4.0)
 	# the embers breathe; brighter as it winds up, flaring on a shriek
 	if model.has_meta("ember"):
 		var flare: float = (
-			1.0
-			+ wind * 1.4
-			+ (1.6 if m.time - shriek_t < 0.6 else 0.0)
-			+ spot * (3.0 if mkind == "bl_nest" else 0.8)
+			1.0 + wind * 1.4 + (1.6 if m.time - shriek_t < 0.6 else 0.0) + spot * (3.0 if mkind == "bl_nest" else 0.8)
 		)
 		if mkind == "bl_nest":
 			flare *= 0.25 + 0.75 * clampf(cone_a * 3.0, 0.0, 1.0)
@@ -630,16 +604,9 @@ func render(delta: float, alpha: float) -> void:
 		var L := cone_len()
 		cone.scale = Vector3(L, 1.0, L)
 		var alert := st in ["chase", "windup", "recover"] and tgt != null
-		var c := Color(1.0, 0.62, 0.25).lerp(
-			Color(1.0, 0.18, 0.1), clampf(spot, 0.0, 1.0) if not alert else 1.0
-		)
+		var c := Color(1.0, 0.62, 0.25).lerp(Color(1.0, 0.18, 0.1), clampf(spot, 0.0, 1.0) if not alert else 1.0)
 		cone_mat.set_shader_parameter("col", c)
 		var night_k: float = 1.0 + (1.0 - m.sight_k) * 0.7
 		cone_mat.set_shader_parameter(
-			"strength",
-			(
-				(0.32 + spot * 0.25 + (0.25 if alert else 0.0))
-				* night_k
-				* (0.9 + 0.1 * sin(m.time * 5.0))
-			)
+			"strength", (0.32 + spot * 0.25 + (0.25 if alert else 0.0)) * night_k * (0.9 + 0.1 * sin(m.time * 5.0))
 		)

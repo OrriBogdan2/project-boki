@@ -13,22 +13,23 @@ const POP_XP_R := 14.0
 
 var dir: BlightDir
 var m: Match
-var R: Dictionary
+var cfg: Dictionary
 ## {pos, island, full, stock, refill_at (INF unless empty), stir_at (INF unless stirring), waker, mob}
 var list: Array = []
 var released := 0  # Skitters that climbed out of a nest (for checks)
 var _tick_t := 0.0
 var _tide_k := -1
+var _d := {}  # the --blight-demo=nest run (demo())
 
 
 func _init(d: BlightDir) -> void:
 	dir = d
 	m = d.m
-	R = Content.rules("blight_nests")
+	cfg = Content.rules("blight_nests")
 
 
 func rule(k: String) -> float:
-	return float(R.get(k, 0.0))
+	return float(cfg.get(k, 0.0))
 
 
 # ------------------------------------------------------------------ placement (every peer)
@@ -39,8 +40,8 @@ func place() -> void:
 	var w := m.world
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([int(m.seed_val), "nests"])
-	var per: Array = R.get("per_island", [1, 1, 2])
-	var stock: Array = R.get("stock", [6, 7, 8])
+	var per: Array = cfg.get("per_island", [1, 1, 2])
+	var stock: Array = cfg.get("stock", [6, 7, 8])
 	var gap := rule("space_m")
 	for ii in w.islands.size():
 		var dg := dir.island_danger(ii)
@@ -66,9 +67,7 @@ func place() -> void:
 func _spot(ii: int, r: RandomNumberGenerator, gap: float) -> Vector3:
 	var w := m.world
 	var avoid: Array = (
-		w.camp_spots.map(func(c): return c["pos"])
-		+ w.spawns
-		+ w.warden_posts.map(func(c): return c["pos"])
+		w.camp_spots.map(func(c): return c["pos"]) + w.spawns + w.warden_posts.map(func(c): return c["pos"])
 	)
 	if m.exits:
 		avoid += m.exits.list.map(func(x): return x["pos"])
@@ -78,10 +77,7 @@ func _spot(ii: int, r: RandomNumberGenerator, gap: float) -> Vector3:
 			continue
 		if not w.roomy(int(p.x), int(p.z), 30):
 			continue
-		if (
-			dir._near_any(p, avoid, 9.0)
-			or dir._near_any(p, list.map(func(n): return n["pos"]), gap)
-		):
+		if dir._near_any(p, avoid, 9.0) or dir._near_any(p, list.map(func(n): return n["pos"]), gap):
 			continue
 		if m.lairs and not m.lairs.lair_of(p, 6.0).is_empty():
 			continue
@@ -146,20 +142,14 @@ func on_noise(at: Vector3, loud: float) -> void:
 	if loud < 12.0:
 		return  # footsteps and dashes don't carry to a nest; shots, blasts and chests do
 	for n in list:
-		if (
-			ready(n)
-			and Vector2(at.x - n["pos"].x, at.z - n["pos"].z).length() < loud * rule("noise_k")
-		):
+		if ready(n) and Vector2(at.x - n["pos"].x, at.z - n["pos"].z).length() < loud * rule("noise_k"):
 			wake(n, at)
 
 
 ## A Warden shrieked: nests near it give up what they hold. It never makes Skitters of its own.
 func on_shriek(from: Vector3, toward: Vector3) -> void:
 	for n in list:
-		if (
-			ready(n)
-			and Vector2(from.x - n["pos"].x, from.z - n["pos"].z).length() < rule("shriek_r")
-		):
+		if ready(n) and Vector2(from.x - n["pos"].x, from.z - n["pos"].z).length() < rule("shriek_r"):
 			wake(n, toward)
 
 
@@ -204,9 +194,7 @@ func tick(dt: float) -> void:
 			b.spot = (
 				0.0
 				if n["stir_at"] == INF
-				else clampf(
-					1.0 - (float(n["stir_at"]) - m.time) / maxf(0.1, rule("warn_s")), 0.0, 1.0
-				)
+				else clampf(1.0 - (float(n["stir_at"]) - m.time) / maxf(0.1, rule("warn_s")), 0.0, 1.0)
 			)
 			b.cone_a = float(n["stock"]) / maxf(1.0, float(n["full"]))
 	_tick_t -= dt
@@ -228,13 +216,7 @@ func tick(dt: float) -> void:
 
 func _wakes(n: Dictionary, h: Hunter) -> bool:
 	var p: Vector3 = n["pos"]
-	if (
-		not h.targetable()
-		or h.out
-		or h.extracted
-		or absf(h.pos.y - p.y) > 3.0
-		or h.flat_dist(p) > rule("wake_r")
-	):
+	if not h.targetable() or h.out or h.extracted or absf(h.pos.y - p.y) > 3.0 or h.flat_dist(p) > rule("wake_r"):
 		return false
 	return m.world.los(p, h.pos, p.y + 0.7)
 
@@ -272,16 +254,9 @@ func _release(n: Dictionary) -> void:
 	var p: Vector3 = n["pos"]
 	var near := 0
 	for b in m.mobs:
-		if (
-			b is Blight
-			and not b.dead
-			and b.mkind == "bl_skitter"
-			and b.flat_dist(p) < rule("area_r")
-		):
+		if b is Blight and not b.dead and b.mkind == "bl_skitter" and b.flat_dist(p) < rule("area_r"):
 			near += 1
-	var k := mini(
-		int(n["stock"]), mini(int(rule("area_cap")) - near, dir.cap() - dir.skitters_alive())
-	)
+	var k := mini(int(n["stock"]), mini(int(rule("area_cap")) - near, dir.cap() - dir.skitters_alive()))
 	var i := list.find(n)
 	var l := dir.level_here(p)
 	for j in maxi(0, k):
@@ -314,15 +289,7 @@ func _refill(n: Dictionary) -> void:
 func _send(n: Dictionary) -> void:
 	if m.net_on and dir.host:
 		var left := float(n["refill_at"]) - m.time if cooling(n) else -1.0
-		m.net_event(
-			[
-				"nest",
-				list.find(n),
-				int(n["stock"]),
-				snappedf(left, 0.1),
-				1 if n["stir_at"] != INF else 0
-			]
-		)
+		m.net_event(["nest", list.find(n), int(n["stock"]), snappedf(left, 0.1), 1 if n["stir_at"] != INF else 0])
 
 
 ## A client hears a nest change (Match._net_ev "nest").
@@ -344,68 +311,65 @@ func refill_left(n: Dictionary) -> float:
 
 
 # ------------------------------------------------------------------ the demo (--blight-demo=nest)
-var _d := {}
 
 
 ## A recorded beat for the decision's MP4: walk up to a nest, it stirs, its Skitters climb out, you
 ## clear them and break it (gems, XP, the feed line), then walk round it while it stays quiet.
 func demo() -> void:
-	var P := m.player
-	P.hp = P.max_hp
-	if _d.is_empty() and not _demo_setup(P):
+	var pl := m.player
+	pl.hp = pl.max_hp
+	if _d.is_empty() and not _demo_setup(pl):
 		return
 	var n: Dictionary = _d["n"]
 	var nest: Blight = n["mob"]
 	var t := m.time - float(_d["t0"])
-	P.inp["move"] = Vector2.ZERO
-	P.inp["fire"] = false
+	pl.inp["move"] = Vector2.ZERO
+	pl.inp["fire"] = false
 	var tgt: Blight = null
 	for b in m.mobs:
 		if b is Blight and not b.dead and b.mkind == "bl_skitter":
 			b.cd = maxf(b.cd, 1.0)  # (they swarm and circle, but hold the bite for the shot)
-			if b.flat_dist(P) < 3.0:
-				var back: Vector2 = -b.dir_to(P) * (3.0 - b.flat_dist(P))
+			if b.flat_dist(pl) < 3.0:
+				var back: Vector2 = -b.dir_to(pl) * (3.0 - b.flat_dist(pl))
 				b.pos += Vector3(back.x, 0, back.y)
-			if tgt == null or P.flat_dist(b) < P.flat_dist(tgt):
+			if tgt == null or pl.flat_dist(b) < pl.flat_dist(tgt):
 				tgt = b
 	match String(_d["ph"]):
 		"walk":
-			var to := Vector3(n["pos"]) - P.pos
-			P.inp["move"] = Vector2(to.x, to.z).normalized()
-			P.inp["aim"] = Vector3(n["pos"]) + Vector3(0, 0.5, 0)
+			var to := Vector3(n["pos"]) - pl.pos
+			pl.inp["move"] = Vector2(to.x, to.z).normalized()
+			pl.inp["aim"] = Vector3(n["pos"]) + Vector3(0, 0.5, 0)
 			if n["stir_at"] != INF or t > 8.0:
 				_d["ph"] = "fight"
 		"fight":
-			P.inp["aim"] = (tgt.pos if tgt else Vector3(n["pos"])) + Vector3(0, 0.5, 0)
+			pl.inp["aim"] = (tgt.pos if tgt else Vector3(n["pos"])) + Vector3(0, 0.5, 0)
 			if tgt:
-				P.inp["fire"] = true
+				pl.inp["fire"] = true
 				if tgt != _d.get("tgt"):
 					_d["tgt"] = tgt
 					_d["tgt_t"] = m.time
 				elif m.time - float(_d["tgt_t"]) > 0.9:
-					tgt.hurt(9999.0, P, {})  # (a backstop so the clip keeps time with any kit)
+					tgt.hurt(9999.0, pl, {})  # (a backstop so the clip keeps time with any kit)
 			elif int(n["stock"]) <= 0 and n["stir_at"] == INF:
 				_d["ph"] = "pop"
 				_d["pop_t"] = m.time
 		"pop":
-			P.inp["aim"] = Vector3(n["pos"]) + Vector3(0, 0.5, 0)
-			P.inp["fire"] = true
+			pl.inp["aim"] = Vector3(n["pos"]) + Vector3(0, 0.5, 0)
+			pl.inp["fire"] = true
 			if nest and not nest.dead and m.time - float(_d["pop_t"]) > 2.5:
-				nest.hurt(9999.0, P, {})
+				nest.hurt(9999.0, pl, {})
 			if nest == null or nest.dead:
 				_d["ph"] = "quiet"
 				_d["q_t"] = m.time
 		"quiet":
 			var a := (m.time - float(_d["q_t"])) * 0.5
 			var goal := Vector3(n["pos"]) + Vector3(cos(a), 0, sin(a)) * 5.0
-			var to2 := goal - P.pos
-			P.inp["move"] = (
-				Vector2(to2.x, to2.z).normalized() if to2.length() > 0.6 else Vector2.ZERO
-			)
-			P.inp["aim"] = Vector3(n["pos"]) + Vector3(0, 0.5, 0)
+			var to2 := goal - pl.pos
+			pl.inp["move"] = (Vector2(to2.x, to2.z).normalized() if to2.length() > 0.6 else Vector2.ZERO)
+			pl.inp["aim"] = Vector3(n["pos"]) + Vector3(0, 0.5, 0)
 
 
-func _demo_setup(P: Hunter) -> bool:
+func _demo_setup(pl: Hunter) -> bool:
 	Settings.v["tips"] = false
 	if m.hud:
 		m.hud.guide_hidden = true
@@ -420,12 +384,8 @@ func _demo_setup(P: Hunter) -> bool:
 			var q := m.world.free_spot_near(
 				Vector3(n["pos"]) + Vector3(cos(a), 0, sin(a)) * 13.0, [n["pos"]], 1.0, 0.45, 1.5
 			)
-			var d := P.flat_dist(n["pos"])
-			if (
-				absf(q.y - n["pos"].y) < 1.0
-				and m.world.los(n["pos"], q, n["pos"].y + 0.7)
-				and d < bd
-			):
+			var d := pl.flat_dist(n["pos"])
+			if absf(q.y - n["pos"].y) < 1.0 and m.world.los(n["pos"], q, n["pos"].y + 0.7) and d < bd:
 				bd = d
 				best = n
 				stand = q
@@ -433,7 +393,7 @@ func _demo_setup(P: Hunter) -> bool:
 	if best.is_empty():
 		return false
 	for o in m.hunters:
-		if o != P:
+		if o != pl:
 			o.ctrl = "idle"
 	for b in m.mobs:
 		if b.flat_dist(best["pos"]) < 40.0 and not (b is Blight and b.mkind == "bl_nest"):
@@ -442,6 +402,6 @@ func _demo_setup(P: Hunter) -> bool:
 			else:
 				b.dead = true
 				b.visible = false
-	P.teleport(stand)
+	pl.teleport(stand)
 	_d = {"t0": m.time, "n": best, "ph": "walk"}
 	return true

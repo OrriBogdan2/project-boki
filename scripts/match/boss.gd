@@ -605,7 +605,7 @@ func _atk_brood() -> void:
 	for i in n:
 		var a := TAU * i / n + 0.3 * float(add_k % 3)      # fixed spots round it (they turn a little each brood)
 		var at := clamp_in(pos + Vector3(cos(a), 0, sin(a)) * 3.0, 0.8)
-		var kind: String = BROOD_ADDS[add_k % (2 + mini(phase, 2))]
+		var add_kind: String = BROOD_ADDS[add_k % (2 + mini(phase, 2))]
 		add_k += 1
 		at.y = centre().y
 		# egg sacs: glowing eggs that wobble, then burst into adds
@@ -620,7 +620,7 @@ func _atk_brood() -> void:
 		_at(w + 2.2, func():
 			m.fx.burst(at + Vector3(0, 0.4, 0), Color("e0b040"), 16, 4.0, 0.5, 6.0)
 			m.sfx("die_small", at, -2.0, 1.3)
-			m.lairs.spawn_add(lair, kind, at))
+			m.lairs.spawn_add(lair, add_kind, at))
 
 func _atk_burrow() -> void:
 	_begin("burrow", 3.6, "burrow")

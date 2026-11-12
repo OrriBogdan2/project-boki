@@ -28,6 +28,7 @@ var raid_k := 1.0
 var host := true
 var land_at := {}                 # team -> match time its squad landed
 var noises: Array = []            # {pos, loud, t, kind} the last few seconds of noise (for tests and the HUD)
+var nests: BlightNests
 var _tick_t := 0.0
 var _vis_t := 0.0
 var _step_t := 0.0
@@ -35,7 +36,6 @@ var _lvl_t := 0.0
 var spawned := 0
 var shrieks := 0
 var wardens: Array = []
-var nests: BlightNests
 
 static func enabled(opts: Dictionary) -> bool:
 	if "--no-blight" in OS.get_cmdline_user_args():
@@ -208,7 +208,7 @@ func skitters_alive() -> int:
 # ------------------------------------------------------------------ noise
 ## Something loud happened (Match.note_sound, chests, dashes, running). The Blight in earshot
 ## come to look, and a loud one wakes a nest close by (BlightNests.on_noise).
-func noise(at: Vector3, kind: String, by = null) -> void:
+func noise(at: Vector3, kind: String, _by = null) -> void:
 	var loud: float = float(LOUD.get(kind, 10.0))
 	noises.append({"pos": at, "loud": loud, "t": m.time, "kind": kind})
 	if noises.size() > 48:

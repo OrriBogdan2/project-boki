@@ -43,9 +43,7 @@ static func build(kind: String) -> Node3D:
 	root.set_meta("mats", mats)
 	root.set_meta("sculpted", true)
 	for k in ["ember", "hot"]:
-		(M[k] as ShaderMaterial).set_meta(
-			"glow0", float((M[k] as ShaderMaterial).get_shader_parameter("glow"))
-		)
+		(M[k] as ShaderMaterial).set_meta("glow0", float((M[k] as ShaderMaterial).get_shader_parameter("glow")))
 	root.set_meta("pulse", [M["ember"], M["hot"]])
 	root.set_meta("ember", [M["ember"], M["hot"]])
 	MobModels._finish(root)  # a mesh per material per pivot: a few draw calls a body
@@ -60,9 +58,7 @@ static func _ember(c: Color, g: float) -> ShaderMaterial:
 
 ## A jagged glowing seam across a surface: short boxes end to end, turning at random-looking (fixed)
 ## angles, laid just above y.
-static func _seam(
-	parent: Node3D, mat: Material, from: Vector2, dirs: Array, y: float, w := 0.035, tilt := 0.0
-) -> void:
+static func _seam(parent: Node3D, mat: Material, from: Vector2, dirs: Array, y: float, w := 0.035, tilt := 0.0) -> void:
 	var p := from
 	for d in dirs:
 		var v: Vector2 = d
@@ -82,11 +78,7 @@ static func _seam(
 static func _skitter(body: Node3D, M: Dictionary) -> void:
 	# the shell: a flat six-sided stone dome, a darker underside, a ridge of bone plates
 	var shell := Models.part(
-		body,
-		Models.cyl(0.36, 0.44, 0.16, 6),
-		M["stone"],
-		Vector3(0, 0.42, 0.02),
-		Vector3(1.0, 1.0, 1.22)
+		body, Models.cyl(0.36, 0.44, 0.16, 6), M["stone"], Vector3(0, 0.42, 0.02), Vector3(1.0, 1.0, 1.22)
 	)
 	shell.rotation.y = PI / 6.0
 	Models.part(
@@ -122,18 +114,10 @@ static func _skitter(body: Node3D, M: Dictionary) -> void:
 		[Vector2(0.12, 0.14), Vector2(-0.04, 0.16), Vector2(0.1, 0.12), Vector2(0.02, 0.18)],
 		0.59
 	)
-	_seam(
-		body,
-		M["ember"],
-		Vector2(0.26, -0.22),
-		[Vector2(-0.1, 0.16), Vector2(0.06, 0.14), Vector2(-0.08, 0.2)],
-		0.59
-	)
+	_seam(body, M["ember"], Vector2(0.26, -0.22), [Vector2(-0.1, 0.16), Vector2(0.06, 0.14), Vector2(-0.08, 0.2)], 0.59)
 	_seam(body, M["ember"], Vector2(-0.3, 0.22), [Vector2(0.18, 0.06), Vector2(0.14, -0.05)], 0.55)
 	Models.part(body, Models.box(0.2, 0.04, 0.05), M["hot"], Vector3(0, 0.42, -0.5))
-	Models.part(
-		body, Models.sphere(0.07, 8), M["hot"], Vector3(0, 0.36, -0.44), Vector3(1.6, 0.6, 0.8)
-	)
+	Models.part(body, Models.sphere(0.07, 8), M["hot"], Vector3(0, 0.36, -0.44), Vector3(1.6, 0.6, 0.8))
 	# eight bone legs, splayed all round: up to a knee, then down to a needle point
 	for i in 4:
 		for sx in [-1, 1]:
@@ -174,26 +158,14 @@ static func _warden(body: Node3D, M: Dictionary) -> void:
 		lg.rotation.y = -a
 		body.add_child(lg)
 		Models.part(
-			lg,
-			Models.cyl(0.04, 0.06, 0.8, 5),
-			M["bone"],
-			Vector3(0.36, 0.12, 0),
-			Vector3.ONE,
-			Vector3(0, 0, -1.25)
+			lg, Models.cyl(0.04, 0.06, 0.8, 5), M["bone"], Vector3(0.36, 0.12, 0), Vector3.ONE, Vector3(0, 0, -1.25)
 		)
 		Models.part(lg, Models.sphere(0.075, 6), M["dark"], Vector3(0.74, 0.3, 0))
 		Models.part(
-			lg,
-			Models.cyl(0.0, 0.045, 1.8, 5),
-			M["bone"],
-			Vector3(0.9, -0.55, 0),
-			Vector3.ONE,
-			Vector3(0, 0, -0.18)
+			lg, Models.cyl(0.0, 0.045, 1.8, 5), M["bone"], Vector3(0.9, -0.55, 0), Vector3.ONE, Vector3(0, 0, -0.18)
 		)
 	# the body: a ribcage of bone hanging under a stone carapace
-	Models.part(
-		body, Models.sphere(0.5, 14), M["dark"], Vector3(0, 1.4, 0.1), Vector3(1.0, 0.55, 1.35)
-	)
+	Models.part(body, Models.sphere(0.5, 14), M["dark"], Vector3(0, 1.4, 0.1), Vector3(1.0, 0.55, 1.35))
 	for i in 5:
 		var z := -0.3 + i * 0.16
 		Models.part(
@@ -204,13 +176,7 @@ static func _warden(body: Node3D, M: Dictionary) -> void:
 			Vector3(1.0, 1.0, 1.0),
 			Vector3(0, 0, PI / 2.0)
 		)
-		Models.part(
-			body,
-			Models.sphere(0.05, 6),
-			M["ember"],
-			Vector3(0, 1.1, z + 0.06),
-			Vector3(1.0, 0.6, 0.6)
-		)
+		Models.part(body, Models.sphere(0.05, 6), M["ember"], Vector3(0, 1.1, z + 0.06), Vector3(1.0, 0.6, 0.6))
 	Models.part(
 		body,
 		Models.cyl(0.5, 0.56, 0.24, 7),
@@ -240,21 +206,15 @@ static func _warden(body: Node3D, M: Dictionary) -> void:
 		Vector3(1.0, 1.0, 1.1),
 		Vector3(-0.75, 0, 0)
 	)
-	Models.part(
-		hood, Models.sphere(0.3, 10), M["dark"], Vector3(0, 0.22, -0.22), Vector3(0.9, 1.0, 0.5)
-	)
+	Models.part(hood, Models.sphere(0.3, 10), M["dark"], Vector3(0, 0.22, -0.22), Vector3(0.9, 1.0, 0.5))
 	_seam(hood, M["ember"], Vector2(-0.2, 0.2), [Vector2(0.06, -0.12), Vector2(0.08, -0.06)], 0.5)
-	_seam(
-		hood, M["ember"], Vector2(0.24, 0.3), [Vector2(-0.04, -0.14), Vector2(-0.08, -0.08)], 0.45
-	)
+	_seam(hood, M["ember"], Vector2(0.24, 0.3), [Vector2(-0.04, -0.14), Vector2(-0.08, -0.08)], 0.45)
 	var lamp := Node3D.new()
 	lamp.name = "Lamp"
 	lamp.position = Vector3(0, 0.22, -0.4)
 	hood.add_child(lamp)
 	Models.part(lamp, Models.sphere(0.16, 10), M["hot"], Vector3.ZERO, Vector3(1.0, 1.3, 0.7))
-	Models.part(
-		lamp, Models.sphere(0.24, 10), M["ember"], Vector3(0, 0, 0.06), Vector3(1.0, 1.25, 0.4)
-	)
+	Models.part(lamp, Models.sphere(0.24, 10), M["ember"], Vector3(0, 0, 0.06), Vector3(1.0, 1.25, 0.4))
 	# a bone spine down the back, and a tail of plates trailing behind (the teardrop's point)
 	for i in 4:
 		Models.part(
@@ -275,30 +235,23 @@ static func _warden(body: Node3D, M: Dictionary) -> void:
 		)
 
 
-static func _nest(body: Node3D, M: Dictionary) -> void:
+static func _nest(body: Node3D, mats: Dictionary) -> void:
 	# the mound: stacked stone rings, wide and low, a darker lip round the pit
-	Models.part(body, Models.cyl(0.95, 1.25, 0.35, 9), M["stone"], Vector3(0, 0.17, 0))
+	Models.part(body, Models.cyl(0.95, 1.25, 0.35, 9), mats["stone"], Vector3(0, 0.17, 0))
 	Models.part(
-		body,
-		Models.cyl(0.6, 0.95, 0.3, 9),
-		M["stone"],
-		Vector3(0, 0.48, 0),
-		Vector3.ONE,
-		Vector3(0, PI / 9.0, 0)
+		body, Models.cyl(0.6, 0.95, 0.3, 9), mats["stone"], Vector3(0, 0.48, 0), Vector3.ONE, Vector3(0, PI / 9.0, 0)
 	)
-	Models.part(body, Models.cyl(0.42, 0.55, 0.12, 9), M["dark"], Vector3(0, 0.66, 0))
+	Models.part(body, Models.cyl(0.42, 0.55, 0.12, 9), mats["dark"], Vector3(0, 0.66, 0))
 	# the pit: an ember glow sunk in the top, a hot core
-	Models.part(body, Models.cyl(0.4, 0.4, 0.04, 9), M["ember"], Vector3(0, 0.71, 0))
-	Models.part(
-		body, Models.sphere(0.22, 10), M["hot"], Vector3(0, 0.66, 0), Vector3(1.0, 0.45, 1.0)
-	)
+	Models.part(body, Models.cyl(0.4, 0.4, 0.04, 9), mats["ember"], Vector3(0, 0.71, 0))
+	Models.part(body, Models.sphere(0.22, 10), mats["hot"], Vector3(0, 0.66, 0), Vector3(1.0, 0.45, 1.0))
 	# ember seams down the sides (fixed angles), and bone spurs leaning outward
 	for i in 6:
 		var a := TAU * float(i) / 6.0 + 0.3
 		var o := Vector2(sin(a), cos(a))
 		_seam(
 			body,
-			M["ember"],
+			mats["ember"],
 			o * 0.62,
 			[o * 0.22 + o.orthogonal() * 0.08, o * 0.2 - o.orthogonal() * 0.1],
 			0.36 - 0.1 * float(i % 2),
@@ -309,7 +262,7 @@ static func _nest(body: Node3D, M: Dictionary) -> void:
 		Models.part(
 			body,
 			Models.cyl(0.0, 0.09, 0.7, 5),
-			M["bone"],
+			mats["bone"],
 			Vector3(sin(a) * 0.85, 0.5, cos(a) * 0.85),
 			Vector3.ONE,
 			Vector3(0.6 * cos(a), 0, -0.6 * sin(a))
