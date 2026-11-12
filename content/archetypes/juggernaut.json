@@ -43,5 +43,5 @@
 	"rank3": {"dash": "a shot dodged through the Rampage feeds your Rage", "sec": "+20% more damage on every Smash (+40% in all), and the Meteor Drop rests 2.4s less", "kin": "the cooldown is 37.5% shorter in all"},
 	"rank2": {"sec": "Rank 2: +20% damage on every Smash.", "dash": "Rank 2: recharge 10.4s -> 8.8s per charge; a third charge.", "kin": "Rank 2: cooldown 12.8s -> 11.2s."},
 	"rank_next": {"sec": "Rank 3: +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less (7.2s -> 4.8s).", "kin": "Rank 3: cooldown 12.8s -> 8s.", "dash": "Rank 3: recharge 10.4s -> 6.4s per charge; a shot dodged through the Rampage feeds your Rage."},
-	"tells": {"half": "red heat glowing through the pauldrons as Rage fills, steam from half", "full": "Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike cone while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards", "dash_spent": "dash pips dark"}
+	"tells": {"half": "red heat glowing through the pauldrons as Rage fills, steam from half", "full": "Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards", "dash_spent": "dash pips dark"}
 }
