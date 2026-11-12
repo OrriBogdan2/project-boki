@@ -270,3 +270,34 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## Cast pops (PRIORITIES area 4, blends and gaps; Nov 12)
+Measured by `--cast-pop-check` on the live AnimationTree: for each move, the farthest any hand, foot or the weapon tip sits
+between the locomotion pose and the clip's first frame (in) and between its last frame and the locomotion he returns to (out),
+standing (idle and the 6 s rest stance) and walking (worst phase of a stride). An upper-body move leaves the legs on the walk,
+so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` grows toward gap / 0.8 m/s but never past the
+kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
+(content/rules/warden_anim/hem.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
+
+The bow tip is the point that jumps: her idle, rest stance and walk carry the bow low on the left hand, every shot clip starts with it raised across the body (0.65 to 0.75 m at the tip, under 0.25 m at the hands). The blend-in cannot grow past the release key (0.04 to 0.06 s on the taps), so the shots keep their snap and the gap in stays; the blend back to the legs now takes the bow down over 0.24 to 0.40 s instead of 0.16. `arc_heavy_wind`, `pin_walk`, `arc_hail` and `mf_xform` start slower (their first keys allow it).
+
+| Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
+|---|---|---|---|---|---|---|
+| `arc_draw` | 0.06 | **0.66** weapon | **0.22** hand.L | **0.75** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `arc_tap` | **0.65** weapon | 0.06 | **0.74** weapon | **0.20** hand.L | 0.10 / 0.16 | 0.10 / 0.25 |
+| `arc_loose` | **0.69** weapon | 0.03 | **0.73** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.29 |
+| `arc_perfect` | **0.65** weapon | 0.05 | **0.74** weapon | **0.20** hand.L | 0.10 / 0.16 | 0.10 / 0.24 |
+| `arc_super` | **0.69** weapon | 0.03 | **0.72** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.29 |
+| `arc_over` | **0.66** weapon | **0.64** weapon | **0.75** weapon | **0.72** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `arc_over_loose` | **0.67** weapon | 0.04 | **0.71** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.29 |
+| `arc_heavy_wind` | 0.04 | **0.57** weapon | **0.49** foot.L | **0.66** weapon | 0.10 / 0.16 | 0.20 / 0.40 |
+| `arc_heavy` | **0.57** weapon | 0.04 | **0.66** weapon | **0.49** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `arc_hail` | 0.03 | 0.03 | **0.23** hand.L | **0.20** hand.L | 0.10 / 0.16 | 0.12 / 0.26 |
+| `pin_roll` | 0.04 | 0.06 | **0.49** foot.L | **0.49** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_walk` | 0.03 | **0.39** hand.L | **0.20** hand.L | **0.32** weapon | 0.10 / 0.16 | 0.20 / 0.40 |
+| `pin_flick` | 0.04 | 0.08 | **0.49** foot.L | **0.48** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_cast` | 0.07 | **0.66** weapon | **0.21** hand.L | **0.75** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_nock` | **0.65** weapon | **0.68** weapon | **0.74** weapon | **0.73** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_loose` | **0.69** weapon | **0.66** weapon | **0.72** weapon | **0.76** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_final` | **0.65** weapon | 0.04 | **0.74** weapon | **0.20** hand.L | 0.10 / 0.16 | 0.10 / 0.24 |
+| `mf_xform` | 0.04 | 0.04 | **0.49** foot.L | **0.49** foot.L | 0.10 / 0.16 | 0.18 / 0.40 |

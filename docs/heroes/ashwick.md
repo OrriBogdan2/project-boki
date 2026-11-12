@@ -356,3 +356,29 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## Cast pops (PRIORITIES area 4, blends and gaps; Nov 12)
+Measured by `--cast-pop-check` on the live AnimationTree: for each move, the farthest any hand, foot or the weapon tip sits
+between the locomotion pose and the clip's first frame (in) and between its last frame and the locomotion he returns to (out),
+standing (idle and the 6 s rest stance) and walking (worst phase of a stride). An upper-body move leaves the legs on the walk,
+so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` grows toward gap / 0.8 m/s but never past the
+kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
+(content/rules/warden_anim/cinder.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
+
+No weapon: her casting hands are the points (0.37 to 0.53 m standing: the idle holds the arms low, the lance and shot start with the palm out; walking the free foot is 0.46 to 0.83 m off a planted clip start, and `as_aim`/`as_shot` reach 0.84 to 0.87 m at the nozzle). `as_aim` and `mf_xform` start slower; every move eases back over 0.40 s.
+
+| Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
+|---|---|---|---|---|---|---|
+| `as_lance` | **0.37** hand.L | **0.47** hand.R | **0.39** hand.L | **0.77** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_stoke_lance` | **0.47** hand.R | **0.47** hand.R | **0.76** weapon | **0.83** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_lance_end` | **0.47** hand.R | **0.40** hand.L | **0.81** weapon | **0.23** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_aim` | **0.40** hand.L | **0.53** hand.R | **0.22** hand.L | **0.87** weapon | 0.10 / 0.16 | 0.12 / 0.40 |
+| `as_shot` | **0.52** hand.R | **0.37** hand.L | **0.84** weapon | **0.45** hand.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_leap` | **0.40** hand.L | **0.40** hand.L | **0.46** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_hop` | **0.40** hand.L | **0.40** hand.L | **0.55** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_cloak` | **0.25** hand.L | **0.40** hand.L | **0.46** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_stoke` | **0.47** hand.L | **0.49** hand.L | **0.22** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_jet` | **0.40** hand.L | **0.60** foot.R | **0.46** foot.R | **0.83** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_land` | **0.54** weapon | **0.40** hand.L | **0.52** weapon | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_jump` | **0.40** hand.L | **0.35** weapon | **0.46** foot.R | **0.52** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `mf_xform` | **0.40** hand.L | **0.40** hand.L | **0.46** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.18 / 0.40 |

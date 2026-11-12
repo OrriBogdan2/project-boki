@@ -273,3 +273,24 @@ Suggestion (not built): carry the burr cone length over the network so remote pl
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Cast pops (PRIORITIES area 4, blends and gaps; Nov 12)
+Measured by `--cast-pop-check` on the live AnimationTree: for each move, the farthest any hand, foot or the weapon tip sits
+between the locomotion pose and the clip's first frame (in) and between its last frame and the locomotion he returns to (out),
+standing (idle and the 6 s rest stance) and walking (worst phase of a stride). An upper-body move leaves the legs on the walk,
+so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` grows toward gap / 0.8 m/s but never past the
+kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
+(content/rules/warden_anim/vex.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
+
+The gatling muzzle is the point that jumps standing (1.0 to 1.07 m: idle and rest stance hold it low, the shots start with it levelled); walking the arms already swing near the aim, 0.63 to 0.85 m at the muzzle. `gunslinger_e` and `mf_xform` start slower; every move eases back over 0.40 s.
+
+| Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
+|---|---|---|---|---|---|---|
+| `gunslinger_lmb` | **1.00** weapon | **0.31** weapon | **0.68** weapon | **0.63** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `gunslinger_rmb` | **1.07** weapon | **0.29** hand.L | **0.74** weapon | **0.80** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `gunslinger_dash` | **1.04** weapon | **0.29** hand.L | **0.67** weapon | **0.76** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `gunslinger_dash_ex` | **1.01** weapon | **0.29** hand.L | **0.63** weapon | **0.76** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `gunslinger_e` | **0.29** hand.L | **0.29** hand.L | **0.76** weapon | **0.76** weapon | 0.10 / 0.16 | 0.15 / 0.40 |
+| `gunslinger_x` | **0.29** hand.L | **0.29** hand.L | **0.83** weapon | **0.83** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `gunslinger_knock` | **0.29** hand.L | **0.29** hand.L | **0.85** weapon | **0.80** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `mf_xform` | **0.29** hand.L | **0.29** hand.L | **0.76** weapon | **0.75** weapon | 0.10 / 0.16 | 0.18 / 0.40 |

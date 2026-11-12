@@ -423,3 +423,37 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Cast pops (PRIORITIES area 4, blends and gaps; Nov 12)
+Measured by `--cast-pop-check` on the live AnimationTree: for each move, the farthest any hand, foot or the weapon tip sits
+between the locomotion pose and the clip's first frame (in) and between its last frame and the locomotion he returns to (out),
+standing (idle and the 6 s rest stance) and walking (worst phase of a stride). An upper-body move leaves the legs on the walk,
+so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` grows toward gap / 0.8 m/s but never past the
+kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
+(content/rules/warden_anim/kael.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
+
+The sword tip is the point that jumps: idle, rest stance and walk carry the blade dragging behind him, point to the ground, and every move starts with it raised (1.2 to 3.7 m at the tip of a 1.27 m blade, hands under 0.65 m). No blend covers that: the blend-in stays at the first key (the strikes keep their beat; `jug_slam`, `jug_spin`, `jug_wave_wind`, `jug_haul_wind`, `jug_roar` and `mf_xform` start slower), the blend back to the legs is 0.40 s for every move (was 0.16). The carry pose itself is the fix (docs/DEBT.md).
+
+| Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
+|---|---|---|---|---|---|---|
+| `jug_slash_r` | **2.45** weapon | **3.43** weapon | **2.44** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_slash_l` | **2.98** weapon | **3.43** weapon | **3.23** weapon | **2.66** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_wave_wind` | **3.43** weapon | **2.29** weapon | **2.67** weapon | **2.17** weapon | 0.20 / 0.16 | 0.25 / 0.40 |
+| `jug_wave` | **2.29** weapon | **3.43** weapon | **2.17** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_slam` | **3.43** weapon | **3.43** weapon | **2.67** weapon | **2.67** weapon | 0.10 / 0.16 | 0.30 / 0.40 |
+| `jug_lunge_wind` | **3.43** weapon | **3.08** weapon | **2.67** weapon | **3.33** weapon | 0.18 / 0.16 | 0.18 / 0.40 |
+| `jug_lunge` | **3.08** weapon | **3.43** weapon | **3.33** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_meteor` | **3.43** weapon | **3.15** weapon | **2.67** weapon | **1.64** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_meteor_land` | **3.74** weapon | **3.43** weapon | **2.07** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_dash` | **3.43** weapon | **3.43** weapon | **2.67** weapon | **2.66** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_exdash` | **2.20** weapon | **2.55** weapon | **1.53** weapon | **2.01** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_chain` | **3.43** weapon | **3.43** weapon | **2.67** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_reel` | **3.48** weapon | **3.73** weapon | **3.39** weapon | **3.54** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_spin` | **2.97** weapon | **3.43** weapon | **2.78** weapon | **2.67** weapon | 0.10 / 0.16 | 0.30 / 0.40 |
+| `jug_chainlunge` | **3.29** weapon | **3.43** weapon | **3.09** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_haul_wind` | **3.73** weapon | **3.34** weapon | **3.54** weapon | **3.25** weapon | 0.10 / 0.16 | 0.15 / 0.40 |
+| `jug_haulslam` | **3.34** weapon | **3.43** weapon | **3.26** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_guard` | **3.43** weapon | **2.88** weapon | **2.67** weapon | **3.40** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_riposte` | **3.72** weapon | **3.43** weapon | **2.51** weapon | **2.67** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `jug_roar` | **3.46** weapon | **3.49** weapon | **2.62** weapon | **2.64** weapon | 0.10 / 0.16 | 0.12 / 0.40 |
+| `mf_xform` | **3.43** weapon | **3.42** weapon | **2.67** weapon | **2.67** weapon | 0.10 / 0.16 | 0.18 / 0.40 |
