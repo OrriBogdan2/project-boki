@@ -38,6 +38,18 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
+In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
+ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
+- Sparkle, the owner's chest fix (`Sparkle/r3/meshy1112/graft/m4c_livehead.glb`, live 19:59Z). The 160 MB master ran
+  out of memory twice in the server bake. On a remote Blender worker (mac, `jobq submit --app blender`, a minimal tree:
+  tools/, art/wardens/src, the master, WORK/game.glb = `95f0fef3e5^`'s ryzz.glb) it ran in 2 min, but the game showed
+  her white-grey with black specks: the base colour did not bake there. Re-run on a worker whose bake keeps colour.
+- Albert's i1 face pass (`Albert/r3/meshy1112/candidates/i1/glb.glb`, live 20:35Z): the same mac run (current
+  breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
+  rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
+- Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
 Cinder (the facekeep body: body6 cand_B's shape with the cand_A face3 image), Sable (prop1111 cand_B), Vex (prop1111
