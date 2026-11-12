@@ -74,11 +74,11 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
 			"Hob is a person standing by the market stall")
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "hob" and home.guide.hint_lbl.text.contains("Hob")
-			and not home.guide.hint_lbl.text.contains("Hob:"),
-			"the first goal: meet him (%s)" % home.guide.hint_lbl.text)
-	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["gunslinger"],
-			"after the first expedition no second Mask is owned yet")
+	ok(FarmTutorial.current() == "hob" and home.guide.hint_text().contains("Hob")
+			and not home.guide.hint_text().contains("Hob:"),
+			"the first goal: meet him (%s)" % home.guide.hint_text())
+	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
+			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
 	# 2. the camera swing
 	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
 	var focus: Vector3 = home.ppos
@@ -187,7 +187,8 @@ func _offer() -> void:
 			"the reel moves on to the dash, from its start")
 	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
-	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
+	var tracker_off: bool = home.guide.tracker == null or not home.guide.tracker.visible
+	ok(tracker_off and marker_off and not home.guide.hint_box.visible
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
 	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
 	var screen: Rect2 = main.get_viewport().get_visible_rect()
@@ -199,8 +200,8 @@ func _offer() -> void:
 	offer.show_clip(2)
 	await _shot("hob_6c_dash", 1.0)
 	offer.pick("tender")
-	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
-			"taking Meeko opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))
+	ok(ClassUnlock.open_ids() == ["archer", "gunslinger", "tender"] and not ClassUnlock.second_pending(),
+			"taking Meeko opens her and no one else (%s)" % str(ClassUnlock.open_ids()))
 	box.advance()
 	box.advance()
 	await _frames(3)
@@ -216,7 +217,9 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	ok(home.guide.tracker.visible and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
+	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
+	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
+	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:
