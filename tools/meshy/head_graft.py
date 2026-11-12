@@ -12,10 +12,12 @@ Both glbs must share a frame (Meshy outputs of the same character: soles and cro
 `--body-fit S,TX,TY,TZ` scales the body by S and moves it by T into the head's frame.
 `--head-box XMAX,ZMIN[,YMAX]` (repeatable, a union) limits the head part above the cut to |x| < XMAX, z > ZMIN (and
 y < YMAX): props outside it (Sparkle's rods behind the head) stay the body's. `--min-island N` drops the specks such
-boxes cut off (islands under N triangles, joined through shared positions).
+boxes cut off (islands under N triangles, joined through shared positions). `--head-box XMAX,ZMIN,YMAX,YC` is an
+ellipse in x/y centred at (0, YC) instead (a face oval, no framed box corners where new hair meets the kept face).
+`--interleave` deals the body into round-robin chunks, so a dense body's top chunk is not taken for a head part.
 Run: blender -b --factory-startup --python tools/meshy/head_graft.py -- HEAD_GLB BODY_GLB OUT_GLB --cut Y
      [--keep-node NAME]... [--compact] [--ramp M] [--body-fit S,TX,TY,TZ]
-     [--head-box XMAX,ZMIN[,YMAX]]... [--min-island N]"""
+     [--head-box XMAX,ZMIN[,YMAX[,YC]]]... [--min-island N] [--interleave]"""
 
 import argparse
 import json
@@ -29,6 +31,7 @@ from mathutils.bvhtree import BVHTree
 RAMP = 0.0  # m: default --ramp (0: no body vertex is moved)
 OVERLAP = 0.006  # m: the head keeps its triangles this far under the cut, over the body
 SINK = 0.0005  # m: body vertices in the overlap sit this far inside the head's surface
+INTERLEAVE = False  # --interleave
 MAX_PRIM_VERTS = 200000  # body vertices per primitive (the head's face primitive stays the largest)
 NEAR_CUT = 0.08  # m: head triangles this close to the cut (kept or not) are the surface the body is pulled onto
 REACH = 0.03  # m: farthest a body vertex looks for its layer of the head surface
@@ -223,6 +226,9 @@ def in_box(P, T, boxes):
     c = P[T].mean(1)
     inside = np.zeros(len(T), bool)
     for b in boxes:
+        if len(b) > 3:  # XMAX,ZMIN,YMAX,YC: an ellipse in x/y centred at (0, YC) instead of a box (no framed corners)
+            inside |= ((c[:, 0] / b[0]) ** 2 + ((c[:, 1] - b[3]) / (b[2] - b[3])) ** 2 < 1) & (c[:, 2] > b[1])
+            continue
         inside |= (np.abs(c[:, 0]) < b[0]) & (c[:, 2] > b[1]) & (c[:, 1] < (b[2] if len(b) > 2 else np.inf))
     return inside
 
@@ -320,7 +326,9 @@ def graft(
     remap[used] = np.arange(len(used))
     tris = remap[body_tris]
     prims = []
-    for part in np.array_split(np.argsort(pos[tris, 1].mean(1)), -(-len(used) // MAX_PRIM_VERTS)):
+    order, nch = np.argsort(pos[tris, 1].mean(1)), -(-len(used) // MAX_PRIM_VERTS)
+    # --interleave: round-robin chunks span the whole body height, so no body chunk's bbox centre sits in the head band
+    for part in [order[k::nch] for k in range(nch)] if INTERLEAVE else np.array_split(order, nch):
         t = tris[part]
         vs = np.unique(t)
         local = np.full(len(used), -1, np.int64)
@@ -360,10 +368,18 @@ def main():
     ap.add_argument("--ramp", type=float, default=RAMP, help="m of body under the cut pulled onto the head (0 = none)")
     ap.add_argument("--body-fit", default="1,0,0,0", help="S,TX,TY,TZ: body scale and move into the head's frame")
     ap.add_argument(
-        "--head-box", action="append", default=[], help="XMAX,ZMIN[,YMAX]: head part extent above the cut (m)"
+        "--head-box",
+        action="append",
+        default=[],
+        help="XMAX,ZMIN[,YMAX[,YC]]: head part box (or ellipse with YC) above the cut (m)",
     )
     ap.add_argument("--min-island", type=int, default=0, help="drop cut fragments of fewer triangles (0 = keep all)")
+    ap.add_argument(
+        "--interleave", action="store_true", help="round-robin body chunks (no body chunk centred in the head band)"
+    )
     a = ap.parse_args(sys.argv[sys.argv.index("--") + 1 :])
+    global INTERLEAVE
+    INTERLEAVE = a.interleave
     fit = [float(v) for v in a.body_fit.split(",")]
     boxes = [[float(v) for v in b.split(",")] for b in a.head_box]
     graft(a.head, a.body, a.out, a.cut, a.keep_node, a.compact, a.ramp, fit, boxes, a.min_island)
