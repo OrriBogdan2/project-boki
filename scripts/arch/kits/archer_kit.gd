@@ -312,7 +312,6 @@ func _pin(a: Vector3, k: float) -> void:
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
 		var face := _wall_face(f, dir, float(pd["wall"]))
 		if face.is_finite():
@@ -326,7 +325,6 @@ func _pin(a: Vector3, k: float) -> void:
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					vfx("heavy_stun", f.pos, dir, {"k": k})
-					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	# its scorch runs from the ground under the bow (heavy_go's bursts sit on the bow itself)
