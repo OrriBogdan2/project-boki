@@ -2239,7 +2239,8 @@ func on_kin_down(k: Kin) -> void:
 	if k.owner_h == player:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:
-			hud.toast("%s is down  ·  %s" % [k.rec.get("name", "Your Boki"), "run into it to pick it up" if not k.down_void else "it will come round on its own"], Color("ffb0a0"))
+			var how := "run into it to pick it up" if not k.down_void else "it will come round on its own"
+			hud.msgs.push("%s is down  ·  %s" % [k.rec.get("name", "Your Boki"), how], Color("ffb0a0"), MsgLane.URGENT)
 	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
 		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
