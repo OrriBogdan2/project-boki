@@ -25,7 +25,7 @@ No source hero's pose or attitude is copied.
 
 | # | Hunter | Main problem |
 |---|---|---|
-| 1 | Kael the Unbroken (`juggernaut`) | No clips at all: a procedural mannequin frozen in an A-stance |
+| 1 | Kael the Unbroken (`juggernaut`) | Reworked 2026-11-08 (ext/idle-juggernaut): was a frozen procedural mannequin |
 | 2 | Mossy the Barnacle Knight (`bulwark`) | Loop pop; 1.6 s stance; a shield wall hides the warm giant; the shield snaps up in 0.5 s |
 | 3 | Tenzo the Stone Seer (`dolm`) | 0.8 s stance: a 2.5 Hz hip jitter; the feet slide in the hand-off |
 | 4 | Cinder the Ashen Kiss (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
@@ -66,7 +66,7 @@ No source hero's pose or attitude is copied.
 
 Each target applies **quality** parity only. The attitude comes from the line quoted for that Hunter.
 
-### 1. Kael the Unbroken (`juggernaut`, art `kael`): procedural, frozen
+### 1. Kael the Unbroken (`juggernaut`, art `kael`): reworked 2026-11-08
 
 - **Source:** LORE_MASKS, which wins per DECISIONS: "grim, cold, never cocky"; kael_clips.py: "enormous, grim,
   economical". The archetype line "a proud champion... fights like the crowd is watching" is stale.
@@ -87,6 +87,14 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Nothing showy: stillness is his attitude.
 - **Work:** bake kael_clips.py (idle :39, stance :53) to the spec into the v2 .glb, and add
   `content/rules/warden_anim/kael.json` (loco idle/stance, `stance_after` 4.0) so WardenClips takes over.
+- **Done (2026-11-08, ext/idle-juggernaut):** kael_clips.py idle and stance rewritten to the spec on one planted base
+  (PLANT): weight on the back leg with soft knees, a 1.3 s weight shift that overshoots and settles, pelvis, chest, head
+  and hands offset 3 to 5 frames (LAG_*), two breaths per idle loop and three per stance loop on `x_breath` (3 %, a new
+  leaf under hips skinned to the rib cage by kael_retarget.py), the neck roll plus grip resettle once per idle loop and
+  the shoulder dip once per stance loop. Every curve is a whole number of cycles, so the seams measure 0.0x the limit.
+  The sword point sits 0.8 cm under the ground at the idle's first frame (kael_retarget.py prints it).
+  Strips: docs/art/gen/wardens/kael_idle_before.png and kael_idle_after.png (idle_front, stance_front f000 and f012,
+  live hand-off); stance_after 4.0 s.
 
 ### 2. Mossy the Barnacle Knight (`bulwark`, art `breaker`)
 
@@ -135,6 +143,15 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     figure-8.
   - Breath in the shoulders; no bounce faster than 1 Hz.
 - **Seam / length:** remove `dolm:stance` from `STAND_OPEN`.
+- **Done (ext/idle-dolm):**
+  - tarek_clips.py bakes both as 6 s loops on one set of feet (`FEET`). The weight shift, soft knees and right
+    heel lift are lagged by pelvis, torso, head and hands (`LAG`). The toe-tap fidget lands at 3.2 s,
+    and the hop answers it at 4.1 s.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage.
+  - The stones orbit in code (`Orbits`, warden_glb.gd), so the hop rides on a chin lift and a fist hop. Alternative, not
+    done: a clip event that bumps the orbit.
+  - Shots: before and after f000 and f012 match on the body. In live f012 to f013 the feet stay planted. tarek_clipcheck
+    finds no arm deeper than 2 cm in the chest. `LOOSE` and `STANCE`, used by the kit clips, are unchanged.
 
 ### 4. Cinder the Ashen Kiss (`ashwick`, art `cinder`)
 
@@ -155,6 +172,23 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     unhurried shift of hip to hip.
 - **Note:** her model still carries the removed flamethrower. Author the hands empty now (the stuck arm is wrong either
   way), and the rework lands cleanly when the v2 model replaces it.
+- **Done (ext/idle-ashwick, 2026-11-08):** tools/art1/cinder_clips.py `idle`/`stance`, 6 s each, rebaked into cinder.glb.
+  - Idle: weight in her left hip, pelvis rolled and dropped (soft knees), the chest countering 4 frames behind and the
+    head 8 behind, the hands 10 behind the chest. The left hand rests at the collarbone. The right lies palm up at her hip
+    and rolls the flame (3 wrist rolls a loop). At u 0.40-0.72 the left hand opens in front of her chest and turns to
+    her, she tips her head to it and smiles, then the hand settles back with an overshoot and the hips resettle.
+  - Stance: on the idle's feet (the right heel settles as the weight comes over), both palms up at hip height, one
+    held shift left-right-left, the head scanning behind it.
+  - Breath: a new leaf `x_breath` under hips (scale, 2 breaths a loop, a quicker in-breath), skinned to the rib cage by
+    a smooth share of the hips weight; `extra_bones` in warden_anim/cinder.json.
+  - Every curve is whole cycles of the loop or a bump that is zero at the seam: `--clip-check` seam 0.0x the limit.
+  - Left open: the tail's sweep (its spring chain hangs off `root`, so it follows the hips but can't be keyed). The
+    magma cracks' brightening is now PipStars.pulse (v2 model). The v2 body (empty hands, no fins) is rebased in
+    (ext/idle-ashwick-rebased): both hands are placed by free turns (`RH`/`LH` palm normal + fingers, read by
+    cinder_clips.py `CastSolver`) instead of the old gun fist; the hair flicker/toss (`fin`) is gone with the fins.
+    Frames on the v2 body: [idle f008](idle/cinder_after_v2_idle_f008.png), [stance f003](idle/cinder_after_v2_stance_f003.png).
+  - Strips (front, f000 to f012 every 1 s, idle then stance): [before](idle/cinder_before.png),
+    [after](idle/cinder_after.png).
 
 ### 5. Sparkle the Storm Chaser (`mage`, art `ryzz`)
 
@@ -225,6 +259,25 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: a small toe-pick tap that leaves frost, then a half spin on one blade back to rest.
 - **Target stance (6 s):**
   - The same feet. The spear twirls once and lowers to a ready angle, with a cool smirk.
+- **Done (ext/idle-rimewright):**
+  - claire_clips.py bakes both as 6 s loops on one set of feet (`FEET`: the weight on the left blade, the right toe
+    pick tucked behind). `life()` is the shared edge-sway (two shifts a loop with an overshoot and a hold), lagged by
+    pelvis, torso, head and hands (`LAG`), plus the breath and a blink. The pelvis sits over the left blade with a
+    soft knee; the free hip drops and the torso and head counter it.
+  - Idle: the spear lies across her shoulders behind the hood, the right hand draped over it, the left resting on the
+    shaft. At 2.9 s the toe pick taps twice while she glances down at it; at 3.9 s she turns one full spin on the left
+    blade (`turned()` rotates every world target about it) with an overshoot settle. A full turn, not the half of the
+    spec, so the loop closes facing front; the frost is a VFX hook the clips do not carry.
+  - Stance: the same feet, the spear at a low ready across her, a smirk at the right corner (`smirk` in extras). At
+    1.2 s it lifts to her chest and twirls one full turn round the forearm (`TWIRL_AXIS`) while the left arm opens for
+    balance, then lowers and the left hand re-catches the hilt.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage (289 verts), keyed as a 2.5 % scale,
+    two breaths a loop. posekit.bake takes the scale as an optional third item.
+  - Shots (`--idle-shots --wardens=rimewright --frames=12`): before, jobq 20261108-103813-06781 (a `git archive` of
+    the base commit, since the tree already had the new rules); after, 20261108-111745-02791. Idle and stance f000
+    against f012 differ by a mean of 2.0 to 2.4 per channel, the before's own seam being 1.7; a mid-loop control
+    frame is 11. The live hand-off f012 to f013 keeps the feet planted. The bake resolves the atlas from the blend's
+    own folder (the first bake from the tree's cwd exported the model white).
 
 ### 9. Sable the Silver Thief (`thief`, art `sable`)
 
@@ -288,8 +341,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   every track;
 - each clip lasts at least 2 s (`STAND_MIN`).
 
-`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance` and
-`dolm:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
+`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
 so each rework must delete its own entries.
 
 ## Verifying a rework

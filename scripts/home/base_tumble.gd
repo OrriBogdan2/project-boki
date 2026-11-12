@@ -285,7 +285,7 @@ func _start() -> void:
 	shown_pos = 0.0
 	_open_panel()
 	_place_pair(0.0)
-	Sfx.play("garden_start", ring.position, BaseRace.GARDEN_DB)
+	GardenSfx.countdown(h, ring.position)
 
 ## A garden visitor of a random species, its stats near yours; a temporary entry, never saved.
 func _visitor(mine: Dictionary) -> Dictionary:
@@ -319,8 +319,7 @@ func input(event: InputEvent) -> bool:
 		return true
 	var r := bar.press()
 	run.press(r)
-	Sfx.play("garden_miss" if r == "miss" else "garden_cheer", ring.position, BaseRace.GARDEN_DB,
-			0.04, 1.2 if r == "great" else 1.0)
+	GardenSfx.crowd(r, ring.position)
 	h._emote(pair[0], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
 
@@ -367,12 +366,14 @@ func _enter(s: String) -> void:
 		"push":
 			_close_bar()
 			var w := int(run.last["winner"])
-			Sfx.play("garden_thud" if w >= 0 else "garden_creak", ring.position, BaseRace.GARDEN_DB)
+			GardenSfx.clash(h, run.last["moves"][maxi(w, 0)], ring.position, w >= 0)
 			if w >= 0 and not pair[w].has("visitor"):
 				h._emote(pair[w], "♪", true)
 			_sync_panel()
 		"result":
 			_clips("", "")
+			if run.out():
+				GardenSfx.cue("tumble_ringout", pair[1 - run.winner()]["pos"])
 	if teach != null:
 		teach.sync(run)
 
@@ -476,8 +477,7 @@ func _end(finished: bool) -> void:
 	if finished:
 		_card(res)
 		var wi := run.winner()
-		Sfx.play("garden_win", pair[wi]["pos"], BaseRace.GARDEN_DB)
-		Sfx.play("garden_sulk", pair[1 - wi]["pos"], BaseRace.GARDEN_DB)
+		GardenSfx.fanfare(h, pair[wi], pair[1 - wi])
 		for i in 2:
 			if not pair[i].has("visitor"):
 				h._emote(pair[i], "♥" if i == wi else "…", true)

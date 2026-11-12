@@ -10,11 +10,11 @@
 			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
 		},
 		"air": {
-			"lmb": {"mode": "fire", "source": "Not in the data or footage (the source shows no air dash). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"rmb": {"mode": "fire", "source": "Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam."},
+			"lmb": {"mode": "fire", "carry": true, "source": "Item 183: with a charge, the air dash is the same Rock Hop as the ground one (the source has one Landslide, no air variant), so the punch goes off mid-hop and the hop carries on, as on the ground."},
+			"rmb": {"mode": "fire", "carry": true, "source": "Item 183: the same Rock Hop as on the ground, so the charge starts mid-hop and the slam lands where the hop does. With no charge left the shared long dash runs and the dive waits for its end."},
 			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash)."},
-			"x": {"mode": "fire", "source": "Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash."},
-			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-dash like any glove."}
+			"x": {"mode": "fire", "source": "Item 183: the same Rock Hop as on the ground. The aim is placed at the cursor, so it starts mid-hop."},
+			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
 		}
 	},
 	"into_dash": {
