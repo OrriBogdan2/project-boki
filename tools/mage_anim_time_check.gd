@@ -80,7 +80,7 @@ func _rec(secs: float, each := Callable()) -> Array:
 		_frame()
 		var live := c.cur
 		if live == "" and c.up_w > 0.0:
-			live = String(c._node("anim_u").animation)
+			live = c.cur_u
 		out.append({"t": m.time - t0, "id": K.anim_id, "at": m.time - K.anim_at, "w": maxf(c.act_w, c.up_w),
 				"clip": live, "ph": K.ult.phase(), "x": P.pos.x, "z": P.pos.z, "hp": T.hp})
 	return out
@@ -267,8 +267,8 @@ func _wire() -> void:
 			and absf(float(a["go"]) - 0.9) <= DT * 2.0, "crouch in %.2f let go %.2f go %.2f" % [a["crouch"],
 				a["drop"], a["go"]])
 	var feel_t := float(K.dash_feel()["time"])     # the global dash feel (rules/dash_feel.json) slows every dash
-	C.ok("Sparkle timing Wirerun: the full run goes 13 m at 40 m/s (the owner's; source ~32) times the dash feel",
-			absf(float(a["dist"]) - 13.0) < RUN_TOL and absf(float(a["run"]) - 13.0 / 40.0 * feel_t) <= DT * 2.0
+	C.ok("Sparkle timing Wirerun: the full run goes 9.75 m at 40 m/s (the owner's; source ~32) times the dash feel",
+			absf(float(a["dist"]) - 9.75) < RUN_TOL and absf(float(a["run"]) - 9.75 / 40.0 * feel_t) <= DT * 2.0
 			and float(a["land"]) > float(a["go"]),
 			"%.1f m in %.2f s" % [a["dist"], a["run"]])
 	C.ok("Sparkle timing Wirerun: the pass hit lands inside the streak, on the go clip",
@@ -279,8 +279,8 @@ func _wire() -> void:
 			and float(a["out"]) < float(a["land"]) + float(a["len"]) + HAND_BACK,
 			"land %.2f len %.2f out %.2f" % [a["land"], a["len"], a["out"]])
 	var b := _wire_run(0.0, 5.0)
-	C.ok("Sparkle timing Wirerun: a tap runs 7.5 m at 40 m/s times the dash feel within a few frames",
-			absf(float(b["dist"]) - 7.5) < RUN_TOL and absf(float(b["run"]) - 7.5 / 40.0 * feel_t) <= DT * 2.0
+	C.ok("Sparkle timing Wirerun: a tap runs 5.6 m at 40 m/s times the dash feel within a few frames",
+			absf(float(b["dist"]) - 5.6) < RUN_TOL and absf(float(b["run"]) - 5.6 / 40.0 * feel_t) <= DT * 2.0
 			and float(b["go"]) <= DT * 4.0, "go %.2f, %.1f m in %.2f s" % [b["go"], b["dist"], b["run"]])
 
 ## One Skycall: E held `drag` s from the press then let go, the strike's beats from the press.
