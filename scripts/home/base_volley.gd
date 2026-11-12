@@ -78,6 +78,7 @@ class Run:
 	var called := false             # your one call is used
 	var last_miss := -1             # the side that dropped the last seed, -1 before the first point
 	var rally := 0                  # hits since the serve
+	var hits := 0                   # hits in the whole match (the seed bat sound)
 	var to_win: int                 # points that win it: the rules', or this week's format
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
@@ -145,6 +146,7 @@ class Run:
 			spike = ""
 		fly_t = fly_total
 		rally += 1
+		hits += 1
 
 	func _arrive() -> void:
 		var p := BaseVolley.p_return(recs[to], recs[hitter]) * hard
@@ -167,6 +169,7 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]))
 	var wp: int = run.score[run.winner()]
 	var lp: int = run.score[1 - run.winner()]
+	MinigameHub.record("volley", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "volley", "beat %s %d to %d at Spark Volley" % [lose["name"], wp, lp], float(R["win_trust"]))
 	Save.remember(lose, "volley", "lost Spark Volley to %s, %d to %d" % [win["name"], lp, wp])
 	var backed_won: bool = run.recs[run.backed] == win
@@ -188,16 +191,22 @@ var card_t := 0.0
 func _init(home) -> void:
 	h = home
 
-## The log and the seed beside the Training post (none without one); called when fixtures move.
+## This zone's own court (base_volley.json "courts": the log's middle, and what a miss splashes), or {}.
+static func court() -> Dictionary:
+	return rules()["courts"].get(GardenZones.here, {})
+
+## The log and the seed beside the Training post, or on the zone's court over its shallows (none without
+## either); called when fixtures move.
 func place() -> void:
 	if is_instance_valid(log_node):
 		log_node.queue_free()
 	log_node = null
-	if h.YARD_AT.x < -100.0:
+	var C := court()
+	if C.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	log_node = Node3D.new()
 	log_node.name = "VolleyLog"
-	log_node.position = h.YARD_AT + LOG_OFF
+	log_node.position = h.YARD_AT + LOG_OFF if C.is_empty() else Vector3(C["at"][0], 0.0, C["at"][1])
 	h.add_child(log_node)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -220,6 +229,13 @@ func place() -> void:
 	seed_node.material_override = glow
 	seed_node.visible = false
 	log_node.add_child(seed_node)
+
+## A miss over a court's shallows: the seed drops in and throws up water at the side that missed.
+func _splash(side: int) -> void:
+	var C := court()
+	if not C.is_empty():
+		var at := log_node.position + Vector3(0, 0.1, _side_z(side, 0.9))
+		h.fx.burst(at, Color(String(C["splash"])), 14, 2.2, 0.5, 6.0)
 
 func find(p2: Vector2) -> Dictionary:
 	if run != null or not is_instance_valid(log_node):
@@ -247,7 +263,7 @@ func use() -> void:
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
 	seed_node.visible = true
 	_place()
-	Sfx.play("whoosh", null, -8.0)
+	GardenSfx.countdown(h, log_node.position)
 
 ## A press: true when the match took it.
 func input(event: InputEvent) -> bool:
@@ -261,6 +277,7 @@ func input(event: InputEvent) -> bool:
 	if run.can_call():
 		var r := bar.press()
 		run.call_spike(r)
+		GardenSfx.crowd(r, pair[run.backed]["pos"])
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -273,11 +290,15 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	var points: int = run.score[0] + run.score[1]
+	var hits: int = run.hits
 	run.step(d)
+	if run.hits != hits:
+		GardenSfx.cue("garden_bat", pair[run.hitter]["pos"])
 	if not run.called:
 		bar.step(d)
 	if run.score[0] + run.score[1] != points:
 		h._emote(pair[run.last_miss], "!", true)
+		_splash(run.last_miss)
 		h._toast("%s %d : %d %s" % [run.recs[0]["name"], run.score[0], run.score[1], run.recs[1]["name"]])
 	_place()
 	if run.over():
@@ -320,6 +341,7 @@ func _end(finished: bool) -> void:
 	seed_node.visible = false
 	if finished:
 		_card(res, h.hrace.pin(res["win"], "volley"))
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
@@ -337,5 +359,5 @@ func _card(res: Dictionary, pinned: bool) -> void:
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost Spark Volley to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
 		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]]
-		+ GardenPrizes.rows(res["prize"], 14) + BaseRace.pin_rows(pinned))
+		+ BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])

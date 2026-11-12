@@ -6,7 +6,7 @@ extends RefCounted
 ## rules()["base"] run instead: meet your Boki, feed it, place a toy and watch it play, head out or stay.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
-##   done / skipped   finished, or skipped (nothing is granted or taken away)
+##   done / skipped   finished, or skipped (no gems or items change hands; the tools are still handed over)
 ##   gift     the starter food was handed out
 ## Old saves never see it: the v8 migration marks them done, and so does tutorial.day1_done (the flag
 ## every test save and the new-game shortcuts already set).
@@ -134,10 +134,14 @@ static func hint_text(id: String) -> String:
 	if s.is_empty():
 		return ""
 	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
-	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
 	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
+
+## What the spotlight lights for this step's current stage: {"hub": bar button id, "world": true}, or {}.
+static func spot(id: String) -> Dictionary:
+	return (step_def(id).get("spot", {}) as Dictionary).get(stage(id), {})
 
 static func world_text(id: String) -> String:
 	var s := step_def(id)
@@ -207,9 +211,12 @@ static func finish() -> int:
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return gems
 
-## Skipping: nothing granted or taken. (FarmGuide puts the house down as a site when none is; in the base it puts a toy
-## down and the starter food is handed over.)
+## Skipping: no gems or items granted or taken, and the tools the steps would have handed over are handed over
+## (a skipper must not be worse off than a player who walked it). FarmGuide puts the house down as a site when
+## none is; in the base it puts a toy down and the starter food is handed over.
 static func skip() -> void:
+	for s in steps():
+		give_step_tool(String(s["id"]))
 	var st := state()
 	st["done"] = true
 	st["skipped"] = true

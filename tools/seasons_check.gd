@@ -120,9 +120,9 @@ func _snacks() -> void:
 		var others := true
 		for o in _seasons():
 			if o["snack"] != s["snack"]:
-				others = others and not got.has(o["snack"])
+				others = others and not got.slice(0, 5).has(o["snack"])      # the sixth is the rotating extra
 		var four: Array = SnackPatch.rules()["snacks"]
-		ok(got.size() == four.size() + 1 and got.has(s["snack"]) and int(d["crops"][s["snack"]]) == 1,
+		ok(got.size() == four.size() + 2 and got[four.size()] == s["snack"] and int(d["crops"][s["snack"]]) >= 1,
 				"%s season: the patch grows %s" % [s["zone"], s["snack"]])
 		ok(others, "%s season: no other season's snack" % s["zone"])
 
