@@ -14,6 +14,27 @@ static var STYLES: Dictionary = RULES["styles"]
 ## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
 static var FRAME_ASPECT: float = RULES["frame_aspect"]
 
+## The camera's mode, on the shared Fsm (scripts/core/fsm.gd): only `mode.go()` changes it; F7 shows it (MoveReadout).
+enum Mode {
+	FOLLOW,    ## on you, with the follow preset's cursor lean; the setting turning "locked" leaves it
+	LOCKED,    ## on you with the "locked" preset: no cursor lean, no cast lean; the setting leaves it
+	CAST,      ## an aimed cast's wider view while the kit keeps asking (cast_view); leaves CAST_HOLD after the last ask
+	KILLCAM,   ## you're down or out: you and whoever got you, with kill_text; getting back up leaves it
+	SPECTATE,  ## out and waiting: a teammate still in it (Match.spectating); losing them goes back to KILLCAM
+	SNAP,      ## the view was just put somewhere (snap); the next follow settles into the mode it belongs in
+}
+const MODE_NAMES: PackedStringArray = ["FOLLOW", "LOCKED", "CAST", "KILLCAM", "SPECTATE", "SNAP"]
+const MODE_TABLE := {
+	Mode.FOLLOW: [Mode.LOCKED, Mode.CAST, Mode.KILLCAM, Mode.SNAP],
+	Mode.LOCKED: [Mode.FOLLOW, Mode.CAST, Mode.KILLCAM, Mode.SNAP],
+	Mode.CAST: [Mode.FOLLOW, Mode.LOCKED, Mode.KILLCAM, Mode.SNAP],
+	Mode.KILLCAM: [Mode.SPECTATE, Mode.FOLLOW, Mode.LOCKED, Mode.SNAP],
+	Mode.SPECTATE: [Mode.KILLCAM, Mode.FOLLOW, Mode.LOCKED, Mode.SNAP],
+	Mode.SNAP: [Mode.FOLLOW, Mode.LOCKED, Mode.CAST, Mode.KILLCAM, Mode.SPECTATE],
+}
+var mode := Fsm.new(MODE_NAMES, MODE_TABLE, Mode.FOLLOW, "cam")
+var kill_text := ""        # what got you, shown by the HUD in KILLCAM and SPECTATE; leaving those clears it
+
 var focus := Vector3.ZERO
 var target: Node3D = null
 var shake_amp := 0.0          # a shake in progress (see Shake: only big hits on you)
@@ -117,12 +138,37 @@ func frame_fov() -> float:
 	var view := get_viewport().get_visible_rect().size
 	return rad_to_deg(2.0 * atan(tan(deg_to_rad(lens) * 0.5) * FRAME_ASPECT * view.y / maxf(1.0, view.x)))
 
+func _init() -> void:
+	mode.guard(Mode.FOLLOW, func(_from: int) -> bool: return follow_mode != "locked")
+	mode.guard(Mode.LOCKED, func(_from: int) -> bool: return follow_mode == "locked")
+	var cast_done := func() -> bool: return cast_left <= 0.0
+	mode.guard_from(Mode.CAST, Mode.FOLLOW, cast_done)
+	mode.guard_from(Mode.CAST, Mode.LOCKED, cast_done)
+	mode.on_exit(Mode.KILLCAM, _left_dead)
+	mode.on_exit(Mode.SPECTATE, _left_dead)
+	mode.on_exit(Mode.SNAP, _left_dead)
+
+## Going back to play (not to watching, nor through a snap) ends what the killcam said.
+func _left_dead(to: int) -> void:
+	if to != Mode.KILLCAM and to != Mode.SPECTATE and to != Mode.SNAP:
+		kill_text = ""
+
+## Back to playing: FOLLOW, or LOCKED with that preset.
+func go_play(why: String) -> void:
+	mode.go(Mode.LOCKED if follow_mode == "locked" else Mode.FOLLOW, why)
+
+## You're down or out (the local player): the death camera, saying `text` (logged as the reason too).
+func kill_view(text: String) -> void:
+	kill_text = text
+	mode.go(Mode.KILLCAM, text)
+
 func _ready() -> void:
 	near = 1.0
 	far = 120.0
 	current = true
 
-func snap(p: Vector3) -> void:
+func snap(p: Vector3, why := "snap") -> void:
+	mode.go(Mode.SNAP, why)
 	focus = p
 	base = p
 	pan = Vector3.ZERO
@@ -139,6 +185,8 @@ func punch(_a: float) -> void:
 
 ## Asked each step of an aimed cast: push out by `zoom_k` and frame the line of `reach` metres along `dir`.
 func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
+	if not mode.go(Mode.CAST, "aim"):
+		return
 	cast_left = CAST_HOLD
 	cast_zoom = zoom_k
 	var pan_by := 0.0 if follow_mode == "locked" else minf(reach * 0.5, _cast_room(dir, zoom_k))
@@ -157,8 +205,12 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	return minf(room.x / maxf(0.001, absf(turned.x)), room.y / maxf(0.001, absf(turned.y)))
 
 func _tick_cast(delta: float) -> void:
-	cast_left = maxf(0.0, cast_left - minf(delta, CAST_STEP))      # (a slow frame mustn't outlast the kit's request)
-	cast_k = lerpf(cast_k, 1.0 if cast_left > 0.0 else 0.0, 1.0 - exp(-CAST_EASE * delta))
+	if mode.is_in(Mode.CAST):
+		# (a slow frame mustn't outlast the kit's request)
+		cast_left = maxf(0.0, cast_left - minf(delta, CAST_STEP))
+		if cast_left <= 0.0:
+			go_play("cast over")
+	cast_k = lerpf(cast_k, 1.0 if mode.is_in(Mode.CAST) else 0.0, 1.0 - exp(-CAST_EASE * delta))
 	if cast_k < 0.001:
 		cast_k = 0.0
 
@@ -186,6 +238,9 @@ func cursor_pan(at: Vector2) -> Vector3:
 	return Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
 
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
+	mode.tick(delta)
+	if mode.is_in(Mode.SNAP) or mode.is_in(Mode.FOLLOW) or mode.is_in(Mode.LOCKED):
+		go_play("settled" if mode.is_in(Mode.SNAP) else "setting")
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
 	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])

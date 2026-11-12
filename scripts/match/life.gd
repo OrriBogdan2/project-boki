@@ -506,7 +506,6 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	m.fx.ring(o.pos, 2.2, Color("9ee2a0"), 0.5)
 	m.fx.burst(o.pos + Vector3(0, 1.0, 0), Color("cff6e0"), 26, 5.0, 0.6, -2.0)
 	if o == m.player:
-		m.killcam_text = ""
 		if m.hud:
 			m.hud.flash(Color("9ee2a0"), 0.3)
 			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage for 12s" if sick else ""), Color("9ee2a0"))

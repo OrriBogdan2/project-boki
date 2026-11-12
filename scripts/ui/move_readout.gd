@@ -2,8 +2,8 @@ class_name MoveReadout
 extends Label
 ## The movement readout for tuning: horizontal and vertical speed, the locomotion state and its
 ## last transitions, the cap and the drag, for whoever moves locally (farm avatar or match hunter, via
-## Loco.report). F7 (the move_readout key) or Settings > Controls toggles it. While it shows,
-## content/rules/tuning.json is re-read whenever it changes, so every knob tunes live.
+## Loco.report), and the camera's mode. F7 (the move_readout key) or Settings > Controls toggles it. While it
+## shows, content/rules/tuning.json is re-read whenever it changes, so every knob tunes live.
 
 var _poll_t := 0.0
 
@@ -29,8 +29,17 @@ func _process(dt: float) -> void:
 		Loco.poll()
 	var f := Loco.r_fsm
 	if f == null:
-		text = "movement: nothing moving yet"
+		text = "movement: nothing moving yet" + _cam_line()
 		return
 	text = "h %5.2f m/s   v %6.2f m/s\nstate %s (%.2fs)   cap %.2f   drag %.2f/s\n%s%s" % [Loco.r_hs, Loco.r_vs,
 		f.state_name(), f.since, Loco.r_cap, Loco.drag_now(), " ".join(f.history),
-		("   refused %d" % f.refused) if f.refused > 0 else ""]
+		("   refused %d" % f.refused) if f.refused > 0 else ""] + _cam_line()
+
+## The camera's mode (CamRig.mode): its state, the time in it, its last 3 transitions and any refusals.
+static func _cam_line() -> String:
+	var ref: WeakRef = Fsm.live.get("cam")
+	var c: Fsm = ref.get_ref() if ref else null
+	if c == null:
+		return ""
+	return "\ncam %s (%.2fs)  %s%s" % [c.state_name(), c.since, " | ".join(c.history.slice(-3)),
+		("   refused %d" % c.refused) if c.refused > 0 else ""]

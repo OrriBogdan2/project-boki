@@ -6,14 +6,14 @@ extends RefCounted
 ## in the source, not a frame's camera step behind it (--dash-aim-check, steady part). `alpha` is where the last
 ## frame drew the bodies, so the view follows what is on screen.
 
+const DEAD := [CamRig.Mode.KILLCAM, CamRig.Mode.SPECTATE]
+
 static func update(m: Match, delta: float, alpha: float) -> void:
 	var cam: CamRig = m.cam
 	var player: Hunter = m.player
-	cam.follow_mode = String(Settings.get_v("cam_follow"))
-	var sty := String(Settings.get_v("cam_style"))
-	if sty != m.cam_style:
-		m.cam_style = sty
-		cam.use_style(sty)
+	cam.apply_settings()
+	if player and not player.out and not player.downed and cam.mode.state in DEAD:
+		cam.go_play("back up")
 	cam.lead_vel = Vector3.ZERO      # only a live glide leans the view (set below)
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
@@ -72,8 +72,11 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 		# dead and waiting on your team: after a moment, watch a teammate who's still in it
 		var mate := m.spectating()
 		if mate:
+			cam.mode.go(CamRig.Mode.SPECTATE, "mate")
 			foc = mate.prev.lerp(mate.pos, alpha)
 			cam.zoom_to = 1.0
+		else:
+			cam.mode.go(CamRig.Mode.KILLCAM, "no mate")
 		cam.follow(foc, delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)

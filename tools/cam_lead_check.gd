@@ -66,6 +66,8 @@ func _area(label: String, opts: Dictionary) -> void:
 	ok(moved <= FLICK_MOVE_MAX_M, "%s: in the second after a cursor flick the view drifts %.3f m off you"
 		% [label, moved])
 	_dash(label, m, cam, P)
+	ok(cam.mode.is_in(CamRig.Mode.FOLLOW) and cam.mode.refused == 0, "%s: the camera mode after the snap, the lean"
+		% label + " and the dash is %s (FOLLOW), %d refused (0)" % [cam.mode.state_name(), cam.mode.refused])
 	m.queue_free()
 	await main.get_tree().process_frame
 

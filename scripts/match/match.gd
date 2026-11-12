@@ -62,8 +62,6 @@ var arena: Arena = null   # the Arena (opts "arena") or the Training Grounds's p
 var shot_n := 0          # the duel room: you and one sparring bot (opts "duel")
 var slowmo := 0.0
 var slow_k := 0.35
-var killcam_text := ""
-var cam_style := ""
 var swing_hits := {}
 var ride_procs := {}       # kin damage riders on shots: "shooter>target" -> last proc time
 var aim_y := 0.0
@@ -341,8 +339,7 @@ func _start(o: Dictionary) -> void:
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
-	cam_style = String(Settings.get_v("cam_style"))
-	cam.use_style(cam_style)
+	cam.apply_settings()
 	_build_shot_pool()
 	if o.has("net"):
 		net_on = true
@@ -1816,7 +1813,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		_slow(0.55, 0.3)
 		if hud: hud.flash(Color("ff3a2a"), 0.3)
 		Sfx.duck(0.6)
-		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
+		cam.kill_view(("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down")
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
 		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
@@ -1986,7 +1983,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 			_end_soon(2.2)
 		if why != "abyss":
 			_slow(0.8, 0.3)
-		killcam_text = ("Taken out by %s" % credit.pname) if credit is Hunter and credit != h else ("You fell" if why == "abyss" else ("Hit by the Sky Train" if why == "train" else "You're out"))
+		cam.kill_view(("Taken out by %s" % credit.pname) if credit is Hunter and credit != h else ("You fell" if why == "abyss" else ("Hit by the Sky Train" if why == "train" else "You're out")))
 	elif credit == player and player and not player.out:
 		# taking out the last rival squad gets the big moment
 		var rivals := hunters.any(func(x): return x.team != player.team and not x.out and not x.extracted)
@@ -2089,7 +2086,6 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 	if h.kin and h.kin.state == "downed":
 		h.kin.hp = h.kin.max_hp * 0.5
 	if h == player and h.lives < 50:
-		killcam_text = ""
 		_slow(0.6, 0.35)
 		if hud:
 			hud.flash(Color("ff3a2a"), 0.35)

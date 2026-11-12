@@ -69,6 +69,7 @@ func run(mn: Node, mode: String) -> void:
 		m.set_process(false)
 		for c in _cases():
 			_case(c)
+		_modes()
 		print("CAMERA FAST CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -118,6 +119,75 @@ func _case(c: Dictionary) -> void:
 			"ok" if okk else "FAIL"])
 	if not okk: bad += 1
 	if c.has("go"): _clear_guest()
+
+## The camera's mode machine (CamRig.Mode) through the real frame path: each step, then the state it must be in.
+## A cast while down is the one change the table must refuse; every other row is legal, so nothing else refuses.
+## Prints "CAMMODE <step> <state>  ok|FAIL" per row and "CAMMODE refused <n>  ok|FAIL".
+func _modes() -> void:
+	var M: Dictionary = CamRig.Mode
+	var mate: Hunter = m.hunters[1] if m.hunters[0] == P else m.hunters[0]
+	var was_team := mate.team
+	var refused0 := cam.mode.refused
+	var rows := [["snap", M.SNAP], ["frame after a snap", M.FOLLOW], ["aimed cast", M.CAST],
+		["2 frames after the last ask", M.FOLLOW], ["setting: locked", M.LOCKED], ["setting: supervive", M.FOLLOW],
+		["knocked down", M.KILLCAM], ["a cast while down (refused)", M.KILLCAM],
+		["out, a teammate still in it", M.SPECTATE], ["the teammate goes out", M.KILLCAM], ["back up", M.FOLLOW]]
+	for r in rows:
+		_mode_step(r[0], mate)
+		var okk: bool = cam.mode.is_in(r[1])
+		print("CAMMODE %-30s %-8s %s" % [r[0], cam.mode.state_name(), "ok" if okk else "FAIL"])
+		if not okk: bad += 1
+	mate.team = was_team
+	mate.teleport(Vector3(-500, 50, -500))
+	var refused := cam.mode.refused - refused0
+	var okr := refused == 1 and cam.kill_text == ""
+	print("CAMMODE refused %d (1 expected: the cast while down), killcam text cleared: %s  %s" % [refused,
+			cam.kill_text == "", "ok" if okr else "FAIL"])
+	print("CAMMODE log  " + " | ".join(cam.mode.history.slice(-10)))
+	if not okr: bad += 1
+
+## What each _modes row does before its state is read: a call, a setting, a knock, a frame of the real path.
+func _mode_step(key: String, mate: Hunter) -> void:
+	match key:
+		"snap":
+			cam.snap(P.pos)
+		"aimed cast":
+			cam.cast_view(Vector2(1, 0), 0.25, 10.0)
+		"2 frames after the last ask":
+			_frame()
+		"setting: locked":
+			Settings.v["cam_follow"] = "locked"
+		"setting: supervive":
+			Settings.v["cam_follow"] = "supervive"
+		"knocked down":
+			P.downed = true
+			cam.kill_view("Knocked down")
+		"a cast while down (refused)":
+			cam.cast_view(Vector2(1, 0), 0.25, 10.0)
+			return
+		"out, a teammate still in it":
+			_out_with(mate)
+		"the teammate goes out":
+			mate.out = true
+		"back up":
+			P.out = false
+			P.gone = false
+	if key != "snap":
+		_frame()
+
+func _frame() -> void:
+	m._process(DT)
+
+## You out for 3 s (past Match.spectating's wait) with `mate` on your team, still in it, beside you. Not gone: the
+## knocked-down frame wiped your one-Hunter squad.
+func _out_with(mate: Hunter) -> void:
+	P.downed = false
+	P.out = true
+	P.gone = false
+	P.set_meta("died_at", m.time - 3.0)
+	mate.team = P.team
+	mate.out = false
+	mate.teleport(P.pos + Vector3(4.0, 0, 0))
 
 ## Your body's pixel, from the rendered position the model stands at.
 func _screen() -> Vector2:
