@@ -14,10 +14,10 @@ const WAVE_COL := [Color("ff9a14"), Color("8a4dff")]     # wave 1 saturated bras
 const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
 const WAVE_DARK := [Color("5a2e04"), Color("2a1260")]    # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
-## the fan on the ground: Dredge's brass, saturated so it can't read white on bright grass, and how strong
-## its fill and rim are over AimKit's defaults
-const FAN_COL := Color("f08c14")
-const FAN_ALPHA := 1.8
+## Clarity (docs/COMBAT_CLARITY.md): the fan is the true area in his gold (dredge.json "color", AimKit's default) at
+## AimKit's own low fill; nothing that only decorates may stand over the bodies inside it.
+const MUZZLE_FLASH := 0.6           # m: a wave's flash at his fists (the scattergun's own size), marks the wave going
+const HIT_GLOW := 0.4               # m: the glow where a slug strikes a body, small enough to leave the body readable
 ## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
 ## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
 const SLUG_HOLD := 0.35
@@ -109,13 +109,13 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "col": FAN_COL, "col2": WAVE_COL[1], "alpha": FAN_ALPHA, "hot": 0.15 * kc})
+		"fill": kc, "all": true, "hot": 0.15 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
 	var hand_r := _hand(1.0)
 	m.fx.bolt(hand_l, hand_r + Vector3(0, randf_range(-0.2, 0.2), 0), Color(WAVE_COL[1], 0.9))
-	k.fx.orb((hand_l + hand_r) * 0.5, WAVE_COL[0], WAVE_CORE[0], 0.3 + 0.5 * kc, 0.08)
+	k.fx.orb((hand_l + hand_r) * 0.5, WAVE_COL[0], WAVE_CORE[0], 0.2 + 0.2 * kc, 0.08)
 
 func _hand(side: float) -> Vector3:
 	var d2: Vector2 = blast["dir"]
@@ -153,20 +153,16 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	last_wave_hits[wave] = int(last_wave_hits[wave]) + 1
 	e.hurt(dmg, h, {"src": "abil", "ab": "ult", "tags": ["ult", "slug"]})
 	KitStatus.apply(e, "blt", float(xd()["blt_t"]))
-	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], WAVE_CORE[wave % 2], 0.9, 0.1)
+	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], WAVE_CORE[wave % 2], HIT_GLOW, 0.1)
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("b48aff"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 
-## A wave goes: a brass sunburst at his fists, a crescent sweep across the fan, a heavy thump and a shove
-## of the camera back toward him.
+## A wave goes: a small flash at his fists, the fan's edges, a heavy thump. Nothing sweeps the fan itself:
+## the slugs show the wave, and the bodies in it stay in view.
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	var x := xd()
-	k.fx.sunburst(at, 1.9, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.3, true)
-	k.fx.crescent(
-		h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_COL[i % 2], WAVE_DARK[i % 2],
-		0.32
-	)
+	k.fx.sunburst(at, MUZZLE_FLASH, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.3, true)
 	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
-		"all": true, "col": FAN_COL, "alpha": FAN_ALPHA, "dur": 0.25})
+		"all": true, "dur": 0.25})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
 	k.net_ring(at, float(x["range"]) * 0.5, WAVE_COL[i % 2])
