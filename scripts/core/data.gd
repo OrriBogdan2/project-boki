@@ -208,9 +208,12 @@ func load_kin_content() -> void:
 	for id in ids:
 		var sp: Dictionary = KinLib.species(id)
 		var home: Dictionary = Content._load("kin", id)
+		sp["sex_forms"] = bool(home.get("sex_forms", false))
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
+			sp["trade_to"] = String(home["trade_to"])      # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
@@ -379,6 +382,7 @@ const TIERS := [
 ]
 
 ## Home islands beyond the first one. Build a bridge to reach them. Rects are in home grid tiles.
+## Retired in the Boki base (base_mode hides the unbuilt bridges); delete after sign-off, GARDEN.md 10.7 step 11.
 const ISLES := {
 	"orchard": {"name": "Orchard Isle", "cost": 100, "need": 1, "c": Vector2(69, 11), "r": Vector2(8.5, 6.5),
 		"bridge": [62, 14, 63, 29], "sign": Vector2(60.6, 29.4), "desc": "A sunny isle with room for a greenhouse."},
@@ -419,8 +423,6 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"length": 360.0,       # seconds until the islands fall
-	"portal_open": 150.0,  # first exit portals open this many seconds in
 	"extract_time": 4.0,   # seconds standing in an exit's circle to leave; a hit from another hunter resets it
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,

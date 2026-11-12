@@ -54,7 +54,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `kin_companion.gd` | A Boki as a teammate: callouts, caring, keeping close |
 | `boki_chatter.gd` | What a Boki says in a match (BokiLines) |
 | `life.gd` | Down, death, deathboxes, revives and beacons |
-| `exits.gd`, `exit_models.gd` | Skiff docks, rift hatches, uplink outposts and their props |
+| `exits.gd`, `exit_models.gd` | Uplink outposts and their props (the Heart is `heart.gd`) |
 | `lairs.gd`, `boss.gd`, `boss_models.gd` | Boss lairs, their locks and seals; the three bosses |
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
@@ -136,12 +136,6 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd` | Between screens |
 | `dex_view.gd`, `about_view.gd`, `iv_view.gd`, `kinbox_view.gd`, `incubator_view.gd`, `work_view.gd` | Boki menus |
 | `egg_hatch.gd`, `kin_reveal.gd`, `kin_portrait.gd`, `portraits.gd`, `icons.gd` | Hatching, portraits, icons |
-
-## scripts/feel/
-
-A stand-alone movement and camera lab (`--feel-lab`): `hunter_controller.gd`, `top_down_camera.gd`,
-`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `jump_pad.gd`, `kinfall_input.gd`. The
-match's real movement is in `scripts/match/hunter.gd`.
 
 ## scripts/server/ and scripts/social/
 
