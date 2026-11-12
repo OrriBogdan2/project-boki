@@ -64,3 +64,14 @@ Checks (headless, this branch): `--hero-vfx-check` OK (incl. the origin rows), `
 
 Reel strips (`--hero-vfx-reel --reel-hero=<arch>`, GPU through jobq, before = 272368589, after = this branch):
 see the table at the end of this file.
+
+| item | Hero (`--reel-hero`) | before job (jobq label) | after job (jobq label) |
+|---|---|---|---|
+| ext/vfx-dolm port | dolm | 20261112-023058-17230 (vpt-dolm-before) | 20261112-023217-17343 (vpt-dolm-after) |
+| ext/vfx-ostra-abilities port | ostra | 20261112-023228-21446 (vpt-ostra-before) | 20261112-023241-18394 (vpt-ostra-after) |
+| ext/vfx-gunslinger port | gunslinger | 20261112-023255-18767 (vpt-gunslinger-before) | 20261112-023308-11668 (vpt-gunslinger-after) |
+| origin-v2: Sable bolts, knife | thief | 20261112-023322-20679 (vpt-thief-before) | 20261112-023335-28518 (vpt-thief-after) |
+| origin-v2: Grimble slugs | dredge | 20261112-023349-03039 (vpt-dredge-before) | 20261112-023403-26828 (vpt-dredge-after) |
+
+Sheets land in `/home/boki/jobq/done/<id>/out/reel_<arch>/<arch>_<part>.png`. They were still queued (GPU queue 112
+deep) when this branch was posted, so the look is not yet seen on a GPU strip.
