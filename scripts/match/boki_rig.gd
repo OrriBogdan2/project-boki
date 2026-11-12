@@ -178,6 +178,8 @@ const CLIP_FACE := {
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
 
+signal stepped(sound: String)           # a planted foot came down and this step sound was played (BokiSteps)
+
 static var enabled := true
 
 var species := ""
@@ -209,6 +211,7 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _steps := BokiSteps.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -311,6 +314,7 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
+	_steps.update(self, dt)
 	_face_step(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and

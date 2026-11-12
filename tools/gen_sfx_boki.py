@@ -7,7 +7,7 @@ of each so a Boki that talks a lot never repeats itself. Moves are by element:
   gravity a deep soft thud and a pull    prism   a glassy chime fan
   lunar   moonlit wind and a pale bell   echo    one ping bouncing away through a dark room
 Existing names are regenerated (kin_happy/unsure/alert, kinhit, recall, throw, catch, bond, skill,
-k_<element>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
+k_<element>, boki_step_<size>_<surface>: the walk and run, four size families on four grounds); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
 """
 import numpy as np
 import sfx_lib as S
@@ -280,6 +280,33 @@ def unfuse(i):
     return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
 
 
+## The four size families of a footfall (BokiSteps): the thump's pitch (Hz) and weight, how long the ground's
+## texture lasts (s) and how bright it is (Hz).
+FEET = {
+    'tiny':   {'thump': 260, 'weight': 0.25, 'len': 0.05, 'bright': 6500},
+    'small':  {'thump': 170, 'weight': 0.5, 'len': 0.08, 'bright': 5200},
+    'medium': {'thump': 115, 'weight': 0.9, 'len': 0.12, 'bright': 4200},
+    'heavy':  {'thump': 62, 'weight': 1.5, 'len': 0.2, 'bright': 2800},
+}
+
+
+def step(fam, surface, i):
+    """One paw or hoof down: a soft thump for the body, a little texture of the ground on top."""
+    f = FEET[fam]; d = f['len']
+    thump = S.kick(f['thump'] * (1 + 0.05 * i), f['thump'] * 0.5, d * 2.2, 0.012, d * 0.5, 1.5) * f['weight']
+    if surface == 'grass':
+        tex = lpf(S.grains(d * 1.6, 220, 700, f['bright'], fall=d * 0.4) * 0.5, f['bright'])
+    elif surface == 'stone':
+        tex = mix(S.click(0.003, 1400, f['bright']) * 0.8, S.crack(d, 500, f['bright'], d * 0.25) * 0.5)
+    elif surface == 'wood':
+        tex = mix(S.ring((f['thump'] * 1.9, f['thump'] * 4.3), d * 3, (d * 0.7, d * 0.4), (0.4, 0.2)),
+                  S.crack(d, 300, f['bright'] * 0.6, d * 0.3) * 0.5)
+    else:
+        tex = lpf(mix(S.grains(d * 2, 260, 900, f['bright'] * 0.7, fall=d * 0.7) * 0.7,
+                      noise(d * 1.5) * env(N(d * 1.5), 0.006, d * 0.5) * 0.35), f['bright'])
+    return soft(mix(thump, tex), f['bright'] * 1.1)
+
+
 def main():
     S.takes_cat('kin_happy', happy, 3, 'boki')
     S.takes_cat('kin_unsure', unsure, 3, 'boki')
@@ -304,6 +331,9 @@ def main():
     S.takes_cat('boki_work', work, 3, 'boki')
     S.takes_cat('boki_fuse', fuse, 0, 'boki')
     S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
+    for fam in FEET:
+        for surface in ('grass', 'stone', 'wood', 'snow'):
+            S.takes_cat('boki_step_%s_%s' % (fam, surface), lambda i, fam=fam, surface=surface: step(fam, surface, i), 2, 'step')
 
 
 if __name__ == '__main__':
