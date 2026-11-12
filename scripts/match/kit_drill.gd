@@ -60,7 +60,7 @@ static func steps(hunter_id: String) -> Array:
 static func line(hunter_id: String, slot: String) -> String:
 	if hunter_id in SLICE:
 		return AbilityClip.line_for(hunter_id, slot)
-	var nm := String(HunterViewer.slot_info(hunter_id, slot)["name"])
+	var nm := String(HunterViewer.slot_info(hunter_id, slot).get("name", ""))
 	return "Try %s on the dummy." % (nm if nm != "" else "it")
 
 ## What the slot's JSON text says it takes: "again" (a recast), "hold", or "" (a plain press).
@@ -156,12 +156,7 @@ func build_ui() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 4
 	add_child(layer)
-	_panel = PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.04, 0.05, 0.08, 0.9)
-	sb.set_corner_radius_all(14)
-	sb.set_content_margin_all(10)
-	_panel.add_theme_stylebox_override("panel", sb)
+	_panel = UI.glass(10, 14)
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 24)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(_panel)
@@ -194,7 +189,9 @@ func _label(parent: Node, col: Color, px: int) -> Label:
 func _show() -> void:
 	if _panel == null:
 		return
-	_panel.visible = not plan.is_empty()
+	_panel.visible = not plan.is_empty()      # no steps (the player has no Hunter): no banner
+	if plan.is_empty():
+		return
 	if step >= plan.size():
 		_key.text = ""
 		_line.text = "That's the kit. Try it all on the dummies."
