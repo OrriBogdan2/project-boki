@@ -52,7 +52,7 @@
 		"emp_idle": 1.0,
 		"emp_range": 1.4,
 		"falloff": 0.5,
-		"col": "#ffb347"
+		"col": "#5fdc6a"
 	},
 	"passive": {
 		"name": "Carrier",

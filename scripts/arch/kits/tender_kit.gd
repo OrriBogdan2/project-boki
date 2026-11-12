@@ -27,6 +27,15 @@ var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
+## Her colours, one table (content/vfx/tender.json "palette"): leaf for her own moves, gold for her heals.
+static var main_col := HeroVfx.col("tender", "main")     # leaf, her ability colour
+static var hot_col := HeroVfx.col("tender", "hot")       # pale leaf core, aim lane
+static var moss_col := HeroVfx.col("tender", "moss")     # burrs
+static var fern_col := HeroVfx.col("tender", "fern")     # burr rims
+static var gold_col := HeroVfx.col("tender", "gold")     # heals: Hearthlight, Hearth Call
+static var amber_col := HeroVfx.col("tender", "amber")   # heal rims and the call line
+static var teal_col := HeroVfx.col("tender", "teal")     # a thrown Hearthlight's rim
+static var coral_col := HeroVfx.col("tender", "coral")   # a fizzle: dropped, snapped, out of reach
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
@@ -133,7 +142,7 @@ func _tick_look(dt: float) -> void:
 		var s := lk().last_shot()
 		if not s.is_empty() and String((s["x"] as Dictionary).get("src", "")) != "abil":
 			_dress_ember(s)
-	# Kindle reads on the foe: an ember-violet glow at the feet that grows per stack
+	# Kindle reads on the foe: a leaf glow at the feet that grows and pales per stack
 	for key in kind:
 		var e: Dictionary = kind[key]
 		var n := kindle_on(e["t"])
@@ -142,7 +151,7 @@ func _tick_look(dt: float) -> void:
 			lk().keep(
 					"kin%d" % key, "kindle", t.pos,
 					{
-						"r": 0.55 + 0.12 * n, "col": Color("9a6aff").lerp(Color("ffb347"), float(n) / 5.0),
+						"r": 0.55 + 0.12 * n, "col": main_col.lerp(hot_col, float(n) / 5.0),
 						"a": 0.35 + 0.13 * n, "fill": 0.8, "pattern": 0.0})
 	_tick_dash_look(dt)
 	lk().tick(dt)
@@ -346,13 +355,13 @@ func fire_rmb(c: Dictionary) -> void:
 	play("mm_seed_aim")
 	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
 	lk().burst("flare", h.pos,
-			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
+			{"col": moss_col, "rim": fern_col, "r": 1.4, "dur": seed_wind, "pattern": 3.0})
 	_seed_lane()
 
 func _seed_lane() -> void:
 	var sd := rmb_def()
 	var width := float(sd["seed"]["hit_r"]) * 2.0
-	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
+	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": hot_col})
 
 ## Her share of run speed during the wind-up.
 func move_k() -> float:
@@ -367,7 +376,7 @@ func _tick_seed(dt: float) -> void:
 	seed_wind -= dt
 	if seed_wind > 0.0:
 		_seed_lane()
-		HeroVfx.of(m).hold(h, "seed_aim")      # lilac stars gather at the lantern while she winds up
+		HeroVfx.of(m).hold(h, "seed_aim")      # leaf stars gather at the lantern while she winds up
 		return
 	_seed_cancel()
 	_throw_seed()
@@ -409,7 +418,7 @@ func burst_radius() -> float:
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n})
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
+	lk().burst("column", e.pos, {"col": moss_col, "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
@@ -434,13 +443,13 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
+					"r": burst_radius(), "col": moss_col, "rim": fern_col, "fill": 1.2,
 					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
-		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
+		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": fern_col})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
-				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else Color("ff8a6a"),
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else coral_col,
 				"a": lerpf(0.3, 0.9, k) if held else 0.25})
 		if k >= 1.0:
 			_burr_off(b)
@@ -457,7 +466,6 @@ func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
 	var at := t.pos
 	var rr := burst_radius()
-	var col := col_of(rmb_def())
 	# the flare: a swirl of starlight snaps out over the area, then a root beam holds on each foe
 	vfx("seed_burst", at, null, {"r": rr})
 	m.sfx("tend_root", at, 0.0, 1.0)
@@ -468,7 +476,7 @@ func _burst(t: Ent) -> void:
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
-		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
+		lk().burst("beam_root", f.pos, {"col": moss_col, "r": 1.0, "dur": root, "ent": f})
 	stats["flares"] += 1
 	play_soft("mm_tug")
 
@@ -562,10 +570,10 @@ func _tick_hearth(dt: float) -> void:
 	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
 	# to teal, a bright rim, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
+	var look_p := {"r": hearth_r(), "col": gold_col, "rim": amber_col, "fill": 0.45, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"col": gold_col, "rim": teal_col, "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
@@ -679,9 +687,9 @@ func _call_preview() -> void:
 	if who == null or who == h:
 		return
 	var xd := x_def()
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
-	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffb347"), "lw": 0.1, "alpha": 1.8})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true, "alpha": 1.6})
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold_col, "dashed": true, "alpha": 1.2})
+	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": amber_col, "lw": 0.1, "alpha": 1.8})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": col_of(xd), "ticks": true, "alpha": 1.6})
 	# a faint tether already strung from her raised hand onto them: this is who X will reach
 	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
 
@@ -724,7 +732,7 @@ func _start_call() -> bool:
 	var who := call_target()
 	if who == null:
 		if h.is_local() and m.hud:
-			m.hud.toast_small("No teammate there", Color("a2a8bb"))
+			m.hud.toast_small("No teammate there", HudStyle.MUTED)
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
@@ -733,7 +741,7 @@ func _start_call() -> bool:
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
 	vfx("call")
 	vfx("call_land", who.pos)
-	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), gold_col)
 	return true
 
 
@@ -774,11 +782,10 @@ func _call_heal(who: Hunter, amount: float) -> void:
 
 func _call_look(who: Hunter, dt: float) -> void:
 	var xd := x_def()
-	var gold := Color("ffd27a")
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
-	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold_col, "all": true, "dashed": true})
+	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": gold_col, "all": true})
 	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": col_of(xd), "all": true})
 		var hand := CareUtil.hand_at(h, false)
 		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
@@ -818,7 +825,7 @@ func _call_end(done: bool) -> void:
 
 ## The tether snaps where everyone can see it: coral sparks at her hand and at the far end.
 func _call_snap(who: Hunter) -> void:
-	var snap := Color("ff8a6a")
+	var snap := coral_col
 	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
 	if who != null:
 		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)

@@ -14,6 +14,11 @@ const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave
 const HUE_OFF := 40.0          # deg round the colour wheel from its Hunter's: past this an ability colour is off
 const PALE_S := 0.3            # saturation under which a colour is a pale tint, free on any Hunter
 const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"]}   # colours that mean something: a shield's blue, heals
+## Hunters whose every recipe move sits on their hue (docs/HERO_VFX.md "Ability colours"), and the moves that keep a
+## colour that means something (Meeko's heals: Hearthlight, its stars and bloom, Hearth Call).
+const MOVES_ON_HUE := {"tender": ["heal_stars", "hearth", "hearth_land", "hearth_motes", "bloom", "call", "call_land",
+	"mended"]}
+const NO_HEX := ["dolm_kit", "tender_kit"]   # kits that draw only from their colour table
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -91,15 +96,33 @@ func _colours() -> void:
 			cols[slot] = Color(String((Arch.def(arch)[slot] as Dictionary).get("col", "#ffffff")))
 		if Arch.def(arch).has("palette"):
 			cols["palette"] = Arch.fx_col(arch, "main")
+		elif HeroVfx.data(arch).has("palette"):
+			cols["palette"] = HeroVfx.col(arch, "main")
 		for slot: String in cols:
 			var c: Color = cols[slot]
-			var gap := rad_to_deg(absf(angle_difference(c.h * TAU, want.h * TAU)))
-			if c.s >= PALE_S and gap > HUE_OFF and not slot in MEANING.get(arch, []):
+			if _off_hue(c, want) and not slot in MEANING.get(arch, []):
 				off.append("%s %s" % [arch, slot])
 	ok(off.is_empty(), "every Hunter's LMB/RMB/E/R/dash colour is on its ability colour %s" % [off])
-	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col]
-	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm")],
-			"Vex's, Sparkle's and Tenzo's kits draw from their colour tables")
+	for arch: String in MOVES_ON_HUE:
+		var moves: Dictionary = HeroVfx.data(arch)["moves"]
+		var off_moves: Array = []
+		for mv: String in moves:
+			for layer: Dictionary in moves[mv].get("fx", []):
+				for key in ["c", "c2", "c3"]:
+					var c := HeroVfx.col(arch, String(layer.get(key, "main")))
+					if _off_hue(c, Arch.color(arch)) and not mv in MOVES_ON_HUE[arch] and not mv in off_moves:
+						off_moves.append(mv)
+		ok(off_moves.is_empty(), "%s: every recipe move but its heals is on its ability colour %s" % [arch, off_moves])
+	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col, TenderKit.main_col]
+	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm"), Arch.color("tender")],
+			"Vex's, Sparkle's, Tenzo's and Meeko's kits draw from their colour tables")
+	var hex := NO_HEX.filter(func(k): return FileAccess.get_file_as_string(
+			"res://scripts/arch/kits/%s.gd" % k).contains("Color(\""))
+	ok(hex.is_empty(), "no hex colour in the kits that draw from a table %s" % [hex])
+
+## A saturated colour more than HUE_OFF round the wheel from the Hunter's (pale tints are free).
+func _off_hue(c: Color, want: Color) -> bool:
+	return c.s >= PALE_S and rad_to_deg(absf(angle_difference(c.h * TAU, want.h * TAU))) > HUE_OFF
 
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:
