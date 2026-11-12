@@ -337,10 +337,10 @@ def clips():
     sp2 = dict(sp1, pel=(-0.07, 0.0, -0.06), FR=(0.2, 0.16, A_Z + 0.34), FRp=-0.7, hed=(-0.6, 0.0, 0.0), G=(0.6, -0.1, 0.9), LP=(-0.52, 0.08, 1.0), jaw=0.9)
     sp3 = dict(sp0, pel=(-0.03, 0.04, -0.27), prt=(0.7, 0.0, 0.0), tor=(0.4, 0.0, 0.0), FR=(0.2, 0.16, A_Z), FRp=0.0, hed=(-0.7, 0.0, 0.0), G=(0.48, 0.2, 0.5), LP=(-0.3, 0.42, 0.34), jaw=1.0, hd=(0.2, 0.0, 0.0))
     o.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(-0.03, 0.03, -0.2), prt=(0.5, 0.0, 0.0), tor=(0.34, 0.0, 0.0)), "out"), (0.7, sp0)], loop=True))
-    # drink (DRINK_TIME 1.1 s): the scrap fist hoists the flask up, the head tips right back, the throat works, a wet gasp and a wipe of the mouth
+    # drink (the tonic's 1.0 s channel, UtilityUse): the scrap fist hoists the flask up, the head tips right back, the throat works, a wet gasp and a wipe of the mouth
     dr1 = {"LP": (-0.12, 0.34, 0.86), "tor": (0.2, 0.06, 0.02), "hed": (-0.5, -0.06, 0.05), "fing": 0.9, "brow": 0.5, "jaw": 0.3}
     dr2 = dict(dr1, LP=(-0.1, 0.28, 0.98), hed=(-0.98, -0.06, 0.05), tor=(0.12, 0.06, 0.02), jaw=0.9, lid=0.6, brow=-0.3)
-    o.append(C("drink", 1.1, [(0.0, KEYS_END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-1.04, -0.06, 0.05), jaw=0.5)), (0.92, dict(dr1, jaw=1.0, brow=0.8, lid=-0.1), "out"), (1.1, KEYS_END)]))
+    o.append(C("drink", 1.0, [(0.0, KEYS_END), (0.2, dr1, "out"), (0.33, dr2), (0.73, dict(dr2, hed=(-1.04, -0.06, 0.05), jaw=0.5)), (0.84, dict(dr1, jaw=1.0, brow=0.8, lid=-0.1), "out"), (1.0, KEYS_END)]))
     # death: he reels back, the pile takes him over, he lies on it, one last grin
     d1 = {"pel": (0, -0.08, -0.10), "prt": (-0.22, 0, 0), "tor": (-0.34, 0, 0), "hed": (0.2, 0.0, 0.0), "lid": 0.2, "brow": -1, "jaw": 1.0, "LP": (-0.46, 0.05, 0.92), "G": (0.5, 0.05, 0.92), "BE": be(-90, 10, FLAT), "fing": 0.1, "hd": (-0.3, 0, 0)}
     d2 = {"pel": (0, -0.30, -0.42), "prt": (-1.22, 0, 0.05), "tor": (-0.02, 0.1, 0), "hed": (0.36, 0.5, 0.2), "lid": 1.0, "brow": -1, "jaw": 0.55, "LP": (-0.62, 0.06, 0.20), "G": (0.62, -0.02, 0.16), "BE": be(-60, -2, FLAT), "fing": 0.05, "FL": (-0.22, 0.26, 0.14), "FR": (0.20, 0.36, 0.20), "FLp": -0.6, "FRp": -0.8, "hd": (0.14, 0.06, 0.08)}

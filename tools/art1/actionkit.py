@@ -1,13 +1,13 @@
 """ART-1 action set (item 145): the three shared actions every Hero gets its own motion for, in the keys posekit solves.
 stomp: one finishing stomp, a loop of the game's cycle (Life stomp_cycle 0.7 s); the right foot lifts, the heel comes down on the beat at 0.7 of the cycle (Life hit_at).
-drink: one tonic (Hunter DRINK_TIME 1.1 s), a one-shot for the upper body: the flask to the mouth, the head back, two swallows, down again.
+drink: one tonic (the tonic's 1.0 s channel, UtilityUse), a one-shot for the upper body: the flask to the mouth, the head back, two swallows, down again.
 revive: down on the right knee beside the fallen, the hands pressing, a loop.
 A Hero's clips file gives its ready pose and what is its own: `hold` {"stomp": {...}, "drink": {...}, "revive": {...}} are pose keys laid over the shared ones
 (its free hand, its weapon, how far its feet reach); `mouth` is where the flask meets the face, in armature space."""
 
 CYCLE = 0.7     # s, Life.R["stomp_cycle"]
 SLAM = 0.49     # s into the cycle the heel lands: 0.7 of it (Life: hit_at = cycle * 0.7)
-DRINK = 1.1     # s, Hunter.DRINK_TIME
+DRINK = 1.0     # s, the tonic's channel (UtilityUse.channel("tonic", "time"))
 
 
 def shift(p, **d):
@@ -58,7 +58,7 @@ def drink(C, ready, mouth, over=None):
     gulp = dict(sip, hed=(hed[0] - 0.4, hed[1], hed[2]))
     tilt = dict(sip, hed=(hed[0] - 0.46, hed[1], hed[2]), **{key: (mouth[0], mouth[1] - 0.03, mouth[2] + 0.015)})
     lift = dict(ready, **{key: (mouth[0] * 0.5 + ready[key][0] * 0.5, mouth[1] * 0.6, ready[key][2] * 0.5 + mouth[2] * 0.5 - 0.08)}, hed=(hed[0] - 0.1, hed[1], hed[2]))
-    return C("drink", DRINK, [(0.0, ready), (0.14, lift), (0.28, sip, "out"), (0.45, tilt), (0.54, gulp), (0.64, tilt), (0.72, gulp), (0.84, sip), (1.0, lift), (DRINK, ready)])
+    return C("drink", DRINK, [(0.0, ready), (0.13, lift), (0.25, sip, "out"), (0.41, tilt), (0.49, gulp), (0.58, tilt), (0.65, gulp), (0.76, sip), (0.91, lift), (DRINK, ready)])
 
 
 def revive(C, ready, a_z, hands, over=None):

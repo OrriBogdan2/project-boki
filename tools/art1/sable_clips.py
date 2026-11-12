@@ -267,7 +267,7 @@ def prowl_upper(p, u, c1, s2, d):
 # ---- the stomp, the revive kneel and the drink (item 143b): the three actions every Hunter shares. Hers are a dancer's: the stomp a high stage kick that comes down on the beat, the kneel a hand pressed to the
 # wisp with her head bowed, the drink a sip taken like a toast.
 def finish_set():
-    """stomp (0.7 s, Life.R stomp_cycle: the foot comes down at 0.49, phase 0.7), revive (a kneel loop), drink (1.1 s, Hunter.DRINK_TIME; upper body: the legs walk on)."""
+    """stomp (0.7 s, Life.R stomp_cycle: the foot comes down at 0.49, phase 0.7), revive (a kneel loop), drink (1.0 s, the tonic's channel; upper body: the legs walk on)."""
     s0 = dict(READY, pel=(-0.035, 0.0, -0.03), tor=(-0.04, -0.1, 0.05), G=(0.5, 0.14, 1.0), BE=PR(-40, 10), GL=(-0.5, 0.1, 0.95), BL=PR(40, 10), FL=(-0.09, 0.0, A_Z), FR=(0.105, -0.03, A_Z))
     up = dict(s0, pel=(-0.07, 0.04, -0.01), prt=(-0.12, 0.09, -0.03), tor=(-0.1, -0.1, 0.05), hed=(0.06, 0.1, -0.06), FR=(0.13, 0.16, A_Z + 0.42), FRp=-0.45, FRy=-0.4, FL=(-0.09, 0.0, A_Z),
               G=(0.58, 0.2, 1.2), BE=PR(-50, 40), GL=(-0.55, 0.0, 0.84), BL=PR(40, -30), smile=1.0, brow=0.2)
@@ -284,7 +284,7 @@ def finish_set():
     sip0 = dict(END, GL=(-0.3, 0.2, 1.0), BL=PR(10, 40), smile=0.8)
     sip1 = dict(END, GL=(-0.06, 0.2, 1.34), BL=PR(0, 70), hed=(0.12, 0.0, -0.06), lid=0.0, smile=0.9, brow=0.3)
     sip2 = dict(sip1, hed=(-0.32, 0.0, -0.06), tor=(-0.08, -0.14, 0.04), GL=(-0.06, 0.22, 1.38), BL=PR(0, 110))
-    drink = C("drink", 1.1, [(0.0, END), (0.22, sip0), (0.42, sip1), (0.62, sip2), (0.8, sip1), (0.95, dict(END, GL=(-0.28, 0.2, 1.0), smile=1.0)), (1.1, END)])
+    drink = C("drink", 1.0, [(0.0, END), (0.2, sip0), (0.38, sip1), (0.56, sip2), (0.73, sip1), (0.86, dict(END, GL=(-0.28, 0.2, 1.0), smile=1.0)), (1.0, END)])
     return [stomp, kneel, drink]
 
 

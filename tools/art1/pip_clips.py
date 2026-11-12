@@ -345,10 +345,10 @@ def clips():
     sp2 = dict(sp1, pel=(-0.05, 0.0, -0.02), FR=(0.14, 0.12, A + 0.24), FRp=-0.5, hed=(-0.12, 0, 0), G=(SH + 0.22, 0.14, 1.04), LP=(-0.42, 0.12, 1.06), jaw=0.5)
     sp3 = dict(sp0, pel=(-0.025, 0.02, -0.12), prt=(0.3, 0, 0), tor=(0.3, 0, 0), hed=(0.22, 0, 0), FR=(0.14, 0.12, A), FRp=0.0, G=(SH + 0.16, 0.24, 0.7), LP=(-0.26, 0.24, 0.72), jaw=0.7, ear=0.9, skirt=0.3, wfl=0.2)
     out.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(-0.03, 0.02, -0.08), prt=(0.2, 0, 0), tor=(0.2, 0, 0)), "out"), (0.7, sp0)], loop=True))
-    # drink (Hunter.DRINK_TIME 1.1 s): the left paw brings the flask up, eyes shut, head back for a long swallow, a satisfied shudder of the ears, and the paw comes down
+    # drink (the tonic's 1.0 s channel, UtilityUse): the left paw brings the flask up, eyes shut, head back for a long swallow, a satisfied shudder of the ears, and the paw comes down
     dr1 = {"LP": (-0.06, 0.20, 1.12), "Lh": (-1.6, 0.6, 0.0), "tor": (0.0, 0, 0), "hed": (-0.04, 0.0, 0.0), "fing": 0.9, "ear": 0.1, "brow": 0.1}
     dr2 = dict(dr1, hed=(-0.36, 0.0, 0.0), tor=(-0.1, 0, 0), lid=0.95, jaw=0.3, ear=0.0, brow=0.4, LP=(-0.05, 0.19, 1.16), pel=(0.0, 0.0, 0.0), prt=(0.0, 0, 0))
-    out.append(C("drink", 1.1, [(0.0, END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-0.4, 0.0, 0.0), LP=(-0.05, 0.19, 1.18))), (0.9, dict(dr1, hed=(0.1, 0.0, 0.0), lid=0.3, ear=0.5, jaw=0.5, brow=0.5), "out"), (1.1, END)]))
+    out.append(C("drink", 1.0, [(0.0, END), (0.2, dr1, "out"), (0.33, dr2), (0.73, dict(dr2, hed=(-0.4, 0.0, 0.0), LP=(-0.05, 0.19, 1.18))), (0.82, dict(dr1, hed=(0.1, 0.0, 0.0), lid=0.3, ear=0.5, jaw=0.5, brow=0.5), "out"), (1.0, END)]))
     # death: the lantern arm drops last: she sinks, curls over it and goes still
     dd = {"pel": (0.0, -0.04, -0.27), "prt": (0.72, 0.1, 0.2), "tor": (0.62, 0.1, 0.2), "hed": (0.3, 0.4, 0.2), "G": (0.16, 0.44, 0.12), "BE": be((0.3, 0.3, -0.9)), "LP": (-0.20, 0.50, 0.14), "Lh": (-1.4, 0, 0), "FL": (-0.16, -0.26, 0.11), "FR": (0.18, -0.30, 0.11), "FLp": 1.3, "FRp": 1.3, "FLy": 0.0, "FRy": 0.0, "lid": 1.0, "brow": -0.5, "ear": 1.0, "fing": 0.1, "jaw": 0.15, "skirt": 0.4, "wing": -0.4, "wb": 0.7, "tailw": 1.0}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.07, -0.05), "prt": (-0.22, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.34, 0, 0), "lid": -0.1, "brow": -1, "jaw": 0.8, "ear": 0.8, "G": (SH + 0.2, 0.14, 0.86)}, "out"),

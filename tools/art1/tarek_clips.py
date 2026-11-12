@@ -381,10 +381,10 @@ ST1 = m(ST0, pos=(-0.03, -0.02, -0.08), hips=(-6, 0, 4), head=(-2, -4, 12), fr=(
 ST2 = m(ST1, pos=(-0.03, -0.02, -0.02), hips=(-2, 0, 6), head=(-10, -4, 12), hr=hand(0.14, 0.1, -0.26), hl=lhand(0.1, 0.2, -0.28), fr=(AX + 0.05, 0.16, AZ + 0.34), fra=-30.0, jaw=0.4, lip=-1.0)
 ST3 = m(ST0, pos=(0.02, 0.03, -0.2), hips=(-24, 2, 2), head=(14, -4, 10), hr=hand(0.12, 0.26, -0.5), hl=lhand(0.08, 0.34, -0.5), fr=(AX + 0.08, 0.16, AZ), fra=0.0, frt=-18.0, jaw=0.7, lip=-1.0)
 C.bake("stomp", 0.7, [(0, ST0), (0.16, m(ST1, e="out")), (0.38, m(ST2, e="out")), (0.49, m(ST3, e="in")), (0.58, m(ST3, pos=(0.02, 0.02, -0.15), hips=(-16, 1, 3)), ), (0.7, ST0)], loop=True)
-# drink (Hunter.DRINK_TIME 1.1 s): the left fist brings the flask up under his chin, his head tips back, a long swallow, the flask lowers with a grunt of satisfaction
+# drink (the tonic's 1.0 s channel, UtilityUse): the left fist brings the flask up under his chin, his head tips back, a long swallow, the flask lowers with a grunt of satisfaction
 DR1 = m(LOOSE, hl=lhand(0.0, 0.2, -0.05), hips=(-2, -2.5, -4), head=(-3, 5, 7), fing_l=1.0, thumb_l=1.0)
 DR2 = m(DR1, hl=lhand(-0.04, 0.16, 0.1), hips=(2, -2, -4), head=(-24, 4, 6), jaw=0.3, lip=0.4)
-C.bake("drink", 1.1, [(0, LOOSE), (0.22, m(DR1, e="out")), (0.36, DR2), (0.8, m(DR2, head=(-28, 4, 6))), (0.9, m(DR1, head=(4, 5, 7), jaw=0.5, lip=0.8), ), (1.1, LOOSE)])
+C.bake("drink", 1.0, [(0, LOOSE), (0.2, m(DR1, e="out")), (0.33, DR2), (0.73, m(DR2, head=(-28, 4, 6))), (0.82, m(DR1, head=(4, 5, 7), jaw=0.5, lip=0.8), ), (1.0, LOOSE)])
 # death: buckles to the knees, falls on his side; ends lying still (a one-shot: DeathFX keeps the last frame)
 SIDE = m(DOWNED, pos=(0.62, 0.0, 0.2), rot=(0, -84, 0), hips=(-6, 0, 0), head=(6, 10, 0), hr=hand(0.3, 0.3, -0.5), hl=lhand(0.3, -0.1, -0.5), fr=(0.66, -0.12, 0.3), fl=(0.56, 0.18, 0.13), fra=0.0, fla=0.0, fing_r=0.3, fing_l=0.3, jaw=0.2, lip=0.0)
 C.bake("death", 1.6, [(0, LOOSE), (0.16, m(LOOSE, pos=(0, -0.05, -0.1), hips=(14, 0, 4), head=(-20, 0, 0), jaw=0.6, lip=-1.0, fing_r=0.1, fing_l=0.1, e="snap")),

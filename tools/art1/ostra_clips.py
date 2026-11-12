@@ -337,14 +337,14 @@ CLIPS = {
         (0.58, {"lift": (0.0, 0.0, -0.2), "spine": (26.0, 0.0, 0.0), "smoke": 0.4}, "out"),
         (0.70, dict(STILL, lift=(0.0, 0.0, 0.0), smoke=0.0, box=(0.0, 0.0), jaw=0.0)),
     ]},
-    # the sip (1.1 s, upper body): the left hand brings the cup up to the grin, the head tips back, the cheeks puff, it comes down
-    "drink": {"len": 1.1, "base": STILL, "keys": [
+    # the sip (1.0 s, upper body): the left hand brings the cup up to the grin, the head tips back, the cheeks puff, it comes down
+    "drink": {"len": 1.0, "base": STILL, "keys": [
         (0.00, {}),
-        (0.22, {"hL": (-0.26, 0.26, 1.2), "fL": (-0.1, 0.4, 0.9), "pL": (0.2, -0.9, 0.3)}, "out"),
-        (0.42, {"hL": (-0.1, 0.3, 1.42), "fL": (0.0, -0.2, 1.0), "pL": (0.2, -0.9, 0.3), "head": (-32.0, 4.0, 8.0), "jaw": 10.0, "cheek": 1.0, "brow": -0.2}, "out"),
-        (0.62, {"head": (-42.0, 4.0, 8.0), "hL": (-0.1, 0.32, 1.46), "jaw": 2.0, "cheek": 0.2, "lid": 1.0}),
-        (0.80, {"head": (-30.0, 4.0, 8.0), "jaw": 8.0, "cheek": 1.0, "lid": 0.3}),
-        (1.10, dict(STILL)),
+        (0.20, {"hL": (-0.26, 0.26, 1.2), "fL": (-0.1, 0.4, 0.9), "pL": (0.2, -0.9, 0.3)}, "out"),
+        (0.38, {"hL": (-0.1, 0.3, 1.42), "fL": (0.0, -0.2, 1.0), "pL": (0.2, -0.9, 0.3), "head": (-32.0, 4.0, 8.0), "jaw": 10.0, "cheek": 1.0, "brow": -0.2}, "out"),
+        (0.56, {"head": (-42.0, 4.0, 8.0), "hL": (-0.1, 0.32, 1.46), "jaw": 2.0, "cheek": 0.2, "lid": 1.0}),
+        (0.73, {"head": (-30.0, 4.0, 8.0), "jaw": 8.0, "cheek": 1.0, "lid": 0.3}),
+        (1.00, dict(STILL)),
     ]},
     # ---------------------------------------------------------------- one-shots
     "land": {"len": 0.4, "base": dict(STILL, spine=(24.0, 0.0, 0.0), head=(-20.0, 0.0, 6.0), hL=(-0.34, 0.08, 0.96), hR=(0.33, 0.14, 1.0), pld=(-10.0, -10.0), lift=(0.0, 0.0, -0.26), smoke=0.8), "keys": [

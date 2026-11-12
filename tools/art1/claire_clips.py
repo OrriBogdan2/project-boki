@@ -377,10 +377,10 @@ def clips():
     sp2 = dict(sp1, pel=(-0.02, 0.0, -0.02), FR=(0.1, 0.18, A_Z + 0.22), FRp=-0.5, hed=(-0.08, 0.06, 0.0), G=(0.32, 0.16, 1.1), LP=(-0.32, 0.12, 1.1))
     sp3 = dict(sp0, pel=(0.0, 0.03, -0.12), prt=(0.22, 0.1, -0.02), tor=(0.22, -0.06, 0.03), hed=(0.2, 0.06, 0.0), FR=(0.1, 0.12, A_Z), FRp=0.0, G=(0.3, 0.24, 0.84), LP=(-0.3, 0.2, 0.84), brow=-0.9, skirt=0.2)
     out.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(0.0, 0.02, -0.08), tor=(0.15, -0.06, 0.03)), "out"), (0.7, sp0)], loop=True))
-    # drink (Hunter.DRINK_TIME 1.1 s): the free hand lifts the flask while the spear stays in the other; a small tilt of the head, eyes closed, one slow swallow, a quiet breath out
+    # drink (the tonic's 1.0 s channel, UtilityUse): the free hand lifts the flask while the spear stays in the other; a small tilt of the head, eyes closed, one slow swallow, a quiet breath out
     dr1 = dict(END, LP=(-0.14, 0.16, 1.24), LH=(-1.5, 0, 0.0), fing=0.9, hed=(-0.02, 0.06, 0.0), tor=(0.0, -0.06, 0.03))
     dr2 = dict(dr1, hed=(-0.3, 0.06, 0.0), tor=(-0.08, -0.06, 0.03), lid=0.95, brow=-0.1, smile=0.3, LP=(-0.13, 0.15, 1.3))
-    out.append(C("drink", 1.1, [(0.0, END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-0.34, 0.06, 0.0))), (0.9, dict(dr1, hed=(0.08, 0.06, 0.0), lid=0.3, smile=0.6), "out"), (1.1, END)]))
+    out.append(C("drink", 1.0, [(0.0, END), (0.2, dr1, "out"), (0.33, dr2), (0.73, dict(dr2, hed=(-0.34, 0.06, 0.0))), (0.82, dict(dr1, hed=(0.08, 0.06, 0.0), lid=0.3, smile=0.6), "out"), (1.0, END)]))
     # death: the spear slips, she folds softly to her knees and over onto her side, hands drawn in
     dd0 = {"pel": (0, -0.02, -0.08), "prt": (-0.08, 0, 0), "tor": (-0.16, 0, 0), "hed": (-0.1, 0.1, 0), "lid": 0.4, "brow": -1.0, "smile": -0.4, "LP": (-0.16, 0.18, 1.24), "LH": (-0.8, 0, 0.3), "G": (0.3, 0.2, 0.9)}
     dd1 = {"pel": (0, 0.0, -0.46), "prt": (0.25, 0, 0.12), "tor": (0.3, 0, 0.12), "hed": (0.3, 0.1, 0.1), "G": (0.36, 0.34, 0.42), "BE": spr(30, 30, (-0.3, -0.9, 0.0)), "LP": (-0.2, 0.18, 0.74), "FL": (-0.12, -0.2, A_Z - 0.04), "FR": (0.12, -0.14, A_Z - 0.04), "FLp": 0.8, "FRp": 0.8, "lid": 0.7, "skirt": 0.2}

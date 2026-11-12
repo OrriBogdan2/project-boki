@@ -155,7 +155,7 @@ def crouch_set():
 
 
 def finish_set():
-    """What she does to a downed foe and to a friend (Hunter.stomp / reviving / drink): a cocky stomp with the slam on the 0.49 s beat (life.gd stomp_cycle 0.7, hit at 0.7 of it), the one-knee revive loop, the sip (1.1 s, upper body)."""
+    """What she does to a downed foe and to a friend (Hunter.stomp / reviving / drink): a cocky stomp with the slam on the 0.49 s beat (life.gd stomp_cycle 0.7, hit at 0.7 of it), the one-knee revive loop, the sip (1.0 s, upper body)."""
     s0 = dict(END, pel=(-0.03, 0.0, -0.03), G=(0.3, 0.3, 1.2), BE=aim(-8, 10), gunR=1.0, LP=(-0.3, 0.3, 1.2), LBE=aim(8, 10), gunL=1.0)
     up = dict(s0, pel=(-0.07, 0.03, -0.01), prt=(-0.12, 0.0, -0.1), tor=(-0.1, 0.14, 0.05), hed=(0.08, -0.1, 0.1), FR=(0.14, 0.14, A_Z + 0.42), FRp=-0.5, FRy=-0.45,
               G=(0.27, 0.2, 1.38), BE=aim(-14, 36), LP=(-0.27, 0.2, 1.38), LBE=aim(14, 36), smile=1.0, lidR=1.0, lidL=0.12, brow=0.5)
@@ -171,7 +171,7 @@ def finish_set():
     sip0 = dict(END, LP=(-0.3, 0.2, 1.0), LBE=((0, 0.3, 1), (0, -1, 0.1)), smile=0.8)
     sip1 = dict(END, LP=(-0.08, 0.2, 1.34), LBE=((0.1, 0.0, 1), (0, -1, 0.1)), gunL=0.3, hed=(0.12, -0.08, 0.06), lidL=0.0, lidR=0.0, smile=0.9, brow=0.3)
     sip2 = dict(sip1, hed=(-0.32, -0.08, 0.06), tor=(-0.08, 0.14, 0.04), LP=(-0.08, 0.22, 1.4))
-    drink = C("drink", 1.1, [(0.0, END), (0.22, sip0), (0.42, sip1), (0.62, sip2), (0.8, sip1), (0.95, dict(END, LP=(-0.28, 0.2, 1.0), smile=1.0)), (1.1, END)])
+    drink = C("drink", 1.0, [(0.0, END), (0.2, sip0), (0.38, sip1), (0.56, sip2), (0.73, sip1), (0.86, dict(END, LP=(-0.28, 0.2, 1.0), smile=1.0)), (1.0, END)])
     return [stomp, kneel, drink]
 
 
