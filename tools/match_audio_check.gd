@@ -82,8 +82,8 @@ func run(main_node: Node) -> void:
 	for n in Sfx.amb_layers:
 		if not n in ["abyss", "ruins"] and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).playing:
 			farm_beds += 1
-	var left := Sfx.match_voices() - farm_beds
-	ok(left == 0, "after the fades nothing the match started is playing (%d, %d farm beds)" % [left, farm_beds])
+	var rest := Sfx.match_voices() - farm_beds
+	ok(rest == 0, "after the fades nothing the match started is playing (%d, %d farm beds)" % [rest, farm_beds])
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
