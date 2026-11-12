@@ -211,7 +211,7 @@ func _xform() -> void:
 	P.ult = 1.0
 	var pressed := KinMerge.press(P)
 	ok(not pressed and not KinMerge.active(P) and is_equal_approx(P.ult, 1.0), "R with the Boki downed does nothing and keeps the full meter")
-	ok(KinMerge.deny_text(P) == "Rescue %s to merge" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
+	ok(KinMerge.deny_text(P) == "Rescue %s to fuse" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
 	P.ult = 0.5
 	Bond.add(P, 0.1)
 	ok(P.ult > 0.5 or before > 0.0, "the bond meter keeps filling while the Boki is down")
