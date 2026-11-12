@@ -44,9 +44,9 @@ func _host() -> void:
 	for l in lines:
 		f.store_line(l)
 	f.close()
-	var log_path := dir.path_join("guest.log")
-	if FileAccess.file_exists(log_path):
-		DirAccess.copy_absolute(log_path, shots_dir.path_join("guest.log"))
+	for name in ["guest.log", "guest_notes.txt"]:
+		if FileAccess.file_exists(dir.path_join(name)):
+			DirAccess.copy_absolute(dir.path_join(name), shots_dir.path_join(name))
 	_finish()
 
 
@@ -86,6 +86,7 @@ func _frame(copy: Hunter) -> void:
 
 # ------------------------------------------------------------------ the guest
 func _on_msg(topic: String, data, from: String) -> void:
+	_note("msg %s %s m=%s player=%s" % [topic, str(data).left(80), m != null, m != null and m.player != null])
 	if topic == "ra" and typeof(data) == TYPE_DICTIONARY and String(data.get("c", "")) == "cast" and m and m.player:
 		_cast_here(String(data["arch"]), String(data["key"]), float(data["held"]))
 		return
@@ -107,6 +108,17 @@ func _cast_here(arch: String, key: String, held: float) -> void:
 		me.inp[inp] = false
 	await main.get_tree().create_timer(held).timeout
 	var up := AimKit.layer(m).entries.keys().filter(func(k): return AimKit.layer(m).entries[k]["all"])
+	_note("cast %s %s: up %s" % [arch, key, str(up)])
 	Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "up": up, "online": m.net_on, "arch": me.arch})
 	for k in ["fire", "sec", "sec_hold", "sig", "ult"]:
 		me.inp[k] = false
+
+
+## The guest's own notes, a file the host copies out (a killed guest's stdout may never reach its log).
+func _note(line: String) -> void:
+	var p := ProjectSettings.globalize_path("user://displace_net").path_join("guest_notes.txt")
+	var f := FileAccess.open(p, FileAccess.READ_WRITE if FileAccess.file_exists(p) else FileAccess.WRITE)
+	if f:
+		f.seek_end()
+		f.store_line("%d %s" % [Time.get_ticks_msec(), line])
+		f.close()
