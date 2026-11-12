@@ -37,7 +37,7 @@ const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
-const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't posed yet: use NOZZLE
+const NOZZLE_REACH := 2.6                # m at the plain drawn size (grows with it): a palm further off isn't posed yet: use NOZZLE
 # m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
 const PALM_AHEAD := 0.12
 
@@ -108,7 +108,8 @@ func tip() -> Vector3:
 		at = nozzle_at.global_position
 	elif h.anim != null and h.anim.hand_r != null and h.anim.hand_r.is_inside_tree():
 		at = h.anim.hand_r.global_position + _fwd() * PALM_AHEAD
-	return at if at.distance_to(h.pos) < NOZZLE_REACH else nozzle()
+	var reach := NOZZLE_REACH * h.vis_k / Hunter.VIS_SCALE      # (a match draws her up to 2.1x bigger)
+	return at if at.distance_to(h.pos) < reach else nozzle()
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
