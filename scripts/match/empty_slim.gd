@@ -1,11 +1,11 @@
 class_name EmptySlim
 extends RefCounted
 ## Brings a built Empty inside the Hunter budget (15k triangles, 8 materials, LODs on). The procedural body is drawn
-## for a close camera and comes to about 33k triangles, most of it smooth limbs that lose nothing at a third of
+## for a close camera and comes to about 33k triangles, most of it smooth limbs that lose nothing at a sixth of
 ## that; this reduces each part's triangle list in place, with a further LOD for distance. The head under the void
 ## shell never shows, so it goes. Runs once a model is built (Shrouds.bind), before its materials are collected.
 
-const BODY_KEEP := 0.23             # of each body part's triangles
+const BODY_KEEP := 0.17             # of each body part's triangles
 const SHELL_KEEP := 0.5             # of the void shell's: it is the silhouette of the head
 const LOD_KEEP := 0.45              # of those again, at a distance
 const MIN_TRIS := 40                # a part this small is left alone

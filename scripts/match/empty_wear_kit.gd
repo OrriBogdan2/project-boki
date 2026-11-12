@@ -6,6 +6,7 @@ extends RefCounted
 ## Layers go on bottom, top, shoes, gloves, headwear (EmptyWear.DRESS_ORDER).
 
 const OFF := 0.014                  # m: a garment's surface out from what it covers
+const BOOT_SNUG := 0.004            # m: boots and straps, thinner: a thicker shell folds into itself at the ankle's crease
 const SNUG := 0.008                 # m: leggings, gloves, shoes
 const LOOSE := 0.032                # m: baggy trousers
 const TRIM := 0.006                 # m: a band stands this far out from the garment it edges
@@ -19,11 +20,10 @@ const ARM_TOP := 0.08               # m up the arm's pivot: the top of the shoul
 const THIGH := [0.05, -0.13, -0.29]     # m down the leg: the top, a shorts hem, the knee
 const SHIN := [0.07, -0.18]             # m down the knee: the top of the knee, the ankle (above the foot)
 const SKIRT_OVAL := 0.86            # a skirt's depth front to back, of its width
-## Where a grown copy stops short of the rounded end that sits inside the body (HeroKit's boot, mitten and thumb):
+## Where a grown copy stops short of the rounded end that sits inside the body (HeroKit's boot and mitten):
 const BOOT_TOP := -0.07             # m down the knee: the top of the boot's shaft
 const WRIST := 0.055                # m up the hand: the mitten's cuff end
-const THUMB_ROOT := 0.03            # m up the hand: the thumb's root, inside the palm
-const HOOD_KEEP := 0.35             # of HeroGear's hood's triangles
+const HOOD_OPEN := 0.12             # of a turn: half the hood's front opening (the front is 0.75 of a turn round)
 const SKIRT_ROWS := 12
 const SKIRT_ROW := 0.025            # m: half a skirt row at its longest (reach_near's window)
 ## What each headwear leaves of the hair (HeroHair.human's cover).
@@ -221,16 +221,17 @@ func _shoe(knee: Node3D, foot: MeshInstance3D, it: int, mats: Array) -> void:
 		_grown_part(knee, foot, SNUG + 0.004, -INF, low + 0.022, mats[1])
 	match it:
 		0:   # boots to mid-shin
-			_grown_part(knee, foot, SNUG, -INF, BOOT_TOP, mats[0])
+			_grown_part(knee, foot, BOOT_SNUG, -INF, BOOT_TOP, mats[0])
 		1:   # shoes, below the ankle
 			_grown_part(knee, foot, SNUG, -INF, -0.165, mats[0])
 		2:   # tall boots to the knee, a band at the top
-			_grown_part(knee, foot, SNUG, -INF, BOOT_TOP, mats[0])
+			_grown_part(knee, foot, BOOT_SNUG, -INF, BOOT_TOP, mats[0])
 			_tube(knee, SHIN[0], -0.09, OFF, mats[0])
 			_tube(knee, SHIN[0], SHIN[0] - 0.025, OFF + TRIM, mats[1])
-		3:   # sandals: two straps over the foot and one round the ankle
-			for band in [[-0.2, -0.188], [-0.214, -0.204], [-0.17, -0.158]]:
-				_grown_part(knee, foot, SNUG + 0.002, band[0], band[1], mats[0])
+		3:   # sandals: two straps over the foot and one round the shin
+			for band in [[-0.2, -0.188], [-0.214, -0.204]]:
+				_grown_part(knee, foot, BOOT_SNUG, band[0], band[1], mats[0])
+			_tube(knee, -0.12, -0.15, OFF, mats[0])
 		4:   # wraps round the shin and over the foot
 			for band in [[-0.1, -0.08], [-0.14, -0.12], [-0.18, -0.16], [-0.21, -0.195]]:
 				_grown_part(knee, foot, SNUG + 0.002, band[0], band[1], mats[0])
@@ -250,7 +251,7 @@ func _gloves(it: int, mats: Array) -> void:
 		match it:
 			0, 1, 3:   # mitts; gauntlets with a big flared cuff; long gloves up the forearm
 				_grown_part(hand, palm, SNUG, -INF, WRIST, mats[0])
-				_grown_part(hand, thumb, SNUG, -INF, THUMB_ROOT, mats[0])
+				_grown_part(hand, thumb, SNUG, -INF, INF, mats[0])
 				if it == 1:
 					_tube(elbow, -0.12, -0.21, OFF + 0.01, mats[1])
 				elif it == 3:
@@ -258,30 +259,33 @@ func _gloves(it: int, mats: Array) -> void:
 				_grown_part(hand, palm, SNUG + TRIM, 0.03, 0.06, mats[1])
 			2:   # fingerless: the palm and thumb's root
 				_grown_part(hand, palm, SNUG, -0.045, WRIST, mats[0])
-				_grown_part(hand, thumb, SNUG, -0.01, THUMB_ROOT, mats[0])
+				_grown_part(hand, thumb, SNUG, -0.01, INF, mats[0])
 				_grown_part(hand, palm, SNUG + TRIM, 0.03, 0.06, mats[1])
 			4:   # bracers on the forearm, banded at both ends; the hand bare
 				_tube(elbow, -0.06, -0.205, OFF, mats[0])
 				_tube(elbow, -0.06, -0.085, OFF + TRIM, mats[1])
 				_tube(elbow, -0.18, -0.205, OFF + TRIM, mats[1])
-			5:   # wraps round the palm and the wrist
-				for band in [[-0.02, 0.0], [-0.055, -0.035], [0.03, 0.055]]:
-					_grown_part(hand, palm, SNUG, band[0], band[1], mats[0])
+			5:   # wraps: the palm and thumb under two bands, the fingertips bare
+				_grown_part(hand, palm, SNUG, -0.07, WRIST, mats[0])
+				_grown_part(hand, thumb, SNUG, -INF, INF, mats[0])
+				for band in [[-0.02, 0.0], [-0.055, -0.035]]:
+					_grown_part(hand, palm, SNUG + TRIM, band[0], band[1], mats[1])
 				_tube(elbow, -0.17, -0.2, SNUG, mats[1])
 
 # ------------------------------------------------------------------------------------------ headwear
 func _head(it: int, mats: Array) -> void:
 	var gear: Node3D = c["gear"]
-	var hk := String(c["hk"])
 	cover = COVERS.get(it, "")
 	match it:
-		0:   # hood, with a rolled collar
-			_put(gear, _hood(hk), mats[0], HC)
-			_put(gear, HeroKit.band("empty_hood_roll", 0.15, 0.16, 0.05, 0.02), mats[1], Vector3(0, 0.66, 0.0))
+		0:   # hood, open at the front, with a trimmed edge
+			var fit := _head_fit()
+			_put(gear, fit.tube(HC.y + 0.32, HC.y - 0.14, OFF, 0.75 + HOOD_OPEN, 1.75 - HOOD_OPEN), mats[0])
+			_put(gear, fit.tube(HC.y - 0.09, HC.y - 0.14, OFF + TRIM, 0.75 + HOOD_OPEN, 1.75 - HOOD_OPEN), mats[1])
 		1:   # helm, a crest down the middle and a brow band
-			_put(gear, HeroGear.helm_mesh("empty", hk), mats[0], HC)
+			var fit := _head_fit()
+			_put(gear, fit.tube(HC.y + 0.32, HC.y - 0.07, OFF), mats[0])
 			_put(gear, Models.box(0.035, 0.08, 0.34), mats[1], HC + Vector3(0, 0.22, 0.02))
-			_put(gear, HeroKit.band("empty_helm_brow", 0.232, 0.25, 0.03), mats[2], HC + Vector3(0, 0.07, 0))
+			_put(gear, fit.tube(HC.y + 0.1, HC.y + 0.06, OFF + TRIM), mats[2])
 		2:   # wide hat: a low crown, a wide brim, a hat band and a feather
 			_hat_crown(gear, mats, 0.08, OFF)
 			_put(gear, HeroGear.brim("empty_wide", 0.2, 0.38, 0.03, 0.0, 0.01), mats[0], HC + Vector3(0, 0.08, 0))
@@ -289,8 +293,8 @@ func _head(it: int, mats: Array) -> void:
 			_put(gear, HeroKit.lock_mesh("empty_feather", [tip, tip + Vector3(0.04, 0.12, 0.08), tip + Vector3(0.05, 0.2, 0.2)],
 				0.05, 0.25, Vector3.BACK), mats[2])
 		3:   # cap with a bill
-			_hat_crown(gear, mats, 0.06, SNUG)
-			_put(gear, Models.box(0.28, 0.018, 0.16), mats[0], HC + Vector3(0, 0.07, -0.25))
+			_hat_crown(gear, mats, 0.06, OFF)
+			_put(gear, Models.box(0.28, 0.018, 0.16), mats[0], HC + Vector3(0, 0.07, -0.29))
 			_put(gear, Models.sphere(0.022, 8), mats[2], HC + Vector3(0, 0.33, 0.0))
 		4:   # beanie: a knit dome with a folded brim and a pompom
 			_hat_crown(gear, mats, 0.03, OFF)
@@ -298,13 +302,6 @@ func _head(it: int, mats: Array) -> void:
 		5:   # headband with a knot at the back
 			_put(gear, _head_fit().tube(HC.y + 0.1, HC.y + 0.055, SNUG), mats[0])
 			_put(gear, Models.sphere(0.035, 8), mats[2], HC + Vector3(0, 0.07, 0.25))
-
-## HeroGear's hood, drawn lighter once per head (it is a Hunter's close-up hood: three times the triangles needed here).
-static func _hood(hk: String) -> Mesh:
-	var key := "hood|" + hk
-	if not _grown.has(key):
-		_grown[key] = EmptySlim.slim(HeroGear.hood_mesh("empty", hk), HOOD_KEEP)
-	return _grown[key]
 
 ## A crown fitted over the void head from its top down to `brim` m above the head's centre, and a band round its foot.
 func _hat_crown(gear: Node3D, mats: Array, brim: float, off: float) -> void:
