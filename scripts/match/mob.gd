@@ -347,7 +347,8 @@ func _begin_attack() -> void:
 		"volley":
 			tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
 	# each kind has its own call as it winds up, instead of the same alarm for everyone
-	m.sfx("v_" + mkind, pos, -9.0 if mkind != "warden" else -3.0, randf_range(0.9, 1.12))
+	var voice := mkind.trim_prefix("bl_")       # a Blight skitter or watcher calls like its plain cousin
+	m.sfx("v_" + voice, pos, -9.0 if voice != "warden" else -3.0, randf_range(0.9, 1.12))
 
 func _strike() -> void:
 	_cancel_tele()
