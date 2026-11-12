@@ -22,8 +22,9 @@ func _init(r) -> void:
 	rig = r
 
 ## The farm on the demo save, built and shown, with the home screen in `home`.
-func _farm(preset: String) -> void:
-	Demo.setup(preset)
+func _farm(preset: String, set_up := true) -> void:
+	if set_up:
+		Demo.setup(preset)
 	await rig.main.show_screen("home", {})
 	home = rig.main.current
 	while home.building or not is_instance_valid(home.root_ui):
@@ -56,10 +57,11 @@ func hatch(take: int) -> void:
 
 ## Shot 3: a Boki that is one level from its next form takes it: the farm's own evolution scene.
 func evolve() -> void:
-	await _farm("farm")
+	Demo.setup("farm")
 	var rec := _about_to_evolve()
+	await _farm("farm", false)
 	if rec.is_empty():
-		rig.fail("no Boki in the roster has an evolution whose form has art yet")
+		rig.fail("no Boki species has a level evolution whose form has art yet (waits for the new models)")
 		return
 	rig.mark("evolve")
 	Evo.level_up(rec)
@@ -70,14 +72,30 @@ func evolve() -> void:
 		await rig.wait(0.25)
 	await rig.wait(EVO_HOLD_S)
 
-## The first roster Boki whose level line has an evolution with art, put one level short of it.
+## The first roster Boki whose level line has an evolution with art, put one level short of it. When the demo farm
+## holds none, its first Boki becomes the first species whose line has art (at both ends if any line has; picked
+## before the farm is built, so the farm shows that species).
 func _about_to_evolve() -> Dictionary:
-	for rec in Save.d["roster"]:
-		var line: Dictionary = Evo.rules()["lines"].get(String(rec["species"]), {})
-		if line.has("level") and Evo.has_art(String(line["into"][0]["id"])):
-			rec["level"] = int(line["level"]) - 1
-			return rec
+	var roster: Array = Save.d["roster"]
+	for rec in roster:
+		if _evolves_with_art(String(rec["species"]), false):
+			return _one_short(rec)
+	for both_ends in [true, false]:      # (until the T1 models land, only the T2 form may have art)
+		for sp in Evo.rules()["lines"]:
+			if not roster.is_empty() and _evolves_with_art(String(sp), both_ends):
+				roster[0]["species"] = String(sp)
+				return _one_short(roster[0])
 	return {}
+
+func _evolves_with_art(sp: String, both_ends: bool) -> bool:
+	var line: Dictionary = Evo.rules()["lines"].get(sp, {})
+	if not Data.KIN.has(sp) or not line.has("level") or line.get("into", []).is_empty():
+		return false
+	return Evo.has_art(String(line["into"][0]["id"])) and (not both_ends or Evo.has_art(sp))
+
+func _one_short(rec: Dictionary) -> Dictionary:
+	rec["level"] = int(Evo.rules()["lines"][String(rec["species"])]["level"]) - 1
+	return rec
 
 ## Shot 4: hungry Boki walk to the trough and eat, then one is patted, one plays fetch, one is brushed and one trains
 ## on the dummy (three rounds, pressed in the gold). The camera stays where the farm puts it.
@@ -114,7 +132,7 @@ func _press_in_gold() -> void:
 	if absf(bar.m - bar.zone) < GOLD_BAND:
 		home._train_hit()
 
-## Shot 6: the Hunters screen (J on the farm) steps through every Hunter, then lands on `chosen` and plays it.
+## Shot 6: the Hunters screen (J on the farm) steps through every Hunter, then lands on `chosen` and picks it.
 func hunter_select(chosen: String) -> void:
 	await _farm("farm")
 	HomeClasses.open(home, "")
@@ -125,5 +143,7 @@ func hunter_select(chosen: String) -> void:
 		await rig.wait(SELECT_STEP_S)
 	HomeClasses._show(home, chosen)
 	await rig.wait(SELECT_LAND_S)
-	HomeHero.pick(home, chosen)
+	# the pick is saved with the screen still up (HomeHero.pick closes it, and the take would end on the farm)
+	HeroGrid.save_pick(chosen)
+	HomeClasses._show(home, chosen)
 	await rig.wait(1.0)
