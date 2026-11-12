@@ -18,7 +18,8 @@ const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
 const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender",    # Vex, Kael, Cinder, Meeko: their own ledge climb
-	"archer", "dolm", "dredge", "rimewright"]    # Lace, Tenzo, Grimble, Neve (tools/art1/glb_climb_clips.py)
+	"archer", "dolm", "dredge", "rimewright",    # Lace, Tenzo, Grimble, Neve (tools/art1/glb_climb_clips.py)
+	"bulwark", "mage", "thief", "ostra"]         # Albert, Sparkle, Sable, Motley (tools/art1/climb_clips.py)
 
 var bad := 0
 var holder: Node3D

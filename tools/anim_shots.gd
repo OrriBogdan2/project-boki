@@ -147,8 +147,9 @@ func _keyed(model: Node3D, sync: Node, clips: WardenClips, dir: String, clip: St
 		await _grab(dir.path_join("f%03d.png" % i))
 	clips.force = {}
 
-## A ledge rise through the game's own state: half the frames climb the face (the state's mantle 0..1), the rest are the
-## vault in real time. The lip is a block whose top comes down past the Hunter as in the game (mantlekit.py `surface`).
+## A ledge rise through the game's own state: half the frames climb the face (the state's mantle 0..1), the rest
+## are the vault in real time (all of them climb when the data's rise is 1: no vault tail). The lip is a block whose
+## top comes down past the Hunter as in the game (mantlekit.py `surface`).
 func _mantle(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var lip := MeshInstance3D.new()
@@ -159,8 +160,8 @@ func _mantle(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames:
 	holder.add_child(lip)
 	var md: Dictionary = clips.d["mantle"]
 	var length := clips.lib.get_animation(String(md["clip"])).length
-	var climb := frames / 2
-	var tail_steps := maxi(1, int(round(length * (1.0 - float(md["rise"])) / float(frames - climb) / DT)))
+	var climb := frames if float(md["rise"]) >= 0.999 else frames / 2     # (rise 1: all climb)
+	var tail_steps := maxi(1, int(round(length * (1.0 - float(md["rise"])) / float(maxi(1, frames - climb)) / DT)))
 	for i in frames:
 		var k := float(i) / (climb - 1) if i < climb else 1.0
 		lip.position = Vector3(0.38 + 0.5, MANTLE_DEEP * (1.0 - k) - MANTLE_SOLE - 1.5, 0.0)
