@@ -412,7 +412,7 @@ func _swap_end(go: bool) -> void:
 				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
 			):
 				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
-				o2.shield_t = 3.0
+				o2.shield_t = float(dd["ally_shield_t"])
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
 ## its place in the circle. Bodies another game owns are moved there over Net.

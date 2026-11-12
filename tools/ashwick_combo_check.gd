@@ -653,6 +653,14 @@ func _all() -> void:
 	)
 	ok("cloak: the swirling fire shield shows while it holds", K.fx.shown("swirl%d" % P.get_instance_id()))
 	var pulled_far: float = P.flat_dist(T)
+	# the cloak's shield is a 3 s pool that drops whole at its time (0.7 s already stepped)
+	ak.step(m, float(K.e_def()["shield_t"]) - 0.9)
+	var held: bool = P.shield_t > 0.0
+	ak.step(m, 0.4)
+	ok(
+		"cloak: the shield is gone at its 3 s", held and P.shield_t <= 0.0 and P.shield == 0.0,
+		"t %.2f shield %.1f" % [P.shield_t, P.shield]
+	)
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	ak.aim_at(P, T.pos)

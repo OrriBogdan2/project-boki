@@ -236,6 +236,25 @@ Several verbs appear in more than one element, tuned to fit it:
 - **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits).
 - **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
 
+## Shields: duration, fade, stacking (2026-11-10)
+
+Source = `supervive_kits.md` on origin/ext/agent-briefs ([D]); amounts are in [HEAL_PARITY](HEAL_PARITY.md). The data names no shield that decays: nothing says "fades" or "drains", so "drops at the end" is ours everywhere and stays `[?]`. How it works for every timed shield: one pool (`Hunter.shield`, soaks before armour and health) with one timer (`shield_t`); at 0 the whole pool is gone, no slope. A new shield from a different source keeps the larger amount and the longer time (`Effects`), except the three kit shields (Tenzo, Cinder, Void's swap), which set their own time. Checks: `--breah-combo-check` (Tenzo gone at 6 s, stacks add and cap), `--ashwick-combo-check` (cloak gone at 3 s).
+
+| Source | Ours | Source says | Verdict |
+|---|---|---|---|
+| Tenzo punch (Molten Guard) | 18 a punch at your own rock, up to 4 stacks (72), 6 s; each punch refreshes one shared timer; the whole pool drops at 6 s; rank 3 slam of a foe or rock adds a stack | "temporary Shield" (passive); rank IV: a slam of enemies or Rocks grants a stack. No amount, time, cap or fade | slam stack matches; time, cap and fade `[?]` |
+| Cinder spin (Heat Shield, E) | 6.4% + 5.1% of max health per foe hit, 3 s, drops at the end; a recast resets the time | "shield per enemy hit" | per-foe stacking matches; time and fade `[?]` (HEAL_PARITY cites a 3 s wiki page) |
+| Cinder pounce, rank 3 (source rank IV) | 11.6% of max health (150 of 1290), 2 s | 150 shield for 2 s with +75 move speed | match; fade `[?]` |
+| Albert aegis (Brightshield) | its own pool, no timer: 160 HP, regen 20 a second after 2 s, locked 3 s when broken; rank +25% / +50% | "shield energy that regens/repairs", blocks all damage from the front; amounts not listed | `[?]`; the ranks match |
+| Albert Shield Bash | invulnerable for the charge | "shield briefly Invulnerable" | match |
+| Albert Mending Ground burst | mends the aegis 60 | not listed | `[?]` |
+| Meeko Carrier shield | none (cut 11-07, owner call) | Soulpack: 200 to 450 shield, refilled on pickup (wiki, not in the data file); kits.md only has the drop rule | `[?]` owner call |
+| Void (Motley) swap, rank 3 | 26 to allies beside him, 3 s (`ally_shield_t`) | 375 HP for 3 s | time match (26 is the same share of health) |
+| Level-up | none; each level scales ability shields by AP (`level_growth.json`) | no level-up shield | match |
+| Belt: Shield cell | 40 for 8 s | no source item (UTILITY_PARITY: ours only) | ours, keep |
+| Perk orbs | none give a shield (`perk_orbs.json`) | none | match |
+| Two shields at once | larger amount, longer time; Tenzo stacks add | not stated | `[?]` |
+
 ## Readability
 
 - Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).
