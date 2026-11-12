@@ -30,8 +30,9 @@ const T := {
 	"ground_stop_t":           ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s"],
 	"ground_stop_dist":        ["~", [0.27, 0.4], "m", "[game data] UE's walking brake: 0.28-0.39m at 30-144 fps"],
 	"brake_vs_ue_err":         ["<=", 0.0001, "m/s", "HunterMove.brake against UE's ApplyVelocityBraking"],
-	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
-	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
+	"reverse_vs_source":       ["~", [0.98, 1.03], "x", "[game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a"],
+	"cut90_vs_source":         ["~", [0.97, 1.10], "x", "[game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%"],
+	"cut90_min_speed":         [">=", 0.97, "x", "[game data] a cut arcs at run speed (MaxWalkSpeed cap)"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
 	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
@@ -213,7 +214,7 @@ func ok(cond: bool, what: String) -> void:
 	print("MFEEL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func rec(key: String, v: float) -> void:
+func rec(key: String, v: float, who := "") -> void:
 	results[key] = v
 	var t: Array = T[key]
 	var pass_ := false
@@ -225,7 +226,8 @@ func rec(key: String, v: float) -> void:
 			var r: Array = t[1]
 			pass_ = v >= float(r[0]) - 1e-6 and v <= float(r[1]) + 1e-6
 			tgt = "in [%s, %s]" % [str(r[0]), str(r[1])]
-	print("MFEEL %-26s = %7.3f %-6s target %-14s %s   (%s)" % [key, v, t[2], tgt, "ok" if pass_ else "FAIL", t[3]])
+	print("MFEEL %-26s = %7.3f %-6s target %-14s %s   (%s)" % [(key + " " + who).strip_edges(), v, t[2], tgt,
+			"ok" if pass_ else "FAIL", t[3]])
 	if not pass_: bad += 1
 
 func _steps(n: int) -> void:
@@ -285,7 +287,8 @@ func _begin(main: Node) -> void:
 	Save.d = Save.fresh()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
+	# no Blight: its Skitters spawn mid-run and lunge at the hunter, knocking whatever row is running
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true, "blight": false})
 	m.set_process(false)
 	w = m.world
 	for mb in m.mobs: mb.queue_free()
@@ -331,6 +334,7 @@ func run(main: Node) -> void:
 	load("res://tools/dash_refill_check.gd").run(self)
 	bad += DIRS.new(m, flat, _reset).run()      # W A S D and the diagonals, on screen and in speed
 	_standing_dash()          # last: it swaps the kit and model the framing rows measure
+	_turns()                  # after it: swaps through all 12 kits
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -362,27 +366,6 @@ func _ground() -> void:
 			if ts < 0.0 and _hv(P).length() < 0.05: ts = (i + 1) * DT
 		rec("ground_stop_t", ts)
 		rec("ground_stop_dist", P.pos.x - x0)
-		# reversal
-		_reset(flat + Vector3(-2.5, 0, 0)); P.base_speed = top
-		P.inp["move"] = Vector2(1, 0)
-		_steps(20)
-		P.inp["move"] = Vector2(-1, 0)
-		var tr := -1.0
-		for i in 40:
-			m.step(DT)
-			if tr < 0.0 and P.vel.x <= -0.95 * top: tr = (i + 1) * DT
-		rec("ground_reverse_t", tr)
-		# 90 degree turn
-		_reset(flat + Vector3(-2.5, 0, -2.5)); P.base_speed = top
-		P.inp["move"] = Vector2(1, 0)
-		_steps(20)
-		P.inp["move"] = Vector2(0, 1)
-		var t90 := -1.0
-		for i in 40:
-			m.step(DT)
-			var hv := _hv(P)
-			if t90 < 0.0 and hv.length() >= 0.9 * top and absf(hv.angle_to(Vector2(0, 1))) < deg_to_rad(10.0): t90 = (i + 1) * DT
-		rec("ground_turn90_t", t90)
 		# a shove over the run (a knock, a kit step) slides out under the same brake, keys held or not
 		for keys in [Vector2.ZERO, Vector2(1, 0)]:
 			_reset(flat + Vector3(-3.0, 0, 0))
@@ -396,6 +379,57 @@ func _ground() -> void:
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+## Every hunter's hard reversal and 90-degree cut at run speed against the source's walking model (UE
+## CalcVelocity with keys held: V -= (V - dir x |V|) x F dt, V += a dt, capped at run; HunterMove.walk).
+## Times are interpolated inside the step so a few percent shows.
+func _turns() -> void:
+	var was := [P.cls, P.arch, P.wid, P.base_speed]
+	var F := HunterMove.turn_friction
+	ok(is_equal_approx(F, 1.0), "turn_friction = GroundFriction 1.0 (%s)" % F)
+	for id: String in HunterMove.rules():
+		if not HunterMove.rules()[id] is Dictionary or id in ["physics", "glide_spike", "default"]:
+			continue
+		P.cls = Arch.weight(id)
+		P.set_arch(id)
+		_reset(flat + Vector3(-2.5, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
+		var v := _hv(P).length()
+		var a := P.ground_accel
+		P.inp["move"] = Vector2(-1, 0)
+		var tr := _cross(func() -> float: return -P.vel.x, 0.95 * v)
+		var src_r := log(1.0 + 2.0 * F * v / a) / (2.0 * F) + 0.95 * v / a
+		rec("reverse_vs_source", tr / src_r, id)
+		_reset(flat + Vector3(-2.5, 0, -2.5))
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
+		P.inp["move"] = Vector2(0, 1)
+		var low := [v]
+		var t90 := _cross(func() -> float:
+			low[0] = minf(low[0], _hv(P).length())
+			return -rad_to_deg(absf(_hv(P).angle_to(Vector2(0, 1)))), -10.0)
+		var src_c := log(1.0 / tan(deg_to_rad(5.0))) / (F + a / v)
+		rec("cut90_vs_source", t90 / src_c, id)
+		rec("cut90_min_speed", float(low[0]) / v, id)
+		print("MFEEL turn %-10s run %.2f m/s accel %.0f: reverse %.3f s (source %.3f), cut %.3f s (source %.3f)" % [
+			id, v, a, tr, src_r, t90, src_c])
+	P.inp["move"] = Vector2.ZERO
+	P.cls = was[0]
+	P.set_arch(was[1])
+	if P.wid != was[2]: P.equip(was[2])
+	P.base_speed = was[3]
+
+## Seconds of match steps until probe() rises to `at`, interpolated inside the last step (-1: never in 1 s).
+func _cross(probe: Callable, at: float) -> float:
+	var was: float = probe.call()
+	for i in 60:
+		m.step(DT)
+		var now: float = probe.call()
+		if now >= at:
+			return (i + (at - was) / maxf(1e-6, now - was)) * DT
+		was = now
+	return -1.0
 
 ## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
 func _face_turn() -> void:

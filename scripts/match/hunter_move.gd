@@ -10,6 +10,8 @@ static var brake_decel: float = _phys["brake"]
 ## 1/s: GroundFriction x BrakingFrictionFactor, the share of the speed the walking brake sheds per second
 static var brake_friction: float = _phys["ground_friction"] * _phys["braking_friction_factor"]
 static var braking_substep: float = _phys["braking_substep"]      # s, the longest sub-step of a brake
+## 1/s, GroundFriction: bends a walk with keys held toward the keys (HunterMove.walk)
+static var turn_friction: float = _phys["ground_friction"]
 static var brake_stop_speed: float = _phys["brake_stop_speed"]    # m/s, a brake leaving less stops dead
 static var min_tick: float = _phys["min_tick"]                    # s, the shortest sub-step braked
 static var dash_exit_run: float = _phys["dash_exit_run"]
@@ -87,6 +89,19 @@ static func climbs_tall(h: Hunter) -> bool:
 ## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
 static func brake_rate(speed: float) -> float:
 	return brake_friction * speed + brake_decel
+
+## Ground velocity after a step with keys held: UE's walking CalcVelocity. Up to the wanted speed (with UE's 1%
+## IsExceedingMaxSpeed slack) GroundFriction bends the velocity toward the keys at its own speed, the accel adds
+## on and the speed caps at the wanted speed: a reversal sheds 2 x turn_friction x speed + accel, a 90-degree
+## cut arcs round at run speed. Over it (a Slow landing, a knock, a pad's carry) the walking brake sheds it.
+static func walk(hv: Vector2, wish: Vector2, accel: float, grip: float, dt: float) -> Vector2:
+	var run := wish.length()
+	var s := hv.length()
+	if s > run * 1.01:
+		return Loco.accel_to(hv, wish, accel, 0.0, brake_rate(s) * grip, dt)
+	var dir := wish / run
+	var bent := hv - (hv - dir * s) * minf(turn_friction * grip * dt, 1.0)
+	return (bent + dir * accel * dt).limit_length(run)
 
 ## Ground speed after a step with no keys: UE's walking brake (ApplyVelocityBraking) exactly, so a let-go from a
 ## run slides 0.31-0.37 m and a knock or kit step slides out under the same rule. A step longer than
