@@ -299,6 +299,8 @@ func run(m: Node) -> void:
 	var H = load("res://scripts/home/home.gd").new()
 	main.add_child(H)
 	for _f in 4: await main.get_tree().process_frame
+	# built under a still-covered fade, the farm comes in slices
+	while H.building: await main.get_tree().process_frame
 	var out_uids: Array = H.kins.map(func(k): return String(k["rec"]["uid"]))
 	var boxed_out := KinBox.boxed().any(func(r): return out_uids.has(String(r["uid"])))
 	ok(H.kins.size() == KinBox.farm().size() and not boxed_out and KinBox.boxed().size() == 4, "home puts the %d farm kin out; the %d in the burrow stay inside" % [H.kins.size(), KinBox.boxed().size()])
