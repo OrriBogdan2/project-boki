@@ -18,7 +18,7 @@ static func rules() -> Dictionary:
 
 ## Seconds `rec` takes over leg `leg` with no wobble.
 static func leg_time(rec: Dictionary, leg: int) -> float:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.course(GardenZones.here)
 	var out := 0.0
 	for s in rules()["legs"][leg]:
 		out += float(st[s]["len"]) / BaseRace.stretch_pace(rec, int(s))
@@ -79,7 +79,7 @@ class Run:
 		teams = [mine, theirs]
 		rng = r
 		var at := 0.0
-		for s in BaseRace.rules()["stretches"]:
+		for s in BaseRace.course(GardenZones.here):
 			at += float(s["len"])
 			ends.append(at)
 		for team in 2:
@@ -330,7 +330,7 @@ func _hear() -> void:
 			GardenSfx.cue("relay_finish", ents[-1]["pos"])
 
 func _place_runners() -> void:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.course(GardenZones.here)
 	var lane := float(BaseRace.rules()["lane"])
 	for team in 2:
 		var side := lane * (team - 0.5)
@@ -350,7 +350,7 @@ func _place_runners() -> void:
 			var p := race.track_at(s, f, side + out)
 			var n: Node3D = ents[i]["node"]
 			n.position = p
-			n.rotation.y = race.heading(s)
+			n.rotation.y = race.heading(s, f)
 			ents[i]["pos"] = p
 
 func _end(finished: bool) -> void:
@@ -376,7 +376,7 @@ func _end(finished: bool) -> void:
 	visitors = []
 
 func _card(res: Dictionary) -> void:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.course(GardenZones.here)
 	var legs: Array = []
 	for i in run.legs.size():
 		legs.append("%s the %s" % [run.teams[0][i]["name"], st[run.legs[i][0]]["kind"]])
