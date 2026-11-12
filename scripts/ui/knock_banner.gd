@@ -4,8 +4,9 @@ extends Control
 ## squad knocked a rival). The knocked hunter's round portrait in a thick ring over an ink slash, an X on
 ## top, the word in bold italic and their name on a dark pill. The slash and pill are see-through
 ## (back_alpha); the banner sits on whole pixels and its words are drawn at their real size, never scaled.
-## It pops in, holds, then fades and rises away (show_s in all). A new knock replaces it at once; another of the same kind within combo_s counts
-## up ("x2") instead. Each kind has its sound: a low warning for a teammate, a hit sting for a rival.
+## It pops in, holds, then fades and rises away (show_s in all). A new knock replaces it at once;
+## another of the same kind within combo_s counts up ("x2") instead. Each kind has its sound: a low
+## warning for a teammate, a hit sting for a rival.
 ## Match.knock (through Juice.knock) and a knock from the network call knocked(). A full-screen Control
 ## over the HUD's canvas (so the whole banner, portrait included, fades with `modulate`).
 ## Numbers: content/rules/knock_banner.json.
