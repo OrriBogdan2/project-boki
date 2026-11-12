@@ -287,7 +287,18 @@ static func _shape(c: Dictionary, fem: bool) -> void:
 	for nm in ["LegL", "LegR"]:
 		var leg := legs.get_node(nm) as Node3D
 		leg.position.x *= 1.12
-		leg.scale = Vector3(0.9, 1.0, 0.9)
+		_slim_leg(leg)
+
+## A slimmer leg without scaling the joints (a scaled leg node shears as it pitches, and the planted foot then
+## hangs off the solved pose, EmptyGait): the thigh narrows in both directions, the boot and knee only in width,
+## so the sole keeps its length.
+static func _slim_leg(leg: Node3D) -> void:
+	for ch in leg.get_children():
+		if ch is MeshInstance3D:
+			(ch as Node3D).scale = Vector3(0.9, 1.0, 0.9)
+	for ch in leg.get_node("Knee").get_children():
+		if ch is MeshInstance3D:
+			(ch as Node3D).scale.x = 0.9
 
 ## The Empty's torso: the hunter torso drawn into an hourglass for a woman (a slim waist, a fuller bust
 ## and hips) or a broad, square chest for a man.

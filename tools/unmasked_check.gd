@@ -8,7 +8,7 @@ extends RefCounted
 ## mass, and a woman's silhouette and stance differ from a man's; it animates with HunterAnim and shows kept
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
-const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
+const FOOT_TOLERANCE := 0.012    # m: how far the lowest foot point may sit above or below the ground
 
 var bad := 0
 

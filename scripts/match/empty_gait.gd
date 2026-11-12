@@ -39,6 +39,7 @@ class Leg:
 	var side := 1.0              # -1 left, 1 right: which way the foot splays
 	var planted := false
 	var anchor := Vector3.ZERO   # world: the heel's ground point (the other sole points lie flat ahead of it)
+	var aim := Basis.IDENTITY    # the legs' world basis as it landed: the boot keeps pointing where it was put down
 	var pose := Vector3.ZERO     # hip x, knee x, leg-out z (rad)
 	var from := Vector2.ZERO     # legs' space (x, z) as the swing began: where the foot left the ground
 	var swing_t := 0.0
@@ -174,6 +175,7 @@ func _plant(leg: Leg, xf: Transform3D) -> void:
 	leg.contact = low[0]
 	var heel_ground := Vector3(low[1].x, 0.0, low[1].z - ((SOLE[low[0]] as Vector3).z - HEEL_Z))
 	leg.anchor = xf * heel_ground
+	leg.aim = xf.basis
 	leg.planted = true
 	leg.landed_at = _clock
 
@@ -183,12 +185,11 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 	var other: Leg = right if leg == left else left
 	var a := inv * leg.anchor
 	leg.u = (a.z - _strike) / _stance
-	var target := Vector3(a.x, 0.0, a.z)
 	var hip_h := lerpf(float(_hip[1]), _hip_h(leg.u), _move_k)      # standing: the flat-footed height
-	while _too_far(leg, a, hip_h) and leg.contact < SOLE.size() - 1:
+	while _too_far(leg, _heel_at(leg, a, inv), hip_h) and leg.contact < SOLE.size() - 1:
 		leg.contact += 1      # the heel comes up: the boot rolls on to the next sole point
 	var done := (dir > 0.0 and leg.u >= 1.0) or (dir < 0.0 and leg.u <= 0.0)
-	if done or _too_far(leg, a, hip_h):
+	if done or _too_far(leg, _heel_at(leg, a, inv), hip_h):
 		# this foot comes down a step after the other: half-way from the cycle's own swing toward that beat
 		var period := step_len / maxf(spd, 0.5)
 		var other_down := other.landed_at if other.planted else _clock + other.swing_dur - other.swing_t
@@ -197,12 +198,20 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 		var dur := clampf(lerpf(nominal, on_beat, 0.5), SWING_MIN, SWING_MAX)
 		_lift(leg, lerpf(STAND_STEP, dur, _move_k), inv)
 		return
-	leg.pose = _solve(leg, leg.contact, target, hip_h)
+	leg.pose = _solve(leg, leg.contact, _heel_at(leg, a, inv), hip_h)
 	var low := _lowest(leg, leg.pose)
 	if low[0] != leg.contact and (leg.pivot.y - low[1].y) > hip_h + ROLL_TOL:
 		leg.contact = low[0]      # the boot rolled on: the next sole point along is down
-		leg.pose = _solve(leg, leg.contact, target, hip_h)
+		leg.pose = _solve(leg, leg.contact, _heel_at(leg, a, inv), hip_h)
 	_hip_now = maxf(_hip_now, hip_h)
+
+## The heel's ground point in the legs' space (`a` where the anchor is) shifted, on the move, so the contact sole
+## point stays where the boot was put down while the body turns above it: the boot does not swivel on its toe.
+## Standing, a turn on the spot leaves the boot to turn with the body (it re-steps when a leg cannot reach).
+func _heel_at(leg: Leg, a: Vector3, inv: Transform3D) -> Vector3:
+	var ahead := (SOLE[leg.contact] as Vector3).z - HEEL_Z
+	var held := inv.basis * (leg.aim * Vector3(0.0, 0.0, ahead))
+	return a + _move_k * Vector3(held.x, 0.0, held.z - ahead)
 
 ## True when the leg cannot stretch from the hip at `hip_h` to its contact sole point's ground spot (`a` the
 ## heel's, in the legs' space).

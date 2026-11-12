@@ -22,10 +22,11 @@ const SETTLE_S := 0.8         # s: from a stop at full stick to still feet
 const STILL_MPS := 0.02       # m/s: a foot this slow is still
 const POP_CM := 8.0           # cm: the biggest one-frame jump turning on the spot
 const CREEP_CM := 2.0         # cm: the planted feet's creep while standing
-## [sex, height, build] of the Unmasked look: Male short slight, Male average, Male tall sturdy, Female average.
 const FLICK_M := 0.5          # m: the cast's wind-back to the flick moves the rod tip at least this far
 const ROD_HAND_CM := 8.0      # cm: the rod's grip may sit this far from the rear hand
-const BODIES := [[1, 0, 0], [1, 1, 1], [1, 2, 2], [0, 1, 1]]
+const HOVER_CM := 1.5         # cm: standing, the lowest sole point is no higher than this over the floor
+## [sex, height, build] of the Unmasked look: both frames at the height and build extremes, and the averages.
+const BODIES := [[1, 0, 0], [1, 1, 1], [1, 2, 2], [0, 0, 0], [0, 1, 1], [0, 2, 1], [0, 2, 2]]
 
 var bad := 0
 var rows := {}
@@ -91,6 +92,8 @@ func _gate(id: String, row: Dictionary) -> void:
 			% [id, row["turn"]["pop_cm"], POP_CM])
 	ok(row["idle"]["creep_cm"] <= CREEP_CM, "%s: standing feet creep %.1f cm (limit %.0f)"
 			% [id, row["idle"]["creep_cm"], CREEP_CM])
+	ok(row["idle"]["hover_cm"] <= HOVER_CM, "%s: standing feet rest on the floor (%.1f cm over it, limit %.1f)"
+			% [id, row["idle"]["hover_cm"], HOVER_CM])
 	var fish: Dictionary = row["fishing"]
 	ok(fish["creep_cm"] <= CREEP_CM, "%s: fishing (wait, cast, bite, reel, land) feet creep %.1f cm (limit %.0f)"
 			% [id, fish["creep_cm"], CREEP_CM])
@@ -216,7 +219,14 @@ func _turn(m: Node3D, an: HunterAnim) -> Dictionary:
 func _idle(m: Node3D, an: HunterAnim) -> Dictionary:
 	_run_for(m, an, 1.0, 0.0, 0.0, false)
 	var fr := _run_for(m, an, IDLE_S, 0.0, 0.0, true)
-	return {"creep_cm": _creep(fr)}
+	var hover := 0.0
+	for f in fr:
+		var low := INF
+		for key in f:
+			if String(key).begins_with("sole."):
+				low = minf(low, (f[key] as Vector3).y)
+		hover = maxf(hover, low)
+	return {"creep_cm": _creep(fr), "hover_cm": 100.0 * hover}
 
 ## The sole points' biggest move (cm) from where they first stood, while both stood on the floor.
 func _creep(fr: Array) -> float:
