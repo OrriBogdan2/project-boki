@@ -18,6 +18,8 @@ const GLOW_T := 0.8         # s the bright edge of a new panel takes to settle
 const PANEL := Color(0.03, 0.04, 0.07, 0.94)
 const DETAIL_K := 1.9       # a panel with a second line is this much taller
 
+static var _ring_at := Rect2()      # the pick ring's slot, as last drawn
+
 ## The lanes: the panel, the check mark and the message column (Rect2 each), for a screen size.
 static func lanes(sz: Vector2) -> Dictionary:
 	var w := sz.x * BAR_W
@@ -51,6 +53,7 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.target != Vector3.INF and h.m.cam and h.m.player:
 		dir = MarkerDir.off_dir(h.m.cam, sz, tu.target, h.m.player.pos)
 	_bar(h, r, tu, dir)
+	_pick_ring(h, tu)
 	if not tu.card_up():
 		_extras(h, r, tu)
 	if tu.done_t > 0.0:
@@ -123,6 +126,27 @@ static func _extras(h, r: Rect2, tu: Tutorial) -> void:
 		if not o.is_empty():
 			var br := Rect2(Vector2(r.position.x + 20.0, r.end.y + 6.0), Vector2(r.size.x - 40.0, 6.0))
 			h._bar(br, clampf(float(o["prog"]), 0.0, 1.0), ExitModels.UPLINK)
+
+## A pick step: a pulsing gold ring on the one skill slot that can take the point, an arrow dropping onto it.
+## (The slot's rect is the gold "+" HudPanels drew; the last one is kept, so the ring holds between redraws.)
+static func _pick_ring(h, tu: Tutorial) -> void:
+	var slot := TutorialCamps.pick_slot(tu.id())
+	if slot == "":
+		_ring_at = Rect2()
+		return
+	var got: Array = RankMarks.plus_spots.get(slot, [])
+	if not got.is_empty() and int(got[1]) >= HudPanels.draws - 1:
+		_ring_at = got[0]          # (this draws inside the panel pass, before it marks the slots: last pass's)
+	if _ring_at.size == Vector2.ZERO:
+		return
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 6.0)
+	var c := _ring_at.get_center()
+	var rad := maxf(_ring_at.size.x, _ring_at.size.y) * (0.78 + 0.1 * pulse)
+	h.c.draw_circle(c, rad, Color(GOLD, 0.12 + 0.1 * pulse))
+	h.c.draw_arc(c, rad, 0.0, TAU, 40, Color(GOLD, 0.7 + 0.3 * pulse), 4.0, true)
+	var tip := c - Vector2(0, rad + 6.0 + 10.0 * pulse)
+	var s := rad * 0.5
+	h.c.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-s, -s * 1.2), tip + Vector2(s, -s * 1.2)]), GOLD)
 
 ## The first-time intro: short, over a light dim, and the rest of the HUD stays away.
 static func _intro(h, sz: Vector2, tu: Tutorial) -> void:
