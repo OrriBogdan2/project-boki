@@ -147,6 +147,7 @@ const CHECKS := {
 	"--hold-pose-check": ["res://tools/hold_pose_check.gd", "hold_pose_check", null],      # hold poses need the key
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
+	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
 	"--dash-streak-check": ["res://tools/dash_streak_check.gd", "dash_streak_check", null],
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
