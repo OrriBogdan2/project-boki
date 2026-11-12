@@ -34,7 +34,6 @@ const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
-const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -210,7 +209,7 @@ func _build() -> AnimationNodeBlendTree:
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
+		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * WardenGait.WALK_R)
 		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
@@ -507,14 +506,11 @@ func _loco(s: Dictionary, dt: float) -> void:
 	# (the model faces -Z at yaw 0: forward and right of the facing)
 	var fw := Vector2(-sin(face), -cos(face))
 	var rt := Vector2(cos(face), -sin(face))
-	var run := float(lc.get("run_speed", 4.6))
-	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
-	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * gait.ring(spd, lc, STILL)
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
-	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
+	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos.length()) if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -581,4 +577,4 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
 	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, CROUCH_RATE_MAX) if spd >= STILL else 1.0)
+	_p("crouch_rate/scale", WardenGait.crouch_rate(spd, cr, crouch_pos.length()) if spd >= STILL else 1.0)

@@ -13,6 +13,9 @@ const DT := 1.0 / 30.0
 const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
 const SAMPLE_S := 2.4        # s of locomotion sampled
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
+const CROUCH_K := 0.55      # of the run speed a crouch walks at (Hunter._physics): the sneak sampled at full stick
+# --fit-soles: shares of the file's foot_mps tried
+const FIT_K := [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.35, 1.5, 1.7, 1.9, 2.2]
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
@@ -37,8 +40,12 @@ func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--json="): json = a.substr(7)
+	var fit := "--fit-soles" in OS.get_cmdline_user_args()
 	for id in ids:
-		await _hero(main, String(id))
+		if fit:
+			await _fit(main, String(id))
+		else:
+			await _hero(main, String(id))
 	if json != "":
 		var f := FileAccess.open(json, FileAccess.WRITE)
 		f.store_string(JSON.stringify(rows, "\t"))
@@ -70,6 +77,13 @@ func _hero(main: Node, id: String) -> void:
 	for s in SPEEDS:
 		live[str(s)] = _gait(m, sync, clips, sk, s)
 	row["live"] = live
+	if clips.d.has("crouch"):
+		var cs: float = CROUCH_K * SPEEDS[2]
+		row["crouch"] = _gait(m, sync, clips, sk, cs, 1.0)
+		row["crouch"]["speed"] = cs
+	print("SLIDE %-10s walk %d%% jog %d%% run %d%% crouch %s" % [id, _pct(live[str(SPEEDS[0])], SPEEDS[0]),
+			_pct(live[str(SPEEDS[1])], SPEEDS[1]), _pct(live[str(SPEEDS[2])], SPEEDS[2]),
+			"%d%%" % _pct(row["crouch"], row["crouch"]["speed"]) if row.has("crouch") else "-"])
 	row["seam"] = {}
 	for nm in [walk, run, String(lc["idle"])]:
 		row["seam"][nm] = _seam(sync, clips, sk, nm, hgt)
@@ -143,9 +157,61 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	clips.force = {}
 	return out
 
-## A gait at speed s, as the game plays it: the state carries the velocity, facing -Z.
-func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) -> Dictionary:
-	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true})
+## --fit-soles: per Hunter, the walk, run and sneak "foot_mps" (WardenGait) that leave the least slide in this audit's
+## own walk, run and crouch rows: each tried at FIT_K of the file's value (a loop that glides, or a run pinned by
+## "cadence", is left as it is). Prints one FIT line per Hunter; the file is not written.
+func _fit(main: Node, id: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	for k in 5:
+		await main.get_tree().process_frame
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var clips: WardenClips = sync.get("clips")
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var lc: Dictionary = clips.d["loco"]
+	var cr: Dictionary = clips.d.get("crouch", {})
+	var foot: Array = (lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)]) as Array).duplicate()
+	var keep_foot: Variant = lc.get("foot_mps")
+	var keep_cr: Variant = cr.get("foot_mps")
+	var out := {}
+	var rings := [float(lc.get("walk_speed", 2.2)), float(lc.get("run_speed", 4.6)), float(cr.get("speed", 2.4))]
+	for g in 3:
+		var v0: float = float(foot[g]) if g < 2 else float(cr.get("foot_mps", rings[2]))
+		if (g == 2 and cr.is_empty()) or v0 < rings[g] * WardenGait.GLIDE_K or (g == 1 and lc.has("cadence")):
+			out[["walk", "run", "crouch"][g]] = [v0, -1]
+			continue
+		var best := [v0, INF]
+		for k in FIT_K:
+			var v: float = snappedf(v0 * k, 0.01)
+			var f2 := foot.duplicate()
+			if g < 2:
+				f2[g] = v
+			lc["foot_mps"] = f2
+			if g == 2:
+				cr["foot_mps"] = v
+			var spd: float = [SPEEDS[0], SPEEDS[2], CROUCH_K * SPEEDS[2]][g]
+			var pct := _pct(_gait(m, sync, clips, sk, spd, 1.0 if g == 2 else 0.0), spd)
+			if pct < best[1]:
+				best = [v, pct]
+		out[["walk", "run", "crouch"][g]] = best
+		if g < 2:
+			foot[g] = best[0]
+	if keep_foot == null: lc.erase("foot_mps")
+	else: lc["foot_mps"] = keep_foot
+	if keep_cr == null: cr.erase("foot_mps")
+	elif not cr.is_empty(): cr["foot_mps"] = keep_cr
+	rows[id] = out
+	print("FIT   %-10s %s" % [id, JSON.stringify(out)])
+	m.free()
+
+func _pct(g: Dictionary, s: float) -> int:
+	return roundi(100.0 * float(g["slide"]) / s)
+
+## A gait at speed s, as the game plays it: the state carries the velocity, facing -Z (`crouch` 1: the sneak).
+func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float, crouch := 0.0) -> Dictionary:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true, "crouch": crouch})
 	clips.loco_pos = Vector2.ZERO
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
@@ -160,6 +226,9 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
 func _slide(fr: Array, s: float) -> Dictionary:
+	return _slide_dt(fr, s, DT)
+
+func _slide_dt(fr: Array, s: float, dt: float) -> Dictionary:
 	var slide := 0.0
 	var peak := 0.0
 	var back := 0.0
@@ -173,7 +242,7 @@ func _slide(fr: Array, s: float) -> Dictionary:
 		for i in range(1, fr.size() - 1):
 			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
 				continue
-			var v: float = ((fr[i + 1][f] as Vector3).z - (fr[i - 1][f] as Vector3).z) / (2.0 * DT)     # +Z: backward
+			var v: float = ((fr[i + 1][f] as Vector3).z - (fr[i - 1][f] as Vector3).z) / (2.0 * dt)     # +Z: backward
 			slide += absf(s - v)
 			peak = maxf(peak, absf(s - v))
 			back += v

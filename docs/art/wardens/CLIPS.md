@@ -16,10 +16,13 @@ Hero live in `tools/art1/` (Kael is the pilot).
   don't collide.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
-  thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
-  and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
+  thighs about their running mean; `foot_mps` [walk, run] is the m/s the forward loops' planted soles run back at, at rate 1
+  with that stretch (`--anim-audit --fit-soles` fits it to the least slide), and the ground speed over it is the loops'
+  rate (0.3 to 3: WardenGait.rate, the one rule; a loop under 0.2 of its ring's speed glides and plays at the ground over
+  the ring's speed). The run ring shows from 1.3x `walk_speed`, back under 1.2x; `cadence` (optional) pins the run's
+  rate at `run_speed` to a source's footfalls. `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s: the sneak ring), `foot_mps` (its soles' speed at rate 1, as `loco.foot_mps`; the sneak's rate is WardenGait's one rule too). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne. Over the glide clip (and the dive, which
   plays it too) the whole body takes HunterAnim's air tilt (root meta `AIR_TILT`, WardenClips._air_tilt): the roll into
   a glider turn (25 deg at full steer) and the dive's nose-down pitch, about the rig's hips as the rig takes it, so the
