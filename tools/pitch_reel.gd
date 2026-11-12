@@ -137,7 +137,7 @@ func _film_one(s: int, k: int) -> int:
 	var stall := maxf(STALL_X * float(SECS.get(s, 0.0)), STALL_MIN_S)
 	var watch := [ProjectSettings.globalize_path("res://tools/pitch_take_filter.sh"), movie, str(int(stall)),
 		str(CHILD_LOG_LINES), OS.get_executable_path()]
-	var rc := OS.execute("bash", watch + args, out, true)
+	var rc := OS.execute("bash", watch + args, out)  # stderr stays the job's log: the filter's PITCH_BEAT lines
 	var marks := FileAccess.open(dir.path_join(stem + ".marks"), FileAccess.WRITE)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
 		marks.store_line(line)

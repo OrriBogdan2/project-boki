@@ -3,7 +3,8 @@ extends RefCounted
 ## movie writer, so a game change that breaks a driver shows here and not hours later on the GPU queue. The hatch
 ## reaches its reveal, the evolution either plays or says why it cannot, the Hunter select lands on and saves the
 ## chosen Hunter with its screen still up, the kit shot runs its rota with neither Hunter down or fallen off the
-## island, and the escape Hunter gets out. The save file is never written.
+## island, and the escape Hunter gets out. The take watchdog kills a child that writes no frames and passes one that
+## ends. The save file is never written.
 
 const CHOSEN := "mage"       # the Hunter shot 6 is asked to land on (not the default, so the pick is seen)
 
@@ -16,6 +17,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	var real := FileAccess.get_file_as_string(Save.path_for(Save.slot))
+	_watchdog()
 	var rig = load("res://tools/pitch_reel.gd").new()
 	rig.main = main
 	for s in [2, 3, 6, 7, 10]:
@@ -32,6 +34,19 @@ func run(main: Node) -> void:
 	ok(FileAccess.get_file_as_string(Save.path_for(Save.slot)) == real, "the player's own save file is untouched")
 	print("PITCH REEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## tools/pitch_take_filter.sh on a child that hangs (sleep, no movie) and one that ends at once.
+func _watchdog() -> void:
+	var filter := ProjectSettings.globalize_path("res://tools/pitch_take_filter.sh")
+	var movie := OS.get_cache_dir().path_join("pitch_check_none.avi")
+	OS.set_environment("PITCH_POLL_S", "1")
+	var out: Array = []
+	var rc := OS.execute("bash", [filter, movie, "2", "10", "sleep", "60"], out)
+	ok(rc == 124 and String(out[0]).contains("PITCH_STALL"), "watchdog: a take with no new frames is killed (rc %d)" % rc)
+	out.clear()
+	rc = OS.execute("bash", [filter, movie, "2", "10", "echo", "PITCH_DONE"], out)
+	ok(rc == 0 and String(out[0]).contains("PITCH_DONE"), "watchdog: a take that ends passes its rc and lines")
+	OS.unset_environment("PITCH_POLL_S")
 
 func _select_landed(main: Node) -> bool:
 	var grid = main.current.get_meta("classes_grid", null)
