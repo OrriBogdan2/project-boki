@@ -56,6 +56,8 @@ onto its side (`Kin.render`).
 4. **Hunter dash is `proc` for 5 Hunters** (breaker, cinder, hem, pip, and gil): the procedural roll,
    phase and charge poses stand in; claire, dredge, kael, ostra, ryzz, sable, tarek and vex key a dash clip (Grimble's
    shoulder barge, Motley's 1.8 s lob from launch to the lid shutting; a move whose name doesn't say dash is marked
-   `"dash": true` in its warden_anim entry).
+   `"dash": true` in its warden_anim entry). GPU parity strips of the two (`--parity-strip --slot=dash`, jobq
+   20261112-134749-25324 ostra 0156-0168, 20261112-134803-00222 dredge 0186-0190) hold footage, so they live in
+   hetzner `~/anim/anim-dash-clips-motley-grimble/`, not in the repo.
 5. **Tarek has no upper-body kit move**, so his attacks stop the legs.
 6. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
