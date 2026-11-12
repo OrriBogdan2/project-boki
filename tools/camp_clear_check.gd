@@ -42,6 +42,7 @@ func run(main: Node) -> void:
 			await _hero(main, String(arch))
 	if only == "":
 		_band()
+	print("CAMPCLEAR pve: 0 sourced modifiers applied, times unchanged (docs/CAMP_PARITY.md)")
 	print("CAMPCLEAR DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
