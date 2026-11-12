@@ -22,7 +22,7 @@ Its JSON carries each cell's ground speed and clip rate: a ring's planted-sole s
 rate, and `loco.foot_mps` and `crouch.speed` are the median of the 8 directions.
 
 `--loco-dir-shots --shots-dir=<dir>` films 8 copies of a Hunter, one per direction, each on a checker floor that
-scrolls at the ground speed (a slide shows against the squares). Before/after MP4: `~/meshy/anim-dir-1112/` on hetzner.
+scrolls at the ground speed (a slide shows against the squares). Before/after MP4: `~/meshy/anim-dir-1112/` on hetzner; Grimble, Sparkle and Albert run, sprint and crouch walk for the last 30 cells: `~/meshy/anim-loco-dir-last/loco_dir_before_after_v3.mp4` on rpc1 (jobs 20261112-103748-11485 before, 20261112-103907-24157 after).
 
 ## Grid: failing cells of 8, before -> after
 Before is the 0.24.5 integ with the READY dirloops, crouch-rest-2 and run-aim-twist branches (cfa684194b), read by
@@ -32,18 +32,21 @@ today's audit.
 |---|---|---|---|---|---|---|---|---|
 | Lace (archer) | 1 → 0 | 1 → 0 | 4 → 0 | 4 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 15 → 0 |
 | Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 0 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 0 |
-| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 2 | 25 → 22 |
+| Albert (bulwark) | 2 → 0 | 8 → 0 | 1 → 0 | 7 → 4 | 3 → 1 | 2 → 0 | 2 → 0 | 25 → 5 |
 | Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
-| Grimble (dredge) | 5 → 0 | 5 → 3 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 1 | 5 → 0 | 28 → 6 |
+| Grimble (dredge) | 5 → 0 | 5 → 0 | 5 → 0 | 3 → 0 | 0 → 0 | 5 → 0 | 5 → 0 | 28 → 0 |
 | Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
 | Kael (juggernaut) | 1 → 0 | 6 → 0 | 5 → 0 | 3 → 0 | 1 → 0 | 4 → 0 | 2 → 0 | 22 → 0 |
-| Sparkle (mage) | 3 → 0 | 7 → 2 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 2 |
+| Sparkle (mage) | 3 → 0 | 7 → 0 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 0 |
 | Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
-| Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
+| Meeko (tender) | 5 → 0 | 7 → 1 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 1 |
 | Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
-| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 4 | 31 → 2 | **271 → 30** |
+| **all 11** | 28 → 0 | 65 → 1 | 47 → 0 | 47 → 4 | 6 → 1 | 47 → 0 | 31 → 0 | **271 → 6** |
 
-By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 20.
+By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 3, SNAP 92 → 2.
+
+ext/anim-loco-slip (merged into ext/anim-loco-dir-last): Albert's run_fl/fr turned from run_f
+(art/wardens/breaker/IMPORT.md): run, sprint and strafe fl/fr clean.
 
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
@@ -95,14 +98,51 @@ at in the steady loop). PLANT fails a cell whose first foot down lands over 2 fr
 - **Stops:** not in this pass. `ext/anim-stop-on-stride` (READY, WardenStride) owns the run stop; Albert's crouch stops
   (hand.R) are his half-turn rest below.
 
-## Left (docs/DEBT.md)
-- Starts still off (tools/loco_dir_known.txt): PLANT Albert walk fr/r/b/bl (-4..-9 frames), Vex walk f/fl (-9: her
-  first swing never clears half its height, so the next foot is the first plant read), Sable run fr/fl (+4..6), Kael
-  walk bl / run b (no plant read in 1 s). SNAP Albert walk bl / aim_walk bl start (a toe spike on his walk_bl shin key
-  step, above), run bl stop (the stop is ext/anim-stop-on-stride's), walk br / aim_walk br stop.
-- Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
-  copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
-  Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
-  flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
+## Last 30 cells (ext/anim-loco-dir-last): 30 → 6
+Per cell: the clip, the ring blend or the foot_mps number? Grimble's and Sparkle's 8 were all one cause, **the ring
+blend**: Grimble's run_f/fl/fr (and Sparkle's) swing an arm over 100 degrees from the walk loop's, and a start,
+stop or walk/run change crossfaded a hidden ring at whatever stride it had frozen in (Godot's Blend2 does not advance a
+hidden input), so the two arms sat near half a turn apart. `Quaternion` blends take the short way round, and at the
+crossfade the forearm flipped 140-170 degrees in one frame (a hand 0.6 m away): with the walk ring only, or the run ring
+only, every cell passed; spring rates, `arm_swing` and re-resting the arm did not move it. The fix is data and a few
+lines: the run loops are re-timed to the walk loop's length (`tools/art1/glb_add_clips.py --stretch`; Grimble 0.63 →
+1.0 s, Sparkle 0.60 → 0.75 s with her walk loops, both on one strike key), `foot_mps` is re-measured on the sole
+(Grimble 1.59 / 4.71 → 1.59 / 2.98, Sparkle 1.11 / 3.47 → 1.38 / 2.77: the same cadence at speed, a longer stride per
+turn), and WardenClips keeps rings of one length advancing in step (`rings.sync`) and holds them at `loco.ring_start`
+(0 by default; Sparkle 0.25) while he stands, so a start opens on a stride the idle's arms can blend into.
+Albert's hammer forearm (`forearm.R`) sits 177-179 degrees off its rest in every crouch clip, so crouch starts and stops
+flipped it: `loco.rest_bones` re-rests it at the mean of its keys at load (`WardenClips._rerest`; the .glb's rest stays,
+WardenGlb checks it) and 7 crouch cells pass.
+
+Albert's run/sprint/strafe fl/fr (6) are ext/anim-loco-slip's turned run_f. His start snaps (walk br, strafe bl,
+aim_walk br/bl) were **the ring blend**, hidden behind **an arm bug**: WardenGait's `arm_swing` set his left arm
+against the pitch of his thigh's Y axis, but his thighs point every way but down (straight ahead for half a stride,
+then out and up), so that pitch ran a full turn each stride and threw his hand 1.26 m in one frame (`--anim-audit`
+arms read +0.36 or -0.5 by where the rings waited). The leg's pitch is now its lean ahead, hip to ankle (a rig
+without feet: the knee); his hand moves at most 0.38 m a frame against 0.12 for the clip alone, arms 0.33, the same
+at every start. With that, `loco.ring_start` 0.32 (clean 0.30-0.34, narrow) opens his walk ring on a stride the idle's
+feet blend into, and the four start snaps pass. Other Hunters' arms: Lace 0.83 → 0.95, Cinder 0.79 → 0.91, Sable
+0.83 → 0.94, Vex 0.95 → 0.92, Meeko 0.33 → 0.32.
+
+## One start (ext/anim-loco-snap-startstop): 30 → 19, SNAP 13 → 8
+The two branches above each opened the rings their own way (WardenStart's per-ring seek to the pose nearest the idle;
+a held `ring_seek` at `loco.ring_start`). One stays: WardenStart. Rings of one length (Albert, Grimble, Sparkle after
+the re-timing) open both on `loco.ring_start` (0 by default: the strike key); other Hunters keep the pose nearest the
+idle. The nearest-idle phase on Grimble's locked rings put 11 cells over the bar (his hook arm on run starts), so the
+strike key it is. `rings.sync`, `rest_bones` and the leg-pitch arm fix come in as they were.
+Per Hunter, SNAP before → after: Albert 13 → 7 (gone: crouch_walk r/b/l and crouch_idle r/br/bl/l by the
+`rest_bones` forearm, run bl stop; new: walk/aim_walk fl stop), Grimble 0 → 1 (run f stop, new),
+others 0.
+All failing cells 30 → 19: SLIP 9 → 3 (ext/anim-loco-slip's turned run diagonals), PLANT 7 → 7.
+Tried and dropped: the eased start rate (the 3 new stops pass, 5 starts land 4-11 frames off their contact key: the stop
+cells read the stride phase the start left), and `rest_bones` on Albert's shins (7 cells fail: slips and plants).
+
+## Left (docs/DEBT.md): 19 cells
+- Albert crouch (5), **the clip**: crouch_f has no stance (crouch_walk fr/fl/br/bl, crouch_idle b); see above.
+- Albert walk/aim_walk br/bl SNAP (4): his walk_b* shins sit 60-178 deg off their rest (a 57 deg shin key step in
+  walk_bl), so a start or stop blended with the idle flips the toe. Needs the shins re-keyed (Blender).
+- Stops over the bar by 2-6 % at the check's one stop phase (3): Albert walk/aim_walk fl toe 1.030 (bar 1.013), Grimble
+  run f hand.L 0.510 (bar 0.480). The stop does not wait for the planted foot: ext/anim-stop-on-stride (WardenStride).
+- PLANT (7): Albert walk fr/r/b, Kael run b, Sable walk r / run fr/fl: first foot down over 2 frames off its key.
 - Vex's rebuilt run_f has a shorter stance than the old one, so its kept arm keys swung with the legs; `arm_swing`
   now drives both arms off the legs (0.5 each), as it did her right one.

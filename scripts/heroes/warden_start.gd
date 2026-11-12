@@ -25,8 +25,11 @@ static func phases(lib: AnimationLibrary, lc: Dictionary, sk: Skeleton3D) -> Arr
 			pts[b] = bi
 	var idle := _pose(lib.get_animation(String(lc["idle"])), 0.0, sk, pts)
 	var walk := lib.get_animation(String(lc["walk"]["f"]))
-	var walk_t := _nearest(walk, [idle], sk, pts)
 	var run := lib.get_animation(String(lc["run"]["f"]))
+	if is_equal_approx(walk.length, run.length):     # (rings of one length keep time: both open on the strike key)
+		var start := float(lc.get("ring_start", 0.0)) / walk.length     # (data: a Hunter's own start, s)
+		return [start, start]
+	var walk_t := _nearest(walk, [idle], sk, pts)
 	var run_t := _nearest(run, [idle, _pose(walk, walk_t, sk, pts)], sk, pts)
 	return [walk_t / walk.length, run_t / run.length]
 

@@ -155,6 +155,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
+	for bone in (d["loco"] as Dictionary).get("rest_bones", []):
+		_rerest(String(bone))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -169,6 +171,29 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
+
+## Data "loco.rest_bones": a bone whose clips all sit near half a turn off its rest. The tree blends a rotation as a
+## turn off the rest, so two of those clips blending flip the bone across 180 degrees: its rest becomes the mean of
+## its keys.
+func _rerest(bone: String) -> void:
+	var bi := WardenSkeleton.find(skel, bone)
+	var first := Quaternion.IDENTITY
+	var sum := Vector4.ZERO
+	for nm in lib.get_animation_list():
+		var a := lib.get_animation(nm)
+		for i in a.get_track_count():
+			var on_bone := a.track_get_path(i).get_concatenated_subnames() == bone
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D or not on_bone:
+				continue
+			for k in a.track_get_key_count(i):
+				var q: Quaternion = a.track_get_key_value(i, k)
+				first = q if sum == Vector4.ZERO else first
+				var side := 1.0 if q.dot(first) >= 0.0 else -1.0
+				sum += side * Vector4(q.x, q.y, q.z, q.w)
+	var rest := skel.get_bone_rest(bi)
+	var mean := sum.normalized()
+	rest.basis = Basis(Quaternion(mean.x, mean.y, mean.z, mean.w))
+	skel.set_bone_rest(bi, rest)
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
 ## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
@@ -233,7 +258,11 @@ func _build() -> AnimationNodeBlendTree:
 	var in_step := bool(lc.get("in_step", false))     # (a ring on one length and strike key: every loop keeps time)
 	t.add_node("walk", _ring(lc["walk"], in_step))
 	t.add_node("run", _ring(lc["run"], in_step))
-	t.add_node("rings", AnimationNodeBlend2.new())
+	# (rings of one length and strike key keep time even while one is hidden: the crossfades (walk, run) then never
+	# blend arms half a stride apart: docs/art/LOCO_DIR.md)
+	var rings := AnimationNodeBlend2.new()
+	rings.sync = is_equal_approx(_length(String(lc["walk"]["f"])), _length(String(lc["run"]["f"])))
+	t.add_node("rings", rings)
 	for i in 2:
 		var ring: String = ["walk", "run"][i]
 		t.add_node(ring + "_seek", AnimationNodeTimeSeek.new())

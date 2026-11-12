@@ -56,7 +56,7 @@
 		},
 		"walk_speed": 2.0,
 		"run_speed": 4.8,
-		"foot_mps": [1.27, 4.50], "in_step": true, "arm_swing": {"L": 0.5}
+		"foot_mps": [1.27, 4.50], "in_step": true, "ring_start": 0.32, "rest_bones": ["forearm.R"], "arm_swing": {"L": 0.5}
 	},
 	"air": {
 		"rise": "jump",

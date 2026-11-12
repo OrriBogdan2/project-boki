@@ -7,7 +7,9 @@ extends RefCounted
 ##    faster (`plan`, the loco_rate scale) and a longer stride (the thigh and shin turn further about their running
 ##    mean), so a planted foot stays put on the floor without the cadence going frantic;
 ##  - "loco.arm_swing": {"L": gain, "R": gain} puts the arm on the opposite swing of its own side's leg: its pitch
-##    about the side axis follows minus the leg's, around the arm's running mean (a static arm gets a swing too).
+##    about the side axis follows minus the leg's, around the arm's running mean (a static arm gets a swing too). The
+##    leg's is its lean ahead, hip to ankle: Albert's thigh bones point every way but down, and his ankle swings up
+##    level with his hip, so a pitch off straight down wraps a full turn each stride.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -21,7 +23,7 @@ var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+var arms: Array = []         # [upper arm, parent, same-side thigh, hand, gain, arm mean pitch, leg mean pitch, ankle]
 
 func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 	skel = sk
@@ -33,8 +35,11 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 		var ai := WardenSkeleton.find(sk, "upper_arm." + String(side))
 		var hi := WardenSkeleton.find(sk, "hand." + String(side))
 		var ti := WardenSkeleton.find(sk, "thigh." + String(side))
+		var fi := WardenSkeleton.find(sk, "foot." + String(side))
+		fi = fi if fi >= 0 else WardenSkeleton.find(sk, "x_foot." + String(side))
+		fi = fi if fi >= 0 else WardenSkeleton.find(sk, "shin." + String(side))     # (no foot: the knee)
 		if ai >= 0 and hi >= 0 and ti >= 0:
-			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
+			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN, fi])
 
 ## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
 ## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, in game: tools/loco_dir_check.gd),
@@ -61,7 +66,8 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 			skel.set_bone_pose_rotation(l[0], (m * Quaternion.IDENTITY.slerp(m.inverse() * q, k)).normalized())
 	for r in arms:
 		var arm_p := _pitch(skel.get_bone_global_pose(r[3]).origin - skel.get_bone_global_pose(r[0]).origin)
-		var leg_p := _pitch(skel.get_bone_global_pose(r[2]).basis.y)
+		var leg := skel.get_bone_global_pose(r[7]).origin - skel.get_bone_global_pose(r[2]).origin
+		var leg_p := asin(clampf(-leg.normalized().z, -1.0, 1.0))     # (its lean ahead: never wraps)
 		r[5] = arm_p if is_nan(r[5]) else lerp_angle(r[5], arm_p, a)     # (a first frame is its own mean)
 		r[6] = leg_p if is_nan(r[6]) else lerp_angle(r[6], leg_p, a)
 		if arm_w <= 0.0:

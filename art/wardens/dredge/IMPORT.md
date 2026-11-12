@@ -43,3 +43,5 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
 
 walk and run b, l, r, fl, fr, bl, br (2026-11-12, ext/anim-dir-all-1112): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/dredge/dredge.glb OUT.glb 1.06 3.24` (walk_f's and run_f's own planted sole speed), then `python3 tools/art1/glb_add_clips.py art/wardens/dredge/dredge.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`. The ring is in step; `loco.stride` is gone (it stretched the side and back loops unevenly) and `foot_mps` is the ring's in-game sole median (docs/art/LOCO_DIR.md).
+
+run_b, run_bl..run_r and run_f re-timed to 1.0 s (the walk loops' length) on 2026-11-12 (ext/anim-loco-dir-last): `python3 tools/art1/glb_add_clips.py --stretch art/wardens/dredge/dredge.glb run_ 1.0`; `loco.foot_mps` run 4.71 -> 2.98 (measured on the sole, tools/loco_dir_check.gd).
