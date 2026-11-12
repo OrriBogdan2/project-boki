@@ -29,15 +29,19 @@ static func fill(body: VBoxContainer, h: Hunter, again: Callable) -> void:
 		var line := "%s: rank %d / %d" % [_name(h, s), int(h.slot_lv[s]), int(Hunter.SLOT_MAX[s])]
 		body.add_child(UI.label(line, 15))
 	body.add_child(UI.spacer(6))
-	body.add_child(UI.button("Max all", func(): max_all(h); again.call(), WIDE, "next"))
+	body.add_child(UI.button("Max all", _then.bind(max_all.bind(h), again), WIDE, "next"))
 	body.add_child(UI.label("Pick your max:", 14, UI.MUTED))
 	for s in Hunter.SLOTS:
-		var b := UI.button("Max %s" % _name(h, s), func(): pick_max(h, s); again.call(), WIDE, "check")
+		var b := UI.button("Max %s" % _name(h, s), _then.bind(pick_max.bind(h, s), again), WIDE, "check")
 		var ranks := Arch.next_ranks(h.arch, s, 1)
 		if not ranks.is_empty():
 			b.tooltip_text = String(ranks[-1][1])      # what the top rank unlocks (the kit's data bonus)
 		body.add_child(b)
-	body.add_child(UI.button("Reset to rank 1", func(): reset(h); again.call(), WIDE, "back"))
+	body.add_child(UI.button("Reset to rank 1", _then.bind(reset.bind(h), again), WIDE, "back"))
+
+static func _then(change: Callable, again: Callable) -> void:
+	change.call()
+	again.call()
 
 static func _name(h: Hunter, slot: String) -> String:
 	return String(h.slot_info(String(HUD_SLOT[slot]))["name"])

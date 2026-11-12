@@ -360,14 +360,16 @@ func _practice_page(m: Match) -> void:
 	Overlay.open_pause("match")
 	await tree.process_frame
 	ok("practice: the Esc menu has Practice", await _press("Practice") and Overlay.page == "practice", Overlay.page)
-	ok("practice: Max all", await _press("Max all") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s]), str(P.slot_lv))
+	var maxed := await _press("Max all") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s])
+	ok("practice: Max all", maxed, str(P.slot_lv))
 	ok("practice: max rank shortens the cooldown", is_equal_approx(P.rank_cd_k("sec"), 0.8), str(P.rank_cd_k("sec")))
 	var dash := String(P.slot_info("dash")["name"])
 	var bonus := String(Arch.next_ranks(P.arch, "dash", 1)[-1][1])
 	ok("practice: Pick your max shows its bonus", _button("Max " + dash).tooltip_text == bonus, bonus)
 	ok(
 		"practice: Pick your max maxes that ability only",
-		await _press("Max " + dash) and P.ak.rank("dash") == 3 and P.slot_lv["sec"] == 1 and P.slot_lv["kin"] == 1 and P.slot_lv["ult"] == 1,
+		await _press("Max " + dash) and P.ak.rank("dash") == 3
+			and P.slot_lv["sec"] == 1 and P.slot_lv["kin"] == 1 and P.slot_lv["ult"] == 1,
 		str(P.slot_lv)
 	)
 	await _practice_shot()
@@ -375,7 +377,8 @@ func _practice_page(m: Match) -> void:
 	ok("practice: one-line labels", buttons.all(func(b): return not String(b.text).contains("\n")))
 	var r := Rect2(Vector2.ZERO, main.get_viewport().get_visible_rect().size)
 	ok("practice: the page fits the screen", buttons.all(func(b): return r.encloses(b.get_global_rect())), str(r.size))
-	ok("practice: Reset", await _press("Reset to rank 1") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1) and P.skill_pts == 0, str(P.slot_lv))
+	var rank1 := await _press("Reset to rank 1") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1)
+	ok("practice: Reset", rank1 and P.skill_pts == 0, str(P.slot_lv))
 	ok("practice: the dummies keep their ranks", D.slot_lv == dummy_ranks, str(D.slot_lv))
 	Overlay.close()
 	main.set("current", was)
@@ -383,10 +386,11 @@ func _practice_page(m: Match) -> void:
 
 ## --practice-shot=<dir> (needs a renderer, jobq --needs gpu): the Practice page at 1280x720 as <dir>/practice_page.png.
 func _practice_shot() -> void:
-	var dirs: Array = OS.get_cmdline_user_args().filter(func(a): return String(a).begins_with("--practice-shot="))
-	if dirs.is_empty():
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--practice-shot="): dir = a.trim_prefix("--practice-shot=")
+	if dir == "":
 		return
-	var dir := String(dirs[0]).trim_prefix("--practice-shot=")
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_window().size = Vector2i(1280, 720)
 	for i in 20: await main.get_tree().process_frame

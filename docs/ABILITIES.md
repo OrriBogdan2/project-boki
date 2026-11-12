@@ -107,6 +107,8 @@ Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unl
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
 
+In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1. Bots and dummies keep their own ranks and spend by their kit's `order`.
+
 ## Shift: class dashes
 
 Each class has its own dodge verb. Grounded with a charge, Shift does the class dodge; in the air or out of charges it does the class's long dash (its own cooldown). Both chain straight into a jump or the glider.
