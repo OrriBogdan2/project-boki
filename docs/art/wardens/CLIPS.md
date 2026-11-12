@@ -18,10 +18,13 @@ Hero live in `tools/art1/` (Kael is the pilot).
   them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time; `--clip-check`
   holds each loop's pelvis to the forward loop's height at the same phase).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
-  thighs about their running mean; `foot_mps` [walk, run] is the ring's planted-sole speed at rate 1 in game (m/s: the median
-  of the 8 directions `--loco-dir-check` reads), and move speed over it sets the clip rate (0.6 to 1.8, eased). The blend
-  holds the walk ring (radius 0.45, eased in from the idle) or the run ring, switching above 1.3x `walk_speed` and back
-  under 1.2x, never resting between them (two out-of-step loops cancel the feet); it moves on a critically damped spring.
+  thighs about their running mean (hand-keyed loops only: on a ring of pinned soles it stretches the side and back loops
+  unevenly); `foot_mps` [walk, run] is the ring's planted-sole speed at rate 1 in game (m/s: the median of the 8
+  directions `--loco-dir-check` reads), and move speed over it sets the clip rate (0.6 to 1.8, eased). The idle lies
+  under the rings on one weight (up to `walk_speed`), the walk ring under the run ring on another (the run ring above
+  1.3x `walk_speed`, back under 1.2x, never resting between them), and the direction is a blend position on each ring:
+  all three ride critically damped springs, so a start, stop or ring change never jumps a foot. In step, the run
+  ring's clock runs at its length over the walk ring's, so the two are blended at the same point of the stride.
   `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
   `aim_twist` (Vex, Lace, Cinder): run-and-aim as the source does it. The walk and run play forward with the legs turned
@@ -38,7 +41,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
+loco (Blend2 of the idle and the rings; the rings a Blend2 of two BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
 

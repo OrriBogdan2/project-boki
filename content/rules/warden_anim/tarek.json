@@ -42,7 +42,7 @@
 		"run_speed": 5.0,
 		"foot_mps": [1.45, 3.23], "in_step": true, "arm_swing": {"L": 0.5, "R": 0.5}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r", "fl": "crouch_fl", "fr": "crouch_fr", "bl": "crouch_bl", "br": "crouch_br"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r", "fl": "crouch_fl", "fr": "crouch_fr", "bl": "crouch_bl", "br": "crouch_br"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.70},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",

@@ -18,46 +18,58 @@ against the move within 40 deg (DIR: no forward loop walked backwards, no mirror
 the ground speed (SKATE) and slip over it at most 45 % of it (SLIP); a start or stop must not change any point's
 velocity in one frame by more than 2.5x the loop's own worst (SNAP). It is a ratchet: `tools/loco_dir_known.txt`
 lists the cells failing today; any other failing cell fails the suite, and `--update` rewrites the list after a fix.
+Its JSON carries each cell's ground speed and clip rate: a ring's planted-sole speed at rate 1 is carry x speed /
+rate, and `loco.foot_mps` and `crouch.speed` are the median of the 8 directions.
 
 `--loco-dir-shots --shots-dir=<dir>` films 8 copies of a Hunter, one per direction, each on a checker floor that
 scrolls at the ground speed (a slide shows against the squares). Before/after MP4: `~/meshy/anim-dir-1112/` on hetzner.
 
-## Grid: failing cells of 8, before (the 0.24.5 integ + the READY dirloops, crouch-rest-2, run-aim-twist branches) -> after
+## Grid: failing cells of 8, before -> after
+Before is the 0.24.5 integ with the READY dirloops, crouch-rest-2 and run-aim-twist branches (cfa684194b), read by
+today's audit.
+
 | Hunter | walk | run | sprint | crouch_walk | crouch_idle | strafe | aim_walk | total |
 |---|---|---|---|---|---|---|---|---|
-| Lace (archer) | 1 → 0 | 1 → 1 | 4 → 0 | 3 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 14 → 1 |
-| Cinder (ashwick) | 2 → 2 | 7 → 6 | 6 → 7 | 4 → 1 | 1 → 1 | 7 → 7 | 2 → 2 | 29 → 26 |
-| Albert (bulwark) | 3 → 1 | 8 → 3 | 4 → 2 | 6 → 6 | 3 → 3 | 1 → 4 | 3 → 1 | 28 → 20 |
-| Tenzo (dolm) | 0 → 0 | 6 → 5 | 6 → 1 | 7 → 1 | 0 → 0 | 6 → 1 | 0 → 0 | 25 → 8 |
-| Grimble (dredge) | 6 → 3 | 5 → 5 | 5 → 4 | 4 → 0 | 0 → 0 | 4 → 4 | 5 → 4 | 29 → 20 |
-| Vex (gunslinger) | 3 → 3 | 6 → 5 | 4 → 4 | 3 → 0 | 0 → 0 | 4 → 5 | 3 → 3 | 23 → 20 |
-| Kael (juggernaut) | 2 → 1 | 3 → 8 | 4 → 5 | 4 → 7 | 1 → 0 | 4 → 8 | 3 → 1 | 21 → 30 |
-| Sparkle (mage) | 2 → 3 | 6 → 4 | 3 → 3 | 4 → 0 | 0 → 0 | 3 → 4 | 2 → 4 | 20 → 18 |
-| Neve (rimewright) | 1 → 6 | 8 → 8 | 7 → 2 | 4 → 0 | 0 → 0 | 7 → 2 | 2 → 1 | 29 → 19 |
-| Meeko (tender) | 5 → 2 | 6 → 4 | 4 → 2 | 6 → 0 | 0 → 0 | 4 → 4 | 7 → 2 | 32 → 14 |
-| Sable (thief) | 3 → 1 | 3 → 5 | 1 → 1 | 4 → 0 | 0 → 0 | 1 → 1 | 2 → 1 | 14 → 9 |
-| **all 11** | 28 → 22 | 59 → 54 | 48 → 31 | 49 → 15 | 5 → 4 | 45 → 40 | 30 → 19 | **264 → 185** |
+| Lace (archer) | 1 → 0 | 1 → 0 | 4 → 0 | 4 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 15 → 0 |
+| Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 1 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 1 |
+| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 1 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 1 | 25 → 20 |
+| Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
+| Grimble (dredge) | 5 → 0 | 5 → 0 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 0 | 5 → 0 | 28 → 2 |
+| Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
+| Kael (juggernaut) | 1 → 0 | 6 → 0 | 5 → 0 | 3 → 0 | 1 → 0 | 4 → 0 | 2 → 0 | 22 → 0 |
+| Sparkle (mage) | 3 → 0 | 7 → 2 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 2 |
+| Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
+| Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
+| Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
+| **all 11** | 28 → 1 | 65 → 4 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 3 | 31 → 1 | **271 → 25** |
 
-By test, before → after: DIR 33 → 19, SKATE 70 → 9, SLIP 74 → 68, SNAP 87 → 89.
+By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 8, SNAP 92 → 16.
 
 ## What was broken, what changed
-- **Crouch walk backwards and sideways skated:** several shipped crouch_b/l/r planted at a fraction of crouch_f's
-  speed (Tenzo crouch_b 0.31 m/s against 2.66), and the sneak ring had no diagonals: at 45 deg it blended crouch_f
-  with crouch_r out of step, and the feet went sideways or nowhere (DIR on every diagonal). hunter_dir_gait.py now
-  builds a crouch ring (GAITS `crouch`): b, l, r and the four diagonals at crouch_f's own sole speed and length, in step;
-  WardenClips syncs the ring and adds the diagonals. Baked for 10 Hunters; Albert is left (below).
-- **Walk to run:** the blend rested between the walk and run rings, which differ in length, so their feet cancelled
-  (Lace's run, Tenzo's sprint). It now holds one ring (switch at 1.3x `walk_speed`, back at 1.2x) on a critically
-  damped spring; the rates ease.
-- **Rates:** `foot_mps` was measured at the shin's tip, which a heel-to-toe roll over a pinned sole reads as a slide,
-  and the pilot rings (Tenzo, Vex, Albert, Neve) had none, so they played at speed / walk_speed while the model is
-  scaled (Tenzo x0.75): the feet carried ~55 %. Every Hunter's `foot_mps` is now the in-game sole median of its ring;
-  the rate cap is 1.8 (was 1.4).
+- **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
+  every start, stop or walk/run change crossed the walk ring at speed, where the triangle weights turn a corner, and the
+  feet and hands jumped. WardenClips now mixes the idle, a walk ring and a run ring (each a BlendSpace2D of the
+  directions on the unit circle) with Blend2 weights on critically damped springs, and the two rings run on one phase
+  (the run ring's clock at its length over the walk ring's). A stop starts the idle from its top: Neve's idle spins
+  at 4-5 s, and a stop that landed there swung her root through half a turn.
+- **Run-and-aim slid sideways:** the aim twist turned the root's rotation but not its position, so a loop's sway of the
+  root pushed a planted foot sideways once the legs turned (Vex: 19 cells); the turn rides the same spring now.
+- **Diagonals walked the wrong way:** Grimble, Sparkle and Meeko had only f/b/l/r walk and run loops, so a diagonal
+  blended two loops out of step. hunter_dir_gait.py builds their b, l, r and diagonals on the recipe at the forward
+  loop's own sole speed; Albert's back crouch diagonals are crouch_b turned 45 deg into the move ("bl~").
+- **Forward loops skated:** several shipped forward loops never planted at one speed (Tenzo's run_f 0.75..8.89 m/s, Vex's
+  run_f 0.58..6.67, Neve's walk_f and run_f, Sable's and Meeko's walk_f); they are rebuilt on the ring's recipe, the
+  upper body kept.
+- **Rates:** `loco.stride` stretched the side and back loops of a recipe ring 1.3-1.6x faster than the rest; it is off on
+  those rings (Grimble, Sparkle, Meeko, Kael), and `foot_mps` and every `crouch.speed` are the measured sole medians
+  (Kael's sneak overran 1.5x at 1.55, Tenzo's 1.3x). `--crouch-check` no longer measures the plant: it read Kael at a
+  point on his shin's line that a crouched shin swings off the boot.
+- The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
 ## Left (docs/DEBT.md)
-- Albert's crouch: his crouch_f plants at 0.39 m/s with the hips 9 cm up on 14 cm legs; the recipe can't build a ring
-  from it. Needs a hand-made sneak.
-- SNAP (89 cells): mostly Cinder, Kael, Neve, Vex at run/sprint start and stop: WardenGait's stride layer fades in and
-  out at 8/s as the speed crosses 0.25 m/s, and walk and run loops of unequal length meet mid-blend.
-- SLIP (68 cells, most within 1.2x the bar; Kael's crouch ring overruns at the crouch-rest-2 speed that --crouch-check holds): a ring whose directions plant at different speeds (one rate per ring);
-  per-direction rates, or re-baked rings on the pilot recipe, would close it.
+- Albert (20): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
+  copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
+  Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
+  flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
+- Cinder sprint fl, Grimble sprint fr/bl, Sparkle run b/br (5): a start or stop peaks 3-35 % over the snap bar, a run
+  arm swinging hard (Grimble's hook arm: 0.25 m/frame^2 in a steady run) while the weights and rate settle.

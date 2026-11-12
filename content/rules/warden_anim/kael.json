@@ -43,7 +43,7 @@
 			"r": "crouch_r", "fl": "crouch_fl", "fr": "crouch_fr", "bl": "crouch_bl", "br": "crouch_br"},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.40
+		"speed": 2.44
 	},
 	"air": {
 		"rise": "jump",

@@ -44,7 +44,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 body (not in the air, a crouch, or a move that owns the body):
 
 - **Stride and rate.** `loco.foot_mps` is the clips' measured foot speed, `loco.stride` the thigh stretch about its running
-  mean. The move speed over the foot speed sets the loco rate (0.6 to 1.4); the stretch carries the rest.
+  mean. The move speed over the foot speed sets the loco rate (0.6 to 1.8); the stretch carries the rest. A ring of
+  pinned soles (tools/art1/hunter_dir_gait.py) has no stretch: it skews its side and back loops (docs/art/LOCO_DIR.md).
 - **Arm counter-swing.** `loco.arm_swing` {"L"|"R": gain} turns that upper arm about the side axis so the
   shoulder-to-hand pitch follows minus the same side's thigh, around the arm's running mean. A static arm gets a swing
   too. It is off while an upper-body move owns the arm.
