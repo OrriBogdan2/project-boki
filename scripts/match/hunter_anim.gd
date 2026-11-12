@@ -849,7 +849,7 @@ func update(dt: float, s: Dictionary) -> void:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack":
+	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack" and not HunterRod.ACTS.has(act_kind):
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -1073,6 +1073,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# ================================================================ WEAPON AND ARMS
 	_upper(dt, s, vel, r1, still, pitch, yaw, cast_k, em_t, fired, breath)
 	HunterTool.place(self)
+	HunterRod.place(self)
 	# ================================================================ HEAD
 	if head:
 		glance_t -= dt
@@ -1721,6 +1722,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
 ##   feed, pat, toss, cheer   the garden moves (HunterVerbs)
+##   wait, cast, bite, reel, land   fishing with the rod (HunterRod): the legs stay on EmptyGait's planted feet
 ##   carry, pack   a Boki held against the chest, or on the back (home): both keep the walk cycle
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
@@ -1766,6 +1768,8 @@ func _act_pitch() -> float:
 		return HunterTool.pitch(act_kind, tool_ph)
 	if HunterVerbs.ACTS.has(act_kind):
 		return HunterVerbs.pitch(act_kind, act_t)
+	if HunterRod.ACTS.has(act_kind):
+		return HunterRod.pitch(act_kind, act_t)
 	match act_kind:
 		"scan": return 0.25 + 0.04 * sin(act_t * 1.6)
 		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
@@ -1787,6 +1791,8 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 		return HunterTool.hands(act_kind, tool_ph, sh_l, sh_r)
 	if HunterVerbs.ACTS.has(act_kind):
 		return HunterVerbs.hands(act_kind, act_t, sh_l, sh_r)
+	if HunterRod.ACTS.has(act_kind):
+		return HunterRod.hands(act_kind, act_t, sh_l, sh_r)
 	var t := act_t
 	match act_kind:
 		"scan":
