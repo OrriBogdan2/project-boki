@@ -713,6 +713,26 @@ func _home(tree: SceneTree) -> void:
 	var patch := chips.filter(func(c): return String(c.get_meta("glider")) == "patchwork")
 	ok(patch.size() == 1 and (patch[0] as Button).disabled and String((patch[0] as Button).tooltip_text).contains(
 			Arch.name_of("dredge")), "an unearned mastery glider shows greyed with how to earn it")
+	# one click on an open Hunter's tile plays it (no Play button); focus shows a tile in the viewer
+	var tiles: Array = []
+	_collect_meta(hm.panel_host, "arch", tiles)
+	var skip := [Arch.of_save(), sel]
+	var open_tiles := tiles.filter(func(c): return _can_show(c, skip))
+	ok(not open_tiles.is_empty() and _no_play_button(hm.panel_host), "no Play button on the Hunters screen")
+	if not open_tiles.is_empty():
+		var other := String(open_tiles[0].get_meta("arch"))
+		open_tiles[0].focus_entered.emit()
+		await tree.process_frame
+		ok(String(hm.get_meta("hunters_sel")) == other, "focusing a tile shows that Hunter in the viewer")
+		HomeClasses.open(hm, "dredge")
+		await tree.process_frame
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		var again: Array = []
+		_collect_meta(hm.panel_host, "arch", again)
+		again.filter(func(c): return String(c.get_meta("arch")) == other)[0].gui_input.emit(click)
+		ok(Arch.of_save() == other, "one click on an open Hunter's tile plays it (%s)" % Arch.of_save())
 	# play an open one from the screen; a locked one can't be
 	var old_model: Node3D = hm.player
 	HomeClasses._click(hm, sel)
@@ -847,3 +867,11 @@ func _collect_meta(n: Node, key: String, out: Array) -> void:
 
 func _any_text(n: Node, needle: String) -> bool:
 	return _texts(n).any(func(t): return String(t).contains(needle))
+
+func _no_play_button(root: Node) -> bool:
+	var buttons := root.find_children("*", "Button", true, false)
+	return buttons.all(func(b): return not (b as Button).text.begins_with("Play "))
+
+## An open Hunter's tile that isn't one of `skip`.
+func _can_show(tile: Control, skip: Array) -> bool:
+	return tile.get_meta("class_status") == "open" and not skip.has(tile.get_meta("arch"))

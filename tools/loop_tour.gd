@@ -185,9 +185,6 @@ func _front() -> void:
 	await wait(1.0)
 	await shot("egg_pick")
 	hx._pick(0)
-	await wait(0.8)
-	await shot("egg_chosen")
-	press("Hatch it")
 	await wait(2.5)
 	for i in 7:
 		hx._tap_egg()

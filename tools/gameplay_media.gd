@@ -276,7 +276,6 @@ func _hatch(secs: float) -> void:
 	await main.fade.reveal(0.01)
 	hx._end_intro()
 	hx._pick(0)
-	hx._pick(0)
 	hx.auto_warm = true
 	still_at = secs * 0.7
 	_mark("start")

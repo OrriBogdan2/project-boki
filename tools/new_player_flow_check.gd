@@ -100,6 +100,12 @@ func _is_screen(file: String) -> bool:
 	return is_instance_valid(main.current) and main.current.get_script() != null \
 		and String(main.current.get_script().resource_path).ends_with(file)
 
+## Waits out HobOffer's misclick guard on the wall clock (game time can run ahead of it).
+func _past_guard() -> void:
+	var until := Time.get_ticks_msec() + int(HobOffer.OPEN_GUARD_S * 1000.0) + 50
+	while Time.get_ticks_msec() < until:
+		await tree.process_frame
+
 func _key(action: String) -> InputEventAction:
 	var e := InputEventAction.new()
 	e.action = action
@@ -136,10 +142,10 @@ func _hatch() -> void:
 	_press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
-	_press(hx, "This one")
-	var chosen: int = hx.chosen
-	ok(chosen >= 0 and _button(hx, "Hatch it") != null, "choosing an egg offers 'Hatch it'")
-	_press(hx, "Hatch it")
+	var egg_cards: Array = (hx.bottom.get_children()[-1] as Control).get_children()
+	ok(not egg_cards.is_empty() and _button(hx, "Hatch it") == null, "the egg cards have no confirm button")
+	egg_cards[0].gui_input.emit(_key("ui_accept"))      # (one Enter on the first egg's card)
+	ok(hx.chosen == 0 and hx.stage == "warm", "one press on an egg's card takes it")
 	await _wait(func(): return hx.stage == "warm", "the egg waits for knocks")
 	for i in hx.TAPS:
 		hx._unhandled_input(_key("jump"))
@@ -166,8 +172,8 @@ func _vex_card(hx) -> Control:
 func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _vex_card(hx) != null, "naming leads into the starter pick")
-	_vex_card(hx).mouse_entered.emit()      # (Vex in focus: the Take button takes him, as the tutorial always did)
-	_press(hx, "Take Vex")
+	await _past_guard()
+	_vex_card(hx).gui_input.emit(_key("ui_accept"))      # (one press on Vex's card takes him)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -268,9 +274,11 @@ func _second_relic(home) -> void:
 		await tree.process_frame
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
-	ok(offer.ids.size() == 3 and offer.take_button != null, "three to choose from, with a Take button")
+	ok(offer.ids.size() == 3 and _button(offer.root, "Take " + HeroTitle.base_name(String(offer.ids[0]))) == null,
+			"three to choose from, no Take button")
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
+	await _past_guard()
+	offer.cards[0].gui_input.emit(_key("ui_accept"))      # (one press on the first card)
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")

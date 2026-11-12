@@ -12,6 +12,7 @@ const RANK := ["ready", "open", "progress", "locked"]
 const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3
 const LEFT_W := TILE_W * TILE_COLS + 16.0      # px, the tiles with their gaps: mastery and the glider pick match it
+const DWELL_S := 0.3          # s: the mouse rests on a tile this long before the viewer shows it
 const STAGE := Vector2(180, 240)
 const CLIP := Vector2(150, 84)        # px: each ability clip beside the turntable
 
@@ -78,11 +79,20 @@ static func _first_ready() -> String:
 		if ClassUnlock.status(String(a)) == "ready": return String(a)
 	return ""
 
-## One small tile: portrait, name, and where it stands.
+## One small tile: portrait, name, and where it stands. One click on an open Hunter plays it; a Hunter still
+## to unlock opens in the viewer. Focusing a tile, or resting the mouse on it for DWELL_S, shows it in the viewer.
 static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	var st := ClassUnlock.status(id)
 	var col := Arch.color(id)
-	var card := UI.tile_card(on, func(): _show.call_deferred(home, id), 6, col)      # (deferred: it swaps this tile)
+	var show_it := func():
+		if id != String(home.get_meta("hunters_sel", "")):
+			_show.call_deferred(home, id)      # (deferred: it swaps this tile)
+	var card := UI.tile_card(on, (func(): HomeHero.pick(home, id)) if st == "open" else show_it, 6, col)
+	card.focus_entered.connect(show_it)
+	card.mouse_entered.connect(func():
+		await card.get_tree().create_timer(DWELL_S).timeout      # (a mouse just passing over shows nothing)
+		if is_instance_valid(card) and card.is_hovered():
+			show_it.call())
 	card.custom_minimum_size = Vector2(TILE_W, 0)
 	card.set_meta("arch", id)
 	card.set_meta("class_status", st)
@@ -113,21 +123,18 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	elif st == "progress": card.modulate = Color(0.82, 0.82, 0.88, 0.96)
 	return card
 
-## Under the viewer: Play it, hold to unlock it, or what it still needs.
+## Under the viewer: who you play, hold to unlock it, or what it still needs.
 static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 	var box := UI.vbox(6)
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	match ClassUnlock.status(id):
 		"open":
-			if id == Arch.of_save():
-				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id, true),
-						UI.T_SMALL, UI.GOOD, UI.semi)
-				pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				box.add_child(pl)
-			else:
-				var b := UI.primary("Play %s" % Arch.name_of(id, true), func(): HomeHero.pick(home, id), 260)
-				b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-				box.add_child(b)
+			var line := "You're playing %s. Your expeditions start with it." % Arch.name_of(id, true)
+			if id != Arch.of_save():
+				line = "Click its tile to play %s." % Arch.name_of(id, true)
+			var pl := UI.label(line, UI.T_SMALL, UI.GOOD, UI.semi)
+			pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			box.add_child(pl)
 		"ready":
 			var hu := HoldUnlock.make(id, viewer)
 			hu.done.connect(func(_id): _revealed(home, id))
@@ -167,11 +174,14 @@ static func _show(home: Node, id: String) -> void:
 		var aid := String(old.get_meta("arch"))
 		if aid == id or aid == was:
 			var at := old.get_index()
+			var had_focus: bool = old.has_focus()
 			grid.remove_child(old)
 			old.queue_free()
 			var tile := _tile(home, aid, aid == id)
 			(grid as GridContainer).add_child(tile)
 			(grid as GridContainer).move_child(tile, at)
+			if had_focus:
+				tile.grab_focus.call_deferred()      # (the arrow keys carry on from the same tile)
 	_fill(home, id, viewer)
 	home.get_tree().process_frame.connect(func():      # (the viewer next frame: one frame doesn't do both)
 		if is_instance_valid(viewer): (viewer as HunterViewer).set_hunter(id), CONNECT_ONE_SHOT)

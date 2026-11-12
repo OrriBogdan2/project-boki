@@ -5,7 +5,8 @@ extends RefCounted
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,
 ## and only then can it be named. A shimmer shows as a faint sparkle on the Boki itself, a rare one
 ## gets a plain provenance line. Then the first Relic: after naming the
-## Boki, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
+## Boki, a pick of Lace, Kael or Vex (HobOffer: one click on a card takes it, no Take button, a click in its
+## first 0.3 s is ignored), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
 ## Relic" (the interact key) puts it on and you become that Hunter; a short look at their
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). Never touches the real save.
 
@@ -143,7 +144,9 @@ func _first_mask(tree: SceneTree) -> void:
 	var worn: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
 		"nothing is worn before the pick, and no one else can be picked")
-	cards[2].mouse_entered.emit()      # (Vex's card in focus: the Take button takes him)
+	cards[2].gui_input.emit(_click())
+	ok(ClassUnlock.needs_starters(),
+			"a click in the panel's first %.1f s is ignored (a misclick)" % HobOffer.OPEN_GUARD_S)
 	for arg in OS.get_cmdline_user_args():      # --shots-dir=<dir>: the pick screen as hatch_pick.png
 		if String(arg).begins_with("--shots-dir="):
 			cards[0].mouse_entered.emit()
@@ -153,12 +156,15 @@ func _first_mask(tree: SceneTree) -> void:
 			var dir := String(arg).substr(12)
 			DirAccess.make_dir_recursive_absolute(dir)
 			tree.root.get_texture().get_image().save_png(dir.path_join("hatch_pick.png"))
-			cards[2].mouse_entered.emit()
-	var picker: Array = hx.ui.find_children("*", "Button", true, false).filter(
-			func(b): return (b as Button).text == "Take Vex")
-	picker[0].emit_signal("pressed")
+	var takes: Array = hx.ui.find_children("*", "Button", true, false).filter(
+			func(b): return (b as Button).text.begins_with("Take"))
+	ok(takes.is_empty(), "no separate Take button under the cards")
+	cards[1].mouse_entered.emit()
+	ok(ClassUnlock.needs_starters(), "hovering a card only shows it")
+	await tree.create_timer(HobOffer.OPEN_GUARD_S + 0.05).timeout
+	cards[2].gui_input.emit(_click())      # (one click on Vex's card, no hover first)
 	var moments: Array = hx.get_children().filter(func(c): return c is MaskMoment)
-	ok(moments.size() == 1, "taking one leads into the Relic moment, not the match")
+	ok(moments.size() == 1, "one click on a card takes it, into the Relic moment, not the match")
 	if moments.is_empty():
 		hx.queue_free()
 		return
@@ -209,3 +215,10 @@ func _texts(n: Node) -> Array:
 	elif n is Button: out.append((n as Button).text)
 	for c in n.get_children(): out.append_array(_texts(c))
 	return out
+
+## A left mouse press, as a click on a card gives its gui_input.
+func _click() -> InputEventMouseButton:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	return ev
