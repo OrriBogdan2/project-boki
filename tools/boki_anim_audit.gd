@@ -67,6 +67,10 @@ func run(main: Node) -> void:
 		ok(id in BokiRig.CONTACT, "%s has its attack contact in BokiRig.CONTACT" % id)
 	for id in Check.SPECIES_LIST:
 		await _species(main, id)
+	var cover := Cover.new()
+	for id in Check.SPECIES_LIST:
+		await cover.species(main, id)
+	bad += cover.bad
 	print("BOKIGAIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
