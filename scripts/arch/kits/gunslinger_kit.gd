@@ -117,6 +117,10 @@ func own_dash_trail() -> bool:
 func dodge_anim() -> String:
 	return "slide" if not slide.is_empty() else ""      # Slipstep: the kit move is the whole pose (no roll)
 
+## Her rifle goes from an open glider, which stays open (docs/heroes/gunslinger.md Cancels: every interaction chains).
+func fires_in_glide() -> bool:
+	return true
+
 func shows_charge_ball() -> bool:
 	return false                   # the Longneedle charges an ember orb at the muzzle instead
 

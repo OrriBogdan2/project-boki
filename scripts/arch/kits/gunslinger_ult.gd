@@ -40,8 +40,6 @@ func running() -> bool:
 ## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
 func cast() -> bool:
 	var h := kit.h
-	if not kit.needle.is_empty():
-		return false
 	var xd := data()
 	var at := AimMode.place(h, float(xd["range"]))
 	casts += 1
