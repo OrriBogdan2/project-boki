@@ -20,3 +20,12 @@ id_ed25519*
 credentials*.json
 secrets.*
 *.secret
+
+# Tracy profiling build (docs/PERF.md): never committed, never exported
+perf_tracy/
+tools/perf/bin/
+native/tracy/deps/
+native/tracy/build/
+native/tracy/.sconsign.dblite
+native/tracy/gen/
+native/tracy/src/*.os
