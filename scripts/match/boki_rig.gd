@@ -2,8 +2,9 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and a flier's "aloft" and "lift" (BokiFly: hover
-## or glide up there, a flare coming down), and plays the face on top of whatever the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet), "kburst" (a factor on the gait's cadence) and
+## a flier's "aloft" and "lift" (BokiFly: hover or glide up there, a flare coming down), and plays the face on top
+## of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -375,7 +376,8 @@ func _pick_clip(dt: float) -> void:
 	# the world scale: a size roll's bigger Boki takes longer steps
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
-	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
+	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:
 	_shot = which
