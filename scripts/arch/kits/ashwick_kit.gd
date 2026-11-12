@@ -358,7 +358,11 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
 	HeroVfx.of(m).hold(h, "lance")
-	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt, tip() - nozzle())
+	# the fire's rules start at her body (ShotOrigin), the same reach out; it's still drawn from the palm
+	var nz := nozzle()
+	var from := ShotOrigin.body(h, nz)
+	var reach := float(ld["range"]) + nz.distance_to(from)
+	hose.emit(from, h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), reach, dt, tip() - from)
 	flame_acc += dt
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:

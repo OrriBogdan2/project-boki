@@ -2696,6 +2696,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
+	var from := ShotOrigin.hit_from(by, at, v2, extra)      # the hit sweep starts at the body; `at` is the muzzle
+	life += ShotOrigin.extra_life(at, from, v2)
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
 		var src: Hunter = by as Hunter if by is Hunter else ((by as Kin).owner_h as Hunter if by is Kin and (by as Kin).owner_h else null)
 		if src and src.inp.has("aim_y"):
@@ -2704,21 +2706,22 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 				var aimp: Vector3 = src.inp["aim"]
 				extra = extra.duplicate()
 				extra["dy"] = dyv
-				extra["dyd"] = maxf(1.0, Vector2(aimp.x - at.x, aimp.z - at.z).length())
+				extra["dyd"] = maxf(1.0, Vector2(aimp.x - from.x, aimp.z - from.z).length())
 				extra["y0"] = at.y
 				extra["gmax"] = maxf(src.pos.y, float(src.inp["aim_y"]))
 	var team := by.team
 	if duel and not extra.get("cos", false):
 		duel.note_shot(by)
 	shot_n += 1
-	var sd := {"vr": vr, "sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
+	var sd := {"vr": vr, "sid": shot_n, "pos": from, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": from, "start": from}
+	if from != at: sd["muzzle"] = at
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
-		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
+		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
 	if by is Hunter and not extra.get("melee", false):
 		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
@@ -2781,7 +2784,7 @@ func _update_shots(dt: float) -> void:
 					p = back
 					s["pos"] = p
 					hit = true; break
-				_shot_end(s, p, null, "wall")
+				_shot_end(s, p - step / n, null, "wall")      # at the face, so the miss puff is in view
 				hit = true; break
 			var vr: String = verbs.shot_check(s, p) if verbs else ""
 			if vr == "end":
@@ -3213,7 +3216,7 @@ func _process(delta: float) -> void:
 			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 		if s["node"]:
 			var mi: MeshInstance3D = s["node"]
-			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
+			mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 			var v: Vector2 = s["vel"]
 			if v.length() > 1.0:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)

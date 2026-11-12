@@ -242,6 +242,8 @@ func _all() -> void:
 		P.inp["move"] = Vector2.ZERO
 		ak.aim_at(P, T.pos)
 		ak.step(m, 0.05)
+		for mb in m.mobs: mb.queue_free()      # (one spawned on that last step would count as a third foe)
+		m.mobs.clear()
 	var hold_fire := func(secs: float):
 		var t := 0.0
 		while t < secs:
@@ -379,16 +381,17 @@ func _all() -> void:
 		"lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)",
 		absf(flash - (cold * 1.4 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * 1.4 + chip2]
 	)
-	# a burning foe builds Char as fast as a cold one (the old halving is gone)
+	# a burning foe builds Char as fast as a cold one (the old halving is gone). 0.8 s: the fire leaves from
+	# her body (ShotOrigin), so it reaches the foe ~0.08 s later than from the old 1.3 m nozzle
 	reset.call()
 	K.relight_t = 0.0
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	var char_cold: float = K.char_of(T)
 	P.inp["fire"] = false
 	reset.call()
 	K.relight_t = 0.0
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	ok(
 		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
 		"cold %.1f burning %.1f" % [char_cold, K.char_of(T)]
