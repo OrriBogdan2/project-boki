@@ -71,13 +71,13 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
+| LMB | Hold; 51 a round, 30 rounds, rapid refill when idle, first 10 rounds stronger [D]; opens at 2x, 50% by round 10, 0.08 s [wiki] | 12 -> 6 over 10 rounds (51 of 1285 = 6 of 154), cadence 0.08, mag 30, refill 40/s after 0.35 s, no fire slow | match (ext/parity-ttk-vex, docs/TTK.md) |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) |
 | Q | none | glove | ours |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) |
 | Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
-| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match |
+| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +38% rifle (+39 on the 102 opening) | match |
 | Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
 
 ## Zedran (`juggernaut`, source Brall) · slice Warden
@@ -112,12 +112,12 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold, hose, ignite, % HP vs Ignited [D,F] | Hose stream (`ashwick_hose.gd`), range 7, .35 relight, no fuel | match |
-| RMB | Bolt + Slow, upgrades Ignite, 9 s [D] | Range 14, slow 30%, cd 7, +1 charge at rank 3 | match; 0.78x cd |
+| LMB | Hold, hose, ignite, % HP vs Ignited [D,F] | Hose stream (`ashwick_hose.gd`), range 7, .35 relight, no fuel; 31/s = 258 x 154/1285 (docs/TTK.md frame; Flashover bonus sized by `--ttk-check`) | match |
+| RMB | Bolt + Slow, upgrades Ignite, 9 s [D] | Range 14, slow 30%, cd 7, +1 charge at rank 3; 13 dmg = 106 x 154/1285 | match; 0.78x cd |
 | Q | none | glove | ours |
-| E | Spin pull, shield per foe, knock resets, 13 s; ~.2 s arm fling [D,F] | Instant, r 4.5, pull 14 m/s, cd 10.5 | differ (owner item 11) |
-| R | Fly forward, burning ground + Slow, 45 s [D] | 12.6 m/s, 1.8 s, trail 5.2 s, slow 30%, cd 36 | match; 0.8x cd |
-| Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | 3.4 m/.33 s (F), air poof 6.8 m/.28 s, off the dash feel; stops on foe, 2 charges | match |
+| E | Spin pull, shield per foe, knock resets, 13 s; ~.2 s arm fling [D,F] | Instant, r 4.5, pull 14 m/s, cd 10.5; 9 dmg = 76.8/106 x the bolt 13 | differ (owner item 11); damage ratio match |
+| R | Fly forward, burning ground + Slow, 45 s [D] | 12.6 m/s, 1.8 s, trail 5.2 s, slow 30%, cd 36; carpet 4.5/s (source 239.2/s would be 28.7) | owner: burst cap (SERVER_UPDATE6) holds the carpet at 4.5/s; 0.8x cd |
+| Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | 3.4 m/.33 s (F), air poof 6.8 m/.28 s, off the dash feel; stops on foe, 2 charges; 18 dmg = 150.4/106 x the bolt 13, tier IV +5 (+40) | match |
 | Passive | Ignite levels, bonus dmg [D] | Flashover 1/2, `ignite_bonus`, heal_knock .16 (wiki only) | match |
 | Anim | Footage poses | 12 moves, all on `cinder.glb` (41) | match on coverage |
 
@@ -165,10 +165,10 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
-| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
+| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2; detonation 22 = 190/156 x hit 18 | differ (owner); damage ratio match |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80 | match; +15% radius, +5% slide (owner 11-08) |
+| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80; crash 18 = 155/156 x spear hit 18 | match; +15% radius, +5% slide (owner 11-08) |
 | Dash | Hold, release stops, 13 s [D] | 11.5 m/s (F 10-11), 1.6 s, early-release refund .6 (owner) | match; refund owner |
 | Passive | Chill 4 s, shatter on knock [D] | Chill + 15% slow (ours) | differ: slow ours |
 | Anim | Footage poses | 19 moves, all on `claire.glb` (49) | match on coverage |
@@ -191,11 +191,11 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .48 vs .45, walks 55% vs stands | differ (owner); cadence S fix (gap 12) |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
+| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .45 on every press (recall too: TTK 1.16x), walks 55% vs stands | differ (owner) |
+| RMB | Hold shield, front block, Shift = bash 198 = 1.03x throw, 6 s [D] (supervive_kits.md:89-90) | hold .1, aegis, bash 12.4 (0.95x throw 13), cd 6 | match; routing `[?]` |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
-| R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
+| R | Fissure stun (31 = 0.16x throw), AoE series 396 = 2.06x, heavy Slow, 50 s [D] (supervive_kits.md:93) | 4 cells, strike 1.9 (.16x), eruption 24.8 (2.06x), stun .5, cd 40 | match; 0.8x cd |
 | Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m/.17 s (F), off the dash feel, cd 8 | match |
 | Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open |
 | Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
@@ -249,7 +249,7 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 
 | Hunter | Effect (ours) | Source | Verdict |
 |---|---|---|---|
-| Vex | Burr Charge Daze 1.4 s (only +90% rifle, +20% Railgun, no slow); wall slam: stun 0.7 s and Daze +0.6 s; Cinderfall zone slow 30% (0.6 s refreshed) | Daze about 1.2 s [F]; wall: "Dazed longer and Stunned" and zone "Slow", no numbers [D] | match (1.4 vs 1.2 is one frame at 5 fps) |
+| Vex | Burr Charge Daze 1.4 s (only +38% rifle, +20% Railgun, no slow); wall slam: stun 0.7 s and Daze +0.6 s; Cinderfall zone slow 30% (0.6 s refreshed) | Daze about 1.2 s [F]; wall: "Dazed longer and Stunned" and zone "Slow", no numbers [D] | match (1.4 vs 1.2 is one frame at 5 fps) |
 | Zedran | Meteor Drop: core stun 0.8 s, ring slow 40% 1.5 s | "Slow + 88 dmg; center hits Stun" [D], no numbers | match in shape |
 | Zedran | Fireblast (full) slow 30% 1 s; Chain Lunge stun 0.35 s; Haul Slam stun 0.25 to 0.6 s | none: the tooltips list no slow on the blast and no stun on the chain | ours-only riders, see suggestions |
 | Hem | Heartpiercer wall stun 1.2 s (rank 3: dash charge); Rain of Arrows slow 35% 0.8 s refreshed | "enemies that collide with terrain are Stunned", "Slow + Anti-Heal", no numbers; wall stun not shown cleanly [F] | match; numbers unsourced |
