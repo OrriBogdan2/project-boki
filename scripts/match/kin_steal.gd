@@ -86,6 +86,7 @@ static func break_loose(k: Kin, at: Vector3) -> void:
 	k.pos = at + Vector3(0, KinWisp.SHOULDER_Y, 0)
 	k.prev = k.pos
 	k.m.fx.burst(k.pos, k.sp.get("glow", k.sp["color"]), 10, 2.5)
+	k.m.sfx("boki_downed", k.pos, -4.0)
 
 ## Back to its own hunter's shoulder (loose too long, or the match is over). A downed hunter keeps it this time.
 static func go_home(k: Kin) -> void:

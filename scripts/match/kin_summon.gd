@@ -126,6 +126,7 @@ func killed(by: Ent) -> bool:
 	elif foe and (o.downed or o.out):
 		KinSteal.break_loose(k, at)          # its owner is down: anyone may grab it
 	else:
+		k.m.sfx("boki_downed", at, -4.0)          # (a loose one says it as it breaks loose)
 		k.back_home = true
 		fly_len = maxf(0.1, Vector2(at.x - o.pos.x, at.z - o.pos.z).length() / float(rules()["home_speed"]))
 		fly = fly_len

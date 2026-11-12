@@ -1,9 +1,9 @@
 extends RefCounted
-## --wisp-steal-check: stolen Boki wisps (KinSteal, decision 0041), with Boki wisps on. A downed hunter's wisp
-## breaks loose and floats; holding interact beside it grabs it (the prompt shows the key cap); the thief gets its
-## carry passive at half strength (clamped) and the owner loses it; one stolen summon at half the window; at most
-## two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an
-## ungrabbed wisp goes home and stays; match end sends every stolen wisp home with a soul echo in the Field Book;
+## --wisp-steal-check: stolen Boki wisps (KinSteal, decision 0041), with Boki wisps on. A downed hunter's wisp breaks
+## loose (one boki_downed) and floats; holding interact beside it grabs it (the prompt shows the key cap); the thief
+## gets its carry passive at half strength (clamped) and the owner loses it; one stolen summon at half the window; at
+## most two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived;
+## an ungrabbed wisp goes home and stays; match end sends every stolen wisp home with a soul echo in the Field Book;
 ## the kin snapshot carries the carrier. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
@@ -11,6 +11,7 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
+var downs := 0      # boki_downed starts, one a step at most (_heard_down)
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -41,6 +42,21 @@ func _frames(secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
+		_heard_down()
+
+## Counts a boki_downed start into `downs` and clears Sfx's own last start: the steps run faster than real time,
+## so the real-time MIN_GAP would hide a repeat.
+func _heard_down() -> void:
+	if Sfx.last_played.has("boki_downed"):
+		downs += 1
+		Sfx.last_played.erase("boki_downed")
+		Sfx.recent.erase("boki_downed")
+
+## A fresh boki_downed count, heard from `at`.
+func _listen(at: Vector3) -> void:
+	Sfx.listener = at
+	_heard_down()
+	downs = 0
 
 ## Hold interact beside a wisp for a while (the player stays put; nothing else moves).
 func _hold(h: Hunter, k: Kin, secs: float) -> void:
@@ -66,12 +82,14 @@ func _steal() -> void:
 			amount += float(ps["amount"])
 	var mine := p.owner_stat(stat)
 	var fell := f.pos
+	_listen(fell)
 	m.knock(f, p, {})
 	_frames(0.1)
 	ok(KinSteal.loose(fk) and fk.owner_h == f and not fk.carried() and absf(fk.flat_dist(fell) - KinSteal.POP_M) < 0.1,
 		"loose: the downed hunter's wisp breaks loose and pops off them")
 	ok(fk.visible and absf(fk.pos.y - fell.y - KinWisp.SHOULDER_Y) < 0.05, "...floating at shoulder height")
 	_hold(p, fk, 0.2)
+	ok(downs == 1, "...with one boki_downed as it breaks loose, nothing while it floats (%d)" % downs)
 	var label := String(m.interact.get("label", ""))
 	ok(label.contains(Settings.key_cap("interact")) and String(m.interact.get("kind", "")) == "wisp",
 		"grab: the prompt names the interact key (%s)" % label)

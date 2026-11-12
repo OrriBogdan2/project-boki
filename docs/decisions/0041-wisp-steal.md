@@ -17,7 +17,8 @@ match end they go home and the thief keeps a soul echo. WISP_DESIGN_OPEN.md Q6/Q
 ## Decision
 Option 2, in `KinSteal`. Numbers in `content/rules/boki_summon.json` "steal": loose 10 s, grab 0.6 s hold within
 2 m, carry 2, passives at 50 % clamped at the carry cap, one summon at half the window (min 5 s) when your own Boki
-is resting or gone. The wisp pops 2.5 m off its fallen hunter so the grab never fights the stomp/revive prompt.
+is resting or gone. The wisp pops 2.5 m off its fallen hunter so the grab never fights the stomp/revive prompt,
+with one `boki_downed` (`KinSteal.break_loose`).
 A thief who goes down (not only dies) scatters: the same moment that frees the owner's wisp. Ungrabbed wisps go
 back to their hunter, who keeps them for that down. Soul echo: the dex entry's optional `echo` count (seen = true);
 no save migration (an old entry without it is 0). Left out: guardian interplay (ext/wisp-guardian), killed-summon
