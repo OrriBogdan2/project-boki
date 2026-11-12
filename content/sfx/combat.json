@@ -1,0 +1,10 @@
+{
+ "group": "combat",
+ "name": "Shared combat",
+ "script": "tools/gen_sfx_el.py",
+ "sounds": {
+  "dodge": "dash"
+ },
+ "signature": [],
+ "replaces": []
+}

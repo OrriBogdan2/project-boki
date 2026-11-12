@@ -34,7 +34,8 @@ static func entry_key(species: String) -> String:
 
 ## Every Field Book entry, in species order: a branch pair is one.
 static func entries() -> Array:
-	return Data.KIN.keys().filter(func(s): return entry_key(s) == s)
+	var keys: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
+	return keys.filter(func(k): return not Legendary.is_legendary(k)) + keys.filter(Legendary.is_legendary)
 
 ## One species on its own (caught ones count as seen).
 static func form_seen(species: String) -> bool:

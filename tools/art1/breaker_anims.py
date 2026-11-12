@@ -262,8 +262,17 @@ C.bake("death", 1.3, [(0, CARRY), (0.2, dict(pos=(0, -0.03, -0.02), rot=(10, 0, 
 
 # ---------------------------------------------------------------------- one-shots
 C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.06), rot=(-12, 0, 0), head=(10, 0, 0), sh=sl(0.1, 0.12, -0.34), gr=sp(0.1, 0.2, -0.32), fr=(AX + 0.02, -0.02, AZ), fl=(-AX - 0.02, 0.04, AZ))), (0.36, CARRY)])
-C.bake("hit_f", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.04, 0.0), rot=(10, 5, 6), head=(-10, 0, -6), e="snap")), (0.36, CARRY)])
-C.bake("hit_b", 0.36, [(0, CARRY), (0.06, dict(pos=(0, 0.04, -0.01), rot=(-10, -4, -5), head=(8, 0, 5), e="snap")), (0.36, CARRY)])
+
+def hit(peak, bump):
+    """A hit (0.36 s): the blow lands on the hips, since the upper-body hit path drops root. The hips bump peaks at 0.06 s
+    and is carried back along 1 - u^2 (a heavy body, docs/art/REACT_AUDIT.md), keyed in three hips-only steps."""
+    at = lambda f: tuple(c + f * b for c, b in zip(CARRY["hips"], bump))
+    mid = [(0.06 + 0.075 * n, dict(hips=at(1 - (0.25 * n) ** 2), e="lin")) for n in (1, 2, 3)]
+    return [(0, CARRY), (0.06, dict(peak, hips=at(1.0), e="snap"))] + mid + [(0.36, CARRY)]
+
+
+C.bake("hit_f", 0.36, hit(dict(pos=(0, -0.04, 0.0), rot=(10, 5, 6), head=(-10, 0, -6)), (14, 0, 3)))
+C.bake("hit_b", 0.36, hit(dict(pos=(0, 0.04, -0.01), rot=(-10, -4, -5), head=(8, 0, 5)), (-12, 0, -3)))
 # the emote: he rocks with laughter, the door hand patting his hull
 LAUGH = merged(CARRY, rot=(10, 0, 0), head=(-12, 0, 0), sh=sl(-0.2, 0.36, -0.3), sn=(-0.6, 0.75, 0.1), el=(-0.9, 0.1, -0.5))
 
