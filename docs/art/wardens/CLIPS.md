@@ -25,6 +25,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `act` (DECISIONS 2026-11-09, the garden): home verb (HunterVerbs: `pat`, `feed`, `cheer`) -> clip (`pet` 1.3 s, `give` 1.0 s, `cheer` 0.8 s, as long as HunterVerbs.LENGTH). Seeked to the state's `act_t`; a verb with no entry stays on the procedural rig. Vex, Kael, Lace (hem), Cinder: tools/art1/gardenkit.py holds the shared timing, each hero's `*_clips.py` (Kael: `kael_garden.py`) the poses and attitude; `glb_add_clips.py` copies them onto the shipped glb.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+- `cc` (scripts/heroes/warden_cc.gd): how the Hero fights crowd control, laid over the clips and in and out in 0.1 s. A stun plays the `stun` state (its sway loop); a root keeps the legs planted on the idle while the torso pulls (`pull` rad of lean, `tug_hz` tugs a second, `twist` rad of wring); Grounded drops into the `crouch` layer (no dip) and bows the head `bow` rad at the cords. `--clip-check` asserts all three for every Hero.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree

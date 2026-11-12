@@ -1,7 +1,8 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]:
 ## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
-## and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--heavy: stagger).
+## and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--heavy: stagger),
+## with --cc a stun, a root and Grounded standing in <dir>/cc_<state>/.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
@@ -99,6 +100,9 @@ func run(main: Node) -> void:
 			await _grab(dir.path_join("f%03d.png" % i))
 	if OS.get_cmdline_user_args().has("--flinch"):
 		await _flinch(model, sync, fps, out)
+	if OS.get_cmdline_user_args().has("--cc"):
+		for key in ["stun", "rooted", "gnd"]:
+			await _cc(model, sync, fps, out, key)
 	if OS.get_cmdline_user_args().has("--moods"):
 		await _moods(model, sync, clips, out)
 	print("CLIP_SHOTS_DONE")
@@ -139,6 +143,20 @@ func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 	for i in int(fps):
 		var t := float(i) / fps
 		s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
+		sync.call("_process", 1.0 / fps)
+		await _grab(dir.path_join("f%03d.png" % i))
+
+## --cc: standing, state `key` on from 0.2 s to 1.0 s; <dir>/cc_<key>/f###.png every 1/fps s for 1.2 s.
+func _cc(model: Node3D, sync: Node, fps: float, out: String, key: String) -> void:
+	var dir := out.path_join("cc_" + key)
+	DirAccess.make_dir_recursive_absolute(dir)
+	var s := {"vel": Vector3.ZERO, "face": model.rotation.y, "grounded": true}
+	model.set_meta(WardenClips.STATE, s)
+	for k in 30:
+		sync.call("_process", 1.0 / 30.0)
+	for i in int(fps * 1.2):
+		var t := float(i) / fps
+		s[key] = t >= 0.2 and t < 1.0
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
 

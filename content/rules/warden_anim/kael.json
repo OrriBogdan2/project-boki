@@ -200,6 +200,7 @@
 			0.8
 		]
 	],
+	"cc": {"pull": 0.27, "tug_hz": 0.7, "twist": 0.06, "bow": 0.15},
 	"procedural": [
 		"ledge",
 		"mantle",

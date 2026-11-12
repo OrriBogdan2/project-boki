@@ -140,6 +140,7 @@
 		},
 		"dead_t": 1.3
 	},
+	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
 		"ledge",
 		"mantle",
