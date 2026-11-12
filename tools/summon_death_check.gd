@@ -4,7 +4,7 @@ extends RefCounted
 ## cooldown, the wisp flies home at home_speed, its owner is revealed for reveal_s and pinged on the killer squad's
 ## minimap. A monster's kill: plain cooldown, no reveal. The owner downed: a rival's kill leaves a loose wisp
 ## where it fell, a monster's sends it home. Online: the "wkill" event pings only the killer's squad and the kin
-## snapshot shows the wisp. Prints PASS/FAIL.
+## snapshot shows the wisp. Owner knocked: the summon fights on (main's KinWispForm skips it). Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -116,3 +116,9 @@ func _death() -> void:
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
 	ok(other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
 		"online: the snapshot shows the killed summon as a resting wisp")
+	var g: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team and h.kin != null and not h.out)[0]
+	k = _summoned(g)
+	m.knock(g, p, {})
+	g.down_hp = 1e6
+	_frames(0.2)
+	ok(g.downed and k.summon.out() and k.state != KinWispForm.STATE, "owner knocked: the summon fights on (no KinWispForm)")
