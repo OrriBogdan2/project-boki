@@ -1,6 +1,12 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
-## Owner fix 2026-11-12: arms and hands (`tools/art1/warden_fix_1112.py claire`, on the 11-10 file)
+## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
+claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
+byte-identical down to the fur collar, tools/meshy/head_graft.py). It replaces the arms fix below: that fix was made for the
+11-10 body, and on the skirt body its sleeve and glove detection finds 43 and 60 arm vertices and no glove, so it is not
+applied (the skirt swap's own spec puts the arms on the arm bones). Kept below as the 11-10 body's history.
+
+## Owner fix 2026-11-12 (11-10 body, superseded): arms and hands (`tools/art1/warden_fix_1112.py claire`, on the 11-10 file)
 The owner's Model Room note: "arm / hands are weird". Bone heat had put the sleeves mostly on `hips` and the gloves on
 `forearm`, and the skirt, the sash and its bow on the forearms and hands, so a raised arm dragged a lump of skirt and the
 bow up with it (the bulky "sleeve", the bow fused into the hand). The mesh's arms also hung 6-10 cm outside the arm bones.
