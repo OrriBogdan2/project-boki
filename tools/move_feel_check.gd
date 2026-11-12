@@ -719,16 +719,19 @@ func _plain_dash() -> void:
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
 	"gunslinger": {"ground": [4.8, 0.45], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
-	"archer": {"ground": [3.0, 0.27], "src": "[footage] Phase Walk roll 3 m in 0.27 s"},
+	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
+	"archer": {"ground": [3.0, 0.386], "src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
 	"tender": {"ground": [3.6, 0.2], "src": "[footage] Elluna 2 bh in 0.2 s (air glide: tender's own check)"},
 	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
-	"thief": {"ground": [4.5, 0.48], "air": [8.4, 0.95], "src": "[footage] Shiv Cartwheel 4.5 m in 0.48 s"},
+	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
+	"thief": {"ground": [4.5, 0.48], "air": [4.5, 0.48], "src": "[footage] Shiv Cartwheel 4.5 m in 0.48 s"},
 	"juggernaut": {"ground": [3.825, 0.266], "src": "owner 113.8: a 0.07 s dip, then 4.5 m / 0.17 s x0.85 / x1.15"},
 	"dredge": {"ground": [2.72, 0.184], "air": [3.672, 0.184],
 			"src": "owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35"},
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
-	"mage": {"ground": [7.5, 0.216], "src": "owner item 70: shortest lane 7.5 m at 40 m/s, time x1.15"},
+	# owner playtest 11-10 (754d177a0): the lane cut to 5.6-9.75 m, still at 40 m/s, so 5.6 / 40 x1.15
+	"mage": {"ground": [5.6, 0.161], "src": "owner 11-10: shortest lane 5.6 m at 40 m/s, time x1.15"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -751,7 +754,9 @@ func _kit_dashes() -> void:
 		ok(not src or off, "felt dash %s: a sourced dash is off the dash feel" % id)
 	P.reclass(was[0], was[1])
 
-## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it).
+## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
+## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
+## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
 func _felt_dash(air: bool) -> Array:
 	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
@@ -761,6 +766,7 @@ func _felt_dash(air: bool) -> Array:
 	var n := 0
 	for i in 150:
 		var before := P.pos
+		var left := minf(P.roll_t, DT)
 		m.step(DT)
 		P.inp["dash"] = false
 		if P.roll_t > 0.0:
@@ -768,7 +774,8 @@ func _felt_dash(air: bool) -> Array:
 			if start == Vector3.INF: start = before
 			n += 1
 		elif start != Vector3.INF:
-			return [Vector2(P.pos.x - start.x, P.pos.z - start.z).length(), (n + 1) * DT]
+			var end := Vector2(P.pos.x, P.pos.z) - _hv(P) * (DT - left)
+			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
 
 ## Tarek's Rock Hop is an arc off a rock: its reach and flight as the hop reads them.
@@ -969,10 +976,16 @@ func _wall2() -> Dictionary:
 					var hs: Vector2i = hi + side * sd
 					for k in range(0, 3):
 						var hk: Vector2i = hs + d * k
-						if not w.inb(hk.x, hk.y) or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 or w.sheer.has(w.idx(hk.x, hk.y)): good = false
+						if not w.inb(hk.x, hk.y) \
+								or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND \
+								or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 \
+								or w.sheer.has(w.idx(hk.x, hk.y)): good = false
 					for back in range(0, 4):
 						var lb: Vector2i = Vector2i(x, z) + side * sd - d * back
-						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0 or w.stairs.has(w.idx(lb.x, lb.y)): good = false
+						if not w.inb(lb.x, lb.y) \
+								or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND \
+								or int(w.level[w.idx(lb.x, lb.y)]) != l0 \
+								or w.stairs.has(w.idx(lb.x, lb.y)): good = false
 				if not good: continue
 				var n := Vector2(d)
 				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5

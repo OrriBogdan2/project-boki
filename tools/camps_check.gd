@@ -39,11 +39,14 @@ func run(main: Node) -> void:
 
 func _rules() -> void:
 	var R := XpRules.rules()
-	ok(float(R["share_r"]) == 30.0 and float(R["stray"]) == 8.0, "XP rules come from content/rules/xp.json (30 m squad, 8 a stray)")
+	ok(float(R["share_r"]) == 30.0 and float(R["stray"]) == 8.0,
+		"XP rules come from content/rules/xp.json (30 m squad, 8 a stray)")
 	var src := FileAccess.get_file_as_string("res://scripts/match/rolling.gd")
-	ok(not ("CAMP_RESPAWN" in src or "_camp_respawns" in src or "note_camp" in src), "Rolling no longer owns the camp comeback")
+	ok(not ("CAMP_RESPAWN" in src or "_camp_respawns" in src or "note_camp" in src),
+		"Rolling no longer owns the camp comeback")
 	var ms := FileAccess.get_file_as_string("res://scripts/match/match.gd")
-	ok(not ("func _spawn_mobs" in ms) and not ("0.35))" in ms), "Match spawns camps through Camps and pays no damage XP")
+	ok(not ("func _spawn_mobs" in ms) and not ("0.35))" in ms),
+		"Match spawns camps through Camps and pays no damage XP")
 	ok(not ("gain_xp(dt" in FileAccess.get_file_as_string("res://scripts/match/hunter.gd")), "no XP trickle in Hunter")
 
 func _camp_mobs(c: Dictionary) -> Array:
@@ -51,7 +54,8 @@ func _camp_mobs(c: Dictionary) -> Array:
 
 func _spawn(m: Match) -> void:
 	var C: Camps = m.camps
-	ok(C != null and C.camps.size() == m.world.camp_spots.size() and C.camps.size() > 4, "a camp on every camp spot (%d)" % (C.camps.size() if C else 0))
+	ok(C != null and C.camps.size() == m.world.camp_spots.size() and C.camps.size() > 4,
+		"a camp on every camp spot (%d)" % (C.camps.size() if C else 0))
 	var sized := true
 	var tagged := true
 	var xp_ok := true
@@ -66,7 +70,8 @@ func _spawn(m: Match) -> void:
 			tagged = tagged and int(mb.get_meta("camp", -1)) == int(c["id"])
 			xp += XpRules.kill_xp(mb)
 			if mb.has_meta("chief"):
-				chief_ok = chief_ok and mb.mkind == "brute" and (not mb.has_meta("rarity") or int(mb.get_meta("rarity")) >= 1)
+				chief_ok = chief_ok and mb.mkind == "brute" \
+					and (not mb.has_meta("rarity") or int(mb.get_meta("rarity")) >= 1)
 		xp_ok = xp_ok and absf(xp - float(SIZE_XP[sd["id"]])) < 0.5
 		if sd["id"] == "chief":
 			chief_ok = chief_ok and (c["mobs"] as Array).filter(func(mb): return mb.has_meta("chief")).size() == 1
@@ -76,10 +81,14 @@ func _spawn(m: Match) -> void:
 	ok(chief_ok, "a Camp Chief has one Chief Brute, a rarity tier up")
 	ok(seen.size() >= 2, "the map has several camp sizes (%s)" % ", ".join(seen.keys()))
 	var L := C.list()
-	ok(L.size() == C.camps.size() and L[0].has_all(["id", "pos", "size", "state", "back_t", "region"]), "Camps.list() gives id, pos, size, state, back_t, region")
+	ok(L.size() == C.camps.size() and L[0].has_all(["id", "pos", "size", "state", "back_t", "region"]),
+		"Camps.list() gives id, pos, size, state, back_t, region")
 	var c0: Dictionary = C.camps[0]
-	ok(int(C.nearest_live(c0["pos"], 5.0).get("id", -1)) == int(c0["id"]) and C.nearest_live(c0["pos"] + Vector3(1e4, 0, 0), 30.0).is_empty(), "nearest_live finds the camp here and none far off")
-	ok(C.region_xp(int(c0["region"])) >= float(SIZE_XP[Camps.size_def(int(c0["size"]))["id"]]) - 0.5, "region_xp counts the XP alive in a region's camps")
+	ok(int(C.nearest_live(c0["pos"], 5.0).get("id", -1)) == int(c0["id"]) \
+		and C.nearest_live(c0["pos"] + Vector3(1e4, 0, 0), 30.0).is_empty(),
+		"nearest_live finds the camp here and none far off")
+	ok(C.region_xp(int(c0["region"])) >= float(SIZE_XP[Camps.size_def(int(c0["size"]))["id"]]) - 0.5,
+		"region_xp counts the XP alive in a region's camps")
 
 func _xp(m: Match) -> void:
 	var P: Hunter = m.player
@@ -101,14 +110,16 @@ func _xp(m: Match) -> void:
 	var xs := [P.xp, near.xp, far.xp, rival.xp]
 	var mb := m.spawn_mob("skitter", P.pos + Vector3(2, 0, 0))
 	mb.hurt(1e6, P)
-	ok(absf(P.xp - xs[0] - 8.0) < 0.01 and absf(near.xp - xs[1] - 8.0) < 0.01, "a stray kill pays 8 to the killer and a teammate 10 m away")
+	ok(absf(P.xp - xs[0] - 8.0) < 0.01 and absf(near.xp - xs[1] - 8.0) < 0.01,
+		"a stray kill pays 8 to the killer and a teammate 10 m away")
 	ok(absf(far.xp - xs[2]) < 0.001 and absf(rival.xp - xs[3]) < 0.001, "not to a teammate 40 m away, nor a rival")
 	var kx := XpRules.knock_xp(rival)
 	ok(kx == 40.0 + 15.0 * rival.lvl, "a knock pays 40 + 15 x the victim's level (%d)" % int(kx))
 	xs = [P.xp, near.xp, far.xp]
 	rival.pos = P.pos + Vector3(3, 0, 0)
 	m.knock(rival, P, {})
-	ok(absf(P.xp - xs[0] - kx) < 0.01 and absf(near.xp - xs[1] - kx) < 0.01 and absf(far.xp - xs[2]) < 0.001, "the knock XP goes in full to the knocker and teammates within 30 m only")
+	ok(absf(P.xp - xs[0] - kx) < 0.01 and absf(near.xp - xs[1] - kx) < 0.01 and absf(far.xp - xs[2]) < 0.001,
+		"the knock XP goes in full to the knocker and teammates within 30 m only")
 	m.revive_hunter(rival, rival)
 
 ## Clears a camp with hunter h; returns the toasts and drops it made.
@@ -144,14 +155,21 @@ func _clear(m: Match) -> void:
 		var sd := Camps.size_def(int(c["size"]))
 		m.time = 30.0
 		var r := _kill_camp(m, c, P)
-		ok(absf(float(r["xp"]) - float(SIZE_XP[sid])) < 0.5, "%s: clearing it pays %d XP (got %d)" % [sid, int(SIZE_XP[sid]), int(r["xp"])])
-		ok(r["got"].size() == 1 and int(r["got"][0][1]) == P.team, "%s: one cleared signal, for the clearing squad" % sid)
-		ok(c["state"] == Camps.State.CLEARED and absf(float(c["back_t"]) - 180.0) < 0.01, "%s: CLEARED, back at +150 s" % sid)
-		ok(r["armor"].size() == 1 and int(r["armor"][0]["v"]) == int(sd["armor"]), "%s: one armor drop of %d" % [sid, int(sd["armor"])])
+		ok(absf(float(r["xp"]) - float(SIZE_XP[sid])) < 0.5,
+			"%s: clearing it pays %d XP (got %d)" % [sid, int(SIZE_XP[sid]), int(r["xp"])])
+		ok(r["got"].size() == 1 and int(r["got"][0][1]) == P.team,
+			"%s: one cleared signal, for the clearing squad" % sid)
+		ok(c["state"] == Camps.State.CLEARED and absf(float(c["back_t"]) - 180.0) < 0.01,
+			"%s: CLEARED, back at +150 s" % sid)
+		ok(r["armor"].size() == 1 and int(r["armor"][0]["v"]) == int(sd["armor"]),
+			"%s: one armor drop of %d" % [sid, int(sd["armor"])])
 		var p_last: Vector3 = (r["last"] as Mob).pos
-		ok(r["armor"].size() == 1 and Vector2(r["armor"][0]["pos"].x - p_last.x, r["armor"][0]["pos"].z - p_last.z).length() < 2.5, "%s: the bundle lands where the last monster fell" % sid)
+		ok(r["armor"].size() == 1 \
+			and Vector2(r["armor"][0]["pos"].x - p_last.x, r["armor"][0]["pos"].z - p_last.z).length() < 2.5,
+			"%s: the bundle lands where the last monster fell" % sid)
 		if float(sd["orb"]) >= 1.0 or float(sd["orb"]) <= 0.0:
-			ok(int(r["orbs"]) == int(sd["orb"]), "%s: %d perk orb(s) in the bundle (got %d)" % [sid, int(sd["orb"]), int(r["orbs"])])
+			ok(int(r["orbs"]) == int(sd["orb"]),
+				"%s: %d perk orb(s) in the bundle (got %d)" % [sid, int(sd["orb"]), int(r["orbs"])])
 		var gear: Array = r["w"].filter(func(w): return w.has("gear") and String(w.get("gear", "")) != "")
 		var want_gear := 1 if sd.has("gear") else 0
 		ok(gear.size() == want_gear, "%s: %d gear piece(s)" % [sid, want_gear])
@@ -173,8 +191,11 @@ func _clear(m: Match) -> void:
 		var pgot := P.xp - px
 		var tx := thief.xp
 		var r := _kill_camp(m, c2, thief)
-		ok(r["got"].size() == 1 and int(r["got"][0][1]) == thief.team and absf(float(r["xp"]) - XpRules.kill_xp(ms[-1])) < 0.5, "a stealer's last hit takes that kill's XP and the clear")
-		ok(absf(P.xp - px - pgot) < 0.001 and pgot > 0.0 and thief.xp > tx, "the first squad keeps what its own kills paid")
+		ok(r["got"].size() == 1 and int(r["got"][0][1]) == thief.team \
+			and absf(float(r["xp"]) - XpRules.kill_xp(ms[-1])) < 0.5,
+			"a stealer's last hit takes that kill's XP and the clear")
+		ok(absf(P.xp - px - pgot) < 0.001 and pgot > 0.0 and thief.xp > tx,
+			"the first squad keeps what its own kills paid")
 
 ## One Camps tick now (it runs once a second).
 func _tick(C: Camps) -> void:
@@ -204,11 +225,14 @@ func _comeback(m: Match) -> void:
 	var len0 := m.length
 	m.length = m.time + 30.0
 	_tick(C)
-	ok(c["state"] == Camps.State.CLEARED and not C.safe_for(c["pos"], 60.0), "not back where the Blight will be within 60 s")
+	ok(c["state"] == Camps.State.CLEARED and not C.safe_for(c["pos"], 60.0),
+		"not back where the Blight will be within 60 s")
 	m.length = len0
 	_tick(C)
 	var want := mini(s0 + 1, Camps.rules()["sizes"].size() - 1)
-	ok(c["state"] == Camps.State.RETURNING and int(c["size"]) == want and _camp_mobs(c).size() == int(Camps.size_def(want)["n"]), "back once at 150 s, one size up (%s)" % Camps.size_def(want)["id"])
+	ok(c["state"] == Camps.State.RETURNING and int(c["size"]) == want \
+		and _camp_mobs(c).size() == int(Camps.size_def(want)["n"]),
+		"back once at 150 s, one size up (%s)" % Camps.size_def(want)["id"])
 	ok(C.comebacks == 1, "one comeback counted")
 	var r := _kill_camp(m, c, m.player)
 	ok(c["state"] == Camps.State.SPENT and r["got"].size() == 1, "clearing it again pays and leaves it SPENT")
@@ -233,7 +257,8 @@ func _comeback(m: Match) -> void:
 		m.time = float(c3["back_t"]) + 1.0
 		for h in m.hunters: h.pos = Vector3(-1e4, 0, -1e4)
 		_tick(C)
-		ok(c3["state"] == Camps.State.CLEARED or m.time > float(Camps.rules()["back_until_s"]), "no comeback at the camp-monster cap")
+		ok(c3["state"] == Camps.State.CLEARED or m.time > float(Camps.rules()["back_until_s"]),
+			"no comeback at the camp-monster cap")
 		Camps.rules()["max_mobs"] = sv
 
 ## In the hot zone every camp is one size up from its spot's kind.
