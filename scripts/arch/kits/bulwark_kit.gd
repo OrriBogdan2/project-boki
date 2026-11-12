@@ -472,9 +472,11 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 			if is_instance_valid(f) and not f.dead:
 				vfx("hit_trail", f.pos, dv, {"k": k}))
 
-## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
-## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
-const THROW_WIND := 0.08
+## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame, <= 0.2 s, of wind-up).
+## 0.16: the hand opens at the lmb_throw clip's key 0.19 (gripped at 0.11): it leaves as the arm comes through
+const THROW_WIND := 0.16
+## s into the bul_recall clip (lmb_recall) when the hand closes on the hammer: the catch key the flight is timed to
+const RECALL_CATCH := 0.3
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:
@@ -529,6 +531,10 @@ func recast_now(slot_id: String) -> void:
 
 func _recall() -> void:
 	play("bul_recall")
+	# the clip's catch key (0.3) lands on the real catch: skip into it by what the flight leaves out
+	var gap: float = (mace["pos"] - (h.pos + Vector3(0, 1.0, 0))).length() - 0.6
+	var fly_t := maxf(gap, 0.0) / float(lmb_def()["recall_speed"])
+	anim_at = m.time - clampf(RECALL_CATCH - fly_t, 0.0, 0.176)
 	mace["st"] = "back"
 	mace["hit"] = {}
 	HeroVfx.of(m).trail(h, "throw", fx.hammer)
@@ -631,6 +637,10 @@ func press_rmb() -> void:
 	rmb_t = 0.0
 	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e()}
 	cancel_hold()
+	# the arm comes up through the cast (hold 0.1 s): the bul_guard clip starts on the press, so its hand-up key
+	# (0.1) lands as the wall does; a tap that never raises it clears it in fire_rmb
+	if not rmb_ctx["air"] and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0 and not h.downed:
+		play("bul_guard")
 
 func rmb_hold_tick(t: float) -> void:
 	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
@@ -642,7 +652,8 @@ func _raise() -> void:
 	wall = m.verbs.add_wall(h, h.pos + Vector3(d.x, 0, d.y) * 1.0, d, {"length": float(sd["len"]), "hp": shield_hp, "time": 99.0, "follow": true, "dist": 0.95, "block": "enemy", "color": rmb_def().get("col", "#9ad8ff")}, 1.0)
 	h.mel_hold = 0.0
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
-	play("bul_guard")
+	if anim_id != "bul_guard" or m.time - anim_at > 0.3:
+		play("bul_guard")          # (not pressed on the ground: the air press, a hold that waited out a lock)
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
@@ -679,6 +690,8 @@ func _lower() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
 	_lower()
+	if not was_up and anim_id == "bul_guard":
+		anim_id = ""          # a tap before the cast ended: the arm drops with the press
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
 func fire_ok_rmb() -> bool:

@@ -29,7 +29,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | LMB hold: movement [footage] | stands in the two holds seen (unclear if forced) | walks at 55% | kept: owner #59 ("he can walk, keep the source hold-walk speed"); the data has no number and the footage can't tell (parity item 12); asserted `bjorn #59: he walks at the hold speed` |
 | LMB release: timing [footage 0146-0149] | one-frame sweep, the impact the frame after, ~0.4 s recovery | the same keys (`bul_smash`), 0.61 s before the next action | unchanged; asserted: the swing goes on the release step at the cursor (even behind him), the hit within 0.1 s, 0.61 s recovery |
 | LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49) |
-| LMB tap: throw [footage 0033-0036] | one frame of wind-up, cocked low behind, then an overhand throw | the hammer left on the press while the arm was still cocking | leaves the hand ~0.12 s after the press, as the arm comes through (`THROW_WIND`); asserted |
+| LMB tap: throw [footage 0033-0036] | one frame of wind-up, cocked low behind, then an overhand throw | the hammer left on the press while the arm was still cocking | leaves the hand 0.16 s after the press, as the hand opens (`THROW_WIND`; was 0.08 until the timing pass); asserted |
 | LMB cadence [game data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
 | RMB [game data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
 | Shift [footage 0369-0380, game data Spin Dash] | ~3.5 m hard dash, one spin, 0.4 s recovery; 8 s (data at level 15) / 9.2 s (card) | matched in the earlier pass (3.5 m, 0.17 s, one spin) | off the dash feel, so it is felt as 3.5 m in 0.17 s (it was 3.0 m in 0.2 s under it); cooldown 8 s (game data, set in the audit) |
@@ -224,7 +224,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
-| LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.12 s after the press, as the arm comes through |
+| LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand 0.16 s after the press (`THROW_WIND`), as the hand opens |
 | LMB tap again (recall) | `bul_recall` | hand out, the catch |
 | LMB hold (whirl, owner item 59) | `bul_smash_wind` (held) | side-on and crouched, the hammer arm out to the side, the shield arm forward, sinking lower to full charge; BjornFx whirls the model's "Hammer" pivot on the kit's angle (eases out of the hand over 0.12 s). The release keys still start from the coil (`BUL_COIL`), so the hammer hauls back on the swing's first frame |
 | LMB release (Crushing Blow) | `bul_smash` | from the coil, sweep from behind to front in one frame, crash down, the step, 0.4 s recovery |
@@ -237,6 +237,36 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | Payoffs / procs | `bul_crush` | the hammer raised in triumph |
 | X (Faultline), 10 fps beats | `bul_ult_wind` (held), `bul_ult_slam` | planted wide, the hammer hauled overhead and leaning back (0.4 s); one frame down into the ground, a deep crouch through the 0.2 s plant, then the legs free to walk while the back comes up |
 Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Clips are `WardenClips` clips seeked to the kit's move clock (`kmove_t` = time since `play(id)`; blend in 0.1 s, out to
+locomotion 0.16 s, under one footage frame). Times are seconds on that clock. "Hit" is the release or contact key.
+Source: briefs/hero-ref/bjorn.md (one frame = 0.2 s, the ult 0.1 s). Albert is 1.5x a medium Hunter (owner), so his
+clips keep their own poses (DECISIONS 11-07 evening); only the timing is matched.
+
+| Move | Source (s) | Ours before | Ours after | Status |
+|---|---|---|---|---|
+| `bul_throw` | one frame of wind-up, cocked low behind, then an overhand throw [0033-0036] | cock key 0.07, hand opens 0.19; the hammer left at 0.08 (arm still cocking) | leaves at 0.16 (`THROW_WIND`), as the hand opens | fixed; asserted |
+| throw cadence | 0.45 s card; round trip ~0.4 s | `throw_rate` 0.45 | same | matches (`bjorn parity LMB`) |
+| `bul_recall` | out 0.2-0.4 s, caught with a flash at the hand [0031/0044/0427] | clip starts at the press; catch key 0.3; the real catch at 0.13 (5 m) to 0.25 (9 m): the hand closed 0.05-0.17 s late | clip skips in so key 0.3 is the catch (`RECALL_CATCH`) | fixed; asserted |
+| `bul_smash_wind` | hold 0.2-0.4 s is the minimum swing; glint 0.6 s; full only seen by 2.4 s [0116, 0133-0146] | clip from tap 0.2 (wind pose 0.2, then the kit's angle spins it); full 1.25 s held, glint 0.6 s | same | matches (full has no source; 1.25 kept) |
+| `bul_smash` | one-frame sweep, impact the frame after, ~0.4 s recovery [0146-0149] | damage on the release step; clip impact 0.08; 0.61 s before the next action | same | matches (the 0.08 gap is under one frame) |
+| `bul_guard` | up after a 0.1-0.15 s cast [0185-0200] | wall at 0.1; the clip began then, hand-up at wall + 0.1 | the clip starts on the press, hand-up 0.1 = the wall; a tap leaves none | fixed; asserted |
+| `bul_charge` (Shield Charge) | wiki only | 0.6 s clip with the dash (0.23 s) | same | no source |
+| `bul_whirl` (360 Smash) | dash ~0.17-0.2 s, one spin 0.15-0.2 s, ~0.4 s crouched [0369-0380] | lean-in to 0.17, turn 0.17-0.33, skid to 0.58; the spin hit at 0.196 (dash 0.17 x feel 1.15) | same | matches (0.03 s late, under one frame) |
+| `bul_short` `bul_lumber` | not in the footage | clips 0.25 / 0.6 s | same | no source |
+| `bul_mend` (E) | hammer hauled up, then driven down; column ~1 s, gone by ~1.8 s [0412-0421] | up 0.16-0.26, held to 0.45, back 0.95; the column's delay 1.0 s | same | matches (the drive-down moment has no frame; kept) |
+| `bul_ult_wind` `bul_ult_slam` | wind-up 0.4 s, slam f29, cells ~0.15 s apart [ult f25-f39] | wind held from 0.4 = `windup`; strike at slam 0, impact key 0.1 | same | matches (one 10 fps frame) |
+| `bul_crush` `bul_armed` `bul_break` | not in the footage | clips 0.6 / 0.35 / 0.65 s | same | no source |
+| `mf_xform` | - | clip 0.8 s | same | no source |
+| run | stride ~2.5 Hz +-15% (legs hidden: rough) | `run_f` 0.37 s = 2.73 Hz at 4.8 m/s, the clip rate follows speed | same | matches; asserted in `--warden-clips-check` |
+
+Asserts: `bjorn anim timing: ...` in `--bulwark-combo-check` (throw release, recall catch, aegis raise, the tap), the
+run cycle in `--warden-clips-check`, the `THROW_WIND` bound in `bjorn_launch_check`. No clip was re-keyed (no Blender
+needed).
+
+Suggestions (ours, not built): the recall's catch flash could carry a short clank so the catch is heard on the key; the
+hold's glint (0.6 s) could start the pose sinking so the charge reads in the body before the glint.
 
 ## Engine notes
 - Kit: `scripts/arch/kits/bulwark_kit.gd`, `bjorn_fx.gd` (pooled effects: hammer, beacon, glint, flare, crescent, swirl, aegis, column, disc), `kit_shaders.gd` / `kit_meshes.gd`, `scripts/match/pin_bjorn_weapons.gd` (war hammer under a "Hammer" pivot, the aegis-sigil tower shield), `scripts/match/kmoves_pin_bjorn.gd`. Data: `content/archetypes/bulwark.json` (`lmb.carry`, `lie_t` 0 = never auto-recall, `dash.spin_r`), `content/weapons/tower_shield.json`.

@@ -831,7 +831,17 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
+	var left_clip := -1.0
+	for i in 30:
+		m.step(DT)
+		if left_clip < 0.0 and String(K.mace.get("st", "")) == "fly":
+			left_clip = m.time - K.anim_at
 	step(m, 0.6)
+	ok(
+		"bjorn anim timing: the hammer leaves as the lmb_throw clip's hand opens (key 0.19; sheet: one frame)",
+		K.anim_id == "bul_throw" and left_clip >= 0.14 and left_clip <= 0.2,
+		"left at clip %.3f" % left_clip
+	)
 	ok(
 		"bjorn aim: the hammer lands at the cursor (5m) and stays planted",
 		K.throws == thr0 + 1 and String(
@@ -850,8 +860,18 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
+	var catch_clip := -1.0
+	for i in 40:
+		m.step(DT)
+		if catch_clip < 0.0 and K.mace.is_empty():
+			catch_clip = m.time - K.anim_at
 	step(m, 1.2)
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
+	ok(
+		"bjorn anim timing: the recall clip's catch key (0.3) lands on the real catch from 5 m (sheet: a flash)",
+		K.anim_id == "bul_recall" and absf(catch_clip - BulwarkKit.RECALL_CATCH) < 0.05,
+		"caught at clip %.3f" % catch_clip
+	)
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
 	P.ak.use_e()
@@ -978,6 +998,18 @@ func _bulwark_combos() -> void:
 	reset.call()
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
+	var guard_on_press := K.anim_id == "bul_guard"
+	var up_clip := -1.0
+	for i in 24:
+		P.inp["sec_hold"] = true
+		m.step(DT)
+		if up_clip < 0.0 and not K.wall.is_empty():
+			up_clip = m.time - K.anim_at
+	ok(
+		"bjorn anim timing: the raise clip starts on the press, its hand-up key (0.1) is the wall (sheet: 0.1-0.15 s)",
+		guard_on_press and absf(up_clip - float(K.rmb_def()["hold"])) < 0.03,
+		"on press %s wall up at clip %.3f" % [guard_on_press, up_clip]
+	)
 	step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	ok(
 		"bjorn RMB: his aegis is drawn in place of the plain wall",
@@ -988,6 +1020,18 @@ func _bulwark_combos() -> void:
 	)
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
+	# a tap shorter than the cast never raises it: the arm drops with the press
+	reset.call()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.03, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	ok(
+		"bjorn anim timing: a RMB tap shorter than the cast leaves no raise clip behind",
+		K.wall.is_empty() and K.anim_id != "bul_guard",
+		"wall %s anim %s" % [not K.wall.is_empty(), K.anim_id]
+	)
 	_wall_at(m, home, lv, 3)
 	# the long dash (no charges left): Breaker's lumbering shove
 	reset.call()

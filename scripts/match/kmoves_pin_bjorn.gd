@@ -302,7 +302,7 @@ const MOVES := {
 		]]},
 	# ---------------------------------------------------------------- Breaker (bulwark; hero sheet bjorn.md)
 	# the hammer thrown (sheet 0033-0034): cocked far back and low for one frame, leaning away, then an
-	# overhand throw (the hammer leaves the hand ~0.12 s after the press, as the arm comes through)
+	# overhand throw (the hammer leaves the hand 0.16 s after the press, as the hand opens)
 	# that overshoots past the front before it settles
 	"bul_throw": {"keys": [
 		[0, {}],
