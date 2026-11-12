@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
-##   3. every line fits the banner lane in at most two lines at 1280x720
+##   3. every line fits the tutorial strip on one line at 1280x720
 ##   4. the first-ready hero ultimate hint (FirstUltHint): only when ready, never in a fight's first 2 s of
 ##      damage, the key from Settings.key_cap, once per save, a short line for every hero
 var bad := 0
@@ -132,12 +132,14 @@ func _walk() -> void:
 	_fit()
 
 func _fit() -> void:
-	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var w := strip.size.x - strip.size.y
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle")
-		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
-		var n: int = fit["lines"].size()
-		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+		var px := int(strip.size.y * 0.5)
+		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+			px -= 1
+		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])
 
 # ------------------------------------------------------------------ 4. the first-ready ult hint
 func _first_ult() -> void:
