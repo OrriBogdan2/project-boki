@@ -49,7 +49,8 @@ func _cases() -> Array:
 		{"arch": "tender", "name": "Burrseed", "min": 30.0, "start": rmb.call(0.0)},
 		{"arch": "ostra", "name": "Nightwell", "ring": true, "start": ult},
 		{"arch": "juggernaut", "name": "Finishing Slam", "dist": 3.0, "start": rmb.call(0.0)},
-		{"arch": "juggernaut", "name": "Meteor Drop", "dist": 4.0, "start": air_rmb},
+		# Meteor Drop is straight down now (jugg-downslam): a 2.4 m circle 0.8 m ahead, so the dummy stands at 2 m
+		{"arch": "juggernaut", "name": "Meteor Drop", "dist": 2.0, "start": air_rmb},
 		{"arch": "gunslinger", "name": "Burr Charge", "prep": beside, "each": by_burr, "start": rmb.call(0.0)},
 		{"arch": "gunslinger", "name": "Nuke", "ring": true, "start": ult},
 		{"arch": "dredge", "name": "Anchor slam", "dist": 2.5, "start": e},

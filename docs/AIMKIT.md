@@ -215,7 +215,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
 | Neve | Ice Spear blast | `rmb.lance.delay` 1.8 s | ring fill |
 | Meeko | Burrseed root | `rmb.seed.delay` 0.7 s | ring fill |
 | Motley | Nightwell | `x.tell` 1.0 s | dome fill; the first catch now lands on the frame it completes (was one frame later) |
-| Kael | Finishing Slam, Meteor Drop | `rmb.windup` 0.6 s, `rmb.drop.hang` 0.2 s | lane / marker fill |
+| Kael | Finishing Slam, Meteor Drop | `rmb.windup` 0.6 s; `rmb.drop.hang` 0.08 s + the dive (24 m/s, 0.12-0.35 s) | lane / marker fill (the drop is straight down: its 2.4 m circle sits 0.8 m ahead) |
 | Grimble | Anchor slam | `e.windup` 0.38 s | cone fill |
 | Albert | Faultline | `x.windup` 0.4 s + `x.lead` 0.2 s | one lane (`x`) whose fill reaches each cell on the frame its slab hits; checked in the last cell (13.5 m), where the fill hits 1 |
 | Tenzo | Basalt Spine (X) | `x.tell` 0.2 s | cracks are HeroVfx plays now (no AimKit entry): not in the check, as in `--telegraph-lead-check` |
