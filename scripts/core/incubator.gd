@@ -11,7 +11,7 @@ class_name Incubator
 ##
 ## On the save:
 ##   Save.d["incubator"]  {slots: n, eggs: [{sp, boss, id, slot, m0 (expeditions when placed), heat (seconds), t}], coal: seconds, t}
-##   Save.d["rare_eggs"]  [{sp, boss, rare, id}] waiting on the shelf, next first
+##   Save.d["rare_eggs"]  [{sp, boss, rare, id, wild?}] waiting on the shelf, next first
 ##   Save.d["items"]["coals"]  Ember Coals not used yet
 
 const SLOTS := 5              # cradles to start with
@@ -67,10 +67,13 @@ static func migrate() -> bool:
 	settle()
 	return true
 
-## A Rare Egg brought home: into a free cradle, or onto the shelf to wait.
-static func add(sp: String, boss := "") -> Dictionary:
+## A Rare Egg brought home: into a free cradle, or onto the shelf to wait. `wild` marks one a wild visitor left
+## (it glints until hatched).
+static func add(sp: String, boss := "", wild := false) -> Dictionary:
 	ensure()
 	var e := {"sp": sp, "boss": boss, "rare": true, "id": _id()}
+	if wild:
+		e["wild"] = true
 	(Save.d["rare_eggs"] as Array).append(e)
 	settle()
 	return e
@@ -112,8 +115,11 @@ static func settle() -> int:
 		if q.is_empty(): break
 		if not in_slot(i).is_empty(): continue
 		var e: Dictionary = q.pop_front()
-		(inc["eggs"] as Array).append({"sp": String(e.get("sp", "")), "boss": String(e.get("boss", "")), "id": String(e.get("id", _id())), "slot": i,
-			"m0": int(Save.d.get("matches", 0)), "heat": 0.0, "t": Time.get_unix_time_from_system()})
+		var placed := {"sp": String(e.get("sp", "")), "boss": String(e.get("boss", "")), "id": String(e.get("id", _id())), "slot": i,
+			"m0": int(Save.d.get("matches", 0)), "heat": 0.0, "t": Time.get_unix_time_from_system()}
+		if e.get("wild", false):
+			placed["wild"] = true      # left by a wild visitor (GardenVisitor): glints until hatched
+		(inc["eggs"] as Array).append(placed)
 		n += 1
 	return n
 

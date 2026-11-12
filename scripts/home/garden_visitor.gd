@@ -5,7 +5,8 @@ extends RefCounted
 ## at a time. It stays one garden day (care.json care_day_s), walks and plays your games as one more Boki
 ## (it is in the zone's kins, GardenZones.out_here) and eats only what you hand it: E on it opens the feed
 ## list and its favourite is shown. The third favourite meal makes it ask to stay as a new Boki when the
-## zone has room, else leave an egg in the Incubator. The away card says who came and left.
+## zone has room, else leave an egg in the Incubator. It arrives with footprints and a shimmer and its egg
+## glints (VisitorArrive). The away card says who came and left.
 ## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next}: a lazy key, no save bump; the rec carries
 ## "visitor": true until it joins. Tuning: content/rules/garden_visitor.json.
 
@@ -76,6 +77,8 @@ static func step(h, dt: float, now := -1.0) -> void:
 		_look(h, dt, now)
 		return
 	var k: Dictionary = h._kin_entry(r)
+	if not k.is_empty():
+		VisitorArrive.shimmer(h, k, r, now - float(Save.d["visitor"]["t"]))
 	if not k.is_empty() and (k.get("busy", false) or k.has("indoors") or float(k.get("hold_t", 0.0)) > 0.0):
 		return      # mid-game, in a house or being fed: it goes after
 	if int(Save.d["visitor"]["fed"]) >= int(rules()["feeds"]):
@@ -95,7 +98,7 @@ static func _look(h, dt: float, now: float) -> void:
 	if sp == "":
 		return
 	var r := begin(zone, sp, now)
-	h.add_kin(r, 0)
+	VisitorArrive.trail(h, h.add_kin(r, 0)["pos"], sp)
 	var loves := Care.food_name(String(r["likes"]["food"]))
 	h._toast("A wild %s wandered into %s. It loves %s" % [_name(r), _zone_name(), loves])
 
@@ -125,7 +128,7 @@ static func _thank(h, r: Dictionary, now: float) -> void:
 			_dismiss(h, r)
 		h._toast("%s asks to stay. It is yours now" % r["name"])
 	else:
-		var egg := Incubator.add(String(r["species"]))
+		var egg := Incubator.add(String(r["species"]), "", true)
 		leave(h, "A wild %s left %s" % [_name(r), "a " + Incubator.egg_name(egg)], now)
 		h._toast("%s left an egg" % _name(r))
 
