@@ -66,7 +66,30 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
   point on his shin's line that a crouched shin swings off the boot.
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
+## Starts (ext/anim-loco-starts)
+Moving off from idle at walk and run, per Hunter and direction, the check's `start` JSON carries the first-pose gap
+(the ring's pose as it starts showing against the idle's, worst point over his height), the ring's phase, and the
+frame of the first plant against the frame the ring passes that foot's contact key (the phase the sole touches down
+at in the steady loop). PLANT fails a cell whose first foot down lands over 2 frames off its key.
+- **Before:** a ring at no weight stands still, so a start picked up wherever the last stop left it: any stride, a foot
+  half through its swing. And the clip rate eased up from the stopped value (0.6x) while the body was at speed in 3
+  frames (HunterMove accel 47-54 m/s^2), so the first steps played slow under him.
+- **Now (scripts/heroes/warden_start.gd, WardenClips._loco):** one start for every Hunter. The rings pick up at the
+  phase of the forward loop whose points (hips, head, hands, ankles: the clip's rotations on the rest) lie nearest
+  the idle's top; the run ring picks up on the same stride (nearest that walk pose too), and whenever the run ring
+  comes in from no weight it takes the walk ring's stride. Until the rings own the legs the rate is the ground speed
+  over the loop's sole speed with no ease, so the stride covers what the accel carries him. No per-Hunter numbers.
+- **Before -> after,** 176 start cells: first plant on its key 161 -> 166; first-pose gap mean 24.6 % -> 21.3 %,
+  worst 49 % -> 39 %; starts over the snap bar 13 -> 7 (all snaps 22 -> 17); `--loco-dir-check` known cells 30 -> 35
+  with PLANT new (9 cells left the list, 14 joined: 10 PLANT, 4 SNAP). Video: `~/meshy/anim-loco-starts/`.
+
 ## Left (docs/DEBT.md)
+- Starts still off (tools/loco_dir_known.txt): PLANT Albert walk fr/r/b/bl (-4..-9 frames), Vex walk f/fl (-9: her
+  first swing never clears half its height, so the next foot is the first plant read), Sable run fr/fl (+4..6), Kael
+  walk bl / run b (no plant read in 1 s). SNAP Grimble sprint r / strafe r: a bone layer after the tree throws his
+  left hand 0.14 m in the frame his speed tops out (the walk_r and run_r clips are smooth there; the same pop was his
+  known run r start before); Albert run r: a one-frame heel spike at 23 % ring weight (his half-turn rest, below);
+  Albert run bl stop: the stop now lands on another phase (the stop is ext/anim-stop-start's).
 - Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
   copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
   Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
