@@ -1821,10 +1821,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
-		# getting knocked hits hard: slow time, flash red, pull the camera in
-		_slow(0.55, 0.3)
-		if hud: hud.flash(Color("ff3a2a"), 0.3)
-		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
@@ -1837,7 +1833,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
-			_reward_moment(h.pos)
+			Juice.knock_landed(self, h.pos)
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
@@ -1867,15 +1863,6 @@ func _armor_up(h: Hunter) -> void:
 	if h == player:
 		sfx("revive", null, -6.0)
 		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
-
-func _reward_moment(at: Vector3) -> void:
-	_slow(0.22, 0.35)
-	freeze_frame(0.07)
-	if hud: hud.flash(Color.WHITE, 0.25)
-	fx.ring(at, 3.0, Color(1, 0.95, 0.8, 0.9), 0.35)
-	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
-	Sfx.duck(0.25)
-	sfx("kill", null, -2.0)
 
 func _slow(t: float, k: float) -> void:
 	if net_on:
@@ -5426,7 +5413,7 @@ func _net_ev(x, from: String) -> void:
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
-					_reward_moment(who.pos)
+					Juice.knock_landed(self, who.pos)
 				_check_team(player.team if player else -9)
 		"out":
 			who = ents_by_id.get(String(x[1]), null)

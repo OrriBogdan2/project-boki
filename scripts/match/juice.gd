@@ -96,10 +96,38 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var col: Color = w.get("color", Color("ffd9a0"))
 	m.fx.muzzle(start + Vector3(dir2.x, 0, dir2.y) * 0.25, dir2, col, power)
 
+## The knock moment (docs/DASHES_AND_ABILITY_FEEL.md 5.4): the same beat on every knock, never by chance.
+## Offline only: online the match clock can't slow or freeze, so the flash plays alone.
+const KNOCK_FREEZE_S := 0.07        # s the fight holds still when you knock a rival (Feel tier 4)
+const KNOCK_SLOW_S := 0.22          # s of real time the match then runs slowed
+const KNOCK_SLOW_K := 0.35          # the match's speed in that slow-mo
+const KNOCK_FLASH := 0.25           # strength of the white screen flash
+const DOWNED_SLOW_S := 0.55         # s of slow-mo when you are the one knocked (longer, so you see why)
+const DOWNED_SLOW_K := 0.3          # the match's speed in it
+const DOWNED_FLASH := 0.3           # strength of the red screen flash
+const DOWNED_COL := Color("ff3a2a")
+
+## You knocked a rival (Match.knock, or the knock event online): freeze, slow-mo and a white flash. Your
+## dash is already back by then (DashReset.takedown runs first), so its cue and the Shift pop land in
+## the same beat.
+static func knock_landed(m: Match, at: Vector3) -> void:
+	m.freeze_frame(KNOCK_FREEZE_S)
+	m._slow(KNOCK_SLOW_S, KNOCK_SLOW_K)
+	if m.hud: m.hud.flash(Color.WHITE, KNOCK_FLASH)
+	if m.fx:
+		m.fx.ring(at, 3.0, Color(1, 0.95, 0.8, 0.9), 0.35)
+		m.fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
+	Sfx.duck(0.25)
+	m.sfx("kill", null, -2.0)
+
 ## Someone knocked down (Match.knock): a burst of their team colour, a shockwave on the ground and a
-## white flash, so the moment reads from anywhere on screen.
+## white flash, so the moment reads from anywhere on screen. When it is you: slow-mo and a red flash.
 static func knock(m: Match, h: Hunter, credit: Ent) -> void:
-	if m == null or m.fx == null:
+	if h == m.player:
+		m._slow(DOWNED_SLOW_S, DOWNED_SLOW_K)
+		if m.hud: m.hud.flash(DOWNED_COL, DOWNED_FLASH)
+		Sfx.duck(0.6)
+	if m.fx == null:
 		return
 	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 	var c := h.pos + Vector3(0, 0.9, 0)
