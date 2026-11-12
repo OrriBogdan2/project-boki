@@ -601,3 +601,6 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Pick-one panels: one click on the card takes it (owner 11-11).
 
 - 2026-11-11 (owner, 6:55 PM EST): KEEP Ringrove as is (current 2D + 3D) for now; its 3D model is good. Mycroll-line round 3 (Willow final / new Sporcupine, /home/boki/meshy/ringrove-options3) is PARKED: do not replace or regenerate Ringrove art or GLB.
+
+## 2026-11-11 owner (7 PM EST): PvE mode "Heart Raid" prototype
+- Owner wants a PvE mode (solo or up to 4) alongside Expeditions; prototype for Thu 11-12. Reuses the Expedition map/Heart/Blight/bots; waves + 1 boss instead of enemy squads. Mode-exclusive Boki = found only in that mode, not ownership-locked. Prototype lane: job 20261112-000003-a1, branch ext/pve-raid-1111, design doc docs/design/PVE_HEART_RAID.md. Expeditions must stay unchanged.
