@@ -1,0 +1,225 @@
+{
+	"desc": "Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).",
+	"day_s": 86400,
+	"day_doc": "Seconds in a garden day: the first-win item comes once per day per game.",
+	"week_s": 604800,
+	"week_doc": "Seconds in a cup week: a Boki's Crown for a game counts once per week.",
+	"cup": {
+		"rounds": [
+			{
+				"name": "Sprout",
+				"min_ratio": 0.9
+			},
+			{
+				"name": "Bloom",
+				"min_ratio": 1.0
+			},
+			{
+				"name": "Crown",
+				"min_ratio": 1.1
+			}
+		],
+		"rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."
+	},
+	"games": {
+		"dash": {
+			"name": "The Dash",
+			"first": "zipseed",
+			"ribbon": "Dash Cup Ribbon",
+			"colour": "#f2c84a",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 40
+				},
+				{
+					"kind": "snack",
+					"id": "puffcorn",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 15
+				},
+				{
+					"kind": "snack",
+					"id": "tidebloom",
+					"w": 10
+				},
+				{
+					"kind": "item",
+					"id": "shellbark_chew",
+					"w": 10
+				}
+			]
+		},
+		"shove": {
+			"name": "Stump Shove",
+			"first": "thumpnut",
+			"ribbon": "Stump Shove Cup Ribbon",
+			"colour": "#d9604a",
+			"cup_prize": "keepstone",
+			"table": [
+				{
+					"kind": "item",
+					"id": "thumpnut",
+					"w": 35
+				},
+				{
+					"kind": "item",
+					"id": "shellbark_chew",
+					"w": 25
+				},
+				{
+					"kind": "snack",
+					"id": "emberberry",
+					"w": 20
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 10
+				},
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 10
+				}
+			]
+		},
+		"seek": {
+			"name": "Seek",
+			"first": "hushpearl",
+			"ribbon": "Seek Cup Ribbon",
+			"colour": "#8a6ad0",
+			"cup_prize": "puzzlenut",
+			"table": [
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 40
+				},
+				{
+					"kind": "snack",
+					"id": "sunroot",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 15
+				},
+				{
+					"kind": "snack",
+					"id": "puffcorn",
+					"w": 10
+				},
+				{
+					"kind": "item",
+					"id": "thumpnut",
+					"w": 10
+				}
+			]
+		},
+		"volley": {
+			"name": "Spark Volley",
+			"first": "hushpearl",
+			"ribbon": "Spark Volley Cup Ribbon",
+			"colour": "#5ab8f0",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 30
+				},
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 25
+				},
+				{
+					"kind": "snack",
+					"id": "tidebloom",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 10
+				},
+				{
+					"kind": "item",
+					"id": "shellbark_chew",
+					"w": 10
+				}
+			]
+		},
+		"show": {
+			"name": "Show Ring",
+			"first": "sunsap",
+			"ribbon": "Show Ring Cup Ribbon",
+			"colour": "#f08ac0",
+			"cup_prize": "keepstone",
+			"table": [
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 30
+				},
+				{
+					"kind": "snack",
+					"id": "sunroot",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "unwind_tea",
+					"w": 20
+				},
+				{
+					"kind": "item",
+					"id": "rinse_melon",
+					"w": 15
+				},
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 10
+				}
+			]
+		},
+		"relay": {
+			"name": "Relay Cup",
+			"first": "zipseed",
+			"ribbon": "Relay Cup Ribbon",
+			"colour": "#4ad6b0",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 40
+				},
+				{
+					"kind": "snack",
+					"id": "puffcorn",
+					"w": 30
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 15
+				},
+				{
+					"kind": "snack",
+					"id": "tidebloom",
+					"w": 15
+				}
+			]
+		}
+	}
+}
