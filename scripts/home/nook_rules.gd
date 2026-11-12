@@ -4,7 +4,7 @@ class_name NookRules
 
 const GROWN_LV: int = Care.STAGES[2][0]     # the level a Boki is Grown
 const REST_SEC := 1200.0                    # seconds a parent rests after laying an egg
-const FRIEND_BOND := 50.0                   # a bond (or, with none recorded, trust) that counts as friends
+const FRIEND_TRUST := 50.0                  # trust that counts as friends when no bond is recorded
 
 ## Why this one Boki can't be paired right now ("" when it can).
 static func can_pair(rec: Dictionary) -> String:
@@ -15,14 +15,15 @@ static func can_pair(rec: Dictionary) -> String:
 	if KinBox.full(): return "Your farm and the Boki Burrow are full"
 	return ""
 
-## Friends: a bond of 50 or more either way. rec["bonds"] (uid -> bond) is not on every build yet; with
-## none recorded on either, trust 50 or more on both stands in.
+## Friends: a base-life bond (rec["bonds"], -1..1) at or above base_life.json friend_at either way. With none
+## recorded on either, trust 50 or more on both stands in.
 static func friends(a: Dictionary, b: Dictionary) -> bool:
 	var ba: Dictionary = a.get("bonds", {})
 	var bb: Dictionary = b.get("bonds", {})
 	if ba.is_empty() and bb.is_empty():
-		return float(a["trust"]) >= FRIEND_BOND and float(b["trust"]) >= FRIEND_BOND
-	return float(ba.get(b["uid"], 0.0)) >= FRIEND_BOND or float(bb.get(a["uid"], 0.0)) >= FRIEND_BOND
+		return float(a["trust"]) >= FRIEND_TRUST and float(b["trust"]) >= FRIEND_TRUST
+	var at := float(Content.rules("base_life")["friend_at"])
+	return float(ba.get(b["uid"], 0.0)) >= at or float(bb.get(a["uid"], 0.0)) >= at
 
 ## Why these two can't be paired ("" when they can).
 static func pair_why(a: Dictionary, b: Dictionary) -> String:
