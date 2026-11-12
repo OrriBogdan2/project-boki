@@ -1,6 +1,7 @@
 """Re-times one clip of a .glb with no Blender: every track is sampled through a piecewise-linear time warp at 60 fps
-(rotations by slerp, the rest linear), so a fast move spreads over more frames while the clip keeps its length. The
-old key data stays in the file unused; the new keys are appended.
+(rotations by slerp, the rest linear), so a fast move spreads over more frames while the clip keeps its length (or takes
+the one a last pair naming its end gives: drink 0:0,1.0:1.1 plays a 1.1 s clip in 1.0 s). The old key data stays in the
+file unused; the new keys are appended.
 Run: python3 tools/art1/glb_retime.py <glb> <clip> <new:old>[,<new:old>...] [out.glb]
   e.g. lmb_punch 0:0,0.09:0.05,0.14:0.12  (the end maps to itself; the pose the clip had at 0.05 s now arrives at 0.09 s; the end keeps its time)"""
 import math
@@ -84,7 +85,9 @@ if __name__ == "__main__":
     glb, binary = read(path)
     first = next(a for a in glb["animations"] if a["name"] == clip)["samplers"][0]["input"]
     end = glb["accessors"][first]["max"][0]
-    anchors = [tuple(float(x) for x in p.split(":")) for p in spec.split(",")] + [(end, end)]
+    anchors = [tuple(float(x) for x in p.split(":")) for p in spec.split(",")]
+    if abs(anchors[-1][1] - end) > 1e-6:      # (the end maps to itself unless the last pair names it)
+        anchors.append((end, end))
     retime(glb, binary, clip, anchors)
     write(sys.argv[4] if len(sys.argv) > 4 else path, glb, binary)
-    print("retimed", clip, "length", end)
+    print("retimed", clip, "length", anchors[-1][0])
