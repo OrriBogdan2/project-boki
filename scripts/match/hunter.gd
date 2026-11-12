@@ -3093,17 +3093,27 @@ func _anim_state(stretch: float) -> void:
 		s.erase("air_h")
 
 ## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"). Visual only: the hitbox (r), the TeamRing hit circle under your
-## feet, shot heights and the balloon marker are unchanged.
+## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
+## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
 const VIS_SCALE := 1.12
+var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
 	if n == null:
 		return
-	n.scale *= VIS_SCALE
-	var ring := n.get_node_or_null("TeamRing") as Node3D
+	vis_k = 1.0
+	fit_scale()
+
+## Puts VIS_SCALE x the camera's hunter_scale on the model (again when the Settings camera changes).
+func fit_scale() -> void:
+	var k: float = VIS_SCALE * (m.cam.hunter_scale if m and m.cam else 1.0)
+	if is_equal_approx(k, vis_k):
+		return
+	model.scale *= k / vis_k
+	var ring := model.get_node_or_null("TeamRing") as Node3D
 	if ring:
-		ring.scale /= VIS_SCALE
+		ring.scale /= k / vis_k
+	vis_k = k
 
 ## (movefeel) Where to draw this hunter between simulation steps. Everyone else is interpolated
 ## (drawn up to one step in the past, which is smooth); the local player is drawn at the present
@@ -3128,6 +3138,7 @@ func render(delta: float, alpha: float) -> void:
 	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
+	fit_scale()
 	HunterWisp.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
