@@ -16,6 +16,19 @@ func _grab(file: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s.png" % file))
 	print("MATELOOK-SHOT ", file)
 
+## Scrolls the open settings list so the section header with this text sits at the top.
+func _scroll_to(header: String) -> void:
+	for l in main.get_tree().root.find_children("*", "Label", true, false):
+		if (l as Label).text != header:
+			continue
+		var n: Node = l
+		while n != null and not (n is ScrollContainer):
+			n = n.get_parent()
+		if n != null:
+			var sc := n as ScrollContainer
+			sc.scroll_vertical = int((l as Control).global_position.y - sc.global_position.y) + sc.scroll_vertical
+		return
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -36,11 +49,16 @@ func run(main_node: Node) -> void:
 	m.mobs.clear()
 	for h in m.hunters:
 		h.ctrl = "idle"
+		h.inp["move"] = Vector2.ZERO   # a leftover walk would carry a mate off an edge
 	var mates := m.mate_look.mates()
 	var spots := [Vector3(16, 0, 0), Vector3(-14, 0, 12), Vector3(2, 0, -18)]
 	for i in 3:
-		(mates[i] as Hunter).teleport(m.world.free_spot_near(m.player.pos + spots[i], [], 1.0, 0.45, 6.0))
+		# a wide search: a spot over the void would drop the mate into the abyss
+		(mates[i] as Hunter).teleport(m.world.free_spot_near(m.player.pos + spots[i], [], 1.0, 0.45, 40.0))
 	(mates[1] as Hunter).hp = (mates[1] as Hunter).max_hp * 0.55
+	await _frames(30)
+	for i in 3:
+		print("MATELOOK-MATE %d %s out=%s" % [i + 1, (mates[i] as Hunter).pname, (mates[i] as Hunter).out])
 	await _grab("own_view")
 	for i in 3:
 		Input.action_press(MateLook.ACTIONS[i])
@@ -49,6 +67,8 @@ func run(main_node: Node) -> void:
 	m.paused = true
 	Overlay.tab = "Controls"
 	Overlay.open_settings()
+	await _frames(10)
+	_scroll_to("SQUAD AND MAP")
 	await _frames(10)
 	var sc := main.get_viewport().get_texture().get_image()
 	sc.save_png(dir.path_join("controls_top.png"))
