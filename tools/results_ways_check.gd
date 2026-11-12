@@ -47,6 +47,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	_placing()
 	_pay_and_lines()
+	_other_seat()
 	_real_match(main)
 	_apply()
 	_hiding()
@@ -106,6 +107,16 @@ func _pay_and_lines() -> void:
 		WaysResult.reward_line({"egg": {}, "goods": {"heartwood": 1}}) == "Heart reward: 1 Heartwood.",
 		"the minor reward line"
 	)
+
+## The results screen names the other Heart seat and what it would have paid; no line for any other way out.
+func _other_seat() -> void:
+	var early := WaysResult.other_line("heart_early")
+	var final := WaysResult.other_line("heart_final")
+	ok(early.contains("final seat (10:00") and early.contains("150 gems") and early.contains("Rare Egg"),
+		"the early exit says the final seat would have paid the major set: %s" % early)
+	ok(final.contains("early seat") and final.contains("40 gems") and not final.contains("Egg"),
+		"the final exit says the early seat would have paid the minor set: %s" % final)
+	ok(WaysResult.other_line("uplink") == "" and WaysResult.other_line("") == "", "no line for other ways out")
 
 ## A real match: the player's squad is wiped second of three; the result carries place and no how.
 func _real_match(main: Node) -> void:
@@ -210,5 +221,16 @@ func _screen(main: Node) -> void:
 		"the final seat screen shows how you left and the reward"
 	)
 	ok(not _has(t, "Placement pay") and not _has(t, "placed"), "and no placing")
+	scr.queue_free()
+	ok(_has(t, "The early seat (the Gate) would have paid: 40 gems"), "and what the early seat would have paid")
+	scr.queue_free()
+	Save.d = Save.fresh()
+	scr = load("res://scripts/ui/results.gd").new()
+	main.add_child(scr)
+	scr.show_result(_res({"extracted": true, "how": "heart_early", "where": "the Heart", "gems": 40,
+		"heart": {"egg": {}, "goods": {"heartwood": 1}, "seeds": {}, "gems": 40, "trust": 6.0}}))
+	t = _texts(scr, [])
+	ok(_has(t, "You left through the Heart Gate") and _has(t, "Heart reward: 1 Heartwood."), "the early seat screen")
+	ok(_has(t, "The final seat (10:00, one squad) would have paid: 150 gems"), "...says what the final would have paid")
 	scr.queue_free()
 	await main.get_tree().process_frame
