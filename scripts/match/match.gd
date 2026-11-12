@@ -1546,10 +1546,9 @@ func _spawn_wild() -> void:
 	var live := {}
 	for i in mini(spots.size(), maxi(WILD_MIN, int(round(spots.size() * WILD_LIVE)))):
 		live[order[i]] = true
-	var pool: Array = Data.wild_kin(HeartRaid.mode_of(opts))      # this mode's spawn table
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp: String = pool[rng.randi_range(0, pool.size() - 1)]
+		var sp := BokiModes.draw(BokiModes.site_pool("expedition", "wild"), rng)
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
