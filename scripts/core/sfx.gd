@@ -371,6 +371,7 @@ func clear_amb_layers(fade := 1.0) -> void:
 func _process(delta: float) -> void:
 	if not loops.is_empty():
 		_drop_stale_holds()
+		voices.cull_loops(loops, listener)
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
@@ -413,17 +414,12 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
-## A free voice from the pool for a sound of rank r (SfxVoices), so a new sound doesn't cut one that's still
-## ringing (the oldest if all are busy).
+## The pool voice for a sound of rank r (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
+## null when it gets none.
 func _voice(pos, r: float, sname: String) -> AudioStreamPlayer:
-	var i := -1
-	for k in POOL:
-		if not players[(next + k) % POOL].playing:
-			i = (next + k) % POOL
-			break
+	var i := voices.pick(players, next, r, sname)
 	if i < 0:
-		i = next
-		voices.cut.emit(voices.sound[i], voices.rank[i], &"stolen")
+		return null
 	next = (i + 1) % POOL
 	voices.rank[i] = r
 	voices.sound[i] = sname
@@ -525,6 +521,7 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	p.stream = st
 	_loop_level(loops[key])
 	p.play()
+	voices.cull_loops(loops, listener, true)
 
 func loop_set(key: String, pos = null, pitch := 1.0) -> void:
 	if not loops.has(key):

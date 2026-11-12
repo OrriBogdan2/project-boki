@@ -51,6 +51,13 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
+## Voice priority (`scripts/core/sfx_voices.gd`)
+- The cap: `Sfx.POOL` (24) one-shot voices plus `SfxVoices.LOOP_CAP` (8) loops sounding at once.
+- Ranks: **yours** first (no position, `mine` = true, or within 0.7 m of you), then **your squad's** (within 0.7 m of a living squadmate, kept by `Sfx.voices.keep_squad` each match frame), then everyone else by distance, nearest first. A sound you make away from you, like the hit tick on the one you hit, passes `mine` (`m.sfx(name, pos, vol, pitch, true)`).
+- With the pool full, a new sound takes the voice of the farthest sound ranked below it, or doesn't play. A sound of yours with only yours playing takes the oldest. An enemy's sound never takes yours or your squad's.
+- Loops past the cap pause, farthest first, and resume once there's room. Yours and your squad's never pause.
+- `--sfx-voice-check`: a 30-Hunter trio brawl stays under the cap, enemies get cut, none of yours do, and far loops pause first. On main's old ring stealing the same fight cut your and your squad's sounds 608 times in 40 s.
+
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 
