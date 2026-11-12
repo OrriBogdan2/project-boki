@@ -20,6 +20,7 @@ const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
+const HOLD_KNOCK := 1.5              # steps of knock the Wirerun hold keeps on her: her drift bleeds as a knock's
 
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
@@ -430,10 +431,17 @@ func _tick_wire(dt: float) -> void:
 	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
 		return
+	if not h.grounded and bool(h.inp.get("jump", false)) and h.knock_t <= dt * HOLD_KNOCK:
+		# Space in the air hold (DECISIONS 11-08, Shift cancels into glide for every Hunter): cut, the charge
+		# stays spent as on any cut, and the press opens the glider at the drift she had
+		_end_wire(false)
+		_drop_hold_knock(dt)
+		h.do_jump()
+		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO
 	h.inp["jump"] = false
-	h.knock_t = maxf(h.knock_t, dt * 1.5)
+	h.knock_t = maxf(h.knock_t, dt * HOLD_KNOCK)
 	if bool(wire["air"]):
 		h.vel.y = 0.0
 		h.pos.y = float(wire["y"])
@@ -457,7 +465,15 @@ func _tick_wire(dt: float) -> void:
 	var auto_t := float(dd.get("auto", float(dd["hold"]) + 0.3)) * wire_hold() / float(dd["hold"])
 	if not held("dash") or t >= auto_t:
 		_end_wire(false)
+		_drop_hold_knock(dt)            # the streak is a dash like any other, so a glide press cuts it
 		_run(L, d, dr)
+
+## The hold's own knock off her (a real knock lasts longer and stays), in the Loco state she is really in.
+func _drop_hold_knock(dt: float) -> void:
+	if h.knock_t > dt * HOLD_KNOCK:
+		return
+	h.knock_t = 0.0
+	h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE, "wirerun let go")
 
 func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dd := dash_def()
@@ -500,14 +516,18 @@ func _tick_run(dt: float) -> void:
 ## ticks before the move, so nothing of the streak's speed slips into the air step; a jump out of it keeps its own.
 func _exit_run() -> void:
 	run_exit = false
-	if run_t > 0.0:
+	if run_t > 0.0 and not h.gliding:
 		return
+	if h.gliding:
+		# a glide press cut the streak (Hunter._dash_into_glide): she is back in her body, at run speed
+		run_t = 0.0
+		if h.model: h.model.visible = true
 	var hv := HunterMove.dash_exit(Vector2(h.vel.x, h.vel.z), h.base_speed)
 	h.vel.x = hv.x
 	h.vel.z = hv.y
 
 func _arrive() -> void:
-	if not is_instance_valid(h): return
+	if not is_instance_valid(h) or h.gliding: return      # a glide cut the streak: _exit_run brought her back
 	run_t = 0.0
 	if h.model: h.model.visible = true
 	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way

@@ -2,15 +2,12 @@ extends "res://tools/abyss_check.gd"
 ## --glide-hold-check (DECISIONS "holding Space NEVER opens the glider"): with a player's keys
 ## (inp glide_press_only) the glider opens only from a fresh press in the air; Space held from the jump, or
 ## held while LMB/RMB are used, never opens it; a folded glider stays shut while still held, until a new press.
-## Every Hunter: a fresh Space press during and after its air Shift glides (by the move's end at the latest),
-## except a Shift in SWALLOWS.
+## Every Hunter: a fresh Space press during and after its air Shift glides (by the move's end at the latest).
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const SECS := 2.0       # how long each scenario runs
 const HIGH := 12.0      # m: a start in the air, well above the ground, for the in-air presses
 const BUTTONS := {"juggernaut": "RMB", "archer": "LMB", "bulwark": "LMB"}      # Kael, Lace, Albert
-## Air Shifts that drop a Space press by design (MOVEMENT_FEEL "Dash into glide": a kit's own move is not cancelled)
-const SWALLOWS := {"mage": "Sparkle's wire: her keys do nothing while it holds (mage_kit _tick_wire)"}
 
 ## A training match as `arch` ("" keeps the default kit), the player on an empty patch of ground.
 func _start(main: Node, arch: String) -> void:
@@ -151,10 +148,7 @@ func _shift_case(arch: String) -> void:
 	var after := _scenario(late, 30.0)
 	ok(after["t"] > 0.3, "%s: a fresh Space press 1s after the air Shift glides" % arch)
 	var line := "%s: Space pressed 0.07s into the air Shift and held glides %.2fs of 1.93s" % [arch, r["t"]]
-	if SWALLOWS.has(arch):
-		ok(r["t"] == 0.0, line + " (by design: %s)" % SWALLOWS[arch])
-	else:
-		ok(r["t"] > 0.3, line)
+	ok(r["t"] > 0.3, line)
 
 func run(main: Node) -> void:
 	Save.no_write = true
