@@ -38,6 +38,7 @@ static func build(kind: String) -> Node3D:
 	root.set_meta("pulse", [M["ember"], M["hot"]])
 	root.set_meta("ember", [M["ember"], M["hot"]])
 	MobModels._finish(root)        # a mesh per material per pivot: a few draw calls a body
+	MobGlb.dress(root, kind)
 	return root
 
 static func _ember(c: Color, g: float) -> ShaderMaterial:
