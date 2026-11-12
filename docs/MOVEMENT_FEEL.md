@@ -306,6 +306,79 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## Ability ranges on screen (`--range-screen-check`, `tools/range_screen_check.gd`)
+
+Does each slot's end at max range stay on screen with the wide match camera (36.3 m back, 37 m across at 16:9)?
+The check puts each of the 12 Hunters at the screen's centre (the camera focus: feet a little below it), takes
+every slot's longest range from its data (LMB the weapon's `range`; RMB, E, R, dash the largest range-like number
+in the slot; Cinder's flight is `speed` x `time`), aims up, down, left and right at that range on the ground and
+projects the end through the camera at zoom 1.0 and 0.7 (the wheel's closest), at 1280x720, 1920x1080, 2560x1080
+and 1024x768. An end closer than 20 px to the edge (`CamRig.on_screen`) counts as off. **No range was changed
+(source data) and no indicator was clamped wrong**: the cursor-placed shapes end at the cursor, which is always
+on screen, and the fixed lanes are drawn at their full data length as in the source. The ends below simply do not
+fit when the Hunter is centred. Letters: U up, D down, L left, R right; `-` none.
+
+The lens is vertical, so 1280x720 is 1920x1080 scaled (it differs only where the 20 px margin decides: 14 m up
+for Lace RMB, Kael LMB hold, Vex R, Cinder RMB, Meeko RMB, Sable E is on at 1080p and off at 720p). Straight down
+is the tight way: the screen's lower edge is only about 10 m from a centred Hunter at zoom 1.0 and 7 m at 0.7, so
+every reach over that falls off the bottom in any aspect. Left and right need the width: 18.5 m at 16:9, more at
+21:9, 13.9 m at 4:3 (1024x768), half that at 0.7.
+
+| Hunter | Slot | Reach m (data) | 16:9 z1.0 | 16:9 z0.7 | 21:9 z1.0 | 21:9 z0.7 | 4:3 z1.0 | 4:3 z0.7 | Lean, 16:9 z1.0 |
+|---|---|---|---|---|---|---|---|---|---|
+| Lace | lmb | 12.0 (weapon longbow) | D | UD | D | UD | D | UDLR | - |
+| Lace | rmb | 14.0 (rmb.pin.range) | D | UDLR | D | UD | UDLR | UDLR | - |
+| Lace | e | 9.0 (e.reach) | - | D | - | D | - | D | - |
+| Lace | x | 18.0 (x.range) | UD | UDLR | UD | UD | UDLR | UDLR | D |
+| Kael | lmb | 14.0 (lmb.wave_range[1]) | D | UDLR | D | UD | UDLR | UDLR | - |
+| Kael | rmb | 7.5 (rmb.lunge.dist[1]) | - | D | - | D | - | D | - |
+| Kael | e | 24.0 (e.tether_max) | UDLR | UDLR | UD | UDLR | UDLR | UDLR | UD |
+| Vex | lmb | 11.0 (weapon quill_rifle) | D | UD | D | UD | D | UDLR | - |
+| Vex | rmb | 10.5 (rmb.burr.range) | D | UD | D | UD | D | UDLR | - |
+| Vex | e | 18.0 (e.range) | UD | UDLR | UD | UD | UDLR | UDLR | D |
+| Vex | x | 14.0 (x.range) | D | UDLR | D | UD | UDLR | UDLR | - |
+| Albert | lmb | 9.0 (lmb.throw_range) | - | D | - | D | - | D | - |
+| Cinder | rmb | 14.0 (rmb.range) | D | UDLR | D | UD | UDLR | UDLR | - |
+| Cinder | dash | 6.8 (dash.air_dist) | - | D | - | D | - | D | - |
+| Cinder | x | 22.7 (flight speed x time) | UDLR | UDLR | UD | UDLR | UDLR | UDLR | UD |
+| Meeko | lmb | 12.0 (weapon lantern_crook) | D | UD | D | UD | D | UDLR | - |
+| Meeko | rmb | 14.0 (rmb.seed.range) | D | UDLR | D | UD | UDLR | UDLR | - |
+| Meeko | e | 9.0 (e.reach) | - | D | - | D | - | D | - |
+| Meeko | x | 12.6 (x.range) | D | UD | D | UD | D | UDLR | - |
+| Meeko | dash | 13.3 (dash.air.dist) | D | UD | D | UD | D | UDLR | - |
+| Tenzo | lmb | 11.0 (weapon rubble_fists) | D | UD | D | UD | D | UDLR | - |
+| Tenzo | x | 12.0 (x.len) | D | UD | D | UD | D | UDLR | - |
+| Grimble | rmb | 11.5 (rmb.range) | D | UD | D | UD | D | UDLR | - |
+| Neve | lmb | 10.0 (weapon hoar_fan) | D | D | D | D | D | DLR | - |
+| Neve | rmb | 12.0 (rmb.lance.range) | D | UD | D | UD | D | UDLR | - |
+| Neve | e | 16.2 (e.travel) | UD | UDLR | UD | UD | UDLR | UDLR | D |
+| Sparkle | lmb | 13.0 (weapon coilcaster) | D | UD | D | UD | D | UDLR | - |
+| Sparkle | rmb | 13.0 (rmb.coil.range) | D | UD | D | UD | D | UDLR | - |
+| Sparkle | e | 11.0 (e.reach) | D | UD | D | UD | D | UDLR | - |
+| Sparkle | x | 14.4 (x.range) | UD | UDLR | UD | UD | UDLR | UDLR | - |
+| Sparkle | dash | 9.8 (dash.dist[1]) | D | D | D | D | D | D | - |
+| Sable | lmb | 8.5 (weapon arc_bolts) | - | D | - | D | - | D | - |
+| Sable | rmb | 7.0 (rmb.bola.range) | - | D | - | D | - | D | - |
+| Sable | e | 14.0 (e.range) | D | UDLR | D | UD | UDLR | UDLR | - |
+| Motley | lmb | 12.2 (weapon tether_lantern) | D | UD | D | UD | D | UDLR | - |
+| Motley | rmb | 13.0 (rmb.snap.range) | D | UD | D | UD | D | UDLR | - |
+| Motley | e | 9.0 (e.reach) | - | D | - | D | - | D | - |
+| Motley | x | 10.0 (x.range) | D | D | D | D | D | DLR | - |
+| Motley | dash | 12.0 (dash.reach) | D | UD | D | UD | D | UDLR | - |
+
+On screen in every case: Cinder lmb, Tenzo dash, Grimble lmb, Grimble x, Sable x.
+"Lean" is the same end with the view leaned toward it as the cursor held there makes it (`CamRig.lean_to`, 7.5 m
+cap); that is what a player aiming at the end sees. Only Lace R, Vex E, Neve E, Kael's tether and Cinder's flight
+still lose an end there (Vex E widens the view itself while aimed, `e.view_zoom`, not measured here). Kael's 24 m
+is the tether's pay-out cap, not an aimed shape, and Cinder's 22.7 m is a steered flight, so both are the whole
+view by design.
+
+For the owner (suggestions, nothing built): (1) a fixed-length lane over about 10 m, drawn straight down, ends
+under the bottom edge; the source's view has the same geometry, so this may be as in the source. If not,
+`cast_view` (what Vex E uses) could widen the view for Lace R, Neve E and Sparkle R too. (2) At 4:3 the view is
+narrower than 16:9 (a vertical lens); a horizontal-FOV lens would keep 37 m across at every aspect.
+(3) The wheel's closest zoom (0.7, 26 m across) puts every range over 13 m off the sides.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
