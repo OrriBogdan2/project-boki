@@ -38,3 +38,11 @@ source's facing: `blender -b --factory-startup --python tools/art1/hunter_dir_ga
 OUT.glb 1 1 "bl~,br~" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_bl,crouch_br`. The same
 turn of crouch_f does not help (it barely plants: its copies carry 0.2 of the speed), so fl and fr still blend f with
 l and r; a hand-made sneak is docs/DEBT.md.
+
+run_fl, run_fr (2026-11-12, ext/anim-loco-slip): run_f turned 45 degrees into the move, as crouch_bl/br. The recipe's
+diagonals were baked while his feet were skinned on `x_foot`; the 0.24.5 body skins them on the shin, so the foot pivot
+that kept `x_foot` planted dragged the visible foot (planted sole 7.2 m/s at rate 1 against run_f's 4.0). The recipe
+can't rebuild them on this body (`fl,fr ... run`: stance 0.14, pelvis dips 12-20 cm). Run from the repo root (jobq
+blender workers take tree-relative paths): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py --
+art/wardens/breaker/breaker.glb OUT.glb 2.0 4.5 "fl~,fr~" 0 0 2.0 2,1 55 run`, then
+`glb_add_clips.py breaker.glb OUT.glb run_fl,run_fr`.

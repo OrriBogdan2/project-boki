@@ -45,6 +45,10 @@ today's audit.
 
 By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 5.
 
+Then ext/anim-loco-slip: Albert's run_fl/fr turned from run_f (art/wardens/breaker/IMPORT.md): run, sprint and strafe
+fl/fr clean, 30 → 24 failing cells (Albert 22 → 16), SLIP 9 → 3 verdicts. Cells whose planted feet slip over the bar,
+whatever their first verdict: 10 → 4, all Albert's crouch diagonals (below).
+
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
   every start, stop or walk/run change crossed the walk ring at speed, where the triangle weights turn a corner, and the
