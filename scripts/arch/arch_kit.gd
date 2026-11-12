@@ -168,7 +168,7 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.press_buffer.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)

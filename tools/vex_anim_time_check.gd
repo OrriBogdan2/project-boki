@@ -181,7 +181,7 @@ func _slide(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 
 ## E: the beam on the clip's fire key (0.63 s), then the source's recovery: held E_RECOVER (0.6 s) after it, the
 ## recoil shove still carrying her back. Walking and an RMB press early in the hold do nothing; an RMB press in its
-## last DashFlow.BUFFER_S goes as it lifts, on the frame the clip hands the body back. Then she walks off on her legs.
+## last Loco.press_buffer goes as it lifts, on the frame the clip hands the body back. Then she walks off on her legs.
 func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	C.ac.fresh(T)
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -208,7 +208,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 
 ## R: the barrel comes up over 0.1 s and the shot leaves on its kick key (0.14 s), not at the press: the source's
 ## raise, then fire. She is held GunslingerUlt.COMMIT (0.76 s, the source's ~0.8 s); the clip hands back on that
-## frame. A jump early in it is dropped, one in its last DashFlow.BUFFER_S goes as it lifts.
+## frame. A jump early in it is dropped, one in its last Loco.press_buffer goes as it lifts.
 func _nuke(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	C.ac.aim_at(P, home + Vector3(8.0, 0, 0))
 	K.cd["x"] = 0.0
