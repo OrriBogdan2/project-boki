@@ -189,6 +189,7 @@ func draw(sz: Vector2) -> void:
 	if m.biomes:
 		m.biomes.hot.full_map(self, kk)
 	HeartHud.full_map(self)
+	NestMap.full_map(self)
 	WaysOutMap.full_map(self)
 	_lair_alerts(c)
 	_ship(c)

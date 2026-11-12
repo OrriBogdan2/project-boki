@@ -705,6 +705,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
+	NestMap.minimap(self, to_map, on_map, hold)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
