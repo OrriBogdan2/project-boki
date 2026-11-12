@@ -181,8 +181,8 @@ re-rendered with it so far (xvfb opengl3 on rpc3; GPU job 20261112-030437-07461 
 
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
   `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
-  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's ground and air rows
-  still `buffer`.
+  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
+  stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
 ## Vex the Hired Gun (`gunslinger`, source Ghost)
 [gunslinger.mp4](gunslinger.mp4)
