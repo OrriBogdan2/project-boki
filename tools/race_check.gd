@@ -9,9 +9,12 @@ extends RefCounted
 ##   5. on the base: no race post with base_mode off; with it on, a race runs to a result card
 ##   6. the Training post on the base is a solo lap of the loop: perfect cheers add Speed (and a journal
 ##      line), missed ones add none, a Boki at its cap or too tired does not start
-##   7. the cues: three cheer marks and the finish line appear with the lap, light as your Boki passes them
+##   7. weekly formats: each Dash format's tweak changes the lap as it says (pace, wobble, a second water stretch)
+##   8. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
+##      under a twist still finishes, a won Dash pins the winner on the showcase wall and the sign shows the twist
+##   9. the cues: three cheer marks and the finish line appear with the lap, light as your Boki passes them
 ##      (all three by the last stretch) and are gone when it ends
-##   8. the Training post drill still runs on the shared timing bar: three presses, then it ends
+##   10. the Training post drill still runs on the shared timing bar: three presses, then it ends
 ## Never touches the real save.
 
 const RACES := 20
@@ -36,6 +39,8 @@ func run(m: Node) -> void:
 	_leans()
 	_friends_rivals()
 	_settle()
+	_twists()
+	_formats()
 	await _on_base()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -49,8 +54,8 @@ func _kin(sp: String, kname: String, speed: int, joy: float) -> Dictionary:
 	k["needs"]["energy"] = 90.0
 	return k
 
-func _race(recs: Array, back: int, rng: RandomNumberGenerator, cheer := true) -> BaseRace.Run:
-	var r := BaseRace.Run.new(recs, back, rng)
+func _race(recs: Array, back: int, rng: RandomNumberGenerator, cheer := true, tw := {}) -> BaseRace.Run:
+	var r := BaseRace.Run.new(recs, back, rng, tw)
 	while not r.over() and r.t < MAX_S:
 		if cheer and r.can_cheer():
 			r.cheer(["great", "good", "miss"][rng.randi() % 3])
@@ -154,6 +159,52 @@ func _settle() -> void:
 	ok(not mem_w.is_empty() and mem_w[-1]["kind"] == "race" and not mem_l.is_empty() and mem_l[-1]["kind"] == "race",
 			"both remember it: \"%s\"" % (mem_w[-1]["text"] if not mem_w.is_empty() else ""))
 
+func _twists() -> void:
+	var rec := _kin("zapple", "Tw", 10, 60.0)
+	var st: Array = BaseRace.rules()["stretches"]
+	var tw := {"mult": {"water": 0.5}}
+	for i in st.size():
+		var want := 0.5 if st[i]["kind"] == "water" else 1.0
+		var got := BaseRace.stretch_pace(rec, i, tw) / BaseRace.stretch_pace(rec, i)
+		ok(is_equal_approx(got, want), "twist row %s: x%.2f on the %s" % [st[i]["kind"], got, st[i]["kind"]])
+	ok(BaseRace.expected_time(rec, tw) > BaseRace.expected_time(rec), "a slow-water twist lengthens the lap")
+	var rng := RandomNumberGenerator.new()
+	for t in BaseRace.rules()["twists"]:
+		rng.seed = 5
+		var r := _race([rec, _kin("zapple", "Tx", 20, 60.0)], 0, rng, true, t)
+		ok(r.over(), "every race under '%s' finishes" % t["id"])
+	var wild: Dictionary = BaseRace.rules()["twists"].filter(func(t): return t.has("wobble"))[0]
+	ok(float(wild["wobble"]) > float(BaseRace.rules()["wobble"]), "a wobble twist widens the wobble")
+
+## Each Dash format changes the lap the way its tweak says: 'mult' speeds or slows its stretch kind, 'wobble'
+## widens the roll, 'swap' makes a second water stretch (a Tide lean gains there, a glide is lost).
+func _formats() -> void:
+	var plain := _kin("zapple", "Pl", 10, 60.0)
+	var swim := _kin("zapple", "Sw", 10, 60.0)
+	var fly := _kin("zapple", "Fl", 10, 60.0)
+	swim["lean"] = {"water": 1.0}
+	fly["lean"] = {"flying": 1.0}
+	var dash: Array = BaseRace.rules()["twists"].filter(func(t): return t["game"] == "dash")
+	ok(dash.size() >= 3, "%d Dash formats in the weekly list" % dash.size())
+	for t in dash:
+		if t.has("mult"):
+			var faster: bool = float(t["mult"].values()[0]) > 1.0
+			var shorter := BaseRace.expected_time(plain, t) < BaseRace.expected_time(plain)
+			ok(shorter == faster, "format %s %s the lap" % [t["id"], "shortens" if faster else "lengthens"])
+		if t.has("wobble"):
+			ok(float(t["wobble"]) != float(BaseRace.rules()["wobble"]), "format %s changes the wobble" % t["id"])
+		if t.has("swap"):
+			var at := int(t["swap"]["at"])
+			var kinds: Array = BaseRace.stretches(t).map(func(s): return s["kind"])
+			ok(kinds.count("water") == 2, "format %s makes a second water stretch" % t["id"])
+			var then := BaseRace.stretch_pace(swim, at, t) / BaseRace.stretch_pace(plain, at, t)
+			var was := BaseRace.stretch_pace(swim, at) / BaseRace.stretch_pace(plain, at)
+			ok(then > was, "format %s: a Tide lean gains on it" % t["id"])
+			var glide := BaseRace.stretch_pace(fly, at, t) / BaseRace.stretch_pace(plain, at, t)
+			ok(is_equal_approx(glide, 1.0), "format %s: the glide is lost there" % t["id"])
+			var slower := BaseRace.expected_time(plain, t) > BaseRace.expected_time(plain)
+			ok(slower, "format %s lengthens a plain Boki's lap" % t["id"])
+
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
@@ -208,6 +259,13 @@ func _on_base() -> void:
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
 		ok(peak == 3 and race.cue == null, "cue: the marks lit one by one (%d of 3) and cleared at the end" % peak)
 		await _solo(home)
+		var wall: Array = Save.d.get("showcase", [])
+		var game := String(BaseRace.twist()["game"])
+		var pinned: bool = wall.size() == 1 and wall[0]["twist"] == BaseRace.twist()["name"]
+		ok(pinned == (game == "dash"), "on: a Dash win is pinned under this week's format only when it is a Dash week")
+		var rec: Dictionary = home.kins[0]["rec"]
+		ok(race.pin(rec, game) and not race.pin(rec, game + "x"), "on: only a win in this week's event game is pinned")
+		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 	await _drill(home)
 	rules["base_mode"] = false
 	home.queue_free()

@@ -110,12 +110,14 @@ static func settle(run: Run) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("shove", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won}
+	var prize := GardenPrizes.settle("shove", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -132,16 +134,22 @@ var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bo
 func _init(home) -> void:
 	h = home
 
-## The stump beside the Training post (none without one); called when fixtures move.
+## This zone's own stump spot (base_shove.json "spots", tiles x and z), or [].
+static func spot() -> Array:
+	return rules()["spots"].get(GardenZones.here, [])
+
+## The stump beside the Training post, or on the zone's own spot (none without either); called when
+## fixtures move.
 func place() -> void:
 	if is_instance_valid(stump):
 		stump.queue_free()
 	stump = null
-	if h.YARD_AT.x < -100.0:
+	var S := spot()
+	if S.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	stump = Node3D.new()
 	stump.name = "Stump"
-	stump.position = h.YARD_AT + STUMP_OFF
+	stump.position = h.YARD_AT + STUMP_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
 	h.add_child(stump)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -191,7 +199,7 @@ func use() -> void:
 	_place_pair()
 	creaked = false
 	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
-	Sfx.play("garden_start", stump.position, BaseRace.GARDEN_DB)
+	GardenSfx.countdown(h, stump.position)
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -205,8 +213,7 @@ func input(event: InputEvent) -> bool:
 	if run.can_shove():
 		var r := bar.press()
 		run.shove(r)
-		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", stump.position, BaseRace.GARDEN_DB,
-				0.04, 1.2 if r == "great" else 1.0)
+		GardenSfx.crowd(r, stump.position)
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -233,10 +240,10 @@ func tick(d: float) -> void:
 ## The strain loop while they push (louder and higher the nearer the stump is to going), one creak as it first leans.
 func _hear_strain() -> void:
 	var lean := absf(run.balance)
-	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, BaseRace.GARDEN_DB, 0.9 + 0.3 * lean)
+	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, GardenSfx.DB, 0.9 + 0.3 * lean)
 	if lean >= CREAK_AT and not creaked:
 		creaked = true
-		Sfx.play("garden_creak", stump.position, BaseRace.GARDEN_DB)
+		GardenSfx.cue("garden_creak", stump.position)
 
 ## The pair slide along the push and the stump leans toward whoever is losing.
 func _place_pair() -> void:
@@ -265,9 +272,9 @@ func _end(finished: bool) -> void:
 	Sfx.loop_stop("shove_strain")
 	if finished:
 		if absf(run.balance) >= 1.0:
-			Sfx.play("garden_thud", stump.position, BaseRace.GARDEN_DB)
+			GardenSfx.cue("garden_thud", stump.position)
 		_card(res)
-		BaseRace.result_sounds(h, res)
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		held = BaseRace.hold(h, res)
@@ -285,5 +292,5 @@ func _card(res: Dictionary) -> void:
 		["%s holds the stump!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost the Stump Shove to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])

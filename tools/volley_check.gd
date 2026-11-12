@@ -6,6 +6,7 @@ extends RefCounted
 ##   3. a good spike call: over 50 seeded matches of equal Boki, the same dice with a great call at the
 ##      start win the backed Boki more matches than without, by under 25 points
 ##   4. the machine: no move is refused, a match ends at 5 with a winner, and a TABLE-less move is counted
+##   4b. the weekly 'to_win' format ends every match on its own target, taking more points when it is bigger
 ##   5. a settled match: the winner's joy and trust go up, the loser's joy down, both remember it, gems
 ##   6. on the base: no log with base_mode off; with it on, a match runs to a result card;
 ##      the landing ring shows while the seed flies, a called spike flashes and dies away, all gone at the end
@@ -16,6 +17,7 @@ const WIN_LOW := 0.6             # the better side must win at least this share
 const WIN_HIGH := 0.85           # ... and at most this share
 const SPIKE_MAX := 0.25          # the call may move the backed Boki's win share by less than this
 const EDGE_MATCHES := 400        # matches in the stat tests
+const FORMAT_MATCHES := 20       # matches per weekly format
 const DT := 1.0 / 30.0           # s per step
 const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
 
@@ -35,6 +37,7 @@ func run(m: Node) -> void:
 	_stats()
 	_spike()
 	_machine()
+	_format()
 	_settle()
 	await _on_base()
 	print("VOLLEY DONE, failures: %d" % bad)
@@ -56,10 +59,10 @@ func _random_kin(rng: RandomNumberGenerator, kname: String) -> Dictionary:
 	return _kin(species[rng.randi() % species.size()], kname, rng.randi_range(0, 42), rng.randi_range(0, 42),
 			rng.randf_range(30.0, 100.0), rng.randf_range(0.0, 100.0))
 
-func _match(recs: Array, back: int, seed_: int, grade := "") -> BaseVolley.Run:
+func _match(recs: Array, back: int, seed_: int, grade := "", tw := {}) -> BaseVolley.Run:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_
-	var r := BaseVolley.Run.new(recs, back, rng)
+	var r := BaseVolley.Run.new(recs, back, rng, tw)
 	if grade != "":
 		r.call_spike(grade)
 	while not r.over():
@@ -141,6 +144,27 @@ func _machine() -> void:
 	var ended: bool = top >= int(BaseVolley.rules()["to_win"]) and r.score[r.winner()] == top
 	ok(ended, "it ends at the target with the leader as winner (%d:%d)" % [r.score[0], r.score[1]])
 	ok(not r.go(BaseVolley.Run.S.SERVE) and r.refused == 1, "DONE goes nowhere: the move is refused and counted")
+
+## The weekly format for Volley changes the points to win: every match ends on exactly that score, and a
+## longer target takes more points than the usual one.
+func _format() -> void:
+	var fmts: Array = BaseRace.rules()["twists"].filter(func(t): return t["game"] == "volley")
+	ok(not fmts.is_empty(), "%d Volley formats in the weekly list" % fmts.size())
+	var a := _kin("zapple", "A", 10, 10, 50.0, 50.0)
+	var b := _kin("cindle", "B", 10, 10, 50.0, 50.0)
+	for t in fmts:
+		var target := int(t["to_win"])
+		var longer := 0
+		var timed_out := 0
+		for s in FORMAT_MATCHES:
+			var r := _match([a, b], 0, 700 + s, "", t)
+			var usual := _match([a, b], 0, 700 + s)
+			longer += 1 if r.score[0] + r.score[1] > usual.score[0] + usual.score[1] else 0
+			timed_out += 0 if maxi(r.score[0], r.score[1]) == target else 1
+		ok(timed_out == 0, "format %s: every match ends with the winner on %d" % [t["id"], target])
+		var bigger: bool = target > int(BaseVolley.rules()["to_win"])
+		var what := "format %s: a bigger target takes more points (%d of %d longer)"
+		ok(bigger == (longer > FORMAT_MATCHES / 2), what % [t["id"], longer, FORMAT_MATCHES])
 
 func _settle() -> void:
 	Save.d = Save.fresh()
