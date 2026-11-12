@@ -26,6 +26,7 @@ func run(main_node: Node) -> void:
 	await _glide_wins()
 	await _parity_gun()
 	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_gun_range_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
@@ -401,7 +402,7 @@ func _all() -> void:
 	)
 	ok(
 		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 20.0 and float(cone.get("deg", 0.0)) <= 30.5,
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
