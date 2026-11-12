@@ -191,7 +191,6 @@ func _take_off() -> void:
 	kit.play("mage_x_air")
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
 	kit.vfx("x_air", from, null, {"r": r, "len": float(data()["height"]), "t": hover})
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
