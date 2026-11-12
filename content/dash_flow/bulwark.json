@@ -32,9 +32,9 @@
 		}
 	},
 	"dash_jump": {
-		"ground": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
-		"air": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
+		"ground": {"ours": "cancel", "carry": 0.73, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
+		"air": {"ours": "end", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
 		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
-		"same": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+		"same": {"ours": "cancel", "carry": 0.03, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
 	}
 }

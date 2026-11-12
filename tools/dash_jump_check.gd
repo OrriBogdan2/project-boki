@@ -1,10 +1,11 @@
 extends RefCounted
 ## --dash-jump-check: Space during a ground dash and an air dash, Shift in a jump's rise, and both on the same
-## step, for all 12 Hunters. Each case is measured headless and must do what the hero's dash_jump row in
+## step, for every Hunter. Each case is measured headless and must do what the hero's dash_jump row in
 ## content/dash_flow/<id>.json says ("ours"); docs/heroes/dash_interactions.md shows the rows next to the source.
 ## Modes: cancel (the jump goes at once and ends the dash, keeping `carry` of its speed), both (the jump goes and
 ## the dash runs on), ignore (the dash runs on and the press is dropped), end (the dash ends, no jump), buffer (the
-## jump waits for the dash's end), dash (Shift: the air dash goes at once and ends the rise). Never touches the save.
+## jump waits for the dash's end), dash (Shift: the air dash goes at once and ends the rise), hop (Shift: the
+## air dash goes at once and arcs on as a hop, the rise kept). Never touches the save.
 
 const FLOW := preload("res://tools/dash_flow_check.gd")
 const CASES := ["ground", "air", "rise", "same"]
@@ -54,8 +55,10 @@ func _measure(m: Match, kind: String) -> Dictionary:
 			_tap(m, "jump")
 			_steps(m, RISE_STEPS - 1)
 			_tap(m, "dash")
-			var flat := h.ak.in_dash() and h.vel.y <= 0.0
-			return {"mode": "dash" if flat else "late", "carry": 0.0}
+			var mode := "late"
+			if h.ak.in_dash():
+				mode = "dash" if h.vel.y <= 0.0 else "hop"
+			return {"mode": mode, "carry": 0.0}
 	var spent := h.dashes
 	h.inp["dash"] = true
 	_tap(m, "jump")
