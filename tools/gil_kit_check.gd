@@ -271,6 +271,11 @@ func _riptide() -> void:
 	step(m, 1.0)
 	var spin_dmg := dmg(T)
 	ok("Riptide: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
+	var w := K.recast_window()
+	ok("Riptide: RecastCue's ring runs over the 2 s spin and the spout goes by itself (no EXPIRED)",
+		float(w.get("total", 0.0)) == 2.0 and float(w.get("left", 0.0)) < 1.1 and bool(w.get("auto", false)), str(w))
+	ok("Riptide: the recast opens and ticks in Gil's own sounds",
+		HeroSfx.of(P, "recast_open", "") == "gil_recast_open" and HeroSfx.of(P, "recast_tick", "") == "gil_recast_tick")
 	_reset(7.0)
 	K.use_e()
 	step(m, 0.3)
