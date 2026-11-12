@@ -60,6 +60,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 | Item | Cost | Tiles | Notes |
 |---|---|---|---|
 | Flower bed | 8 gems | 1x1 |  |
+| Snack patch | 0 gems | 2x2 | Grows four element snacks every few minutes. Walk over it to pick them. For feeding only. (one only) |
 | Bush | 10 gems | 1x1 |  |
 | Leafy tree | 20 gems | 1x1 |  |
 | Pine tree | 20 gems | 1x1 |  |

@@ -44,6 +44,7 @@ var eye_base: Array[Vector3] = []
 var t := 0.0
 var blink_t := 2.0
 var blink_k := 0.0
+var lids := 0.0        # eyes held shut, 0..1 (BokiWispPop: eyes open last, close first)
 var y_prev := 0.0
 var vy := 0.0
 var vy_prev := 0.0
@@ -72,7 +73,7 @@ var quirk_k := 0.0     # 1 at the start of one, down to 0
 var pose_last := ""
 var fl := KinFlinch.new()
 var rot_base := Vector3.ZERO     # the lean before the hit jolt is added
-var pz := {"sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
+var pz := {"sx": 1.0, "sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
 const POSE_T := {
 	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
 	"guard": {"sy": 1.02, "rx": 0.08, "ear": 0.4, "tail": -0.7, "shiver": 0.4},
@@ -261,10 +262,11 @@ func _process(dt: float) -> void:
 		if pose == "flinch":
 			sq_v += 3.0; ear_v -= 6.0
 		pose_last = pose
-	var pt: Dictionary = POSE_T.get(pose, {})
+	var pt: Dictionary = KinGuardStance.row(plan) if pose == "stance" else POSE_T.get(pose, {})
 	for key in pz:
-		var base := 1.0 if key in ["sy", "sz"] else 0.0
+		var base := 1.0 if key in ["sx", "sy", "sz"] else 0.0
 		pz[key] = lerpf(float(pz[key]), float(pt.get(key, base)), 1.0 - exp(-10.0 * dt))
+	sx *= float(pz["sx"])
 	sy *= float(pz["sy"])
 	sz *= float(pz["sz"])
 	rx += float(pz["rx"])
@@ -302,6 +304,7 @@ func _process(dt: float) -> void:
 		shut = 1.0
 	elif happy:
 		shut = maxf(shut, 0.45)
+	shut = maxf(shut, lids)
 	for i in eyes.size():
 		var b := eye_base[i]
 		eyes[i].scale = Vector3(b.x * (1.0 + shut * 0.15), b.y * maxf(0.08, 1.0 - shut), b.z)
