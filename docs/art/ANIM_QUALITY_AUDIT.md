@@ -301,3 +301,45 @@ Strips: `--anim-shots` has a `start` strip (idle to a run, first 0.27 s at 30 fp
 ![archer start, before and after](anim_audit/start_archer.jpg)
 ![gunslinger start, before and after](anim_audit/start_gunslinger.jpg)
 ![mage start, before and after](anim_audit/start_mage.jpg)
+
+## Run stop: one system (Nov 12)
+
+Two branches solved the same let-go from a run. Merged (0.24.5): `WardenStride` (`ext/anim-run-start-stop`,
+`content/rules/warden_stride.json`) leans the weight back over the brake's slide, IK-pins the leading foot where it
+was, swings the trailing one to its idle spot and steps the planted one in. Held: `ext/anim-stop-start` 6e24c8d29 made
+the loop clip rate follow the blend's feet (`WardenGait.plan(spd, k)` / `follow`, legs hold their stride on a
+let-go), added `loco.stop_rate` 8/s (5 for six heavy Hunters) and settled the legs into the idle at 3/s.
+
+Measured on 0.24.5 + `ext/w0246-anim` 1ebf4587d with the brake unchanged (`hunter_move.json` brake 22.2):
+`--anim-audit` now prints a `STOP` row per legged Hunter. It lets go of a full-stick run under `HunterMove.brake` at 60 fps
+and carries the model over the ground as the match does (WardenStride pins feet in the world, so a fixed-root audit
+would misread it). The row gives the planted feet's mean ground speed as a share of the run over the 0.4 s after, as
+the mean of 8 let-gos through the run cycle. The audit fails a Hunter whose stop slides more than `MAX_SLIDE` (25 %),
+the same gate as the steady run.
+
+| Hunter | A: WardenStride (kept) | B: stop-start alone | C: A + all of B | D: A + B's clip rate only |
+|---|---|---|---|---|
+| archer | **6 %** (0.09 m) | 28 % (0.44 m) | 11 % | 6 % |
+| juggernaut | 10 % (0.02 m) | 29 % (0.46 m) | **5 %** | 13 % |
+| gunslinger | **9 %** (0.18 m) | 21 % (0.31 m) | 18 % | 9 % |
+| bulwark | 10 % (0.20 m) | 15 % (0.27 m) | 9 % | 9 % |
+| ashwick | 10 % (0.17 m) | 18 % (0.30 m) | 14 % | **8 %** |
+| tender | **4 %** (0.10 m) | 13 % (0.26 m) | 7 % | 4 % |
+| dolm | **19 %** (0.50 m) | 38 % (0.64 m) | 21 % | 23 % |
+| dredge | 8 % (0.19 m) | 19 % (0.32 m) | 6 % | 6 % |
+| mage | **5 %** (0.09 m) | 11 % (0.16 m) | 12 % | 5 % |
+| thief | 24 % (0.37 m) | **19 %** (0.30 m) | 19 % | 24 % |
+| mean | **10.5 %** | 21.1 % | 12.2 % | 10.7 % |
+
+(m: how far one foot skates in the stop. `ostra` and `rimewright` have no leg motion, so the audit skips them.)
+
+**Pick: A, WardenStride, as merged.** It slides half as much as B and keeps the source brake.
+**Rejected: B, `ext/anim-stop-start`.** It loses on 9 of 10 Hunters (only thief is better). Laid under the pins (C) its
+slower stop blend and the 3/s settle drag the legs that WardenStride's IK starts from: 6 Hunters get worse. Its one
+part that does not fight the pins, the feet-following clip rate (D), comes out even (10.7 % vs 10.5 %), so no game code
+is ported. What is ported is its measurement: the run-stop slide in `--anim-audit` (above), re-made for a moving body.
+Its `stop_rate` data, `WardenGait` API change, stop sheets and clip-check stop gate are not taken (they measure a fixed
+root). The branch can be dropped.
+
+Left: thief (24 %, one gate point under the limit) and dolm (19 %, one foot skates 0.5 m) slide most under
+WardenStride. Not traced here (docs/DEBT.md).
