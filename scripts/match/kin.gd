@@ -470,6 +470,7 @@ func start_rush(d: Vector2, e: Dictionary, ctx: Dictionary) -> void:
 		k -= 0.5
 	fly = {"from": pos, "to": to, "t": 0.0, "dur": maxf(0.08, pos.distance_to(to) / float(e.get("speed", 22.0))), "hit": {}, "rush": true, "e": e, "ctx": ctx}
 	state = "flying"
+	KinFlinch.dash(model, Vector3(d.x, 0, d.y), mass())
 
 ## A jump onto a spot (a grammar leap): untouchable in the air, then its landing.
 func start_leap(to: Vector3, e: Dictionary, ctx: Dictionary) -> void:

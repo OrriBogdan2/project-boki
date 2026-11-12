@@ -39,18 +39,18 @@ onto its side (`Kin.render`).
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | missing | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | missing | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | missing | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
 <!-- table:end -->
 
 ## Gaps, worst first
 
 1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
    crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
-2. **Boki glide, dash and stomp are `missing`**: the Boki is carried curled up through a glide, dashes as the run clip
-   and has no stomp (the Wisp stomp is the Hunter's). A dash lean needs `KinFlinch`-style spring on `kact`: next after
-   the landing (done here).
+2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
+   and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
+   the move and the landing squash settles it.
 3. **Boki jump** is the `hop` clip only for a cheer; a leap or throw plays the run clip in the air. A `kact` of
    `hop` while `fly` is set would use the existing clip.
 4. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
