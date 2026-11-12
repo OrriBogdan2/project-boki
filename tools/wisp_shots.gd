@@ -15,6 +15,7 @@ extends RefCounted
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
+const STRIP_ZOOM := 0.6      # the camera in closer, so the fall's pose reads
 
 var main: Node
 var m: Match
@@ -71,12 +72,13 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	var opts := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
-	if arch != "":
-		opts["arch"] = arch
-	await m.start(opts)
+	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	P = m.player
+	if arch != "":
+		P.reclass(Arch.weight(arch), arch)
+	m.cam.zoom_to = STRIP_ZOOM
+	m.cam.zoom = STRIP_ZOOM
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()

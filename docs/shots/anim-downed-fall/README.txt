@@ -1,0 +1,1 @@
+strip_compat.jpg: --wisp-shots, Compatibility/llvmpipe under xvfb on rpc3 (poses true, materials not GPU). Rows: thief (light), juggernaut (heavy). Columns: standing, 0.1 s stagger, 0.22 s knee, 0.35 s collapse (body fading, Wisp rising), Wisp idle.
