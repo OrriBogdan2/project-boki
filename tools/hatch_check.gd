@@ -7,7 +7,9 @@ extends RefCounted
 ## gets a plain provenance line. Then the first Relic: after naming the
 ## Boki, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
 ## Relic" (the interact key) puts it on and you become that Hunter; a short look at their
-## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). Never touches the real save.
+## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). A pair's egg appearing in
+## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble.
+## Never touches the real save.
 
 var bad := 0
 var main: Node
@@ -79,6 +81,7 @@ func run(m: Node) -> void:
 	ok(big.is_empty() and gold.is_empty(), "only a few flakes of shell, no sparkle showers (%d bursts, largest %d)" % [spy.got_bursts.size(), spy.got_bursts.map(func(b): return int(b[1])).max() if not spy.got_bursts.is_empty() else 0])
 	holder.queue_free()
 	await tree.process_frame
+	await _nest_reveal(sp)
 	# ---------------------------------------------------------------- 2. the closer look
 	var rec := Save.new_kin(sp, "Ember")
 	rec["shimmer"] = true
@@ -202,6 +205,31 @@ func _first_mask(tree: SceneTree) -> void:
 	ok(moment.go_button.text == MaskMoment.GO, "and goes on: %s" % moment.go_button.text)
 	hx.queue_free()
 	for i in 3: await tree.process_frame
+
+## A pair's egg appearing in the Nesting Nook (NestReveal): one soft ring, one small sparkle burst in
+## the egg's type colour, and one wobble that settles back upright.
+func _nest_reveal(sp: String) -> void:
+	var spy := FxSpy.new()
+	main.add_child(spy)
+	var nest := Models.nest_egg(Data.KIN[sp]["color"], Color("fff6c0"))
+	main.add_child(nest)
+	NestReveal.play(spy, nest, sp)
+	var col := DexView.type_col(DexView.type_of(sp))
+	var tinted := spy.got_bursts.filter(
+		func(b): return (b[0] as Color).is_equal_approx(col.lightened(0.3)) and int(b[1]) <= 14)
+	ok(spy.got_rings == 1 and spy.got_bursts.size() == 1 and tinted.size() == 1,
+		"a new nest egg: one glow ring and one small sparkle in its type colour (%d rings, %d bursts)"
+		% [spy.got_rings, spy.got_bursts.size()])
+	var shell: Node3D = nest.get_node("Shell")
+	var tip := 0.0
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < int(NestReveal.WOBBLE_S * 1000.0) + 300:
+		tip = maxf(tip, absf(shell.rotation.z))
+		await main.get_tree().process_frame
+	ok(tip > NestReveal.WOBBLE * 0.5 and is_zero_approx(shell.rotation.z),
+		"and it wobbles once (tips %.2f rad), then sits upright (%.3f)" % [tip, shell.rotation.z])
+	nest.queue_free()
+	spy.queue_free()
 
 func _texts(n: Node) -> Array:
 	var out: Array = []

@@ -666,8 +666,8 @@ func _ready_rest() -> void:
 			var kw := a.substr(14) if a.length() > 14 else "box"
 			get_tree().create_timer(0.4).timeout.connect(func(): KinBoxView.demo_show(self, kw))
 		if a.begins_with("--nest-demo"):
-			# test: a full roster, then the Nesting Nook (=grid, =kin, =rare, =pair), a kin card's IVs (=card)
-			# or the Kin Burrow's side panel (=box). Never written to the save.
+			# test: a full roster, then the Nesting Nook (=grid, =kin, =rare, =pair, =egg: a pair's egg
+			# appears), a kin card's IVs (=card) or the Kin Burrow's side panel (=box). Never written to the save.
 			KinBoxView.demo_roster()
 			var nw := a.substr(12) if a.length() > 12 else "grid"
 			get_tree().create_timer(0.4).timeout.connect(func(): _nest_demo(nw))
@@ -4912,7 +4912,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.save_game()
 	_close_panel()
 	_refresh_nest()
-	fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
+	NestReveal.play(fx, nest, esp)
 	Sfx.play("unlock")
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
@@ -4976,6 +4976,11 @@ func _nest_demo(which: String) -> void:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
 		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"egg":
+			ppos = NEST_AT + Vector3(0, 0, 2.2)
+			player.position = ppos
+			cam.snap(ppos)
+			_make_egg(pa, pb)
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)
