@@ -50,8 +50,8 @@ vec4 splash(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
 	float r = 1.0 - pow(1.0 - life, 3.0);
-	float teeth = 0.5 + 0.5 * cos(atan(p.y, p.x) * 8.0 + seed);
-	float reach = r * 0.85 + teeth * 0.12 * sin(life * 3.1416);
+	float teeth = pow(0.5 + 0.5 * cos(atan(p.y, p.x) * 8.0 + seed), 3.0);   // points, not waves
+	float reach = r * 0.85 + teeth * 0.2 * sin(life * 3.1416);
 	float band = hard(min(reach - d, d - reach + mix(0.16, 0.05, life)));
 	float a = band * (1.0 - hard(life - 0.65));
 	return vec4(mix(col.rgb, col2.rgb, hard(d - reach + 0.04)) * a, a);
