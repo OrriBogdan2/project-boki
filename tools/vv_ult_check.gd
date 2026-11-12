@@ -279,7 +279,7 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])
 	K.reset_dash_boost = false
-	ok("Wirerun: a plain run stays 7.5 to 13 m, full at 0.6 s",
+	ok("Wirerun: a plain run stays 5.6 to 9.75 m, full at 0.6 s",
 			absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01)
 	K.cd["dash"] = 0.0
 	P.teleport(home)
