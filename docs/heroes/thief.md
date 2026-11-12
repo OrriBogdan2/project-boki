@@ -110,6 +110,40 @@ pass above.
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, X | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
 
+## Animation timing (ext/anim-time-sable, ext/anim-sable-first-pose)
+
+Every move of content/rules/warden_anim/sable.json measured in game: the kit's keyed time (KMovesDJ) drives the
+skinned clip, so wind-up start, release and recovery end are the kit's; what the clip adds is the blend in and out
+(`FADE` 0.1 s, every move). [footage] is briefs/hero-ref/dancer.md at 5 fps (one frame = 0.2 s, so a release is only
+known to a frame); [game data] has no animation timings. Asserted in `--dancer-combo-check`
+(tools/dancer_timing_check.gd, lines `dancer timing ...`).
+
+ext/anim-time-sable first gave the quick moves a short per-move `"fade"` (0.03-0.04 s), because a 0.1 s blend in
+showed 25% of the clip at the move's first key and some clips spent that blend on a settled pose. Instead, each quick
+clip is now keyed on its first pose at 0.0 in tools/art1/sable_clips.py, so the blend in moves straight into the
+move, and the fades are back to the default. "Frame 0" is how far the clip's first frame turns some bone off the
+settled pose (END, the LMB clip's last frame); 60 degrees or more counts as the move.
+
+| Move | Source s | Frame 0 before | Frame 0 now |
+|---|---|---|---|
+| LMB throw (`thf_lmb_r/l`) | arm whipped out inside a 2-3 frame shot, a hit every 0.45 s [footage] | the arm already cocked wide (152 deg) | unchanged |
+| Empowered LMB (`thf_primed`) | one big shot, same beat [footage] | coiled (128 deg) | unchanged |
+| Cartwheel (`thf_vault_r/l/f/b/twist`) | dash 0.37-0.57 s, 3 frames with recovery [footage] | settled (0 deg), the crouch keyed at 0.05 | the crouch with the arms swung up from 0.0 to 0.05 (112-172 deg) |
+| Air Cartwheel (`thf_exdash`) | the same flick, then carried to the ground [footage] | settled (0 deg) | the crouch from 0.0 (118 deg) |
+| Landing (`thf_land`) | carried to the ground [footage] | the low crouch (90 deg) | unchanged |
+| Bola (`thf_bola`) | whirled through the 0.4-0.6 s lane, slung at its end [footage] | cast 0.4 s, sling at 0.42 | unchanged (already at the source) |
+| Knife (`thf_knife`) | dagger in the air one frame after the spin starts [footage] | a settled dip (42 deg), the spin from 0.04 | the spin and the cocked hand from 0.0 (127 deg); release 0.12 unchanged |
+| Encore ring (`thf_encore`) | ring grows 0.4 s [footage] | 0.4 s | unchanged |
+| Reset (`thf_reset`) | the heel-snap on the card, 0.4 s | a settled dip (42 deg) | the arms flung wide and the spin from 0.0 (129 deg) |
+
+The hit frames did not move: every key from the move's first key on is the same, and the rebaked clips match the
+old ones there to 0.04 degrees (the vaults and the air vault from 0.05, the knife from 0.04, the reset from 0.08).
+The clips' peak motion lands on the kit's release frames (the lmb whip 0.00-0.03, the bola sling 0.37-0.40, the
+knife release 0.10-0.13). Clip lengths against the kit's moves are within 0.06 s for every move (asserted).
+
+Suggestions (ours, not built): a held LMB could cross-fade the two arms' clips on the release instead of the
+channel swap; a 0.03 s hit-stop on the empowered bolt.
+
 ## Per-slot table
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
