@@ -18,6 +18,7 @@ static func draw(H, p: Hunter, x: float, y: float, s: float, gap: float) -> floa
 	var cd_left := float(xi["cd"])
 	var frac := cd_left / maxf(0.01, float(xi["cd_max"])) if cd_left > 0.0 else 0.0
 	H._ab_slot("x", r, String(xi["icon"]), key, xi["col"], frac, cd_left, bool(xi["ready"]))
+	RecastCue.slot(H, p, "x", r)          # X again in the ult (an early landing, the late crack)
 	return x + s + gap
 
 ## The hover text: [title, colour] then rows of [text, colour, size].

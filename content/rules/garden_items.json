@@ -1,0 +1,433 @@
+{
+	"desc": "Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; this file does not drop them. Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).",
+	"pip": 6.0,
+	"pip_doc": "Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food.",
+	"max_tokens": 3,
+	"max_tokens_doc": "Path tokens worn at once on one Boki.",
+	"verbs": {
+		"eaten": "ate",
+		"worn": "put on"
+	},
+	"verbs_doc": "Journal verb by use; an item's own verb wins.",
+	"log_keep": 5,
+	"log_keep_doc": "Uses remembered per item for its Field Book page (Save.d item_log, newest last).",
+	"families": {
+		"stat": {"name": "Stat bites", "icon": "burst"},
+		"path": {"name": "Path tokens", "icon": "dash"},
+		"lean": {"name": "Rinse", "icon": "wave"},
+		"respec": {"name": "Unwinding", "icon": "recall"}
+	},
+	"families_doc": "Field Book page grouping: a family's name and picture; it gets a star once every item of it has been owned.",
+	"items": [
+		{
+			"id": "thumpnut",
+			"name": "Thumpnut",
+			"family": "stat",
+			"use": "eaten",
+			"effect": {
+				"kind": "stat",
+				"stat": "power",
+				"n": 3
+			},
+			"sources": [
+				"Cinderstep patch",
+				"Stump Shove prize",
+				"Tumble prize"
+			]
+		},
+		{
+			"id": "shellbark_chew",
+			"name": "Shellbark Chew",
+			"family": "stat",
+			"use": "eaten",
+			"effect": {
+				"kind": "stat",
+				"stat": "guard",
+				"n": 3
+			},
+			"sources": [
+				"Bramblebank dig patch",
+				"Stump Shove prize"
+			]
+		},
+		{
+			"id": "zipseed",
+			"name": "Zipseed",
+			"family": "stat",
+			"use": "eaten",
+			"effect": {
+				"kind": "stat",
+				"stat": "speed",
+				"n": 3
+			},
+			"sources": [
+				"Kitewind patch",
+				"Dash prize",
+				"Relay prize"
+			]
+		},
+		{
+			"id": "hushpearl",
+			"name": "Hushpearl",
+			"family": "stat",
+			"use": "eaten",
+			"effect": {
+				"kind": "stat",
+				"stat": "focus",
+				"n": 3
+			},
+			"sources": [
+				"Glint Fishing",
+				"Seek prize",
+				"Spark Volley prize"
+			]
+		},
+		{
+			"id": "sunsap",
+			"name": "Sunsap",
+			"family": "stat",
+			"use": "eaten",
+			"effect": {
+				"kind": "xp",
+				"n": 40
+			},
+			"sources": [
+				"today's wishes",
+				"first win of the day",
+				"away gift"
+			]
+		},
+		{
+			"id": "bristlethorn",
+			"name": "Bristlethorn",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "token",
+				"aff": "fierce"
+			},
+			"sources": [
+				"Tumble cup",
+				"Cinderstep patch"
+			]
+		},
+		{
+			"id": "keepstone",
+			"name": "Keepstone",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "token",
+				"aff": "steadfast"
+			},
+			"sources": [
+				"Stump Shove cup",
+				"Bramblebank dig patch"
+			]
+		},
+		{
+			"id": "puzzlenut",
+			"name": "Puzzlenut",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "token",
+				"aff": "curious"
+			},
+			"sources": [
+				"Echo Steps cup",
+				"Seek cup",
+				"Hushwood patch"
+			]
+		},
+		{
+			"id": "galeribbon",
+			"name": "Galeribbon",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "token",
+				"aff": "swift"
+			},
+			"sources": [
+				"Dash cup",
+				"Relay cup",
+				"Kitewind patch"
+			]
+		},
+		{
+			"id": "stayleaf",
+			"name": "Stayleaf",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "stay"
+			},
+			"sources": [
+				"Bramblebank nap tree",
+				"Drift Trader"
+			]
+		},
+		{
+			"id": "rinse_melon",
+			"name": "Rinse Melon",
+			"family": "lean",
+			"use": "eaten",
+			"effect": {
+				"kind": "rinse"
+			},
+			"sources": [
+				"Glasswater patch",
+				"Drift Trader"
+			]
+		},
+		{
+			"id": "unwind_tea",
+			"name": "Unwind Tea",
+			"family": "respec",
+			"use": "eaten",
+			"effect": {
+				"kind": "loose",
+				"n": 20
+			},
+			"sources": [
+				"Drift Trader",
+				"today's wishes"
+			],
+			"verb": "drank"
+		},
+		{
+			"id": "heirloom_thread",
+			"name": "Heirloom Thread",
+			"family": "nest",
+			"use": "worn",
+			"effect": {
+				"kind": "nest",
+				"nest": "gifts",
+				"n": 1,
+				"max": 2
+			},
+			"sources": [
+				"Soul Shrine mentor gift",
+				"Crown prize (rare)"
+			]
+		},
+		{
+			"id": "likeness_locket",
+			"name": "Likeness Locket",
+			"family": "nest",
+			"use": "worn",
+			"effect": {
+				"kind": "nest",
+				"nest": "species"
+			},
+			"sources": [
+				"Show Ring cup"
+			]
+		},
+		{
+			"id": "lullaby_shell",
+			"name": "Lullaby Shell",
+			"family": "nest",
+			"use": "worn",
+			"effect": {
+				"kind": "nest",
+				"nest": "habit"
+			},
+			"sources": [
+				"Glint Fishing (rare)"
+			]
+		},
+		{
+			"id": "hatchling_down",
+			"name": "Hatchling Down",
+			"family": "nest",
+			"use": "eaten",
+			"effect": {
+				"kind": "down",
+				"trust": 3
+			},
+			"sources": [
+				"every hatch"
+			]
+		},
+		{
+			"id": "fourfold_bun",
+			"name": "Fourfold Bun",
+			"family": "stat",
+			"use": "eaten",
+			"effect": {
+				"kind": "stat_all",
+				"n": 1
+			},
+			"sources": [
+				"Mixing Bowl: any two different bites"
+			]
+		},
+		{
+			"id": "bramble_honey",
+			"name": "Bramble Honey",
+			"family": "lean",
+			"use": "eaten",
+			"effect": {
+				"kind": "sweet",
+				"types": [
+					"grass",
+					"bug",
+					"spore"
+				],
+				"share": 0.5,
+				"hold_days": 7
+			},
+			"sources": [
+				"Bramblebank golden ripening",
+				"Mixing Bowl: 3 snacks of one type"
+			]
+		},
+		{
+			"id": "glassdew",
+			"name": "Glassdew",
+			"family": "lean",
+			"use": "eaten",
+			"effect": {
+				"kind": "sweet",
+				"types": [
+					"water",
+					"ice",
+					"crystal"
+				],
+				"share": 0.5,
+				"hold_days": 7
+			},
+			"sources": [
+				"Glasswater ripening",
+				"Glint Fishing",
+				"Mixing Bowl: 3 snacks of one type"
+			]
+		},
+		{
+			"id": "cinderbrittle",
+			"name": "Cinderbrittle",
+			"family": "lean",
+			"use": "eaten",
+			"effect": {
+				"kind": "sweet",
+				"types": [
+					"fire",
+					"rock",
+					"steel",
+					"dragon"
+				],
+				"share": 0.5,
+				"hold_days": 7
+			},
+			"sources": [
+				"Cinderstep ripening",
+				"Tumble cup",
+				"Mixing Bowl: 3 snacks of one type"
+			]
+		},
+		{
+			"id": "hush_truffle",
+			"name": "Hush Truffle",
+			"family": "lean",
+			"use": "eaten",
+			"effect": {
+				"kind": "sweet",
+				"types": [
+					"dark",
+					"psychic",
+					"poison"
+				],
+				"share": 0.5,
+				"hold_days": 7
+			},
+			"sources": [
+				"Hushwood ripening",
+				"Lantern Match",
+				"Mixing Bowl: 3 snacks of one type"
+			]
+		},
+		{
+			"id": "windfloss",
+			"name": "Windfloss",
+			"family": "lean",
+			"use": "eaten",
+			"effect": {
+				"kind": "sweet",
+				"types": [
+					"flying",
+					"electric",
+					"fairy",
+					"sound"
+				],
+				"share": 0.5,
+				"hold_days": 7
+			},
+			"sources": [
+				"Kitewind ripening",
+				"Echo Steps cup",
+				"Mixing Bowl: 3 snacks of one type"
+			]
+		},
+		{
+			"id": "dare_pepper",
+			"name": "Dare Pepper",
+			"family": "personality",
+			"use": "eaten",
+			"effect": {
+				"kind": "trait",
+				"trait": "bravery",
+				"by": 0.04
+			},
+			"sources": [
+				"Cinderstep patch"
+			]
+		},
+		{
+			"id": "lullwort_tea",
+			"name": "Lullwort Tea",
+			"family": "personality",
+			"use": "eaten",
+			"effect": {
+				"kind": "trait",
+				"trait": "temper",
+				"by": -0.04
+			},
+			"sources": [
+				"Glasswater patch"
+			]
+		},
+		{
+			"id": "peekbox",
+			"name": "Peekbox",
+			"family": "personality",
+			"use": "eaten",
+			"effect": {
+				"kind": "trait",
+				"trait": "curiosity",
+				"by": 0.04
+			},
+			"sources": [
+				"Hushwood patch",
+				"Lantern Match"
+			]
+		},
+		{
+			"id": "twinbun",
+			"name": "Twinbun",
+			"family": "personality",
+			"use": "eaten",
+			"effect": {
+				"kind": "twin",
+				"trait": "loyalty",
+				"by": 0.04,
+				"bond": 0.1
+			},
+			"sources": [
+				"Bramblebank patch",
+				"Mixing Bowl: 2 sweet buns"
+			]
+		}
+	]
+}
