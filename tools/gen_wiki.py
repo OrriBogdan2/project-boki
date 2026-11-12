@@ -495,7 +495,7 @@ def gen_gear():
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
-    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
@@ -545,9 +545,7 @@ def gen_maps():
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
-        if m.get("docks"): ex.append("%d skiff docks" % len(m["docks"]))
         if m.get("outposts"): ex.append("%d uplink outposts" % len(m["outposts"]))
-        if m.get("hatches"): ex.append("%d rift hatches" % len(m["hatches"]))
         if ex: body += "**Exits:** " + ", ".join(ex) + ".\n\n"
         trav = []
         for key, label in (("bridges", "bridges"), ("glides", "glide routes"), ("pads", "jump pads"), ("updrafts", "updrafts"), ("winds", "wind roads")):

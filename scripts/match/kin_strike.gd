@@ -30,9 +30,7 @@ static func sweep(k: Kin, a: Vector3, b: Vector3) -> void:
 	for f in k.m.foes_of(k.team):
 		if hit.has(f.nid) or absf(f.pos.y + 0.6 - b.y) > 2.4:
 			continue
-		var q := Vector2(f.pos.x - a.x, f.pos.z - a.z)
-		var t := clampf(q.dot(seg) / maxf(0.0001, seg.length_squared()), 0.0, 1.0)
-		if (q - seg * t).length() > f.r + w:
+		if Swept.dist(f.pos, a, b) > f.r + w:
 			continue
 		hit[f.nid] = true
 		var d := seg.normalized() if seg.length() > 0.001 else Vector2.ZERO
