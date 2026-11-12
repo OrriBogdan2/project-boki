@@ -2,9 +2,9 @@ extends RefCounted
 ## --crouch-check: every Hero whose clip file has "crouch" (item 143), through the game state (HunterAnim, WardenClips).
 ## Held: the head comes down a good share of the height, the feet stay on the ground, one foot leads. Going down: a dip
 ## below the hold and a settle, no pop. Sneaking: the feet step, the head rides level. Coming up: back on the idle, no
-## pop. Every Hero with clips must have a crouch, but for LATER, which still stand through one: with the data taken
-## away a Hero's clips stand, so nothing changes for those. A Hero with no feet (Motley on his spring) skips the rows
-## about them.
+## pop. Every Hero with clips must have a crouch: with the data taken away a Hero's clips stand through one. A Hero with
+## no feet (Motley on his spring) skips the rows about them; one with no foot bone (Kael's boots ride his shins) has its
+## plant measured at the shin's tip.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -16,9 +16,9 @@ const BOB := 0.07          # m: the head's rise and fall over a sneak
 const STEP := 0.14         # m: how far a foot travels over a sneak
 const K := 8.0             # 1/s: Hunter.render's crouch rate
 const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetype's run speed
-const PLANT := 0.45        # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
+const PLANT := 0.8         # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
 const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
-const LATER := ["juggernaut"]    # Kael: landing after art1-integ
+const SHIN_SOLE := ["juggernaut"]  # Kael: no foot bone, his boots ride his shins
 const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the top rate (docs/DEBT.md)
 
 var bad := 0
@@ -68,6 +68,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		_tick(m, a, sync, 0.0)
 	var stand: Vector3 = _at(m, sk, "head")
 	var feet := WardenSkeleton.find(sk, _foot(sk, "L")) >= 0
+	var sole := _foot(sk, "L") if feet else "shin.L"
+	var reach := _shin_reach(m, sk) if id in SHIN_SOLE else 0.0
 	var rest_l: Vector3 = _at(m, sk, _foot(sk, "L")) if feet else Vector3.ZERO
 	var rest_r: Vector3 = _at(m, sk, _foot(sk, "R")) if feet else Vector3.ZERO
 	var ck := 0.0
@@ -117,7 +119,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			zmax = maxf(zmax, z)
 	if feet:
 		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
-		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K)
+	if feet or reach > 0.0:
+		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K, sole, reach)
 		ok(carry >= PLANT or id in SKATES, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
 	ok(hmax - hmin <= BOB + _float_bob(id), "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
 	for k in 30:
@@ -159,17 +162,20 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	dd["crouch"] = keep
 
 ## Sneaking at the game's crouch speed: the planted foot's speed back along the ground, as a share of it (1: no skate).
-func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed: float) -> float:
+## The sole is the bone's point `reach` along it (0: its head).
+func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed: float, sole: String,
+		reach: float) -> float:
 	var v := Vector3(0, 0, -speed)
-	var bone := WardenSkeleton.find(sk, _foot(sk, "L"))
+	var bone := WardenSkeleton.find(sk, sole)
+	var tip := Vector3(0, reach, 0)
 	for k in 30:
 		_tick(m, a, sync, 1.0, v)
-	var prev := sk.to_global(sk.get_bone_global_pose(bone).origin)
+	var prev := sk.to_global(sk.get_bone_global_pose(bone) * tip)
 	var ys: Array[float] = []
 	var vz: Array[float] = []
 	for k in 120:
 		_tick(m, a, sync, 1.0, v)
-		var f := sk.to_global(sk.get_bone_global_pose(bone).origin)
+		var f := sk.to_global(sk.get_bone_global_pose(bone) * tip)
 		ys.append(f.y)
 		vz.append((f.z - prev.z) / DT)
 		prev = f
@@ -182,10 +188,17 @@ func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed:
 			n += 1
 	return sum / maxf(n, 1) / speed
 
-## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
+## Standing, how far along the left shin its line meets the ground.
+func _shin_reach(m: Node3D, sk: Skeleton3D) -> float:
+	var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L"))
+	var knee := m.to_local(sk.to_global(pose.origin))
+	var down := m.to_local(sk.to_global(pose * Vector3.UP)).y - knee.y
+	return knee.y / -down
+
 ## m: the rise and fall a floating hero's hover adds on its own (Motley's bob, KMovesStone), allowed on top.
 func _float_bob(id: String) -> float:
 	return 2.0 * KMovesStone.HOVER_BOB if KMovesStone.hover(id, 0.0) > 0.0 else 0.0
 
+## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
 func _foot(sk: Skeleton3D, side: String) -> String:
 	return "foot." + side if WardenSkeleton.find(sk, "foot." + side) >= 0 else "x_foot." + side
