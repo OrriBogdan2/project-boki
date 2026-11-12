@@ -31,7 +31,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, swim, paddle, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
-`TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
+`TWEAK` table per species. `kstate` faint (a downed Boki) does the same at 0.6x with the eyes shut, tumbled onto its side the way the last hit pushed it (`KinFaint`: 0.26 s fall, one 0.2 s bounce, held until it comes round or is gone; the primitive bodies too) and springs up with the `hop` clip for 0.3 s on revive (`--kin-downed-check`). `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
 Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
@@ -57,10 +57,10 @@ stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids l
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
 Hit flinch: the glbs carry no hit clip. Every damage event to a Boki (owned, wild, summoned; not burn or other
-damage-over-time ticks) reaches `Oomph.react`, which calls `KinFlinch.hit` (meta "hit" on the model root). `KinFlinch`
+damage-over-time ticks) reaches `Oomph.react`, which calls `KinFlinch.hit` (metas `hit_n`, `hit_k`, `hit_push`, `hit_mass` on the model root: no allocation per hit). `KinFlinch`
 springs Flex (tilt, shove away from the attacker, squash), and `BokiRig._keep_flex` adds it, as `KinPuppet` does for
 the primitive bodies. Size of the jolt follows the hit's share of max health and falls with mass; the time to settle
-grows with mass (0.20 s light to 0.38 s heavy); each body plan jolts its own way (`KinFlinch.PLAN`). Checks:
+grows with mass (0.20 s light to 0.30 s heavy); each body plan jolts its own way (`KinFlinch.PLAN`). Checks:
 `--boki-react-check`; `--boki-flinch-shots --shots-dir=<dir>` (GPU strip of 6 species).
 
 Eyes: a visible eye about 18-20% of the head's width (the owner asked for smaller eyes in game). The dome is bigger

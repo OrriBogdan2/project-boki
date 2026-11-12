@@ -1,31 +1,40 @@
 extends RefCounted
-## --boki-flinch-shots --shots-dir=<dir> [--px=384]: a strip per species of a Boki taking a big hit from the side
-## (KinFlinch): rest, then AT seconds after the hit. <dir>/flinch_<species>.png and flinch_all.png. Needs a renderer.
+## --boki-flinch-shots --shots-dir=<dir> [--px=384] [--faint]: a strip per species of a Boki taking a big hit from the
+## side (KinFlinch): rest, then AT seconds after the hit. <dir>/flinch_<species>.png and flinch_all.png. With --faint
+## the hit knocks it out (KinFaint: the tumble, the bounce, still lying 3 s on), FAINT_AT, as faint_*.png.
+## Needs a renderer.
 
 const SPECIES := ["cindle", "zapple", "wisplet", "zephyrak", "basaltoad", "puddlet"]
 const AT := [-0.05, 0.05, 0.1, 0.2, 0.3, 0.6]       # s from the hit, left to right
+const FAINT_AT := [-0.05, 0.12, 0.26, 0.36, 0.6, 3.0]
 const STEP := 1.0 / 60.0
 const BIG := 0.35
 
 var main: Node
 var out := "/tmp/boki_flinch"
 var px := 384
+var faint := false
+var at: Array = AT
 
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--px="): px = int(a.substr(5))
+		if a == "--faint": faint = true
+	if faint:
+		at = FAINT_AT
+	var kind := "faint" if faint else "flinch"
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	Save.no_write = true
-	var all := Image.create(px * AT.size(), px * SPECIES.size(), false, Image.FORMAT_RGBA8)
+	var all := Image.create(px * at.size(), px * SPECIES.size(), false, Image.FORMAT_RGBA8)
 	for i in SPECIES.size():
 		var strip: Image = await _species(String(SPECIES[i]))
-		strip.save_png(out.path_join("flinch_%s.png" % SPECIES[i]))
+		strip.save_png(out.path_join("%s_%s.png" % [kind, SPECIES[i]]))
 		all.blit_rect(strip, Rect2i(0, 0, strip.get_width(), px), Vector2i(0, i * px))
-	all.save_png(out.path_join("flinch_all.png"))
+	all.save_png(out.path_join("%s_all.png" % kind))
 	print("BOKI_FLINCH_SHOTS_DONE")
 	main.get_tree().quit()
 
@@ -56,15 +65,17 @@ func _species(id: String) -> Image:
 	pup.set_process(false)
 	if rig:
 		rig.set_process(false)
-	var strip := Image.create(px * AT.size(), px, false, Image.FORMAT_RGBA8)
+	var strip := Image.create(px * at.size(), px, false, Image.FORMAT_RGBA8)
 	var hit := false
 	var t0 := -0.6                     # s since the hit; starts before it, to settle into the idle
-	for i in AT.size():
-		var want: float = AT[i]
+	for i in at.size():
+		var want: float = at[i]
 		while t0 < want:
 			if not hit and t0 >= 0.0:
 				hit = true
 				KinFlinch.hit(k, Vector3(1, 0, 0), BIG, KinLib.kin(id).mass)
+				if faint:
+					k.set_meta("kstate", "faint")
 			_step(pup, rig)
 			t0 += STEP
 		for f in 3:

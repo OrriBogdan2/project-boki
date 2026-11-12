@@ -1133,7 +1133,8 @@ func render(delta: float, alpha: float) -> void:
 		return
 	var on_you := state == "shoulder" and not beside
 	var striking := lunge_t > 0.0 or wind_do.is_valid()
-	model.set_meta("kstate", "perch" if on_you else ("attack" if striking else ""))
+	var kstate := "perch" if on_you else ("attack" if striking else "")
+	model.set_meta("kstate", "faint" if state == "downed" else kstate)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
@@ -1181,7 +1182,7 @@ func render(delta: float, alpha: float) -> void:
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
-	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("dazed", state == "dazed" or stun_t > 0.0)
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)

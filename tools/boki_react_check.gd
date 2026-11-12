@@ -7,7 +7,8 @@ extends RefCounted
 ##  - the jolt is back under a quarter of its peak inside the window for its weight (light snaps back, heavy
 ##    carries the hit);
 ##  - no part detaches (parts and bones stay put in Flex space) and Flex never squashes out of shape.
-## Then in a real match, owned, rival and wild Boki each get the "hit" meta from Ent.hurt, and a burn tick does not.
+## Then in a real match, owned, rival and wild Boki each get a hit (KinFlinch.count) from Ent.hurt, and a burn
+## tick does not.
 ## Prints BOKIREACT PASS/FAIL lines. No renderer.
 
 const READ_T := 0.1          # s: a hit must read by then
@@ -20,8 +21,9 @@ const MIN_SCALE := 0.65      # Flex stays inside these scales
 const MAX_SCALE := 1.35
 const CHIP := 0.05           # share of max health: a chip hit, and a big one
 const BIG := 0.35
-## Settle time a Boki of each weight should show (s). Light under mass 1.0, medium under 1.6, then heavy.
-const WEIGHT := {"light": [0.14, 0.30], "medium": [0.18, 0.38], "heavy": [0.24, 0.45]}
+## Settle time a Boki of each weight should show (s). Light under mass 1.0, medium under 1.6, then heavy. A flinch
+## lasts 0.2 to 0.3 s, plus a frame of sampling.
+const WEIGHT := {"light": [0.14, 0.26], "medium": [0.18, 0.30], "heavy": [0.24, 0.32]}
 const MASS := {"light": 0.8, "medium": 1.3, "heavy": 2.0}
 ## One primitive-bodied species per plan (the rigged models are tried one by one below).
 const PLANS := {"quad": "cindle", "biped": "zapple", "flyer": "wisplet", "serpent": "zephyrak", "blob": "basaltoad"}
@@ -213,4 +215,4 @@ func _in_match(main: Node) -> void:
 	m.queue_free()
 
 func _count(k: Kin) -> int:
-	return int((k.model.get_meta("hit", {"n": 0}) as Dictionary)["n"])
+	return KinFlinch.count(k.model)

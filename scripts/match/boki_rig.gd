@@ -3,7 +3,9 @@ extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and "kburst" (a factor on the gait's
-## cadence), and plays the face on top of whatever the body does.
+## cadence), and plays the face on top of whatever the body does. A downed Boki (kstate "faint") tumbles onto its
+## side (KinFaint), settles into the nap clip at DOWN_SPEED with its eyes shut and springs up with a GETUP_S hop
+## on revive: no clip of its own is baked (docs/art/kin/RIGGED_BOKI.md).
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
 ## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
@@ -131,6 +133,8 @@ const STRIDE := {
 	"nettlynx": [0.54, 1.07],
 	"thrumbird": [1.50, 2.90],
 }
+const DOWN_SPEED := 0.6       # x: the nap clip's pace while knocked out, a slow breath
+const GETUP_S := 0.3          # s: the hop it springs up with when a downed Boki comes round
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
@@ -206,6 +210,7 @@ var _lunging := false
 var _shot_left := 0.0
 var _shot := ""
 var _asleep := false
+var _down := false             # kstate faint: knocked out, in the nap clip with its eyes shut
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -218,6 +223,7 @@ var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
 var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
 var _swimmer := false          # a Water type: swims level rather than paddling
+var _faint := KinFaint.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -289,6 +295,8 @@ func _ready() -> void:
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_swimmer = swimmer(species)
+	_faint.plan = _flinch.plan
+	_faint.half_w = absf((FRAME[species]["marks"]["right flank"] as Vector3).x)
 	_copy_coat()
 	BokiIdle.build(player, skeleton(), species)
 	_idle.rest(_rng)
@@ -328,18 +336,19 @@ func _process(dt: float) -> void:
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
 		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
+	_faint.update(_down, _flinch.push.x, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
-## the jolt of a hit (KinFlinch) stay.
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll,
+## the jolt of a hit (KinFlinch) and the tumble when knocked out (KinFaint) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
+	flex.rotation = _flinch.rot + Vector3(0.0, 0.0, _faint.roll)
 	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
-	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
+	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove + _faint.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
@@ -373,18 +382,23 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("lunge")
 	_lunging = lunging
 	_shot_left -= dt
-	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	var ks := String(root.get_meta("kstate", ""))
+	var asleep := ks in ["sleep", "faint"]
 	if asleep != _asleep:
-		_asleep = asleep
-		if _speed < WALK_SPEED:
+		if _down and not asleep:
+			_shot = "hop"
+			_shot_left = GETUP_S
+		elif _speed < WALK_SPEED or ks == "faint":
 			_start_shot("settle" if asleep else "wake")
+		_asleep = asleep
+	_down = ks == "faint"
 	var want := _state_clip()
 	if want == "idle":
 		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)
 	set_clip(want)
-	player.speed_scale = 1.0
+	player.speed_scale = DOWN_SPEED if _down else 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
@@ -401,7 +415,7 @@ func _state_clip() -> String:
 	var swim := _swim_clip()
 	if swim != "":
 		return swim
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if _asleep:
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
@@ -437,6 +451,8 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if _down:
+		return "asleep"
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")
