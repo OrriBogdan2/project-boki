@@ -161,7 +161,7 @@ Passive gloves (no Q, stats only): **Bastion Plate** (Heavy plate: lots of armor
 
 ## E, the kin's own ability, and the merge
 
-Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (G) and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
+Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C) and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 

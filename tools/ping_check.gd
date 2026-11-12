@@ -37,13 +37,13 @@ func _has_mouse(action: String, b: int) -> bool:
 # ------------------------------------------------------------------ 1. keys
 func _keys() -> void:
 	ok(_has_mouse("ping", MOUSE_BUTTON_MIDDLE), "middle mouse pings")
-	ok(not _has_mouse("throw", MOUSE_BUTTON_MIDDLE) and Settings.key_cap("throw") == "G", "G alone sends the Boki")
+	ok(not _has_mouse("throw", MOUSE_BUTTON_MIDDLE) and Settings.key_cap("throw") == "C", "C alone sends the Boki")
 	ok(Settings.ACTIONS.any(func(a): return a[0] == "ping"), "ping is in the rebindable list")
 
 func _migration() -> void:
 	var g := "key:%d" % KEY_G
 	var mmb := "mouse:%d" % MOUSE_BUTTON_MIDDLE
-	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1}
+	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys6_v": 1}
 	var both := {"keys": {"throw": [g, mmb]}}
 	both.merge(steps)
 	KeyMigrate.run(both)

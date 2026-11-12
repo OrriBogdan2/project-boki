@@ -224,7 +224,7 @@ func _controls() -> void:
 	ok("keys: E archetype utility", _has_key("signature", KEY_E))
 	ok("keys: X merge, R hunter ultimate, no reload",
 		_has_key("ultimate", KEY_X) and _has_key("hunter_ult", KEY_R) and not InputMap.has_action("reload"))
-	ok("keys: G send/recall, MMB pings", _has_key("throw", KEY_G) and _has_mouse("ping", MOUSE_BUTTON_MIDDLE))
+	ok("keys: C send/recall, MMB pings", _has_key("throw", KEY_C) and _has_mouse("ping", MOUSE_BUTTON_MIDDLE))
 	ok("keys: Q glove, Shift dash, RMB", _has_key("gear1", KEY_Q) and _has_key("dash", KEY_SHIFT) and _has_mouse("secondary", MOUSE_BUTTON_RIGHT))
 	ok("keys: binding version bumped", Settings.KEYS_V >= 3, "keys_v %d" % Settings.KEYS_V)
 	ok("keys: rebindable list names them", Settings.ACTIONS.any(func(a): return a[0] == "hunter_ult"))
