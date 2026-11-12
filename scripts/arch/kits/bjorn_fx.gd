@@ -3,14 +3,13 @@ extends Node3D
 ## Breaker's own effects, every one pooled (built once when the kit starts). The coloured ones are layered
 ## (KitShaders): an alpha-blended body in his gold, orange and red with the glow on top, so they keep their
 ## colour on bright grass.
-## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an
-##   upright gold beacon with rising chevrons
+## - the thrown hammer (tumbling; trail, plant and catch: content/vfx/bulwark.json), planted head-down in the
+##   ground under an upright gold beacon with rising chevrons
 ## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a
-##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows; at full charge a short
-##   ring-free flash on it, the glint burning white-hot while the perfect window is open. It never stops until
-##   he lets go: the charge motion only, the damage comes on the release
-## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
-## - the Bash's gold fan of force, the dash's gold chevron wake (his own after-image)
+##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while the
+##   perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the release
+## - the 360 Smash's red-orange-gold spiral ring at its hit radius, the dash's gold chevron wake (his own after-image)
+##   (the swing's crescent, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
@@ -22,16 +21,8 @@ const EMBER := Color("ff8a2a")
 const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
 const STAR_GOLD := Color("ffd25a")
-## s the full-charge flare shows (the sheet: one bright frame)
-const FLARE_T := 0.12
-## s the slam's crescent stays at full strength, then s it burns away over
-const CRES_HOLD := 0.1
-const CRES_FADE := 0.2
-## m: the crescent's band (inner, outer radius) and its height over his feet
-const CRES_IN := 1.1
-const CRES_OUT := 2.9
-const CRES_Y := 0.45
 const SWIRL_T := 0.45
+const SWIRL_IN := 0.55         # the spin ring's inner edge as a share of the hit radius (its outer edge is the radius)
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
@@ -78,17 +69,12 @@ const PUSH_FLASH_T := 0.2
 
 var h: Hunter
 var hammer: Node3D            # the thrown hammer
-var hammer_glow: MeshInstance3D
-var trail: MeshInstance3D
 var beacon: MeshInstance3D
 var glint: MeshInstance3D
-var flare: MeshInstance3D
-var flare_t := 0.0
 var orbit_trail: MeshInstance3D
-var crescent: MeshInstance3D
-var cres_t := 0.0
 var swirl: MeshInstance3D
 var swirl_t := 0.0
+var swirl_r := 1.0             # m, the hit radius the spin ring was drawn at
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
@@ -126,18 +112,12 @@ func _ready() -> void:
 	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
-	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
-	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.62, 0.2), true))
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
 	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
-	flare = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
-	for star in [hammer_glow, glint, flare]:
-		KitShaders.param(star, "white", 0.25)
+	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
-	var cres_mesh := KitMeshes.band(CRES_IN, CRES_OUT, -PI * 0.5, PI * 0.5, 40)
-	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
-	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
+	var swirl_mesh := KitMeshes.band(SWIRL_IN, 1.0, 0.0, TAU, 48)
 	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
 	KitShaders.param(swirl, "color2", Color("ffc93a"))
 	KitShaders.param(swirl, "twist", 2.2)
@@ -257,13 +237,6 @@ func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
 	hammer.rotation = Vector3(Time.get_ticks_msec() * 0.001 * spin_rate, atan2(-dir.x, -dir.y), 0.0)
 	hammer.scale = Vector3.ONE
 	beacon.visible = false
-	hammer_glow.visible = true
-	hammer_glow.global_position = p
-	hammer_glow.scale = Vector3.ONE * 1.1
-	trail.visible = true
-	trail.global_position = p - Vector3(dir.x, 0, dir.y) * 1.0
-	trail.rotation = Vector3(-PI * 0.5, atan2(-dir.x, -dir.y) + PI * 0.5, 0)
-	trail.scale = Vector3(2.0, 0.45, 1.0)
 
 ## Planted: standing head-down in the ground, leaning back along its flight, the beacon over it.
 func hammer_plant(p: Vector3, yaw: float) -> void:
@@ -274,15 +247,11 @@ func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
 	var head_drop := 0.62 * plant_k * cos(PLANT_LEAN)
 	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
-	hammer_glow.visible = false
-	trail.visible = false
 	beacon.visible = true
 	beacon.global_position = p
 
 func hammer_hide() -> void:
 	hammer.visible = false
-	hammer_glow.visible = false
-	trail.visible = false
 	beacon.visible = false
 
 # ------------------------------------------------------------------ the held swing
@@ -299,10 +268,6 @@ func hold(held_t: float, k: float, window: bool, turn: float) -> void:
 	glint_k = k if held_t >= 0.6 else -1.0
 	glint.visible = glint_k >= 0.0
 	hot = window
-
-## Full charge: the big gold star on the hammer head.
-func full_flare() -> void:
-	flare_t = FLARE_T
 
 func hold_end() -> void:
 	held = false
@@ -381,31 +346,12 @@ func _place_glint(pv: Node3D) -> void:
 	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
-# ------------------------------------------------------------------ slam crescent and smash swirl
-## The Crushing Blow's crescent: 180 degrees in front of him toward `dir` (the blow's hit area), bigger with the
-## charge k. It rides with him through the slam's carry, so it stays in front instead of being left behind.
-func slam(dir: Vector2, k: float) -> void:
-	crescent.visible = true
-	crescent.global_position = _cres_at()
-	crescent.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	crescent.scale = Vector3.ONE * lerpf(0.85, 1.0, k)
-	cres_t = CRES_HOLD + CRES_FADE
-
-## Where the crescent is drawn this frame: on him, so it rides through the carry.
-func _cres_at() -> Vector3:
-	return h.pos + Vector3(0, CRES_Y, 0)
-
-## Where the crescent's area centres on the ground as drawn now (the centroid of its half band), for checks.
-func crescent_centre() -> Vector3:
-	var r3 := pow(CRES_OUT, 3) - pow(CRES_IN, 3)
-	var r2 := CRES_OUT * CRES_OUT - CRES_IN * CRES_IN
-	var reach := 4.0 / (3.0 * PI) * r3 / r2 * crescent.scale.x
-	var ahead := -crescent.basis.z.normalized()
-	return _cres_at() + ahead * reach - Vector3(0, CRES_Y, 0)
-
-func smash_ring(at: Vector3) -> void:
+# ------------------------------------------------------------------ the 360 Smash ring
+## The 360 Smash's spin ring: a red-gold band out to the spin's hit radius `r`, sweeping out to it with the hit.
+func smash_ring(at: Vector3, r: float) -> void:
 	swirl.visible = true
 	swirl.global_position = at + Vector3(0, 0.3, 0)
+	swirl_r = r
 	swirl_t = SWIRL_T
 
 ## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
@@ -522,7 +468,6 @@ func _process(_delta: float) -> void:
 	_tick_hold(delta)
 	if not chain.is_empty():
 		_tick_chain()
-	_tick_flare(delta)
 	_tick_slam(delta)
 	if aegis_hit > 0.0:
 		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
@@ -560,31 +505,13 @@ func _tick_hold(delta: float) -> void:
 	elif pv.transform != Transform3D.IDENTITY:
 		pv.transform = Transform3D.IDENTITY
 
-func _tick_flare(delta: float) -> void:
-	if flare_t <= 0.0:
-		flare.visible = false
-		return
-	flare_t -= delta
-	var head := _head_world()
-	flare.visible = head != Vector3.INF and flare_t > 0.0
-	if flare.visible:
-		var u := 1.0 - flare_t / FLARE_T
-		flare.global_position = head + Vector3(0, 0.15, 0)
-		flare.scale = Vector3.ONE * lerpf(1.6, 2.3, sqrt(u))
-		KitShaders.param(flare, "power", 1.8 * (1.0 - u * 0.6))
-
 func _tick_slam(delta: float) -> void:
-	if cres_t > 0.0:
-		cres_t -= delta
-		crescent.global_position = _cres_at()
-		KitShaders.param(crescent, "life", clampf(cres_t / CRES_FADE, 0.0, 1.0))
-		crescent.visible = cres_t > 0.0
 	if swirl_t > 0.0:
 		swirl_t -= delta
 		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
 		swirl.rotation.y += delta * 12.0
 		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
-		swirl.scale = Vector3.ONE * lerpf(1.12, 0.88, life)
+		swirl.scale = Vector3.ONE * swirl_r * lerpf(1.0, 0.8, life)
 		swirl.visible = swirl_t > 0.0
 
 ## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and

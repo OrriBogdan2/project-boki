@@ -427,6 +427,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var fire := false
+	K.res = 0.0            # no resource tell in the strips
 	# dashes go across the screen, clear of the dummy ahead (a strip used to end inside its model)
 	if mv in ["pin_roll", "pin_walk", "pin_flick", "bul_lumber", "bul_whirl", "bul_short"]:
 		P.inp["move"] = Vector2(0, 1)

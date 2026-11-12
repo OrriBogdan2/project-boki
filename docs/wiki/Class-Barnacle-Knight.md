@@ -1,6 +1,6 @@
 # The Barnacle Knight
 
-A heavy hammer-and-shield fighter. Blocks with his aegis, then slams people into walls
+A heavy hammer-and-shield fighter. Blocks with his aegis, then knocks people into walls
 and into each other. Plants his hammer where the fight is and heals the squad there.
 
 <!-- gen:profile -->
@@ -17,13 +17,13 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 ## How it plays
 
 1. **Hold RMB** to raise his **aegis**, a curved gold shield: it has its own health, regenerates, and
-   blocks from the front while you walk slower.
-2. With it up, **Shift** is a **Shield Charge** on its own 6s cooldown.
+   blocks from the front while you walk slower. Letting go only lowers it.
+2. **Shift** with the aegis up is the **Shield Charge**, a heavy shoulder-first knock (its own 6s cooldown).
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
    beacon, shows foes near it to your team, and comes back hitting on a second tap.
 4. **Hold LMB** to spin the hammer up (a glint on its head, a flare when it's full), then let go for a
    **Crushing Blow**: a flaming crescent in front that carries you forward.
-5. Knock someone into a wall or into another foe with a Shield Charge, 360 Smash or full Crushing Blow and
+5. Knock someone into a wall or into another foe with a Bash, Shield Charge or full Crushing Blow and
    they're **Crushed**: stunned, and you heal.
 6. **360 Smash** (Shift): a short dash, then one spinning hit all round you; with the aegis up it's a
    **Shield Charge**, invulnerable for its length.
@@ -34,7 +34,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 | Do this | And you get |
 |---|---|
-| Shield Charge, 360 Smash or full Crushing Blow into a wall or another foe | Crushed: stun 0.5, +8 damage, you heal 24 |
+| A Crushing Blow, 360 Smash or Shield Charge into a wall or another foe | Crushed: stun 1.0, +8 damage |
 | Shift with the aegis raised | Shield Charge: invulnerable, heavier knock |
 | Throw the hammer, then E | Mending Ground lands where the hammer stands |
 | Hold LMB, then Shift | A short plain dash for half a charge; the spin keeps charging |
@@ -42,7 +42,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## Tips
 
-- Raise the aegis into their fire first; it shrugs off shots from the front.
+- Raise the aegis into their fire, then Shield Charge them into a wall.
 - Fight near walls and pillars. A Crushed stun sets up a full Crushing Blow.
 - Throw the hammer round a corner to scout it, then heal there; it waits until you call it.
 - A broken aegis locks you out for 3s: drop it before it breaks.
@@ -58,7 +58,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 | Signature weapon | War Hammer & Aegis (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the frozen prow shield and the long ice-cased oar |
-| Resource | none |
+| Resource | Crushed (max 1) |
 
 ### Kit card
 
@@ -77,7 +77,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Crushed (passive).** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 0.5s (8 damage).
+**Crushed (passive).** Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 
 **360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
@@ -97,9 +97,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | shield HP +25% (160 -> 200), damage +15%. | shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
-| Dash (Shift) | recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it. |
-| E | healing +25% (burst 18 -> 22), damage +15%. | cooldown 12s -> 8s, healing +50% in all. |
+| RMB | shield HP +25% (160 -> 200). | shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
+| Dash (Shift) | recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further. |
+| E | healing +25% (burst 18 -> 22). | cooldown 12s -> 8s, healing +50% in all. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 
