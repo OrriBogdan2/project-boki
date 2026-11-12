@@ -4,7 +4,8 @@ extends RefCounted
 ## spec 11-10. Only from the air (he must already be jumping or falling; on the ground RMB is the Finishing Slam or
 ## the Lunge). Press: his drift stops, a beat of hang with the blade hauled overhead (`hang`, <= 0.1s), then a fast
 ## straight drop to the ground under him (no dive across, no leap, no extra height). The hit is a small circle
-## a little ahead of where he lands, in the facing at the press, shown to everyone from the press: everyone in it
+## centred where he lands, no aim offset (move, Shift or pull there first), shown to everyone from
+## the press: everyone in it
 ## is knocked down and anyone airborne is spiked to the ground (Displace.spike); a crack, a shock ring, cel dust
 ## and debris, a shake for those nearby and a deep boom. Then a recovery rising from the crouch. Owned by
 ## JuggernautKit.
@@ -16,7 +17,7 @@ const SPIKE_OVER := 0.3               # m over the landing a foe counts as airbo
 var k: JuggernautKit
 var phase := ""                       # "" | hang | dive | recover
 var t := 0.0                          # s into the phase
-var dir := Vector2.RIGHT              # facing at the press: the hit sits `ahead` m this way from the landing
+var dir := Vector2.RIGHT              # facing at the press (the impact's crack and debris run this way)
 var land := Vector3.ZERO              # where his feet land (fixed when the drop starts)
 var from := Vector3.ZERO              # where the drop starts
 var dive_t := 0.0                     # s the drop takes
@@ -54,14 +55,9 @@ func move_k() -> float:
 				if t >= planted else 0.0
 	return 1.0
 
-## The centre of the hit for a landing at `feet` facing `d`: `ahead` m in front, on the ground.
-func hit_at(feet: Vector3, d: Vector2) -> Vector3:
-	var c := feet + Vector3(d.x, 0.0, d.y) * float(data()["ahead"])
-	return Vector3(c.x, feet.y, c.z)
-
-## Where a Meteor Drop pressed now would hit: ahead of the ground straight under him, in his aim.
+## Where a Meteor Drop pressed now would hit: the ground straight under him.
 func point() -> Vector3:
-	return hit_at(k.ground(k.h.pos), k.h.aim_dir())
+	return k.ground(k.h.pos)
 
 ## The press (the slot is already spent): his drift stops and the short hang begins.
 func start() -> void:
@@ -75,7 +71,7 @@ func start() -> void:
 	h.vel = Vector3.ZERO
 	k.play("jug_meteor")
 	k.vfx("drop_tell")
-	_marker(hit_at(k.ground(h.pos), dir), 0.0)
+	_marker(point(), 0.0)
 
 ## The hit circle (everyone sees it): the damage area, and the stun core inside it.
 func _marker(at: Vector3, fill: float) -> void:
@@ -114,7 +110,7 @@ func tick(dt: float) -> void:
 func _tick_hang(dt: float) -> void:
 	var h := k.h
 	var hang := float(data()["hang"])
-	_marker(hit_at(k.ground(h.pos), dir), 0.5 * minf(t / hang, 1.0))
+	_marker(point(), 0.5 * minf(t / hang, 1.0))
 	HeroVfx.of(k.m).hold(h, "drop_gather", minf(t / hang, 1.0))
 	if h.roll_t > 0.0:
 		return
@@ -135,7 +131,7 @@ func _tick_dive() -> void:
 	var u := clampf(t / dive_t, 0.0, 1.0)
 	h.vel = Vector3.ZERO
 	h.teleport(Vector3(from.x, lerpf(from.y, land.y, u * u), from.z))
-	_marker(hit_at(land, dir), 0.5 + 0.5 * u)
+	_marker(land, 0.5 + 0.5 * u)
 	if k.tells_visible():
 		HeroVfx.of(k.m).hold(h, "drop_comet")
 	if u >= 1.0:
@@ -153,7 +149,7 @@ func _impact() -> void:
 	t = 0.0
 	drops += 1
 	last_drop = h.pos
-	last_hit = hit_at(h.pos, dir)
+	last_hit = h.pos
 	last_air = k.m.time - pressed_at
 	k.play("jug_meteor_land")
 	_hit(last_hit)

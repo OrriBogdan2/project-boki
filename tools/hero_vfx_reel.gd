@@ -10,7 +10,8 @@ extends "res://tools/combo51_shots.gd"
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
-const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
+const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice",
+		"tether_hold", "e_rmb_e", "slam_drive"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
@@ -39,7 +40,7 @@ func run(main_node: Node) -> void:
 		if arg.begins_with("--reel-hero="):
 			who = arg.substr(12)
 		if arg.begins_with("--reel-only="):
-			only = arg.substr(12)
+			only = arg.substr(12)      # one part, or several: "slam,drop"
 		if arg == "--reel-frames":
 			frame_dir = "frames"
 	var own := "res://tools/vfx_reel/%s.gd" % who
@@ -58,9 +59,9 @@ func run(main_node: Node) -> void:
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
 	for part: String in parts():
-		if only != "" and part != only:
+		if only != "" and part not in only.split(","):
 			continue
-		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
+		print("REEL_MARK %d %s" % [frames if frame_dir != "" else Engine.get_frames_drawn(), part])
 		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
 		P.ak.set("enraged_t", 0.0)
 		var own_part := "_%s_%s" % [who, part]
@@ -191,10 +192,10 @@ func _juggernaut_slam() -> void:
 	var slam := func(t: float):
 		if _at(t, 0.1):
 			K.press_rmb()
-		_aim(T.pos)
+		_aim(T.pos if t < 0.3 else T.pos + Vector3(-3.0, 0, -5.0))      # (swung off mid wind-up: the lane holds)
 	await _go(2.5, slam, _sheet("slam",
-			"RMB tap, Finishing Slam: the wind-up gathers at the blade, the strike opens a burning "
-			+ "cone, debris, sweet spot on the dummy, fissures cool",
+			"RMB tap, Finishing Slam: planted, the lane locked at the press (the cursor swings off, it stays), "
+			+ "the strike down the lane, debris, sweet spot on the dummy, fissures cool",
 			[0.3, 0.6, 0.72, 0.76, 0.82, 0.92, 1.1, 1.5, 2.2]), 1.5)
 	await _go(GAP)
 
@@ -209,8 +210,8 @@ func _juggernaut_lunge() -> void:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
 	await _go(2.8, lunge, _sheet("lunge",
-			"RMB hold, Lunge: charging (the lane is AimKit's), full flash at the blade, the fling "
-			+ "with its mesh trails, the impact, the scorched line",
+			"RMB hold, Lunge: charging with the blade over his head (nothing ahead), full flash at the blade, "
+			+ "the fling with its mesh trails, the impact, the scorched line",
 			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]), 3.0)
 	await _go(GAP)
 
@@ -223,7 +224,7 @@ func _juggernaut_drop() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
+			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle under him), "
 			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
 			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
 	await _go(GAP)
@@ -306,6 +307,61 @@ func _juggernaut_rage() -> void:
 	await _go(2.4, rage, _sheet("rage", "Enraged: the flare as Rage fills, the body burning, slashes keeping it fed",
 			[0.13, 0.2, 0.3, 0.6, 0.86, 1.0, 1.4, 1.9, 2.3]), 1.5)
 	K.enraged_t = 0.0
+	await _go(GAP)
+
+## Hooked to the dummy, RMB held while he walks off the chain and swings the aim aside: no pull toward the chain,
+## nothing drawn ahead, the blade over his head; let go, the Lunge goes where he aims and the chain stays on.
+func _juggernaut_tether_hold() -> void:
+	await _reset(6.0)
+	var K: JuggernautKit = P.ak
+	var hold := func(t: float):
+		if _at(t, 0.1):
+			K.use_e()
+		if _at(t, 0.7):
+			P.inp["sec_hold"] = true
+			K.press_rmb()
+		P.inp["sec_hold"] = t >= 0.7 and t < 2.6
+		P.inp["move"] = Vector2(-0.7, 0.7) if t > 0.8 and t < 2.4 else Vector2.ZERO
+		_aim(T.pos if t < 1.2 else P.pos + Vector3(2.0, 0, 5.0))
+	await _go(3.6, hold, _sheet("tether_hold",
+			"E, then RMB held with the chain on: he walks off it unpulled, the blade over his head, nothing "
+			+ "ahead of him; let go aimed away from the chain, the Lunge goes where he aims",
+			[0.5, 0.9, 1.4, 1.9, 2.4, 2.62, 2.7, 2.9, 3.4]), 1.0)
+	await _go(GAP)
+
+## E on the dummy, jump, RMB in the air: the Meteor Drop lands straight under him; E pressed in the drop pulls him
+## in the moment it lands.
+func _juggernaut_e_rmb_e() -> void:
+	await _reset(7.0)
+	var K: JuggernautKit = P.ak
+	var combo := func(t: float):
+		if _at(t, 0.1):
+			K.use_e()
+		P.inp["jump"] = _at(t, 0.6)
+		if _at(t, 0.85):
+			K.press_rmb()
+		if _at(t, 0.95):
+			K.use_e()
+		_aim(T.pos)
+	await _go(3.0, combo, _sheet("e_rmb_e",
+			"E > jump > RMB > E: the hook, the jump, the drop's circle under him, the slam straight down, "
+			+ "the pull the moment it lands",
+			[0.3, 0.7, 0.86, 0.95, 1.05, 1.2, 1.4, 1.7, 2.2]), 3.5)
+	await _go(GAP)
+
+## Shift in the Finishing Slam's wind-up: the Slam Drive down the locked lane, the Slam landing where it arrives.
+func _juggernaut_slam_drive() -> void:
+	await _reset(7.5)
+	var K: JuggernautKit = P.ak
+	var drive := func(t: float):
+		if _at(t, 0.1):
+			K.press_rmb()
+		if _at(t, 0.25):
+			P.do_dash()
+		_aim(T.pos)
+	await _go(1.8, drive, _sheet("slam_drive",
+			"Shift in the Slam's wind-up: the Slam Drive down the locked lane, the Slam lands where it arrives",
+			[0.2, 0.3, 0.42, 0.56, 0.76, 0.95, 1.1, 1.3, 1.6]), 3.0)
 	await _go(GAP)
 
 ## The sounds with no key of their own: footsteps by surface, the hurt grunts and the downed grunt.

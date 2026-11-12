@@ -144,7 +144,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		m.step(DT)
 		t0 += DT
 		_park_others()
-		if P.roll_t <= 0.0:
+		if P.roll_t <= 0.0 and not P.ak.face_locked():
 			P.face = atan2(-(P.inp["aim"].x - P.pos.x), -(P.inp["aim"].z - P.pos.z))
 		m.cam.snap(cam_at if cam_at != Vector3.ZERO else P.pos + Vector3(lead, 0, 0))
 		for h in m.hunters:

@@ -68,9 +68,11 @@
 			"clip": "slam"
 		},
 		"jug_lunge_wind": {
-			"clip": "lunge_wind",
-			"hold_from": 0.45,
-			"fade": 0.18
+			"clip": "haul_wind",
+			"lead": 0.15,
+			"hold_from": 0.15,
+			"fade": 0.18,
+			"upper": true
 		},
 		"jug_lunge": {
 			"clip": "lunge"
@@ -98,9 +100,6 @@
 		},
 		"jug_spin": {
 			"clip": "spin"
-		},
-		"jug_chainlunge": {
-			"clip": "chainlunge"
 		},
 		"jug_haul_wind": {
 			"clip": "haul_wind",

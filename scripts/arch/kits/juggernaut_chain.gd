@@ -278,6 +278,9 @@ func _tick_hooked(dt: float) -> void:
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
 	if stretch > 1.0:
+		if k.lunging():
+			snap()                  # never a lock while the Smash is held or flinging him: it breaks
+			return
 		_hold_taut(most)
 		stretch = 1.0
 	_draw_hooked(stretch)
@@ -329,8 +332,8 @@ func _bow(aside: float) -> Vector3:
 func _draw_preview() -> void:
 	var h := k.h
 	var aimed := _aimed()
-	if not h.is_local() or absf(aimed) < PREVIEW_MIN:
-		return
+	if not h.is_local() or absf(aimed) < PREVIEW_MIN or k.rmb_down or k.lunging():
+		return                      # (and nothing ahead of him from the Smash's press to the Lunge's end)
 	var ed := data()
 	var y := h.pos.y + PREVIEW_Y
 	var pos := Vector2(h.pos.x, h.pos.z)
