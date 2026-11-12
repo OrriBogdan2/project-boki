@@ -18,7 +18,8 @@ const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
 const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
-## The LMB part's sheet times for a Hero whose round flies in ~0.1 s (74 m/s over 8 m): a frame per step across the first flight.
+## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
+const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
 const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
 const FRAME_W := 960                      # px wide, each --reel-frames frame
 
@@ -115,7 +116,7 @@ func _part_lmb() -> void:
 	var shoot := func(t: float):
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
-	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", LMB_TIMES.get(who, [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6])), 1.5)
+	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", LMB_TIMES.get(who, LMB_TIMES_DEFAULT)), 1.5)
 	await _go(GAP)
 
 func _part_hold() -> void:
