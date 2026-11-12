@@ -67,8 +67,7 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
 Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
-allies beside him when he leaves or at the landing (26, 3s: the data's 375 shield as a share of a level-15 hunter's health,
-on 145); the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
+allies in his 1.5m ring as he leaves (32.6% of his health, 47 on 145, for 3s; see the data pass); none at the landing; the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
 
 **Unfolded:** the kit pass had folded the source's Black Hole into Brimseed rank 3 (the pop dragging foes from 1.3x its radius
 to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the pop; the burn stays, as it is the source's own
@@ -150,8 +149,11 @@ ext/recast-marker-a (a world ring on the seed). Suggestions, not built: assert t
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
 Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 9.5, full orb 353 -> +34%, Swollen Snap 399 ->
 +44%, the seed 365 -> 12.5, its damage over time 250 a second -> 8.2. Durations and cooldowns match directly: Snap 10s, Trade
-9.5s, seed 10s. Speed bursts as a share of the data's 465: +50 -> 10.8%, +100 -> 21.5%. The ally shield by health: 375 of a
-2074-hp hunter (level 15) -> 26 of 145.
+9.5s, seed 10s. Speed bursts as a share of the data's 465: +50 -> 10.8%, +100 -> 21.5%. The ally shield like Cinder's ram shield
+(docs/heroes/ashwick.md), a share of the source hero's Base HP: 375 of Void's 1150 (supervive_physics.md) = 32.6% of Motley's
+health, 47 of 145 (`dash.ally_shield` 0.326, 3s). Source: supervive_kits.md, Swap tier IV, "allies entering cast radius get a
+375 HP shield for 3s". The cast radius is the ring round him as he leaves, so nobody is shielded at the landing (that half,
+and its own 3m reach `ally_r`, were ours and are cut, DECISIONS 2026-11-07); it uses the Trade's 1.5m circle.
 - Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass him by (`incoming`; the lightning rod's sky
   strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
   cooldown is 10s -> 8s at rank 3 (the data's -2s at rank IV).
@@ -172,7 +174,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
 | Swap travel 1.7s, 1.25s Empowered | wiki | yes (about 1.8s) | built |
 | Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 35% speed (item 75; was 20%, then 30%; owner 11-08 asked +15-25%, 35% keeps the earlier 25-35% band; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
-| Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing |
+| Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies in his 1.5m ring as he leaves (47, 3s), checked as he goes; none at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
 | Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size; the knock heal is removed (the owner's tooltip data has none) |
 | Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on X; asserted `ult open`, `drawn to the middle`, `small ticks` |
