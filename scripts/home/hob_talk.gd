@@ -57,7 +57,7 @@ func start() -> void:
 	box.closed.connect(_closed)
 	if offer_due():
 		box.say(_offer_lines(), _show_offer)
-	elif first and FarmTutorial.active():
+	elif first and FarmTutorial.active() and not FarmTutorial.base():      # the base tutorial is the Boki's to lead
 		box.say(rules()["intro"], box.close)
 	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
@@ -214,7 +214,7 @@ func _intro() -> void:
 	var tut: Dictionary = Save.d["tutorial"]
 	var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
 	var met := bool(FarmBuilder.state().get("met", false))
-	if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active():
+	if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active() or FarmTutorial.base():
 		return
 	tut["hob_intro"] = true
 	if not look.look(hob.node.position, true):
