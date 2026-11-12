@@ -30,6 +30,15 @@
 		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.dmg", "per": "e.dmg", "value": 0.759, "tol": 0.02, "evidence": "D Void Snap 277 vs Unstable Anomaly 365 (the orb is --ttk-check's, item 117)"},
 		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.swollen_k", "value": 0.44, "tol": 0.01, "evidence": "D Void Snap Empowered 399 vs 277 = +44%"},
 		{"hero": "ostra", "slot": "E", "field": "e.dmg_max_k", "value": 3.5, "tol": 0.0, "evidence": "D Unstable Anomaly: up to 3.5x based on held time"},
-		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"}
+		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"},
+		{"hero": "mage", "slot": "LMB", "field": "weapons/coilcaster:primary.dmg", "value": 8.74, "tol": 0.3, "evidence": "D Jolt 90 every 0.8s = 8.75% of the target a second (90 of 1285); at our 0.648s (owner items 70, 116) 8.74 of 154 a bolt; --ttk-check LMB 1.00"},
+		{"hero": "mage", "slot": "RMB", "field": "rmb.coil.dmg.0", "value": 15.94, "tol": 0.3, "evidence": "D Voltaic Spear 133 of 1285 = 10.4% of the target = 15.9 of 154 (tooltip read as the uncharged throw)"},
+		{"hero": "mage", "slot": "dash", "field": "dash.dmg", "value": 18.34, "tol": 0.3, "evidence": "D Surge 153 of 1285 = 11.9% of the target = 18.3 of 154"},
+		{"hero": "mage", "slot": "E", "field": "e.dmg", "value": 19.41, "tol": 0.3, "evidence": "D Lightning Strike 162 of 1285 = 12.6% of the target = 19.4 of 154"},
+		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.dmg", "value": 3.0, "tol": 0.1, "evidence": "D Chain Bolas 46 of 2364 (level 15) = 1.95% of the target = 3.0 of 154"},
+		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.pair_dmg", "value": 6.12, "tol": 0.15, "evidence": "D Chain Bolas: 2 targets take 94 bonus, of 2364 = 4.0% = 6.1 of 154"},
+		{"hero": "thief", "slot": "X", "field": "x.dmg", "value": 4.49, "tol": 0.1, "evidence": "D Fusillade 69 of 2364 (level 15) = 2.9% of the target = 4.5 of 154 a blade"},
+		{"hero": "thief", "slot": "X", "field": "x.rim_dmg", "value": 3.13, "tol": 0.1, "evidence": "D Fusillade +48 near the edge, of 2364 = 2.0% = 3.1 of 154"},
+		{"hero": "archer", "slot": "X", "field": "x.final_dmg", "per": "x.dmg", "value": 1.2945, "tol": 0.01, "evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"},
 	]
 }
