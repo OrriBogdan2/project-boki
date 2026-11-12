@@ -158,6 +158,7 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
+	"--contact-check": ["res://tools/contact_check.gd", "contact_check", null],      # v95 swaps: hit vs contact pose
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
