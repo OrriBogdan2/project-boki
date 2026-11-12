@@ -7,7 +7,7 @@ extends ArchKit
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
-## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
+## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +38% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
 ## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
@@ -189,7 +189,7 @@ func combo_read(t: Ent) -> Dictionary:
 	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
 			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
-## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
+## Dazed foes take +38% from the rifle: a crit-style big gold number, and the string's decay pauses.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
 		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):
@@ -222,6 +222,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 ## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
+	CombatBus.tech.emit(h, "gunslinger")
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0

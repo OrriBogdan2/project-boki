@@ -1671,7 +1671,8 @@ func rimewright() -> void:
 		since += 1.0 / 60.0
 	ok(
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) * 0.9
+			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor

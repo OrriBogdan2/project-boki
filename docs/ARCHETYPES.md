@@ -1183,7 +1183,8 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of
 (tip +20), Execution Slam 70 (3.5 slashes), Lunge 45, Obsidian 52, Spin 54, Flame Step 18 / tip 36, R
 130 -> ours slash 8 (tip 16), Slam 26, Lunge 14 -> 22, Meteor 18, Spin 18, Rampage 7 / tip 14,
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
-Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top).
+Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top). Kael's numbers were since
+retuned to the source's time to knock (docs/TTK.md, slash 5.2, Slam 15.6), so his part of this is history.
 
 ### R removed: the ult choice (kits2-nor, Nov 2) — superseded
 
@@ -1232,9 +1233,10 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+| `gil` | Gil | none, our own Hunter (0.24.4) | `content/archetypes/gil.json` |
 
 ## Kit parity lock
-`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
+`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, or `<file>:<path>` into another content file such as `weapons/quill_rifle:primary.dmg`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
 - **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.

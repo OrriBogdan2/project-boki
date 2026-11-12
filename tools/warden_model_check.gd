@@ -43,7 +43,7 @@ const WARDENS := {
 	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
 	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
 	# yet, so "moves" is "" and the rig's generic poses play)
-	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.956, "width": [0.5, 1.5], "moves": ""},
+	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.956, "width": [0.5, 1.5], "moves": "gil_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

@@ -214,8 +214,13 @@ func _ostra() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok("combo: Swollen Snap hits 44% harder", dmg(T) > d_near * 1.35, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
-	var snap_k := float(sn["dmg"]) / float(Data.weapon_stats("tether_lantern")["dmg"])
-	ok("data: the Snap hits about 1.05x an orb (277 vs 263)", absf(snap_k - 277.0 / 263.0) < 0.03, "%.3f" % snap_k)
+	var snap_k := float(sn["dmg"]) / float(K.e_def()["dmg"])
+	ok("data: the Snap hits about 0.76x a seed (277 vs 365)", absf(snap_k - 277.0 / 365.0) < 0.02, "%.3f" % snap_k)
+	var orb_k := float(Data.weapon_stats("tether_lantern")["dmg"]) / float(sn["dmg"])
+	ok(
+		"data: an orb is the source's 263 vs 277 less the ~15% held-fire DPS the owner gave up (item 117)",
+		absf(orb_k - 263.0 / 277.0 * 0.85) < 0.03, "%.3f" % orb_k
+	)
 	ok(
 		"data: the Snap rests 10s; the Trade 9.5s; the seed 10s",
 		absf(float(sn["cooldown"] if sn.has("cooldown") else K.rmb_def()["cooldown"]) - 10.0) < 0.01 and absf(
@@ -358,8 +363,8 @@ func _ostra() -> void:
 		"early %.1f late %.1f" % [early, late]
 	)
 	ok(
-		"e: a full pop is 3.5x the base 12.5 (source peak)", absf(late - 12.5 * 3.5) < 1.0,
-		"late %.2f vs %.2f" % [late, 12.5 * 3.5]
+		"e: a full pop is 3.5x the base damage (source peak)", absf(late - float(K.e_def()["dmg"]) * 3.5) < 1.0,
+		"late %.2f vs %.2f" % [late, float(K.e_def()["dmg"]) * 3.5]
 	)
 	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
@@ -472,14 +477,15 @@ func _ostra() -> void:
 	ok("data: a plain hit still lands", P.hp < plain0 - 1.0)
 	# rank 3: the growing seed burns; the pop no longer pulls (the pull is Nightwell's, on X)
 	P.slot_lv["kin"] = 3
+	var burn := float(K.e_def()["burn"])
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
 	aim_at(P, T.pos)
 	K.cast_e()
 	step(m, 1.2)
 	ok(
-		"rank 3: the growing seed burns a foe inside it, about 8 a second (250 vs a 365 bomb of 12.5)",
-		dmg(T) / K.power("kin") > 11.0 and dmg(T) / K.power("kin") < 14.0,
+		"rank 3: the growing seed burns a foe inside it, about 16 a second (250 vs a 365 bomb)",
+		dmg(T) / K.power("kin") > 1.34 * burn and dmg(T) / K.power("kin") < 1.71 * burn,
 		"dmg %.1f over 1.2s (power %.2f)" % [dmg(T), K.power("kin")]
 	)
 	step(m, 4.8)

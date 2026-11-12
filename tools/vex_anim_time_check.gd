@@ -104,7 +104,7 @@ func _legs_walk(rec: Dictionary) -> bool:
 	return float(rec.get("speed", 0.0)) > 1.0 and float(rec.get("upper", 0.0)) >= 0.99 \
 			and float(rec.get("full", 1.0)) <= 0.01
 
-## LMB: the round leaves and the move plays on the same frame (its kick is the next), a round every 0.12 s.
+## LMB: the round leaves and the move plays on the same frame (its kick is the next), a round every 0.08 s.
 func _lmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 	P.ammo = 30

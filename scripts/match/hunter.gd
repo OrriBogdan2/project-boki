@@ -1012,7 +1012,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
-const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
 	if downed or out:
@@ -1026,7 +1025,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
+		dash_buf = Loco.press_buffer  # pressed a hair early: fire it as soon as this movement ends
 		return
 	var use_ex := not grounded or dashes < 1.0
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1479,9 +1478,10 @@ func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> vo
 		var aa := a0 - arc * 0.5 + arc * float(i) / float(rays - 1)
 		var st := Vector3(pos.x + cos(aa) * 0.25, y, pos.z + sin(aa) * 0.25)
 		m.spawn_shot(self, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * m.dmg_mult(self), maxf(0.02, (reach - 0.25) / 40.0), 0.22, wpn["color"], extra)
-	m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
 	Oomph.on_fire(self, true)
-	m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
+	if not o.get("own_look", false):      # a kit with its own swing look and sound (Gil's thrusts: no arc)
+		m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
+		m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
 
 func _emit_shot() -> void:
 	var dir := aim_dir()

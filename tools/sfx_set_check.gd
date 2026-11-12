@@ -210,9 +210,7 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
-	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
+	var wrong := Arch.ids().filter(func(a): return picked[a] != "%s_dash_air %s_dash" % [a, a])
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the

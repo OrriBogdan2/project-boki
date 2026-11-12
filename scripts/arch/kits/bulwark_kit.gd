@@ -160,7 +160,7 @@ func _tick(dt: float) -> void:
 	launch.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
-		h.dash_buf = Hunter.DASH_BUFFER
+		h.dash_buf = Loco.press_buffer
 	if not mend.is_empty():
 		_tick_mend(dt)
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
@@ -479,6 +479,7 @@ func _smash() -> void:
 		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
 	if perfect:
+		CombatBus.tech.emit(h, "bulwark")
 		launch.start(dv)
 	else:
 		_carry(dv, k)
@@ -570,6 +571,7 @@ func recast_now(slot_id: String) -> void:
 
 func _recall() -> void:
 	play("bul_recall")
+	h.fire_cd = float(lmb_def()["throw_rate"])      # a recall is a press: 0.45 s to the next
 	mace["st"] = "back"
 	mace["hit"] = {}
 	HeroVfx.of(m).trail(h, "throw", fx.hammer)

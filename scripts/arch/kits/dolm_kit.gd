@@ -464,6 +464,7 @@ func _punch(k: float) -> void:
 	if swept.size() >= 2: sweeps += 1
 	if swept.any(func(w): return w.get("by") == h):      # (the data: hitting *your* rocks; an ally's still fly)
 		guard_punches += 1
+		CombatBus.tech.emit(h, "dolm")
 		guard_stack()
 	for i in swept.size():
 		var w: Dictionary = swept[i]

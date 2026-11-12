@@ -528,6 +528,7 @@ func _blowout(f: Ent) -> void:
 	clear_sparks(f)
 	blowouts += 1
 	ComboMark.payoff(m, h, f)
+	CombatBus.tech.emit(h, "mage")
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0

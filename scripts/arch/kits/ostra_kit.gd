@@ -651,6 +651,7 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
+		CombatBus.tech.emit(h, "ostra")
 		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots
