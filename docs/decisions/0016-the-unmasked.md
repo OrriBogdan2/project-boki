@@ -55,3 +55,10 @@ Relic moment).
 - **Soles**: `FootPlant.reach` gives HunterAnim the real lowest boot point so the hips drop or lift until the sole
   meets the ground, standing and walking, at every height, build and sex (`--unmasked-check` asserts 2 cm).
 - Prologue captions wrap inside 86% of the width and grow upward from the bottom, never off screen.
+
+## Update: the creator's preview (owner list, Nov 9)
+Making yourself (hatch.gd) gets its preview controls from `scripts/ui/creator_view.gd` (`CreatorView`): drag to
+turn, the wheel or **See your face / See all of you** to ease from the whole body to a close-up of the face
+and back, and **Surprise me** (replaces Random): a seeded roll of every row (`Unmasked.random_look(rng)`) that
+keeps the glider, with one **Back** to undo it (a row changed by hand drops the Back). No save or setting
+changes. Checked by `--creator-view-check`.
