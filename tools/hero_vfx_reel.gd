@@ -337,7 +337,7 @@ func _juggernaut_tether_hold() -> void:
 func _juggernaut_e_rmb_e() -> void:
 	await _reset(7.0)
 	var K: JuggernautKit = P.ak
-	K.warchain.snap("")             # (a chain still hooked from the part before would pull at the first E)
+	K.warchain.snap(true)             # (a chain still hooked from the part before would pull at the first E)
 	K.cd["e"] = 0.0
 	K.cd["air"] = 0.0
 	var combo := func(t: float):

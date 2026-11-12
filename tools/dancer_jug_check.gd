@@ -1108,7 +1108,7 @@ func combos(a) -> void:
 		P.inp["move"] = Vector2(-1, 0))
 	var not_charge := K.rmb_down and not K.lunge_charging()
 	var kept_on := K.warchain.hooked()
-	K.warchain.snap("")                     # (the next row starts from a fresh throw either way)
+	K.warchain.snap(true)                     # (the next row starts from a fresh throw either way)
 	P.inp["move"] = Vector2.ZERO
 	P.inp["sec_hold"] = false
 	ed["tether_max"] = most
