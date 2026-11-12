@@ -4229,16 +4229,19 @@ func _care_tick(d: float) -> void:
 		for k in kins:
 			var rec: Dictionary = k["rec"]
 			var in_bed: bool = k.has("bed") and Vector2(k["pos"].x - k["bed"].x, k["pos"].z - k["bed"].z).length() < 0.6
-			Care.tick(rec, care_acc, float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors"), raining)
+			var resting: bool = float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors")
+			Care.tick(rec, care_acc, resting, raining)
 		care_acc = 0.0
 		KinBondMoment.tick(self)      # a bond rank it just reached: a heart, a line and a card
 	if care_save > 20.0:
 		care_save = 0.0
 		Save.save_game()
 	# a little life: an egg wobbles when it's close, dusty kin shed a little dust
+	if is_instance_valid(nest): EggSfx.hear("nest", 1.0 if _egg_ready() else 0.0, NEST_AT, d)
 	if is_instance_valid(nest) and _egg_ready():
 		var sh: Node3D = nest.get_node("Shell")
-		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * (1.0 if fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6 else 0.0)
+		var rattling := fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6
+		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * float(rattling)
 
 ## The thought bubble over each kin that wants something (KinWants), and the sleeping badge by the door.
 func _update_bubbles(d: float) -> void:

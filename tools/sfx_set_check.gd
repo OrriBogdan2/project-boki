@@ -151,7 +151,7 @@ func _garden_names() -> void:
 	var seen := []
 	var silent := []
 	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "base_tumble.gd", "echo_steps.gd",
-			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd"]:
+			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd", "egg_sfx.gd"]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
 			var sname := hit.get_string(1) + hit.get_string(2)
 			if sname.ends_with("_"):          # a prefix, completed below

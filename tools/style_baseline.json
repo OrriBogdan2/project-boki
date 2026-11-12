@@ -212,7 +212,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 201,
 "nested_ternary": 27,
 "semicolon": 243
 },
@@ -235,7 +235,7 @@
 "long_line": 2
 },
 "scripts/home/home_incubator.gd": {
-"long_line": 4,
+"long_line": 3,
 "nested_ternary": 2,
 "semicolon": 4
 },
