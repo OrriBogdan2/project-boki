@@ -101,6 +101,10 @@ func island_of(x: float, z: float) -> int:
 const ABYSS_DEPTH := 6.0
 const ABYSS_NEAR := 9          # "around": island ground within this many tiles
 const WALL_MIN := 0.001        # occupy()'s height for a wall whose top is at 0 (0 itself means free)
+## Where a body of radius r samples the ground (its centre, four sides and four corners), as
+## unit offsets; built once, so occupy() (every body, every step) allocates nothing.
+const BODY_SAMPLES: PackedVector2Array = [Vector2(0, 0), Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1),
+	Vector2(0.7, 0.7), Vector2(-0.7, 0.7), Vector2(0.7, -0.7), Vector2(-0.7, -0.7)]
 var _aref := PackedFloat32Array()
 var _low_top := INF
 
@@ -166,8 +170,8 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
 	if not ghost:
-		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-			var g := ground_at(x + o.x, z + o.y)
+		for o in BODY_SAMPLES:
+			var g := ground_at(x + o.x * r, z + o.y * r)
 			if g > y + STEP:
 				worst = maxf(worst, g)
 				hit = true
@@ -310,8 +314,10 @@ func _fits(x: float, z: float, r: float) -> bool:
 	if is_void(x, z):
 		return false
 	var g := ground_at(x, z)
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		if is_block(x + o.x, z + o.y) or is_void(x + o.x, z + o.y) or absf(ground_at(x + o.x, z + o.y) - g) > 0.05:
+	for o in BODY_SAMPLES:
+		var sx := x + o.x * r
+		var sz := z + o.y * r
+		if is_block(sx, sz) or is_void(sx, sz) or absf(ground_at(sx, sz) - g) > 0.05:
 			return false
 	return true
 

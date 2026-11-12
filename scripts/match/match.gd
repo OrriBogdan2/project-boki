@@ -4006,6 +4006,7 @@ func _ground_aim(h: Hunter) -> Vector3:
 	return Vector3(a.x, g if g > World.VOID + 1.0 else h.pos.y, a.z)
 
 const SEP_CELL := 4.0
+const SEP_KIN_STATES := ["active", "wild", "dazed", "returning"]   # a Boki on the ground has a body that pushes
 func _separate() -> void:
 	var bodies: Array = []
 	for h in hunters:
@@ -4013,7 +4014,7 @@ func _separate() -> void:
 	for mb in mobs:
 		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
-		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
+		if k.state in SEP_KIN_STATES and not k.dead and not KinLoss.cradled(k): bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
 	# instead of every pair, in the same pair order as before
 	var grid := {}
