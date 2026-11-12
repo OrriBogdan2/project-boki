@@ -226,6 +226,8 @@ const CHECKS := {
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
+	# the sight wedge first-time hint
+	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],      # one voice
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment

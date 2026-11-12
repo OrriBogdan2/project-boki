@@ -39,3 +39,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
   a 6-9 m sight range, which would hide every ranged fight. Owner call if wanted.
 - **A small lit circle stays behind you (2.0 m).** Someone touching your back is still seen; it is drawn as lit so
   the screen never lies about who you can see.
+- **A first-time line explains the dim side.** The first time a rival is hidden only by the wedge, or you swing
+  your aim 120 degrees within 0.6 s and the dim area sweeps, the hint lane says "You only see enemies in front of
+  you and near you" (`VisionHint`, through `Match._tips`): once per save, never with tips off or in the tutorial
+  course. `--first-time-hint-check`.
