@@ -6,7 +6,7 @@ extends RefCounted
 ##                                           after the ability is pressed), for the animation strips
 ## Moves: mage_live, mage_wire, mage_blowout, mage_coil, mage_sky, mage_card
 ##        gunslinger_fever, gunslinger_burr, gunslinger_wall, gunslinger_needle, gunslinger_skewer, gunslinger_dash,
-##        gunslinger_railrest, gunslinger_railwind, gunslinger_railbeam (the Longneedle's view, item 68),
+##        gunslinger_railrest, gunslinger_railwind, gunslinger_railbeam (the Palm Lance's view, item 68),
 ##        <hero>_dashaim (any hero: a slide east with the cursor north, LMB held; item 109)
 
 const GO := 0.4
