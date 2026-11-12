@@ -936,7 +936,7 @@ class Sync extends Node:
 	var blade_root_bone := -1     # (the bone blade_root rides; data "root_bone", else blade_bone)
 	var gun: Node3D
 	var muzzle: Node3D
-	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+	var hand_nodes: Array = []    # [rig hand, its bone index, its wrist spot]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
 	var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
@@ -991,7 +991,7 @@ class Sync extends Node:
 				var nd := root.get_node_or_null(String(BONES["hand." + sd])) as Node3D
 				var bi := WardenSkeleton.find(skel, "hand." + sd)
 				if nd and bi >= 0:
-					hand_nodes.append([nd, bi])
+					hand_nodes.append([nd, bi, nd.position])
 
 	## Hunter.equip rebuilds the rig's weapon and prow (a new match, a practice swap): on a skinned weapon those pieces
 	## must stay hidden, so one weapon is drawn in every mode (item 76b.5).
@@ -1017,6 +1017,7 @@ class Sync extends Node:
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		if companions:
+			companions.swimming = bool((root.get_meta(WardenClips.STATE, {}) as Dictionary).get("swim", false))
 			companions.step(dt)     # (before the blade: the sun's FX points ride it)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
@@ -1064,6 +1065,8 @@ class Sync extends Node:
 		clips.step(dt)
 		var w := clips.proc_w
 		if w >= 1.0:
+			for h in hand_nodes:
+				(h[0] as Node3D).position = h[2]      # (the rig owns the pose: no hand left where the clips put it)
 			apply()
 		elif w > 0.0:
 			var poses: Array = []

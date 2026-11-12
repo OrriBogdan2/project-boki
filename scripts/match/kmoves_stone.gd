@@ -195,7 +195,8 @@ const MOVES := {
 	# him, owner item 61 and 11-08): from the wound-up crouch he drives up off both legs with the fists swinging
 	# back (0.05), arches at the top with both fists high behind his head (0.41), whips them over and down as he
 	# drops (0.62), smashes them into the ground on landing (0.75: flat squash, knees wide), rebounds a little in
-	# the crater (0.85), stays low over his fists while the dust settles (1.03) and heaves himself up (1.27-1.51)
+	# the crater (0.85), stays low over his fists while the dust settles (1.03) and heaves himself up (1.15-1.37: the
+	# length of his hand-keyed rmb_slam clip)
 	"breah_slam": {"keys": [
 		[0.00, WOUND],
 		[
@@ -241,13 +242,13 @@ const MOVES := {
 			}
 		],
 		[
-			1.27,
+			1.15,
 			{
 				"p": -0.22, "sq": 0.06, "fl": Vector3(-0.24, -0.2, -0.3), "hw": 0.6, "fr": Vector3(0.24, -0.2, -0.3),
 				"rw": 0.6
 			}
 		],
-		[1.51, {}]]},
+		[1.37, {}]]},
 	# the air Quakefall: fists high, pitched down over them as she falls
 	"breah_dive": {"hold": true, "keys": [
 		[0.00, {}],

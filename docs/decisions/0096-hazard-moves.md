@@ -20,6 +20,9 @@ Option 2. HazardMoves.of(h) (scripts/match/hazard_moves.gd): grounded in deep wa
 deep, a counter only swims faster); on ice with ground_grip < 1 (no frost Boki, no ward perk) -> footing; a remote
 hunter reads what its row carried. The footing numbers are data (terrain_hazards.json ice "moves"), laid on the
 existing WardenGait (stride, cadence, the loco arm_swing arms out); the swim is the existing HunterSwim on the rig.
+In the crawl the run cycle's shoulder twist and roll are off (they were mixing into the stroked hand), a Warden's rig hands go
+back to their own wrist once the rig owns the pose (WardenGlb Sync), and a floating weapon (Meeko's sun, companion
+"swim_stow") is put away in deep water, from the same "swim" state a remote hunter reads.
 
 ## Consequences
 HunterNet appends ["hz", move] after ["lv", level]; Net.VERSION 0.24.6. hunter.gd: one call in _anim_state and the

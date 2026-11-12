@@ -881,7 +881,7 @@ func update(dt: float, s: Dictionary) -> void:
 	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
 	pitch -= act_k * _act_pitch()
-	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
+	var yaw := -sin(ph) * 0.16 * r1 * back * (1.0 - swim_k)      # shoulders swing against the hips (not in a crawl)
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05 + cos(swim_ph) * 0.14 * swim_k
 	var dz := 0.0
 	if arch == "thief":
@@ -1063,7 +1063,7 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y -= 0.12 * roll_k
 	if dash_k > 0.01 and dash_kind != "charge":
 		off.y -= 0.1 * dash_k
-	rb = Basis(Vector3.BACK, sin(ph) * 0.03 * r1) * rb
+	rb = Basis(Vector3.BACK, sin(ph) * 0.03 * r1 * (1.0 - swim_k)) * rb
 	rig.basis = rb * Basis.from_scale(scl)
 	rig.position = rpivot - rb * rpivot + off
 	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - dive_k) + sin(ph) * legs_sway * r1 * back

@@ -452,7 +452,8 @@ func _run_gait(id: String, footing: Dictionary) -> Dictionary:
 
 ## The pond walk (tools/pond_walk.gd): the right move for each depth. Wading is the run with the knees hauled up (higher
 ## than the rig's plain walk at that speed); swimming is a flutter kick and, in a hand the kit lets go of, a stroke,
-## both at the pace of the swim (slower treading water); the weapon stays in its hand; the clips stand aside.
+## both at the pace of the swim (slower treading water); the weapon stays in its hand (a floating one is put away
+## in deep water); the clips stand aside.
 func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var bi := {}
@@ -474,6 +475,8 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			plain = maxf(plain, maxf(_pos(sk, m, bi["shin.L"]).y, _pos(sk, m, bi["shin.R"]).y))
 	clips.force = {}
 	var rows: Array = []
+	var comp := sync.get("companions") as WardenCompanions      # (Meeko's sun floats round her: no hand to stay in)
+	var stow_ok := true
 	var held := [0.0, 0.0]      # worst Muzzle-off-the-tip, blade-off-the-hand in the water (the callback fills it)
 	var sample := func(info: Dictionary) -> void:
 		var row := {"phase": info["phase"], "depth": info["depth"], "proc": clips.proc_w, "state": info["state"]}
@@ -481,7 +484,11 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			row[b] = _pos(sk, m, bi[b])
 		row["hand.L"] -= row["upper_arm.L"]      # (the hand about its shoulder: the body's bob stays out of the stroke)
 		rows.append(row)
-		if info["depth"] > 0:
+		for p in (comp.parts if comp else []):
+			var part := p as WardenCompanions.Part
+			if part.swim_stow:
+				stow_ok = stow_ok and (not part.node.visible) == (info["depth"] == 2)
+		if info["depth"] > 0 and comp == null:
 			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
@@ -512,9 +519,12 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			"%s: %s (%.1f strokes/s swimming, %.1f treading)" % [id,
 			"its free hand strokes at the swim pace" if strokes else "both hands stay on the weapon",
 			stroke[0], stroke[1]])
-	ok(held[0] <= FX_ON_BLADE and held[1] <= 2.0 * HunterAnim.WEAPON_SLACK,
-			"%s: the weapon stays in its hand in the water (%.3f m off the tip, %.3f m off the hand)" % [
-			id, held[0], held[1]])
+	if comp:
+		ok(stow_ok, "%s: the floating weapon is put away in deep water and drawn on the bank and in the shallows" % id)
+	else:
+		ok(held[0] <= FX_ON_BLADE and held[1] <= 2.0 * HunterAnim.WEAPON_SLACK,
+				"%s: the weapon stays in its hand in the water (%.3f m off the tip, %.3f m off the hand)" % [
+				id, held[0], held[1]])
 	var ends: Array = rows.filter(func(r): return r["phase"] in ["swim", "tread", "wade"])
 	ok(ends.slice(int(ends.size() / 4.0)).all(func(r): return float(r["proc"]) >= 1.0),
 			"%s: the clips stand aside while it wades and swims" % id)

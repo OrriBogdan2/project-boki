@@ -7,7 +7,7 @@
 		"wobble": [0.25, 5.3], "bob": 0.07, "lag": 7.0, "trail_max": 0.25, "face": "forward",
 		"sway_deg": 8.0, "lean_deg": 5.0, "clear_min": 0.01,
 		"list": [
-			{"id": "sun", "surfaces": ["cloth-sun", "eyes-mood_sun"], "at": [-0.40, 1.10, -0.04], "phase_deg": 180.0, "bob_period": 2.7, "bob_phase": 0.0, "bone": "pauldron.L", "anchors": ["weapon_muzzle", "anchor_hang_lantern", "anchor_lantern_top"]},
+			{"id": "sun", "surfaces": ["cloth-sun", "eyes-mood_sun"], "at": [-0.40, 1.10, -0.04], "phase_deg": 180.0, "bob_period": 2.7, "bob_phase": 0.0, "swim_stow": true, "bone": "pauldron.L", "anchors": ["weapon_muzzle", "anchor_hang_lantern", "anchor_lantern_top"]},
 			{"id": "cloud", "surfaces": ["skin-cloud", "ice-drop", "eyes-mood_cloud"], "at": [0.40, 1.06, -0.04], "phase_deg": 0.0, "bob_period": 3.3, "bob_phase": 1.9, "bone": "pauldron.R", "anchors": []}
 		]
 	},

@@ -13,7 +13,8 @@ extends RefCounted
 ##   "bob": m, "lag": 1/s of the ease behind her, "trail_max": m the centre may fall behind
 ##   "face": "forward" (as modelled) or "outward", "sway_deg": a slow yaw, "lean_deg": a roll into the turn
 ##   "list": [{"id", "surfaces": [material names], "at": [x, y, z] the part's centre at rest, "phase_deg" (0 = her
-##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it]}]
+##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it],
+##     "swim_stow": true when the part is a weapon that goes away in deep water (the sun)}]
 ## Cosmetic only; nothing here touches a kit (the FX empties on the sun follow it, so a shot leaves the sun).
 
 const PREFIX := "Companion_"   # node name of each cut-out part
@@ -30,6 +31,7 @@ class Part:
 	var bob_phase := 0.0
 	var bone := -1                    # the bone its anchors were on
 	var anchors: Array = []           # [empty, its rest position relative to the part's centre]
+	var swim_stow := false            # a weapon: hidden while the Hunter swims
 	var pos := Vector3.ZERO           # last placed (skeleton space)
 
 var skel: Skeleton3D
@@ -39,6 +41,7 @@ var centre_bone := -1
 var centre_off := Vector3.ZERO      # circle centre minus the bone's rest origin
 var centre := Vector3.ZERO          # the eased centre (world)
 var primed := false
+var swimming := false               # in deep water (the Hunter's "swim" state)
 var t := 0.0
 
 ## Cuts the companions out of `glb`'s body mesh when `data` has them; returns the live helper or null.
@@ -84,6 +87,7 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary) -> WardenCompa
 		part.bob_period = float(p.get("bob_period", 2.7))
 		part.bob_phase = float(p.get("bob_phase", 0.0))
 		part.bone = WardenSkeleton.find(sk, String(p.get("bone", "")))
+		part.swim_stow = bool(p.get("swim_stow", false))
 		for an in p.get("anchors", []):
 			var nd := glb.find_child(String(an), true, false) as Node3D
 			if nd and part.bone >= 0:
@@ -187,6 +191,7 @@ func step(dt: float) -> void:
 		else:
 			bas = Basis(Vector3.UP, sway * sin(TAU * t / (1.7 * float(d.get("period", 4.0))) + part.bob_phase)) * roll
 		part.node.transform = Transform3D(bas, part.pos)
+		part.node.visible = not (swimming and part.swim_stow)
 		# (the empties the sun carries sit on a bone: put them where that bone must hold them to land on the sun)
 		if part.bone >= 0 and not part.anchors.is_empty():
 			var inv := skel.get_bone_global_pose(part.bone).affine_inverse()
