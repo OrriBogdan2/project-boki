@@ -863,7 +863,8 @@ func _sim_active(dt: float) -> void:
 				ignore_until[target] = m.time + 5.0
 				target = null
 				wish = Vector2.ZERO
-		if target and d < reach and atk_cd <= 0.0 and not wind_do.is_valid() and absf(target.pos.y - pos.y) < 1.5 and not BokiHit.held(self):
+		if target and d < reach and atk_cd <= 0.0 and not wind_do.is_valid() and absf(target.pos.y - pos.y) < 1.5 \
+				and not BokiHit.held(self):
 			atk_cd = 0.95
 			if BokiRig.has(species):
 				_wind(BokiSwing.LUNGE_WIND, _bite.bind(target))
