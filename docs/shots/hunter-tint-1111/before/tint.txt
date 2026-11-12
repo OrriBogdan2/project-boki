@@ -1,0 +1,13 @@
+TINT archer      match 0.34 0.18 0.25 R/B 1.36 | albedo 0.42 0.29 0.37 R/B 1.13
+TINT juggernaut  match 0.42 0.28 0.31 R/B 1.36 | albedo 0.44 0.33 0.37 R/B 1.18
+TINT gunslinger  match 0.28 0.23 0.22 R/B 1.24 | albedo 0.42 0.38 0.35 R/B 1.21
+TINT bulwark     match 0.30 0.23 0.24 R/B 1.25 | albedo 0.46 0.35 0.37 R/B 1.23
+TINT ashwick     match 0.34 0.19 0.22 R/B 1.55 | albedo 0.37 0.22 0.30 R/B 1.25
+TINT tender      match 0.45 0.30 0.35 R/B 1.26 | albedo 0.71 0.55 0.60 R/B 1.18
+TINT dolm        match 0.26 0.19 0.19 R/B 1.34 | albedo 0.45 0.35 0.34 R/B 1.34
+TINT dredge      match 0.27 0.16 0.25 R/B 1.06 | albedo 0.47 0.32 0.47 R/B 1.01
+TINT rimewright  match 0.41 0.37 0.39 R/B 1.06 | albedo 0.73 0.72 0.75 R/B 0.97
+TINT mage        match 0.39 0.22 0.26 R/B 1.51 | albedo 0.51 0.37 0.41 R/B 1.26
+TINT thief       match 0.31 0.19 0.34 R/B 0.93 | albedo 0.37 0.26 0.41 R/B 0.90
+TINT ostra       match 0.45 0.30 0.51 R/B 0.89 | albedo 0.38 0.24 0.44 R/B 0.87
+TINT gil         match 0.29 0.22 0.24 R/B 1.20 | albedo 0.32 0.27 0.32 R/B 1.01
