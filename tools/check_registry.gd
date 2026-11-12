@@ -167,6 +167,8 @@ const CHECKS := {
 	"--strike-reach-check": ["res://tools/strike_reach_check.gd", "strike_reach_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
+	"--fusion-states-check": ["res://tools/fusion_states_check.gd", "fusion_states_check", null],  # merge form x state
+	"--fusion-strips": ["res://tools/fusion_strips.gd", "fusion_strips", null],      # 5 fps per form
 	"--aim-lead-check": ["res://tools/aim_lead_check.gd", "aim_lead_check", null],      # head and chest lead the cursor
 	# feet on stairs (FootPlant)
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],
