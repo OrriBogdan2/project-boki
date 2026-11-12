@@ -681,7 +681,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var flare := float(km.get("wg", 0.0))
 	if moth:      # (moth wings that come up now and then: WardenWings)
 		var ground_v := spd if grounded else 0.0
-		var open := moth.fold(dt, flare, not grounded or rolling, emote_k > 0.5, ground_v, downed)
+		var open := moth.fold(dt, flare, not grounded or rolling, emote_k > 0.5, ground_v, s.get("downed", false))
 		model.set_meta(WardenGlb.WING_FOLD, open)
 	elif dash_kind == "skate" or flare > 0.0 or model.has_meta(WardenGlb.WING_FOLD):
 		model.set_meta(WardenGlb.WING_FOLD, dash_k if dash_kind == "skate" else -flare)
