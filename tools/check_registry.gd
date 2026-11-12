@@ -53,6 +53,7 @@ const CHECKS := {
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
+	"--fsm-check": ["res://tools/fsm_check.gd", "fsm_check", null],      # every Fsm's table + the glider's edges
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],      # one movement model
 	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],      # 30/60/144 fps
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
