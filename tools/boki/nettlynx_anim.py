@@ -125,4 +125,6 @@ CLIPS.update({
     "chop": (1.1, True, chop_mouth),
     "mine": (1.0, True, mine_mouth),
 })
+import boki_react
+CLIPS.update({n: (sec, lp, prickly(fn)) for n, (sec, lp, fn) in boki_react.react().items()})
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}

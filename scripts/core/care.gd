@@ -135,7 +135,8 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("path"):
 		rec["path"] = []           # path tokens it wears (GardenItems)
 		rec["stay"] = false        # wearing a Stayleaf: no new forms
-		rec["loose"] = 0           # points taken out of its stats, waiting to go back in
+	if not rec.has("aura"):
+		rec["aura"] = ""           # the aura item it wears, "" none (GardenItems, GardenAura draws it)
 	if not rec.has("hold"):
 		rec["hold"] = {}           # lean type -> garden days it is kept (GardenItems sweets)
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
@@ -436,6 +437,7 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		joy += 22.0
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
+	out["learned"] = FoodJournal.learn(f)
 	var was := need(rec, "food")
 	change(rec, "food", fill)
 	change(rec, "joy", joy)
