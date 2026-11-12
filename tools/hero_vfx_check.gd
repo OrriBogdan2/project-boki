@@ -11,6 +11,9 @@ extends RefCounted
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
+const HUE_OFF := 40.0          # deg round the colour wheel from its Hunter's: past this an ability colour is off
+const PALE_S := 0.3            # saturation under which a colour is a pale tint, free on any Hunter
+const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"]}   # colours that mean something: a shield's blue, heals
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -48,6 +51,7 @@ func run(main: Node) -> void:
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
 	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
+	_colours()
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -75,6 +79,27 @@ func _called(arch: String) -> Dictionary:
 			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
 				called[hit.get_string(1)] = true
 	return called
+
+## Every Hunter's abilities wear its ability colour (docs/HERO_VFX.md "Ability colours"): the LMB (its weapon), each
+## slot's colour and its kit table's main colour sit on that hue, except the colours that mean something (MEANING).
+func _colours() -> void:
+	var off: Array = []
+	for arch: String in Arch.ORDER:
+		var want := Arch.color(arch)
+		var cols := {"lmb": Content.weapon(Arch.signature(arch)).primary.get("color", Color.WHITE) as Color}
+		for slot: String in ["dash", "rmb", "e", "x"]:
+			cols[slot] = Color(String((Arch.def(arch)[slot] as Dictionary).get("col", "#ffffff")))
+		if Arch.def(arch).has("palette"):
+			cols["palette"] = Arch.fx_col(arch, "main")
+		for slot: String in cols:
+			var c: Color = cols[slot]
+			var gap := rad_to_deg(absf(angle_difference(c.h * TAU, want.h * TAU)))
+			if c.s >= PALE_S and gap > HUE_OFF and not slot in MEANING.get(arch, []):
+				off.append("%s %s" % [arch, slot])
+	ok(off.is_empty(), "every Hunter's LMB/RMB/E/R/dash colour is on its ability colour %s" % [off])
+	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col]
+	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm")],
+			"Vex's, Sparkle's and Tenzo's kits draw from their colour tables")
 
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:

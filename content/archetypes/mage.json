@@ -9,6 +9,7 @@
 	"body": {"size": 1.098, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.05, "shoulder": 0.85, "build": 0.92, "hit_r": 0.4},
 	"model_glow": {"core": "#ff3fb4"},
 	"color": "#ff5ab4",
+	"palette": {"main": "#ff5ab4", "hot": "#ffd2ec", "deep": "#3a1440", "rim": "#c8509a", "rim_hot": "#ff8ac8"},
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"card": {
@@ -33,7 +34,7 @@
 		"gap": 0.15,
 		"blow_dmg": 16.0,
 		"blow_pct": 0.18,
-		"col": "#c6fff2"
+		"col": "#ffd2ec"
 	},
 	"passive": {
 		"name": "Static",
@@ -43,7 +44,7 @@
 		"id": "wirerun",
 		"name": "Wirerun",
 		"icon": "dash",
-		"col": "#9ff5e0",
+		"col": "#ff9ad0",
 		"cd": 8.0,
 		"reset_mult": 1.5,
 		"reset_charge": 0.75,
@@ -68,7 +69,7 @@
 		"name": "Storm Rod",
 		"short": "Rod",
 		"icon": "shock",
-		"col": "#7dffd8",
+		"col": "#ff7ac4",
 		"cooldown": 8.0,
 		"charges": 1,
 		"hold": 1.0,
@@ -107,7 +108,7 @@
 		"name": "Skycall",
 		"short": "Sky",
 		"icon": "updraft",
-		"col": "#b8f7ff",
+		"col": "#ffc6e6",
 		"cooldown": 10.5,
 		"reach": 11.0,
 		"delay": 0.8,
@@ -133,7 +134,7 @@
 		"name": "Kitefall",
 		"short": "Fall",
 		"icon": "quake",
-		"col": "#ffd36a",
+		"col": "#ff4fa8",
 		"cooldown": 42.0,
 		"windup": 0.3,
 		"rise": 0.3,

@@ -55,6 +55,11 @@ static func label(id: String) -> String:
 static func color(id: String) -> Color:
 	return Color(String(def(id).get("color", "#ffffff")))
 
+## An effect colour from the Hero's own table (content "palette"; docs/HERO_VFX.md "Ability colours"): kit code
+## reads its looks from here so a Hero's abilities stay in its ability colour.
+static func fx_col(id: String, key: String) -> Color:
+	return Color(String(def(id)["palette"][key]))
+
 ## The two archetypes of a weight class.
 static func of_class(cls: String) -> Array:
 	return ids().filter(func(a): return weight(a) == cls)
