@@ -66,7 +66,7 @@ func _build() -> void:
 	ph.add_child(tabs)
 	ph.add_child(UI.button("›", func(): page = (page + 1) % KinBox.PAGES; renaming = false; refresh(), 34))
 	bc.add_child(ph)
-	var gc := UI.card(Color(0.07, 0.07, 0.12, 0.9), 8, 12)
+	var gc := UI.card(Color(UI.NIGHT, 0.9), 8, 12)
 	UI.set_card_border(gc, Color(Color("bfa6ff"), 0.25), 1)
 	grid = GridContainer.new()
 	grid.columns = COLS
@@ -204,7 +204,7 @@ func _build_farm(fk: Array) -> void:
 	for i in maxi(0, KinBox.farm_cap() - fk.size()): fg.add_child(_cell({}, "farm", -1))
 	var cost := KinBox.expand_cost()
 	if cost >= 0:
-		var nxt: int = KinBox.farm_caps()[KinBox.farm_lvl() + 1]
+		var nxt: int = KinBox.FARM_CAPS[KinBox.farm_lvl() + 1]
 		var eb := UI.button("Expand: room for %d\n%d gems" % [nxt, cost], func():
 			var why := KinBox.expand()
 			if why != "": _fail(why)

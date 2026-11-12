@@ -61,6 +61,13 @@ static func zone_of(rec: Dictionary) -> String:
 static func is_open(id: String) -> bool:
 	return bool(Save.d.get("zones", fresh()).get(id, {}).get("open", false))
 
+## A locked zone wakes: it opens, with its sting (the one place a zone opens, for the unlock step to call).
+static func wake(id: String) -> void:
+	if is_open(id):
+		return
+	Save.d["zones"][id] = {"open": true}
+	Sfx.play("garden_wake")
+
 ## The Boki out (not in the Burrow) whose home is this zone.
 static func residents(id: String) -> Array:
 	return KinBox.farm().filter(func(r): return zone_of(r) == id)
@@ -159,10 +166,10 @@ static func thrives(rec: Dictionary) -> bool:
 		return false
 	return zone["types"].has(Evo.lean(rec)[0]) or trait_match(rec, zone) > float(rules()["thrive"]["trait_over"])
 
-## Stat points a toy gives `rec`: `base`, and now and then one more while it thrives.
+## Stat points a toy gives `rec`: `base`, and now and then one more while it thrives or loves its zone.
 static func train_gain(rec: Dictionary, base: int) -> int:
-	var more := thrives(rec) and randf() < float(rules()["thrive"]["train_bonus"])
-	return base + (1 if more else 0)
+	var chance := float(rules()["thrive"]["train_bonus"]) if thrives(rec) else 0.0
+	return base + (1 if randf() < chance + ZoneAffinity.stat_bonus(rec) else 0)
 
 ## Both keys in hand: plants the Wayseed and wakes the zone. The Boki that leans toward it becomes its
 ## founder: it moves in, remembers the day and writes it in its journal. {"ok", "why", "founder"}.

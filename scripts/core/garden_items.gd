@@ -4,8 +4,8 @@ extends RefCounted
 ## each one moves one thing on one Boki and says the exact change first. preview() is that change as numbers
 ## (after caps), apply() does exactly it and writes the journal line. They sit in the garden bag
 ## (Save.d items) and are fed from the feed menu (Care.feed hands them to feed()). Worn ones (path tokens,
-## Stayleaf, auras) go in rec.path / rec.stay / rec.aura and come off again with take_off().
-## Sweets (a lean to pick) go through use(), the Twinbun (two Boki) through share().
+## Stayleaf) go in rec.path / rec.stay and come off again with take_off(). Sweets (a lean to pick) go through
+## use(), the Twinbun (two Boki) through share().
 
 static func rules() -> Dictionary:
 	return Content.rules("garden_items")
@@ -49,7 +49,6 @@ static func preview(rec: Dictionary, id: String, pick := "") -> Dictionary:
 		"xp": return _xp(rec, int(e["n"]))
 		"token": return _token(rec, String(e["aff"]))
 		"stay": return _stay(rec)
-		"aura": return _aura(rec, id)
 		"rinse": return _rinse(rec)
 		"nest": return _no("goes in the Nesting Nook with a pair")
 		"down": return _down(rec, int(e["trust"]))
@@ -71,9 +70,8 @@ static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
 		_write(rec, d)
 	if String(item(id)["effect"]["kind"]) == "down":
 		Save.remember(rec, "down", NestItems.take_memory())
-	if d.has("aura") and String(d["aura"][0]) != "":
-		Save.add_item(String(d["aura"][0]), 1)     # one aura at a time: the old one goes back in the bag
 	CareJournal.note(rec, "%s %s: %s" % [_verb(id), item_name(id), pv["text"]])
+	_remember(rec, id, String(pv["text"]))
 	return pv
 
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
@@ -92,7 +90,7 @@ static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
 		Save.d["items"][id] = int(Save.d["items"][id]) - 1
-	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) in ["sweet", "aura"]
+	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) == "sweet"
 	pv["text"] = "%s: %s" % [item_name(id), pv["text"]] if pv["ok"] else pv["text"]
 	return pv
 
@@ -126,6 +124,45 @@ static func share(a: Dictionary, b: Dictionary, id: String) -> Dictionary:
 	pv["text"] = "%s shared: %s" % [item_name(id), pv["text"]]
 	return pv
 
+## The uses kept for an item's Field Book page: [{boki, text}], newest last.
+static func uses(id: String) -> Array:
+	return Save.d.get("item_log", {}).get(id, [])
+
+static func _remember(rec: Dictionary, id: String, text: String) -> void:
+	var log: Dictionary = Save.d.get("item_log", {})
+	var mine: Array = log.get(id, [])
+	mine.append({"boki": String(rec.get("name", "")), "text": text})
+	if mine.size() > int(rules()["log_keep"]):
+		mine.pop_front()
+	log[id] = mine
+	Save.d["item_log"] = log
+
+## Has it ever been in the bag? In the bag now, or used on a Boki (worn ones are out of the bag).
+static func owned(id: String) -> bool:
+	return int(Save.d["items"].get(id, 0)) > 0 or not uses(id).is_empty()
+
+## Item ids of one family, in file order.
+static func family_ids(fam: String) -> Array:
+	return ids().filter(func(id): return item(id)["family"] == fam)
+
+## Every item of the family has been owned: the page shows a star.
+static func family_done(fam: String) -> bool:
+	return family_ids(fam).all(func(id): return owned(id))
+
+static func family_name(fam: String) -> String:
+	return String(rules()["families"].get(fam, {}).get("name", fam.capitalize()))
+
+## What the item nudges, in words (the page's one line; preview() has the exact numbers for a Boki).
+static func nudge(id: String) -> String:
+	var e: Dictionary = item(id)["effect"]
+	match String(e["kind"]):
+		"stat": return "+%d %s, up to the limit for its level" % [int(e["n"]), Care.STATS[e["stat"]]["name"]]
+		"xp": return "+%d xp" % int(e["n"])
+		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
+		"stay": return "no new forms while worn"
+		"rinse": return "clears the lean; the grown parts stay"
+		_: return "%d points of the top stat become loose points" % int(e["n"])
+
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
 	Care.ensure(rec)
@@ -133,10 +170,6 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 		if not rec["stay"]:
 			return false
 		rec["stay"] = false
-	elif String(item(id)["effect"]["kind"]) == "aura":
-		if String(rec["aura"]) != id:
-			return false
-		rec["aura"] = ""
 	elif rec["path"].has(id):
 		rec["path"].erase(id)
 	else:
@@ -148,9 +181,8 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 ## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it.
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
-	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
 	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "",
-			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw}
+			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": item(id)["effect"]["kind"] == "rinse"}
 
 static func _no(why: String) -> Dictionary:
 	return {"ok": false, "text": why, "deltas": {}, "look": false}
@@ -275,16 +307,6 @@ static func _stay(rec: Dictionary) -> Dictionary:
 	if rec["stay"]:
 		return _no("already staying small")
 	return _yes("stays small: no new forms while worn", {"stay": [false, true]})
-
-## An aura (looks only, GardenAura draws it): one at a time, a new one swaps the old back into the bag.
-static func _aura(rec: Dictionary, id: String) -> Dictionary:
-	var was := String(rec["aura"])
-	if was == id:
-		return _no("already wearing it")
-	var text := String(item(id)["effect"].get("text", "a new look"))
-	if was != "":
-		text += " (%s back in the bag)" % item_name(was)
-	return _yes(text, {"aura": [was, id]})
 
 static func _rinse(rec: Dictionary) -> Dictionary:
 	if Care.lean_total(rec) <= 0.0:

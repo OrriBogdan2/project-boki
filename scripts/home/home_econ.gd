@@ -264,7 +264,6 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = sp
 			if Vector2(sp.x - pos.x, sp.z - pos.z).length() < 0.4:
 				e["phase"] = "eat"; e["t"] = 2.6
-				HomeVoice.say(k["rec"], "boki_eat", pos)
 				k["hold_t"] = 0.3
 				(k["node"] as Node3D).rotation.y = atan2(-(c.x - pos.x), -(c.z - pos.z))
 		"eat":

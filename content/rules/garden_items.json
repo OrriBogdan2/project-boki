@@ -1,5 +1,5 @@
 {
-	"desc": "Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; this file does not drop them. aura = a worn look, one at a time (rec.aura; its aura block is drawn by GardenAura, scripts/home/garden_aura.gd). Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).",
+	"desc": "Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; this file does not drop them. Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).",
 	"pip": 6.0,
 	"pip_doc": "Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food.",
 	"max_tokens": 3,
@@ -9,6 +9,15 @@
 		"worn": "put on"
 	},
 	"verbs_doc": "Journal verb by use; an item's own verb wins.",
+	"log_keep": 5,
+	"log_keep_doc": "Uses remembered per item for its Field Book page (Save.d item_log, newest last).",
+	"families": {
+		"stat": {"name": "Stat bites", "icon": "burst"},
+		"path": {"name": "Path tokens", "icon": "dash"},
+		"lean": {"name": "Rinse", "icon": "wave"},
+		"respec": {"name": "Unwinding", "icon": "recall"}
+	},
+	"families_doc": "Field Book page grouping: a family's name and picture; it gets a star once every item of it has been owned.",
 	"items": [
 		{
 			"id": "thumpnut",
@@ -157,28 +166,6 @@
 			"sources": [
 				"Bramblebank nap tree",
 				"Drift Trader"
-			]
-		},
-		{
-			"id": "glowmoss_sprig",
-			"name": "Glowmoss Sprig",
-			"family": "look",
-			"use": "worn",
-			"effect": {
-				"kind": "aura",
-				"text": "slow glow motes drift round it at night (looks only)"
-			},
-			"aura": {
-				"colour": "#9dffb0",
-				"amount": 6,
-				"life": 2.6,
-				"rise": 0.12,
-				"size": 0.03,
-				"night_only": true
-			},
-			"sources": [
-				"Hushwood patch",
-				"Lantern Match"
 			]
 		},
 		{

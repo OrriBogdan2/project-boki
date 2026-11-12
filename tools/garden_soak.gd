@@ -135,8 +135,8 @@ func _step() -> void:
 	home.hrace.tick(DT)
 	home.hshove.tick(DT)
 	var e := SnackPatch.entry(Save.d)
-	if e.has(SnackPatch.RIPE_KEY):
-		e[SnackPatch.RIPE_KEY] = float(e[SnackPatch.RIPE_KEY]) - DT      # unix time cannot speed up: age the timer
+	if e.has("t"):
+		e["t"] = float(e["t"]) - DT          # real unix time cannot be sped up: age the timer instead
 	if int(t / home.DAY_LEN) > day_before:
 		_player_day(int(t / home.DAY_LEN))
 

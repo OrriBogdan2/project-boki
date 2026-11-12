@@ -11,20 +11,9 @@ class_name KinBox
 
 const PAGE := 30
 const PAGES := 8
-const RULES_PATH := "res://content/rules/burrow.json"      # the cap and the prices, with units and reasons
+const FARM_CAPS := [6, 8, 10, 12]            # room on the farm, by Kin Cottage expansion
+const EXPAND_COST := [0, 200, 400, 700]      # gems for each expansion
 const DEFAULT_NAMES := ["Meadow", "Burrow", "Riverbank", "Hollow", "Thicket", "Dunes", "Grotto", "Starfall"]
-
-static var _rules: Dictionary = {}
-
-static func rules() -> Dictionary:
-	if _rules.is_empty():
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
-		_rules = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
-	return _rules
-
-## Room on the farm for each expansion level.
-static func farm_caps() -> Array:
-	return rules()["farm_caps"]
 
 ## Fills in the box on any save and, the first time, moves the overflow off an old crowded farm.
 ## Returns how many kin it boxed (0 normally).
@@ -108,10 +97,10 @@ static func boxed() -> Array:
 	return (Save.d.get("roster", []) as Array).filter(func(r): return is_boxed(r))
 
 static func farm_lvl() -> int:
-	return clampi(int(Save.d.get("farm_lvl", 0)), 0, farm_caps().size() - 1)
+	return clampi(int(Save.d.get("farm_lvl", 0)), 0, FARM_CAPS.size() - 1)
 
 static func farm_cap() -> int:
-	return int(farm_caps()[farm_lvl()])
+	return int(FARM_CAPS[farm_lvl()])
 
 ## Room for one more out in the zone you are in (each zone holds the cap: GardenZones).
 static func farm_room() -> int:
@@ -208,7 +197,7 @@ static func to_farm(rec: Dictionary) -> String:
 	ensure()
 	if not is_boxed(rec): return ""
 	if farm_room() <= 0:
-		return "The farm is full (%d/%d). Box someone first%s" % [farm_cap() - farm_room(), farm_cap(), " or expand the cottages" if farm_lvl() < farm_caps().size() - 1 else ""]
+		return "The farm is full (%d/%d). Box someone first%s" % [farm_cap() - farm_room(), farm_cap(), " or expand the cottages" if farm_lvl() < FARM_CAPS.size() - 1 else ""]
 	_unbox(rec)
 	return ""
 
@@ -259,8 +248,8 @@ static func release(rec: Dictionary) -> String:
 ## Buys the next Kin Cottage expansion (+2 room on the farm). Returns "" or why not.
 static func expand() -> String:
 	var lv := farm_lvl()
-	if lv >= farm_caps().size() - 1: return "The farm is as big as it gets"
-	var cost := int(rules()["expand_cost"][lv + 1])
+	if lv >= FARM_CAPS.size() - 1: return "The farm is as big as it gets"
+	var cost := int(EXPAND_COST[lv + 1])
 	if int(Save.d["gems"]) < cost and not Game.modding(): return "Needs %d gems" % cost
 	if not Game.modding(): Save.d["gems"] = int(Save.d["gems"]) - cost
 	Save.d["farm_lvl"] = lv + 1
@@ -268,7 +257,7 @@ static func expand() -> String:
 
 static func expand_cost() -> int:
 	var lv := farm_lvl()
-	return int(rules()["expand_cost"][lv + 1]) if lv < farm_caps().size() - 1 else -1
+	return int(EXPAND_COST[lv + 1]) if lv < FARM_CAPS.size() - 1 else -1
 
 # ------------------------------------------------------------------ new kin
 ## A species already out on the farm (not counting this kin).

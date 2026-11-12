@@ -1,13 +1,11 @@
 class_name SnackPatch
 extends RefCounted
 ## The garden's one snack patch (briefs/design/GARDEN.md section 10 question 1, default). With base_mode on, a save has
-## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens its zone's snacks
-## and the season's snack (GardenSeasons) on a timer (content/rules/snack_patch.json) and walking over it picks them
-## up for the pantry, to feed the lean foods. Never sold, no seeds, no watering. The timer is the deco entry's
-## RIPE_KEY (unix seconds of the last pick).
+## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens four element snacks
+## on a timer (content/rules/snack_patch.json) and walking over it picks them up for the pantry, to feed the lean
+## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
 
 const ID := "snack_patch"
-const RIPE_KEY := "ripe_t"      # the deco entry's pick time (a deco "t" is a building tier, clamped to 1..3 on load)
 
 var h                                    # the Home screen
 var _look_t := 0.0
@@ -48,32 +46,19 @@ static func entry(d: Dictionary) -> Dictionary:
 	return {}
 
 static func ripe(e: Dictionary, now: float) -> bool:
-	return not e.is_empty() and now - float(e.get(RIPE_KEY, now)) >= grow_secs()
-
-## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort).
-static func grow_secs() -> float:
-	return float(rules()["grow_secs"]) * DecorComfort.value("bright", "grow", 1.0)
-
-## The snacks one ripening yields at `now`: this island's list plus the season's snack (GardenSeasons).
-static func grown(d: Dictionary, now: float) -> Array:
-	var got: Array = snacks(d).duplicate()
-	var season := GardenSeasons.snack(now)
-	if not got.has(season):
-		got.append(season)
-	return got
+	return not e.is_empty() and now - float(e.get("t", now)) >= float(rules()["grow_secs"])
 
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
 	var e := entry(d)
 	if not ripe(e, now):
 		return []
-	e[RIPE_KEY] = now
-	var got := grown(d, now)
+	e["t"] = now
+	var got: Array = snacks(d).duplicate()
 	var more := extra(d, e)
 	if more != "":
-		e["rot"] = int(e.get("rot", 0)) + 1
-	if more != "" and not got.has(more):
 		got.append(more)
+		e["rot"] = int(e.get("rot", 0)) + 1
 	for s in got:
 		shelve(d, String(s))
 	return got
@@ -83,27 +68,22 @@ static func shelve(d: Dictionary, snack: String, n := 1) -> void:
 	var store: Dictionary = d["crops"] if Data.CROPS.has(snack) else d["items"]
 	store[snack] = int(store.get(snack, 0)) + n
 
-## Part of the deco signature, so the model changes when it ripens or the season turns.
+## Part of the deco signature, so the model changes when it ripens.
 static func sig(e: Dictionary) -> String:
-	if String(e["id"]) != ID:
-		return ""
-	var now := Time.get_unix_time_from_system()
-	return ("r" if ripe(e, now) else "") + GardenSeasons.snack(now)
+	return "r" if String(e["id"]) == ID and ripe(e, Time.get_unix_time_from_system()) else ""
 
-## Four little beds and the season's bed in the middle, each with its snack's colour: sprouts while growing,
-## fat berries once ripe.
+## Four little beds, each with its snack's colour: sprouts while growing, fat berries once ripe.
 static func model(e: Dictionary) -> Node3D:
 	var n := Node3D.new()
-	var now := Time.get_unix_time_from_system()
-	var is_ripe := ripe(e, now)
+	var is_ripe := ripe(e, Time.get_unix_time_from_system())
 	Models.part(n, Models.box(1.9, 0.08, 1.9), Models.toon(Color("7a5a3a"), false), Vector3(0, 0.04, 0))
-	var got := grown(Save.d, now)
-	for i in got.size():
-		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45) if i < 4 else Vector3.ZERO
+	var grown := snacks(Save.d)
+	for i in grown.size():
+		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45)
 		var leaf := Models.toon(Color("5f9a45"))
 		Models.part(n, Models.sphere(0.2, 8), leaf, at + Vector3(0, 0.22, 0), Vector3(1, 0.7, 1))
 		if is_ripe:
-			Models.part(n, Models.sphere(0.13, 8), Models.toon(Care.food_col(got[i])), at + Vector3(0, 0.5, 0))
+			Models.part(n, Models.sphere(0.13, 8), Models.toon(Care.food_col(grown[i])), at + Vector3(0, 0.5, 0))
 	return n
 
 func tick(d: float) -> void:
@@ -113,8 +93,8 @@ func tick(d: float) -> void:
 	_look_t = 0.2
 	var now := Time.get_unix_time_from_system()
 	var e := entry(Save.d)
-	if not e.is_empty() and not e.has(RIPE_KEY):
-		e[RIPE_KEY] = now          # the timer starts when it is put down
+	if not e.is_empty() and not e.has("t"):
+		e["t"] = now          # the timer starts when it is put down
 	var now_ripe := ripe(e, now)
 	if now_ripe != _ripe:
 		_ripe = now_ripe

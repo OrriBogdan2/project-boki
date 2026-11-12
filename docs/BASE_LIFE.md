@@ -59,7 +59,7 @@ check: `--base-life-check`.
   recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
   `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
 - Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
@@ -77,30 +77,3 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
-- Tag (GARDEN.md section 4; `scripts/home/base_tag.gd`, `base_life.json` "tag", check `--garden-tag-check`): the PlayWith
-  state. Only friends (bond >= `friend_at`) start a game, 10-20 s; "it" chases, the runner flees `flee_s` then stands
-  `stand_s`, a touch swaps it (new "it" has `grace`) and adds `bond_tag`. A finished game gives each player `speed`
-  Speed (Care.add_stat) and a journal line, then a `rest` breather. A rival of either within `rival_gap` m ends the
-  game as a squabble: both huff, sulk (`sulk_joy`) and stand about `sulk_s`; no new state, existing clips only.
-- Rivals from the games (GARDEN.md sections 4 and 5; `scripts/home/base_rival.gd`, `content/rules/base_rival.json`,
-  check `--garden-rivals-check`): extends the bonds, no second system. `BaseBoard.record(game, win, lose)` (every
-  game's settle) calls `BaseRival.result`: a Boki that loses to the same Boki `lose_to_mark` (2) times in a row, in
-  any game, marks it a rival (a win over it clears the count). The bond drops to `bond_mark`, so the usual stares
-  apply; `rec["grudge"] = {uid: {lost, rival, good, game}}` keeps the tally, the game last lost and the shared good
-  days. Rivals pick a nap spot (`life_spot`) and toys (`HomeToys.pick`) at least `gap` m from each other and show a
-  `#` bubble when they pass. A roaming loser holding a grudge sometimes enters the Ask state (`BaseLife.S.ASK`),
-  walks to the Games board and waits `ask_secs`; with it there, the interact key accepts
-  (`BaseBoard.use`): the game it lost starts with the pair (`BaseRace.pair_force`, read by `entrants`). The marker
-  winning any game over its rival, or three days (`BaseLife` day wrap) with both at joy `good_joy` or more, settles
-  it: bond back to 0. One journal line each way (CareJournal, on the marker). The grudge key is optional (read
-  with `.get`, made on first use), so older saves load as they are and Save.VERSION stays 12.
-
-## Decor with a purpose (comfort tags)
-Every decoration in the build catalog has one comfort tag (`HomeLayout.CATALOG` `"comfort"`: cosy, bright, wild,
-quiet). A zone holding three of one tag (`content/rules/decor_comfort.json` `need`) gets that tag's named effect,
-shown in gold on its Waystone card (`ZoneCards.open_lines`). `DecorComfort` counts and caches the tags; each effect
-is one number read where it acts: Snug naps (cosy) restore joy while napping (`BaseLife._nap_tick`), Sunny patch
-(bright) ripens the snack patch faster (`SnackPatch.grow_secs`), Wild welcome (wild) raises the visitor chance
-(`GardenVisitor.chance`), Calm air (quiet) lowers the squabble chance (`BaseLife._clash`). A built zone counts its
-fixed pieces; every other zone counts the save's island. No scores: an effect is on or off. Check:
-`--decor-tags-check`.

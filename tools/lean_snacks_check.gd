@@ -67,7 +67,7 @@ func _habits() -> void:
 func _patch() -> void:
 	Save.d = Save.fresh()
 	HomeLayout.ensure(Save.d)
-	var e := {"id": SnackPatch.ID, SnackPatch.RIPE_KEY: 1, "x": 0, "z": 0, "r": 0}
+	var e := {"id": SnackPatch.ID, "t": 1, "x": 0, "z": 0, "r": 0}
 	Save.d["layout"]["deco"].append(e)
 	var seen := {}
 	for i in 24:
@@ -78,7 +78,5 @@ func _patch() -> void:
 	Save.d["layout"]["theme"] = "ridge"
 	e["rot"] = 0
 	var ridge: Array = SnackPatch.harvest(Save.d, 3.0e9)
-	var own: Array = SnackPatch.rules()["zone_snacks"]["ridge"].duplicate()
-	if not own.has(GardenSeasons.snack(3.0e9)):
-		own.append(GardenSeasons.snack(3.0e9))
-	ok(ridge == own, "a ridge patch grows exactly its zone's list and the season's snack (%s)" % str(ridge))
+	var own: Array = SnackPatch.rules()["zone_snacks"]["ridge"]
+	ok(ridge == own, "a ridge patch grows exactly its zone's list (%s)" % str(ridge))

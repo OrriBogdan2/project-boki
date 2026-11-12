@@ -120,7 +120,7 @@ func _rare_card(e: Dictionary) -> Control:
 		col = Color(String(GardenZones.info(BlackMarket.id_of(key))["colour"]))
 		icon = "seed"
 		blurb = "One key to wake the zone, once a week"
-	var b := UI.badge(icon if icon != "" else Goods.icon_of(key), col, 32.0, UI.R_CTRL)
+	var b := UI.badge(icon if icon != "" else Goods.icon_of(key), col, 32.0)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(b)
 	var nv := UI.vbox(0)

@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 27 and fine, "27 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 26 and fine, "26 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -105,39 +105,13 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = 4
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 4 grows a form")
+	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
+			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
 	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
-	_aura(rec)
-
-## Glowmoss Sprig: a worn aura, one at a time, looks only; the model grows a GardenAura that glows at night.
-func _aura(rec: Dictionary) -> void:
-	var stats: Dictionary = rec["stats"].duplicate()
-	var pv := GardenItems.preview(rec, "glowmoss_sprig")
-	ok(pv["ok"] and pv["deltas"].keys() == ["aura"], "Glowmoss Sprig previews one change: its aura")
-	Save.d["items"]["glowmoss_sprig"] = 1
-	var res := GardenItems.use(rec, "glowmoss_sprig")
-	ok(res["ok"] and res["look"] and rec["aura"] == "glowmoss_sprig" and rec["stats"] == stats,
-			"worn: rec.aura set, stats untouched, the model redraws")
-	ok(not GardenItems.preview(rec, "glowmoss_sprig")["ok"], "a second one on the same Boki is refused")
-	var look := Save.new_kin(String(rec["species"]), "Look")      # a plain body: only the aura differs
-	look["aura"] = rec["aura"]
-	var n := Models.kin(String(rec["species"]), look)
-	var pt: GardenAura = n.get_node_or_null("GardenAura")
-	ok(pt != null and pt.night_only and not pt.emitting, "the model wears its aura, dark until night")
-	var clock: bool = HomeWork.is_night(0.97) and not HomeWork.is_night(0.5)
-	ok(GardenAura.lit(null, true) and clock, "no day clock: it glows; Home lights it at night")
-	n.free()
-	var off := GardenItems.take_off(rec, "glowmoss_sprig")
-	ok(off and rec["aura"] == "" and int(Save.d["items"]["glowmoss_sprig"]) == 1,
-			"taken off, back in the bag")
-	look["aura"] = rec["aura"]
-	var bare := Models.kin(String(rec["species"]), look)
-	ok(bare.get_node_or_null("GardenAura") == null, "no aura worn, no aura node")
-	bare.free()
 
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")
@@ -157,8 +131,4 @@ func _migration() -> void:
 		old.erase(f)
 	var data := {"v": 12, "roster": [old]}
 	var moved := Save.migrate(data) and int(data["v"]) == Save.VERSION
-	var no_aura := Save.new_kin("cindle", "Older")
-	no_aura.erase("aura")
-	Care.ensure(no_aura)
-	ok(no_aura["aura"] == "", "a Boki saved before auras loads wearing none")
 	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == 0, "a v12 save gains path, stay, loose")

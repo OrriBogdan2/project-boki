@@ -20,14 +20,11 @@ at 3 minutes and hatches 10 minutes later. The real wall is levels (below).
 
 ## Fixed on this branch (two blockers; the third below, the wood gate, is as bad and waits on an economy call)
 
-1. **A Boki raised at home could never level, so the Nook never opened (no egg, ever).** XP came only from
-   expeditions (`Game.add_xp` callers: match results and the Sunsap item). The Nook needs both Grown (level 8,
-   2800 XP). Fix: garden XP (GARDEN_MODERN 2.5, `scripts/home/garden_xp.gd`, `content/rules/garden_xp.json`): a
-   finished garden game pays every Boki that ran (8; the winner 15; the first win of the day in a game 45) through
-   `GardenPrizes.settle`, the one place all seven games already report to; the first care of a kind in a day pays 3
-   (`Care.care_day`, 3 kinds a day). Each grant is a journal line ("won the Dash: +45 XP", "reached level 2"), and
-   the result card shows "+N XP for your Boki". This also closed a journal gap: a Dash win or loss was a hidden
-   memory only. Check rows: `--garden-day-check` ("the Dash pays garden XP", "both Boki's journals say why").
+1. **A Boki raised at home could never level, so the Nook never opened.** Since written, main fixed it its own way:
+   `scripts/home/garden_xp.gd` pays XP for feed, pet, fetch and the training drill (farm-garden-xp-live). The branch's
+   own XP (games 8/15/45, first care of a kind 3, journal line, "+N XP" on the result card) was dropped in the merge
+   with main as redundant for care and unpaced for games; the alternative is `GardenXp.played` called from
+   `GardenPrizes.settle`, after `tools/garden_pace_check.gd` is re-run with it. The Dash pays no XP today.
 2. **No way to a second Boki from the base.** The Shelter (the only place to adopt a stray) opens at market stall
    level 2, and the stall says "Upgrade the stall (build mode, Upgrades)", but the base's build bar has no Upgrades
    tab. The Dash and the Nook both need two Boki. Fix: `Shelter.open()` (level 2, or base_mode), used by the market
@@ -60,3 +57,10 @@ at 3 minutes and hatches 10 minutes later. The real wall is levels (below).
 
 Every cause the run used shows on the Boki card after the fixes: meal, petting (first care of the day), the toy
 (fetches), the Dash (win or loss), XP and levels. Not in the journal: a bond forming between two Boki.
+
+## Notes from merging onto main (2026-11-12)
+
+On main the day check lists, rather than fails on: the Hob prompt wins over the Boki's own beside the start spot (pet
+step); feed, pet and Dash lines are not in the journal (main's XP grants write none; the branch's did); the Nook is
+out of reach in an hour (level 1 with 2 XP after the hour; the check's own "first egg" row is its test helper).
+The Shelter fix and `Shelter.open()` are unchanged. XP for games stays the open design question above.

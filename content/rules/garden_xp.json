@@ -1,13 +1,8 @@
 {
-	"desc": "Garden XP (scripts/home/garden_xp.gd; briefs/design/GARDEN_MODERN.md section 2.5): a Boki raised only at home levels too, so it can be Grown (the Nesting Nook's gate) and evolve. Level n needs 100 x n XP (Game.xp_need), the same curve as expeditions. Only with base_mode on.",
-	"play": 8,
-	"play_doc": "XP to each Boki that played a garden minigame (a loss, or the other side of a win).",
-	"win": 15,
-	"win_doc": "XP to the winner, instead of play.",
-	"first_win": 45,
-	"first_win_doc": "XP to the winner of the first win of the day in that game (three times a win), instead of win.",
-	"care_first": 3,
-	"care_first_doc": "XP for the first care of a kind in a garden day (a meal, a pet, a play).",
-	"care_kinds": 3,
-	"care_kinds_doc": "Kinds of care a day that pay care_first."
+ "_doc": "Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models.",
+ "feed": 2, "feed_love": 5,
+ "pet": 1, "pet_love": 2,
+ "fetch": 3, "fetch_love": 6,
+ "drill_per_point": 1,
+ "pace": {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0}
 }

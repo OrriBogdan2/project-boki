@@ -78,6 +78,7 @@ class Run:
 	var called := false             # your one call is used
 	var last_miss := -1             # the side that dropped the last seed, -1 before the first point
 	var rally := 0                  # hits since the serve
+	var hits := 0                   # hits in the whole match (the seed bat sound)
 	var to_win: int                 # points that win it: the rules', or this week's format
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
@@ -145,6 +146,7 @@ class Run:
 			spike = ""
 		fly_t = fly_total
 		rally += 1
+		hits += 1
 
 	func _arrive() -> void:
 		var p := BaseVolley.p_return(recs[to], recs[hitter]) * hard
@@ -167,9 +169,9 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]))
 	var wp: int = run.score[run.winner()]
 	var lp: int = run.score[1 - run.winner()]
+	MinigameHub.record("volley", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "volley", "beat %s %d to %d at Spark Volley" % [lose["name"], wp, lp], float(R["win_trust"]))
 	Save.remember(lose, "volley", "lost Spark Volley to %s, %d to %d" % [win["name"], lp, wp])
-	BaseBoard.record("volley", win, lose)
 	var backed_won: bool = run.recs[run.backed] == win
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
@@ -242,10 +244,6 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "volley"}
 
-## True from the start until the game is over (the Games board starts none on top of it).
-func running() -> bool:
-	return run != null
-
 func label() -> String:
 	return "Play Spark Volley (back %s)" % Save.active_kin().get("name", "your partner")
 
@@ -265,7 +263,7 @@ func use() -> void:
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
 	seed_node.visible = true
 	_place()
-	Sfx.play("whoosh", null, -8.0)
+	GardenSfx.countdown(h, log_node.position)
 
 ## A press: true when the match took it.
 func input(event: InputEvent) -> bool:
@@ -279,6 +277,7 @@ func input(event: InputEvent) -> bool:
 	if run.can_call():
 		var r := bar.press()
 		run.call_spike(r)
+		GardenSfx.crowd(r, pair[run.backed]["pos"])
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -291,7 +290,10 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	var points: int = run.score[0] + run.score[1]
+	var hits: int = run.hits
 	run.step(d)
+	if run.hits != hits:
+		GardenSfx.cue("garden_bat", pair[run.hitter]["pos"])
 	if not run.called:
 		bar.step(d)
 	if run.score[0] + run.score[1] != points:
@@ -339,6 +341,7 @@ func _end(finished: bool) -> void:
 	seed_node.visible = false
 	if finished:
 		_card(res, h.hrace.pin(res["win"], "volley"))
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()

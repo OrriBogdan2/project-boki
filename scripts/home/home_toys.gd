@@ -5,7 +5,7 @@ extends RefCounted
 ## farm_build.json base_mode is on.
 ## An idle Boki with room to be happier picks a toy by its lean and traits (a Flying or Rock Boki likes
 ## the post, Water and Ice the tub, Fire the stone, Grass and Bug the patch), walks to it, plays, and gains
-## the toy's stat through Care.add_stat.
+## the toy's stat through Care.add_stat. Its most-used toy becomes its favourite, picked first (FavToy).
 ## A second Boki may join the first; two hot tempers squabble and the newcomer huffs off.
 ## k["play"] = {u: toy uid, phase: "go" | "play", t: seconds}. home.gd calls pick, step and pose.
 
@@ -75,6 +75,8 @@ static func weight(rec: Dictionary, toy_id: String) -> float:
 	var w := 1.0 + float(R["trait_weight"]) * float(rec["traits"].get(String(def["trait"]), 0.5))
 	if (def["likes"] as Array).has(lean_of(rec)):
 		w += float(R["like_weight"])
+	if FavToy.of(rec) == toy_id:
+		w *= float(R["fav_weight"])
 	return w
 
 ## An idle Boki looks for a toy: true when it has set off for one. want: it is bored or curious (BaseLife.choose),
@@ -94,7 +96,7 @@ func pick(k: Dictionary, want := false) -> bool:
 	for t in toys():
 		var tp: Vector3 = t["pos"]
 		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
-		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp) or BaseRival.rival_near(h, k, tp):
+		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp):
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
 		weights[int(t["u"])] = weight(rec, String(t["id"])) * company
@@ -195,6 +197,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 	FarmTutorial.event("play")
 	var secs: Array = R["play_secs"]
 	p["t"] = randf_range(float(secs[0]), float(secs[1]))
+	p["secs"] = p["t"]
 	if others.size() >= 1:
 		h._emote(k, "★", true)
 		_bond(k, others[0], "bond_share")      # sharing one builds friendship
@@ -213,14 +216,14 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var def: Dictionary = R["toys"][t["id"]]
 	var stat := String(def["stat"])
 	var gained := Care.add_stat(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])))
-	var use: Dictionary = rec.get_or_add("toy_use", {})      # plays per toy: its habit (EvoPath care pip)
-	use[t["id"]] = int(use.get(t["id"], 0)) + 1
+	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])
 		Save.add_item(item, 1)
 		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
+	GardenFirstDay.mark("toy", h)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)

@@ -31,11 +31,20 @@
 		"dye_sky": {"name": "Sky dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "5ab8f0", "desc": "Recolours what a Boki wears."},
 		"dye_moss": {"name": "Moss dye", "kind": "dye", "rarity": "uncommon", "ref": 25, "icon": "paw", "col": "6fbf5a", "desc": "Recolours what a Boki wears."},
 		"dye_gold": {"name": "Gilt dye", "kind": "dye", "rarity": "rare", "ref": 60, "icon": "paw", "col": "f2c84a", "desc": "Recolours what a Boki wears, in shining gold."},
-		"dye_night": {"name": "Nightfall dye", "kind": "dye", "rarity": "epic", "ref": 120, "icon": "paw", "col": "3a3a6a", "desc": "Recolours what a Boki wears, deep as the night sky."}
+		"dye_night": {"name": "Nightfall dye", "kind": "dye", "rarity": "epic", "ref": 120, "icon": "paw", "col": "3a3a6a", "desc": "Recolours what a Boki wears, deep as the night sky."},
+		"ink_ember": {"name": "Ember Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "ff6a3a", "desc": "A vial of Ember Ink. Some Boki evolve when it is used on them."},
+		"ink_tide": {"name": "Tide Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "3a8ae0", "desc": "A vial of Tide Ink. Some Boki evolve when it is used on them."},
+		"ink_bloom": {"name": "Bloom Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "6fcf5a", "desc": "A vial of Bloom Ink. Some Boki evolve when it is used on them."},
+		"ink_storm": {"name": "Storm Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "f0d040", "desc": "A vial of Storm Ink. Some Boki evolve when it is used on them."},
+		"ink_frost": {"name": "Frost Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "9ae0f0", "desc": "A vial of Frost Ink. Some Boki evolve when it is used on them."},
+		"ink_shadow": {"name": "Shadow Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "4a3a6a", "desc": "A vial of Shadow Ink. Some Boki evolve when it is used on them."},
+		"ink_lunar": {"name": "Lunar Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "d8d0ff", "desc": "A vial of Lunar Ink. Some Boki evolve when it is used on them."},
+		"ink_prism": {"name": "Prism Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "f08ae0", "desc": "A vial of Prism Ink. Some Boki evolve when it is used on them."},
+		"ink_wyrm": {"name": "Wyrm Ink", "kind": "ink", "rarity": "rare", "ref": 60, "icon": "gem", "col": "8a3a3a", "desc": "A vial of Wyrm Ink. Some Boki evolve when it is used on them."}
 	},
-	"goods_doc": "Goods held in Save.d['goods'] (counts). kind: material (rare materials, found on expeditions), trophy (boss kills), dye (recolours a Boki's worn accessory). Belt utility, Boki wear and gear are traded from where they already live; their rarity is below.",
+	"goods_doc": "Goods held in Save.d['goods'] (counts). kind: material (rare materials, found on expeditions), trophy (boss kills), dye (recolours a Boki's worn accessory), ink (evolves a Boki whose line takes it, content/rules/evolve.json). Belt utility, Boki wear and gear are traded from where they already live; their rarity is below.",
 	"utility_rarity": {"armor_kit": "common", "jump_pad": "common", "smoke": "common", "stim": "uncommon", "medkit": "uncommon", "shield_cell": "rare", "scanner": "rare"},
 	"wear_rarity": {"bell": "common", "bow": "common", "leafhat": "common", "scarf": "uncommon", "crown": "uncommon", "goggles": "uncommon", "cape": "rare", "tophat": "rare", "collar": "uncommon", "charm": "epic"},
-	"finds": {"material": 0.25, "trophy_per_boss": 1},
-	"finds_doc": "Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill."
+	"finds": {"material": 0.25, "trophy_per_boss": 1, "ink": 0.05},
+	"finds_doc": "Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. ink: the chance of one Ink of any type (weighted by restock), rare on purpose; a boss with an 'ink' in its def (Data.MOBS) also gives its own Ink to the hunter who killed it."
 }

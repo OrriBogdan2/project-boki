@@ -136,8 +136,6 @@ static func ensure(rec: Dictionary) -> void:
 		rec["path"] = []           # path tokens it wears (GardenItems)
 		rec["stay"] = false        # wearing a Stayleaf: no new forms
 		rec["loose"] = 0           # points taken out of its stats, waiting to go back in
-	if not rec.has("aura"):
-		rec["aura"] = ""           # the aura item it wears, "" none (GardenItems, GardenAura draws it)
 	if not rec.has("hold"):
 		rec["hold"] = {}           # lean type -> garden days it is kept (GardenItems sweets)
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
@@ -159,8 +157,9 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 	rec["needs"][n] = clampf(before + amt, float(sulky().get(n, 0.0)), 100.0)      # the base: sulky at worst
 	return float(rec["needs"][n]) - before
 
-## Time passing at home. sleeping: curled up in bed or napping.
-static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
+## Time passing at home. sleeping: curled up in bed or napping (or indoors); raining: rain on the
+## farm, which some kinds love and some hate (BokiQuirks.rain_joy).
+static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -169,8 +168,9 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	var mins := secs / 60.0
 	var nd: Dictionary = rec["needs"]
 	var f0 := float(nd["food"])
-	var rate := DECAY["food"] / 60.0 * (0.5 if sleeping else 1.0)
-	nd["food"] = clampf(float(nd["food"]) - DECAY["food"] * mins * (0.5 if sleeping else 1.0), 0.0, 100.0)
+	var species := String(rec.get("species", ""))
+	var rate := DECAY["food"] * BokiQuirks.food_rate(species) / 60.0 * (0.5 if sleeping else 1.0)
+	nd["food"] = clampf(float(nd["food"]) - rate * secs, 0.0, 100.0)
 	var floors := sulky()
 	if floors.is_empty():
 		# the part of this stretch spent with nothing in it counts toward starving
@@ -183,7 +183,9 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
-	nd["joy"] = clampf(float(nd["joy"]) - joy_loss, 0.0, 100.0)
+	nd["joy"] = clampf(float(nd["joy"]) - joy_loss + ZoneAffinity.joy_per_min(rec) * mins, 0.0, 100.0)
+	if raining and not sleeping:
+		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
@@ -275,7 +277,6 @@ static func care_day(rec: Dictionary, kind: String) -> bool:
 	if now - float(days.get(kind, 0.0)) < float(Content.rules("care")["care_day_s"]):
 		return false
 	days[kind] = now
-	GardenXp.care(rec, kind)
 	return true
 
 ## Overall condition, 0 to 100.
@@ -287,7 +288,6 @@ static func condition(rec: Dictionary) -> float:
 static func condition_name(rec: Dictionary) -> String:
 	var ss := starve_stage(rec)
 	if ss != "" and ss != "dead": return String(STARVE_INFO[ss][0])
-	if rec.has("extra_care"): return "Needs extra care"
 	var c := condition(rec)
 	if c >= 75.0: return "In great shape"
 	if c >= 50.0: return "Doing fine"
@@ -609,6 +609,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
 	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
 	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
+	BokiQuirks.set_sex(baby)
 	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
@@ -631,7 +632,7 @@ static func lean_total(rec: Dictionary) -> float:
 static func stronger(a: Dictionary, b: Dictionary) -> Dictionary:
 	return b if lean_total(b) > lean_total(a) else a
 
-## One habit from each parent: the favourite food from one, the favourite play from the other.
+## One habit from each parent: the favourite food from one, the favourite play (and favourite toy) from the other.
 ## True if the food came from a.
 static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> bool:
 	ensure(a)
@@ -644,6 +645,8 @@ static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng:
 	if String(likes["hates"]) == food: likes["hates"] = likes["food"]
 	likes["food"] = food
 	likes["play"] = pp["likes"]["play"]
+	var toy := FavToy.of(pp) if FavToy.of(pp) != "" else FavToy.of(pf)     # the play habit carries its favourite toy
+	if toy != "": FavToy.inherit(baby, toy)
 	return a_food
 
 ## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
@@ -666,6 +669,8 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
 	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
+	if egg.has("visitor"):
+		baby["lineage"] = {"parents": [], "names": [], "gen": 0, "visitor": egg["visitor"]}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby

@@ -136,9 +136,9 @@ static func settle(hunt: Hunt) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]) * (float(R["friend_sulk"]) if friends else 1.0))
+	MinigameHub.record("seek", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
-	BaseBoard.record("seek", win, lose)
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
 	BaseRace.nudge_bond(win, lose, step)
 	Save.d["gems"] = int(Save.d["gems"]) + int(R["gems"])
@@ -209,10 +209,6 @@ func find(p2: Vector2) -> Dictionary:
 			return {"kind": "seek"}
 	return {}
 
-## True from the start until the game is over (the Games board starts none on top of it).
-func running() -> bool:
-	return state != S.IDLE
-
 func label() -> String:
 	if state == S.CARRY:
 		return "Hide the scent here"
@@ -250,7 +246,7 @@ func _hide(at: Vector2) -> void:
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
-	Sfx.play("whoosh", null, -8.0)
+	GardenSfx.countdown(h, scent.position)
 
 func _walkable(p: Vector2) -> bool:
 	return h._ground_h(p.x, p.y) > -50.0
@@ -277,6 +273,8 @@ func tick(d: float) -> void:
 		S.HUNT:
 			hunt.step(d)
 			_move_pair(d)
+			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
+			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
 			if hunt.over():
 				_end(true)
 		S.RESULT:
@@ -301,9 +299,11 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 	if is_instance_valid(scent):
 		scent.queue_free()
+	GardenSfx.sniff_stop()
 	if finished:
 		go(S.RESULT)
 		_card(res, h.hrace.pin(res["win"], "seek"))
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
@@ -322,5 +322,4 @@ func _card(res: Dictionary, pinned: bool) -> void:
 		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]]
-		+ BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
+		["+%d gems" % res["gems"], 14, UI.GOLD]] + BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))

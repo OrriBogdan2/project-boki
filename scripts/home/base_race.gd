@@ -24,8 +24,6 @@ const JUMP_H := 0.6                          # m, the top of the jump's arc
 const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
 const TRACK_W := 1.4                         # m, the track's width (four lanes)
 const REACH := 1.6                           # m from the post to start a race
-const GARDEN_DB := -6.0                      # dB: the garden sounds sit under the Boki voices
-const SULK_DELAY := 0.7                      # s after the win sting until the loser huffs
 const STRETCH_COL := {
 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
 }
@@ -33,9 +31,9 @@ const STRETCH_COL := {
 static func rules() -> Dictionary:
 	return Content.rules("base_race")
 
-## Weeks since 1970 by the device clock (default now), or at `now` in unix seconds.
-static func week_now(now := -1.0) -> int:
-	return int((now if now >= 0.0 else Time.get_unix_time_from_system()) / float(rules()["week_s"]))
+## Weeks since 1970 by the real clock.
+static func week_now() -> int:
+	return int(Time.get_unix_time_from_system() / float(rules()["week_s"]))
 
 ## The weekly event format for a week number (default this week): {id, game, name, note, plus its tweak:
 ## mult?, wobble?, swap?, night?, to_win?}.
@@ -43,11 +41,10 @@ static func twist(week := -1) -> Dictionary:
 	var list: Array = rules()["twists"]
 	return list[(week if week >= 0 else week_now()) % list.size()]
 
-## The week's format (default this week) when it is for this game ("dash", "seek", "volley", "shove"),
-## else the in-season zone's twist when the season is this game's (GardenSeasons), else {}: plays as usual.
-static func tweak(game: String, week := -1) -> Dictionary:
-	var f := twist(week)
-	return f if String(f["game"]) == game else GardenSeasons.twist(game, week)
+## This week's format when it is for this game ("dash", "seek", "volley"), else {}: the game plays as usual.
+static func tweak(game: String) -> Dictionary:
+	var f := twist()
+	return f if String(f["game"]) == game else {}
 
 static func lap() -> float:
 	var out := 0.0
@@ -237,9 +234,9 @@ static func settle(run: Run) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
-	BaseBoard.record("race", win, lose)
 	nudge_bond(win, lose, -float(R["rival_step"]))
 	for n in range(1, order.size()):
 		var a: Dictionary = run.recs[order[n - 1]]
@@ -280,7 +277,6 @@ var wall: Node3D = null        # the showcase wall (BaseShowcase) by the post, w
 var start := Vector3.ZERO      # the loop's start line
 var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
-var pair_force: Array = []     # a rematch's two kin entries, which every game takes before the rested ones (BaseRival)
 var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var cheers: Array = []         # the grades of your presses this lap
@@ -349,13 +345,11 @@ func _post_model() -> void:
 	flag.position = Vector3(0.32, ground(post.position) + 1.4, 0)
 	post.add_child(flag)
 	var sign_t := Label3D.new()
-	var season := GardenSeasons.season()
-	sign_t.text = "This week, %s: %s\n%s\nIn season: %s, %s" % [String(twist()["game"]).capitalize(),
-			twist()["name"], twist()["note"], season["name"], GardenSeasons.twist(season["game"])["name"]]
+	sign_t.text = "This week, %s: %s\n%s" % [String(twist()["game"]).capitalize(), twist()["name"], twist()["note"]]
 	sign_t.font_size = 28
 	sign_t.pixel_size = 0.004
 	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sign_t.position = Vector3(0.3, ground(post.position) + 1.92, 0)
+	sign_t.position = Vector3(0.3, ground(post.position) + 1.85, 0)
 	post.add_child(sign_t)
 
 static func mat(c: Color) -> StandardMaterial3D:
@@ -379,10 +373,6 @@ func find(p2: Vector2) -> Dictionary:
 		return relay.find(p2)
 	return {"kind": "race"}
 
-## True from the start until the game is over (the Games board starts none on top of it).
-func running() -> bool:
-	return run != null
-
 func label() -> String:
 	var fmt := String(tweak("dash").get("name", ""))
 	var back := "back %s" % Save.active_kin().get("name", "your partner")
@@ -390,8 +380,6 @@ func label() -> String:
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
-	if pair_force.size() == 2 and pair_force.all(func(k): return h.kins.has(k) and not BaseLife._taken(k)):
-		return pair_force
 	var R := rules()
 	var out: Array = []
 	var ak := Save.active_kin()
@@ -444,7 +432,7 @@ func _begin(ks: Array) -> void:
 	heard = []
 	heard.resize(runners.size())
 	heard.fill(0)
-	Sfx.play("garden_start", start, GARDEN_DB)
+	GardenSfx.countdown(h, start)
 
 func _bar_label(last: String) -> void:
 	var who: String = run.recs[run.backed]["name"]
@@ -465,8 +453,7 @@ func input(event: InputEvent) -> bool:
 		var r := bar.press()
 		run.cheer(r)
 		cheers.append(r)
-		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", runners[run.backed]["pos"], GARDEN_DB,
-				0.04, 1.2 if r == "great" else 1.0)
+		GardenSfx.crowd(r, runners[run.backed]["pos"])
 		if r != "miss" and "verbs" in h:
 			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
@@ -497,11 +484,11 @@ func _hear_laps() -> void:
 			continue
 		heard[i] = mark
 		if mark < stretches:
-			Sfx.play("garden_lap", runners[i]["pos"], GARDEN_DB)
+			GardenSfx.cue("garden_lap", runners[i]["pos"])
 			continue
-		Sfx.play("garden_finish", runners[i]["pos"], GARDEN_DB)
+		GardenSfx.cue("garden_finish", runners[i]["pos"])
 		if heard.filter(func(m): return m >= stretches).size() == 1:
-			Sfx.play("garden_crowd", runners[i]["pos"], GARDEN_DB)
+			GardenSfx.cue("garden_crowd", runners[i]["pos"])
 
 func _place_runners() -> void:
 	var st: Array = stretches(run.tw)
@@ -544,9 +531,10 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 	bar.close()
 	if finished:
+		GardenFirstDay.mark("race", h)
 		if solo_rec.is_empty():
 			_race_card(res, pin(res["win"], "dash"))
-			result_sounds(h, res)
+			GardenSfx.result(h, res)
 			h._emote(h._kin_entry(res["win"]), "♥", true)
 			h._emote(h._kin_entry(res["lose"]), "…", true)
 		else:
@@ -559,8 +547,8 @@ func _end(finished: bool) -> void:
 ## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
 ## Shared with Seek and Spark Volley. False when this week's format is another game's.
 func pin(win: Dictionary, game: String) -> bool:
-	var fmt := twist()
-	if String(fmt["game"]) != game:
+	var fmt := tweak(game)
+	if fmt.is_empty():
 		return false
 	var node: Node3D = h._kin_entry(win)["node"]
 	BaseShowcase.add(win, fmt, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))
@@ -583,7 +571,6 @@ func _race_card(res: Dictionary, pinned: bool) -> void:
 	var lose: Dictionary = res["lose"]
 	var why := " for backing the winner" if res["backed_won"] else ""
 	show_card("%s wins the Dash!" % win["name"], [
-		["%s: pinned to the showcase wall" % run.tw.get("name", "Dash"), UI.MUTED],
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
 		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned) + GardenPrizes.rows(res["prize"]))
@@ -611,12 +598,6 @@ func show_card(title: String, lines: Array) -> void:
 		rows.append([l[0], 14, l[1]])
 	card = result_card(h, rows)
 	card_t = float(rules()["card_s"])
-
-## The win sting at the winner and, a beat later, the loser's huff. Shared with the Stump Shove.
-static func result_sounds(home, res: Dictionary) -> void:
-	Sfx.play("garden_win", home._kin_entry(res["win"])["pos"], GARDEN_DB)
-	var huff := func(): Sfx.play("garden_sulk", home._kin_entry(res["lose"])["pos"], GARDEN_DB)
-	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
 
 ## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove,
 ## Seek and Spark Volley.

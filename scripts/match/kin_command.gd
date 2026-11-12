@@ -6,6 +6,7 @@ extends RefCounted
 ##           Boki on you (Return): it is thrown at the cursor as before.
 ##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow
 ##   The Boki casts its own ability by itself (KinTactics.think_abilities); bots press it through cast_c.
+##   Quick keys (unbound by default) give the wheel orders and the tap: KinKeys
 ##   X       the Merge (KinMerge.press)
 ## A tap is judged on release (so a hold can be told apart); the press is polled each frame (poll),
 ## the result is queued in Match.pending_input and applied on the fixed step (tap); a wheel pick waits in
@@ -14,10 +15,6 @@ extends RefCounted
 
 static func rules() -> Dictionary:
 	return Content.rules("boki_system")
-
-## R runs the classes' own ultimate (ArchKit.use_r) instead of the Merge. Off: R is the Merge for every class.
-static func class_ults() -> bool:
-	return bool(rules().get("class_ults", false))
 
 ## The G key, polled every frame for the local player. Returns "tap" on the frame a short press is released,
 ## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
@@ -135,8 +132,7 @@ static func order(h: Hunter, id: String) -> bool:
 		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "back on you", "follow": "at your side"}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
 		h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)
-		var mood := "alert" if id in ["guard", "chase"] else "happy"
-		h.m.sfx(KinVoice.cue(k.species, mood), k.pos, -8.0, Unique.voice(k.rec))
+		h.m.sfx("kin_alert" if id in ["guard", "chase"] else "kin_happy", k.pos, -8.0, Unique.voice(k.rec))
 	return ok
 
 static func target_name(e: Ent) -> String:
@@ -156,7 +152,7 @@ static func chase_pick(h: Hunter) -> Ent:
 	var aim: Vector3 = h.inp.get("aim", h.pos)
 	var best: Ent = null
 	var bd := 1e9
-	for f in h.m.foes_of(h.team):
+	for f in h.m.foes_of(h.team, false):
 		if f.dead or not f.hittable() or (f is Hunter and f.downed) or Shrubling.hidden(f):
 			continue
 		if f.flat_dist(h) > float(rules()["follow"]["engage_range"]) * 2.0:

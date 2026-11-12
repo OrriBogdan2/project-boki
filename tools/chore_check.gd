@@ -32,7 +32,7 @@ func _new_save() -> Dictionary:
 	recs[3]["needs"]["joy"] = GLUM_JOY
 	d["roster"] = recs
 	d["active"] = recs[0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	d["egg"] = {"a": recs[0]["uid"], "b": recs[1]["uid"], "m": 99999, "t": Time.get_unix_time_from_system() + HATCH_S}
 	Save.d = d
 	HomeLayout.ensure(d)
