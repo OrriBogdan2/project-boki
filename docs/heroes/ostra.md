@@ -279,6 +279,14 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 
 Not in the slots: `ostra_flurry` has no caller on main; `ostra_empower` (Swollen, 0.9 s) has no source frame.
 
+## Release against the gesture (11-12, `--sfx-strike-check`, docs/art/SFX_TIMING.md)
+E Brimseed: the clip's strike sits at 0.02 with `lead` 0.06 (the table above), but as played the 0.1 s blend from the
+idle put the hand's fastest frame at 83 ms (100 on d255acbee), after the seed was down. Source [0350-0352]: Void's field
+is at the cursor in the first frame his pose changes, nothing leaves his hand (the orb drops onto the spot from above),
+so the seed stays on the press (gameplay kept) and the gesture moves to frame 0: `ostra_seed` "fade" 0.03 in
+warden_anim/ostra.json, strike now 33 ms. Asserted by `--sfx-strike-check` (FIXED: os_seed on its strike).
+`--ostra-combo-check` E seed "owns the body" 0.10 -> 0.03 s.
+
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
   HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.

@@ -211,6 +211,19 @@ cycle at 4.1 steps/s) to slow its cadence without sliding.
 Suggestions (ours, not built): a bigger RMB hop (taken up by ext/meeko-rmb-verify); a run re-key to the sheet's 4.1
 steps/s with longer strides; a quicker fade (0.05 s) on `mm_call` so the 0.1 s thrust lands at full weight.
 
+## Release against the gesture (11-12, `--sfx-strike-check`, docs/art/SFX_TIMING.md)
+The clip's own strike already sat on the effect (the `lead` above); what still lagged was the blend from the pose before
+into the move (0.05 s on the ember, WardenClips.FADE 0.1 on the Hearthlight), so the arm landed 50-83 ms after the
+ember and the hearth (83 / 133 ms on d255acbee). Checked against the footage, one row each:
+
+| Move | Source (5 fps) | Decision | Change | Now |
+|---|---|---|---|---|
+| LMB ember | the hand swirl and the bolt show in the same frame, the bolt already about 3 bh out (one frame of flight) in every swirl frame [0057, 0063, 0066, 0069]; no frame has the flick without the bolt | the bolt leaves on the press: gameplay kept, gesture to frame 0 | `mm_shot_r`/`_l`/`_emp` "fade" 0.03; the hand flash `THRUST_T` 0.08 -> 0.03 s (when the arm lands) | arm straight 33 ms after the ember (two 60 Hz frames), hit 67 unchanged |
+| E Hearthlight | the zone, the green plus and the raised hand first show in one frame [0196, 0216]; the frame before has none [0195, 0215] | the light is up on the press: gameplay kept, gesture to frame 0 | `mm_hearth` "fade" 0.05 (0.03 lifts the arms in a single 37 m/s frame) | arms up 33 ms after the press |
+
+Asserted by `--sfx-strike-check` (FIXED: tend_ember and tend_hearth on their strike). The procedural fallback rig
+(`KMovesCare`, used only without pip.glb) still thrusts at 0.08. Damage, cadence, cooldowns and Net unchanged.
+
 ## Look and sound
 - Pooled looks (`scripts/arch/kits/care_look.gd`, shaders `care_disc` and `care_glow`, both mixed rather than additive so the colours hold on bright grass): the 0.44 m amber ember comet with a 1.6 m tail and a violet-star impact, the burr orb, the saturated violet Burrseed root disc with thorns, the violet light column and root beams, the lantern plus and rising rays, the warm ring on her and the thrown disc (amber in the middle to teal at a bright rim, with a small caged lantern of light floating over it and drifting motes; no floor plus), the Kindle foot glow, and the dash's ember motes. Nothing is created per shot. Hearth Call's tether (a braid of warm light with two twisting strands) is pooled in `UltLook` (`ult_look.gd`, extends CareLook); its reach ring, pick ring and aim line are AimKit circles and a line.
 - Loudness (owner review item 23): the Hearthlight's closing chime plays at -8 dB, and the generic explosion sounds (`boom`, `ab_blast`, `ab_slam`: Boki bursts and riders, area hits) sit 7 dB under the rest of the mix (`Sfx.BLAST_DB`), so their peak stays under -6 dBFS (`Sfx.BLAST_PEAK_DB`, "audio: the explosion category peaks under the agreed level").

@@ -23,7 +23,7 @@
 		"ostra_snap_wind": {"clip": "snap_wind", "hold_from": 0.3}, "ostra_snap": {"clip": "snap", "fade": 0.05},
 		"ostra_swap_aim": {"clip": "swap_aim", "hold_from": 0.16, "fade": 0.05}, "ostra_swap": {"clip": "swap", "lead": 0.1},
 		"ostra_swap_air": {"clip": "swap_air", "hold_from": 0.47, "lead": 0.06}, "ostra_arrive": {"clip": "arrive"},
-		"ostra_seed": {"clip": "seed", "lead": 0.06}, "ostra_pop": {"clip": "pop", "upper": true},
+		"ostra_seed": {"clip": "seed", "lead": 0.06, "fade": 0.03}, "ostra_pop": {"clip": "pop", "upper": true},
 		"ostra_well": {"clip": "well", "hold_from": 0.27}, "ostra_well_snap": {"clip": "well_snap", "fade": 0.05}, "ostra_well_end": {"clip": "well_end"},
 		"ostra_empower": {"clip": "empower"},
 		"mf_xform": {"clip": "fuse"}

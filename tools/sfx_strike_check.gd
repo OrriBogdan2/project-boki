@@ -19,8 +19,11 @@ const STRIKE_MIN := 8.0        # m/s: a hand slower than this at its fastest has
 const WIND := ["wind", "aim", "draw", "charge", "tell", "summon", "place", "count", "whirl", "hum", "creak",
 	"shield_up", "pilot", "spin", "leap", "prime"]
 ## arch -> move -> [the sound fixed to play from its own event, that event: "strike", "hit" or "rise" (a Stone Row's
-## first rock up)]
-const FIXED := {"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"]}}
+## first rock up)]. Meeko's ember and Hearthlight and Motley's seed keep the press (the source's effect is out with the
+## gesture): their clip blends in fast enough ("fade" 0.03-0.05) that the strike lands on the sound
+const FIXED := {
+	"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"]},
+	"tender": {"lmb": ["tend_ember", "strike"], "e": ["tend_hearth", "strike"]}, "ostra": {"e": ["os_seed", "strike"]}}
 
 var A
 var bad := 0

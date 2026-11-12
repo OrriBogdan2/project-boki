@@ -17,6 +17,9 @@ Does each Hero's own fire / cast / impact sound land on what it belongs to? Meas
 |---|---|---|---|---|---|
 | Albert (bulwark) | LMB hammer throw | bjorn_throw | -67 ms (at the press) | +17 ms | plays when the hammer leaves his hand (`THROW_WIND`, the clip's release), not on the press |
 | Tenzo (dolm) | E Stone Row | br_raise | own `m.later(tell)` timer | +0 ms on the first rock up | played by the first rock that rises; the separate timer is gone, so no sound when no rock rose |
+| Meeko (tender) | LMB ember | tend_ember (and the ember) | @0, strike 83 on d255acbee, 50 on main + ext/w0246-anim (`lead` 0.06 already skips the clip's wind; the 0.05 s blend-in was the lag), -50..-67 ms | @0, strike 33, -33 ms; hit 67 unchanged | **source leaves on the press, gameplay kept, gesture moved**: Elluna's hand swirl and the bolt show in the same 0.2 s frame, the bolt already about 3 bh out (one frame of flight) in every swirl frame (0057, 0063, 0066, 0069), and no frame has the flick without the bolt. `mm_shot_r/l/emp` "fade" 0.03 in warden_anim/pip.json, the hand flash `THRUST_T` 0.08 -> 0.03 s (ext/anim-release-sync-meeko-motley) |
+| Meeko (tender) | E Hearthlight | tend_hearth (and the hearth) | @0, strike 133 on d255acbee, 83 on this line (the 0.1 s blend-in; the clip already holds the lift at `lead` 0.15), -83..-133 ms | @0, strike 33, -33 ms | **source on the press, gameplay kept, gesture moved**: the zone, the green plus and her raised hand first show in one frame (0196, 0216), the frame before (0195, 0215) has none of them. `mm_hearth` "fade" 0.05 (0.03 lifts the arms in one 37 m/s frame) |
+| Motley (ostra) | E Brimseed | os_seed (and the seed) | @0, strike 100 on d255acbee, 83 on this line (the 0.1 s blend-in; the clip's own strike sits at 0.02 with `lead` 0.06), -83..-100 ms | @0, strike 33, -33 ms | **source on the press, gameplay kept, gesture moved**: Void's field is at the cursor in the first frame his pose changes (0351, 0350 has neither), nothing leaves his hand (the orb drops from above at 0352). `ostra_seed` "fade" 0.03 in warden_anim/ostra.json |
 
 ## Over 50 ms, left as they are
 
@@ -27,11 +30,8 @@ kit's release time, not in the sound. Listed for the animation pass.
 
 | Hero | Move | Sound @ ms after press | Strike | Hit | Off | Why |
 |---|---|---|---|---|---|---|
-| Meeko (tender) | E Hearthlight | tend_hearth @0 | 133 (hearth) | - | -133 | hearth and its light appear on the press; the lantern lift peaks later |
-| Motley (ostra) | E Brimseed | os_seed @0 | 100 (seed) | - | -100 | the seed is planted at the aim on the press; the throw gesture follows |
 | Tenzo (dolm) | E Stone Row | br_crack @0 | 100 (e_row) | - | -100 | the ground-crack tell starts on the press; the hands hit the ground at 100 |
 | Tenzo (dolm) | LMB boulder | br_throw @17 | 150 (lmb_throw) | 83 | -67 | the boulder spawns on the press and hits before the arm comes through (clip late) |
-| Meeko (tender) | LMB ember | tend_ember @0 | 83 (shot_r) | 67 | -67 | ember spawns on the press; the arm is straight at `THRUST_T` 0.08 s |
 | Neve (rimewright) | LMB dart | rime_shard @0 | 67 (dart_l) | 100 | -67 | dart spawns on the press |
 | Neve (rimewright) | RMB held lance | rime_lance @600 | 83 (spear_aim) | 667 | -67 | the lance flies 67 ms to the zone; its spear clip strikes ~0.58 s (the aim clip's twitch is picked as the strike), so on the clip it is within 20 ms |
 | Grimble (dredge) | LMB shot | dr_shot @17 | - | 100 | -83 | no clip strike; the pellets travel 3 m |

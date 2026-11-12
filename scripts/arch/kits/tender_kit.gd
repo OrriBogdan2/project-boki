@@ -10,7 +10,7 @@ extends ArchKit
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
-const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
+const THRUST_T := 0.03         # s after the ember when the arm is straight out (pip.json "fade"; the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
