@@ -65,3 +65,11 @@ body by node name (same skeleton, no rest drift) and added `x_breath` at the lin
 
 ## Body6 (2026-11-11, patch 0.24.6)
 Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/cinder_v95.json`) onto the body6 pick cand_B from `~/meshy/v95/Cinder/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick).
+
+Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with cinder_clips.py on
+~/meshy/cinder_v2/stage_p2/cinder.blend (a control bake of `walk_f` matched this glb's to 4e-7) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
+On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
+command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.
+
+Merge of origin/main into ext/hunters3d-0246 (11-12): the body6 B glb kept; main's `run_f/b/l/r`, `jet_land` (re-key) and `pet`, `give`, `cheer` copied on from main's glb with glb_add_clips.py (same rig). hem.glb and vex.glb got `pet`/`give`/`cheer` the same way, and main's emitter anchors (Vex's three muzzles on forearm.R, Hem's anchor_nock on bow_s: node parent and local transform from main's glb; rest world positions are equal).
