@@ -883,14 +883,19 @@ func can_glide() -> bool:
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
-## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled. The
-## dash's own wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
+## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled, unless
+## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Rock Hop's launch_to). The dash's own
+## wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 ## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 func _dash_into_glide() -> bool:
+	if grounded or dropping or downed or shot_down or stun_t > 0.0 or (ak != null and ak.no_glide()) \
+			or not loco.can(Loco.S.GLIDING):
+		return false
+	if ak != null and ak.glide_cancel():
+		return true
 	var in_dash := roll_t > 0.0 and move_kind == "dash"
 	var just_after := roll_t <= 0.0 and dash_glide.fresh(self)
-	if not (in_dash or just_after) or grounded or dropping or downed or shot_down or stun_t > 0.0 \
-			or (ak != null and ak.no_glide()) or not loco.can(Loco.S.GLIDING):
+	if not (in_dash or just_after):
 		return false
 	roll_t = 0.0
 	glide_cd = 0.0
