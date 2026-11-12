@@ -1,7 +1,5 @@
 {
 	"desc": "The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.",
-	"class_ults": false,
-	"class_ults_doc": "false: the Merge key is the Merge for every class. true: it runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits.",
 	"bond_from_ult": {
 		"hit": 0.6,
 		"knock": 0.7,
@@ -70,9 +68,12 @@
 		"engage_range": 9.0,
 		"disengage_range": 4.0,
 		"guard_leash": 24.0,
-		"chase_leash": 30.0
+		"chase_leash": 30.0,
+		"shoulder_max_mass": 1.2,
+		"guard_side_m": 1.7,
+		"guard_min_m": 1.2
 	},
-	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. disengage_range: m; after an explicit Follow in a fight, a foe hitting the Boki or you from this close sends it back into the fight. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you.",
+	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. disengage_range: m; after an explicit Follow in a fight, a foe hitting the Boki or you from this close sends it back into the fight. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you. shoulder_max_mass: a Boki heavier than this (body.mass) is too big to sit on you; on the Return order it guards at your side instead. guard_side_m: m from you to that guard spot, square to where you face; guard_min_m: m it never comes closer than (never under or in you).",
 	"wheel": {
 		"deadzone_px": 30,
 		"pop_s": 0.14,

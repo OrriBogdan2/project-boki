@@ -2,7 +2,7 @@ extends RefCounted
 ## --in-combat-check: the one "in combat" rule (scripts/match/in_combat.gd, content/rules/combat.json).
 ## Hitting a foe, being hit, a monster's damage either way and a Boki's hit each start it and last the
 ## window; healing, falling, friendly fire and damage to yourself don't. The Hunter's shield refill, the
-## drive music, a far bot's slow tick and the Boki's 10 Hz think all switch on the same frame, on and
+## drive music and the Boki's 10 Hz think all switch on the same frame, on and
 ## off. Never touches the save.
 
 var bad := 0
@@ -77,19 +77,15 @@ func run(main: Node) -> void:
 	print("INCOMBAT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Shield refill, drive music, a far bot's tick and the Boki's think, frame by frame from a hit until the window ends.
+## Shield refill, drive music and the Boki's think, frame by frame from a hit until the window ends.
 func _same_frame() -> void:
 	P.kin_bonus = {"owner_shield": 40.0}
 	P.kin_shield = 0.0
-	while foe.flat_dist(P) < Bot.FAR_M + 5.0:
-		foe.teleport(m.world.random_ground())
-	foe.ai["tgt"] = null
-	foe.ai["goal_kind"] = ""
 	var k: Kin = P.kin
 	k.disengaged = false
 	var md: MusicDir = m.music_dir
 	foe.hurt(5.0, P)
-	var first := {"shield": -1, "music": -1, "bot": -1, "boki": -1}
+	var first := {"shield": -1, "music": -1, "boki": -1}
 	var window_frames := int(round(InCombat.window() / Match.DT))
 	for i in window_frames + 30:
 		var shield0 := P.kin_shield
@@ -98,16 +94,12 @@ func _same_frame() -> void:
 		k.pos = P.pos + Vector3(1.5, 0, 0)
 		_step()
 		md.tick(m, Match.DT)
-		foe.ai["far_dt"] = 0.0
-		m.bot_brain.tick(m, foe, Match.DT)
-		var calm := {"shield": P.kin_shield > shield0, "music": md.goal < 1.0, "bot": float(foe.ai["far_dt"]) > 0.0,
-			"boki": k.think_t > 0.0}
+		var calm := {"shield": P.kin_shield > shield0, "music": md.goal < 1.0, "boki": k.think_t > 0.0}
 		for key in first:
 			if i == 0:
 				ok(not calm[key], "%s is on the frame of the hit" % key)
 			if first[key] < 0 and calm[key]:
 				first[key] = i
-		foe.ai["tgt"] = null
 	var frames: Array = first.values()
 	ok(frames[0] > 0 and frames.count(frames[0]) == frames.size(),
-		"all four go calm on the same frame (shield %d, music %d, bot %d, boki %d)" % frames)
+		"shield, music and Boki think go calm on the same frame (%d, %d, %d)" % frames)

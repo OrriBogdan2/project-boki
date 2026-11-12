@@ -2,7 +2,7 @@ class_name InCombat
 extends RefCounted
 ## The one "in combat" rule (content/rules/combat.json): a Hunter or a Boki is in combat for window_s
 ## seconds after it deals or takes fight damage. Ent.hurt reports every hit here; regen, music, the
-## bot and Boki AI tick and the Boki's orders only ask is_in.
+## Boki AI tick and the Boki's orders only ask is_in.
 
 const CALM_HZ := 10.0                           # decisions a second for a Boki out of combat (perf pass)
 const NOT_FIGHTS := ["fall", "wall", "heat"]    # hit sources that are the world, not a fight
