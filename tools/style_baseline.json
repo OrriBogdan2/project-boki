@@ -861,9 +861,6 @@
 "long_line": 33,
 "semicolon": 15
 },
-"tools/camps_check.gd": {
-"long_line": 21
-},
 "tools/capture_check.gd": {
 "long_line": 29,
 "semicolon": 9
