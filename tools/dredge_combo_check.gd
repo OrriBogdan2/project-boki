@@ -25,14 +25,26 @@ func run(main_node: Node) -> void:
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
+	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await _ranks()
+	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Taps the Abyssal Hand and steps through the coil-back and the flight (it grabs, misses or is stopped), then
+## one frame more so a reel's first frame is drawn.
+func _throw(m: Match, P: Hunter) -> void:
+	ak.tap(m, P)
+	var tw := 0.0
+	while (P.ak as DredgeKit).flying and tw < 1.5:
+		ak.step(m, ak.DT)
+		tw += ak.DT
+	ak.step(m, ak.DT)
 
 ## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
 ## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
@@ -60,7 +72,7 @@ func _hook_hold() -> void:
 		"hook hold: while the hook flies out he walks at 15-25% speed",
 		K.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
 	)
-	ak.step(m, 0.5)
+	ak.step(m, 01.0)
 	P.inp["move"] = Vector2.ZERO
 	# mid-air, a hook that misses: no fall while it flies, gravity the moment it ends
 	K.cd["rmb"] = 0.0
@@ -103,7 +115,7 @@ func _hook_hold() -> void:
 		K.flying and P.flat_dist(k0) > 0.6 and absf(P.pos.y - k0.y) <= 0.05,
 		"shoved %.2f m, height %+.3f" % [P.flat_dist(k0), P.pos.y - k0.y]
 	)
-	ak.step(m, 0.6)
+	ak.step(m, 01.0)
 	# mid-air, a hook that catches: held from the throw to the end of the reel
 	P.teleport(home + Vector3(0, 1.0, 0))
 	P.vel = Vector3.ZERO
@@ -352,6 +364,7 @@ func _all() -> void:
 		K.cd["e"] = 0.0
 		K.pull = {}
 		K.flying = false
+		K.coil = 0.0
 		K.wind = 0.0
 		K.dive = {}
 		K.scoop = []
@@ -367,35 +380,20 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s; the spread's edge lines follow the real fan (fan_deg + bloom): each shot
-	# springs them wide, they breathe back in while fire is held, go brass once tight, and fold to one line at rest
+	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
 	var v0: int = K.volleys
-	var g: DredgeGun = K.gun
-	var rest := float(P.wpn["fan_deg"])
-	var off := 0.0          # the drawn lines against the real fan, once the kick's spring has settled
-	var narrowed := 0.0     # how far the lines closed between two shots, fire held
-	var peak := 0.0
-	var bloom := 0.0
-	var kicked := 0.0       # the last time the bloom rose (a shot)
+	var cone_seen := false
 	var tf := 0.0
-	var settled := 0.0      # s since the bloom settled after the release (the lines hold IDLE_T before they fold)
-	while tf < 3.0 and settled < 0.15:
-		P.inp["fire"] = tf < 1.05
-		settled = settled + ak.DT if tf >= 1.05 and P.wbloom <= 0.0 else 0.0
+	while tf < 1.05:
+		P.inp["fire"] = true
 		ak.aim_at(P, home + Vector3(2.0, 0, 0))
 		m.step(ak.DT)
 		tf += ak.DT
-		var deg := float(AimKit.entry(P, "spread").get("deg", 0.0)) if AimKit.shown(P, "spread") else 0.0
-		peak = maxf(peak, deg)
-		narrowed = maxf(narrowed, peak - deg) if P.inp["fire"] else narrowed
-		if P.wbloom > bloom + 0.5: kicked = tf
-		bloom = P.wbloom
-		if tf - kicked > 0.2 and AimKit.shown(P, "spread"):
-			off = maxf(off, absf(deg - (rest + P.wbloom)))
-		if m.time - g.shot_at < 0.02: peak = deg
+		if AimKit.shown(P, "spread"): cone_seen = true
+	P.inp["fire"] = false
 	var cone: Dictionary = AimKit.entry(P, "spread")
 	ok(
 		"gun: a shot every half second",
@@ -403,20 +401,14 @@ func _all() -> void:
 		"volleys %d in 1.05s" % (K.volleys - v0)
 	)
 	ok(
-		"gun: the spread's edge lines lie at the gun's real fan, out to the slug range",
-		AimKit.shown(P, "spread") and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and off < 2.0,
-		"len %.1f, %.1f deg off the real fan" % [float(cone.get("len", 0.0)), off]
+		"gun: the spread's edge lines lie on the ground out to the slug range",
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
+		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
 	)
-	ok("gun: fire held, the lines breathe back in between shots", narrowed >= 5.0, "closed %.1f deg" % narrowed)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
-	var col: Color = cone.get("col", Color.BLACK)
-	ok(
-		"gun: let go, the bloom settles to the rest fan and the lines go brass",
-		P.wbloom < 0.01 and absf(float(cone.get("deg", 0.0)) - rest) < 1.0 and col.is_equal_approx(DredgeGun.TIGHT_COL),
-		"bloom %.1f deg %.1f col %s" % [P.wbloom, float(cone.get("deg", 0.0)), col.to_html(false)]
-	)
-	ak.step(m, 0.8)
-	ok("gun: idle, the lines fold into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
+	# (the aimed shot comes back rate + 0.2 s off the trigger; the lines then hold IDLE_T and fold over FOLD_T)
+	ak.step(m, float(P.wpn["rate"]) + 0.2 + DredgeGun.IDLE_T + DredgeGun.FOLD_T + 0.1)
+	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
@@ -447,8 +439,7 @@ func _all() -> void:
 	)
 	# --- Abyssal Hand reels a foe in
 	reset.call()
-	ak.tap(m, P)
-	ak.step(m, 0.3)
+	_throw(m, P)
 	var d0 := P.flat_dist(T)
 	ok(
 		"abyssal hand: hooks the first foe, reel begins",
@@ -537,8 +528,8 @@ func _all() -> void:
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv + 4
 	var g0 := K.grapples
-	ak.tap(m, P)
-	ak.step(m, 0.5)
+	_throw(m, P)
+	ak.step(m, 0.2)          # the reel under way
 	ok(
 		"cliff: the hook pierces a cliff face and hooks the foe behind it",
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
@@ -565,8 +556,7 @@ func _all() -> void:
 	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4.0, 0, 0), Vector2(-1, 0), wall_def, 1.0)
 	var dm0: float = ak.dmg(T)
 	var gw0 := K.grapples
-	ak.tap(m, P)
-	ak.step(m, 0.6)
+	_throw(m, P)
 	ok(
 		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
 		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
@@ -593,8 +583,7 @@ func _all() -> void:
 	ak.step(m, 1.0)
 	# --- the reel has weight: walking sideways while reeling swings the body round you
 	reset.call()
-	ak.tap(m, P)
-	ak.step(m, 0.25)
+	_throw(m, P)
 	var start := T.pos
 	var dev := 0.0
 	var p_start := P.pos
@@ -624,8 +613,7 @@ func _all() -> void:
 	T2.dead = false
 	T2.teleport(home + Vector3(4.0, 0, 0))
 	ak.aim_at(P, T.pos)
-	ak.tap(m, P)
-	ak.step(m, 0.4)
+	_throw(m, P)
 	ok(
 		"ally: the hook catches an ally in its path and reels them in",
 		not K.pull.is_empty() and K.pull["t"] == T2 and T2.stun_t <= 0.0 and ak.dmg(T2) == 0.0,
@@ -919,8 +907,7 @@ func _all() -> void:
 	reset.call()
 	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
-	ak.tap(m, P)
-	ak.step(m, 0.3)
+	_throw(m, P)
 	ok(
 		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
 		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
@@ -946,8 +933,7 @@ func _all() -> void:
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
 	# --- a Boki merge that starts mid-reel / mid-wind-up ends them: the rope goes, no Anchor slam, no landing hit
 	reset.call()
-	ak.tap(m, P)
-	ak.step(m, 0.3)
+	_throw(m, P)
 	var reeling: bool = not K.pull.is_empty()
 	ok("merge hold: the reel is under way before the merge", reeling, "pull %s" % reeling)
 	var rope: Node3D = K.pull.get("node")

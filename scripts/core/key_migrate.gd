@@ -11,9 +11,9 @@ extends RefCounted
 ##           if its new key is already a custom key of another action.
 ##   step 5  Middle mouse left the Boki key (throw) for the new ping key: a saved throw binding drops it, and
 ##           ping starts unbound if middle mouse is another action's custom key.
-##   step 6  New defaults: Mouse 4 also pings, Mouse 5 also dashes (they left glide), and the Boki orders attack, come
-##           back and hold are K, N and L. Custom bindings stay as saved. A new default that would land on a key
-##           another action has saved is not applied: ping and dash keep their old key, the orders start unbound.
+##   step 6  New defaults: Mouse 4 also pings, Mouse 5 also dashes (they left glide). Custom bindings stay as
+##           saved. A new default that would land on a key another action has saved is not applied: ping and dash
+##           keep their old key.
 
 static func _code(k: int) -> String:
 	return "key:%d" % k
@@ -108,8 +108,7 @@ static func _mmb_to_ping(ks: Dictionary) -> void:
 ## player saved keeps what they saved; an unsaved one is pinned to its old default (or to none) instead.
 static func _new_defaults(ks: Dictionary) -> void:
 	var added := [["ping", "mouse:%d" % MOUSE_BUTTON_XBUTTON1, ["mouse:%d" % MOUSE_BUTTON_MIDDLE]],
-		["dash", "mouse:%d" % MOUSE_BUTTON_XBUTTON2, [_code(KEY_SHIFT)]],
-		["kin_attack", _code(KEY_K), []], ["kin_return", _code(KEY_N), []], ["kin_hold", _code(KEY_L), []]]
+		["dash", "mouse:%d" % MOUSE_BUTTON_XBUTTON2, [_code(KEY_SHIFT)]]]
 	for d in added:
 		if not ks.has(d[0]) and _used_elsewhere(ks, d[1], [d[0]]):
 			ks[d[0]] = d[2]

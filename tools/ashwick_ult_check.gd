@@ -396,6 +396,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	K.lmb_override(false, ak.DT)
 	P.wid = wid0
 	m.hud.slot_fx.erase("base")
+	PressDeny.last.clear()      # the press above was denied too, well inside the mash throttle (PressDeny.THROTTLE_S)
 	K.lmb_override(true, ak.DT)
 	ok("ult 66: a press answers on the LMB slot with the deny cue",
 			String((m.hud.slot_fx.get("base", {}) as Dictionary).get("kind", "")) == "deny")

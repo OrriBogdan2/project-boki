@@ -189,6 +189,9 @@ func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
 	return (ks.mass if ks else 0.8) * g * g
 
+func impulse(kb: Vector2, lift := -1.0) -> void:
+	BokiHit.knock(self, kb, lift)
+
 ## How it's carried: "shoulder", "perch" or "mount" (KinSpec carry.style).
 func carry_style() -> String:
 	return ks.carry_style if ks else "shoulder"
@@ -238,7 +241,7 @@ func courage() -> float:
 
 func danger_at(p: Vector3) -> float:
 	var d := (1.0 - hp / max_hp) * 2.0
-	for f in m.foes_of(team):
+	for f in m.foes_of(team, false):
 		var dist: float = Vector2(f.pos.x - p.x, f.pos.z - p.z).length()
 		if dist < 4.5:
 			var w := 0.6
@@ -592,7 +595,7 @@ func unbench() -> void:
 # ------------------------------------------------------------------ simulation
 func sim(dt: float) -> void:
 	prev = pos
-	if dead:
+	if dead or dt <= 0.0:          # (0: its far, calm hunter's off step, SimLod)
 		return
 	dt = KinPace.step(self, dt)
 	if dt == 0.0:
@@ -661,7 +664,7 @@ func sim(dt: float) -> void:
 				pos = owner_h.pos; prev = pos
 			if hp < max_hp:
 				hp = minf(max_hp, hp + max_hp * 0.02 * dt)   # resting in your satchel
-	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain:
+	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain and not BokiHit.held(self):
 		brain.think_abilities(dt)
 	KinRegen.tick(self, dt)
 	if comp:
@@ -854,9 +857,7 @@ func _sim_active(dt: float) -> void:
 			if target == null and m.time >= look_at_t:
 				look_at_t = m.time + RETARGET_S * rng.randf_range(0.75, 1.25)    # nothing to fight: look again soon
 	var wish := Vector2.ZERO
-	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
-	if root_t > 0.0 or stun_t > 0.0:
-		spd = 0.0
+	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if target:
 		var to := Vector2(target.pos.x - pos.x, target.pos.z - pos.z)
 		var d := to.length()
@@ -871,7 +872,7 @@ func _sim_active(dt: float) -> void:
 				ignore_until[target] = m.time + 5.0
 				target = null
 				wish = Vector2.ZERO
-		if target and d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5:
+		if target and d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5 and not BokiHit.held(self):
 			atk_cd = 0.95
 			lunge_t = 0.15
 			vel.x += to.normalized().x * 5.0; vel.z += to.normalized().y * 5.0
@@ -1028,7 +1029,7 @@ func _sim_wild(dt: float) -> void:
 		else:
 			if to.length() > 1.2:
 				wish = to.normalized() * speed * 0.85
-			elif atk_cd <= 0.0:
+			elif atk_cd <= 0.0 and not BokiHit.held(self):
 				atk_cd = 1.1
 				lunge_t = 0.15
 				angry_at.hurt(dmg * 0.8, self, {"kb": to.normalized() * 2.0, "src": "kin"})
@@ -1041,7 +1042,7 @@ func _sim_wild(dt: float) -> void:
 		if wander_to != Vector3.INF:
 			var to := Vector2(wander_to.x - pos.x, wander_to.z - pos.z)
 			wish = to.normalized() * speed * 0.35
-	_ground_move(wish, dt)
+	_ground_move(wish * BokiHit.move_k(self, 0.6), dt)
 
 func _daze() -> void:
 	burn_t = 0.0
@@ -1067,6 +1068,9 @@ func _sim_dazed(dt: float) -> void:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if state in ["dazed", "bench", "fused", "downed"] or wisp:
 		return 0.0
+	var bh := BokiHit.take(self, d, opts)
+	d = float(bh[0])
+	opts = bh[1]
 	if is_wild() and by and by is Hunter:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
@@ -1138,18 +1142,18 @@ func render(delta: float, alpha: float) -> void:
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
 		# perched on the pack (or a mount curled up into a ball on your back while you glide)
-		var torso: Node3D = owner_h.model.get_node("Rig/Torso")
 		var ball := carry_style() == "mount"
-		global_position = torso.global_transform * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
-		model.rotation.y = owner_h.face
+		var torso := WardenGlb.shown_torso(owner_h.model)
+		global_position = torso * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
+		model.basis = _ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.62 if not ball else 0.42, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
 		return
 	if on_you and owner_h and owner_h.model:
 		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
-		global_position = sh.global_position
-		model.rotation.y = owner_h.face
+		global_position = WardenGlb.shown_torso(owner_h.model) * sh.position
+		model.basis = _ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.55, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		# now and then it peeks out past its hunter's head, or nuzzles in against it
@@ -1189,6 +1193,12 @@ func render(delta: float, alpha: float) -> void:
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
+
+## Riding on you, it faces your way and leans with your body in the air (HunterAnim.AIR_TILT: the glider's bank, the
+## dive's pitch); its seat is on the body you see (WardenGlb.shown_torso).
+func _ride_basis() -> Basis:
+	var tilt: Quaternion = owner_h.model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	return Basis(Vector3.UP, owner_h.face) * Basis(tilt)
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:

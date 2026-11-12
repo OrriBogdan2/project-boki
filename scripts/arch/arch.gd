@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["gunslinger", "bulwark", "rimewright", "juggernaut", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "archer", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Albert, Neve, Kael, Cinder, Tenzo, Sparkle, Grimble, Meeko, Sable, Lace, Motley
+const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright", "mage", "thief", "ostra", "gil"]   # canonical Hunter order (display and unlock order everywhere): Lace, Kael, Vex, Albert, then Cinder, Meeko, Tenzo, Grimble, Neve, Sparkle, Sable, Motley, Gil
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -73,12 +73,19 @@ static func of_save() -> String:
 	return fix(String(Save.d.get("arch", "")), Data.class_of_save())
 
 ## A bot's archetype from a key (its id and the match seed): its own random stream, so picking one
-## never shifts the match's (seeded maps, loot and tests stay as they were). `only`, when it holds
-## any of the class, narrows the choice to those (DemoQuick's showcase lobby).
-static func pick_for(cls: String, key: String, only: Array = []) -> String:
+## never shifts the match's (seeded maps, loot and tests stay as they were). One already in `taken`
+## (its squad's) is skipped while the class has another; `only`, when it holds any of what is left,
+## narrows the choice to those (DemoQuick's showcase lobby).
+static func pick_for(cls: String, key: String, taken := [], only: Array = []) -> String:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
-	return pick(cls, r, only)
+	var pool := of_class(cls).filter(func(a): return not taken.has(a))
+	if pool.is_empty():
+		return pick(cls, r, only)
+	var shown := pool.filter(func(a): return a in only)
+	if not shown.is_empty():
+		pool = shown
+	return String(pool[r.randi_range(0, pool.size() - 1)])
 
 ## A random archetype of a class (bots), from `only` when it holds any of the class.
 static func pick(cls: String, rng: RandomNumberGenerator, only: Array = []) -> String:

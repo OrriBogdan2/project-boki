@@ -116,7 +116,8 @@ func _start() -> void:
 		if id == Net.me:
 			p = Net.my_presence
 		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
-	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": Data.SQUADS, "squad": squad, "tier": int(opts.get("tier", 0))}
+	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
+	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, Data.MATCH_PLAYERS), "squad": squad, "tier": int(opts.get("tier", 0))}
 	Net.lobby_emit("start", d)
 	_go(d)
 

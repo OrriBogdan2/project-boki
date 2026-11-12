@@ -47,7 +47,7 @@ func run(main_node: Node, _who := "") -> void:
 	A.ok("kael RMB aim follows the cursor live during E (90 deg off the throw)", A.dmg(T) >= 20.0,
 			"took %.0f" % A.dmg(T))
 	# 180 deg off the throw (behind him): the strike goes there too
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	A.fresh(T)
 	T.teleport(home + Vector3(-2.5, 0, 0))
 	K.cd["rmb"] = 0.0
@@ -61,7 +61,7 @@ func run(main_node: Node, _who := "") -> void:
 	A.ok("kael RMB aim follows the cursor live during E (180 deg, behind him)", A.dmg(T) >= 20.0,
 			"took %.0f" % A.dmg(T))
 	# the ult keeps momentum
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	P.teleport(home)
 	P.vel = Vector3(6.0, 0, 0)
 	K.cd["x"] = 0.0

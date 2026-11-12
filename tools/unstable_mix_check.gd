@@ -98,18 +98,18 @@ func run(m: Node) -> void:
 	ok(untouched == calm, "calm babies hatch with normal joy and no tag (%d of %d)" % [untouched, calm])
 	ok(quiet == calm, "calm pairs get no unstable note (%d of %d)" % [quiet, calm])
 	# ---- the day of care
-	var kid := Care.breed(_kin(themes["ember"], 0.5), _kin(themes["frost"], 0.5), rng)
+	var kid := Care.breed(_kin(themes["fire"], 0.5), _kin(themes["ice"], 0.5), rng)
 	for n in Care.NEEDS: kid["needs"][n] = 90.0
 	UnstableMix.tick(kid, float(rules["care_s"]) - 60.0)
 	ok(kid.has("extra_care"), "just under a day of care: still tagged")
 	UnstableMix.tick(kid, 120.0)
 	var cleared: bool = not kid.has("extra_care") and Care.condition_name(kid) != "Needs extra care"
 	ok(cleared, "after a day of care the tag is gone")
-	var worn := Care.breed(_kin(themes["ember"], 0.5), _kin(themes["frost"], 0.5), rng)
+	var worn := Care.breed(_kin(themes["fire"], 0.5), _kin(themes["ice"], 0.5), rng)
 	for n in Care.NEEDS: worn["needs"][n] = 10.0
 	UnstableMix.tick(worn, 3.0 * float(rules["care_s"]))
 	ok(worn.has("extra_care"), "days of neglect do not count as care")
-	var live := Care.breed(_kin(themes["ember"], 0.5), _kin(themes["frost"], 0.5), rng)
+	var live := Care.breed(_kin(themes["fire"], 0.5), _kin(themes["ice"], 0.5), rng)
 	var owed := float(live["extra_care"])
 	Care.tick(live, 60.0)
 	ok(float(live["extra_care"]) < owed, "Care.tick at home pays the day down")

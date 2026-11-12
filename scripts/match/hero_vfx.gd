@@ -14,12 +14,12 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"dome": 8}
+	"ring": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7, "petal": 8}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"dome": 2, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6, "petal": 4}
+	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6, "petal": 4}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32,
 	"petal": 24}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -32,8 +32,6 @@ const HOLD_LINGER := 0.15      # s a hold outlives its last ask
 const RIBBON_SAMPLES := 18     # points a mesh trail keeps
 const RIBBON_WAVES := 11.0     # rad along a trail's "wave" (a thread trailing in the air)
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
-const DOME_TOP := 0.55         # rad, how far a dome's shell rises from the ground toward its crown
-const DOME_ROWS := 6           # rings of a dome's mesh from its foot to its crown
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
 const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
@@ -52,7 +50,6 @@ var made := 0                  # nodes made so far (tests: it stops growing once
 var plays := {}                # (tests) move -> times played
 var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
-var _dome: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
 var scarves := HeroScarf.new(self)   # the cloth ends some Heroes trail (data "scarf")
@@ -312,8 +309,6 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"dome":
-			mi.mesh = _dome_mesh()
 		"flare":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
@@ -324,7 +319,7 @@ func _surface_node(kind: String) -> Node3D:
 			strip.size = Vector2.ONE
 			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
-		"vortex":
+		"vortex", "ring":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
 			mi.mesh = disc
@@ -367,31 +362,6 @@ func _cylinder() -> ArrayMesh:
 		st.add_vertex(way + Vector3.UP)
 	_cyl = st.commit()
 	return _cyl
-
-## A unit sphere band from the ground up to DOME_TOP, all round (the shader keeps its `arc` share, centred on +Z):
-## UV.x round it (0.5 at +Z), UV.y foot (0) to crown (1), normals out from the centre for the shader's sheen.
-func _dome_mesh() -> ArrayMesh:
-	if _dome:
-		return _dome
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var cols := ARC_SEGS * 2
-	for row in DOME_ROWS + 1:
-		var up := DOME_TOP * row / DOME_ROWS
-		for col in cols + 1:
-			var a := TAU * (float(col) / cols - 0.5)
-			var way := Vector3(sin(a) * cos(up), sin(up), cos(a) * cos(up))
-			st.set_uv(Vector2(float(col) / cols, float(row) / DOME_ROWS))
-			st.set_normal(way)
-			st.add_vertex(way)
-	for row in DOME_ROWS:
-		for col in cols:
-			var i0 := row * (cols + 1) + col
-			var i1 := i0 + cols + 1
-			for idx in [i0, i1, i0 + 1, i0 + 1, i1, i1 + 1]:
-				st.add_index(idx)
-	_dome = st.commit()
-	return _dome
 
 ## One of every kind held up at `at` on the loading screen (Match.warm_up, once per view, then prewarm_end), so the
 ## first cast compiles nothing. Particles have to run and a trail needs a surface, or their shaders are never built.
@@ -480,13 +450,11 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		"flare":
 			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
-		"vortex":
+		"vortex", "ring":
 			s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
-		"dome":
-			mt.set_shader_parameter("arc", float(layer.get("arc", 360.0)) / 360.0)
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
@@ -636,7 +604,7 @@ func _burst(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2
 	live_n += n
 	motes.append({"node": node, "t": 0.0, "dur": node.lifetime * 1.1, "n": n})
 
-## A look that stays on the Hero until the kit hides it (the first layer of `move`, a "skirt" or a "dome", seated on
+## A look that stays on the Hero until the kit hides it (the first layer of `move`, a "skirt", seated on
 ## the body and not pooled: one per hunter, freed with the kit's nodes). `arc` is in degrees, `tall` defaults to `size`.
 func shell(h: Hunter, move: String) -> MeshInstance3D:
 	var layer: Dictionary = _rec(h, move)["fx"][0]

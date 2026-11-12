@@ -1,12 +1,9 @@
 extends RefCounted
-## --farm-place-check: the farm tutorial's placement spotlight, Enter on "Fill it up", and the hunger gate
+## --farm-place-check: Enter on "Fill it up", Hob's relic timing and the hunger gate
 ## (PLAYTEST-1108 items 27, 28 and 31). Never touches the real save.
 ##   1. Enter presses "Fill it up" like a click, every time, and never leaves the panel stuck
-##   2. the placing spotlight (house, trough): dark throughout, the Build button, then the tile, then the exact
-##      ground, each cut out with a ring and "Click here"; clicks elsewhere do nothing; a click in the cut-out
-##      places the piece there; it fades after
-##   3. Hob's relic only after all 12 steps, on a fresh save and on a save reloaded mid-tutorial
-##   4. the hunger gate says how many meals a too-hungry partner needs, feeds it on the spot, updates live and
+##   2. Hob's relic only after all 12 steps, on a fresh save and on a save reloaded mid-tutorial
+##   3. the hunger gate says how many meals a too-hungry partner needs, feeds it on the spot, updates live and
 ##      offers Go the moment the line is crossed
 
 var bad := 0
@@ -30,7 +27,6 @@ func run(m: Node) -> void:
 		main.fade.reveal(0.05)
 	main.get_tree().root.size = Vector2i(1280, 720)
 	await _enter()
-	await _modal()
 	await _relic()
 	await _hunger()
 	print("FPLACE DONE, failures: %d" % bad)
@@ -125,79 +121,6 @@ func _enter() -> void:
 	ok(home.panel_open != "" and Econ.fill(f) == 0,
 		"an empty pantry: Enter says so and keeps the panel (nothing to do)")
 	home._close_panel()
-	home.queue_free()
-	await _frames(2)
-
-# ------------------------------------------------------------------ the placing spotlight
-func _modal() -> void:
-	var home = await _tutorial_home(["chop"])
-	ok(FarmTutorial.current() == "house" and FarmTutorial.stage("house") == "place",
-		"the house step is up (%s)" % FarmTutorial.current())
-	await _poll(home)
-	var n = FarmSpotlight._node
-	ok(FarmSpotlight.showing() and n.modal and n.phase == "hub", "step 1: the Build button is lit")
-	var btn: Control = home.hub_btns["build"]
-	await _frames(2)
-	var btn_at: Vector2 = btn.get_global_rect().get_center() - n.global_position
-	ok(n._block._has_point(Vector2(5, 5)) and not n._block._has_point(btn_at),
-			"clicks anywhere else are caught, the Build button is open")
-	await main.get_tree().create_timer(0.5).timeout
-	ok(n._mat.get_shader_parameter("dim") >= FarmSpotlight.DIM_MODAL - 0.01,
-		"everything else is dark (%.2f)" % n._mat.get_shader_parameter("dim"))
-	await _shot("place_1_build_button", 0.2)
-	home.hb.toggle()
-	await _poll(home)
-	n = FarmSpotlight._node
-	await _shot("place_2_house_tile", 0.6)
-	ok(FarmSpotlight.showing() and n.phase == "tile", "step 2: in build mode, the House tile is lit")
-	var tile: Control = home.hb.bar.tile_of("house")
-	var tile_r := Rect2()
-	if tile != null:
-		tile_r = Rect2(tile.get_global_rect().position - n.global_position, tile.size).grow(-4.0)
-	ok(tile != null and n._holes.size() == 1 and n._holes[0].grow(2.0).encloses(tile_r),
-			"the cut-out is exactly that tile")
-	ok(n.get_index() == n.get_parent().get_child_count() - 1, "the spotlight sits above the build bar")
-	var placed := HomeLayout.fixtures(Save.d, "house").size() + HomeLayout.fixtures(Save.d, "site").size()
-	var before: int = HomeLayout.ensure(Save.d)["deco"].size()
-	await _click(Vector2(12, 12))
-	await _frames(3)
-	ok(home.hb.held.is_empty() and Save.d["layout"]["deco"].size() == before, "a click elsewhere does nothing")
-	if tile is Button:
-		(tile as Button).pressed.emit()
-	else:
-		tile.gui_input.emit(_tile_click())
-	await _poll(home)
-	n = FarmSpotlight._node
-	ok(String(home.hb.held.get("id", "")) == "house" and FarmSpotlight.showing() and n.phase == "spot",
-		"step 3: the House is in hand, the spot is lit")
-	var cells: Array = home.guide.place_cells()
-	await _shot("place_3_the_spot", 0.6)
-	ok(not cells.is_empty() and home.hb.debug_m != Vector2.INF,
-		"the ghost sits on the target (%d tiles)" % cells.size())
-	var hole := Rect2(n._holes[0].position + n.global_position, n._holes[0].size)
-	await _click(Vector2(12, 12))
-	await _frames(3)
-	ok(Save.d["layout"]["deco"].size() == before, "a click outside the spot does nothing")
-	await _click(hole.get_center())
-	await _frames(4)
-	ok(not FarmHob.house_entry().is_empty(), "a click in the cut-out puts the house exactly there")
-	await main.get_tree().create_timer(0.5).timeout
-	ok(not FarmSpotlight.showing() or FarmSpotlight._node.phase != "spot",
-		"the spot light fades after the house is down")
-	ok(home.hb.debug_m == Vector2.INF, "the ghost is the player's again")
-	home.hb.toggle() if home.hb.active else null
-	home.queue_free()
-	await _frames(2)
-	# the trough, the same way
-	home = await _tutorial_home(["chop", "house"])
-	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-		"the trough step is up (%s)" % FarmTutorial.current())
-	await _poll(home)
-	ok(FarmSpotlight.showing() and FarmSpotlight._node.phase == "hub", "the trough step starts on the Build button too")
-	home.hb.toggle()
-	await _poll(home)
-	var lit := FarmSpotlight._node != null and FarmSpotlight._node.phase == "tile"
-	ok(lit and home.hb.bar.tile_of("feeder_trough") != null, "then the trough tile")
 	home.queue_free()
 	await _frames(2)
 

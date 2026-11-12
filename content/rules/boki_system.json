@@ -34,7 +34,9 @@
 		"carried_pct_s": 0.06,
 		"out_pct_s": 0.015,
 		"out_delay_s": 6.0,
-		"desc": "Health a Boki wins back on its own, as a share of max health per second: on you (Return, settled) 6%/s; out beside you 1.5%/s once it has gone out_delay_s without taking damage. A downed Boki never regenerates (rescue it). Kin.regen_quiet counts the seconds since it last lost health; Blight cuts it like any healing."
+		"owner_shield_delay_s": 5.0,
+		"owner_shield_pct_s": 0.5,
+		"desc": "Health a Boki wins back on its own, as a share of max health per second: on you (Return, settled) 6%/s; out beside you 1.5%/s once it has gone out_delay_s without taking damage. A downed Boki never regenerates (rescue it). Kin.regen_quiet counts the seconds since it last lost health; Blight cuts it like any healing. Hunters have no out-of-combat health regen of their own [game data: CT_LokiCharacterAttributes has stamina regen but no health regen for any of the 12]; only a Boki heals them: owner_regen points give that many hp/s at all times (none while downed, Blight cuts it), and owner_shield points give a small shield that refills owner_shield_pct_s of its size a second once you have gone owner_shield_delay_s without taking damage (Hunter.regen_wait). Dealing damage never restarts a wait; armour never refills on its own."
 	},
 	"down": {
 		"recover_s_trusting": 15.0,

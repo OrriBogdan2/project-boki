@@ -34,4 +34,4 @@ static func _calm_far(k: Kin) -> bool:
 		return false
 	if not (k.state == "active" or k.state == "shoulder") or k.m.time - o.hurt_at < HURT_S:
 		return false
-	return o.ai.get("tgt") == null and o.flat_dist(me) > Bot.FAR_M
+	return o.ai.get("tgt") == null and o.flat_dist(me) > SimLod.FAR_M

@@ -6,7 +6,7 @@ extends RefCounted
 ##   2. the first arrival: he waves and calls out and the camera does not move
 ##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; he points at the
 ##      stall; the camera holds one framing for every line (no zoom or pan per line) and only drifts to a far
-##      "show"; after the last line he is met (no name tag) and chopping is next
+##      "show"; after the last line he is met (no name tag) and the axe is next
 ##   4. the second Mask: no second Mask on a fresh save after the first expedition; not offered before the house
 ##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
@@ -75,10 +75,11 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
 			"Hob is a person standing by the market stall")
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "chop" and not home.guide.hint_lbl.text.contains("Hob:"),
-			"the first goal is chopping; meeting him is a one-time hint (%s)" % home.guide.hint_lbl.text)
-	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["gunslinger"],
-			"after the first expedition no second Mask is owned yet")
+	ok(FarmTutorial.current() == "hob" and home.guide.hint_text().contains("Hob")
+			and not home.guide.hint_text().contains("Hob:"),
+			"the first goal: meet him (%s)" % home.guide.hint_text())
+	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
+			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
 	# 2. the first arrival: no camera move
 	var zoom0: float = home.cam.zoom_to
 	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
@@ -131,10 +132,10 @@ func _first_arrival() -> void:
 		if hob.chat.talking():
 			box.advance()
 	await _frames(3)
-	ok(not hob.chat.talking() and home.panel_open == "" and FirstTimeHint.seen("hob") and not hob.node.tag.visible,
+	ok(not hob.chat.talking() and home.panel_open == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
-	ok(FarmTutorial.current() == "chop" and is_equal_approx(home.cam.zoom_to, zoom0),
-			"the goal is still chopping (you start with the axe), and the zoom is still yours")
+	ok(FarmTutorial.current() == "axe" and is_equal_approx(home.cam.zoom_to, zoom0),
+			"the next goal is the axe, and the zoom is still yours")
 	await _frames(40)
 	hob.talk()
 	await _frames(2)
@@ -202,7 +203,8 @@ func _offer() -> void:
 			"the reel moves on to the dash, from its start")
 	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
-	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
+	var tracker_off: bool = home.guide.tracker == null or not home.guide.tracker.visible
+	ok(tracker_off and marker_off and not home.guide.hint_box.visible
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
 	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
 	var screen: Rect2 = main.get_viewport().get_visible_rect()
@@ -214,8 +216,8 @@ func _offer() -> void:
 	offer.show_clip(2)
 	await _shot("hob_6c_dash", 1.0)
 	offer.pick("tender")
-	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
-			"taking Meeko opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))
+	ok(ClassUnlock.open_ids() == ["archer", "gunslinger", "tender"] and not ClassUnlock.second_pending(),
+			"taking Meeko opens her and no one else (%s)" % str(ClassUnlock.open_ids()))
 	box.advance()
 	box.advance()
 	await _frames(3)
@@ -231,11 +233,9 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	# every step was ticked off above, so there may be no goal line or card left: when there is one it is shown again
-	var g: FarmGuide = home.guide
-	var card_ok := not is_instance_valid(g.tracker) or g.tracker.visible
-	var line_ok := not is_instance_valid(g.hint_box) or g.hint_box.visible
-	ok(card_ok and line_ok and hob.node.tag.modulate.a == 1.0,
+	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
+	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
+	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:

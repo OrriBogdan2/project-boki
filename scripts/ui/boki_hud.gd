@@ -282,6 +282,16 @@ static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
 	H.c.draw_colored_polygon(PackedVector2Array([edge + dir * 14.0, edge - dir * 8.0 + side * 10.0, edge - dir * 8.0 - side * 10.0]), col)
 	H._ctext(edge - dir * 22.0 + Vector2(0, 4), "%ds" % int(ceil(k.down_t)), 11, Color(H.INK, 0.9), H.big)
 
+## Your Boki on the minimap once it is off your shoulder: a paw in its colour (the default minimap's "boki" kind).
+static func map_kin(c: Control, m: Match, to_map: Callable, on_map: Callable) -> void:
+	var k: Kin = m.player.kin if m.player else null
+	if k == null or not k.state in ["active", "flying", "returning", "flying_home", "dazed"]:
+		return
+	var pv: Vector2 = to_map.call(k.position)
+	if on_map.call(pv, 3.0):
+		c.draw_circle(pv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+		Icons.draw(c, "paw", pv, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
+
 ## Your squad's downed Boki on a map: a ringed cross in its colour (the minimap draws it at `pv`).
 static func map_dot(c: Control, pv: Vector2, k: Kin, r: float, time: float) -> void:
 	var col := Color(k.sp.get("glow", k.sp["color"]))
@@ -302,8 +312,6 @@ static func order_tip(H, p: Hunter) -> Array:
 	out.append(["Boki  ·  %s  ·  now: %s" % [Settings.key_cap("throw"), String(KinFollow.NAMES.get(k.cmd, "Follow"))], H.MUTED, 12])
 	out.append([("Tap: Sic, your Boki dives on the cursor from above" if k.carry_style() == "perch" else "Tap: Sic, your Boki leaps at the cursor") + ". Whatever it hits is stunned, and your shots crit stunned foes. Tap while it is away to call it back.", H.INK, 14])
 	out.append(["Hold and flick: up Chase (stick to a foe), right Guard (hold this spot), down Return (back on you), left Follow (at your side).", H.INK, 14])
-	var quick := "Quick orders  ·  %s attack my target  ·  %s come back  ·  %s hold position"
-	out.append([quick % ["kin_attack", "kin_return", "kin_hold"].map(Settings.key_cap), H.MUTED, 12])
 	if k.ks and not k.ks.throw_effects.is_empty():
 		out.append(["Its Sic also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
 	if k.ks:

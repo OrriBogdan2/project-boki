@@ -189,7 +189,6 @@ func _take_off() -> void:
 	_next(RISE)
 	kit.play("mage_x_air")
 	kit.vfx("x_rise", from)            # dust kicked out, a bolt up her climb (the range is AimKit's ring, not a fill)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.GLOW, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 

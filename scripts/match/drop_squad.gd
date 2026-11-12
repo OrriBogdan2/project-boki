@@ -28,6 +28,7 @@ var _bot_ping := {}           # hunter nid -> plan time left when it pings
 var _ack := []                # bot acknowledgements due {h, at, id}
 var clock := 0.0              # runs through the planning phase too (the match clock waits)
 var events: Array = []        # what happened, for tests
+var chests_hidden := false    # no chests show while you ride the ship and drop in (KeyChest.show_all)
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -48,6 +49,9 @@ func setup() -> void:
 		elif mem.has(m.player):
 			lead = m.player
 		leads[t] = lead
+	if m.player and (m.player.riding or m.player.dropping):
+		chests_hidden = true
+		KeyChest.show_all(m, false)      # until you're down (tick)
 	var o: Dictionary = m.opts
 	if m.big and not m.ship.is_empty() and not o.get("no_plan", false) and not o.get("tutorial", false) and not o.get("training", false) and not o.get("duel", false):
 		planning = true
@@ -294,6 +298,9 @@ func follow_vy(f: Hunter) -> float:
 func tick(dt: float) -> void:
 	clock += dt
 	_tick_acks()
+	if chests_hidden and not (m.player.riding or m.player.dropping):
+		chests_hidden = false      # landed, or fell short and came back on foot
+		KeyChest.show_all(m, true)
 	for t in leads:
 		var l := leader(int(t))
 		if l == null or not l.dropping:

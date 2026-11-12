@@ -27,11 +27,9 @@
 		"ult_carry_k": 0.8,
 		"ult_carry_decay_per_s": 1.6,
 		"ult_up_min_mps": 1.0,
-		"ult_up_bonus_mps": 2.2,
-		"chain_lunge_deg": 25.0
+		"ult_up_bonus_mps": 2.2
 	},
 	"perf": {
-		"bot_replan_s": 0.1,
 		"boki_retarget_s": 0.2,
 		"actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0},
 		"anim_far_every": 2,

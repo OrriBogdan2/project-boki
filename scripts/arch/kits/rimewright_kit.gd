@@ -48,6 +48,7 @@ const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the 
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
+const RINK_BAND := 0.25        # m: the width of the Rimelock ring, its outer edge on the hit radius
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -129,7 +130,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
-	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
 	lk().burst("spikes", at, {"r": r, "dur": 0.7})
 	vfx("shatter", at)
@@ -216,7 +216,9 @@ func _throw_dart() -> void:
 	var bow := 0.0 if skating else deg_to_rad(float(wd.get("bow_deg", 18.0))) * side
 	var v := dir.rotated(bow)
 	var start := Vector3(h.pos.x + v.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + v.y * 0.6)
-	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy)
+	# dash.skate_dart_dmg_k: damage multiplier (unitless, x plain) of a dart fired from the skate (wiki: 2x)
+	var skate_k := float(dash_def()["skate_dart_dmg_k"]) if skating else 1.0
+	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy) * skate_k
 	var spd := (float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])) * _heavy_k("speed_k", heavy)
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
@@ -385,7 +387,7 @@ func _begin_skate() -> void:
 	if not h.grounded:
 		h.vel.y = -float(dash_def().get("air_fall", 1.5))
 	play("tm_skate_go" if h.grounded else "tm_skate_air")
-	m.sfx("rimewright_dash", h.pos, -3.0, 1.0)
+	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0, 1.0)
 	vfx("skate_go", null, dir)          # ice kicked back off the pushing blade (no ring: a dash never bursts)
 
 func _tick_rinkrun(dt: float) -> void:
@@ -932,7 +934,6 @@ func _start_rime() -> bool:
 	_rime_hold_body()
 	play("tm_rime" if carry.is_empty() else "tm_rime_carry")
 	m.sfx("rime_lock", h.pos, 0.0, 1.0)
-	m.fx.word(h.pos + Vector3(0, 3.0, 0), "RIMELOCK", col_of(x_def()), true)
 	vfx("rime")
 	return true
 
@@ -1007,7 +1008,6 @@ func _rime_no_glide() -> void:
 	var glide_now := bool(h.inp.get("glide", false))
 	if glide_now and not glide_held and not h.grounded:
 		h._ab_feedback("x", "deny")
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "NO GLIDE", Color("bff7ef"), false)
 	glide_held = glide_now
 
 
@@ -1042,13 +1042,15 @@ func rime_slow_of(f: Ent) -> float:
 	return float((rime["slow"] as Dictionary).get(f.get_instance_id(), 0.0))
 
 
-## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees
-## and the creaks; her body is IceBody's.
+## The rink (snaps out in snap_t, its cracks brighter as it builds), the frost bud at her feet, the thin
+## lit ring at the hit radius everyone sees (brighter as it builds: the countdown) and the creaks; her
+## body is IceBody's.
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
 	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
-	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
+	ulk().keep("bud", "frostbud", at, {"grow": snap, "crack": k})
+	AimKit.circle(h, "x", {"at": at, "r": radius, "band": RINK_BAND, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:
 		rime["creak"] = lerpf(0.8, 0.35, k)
@@ -1102,6 +1104,7 @@ func _rime_clear() -> void:
 		ice.thaw()
 	if ult_look != null:
 		ult_look.drop("rink")
+		ult_look.drop("bud")
 		if anim_id == "tm_rime_hold":
 			anim_id = ""
 

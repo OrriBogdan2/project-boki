@@ -45,7 +45,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel distance | 105-144 px, about 4.5m (3.9-5.4) [footage] | 4.5m x the global dash feel = 3.8m | 4.5m (taken off the global dash feel, content/rules/dash_feel.json) |
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
-| Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | 8.4m over 0.95s, held to the landing |
+| Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
 | Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
 | How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
@@ -160,8 +160,9 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 - Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
 - Runs pitched far forward (about 0.57 rad at a run).
-- Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
-  carried flat on its speed for 8.4 m over 0.95 s, ending where she lands (both off the global dash feel). From a jump it
+- Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve (off the global dash feel). In the air it is the same
+  Cartwheel on the same curve (item 183), out of charges the class's long dash, and the shared air drag carries her
+  on to the landing (owner 11-09: the sheet's 8.4 m held flat over 0.95 s flew far past the cast). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
 - Her dashes leave her own cyan streaks and stars, not the shared after-image. No ring or burst on a dash or a
   landing: the empowered bolt shows as a tight gold glint (a hot core and a turning four-point star) in the hand

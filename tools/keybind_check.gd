@@ -49,12 +49,12 @@ func _actions_and_orders(S) -> void:
 	ok(_names().has("crouch") and _names().has("whistle") and _names().has("rotate"), "sneak, whistle, rotate listed")
 	ok(S.slots("ping") == [_mouse(MOUSE_BUTTON_MIDDLE), _mouse(MOUSE_BUTTON_XBUTTON1)], "Mouse 4 pings by default")
 	ok(S.slots("dash") == [_code(KEY_SHIFT), _mouse(MOUSE_BUTTON_XBUTTON2)], "Mouse 5 is the second dash key")
-	var orders: Array = [S.slots("kin_attack")[0], S.slots("kin_return")[0], S.slots("kin_hold")[0]]
-	ok(orders == [_code(KEY_K), _code(KEY_N), _code(KEY_L)], "the Boki orders ship on K, N and L (%s)" % str(orders))
+	var quick: Array = KinKeys.ids().filter(func(a): return S.slots(a) != ["", ""])
+	ok(quick.is_empty(), "the quick Boki keys ship unbound, so a new player sees only G (bound: %s)" % str(quick))
 	var clash := _names().filter(func(n): return not S.clashes(n).is_empty())
 	ok(clash.is_empty(), "no two actions share a default key (clashing: %s)" % str(clash))
-	S.rebind("kin_attack", _key(KEY_G), 0)
-	ok(S.clashes("kin_attack") == ["throw"] and S.clashes("throw") == ["kin_attack"], "a shared key flags both actions")
+	S.rebind("kin_chase", _key(KEY_G), 0)
+	ok(S.clashes("kin_chase") == ["throw"] and S.clashes("throw") == ["kin_chase"], "a shared key flags both actions")
 	S.rebind("signature", _key(KEY_U), 0)
 	ok(S.key_cap("signature") == "U" and S.slots("signature")[0] == _code(KEY_U), "a key cap follows a rebind")
 	S.reset_all()
@@ -63,13 +63,11 @@ func _actions_and_orders(S) -> void:
 func _migration(S) -> void:
 	var saved := {"fire": [_code(KEY_K)], "jump": [_mouse(MOUSE_BUTTON_XBUTTON2)]}
 	saved["glide"] = [_code(KEY_O)]
-	saved["util3"] = [_code(KEY_N)]
 	var m := {"keys": saved, "keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys5_v": 1}
 	KeyMigrate.run(m)
 	var ks: Dictionary = m["keys"]
 	var kept: bool = ks["fire"] == [_code(KEY_K)] and ks["glide"] == [_code(KEY_O)]
 	ok(m["keys6_v"] == 1 and kept, "migration keeps custom bindings")
-	ok(ks["kin_attack"] == [] and ks["kin_return"] == [] and not ks.has("kin_hold"), "a taken order key starts unbound")
 	ok(ks["dash"] == [_code(KEY_SHIFT)] and not ks.has("ping"), "dash backs off a taken Mouse 5, ping does not")
 	var before := ks.duplicate(true)
 	KeyMigrate.run(m)
