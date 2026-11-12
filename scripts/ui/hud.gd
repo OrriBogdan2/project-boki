@@ -536,7 +536,7 @@ func _draw_top(sz: Vector2) -> void:
 		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
 		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
 		# the checklist: only what's left (up to six), with a count; H folds it away
-		var all_rows: Array = m.train_rows()
+		var all_rows: Array = m.training.rows()
 		var left: Array = all_rows.filter(func(t): return not m.train.has(t[0]))
 		var n_done := all_rows.size() - left.size()
 		if guide_hidden:

@@ -11,7 +11,7 @@ import os, re, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # god files: current size is the ceiling (plus a little slack for wiring); lower these as refactors land
 BUDGETS = {
-    "scripts/match/match.gd": 6950,
+    "scripts/match/match.gd": 5725,
     "scripts/home/home.gd": 5950,
     "scripts/main.gd": 4100,
     "scripts/ui/hud.gd": 3850,

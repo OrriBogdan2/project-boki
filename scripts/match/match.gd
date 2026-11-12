@@ -39,6 +39,7 @@ var glimmer_done := false
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
+var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
 var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
@@ -547,6 +548,7 @@ func _spawn_pads_and_exits() -> void:
 	await exits.setup(self)
 	await _slice()
 	truce = Truce.new(self)
+	training.setup(self)
 	lairs = Lairs.new()
 	lairs.setup(self)
 
@@ -3889,9 +3891,9 @@ func step(dt: float) -> void:
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
 	if opts.has("train_demo") and skytrain and player:
-		_train_demo()
+		training.train_demo()
 	if opts.has("balloon_demo") and player:
-		_balloon_demo()
+		training.balloon_demo()
 	if duel:
 		duel.after_think()
 		duel.tick(dt)
@@ -3980,7 +3982,7 @@ func step(dt: float) -> void:
 				player.inp["move"] = (player.inp["move"] as Vector2) * 0.5     # test: walk, so your Boki can lead (screenshots)
 		tut.update(dt)
 	if opts.get("training", false) and duel == null:
-		_update_training(dt)
+		training.update(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
 	_prof("rest")
@@ -4438,15 +4440,6 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
-## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
-	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
-	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
-	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
-	["ledge", "Dash off an edge and float back up", ""]]
 var train := {}
 var train_t := 0.0
 
@@ -4480,238 +4473,6 @@ static func arena_opts(arch_id := "") -> Dictionary:
 ## The training pad that takes you to the duel room.
 static func duel_opts() -> Dictionary:
 	return {"training": true, "duel": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 5151, "no_drop": true}
-
-func _update_training(dt: float) -> void:
-	if player == null:
-		return
-	if duel_pad != Vector3.INF and player.flat_dist(duel_pad) < 1.3 and not player.downed:
-		if Input.is_action_just_pressed("interact") and not paused:
-			Game.start_match(duel_opts())
-			return
-	train_t += dt
-	if player.downed and train_t > 2.0:
-		revive_hunter(player, null)
-	if opts.get("arena", false):
-		return        # the Arena runs its own (scripts/match/arena.gd)
-	var was_ult: bool = train.get("_ult_full", false)
-	# everything recharges quickly here
-	player.ult = minf(1.0, player.ult + dt / 6.0)
-	player.sig_cd = maxf(0.0, player.sig_cd - dt * 2.0)
-	for kk in [player.kin, player.kin2]:
-		if kk: (kk as Kin).runner.tick(dt * 2.0)
-	if player.tonics < 1: player.tonics = 3
-	if not train.has("tonic") and player.hp >= player.max_hp and train_t > 1.0:
-		player.hp = player.max_hp * 0.7     # a scratch, so the tonic has something to heal
-	if player.inp["move"].length() > 0.1:
-		train["_moved"] = float(train.get("_moved", 0.0)) + Vector2(player.pos.x - player.prev.x, player.pos.z - player.prev.z).length()
-	var marks := {
-		"move": float(train.get("_moved", 0.0)) > 4.0,
-		"dash": player.roll_t > 0.0,
-		"glide": player.gliding and not player.dropping,
-		"shoot": player.dmg_done > 0.0,
-		"ability": (player.ak != null and float(player.ak.cd["e"]) > 0.0) or (player.ak == null and player.kin != null and (player.kin as Kin).runner.has_slot("k1") and not (player.kin as Kin).runner.is_ready("k1")),
-		"glove": float(player.gear_cd[0]) > 0.0,
-		"combo": int(player.stats.get("combos", 0)) > 0,
-		"crouch": player.crouch,
-		"secondary": (player.ak != null and player.ak.last_variant != "") or (player.runner != null and player.runner.has_slot("utility") and not player.runner.is_ready("utility")),
-		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
-		"throw": player.kin != null and player.kin.st_throws > 0,
-		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
-		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
-		"smash": train.get("_smash", false),
-		"stagger": train.get("_stagger", false),
-		"weapon": train.get("_weapon", false),
-	}
-	train["_ult_full"] = player.ult >= 0.99
-	train["_tonics"] = player.tonics
-	for k in marks:
-		if marks[k] and not train.has(k):
-			train[k] = true
-			Sfx.play("unlock", null, -8.0)
-			var left := train_rows().filter(func(t): return not train.has(t[0])).size()
-			if hud: hud.toast(("Done: %s" % _train_label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
-			if left == 0:
-				Save.d["tutorial"]["training"] = true
-	# keep a few target dummies around you
-	var alive := mobs.filter(func(x): return not x.dead)
-	if alive.size() < 4 and int(train_t * 10.0) % 20 == 0:
-		var at := world.random_ground(world.island_of(player.pos.x, player.pos.z))
-		if Vector2(at.x - player.pos.x, at.z - player.pos.z).length() > 3.0:
-			spawn_mob(["skitter", "spitter", "brute", "sentinel"][randi() % 4], at)
-
-## The checklist for this hero: the secondary step only shows for heroes that have one.
-func train_rows() -> Array:
-	var rows := TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
-	return rows.map(func(t): return [t[0], _train_text(t), t[2]])
-
-func _train_text(t: Array) -> String:
-	return String(t[1]) % Settings.key_cap(String(t[2])) if String(t[1]).contains("%s") else String(t[1])
-
-func _train_label(k: String) -> String:
-	for t in TRAIN:
-		if t[0] == k: return _train_text(t)
-	return k
-
-## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
-## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
-## (rings) and you shoot the low one through its ring; "hop" holds them mid-hop (no marker: the
-## body is the target); "self" hangs you below the lip (your own faint balloon).
-var _bdemo := {}
-func _balloon_demo() -> void:
-	var mode := String(opts["balloon_demo"])
-	var foe: Hunter = null; var mate: Hunter = null
-	for h in hunters:
-		if h == player: continue
-		if h.team != player.team and foe == null: foe = h
-		elif h.team == player.team and mate == null: mate = h
-	if _bdemo.is_empty():
-		for mb in mobs: mb.queue_free()
-		mobs.clear()
-		for h in hunters:
-			if h != player: h.ctrl = "idle"
-		cam.zoom_to = 0.8
-		# an island edge with open air beyond it, and a flat stretch of ground behind it
-		for k in 4000:
-			var g := world.random_ground()
-			for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-				var ok := not world.is_void(g.x, g.z)
-				for dd in [1.6, 2.4, 3.2, 4.0]:
-					for sd in [-2.0, 0.0, 2.0]:
-						if not world.is_void(g.x + d.x * dd + d.y * sd, g.z + d.y * dd + d.x * sd): ok = false
-				for dd in [0.0, -1.5, -3.0, -4.5]:
-					for sd in [-3.0, 0.0, 3.0]:
-						var x: float = g.x + d.x * dd + d.y * sd; var z: float = g.z + d.y * dd + d.x * sd
-						if world.is_void(x, z) or world.is_block(x, z) or absf(world.ground_at(x, z) - g.y) > 0.05: ok = false
-				if ok:
-					var ex := g.x; var ez := g.z
-					while not world.is_void(ex + d.x * 0.25, ez + d.y * 0.25):
-						ex += d.x * 0.25; ez += d.y * 0.25
-					_bdemo = {"edge": Vector3(ex, g.y, ez), "dir": d}
-					break
-			if not _bdemo.is_empty(): break
-		if _bdemo.is_empty():
-			push_warning("balloon demo: no edge found"); _bdemo = {"edge": player.pos, "dir": Vector2(1, 0)}
-		for h in hunters:
-			if h != player and h != foe and h != mate: h.teleport(world.random_ground())
-	var e: Vector3 = _bdemo["edge"]; var d: Vector2 = _bdemo["dir"]
-	var side := Vector2(-d.y, d.x)
-	var hold := func(h: Hunter, p: Vector3, glide: bool) -> void:
-		if h == null: return
-		h.teleport(p); h.vel = Vector3.ZERO; h.grounded = false; h.pad = {}
-		h.gliding = glide; h.inp["glide"] = glide; h.glide_fuel = 1.0; h.glide_cd = 0.0
-		h.hp = h.max_hp; h.stun_t = 0.0; h.knock_t = 0.0; h.shot_down = false
-	var stand := func(h: Hunter, p: Vector3) -> void:
-		if h == null: return
-		h.teleport(p); h.vel = Vector3.ZERO; h.grounded = true
-		h.hp = h.max_hp
-	var on := func(back: float, sd: float) -> Vector3:
-		var x := e.x - d.x * back + side.x * sd; var z := e.z - d.y * back + side.y * sd
-		return Vector3(x, world.ground_at(x, z), z)
-	var shoot := false
-	match mode:
-		"lip":
-			stand.call(player, on.call(2.2, 0.0))
-			hold.call(foe, Vector3(e.x + d.x * 1.3 + side.x * 1.4, e.y - 2.6, e.z + d.y * 1.3 + side.y * 1.4), true)
-			hold.call(mate, Vector3(e.x + d.x * 1.5 - side.x * 2.0, e.y - 2.0, e.z + d.y * 1.5 - side.y * 2.0), true)
-			shoot = true
-		"glide":
-			stand.call(player, on.call(4.0, 0.0))
-			hold.call(foe, on.call(1.6, 1.6) + Vector3(0, 2.3, 0), true)
-			hold.call(mate, on.call(2.6, -2.4) + Vector3(0, 4.0, 0), true)
-			shoot = true
-		"hop":
-			stand.call(player, on.call(4.0, 0.0))
-			hold.call(foe, on.call(1.6, 1.6) + Vector3(0, 0.9, 0), false)
-			hold.call(mate, on.call(2.6, -2.4) + Vector3(0, 1.1, 0), false)
-			shoot = true
-		"self":
-			hold.call(player, Vector3(e.x + d.x * 1.3, e.y - 2.4, e.z + d.y * 1.3), true)
-			stand.call(mate, on.call(1.5, 1.5))
-			stand.call(foe, on.call(3.5, -2.0))
-	if shoot and foe:
-		# fire level along the island at the foe's marker (or body, mid-hop)
-		var fy: float = shot_stance_y(foe)
-		player.inp["aim"] = Vector3(foe.pos.x, fy + 0.95, foe.pos.z)
-		player.inp["aim_y"] = player.pos.y
-		player.inp["fire"] = fmod(time, 0.9) < 0.12
-		player.inp["move"] = Vector2.ZERO
-		player.ammo = maxi(player.ammo, 3)
-
-## Test hook (--train-demo): ride the sky train from a stop; "--train-demo=track" stands you on the
-## track ahead of the engine instead, "--train-demo=view" watches it from a pier. "walk" and "hit"
-## start with the train already under way: "walk" stands you on a car and walks, strafes, jumps and
-## shoots on it; "hit" stands you on the rails a couple of seconds ahead of the engine.
-func _train_demo() -> void:
-	var mode := String(opts["train_demo"]) if opts["train_demo"] is String else "ride"
-	var st := skytrain
-	if time < DT * 1.5 and mode in ["walk", "hit"]:
-		var lg: Dictionary = st.legs[0]
-		time = st.dwell + float(lg["t"]) * 0.3
-		opts["train_t0"] = time
-		st.tick(0.0)
-		st.old = st.cur.duplicate()
-	var since: float = time - float(opts.get("train_t0", 0.0))
-	if not opts.has("train_init") and mode != "watch":
-		opts["train_init"] = true
-		cam.zoom_to = 0.8
-		if mode == "track" or mode == "hit":
-			# a stretch of open track ahead, level with the islands (not down under a bridge)
-			var ps := st.head_s + 20.0
-			if mode == "hit":
-				# just a couple of seconds down the line, wherever the rails are level with the islands
-				# open air round the rails somewhere ahead, then the clock moved on until the engine is
-				# a couple of seconds away from it
-				ps = st.head_s + 14.0
-				while ps < st.head_s + st.loop_len and not (world.train_at(ps).y > -0.01 and _open_air(world.train_at(ps), 4.0)):
-					ps += 1.0
-				var t1 := time
-				while time < t1 + 120.0 and not (st.head_v > st.speed * 0.8 and fposmod(ps - st.head_s, st.loop_len) < 11.0):
-					time += 0.05
-					st._place(time)
-				st.old = st.cur.duplicate()
-			while mode == "track" and ps < st.head_s + 120.0 and not (world.train_at(ps).y > -0.01 and world.train_at(ps - 6.0).y > -0.01 and world.is_void(world.train_at(ps).x, world.train_at(ps).z)):
-				ps += 1.0
-			opts["train_pin"] = world.train_at(ps)
-			player.teleport(opts["train_pin"])
-		elif mode == "view":
-			var t: Transform3D = st.cur[2]
-			player.teleport(world.free_spot_near(t.origin - t.basis.x * 4.0, [], 1.0, 0.4, 6.0))
-		else:
-			var t2: Transform3D = st.cur[2]
-			player.teleport(t2.origin + Vector3(0, 0.05, 0))
-		player.grounded = true
-	if (mode == "track" or mode == "hit") and not player.downed and not player.out:
-		# stand on the rails (pinned there: the track has no floor of its own) and wait for the engine
-		player.pos = opts["train_pin"]; player.vel = Vector3.ZERO; player.grounded = true
-		player.inp["move"] = Vector2.ZERO
-		player.lives = 1
-	if mode == "walk" and not player.out:
-		# forward along the car, across it, a hop, then shooting from the deck
-		var k := 2
-		var tk: Transform3D = st.cur[k]
-		var f2 := Vector2(-tk.basis.z.x, -tk.basis.z.z).normalized()
-		var r2 := Vector2(tk.basis.x.x, tk.basis.x.z).normalized()
-		player.inp["move"] = Vector2.ZERO
-		if since > 0.4 and since < 1.0: player.inp["move"] = f2
-		elif since > 1.0 and since < 1.5: player.inp["move"] = r2
-		elif since > 1.5 and since < 2.3: player.inp["move"] = -f2
-		if absf(since - 2.4) < DT * 0.5: player.inp["jump"] = true
-		if since > 2.9:
-			player.inp["aim"] = player.pos + Vector3(r2.x * 6.0, 0.9, r2.y * 6.0)
-			player.inp["fire"] = fmod(since, 0.5) < 0.1
-			player.ammo = maxi(player.ammo, 3)
-	if int(time * 60.0) % 60 == 0:
-		var t3: Transform3D = st.cur[2]
-		print("TRAIN t=%.1f head=%.1f v=%.1f player=(%.1f,%.2f,%.1f) car2=(%.1f,%.2f,%.1f) grounded=%d hp=%.0f downed=%d out=%d" % [time, st.head_s, st.head_v, player.pos.x, player.pos.y, player.pos.z, t3.origin.x, t3.origin.y, t3.origin.z, int(player.grounded), player.hp, int(player.downed), int(player.out)])
-
-## Nothing but air within `rad` of p (for the demos).
-func _open_air(p: Vector3, rad: float) -> bool:
-	for i in 12:
-		var a := TAU * i / 12.0
-		for d in [rad * 0.5, rad]:
-			if not world.is_void(p.x + cos(a) * d, p.z + sin(a) * d):
-				return false
-	return true
 
 # ------------------------------------------------------------------ hero zones
 func add_zone(kind_s: String, at: Vector3, radius: float, dur: float, team_i: int, owner: Hunter, from_net := false) -> void:
