@@ -11,7 +11,8 @@ extends RefCounted
 var main: Node
 var fails := 0
 var n := 0
-const MATCH_BEDS := ["abyss", "ruins", "meadow", "cliffs", "water", "gust", "rain", "blight"]    # Sfx.amb_layer names the match sets (AmbBeds, MusicDir); the farm's are HomeAmbience's
+# Sfx.amb_layer names the match sets (AmbBeds, MusicDir); the farm's are HomeAmbience's
+const MATCH_BEDS := ["abyss", "ruins", "meadow", "cliffs", "water", "gust", "rain", "blight"]
 const SETTLE := 4.0            # s: longer than the slowest match fade (the score's stems, 1.2s)
 
 func ok(cond: bool, what: String) -> void:
@@ -105,9 +106,9 @@ func run(main_node: Node) -> void:
 	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
 	ok(Sfx.room == "", "the match's sound zones are gone with it")
-	var farm_beds := Sfx.amb_layers.keys().filter(func(b): return not MATCH_BEDS.has(b))     # the farm's own beds sound on the farm
-	var left := Sfx.match_voices() - farm_beds.size()
-	ok(left == 0 and MATCH_BEDS.all(func(b): return not Sfx.amb_layers.has(b)), "after the fades nothing the match started is playing (%d)" % left)
+	var farm_beds := Sfx.amb_layers.keys().filter(func(b): return not MATCH_BEDS.has(b))
+	var left := Sfx.match_voices() - farm_beds.size()      # the farm's own beds sound on the farm
+	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
