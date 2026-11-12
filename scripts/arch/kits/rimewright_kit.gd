@@ -3,9 +3,10 @@ extends ArchKit
 ## Claire, the Rimewright (light ice controller). docs/heroes/rimewright.md. Copies her source as it
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
 ## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
-## LMB Ice Dart: hold for a steady stream of slow homing shards that bow out and curve onto the foe
-## nearest the cursor; while skating they fly as thick beams that home the same way. RMB Ice Spear: hold to
-## see the landing ring, let go: it lands at the cursor, leaves a slow zone and detonates 1.8s later.
+## LMB Ice Dart: a hold is one burst, a steady stream of slow homing shards that ends on three large ones at
+## the let-go; they bow out and curve onto the foe nearest the cursor; while skating they fly as thick beams
+## that home the same way. RMB Ice Spear: hold to see the landing ring, let go: it lands at the
+## cursor, leaves a slow zone and detonates 1.8s later.
 ## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
 ## cursor, widening, shoving foes; E again freezes it. X Rimelock (level 6): sealed in ice, invulnerable,
 ## inside a slowing rink that cracks open into a stun. R is the Boki Merge. Looks: content/vfx/rimewright.json
@@ -18,7 +19,9 @@ const FAN_HOLD := 3.0          # s a foe's Fan stacks last after its last fan hi
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
-var burst_i := 0               # darts so far in this hold: after wpn.burst plain ones come wpn.heavy.n large ones
+var burst_i := 0               # darts so far in this burst (one hold); the let-go ends it on wpn.heavy.n large ones
+var tail := 0                  # large darts still owed to the burst's end (they fly after the let-go)
+var burst_open := 0.0          # when the next burst may start (wpn.barrage_cd after the last large dart)
 var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
@@ -188,28 +191,39 @@ func _tick(dt: float) -> void:
 func own_aim_line() -> bool:
 	return true
 
+## The source's burst (docs/heroes/rimewright.md, LMB): one hold is one burst, plain darts every wpn.rate for as
+## long as the button stays down; the let-go ends it on wpn.heavy.n larger darts (double damage, faster, longer
+## reach) at the same cadence, then wpn.barrage_cd before a fresh press (or the held button) starts the next.
+## A stun or the Rimelock drops the owed large darts and ends the burst.
 func lmb_override(held: bool, _dt: float) -> bool:
-	if not held:
-		burst_i = 0
 	if not h.can_fire() or not rime.is_empty():
+		if burst_i > 0:
+			_end_burst()
 		return true
-	if not held or h.fire_cd > 0.0 or m.time < seq_next:
+	if burst_i > 0 and not held and tail == 0:
+		tail = int((h.wpn.get("heavy", {}) as Dictionary).get("n", 0))
+		if tail == 0:
+			_end_burst()
+	if h.fire_cd > 0.0 or m.time < seq_next:
 		return true
-	_throw_dart()
+	if tail > 0:
+		_throw_dart(true)
+		tail -= 1
+		if tail == 0:
+			_end_burst()
+		return true
+	if held and m.time >= burst_open:
+		_throw_dart(false)
 	return true
 
-## The barrage's rhythm (the source's data): wpn.burst plain darts, then wpn.heavy.n larger ones (double damage,
-## faster, longer reach), then round again while the button stays down.
-func _heavy_now() -> bool:
-	var wd: Dictionary = h.wpn
-	var plain := int(wd.get("burst", 4))
-	var cycle := plain + int((wd.get("heavy", {}) as Dictionary).get("n", 0))
-	return cycle > plain and burst_i % cycle >= plain
+func _end_burst() -> void:
+	burst_i = 0
+	tail = 0
+	burst_open = m.time + float(h.wpn.get("barrage_cd", 0.5))
 
-func _throw_dart() -> void:
+func _throw_dart(heavy: bool) -> void:
 	var wd: Dictionary = h.wpn
 	var skating := in_dash() and String(flow.row("lmb")["variant"]) == "beam"
-	var heavy := _heavy_now()
 	var dir := h.aim_dir()
 	burst_i += 1
 	dart_n += 1
