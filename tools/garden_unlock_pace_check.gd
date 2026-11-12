@@ -14,12 +14,25 @@ func ok(cond: bool, what: String) -> void:
 	print("UNLOCKPACE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-## The snack that leans a Boki toward this zone (lean.json food whose type the zone lists).
-func _snack(zone: String) -> String:
+## The snacks grown by the end of `day`: the start garden's patch (its four) plus its rotating extra
+## after each of pace.ripenings a day, and the patch of each zone already open (zone_snacks of its
+## theme). A zone's own snacks cannot lean a Boki to wake that zone.
+func _grown(day: int) -> Array:
+	var sp: Dictionary = SnackPatch.rules()
+	var out: Array = sp["snacks"].duplicate()
+	for r in (day - 1) * int(GardenZones.rules()["pace"]["ripenings"]):
+		out.append(SnackPatch.extra(Save.d, {"rot": r}))
+	for z in GardenZones.ids():
+		if GardenZones.is_open(z):
+			out.append_array(sp["zone_snacks"].get(z, []))
+	return out
+
+## The snack that leans a Boki toward this zone: a grown one (lean.json food whose type the zone lists).
+func _snack(zone: String, day: int) -> String:
 	var types: Array = GardenZones.info(zone)["types"]
 	var foods: Dictionary = Lean.rules()["foods"]
-	for f in foods:
-		if types.has(String(foods[f])):
+	for f in _grown(day):
+		if types.has(String(foods.get(f, ""))):
 			return String(f)
 	return ""
 
@@ -51,8 +64,8 @@ func _buy_seed() -> void:
 			BlackMarket.buy(String(e["id"]))
 			return
 
-## One player played for pace.days days: the day (1-based) each zone count was reached, [] for never.
-func _play(pace: Dictionary, runner: bool, phase: int) -> Array:
+## One player played for pace.days days, or until `zones` are open: the day (1-based) each zone count was reached.
+func _play(pace: Dictionary, runner: bool, phase: int, zones := 99) -> Array:
 	Save.d = Save.fresh()
 	var rec := Save.new_kin(Data.common_kin()[0], "Pace")
 	Save.d["roster"] = [rec]
@@ -66,10 +79,12 @@ func _play(pace: Dictionary, runner: bool, phase: int) -> Array:
 		_buy_seed()
 		var zone := _target()
 		if zone != "":
-			for _m in int(pace["meals"]): Evo.eat(rec, _snack(zone))
+			var snack := _snack(zone, day)
+			if snack != "":
+				for _m in int(pace["meals"]): Evo.eat(rec, snack)
 			if GardenZones.attune(zone)["ok"]: opened.append(day)
 			_buy_seed()
-		if opened.size() == GardenZones.ids().size():
+		if opened.size() >= mini(zones, GardenZones.ids().size()):
 			break
 	return opened
 
@@ -83,6 +98,29 @@ func _sample(pace: Dictionary, runner: bool) -> Array:
 		for k in days.size():
 			days[k].append(-1 if k >= opened.size() else int(opened[k]))
 	return days
+
+## The garden-only route to Glasswater, from a fresh save at every point of the trader's week: played
+## forward until the second zone opens, it is Glasswater, on the day zone2_day wants (the gems cover the
+## trader's Wayseed by then: 60 of a new save and garden_gems a day against its price), and every starter
+## species leans Water on the start patch's own tidebloom. The first-day reward is left out (it needs a pair).
+func _route(pace: Dictionary) -> void:
+	var week := int(Goods.rules()["black_market"]["wayseed_days"])
+	var want := int(pace["zone2_day"]["garden"])
+	for phase in week:
+		var opened := _play(pace, false, phase, 2)
+		var day := int(opened[1]) if opened.size() > 1 else -1
+		var in_time: bool = day > 0 and day <= want and GardenZones.is_open("glasswater")
+		ok(in_time, "garden-only, trader week day %d: Glasswater opens on day %d (by %d)" % [phase, day, want])
+	var water := String(Lean.rules()["foods"].get("tidebloom", ""))
+	var types: Array = GardenZones.info("glasswater")["types"]
+	var grows: bool = SnackPatch.snacks(Save.fresh()).has("tidebloom") and types.has(water)
+	ok(grows, "the start patch grows tidebloom, a %s snack Glasswater takes" % water)
+	for sp in Data.common_kin():
+		Save.d = Save.fresh()
+		var rec := Save.new_kin(sp, "Pace")
+		Save.d["roster"] = [rec]
+		for _m in int(pace["meals"]): Evo.eat(rec, "tidebloom")
+		ok(not GardenZones.leaner("glasswater").is_empty(), "%s leans Water on %d tidebloom" % [sp, int(pace["meals"])])
 
 ## The median of a list where -1 means never (counts as past the end).
 func _median(list: Array) -> float:
@@ -107,6 +145,7 @@ func run(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	var pace: Dictionary = GardenZones.rules()["pace"]
 	var all: Array = pace["all_open_days"]
+	_route(pace)
 	for kind in ["runner", "garden"]:
 		var days := _sample(pace, kind == "runner")
 		_table(pace, kind, days)
