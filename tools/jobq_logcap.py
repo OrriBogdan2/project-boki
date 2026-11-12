@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Job-log filter for jobq-worker: `cmd 2>&1 | jobq_logcap.py OUT`. Master copy belongs in boki-tools.
 
-Dedupe: a block of 1-4 lines that repeats 3 times in a row is shown 3 times, then counted
+Dedupe: a block of 1-12 lines (an engine error with its script backtrace) that repeats 3 times in a row is shown 3 times, then counted
 ("[... 2 lines x 23806 more]"). Cap: OUT stays under CAP bytes (default 50 MB): the first HEAD (5 MB) is kept,
 then the newest lines roll through a tail buffer and are written, after an elision note, when the input ends.
 Past the cap OUT is rewritten at exit or on SIGTERM, so a hung job killed by the timeout still leaves a log.
 Check: `python3 tools/jobq_logcap.py --self-test`."""
 import collections, signal, sys
 
-CAP, HEAD, MAX_BLOCK, SHOWN = 50 << 20, 5 << 20, 4, 3
+CAP, HEAD, MAX_BLOCK, SHOWN = 50 << 20, 5 << 20, 12, 3
 
 
 class LogCap:
@@ -26,9 +26,11 @@ class LogCap:
 			self._flush_repeats()
 		self.hist = (self.hist + [line])[-SHOWN * MAX_BLOCK:]
 		self._emit(line)
-		for p in range(1, MAX_BLOCK + 1):
+		for p in range(1, min(MAX_BLOCK, len(self.hist) // SHOWN) + 1):
+			if self.hist[-1] != self.hist[-1 - p]:
+				continue
 			blk = self.hist[-p:]
-			if len(self.hist) >= SHOWN * p and any(s.strip() for s in blk) and all(
+			if any(s.strip() for s in blk) and all(
 					self.hist[-(i + 1) * p:len(self.hist) - i * p] == blk for i in range(SHOWN)):
 				self.block, self.pos, self.reps, self.hist = blk, 0, 0, []
 				return
@@ -83,6 +85,9 @@ def _self_test():
 		out = open(p).read()
 		os.remove(p)
 		return out
+	trace = ["ERROR: The vectors must not be zero.\n", "   at: Quaternion (q.h:140)\n", "   GDScript backtrace:\n",
+			"       [0] step (res://w.gd:1247)\n", "       [1] _process (res://w.gd:1018)\n"]
+	assert run(trace * 50 + ["end\n"]) == "".join(trace * 3) + "[... 5 lines x 47 more]\nend\n"
 	spam = ['ERROR: Parameter "material" is null.\n', "   at: material_set_shader (x.cpp:2284)\n"] * 5000
 	out = run(["start\n"] + spam + ["end\n"])
 	assert out.count("material_set_shader") == 3 and "[... 2 lines x 4997 more]" in out and out.endswith("end\n"), out
@@ -100,6 +105,7 @@ if __name__ == "__main__":
 	if sys.argv[1:] == ["--self-test"]:
 		_self_test()
 		sys.exit(0)
+	sys.stdin.reconfigure(errors="replace")
 	cap = LogCap(sys.argv[1])
 	signal.signal(signal.SIGTERM, lambda *_: (cap.close(), sys.exit(143)))
 	for raw in sys.stdin:
