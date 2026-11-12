@@ -28,6 +28,7 @@ func _init() -> void:
 
 
 func _host() -> void:
+	Save.d["tutorial"][KitDrill.SAVE_KEY] = true  # no first-time drill banner over the shots
 	var copy := await _host_up()
 	if copy == null:
 		return _finish()
@@ -43,6 +44,9 @@ func _host() -> void:
 	for l in lines:
 		f.store_line(l)
 	f.close()
+	var log_path := dir.path_join("guest.log")
+	if FileAccess.file_exists(log_path):
+		DirAccess.copy_absolute(log_path, shots_dir.path_join("guest.log"))
 	_finish()
 
 
@@ -100,5 +104,7 @@ func _cast_here(arch: String, key: String, held: float) -> void:
 	if inp != "fire":
 		me.inp[inp] = false
 	await main.get_tree().create_timer(held).timeout
+	var up := AimKit.layer(m).entries.keys().filter(func(k): return AimKit.layer(m).entries[k]["all"])
+	print("%s guest cast %s %s: all telegraphs up %s, online %s" % [tag, arch, key, str(up), m.net_on])
 	for k in ["fire", "sec", "sec_hold", "sig", "ult"]:
 		me.inp[k] = false
