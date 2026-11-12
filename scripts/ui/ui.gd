@@ -197,6 +197,11 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
 
+## The sound of a pick-one panel taking a card on one click (no confirm button to press): the UI
+## confirm family, once per take. Every such panel calls this from its take path, nowhere else.
+static func pick_taken(pitch := 1.0) -> void:
+	Sfx.play("ui_confirm", null, -6.0, 0.03, pitch)
+
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)

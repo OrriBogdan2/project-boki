@@ -18,6 +18,8 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
+##  11. the pick-one panels' take sound (UI.pick_taken): the confirm family, not the hover tick, once per take;
+##      the egg pick, the Relic pick and the ability rank-up each call it
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -49,6 +51,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_pick_taken()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -317,6 +320,17 @@ func _build_cues() -> void:
 			if not src.contains(needle):
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
+## 11. Pick-one panels have no confirm button, so a take plays the UI confirm family once (UI.pick_taken).
+func _pick_taken() -> void:
+	ok(Sfx.ensure("ui_confirm") and not _takes("ui_confirm").is_empty(), "pick taken: the confirm family has takes")
+	ok(_plays("ui_confirm", func(): UI.pick_taken()) and not Sfx.last_played.has("hover"),
+			"pick taken: UI.pick_taken plays ui_confirm, not the hover tick")
+	var unwired := []
+	for f in ["ui/hatch.gd", "home/hob_offer.gd", "match/hunter.gd"]:
+		if not FileAccess.get_file_as_string("res://scripts/" + f).contains("UI.pick_taken("):
+			unwired.append(f)
+	ok(unwired.is_empty(), "pick taken: egg pick, Relic pick and rank-up call it (missing %s)" % [unwired])
 
 func _takes(sname: String) -> Array:
 	var out := []

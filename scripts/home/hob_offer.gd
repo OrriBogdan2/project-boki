@@ -121,5 +121,5 @@ static func preview_slot(hunter_id: String) -> String:
 func pick(id: String) -> void:
 	if not choose.call(id):
 		return
-	Sfx.play("unlock", null, -6.0)
+	UI.pick_taken()
 	done.call(id)

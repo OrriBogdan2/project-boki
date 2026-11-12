@@ -94,8 +94,13 @@ func _scene(main: Node) -> void:
 	hx._show_pick()
 	await tree.process_frame
 	ok(_cards(hx) == 4, "hovering the black egg shows its card")
+	Sfx.last_played.erase("ui_confirm")
 	hx._pick(m)
 	ok(hx.chosen == m and hx.stage == "warm", "one click on the black egg takes it")
+	ok(Sfx.last_played.has("ui_confirm"), "and the take plays the confirm sound (no button to press)")
+	Sfx.last_played.erase("ui_confirm")
+	hx._pick(m)
+	ok(not Sfx.last_played.has("ui_confirm"), "a second click once it is taken plays nothing")
 	hx.egg_defs[m]["rec"]["mutations"] = ["giant"]
 	hx.kin_node = Models.kin(hx.egg_defs[m]["species"], {"level": 1})
 	hx.add_child(hx.kin_node)

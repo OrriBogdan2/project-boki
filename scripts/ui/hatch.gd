@@ -549,7 +549,7 @@ func _pick(i: int) -> void:
 		return
 	chosen = i
 	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
-	Sfx.play("click")
+	UI.pick_taken()
 	_start_hatch()
 
 ## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The

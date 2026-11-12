@@ -162,7 +162,12 @@ func _first_mask(tree: SceneTree) -> void:
 	cards[1].mouse_entered.emit()
 	ok(ClassUnlock.needs_starters(), "hovering a card only shows it")
 	await tree.create_timer(HobOffer.OPEN_GUARD_S + 0.05).timeout
+	Sfx.last_played.erase("ui_confirm")
 	cards[2].gui_input.emit(_click())      # (one click on Vex's card, no hover first)
+	ok(Sfx.last_played.has("ui_confirm"), "the take plays the confirm sound, no button to press")
+	Sfx.last_played.erase("ui_confirm")
+	cards[1].gui_input.emit(_click())
+	ok(not Sfx.last_played.has("ui_confirm"), "a second card after the take is refused and silent")
 	var moments: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(moments.size() == 1, "one click on a card takes it, into the Relic moment, not the match")
 	if moments.is_empty():
