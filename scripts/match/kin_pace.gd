@@ -12,7 +12,7 @@ const HURT_S := 3.0            # s after its Hunter is hit that a Boki counts as
 ## The time for this step's sim (with what it skipped), or 0.0 on a step a far, calm Boki skips.
 static func step(k: Kin, dt: float) -> float:
 	var acc := k.pace_dt + dt
-	var off_beat := (int(k.m.time / Match.DT) + k.get_instance_id()) % FAR_EVERY != 0
+	var off_beat := (roundi(k.m.time / Match.DT) + k.get_instance_id()) % FAR_EVERY != 0
 	# (Match.DT, not dt: a far bot's SimLod step hands its Boki 3 steps' time at once)
 	if off_beat and acc < Match.DT * FAR_EVERY and _calm_far(k):
 		k.pace_dt = acc
