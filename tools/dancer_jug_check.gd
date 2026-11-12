@@ -1367,9 +1367,9 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
 
-## VFX_QUALITY 6: the crimson Smash telegraphs are the hit, read off the drawn entries (not the data): a foe whose
-## body just reaches into the drawn Slam cone or lane (at its rim or side, at its tip) is hit and one just past it is not; a foe
-## just inside the drawn Lunge lane's side is hit, one just outside it is not, and the fling travels the drawn length.
+## VFX_QUALITY 6: the crimson Smash telegraphs are the hit, read off the drawn entries (not the data): a foe
+## whose body just reaches into the drawn Slam cone or lane (at its rim or side, at its tip) is hit and one just
+## past it is not; the same at the drawn Lunge lane's side, and the fling travels the drawn length.
 func _smash_drawn_is_hit(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	var fwd := Vector3(1, 0, 0)
 	var side := Vector3(0, 0, 1)
