@@ -735,7 +735,7 @@
 "scripts/match/terrain_mesh.gd": {
 "long_line": 49,
 "nested_ternary": 2,
-"semicolon": 86
+"semicolon": 85
 },
 "scripts/match/train_route.gd": {
 "long_line": 2,
@@ -758,7 +758,7 @@
 "scripts/match/world.gd": {
 "long_line": 77,
 "nested_ternary": 9,
-"semicolon": 172,
+"semicolon": 164,
 "shadow": 2
 },
 "scripts/server/relay.gd": {
