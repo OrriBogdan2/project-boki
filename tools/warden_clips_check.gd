@@ -17,8 +17,8 @@ const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
-const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender",    # Vex, Kael, Cinder, Meeko: their own ledge climb
-	"archer", "dolm", "dredge", "rimewright"]    # Lace, Tenzo, Grimble, Neve (tools/art1/glb_climb_clips.py)
+const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: mantlekit.py poses
+const CLIMBERS := ["archer", "dolm", "dredge", "rimewright"]    # Lace, Tenzo, Grimble, Neve: glb_climb_clips.py keys
 
 var bad := 0
 var holder: Node3D
@@ -40,9 +40,11 @@ func run(main: Node) -> void:
 		_air(String(id))
 	_finishers()
 	for id in MANTLERS:
-		_mantle(String(id))
+		_mantle(String(id), false)
+	for id in CLIMBERS:
+		_mantle(String(id), true)
 	for id in Arch.ORDER:
-		if not MANTLERS.has(String(id)):
+		if not MANTLERS.has(String(id)) and not CLIMBERS.has(String(id)):
 			_mantle_proc(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -223,8 +225,8 @@ func _finishers() -> void:
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.
 ## A ledge rise plays the Hero's own climb clip: its time is how far up the face he is, the vault runs on in real time
-## after the lip, and the pose moves.
-func _mantle(id: String) -> void:
+## after the lip, and the pose moves: the hands reach up (a keyed climb over the head), then plant on the lip.
+func _mantle(id: String, keyed: bool) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
@@ -250,15 +252,22 @@ func _mantle(id: String) -> void:
 	var an := HunterAnim.new(m)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
 	var foot := WardenSkeleton.find(sk, "shin.R")
+	var hand := WardenSkeleton.find(sk, "hand.R")
+	var head := WardenSkeleton.find(sk, "head")
 	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
 	var lo := 0.0
 	var hi := 0.0
+	var hands: Array = []    # the hand's height off the head: up at the start, planted on the lip at the end
 	for k in [0.05, 0.3, 0.55, 0.8]:
 		_play(m, an, sync, st.merged({"mantle": k}), 12)
 		var p := sk.get_bone_global_pose(foot).origin
 		lo = minf(lo, p.y)
 		hi = maxf(hi, p.y)
+		hands.append(sk.get_bone_global_pose(hand).origin.y - sk.get_bone_global_pose(head).origin.y)
 	ok(hi - lo > 0.15, "%s: the legs move through the climb (%.2f m)" % [id, hi - lo])
+	var reach: float = 0.0 if keyed else float(hands[3]) + 0.15    # mantlekit's grab starts under the head
+	ok(float(hands[0]) > reach and float(hands[3]) < -0.1,
+			"%s: hands reach up, then plant on the lip (%.2f, %.2f m off the head)" % [id, hands[0], hands[3]])
 	m.free()
 
 ## A Hunter with no climb clip keeps the rig's procedural reach and push for a ledge rise.
