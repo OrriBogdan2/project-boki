@@ -140,7 +140,7 @@ The 8 ranked rows of briefs/hero-ref/ostra.md section 4, marked on main d255acbe
 | 5 | Bomb growth and damage curve | closed | grow 6.5s, 3.5x (5b9a528d2), `min_recast` 0.3s, light column from 68%, implosion pop; `e: ...` rows. In flight: ext/motley-seed-fizzle 9f521695a drops the 10s fizzle (the source lists no expiry) |
 | 6 | Empowered aura | closed | `OstraKit.add_swell`: pink sphere (`os_aura`), vortex disc, pink flash; `swollen_t` 9s; `passive: full Swell = Swollen for 9s, wrapped in the pink sphere` |
 | 7 | Bomb cast is a lob | closed | `e.drop` 0.25s, the `os_drop` mote; `e: a small orb drops from his hand onto the spot` |
-| 8 | Black Hole | closed / owner override | Nightwell on X (392bcdcc7, 59010b314); the 1.0s cast lock, then free, is owner item 16 (OWNER_REVIEW_1103) and DECISIONS (Ostra ult); `ult open`, `lock`, `release` |
+| 8 | Black Hole | closed / owner override | Nightwell on X (392bcdcc7, 59010b314); the 1.0s cast lock, then free, is owner item 16 (OWNER_REVIEW_1103) and DECISIONS (Motley ult); `ult open`, `lock`, `release` |
 
 Nothing is open in the ranked list, so no code was changed. In flight, not touched: ext/motley-seed-fizzle (row 5 fizzle),
 ext/anim-time-motley-rebased, ext/ostra-gait-rebased, ext/vfx-quality-motley and ext/vfx-ostra-abilities (VFX look),

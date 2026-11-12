@@ -67,7 +67,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | LMB tap: throw / recall | - | (a) | Matches; the throw now leaves the hand after one frame of wind-up (e625aa8e) |
 | Passive: the hammer's knock doesn't Crush | MED | (b) | `_mace_hit` arms the knock window; `bjorn audit: the thrown hammer knocking a foe into a wall Crushes it` |
 | Passive: foe-into-foe Crush invented | MED | (b) | Removed (data: walls only); `bjorn audit: a blow that knocks a foe into another foe ... doesn't Crush` |
-| Passive: Guard meter and Shield Slam invented | MED | (c) | Every kit has a built resource with an armed payoff (ArchKit's payoff design: Rage, Cash In, ...); Guard is Bjorn's. Owner question below |
+| Passive: Guard meter and Shield Slam invented | MED | (c) | Every kit has a built resource with an armed payoff (ArchKit's payoff design: Rage, Cash In, ...); Guard is Albert's. Owner question below |
 | Passive: 8 damage on a Crush | MED | (c) | The stun rides a hit (Ent.hurt ignores a 0-damage hit); 8 is small. Kept, ours |
 | RMB: rises after 0.2 s | MED | (a) | 0.1 s (e625aa8e); `bjorn parity RMB: the aegis is up 0.1 s into the hold` |
 | RMB: does it block front melee? | MED | (b) | Yes now: any hit from a foe in its 140 degree arc lands on the aegis (its HP, Guard), as the data's "blocks all damage from the front"; damage over time and blows from behind still land. `bjorn audit: the raised aegis takes a melee blow from the front`, `a blow from behind still lands on him` |

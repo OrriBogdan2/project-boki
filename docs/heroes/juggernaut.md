@@ -81,7 +81,7 @@ in the ability clips), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `t
 
 ## Audit (Nov 3 23:40)
 
-Every row of briefs/specs/kit-audit/zedran_bjorn_pin.md for Zedran (it audited main 200effce): (a) already done on
+Every row of briefs/specs/kit-audit/zedran_bjorn_pin.md for Kael (it audited main 200effce): (a) already done on
 this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--juggernaut-combo-check`.
 
 | Row | Sev | Verdict | Where / why |
