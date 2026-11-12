@@ -12,12 +12,15 @@ extends ArchKit
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
 const PAY := "COLLAPSE"
-const TEAL := Color("7fe0d0")
-const VOID_COL := Color("b06bff")
+const TEAL := Color("7fe0d0")             # the pale teal of his rings and the COLLAPSE payoff
+const SEA := Color("2ee6c0")              # his signature (docs/VFX_QUALITY.md): orbs, Snap, Brimseed, Nightwell
+const DEEP := Color("0b5a50")             # their deep teal (the seed's filling accent)
+const VOID_DARK := Color("06100f")        # the near-black teal of their void cores
+const HOT := Color("b8fff0")              # their white-hot teal (flashes, the full orb)
 const PINK := Color("ff4fd8")
-const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
-const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
-const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
+const ORB_FULL_COL := HOT      # the orb's shot colour at full charge (what other games draw)
+const GLOW_COL := Color("0b9c85")          # the charge glow at his hand, starting...
+const GLOW_FULL_COL := SEA     # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
 const TRADE_COL := Color("c65cff")         # the Trade's violet (his end, the lob; the dash slot's col)
 const TRADE_EDGE := Color("ff3fd0")        # its magenta edge (the landing end; the UI's Void & Masks neon)
@@ -202,8 +205,8 @@ func _tick_weapon() -> void:
 		# camera drew it as a disc at his feet)
 		var hand := hand_pos(true)
 		KitLooks.of(m).hold_on("os_charge", "mote", h, hand, lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
-		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: magenta motes and smoke drawn into his hand
-			m.fx.burst(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
+		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: teal motes and smoke drawn into his hand
+			m.fx.burst(hand, Color(SEA, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
 			m.fx.burst(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
@@ -255,7 +258,7 @@ func _orb_fired() -> void:
 	if charge >= 1.0:
 		settled_shots += 1
 	if held_orb:
-		m.fx.burst(_hand(), Color(TRADE_EDGE, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
+		m.fx.burst(_hand(), Color(SEA, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 		m.fx.burst(_hand(), SMOKE, 6, 1.5, 0.4, -1.0, 1.6)
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
@@ -507,21 +510,21 @@ func _snap_release() -> void:
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
 	m.spawn_shot(
-		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), VOID_COL,
+		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA,
 		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
 	)
 	KitLooks.of(m).skin(m.shots[-1], "spear")
 	m.sfx("os_snap", h.pos, -2.0, 1.0)
 	_boost(float(sn["boost"]["cast"]))
-	m.fx.flash(start, Color("b06bff"), 0.7, 0.07)
-	m.fx.burst(start, Color(0.45, 0.15, 0.7, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
+	m.fx.flash(start, HOT, 0.7, 0.07)
+	m.fx.burst(start, Color(SEA, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	m.fx.burst(at, Color(0.45, 0.15, 0.7, 0.9), 14, 5.0, 0.3, 0.0, 1.2)
-	m.fx.flash(at, PINK, 0.7, 0.08)
+	m.fx.burst(at, Color(SEA, 0.9), 14, 5.0, 0.3, 0.0, 1.2)
+	m.fx.flash(at, HOT, 0.7, 0.08)
 	if e == null:
 		return
 	var sn: Dictionary = rmb_def()["snap"]
@@ -546,7 +549,7 @@ func cast_e() -> bool:
 	var sid := "%s.s%d" % [h.nid if h.nid != "" else str(h.get_instance_id()), sid_n]
 	var grow := float(ed["grow"]) * (float(ed["grow_swollen_k"]) if is_swollen() else 1.0)
 	var rmax := float(ed["rmax_swollen"]) if is_swollen() else float(ed["rmax"])
-	var vis := HeroZones.seed_visual(m, sid, p, rmax, grow, TEAL)
+	var vis := HeroZones.seed_visual(m, sid, p, rmax, grow, SEA)
 	seed = {
 		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
 		"col": null
@@ -578,11 +581,11 @@ func _tick_seed(dt: float) -> void:
 	if float(seed["t"]) < drop:
 		var u := float(seed["t"]) / drop
 		var from: Vector3 = seed["from"]
-		KitLooks.of(m).hold_on("os_drop", "mote", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 1.0, VOID_COL)
+		KitLooks.of(m).hold_on("os_drop", "mote", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 1.0, SEA)
 	AimKit.circle(
 		h, "seed",
 		{
-			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": VOID_COL, "col2": TEAL,
+			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": SEA, "col2": TEAL,
 			"dashed": seed_k() < 1.0
 		}
 	)
@@ -624,7 +627,7 @@ func _pop(hit: bool) -> void:
 	seed = {}
 	e_t = 0.0
 	AimKit.hide(h, "seed")
-	HeroZones.seed_pop(m, sid, TEAL)
+	HeroZones.seed_pop(m, sid, SEA)
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
 	if not hit:
@@ -636,15 +639,15 @@ func _pop(hit: bool) -> void:
 	# an implosion: the rim snaps inward to a bright point, then dark shards fly out
 	for i in 3:
 		var rr := rad * (1.0 - 0.3 * i)
-		m.later(0.04 * i, func(): m.fx.ring(p, rr, VOID_COL if i < 2 else Color("f2eaff"), 0.12))
-	m.fx.burst(p + Vector3(0, 0.8, 0), VOID_COL, int(14 + 22 * k), -5.0, 0.35, 0.0, 1.2)
+		m.later(0.04 * i, func(): m.fx.ring(p, rr, SEA if i < 2 else HOT, 0.12))
+	m.fx.burst(p + Vector3(0, 0.8, 0), SEA, int(14 + 22 * k), -5.0, 0.35, 0.0, 1.2)
 	m.later(
 		0.12,
 		func(): m.fx.spark(
-			p + Vector3(0, 0.6, 0), Vector3.UP, Color("2a0a3a"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
+			p + Vector3(0, 0.6, 0), Vector3.UP, VOID_DARK, int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
 		)
 	)
-	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
+	m.fx.flash(p + Vector3(0, 0.8, 0), HOT, 1.0 + k, 0.1)
 	m.sfx("os_pop", p, -2.0, 1.0)
 	m.sfx("ostra_spring_boing", p, -3.0, 1.0)     # the jack springs out
 	net_ring(p, rad, TEAL)

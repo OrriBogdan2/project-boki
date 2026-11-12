@@ -68,11 +68,13 @@ func _cast_and_dome() -> void:
 	step(m, 0.5)
 	var dome: Dictionary = AimKit.entry(P, "x")
 	ok(
-		"ult telegraph: a dome of the exact size (3.6m) everyone sees, filling over 1.0s",
-		bool(dome.get("all", false)) and absf(float(dome.get("r", 0.0)) - 3.6) < 0.05
+		"ult telegraph: a dome of the exact size (3.5m, the source's 350) everyone sees, filling over 1.0s",
+		bool(dome.get("all", false)) and absf(float(dome.get("r", 0.0)) - 3.5) < 0.05
 			and absf(float(dome.get("fill", 0.0)) - 0.5) < 0.1 and KitLooks.of(m).holding("os_well_dome"),
 		"fill %.2f" % float(dome.get("fill", 0.0))
 	)
+	var shell := (KitLooks.of(m).held["os_well_dome"]["n"] as Node3D).get_child(0) as MeshInstance3D
+	ok("ult look: the dome is pale teal glass, a rim with a faint centre", _faint_teal(shell))
 	var t := 0.5
 	while not W.is_open() and t < 2.0:
 		m.step(DT)
@@ -165,7 +167,7 @@ func _catch_and_hold() -> void:
 	)
 	await done(m)
 
-## A crate, a pot and a keg inside the well's reach (Swollen 5.1m, plain 3.6m), 2.6m out.
+## A crate, a pot and a keg inside the well's reach (Swollen 5.0m, plain 3.5m), 2.6m out.
 func _props(m: Match, c: Vector3) -> Array:
 	var out := []
 	for i in 3:
@@ -194,11 +196,11 @@ func _swollen_and_merge() -> void:
 	m.step(DT)
 	var dome: Dictionary = AimKit.entry(P, "x")
 	ok(
-		"ult Swollen: the well is 5.1m wide, with the pink core",
-		absf(W.radius - 5.1) < 0.01 and W.swollen,
+		"ult Swollen: the well is 5.0m wide (the source's 500), with the pink core",
+		absf(W.radius - 5.0) < 0.01 and W.swollen,
 		"r %.1f" % W.radius
 	)
-	ok("ult Swollen: its dome shows the bigger size", absf(float(dome.get("r", 0.0)) - 5.1) < 0.05)
+	ok("ult Swollen: its dome shows the bigger size", absf(float(dome.get("r", 0.0)) - 5.0) < 0.05)
 	var props := _props(m, c)
 	step(m, 1.0)
 	ok(
@@ -215,7 +217,22 @@ func _swollen_and_merge() -> void:
 	var disc: Node3D = KitLooks.of(m).held["os_well"]["n"]
 	var mt := (disc.get_node("Disc") as MeshInstance3D).material_override as ShaderMaterial
 	ok("ult Swollen: the whirlpool's rim is the empowered one", float(mt.get_shader_parameter("power")) > 0.99)
+	ok(
+		"ult look: a lit rim over a see-through centre (alpha 0.25 or less, never a solid fill), in his sea teal",
+		float(mt.get_shader_parameter("core_a")) <= 0.25 and _teal(mt.get_shader_parameter("streak"))
+			and _teal(mt.get_shader_parameter("rim"))
+	)
 	await done(m)
+
+## His sea teal (#2ee6c0, docs/VFX_QUALITY.md), not the old indigo or violet: green-blue, green over red.
+static func _teal(c: Color) -> bool:
+	return c.h > 0.4 and c.h < 0.55 and c.g > c.r
+
+## A void-glass shell whose face-on alpha ((body + its swirl's 0.1) x alpha) stays at 0.25 or under, rim teal.
+static func _faint_teal(mi: MeshInstance3D) -> bool:
+	var g := mi.material_override as ShaderMaterial
+	var face := (float(g.get_shader_parameter("body")) + 0.1) * float(g.get_shader_parameter("alpha"))
+	return face <= 0.25 and _teal(g.get_shader_parameter("rim"))
 
 ## A hard CC frees him early from the cast (a stun, then a knock); the placed well goes on either way.
 func _lock_breaks() -> void:

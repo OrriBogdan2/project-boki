@@ -5,6 +5,7 @@ extends "res://tools/hero_pair_check.gd"
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
 
 const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
+const ULT := preload("res://tools/ostra_ult_check.gd")              # Nightwell rows, and the teal zone-look tests
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -23,7 +24,7 @@ func run(main_node: Node) -> void:
 	await arena_check.arena(main)
 	n += arena_check.n
 	fails += arena_check.fails
-	var ult_check = load("res://tools/ostra_ult_check.gd").new()
+	var ult_check = ULT.new()
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
@@ -107,7 +108,10 @@ func _ostra() -> void:
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (12.25m)", olen > 11.0 and olen < 13.0, "%.1f m" % olen)
-	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	ok(
+		"lmb: the orb is his own sea-teal shot (skin, weapon colour)",
+		KitLooks.of(m).skins_live("orb") >= 1 and ULT._teal(Color(P.wpn["color"]))
+	)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
 	reset.call()
@@ -348,6 +352,8 @@ func _ostra() -> void:
 	var no_col := K.seed.get("col") == null
 	step(m, 0.6)
 	ok("e: the light column rises near full growth (from about 4.4s)", no_col and K.seed.get("col") != null)
+	var globe := (K.seed["vis"] as Node3D).get_node("Core") as MeshInstance3D
+	ok("e: the globe is a teal rim over a see-through centre (alpha 0.25 or less)", ULT._faint_teal(globe))
 	step(m, 1.95)
 	ok(
 		"e: the seed grows for 6.5s to 3.2m", K.seed_k() >= 0.99 and absf(K.seed_radius() - 3.2) < 0.05,

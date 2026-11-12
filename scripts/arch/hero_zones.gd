@@ -165,9 +165,11 @@ static func bridge(
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
-## growing to its full width, with a thin teal rim at its edge. Ostra's own shape; no other zone looks like it.
+## The seed: a near-black glass globe with a slow sea-teal swirl (shaders/void_glass), lit at its rim and
+## see-through at its centre (SEED_BODY), growing to its full width,
+## with a thin teal rim at its edge. Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
+const SEED_BODY := 0.2                # the globe's glass alpha face-on (x 0.8): the centre stays under 0.25
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
 static func seed_r(rmax: float, grow: float, t: float) -> float:
@@ -185,12 +187,12 @@ static func seed_visual(
 	var core := MeshInstance3D.new()
 	core.name = "Core"
 	core.mesh = Models.sphere(1.0, 32)
-	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color("7a5cff"), 0.8, 0.55)
+	core.material_override = KitLooks.glass_mat(OstraKit.VOID_DARK, OstraKit.SEA, 0.8, SEED_BODY)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
-	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the violet globe reads
+	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the globe reads
 	ring.material_override = Models.ring_mat(Color(col, 0.9), 0.06)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
@@ -242,6 +244,6 @@ static func net_in(m: Node, x: Array) -> void:
 			if x.size() < 9: return
 			var sid := String(x[3])
 			if not (m.get_meta("zone_seeds", {}) as Dictionary).has(sid):
-				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), Color("6fd0c6"), true)
+				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), OstraKit.SEA, true)
 		"pop":
-			seed_pop(m, String(x[2]), Color("6fd0c6"))
+			seed_pop(m, String(x[2]), OstraKit.SEA)
