@@ -39,6 +39,8 @@ HP scale: source hunters have 880-1,596 HP (median 1,030) [D]; ours 124/145/193 
 
 None of those have a published use time or slow in the source either, so nothing there is a clear mismatch beyond what [S] already lists.
 
+First-time tips (`scripts/match/belt_tips.gd`, `--belt-tips-check`): the first ground pickup of each belt item shows one line, "<name> on <key>: <first sentence of its desc>", once per save (`Save.d.tutorial.belt_<id>`). The tonic and armor kit, which every hunter starts with, show theirs the first time health drops under 40% and the first time armor breaks. Chest keys have none. Real matches only (the `Match._tips` rules: not in the tutorial or with tips off).
+
 ## Ideas of ours (not built)
 
 - Hypervive ("Deep Draught" in [S]): a 5 s Vulnerable, 60% slow, full heal item. The slow here is the only consumable slow with a source.

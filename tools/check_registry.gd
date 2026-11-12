@@ -30,6 +30,7 @@ const CHECKS := {
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
+	"--belt-tips-check": ["res://tools/belt_tips_check.gd", "belt_tips_check", null],  # one-time belt item tips
 	# the Ways Out strip and Gate prompt
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],      # EdgeMarker
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
