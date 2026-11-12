@@ -109,7 +109,7 @@ Source: data (Oath, Brightshield: "HOLD to raise a shield that blocks all damage
 | Shift while holding (ground) | Shield Charge: RMB slot's own 6 s cooldown, no dash charge, aegis stays up through it and its pose returns when the Charge ends | [D] Shield Bash |
 | Shift while holding, Charge cooling | Nothing: no dash charge, no spin, aegis stays | [ours] the source does not say what Shift does while the Bash cools (alternative: a plain 360 Smash) |
 | Shift right after the release | The plain 360 Smash on a dash charge; the Charge cooldown is untouched | [D] Spin Dash is the unshielded Shift |
-| Shift while holding, in the air | The lumbering dash (a dash charge); the aegis stays up, never the Charge | [ours] the Bash is only seen on the ground |
+| Shift while holding, in the air | The Shield Charge (riding Shield Surf, main's rule; its own cooldown, no dash charge); the aegis stays up | [ours] the Bash is only seen on the ground |
 | RMB pressed in a 360 Smash | The aegis rises mid-dash; letting go drops it and its pose | [D] no lockout; dash_flow row |
 | RMB let go in the Charge | The aegis comes down, the Charge finishes (it is invulnerable), no leftover pose | [ours] |
 | LMB while holding | No throw, no swing charge; the aegis stays. A press made behind the aegis is spent: after the RMB lets go the button must come up before a swing starts (so no wind-up pose without a fresh hold) | [ours] the source shows him standing still while shielding |

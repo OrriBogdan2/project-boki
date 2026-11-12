@@ -131,7 +131,7 @@ func bjorn() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok("aegis input: that press, let go, throws nothing", K.throws == thr and K.mace.is_empty())
-	# dash while holding, priority: in the air Shift is the plain dash (never the Charge), the hold stays
+	# dash while holding, priority: in the air Shift is the Shield Charge too (Shield Surf, main), the aegis stays
 	reset.call()
 	P.teleport(home + Vector3(0, 8.0, 0))
 	step(m, 0.05)
@@ -141,8 +141,8 @@ func bjorn() -> void:
 	var air := not P.grounded
 	P.do_dash()
 	step(m, 0.1, func(): P.inp["sec_hold"] = true)
-	ok("aegis input: Shift held in the air is the lumbering dash, not the Shield Charge, and the aegis stays",
-		air and K.st.get("last_dash") == "lumber" and K.ch_rmb >= 1.0 and not K.wall.is_empty(),
+	ok("aegis input: Shift held in the air is the Shield Charge (Shield Surf), the aegis stays",
+		air and K.st.get("last_dash") == "charge" and not K.wall.is_empty(),
 		"air %s dash %s up %s" % [str(air), str(K.st.get("last_dash")), str(not K.wall.is_empty())])
 	P.inp["sec_hold"] = false
 	step(m, 1.5)
