@@ -181,6 +181,7 @@ static func _trail(ahead: float) -> Mesh:
 		return null
 	if not _marks.has(count):
 		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		var bar := Models.box(ARROW_LEN, 0.12, 0.3)
 		for k in count:
 			var z := ARROW_START + ARROW_STEP * k
@@ -195,6 +196,7 @@ static func _trail(ahead: float) -> Mesh:
 static func _lift_marks() -> Mesh:
 	if not _marks.has("lift"):
 		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		for k in 3:
 			var cone := Models.cyl(0.0, CONE_R - 0.12 * k, CONE_H, 8)
 			st.append_from(cone, 0, Transform3D(Basis.IDENTITY, Vector3(0, CONE_STEP * (k + 1), 0)))
