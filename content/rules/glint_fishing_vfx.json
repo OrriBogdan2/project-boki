@@ -1,0 +1,7 @@
+{
+	"desc": "Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the shared cel pass). One recipe per moment; the shader draws four looks: ripple, tight, splash, glint. Units: m (size is the quad's half width), seconds, colours as hex.",
+	"plop": {"look": "ripple", "size": 0.4, "life": 0.9, "c": "bff4ff", "c2": "ffffff", "doc": "The bobber lands: one small ripple, on a glint or in empty water."},
+	"wait": {"look": "tight", "size": 0.7, "rest": 0.95, "close": 0.3, "rings": 3, "c": "bff4ff", "c2": "ffffff", "doc": "Waiting: faint rings hold wide round the bobber. When the ears go up they close in over the warning and meet at the bite, so the rings carry the same timing the ears do (Focus sets how long)."},
+	"bite": {"look": "splash", "size": 0.55, "life": 0.3, "c": "bff4ff", "c2": "ffffff", "doc": "The bite, the moment to press: one sharp crown of water."},
+	"catch": {"look": "glint", "life": 0.65, "c": "bff4ff", "c2": "ffffff", "rare_c": "ffd24a", "rare_c2": "fff3c0", "size": {"snack": 0.2, "item": 0.3, "rare": 0.5}, "rise": 0.35, "doc": "A catch is landed: one four-point glint above the water, sized by what came up (snack, item, rare; a rare is gold) and floating up by rise m."}
+}
