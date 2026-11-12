@@ -1,5 +1,5 @@
 extends RefCounted
-## --sfx-set-check section 10: the world's sounds outside the kits (content/rules/sfx_world.json, docs/SFX_WORLD.md).
+## --sfx-set-check section 11: the world's sounds outside the kits (content/rules/sfx_world.json, docs/SFX_WORLD.md).
 ## For each system (mobs, pickups and loot, gloves, utilities, garden games, Ways Out and the Heartspark) every
 ## cue it plays is one of its own sounds (a sound of the system's sets in content/sfx) and exists, never a
 ## shared stock sound or a borrowed Boki k_* cue. The cues are the literal names in the system's files

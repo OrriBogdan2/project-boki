@@ -1,6 +1,6 @@
 # World sound coverage (outside the kits)
 
-`--sfx-set-check` section 10 (`tools/sfx_world_cues.gd`) walks the cues of the world's systems listed in
+`--sfx-set-check` section 11 (`tools/sfx_world_cues.gd`) walks the cues of the world's systems listed in
 `content/rules/sfx_world.json`: mobs and bosses, pickups and loot, gloves, utilities, the garden games and
 the Ways Out (Heartspark, uplink outposts, quest seats). Every cue a system plays must be one of its own
 sounds (a sound in the system's `content/sfx` sets) that exists; a shared stock sound (`pickup`, `thump`,
