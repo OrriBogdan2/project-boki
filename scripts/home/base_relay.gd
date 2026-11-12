@@ -6,7 +6,8 @@ extends RefCounted
 ## the timing bar: the grade sets the seconds the next runner loses taking the baton; rivals fumble unless the
 ## press is great, and duo friends (BaseDuo) hand off cleanly on their own and run the next leg faster.
 ## The visitors mirror your three at the cup round's strength (rivals()), so every win is a cup win in
-## content/rules/garden_prizes.json "relay". Tuning: content/rules/base_relay.json. Run has no nodes, so
+## content/rules/garden_prizes.json "relay". The runners' body language (hand-off contact, launch burst, finish
+## cheer and sulk) is RelayBeats. Tuning: content/rules/base_relay.json. Run has no nodes, so
 ## --relay-cup-check (tools/relay_cup_check.gd) runs it headless with a seed.
 
 const STAND_OFF := Vector3(-1.3, 0, -2.4)   # m from the loop's start line to the relay stand
