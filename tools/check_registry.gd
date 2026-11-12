@@ -205,8 +205,6 @@ const CHECKS := {
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
-	# --shots-dir=<dir> (GPU)
-	"--breakables-shots": ["res://tools/breakables_check.gd", "breakables_check", "shots"],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 	"--range-clamp-check": ["res://tools/range_clamp_check.gd", "range_clamp_check", null],  # cursor past max range
