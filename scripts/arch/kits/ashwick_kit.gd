@@ -28,6 +28,8 @@ const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange 
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
+# s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
+const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
@@ -158,19 +160,18 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", res_col(), false)
 		vfx("ablaze", f.pos)
 
 ## The Flashover payoff: the word, a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
 ## flash; the shared payoff's rings stay out of Cinder's fire.
 func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
-	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
 	m.sfx("crit", f.pos, -7.0, 0.85)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
+	RecastCue.payoff(self, f)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
@@ -189,8 +190,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -328,8 +328,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		_pause_hose()
 		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
+		if was_held:
+			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:
-			play("as_lance_end")
 			vfx("lance_end")
 			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the fire gutters out as she lets go
 		if was_held:
@@ -437,7 +438,8 @@ func rmb_hold_tick(_t: float) -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
-		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
+		h, "rmb", {"len": ln, "width": float(rdf["size"]) * 2.0, "col": Color("fff4e6"), "col2": BOLT_COL,
+				"alpha": 0.9, "tip": true}
 	)
 
 func fire_rmb(c: Dictionary) -> void:
@@ -498,7 +500,6 @@ func _cinder_hit(f: Ent) -> void:
 			if o != f and is_instance_valid(o) and not o.dead and sees_from(f.pos, o):
 				_ignite(o, cur, burning(o))
 				vfx("shot_spread", f.pos, null, {"to": o.pos + Vector3(0, 1.0, 0)})
-		m.fx.word(f.pos + Vector3(0, 2.5, 0), "SPREAD", col_of(rdf), true)
 	else:
 		stoke(f)
 
@@ -613,6 +614,8 @@ func _bash_impact(f: Ent) -> void:
 	bash["hit"] = true
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
+	if anim_id == "as_leap":
+		anim_at = minf(anim_at, m.time - RAM_IMPACT_KEY)      # the squash on the hit frame, not at the full ram
 	var dir: Vector2 = bash["dir"]
 	# and he bounces back a little off them
 	h.vel.x = -dir.x * float(dd["recoil"])
@@ -636,7 +639,6 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
@@ -658,7 +660,7 @@ func _cloak_blast() -> void:
 	var ed := e_def()
 	blasts += 1
 	var hit := 0
-	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
+	var shield_k := rank_k("rank_shield", "kin", 1.0)
 	var r := float(ed["radius"])
 	vfx("cloak", null, null, {"r": r})        # no wider than the blast reaches
 	for f in foes_in(h.pos, r):
@@ -687,6 +689,26 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
+func recast_window() -> Dictionary:
+	if not jet.running():
+		return {}
+	var t := float(x_def()["time"])
+	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
+
+## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var ttl := float(rd()["expire"])
+	for key in chars:
+		var c: Dictionary = chars[key]
+		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
+			continue
+		var lvl := burning(c["e"])
+		var left: float = ttl - (m.time - float(c["t"]))
+		if left > 0.0 or lvl > 0:
+			var label := "ABLAZE" if lvl > 0 else "CHAR"
+			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
