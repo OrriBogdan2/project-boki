@@ -123,7 +123,7 @@ What made the menus feel blocky, samey and hard to get through:
   `art/look/`), tabs Body / Hollow / Shroud / Glider each with its own camera shot, choices as tiles and swatches
   that try themselves on while hovered, a pop on a pick, gliders in their rarity colour (`Gliders.rarity`). Drag
   or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
-  GPU worker.
+  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`.
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 
