@@ -66,7 +66,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	# every kit move mapped, and long enough for the kit's clock
 	var short: Array = []
 	var unmapped: Array = []
-	for table in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES]:
+	for table in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]:
 		for k in table:
 			if not String(k).begins_with(prefix) or k in SKIP:
 				continue

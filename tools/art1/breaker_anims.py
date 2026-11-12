@@ -1,5 +1,5 @@
 """Breaker the Barnacle Knight's clips (ART-1), keyed by hand on the contract armature and timed to his kit's real numbers
-(content/archetypes/bulwark.json, KMovesPinBjorn), then the .glb export:
+(content/archetypes/bulwark.json, KMovesBjorn), then the .glb export:
   blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend OUT.glb
 He is a walking hull: everything starts from the ball of his body rocking on two stubby legs, and the drum's weight
 arrives late."""
