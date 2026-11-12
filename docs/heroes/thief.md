@@ -27,7 +27,7 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 ## Scaling
 
 Ratios, not raw numbers: a bolt is 13 (the source basic attack, 137; raised from 9 on the owner's "plain autos carry her"), the empowered bolt is 2.34x (the data's +214 on 160),
-a Mark is +10% of a bolt (the data's +16 on its 160 bolt), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
+a Mark is a flat +1.3 (the data's +16 on its 160 bolt, on our 13), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
 is 4 and +2 from the outer band (the source's 0.2s cadence, item 54: twice the blades of the old 8 and +4, the same
 40 and 60 over a cast; the old pair was about 0.9 of a bolt, 114-127 against 137, and the card's +50%, 36 + 19%
 against +18 + 9.5%). Cooldown ratios: Vault 4.5s (Cartwheel 4.2), Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom
@@ -49,7 +49,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
 | How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
-| Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add 10% of a bolt each, flat, as the source's +16 a stack |
+| Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add a flat 1.3 each, as the source's +16 a stack |
 | Empowered ranks | +20% damage twice [game data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
 | Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
 | Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
@@ -115,7 +115,7 @@ pass above.
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 37.5 m/s; it flies to the cursor (8.5m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 8.5m (the wiki's 850 units); no magazine |
-| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
+| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): a flat +1.3 bolt damage per Mark (the data's +16 on 160), weapon upgrades do not grow it. A knock heals 20% on top of the takedown's 5% (25% in all, the data's) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
 | Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.8m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
@@ -159,7 +159,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 6. **Phantom Dagger timer:** 6s, then you step to it anyway (the wiki's rule); no target: it lands at the cursor.
 7. **Encore and Marks:** its blades refresh Marks but do not add them, and do not count as bolt hits (the Mark bonus does not apply to them).
 8. **An empowered bolt that misses** is spent (no Vault reset).
-9. **Malice** has no stack cap or duration in any source; ours are 8 and 4s (see 4).
+9. **Malice** has no stack cap or duration in any source: ours has no cap either (the overhead tag shows eight pips, then the count) and a 4s fade (see 4).
 10. **Encore cadence:** one blade every 0.2s per target (10 in 2s), the footage's rate (item 54), with the damage split so the total stays. She is not slowed: the footage shows her walking and firing freely.
 11. **Encore's "weaker dashes":** the wiki's two charges of a weaker Shift while it runs become the Vault given back on the cast (one cartwheel, the normal one).
 12. **Encore needs line of sight:** a blade isn't thrown at a foe behind a wall, even inside the ring.

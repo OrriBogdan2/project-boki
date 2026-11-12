@@ -135,7 +135,9 @@ Faultline telegraph is an amber rectangle with rubble where the footage's is a c
 Still differs:
 - Cooldowns: Bola 7 s vs 13, Encore 24 vs 50, Shadow Knife 15 vs 20 at the top rank, Vault 4.5 vs 5.
 - Bola slows 30% (owner item 53), Grounds for 1.5 s, range 7 m; the stun on two foes is 0.9 s.
-- Marks add +10% each (16 of the 160 shot) with no cap; a knock heals 15% extra; the source stacks a flat +16.
+- Marks: a flat +1.3 per hit (the source's +16 on its 160 shot) with no cap, as the data; the 4 s fade is ours (the
+  data gives none). A knock heals 25% in all (the data's). The Bola and the Knife still add a Mark, the empowered
+  shot 2 (the owner's call); the source stacks only on Arcslinger hits.
 - LMB: 12 m to the cursor (the footage's bolt also stops at the cursor); damage is the scaled 13.
 - Encore's look (violet ring, gold outer band) is ours; the source's is a cyan ring about 3.5 body heights wide.
 
