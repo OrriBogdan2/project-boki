@@ -170,6 +170,7 @@ func run(main_node: Node) -> void:
 	_controls()
 	_data()
 	_health()
+	_roster()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -189,6 +190,25 @@ func run(main_node: Node) -> void:
 ## more than 1.25x either way. The scales differ, so only the ratio is compared.
 const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
 		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+## Every list of all the Hunters holds the same ids as Arch.ORDER (a new Hunter missing from one shows here).
+func _roster() -> void:
+	var want: Array = Arch.ORDER.duplicate()
+	want.sort()
+	var lists := {"HeroKit.ARCH_ORDER": HeroKit.ARCH_ORDER, "Arch.ids()": Arch.ids(),
+			"TitleBackdrop.ORDER": TitleBackdrop.ORDER}
+	for f in ["mantle_look", "warden_stance"]:
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/%s.json" % f))
+		lists[f + ".json"] = d.get("wardens", d).keys().filter(func(k): return want.has(k) or f == "mantle_look")
+	var files := Array(DirAccess.get_files_at("res://content/archetypes")).filter(func(f): return f.ends_with(".json"))
+	lists["content/archetypes/*.json"] = files.map(func(f): return f.get_basename())
+	ok("roster: Arch.ORDER is 13 distinct ids", want.size() == 13 and want.has("gil"), str(want))
+	for k in lists:
+		var got: Array = lists[k].duplicate()
+		got.sort()
+		ok("roster: %s holds the same 13 ids" % k, got == want, str(got))
+	var pk := FileAccess.get_file_as_string("res://server/matchmaker/mm/picks.py")
+	ok("roster: the matchmaker's HUNTERS names the same 13", want.all(func(a): return pk.contains('"%s"' % a)))
 
 const NO_SOURCE := ["gil"]      # our own Hunters: no source Base HP row, left out of the share
 
