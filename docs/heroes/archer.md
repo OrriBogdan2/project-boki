@@ -169,7 +169,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Draw past Supercharged + 0.5 s | Overdrawn: half damage, the drooping release | same |
 | Empowered / tap with no target | Lands at the cursor; the spent arrow stays stuck there for 4 s | same |
 | Supercharged with a foe under the line | The foe ringed at its feet; a silver burst on the hit | same |
-| Heavy Shot into a wall | Wall hit, 1.2 s stun, PINNED | same |
+| Heavy Shot into a wall | Wall hit, 1.2 s stun, PINNED | same; crimson burst on the wall face, crimson-white stars over the foe for the stun (`heavy_pin`, `heavy_stun` in content/vfx/archer.json) |
 | Wall pin, then a shot | a plain arrow (no Deadeye) | same |
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
 | Spirit Walk into a rock column | Passes through; ending inside puts her back (no cost) | same |

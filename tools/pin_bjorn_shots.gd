@@ -460,6 +460,38 @@ const OWNER := [
 		"owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it"
 	],
 	[
+		"wall_pin_a_impact",
+		"archer",
+		"heavy_pin",
+		1.36,
+		5.0,
+		"Heavy Shot into a rock at 1.36 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_b_impact",
+		"archer",
+		"heavy_pin",
+		1.42,
+		5.0,
+		"Heavy Shot into a rock at 1.42 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_c_impact",
+		"archer",
+		"heavy_pin",
+		1.52,
+		5.0,
+		"Heavy Shot into a rock at 1.52 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_d_impact",
+		"archer",
+		"heavy_pin",
+		1.9,
+		5.0,
+		"Heavy Shot into a rock 1.80 s into the hold: the burst on the wall face, the stun mark over the foe"
+	],
+	[
 		"o1103_pin_heavy_stake",
 		"archer",
 		"heavy_pin",
@@ -906,7 +938,7 @@ func _input(what: String, t: float) -> void:
 		"heavy_pin":
 			if t < DT:
 				crush_rock = _rock_near(home)
-				P.teleport(crush_rock - Vector3(8.0, 0, 0))
+				P.teleport(crush_rock - Vector3(5.0, 0, 0))
 				T.teleport(crush_rock - Vector3(1.2, 0, 0))
 			if t < 1.25:
 				T.teleport(crush_rock - Vector3(1.2, 0, 0))
