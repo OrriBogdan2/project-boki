@@ -127,8 +127,6 @@
 				"life": 1.6, "size": 0.54, "c": "smoke", "c3": "mist", "near": true}
 		]},
 		"rime_hold": {"fx": [
-			{"p": "star", "y": 1.0, "n": 14, "shape": "ball", "radius": 1.1, "speed": 0.4, "spread": 1.0, "grav": 0.3,
-				"curl": 1.5, "life": 1.4, "size": 0.1, "c": "smoke", "c2": "hot"},
 			{"p": "smoke", "y": 0.3, "n": 6, "shape": "disc", "radius": 1.2, "speed": 0.5, "spread": 0.8, "grav": -0.2,
 				"life": 1.6, "size": 0.48, "c": "smoke", "c3": "mist", "near": true}
 		]},

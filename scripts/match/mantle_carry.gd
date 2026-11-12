@@ -36,6 +36,15 @@ static func step(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 		h.carry_dir = hv.normalized()
 	return hv
 
+## A Shift dash that meets a ledge in reach hands over to the mantle: what's left of the dash is dropped (the
+## source's mini-mantle sets your speed from here, exit()), and the dash's speed takes you up the face, capped
+## at Hunter.LRISE_SPEED, instead of the suction's slow pull (SV footage: dash at a rim, on top ~0.2 s later
+## at dash-trail speed, no stop). 0 when you aren't dashing.
+static func dash_rise(h: Hunter) -> float:
+	if h.roll_t <= 0.0 or h.move_kind != "dash":
+		return 0.0
+	return minf(h.carry_v, Hunter.LRISE_SPEED)
+
 ## A teleport (a blink, a respawn, a portal) starts you with no momentum to carry.
 static func forget(h: Hunter) -> void:
 	h.carry_v = 0.0
