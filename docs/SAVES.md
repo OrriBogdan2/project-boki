@@ -1,7 +1,7 @@
 # Save compatibility: the golden files
 
 Every file the game writes for the player has a golden copy in `tests/fixtures/saves/`, captured from a real build.
-`--save-compat-check` (in the check registry, and in `tools/check.sh`) loads each one and fails on a load error, a
+`--save-compat-check` (in the check registry, and in `tools/ship_check.sh`) loads each one and fails on a load error, a
 save marked "from a newer game", a lost kin or field, or a key `Settings` no longer knows.
 
 | golden | written by | what the check asserts |
