@@ -61,7 +61,8 @@ func _lead_hint(P: Hunter) -> void:
 	var before := lane.rects().size()
 	m._tips()
 	var want := "%s swaps your lead Boki" % Settings.key_cap("swap_kin")
-	ok(Save.d["tutorial"].get("lead_swap", false) and lane.rects().size() > before, "carrying two shows '%s' once" % want)
+	var shown: bool = Save.d["tutorial"].get("lead_swap", false) and lane.rects().size() > before
+	ok(shown, "carrying two shows '%s' once" % want)
 	var seen_n := lane.rects().size()
 	m._tips()
 	ok(lane.rects().size() == seen_n, "and not again")
