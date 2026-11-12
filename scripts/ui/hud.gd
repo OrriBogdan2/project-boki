@@ -1447,7 +1447,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 
 func _has_status(e: Ent) -> bool:
 	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
-		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
+		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0 or (e as Hunter).sick_t > 0.0))
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -1927,7 +1927,7 @@ func _draw_overhead(p: Hunter) -> void:
 		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
 		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
+		var df := 1.0 - p.drink_t / UtilityUse.channel(p.drink_id, "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
@@ -2109,7 +2109,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
 			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
-		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
+		"util1", "util2", "util3", "util4", "util5", "util6": out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level": out = ArmorHud.tip(p)
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])

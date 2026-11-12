@@ -104,11 +104,21 @@ static func take_belt(tier: int) -> Array:
 static func stash_of(id: String) -> int:
 	return int(Save.d.get("items", {}).get(id, 0))
 
-## The picks as the belt slots will hold them: which item sits in 1 to 4.
+## The picks as the belt slots will hold them: which item sits in 1 to 6. Pinned items (the tonic,
+## the armor kit) sit in their own slots whatever the save says; the rest fill the open slots in the
+## order picked (so a four-slot save from before still reads).
 static func picks() -> Array:
-	var p: Array = (Save.d.get("belt_pick", ["tonic", "armor_kit", "", ""]) as Array).duplicate()
-	while p.size() < UtilityBelt.SLOTS:
-		p.append("")
+	var raw: Array = (Save.d.get("belt_pick", ["tonic", "armor_kit", "", ""]) as Array).duplicate()
+	var p: Array = []
+	for i in UtilityBelt.SLOTS:
+		p.append(UtilityBelt.reserved_id(i))
+	var loose: Array = []
+	for id in raw:
+		if String(id) != "" and UtilityBelt.fixed_slot(String(id)) < 0 and not loose.has(String(id)):
+			loose.append(String(id))
+	for i in UtilityBelt.SLOTS:
+		if String(p[i]) == "" and not loose.is_empty():
+			p[i] = loose.pop_front()
 	return p
 
 # ------------------------------------------------------------------ at the drop (the match side)

@@ -1,6 +1,6 @@
 # Consumables against the source
 
-PARITY FIRST (briefs/DECISIONS.md, 2026-11-07). Every belt item (keys 1-4), what we do, what the source does, and the verdict. Numbers live in `content/utility/*.json` (the `channel` block of the tonic and armor kit, with its citation); the check is `--airheal-check`.
+PARITY FIRST (briefs/DECISIONS.md, 2026-11-07). Every drink and repair on the belt (keys 1-6), what we do, what the source does, and the verdict. Numbers live in `content/utility/*.json` (the `channel` block of every drink and repair, with its citation); the checks are `--airheal-check`, `--equal-check` and `--utility-parity-check`. One row per belt item, source vs ours: docs/SOURCE_UTILITIES.md "Every belt item".
 
 Evidence: **[W]** the item's wiki page (supervive.wiki.gg, raw wikitext read Nov 9 2026), **[D]** docs/SUPERVIVE_DATA.md, **[S]** docs/SOURCE_UTILITIES.md. The briefs on ext/agent-briefs (supervive-data, hero-ref 5 fps sheets) hold no consumable footage or numbers: the only hit is the HUD sheet (item slots with counts on number keys). So **move speed while using, and whether dash, jump or abilities cancel, are not published anywhere we have.** Footage is the open question for those rows.
 
@@ -20,12 +20,15 @@ HP scale: source hunters have 880-1,596 HP (median 1,030) [D]; ours 124/145/193 
 | Tonic cancelled by jump or an ability | no (neither ends the drink) | not stated | unverified, kept | none |
 | Tonic amount | flat 42 HP (was 40% of max, 49-77 HP) | 304 HP, flat; 304 / 7.2 = 42 | **fixed** (about 29% of a medium hunter, as in the source: 304 / 1,030). Perk Remedy and gear still scale it | [W], [D] |
 | Tonic at full health | refuses (buzz) | not stated | unverified, kept | none |
+| Tonic and anti-heal | lifts blight before it heals, so the heal is whole | cleanses anti-heal | **fixed** (ext/utility-parity-2) | [W] Vive_Brew |
+| Tonic and armor kit slots | slots 1 and 2 pinned to them, stack 8 each (was any slot, 5 and 4) | fixed slots 1 and 2, stack 8 | **fixed** (ext/utility-parity) | [W] Consumables |
 | **Armor kit** use time | 1.6 s | "short cast time", no number | **unsourced, kept** (now in data) | [W] Portable_Armor_Repair |
 | Armor kit move speed | 0.45 (now in data) | not stated | **unsourced, kept** | none |
 | Armor kit cancels | same as the tonic | not stated | unverified, kept | none |
-| Armor kit amount | repairs armor to full | one press repairs 1 bar = 500 armor; from 1.04 a press restores 80/40/30% on grey/green/blue [S] | **differs, not changed**: 500 of an armor of 2.2 x HP (~2,270 on a median hero) is ~22% a press. Switching means kit prices, stack and bring limits need to move together, so it is the owner's call | [W], [S] |
+| Armor kit amount | 80 / 40 / 30% of the bar by armor tier, Common first (`channel.repair`; was: to full) | one press repairs 1 bar = 500 armor; from 1.04 a press restores 80/40/30% on grey/green/blue [S] | **fixed** (ext/utility-parity, on the channel block since the 0.24.6 port) | [S], [P-1.04] in [S] |
 | Mending kit (`medkit`) | instant, 40 HP + 20 armor | none: no such item | ours only (see [S]) | [S] 1c |
 | Shield cell (`shield_cell`) | instant, 40 shield for 8 s | none | ours only | [S] 1c |
+| Deep Draught (`deep_draught`) | 5 s at 40% speed, then all your health (`channel.heal_max`); a hit spills it | Hypervive: 60% slow and Vulnerable for 5 s, then a full restore; damage cancels it [W] | **built** (ext/utilities-shops, ext/utility-parity) | [W] Hypervive |
 
 ## Utilities used from the belt
 
@@ -35,13 +38,11 @@ HP scale: source hunters have 880-1,596 HP (median 1,030) [D]; ours 124/145/193 
 | Smoke bomb | instant, cloud 8 s | Ethereal Smoke: moving team cloak, stealth + 50 move speed, 30 s | differs (S): keep |
 | Spring pad | instant place, armed at once, 20 s | Jump Pad: arms after 2 s, 30 s or 10 s after first use, stack 2 | differs (S): a card, not a change here |
 | Seeker flare | instant, 26 tiles, 3 s | Pocket UAV: map marks, duration unknown | differs (S) |
-| Chest key, Rift key | instant | Gold Key / Evil Key | have / differs (S) |
+| Chest key | instant | Gold Key | have (S); the Rift Key went with 0.24.5's Ways Out |
 
 None of those have a published use time or slow in the source either, so nothing there is a clear mismatch beyond what [S] already lists.
 
 ## Ideas of ours (not built)
 
-- Hypervive ("Deep Draught" in [S]): a 5 s Vulnerable, 60% slow, full heal item. The slow here is the only consumable slow with a source.
 - Chained drinks by holding the key (patch 1.02): our belt press ignores a hold.
-- Stack of 8 for the tonic and kit (source) against our 5 and 4.
 - Footage pass for: slow while drinking, dash/jump/ability cancels, whether a cancelled Brew is used up.

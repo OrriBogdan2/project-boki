@@ -73,6 +73,8 @@ func _setup_input() -> void:
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
 	_key("util4", [KEY_4])                    # utility belt slot 4
+	_key("util5", [KEY_5])                    # utility belt slot 5
+	_key("util6", [KEY_6])                    # utility belt slot 6
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further

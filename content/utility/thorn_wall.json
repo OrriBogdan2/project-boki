@@ -1,0 +1,36 @@
+{
+ "id": "thorn_wall",
+ "name": "Thorn Wall",
+ "short": "Thorn",
+ "icon": "wall",
+ "col": "7fd06a",
+ "use": "fx",
+ "cd": 3.0,
+ "max": 10,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 40,
+ "desc": "Stand rooted for 2s, then the wall of thorns rises in front of you for 20s. Rivals who touch it are cut and slowed.",
+ "effects": [
+  {
+   "type": "wall",
+   "at": "front",
+   "dist": 2.0,
+   "length": 6.0,
+   "hp": 200.0,
+   "time": 20.0,
+   "block": "enemy",
+   "color": "#7fd06a",
+   "touch": {
+    "dmg": 10.0,
+    "slow": 1.0
+   },
+   "delay": 2.0
+  }
+ ],
+ "src": "docs/SOURCE_UTILITIES.md: stack 10; you root yourself for 2 s to build it",
+ "root_self": 2.0
+}

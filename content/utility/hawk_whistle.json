@@ -1,0 +1,19 @@
+{
+ "id": "hawk_whistle",
+ "name": "Hawk Whistle",
+ "short": "Hawk",
+ "icon": "divehawk",
+ "col": "ffd27a",
+ "use": "scan",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 45,
+ "desc": "A hawk scouts the whole map: every rival hunter shows for 4s, through walls and grass.",
+ "range": 120.0,
+ "time": 4.0
+}

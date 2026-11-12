@@ -73,7 +73,7 @@
 "semicolon": 1
 },
 "scripts/combat/verbs.gd": {
-"long_line": 29,
+"long_line": 28,
 "nested_ternary": 1,
 "semicolon": 11
 },

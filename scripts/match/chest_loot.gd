@@ -14,6 +14,22 @@ static func rarity_bonus(m: Match, at: Vector3) -> int:
 
 ## The lid springs open and the chest bursts; then the loot (drop).
 static func open(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
+	_spring_lid(m, c)
+	KeyChest.unlock_fx(m, c)
+	m.sfx("pickup", c["pos"], 0.0, 0.8)
+	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("f2c84a"), 28, 4.5, 0.6)
+	m.fx.ring(c["pos"], 2.4, Color("f2c84a", 0.9), 0.4)
+	if h == m.player and h.kin is Kin:
+		BokiChatter.say(m, h.kin, "loot")
+	drop(m, h, c, from_net)
+
+## Raccoons empty a locked chest (Pilfer Pouch): the lid is up and nothing falls out.
+static func raid(m: Match, c: Dictionary) -> void:
+	c["open"] = true
+	_spring_lid(m, c)
+	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("d0b080"), 14, 3.0, 0.5)
+
+static func _spring_lid(m: Match, c: Dictionary) -> void:
 	var lid: Node3D = c["node"].get_node("Body/Lid")
 	if lid.has_meta("hinged"):
 		m.create_tween().tween_property(
@@ -24,13 +40,6 @@ static func open(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 		lid.position.z = 0.2
 	var beacon: Node3D = c["node"].get_node_or_null("Beacon")
 	if beacon: beacon.visible = false
-	KeyChest.unlock_fx(m, c)
-	m.sfx("pickup", c["pos"], 0.0, 0.8)
-	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("f2c84a"), 28, 4.5, 0.6)
-	m.fx.ring(c["pos"], 2.4, Color("f2c84a", 0.9), 0.4)
-	if h == m.player and h.kin is Kin:
-		BokiChatter.say(m, h.kin, "loot")
-	drop(m, h, c, from_net)
 
 ## THE CALL SITE where a chest's contents appear (the perk orbs of ext/perkorbs go in here, at
 ## perk_hook). from_net: another game opened it; this game only shows the lid, the host drops the loot.

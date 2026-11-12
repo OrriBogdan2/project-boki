@@ -108,6 +108,7 @@ static func statuses(e: Ent) -> Array:
 	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
 	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.sick_t > 0.0: out.append(["heart", Color("b8e6c0"), "", hunter.sick_t])
 	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])
 	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
 	return out

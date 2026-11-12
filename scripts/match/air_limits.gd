@@ -14,7 +14,7 @@ extends RefCounted
 ## Every press the drop ignores (move, aim and glide stay: they steer).
 const TRAVEL_JOIN_S := 0.05      # s: a kit move started this close after a travel or Shift press is that move's
 const DROP_KEYS := ["dash", "jump", "fire", "sec", "sec_hold", "sig", "skill", "ult", "throw", "kin_ab", "swap",
-		"util1", "util2", "util3", "util4", "gear1", "gear2", "crouch", "interact"]
+		"util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "crouch", "interact"]
 
 ## The opening drop, in the air: nothing but steering.
 static func drop_locked(h: Hunter) -> bool:

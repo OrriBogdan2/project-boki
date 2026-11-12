@@ -81,7 +81,7 @@ var blight: BlightDir = null       # the Blight: its spawns, its scaling and wha
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -359,6 +359,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
+		Shops.build(self)
 	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
@@ -1370,24 +1371,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("jump", h.pos, -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
-	for gp in gpads.duplicate():
-		gp["t"] = float(gp["t"]) - dt
-		if float(gp["t"]) <= 0.0:
-			(gp["node"] as Node3D).queue_free(); gpads.erase(gp); continue
-		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
-		if top: top.scale = Vector3.ONE * (1.0 + sin(time * 6.0) * 0.06)
-		for h in hunters:
-			if h.out or h.downed or h.remote or not h.grounded:
-				continue
-			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
-				gp["cd"][h.nid] = time + 1.0
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				h.vel = Vector3(d.x * maxf(hv.length(), 6.0), 17.0, d.y * maxf(hv.length(), 6.0))
-				h.grounded = false
-				h.glide_cd = 0.0
-				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
-				sfx("jump", h.pos, -2.0, 0.8)
+	UtilityMore.pads(self, dt)
 	for sm in smokes.duplicate():
 		sm["t"] = float(sm["t"]) - dt
 		var n: Node3D = sm["node"]
@@ -1843,6 +1827,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	else:
 		add_feed("%s went down" % h.pname)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
+	UtilityMore.on_knock(self, h, credit)        # a Bounty Banner's timer
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
@@ -3377,8 +3362,8 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
-		if a[0] in ["util2", "util3", "util4"] and arena != null:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["util5", "util5"], ["util6", "util6"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
+		if a[0] in ["util2", "util3", "util4", "util5", "util6"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
@@ -3868,7 +3853,7 @@ func step(dt: float) -> void:
 		if pending_input["base"]:
 			pending_input["base"] = false
 			player.start_base(base_target(player))
-		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
@@ -3922,6 +3907,7 @@ func step(dt: float) -> void:
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
 	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
+	Shops.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
 	_prof("pickups")
@@ -4297,6 +4283,8 @@ func _update_interact(dt: float) -> void:
 				if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
 					best = {"kind": "shrine", "shrine": sh, "label": "Hold " + Settings.key_cap("interact") + " to pray: heal, a blessing and a perk"}
 					break
+		if best.is_empty() and h == player:
+			best = Shops.prompt(self, h)
 		# 5. the exits: start an uplink
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
@@ -4329,6 +4317,10 @@ func _update_interact(dt: float) -> void:
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
+			"shop":
+				if not h.swap_hold:
+					h.swap_hold = true
+					Shops.use(self, h, best)
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -5558,6 +5550,8 @@ func _net_ev(x, from: String) -> void:
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
+		"sbuy", "sgot", "sno":
+			Shops.on_net(self, x)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):

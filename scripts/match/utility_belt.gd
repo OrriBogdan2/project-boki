@@ -1,14 +1,16 @@
 class_name UtilityBelt
 extends RefCounted
-## The utility belt (docs/decisions/0005-equal-footing.md): four slots on keys 1 to 4, each
-## holding one kind of item with charges. It replaces the old "kit" gear slot and the heal / armor
-## kit keys. Items live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per
-## slot, bring[] = the most you can bring in by difficulty tier, price).
+## The utility belt (docs/decisions/0005-equal-footing.md): six slots on keys 1 to 6, each holding
+## one kind of item with charges. Slots 1 and 2 are the tonic's and the armor kit's (the item's
+## "slot" in its json, as the source reserves its first two for the heal and the repair); the other
+## four hold any other kind. It replaces the old "kit" gear slot and the heal / armor kit keys. Items
+## live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per slot, bring[] = the most
+## you can bring in by difficulty tier, price).
 ##
 ## Chest keys are belt items too: one slot per key type, found in the match only,
 ## never brought or sold (BeltKeys).
 ##
-## What a hunter holds: h.belt = four slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
+## What a hunter holds: h.belt = six slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
 ## issued to everyone (used first, never taken home). The belt is brought in (Equal), found in the
 ## match (pickups, chests), bought (shops) and lost on death (it goes in the deathbox, Life).
 ##
@@ -16,8 +18,8 @@ extends RefCounted
 ## returns how many fit; count(h, id), take(h, id, n), has_room(h, id) and press(h, slot) do the rest.
 ## Using an item (the effects) is UtilityUse.
 
-const SLOTS := 4
-const KEYS := ["util1", "util2", "util3", "util4"]
+const SLOTS := 6
+const KEYS := ["util1", "util2", "util3", "util4", "util5", "util6"]
 
 static var ALL: Dictionary = {}
 
@@ -90,7 +92,31 @@ static func bring_cap(id: String, tier: int) -> int:
 	return mini(max_of(id), int(b[clampi(tier, 0, b.size() - 1)]))
 
 static func empty() -> Array:
-	return [{}, {}, {}, {}]
+	var out: Array = []
+	for i in SLOTS:
+		out.append({})
+	return out
+
+## The slot an item is pinned to (its "slot"), or -1 when it goes in any open slot.
+static func fixed_slot(id: String) -> int:
+	return int(def(id).get("slot", -1))
+
+## The item pinned to slot i, or "" when the slot is open to anything.
+static func reserved_id(i: int) -> String:
+	for id in ALL:
+		if int(ALL[id].get("slot", -1)) == i:
+			return String(id)
+	return ""
+
+## The first empty slot this item may go in: its own pinned slot, or an open one. -1 when none.
+static func free_slot(h, id: String) -> int:
+	var pin := fixed_slot(id)
+	if pin >= 0:
+		return pin if (h.belt[pin] as Dictionary).is_empty() else -1
+	for k in SLOTS:
+		if (h.belt[k] as Dictionary).is_empty() and reserved_id(k) == "":
+			return k
+	return -1
 
 # ------------------------------------------------------------------ what a hunter holds
 ## The everyday issue: the same two tonics and two armor kits for everyone (content/rules/equal.json).
@@ -122,10 +148,7 @@ static func room_for(h, id: String) -> int:
 	var i := slot_of(h, id)
 	if i >= 0:
 		return max_of(id) - int(h.belt[i]["n"])
-	for s in h.belt:
-		if (s as Dictionary).is_empty():
-			return max_of(id)
-	return 0
+	return max_of(id) if free_slot(h, id) >= 0 else 0
 
 ## A key: room up to its cap while it has a slot (or a slot is free); none past the cap.
 static func _key_room(h, id: String) -> int:
@@ -134,10 +157,7 @@ static func _key_room(h, id: String) -> int:
 		return 0
 	if BeltKeys.held(h, id) > 0 and slot_of(h, id) >= 0:
 		return left
-	for s in h.belt:
-		if (s as Dictionary).is_empty():
-			return left
-	return 0
+	return left if free_slot(h, id) >= 0 else 0
 
 static func has_room(h, id: String) -> bool:
 	return room_for(h, id) > 0
@@ -147,7 +167,7 @@ static func can_take(h, kind: String) -> bool:
 	var id := item_of(kind)
 	return not is_item(id) or has_room(h, id)
 
-## Puts charges on the belt: onto the same item's slot, else the first empty one. `issued` marks them as
+## Puts charges on the belt: onto the same item's slot, else the first empty one it may use. `issued` marks them as
 ## issued (used first, never taken home). Returns how many went on (0 when the belt is full).
 static func grant(h, id: String, n := 1, issued := false) -> int:
 	if BeltKeys.is_key(id):
@@ -157,10 +177,7 @@ static func grant(h, id: String, n := 1, issued := false) -> int:
 		return 0
 	var i := slot_of(h, id)
 	if i < 0:
-		for k in SLOTS:
-			if (h.belt[k] as Dictionary).is_empty():
-				i = k
-				break
+		i = free_slot(h, id)
 		h.belt[i] = {"id": id, "n": 0, "cd": 0.0}
 	h.belt[i]["n"] = int(h.belt[i]["n"]) + put
 	if issued:
@@ -224,7 +241,7 @@ static func clear(h) -> Array:
 	return out
 
 # ------------------------------------------------------------------ using it
-## Key 1 to 4 (slot 0..3). Beside a belt item that doesn't fit, the press swaps this slot for it.
+## Key 1 to 6 (slot 0..5). Beside a belt item that doesn't fit, the press swaps this slot for it.
 static func press(h, i: int) -> void:
 	if BeltKeys.swap(h, i):
 		return

@@ -10,7 +10,7 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/revive.json"
 const MOVE_DEADZONE := 0.1        # stick length that counts as moving (a resting stick drifts below it)
-const NO_ATTACK := ["sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
+const NO_ATTACK := ["sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5", "util6",
 	"gear1", "gear2", "fire", "throw", "kin_ab"]
 const DONE_COL := Color("bff5c0")
 

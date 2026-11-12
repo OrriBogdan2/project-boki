@@ -153,7 +153,7 @@ func _hv(h: Hunter) -> Vector2:
 	return Vector2(h.vel.x, h.vel.z)
 
 func _clear_inp() -> void:
-	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 

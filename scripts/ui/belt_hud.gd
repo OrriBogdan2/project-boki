@@ -1,13 +1,15 @@
 class_name BeltHud
 extends RefCounted
-## The utility belt on the HUD (UtilityBelt): four slots on keys 1 to 4 in the row above the
-## weapon card. A slot shows its item's icon, how many charges are left, and lights when pressing
-## it would do something (a tonic when you are hurt, an armor kit when your armor is down).
+## The utility belt on the HUD (UtilityBelt): six slots on keys 1 to 6 in the row above the
+## weapon card (1 and 2 are the tonic's and the armor kit's). A slot shows its item's icon, how many
+## charges are left, and lights when pressing it would do something (a tonic when you are hurt, an armor
+## kit when your armor is down).
 ## Look: HudStyle (slot frames, key pills, count badges).
 
 const SLOT := 44.0
 const GAP := 8.0
-const EMPTY_TIP := "Empty utility slot. Tonics, armor kits and gadgets you find or buy fill it."
+const EMPTY_TIP := "Empty utility slot. Gadgets you find or buy fill it."
+const PINNED_TIP := "Only %s go here: find or buy some."
 
 ## Draws the slots with the last at the right edge `x`, top at `y`. Returns the x where the
 ## next slot to the left starts.
@@ -33,7 +35,7 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 		x -= SLOT + GAP
 	return x
 
-## The tooltip for slot k (0..3): [[text, color, size?]] lines in the HUD's format.
+## The tooltip for slot k (0..5): [[text, color, size?]] lines in the HUD's format.
 static func tip(p: Hunter, k: int) -> Array:
 	var out: Array = []
 	var key := Settings.key_cap(UtilityBelt.KEYS[k])
@@ -41,7 +43,9 @@ static func tip(p: Hunter, k: int) -> Array:
 	if s.is_empty():
 		out.append(["Utility slot %d" % (k + 1), HudStyle.MUTED])
 		out.append(["Item  ·  %s" % key, HudStyle.MUTED, 12])
-		out.append([EMPTY_TIP, HudStyle.INK, 14])
+		var pin := UtilityBelt.reserved_id(k)
+		var tip := PINNED_TIP % (UtilityBelt.name_of(pin).to_lower() + "s") if pin != "" else EMPTY_TIP
+		out.append([tip, HudStyle.INK, 14])
 		return out
 	var id := String(s["id"])
 	var d := UtilityBelt.def(id)

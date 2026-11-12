@@ -5,7 +5,7 @@ class_name Effects
 ## "at" picks where an area happens: "self", "owner", "aim" (the cursor or the kin's target), "here".
 ##
 ##   projectile  dmg speed range size color kb stun slow root burn count spread  on_end:[...] on_hit:[...]
-##   area        radius dmg kb lift stun slow root burn at delay color
+##   area        radius dmg kb lift stun slow root burn shred(share of armor stripped) at delay color
 ##   cone        radius arc dmg kb slow stun color                  (in front of the caster, toward the aim)
 ##   chain       count first jump dmg stun color                    (lightning hopping between foes)
 ##   pull        radius strength at                                 (drags foes toward the spot)
@@ -309,7 +309,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
-			for f in m.foes_of(caster.team):
+			if e.get("raze", false):
+				Beacons.raze(m, at, r)
+			for f in m.foes_of(-1 if e.get("friendly", false) else caster.team):
 				if _hits(f, at, r):
 					var rel := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 					var kb := rel.normalized() * float(e.get("kb", 0.0)) if rel.length() > 0.05 else Vector2.ZERO
@@ -322,6 +324,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						o.erase("lift")
 						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
 						m.displace.spike(f, -16.0, caster)
+					if e.has("shred") and "armor" in f and not f.remote: f.armor *= 1.0 - float(e["shred"])
 					f.hurt(dmg, caster, o)
 		"cone":
 			var d := _aim_dir(caster, ctx)
@@ -587,7 +590,8 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var d := _aim_dir(caster, ctx)
 			var from: Vector3 = caster.pos
 			var g0: float = m.world.ground_at(from.x, from.z)
-			if g0 > World.VOID + 1.0: from.y = g0
+			# cast in the air (a Cloud Raft over the abyss): the span forms under your feet, never over them
+			from.y = g0 if g0 > World.VOID + 1.0 else floorf(from.y / World.LEVEL) * World.LEVEL
 			m.verbs.add_bridge(caster, from, d, e)
 		"line":
 			_fissure(e, caster, ctx, m, pw, col)

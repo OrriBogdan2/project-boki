@@ -1,0 +1,24 @@
+{
+ "id": "pilfer_pouch",
+ "name": "Pilfer Pouch",
+ "short": "Pilfer",
+ "icon": "paw",
+ "col": "d0b080",
+ "use": "pilfer",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  1,
+  1
+ ],
+ "price": 60,
+ "desc": "Stand still for 1.5s while raccoons raid the spot you aim at: they carry off half the gems of every rival there and empty the locked chests.",
+ "range": 8.0,
+ "r": 4.0,
+ "take": 0.5,
+ "channel": {
+  "time": 1.5
+ },
+ "src": "docs/SOURCE_UTILITIES.md: 1.5 s channel, 50% of a hunter's gold, loot from unopened vaults"
+}

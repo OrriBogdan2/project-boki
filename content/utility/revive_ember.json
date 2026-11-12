@@ -1,0 +1,17 @@
+{
+ "id": "revive_ember",
+ "name": "Revive Ember",
+ "short": "Ember",
+ "icon": "egg",
+ "col": "ffe08a",
+ "use": "ember",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  0,
+  0
+ ],
+ "price": 0,
+ "desc": "Wakes every fallen squadmate at your feet. Only the hardest bosses drop it; no one sells it."
+}

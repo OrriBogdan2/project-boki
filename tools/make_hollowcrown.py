@@ -46,6 +46,7 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled)
     chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel|keg"]];  weapons (+) [[x,z]]
     wild (+)          [[x,z]] wild Boki;  shrine (+) [x,z]
+    shops (+)         [[x,z,"armor|move|gear|perks"]] a vendor and its stock theme (content/rules/shops.json)
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
@@ -135,6 +136,7 @@ islands = [
          weapons=[[104, 56]],
          wardens=[[104, 48], [126, 52]],
          traps=[[90, 54]],
+         shops=[[100, 40, "armor"]],
          areas=[[128, 42, "Frostgate Keep"], [84, 54, "Rimefield"]]),
     # ---- CINDER STEPS (west): the Kilns (lv 6) on the north half overlook the Crown's west face; one
     # wide stair comes down into the Forge Yard. The Ash Bridge runs south to the Ashen Gaol.
@@ -152,6 +154,7 @@ islands = [
          weapons=[[38, 108]],
          wardens=[[56, 92], [40, 66]],
          traps=[[48, 110]],
+         shops=[[46, 108, "gear"]],
          areas=[[46, 70, "The Kilns"], [40, 114, "Forge Yard"]]),
     # ---- STORMBREAK (east): a storm-lashed tableland. The Shrine Table (lv 6) rises in the middle, up
     # the South Ramp (a long flight with landings). The Moor Steps run south to Duskmoor.
@@ -169,6 +172,7 @@ islands = [
          weapons=[[190, 126]],
          wardens=[[172, 132], [170, 122]],
          traps=[[166, 120]],
+         shops=[[163, 114, "move"]],
          shrine=[174, 118]),
     # ---- THORNWOOD (south): a low bramble wood full of tall grass and blossom trees, the Boki nest in
     # its west glade and the Thornhive lair at its east end on Bramble Rise (lv 4, stairs from the
@@ -188,6 +192,7 @@ islands = [
          weapons=[[106, 186]],
          wardens=[[112, 168]],
          traps=[[104, 172]],
+         shops=[[106, 178, "perks"]],
          areas=[[133, 170, "Bramble Rise"]]),
     # ---- the outer isles: low, monster-light landings, each with a way out of the match and its own
     # shape and reason to come (docs/MAP_REGIONS.md).
@@ -457,7 +462,7 @@ def sc_wall(W):
         if k in W: W[k] = [sc(v) for v in W[k]]
     return W
 
-POINT_KEYS = ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "areas")
+POINT_KEYS = ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "shops", "areas")
 
 def scale_layout():
     """Everything above is drawn on the DESIGN grid; this maps it onto SIZE (one constant to grow the map).
@@ -642,7 +647,7 @@ def check(lv, owner, stairs):
         if q not in lv or lv[q] == -2 and False: probs.append("%s %s not on ground" % (what, p))
         elif q in stairs: probs.append("%s %s on a stair" % (what, p))
     for d in islands:
-        for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps"]:
+        for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "shops"]:
             for p in d.get(k, []): ground(p, "%s.%s" % (d["id"], k))
         for R in d.get("rocks", []):      # a boulder half over the void is clipped to a post
             if any((x, z) not in lv for x in range(R[0], R[2] + 1) for z in range(R[1], R[3] + 1)):
@@ -839,7 +844,7 @@ class Cover:
         self.hard |= self.solid
         for d in islands:
             for R in d.get("ramps", []): self.hard |= ramp_tiles(R)
-            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables"):
+            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables", "shops"):
                 for p in d.get(k, []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 1.7)
             if d.get("shrine"): self.hard |= _disc_r(d["shrine"][0], d["shrine"][1], 3.0)
             for p in d.get("camps", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 3.6)

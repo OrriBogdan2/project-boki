@@ -1,0 +1,22 @@
+{
+ "id": "warp_seed",
+ "name": "Warp Seed",
+ "short": "Seed",
+ "icon": "seed",
+ "col": "b48cff",
+ "use": "field",
+ "cd": 3.0,
+ "max": 3,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 60,
+ "desc": "Plants a warp. Stand in it for 1.5s and you are thrown to a random spot on the map. Lasts 30s.",
+ "field": "seed",
+ "range": 2.0,
+ "time": 30.0,
+ "r": 1.6,
+ "hold": 1.5
+}
