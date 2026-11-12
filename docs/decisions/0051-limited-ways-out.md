@@ -95,3 +95,10 @@ Quest-race pips: under the Sealed Lair and Uplink badges (strip and full map) tw
 top (discs) and the best rival's below (diamonds), in `SideColor` squad colours. Lair progress is its boss's damage, Uplink its
 charge, a taken seat is full for its squad; locked and shut seats show nothing. It reads the mirrored seat states and the
 boss and outpost the clients already have, so it needs no new Net message. No words or key letters. Check: --quest-race-check.
+## Heart reward gap (ext/combat-heart-reward-gap)
+Owner 2026-11-10: the early seat pays MINOR, the final seat MAJOR. Code pays exactly heart.json "reward" (`Heart.pay`: gems, seeds,
+materials and Boki trust at the exit; the Rare Egg and materials home through `Game.apply_result`). Loot kept and the Boki
+outcome are the same for both seats: any Heart exit is an extraction, so the haul and Bokis come home. The results screen
+says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
+Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
+the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
