@@ -62,6 +62,7 @@ func run(main: Node) -> void:
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
+	await _vex_core(main)
 	await _scarf(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -254,6 +255,27 @@ func _lisette(main: Node, V0: HeroVfx) -> void:
 	var hip := V.anchor_pos(P, "nock")
 	ok(hip.distance_to(K.hand_pos(true)) < 0.001 or WardenGlb.anchor(P.model, "anchor_nock") != null,
 			"nock: the model's anchor, else the drawing hand")
+
+## Cinderfall's hot centre ring: at every ult rank it sits at the radius the +core_k damage uses (the data's
+## core_r), everyone sees it (rivals in the hostile tint) and it fills toward the impact with the outer disc.
+func _vex_core(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var U: GunslingerUlt = (P.ak as GunslingerKit).ult
+	var want := float(P.ak.x_def()["core_r"])
+	for rank in range(1, int(Hunter.SLOT_MAX["ult"]) + 1):
+		P.lvl = int(Hunter.ULT_AT[rank - 1])
+		P.slot_lv["ult"] = rank
+		U.cast()
+		U.tick(0.4)
+		var ring := AimKit.entry(P, "xc%d" % U.casts)
+		var fill := float(AimKit.entry(P, "x%d" % U.casts).get("fill", -1.0))
+		ok(is_equal_approx(float(ring.get("r", 0.0)), want) and is_equal_approx(U.core_r(), want)
+				and bool(ring.get("all", false)) and fill > 0.0 and is_equal_approx(float(ring.get("fill", 0.0)), fill),
+				"Cinderfall rank %d: the centre ring is the damage core (%.2f m), seen by all, filling with the disc"
+				% [rank, want])
+		U.clear()
 
 ## The shared kinds on a synthetic recipe set (the real files are done with): every layer kind plays and a pile-up
 ## stays capped; a bone anchor follows the hand; prewarm builds one of every kind and hides them; a stream held along
