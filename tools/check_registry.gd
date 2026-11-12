@@ -287,6 +287,8 @@ const CHECKS := {
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
+	"--hold-teach-check": ["res://tools/hold_teach_check.gd", "hold_teach_check", null],  # taps teach HOLD
+	"--teach-hold-clip": ["res://tools/teach_hold_clip.gd", "teach_hold_clip", null],  # --shots-dir=<dir>
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--race-check": ["res://tools/race_check.gd", "race_check", null],      # the Dash, GARDEN.md 9.4
