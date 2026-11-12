@@ -3,7 +3,7 @@ extends RefCounted
 ## the kit's hit (seconds into the move, from its kit) plus the move's "lead" (warden_anim) is the clip time the game
 ## shows at the hit. The clip's own contact is a strong tip stroke (the Muzzle's speed against the body), from its
 ## peak to where the tip has slowed down; the hit must lie within CONTACT_S of one.
-## Prints "CONTACT" lines; the moves listed in OPEN are left as debt (docs/DEBT.md).
+## Prints "CONTACT" lines; a move more than CONTACT_S off fails.
 
 const CONTACT_S := 0.05    # s: how far the hit may sit from the clip's own contact
 const DT := 1.0 / 60.0
@@ -22,11 +22,6 @@ const HITS := {
 	"ostra": [["ostra_orb", 0.0, "LMB"], ["ostra_snap", 0.0, "RMB"], ["ostra_swap", 0.0, "E"]],
 	"rimewright": [["tm_dart_r", 0.0, "LMB"], ["tm_spear", 0.0, "RMB"], ["tm_freeze", 0.0, "E"]],
 	"mage": [["mage_lmb_r", 0.0, "LMB"], ["mage_rmb", 0.0, "RMB"], ["mage_e_snap", 0.0, "E"]],
-}
-## "<hero>:<move>" -> why the contact is off and what is left (docs/DEBT.md "v95 contact")
-const OPEN := {
-	"gunslinger:gunslinger_x": "FIRE_T 0.14 vs a barrel up by 0.083 (a kit constant)",
-	"ostra:ostra_swap": "the clip's lob is 0.117 s in (a `lead` breaks --ostra-combo-check)",
 }
 
 var bad := 0
@@ -73,7 +68,7 @@ func _hero(holder: Node3D, id: String) -> void:
 		var st := _stroke(speed, at)
 		var near := clampi(int(round(at / DT)), st[0], st[1])
 		var off: float = st[2]
-		var pass_it := off <= CONTACT_S or OPEN.has("%s:%s" % [id, hit[0]])
+		var pass_it := off <= CONTACT_S
 		print("CONTACT %s %-5s %-16s %-14s hit %.3f s (lead %.2f), strike %.3f..%.3f s, off %.3f s, tip %.3f m "
 				% ["ok  " if pass_it else "FAIL", hit[2], hit[0], clip, at, float(mv.get("lead", 0.0)),
 				st[0] * DT, st[1] * DT, off, (track[int(round(at / DT))] as Vector3).distance_to(track[near])]

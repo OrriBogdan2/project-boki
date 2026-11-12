@@ -19,18 +19,20 @@ window it could measure (Vex, Sable, Albert, Meeko, Motley, Neve, Sparkle; 21 mo
 swap kept the clip timing. Cinder's and Kael's pre-swap files do not load with today's clip setup (no `Warden/Sync`), so they
 have no before/after; their rows below are measured on the current files only.
 
-Result: 25 of 27 PASS. Albert's Shield Slam was 0.250 s off and is fixed in data (`lead` 0.25 in breaker.json). Two are open (DEBT):
-Vex's Cinderfall (X) is 0.057 s early (kit constant `FIRE_T` 0.14 against a barrel that is up by 0.083), and Motley's Swap (E) is
-0.117 s off: `lead` 0.1 fixes the contact but fails `--ostra-combo-check` (the body never hands back), so it was not kept.
+Result: 27 of 27 PASS. Albert's Shield Slam was 0.250 s off and is fixed in data (`lead` 0.25 in breaker.json). Vex's Cinderfall (X) and Motley's Swap (E)
+were fixed by re-timing the clip keys, not the kit (`FIRE_T` and the press-time lob are the source's): Vex's `x` holds READY to 0.06 s and snaps the cannon up by 0.14 s (the shell's
+frame; it was up by 0.1) and squashes at 0.18 (`tools/art1/vex_clips.py`); Motley's `swap` throws by 0.033 s, with the coil left to the `swap_aim` hold (`tools/art1/ostra_clips.py`;
+a `lead` 0.1 had failed `--ostra-combo-check`, this keeps it at 0 so the body hands back as before). Both clips were rebuilt on the shipped .glb with `tools/art1/rebake_from_glb.py` and
+copied in with `glb_add_clips.py =x` / `=swap`; every other clip is byte for byte the same. Not changed: `swap_air` (the air lob) still throws at 0.167 s against the same press.
 
 
 ## Vex (gunslinger, art/wardens/vex/vex.glb)
 
 | Move | Kit move (clip) | Kit hit | `lead` | Clip time at hit | Strike stroke | Off | Tip off | Result |
 |---|---|---|---|---|---|---|---|---|
-| LMB | `gunslinger_lmb` (lmb) | 0.00 s, shot leaves on the press | 0.00 | 0.000 s | 0.033..0.533 s | 0.000 s | 0.071 m | **PASS** |
+| LMB | `gunslinger_lmb` (lmb) | 0.00 s, shot leaves on the press | 0.00 | 0.000 s | 0.033..0.033 s | 0.000 s | 0.071 m | **PASS** |
 | RMB | `gunslinger_rmb` (rmb) | 0.00 s, Burr leaves on the press | 0.00 | 0.000 s | 0.033..0.050 s | 0.033 s | 0.208 m | **PASS** |
-| X | `gunslinger_x` (x) | 0.14 s, `GunslingerUlt.FIRE_T` | 0.00 | 0.140 s | 0.033..0.083 s | 0.057 s | 0.172 m | **FAIL (open)** |
+| X | `gunslinger_x` (x) | 0.14 s, `GunslingerUlt.FIRE_T` | 0.00 | 0.140 s | 0.083..0.117 s | 0.023 s | 0.107 m | **PASS** (was 0.057 s off: stroke 0.033..0.083 s) |
 
 ## Cinder (ashwick, art/wardens/cinder/cinder.glb)
 
@@ -78,7 +80,7 @@ Vex's Cinderfall (X) is 0.057 s early (kit constant `FIRE_T` 0.14 against a barr
 |---|---|---|---|---|---|---|---|---|
 | LMB | `ostra_orb` (orb) | 0.00 s, orb leaves on release | 0.00 | 0.000 s | 0.050..0.083 s | 0.050 s | 0.187 m | **PASS** |
 | RMB | `ostra_snap` (snap) | 0.00 s, shard leaves on release | 0.00 | 0.000 s | 0.033..0.050 s | 0.033 s | 0.924 m | **PASS** |
-| E | `ostra_swap` (swap) | 0.00 s, lantern lobbed on the press | 0.00 | 0.000 s | 0.117..0.150 s | 0.117 s | 1.065 m | **FAIL (open)**: a `lead` 0.1 meets it (0.017 s off) but fails `--ostra-combo-check` |
+| E | `ostra_swap` (swap) | 0.00 s, lantern lobbed on the press | 0.00 | 0.000 s | 0.033..0.050 s | 0.033 s | 1.331 m | **PASS** (was 0.117 s off: stroke 0.117..0.150 s, tip 1.065 m) |
 
 ## Neve (rimewright, art/wardens/claire/claire.glb)
 

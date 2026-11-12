@@ -9,7 +9,7 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
-const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
+const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.14),
                                  # the source's raise, then fire
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
