@@ -20,6 +20,8 @@ Run: `godot --headless --path . -- --bot-kit-use[=<arch>] [--kit-use-t=120] [--k
 | Tenzo | Shift recast | Rock Hop hops after the first of a chain (`hop recast`) |
 | Cinder | E | Furnace Cloak drags foes in (`cloak pull`) |
 
+**Cinder and Gil rows.** Cinder's stream hits are tagged `flame`, so they count as LMB hits (before, the column read 1 while the bots held the stream all duel: about 900 hits a 3-seed run). Gil's bot used to press and release RMB inside one step, so no kit step saw the key down; it now holds the key `BOT_TAP` (0.1 s, still a tap) through `bot_hold` like the other kits.
+
 ## Before (origin/main d255acbee)
 
 | Hunter | LMB hits | RMB presses | RMB holds | RMB hits | E casts | E hits | R casts | Dashes | Glides | Hold / recast specials |
