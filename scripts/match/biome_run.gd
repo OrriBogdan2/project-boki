@@ -27,6 +27,7 @@ const MUTATIONS := {
 var m: Node = null                  # the Match
 var w: World = null
 var defs := {}                      # biome id -> its data
+const AIR_PER_TILE := 2.0         # ambient specks per tile of island radius (decorate)
 const HAZARD_FIRST := 2.0         # seconds: a trap's first strike (+0..4 s by its number, so they don't all go at once)
 const HAZARD_EVERY := 6.5         # seconds between a trap's strikes
 var hazards: Array = []             # {kind, pos, node, t, phase, tele, ...}
@@ -479,7 +480,8 @@ func _tick_hazards(dt: float) -> void:
 					# pick a spot near the rod (near a hunter if one's close), mark it, then strike
 					var h := _near_hunter(p, 9.0)
 					hz["strikes"] = int(hz["strikes"]) + 1
-					var at := SpawnTable.ring_spot(p, int(hz["strikes"]) % 6, 6, 2.5)      # (a fixed round of six marks)
+					# (a fixed round of six marks)
+					var at := SpawnTable.ring_spot(p, int(hz["strikes"]) % 6, 6, 2.5)
 					if h: at = Vector3(h.pos.x, h.pos.y, h.pos.z)
 					if w.is_void(at.x, at.z): at = p
 					at.y = w.ground_at(at.x, at.z)
@@ -590,7 +592,10 @@ func decorate() -> void:
 		var c: Vector2 = w.islands[ii]["c"]
 		var r := float(w.islands[ii]["r"]) * 1.1
 		var p := CPUParticles3D.new()
-		p.amount = maxi(6, int(clampf(r * 4.0, 20, 70) * float(Settings.q("fx")))); p.lifetime = 5.0; p.preprocess = 5.0
+		# (sparse: flavour only, and it drifts at body height round every hunter; docs/design/CLARITY_PASS.md)
+		p.amount = maxi(4, int(clampf(r * AIR_PER_TILE, 10, 35) * float(Settings.q("fx"))))
+		p.lifetime = 5.0
+		p.preprocess = 5.0
 		p.visibility_range_end = 110.0 * float(Settings.q("draw"))
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(r, 2.5, r)
 		p.mesh = Models.sphere(0.06, 4)

@@ -11,12 +11,17 @@ extends RefCounted
 ## them their fixed picks (the n-th camp always holds the same monsters).
 
 const GOLDEN := 2.399963          # radians: the golden angle, an even fan of slots with no dice
+const LEAD_IN := 8.0              # s: the ring and countdown before a match event's monster appears
+const GLIMMER_AT := 0.5           # share of the session when the Glimmerkin appears
+const WARDEN_AT := 0.4            # ... and when the Watcher wakes on the centre island
+const EVENT_COL := Color("ffd25a")
 static var _rules := {}
 
 var m: Match
 var rows: Array = []              # {id, what, pos, n, first, every, fired}
 var teles := {}                   # id -> telegraph node
-var warn := {}                    # id -> {pos, left}: what is about to appear
+var warn := {}                    # id -> {pos, left, total, col}: what is about to appear
+var _glimmer := Vector3.INF       # the Glimmerkin's spot, once worked out (glimmer_spot)
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -104,24 +109,28 @@ func schedule(horizon: float) -> Array:
 	out.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
 	return out
 
-## Seconds until a row's next spawn, and which turn that is.
+## Seconds until a row's next spawn.
 func next_in(row: Dictionary) -> float:
-	var t := m.sess_time()
-	return due_at(row, int(row["fired"]) + 1) - t
+	return due_at(row, int(row["fired"]) + 1) - m.sess_time()
+
+## The last turn of a row that is due by now (-1 before its first).
+func _turn_now(row: Dictionary) -> int:
+	return int(floor((m.sess_time() - float(row["first"])) / float(row["every"])))
 
 func tick(blight: BlightDir) -> void:
 	var tele: float = float(rules()["burrow"]["tele"])
 	for row in rows:
 		var left := next_in(row)
 		if left <= 0.0:
-			row["fired"] = int(row["fired"]) + 1
-			hide(String(row["id"]))
+			# (joined late or the clock jumped: only the turn due now, not the backlog)
+			row["fired"] = _turn_now(row)
+			unmark(String(row["id"]))
 			if blight and _awake(row):    # (a nest nobody is near skips its turn)
 				blight.burrow_out(row["pos"], int(row["n"]))
 		elif left <= tele and _awake(row):
-			show(String(row["id"]), row["pos"], left, tele, float(rules()["burrow"]["radius"]), Color("ff7a3a"))
+			mark(String(row["id"]), row["pos"], left, tele, float(rules()["burrow"]["radius"]), Color("ff7a3a"))
 		else:
-			hide(String(row["id"]))
+			unmark(String(row["id"]))
 
 func _awake(row: Dictionary) -> bool:
 	var reach := float(rules()["burrow"]["awake_range"])
@@ -130,21 +139,43 @@ func _awake(row: Dictionary) -> bool:
 			return true
 	return false
 
+# ------------------------------------------------------------------ the match events
+## The Glimmerkin's spot: an island (not the first) and a ground cell on it, fixed by the map (INF if none).
+func glimmer_spot() -> Vector3:
+	var w := m.world
+	if _glimmer == Vector3.INF and w.islands.size() >= 2:
+		var r := RandomNumberGenerator.new()
+		r.seed = map_key(w) + 61
+		_glimmer = SpawnPlan.new(m).cell_on(r.randi_range(1, w.islands.size() - 1), r, [], 1)
+	return _glimmer
+
+## The last LEAD_IN seconds before the Glimmerkin and the Watcher: their ring and countdown (every game,
+## the host's spawn itself is Match._update_events).
+func lead_ins() -> void:
+	_lead_in("glimmer", glimmer_spot(), m.at_sess(GLIMMER_AT) - m.time)
+	_lead_in("warden", m.world.heart_spot, m.at_sess(WARDEN_AT) - m.time)
+
+func _lead_in(id: String, at: Vector3, left: float) -> void:
+	if at != Vector3.INF and left > 0.0 and left <= LEAD_IN:
+		mark(id, at, left, LEAD_IN, 2.0, EVENT_COL)
+	else:
+		unmark(id)
+
 # ------------------------------------------------------------------ the telegraph
 ## A ring on the ground (and a minimap mark, see warning()) until something appears there:
 ## `left` seconds to go of a `total` countdown.
-func show(id: String, at: Vector3, left: float, total: float, radius: float, col: Color) -> void:
+func mark(id: String, at: Vector3, left: float, total: float, radius: float, col: Color) -> void:
 	if not teles.has(id):
 		teles[id] = m.fx.telegraph_circle(at, radius, col)
 	m.fx.telegraph_progress(teles[id], 1.0 - left / total)
-	warn[id] = {"pos": at, "left": left}
+	warn[id] = {"pos": at, "left": left, "total": total, "col": col}
 
-func hide(id: String) -> void:
+func unmark(id: String) -> void:
 	if teles.has(id):
 		m.fx.end_telegraph(teles[id])
 		teles.erase(id)
 	warn.erase(id)
 
-## What is about to appear: [{pos, left}] for the minimap and the full map.
+## What is about to appear: [{pos, left, total, col}] for the minimap and the full map.
 func warning() -> Array:
 	return warn.values()

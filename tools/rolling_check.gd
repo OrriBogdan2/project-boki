@@ -98,7 +98,9 @@ func _schedule() -> void:
 func _session(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"rolling": true, "join_wave": 4, "squad": 3, "tier": 0, "seed": 31, "autoplay": true, "plan_t": 0.5, "bot_diff": "medium", "sim_keep": true})
+	# (no Heart: its tide runs on the session clock, so four waves in it has closed on the whole map and
+	# knocks the wave out of the air; docs/DEBT.md "Rolling sessions and the Heart tide")
+	m.start({"rolling": true, "join_wave": 4, "squad": 3, "tier": 0, "seed": 31, "autoplay": true, "plan_t": 0.5, "bot_diff": "medium", "sim_keep": true, "no_heart": true})
 	m.set_process(false)
 	var R: Rolling = m.rolling
 	ok(R != null, "opts rolling makes a rolling session")

@@ -31,9 +31,9 @@ func seats() -> Array:
 	return [lair, uplink].filter(func(s): return s != null)
 
 ## Picks the two seats. On the first tick, not in Exits.setup: the lairs are built after the exits.
-## The pick is the map's alone (SpawnTable.map_key: every match of the map makes the same one): the Sealed Lair is one of all
-## the lairs (woken if the spawn plan left it asleep), the Uplink the outpost farthest from it; any
-## other outpost stays dark.
+## The pick is the map's alone (SpawnTable.map_key: every match of the map makes the same one): the
+## Sealed Lair is one of all the lairs (woken if the spawn plan left it asleep), the Uplink the outpost
+## farthest from it; any other outpost stays dark.
 func build() -> void:
 	if built:
 		return

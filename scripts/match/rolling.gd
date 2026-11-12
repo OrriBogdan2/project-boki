@@ -616,12 +616,12 @@ func _camp_respawns() -> void:
 			if not h.out and not h.extracted and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 22.0:
 				near = true; break
 		if near:
-			m.spawn_table.hide("camp%d" % ci)
+			m.spawn_table.unmark("camp%d" % ci)
 			continue
 		if left > 0.0:
-			m.spawn_table.show("camp%d" % ci, p, left, CAMP_TELE, 2.5, Color("ffd86a"))
+			m.spawn_table.mark("camp%d" % ci, p, left, CAMP_TELE, 2.5, Color("ffd86a"))
 			continue
-		m.spawn_table.hide("camp%d" % ci)
+		m.spawn_table.unmark("camp%d" % ci)
 		cp["mobs"] = SpawnTable.spawn_camp(m, p, cp["comp"])
 		cp["cleared_at"] = -1e9
 		stats["camp_respawns"] += 1

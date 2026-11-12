@@ -2,7 +2,8 @@ extends RefCounted
 ## --spawn-table-check: nothing spawns by dice (docs/design/CLARITY_PASS.md). Two seeds of the same
 ## map give the same camps, Shrublings, wild and rare Boki, Wardens, boss lair and burrow schedule; a
 ## nest is telegraphed (ring, minimap warning, countdown) before its pack claws out, exactly on time,
-## at its fixed place; and a cleared rolling camp is telegraphed before it comes back. Never touches
+## at its fixed place; the Glimmerkin and the Watcher get a lead-in ring before they appear; and a cleared
+## rolling camp is telegraphed before it comes back. Never touches
 ## the save.
 
 const SNAP := Vector3(0.1, 0.1, 0.1)
@@ -54,7 +55,10 @@ func run(main: Node) -> void:
 	var shr_b := b.mobs.filter(func(x): return x is Shrubling).map(func(x): return str(x.pos.snapped(SNAP)))
 	ok(shr_a == shr_b and not shr_a.is_empty(), "the same %d Shrublings hide in the same grass" % shr_a.size())
 	ok(float(sa[3][0][0]) >= 60.0, "the first nest turn is %ds in: nothing claws out on landing" % int(sa[3][0][0]))
-	b.queue_free()
+	var ga := a.spawn_table.glimmer_spot()
+	ok(ga != Vector3.INF and ga == b.spawn_table.glimmer_spot(),
+		"the Glimmerkin's spot is the map's, not the seed's (%s)" % str(ga))
+	_lead_in(b)
 	_telegraph(a)
 	_camp_telegraph(main)
 	print("SPAWNTABLE DONE, failures: %d" % bad)
@@ -92,6 +96,23 @@ func _telegraph(m: Match) -> void:
 	var near := m.mobs.filter(func(x): return x is Blight and not x.dead and x.flat_dist(row["pos"]) < 8.0)
 	ok(near.size() >= int(row["n"]), "... at the nest (%d within 8 tiles)" % near.size())
 	ok(_ring_at(m, row["pos"]).is_empty(), "the ring is gone once it has spawned")
+	m.queue_free()
+
+## The Glimmerkin (and the Watcher, on a map with a centre island): a ring for the last LEAD_IN seconds,
+## then it appears at that spot.
+func _lead_in(m: Match) -> void:
+	var at := m.spawn_table.glimmer_spot()
+	m.time = m.at_sess(SpawnTable.GLIMMER_AT) - 5.0
+	_run(m, 0.5)
+	ok(_ring_at(m, at).size() == 1 and not m.glimmer_done, "the Glimmerkin's ring counts down before it comes")
+	_run(m, 5.0)
+	var g := m.mobs.filter(func(x): return x.mkind == "glimmer" and not x.dead)
+	ok(g.size() == 1 and _ring_at(m, at).is_empty() and Vector2(g[0].pos.x - at.x, g[0].pos.z - at.z).length() < 2.0,
+		"then it appears there (%d)" % g.size())
+	if m.world.heart_spot != Vector3.INF:
+		m.time = m.at_sess(SpawnTable.WARDEN_AT) - 4.0
+		_run(m, 0.5)
+		ok(_ring_at(m, m.world.heart_spot).size() == 1, "the Watcher's ring counts down before it wakes")
 	m.queue_free()
 
 ## A rolling session's cleared camp: a ring for the last CAMP_TELE seconds, then the same monsters again.
