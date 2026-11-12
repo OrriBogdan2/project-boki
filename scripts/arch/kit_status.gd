@@ -97,8 +97,6 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				n.add_child(c)
 			e.add_child(n)
 			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			if toast == "":
-				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
 			var old2 := e.get_node_or_null("Rattled")
@@ -117,11 +115,6 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				rn.add_child(st)
 			e.add_child(rn)
 			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
-			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
-		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
-		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:
