@@ -51,6 +51,8 @@ var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
+## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
+var cue_log = null
 var rng := RandomNumberGenerator.new()
 
 signal new_track(name: String)
@@ -433,6 +435,7 @@ func _voice(pos) -> AudioStreamPlayer:
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
+	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
@@ -500,6 +503,7 @@ var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
 func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
 	if loops.has(key):
 		return
+	if cue_log != null: cue_log.append([sname, pos, ensure(sname)])
 	var st = streams.get(sname)
 	if st is Array: st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()

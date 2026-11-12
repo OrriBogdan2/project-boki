@@ -2665,6 +2665,8 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
 			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
+	else:
+		Juice.rival_pickup(self, h)
 
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:

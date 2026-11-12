@@ -22,6 +22,7 @@ extends RefCounted
 const ARMS_FWD := 0.42    # m: how far in front of the carrier the Boki rides
 const ARMS_UP := 0.9      # m: the height of the arms above the carrier's feet
 const LEAVE_META := "leave"   # on a Boki put down on purpose: no automatic pick-up until the owner steps away
+const DOWN_CRY_DB := -4.0   # dB: the Boki's cry as it goes down, in its own voice
 const ENEMY_NEAR := 6.0   # m: with a foe this close, running into the Boki does not pick it up (press interact)
 const F_EDGE_S := 0.1     # s: an interact press this recent counts as a fresh press
 const BLOCKED_INPUTS := ["jump", "glide", "fire", "sig", "sec", "sec_hold", "skill", "ult", "kin_ab", "gear1", "gear2",
@@ -50,6 +51,7 @@ static func begin(k: Kin, fell: bool) -> void:
 	if fell:
 		k.teleport(k.last_safe if k.last_safe != Vector3.INF else (k.owner_h.pos if k.owner_h else k.pos))
 	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
+	k.m.sfx("kin_unsure", k.pos, DOWN_CRY_DB, Unique.voice(k.rec))
 
 ## Can the owner scoop it up right now?
 static func rescuable(k: Kin) -> bool:
