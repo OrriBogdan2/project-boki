@@ -70,3 +70,12 @@ the soles land at 2.2 and 4.6 m/s), then `glb_add_clips.py cinder.glb B.glb run_
 `glb_add_clips.py cinder.glb DIAG.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl` after (prefix match: run_b
 would replace run_bl). Her foot jets are scaled down in every loco clip; the recipe keys bone scale since this pass
 (the first pass's fl/br showed them full size). Judge: docs/art/wardens/dirloops/JUDGE.md.
+
+Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with cinder_clips.py on
+~/meshy/cinder_v2/stage_p2/cinder.blend (a control bake of `walk_f` matched this glb's to 4e-7) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
+On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
+command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.
+On the merge of main into ext/anim-loco-slip (11-12) the re-keyed run_f/b/l/r and jet_land stayed main's and
+the directional loops' run_b, run_fl, run_fr and run_bl were left off (baked from the old run, they did not match the
+scurry): her run ring is f, b, l, r again. Walk diagonals and the crouch ring were copied onto main's glb by name.
