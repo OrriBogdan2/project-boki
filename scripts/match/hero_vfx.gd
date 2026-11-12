@@ -224,6 +224,10 @@ func _num(layer: Dictionary, key: String, o: Dictionary, fallback := 1.0) -> flo
 		n *= 1.0 + float(layer[key + "_k"]) * float(o.get("k", 0.0))
 	return n
 
+## A colour of the Hero's palette (its data file), for the looks a kit places itself.
+func color(h: Hunter, key: String) -> Color:
+	return _pal(h, key, key)
+
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
 	var pal: Dictionary = data(h.arch).get("palette", {})
 	var key := String(name_or_hex) if name_or_hex != null else fallback
@@ -452,6 +456,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
+			mt.set_shader_parameter("rim_only", bool(layer.get("thin", false)))
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)

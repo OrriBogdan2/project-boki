@@ -133,15 +133,15 @@
 		]},
 		"cloak": {"fx": [
 			{"p": "flare", "at": "chest", "size": 2.2, "grow": 1.2, "life": 0.22, "c": "main", "c2": "white", "c3": "red"},
-			{"p": "skirt", "size": "r", "size_x": 0.4, "from": 0.3, "tall": 1.9, "life": 0.55, "c": "main", "c2": "hot", "c3": "red"},
-			{"p": "scorch", "size": "r", "life": 1.8, "c": "main", "c2": "hot", "c3": "char"},
-			{"p": "ember", "y": 0.5, "n": 36, "shape": "disc", "radius": 1.0, "way": "up", "speed": 6.0, "spread": 0.9,
+			{"p": "vortex", "thin": true, "size": "r", "spin": -1.6, "grow": 0.3, "life": 0.4, "c": "main", "c2": "white"},
+			{"p": "vortex", "thin": true, "size": "r", "spin": -2.2, "grow": 0.3, "life": 0.34, "delay": 0.06, "c": "hot", "c2": "white"},
+			{"p": "ember", "y": 0.5, "n": 18, "shape": "disc", "radius": 1.0, "way": "up", "speed": 6.0, "spread": 0.9,
 				"drag": 2.0, "grav": -1.0, "life": 0.6, "size": 0.1, "c": "main", "c2": "hot", "c3": "red"},
-			{"p": "smoke", "y": 0.6, "n": 7, "shape": "disc", "radius": 2.5, "speed": 1.2, "spread": 0.8, "grav": -1.0,
-				"life": 1.4, "size": 0.26, "c": "smoke", "c3": "soot", "near": true}
+			{"p": "smoke", "y": 0.6, "n": 3, "shape": "disc", "radius": 1.5, "speed": 1.2, "spread": 0.8, "grav": -1.0,
+				"life": 1.2, "size": 0.26, "c": "smoke", "c3": "soot", "near": true}
 		]},
 		"cloak_gather": {"net": false, "fx": [
-			{"p": "ember", "y": 1.0, "n": 20, "shape": "gather", "radius": 1.4, "speed": 6.0, "life": 0.18, "size": 0.08,
+			{"p": "ember", "y": 0.3, "n": 24, "shape": "gather", "radius": "r", "speed": 14.0, "life": 0.26, "size": 0.08,
 				"c": "main", "c2": "white", "c3": "red"}
 		]},
 		"cloak_hit": {"fx": [
