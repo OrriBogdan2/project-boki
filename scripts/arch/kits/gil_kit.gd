@@ -11,7 +11,7 @@ const THRUSTS := ["gil_thrust_a", "gil_thrust_b", "gil_lunge"]   # the Fencer's 
 
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
-var flying: Array = []              # thrown potions in the air: {at, from, t, left, v}
+var flying: Array = []              # thrown potions: {at, from, t, left, v, out_at (when it leaves his hand)}
 var puddles: Array = []             # slime puddles: {at, r, left, k, tick}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
@@ -114,9 +114,15 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	tele_circle(at, float(vd["radius"]), col_of(vd), ft)
-	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v})
+	# (the potion leaves the bag on the toss clip's pull-out key, rmb draw s after the press, and flies from there)
+	var wait := float(rd["draw"])
+	tele_circle(at, float(vd["radius"]), col_of(vd), wait + ft)
+	flying.append({"at": at, "t": ft, "left": ft, "v": v, "out_at": m.time + wait})
 	play("gil_toss")
+
+## The potion leaves his hand: it flies from where he is now.
+func _let_go(it: Dictionary) -> void:
+	it["from"] = h.pos + Vector3(0, 1.3, 0)
 	m.sfx("throw", h.pos, -4.0, 1.15)
 
 func rmb_hold_tick(t: float) -> void:
@@ -354,6 +360,11 @@ func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	for it in flying.duplicate():
+		if not it.has("from"):
+			# (a ms early: the step clock adds up in floats)
+			if m.time < float(it["out_at"]) - 0.001:
+				continue
+			_let_go(it)
 		it["left"] = float(it["left"]) - dt
 		var k := 1.0 - clampf(float(it["left"]) / maxf(0.01, float(it["t"])), 0.0, 1.0)
 		var p: Vector3 = (it["from"] as Vector3).lerp(it["at"], k) + Vector3(0, sin(k * PI) * 2.0, 0)

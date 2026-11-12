@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	_fencer()
 	_vials()
 	_hold_and_air()
+	_pull_out()
 	_beach()
 	_swim()
 	_riptide()
@@ -174,6 +175,19 @@ func _hold_and_air() -> void:
 		var at: Vector3 = K.flying[0]["at"]
 		below = Vector2(at.x - P.pos.x, at.z - P.pos.z).length() < 0.6 and at.y < P.pos.y - 1.0
 	ok("Grab Bag in the air: drops the vial straight down", below)
+	_land()
+
+## The potion stays in the bag until the toss clip's pull-out key (rmb draw), then leaves his hand.
+func _pull_out() -> void:
+	_reset(6.0)
+	tap(m, P)
+	var held: bool = not K.flying.is_empty() and not K.flying[0].has("from")
+	while not K.flying.is_empty() and not K.flying[0].has("from") and m.time - K.anim_at < 1.0:
+		step(m, DT)
+	var out_t := m.time - K.anim_at
+	var draw := float(K.rmb_def()["draw"])
+	ok("Grab Bag: the potion comes out of the bag on the toss key", held and absf(out_t - draw) <= 1.0 / 30.0,
+		"out %.3f s, key %.3f s" % [out_t, draw])
 	_land()
 
 func _beach() -> void:
