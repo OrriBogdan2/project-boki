@@ -100,13 +100,14 @@ static func find(w: World, pos: Vector3, r: float, mv: Vector2, hvel: Vector2, c
 ## A new rise up `best` (from find): the rise's Dictionary. `shove`: thrown into the side with no
 ## keys (it carries you over); `v_in`: the speed you came in with comes over the top (item 185b).
 static func begin(best: Dictionary, pos: Vector3, mv: Vector2, glide_held: bool, shove: bool, v_in: float,
-		downed: bool) -> Dictionary:
+		downed: bool, dash_vy := 0.0) -> Dictionary:
 	var dir_in := Vector2(float(best["ex"]) - pos.x, float(best["ez"]) - pos.z)
 	if dir_in.length() < 0.01:
 		dir_in = mv
 	return {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": glide_held, "shove": shove,
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
-		"v_in": v_in, "max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
+		"v_in": v_in, "dash_vy": dash_vy,    # a dash hands over: its speed takes you up the face
+		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
 
 ## Ticks the rise's clock; true once it has let go on its own: moved out from the face, slid along
 ## past its end (or teleported), or ran out of time.
@@ -125,7 +126,8 @@ static func left(lf: Dictionary, w: World, pos: Vector3, r: float) -> float:
 
 ## Up speed this step of the rise.
 static func rise_vy(lf: Dictionary, vy: float, to_go: float, dt: float) -> float:
-	return HunterMove.rise_vy(vy, to_go, DOWNED_PACE if bool(lf["downed"]) else 1.0, RISE_MAX, dt)
+	var up := HunterMove.rise_vy(vy, to_go, DOWNED_PACE if bool(lf["downed"]) else 1.0, RISE_MAX, dt)
+	return maxf(up, float(lf.get("dash_vy", 0.0)))
 
 ## True the step the fling window near the top opens (cue it so the timing reads).
 static func window_opens(lf: Dictionary, to_go: float) -> bool:

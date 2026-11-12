@@ -194,7 +194,7 @@ func _reset(at: Vector3, grounded: bool, last_gy: float) -> void:
 	hm.last_gy = last_gy
 	hm.ledge_cd = 0.0
 	hm.air_t = 0.0 if grounded else 0.3
-	hm.carry.forget()
+	hm.mcarry.forget()
 	hm.safe_at = Vector3(at.x - 3.0, 0, at.z)
 	_press(Vector2.ZERO, false)
 
