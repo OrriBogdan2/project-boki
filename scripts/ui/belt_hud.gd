@@ -1,12 +1,35 @@
 class_name BeltHud
 extends RefCounted
-## The utility belt on the HUD (UtilityBelt): four slots on keys 1 to 4 in the row above the
-## weapon card. A slot shows its item's icon, how many charges are left, and lights when pressing
-## it would do something (a tonic when you are hurt, an armor kit when your armor is down).
-## Look: HudStyle (slot frames, key pills, count badges).
+## The bottom-right row (`row`): the utility belt (UtilityBelt), four small slots on keys 1 to 4, the
+## Boki throw left of it and the grip cards (GripHud) right of it, where the owner's 11-12 reference
+## keeps its consumables and item cards (scripts/ui/HUD_SPEC.md). A belt slot shows its item's icon,
+## "left/max" over it, and lights when pressing it would do something (a tonic when you are hurt, an
+## armor kit when your armor is down). Look: HudStyle (slot frames, key pills).
 
-const SLOT := 44.0
-const GAP := 8.0
+const SLOT := 26.0             # px (ref 41 at 1080p)
+const GAP := 3.0               # px (ref pitch 45)
+const BOTTOM := 696.0          # px: where the row stands (bottom-anchored)
+const RIGHT_PAD := 49.0        # px from the right edge to the grip cards (room for GearPanel's column)
+const TO_GRIPS := 32.0         # px between the belt and the grip cards
+const COUNT_FS := 11           # the "left/max" over a slot
+const COUNT_UP := 4.0          # px from the slot's top to that count's baseline
+
+## The whole row, right-anchored to the screen size `sz`.
+static func row(hud, p: Hunter, sz: Vector2) -> void:
+	var bottom := sz.y - 720.0 + BOTTOM
+	var grips := GripHud.draw(hud, p, sz.x - RIGHT_PAD, bottom)
+	var x := draw(hud, p, grips.position.x - TO_GRIPS - SLOT, bottom - SLOT)
+	_throw(hud, p, Rect2(Vector2(x, bottom - SLOT), Vector2(SLOT, SLOT)))
+
+## Throw or recall your Boki (C).
+static func _throw(hud, p: Hunter, r: Rect2) -> void:
+	var k: Kin = p.kin
+	if k == null:
+		return
+	var out_now: bool = k.state in ["active", "flying", "returning"]
+	var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
+	hud._ab_slot("throw", r, "recall" if out_now else "throw", Settings.key_cap("throw"), Data.KIN[k.species]["color"],
+			maxf(0.0, k.throw_cd), k.throw_cd, can_throw)
 const EMPTY_TIP := "Empty utility slot. Tonics, armor kits and gadgets you find or buy fill it."
 
 ## Draws the slots with the last at the right edge `x`, top at `y`. Returns the x where the
@@ -29,7 +52,8 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 			var ready := UtilityUse.can_use(p, id) and cd <= 0.0 and not p.downed
 			hud._ab_slot(key, r, UtilityBelt.icon_of(id), Settings.key_cap(key), col, cd / cd_max if cd > 0.0 else 0.0,
 					cd, ready)
-			HudStyle.count_badge(c, Vector2(r.end.x - 4.0, r.position.y + 2.0), int(s["n"]), col)
+			var count := "%d/%d" % [int(s["n"]), UtilityBelt.max_of(id)]
+			HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - COUNT_UP), count, COUNT_FS, col.lightened(0.3))
 		x -= SLOT + GAP
 	return x
 

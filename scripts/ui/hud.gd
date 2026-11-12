@@ -563,21 +563,7 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
-	# top right, as in Supervive: squads left, your kills, your knocks, your gems
-	var teams := {}
-	for h in m.hunters:
-		if not h.out and not h.extracted: teams[h.team] = true
-	var cells := [["paw", str(teams.size()), INK], ["knock", str(m.player.kills if m.player else 0), Color("ff9a8a")],
-		["burst", str(m.player.knocks if m.player else 0), Color("ffd27a")], ["gem", str(m.player.gems if m.player else 0), GOLD]]
-	var cw := 58.0
-	var cr := Rect2(Vector2(sz.x - 18 - cw * cells.size(), 18), Vector2(cw * cells.size(), 34))
-	_rounded(cr, Color(0.04, 0.05, 0.08, 0.86), 8)
-	for i in cells.size():
-		var cx := cr.position.x + cw * i
-		Icons.draw(c, String(cells[i][0]), Vector2(cx + 17, cr.position.y + 17), 7.0, Color(cells[i][2], 0.85))
-		_text(Vector2(cx + 28, cr.position.y + 23), String(cells[i][1]), 15, cells[i][2], big)
-		if i > 0: c.draw_line(Vector2(cx, cr.position.y + 7), Vector2(cx, cr.end.y - 7), Color(1, 1, 1, 0.1), 1.0)
-	feed_top = cr.end.y + 10.0
+	feed_top = ScoreRow.draw(self, sz) + 10.0
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
 func _draw_duel(sz: Vector2) -> void:
@@ -635,8 +621,8 @@ func _draw_feed(sz: Vector2) -> void:
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
-	var s := 340.0 if riding else 196.0
-	var r := Rect2(Vector2(18, 18), Vector2(s, s))
+	var s := 340.0 if riding else MM_D
+	var r := Rect2(Vector2(18, 18) if riding else MM_AT, Vector2(s, s))
 	mm_bottom = r.end.y
 	var w := m.world
 	var inner := Rect2(r.position + Vector2(8, 8), r.size - Vector2(16, 16))
@@ -644,7 +630,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		mm_circ = Vector3.ZERO
 		_panel(r, Color(0.05, 0.06, 0.09, 0.78), 12)
 	else:
-		# on the ground the map is a disc, as in Supervive, with a rim and a north tick
+		# on the ground the map is a disc with a thin rim, the match clock on a tab at its top
 		inner = Rect2(r.position + Vector2(5, 5), r.size - Vector2(10, 10))
 		mm_circ = Vector3(r.get_center().x, r.get_center().y, inner.size.x * 0.5)
 		c.draw_circle(r.get_center(), s * 0.5 + 2.0, Color(0.02, 0.02, 0.04, 0.9))
@@ -815,43 +801,40 @@ func _draw_minimap(sz: Vector2) -> void:
 
 	if mm_circ.z > 0.0:
 		var ctr := Vector2(mm_circ.x, mm_circ.y)
-		c.draw_arc(ctr, mm_circ.z + 1.0, 0, TAU, 72, Color(0.85, 0.8, 1.0, 0.55), 2.5, true)
-		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
+		c.draw_arc(ctr, mm_circ.z + 1.0, 0, TAU, 72, Color(0.85, 0.9, 0.95, 0.8), 1.5, true)
 	_draw_clock_bar(sz, r)
 
-## Under the minimap, like Supervive's day bar: the match clock, your run
-## level, and a thin bar for how far through the match you are.
+## Around the minimap: the match clock on a tab over the disc's top, then one line under it (the
+## raid condition, a phase word, your run level) over a thin bar of how far through the match you are.
 func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
-	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
-	mm_bottom = r.end.y
 	var left := m.length - m.time
-	var phase := ""; var pc := MUTED
-	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
-	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
-	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
-	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
-	if m.player:
-		var lt := "LV %d" % m.player.lvl
-		_text(Vector2(r.end.x - 10 - big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, r.position.y + 19), lt, 12, Color("ffd27a"), big)
-	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
-	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
-	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
-	# the raid condition (RaidLook), and how far you see under it
-	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
-	mm_bottom = rr.end.y
+	var late := left < 30.0
+	var tab := Rect2(Vector2(mm.get_center().x - 20, mm.position.y - 15), Vector2(40, 13))
+	_rounded(tab, Color(0.71, 0.79, 0.78, 0.85) if not late else Color(BAD, 0.9), 3)
+	_ctext(Vector2(tab.get_center().x, tab.end.y - 2.5), _fmt(left), 11, Color(0.06, 0.08, 0.1), big)
+	var r := Rect2(Vector2(5, mm.end.y + 4), Vector2(MM_D + 6, 16))
+	mm_bottom = r.end.y
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
-	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
-	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
-	_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
-	if m.sight_k < 0.99:
-		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
-		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
+	c.draw_circle(r.position + Vector2(6, 7), 5.0, rcol)
+	var raid_name := String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper()
+	HudStyle.lean_text(c, r.position + Vector2(14, 11), raid_name, 10, INK, 3)
+	var phase := "SIGHT %d%%" % int(round(m.sight_k * 100.0)) if m.sight_k < 0.99 else ""
+	if late: phase = "ISLANDS FALLING"
+	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+	HudStyle.lean_text(c, Vector2(r.position.x + r.size.x * 0.58 - pw * 0.5, r.position.y + 11), phase, 10, BAD if late else INK, 3)
+	if m.player:
+		var lt := "LV. %d" % m.player.lvl
+		var lw := big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		HudStyle.lean_text(c, Vector2(r.end.x - lw - 2, r.position.y + 11), lt, 10, INK, 3)
+	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
+	var bar := Rect2(Vector2(r.position.x + 2, r.end.y - 2), Vector2(r.size.x - 4, 3))
+	c.draw_rect(bar, Color("242f3e"))
+	c.draw_rect(Rect2(bar.position, Vector2(bar.size.x * prog, 3)), BAD if late else Color("0863d4"))
 	if m.rolling:
-		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
+		SessionRow.draw(self, Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 42)))
 
 ## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
 func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
@@ -865,6 +848,8 @@ func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
 		var a := PI * 0.5 * i
 		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
+const MM_D := 168.0            # px: the round minimap's size on the ground (scripts/ui/HUD_SPEC.md)
+const MM_AT := Vector2(8, 22)  # px: its top-left (room above for the clock tab)
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 	if mm_circ.z > 0.0:
@@ -1029,10 +1014,7 @@ func _hud_tick(delta: float) -> void:
 		h["t"] = float(h["t"]) + delta
 		if float(h["t"]) > 1.2: hurt_dirs.erase(h)
 
-## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
-const HUD_PORTRAIT := Vector2(112, 132)
-func _hud_origin(sz: Vector2) -> Vector2:
-	return Vector2(18, sz.y - 18 - HUD_PORTRAIT.y)
+## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits to their right).
 
 var lvl_pop := 0.0
 var lvl_seen := -1
@@ -1046,35 +1028,7 @@ func level_up(lv: int, info := {}) -> void:
 		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
 	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
 
-## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
-func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
-	var k: ArchKit = p.ak
-	var rc := k.res_col()
-	var f := k.res_frac()
-	var rd := k.res_def()
-	_text(Vector2(x0, y + 9), String(rd.get("name", "")).to_upper(), 10, Color(rc, 0.9), big)
-	var bx := x0 + 78.0
-	var bw := w - 78.0 - 40.0
-	if String(rd.get("kind", "")) in ["count", "on_targets"]:
-		var n := int(rd.get("max", 3))
-		var have := int(round(f * n))
-		for i in n:
-			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
-			_rounded(cr, rc if i < have else Color(1, 1, 1, 0.12), 3)
-	else:
-		_bar(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)), f, rc)
-		if String(rd.get("id", "")) == "heat":
-			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
-			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
-	var txt := k.res_text()
-	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
-	var tw := big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
-	if k.tell == "full":
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		_rounded(Rect2(Vector2(bx - 2, y), Vector2(bw + 4, 11)), Color(0, 0, 0, 0), 4, Color(rc, 0.4 + 0.5 * pulse), 2)
-
-## Glider heat as a ring floating beside the glider, as in Supervive: it fills as you glide (faster
+## Glider heat as a ring floating beside the glider: it fills as you glide (faster
 ## when you're hit or lifting out of the abyss), drains on the ground, and pulses red when
 ## overheated, when the next hit will spike you.
 func _draw_glider_heat(p: Hunter) -> void:
@@ -1107,17 +1061,16 @@ func _draw_glider_heat(p: Hunter) -> void:
 		c.draw_arc(cpt, 17.0 + 2.0 * sin(m.time * 14.0), 0.0, TAU, 32, Color(1.0, 0.3, 0.2, 0.6), 2.0, true)
 
 ## The ability row under the bars: right click, Shift dash, E kin, R bond ultimate (gloves: GripHud). Every
-## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
+## one starts the run locked; a rank badge sits on each, a gold border means a point can unlock it
 ## (just press its key), and a gold + means Alt + its key will rank it up.
 func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	if p.ak:
 		_draw_arch_abilities(sz, p)
 		return
-	var o := _hud_origin(sz)
-	var s := 50.0
-	var gap := 10.0
-	var x := o.x + HUD_PORTRAIT.x + 16.0
-	var y := o.y + 66.0
+	var s := HudVitals.SLOT
+	var gap := HudVitals.SLOT_GAP
+	var x := HudVitals.SLOT_X
+	var y := sz.y - 720.0 + HudVitals.SLOT_Y
 	var k: Kin = p.kin
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner else null
 	# right click: the weapon's ability
@@ -1149,11 +1102,10 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 ## The archetype row: RMB, Shift dash, E utility, X the hero's ultimate (locked until level 6), then the
 ## kin's own ability (C) and send/recall (G) as small badges. The Merge is the Boki box on the right (GripHud).
 func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
-	var o := _hud_origin(sz)
-	var s := 50.0
-	var gap := 10.0
-	var x := o.x + HUD_PORTRAIT.x + 16.0
-	var y := o.y + 74.0
+	var s := HudVitals.SLOT
+	var gap := HudVitals.SLOT_GAP
+	var x := HudVitals.SLOT_X
+	var y := sz.y - 720.0 + HudVitals.SLOT_Y
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1215,10 +1167,9 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var k: Kin = p.kin
 	if k == null:
 		return
-	var o := _hud_origin(sz)
 	var kc: Color = Data.KIN[k.species]["color"]
 	var glow: Color = Data.KIN[k.species].get("glow", kc)
-	var pc := o + Vector2(6, 6)
+	var pc := Vector2(0, sz.y - 720.0) + HudVitals.KIN_C
 	var rr := 20.0
 	c.draw_circle(pc, rr + 4, Color(0.03, 0.03, 0.05, 0.95))
 	c.draw_arc(pc, rr + 1.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
@@ -1249,78 +1200,6 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
 		_ctext(sr.get_center() + Vector2(0, 3.5), st.to_upper(), 9, Color(kc.lerp(INK, 0.3), 0.95), big)
-
-## Bottom right, as in Supervive: your consumables and kin throw as small slots with counts, your
-## loot counter, and the weapon card with ammo underneath.
-func _draw_weapon(sz: Vector2, p: Hunter) -> void:
-	var w := 270.0
-	var r := Rect2(Vector2(sz.x - w - 18, sz.y - 18 - 62), Vector2(w, 62))
-	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
-	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
-	hover_spots.append([r, "weapon"])
-	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
-	RecastCue.slot(self, p, "lmb", Rect2(r.position + Vector2(14, 8), Vector2(52, 52)))      # the recall (Bulwark)
-	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
-	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
-	var wn := String(p.wpn["name"]).to_upper()
-	_text(r.position + Vector2(78, 22), wn, 12 if wn.length() <= 20 else 10, rc, big)
-	if p.welem != "":
-		# the element's colour: what it does to whatever you hit is in the hover
-		var ec: Color = Loot.ELEMENTS[p.welem]["col"]
-		c.draw_circle(r.position + Vector2(w - 16, 18), 5.0, ec)
-		c.draw_arc(r.position + Vector2(w - 16, 18), 8.0, 0, TAU, 20, Color(ec, 0.5), 2.0)
-	var mag := int(p.wpn["mag"])
-	var ammo_col := INK if p.ammo > mag * 0.25 else HP_LOW
-	if p.wpn.get("melee", false):
-		_text(r.position + Vector2(78, 48), "MELEE", 18, rc, big)
-		var cn: int = (p.wpn.get("combo_dmg", p.wpn.get("combo", [1.0])) as Array).size()
-		var live := m.time - p.swing_at <= float(p.wpn["rate"]) + float(p.wpn.get("combo_reset", 0.6))
-		for ci in cn:
-			var on := live and (p.combo_i % cn) > ci
-			c.draw_circle(r.position + Vector2(160 + ci * 16, 42), 5.0 if ci == cn - 1 else 3.5, rc if on else Color(1, 1, 1, 0.2))
-	elif not p.wpn.get("ammo", true):
-		pass                       # no ammo (Data.weapon_stats): no count to show
-	elif p.reload_t > 0.0:
-		_text(r.position + Vector2(78, 46), "RELOADING", 16, Color("ffe7a8"), big)
-		_bar(Rect2(r.position + Vector2(78, 52), Vector2(170, 4)), 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"))
-	else:
-		_text(r.position + Vector2(78, 52), str(p.ammo), 28, ammo_col, big)
-		var aw := big.get_string_size(str(p.ammo), HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x
-		_text(r.position + Vector2(84 + aw, 52), "/ %d" % mag, 14, MUTED, big)
-	# the row of small slots above the weapon card
-	var s := 44.0; var gap := 8.0
-	var y := r.position.y - s - 22.0
-	var x := r.end.x - s
-	var k: Kin = p.kin
-	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
-	x = BeltHud.draw(self, p, x, y)
-	GripHud.draw(self, p, r)
-	# C: throw / recall your kin
-	if k:
-		var kc: Color = Data.KIN[k.species]["color"]
-		var out_now: bool = k.state in ["active", "flying", "returning"]
-		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
-		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
-		x -= s + gap
-	# what you're carrying home, as a counter
-	var seeds := 0
-	for sd in p.seeds: seeds += int(p.seeds[sd])
-	# (inside the weapon card on the right: the slot row above is full with the four-slot belt)
-	var gx := r.end.x - 112.0
-	var cy := r.position.y + 6.0
-	Icons.draw(c, "gem", Vector2(gx + 8, cy + s - 10), 7.0, GOLD)
-	_text(Vector2(gx + 20, cy + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
-	_text(Vector2(gx + 2, cy + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
-	if not m.opts.get("training", false):
-		# the backpack: slots used (red when full); the key opens it
-		var full := p.pack.size() >= p.pack_cap
-		var pcol := Color("ffb0a0") if full else (INK if p.pack.size() > 0 else MUTED)
-		var gw := big.get_string_size("%d" % p.gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
-		var px := gx + 30.0 + gw
-		Icons.draw(c, "satchel", Vector2(px + 8, cy + s - 10), 8.0, pcol)
-		_text(Vector2(px + 20, cy + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
-		var pw := big.get_string_size("%d/%d" % [p.pack.size(), p.pack_cap], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-		hover_spots.append([Rect2(Vector2(px, cy + s - 22), Vector2(24 + pw, 24)), "pack"])
 
 ## Your squadmates down the left side.
 ## A teammate's state, for the squad frames, markers and arrows: [label, colour, where to point,
@@ -2641,7 +2520,7 @@ func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) ->
 		return
 	var vs := pc.get_viewport_rect().size
 	var top := 64.0
-	var bottom := vs.y - 172.0          # clear of the weapon card and the consumable slots
+	var bottom := vs.y - 172.0          # clear of the gear column and the bottom-right row
 	var want := rows.get_combined_minimum_size().y
 	var rest := pc.get_combined_minimum_size().y - sc.get_combined_minimum_size().y
 	sc.custom_minimum_size.y = clampf(bottom - top - rest, 60.0, want)
