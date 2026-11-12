@@ -3143,7 +3143,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var hx := UI.head_extra(v)
 	hx.add_child(VoidPortrait.of(rec, get_tree(), 84.0))
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
-	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
+	elif rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
 	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Boki Burrow", Color("cdb8ff")))
 	for mid in Mutations.of(rec):
@@ -3275,11 +3275,11 @@ func _open_kin(rec: Dictionary) -> void:
 			if not swapped.is_empty(): _toast("%s went to the Boki Burrow to make room" % swapped["name"])
 			_spawn_kin(); _refresh_burrow()
 			_open_kin(rec)))
-		if Match.TWO_KIN and rec["uid"] != Save.d.get("active2", ""):     # (one Boki per run now: no second)
+		if rec["uid"] != Save.d.get("active2", ""):
 			fl.add_child(UI.ghost("Bring as second", func():
 				Save.d["active2"] = rec["uid"]
 				Save.save_game()
-				_toast("%s joins your next expedition (%s swaps)" % [rec["name"], Settings.key_cap("swap_kin")])
+				_toast("%s goes with you as your second Boki" % rec["name"])
 				_open_kin(rec)))
 	ZoneCards.add_move_link(self, fl, rec)
 	# the Kin Burrow: put it to sleep there, or wake it and bring it out
@@ -3467,10 +3467,8 @@ func _open_expedition() -> void:
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
 		left.add_child(UI.section("Boki you bring"))
-		left.add_child(_kin_pick_row("Partner", ak, "active"))
+		CarryPick.add_cards(left, _open_expedition)
 		left.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
-		if Match.TWO_KIN and Save.d["roster"].size() > 1:
-			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
 		if float(ak["trust"]) < 30.0:
 			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
 	if Save.d.get("treat", "") != "":
@@ -3544,61 +3542,6 @@ func _open_kit_card() -> void:
 ## The old separate loadout page now lives inside the expedition panel.
 func _open_loadout() -> void:
 	_open_expedition()
-
-## One row of the expedition loadout: which kin, with ‹ › to change it.
-func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
-	var card := UI.card(UI.CARD, 10, 10)
-	var row := UI.hbox(10); card.add_child(row)
-	var roster: Array = Save.d["roster"]
-	var other := str(Save.d.get("active2" if key == "active" else "active", ""))
-	var choices: Array = roster.filter(func(r): return r["uid"] != other)
-	var cur := str(Save.d.get(key, ""))
-	var cycle := func(dir: int) -> void:
-		var ids: Array = choices.map(func(r): return r["uid"])
-		if key == "active2": ids.append("none")
-		var i := ids.find(cur)
-		Save.d[key] = ids[(i + dir + ids.size()) % ids.size()] if ids.size() > 0 else cur
-		Save.save_game()
-		_open_expedition()
-	var prev_b := UI.icon_button("back", func(): cycle.call(-1), "Previous Boki", 12.0)
-	prev_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(prev_b)
-	if not rec.is_empty():
-		var ksp: Dictionary = Data.KIN[rec["species"]]
-		var kcol: Color = Color(ksp["color"]).lerp(Color.WHITE, 0.25)
-		var dot := UI.badge("paw", kcol, 36.0)
-		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(dot)
-	var info := UI.vbox(1); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if rec.is_empty():
-		info.add_child(UI.label("%s: none" % label_t, 16, UI.MUTED, UI.big))
-		info.add_child(UI.label("Bring only your partner. Nothing else at risk.", 12, UI.MUTED))
-	else:
-		var sp: Dictionary = Data.KIN[rec["species"]]
-		var nl := UI.label(Data.kin_title(String(rec["name"]), String(sp["name"])), 17, UI.INK, UI.big)
-		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		nl.clip_text = true
-		info.add_child(nl)
-		var sl := UI.label("%s  ·  level %d  ·  trust %d%s" % [label_t, int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Boki Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
-		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		info.add_child(sl)
-		var names: Array = []
-		for aid in sp.get("abilities", []):
-			var ad := KinLib.ability(String(aid))
-			if ad: names.append(ad.display_name)
-		var ud := KinLib.merge(String(sp.get("ultimate", "")))
-		var keys := "auto" if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
-		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
-		al.autowrap_mode = TextServer.AUTOWRAP_OFF
-		al.clip_text = true
-		al.tooltip_text = al.text
-		al.mouse_filter = Control.MOUSE_FILTER_PASS
-		info.add_child(al)
-	row.add_child(info)
-	var next_b := UI.icon_button("next", func(): cycle.call(1), "Next Boki", 12.0)
-	next_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(next_b)
-	return card
 
 ## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
 func _start_training() -> void:

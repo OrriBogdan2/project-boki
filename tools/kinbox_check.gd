@@ -313,5 +313,61 @@ func run(m: Node) -> void:
 	for _f in 2: await main.get_tree().process_frame
 	ok(KinBox.boxed().size() == 5 and H.kins.size() == KinBox.farm().size(), "quick move a farm kin into the box: it leaves the island (%d out)" % H.kins.size())
 	H.queue_free()
+	# ---------------------------------------------------------------- 9. the carry pick (CarryPick)
+	_carry_pick()
+	var roster: Array = (Save.d["roster"] as Array).filter(func(r): return not r.has("ransom"))
+	Save.d["roster"] = roster
+	Save.d["active"] = roster[0]["uid"]
+	Save.d["active2"] = roster[1]["uid"]
+	var P = load("res://scripts/home/home.gd").new()
+	main.add_child(P)
+	for _f in 4: await main.get_tree().process_frame
+	P._open_expedition()
+	for _f in 2: await main.get_tree().process_frame
+	var texts: Array = P.panel_host.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	var heads := func(w: String) -> bool: return texts.any(func(t): return String(t).begins_with(w))
+	ok(heads.call("Carry: "), "the portal's Boki cards show a carry passive line")
+	ok(heads.call("Lead") and heads.call("Second"), "the portal has a lead card and a second card")
+	P.queue_free()
 	print("KINBOX DONE failures: %d" % bad)
 	main.get_tree().quit()
+
+## The pick's rules without any screen: lead and second, one Boki goes with one, equal passives count once, old saves.
+func _carry_pick() -> void:
+	var a := _kin("lilybara", "Lily")
+	var b := _kin("moonloris", "Moon")
+	var c := _kin("cairnback", "Cairn")
+	var e := _kin("burrlet", "Burr")
+	Save.d["roster"] = [a]
+	Save.d["active"] = a["uid"]
+	Save.d["active2"] = ""
+	ok(not CarryPick.has_second_slot() and Save.second_kin().is_empty(), "one Boki: it goes alone, no second slot")
+	Save.d["roster"] = [a, b, c, e]
+	ok(Save.second_kin().is_empty(), "with more Boki the second stays empty until picked (no auto-pick)")
+	var line := CarryPick.passive_line(a)
+	var line_c := CarryPick.passive_line(c)
+	ok(line.begins_with("Carry: ") and line_c.contains("knockback"), "the carry passive is one line (%s)" % line)
+	ok(CarryPick.passive_line(e) == "Carry: no passive", "a Boki with no carry passive says so")
+	ok(CarryPick.shared(a, b) != "" and CarryPick.shared(a, c) == "" and CarryPick.shared(a, e) == "",
+			"the same passive is shared (%s); a different or no passive is not" % CarryPick.shared(a, b))
+	CarryPick.set_second(b["uid"])
+	var note := CarryPick._same_note(a, b)
+	ok(Save.second_kin() == b and note.ends_with("counts once"), "second picked: %s" % note)
+	CarryPick.set_second(a["uid"])
+	ok(Save.second_kin() == b, "the lead can't also be the second")
+	CarryPick.set_lead(b["uid"])
+	ok(Save.active_kin() == b and Save.second_kin() == a, "picking the second as lead swaps the two")
+	var seen := {}
+	for _i in 6:
+		var u := CarryPick.step("active2", 1)
+		Save.d["active2"] = u
+		seen[u] = true
+	var lead_uid := str(Save.d["active"])
+	ok(seen.has("") and not seen.has(lead_uid) and seen.size() == 4, "the second cycles the other Boki and none")
+	var gone := _kin("lilybara", "Gone")
+	gone["ransom"] = {}
+	Save.d["roster"] = [a, b, gone]
+	ok(CarryPick.choices() == [a, b], "a Boki that can't go is not offered")
+	var old := {"v": 13, "roster": [a, b], "active": a["uid"], "active2": b["uid"]}
+	ok(Save.migrate(old) and int(old["v"]) == Save.VERSION and old["active"] == a["uid"] and old["active2"] == "",
+			"a v13 save keeps its partner as lead and has no second")
