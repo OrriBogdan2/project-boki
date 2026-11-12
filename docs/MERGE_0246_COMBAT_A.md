@@ -38,4 +38,26 @@ Branch ext/w0246-combat-a from ext/release-integ-0245 92df78ce4. Merged 70 (2 pa
 61 checks that the merged branches add or touch, run one at a time (headless, LP_NUM_THREADS=2); every red was rerun on release-integ-0245. health.py --strict OK. suite-fast.sh is not on rpc7.
 
 - Red on 0.24.5 too (not counted): --bot-kit-use, --drop-feel-check, --music-leave-check, --ttk-check, --warden-clips-check, --warden-model-check.
-- NEW-RED (9, not fixed): --bot-downed-check and --bot-summon-check (bot Summon/downed play without the held soul-link line), --camp-check (a mob home again does not notice a Hunter at 4 m), --mob-cc-check (Burrseed root on a Hunter control), --mob-tell-check (spitter tell vs hit shape, 1 of 6 probes), --swept-hit-check (Motley dash misses at 12 m), --kit-sweep-check (engine polygon error from ui_torn during Neve LMB), --mage-combo-check (Storm Rod 24 damage, was 39), --ostra-combo-check (rank-3 seed burn 15 over 1.2 s, wants ~10).
+- NEW-RED (9; the two bot reds fixed on ext/combat-w0246-bot-reds, see below): --bot-downed-check and --bot-summon-check (check setup and a held bot rule, not the soul-link line), --camp-check (a mob home again does not notice a Hunter at 4 m), --mob-cc-check (Burrseed root on a Hunter control), --mob-tell-check (spitter tell vs hit shape, 1 of 6 probes), --swept-hit-check (Motley dash misses at 12 m), --kit-sweep-check (engine polygon error from ui_torn during Neve LMB), --mage-combo-check (Storm Rod 24 damage, was 39), --ostra-combo-check (rank-3 seed burn 15 over 1.2 s, wants ~10).
+
+### Bot reds settled (ext/combat-w0246-bot-reds)
+
+Neither red was the held soul-link line; both checks run on the wave's own Boki model (the summon rows on the
+wisp prototype setting the wave has, `boki_wisps`).
+
+- --bot-summon-check (3 duel rows): at seed 79 the 0.24.6 map puts 8 m along +x from the bot on a ledge 1.6 m up
+  with no line of sight, so the bot never took the rival as a target. BotKin.summon was right. Fix in the check:
+  the rival stands along the first of 8 directions with a flat, clear 8 m walk (KinPath.clear_line); rows unchanged.
+  In sight the bot summons at 0.55 s, once, and the 78 s cooldown runs; the low-health, fleeing, tutorial and downed-teammate
+  rows stay green.
+- --bot-downed-check, enemy Well gone: with the squadmate in the Well the bot roamed 45 m off, came back after the
+  20 s fresh-landing grace and fought the idle rival instead of reviving. Fix in the bot: the rim wait
+  (BotRescue.wait_spot, goal `rv_wait`) from ext/combat-bots-downed's held tip, ported alone (an enemy-area rule,
+  no KinSteal); a new row checks the bot waits within 12 m.
+- --bot-downed-check, Meeko carry: set_arch("tender") fell back to the bot's own class archetype at seed 77 (the
+  check reclasses to Meeko's weight now), and then the carried wisp, still a body in Match._separate, shoved her
+  back onto the rival (4.9 m -> 1.3 m). Fix in the game: carried hunters are left out of separation, as on the
+  held tip.
+- The wisp-steal rows stay a SKIP line until KinSteal lands with the soul-link line.
+- Runs, each check alone on rpc1: --bot-summon-check 0 fail x3, --bot-downed-check PASS x3 (0 fail, steal SKIP). --support-check and --tender-combo-check (carry neighbours) rc 0.
+  gen_wiki --check was stale on the merge (Kael/Claire dash rows, Rampage x0.85/x1.15 in Rules): regenerated.
