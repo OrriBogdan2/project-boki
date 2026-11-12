@@ -38,6 +38,8 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
   not sit under the title.
 - Motley's E part waits for the Brimseed to grow full (6.5 s, her `e.grow`) before the recast, so it runs
   about 5 s longer than the other Hunters' E parts and her later parts start that much later.
+- Every MP4 here is re-rendered on main fb360f614 (no drill card, travel parts on the island); see the reel-tool
+  fixes note below. The juggernaut and tender line above describes an earlier render.
 - Re-render one: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-reel --shots-dir=shots
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
@@ -155,8 +157,9 @@ Still differs:
 - Lantern Trade: 12 m lob; faster (1.25 s) only while Swollen.
 - Footstep silence while floating is `[?]`.
 
-Seen in the reel: the reel predates `ext/parity-reel-tool`, so the Brimseed is popped at 1.8 s and its full growth
-(the footage's room-sized violet globe) is not shown; the tool now holds it to full size (not re-rendered); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
+Seen in the reel: re-rendered on main with `ext/parity-reel-tool`, so the Brimseed now grows to full size before the
+recast and shows as a big violet-and-cyan globe (the footage's room-sized violet one, fixed on main; the reel's R part
+starts at frame 672); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
 violet swirl [F].
 
 # The four slice Wardens (main 88b06b9e7, 2026-11-11)
@@ -176,10 +179,13 @@ the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on
   red laces for Hail Wall. Based on ext/release-integ-0245, not main.
 - `ext/albert-hold-cinder-orb` 4cf2f22b4: Cinder's cyan palm orb becomes a gold/white tell in the 0.2 s spool only.
 
-**Reel-tool fixes** (`ext/parity-reel-tool`): these four reels show the kit drill card ("1/5, Skip drill") under
-the title and both dash parts ending in the void, because the 12 m dummy stood past the island rim. The tool now
-skips the drill and keeps the travel parts on the island (see the notes at the top); only `juggernaut.mp4` is
-re-rendered with it so far (xvfb opengl3 on rpc3; GPU job 20261112-030437-07461 queued ~146 deep at the time).
+**Reel-tool fixes** (`ext/parity-reel-tool`, rows now fixed on main): the old reels showed the kit drill card
+("1/5, Skip drill") under the title and both dash parts ending in the void, because the 12 m dummy stood past the
+island rim. The tool now skips the drill and keeps the travel parts on the island. All twelve MP4s are re-rendered
+with it (`ext/parity-reels-rerender`, from main fb360f614; GPU jobs 20261112-124742-*, ashwick 20261112-145556-25476).
+In every run log the three travel parts end on the island (`on ground true`) except Meeko's air dash, a kit property:
+it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Motley's Brimseed full growth is now
+shown. The rest of the "Seen in the reel" lines match the new renders.
 
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
   `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
