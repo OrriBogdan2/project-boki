@@ -6,9 +6,11 @@ extends RefCounted
 ## Never touches the real save.
 
 const STEP := 0.1
+const WALK_R := 7.5       # m of open ground the walks need around their start (a 4.85 m/s circle is 6.5 m across)
 var bad := 0
 var main: Node
 var home
+var turn := 0.0       # heading of the walk, in rad
 
 func ok(cond: bool, what: String) -> void:
 	print("CARRYBOKI %s %s" % ["ok  " if cond else "FAIL", what])
@@ -51,11 +53,41 @@ func _put(rec: Dictionary) -> Dictionary:
 	(k["node"] as Node3D).position = k["pos"]
 	return k
 
-func _walk(k: Dictionary, secs: float) -> float:
+## Walks a small circle at `speed` m/s (before the carry's 90%) and returns the furthest `k` falls behind.
+## The spot nearest `near` with the most open ground (no building, fence, pond or tree) within WALK_R, so
+## the walks below rarely have something the led Boki must go round (the garden's scatter differs per run).
+func _open_ground(near: Vector3) -> Vector3:
+	var home_island: int = home.world.island_of(near.x, near.z)
+	var best := near
+	var best_score := -1
+	for x in range(20, 80, 3):
+		for z in range(10, 60, 3):
+			var c := Vector2(x, z)
+			if home.world.island_of(x, z) != home_island:
+				continue
+			var score := _open_samples(c) * 100 - int(c.distance_to(Vector2(near.x, near.z)))
+			if score > best_score:
+				best = Vector3(x, 0.0, z)
+				best_score = score
+	return best
+
+## How many spots 0.75 m apart across the disc of radius WALK_R around `c` are free.
+func _open_samples(c: Vector2) -> int:
+	var n := 0
+	for r in range(1, int(WALK_R / 0.75) + 1):
+		var around := int(TAU * r)      # a spot about every 0.75 m of the ring
+		for a in around:
+			var p := c + Vector2.from_angle(a * TAU / around) * (r * 0.75)
+			if home.hb.clear_line(p, p + Vector2(0.01, 0.0)) and home.world.occupy(p.x, p.y, 0.3, 0.0, true) == 0.0:
+				n += 1
+	return n
+
+func _walk(k: Dictionary, secs: float, speed: float = -1.0) -> float:
 	var far := 0.0
+	var v: float = (home.SPEED if speed < 0.0 else speed) * home.carry.speed_mul()
 	for i in int(secs / STEP):
-		var turn := float(i) * STEP * 2.0      # a small circle, so the island never runs out
-		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		turn += STEP * 1.5      # a small circle, so the island never runs out (and no jump between walks)
+		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * v * STEP
 		home.player.position = home.ppos
 		home.carry.tick(STEP, {}, true)
 		home._move_kin(STEP)
@@ -81,7 +113,7 @@ func run(m: Node) -> void:
 	home = await main._hb_home()
 	home.set_process(false)      # the check drives the frames itself
 	_sizes(mid, big)
-	home.ppos = Vector3(38.0, 0.0, 30.0)
+	home.ppos = _open_ground(Vector3(38.0, 0.0, 30.0))
 	home.pface = 0.0
 	home.player.position = home.ppos
 	await _lift_walk_drop(_entry(brave))
@@ -192,10 +224,23 @@ func _trust(brave: Dictionary, wary: Dictionary) -> void:
 func _lead(rec: Dictionary) -> void:
 	var c: HomeCarry = home.carry
 	var k := _put(rec)
+	for o in home.kins:      # the others sit this one out: no tag or dodging in the led one's way
+		if o != k:
+			o["busy"] = true
+			o["pos"] = Vector3(-500.0, 0.0, -500.0)
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
-	var far := _walk(k, 4.0)
-	ok(far < 3.0, "it follows beside you as you walk (%.2f m behind at most)" % far)
+	k["pers"] = {"speed": 0.6}      # a plodding kind: a led one still keeps pace
+	var fastest := ""      # the quickest hero's id: its run is the hardest to keep up with
+	for id in HunterMove.rules():
+		var row = HunterMove.rules()[id]
+		if row is Dictionary and row.has("speed") and float(row["speed"]) > float(HunterMove.of(fastest)["speed"]):
+			fastest = id
+	for gait in [["walk", "", home.CROUCH_SPEED], ["run", "", 1.0], ["fastest run", fastest, 1.0]]:
+		Save.d["arch"] = gait[1]
+		var v: float = float(HunterMove.of(gait[1])["speed"]) * float(gait[2])
+		var far := _walk(k, 6.0, v)
+		ok(far < 3.0, "it stays at your side at your %s, %.2f m/s (%.2f m behind at most)" % [gait[0], v, far])
 	c.press_hold(k)
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
 

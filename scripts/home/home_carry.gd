@@ -21,7 +21,8 @@ const GRUMPY := 0.62          # temper above this squirms free
 const CARRY_SCALE := 0.7      # a carried Boki is shown this share of its size, so it fits the arms
 const DROP_DIST := 0.9        # m in front of you where it is set down
 const LEAD_SLOT := 0.9        # m to your right where a led Boki walks
-const LEAD_MAX := 10.0        # m away at which a led Boki is let go
+const LEAD_CATCHUP := 1.2     # x your top speed: a led Boki closes on its slot even at full run
+const LEAD_MAX := 10.0       # m away at which a led Boki is let go
 
 var h                         # the Home screen
 var k := {}                   # the Boki in your arms, on your back or on its lead
@@ -57,6 +58,11 @@ func carrying() -> bool:
 
 func speed_mul() -> float:
 	return SPEED_K if not k.is_empty() else 1.0
+
+## Ground speed (m/s) of a led Boki: a little over your own top speed, whatever its kind or mood.
+func lead_pace() -> float:
+	var top := float(HunterMove.of(String(Save.d.get("arch", "")))["speed"])
+	return top * SPEED_K * LEAD_CATCHUP
 
 func anim_state() -> Dictionary:
 	return {"act": mode} if carrying() else {}
