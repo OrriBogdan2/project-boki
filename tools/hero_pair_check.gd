@@ -5,6 +5,8 @@ extends RefCounted
 ##         Spine clipped there, no walkway), and the Net placement events
 ##         (what one game sends, a second game rebuilds identically).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -14,6 +16,11 @@ func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
 	print("PAIRCHECK %-44s %s  %s" % [name, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 ## A flat strip, the player as `arch`, a dummy hunter `dist` ahead. abyss: x offset where the abyss starts (0 = none).
 func setup(arch: String, dist: float, abyss := 0, rank := 1) -> Array:
@@ -38,6 +45,7 @@ func setup(arch: String, dist: float, abyss := 0, rank := 1) -> Array:
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
+	Sfx.listener = home          # (the camera focus the looks thin out from; no camera runs here)
 	P.set_arch(arch)
 	P.unlock_all()
 	P.lvl = 6

@@ -307,7 +307,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | thief | air dash -> ult (X) | Not shown from the air; same as on the ground. | fires mid-dash |
 | thief | air dash -> Q glove | Not in the source; same as her other actives. | fires mid-dash |
 | thief | LMB -> dash | Footage 0187 -> 0193: the empowered hit lands and the next Cartwheel follows at once; a bolt in flight keeps going. | the dash goes, the ability keeps running |
-| thief | RMB -> dash | Not shown in the data or footage. Ours: Shift in the Bola's 0.4s wind-up cartwheels and the Bola still goes at the end of the wind-up. | the dash goes, the ability keeps running |
+| thief | RMB -> dash | Not shown in the data or footage. Ours: the Bola is thrown on the press, so a cartwheel under way doesn't hold it back. | the dash goes, the ability keeps running |
 | thief | E -> dash | Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to. | the dash goes, the ability keeps running |
 | thief | ult (X) -> dash | Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back. | the dash goes, the ability keeps running |
 | thief | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |

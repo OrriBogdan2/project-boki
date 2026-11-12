@@ -2,7 +2,7 @@ class_name ArchKit
 extends RefCounted
 ## One hunter's archetype kit at run time (docs/ARCHETYPES.md): the dash shape, the passive and
 ## its resource, the RMB router (tap / hold / airborne / during E / during R / resource full),
-## E, R (level 6, rank 2 at 9) and the Bonded R (bond full: the kin merges 0.2s after the ult's
+## E, R (level 6, rank 2 at 9, rank 3 at 10) and the Bonded R (bond full: the kin merges 0.2s after the ult's
 ## cast). Each archetype is a subclass (scripts/arch/kits/); this base holds the timers, the input
 ## router, the kin's infusion of the sockets, telegraphs and the shared helpers.
 ##
@@ -15,6 +15,8 @@ var d: Dictionary = {}
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
+var _x_rank := 0               # the R rank _x_ranked was built for (x_def)
+var _x_ranked: Dictionary = {}
 var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
@@ -72,14 +74,21 @@ const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's deliv
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
-func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
+## The hero ultimate on X (HeroUlt) at the hunter's R rank (its x.per_rank steps added; rebuilt on a new rank).
+func x_def() -> Dictionary:
+	var r := h.ability_level("ult")
+	if r != _x_rank:
+		_x_rank = r
+		_x_ranked = HeroUlt.ranked(d.get("x", {}), r)
+	return _x_ranked
+
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense)
-func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
-func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
+## false when the passive has no meter (Hawk Sense; Crushed has no resource at all)
+func has_meter() -> bool: return d.has("resource") and String(res_def().get("kind", "")) != "none"
+func res_col() -> Color: return Color(String(res_def().get("col", d["passive"].get("col", "#ffffff"))))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 
 func rank(slot: String) -> int:
@@ -228,7 +237,6 @@ func tick(dt: float) -> void:
 			r_t = 0.0
 			_r_end()
 	res_wait = maxf(0.0, res_wait - dt)
-	_tick_knocks()
 	_tick(dt)
 	if not curved.is_empty(): _tick_curve(dt)
 	_tells(dt)
@@ -264,14 +272,25 @@ func _r_end() -> void: pass
 
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
+## True while the kit's move makes her invulnerable to pulls, knocks and slows too, not just damage.
+func cc_proof() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## A capped-turn aim lock: `cur` turned toward the raw cursor (not aim_dir(), which returns the lock) by at
+## most `deg_s` degrees per second. A committed charge keeps its line near-planted this way.
+func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
+	var a: Vector3 = h.inp["aim"]
+	var want := Vector2(a.x - h.pos.x, a.z - h.pos.z)
+	if want.length() < 0.05:
+		return cur
+	var step := deg_to_rad(deg_s) * dt
+	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+	return h.downed or h.out or h.dropping or h.riding or CcLockout.blocks(h, "abil") or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -665,7 +684,7 @@ func run_own(st_: StageSpec, c: Dictionary) -> void:
 func aim() -> Vector3:
 	return h.inp.get("aim", h.pos)
 
-func foes_in(at: Vector3, r: float, dy := 2.2) -> Array:
+func foes_in(at: Vector3, r: float, dy := AimMode.REACH_Y) -> Array:
 	var out: Array = []
 	for f in m.foes_of(h.team):
 		if f.hittable() and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < dy:
@@ -756,21 +775,17 @@ func slot_info(slot: String) -> Dictionary:
 	match slot:
 		"sec", "utility":
 			var sd := rmb_def()
-			var lines: Array = []
-			for v in ["tap", "hold", "air", "during_e", "full"]:
-				if (sd.get("variants", {}) as Dictionary).has(v):
-					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["rmb"]) if ch_rmb < 1.0 else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["e"]), "cd_max": float(sd.get("cooldown", 14.0)) * cd_k("kin"), "charges": 1 if float(cd["e"]) <= 0.0 else 0, "max_charges": 1, "verb": "e",
 				"ready": float(cd["e"]) <= 0.0 or (e_t > 0.0 and e_recastable()), "up": e_t, "full": e_payoff_ready()}, true)
 		"r", "ult":
 			var sd := r_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
 		"x":
@@ -779,7 +794,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
@@ -848,34 +863,14 @@ func on_perfect_dodge() -> void: pass
 func dash_payoff_ready() -> bool: return false
 
 # ------------------------------------------------------------------ knocks and assists (kits2)
-var touched := {}              # rival hunter id -> [hunter, time of our last hit on them]
 var knocks_seen := 0           # knocks and assists this kit has seen (tests)
 
-## Every hit this hunter lands (Match.on_damage calls it before on_deal): remembered for 5s, so a
-## knock on them inside that window reaches on_knock (mine = the knocking blow was ours, else an assist).
-func note_hit(t: Ent) -> void:
-	if t is Hunter and t.team != h.team:
-		touched[t.get_instance_id()] = [t, m.time]
+## KnockCredit.settle: a rival went down (mine = our blow was the knock, else we assisted inside its window).
+func credited(t: Hunter, mine: bool) -> void:
+	knocks_seen += 1
+	on_knock(t, mine)
 
-func _tick_knocks() -> void:
-	if touched.is_empty():
-		return
-	for key in touched.keys():
-		var e: Array = touched[key]
-		var t = e[0]
-		if not is_instance_valid(t):
-			touched.erase(key)
-			continue
-		if (t as Hunter).downed:
-			touched.erase(key)
-			var by = (t as Hunter).last_hit_by
-			if by is Kin and (by as Kin).owner_h: by = (by as Kin).owner_h
-			knocks_seen += 1
-			on_knock(t, by == h)
-		elif m.time - float(e[1]) > 5.0:
-			touched.erase(key)
-
-## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
+## A rival went down and we get credit (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
 ## The weapon fires in this hero's dash when its LMB row says "fire" (DashFlow); a kit with its own dash overrides.
 func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
@@ -1065,7 +1060,7 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 ## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
 const CHARGE_VOICE := {
 	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["jug_ting", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["dolm_rock_crunch", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
 }
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)

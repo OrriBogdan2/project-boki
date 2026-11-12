@@ -97,6 +97,12 @@ var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
+var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
+var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
+var loose_t := 0.0                # s its wisp floats loose, free to grab (KinSteal)
+var stolen_summoned := false      # a thief used its one summon this match (KinSteal)
+var back_home := false            # its loose wisp went back to its downed hunter, who keeps it this time (KinSteal)
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -156,7 +162,10 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	brain = KinTactics.new(self)
 	if owner_h:
 		comp = KinCompanion.new(self)
-	set_model(Models.kin(species, rec))
+	wisp = owner_h != null and KinWisp.mode(match_node)
+	home_h = owner_h
+	summon = KinSummon.new(self) if owner_h else null
+	set_model(KinWisp.look(self))
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
@@ -188,7 +197,7 @@ func carry_style() -> String:
 ## On you by order (Return), settled in: its carry passives are on. A Boki out beside you, or carried only
 ## over a glide or a drop, gives nothing (docs/decisions/0002).
 func carried() -> bool:
-	return not dead and state == "shoulder" and settle >= 1.0 and cmd == "return"
+	return not dead and loose_t <= 0.0 and state == "shoulder" and settle >= 1.0 and cmd == "return"
 
 ## Too big to sit on you (body mass over follow.shoulder_max_mass): on the Return order it guards at
 ## your side instead (KinFollow.guard_tick), never under or in you.
@@ -216,6 +225,8 @@ func slot_open(_slot: String) -> bool:
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
+	if wisp:
+		return false          # (a wisp casts nothing: KinWisp)
 	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
 
 ## Resting after the merge ultimate (docs/decisions/0004)?
@@ -265,7 +276,7 @@ func bark(cat: String) -> void:
 
 # ------------------------------------------------------------------ owner commands
 func throw_to(p: Vector3, slot := "") -> void:
-	if dead or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
+	if dead or wisp or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
 		return
 	if state == "active":
 		if slot == "":
@@ -601,6 +612,12 @@ func sim(dt: float) -> void:
 		if shield_t <= 0.0: shield = 0.0
 	if runner:
 		runner.tick(dt)
+	if summon and not remote:
+		summon.tick(dt)
+	if KinWisp.ride(self, dt):
+		if not remote:
+			KinRegen.tick(self, dt)
+		return
 	if remote:
 		if state != "shoulder":
 			net_follow(dt)
@@ -907,14 +924,16 @@ func _hop_on() -> void:
 	fly = {}
 	pos = owner_h.pos + Vector3(0, 1.5, 0)
 
-func go_down(fell := false) -> void:
+func go_down(fell := false, by: Ent = null) -> void:
 	_end_merge("downed")
+	if summon and summon.killed(by):
+		return
 	KinDowned.begin(self, fell)
 	if owner_h:
 		note("fainted", "went down in a fight" if not fell else "fell off the island", -0.5)
 	m.on_kin_down(self)
 
-func _on_zero(_by: Ent, _opts: Dictionary) -> void:
+func _on_zero(by: Ent, _opts: Dictionary) -> void:
 	if state in ["dazed", "downed"]:
 		hp = maxf(hp, 1.0)
 		return
@@ -922,7 +941,7 @@ func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 		hp = 1.0
 		_daze()
 		return
-	go_down()
+	go_down(false, by)
 
 func fall_out() -> void:
 	if is_wild():
@@ -1031,7 +1050,7 @@ func _sim_dazed(dt: float) -> void:
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused", "downed"]:
+	if state in ["dazed", "bench", "fused", "downed"] or wisp:
 		return 0.0
 	var bh := BokiHit.take(self, d, opts)
 	d = float(bh[0])
@@ -1055,8 +1074,9 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
+	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
-	if not model:
+	if not model or KinWisp.render(self):
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")

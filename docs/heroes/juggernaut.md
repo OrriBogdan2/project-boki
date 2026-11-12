@@ -49,7 +49,8 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal | Duration is ours |
+| Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s [?: no source gives the duration; 0.7 Rage a point and the 3s then 9 a second cool-off are also ours]: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal. The +15% / +12% / +20% and the 20% heal are the wiki's (Empowered); asserted in `--juggernaut-combo-check` | Duration [?] |
+| Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal; no numbers in the data or the footage | Every Rage number is ours [?]: Enraged 6s, +15% damage, +12% dash recharge, +20% cooldown speed, the Searing Wave 3x fill, the 3s cool-off, the 20% heal. No sourced value was found (data: "Empowered"; the dodge-builds-Empowered upgrade is not built). Kept, asserted at 6s in `--juggernaut-combo-check` |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
 | RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you walk at 80% and can jump while charging (footage: the Heavy Attack hold is slower than his runs; docs/MOVEMENT_FEEL.md); release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
@@ -59,6 +60,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
+| Allies | all | the Warchain flies past a teammate and hooks the foe or wall behind; no slot hurts, stuns, roots or slows a teammate | the chain attaches to enemies or walls; spin, slam and strike hit enemies [data] | none; asserted (`jug chain: Throwing passes an ally...`, `juggernaut ally: ...`) |
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
@@ -93,7 +95,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Warchain hooks (no blight ...)" |
 | RMB hold auto-fire, perfect release | HIGH | (a) | ext/parity e6429ccb: held indefinitely, a perfect window at full then once a second (+20%); "jug parity rmb: ..." |
 | RMB hold pose | HIGH | (a) | e6429ccb / 097cff7c: the sword over his head; owner 113.3 levels it forward |
-| Slam resets X on any knock | MED | (b) | any Finishing Slam hit then a knock within 2 s readies the Riposte; the sweet spot now hits 40% harder (the data's "edge hits do more"). "juggernaut Smash: a knock after any Slam hit ..." |
+| Slam resets X on any knock | MED | (b) | any Finishing Slam hit then a knock within 2 s readies the Riposte (the knocker's, never an assist's: KnockCredit); the sweet spot now hits 40% harder (the data's "edge hits do more"). "juggernaut Smash: a knock after any Slam hit ..." |
 | RMB tap numbers | - | (c) | fine per the audit |
 | Meteor self-shake | MED | (c) | item 50 lands on ext/no-shake; nothing added here |
 | RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
@@ -200,6 +202,9 @@ is held for 0.12 s before it ends and goes off when it does; earlier presses are
 | Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, stun 0.25 to 0.6 s) | ours |
 | Hooked, Slam wind-up, Lunge, Meteor Drop hang or dive | E | the pull is kept and goes the moment the Smash lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
 | Pulling | press | Cinder Spin at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
+| Hooked | hold, release | Chain Lunge along the chain to its anchor (x1.25, a short stun on the foe); the chain is spent | ours |
+| Hooked, Lunge charging | E | Pulling, then a Haul Slam on arrival (2.8 m, stun 0.25 to 0.6 s) | ours |
+| Pulling | press | Cinder Spin at once (2.6 m, blights 5 s (wiki: Scorching Spin Anti-Heal 5 s; was 4)); the pull goes on | [D] "DURING Feysteel Chain pull" |
 | Arriving (0.25 s) | press | Cinder Spin | [F] 0333-0336 (RMB on arrival) |
 | Arrived, window over | tap / hold | Finishing Slam / Lunge from where you stand, with the carried speed | |
 | Arrived beside a foe | tap | the Slam hits as a body hit (you're 1.2 m off, inside the 2.4 to 4.2 m sweet spot); a wall pull or a steered pull that leaves them 2.4 to 4.2 m ahead gets the sweet spot | no special rule (source: edge hits) |
@@ -250,7 +255,8 @@ ultimate (now the X cooldown).
 1. **Quick Attack direction:** the slashes follow the aim (cursor), not the movement direction.
 2. **0154-0158 was the tap** (Finishing Slam), not the hold on an executable target.
 3. **Air Slam reach:** 5m from under you, clamped; height doesn't add damage.
-4. **Empowered** is our Enraged (6s, the numbers above); the hold-blast range is 6 to 10m.
+4. **Empowered** is our Enraged (6s [?], no source; the numbers above); the hold-blast range is 6 to 10m.
+4. **Empowered** is our Enraged (6s [?], unsourced; the numbers above); the hold-blast range is 6 to 10m.
 5. **Lunge length:** grows 4.5 to 7.5m with the charge (owner: release flings you far), against the footage's fixed 5m.
 6. **Jumping while charging** keeps the charge, and the release lunges from the air along your aim.
 8. **Retaliation, hit during the guard:** the strike still comes at the end of the 0.65s (no early strike); each
@@ -260,6 +266,15 @@ ultimate (now the X cooldown).
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
+
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). The hold-blast (LMB) and the Lunge and Meteor Drop (dashes, no projectile) are not in this table.
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| E Warchain, flying out | 32 m/s (`e.speed`) | 13 m (`e.range`) | 0.41 s | none | no, to its range or the first foe or wall | [F] about 7 body heights (12.6 m) in 0.4 s (31.5 m/s) | match |
+| E Warchain, the pull | 22 m/s (`e.reel_speed`) | the tether | 0.41 s for 9 m | none | to the anchor | [F] about 5 body heights (9 m) in 0.4 s (22.5 m/s) | match |
 
 ## Small mechanics
 
@@ -423,3 +438,40 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB tap Smash (Execution Slam) | Data: 130 in front, edge hits more. Footage: a short strike lane ahead. | A 4 m lane strike that hits every foe in it (hunters, Boki, monsters), passes allies. An area in front, not a shot. Matches. |
+| RMB hold Lunge (Fiery Lunge) | Data: charge and release a dash attack. Footage briefs/hero-ref/juggernaut.md:64: 'stops at the target' with a white burst. | Flings him into the first foe and stops there; nothing behind it is hit; a miss doubles the cooldown. Matches (`the charged Lunge into the first foe`). |
+| E Warchain (Feysteel Chain) | Data: a tether that attaches to enemies or walls. Footage juggernaut.md:96: a skillshot, about 7 bh. | The hook stops on the first foe (hunter, Boki or monster) or a wall and holds there; it passes allies. Matches. |
+| Shift Rampage (Flame Step) | Data: a dash attack in the facing direction. Footage (0387, 0401): one hit on the dummy; whether it stops or passes is not shown. | Not determinable: it shoves the foes it meets and the tip hits at its end. Kept. |
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Searing Wave (hold to charge) | stun | [?] Brall data and footage silent | the charge is dropped, no wave (unless a dash row keeps it) | [?] |
+| LMB Searing Wave | knock, root | [?] | ignored | [?] |
+| RMB Finishing Slam (0.6 s wind-up) | stun (and Hex, down) | [?] | cancelled, no strike, the cooldown stays spent (`_tick_slam`) | [?] |
+| RMB Finishing Slam | knock, root | [?] | ignored, the strike lands | [?] |
+| RMB Lunge (hold) | stun | [?] | the hold is let go: the Lunge goes (shared rule) | [?] |
+| RMB Lunge (hold) | knock, root | [?] | ignored, the charge goes on | [?] |
+| RMB air, Meteor Drop (hang, then dive) | stun (and down, merge) | [?] | in the air it stops, no slam, its cooldown stays spent (`JuggernautDrop.tick`) | [?] |
+| RMB air, Meteor Drop | knock, root | [?] | ignored | [?] |
+| Shift Rampage (crouch before the drive) | stun (and down) | [?] | no drive, the charge stays spent (`_tick_crouch`) | [?] |
+| E Warchain throw / hooked tether | stun | [W] a stun breaks it; the cooldown starts when it breaks | breaks (CHAIN BROKE), the cooldown starts (`JuggernautChain.snap`) | match |
+| E Warchain throw | root (and Grounded) | [W] no throw while rooted or Grounded | the press is refused | match |
+| E Warchain hooked tether | knock, root | [?] | the tether holds | [?] |
+| E recast, the pull | stun, root, knock (and down) | [?] | the pull stops where he is (`_tick_pull`, `pull`) | [?] |
+| X Gilded Riposte, the guard | stun, knock, root | [D] Volcanic Rebuke: Invulnerable | no damage and no crowd control | match |
+| X Gilded Riposte, the cleave | stun, knock, root | [?] | ignored, only going down ends it | [?] |

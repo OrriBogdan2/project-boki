@@ -3,11 +3,11 @@ extends RefCounted
 ## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
-## launches straight up and hangs there invulnerable while a pink range ring and its dark interior show round
-## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
-## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
-## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink lightning
-## crackles at her feet for a moment after.
+## launches straight up and hangs there, shots passing through her, while a pink range ring with a glowing centre
+## shows round the take-off spot and the camera pulls back. Press again (X or the attack key) to come down
+## as a bolt at the cursor, clamped inside the ring; with no second press she comes down there by herself when
+## the hover runs out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink
+## lightning crackles at her feet for a moment after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -103,7 +103,9 @@ func tick(dt: float) -> void:
 	var xd := data()
 	match phase():
 		CROUCH:
-			if _moving():
+			if kit.h.downed:
+				drop()                      # knocked in the crouch: she never takes off (mage.md "Interrupts")
+			elif _moving():
 				leap["t"] = 0.0             # a Shift in the crouch: the crouch waits for it, then starts over
 				leap["moved"] = true
 			elif bool(leap.get("moved", false)):
@@ -147,6 +149,10 @@ func _wants_down(t: float, xd: Dictionary) -> bool:
 		return true
 	if hung and fire and bool(leap["fire_free"]):
 		return true
+	if hung and kit.h.ctrl == "bot":
+		# a bot strikes once the crown is on a foe
+		var crown: Vector3 = leap["land"]
+		return kit.m.foes_of(kit.h.team).any(func(f): return f.hittable() and f.flat_dist(crown) < float(xd["radius"]))
 	return t >= float(xd["hover"])
 
 ## The crouch: no steering, but a jump still goes (she takes off from up there) and any speed she had runs out
@@ -168,14 +174,13 @@ func _hold_air(k: float) -> void:
 	h.vel = Vector3.ZERO
 	var y := lerpf(float(leap["base"]), float(leap["top"]), k) + 0.12 * sin(kit.m.time * 3.0) * k
 	h.pos = Vector3(from.x, y, from.z)
-	_untouchable(0.1)
+	_shots_pass(0.1)
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL * k)
 
-func _untouchable(secs: float) -> void:
-	var h := kit.h
-	h.inv_t = maxf(h.inv_t, secs)
-	h.phase_t = maxf(h.phase_t, secs)
+## Shots pass through her, nothing more: the data's Thunderstorm is "immune to projectiles".
+func _shots_pass(secs: float) -> void:
+	kit.h.phase_t = maxf(kit.h.phase_t, secs)
 
 ## She launches from where she is: a jump or a dash in the crouch moves the ring there (unless that is over the
 ## abyss), and the climb starts at her height, so nothing snaps.
@@ -196,10 +201,10 @@ func _take_off() -> void:
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
-	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
+	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK, true, true)
 	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
-	_untouchable(0.2)
+	_shots_pass(0.2)
 
 # ------------------------------------------------------------------ aiming the landing
 ## The ground under the cursor: its ray walked down to the first ground it meets. Hanging 5 m up, inp["aim"] (the
@@ -242,8 +247,8 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The range ring with its gold rim (everyone sees where she can come down), the dark inside, and the gold
-## crown at the cursor (her own).
+## The range ring (everyone sees where she can come down) and the crown at the cursor (her own), as big as
+## the strike's hit area.
 func _aim_tick() -> void:
 	var h := kit.h
 	var from: Vector3 = leap["from"]
@@ -251,7 +256,7 @@ func _aim_tick() -> void:
 	leap["land"] = land_point()
 	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
 	AimKit.circle(h, "x_ring", ring)
-	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
+	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
 	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
@@ -292,7 +297,7 @@ func _fall_tick(u: float) -> void:
 	h.vel = Vector3.ZERO
 	h.inp["move"] = Vector2.ZERO
 	h.pos = a.lerp(b, u * u)
-	_untouchable(0.1)
+	_shots_pass(0.1)
 	if h.model:
 		h.model.visible = u < 0.3
 	if h.is_local() and kit.m.cam:

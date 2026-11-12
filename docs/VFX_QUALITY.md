@@ -57,7 +57,8 @@ top of the signature colour. Any new hard-coded colour in a kit needs a comment 
 
 Still open (shared, not done here):
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
-  breaks gl_compatibility, so it needs a mobile fallback.
+  breaks gl_compatibility. HeroVfx motes now fade by height over the ground instead (docs/HERO_VFX.md "Ground"), which
+  works on every renderer: the same fix fits `fx_dot`.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
@@ -93,6 +94,8 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
 `vfxq-after-archer-2`, job 20261108-213129-03140); the pair is on branch `ext/vfx-archer-strips` (not for merge). Her
 row keeps its place until the integrator re-sorts the table.
+| 11 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar: slash arcs, burning lanes, debris. Polish: cleave sound transient, ult shockwave scale |
+| 12 | Cinder | ashwick | 4 | 4 | 5 | 5 | 4 | 4 | 4 | 30 | the bar: layered flame with a hot core. Done (ext/vfx-cinder-polish): embers land and fade into the ground; a palm heat glow builds over 0.8 s of roaring and cools after. Left: Cinder Shot's pink-red body is off her orange signature (C) |
 
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and

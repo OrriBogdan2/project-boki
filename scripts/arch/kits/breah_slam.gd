@@ -134,7 +134,7 @@ func fire(c: Dictionary) -> void:
 		h.gliding = false
 		h.fly_t = 0.0
 		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
-		k.m.sfx("glide", h.pos, -6.0, 0.7)
+		k.m.sfx("dolm_glide_fold", h.pos, -6.0)
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
 	var air: bool = c.get("air", false) or not h.grounded
 	if not air and not c.get("hold", false):
@@ -201,7 +201,7 @@ func slam(c: float, at_feet: bool) -> void:
 	m.sfx("br_slam", at, 0.0, 1.0)
 	k.net_ring(at, r, Color("3a7cff"))
 	var gained := false
-	for f in k.foes_in(at, r, 3.2):
+	for f in k.foes_in(at, r):
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
@@ -219,7 +219,6 @@ func slam(c: float, at_feet: bool) -> void:
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("9ad0ff"), true)
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
-		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
 			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
 		gained = true

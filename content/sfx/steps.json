@@ -1,0 +1,18 @@
+{
+ "group": "steps",
+ "name": "Footsteps on sand, water and metal",
+ "script": "tools/gen_sfx_steps.py",
+ "sounds": {
+  "step_sand_light": "step",
+  "step_sand_medium": "step",
+  "step_sand_heavy": "step",
+  "step_water_light": "step",
+  "step_water_medium": "step",
+  "step_water_heavy": "step",
+  "step_metal_light": "step",
+  "step_metal_medium": "step",
+  "step_metal_heavy": "step"
+ },
+ "signature": [],
+ "replaces": []
+}

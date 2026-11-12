@@ -7,6 +7,7 @@ palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every
 layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
 scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
 The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs/parity_reel/`) are `tools/parity_reel.gd`.
+scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays. `--reel-parity` plays one fixed set for any Hunter with the key on screen (`tools/vfx_reel/parity.gd`; its clips are in docs/parity_reel).
 
 ## From a kit
 - `vfx("move", at, dir, {...})` (ArchKit): a moment. Sounds and layers come from the recipe; online it goes to other
@@ -28,7 +29,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `yaw`, `flip` |
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
-| `flare` | a ragged burst facing the camera | `size`, `grow` |
+| `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
@@ -78,7 +79,19 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).
+- **Ground:** each emitter knows the ground under it (`_seat`, `World.ground_at`). A falling particle lands and skids
+  instead of sinking, and every particle fades out over its last 0.15 m above the ground (a soft particle by height, so
+  it works on gl_compatibility too). The ground is the one under the emitter, so a spark that flies off a terrace edge
+  lands on the upper terrace's height.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+
+## Ultimate ready glow
+`UltGlow` (scripts/match/ult_glow.gd): a Hunter whose ultimate (X) is unlocked and off cooldown carries a quiet rim glow in
+their archetype colour (`Arch.color`), visible to everyone; on the cast it flashes to full and fades in ~0.3 s, on top of the
+existing cast cue. One shader value, `hero_toon.gdshader`'s `ult_glow` (+ `ult_color` set with it), written to the body's
+materials only when it changes. The ready state rides the "st" hunter flags (`UltGlow.READY_BIT`, bit 19; older clients ignore
+it); the flash on other clients is the flag dropping. Not shown while downed, out or merged. `--ult-glow-check`; stills with
+`--ult-glow-shots --shots-dir=<dir>`.

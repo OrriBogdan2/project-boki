@@ -1,0 +1,7 @@
+{
+	"desc": "What each crowd-control status forbids a Hunter (CcLockout, scripts/combat/cc_lockout.gd; table and sources in docs/COMBAT.md). Acts: move (walk and air control), dash (Shift), lmb (weapon), abil (RMB, E, R), travel (an ability that moves the caster), jump, glide, crouch, item (a belt item: drink, repair kit). Slow, knock-up, Static and Chill forbid nothing, so they have no row.",
+	"stun": ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"],
+	"daze": ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"],
+	"root": ["move", "dash", "travel", "jump", "glide"],
+	"gnd": ["dash", "travel", "jump", "glide"]
+}

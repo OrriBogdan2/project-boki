@@ -5,6 +5,8 @@ extends RefCounted
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -28,6 +30,12 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
+	var abyss = load("res://tools/abyss_cast.gd").new()
+	abyss.main = main
+	await abyss.dredge()
+	n += abyss.n
+	fails += abyss.fails
+	await _ally("dredge")
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -44,6 +52,11 @@ func _throw(m: Match, P: Hunter) -> void:
 		ak.step(m, ak.DT)
 		tw += ak.DT
 	ak.step(m, ak.DT)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 ## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
 ## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
@@ -401,8 +414,13 @@ func _all() -> void:
 	)
 	ok(
 		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 20.0 and float(cone.get("deg", 0.0)) <= 30.5,
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
+	)
+	ok(
+		"gun: the fan rests at 20 degrees and blooms to 30 at most (footage 20 rested, 30 firing)",
+		absf(float(P.wpn["fan_deg"]) - 20.0) < 0.01
+		and absf(float(P.wpn["fan_deg"]) + float(P.wpn["bloom_max_deg"]) - 30.0) < 0.01
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
@@ -470,9 +488,14 @@ func _all() -> void:
 		"moved %.1f" % P.flat_dist(pos0)
 	)
 	var tw := 0.0
+	var reel_v := 0.0
 	while K.arrivals < 1 and tw < 3.0:
+		var before := T.pos
 		ak.step(m, 0.05)
 		tw += 0.05
+		reel_v = maxf(reel_v, T.pos.distance_to(before) / 0.05)
+	ok("reel: the foe comes in at about 9 m/s, 5 bh/s (footage 0124-0129)",
+		reel_v > 7.5 and reel_v < 9.6, "%.1f m/s" % reel_v)
 	ok(
 		"abyssal hand: foe arrives at your feet and does not land Grounded",
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
@@ -497,9 +520,9 @@ func _all() -> void:
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage, stun, Grounded",
-		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and KitStatus.grounded(T) and T.stun_t > 0.8,
-		"anchors %d took %.0f stun %.2f" % [K.anchors, ak.dmg(T) - hp0, T.stun_t]
+		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (the source E is slam, stun, dunk)",
+		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and not KitStatus.grounded(T) and T.stun_t > 0.8,
+		"anchors %d took %.0f stun %.2f gnd %s" % [K.anchors, ak.dmg(T) - hp0, T.stun_t, KitStatus.grounded(T)]
 	)
 	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
@@ -853,20 +876,22 @@ func _all() -> void:
 		absf(P.ex_cd - 12.5) < 0.01 and absf(cd_r[1] - 10.5) < 0.01 and absf(cd_r[2] - 8.5) < 0.01 and air_spent < 0.01,
 		"ex_cd %.2f ranks %s charge spent %.2f" % [P.ex_cd, str(cd_r), air_spent]
 	)
-	# --- Salvage: knocks stack, +2.5% health each, a knock heals, losing one when downed
+	# --- Salvage: knocks stack, +2.5% health each, no knock heal (the data has none), losing one when downed
 	reset.call()
 	P.slot_lv["kin"] = 1
+	K.add_stack(-int(K.res))      # (the knock of an earlier step is Salvage too: count from none)
 	var mh0 := P.max_hp
 	P.hp = P.max_hp * 0.5
 	K.on_knock(T, true)
 	ok(
-		"passive: a knock = 1 stack, +2.5% health, a heal",
-		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp > mh0 * 0.5 + mh0 * 0.15,
+		"passive: a knock = 1 stack, +2.5% health, no knock heal",
+		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp <= mh0 * 0.5 + mh0 * 0.03 + 0.5
+		and not K.res_def().has("heal_knock"),
 		"res %.0f maxhp %.1f hp %.1f" % [K.res, P.max_hp, P.hp]
 	)
 	var hp1 := P.hp
 	K.on_knock(T, false)
-	ok("passive: an assist stacks but does not heal", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
+	ok("passive: a second knock stacks again", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
 	for i in 12: K.on_knock(T, false)
 	ok(
 		"passive: capped at 10 stacks (+25%)", K.res == 10.0 and absf(P.max_hp - mh0 * 1.25) < 0.5,

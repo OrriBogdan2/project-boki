@@ -58,7 +58,7 @@ static func _swap(m: Match, P: Hunter, ak: String) -> void:
 	m.fx.ring(P.pos, 1.8, Arch.color(ak), 0.4)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(ak), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
-	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(ak), String(Arch.def(ak).get("card", {}).get("loop", ""))], Arch.color(ak))
+	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(ak), AbilityText.loop(ak)], Arch.color(ak))
 
 ## (Re)builds the picker layer with one titled panel and returns its body to fill.
 static func _show(p: Practice, title: String, width: float, on_close: Callable, close_txt: String, page: String) -> VBoxContainer:

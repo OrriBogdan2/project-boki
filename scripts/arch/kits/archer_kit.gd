@@ -6,7 +6,8 @@ extends ArchKit
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+## Passive: Hawk Sense (hurt rivals are seen through walls and fog). No resource meter: the old Focus and
+## Deadeye were invented.
 
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
@@ -18,6 +19,7 @@ var perfects: int:
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
 var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
+const SENSE_PULSE := 0.3       # seconds between Hawk Sense scans (sense_linger must outlast it)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -50,7 +52,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 func _tick(dt: float) -> void:
 	sense_t -= dt
 	if sense_t <= 0.0:
-		sense_t = 0.3
+		sense_t = SENSE_PULSE
 		_sense_injured()
 	if pin_aim and rmb_down:
 		_heavy_tele()
@@ -143,13 +145,25 @@ func _tag_shots() -> void:
 			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
 
-## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
+## Passive, Hawk Sense: rivals under sense_hp of their health within sense_r are seen by her team
+## through walls, fog and grass (Match.can_see) until sense_linger after they heal or leave range.
 func _sense_injured() -> void:
 	var rd := res_def()
+	var until: float = m.time + float(rd["sense_linger"])
 	for f in m.foes_of(h.team):
-		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
-		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
-			f.reveal_t = maxf(f.reveal_t, 0.4)
+		var hurt_enough: bool = f.hp < f.max_hp * float(rd["sense_hp"])
+		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd["sense_r"]):
+			(f as Hunter).sensed_until[h.team] = until
+
+## A Hawk Sense on team_i still sees target (seen through walls and fog).
+static func sensed_by(m: Match, team_i: int, target: Hunter) -> bool:
+	return float(target.sensed_until.get(team_i, -1.0)) > m.time
+
+## Some rival's Hawk Sense still sees target (its HUD says SPOTTED).
+static func sensed_any(m: Match, target: Hunter) -> bool:
+	for team_i in target.sensed_until:
+		if float(target.sensed_until[team_i]) > m.time: return true
+	return false
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():
@@ -303,14 +317,13 @@ func _pin(a: Vector3, k: float) -> void:
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
-			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
-			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
+			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir, {"k": k})
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
@@ -373,7 +386,7 @@ func cast_e() -> bool:
 
 func _in_rain(f: Ent) -> bool:
 	var ed := e_def()
-	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]), f.pos, f.r) and absf(f.pos.y - (rain["c"] as Vector3).y) < 2.5
+	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]), f.pos, f.r) and AimMode.in_reach((rain["c"] as Vector3).y, f.pos.y)
 
 func _tick_rain(dt: float) -> void:
 	var ed := e_def()
@@ -406,13 +419,13 @@ func _tick_rain(dt: float) -> void:
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
 		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
-		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
+		KitStatus.apply(f, "blt", float(ed["blight"]))
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and los and dist > 4.0 and dist < 14.0:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) - 2.0 and randf() < 0.3:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		HunterKeys.ult_pressed(h)
 		return

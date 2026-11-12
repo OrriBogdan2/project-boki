@@ -52,7 +52,7 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
+	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), AbilityText.short_name(k.id, "x").to_upper(), GOLD, false)
 	k.vfx("guard_tell")
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
@@ -144,7 +144,7 @@ func _land(d: Dictionary) -> void:
 	k.vfx("riposte_land", from, dir, {"len": float(d["len"]), "w": float(d["width"])})
 	last_dealt = 0.0
 	for f in k.m.foes_of(h.team):
-		if not f.hittable() or absf(f.pos.y - from.y) > 2.0:
+		if not f.hittable() or not AimMode.in_reach(from.y, f.pos.y):
 			continue
 		if not AimMode.in_lane(from, dir, float(d["len"]), float(d["width"]), f.pos, f.r):
 			continue

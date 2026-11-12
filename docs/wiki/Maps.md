@@ -60,6 +60,18 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Highwatch | landing | Frost | quiet | 6 | The Lookout |
 | Duskmoor | landing | Storm | quiet | 18 | Moor Chapel |
 | Saltmere | landing | Bloom | quiet | 34 | Salt River |
+| The Crown | heart | Gloom | dangerous | 27 |  |
+| Stormcrown Gaol | camp | Storm | dangerous | 4 |  |
+| Ashen Gaol | camp | Ember | dangerous | 6 |  |
+| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 11 |  |
+| Thornwood | nest | Bloom | contested | 28 |  |
+| Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
+| Highwatch | landing | Frost | quiet | 3 |  |
+| Duskmoor | landing | Storm | quiet | 11 |  |
+| Saltmere | landing | Bloom | quiet | 16 |  |
+| Shardfall | perch | Gloom | dangerous | 0 |  |
 
 ### Boss lairs
 
@@ -81,6 +93,9 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Vaults | 3 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
 | Item caches | 7 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol, Frostgate, Stormbreak, Thornwood, Cinder Steps |
 | Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
+| Rare Boki | 3 | Larkhollow, Highwatch, Duskmoor, Saltmere, Nest Glade, Rimefield, Forge Yard, Stormbreak |
+| Vaults | 2 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
+| Item caches | 4 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol |
 
 
 ## Skyreach
@@ -130,7 +145,7 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Rare Boki | 3 | Lantern Hollow, Gullcrest, Mossmere, Stillwater, Petal Hollow, Icewing Roost, Cinder Steps, Rainbreak |
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
-| Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+| Live boss lairs | 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
 
 
 ## First Flight

@@ -1,6 +1,6 @@
 # 0022: Ultimate ranks
 
-- **Status:** proposed (spec only, no code)
+- **Status:** accepted (built on ext/ult-ranks, 2026-11-09; owner may override)
 - **Date:** 2026-11-09
 - **Area:** combat, progression
 
@@ -81,6 +81,19 @@ rank 1.
 - Check: extend the rank check so rank 3 needs level 10, `HeroUlt.cooldown` shrinks with rank, and a bot at
   10 takes rank 3.
 - Alternative kept open: option 1 if the owner wants Merge and ult ranks spent separately.
+
+## As built (ext/ult-ranks)
+- `x.per_rank` holds, per key, what R ranks 2 and 3 each add **in the key's own unit** (a +20% source step is
+  written as the flat 20% of our base), read by `HeroUlt.ranked` through `ArchKit.x_def()` (cached per rank),
+  so no kit code changed. A kit with `per_rank` takes only its own steps (parity: no generic +15% / -10% on top);
+  tender (no source tiers) takes the shared -10% cooldown step. Rimewright's ult no longer reads `power("ult")`.
+- Cooldown steps are the source deltas scaled by our base / the source's (last line below), rounded to 0.5s:
+  juggernaut -4, gunslinger -4, dredge -3, mage -5, bulwark -4, thief -2.5, ashwick -12 at rank 2.
+  Alternative: the unscaled source deltas (-5 each) if the owner prefers the absolute numbers.
+- Text: `rank2.ult` / `rank_next.ult` (the slot key the other slots use, read by `Arch.next_ranks` and the wiki),
+  not `rank2.x` / `rank3.x`. No rank-3 toast: no other slot has one.
+- Bots take R ranks 1-2 as they open and rank 3 once every slot is rank 2 (no `order` edits).
+- Juggernaut's +5% AP per tier is not built (our ult has no AP ratio). Check: `--ult-rank-check`.
 
 ## Per-hero build items (for the planner)
 1. Shared: `ULT_AT`, `SLOT_MAX`, `_bot_spend`, `HeroUlt.cooldown`, `rank_text`, pips to 3, Net.VERSION, check.

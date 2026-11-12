@@ -1,0 +1,33 @@
+{
+ "group": "foley",
+ "name": "Hunter foley on steps and dashes",
+ "script": "tools/gen_sfx_foley.py",
+ "sounds": {
+  "dredge_foley": "step",
+  "dredge_foley_dash": "dash",
+  "bulwark_foley": "step",
+  "bulwark_foley_dash": "dash",
+  "rimewright_foley": "step",
+  "rimewright_foley_dash": "dash",
+  "juggernaut_foley": "step",
+  "juggernaut_foley_dash": "dash",
+  "ashwick_foley": "step",
+  "ashwick_foley_dash": "dash",
+  "thief_foley": "step",
+  "thief_foley_dash": "dash",
+  "archer_foley": "step",
+  "archer_foley_dash": "dash",
+  "dolm_foley": "step",
+  "dolm_foley_dash": "dash",
+  "gunslinger_foley": "step",
+  "gunslinger_foley_dash": "dash",
+  "mage_foley": "step",
+  "mage_foley_dash": "dash",
+  "ostra_foley": "step",
+  "ostra_foley_dash": "dash",
+  "tender_foley": "step",
+  "tender_foley_dash": "dash"
+ },
+ "signature": [],
+ "replaces": []
+}

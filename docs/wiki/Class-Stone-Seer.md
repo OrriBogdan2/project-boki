@@ -27,7 +27,7 @@ Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stan
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Rubble Fists (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you. |
+| Fantasy | The stone seer. Raises stone out of the ground, climbs it, then punches it into you. |
 | Silhouette | the huge stone left arm, the stone gauntlet and the three floating eye stones |
 | Resource | Rocks (max 6) |
 
@@ -48,7 +48,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 16m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
+**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 18m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
 
 **Rock Hop (dash, Shift, 12s cooldown).** A rock bursts up under you and you spring off it toward the cursor, about 2.5m. A fresh rock rises under your feet at each landing and you skid along it, skateboard style. Press again within 0.6s of a take-off to hop on toward the cursor, up to 3 hops; press nothing and you land. Each landing nudges whoever is beside you. The last one crashes (8 damage and a shove), and a rock rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. Rocks crumble in a moment, allies can hop them, and a hop crosses the abyss only if ground lies within your hops left. The cooldown starts when the chain ends. In the air: your long dash.
 
@@ -71,6 +71,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
 | Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; a second charge, and each hop goes a third further. |
 | E | cooldown 12.5s -> 11.3s, rocks hit +15%. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
+| R (ultimate) | Basalt Spine cooldown 45s -> 40s, lasts 7s -> 9.5s. The Merge lasts 30% longer. | Basalt Spine cooldown 45s -> 35s, lasts 7s -> 12s. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

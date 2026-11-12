@@ -4,6 +4,8 @@ extends RefCounted
 ## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
 ## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -76,6 +78,11 @@ func down(m: Match, A: Hunter) -> void:
 	A.ctrl = "idle"
 	A.down_hp = 60.0
 
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
+
 func run(mn: Node, md := "all") -> void:
 	main = mn
 	mode = md
@@ -88,16 +95,31 @@ func run(mn: Node, md := "all") -> void:
 	anims.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
+		await _ally("tender")
 		await combos.tender()
 		await ults.tender()
+		await _abyss("tender")
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
+		await _ally("rimewright")
 		await combos.rimewright()
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
+		await _abyss("rimewright")
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The "over the abyss" rows (tools/abyss_cast.gd).
+func _abyss(who: String) -> void:
+	var ab = load("res://tools/abyss_cast.gd").new()
+	ab.main = main
+	if who == "tender":
+		await ab.tender()
+	else:
+		await ab.rimewright()
+	n += ab.n
+	fails += ab.fails
 
 func _free(m: Match) -> void:
 	m.queue_free()
@@ -164,14 +186,25 @@ func _tender_support() -> void:
 	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
 	ok("Carrier: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
-	# --- a hit drops them too, and costs you no stun of your own
+	# --- a root keeps them (interrupt table: the data lists damage and a stun only)
 	P.stun_t = 0.0; K.lock_t = 0.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
+	var carried_root := CareUtil.is_carried(A)
+	P.root_t = 0.5
+	step(m, 0.1)
+	ok("Carrier: a root does not drop them", carried_root and CareUtil.is_carried(A), "again %s" % str(carried_root))
+	P.root_t = 0.0
+	# --- a hit drops them too, and costs you no stun of your own
 	var carried_third := CareUtil.is_carried(A)
 	P.hurt(5.0, T, {}); step(m, 0.1)
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+	var pd: Dictionary = K.d["passive"]
+	var kd: Dictionary = K.res_def()
+	ok("Carrier numbers: lock 4s (data), 2 carried, Kindle 5 stacks for 4s, no carry-slow key",
+		absf(float(pd["lock"]) - 4.0) < 0.001 and int(pd["max"]) == 2 and int(kd["max"]) == 5
+		and absf(float(kd["dur"]) - 4.0) < 0.001 and not pd.has("pick_speed"), "%s %s" % [pd, kd])
 	# --- the drop set: a stun or any damage; a root or a hex holds; 4s no re-pick
 	P.stun_t = 0.0
 	K.lock_t = 0.0

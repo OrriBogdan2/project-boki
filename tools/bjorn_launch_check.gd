@@ -585,8 +585,8 @@ func _rmb_parity(m: Match, P: Hunter, K: BulwarkKit, home: Vector3) -> void:
 
 # ------------------------------------------------------------------ kit audit (Nov 3 23:40)
 ## The audit's fixes: the thrown hammer's knock into a wall Crushes (data: any knock into a wall), a knock
-## into another foe doesn't (data: walls only), and the raised aegis takes any blow from the front, melee
-## included (data: Brightshield blocks all damage from the front), not one from behind.
+## into another foe Crushes it too (Valiant Strength: a wall or another enemy), and the raised aegis takes
+## any blow from the front, melee included (data: Brightshield blocks all damage from the front), not one from behind.
 func _audit() -> void:
 	var r := setup("bulwark", 5.0, "", true)
 	var m: Match = r[0]
@@ -623,9 +623,11 @@ func _audit() -> void:
 	c0 = K.crushes
 	step(m, float(K.lmb_def()["full"]) + 0.3, press_at.bind(P, T.pos))
 	P.inp["fire"] = false
-	step(m, 0.6)
-	ok("bjorn audit: a blow that knocks a foe into another foe (no wall) doesn't Crush (data: walls only)",
-		K.crushes == c0 and dmg(T) > 0.0, "crushes %d took %.0f" % [K.crushes - c0, dmg(T)])
+	var peak := [0.0]
+	step(m, 0.6, func(): peak[0] = maxf(peak[0], T.stun_t))
+	ok("bjorn audit: a blow that knocks a foe into another foe (no wall) Crushes it",
+		K.crushes == c0 + 1 and dmg(T) > 0.0 and peak[0] > 0.0,
+		"crushes %d took %.0f stun %.2f" % [K.crushes - c0, dmg(T), peak[0]])
 	# the aegis: a melee blow from the front lands on it, one from behind lands on him
 	step(m, 1.0)
 	P.teleport(home)

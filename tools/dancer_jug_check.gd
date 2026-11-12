@@ -9,6 +9,7 @@ const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimate
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
 var A: AKCheck
 
@@ -122,6 +123,15 @@ func thief(a) -> void:
 	A.ok("dancer passive: Marks have no cap (22 after 20 more), eight diamonds show",
 			K.marks_on(T) == 22 and K.res_text() == "22" and K.pip_count() == 8 and K.res_frac() == 1.0, K.res_text())
 	A.ok("dancer passive: 22 Marks make a bolt 3.2x", absf(K.outgoing(T, 10.0, {"src": "shot"}) - 32.0) < 0.01)
+	# source shape (data: Shiv +16 on a 160 bolt per Arcslinger hit, stacking; footage: flat steps, no cap in 8 hits).
+	# Duration and decay are in neither source: 4s refreshed is an assumption.
+	K.set_marks(T, 1)
+	var step1 := K.outgoing(T, 160.0, {"src": "shot"}) - 160.0
+	K.set_marks(T, 20)
+	var step20 := (K.outgoing(T, 160.0, {"src": "shot"}) - 160.0) / 20.0
+	A.ok("dancer passive: a flat +16 a stack on a 160 bolt (the data's), the 1st and the 20th alike, uncapped, 4s",
+			absf(step1 - 16.0) < 0.01 and absf(step20 - 16.0) < 0.01 and float(K.res_def()["dur"]) == 4.0,
+			"first %.1f twentieth %.1f" % [step1, step20])
 	# Vault ranks: empowered +20% at rank 2 and again at rank 3, the speed boost half again as big at rank 3
 	var vault_ranks: Array = []
 	for rk in [1, 2, 3]:
@@ -233,7 +243,7 @@ func thief(a) -> void:
 	K.haste_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(6.0, 0, 0))
-	# RMB: a 0.4s wind-up with the lane showing, then the Bola grounds the first, flies on, tangles a second
+	# RMB: the Bola leaves on the press (no wind-up), grounds the first, flies on, tangles a second
 	A.fresh(T)
 	A.fresh(T2)
 	T.teleport(home + Vector3(4.0, 0, 0))
@@ -243,13 +253,15 @@ func thief(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
-	A.step(m, 0.2)
 	var bl: Dictionary = AimKit.entry(P, "rmb")
-	A.ok("dancer RMB: the lane shows through the 0.4s wind-up (about 1 bh by 6 bh), nothing thrown yet",
-			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
+	A.ok("dancer RMB: instant release, the Bola is in flight on the press with its lane (7m + 5.5m past the first)",
+			not K.bola.is_empty() and AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 12.5) < 0.1
 			and A.dmg(T) <= 0.0,
-			"len %.1f" % float(bl.get("len", 0.0)))
-	A.step(m, 0.6)
+			"len %.1f flying %s" % [float(bl.get("len", 0.0)), not K.bola.is_empty()])
+	var fly := [0.0]
+	A.step(m, 0.8, func(): fly[0] += A.DT if not K.bola.is_empty() else 0.0)
+	A.ok("dancer Bola speed: about 30 bh/s (54 m/s), the whole flight under 0.2 s (footage 0102-0105)",
+			fly[0] > 0.05 and fly[0] < 0.2, "flight %.2f s" % fly[0])
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
 			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
@@ -278,6 +290,20 @@ func thief(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.9)
 	A.ok("dancer Bola: bounces off a wall", K.bola_bounces == 1, "bounces %d" % K.bola_bounces)
+	# ... a foe caught first and then the wall: that foe is pinned (stunned, +13), the Bola stops
+	A.fresh(T)
+	T.teleport(home + Vector3(-4.0, 0, 0))
+	P.teleport(home)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	var bounces0 := K.bola_bounces
+	A.aim_at(P, home + Vector3(-6.0, 0, 0))
+	A.tap(m, P)
+	A.step(m, 0.8)
+	A.ok("dancer Bola: foe + wall = stun (pinned, bonus damage, no bounce)",
+			K.bola_pins == 1 and K.bola_bounces == bounces0 and K.bola.is_empty() and T.stun_t > 0.0
+			and KitStatus.grounded(T) and A.dmg(T) >= 18.0,
+			"pins %d stun %.2f dmg %.0f bounces %d" % [K.bola_pins, T.stun_t, A.dmg(T), K.bola_bounces - bounces0])
 	# small mechanic: a crate counts as the Bola's first catch (it breaks and flies on its after-distance)
 	A.step(m, 1.0)
 	P.teleport(home)
@@ -359,6 +385,7 @@ func thief(a) -> void:
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
+	await _ally_rows("thief")
 
 
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
@@ -441,7 +468,7 @@ func _knife_in_barriers(m, A, P, T, K, home: Vector3) -> void:
 	m.verbs.clear()
 
 ## Item 32: a bolt pressed mid-cartwheel goes at once, empowered, and the cartwheel isn't cut; Shift in the Bola's
-## wind-up cartwheels and the Bola still flies; the dagger's blink ends a cartwheel.
+## cartwheel doesn't hold the Bola back; the dagger's blink ends a cartwheel.
 func _dancer_dash_flow(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	K.primed_t = 0.0
 	K.haste_t = 0.0
@@ -468,15 +495,13 @@ func _dancer_dash_flow(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector
 	K.cd["rmb"] = 0.0
 	P.dashes = P.max_dashes()
 	A.tap(m, P)
-	A.step(m, 0.1)
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
-	var wound := not K.bola_cast.is_empty() and P.roll_t > 0.0
-	var thrown := [false]
-	A.step(m, 0.4, func(): thrown[0] = thrown[0] or not K.bola.is_empty())
+	var thrown := not K.bola.is_empty()
+	A.step(m, 0.4)
 	P.inp["move"] = Vector2.ZERO
-	A.ok("dancer RMB -> dash (into_dash row: fire): Shift in the wind-up cartwheels, the Bola still flies",
-			wound and thrown[0], "wound %s thrown %s" % [wound, thrown[0]])
+	A.ok("dancer RMB -> dash (into_dash row: fire): the Bola is already away, Shift cartwheels",
+			thrown and P.roll_t > 0.0, "thrown %s roll %.2f" % [thrown, P.roll_t])
 	A.step(m, 1.0)
 	P.teleport(home)
 	K.cd["e"] = 0.0
@@ -587,7 +612,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut passive: no bonus below full", absf(K.outgoing(T, 100.0, {}) - 100.0) < 0.1)
 	K.gain_rage(100.0)
 	A.ok("juggernaut passive: full = Enraged (+15%)",
-			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED",
+			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED"
+			and absf(K.enraged_t - 6.0) < 0.1,   # 6 s is ours [?]: the data's "Empowered" has no duration
 			"%.1f" % K.outgoing(T, 100.0, {}))
 	K.cd["e"] = 10.0
 	P.dashes = 0.0
@@ -595,6 +621,11 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut Enraged: ability + dash haste",
 			float(K.cd["e"]) < 8.85 and P.dashes > 1.0 / P.dash_regen() * 1.08,
 			"e cd %.2f dashes %.3f" % [float(K.cd["e"]), P.dashes])
+	var rg: Dictionary = K.res_def()
+	A.ok("juggernaut passive numbers: Enraged 6s [?], +15% damage, +12% dash, +20% ability haste, 20% heals (wiki)",
+			absf(float(rg["enraged_t"]) - 6.0) < 0.001 and absf(float(rg["enraged_dmg"]) - 0.15) < 0.001
+			and absf(float(rg["dash_haste"]) - 0.12) < 0.001 and absf(float(rg["ab_haste"]) - 0.2) < 0.001
+			and absf(float(rg["heal_knock"]) - 0.2) < 0.001 and absf(float(rg["heal_creep"]) - 0.2) < 0.001, str(rg))
 	K.enraged_t = 0.0
 	K.res = 0.0
 	K.cd["e"] = 0.0
@@ -962,6 +993,14 @@ func juggernaut(a) -> void:
 	await A.done(m)
 	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
+	await _ally_rows("juggernaut")
+
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero. (Kael's Warchain
+## passing a teammate to hook the foe behind is the "jug chain" row.)
+func _ally_rows(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(A.main, arch)
+	A.ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
@@ -1012,6 +1051,13 @@ func combos(a) -> void:
 	A.ok("combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits)",
 			K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0,
 			"spins %d variant %s" % [K.spins, K.last_variant])
+	A.ok("combo jug: the spin's Anti-Heal lasts 5s (wiki: Scorching Spin) and cuts healing 60%",
+			T.blight_t > 4.5 and T.blight_t <= 5.0 and is_equal_approx(T.blight_k, 0.6),
+			"blight %.2f k %.2f" % [T.blight_t, T.blight_k])
+	Sfx.listener = P.pos      # (the body looks draw near the camera focus; no camera runs here)
+	var tags := HudPlate.statuses(T).map(func(s): return s[2])
+	A.ok("combo jug: Anti-Heal shows one icon on the plate and one body look (streaks)",
+			tags.count("ANTI-HEAL") == 1 and StatusLooks.of(m).showing(T, "antiheal"), str(tags))
 	# E, then RMB held and let go while attached: Chain Lunge along it
 	A.step(m, 1.0)
 	hook.call()
@@ -1201,11 +1247,14 @@ func combos(a) -> void:
 	T2.teleport(home + Vector3(0, 0, 9.0))
 	A.aim_at(P, T.pos)
 	P.dashes = 0.0
+	P.ex_cd = 5.0
 	TK.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.35)
-	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund",
-			P.dashes >= 0.99 and float(TK.cd["e"]) < 10.0, "dashes %.2f e cd %.1f" % [P.dashes, float(TK.cd["e"])])
+	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset (the long dash too) + refund",
+			P.dashes >= 0.99 and P.ex_cd <= 0.0 and float(TK.cd["e"]) < 10.0,
+			"dashes %.2f ex_cd %.1f e cd %.1f" % [P.dashes, P.ex_cd, float(TK.cd["e"])])
+	A.ok("combo dancer: a Knife in a foe adds no Mark (only bolts stack)", TK.marks_on(T) == 0, "%d" % TK.marks_on(T))
 	P.ak.use_e()
 	A.step(m, 0.05)
 	A.ok("combo dancer: Knife > E = step to them", P.flat_dist(T) < 1.8)
@@ -1222,8 +1271,8 @@ func combos(a) -> void:
 	TK.cd["rmb"] = 0.0
 	A.tap(m, P)
 	A.step(m, 0.9)
-	A.ok("combo dancer: Bola on two (rank 3) = pooled Marks",
-			TK.bola_pairs >= 1 and TK.marks_on(T) >= 4 and TK.marks_on(T) == TK.marks_on(T2),
+	A.ok("combo dancer: Bola on two (rank 3) = pooled Marks, the Bola adding none of its own",
+			TK.bola_pairs >= 1 and TK.marks_on(T) == 3 and TK.marks_on(T) == TK.marks_on(T2),
 			"T %d T2 %d" % [TK.marks_on(T), TK.marks_on(T2)])
 	A.ok("combo dancer: Bola > Grounded = no dash", KitStatus.grounded(T) and _dash_blocked(T))
 	A.step(m, 2.0)
@@ -1308,24 +1357,6 @@ func merge_holds() -> void:
 	A.ok("merge hold jug: the charged Lunge does not go and no Smash charge is spent",
 			K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
 	A.ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
-	await A.done(m)
-	# ---- Sable: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
-	r = A.setup("thief", 4.0, "cindle")
-	m = r[0]
-	P = r[1]
-	T = r[2]
-	var TK: ThiefKit = P.ak
-	P.ult = 1.0
-	P.merge_cd = 0.0
-	A.aim_at(P, T.pos)
-	TK.ch_rmb = 1.0
-	TK.cd["rmb"] = 0.0
-	A.tap(m, P)
-	A.ok("merge hold dancer: the Bola is winding up", not TK.bola_cast.is_empty())
-	KinMerge.cast(P)
-	A.step(m, 0.8)
-	A.ok("merge hold dancer: the wound-up Bola is not thrown",
-			TK.bola_cast.is_empty() and TK.bola.is_empty() and not KitStatus.grounded(T) and not AimKit.shown(P, "rmb"))
 	await A.done(m)
 	# ---- Juggernaut: a Meteor Drop diving when a merge starts doesn't land
 	r = A.setup("juggernaut", 4.0, "cindle")
