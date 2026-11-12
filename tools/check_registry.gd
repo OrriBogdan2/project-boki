@@ -62,6 +62,7 @@ const CHECKS := {
 	"--glide-hit-check": ["res://tools/glide_hit_check.gd", "glide_hit_check", null],
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
+	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],      # gloves stay inside the kits' E band
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk

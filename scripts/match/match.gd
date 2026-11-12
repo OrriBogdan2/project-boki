@@ -1298,10 +1298,11 @@ func use_gear(h: Hunter, slot: int) -> void:
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
 		sfx("skill", h.pos, -4.0, 1.0)
 		return
+	var lau: Dictionary = gd.get("launch", {})      # launch gloves: m/s, m (content/gear)
 	match gid:
 		"gust_fan":
 			var d := h.aim_dir()
-			h.vel = Vector3(d.x * 9.0, 13.0, d.y * 9.0)
+			h.vel = Vector3(d.x * float(lau["fwd_mps"]), float(lau["up_mps"]), d.y * float(lau["fwd_mps"]))
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.shot_down = false
@@ -1337,7 +1338,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 		"rocket":
 			# straight up: a column of thrust that also cools your glider, so you can keep going
 			var d := h.aim_dir()
-			h.vel = Vector3(h.vel.x * 0.5 + d.x * 2.0, 17.0, h.vel.z * 0.5 + d.y * 2.0)
+			h.vel = Vector3(h.vel.x * 0.5 + d.x * lau.fwd_mps, lau.up_mps, h.vel.z * 0.5 + d.y * lau.fwd_mps)
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.shot_down = false
@@ -1350,10 +1351,10 @@ func use_gear(h: Hunter, slot: int) -> void:
 			# one there, otherwise straight up into the air
 			var d := h.aim_dir()
 			var aim: Vector3 = h.inp.get("aim", h.pos)
-			var reach := clampf(Vector2(aim.x - h.pos.x, aim.z - h.pos.z).length(), 2.0, 9.0)
+			var reach := clampf(Vector2(aim.x - h.pos.x, aim.z - h.pos.z).length(), 2.0, float(lau["reach_m"]))
 			var tx := h.pos.x + d.x * reach; var tz := h.pos.z + d.y * reach
 			var gy := world.ground_at(tx, tz)
-			var to := Vector3(h.pos.x + d.x * 3.0, h.pos.y + 8.0, h.pos.z + d.y * 3.0)
+			var to := Vector3(h.pos.x + d.x * 3.0, h.pos.y + float(lau["rise_m"]), h.pos.z + d.y * 3.0)
 			if gy > World.VOID + 1.0 and not world.is_block(tx, tz) and gy > h.pos.y - 1.0:
 				to = Vector3(tx, gy + 1.2, tz)
 			h.launch_to(to, 0.55)
@@ -1362,7 +1363,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("throw", h.pos, -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
-			h.vel.y = maxf(h.vel.y, 11.0)
+			h.vel.y = maxf(h.vel.y, float(lau["up_mps"]))
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.roll_t = 0.0
