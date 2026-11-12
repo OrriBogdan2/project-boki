@@ -87,3 +87,6 @@ The Empty pats, feeds and cheers with its feet where they stand (HunterVerbs, `s
 - Crouch-walking adds HunterAnim's knee bend after the solve, so a crouched walk slides a little (DEBT).
 - The toe dips up to 2 cm into the floor just after toe-off on the sturdy body (gated at 3 cm).
 - Arm swing is HunterAnim's, following the gait's phase (left leg's cycle); not re-tuned here.
+
+## Fishing (Glint Fishing)
+The Empty fishes with a rod (`scripts/match/hunter_rod.gd`): HunterAnim's "act" slot plays `wait` (rod held out, a loop), `cast` (wind back, flick, 0.6 s), `bite` (the tip jerks, 0.4 s), `reel` (the rear hand cranks, a loop) and `land` (the lift on a catch, 0.9 s). `HomeVerbs.hold` keeps `wait`/`reel`, `play` lays the one-shots over it; `GlintFishing` calls them on its state changes and puts the rod away when the session ends. These poses skip HunterAnim's act-legs override, so the legs stay on EmptyGait's planted feet and only the lean moves. The line leaves the rod's `Tip` node. `--home-gait-check` runs the sequence on the four bodies (feet creep, rod up and in the hands, hidden afterwards); `--glint-fishing-check --glint-fishing-shots=<dir>` is the GPU strip (docs/shots/glint-fishing-anim/).
