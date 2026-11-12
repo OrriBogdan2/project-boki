@@ -509,7 +509,7 @@ func _run(secs: float) -> void:
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
 func _strike(at: Vector3) -> void:
 	var b := BiomeRun.new(m)
-	b._hit_area(at, 1.8, 14.0, {"stun": 0.4, "sky": true})
+	b._hit_area(at, 1.8, 14.0, {"stun": 0.4, "sky": true}, "lightning_rod")
 	b.free_up()
 
 static func _v(a) -> Vector3:
