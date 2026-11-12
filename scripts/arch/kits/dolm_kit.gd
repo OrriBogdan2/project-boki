@@ -159,6 +159,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.23, 0.49, 1.0, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
 	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
+	DolmImpact.hit(m, AimMode.ground(m, at), float(s["dmg"]))
 	m.sfx("br_burst", at, -3.0, 1.0)
 	net_ring(at, blast, Color("3a7cff"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
@@ -427,6 +428,7 @@ func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
 	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
 	m.fx.flash(at, Color("9ad0ff"), 0.5, 0.06)
+	DolmImpact.hit(m, g, float(s["dmg"]))
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -483,25 +485,25 @@ func _punch(k: float) -> void:
 		var hp0: float = f.hp
 		f.hurt(dmg, h, o)
 		landed += 1
-		_punch_impact(f.pos, dir, k)
-		if terrain_behind(f, dir, 1.6):
+		_punch_impact(f.pos, dir, k, dmg)
+		if KnockWall.hit(m, f, dir, 1.6, h):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
-			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
-		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
+		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k, dmg)
 
 ## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
 ## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
-func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
+func _punch_impact(at: Vector3, dir: Vector2, k: float, dmg: float) -> void:
 	var fwd := Vector3(dir.x, 0.25, dir.y)
 	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
 	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
 	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
 	m.fx.flash(at + Vector3(0, 0.7, 0), Color("9ad0ff"), 0.5 + 0.3 * k, 0.07)
+	DolmImpact.hit(m, AimMode.ground(m, at), dmg, dir)
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
@@ -632,7 +634,7 @@ func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
 	shield_at = m.time
-	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
+	ReceiverCue.shield(h, float(gd["shield"]) * shield_stacks)
 	h.shield_t = float(gd["t"])
 	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 
@@ -690,10 +692,12 @@ func cast_e() -> bool:
 	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
+## One rock of the Stone Row rises (the row's one rise sound is _raise_feel).
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
 	m.fx.burst(p + Vector3(0, 0.2, 0), COBALT, 8, 4.0, 0.3, 8.0, 1.0)
+	DolmImpact.rise(m, p)
 
 func _raise_feel() -> void:
 	if not is_instance_valid(h):

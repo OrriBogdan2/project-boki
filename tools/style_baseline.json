@@ -28,8 +28,7 @@
 },
 "scripts/arch/kit_status.gd": {
 "long_line": 2,
-"nested_ternary": 1,
-"semicolon": 2
+"nested_ternary": 1
 },
 "scripts/arch/kits/archer_kit.gd": {
 "long_line": 11,
@@ -185,7 +184,7 @@
 "semicolon": 4
 },
 "scripts/core/sfx.gd": {
-"long_line": 5,
+"long_line": 3,
 "semicolon": 3,
 "shadow": 3
 },
@@ -252,9 +251,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 204,
 "nested_ternary": 27,
-"semicolon": 243,
+"semicolon": 242,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -475,7 +474,7 @@
 "long_line": 2
 },
 "scripts/match/capture.gd": {
-"long_line": 11,
+"long_line": 10,
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
@@ -508,8 +507,7 @@
 "shadow": 1
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
-"nested_ternary": 1,
+"long_line": 10,
 "semicolon": 25,
 "shadow": 2
 },
@@ -571,7 +569,7 @@
 },
 "scripts/match/kin.gd": {
 "long_line": 30,
-"nested_ternary": 7,
+"nested_ternary": 6,
 "semicolon": 19
 },
 "scripts/match/kin_command.gd": {
@@ -600,8 +598,7 @@
 "shadow": 1
 },
 "scripts/match/kin_net.gd": {
-"long_line": 12,
-"nested_ternary": 1
+"long_line": 11
 },
 "scripts/match/kin_path.gd": {
 "long_line": 2,
@@ -649,7 +646,7 @@
 "long_line": 23
 },
 "scripts/match/merge_xform.gd": {
-"long_line": 5
+"long_line": 4
 },
 "scripts/match/mob.gd": {
 "long_line": 12,
@@ -664,7 +661,7 @@
 "scripts/match/models.gd": {
 "long_line": 280,
 "nested_ternary": 12,
-"semicolon": 276,
+"semicolon": 272,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -822,7 +819,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 174,
+"long_line": 173,
 "nested_ternary": 33,
 "semicolon": 43,
 "shadow": 2
@@ -1162,6 +1159,9 @@
 "tools/speaktest.gd": {
 "long_line": 1,
 "semicolon": 1
+},
+"tools/status_sfx_check.gd": {
+"long_line": 1
 },
 "tools/support_check.gd": {
 "long_line": 14,

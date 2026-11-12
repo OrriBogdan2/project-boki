@@ -16,6 +16,7 @@ var hunters: Array = []
 var kins: Array = []
 var mobs: Array = []
 var shots: Array = []
+var shot_floor := ShotFloor.new(self)      # the readable core on every LMB projectile
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
@@ -47,6 +48,7 @@ var skydrop: DropSquad = null  # the planning phase before the ship sets off, dr
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
+var flyby := Flyby.new()     # rival shots passing close sound (see Flyby)
 var player: Hunter = null
 var over := false
 var result := {}
@@ -300,6 +302,7 @@ func _start(o: Dictionary) -> void:
 	world.biome = T["biome"].duplicate()
 	world.clouds = T["clouds"]
 	add_child(world)
+	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
@@ -322,6 +325,7 @@ func _start(o: Dictionary) -> void:
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
+	StatusLooks.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -339,6 +343,7 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	add_child(StatusSfx.new(self))        # status cues and loops
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -1168,6 +1173,7 @@ func _spawn_breakables() -> void:
 		var wsp: Vector3 = world.weapon_spots[i]
 		var gg := GearDrops.roll_gear(wr, 1 if tier >= 2 else 0, 0, -1, biomes.slot_lean_at(wsp) if biomes else {})
 		spawn_gear(String(gg["id"]), int(gg["rar"]), wsp, "ws%d" % i, false)
+	LootGlow.stand_in(self)
 
 func _add_break(kind_s: String, at: Vector3) -> void:
 	var n := Models.breakable(kind_s)
@@ -1254,7 +1260,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
+	sfx(PickupSfx.of_gear(String(wp["gear"])), h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:
 		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
@@ -1295,7 +1301,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 	if gd.has("effects"):
 		# newer gloves are built from the same effect blocks as abilities, scaled by rarity
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
-		sfx("skill", h.pos, -4.0, 1.0)
+		Gear.cast_sfx(self, gid, h.pos, "skill", -4.0, 1.0)
 		return
 	match gid:
 		"gust_fan":
@@ -1306,7 +1312,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.shot_down = false
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
 			fx.burst(h.pos + Vector3(0, 0.4, 0), col, 20, 5.0, 0.5, -2.0, 1.0)
-			sfx("glide", h.pos, 0.0, 1.5)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 1.5)
 		"platform":
 			var tiles: Array = []
 			var y := h.pos.y - 0.1
@@ -1330,7 +1336,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 				h.vel.y = 0.0
 			h.glide_fuel = 1.0
 			h.shot_down = false
-			sfx("shield", h.pos, 0.0, 0.8)
+			Gear.cast_sfx(self, gid, h.pos, "shield", 0.0, 0.8)
 		"shock":
 			Abil._blast(h, h.pos, 3.4, 12.0, 13.0, col, 5.0, "gear")
 		"rocket":
@@ -1343,7 +1349,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.5)
 			fx.burst(h.pos + Vector3(0, 0.2, 0), col, 26, 6.0, 0.5, -1.0, 1.2, Vector3.DOWN, 30.0)
-			sfx("glide", h.pos, 0.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 0.7)
 		"skyhook":
 			# hook a point toward the cursor and swing up to it: onto a ledge above you if there is
 			# one there, otherwise straight up into the air
@@ -1358,7 +1364,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.launch_to(to, 0.55)
 			h.glide_cd = 0.0
 			fx.bolt(h.pos + Vector3(0, 1.2, 0), to, Color(col, 0.9))
-			sfx("throw", h.pos, -2.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "throw", -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
 			h.vel.y = maxf(h.vel.y, 11.0)
@@ -1367,7 +1373,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			fx.ring(h.pos, 1.2, col, 0.3)
 			fx.burst(h.pos, col, 14, 3.0, 0.4, 2.0, 1.0, Vector3.DOWN, 50.0)
-			sfx("jump", h.pos, -2.0, 1.3)
+			Gear.cast_sfx(self, gid, h.pos, "jump", -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
 	for gp in gpads.duplicate():
@@ -1859,14 +1865,12 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 func freeze_frame(t: float) -> void:
 	hitstop = maxf(hitstop, t)
 
-## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
+## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
-	var col := h.armor_col()
-	fx.ring(h.pos, 2.4, Color(col, 0.9), 0.45)
-	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 14, 3.5, 0.5)
-	if h == player:
-		sfx("revive", null, -6.0)
-		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
+	Juice.armor_up(self, h)
+	HeroVfx.of(self).tier_up(h, h.armor_tier)
+	if h == player and hud:
+		hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), h.armor_col())
 
 func _reward_moment(at: Vector3) -> void:
 	_slow(0.22, 0.35)
@@ -2191,11 +2195,13 @@ func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
+	var top := KillCues.top_team(mb)
 	if net_on:
-		net_event(["mobdead", mb.nid, by.nid if by else ""])
+		net_event(["mobdead", mb.nid, by.nid if by else "", top])
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	KillCues.on_kill(self, mb, credit, top)
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
@@ -2465,10 +2471,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 		hud.toast("Staggered %s!%s" % [mb.md["name"], ("  " + what) if what != "" else ""], Color("e0b0ff"))
 		train["_stagger"] = true
 
-## Someone's armor just shattered: a clear sound and burst so the attacker knows to push.
+## Someone's armor just shattered: a clear sound and the body cracking so the attacker knows to push.
 func on_armor_break(h: Hunter, by: Ent) -> void:
-	fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7ac8ff"), 22, 5.0, 0.5, 6.0, 1.0)
-	fx.ring(h.pos, 1.4, Color("7ac8ff"), 0.3)
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
@@ -2478,9 +2482,8 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
-func on_wall_slam(e: Ent) -> void:
-	fx.burst(e.pos + Vector3(0, 0.9, 0), Color("e6dccb"), 16, 4.0, 0.4)
-	fx.ring(e.pos, 1.2, Color("fff27a"), 0.3)
+func on_wall_slam(e: Ent, dir: Vector2) -> void:
+	KnockWall.slammed(e, dir, e.last_hit_by)
 	sfx("knock", e.pos, -2.0, 1.2)
 	var sc: Ent = e.last_hit_by
 	if sc is Kin and (sc as Kin).owner_h: sc = (sc as Kin).owner_h
@@ -2496,7 +2499,7 @@ const VIEW_COS := 0.6          # about 106 degrees wide
 const NEAR_SENSE := 3.2
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or HawkSense.seen_by(target, team_i):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
@@ -2576,7 +2579,7 @@ func _exit_tree() -> void:
 func on_perfect_dodge(h: Hunter) -> void:
 	fx.ring(h.pos, 1.3, Color("9af0ff"), 0.3)
 	fx.burst(h.pos + Vector3(0, 0.9, 0), Color("cff6ff"), 12, 3.5, 0.4)
-	sfx("dash", h.pos, -2.0, 1.4)
+	sfx("dodge", h.pos)
 	if h == player:
 		_slow(0.25, 0.4)
 		hud.toast("Perfect dodge!  Next shots crit", Color("9af0ff"))
@@ -2662,7 +2665,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		"ckey": KeyRun.on_pickup(self, h)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
 	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
+		sfx(PickupSfx.of_kind(String(p["kind"])), null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
 			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
 
@@ -2688,7 +2691,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.material_override.set_shader_parameter("color", vis_col)
 		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
 		if halo:
-			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
+			halo.material_override.set_shader_parameter("color", Color(look[3] as Color, float(look[2])))
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
@@ -2916,6 +2919,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
 	# that stopped it
 	var fxx: Dictionary = s["x"]
+	if why == "wall" and is_instance_valid(s["by"]): Juice.wall(self, at, s["by"])
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
 		(fxx["kx"] as Callable).call(s, at, e, why if not (e != null and fxx.has("hitset")) else "end")
@@ -2933,6 +2937,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null:
+		MissFx.shot_ended(self, s, at, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -3173,6 +3179,7 @@ func _process(delta: float) -> void:
 	KeysDemo.frame(self)           # screenshot tooling: --keys-demo=thicket|chest|glint|shrub
 	_update_vision()
 	SeeThrough.for_match(self)     # trees and pillars over your hunter or Boki thin out
+	OcclusionOutline.for_match(self)     # your side's outline where cover hides it
 	_vprof("vision")
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
@@ -3215,6 +3222,7 @@ func _process(delta: float) -> void:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
 				var r: float = s.get("vr", s["r"])
 				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
@@ -3917,6 +3925,7 @@ func step(dt: float) -> void:
 	_prof("separate")
 	_update_rings(dt)
 	_update_shots(dt)
+	flyby.tick(self)
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
@@ -4776,9 +4785,9 @@ func _update_zones(dt: float) -> void:
 					if amt > 0.0:
 						for h in hunters:
 							if h.team == z["team"] and not h.remote and not h.downed and not h.out and h.flat_dist(c) < z["r"]:
-								h.hp = minf(h.max_hp, h.hp + amt)
+								h.heal(amt)
 								if h.kin and h.kin.state == "active" and h.kin.flat_dist(c) < z["r"]:
-									h.kin.hp = minf(h.kin.max_hp, h.kin.hp + amt)
+									Effects._heal(h.kin, amt)
 						if z["kind"] == "sanctuary":
 							fx.burst(c + Vector3(randf_range(-2, 2), 0.3, randf_range(-2, 2)), Color("9ee2a0"), 3, 1.5, 0.6, -2.0, 0.8)
 				"well":
@@ -5515,6 +5524,7 @@ func _net_ev(x, from: String) -> void:
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				sfx("kill", who.pos, -6.0, 1.3)
+				KillCues.on_kill(self, who, ents_by_id.get(String(x[2]), null), int(x[3]) if x.size() > 3 else -1)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))

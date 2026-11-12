@@ -15,13 +15,30 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
+##  10. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
+##  11. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
+##  12. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
+##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd plays no stock cue
+##  13. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
+##  14. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
+##      an unknown species falls back to the generic cues, and no two species share a happy take
+##  15. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
+##  16. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
+##  17. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
+##  18. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
+##      drops, and stops on a heal, a down or out
+##  19. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
+const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+
+## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
+const WIRED := {"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"]}   # (the Boki ones: _boki_wired)
 
 var bad := 0
 var levels := {}
@@ -41,12 +58,55 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_dash_air()
+	_cue_table()
+	_wired()
 	_fallback()
 	_ult_cues()
 	_garden_names()
 	_garden()
+	_hit_targets()
+	_ambience()
+	_belt()
+	_boki_cues()
+	_boki_wired()
+	_fusion_cues()
+	_gloves()
+	_ui_cues()
+	_low_hp()
+	_pickups()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The ambience beds the match (AmbBeds) and the title ask for each have their loop file.
+func _ambience() -> void:
+	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
+		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
+
+func _boki_cues() -> void:
+	var missing := []
+	for id in KinLib.kin_ids():
+		var cue := KinLib.cue_of(String(KinLib.species(id).get("type", "")))
+		if _takes(cue).is_empty() and not missing.has(cue):
+			missing.append(cue)
+	ok(missing.is_empty(), "every Boki type has a cast cue file %s" % str(missing))
+	var types := {}
+	for theme in KinLib.TYPE_OF_THEME:
+		types[KinLib.TYPE_OF_THEME[theme]] = true
+	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+## The mix pass's cue table (content/rules/sfx_cues.json): every named sound has a file and the dB is a sane trim.
+func _cue_table() -> void:
+	var mix = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_mix.json"))
+	var cues: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_cues.json"))["cues"]
+	var off := []
+	for sname in cues:
+		var db := float(cues[sname])
+		if _takes(String(sname)).is_empty() or db < -float(mix["max_trim_db"]) or db > float(mix["max_boost_db"]):
+			off.append(sname)
+	ok(not cues.is_empty() and off.is_empty(),
+		"the cue table: %d sounds on file, each within the trim/boost caps %s" % [cues.size(), off])
+	var d: Dictionary = mix["duck"]
+	var dips := float(d["ult_db"]) < 0.0 and float(d["knock_db"]) < 0.0
+	ok(dips and float(d["back_s"]) <= 1.2, "the ducking rules dip and come back in about a second")
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -73,6 +133,30 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "boki_voices":
+		_boki_voices(d["sounds"])
+
+## 7. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
+func _boki_voices(sounds: Dictionary) -> void:
+	var gaps := []
+	var same := []
+	var seen := {}
+	for sp in DirAccess.get_directories_at("res://art/kin"):
+		for mood in KinVoice.GENERIC_CUE:
+			var want := "bk_%s_%s" % [sp, mood]
+			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
+				gaps.append(want)
+		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
+		if seen.has(sig):
+			same.append("%s = %s" % [sp, seen[sig]])
+		seen[sig] = sp
+	var what := "boki_voices: %d species, 5 moods, 2 takes (gaps %s)" % [seen.size(), gaps]
+	ok(gaps.is_empty() and not seen.is_empty(), what)
+	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
+	var fell := []
+	for mood in KinVoice.GENERIC_CUE:
+		fell.append(KinVoice.cue("no_such_species", mood))
+	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -186,6 +270,52 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+## 7. Each target class has its own short layer (Juice plays HitClass.SOUND[class] under the weapon's hit).
+func _hit_targets() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/targets.json"))
+	var sounds: Dictionary = set_d.get("sounds", {}) if set_d is Dictionary else {}
+	var names := HitClass.SOUND.values()
+	var missing := names.filter(func(n): return not sounds.has(n) or not Sfx.ensure(n))
+	var all := names.size() == HitClass.WALL + 1 and missing.is_empty()
+	ok(all, "hit targets: all %d classes have a sound (missing %s)" % [names.size(), missing])
+	var long := []
+	for n in names:
+		for t in _takes(n):
+			if _data(t).size() / 2 > 0.25 * 44100:
+				long.append(t.get_file())
+	ok(long.is_empty(), "hit targets: every take is under 0.25 s, a layer not a hit (long: %s)" % [long])
+## 7. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
+func _fusion_cues() -> void:
+	var cues := {}
+	for t in (MergeForm.data()["types"] as Dictionary).values():
+		cues[String(t["cue"])] = true
+	for f in DirAccess.get_files_at("res://content/merge_forms"):
+		cues[String(MergeForm.kit_form(f.get_basename())["cue"])] = true
+	var missing := []
+	for c in cues:
+		if not Sfx.ensure("boki_fuse_" + c):
+			missing.append(c)
+	for c in ["boki_fuse_end", "boki_fuse_tired", "boki_evolve"]:
+		if not Sfx.ensure(c):
+			missing.append(c)
+	ok(missing.is_empty() and cues.size() >= 16,
+		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+## Each sound in WIRED is in a set and its script(s) play it by name.
+func _wired() -> void:
+	var listed := {}
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if f.ends_with(".json"):
+			var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+			if d is Dictionary:
+				listed.merge(d.get("sounds", {}))
+	var unplayed := []
+	for sname in WIRED:
+		if not listed.has(sname) or not Sfx.ensure(sname):
+			unplayed.append(sname + " (no set or file)")
+		for f in WIRED[sname]:
+			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
+				unplayed.append("%s not in %s" % [sname, f])
+	ok(unplayed.is_empty(), "%d warning sounds are wired %s" % [WIRED.size(), unplayed])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -277,6 +407,98 @@ func _garden() -> void:
 	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
 	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
 	Sfx.clear_amb_layers(0.0)
+## 7. Every belt item has its own cues (BeltSfx), none of them a stock one.
+func _belt() -> void:
+	var rows := BeltSfx.items()
+	var seen := {}
+	var wrong := []
+	for id in UtilityBelt.ids():
+		if UtilityBelt.is_key(id):
+			continue
+		var kinds := ["start"] + (["loop", "end", "cancel"] if UtilityUse.use_of(id) in ["drink", "repair"] else [])
+		for kind in kinds:
+			var c := BeltSfx.cue(id, kind)
+			if c != "belt_%s_%s" % [id, kind] or c in STOCK or seen.has(c) or _takes(c).is_empty():
+				wrong.append("%s %s '%s'" % [id, kind, c])
+			seen[c] = true
+		if (rows.get(id, {}) as Dictionary).size() != kinds.size():
+			wrong.append("%s has the wrong set of cues" % id)
+	ok(wrong.is_empty(), "belt: %d items with their own start/loop/end/cancel cues %s" % [rows.size(), wrong])
+	var src := FileAccess.get_file_as_string("res://scripts/match/utility_use.gd")
+	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))
+	ok(stock_left.is_empty(), "belt: utility_use.gd plays no stock cue %s" % [stock_left])
+
+## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
+func _boki_wired() -> void:
+	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
+		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
+	for cue in wired:
+		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
+		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
+## 7. Every sound a glove names in its content (cast, an effect's "sfx" / "hit_sfx") exists, and at least the
+## first four gloves (Blink, Barrier, Hook, Rocket) have their own.
+func _gloves() -> void:
+	var names := {}
+	var own := []
+	for id in Gear.ALL:
+		var g: Dictionary = Gear.ALL[id]
+		if g.has("sfx"):
+			own.append(id)
+		_glove_names(g, names)
+	var silent := names.keys().filter(func(n): return not Sfx.ensure(String(n)))
+	ok(silent.is_empty(), "gloves: every named sound exists (silent: %s)" % [silent])
+	var first := ["blink", "barrier", "grapple", "rocket"]
+	var have_first: bool = first.all(func(id): return own.has(id))
+	ok(have_first, "gloves: Blink, Barrier, Hook and Rocket have their own sounds (%d do)" % own.size())
+
+func _glove_names(node, names: Dictionary) -> void:
+	if node is Dictionary:
+		for k in node:
+			if k in ["sfx", "hit_sfx", "cast"] and node[k] is String and node[k] != "":
+				names[node[k]] = true
+			else:
+				_glove_names(node[k], names)
+	elif node is Array:
+		for v in node:
+			_glove_names(v, names)
+## 6. Every sound UiSfx plays by name has a file, so a typo never plays silence.
+func _ui_cues() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
+	var re := RegEx.create_from_string('"([a-z_]+)"')
+	var names := {}
+	for hit in re.search_all(src):
+		names[hit.get_string(1)] = true
+	var missing := []
+	for n in names:
+		if _takes(String(n)).is_empty():
+			missing.append(n)
+	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
+## 7. Pickups by item category (content/rules/pickup_sfx.json): every category, gear kind, treasure, belt
+## item and ground kind maps to a sound that exists, and the key cue is kept.
+func _pickups() -> void:
+	var r: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PickupSfx.RULES))
+	var cats: Dictionary = r["cues"]
+	var cues := cats.values()
+	for c in (r["gear_kind"] as Array) + [r["valuable"], r["belt"]] + (r["kinds"] as Dictionary).values():
+		ok(cats.has(c), "pickup category %s has a cue" % c)
+	var kinds := Gear.SLOT_NAMES.size()
+	ok((r["gear_kind"] as Array).size() == kinds, "a pickup category for each of the %d gear kinds" % kinds)
+	var silent := cues.filter(func(s): return not Sfx.ensure(String(s)))
+	ok(silent.is_empty(), "every pickup category has its sound file (missing %s)" % [silent])
+	ok(Sfx.ensure("key_get"), "the key cue key_get is kept")
+	var wrong := []
+	for gid in Gear.ALL:
+		if not cues.has(PickupSfx.of_gear(String(gid))):
+			wrong.append(gid)
+	for vid in Loot.VALUABLES:
+		if not cues.has(PickupSfx.of(Loot.valuable(String(vid)))):
+			wrong.append(vid)
+	for iid in UtilityBelt.ALL:
+		if not cues.has(PickupSfx.of_kind(String(iid))):
+			wrong.append(iid)
+	ok(wrong.is_empty(), "every gear piece, treasure and belt item has a cue (%s)" % [wrong])
+	ok(Sfx.ensure("use_tonic") and Sfx.ensure("use_armor_kit"), "tonic drink and armour-kit repair have own sounds")
 
 func _takes(sname: String) -> Array:
 	var out := []
@@ -316,3 +538,30 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 7. The heartbeat: silent at the line, beating just under it (the first beat at once), faster the lower the
+## share, and silent again on a heal over the line, a down or out. Beats counted over 10 s of 60 fps frames.
+func _low_hp() -> void:
+	var cue := LowHpCue.new()
+	var line := float(Content.rules(LowHpCue.RULES)["start_share"])
+	var at_line := _beats(cue, line, 10.0)
+	ok(at_line == 0 and not cue.active, "heartbeat: silent at the line (%.2f of max health and armour)" % line)
+	var just := _beats(cue, line - 0.01, 10.0)
+	var want := int(ceil(10.0 * cue.bpm(line - 0.01) / 60.0))
+	ok(cue.active and just == want, "heartbeat: starts just under the line, %d beats in 10 s" % just)
+	var low := _beats(cue, line * 0.2, 10.0)
+	ok(low > just, "heartbeat: faster as health drops (%d beats in 10 s near empty)" % low)
+	ok(_beats(cue, line + 0.01, 10.0) == 0 and not cue.active, "heartbeat: stops when you heal back over the line")
+	_beats(cue, 0.1, 1.0)
+	var was := cue.active
+	ok(was and _beats(cue, 1.0, 1.0) == 0 and not cue.active, "heartbeat: stops when downed or out (a full share)")
+	var wav := "res://audio/%s.wav" % LowHpCue.SOUND
+	var on: bool = Settings.DEFAULTS["low_hp_pulse"]
+	ok(on and FileAccess.file_exists(wav), "heartbeat: on by default, sound on file")
+
+func _beats(cue: LowHpCue, s: float, secs: float) -> int:
+	var n := 0
+	for i in int(secs * 60.0):
+		if cue.step(s, 1.0 / 60.0):
+			n += 1
+	return n
