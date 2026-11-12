@@ -491,9 +491,10 @@ func _tick_skins(delta: float) -> void:
 		e["last"] = p
 		var v: Vector2 = s["vel"]
 		var fwd := Vector3(v.x, 0, v.y).normalized() if v.length() > 0.1 else Vector3.FORWARD
-		n.global_position = p
+		var q := Muzzle.drawn(s, p)
+		n.global_position = q
 		if fwd.length() > 0.1:
-			n.look_at(p + fwd, Vector3.UP)
+			n.look_at(q + fwd, Vector3.UP)
 		var spin := n.get_node_or_null("Spin") as Node3D
 		if spin:
 			match String(e["kind"]):

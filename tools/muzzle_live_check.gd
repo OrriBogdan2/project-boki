@@ -15,6 +15,7 @@ const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gil", "gunsli
 const SLOTS := ["lmb", "rmb", "e", "r", "x"]
 
 var bad := 0
+var first: Dictionary = {}      # the first round of the press
 
 func ok(cond: bool, what: String) -> void:
 	print("MUZZLE %s %s" % ["ok  " if cond else "FAIL", what])
@@ -32,7 +33,8 @@ func _frame(m: Match, h: Hunter) -> void:
 func _collect(m: Match, P: Hunter, sid0: int, group: Array) -> void:
 	for s in m.shots:
 		if s["by"] == P and int(s["sid"]) > sid0 and not (s["x"] as Dictionary).get("melee", false):
-			group.append(s["start"])
+			group.append(Muzzle.drawn(s, s["start"]))
+			first = s
 
 ## Presses `slot` and returns {"n": rounds, "off": m} for the first round(s) it spawns, off -1 when none or a ring.
 func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
@@ -49,6 +51,7 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 		"x": HunterKeys.ult_pressed(P)
 	P.inp["sec_hold"] = held
 	var group: Array = []
+	first = {}
 	_collect(m, P, sid0, group)      # (a round that spawns on the press may hit and be gone after one step)
 	var seen := 0 if not group.is_empty() else -1
 	for f in 120:
@@ -66,6 +69,8 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 			break
 	for k in ["fire", "sec", "sec_hold"]:
 		P.inp[k] = false
+	if slot == "lmb" and not first.is_empty():
+		_look_eases(P, first)
 	if group.is_empty():
 		return {"n": 0, "off": -1.0}
 	var mid := Vector3.ZERO
@@ -82,16 +87,14 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 		worst = maxf(worst, best)
 	return {"n": group.size(), "off": worst}
 
-## The round moved to the muzzle keeps what is gameplay: its height, its speed and the point its flight ends at.
-func _reach_kept(P: Hunter) -> void:
-	var at := P.pos + Vector3(0.6, 0.95, 0)
-	var v2 := Vector2(20.0, 0.0)
-	var out: Array = Muzzle.leave(P, "lmb", at, v2, 0.5)
-	var end0 := Vector2(at.x, at.z) + v2 * 0.5
-	var end1 := Vector2(out[0].x, out[0].z) + (out[1] as Vector2) * float(out[2])
-	var kept: bool = is_equal_approx(out[0].y, at.y) and is_equal_approx((out[1] as Vector2).length(), v2.length())
-	var off := end0.distance_to(end1)
-	ok(kept and off < 0.01, "%s: the round keeps its height, speed and flight end (end off %.3f m)" % [P.arch, off])
+## Only the look moves to the muzzle: the round keeps its start (aim, reach, hits); its look eases onto its line.
+func _look_eases(P: Hunter, s: Dictionary) -> void:
+	if not s.has("vis"):
+		return
+	var start_at: Vector3 = s["start"]
+	var far := start_at + Vector3(Muzzle.BLEND_M, 0, 0)
+	ok(Muzzle.drawn(s, far) == far and Muzzle.drawn(s, start_at) == start_at + (s["vis"] as Vector3),
+		"%s: the look is at the muzzle at the start and on the round's line %.0f m on" % [P.arch, Muzzle.BLEND_M])
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -132,7 +135,6 @@ func run(main: Node) -> void:
 			A.step(m, 1.0)
 			A.aim_at(P, aim)
 		ok(worst < MAX_OFF, "%s: every round leaves its weapon point (worst %.3f m)" % [arch, worst])
-		_reach_kept(P)
 		m.queue_free()
 	print("MUZZLE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

@@ -2668,11 +2668,6 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
-	if String(extra.get("muz", "")) != "" and by is Hunter:
-		var out := Muzzle.leave(by as Hunter, String(extra["muz"]), at, v2, life, extra.has("decel"))
-		at = out[0]
-		v2 = out[1]
-		life = out[2]
 	var mi: MeshInstance3D = null
 	var vr := size          # the drawn radius (Oomph.shot_look), kept for the tracer stretch
 	for s in shot_pool:
@@ -2715,6 +2710,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	var sd := {"vr": vr, "sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
+	if String(extra.get("muz", "")) != "" and by is Hunter:
+		sd["vis"] = Muzzle.offset(by as Hunter, String(extra["muz"]), at)
 	shots.append(sd)
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
@@ -3211,10 +3208,10 @@ func _process(delta: float) -> void:
 		if s.has("deco"):
 			_render_deco(s, alpha)
 		if String((s["x"] as Dictionary).get("src", "")) == "abil":
-			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+			AbilityFx.trail(self, s, Muzzle.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha)))
 		if s["node"]:
 			var mi: MeshInstance3D = s["node"]
-			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
+			mi.global_position = Muzzle.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 			var v: Vector2 = s["vel"]
 			if v.length() > 1.0:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)

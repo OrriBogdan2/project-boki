@@ -579,7 +579,8 @@ func _process(delta: float) -> void:
 			continue
 		r["spin"] = float(r["spin"]) + delta * 9.0
 		r["last"] = sd["pos"]
-		_pose(n, String(r["kind"]), sd["pos"], sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
+		var at := Muzzle.drawn(sd, sd["pos"])
+		_pose(n, String(r["kind"]), at, sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:

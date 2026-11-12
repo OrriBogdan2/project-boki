@@ -711,7 +711,7 @@ func _process(_delta: float) -> void:
 			live.erase(e)
 	track()
 	for r in riders:
-		_pose(r["node"], r["sd"]["pos"], r["sd"]["vel"], float(r["trail"]), float(r["width"]))
+		_pose(r["node"], Muzzle.drawn(r["sd"], r["sd"]["pos"]), r["sd"]["vel"], float(r["trail"]), float(r["width"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:

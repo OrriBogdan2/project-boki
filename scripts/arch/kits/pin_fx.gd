@@ -260,7 +260,7 @@ func tick_shots() -> void:
 		seen[sid] = true
 		var e: Dictionary = live[sid]
 		var n: Node3D = e["node"]
-		var p := (s["prev"] as Vector3).lerp(s["pos"], a)
+		var p := Muzzle.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], a))
 		var v: Vector2 = s["vel"]
 		n.global_position = p
 		if v.length() > 0.5:

@@ -321,9 +321,10 @@ func _tick_skins(dt: float) -> void:
 			p.y = arc.x
 			slope = arc.y
 			sk["last"] = p
-		n.global_position = p
+		var q := Muzzle.drawn(s, p)
+		n.global_position = q
 		if v.length() > 0.5:
-			n.look_at(p + Vector3(v.x, v.length() * slope, v.y), Vector3.UP)
+			n.look_at(q + Vector3(v.x, v.length() * slope, v.y), Vector3.UP)
 		var sp := n.get_node_or_null("Spin") as Node3D
 		if sp and kind == "spear":
 			sp.rotate_z(dt * 14.0)
