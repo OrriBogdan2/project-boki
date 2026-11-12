@@ -15,6 +15,10 @@ func run(main_node: Node) -> void:
 	var bad: int = await flow.combos_of(main, "dolm")
 	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
 		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	var glide = load("res://tools/dolm_glide_slam_check.gd").new()
+	await glide.states(main)
+	n += glide.n
+	fails += glide.fails
 	var parity = load("res://tools/parity_pvb.gd").new()
 	parity.main = main
 	await parity.breah()
@@ -559,7 +563,6 @@ func _breah() -> void:
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
 	await _hop_glide(m, P, home, K, reset)
-	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
 	ok(
 		"data: the dash rests 12s per charge and starts with one charge (a second at rank 3)",
@@ -857,45 +860,6 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
-
-## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Quakefall
-## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down, sideways
-## speed x0.25), slamming where she lands; glide still held doesn't reopen it on the way down.
-func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
-	reset.call()
-	P.pos.y += 8.0
-	P.grounded = false
-	P.inp["move"] = Vector2(1, 0)
-	var t := 0.0
-	while not P.gliding and t < 1.0:
-		P.inp["glide"] = true
-		m.step(DT)
-		t += DT
-	var glided := P.gliding
-	var s0 := K.slams
-	var vx0 := absf(P.vel.x)
-	P.inp["move"] = Vector2.ZERO
-	tap(m, P)
-	var folded := not P.gliding and K.dive and K.dive_glide
-	var vx1 := absf(P.vel.x)
-	var fall := 0.0
-	var vmin := 0.0
-	var reopened := false
-	while not P.grounded and fall < 2.0:
-		P.inp["glide"] = true
-		m.step(DT)
-		fall += DT
-		vmin = minf(vmin, P.vel.y)
-		reopened = reopened or P.gliding
-	P.inp["glide"] = false
-	P.inp["move"] = Vector2.ZERO
-	m.step(DT)
-	ok("glide slam: RMB in a glide folds the glider and plunges at the glider's dive speed (data 32.5 m/s)",
-		glided and folded and not reopened and vmin <= -30.0 and vx1 <= vx0 * 0.3 + 0.1,
-		"glided %s folded %s reopened %s vy %.1f vx %.1f -> %.1f" % [glided, folded, reopened, vmin, vx0, vx1])
-	ok("glide slam: she slams where she lands (about 0.3s down from 8m)", K.slams == s0 + 1 and P.grounded
-		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
-	step(m, 0.8)
 
 ## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
 ## release in it punches as the dash ends, in the air, keeping most of her speed.
