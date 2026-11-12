@@ -32,6 +32,8 @@ const SLUG_CORE := Color("ffd0ec")
 const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
+const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
+const CHAIN_GRACE := 0.08              # s the ball stays closed past the gap, for a press a frame or two late
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
@@ -60,6 +62,7 @@ var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
+var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
@@ -205,6 +208,7 @@ func _tick(dt: float) -> void:
 		tell = "half"
 	self_pips(int(res_max()), int(res), res >= res_max(), dt)
 	if stop_t > 0.0: _tick_stop(dt)
+	if m.time >= ball_open_at and anim_id == "dr_lunge": play("dr_lunge_out")
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
 	if coil > 0.0: _tick_coil(dt)
@@ -747,7 +751,7 @@ func on_dash(use_ex: bool) -> bool:
 		var shove := {"invuln": 0.06, "trail": "", "dir": dir}        # Brute Dash hits nobody (data, footage)
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
-		if not _move_runs(): play("dr_lunge")
+		if not _move_runs(): _roll_ball()
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
 		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
@@ -758,6 +762,16 @@ func on_dash(use_ex: bool) -> bool:
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
+
+## The ground shove's pose: a chained shove joins the ball still rolling from the last one (the clip holds closed from
+## the gap's end), and it opens only after the run's last shove (no charge left) or once the next press is too late.
+func _roll_ball() -> void:
+	var chained: bool = anim_id == "dr_lunge" and m.time < ball_open_at
+	play("dr_lunge")
+	if chained:
+		anim_at = m.time - FOLD_T
+	var open_after := 0.0 if h.dashes < 1.0 else float(dash_def()["gap"]) + CHAIN_GRACE
+	ball_open_at = m.time + h.roll_t + open_after
 
 ## A move that runs on through a barge, keeping its own pose: the Anchor's wind-up or air smash, the Broadside.
 func _move_runs() -> bool:
