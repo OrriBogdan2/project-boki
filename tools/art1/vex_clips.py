@@ -12,6 +12,9 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
+import gardenkit
+import actionkit
+import mantlekit
 
 A_Z = 0.16
 SP = 0.0
@@ -147,6 +150,15 @@ KNEEL = dict(READY, **{
     "FR": (0.16, 0.32, A_Z), "FL": (-0.13, -0.34, A_Z + 0.07), "FRy": -0.2, "FLy": 0.3, "FRp": 0.05, "FLp": 0.75,
     "brow": 0.2, "lid": 0.15,
 })
+# the ledge climb (mantlekit): one hand on the lip, the cannon arm braced beside it, a racer's lazy lean over the top, a smirk at the landing
+MANTLE = {"az": A_Z, "hx": 0.18, "hands": {"LP": -1.0}, "w": 0.85, "nod": 0.02, "tail": 0.38, "extra": {
+    "reach": {"BE": aim(0, 35), "UA": (-6, 38), "fing": 0.9, "brow": 0.6, "lid": 0.1},
+    "over": {"BE": aim(0, -40), "UA": (-8, -22), "tor": (0.32, -0.28, 0.0), "fing": 0.9, "brow": 0.7},
+    "step": {"BE": aim(0, -62), "UA": (-10, -46), "tor": (0.24, -0.2, 0.0), "fing": 0.9},
+    "up": {"tor": (0.14, 0.1, 0.0), "fing": 0.3, "LP": (-0.3, -0.08, 1.0), "brow": 0.2},
+    "top": {"LP": (-0.3, -0.1, 1.04), "hed": (-0.08, 0.1, 0.03)},
+    "pop": {"hed": (-0.18, 0.2, 0.04), "brow": -0.3, "lid": 0.2, "LP": (-0.3, -0.12, 1.1)},
+    "land": {"brow": -0.3, "lid": 0.2, "LP": (-0.3, 0.1, 1.0)}}}
 PROWL = {"ankle": A_Z, "foot": 0.11, "width": 0.13, "stride": 0.32, "lift": 0.05, "toe": 0.26, "share": 0.6, "sway": 0.04, "bob": 0.016, "twist": 0.12, "T": 0.62, "toe_out": -0.24}
 
 
@@ -154,9 +166,41 @@ def crouch_set():
     return crouchkit.quick(C, READY, KNEEL, PROWL, hands=("LP",), scan=0.26, dip_t=0.2)
 
 
+# ---- the garden (DECISIONS 2026-11-09): bored and cocky. The cannon rests on her knee through the pet and the snack; her one brass hand does the work, palm down for the head,
+# palm up for the snack, a chin-up smirk at the Boki; the cheer is the one time she gives it everything (cannon up, hop).
+PET_A = dict(KNEEL, pel=(0.02, 0.1, -0.44), prt=(0.2, 0.24, 0.03), tor=(0.3, -0.22, -0.03), hed=(-0.34, 0.18, 0.08), LP=(0.0, 0.86, 0.56), LQ=(1.3, 1.3, 0.0), fing=0.1, brow=0.35)
+GIVE = dict(KNEEL, pel=(0.02, 0.08, -0.4), prt=(0.14, 0.2, 0.03), tor=(0.2, -0.2, -0.03), hed=(-0.3, 0.14, 0.08), LP=(-0.04, 0.82, 0.38), LQ=(1.4, -1.4, 0.0), fing=0.0, brow=0.55)
+DIP = dict(READY, pel=(0.0, 0.0, -0.2), prt=(0.24, 0.0, 0.0), tor=(0.2, 0.0, 0.0), hed=(-0.3, 0.0, 0.0), LP=(-0.28, 0.16, 0.8), LQ=(0.6, 0.0, 0.0), fing=0.9,
+           FL=(-0.15, 0.13, A_Z), FR=(0.17, -0.12, A_Z), BE=aim(-6, -30), UA=(-18, -60))
+SPRING = dict(READY, pel=(0.0, 0.0, 0.06), prt=(-0.1, 0.0, 0.0), tor=(-0.1, 0.0, 0.0), hed=(-0.2, 0.0, 0.0), LP=(-0.3, 0.1, 1.7), LQ=(-3.0, 0.0, 0.0), fing=0.9,
+          FL=(-0.12, 0.08, A_Z + 0.09), FR=(0.14, -0.1, A_Z + 0.1), FLp=-0.5, FRp=-0.5, BE=aim(-4, 66), UA=(-10, 38), brow=0.7, lid=0.3)
+
+
+def garden_set():
+    P = {"kneel": KNEEL, "pet_a": PET_A, "pet_b": dict(PET_A, LP=(0.0, 0.7, 0.58), tor=(0.26, -0.22, -0.03)),
+         "give": GIVE, "give_in": dict(GIVE, LP=(-0.04, 0.72, 0.36), prt=(0.1, 0.2, 0.03)),
+         "dip": DIP, "up": SPRING, "peak": dict(SPRING, pel=(0.0, 0.0, 0.08), LP=(-0.3, 0.1, 1.76), BE=aim(-4, 70)),
+         "pump": dict(SPRING, pel=(0.0, 0.0, 0.0), FL=(-0.12, 0.08, A_Z), FR=(0.14, -0.1, A_Z), FLp=0.0, FRp=0.0, LP=(-0.3, 0.1, 1.6), BE=aim(-4, 62), hed=(-0.28, 0.1, 0.05))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.08, "snap": 0.4})
+
+
+# ---- stomp, drink, revive (item 145): the cannon stays low on its arm; the left, brass hand does the rest
+ACT = {
+    "stomp": {"top": {"LP": (-0.42, 0.04, 1.14), "BE": aim(-8, -50)}, "hit": {"LP": (-0.3, 0.1, 0.84), "BE": aim(-6, -42)}},
+    "drink": {"sip": {"LQ": (-1.3, 0.0, 0.0), "BE": aim(-6, -62)}},
+    "revive": {"kneel": {"LP": (-0.12, 0.5, 0.4), "LQ": (0.9, 0.0, 0.0), "BE": aim(-34, -34), "UA": (-30, -50)}},
+}
+
+
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("LP",), (-0.045, 0.17, 1.64), ACT)
+
+
 def clips():
     out = [FnClip("idle", 3.2, idle), FnClip("stance", 3.0, stance)]
     out += crouch_set()
+    out += garden_set()
+    out += action_set()
     for nm, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(named(gait(0.45, h, 0.86), "walk_" + nm))
         out.append(named(gait(1.0, h, 0.58), "run_" + nm))
@@ -170,6 +214,7 @@ def clips():
     gl = dict(pel=(0, 0, 0.0), prt=(0.22, 0, 0), tor=(0.0, 0, 0), hed=(-0.2, 0, 0), LP=(-0.1, -0.06, 1.72), LQ=(-3.0, 0, 0), UA=(-10, 40), BE=aim(-6, 72), FL=(-0.09, -0.12, A_Z + 0.04), FR=(0.11, -0.24, A_Z + 0.1), FLp=-0.7, FRp=-0.9)
     out.append(C("glide", 1.0, [(0.0, gl), (0.5, dict(gl, FR=(0.11, -0.26, A_Z + 0.13))), (1.0, gl)], loop=True))
 
+    out.append(mantlekit.clip(C, READY, MANTLE))
     # ---- LMB: the gatling's rounds; keys from gunslinger_lmb: the kick at 0.025, back on the aim by 0.09, the next round at 0.12, she eases out by 0.55
     base = dict(BRACE, **ON_AIM)
     base.update(LP=(-0.26, 0.2, 0.98), LQ=(0.3, 0, 0), brow=0.5, lid=0.1)
@@ -217,7 +262,6 @@ def clips():
     dn = {"pel": (0, -0.08, -0.72), "prt": (-0.32, 0.3, 0.42), "tor": (0.2, 0, 0.0), "hed": (0.24, 0, 0.1), "FL": (-0.28, 0.42, A_Z - 0.03), "FR": (0.1, 0.5, A_Z - 0.03), "FLy": 0.6, "FRy": 0.2, "FLp": 0.5, "FRp": 0.4,
           "BE": aim(-40, -6), "UA": (-40, -30), "LP": (-0.34, -0.1, 0.22), "LQ": (0, 0, 0), "lid": 0.65, "brow": -0.8, "fing": 0.0}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.3, 0, 0), hed=(0.38, 0, 0.1))), (2.4, dn)], loop=True))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.32, 0, 0.1), hed=(-0.1, 0, 0), lid=0.3, brow=0.8)), (0.95, dict(READY, pel=(0, -0.02, -0.26), prt=(0.32, 0, 0), tor=(0.3, 0, 0), hed=(-0.3, 0, 0), FR=(0.16, -0.28, A_Z), LP=(-0.3, 0.1, 0.62), BE=aim(-16, -42))), (1.6, READY)]))
     dead = {"pel": (0, -0.1, -0.86), "prt": (-1.35, 0.1, 0.1), "tor": (0.1, 0.1, -0.1), "hed": (-0.1, 0.4, 0.3), "FL": (-0.2, 0.6, A_Z - 0.04), "FR": (0.16, 0.68, A_Z - 0.04), "FLy": 0.4, "FRy": -0.4, "FLp": 0.6, "FRp": 0.6,
             "BE": aim(-58, 4), "UA": (-80, -2), "LP": (-0.42, -0.2, 0.2), "LQ": (0, 0, 0), "lid": 1.0, "brow": -0.3, "fing": 0.0}
     out.append(C("death", 1.5, [(0.0, READY), (0.16, dict(READY, pel=(0, -0.08, -0.08), tor=(-0.3, 0, 0.1), hed=(-0.4, 0, 0), lid=0.2, brow=-1, BE=aim(-20, -30)), "out"),

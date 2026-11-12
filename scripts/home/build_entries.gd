@@ -170,6 +170,8 @@ func add_island_entries(out: Array) -> void:
 	for t in HomeLayout.THEMES:
 		var theme: String = t
 		var td: Dictionary = HomeLayout.THEMES[t]
+		if td.has("zone"):
+			continue
 		var own: bool = (lay["themes"] as Array).has(t)
 		var now: bool = String(lay["theme"]) == t
 		var note := "Owned" if own else ""
