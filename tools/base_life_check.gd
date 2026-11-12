@@ -50,9 +50,10 @@ func _chase_rows(home, center: Vector3) -> void:
 	var R: Dictionary = BaseChase.rules()
 	var life: BaseLife = home.life
 	home.day_t = 0.4
+	life.night = false      # the 10 minutes ended at night; the next tick would set it again
 	for k in home.kins:
-		(life.machine(k) as Fsm).go(BaseLife.S.ROAM, "test")
 		k["nap_t"] = 0.0
+		life.machine(k).go(BaseLife.S.ROAM, "test")
 		k["pers"]["social"] = 1.0
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
@@ -92,7 +93,7 @@ func _chase_rows(home, center: Vector3) -> void:
 	ok(ended_at > 0.0 and absf(ended_at - secs) <= 1.0, "end: it stopped at %.1f s of the %.1f s" % [ended_at, secs])
 	ok(life.machine(a).is_in(BaseLife.S.NAP) and life.machine(b).is_in(BaseLife.S.NAP) and BaseLife._dist(a, b) < 2.5,
 		"end: both are resting together (%.1f m apart)" % BaseLife._dist(a, b))
-	var marks: bool = a.has("life_chase") or b.has("tag_pace") or BaseChase.running(life) > 0
+	var marks: bool = a.has("life_chase") or b.has("life_chase") or a.has("tag_pace") or b.has("tag_pace")
 	ok(not marks, "end: the chase marks are gone")
 	var slow := {"stats": {"speed": 0}, "species": "cindle"}
 	var fast := {"stats": {"speed": 999}, "species": "cindle"}

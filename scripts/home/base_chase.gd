@@ -22,15 +22,15 @@ static func clear(k: Dictionary) -> void:
 static func running(life: BaseLife) -> int:
 	return life.h.kins.filter(func(k): return k.has("life_chase") and k.has("life_it")).size()
 
-## The friend `k` starts a chase with, or {} (not outgoing enough, no free friend near, or the zone is at its cap).
+## The friend `k` starts a chase with, or {} (none near that is free and less outgoing, or the zone is at its cap).
 static func pick(life: BaseLife, k: Dictionary, near: Array) -> Dictionary:
 	if running(life) >= int(rules()["per_zone"]):
 		return {}
 	var social := float(k["pers"].get("social", 0.22))
 	for o in near:
-		var friends := BaseLife.bond(k["rec"], o["rec"]) >= float(life.R["friend_at"])
-		var loose := (o["life"] as Fsm).is_in(BaseLife.S.ROAM) and not o.has("play")
-		if friends and loose and social >= float(o["pers"].get("social", 0.22)) and randf() < social:
+		var friends: bool = BaseLife.bond(k["rec"], o["rec"]) >= float(life.R["friend_at"])
+		var loose: bool = (o["life"] as Fsm).is_in(BaseLife.S.ROAM) and not o.has("play")
+		if friends and loose and social >= float(o["pers"].get("social", 0.22)):
 			return o
 	return {}
 
@@ -79,13 +79,12 @@ static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 	if k.has("life_it"):
 		k["chase_leg"] = float(k["chase_leg"]) + dt
 		k["goal"] = o["pos"]
-		if BaseLife._dist(k, o) < BaseLife.CATCH:
+		if BaseLife._dist(k, o) < float(rules()["catch_m"]) and float(k["chase_leg"]) >= float(rules()["grace_s"]):
 			_swap(life, k, o)
 	else:
 		_flee(life, k, o)
 
 static func _swap(life: BaseLife, k: Dictionary, o: Dictionary) -> void:
-	BaseLife.add_bond(k["rec"], o["rec"], float(life.R["bond_tag"]))
 	_roles(o, k)
 	o["goal"] = o["pos"]
 	for who in [k, o]:

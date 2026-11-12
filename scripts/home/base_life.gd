@@ -189,7 +189,7 @@ func choose(k: Dictionary) -> void:
 		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
-	var friend: Dictionary = BaseChase.pick(self, k, near)
+	var friend: Dictionary = BaseChase.pick(self, k, near) if randf() < float(pers.get("social", 0.22)) else {}
 	if not friend.is_empty() and BaseChase.begin(self, k, friend):
 		return
 	var mate := _mate(k, near)

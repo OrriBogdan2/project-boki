@@ -819,8 +819,8 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 
 | Setting | Value |
 |---|---|
-| chase | {"secs": [6.0, 10.0], "per_zone": 1, "run": 1.5, "speed_gain": 0.3, "flee_mul": 0.9, "leg_s": 3.0, "flee_m": 3.5, "hop_s": 0.6, "hop_tries": 8} |
-| chase_doc | Friend chase (scripts/home/base_chase.gd, run by BaseLife): two Boki whose bond is a friendship play a toy-free tag. It lasts secs seconds, only per_zone chases run in a zone at once; run scales the 2.4 m/s farm walk and speed_gain adds up to that share at a full Speed stat; the one being chased runs at flee_mul of its pace and, after leg_s seconds without a catch, stops to let itself be caught; it picks a flee spot flee_m m off, trying hop_tries directions; on each swap the new runner hops for hop_s s (no tag clip yet, the rig's hop). Both end resting together (a nap). |
+| chase | {"secs": [6.0, 10.0], "per_zone": 1, "run": 1.5, "speed_gain": 0.3, "flee_mul": 0.9, "catch_m": 1.2, "grace_s": 1.0, "leg_s": 3.0, "flee_m": 3.5, "hop_s": 0.6, "hop_tries": 8} |
+| chase_doc | Friend chase (scripts/home/base_chase.gd, run by BaseLife): two Boki whose bond is a friendship play a toy-free tag. It lasts secs seconds, only per_zone chases run in a zone at once; run scales the 2.4 m/s farm walk and speed_gain adds up to that share at a full Speed stat; the one being chased runs at flee_mul of its pace, a tag lands within catch_m m (Boki keep about 1 m apart, so it is wider than the plain tag's), the new chaser waits grace_s seconds after a swap before it can tag, and after leg_s seconds without a catch, stops to let itself be caught; it picks a flee spot flee_m m off, trying hop_tries directions; on each swap the new runner hops for hop_s s (no tag clip yet, the rig's hop). Both end resting together (a nap). |
 | days | 30 |
 | seeds | 200 |
 | seeds_doc | Runs per player; the report gives medians (days) and means (per-day rates). |
