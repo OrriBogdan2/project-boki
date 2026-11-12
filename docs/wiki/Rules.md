@@ -597,6 +597,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | natural_death | False |
 | sulky | {"food": 8.0, "energy": 8.0, "joy": 12.0, "clean": 8.0} |
 | sulky_doc | base_mode only (GARDEN.md section 2): needs bottom out here, sulky, and the starve clock never builds, so a Boki left alone is never weak or sick. It gets hungry and glum, and feeds itself from a bowl or a snack (BaseFeed). Off base_mode the starve stages apply. |
+| base_joy_decay | 8 |
+| base_joy_decay_doc | base_mode only: joy (0..100) a Boki loses each awake minute at the base (0.3x asleep, faster when hungry, grubby or worn out). A farm day is 5 minutes (care_day_s). Off base_mode Care.DECAY's 0.6 applies. |
 | care_day_s | 300 |
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
 | stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
@@ -1467,11 +1469,11 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 
 | Setting | Value |
 |---|---|
-| joy_below | 85 |
+| joy_below | 90 |
 | pick_chance | 0.5 |
 | play_secs | [8.0, 12.0] |
 | go_timeout | 20 |
-| joy_gain | 10 |
+| joy_gain | 3 |
 | stat_gain | 1 |
 | max_players | 2 |
 | fav_after | 3 |
