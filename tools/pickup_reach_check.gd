@@ -153,12 +153,13 @@ func _clear_rect(x: float, z: float, half_x: float, half_z: float) -> bool:
 ## The middle of a rock cell with two clear flat cells on each side along x, at the rock's ground height.
 func _rock_with_room() -> Vector3:
 	var c := P.pos
-	for ring in range(1, 80):
-		for k in 16:
-			var d := Vector2.RIGHT.rotated(TAU * k / 16.0) * float(ring)
-			var cx := floorf(c.x + d.x) + 0.5
-			var cz := floorf(c.z + d.y) + 0.5
-			if not w.is_block(cx, cz):
+	var best := Vector3.INF
+	var best_d := INF
+	for ix in range(2, w.w - 2):
+		for iz in range(2, w.h - 2):
+			var cx := float(ix) + 0.5
+			var cz := float(iz) + 0.5
+			if not w.is_block(cx, cz) or Vector2(cx - c.x, cz - c.z).length() >= best_d:
 				continue
 			var g := w.ground_at(cx - 1.0, cz)
 			var room := true
@@ -169,8 +170,9 @@ func _rock_with_room() -> Vector3:
 					if w.is_block(px, pz) or w.is_void(px, pz) or absf(w.ground_at(px, pz) - g) > 0.05:
 						room = false
 			if room:
-				return Vector3(cx, g, cz)
-	return Vector3.INF
+				best = Vector3(cx, g, cz)
+				best_d = Vector2(cx - c.x, cz - c.z).length()
+	return best
 
 func _reset(at: Vector3) -> void:
 	P.teleport(Vector3(at.x, w.ground_at(at.x, at.z), at.z))
