@@ -27,3 +27,9 @@ The owner sent a reference with a wide lit wedge, so the numbers change, the mod
 (the reference's circle measures about the same in the world). The shader draws the same wedge (`VIS_COS`,
 `VIS_NEAR`, asserted by `--vision-check`), and a seen rival who is hiding (crouched, grass, smoke) shows no plate.
 Bots use the same rule, so they also see wider. No Net or save change. Measurements: docs/specs/VISION_LOOK.md.
+
+## Addendum 2026-11-12: the reveal circle
+A second owner frame shows a rival seen outside the wedge inside her own lit circle. The attacker reveal already
+existed (`reveal_t` from shots, strikes, hits and gloves); it is now drawn: `RevealLight` lights a soft 2.0 m circle
+in `vis.gdshaderinc` round up to three seen, revealed rivals and fades it over the reveal's last 0.3 s. No new sight
+rule, no Net or save change (clients already get the reveal flag); `--vision-check` covers it.
