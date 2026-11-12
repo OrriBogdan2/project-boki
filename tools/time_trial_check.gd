@@ -3,7 +3,7 @@ extends RefCounted
 ## built; the course asks for a dash, a wall kick, the pad and a glide (the kick tower can't be climbed with a
 ## plain jump, the glide tower only by the pad); a scripted run with real inputs goes start -> ten gates ->
 ## finish and sets this Hunter's best; a dash gate walked through doesn't count; a slower run keeps the best;
-## a Hunter swap or a fall ends the run; a v12 save migrates to an empty best list. Prints TIMETRIALCHECK PASS/FAIL.
+## a Hunter swap or a fall ends the run; a v13 save migrates to an empty best list. Prints TIMETRIALCHECK PASS/FAIL.
 
 const DT := 1.0 / 60.0
 const RUN_CAP := 120.0          # [s] a scripted run that takes longer has got stuck
@@ -142,9 +142,9 @@ func _slower_and_swap(m: Match, T: TimeTrial) -> void:
 	ok("a fall ends the run", not T.running)
 
 func _migrate() -> void:
-	var old := {"v": 12, "roster": []}
+	var old := {"v": 13, "roster": []}
 	var good := Save.migrate(old)
 	var bests = old.get("time_trial", null)
 	var empty: bool = bests is Dictionary and (bests as Dictionary).is_empty()
-	ok("a v12 save gets an empty best list", good and int(old["v"]) == Save.VERSION and empty)
+	ok("a v13 save gets an empty best list", good and int(old["v"]) == Save.VERSION and empty)
 	ok("a fresh save has one", Save.fresh().get("time_trial", null) is Dictionary)

@@ -15,4 +15,4 @@ The Training Grounds' time trial (scripts/match/time_trial.gd) keeps a personal 
 Option 1. `fresh()` has `"time_trial": {}`, and `TimeTrial.migrate` only adds the key when it is missing or not a dictionary (decision 0060's rule), so running it twice or out of order is safe. `TimeTrial.record` saves through `Save.save_game` only on a new best.
 
 ## Consequences
-scripts/core/save.gd (VERSION 12 -> 13 on this branch's ext/release-integ-0244c base) and scripts/match/time_trial.gd. 0.24.5 already uses v13 (garden zones, 0060), so when this lands on the 0.24.5 chain (docs/SAVE_CHAIN_0245.md) it takes the next free number. Only the step number changes, not its body. No Net change: the course is local to --arena. `--time-trial-check` covers a v12 save and a fresh save.
+scripts/core/save.gd (VERSION 13 -> 14 after merging main, whose v13 is garden zones) and scripts/match/time_trial.gd. main uses v13 for garden zones (0060); docs/SAVE_CHAIN_0245.md renumbers it again if that chain lands first. Only the step number changes, not its body. No Net change: the course is local to --arena. `--time-trial-check` covers a v13 save and a fresh save.
