@@ -15,6 +15,7 @@ const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
 const SEA := Color("2ee6c0")               # the signature: Snap, Brimseed rim and Nightwell (content/vfx/ostra.json)
+const DEEP := Color("0b5a50")              # their deep teal: the dome's filling accent
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
