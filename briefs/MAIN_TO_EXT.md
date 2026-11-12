@@ -1339,3 +1339,9 @@ Owner 11-11 ~12 AM EST: ship what is gated now (ext/release-integ-0244c, docs/GA
 - **Checks to fix:** pip-live (Meeko appeal3 body has no emissive constellations; came with ext/meeko-appeal-b), boki-hit-table (Ashwick rows vs a summoned Boki, red before the Meeko merge too); both -> 0.24.5. Known load/flake reds: docs/GATE_0244.md
 - **Not merged, next in 0.24.5:** Limited Ways Out (Heart + quest exits), the Chao-style garden core, ext/meeko-orbit, ext/albert-appeal, the appeal4 candidates (ext/cinder-bust, Sable appeal4).
 - Not merged on purpose: ext/anim-uthana-rank (NO-GO), ext/sable-wings (excluded), the 10 ext/boki-<species> (superseded). Already in the base: ext/gatefix-w2, map-2x 0245, UI void & masks.
+
+## 2026-11-12 UTC integration lane (job 20261112-021536-a6) SHIPPED 53e2fe7f3 (PR #37, no tag)
+Owner 11-11 "go integration": ext/release-integ-0245@2723685892 merged to main. Do NOT re-merge its branches (list: docs/GATE_0245.md). Branches stacked on 0245 now only need main.
+- **Player gets:** Limited Ways Out (Heart site + two Uplinks a map, quest seats, HUD strip, map badges, results; open extraction gone), the Chao-style garden core (26 branches), tutorial abilities course, Meeko orbit, Albert appeal, Cinder appeal4 bust, StatBudget + ZoneDress crash fixes.
+- **Gate:** docs/GATE_0245.md (NEW-REDs fixed or explained, in docs/DEBT.md); health --strict OK; export-pack rc 0. Net.VERSION 0.24.5.
+- **Checks to fix (owners):** teammate, new-player-flow, drop-feel, box-revive, revive-net, capture, kin-loss, carry-boki, minigame-hub, raising, lean, unmasked, warden-clips (see the gate's NEW-RED table).
