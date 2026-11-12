@@ -231,8 +231,7 @@ func _ready() -> void:
 func _classic_layout(path_col: Color) -> void:
 	if fs:
 		return
-	spots["house"] = Vector3(38.0, 0, 26.5)
-	world.set_block_rect(36, 25, 40, 27)
+	ClassicSet.place(self)      # the house, stall, Nook and Burrow (at FAR if the hub holds them)
 	world.paint_path(Vector2i(37, 28), Vector2i(37, 38), path_col)
 	world.paint_path(Vector2i(39, 31), Vector2i(42, 31), path_col, false)
 	world.paint_path(Vector2i(24, 30), Vector2i(36, 30), path_col, false)
@@ -243,8 +242,6 @@ func _classic_layout(path_col: Color) -> void:
 	world.paint_path(Vector2i(48, 28), Vector2i(61, 28), path_col, false)
 	world.paint_path(Vector2i(29, 25), Vector2i(29, 29), path_col, false)
 	world.paint_path(Vector2i(34, 42), Vector2i(34, 46), path_col, false)
-	spots["stall"] = Vector3(30.5, 0, 33.0)
-	world.set_block_rect(29, 32, 31, 33)
 	spots["pot"] = Vector3(42.5, 0, 27.5)
 	world.set_block_rect(42, 27, 42, 27)
 	for z in range(30, 38):
@@ -418,10 +415,8 @@ func _ready_rest() -> void:
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	if not fs:
-		var house := Models.house(); house.position = spots["house"]; add_child(house)
-		house_node = house
 		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
-		var stall := StallModels.build(Stalls.level()); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
+		ClassicSet.build(self)
 	var portal := Models.portal(UI.TEAL); portal.position = spots["portal"]; add_child(portal)
 	if VisitZones.has(visit) or (FarmUnlocks.base_mode() and not _visiting()):
 		hway = HubWaystone.new(self)
@@ -449,8 +444,6 @@ func _ready_rest() -> void:
 		add_child(bed)
 	await _slice()
 	_build_lots()
-	if visit.is_empty() and not fs:
-		_build_burrow()
 	await _slice()
 	_build_bridges()
 	ZoneDress.place(self)
@@ -1853,7 +1846,7 @@ func _rack_equip(id: String) -> void:
 
 # ---- the whistle: press H at home and your kin come running, even from inside the house
 func _house_door() -> Vector3:
-	if fs and (not spots.has("house") or spots["house"].x < -100.0):
+	if not spots.has("house") or spots["house"].x < -100.0:
 		return HomeLayout.LANDING      # no house yet: the way in is the landing by the portal
 	return spots["house"] + HomeLayout.facing(house_r) * 2.1
 
@@ -4085,17 +4078,6 @@ var kinbox_view: KinBoxView = null
 func _farm_kin() -> Array:
 	return (_d()["roster"] as Array) if not visit.is_empty() else GardenZones.out_here()
 
-func _build_burrow() -> void:
-	burrow_node = KinBurrow.model(KinBox.boxed().size())
-	burrow_node.position = BURROW_AT
-	burrow_node.scale = Vector3.ONE * 0.8
-	add_child(burrow_node)
-	var bl := Label3D.new()
-	bl.text = "Boki Burrow"; bl.font = UI.big; bl.font_size = 40; bl.pixel_size = 0.008; bl.outline_size = 10
-	bl.modulate = Color("d9c8ff"); bl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	bl.position = BURROW_AT + Vector3(0, 1.85, 0.3)
-	add_child(bl)
-
 func _refresh_burrow() -> void:
 	KinBurrow.set_sleepers(burrow_node, KinBox.boxed().size())
 
@@ -4120,15 +4102,6 @@ func _setup_care() -> void:
 		yard = Models.training_yard()
 		yard.position = YARD_AT
 		add_child(yard)
-		# the Nesting Nook: where two close kin leave an egg
-		var nook := Models.nesting_nook()
-		nook.position = NEST_AT
-		add_child(nook)
-		var nl := Label3D.new()
-		nl.text = "Nesting Nook"; nl.font = UI.big; nl.font_size = 40; nl.pixel_size = 0.008; nl.outline_size = 10
-		nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
-		add_child(nl)
 	if not _visiting():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
