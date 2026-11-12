@@ -73,7 +73,7 @@ var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
 	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "glide_press_only": false, "ult": false,
-	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
+	"sec": false, "sec_hold": false, "crouch": false, "scout": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
 var ammo := 12
@@ -175,6 +175,7 @@ var max_armor := 50.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
 var crouch := false           # slower, steadier aim, and much harder to spot
 var crouch_k := 0.0
+var scout := false            # holding the far look (ScoutLook): further sight in a narrow cone, speed unchanged
 var reveal_t := 0.0           # seen through bushes and around walls for a moment after firing or getting hit
 var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
@@ -1877,6 +1878,7 @@ func sim(dt: float) -> void:
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
 		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
+		scout = bool(inp.get("scout", false)) and not downed and not out and not dropping and not riding
 	var want_bloom := -0.3 if crouch else 0.0
 	if not grounded: want_bloom = 1.0
 	elif Vector2(vel.x, vel.z).length() > 1.5 and not crouch: want_bloom = 0.45

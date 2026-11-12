@@ -77,6 +77,10 @@ vis_range={
 "type": "float",
 "value": 24.0
 }
+vis_scout={
+"type": "vec2",
+"value": Vector2(0, 1)
+}
 vis_allies={
 "type": "float",
 "value": 0.0

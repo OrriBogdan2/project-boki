@@ -2513,7 +2513,9 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 		if d < near:
 			return true
 		# sneaking (Ctrl) slows you but lets you see further, as in Supervive
-		if d > rng * (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight")) or (in_grass and not revealed):
+		var far: float = (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight"))
+		far *= ScoutLook.sight_mul(h, rel / maxf(d, 0.001))
+		if d > rng * far or (in_grass and not revealed):
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
@@ -2536,6 +2538,7 @@ func _update_vision() -> void:
 		RenderingServer.global_shader_parameter_set("vis_focus", player.model.global_position if player.model else player.pos)
 		RenderingServer.global_shader_parameter_set("vis_dir", player.aim_dir())
 		RenderingServer.global_shader_parameter_set("vis_range", view_range() * (1.25 if player.crouch else 1.0))
+		RenderingServer.global_shader_parameter_set("vis_scout", ScoutLook.shader_arg(cam.scout_k))
 		# teammates light up what they see too (up to three)
 		var n := 0
 		for h in hunters:
@@ -3222,6 +3225,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	cam.scout_on = player != null and player.scout
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3372,6 +3376,7 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
+	player.inp["scout"] = Input.is_action_pressed("scout") and not paused
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
@@ -5159,6 +5164,7 @@ func _flags(h: Hunter) -> int:
 	if h.riding: f |= 1024
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
+	if h.scout: f |= ScoutLook.BIT
 	if h.diving: f |= 16384
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
@@ -5317,6 +5323,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			h.scout = f & ScoutLook.BIT != 0
 			if f & 2048 != 0:
 				var hk := ((f >> 15) & 15) - 1
 				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)

@@ -76,6 +76,7 @@ func _setup_input() -> void:
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
+	_key("scout", [KEY_C])                    # hold: the far look (ScoutLook); C is home-only "details" otherwise
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
 		_key(a, [])      # Boki quick keys: unbound until picked
