@@ -91,6 +91,10 @@ func _breah() -> void:
 		"small: the boulder's burst splashes the foe beside it (half damage)",
 		K.splashes >= 1 and dmg(T2) > 3.0 and dmg(T2) < dmg(T), "splash %d took %.1f" % [K.splashes, dmg(T2)]
 	)
+	ok(
+		"boulder: its burst plays the blue hit flash and debris once",
+		int(HeroVfx.of(m).plays.get("boulder_hit", 0)) == 1, str(HeroVfx.of(m).plays)
+	)
 	T2.queue_free()
 	m.hunters.erase(T2)
 	# ---- LMB hold: the lane, the charge ring, the timing, the punch and its step
@@ -129,6 +133,10 @@ func _breah() -> void:
 	ok(
 		"lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 3.0,
 		"punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x]
+	)
+	ok(
+		"lmb: the punch lands with the blue hit flash and debris (sized by the lane's half width)",
+		int(HeroVfx.of(m).plays.get("punch_hit", 0)) >= 1, str(HeroVfx.of(m).plays)
 	)
 	ok("lmb: the punch steps her forward about half a body", P.pos.x - x0 > 0.35, "step %.2f" % (P.pos.x - x0))
 	ok("lmb: the lane is gone after the punch", not AimKit.shown(P, "punch"))

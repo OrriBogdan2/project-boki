@@ -418,14 +418,13 @@ func _boulder() -> void:
 	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), COBALT, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
 	Juice.shot(h, start, dir)
 
-## The boulder bursts where it ends: a small fireball with a red ring on the ground, splashing the
+## The boulder bursts where it ends: a blue flash and short debris over a ring at the splash radius, splashing the
 ## foes beside the one it hit.
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
 	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
-	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
-	m.fx.flash(at, Color("9ad0ff"), 0.5, 0.06)
+	vfx("boulder_hit", at, null, {"r": float(bd["splash"])})
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -491,15 +490,10 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
-## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
+## short spray of stone and sparks thrown on along the punch, sized by the lane's half width, bigger the longer she held.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
-	var fwd := Vector3(dir.x, 0.25, dir.y)
-	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
-	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
-	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
-	m.fx.flash(at + Vector3(0, 0.7, 0), Color("9ad0ff"), 0.5 + 0.3 * k, 0.07)
+	vfx("punch_hit", at, dir, {"r": float(lmb_def()["punch"]["width"]) * 0.5, "k": k})
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
