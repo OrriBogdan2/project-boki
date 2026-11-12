@@ -2177,9 +2177,7 @@ func S_dev_god() -> bool:
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if net_on:
 		net_event(["mobdead", mb.nid, by.nid if by else ""])
-	var credit: Ent = by
-	if by is Kin and by.owner_h:
-		credit = by.owner_h
+	var credit: Ent = KnockCredit.credited(by)
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)

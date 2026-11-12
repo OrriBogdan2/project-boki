@@ -28,10 +28,10 @@ static func boki_nid(by: Ent) -> String:
 	var k := KnockCredit.boki_of(by)
 	return k.nid if k else ""
 
-## "Vex's Cindle" when a Boki did it, else the Hunter's title.
+## "Vex's Cindle" when a Boki did it, else the Hunter's name.
 static func name_of(hunter: Hunter, via: Ent) -> String:
 	var k := KnockCredit.boki_of(via)
-	return "%s's %s" % [hunter.pname, k.rec.get("name", "Boki")] if k else HeroTitle.of_hunter(hunter)
+	return "%s's %s" % [hunter.pname, k.rec.get("name", "Boki")] if k else hunter.pname
 
 ## `by` hurt `victim` just now (a Boki's hit is its owner's).
 static func note(m: Match, by: Ent, victim: Ent) -> void:
@@ -70,7 +70,7 @@ static func _tell(h: Hunter, victim: Hunter, mine: bool) -> void:
 static func announce(m: Match, kind: String, victim: Hunter, hunter: Ent, via: Ent, assists: Array, why := "") -> void:
 	var credited_foe: bool = hunter is Hunter and hunter != victim and hunter.team != victim.team
 	var who := KnockCredit.name_of(hunter, via) if credited_foe else ""
-	var vic := HeroTitle.of_hunter(victim)
+	var vic := victim.pname
 	if kind == "knock":
 		m.add_feed(("%s knocked %s" % [who, vic]) if credited_foe else "%s went down" % vic)
 	else:

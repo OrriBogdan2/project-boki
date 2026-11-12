@@ -52,6 +52,7 @@ func run(main: Node) -> void:
 	_frames(0.3)
 	CombatBus.takedown.connect(_on_takedown)
 	_summon_credit()
+	_mob_xp()
 	_stolen_credit()
 	CombatBus.takedown.disconnect(_on_takedown)
 	m.queue_free()
@@ -73,7 +74,7 @@ func _summon_credit() -> void:
 	v.hp = 5.0
 	v.hurt(20.0, bk, {"src": "kin"})
 	ok(v.downed and p.knocks == k0 + 1, "last hit: the summoned Boki's knock is its Hunter's")
-	ok(_feed() == "%s knocked %s" % [line, HeroTitle.of_hunter(v)], "...and the feed names it: \"%s\"" % _feed())
+	ok(_feed() == "%s knocked %s" % [line, v.pname], "...and the feed names it: \"%s\"" % _feed())
 	ok(seen.size() == 1 and seen[0]["kind"] == "knock" and seen[0]["hunter"] == p and seen[0]["boki"] == bk
 		and seen[0]["victim"] == v, "...CombatBus.takedown: knock, Hunter and Boki")
 	ok(KnockCredit.boki_nid(bk) == bk.nid and m.ents_by_id.get(bk.nid) == bk, "...the net event carries the Boki's id")
@@ -81,7 +82,7 @@ func _summon_credit() -> void:
 	seen.clear()
 	var kills := p.kills
 	m.eliminate(v, bk, "finished")
-	ok(p.kills == kills + 1 and _feed() == "%s took out %s" % [line, HeroTitle.of_hunter(v)],
+	ok(p.kills == kills + 1 and _feed() == "%s took out %s" % [line, v.pname],
 		"last hit, kill: the Hunter's kill, \"%s\"" % _feed())
 	ok(seen.size() == 1 and seen[0]["kind"] == "out" and seen[0]["hunter"] == p and seen[0]["boki"] == bk,
 		"...CombatBus.takedown: out, Hunter and Boki")
@@ -99,7 +100,7 @@ func _summon_credit() -> void:
 	ok(p.ak.knocks_seen == seen0 + 1, "...the Boki's Hunter hears it as an assist")
 	ok(seen.size() == 1 and seen[0]["hunter"] == mate and seen[0]["boki"] == null and seen[0]["assists"].has(p),
 		"...CombatBus.takedown lists the Boki's Hunter as an assister")
-	ok(_feed() == "%s knocked %s" % [HeroTitle.of_hunter(mate), HeroTitle.of_hunter(v2)],
+	ok(_feed() == "%s knocked %s" % [mate.pname, v2.pname],
 		"...and the feed names the finisher")
 
 func _stolen_credit() -> void:
@@ -124,9 +125,34 @@ func _stolen_credit() -> void:
 	v.hurt(20.0, fk, {"src": "kin"})
 	ok(v.downed and p.knocks == thief_k + 1 and f.knocks == home_k,
 		"stolen summon: the thief gets the knock, not its Boki's own Hunter")
-	ok(_feed() == "%s's %s knocked %s" % [p.pname, fk.rec.get("name", "Boki"), HeroTitle.of_hunter(v)],
+	ok(_feed() == "%s's %s knocked %s" % [p.pname, fk.rec.get("name", "Boki"), v.pname],
 		"...the feed shows the thief's: \"%s\"" % _feed())
 	ok(seen.size() == 1 and seen[0]["hunter"] == p and seen[0]["boki"] == fk, "...CombatBus.takedown credits the thief")
 	var kills := p.kills
 	m.eliminate(v, fk, "finished")
 	ok(p.kills == kills + 1 and f.kills == 0, "stolen summon, kill: the thief's kill")
+
+## A monster's last hit by a summoned Boki pays its Hunter's squad; a rival's last hit takes it (decision 11-10).
+func _mob_xp() -> void:
+	var p: Hunter = m.player
+	var mate: Hunter = m.hunters.filter(func(h: Hunter): return h.team == p.team and h != p)[0]
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team)[0]
+	var bk: Kin = p.kin
+	ok(not bk.wisp and bk.owner_h == p, "setup: %s's Boki is still out" % p.pname)
+	for h in m.hunters:
+		h.xp = 0.0
+		h.out = false
+		h.downed = false
+	mate.pos = p.pos
+	var mob := m.spawn_mob("skitter", p.pos + Vector3(2, 0, 0))
+	mob.hp = 5.0
+	mob.hurt(20.0, bk, {})
+	ok(p.xp > 0.0 and is_equal_approx(mate.xp, p.xp) and rival.xp == 0.0,
+		"a monster the Boki finishes pays its Hunter and the squadmate (%.1f, %.1f), no rival" % [p.xp, mate.xp])
+	for h in m.hunters:
+		h.xp = 0.0
+	mob = m.spawn_mob("skitter", p.pos + Vector3(2, 0, 0))
+	mob.hp = 5.0
+	mob.hurt(20.0, rival, {})
+	ok(rival.xp > 0.0 and p.xp == 0.0 and mate.xp == 0.0,
+		"a rival's last-hit steal pays the rival, not the Boki's squad")
