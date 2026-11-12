@@ -10,6 +10,7 @@ extends RefCounted
 ##     full wall for anyone else; Hunter's move step sets `mover` so the rule knows who is asking;
 ##   - Ent.ground() reads top_under(), so a body over a rock lands and stands on it;
 ##   - Hunter's move step calls climb(): the caster pushing into her own rock rises onto it.
+##   - Bot asks hop_ahead(): a bot walking into a teammate's rock jumps it (its paths ignore rocks).
 ## Walking off the top drops you (the ground falls away like any ledge). A launched or broken rock is
 ## removed from Verbs.walls, so whoever stood on it falls.
 
@@ -89,5 +90,23 @@ static func climb(h: Hunter, blk: float) -> bool:
 
 ## An ally of the rock's caster in the air (jumping against it): the rock lifts him over, as it does its caster.
 static func _ally_hop(w: Dictionary, h: Hunter) -> bool:
+	return not h.grounded and _ally(w, h)
+
+## A teammate of the rock's caster (not the caster: he walks up his own).
+static func _ally(w: Dictionary, h: Hunter) -> bool:
 	var by = w.get("by")
-	return by is Hunter and is_instance_valid(by) and by != h and (by as Hunter).team == h.team and not h.grounded
+	return by is Hunter and is_instance_valid(by) and by != h and (by as Hunter).team == h.team
+
+## Whether h, on the ground and walking along `move`, has a teammate's rock right in front: a jump now hops it
+## (a bot jumps it at once, as a player would). A foe's rock, or none, is false: the bot goes round.
+static func hop_ahead(h: Hunter, move: Vector2) -> bool:
+	if not h.grounded or move.length() < 0.5:
+		return false
+	var p2 := Vector2(h.pos.x, h.pos.z)
+	for w in h.m.world.dyn_walls:
+		if not w.has("top") or absf(h.pos.y - float(w["y"])) > World.STEP:
+			continue
+		var into := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"]) - p2
+		if into.length() < h.r + float(w["th"]) + 0.35 and move.normalized().dot(into.normalized()) > 0.5:
+			return _ally(w, h)
+	return false
