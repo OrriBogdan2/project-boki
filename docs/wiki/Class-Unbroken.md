@@ -82,14 +82,14 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 3.6m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again. With the Smash resting, a tap still strikes: a lighter Slam (60% damage, 80% reach, 0.45s wind-up) on its own 1.2s cooldown.
-- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
+- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, crimson, its edges flaring hot at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: only in the air, mid-jump or falling. Press and you stop where you are, the blade hauled overhead for a split second, then slam straight down to the ground below you. It hits a 2.4m circle centred just ahead of where you land (everyone sees it from the press): 18, and everyone in it is knocked down for 0.45s (anyone in the air or gliding is spiked to the ground); the inner ring (1.2m) takes +50% and stays down 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back. While it rests, a press in the air is the Smash as on the ground (tap a Slam, or hold to charge).
-- *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.2m, 18, blights 5s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25 and a short stun).
+- *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.2m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25 and a short stun).
 
 **Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
@@ -112,7 +112,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike cone while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

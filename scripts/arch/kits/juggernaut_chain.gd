@@ -17,13 +17,6 @@ const BOW := 0.3                    # share of the swing the chain bows out by (
 const PREVIEW_MIN := 0.6            # m of swing before the predicted arc shows (looking almost straight: no line)
 const PREVIEW_DT := 0.03            # s per step of the predicted arc
 const PREVIEW_STEPS := 48           # steps at most (the longest pull is under 1.2 s)
-const ROPE_W := 0.4                 # m across the chain at rest (the source's is a thick striped rope)
-const FLIGHT_W := 0.28              # m across the hook's chain in flight
-const HAUL_W := 0.46                # m across it while it hauls him in
-const RING_R := 0.95                # m radius of the marker ring on the hooked foe
-const RING_PTS := 28                # points round the ring
-const RING_W := 0.16                # m wide the ring's band
-const SNAP_T := 0.3                 # s the two broken halves whip back
 const PREVIEW_Y := 0.15             # m over his feet
 
 var k: JuggernautKit
@@ -43,9 +36,6 @@ var reach := 0.0                    # m of chain when the pull started (the swin
 var steer := 0.0                    # m the arrival point has swung sideways of the anchor
 var preview := PackedVector3Array() # the predicted arc, reused each step
 var stall_t := 0.0
-var snap_t := 0.0                   # s left of the broken halves whipping back
-var snap_end := Vector3.ZERO        # where the chain's far end was when it broke
-var ring := PackedVector3Array()    # the marker ring's points, reused each step
 var arrive_t := 0.0                 # s left of the arrival window
 var strained := false
 var tightened := false              # the chain has hit its full length since it bit (one creak per hold)
@@ -142,10 +132,6 @@ func _hook(f: Ent, at: Vector3) -> void:
 	tightened = false
 	hooks += 1
 	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
-	if f:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
-	else:
-		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
 	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
 		pull()                      # E was pressed a hair before it bit
 
@@ -154,21 +140,14 @@ func _miss(at: Vector3) -> void:
 	misses += 1
 	k.start_e_cd()                  # hooked nothing: the chain breaks, its cooldown starts
 	k.vfx("chain_snap", at)
-	k.m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)
 
 ## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
-func snap(word := "CHAIN BROKE") -> void:
+func snap(quiet := false) -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
-		if state == "hooked":
-			snap_t = SNAP_T
-			snap_end = anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
-			k.vfx("chain_snap", _chain_from().lerp(snap_end, 0.5))
-		elif word != "":
+		if not quiet:
 			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
-		if word != "":
-			k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
 	elif state == "pulling":
 		_stop("stopped", false)
 	state = "ready"
@@ -270,8 +249,6 @@ func tick(dt: float) -> void:
 			arrive_t -= dt
 			if arrive_t <= 0.0:
 				state = "ready"
-	if snap_t > 0.0:
-		_draw_snap(dt)
 	if state == "throwing":
 		if k.h.stun_t > 0.0:
 			snap()                  # a stun breaks the throw too
@@ -290,7 +267,7 @@ func _tick_hooked(dt: float) -> void:
 		snap()
 		return
 	if tether_t <= 0.0:
-		snap("")
+		snap(true)
 		return
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
@@ -324,28 +301,6 @@ func _hold_taut(most: float) -> void:
 		holds += 1
 		k.vfx("chain_tight", h.pos)     # the chain snapping taut at its length
 
-## The broken chain: its two halves whip back to their ends, thinning, a gap opening between them.
-func _draw_snap(dt: float) -> void:
-	snap_t = maxf(0.0, snap_t - dt)
-	var u := 1.0 - snap_t / SNAP_T
-	var a := _chain_from()
-	var w := ROPE_W * (1.0 - 0.6 * u)
-	var gap := 0.5 * (1.0 - u) + 0.1
-	k.fx().chain(_fx_id() + "s0", a, a.lerp(snap_end, gap - 0.1 * u), 1.0 - u, HOT, DARK, w)
-	k.fx().chain(_fx_id() + "s1", a.lerp(snap_end, gap + 0.15 * u + 0.1), snap_end, 1.0 - u, HOT, DARK, w)
-
-## The marker ring on the hooked foe, flat on the ground under it: drawn for both sides (not gated on tells).
-func _draw_ring(tension: float) -> void:
-	if target == null:
-		return
-	var r := RING_R * (1.0 + 0.06 * sin(k.m.time * 9.0))
-	var y := target.pos.y + 0.08
-	ring.resize(RING_PTS + 1)
-	for i in RING_PTS + 1:
-		var a := TAU * float(i) / RING_PTS
-		ring[i] = Vector3(target.pos.x + cos(a) * r, y, target.pos.z + sin(a) * r)
-	k.fx().path_line(_fx_id() + "ring", ring, ORANGE.lerp(HOT, 0.4 + 0.6 * tension), RING_W)
-
 ## The attached chain: straight striped links that pull taut and glow hotter as it stretches (with a creak).
 func _draw_hooked(stretch: float) -> void:
 	var h := k.h
@@ -353,14 +308,13 @@ func _draw_hooked(stretch: float) -> void:
 	if stretch >= TAUT and not strained:
 		k.vfx("chain_taut", anchor + Vector3(0, 1.0, 0))
 	strained = stretch >= TAUT
-	_draw_ring(tension)
 	if not (k.tells_visible() or target != null):
 		return
 	var a := _chain_from()
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
 	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
-			ROPE_W, _bow(_aimed()))
+			0.13 + 0.03 * tension, _bow(_aimed()))
 	_draw_preview()
 
 ## How far the chain's middle bends out toward a swing of `aside` m (the side of the pull's line).
@@ -401,7 +355,7 @@ func _chain_from() -> Vector3:
 func _draw_flight() -> void:
 	for s in k.m.shots:
 		if s["by"] == k.h and (s["x"] as Dictionary).get("rope", false):
-			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, FLIGHT_W)
+			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
 			return
 
 func _tick_pull(dt: float) -> void:
@@ -435,8 +389,7 @@ func _tick_pull(dt: float) -> void:
 	h.roll_t = maxf(h.roll_t, dt * 2.0)
 	HeroVfx.of(k.m).hold(h, "chain_drag")
 	var a := h.pos + Vector3(0, 1.0, 0)
-	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, HAUL_W, _bow(steer))
-	_draw_ring(1.0)
+	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16, _bow(steer))
 	_draw_preview()
 
 ## Him to the anchor, flat.

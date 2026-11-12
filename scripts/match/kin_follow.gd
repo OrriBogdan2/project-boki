@@ -36,7 +36,7 @@ static func side_spot(k: Kin) -> Vector3:
 ## Is the Boki fighting alongside you right now? Orders are never refused in a fight (Kin.throw_to).
 static func in_combat(k: Kin, p: Vector3) -> bool:
 	var o := k.owner_h
-	if o != null and InCombat.is_in(o):
+	if o != null and k.m.time - o.hurt_at < 3.0:
 		return true
 	var rad := _r("combat_radius")
 	for f in k.m.foes_of(k.team, false):
@@ -92,9 +92,7 @@ static func on_damage(target: Ent, by: Ent, d: float) -> void:
 # ------------------------------------------------------------------ the order
 ## Give the order. Returns false (and says why) if it cannot be done. `target` is for chase.
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
-	if k.wisp:
-		return false          # (a wisp takes no orders: KinWisp)
-	if k.dead or k.state in ["downed", "bench", "away", "fused", "reviving"] or k.owner_h == null or k.rest_t > 0.0:
+	if k.dead or k.state in ["downed", "bench", "away", "fused", "wisp"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
 	match cmd:

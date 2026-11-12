@@ -42,17 +42,10 @@ var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 
 var streams := {}
-var players: Array[AudioStreamPlayer3D] = []
+var players: Array[AudioStreamPlayer] = []
 var next := 0
-## The ears, as top-down games place them: on the followed Hunter (the watched teammate in spectate), turned
-## with the camera, so a sound left of the Hunter on screen pans left. The camera sets both each frame.
-var listener := Vector3.ZERO:
-	set(v):
-		listener = v
-		_place_ears()
-var listener_yaw := 0.0       # rad, the camera's turn about the vertical (0 = looking north)
-var ears: AudioListener3D
-var hear_range := 32.0        # m: past this a sound is silent; a fight 25 m off screen is still heard, about -15 dB
+var listener := Vector3.ZERO   # set by the camera each frame
+var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
 var rng := RandomNumberGenerator.new()
@@ -94,32 +87,11 @@ func _ready() -> void:
 		elif takes.size() > 1:
 			streams[n] = takes
 	_load_reach()
-	ears = AudioListener3D.new()
-	add_child(ears)
-	ears.make_current()
 	for i in POOL:
-		var p := _voice_3d()
+		var p := AudioStreamPlayer.new()
+		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
-
-## A positional voice: the distance curve is ours (_distance_db), the 3D player only pans it.
-func _voice_3d() -> AudioStreamPlayer3D:
-	var p := AudioStreamPlayer3D.new()
-	p.bus = "SFX"
-	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
-	return p
-
-func set_ears(pos: Vector3, yaw: float) -> void:
-	listener_yaw = yaw
-	listener = pos
-
-func _place_ears() -> void:
-	if ears:
-		ears.global_transform = Transform3D(Basis(Vector3.UP, listener_yaw), listener)
-
-## Where a voice sits: at its sound, or on the listener (a UI sound, centred).
-func _where(pos) -> Vector3:
-	return listener if pos == null else pos
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -355,8 +327,7 @@ func match_voices() -> int:
 	for key in loops:
 		if is_instance_valid(loops[key]["p"]): n += 1
 	for c in get_children():
-		var ours: bool = c in players or c in music or c == amb
-		if (c is AudioStreamPlayer or c is AudioStreamPlayer3D) and c.playing and not ours:
+		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb:
 			n += 1          # also a stem or bed or loop still fading out
 	return n
 
@@ -441,8 +412,8 @@ func _distance_db(pos, reach := 0.0) -> float:
 	return db + linear_to_db(maxf(edge, 0.001))
 
 ## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer3D:
-	var p: AudioStreamPlayer3D = null
+func _voice(pos) -> AudioStreamPlayer:
+	var p: AudioStreamPlayer = null
 	for k in POOL:
 		var c := players[(next + k) % POOL]
 		if not c.playing:
@@ -454,7 +425,6 @@ func _voice(pos) -> AudioStreamPlayer3D:
 		next = (next + 1) % POOL
 	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
 	p.bus = "SFXFar" if far else "SFX"
-	p.global_position = _where(pos)
 	return p
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
@@ -522,14 +492,15 @@ func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
 ## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
 ## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
 ## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
-var loops := {}               # key -> {p: AudioStreamPlayer3D, pos, vol, reach}
+var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
 
 func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
 	if loops.has(key):
 		return
 	var st = streams.get(sname)
 	if st is Array: st = (st as Array)[0]
-	var p := _voice_3d()
+	var p := AudioStreamPlayer.new()
+	p.bus = "SFX"
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
 	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry}
@@ -549,13 +520,13 @@ func loop_set(key: String, pos = null, pitch := 1.0) -> void:
 		return
 	var L: Dictionary = loops[key]
 	L["pos"] = pos
-	(L["p"] as AudioStreamPlayer3D).pitch_scale = maxf(0.05, pitch)
+	(L["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
 	_loop_level(L)
 
 func loop_stop(key: String) -> void:
 	if not loops.has(key):
 		return
-	var p: AudioStreamPlayer3D = loops[key]["p"]
+	var p: AudioStreamPlayer = loops[key]["p"]
 	loops.erase(key)
 	if is_instance_valid(p):
 		# a short fade so it doesn't click off
@@ -582,8 +553,7 @@ func loop_on(key: String) -> bool:
 	return loops.has(key)
 
 func _loop_level(L: Dictionary) -> void:
-	var p: AudioStreamPlayer3D = L["p"]
-	p.global_position = _where(L["pos"])
+	var p: AudioStreamPlayer = L["p"]
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
 	p.volume_db = -80.0 if is_nan(v) else v
 	var far: bool = L["pos"] != null and Vector2(L["pos"].x - listener.x, L["pos"].z - listener.z).length() > FAR
