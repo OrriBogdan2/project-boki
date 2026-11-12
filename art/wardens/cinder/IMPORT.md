@@ -62,3 +62,11 @@ Appeal4 (cand_5, ext/cinder-bust 7efd99345) in 0.24.5: that branch swapped onto 
 line's IDLE_AUDIT clips, so the 0.24.5 merge copied the line glb's 41 clips (spring tracks included) onto the cand_5
 body by node name (same skeleton, no rest drift) and added `x_breath` at the line's spot with the chest band
 1.00-1.32 m up, |x| under 0.17 m (kael_retarget.add_breath): 3288 vertices.
+Directional loops (2026-11-11, second pass; the judge kept only these): run_b re-strided from the hand-keyed loop, and
+walk_fl, walk_fr, walk_bl, walk_br, run_fl, run_fr, run_bl on the recipe. On main's model:
+`blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- cinder.glb B.glb 2.26 5.19 b+` and
+`... -- cinder.glb DIAG.glb 2.26 5.19 fl,fr,bl,br` (her `loco.foot_mps`: the game plays the ring at speed / foot_mps, so
+the soles land at 2.2 and 4.6 m/s), then `glb_add_clips.py cinder.glb B.glb run_b` first and
+`glb_add_clips.py cinder.glb DIAG.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl` after (prefix match: run_b
+would replace run_bl). Her foot jets are scaled down in every loco clip; the recipe keys bone scale since this pass
+(the first pass's fl/br showed them full size). Judge: docs/art/wardens/dirloops/JUDGE.md.
