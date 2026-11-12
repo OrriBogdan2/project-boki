@@ -99,6 +99,7 @@ func _steal() -> void:
 	_frames(win + KinSummon.SHRINK_S + 0.1)
 	ok(fk.wisp and KinSteal.stolen(fk) and fk.stolen_summoned, "...then back to a wisp with the thief")
 	ok(not KinSummon.press(p), "...one summon only")
+	m.revive_hunter(f, null)      # the summoned Boki fought its old owner for the whole window and downed it again
 	var f2k: Kin = f2.kin
 	m.knock(f2, p, {})
 	_frames(0.1)
