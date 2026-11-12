@@ -38,17 +38,14 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 
 ## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
 ## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, in game: tools/loco_dir_check.gd),
-## `t` 0..1 how far the blend is from the walk ring to the run ring (WardenClips holds one, and moves between them),
-## `run_k` the run ring's clock over the walk ring's (WardenClips plays both on one phase): the rate is the walk ring's,
-## and the run ring's fastest is still RATE_MAX.
-func plan(spd: float, lc: Dictionary, t: float, run_k := 1.0) -> float:
+## `t` 0..1 how far the blend is from the walk ring to the run ring (WardenClips holds one, and moves between them).
+func plan(spd: float, lc: Dictionary, t: float) -> float:
 	var walk := float(lc.get("walk_speed", 2.2))
 	var run := float(lc.get("run_speed", 4.6))
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [walk, run])
 	gain = lerpf(float(stride[0]), float(stride[1]), t)
-	var mps := lerpf(float(foot[0]), float(foot[1]) * run_k, t)
-	return clampf(spd / maxf(mps, 0.1), RATE_MIN, RATE_MAX * lerpf(1.0, 1.0 / run_k, t))
+	return clampf(spd / maxf(lerpf(float(foot[0]), float(foot[1]), t), 0.1), RATE_MIN, RATE_MAX)
 
 ## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
 func apply(dt: float, legs_k: float, arm_k: float) -> void:

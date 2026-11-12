@@ -31,27 +31,26 @@ today's audit.
 | Hunter | walk | run | sprint | crouch_walk | crouch_idle | strafe | aim_walk | total |
 |---|---|---|---|---|---|---|---|---|
 | Lace (archer) | 1 → 0 | 1 → 0 | 4 → 0 | 4 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 15 → 0 |
-| Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 1 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 1 |
-| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 1 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 1 | 25 → 20 |
+| Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 0 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 0 |
+| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 2 | 25 → 22 |
 | Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
-| Grimble (dredge) | 5 → 0 | 5 → 0 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 0 | 5 → 0 | 28 → 2 |
+| Grimble (dredge) | 5 → 0 | 5 → 3 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 1 | 5 → 0 | 28 → 6 |
 | Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
 | Kael (juggernaut) | 1 → 0 | 6 → 0 | 5 → 0 | 3 → 0 | 1 → 0 | 4 → 0 | 2 → 0 | 22 → 0 |
 | Sparkle (mage) | 3 → 0 | 7 → 2 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 2 |
 | Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
 | Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
 | Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
-| **all 11** | 28 → 1 | 65 → 4 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 3 | 31 → 1 | **271 → 25** |
+| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 4 | 31 → 2 | **271 → 30** |
 
-By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 8, SNAP 92 → 16.
+By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 20.
 
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
   every start, stop or walk/run change crossed the walk ring at speed, where the triangle weights turn a corner, and the
   feet and hands jumped. WardenClips now mixes the idle, a walk ring and a run ring (each a BlendSpace2D of the
-  directions on the unit circle) with Blend2 weights on critically damped springs, and the two rings run on one phase
-  (the run ring's clock at its length over the walk ring's). A stop starts the idle from its top: Neve's idle spins
-  at 4-5 s, and a stop that landed there swung her root through half a turn.
+  directions on the unit circle) with Blend2 weights on critically damped springs. A stop starts the idle from its top:
+  Neve's idle spins at 4-5 s, and a stop that landed there swung her root through half a turn.
 - **Run-and-aim slid sideways:** the aim twist turned the root's rotation but not its position, so a loop's sway of the
   root pushed a planted foot sideways once the legs turned (Vex: 19 cells); the turn rides the same spring now.
 - **Diagonals walked the wrong way:** Grimble, Sparkle and Meeko had only f/b/l/r walk and run loops, so a diagonal
@@ -61,15 +60,21 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 8, SNAP 92 
   run_f 0.58..6.67, Neve's walk_f and run_f, Sable's and Meeko's walk_f); they are rebuilt on the ring's recipe, the
   upper body kept.
 - **Rates:** `loco.stride` stretched the side and back loops of a recipe ring 1.3-1.6x faster than the rest; it is off on
-  those rings (Grimble, Sparkle, Meeko, Kael), and `foot_mps` and every `crouch.speed` are the measured sole medians
+  those rings (Grimble, Sparkle, Kael; Meeko keeps 1.3 on her run, whose short stride can't reach 4.55 m/s at the top
+  rate), and `foot_mps` and every `crouch.speed` are the measured sole medians
   (Kael's sneak overran 1.5x at 1.55, Tenzo's 1.3x). `--crouch-check` no longer measures the plant: it read Kael at a
   point on his shin's line that a crouched shin swings off the boot.
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
 ## Left (docs/DEBT.md)
-- Albert (20): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
+- Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
   copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
   Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
   flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
-- Cinder sprint fl, Grimble sprint fr/bl, Sparkle run b/br (5): a start or stop peaks 3-35 % over the snap bar, a run
-  arm swinging hard (Grimble's hook arm: 0.25 m/frame^2 in a steady run) while the weights and rate settle.
+- Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
+  rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
+  steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,
+  but turned Albert's arms with their legs in `--anim-audit` (his walk loop holds two strides): it needs each ring's
+  strides per loop in the data first.
+- Vex's rebuilt run_f has a shorter stance than the old one, so its kept arm keys swung with the legs; `arm_swing`
+  now drives both arms off the legs (0.5 each), as it did her right one.

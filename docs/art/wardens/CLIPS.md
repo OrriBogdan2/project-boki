@@ -23,8 +23,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   directions `--loco-dir-check` reads), and move speed over it sets the clip rate (0.6 to 1.8, eased). The idle lies
   under the rings on one weight (up to `walk_speed`), the walk ring under the run ring on another (the run ring above
   1.3x `walk_speed`, back under 1.2x, never resting between them), and the direction is a blend position on each ring:
-  all three ride critically damped springs, so a start, stop or ring change never jumps a foot. In step, the run
-  ring's clock runs at its length over the walk ring's, so the two are blended at the same point of the stride.
+  all three ride critically damped springs, so a start, stop or ring change never jumps a foot.
   `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
   `aim_twist` (Vex, Lace, Cinder): run-and-aim as the source does it. The walk and run play forward with the legs turned
