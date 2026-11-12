@@ -343,6 +343,7 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
+const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
 var _flash_n := -1
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
@@ -360,7 +361,7 @@ func render(delta: float, alpha: float) -> void:
 		flinch = Vector3.ZERO
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
-	var f := clampf(flash_t / 0.12, 0.0, 1.0)
+	var f := clampf(flash_t / FLASH_FADE, 0.0, 1.0)
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
 	if f != _flash_set or mats.size() != _flash_n:
 		_flash_set = f

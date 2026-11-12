@@ -2252,13 +2252,13 @@ func on_kin_up(k: Kin, rescued: bool) -> void:
 	KinNet.event(self, "scoop" if rescued else "round", k)
 
 # ------------------------------------------------------------------ kin combat events
-## A kin used an ability: its name pops up over it so you can read the fight.
+## A kin used an ability: over your own Boki its name pops up (you learn its moves); others' read from their looks.
 func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 	kstat["kin_ab"] += 1
 	if auto: kstat["auto"] += 1
 	if k.owner_h == null or k.unseen:
 		return
-	if player and k.flat_dist(player) < 20.0:
+	if k.owner_h == player:
 		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 	if k.owner_h == player:
 		player.add_stat("kin_abilities")
@@ -2688,7 +2688,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.material_override.set_shader_parameter("color", vis_col)
 		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
 		if halo:
-			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
+			halo.material_override.set_shader_parameter("color", look[2])
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at

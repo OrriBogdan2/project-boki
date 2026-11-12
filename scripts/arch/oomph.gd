@@ -70,13 +70,15 @@ static func render_hit(h: Hunter, delta: float) -> void:
 	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks
-## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the
-## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks).
+## The colour, size and halo colour of a shot as the local player sees it. What can hurt you stays the
+## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks). The core keeps
+## the shooter's colour, the halo leans to the side (SideColor.fx): a rival's hostile, a teammate's cool.
 static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, 0.0]
-		return [Color(col, 0.5), size * 1.7, 0.0]
+		if p0 and by.team != p0.team:
+			return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, Color.TRANSPARENT]
+		return [Color(col, 0.5), size * 1.7, Color.TRANSPARENT]
 	var vis_col := col
 	var vis_size := size * 2.0
 	var halo := 0.28
@@ -91,7 +93,7 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 		if by != p:
 			vis_col.a = 0.7          # teammates' shots: a touch softer than yours
 			halo = 0.18
-	return [vis_col, vis_size, halo]
+	return [vis_col, vis_size, Color(SideColor.fx(m, by, vis_col.lightened(0.2)), halo)]
 
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:

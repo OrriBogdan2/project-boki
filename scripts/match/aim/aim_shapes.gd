@@ -233,6 +233,8 @@ static func _span(g: AimGeo, e: Dictionary) -> void:
 	var bend := float(e["bend"])
 	var n: Vector2 = e["bow"]
 	var ch := int(e["chevrons"])
+	if float(e["width"]) > 0.0:
+		_span_band(g, e)
 	if bend > 0.0:
 		var prev := bent(ctr, u, n, bend, float(e["len"]), -hl)
 		for i in SPAN_SEGS:
@@ -252,3 +254,25 @@ static func _span(g: AimGeo, e: Dictionary) -> void:
 			g.chevron(ctr - u * t, u, 0.28, lw, _rim(e, 0.85))
 	if e["ring"]:
 		g.ring(ctr, 0.35, lw, _rim(e))
+
+## The span's true area under its line: a faint band `width` across, following the bend.
+static func _span_band(g: AimGeo, e: Dictionary) -> void:
+	var ctr: Vector2 = e["at"]
+	var u: Vector2 = e["dir"]
+	var n: Vector2 = e["bow"]
+	var l := float(e["len"])
+	var w := float(e["width"])
+	var hw := w * 0.5
+	var bend := float(e["bend"])
+	if bend <= 0.0:
+		g.band(ctr - u * l * 0.5, ctr + u * l * 0.5, w, w, _fill(e))
+		return
+	var prev := bent(ctr, u, n, bend, l, -l * 0.5)
+	var prev_n := bent_tangent(u, n, bend, l, -l * 0.5).orthogonal() * hw
+	for i in SPAN_SEGS:
+		var s := lerpf(-l * 0.5, l * 0.5, float(i + 1) / SPAN_SEGS)
+		var nxt := bent(ctr, u, n, bend, l, s)
+		var nxt_n := bent_tangent(u, n, bend, l, s).orthogonal() * hw
+		g.quad(prev - prev_n, nxt - nxt_n, nxt + nxt_n, prev + prev_n, _fill(e))
+		prev = nxt
+		prev_n = nxt_n
