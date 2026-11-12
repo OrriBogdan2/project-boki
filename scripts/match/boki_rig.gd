@@ -137,6 +137,8 @@ const STRIDE := {
 	"mossgrade": [0.12, 0.74],
 	"nettlynx": [0.54, 1.07],
 	"thrumbird": [1.50, 2.90],
+	"lilybara": [0.56, 1.08],
+	"umbrathere": [0.25, 0.60],
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at

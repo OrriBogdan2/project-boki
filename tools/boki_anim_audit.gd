@@ -29,6 +29,7 @@ const OVER := {
 	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
 	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
 	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
+	"lilybara walk": 0.30, "lilybara run": 0.70, "umbrathere walk": 0.40, "umbrathere run": 0.70,
 }
 const SAMPLES := 48           # poses per loop
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground

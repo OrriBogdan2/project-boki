@@ -32,7 +32,9 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend, and for minigame results
-win (once), sulk and push (loops; `tools/boki/boki_react.py`, tuned per species).
+win (once), sulk and push (loops; `tools/boki/boki_react.py`, tuned per species; the serpent caecilith and the
+biped umbrathere key their own in `zippelith_anim.py` and `umbrathere_anim.py`, lilybara tunes the shared set in
+`soakybara_anim.py`).
 Home clips (settle, nap, wake, munch, nudge, climb, splash) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
