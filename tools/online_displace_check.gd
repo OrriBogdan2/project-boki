@@ -191,6 +191,7 @@ func _move(
 	var off_b := Time.get_unix_time_from_system()
 	if opt.has("mates"): await _mate(B, false)
 	B.teleport(home + BOT_AT)
+	await _run(SETTLE_VIEW)           # the bot's copy has left the spot on the guest's game (its body would shove G)
 	_kit(arch)
 	await _place(G, home + off)
 	if opt.has("mates"): await _mate(G, true)
