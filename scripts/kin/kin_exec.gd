@@ -103,7 +103,7 @@ static func _enemy_area(st: StageSpec, cx: Dictionary) -> bool:
 	return d.type in ["burst", "zone"] and String(d.params.get("origin", "")) == "aim" and float(d.params.get("radius", 0.0)) >= 1.4
 
 static func _telegraph(m: Node, at: Vector3, r: float, col: Color, t: float) -> void:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(col, 0.9))
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(col, 0.9), SideColor.ORDER_FOE)
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))

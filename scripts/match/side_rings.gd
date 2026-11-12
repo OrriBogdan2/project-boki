@@ -9,6 +9,8 @@ extends RefCounted
 const YOU_A := 0.95        # alpha of your own ring: the brightest thing under any body
 const OTHER_A := 0.75      # alpha of everyone else's
 const BOKI_A := 0.85       # alpha of a Boki's ring
+const THIN := 0.07         # band width of an ownership ring: the thinnest ring on the ground (a cast's is 0.12+)
+const COVERED_K := 0.25    # share of its alpha an ownership ring keeps while a telegraph or cast ring lies over it
 const EDGE_A := 0.9        # strength of the side edge on other Hunters' bodies (none on yours)
 
 ## Every frame, on every Hunter: their ground ring and their Boki's in the right side colour.
@@ -17,23 +19,32 @@ static func tick(h: Hunter) -> void:
 		return
 	var col := SideColor.of(h.m, h)
 	var you: bool = h.m.get("player") == h
-	_paint(h.model.get_node_or_null("TeamRing") as MeshInstance3D, Color(col, YOU_A if you else OTHER_A))
+	var aim := h.m.get_node_or_null("AimKit") as AimDraw
+	_paint(h.model.get_node_or_null("TeamRing") as MeshInstance3D, Color(col, YOU_A if you else OTHER_A), _covered(h.m, aim, h.pos))
 	_edge(h, Color(col, 0.0 if you else EDGE_A))
 	for k in [h.kin, h.kin2]:
 		if k != null and is_instance_valid(k):
-			_paint((k as Kin).ring, Color(col, BOKI_A))
+			_paint((k as Kin).ring, Color(col, BOKI_A), _covered(h.m, aim, (k as Kin).pos))
 
 ## The colour a ring shows now (black when it has none), for checks.
 static func shown(ring: MeshInstance3D) -> Color:
 	return ring.get_meta("side_col", Color.BLACK) if ring else Color.BLACK
 
-static func _paint(ring: MeshInstance3D, col: Color) -> void:
+static func _covered(m: Node, aim: AimDraw, p: Vector3) -> bool:
+	return m.fx.covers(p) or (aim != null and aim.covers(p))
+
+## The ring in `col`, thin, under every cast (ORDER_RING), and faded while a telegraph covers it.
+static func _paint(ring: MeshInstance3D, col: Color, covered: bool) -> void:
+	if covered:
+		col.a *= COVERED_K
 	if ring == null or ring.get_meta("side_col", Color.BLACK) == col:
 		return
 	var mat := ring.material_override as ShaderMaterial
 	if mat == null:
 		return
 	mat.set_shader_parameter("color", col)
+	mat.set_shader_parameter("thickness", THIN)
+	mat.render_priority = SideColor.ORDER_RING
 	ring.set_meta("side_col", col)
 
 ## The side edge a body shows now (transparent when none), for checks.

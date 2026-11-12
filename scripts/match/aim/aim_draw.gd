@@ -14,6 +14,7 @@ var mesh := ImmediateMesh.new()
 var mi := MeshInstance3D.new()
 var geo := AimGeo.new()
 var mat := StandardMaterial3D.new()
+var mat_foe := StandardMaterial3D.new()   # a rival's telegraphs: their own surface, drawn after the rest
 var reticle: AimReticle
 var built := 0             # entries drawn by the last rebuild (tests)
 var ret := {}              # hunter instance id -> the cursor states: {h, k, t, col, flare, perfect, pcol}
@@ -28,7 +29,9 @@ func _ready() -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-	mat.render_priority = 2
+	mat.render_priority = SideColor.ORDER_OWN
+	mat_foe = mat.duplicate()
+	mat_foe.render_priority = SideColor.ORDER_FOE
 	mi.mesh = mesh
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 16384.0       # the mesh is rebuilt every frame; never cull it by a stale AABB
@@ -84,6 +87,31 @@ func ret_of(h: Hunter) -> Dictionary:
 		ret[k] = {"h": h, "k": -1.0, "t": -99.0, "col": Color.WHITE, "flare": 0.0, "perfect": 0.0, "pcol": Color.WHITE, "fcol": Color.WHITE}
 	return ret[k]
 
+## True when a telegraph the local player sees (a disc, lane or cone) lies over the ground point `p`.
+func covers(p: Vector3) -> bool:
+	var q := Vector2(p.x, p.z)
+	var me = m.get("player")
+	for e in entries.values():
+		if not e["all"] and e["h"] != me:
+			continue
+		match String(e["kind"]):
+			"circle":
+				if q.distance_to(e["at"]) <= float(e["r"]):
+					return true
+			"lane", "cone":
+				if _in_ray(e, q):
+					return true
+	return false
+
+func _in_ray(e: Dictionary, q: Vector2) -> bool:
+	var rel: Vector2 = q - e["from"]
+	var dir: Vector2 = e["dir"]
+	if rel.dot(dir) < 0.0 or rel.dot(dir) > float(e["len"]):
+		return false
+	if e["kind"] == "cone":
+		return absf(rel.angle_to(dir)) <= deg_to_rad(float(e["deg"])) * 0.5
+	return absf(rel.cross(dir)) <= maxf(float(e["width"]), float(e["width_end"])) * 0.5
+
 ## Prune expired entries and draw the rest (also called directly by tests).
 func rebuild() -> void:
 	for k in entries.keys():
@@ -94,22 +122,32 @@ func rebuild() -> void:
 	geo.world = m.get("world")
 	geo.reset()
 	var me = m.get("player")
-	for k in entries:
-		var e: Dictionary = entries[k]
-		if not e["all"] and e["h"] != me:
-			continue                    # an aim reticle: only its own player sees it
-		if e["all"] and me != null and e["h"] != me:
-			e = e.duplicate()            # someone else's telegraph: a rival's reads hostile, a teammate's cool
-			e["col"] = SideColor.fx(m, e["h"], e["col"])
-			e["col2"] = SideColor.fx(m, e["h"], e["col2"])
-		AimShapes.build(geo, e)
-		built += 1
+	var split := 0                      # first vertex of the rivals' telegraphs: a teammate's, then yours, draw under them
+	for tier in [SideColor.ORDER_ALLY, SideColor.ORDER_OWN, SideColor.ORDER_FOE]:
+		if tier == SideColor.ORDER_FOE:
+			split = geo.v.size()
+		for k in entries:
+			var e: Dictionary = entries[k]
+			if (not e["all"] and e["h"] != me) or SideColor.order(m, e["h"]) != tier:
+				continue                # an aim reticle: only its own player sees it
+			if e["all"] and me != null and e["h"] != me:
+				e = e.duplicate()        # someone else's telegraph: a rival's reads hostile, a teammate's cool
+				e["col"] = SideColor.fx(m, e["h"], e["col"])
+				e["col2"] = SideColor.fx(m, e["h"], e["col2"])
+			AimShapes.build(geo, e)
+			built += 1
 	if geo.v.is_empty():
 		mi.visible = false
 		return
 	mi.visible = true
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, mat)
-	for i in geo.v.size():
+	_surface(0, split, mat)
+	_surface(split, geo.v.size(), mat_foe)
+
+func _surface(from: int, to: int, material: Material) -> void:
+	if to <= from:
+		return
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	for i in range(from, to):
 		mesh.surface_set_color(geo.c[i])
 		mesh.surface_add_vertex(geo.v[i])
 	mesh.surface_end()

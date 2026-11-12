@@ -374,7 +374,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			# a warning marker on the ground that fills up, then disappears as the hit lands
 			var at := _where(e, caster, ctx, "aim")
 			var tt := float(e.get("time", 0.4))
-			var tele: Node3D = m.fx.telegraph_circle(at, float(e.get("radius", 2.0)), Color(col, 0.9))
+			var tele: Node3D = m.fx.telegraph_circle(at, float(e.get("radius", 2.0)), Color(col, 0.9), SideColor.order(m, caster))
 			m.sfx("warn", at, -10.0, 0.8)
 			var tw := tele.create_tween()
 			tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, tt)
@@ -390,7 +390,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var lr := 2.0
 			for e2 in e.get("on_land", []):
 				lr = maxf(lr, float(e2.get("radius", 0.0)))
-			var tele: Node3D = m.fx.telegraph_circle(to, lr, Color(col if e.has("color") else Color("ffb070"), 0.9))
+			var tele: Node3D = m.fx.telegraph_circle(to, lr, Color(col if e.has("color") else Color("ffb070"), 0.9), SideColor.order(m, caster))
 			if caster is Hunter: AbilityFx.cast(m, caster, "leap", caster.pos, _aim_dir(caster, ctx), col)
 			var lt := float(e.get("time", 0.5))
 			var tw := tele.create_tween()
@@ -674,7 +674,7 @@ static func _fissure(e: Dictionary, caster: Node, ctx: Dictionary, m: Node, pw: 
 	var steps := int(e.get("steps", 6))
 	var every := float(e.get("every", 0.06))
 	var width := float(e.get("width", 1.3))
-	var tele: Node3D = m.fx.telegraph_rect(start, d, length, width * 2.0, Color(col, 0.9))
+	var tele: Node3D = m.fx.telegraph_rect(start, d, length, width * 2.0, Color(col, 0.9), SideColor.order(m, caster))
 	var total := every * steps + 0.05
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, total)

@@ -205,6 +205,7 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
+const UNDER_A := 0.35          # share of its alpha a telegraph keeps when a higher one covers its centre
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
@@ -376,13 +377,15 @@ func _clear_spot(at: Vector3) -> Vector3:
 		spot += up * WORD_STEP
 	return spot
 
-func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+## `order`: where it sits among the ground looks (SideColor.ORDER_*, a render_priority).
+func ring(at: Vector3, radius: float, col: Color, dur := 0.35, order := 0) -> void:
 	if own_look:
 		return
 	radial += 1
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
 	mi.material_override = Models.ring_mat(col, 0.12)
+	mi.material_override.render_priority = order
 	mi.material_override.set_shader_parameter("wash", 1.0)
 	mi.material_override.set_shader_parameter("halo", 1.0)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -465,9 +468,12 @@ func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
 		burst(at + Vector3(d.x, 0.5, d.y) * (0.5 + i * 1.2), col, 12, 6.0, 0.4, 4.0, 1.4, Vector3(d.x, 0.2, d.y), 25.0)
 
 # ---- telegraphs
-func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
+func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var mat := ShaderMaterial.new()
+	mat.render_priority = order
+	mi.set_meta("order", order)
+	mi.set_meta("a0", col.a)
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
 	mat.set_shader_parameter("shape", shape)
@@ -477,17 +483,19 @@ func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
 	teles.append(mi)
 	return mi
 
-func telegraph_circle(at: Vector3, radius: float, col: Color) -> Node3D:
-	var mi := _tele_mesh(col, 0)
+func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Node3D:
+	var mi := _tele_mesh(col, 0, order)
 	mi.mesh = Models.flat_quad(radius * 2.0)
+	mi.set_meta("r", radius)
 	mi.global_position = at + Vector3(0, 0.07, 0)
 	return mi
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color) -> Node3D:
-	var mi := _tele_mesh(col, 1)
+func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color, order := 0) -> Node3D:
+	var mi := _tele_mesh(col, 1, order)
 	var pm := PlaneMesh.new(); pm.size = Vector2(width, length)
 	mi.mesh = pm
 	mi.set_meta("len", length)
+	mi.set_meta("w", width)
 	aim_telegraph(mi, at, d)
 	return mi
 
@@ -499,11 +507,47 @@ func aim_telegraph(mi: Node3D, at: Vector3, d: Vector2) -> void:
 func telegraph_progress(mi: Node3D, p: float) -> void:
 	(mi as MeshInstance3D).material_override.set_shader_parameter("progress", clampf(p, 0.0, 1.0))
 
+## One full-strength fill under a body: a telegraph whose centre sits inside a higher one (the later one on a tie)
+## drops to UNDER_A of its alpha until that one ends. Only the colour changes, and only when the answer does.
+func stack_telegraphs() -> void:
+	for t in teles:
+		var low := false
+		for o in teles:
+			low = low or (o != t and _above(o, t) and _holds(o, t.global_position))
+		if low != t.get_meta("under", false):
+			t.set_meta("under", low)
+			var c: Color = t.material_override.get_shader_parameter("color")
+			t.material_override.set_shader_parameter("color", Color(c, float(t.get_meta("a0")) * (UNDER_A if low else 1.0)))
+
+## True when a telegraph or a ring still spreading lies over the ground point `p`.
+func covers(p: Vector3) -> bool:
+	for t in teles:
+		if _holds(t, p):
+			return true
+	for rg in rings:
+		var mi: Node3D = rg["node"]
+		if Vector2(p.x - mi.global_position.x, p.z - mi.global_position.z).length() <= mi.scale.x:
+			return true
+	return false
+
+func _above(o: Node3D, t: Node3D) -> bool:
+	var oo := int(o.get_meta("order")) - int(t.get_meta("order"))
+	return oo > 0 or (oo == 0 and teles.find(o) > teles.find(t))
+
+## True when the world point `p` is on the ground this circle or lane telegraph covers.
+func _holds(tele: Node3D, p: Vector3) -> bool:
+	var q: Vector3 = tele.to_local(p)
+	if tele.has_meta("w"):
+		return absf(q.x) <= float(tele.get_meta("w")) * 0.5 and absf(q.z) <= float(tele.get_meta("len")) * 0.5
+	return Vector2(q.x, q.z).length() <= float(tele.get_meta("r"))
+
 func end_telegraph(mi: Node3D) -> void:
 	teles.erase(mi)
 	mi.queue_free()
 
 func _process(delta: float) -> void:
+	if not teles.is_empty():
+		stack_telegraphs()
 	for n in nums.duplicate():
 		n["t"] += delta
 		var l: Label3D = n["node"]

@@ -696,7 +696,7 @@ func ground(p: Vector3) -> Vector3:
 
 ## A filling ground circle everyone sees, in the viewer's side lean (SideColor.fx). Returns the node.
 func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, h, col), 0.9))
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, h, col), 0.9), SideColor.order(m, h))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
@@ -704,7 +704,7 @@ func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
 
 ## A filling lane (dash arrows, beams, charge lines).
 func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(SideColor.fx(m, h, col), 0.9))
+	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(SideColor.fx(m, h, col), 0.9), SideColor.order(m, h))
 	if t > 0.0:
 		var tw := tele.create_tween()
 		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -1125,7 +1125,7 @@ func _tick_charge(dt: float) -> void:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
 		var rc := SideColor.fx(m, h, col)
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9), SideColor.order(m, h))
 		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)

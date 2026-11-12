@@ -138,7 +138,7 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 		"trap", "zone":
 			fx.flash(at + Vector3(0, 0.3, 0), hot, 0.6, 0.12)
 			fx.spark(at + Vector3(0, 0.1, 0), Vector3.UP, hot, 10, 5.0, 60.0, 0.22, 12.0, 0.9)
-			fx.ring(at, float(o.get("radius", 1.1)), Color(SideColor.fx(m, caster, col), 0.95), 0.45)
+			fx.ring(at, float(o.get("radius", 1.1)), Color(SideColor.fx(m, caster, col), 0.95), 0.45, SideColor.order(m, caster))
 		"tether":
 			fx.flash(at + Vector3(0, 1.0, 0), hot, 0.9, 0.12)
 			fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, hot, 10, 6.0, 140.0, 0.22, 4.0, 1.0)
@@ -155,7 +155,7 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 	var fx: Fx = m.fx
 	var hot := col.lerp(Color.WHITE, 0.4)
 	fx.flash(at + Vector3(0, 0.5, 0), hot, 0.5 + r * 0.35, 0.16)
-	fx.ring(at, r, Color(SideColor.fx(m, caster, col), 0.9), 0.32)      # the true area, in whose-it-is colour
+	fx.ring(at, r, Color(SideColor.fx(m, caster, col), 0.9), 0.32, SideColor.order(m, caster))      # the true area, in whose-it-is colour
 	fx.ring(at, r * 0.6, Color(1, 1, 1, 0.7), 0.2)
 	fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, int(10 + r * 6), 6.0 + r * 2.0, 65.0, 0.35, 14.0, 1.0 + r * 0.15)
 	fx.dust(at, int(8 + r * 4))
