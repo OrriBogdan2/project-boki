@@ -276,6 +276,9 @@ const MOBS := {
 		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
 	"bl_warden": {"name": "Blight Watcher", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
 		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
+	# a Blight nest (BlightNests): a stone mound the Skitters climb out of; break it for gems and gear
+	"bl_nest": {"name": "Blight Nest", "hp": 120.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 0.9, "gems": 6, "color": Color("3a3230"), "attack": "none", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},

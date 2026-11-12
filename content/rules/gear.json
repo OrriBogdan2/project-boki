@@ -84,6 +84,16 @@
     "chance": 0.7
    }
   ],
+  "bl_nest": [
+   {
+    "kind": "tune",
+    "chance": 0.5
+   },
+   {
+    "kind": "gear",
+    "chance": 0.3
+   }
+  ],
   "bl_skitter": [
    {
     "kind": "tune",

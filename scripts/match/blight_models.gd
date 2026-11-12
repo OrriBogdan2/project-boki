@@ -7,6 +7,8 @@ class_name BlightModels
 ##   bl_warden   a lantern-bearer: a tall hooded stone cowl on six stilt legs, a ribcage of bone under
 ##               it and an ember lamp where a face should be (from above: a long teardrop ringed by
 ##               stilts, its light fanning out in front)
+##   bl_nest     a cinder mound: a low cracked stone dome split by ember seams round a glowing pit,
+##               bone spurs leaning out of it (from above: a dark ring with a hot centre, camp-sized)
 ## root > "Body" (squashed and leaned by Mob), front is -z, ground is y = 0. Pivots: Leg<i><side>
 ## (skitter, i 0..3, side -1/1), Leg<i> (warden, i 0..5), Hood and Lamp (warden). Glowing materials
 ## are in meta "pulse" (they flare as an attack winds up) and meta "ember" (Blight.render breathes them).
@@ -28,6 +30,7 @@ static func build(kind: String) -> Node3D:
 	match kind:
 		"bl_skitter": _skitter(body, M)
 		"bl_warden": _warden(body, M)
+		"bl_nest": _nest(body, M)
 	var mats: Array = []
 	for k in M:
 		mats.append(M[k])
@@ -119,3 +122,20 @@ static func _warden(body: Node3D, M: Dictionary) -> void:
 		Models.part(body, Models.cyl(0.0, 0.08, 0.26, 4), M["bone"], Vector3(0, 1.82 - i * 0.05, 0.12 + i * 0.2), Vector3(1.0, 1.0, 1.5), Vector3(0.5, 0, 0))
 	for i in 3:
 		Models.part(body, Models.cyl(0.24 - i * 0.06, 0.3 - i * 0.07, 0.1, 6), M["stone"], Vector3(0, 1.5 - i * 0.12, 0.85 + i * 0.26), Vector3(1.0, 1.0, 1.3))
+
+static func _nest(body: Node3D, M: Dictionary) -> void:
+	# the mound: stacked stone rings, wide and low, a darker lip round the pit
+	Models.part(body, Models.cyl(0.95, 1.25, 0.35, 9), M["stone"], Vector3(0, 0.17, 0))
+	Models.part(body, Models.cyl(0.6, 0.95, 0.3, 9), M["stone"], Vector3(0, 0.48, 0), Vector3.ONE, Vector3(0, PI / 9.0, 0))
+	Models.part(body, Models.cyl(0.42, 0.55, 0.12, 9), M["dark"], Vector3(0, 0.66, 0))
+	# the pit: an ember glow sunk in the top, a hot core
+	Models.part(body, Models.cyl(0.4, 0.4, 0.04, 9), M["ember"], Vector3(0, 0.71, 0))
+	Models.part(body, Models.sphere(0.22, 10), M["hot"], Vector3(0, 0.66, 0), Vector3(1.0, 0.45, 1.0))
+	# ember seams down the sides (fixed angles), and bone spurs leaning outward
+	for i in 6:
+		var a := TAU * float(i) / 6.0 + 0.3
+		var o := Vector2(sin(a), cos(a))
+		_seam(body, M["ember"], o * 0.62, [o * 0.22 + o.orthogonal() * 0.08, o * 0.2 - o.orthogonal() * 0.1], 0.36 - 0.1 * float(i % 2), 0.05)
+	for i in 5:
+		var a := TAU * float(i) / 5.0
+		Models.part(body, Models.cyl(0.0, 0.09, 0.7, 5), M["bone"], Vector3(sin(a) * 0.85, 0.5, cos(a) * 0.85), Vector3.ONE, Vector3(0.6 * cos(a), 0, -0.6 * sin(a)))

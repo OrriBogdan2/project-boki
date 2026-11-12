@@ -87,9 +87,7 @@ static func next_r(m: Match) -> float:
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
 
-## Extra Skitter spawn heat per second for a squad out in the tide.
-static func tide_heat(m: Match, p: Vector3) -> float:
-	return r("tide_heat") * tide_out(m, p) if m.heart else 0.0
+## (A squad out in the tide also stirs the nearest Blight nest on a clock: BlightNests._tide.)
 
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (-1 before the tide starts).

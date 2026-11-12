@@ -47,8 +47,6 @@
  "_tide_src_hp": "the source's base health for a medium Hunter: the curve is scaled by our medium health over this, so a stage takes as long to kill as there",
  "tide_tick_s": 1.0,
  "_tide_tick_s": "seconds between tide hits (the source gives a per-stage value and no rate: read as per second)",
- "tide_heat": 0.06,
- "_tide_heat": "extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away",
  "map": {
   "_doc": "where the seats sit (spec section 8): metres on the 216 m design; a map's \"ways_scale\" (1.412 on the 305 m Hollow Crown) stretches these, the tide radii and gate_dist, never times. tools/ways_out_sites.py (the generators) and --ways-out-map-check enforce them",
   "seat_window_s": 150.0,

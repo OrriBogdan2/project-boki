@@ -56,7 +56,7 @@ func init_blight(match_node: Node, id: String, k: String, at: Vector3, level: fl
 		_build_cone()
 
 func mass() -> float:
-	return 4.0 if mkind == "bl_warden" else 0.8
+	return 80.0 if mkind == "bl_nest" else (4.0 if mkind == "bl_warden" else 0.8)
 
 ## Health, damage and speed for a strength level. Health keeps its share when it changes.
 func set_level(l: float, fresh := false) -> void:
@@ -120,6 +120,9 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		# shot at: a Warden has found you whether or not you were in its light
 		if mkind == "bl_warden" and tgt and shriek_cd <= 0.0 and (tgt is Hunter or tgt is Kin):
 			shriek(tgt)
+	if dealt > 0.0 and not remote and mkind == "bl_nest" and dir:
+		if dead: dir.nests.on_popped(self, by)       # broken: it stays empty for its cooldown
+		else: dir.nests.on_hurt(self, by)            # hit: it wakes
 	return dealt
 
 ## A noise reaches it (BlightDir.noise): go and look, if nothing better to do.
@@ -143,6 +146,9 @@ func sim(dt: float) -> void:
 		st_t -= dt
 		net_follow(dt)
 		_net_telegraph()
+		return
+	if mkind == "bl_nest":
+		pos = post; vel = Vector3.ZERO; st = "idle"; tgt = null      # a nest sits where it grew (BlightNests)
 		return
 	cd -= dt
 	st_t -= dt
@@ -460,7 +466,12 @@ func render(delta: float, alpha: float) -> void:
 	var wind := 0.0
 	if st == "windup":
 		wind = 1.0 - st_t / float(md["windup"])
-	if mkind == "bl_skitter":
+	if mkind == "bl_nest":
+		# stirring: it swells and shakes; empty: it sags and its embers go dull (spot, cone_a: BlightNests)
+		var sw := spot * (1.0 + 0.35 * sin(m.time * 26.0))
+		body.scale = Vector3.ONE * (0.82 + 0.18 * clampf(cone_a, 0.0, 1.0) + 0.12 * sw)
+		body.position.x = sin(m.time * 41.0) * 0.05 * spot
+	elif mkind == "bl_skitter":
 		body.position.y = absf(sin(anim * 1.4)) * 0.04 * float(moving) - wind * 0.1
 		for i in 4:
 			for sx in [-1, 1]:
@@ -482,7 +493,8 @@ func render(delta: float, alpha: float) -> void:
 			hood.rotation.y = lerp_angle(hood.rotation.y, 0.0, delta * 4.0)
 	# the embers breathe; brighter as it winds up, flaring on a shriek
 	if model.has_meta("ember"):
-		var flare: float = 1.0 + wind * 1.4 + (1.6 if m.time - shriek_t < 0.6 else 0.0) + spot * 0.8
+		var flare: float = 1.0 + wind * 1.4 + (1.6 if m.time - shriek_t < 0.6 else 0.0) + spot * (3.0 if mkind == "bl_nest" else 0.8)
+		if mkind == "bl_nest": flare *= 0.25 + 0.75 * clampf(cone_a * 3.0, 0.0, 1.0)
 		for em in model.get_meta("ember"):
 			(em as ShaderMaterial).set_shader_parameter("glow", float((em as ShaderMaterial).get_meta("glow0", 2.0)) * flare * (0.85 + 0.15 * sin(m.time * 3.0 + float(nid.hash() % 7))))
 	if cone:

@@ -5481,6 +5481,7 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Blight and not who.dead:
 				(who as Blight).burrow()
+		"nest": if blight: blight.nests.net(x)      # a Blight nest's stock and refill clock (BlightNests)
 		"mobdead":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:
