@@ -254,7 +254,8 @@ func _on_rock() -> void:
 		gf.holding = fmod(t, 1.0) < 0.5
 		gf.tick(0.1)
 		t += 0.1
-	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
+	ok(gf.run == null and is_instance_valid(gf.card) and gf.card.name == "GameResultCard",
+		"it ends with the shared result card (%.1f s, pressing every second)" % t)
 	Content.rules("farm_build")["base_mode"] = false
 
 func _arrived(was: Node):

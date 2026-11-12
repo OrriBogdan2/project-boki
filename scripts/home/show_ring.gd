@@ -541,6 +541,7 @@ func _walk_pos() -> Vector3:
 	return p
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap(run.recs)
 	var res := settle(run) if finished else {}
 	for k in pair:
 		k["busy"] = false
@@ -551,7 +552,7 @@ func _end(finished: bool) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
 	if finished:
-		_card(res)
+		_card(res, before)
 		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
@@ -559,13 +560,11 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
+func _card(res: Dictionary, before: Array) -> void:
+	var won: int = run.winner()
+	var totals: Array = res["scores"]
 	var why := " for showing the winner" if res["backed_won"] else ""
-	card = BaseRace.result_card(h, [
-		["%s wins the Show Ring!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
-		["%s sulks: \"came second to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
+	card = GameResultCard.open(h, {"game": "Show Ring", "before": before,
+			"place": "%s wins, %.1f to %.1f" % [res["win"]["name"], totals[won]["total"], totals[1 - won]["total"]],
+			"prize": [["+%d gems%s" % [res["gems"], why], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

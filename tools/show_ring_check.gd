@@ -176,7 +176,8 @@ func _on_base() -> void:
 		while sr.run != null and t < LONG_HIGH + 30.0:
 			sr.tick(0.1)
 			t += 0.1
-		ok(sr.run == null and is_instance_valid(sr.card), "on: the show ends with a result card (%.1f s)" % t)
+		ok(sr.run == null and is_instance_valid(sr.card) and sr.card.name == "GameResultCard",
+				"on: the show ends with the shared result card (%.1f s)" % t)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

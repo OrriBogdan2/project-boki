@@ -191,8 +191,8 @@ func _on_base() -> void:
 				home.hrace.input(press)
 			home.hrace.tick(DT)
 			t += DT
-		ok(relay.run == null and is_instance_valid(home.hrace.card),
-				"on: the relay ends with a result card (%.1f s)" % t)
+		ok(relay.run == null and is_instance_valid(home.hrace.card) and home.hrace.card.name == "GameResultCard",
+				"on: the relay ends with the shared result card (%.1f s)" % t)
 		await main.get_tree().process_frame
 		ok(nodes.all(func(n): return not is_instance_valid(n)), "on: the visitors leave")
 		ok(home.kins.all(func(k): return not k.get("busy", false)), "on: your three are free again")
