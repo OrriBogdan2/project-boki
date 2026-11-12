@@ -2121,9 +2121,9 @@ func _find_interact() -> void:
 	prompt_box.visible = true
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], [Settings.key_cap("interact") + " hold", "Pick up"]]
+		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], ["Hold " + Settings.key_cap("interact"), "to pick up"]]
 	else:
-		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
+		pairs = [hg.prompt_pair(best) if best["kind"] == "wild" else [Settings.key_cap("interact"), _label_for(best)]]
 	# the prompt is keycaps and words, rebuilt only when what it says changes
 	var sig := str(pairs)
 	if String(prompt_box.get_meta("sig", "")) != sig:
@@ -2131,7 +2131,7 @@ func _find_interact() -> void:
 		prompt_lbl.visible = false
 		var old_row := prompt_box.get_node_or_null("Keys")
 		if old_row: old_row.free()
-		var row := UI.key_hints(pairs, 14, UI.INK)
+		var row := HoldPrompt.key_hints(pairs, 14, UI.INK, hg.ring_fill, hg.ring_action)      # "Hold F": the ring
 		row.name = "Keys"
 		row.add_theme_constant_override("separation", 22)
 		for one in row.get_children():

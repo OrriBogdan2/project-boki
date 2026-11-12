@@ -296,6 +296,7 @@ func _draw_all() -> void:
 	if p and not p.out and not p.extracted:
 		_draw_overhead(p)
 		_draw_glider_heat(p)
+		HoldPrompt.air_tap(c, m.cam, _head(p, 2.25 * float(p.cdat["scale"])))      # a tapped Space: "Hold"
 	if p:
 		_draw_hurt_dirs(sz)
 		if not p.riding:
@@ -1754,7 +1755,9 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
 			"heart": prog = float(it.get("prog", 0.0))
-		if not WaysOutHud.gate_prompt(self, sz, y, it):
+		# "Hold F ...": the ring (HoldPrompt)
+		if not WaysOutHud.gate_prompt(self, sz, y, it) \
+				and not HoldPrompt.row(c, Vector2(sz.x * 0.5, y), it["label"], prog, it.get("col", GOLD)):
 			var s: String = it["label"]
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))

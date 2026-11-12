@@ -3147,6 +3147,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
+	HoldTeach.match_tick(self)      # tap-vs-hold teaching (glide, Hold F prompts)
 	_tips()
 	if music_dir: music_dir.tick(self, delta)
 	if hitstop > 0.0 and not net_on:
@@ -5682,7 +5683,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then hold Space in the air to glide")
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
