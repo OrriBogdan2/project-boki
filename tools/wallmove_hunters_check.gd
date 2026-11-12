@@ -112,6 +112,8 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
+	for w in m.verbs.walls.duplicate():      # (each case starts clean: an earlier case's Rink Wall stands in this one's path)
+		m.verbs._break_wall(w)
 
 func _go(keys: Vector2, secs: float, each := Callable()) -> void:
 	var t := 0.0
