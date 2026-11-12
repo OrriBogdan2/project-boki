@@ -43,7 +43,7 @@ const T := {
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
 	"air_reverse_dv":          [">=", 5.0, "m/s", "[owner 11-08] strong WASD air control"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
-	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] UE brakes a let-go the same under a cast: the widest cast stop vs plain stop gap over the 12"],
+	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] a let-go brakes the same under a cast"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
@@ -664,13 +664,14 @@ func _dash_exit() -> void:
 ## moves the Hunter itself (a step, a hop, a knock, leaving the ground) is printed and not compared.
 func _brake_cast() -> void:
 	var kit_was := P.arch
+	var cls_was := P.cls
 	var gap := 0.0
 	for id in Arch.ids():
-		P.cls = Arch.weight(id)          # (set_arch swaps a kit from another class for the class's default)
-		P.set_arch(id)
+		P.reclass(Arch.weight(id), id)
 		var plain := _cast_stop(false)
 		var cast := _cast_stop(true)
-		var row := "brake_cast %-11s plain %.3f m %.3f s, cast %.3f m %.3f s" % [id, plain["dist"], plain["t"], cast["dist"], cast["t"]]
+		var row := "brake_cast %-11s plain %.3f m %.3f s, cast %.3f m %.3f s" % [
+				id, plain["dist"], plain["t"], cast["dist"], cast["t"]]
 		if cast["moved"]:
 			print("MFEEL note %s: RMB moves him itself, no stop compare" % row)
 			continue
@@ -678,9 +679,15 @@ func _brake_cast() -> void:
 		gap = maxf(gap, d)
 		ok(d <= 0.05 and float(cast["t"]) > 0.0, row)
 	rec("brake_cast_gap_m", gap)
-	P.cls = "medium"
-	P.set_arch(kit_was)
-	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+	P.reclass(cls_was, kit_was)
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec"] = false
+	# (the casts left shots, areas and delayed steps in the match: later rows start without them)
+	for a in [m.shots, m.zones, m.fields, m.mobs, m._later]:
+		a.clear()
+	for a in [m.gpads, m.smokes, m.plats]:
+		a.clear()
+	_reset(flat)
 
 ## A run to full speed, then the keys off (and RMB pressed the same frame when cast): the stop's distance
 ## and time, and whether the kit moved him (a dash, a knock, leaving the ground).
