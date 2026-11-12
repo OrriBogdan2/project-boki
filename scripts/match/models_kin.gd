@@ -237,6 +237,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
 		accessory(body, acc, Goods.wear_col(rec))
+	PrizeBoard.dress(body, rec)      # a rosette for each Cup Ribbon (garden games)
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():

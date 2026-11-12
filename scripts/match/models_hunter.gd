@@ -213,7 +213,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		glider.add_child(gtrail)
 	var gset := ModelsBake._glider_set(gskin)
 	var g_line := ModelsBase.toon(Color("5a4636"), false)
-	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), ModelsBake.vtoon_outlined()], [gset[1], g_line]]:
+	for pc in [[gset[0], Gliders.canopy_material(gskin, team_col, hero_col)], [gset[1], g_line]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
 		gmi.material_override = pc[1]
