@@ -7,8 +7,9 @@ extends RefCounted
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
-##   4. the panel counter, the right click taught from its kit data, the Boki step by its state
-##   5. the lookout: every course stop is climbable from the one before it with plain movement
+##   4. the panel counter, the right click taught from its kit data, the Boki step's words
+##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
+##      wall kick (taller than a jump, within a jump and a kick's climb)
 
 var bad := 0
 var m: Match
@@ -115,17 +116,17 @@ func _course() -> void:
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
-	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
+	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak
 	if ak != null:
 		var hold := float(ak.rmb_def().get("hold", 0.0)) > 0.0
 		var why := "(%s hold %s)" % [ak.id, str(hold)]
 		ok(tu.rmb_has_hold() == hold, "the right click step follows the kit's hold variant " + why)
-		var line := String(texts.get("utility", ""))
+		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
-	var tl := String(texts.get("throw", ""))
-	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+	var tl := String(texts.get("gkey", "")).to_lower()
+	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
@@ -170,7 +171,7 @@ func _under_banner() -> int:
 func _reach() -> void:
 	var tu: Tutorial = m.tut
 	var jump_apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
-	var order := ["land", "move", "dash", "exdash", "glide", "crouch", "pickup", "yard", "chest"]
+	var order := ["land", "dash", "exdash", "glide", "crouch", "pickup", "yard"]
 	var worst := 0.0
 	var worst_at := ""
 	for i in range(1, order.size()):
@@ -180,6 +181,8 @@ func _reach() -> void:
 			continue
 		if m.world.island_of(a.x, a.z) != m.world.island_of(b.x, b.z):
 			continue      # (a gap: the dash, jump and glide steps and the bridges, which the run above plays)
+		if order[i] == "crouch":
+			continue      # (the lookout: climbed with a wall kick, checked below)
 		var prev := a.y
 		var n := int(a.distance_to(b) / 0.4) + 1
 		for k in range(1, n + 1):
@@ -192,4 +195,5 @@ func _reach() -> void:
 	var msg := "every walk between stops climbs at most 60%% of a jump (%.2fm of %.2fm, %s)"
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
 	var cr := tu.stop("crouch")
-	ok(cr.y <= jump_apex * 0.6, "the lookout top is %.2fm up, under 60%% of a jump (%.2fm)" % [cr.y, jump_apex])
+	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
+	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
