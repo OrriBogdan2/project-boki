@@ -120,6 +120,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	if names.is_empty():
 		return false
 	lib = player.get_animation_library(names[0])
+	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
 		if b != "root" and WardenSkeleton.find(sk, b) >= 0:

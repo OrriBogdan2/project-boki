@@ -49,6 +49,16 @@
 		"dur": 0.4,
 		"min_fall": 0.25
 	},
+	"derive": {
+		"ult_recover": {
+			"from": "riposte",
+			"keys": [
+				[0.0, 0.1, {}],
+				[0.1, 0.4, {"hips": [10, 0, 0], "root": [6, 0, 0], "head": [14, 0, 0]}],
+				[0.35, 0.4667, {"hips": [6, 0, 0], "root": [4, 0, 0], "head": [10, 0, 0]}]
+			]
+		}
+	},
 	"kmoves": {
 		"jug_slash_r": {
 			"clip": "slash_r"
@@ -115,6 +125,10 @@
 		},
 		"jug_riposte": {
 			"clip": "riposte"
+		},
+		"jug_ult_recover": {
+			"clip": "ult_recover",
+			"upper": "moving"
 		},
 		"jug_roar": {
 			"clip": "roar",
@@ -190,6 +204,14 @@
 		[
 			"jug_guard",
 			0.66
+		],
+		[
+			"jug_riposte",
+			0.1
+		],
+		[
+			"jug_ult_recover",
+			0.35
 		],
 		[
 			"jug_riposte",
