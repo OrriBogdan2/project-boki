@@ -251,6 +251,7 @@ static func ensure(d: Dictionary) -> Dictionary:
 			FarmSites.clean(e)
 			keep.append(e)
 	L["deco"] = keep
+	FarmSites.clean_crew(d)
 	for b in (L["b"] as Dictionary).keys():
 		var be = L["b"][b]
 		if not Data.BUILDINGS.has(b) or typeof(be) != TYPE_DICTIONARY:

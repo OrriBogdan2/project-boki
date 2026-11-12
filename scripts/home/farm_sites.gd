@@ -13,6 +13,8 @@ extends RefCounted
 ##
 ## On the deco entry:
 ##   t       tier 1..3 (missing = 1)
+##   rec["build_at"] (on a Boki, not the entry) the deco uid of the site it is assigned to: it builds only
+##           there, in a slot kept for it, until the site stands or it is reassigned (assign / clean_crew)
 ##   site    {need: swings, got: swings done, to: tier it becomes, up: upgrading a standing building,
 ##            cost: the materials the whole build takes, paid: what has been spent so far (taking the
 ##            site down gives it back), steps: how many quarters of the cost are paid}
@@ -259,6 +261,43 @@ static func entry(u: int) -> Dictionary:
 		if int(e["u"]) == u: return e
 	return {}
 
+# ------------------------------------------------------------------ Boki assigned to a site
+static func site_of(rec: Dictionary) -> int:
+	return int(rec.get("build_at", -1))
+
+## The Boki assigned to this site (deco uid).
+static func crew(u: int) -> Array:
+	var out: Array = []
+	for r in Save.d.get("roster", []):
+		if typeof(r) == TYPE_DICTIONARY and site_of(r) == u: out.append(r)
+	return out
+
+## Sends a Boki to build at a site for good (u < 0: free again). Like a station, it leaves its pin and rest.
+static func assign(rec: Dictionary, u: int) -> void:
+	if u < 0:
+		rec.erase("build_at")
+		return
+	rec["build_at"] = u
+	rec.erase("work_at")
+	rec.erase("work_rest")
+	rec.erase("work_pin")
+
+## Tidies the assignments of a save: a number is an int again after JSON, and one to a site that is gone
+## or finished (or that has no room) is dropped. HomeLayout.ensure and HomeWork.scan call it.
+static func clean_crew(d: Dictionary) -> void:
+	var seats := {}
+	for e in sites(d):
+		seats[int(e["u"])] = int(rules()["crew_slots"])
+	for r in d.get("roster", []):
+		if typeof(r) != TYPE_DICTIONARY or not r.has("build_at"):
+			continue
+		var u := int(r["build_at"])
+		if int(seats.get(u, 0)) <= 0:
+			r.erase("build_at")
+		else:
+			r["build_at"] = u
+			seats[u] = int(seats[u]) - 1
+
 # ------------------------------------------------------------------ the farm's builders (HomeWork hooks)
 ## Called by HomeWork.scan(): a job per open swing (up to two Boki at a site at once).
 static func scan(hw) -> void:
@@ -268,8 +307,10 @@ static func scan(hw) -> void:
 		var u := int(e["u"])
 		var left := int(e["site"]["need"]) - int(e["site"]["got"])
 		var nm := String(HomeLayout.CATALOG[String(e["id"])]["name"]).to_lower()
+		var crew_n := mini(crew(u).size(), slots)
 		for slot in mini(slots, left):
-			hw._job("build:%d:%d" % [u, slot], "craft", "build", hw.stand(e, slot), HomeLayout.deco_center(e), {"u": u, "site": true, "what": nm})
+			var extra := {"u": u, "site": true, "what": nm, "slot": slot, "crew": crew_n}
+			hw._job("build:%d:%d" % [u, slot], "craft", "build", hw.stand(e, slot), HomeLayout.deco_center(e), extra)
 
 ## You start hammering: the nearest Boki that can work (CALL_R) drop what they are doing and come to
 ## take the open swings of this site (hw.jobs). Returns how many were called.
@@ -300,9 +341,13 @@ static func valid(J: Dictionary) -> bool:
 	return not e.is_empty() and has_site(e) and not stalled(e)
 
 ## Any Boki that can work may build; a Craft knack is not needed (but Craft Off on the Job Board
-## and a pin to another element still count).
-static func takes(rec: Dictionary, _j: Dictionary) -> bool:
-	if not Work.can_work(rec) or Work.prio("craft") <= 0:
+## and a pin to another element still count). A Boki assigned to a site builds only there (whatever the
+## Job Board says) and the first `crew` slots of a site are kept for its assigned Boki.
+static func takes(rec: Dictionary, j: Dictionary) -> bool:
+	var at := site_of(rec)
+	if at >= 0:
+		return Work.can_work(rec) and at == int(j.get("u", -1)) and int(j.get("slot", 0)) < int(j.get("crew", 0))
+	if int(j.get("slot", 0)) < int(j.get("crew", 0)) or not Work.can_work(rec) or Work.prio("craft") <= 0:
 		return false
 	var p := Work.pin(rec)
 	return p == "" or p == "craft"

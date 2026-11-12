@@ -26,4 +26,5 @@ A new farm let you buy every building at once and placing one was instant, so th
 - Save stays v4. New optional fields only: `layout.fb`, `layout.fbs`, `deco[].t`, `deco[].site`, `mats.fibre`, `stats.bosses`, `stats.fb_built`. `HomeLayout.ensure` tidies them (JSON floats). Old saves load unchanged and stay ungated.
 - Net: nothing synced changes (the farm is local), `Net.VERSION` unchanged.
 - Checks: `--farmbuild-check`. `--farm-start-check` now runs its older instant-placement sections on a layout with the pass switched off.
-- Not done: assigning a Boki to one site from a panel (use the Job Board: Craft priority and pins), progress of sites while you are away on a run.
+- Assigning (ext/farm-site-assign): near a new-build site the Details key opens its panel (`FarmSiteAssign`) with an Assign list of Boki and their building skill. `rec["build_at"]` (optional, save stays v4; `FarmSites.clean_crew` makes it an int and drops it once the site stands or is gone, from `HomeLayout.ensure` and every `HomeWork.scan`) sends that Boki to that site only, whatever the Job Board says, and its slot (`crew_slots` per site) is not taken by free Boki. Assigning it to a station clears it, and the other way round.
+- Not done: progress of sites while you are away on a run, and a panel for upgrade sites (only new builds can be walked up to).

@@ -158,6 +158,12 @@ func label(it: Dictionary) -> String:
 	var nm := String(HomeLayout.CATALOG[String(e["id"])]["name"]).to_lower()
 	return "Hold to hammer the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
 
+## Details on a site: its panel, where you send Boki to build it.
+func open_site(it: Dictionary) -> void:
+	var e := FarmSites.entry(int(it["u"]))
+	if not e.is_empty() and FarmSites.has_site(e):
+		FarmSiteAssign.open(h, e)
+
 func use(it: Dictionary) -> void:
 	if String(it["kind"]) == "hob":
 		talk()
