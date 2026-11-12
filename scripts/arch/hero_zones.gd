@@ -102,6 +102,8 @@ static func rock(
 	var tall := top / ROCK_TOP
 	if tall < 1.0:
 		RockLook.upright(n)
+	if RockLook.is_ridge(rid):
+		RockLook.ridge(n)
 	n.scale = Vector3(len_ / 1.15, tall, 1.0)
 	m.add_child(n)
 	RockLook.cool(n)

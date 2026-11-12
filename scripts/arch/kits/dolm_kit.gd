@@ -12,6 +12,7 @@ extends ArchKit
 ## KitLooks.
 
 const ROCK_PAY := "ROCKFALL"
+const PUNCH_STREAK_W := 0.8             # m: width of the bright streak down the punch lane (the footage's is a thick white-hot streak)
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
@@ -425,7 +426,7 @@ func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
 	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
-	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
+	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 22, 6.0, 0.4, 4.0, 1.6)
 	DolmImpact.hit(m, g, float(s["dmg"]))
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
@@ -459,6 +460,8 @@ func _punch(k: float) -> void:
 	m.fx.burst(fp, Color("8f9cb8"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), COBALT, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
 	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, COBALT, k > 0.6)
+	var lane := Vector3(dir.x, 0, dir.y) * float(pd["len"])
+	m.fx.beam(h.pos + Vector3(0, 1.0, 0) + lane * 0.15, h.pos + Vector3(0, 1.0, 0) + lane, COBALT, PUNCH_STREAK_W, 0.2)
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
@@ -501,6 +504,7 @@ func _punch_impact(at: Vector3, dir: Vector2, k: float, dmg: float) -> void:
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
 	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
 	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
+	KitLooks.of(m).chips(at + Vector3(0, 0.5, 0), int(6 + 6 * k), k)
 	DolmImpact.hit(m, AimMode.ground(m, at), dmg, dir)
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up

@@ -24,6 +24,11 @@ const COLS := [
 	[-0.08, 0.27, 0.32, 0.8, -0.1], [0.58, -0.2, 0.24, 1.15, 0.16], [-0.58, -0.16, 0.26, 1.3, -0.16]
 ]
 
+# a Basalt Spine rock's ridge fin: one low spiked ridge that runs on from rock to rock, so the nine read as one
+# ridge. [x along the rock, height, half width at the foot]; both ends match so neighbours meet.
+const FIN_STATIONS := [[-0.7, 0.85, 0.34], [-0.38, 1.5, 0.3], [0.0, 1.0, 0.36], [0.38, 1.45, 0.3], [0.7, 0.85, 0.34]]
+const FIN_CRACK := Color(0.35, 0.6, 1.0, 0.95)
+
 static var _rumble_at := -9.0
 static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
 
@@ -41,6 +46,53 @@ static func make() -> Node3D:
 		Models.part(col, crag[0], crag[1])
 	_cracks(n)
 	return n
+
+## A rock of the Basalt Spine has an rid "<owner>.x<cast>.<n>" (BreahSpine._raise).
+static func is_ridge(rid: String) -> bool:
+	var parts := rid.split(".")
+	return parts.size() == 3 and parts[1].begins_with("x")
+
+## Joins a Spine rock to its neighbours with the spiked fin and a glowing seam along its foot. It is a "Col" so
+## the crumble takes it down with the rock; the rock's collision is untouched.
+static func ridge(n: Node3D) -> void:
+	var fin := Node3D.new()
+	fin.name = "ColRidge"
+	n.add_child(fin)
+	Models.part(fin, _fin()[0], _fin()[1])
+	var cracks := n.get_node("Cracks")
+	for side in [-1.0, 1.0]:
+		var seam := Models.part(
+			cracks, Models.box(1.4, 0.012, 0.05), KitLooks.shade_mat(FIN_CRACK), Vector3(0, 0.04, side * 0.36)
+		)
+		seam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+static func _fin() -> Array:
+	if _crags.has(-1):
+		return _crags[-1]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_smooth_group(-1)
+	for i in FIN_STATIONS.size():
+		var a: Array = FIN_STATIONS[i]
+		var tent := [Vector3(a[0], 0, -a[2]), Vector3(a[0], a[1], 0), Vector3(a[0], 0, a[2])]
+		if i == 0 or i == FIN_STATIONS.size() - 1:
+			for v in tent:
+				st.add_vertex(v)
+		if i == FIN_STATIONS.size() - 1:
+			continue
+		var b: Array = FIN_STATIONS[i + 1]
+		var nxt := [Vector3(b[0], 0, -b[2]), Vector3(b[0], b[1], 0), Vector3(b[0], 0, b[2])]
+		for v in [tent[0], tent[1], nxt[1], tent[0], nxt[1], nxt[0], tent[2], nxt[1], tent[1], tent[2], nxt[2], nxt[1]]:
+			st.add_vertex(v)
+	st.generate_normals()
+	var mt := KitLooks.rock_mat(0.3, 9.1)
+	mt.set_shader_parameter("stone", STONE)
+	mt.set_shader_parameter("stone_hi", STONE_HI)
+	mt.set_shader_parameter("rim", RIM)
+	mt.set_shader_parameter("cap_col", CAP)
+	mt.set_shader_parameter("cap", 1.0)
+	_crags[-1] = [st.commit(), mt]
+	return _crags[-1]
 
 ## Stands the columns straight, so a low rock can be squashed without shearing them.
 static func upright(n: Node3D) -> void:
