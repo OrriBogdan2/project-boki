@@ -7936,3 +7936,4 @@ READY ext/sable-knife-audit 2aa8b791bf (Shadow Knife audit vs Farstep Dagger in 
 READY ext/grimble-barge-chain 3b599ef6d (Barge chain as a burst of Brute Dash: gap 0.22->0.1 s, a press between shoves held not dropped, LMB after the last shove next step; move-feel rows)
 READY ext/neve-skate-speed 62584033d (Rimewright skate 11.5 -> 10.5 m/s, the footage mean of 450-600 px/s = 5.83 bh/s; asserted in --rimewright-combo-check; Rimelock carry text 6.3 -> 5.9 m; refund 0.6 untouched)
 READY ext/cinder-flue-steer 422080409 (Cinder Flue Flight: 0.15 s hang at the ember ring + turn cap 120->90 deg/s, both measured off Felix at 15 fps; owner 1.8 s kept; move-feel rows flue_lift_hold_s/flue_hover_m/flue_turn_deg_s)
+READY ext/sable-knife-clips aab618c2e (Sable knife release 0.12s pinned to the throw key pose by a check, recast plays thf_arrive; timings already matched the source and clips, no clip missing; GPU strips jobq 20261112-144141-23689 and 20261112-144202-24072)
