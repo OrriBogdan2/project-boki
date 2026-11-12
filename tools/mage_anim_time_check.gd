@@ -180,6 +180,11 @@ func _wirerun(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 ## snap beat plays from the raised arm. A short drag (release at 0.3 s) and the longest (release at 1.0 s).
 func _skycall(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 	var at := home + Vector3(7.0, 0, 0)
+	var cl := _clips(P)
+	var mv: Dictionary = cl.d["kmoves"]["mage_e"]
+	C.ok("Sparkle timing Skycall: the sky clip itself keys the raised arm to 1.9 s (no hold_at in the data)",
+			not mv.has("hold_at") and cl.lib.get_animation(String(mv["clip"])).length >= 1.9,
+			"length %.2f" % cl.lib.get_animation(String(mv["clip"])).length)
 	for rel in [0.3, 1.0]:
 		C.ac.aim_at(P, at)
 		K.cd["e"] = 0.0

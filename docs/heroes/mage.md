@@ -203,17 +203,17 @@ under one footage frame. Seconds from the press.
 | RMB held | spear in hand, white flash, throw: ~1.2 s press to throw; recovery ~0.4 | flash 1.0, release throws at once, beat on the same frame, clip 0.70, arm back +0.85 | unchanged |
 | RMB tap (min_t 0.33) | not seen (the footage always held) | the beat played on the release (0.13) and the rod left at 0.35: the arm threw 0.22 s early | the beat plays as the rod leaves (0.35) |
 | Wirerun | charge ~0.6 to full length, travel ~0.6 (owner: speed 40), recover ~0.4 | crouch on at 0.10, streak and beat at the full charge 0.62, landing beat after the arrival | unchanged |
-| Skycall | disc to strike 0.8 s (4 frames), strike committed ~1 frame after the disc | arm up on the press (0.02); a drag released late (1.0 s, strike at 1.8) dropped the arm at 1.55 (clip 1.4), then the snap popped up from rest | the arm holds its raised pose (`hold_at` 1.15, `hold_until` 1.9) until the snap |
+| Skycall | disc to strike 0.8 s (4 frames), strike committed ~1 frame after the disc | arm up on the press (0.02); a drag released late (1.0 s, strike at 1.8) dropped the arm at 1.55 (clip 1.4), then the snap popped up from rest | the arm holds its raised pose until the snap: the `sky` clip keys it from 0.3 to 1.9 s and drops to rest by 2.15 |
 | Kitefall | crouch then leap ~0.4, up 1.2-1.8, streak down | windup 0.3, hover 1.7 (inside 1.2-1.8) | unchanged |
 | mage_live, gum, fusion, dash_ex | not in the footage | | unchanged |
 
 Owner overrides left as they are: the 0.648 s LMB cadence, Wirerun's travel speed, the Skycall pull.
 
-Clip re-keys for origin/ext/ryzz-v2-model (not done here: the GLB and tools/art1 are that branch's):
+Clip re-keys (ext/anim-sparkle-sky-hold did the sky one):
 
 | Clip | Re-key |
 |---|---|
-| sky | the raised pose (SK) holds 0.3-1.15 and drops to rest by 1.4, but the move lasts up to 1.8 s (1.0 s drag + 0.8 s); a hold key at the end of SK would let `hold_at`/`hold_until` go |
+| sky | done: a hold key at the end of the raised pose (SK 1.15 to 1.9 s, rest by 2.15), so the move's 1.8 s (1.0 s drag + 0.8 s) stays raised with no `hold_at`/`hold_until` in the data |
 | rmb | the throw's release key is 0.16; a tap now plays it at the launch (0.33) so it reads right as is |
 
 Suggestions (ours, not built): keep the rod in her hand until it leaves on a tap (the tick hides it on the release,
