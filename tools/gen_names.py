@@ -30,20 +30,26 @@ while len(kin)<2200:
     if re.search(r"[^aeiouy]{3}", n.lower()): continue
     if 3<=len(n)<=8 and not bad.search(n) and not re.search(r"(.)\1\1",n) and not re.search(r"[aeiou]{3}",n): kin.add(n)
 kin = sorted(kin, key=lambda s:(s not in words, random.random()))[:2200]
-# bot names: sharp gamer-ish handles
-bon = ["v","k","r","z","t","s","n","m","j","b","d","c","l","dr","kr","tr","sk","st","th","br","gr","vr","w","f","h","x"]
-bnu = ["a","e","i","o","u","a","e","i","o","ae","ai","io"]
-bco = ["","n","x","r","k","l","s","th","sh","z","v","nn","rr","ss","ck","rn","nt","st","lk","sk","x","rd","ld","m"]
-bend = ["","a","o","is","us","ix","yn","en","ar","or","el","ia","ra","ka","on","ex","ax","ek","ir","ys","ie","ri","ne","ze","ka"]
-bwords = """Vexa Moss Tarn Juno Rook Kestrel Nim Sable Orin Lux Bryn Cato Ivy Rho Wick Zed Fen Mara
-Ash Blaze Bolt Briar Cinder Cobalt Crow Dagger Drift Echo Ember Flint Frost Gale Ghost Grim Hawk Hex Hollow Jinx Jolt Kite Lynx Mako Nova Onyx Pike Quill Raven Reef Riot Rust Scythe Shade Slate Spike Storm Talon Thorn Vale Viper Volt Warden Wraith Zephyr""".split()
-bot=set(bwords)
-while len(bot)<2000:
-    n = random.choice(bon)+random.choice(bnu)+random.choice(bco)+random.choice(bend)
-    n = n[:1].upper()+n[1:]
-    if re.search(r"[^aeiouy]{3}", n) or re.search(r"[aeiou]{3}", n): continue
-    if 3<=len(n)<=7 and not bad.search(n) and not re.search(r"(.)\1\1",n) and n not in kin: bot.add(n)
-bot = sorted(bot, key=lambda s:(s not in bwords, random.random()))[:2000]
+# bot names: hand-written gamer tags (no hunter names or titles, nothing rude); unique per match
+bot = """kyoto_drift nightjar Pixelpup zr0 BrewMaster tofu.exe lowbatt_ Mossback jetsam44 PaperTiger dustyboots
+OatmealRaider quietstorm ctrl_alt_pie sk8rboi_ tinyvolt Wafflehaus ghostpepper_ nox FrostByte spoonfed gl1tchy
+moonwalker99 Cr0ssfade zippy_z kettlecorn BigMood Lunchbreak st4rfish hotsauce_ reroll_ rustbucket
+pancakes4all sleepyfox_ Tilt_Shift voidwalker7 mr_biscuit Dr_Static clutch_or_kick breadcrumb_ zenmode
+bonk.png yeetmaster_x sourpatch_ cosmicgoat Pogo_Stick anchovy_ Lil_Thunder fumble_ kn1ghtowl SunnyD4y
+gravy_train petrichor_ N0_Scope Mothlight TurboTurnip salty_sam wobblyjelly hexed_ marmalade_ ricochet_
+duskrunner glitchwitch emberfall_ jam_sandwich rngesus_ tumbleweed_ Cheddar_ chipmunk_ quasar_k lag_spike_
+cozy_goblin Inkwell solarflare_ pixelated_ fiddlesticks lobster_roll overcooked tinfoil_hat midnight_oil
+SaltyPretzel capy_bara fumblecore nightowl_ft Gingersnap_ mushroom_man snowbound_ zigzag_ Hazmat_Hal
+uncle_static BoneApple8 Brickhouse cloudsurfer plum_crazy nova_nick ByteMe_ shortcircuit wheezy_ krispy_k
+Tangent_ sidequest_ noodle_ninja phantom_pho rift_runner dizzy_dot TankTop_Tim crumbs_ ClapBack unlucky7
+jollyroger_ quickscope_q OffBrand_ lemon_zest_ frogger_ headphones_on glowstick_ Mr_Meep dashdot_ AFK_Alex
+grapejuice_ wrenchmonkey afterimage_ pocketsand stray_sock bubblegum_b couch_co_op parry_pete Roulette_
+nitrogen_ speedbump_ hoodie_up tapioca_tom vinyl_vic sundial_ lofi_lena kilowatt_ blank_page rooftop_ruth
+jetlag_ MidgameMike static_shock Sprocket_ iron_loaf saltlick_ tuesdays_ opal_ox gnarly_gnome popcorn_pete
+ZigZagZoe cable_guy_ bunker_buddy wetpaint_ thumbtack driftwood_d cheerio_ mystery_meat tiptoe_ glowworm_
+pepper_jack ClutchCarl fizzbuzz_ lamplight_ otter_pop backseat_bee Hexagon_Hank pinecone_pro latte_lord
+Bobbin_ coil_whine toastbot_ ruckus_ drizzle_d OverEasy nimbus_nina quarterpipe slowpoke_sal gumbo_ Cobweb_
+paperplane_ mintcondition tinsel_ halfpipe_h moondust_""".split()
 def arr(a):
     out=[];line="\t"
     for x in a:
@@ -52,6 +58,6 @@ def arr(a):
         line+=t
     out.append(line.rstrip().rstrip(","))
     return "[\n"+"\n".join(out)+"\n]"
-src = "class_name Names\n## Name pools for kin and bot hunters: a few hundred hand-picked words plus generated ones\n## (pronounceable, filtered for anything rude), so the same name rarely comes up twice.\n## Regenerate with tools/gen_names.py.\n\nconst KIN := " + arr(kin) + "\n\nconst BOT := " + arr(bot) + "\n"
+src = "class_name Names\n## Name pools: kin names (hand-picked + generated, filtered for anything rude) and bot gamer tags (hand-written).\n## Regenerate with tools/gen_names.py.\n\nconst KIN := " + arr(kin) + "\n\nconst BOT := " + arr(bot) + "\n"
 open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "scripts", "core", "names.gd"),"w").write(src)
-print(len(kin),len(bot), random.sample(kin[300:],25), random.sample(bot[80:],25))
+print(len(kin),len(bot))
