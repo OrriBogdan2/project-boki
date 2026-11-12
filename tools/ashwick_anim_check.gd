@@ -1,7 +1,7 @@
 extends RefCounted
 ## Cinder's animation timing against the footage (docs/heroes/ashwick.md, "Animation timing"), for
-## --ashwick-combo-check: each fix of the timing pass, on the kit's move clock (kmove_t = time - anim_at) that
-## WardenClips seeks her clips on, and the clip lengths in the glb.
+## --ashwick-combo-check: the jet, landing and cloak fixes of the timing pass (the ram and run rows live in
+## ashwick_combo_check), on the kit's move clock (kmove_t = time - anim_at) that WardenClips seeks clips on.
 
 const MAP := "res://content/rules/warden_anim/cinder.json"
 const GLB := "res://art/wardens/cinder/cinder.glb"
@@ -24,25 +24,7 @@ func run() -> void:
 	var home: Vector3 = r[4]
 	var K: AshwickKit = P.ak
 	var km: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAP))["kmoves"]
-	var lens := _clip_lens(["cloak", "walk_f", "run_f"])
-	# the ram into a foe: contact early, and the clip jumps to the struck pose then (not the free ram's 0.36)
-	T.teleport(home + Vector3(3.0, 0, 0))
-	ak.aim_at(P, T.pos)
-	K.on_dash(false)
-	var hit_at := -1.0
-	var kt := -1.0
-	var tt := 0.0
-	while tt < 0.4 and hit_at < 0.0:
-		ak.step(m, ak.DT)
-		tt += ak.DT
-		if K.bash_hits > 0:
-			hit_at = tt
-			kt = m.time - K.anim_at
-	ok(
-		"timing: a ram into a foe shows the struck pose on contact ([F] contact ~0.12 s)",
-		hit_at > 0.0 and hit_at < K.RAM_HIT_KEY - 0.05 and K.anim_id == "as_leap" and kt >= K.RAM_HIT_KEY - 0.001,
-		"contact %.2f s, clip at %.2f s" % [hit_at, kt]
-	)
+	var lens := _clip_lens(["cloak"])
 	# Flue Flight: flying 0.1 s after the press; the landing hands the legs back to her walk
 	ak.step(m, 1.0)
 	T.teleport(home + Vector3(0, 0, 9.0))
@@ -70,14 +52,6 @@ func run() -> void:
 		wide >= 0.18 and end <= 0.4 and absf(float(lens["cloak"]) - end) < 0.04 and K.CLOAK_POSE_T < end
 			and km["as_cloak"].get("upper") == "moving",
 		"wide %.2f s, end %.2f s, clip %.2f s" % [wide, end, float(lens["cloak"])]
-	)
-	# the run: a footfall every 0.15-0.2 s at her run speed; the walk shares the cycle (feet in phase in the blend)
-	var rate := clampf(P.base_speed / 4.6, 0.6, 1.5)
-	var step := float(lens["run_f"]) / 2.0 / rate
-	ok(
-		"timing: a running step every 0.15-0.2 s ([F] quick short strides)",
-		step >= 0.15 and step <= 0.2 and absf(float(lens["walk_f"]) - float(lens["run_f"])) < 0.001,
-		"step %.3f s, walk %.3f run %.3f" % [step, float(lens["walk_f"]), float(lens["run_f"])]
 	)
 
 ## The lengths (s) of these clips in her glb as Godot imported it (-1: missing).

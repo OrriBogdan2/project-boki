@@ -50,6 +50,7 @@ const LIFT_LEAD := 0.12         # s of lw_jet skipped on the press: its fly key 
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
 ## gear, the Boki's C and a throw. A press answers with the soft "can't" tick.
 const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+const SLOT_OF := {"gear1": "gear0", "gear2": "gear1"}      # input -> the HUD slot its deny pulses
 
 func lock_inputs() -> void:
 	if not running():
@@ -58,7 +59,7 @@ func lock_inputs() -> void:
 		if h.inp.get(key, false):
 			locked += 1
 			h.inp[key] = false
-			h._ab_feedback(key if key in ["dash", "sec"] else "base", "deny")
+			h._ab_feedback(SLOT_OF.get(key, key), "deny")
 	h.dash_buf = 0.0
 	h.inp["dash_down"] = false
 	h.inp["sec_hold"] = false
@@ -190,10 +191,9 @@ func _leap() -> void:
 	flight = {}
 	leaps += 1
 	h.roll_t = 0.0
-	var keep := dir * speed * Hunter.DASH_JUMP_CARRY
+	var keep := dir * speed * Loco.dash_jump_keep
 	h.vel.x = keep.x
 	h.vel.z = keep.y
-	h.glide_handoff(dir, speed)
 	AimKit.hide(h, "x_steer")
 	k.play("lw_hop")                 # tucked for the leap off (no burst: the jet's own flame just stops)
 

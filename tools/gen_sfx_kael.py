@@ -242,13 +242,17 @@ def ting(i):
                crack(0.15, 500, 3000, 0.01) * 1.2, kick(400, 200, 0.12, 0.004, 0.015, 1.8) * 0.3)
 
 
+RIPOSTE_HIT = 0.1   # s: the cut lands with the cleave (content/archetypes/juggernaut.json x.strike_t)
+
+
 def riposte(i):
-    """The lunging upward cleave: a rising heave, the cut, the hot edge hissing after it."""
-    d = 0.8
-    cut = mix(click(0.003, 2000, 6000) * 1.1, kick(190, 65, 0.5, 0.012, 0.06, 2.8) * 0.7,
-              crack(0.5, 300, 2600, 0.035) * 1.8)
-    return mix(swish(0.3, 150, 2000, 2.0) * 1.0, at(cut, 0.17), at(sizzle(0.55, 0.01, 0.18) * 0.45, 0.18),
-               at(bell(784, 0.5, 0.2) * 0.15, 0.18))
+    """The lunging upward cleave: a short rising heave, then the cut on the strike: a hard bright edge (a
+    near-instant click and a steel shing) over the chop, the hot edge hissing after it."""
+    edge = mix(click(0.002, 3000, 9000, 0.0008) * 2.2, crack(0.12, 2500, 8000, 0.008, 0.0002) * 1.6,
+               ring((2350, 3530), 0.3, (0.06, 0.035), (0.14, 0.08), 0.0002))
+    cut = mix(edge, kick(190, 65, 0.5, 0.006, 0.05, 2.8) * 0.7, crack(0.5, 300, 2600, 0.03, 0.0003) * 1.5)
+    return mix(swish(RIPOSTE_HIT + 0.02, 150, 2000, 2.0) * 0.6, at(cut, RIPOSTE_HIT),
+               at(sizzle(0.55, 0.01, 0.18) * 0.45, RIPOSTE_HIT + 0.01), at(bell(784, 0.5, 0.2) * 0.15, RIPOSTE_HIT))
 
 
 def heal(i):
