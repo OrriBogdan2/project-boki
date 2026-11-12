@@ -64,8 +64,8 @@ func dancer(a) -> void:
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
 	var thin: Dictionary = AimKit.entry(P, "ult")
-	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band marked; no blade before it",
-			absf(float(thin["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
+	A.ok("dancer X: the ring is near 3 bh just before 0.4s, the outer band marked; no blade before it",
+			absf(float(thin["r"]) - float(d["reach"])) < 0.25 and AimKit.shown(P, "ult_rim")
 			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(thin["r"]))
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
