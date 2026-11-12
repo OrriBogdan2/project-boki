@@ -126,8 +126,6 @@ uniform float emit_flicker = 0.0;
 // the emission layer's colour (WardenGlb, the archetype's "model_glow" core; alpha 0: the layer's own painted colour):
 // the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Sparkle)
 uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
-// the layer's weak texels dropped (model_glow "cut", 0..1): thinner cracks, glowing only where they are hottest
-uniform float emit_cut = 0.0;
 // a curse's char (a warden_look slot's): the skin round the emission layer's cracks (its mip char_reach, a blurred
 // mask) and the red-painted curse skin turn to char_col by char_k, unlit by the hot key, so only the cracks glow (Kael)
 uniform float char_k = 0.0;
@@ -188,9 +186,6 @@ void fragment() {
 			float charred = char_k * max(crack, curse);
 			c = mix(c, char_col.rgb, charred);
 			heat *= 1.0 - charred;      // (the char does not glow: only the emission layer's cracks do)
-		}
-		if (emit_cut > 0.0) {
-			emit_c *= smoothstep(emit_cut, emit_cut + 0.15, max(emit_c.r, max(emit_c.g, emit_c.b)));
 		}
 		if (emit_tint.a > 0.0) {
 			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));

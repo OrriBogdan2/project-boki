@@ -635,14 +635,6 @@ static func look(nm: String) -> Dictionary:
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(LOOK_PATH)) if FileAccess.file_exists(LOOK_PATH) \
 				else null
 		_look = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
-		for arch in ART:     # (a look variant's "warden" keys; a dictionary one, "slots", merges per slot)
-			var own: Dictionary = (_look as Dictionary).get(ART[arch], {})
-			var over: Dictionary = HeroVfx.look_of(arch).get("warden", {})
-			for k in over:
-				if own.get(k) is Dictionary:
-					(own[k] as Dictionary).merge(over[k], true)
-				else:
-					own[k] = over[k]
 	return (_look as Dictionary).get(nm, {})
 
 ## The look's "lights": a small OmniLight3D on each named anchor empty of the model (Pip's lantern glow), so a
@@ -855,7 +847,7 @@ static func _void(src: BaseMaterial3D, soft: bool) -> ShaderMaterial:
 ## rebake. A flat piece tagged "edge"
 ## (glow-<name>_edge) takes the edge colour.
 static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
-	var g := _model_glow(arch)
+	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.is_empty():
 		return
 	var core := Color(String(g.get(tag, g.get("core", "ffffff"))))     # (a tag's own: Kael's scarf embers)
@@ -871,21 +863,12 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 		m.set_shader_parameter("glow", float(g["strength"]))
 
 ## The emission layer in the archetype's "model_glow" core colour (Sparkle's pink scar, charm, piping and veins): the
-## layer is a mask then, so the colour can change without a rebake. "emit" its strength (EMIT), "cut" the share of its
-## weakest texels dropped (thinner cracks).
+## layer is a mask then, so the colour can change without a rebake. "emit" its strength (EMIT).
 static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
-	var g := _model_glow(arch)
+	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.has("core"):
 		m.set_shader_parameter("emit_tint", Color(String(g["core"])))
-	m.set_shader_parameter("emit_cut", float(g.get("cut", 0.0)))
 	m.set_shader_parameter("emit", float(g.get("emit", EMIT)))
-
-## The archetype's "model_glow", with its chosen look variant's on top (HeroVfx.look_of).
-static func _model_glow(arch: String) -> Dictionary:
-	if arch == "":
-		return {}
-	var own: Dictionary = Arch.def(arch).get("model_glow", {})
-	return own.merged(HeroVfx.look_of(arch).get("model_glow", {}), true)
 
 static func _gloss() -> ShaderMaterial:
 	if _gloss_m == null:

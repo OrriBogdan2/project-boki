@@ -381,16 +381,14 @@ ground that cools to fissures, walls of flame, mesh trails, GPU embers, smoke an
 The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
 (`jug_*`, `juggernaut_*`), played from the recipes.
 
-**Black and red (look-dev, 11-11; the owner picks before merge).** The owner wants every red effect of his to read as
-black with red glowing through it, as on his splash and turnaround, and never as Cinder's orange-yellow fire. The
-data's `"look"` flag picks one of its `"looks"` (`""`: the old ember / magenta look): **A** a charred base with
-crimson cracks, trails a black ink ribbon with a red hot edge, sparks dark red into black flecks; **B** darker, thinner
-cracks (`model_glow.cut`) glowing only where hottest, trails mostly black; **C** A with a faint violet in the black.
-A look sets the palette (also the Warchain's `chain*` colours and the chain moves' `haul*`), the model's crack colour
-and strength (`model_glow`) and his skin slot's char (warden_look `char_k`, `char_reach`, `char_col`: the skin round
-the emission cracks and the red-painted curse skin turn black, so only the cracks glow). Unchanged: the red cloth, the
-white sword, and the Gilded Riposte's gold (its name and the guard's read). Once picked, the pick's values go in place
-and the flag and the other looks are deleted.
+**Black and red (owner pick A, 11-12).** Every red effect of his reads as black with red glowing through it, as on his
+splash and turnaround, never as Cinder's orange-yellow fire: a charred base with crimson cracks, trails a black ink
+ribbon with a red hot edge (the palette's `peak`), sparks dark red into black flecks. The palette carries it (also the
+Warchain's `chain*` colours and the chain moves' `haul*`), with the model's crack colour and strength (archetype
+`model_glow` core `#c80a22`, `emit` 1.4) and his skin slot's char (warden_look `char_k`, `char_reach`, `char_col`: the
+skin round the emission cracks and the red-painted curse skin turn black, so only the cracks glow). Unchanged: the red
+cloth, the white sword, and the Gilded Riposte's gold (its name and the guard's read). tools/hero_vfx_check.gd keeps
+his palette's red keys out of orange and yellow.
 
 ## Originality
 

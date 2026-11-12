@@ -38,9 +38,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
 A palette's optional `"peak"` (RRGGBBAA) is what the hottest part turns toward, its alpha how far (absent: halfway to
-white; Kael's looks: all the way to red, so a red stays red).
-A look-dev `"look"` flag picks one of the data's `"looks"` ({palette, model_glow, warden}, `HeroVfx.look_of`), laid
-over the palette, the archetype's `model_glow` and the Hero's warden_look.json entry (Kael's black-red, 11-11).
+white; Kael's: all the way to red, so a red stays red).
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
