@@ -28,7 +28,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Vex | RMB range, cone, lane | 10.5, 6 m at 100, 0.72 | 5-6 bh (9-10.8), 3.5 bh at 100, 0.4 bh | match |
 | Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) |
 | Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] |
-| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] |
+| Kael | RMB slam length, width | **4.3 x 0.72 lane** (was a 4.0 m cone at 70) | lane 2.4 bh x 0.4 bh (4.3 x 0.72): 0157 the magenta lane is 35-39 px wide at 1080p (1 bh = 96 px) with parallel sides, so it does not widen; 0158 the dummy struck at 2.4 bh; the Charge Dash lane is the same width (0125-0126, 0145) | **fixed** (lane hit, aim lane and lane scorch) |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
 | Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
@@ -55,7 +55,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), - | match; range [?] |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen | aegis match; slam [?] |
+| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen: 0290-0315 (Empower Shield Bash card at 0296) show no bash decal and no foe in reach; the 0309 red flash and 316 are on Oath (the dummy's beam) | aegis match; slam [?] |
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
 | Sparkle | RMB range | 13 | 7.5 bh (13.5) | match |
