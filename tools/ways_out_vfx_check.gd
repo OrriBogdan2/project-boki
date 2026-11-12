@@ -49,9 +49,15 @@ func _h(look: Array) -> float:
 func _txt(look: Array) -> String:
 	return String(look[3])
 
-## The beam colour a seat shows while this squad uses it.
-func _use(team: int) -> Color:
-	return Color(WaysOutLook.team_col(team), WaysOutLook.LOOKS[St.IN_USE]["a"])
+## The beam colour a seat shows while this squad uses it, seen by the local squad `viewer`.
+func _use(team: int, viewer: int) -> Color:
+	return Color(SideColor.of_team(viewer, team), WaysOutLook.LOOKS[St.IN_USE]["a"])
+
+## A seat's reading as `viewer` sees it (no match: the reading's viewer is set by hand).
+func _rd(st: int, viewer := 0, team := 1) -> Dictionary:
+	var rd := WaysOutLook.read(null, st, team, 94.2, 0.4)
+	rd["viewer"] = viewer
+	return rd
 
 func _nodes(n: Node) -> int:
 	var c := 1
@@ -78,23 +84,24 @@ func _five_looks(main: Node) -> void:
 	var seen := {}
 	for st in [St.LOCKED, St.OPEN, St.IN_USE, St.TAKEN, St.LOST]:
 		for i in 60:
-			b.show(WaysOutLook.read(st, 1, 94.2, 0.4), Match.DT)
+			b.show(_rd(st), Match.DT)
 		seen[st] = b.looks()
 	var distinct := {}
 	for st in seen:
 		distinct[str(seen[st])] = true
 	ok(distinct.size() == 5, "the five looks all differ (%d distinct)" % distinct.size())
-	ok(_txt(seen[St.LOCKED]) == "1:35" and _txt(seen[St.OPEN]) == "" and _txt(seen[St.IN_USE]) == "",
-		"only a locked seat shows a countdown (%s)" % _txt(seen[St.LOCKED]))
+	ok(_txt(seen[St.LOCKED]) == "1:35" and _txt(seen[St.OPEN]) == "" and _txt(seen[St.TAKEN]) == "",
+		"a locked seat shows its countdown, open and taken none (%s)" % _txt(seen[St.LOCKED]))
+	ok(_txt(seen[St.IN_USE]) == WaysOutLook.WORD_RIVAL, "a rival's seat in use is labelled: %s" % _txt(seen[St.IN_USE]))
 	var tall := _h(seen[St.OPEN])
 	ok(tall > _h(seen[St.LOCKED]) and tall > 20.0, "an open beam is tall, a locked one a stub")
-	ok(seen[St.IN_USE][0].is_equal_approx(_use(1)), "in use is the squad's colour")
+	ok(seen[St.IN_USE][0].is_equal_approx(_use(1, 0)), "in use is the using squad's colour, a rival's to viewer 0")
 	ok(_h(seen[St.TAKEN]) == 0.0 and _h(seen[St.LOST]) < _h(seen[St.OPEN]), "taken has no beam, lost only a low haze")
-	b.show(WaysOutLook.read(St.OPEN), Match.DT)
-	b.show(WaysOutLook.read(St.TAKEN), Match.DT)
+	b.show(_rd(St.OPEN, 0, -1), Match.DT)
+	b.show(_rd(St.TAKEN, 0, -1), Match.DT)
 	ok(float(b.looks()[2]) > 0.0, "a taken seat's beam sinks over time, not in one frame")
 	for i in int(WaysOutLook.COLLAPSE_S / Match.DT) + 2:
-		b.show(WaysOutLook.read(St.TAKEN), Match.DT)
+		b.show(_rd(St.TAKEN, 0, -1), Match.DT)
 	ok(float(b.looks()[2]) == 0.0, "...and is gone after %.1f s" % WaysOutLook.COLLAPSE_S)
 	ok(WaysOutLook.clock(5.0) == "0:05" and WaysOutLook.clock(120.0) == "2:00", "the countdown reads m:ss")
 	holder.queue_free()
@@ -121,7 +128,7 @@ func _heart(main: Node) -> void:
 	p.teleport(H.site + Vector3(1, 0, 0))
 	H._pick(p)
 	var g2: Array = gate.call()
-	ok(H.state == Heart.S.CARRIED and g2 != g1 and g2[0].is_equal_approx(_use(p.team)),
+	ok(H.state == Heart.S.CARRIED and g2 != g1 and g2[0].is_equal_approx(_use(p.team, p.team)),
 		"carried: the Gate takes the carrier's squad colour")
 	H._gate_done(p)
 	_run(m, WaysOutLook.COLLAPSE_S + 0.8)
@@ -129,7 +136,8 @@ func _heart(main: Node) -> void:
 	ok(H.early_team == p.team and float(g3[2]) == 0.0 and g3 != g2, "taken: the Gate's beam is gone and it goes dark")
 	m.time = float(rl["final_s"]) - m.sess_t0 + 0.1
 	var r1: Array = ring.call()
-	ok(H.state == Heart.S.FINAL and r1 != r0 and _txt(r1) == "" and _h(r1) > 20.0, "the final seat opens: a clear beam")
+	ok(H.state == Heart.S.FINAL and r1 != r0 and not _txt(r1).contains(":") and _h(r1) > 20.0,
+		"the final seat opens: a clear beam, no countdown")
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
 	for h in m.hunters:
 		if h != rival:
@@ -138,7 +146,7 @@ func _heart(main: Node) -> void:
 	rival.vel = Vector3.ZERO
 	_run(m, 3.0)
 	var r2: Array = ring.call()
-	ok(H.final_team == rival.team and r2 != r1 and r2[0].is_equal_approx(_use(rival.team)),
+	ok(H.final_team == rival.team and r2 != r1 and r2[0].is_equal_approx(_use(rival.team, p.team)),
 		"a squad holding the ring: the ring and beam take its colour")
 	_run(m, float(rl["final_hold_s"]) + 1.0)
 	_run(m, WaysOutLook.COLLAPSE_S + 0.8)
@@ -164,7 +172,7 @@ func _quest(main: Node) -> void:
 	m.exits._start(x, m.player)
 	x["prog"] = 0.5
 	var u2 := _look(m, at)
-	ok(u2 != u1 and u2[0].is_equal_approx(_use(m.player.team)), "charging: the holder's colour")
+	ok(u2 != u1 and u2[0].is_equal_approx(_use(m.player.team, m.player.team)), "charging: the holder's colour")
 	x["taken"] = true
 	_run(m, WaysOutLook.COLLAPSE_S + 0.8)
 	var u3 := _look(m, at)
@@ -185,7 +193,8 @@ func _quest(main: Node) -> void:
 	L["state"] = "awake"
 	L["sealed_in"] = [m.player]
 	var l2 := _look(m, up)
-	ok(l2 != l1 and l2[0].is_equal_approx(_use(m.player.team)), "a squad sealed in with the boss: its colour")
+	ok(l2 != l1 and l2[0].is_equal_approx(_use(m.player.team, m.player.team)),
+		"a squad sealed in with the boss: its colour")
 	L["state"] = "cleared"
 	L["up_on"] = false
 	_run(m, WaysOutLook.COLLAPSE_S + 0.8)
