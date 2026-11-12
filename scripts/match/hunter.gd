@@ -109,6 +109,7 @@ var shield_t := 0.0
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model
+var anim_posed := true      # this frame's render posed the rig: a 3D hero's bones follow it then (WardenGlb.Sync)
 var downed := false
 var down_hp := 0.0
 var revive := 0.0
@@ -3010,7 +3011,6 @@ func _on_kin_thrown(_k: Node, owner: Node) -> void:
 var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
-var anim_posed := true      # this frame's render posed the rig: a 3D hero's bones follow it then (WardenGlb.Sync)
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
 
 ## The dodge pose HunterAnim plays. Claire's skate has its own, so the light-dash lean does not stack

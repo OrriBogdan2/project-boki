@@ -15,6 +15,7 @@ var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
 var rings: Array = []         # {node, t, dur, r}
 var ring_pool: Array[MeshInstance3D] = []      # finished rings, hidden: ring() reuses one (a fight makes dozens)
+var ghost_pool: Array[MeshInstance3D] = []     # finished after-images, hidden: the next ghost() reuses one
 var teles: Array = []
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
@@ -244,7 +245,6 @@ func dash_trail(h) -> void:
 	dust(h.pos, 7)
 
 var ghosts: Array = []
-var ghost_pool: Array[MeshInstance3D] = []     # finished after-images, hidden: the next ghost() reuses one
 const GLOW_DUR := 0.5      # s: a body glow's life
 const GLOW_RISE := 1.4     # m/s: how fast it drifts up
 var _ghost_mesh: Mesh
