@@ -239,6 +239,11 @@ func _always_adopt() -> void:
 	Save.d["roster"].clear()
 	Save.d["gems"] = fee
 	ok(not Lifeline.stuck(), "no Boki and the fee in gems is not stuck")
+	# a fresh save at 0 gems and 0 Boki: the shelter still shows 3 strays, and the floor gives one for free
+	_save(0)
+	Save.d["roster"].clear()
+	ok(Shelter.cards().size() == 3 and Lifeline.stuck(), "0 gems, 0 Boki: 3 strays shown, but none affordable")
+	ok(Lifeline.check().size() == 1 and Save.d["roster"].size() == 1, "and the floor hands over a stray")
 
 func _card_of(uid: String) -> Dictionary:
 	for c in Shelter.cards():
