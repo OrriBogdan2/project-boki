@@ -81,7 +81,7 @@ var blight: BlightDir = null       # the Blight: its spawns, its scaling and wha
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -605,20 +605,6 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 	return h
 
 ## Who B would take you to: the teammate nearest the cursor on screen (alive, standing, not out).
-func base_target(h: Hunter) -> Hunter:
-	var mates: Array = hunters.filter(func(o): return o != h and o.team == h.team and not o.out and not o.downed and not o.extracted and not o.dropping and not o.riding)
-	if mates.is_empty():
-		return null
-	if h != player or mates.size() == 1:
-		return mates[0]
-	var mp := get_viewport().get_mouse_position()
-	var best: Hunter = mates[0]; var bd := 1e9
-	for o in mates:
-		var sp := cam.unproject_position(o.pos) if not cam.is_position_behind(o.pos) else Vector2(1e6, 1e6)
-		var d := sp.distance_to(mp)
-		if d < bd: bd = d; best = o
-	return best
-
 ## How high the player is over the ground under them (over the abyss: over the last ground they stood on).
 func player_altitude() -> float:
 	if player == null:
@@ -3374,8 +3360,7 @@ func _gather_input() -> void:
 	player.inp["crouch"] = crouch_on
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
-	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
-		pending_input["base"] = true
+	BaseWheel.poll(player, get_process_delta_time(), paused or map_up or duel != null or opts.get("arena", false))
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
@@ -3865,9 +3850,7 @@ func step(dt: float) -> void:
 	if opts.has("abyss_demo") and player:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
-		if pending_input["base"]:
-			pending_input["base"] = false
-			player.start_base(base_target(player))
+		BaseWheel.apply_pick(player)
 		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true

@@ -358,20 +358,7 @@ func _draw_world_labels() -> void:
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
 		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
-	# someone basing to a teammate: a ring filling round them, and a marker on where they'll appear
-	for h in m.hunters:
-		if h.base_t <= 0.0 or h.out or (h.unseen and h != m.player) or cam.is_position_behind(h.position):
-			continue
-		var bsp: Vector2 = cam.unproject_position(h.position + Vector3(0, 0.2, 0))
-		var bf: float = 1.0 - h.base_t / Hunter.BASE_TIME
-		c.draw_arc(bsp, 26.0, 0, TAU, 40, Color(0.56, 0.89, 0.78, 0.25), 3.0, true)
-		_arc(bsp, 26.0, bf, Color("8fe3c8"), 4.0)
-		_ctext(bsp + Vector2(0, 44), "BASING  %.1f" % h.base_t, 12, Color("8fe3c8"), big)
-		var to: Hunter = h.base_to
-		if to and is_instance_valid(to) and not cam.is_position_behind(to.position):
-			var tsp := cam.unproject_position(to.position + Vector3(0, 3.0, 0))
-			_ctext(tsp, "%s incoming" % h.pname.substr(0, 14), 12, Color("8fe3c8"), big)
-			c.draw_arc(cam.unproject_position(to.position + Vector3(0, 0.1, 0)), 22.0, 0, TAU, 32, Color(0.56, 0.89, 0.78, 0.4 + 0.3 * sin(m.time * 8.0)), 2.0, true)
+	BaseHud.draw(self)       # basing rings (anyone) and your B wheel
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
 			continue
@@ -1144,7 +1131,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
 ## The archetype row: RMB, Shift dash, E utility, X the hero's ultimate (locked until level 6), then the
 ## kin's own ability (C) and send/recall (G) as small badges. The Merge is the Boki box on the right (GripHud).
@@ -1193,7 +1180,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
 ## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
 ## "" once it's unlocked.
@@ -2114,8 +2101,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])
 			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])
-			out.append(["A 3s channel to the teammate nearest your cursor. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for 3s: half damage, and your crowd control, healing and shields are halved.", INK, 14])
-			out.append(["Cooldown %ds%s" % [int(Hunter.BASE_CD), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
+			out.append(["Hold to pick a teammate on the wheel, let go to channel for %ss. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for %ds: half damage, and your crowd control, healing and shields are halved." % [str(BaseRecall.CHANNEL_S), int(BaseRecall.WEAK_S)], INK, 14])
+			out.append(["Cooldown %ds%s" % [int(BaseRecall.CD_S), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
 		"pack":
 			var pack_tip := Backpacks.tip(p)
 			out.append(pack_tip[0])
