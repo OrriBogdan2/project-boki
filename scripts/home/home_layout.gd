@@ -40,8 +40,8 @@ const THEMES := {
 		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
 	"hushwood": {"name": "Hushwood", "zone": true, "region": 0, "style": "gloom", "top": "4a6a52", "top2": "3a5848",
 		"side": "4a3d52", "deep": "20202e", "leaf": "6f8f9c"},
-	"ridge": {"name": "Kitewind Ridge", "zone": true, "region": 0, "style": "storm", "track": "ridge", "top": "9cba86", "top2": "7fa27a",
-		"side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
+	"ridge": {"name": "Kitewind Ridge", "zone": true, "region": 0, "style": "storm", "track": "ridge",
+		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and

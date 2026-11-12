@@ -1,6 +1,6 @@
 extends RefCounted
 ## --toy-check: the Boki base's playthings (GARDEN.md section 4, content/rules/toys.json, HomeToys).
-##   1. data: a ball, post, tub, warm stone, updraft vent and dig patch in the Base category, each with a stat Care knows
+##   1. data: a ball, post, tub, warm stone, updraft vent and dig patch in Base, each with a stat Care knows
 ##   2. lean: Flying and Rock Boki weigh the post up, Water, Ice and Crystal the tub
 ##   3. off: with base_mode off (the shipped default) nothing plays
 ##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
