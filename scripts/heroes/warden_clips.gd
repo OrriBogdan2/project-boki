@@ -397,7 +397,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
 	# after a hit-stop (WardenGlb.Sync holds the pose) the clips play the held time back, never trailing by more
-	# than one window's cap (a model built mid-match starts on the kit's clock)
+	# than one window's cap (so a model built mid-match starts at most that far behind)
 	var held := float(s.get("held", 0.0))
 	caught = clampf(move_toward(caught, held, dt * CATCH_UP), held - ImpactWeight.cap("hitstop_ms") / 1000.0, held)
 	var want := force
