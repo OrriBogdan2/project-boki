@@ -67,7 +67,7 @@ static func torn(fill: Color, glow := 0.0, edge := Color(0, 0, 0, 0), down := fa
 	return f
 
 static func _states(t: Theme, type: String, n: StyleBox, h: StyleBox, p: StyleBox, d: StyleBox) -> void:
-	if type != "Button":
+	if not ClassDB.class_exists(type):  # a native class (OptionButton) can't be a variation
 		t.add_type(type)
 		t.set_type_variation(type, "Button")
 	t.set_stylebox("normal", type, n)
