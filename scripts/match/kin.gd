@@ -1097,6 +1097,8 @@ func render(delta: float, alpha: float) -> void:
 		return
 	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
+	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
+	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
@@ -1152,7 +1154,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 		body.rotation.x = -0.4 if lunge_t > 0.0 else 0.0
-	if state == "flying" and not fly.get("rush", false):
+	if airborne:
 		body.rotation.x += delta * 14.0
 	if state in ["active", "reviving"]:
 		_render_attention(delta, body)
