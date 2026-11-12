@@ -534,7 +534,7 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
 						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)
