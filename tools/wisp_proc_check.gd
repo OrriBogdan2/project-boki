@@ -3,26 +3,24 @@ extends RefCounted
 ## glow (the shiny colours when shiny) and a thin streak. Each passive kind (heal, shield, damage, speed) plays
 ## the cue once, only the wisp that carries that passive plays it, the rate limit (one cue per 0.5 s per wisp)
 ## holds under a flood of triggers, a rival's wisp cues the same way, the two meshes are pooled (no nodes added,
-## no particle burst) and a shiny Boki's cue wears the shiny glow. Prints PASS/FAIL.
+## no particle burst) and a shiny Boki's cue wears the shiny glow. Your own Boki's first cue gives one tip,
+## "<Boki>'s <passive>: <what it does>" (Match._tips, once per save), and the wisp flashes again; a later or
+## stale cue, a rival's cue or the tutorial match says nothing. With the wisps off, a Boki carried by order cues
+## and tells it, one out beside you does not. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 const STAT_OF := {"heal": "regen", "shield": "armor", "damage": "damage", "speed": "move_speed"}
+const TIPS_AT_S := 20.0    # Match._tip_t past every opening tip's wait
+const OPENING_TIPS := ["move", "ability", "throw", "skill", "ult"]   # marked seen: only the proc tip may show
 
 var bad := 0
 var m: Match
 
 func run(main: Node) -> void:
-	m = Match.new()
-	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true,
-		"demo_kin": "cindle", "boki_wisps": true})
-	m.set_process(false)
-	for mb in m.mobs:
-		mb.queue_free()
-	m.mobs.clear()
-	for h in m.hunters:
-		h.ctrl = "idle"
-	_frames(0.3)
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Settings.set_v("tips", true, false)
+	_start(main, true)
 	var k: Kin = m.player.kin
 	for kind in STAT_OF:
 		_kind(k, kind)
@@ -31,9 +29,27 @@ func run(main: Node) -> void:
 	var rival: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x.owner_h.team != m.player.team)[0]
 	_kind(rival, "heal")
 	_shiny(k)
+	_first_tip(k, rival)
+	_start(main, false)
+	_walking_tip()
 	m.queue_free()
 	print("WISPPROC %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _start(main: Node, wisps: bool) -> void:
+	if m:
+		m.queue_free()
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true,
+		"demo_kin": "cindle", "boki_wisps": wisps})
+	m.set_process(false)
+	for mb in m.mobs:
+		mb.queue_free()
+	m.mobs.clear()
+	for h in m.hunters:
+		h.ctrl = "idle"
+	_frames(0.3)
 
 func ok(cond: bool, what: String) -> void:
 	print("WISPPROC %s %s" % ["ok  " if cond else "FAIL", what])
@@ -147,3 +163,66 @@ func _shiny(k: Kin) -> void:
 	var got := mat.albedo_color
 	ok(is_equal_approx(got.r, shiny.r) and is_equal_approx(got.b, shiny.b), "shiny: the flash wears the shiny glow")
 	ok(not (is_equal_approx(got.r, plain.r) and is_equal_approx(got.b, plain.b)), "shiny: and not the plain one")
+
+## The tip lines on screen after Match._tips ran (the opening tips seen, so only the proc tip can show).
+func _tip_lines() -> Array[String]:
+	for key in OPENING_TIPS:
+		Save.d["tutorial"][key] = true
+	m._tip_t = TIPS_AT_S
+	m._tips()
+	m.hud.msgs._process(DT)
+	return m.hud.msgs.texts().filter(func(t: String): return t.contains("'s "))
+
+func _proc_tip_text(k: Kin, stat: String) -> String:
+	var passive := k.ks.carry_name if k.ks.carry_name != "" else "carry passive"
+	var acted := k.ks.carry_passives.filter(func(ps): return String(ps["stat"]) == stat)
+	return "%s's %s: %s" % [k.rec.get("name", "Your Boki"), passive, KinText.passives(acted)]
+
+## Your Boki's first cue: one tip naming its passive and the wisp flashes again; never again on this save.
+func _first_tip(k: Kin, rival: Kin) -> void:
+	var saved: Array = k.ks.carry_passives
+	Save.d["tutorial"].erase("proc")
+	m.hud.msgs.clear()
+	m.time += WispProc.TIP_KEEP_S + 1.0      # the cues of the rows above are stale
+	_carry(rival, "regen")
+	_trigger(rival.owner_h, "heal")
+	ok(_tip_lines().is_empty(), "tip: a rival's cue tells you nothing")
+	m.time += 1.0
+	_carry(k, "regen")
+	_trigger(m.player, "heal")
+	m.time += WispProc.TIP_KEEP_S + 0.5
+	ok(_tip_lines().is_empty() and not Save.d["tutorial"].has("proc"), "tip: a cue older than TIP_KEEP_S is not told")
+	m.opts["tutorial"] = true
+	m.time += 1.0
+	_trigger(m.player, "heal")
+	ok(_tip_lines().is_empty() and not Save.d["tutorial"].has("proc"), "tip: none in the tutorial match")
+	m.opts.erase("tutorial")
+	var line := _proc_tip_text(k, "regen")
+	var n := _proc(k).cues
+	var lines := _tip_lines()
+	ok(lines.size() == 1 and lines[0].contains(line), "tip: '%s' (%s)" % [line, lines])
+	ok(Save.d["tutorial"].get("proc", false) and _proc(k).cues == n + 1, "tip: marked seen, the wisp flashes again")
+	m.hud.msgs.clear()
+	m.time += 1.0
+	_trigger(m.player, "heal")
+	ok(_tip_lines().is_empty(), "tip: a later cue says nothing")
+	k.ks.carry_passives = saved
+
+## Wisps off: a walking Boki's damage passive cues and tells only while it is carried by order.
+func _walking_tip() -> void:
+	var k: Kin = m.player.kin
+	Save.d["tutorial"].erase("proc")
+	m.hud.msgs.clear()
+	_carry(k, "damage")
+	ok(not k.wisp and not m.player.kin_carry_on(), "wisps off: the Boki walks beside you")
+	m.time += 1.0
+	_trigger(m.player, "damage")
+	ok(_tip_lines().is_empty() and k.get_node_or_null("Proc") == null, "wisps off, not carried: no cue, no tip")
+	k.stow()
+	_frames(0.5)
+	ok(m.player.kin_carry_on(), "wisps off: stowed, carried by order")
+	m.time += 1.0
+	_trigger(m.player, "damage")
+	var lines := _tip_lines()
+	var line := _proc_tip_text(k, "damage")
+	ok(lines.size() == 1 and lines[0].contains(line), "wisps off, carried: '%s' (%s)" % [line, lines])

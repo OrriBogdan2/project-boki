@@ -29,3 +29,6 @@ Alternative noted: keep the kin's ability/merge castable from the wisp; left for
 - `--wisp-check` covers it; `--perf-bench --bench-hunters=30 [--boki-wisps]` measures it.
 - Proc look (`WispProc`, `--wisp-proc-check`): a carried passive acting (heal, shield, damage bonus, run boost) gives its wisp one small flash in
   its own glow and a thin streak to where it acted, one cue per 0.5 s per wisp, two pooled meshes, no bursts.
+  With the wisps off, a walking Boki carried by order cues the same way. Your own Boki's first cue (within 6 s)
+  gives one Match tip, "<Boki>'s <passive>: <what it does>" from its carry data (`WispProc.tip`, once per save
+  in `Save.d.tutorial.proc`, real matches only), and the wisp flashes again so the eye finds it.

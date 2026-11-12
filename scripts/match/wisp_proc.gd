@@ -6,6 +6,8 @@ extends Node3D
 ## own glow (the shiny colours when shiny) and a thin streak to where it acted. At most one cue per RATE_S per
 ## wisp. One WispProc node per wisp holds its two meshes for the whole match: nothing is built per cue.
 ## It reads the hunter's state (hp, shield, armor, muzzle, speed), so a rival's wisp cues too, from the snapshot.
+## With the wisps off, a walking Boki carried by order (the Return order) cues the same way while it rides.
+## Your own Boki's first cue also gives the one-time tip that names the passive (tip, Match._tips).
 
 const RATE_S := 0.5        # s between cues of one wisp
 const FLASH_S := 0.25      # s the flash takes to swell and fade
@@ -15,6 +17,7 @@ const STREAK_R := 0.012    # m: the streak's radius (thin, like the thief tether
 const CHEST_Y := 1.2       # m above a hunter's feet where a heal, shield or boost lands
 const SHOT_REACH := 6.0    # m the damage streak runs along the aim
 const RUN_START := 3.0     # m/s the hunter must pass, from standing, for the speed boost to read
+const TIP_KEEP_S := 6.0    # s a cue may wait for the first-proc tip (the tip lane can be busy)
 const KINDS := {           # cue kind -> the carry passive stats that make it
 	"heal": ["regen"],
 	"shield": ["armor", "damage_reduction", "knockback_resist"],
@@ -46,6 +49,32 @@ static func watch(k: Kin) -> void:
 	if p == null:
 		p = _make(k)
 	p._look(k)
+
+## A walking Boki (no wisp): watched while its hunter carries it by order; off them its watch rests, so
+## the hp or shield it missed meanwhile is not read as a proc when it is carried again (KinWisp.render calls it).
+static func watch_carried(k: Kin) -> void:
+	if k.owner_h != null and k.owner_h.kin_carry_on():
+		watch(k)
+		return
+	var p := k.get_node_or_null("Proc") as WispProc
+	if p != null:
+		p._seen = false
+		p._fade(k.m.time)
+
+## The first-proc tip for your Boki `k`, "<Boki>'s <passive>: <what it does>" from its carry data, while its
+## last cue is under TIP_KEEP_S old and this save has not had the tip ("" otherwise). Match._tips shows it once
+## (Save.d.tutorial.proc); the wisp flashes again so the eye finds it.
+static func tip(k: Kin) -> String:
+	if Save.d["tutorial"].get("proc", false):
+		return ""
+	var p := k.get_node_or_null("Proc") as WispProc
+	if p == null or p.last_kind == "" or k.m.time - p._t0 > TIP_KEEP_S:
+		return ""
+	var kinds: Array = KINDS[p.last_kind]
+	var acted := k.ks.carry_passives.filter(func(ps): return String(ps["stat"]) in kinds)
+	var passive := k.ks.carry_name if k.ks.carry_name != "" else "carry passive"
+	p._play(k, p.last_kind, p._to, k.m.time)
+	return "%s's %s: %s" % [k.rec.get("name", "Your Boki"), passive, KinText.passives(acted)]
 
 static func _make(k: Kin) -> WispProc:
 	if _flash_mesh == null:
