@@ -283,7 +283,7 @@ Kept: holding Space never opens the glider (DECISIONS 11-08; every reopen above 
 
 ## Knocked in the air (`--glide-hit-check` rows "ACHECK row ..."; PARITY FIRST)
 
-Asked: what a knock or a stun does to a Hunter who is gliding, in an air dash or falling, for Lace, Kael, Vex and Albert. Source: `supervive_physics.md` has only Knockback/KnockbackResist 1.0 for every hunter and Mass 100 (no knock distances, no glider-hit values: the glide and heat constructor defaults are encrypted); the hero-ref frames show no hit on a glider; `docs/SUPERVIVE_DATA.md` sections 4-5: a hit doesn't knock you out of the air, a knockback pushes you and you can steer it, a stun is "no movement, no air control, no abilities". Dash protection stays short (0.14 s i-frames, `docs/DASHES_AND_ABILITY_FEEL.md`).
+Asked: what a knock or a stun does to a Hunter who is gliding, in an air dash or falling, for Lace, Kael, Vex and Albert (now every Hunter in the registry; rows for the rest print the same way). Source: `supervive_physics.md` has only Knockback/KnockbackResist 1.0 for every hunter and Mass 100 (no knock distances, no glider-hit values: the glide and heat constructor defaults are encrypted); the hero-ref frames show no hit on a glider; `docs/SUPERVIVE_DATA.md` sections 4-5: a hit doesn't knock you out of the air, a knockback pushes you and you can steer it, a stun is "no movement, no air control, no abilities". Dash protection stays short (0.14 s i-frames, `docs/DASHES_AND_ABILITY_FEEL.md`).
 
 Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6, or Albert's full Crushing Blow, kb 13 and a 0.4 s stun; stun = 0.5 s, no push. Knock speed is kb / mass (Lace 0.85, Vex 1.0, Kael and Albert 1.35). Each cell: how far the hit carried the Hunter, measured as the x gap to the same run with no hit at the end of a 1.3 s run, and when a press opened the glider after the hit ("-" means it never shut). Hit 0.05 s in; in an air dash, on the first step its i-frames are over. Measured 2026-11-12, 60 Hz.
 
@@ -345,7 +345,7 @@ With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. 
 
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
-Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held
+Nobody had measured what a dash does when it meets a rim. Each Hunter (the registry, Arch.ORDER) presses Shift straight at a rim with the keys held
 into it, from the ground and from the air (hanging with the lip that far above the feet). Lace's rows are her travel dash,
 the flick: with charges her Shift is the Spirit Walk, which climbs faces by design. The terrain grid builds ground rims in
 whole 0.8 m terraces, so a ground row builds the terrace nearest its height. Columns: what happened, press to over the

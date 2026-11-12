@@ -18,6 +18,9 @@ const DT := Match.DT
 const MAX_FACES := 16          # faces sampled per rise
 const TRIAL_S := 2.6
 const MODES := ["jump_0", "jump_30", "jump_60", "dash_jump", "jump_dash", "glide"]
+## Ostra's Shift is Lantern Trade, not a roll: with a jump either side she tops double-high ground (found widening
+## this sweep to Arch.ORDER, 2026-11-12), so the two dash+jump modes skip her. docs/DEBT.md "Widened sweeps".
+const TRADE_DASH := ["ostra"]
 const KEEP := MantleCarry.KEEP
 const TOP_RATE := 0.9
 const DOUBLE_HIGH := 4         # terraces: the wall tier, out of a jump's reach
@@ -80,6 +83,8 @@ func _tier(main: Node, tier: int) -> void:
 		h.unlock_all()
 		for f in faces:
 			for mode in MODES:
+				if arch in TRADE_DASH and mode in ["dash_jump", "jump_dash"]:
+					continue
 				_count("face %d %s" % [f["rise"], mode], _try(f, mode), f, arch)
 		for r in rims:
 			_count("rim abyss", _try(r, "abyss"), r, arch)

@@ -10,6 +10,9 @@ extends "res://tools/dash_flow_check.gd"
 
 const MFC := preload("res://tools/move_feel_check.gd")
 const ACTION_OF := {"dash": "dash", "jump": "jump", "lmb": "fire", "e": "signature", "x": "hunter_ult"}
+## Hunters whose LMB is a held stream: a one-step tap is only the pilot flicker (Cinder's spool, content/archetypes/
+## ashwick.json lmb.spool), no shot to count, so the LMB tap row skips them.
+const HELD_LMB := ["ashwick"]
 const TAPS := 6                 # taps per key and round
 const CAP_FPS := 30             # the low-end target
 const CAP_FRAMES := 15          # frames timed to see the cap holds
@@ -40,6 +43,9 @@ func run(main: Node) -> void:
 		ok(ms >= 1000.0 / CAP_FPS * 0.85, "frames capped at %d fps: %.1f ms a frame" % [CAP_FPS, ms])
 		for stall in [false, true]:
 			for key in ACTION_OF:
+				if key == "lmb" and hero in HELD_LMB:
+					print("LOWFPS skip %s lmb tap: a held stream (spool, no shot from one step)" % hero)
+					continue
 				var lost := 0
 				for i in TAPS:
 					if not await _tap_trial(tree, m, key, stall):
@@ -89,7 +95,7 @@ func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
 		await tree.process_frame
 		var went: bool
 		match key:
-			"dash": went = hunter.dash_at > dash0
+			"dash": went = hunter.dash_at > dash0 or hunter.ak.in_dash()
 			"jump": went = hunter.pos.y > y0 + RISE
 			_: went = _went_off(before, key)
 		if went:
@@ -99,6 +105,9 @@ func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
 ## One hero's dash, on the ground or in the air, at the rounds' frame rates against the 60 fps dash.
 func _dash_rounds(tree: SceneTree, m: Match, hero: String, air: bool) -> void:
 	var ref: Array = await _dash(tree, m, Match.DT, false, air)
+	if ref[0] == 0.0:
+		print("LOWFPS skip %s %s dash: no roll to time (a kit-owned dash)" % [hero, "air" if air else "ground"])
+		return
 	for r in ROUNDS:
 		var got: Array = await _dash(tree, m, r[1], r[2], air)
 		var tol: Array = MFC.DASH_TOL
