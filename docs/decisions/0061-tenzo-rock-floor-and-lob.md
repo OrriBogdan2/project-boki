@@ -1,4 +1,4 @@
-# 0024: Tenzo's R rock floor and the Quakefall lob
+# 0061: Tenzo's R rock floor and the Quakefall lob
 
 - **Status:** proposed
 - **Date:** 2026-11-08
