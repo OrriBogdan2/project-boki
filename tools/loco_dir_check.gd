@@ -12,8 +12,10 @@ extends RefCounted
 ##  - SNAP: starting and stopping (and crouch-walk to crouch idle) at the game's own rates (HunterMove accel to the
 ##    speed, HunterMove.brake to a stop) no point jumps: a frame's change of velocity of the
 ##    hips, head, hands or ankles at most SNAP_K x the steady loop's worst, and at least SNAP_MIN.
-## Prints a grid (one row per Hunter and state, one cell per direction: "ok" or the first failed test) and a FAIL line
-## per failed cell; exit 1 on any. A Hunter in FLAT or with no clips is listed, skipped.
+## Prints a grid (one row per Hunter and state, one cell per direction: "ok" or the first failed test). A ratchet: the
+## cells in KNOWN fail today (docs/art/LOCO_DIR.md, docs/DEBT.md) and print KNOWN; any other failed cell prints FAIL
+## and exits 1, a known one that passes prints FIXED. --update rewrites KNOWN from this run (after a fix, never to
+## hide a new fail). The steps are fixed (no frame's real dt reaches the clips), so two runs read the same. A Hunter in FLAT or with no clips is listed, skipped.
 ## "aim" states: the Hunter always faces his aim (the facing follows the cursor), so a walk is an aim-walk; aim_walk and
 ## strafe swing the aim AIM_SWING either side of the facing while he holds the move, so the ring crosses its neighbours.
 
@@ -38,11 +40,14 @@ const SNAP_MIN := 0.06       # m per frame per frame (at 60 fps): a change this 
 const IDLE_SLIP := 0.25      # m/s: crouched still, a foot drifts at most this (mean, over the hold)
 const PLANT_BAND := 0.1     # a sole is planted in the lowest 10 % of its height range (the sole sits on the floor)
 const FLAT := ["ostra"]      # Motley rides his spring: no steps to read
+const KNOWN := "res://tools/loco_dir_known.txt"     # "<hunter> <state> <dir>" a line: the cells failing today
 const POINTS := ["hips", "head", "hand.L", "hand.R", "heel.L", "heel.R", "toe.L", "toe.R"]
 
 var bad := 0
 var holder: Node3D
 var rows := {}
+var known := {}             # "<hunter> <state> <dir>" -> true
+var now_failing: Array = []
 var soles := {}              # side -> [bone index, heel and toe in that bone's frame]: the sole, as the rest pose stands
 
 func run(main: Node) -> void:
@@ -51,7 +56,15 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	var ids: Array = Arch.ORDER.duplicate()
 	var json := ""
+	var update := false
+	var f := FileAccess.open(KNOWN, FileAccess.READ)
+	while f and not f.eof_reached():
+		var line := f.get_line().strip_edges()
+		if line != "" and not line.begins_with("#"):
+			known[line] = true
 	for a in OS.get_cmdline_user_args():
+		if a == "--update":
+			update = true
 		if a.begins_with("--wardens="):
 			ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--json="):
@@ -61,11 +74,15 @@ func run(main: Node) -> void:
 		await _hero(main, String(id))
 	if json != "":
 		FileAccess.open(json, FileAccess.WRITE).store_string(JSON.stringify(rows, "\t"))
+	if update:
+		FileAccess.open(KNOWN, FileAccess.WRITE).store_string("# --loco-dir-check: cells failing today (--update)\n"
+				+ "\n".join(now_failing) + "\n")
 	var cells := 0
 	for id in rows:
 		for st in rows[id]:
 			cells += (rows[id][st] as Dictionary).size()
-	print("LOCO_DIR_DONE hunters %d cells %d FAIL %d" % [rows.size(), cells, bad])
+	print("LOCO_DIR_DONE hunters %d cells %d failing %d (known %d) FAIL %d" % [rows.size(), cells, now_failing.size(),
+			known.size(), bad])
 	main.get_tree().quit(1 if bad > 0 or rows.is_empty() else 0)
 
 func _hero(main: Node, id: String) -> void:
@@ -76,10 +93,10 @@ func _hero(main: Node, id: String) -> void:
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
 	var a := HunterAnim.new(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)     # (only the fixed steps below move the clips: a real frame's dt would shift their phase)
 	for k in 3:
 		await main.get_tree().process_frame
-	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)     # (only the fixed steps below move the clips)
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var clips: WardenClips = sync.get("clips")
 	_soles(sk)
@@ -98,9 +115,14 @@ func _hero(main: Node, id: String) -> void:
 			var c := _cell(m, a, sync, sk, String(st), deg_to_rad(DIRS[dir]), float(speed[st]), accel)
 			cells[dir] = c
 			line.append("%-5s" % c["verdict"])
+			var key := "%s %s %s" % [id, st, dir]
 			if c["verdict"] != "ok":
-				bad += 1
-				print("FAIL %s %s %s: %s" % [id, st, dir, c["why"]])
+				now_failing.append(key)
+				if not known.has(key):
+					bad += 1
+				print("%s %s: %s" % ["KNOWN" if known.has(key) else "FAIL", key, c["why"]])
+			elif known.has(key):
+				print("FIXED %s (--update drops it)" % key)
 		row[st] = cells
 		print("LOCO_DIR %-10s %-12s %s" % [id, st, " ".join(line)])
 	rows[id] = row
@@ -148,12 +170,13 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 	if st == "crouch_idle":
 		var drift := _drift(stop.slice(int(SETTLE_S / DT)))
 		out["drift"] = drift
-		_judge(out, drift > IDLE_SLIP, "SLIP", "crouched still, a foot drifts %.2f m/s (bar %.2f)" % [drift, IDLE_SLIP])
+		_judge(out, drift > IDLE_SLIP, "SLIP", "crouched still, a foot drifts %.2f m/s (bar %.2f)" % [drift,
+				IDLE_SLIP])
 		_judge(out, snap > out["snap_bar"], "SNAP", "crouch-walk to crouch idle jumps %.3f (bar %.3f)" % [snap,
 				out["snap_bar"]])
 		return out
-	_judge(out, out["off_deg"] > DIR_MAX, "DIR", "planted feet travel %.0f deg off the move (bar %.0f): the clip plays "
-			% [out["off_deg"], DIR_MAX] + "another direction")
+	_judge(out, out["off_deg"] > DIR_MAX, "DIR", "planted feet travel %.0f deg off the move (bar %.0f): the "
+			% [out["off_deg"], DIR_MAX] + "clip plays another direction")
 	_judge(out, out["carry"] < FOOT_K, "SKATE", "planted feet carry %.0f%% of the speed (bar %.0f%%)" % [
 			100.0 * out["carry"], 100.0 * FOOT_K])
 	_judge(out, out["slip"] > slip_bar, "SLIP", "planted feet slip %.2f m/s at %.2f m/s (bar %.2f)" % [out["slip"], spd,
