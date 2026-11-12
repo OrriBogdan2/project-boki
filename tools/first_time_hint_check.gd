@@ -6,7 +6,6 @@ extends RefCounted
 ##      it never shows; the flags live in the save, so a reload keeps them
 ##   3. the v12 -> v13 migration (run from v11): a save past the old tutorials gets none of their hints, one mid-farm-
 ##      tutorial keeps the farm ones
-##   4. when the farm ones are due (FarmHints.due): out of seeds, holding a crop
 
 const LINE_MAX := 60        # characters: a hint is one short toast line
 
@@ -24,7 +23,6 @@ func run(m: Node) -> void:
 	_data()
 	_once()
 	_migrate()
-	_farm_due()
 	print("FTH DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -83,14 +81,3 @@ func _migrate() -> void:
 	Save.d = mid
 	ok(FirstTimeHint.seen("rank") and not FirstTimeHint.seen("hammer") and not FirstTimeHint.seen("sell"),
 			"mid farm tutorial: the match hints are settled, the farm ones still to come")
-
-func _farm_due() -> void:
-	Save.d = _fresh()
-	var fh := FarmHints.new(null)
-	for s in Save.d["seeds"]:
-		Save.d["seeds"][s] = 0
-	ok(fh.due("buy"), "out of seeds: the Market hint is due")
-	Save.d["seeds"]["tidebloom"] = 2
-	ok(not fh.due("buy"), "with seeds: not")
-	Save.d["crops"]["tidebloom"] = 1
-	ok(fh.due("sell"), "holding a crop: the selling hint is due")

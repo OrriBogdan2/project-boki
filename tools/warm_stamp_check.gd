@@ -37,7 +37,9 @@ func run(main: Node) -> void:
 	WarmStamp.save(keys)
 	FileAccess.open(pipes, FileAccess.WRITE).store_8(1)
 	_ok("a stamp reads back", WarmStamp.warm_keys().size() == keys.size())
-	_ok("an older pipeline cache is not trusted", not WarmStamp.trusted(1, int(Time.get_unix_time_from_system()) + 60))
+	var gl := WarmStamp._driver() == "opengl3"      # (GL keeps no pipeline cache: trusted() skips the age test there)
+	_ok("an older pipeline cache is not trusted (on opengl3: no pipeline cache, trusted)",
+			WarmStamp.trusted(1, int(Time.get_unix_time_from_system()) + 60) == gl)
 	DirAccess.remove_absolute(cache_file)
 	_ok("a shader cache that lost files is not trusted", WarmStamp.warm_keys().is_empty())
 	FileAccess.open(cache_file, FileAccess.WRITE).store_8(1)
