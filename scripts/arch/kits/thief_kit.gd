@@ -42,7 +42,7 @@ const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance st
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
-const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the key pose where the side-arm throw lets go (kmoves_dj.gd, sable_clips.py)
+const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the throw's key pose, where the knife leaves her hand
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
 var primed_t := 0.0            # Vault empowered the next bolt
