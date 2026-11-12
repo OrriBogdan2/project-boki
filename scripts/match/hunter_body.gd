@@ -157,7 +157,7 @@ static func _torso(c: Dictionary) -> void:
 		for sx in [-1.0, 1.0]:
 			Models.part(torso, Models.cyl(0.08, 0.08, 0.06, 12), m["acc"], Vector3(0.2 * sx, 0.56, 0.27 * bw),
 					Vector3.ONE, Vector3(0, 0, PI / 2))
-		Models._class_marks(torso, c["cls"], bw, m["acc"], m["trim"])
+		Models.class_marks(torso, c["cls"], bw, m["acc"], m["trim"])
 	# the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
 	c["hk"] = hk
@@ -169,7 +169,7 @@ static func _torso(c: Dictionary) -> void:
 			Models.part(torso, ear, m["skin"], Vector3(0.226 * sx * (0.98 if fem else 1.03), 0.85, 0.012),
 					Vector3.ONE, Vector3(0, 0.25 * sx, 0))
 	if um: Unmasked.face(torso, c["look"])
-	else: Models._face(torso, lk, m["dark"], m["skin"], c["team_col"])
+	else: Models.hunter_face(torso, lk, m["dark"], m["skin"], c["team_col"])
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a hood or
 	# helm: only what spills out below)
 	var cov := HeroGear.cover(c["arch"], c["bare"])
@@ -179,9 +179,9 @@ static func _torso(c: Dictionary) -> void:
 	if rid == "human":
 		HeroHair.human(hair_n, int(lk["hair"]), fem, m["hair"], hk, cov)
 	else:
-		Models._race_hair(hair_n, rid, int(lk["hair"]), m["hair"], lk["hair_col"], lk["skin_col"],
+		Models.race_hair(hair_n, rid, int(lk["hair"]), m["hair"], lk["hair_col"], lk["skin_col"],
 				cov in ["hood", "helm"])
-	Models._race_parts(torso, rid, m["skin"], m["hair"], m["dark"], lk["skin_col"], lk["hair_col"], c["hero_col"])
+	Models.race_parts(torso, rid, m["skin"], m["hair"], m["dark"], lk["skin_col"], lk["hair_col"], c["hero_col"])
 
 ## Arms hang from the shoulders with an elbow and a hand on joints of their own, so HunterAnim can put the hands
 ## on the weapon's grips (solving the elbows) or let them swing free: a sleeve on the shoulder, a forearm "ArmX"

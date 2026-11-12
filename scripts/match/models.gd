@@ -588,7 +588,8 @@ static func _pivot(torso: Node3D, nm: String, at: Vector3) -> Node3D:
 		torso.add_child(n)
 	return n
 
-static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material, m_trim: Material) -> void:
+## The class emblem on the glider pack (light: a chevron, medium: a diamond, heavy: a shield).
+static func class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material, m_trim: Material) -> void:
 	var m_cls := class_mat(cls)
 	var at := Vector3(0, 0.655, 0.27 * bw)
 	var tilt := Vector3(-1.05, 0, 0)          # lying back on the rolled wing, facing up and back
@@ -856,7 +857,7 @@ static func _on_head(x: float, y: float, z: float, out := 0.0) -> Vector3:
 ## Each race's own head styles (see HAIR_STYLES): fur for the Vulpin (parted round their ears),
 ## crystals, stone and moss for the Stoneborn, leaves and flowers for Sprigs, crests, frills, horns
 ## and spines for Scalefolk, feathers for Owlets. All in the hair colour.
-static func _race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair_c: Color, skin_c: Color, covered: bool) -> void:
+static func race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair_c: Color, skin_c: Color, covered: bool) -> void:
 	var light := toon(hair_c.lightened(0.3)); (light as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
 	var dark := toon(hair_c.darkened(0.25))
 	match rid:
@@ -1042,7 +1043,7 @@ static func _race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hai
 						_blade(n, m_hair if i % 2 == 0 else light, _on_head(x * 2.0, 0.4, 0.9), Vector3(x, -1.0, 0.35), 0.44 - absf(i - 1.5) * 0.06, 0.08, PI * 0.5, 0.25)
 
 ## What each race adds: ears, tails, wings, snouts, crests, crystals.
-static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Material, m_dark: Material, skin_c: Color, hair_c: Color, hero_col: Color) -> void:
+static func race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Material, m_dark: Material, skin_c: Color, hair_c: Color, hero_col: Color) -> void:
 	match rid:
 		"vulpin":
 			var inner := toon(Color("ffb6bf"))
@@ -1266,7 +1267,7 @@ static func m_trim0(c: Color) -> ShaderMaterial:
 ## Eyes, brows and a mouth: small shapes, but they carry a lot of character.
 ## The face on the head: eyes, brows, nose and mouth for the look's expression and gender, sized and
 ## placed by its face factors (MantleLook params: eye_size, eye_shape, brow, nose), and its markings.
-static func _face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
+static func hunter_face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
 	var face := int(lk["face"])
 	var detail := int(lk["detail"])
 	var skin: Color = lk["skin_col"]
