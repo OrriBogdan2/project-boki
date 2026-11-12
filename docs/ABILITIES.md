@@ -107,7 +107,7 @@ Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unl
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
 
-In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1. Bots and dummies keep their own ranks and spend by their kit's `order`.
+In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1 ([shot, 1280x720](shots/ui-train-rank-port/practice_page.jpg)). Bots and dummies keep their own ranks and spend by their kit's `order`.
 
 ## Shift: class dashes
 
