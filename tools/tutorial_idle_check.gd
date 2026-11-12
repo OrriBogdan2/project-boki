@@ -119,6 +119,7 @@ func _farm_course() -> void:
 	d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
+	FarmUnlocks.rules()["base_mode"] = true      # (the base tutorial only runs in base mode)
 	HomeLayout.ensure(Save.d)
 	Save.d["stats"] = {"extracts": 0, "bosses": 0, "caught": 0, "harvested": 0, "hatched": 0, "fb_built": 0}
 	var home = await main._hb_home()
@@ -133,13 +134,8 @@ func _farm_course() -> void:
 	while FarmTutorial.done_count() < last and FarmTutorial.current() != "":
 		var id := FarmTutorial.current()
 		_idle_farm(g, id)
-		if id == "house":
-			ok(g.place_house(), "the house goes down as a site")
-			home._sync_fixtures()
-			_idle_farm(g, id)      # (the site is up: its "wait" hint)
-		elif id == "hammer":
-			FarmSites.finish(FarmHob.house_entry())      # (built, so the steps that wait for it open)
 		FarmTutorial.mark(id)
+	FarmUnlocks.rules()["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
 

@@ -3,6 +3,7 @@
 - **Status:** accepted (owner answers of Nov 2 20:40 ET and the Nov 3 04:55 UTC ask); the six tutorial questions use the stated defaults, kept as data
 - **Date:** 2026-11-03
 - **Area:** farm / UI / save
+- **Update 2026-11-12:** the twelve-step farm tutorial, its Hob intro and the job-step guides are deleted; the base list (meet, feed, toy, head out or stay; GARDEN.md section 8) is the only tutorial. The Goals card and Hob the builder stand.
 
 ## Problem
 The build menu showed the whole catalogue, locked items greyed out ("everyone has admin view"). A new farm began with a house that was simply placed, and the first-day card in the top right mixed tutorial steps with goals.

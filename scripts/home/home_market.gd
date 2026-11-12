@@ -144,8 +144,7 @@ func _seed_goods() -> Array:
 		var have := "have %d" % int(Save.d.get("seeds", {}).get(c, 0))
 		goods.append(["seed:" + c, "%s seeds" % cd["name"], "Plant on a farm plot. " + String(cd["desc"]),
 			int(cd["price"]), cd["color"], func():
-				Save.add_seed(ck, 1)
-				FarmTutorial.event("buy"), have])
+				Save.add_seed(ck, 1), have])
 	return goods
 
 func _boki_food() -> Array:
@@ -291,7 +290,6 @@ func _vendor_sell(v: VBoxContainer) -> void:
 			if int(Save.d["crops"].get(sk, 0)) <= 0: return
 			Save.d["crops"][sk] = int(Save.d["crops"][sk]) - 1
 			Save.d["gems"] = int(Save.d["gems"]) + gain
-			FarmTutorial.event("sell")
 			Sfx.play("pickup")
 			Save.save_game()
 			h._refresh_top()

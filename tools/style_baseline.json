@@ -252,7 +252,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 202,
 "nested_ternary": 27,
 "semicolon": 243,
 "shadow": 3
@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -463,9 +463,9 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 1,
-"semicolon": 49
+"semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
@@ -997,7 +997,7 @@
 "semicolon": 19
 },
 "tools/farm_hob_shots.gd": {
-"long_line": 7,
+"long_line": 6,
 "semicolon": 2
 },
 "tools/farm_start_check.gd": {
@@ -1007,7 +1007,7 @@
 },
 "tools/farm_tutorial_check.gd": {
 "history_comment": 1,
-"long_line": 21,
+"long_line": 13,
 "semicolon": 2
 },
 "tools/farmbuild_check.gd": {

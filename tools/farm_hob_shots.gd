@@ -1,6 +1,6 @@
 extends RefCounted
-## --farm-hob-shots=<dir>: screenshots of Hob and the farm tutorial (run with a real renderer, e.g.
-## xvfb-run with --rendering-driver opengl3): a tutorial prompt, the starter build menu, Hob with
+## --farm-hob-shots=<dir>: screenshots of Hob (run with a real renderer, e.g.
+## xvfb-run with --rendering-driver opengl3): the starter build menu, Hob with
 ## his talk prompt, the "new blueprints" toast and the Goals card. Never touches the real save.
 
 var main: Node
@@ -59,17 +59,11 @@ func run(m: Node, out_dir: String) -> void:
 	dir = out_dir
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	# 1. the first tutorial prompt, before the house
 	await _new_home({"extracts": 0, "bosses": 0, "caught": 0, "harvested": 0, "hatched": 1, "fb_built": 0})
-	HomeGather.give_tool("axe")
-	Work.add_mat("wood", 3)
-	FarmTutorial.detect()
-	home.guide.refresh()
 	var spot: Vector3 = home.guide.house_spot()
 	_look(spot, Vector3(0, 0, 4.5), 1.0)
 	home.cam.snap(spot + Vector3(0, 0, 2.0))
 	await main.get_tree().create_timer(1.0).timeout
-	await _shot("01_tutorial_prompt", "Tutorial step 1: house marker, hint with the real key and Skip, Goals", true)
 	# 2. the starter build menu
 	home.hb.toggle()
 	await _shot("02_starter_build_menu", "B opens on Buildings: starter set only, empty tabs hidden, footer line")
@@ -174,28 +168,3 @@ func _round2() -> void:
 	await _shot("09_near_water_preview", "Placing a crop patch within 2 tiles of the channel: 'Near water: waters itself' in green", true)
 	home.hb.debug_m = Vector2.INF
 	home.hb.toggle()
-	# 11 / 12 / 13. the market steps
-	await _new_home(base.duplicate())
-	var L := HomeLayout.of(Save.d)
-	var hsite := {"u": HomeLayout._next_uid(L), "id": "house", "x": 36, "z": 24, "r": 0}
-	(L["deco"] as Array).append(hsite)
-	var stall := {"u": HomeLayout._next_uid(L), "id": "market_stall", "x": 41, "z": 29, "r": 0}
-	(L["deco"] as Array).append(stall)
-	home._sync_fixtures()
-	for id in ["axe", "chop", "house", "hammer", "task", "stone", "feed", "crop"]:
-		FarmTutorial.mark(id)
-	Save.d["gems"] = 0
-	home.guide.detect_t = 0.0
-	var sc := HomeLayout.deco_center(stall)
-	_look(sc, Vector3(2.5, 0, 6.5), 1.0)
-	await main.get_tree().create_timer(1.2).timeout
-	await _shot("11_market_step", "Buy a seed: Hob slips you the gems, the stall is marked, the hint says Seeds tab", true)
-	FarmTutorial.event("buy")
-	Save.d["crops"]["tidebloom"] = 2
-	home.guide.detect_t = 0.0
-	await main.get_tree().create_timer(1.0).timeout
-	await _shot("12_sell_step", "Sell a crop: the hint says Sell tab and where gems come from", true)
-	home.hmk.vendor_tab = "Sell"
-	home.hmk.open("Vendor")
-	await _shot("13_sell_tab", "The Market opens on the Sell tab: sell one crop, gems come in", true)
-	home._close_panel()

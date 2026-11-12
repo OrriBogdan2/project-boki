@@ -93,7 +93,7 @@ func tick(dt: float) -> void:
 func _walk(dt: float) -> void:
 	var to := Vector3(pos.x - node.position.x, 0, pos.z - node.position.z)
 	var step := float(rules()["walk_mps"]) * dt
-	if chat.busy():
+	if chat.talking():
 		return
 	if to.length() > step:
 		node.position += to.normalized() * step
@@ -110,15 +110,12 @@ func _walk(dt: float) -> void:
 	else:
 		node.face_to = Vector3.INF
 
-## Until you have met him, and while he has the second Mask for you, he calls you over now and then.
+## While he has the second Mask for you, he calls you over now and then.
 func _call_out(dt: float) -> void:
 	call_t -= dt
 	var talk: Dictionary = rules()["talk"]
-	var met := bool(FarmBuilder.state().get("met", false))
-	var line := "" if met or FarmTutorial.base() else String(talk["call"])      # in the base your Boki calls you
-	if chat.offer_due():
-		line = String(talk["call_offer"])
-	if call_t > 0.0 or chat.busy() or line == "":
+	var line := String(talk["call_offer"]) if chat.offer_due() else ""
+	if call_t > 0.0 or chat.talking() or line == "":
 		return
 	call_t = float(talk["call_every_s"])
 	node.shout(line)
@@ -179,7 +176,6 @@ func _land_swing() -> bool:
 	if e.is_empty() or not FarmSites.has_site(e):
 		return false
 	FarmSites.player_swing(h.hw, e)
-	FarmTutorial.event("swing")
 	h._refresh_top()
 	e = FarmSites.entry(site_u)
 	if e.is_empty() or not FarmSites.has_site(e):

@@ -4,7 +4,7 @@ extends RefCounted
 ## (GoalTracker, from the end of the tutorial on), and while the tutorial runs, one prompt in the world over
 ## what to do next and one line reminding you of the current goal, with a Skip button (Hob explains each
 ## step face to face: HobTalk). The rules are FarmTutorial; none of it shows when visiting. Skipping puts
-## the house down as a site if it isn't, so a skipper isn't stuck.
+## a toy down if there is none.
 
 const DONE_TICK_S := 1.6      # s the "Done!" stays on the goal line before fading
 
@@ -13,17 +13,12 @@ var tracker: PanelContainer = null
 var hint_box: StripView = null      # the one objective strip (TutorialStrip), as on the match HUD
 var skip_row: HBoxContainer = null
 var marker: Label3D = null
-var crop_lbl: Label3D = null
 var sig := ""
 var t := 0.0
 var detect_t := 0.0
 var asking := false
 var stay_shown := false      # the base's last step offers Stay beside Skip
 var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
-var tree_t := 0.0
-var tree_at := Vector3.INF
-var tab_for := ""
-var tree_what := ""
 var done_t := 0.0     # s left of the "Done!" in front of the strip line
 var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
 
@@ -50,12 +45,12 @@ func refresh() -> void:
 			h.root_ui.move_child(tracker, h.panel_host.get_index())      # menus open on top of it
 	_refresh_hint()
 
-## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.
+## Steps the guidance aside (quiet) or back: the Goals card, the goal line and the world prompt.
 func set_quiet(on: bool) -> void:
 	quiet = on
 	if on:
 		FarmSpotlight.close()
-	for c in [tracker, hint_box, marker, crop_lbl]:
+	for c in [tracker, hint_box, marker]:
 		if is_instance_valid(c):
 			c.visible = not on
 
@@ -90,20 +85,8 @@ func _poll() -> void:
 		FarmTutorial.detect()
 		if FarmTutorial.current() == "meet" and _near_boki():
 			FarmTutorial.event("meet")
-		if FarmTutorial.current() in ["feed", "eat"]:
+		if FarmTutorial.current() == "eat":
 			FarmTutorial.give_food()
-		var cur := FarmTutorial.current()
-		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
-		if tool != "":
-			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))
-		if (cur == "buy" or cur == "sell") and cur != tab_for:
-			tab_for = cur      # the market opens on the tab the step wants
-			h.hmk.vendor_tab = "Seeds" if cur == "buy" else "Sell"
-		if cur == "buy":
-			var gave := FarmTutorial.give_seed_gems()
-			if gave > 0:
-				h._toast(String(FarmTutorial.rules()["gems_toast"]) % gave)
-				h._refresh_top()
 	var st := FarmTutorial.state()
 	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
@@ -136,7 +119,7 @@ func _near_boki() -> bool:
 	if ke.is_empty():
 		return false
 	var at: Vector3 = ke["node"].position
-	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["base"]["near"])
+	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["near"])
 
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
@@ -148,16 +131,7 @@ func _refresh_hint() -> void:
 		hint_box.visible = not quiet
 	if (id == "out") != stay_shown:
 		_skip_buttons()
-	var s := FarmTutorial.hint_text(id)
-	if id == "house" and FarmTutorial.stage(id) == "wait":
-		s = "%s (%s)" % [s, _site_progress()]
-	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if not grow.is_empty() and id != "crop":
-		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
-	elif id == "crop" and not grow.is_empty():
-		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
-	s = s.replace("{secs}", "a few")
-	var txt := s.strip_edges()
+	var txt := FarmTutorial.hint_text(id).strip_edges()
 	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
 			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)
 	_place_skip()
@@ -173,12 +147,6 @@ func _clear_hint() -> void:
 	if is_instance_valid(marker):
 		marker.queue_free()
 	marker = null
-
-func _site_progress() -> String:
-	var e := FarmHob.house_entry()
-	if e.is_empty() or not FarmSites.has_site(e):
-		return "done"
-	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
 
 func _make_hint() -> void:
 	hint_box = StripView.new()
@@ -196,11 +164,9 @@ func _place_skip() -> void:
 func _skip_buttons() -> void:
 	for c in skip_row.get_children():
 		c.queue_free()
-	stay_shown = FarmTutorial.base() and FarmTutorial.current() == "out"
+	stay_shown = FarmTutorial.current() == "out"
 	if stay_shown:
 		skip_row.add_child(UI.button(String(FarmTutorial.rules()["stay_label"]), func(): FarmTutorial.event("stay"), 0))
-	if not FarmTutorial.skippable():
-		return
 	if not asking:
 		skip_row.add_child(UI.button(String(FarmTutorial.rules()["skip_label"]), func():
 			asking = true
@@ -212,23 +178,18 @@ func _skip_buttons() -> void:
 		asking = false
 		_skip_buttons(), 0))
 
-## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
-## needs handed over so it can still be built. In the base a toy is put down instead and the food is handed over.
+## Skips the tutorial: nothing is taken; a toy is put down if there is none and the food is handed over.
 func skip() -> void:
 	asking = false
 	FarmTutorial.skip()
-	if FarmTutorial.base():
-		FarmTutorial.give_food()
-		if FarmTutorial.toy_spot().x == INF:
-			place_toy()
-	elif FarmHob.house_entry().is_empty():
-		place_house()
-		FarmSites.refund(FarmSites.build_cost("house"))
+	FarmTutorial.give_food()
+	if FarmTutorial.toy_spot().x == INF:
+		place_toy()
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
 
-## The tutorial's house spot: from the landing, as the data says.
+## The house's spot: from the landing, as the data says.
 func house_spot() -> Vector3:
 	var sp: Dictionary = FarmTutorial.rules()["house_spot"]
 	return HomeLayout.LANDING + Vector3(float(sp["x"]), 0, float(sp["z"]))
@@ -238,9 +199,9 @@ func house_spot() -> Vector3:
 func place_house() -> bool:
 	return _place("house", house_spot())
 
-## The base's skip: a toy near the landing, from the inventory so it costs nothing.
+## The skip's toy: put near the landing, from the inventory so it costs nothing.
 func place_toy() -> bool:
-	var id := String(FarmTutorial.rules()["base"]["skip_toy"])
+	var id := String(FarmTutorial.rules()["skip_toy"])
 	var inv: Dictionary = h.hb.L()["inv"]
 	inv[id] = int(inv.get(id, 0)) + 1
 	return _place(id, HomeLayout.LANDING + Vector3(3, 0, -3))
@@ -273,88 +234,21 @@ func _place(id: String, p: Vector3) -> bool:
 	return found
 
 # ------------------------------------------------------------------ the world prompt
-## Where a step's work is (its marker; Hob points there when he explains it).
+## Where a step's work is (its marker; your Boki leads there).
 func target(id: String) -> Vector3:
 	match id:
-		"chop":
-			return _nearest_wild("tree")
-		"stone":
-			return _nearest_wild("rock")
-		"buy", "sell":
-			var stalls := HomeLayout.fixtures(Save.d, "stall")
-			return HomeLayout.deco_center(stalls[0]) if not stalls.is_empty() else Vector3.INF
-		"house":
-			var e := FarmHob.house_entry()
-			return house_spot() if e.is_empty() else HomeLayout.deco_center(e)
-		"hammer":
-			return HomeLayout.deco_center(FarmHob.house_entry())
-		"feed":
-			var fs := Econ.feeders()
-			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
-		"crop":
-			if FarmTutorial.stage(id) == "patch":
-				return _water_spot()      # the patch goes by the water
-			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
-			return h.plots[0].position if planted else Vector3.INF
-		"task", "meet", "eat":
+		"meet", "eat":
 			var ke: Dictionary = h._kin_entry(Save.active_kin())
 			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
 		"toy":
 			return FarmTutorial.toy_spot()
-		"hob":
-			return h.hob.pos
-		"expedition", "out":
+		"out":
 			return h.spots["portal"]
 	return Vector3.INF
-
-## The water tile nearest the player (where the tutorial says to put the crop patch).
-func _water_spot() -> Vector3:
-	var c := FarmWater.nearest(Save.d, Vector2(h.ppos.x, h.ppos.z))
-	return Vector3(c.x + 0.5, 0, c.y + 0.5) if c.x >= 0 else Vector3.INF
-
-## The wild tree or boulder nearest the player (the tutorial's chop and mine markers); looked up twice a second at most.
-func _nearest_wild(what: String) -> Vector3:
-	if tree_t > t and tree_what == what:
-		return tree_at
-	tree_t = t + 0.5
-	tree_what = what
-	tree_at = Vector3.INF
-	var best := INF
-	var w: World = h.world
-	for i in h.hb.wild_t:
-		if String(h.hb.wild_t[i]) != what:
-			continue
-		var at := Vector3(int(i) % w.w + 0.5, 0, int(i) / w.w + 0.5)
-		var d := Vector2(at.x - h.ppos.x, at.z - h.ppos.z).length()
-		if d < best:
-			best = d
-			tree_at = at
-	return tree_at
-
-## A growth bar and countdown over the first patch while a seed grows, whatever step is showing.
-func _update_crop_label() -> void:
-	var g := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if g.is_empty() or not FarmTutorial.active() or h.plots.size() <= int(g["plot"]):
-		if is_instance_valid(crop_lbl):
-			crop_lbl.visible = false
-		return
-	if not is_instance_valid(crop_lbl):
-		crop_lbl = Label3D.new()
-		crop_lbl.font_size = 48
-		crop_lbl.pixel_size = 0.0095
-		crop_lbl.outline_size = 14
-		crop_lbl.modulate = Color("8fe0a0")
-		crop_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		crop_lbl.no_depth_test = true
-		h.add_child(crop_lbl)
-	crop_lbl.visible = true
-	crop_lbl.text = "Growing\n" + FarmCropGuide.bar_text(g)
-	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 2.2, 0)
 
 func _update_marker(dt: float) -> void:
 	if quiet:
 		return
-	_update_crop_label()
 	var id := FarmTutorial.current()
 	var txt := FarmTutorial.world_text(id)
 	var at := target(id) if id != "" and txt != "" else Vector3.INF

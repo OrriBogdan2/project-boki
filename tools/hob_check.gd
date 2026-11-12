@@ -1,18 +1,15 @@
 extends RefCounted
 ## --hob-check: Hob is a person on the farm and talks face to face (item 89), and the second Mask comes from him
 ## (item 87). FarmHob, HobModel, HobTalk, HobOffer, TalkBox; lines in content/rules/farm_builder.json "talk".
-##   1. a new farm: Hob (the HobModel) waits by the market stall with his name over him; the first goal is to
-##      meet him and the reminder line names him
-##   2. the first arrival: the camera swings over to him while he waves and calls out, then comes back
-##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; he points at the
-##      stall and the camera looks there; after the last line he is met (no name tag) and the axe is next
-##   4. the second Mask: no second Mask on a fresh save after the first expedition; not offered before the house
-##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
+##   1. a new farm: Hob (the HobModel) waits by the market stall with his name over him
+##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; Esc ends it
+##   4. the second Mask: no second Mask on a fresh save after the first expedition; a "!" and "By the way... I see
+##      you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
-## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_camera_intro, hob_3_dialogue_box,
-## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_7_mask_moment, hob_8_mask_name.
+## With --shots-dir=<dir> (a renderer): hob_3_dialogue_box, hob_5_offer_line,
+## hob_6_three_masks, hob_7_mask_moment, hob_8_mask_name.
 
 const SECOND := ["juggernaut", "ashwick", "tender"]    # owner order, class_unlock.json second_picks
 
@@ -73,24 +70,8 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
 			"Hob is a person standing by the market stall")
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "hob" and home.guide.hint_text().contains("Hob")
-			and not home.guide.hint_text().contains("Hob:"),
-			"the first goal: meet him (%s)" % home.guide.hint_text())
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
 			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
-	# 2. the camera swing
-	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
-	var focus: Vector3 = home.ppos
-	var framed: Vector3 = hob.chat.frame(focus)
-	var him: Vector3 = hob.node.position
-	ok(Vector2(framed.x - him.x, framed.z - him.z).length() < 0.5 and hob.node.pose == "wave"
-			and hob.node.bubble.visible and hob.node.bubble.text == String(hob.chat.rules()["call"]),
-			"first arrival: the camera swings over to him while he waves and calls '%s'" % hob.node.bubble.text)
-	await _shot("hob_1_calls_you_over", 0.3)
-	await _shot("hob_2_camera_intro", 0.4)
-	await _wait(func(): return hob.chat.intro_t < 0.0, 20.0)
-	ok(hob.chat.frame(focus) == focus and bool(Save.d["tutorial"].get("hob_intro", false)),
-			"then it comes back to you, once")
 	# 3. talking
 	_stand_by(hob.node.position)
 	var it: Dictionary = hob.find(Vector2(home.ppos.x, home.ppos.z))
@@ -101,47 +82,17 @@ func _first_arrival() -> void:
 	ok(box != null and home.panel_open == HobTalk.TALK, "interact opens the talk box (you stand still)")
 	if box == null:
 		return
-	var intro: Array = hob.chat.rules()["intro"]
-	ok(_texts(box).has(FarmBuilder.full_name()) and box.find_children("*", "TextureRect", true, false).size() > 0
-			and box.text.text == String(intro[0]["text"]), "his portrait, his name and his first line")
+	ok(_texts(box).has(FarmBuilder.full_name()) and box.find_children("*", "TextureRect", true, false).size() > 0,
+			"his portrait and his name")
 	await _shot("hob_3_dialogue_box", 0.9)
-	for i in 4:      # (each line: one click finishes typing it, the next moves on)
-		box.advance()
-	await _frames(2)
-	ok(box.text.text == String(intro[2]["text"]) and hob.node.pose == "point"
-			and hob.node.point_at.distance_to(stall) < 0.5 and hob.chat.show_t >= 0.0,
-			"line by line; on the stall line he points at it")
-	await main.get_tree().create_timer(0.5).timeout
-	await _shot("hob_4_points_at_stall", 0.1)
-	var mid: Vector3 = hob.chat.frame(home.ppos)
-	ok(Vector2(mid.x - home.ppos.x, mid.z - home.ppos.z).length() > 1.0, "and the camera looks over there")
-	for i in intro.size() * 2:
-		if hob.chat.talking():
-			box.advance()
-	await _frames(3)
-	ok(not hob.chat.talking() and home.panel_open == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
-			"after the last line: met, his name tag gone")
-	ok(FarmTutorial.current() == "axe", "the next goal is the axe")
-	await _frames(40)
-	hob.talk()
-	await _frames(2)
-	ok(hob.chat.talking() and hob.chat.box.text.text == FarmTutorial.hint_text(FarmTutorial.current()),
-			"later he explains the step you're on: '%s'" % hob.chat.box.text.text)
 	home._close_panel()
 	await _frames(2)
 	ok(not hob.chat.talking(), "Esc ends the talk")
 
 func _offer() -> void:
 	var hob: FarmHob = home.hob
-	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Mask talk before the house is down")
-	FarmTutorial.mark("axe")
-	FarmTutorial.mark("chop")
-	Work.add_mat("wood", 10)
-	home.guide.place_house()
-	home._sync_fixtures()
-	FarmTutorial.detect()
 	await _frames(3)
-	ok(hob.chat.offer_due() and hob.node.mark.visible, "with the house down he has a '!' for you")
+	ok(hob.chat.offer_due() and hob.node.mark.visible, "he has a '!' for you")
 	hob.node.position = hob.pos
 	_stand_by(hob.node.position)
 	hob.talk()
@@ -177,10 +128,8 @@ func _offer() -> void:
 	var clips := box.find_children("*", "AbilityClip", true, false).filter(
 			func(c): return not c.is_queued_for_deletion())
 	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Relic in focus (Meeko)")
-	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
 	var tracker_off: bool = home.guide.tracker == null or not home.guide.tracker.visible
-	ok(tracker_off and marker_off and not home.guide.hint_box.visible
-			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
+	ok(tracker_off and hob.node.mark.modulate.a == 0.0, "the Goals card steps aside")
 	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
 	var screen: Rect2 = main.get_viewport().get_visible_rect()
 	ok(screen.size == Vector2(1280, 720) and screen.encloses(pick_rect),
@@ -204,10 +153,8 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
-	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
-	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
-			"and the Goals card and the goal line are back")
+	var tracker_back: bool = home.guide.tracker != null and home.guide.tracker.visible
+	ok(tracker_back and hob.node.tag.modulate.a == 1.0, "and the Goals card is back")
 
 func _later_and_legacy() -> void:
 	await _new_farm(false)
