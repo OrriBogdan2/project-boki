@@ -255,6 +255,10 @@ func _ground(p: Vector2) -> float:
 	var g: float = h._ground_h(p.x, p.y)
 	return g if g > -50.0 else 0.0
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return state == S.CARRY or state == S.HUNT
+
 ## True when the hunt took the key (menu calls it off, or puts the scent back).
 func input(event: InputEvent) -> bool:
 	if state != S.CARRY and state != S.HUNT:

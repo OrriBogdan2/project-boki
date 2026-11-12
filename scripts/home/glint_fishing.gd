@@ -378,6 +378,10 @@ func use() -> void:
 	who["pos"] = at
 	h._toast("Hold %s to swing the cast, let go on a glint" % Settings.key_cap("interact"))
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press or release: true when fishing took it.
 func input(event: InputEvent) -> bool:
 	if run == null:

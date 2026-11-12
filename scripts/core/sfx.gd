@@ -50,7 +50,6 @@ var sound_reach := {}       # sound -> metres it carries, past hear_range (conte
 var last_played := {}
 var rng := RandomNumberGenerator.new()
 
-signal new_track(name: String)
 var music: Array[AudioStreamPlayer] = []   # two players so tracks can crossfade
 var music_i := 0
 var music_name := ""
@@ -191,7 +190,6 @@ func play_music(name: String, fade := 1.5) -> void:
 		if not Save.d.has("music"): Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()
-		new_track.emit(name)
 	var old := music[music_i]
 	music_i = 1 - music_i
 	var nw := music[music_i]
