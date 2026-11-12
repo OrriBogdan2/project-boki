@@ -12,7 +12,7 @@ extends RefCounted
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
 ## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
-## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
+## Each type's badge colour and name (the glyphs are drawn by TypeIcon); "ink" tints the glyph (white if unset).
 const TYPES := {
 	"spore": {"name": "Spore", "col": Color("9ccf6a")},
 	"titan": {"name": "Titan", "col": Color("cbb48a")},
@@ -23,6 +23,8 @@ const TYPES := {
 	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
 	"echo": {"name": "Echo", "col": Color("6fb6ff")},
 	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
+	"ghost": {"name": "Ghost", "col": Color("bcebdf"), "ink": Color("5a4aa8")},
+	"dark": {"name": "Dark", "col": Color("4a4a9a"), "ink": Color("ffb454")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -338,7 +340,8 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 	ci.draw_circle(c, r, Color(col.darkened(0.45), alpha))
 	ci.draw_circle(c, r - 1.2, Color(col.darkened(0.15), alpha))
 	var s := r * 0.62
-	var ink := Color(1, 1, 1, 0.95 * alpha)
+	var ink: Color = TYPES.get(t, {}).get("ink", Color.WHITE)
+	ink.a = 0.95 * alpha
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
 	var w := maxf(1.2, r * 0.16)
 	match t:
@@ -374,6 +377,26 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
 		"tempest":     # a bolt
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
+		"ghost":       # a sheet ghost: round head, wavy hem, two eyes
+			var body := PackedVector2Array()
+			for i in 13:
+				var a := PI + PI * i / 12.0
+				body.append(P.call(cos(a) * 0.7, -0.1 + sin(a) * 0.75))
+			for hem in [[0.7, 0.9], [0.35, 0.55], [0.0, 0.9], [-0.35, 0.55], [-0.7, 0.9]]:
+				body.append(P.call(hem[0], hem[1]))
+			ci.draw_colored_polygon(body, ink)
+			for ex in [-0.27, 0.27]:
+				ci.draw_circle(P.call(ex, -0.2), s * 0.13, Color(col.darkened(0.55), alpha))
+		"dark":        # a slit eye open in the night
+			var lid := PackedVector2Array()
+			for i in 15:
+				var x := -0.95 + 1.9 * i / 14.0
+				lid.append(P.call(x, -0.6 * (1.0 - x * x / 0.9025)))
+			for i in range(13, 0, -1):
+				var x := -0.95 + 1.9 * i / 14.0
+				lid.append(P.call(x, 0.6 * (1.0 - x * x / 0.9025)))
+			ci.draw_colored_polygon(lid, ink)
+			ci.draw_circle(P.call(0.0, 0.0), s * 0.3, Color(col.darkened(0.15), alpha))
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 
