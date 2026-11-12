@@ -1,10 +1,11 @@
 extends "res://tools/archetype_check.gd"
-## --ttk-check: time to knock for all 12 Hunters against the source (PARITY FIRST, briefs/DECISIONS.md 2026-11-07).
+## --ttk-check: time to knock for every Hunter against the source (PARITY FIRST, briefs/DECISIONS.md 2026-11-07).
 ## Ours: a live Match, the Hunter against an idle standard target (roster mean health, full armour).
 ## Source: the same fight worked out from supervive_kits.md (briefs/supervive-data on origin/ext/agent-briefs).
 ## (a) LMB alone; (b) the kit's simple combo: every direct-damage non-ult ability once, then again whenever its
 ## cooldown or charge is back, LMB between. Each at rank 0 (unspent, slot_lv 1) and max.
 ## Rows outside RATIO_LO..RATIO_HI fail unless OVERRIDES cites the owner decision. --write updates docs/TTK.md.
+## A Hunter with no source hero (Gil) is held to the roster median: the median source time of the same row.
 
 const RATIO_LO := 0.8      # ours / source time to knock: the parity bar either side (1.25 = 1 / 0.8)
 const RATIO_HI := 1.25
@@ -43,7 +44,9 @@ const HEROES := [
 	["dolm", "Tetra", "tap", false, [], {}],
 	["dredge", "Kingpin", "hold", false, [], {}],
 	["rimewright", "Celeste", "hold", false, [], {}],
+	["gil", MEDIAN_BAR, "hold", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
 ]
+const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
 
 ## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
 const OVERRIDES := {}
@@ -84,6 +87,18 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 				shots.append([t, dmg])
 				t += cd
 	return _src_knock(shots, need)
+
+## The median source time of the rows so far with this label (the bar for a Hunter with no source hero).
+func _median_src(label: String) -> float:
+	var times := []
+	for r in rows:
+		if r["label"] == label and r["src"] > 0.0:
+			times.append(r["src"])
+	if times.is_empty():
+		return -1.0
+	times.sort()
+	var mid := times.size() / 2
+	return times[mid] if times.size() % 2 == 1 else (times[mid - 1] + times[mid]) / 2.0
 
 func _src_hp(hero: Array) -> float:
 	return SRC_HP + (SRC_HP_LV * 14.0 if hero[3] else 0.0)
@@ -203,9 +218,9 @@ func run(main_node: Node) -> void:
 				continue
 			for rank in [1, 3]:
 				var ours: float = await our_ttk(hero, combo, rank)
-				var src := src_ttk(hero, combo, rank == 3)
 				var kind := "combo" if combo else "LMB"
 				var label := "%s %s" % [kind, "rank 0" if rank == 1 else "rank max"]
+				var src := _median_src(label) if hero[1] == MEDIAN_BAR else src_ttk(hero, combo, rank == 3)
 				var row := _cell(hero, label, ours, src)
 				rows.append(row)
 				bad += int(row["state"] == "FAIL")
@@ -213,6 +228,8 @@ func run(main_node: Node) -> void:
 					row["state"], hero[0], label, _fmt(ours), _fmt(src), _ratio_text(row["ratio"])])
 	for hero in HEROES:
 		for slot in hero[5]:
+			if hero[5][slot].is_empty():
+				continue
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
 			hits.append([hero[0], hero[1], slot, ours_share, src_share])
