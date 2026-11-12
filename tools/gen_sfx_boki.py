@@ -220,13 +220,39 @@ def eat(i):
     return soft(room(mix(out, hum), 0.3), 3800)
 
 
-def sleep(i):
-    """A tiny sleeper's breath: a slow soft in-and-out with a tiny snore at the end."""
-    d = 1.5; n = N(d); u = np.arange(n) / n
-    breath = bpf(noise(d), 300, 1500) * (np.sin(np.pi * np.clip(u * 2, 0, 1)) ** 2 * (u < 0.5) +
-                                          0.7 * np.sin(np.pi * np.clip(u * 2 - 1, 0, 1)) ** 2 * (u >= 0.5))
-    snore = at(vowel(210, 190, 0.3, 'mm', 1.3, 0.1) * 0.4, 1.0)
-    return soft(room(mix(breath * 0.8, snore), 0.3), 2200)
+BREATH = 3.1       # s: one sleeping in-and-out at pitch 1 (the game pitches it by body size, so a small Boki breathes faster)
+
+
+def breath_cycle(snore_amt):
+    """One slow sleeping breath: a soft drawn-in hiss, a longer lower sigh out, a short rest; `snore_amt`
+    lays a small throaty snore under the in-breath."""
+    d = BREATH; n = N(d); u = np.arange(n) / n
+    inhale = np.sin(np.pi * np.clip(u / 0.38, 0, 1)) ** 2 * (u < 0.38)
+    exhale = np.sin(np.pi * np.clip((u - 0.42) / 0.45, 0, 1)) ** 2 * ((u >= 0.42) & (u < 0.87))
+    air = bpf(noise(d), 380, 1700) * inhale * 0.7 + bpf(noise(d), 220, 1100) * exhale * 0.55
+    snore = S.voice(d * 0.36, 150, 135, 'uh', breath=0.5, rasp=0.7, scale=1.25, a=0.25, decay=d * 0.2)
+    flutter = 0.6 + 0.4 * np.sin(2 * np.pi * 27 * np.arange(len(snore)) / S.SR)
+    return mix(air, at(lpf(snore * flutter, 900) * snore_amt, d * 0.03))
+
+
+def sleep_loop():
+    """boki_sleep, a seamless loop: two breaths, the second with a tiny snore, over a faint room hush.
+    Four breaths are rendered and two cut from the middle, starting mid-sigh, so the seam falls on sound
+    and the room's echoes run on across it (Sfx.loop_hold plays it at each sleeper near you: BokiNapSfx)."""
+    d = BREATH * 4
+    cycles = [at(breath_cycle(0.35 * (c % 2)), BREATH * c) for c in range(4)]
+    x = soft(room(mix(lpf(noise(d), 500) * 0.06, *cycles), 0.3), 2000)
+    start = N(BREATH * 1.65)
+    return x[start:start + N(BREATH * 2 + 0.06)]      # + the 0.06 s save_loop folds into the start
+
+
+def yawn(i):
+    """Waking: a small open-mouthed yawn that stretches up and sighs down, ending on a contented 'mm'."""
+    f = j(i, 0.05)
+    ah = S.voice(0.62, 360 * f, 470 * f, 'ah', breath=0.45, vib=0.03, scale=1.35, a=0.12, decay=0.4)
+    oh = at(S.voice(0.45, 440 * f, 280 * f, 'oh', breath=0.4, scale=1.35, a=0.04, decay=0.25), 0.5)
+    mm = at(vowel(300 * f, 270 * f, 0.22, 'mm', 1.3, 0.1) * 0.45, 0.98)
+    return soft(room(mix(ah * 0.8, oh * 0.7, mm), 0.35), 3600)
 
 
 def work(i):
@@ -273,7 +299,8 @@ def main():
     S.takes_cat('boki_downed', downed, 2, 'boki')
     S.takes_cat('boki_revive', revive, 0, 'boki')
     S.takes_cat('boki_eat', eat, 2, 'boki')
-    S.takes_cat('boki_sleep', sleep, 1, 'boki')
+    S.save_loop('boki_sleep', sleep_loop(), 'loop')
+    S.takes_cat('boki_yawn', yawn, 1, 'boki')
     S.takes_cat('boki_work', work, 3, 'boki')
     S.takes_cat('boki_fuse', fuse, 0, 'boki')
     S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
