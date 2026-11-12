@@ -3,7 +3,8 @@ extends RefCounted
 ## The market stall's panel (docs/decisions/0013-market.md): one panel, its tabs by the stall's
 ## level (Stalls.level). L1: the Vendor (goods for Boki and the Hunter, seeds, farm, house, selling
 ## crops) and the Tradewind Exchange (materials, Exchange). L2 adds the Shelter, your own stall and
-## market search; L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the
+## market search (the Shelter shows up earlier while a Boki handed to you waits); L3 the Auction
+## House (those four tabs are HomeTrade). Opened from the stall, the
 ## hub bar's Market button and --open=shop[:boki|hunter|seeds|farm|home|sell] / exchange[:item] / shelter / stall / search / auctions.
 
 ## [tab, the stall level that opens it]
@@ -36,7 +37,9 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 func tabs() -> Array:
 	var lv := Stalls.level()
 	var no_exchange := FarmUnlocks.base_mode()
-	return TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
+	var handed := not TransferPost.inbox.is_empty()     # a Boki waiting for you opens the Shelter at any level
+	return TABS.filter(func(t): return (int(t[1]) <= lv or handed and t[0] == "Shelter")
+			and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
 
 ## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.

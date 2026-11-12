@@ -18,6 +18,7 @@ var guild_progress: Dictionary = {} # project -> gems put in
 var _keep: Array = []
 var _last_publish := -1e9
 var _busy := {}                     # operations in flight, so a double click can't run one twice
+var fake_store := Callable()        # checks only: (method, args) -> the reply text, instead of the page's store
 
 const PROJECTS := {
 	"hall": {"name": "Guild Hall", "goal": 600, "perk": "+10% gems from every expedition you make it out of."},
@@ -83,6 +84,9 @@ static func say_of(v, def := "Someone", n := 16) -> String:
 
 # ------------------------------------------------------------------ plumbing
 func _call(method: String, args: Array, cb: Callable) -> void:
+	if fake_store.is_valid():
+		cb.call(fake_store.call(method, args))
+		return
 	var js = JavaScriptBridge.get_interface("kinBridge")
 	if js == null:
 		cb.call_deferred("")
@@ -140,12 +144,12 @@ func now_ms() -> float:
 	return Time.get_unix_time_from_system() * 1000.0
 
 ## Runs step(item, next) for each item in turn, then done().
-func _each(items: Array, step: Callable, done: Callable) -> void:
+func each(items: Array, step: Callable, done: Callable) -> void:
 	if items.is_empty():
 		done.call()
 		return
 	var rest := items.slice(1)
-	step.call(items[0], func(): _each(rest, step, done))
+	step.call(items[0], func(): each(rest, step, done))
 
 func _save_dict(key: String) -> Dictionary:
 	if typeof(Save.d.get(key)) != TYPE_DICTIONARY:
@@ -197,7 +201,8 @@ func send_gift(to: String, kind: String, key: String, cb := Callable()) -> void:
 	add_doc("gifts", {"to": to, "from": me, "from_name": Save.d.get("name", "Hunter"), "kind": kind, "key": key, "n": 1, "t": now_ms()}, func(id: String):
 		if cb.is_valid(): cb.call(id != ""))
 
-## Collects gifts and visits left on your island while you were away. cb gets a list of lines.
+## Collects gifts and visits left on your island while you were away, then the Boki handed to you
+## (TransferPost). cb gets a list of lines.
 ## Every gift is one item, a sender counts for at most three per visit home, and a visitor can
 ## only make each kin happier once a day.
 func collect_gifts(cb: Callable) -> void:
@@ -245,7 +250,7 @@ func collect_gifts(cb: Callable) -> void:
 		if lines.size() > 0:
 			Save.save_game()
 		_busy.erase("gifts")
-		cb.call(lines))
+		TransferPost.sync(func(handed: Array): cb.call(lines + handed)))
 
 # ------------------------------------------------------------------ guilds
 ## Your guild lives in your own save; the store only has to describe it.
@@ -564,7 +569,7 @@ func collect_payouts(cb: Callable) -> void:
 	var total := [0]
 	query("payouts", [["to", "==", me]], "", "asc", 40, func(rows: Array):
 		var paid := {}
-		_each(rows, func(r: Dictionary, next: Callable):
+		each(rows, func(r: Dictionary, next: Callable):
 			var lid := txt_of(r["data"].get("lid"))
 			if not listings.has(lid) or paid.has(lid):
 				del_doc("payouts/" + r["id"])
@@ -582,7 +587,7 @@ func collect_payouts(cb: Callable) -> void:
 			for lid in listings.keys():
 				if now_ms() - float(listings[lid].get("t", now_ms())) > STRANDED_DAYS * 86400000.0:
 					old.append(lid)
-			_each(old.slice(0, 10), func(lid: String, next: Callable):
+			each(old.slice(0, 10), func(lid: String, next: Callable):
 				get_doc("market/" + lid, func(still: Dictionary):
 					if still.is_empty(): _refund(lid)
 					next.call()),
