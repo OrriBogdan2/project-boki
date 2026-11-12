@@ -23,6 +23,8 @@ const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing tou
                                    # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
+const AIR_CARRY := 1.2        # s: how long the car's speed stays your frame in the air (a jump's hang), out of the air drag
+const AIR_REACH := 4.0        # m above a deck: in the air this close over a car, its frame follows the car
 
 var m: Node = null
 var world: World = null
@@ -47,7 +49,7 @@ var rail_cd := 0.0
 var was_moving := false
 var ride_t := {}              # hunter -> match time they last stood on a car
 var carried := {}             # hunter -> how far the train carried them last step (world units)
-var dash_off := {}            # hunter -> the car's speed (m/s, world) they dashed off with, while the dash lasts
+var off_car := {}             # hunter -> {v: the car's speed (m/s, world) they left it with, dash: dashed since}
 var depart_warned := false
 var hits: Array = []          # [{e, car, t}] for the checks: what the train hit, which car, and when
 
@@ -211,11 +213,11 @@ func tick(dt: float) -> void:
 	_place(float(m.time))
 	var moving := head_v > 0.3
 	# riders: anyone standing on a car moves with it. This is only the platform's motion: the rider's
-	# own walking, dashing and jumping happen on top of it in Hunter.sim, in the car's frame. The
-	# car's speed moves between your world speed and your speed over the deck as you step on or off,
-	# so neither way jolts: a jump, a dash off the side or a glider opened over the rails sets off at
-	# the train's speed and the air steering and drag take it from there (a moving platform, as in
-	# the source), and a glide that lands on a car is at the deck's speed the step it touches down.
+	# own walking, dashing and jumping happen on top of it in Hunter.sim, in the car's frame. Leaving
+	# a car, its speed stays your frame for AIR_CARRY or until a dash ends (off_car): you move with it
+	# on top of your own air motion, so the air drag and steering work on your speed over the car
+	# alone and a jump comes down on it (a moving platform, as in the source). Then it joins your own
+	# speed and the drag takes it from there. Landing on a car takes its speed off yours: no jolt.
 	var was_carried := carried
 	carried = {}
 	for h in m.hunters:
@@ -230,25 +232,36 @@ func tick(dt: float) -> void:
 		h.pos += dp
 		h.prev += dp
 		if dt > 0.0 and not was_carried.has(h):
-			h.vel.x -= dp.x / dt     # stepped on: what's left is your speed over the deck
-			h.vel.z -= dp.z / dt
+			var fr: Vector2 = off_car.get(h, {"v": Vector2.ZERO})["v"]
+			off_car.erase(h)
+			h.vel.x += fr.x - dp.x / dt     # stepped on: what's left is your speed over the deck
+			h.vel.z += fr.y - dp.z / dt
 	if dt > 0.0:
 		for h in was_carried:
-			if carried.has(h) or not is_instance_valid(h) or h.out:
-				continue
-			var dv: Vector3 = (was_carried[h] as Vector3) / dt
-			if h.roll_t > 0.0:
-				dash_off[h] = Vector2(dv.x, dv.z)
-			else:
-				h.vel.x += dv.x     # stepped off: the car's speed comes with you (not its climb, as in the source)
-				h.vel.z += dv.z
-	# a dash sets its own speed every step, so one that carries on past the end of a car is moved
-	# along with the car's speed until it hands over to the run; from there the air is your frame
-	for h in dash_off.keys():
-		if not is_instance_valid(h) or carried.has(h) or h.grounded or h.out or h.roll_t <= dt:
-			dash_off.erase(h)     # (the dash hands over this step: that step is the air's)
+			if not carried.has(h) and is_instance_valid(h) and not h.out:
+				var dv: Vector3 = (was_carried[h] as Vector3) / dt
+				off_car[h] = {"v": Vector2(dv.x, dv.z), "dash": false}     # (not the car's climb, as in the source)
+	for h in off_car.keys():
+		if not is_instance_valid(h) or h.out:
+			off_car.erase(h)
 			continue
-		var along: Vector3 = Vector3(dash_off[h].x, 0.0, dash_off[h].y) * dt
+		var over := _car_under(h.pos, old, AIR_REACH)
+		if over > 0 and dt > 0.0:     # still over a car: its frame is the deck's motion under you (its curves)
+			var at: Vector3 = (old[over] as Transform3D).affine_inverse() * h.pos
+			at.y = 0.0     # (on the deck: a pitching car would swing a point up in the air about)
+			var dp: Vector3 = (cur[over] as Transform3D) * at - (old[over] as Transform3D) * at
+			off_car[h]["v"] = Vector2(dp.x, dp.z) / dt
+		var fr: Vector2 = off_car[h]["v"]
+		# a dash sets its own speed every step: the car's speed joins yours as it hands over, so a dash
+		# ends in world terms (the car's frame would pull a dash off the back forward again)
+		if h.roll_t > 0.0:
+			off_car[h]["dash"] = true
+		elif h.grounded or off_car[h]["dash"] or m.time - float(ride_t.get(h, -9.0)) > AIR_CARRY:
+			h.vel.x += fr.x
+			h.vel.z += fr.y
+			off_car.erase(h)
+			continue
+		var along := Vector3(fr.x, 0.0, fr.y) * dt
 		h.pos += along
 		h.prev += along
 	for p in m.pickups:

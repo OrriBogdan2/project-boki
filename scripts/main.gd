@@ -471,9 +471,6 @@ func _ready() -> void:
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
-	if "--train-ride-check" in args:
-		load("res://tools/train_ride_check.gd").new().run(self)      # leaving and landing on the moving cars keeps your momentum
-		return
 	if "--balloon-check" in args:
 		load("res://tools/balloon_check.gd").new().run(self)      # the hit marker is the hitbox
 		return

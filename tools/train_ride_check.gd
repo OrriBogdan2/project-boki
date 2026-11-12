@@ -8,9 +8,6 @@ extends RefCounted
 
 const DT := Match.DT
 const LOG_EVERY := 6           # steps between log lines (0.1 s)
-const AIR_FLOOR := 4.0        # m/s: the lowest the world speed may sink in the air. Loco.air_step bleeds speed above the run cap
-							# (air_drag), so a 10 m/s deck settles near the cap, never to a stop
-const AIR_STEP := 0.8         # m/s: the most one air step may change it by (that drag, plus the dash's hand-over)
 const JOLT := 0.5              # m/s: the most the world speed may change the step you leave or touch a car
 const MATCH_T := 0.1           # s: a landing moves with the deck within this
 const RISE_MAX := 0.5          # m the track may climb or drop where a case needs it level
@@ -37,6 +34,7 @@ func _set_time(t: float) -> void:
 	st.tick(0.0)
 	st.old = st.cur.duplicate()
 	st.carried = {}
+	st.off_car = {}
 
 func _fwd2(k: int) -> Vector2:
 	var f: Vector3 = -(st.cur[k] as Transform3D).basis.z
@@ -51,12 +49,12 @@ func _deck_v(k: int) -> Vector2:
 	var d: Vector3 = (st.cur[k] as Transform3D).origin - (st.old[k] as Transform3D).origin
 	return Vector2(d.x, d.z) / DT
 
-## P's world velocity this step: on a car (or dashing on past its end) the train moved them on top
-## of their own motion.
+## P's world velocity this step: on a car (or just off one) the train moved them on top of their
+## own motion.
 func _world_hv() -> Vector2:
 	var hv := Vector2(P.vel.x, P.vel.z)
-	if st.dash_off.has(P):
-		return hv + (st.dash_off[P] as Vector2)
+	if st.off_car.has(P):
+		return hv + (st.off_car[P]["v"] as Vector2)
 	if not st.carried.has(P):
 		return hv
 	var dp: Vector3 = st.carried[P]
@@ -143,7 +141,7 @@ func _find_ride(lo: int, hi: int, flat: bool, side := 0.0, K := 2) -> float:
 func _leave(label: String, k: int, drive: Callable) -> Dictionary:
 	var fwd := _fwd2(k)
 	var r := {"left": false, "jolt": INF, "min_v": INF, "max_along": -INF, "max_step": 0.0,
-		"landed": -1.0, "landed_on_deck": false, "glide_at": -1.0}
+		"landed": -1.0, "landed_on_deck": false, "glide_at": -1.0, "deck_max": 0.0}
 	var prev := _world_hv()
 	var left_i := -1
 	for i in 240:
@@ -175,6 +173,7 @@ func _leave(label: String, k: int, drive: Callable) -> Dictionary:
 			r["glide_at"] = tt
 		var dash_end := dashing and P.roll_t <= 0.0     # the dash's own hand-over to run speed, not the train's doing
 		if r["landed"] < 0.0:
+			r["deck_max"] = maxf(r["deck_max"], _deck_v(k).length())     # (the train may still be speeding up)
 			r["min_v"] = minf(r["min_v"], hv.length())
 			r["max_along"] = maxf(r["max_along"], hv.dot(fwd))
 			if not dash_end:
@@ -197,29 +196,28 @@ func _case_jump(t: float) -> void:
 	var r := _leave("jump", 2, func(i: int, _left: bool) -> void: P.inp["jump"] = i == 0)
 	ok(r["left"] and r["jolt"] <= JOLT,
 		"jump: the step you leave the deck keeps your world speed (change %.2f m/s)" % r["jolt"])
-	ok(r["min_v"] >= minf(deck * 0.6, AIR_FLOOR),
+	ok(r["min_v"] >= deck * 0.6,
 		"jump: no dead stop in the air (slowest %.1f of the deck's %.1f m/s)" % [r["min_v"], deck])
-	ok(r["max_along"] <= deck + 0.3,
-		"jump: no slingshot past the train (fastest along the track %.1f m/s)" % r["max_along"])
+	ok(r["max_along"] <= r["deck_max"] + 0.3,
+		"jump: no slingshot past the train (fastest along the track %.1f m/s, the deck %.1f)" % [r["max_along"], r["deck_max"]])
 	ok(r["max_step"] <= JOLT,
 		"jump: the air steering and drag ease it off, no step over %.2f m/s (largest %.2f)" % [JOLT, r["max_step"]])
 	ok(r["landed"] > 0.0 and r["landed_on_deck"],
-		"jump: comes down on the train (%.2f s, drifted back by the air drag)" % r["landed"])
+		"jump: comes down on the train (%.2f s)" % r["landed"])
 
 func _case_dash_back(t: float) -> void:
 	var k := st.cars_n - 1
 	_board(t, k, 0.0)
-	var deck := _deck_v(k).length()
 	var back := -_fwd2(k)
 	var r := _leave("dash_back", k, func(i: int, _left: bool) -> void:
 		if i == 0:     # the base dash itself (a hero's kit may shape its own)
 			P.dash_with({"type": "dash", "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME, "dir": back}))
 	ok(r["left"] and r["jolt"] <= JOLT,
 		"dash back: off the back of the train your world speed carries over (change %.2f m/s)" % r["jolt"])
-	ok(r["max_along"] <= deck + 0.3, "dash back: no slingshot (fastest along the track %.1f m/s)" % r["max_along"])
-	ok(r["min_v"] >= 2.0 and r["max_step"] <= AIR_STEP,
+	ok(r["max_along"] <= r["deck_max"] + 0.3, "dash back: no slingshot (fastest along the track %.1f m/s)" % r["max_along"])
+	ok(r["min_v"] >= 2.0 and r["max_step"] <= JOLT,
 		"dash back: no dead stop (slowest %.1f m/s), no step over %.2f m/s but the dash's own end (largest %.2f)"
-			% [r["min_v"], AIR_STEP, r["max_step"]])
+			% [r["min_v"], JOLT, r["max_step"]])
 
 func _case_walk_off(t: float, glide: bool) -> void:
 	var label := "glide_off" if glide else "walk_off"
@@ -232,9 +230,9 @@ func _case_walk_off(t: float, glide: bool) -> void:
 		P.inp["glide_btn"] = glide and left)
 	ok(r["left"], "%s: walking off the side is never blocked" % label)
 	ok(r["jolt"] <= JOLT, "%s: the step you walk off keeps your world speed (change %.2f m/s)" % [label, r["jolt"]])
-	ok(r["min_v"] >= minf(deck * 0.6, AIR_FLOOR),
+	ok(r["min_v"] >= deck * 0.6,
 		"%s: no dead stop in the air (slowest %.1f of the deck's %.1f m/s)" % [label, r["min_v"], deck])
-	ok(r["max_along"] <= deck + 0.3 and r["max_step"] <= AIR_STEP,
+	ok(r["max_along"] <= r["deck_max"] + 0.3 and r["max_step"] <= JOLT,
 		"%s: no slingshot (fastest along %.1f m/s, largest step %.2f)" % [label, r["max_along"], r["max_step"]])
 	if glide:
 		ok(r["glide_at"] >= 0.0 and r["glide_at"] <= 0.1,
