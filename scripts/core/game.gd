@@ -94,7 +94,7 @@ func _setup_input() -> void:
 	_key("play", [KEY_V])                     # at home: play fetch with a kin
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
-	_key("whistle", [KEY_H])                  # at home: whistle, and your kin come running
+	_key("whistle", [KEY_H])                  # at home: your partner comes; hold: the nearest Boki
 	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
@@ -268,11 +268,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		if rest > 0.0:
 			hk["trust"] = clampf(float(hk["trust"]) + rest, 0.0, 100.0)
 		if Save.has_building("dojo"):
-			hk["xp"] = int(hk.get("xp", 0)) + 40
-			while int(hk["level"]) < Evo.cap() and int(hk["xp"]) >= 100 * int(hk["level"]):
-				hk["xp"] = int(hk["xp"]) - 100 * int(hk["level"])
-				Evo.level_up(hk)
-				_evolve(hk, out)
+			add_xp(hk, 40, out)
 	# records for the trophy hall
 	var stt: Dictionary = d["stats"]
 	stt["kills"] = int(stt.get("kills", 0)) + int(r.get("kills", 0))
@@ -334,7 +330,9 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 			break
 	if won:
 		k["wins"] = int(k.get("wins", 0)) + 1
-		Save.remember(k, "extracted", "made it out of the islands with you", 3.0)
+		Save.remember(k, "extracted", "made it out of the islands with you")
+		var why := Care.trust_up(k, "win", Time.get_unix_time_from_system())
+		if lead: out["trust_why"] = why
 		k["traits"]["bravery"] = clampf(float(k["traits"]["bravery"]) + 0.015, 0.05, 0.95)
 	else:
 		Save.remember(k, "lost", "lost a match with you (%s)" % _why(r.get("why", "")), -1.0)
@@ -347,14 +345,25 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	var xp := 40 + (40 if won else 0) + int(r.get("knocks", 0)) * 10
 	if not lead: xp = int(xp * 0.7)
 	if treat == "treat_xp": xp = int(xp * 1.5)
-	k["xp"] = int(k.get("xp", 0)) + xp
-	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= 100 * int(k["level"]):
-		k["xp"] = int(k["xp"]) - 100 * int(k["level"])
-		Evo.level_up(k)
+	if add_xp(k, xp, out) > 0:
 		out["levelup"] = true
-		_evolve(k, out)
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
+
+## XP a kin needs to go from level `lv` to the next.
+func xp_need(lv: int) -> int:
+	return 100 * lv
+
+## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
+func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:
+	var gained := 0
+	k["xp"] = int(k.get("xp", 0)) + xp
+	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= xp_need(int(k["level"])):
+		k["xp"] = int(k["xp"]) - xp_need(int(k["level"]))
+		Evo.level_up(k)
+		gained += 1
+		_evolve(k, out)
+	return gained
 
 ## A level up can bring a new form or a mutation. The home island plays it when you get back.
 func _evolve(k: Dictionary, out: Dictionary) -> void:
@@ -362,6 +371,7 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 	if ev.is_empty():
 		return
 	ev["text"] = Evo.describe(ev, k)
+	CareJournal.evolved(k, ev)
 	if ev["kind"] == "form": Care.dex_mark(k["species"], "caught")      # it evolved into a new species
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
