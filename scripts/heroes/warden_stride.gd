@@ -3,7 +3,8 @@ extends RefCounted
 ## A Hero's run start and stop on top of the locomotion loops (content/rules/warden_stride.json), driven by the speed
 ## and the brake state, never by a timer. A start leans forward and settles as the shown speed catches the real one. A
 ## let-go from a walk or run shifts the weight back while the body slides (HunterMove.slide); one foot stays planted
-## where it was and the other lifts and lands on its idle spot, then the planted one steps in, then the clips' idle.
+## where it was and the other lifts and lands on its idle spot, then the planted one steps in, and both stay pinned
+## until the loops' legs are back at the idle, then hand over to it ("settle_s", longer for the heavy).
 ## A dash, a cast, a hit, the air or a knock (speed over a run that nothing keyed) wears none of it, in that frame.
 ## Runs after WardenClips posed the bones.
 
@@ -13,7 +14,8 @@ const BRAKE_REGAIN := 0.4    # m/s over the slowest speed of the slide: the keys
 const CARRY := 1.15          # of the run speed: faster than this, nothing keyed it (a knock, a kit step)
 const LEAN_RAMP := 0.3       # s a start takes to build the run speed on screen
 const EASE := 12.0           # 1/s: the weight shift and the lean ease in and out
-const RELEASE := 12.0        # 1/s: the foot pins let go of the legs
+const RELEASE := 12.0        # 1/s: the foot pins let go of the legs when he moves off again
+const IDLE_AT := 0.05        # loco blend radius under which the loops' legs stand in the idle
 const REACH_AT := 0.85       # of the slide: the swinging foot is over its spot, and comes down in place from there
 const FREEZE_AT := 0.96      # of the slide: its spot stops following the body (the drawn body lags its speed a little)
 const CROUCH_MAX := 0.3      # a sneak or slide dip is not a stop
@@ -89,7 +91,7 @@ func step(dt: float, s: Dictionary, clips: WardenClips) -> void:
 	if phase == 0:
 		_lean(dt, spd, run, walk, vel)
 	else:
-		_stop(dt, spd)
+		_stop(dt, spd, clips.loco_pos.length() < IDLE_AT)
 	_pose()
 
 ## Nothing but the loops moves him: no action, no air, no dash, no crouch, nothing keyed.
@@ -109,7 +111,7 @@ func _reset(spd: float) -> void:
 	last_spd = spd
 
 func _record_idle(clips: WardenClips) -> void:
-	if clips.loco_pos.length() > 0.05 or clips.stance_w > 0.05:
+	if clips.loco_pos.length() > IDLE_AT or clips.stance_w > 0.05:
 		return
 	var inv := root.global_transform.affine_inverse()
 	var f := _feet()
@@ -153,7 +155,8 @@ func _lean(dt: float, spd: float, run: float, walk: float, vel: Vector3) -> void
 	if lean_w > 0.001:
 		_tilt(Vector3(vel.x, 0.0, vel.z), deg_to_rad(float(cfg["lean_deg"])) * lean_w)
 
-func _stop(dt: float, spd: float) -> void:
+## `settled`: the loops' legs are back at the idle, so the pins can hand the feet over without a slip.
+func _stop(dt: float, spd: float, settled: bool) -> void:
 	lean_w = 0.0
 	shown = spd
 	var want := 1.0
@@ -172,7 +175,10 @@ func _stop(dt: float, spd: float) -> void:
 			phase = 3
 	if phase == 3:
 		want = 0.0
-		pin_w = move_toward(pin_w, 0.0, RELEASE * dt)
+		if spd >= WardenClips.STILL:
+			pin_w = move_toward(pin_w, 0.0, RELEASE * dt)
+		elif settled or pin_w < 1.0:
+			pin_w = move_toward(pin_w, 0.0, dt / float(cfg["settle_s"]))
 		if pin_w <= 0.0 and stop_w <= 0.01:
 			phase = 0
 			peak = spd
@@ -205,13 +211,15 @@ func _pose() -> void:
 		var reach := 1.0       # how far this foot is along its way to `at`, and how far through its arc
 		var arc_p := 0.5
 		if i == swing:
-			reach = clampf(u / REACH_AT, 0.0, 1.0) if phase == 1 else 1.0
+			reach = smoothstep(0.0, REACH_AT, u) if phase == 1 else 1.0
 			arc_p = u if phase == 1 else 1.0
 		else:
+			# (the step-in rises before it travels and lands before it stops: no skate on the last step)
 			from.y = at.y
-			reach = 0.0 if phase == 1 else step_p
-			arc_p = reach if phase != 1 else 0.0
-		var goal := from.lerp(at, smoothstep(0.0, 1.0, reach)) + Vector3.UP * (arc * sin(PI * arc_p))
+			var lift := float(cfg["lift_p"])
+			reach = 0.0 if phase == 1 else smoothstep(lift, 1.0 - lift, step_p)
+			arc_p = 0.0 if phase == 1 else step_p
+		var goal := from.lerp(at, reach) + Vector3.UP * (arc * sin(PI * arc_p))
 		_plant(i, goal, pin_w)
 
 func _feet() -> Array:

@@ -1,16 +1,17 @@
 extends RefCounted
 ## --stride-check: a Hunter's run start and stop through the real match code (WardenStride). Per Hero with clips:
 ## a start leans forward and the lean is gone once the speed is built; a let-go from a run slides 0.3-0.55 m with the
-## weight shifted back and the planted foot sliding under 3 cm; a dash the frame after the stop, a knock, and a keyed
-## move show none of it. Never touches the save.
+## weight shifted back and a planted foot sliding under 3 cm through the step-in and the hand-over to the idle; a dash
+## the frame after the stop, a knock, and a keyed move show none of it. Never touches the save.
 
 const DT := 1.0 / 60.0
 const SLIDE_MIN := 0.30        # m: the stop slide (decision 0020's 0.3-0.5 m, a little over for the heavy)
 const SLIDE_MAX := 0.55
 const FOOT_MAX := 0.03         # m: a planted foot may stray this far from where its contact began
 const PLANT_Y := 0.015         # m: a foot this near its standing sole height is planted
+const STOP_FRAMES := 60       # frames: the most a stop may take (slide, step-in, feet handed back to the idle)
 const RUN_UP := 40             # frames: a run-up reaches the Hero's run speed in 6 and the strip is 10 m either way
-const HEROES := ["gunslinger", "juggernaut", "bulwark", "dolm", "rimewright"]
+const HEROES := ["gunslinger", "juggernaut", "archer", "ashwick", "bulwark", "dolm", "rimewright"]
 
 var A
 var bad := 0
@@ -56,7 +57,8 @@ func _shown(P: Hunter) -> bool:
 	var st := _stride(P)
 	return st.phase != 0 or st.stop_w > 0.0 or st.lean_w > 0.0 or st.pin_w > 0.0
 
-## Lets go of a run and follows the planted feet to a stop: [slide m, worst planted-foot slide m, peak weight].
+## Lets go of a run and follows the planted feet until WardenStride hands them back to the idle: [slide m, worst
+## planted-foot slide m, peak weight].
 ## A foot is planted while it sits within PLANT_Y of its standing sole height; its slide is how far it strays from where
 ## that contact began.
 func _stop(m: Match, P: Hunter) -> Array:
@@ -67,7 +69,7 @@ func _stop(m: Match, P: Hunter) -> Array:
 	var start := [Vector3.INF, Vector3.INF]
 	var worst := 0.0
 	var peak := 0.0
-	for f in 40:
+	for f in STOP_FRAMES:
 		_frame(m, P)
 		var now := _feet(P)
 		for i in 2:
@@ -79,6 +81,8 @@ func _stop(m: Match, P: Hunter) -> Array:
 				start[i] = foot
 			worst = maxf(worst, Vector2(foot.x - start[i].x, foot.z - start[i].z).length())
 		peak = maxf(peak, _stride(P).stop_w)
+		if peak > 0.0 and not _shown(P):
+			break        # (the idle's own weight shifts after it are not the stop's)
 	return [from.distance_to(P.pos), worst, peak]
 
 ## A run-up's first frames: how far the start lean got, and whether any is left at the steady run.

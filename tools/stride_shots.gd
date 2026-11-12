@@ -8,7 +8,7 @@ const DT := 1.0 / 60.0
 const STAND := 120             # frames standing first (the idle feet are read there)
 const RUN := 40                # frames at full run before the let-go
 const TAIL := 40               # frames standing after the stop
-const PICK := [-4, 0, 2, 4, 6, 8, 10, 14, 18, 24]     # frames from the let-go that are filmed
+const PICK := [-4, 0, 4, 8, 12, 16, 20, 26, 32, 40]     # frames from the let-go that are filmed (to the idle hand-over)
 const FRAME := 1.25            # of the Hero's height: what the square frame covers
 const FOV := 36.0
 
