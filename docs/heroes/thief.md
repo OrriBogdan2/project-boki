@@ -234,10 +234,14 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
 ## Look and sound (all ours)
 
 - Arc Bolts model: two dark ring blades with swept spikes and a gold inner edge (scripts/match/hero_arms_dj.gd).
-- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the violet chakram and its
-  comet trail, the empowered chakram in a lightning streak, the fizzle puff, the Bola's two weights, the
-  dagger, the afterimage chain, the knock star and heal pillar, the cartwheel arc. Their colours are her table
-  (content/archetypes/thief.json "palette", docs/HERO_VFX.md "Ability colours").
+- Effects: every moment is data, content/vfx/thief.json played by HeroVfx (docs/HERO_VFX.md): the bolt's throw,
+  trail, hit (bigger on the empowered one), fizzle and wall sparks; the dash after-images and the flip's trail (ribbons
+  on her hand and foot over the clip's 0.1-0.3 s turn); the reset, the knock star and heal pillar; the Bola's throw
+  lane, bounce, end and Tangle cord; the knife throw and stick; the blink path and arrival; the Encore ring at the
+  blades' reach, its beats and hits. Online they reach other games as `hvfx` events. The projectile skins stay
+  pooled in scripts/arch/kits/dj_fx.gd (shaders/dj_fx.gdshader): the chakrams, the Bola's two weights, the dagger,
+  the Encore blades and the blink's afterimage chain. All colours are one table, content/archetypes/thief.json
+  "palette" (the recipes read it too: docs/HERO_VFX.md "Ability colours").
 - Sounds: tools/gen_sfx_sable.py (`dj_*`, `thief_*`), synthesized; set in content/sfx/thief.json.
 
 ## Engine notes

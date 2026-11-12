@@ -88,7 +88,9 @@ DECISIONS 2026-11-08: every Hunter's abilities wear its ability colour (`content
 docs/VFX_QUALITY.md has the list). Where a Hunter's colours live, one table each:
 - a Hero with recipes: the `palette` of `content/vfx/<arch>.json` (Lace, Kael, Albert, Cinder, Meeko, Neve);
 - a kit that draws in code: the `palette` of its archetype JSON, read with `Arch.fx_col(arch, key)` into the kit's
-  `main_col` / `hot_col` / ... static vars (Vex, Sparkle, Tenzo, Sable). No hex in those kits.
+  `main_col` / `hot_col` / ... static vars (Vex, Sparkle, Tenzo, Sable). No hex in those kits. A Hero with both (Sable:
+  recipes in `content/vfx/thief.json`, projectile skins in code) keeps one table, the archetype's: a recipe file
+  without a `palette` reads its archetype's (`HeroVfx.palette`).
 - every Hunter: each slot's `col` (HUD tile, cast words, rings through `col_of`) and the signature weapon's
   `primary.color` (the LMB tile and charge flash).
 

@@ -12,10 +12,13 @@ const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling 
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 const HUE_OFF := 40.0          # deg round the colour wheel from its Hunter's: past this an ability colour is off
 const PALE_S := 0.3            # saturation under which a colour is a pale tint, free on any Hunter
-const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"]}   # colours that mean something: a shield's blue, heals
+## Colours that mean something: a shield's blue, heals (Sable's knock heal in her table).
+const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"], "thief": ["palette heal"]}
 ## The colour hex a kit drawing from its table still keeps: only the named colours that mean something (Sable: the
 ## empowered tell's gold her card names, her knock heal's green).
-const KIT_MEANING := {"thief": ["EMP_LINE", "GLINT_CORE", "HEAL", "HEAL_WORD"]}
+const KIT_MEANING := {"thief": ["EMP_LINE", "GLINT_CORE", "HEAL_WORD"]}
+## Heroes whose every moment is data (the check below scans their kit for inline looks).
+const DATA_MOMENTS := ["thief"]
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -54,6 +57,7 @@ func run(main: Node) -> void:
 		_recipes(arch)
 	_colours()
 	_kit_hex()
+	_kit_moments()
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -75,10 +79,14 @@ func run(main: Node) -> void:
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
 	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	# a call may pick one of two moves: vfx("a" if flag else "b", ...)
+	var re := RegEx.create_from_string(
+			"(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"(?: if \\w+ else \"(\\w+)\")?")
 	for src: String in _kit_sources(arch):
 		for hit in re.search_all(src):
-			called[hit.get_string(1)] = true
+			for g in [1, 2]:
+				if hit.get_string(g) != "":
+					called[hit.get_string(g)] = true
 	return called
 
 ## The source of a Hero's kit scripts (KIT_FILES).
@@ -122,6 +130,18 @@ func _kit_hex() -> void:
 					stray.append(hit.get_string().strip_edges().left(60))
 		ok(stray.is_empty(), "%s's kit keeps no colour hex but the named ones that mean something %s" % [arch, stray])
 
+## A Hero moved onto data draws its moments only through HeroVfx: no star, puff, spark, burst, flash, streak, bolt or
+## pillar left in its kit code (its projectile skins, after-image chain and words stay in code).
+func _kit_moments() -> void:
+	var re := RegEx.create_from_string("(?:fx\\(\\)\\.(?:star|puff|streak|seg|crescent|pillar)"
+			+ "|m\\.fx\\.(?:spark|burst|flash|bolt|ring))\\(")
+	for arch: String in DATA_MOMENTS:
+		var left: Array = []
+		for src: String in _kit_sources(arch):
+			for hit in re.search_all(src):
+				left.append(hit.get_string())
+		ok(left.is_empty(), "%s's kit plays every moment from its data %s" % [arch, left])
+
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:
 	var d := HeroVfx.data(arch)
@@ -133,7 +153,7 @@ func _recipes(arch: String) -> void:
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
 	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
-	var pal: Dictionary = d["palette"]
+	var pal := HeroVfx.palette(arch)
 	var bad_sound: Array = []
 	var bad_col: Array = []
 	var over: Array = []
