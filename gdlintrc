@@ -1,11 +1,10 @@
-# gdlint config tuned to the current code (tools/check.sh runs it through tools/lint_gate.py, which baselines the
-# old debt per file so only new problems fail). Rules left out are covered elsewhere or not worth the noise:
+# gdlint config: the official GDScript style guide (docs/STYLE.md links it). tools/check.sh runs it through
+# tools/lint_gate.py, which baselines the old debt per file, so only new problems fail. Rules left out:
 #   max-line-length, max-file-lines : tools/style_lint.py (120 chars) and tools/health.py (file budgets)
-#   class-definitions-order         : 1100+ hits, a reorder is not a mechanical fix
 #   max-public-methods, max-returns, function-arguments-number : design limits, reviewed by hand
-disable: [max-line-length, max-file-lines, class-definitions-order, max-public-methods, max-returns, function-arguments-number]
-# short capitals (P, K, RR, H2 ...) are the repo's names for typed locals and arguments
-function-variable-name: ([a-z_][a-z0-9_]*|[A-Z][A-Z0-9]*)
-function-argument-name: _?([a-z][a-z0-9_]*|[A-Z][A-Z0-9]*)
-loop-variable-name: _?([a-z][a-z0-9_]*|[A-Z][A-Z0-9]*)
-class-variable-name: _?([a-z][a-z0-9_]*|[A-Z][A-Z0-9]*)
+disable: [max-line-length, max-file-lines, max-public-methods, max-returns, function-arguments-number]
+# the guide's snake_case, with the leading underscore Godot asks for on unused or private names
+function-variable-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+function-argument-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+loop-variable-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+class-variable-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
