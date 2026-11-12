@@ -1,7 +1,8 @@
 class_name FarmHob
 extends RefCounted
-## Hob Brackenridge in the world (home.gd owns one): a person (HobModel) who waits by the market stall and
-## walks over to work at the house while it goes up. On the first arrival the camera swings over to him while
+## Hob Brackenridge in the world (home.gd owns one): a person (HobModel) who waits at his own spot near the
+## market stall, with a clear ring round it that nothing may be built in (HobSpot), and walks over to work
+## at the house while it goes up. On the first arrival the camera swings over to him while
 ## he waves and calls you over, and his name shows over him until you have talked. Walk up and press interact
 ## and he talks face to face (HobTalk: the farm tutorial, blueprints from FarmBuilder, and the second Mask).
 ## A "!" floats over him while he has something for you. Holding the same interact key hammers a house or
@@ -19,6 +20,7 @@ var poll_t := 0.0
 var call_t := 0.0
 var site_u := -1                 # the construction site you are hammering (deco uid)
 var pos := Vector3.INF           # where he is standing (or walking to)
+var spot := Vector3.INF          # his home spot with its clear ring (HobSpot), INF while he is not on the farm
 
 func _init(home) -> void:
 	h = home
@@ -27,8 +29,8 @@ func _init(home) -> void:
 func rules() -> Dictionary:
 	return FarmBuilder.rules()
 
-## Where he stands: working beside the house while it is a construction site, else by the market stall
-## (out in front of it and to its side). INF when neither is on the island.
+## Where he stands: working beside the house while it is a construction site, else at his home spot.
+## INF when he has no spot (no market stall on the island).
 func stand_at() -> Vector3:
 	var e := house_entry()
 	if not e.is_empty() and FarmSites.has_site(e):
@@ -36,13 +38,28 @@ func stand_at() -> Vector3:
 		var side := Vector3(-face.z, 0, face.x)
 		var st: Dictionary = rules()["stand"]
 		return HomeLayout.deco_center(e) + face * float(st["along"]) + side * float(st["side"])
+	return spot
+
+
+## His home spot (HobSpot), first looked for out in front of the market stall and to its side. INF with no stall.
+func _home_spot() -> Vector3:
 	var stalls := HomeLayout.fixtures(Save.d, "stall")
 	if stalls.is_empty():
 		return Vector3.INF
 	var face: Vector3 = HomeLayout.facing(int(stalls[0].get("r", 0)))
 	var side := Vector3(-face.z, 0, face.x)
 	var ss: Dictionary = rules()["stall_stand"]
-	return HomeLayout.deco_center(stalls[0]) + face * float(ss["out"]) + side * float(ss["side"])
+	return HobSpot.home(h, HomeLayout.deco_center(stalls[0]) + face * float(ss["out"]) + side * float(ss["side"]))
+
+
+## Would a piece on tile c be inside his clear ring? (Build mode refuses it.)
+func crowds(c: Vector2i) -> bool:
+	return spot != Vector3.INF and HobSpot.near_tile(spot, c)
+
+
+## Would a door (a place you interact with) at p be inside his clear ring?
+func crowds_point(p: Vector3) -> bool:
+	return spot != Vector3.INF and Vector2(p.x - spot.x, p.z - spot.z).length() < HobSpot.clear_m()
 
 ## Whether he is at work on the house site (hammering) rather than waiting by the stall.
 func at_site() -> bool:
@@ -60,6 +77,7 @@ static func house_entry() -> Dictionary:
 func sync() -> void:
 	if not FarmUnlocks.gated() or not h.visit.is_empty():
 		return
+	spot = _home_spot()
 	pos = stand_at()
 	if pos.x == INF:
 		if is_instance_valid(node):
@@ -125,13 +143,14 @@ func _call_out(dt: float) -> void:
 	Sfx.play("ping", node.position, -10.0)
 
 # ------------------------------------------------------------------ interaction
-## The thing to interact with near the player, or {}: Hob, or a site you can help build.
+## The thing to interact with near the player, or {}: Hob ({kind, d}: d m away, so the nearest thing wins), or
+## a site you can help build.
 func find(p2: Vector2) -> Dictionary:
 	if not h.visit.is_empty() or not FarmUnlocks.gated():
 		return {}
-	var reach := float(rules()["talk_reach"])
-	if is_instance_valid(node) and p2.distance_to(Vector2(node.position.x, node.position.z)) < reach:
-		return {"kind": "hob"}
+	var d := p2.distance_to(Vector2(node.position.x, node.position.z)) if is_instance_valid(node) else INF
+	if d < float(rules()["talk_reach"]):
+		return {"kind": "hob", "d": d}
 	if not swing_on():
 		return {}
 	for e in FarmSites.sites():
