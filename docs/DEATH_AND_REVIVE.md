@@ -135,3 +135,8 @@ All names and multipliers are placeholders.
 - Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.
 - Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+
+## Watching your squad while you're out
+- Out with a teammate still in it, the camera, minimap and Boki card follow one of them (`scripts/match/spectate.gd`). The fire and secondary keys (rebindable) step to the next or previous living teammate, wrapping and skipping the out and the extracted.
+- A strip at the bottom reads "Watching <name> (<Hunter>)" with their health, armour and ability tiles, and one Give up button that leaves the match. Cooldowns of a remote teammate show as the owner last sent them.
+- Checked by `--spectate-check`; `--spectate-shots --shots-dir=<dir> [--shot-size=2560x1440]` takes the screenshots.

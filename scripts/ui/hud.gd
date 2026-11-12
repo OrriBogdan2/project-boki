@@ -653,9 +653,10 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_circle(r.get_center(), inner.size.x * 0.5, Color(0.07, 0.07, 0.14, 0.92))
 	# riding in or dropping: the whole map. On the ground: a close view that follows you.
 	var view := Rect2(Vector2.ZERO, Vector2(w.w, w.h))
-	if not riding and m.player:
+	var vh: Hunter = m.spectate.viewed()      # you, or the teammate you watch once you're out
+	if not riding and vh:
 		var R := 34.0
-		view = Rect2(Vector2(m.player.pos.x, m.player.pos.z) - Vector2(R, R), Vector2(R, R) * 2.0)
+		view = Rect2(Vector2(vh.pos.x, vh.pos.z) - Vector2(R, R), Vector2(R, R) * 2.0)
 	var k := inner.size.x / view.size.x
 	var to_map := func(p3: Vector3) -> Vector2:
 		return inner.position + (Vector2(p3.x, p3.z) - view.position) * k
@@ -681,9 +682,9 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
 		train_map.draw(self, m.skytrain, inner, view, k, false)
 	# your view cone, faintly
-	if m.player and not riding:
-		var pp: Vector2 = to_map.call(m.player.pos)
-		var ad: Vector2 = m.player.aim_dir()
+	if vh and not riding:
+		var pp: Vector2 = to_map.call(vh.pos)
+		var ad: Vector2 = vh.aim_dir()
 		var a0 := atan2(ad.y, ad.x)
 		var pts := PackedVector2Array([pp])
 		for i in 13:
@@ -1838,9 +1839,6 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
-	var mate := m.spectating()
-	if mate:
-		lines.append("Watching %s." % mate.pname)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
 	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)

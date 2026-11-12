@@ -11,6 +11,7 @@ var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
 var hud: Node = null
+var spectate := Spectate.new(self)     # who you watch once you're out
 var env: WorldEnvironment
 var hunters: Array = []
 var kins: Array = []
@@ -3428,6 +3429,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.open_map(false)
 		get_viewport().set_input_as_handled()
 		return
+	if spectate.input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if skydrop and player and not player.out and not paused:
 		if event.is_action_pressed("pass_lead") and skydrop.pass_lead(player):
 			get_viewport().set_input_as_handled()
@@ -4984,12 +4988,7 @@ func _watch_death() -> void:
 
 ## The teammate the camera follows while you're dead, or null.
 func spectating() -> Hunter:
-	if player == null or not player.out or player.gone or time - float(player.get_meta("died_at", time)) < 2.5:
-		return null
-	for x in hunters:
-		if x.team == player.team and x != player and not x.out and not x.extracted:
-			return x
-	return null
+	return spectate.current()
 
 ## Leave while dead and waiting on your team.
 func give_up() -> void:
