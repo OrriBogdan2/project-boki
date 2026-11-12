@@ -17,6 +17,8 @@
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},
 		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.lane_w", "value": 1.8, "tol": 0.18, "evidence": "F Trickshot lane about 1 bh wide = 1.8 m (hero-ref/dancer.md)"},
-		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"}
+		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"},
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.5, "evidence": "F Rain of Arrows wall centred on the cursor 252 px out over a 42 px body = 6.0 bh = 10.8 m (hero-ref-footage pin 0493-0498); the cap is not seen, so this is the floor"},
+		{"hero": "archer", "slot": "R", "field": "x.width", "value": 0.5, "tol": 0.1, "evidence": "F Primal Forces beam 10-13 px wide over a 42 px body = 0.43-0.56 m (hero-ref-footage pin 0559, 0566, 0573)"}
 	]
 }

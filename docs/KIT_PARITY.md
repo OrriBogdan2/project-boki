@@ -21,23 +21,23 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 
 ## Ranges and radii: RMB, E, R (main d255acbee, 2026-11-10)
 
-Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range numbers, so only the Black Hole radius, 350/500 uu = 3.5/5.0 m, is data) plus the footage measures in `briefs/hero-ref` (1 body height = 1.8 m; a later per-ultimate re-measure wins over the first sheet). Ours = `content/archetypes/<id>.json`, metres. The aim indicator and the hit read the same JSON field for every row below; the Bola lane is drawn at the width the hit reaches (0.45 + body radius per side). **fixed** = changed here and asserted in `--kit-parity-check`. `[?]` = not measurable from the source, or an owner note stands.
+Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range numbers, so only the Black Hole radius, 350/500 uu = 3.5/5.0 m, is data) plus the footage measures in `briefs/hero-ref` (1 body height = 1.8 m; a later per-ultimate re-measure wins over the first sheet). Ours = `content/archetypes/<id>.json`, metres. The aim indicator and the hit read the same JSON field for every row below; the Bola lane is drawn at the width the hit reaches (0.45 + body radius per side). **fixed** = changed here and asserted in `--kit-parity-check`. `[?]` = not measurable from the source, or an owner note stands. Footage rows re-read frame by frame on origin/ext/hero-ref-footage (720 px frames, 2026-11-12): 1 bh = the hunter from the top of the health bar to the feet in the same frame and camera (the sheets' convention; it gives the 1.8 m fit), distance from the feet; **Not determinable** names the frames checked.
 
 | Hero | Slot, number | Ours | Source | Verdict |
 |---|---|---|---|---|
 | Vex | RMB range, cone, lane | 10.5, 6 m at 100, 0.72 | 5-6 bh (9-10.8), 3.5 bh at 100, 0.4 bh | match |
 | Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) |
-| Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] |
+| Vex | R range, disc | 14, 3.4 | both nukes land on the cursor inside 3.1 bh: on the dummy (venator_ghost 0191-0195) and on empty ground 136 px over a 44 px body (5.6 m, 0226-0228); no clamp, no range ring in the reticle; 1.8-2 bh (3.2-3.6) | disc match; range **Not determinable** (frames 0190-0255, the only R casts; 14 is above the 5.6 m floor) |
 | Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
 | Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
-| Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
-| Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] |
-| Lace | R range, width | 18, 0.5 | not in the footage | [?] |
-| Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] |
+| Lace | RMB range | 14 (to 16.8 at full charge) | every Impaling Shot ends on a dummy 1-4 bh out (pin 0264-0273, 0281-0285, 0327-0331, 0494-0501); the 2 bh gold bar (0494) is the hold telegraph | **Not determinable**: no miss shows where the arrow stops |
+| Lace | E arc, reach | 120, **10.8** (was 9) | 120; the wall sits on the cursor at 4.5 bh (0457) and 252 px over a 42 px body = 6.0 bh = 10.8 m (0493-0498) | arc match; reach **fixed** to the 0493 floor (9 m could not place that wall; the cap is not seen), locked in kit_parity.json |
+| Lace | R range, width | 18, 0.5 | Primal Forces beams (pin 0559-0560, 0566, 0573, 0587-0593) run off the top edge past 6.8 bh (12.2 m); beam 10-13 px over a 42 px body = 0.43-0.56 m | width match, locked in kit_parity.json; range **Not determinable** (beam end off screen in every shot; 18 is above the 12.2 m floor) |
+| Cinder | RMB range | 14 | hits at 6.9 bh (12.4 m: 273 px over a 39-40 px body, linwick 0102-0107) and near (0073-0076); the one miss (0128-0135) ends on the cursor at 184 px over 28.5 px = 6.45 bh (11.6 m), lane drawn to the cursor | **Not determinable** (14 is above the 12.4 m floor). On that miss the source bolt stopped at the cursor; ours always flies its full 14 m by owner call (OWNER_REVIEW_1103 item 19) |
 | Cinder | E radius | 4.5 | 2.5 bh (4.5) | match |
 | Cinder | R carpet, ring, flight | 1.8, 2.2, 22.7 | 1 bh, 1.2 bh, 16-18 | width, ring match; flight longer (owner item 20) |
 | Meeko | RMB range, burst | 14, 2.2 | 8-9 bh (14.4-16.2), disc 1.2 bh (2.2; flare 1.8 bh = 3.2) | match; flare [?] |
