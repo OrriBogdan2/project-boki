@@ -168,7 +168,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Q | none | glove | ours |
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, self_k .33 (ours) | match |
 | R | Channel on ally/Wisp; revive and pull; cancels on stun, knock, range; 60 s [D] | Tether 5 s, range 12.6, cd 46 | match in shape; 0.77x cd |
-| Dash | Ground 7 s, air 14 s, separate [D] | 7 s and 14 s, 3.6 m/.2 s (F) and 13.3 m/.95 s (F), off the dash feel, air steer (owner) | match |
+| Dash | Ground 7 s, air 14 s, separate [D]; ally pass refunds half the cd + 1 s E only on the footage card's Super (older build), absent at every rank in [D] | 7 s and 14 s, 3.6 m/.2 s (F) and 13.3 m/.95 s (F), off the dash feel, air steer (owner); no ally refund | match; ally refund `[?]` (tender.md "Ally-pass refund") |
 | Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | differ: shield ours. Drop lockout built (lock 4 s); which hits drop not traced |
 | Anim | Footage poses | 16 moves, all on `pip.glb` (45) | match on coverage |
 

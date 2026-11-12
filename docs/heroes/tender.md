@@ -65,7 +65,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | Its area shows at once and roots 2s later, held by her reach (owner 11-10 over the footage's 0.6-0.8s) | wiki (2s), owner | no (footage 0.6-0.8s) | yes, 2s; out of 15m it unwinds 2x and falls off | "it roots at about 2.0 s of contact", "out of her reach it unwinds 2x", "escaped ... never roots" |
 | The aura's recast throws it to a spot, and it sticks to the first ally it passes | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage | the spot, yes | yes | "thrown, it lands on the cursor"; `--support-check` latch |
 | A stun on you does not put out the aura (data pass; the wiki's rule was not in the tooltip data) | tooltip data | no | yes | `--support-check` |
-| Dashing through an ally refunds nothing (data pass: the source has no such bonus) | tooltip data | no | removed | `--support-check` |
+| Dashing through an ally refunds nothing `[?]`: not base kit in any source; the refund sits only on the footage card's upgraded Super dash (older build), and the Nov 2 tooltips have it at no rank (see "Ally-pass refund" below) | tooltip data, footage card | card only (Super) | removed | `--support-check` |
 | Rank 3 (source level 4): picking up a wisp refreshes the air dash | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
 | Healing is x5 on wisps and x0.33 on yourself | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
 | Relay Step goes where you move, not at the cursor | footage | yes | yes | "Relay Step goes where you move" |
@@ -130,6 +130,15 @@ Item 24's "air about 3x the ground" rule is dropped; both dashes copy the source
 | Cooldowns | ground 7 s, air 14 s (separate) | data | `dash.cd` 7.0, `dash.air.cd` 14.0 (`ArchKit.long_dash_cd`) | 7 s per hop charge, 14 s for the glide (owner: copy Elluna) |
 
 Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm dashes: the ground hop is Elluna's ...", "... the air glide is Elluna's ...", "... 3-4x the hop's distance and about 5x its time").
+
+### Ally-pass refund `[?]` (Nov 12 check: not settled, no code changed)
+The parity reel asked whether dashing through a teammate should refund the dash. The evidence:
+- **Footage card** (briefs/hero-ref/mooshmoosh.md, `0157`): the card names "Lighter Than Air / Super Lighter Than Air". Only the **Super** (upgraded) version has it: "through an ally refunds half its cooldown and 1 s of E", on a 9.2 s cooldown. The card's names (Backpack, Moon Shot) are from an older build than the tooltip data.
+- **Tooltip data** (briefs/supervive-data/supervive_kits.md, Nov 2): Lunar Dash 7 s and Lunar Air Dash 14 s, upgrades "-0.75 s (-1.5 s air) cooldown x2 / air dash cooldown refreshed on picking up a wisp". There is no ally refund at any rank.
+- **Ours:** the old Relay Step refund (half a charge and 1 s of Hearthlight, `ally_r` 1.1) was removed by the owner's data pass (c6932ae60, kit_comparison.md "Relay Step bonus ... invented"). Rank 3 has the tooltip upgrade (a wisp pickup refreshes the air glide). `--support-check` asserts that a pass refunds nothing.
+- **What `refund` 0.2 / `emp_refund` 0.4 are:** they're unrelated to the dash. They are Kindle's Hearthlight wind-back: an ember into a Kindled foe takes 0.2 s off Hearthlight's cooldown, or 0.4 s for an Empowered ember (`TenderKit.on_deal`).
+
+Verdict: it is not base kit in either source. As an upgrade it exists only in the older footage build, and the current tooltips replace it with the wisp refresh. So nothing is built. Bringing it back as a rank upgrade would be an owner call.
 
 ## Combinations
 | Interaction | Implemented in | Check (`--tender-combo-check` unless noted) |
