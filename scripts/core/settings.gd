@@ -12,9 +12,7 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
+	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -150,7 +148,6 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
@@ -159,10 +156,13 @@ const ACTIONS := [
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
+	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
+	["kin_chase", "Boki quick key: Chase"], ["kin_guard", "Boki quick key: Guard"],
+	["kin_return", "Boki quick key: Return"], ["kin_follow", "Boki quick key: Follow"],
 ]
 
 var v: Dictionary = {}
@@ -498,13 +498,9 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	_put(sl, slot, s)
+	sl[slot] = s
+	if sl[1 - slot] == s: sl[1 - slot] = ""
 	_set_slots(action, sl)
-
-## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
-func _put(sl: Array, slot: int, code: String) -> void:
-	sl[slot] = code
-	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -526,28 +522,21 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
-	["details", "summon"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
-## what `action` had there instead, so none of them loses a key.
-func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
+## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
+## `action` had there.
+func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
 	var mine := slots(action)
-	var old: String = mine[slot]
-	_put(mine, slot, ev_code(ev))
-	for o in owners:
-		var theirs := slots(o[0])
-		_put(theirs, o[1], old)
-		_set_slots(o[0], theirs)
+	var theirs := slots(other)
+	theirs[other_slot] = mine[slot]
+	mine[slot] = ev_code(ev)
+	_set_slots(other, theirs)
 	_set_slots(action, mine)
-
-## True when an action has no key at all (the Controls page marks it red).
-func unbound(action: String) -> bool:
-	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")

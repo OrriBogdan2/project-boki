@@ -3,7 +3,7 @@ extends RefCounted
 ## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
-## launches straight up and hangs there invulnerable while a pink range ring with a glowing centre shows round
+## launches straight up and hangs there invulnerable while a pink range ring and its dark interior show round
 ## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
 ## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
 ## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink lightning
@@ -21,7 +21,6 @@ const RAY_FINE := 8              # the last step, cut this many times
 const RAY_ABOVE := 12.0          # m: the ray is walked from this far above the take-off...
 const RAY_BELOW := 12.0          # ... to this far below it
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
-const DUST := Color("c9b48a")
 
 var kit: MageKit
 var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free, disc}
@@ -193,12 +192,11 @@ func _take_off() -> void:
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
-	kit.m.fx.burst(from + Vector3(0, 0.2, 0), DUST, 18, 3.5, 0.5, 2.0, 1.4)
+	kit.m.fx.dust(from, 6)
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
-	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK, true, true)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
+	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
@@ -243,8 +241,8 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The range ring (everyone sees where she can come down) and the crown at the cursor (her own), as big as
-## the strike's hit area.
+## The range ring with its gold rim (everyone sees where she can come down), the dark inside, and the gold
+## crown at the cursor (her own).
 func _aim_tick() -> void:
 	var h := kit.h
 	var from: Vector3 = leap["from"]
@@ -252,7 +250,7 @@ func _aim_tick() -> void:
 	leap["land"] = land_point()
 	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
 	AimKit.circle(h, "x_ring", ring)
-	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
+	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
 	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
@@ -278,20 +276,16 @@ func _slam() -> void:
 	_next(FALL)
 	kit.play("mage_x_dive")
 	AimKit.hide(kit.h, "x_aim")
-	_mark(land, 0.0)
-	kit.fx().ring(land, float(data()["radius"]), MageKit.PINK, MageKit.TEAL, 0.15)
-	kit.net_ring(land, float(data()["radius"]), MageKit.PINK)
-
-## The landing marker everyone sees: it fills over the drop and is full on the frame she strikes.
-func _mark(land: Vector3, fill: float) -> void:
-	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "fill": fill}
+	# the landing marker flashes on the spot a beat before she arrives (everyone sees it)
+	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
 	mark.merge({"col": MageKit.PINK, "col2": MageKit.PINK, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
+	kit.fx().ring(land, float(data()["radius"]), MageKit.PINK, MageKit.TEAL, 0.15)
+	kit.net_ring(land, float(data()["radius"]), MageKit.PINK)
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
 func _fall_tick(u: float) -> void:
 	var h := kit.h
-	_mark(leap["land"], u)
 	var a: Vector3 = leap["high"]
 	var b: Vector3 = leap["land"]
 	h.vel = Vector3.ZERO
@@ -308,7 +302,6 @@ func _strike() -> void:
 	var xd := data()
 	var at: Vector3 = leap["land"]
 	var r := float(xd["radius"])
-	AimKit.hide(h, "x_land")
 	h.teleport(at)
 	h.vel = Vector3.ZERO
 	if h.model:
