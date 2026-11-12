@@ -7,7 +7,7 @@ extends "res://tools/displace_net_check.gd"
 ## id and HunterAnim's), compared per cast. Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
 ## Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a Boss fed
 ## by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
-## LAG_TOL, its wind-up starting near its start (the progress comes off the synced start time).
+## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -105,7 +105,7 @@ func _boss(kind: String, atk: String) -> void:
 	ok(cmp["bad"] == "", "%s: the guest's copy plays the same moves, in order, within %.1f s (worst %.2f s)" % [
 		kind, LAG_TOL, cmp["lag"]], str(cmp["bad"]))
 	var first := _first_k(theirs, atk + "_windup")
-	ok(first >= 0.0 and first < 0.4, "%s: the copy's %s starts near its start (progress off synced time)" % [
+	ok(first >= 0.0 and first < 0.4, "%s: the copy's %s starts near its start (progress from the synced age)" % [
 		kind, atk + "_windup"], "k at first sight %.2f" % first)
 	b.queue_free()
 	m.mobs.erase(b)

@@ -1,9 +1,10 @@
 class_name BossNet
 extends RefCounted
-## What a lair boss shows on its body but the monster snapshot does not carry: the attack under way (and when it
-## began), asleep or awake, the phase, enraged. The host sends one "bat" event when any of them changes, never
+## What a lair boss shows on its body but the monster snapshot does not carry: the attack under way (and how long
+## ago it began), asleep or awake, the phase, enraged. The host sends one "bat" event when any of them changes, never
 ## per frame (about 35 bytes a change, an attack every second or two). A remote game builds a real Boss (make),
-## applies the event (net_in) and reads the wind-up's progress off the synced start time (advance), so
+## applies the event (net_in) and counts the wind-up's progress from the synced age on its own frame time (advance;
+## the match clocks of two games drift up to 0.5 s apart, so a start time would show the strike late), so
 ## BossAnim poses it as it does on the host. Net.VERSION 0.24.6.
 
 const ATKS := ["", "phase", "slam", "boulders", "fissure", "dash", "storm", "static", "spit", "lob", "brood", "burrow"]
@@ -25,7 +26,7 @@ static func watch(b: Boss) -> void:
 	if b.has_meta("bat") and b.get_meta("bat") == key:
 		return
 	b.set_meta("bat", key)
-	b.m.net_event(["bat", b.nid, ATKS.find(b.atk), key[1], b.phase, flags, key[4]])
+	b.m.net_event(["bat", b.nid, ATKS.find(b.atk), snappedf(b.atk_t, 0.01), b.phase, flags, key[4]])
 
 ## A remote game: take the host's event.
 static func net_in(m: Match, x: Array) -> void:
@@ -34,7 +35,7 @@ static func net_in(m: Match, x: Array) -> void:
 		return
 	var woke := (int(x[5]) & F_DORMANT) == 0 and b.dormant
 	b.atk = String(ATKS[int(x[2])]) if int(x[2]) >= 0 and int(x[2]) < ATKS.size() else ""
-	b.atk_began = float(x[3])
+	b.atk_t = float(x[3])      # (how far into the attack the host was when it sent)
 	b.phase = int(x[4])
 	b.dormant = (int(x[5]) & F_DORMANT) != 0
 	b.enraged = (int(x[5]) & F_ENRAGED) != 0
@@ -46,4 +47,4 @@ static func net_in(m: Match, x: Array) -> void:
 static func advance(b: Boss, delta: float) -> void:
 	b.awake_t += delta
 	if b.atk != "":
-		b.atk_t = maxf(0.0, b.m.time - b.atk_began)
+		b.atk_t += delta
