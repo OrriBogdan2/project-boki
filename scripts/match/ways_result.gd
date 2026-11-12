@@ -84,6 +84,28 @@ static func reward_line(hb: Dictionary) -> String:
 		parts.append("%d %s" % [int(hb["goods"][g]), String(g).capitalize()])
 	return "Heart reward: %s." % ", ".join(parts) if not parts.is_empty() else ""
 
+## What the Heart seat you did not take pays (rules "reward"), for a Heart exit only: the early seat names the
+## final one (and when it opens), the final seat names the early one.
+static func other_line(how: String) -> String:
+	var rl := Heart.rules()
+	var early := how == Heart.HOW_EARLY
+	if not early and how != Heart.HOW_FINAL:
+		return ""
+	var rw: Dictionary = rl["reward"]["major" if early else "minor"]
+	var parts: Array = ["%d gems" % int(rw["gems"])]
+	if bool(rw["egg"]):
+		parts.append("a Rare Egg")
+	var seeds := 0
+	for n in (rw["seeds"] as Dictionary).values():
+		seeds += int(n)
+	parts.append("%d seeds" % seeds)
+	for g in rw["goods"]:
+		parts.append("%d %s" % [int(rw["goods"][g]), String(g).capitalize()])
+	var seat := "The early seat (the Gate)"
+	if early:
+		seat = "The final seat (%d:%02d, one squad)" % [int(rl["final_s"]) / 60, int(rl["final_s"]) % 60]
+	return "%s would have paid: %s." % [seat, ", ".join(parts)]
+
 ## One Boki you left behind, in one line.
 static func boki_line(news: Dictionary) -> String:
 	var boki := String((news["kin"] as Dictionary)["name"])
