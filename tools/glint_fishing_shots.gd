@@ -31,8 +31,11 @@ func run(main: Node, dir: String) -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	home.talk_cd = 1.0e9
-	home.cam.zoom_to = 0.5
-	home.cam.zoom = 0.5
+	home.cam.zoom_to = 0.3
+	home.cam.zoom = 0.3
+	home.cam.yaw = -PI * 0.5      # from the side, the rod not behind the cloak or Hob
+	home.cam.yaw_to = -PI * 0.5
+	home.root_ui.visible = false
 	if main.fade: main.fade.reveal(0.05)
 	var vp := main.get_viewport()
 	var at := vp.get_camera_3d().unproject_position(home.player.global_position + Vector3(0, 0.9, 0))
