@@ -68,7 +68,8 @@ func inb(x: int, z: int) -> bool:
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	if not inb(ix, iz):
 		return VOID
 	var i := idx(ix, iz)
@@ -86,11 +87,13 @@ func is_void(x: float, z: float) -> bool:
 	return ground_at(x, z) <= VOID + 1.0
 
 func is_block(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and kind[idx(ix, iz)] == T_BLOCK
 
 func island_of(x: float, z: float) -> int:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	if not inb(ix, iz):
 		return -1
 	return island[idx(ix, iz)]
@@ -181,7 +184,8 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 
 ## Is (x, z) on a flight of stairs? Its ground is a slope (rising LEVEL per metre), not a wall or a ledge.
 func on_stairs(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and stairs.has(idx(ix, iz))
 
 ## How far the ground may rise or fall between (x0, z0) and (x, z) and still be one walkable slope: the stairs'
@@ -676,7 +680,8 @@ func vis_texture() -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 func in_bush(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and (bush.has(idx(ix, iz)) or live_bush.has(idx(ix, iz))) and kind[idx(ix, iz)] == T_GROUND
 
 func _edge_cell_toward(isl: int, target: Vector2, avoid: Array = [], spacing := PAD_SPACING) -> Vector2i:
