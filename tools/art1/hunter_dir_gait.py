@@ -14,10 +14,12 @@ shin's tail) and turns with the shin. On a Hunter whose walk_f/run_f still lean 
 foot_mps pair as the speeds, so every direction gets the forward loop's rate and stride in game.
 A direction written "b+" keeps the shipped loop instead (restride): only its feet are pushed along the move until a
 planted sole travels at the loco speed, for a hand-keyed loop whose look wins but whose feet slide.
-  blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED [DIRS WALK_S RUN_S SIZE CYCLES TURN]
+  blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED [DIRS WALK_S RUN_S SIZE CYCLES TURN GAITS]
 SIZE: game metres per model metre (Albert's breaker.glb is 2.0); the metre constants below are game metres.
 CYCLES: WALK,RUN left + right pairs a loop (Albert's 14 cm legs walk 2,1: a half-length step in the forward loop's time).
 TURN: deg, the pelvis's most turn into the move (Albert 55: a side run his legs can reach).
+GAITS: the rings to build, "walk,run" by default; "crouch" builds crouch_<dir> from crouch_f/b/l/r at crouch_f's own
+planted sole speed and length, so the sneak ring's diagonals step in time with it (docs/art/LOCO_DIR.md).
   python3 tools/art1/glb_add_clips.py SRC.glb OUT.glb walk_b,walk_l,...,run_br
 (glb_add_clips matches by prefix: "run_b" also replaces run_bl/run_br, so add the b clips before the diagonals.)"""
 import math
@@ -33,6 +35,8 @@ LENGTH = {"walk": float(MORE[1]) if len(MORE) > 1 else 0.0, "run": float(MORE[2]
 CYCLES = dict(zip(("walk", "run"), map(int, (MORE[4] if len(MORE) > 4 else "1,1").split(","))))   # pairs a loop, in step
 SIZE = float(MORE[3]) if len(MORE) > 3 else 1.0    # game metres per model metre: every length below is in model metres
 SPEED = {"walk": float(WALK) / SIZE, "run": float(RUN) / SIZE}   # warden_anim loco, game m/s
+GAITS = (MORE[6] if len(MORE) > 6 else "walk,run").split(",")   # the rings to build: walk, run, crouch
+LENGTH["crouch"], CYCLES["crouch"] = 0.0, 1      # (the crouch ring keeps crouch_f's length and its sole speed, below)
 FPS = 48            # keys per second
 CONTACT = 0.012 / SIZE   # m: a sole vert this close to the floor is planted
 TURN = float(MORE[5]) if len(MORE) > 5 else 40.0   # deg: the most the pelvis turns into the move, the chest keeps the source's
@@ -58,7 +62,17 @@ scene.render.fps = FPS
 bpy.ops.import_scene.gltf(filepath=SRC)
 arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
 FOOT_BONE = "x_foot" if "x_foot.L" in arm.data.bones else "foot"   # (Albert's feet are x_ bones: the game leaves them to his clips)
-HAS_FOOT = FOOT_BONE + ".L" in arm.data.bones     # (no foot bone, Kael: the foot is skinned to the shin and turns with it)
+
+
+def skinned(group):
+    """Whether any mesh has verts mostly on this vertex group."""
+    return any(group in o.vertex_groups and any(e.group == o.vertex_groups[group].index and e.weight > 0.3
+                                                 for v in o.data.vertices for e in v.groups)
+               for o in bpy.data.objects if o.type == "MESH")
+
+
+# (no foot bone, Kael, or no verts on it, Albert's appeal3 body: the foot is skinned to the shin and turns with it)
+HAS_FOOT = FOOT_BONE + ".L" in arm.data.bones and skinned(FOOT_BONE + ".L")
 LEGS = ("thigh", "shin", FOOT_BONE) if HAS_FOOT else ("thigh", "shin")
 LEG_BONES = ["%s.%s" % (n, s) for n in LEGS for s in "LR"]
 FOOT_GROUP = FOOT_BONE if HAS_FOOT else "shin"
@@ -462,11 +476,13 @@ def measure(name, src, speed):
 
 
 made = []
-for gait in ("walk", "run"):
+for gait in GAITS:
     shipped = {k: read("%s_%s" % (gait, k)) for k in "fblr"}
     fwd = shipped["f"]
     print("FWD %s_f %d keys floor %.3f strike %d lift %d duty %.2f swing %.3f" % (
         gait, fwd["n"], fwd["floor"], fwd["strike"], fwd["lift_at"], fwd["duty"], fwd["swing"]))
+    if gait == "crouch":     # (the sneak's speed is data tuned to crouch_f: every new loop runs at its sole's speed)
+        SPEED[gait] = measure("crouch_f", fwd, 0.0)
     planted = {k: measure("%s_%s" % (gait, k), shipped[k], SPEED[gait]) for k in shipped}
     for k in BUILD:
         if k.endswith("+"):

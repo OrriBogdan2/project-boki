@@ -2,11 +2,15 @@ extends RefCounted
 ## --loco-dir-check [--wardens=a,b] [--json=<file>]: every Hunter's legs in every direction (docs/art/LOCO_DIR.md).
 ## Per Hunter with clips, through the game's own path (HunterAnim -> WardenClips, fixed steps, no physics), each state
 ## of STATES moves the model in the 8 directions of DIRS off its facing and reads the shin-tip ankles:
+## A foot is its sole: a heel point under the ankle and a toe point ahead of it on the rest pose's ground, riding the
+## foot bone (the shin on a rig without one); the lower of the two is the one on the floor, so a heel-to-toe roll over a
+## pinned sole reads as planted, not as a slide.
 ##  - DIR: a planted foot must travel back against the move (the clip plays the way he goes: no forward loop walking
 ##    backwards, no mirrored side loop). The angle between the planted feet's mean travel and the move, at most DIR_MAX.
 ##  - SKATE / SLIP: the planted feet carry the ground back at FOOT_K of the speed or more, and slip over it (the body's
 ##    velocity plus the foot's own, flat) at most SLIP_K of the speed (SLIP_MIN m/s for the slow crouch).
-##  - SNAP: starting and stopping (and crouch-walk to crouch idle) no point jumps: a frame's change of velocity of the
+##  - SNAP: starting and stopping (and crouch-walk to crouch idle) at the game's own rates (HunterMove accel to the
+##    speed, HunterMove.brake to a stop) no point jumps: a frame's change of velocity of the
 ##    hips, head, hands or ankles at most SNAP_K x the steady loop's worst, and at least SNAP_MIN.
 ## Prints a grid (one row per Hunter and state, one cell per direction: "ok" or the first failed test) and a FAIL line
 ## per failed cell; exit 1 on any. A Hunter in FLAT or with no clips is listed, skipped.
@@ -32,12 +36,14 @@ const SLIP_MIN := 0.45       # m/s: the slip bar never goes under this (a slow c
 const SNAP_K := 2.5          # x the steady loop's worst change of velocity in one frame
 const SNAP_MIN := 0.06       # m per frame per frame (at 60 fps): a change this small is never a snap
 const IDLE_SLIP := 0.25      # m/s: crouched still, a foot drifts at most this (mean, over the hold)
+const PLANT_BAND := 0.1     # a sole is planted in the lowest 10 % of its height range (the sole sits on the floor)
 const FLAT := ["ostra"]      # Motley rides his spring: no steps to read
-const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
+const POINTS := ["hips", "head", "hand.L", "hand.R", "heel.L", "heel.R", "toe.L", "toe.R"]
 
 var bad := 0
 var holder: Node3D
 var rows := {}
+var soles := {}              # side -> [bone index, heel and toe in that bone's frame]: the sole, as the rest pose stands
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -76,7 +82,9 @@ func _hero(main: Node, id: String) -> void:
 	sync.set_process(false)     # (only the fixed steps below move the clips)
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var clips: WardenClips = sync.get("clips")
+	_soles(sk)
 	var top := float(HunterMove.of(id)["speed"])
+	var accel := float(HunterMove.of(id)["accel"])
 	var walk := float(clips.d["loco"].get("walk_speed", 2.2))
 	var speed := {"walk": walk, "run": (walk + top) / 2.0, "sprint": top, "crouch_walk": top * CROUCH_K,
 			"crouch_idle": top * CROUCH_K, "strafe": top, "aim_walk": walk}
@@ -87,7 +95,7 @@ func _hero(main: Node, id: String) -> void:
 		var cells := {}
 		var line := []
 		for dir in DIRS:
-			var c := _cell(m, a, sync, sk, String(st), deg_to_rad(DIRS[dir]), float(speed[st]))
+			var c := _cell(m, a, sync, sk, String(st), deg_to_rad(DIRS[dir]), float(speed[st]), accel)
 			cells[dir] = c
 			line.append("%-5s" % c["verdict"])
 			if c["verdict"] != "ok":
@@ -98,32 +106,41 @@ func _hero(main: Node, id: String) -> void:
 	rows[id] = row
 	m.free()
 
-## One state and direction: start from a standstill, hold the move, stop. `rel` rad off the facing (+ his right).
-func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel: float, spd: float) -> Dictionary:
+## One state and direction: start from a standstill at `accel` m/s^2, hold the move, brake to a stop. `rel` rad off the facing (+ his right).
+func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel: float, spd: float,
+		accel: float) -> Dictionary:
 	var ck := 1.0 if st.begins_with("crouch") else 0.0
 	var swing := AIM_SWING if st in ["strafe", "aim_walk"] else 0.0
 	var t := 0.0
 	for k in int(0.6 / DT):     # stand (or crouch) still first
 		_tick(m, a, sync, Vector3.ZERO, 0.0, ck)
 	var fr: Array = []
+	var v := 0.0
 	for k in int((WARM_S + SAMPLE_S) / DT):
 		var face := swing * sin(TAU * AIM_HZ * t)
-		_tick(m, a, sync, _vel(face + rel, spd), face, ck)
-		fr.append(_read(m, sk, _vel(face + rel, spd)))
+		v = move_toward(v, spd, accel * DT)
+		_tick(m, a, sync, _vel(face + rel, v), face, ck)
+		fr.append(_read(m, sk, _vel(face + rel, v)))
 		t += DT
+	var cl: WardenClips = sync.get("clips")
+	var rate: float = cl.tree.get("parameters/%s/scale" % ("crouch_rate" if ck > 0.0 else "loco_rate"))
 	var stop: Array = []
 	for k in int((SETTLE_S + 1.0) / DT):
-		_tick(m, a, sync, Vector3.ZERO, swing * sin(TAU * AIM_HZ * t), ck)
-		stop.append(_read(m, sk, Vector3.ZERO))
+		var face := swing * sin(TAU * AIM_HZ * t)
+		v = HunterMove.brake(Vector2(v, 0.0), 1.0, DT).x
+		_tick(m, a, sync, _vel(face + rel, v), face, ck)
+		stop.append(_read(m, sk, _vel(face + rel, v)))
 		t += DT
 	m.rotation.y = 0.0
 	var steady := fr.slice(int(WARM_S / DT))
 	var out := _gait(steady, spd)
-	var cl: WardenClips = sync.get("clips")
-	out["rate"] = cl.tree.get("parameters/%s/scale" % ("crouch_rate" if ck > 0.0 else "loco_rate"))
-	var calm := _jerk(steady)
-	var snap := maxf(_jerk(fr.slice(0, int(SETTLE_S / DT))), _jerk(stop.slice(0, int(SETTLE_S / DT))))
+	out["rate"] = rate
+	var calm: float = _jerk(steady)[0]
+	var start := _jerk(fr.slice(0, int(SETTLE_S / DT)))
+	var halt := _jerk(stop.slice(0, int(SETTLE_S / DT)))
+	var snap := maxf(start[0], halt[0])
 	out["snap"] = snap
+	out["snap_at"] = "start %s" % start[1] if start[0] >= halt[0] else "stop %s" % halt[1]
 	out["snap_bar"] = maxf(calm * SNAP_K, SNAP_MIN)
 	out["verdict"] = "ok"
 	out["why"] = ""
@@ -141,7 +158,7 @@ func _cell(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, st: String, rel
 			100.0 * out["carry"], 100.0 * FOOT_K])
 	_judge(out, out["slip"] > slip_bar, "SLIP", "planted feet slip %.2f m/s at %.2f m/s (bar %.2f)" % [out["slip"], spd,
 			slip_bar])
-	_judge(out, snap > out["snap_bar"], "SNAP", "start or stop jumps %.3f (bar %.3f, steady %.3f)" % [snap,
+	_judge(out, snap > out["snap_bar"], "SNAP", "%s jumps %.3f (bar %.3f, steady %.3f)" % [out["snap_at"], snap,
 			out["snap_bar"], calm])
 	return out
 
@@ -164,13 +181,35 @@ func _read(m: Node3D, sk: Skeleton3D, vel: Vector3) -> Dictionary:
 	var xf := sk.global_transform
 	for b in ["hips", "head", "hand.L", "hand.R"]:
 		out[b] = xf * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
-	for side in ["L", "R"]:     # the ankle: the shin's tip (every rig has shins; Kael has no foot bone)
-		var shin := WardenSkeleton.find(sk, "shin." + side)
-		var gs := sk.get_bone_global_pose(shin)
-		var leg := (sk.get_bone_global_rest(shin).origin - sk.get_bone_global_rest(WardenSkeleton.find(sk,
-				"thigh." + side)).origin).length()
-		out["foot." + side] = xf * (gs.origin + gs.basis.y.normalized() * leg)
+	for side in soles:
+		var gs := sk.get_bone_global_pose(soles[side][0])
+		var heel: Vector3 = xf * (gs * (soles[side][1] as Vector3))
+		var toe: Vector3 = xf * (gs * (soles[side][2] as Vector3))
+		out["heel." + side] = heel
+		out["toe." + side] = toe
+		out["foot." + side] = heel if heel.y <= toe.y else toe
 	return out
+
+## The heel and toe of each foot in its bone's frame, from the rest pose: under the ankle (the foot bone's head, or
+## the shin's tip) on the ground, and ahead of it by the ankle's height.
+func _soles(sk: Skeleton3D) -> void:
+	soles = {}
+	for side in ["L", "R"]:
+		var shin := WardenSkeleton.find(sk, "shin." + side)
+		var bi := shin
+		for nm in ["foot.", "x_foot."]:
+			if WardenSkeleton.find(sk, nm + side) >= 0:
+				bi = WardenSkeleton.find(sk, nm + side)
+				break
+		var rest := sk.get_bone_global_rest(bi)
+		var ankle := rest.origin
+		if bi == shin:
+			var thigh := sk.get_bone_global_rest(WardenSkeleton.find(sk, "thigh." + side)).origin
+			ankle = rest.origin + rest.basis.y.normalized() * (rest.origin - thigh).length()
+		var ground := minf(ankle.y, 0.0)
+		var heel := Vector3(ankle.x, ground, ankle.z)
+		var toe := heel + Vector3(0, 0, -maxf(ankle.y - ground, 0.04))     # (the model faces -Z)
+		soles[side] = [bi, rest.affine_inverse() * heel, rest.affine_inverse() * toe]
 
 ## The planted feet over a steady stretch: how far their mean travel points off the move (deg), what share of the
 ## speed they carry back along it, and their mean slip over the ground (m/s).
@@ -186,9 +225,10 @@ func _gait(fr: Array, spd: float) -> Dictionary:
 			lo = minf(lo, (p[f] as Vector3).y)
 			hi = maxf(hi, (p[f] as Vector3).y)
 		for i in range(1, fr.size() - 1):
-			if (fr[i][f] as Vector3).y > lo + AUDIT.PLANT_BAND * maxf(hi - lo, 0.02):
+			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
 				continue
-			var fv: Vector3 = ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * DT)
+			var pt: String = ("heel" if (fr[i][f] as Vector3) == fr[i]["heel" + f.substr(4)] else "toe") + f.substr(4)
+			var fv: Vector3 = ((fr[i + 1][pt] as Vector3) - (fr[i - 1][pt] as Vector3)) / (2.0 * DT)
 			var vel: Vector3 = fr[i]["vel"]
 			carry += Vector2(-fv.x, -fv.z)
 			move += Vector2(vel.x, vel.z)
@@ -199,20 +239,21 @@ func _gait(fr: Array, spd: float) -> Dictionary:
 	var off := rad_to_deg(absf(carry.angle_to(move))) if carry.length() > 0.001 else 180.0
 	return {"off_deg": off, "carry": carry.dot(move.normalized()) / n / spd, "slip": slip / n}
 
-## The largest change of velocity of any point in one frame (m per frame per frame).
-func _jerk(fr: Array) -> float:
-	var worst := 0.0
+## The largest change of velocity of any point in one frame (m per frame per frame), and "<point> f<frame>".
+func _jerk(fr: Array) -> Array:
+	var worst := [0.0, ""]
 	for i in range(1, fr.size() - 1):
 		for b in POINTS:
 			var acc: Vector3 = (fr[i + 1][b] as Vector3) - 2.0 * (fr[i][b] as Vector3) + (fr[i - 1][b] as Vector3)
-			worst = maxf(worst, acc.length())
+			if acc.length() > worst[0]:
+				worst = [acc.length(), "%s f%d" % [b, i]]
 	return worst
 
 ## Mean flat speed of the feet while he stands (m/s): nothing should move them.
 func _drift(fr: Array) -> float:
 	var sum := 0.0
 	var n := 0
-	for f in ["foot.L", "foot.R"]:
+	for f in ["heel.L", "heel.R", "toe.L", "toe.R"]:
 		for i in range(1, fr.size()):
 			var d: Vector3 = (fr[i][f] as Vector3) - (fr[i - 1][f] as Vector3)
 			sum += Vector2(d.x, d.z).length() / DT

@@ -147,6 +147,7 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) -> Dictionary:
 	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true})
 	clips.loco_pos = Vector2.ZERO
+	clips.loco_v = Vector2.ZERO
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
 	var fr: Array = []

@@ -13,7 +13,7 @@ extends RefCounted
 const LEG_BONES := ["thigh.L", "thigh.R"]
 const MEAN_TAU := 0.8        # s: the running mean a stride or an arm swing is scaled around
 const RATE_MIN := 0.6        # x: slowest the walk and run clips play
-const RATE_MAX := 1.4        # x: fastest
+const RATE_MAX := 1.8        # x: fastest (a short-legged ring at full stick: its soles keep up with the ground)
 const FADE_RATE := 8.0       # 1/s: the gait layer in and out
 
 var skel: Skeleton3D
@@ -37,12 +37,11 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
 
 ## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
-## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, tools/anim_audit.gd), between the
-## rings at "walk_speed" and "run_speed".
-func plan(spd: float, lc: Dictionary) -> float:
+## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, in game: tools/loco_dir_check.gd),
+## `t` 0..1 how far the blend is from the walk ring to the run ring (WardenClips holds one, and moves between them).
+func plan(spd: float, lc: Dictionary, t: float) -> float:
 	var walk := float(lc.get("walk_speed", 2.2))
 	var run := float(lc.get("run_speed", 4.6))
-	var t := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [walk, run])
 	gain = lerpf(float(stride[0]), float(stride[1]), t)
