@@ -44,6 +44,49 @@ func _gather(home, at: Vector3) -> void:
 		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 
+## The rivalry beat (BaseRival, garden_sim.json rivalry): rivals passing close turn, huff and walk on, once a
+## cooldown, and never play tag; a pair that is not rivals does nothing.
+func _rival_beat(home) -> void:
+	var R: Dictionary = BaseRival.rules()
+	var a: Dictionary = home.kins[0]
+	var b: Dictionary = home.kins[1]
+	var c: Dictionary = home.kins[2]
+	home.day_t = 0.4
+	home.life.night = false
+	for k in [a, b, c]:
+		for key in ["rival_cd", "play", "eat", "nap_t", "life_at", "life_rival"]:
+			k.erase(key)
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	b["pos"] = a["pos"] + Vector3(float(R["pass_m"]) * 0.5, 0, 0)
+	c["pos"] = a["pos"] + Vector3(-float(R["pass_m"]) * 0.5, 0, 0)
+	BaseLife.add_bond(a["rec"], b["rec"], -1.0 - BaseLife.bond(a["rec"], b["rec"]))
+	BaseLife.add_bond(a["rec"], c["rec"], 0.0 - BaseLife.bond(a["rec"], c["rec"]))
+	var heard := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
+		+ int(GardenSfx.heard.get("garden_sulk_large", 0))
+	home.life.step(0.2)
+	var fa: Fsm = a["life"]
+	var fb: Fsm = b["life"]
+	var facing := is_same(a["life_at"], b) and is_same(b["life_at"], a)
+	ok(fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
+		"rivals passing within %.1f m both turn to each other (React)" % float(R["pass_m"]))
+	ok(float(a["huff_t"]) > 0.0 and float(b["huff_t"]) > 0.0, "both play the growl clip")
+	var after := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
+		+ int(GardenSfx.heard.get("garden_sulk_large", 0))
+	ok(after == heard + 2, "each huffs through the garden SFX (%d cues)" % (after - heard))
+	ok((c["life"] as Fsm).is_in(BaseLife.S.ROAM), "a Boki that is not a rival is left alone")
+	var gap := BaseLife._dist(a, b)
+	for i in int(float(R["beat_s"]) / 0.1) + 2:
+		home.life.step(0.1)
+	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"), 
+		"the beat ends in %.1f s" % float(R["beat_s"]))
+	ok(Vector2(a["goal"].x - b["pos"].x, a["goal"].z - b["pos"].z).length() > gap, "it walks on, away from the other")
+	home.life.step(0.2)
+	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(R["cooldown_s"]))
+	for k in [a, b]:
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	home.life._tag(a, b)
+	ok(not fa.is_in(BaseLife.S.PLAY_WITH) and not fb.is_in(BaseLife.S.PLAY_WITH), "rivals never play tag together")
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -118,6 +161,7 @@ func run(m: Node) -> void:
 	ok(pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames])
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
+	_rival_beat(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

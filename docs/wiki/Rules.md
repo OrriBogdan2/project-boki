@@ -840,6 +840,8 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | skill | 0.1 |
 | slope | 1.5 |
 | rival_spread | 0.15 |
+| rivalry | {"pass_m": 3.0, "beat_s": 1.6, "walk_s": 3.0, "walk_m": 4.0, "cooldown_s": 40.0, "win_step": 0.15} |
+| rivalry_doc | Farm rivals (scripts/home/base_rival.gd, GARDEN.md section 4): two free roaming rivals (bond at or below base_life rival_at) within pass_m m turn to each other for beat_s s (React, a huff and a growl), then walk walk_m m away for walk_s s; a pair does not do it again for cooldown_s s. A garden game two Boki win together (the Relay Cup team) adds win_step to their bond, so a rivalry can become a friendship over days. |
 | win_doc | assume: win chance = 0.5 + skill + slope x (1 - rival ratio), clamped 0.1..0.9. Daily rivals are the player's stat for that game times 1 +- rival_spread; cup rivals use garden_prizes cup min_ratio. |
 | game_stats | {"dash": ["speed"], "shove": ["power", "guard"], "seek": ["focus"], "volley": ["focus", "speed"]} |
 | zones | {"bramblebank": {"game": "dash", "golden": ["keepstone", "shellbark_chew", "bramble_honey", "twinbun", "stayleaf"]}, "cinderstep": {"game": "shove", "golden": ["thumpnut", "bristlethorn", "cinderbrittle", "dare_pepper"]}, "glasswater": {"game": "volley", "golden": ["glassdew", "rinse_melon", "lullwort_tea"]}, "hushwood": {"game": "seek", "golden": ["puzzlenut", "hush_truffle", "glowmoss_sprig", "peekbox"]}} |

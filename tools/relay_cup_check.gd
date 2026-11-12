@@ -139,7 +139,12 @@ func _cup() -> void:
 	var gems := int(Save.d["gems"])
 	var r := _relay(mine, BaseRelay.rivals(mine, BaseRelay.cup_round(anchor)["min_ratio"]), 5, "great")
 	r.done_t = [30.0, 31.0]       # settle a win
+	var rival_bond := -0.8
+	BaseLife.add_bond(mine[0], mine[2], rival_bond)      # the first and last runner never hand off to each other
 	var res := BaseRelay.settle(r, anchor)
+	var step := BaseLife.bond(mine[0], mine[2]) - rival_bond
+	ok(res["won"] and is_equal_approx(step, float(BaseRival.rules()["win_step"])),
+		"a win together raises each pair's bond by the rivalry win_step")
 	ok(res["won"] and int(Save.d["gems"]) == gems + int(BaseRelay.rules()["gems_win"]), "a win pays the relay's gems")
 	ok(not res["prize"]["items"].is_empty() and res["prize"]["round"] == "Sprout"
 			and GardenPrizes.stage(anchor, "relay") == 1,

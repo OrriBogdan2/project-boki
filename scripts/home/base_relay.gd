@@ -175,6 +175,8 @@ static func settle(run: Run, anchor: Dictionary) -> Dictionary:
 		else:
 			Care.change(rec, "joy", float(RR["lose_joy"]))
 			Save.remember(rec, "relay", "lost the Relay Cup to the %s" % R["rival_team"])
+	if won:
+		BaseRival.won_together(mine)
 	for i in run.grades.size():
 		if run.grades[i] == "great" or BaseDuo.friends(mine[i], mine[i + 1]):
 			BaseRace.nudge_bond(mine[i], mine[i + 1], float(R["close_step"]))
