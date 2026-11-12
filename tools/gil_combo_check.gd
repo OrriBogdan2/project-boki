@@ -1,12 +1,13 @@
 extends "res://tools/hero_pair_check.gd"
-## --gil-kit-check: Gil, the Novice Mage (content/archetypes/gil.json, scripts/arch/kits/gil_kit.gd), on a training
-## dummy through the real match code: the Fencer chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each
-## vial's effect, hold range, the air drop), Fish Out of Water (three marks Beach), Ground Swim (hittable, surfacing
-## knocks up), Riptide (spin damage, the spout's knockup, longer spin = wider spout) and Tidal Wave (untargetable,
-## knockup then slow, lands with a shield) and its telegraphs (AimKit, seen by everyone, no Fx node of their own).
-## Last, his sound set: every move and phase that ran plays a sound of its own (content/vfx/gil.json, made by
-## tools/gen_sfx_gil.py), none shared with another move or the stock set. Each cast plays its own move, and every
-## move but the dive has his clip.
+## --gil-combo-check (old name --gil-kit-check): Gil, the Novice Mage (content/archetypes/gil.json,
+## scripts/arch/kits/gil_kit.gd), on a training dummy through the real match code: the Fencer chain (steps, third-hit
+## slow), the Grab Bag (the shuffled bag, each vial's effect, hold range, the air drop), Fish Out of Water (three marks
+## Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's knockup, longer spin = wider
+## spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield) and its telegraphs (AimKit, seen by
+## everyone, no Fx node of their own). Last, his sound set: every move and phase that ran plays a sound of its own
+## (content/vfx/gil.json, made by tools/gen_sfx_gil.py), none shared with another move or the stock set. Each cast plays
+## its own move, and every move but the dive has his clip. Then the dash-flow rows (content/dash_flow/gil.json,
+## tools/dash_flow_check.gd).
 
 var m: Match
 var P: Hunter
@@ -37,6 +38,9 @@ func run(main_node: Node) -> void:
 	_telegraphs()
 	_moves()
 	await done(m)
+	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "gil")
+	ok("dash flow: every row in content/dash_flow/gil.json holds, every slot casts mid-jump, holds through moves",
+		rows_bad == 0, "%d failures" % rows_bad)
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
