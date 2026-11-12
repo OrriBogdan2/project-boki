@@ -16,13 +16,16 @@ Hero live in `tools/art1/` (Kael is the pilot).
   don't collide.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
-  thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
-  and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
+  thighs about their running mean; `foot_mps` [walk, run] is the m/s the forward loops' planted soles run back at, at rate 1
+  with that stretch (`--anim-audit --fit-soles` fits it to the least slide), and the ground speed over it is the loops'
+  rate (0.3 to 3: WardenGait.rate, the one rule; a loop under 0.2 of its ring's speed glides and plays at the ground over
+  the ring's speed: Neve's skates, Motley's hover, Albert's sneak). The run ring shows from 1.3x `walk_speed`, back under
+  1.2x. `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time).
 - `hide_while_chain`: bones that shrink away while a kit sets the root meta `chain_out` (a runtime piece of the weapon).
-- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds; `cadence` (optional) plays the run clip that many times its planted-foot rate, blended in over the walk-to-run band (Cinder's scurry, 1.8).
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds; `cadence` (optional) pins the run loop's rate at `run_speed` to a source's footfalls, over its soles (Cinder's scurry 1.6, Kael's heavy run 1.5, Tarek's plod 0.85: their run feet slide).
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s: the sneak ring), `foot_mps` (its soles' speed at rate 1, as `loco.foot_mps`). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
@@ -50,8 +53,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   The clip is seeked to the kit's own `kmove_t` (times `rate`), so it can't drift from the hit. Clip length = the table's last key.
 - `recoil` {`deg`, `settle`}: every shot (the state's `fired` falling back to 0) kicks the arm bones and shoulder pieces up by `deg` degrees over whatever plays, settling in `settle` s (0.06-0.12); fast fire stacks to 1.5x. Only those bones move: the legs keep running, the shot's timing is the kit's. Vex 2 (the minigun, a shot every 0.12 s), Sable 3, Grimble 4. `--recoil-shots` films before/after strips.
 - A kmove with `"upper": "moving"` (Vex's shots, Tarek's boulder, wind and punch, Grimble's shot and throw, Sparkle's casts) rides the torso and arms only while the Hero moves, so the legs keep the walk or run; without it the clip owns the legs and the feet stop mid-stride. `--layer-verify --wardens=gunslinger,dolm,dredge,mage` (`--shots-dir=<dir>` for the strips) measures every layer over walk and run in four directions.
-- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds; `cadence` (optional) plays the run clip that many times its planted-foot rate, blended in over the walk-to-run band (Cinder's scurry 1.8, Kael's heavy run 1.5).
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds; `cadence` (optional): see above (the run's rate at `run_speed`, pinned to a source).
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s: the sneak ring), `foot_mps` (its soles' speed at rate 1, as `loco.foot_mps`). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `lead` (s: the clip starts that far in, so a late strike key lands on the kit's hit; under zero, its first frame is held that long)}.
   The clip is seeked to the kit's own `kmove_t` (plus the lead), so it can't drift from the hit. Clip length = the table's last key.

@@ -44,10 +44,7 @@
 			1.5,
 			1.2
 		],
-		"foot_mps": [
-			1.51,
-			5.16
-		],
+		"foot_mps": [2.96, 5.25],
 		"arm_swing": {
 			"L": 0.5,
 			"R": 0.5
@@ -65,7 +62,7 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 1.16
+		"speed": 1.16, "foot_mps": 1.31
 	},
 	"air": {
 		"rise": "jump",

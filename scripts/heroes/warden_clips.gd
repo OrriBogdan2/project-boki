@@ -49,7 +49,6 @@ const RECOIL_DECAY := 3.0    # e-folds over the data's "settle" (the kick is dow
 ## Bone -> its share of the kick: the gun arm, the support arm, the shoulder pieces (the HunterAnim PAD_FOLLOW)
 const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.55, "pauldron.L": 0.55}
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
-const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -257,11 +256,11 @@ func _build() -> AnimationNodeBlendTree:
 	bs.sync = bool(lc.get("in_step", false))      # (a ring baked on one length and strike key: every loop keeps time)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
+		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * WardenGait.WALK_R)
 		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
 	for k in ["fl", "fr", "bl", "br"]:            # (a Hero with its own diagonal loops: no half-speed blend of two)
 		var at: Vector2 = (dirs[k[0]] + dirs[k[1]]).normalized()
-		if lc["walk"].has(k): bs.add_blend_point(_anim(String(lc["walk"][k])), at * 0.45)
+		if lc["walk"].has(k): bs.add_blend_point(_anim(String(lc["walk"][k])), at * WardenGait.WALK_R)
 		if lc["run"].has(k): bs.add_blend_point(_anim(String(lc["run"][k])), at)
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
@@ -740,19 +739,12 @@ func _loco(s: Dictionary, dt: float) -> void:
 	# (the model faces -Z at yaw 0: forward and right of the facing)
 	var fw := Vector2(-sin(face), -cos(face))
 	var rt := Vector2(cos(face), -sin(face))
-	var run := float(lc.get("run_speed", 4.6))
-	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
-	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * gait.ring(spd, lc, STILL)
 	var blend := float(lc.get("blend_rate", LOCO_RATE))
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * blend))
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
-	# ("cadence": the run clip's rate over its planted feet, for a hero whose source scurries or plods; the walk
-	# keeps 1)
-	var walk := float(lc.get("walk_speed", 2.2))
-	rate *= lerpf(1.0, float(lc.get("cadence", 1.0)), clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
+	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos.length()) if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -828,4 +820,4 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
 	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, CROUCH_RATE_MAX) if spd >= STILL else 1.0)
+	_p("crouch_rate/scale", WardenGait.crouch_rate(spd, cr, crouch_pos.length()) if spd >= STILL else 1.0)

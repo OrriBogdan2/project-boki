@@ -52,10 +52,7 @@
 			1.35,
 			1.55
 		],
-		"foot_mps": [
-			3.1,
-			7.4
-		],
+		"foot_mps": [3.12, 7.73],
 		"arm_swing": {
 			"L": 0.5
 		}
@@ -230,7 +227,7 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 2.42, "foot_mps": 1.01
 	},
 	"carry_stow": ["x_weapon", "x_shield"],
 	"carry_fwd": 1.35,
