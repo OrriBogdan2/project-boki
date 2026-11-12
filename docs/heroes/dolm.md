@@ -289,12 +289,10 @@ Measured in game against `briefs/hero-ref/breah.md`. The task brief said one fra
 | E Stone Row: flash to rocks up | within a frame (under 0.25) | tell 0.2, clip slam 0.18 | same | ok |
 | X Spine: cracks | about 0.2 (f45-f47) | 0.2 | 0.2 | ok |
 | X Spine: centre-out rise | ridge full at f55, 1.0 after the release (and about 1 s on the 4 fps frames `0583`-`0587`) | 0.4 (read from the f47-f51 sample, which is still mid-spread) | 0.8 (`x.rise`): last rock up 1.0 after the release | fixed |
-| X Spine: heave (body comes up) | as the ridge stands | clip heave at 0.7, before the far rocks | 1.0 (`x_spine` played at `speed` 0.7) | fixed on the gameplay side; re-key below |
+| X Spine: heave (body comes up) | as the ridge stands | clip heave at 0.7, before the far rocks | 1.0: `x_spine` re-keyed, hunch held to 0.95, heave at 1.0, clip 1.4 | fixed |
 | Blend in / out | not resolvable at 0.1 to 0.25 s a frame | 0.1 / 0.16 | same | left |
 
-Clip re-key the model needs (the unmerged `origin/ext/tarek-v2-model` rebuilds the GLB; this branch does not touch it or `tools/art1`):
-- `x_spine`: hold the hunch to about 0.95 s and put the heave at about 1.0 s (clip about 1.4 s long), then drop `"speed": 0.7` from `breah_spine` in `content/rules/warden_anim/tarek.json` (`--warden-clips-check` asserts the heave against `x.tell + x.rise`, so it catches either side).
-- `lmb_throw`: none; its whip at 0.13 is the release.
+Clip re-key (ext/anim-tenzo-spine-rekey, on the v2 GLB): `x_spine` (tools/art1/tarek_clips.py and its KMovesStone mirror) holds the hunch to 0.95 s, heaves at 1.0 s and is 1.4 s long; the `"speed"` override on `breah_spine` is gone. `--warden-clips-check` asserts the heave against `x.tell + x.rise`. `lmb_throw` needs none: its whip at 0.13 is the release.
 
 ## Animation moves (KMovesStone)
 | Ability | Moves | Strip |

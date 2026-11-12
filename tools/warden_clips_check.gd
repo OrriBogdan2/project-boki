@@ -211,11 +211,10 @@ func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
 	# the spine's heave (its last pose key) lands as the last rock stands: cracks + rise after the release
 	var xd: Dictionary = Arch.def("dolm")["x"]
 	var stand := float(xd["tell"]) + float(xd["rise"])
-	var spd := float((moves["breah_spine"] as Dictionary).get("speed", 1.0))
 	var sk: Array = (KMovesStone.MOVES["breah_spine"] as Dictionary)["keys"]
-	var heave := float((sk[sk.size() - 2] as Array)[0]) / spd
+	var heave := float((sk[sk.size() - 2] as Array)[0])
 	ok(absf(heave - stand) <= 0.1, "tarek: the spine heaves at %.2f s, the ridge stands at %.2f s" % [heave, stand])
-	ok(lib.get_animation("x_spine").length / spd >= stand, "tarek: the spine clip holds the hunch through the rise")
+	ok(lib.get_animation("x_spine").length >= stand, "tarek: the spine clip holds the hunch through the rise")
 
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
 func _hammer_scale(w: Node, sk: Skeleton3D) -> void:

@@ -99,8 +99,7 @@
 			"hold_from": 0.12
 		},
 		"breah_spine": {
-			"clip": "x_spine",
-			"speed": 0.7
+			"clip": "x_spine"
 		},
 		"mf_xform": {
 			"clip": "fuse"
