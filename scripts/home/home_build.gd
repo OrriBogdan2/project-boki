@@ -352,6 +352,7 @@ func _apply_blockers() -> void:
 		for c in HomeLayout.cells_of(HomeLayout.rect_of(b, h._d())):
 			mark.call(c, "b:" + b, built)
 	for e in lay["deco"]:
+		if HubLayout.holds(lay, String(e["id"])): continue
 		for c in HomeLayout.deco_cells(e):
 			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])))
 	for k in lay["water"]:
@@ -529,7 +530,7 @@ func _free_node(n: Node3D) -> void:
 func _sync_deco() -> void:
 	var want := {}
 	for e in L()["deco"]:
-		if HomeLayout.CATALOG[String(e["id"])].get("line", false):
+		if HomeLayout.CATALOG[String(e["id"])].get("line", false) or HubLayout.holds(L(), String(e["id"])):
 			continue
 		want[int(e["u"])] = e
 	for u in nodes.keys():
