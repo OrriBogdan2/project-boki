@@ -17,14 +17,20 @@ const DRAW_S := 1.1        # s a bow is held before the release (the full draw)
 const MAX_S := 20.0        # a row that has not knocked by then counts as never
 const DT_SRC := 0.01       # s step of the source model
 
-## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), read at level 15, source LMB, abilities].
-## LMB is [damage, interval s, extra damage per consecutive hit]. Abilities map a slot to
-## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
-## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so). A Hunter whose
+## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), read at level 15, source LMB, abilities,
+## and optionally the Daze its combo puts on the target]. LMB is [damage, interval s, extra damage per consecutive
+## hit], optionally + [front-load share, rounds]: the first round deals that much extra, falling off by that round.
+## The Daze is {"from": slot that applies it, "t": s, "lmb": flat extra per round, slot: extra share}.
+## Abilities map a slot to [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges,
+## extra charges at max rank]. Every number is a supervive_kits.md tooltip (level 1, or level 15 where its
+## section says so) unless its row's comment names another source. A Hunter whose
 ## LMB has no damage number there has no source row (n/a).
 const HEROES := [
-	["gunslinger", "Ghost", "hold", false, [51.0, 0.08, 0.0], {
-		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]}],
+	# MK7: 51/round, the first 10 extra (supervive_kits.md:48), opening at 2x (wiki: "decays over your first 10
+	# rounds to 50%"); its Spike Grenade Dazes: +39 a round, Railgun +20% (:48-51), 1.2 s (docs/SUPERVIVE_DATA.md)
+	["gunslinger", "Ghost", "hold", false, [51.0, 0.08, 0.0, 1.0, 10], {
+		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]},
+		{"from": "rmb", "t": 1.2, "lmb": 39.0, "e": 0.2}],
 	["juggernaut", "Brall", "tap", false, [43.0, 0.35, 0.0], {
 		"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1],
 		"e": [30.0, 0.0, 16.0, 6.0, 1, 0]}],
@@ -67,23 +73,48 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 	if lmb.is_empty():
 		return -1.0
 	var need := _src_hp(hero) / (1.0 - SOURCE_DR)
+	var daze: Dictionary = hero[6] if combo and hero.size() > 6 else {}
+	var dazed := _casts(hero, String(daze.get("from", "")), max_rank)
 	var shots := []
 	var t := 0.0
 	var n := 0
 	while t <= MAX_S:
-		shots.append([t, float(lmb[0]) + float(lmb[2]) * n])
+		var dmg := float(lmb[0]) + float(lmb[2]) * n
+		if lmb.size() > 3:
+			dmg += float(lmb[0]) * float(lmb[3]) * maxf(0.0, 1.0 - float(n) / float(lmb[4]))
+		if _in_daze(dazed, daze, t):
+			dmg += float(daze["lmb"])
+		shots.append([t, dmg])
 		n += 1
 		t += float(lmb[1])
 	for slot in hero[5] if combo else {}:
 		var a: Array = hero[5][slot]
 		var dmg := float(a[0]) * (1.0 + float(a[1]) * float(max_rank))
-		var cd := float(a[2]) - float(a[3]) * float(max_rank)
-		for c in int(a[4]) + int(a[5]) * int(max_rank):
-			t = 0.0
-			while t <= MAX_S:
-				shots.append([t, dmg])
-				t += cd
+		for at in _casts(hero, slot, max_rank):
+			var k := 1.0 + float(daze.get(slot, 0.0)) * float(_in_daze(dazed, daze, at))
+			shots.append([at, dmg * k])
 	return _src_knock(shots, need)
+
+## The times the source casts `slot` in a fight: every charge at 0 s, then again each cooldown.
+func _casts(hero: Array, slot: String, max_rank: bool) -> Array:
+	var out := []
+	if not hero[5].has(slot):
+		return out
+	var a: Array = hero[5][slot]
+	var cd := float(a[2]) - float(a[3]) * float(max_rank)
+	for c in int(a[4]) + int(a[5]) * int(max_rank):
+		var t := 0.0
+		while t <= MAX_S:
+			out.append(t)
+			t += cd
+	return out
+
+## Does a hit at `t` land while one of the Daze casts at `starts` holds.
+func _in_daze(starts: Array, daze: Dictionary, t: float) -> bool:
+	for s in starts:
+		if t >= s and t <= s + float(daze["t"]):
+			return true
+	return false
 
 func _src_hp(hero: Array) -> float:
 	return SRC_HP + (SRC_HP_LV * 14.0 if hero[3] else 0.0)
