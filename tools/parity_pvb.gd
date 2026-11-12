@@ -94,6 +94,39 @@ func pin() -> void:
 	_pin_audit(m, P, r[2], r[3], K, home)
 	await done(m)
 
+## Animation timing (Nov 10, docs/heroes/dolm.md "Animation timing"): his hand-keyed clips (tarek.glb) against the
+## kit's own clock. The footage is 4 fps (0.25 s a frame, 10 fps for the ult), so each is held to well inside a frame.
+func _tarek_timing(P: Hunter, K: DolmKit) -> void:
+	var gl: PackedScene = load("res://art/wardens/tarek/tarek.glb")
+	var root: Node = gl.instantiate()
+	var ap: AnimationPlayer = root.find_children("*", "AnimationPlayer", true, false)[0]
+	var ln := func(c: String) -> float: return ap.get_animation(c).length
+	var ds := K.dash_def()
+	ok("anim tarek: a Rock Hop's clip ends with its hop", absf(ln.call("dash_hop") - float(ds["time"])) < 0.03,
+		"clip %.2f s, hop %.2f s" % [ln.call("dash_hop"), float(ds["time"])])
+	ok("anim tarek: the skid clip is the skid", absf(ln.call("dash_skate") - float(ds["skid_t"])) < 0.03,
+		"clip %.2f s, skid_t %.2f s" % [ln.call("dash_skate"), float(ds["skid_t"])])
+	var hop_t: float = K.slam._flight(float(K.slam_def()["hop_up"]))
+	ok("anim tarek: the slam clip's smash key (0.60) is the hop's landing",
+		absf(hop_t - 0.6) < 0.05 and ln.call("rmb_slam") > 1.2,
+		"landing %.2f s" % hop_t)
+	ok("anim tarek: the row's clip smash (0.18) is the cast tell",
+		absf(float(K.e_def()["tell"]) - 0.2) < 0.03 and ln.call("e_row") > 0.9,
+		"tell %.2f s" % float(K.e_def()["tell"]))
+	# the run's step rate at his top speed against the sheet's cadence 1.0 (a medium's: 2.15 rad of stride a metre)
+	var path := "res://content/rules/warden_anim/tarek.json"
+	var lc: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string(path)) as Dictionary)["loco"]
+	var v := P.base_speed
+	var walk := float(lc["walk_speed"])
+	var run := float(lc["run_speed"])
+	var gait := lerpf(walk, run, clampf((v - walk) / (run - walk), 0.0, 1.0))      # (WardenClips._loco's own rate)
+	var rate := clampf(v / gait, 0.6, 1.5) * float(lc.get("cadence", 1.0))
+	var ours: float = ln.call("run_f") / rate
+	var medium := TAU / (2.15 * v)
+	ok("anim tarek: the run cadence is a medium's within 5% (sheet: cadence 1.0; the clip alone is 16% quick)",
+		absf(ours / medium - 1.0) < 0.05, "%.3f s a cycle at %.1f m/s, medium %.3f s" % [ours, v, medium])
+	root.free()
+
 ## The audit (Nov 3 23:40): cooldowns from the data, the Heavy Shot stops on the first foe, and an early-release
 ## wall pin pays a share of the wall hit.
 func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: Vector3) -> void:
@@ -228,6 +261,7 @@ func breah() -> void:
 		stepped > 0.4 and stepped < 1.4, "%.2f m" % stepped)
 	var bp := beats("breah_punch")
 	ok("parity breah: the punch drives out at once from the cocked pose (out by 0.06s)", bp.x <= 0.06, "%.2f s" % bp.x)
+	_tarek_timing(P, K)
 	_tarek_audit(m, P, K, home)
 	await done(m)
 

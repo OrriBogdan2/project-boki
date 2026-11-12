@@ -47,23 +47,32 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.8, "stride": [1.35, 1.55], "foot_mps": [3.1, 7.4], "arm_swing": {"L": 0.5}
+		"run_speed": 4.8,
+		"stride": [
+			1.35,
+			1.55
+		],
+		"foot_mps": [
+			3.1,
+			7.4
+		],
+		"arm_swing": {
+			"L": 0.5
+		}
 	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive"
+		"dive": "dive",
+		"dive_tilt": 50.0
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.36,
-		"min_fall": 0.25
-	},
+	"land": {"clip": "land", "hop": {"w": 0.8, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"bul_recall": {
 			"clip": "lmb_recall",
@@ -72,20 +81,28 @@
 		"bul_smash_wind": {
 			"clip": "lmb_hold",
 			"upper": "moving",
-			"hold_from": 0.2
+			"hold_from": 0.2,
+			"air_legs": true
 		},
 		"bul_smash": {
-			"clip": "lmb_slam"
+			"clip": "lmb_slam",
+			"air_legs": true,
+			"fade": 0.05,
+			"strike": ["tip", "lmb/smash_reach", "edge"]
 		},
 		"bul_launch": {
+			"fade": 0.05,
 			"clip": "lmb_launch"
 		},
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
-			"hold_from": 0.12
+			"hold_from": 0.12,
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"bul_break": {
+			"fade": 0.05,
 			"clip": "guard_break",
 			"upper": true
 		},
@@ -94,16 +111,20 @@
 			"upper": true
 		},
 		"bul_whirl": {
-			"clip": "shift_whirl"
+			"clip": "shift_whirl",
+			"strike": ["tip", "dash/whirl", "edge"]
 		},
 		"bul_charge": {
+			"fade": 0.05,
 			"clip": "shift_charge"
 		},
 		"bul_short": {
 			"clip": "dash_short"
 		},
 		"bul_lumber": {
-			"clip": "dash_air"
+			"clip": "dash_air",
+			"air_clip": "dash_air",
+			"ground_clip": "dash_short"
 		},
 		"bul_crush": {
 			"clip": "crush",
@@ -114,19 +135,24 @@
 		},
 		"bul_mend": {
 			"clip": "e_mend",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"bul_ult_wind": {
+			"fade": 0.05,
 			"clip": "x_wind",
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"lead": 0.07,
+			"fade": 0.04
 		},
 		"mf_xform": {
 			"clip": "fuse"
 		}
 	},
+	"lockin": {"clip": "emote", "from": 0.1, "dur": 1.45, "rate": 1.2},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -138,15 +164,12 @@
 			"back": "hit_b",
 			"dur": 0.36
 		},
-		"dead_t": 1.3
+		"dead_t": 1.3,
+		"stomp": "stomp",
+		"drink": "drink"
 	},
-	"procedural": [
-		"ledge",
-		"mantle",
-		"stomp",
-		"base",
-		"drink"
-	],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_cross"},
+	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"upper": [
 		"hips",
 		"head",
@@ -208,5 +231,20 @@
 		"in": "crouch_in",
 		"out": "crouch_out",
 		"speed": 2.42
-	}
+	},
+	"carry_stow": ["x_weapon", "x_shield"],
+	"carry_fwd": 1.6,
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [-5, 20, 0],
+				"upper_arm.R": [-35, 0, 55],
+				"forearm.R": [-25, 0, 0],
+				"upper_arm.L": [5, 0, -10]
+			}
+		}
+	},
+	"summon_call": "g_call_slam_r"
 }

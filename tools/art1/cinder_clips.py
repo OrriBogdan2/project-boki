@@ -14,8 +14,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import cinder_pieces as K
+import actionkit
 import crouchkit
 import gardenkit
+import mantlekit
 
 A_Z = K.ANKLE_Z
 
@@ -34,6 +36,14 @@ def C(name, dur, keys, loop=False, base=READY):
 
 
 END = {k: READY[k] for k in READY}
+# the ledge climb (mantlekit): both palms flat on the lip, grinning at it; over the top a puff of heel flame and the skirt flung up, a whoop at the landing
+OPEN = {"cast": 0.0, "castl": 0.0, "fing": 0.8, "fistl": 0.6, "jaw": 0.35, "brow": 0.5}
+MANTLE = {"az": A_Z, "hx": K.SH, "hands": {"LP": -1.0, "G": 1.0}, "w": 1.0, "nod": 0.05, "tail": 0.42, "extra": {
+    "reach": dict(OPEN, lid=0.3), "over": dict(OPEN, jaw=0.5), "step": dict(OPEN, jaw=0.6, jet=0.3),
+    "up": {"cast": 0.0, "castl": 0.0, "fing": 0.3, "jet": 0.4, "jaw": 0.7, "brow": -0.2},
+    "top": {"jet": 0.7, "skirt": 0.3, "jaw": 0.8, "brow": -0.5},
+    "pop": {"jet": 0.5, "skirt": 0.45, "jaw": 1.0, "brow": -0.7, "lid": 0.05, "G": (0.34, 0.04, 1.0), "LP": (-0.34, 0.04, 1.02)},
+    "land": {"jet": 0.0, "jaw": 1.0, "skirt": 0.2, "brow": -0.6}}}
 
 
 TAU = 2 * math.pi
@@ -267,14 +277,25 @@ def garden_set():
     return gardenkit.clips(C, READY, P, {"lead": 0.03, "snap": 1.0})
 
 
+ACT = {"stomp": {"set": {"G": (0.4, 0.0, 0.96), "LP": (-0.4, 0.0, 0.96)}, "top": {"G": (0.5, 0.05, 1.0), "LP": (-0.5, 0.05, 1.0)}},
+       "drink": {"hand": "LP"},
+       "revive": {"kneel": {"G": (0.14, 0.46, 0.34), "LP": (-0.14, 0.46, 0.34), "fing": 0.1, "jaw": 0.3}}}
+
+
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("G", "LP"), (-0.04, 0.15, 1.42), ACT)
+
+
 def clips():
     out = [FnClip("idle", 6.0, idle), FnClip("stance", 6.0, stance)]
     out += crouch_set()
     out += garden_set()
+    out += action_set()
     for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.6, 0.37, 0.2)):
         T = 2 * stride / (share * sp)
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stride * (0.8 if tag in "lr" else 1.0), share, lift)))
+    out.append(mantlekit.clip(C, END, MANTLE))
     # LMB: the pilot's 0.2 s: the arm snaps out, palm first, feet set; then the roar throws her back a step and she leans in, teeth bared, the arm shaking
     braced = {"pel": (0.0, 0.03, -0.075), "prt": (0.04, -0.14, 0.0), "tor": (0.2, -0.3, 0.0), "hed": (-0.18, 0.42, 0.0), "brow": 0.55, "lid": 0.12, "jaw": 0.55, "fing": 0.05,
               "G": (0.16, 0.44, 1.2), "LP": (-0.28, -0.06, 0.98), "cast": 1.0, "castl": 0.5, "FL": (-0.11, 0.17, A_Z), "FR": (0.15, -0.17, A_Z), "FLy": 0.1, "FRy": -0.55}
@@ -302,11 +323,12 @@ def clips():
     roll = dict(ball, prt=(-3.0, 0, 0))
     spread = {"pel": (0, 0, 0.0), "prt": (-6.283 + 0.35, 0, 0), "tor": (-0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (0.36, 0.02, 1.03), "LP": (-0.42, 0.02, 1.08), "FL": (-0.24, -0.1, 0.32), "FR": (0.24, -0.16, 0.36), "FLp": 0.7, "FRp": 0.7, "jaw": 0.9, "lid": 0.05, "brow": -0.7}
     out.append(C("hop", 0.7, [(0.0, {"pel": (0, 0, -0.08), "FL": (-0.1, 0.1, 0.25), "FR": (0.12, 0.1, 0.26)}), (0.05, ball, "out"), (0.17, roll), (0.25, spread), (0.5, dict(spread, prt=(-6.283 + 0.45, 0, 0))), (0.7, dict(END, prt=(-6.283 + 0.04, -0.14, 0.09)))]))
-    # E, Furnace Cloak (0.24): tuck for a blink, then everything flung wide, chest out, up on her toes, a shriek of joy
+    # E, Furnace Cloak (0.36): tuck for a blink, then everything flung wide, chest out, up on her toes, a shriek of joy
     tuck = {"pel": (0, 0, -0.1), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.16, 0.16, 0.96), "LP": (-0.14, 0.14, 0.95), "fing": 1.0, "lid": 0.5, "jaw": 0.05}
     wide = {"pel": (0, 0, 0.03), "prt": (-0.12, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.4, 0, 0), "G": (0.42, 0.06, 1.12), "LP": (-0.44, 0.06, 1.14), "cast": 1.0, "castl": 1.0, "fing": 0.0, "jaw": 1.0, "lid": 0.05, "brow": -0.8,
             "FLp": 0.5, "FRp": 0.5, "FL": (-0.15, 0.05, A_Z + 0.045), "FR": (0.17, -0.05, A_Z + 0.045), "skirt": 0.3}
-    out.append(C("cloak", 0.24, [(0.0, tuck), (0.06, wide), (0.13, dict(wide, pel=(0, 0, 0.0), LP=(-0.42, 0.03, 1.11))), (0.24, END)]))
+    # [footage] arms flung wide for about 0.2 s (0181-0182): wide from 0.06 to 0.26, settled by 0.36
+    out.append(C("cloak", 0.36, [(0.0, tuck), (0.06, wide), (0.26, dict(wide, pel=(0, 0, 0.0), LP=(-0.42, 0.03, 1.11))), (0.36, END)]))
     # a Flashover or a knock: the left fist punches up, a bounce on her heels, cackling
     pu = {"pel": (0, 0, -0.01), "tor": (-0.26, 0.15, 0.1), "hed": (-0.4, -0.2, 0.1), "G": (0.3, 0.1, 1.2), "LP": (-0.14, 0.08, 1.76), "cast": 1.0, "fistl": 1.0, "jaw": 1.0, "lid": 0.32, "brow": -0.7}
     out.append(C("stoke", 0.5, [(0.0, END), (0.1, pu, "out"), (0.22, dict(pu, pel=(0, 0, -0.09), LP=(-0.14, 0.08, 1.68))), (0.5, END)]))
@@ -344,8 +366,6 @@ def clips():
     dn = {"pel": (0.05, -0.08, -0.56), "prt": (-0.12, 0.2, -0.18), "tor": (0.42, 0.15, 0.2), "hed": (0.1, 0.1, 0.15), "G": (0.24, 0.3, 0.46), "LP": (-0.32, -0.16, 0.13), "FL": (-0.2, 0.5, 0.1), "FR": (0.2, 0.26, 0.1), "FLp": -0.7, "FRp": 0.2, "FRy": -0.5, "FLy": 0.4,
           "brow": 0.9, "lid": 0.4, "fing": 0.1, "jaw": 0.15, "skirt": 0.5}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.46, 0.15, 0.2), pel=(0.05, -0.08, -0.57), hed=(0.15, 0.1, 0.15))), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.3, 0.1, 0.1), hed=(-0.2, 0, 0), lid=0.1, brow=-0.3, jaw=0.5)),
-                                 (0.95, {"pel": (0, 0.0, -0.26), "prt": (0.34, 0, 0), "tor": (0.34, 0, 0), "hed": (-0.4, 0, 0), "FL": (-0.12, 0.2, A_Z), "FR": (0.14, -0.14, A_Z), "FLp": 0, "FRp": 0.2, "G": (0.26, 0.2, 0.7), "LP": (-0.28, 0.16, 0.56), "lid": 0.1}), (1.6, END)]))
     # death: a last laugh dies in her throat; she staggers back, her knees go, she falls on her side and her hand falls open
     dead = {"pel": (0.05, -0.1, -0.66), "prt": (0.18, 0.2, 1.3), "tor": (0.2, 0.2, 0.2), "hed": (0.2, 0.3, 0.3), "G": (0.62, 0.44, 0.08), "LP": (-0.25, 0.32, 0.16), "FL": (0.3, 0.36, 0.1), "FR": (0.42, 0.1, 0.1), "FLp": 0.4, "FRp": 0.4, "lid": 1.0, "brow": -0.4, "fing": 0.0, "jaw": 0.3, "skirt": 0.3}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.08, -0.06), "prt": (-0.2, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.5, 0, 0), "lid": 0.1, "brow": -1, "jaw": 0.8, "G": (0.34, 0.1, 0.78)}, "out"),
