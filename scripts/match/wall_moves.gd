@@ -7,9 +7,8 @@ extends RefCounted
 ## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
 ## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
 ## opens the glider: the glide button still does). Bounce: hitting a
-## wall at an angle with speed in the air (a dash, a boosted jump) rebounds you off it;
-## head-on you just stop, as ever, and a jump there kicks. Slide: the glider never bounces or stops dead
-## on a wall, see stopped().
+## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
+## head-on you just stop, as ever, and a jump there kicks.
 
 const KICK_RISE := 0.8          # m of extra jump height: one terrace (World.LEVEL)
 const HOP_CLIMB_CAP := 1.6      # m above the take-off ground a hop may still start (a plain jump's apex)
@@ -33,10 +32,8 @@ const BOUNCE_KNOCK_QUIET := 0.6  # s after a knockback in which the wall slam ru
 const BOUNCE_STEER := 25.0      # m/s^2 your keys steer the rebound for BOUNCE_WINDOW
 const BOUNCE_WINDOW := 0.25     # s to steer before ordinary air control returns
 const BOUNCE_DUST := 3          # dust puffs
-const KICK_DUST := 4            # dust puffs
 const FX_OFFSET := 0.3          # m the spark sits in front of the wall face
 const FX_HEIGHT := 0.8          # m above the feet
-const WALL_BACK := -0.1         # share of the speed into a wall a walker or jumper gets back off it (a nudge clear)
 
 static var scuffs := 0          # (tests) hop scuffs played
 var bounce_t := 0.0
@@ -69,13 +66,13 @@ func try_kick(h: Hunter) -> bool:
 	var pitch := randf_range(KICK_PITCH_MIN, KICK_PITCH_MAX)
 	scuff(h.m, h.pos, pitch)
 	h.m.net_fx(["whop", Match._r(h.pos.x), Match._r(h.pos.y), Match._r(h.pos.z), snappedf(pitch, 0.01)])
-	h.m.fx.dust(_fx_at(h), KICK_DUST)
+	h.m.fx.burst(_fx_at(h), Color("e6dccb"), 8, 2.5, 0.3)
 	return true
 
-## The hop's sound at `pitch` (every game plays it): a push in the kicker's weight class, else a stone step.
+## The hop's sound: a footstep on stone, at `pitch`. Played in every game (Match "fx" "whop").
 static func scuff(m: Match, at: Vector3, pitch: float) -> void:
 	scuffs += 1
-	HeroSfx.kick(m, at, pitch, KICK_VOL)
+	m.sfx("step_stone", at, KICK_VOL, pitch)
 
 ## Touching a wall (the last 0.2 s), or facing one (keys, else your aim) within FACE_REACH: sets wall_n to its normal.
 func _at_wall(h: Hunter) -> bool:
@@ -90,19 +87,10 @@ func _at_wall(h: Hunter) -> bool:
 	h.wall_n = -dir
 	return true
 
-## The speed left along an axis a wall stopped this step (Hunter's axis moves). A glider keeps none of it:
-## [game data] SUPERVIVE's glide runs on UE's CharacterMovementComponent, whose wall hit (HandleImpact,
-## SlideAlongSurface) drops the part of the velocity into the wall and keeps the part along it, so a
-## glider slides, never rebounds or stops dead, and nothing closes the canopy; the glide force
-## (Hunter.GLIDE_ACCEL) then settles the slide at cruise x sin(angle off the normal). The source dump has no
-## glide-wall row of its own [?]. Everyone else gets WALL_BACK of it. Measured by --move-feel-check glide_wall_*.
-static func stopped(h: Hunter, v: float) -> float:
-	return 0.0 if h.gliding else v * WALL_BACK
-
 ## Called the step a wall stopped you in the air, with the velocity you hit it at and the wall's top.
-## Reflects an angled hit about the wall's normal (a glider slides instead: stopped()).
+## Reflects an angled hit about the wall's normal.
 func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
-	if h.grounded or h.gliding or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
+	if h.grounded or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
 		return
 	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()      # (a shove outlives the dash: only its run is a ram)
 	if wall_top - h.pos.y <= Hunter.MANTLE_REACH or ramming or not h.charge.is_empty():
@@ -121,6 +109,7 @@ func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 		_rebound = out
 		_rebound_speed = out.length()
 	h.m.sfx("land", h.pos, BOUNCE_VOL, BOUNCE_PITCH)
+	h.m.fx.burst(_fx_at(h), Color("ffe9b0"), 8, 3.0, 0.25, 4.0, 0.8)
 	h.m.fx.dust(h.pos, BOUNCE_DUST)
 
 ## While the rebound window lasts your keys steer it. Called every step after the ordinary air control.

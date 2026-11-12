@@ -16,8 +16,7 @@ extends RefCounted
 ##   ["disp", "vy",   nid, vy]                           a spike: falling at least this fast
 ##   ["disp", "tow",  nid, by_nid, params]               a tow starts (params: see tow())
 ##   ["disp", "stop", nid]                               the caster's game ended it
-##   ["disp", "end",  nid, why]                          the owner's game ended it: arrived | walled | time |
-##                                                       gone | knocked (a newer knock took over: knocked())
+##   ["disp", "end",  nid, why]                          the owner's game ended it: arrived | walled | time | gone
 ##   ["disp", "yank", nid, x, y, z, dur, hop]            Verbs.yank on a body another game owns
 
 const CLIFF := 1.2           # m: a rise past which a hauled body is lifted onto the ground ahead instead of walking up
@@ -25,7 +24,6 @@ const MAX_T := 5.0           # s: the longest tow another game may ask for
 const MAX_SPD := 40.0        # m/s: the fastest
 const ARRIVE := 0.05         # m: a tow toward an anchor has arrived this close to its gap
 const MIRROR_GRACE := 0.4    # s a mirror waits past its time for the owner's "end" (the reply's trip)
-const KNOCK_MIN := 2.5       # m/s (after mass and resist): a shove this fast is a knock (it takes over); slower nudges
 
 ## What a hit's options carry beyond the fixed hit fields (Match.net_send_hit), so a knock on a body another
 ## game owns lands the same there: its wall-slam stun, steer, weight, diminishing returns, burn time, slow
@@ -54,30 +52,6 @@ func knock(e: Ent, kb: Vector2, lift := -1.0) -> void:
 		e.impulse(kb, lift)
 	else:
 		_send(["kb", e.nid, m._r(kb.x), m._r(kb.y), m._r(lift)])
-
-# ------------------------------------------------------------------ a knock on a body already moving
-## A knock on a body already flying from one (another knock, a reel, a slide, a push): the newer one takes
-## over. Its speed replaces the old flight (no adding, no immunity window), it ends a tow on that body, and the
-## wall stun is the newer knock's: the wall-slam lockout re-arms and an older knock's longer stun is dropped.
-## A tow starting on a knocked body takes over the same way (tow()). Source (docs/decisions/0022): SUPERVIVE's
-## data has only Knockback / KnockbackResist multipliers (1.0) and no immunity, and every wall stun belongs to
-## the ability that threw you into the wall.
-
-## The flat velocity after a shove of `s` m/s along `dir`: a knock sets it; a nudge only tops it up along `dir`.
-static func knock_speed(hv: Vector2, dir: Vector2, s: float) -> Vector2:
-	if s >= KNOCK_MIN:
-		return dir * s
-	var along := hv.dot(dir)
-	return hv + dir * (maxf(along, s) - along)
-
-## A knock just landed on `h` on its own game (Hunter.impulse).
-func knocked(h: Hunter) -> void:
-	var rec := towing(h)
-	if not rec.is_empty() and not rec["mirror"]:
-		_finish(rec, "knocked")
-	h.wslam_t = 0.0
-	if h.wallstun_at < m.time:
-		h.wallstun = 0.0
 
 ## Spiked down: it falls at least `vy` (a negative speed) fast; a glider slammed hard enough is spiked
 ## out of the air (GlideSpike.slam, on the game that owns the body) and `by` gets the credit here.
@@ -113,14 +87,8 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	if by: DashReset.note(e, by)      # being hauled is crowd control: it counts toward an assist
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
-	elif e is Hunter:
-		var h := e as Hunter
-		if p.get("unroll", false):
-			h.roll_t = 0.0
-		if h.knock_t > 0.0:
-			h.knock_t = 0.0             # the tow takes over a knock's flight
-			h.vel.x = 0.0
-			h.vel.z = 0.0
+	elif p.get("unroll", false) and e is Hunter:
+		(e as Hunter).roll_t = 0.0
 	return rec
 
 func towing(e: Ent) -> Dictionary:
@@ -202,9 +170,7 @@ func _reel(rec: Dictionary, e: Ent, to: Vector2, dist: float, gap: float, dt: fl
 		e.stun_t = maxf(e.stun_t, float(p["stun"]))
 	var want := to / dist * float(p["spd"])
 	var sw := float(p.get("swing", 0.0))
-	var v: Vector2 = rec["v"]
-	# full speed from the grab (the source's reel has no wind-up); after that it eases onto each new heading
-	v = v.lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 and v != Vector2.ZERO else want
+	var v: Vector2 = (rec["v"] as Vector2).lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 else want
 	rec["v"] = v
 	var left := minf(v.length() * dt, dist - gap)
 	var dir := v.normalized() if v.length() > 0.01 else to / dist

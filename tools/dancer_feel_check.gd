@@ -137,9 +137,9 @@ func _window(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	A.step(m, 0.5)
 	P.inp["move"] = Vector2.ZERO
 	A.step(m, 1.35)
-	var hasted := K.speed_bonus() > 0.15
+	var hasted := K.move_k() > 1.15
 	A.step(m, 0.25)
-	var hasted_after := K.speed_bonus() > 0.0
+	var hasted_after := K.move_k() > 1.0
 	A.step(m, 0.8)
 	var still := K.primed_t > 0.0
 	A.step(m, 0.2)

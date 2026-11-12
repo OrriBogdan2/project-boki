@@ -152,7 +152,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
-| RMB | Arm pierces terrain, pulls first target, 18 s [D]; out 22.5 m/s, reel 9 m/s to adjacent [F] | 11.5 m at 22.5 m/s through terrain, reel 9 m/s to adjacent, 20% braced shuffle, cd 12 (heroes/dredge.md, reel parity) | match; 0.67x cd |
+| RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, Grounded (ours) | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
@@ -164,7 +164,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight while skating | match; skate tracking owner question (gap 16) |
+| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
@@ -181,7 +181,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | LMB | Orb; idle next orb stronger, terrain, Slow [D] | .6, continuous charge to 1.4 s, every orb pierces | differ (owner items 60, data overruled) |
 | RMB | Shards, stun, 10 s [D] | cd 10, wind-up .32 vs .2 | differ (owner item 40) |
 | Q | none | glove | ours |
-| E | Bomb grows, reactivate, up to 3.5x [D] | Grows 6.5 s, dmg_max_k 3.0, fizzles 10 s (ours) | differ: 3x vs 3.5x, fizzle ours |
+| E | Bomb grows, reactivate, up to 3.5x [D] | Grows 6.5 s, dmg_max_k 3.5, waits at full size until popped, no timer; cooldown on the plant [?] | match (the fizzle is removed) |
 | R | Vortex stun + pull, 70 s [D] | Tell 1.0, 3.5 s, pull 12, cd 70 | match; ~1 s lock (owner) |
 | Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift 35% (owner 11-08 +17%; source gives no drift), moves foes and allies (counters both) | match |
 | Passive | Damage Empowers; floats [D] | Swollen variants | match; floating `[?]` |
@@ -192,7 +192,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .48 vs .45, walks 55% vs stands | differ (owner); cadence S fix (gap 12) |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6; every input case settled in [bulwark.md](heroes/bulwark.md#aegis-input-cases) | match |
+| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
@@ -301,15 +301,15 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 17 | Ostra's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
-| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 55 dash-flow rows are `[?]` (no source, or "Not determinable"), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
+| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 19 dash-flow rows have no source `[?]` (Hem 8, Ryzz 5, Tarek 6), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
 
 ## Item 20: jump speed and the unsourced flow rows
 
 **Jump speed.** Source: JumpZVelocity 750 uu/s = 7.5 m/s at gravity 14.7 m/s² (supervive_physics.md:45, [D]). Ours: `Hunter.JUMP_V` 6.8 m/s. Kept on purpose (`docs/MOVEMENT_FEEL.md`, "Jump 9 → 6.8"): 7.5 lets jump plus mantle top four terraces. It is a map-grammar deviation, not a source value; the owner can flip it once the terraces change. `--move-feel-check` now asserts `jump_speed_vs_source` (lift-off over 7.5, must sit in 0.85 to 1.0), so the source number is pinned and the gap cannot drift.
 
-**Dash-flow rows marked `[?]`.** A row in `content/dash_flow` that exists but has no `source`, or whose `source` starts "Not determinable". No source or footage settles these; they run as the kit's default (`keep` for holds, `fire` for Q and the silent dash rows). Not guessed. `tools/gen_wiki.py` puts `[?]` at the start of each one's Source cell in `docs/heroes/dash_interactions.md` (a pair with no row stays empty), so both places list the same 55 rows (names as of 2026-11-09; `*` = already says "Not determinable"):
+**Dash-flow rows with no `source` field `[?]`.** No source or footage settles these; they run as the kit's default (`keep`, or `fire` for Q). Not guessed.
 
-| Hero (id) | Rows `[?]` |
+| Hero | Rows `[?]` |
 |---|---|
 | Hem (`archer`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
 | Ryzz (`mage`) | `hold.rmb.{ground,air,jump}` (3, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`, ours) |
@@ -341,31 +341,3 @@ PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a 
 **Verdict: no outlier over 1.25x, so no health number was changed** (global scale untouched). Kael and Cinder sit at 1.249 and Neve, Sparkle and Sable at 0.802 (1/1.247): inside the bar by a hair, caused by the same thing: three weight classes against a source where 8 of 12 Hunters share 1290. No owner note on tankiness was found in DECISIONS or OWNER_REVIEW_1103, so none overrides these rows. `--archetype-check` ("health:" rows) asserts every Hunter is inside 0.8x to 1.25x.
 
 **Suggestion, not built.** The source is flatter: 1100 to 1475 (1.34x spread) against our 124 to 193 (1.56x). Lowering heavy to about 185 and raising light to about 128 would bring all five near-limit Hunters to about 1.2x/0.83x. That moves a whole weight class, so it is the owner's call. Per-archetype health (Hem and Motley a little lower, Bjorn and Grimble a little higher) would match the source more exactly but breaks the one-weight-one-health rule.
-| Vex (`gunslinger`) | dash.ground.{rmb,e,x}\*, dash.air.{lmb,rmb,e,x}\* (7) |
-| Kael (`juggernaut`) | hold.lmb.jump, hold.rmb.{ground,air,jump} (4) |
-| Cinder (`ashwick`) | dash.ground.lmb\*, hold.rmb.{ground,air,jump} (4) |
-| Meeko (`tender`) | hold.rmb.{ground,air,jump} (3) |
-| Tenzo (`dolm`) | hold.lmb.{ground,air,jump}, hold.rmb.{ground,air,jump} (6) |
-| Lace (`archer`) | dash.ground.lmb\*, dash.air.{lmb,rmb,e,x}\*, dash.{ground,air}.q (Q is ours), hold.lmb.{ground,air,jump}, hold.rmb.{ground,air,jump} (13) |
-| Grimble (`dredge`) | dash.ground.lmb\* (1) |
-| Neve (`rimewright`) | hold.rmb.{ground,air,jump} (3) |
-| Sparkle (`mage`) | dash.{ground,air}.{lmb,rmb,e,x}\*, dash.{ground,air}.q (Q is ours), hold.rmb.{ground,air,jump} (13) |
-| Albert (`bulwark`) | hold.lmb.jump (1) |
-
-Dash -> LMB fires mid-dash for Lace, Sparkle, Cinder (both dashes) and Tenzo (air dash), where the source is silent (`--dash-flow-check` SOURCE_ROWS); Kael and Albert dash as the attack and buffer it; Grimble's ground row stays buffered (owner fallback) and his air pounce has its own row.
-Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`. Re-checked 2026-11-09 (ext/dash-nd-rows-a) against data, footage and the wiki lines in the briefs: Vex `dash.air.lmb` is settled by the card's unqualified "can fire the rifle while sliding" plus the wiki's air tap (asserted in `--dash-flow-check`); Vex `dash.{ground,air}.{rmb,e,x}`, Cinder and Grimble `dash.ground.lmb` stay "Not determinable", each `source` says which lines and frames were read.
-Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x} (all 13 re-checked 11-09 against the data, the pin/vireo frames, the cancel-matrix-a/b tables and the patch lines; none settled, each `source` says why in one line). Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
-## Allies and forced movement (PARITY FIRST pass, ext/feel-ally-safe)
-
-Every knock, pull, push, root, slow, stun and Grounded the 12 kits apply goes to `foes_of(team)` (or `foes_in`), so a teammate is never moved or given a status. `--ally-cc-check` (`tools/ally_cc_check.gd`) proves it: each hero presses LMB, RMB tap and hold, E, X and the dash, on the ground and in the air, with a teammate standing on the aim line at 2, 3.5, 6 and 9 m; the teammate must not move, be towed, or gain stun, root, slow, knock, Shred, Blight, burn, Grounded, Dazed or Disoriented. Over the relay, `--displace-net-check` aims Cinder's cloak, Sparkle's Skycall and Albert's aegis at a teammate on the guest's game: no move is sent and the guest stays put.
-
-Where the source lets a move touch an ally (`supervive_kits.md`), the check excuses exactly that slot:
-
-| Move | Source | Ours |
-|---|---|---|
-| Grimble's Abyssal Grasp | "pulling in the first target hit (enemy or ally)" | hook pulls the first hunter hit, ally included |
-| Motley's Swap (dash) | "swaps you and all units to its location" | foes, allies and Boki in the circle are sent back; allies get the shield |
-| Meeko's ult | "reviving them and pulling them to" her | a downed ally is called to her side |
-| Tenzo's rocks | "allies can hop over friendly walls" (owner-decided) | allies hop; not a move |
-
-Not in the source, kept: Tenzo's Basalt Spine never raises a rock inside a body, so anyone on the line (ally included) steps to their side of it. That is a collision fix, not a status; the check allows a move there and nothing else. A dash or lunge that runs into a teammate shoves it like any two bodies (`Match._separate`); the check ignores that sideways shove but still fails on any status or tow. No leak was found in the kits, so no gameplay code changed.

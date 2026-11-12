@@ -10,10 +10,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
-| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
-| `hurt_wash.gd` (`HurtWash`) | low health (under 35%): a red wash in from the screen edges, deeper as health runs out, pulsing, heavier in a soft arc on the edge the last second's hits came from (`hud.hurt_dirs`, the same list as the hurt arrows), easing back to even; at most ~220 px in and 0.55 alpha on the outermost pixels (at zero health, fresh hit), so aim lines and telegraphs show through. Check: `--hudref-check` 7 |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
@@ -24,8 +22,6 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
-| `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
-| `hudref_demo.gd` | `--hudref-demo=plates|wash|fight|busy` screenshot scenes |
 
 Rules of the look:
 - Colours are roles: `SELF` / `ALLY` / `FOE` for health, `LOW` as yours and allies' runs low, armour in
@@ -117,3 +113,15 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+
+## Tutorial objective strip (one banner for both tutorials)
+- `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
+  title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
+  pulses for 1.6 s whenever the objective changes, then keeps a steady rim. The message lane starts at 72% of the
+  width, so the strip never touches it. In the match tutorial the Ways Out strip, the match clock and the ship's
+  planning countdown are off; in a real match (`FirstMatchGuide`) the strip drops under `WaysOutHud.bottom()`
+  (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
+- The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
+  Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.

@@ -6,8 +6,6 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
-##  10. jump, land and wall kick exist for every weight class an archetype has, HeroSfx.weighted picks them,
-##      a heavy hunter's glider open has its own layer, and a landing gets louder the faster the fall
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
@@ -17,6 +15,9 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
+##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
+##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
+##      the farm's build mode and the house's decorating play them
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -47,7 +48,7 @@ func run(main: Node) -> void:
 	_ult_cues()
 	_garden_names()
 	_garden()
-	_weighted()
+	_build_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -281,6 +282,42 @@ func _garden() -> void:
 	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
 	Sfx.clear_amb_layers(0.0)
 
+## Does calling play() make the named sound start (it stamps Sfx.last_played)?
+func _plays(sname: String, act: Callable) -> bool:
+	Sfx.last_played.erase(sname)
+	act.call()
+	return Sfx.last_played.has(sname)
+
+## 10. The build and decorate cues.
+func _build_cues() -> void:
+	var names := ["build_pick", "build_rotate", "build_place_wood", "build_place_stone", "build_store",
+			"build_move", "build_blocked"]
+	var silent := names.filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "build cues: %d sounds exist (silent: %s)" % [names.size(), silent])
+	var made := [BuildSfx.placed_name("fence", false), BuildSfx.placed_name("stone_wall", false),
+			BuildSfx.placed_name("stone_wall", true)]
+	ok(made == ["build_place_wood", "build_place_stone", "build_move"],
+			"build cues: wood or stone by material, a move is its own (%s)" % [made])
+	var stone_ids: Array = BuildSfx.rules()["stone"]
+	var unknown := stone_ids.filter(func(i): return not HomeLayout.CATALOG.has(i))
+	ok(unknown.is_empty(), "build cues: every stone piece is in the catalog (unknown: %s)" % [unknown])
+	var knock := func(spot): return _plays("build_blocked", func(): BuildSfx.blocked(spot))
+	var spots := [knock.call("check_a"), knock.call("check_a"), knock.call("check_b"), knock.call("check_b")]
+	ok(spots == [true, false, true, false], "build cues: one knock per attempt, then silent on that spot %s" % [spots])
+	BuildSfx.quiet = true
+	var hushed := [_plays("build_pick", BuildSfx.picked), _plays("build_store", BuildSfx.stored),
+			_plays("build_rotate", BuildSfx.rotated)]
+	BuildSfx.quiet = false
+	ok(hushed == [false, false, true], "build cues: quiet mutes pick and store, not the turn %s" % [hushed])
+	var wired := []
+	for f in ["home_build.gd", "decorate.gd"]:
+		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
+		for cue in ["picked()", "rotated()", "placed(", "stored()", "blocked("]:
+			var needle: String = "BuildSfx." + cue
+			if not src.contains(needle):
+				wired.append("%s %s" % [f, needle])
+	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
 func _takes(sname: String) -> Array:
 	var out := []
 	var paths: Array = ["res://audio/%s.wav" % sname]
@@ -319,25 +356,3 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
-
-## 7. Movement by weight: every archetype's class has its variants and gets them; louder landings from faster falls.
-func _weighted() -> void:
-	var picked := []
-	var missing := []
-	for arch in Arch.ids():
-		var h := Hunter.new()
-		h.arch = arch
-		for kind in ["jump", "land", "kick"]:
-			var want := "%s_%s" % [kind, Arch.weight(arch)]
-			if HeroSfx.weighted(h, kind, "") != want:
-				missing.append("%s/%s" % [arch, want])
-		picked.append(HeroSfx.weighted(h, "glide_open", "") != "")
-		h.free()
-	ok(missing.is_empty(), "every Hunter gets jump, land and kick in its weight class (missing %s)" % [missing])
-	var heavies := Arch.ids().filter(func(a): return Arch.weight(a) == "heavy").size()
-	ok(picked.count(true) == heavies, "only the heavy class has the heavier glider open")
-	var db := [HeroSfx.land_db(4.0), HeroSfx.land_db(10.0), HeroSfx.land_db(20.0)]
-	ok(db[0] < db[1] and db[1] < db[2], "a landing is louder the faster the fall %s dB" % [db])
-	var plain := Hunter.new()
-	ok(HeroSfx.weighted(plain, "jump", "jump") == "jump", "no class: the shared jump")
-	plain.free()

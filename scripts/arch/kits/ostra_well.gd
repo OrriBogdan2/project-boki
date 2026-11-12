@@ -50,7 +50,7 @@ func is_open() -> bool: return phase == "open"
 func start() -> bool:
 	if running():
 		return false
-	var pw := HeroZones.walk(k.m, HeroZones.footing(k.m, k.h), k.aim(), float(xd()["range"]))
+	var pw := HeroZones.walk(k.m, k.h.pos, k.aim(), float(xd()["range"]))
 	if not pw["ok"]:
 		denied += 1
 		if k.h.is_local() and k.m.hud:
@@ -170,8 +170,6 @@ func _tick_catch(left: float) -> void:
 		var first := not caught.has(f.get_instance_id())
 		if first:
 			hit["stun"] = maxf(left, TICK)
-		else:
-			hit["tick"] = true      # (the catch's hold-down ticks carry no hit-stop; the catch does)
 		caught[f.get_instance_id()] = f
 		f.hurt(dmg, k.h, hit)
 		if first:

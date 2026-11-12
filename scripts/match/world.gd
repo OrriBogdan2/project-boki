@@ -5,7 +5,7 @@ extends Node3D
 
 const VOID := -1.0e9
 const LEVEL := 0.8      # height of one terrace
-static var STEP: float = HunterMove.step_height      # m: the tallest lip you walk up without jumping (hunter_move.json)
+const STEP := 0.32      # how high you can walk up without jumping
 const BLOCK_H := 3.0
 
 enum { T_VOID, T_GROUND, T_BLOCK }
@@ -32,6 +32,7 @@ var chest_spots: Array = []
 var camp_spots: Array = []
 var wild_spots: Array = []
 var no_deco := {}
+var scatter_chunk := 0       # tiles: scatter batches are at least this wide (a home sets its whole map: all on screen)
 var paint := {}          # tile index -> colour for paths and soil, blended at the corners
 var clouds: Array = []
 var sheer := {}          # tile index -> true: a smooth cliff rim you can't grab (authored maps)
@@ -64,10 +65,6 @@ func idx(x: int, z: int) -> int:
 
 func inb(x: int, z: int) -> bool:
 	return x >= 0 and z >= 0 and x < w and z < h
-
-## True on a flight of stairs, where the ground rises smoothly instead of in lips.
-func on_stairs(x: float, z: float) -> bool:
-	return stairs.has(idx(int(floor(x)), int(floor(z))))
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
@@ -1386,6 +1383,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
 			# mean far fewer draws (and shadow draws) for a few more off-screen instances
 			chunk = maxi(chunk, 32)
+	chunk = maxi(chunk, scatter_chunk)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin

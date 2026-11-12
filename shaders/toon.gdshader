@@ -6,6 +6,14 @@ shader_type spatial;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
+// With use_vertex_color: the vertex colour's red, green and blue weigh these three colours instead of
+// being the colour, so one mesh wears many colour sets (a glider canopy: one per skin, each Hunter's
+// cloth, stripe and edge here). Set as Vector4 (Gliders.weight), so no renderer converts them: they
+// mix as a vertex colour would.
+uniform bool vertex_weights = false;
+uniform vec4 weight_r = vec4(1.0);
+uniform vec4 weight_g = vec4(1.0);
+uniform vec4 weight_b = vec4(1.0);
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
@@ -57,7 +65,6 @@ uniform float mark_amt = 0.5;
 uniform float mark_glow = 0.0;
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
-#include "res://shaders/canopy_heat.gdshaderinc"
 varying vec3 lpos;
 varying vec3 wnorm;
 varying vec2 part_y;
@@ -130,7 +137,8 @@ void fragment() {
 		t = mix(vec3(lum), t, tex_sat);
 		c *= mix(t, painted, band * recolor);
 		if (use_vertex_color) { c *= mix(vec3(1.0), COLOR.rgb, color_tint * (1.0 - band * recolor)); }
-	} else if (use_vertex_color) { c *= COLOR.rgb; }
+	} else if (use_vertex_color && vertex_weights) { c *= mat3(weight_r.rgb, weight_g.rgb, weight_b.rgb) * COLOR.rgb; }
+	else if (use_vertex_color) { c *= COLOR.rgb; }
 	else if (vertex_ao) { c *= COLOR.rgb; }
 	float mk = 0.0;
 	if (mark_kind > 0) {
@@ -174,15 +182,13 @@ void fragment() {
 			c *= 0.8 + 0.6 * smoothstep(0.1, 0.8, r.y);
 		}
 	}
-	float ember = canopy_ember(lpos.xz);
-	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

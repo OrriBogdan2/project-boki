@@ -2,6 +2,7 @@ extends Node3D
 ## Inside a building: walk around, hang out with the kin who live there, and decorate. Furniture
 ## sits on a tile grid; press B (or the Decorate button) to place, turn, move and put things away.
 
+const SPEED := 4.2
 const TILE := 1.0
 
 var room := "house"
@@ -17,7 +18,7 @@ var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
 var pface := PI
 var verbs := HomeVerbs.new()      # your garden moves (home_verbs.gd)
-var mover := FarmStep.new()      # fixed steps and a blended facing, as on the farm (farm_step.gd)
+var walk_ph := 0.0
 var decor: Array = []           # [{id, x, z, r}], the live list in the save (or a copy when visiting)
 var nodes: Array = []           # one Node3D per decor entry
 var occ := {}                   # Vector2i -> index into decor, for pieces you can't walk through
@@ -238,7 +239,7 @@ func _free_spot() -> Vector3:
 # ------------------------------------------------------------------ loop
 func _process(delta: float) -> void:
 	var d := minf(delta, 0.05)
-	mover.run(d, player, _move_player)
+	_move_player(d)
 	for k in kins:
 		k["t"] -= d
 		if k["t"] <= 0.0:
@@ -273,7 +274,8 @@ func _move_player(d: float) -> void:
 	if panel_open == "" and not Overlay.is_open():
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
-	var hv := mover.walk(Vector2(pvel.x, pvel.z), mv, d)
+	var hv := Vector2(pvel.x, pvel.z)
+	hv += (mv * SPEED - hv) * (1.0 - exp(-14.0 * d))
 	var nx := ppos.x + hv.x * d
 	if not _blocked(nx, ppos.z): ppos.x = nx
 	var nz := ppos.z + hv.y * d
@@ -281,12 +283,11 @@ func _move_player(d: float) -> void:
 	pvel = Vector3(hv.x, 0, hv.y)
 	player.position = ppos
 	if hv.length() > 0.3:
-		pface = rotate_toward(pface, atan2(-hv.x, -hv.y), HunterMove.turn_rate * d)
-	mover.face(pface)
+		pface = lerp_angle(pface, atan2(-hv.x, -hv.y), minf(1.0, d * 14.0))
 	player.rotation.y = pface
 	if not player.has_meta("anim"): player.set_meta("anim", HunterAnim.new(player))
 	var ps := {"vel": pvel, "face": pface, "fired": 99.0, "holster": true}
-	mover.pose(player.get_meta("anim"), ps.merged(verbs.step(d)), d)
+	(player.get_meta("anim") as HunterAnim).update(d, ps.merged(verbs.step(d)))
 
 func _find_interact() -> void:
 	var best := {}; var bd := 1.3

@@ -180,8 +180,9 @@ func _tender_support() -> void:
 	step(m, 0.1)
 	var held := CareUtil.is_carried(A)
 	P.root_t = 0.5
+	Hex.apply(P, 0.5, false)
 	step(m, 0.1)
-	ok("Carrier: a root holds them", held and CareUtil.is_carried(A))
+	ok("Carrier: a root and a hex hold them", held and CareUtil.is_carried(A))
 	P.root_t = 0.0
 	P.hurt(10.0, T, {"src": "primary"})
 	step(m, 0.1)

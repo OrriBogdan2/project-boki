@@ -122,7 +122,6 @@ func drop_holds() -> void:
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
-func _rmb_dropped() -> void: pass                    # the hold was dropped (stun, down): clear what it showed
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
 func rmb_auto_t() -> float: return 9.0               # a hold this long fires by itself
 func full_ready() -> bool: return false              # the resource-full RMB variant is ready
@@ -166,17 +165,12 @@ func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
-## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
-func speed_bonus() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
-## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with
-## their own hold set it.
-func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
@@ -216,9 +210,7 @@ func tick(dt: float) -> void:
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
 	if rmb_down:
-		if h.downed or h.stun_t > 0.0:
-			_drop_rmb()
-		elif held("rmb"):
+		if held("rmb") and not h.downed and h.stun_t <= 0.0:
 			rmb_t += dt
 			rmb_hold_tick(rmb_t)
 			if rmb_t >= rmb_auto_t():
@@ -273,32 +265,13 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
-## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
-## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
-## A recast row it doesn't have is its first cast's (a second press of a slot with no recast changes nothing).
-func turn_rule(slot: String) -> Dictionary:
-	var rows: Dictionary = d.get("turn", {})
-	var row: Dictionary = rows.get(slot, rows.get(slot.trim_suffix("_recast"), {}))
-	return {"early": row.get("early", "free"), "late": row.get("late", "free")}
-## A capped row's turn rate (deg/s) for a window, read where the cast steers.
-func turn_deg_s(slot: String, window: String) -> float:
-	return float(d["turn"][slot][window])
-## A capped-turn aim lock: `cur` turned toward the raw cursor (not aim_dir(), which returns the lock) by at
-## most `deg_s` degrees per second. A committed charge keeps its line near-planted this way.
-func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
-	var a: Vector3 = h.inp["aim"]
-	var want := Vector2(a.x - h.pos.x, a.z - h.pos.z)
-	if want.length() < 0.05:
-		return cur
-	var step := deg_to_rad(deg_s) * dt
-	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -326,14 +299,6 @@ func _release_rmb() -> void:
 	c["hold"] = rmb_t >= float(rmb_def().get("hold", 0.3)) and not c.get("air", false)
 	c["variant"] = describe_rmb_variant(c)
 	fire_rmb(c)
-
-## Stunned or downed mid-hold: the hold ends with no release and nothing is spent, so no charged move leaves a
-## hunter who can't act (docs/heroes/hold_release_rules.md). Kits clean up what the hold showed in _rmb_dropped().
-func _drop_rmb() -> void:
-	rmb_down = false
-	rmb_t = 0.0
-	AimKit.clear(h)
-	_rmb_dropped()
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:
@@ -436,7 +401,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), String(rd.get("name", "")).to_upper(), col, true)
 	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
@@ -445,7 +409,6 @@ func _fuse_start(bond: bool) -> void:
 		m.sfx("bond", h.pos, -3.0, 0.9)
 	if String(fuse["guard"]) == "unstoppable":
 		h.fortify_t = maxf(h.fortify_t, T + 0.05)
-		m.fx.word(h.pos + Vector3(0, 2.2, 0), "UNSTOPPABLE", Color("ffe2a0"), false)
 	# everyone else's game: a ring and a column of light where it's winding up (the existing fx path)
 	if m.net_on and not h.remote:
 		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 2.4, col.to_html(false)])
@@ -464,7 +427,6 @@ func _tick_fuse(dt: float) -> void:
 		# interrupted: the ult fizzles and comes back after a short wait (that's the counterplay)
 		fuse = {}
 		cd["r"] = minf(float(cd["r"]), 8.0)
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 		m.sfx("warn", h.pos, -4.0, 0.8)
 		return
 	# energy gathers inward, faster and brighter toward the end
@@ -531,7 +493,6 @@ func _bond_tell() -> void:
 	m.fx.ring(h.pos, 2.6, Color(kc, 0.95), 0.35)
 	for i in 6:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.4 + 0.5 * i, 0), kc, 10, 2.5, 0.35, -2.0, 1.1))
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "BONDED", kc, true)
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
@@ -923,13 +884,6 @@ func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
 ## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
 func dash_vy(_dt: float) -> float: return 0.0
-
-## A ground dash ran off a ledge and ended in the air (HunterMove.dash_off_ledge): its ground pose stops there,
-## and so does its wind-down (the glider kept shut a beat after a dash is for a dash that stays on the ground).
-func on_dash_off_ledge() -> void:
-	if anim_at >= dash_press_at:
-		anim_id = ""
-	h.glide_cd = 0.0
 ## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
 func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
@@ -1013,21 +967,18 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: a word over the hunter, the body glow, the ready ping (the owner's slot pings too).
-func armed_fx(word: String, slot := "sec") -> void:
-	var rc := res_col()
-	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
-	m.fx.body_glow(h.pos, rc)
+## The payoff becoming armed: the body glow, the ready ping (the owner's slot pings too).
+func armed_fx(slot := "sec") -> void:
+	m.fx.body_glow(h.pos, res_col())
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
+## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
+func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
 		rings := true) -> void:
-	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
 	if rings:
 		m.fx.ring(at, 2.4, col, 0.38)
 		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)

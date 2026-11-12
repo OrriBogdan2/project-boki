@@ -121,7 +121,7 @@ func _anim(id: String) -> void:
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(WARDENS[id]["moves"]) != "" and String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
@@ -230,7 +230,11 @@ func _glb_top(m: Node3D) -> float:
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
 			continue        # (floating props, Tarek's stones and Motley's halo: not the height)
-		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
+		var mi := nd as MeshInstance3D
+		if mi.skin == null:      # a rigid piece (no skin): its box, where its bone or parent holds it
+			top = maxf(top, (mi.global_transform * mi.get_aabb()).end.y)
+			continue
+		for p in WARDEN_SKIN.points(mi):
 			top = maxf(top, p.y)
 	return top - m.global_position.y
 

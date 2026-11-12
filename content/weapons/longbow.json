@@ -29,9 +29,8 @@
 			]
 		],
 		"draw_early": 15.0,
-		"draw_min": 0.08,
 		"draw_slow": 0.7,
-		"desc": "Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor (a click under 0.08s looses nothing: mashing never beats the draw). You walk slower while drawing.",
+		"desc": "Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor. You walk slower while drawing.",
 		"kick": 0.12,
 		"push": 1.0,
 		"overdraw_t": 0.5,

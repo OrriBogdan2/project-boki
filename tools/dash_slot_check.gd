@@ -63,8 +63,6 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		var pips: Array = sh.get("pips", [])
 		ok(pips.size() == want and pips.all(func(f): return f == 1.0) and (float(sh.get("air", -1.0)) >= 0.0) == air,
 			"%s: %d pips, all full = %d charges, air dash %s" % [a, pips.size(), want, air])
-	var owed := DashSlot.next_secs(DashSlot.src(-0.4, 1, 8.5, 0.0, 0.0, "", Color.WHITE))
-	ok(absf(owed - 1.4 * 8.5) < 0.01, "a held slide's charge (-0.4) counts down 1.4 recharges, not 0.4 (%.1fs)" % owed)
 	P.reclass(Arch.weight("juggernaut"), "juggernaut", Arch.signature("juggernaut"))
 	P.unlock_all()
 	var regen: float = P.dash_regen()

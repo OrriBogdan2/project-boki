@@ -24,7 +24,6 @@ const EAST := Vector2(1, 0)
 var bad := 0
 var m: Match
 var h: Hunter
-var park := Vector3.ZERO    # where the other Hunters wait, far from the cleared square
 var wall_x := 0.0       # world x of the wall face
 
 func ok(cond: bool, what: String) -> void:
@@ -57,10 +56,16 @@ func _start(main: Node, arch: String) -> void:
 	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 1109, "no_drop": true,
 		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
 	m.set_process(false)
+	for mob in m.mobs:
+		mob.queue_free()
+	m.mobs.clear()
 	h = m.player
-	park = h.pos + Vector3(80, 0, 80)
 	h.set_arch(arch)
 	h.unlock_all()
+	for other in m.hunters:
+		if other != h:
+			other.ctrl = "idle"
+			other.teleport(h.pos + Vector3(80, 0, 80))
 	var w: World = m.world
 	var hx := int(floor(h.pos.x))
 	var hz := int(floor(h.pos.z))
@@ -80,29 +85,11 @@ func _start(main: Node, arch: String) -> void:
 			w.bush.erase(i)
 	h.teleport(Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5))
 	wall_x = hx + WALL_AT
-	_clear()
 	_steps(SETTLE)
 
 func _steps(n: int) -> void:
 	for i in n:
-		_clear()
 		m.step(Match.DT)
-
-## A cleared space: no mobs, no wild or own Boki, every other Hunter (bots) parked idle far away. Anything
-## standing there would shove the Hunter in Match._separate and make a trace differ from run to run.
-func _clear() -> void:
-	for mob in m.mobs:
-		mob.queue_free()
-	m.mobs.clear()
-	for k in m.kins:
-		k.queue_free()
-	m.kins.clear()
-	h.kin = null
-	for other in m.hunters:
-		if other != h:
-			other.ctrl = "idle"
-			other.vel = Vector3.ZERO
-			other.teleport(park)
 
 ## Back to a clean standing (or airborne) start at `at`, everything ready, then settled.
 func _reset(at: Vector3, grounded: bool) -> void:
@@ -179,7 +166,6 @@ func _record(script: String) -> Array:
 	var trace := []
 	for i in STEPS:
 		_press(script, i)
-		_clear()
 		m.step(Match.DT)
 		if (i + 1) % EVERY == 0:
 			var d := h.pos - start

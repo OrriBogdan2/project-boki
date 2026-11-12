@@ -1,7 +1,0 @@
-{
-	"desc": "Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.",
-	"walk": {"radius": 2.2, "height": 2.0, "settle": 0.5, "pull_speed": 6.0, "pull_gain": 6.0, "grab": 0.6},
-	"tune": {"radius": 1.1, "height": 1.0},
-	"bot": {"radius": 1.4, "height": 1.0},
-	"interact": {"radius": 1.5, "height": 1.2}
-}

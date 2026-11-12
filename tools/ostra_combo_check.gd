@@ -14,6 +14,10 @@ func run(main_node: Node) -> void:
 	await orb_check.orbs(main)
 	n += orb_check.n
 	fails += orb_check.fails
+	var globe_check = load("res://tools/ostra_globe_check.gd").new()
+	await globe_check.globe(main)
+	n += globe_check.n
+	fails += globe_check.fails
 	var arena_check = load("res://tools/ostra_arena_check.gd").new()
 	await arena_check.arena(main)
 	n += arena_check.n
@@ -222,7 +226,7 @@ func _ostra() -> void:
 		"data: a full orb is 34% harder (353 vs 263)",
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
-	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
+	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -375,10 +379,27 @@ func _ostra() -> void:
 	)
 	reset.call()
 	K.cd["e"] = 0.0
-	var hp_fizz := T.hp
-	K.cast_e()
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
-	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
+	var hp_idle := T.hp
+	K.use_e()
+	var cd_cast := float(K.cd["e"])
+	step(m, float(K.e_def()["grow"]) + 60.0)
+	ok(
+		"e: no fizzle: a full seed left a whole minute is still there at full size, harmless",
+		not K.seed.is_empty() and K.seed_k() >= 0.99 and T.hp >= hp_idle and K.e_recastable(),
+		"seed %s k %.2f" % [not K.seed.is_empty(), K.seed_k()]
+	)
+	ok(
+		"e: the cooldown starts on the plant (it has run out by the minute, the pop is not waited for)",
+		cd_cast > 0.0 and float(K.cd["e"]) <= 0.0 and K.in_e(),
+		"cd at plant %.1f now %.1f" % [cd_cast, float(K.cd["e"])]
+	)
+	ok("e: the data lists no timer: no hold_full cap in the def", not K.e_def().has("hold_full"))
+	ok("e: a merge does not take the waiting seed", _merge(P) and not K.seed.is_empty())
+	step(m, 2.0)
+	P.downed = true
+	K._tick(0.016)
+	P.downed = false
+	ok("e: going down ends the seed with no damage", K.seed.is_empty() and T.hp >= hp_idle and not K.in_e())
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -484,11 +505,11 @@ func _ostra() -> void:
 			elif K.snaps > 0: cast_k[0] = maxf(cast_k[0], K.boost_k))
 	ok(
 		"data rank 3: Snap speeds him up 11% on the cast and 22% on a hit",
-		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.speed_bonus() - 0.215) < 0.01,
-		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.speed_bonus()]
+		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.move_k() - 1.215) < 0.01,
+		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.move_k()]
 	)
 	step(m, 2.2)
-	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
+	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	P.slot_lv["sec"] = 1
 	# ---- data pass, Trade rank 3: allies beside him get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
 	P.slot_lv["dash"] = 3
@@ -693,7 +714,7 @@ func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))

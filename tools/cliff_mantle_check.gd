@@ -9,7 +9,7 @@ extends RefCounted
 ##   glide                       gliding in below the lip
 ##   abyss                       falling below an island's rim, heading back in
 ## Asserts each kind of approach tops at least TOP_RATE of its tries, that over the lip you still have
-## mantle_launch_keep (0.6) of the speed you came in with in KEEP_RATE of them, and that no face is topped by nobody.
+## KEEP (0.6) of the speed you came in with in KEEP_RATE of them, and that no face is topped by nobody.
 ## Double-high ground (4 terraces, 3.2m: LAYOUT_RULES' wall tier) is never reached by jumping alone, a
 ## dash included: only a glide (or a launch, an ability, the abyss) gets you up it.
 ## With --verbose prints every try. Never touches the save.
@@ -19,6 +19,7 @@ const HEROES := ["thief", "gunslinger", "juggernaut", "mage", "dredge"]
 const MAX_FACES := 16          # faces sampled per rise
 const TRIAL_S := 2.6
 const MODES := ["jump_0", "jump_30", "jump_60", "dash_jump", "jump_dash", "glide"]
+const KEEP := MantleCarry.KEEP
 const TOP_RATE := 0.9
 const DOUBLE_HIGH := 4         # terraces: the wall tier, out of a jump's reach
 const KEEP_RATE := 0.9
@@ -119,7 +120,7 @@ func _count(k: String, r: Dictionary, f: Dictionary, arch: String) -> void:
 		f["topped"] = true
 		for key in ["vin", "vmin", "vlip", "t"]:
 			s[key] += r[key]
-		if r["vlip"] >= HunterMove.mantle_launch_keep * r["vin"] - 0.01:
+		if r["vlip"] >= KEEP * r["vin"] - 0.01:
 			s["kept"] += 1
 	if verbose:
 		print("CLIFF try %s %s at %s dir %s: %s" % [k, arch, f["a"], f["d"], r])

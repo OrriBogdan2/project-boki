@@ -7,8 +7,7 @@ extends Node3D
 ## The cars are platforms you can stand on and ride; each carries a crate of early loot. Standing on a
 ## car you move freely in its frame: it carries you (a moving platform), and you walk, aim, dash and
 ## jump on top of that (Hunter._occ keeps you on the deck and lets you step off onto a pier or jump
-## off). Leaving a car takes its speed with you, and landing on one takes it up: no jolt either
-## way. The train itself is deadly while it's moving: its front, or any car that hits you while you
+## off). The train itself is deadly while it's moving: its front, or any car that hits you while you
 ## aren't on top of it, takes you straight out (Match.train_hit). It warns you: a headlight, a horn
 ## about two seconds before it reaches you (and before it pulls out of a stop), and the rails ahead
 ## of it pulsing.
@@ -47,7 +46,6 @@ var rail_cd := 0.0
 var was_moving := false
 var ride_t := {}              # hunter -> match time they last stood on a car
 var carried := {}             # hunter -> how far the train carried them last step (world units)
-var dash_off := {}            # hunter -> the car's speed (m/s, world) they dashed off with, while the dash lasts
 var depart_warned := false
 var hits: Array = []          # [{e, car, t}] for the checks: what the train hit, which car, and when
 
@@ -210,47 +208,33 @@ func tick(dt: float) -> void:
 	old = cur.duplicate()
 	_place(float(m.time))
 	var moving := head_v > 0.3
-	# riders: anyone standing on a car moves with it. This is only the platform's motion: the rider's
-	# own walking, dashing and jumping happen on top of it in Hunter.sim, in the car's frame. The
-	# car's speed moves between your world speed and your speed over the deck as you step on or off,
-	# so neither way jolts: a jump, a dash off the side or a glider opened over the rails sets off at
-	# the train's speed and the air steering and drag take it from there (a moving platform, as in
-	# the source), and a glide that lands on a car is at the deck's speed the step it touches down.
+	# riders: anyone standing on a car moves with it (and for a moment after a hop, so jumping on a
+	# moving train doesn't leave you behind). This is only the platform's motion: the rider's own
+	# walking, dashing and jumping happen on top of it in Hunter.sim, in the train's frame.
 	var was_carried := carried
 	carried = {}
 	for h in m.hunters:
-		if h.out or h.extracted or h.riding or h.remote or not h.grounded:
+		if h.out or h.extracted or h.riding or h.remote:
 			continue
-		var k := _car_under(h.pos, old, 0.25)
+		var k := _car_under(h.pos, old, 0.25 if h.grounded else 4.0)
 		if k < 0:
 			continue
-		ride_t[h] = m.time
-		var dp: Vector3 = _carry(k, h.pos) - h.pos
-		carried[h] = dp
-		h.pos += dp
-		h.prev += dp
-		if dt > 0.0 and not was_carried.has(h):
-			h.vel.x -= dp.x / dt     # stepped on: what's left is your speed over the deck
-			h.vel.z -= dp.z / dt
+		if h.grounded:
+			ride_t[h] = m.time
+		elif m.time - float(ride_t.get(h, -9.0)) > 1.2:
+			continue
+		var np := _carry(k, h.pos)
+		carried[h] = np - h.pos
+		h.pos = np
+		h.prev += carried[h]
+	# off the train in mid-air (jumped or dashed off the side): you keep the train's speed, as off
+	# any moving platform, and the air steering eases it off
 	if dt > 0.0:
 		for h in was_carried:
-			if carried.has(h) or not is_instance_valid(h) or h.out:
+			if carried.has(h) or not is_instance_valid(h) or h.grounded or h.out:
 				continue
 			var dv: Vector3 = (was_carried[h] as Vector3) / dt
-			if h.roll_t > 0.0:
-				dash_off[h] = Vector2(dv.x, dv.z)
-			else:
-				h.vel.x += dv.x     # stepped off: the car's speed comes with you (not its climb, as in the source)
-				h.vel.z += dv.z
-	# a dash sets its own speed every step, so one that carries on past the end of a car is moved
-	# along with the car's speed until it hands over to the run; from there the air is your frame
-	for h in dash_off.keys():
-		if not is_instance_valid(h) or carried.has(h) or h.grounded or h.out or h.roll_t <= dt:
-			dash_off.erase(h)     # (the dash hands over this step: that step is the air's)
-			continue
-		var along: Vector3 = Vector3(dash_off[h].x, 0.0, dash_off[h].y) * dt
-		h.pos += along
-		h.prev += along
+			h.vel.x += dv.x; h.vel.z += dv.z
 	for p in m.pickups:
 		if p.has("ride"):
 			var k2 := int(p["ride"])
@@ -316,8 +300,7 @@ func _kill_zone() -> void:
 
 ## Which car hits a body at p right now (0 = the engine), or -1. The engine's front sweeps the
 ## track ahead; the engine's body and the cars' frames hit anything that isn't up on a deck. A rider
-## (on a car a moment ago) is never hit by the engine's body or a car's frame, only by the engine's
-## front: a deck climbing out of a dip under someone who just jumped off it scoops them up instead.
+## (on a car a moment ago) is never hit by the engine's body, only by its front.
 func hit_by(p: Vector3, rider := false) -> int:
 	if not _near_train(p, cur):
 		return -1
@@ -334,7 +317,7 @@ func hit_by(p: Vector3, rider := false) -> int:
 			continue
 		if k == 0 and not rider and lk.y > -1.8 and lk.y < 1.9:
 			return 0
-		if k > 0 and not rider and lk.y > -1.8 and lk.y < -0.45:
+		if k > 0 and lk.y > -1.8 and lk.y < -0.45:
 			return k
 	return -1
 

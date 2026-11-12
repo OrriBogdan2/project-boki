@@ -113,7 +113,6 @@ func mage() -> void:
 	await _mage_merge(m, P, K, home)
 	_mage_shift(m, P, K, home)
 	_mage_jump(m, P, K, home)
-	_mage_move(m, P, K, home)
 	_mage_spread(m, P, T, T2, K, home)
 	await _mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
@@ -335,87 +334,6 @@ func _mage_shift(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 	ac.step(m, float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1)
 	ok("Kitefall + Shift (item 51): she still comes down and strikes", U.phase() == MageUlt.AFTER, U.phase())
 	ac.step(m, 0.6)
-
-## How Kitefall moves her (docs/heroes/mage.md "Movement settled"): straight up, WASD never moves her in the crouch or
-## the hang (the cursor only places the landing); the climb reaches its height in the rise; the strike leaves her
-## with no momentum and the next step is hers (she walks); the landing never lands in the abyss, and on a higher
-## terrace she lands on top of it.
-func _mage_move(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
-	var U := K.ult
-	var xd := K.x_def()
-	var W = m.world
-	K.cd["x"] = 0.0
-	P.teleport(home)
-	ac.step(m, 0.1)
-	var spot := home + Vector3(5, 0, 0)
-	ac.aim_at(P, spot)
-	HunterKeys.ult_pressed(P)
-	var drift := 0.0
-	var t := 0.0
-	var top := 0.0
-	var climb_t := 0.0
-	while U.phase() in [MageUlt.CROUCH, MageUlt.RISE, MageUlt.AIR]:
-		P.inp["move"] = Vector2(0, 1)
-		ac.step(m, hc.DT, func(): ac.aim_at(P, spot))
-		t += hc.DT
-		drift = maxf(drift, hc._flat(P.pos, home))
-		if top < float(xd["height"]) - 0.15 and P.pos.y - home.y >= float(xd["height"]) - 0.15:
-			climb_t = t
-		top = maxf(top, P.pos.y - home.y)
-	ok("Kitefall move: WASD never moves her in the crouch or the hang (straight up, no drift)", drift < 0.05,
-			"%.3f m" % drift)
-	var want_t := float(xd["windup"]) + float(xd["rise"])
-	ok("Kitefall move: up to her full height by the end of the rise (0.3 s crouch + 0.3 s rise)",
-			absf(climb_t - want_t) < 0.08 and absf(top - float(xd["height"])) < 0.2, "%.2f s, %.1f m" % [climb_t, top])
-	var air_t := float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"])
-	ok("Kitefall move: with no second press she comes down after the full hover (crouch, rise, 1.7 s hang)",
-			absf(t - air_t) < 0.05, "%.2f s of %.2f" % [t, air_t])
-	while U.phase() == MageUlt.FALL:
-		ac.step(m, hc.DT)
-	var still := Vector2(P.vel.x, P.vel.z).length()
-	var p0 := P.pos
-	ac.step(m, 0.15, func(): P.inp["move"] = Vector2(0, 1))
-	P.inp["move"] = Vector2.ZERO
-	ok("Kitefall end: no momentum from the strike, and the next step is hers (she walks off)",
-			still < 0.01 and hc._flat(P.pos, p0) > 0.25 and P.grounded,
-			"%.2f m/s then %.2f m" % [still, hc._flat(P.pos, p0)])
-	ac.step(m, 0.6)
-	# the landing over the abyss backs off to ground; a higher terrace takes her on top
-	var hx := int(floor(home.x))
-	var hz := int(floor(home.z))
-	for dz in range(-3, 4):
-		for dx in range(4, 9):
-			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
-	K.cd["x"] = 0.0
-	P.teleport(home)
-	var over_void := home + Vector3(6.5, 0, 0)
-	ac.aim_at(P, over_void)
-	HunterKeys.ult_pressed(P)
-	ac.step(m, 0.8, func(): ac.aim_at(P, over_void))
-	HunterKeys.ult_pressed(P)
-	ac.step(m, float(xd["drop"]) + 0.05)
-	ok("Kitefall abyss: a cursor over the void lands her on the nearest ground toward the take-off",
-			U.phase() == MageUlt.AFTER and not W.is_void(P.pos.x, P.pos.z) and P.pos.x - home.x > 2.5,
-			"x %.1f void %s" % [P.pos.x - home.x, W.is_void(P.pos.x, P.pos.z)])
-	for dz in range(-3, 4):
-		for dx in range(4, 9):
-			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
-			W.level[W.idx(hx + dx, hz + dz)] += 2
-	ac.step(m, 0.6)
-	K.cd["x"] = 0.0
-	P.teleport(home)
-	HunterKeys.ult_pressed(P)
-	ac.step(m, 0.8, func(): ac.aim_at(P, over_void))
-	HunterKeys.ult_pressed(P)
-	ac.step(m, float(xd["drop"]) + 0.05)
-	var up := P.pos.y - home.y
-	ok("Kitefall ledge: a cursor on a higher terrace lands her on top of it", absf(up - 2.0 * World.LEVEL) < 0.15,
-			"%.2f m up" % up)
-	for dz in range(-3, 4):
-		for dx in range(4, 9):
-			W.level[W.idx(hx + dx, hz + dz)] -= 2
-	ac.step(m, 0.6)
-	P.teleport(home)
 
 ## Item 51: a jump in Kitefall's crouch goes at once; she launches from up there and the climb starts at her
 ## height (it never drops her back to the ground first).

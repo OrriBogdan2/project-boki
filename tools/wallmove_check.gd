@@ -6,8 +6,6 @@ extends RefCounted
 ##      you hop, and the glider never opens from it.
 ##      Facing a wall with no keys, ten hops in a row, each with its scuff, and never a glider; a standing
 ##      jump at a one-terrace ledge mantles onto it.
-##   1b. Tall climb: Lace's plain jump facing the four-terrace wall climbs it, Vex's doesn't; both still
-##      walk off its top.
 ##   2. Wall bounce: an angled hit with speed reflects and keeps most of the speed; head-on it doesn't.
 ##   3. Ledges: a glide release against a two-terrace ledge, and falling past one, put you on top;
 ##      keys along or away from the wall never do.
@@ -57,7 +55,6 @@ func run(main: Node) -> void:
 	var w4: Dictionary = _carve(4, 1)[0]
 	var w5 := _carve(5, 2)
 	_kick(w4, w5[0], w5[1])
-	_tall(w4)
 	_dance(w5[1])
 	_stand_mantle(_carve(1, 1)[0])
 	_bounce(w4)
@@ -186,41 +183,6 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	var again := _attempt(w5b, true, false)
 	var same := absf(again["peak"] - kicked["peak"]) < 0.15
 	ok(again["kicks"] == 1 and same, "the next jump kicks the same: %.2fm" % again["peak"])
-
-# ---------------------------------------------------------------- 1b. tall climb
-## Lace's passive ([game data] bCanWallJump, climb_tall in hunter_move.json): a plain jump facing a
-## four-terrace wall climbs it, no kick; Vex's doesn't. Walking off that wall's top still drops either
-## of them to the ground below, keys turned back into the face on the way down included.
-func _tall(w4: Dictionary) -> void:
-	var cls0 := h.cls
-	var arch0 := h.arch
-	for a: String in ["archer", "gunslinger"]:
-		h.reclass(Arch.weight(a), a)
-		var hero := "Lace" if a == "archer" else "Vex"
-		var tall := a == "archer"
-		var r := _attempt(w4, false)
-		ok(r["top"] == tall and r["kicks"] == 0, "%s: a jump facing a 4-terrace wall %s (peak %.2fm, no kick)" % [
-			hero, "climbs it" if tall else "doesn't climb it", r["peak"]])
-		for back in [false, true]:
-			var y := _walk_off(w4, back)
-			ok(y < 0.1, "%s walks off the 4-terrace top%s and lands below (%.2fm)" % [
-				hero, ", turning back into the face," if back else "", y])
-	h.reclass(cls0, arch0)
-
-## Walks off the wall's top (back: keys turn into the face once airborne). Returns the landing height
-## over the low ground (the top's height if she never left it or was lifted back up).
-func _walk_off(wl: Dictionary, back: bool) -> float:
-	var n: Vector2 = wl["n"]
-	var at: Vector2 = (wl["at"] as Vector2) + n * 0.8
-	_reset(Vector3(at.x, wl["top"], at.y), true)
-	var air := 0.0
-	for i in 150:
-		air = air + DT if not h.grounded else 0.0
-		h.inp["move"] = n if back and air > 0.15 else -n
-		m.step(DT)
-		if h.grounded and i > 10 and h.pos.y < float(wl["top"]) - 0.5:
-			break
-	return h.pos.y - float(wl["low"])
 
 ## Facing the wall, no keys: Space on every fall for DANCE_S. Ten hops, ten scuffs, the glider never opens.
 func _dance(wl: Dictionary) -> void:

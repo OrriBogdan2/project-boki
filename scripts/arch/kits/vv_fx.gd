@@ -325,12 +325,9 @@ func echo(who: Hunter, col: Color, dur := 0.35, alpha := 0.75, back := 0.0) -> v
 	var soft := alpha < 0.5
 	var push := _push_back(who, shift) if soft else Transform3D.IDENTITY
 	for pair in n.get_meta("pairs") as Array:
-		var dst: MeshInstance3D = pair[1]
-		if not is_instance_valid(pair[0]):
-			dst.visible = false          # a mesh the model has since dropped (a muzzle flash, an old weapon)
-			continue
 		var src: MeshInstance3D = pair[0]
-		dst.visible = _shown_under(src, model)
+		var dst: MeshInstance3D = pair[1]
+		dst.visible = is_instance_valid(src) and _shown_under(src, model)
 		if dst.visible:
 			dst.global_transform = push * src.global_transform.translated(shift)
 	var mat: StandardMaterial3D = n.get_meta("mat")

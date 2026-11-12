@@ -8,8 +8,9 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var reticle: Reticle        # the hit tick round the cursor (the reticle itself draws statically)
+var hit_t := 0.0
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
+var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
@@ -36,7 +37,6 @@ const GOLD := Color("f2c84a")
 
 func setup(match_node: Match) -> void:
 	m = match_node
-	reticle = Reticle.new(m)
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
@@ -92,7 +92,7 @@ func _process(delta: float) -> void:
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
-	reticle.tick(delta)
+	hit_t = maxf(0.0, hit_t - delta)
 	_hud_tick(delta)
 	plates.tick(delta)
 	panels.tick(delta)
@@ -102,6 +102,13 @@ func _process(delta: float) -> void:
 	_clear_under_toasts(delta)
 	c.queue_redraw()
 	cursor.queue_redraw()
+
+var hit_armor := false
+
+func hitmarker(crit: bool, armor := false) -> void:
+	hit_t = 0.14
+	hit_crit = crit
+	hit_armor = armor
 
 var flash_t := 0.0
 var flash_col := Color.WHITE
@@ -275,7 +282,11 @@ func _draw_all() -> void:
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
-	HurtWash.draw(c, sz, p, hurt_dirs, m.time)      # low health: the red edge, heavier where the hits came from
+	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
+		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
+		for i in 5:
+			var inset := i * 16.0
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.75, 0.05, 0.05, (0.09 - i * 0.016) * (0.6 + pulse * 0.4)), false, 16.0)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
@@ -1231,9 +1242,9 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
-		"reviving": st = "reviving you!"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
-	if k.state in ["active", "downed", "reviving", "fused", "returning"] or not k.giant.is_empty():
+	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
 		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
@@ -1505,7 +1516,7 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var side := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
 		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
-		if String(st[0]) == "WISP": lbl = "%s DOWN %dm" % [h.pname.substr(0, 10), dist]
+		if String(st[0]) == "WISP": DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ALLY, m.time, 10.0)
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
 		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
 
@@ -1798,7 +1809,17 @@ func _draw_crosshair(p: Hunter) -> void:
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
 		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
 		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
-	reticle.draw_tick(c, mp)
+	if hit_t > 0.0:
+		var hc := Color("ffd23f") if hit_crit else Color.WHITE
+		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")
+		# a sharp X that snaps out and settles: bigger and bolder on crits, dark-edged so it reads
+		# over bright effects
+		var k := hit_t / 0.14
+		var s := (11.0 if not hit_crit else 15.0) + (1.0 - k) * 3.0 + k * k * 4.0
+		var w := 3.0 if not hit_crit else 4.0
+		for d in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
+			c.draw_line(mp + d * 5.0, mp + d * s, Color(0.05, 0.03, 0.08, 0.65 * minf(1.0, k * 2.0)), w + 2.0)
+			c.draw_line(mp + d * 5.0, mp + d * s, Color(hc, minf(1.0, k * 2.5)), w)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))

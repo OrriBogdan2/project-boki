@@ -202,7 +202,6 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
 const PARTICLES := 0.6
-const DEBRIS_MAX := 6          # particles in one debris puff
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
 var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
@@ -234,21 +233,9 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	p.restart()
 	p.emitting = true
 
-## Particles that ride a mover: turf a dash kicks up, a trail behind a glide or a thrown lantern. Not a burst
-## (no `radial`, never thinned by `own_look`): capped at DEBRIS_MAX so it stays a few specks (--move-fx-check).
-func debris(at: Vector3, col: Color, amount := 4, speed := 2.0, life := 0.35, grav := 8.0, size_k := 1.0,
-		dir := Vector3.UP, spread := 60.0) -> void:
-	_emit(at, col, mini(amount, DEBRIS_MAX), speed, life, grav, size_k, dir, spread)
-
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8) -> void:
 	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
-
-## A thin smoke puff drifting behind `dir` (an overheated glider's trail). Like dust, not a burst: dark and grey
-## (no hot core), ~0.4 m soft dots that rise a little and fade over a second, so the puffs left every SMOKE_EVERY
-## behind a gliding Hunter read as one thin dark line at match zoom.
-func smoke(at: Vector3, dir: Vector3) -> void:
-	_emit(at, Color(0.16, 0.15, 0.15, 0.8), 4, 0.6, 1.1, -0.8, 2.6, dir, 20.0)
 
 ## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
 ## burst: those are kept for blasts that do something.

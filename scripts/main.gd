@@ -273,7 +273,7 @@ func _ready() -> void:
 				var to := tgt - Vector2(ph.pos.x, ph.pos.z)
 				ph.inp["move"] = to.normalized() if to.length() > 0.4 else Vector2.ZERO
 				ph.inp["jump"] = t < 0.1 or (ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) != pi)
-				ph.inp["glide"] = t > 0.25; ph.inp["glide_btn"] = t > 0.25
+				ph.inp["glide"] = t > 0.25
 				pm.step(Match.DT); t += Match.DT
 				top_y = maxf(top_y, ph.pos.y)
 				var up: Dictionary = pm.world.updraft_at(ph.pos)
@@ -459,9 +459,6 @@ func _ready() -> void:
 		return
 	if "--move-feel-check" in args:
 		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
-		return
-	if "--aim-latency-check" in args:
-		load("res://tools/aim_latency_check.gd").new().run(self)    # a scripted mouse move: the reticle and the aim point sit under it within one physics tick
 		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk

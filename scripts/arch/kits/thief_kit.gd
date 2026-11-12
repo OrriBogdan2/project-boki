@@ -322,8 +322,8 @@ func _net_glint(dt: float) -> void:
 	glint_net_t = GLINT_NET_EVERY
 	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
-func speed_bonus() -> float:
-	return vault_haste() if haste_t > 0.0 else 0.0
+func move_k() -> float:
+	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
 
 ## Vault's speed boost; the last rank makes it half again as big.
 func vault_haste() -> float:
@@ -373,9 +373,7 @@ func _bolt() -> void:
 	var d := h.aim_dir()
 	var right := Vector2(-d.y, d.x)
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
-	var side := Vector3(off.x, 0, off.y)
-	var start: Vector3 = (sd["pos"] as Vector3) + side
-	var gun: Vector3 = sd.get("muzzle", sd["pos"]) + side      # where it's drawn from; it hits from the body
+	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)
@@ -389,7 +387,6 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	if sd.has("muzzle"): sd["muzzle"] = gun
 	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
 	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
 	# empowered one is both blades driven out together (thf_primed)
@@ -397,7 +394,7 @@ func _bolt() -> void:
 	play("thf_primed" if emp else throw)
 	h.swing_n += 1
 	h.combo_i = 1 if hand == 1 else 2
-	var muzzle := gun + Vector3(d.x, 0, d.y) * 0.1
+	var muzzle := start + Vector3(d.x, 0, d.y) * 0.1
 	if emp:
 		primed_t = 0.0
 		haste_t = 0.0
@@ -576,7 +573,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
@@ -593,8 +589,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
-	var who: String = "TAKEN" if mine else "ASSIST"
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
+	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ RMB: Bola
@@ -766,7 +761,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)

@@ -117,6 +117,7 @@ var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
+const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -431,7 +432,7 @@ func _ready_rest() -> void:
 		rack_node.position = spots["rack"]
 		add_child(rack_node)
 	portal.get_node("Disc").visible = true
-	(portal.get_node("Beam") as CPUParticles3D).emitting = true
+	ZoneDress.calm_pad(portal)
 	if not fs:
 		var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
 		(pond.get_child(0) as MeshInstance3D).material_override = HomeBuild.water_mat()      # animated water
@@ -979,7 +980,9 @@ func _spawn_kin() -> void:
 		var isl: int = 0 if rec["uid"] == _d().get("active", "") else open_isles[ri % open_isles.size()]
 		ri += 1
 		add_kin(rec, isl, farm_kin.find(rec))
-	if hb and hb.astar: hb.assign_beds()
+	if hb and hb.astar:
+		hb.assign_beds()
+		PlaceClearance.free_trapped(self)
 
 ## One kin on the farm: its model, mood label and entry in kins, on island `isl`; `slot` (its place in the
 ## roster, -1 for none) picks its bed.
@@ -1073,7 +1076,7 @@ func _process(delta: float) -> void:
 	if _hub_room_t <= 0.0:
 		_hub_room_t = 0.2
 		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
-	mover.run(d, player, _move_player)
+	_move_player(d)
 	_move_kin(d)
 	if guide: guide.tick(d)
 	if hhints: hhints.tick(d)
@@ -1091,7 +1094,7 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
-	var focus := Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z)
+	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -1113,7 +1116,6 @@ func _process(delta: float) -> void:
 # drop into the sky and the wind sets you back down where you last stood.
 var gliding := false
 var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
-var mover := FarmStep.new()      # its clock: fixed steps, latched presses, the jump's grace timers (farm_step.gd)
 var dash_t := 0.0
 var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv scales it)
 var dash_charges := 2.0
@@ -1248,9 +1250,9 @@ func _move_player(d: float) -> void:
 	var air := py > gh + 0.001 or pvy > 0.0
 	# crouch: held by default, or tapped to toggle (Settings crouch_toggle), as in a match
 	if Settings.get_v("crouch_toggle"):
-		if can_act and mover.pressed(&"crouch"):
+		if can_act and Input.is_action_just_pressed("crouch"):
 			crouch_on = not crouch_on
-		if mover.pressed(&"jump") or mover.pressed(&"dash"):
+		if Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("dash"):
 			crouch_on = false
 	else:
 		crouch_on = can_act and Input.is_action_pressed("crouch")
@@ -1259,7 +1261,7 @@ func _move_player(d: float) -> void:
 	water.step(wdep, d, mv, air)
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
-	if can_act and mover.pressed(&"dash") and dash_t <= 0.0 and not water.swimming:
+	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
 		if not try_dash(mv, air) and dash_slot:
 			dash_slot.deny()
 	_mv = mv
@@ -1276,7 +1278,7 @@ func _move_player(d: float) -> void:
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	elif mv.length() > 0.001:
-		hv = Loco.accel_to(hv, mv * run * (HunterMove.sneak_speed if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
+		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
 	else:
 		hv = HunterMove.brake(hv, 1.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
@@ -1313,9 +1315,8 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
-	var over := py - gh if gh > World.VOID + 1.0 else INF
-	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump"), air, pvy, over, d)
-	if jump == FarmStep.Jump.JUMP:
+	var jump_now := can_act and Input.is_action_just_pressed("jump")
+	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
 		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
@@ -1324,7 +1325,7 @@ func _move_player(d: float) -> void:
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
-		var press := jump == FarmStep.Jump.GLIDE or mover.pressed(&"glide")
+		var press := (jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide")
 		if not gliding and press and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
@@ -1379,7 +1380,6 @@ func _move_player(d: float) -> void:
 		want = atan2(-hv.x, -hv.y)
 	if tw.active(): want = tw.face_from(ppos)      # working: face the target
 	pface = rotate_toward(pface, want, HunterMove.turn_rate * d)
-	mover.face(pface)
 	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
 	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
@@ -1390,12 +1390,14 @@ func _move_player(d: float) -> void:
 	ps.merge(carry.anim_state())
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
-	mover.pose(p_anim, ps, d)
+	p_anim.update(d, ps)
 	if dash_slot == null and ui:
 		dash_slot = HomeDashSlot.new()
 		dash_slot.home = self
 		ui.add_child(dash_slot)
 		ui.move_child(dash_slot, 0)
+	if p_anim.stepped:
+		Sfx.step(null, -20.0)
 
 func _move_kin(d: float) -> void:
 	whistle_cd = maxf(0.0, whistle_cd - d)
@@ -1618,12 +1620,12 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 	var n: Vector2 = lfl["n"]
 	var glide_now := Input.is_action_pressed("glide")
 	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
-	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and mover.pressed(&"glide")):
+	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and Input.is_action_just_pressed("glide")):
 		lfl = {}
 		return false
 	var left: float = float(lfl["lip"]) + 0.12 - py
 	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
-	if mover.pressed(&"jump") and panel_open == "":
+	if Input.is_action_just_pressed("jump") and panel_open == "":
 		# the fling: strong in the window near the top, weaker before it
 		var timed := left <= Hunter.LRISE_WINDOW
 		lfl = {}
@@ -1719,8 +1721,7 @@ func _respawn_safe() -> void:
 func _glider_look() -> void:
 	if glider_node == null or not is_instance_valid(glider_node):
 		glider_node = MeshInstance3D.new()
-		glider_node.mesh = Gliders.mesh(Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
-		glider_node.material_override = Models.vtoon_outlined()
+		Gliders.dress(glider_node, Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
 		glider_node.position = Vector3(0, 2.0, 0.05); glider_node.scale = Vector3.ONE * 0.8
 		glider_node.visible = false
 		player.add_child(glider_node)
@@ -1734,8 +1735,7 @@ func _glider_rack() -> Node3D:
 		Models.part(n, Models.cyl(0.06, 0.07, 1.9, 8), wood, Vector3(0.75 * sx, 0.95, 0))
 	Models.part(n, Models.cyl(0.05, 0.05, 1.7, 8), dark, Vector3(0, 1.85, 0), Vector3.ONE, Vector3(0, 0, PI / 2))
 	var can := MeshInstance3D.new(); can.name = "Canopy"
-	can.mesh = Gliders.mesh(Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
-	can.material_override = Models.vtoon_outlined()
+	Gliders.dress(can, Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
 	can.position = Vector3(0, 1.75, 0); can.scale = Vector3.ONE * 0.75; can.rotation = Vector3(-0.35, 0, 0)
 	n.add_child(can)
 	var sign := Label3D.new(); sign.text = "Gliders"
@@ -1757,8 +1757,7 @@ func _open_rack() -> void:
 	Look.lights(w3, Color("fff1dc"), 1.0)
 	var holder := Node3D.new(); w3.add_child(holder)
 	var can := MeshInstance3D.new()
-	can.mesh = Gliders.mesh(rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
-	can.material_override = Models.vtoon_outlined()
+	Gliders.dress(can, rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
 	holder.add_child(can)
 	var tr := Gliders.trail(rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
 	if tr: tr.position = Vector3(0, -0.05, 0.3); tr.local_coords = true; tr.direction = Vector3(0, -0.2, 1); holder.add_child(tr)
@@ -1848,7 +1847,7 @@ func _rack_equip(id: String) -> void:
 	_rack_sound(id)
 	if is_instance_valid(rack_node):
 		var can := rack_node.get_node_or_null("Canopy") as MeshInstance3D
-		if can: can.mesh = Gliders.mesh(id, Data.TEAM_COLORS[0], UI.ACCENT)
+		if can: Gliders.dress(can, id, Data.TEAM_COLORS[0], UI.ACCENT)
 	_refresh_top()
 	_open_rack()
 
@@ -2346,6 +2345,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.pressed and panel_open == "":
+		if event.button_index == MOUSE_BUTTON_LEFT and stat_glint.open_card(event.position):
+			get_viewport().set_input_as_handled()      # a risen stat's glint: that Boki's card on the stat
+			return
 		# click a kin to see its details
 		if event.button_index == MOUSE_BUTTON_LEFT and not hover_k.is_empty() and visit.is_empty() and not building_now and not chat_open:
 			_open_kin(hover_k["rec"])
@@ -3169,6 +3171,7 @@ func _open_kin(rec: Dictionary) -> void:
 			for n in Care.NEEDS:
 				row.call(c1, Care.NEED_INFO[n]["name"], Care.need(rec, n) / 100.0, Care.NEED_INFO[n]["col"], str(int(Care.need(rec, n))))
 			c2.add_child(UI.section("Likes"))
+			ZoneAffinity.add_line(c2, rec)
 			var known: Array = rec["known"]
 			var lk: Dictionary = rec["likes"]
 			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
@@ -3189,7 +3192,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
 		"Training":
 			c1.add_child(UI.section("Stats", UI.FAINT.lightened(0.2)))
-			StatBudgetView.fill(c1, rec)
+			StatBudgetView.fill(c1, rec, stat_glint.lit_for(rec))
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			_kin_match_rows(rec, c2, true)
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
@@ -4143,7 +4146,6 @@ func _setup_care() -> void:
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	ZoneAway.card(self)      # the one "While you were away" card: the stations' work and every zone's journal
-	GardenWishes.arrive(self)
 	Care.dex_sync()
 	_refresh_nest()
 
@@ -5025,7 +5027,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	# it's yours from the moment it hatches; the naming card only renames it
 	baby["name"] = Data.default_kin_name(String(baby["species"]))
 	if rare:
-		Save.remember(baby, "born", "hatched from a Rare Egg you carried home from %s" % String(Data.MOBS.get(boss, {}).get("name", "a boss's lair")), 2.0)
+		Save.remember(baby, "born", Incubator.born_line(baby, boss), 2.0)
 		Progress.add("rare_hatched")
 	else:
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)

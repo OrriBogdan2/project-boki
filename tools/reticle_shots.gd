@@ -4,7 +4,6 @@ extends RefCounted
 ##     and a 3x crop round the cursor
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
-##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
 ## Never touches the save; the settings it sets live in the run's own XDG_DATA_HOME.
 
 const STYLES := [
@@ -42,8 +41,6 @@ func run(main_node: Node, what: String) -> void:
 			h.ctrl = "idle"
 	if what == "ping":
 		await _pings()
-	elif what == "hit":
-		await _hits()
 	else:
 		await _reticles()
 	main.get_tree().quit(0)
@@ -53,33 +50,13 @@ func _reticles() -> void:
 		Settings.reset_all()
 		for key in st[1]:
 			Settings.set_v(key, st[1][key])
-		_save(await _frame(), String(st[0]))
+		var img := await _frame()
+		img.save_png(dir.path_join(String(st[0]) + ".png"))
+		var c := Vector2i(Vector2(img.get_size()) * AT)
+		var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+		crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
+		crop.save_png(dir.path_join(String(st[0]) + "_zoom.png"))
 		print("RETICLESHOTS %s" % st[0])
-
-## The tick a landed hit raises and the knock one (the rival's hp at 0 for that frame), slowed to
-## a twentieth so the shot lands while it shows.
-func _hits() -> void:
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	for row in [["hit_tick", false], ["hit_tick_knock", true]]:
-		await _frame()
-		var hp := foe.hp
-		if row[1]:
-			foe.hp = 0.0
-		Engine.time_scale = 0.05
-		CombatBus.hit_landed.emit(m.player, foe, 10.0, ["primary"])
-		foe.hp = hp
-		await RenderingServer.frame_post_draw
-		await RenderingServer.frame_post_draw
-		_save(main.get_viewport().get_texture().get_image(), String(row[0]))
-		Engine.time_scale = 1.0
-		print("HITSHOTS %s" % row[0])
-
-func _save(img: Image, file: String) -> void:
-	img.save_png(dir.path_join(file + ".png"))
-	var c := Vector2i(Vector2(img.get_size()) * AT)
-	var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
-	crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
-	crop.save_png(dir.path_join(file + "_zoom.png"))
 
 func _pings() -> void:
 	var P := m.player

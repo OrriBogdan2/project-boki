@@ -464,8 +464,7 @@ func _into_dash(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	K.use_e()
 	C.ac.step(m, 0.2)
 	P.dashes = P.max_dashes()
-	# back along the line: the beam is yaw-locked, so a sideways slide would walk off it
-	P.inp["move"] = Vector2(-1, 0)
+	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
 	var p0 := P.pos
 	C.ac.step(m, 0.9)

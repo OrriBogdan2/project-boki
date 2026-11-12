@@ -171,13 +171,6 @@
 		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%.",
 		"dash": "Rank 3: recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash."
 	},
-	"turn": {
-		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:45 'the hunter turns to the cursor'; :313 the torso keeps facing the cursor while she strafes"},
-		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:26 a tap with an aim telegraph while held; no turn limit shown"},
-		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:28 a zone on herself; no turn limit shown"},
-		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:28 recast throws it to the cursor; no turn limit shown"},
-		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:224-225 'Elluna can walk during the channel', the tether follows"}
-	},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",
 		"full": "a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",

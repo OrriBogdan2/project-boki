@@ -98,29 +98,19 @@ static func blocks_sight(w: Dictionary) -> bool:
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
 static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
 	for w in list:
-		var top := wall_top(w, y)
-		if top <= 0.0:
+		if not w["move"]:
+			continue
+		if absf(y - float(w["y"])) > 1.9:
+			continue
+		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
+		var top := StoneStand.top_for(w) if w.has("top") else 3.0
+		if y >= float(w["y"]) + top - World.STEP:
 			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
-		if p.distance_to(c) < wall_reach(w, r):
-			return top
+		if p.distance_to(c) < r * 0.8 + float(w["th"]):
+			return float(w["y"]) + top
 	return 0.0
-
-## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
-## block movement, or the body is above or on it).
-static func wall_top(w: Dictionary, y: float) -> float:
-	if not w["move"] or absf(y - float(w["y"])) > 1.9:
-		return 0.0
-	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
-	var top := StoneStand.top_for(w) if w.has("top") else 3.0
-	if y >= float(w["y"]) + top - World.STEP:
-		return 0.0
-	return float(w["y"]) + top
-
-## How close the centre of a body of radius r may come to barrier w's line.
-static func wall_reach(w: Dictionary, r: float) -> float:
-	return r * 0.8 + float(w["th"])
 
 # ------------------------------------------------------------------ reflect windows
 ## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.

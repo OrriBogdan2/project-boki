@@ -1,9 +1,9 @@
 extends RefCounted
 ## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
 ## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
-## reel (its parity rows: tools/dredge_reel_check.gd), only the barge during it, reel into the Anchor Drop,
-## terrain the hook pierces, the abyss, the Salvage passive, the back hit, the barge's turn lock after the
-## Anchor, the rank-3 specials, and the X ult, Brass Broadside (tools/dredge_ult_check.gd).
+## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
+## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
+## Brass Broadside (tools/dredge_ult_check.gd).
 
 var main: Node
 var fails := 0
@@ -28,7 +28,6 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
-	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -582,8 +581,7 @@ func _all() -> void:
 	ak.step(m, 1.0)
 	# --- the reel has weight: walking sideways while reeling swings the body round you
 	reset.call()
-	ak.tap(m, P)
-	_until_grab(m, K)
+	_throw(m, P)
 	var start := T.pos
 	var dev := 0.0
 	var p_start := P.pos
@@ -613,8 +611,7 @@ func _all() -> void:
 	T2.dead = false
 	T2.teleport(home + Vector3(4.0, 0, 0))
 	ak.aim_at(P, T.pos)
-	ak.tap(m, P)
-	_until_grab(m, K)
+	_throw(m, P)
 	ok(
 		"ally: the hook catches an ally in its path and reels them in",
 		not K.pull.is_empty() and K.pull["t"] == T2 and T2.stun_t <= 0.0 and ak.dmg(T2) == 0.0,
@@ -950,13 +947,6 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
-
-## Steps until the thrown hook grabs (or gives up after 1 s), whatever its flight time.
-func _until_grab(m: Match, K: DredgeKit) -> void:
-	var t := 0.0
-	while K.flying and K.pull.is_empty() and t < 1.5:      # (the coil-back, then the flight)
-		m.step(ak.DT)
-		t += ak.DT
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop

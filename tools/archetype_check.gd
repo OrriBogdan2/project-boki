@@ -242,6 +242,10 @@ func _data() -> void:
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	var rmb: Dictionary = Arch.def("archer")["rmb"]
+	var push: Array = rmb["pin"]["push"]
+	var push_text := "push %d -> %d" % [push[0], push[1]]
+	ok("Lace: Heavy Shot card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -747,15 +751,14 @@ func _feel() -> void:
 	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
 			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
-	# hit weights (the Hunters' own are --impact-weight-check's): what a hit did, when no rule names it
+	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
-	ok("feel: chip hit is light", ImpactWeight.of_hit(null, dummy, 4.0, {"src": "shot"}) == "light")
-	ok("feel: a hit of 8%+ is solid", ImpactWeight.of_hit(null, dummy, 14.0, {"src": "shot"}) == "solid")
-	ok("feel: CC landing is solid", ImpactWeight.of_hit(null, dummy, 2.0, {"stun": 0.4}) == "solid")
-	ok("feel: wall slam and a solid payoff are heavy", ImpactWeight.of_hit(null, dummy, 10.0, {"src": "wall"}) == "heavy"
-			and ImpactWeight.of_hit(null, dummy, 14.0, {"payoff": true}) == "heavy")
-	ok("feel: bonded start is heavy", ImpactWeight.of_hit(null, dummy, 0.0, {"bonded": true}) == "heavy")
-	ok("feel: ticks never hold", ImpactWeight.of_hit(null, dummy, 30.0, {"src": "burn"}) == "")
+	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)
+	ok("feel: solid hit T2", Feel.tier(dummy, 14.0, {"src": "shot"}) == 2)
+	ok("feel: CC landing T3", Feel.tier(dummy, 2.0, {"stun": 0.4}) == 3)
+	ok("feel: wall slam / payoff T4", Feel.tier(dummy, 10.0, {"src": "wall"}) == 4 and Feel.tier(dummy, 5.0, {"payoff": true}) == 4)
+	ok("feel: bonded start T5", Feel.tier(dummy, 0.0, {"bonded": true}) == 5)
+	ok("feel: ticks never freeze", Feel.tier(dummy, 30.0, {"src": "burn"}) == 0)
 	ok("feel: category colours", Feel.cat_color("control") == Color("c46bff") and Feel.cat_color("damage") == Color("ff7a3d") and Feel.cat_color("utility") == Color("5fd8ff"))
 	ok("feel: severity from parts", Feel.severity([{"type": "root", "duration": 1.2}]) == "hard_cc" and Feel.severity([{"type": "slow", "duration": 1.0}]) == "soft_cc" and Feel.severity([{"type": "damage", "amount": 30}]) == "heavy_dmg")
 	dummy.free()

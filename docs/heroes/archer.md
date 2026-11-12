@@ -74,10 +74,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | Passive | always | Hawk Sense (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
-| Passive | always | Hawk Sense (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal), and a plain jump facing a wall up to four terraces (3.2 m) climbs it, no extra key (`climb_tall` in content/rules/hunter_move.json: the mantle reaches 0.9 m higher, `Hunter.TALL_CLIMB_EXTRA`) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). Everyone else needs a wall kick (a second jump press) for the four-terrace wall |
 | LMB | tap | Released before Empowered: 15 damage, lands at the cursor | Weak tap shot (not isolated) | Assumed to land at the cursor too |
-| Passive | always | Hawk Sense (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb has no heightmap equivalent and is left out |
-| LMB | tap | Released before Empowered: 15 damage, lands at the cursor; let go inside `draw_min` 0.08 s (a mashed click) and nothing looses, the next press draws afresh | Weak tap shot (not isolated); a charge weapon ignores early taps (coordinator's read of the source, 2026-11-10) | Assumed to land at the cursor too; `--lmb-spam-check` |
 | LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). The reticle (owner item 55b) is a thin line to the cursor that a bright fill runs along from near Lace like a progress bar, full at Supercharged, with one small circle on the line at the next perfect point: it flashes gold from the frame the fill reaches it to the end of the perfect window, then moves on to the end of the line. Nothing else: no V, no glints, no cursor ring. At Supercharged: a body flash, a thick white line past the cursor to 16 m and a target ring | Same stages; the owner's filling line overrides the footage's V | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
 | LMB | perfect | Let go within 0.15 s of a stage coming up: no extra damage, the next draw runs 1.6x until Empowered; a brief gold fletch burst (her own motif: feathers radiating from a core, 1.1 m, 0.13 s) with a ring at the bow, on the aim line, a higher-pitched shing, `arc_perfect` | The next Empowered charge is faster; a gold star by the bow hand | The 1.6x is our pick (not measurable at 5 fps) |
 | LMB | overdraw | Held 0.5 s past Supercharged: the line dims to a thin pale one, the arm shakes (`arc_over`); the arrow does half | About 50% (263 vs 505) | Matches the ratio |
@@ -88,22 +85,6 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 15 s: the game data wins over the footage's 8.3 s (audit row "E cooldown 9 vs 15", `e.cooldown`) |
 | X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
 | R | - | the Boki Merge | - | R is the Merge for every hero |
-
-## Move speed while casting (PARITY FIRST, Nov 9)
-Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
-drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
-footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
-footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
-
-| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/pin.md) | Verdict |
-|---|---|---|---|---|
-| LMB | drawing | 0.7 (longbow `draw_slow`) | walks slowly while drawing (0111-0116); the factor isn't measured | [?] |
-| LMB | quick draw after a perfect release | 0.8 (`perfect_slow`) | not resolvable at 5 fps | [?] |
-| LMB | 0.5 s after a shot | 0.8 (default ranged `fire_slow`) | "she can walk between shots"; not measured | [?] |
-| RMB | Heavy Shot held | 0.38 (`rmb.pin.hold_move`) | the charge pose of the LMB draw; the walk isn't measured | [?] |
-| Shift | Spirit Walk | 1.1 (`dash.walk_k`) | 117-126 px/s against a 113 median (0349-0356) | match |
-| E | Hail Wall, tap | 1.0 | a tap | match |
-| X | Starpiercer nock (0.5 s per arrow) | 1.0 | Primal Forces is a tap buff; the empowered shots' walk isn't measured | [?] |
 
 ## Assumptions (the footage is silent; the owner can correct these)
 - Spirit Walk passes rocks, trees, pillars, ability barriers and raised terrain: the data's Phase Walk rolls "through a pillar and the raised-platform wall" (supervive_kits.md:78, KIT_PARITY gap 8). She climbs a ledge face at 14 m/s and drops off the far side; if the walk ends in a ledge she is set on top of it, never inside terrain; the edge of the abyss still holds her.
@@ -116,7 +97,6 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 - During Spirit Walk she can still shoot and cast, and moves 10% faster (the sheet measures +5-10% outside); at rank 3, 33% more inside something, fading over the walk.
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
-- The double-high wall is our four-terrace wall (3.2 m, the map's wall tier; the source's single climb is about 1.5 m). Walking off ledges stays allowed (the source's bCanWalkOffLedges is off for everyone; ours is a separate, shared rule).
 - Not built: Hail Wall damaging wisps (our downed hunters take no ability damage).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
@@ -148,7 +128,6 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 | Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
 | Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
 | Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
-| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth); data bCanWallJump (supervive_physics.md:67) | not shown | built: a jump facing a four-terrace wall mantles over it; Vex's doesn't; walking off the top still drops you | `WCHECK Lace: a jump facing a 4-terrace wall climbs it`, `Vex: ... doesn't climb it`, `... walks off the 4-terrace top` |
 | Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
 | Ult: pierces enemies, longer range, knocks back | [wiki](https://supervive.wiki.gg/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
@@ -235,7 +214,6 @@ Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bo
 source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
-## Animations (KMovesPin ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB draw | `arc_draw` (held) | side-on to the cursor in 0.2 s, string hand to the chest, deeper by Empowered |
@@ -292,20 +270,3 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
-
-## Moving while casting (RMB and E, parity pass 2026-11-09)
-
-Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
-row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
-hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
-px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
-
-| Slot, phase | Source | Ours | Call |
-|---|---|---|---|
-| RMB Heavy Shot, hold | same draw pose as the LMB draw, which "walks slowly" (0111-0116); no separate RMB measure | 0.38 of a run while held, up to 3 s (`rmb.pin.hold_move`); the LMB draw is 0.7 | owner item 114 ("she is slowed while holding RMB"); the number is ours, unmeasured |
-| RMB, release | one-frame snap, little recoil | loose at once; 1.0 | match |
-| E Hail Wall, cast | instant, bow raised high; no stop seen | a 0.35 s lob tell, no lock; 1.0 | match |
-| E, rain | she walks on | the wall stands 4.4 s and she is free | match |
-| Facing | body turned side-on to the cursor while drawing | cursor throughout | match |
-
-Open: the source's RMB hold speed. If a clip ever measures it, `pin.hold_move` is the one number to move.

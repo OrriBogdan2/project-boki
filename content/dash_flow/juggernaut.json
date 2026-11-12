@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). window.source: the footage evidence for the buffer window (DashFlow.BUFFER_S), shown in docs/heroes/dash_interactions.md. dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
 			"lmb": {
@@ -99,46 +99,5 @@
 			"reason": "The source plants him through the guard: no jump until the counter has struck.",
 			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
 		}
-	},
-	"held_fire": {
-		"all": {"source": "Data: nothing ends a held Molten Greatsword charge; the key is a held input. Footage card: 'Dash while attacking'.", "ours": "A cast that stops the blade (E, RMB, the ult, a glove) drops the Searing Wave charge with nothing thrown; the key still down starts a fresh hold the step he is free (--held-fire-resume-check: 0 frames)."}
-	},
-	"window": {"source": "Kael (juggernaut.md 0371-0420): Quick Dash chains 0.4 s apart over 3 charges, 0.3 s drive and 0.35 s recovery; no slash inside and no dropped press. OWNER_REVIEW_1103 item 24 asks for about 0.1 s, within the frame."},
-	"glide_rows": [
-		{
-			"pair": "air dash -> glide press",
-			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
-			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. Asserted in --airdash-glide-check."
-		},
-		{
-			"pair": "ability -> glide press",
-			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
-			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.45 s; RMB at once; E 0.68 s; X 0.72 s; Q at once (n/a: the press did not go off in the air in the check)."
-		},
-		{
-			"pair": "hold -> glide press",
-			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
-			"ours": "glide pressed 0.3 s into a hold: LMB n/a; RMB at once; E 0.42 s; X 0.37 s; Q at once."
-		}
-	],
-	"air_cast": {
-		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:18); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
-		"rmb": {"h": "push", "v": "slow", "ours": "the Meteor Drop: slides to the cursor disc (5 m at most) in a 0.2 s hang, then slams straight down", "source": "Data: Obsidian Slam is the RMB while airborne, 'strike down' (supervive_kits.md:22); footage 0261-0288: up to the top, about 0.2 s there, then a steep drive down onto the cursor disc (hero-ref/juggernaut.md:276-283)", "verdict": "match"},
-		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:27); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
-		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:28); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"}
-	},
-	"dash_jump": {
-		"ground": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315).", "verdict": "[?]"},
-		"air": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315).", "verdict": "[?]"},
-		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315).", "verdict": "[?]"},
-		"same": {"ours": "cancel", "carry": 0.0, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
-	},
-	"glide": {
-		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
-		"rmb": {"mode": "fold", "source": "Data (supervive_kits.md:22,25): RMB while airborne is Obsidian Slam, its own Air Slam slot; footage 0251-0300 (hero-ref/juggernaut.md:75) shows it from a jump. [?] whether an open glider counts as airborne; the owner's rule (briefs/DECISIONS.md: the source decides, the glider never blocks a slam) casts it. Ours: the Meteor Drop folds the glider."},
-		"e": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open."},
-		"x": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open."},
-		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
-		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open. The source has air dashes (supervive_kits.md:10-11, :58-59); ours: Shift in a glide is the air dash and hands its speed back to the glider."}
 	}
 }

@@ -135,7 +135,6 @@ func _shatter(it: Dictionary) -> void:
 	m.fx.ring(at, r, col, 0.4)
 	var sound := "boom" if v in ["thunder", "zeep", "fire"] else "whoosh"
 	m.sfx(sound, at, -3.0, 1.2 if v != "zeep" else 0.8)
-	if v == "zeep": Shake.incoming_big(m, at, 0.25, h)
 	var p := power("sec")
 	for f in foes_in(at, r, 3.0):
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "gil_" + v]}
@@ -182,7 +181,6 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "BEACHED!", res_col(), true)
 		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
 		m.sfx("unlock", f.pos, -4.0, 0.7)
 	else:
@@ -328,7 +326,6 @@ func _start_wave() -> bool:
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
-	Shake.incoming_big(m, h.pos, 0.35, h)
 	m.sfx("whoosh", h.pos, 0.0, 0.6)
 	return true
 
@@ -397,6 +394,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.6:
+		h.inp["aim"] = tgt.pos          # the wave rolls along the aim
 		HunterKeys.ult_pressed(h)
 		return
 	if spin_t >= 0.0:

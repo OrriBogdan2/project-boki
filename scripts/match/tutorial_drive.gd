@@ -50,9 +50,7 @@ static func drive(m: Match) -> void:
 			else:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
-				if sid == "glide":
-					p.inp["glide"] = true
-					p.inp["jump"] = not p.gliding and p.coyote <= 0.0 and p.can_glide()     # (a second press opens it)
+				if sid == "glide": p.inp["glide"] = true
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
 			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
@@ -151,7 +149,6 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 				elif not p.grounded:
 					mv = tol.normalized()
 					p.inp["glide"] = tol.length() > 1.6 or m.world.is_void(p.pos.x, p.pos.z)
-					p.inp["jump"] = p.inp["glide"] and not p.gliding and p.coyote <= 0.0 and p.can_glide()
 				elif p.flat_dist(L["take"]) < 1.3:
 					mv = tol.normalized()
 					p.inp["jump"] = true
