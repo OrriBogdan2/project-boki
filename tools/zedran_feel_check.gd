@@ -642,8 +642,8 @@ func _last_key(id: String) -> float:
 	return float(keys[-1][0]) if not keys.is_empty() else 0.0
 
 # ------------------------------------------------------------------ parity pass (docs/heroes/juggernaut.md)
-## LMB: slashes go where the cursor is at the swing, on the move, every 0.34s; the held Searing Wave's lane grows
-## with the hold and the wave it throws is that long and wide, flying at the footage's ~20 bh/s.
+## LMB: slashes go where the cursor is at the swing, on the move, every 0.34s; holding fills the footage's arc round
+## him (the blade's own), and the wave it throws grows with the hold, flying at the footage's ~20 bh/s.
 func parity_lmb() -> void:
 	var r := A.setup("juggernaut", 2.4)
 	var m: Match = r[0]
@@ -689,26 +689,39 @@ func parity_lmb() -> void:
 			"%d slashes, %.1f m/s of %.1f" % [slashes, walk, P.base_speed])
 	A.step(m, 0.6)
 	P.teleport(home)
-	# the hold: the lane grows with the charge, and the wave matches it
-	var lens: Array = []
+	# the hold: no lane; the footage's arc round him, the blade's own (lmb.arc and lmb.reach, the fields the slash
+	# hits with), fills with the charge; the wave it throws grows with the hold
+	var rows: Array = []
 	for hold_t in [float(ld["tap"]) + 0.15, float(ld["full"]) + 0.1]:
 		A.step(m, 0.7)
 		K.res = 0.0
 		P.fire_cd = 0.0
 		A.step(m, hold_t, func(): P.inp["fire"] = true)
-		var lane: Dictionary = AimKit.entry(P, "lmb")
+		var arc: Dictionary = AimKit.entry(P, "lmb")
 		var n0 := m.shots.size()
 		P.inp["fire"] = false
 		m.step(A.DT)
 		var sd: Dictionary = m.shots[-1] if m.shots.size() > n0 else {}
 		var speed := (sd.get("vel", Vector2.ZERO) as Vector2).length()
-		lens.append([float(lane.get("len", 0.0)), float(lane.get("width", 0.0)), speed, float(sd.get("r", 0.0))])
-	A.ok("jug parity lmb hold: the lane grows with the hold (longer and wider), the wave matches it",
-			lens[1][0] > lens[0][0] + 4.0 and lens[1][1] > lens[0][1] + 0.4 and lens[1][3] > lens[0][3] + 0.2
-					and absf(lens[1][0] - float(ld["wave_range"][1])) < 0.2,
-			str(lens))
-	A.ok("jug parity lmb hold: the wave flies at the footage's ~20 bh/s (36 m/s)", absf(float(lens[1][2]) - 36.0) < 1.0,
-			"%.1f m/s" % float(lens[1][2]))
+		rows.append({"arc": arc, "speed": speed, "r": float(sd.get("r", 0.0)), "len": float(sd.get("life0", 0.0)) * speed})
+	var part: Dictionary = rows[0]["arc"]
+	var full: Dictionary = rows[1]["arc"]
+	A.ok("jug parity lmb hold: an arc round him, centred on the aim, as wide and as far out as the blade cuts",
+			full.get("kind") == "arc_wall" and is_equal_approx(float(full["deg"]), float(ld["arc"]))
+					and is_equal_approx(float(full["radius"]), float(ld["reach"]))
+					and (full["center"] as Vector2).distance_to(Vector2(P.pos.x, P.pos.z)) < 0.2
+					and (full["dir"] as Vector2).dot(P.aim_dir()) > 0.99,
+			"%s %.0f deg r %.2f" % [full.get("kind"), float(full.get("deg", 0.0)), float(full.get("radius", 0.0))])
+	A.ok("jug parity lmb hold: the arc fills with the charge, hot only at full",
+			part.get("kind") == "arc_wall" and float(part["fill"]) < 0.5 and float(part["hot"]) == 0.0
+					and float(full["fill"]) >= 1.0 and float(full["hot"]) == 1.0,
+			"fill %.2f -> %.2f" % [float(part.get("fill", 0.0)), float(full.get("fill", 0.0))])
+	A.ok("jug parity lmb hold: the wave grows with the hold (longer and wider), to its full range",
+			rows[1]["len"] > rows[0]["len"] + 4.0 and rows[1]["r"] > rows[0]["r"] + 0.2
+					and absf(rows[1]["len"] - float(ld["wave_range"][1])) < 0.2,
+			"%.1f -> %.1f m, r %.2f -> %.2f" % [rows[0]["len"], rows[1]["len"], rows[0]["r"], rows[1]["r"]])
+	A.ok("jug parity lmb hold: the wave flies at the footage's ~20 bh/s (36 m/s)", absf(float(rows[1]["speed"]) - 36.0) < 1.0,
+			"%.1f m/s" % float(rows[1]["speed"]))
 	await A.done(m)
 
 ## RMB: the Lunge holds as long as you like with the blade over his head, and a release on the blade's flash (a

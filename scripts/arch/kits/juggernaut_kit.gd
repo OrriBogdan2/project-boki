@@ -27,6 +27,8 @@ const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+const WAVE_ARC := Color("fffaf0")      # the charge filling the arc round him: his blade's white-hot (model_glow.sword)
+const WAVE_ARC_W := 0.18               # m: that arc's band, thin as the footage's (hero-ref 0087)
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
@@ -369,15 +371,14 @@ func lmb_override(held: bool, dt: float) -> bool:
 		_slash()
 	return true
 
-## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
-## going gold-hot at full, and the cursor ring fills.
+## The Searing Wave charging: the footage's thin arc round him (hero-ref 0087), as wide and as far out as his
+## blade cuts (lmb.arc and lmb.reach, the fields the slash hits with), in his crimson; white-hot fills it from the
+## aim out to both ends with the charge, all of it at full. The cursor ring fills too.
 func _wave_preview() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
-	var lane := {"len": lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k),
-			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
-			"col": WAVE_RED, "col_full": WAVE_FULL}
-	AimKit.lane(h, "lmb", lane)
+	AimKit.arc_wall(h, "lmb", {"radius": float(ld["reach"]), "deg": float(ld["arc"]), "thick": WAVE_ARC_W,
+			"panels": 1, "fill": k, "col2": WAVE_ARC})
 	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
 	HeroVfx.of(m).hold(h, "wave_charge", k)
 
