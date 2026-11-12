@@ -686,6 +686,38 @@ func parity_lmb() -> void:
 	A.ok("jug parity lmb: taps chain one slash per 0.34s (3 in 1s) and he walks on while swinging",
 			slashes == 3 and walk >= P.base_speed * 0.85,
 			"%d slashes, %.1f m/s of %.1f" % [slashes, walk, P.base_speed])
+	# standing taps at the footage's gaps (0026, 0029, 0033 at 5 fps): no step into any swing, the sides keep
+	# alternating across a gap under CHAIN_RESET, and a tap after it starts the chain over on the right
+	A.step(m, 0.6)
+	P.teleport(home)
+	A.step(m, JuggernautKit.CHAIN_RESET + 0.2)
+	var stand := P.pos
+	var sides: Array = []
+	for gap in [0.0, 0.6, 0.8, 0.95]:
+		A.step(m, gap)
+		_lmb_tap(m, P)
+		sides.append(K.anim_id)
+	var stepped := P.flat_dist(stand)
+	A.ok("jug parity lmb chain: standing taps 0.6-0.95 s apart alternate right-left-right-left and none steps "
+			+ "him forward",
+			sides == ["jug_slash_r", "jug_slash_l", "jug_slash_r", "jug_slash_l"] and stepped < 0.1,
+			"%s, moved %.2f m" % [str(sides), stepped])
+	A.step(m, JuggernautKit.CHAIN_RESET + 0.1)
+	_lmb_tap(m, P)
+	A.ok("jug parity lmb chain: idle past CHAIN_RESET (1.0 s) the next tap is the first swing (right) again",
+			K.anim_id == "jug_slash_r", K.anim_id)
+	# taps inside the 0.34 s between slashes: kept, one slash when the cooldown ends (two taps still give one)
+	var n_slash := K.slash_n
+	var at_slash := K.slash_at
+	A.step(m, 0.12)
+	_lmb_tap(m, P)
+	A.step(m, 0.05)
+	_lmb_tap(m, P)
+	var early := K.slash_n - n_slash
+	A.step(m, 0.4)
+	A.ok("jug parity lmb chain: taps inside the 0.34 s cooldown queue one slash for its end, not two and not at once",
+			early == 0 and K.slash_n == n_slash + 1 and absf(K.slash_at - at_slash - float(ld["rate"])) < 0.04,
+			"early %d, +%d slashes, %.2f s after" % [early, K.slash_n - n_slash, K.slash_at - at_slash])
 	A.step(m, 0.6)
 	P.teleport(home)
 	# the hold: the lane grows with the charge, and the wave matches it
@@ -709,6 +741,13 @@ func parity_lmb() -> void:
 	A.ok("jug parity lmb hold: the wave flies at the footage's ~20 bh/s (36 m/s)", absf(float(lens[1][2]) - 36.0) < 1.0,
 			"%.1f m/s" % float(lens[1][2]))
 	await A.done(m)
+
+## An attack-key tap: pressed one step and let go the next (a slash swings on the release).
+func _lmb_tap(m: Match, P: Hunter) -> void:
+	P.inp["fire"] = true
+	m.step(A.DT)
+	P.inp["fire"] = false
+	m.step(A.DT)
 
 ## RMB: the Lunge holds as long as you like with the blade over his head, and a release on the blade's flash (a
 ## perfect window at full, then once a second) flings him further (docs/heroes/juggernaut.md "Parity pass").
