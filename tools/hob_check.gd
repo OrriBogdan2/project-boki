@@ -72,7 +72,7 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
 			"Hob is a person standing by the market stall")
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "meet", "the first goal: meet your Boki (%s)" % home.guide.hint_lbl.text)
+	ok(FarmTutorial.current() == "meet", "the first goal: meet your Boki (%s)" % home.guide.hint_text())
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
 			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
 	# 2. talking: while the tutorial runs he explains the step you're on
@@ -166,9 +166,10 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
-	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
-	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
+	# the offer comes after the tutorial: no goal strip any more, the Goals card (when it has lines) or nothing
+	var strip_back: bool = home.guide.hint_box == null if not FarmTutorial.active() else home.guide.hint_box.visible
+	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else not FarmTutorial.active()
+	ok(tracker_back and strip_back and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:

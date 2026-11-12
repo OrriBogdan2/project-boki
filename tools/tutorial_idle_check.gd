@@ -149,7 +149,7 @@ func _idle_farm(g: FarmGuide, id: String) -> void:
 	while t < IDLE_S:
 		g.tick(0.1)
 		t += 0.1
-		if hint_t < 0.0 and g.hint_visible() and g.hint_lbl.text != "":
+		if hint_t < 0.0 and g.hint_visible() and g.hint_text() != "":
 			hint_t = t
 		if place and not (is_instance_valid(g.marker) and g.marker.visible and g.marker.text != ""):
 			lost += 1
