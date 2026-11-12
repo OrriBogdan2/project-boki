@@ -20,6 +20,11 @@ uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_disable
 uniform float normal_k = 1.0;     // its strength (NORMAL_MAP_DEPTH); a look can set it per slot
 uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
+// toon.gdshader's colour weights (a glider canopy), kept when Models.hero_look moves a material here.
+uniform bool vertex_weights = false;
+uniform vec4 weight_r = vec4(1.0);
+uniform vec4 weight_g = vec4(1.0);
+uniform vec4 weight_b = vec4(1.0);
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
@@ -199,7 +204,8 @@ void fragment() {
 		vec3 hot = mix(glow_edge.a > 0.0 ? glow_edge.rgb : glow_core.rgb, glow_core.rgb, smoothstep(0.35, 0.9, heat));
 		c = mix(c, hot, glow_key ? heat : 1.0);
 	}
-	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
+	if (use_vertex_color && vertex_weights) { c *= mat3(weight_r.rgb, weight_g.rgb, weight_b.rgb) * COLOR.rgb; }
+	else if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	if (desat > 0.0) { c = mix(c, vec3(dot(c, vec3(0.3, 0.59, 0.11))), desat); }
 	if (dark_lift > 0.0) {
 		float dl = dot(c, vec3(0.3, 0.59, 0.11));
