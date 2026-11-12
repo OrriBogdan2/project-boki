@@ -179,7 +179,7 @@ the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on
 **Reel-tool fixes** (`ext/parity-reel-tool`): these four reels show the kit drill card ("1/5, Skip drill") under
 the title and both dash parts ending in the void, because the 12 m dummy stood past the island rim. The tool now
 skips the drill and keeps the travel parts on the island (see the notes at the top); only `juggernaut.mp4` is
-re-rendered with it so far.
+re-rendered with it so far (xvfb opengl3 on rpc3; GPU job 20261112-030437-07461 queued ~146 deep at the time).
 
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
   `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
