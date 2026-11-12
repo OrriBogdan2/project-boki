@@ -65,7 +65,8 @@ func start() -> void:
 		_roll_on()         # the last chain's rock was still to come
 	spots = []
 	st = {
-		"n": 0, "phase": "crouch", "t": 0.0, "T": _flight(), "from": h.pos, "start": h.pos, "press": false, "left": 0.0
+		"n": 0, "phase": "crouch", "t": 0.0, "T": _flight(), "from": h.pos, "start": h.pos, "press": false, "left": 0.0,
+		"air": not h.grounded
 	}
 	dash_was = true
 	_aim_hop()
@@ -94,7 +95,7 @@ func _aim_hop() -> bool:
 	var at: Vector3 = spot["at"]
 	AimKit.circle(
 		h, "leap",
-		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": Color("ff5a2a"), "dur": st["T"] + 0.4}
+		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": Color("3a7cff"), "dur": st["T"] + 0.4}
 	)
 	return true
 
@@ -110,6 +111,8 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 		var g: float = m.world.ground_at(p.x, p.z)
 		if not _clear(dir, want):
 			pass
+		elif bool(st.get("air", false)) and not h.grounded:
+			return {"at": Vector3(p.x, h.pos.y, p.z), "rock": false, "feet": h.pos.y}  # in the air
 		elif g <= World.VOID + 1.0:
 			if _ground_ahead(p, dir, far * after + 0.5):
 				return {"at": Vector3(p.x, h.pos.y - top, p.z), "rock": true, "feet": h.pos.y}
@@ -184,7 +187,7 @@ func tick(dt: float) -> void:
 	dash_was = down
 	if phase == "skid" and h.ctrl == "bot":
 		press()            # bots ride the whole chain
-	if h.grounded or phase != "crouch":
+	if (h.grounded or phase != "crouch") and not bool(st.get("air", false)):
 		_foot()
 	match phase:
 		"crouch":
@@ -250,7 +253,7 @@ func _tick_air(dt: float) -> void:
 		h, "leap",
 		{
 			"at": st["spot"]["at"], "r": float(dd()["land_r"]), "fill": clampf(t / T, 0.0, 1.0), "all": true,
-			"col": Color("ff5a2a")
+			"col": Color("3a7cff")
 		}
 	)
 	if not h.grounded and h.pad.is_empty():
@@ -263,6 +266,8 @@ func _tick_air(dt: float) -> void:
 			_raise(at, st["dir"])
 	if t > 0.08 and h.grounded:
 		_touchdown()
+	elif bool(st.get("air", false)) and t >= T:
+		drop()                  # an air hop ends at its own height: no landing, no rock
 	elif t > T + 0.5:
 		_crash()
 
@@ -352,7 +357,7 @@ func _landslide(at: Vector3, dir: Vector2) -> void:
 	var d := dd()
 	k.landslides += 1
 	var from := at + Vector3(dir.x * 0.9, 0.85, dir.y * 0.9)
-	m.fx.burst(from, Color("a8805a"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
+	m.fx.burst(from, Color("8f9cb8"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
 	m.fx.dust(from, 8)
 	k._fire_rock(from, dir, float(d["dmg"]) * k.power("dash"), "dash", "dashrock", float(d["rock_range"]))
 	m.sfx("br_roll", from, -3.0, 1.0)
