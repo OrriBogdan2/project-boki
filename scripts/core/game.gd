@@ -68,7 +68,6 @@ func _setup_input() -> void:
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
-	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
@@ -95,6 +94,8 @@ func _setup_input() -> void:
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
 	_key("whistle", [KEY_H])                  # at home: your partner comes; hold: the nearest Boki
+	_key("goals", [KEY_G])                    # at home: the Goals line opens into the whole list
+	_key("fold_guide", [KEY_H])               # training / duel: fold the guide and the kit panel away (and back)
 	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate

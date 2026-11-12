@@ -156,6 +156,7 @@ const ACTIONS := [
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
+	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
 	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["undo", "Undo the last piece (build mode, with Ctrl)"], ["keep_placing", "Hold to keep placing (build mode)"],
@@ -526,7 +527,8 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
 const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
-		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"]]
+		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
+		["goals", "throw"], ["fold_guide", "whistle"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true

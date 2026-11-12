@@ -2359,7 +2359,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open == "" and visit.is_empty() and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_G and guide and guide.toggle_goals():
+	if panel_open == "" and visit.is_empty() and event.is_action_pressed("goals") and guide and guide.toggle_goals():
 		get_viewport().set_input_as_handled()      # G: the Goals line opens into the full list
 		return
 	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == HomeClasses.TITLE):

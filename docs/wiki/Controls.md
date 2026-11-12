@@ -89,6 +89,8 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle at home: your partner comes, hold for the nearest Boki | `whistle` | yes |
+| G | Goals list: open and close (at home) | `goals` | yes |
+| H | Fold the training guide away (training, duel) | `fold_guide` | yes |
 | J | Relics: change your Relic (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |

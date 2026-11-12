@@ -131,7 +131,7 @@ static func _next_ui(r: Dictionary) -> Control:
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(text)
 	head.add_child(UI.label("%d/%d" % [r["have"], r["need"]], 12, UI.MUTED, UI.caps))
-	head.add_child(UI.keycap("G", 11))
+	head.add_child(UI.keycap(Settings.key_cap("goals"), 11))
 	return head
 
 static func _row_ui(r: Dictionary) -> Control:
