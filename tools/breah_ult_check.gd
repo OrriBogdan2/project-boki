@@ -1,7 +1,7 @@
 extends "res://tools/hero_pair_check.gd"
 ## Tenzo's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
 ## tap (across the aim, at the cursor) and the hold-and-drag (pivots on its centre), the preview only while
-## held, the 0.2s cracks everyone sees, the centre-out rise over 0.4s, the slow beside it, bodies shoved off
+## held, the 0.2s cracks everyone sees, the centre-out rise over 0.8s, the slow beside it, bodies shoved off
 ## the line, the rocks standing apart from Stone Row's, a punch along the ridge launching it, the bond only on
 ## a land (and inside its window), the merge drop while aiming, the cooldown and the burst cap; the arc and
 ## width of the ridge, and the rocks standing as ground over the abyss.
@@ -127,7 +127,7 @@ func _drag_slow_shove() -> void:
 	T.teleport(on_line)
 	var paid0 := paid(P)
 	P.inp["x_down"] = false
-	step(m, 0.9)
+	step(m, 1.1)
 	ok("ult drag: let go casts along the dragged line", S.axis.dot(want) > 0.99 and S.phase == "up", str(S.axis))
 	var off := absf(Vector2(T.pos.x - on_line.x, T.pos.z - on_line.z).dot(Vector2(-want.y, want.x)))
 	ok("ult: a body on the line is shoved off it, never inside a rock", S.shoved >= 1 and off >= 0.75, "off %.2f" % off)
@@ -152,7 +152,7 @@ func _punch_and_bond() -> void:
 	var K: DolmKit = P.ak
 	_ridge_along(m, P, home)
 	var spread := K.spine.last_rise_t - K.spine.first_rise_t
-	ok("ult beats: the rocks rise from the centre outward over 0.4s", absf(spread - 0.4) < 0.05, "%.2f" % spread)
+	ok("ult beats: the rocks rise from the centre outward over 0.8s", absf(spread - 0.8) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 9 rocks over 12m on open ground", n_up == 9, "rocks %d" % n_up)
 	var rd := K.rock_def()
@@ -215,7 +215,7 @@ func _ridge_along(m: Match, P: Hunter, home: Vector3) -> void:
 	aim_at(P, home + Vector3(8, 0, 0))
 	step(m, 0.05)
 	P.inp["x_down"] = false
-	step(m, 0.75)
+	step(m, 1.15)
 
 func _punch(m: Match, P: Hunter, T: Hunter) -> void:
 	aim_at(P, T.pos)
@@ -294,7 +294,7 @@ func _walkway() -> void:
 	T.teleport(home + Vector3(0, 0, 5))
 	P.lvl = 6
 	_press(m, P, home + Vector3(7, 0, 0), false)
-	step(m, 1.0)
+	step(m, 1.2)
 	var gap := rocks(m).filter(func(w): return m.world.is_void(K.rock_mid(w).x, K.rock_mid(w).z))
 	ok(
 		"spine walkway: the whole ridge is laid over the abyss, none refused",
