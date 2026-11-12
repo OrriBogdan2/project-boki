@@ -400,6 +400,24 @@ rest of the dash and resume it on top (more than the source's 0.6x would come ov
 
 The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
+## Falling never becomes horizontal speed (`--move-feel-check` "carry" rows, owner DECISIONS 2026-11-11)
+
+Asked: one shared movement profile for all modes, and falling never converts into horizontal momentum. `tools/fall_carry_rows.gd` runs the same 12 rows for every Hunter in `Arch.ORDER` (each made that Hunter with `Hunter.reclass`, its own class and run speed), first in the match (`Match.step`) and then in the garden (`Home._move_player`), on one test lane (`tools/fall_course.gd`: the live world with a straight strip laid over open sky, flat terraces stamped as real tiles so the match's ledge rise reads them, no wind or updraft in it). "Before" is the horizontal speed the step the last fall began (leaving the ground, the top of a rise, or the glider shutting); "after" is the most horizontal speed from the landing step to 0.5 s on. After may never pass before by more than 0.05 m/s.
+
+| Row | What | Match (before > after, m/s) | Garden |
+|---|---|---|---|
+| ledge | walk off 2.4 m at run speed, keys held | run > run (each Hunter its hunter_move.json speed, 4.45-4.85) | same |
+| fall_6 / fall_15 | walk off into a 6 m / 15 m fall, keys held | run > run | same |
+| slope_10 / 25 / 40 | dropped 6 m from rest onto a slope falling away at 10/25/40 degrees, no keys | 0 > 0 | same |
+| slope_N_run | run off a 2.4 m ledge onto each slope, downhill, keys held | run > run | same |
+| mantle | jump into a wall three terraces up, rise onto its 1 m top, go over it into an 8 m fall (keys let go as the fall begins) | run > 2.87-3.12 | same |
+| knock | 10 m/s push with 4 m/s lift at the edge of a 6 m drop | 8.30 > 4.17-4.42 | 6.89-7.05 > 3.90-4.15 |
+| glide_close | glide 0.6 s at 12 m with keys, let go of glider and keys | 5.00 > 3.47 | 5.00 > 2.98-3.05 |
+
+Result: 13 Hunters x 12 rows x 2 modes = 312 rows, 0 broken. No path converts fall speed: the landing in both modes sets the vertical speed to 0 and leaves the horizontal speed alone (`Hunter._physics` landing block, `Home._move_player`), the ground is a height under the body with no slope term (no projection on landing, so the slope rows land at 0 and stay at 0), and the run speed after any landing comes from the ground step toward the keys, capped at the Hunter's run speed (content/rules/hunter_move.json, unchanged). Nothing in the movement code changed.
+
+The two rows that differ between the modes differ in the air, not at the landing: a match knock has its own window (`knock_t`: 6 m/s² drag, no idle drag) and a glider let go of in a match keeps glide drag for `FEATHER_KEEP`; the garden has neither (it has no knock at all: the row puts the same push on as `Hunter.impulse`). Filed in docs/DEBT.md; both still never carry fall speed.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
