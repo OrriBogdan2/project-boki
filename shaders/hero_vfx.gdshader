@@ -30,6 +30,7 @@ uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the sha
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
+uniform float core_w = 0.0;  // M_BOLT: the bright core's half width as a share of the strip (0: the thread/strike default)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
@@ -193,7 +194,7 @@ vec4 bolt(vec2 uv) {
 	wander += (h21(vec2(floor(uv.x * 14.0), tick + seed)) - 0.5) * 0.5 * jag;     // sharp kinks
 	wander *= sin(3.14159 * uv.x);                       // pinned at both ends
 	float off = abs(uv.y * 2.0 - 1.0 - wander);
-	float thin = jag > 0.0 ? 0.07 : 0.16;
+	float thin = core_w > 0.0 ? core_w : (jag > 0.0 ? 0.07 : 0.16);
 	float grow = smoothstep(0.0, 0.12, life) * 1.2;          // runs out from A
 	float reach = 1.0 - smoothstep(grow - 0.1, grow, uv.x);
 	float fade = 1.0 - smoothstep(0.45, 1.0, life);
