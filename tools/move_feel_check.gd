@@ -123,9 +123,10 @@ const T := {
 	# range moved up by that 0.46; the camera did not change)
 	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
-	"source_view_across_m":    ["~", [35.0, 39.0], "m", "the source_scale test camera (off by default): the source's ~37 m of ground across (camera.json source across_m)"],
-	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "the medium hunter under source_scale, measured as hunter_screen_pct: the source's 90-100 px of 1080 (camera.json source hunter_screen_pct)"],
-	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "feet below the screen centre under source_scale, as hunter_feet_below_pct"],
+	# the source_scale test camera (off by default; bands from camera.json "source")
+	"source_view_across_m":    ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
+	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
+	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
 }
 
 var results := {}
@@ -1215,8 +1216,11 @@ func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	rec("source_view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("source_hunter_screen_pct", now[1] / vh * 100.0)
 	rec("source_hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
-	print("MFEEL source scale x%.2f (model %.2f): body %.2f m tall; kept: hit circle r %.2f m, shots leave %.2f m up and hit it below %.2f m, teammate tag 2.4 m up"
-			% [cam.hunter_scale, P.vis_k, float(now[2]), P.hit_radius(), 0.95 * float(P.cdat["scale"]), m.shot_band(P).y - m.shot_stance_y(P)])
+	var shot_from := 0.95 * float(P.cdat["scale"])
+	var hit_top := m.shot_band(P).y - m.shot_stance_y(P)
+	print("MFEEL source scale x%.2f (model %.2f): body %.2f m tall; kept: hit circle r %.2f m," % [cam.hunter_scale,
+			P.vis_k, float(now[2]), P.hit_radius()]
+			+ " shots leave %.2f m up and hit it below %.2f m, teammate tag 2.4 m up" % [shot_from, hit_top])
 	ref.free()
 	for id in FRAME_HEROES:
 		var hm := _stand_in(id, PlayerLook.neutral())

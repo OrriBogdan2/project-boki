@@ -3,7 +3,8 @@ extends RefCounted
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
-## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=source_scale). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=source_scale).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters

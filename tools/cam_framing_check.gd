@@ -84,12 +84,14 @@ func _source_style(cam: CamRig) -> void:
 			% Settings.DEFAULTS["cam_style"])
 	cam.use_style("source_scale")
 	var across := CamRig.style_across("source_scale")
-	ok(_inside(across, src["across_m"]), "source_scale shows %.1f m across, inside the source's %s" % [across, str(src["across_m"])])
+	ok(_inside(across, src["across_m"]), "source_scale shows %.1f m across, inside the source's %s"
+			% [across, str(src["across_m"])])
 	ok(cam.hunter_scale > 1.5, "source_scale draws Hunters %.2fx bigger" % cam.hunter_scale)
 	var was = Settings.get_v("cam_style")
 	Settings.set_v("cam_style", "source_scale", false)
 	cam.apply_settings()
-	ok(cam.style_id == "supervive" and is_equal_approx(cam.hunter_scale, 1.0), "the home keeps the Supervive view under source_scale")
+	ok(cam.style_id == "supervive" and is_equal_approx(cam.hunter_scale, 1.0),
+			"the home keeps the Supervive view under source_scale")
 	Settings.set_v("cam_style", was, false)
 	cam.use_style("supervive")
 
