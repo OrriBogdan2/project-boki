@@ -401,13 +401,14 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	var was_ears := run.ears()
+	var was := last
 	run.step(d, holding)
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
-		Sfx.play("ping", null, -6.0)
 	if run.state != last:
 		_entered(run.state)
 	_draw_water()
+	GlintSfx.tick(h, run, was, was_ears, _sfx_at())
 	if run.over():
 		_end(true)
 
@@ -415,10 +416,7 @@ func _entered(s: Run.S) -> void:
 	last = s
 	bar.visible = s == Run.S.REEL
 	match s:
-		Run.S.WAIT:
-			Sfx.play("splash", null, -10.0)
 		Run.S.REEL:
-			Sfx.play("splash", null, -4.0)
 			h._toast("Hooked! Hold and let go to keep the line in the band")
 		Run.S.SHOW:
 			var c: Dictionary = run.casts[-1]
@@ -429,6 +427,10 @@ func _entered(s: Run.S) -> void:
 				got = "Landed %s!" % GardenPrizes.entry_name(c["catch"])
 			h._toast("Cast %d of %d: %s" % [run.casts.size(), int(rules()["casts"]), got])
 			h._emote(who, "♥" if c["how"] == "caught" else "…", true)
+
+## Where the line meets the water, for the sounds: the bobber while it shows, else where the swing was let go.
+func _sfx_at() -> Vector3:
+	return bobber.global_position if bobber.visible else _water(run.reach(), 0.0)
 
 ## m along the cast and m to its side, from the rock, as a point on the water.
 func _water(along: float, side: float) -> Vector3:
@@ -493,6 +495,7 @@ func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}
 	who["busy"] = false
 	who["t"] = 1.5
+	GlintSfx.stop()
 	if is_instance_valid(bar):
 		bar.queue_free()
 	for g in glint_nodes:

@@ -1,0 +1,13 @@
+{
+ "group": "glint",
+ "name": "Glint Fishing",
+ "script": "tools/gen_sfx_glint.py",
+ "sounds": {
+  "glint_cast": "ui", "glint_plop": "ui", "glint_water": "loop", "glint_bite": "signature",
+  "glint_reel": "loop", "glint_catch_small": "boki", "glint_catch_medium": "boki", "glint_catch_large": "boki"
+ },
+ "reach": {"glint_water": 20},
+ "signature": [],
+ "replaces": [],
+ "loops": ["glint_water", "glint_reel"]
+}
