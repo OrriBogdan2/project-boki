@@ -10,7 +10,7 @@ extends ArchKit
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v}
-var puddles: Array = []             # slime puddles: {at, r, left, k, tick}
+var puddles: Array = []             # slime puddles: {at, r, t, left, k, tick, node, rim, inside}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
 var combo_n := 0
@@ -261,8 +261,7 @@ func _shatter(it: Dictionary) -> void:
 		f.hurt(float(vd["dmg"]) * p, h, o)
 		_mark(f, String(vd.get("mark", v)), col)
 	if v == "slime":
-		puddles.append({"at": at, "r": float(vd["puddle_r"]), "left": float(vd["puddle_t"]),
-			"k": float(vd["puddle_k"]), "tick": 0.0})
+		_add_puddle(at, vd)
 
 ## Each bottle breaks in its own look (content/vfx/gil.json shatter_<vial>, sized to its circle).
 func _shatter_look(v: String, at: Vector3, r: float) -> void:
@@ -273,6 +272,46 @@ func _shatter_look(v: String, at: Vector3, r: float) -> void:
 		"air": vfx("shatter_air", at, dir, {"r": r})
 		"fire": vfx("shatter_fire", at, dir, {"r": r})
 		_: vfx("shatter_zeep", at, dir, {"r": r})
+
+const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
+const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
+const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
+const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
+const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
+const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
+const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
+
+## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
+## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
+func _add_puddle(at: Vector3, vd: Dictionary) -> void:
+	var r := float(vd["puddle_r"])
+	var n := Node3D.new()
+	var quad := Models.flat_quad(r * 2.0)
+	var inside := Models.ring_mat(Color(col_of(vd), PUDDLE_IN_A), 0.0)
+	inside.set_shader_parameter("wash", 1.0)
+	var rim := Models.ring_mat(Arch.color(h.arch), PUDDLE_RIM)
+	rim.set_shader_parameter("halo", 1.0)
+	Models.part(n, quad, inside, Vector3(0, 0.06, 0))
+	Models.part(n, quad, rim, Vector3(0, 0.08, 0))
+	ShadowPolicy.off(n)
+	m.add_child(n)
+	n.global_position = at
+	puddles.append({"at": at, "r": r, "t": float(vd["puddle_t"]), "left": float(vd["puddle_t"]),
+		"k": float(vd["puddle_k"]), "tick": 0.0, "node": n, "rim": rim, "inside": inside})
+
+## The puddle's glow now: the rim's flare as it lands, then steady, then the ease-out fade as it dries.
+func _puddle_look(pd: Dictionary) -> void:
+	var left := float(pd["left"])
+	var age := float(pd["t"]) - left
+	if age > PUDDLE_SETTLE and left > PUDDLE_FADE:
+		return
+	var flare := pow(1.0 - clampf((age - PUDDLE_PEAK) / (PUDDLE_SETTLE - PUDDLE_PEAK), 0.0, 1.0), 2.0)
+	var fade := pow(clampf(left / PUDDLE_FADE, 0.0, 1.0), 2.0)
+	var sig := Arch.color(h.arch)
+	(pd["rim"] as ShaderMaterial).set_shader_parameter("color",
+		Color(sig.lerp(Color.WHITE, PUDDLE_FLARE * flare), lerpf(PUDDLE_RIM_A, 1.0, flare) * fade))
+	var inside: ShaderMaterial = pd["inside"]
+	inside.set_shader_parameter("color", Color(inside.get_shader_parameter("color"), PUDDLE_IN_A * fade))
 
 # ------------------------------------------------------------------ passive: Fish Out of Water
 func _mark(f: Ent, mk: String, col: Color) -> void:
@@ -494,12 +533,14 @@ func _tick(dt: float) -> void:
 		pd["tick"] = float(pd["tick"]) - dt
 		if float(pd["tick"]) <= 0.0:
 			pd["tick"] = 0.25
-			m.fx.ring(pd["at"], float(pd["r"]), Color("#7be05a", 0.5), 0.26)
 			for f in foes_in(pd["at"], float(pd["r"])):
 				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
 				f.slow_t = maxf(f.slow_t, 0.35)
 		if float(pd["left"]) <= 0.0:
+			(pd["node"] as Node3D).queue_free()
 			puddles.erase(pd)
+		else:
+			_puddle_look(pd)
 	if swim_t > 0.0:
 		swim_t -= dt
 		if swim_t <= 0.0:

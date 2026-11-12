@@ -38,6 +38,7 @@ func run(main_node: Node) -> void:
 func _reset(dist := 6.0) -> void:
 	K._drop_holds()
 	K.flying.clear()
+	for pd in K.puddles: (pd["node"] as Node3D).queue_free()
 	K.puddles.clear()
 	K.spouts.clear()
 	K.wave = {}
@@ -185,15 +186,53 @@ func _vials() -> void:
 				"dmg %.1f burn %.2f" % [dmg(T), top["burn"]])
 			"zeep": ok("Super Zeep: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
 				"stun %.2f lift %.2f" % [top["stun"], top["lift"]])
-	# the slime puddle keeps slowing
+	_puddle()
+
+## The slime puddle keeps slowing, and it is drawn for exactly as long, on its radius: Gil's lit rim over a faint
+## slime inside, a white flare as it lands, an ease-out fade before it dries, and no strobing rings.
+func _puddle() -> void:
 	_reset(6.0)
 	K.bag.append("slime")
 	tap(m, P)
 	_land()
+	var vd := K.vial_def("slime")
+	var pd: Dictionary = K.puddles[0] if K.puddles.size() == 1 else {}
+	ok("Slime: one puddle, drawn", pd.has("node") and (pd["node"] as Node3D).is_inside_tree())
+	if not pd.has("node"):
+		return
+	var node: Node3D = pd["node"]
+	var rim: ShaderMaterial = pd["rim"]
+	var inside: ShaderMaterial = pd["inside"]
+	var sig := Arch.color("gil")
+	var quad := (node.get_child(1) as MeshInstance3D).mesh as PlaneMesh
+	var flare: Color = rim.get_shader_parameter("color")
+	ok("Slime: the rim sits on the puddle's radius and flares white as it lands",
+		absf(quad.size.x - 2.0 * float(vd["puddle_r"])) < 0.01 and flare.a > GilKit.PUDDLE_RIM_A + 0.05
+			and flare.r > sig.r + 0.05,
+		"quad %.2f m, flare %s" % [quad.size.x, flare])
 	fresh(T)
 	step(m, 0.3)
 	ok("Slime: the puddle slows whoever stands in it", T.slow_t > 0.0 and absf(T.slow_k - 0.25) < 0.05,
 		"slow %.2f k %.2f" % [T.slow_t, T.slow_k])
+	var steady: Color = rim.get_shader_parameter("color")
+	var in_col: Color = inside.get_shader_parameter("color")
+	ok("Slime: then a steady rim in Gil's colour over a faint inside in the slime's (0.25 alpha or less)",
+		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - GilKit.PUDDLE_RIM_A) < 0.01
+			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * 0.3 <= 0.25,
+		"rim %s inside %s" % [steady, in_col])
+	var at: Vector3 = pd["at"]
+	var r := float(pd["r"])
+	var on_it := func(rg: Dictionary) -> bool:
+		return absf(float(rg["r"]) - r) < 0.05 and (rg["node"] as Node3D).global_position.distance_to(at) < 0.5
+	var strobe := false
+	while float(pd["left"]) > GilKit.PUDDLE_FADE * 0.5:
+		step(m, DT)
+		strobe = strobe or m.fx.rings.any(on_it)
+	var mid: float = (rim.get_shader_parameter("color") as Color).a / GilKit.PUDDLE_RIM_A
+	ok("Slime: no rings strobe over it, and it fades on an ease-out curve as the slow ends (a quarter left halfway)",
+		not strobe and absf(mid - 0.25) < 0.05, "%.3f of its glow halfway through the fade" % mid)
+	step(m, 0.3)
+	ok("Slime: gone with its slow", K.puddles.is_empty() and node.is_queued_for_deletion())
 
 func _hold_and_air() -> void:
 	_reset(6.0)
