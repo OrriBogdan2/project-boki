@@ -43,7 +43,6 @@ const OPEN := {
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
-	"mage:mage_lmb_l:pop": "the free arm leaves the run's wide swing in a 0.067 s fade (first key: the idle's arm)",
 }
 
 var bad := 0

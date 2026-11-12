@@ -66,6 +66,10 @@ full orb lets its casting arm go at 0.2 s and the Trade lob at 0.22 s, so the ar
 elbow out.
 clip sources in tools/art1 are unchanged). Done for `juggernaut` (slam, meteor: the sword stays in the right hand as on his v2 splash, the off arm hangs; `t_free` 33 % to 0 and free-hand travel 1.7 to 0.8 and 1.0 to 0.3 body heights; `haulslam` keeps its arms, the chain hand), `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
 clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `dolm` (lmb_throw, lmb_punch).
+Data `"arm_fade": {clip: {side: seconds}}` (same module) eases one arm from the pose it showed the frame before into the
+clip over those seconds (smoothstep), while the rest of the upper body takes the move's own `fade`: Sparkle's `lmb_l` out of
+the run (`"R": 0.15`), where the right arm leaves a wide run swing and the casting left hand must still snap at full weight
+on its 0.067 s key. `--clip-check`'s hand-over row measures it (0.314 to 0.158 m over the clip's own; limit 0.240).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out. It measures every clip a Hunter's data names in
 `free_arm`, not only the two shown in the strips, and gates three things: the free arm out for at most 10 % of the clip; the
