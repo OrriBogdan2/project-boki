@@ -281,6 +281,8 @@ func _parity(main: Node) -> void:
 	main.add_child(hm)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
+	while hm.building:      # (built under a still-covered fade, the farm comes in slices)
+		await main.get_tree().process_frame
 	hm.set_process(false)
 	hm.ppos = Vector3(hm.ppos.x, 0, hm.ppos.z)
 	hm.py = hm._ground_h(hm.ppos.x, hm.ppos.z) + 6.0

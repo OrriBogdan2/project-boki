@@ -434,6 +434,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 ## every Hunter. The sheet's air cartwheel, 8.4m held flat over 0.95s, flew far past the cast.
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
+	use_ex = h.dashes < 1.0           # (a jump alone doesn't make it the long dash: Hunter.do_dash says so in the air)
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
@@ -510,7 +511,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	play("thf_exdash" if air else chain.next_flip(dir))
 	var t := float(dd["time"])
-	m.sfx("thief_dash", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
@@ -572,7 +573,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
@@ -589,8 +589,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
-	var who: String = "TAKEN" if mine else "ASSIST"
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
+	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ RMB: Bola
@@ -762,7 +761,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)

@@ -36,6 +36,13 @@ func _setup() -> void:
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
 
+## Swapped off her mid Phase Walk (Training Grounds, a hero swap): the walk ends with her kit, else
+## Hunter.spirit_t would never tick down and the next hunter would ghost through terrain for good.
+func teardown() -> void:
+	if spirit:
+		spirit.end("merge")
+	super()
+
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
 		_arrow_hit(t)
@@ -304,7 +311,6 @@ func _pin(a: Vector3, k: float) -> void:
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
@@ -316,7 +322,6 @@ func _pin(a: Vector3, k: float) -> void:
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
-					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
