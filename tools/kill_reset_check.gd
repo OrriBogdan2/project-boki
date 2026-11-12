@@ -6,7 +6,8 @@ extends RefCounted
 ## data opts out gets nothing; killing a mob changes nothing; a bot gets it too but only the local hunter
 ## gets the cue (the CombatBus.dash_reset_cue event, the Shift icon pop and the sound); a knock on a teammate counts for
 ## nothing; the hero-specific resets (DashReset.cue) fire the same event; the cue variants all exist and
-## the setting picks between them. Never touches the save.
+## the setting picks between them. The knock moment: freeze, slow-mo and a white flash for the
+## knocker, the same every knock; slow-mo and a red flash for the one knocked. Never touches the save.
 
 var bad := 0
 var cues: Array = []
@@ -49,8 +50,14 @@ func run(main: Node) -> void:
 	P.max_hp = 200.0; P.hp = 100.0
 	P.lvl = Hunter.XP_TO.size()      # (at the level cap: a takedown's XP can't level you, so quiet growth stays out of the numbers)
 	_spend(P)
+	_calm(m)
 	m.knock(f1, P, {})
+	var beat := _beat(m)
 	ok(f1.downed, "(a) the rival is down")
+	ok(is_equal_approx(m.hitstop, Juice.KNOCK_FREEZE_S) and is_equal_approx(m.slowmo, Juice.KNOCK_SLOW_S)
+			and is_equal_approx(m.slow_k, Juice.KNOCK_SLOW_K), "(a) the knock moment: freeze then slow-mo (%s)" % str(beat))
+	ok(m.hud == null or (m.hud.flash_t == 1.0 and m.hud.flash_col == Color(Color.WHITE, Juice.KNOCK_FLASH)),
+			"(a) and a white screen flash")
 	ok(P.dashes >= P.max_dashes() - 0.001 and P.max_dashes() >= 1.0, "(a) the knock brings back every dash charge (%.2f / %.2f)" % [P.dashes, P.max_dashes()])
 	ok(P.ex_cd == 0.0, "(a) the long-dash cooldown is cleared")
 	ok(absf(P.hp - (100.0 + 200.0 * DashReset.HEAL)) < 0.01, "(a) +5%% of max health (%.1f, want 110)" % P.hp)
@@ -59,7 +66,9 @@ func run(main: Node) -> void:
 	# (b) the heal never passes max health
 	P.hp = P.max_hp - 3.0
 	_spend(P)
+	_calm(m)
 	m.knock(f2, P, {})
+	ok(_beat(m) == beat, "(b) the next knock plays the very same moment (%s)" % str(_beat(m)))
 	ok(is_equal_approx(P.hp, P.max_hp) and P.dashes >= P.max_dashes() - 0.001, "(b) near full health the heal stops at max (%.1f / %.1f)" % [P.hp, P.max_hp])
 
 	# (c) finishing the downed rival is a kill: the reset again
@@ -129,9 +138,26 @@ func run(main: Node) -> void:
 	ok(hud_pop, "(h) the HUD holds the Shift pop")
 
 	_assists(m, P, mates, foes)
+
+	# (m) knocked yourself: the longer slow-mo and a red flash
+	_calm(m)
+	m.knock(P, foes[-5], {})
+	ok(P.downed and is_equal_approx(m.slowmo, Juice.DOWNED_SLOW_S) and is_equal_approx(m.slow_k, Juice.DOWNED_SLOW_K),
+			"(m) your own knock slows the match (%s)" % str(_beat(m)))
+	ok(m.hud == null or m.hud.flash_col == Color(Juice.DOWNED_COL, Juice.DOWNED_FLASH), "(m) and flashes red")
 	m.queue_free()
 	print("KILLRESET DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
+## Clears the freeze, slow-mo and flash, so the next knock's moment reads alone.
+func _calm(m: Match) -> void:
+	m.hitstop = 0.0
+	m.slowmo = 0.0
+	if m.hud: m.hud.flash_t = 0.0
+
+## The knock moment the match holds right now: [freeze s, slow-mo s, slow-mo speed, flash colour].
+func _beat(m: Match) -> Array:
+	return [m.hitstop, m.slowmo, m.slow_k, m.hud.flash_col if m.hud else Color.BLACK]
 
 ## (i)-(l) the assist rule, the one-charge rule for multi-charge dashes and the per-hero opt-out.
 func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:

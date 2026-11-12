@@ -209,6 +209,7 @@ const CHECKS := {
 	"--hero-vfx-reel": ["res://tools/hero_vfx_reel.gd", "hero_vfx_reel", null],
 	# the per-Hunter parity reels (docs/parity_reel)
 	"--parity-reel": ["res://tools/parity_reel.gd", "parity_reel", null],
+	"--knock-moment-reel": ["res://tools/knock_moment_reel.gd", "knock_moment_reel", null],      # GPU, movie writer
 	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],      # every look, side by side
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
