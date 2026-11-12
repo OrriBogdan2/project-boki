@@ -54,3 +54,5 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 
 ## Body6 (2026-11-11, patch 0.24.6)
 Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/sable_v95.json`) onto the body6 pick cand_A from `~/meshy/v95/Sable/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick). Re-ran `tools/art1/sable_wings.py` after the swap.
+
+Merge with main (ext/hunters3d-0246, 11-12): main's `--clip-check` seam test flagged this glb's `idle` (forearm.R seam 1.6x the limit after the Blender export). The idle's last key was set equal to its first on every track (glb data only, 0.01 rad at most; one quaternion was the sign-flipped twin).
