@@ -33,7 +33,7 @@ func _boki(power: int) -> Dictionary:
 	return rec
 
 func _tables() -> void:
-	ok(GardenPrizes.ids().size() == 6, "six games: dash, shove, seek, volley, show, relay")
+	ok(GardenPrizes.ids().size() == 8, "eight games: dash, shove, seek, volley, show, echo, relay, lantern")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for id in GardenPrizes.ids():
@@ -93,7 +93,18 @@ func _cup() -> void:
 		later.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + WEEK, rng))
 	var week_now := int(me["ribbons"]["shove"]["week"]) == GardenPrizes.week_of(t + WEEK)
 	ok(not later[2]["ribbon"] and week_now, "next week's Crown: no second ribbon, the week moves on")
+	_echo_crown(rng, t + 5.0 * WEEK)
 	_loss_and_games(rng, t + 3.0 * WEEK)
+
+## Echo Steps' first Crown also gives Chimegrass; the next one does not.
+func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
+	var me := _boki(20)
+	for week in 2:
+		for foe_power in [19, 21, 23]:
+			GardenPrizes.settle("echo", me, _boki(foe_power), true, t + week * WEEK, rng)
+		ok(int(Save.d["items"].get("chimegrass", 0)) == 1, "Echo Steps Crown %d: Chimegrass once in all" % (week + 1))
+	var week_two := int(me["ribbons"]["echo"]["week"]) == GardenPrizes.week_of(t + WEEK)
+	ok(GardenPrizes.has_ribbon(me, "echo") and week_two, "...and it wears the Echo Steps Cup Ribbon, both weeks")
 
 func _loss_and_games(rng: RandomNumberGenerator, t: float) -> void:
 	var me := _boki(20)

@@ -128,9 +128,12 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	var g := game(id)
 	out["crown"] = true
 	out["ribbon"] = GardenItems.award_ribbon(mine, id, week_of(now), "won the %s Crown cup" % g["name"])
-	var prize := {"kind": "item", "id": g["cup_prize"]}
-	bank(prize)
-	(out["items"] as Array).append(prize)
+	var prizes: Array = [{"kind": "item", "id": g["cup_prize"]}]
+	if out["ribbon"] and g.has("first_crown"):
+		prizes.append({"kind": "item", "id": g["first_crown"]})
+	for prize in prizes:
+		bank(prize)
+		(out["items"] as Array).append(prize)
 	Save.remember(mine, "cup", "won the %s Crown cup and wears the %s" % [g["name"], g["ribbon"]], 2.0)
 
 ## The lines a result card adds under the gems: the prizes won and the cup step. font 0 leaves it out.
