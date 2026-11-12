@@ -2,14 +2,17 @@ class_name StatBudgetView
 extends RefCounted
 ## The Boki card's Training tab, stats half (decision 0022): the budget ring (points spent of the total),
 ## one bar per stat on a 0 to 100 scale with marks where the gain bands change and the level cap, and the
-## "next point: N more plays" line, and under each bar its last change with the cause (StatCause).
+## "next point: N more plays" line, and under each bar its last change with the cause (StatCause). A Boki's
+## glint click passes "lit" ({"from": {stat: old}, "left": s}): those rows show old -> new on a tinted strip
+## until "left" runs out.
 
 const RING_PX := 64.0
 const RING_W := 7.0
 const MARK := Color(1, 1, 1, 0.55)
+const FADE_S := 0.3     # s the lit strip takes to fade out
 const CAP_MARK := Color("e0b24a")
 
-static func fill(box: Control, rec: Dictionary) -> void:
+static func fill(box: Control, rec: Dictionary, lit := {}) -> void:
 	var spent := StatBudget.total(rec)
 	var total := int(StatBudget.rules()["total_cap"])
 	var head := UI.hbox(12)
@@ -21,12 +24,12 @@ static func fill(box: Control, rec: Dictionary) -> void:
 	head.add_child(UI.label(words, UI.T_SMALL, UI.MUTED))
 	box.add_child(head)
 	for s in Care.STATS:
-		box.add_child(_row(rec, s))
+		box.add_child(_row(rec, s, lit))
 		box.add_child(_cause(rec, s))
 	var tip := "Train at the yard to raise them. Past 50 points a gain counts half, past 80 a quarter."
 	box.add_child(UI.para(tip, 12, UI.FAINT))
 
-static func _row(rec: Dictionary, s: String) -> Control:
+static func _row(rec: Dictionary, s: String, lit: Dictionary) -> Control:
 	var info: Dictionary = Care.STATS[s]
 	var cap_max := float(StatBudget.rules()["cap_max"])
 	var r := UI.hbox(10)
@@ -43,7 +46,17 @@ static func _row(rec: Dictionary, s: String) -> Control:
 	right.custom_minimum_size.x = 120.0
 	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	r.add_child(right)
-	return r
+	if not lit.get("from", {}).has(s):
+		return r
+	var strip := UI.card(Color(info["col"], 0.22), 2, 6)
+	strip.name = "Lit_" + s
+	strip.add_child(r)
+	right.text = "%d \u2192 %d  ·  %s" % [int(lit["from"][s]), int(rec["stats"][s]), next]
+	var tw := strip.create_tween()
+	tw.tween_interval(float(lit["left"]))
+	tw.tween_callback(func(): right.text = "%d  ·  %s" % [int(rec["stats"][s]), next])
+	tw.tween_property(strip, "self_modulate:a", 0.0, FADE_S)
+	return strip
 
 ## Under a stat's bar: its last change and what caused it (StatCause.last).
 static func _cause(rec: Dictionary, s: String) -> Label:
