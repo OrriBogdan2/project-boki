@@ -1,13 +1,24 @@
 extends RefCounted
 ## --garden-audio-check (briefs/design/GARDEN.md 10.2, docs/AUDIO.md): each zone and the hub has its own
 ## ambience bed under the time-of-day bed, Hushwood's clock stays at dusk, a hop plays its sound (as long
-## as the Waystone's light-up) and a zone waking plays its sting once. Part 1 runs HomeAmbience on its own
-## for every zone; part 2 travels hub -> Bramblebank through the real Waystone and reads each home's beds.
+## as the Waystone's light-up) and a zone waking plays its sting once. Each zone and the hub also has its own
+## music track (GardenMusic). Part 1 runs HomeAmbience on its own for every zone; part 2 travels hub ->
+## Bramblebank through the real Waystone, reads each home's beds and track, the music's crossfade after the
+## hop and its duck while a garden game is on.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 const TICK_S := 0.25      # s per simulated ambience step
 const SETTLE_S := 6.0     # s of steps for a zone's bed to come up (ZONE_FADE_S is 3)
 const DEPART_MAX_S := 0.5  # s the departure whoosh may last: it plays as the ink wipe covers the screen
+const FULL_DB := -9.0     # dB of a track at full (Sfx.play_music)
+
+## Stands in for a garden game that is on, for the duck.
+class OnGame:
+	func place() -> void: pass
+	func tick(_d: float) -> void: pass
+	func find(_p2: Vector2) -> Dictionary: return {}
+	func input(_event: InputEvent) -> bool: return false
+	func playing() -> bool: return true
 
 var bad := 0
 
@@ -18,6 +29,7 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	Save.no_write = true
 	_bed_part()
+	_music_part()
 	_cue_part()
 	await _travel_part(m)
 	print("GARDENAUDIO %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -50,6 +62,17 @@ func _bed_part() -> void:
 	ok(dusk == "garden_evening" and morning == "garden_morning",
 		"Hushwood stays at dusk, Bramblebank keeps the clock")
 	GardenZones.here = ""
+
+## Every zone and the hub (by day) has a track of its own, rendered and in the music list.
+func _music_part() -> void:
+	var seen := {}
+	for z: String in _zones():
+		seen[GardenMusic.zone_track(z, false)] = true
+	ok(seen.size() == _zones().size(), "every zone and the hub have their own track (%d)" % seen.size())
+	seen[GardenMusic.zone_track(GardenZones.HUB, true)] = true
+	for t: String in seen:
+		ok(ResourceLoader.exists("res://audio/music_%s.ogg" % t) and Data.MUSIC.has(t),
+			"track %s is rendered and listed" % t)
 
 ## The travel and wake sounds exist, the hop is as long as the light-up, and waking a zone plays once.
 func _cue_part() -> void:
@@ -84,6 +107,7 @@ func _travel_part(m: Node) -> void:
 	ok(hub != null and hub.ambience.levels.has(HomeAmbience.zone_bed(GardenZones.HUB)), "the hub plays its own bed")
 	if hub == null:
 		return
+	ok(Sfx.music_name in GardenZones.rules()["hub_music"].values(), "the hub plays its track (%s)" % Sfx.music_name)
 	ZoneCards.open(hub, GardenZones.HUB)
 	var buttons: Array = hub.find_children("*", "Button", true, false)
 	var shut := buttons.filter(func(b: Button) -> bool: return b.text == "Locked")
@@ -102,7 +126,29 @@ func _travel_part(m: Node) -> void:
 	var hub_bed := HomeAmbience.zone_bed(GardenZones.HUB)
 	ok(bb != null and bb.ambience.levels.has(bed) and not bb.ambience.levels.has(hub_bed),
 		"after the hop Bramblebank plays %s, the hub bed is gone" % bed)
+	if bb != null:
+		await _music_travel(m, bb)
 	Content.rules("farm_build")["base_mode"] = false
+
+## After the hop the zone's track fades up over music_fade_s while the hub's fades out; a game ducks it.
+func _music_travel(m: Node, bb: Node) -> void:
+	var want := GardenMusic.zone_track("bramblebank", false)
+	var fade := float(GardenZones.rules()["music_fade_s"])
+	var nw: AudioStreamPlayer = Sfx.music[Sfx.music_i]
+	var old: AudioStreamPlayer = Sfx.music[1 - Sfx.music_i]
+	ok(Sfx.music_name == want and nw.volume_db < FULL_DB - 1.0 and old.playing,
+		"Bramblebank's %s is crossfading in (%.1f dB) under the hub's track" % [Sfx.music_name, nw.volume_db])
+	await m.get_tree().create_timer(fade + 0.3).timeout
+	ok(absf(nw.volume_db - FULL_DB) < 0.5 and not old.playing,
+		"after %.1f s %s is at full (%.1f dB) and the hub's track has stopped" % [fade, want, nw.volume_db])
+	var game := OnGame.new()
+	bb.games.append(game)
+	var duck_db := float(GardenZones.rules()["music_duck_db"])
+	await m.get_tree().create_timer(GardenMusic.LOOK_S * 2.0).timeout
+	ok(Sfx._duck_fx.volume_db <= duck_db + 0.5, "a garden game ducks the music (%.1f dB)" % Sfx._duck_fx.volume_db)
+	bb.games.erase(game)
+	await m.get_tree().create_timer(GardenMusic.LOOK_S * 2.0 + 1.5).timeout
+	ok(Sfx._duck_fx.volume_db > -0.5, "the music comes back once it ends (%.1f dB)" % Sfx._duck_fx.volume_db)
 
 ## Waits for the home a goto started to be built and revealed, with a few ambience steps; null on a timeout.
 func _arrived(m: Node, was: Node):

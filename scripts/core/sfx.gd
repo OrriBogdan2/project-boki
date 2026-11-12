@@ -258,7 +258,6 @@ var last_played := {}
 var cue_log = null
 var rng := RandomNumberGenerator.new()
 
-signal new_track(name: String)
 ## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
 signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []  # two players so tracks can crossfade
@@ -376,7 +375,6 @@ func play_music(name: String, fade := 1.5) -> void:
 			Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()
-		new_track.emit(name)
 	var old := music[music_i]
 	music_i = 1 - music_i
 	var nw := music[music_i]
@@ -386,12 +384,12 @@ func play_music(name: String, fade := 1.5) -> void:
 	var tw := create_tween().set_parallel(true)
 	_music_tw = tw
 	tw.tween_property(old, "volume_db", -80.0, fade).set_trans(Tween.TRANS_SINE)
-	tw.chain().tween_callback(old.stop)
 	if name != "":
 		nw.stream = _loop_stream("res://audio/music_%s.ogg" % name)
 		nw.volume_db = -40.0
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
+	tw.chain().tween_callback(old.stop)      # after both fades: chained before the fade-in, it waited for the fade-out
 
 
 func play_ambience(name: String) -> void:

@@ -201,6 +201,10 @@ func use() -> void:
 	GardenSfx.countdown(h, stump.position)
 	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
 	if run == null:
