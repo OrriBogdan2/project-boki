@@ -209,6 +209,7 @@ func _pointers() -> void:
 	pm.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	pm.set_process(false)
 	var seen := {}
+	var faces := {}
 	var guard := 0
 	while guard < 20000 and pm.tut.step < Tutorial.steps().size() and not pm.player.extracted:
 		guard += 1
@@ -224,6 +225,8 @@ func _pointers() -> void:
 			await pm.hud.panels.draw
 			var face := RankMarks.face(slot)
 			var tag := "%dx%d %s" % [sz.x, sz.y, slot]
+			if sz == SIZES[1]:
+				faces[slot] = face
 			ok(face.has_area(), "%s: the pick ring finds the slot the HUD drew" % tag)
 			var rad := maxf(face.size.x, face.size.y) * 0.88      # (the ring at its biggest; its arrow sits above it)
 			var reach := Rect2(face.get_center() - Vector2(rad, rad * 2.6 + 16.0), Vector2(rad * 2.0, rad * 3.6 + 16.0))
@@ -234,4 +237,18 @@ func _pointers() -> void:
 			ok(spots.any(func(s): return (s[0] as Rect2).is_equal_approx(face)),
 				"%s: it is the slot's own hover rect, not a fixed spot" % tag)
 	ok(seen.size() >= 3, "the course has pick steps for %s" % str(seen.keys()))
+	_hint_pills(faces)
 	pm.queue_free()
+
+## The ALT+key hints over the neighbouring ranked slots (Rank step) never cover each other at 1920x1080.
+func _hint_pills(faces: Dictionary) -> void:
+	var keys := {"sec": "RMB", "dash": "SHIFT", "kin": "E"}
+	var pills: Array = []
+	for slot: String in keys:
+		if faces.has(slot):
+			pills.append(RankMarks.hint_pill(faces[slot], slot, keys[slot]))
+	var clash := false
+	for i in pills.size():
+		for j in range(i + 1, pills.size()):
+			clash = clash or (pills[i] as Rect2).intersects(pills[j])
+	ok(pills.size() == 3 and not clash, "the ALT+key pills over RMB, SHIFT and E do not overlap (%s)" % str(pills))

@@ -11,6 +11,8 @@ const NUMERALS := ["", "I", "II", "III", "IV", "V", "VI"]
 const PLUS_R := 11.0           # px: the "+" badge's radius before its pulse
 const PLUS_HIT := 16.0         # px: half the clickable square round the "+"
 const HINT_SECS := 5.0         # s: the ALT+key hint shows on every rankable slot after a new point
+const HINT_RAISED := ["dash"]  # slots whose hint sits a row higher: the row's slots are closer than "ALT+SHIFT" is wide
+const HINT_ROW := 19.0         # px: that extra height
 
 static var plus_spots := {}    # slot -> [Rect2 the "+" covers, HudPanels.draws when drawn] (RankClick reads it)
 static var faces := {}         # slot -> [Rect2 the slot's face, HudPanels.draws when drawn] (tutorial pointers read it)
@@ -41,7 +43,7 @@ static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
 	var glow := Color(1.0, 0.82, 0.48, 0.35 + 0.5 * pulse)
 	H._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
 	if H.hover_id == id or t < _hint_until:
-		_hint(H, Vector2(r.get_center().x, r.position.y - 14.0), "ALT+" + key)
+		_hint(H, hint_pill(r, slot, key), "ALT+" + key)
 	var cp := Vector2(r.end.x - 3.0, r.position.y + 3.0)
 	var rad := PLUS_R + pulse * 1.5
 	c.draw_circle(cp, rad + 1.5, HudStyle.SHADE_EDGE)
@@ -73,9 +75,13 @@ static func face(slot: String) -> Rect2:
 		return Rect2()
 	return s[0]
 
+## Where the ALT+key hint sits over the slot at `r`: centred on it, a row higher for HINT_RAISED slots.
+static func hint_pill(r: Rect2, slot: String, key: String) -> Rect2:
+	var w := HudStyle.BIG.get_string_size("ALT+" + key, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0
+	var lift := HINT_ROW if slot in HINT_RAISED else 0.0
+	return Rect2(Vector2(r.get_center().x - w * 0.5, r.position.y - 27.0 - lift), Vector2(w, 17.0))
+
 ## The ALT+key hint on a dark pill, so it reads over the bars and labels above the slot.
-static func _hint(H, at: Vector2, text: String) -> void:
-	var w := HudStyle.BIG.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0
-	var pill := Rect2(Vector2(at.x - w * 0.5, at.y - 13.0), Vector2(w, 17.0))
+static func _hint(H, pill: Rect2, text: String) -> void:
 	H._rounded(pill, HudStyle.KEY_BG, 6, Color(HudStyle.GOLD, 0.8), 1)
-	HudStyle.ctext(H.c, Vector2(at.x, pill.end.y - 4.0), text, 12, HudStyle.GOLD, 0)
+	HudStyle.ctext(H.c, Vector2(pill.get_center().x, pill.end.y - 4.0), text, 12, HudStyle.GOLD, 0)
