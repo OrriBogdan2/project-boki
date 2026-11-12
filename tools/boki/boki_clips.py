@@ -24,6 +24,13 @@ def ease(x):
     return x * x * (3 - 2 * x)
 
 
+def sweep(t, n=1.0, ph=0.0):
+    """s(t, n, ph), a paw's swing round the hip from 1 forward to -1 back, but its stance (the back half) is a
+    straight line, so the planted paw goes back at one pace; the swing forward keeps the sine's ease."""
+    u = (n * t + ph) % 1.0
+    return 2.0 - 4.0 * u if 0.25 <= u < 0.75 else math.sin(TAU * u)
+
+
 def seq(t, keys):
     """keys: (t, value), eased between. Values may be numbers."""
     if t <= keys[0][0]:
