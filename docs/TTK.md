@@ -50,8 +50,8 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | dolm (Tetra) | LMB rank max | 13.30 | never | n/a | n/a |
 | dredge (Kingpin) | LMB rank 0 | 9.43 | never | n/a | n/a |
 | dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| rimewright (Celeste) | LMB rank 0 | 3.60 | never | n/a | n/a |
+| rimewright (Celeste) | LMB rank max | 3.60 | never | n/a | n/a |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|

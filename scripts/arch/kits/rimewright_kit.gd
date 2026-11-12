@@ -3,7 +3,7 @@ extends ArchKit
 ## Claire, the Rimewright (light ice controller). docs/heroes/rimewright.md. Copies her source as it
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
 ## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
-## LMB Ice Dart: hold for a steady stream of slow homing shards that bow out and curve onto the foe
+## LMB Ice Dart: bursts of slow homing shards (plain, three large, a pause) that bow out and curve onto the foe
 ## nearest the cursor; while skating they fly as thick beams that home the same way. RMB Ice Spear: hold to
 ## see the landing ring, let go: it lands at the cursor, leaves a slow zone and detonates 1.8s later.
 ## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
@@ -18,7 +18,8 @@ const FAN_HOLD := 3.0          # s a foe's Fan stacks last after its last fan hi
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
-var burst_i := 0               # darts so far in this hold: after wpn.burst plain ones come wpn.heavy.n large ones
+var burst_i := 0               # darts so far in this burst: wpn.burst plain ones, then wpn.heavy.n large ones end it
+var burst_last := -9.0         # when the last dart of this burst left (the count restarts wpn.barrage_cd after it)
 var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
@@ -188,7 +189,8 @@ func own_aim_line() -> bool:
 	return true
 
 func lmb_override(held: bool, _dt: float) -> bool:
-	if not held:
+	# a let-go keeps the count: it restarts only once the barrage pause has passed since the last dart
+	if burst_i > 0 and m.time - burst_last >= float(h.wpn.get("barrage_cd", 0.5)):
 		burst_i = 0
 	if not h.can_fire() or not rime.is_empty():
 		return true
@@ -197,13 +199,13 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	_throw_dart()
 	return true
 
-## The barrage's rhythm (the source's data): wpn.burst plain darts, then wpn.heavy.n larger ones (double damage,
-## faster, longer reach), then round again while the button stays down.
+## The barrage's rhythm (the source's data): a burst of wpn.burst plain darts that ends on wpn.heavy.n larger ones
+## (double damage, faster, longer reach), then the barrage cooldown wpn.barrage_cd before the next burst.
+func burst_len() -> int:
+	return int(h.wpn.get("burst", 4)) + int((h.wpn.get("heavy", {}) as Dictionary).get("n", 0))
+
 func _heavy_now() -> bool:
-	var wd: Dictionary = h.wpn
-	var plain := int(wd.get("burst", 4))
-	var cycle := plain + int((wd.get("heavy", {}) as Dictionary).get("n", 0))
-	return cycle > plain and burst_i % cycle >= plain
+	return burst_i >= int(h.wpn.get("burst", 4))
 
 func _throw_dart() -> void:
 	var wd: Dictionary = h.wpn
@@ -250,6 +252,9 @@ func _throw_dart() -> void:
 	h.reveal_t = maxf(h.reveal_t, 1.2)
 	h.idle_fire = 0.0
 	seq_next = m.time + float(wd.get("rate", 0.18))
+	burst_last = m.time
+	if burst_i >= burst_len():     # the large ones ended the burst: the pause, then a fresh count
+		seq_next = m.time + maxf(float(wd.get("rate", 0.18)), float(wd.get("barrage_cd", 0.5)))
 
 ## A large dart's multiplier `key` (wpn.heavy), 1 for a plain one.
 func _heavy_k(key: String, heavy: bool) -> float:

@@ -65,7 +65,12 @@ func _stream() -> void:
 	var n0: int = K.stats["darts"]
 	step(m, 3.0)
 	var gap := 3.0 / float(K.stats["darts"] - n0)
-	ok("anim darts: a dart every 0.15-0.2 s (footage 0005-0090)", gap >= 0.15 and gap <= 0.2, "%.3f s" % gap)
+	# inside a burst the footage's cadence; each burst ends on its large darts and the barrage pause (source text)
+	var rate := float(P.wpn["rate"])
+	var avg := (rate * (K.burst_len() - 1) + maxf(rate, float(P.wpn["barrage_cd"]))) / K.burst_len()
+	ok("anim darts: a dart every 0.15-0.2 s inside a burst (footage 0005-0090), the pause after each burst",
+			rate >= 0.15 and rate <= 0.2 and gap >= avg * 0.85 and gap <= avg * 1.2,
+			"%.3f s in a burst, %.3f s on average (want about %.3f)" % [rate, gap, avg])
 	P.inp["fire"] = false
 
 func _spear() -> void:

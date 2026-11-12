@@ -73,8 +73,8 @@ Still differs:
 - Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
   40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
   stacking slow ramp is ours.
-- Darts: four plain then three large, repeating; the footage shows a near-uniform stream and [D] puts the large
-  three at the end of the burst only. The skating beams home late like the darts; the bend assert is pending on
+- Darts: a burst of four plain that ends on the three large ones [D], then a 0.5 s pause before a fresh count
+  (source text); the burst length is ours (no source count), the footage shows a near-uniform stream. The skating beams home late like the darts; the bend assert is pending on
   `ext/parity-neve-skate-home`.
 - Body 1.014 vs the footage's 1.1 to 1.15 (owner height chart).
 

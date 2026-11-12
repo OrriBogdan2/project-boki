@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 | RMB: Ice Spear | Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later. |
 | E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
 | Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
-| Weapon: Hoar Fan | Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones. |
+| Weapon: Hoar Fan | Hold for bursts of slow darts that curve onto the foe at your cursor; each burst ends in three large ones, then a short pause. |
 
 ### Abilities in full
 

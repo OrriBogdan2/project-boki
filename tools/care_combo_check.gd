@@ -1387,14 +1387,15 @@ func rimewright() -> void:
 	ok(
 			"tm: the thin aim line to the cursor is always up, the shared one hidden",
 			AimKit.shown(P, "aim") and K.own_aim_line())
-	# --- a steady stream (no pause) of slow darts that bow out and home, 4 plain then 3 large
+	# --- a held burst: plain darts, ending on the 3 large ones, then the barrage pause, then a fresh count
 	var times: Array = []
 	var dmgs: Array = []
+	var sizes: Array = []
 	var bows: Array = []
 	var seen := {}
 	P.inp["fire"] = true
 	var t := 0.0
-	while t < 1.4:
+	while t < 2.2:
 		step(m, 1.0 / 60.0)
 		t += 1.0 / 60.0
 		for s in _mine(m, P):
@@ -1402,21 +1403,34 @@ func rimewright() -> void:
 				seen[s["sid"]] = true
 				times.append(t)
 				dmgs.append(float(s["dmg"]))
+				sizes.append(float(s["r"]))
 				bows.append(absf(rad_to_deg((s["vel"] as Vector2).angle_to(P.aim_dir()))))
 	P.inp["fire"] = false
+	var plain_n := int(P.wpn["burst"])
+	var blen := K.burst_len()
+	var cd := float(P.wpn["barrage_cd"])
+	var rate := float(P.wpn["rate"])
 	var gaps: Array = []
 	for i in range(1, times.size()): gaps.append(float(times[i]) - float(times[i - 1]))
-	var maxgap: float = gaps.max() if not gaps.is_empty() else 9.0
+	var in_burst: Array = gaps.slice(0, blen - 1)
+	var maxgap: float = in_burst.max() if not in_burst.is_empty() else 9.0
 	ok(
-			"tm LMB: a steady stream, one dart every 0.18 s with no pause", times.size() >= 7 and maxgap < 0.22,
+			"tm LMB: inside a burst a steady stream, one dart every 0.18 s with no pause",
+			times.size() >= blen and maxgap < 0.22,
 			"%d darts, longest gap %.2f" % [times.size(), maxgap])
 	var base_dmg := float(P.wpn["dmg"]) * float(m.dmg_mult(P))
-	var pattern := dmgs.slice(0, 7).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p")
+	var order := ""
+	for i in mini(sizes.size(), blen + 2):
+		order += "H" if float(sizes[i]) > float(P.wpn["size"]) * 1.2 and float(dmgs[i]) > base_dmg * 1.5 else "p"
+	var order_want := "p".repeat(plain_n) + "H".repeat(blen - plain_n) + "pp"
 	ok(
-			"tm LMB: the source's barrage: 4 darts, then 3 larger ones at double damage (game data), then round again",
-			"".join(pattern) == "ppppHHH" and dmgs.size() >= 8 and float(dmgs[7]) < base_dmg * 1.5
-				and K.stats["heavies"] >= 3,
-			"".join(pattern))
+			("tm LMB: dart index -> size: %d plain, then the burst ends on %d large ones (x2 damage, x1.5 size, "
+				+ "game data), then plain again") % [plain_n, blen - plain_n],
+			order == order_want and K.stats["heavies"] >= 3,
+			"%s (want %s)" % [order, order_want])
+	var pause: float = float(gaps[blen - 1]) if gaps.size() >= blen else 0.0
+	ok("tm LMB: after the large ones the barrage pause (%.1f s, source text) before the next burst" % cd,
+			absf(pause - maxf(cd, rate)) < 0.04, "pause %.2f" % pause)
 	ok(
 			"tm LMB: darts come out slowly (16 m/s), a little off the aim to alternating sides",
 			float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 5.0 and float(bows[0]) < 15.0,
@@ -1431,6 +1445,26 @@ func rimewright() -> void:
 	ok(
 			"tm passive: the frost glow on the foe shows the stacks",
 			K.lk().showing("frost%d" % T.get_instance_id()) or K.splinter_log > 0)
+	# a let-go mid-burst keeps the count: it restarts only once the pause has passed
+	step(m, 1.0)
+	var k0: int = K.stats["heavies"]
+	P.inp["fire"] = true
+	step(m, rate * (plain_n - 1) + 0.05)     # the plain darts (the first leaves at once)
+	P.inp["fire"] = false
+	step(m, cd * 0.4)
+	P.inp["fire"] = true
+	step(m, rate * float(blen - plain_n) + 0.1)
+	P.inp["fire"] = false
+	var heav_short: int = K.stats["heavies"] - k0
+	step(m, cd + 0.3)
+	k0 = K.stats["heavies"]
+	P.inp["fire"] = true
+	step(m, rate * float(plain_n - 1) - 0.03)
+	P.inp["fire"] = false
+	ok(
+			"tm LMB: a quick let-go keeps the burst's count; after the pause it starts over at the plain darts",
+			heav_short >= 1 and K.stats["heavies"] - k0 == 0,
+			"large after short let-go %d, after pause %d" % [heav_short, K.stats["heavies"] - k0])
 	await _free(m)
 	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes

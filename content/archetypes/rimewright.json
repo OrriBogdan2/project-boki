@@ -30,7 +30,7 @@
 		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
-			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
+			"hoar_fan": "Hold for bursts of slow darts that curve onto the foe at your cursor; each burst ends in three large ones, then a short pause."
 		},
 		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
