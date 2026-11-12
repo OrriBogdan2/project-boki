@@ -72,7 +72,7 @@ Nothing was built on this branch: the only row not closed is in flight, and ever
 | 7 | Anchor slam "giant fist" | closed | a giant translucent coin-gold fist (HeroVfx `fist` layer, `anchor_fist` in `content/vfx/dredge.json`) falls into the cone over the wind-up and lands on the slam's hit frame (0.38 s), at the cone's middle and 0.8 of its radius wide (2.4 m, inside the 2.7 m cone width there); it moves with him through the hop and a barge, and a stun in the wind-up takes it away. Asserts "anchor fist: lands inside the hit cone on the slam frame, about as wide as the cone there", "anchor fist: a stun in the wind-up takes the falling fist away, no slam" |
 | 8 | Grapnel line | closed on main, polish in flight | the hook is his stretched arm now (DECISIONS v2), drawn through rocks (`ld_arm.gdshader` depth test off; 74006733e). ext/grimble-hook-arm adjusts the arm look in `ld_fx.gd` |
 | 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
-| 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
+| 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and a quiet trail (`barge` in `content/vfx/dredge.json`: a little dust and a few gold sparks off his feet). Assert "dredge barge: a few small motes off his feet, no ring or burst" |
 | 11 | Shotgun range and fan | closed | `shotgun.json` fan 30, bloom to 15, range 6.3 m (b1aa67fe3). Assert "parity gun: the slugs stop at 6.3 m with the cursor at 2 m" |
 | 12 | Slugs hang at the stop line | closed | slugs rest as violet dots for 0.26 s (`SLUG_REST`, `fx.dot(at, SLUG_REST, 0.26)`, b1aa67fe3) |
 | 13 | Shotgun recoil | closed | `dr_shot` (b1aa67fe3). Assert "gun: each shot rocks the body back (dr_shot)" |
@@ -181,8 +181,8 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - Body and movement (hero-ref "Body, scale and movement feel"): a heavy's height, 1.3x as broad across the chest and shoulders;
   slower, longer, planted steps (0.9x the step rate, stride 0.7).
 - Not in the footage, built from his character: a plain jump is a deep heave off planted feet with the arms out, landing on a
-  heavy squash (`dr_land`); the idle fidgets are a shoulder roll, a neck crack and a stretch. His barge leaves dark iron
-  after-images with a brass rim instead of the shared pill.
+  heavy squash (`dr_land`); the idle fidgets are a shoulder roll, a neck crack and a stretch. His barge leaves a little dust
+  and a few gold sparks off his feet (`barge`, HeroVfx) instead of the shared pill.
 
 ## Combinations (all scripted in `--dredge-combo-check`)
 | Do this | You get | Asserted by (check line) |
@@ -302,7 +302,7 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
   edge under his raised fist while a giant translucent gold fist falls into it (`anchor_fist`), then a gold sweep, cracked ground, debris and coins; the air smash's ring of fire, debris and
   coins. Kit-drawn in `scripts/arch/kits/ld_fx.gd`: the bone hook at the chain's end (`ld_bone.gdshader`, drawn through
   rocks), the ghost anchor (`ld_anchor.gdshader`, gold rim), the chain ring at his feet while he reels, the gold stun
-  spirals, the barge's iron and brass after-images.
+  spirals.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
   takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,

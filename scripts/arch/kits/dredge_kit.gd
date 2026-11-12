@@ -56,7 +56,6 @@ var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
-var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var shot_seen := 0              # the last weapon volley the kit dressed
@@ -290,7 +289,7 @@ func _tick_looks(dt: float) -> void:
 		fx.place("chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), BRASS, IRON, 0.95, m.time * 0.6)
 	if barge_t > 0.0:
 		barge_t -= dt
-		_barge_trail(dt)
+		HeroVfx.of(m).hold(h, "barge")      # dust and a few gold sparks off his feet: no ring, no burst
 	for s in stunned.duplicate():
 		var f = s["e"]
 		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
@@ -538,8 +537,8 @@ func cast_e() -> bool:
 	wind = float(ed["windup"])
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
-	vfx("anchor_fist", ground(h.pos), slam_dir, {"r": float(ed["radius"])})     # falls into the cone, lands on the slam
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
+	vfx("anchor_fist", ground(h.pos), slam_dir, {"r": float(ed["radius"])})     # falls into the cone, lands on the slam
 	return true
 
 func use_e() -> void:
@@ -792,15 +791,6 @@ func _tick_stop(dt: float) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(STOP_CARRY)
 	h.vel.x = flat.x
 	h.vel.z = flat.y
-
-## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
-func _barge_trail(dt: float) -> void:
-	trail_t -= dt
-	if trail_t > 0.0:
-		return
-	trail_t = 0.045
-	var d2 := h.aim_dir()
-	fx.puff(h.pos + Vector3(0, 0.9, 0) - Vector3(d2.x, 0, d2.y) * 0.5, LDFx.M_ORB, BRASS, IRON, 0.9, 0.3)
 
 func own_dash_trail() -> bool: return true
 

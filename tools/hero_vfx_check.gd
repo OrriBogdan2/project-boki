@@ -109,6 +109,11 @@ func _wedges(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var fly := (float(x["range"]) - DredgeBlast.MUZZLE) / float(x["speed"])
 	ok(absf(float(wave["lead"]) - fly) < 0.02, "the Broadside's front reaches the rim with the slugs (%.2f s)" % fly)
 	_slug_draw(V, P, moves)
+	var barge: Array = moves["barge"]["fx"]
+	var loud := barge.filter(func(l): return not HeroVfx.LOOKS.has(l["p"]) or float(l.get("size", 0.0)) > 0.4)
+	var motes: int = barge.reduce(func(n, l): return n + int(l["n"]), 0)
+	ok(loud.is_empty() and motes <= 12,
+			"dredge barge: a few small motes off his feet, no ring or burst (%d motes)" % motes)
 
 ## Grimble's slugs (LMB and X) draw larger than they hit: the move's "draw" scales the drawn slug only.
 func _slug_draw(V: HeroVfx, P: Hunter, moves: Dictionary) -> void:

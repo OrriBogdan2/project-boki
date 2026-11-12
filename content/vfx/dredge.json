@@ -45,6 +45,9 @@
 				{"p": "coin", "y": 0.3, "n": 12, "speed": 6.0, "spread": 0.7, "grav": 13.0, "life": 0.9, "size": 0.1},
 				{"p": "ember", "y": 0.3, "n": 24, "speed": 8.0, "spread": 0.7, "grav": 5.0, "life": 0.6, "size": 0.06}]},
 
+		"barge": {"fx": [{"p": "smoke", "at": "feet", "radius": 0.35, "way": "up", "n": 4, "speed": 0.6, "spread": 0.9, "grav": -0.3, "life": 0.45, "size": 0.3, "c": "smoke", "c2": "hot", "near": true},
+				{"p": "ember", "at": "feet", "radius": 0.4, "way": "up", "n": 8, "speed": 1.2, "spread": 0.6, "grav": 2.0, "life": 0.25, "size": 0.04, "c": "main", "c2": "hot"}]},
+
 		"broadside_charge": {"fx": [{"p": "wedge", "size": "r", "arc": 105, "c": "main", "c2": "hot", "c3": "char"},
 				{"p": "ember", "at": "fists", "shape": "gather", "radius": 1.0, "n": 22, "speed": 3.0, "drag": 0.0, "curl": 0.3, "life": 0.3, "size": 0.05, "c": "main", "c2": "hot"},
 				{"p": "coin", "at": "fists", "radius": 0.25, "way": "up", "n": 4, "speed": 1.2, "spread": 0.6, "grav": -0.5, "life": 0.4, "size": 0.08, "near": true},
