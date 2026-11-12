@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -388,7 +388,7 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 365,
+"long_line": 364,
 "nested_ternary": 7,
 "semicolon": 380,
 "shadow": 3
@@ -431,8 +431,8 @@
 "long_line": 2
 },
 "scripts/match/biome_run.gd": {
-"long_line": 25,
-"semicolon": 60
+"long_line": 24,
+"semicolon": 59
 },
 "scripts/match/blight.gd": {
 "long_line": 5,
@@ -440,8 +440,8 @@
 "semicolon": 27
 },
 "scripts/match/blight_dir.gd": {
-"long_line": 5,
-"nested_ternary": 2,
+"long_line": 4,
+"nested_ternary": 1,
 "semicolon": 6
 },
 "scripts/match/blight_models.gd": {
@@ -634,9 +634,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
-"nested_ternary": 19,
-"semicolon": 142,
+"long_line": 216,
+"nested_ternary": 18,
+"semicolon": 139,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {
@@ -728,8 +728,8 @@
 "semicolon": 10
 },
 "scripts/match/spawn_plan.gd": {
-"long_line": 8,
-"semicolon": 7,
+"long_line": 4,
+"semicolon": 6,
 "shadow": 1
 },
 "scripts/match/terrain_mesh.gd": {
@@ -799,9 +799,9 @@
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 34,
-"nested_ternary": 4,
-"semicolon": 10,
+"long_line": 31,
+"nested_ternary": 3,
+"semicolon": 9,
 "shadow": 1
 },
 "scripts/ui/gear_panel.gd": {
@@ -969,7 +969,7 @@
 "semicolon": 11
 },
 "tools/blight_check.gd": {
-"long_line": 15,
+"long_line": 13,
 "semicolon": 25
 },
 "tools/boki_follow_check.gd": {

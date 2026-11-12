@@ -1094,8 +1094,6 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | _tide_src_hp | the source's base health for a medium Hunter: the curve is scaled by our medium health over this, so a stage takes as long to kill as there |
 | tide_tick_s | 1 |
 | _tide_tick_s | seconds between tide hits (the source gives a per-stage value and no rate: read as per second) |
-| tide_heat | 0.06 |
-| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
 | map | {"_doc": "where the seats sit (spec section 8): metres on the 216 m design; a map's \"ways_scale\" (1.412 on the 305 m Hollow Crown) stretches these, the tide radii and gate_dist, never times. tools/ways_out_sites.py (the generators) and --ways-out-map-check enforce them", "seat_window_s": 150.0, "_seat_window_s": "a quest seat's site stays inside the tide ring this long after it opens (and lies outside the final ring)", "uplink_band": [42.0, 50.0], "_uplink_band": "the two uplink outposts stand this far from the Heart", "uplink_apart_deg": 90.0, "_uplink_apart_deg": "degrees round the Heart between the two outposts (opposite sides; exactly opposite is impossible with gate_clear)", "gate_clear": 60.0, "_gate_clear": "the seeded Heart Gate keeps this far from every uplink outpost", "gate_arc_min_deg": 30.0, "_gate_arc_min_deg": "whole degrees of Gate angle that must be on ground and gate_clear from both outposts"} |
 | reward | {"_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is about 5x minor", "minor": {"egg": false, "seeds": {"emberberry": 1, "sunroot": 1, "mindmint": 1, "tidebloom": 1}, "goods": {"heartwood": 1}, "gems": 40, "trust": 6.0}, "major": {"egg": true, "seeds": {"emberberry": 3, "sunroot": 3, "mindmint": 3, "tidebloom": 3}, "goods": {"heartwood": 2, "starstone": 2}, "gems": 150, "trust": 20.0}} |
 | quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
@@ -1432,6 +1430,17 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 | joy | 8 |
 | price | 16 |
 | foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
+
+## spawn_tables (`content/rules/spawn_tables.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Fixed spawns (docs/design/CLARITY_PASS.md). Nothing here is rolled: same map, same schedule. Times are session seconds. |
+| camp_comps | {"heavy": [["brute", "spitter", "skitter", "sentinel"]], "light": [["skitter", "skitter"], ["spitter", "skitter"], ["bomber", "skitter"]], "normal": [["brute", "skitter", "bomber"], ["skitter", "bomber", "spitter"], ["sentinel", "skitter", "skitter"], ["spitter", "skitter", "bomber"]]} |
+| wild_every | 4 |
+| burrow | {"what": "bl_skitter", "skip_roles": ["landing", "perch"], "tele": 6.0, "radius": 1.8, "awake_range": 70.0, "stagger": 11.0, "by_danger": [{"first": 150.0, "every": 150.0, "n": 1}, {"first": 110.0, "every": 120.0, "n": 1}, {"first": 80.0, "every": 90.0, "n": 2}]} |
 
 ## toys (`content/rules/toys.json`)
 
