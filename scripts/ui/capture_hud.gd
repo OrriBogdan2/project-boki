@@ -68,7 +68,7 @@ static func pack_section(H, v: VBoxContainer, p: Hunter, rebuild: Callable) -> v
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm)
 		var armed := armed_for(H.m, p, idx)
-		var bt := UI.button("Release %s?" % rec.get("name", "it") if armed else "Release", func():
+		var bt := UI.button("Release %s?" % rec.get("name", "this Boki") if armed else "Release", func():
 			if armed_for(H.m, p, idx):
 				p.remove_meta("release_arm")
 				Capture.release(H.m, H.m.player, idx)

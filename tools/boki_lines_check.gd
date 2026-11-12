@@ -39,6 +39,9 @@ func _data() -> void:
 	var act_cap := int(BokiLines.tuning("act_words"))
 	var bad_lines: Array = []
 	var bad_acts: Array = []
+	var it_words: Array = []
+	var it_re := RegEx.create_from_string("(?i)\\b(its|itself)\\b")
+	var it_act_re := RegEx.create_from_string("(?i)\\b(its|itself|it (is|was|has|will|wobbles)|it's)\\b")
 	var thin: Array = []
 	var feels_ok := true
 	for id in r["triggers"]:
@@ -49,7 +52,11 @@ func _data() -> void:
 			for s in t["lines"][el]:
 				if not BokiLines.fits(String(s)):
 					bad_lines.append("%s: %s" % [id, s])
+				if it_re.search(String(s)):
+					it_words.append("%s: %s" % [id, s])
 		for a in t["acts"]:
+			if it_act_re.search(String(a)):
+				it_words.append("%s: %s" % [id, a])
 			if BokiLines.words(String(a)) > act_cap or not String(a).begins_with("("):
 				bad_acts.append("%s: %s" % [id, a])
 		feels_ok = feels_ok and r["tones"].has(String(t["feel"]))
@@ -57,6 +64,15 @@ func _data() -> void:
 	ok("every line is <= %d words and one sentence" % cap, bad_lines.is_empty(), str(bad_lines))
 	ok("every action is <= %d words, in brackets" % act_cap, bad_acts.is_empty(), str(bad_acts))
 	ok("every trigger's feeling has tones", feels_ok)
+	for key in KinSpeak.ACTS:
+		for a in KinSpeak.ACTS[key]:
+			if it_act_re.search(String(a)):
+				it_words.append("ACTS.%s: %s" % [key, a])
+	ok("no Boki line or action calls a Boki it/its/itself (use {he} {his} {him} {himself})", it_words.is_empty(), str(it_words))
+	var m_line := KinSpeak.pronouns("(pats {his} belly, {he} grins, {He} waits for {him} by {himself})", "m")
+	var f_line := KinSpeak.pronouns("(pats {his} belly, {he} grins, {He} waits for {him} by {himself})", "f")
+	ok("pronoun tokens fill by sex", m_line == "(pats his belly, he grins, He waits for him by himself)"
+			and f_line == "(pats her belly, she grins, She waits for her by herself)", m_line + " / " + f_line)
 	var tones_ok := true
 	for feel in r["tones"]:
 		for tone in r["tones"][feel]:

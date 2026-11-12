@@ -82,7 +82,7 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 
 ## Rampartoad
 
-_Cane toad + Castle rampart_ (`basaltoad`). A toad with a castle wall on its back; sit behind it and nothing gets through, and it pulls stones out of itself to throw. Placid, heavy, a creature of habit; croaks once, deeply, when it disapproves.
+_Cane toad + Castle rampart_ (`basaltoad`). A toad with a castle wall on Rampartoad's back; sit behind Rampartoad and nothing gets through, and Rampartoad pulls stones out of the wall to throw. Placid, heavy, a creature of habit; croaks once, deeply, when Rampartoad disapproves.
 
 |  |  |
 |---|---|
@@ -102,7 +102,7 @@ _Cane toad + Castle rampart_ (`basaltoad`). A toad with a castle wall on its bac
 
 ## Mycroll
 
-_Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstools. It puffs spore clouds that root foes where they stand.
+_Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstools. Mycroll puffs spore clouds that root foes where they stand.
 
 |  |  |
 |---|---|
@@ -122,7 +122,7 @@ _Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstoo
 
 ## Zippelith
 
-_Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: it dives into a seam, zips it shut behind it, and comes up somewhere else. Secretive and sly; loves surprises, appears where you least expect it, grinning.
+_Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: Zippelith dives into a seam, zips the seam shut behind Zippelith, and comes up somewhere else. Secretive and sly; loves surprises, appears where you least expect Zippelith, grinning.
 
 |  |  |
 |---|---|
@@ -142,7 +142,7 @@ _Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: it dive
 
 ## Cairnback
 
-_Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on its shell. Hatched from the Stone Colossus's egg.
+_Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnback's shell. Hatched from the Stone Colossus's egg.
 
 |  |  |
 |---|---|
@@ -163,7 +163,7 @@ _Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carry
 
 ## Anchorbill
 
-_Hornbill + Ship's anchor_ (`casquebill`). A hornbill whose casque is a ship's anchor; it drops out of the sky like one and drags everything to it. Dignified and slow to trust; clacks its bill when it disagrees.
+_Hornbill + Ship's anchor_ (`casquebill`). A hornbill whose casque is a ship's anchor; Anchorbill drops out of the sky like one and drags everything to Anchorbill. Dignified and slow to trust; clacks Anchorbill's bill when Anchorbill disagrees.
 
 |  |  |
 |---|---|
@@ -183,7 +183,7 @@ _Hornbill + Ship's anchor_ (`casquebill`). A hornbill whose casque is a ship's a
 
 ## Vespyx
 
-_Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting drips venom that keeps eating at foes after the hit.
+_Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Vespyx's sting drips venom that keeps eating at foes after the hit.
 
 |  |  |
 |---|---|
@@ -203,7 +203,7 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting 
 
 ## Bellowary
 
-_Cassowary + Forge bellows_ (`cindowary`). A cassowary whose head crest is a leather bellows; every stride pumps it and it blasts a gust of embers. Proud and territorial, loyal to its rider; wheezes the bellows as a warning before it charges.
+_Cassowary + Forge bellows_ (`cindowary`). A cassowary whose head crest is a leather bellows; every stride pumps Bellowary and Bellowary blasts a gust of embers. Proud and territorial, loyal to Bellowary's rider; wheezes the bellows as a warning before Bellowary charges.
 
 |  |  |
 |---|---|
@@ -223,7 +223,7 @@ _Cassowary + Forge bellows_ (`cindowary`). A cassowary whose head crest is a lea
 
 ## Snuffapi
 
-_Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; snuff the candles and it is gone, leaving a smoke copy behind. Shy and graceful, vanishes when strangers come; trusts one rider and only one.
+_Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; snuff the candles and Snuffapi is gone, leaving a smoke copy behind. Shy and graceful, vanishes when strangers come; trusts one rider and only one.
 
 |  |  |
 |---|---|
@@ -243,7 +243,7 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 
 ## Frigatee
 
-_Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on its back; your loot stays cold in its drawers until someone kicks them open. Kind and slow, everyone's friend; hums low songs you feel through your boots.
+_Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on Frigatee's back; your loot stays cold in Frigatee's drawers until someone kicks them open. Kind and slow, everyone's friend; hums low songs you feel through your boots.
 
 |  |  |
 |---|---|
@@ -263,7 +263,7 @@ _Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on it
 
 ## Gongibbon
 
-_Gibbon + Bronze temple bell_ (`gibbelle`). A gibbon whose belly is a temple bell; it swings by its arms and clangs itself to stun everyone. Loud, joyful, a show-off; sings when happy and louder when scared.
+_Gibbon + Bronze temple bell_ (`gibbelle`). A gibbon whose belly is a temple bell; Gongibbon swings by Gongibbon's arms and clangs the bell to stun everyone. Loud, joyful, a show-off; sings when happy and louder when scared.
 
 |  |  |
 |---|---|
@@ -283,7 +283,7 @@ _Gibbon + Bronze temple bell_ (`gibbelle`). A gibbon whose belly is a temple bel
 
 ## Prowyak
 
-_Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for horns; it ploughs through the snow and anything standing in it. Steady and warm-hearted; snorts frost when it laughs.
+_Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for horns; Prowyak ploughs through the snow and anything standing in the way. Steady and warm-hearted; snorts frost when Prowyak laughs.
 
 |  |  |
 |---|---|
@@ -303,7 +303,7 @@ _Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for h
 
 ## Glintmole
 
-_Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is a split geode full of quartz. It feels the ground shake long before you do.
+_Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is a split geode full of quartz. Glintmole feels the ground shake long before you do.
 
 |  |  |
 |---|---|
@@ -323,7 +323,7 @@ _Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is 
 
 ## Gloamshell
 
-_Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked obsidian glass. It drinks the light around it and leaves a trail of dusk behind.
+_Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked obsidian glass. Gloamshell drinks the light around Gloamshell and leaves a trail of dusk behind.
 
 |  |  |
 |---|---|
@@ -363,7 +363,7 @@ _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net
 
 ## Effigeetle
 
-_Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a cart whose shell is a marble statue's face; it splits open down the nose when it flies you across the gap. Earnest and hard-working, a gentle giant; polishes its face when it is proud of you.
+_Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a cart whose shell is a marble statue's face; Effigeetle splits open down the nose when Effigeetle flies you across the gap. Earnest and hard-working, a gentle giant; polishes Effigeetle's face when Effigeetle is proud of you.
 
 |  |  |
 |---|---|
@@ -383,7 +383,7 @@ _Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a car
 
 ## Crofthorn
 
-_Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a walled garden on its back; you ride sitting on the garden wall. Gentle and stubborn, grazes mid-fight; bellows proudly when you climb on.
+_Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a walled garden on Crofthorn's back; you ride sitting on the garden wall. Gentle and stubborn, grazes mid-fight; bellows proudly when you climb on.
 
 |  |  |
 |---|---|
@@ -403,7 +403,7 @@ _Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a wal
 
 ## Hivara
 
-_Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows it everywhere. Hatched from the Brood Mother's egg.
+_Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows Hivara everywhere. Hatched from the Brood Mother's egg.
 
 |  |  |
 |---|---|
@@ -424,7 +424,7 @@ _Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folde
 
 ## Skateron
 
-_Grey heron + Ice skates_ (`hoarheron`). A heron on ice skates with an ice-pick beak; it glides in, stabs, glides out. Patient, severe, says little; approves of you only when you stand still.
+_Grey heron + Ice skates_ (`hoarheron`). A heron on ice skates with an ice-pick beak; Skateron glides in, stabs, glides out. Patient, severe, says little; approves of you only when you stand still.
 
 |  |  |
 |---|---|
@@ -444,7 +444,7 @@ _Grey heron + Ice skates_ (`hoarheron`). A heron on ice skates with an ice-pick 
 
 ## Kestrike
 
-_Kestrel + Copper lightning rod_ (`kestrike`). A kestrel with a copper crest that draws lightning. It hangs still in the wind, then strikes like the bolt it caught.
+_Kestrel + Copper lightning rod_ (`kestrike`). A kestrel with a copper crest that draws lightning. Kestrike hangs still in the wind, then strikes like the bolt Kestrike caught.
 
 |  |  |
 |---|---|
@@ -464,7 +464,7 @@ _Kestrel + Copper lightning rod_ (`kestrike`). A kestrel with a copper crest tha
 
 ## Anvilbrock
 
-_Honey badger + Blacksmith's anvil_ (`kilnbadger`). A honey badger with a red-hot anvil for a back; it headbutts you and the anvil rings. Fearless and grumpy; picks fights it cannot win and wins them.
+_Honey badger + Blacksmith's anvil_ (`kilnbadger`). A honey badger with a red-hot anvil for a back; Anvilbrock headbutts you and the anvil rings. Fearless and grumpy; picks fights Anvilbrock cannot win and wins them.
 
 |  |  |
 |---|---|
@@ -484,7 +484,7 @@ _Honey badger + Blacksmith's anvil_ (`kilnbadger`). A honey badger with a red-ho
 
 ## Kindlewren
 
-_Wren + Ember coal_ (`kindlewren`). A cocky little wren that carries a live coal in its cocked-up tail. It darts in, scorches, and is gone.
+_Wren + Ember coal_ (`kindlewren`). A cocky little wren that carries a live coal in Kindlewren's cocked-up tail. Kindlewren darts in, scorches, and is gone.
 
 |  |  |
 |---|---|
@@ -504,7 +504,7 @@ _Wren + Ember coal_ (`kindlewren`). A cocky little wren that carries a live coal
 
 ## Soakybara
 
-_Capybara + Hot-spring pool_ (`lilybara`). A capybara with a hot spring on its back; you ride sitting in the bath, and the steam heals the squad. Calm and sociable, the friend of everything; nothing ruffles it.
+_Capybara + Hot-spring pool_ (`lilybara`). A capybara with a hot spring on Soakybara's back; you ride sitting in the bath, and the steam heals the squad. Calm and sociable, the friend of everything; nothing ruffles Soakybara.
 
 |  |  |
 |---|---|
@@ -524,7 +524,7 @@ _Capybara + Hot-spring pool_ (`lilybara`). A capybara with a hot spring on its b
 
 ## Buckleron
 
-_Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is a riveted iron shield; it clamps to the ground and the whole squad shoots from behind it. Stubborn as rock and proud of it; grudgingly fond of whoever hides behind it.
+_Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is a riveted iron shield; Buckleron clamps to the ground and the whole squad shoots from behind Buckleron. Stubborn as rock and proud of that; grudgingly fond of whoever hides behind Buckleron.
 
 |  |  |
 |---|---|
@@ -544,7 +544,7 @@ _Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is
 
 ## Lodestick
 
-_Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone twigs. Things drift toward it, and it drifts toward nothing.
+_Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone twigs. Things drift toward Lodestick, and Lodestick drifts toward nothing.
 
 |  |  |
 |---|---|
@@ -564,7 +564,7 @@ _Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone 
 
 ## Marchleaf
 
-_Leafcutter ant + Leaf_ (`marchleaf`). A leafcutter ant hauling a leaf ten times its size, with a column of tiny workers marching behind. It never stops working.
+_Leafcutter ant + Leaf_ (`marchleaf`). A leafcutter ant hauling a leaf ten times Marchleaf's size, with a column of tiny workers marching behind. Marchleaf never stops working.
 
 |  |  |
 |---|---|
@@ -584,7 +584,7 @@ _Leafcutter ant + Leaf_ (`marchleaf`). A leafcutter ant hauling a leaf ten times
 
 ## Lanterloris
 
-_Slow loris + Paper lantern_ (`moonloris`). A slow loris that is a paper lantern: its belly glows, and when it is scared it floats up like a balloon. Soft-spoken, sleepy by day, wide awake at night; clings to you when frightened.
+_Slow loris + Paper lantern_ (`moonloris`). A slow loris that is a paper lantern: Lanterloris's belly glows, and when Lanterloris is scared Lanterloris floats up like a balloon. Soft-spoken, sleepy by day, wide awake at night; clings to you when frightened.
 
 |  |  |
 |---|---|
@@ -604,7 +604,7 @@ _Slow loris + Paper lantern_ (`moonloris`). A slow loris that is a paper lantern
 
 ## Mossgrade
 
-_Tardigrade + Cushion moss_ (`mossgrade`). A plump water bear wearing a cushion of moss. Dry it out and it curls into a pebble; one drop of water and it's back.
+_Tardigrade + Cushion moss_ (`mossgrade`). A plump water bear wearing a cushion of moss. Dry Mossgrade out and Mossgrade curls into a pebble; one drop of water and Mossgrade is back.
 
 |  |  |
 |---|---|
@@ -624,7 +624,7 @@ _Tardigrade + Cushion moss_ (`mossgrade`). A plump water bear wearing a cushion 
 
 ## Spirevark
 
-_Aardvark + Termite clay spire_ (`moundvark`). An aardvark with a termite cathedral on its back; climb the spire and shoot from the belfry. Easy-going and nosy; talks to its termites more than to you.
+_Aardvark + Termite clay spire_ (`moundvark`). An aardvark with a termite cathedral on Spirevark's back; climb the spire and shoot from the belfry. Easy-going and nosy; talks to Spirevark's termites more than to you.
 
 |  |  |
 |---|---|
@@ -644,7 +644,7 @@ _Aardvark + Termite clay spire_ (`moundvark`). An aardvark with a termite cathed
 
 ## Murmurling
 
-_Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; every note it plays flies off as another tiny bird. Sociable, noisy, lonely in a second; mimics your footsteps.
+_Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; every note Murmurling plays flies off as another tiny bird. Sociable, noisy, lonely in a second; mimics your footsteps.
 
 |  |  |
 |---|---|
@@ -664,7 +664,7 @@ _Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; eve
 
 ## Mirrolin
 
-_Pangolin + Disco ball_ (`nacrolin`). A pangolin covered in mirror tiles; curl it up and it is a disco ball that bounces every shot back. Timid but stubborn; curls up when spoken to sharply, unrolls for snacks.
+_Pangolin + Disco ball_ (`nacrolin`). A pangolin covered in mirror tiles; curl Mirrolin up and Mirrolin is a disco ball that bounces every shot back. Timid but stubborn; curls up when spoken to sharply, unrolls for snacks.
 
 |  |  |
 |---|---|
@@ -684,7 +684,7 @@ _Pangolin + Disco ball_ (`nacrolin`). A pangolin covered in mirror tiles; curl i
 
 ## Nettlynx
 
-_Lynx kitten + Stinging nettle_ (`nettlynx`). A lynx kitten whose ear tufts and tail are stinging nettle. Pet it the wrong way and you'll know.
+_Lynx kitten + Stinging nettle_ (`nettlynx`). A lynx kitten whose ear tufts and tail are stinging nettle. Pet Nettlynx the wrong way and you'll know.
 
 |  |  |
 |---|---|
@@ -704,7 +704,7 @@ _Lynx kitten + Stinging nettle_ (`nettlynx`). A lynx kitten whose ear tufts and 
 
 ## Boltstrich
 
-_Ostrich + Thunderhead and copper coil_ (`nimbostrich`). A thundercloud ostrich in rubber boots; ride it and your hair stands up. Skittish and fast, afraid of nothing but boredom; races anything that moves.
+_Ostrich + Thunderhead and copper coil_ (`nimbostrich`). A thundercloud ostrich in rubber boots; ride Boltstrich and your hair stands up. Skittish and fast, afraid of nothing but boredom; races anything that moves.
 
 |  |  |
 |---|---|
@@ -724,7 +724,7 @@ _Ostrich + Thunderhead and copper coil_ (`nimbostrich`). A thundercloud ostrich 
 
 ## Bubblisk
 
-_Basilisk lizard + Soap bubble_ (`opalisk`). A lizard that blows a soap-bubble copy of itself and runs while you pop the bubble. A show-off that startles easily; runs first, poses later.
+_Basilisk lizard + Soap bubble_ (`opalisk`). A lizard that blows a soap-bubble twin and runs while you pop the bubble. A show-off that startles easily; runs first, poses later.
 
 |  |  |
 |---|---|
@@ -744,7 +744,7 @@ _Basilisk lizard + Soap bubble_ (`opalisk`). A lizard that blows a soap-bubble c
 
 ## Terrasloth
 
-_Three-toed sloth + Glass greenhouse_ (`orchisloth`). A sloth carrying a little glass greenhouse on its back with orchids inside; it opens the glass as a wall and the mist heals you. Gentle and dreamy; waters its orchids mid-fight.
+_Three-toed sloth + Glass greenhouse_ (`orchisloth`). A sloth carrying a little glass greenhouse on Terrasloth's back with orchids inside; Terrasloth opens the glass as a wall and the mist heals you. Gentle and dreamy; waters Terrasloth's orchids mid-fight.
 
 |  |  |
 |---|---|
@@ -764,7 +764,7 @@ _Three-toed sloth + Glass greenhouse_ (`orchisloth`). A sloth carrying a little 
 
 ## Gravadillo
 
-_Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. It rolls up in heavy plates and bends gravity to slam foes down.
+_Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. Gravadillo rolls up in heavy plates and bends gravity to slam foes down.
 
 |  |  |
 |---|---|
@@ -784,7 +784,7 @@ _Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. 
 
 ## Prismander
 
-_Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. It bends light into shields and dazzling beams.
+_Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. Prismander bends light into shields and dazzling beams.
 
 |  |  |
 |---|---|
@@ -804,7 +804,7 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. It bend
 
 ## Rimeshrew
 
-_Shrew + Hoarfrost_ (`rimeshrew`). A tiny shrew with a frost-feathered coat that never melts. It has to eat every hour, so it never stops moving.
+_Shrew + Hoarfrost_ (`rimeshrew`). A tiny shrew with a frost-feathered coat that never melts. Rimeshrew has to eat every hour, so Rimeshrew never stops moving.
 
 |  |  |
 |---|---|
@@ -824,7 +824,7 @@ _Shrew + Hoarfrost_ (`rimeshrew`). A tiny shrew with a frost-feathered coat that
 
 ## Chuggamus
 
-_Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engine: smokestack ears, a boiler belly, a cowcatcher jaw, and it charges like a runaway train. Lazy until crossed, then unstoppable; yawns steam at you to say it likes you.
+_Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engine: smokestack ears, a boiler belly, a cowcatcher jaw, and Chuggamus charges like a runaway train. Lazy until crossed, then unstoppable; yawns steam at you to say Chuggamus likes you.
 
 |  |  |
 |---|---|
@@ -844,7 +844,7 @@ _Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engi
 
 ## Selenfin
 
-_Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through the air, a moonstone glowing in its keel. Where it floats, wounds close.
+_Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through the air, a moonstone glowing in Selenfin's keel. Where Selenfin floats, wounds close.
 
 |  |  |
 |---|---|
@@ -864,7 +864,7 @@ _Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through 
 
 ## Barokat
 
-_Meerkat + Brass barometer_ (`sentrikat`). A meerkat with a barometer in its belly; when the needle spins, lightning is coming and so is the enemy. Alert and bossy; cannot relax unless it is the one keeping watch.
+_Meerkat + Brass barometer_ (`sentrikat`). A meerkat with a barometer in Barokat's belly; when the needle spins, lightning is coming and so is the enemy. Alert and bossy; cannot relax unless Barokat is the one keeping watch.
 
 |  |  |
 |---|---|
@@ -884,7 +884,7 @@ _Meerkat + Brass barometer_ (`sentrikat`). A meerkat with a barometer in its bel
 
 ## Barrelmander
 
-_Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with a rain barrel strapped on its back; your loot goes in the barrel, and a hard hit bursts it in a flash flood. Lazy and good-natured, dozes in puddles; comes alive in a storm.
+_Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with a rain barrel strapped on Barrelmander's back; your loot goes in the barrel, and a hard hit bursts the barrel in a flash flood. Lazy and good-natured, dozes in puddles; comes alive in a storm.
 
 |  |  |
 |---|---|
@@ -904,7 +904,7 @@ _Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with 
 
 ## Canvastross
 
-_Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship sails for wings; grab the rigging under it and it carries you across the gap. Easygoing, fearless, a wanderer; restless when it has not seen the sea.
+_Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship sails for wings; grab the rigging under Canvastross and Canvastross carries you across the gap. Easygoing, fearless, a wanderer; restless when Canvastross has not seen the sea.
 
 |  |  |
 |---|---|
@@ -924,7 +924,7 @@ _Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship
 
 ## Knotwyrm
 
-_Slow worm + Knotted hemp rope_ (`threadwyrm`). A rope snake with mushroom caps growing from its knots; lay it across a path and whoever steps over it gets rooted. Quiet, thoughtful, an old soul; likes damp shade and long naps.
+_Slow worm + Knotted hemp rope_ (`threadwyrm`). A rope snake with mushroom caps growing from Knotwyrm's knots; lay Knotwyrm across a path and whoever steps over Knotwyrm gets rooted. Quiet, thoughtful, an old soul; likes damp shade and long naps.
 
 |  |  |
 |---|---|
@@ -944,7 +944,7 @@ _Slow worm + Knotted hemp rope_ (`threadwyrm`). A rope snake with mushroom caps 
 
 ## Thrumbird
 
-_Hummingbird + Tuning fork_ (`thrumbird`). A hummingbird whose forked tail rings like a tuning fork. Its hum steadies your aim and rattles your foes.
+_Hummingbird + Tuning fork_ (`thrumbird`). A hummingbird whose forked tail rings like a tuning fork. Thrumbird's hum steadies your aim and rattles your foes.
 
 |  |  |
 |---|---|
@@ -964,7 +964,7 @@ _Hummingbird + Tuning fork_ (`thrumbird`). A hummingbird whose forked tail rings
 
 ## Lockatara
 
-_Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a crest and a keyhole for a third eye; its tail is the key. Ancient, calm, faintly amused; watches you through the keyhole when you are not looking.
+_Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a crest and a keyhole for a third eye; Lockatara's tail is the key. Ancient, calm, faintly amused; watches you through the keyhole when you are not looking.
 
 |  |  |
 |---|---|
@@ -984,7 +984,7 @@ _Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a cre
 
 ## Umbrathere
 
-_Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground sloth with a ragged umbrella for a back; it opens it and your whole squad disappears underneath. Brooding and protective; shelters smaller Boki under its arms when it rains.
+_Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground sloth with a ragged umbrella for a back; Umbrathere opens the umbrella and your whole squad disappears underneath. Brooding and protective; shelters smaller Boki under Umbrathere's arms when Umbrathere rains.
 
 |  |  |
 |---|---|
@@ -1004,7 +1004,7 @@ _Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground slot
 
 ## Pipewurm
 
-_Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles for a face; it pipes sticky poison icing that glues your feet down. Looks sweet, hunts like a cat; loves being stroked, hates being ignored.
+_Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles for a face; Pipewurm pipes sticky poison icing that glues your feet down. Looks sweet, hunts like a cat; loves being stroked, hates being ignored.
 
 |  |  |
 |---|---|
@@ -1024,7 +1024,7 @@ _Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles fo
 
 ## Lunowl
 
-_Owl + Luna moth_ (`wisplet`). A moonlit owl with soft moth wings. It flits on moondust and dazzles foes with silver light.
+_Owl + Luna moth_ (`wisplet`). A moonlit owl with soft moth wings. Lunowl flits on moondust and dazzles foes with silver light.
 
 |  |  |
 |---|---|
@@ -1044,7 +1044,7 @@ _Owl + Luna moth_ (`wisplet`). A moonlit owl with soft moth wings. It flits on m
 
 ## Echolop
 
-_Hare + Bat_ (`zapple`). A long-eared hare with bat wings. It hears everything coming and fires ringing pulses of sound.
+_Hare + Bat_ (`zapple`). A long-eared hare with bat wings. Echolop hears everything coming and fires ringing pulses of sound.
 
 |  |  |
 |---|---|

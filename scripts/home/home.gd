@@ -1975,7 +1975,7 @@ func _house_alert(inside: Array) -> void:
 	wt.tween_callback(who.queue_free)
 	Sfx.play("kin_alert", at, -6.0, 0.1, 1.15)
 	# the house might be off screen: say it on the HUD as well
-	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", "heard you from the house and is on its way"))
+	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", KinSpeak.about(inside[0]["rec"], "heard you from the house and is on {his} way")))
 	# the house rattles: little feet scurrying for the door
 	if is_instance_valid(house_node):
 		var base := house_node.scale
@@ -4415,7 +4415,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_swap_kin_model(k)      # its colour shifts toward the lean on the spot
 		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Lean.face(leaned)["tint"], 18, 2.4, 0.5)
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
-		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Lean.face(leaned)["name"], pct])
+		_toast(KinSpeak.about(rec, "%s leans %s: {his} colour shifts (%d%%)") % [nm, Lean.face(leaned)["name"], pct])
 	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
 	_garden_xp(rec, "feed", res["love"])
 	if res["love"]:
@@ -4510,10 +4510,10 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 		_close_panel()
 		var why := "energy" if Care.need(rec, "energy") < 20.0 else "food"
 		_say(k, BokiLines.say(rec, "want_" + why))
-		_toast("%s is too %s to train. %s first" % [rec["name"], "tired" if why == "energy" else "hungry", "Let it nap" if why == "energy" else "Feed it"])
+		_toast(KinSpeak.about(rec, "%s is too %s to train. %s first") % [rec["name"], "tired" if why == "energy" else "hungry", "Let {him} nap" if why == "energy" else "Feed {him}"])
 		return
 	if int(rec["stats"][stat]) >= Care.stat_cap(rec):
-		_toast("%s can't train %s any further until it levels up" % [rec["name"], Care.STATS[stat]["name"]])
+		_toast(KinSpeak.about(rec, "%s can't train %s any further until {he} levels up") % [rec["name"], Care.STATS[stat]["name"]])
 		return
 	if not _care_start(k):
 		return

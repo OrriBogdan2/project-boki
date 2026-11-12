@@ -680,8 +680,8 @@ func _revive(g: Dictionary) -> void:
 	if not ke.is_empty():
 		ke["pos"] = at + Vector3(0, 0, 2.0); (ke["node"] as Node3D).position = ke["pos"]; ke["hold_t"] = 3.0
 		h._emote(ke, "!", true)
-	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. It knows you, but it isn't quite the same." % rec["name"],
-		"Level %d now, and a %s nature. It'll have new favourite foods to find out." % [int(rec["level"]), Care.nature(rec).to_lower()]])
+	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. %s knows you, but isn't quite the same." % [rec["name"], KinSpeak.about(rec, "{He}")],
+		KinSpeak.about(rec, "Level %d now, and a %s nature. {He}'ll have new favourite foods to find out.") % [int(rec["level"]), Care.nature(rec).to_lower()]])
 
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:

@@ -407,9 +407,9 @@ func solo(rec: Dictionary) -> void:
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
 		h._toast("%s is not out on the base" % rec["name"])
 	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(T["min_food"]):
-		h._toast("%s is too tired or hungry to train. Nap or feed it first" % rec["name"])
+		h._toast(KinSpeak.about(rec, "%s is too tired or hungry to train. Nap or feed {him} first") % rec["name"])
 	elif int(rec["stats"]["speed"]) >= Care.stat_cap(rec):
-		h._toast("%s can't train Speed any further until it levels up" % rec["name"])
+		h._toast(KinSpeak.about(rec, "%s can't train Speed any further until {he} levels up") % rec["name"])
 	else:
 		h._care_start(k)
 		solo_rec = rec

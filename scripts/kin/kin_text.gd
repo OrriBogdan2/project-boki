@@ -24,7 +24,7 @@ static func effect(e: PartSpec, pw := 1.0) -> String:
 		"root": t = "root %ss" % n(float(p["duration"]))
 		"stun": t = "stun %ss" % n(float(p["duration"]))
 		"pull":
-			var to := {"caster": "the kin", "owner": "its hunter", "center": "the middle"}[String(p["to"])] as String
+			var to := {"caster": "the kin", "owner": "the hunter", "center": "the middle"}[String(p["to"])] as String
 			t = ("yank to %s" % to) if float(p["gap"]) > 0.0 else ("pull in" if String(p["to"]) == "center" else "pull to %s" % to)
 		"push": t = "knock back"
 		"lift": t = "knock up" if e.target == "foes" else ("lift you up" + (" and forward" if float(p["forward"]) > 0.0 else ""))
@@ -56,7 +56,7 @@ static func effect(e: PartSpec, pw := 1.0) -> String:
 	elif e.target == "allies":
 		t += " on allies"
 	elif e.target == "self" and e.type in ["shield", "heal", "cleanse", "reflect", "buff"]:
-		t += " on itself"
+		t += " on the Boki"
 	return t
 
 static func effects(effs: Array, pw := 1.0) -> String:
@@ -75,7 +75,7 @@ static func delivery(d: PartSpec) -> String:
 		"cone": return "%s° cone %sm" % [n(float(p["angle"])), n(float(p["radius"]))]
 		"beam": return ("beam %sm" % n(float(p["range"]))) + (" (locks on)" if bool(p["seek"]) else "") + ((" for %ss" % n(float(p["duration"]))) if float(p["duration"]) > 0.0 else "")
 		"burst":
-			if float(p["radius"]) <= 0.01: return "on you" if o == "owner" else "on itself"
+			if float(p["radius"]) <= 0.01: return "on you" if o == "owner" else "on the Boki"
 			return "burst %sm%s" % [n(float(p["radius"])), " around you" if o == "owner" else (" where it lands" if o == "here" else "")]
 		"zone": return "zone %sm for %ss" % [n(float(p["radius"])), n(float(p["duration"]))]
 		"trap": return ("%d traps" % int(p["count"])) if int(p["count"]) > 1 else "a trap"
@@ -168,7 +168,7 @@ static func icon(ab: AbilitySpec) -> String:
 
 const CUES := {"foe_in_range": "when a foe is in reach", "foes_clumped": "when foes bunch up", "owner_hurt": "when you're hurt",
 	"owner_falling": "when you fall into the abyss", "owner_fighting": "in a fight", "owner_under_fire": "when you're shot at"}
-const TRIGGERS := {"auto": "", "on_throw": "when thrown into a foe", "on_hit": "every few of its hits", "on_recall": "when recalled",
+const TRIGGERS := {"auto": "", "on_throw": "when thrown into a foe", "on_hit": "every few Boki hits", "on_recall": "when recalled",
 	"on_bond_full": "when the bond meter fills", "on_low_hp": "when health runs low"}
 
 ## When an auto ability goes off, in words.
@@ -176,8 +176,8 @@ static func when(ab: AbilitySpec) -> String:
 	if ab == null or ab.trigger == null:
 		return ""
 	if ab.trigger.type == "auto":
-		return "On its own " + String(CUES.get(ab.cue.type if ab.cue else "", "when it sees the chance"))
-	return "On its own " + String(TRIGGERS.get(ab.trigger.type, ab.trigger.type))
+		return "The Boki decides: " + String(CUES.get(ab.cue.type if ab.cue else "", "when the Boki sees the chance"))
+	return "The Boki decides: " + String(TRIGGERS.get(ab.trigger.type, ab.trigger.type))
 
 # ------------------------------------------------------------------ owner stats, carry, merge
 static func owner_stat(stat: String, v: float) -> String:
@@ -229,8 +229,8 @@ static func carry(ks: KinSpec) -> String:
 	var t := "%s%s" % [CARRY_NAMES.get(ks.carry_style, ks.carry_style), (" (%s)" % ks.carry_name) if ks.carry_name != "" else ""]
 	if not bits.is_empty(): t += ": " + "; ".join(bits)
 	match ks.carry_style:
-		"mount": t += ". It curls up on your back while you glide"
-		"perch": t += ". Thrown, it dives on the spot from above"
+		"mount": t += ". The Boki curls up on your back while you glide"
+		"perch": t += ". Thrown, the Boki dives on the spot from above"
 	return t
 
 ## What you lose while it is out beside you: "Off you: no -15% damage taken" ("" if its carry gives nothing).
