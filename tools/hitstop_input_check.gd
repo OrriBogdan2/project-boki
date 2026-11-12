@@ -7,8 +7,8 @@ extends RefCounted
 ## one, and never be lost while the outside one acts. The frames run through Match._process (the hit-stop gate
 ## and _gather_input) and the keys through Input.action_press, so the real input path is under test. A kit
 ## whose top hit never freezes its own body (ranged hits don't, docs/DASHES_AND_ABILITY_FEEL.md §5.4) gets the
-## T4 freeze injected at its hit and the row says so. --hitstop-input-check=<id>,<id> runs only those heroes.
-## Never touches the save.
+## heavy freeze (ImpactWeight) injected at its hit and the row says so. --hitstop-input-check=<id>,<id> runs
+## only those heroes. Never touches the save.
 
 const LAND_WAIT := 150          # steps: the heavy hit lands within this (holds included)
 const WATCH_F := 90             # frames: the freeze and the tapped action both fit in this
@@ -28,6 +28,7 @@ const HEAVY := {
 	"archer": ["lmb", 20, 5.0],
 	"tender": ["lmb", 1, 4.0],
 	"thief": ["lmb", 1, 2.0],
+	"gil": ["e", 1, 4.0],               # Riptide, the rush through the dummy (solid: it holds his body too)
 }
 const KEYS := {"dash": "dash", "lmb": "fire", "e": "signature", "jump": "jump"}      # tapped -> its input action
 const FWD := Vector3(0, 0, -1)       # the dummy stands where ready-up aims the hunter
@@ -133,7 +134,8 @@ func _place_dummy() -> void:
 	hunter.inp["aim"] = dummy.pos + Vector3(0, 0.9, 0)
 
 ## Presses the top hit and steps until it freezes the hunter's own body ("real"), or lands without one and
-## gets the T4 freeze injected ("injected"), or never lands (the freeze is injected anyway: "no hit").
+## gets the heavy freeze (ImpactWeight) injected ("injected"), or never lands (the freeze is injected anyway:
+## "no hit").
 func _land(m: Match, how: Array) -> String:
 	var slot := String(how[0])
 	var hold := int(how[1])
@@ -157,10 +159,10 @@ func _land(m: Match, how: Array) -> String:
 			return "real"
 		if dummy.hp < hp0 - 0.01:
 			injected += 1
-			m.freeze_frame(float(Feel.HITSTOP[4][0]))
+			m.freeze_frame(ImpactWeight.hold_s("heavy"))
 			return "injected"
 	unlanded += 1
-	m.freeze_frame(float(Feel.HITSTOP[4][0]))
+	m.freeze_frame(ImpactWeight.hold_s("heavy"))
 	return "no hit"
 
 func _acted(before: Dictionary, key: String, dashes0: float, roll0: float, jump0: float) -> bool:

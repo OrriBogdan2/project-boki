@@ -5,16 +5,19 @@ extends RefCounted
 ## even right after an earlier wall slam. Three pairs from the kits' own numbers, through the real hit path
 ## (Hunter.hurt with the kit's kb and lift) and the real reel (Displace.tow with Grimble's params):
 ##   Kael's Haul Slam (rmb.haul.push) -> Albert's Shield Charge shove (dash.charge_kb, lift 2.5)
-##   Grimble's Abyssal Hand reel (rmb pull_speed/gap/pull_max) -> Sparkle's full Storm Rod (rmb.coil.push[1])
+##   Grimble's Abyssal Hand reel (rmb pull_speed/stop_gap/pull_max, the gap as DredgeKit builds it)
+##     -> Sparkle's full Storm Rod (rmb.coil.push[1])
 ##   Vex's Burr Charge (rmb.burr.push, lift 2) -> Vex's Burr Charge
 ## Each pair runs twice: on open ground (distance after the second knock vs that knock alone) and with a
-## wall in the second knock's way (wall stun). Lines: KNOCKCHAIN PASS|FAIL <what>, then the table.
+## wall in the second knock's way (wall stun, when it is over the slam speed). Lines: KNOCKCHAIN PASS|FAIL
+## <what>, then the table.
 
 const DT := 1.0 / 60.0
 const MID := 0.15            # s into the first knock's flight when the second lands
 const SETTLE := 1.5          # s to let the body come to rest
 const DIST_TOL := 0.2        # m: the chained knock covers the solo knock's distance within this
 const SPD_TOL := 0.05        # m/s: right after the second knock its speed is the knock's own
+const SLAM_V := 8.0          # m/s: a knock faster than this into a wall stuns (Hunter's wall slam)
 
 var main: Node
 var ak = null
@@ -44,7 +47,8 @@ func run(main_node: Node) -> void:
 	var sparkle := float((Arch.def("mage")["rmb"]["coil"]["push"] as Array)[1])
 	var vex := float(Arch.def("gunslinger")["rmb"]["burr"]["push"])
 	var rd: Dictionary = Arch.def("dredge")["rmb"]
-	var reel := {"mode": "haul", "spd": float(rd["pull_speed"]), "gap": float(rd["gap"]), "dur": float(rd["pull_max"]),
+	var reel := {"mode": "haul", "spd": float(rd["pull_speed"]), "gap": P.r + T.r + float(rd["stop_gap"]),
+		"dur": float(rd["pull_max"]),
 		"swing": DredgeKit.SWING, "stun": 0.2}
 	var side := Vector2(0, 1)      # every second knock goes +z (toward the wall on the walled strip)
 	var pairs := [
@@ -63,7 +67,9 @@ func run(main_node: Node) -> void:
 		ok("%s: covers the solo knock's distance (replace, no add, no immunity)" % p[0], gap < DIST_TOL,
 			"%.2f m vs solo %.2f m (off %.2f)" % [Vector2(chain["moved"].x, chain["moved"].z).length(),
 			Vector2(solo.x, solo.z).length(), gap])
-		ok("%s: into a wall, the second knock wall-stuns" % p[0], int(into["slams"]) >= 1, "stun %.2f" % into["stun"])
+		var slams := want.length() > SLAM_V     # Storm Rod's 6.6 m/s (content data) is too slow to slam, alone too
+		ok("%s: into a wall, the second knock %s" % [p[0], "wall-stuns" if slams else "is too slow to wall-stun"],
+			(int(into["slams"]) >= 1) == slams, "stun %.2f" % into["stun"])
 		if p[1].has("mode"):
 			ok("%s: the knock ends the reel" % p[0], chain["tow_end"] == "knocked", String(chain["tow_end"]))
 		rows.append([p[0], Vector2(chain["moved"].x, chain["moved"].z).length(), Vector2(solo.x, solo.z).length(),

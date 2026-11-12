@@ -19,13 +19,13 @@ const T := {
 	"pad_apex_t":          ["~", [1.05, 1.25], "s", "pad_vy / g"],
 	"pad_walk_hv":         ["~", [5.9, 6.1], "m/s", "[?] a walk-on leaves at the PadFlight.POCKET_RUN floor"],
 	"pad_still_hv":        ["~", [5.9, 6.1], "m/s", "[?] standing on it: the floor, toward your aim"],
-	"pad_walk_travel_m":   ["~", [8.5, 10.5], "m", "to pad height: [game data] FallingLateralFriction 0.375/s"],
+	"pad_walk_travel_m":   ["~", [4.5, 7.0], "m", "to the apex: the 6 m/s throw, eased to the run cap (Loco air drag)"],
 	"pad_dash_carry":      [">=", 0.97, "x", "[wiki] a dash into a pad keeps its momentum (off / into)"],
 	"pad_dash_apex_m":     ["~", [9.0, 10.5], "m", "a dash onto the pad still launches (it ends the dash)"],
 	"pad_dash_travel_x":   [">=", 1.5, "x", "the dash speed carries the whole arc (over a walk-on)"],
-	"pad_reverse_dv":      ["~", [1.5, 2.6], "m/s", "[game data] AirControl 0.015: reversed keys barely bend it"],
-	"pad_side_m":          ["~", [0.5, 2.0], "m", "[game data] AirControl 0.015: sideways keys drift a little"],
-	"pad_glide_auto":      ["<=", 0.0, "", "[wiki] no auto glide: you open it after a pad if you want to"],
+	"pad_reverse_mps":     ["<=", -3.0, "m/s", "[owner 11-08] strong air control: reversed keys turn the throw back"],
+	"pad_side_m":          [">=", 3.0, "m", "[owner 11-08] strong air control: sideways keys carry it metres aside"],
+	"pad_glide_auto":      [">=", 1.0, "", "[DECISIONS] the glider opens by itself at the apex (decision 0024)"],
 	"pad_glide_press":     ["<=", 1.0, "frames", "a second press in the arc opens it at once (it is your call)"],
 	"up_rise_t":           ["<=", 0.3, "s", "[est] to the 8 m/s climb (move-feel updraft_rise_t)"],
 	"up_vy":               ["~", [8.9, 9.1], "m/s", "[?] GlideUpdraftMinZVel not decoded: ours 9 m/s"],
@@ -33,7 +33,6 @@ const T := {
 	"up_heat_used":        ["<=", 0.0, "", "[wiki] currents stop glider heat (in the column)"],
 	"up_glide_kept":       [">=", 1.0, "", "the glider stays open the whole climb"],
 	"up_cross_speed":      ["~", [4.5, 5.5], "m/s", "crossing keeps glide speed: it lifts, never shoves"],
-	"up_no_glide_lift_m":  ["<=", 0.05, "m", "no glider, no lift: a fall through the column is a plain fall"],
 }
 
 func rec(key: String, v: float) -> void:
@@ -125,14 +124,14 @@ func _place_pad() -> void:
 
 ## Run onto the pad from `back` metres behind it (dash: dash on the way), with `keys` held from the
 ## launch on (glide_f: a second jump press that many frames after the launch, then glide held). Returns
-## {hv_in, hv0, hv_end, vy, apex, apex_t, travel, side, glided, open_f} from the launch until the arc is
-## back down at pad height.
+## {hv_in, hv0, vy, apex, apex_t, travel, side, fwd, glided, open_f} over the ballistic throw: from the
+## launch until the glider opens by itself at the apex (PadFlight, decision 0024), or the arc is back down.
 func _arc(back: float, dash: bool, keys: Vector2, glide_f := -1) -> Dictionary:
 	var c: Vector3 = pad["pos"]
 	(pad["cd"] as Dictionary).clear()
 	_reset(Vector3(c.x - dir.x * back, c.y, c.z - dir.y * back))
-	var r := {"hv_in": 0.0, "hv_end": 0.0, "vy": 0.0, "hv0": 0.0, "apex": 0.0, "apex_t": 0.0,
-		"travel": 0.0, "side": 0.0, "glided": false, "open_f": -1}
+	var r := {"hv_in": 0.0, "vy": 0.0, "hv0": 0.0, "apex": 0.0, "apex_t": 0.0,
+		"travel": 0.0, "side": 0.0, "fwd": 0.0, "glided": false, "open_f": -1}
 	var f0 := -1
 	for i in 600:
 		if f0 < 0:
@@ -159,10 +158,12 @@ func _arc(back: float, dash: bool, keys: Vector2, glide_f := -1) -> Dictionary:
 		if P.gliding and not bool(r["glided"]):
 			r["glided"] = true
 			r["open_f"] = i - f0 - glide_f
-		r["hv_end"] = Vector2(P.vel.x, P.vel.z).length()
+		if P.gliding and glide_f < 0:
+			break      # the glider opened by itself at the apex (PadFlight): the throw is over
 		if i - f0 > 6 and (up <= 0.0 or P.grounded):
 			break
 	r["travel"] = (P.pos.x - c.x) * dir.x + (P.pos.z - c.z) * dir.y
+	r["fwd"] = P.vel.x * dir.x + P.vel.z * dir.y
 	r["side"] = absf((P.pos.x - c.x) * dir.y - (P.pos.z - c.z) * dir.x)
 	return r
 
@@ -181,12 +182,12 @@ func _pad_arcs() -> void:
 	rec("pad_dash_carry", float(dash["hv0"]) / maxf(0.01, float(dash["hv_in"])))
 	rec("pad_dash_apex_m", dash["apex"])
 	rec("pad_dash_travel_x", float(dash["travel"]) / maxf(0.01, float(walk["travel"])))
-	rec("pad_reverse_dv", float(walk["hv_end"]) - float(_arc(2.5, false, -dir)["hv_end"]))
+	rec("pad_reverse_mps", float(_arc(2.5, false, -dir)["fwd"]))
 	rec("pad_side_m", float(_arc(2.5, false, Vector2(dir.y, -dir.x))["side"]))
 	rec("pad_glide_press", float(_arc(2.5, false, dir, 36)["open_f"]))
 
 ## A map updraft: a glider in the column climbs with no heat and is thrown past its top; one crossing it
-## keeps glide speed; a fall with no glider gets no lift.
+## keeps glide speed (a fall into the column opens the glider: --pad-check).
 func _updraft() -> void:
 	if w.updrafts.is_empty():
 		print("LARC (no updrafts on this map, skipped)")
@@ -229,11 +230,3 @@ func _updraft() -> void:
 		if w.updraft_at(P.pos).size() > 0:
 			cross = minf(cross, Vector2(P.vel.x, P.vel.z).length())
 	rec("up_cross_speed", cross)
-	_reset(Vector3(c.x, top - 3.0, c.z), false)
-	var n := 20
-	_steps(n)
-	var plain_y := top - 3.0 - 0.5 * Hunter.H_GRAV * pow(n * DT, 2.0)
-	rec("up_no_glide_lift_m", P.pos.y - plain_y)
-
-func _steps(n: int) -> void:
-	for i in n: m.step(DT)

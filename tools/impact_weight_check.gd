@@ -15,6 +15,9 @@ const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
 const FOOTAGE_BOUND_MS := 100      # one 10 fps frame: the reference footage never holds longer
 ## Steps with no hit from the hunter before the next slot, so a zone left behind has run out.
 const QUIET_STEPS := 90
+## Steps LMB is held: a spooled hold weapon lands too (Cinder's lance: 0.2 s pilot, then the flame from her body,
+## ShotOrigin, reaching the dummy 3 m off).
+const LMB_HOLD := 40
 const DRAIN_MAX := 900             # steps at most spent waiting for it
 ## Kit file name prefix -> the Hunter whose code it is (a Hunter's ult or dash can live in its own file).
 const FILE_HERO := {
@@ -113,7 +116,7 @@ func _presses(m: Match, hero: String) -> void:
 		for i in 150:
 			m.step(Match.DT)
 			h.inp["dash"] = false
-			h.inp["fire"] = slot == "lmb" and i < 20
+			h.inp["fire"] = slot == "lmb" and i < LMB_HOLD
 			dummy.hp = dummy.max_hp
 		slot_now = ""
 		_drain(m, dummy)
