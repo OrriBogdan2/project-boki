@@ -328,9 +328,16 @@ func tick_status(dt: float) -> void:
 		if not remote:
 			hp -= burn_dps * dt
 			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
+				_burn_number()
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
+
+## The burn's tick number, only for burns that involve you; it rolls into the same label as the
+## burner's other damage on this body.
+func _burn_number() -> void:
+	var mt := m as Match
+	if mt and (self == mt.player or burn_by == mt.player):
+		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false, "", Fx.roll_key(burn_by, self))
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:
