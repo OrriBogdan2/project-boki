@@ -103,6 +103,7 @@
 		"auto": 1.2
 	},
 	"e": {
+		"ground": {"range": "reach", "r": "radius"},
 		"delivery": "burst",
 		"name": "Skycall",
 		"short": "Sky",
@@ -130,6 +131,7 @@
 		"stacks": 1
 	},
 	"x": {
+		"ground": {"range": "range", "r": "radius"},
 		"name": "Kitefall",
 		"short": "Fall",
 		"icon": "quake",

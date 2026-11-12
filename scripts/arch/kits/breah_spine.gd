@@ -92,6 +92,7 @@ func _tick_aim(dt: float) -> void:
 		axis = drag.normalized()
 	if h.is_local():
 		AimKit.span(h, "x", _span_p({"chevrons": 6, "col": PREVIEW_COL}))
+		AimReach.ring(k, "x")
 	if not _held() or phase_t >= float(xd()["aim_max"]):
 		_erupt()
 
