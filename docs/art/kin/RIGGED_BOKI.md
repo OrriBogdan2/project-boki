@@ -88,16 +88,25 @@ fix (lodestick, mossgrade, cairnback): `docs/art/kin/boki_gait/<id>_before.png` 
 bottom row its match speed). These are not committed yet: they are queued GPU jobs 20261109-153605-29862 (before)
 and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback --tag=before|after`.
 
+Planted paws (cindle run, wisplet walk): these two clips place each paw with `boki_clips.plant` (a two-bone leg
+solved in the side view onto a target) along `boki_clips.stride_leg` (down for part of the step, going back at one
+speed from a little before touch-down to a little after lift-off, so a paw is in the air when it turns). Cindle's run
+is its own gallop (`vespyx_anim.run`: hind paws, then fore, then a gathered flight over the loop's start, whose
+first frame the export holds); wisplet's walk keeps the waddle with its feet planted. Their `OVER` rows are gone:
+at most 18% (cindle at scale 0.8 and match speed, at full cadence) and 9%. Only those two clips' tracks were
+copied into the committed glbs by bone name: a full `build_boki.py` rebuild of either differs from the committed
+mesh and textures.
+
 | Boki | 1.5 m/s | 2.4 | 4.4 | match (m/s) | seam idle/walk/run | idle-walk pop |
 |---|---|---|---|---|---|---|
-| cindle | 58% → 21% 2.6 steps/s | 58% → 38% 3.2 steps/s | 63% → 38% 5.9 steps/s | 75% → 46% 6.0 steps/s (6.8) | 1.1 / 1.0 / 1.3 | 0.9 |
+| cindle | 58% → 21% 2.6 steps/s | 58% → 15% 1.9 steps/s | 63% → 15% 3.4 steps/s | 75% → 15% 5.3 steps/s (6.8) | 1.1 / 1.0 / 0.6 | 0.9 |
 | puddlet | 54% → 16% 3.5 steps/s | 54% → 36% 4.5 steps/s | 71% → 42% 6.0 steps/s | 78% → 57% 6.0 steps/s (6.0) | 1.1 / 1.0 / 1.4 | 0.8 |
 | burrlet | 75% → 30% 4.1 steps/s | 75% → 33% 5.0 steps/s | 83% → 49% 6.0 steps/s | 87% → 64% 6.0 steps/s (6.2) | 1.5 / 1.1 / 1.3 | 0.9 |
 | glintmole | 74% → 33% 4.2 steps/s | 74% → 33% 4.9 steps/s | 79% → 46% 6.0 steps/s | 84% → 61% 6.0 steps/s (6.2) | 1.6 / 1.1 / 1.3 | 0.9 |
 | rimeshrew | 71% → 27% 4.2 steps/s | 71% → 40% 5.5 steps/s | 74% → 54% 6.0 steps/s | 84% → 72% 6.0 steps/s (7.4) | 1.6 / 1.0 / 1.3 | 0.9 |
 | pebbit | 75% → 33% 4.1 steps/s | 75% → 33% 4.7 steps/s | 82% → 44% 6.0 steps/s | 85% → 55% 6.0 steps/s (5.4) | 1.5 / 1.1 / 1.2 | 0.9 |
 | cairnback | 88% → 29% 5.5 steps/s | 88% → 40% 5.0 steps/s | 86% → 56% 6.0 steps/s | 88% → 65% 6.0 steps/s (5.6) | 1.5 / 1.1 / 1.1 | 0.9 |
-| wisplet | 69% → 34% 5.6 steps/s | 69% → 43% 6.0 steps/s | 82% → 62% 6.0 steps/s | 90% → 79% 6.0 steps/s (8.0) | 3.2 / 1.4 / 1.1 | 0.8 |
+| wisplet | 69% → 9% 4.7 steps/s | 69% → 43% 6.0 steps/s | 82% → 62% 6.0 steps/s | 90% → 79% 6.0 steps/s (8.0) | 3.2 / 0.9 / 1.1 | 0.9 |
 | zapple | 57% → 59% 2.7 steps/s | 57% → 71% 3.0 steps/s | 67% → 71% 5.4 steps/s | 73% → 69% 6.0 steps/s (7.6) | 1.0 / 0.8 / 0.8 | 0.6 |
 | hivara | 66% → 27% 3.2 steps/s | 66% → 36% 3.6 steps/s | 63% → 33% 6.0 steps/s | 75% → 56% 6.0 steps/s (7.0) | 1.3 / 1.0 / 1.0 | 0.9 |
 | kestrike | 81% → 28% 6.0 steps/s | 81% → 49% 6.0 steps/s | 85% → 68% 6.0 steps/s | 91% → 81% 6.0 steps/s (7.4) | 0.6 / 1.5 / 1.2 | 1.0 |
