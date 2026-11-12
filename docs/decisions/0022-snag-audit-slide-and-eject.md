@@ -16,3 +16,6 @@ Option 2. Run speed, mantle reach and jump are untouched. The slip uses `spd * m
 
 ## Consequences
 `hunter.gd` (slip condition, 3 eject lines), `world.gd` (`eject`), `tools/snag_check.gd` registered as `--snag-check`. No Net or save change. 32 stalls fall to 2.
+
+## Follow-up (2026-11-12, 2x Hollow Crown)
+34 stalls came back on the bigger map, 32 at outside terrace corners. Still option 2's axis moves (`b1`/`b2` untouched); only the overlap test changed: `World.occupy` tests the body's circle against each terrain tile's square, as `_block_hit` already did for props. A lone diagonal corner tile is a catchable face (`MantleCarry.faces`), and a held glide key no longer reopens the glider during a ledge rise. No Net or save change; `--feel-golden-check` traces unchanged. 34 stalls fall to 2.
