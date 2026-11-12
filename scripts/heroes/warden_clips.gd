@@ -628,8 +628,11 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / fade)
-		if act_w >= 1.0:      # (a full move covers the upper one as it fades in, and drops it once it owns the body)
+		var w_to := float(want.get("w", 1.0))
+		act_w = move_toward(act_w, w_to, dt / fade)
+		if w_to < 1.0:        # (a landing's partial dip never covers the upper move: that one fades out under it)
+			up_w = move_toward(up_w, 0.0, dt / FADE)
+		elif act_w >= 1.0:    # (a full move covers the upper one as it fades in, and drops it once it owns the body)
 			up_w = 0.0
 	else:
 		act_w = move_toward(act_w, 0.0, dt / act_out)
