@@ -393,6 +393,8 @@ const CHECKS := {
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	"--expedition-tips-check": ["res://tools/expedition_tips_check.gd", "expedition_tips_check", null],
+	# the first Fuse: bond-full prompt, rest line
+	"--first-fuse-hint-check": ["res://tools/first_fuse_hint_check.gd", "first_fuse_hint_check", null],
 	# fight beats per starter
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],  # the Empty creator + Relic moment shots
