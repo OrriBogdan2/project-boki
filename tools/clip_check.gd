@@ -358,7 +358,8 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 ## The Hunter's own stomp (docs/decisions/0061-stomp-lock.md): its style, the commit clip as long as Stomp.COMMIT and
 ## the finisher as long as Stomp.TIME; in each beat the foot comes up and is at its lowest on Stomp's slam; the commit
 ## follows the hold's clock and the finisher the stomp's; a stun breaking it cuts the clip that frame, the kill doesn't;
-## a bought style plays on the rig. (Kael's shin ends at the ankle: his knee stands in for the foot.)
+## a bought style plays on the rig. (The foot is the style's own, the left for a left-footed one; Kael's and Albert's
+## shin ends at the ankle: the knee stands in for the foot.)
 func _stomp(id: String, m: Node3D, sync: Node, clips: WardenClips, sd: Dictionary) -> void:
 	ok(sd["style"] == StompLook.default_for(id), "%s: its stomp clip is its own style %s" % [id, sd["style"]])
 	var commit := clips.lib.get_animation(String(sd["commit"])).length
@@ -366,9 +367,10 @@ func _stomp(id: String, m: Node3D, sync: Node, clips: WardenClips, sd: Dictionar
 	ok(absf(commit - Stomp.COMMIT) <= 0.001 and absf(fin - Stomp.TIME) <= 0.001,
 			"%s: stomp clips %.3f s + %.3f s, the game's %.1f + %.1f" % [id, commit, fin, Stomp.COMMIT, Stomp.TIME])
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var foot := WardenSkeleton.find(sk, "foot.R")
+	var side := "L" if StompLook.style(String(sd["style"]))["foot"] == "l" else "R"
+	var foot := WardenSkeleton.find(sk, "foot." + side)
 	if foot < 0:
-		foot = WardenSkeleton.find(sk, "shin.R")
+		foot = WardenSkeleton.find(sk, "shin." + side)
 	var beat := Stomp.TIME / Stomp.BEATS
 	var worst := ""
 	clips.force = {"clip": sd["clip"], "t": 0.0}

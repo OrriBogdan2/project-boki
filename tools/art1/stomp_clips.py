@@ -52,8 +52,8 @@ WEIGHT = {
             "arms": {"top": {"aL": (0.1, 0.3)}, "hit": {"aL": (0.0, 0.15)}}},
     # Albert (bulwark, Anchor Drop): a hull on two stubs that can't lunge, so the whole ball rocks back on its heels, hops and
     # drops both feet like an anchor; the arms heave up with it and slam down
-    "breaker": {"foot": "both", "lift": 0.07, "reach": 0.0, "top": 0.62, "settle": 0.2, "drop": 0.05, "crouch": 0.03, "hop": 0.05, "rise": 0.0,
-                "shift": 0.0, "toe": 0.0, "lean": 0.22, "back": 0.15, "twist": 0.0, "power": (1.0, 0.9, 1.25), "shin": 0.05,
+    "breaker": {"foot": "both", "lift": 0.09, "reach": 0.0, "top": 0.62, "settle": 0.2, "drop": 0.05, "crouch": 0.03, "hop": 0.07, "rise": 0.0,
+                "shift": 0.0, "toe": 0.0, "lean": 0.22, "back": 0.15, "twist": 0.0, "power": (1.0, 1.0, 1.25), "shin": 0.05,
                 "arms": {"top": {"aL": (1.1, 0.35), "aR": (1.1, 0.35)}, "hit": {"aL": (0.2, 0.1), "aR": (0.0, 0.1)}}},
     # Neve (rimewright, Toe Pick): the festival's show-skater; a high pointed toe that stabs the ice, a counter-turn of the
     # shoulders, arms wide for balance, the finish held like the end of a routine
