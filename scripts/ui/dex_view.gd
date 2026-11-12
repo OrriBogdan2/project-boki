@@ -20,7 +20,7 @@ const TYPES := {
 	"swarm": {"name": "Swarm", "col": Color("f2c24a")},
 	"gravity": {"name": "Gravity", "col": Color("8f8cff")},
 	"prism": {"name": "Prism", "col": Color("ff9fd0")},
-	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
+	"lunar": {"name": "Fairy", "col": Color("cfdcff")},
 	"echo": {"name": "Echo", "col": Color("6fb6ff")},
 	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
 }
