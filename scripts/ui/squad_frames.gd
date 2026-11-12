@@ -50,11 +50,11 @@ static var _ring := PackedVector2Array()
 static var name_font := _semibold()   # the name's face
 static var _uv := PackedVector2Array()
 
-## The body sans at weight 600 (its default instance is Light; the axis only answers to its OpenType tag).
+## The body sans at weight 600.
 static func _semibold() -> FontVariation:
 	var f := FontVariation.new()
 	f.base_font = HudStyle.BODY
-	f.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): 600}
+	f.variation_opentype = UI.weight(600)
 	return f
 
 ## The rows, in draw order: your teammates, then you. Empty when you have no teammate.

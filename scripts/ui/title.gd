@@ -560,7 +560,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _spaced() -> FontVariation:
 	var f := FontVariation.new()
 	f.base_font = UI.body
-	f.variation_opentype = {"wght": 600}
+	f.variation_opentype = UI.weight(600)
 	f.spacing_glyph = 2
 	return f
 
@@ -745,7 +745,7 @@ class TitleLogo extends Control:
 		var b := base() + Vector2(0, (1.0 - e) * 10.0)
 		var w := f.get_string_size(WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS).x
 		# "PROJECT", small and spaced, with a hairline either side
-		var pf := FontVariation.new(); pf.base_font = UI.body; pf.variation_opentype = {"wght": 700}; pf.spacing_glyph = int(lerpf(18.0, 12.0, e))
+		var pf := FontVariation.new(); pf.base_font = UI.body; pf.variation_opentype = UI.weight(700); pf.spacing_glyph = int(lerpf(18.0, 12.0, e))
 		var pw := pf.get_string_size(PRE, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 		var py := b.y - FS * 0.78
 		var px := 4.0 + (w - pw) * 0.5

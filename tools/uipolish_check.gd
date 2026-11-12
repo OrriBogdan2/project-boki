@@ -32,6 +32,7 @@ func run(main_node: Node) -> void:
 	_removed(src)
 	await _migration()
 	_static_styles(src)
+	_weights()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -132,6 +133,20 @@ func _static_styles(src: Dictionary) -> void:
 			if line.contains("UI.section(") and line.contains(".lerp("):
 				dim_heads.append(path)
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
+
+## The weight axis really bites: the heavier faces set the same text wider than the Light default.
+func _weights() -> void:
+	UI.theme()
+	var text := "Training Grounds"
+	var light := UI.body.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+	var semi := UI.semi.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+	var bold := UI.weight(700)
+	var heavy := FontVariation.new()
+	heavy.base_font = UI.body
+	heavy.variation_opentype = bold
+	var wide := heavy.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+	ok("UI.semi is heavier than Rubik's Light default", semi > light + 1.0, "%.1f vs %.1f px" % [semi, light])
+	ok("weight 700 is heavier than 560", wide > semi + 1.0, "%.1f vs %.1f px" % [wide, semi])
 
 func _theme_boxes() -> Dictionary:
 	var out := {}

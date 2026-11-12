@@ -60,16 +60,21 @@ static var caps: FontVariation       # spaced-out bold, for section headers
 static func rarity_col(r: int) -> Color:
 	return Data.RARITY[clampi(r, 0, Data.RARITY.size() - 1)]["color"]
 
+## A font variation's weight axis. Rubik's default instance is Light and the axis answers only to its
+## OpenType tag, not the "wght" string, so a string key silently leaves the font Light.
+static func weight(wght: int) -> Dictionary:
+	return {TextServerManager.get_primary_interface().name_to_tag("wght"): wght}
+
 ## The menus' Theme (built once by UiTheme).
 static func theme() -> Theme:
 	if _theme:
 		return _theme
 	semi = FontVariation.new()
 	semi.base_font = body
-	semi.variation_opentype = {"wght": 560}
+	semi.variation_opentype = weight(560)
 	caps = FontVariation.new()
 	caps.base_font = body
-	caps.variation_opentype = {"wght": 700}
+	caps.variation_opentype = weight(700)
 	caps.spacing_glyph = 1
 	_theme = UiTheme.build()
 	return _theme
