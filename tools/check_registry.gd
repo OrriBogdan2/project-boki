@@ -152,6 +152,7 @@ const CHECKS := {
 	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],      # time to knock vs the source (docs/TTK.md)
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--number-looks-check": ["res://tools/number_looks_check.gd", "number_looks_check", null],      # by source
 	# --shots-dir=<dir> [--size=WxH] (GPU)
 	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],

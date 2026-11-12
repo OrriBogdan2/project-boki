@@ -282,13 +282,45 @@ func body_glow(at: Vector3, col: Color) -> void:
 	g["dur"] = GLOW_DUR
 	g["rise"] = GLOW_RISE
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
+## A damage number's look, by what dealt the damage: your direct hits, a Boki's hits (smaller, in its
+## type colour) and over-time ticks (burn, poison: small, a second of them on one number).
+enum NumKind { HIT, KIN, TICK }
+
+## The look a hit by `by` takes (o: the hit's options): a burn or poison tick, or any hit flagged as a
+## tick, then a Boki's own hit, else a direct hit.
+static func num_kind(by: Ent, o: Dictionary) -> NumKind:
+	if String(o.get("src", "")) == "burn" or o.get("tick", false):
+		return NumKind.TICK
+	return NumKind.KIN if by is Kin else NumKind.HIT
+
+## The number for `d` dealt to `target` by `by` (o: the hit's options), in the look its source picks.
+## Only damage that involves `you` shows (dealt by you or your Boki, or taken by you): other fights
+## nearby don't spray digits over yours.
+func damage_number(target: Ent, by: Ent, d: float, o: Dictionary, you: Hunter, armor_hit := false) -> void:
+	var credit: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
+	if you == null or (credit != you and target != you):
+		return
+	var kind := num_kind(by, o)
+	var crit: bool = o.get("crit", false)
+	var kin_type := String((by as Kin).sp.get("type", "")) if kind == NumKind.KIN else ""
+	var on_your_kin := target is Kin and (target as Kin).owner_h == you
+	var col := HudStyle.dmg_col(kind, crit, armor_hit, target == you, on_your_kin, kin_type)
+	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0) + _look_spot(kind), d, col, crit, "", kind)
+
+## Where a look sits from your hits' spot (LOOK_SPOT), along the camera's right and up.
+func _look_spot(kind: NumKind) -> Vector3:
+	var s: Vector2 = LOOK_SPOT[kind]
+	var cam := get_viewport().get_camera_3d() if get_viewport() else null
+	return (cam.global_basis.x if cam else Vector3.RIGHT) * s.x + Vector3.UP * s.y
+
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", kind := NumKind.HIT) -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
-	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
-	# number that sits on it and grows with each hit, then floats off once the hits stop
+	# rapid hits of one look on the same target (a minigun, pellets, a Boki's flurry) add up on one
+	# number that sits on it and grows with each hit, then floats off once the hits stop; ticks add up
+	# for a second (_second_up)
 	for n in nums:
-		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.6:
+		if _joins(n, at, prefix, kind):
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -300,8 +332,8 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 				ln.modulate = col
 			elif not n.get("crit", false):
 				ln.modulate = col
-			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			_num_look(ln, bool(n.get("crit", false)), kind)
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), kind)
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
@@ -312,34 +344,52 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
-	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	_num_look(l, crit, kind)
+	l.font_size = _num_size(v, crit, kind)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v,
+			"pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "kind": kind})
+
+## Does a new number of this look and prefix at `at` join `n`: a damage number of the same look, still
+## taking hits, on the same spot?
+func _joins(n: Dictionary, at: Vector3, prefix: String, kind: NumKind) -> bool:
+	if not n.has("val") or n["kind"] != kind or String(n["pre"]) != prefix or _second_up(n):
+		return false
+	return float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6
+
+## A tick number that has gathered TICK_WINDOW of ticks: it takes no more and floats off.
+func _second_up(n: Dictionary) -> bool:
+	return n["kind"] == NumKind.TICK and float(n["t"]) >= TICK_WINDOW
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
+const TICK_WINDOW := 1.0       # s: ticks on one body add up on one number this long, then a new one starts
 
 const CRIT_POP := 1.7          # a crit lands this many times its size and settles
 const HIT_POP := 1.25          # ... and a normal hit this many
 const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
+const NUM_SCALE := [1.0, 0.78, 0.62]   # size and outline by look (NumKind order): a Boki's smaller, a tick's small
+## m along the camera's right and up from your hits' spot, by look: a Boki's beside yours, a tick lower on
+## the body, so the three don't print over each other on one target
+const LOOK_SPOT := [Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8)]
 
 ## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
-## a yellower number (pooled labels are reused, so every number sets this).
-func _num_look(l: Label3D, crit: bool) -> void:
+## a yellower number; it thins with a smaller look (pooled labels are reused, so every number sets this).
+func _num_look(l: Label3D, crit: bool, kind := NumKind.HIT) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 20 if crit else 14
+	l.outline_size = int((20 if crit else 14) * float(NUM_SCALE[kind]))
 
-## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
-func _num_size(v: float, crit: bool) -> int:
+## Bigger totals and crits read bigger, within a small range so numbers never cover the fight; a Boki's
+## and a tick's look are smaller (NUM_SCALE).
+func _num_size(v: float, crit: bool, kind := NumKind.HIT) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
+	return int((lerpf(36.0, 46.0, k) + (8.0 if crit else 0.0)) * float(NUM_SCALE[kind]))
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -519,7 +569,7 @@ func _process(delta: float) -> void:
 			var lt: float = n["last"]
 			var base: Vector3 = n["base"]
 			var rise := minf(float(n["t"]), 0.25) * 1.6
-			if lt < STICK_T:
+			if lt < STICK_T and not _second_up(n):
 				l.global_position = l.global_position.lerp(base + n["off"] + Vector3(0, 0.25 + rise, 0), minf(1.0, delta * 18.0))
 			else:
 				n["vel"].y -= 5.0 * delta
