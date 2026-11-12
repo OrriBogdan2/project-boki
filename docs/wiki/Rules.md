@@ -621,12 +621,13 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 
 ## class_unlock (`content/rules/class_unlock.json`)
 
-Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.
+Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it; the Hunter pickers tag the three `starters` with a "Start here" chip until the save has played `start_here_matches` matches. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.
 
 | Setting | Value |
 |---|---|
 | starters | ["archer", "juggernaut", "gunslinger"] |
 | starter_picks | 1 |
+| start_here_matches | 1 |
 | second_picks | ["juggernaut", "ashwick", "tender"] |
 | hold_s | 1.6 |
 | tiers | {"easy": "about 1-2 expeditions", "medium": "a handful of expeditions", "hard": "real effort, once other Hunters are open"} |

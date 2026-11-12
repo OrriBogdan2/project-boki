@@ -2,7 +2,8 @@ class_name HunterPickRow
 extends RefCounted
 ## The expedition panel's Hunter pick: big cards with the portrait, the Hunter's name and its role, nothing
 ## else (the abilities are on the Hunters screen, the codex and the tutorial). A locked Hunter is
-## desaturated with a lock on its portrait, can't be picked, and says how to unlock it on hover.
+## desaturated with a lock on its portrait, can't be picked, and says how to unlock it on hover. The three
+## starters wear a "Start here" stamp until the save's first match (ClassCard.add_start_chip).
 ## Picking saves it as your expedition Hunter (its weight and weapon family follow) and turns the farm hunter
 ## into it (docs/decisions/0005: no weight labels).
 
@@ -44,6 +45,7 @@ static func _card(home: Node, id: String, cur: String) -> PanelContainer:
 	col.add_child(UI.label(role_of(id), UI.T_SMALL, UI.MUTED if open else UI.FAINT))
 	if not open:
 		card.tooltip_text = ClassUnlock.requirement(id)
+	ClassCard.add_start_chip(card, id)
 	return card
 
 ## The portrait; locked, it is grey with a lock on it.

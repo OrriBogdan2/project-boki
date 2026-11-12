@@ -221,8 +221,8 @@ func _fill_hunters() -> void:
 	for ak in Arch.ids():
 		grid.add_child(_tile(String(ak)))
 
-## One card: portrait, name, role word. Stats and the unlock quest are the tooltip. A shut Hunter is dim
-## with a padlock.
+## One card: portrait, name, role word (a starter wears a "Start here" stamp until the first match). Stats and
+## the unlock quest are the tooltip. A shut Hunter is dim with a padlock.
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
@@ -251,6 +251,7 @@ func _tile(ak: String) -> PanelContainer:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 		card.tooltip_text = "Locked: %s\n%s" % [ClassUnlock.requirement(ak), card.tooltip_text]
+	ClassCard.add_start_chip(card, ak)
 	card.set_meta("arch", ak)
 	return card
 
