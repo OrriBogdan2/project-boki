@@ -28,6 +28,7 @@ var burn_by: Ent = null
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
+var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
@@ -117,6 +118,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
+			StatusLooks.of(m).from_hit(self, opts)
 			flash_t = 0.12
 			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)

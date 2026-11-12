@@ -10,7 +10,8 @@ extends Node
 ## lunge for attacks, a wiggle of joy, a crouch before a jump and a stretch in the air.
 ##
 ## It reads a few metas on the kin root, all optional:
-##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
+##   "dazed" (bool) "starry" (bool: the circling stars; when unset, while dazed) "happy" (bool)
+##   "pulse" (set to Time msec when an ability goes off)
 ##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
@@ -357,11 +358,12 @@ func _process(dt: float) -> void:
 	if spin:
 		spin.rotation.y += dt * (1.2 + move_k * 2.0)
 	# stars circling the head while dazed
-	if dazed and stars == null:
+	var starry: bool = root.get_meta("starry", dazed)
+	if starry and stars == null:
 		_make_stars()
 	if stars:
-		stars.visible = dazed
-		if dazed:
+		stars.visible = starry
+		if starry:
 			stars.rotation.y += dt * 4.0
 
 func _make_stars() -> void:
