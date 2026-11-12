@@ -665,19 +665,12 @@ func where_at(p: Vector3) -> Dictionary:
 		if b != "": w["biome"] = b
 	return w
 
-var _bot_iv_n := 0
 func bot_kin_record() -> Dictionary:
 	var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
 	var rec := Save.new_kin(sp, "", kin_seed("bot"))
 	rec["trust"] = rng.randf_range(40, 80)
 	rec["level"] = rng.randi_range(1, 4 + tier * 3)
 	Evo.simulate(rec, rng)
-	# IVs from the match seed (a new kin's come from its clock-based uid, so a seeded match would
-	# give bots different stats every run); their own generator, so the match's rng stream is untouched
-	var ivr := RandomNumberGenerator.new()
-	ivr.seed = hash("%d|bot_ivs|%d" % [seed_val, _bot_iv_n])
-	_bot_iv_n += 1
-	rec["ivs"] = Care.roll_ivs(ivr)
 	return rec
 
 func _spawn_hunters() -> void:
