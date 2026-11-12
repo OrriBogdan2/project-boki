@@ -405,6 +405,8 @@ func tick(d: float) -> void:
 	run.step(d, holding)
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
+	if run.state == Run.S.WAIT and run.state_t >= run.bite_t and run.state_t - d < run.bite_t:
+		h.verbs.play("bite")
 	if run.state != last:
 		_entered(run.state)
 	_draw_water()
@@ -413,8 +415,12 @@ func tick(d: float) -> void:
 		_end(true)
 
 func _entered(s: Run.S) -> void:
+	var from := last
 	last = s
 	bar.visible = s == Run.S.REEL
+	h.verbs.hold("reel" if s == Run.S.REEL else "wait")
+	if from == Run.S.AIM:
+		h.verbs.play("cast")
 	match s:
 		Run.S.REEL:
 			h._toast("Hooked! Hold and let go to keep the line in the band")
@@ -425,6 +431,7 @@ func _entered(s: Run.S) -> void:
 			var got: String = lines.get(c["how"], "")
 			if c["how"] == "caught":
 				got = "Landed %s!" % GardenPrizes.entry_name(c["catch"])
+				h.verbs.play("land")
 			h._toast("Cast %d of %d: %s" % [run.casts.size(), int(rules()["casts"]), got])
 			h._emote(who, "♥" if c["how"] == "caught" else "…", true)
 
@@ -462,7 +469,7 @@ func _draw_water() -> void:
 		return
 	bobber.position = _water(out, 0.0) - rock.position
 	if line.visible:
-		var tip: Vector3 = who["node"].position + Vector3(0, ROD_UP, 0) - rock.position
+		var tip := _line_start() - rock.position
 		line.position = (tip + bobber.position) * 0.5
 		line.scale = Vector3(1, 1, tip.distance_to(bobber.position))
 		line.look_at(bobber.global_position)
@@ -471,6 +478,13 @@ func _draw_water() -> void:
 		band_rect.position.x = w * (0.5 - run.half_band())
 		band_rect.size.x = w * run.half_band() * 2.0
 		marker.position.x = w * run.tension - marker.size.x * 0.5
+
+## Where the line leaves: your rod's tip, or your Boki's reach while the rod is away.
+func _line_start() -> Vector3:
+	var rod_tip := HunterRod.tip(h.p_anim) if h.p_anim != null else null
+	if rod_tip != null:
+		return rod_tip.global_position
+	return who["node"].position + Vector3(0, ROD_UP, 0)
 
 ## The tension bar: the band in green, the line's tension as a white marker.
 func _open_bar() -> void:
@@ -496,6 +510,7 @@ func _end(finished: bool) -> void:
 	who["busy"] = false
 	who["t"] = 1.5
 	GlintSfx.stop()
+	h.verbs.hold("")
 	if is_instance_valid(bar):
 		bar.queue_free()
 	for g in glint_nodes:
