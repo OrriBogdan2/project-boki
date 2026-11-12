@@ -72,6 +72,15 @@ a little `back` and out (`splay`); moving, the air's drag streams it back agains
 faster she goes. Keys: `at`, `gap`, `len`, `w` m wide, `back`, `splay`, `c`, `c2`. A wearer keeps its pair of meshes; a
 gone one's pair goes back to the pool, and one drawn while the match loads compiles the shader. Off at the Low preset, past `LOD_FAR` and while the Hero is hidden.
 
+## Shot origins
+`content/shot_origins.json` (read by `scripts/arch/shot_origin.gd`) says where a Hero's rounds leave the v2 model, per
+move: `at` is a list of [side (+ right), forward] m from the feet along the aim, taken shot by shot (Sable's two
+crossbows), and `nodes` lists the .glb empties the muzzle flash sits on. The attack key's rounds are seated the step
+after they fire (`ArchKit.tick`); a kit that fires its own round calls `ShotOrigin.point` / `seat`. A seated round keeps
+its height (the hit band) and speed and still ends where it would have. Today: Sable (LMB, E), Grimble (LMB), Cinder
+(RMB), Tenzo (boulder); Sparkle, Lace and Vex use their own anchors. The numbers were measured on the 11-09 v2 models
+(ext/vfx-origin-v2); `--hero-vfx-check` keeps every origin on the body.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.

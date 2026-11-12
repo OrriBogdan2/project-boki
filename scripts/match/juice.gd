@@ -94,7 +94,7 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var dmg := float(w.get("dmg", 10.0)) * float(maxi(1, int(w.get("pellets", 1))))
 	var power := clampf(dmg / 16.0, 0.7, 3.0)
 	var col: Color = w.get("color", Color("ffd9a0"))
-	m.fx.muzzle(start + Vector3(dir2.x, 0, dir2.y) * 0.25, dir2, col, power)
+	m.fx.muzzle(ShotOrigin.flash(h, start + Vector3(dir2.x, 0, dir2.y) * 0.25), dir2, col, power)
 
 ## Someone knocked down (Match.knock): a burst of their team colour, a shockwave on the ground and a
 ## white flash, so the moment reads from anywhere on screen.
