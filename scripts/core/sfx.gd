@@ -32,7 +32,9 @@ const MIN_GAP := {"xp_tick": 60, "steal_won": 400, "steal_lost": 400, "scan_pop"
 	"pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150,
 	"ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45,
 	"crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60,
-	"die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60, "armor_up": 120}
+	"die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60, "armor_up": 120,
+	# Boki moments: a pack going down, a crowd at a feeder, a base dozing off at dusk
+	"boki_downed": 150, "boki_revive": 300, "boki_eat": 150, "boki_sleep": 400}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90

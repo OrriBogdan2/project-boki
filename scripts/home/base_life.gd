@@ -42,6 +42,7 @@ const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down wit
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
 const ARRIVED := 0.5       # m: a greeter this close to its spot at the portal has got there
 const GRUMPY := 30.0      # joy need below which a Boki naps alone
+const NAP_DB := -10.0     # dB: the sleepy breath as it lies down, as quiet as the farm's own naps
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
@@ -347,6 +348,7 @@ func _lie_down(k: Dictionary) -> void:
 	k["z_t"] = 0.5
 	k["goal"] = k["pos"]
 	k["t"] = float(k["nap_t"])
+	HomeVoice.say(k["rec"], "boki_sleep", k["pos"], NAP_DB)
 
 ## A retired mentor: calm and slow, always near the Soul Shrine (anywhere on the farm if none is marked out).
 func _mentor(k: Dictionary) -> void:

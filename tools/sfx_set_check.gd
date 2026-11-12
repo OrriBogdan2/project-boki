@@ -22,7 +22,8 @@ extends RefCounted
 ##  13. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ##  14. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
 ##      an unknown species falls back to the generic cues, and no two species share a happy take
-##  15. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
+##  15. the Boki downed/revive/eat/sleep and Fusion end/tired cues are in a set, exist and are played from
+##      their event code (WIRED)
 ##  16. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
 ##  17. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
 ##  18. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
@@ -40,7 +41,12 @@ const REACH_MAX := 80.0        # m: past this a sound would carry over most of t
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 ## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
-const WIRED := {"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"]}   # (the Boki ones: _boki_wired)
+const WIRED := {"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"],
+	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_eat": ["home/base_feed.gd", "home/home_econ.gd", "home/home.gd"],
+	"boki_sleep": ["home/base_life.gd", "home/home.gd", "home/kin_indoors.gd"],
+	"boki_fuse_end": ["match/merge_xform.gd"], "boki_fuse_tired": ["match/merge_xform.gd"]}
 
 var bad := 0
 var levels := {}
@@ -70,7 +76,6 @@ func run(main: Node) -> void:
 	_ambience()
 	_belt()
 	_boki_cues()
-	_boki_wired()
 	_fusion_cues()
 	_gloves()
 	_ui_cues()
@@ -318,7 +323,7 @@ func _wired() -> void:
 		for f in WIRED[sname]:
 			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
 				unplayed.append("%s not in %s" % [sname, f])
-	ok(unplayed.is_empty(), "%d warning sounds are wired %s" % [WIRED.size(), unplayed])
+	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -431,14 +436,6 @@ func _belt() -> void:
 	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))
 	ok(stock_left.is_empty(), "belt: utility_use.gd plays no stock cue %s" % [stock_left])
 
-## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
-func _boki_wired() -> void:
-	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
-		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
-		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
-	for cue in wired:
-		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
-		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
 ## 7. Every sound a glove names in its content (cast, an effect's "sfx" / "hit_sfx") exists, and at least the
 ## first four gloves (Blink, Barrier, Hook, Rocket) have their own.
 func _gloves() -> void:
