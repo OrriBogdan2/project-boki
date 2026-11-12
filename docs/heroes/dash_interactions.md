@@ -119,7 +119,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | bulwark | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | bulwark | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | bulwark | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | ult (X) -> jump | Hero sheet bjorn.md Ultimate, aim: 'He is planted for the wind-up and slam (f25-f31)'; owner item 48 (root only during the wind-up + slam, free after). The data card and footage show no jump press in the cast. Ours: no rise in the plant (BjornUlt holds him down, as JuggernautUlt's guard); once the fissure runs a jump goes. | **exception:** the move is refused while it runs (planted for the wind-up and the slam (~0.6 s): a jump would lift him off the plant; the press is dropped, not kept for the plant's end) |
 | bulwark | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
 | bulwark | hold LMB through a ground dash | Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it | the hold carries through and lets go there |
 | bulwark | hold LMB through an air dash | Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is) | the hold carries through and lets go there |
