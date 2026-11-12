@@ -45,7 +45,8 @@ static func touched(m: Match, a: Hunter, from: Vector3, bumped: bool) -> String:
 	var bad: Array = []
 	var sideways := Vector2(a.pos.x - from.x, a.pos.z - from.z).length() > MOVED_M and not bumped
 	if sideways or absf(a.pos.y - from.y) > MOVED_M:
-		bad.append("moved %.2f m to %s" % [a.pos.distance_to(from), a.pos - from])
+		var d := a.pos - from      # no commas: _excused reads ", " as a second problem
+		bad.append("moved %.2f m by (%.2f %.2f %.2f)" % [a.pos.distance_to(from), d.x, d.y, d.z])
 	for k in ["stun_t", "root_t", "slow_t", "knock_t", "vuln_t", "blight_t", "burn_t"]:
 		if float(a.get(k)) > 0.0:
 			bad.append(k)
