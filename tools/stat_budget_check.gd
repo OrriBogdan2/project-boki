@@ -66,10 +66,10 @@ func run(main: Node) -> void:
 	o.erase("stat_frac")
 	o.erase("loose")
 	Care.ensure(o)
-	ok(o["loose"] == {} and o["stat_frac"] == {}, "old saves gain empty progress fields")
+	ok(o["loose"] == 0 and o["stat_frac"] == {}, "old saves gain empty progress fields")
 	var l := _rec(100)
 	l["stats"]["guard"] = 85
-	l["loose"] = {"guard": 3}
+	l["loose"] = 3
 	var back := Care.add_stat(l, "guard", 1) + Care.add_stat(l, "guard", 1)
 	ok(back == 3 and int(l["stats"]["guard"]) == 88, "loose points come back two a play, skipping the quarter band")
 	ok(Care.add_stat(l, "guard", 1) == 0, "once the loose points are back the quarter band applies again")
