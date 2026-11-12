@@ -126,6 +126,7 @@ func tick(dt: float) -> void:
 	if phase == P.WAVES and m.sess_time() >= next_wave_t - r("warn_s"):
 		gates.mark(wave, next_wave_t)
 	gates.show_marks()
+	HeartRaidHints.tick(self)
 	if host():
 		foes = foes.filter(func(x): return is_instance_valid(x) and not x.dead)
 		_direct()
