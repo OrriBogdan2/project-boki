@@ -20,7 +20,7 @@
 		"gunslinger_dash": {"clip": "dash", "legs_heading": true},
 		"gunslinger_dash_ex": {"clip": "dash_ex"},
 		"gunslinger_e": {"clip": "e"},
-		"gunslinger_x": {"clip": "x", "upper": "moving"},
+		"gunslinger_x": {"clip": "x"},
 		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},

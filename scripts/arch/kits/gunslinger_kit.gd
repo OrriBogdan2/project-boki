@@ -42,6 +42,9 @@ const TUBE_SWING := 0.1              # s from the press to the bell coming forwa
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
 const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
+const E_RECOVER := 0.6               # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
+                                     # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
+                                     # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -66,6 +69,7 @@ var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
+var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -124,19 +128,16 @@ func shows_charge_ball() -> bool:
 const TRAILS := {"gunslinger_knock": ["r", 0.0, 0.25]}
 const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.json "dash", low from 0.08): a held slide
                                      # keeps the clip there, so she stands up as the skid ends, not mid-skid
-const WALK_OFF := {"gunslinger_dash": 0.0, "gunslinger_e": 0.8}   # s into the move its hit is past: the dash's
-                                     # from the skid's end, the Longneedle's once its shove has played
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
                                      # is over to the clips (the kit's anim_id is read as long as it is set)
 
-## Walking out of a move's recovery (the slide's stand-up, the Longneedle's settle): the legs are hers again and
-## the walk blends in (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
+## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
+## (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
 ## (Clearing anim_id would not do: the published anim state keeps the last kmove until another move plays.)
 func _tick_walk_off() -> void:
-	if not WALK_OFF.has(anim_id) or not slide.is_empty() or not needle.is_empty() or not h.grounded:
+	if anim_id != "gunslinger_dash" or not slide.is_empty() or not h.grounded:
 		return
-	var walking := (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5
-	if walking and float(m.time) - anim_at >= float(WALK_OFF[anim_id]):
+	if (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5:
 		anim_at = float(m.time) - OVER        # the move reads as over: past its clip, the body goes back to the legs
 
 func _tick_trail() -> void:
@@ -172,11 +173,26 @@ func teardown() -> void:
 	_end_needle()
 
 func move_k() -> float:
+	if commit_left() > 0.0:
+		return 0.0
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
-## The rifle can't fire while a dry drum refills (_tick_mag).
+## The rifle can't fire while a dry drum refills (_tick_mag), nor in a committed recovery.
 func fire_ok() -> bool:
-	return not dry
+	return not dry and commit_left() <= 0.0
+
+## The source's recoveries (E_RECOVER, GunslingerUlt.COMMIT): she stands, and no ability, jump or Shift goes.
+## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
+func commit_left() -> float:
+	return maxf(0.0, commit_end - float(m.time))
+
+func busy() -> bool:
+	return super.busy() or commit_left() > 0.0
+
+func gate_inputs() -> void:
+	if commit_left() > DashFlow.BUFFER_S:
+		h.inp["dash"] = false
+		h.inp["jump"] = false
 
 func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
@@ -747,6 +763,7 @@ func _fire_needle() -> void:
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
+	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):
