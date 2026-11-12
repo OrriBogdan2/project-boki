@@ -441,6 +441,7 @@ func _lmb_parity() -> void:
 ## hurts nobody; a jump and Shift keep it; the release puts the hammer back and still slams at the cursor.
 const MIN_TURNS := 1.0
 const SPIN_STRETCH := 0.25     # s: the turn rate is measured over each of these
+const WHIRL_REACH_K := 0.71    # m per unit of his model scale: the whirling head this far out is at arm's length
 
 ## The hammer's head round the circle's centre (rad, world), with the effect brought up to date.
 func _head_angle(K: BulwarkKit) -> float:
@@ -496,8 +497,9 @@ func _hold_spin() -> void:
 	ok("bjorn #59: the whirl speeds up with the charge",
 		fastest >= slowest + 0.8 and fastest <= float(md["spin_turns"][1]) + 0.1,
 		"%.2f-%.2f turns/s" % [slowest, fastest])
-	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= 1.5 and trail,
-		"head %.2f m out, trail %s" % [reach, trail])
+	var arm := WHIRL_REACH_K * P.model.global_basis.get_scale().y
+	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= arm and trail,
+		"head %.2f m out (arm's length %.2f), trail %s" % [reach, arm, trail])
 	ok("bjorn #59: the whirl hurts nobody (the default for now): a foe inside its circle took nothing in 2 s",
 		dmg(T) == 0.0, "took %.0f" % dmg(T))
 	# walking: the hold's speed (55% of his run, kept from the source), the hammer still round
