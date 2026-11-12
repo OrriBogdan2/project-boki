@@ -376,8 +376,49 @@ func _training() -> void:
 	var dsh := P.dashes
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
+	_dodge_drill(m)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## The dodge drill: the Strafer's shot shows its lane first, standing still in it gets you caught (no
+## count, no damage), three dashes out of the lane finish the drill and tick the checklist row.
+func _dodge_drill(m: Match) -> void:
+	var P: Hunter = m.player
+	var dr: DodgeDrill = m.arena.drill
+	m.arena.cd_off = true
+	step(m, 1.0)        # the earlier dash is over
+	var start := P.pos
+	ok("drill: you start in the Strafer's reach", P.flat_dist(dr.thrower.pos) < DodgeDrill.REACH)
+	var hp := P.hp
+	_next_lane(m, dr)
+	ok("drill: the lane shows before the orb leaves", not dr._shot.is_empty() and dr._shot["t"] < DodgeDrill.WINDUP)
+	_finish_shot(m, dr)
+	ok("drill: standing still is caught, no count, no damage", dr.dodges == 0 and P.hp >= hp, "%d" % dr.dodges)
+	for i in DodgeDrill.NEED:
+		_next_lane(m, dr)
+		step(m, DodgeDrill.WINDUP * 0.5)
+		P.inp["move"] = (dr._shot["dir"] as Vector2).orthogonal()
+		P.do_dash()
+		_finish_shot(m, dr)
+		P.inp["move"] = Vector2.ZERO
+		P.teleport(start)
+	ok("drill: three dashes clear of the shot finish it", dr.done and dr.dodges == DodgeDrill.NEED, "%d" % dr.dodges)
+	step(m, 0.2)
+	ok("drill: the checklist row ticks", m.train.has("dodge"))
+	step(m, DodgeDrill.LOOP * 1.5)
+	ok("drill: done, the Strafer stops throwing", dr._shot.is_empty())
+
+func _next_lane(m: Match, dr: DodgeDrill) -> void:
+	var t := 0.0
+	while dr._shot.is_empty() and t < DodgeDrill.LOOP * 2.0:
+		m.step(DT)
+		t += DT
+
+func _finish_shot(m: Match, dr: DodgeDrill) -> void:
+	var t := 0.0
+	while not dr._shot.is_empty() and t < 4.0:
+		m.step(DT)
+		t += DT
 
 func _cards() -> void:
 	printerr("ARENACHECK (kit cards)")
