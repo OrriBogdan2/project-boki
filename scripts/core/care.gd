@@ -289,6 +289,7 @@ static func condition(rec: Dictionary) -> float:
 static func condition_name(rec: Dictionary) -> String:
 	var ss := starve_stage(rec)
 	if ss != "" and ss != "dead": return String(STARVE_INFO[ss][0])
+	if rec.has("extra_care"): return "Needs extra care"
 	var c := condition(rec)
 	if c >= 75.0: return "In great shape"
 	if c >= 50.0: return "Doing fine"
