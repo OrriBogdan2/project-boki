@@ -11,6 +11,8 @@ extends RefCounted
 ## Per demo: strip times (s, at least 0.06 apart), key moments {name: s}, and the close-up camera yaw.
 const SPEC := {
 	"tender_lmb": {"strip": [0.34, 0.38, 0.42, 0.52, 0.66, 0.82], "keys": {"lmb": 0.42, "lmb_fly": 0.39}},
+	# three embers, the cursor 4, 8 and 14 m out to the open side: each flies on past it to its full range
+	"tender_reach": {"strip": [0.7, 1.4, 2.1], "keys": {"reach4": 0.7, "reach8": 1.4, "reach14": 2.1}},
 	"tender_emp": {"strip": [1.3, 1.36, 1.42, 1.5, 1.6, 1.8], "keys": {"emp": 1.42, "emp_fly": 1.56}},
 	"tender_rmb": {
 		"strip": [0.6, 0.84, 0.9, 0.98, 1.4, 1.86],
@@ -165,7 +167,8 @@ static func _script(
 		A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var go := 0.3
-	if t < 0.2 and (what in ["skateult", "skatefire"] or (arch == "tender" and what in ["dash", "air", "airsteer"])):
+	var tender_lane := arch == "tender" and what in ["dash", "air", "airsteer", "reach"]
+	if t < 0.2 and (what in ["skateult", "skatefire"] or tender_lane):
 		_open_lane(A, P, Al)
 	match what:
 		"rmb":
@@ -210,6 +213,8 @@ static func _script(
 			P.inp["fire"] = t > 0.3 and t < 1.75
 		"emp":
 			P.inp["fire"] = t > 1.28 and t < 1.32
+		"reach":
+			_reach(A, P, t)
 		"skatefire":
 			_dash(A, P, arch, t, dt)
 			P.inp["fire"] = t > 0.55 and t < 1.0
@@ -227,6 +232,20 @@ static func _script(
 			_ult(A, Al, arch, what, t, dt)
 		"skateult":
 			_skate_ult(A, P, t, dt)
+
+## Ember i leaves at 0.3 + 0.7 i s with the cursor REACH_D[i] m out to the open side, marked by a ring there.
+const REACH_D := [4.0, 8.0, 14.0]
+
+static func _reach(A: Arena, P: Hunter, t: float) -> void:
+	var i := clampi(int((t - 0.3) / 0.7), 0, REACH_D.size() - 1)
+	var side: Vector2 = A.get_meta("care_right", Vector2(1, 0))
+	var at := P.pos + Vector3(side.x, 0, side.y) * float(REACH_D[i])
+	P.inp["aim"] = at + Vector3(0, 0.9, 0)
+	AimKit.circle(P, "reach", {"at": at, "r": 0.5, "star": true})
+	var go := 0.3 + 0.7 * i
+	P.inp["fire"] = t > go and t < go + 0.04
+	if P.inp["fire"]:
+		P.idle_fire = 0.0       # plain embers: an idle crook's next one is Empowered (further)
 
 static func _dash(A: Arena, P: Hunter, arch: String, t: float, dt: float) -> void:
 	var side: Vector2 = A.get_meta("care_right", Vector2(1, 0))
