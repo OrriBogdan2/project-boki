@@ -6,6 +6,7 @@ tutorials, their checks and the Hob/farm flow are main's, as ext/mc-20261109-223
 from this candidate with the code they leave orphaned: the short-tutorials bundle (37dc18d84: Pell guide,
 TutorialRival, NpcDialogue, FirstTimeHint/MatchHints/FarmHints, Save v13 hints step), combat v2 / beats 7-8,
 and farm batch 1108 + axe at start (779560546, 1c6fdf4dd: HungerGate, spotlight phases, --farm-place-check).
+Also dropped: the Sky train inertia (271b8a1f9, c97932ba2; --train-check fails on main's new route).
 Everything else is kept: main + the candidate. Net.VERSION is 0.33.0. Save stays at main's v13.
 The NEW-RED / WORSE rows below were measured against d255acbe and were not re-gated against main.
 
