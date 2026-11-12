@@ -497,7 +497,7 @@ var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
 func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
 	if loops.has(key):
 		return
-	var st = streams.get(sname)
+	var st = streams.get(sname) if ensure(sname) else null
 	if st is Array: st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
 	p.bus = "SFX"
