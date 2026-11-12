@@ -1046,18 +1046,18 @@ func render(delta: float, alpha: float) -> void:
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
 		# perched on the pack (or a mount curled up into a ball on your back while you glide)
-		var torso: Node3D = owner_h.model.get_node("Rig/Torso")
 		var ball := carry_style() == "mount"
-		global_position = torso.global_transform * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
-		model.rotation.y = owner_h.face
+		var torso := WardenGlb.shown_torso(owner_h.model)
+		global_position = torso * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
+		model.basis = _ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.62 if not ball else 0.42, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
 		return
 	if on_you and owner_h and owner_h.model:
 		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
-		global_position = sh.global_position
-		model.rotation.y = owner_h.face
+		global_position = WardenGlb.shown_torso(owner_h.model) * sh.position
+		model.basis = _ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.55, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		# now and then it peeks out past its hunter's head, or nuzzles in against it
@@ -1097,6 +1097,12 @@ func render(delta: float, alpha: float) -> void:
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
+
+## Riding on you, it faces your way and leans with your body in the air (HunterAnim.AIR_TILT: the glider's bank, the
+## dive's pitch); its seat is on the body you see (WardenGlb.shown_torso).
+func _ride_basis() -> Basis:
+	var tilt: Quaternion = owner_h.model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	return Basis(Vector3.UP, owner_h.face) * Basis(tilt)
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:
