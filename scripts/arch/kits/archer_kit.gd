@@ -324,8 +324,7 @@ func _pin(a: Vector3, k: float) -> void:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
-	# its scorch runs from the ground under the bow (heavy_go's bursts sit on the bow itself)
-	vfx("heavy_go", AimMode.ground(m, bow), dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
+	vfx("heavy_go", bow, dir, {"k": k})
 	# the release burst's pale fletch core just off the bow along the shot (kept small enough that the bow, not her
 	# body, is what it lights), still wider than any bow cue, and a screen kick along the shot
 	fx.fletch_burst(bow + Vector3(dir.x, 0, dir.y) * HEAVY_BURST_AHEAD, 1.2 + 0.4 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)

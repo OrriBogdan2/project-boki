@@ -67,7 +67,7 @@ func pin() -> void:
 	step(m, 0.1, north)
 	ok("parity pin: mid-draw the body turns to a moved cursor at once (the source turns throughout)",
 		face_err(P) < TRACK_DEG and P.draw_t > 0.0, "%.0f deg" % face_err(P))
-	step(m, 0.4, north)             # (past the perfect window: the plain release move)
+	step(m, 0.5, north)             # (past the 0.35 s perfect window, before Supercharged: the plain release move)
 	var n0 := last_sid(m, P)
 	P.inp["fire"] = false
 	m.step(DT)

@@ -100,9 +100,9 @@ func _heavy_from_the_bow(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vec
 	var moves: Dictionary = HeroVfx.data("archer")["moves"]
 	var at_feet := ""
 	for layer in (moves["heavy_go"] as Dictionary).get("fx", []):
-		if String(layer.get("at", "")) == "h" and String(layer["p"]) != "scorch":
+		if String(layer.get("at", "")) == "h":
 			at_feet += String(layer["p"]) + " "
-	ok("RMB release: no burst sits on her body (heavy_go's bursts ride the bow; only the scorch lies on the ground)",
+	ok("RMB release: no burst sits on her body (heavy_go's bursts ride the bow)",
 		at_feet == "", at_feet)
 	step(m, 1.5)
 

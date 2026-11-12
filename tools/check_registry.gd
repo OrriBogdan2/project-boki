@@ -155,6 +155,7 @@ const CHECKS := {
 	"--lace-1111-check": ["res://tools/lace_1111_check.gd", "lace_1111_check", null],      # Lace 11-11 notes
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 	"--pin-bjorn-shots": ["res://tools/pin_bjorn_shots.gd", "pin_bjorn_shots", null],
+	"--lace-playtest-check": ["res://tools/lace_playtest_check.gd", "lace_playtest_check", null],      # owner 11-08 items 18-20
 	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],      # the Warden models
 	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],      # rig for the Blender build
 	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
