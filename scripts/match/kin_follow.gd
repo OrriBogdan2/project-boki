@@ -39,7 +39,7 @@ static func in_combat(k: Kin, p: Vector3) -> bool:
 	if o != null and k.m.time - o.hurt_at < 3.0:
 		return true
 	var rad := _r("combat_radius")
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		if f.dead or not f.hittable() or Shrubling.hidden(f):
 			continue
 		if (o != null and f.flat_dist(o) < rad) or f.flat_dist(p) < rad:
@@ -54,7 +54,7 @@ static func owner_focus(k: Kin) -> Ent:
 	var aim: Vector3 = o.inp["aim"]
 	var best: Ent = null
 	var bd := 3.0
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		if f.dead or not f.hittable() or Shrubling.hidden(f) or f.flat_dist(o) > _r("engage_range") + 4.0:
 			continue
 		var d := Vector2(f.pos.x - aim.x, f.pos.z - aim.z).length()
@@ -94,7 +94,7 @@ static func on_damage(target: Ent, by: Ent, d: float) -> void:
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 	if k.wisp:
 		return false          # (a wisp takes no orders: KinWisp)
-	if k.dead or k.state in ["downed", "bench", "away", "fused", "reviving"] or k.owner_h == null or k.rest_t > 0.0:
+	if k.dead or k.state in ["downed", "bench", "away", "fused", "wisp"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
 	match cmd:

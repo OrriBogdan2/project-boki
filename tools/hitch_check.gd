@@ -43,6 +43,8 @@ var last_us := 0
 var frames: Array = []
 var load_frames: Array = []
 var load_ms := 0.0
+const READY_HOLD_MS := 300.0    # ms the loading screen may stay up once the match is ready (playtest 11-09)
+const LOADING := preload("res://scripts/ui/loading.gd")
 var landed_at := -1.0
 var vp_rid: RID
 var _end := false
@@ -61,6 +63,7 @@ var seed_v := 4101
 var squad := 3
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
+var hop_only := false      # --load-check=hop: a Waystone hop from the hub to Bramblebank (see _hop_check)
 var trace := false
 var training := false      # --load-check=training: the Training Area's load instead of an expedition's
 var shots_dir := ""        # --load-shots=dir: a screenshot of the loading screen every half second (skews timings)
@@ -79,6 +82,10 @@ func _ready() -> void:
 		if a == "--load-check=training":
 			load_only = true
 			training = true
+		if a == "--load-check=hop":
+			load_only = true
+			home_only = true
+			hop_only = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -108,6 +115,9 @@ func _ready() -> void:
 	started_us = Time.get_ticks_usec()
 	last_us = started_us
 	print("HITCH renderer=%s adapter=%s software=%s headless=%s seed=%d squad=%d" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), software, headless, seed_v, squad])
+	if hop_only:
+		_hop_check()
+		return
 	if home_only:
 		_home_check()
 		return
@@ -416,8 +426,14 @@ func _finish_load() -> void:
 	lines.append("LOAD build steps (total ms): " + ", ".join(sk.slice(0, 16).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	for nt in PerfLog.notes: lines.append("LOAD note: " + String(nt))
 	var spin_ok := up == 0 or drawn >= up - 1
-	var ok := over == 0 and spin_ok and up > 0
-	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s)" % [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen"]))
+	var tail := 0.0       # ms the screen stayed up once the match was built and drawn ("Ready")
+	for f in fl:
+		if String(f["stage"]) == LOADING.STAGES["ready"]: tail += float(f["wall"])
+	lines.append("LOAD held after Ready: %.0f ms (at most %.0f)" % [tail, READY_HOLD_MS])
+	var tail_ok := tail <= READY_HOLD_MS
+	var ok := over == 0 and spin_ok and up > 0 and tail_ok
+	var why := [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen", "" if tail_ok else ", held after Ready"]
+	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s%s)" % why))
 	var txt := "\n".join(lines)
 	print(txt)
 	if out_path != "":
@@ -492,6 +508,33 @@ func _home_check() -> void:
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string(txt + "\n")
 	get_tree().quit(0 if ok else 1)
+
+## --load-check=hop (GARDEN.md 10.6): in the hub, press E's hop to Bramblebank, timed until you have
+## control there (the zone built and the ink lifted); passes inside garden_zones.json hop_max_s.
+func _hop_check() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Game.main.show_screen("home", {"zone": GardenZones.HUB})
+	var hub = await _home_ready(null)
+	var t0 := Time.get_ticks_usec()
+	var started: bool = hub != null and hub.hway.hop("bramblebank")
+	var zone = await _home_ready(hub) if started else null
+	var ms := (Time.get_ticks_usec() - t0) / 1000.0
+	var limit := float(GardenZones.rules()["hop_max_s"]) * 1000.0
+	var ok := zone != null and ms <= limit
+	print("LOAD hop hub -> Bramblebank: %.0f ms to control (limit %.0f ms)" % [ms, limit])
+	print("LOAD %s" % ("PASS" if ok else "FAIL"))
+	get_tree().quit(0 if ok else 1)
+
+## The next home after was, once it is built and the ink has lifted (null after 60 s).
+func _home_ready(was: Node):
+	var t0 := Time.get_ticks_usec()
+	while Time.get_ticks_usec() - t0 < 60 * 1000000:
+		await get_tree().process_frame
+		var cur = Game.main.current
+		if cur != was and is_instance_valid(cur) and cur.get("hway") != null and cur.get("building") != true \
+				and cur.get("root_ui") != null and not Game.main.fade.covered:
+			return cur
+	return null
 
 ## Runs after every other _process in the frame: marks where the scripts ended.
 class Tail extends Node:

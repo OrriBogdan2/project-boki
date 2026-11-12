@@ -15,7 +15,10 @@ const SUMMON_HP := 0.45       # share of health: below this the bot is losing, n
 const SUMMON_DELAY := 0.3     # s: a quick bot waits this long after the moment starts (easy: up to 5x)
 const SUMMON_BASE := 0.5      # chance a bot with no ability skill presses it when the wait is up (skill 1: always)
 const SUMMON_RETRY := 3.0     # s: before a bot that skipped the moment looks again
-const SIC_REACH := 9.0       # m: how far a Sic can reach (Kin throw range)
+const SIC_REACH := 9.0        # m: how far a Sic can reach (Kin throw range)
+const SCAN_NEAR := 9.0        # m: a knocked-out Boki this close is scanned before any lair, seat or exit run
+const SCAN_FAR := 14.0        # m: how far a bot with nothing better to do walks to a knocked-out Boki
+const SCAN_KEEP := 4.0        # m: slack for the Boki it is already walking to (no flip-flop at the edge)
 
 ## Called while the bot has a target: Return when it is low, Sic at the target, cast C, Call back.
 static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
@@ -110,3 +113,13 @@ static func upkeep(h: Hunter) -> void:
 		k.recall()
 	elif k.state == "shoulder" and k.cmd == "return" and h.hp > h.max_hp * 0.6 and k.hp > k.max_hp * 0.6 and float(h.ai.get("throw_cd", 0.0)) <= 0.0:
 		KinCommand.order(h, "follow")
+
+## The spot of a knocked-out Boki this bot can scan within `reach` (a little further for the one it is
+## already heading to, `cur`), or INF.
+static func scan_goal(m: Match, h: Hunter, cur: Vector3, reach: float) -> Vector3:
+	if not Capture.room(h):
+		return Vector3.INF
+	for k in m.kins:
+		if KinLoss.scannable_by(h, k) and h.flat_dist(k) < reach + (SCAN_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
+			return k.pos
+	return Vector3.INF

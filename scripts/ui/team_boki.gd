@@ -1,10 +1,11 @@
 class_name TeamBoki
 extends RefCounted
-## A small Boki icon on each squad row (Hud._draw_squad): the species portrait with a thin health bar under it, so a
-## squad sees whose Boki is down. It sits on the corner of the teammate's portrait and tints for a downed Boki (red),
-## a resting one (blue) and an owner who is a wisp (violet). Online, a teammate's Boki is the Kin the snapshot
-## already updates (hp, state, rest seconds), so it reads that and adds no net traffic. A teammate who carries stolen
-## wisps (KinSteal) also wears a small count badge in the portrait's top corner, in the thief's side ring colour.
+## A small Boki icon and the level chip on each squad row (Hud._draw_squad): the species portrait with a thin
+## health bar under it, so a squad sees whose Boki is down. It sits on the corner of the teammate's portrait and
+## tints for a downed Boki (red), a resting one (blue) and an owner who is a wisp (violet). Online, a teammate's
+## Boki is the Kin the snapshot already updates (hp, state, rest seconds), so it reads that and adds no net traffic.
+## A teammate who carries stolen wisps (KinSteal) also wears a small count badge in the portrait's top corner, in the
+## thief's side ring colour.
 
 const ROW_STEP := 66.0         # px between squad rows (Hud._draw_squad)
 const ROW_X := 16.0            # px: squad row's left edge
@@ -19,12 +20,14 @@ const TINT_ALPHA := 0.45       # how strongly a tint covers the icon
 
 ## hunter nid -> {"state": "", "down", "rest" or "wisp", "frac": health 0..1}: what the last draw put on each row
 static var shown := {}
+## hunter nid -> the level chip's number on that row
+static var levels := {}
 ## hunter nid -> how many stolen wisps the badge on their row says
 static var stolen_shown := {}
 
 ## The icon's state for a teammate's Boki: "down", "rest", "wisp" (its owner is down) or "".
 static func state_of(h: Hunter, k: Kin) -> String:
-	if k.dead or k.state == "downed" or k.state == "reviving":
+	if k.dead or k.state == "downed":
 		return "down"
 	if k.resting():
 		return "rest"
@@ -32,12 +35,17 @@ static func state_of(h: Hunter, k: Kin) -> String:
 
 static func draw(hud, p: Hunter) -> void:
 	shown.clear()
+	levels.clear()
 	stolen_shown.clear()
 	var y: float = hud.mm_bottom + 10.0
 	for h in hud.m.hunters:
 		if h == p or h.team != p.team:
 			continue
 		var k: Kin = h.kin
+		if not h.out and not h.extracted:
+			# the run level, as on the overhead plates: a chip on the portrait's lower-left
+			HudPlate.level_badge(hud.c, Vector2(ROW_X + 8.0, y + ROW_DROP), h.lvl, SideColor.of(hud.m, h))
+			levels[h.nid] = h.lvl
 		if k != null and not h.out and not h.extracted:
 			_icon(hud, Vector2(ROW_X + PORTRAIT_END - ICON, y + ROW_DROP - ICON - BAR_H), h, k)
 		var n := KinSteal.count(h)
