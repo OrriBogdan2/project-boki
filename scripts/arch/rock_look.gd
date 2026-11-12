@@ -112,7 +112,7 @@ static func _cracks(n: Node3D) -> void:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
 		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
+			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(0.35, 0.6, 1.0, 0.95)),
 			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
@@ -133,7 +133,7 @@ static func cool(n: Node3D) -> void:
 static func rise_fx(m: Node, at: Vector3) -> void:
 	m.fx.dust(at, 14)
 	m.fx.burst(at + Vector3(0, 0.3, 0), STONE_HI, 12, 3.5, 0.45, 8.0, 1.2)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ff7a2a"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
+	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("3a7cff"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
 	if absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
