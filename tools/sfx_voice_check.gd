@@ -25,7 +25,7 @@ var lost := {"you": {}, "squad": {}, "enemy": {}}   # whose -> why -> count
 var names := {}                     # "whose why sound" -> count
 var peak := 0
 var sum := 0
-var frames := 0
+var frame_ms := PackedFloat32Array()   # wall ms per frame of the fight, for the frame-time line
 
 func ok(cond: bool, what: String) -> void:
 	print("SFXVOICE %s %s" % ["ok  " if cond else "FAIL", what])
@@ -43,16 +43,23 @@ func run(main_node: Node) -> void:
 	var m := await _brawl()
 	var P: Hunter = m.player
 	var start := m.time
+	var t := Time.get_ticks_usec()
 	while is_instance_valid(m) and m.time - start < secs:
 		P.hp = P.max_hp
 		await main.get_tree().process_frame
+		frame_ms.append((Time.get_ticks_usec() - t) / 1000.0)
+		t = Time.get_ticks_usec()
 		var n := SfxVoices.sounding(Sfx.players, Sfx.loops)
 		peak = maxi(peak, n)
 		sum += n
-		frames += 1
 	var cap := Sfx.POOL + SfxVoices.LOOP_CAP
 	print("SFXVOICE %d Hunters, %d frames: voices peak %d, mean %.1f (cap %d), %d loops at the end" % [
-		m.hunters.size(), frames, peak, float(sum) / maxi(frames, 1), cap, Sfx.loops.size()])
+		m.hunters.size(), frame_ms.size(), peak, float(sum) / maxi(frame_ms.size(), 1), cap, Sfx.loops.size()])
+	frame_ms.sort()
+	var ms_sum := 0.0
+	for x in frame_ms: ms_sum += x
+	print("SFXVOICE frame ms: mean %.2f, p99 %.2f" % [ms_sum / maxi(frame_ms.size(), 1),
+		frame_ms[int(frame_ms.size() * 0.99)] if not frame_ms.is_empty() else 0.0])
 	for whose: String in lost:
 		var line := "SFXVOICE lost %-5s" % whose
 		for why: StringName in WHYS:
