@@ -53,7 +53,7 @@ How the game uses them: the curve is in the dash's own time (u = share of its du
 | `tests/weapons_sim.gd` | Headless weapon check: `godot --headless --path . -s tests/weapons_sim.gd` |
 | `scripts/match/` + `data/rules/` | Downed (wisp), deathboxes, revives, revive beacons, team wipes, solo rules, kin hooks. See DEATH_AND_REVIVE.md. Test: `tests/life_sim.gd` |
 | `scripts/feel/kinfall_input.gd` | Registers default binds at runtime (`kf_*` actions). |
-| `scenes/feel_test.tscn` | Playground: islands over an abyss, a raised island to mantle onto, pillars, a jump pad and a debug HUD. |
+| `tests/feel_test.tscn` | Playground: islands over an abyss, a raised island to mantle onto, pillars, a jump pad and a debug HUD. |
 | `tests/feel_sim.gd` | Headless check: `godot --headless --path . -s tests/feel_sim.gd` |
 
 ## Controls (Supervive defaults)
