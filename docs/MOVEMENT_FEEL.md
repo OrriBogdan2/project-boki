@@ -60,6 +60,7 @@ Nothing here comes from SUPERVIVE's files.
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
 | dash_curve_<hero>_peak_u / _peak_k (gunslinger, juggernaut, archer: where the speed peaks, peak / mean) | flat | 0.11 / 1.86, 0.29 / 1.74, 0.44 / 1.86 | the fit ± ~0.08 / ± ~0.1 | [footage] docs/SUPERVIVE_FEEL.md "Dash speed curves" |
 | dash_curve_dist / dash_curve_exit_run (distance against the kit's, hand-over / run) | n/a | 1.00–1.01x / 0.31–1.0x | 0.95–1.05x / <= 1.05x | the curve's mean is 1; the skid falls through run speed |
+| vault_exit_run / vault_slow_frames / vault_shot_gap_frames (Sable's ground Cartwheel, keys held: hand-over / hasted run, steps under it past the peak, steps from the flip's end to the bolt) | 0.86x / 3 / 0 | 1.0x / 0 / 0 | 0.95–1.05x / 0 / 0 | [footage] briefs/hero-ref/dancer.md: it runs down into the faster run, no dip; the shot leaves mid-flip (0193) |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
