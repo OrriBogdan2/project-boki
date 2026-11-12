@@ -11,6 +11,7 @@ const FIGHT_HOLD := 7.0       # seconds the fight music hangs on after the last 
 const RIVAL_NEAR := 13.0
 const UNDER := 0.15           # how much of the stems is left while a sting plays
 var heat := 0.0               # 0..1, how much of a fight is going on
+var stings := RaritySting.new()   # rare Boki coming into sight
 var last_fight := -99.0
 var last_done := 0.0
 var started := false
@@ -78,6 +79,7 @@ func tick(m: Match, dt: float) -> void:
 		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
+		stings.tick(m, dt, heat)
 	if not started:
 		return
 	var calm := 1.0; var drive := 0.0; var boss := 0.0; var extract := 0.0

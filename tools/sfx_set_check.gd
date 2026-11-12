@@ -15,6 +15,8 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
+##  10. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
+##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -45,6 +47,7 @@ func run(main: Node) -> void:
 	_ult_cues()
 	_garden_names()
 	_garden()
+	_rarity_stings()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -277,6 +280,22 @@ func _garden() -> void:
 	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
 	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
 	Sfx.clear_amb_layers(0.0)
+
+## 10. Rare and very rare Boki have a sting each; a common one plays nothing; each is under the scan chime.
+func _rarity_stings() -> void:
+	var rare: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	var common: String = Data.common_kin()[0]
+	var tiers := [RaritySting.tier(common, {}), RaritySting.tier(rare[0], {}) if not rare.is_empty() else -1,
+			RaritySting.tier(common, {"shimmer": true})]
+	ok(tiers == [0, 1, 2], "rarity tiers: common 0, a rare species 1, a shimmer 2 %s" % [tiers])
+	var names: Array = RaritySting.NAMES.slice(1)
+	var quiet := RaritySting.DB.slice(1).all(func(db): return db < 0.0) and RaritySting.DB[1] <= RaritySting.DB[2]
+	ok(names.all(func(n): return Sfx.ensure(n)) and quiet, "rarity stings exist, under the scan chime %s" % [names])
+	var src := {"scripts/match/music_dir.gd": "stings.tick(", "scripts/match/capture.gd": "RaritySting.claim(",
+			"scripts/ui/egg_hatch.gd": "RaritySting.play("}
+	var unwired := src.keys().filter(func(f): return not FileAccess.get_file_as_string("res://" + f).contains(src[f]))
+	ok(unwired.is_empty(), "rarity stings: first sight, claim and hatch play them (unwired %s)" % [unwired])
+	ok(RaritySting.SIGHT_M == 30.0 and RaritySting.LOUD_HEAT < 1.0, "rarity stings: within 30 m, held in a loud fight")
 
 func _takes(sname: String) -> Array:
 	var out := []
