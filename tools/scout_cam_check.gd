@@ -1,14 +1,14 @@
 extends RefCounted
 ## The held far look (ScoutLook, content/rules/camera.json "scout").
 ## --scout-cam-check, on a 1920x1080 view:
-##   1. distance: held, the view leans toward the cursor as far as the screen has room for (further than the
-##      cursor lean wherever there is room), you stay on screen every way, and a cursor on you leans nowhere
+##   1. distance: held, the view leans the cursor's way on screen, at the edge as far as the screen has room for
+##      (further than the cursor lean wherever there is room), you stay on screen every way, none near the centre
 ##   2. ease: the view goes 90% of the way out in ease_in_s and back in ease_out_s; it lets go off the mouse
 ##   3. cone: in a live match, sight reaches sight_mul further inside the cone_deg cone along your aim while
 ##      held, not outside it, not past it, and not without the hold; the hold rides the hunter flags (Net)
 ##   4. walk: holding it leaves walking speed unchanged; the key is C, shown by Settings.key_cap
 ## --scout-cam-shots (GPU, --shots-dir=<dir>): a live match with the cursor up and to the right: the usual
-## view, the far look held, and just after release (easing back), one PNG each.
+## view, the far look held, and half way back after release, one PNG each.
 
 const VIEW := Vector2i(1920, 1080)
 const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
@@ -45,7 +45,9 @@ func run(main: Node, what: String) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _distance(cam: CamRig) -> void:
-	ok(cam.scout_to(Vector3(CamRig.SCOUT_DEAD * 0.8, 0, 0)) == Vector3.ZERO, "a cursor on you leans nowhere")
+	ok(cam.scout_to(Vector2(CamRig.SCOUT_DEAD * 0.8, 0)) == Vector3.ZERO, "a cursor near the centre leans nowhere")
+	var halfway := cam.scout_to(Vector2(0.55, 0)).length()
+	ok(absf(halfway / cam.scout_to(Vector2(1, 0)).length() - 0.5) < 0.01, "a cursor halfway out leans half the room")
 	for z in [1.0, 1.45]:
 		cam.zoom = z
 		var worst := 1e9
@@ -53,7 +55,7 @@ func _distance(cam: CamRig) -> void:
 		var further := 0
 		for i in 16:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / 16.0)
-			var p := cam.scout_to(dir * 6.0)
+			var p := cam.scout_to(Vector2(dir.x, dir.z))
 			var lean := cam.lean_to(dir * 200.0).length()
 			if p.length() + 0.001 < lean: short += 1
 			if p.length() > lean + 1.0: further += 1
@@ -67,7 +69,7 @@ func _distance(cam: CamRig) -> void:
 				% [z, worst])
 	cam.zoom = 1.0
 	cam.snap(Vector3.ZERO)
-	var side := cam.scout_to(Vector3(6, 0, 0)).length()
+	var side := cam.scout_to(Vector2(1, 0)).length()
 	var cap := float(CamRig.FOLLOW["supervive"][2])
 	print("SCOUTCAM far look across the screen: %.1f m (cursor lean cap %.1f m)" % [side, cap])
 
@@ -76,7 +78,7 @@ func _ease_secs(cam: CamRig, on: bool, mouse_lead: bool, to: float) -> float:
 	cam.scout_on = on
 	var t := 0.0
 	while t < 3.0 and ((cam.scout_k < to) if on else (cam.scout_k > to)):
-		cam._tick_scout(STEP, Vector3.ZERO, mouse_lead)
+		cam._tick_scout(STEP, mouse_lead)
 		t += STEP
 	return t
 
@@ -211,8 +213,8 @@ func _shots(main: Node) -> void:
 		if h != m.player:
 			h.ctrl = "idle"
 	var vp := main.get_viewport()
-	# [name, held, frames]: the usual view, the far look settled, then 0.1 s after release
-	for sh in [["scout_off", false, 90], ["scout_held", true, 90], ["scout_released", false, 6]]:
+	# [name, held, frames]: the usual view, the far look settled, then half way back after release
+	for sh in [["scout_off", false, 90], ["scout_held", true, 90], ["scout_released", false, 60]]:
 		if sh[1]:
 			Input.action_press("scout")
 		else:
@@ -220,6 +222,8 @@ func _shots(main: Node) -> void:
 		for i in int(sh[2]):
 			vp.warp_mouse(vp.get_visible_rect().size * SHOT_CURSOR)
 			await main.get_tree().process_frame
+			if sh[0] == "scout_released" and m.cam.scout_k <= 0.5:
+				break
 		vp.get_texture().get_image().save_png(dir.path_join(String(sh[0]) + ".png"))
 		var s := m.cam.unproject_position(m.player.pos)
 		var off := Vector2(m.cam.focus.x - m.player.pos.x, m.cam.focus.z - m.player.pos.z).length()

@@ -158,22 +158,25 @@ func _tick_cast(delta: float) -> void:
 	if cast_k < 0.001:
 		cast_k = 0.0
 
-const SCOUT_DEAD := 0.5       # m: a cursor this close to you gives the far look no way to lean
+const SCOUT_DEAD := 0.1       # share of the half-screen: a cursor this near the centre gives the far look no lean
 
-## The far look's framing for a cursor `rel` metres from you: along it, as far as the screen has room for with
-## you still EDGE inside it. Nothing while the cursor sits on you (no way to look).
-func scout_to(rel: Vector3) -> Vector3:
-	var flat := Vector2(rel.x, rel.z)
-	if flat.length() < SCOUT_DEAD:
+## The far look's framing for the cursor at `rel` (-1..1 from the screen's centre on each axis): that way, a share of
+## the room the screen has (all of it at the edge) with you still EDGE inside. Read off the screen, not the ground,
+## so the view moving under a still cursor never steers where it goes.
+func scout_to(rel: Vector2) -> Vector3:
+	var l := rel.length()
+	if l < SCOUT_DEAD:
 		return Vector3.ZERO
-	var dir := flat.normalized()
-	return Vector3(dir.x, 0.0, dir.y) * maxf(0.0, _cast_room(dir, 0.0))
+	var way := Vector3(rel.x / l, 0.0, rel.y / l).rotated(Vector3.UP, yaw)
+	var share := minf(1.0, (l - SCOUT_DEAD) / (1.0 - SCOUT_DEAD))
+	return way * maxf(0.0, _cast_room(Vector2(way.x, way.z), 0.0)) * share
 
-func _tick_scout(delta: float, p: Vector3, mouse_lead: bool) -> void:
+func _tick_scout(delta: float, mouse_lead: bool) -> void:
 	var on := scout_on and mouse_lead
 	if on:
-		var cur := mouse_on_plane(p.y)
-		scout_pan = scout_to(Vector3(cur.x - p.x, 0.0, cur.z - p.z))
+		var vp := get_viewport()
+		var half := vp.get_visible_rect().size * 0.5
+		scout_pan = scout_to((vp.get_mouse_position() - half) / half)
 	var secs := float(SCOUT["ease_in_s"] if on else SCOUT["ease_out_s"])
 	scout_k = lerpf(scout_k, 1.0 if on else 0.0, 1.0 - exp(-ScoutLook.rate(secs) * delta))
 	if scout_k < 0.001:
@@ -239,7 +242,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
-	_tick_scout(delta, p, mouse_lead)
+	_tick_scout(delta, mouse_lead)
 	focus = base + pan.lerp(cast_pan, cast_k).lerp(scout_pan, scout_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
