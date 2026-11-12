@@ -36,6 +36,7 @@ var watch: Ent = null         # the first tow on this body, as the host's mirror
 var seen := {}
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
+var guest_bin := GODOT       # what starts the guest (--tele-net-shots: the running binary, a GPU worker has no wrapper)
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
@@ -68,7 +69,7 @@ func _host_up() -> Hunter:
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
 	var cmd := "cd '%s' && %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, guest_flag, port, dir.path_join("guest.log")]
+		ProjectSettings.globalize_path("res://"), guest_bin, guest_flag, port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
 	var t0 := Time.get_ticks_msec()
