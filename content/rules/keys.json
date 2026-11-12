@@ -12,8 +12,7 @@
   "tonic_odds": 0.7,
   "table": "chest",
   "tier_bonus": [0, 0, 1],
-  "rift_key_min_bonus": 2,
-  "rift_key_odds": 0.35,
+  "soul_ember_min_bonus": 2,
   "soul_ember_odds": 0.3,
   "creak": ["chest_creak_plain", "chest_creak_rich", "chest_creak_grand"],
   "creak_doc": "The lid's sound as it opens, by the chest's tier: its rarity bonus (ChestLoot.rarity_bonus: the region's bonus, a dangerous area's step and the match tier's). The last one plays for anything richer."

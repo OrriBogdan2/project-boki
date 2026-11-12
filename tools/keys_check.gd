@@ -131,7 +131,8 @@ func _fewer() -> void:
 			"%d of %d spots" % [tr.chests.size(), tr_spots])
 	tr.queue_free()
 	var tu: Match = await build(5, {"tutorial": true, "teams": 1})
-	ok("tutorial: exactly one chest, the chest step's", tu.chests.size() == 1 and tu.chests[0].get("tut", false),
+	# (ext/tutorial-abilities dropped the chest step, so the tutorial island has no chest at all)
+	ok("tutorial: no chests (the tutorial has no chest step)", tu.chests.is_empty(),
 			"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()])
 	tu.queue_free()
 	await main.get_tree().process_frame
@@ -201,11 +202,13 @@ func _chest_and_keys() -> void:
 	var K: KeyRun = m.keys
 	var car: Mob = K.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
 	var before := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+	var bonus0 := K.bonus_given      # (the death may also roll a bonus key: KeyBonus)
 	car.hurt(99999.0, P, {"src": "shot"})
 	var after := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+	var bonus := K.bonus_given - bonus0
 	ok(
-			"a carrier drops its key when it dies", after == before + 1 and not KeyCarry.carries(car),
-			"%d -> %d" % [before, after])
+			"a carrier drops its key when it dies", after == before + 1 + bonus and not KeyCarry.carries(car),
+			"%d -> %d (+%d bonus)" % [before, after, bonus])
 	m.queue_free()
 	await main.get_tree().process_frame
 
@@ -229,7 +232,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	var still_there: bool = ours.call().size() == 1
 	var held := R.chest_keys
 	ok("a full stack (%d) leaves the key on the ground" % cap, still_there and held == cap, "keys %d" % held)
-	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
+	ok("belt adapter: count", KeyChest.count(R, "chest") == cap)
 	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
 	R.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
