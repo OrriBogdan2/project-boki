@@ -79,13 +79,13 @@ func _breah_lmb() -> void:
 	await _reset(7.0)
 	_aim(T.pos)
 	var tap := func(t: float): P.inp["fire"] = t < 0.06
-	var marks := [[0.36, "full", "lmb_boulder_a", "Boulder (LMB tap) as it lands: the blue flash and debris", _on_target],
+	var marks := [[0.36, "full", "lmb_boulder_a", "Boulder (LMB tap) landing: blue flash, debris", _on_target],
 		[0.42, "full", "lmb_boulder_b", "Boulder burst, a few frames on", _on_target]]
 	await _go(0.7, tap, marks)
 	await _reset(2.4)
 	_aim(T.pos)
 	var hold := func(t: float): P.inp["fire"] = t < 0.95
-	marks = [[1.0, "full", "lmb_punch_a", "Punch (LMB hold and release) on the hit frame: the blue flash and debris", _on_target],
+	marks = [[1.0, "full", "lmb_punch_a", "Punch (LMB hold, release) hit frame: blue flash, debris", _on_target],
 		[1.06, "full", "lmb_punch_b", "Punch hit, a few frames on", _on_target],
 		[1.14, "full", "lmb_punch_c", "Punch hit, settling", _on_target]]
 	await _go(1.4, hold, marks)

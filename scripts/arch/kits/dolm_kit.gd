@@ -491,7 +491,7 @@ func _punch(k: float) -> void:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
 ## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
-## short spray of stone and sparks thrown on along the punch, sized by the lane's half width, bigger the longer she held.
+## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	vfx("punch_hit", at, dir, {"r": float(lmb_def()["punch"]["width"]) * 0.5, "k": k})
 
