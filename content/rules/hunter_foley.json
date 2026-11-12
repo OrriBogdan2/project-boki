@@ -16,6 +16,7 @@
   "gunslinger": {"note": "Vex: brass ammo strap and the coin chain jingle", "step_db": 0.0, "dash_db": 0.0},
   "mage": {"note": "Sparkle: copper coils at the wrists spit static", "step_db": -1.0, "dash_db": 0.0},
   "ostra": {"note": "Motley: tiny jester bells and a flick of cards", "step_db": 0.0, "dash_db": 0.0},
-  "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0}
+  "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0},
+  "gil": {"note": "Gil: potion vials clink in his bag, a wet slap of robe hem", "step_db": 1.0, "dash_db": 0.0}
  }
 }

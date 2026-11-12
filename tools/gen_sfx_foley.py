@@ -120,9 +120,17 @@ def tender(dash, i):
     return mix(tink * 0.5, drip * 0.35, bpf(noise(d), 1500, 6000) * env(N(d), 0.01, d * 0.3) * (0.4 if dash else 0.15))
 
 
+# Gil: potion vials clinking in his bag, a wet slap of robe hem (he was a fish).
+def gil(dash, i):
+    d = 0.45 if dash else 0.24
+    vial = at(chime(1500 + 110 * i, 0.2, 0.07, ((1.0, 1.0), (2.4, 0.3))), 0.015) * (0.6 if dash else 0.4)
+    slosh = bpf(noise(d), 400, 2200) * env(N(d), 0.02, d * 0.4) * (0.7 if dash else 0.45)
+    return mix(vial, slosh, at(tick(2200 + 120 * i, 0.04), 0.045) * 0.35)
+
+
 HUNTERS = {'dredge': dredge, 'bulwark': bulwark, 'rimewright': rimewright, 'juggernaut': juggernaut, 'ashwick': ashwick,
            'thief': thief, 'archer': archer, 'dolm': dolm, 'gunslinger': gunslinger, 'mage': mage, 'ostra': ostra,
-           'tender': tender}
+           'tender': tender, 'gil': gil}
 
 if __name__ == '__main__':
     for arch, fn in HUNTERS.items():
