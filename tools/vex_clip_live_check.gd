@@ -40,6 +40,37 @@ func _shown(h: Hunter) -> int:
 			n += 1
 	return n
 
+## Owner 11-08 item 17: a dash pressed in the air is her tucked barrel roll with a lime fire ribbon, never the
+## ground skid, and once she lands the roll gives way to the landing.
+func _air_dash(m: Match, P: Hunter, home: Vector3) -> void:
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, -1)
+	P.pos.y = home.y + 2.5
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	_frame(m, [P])
+	P.do_dash()
+	var seen := {}
+	var burned := 0
+	var after_land := ""
+	for f in 90:
+		_frame(m, [P])
+		var c := _clips(P)
+		seen[c.cur] = true
+		burned += int(not (P.ak as GunslingerKit).fire.is_empty())
+		if P.grounded and after_land == "" and f > 2:
+			for i in 3:
+				_frame(m, [P])
+			after_land = _clips(P).cur
+	P.inp["move"] = Vector2.ZERO
+	P.teleport(home)
+	for f in 60:
+		_frame(m, [P])           # (standing still again: the next move plays full-body)
+	ok(seen.has("dash_ex") and not seen.has("dash"), "an air dash rolls, no skid (clips %s)" % str(seen.keys()))
+	ok(burned >= 5, "the roll burns a lime fire ribbon (%d frames)" % burned)
+	ok(after_land != "dash_ex", "the roll gives way once she lands (clip after: %s)" % after_land)
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
@@ -86,6 +117,7 @@ func run(main: Node) -> void:
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
+	_air_dash(m, P, home)
 	# RMB tap: the fixed firing point is found and sits ahead of her on the aim, right at the press
 	var fire := WardenGlb.anchor(P.model, "launcher_fire")
 	ok(fire != null and WardenGlb.anchor(P.model, "launcher_muzzle") != null, "the launcher's two FX points are found")
