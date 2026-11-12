@@ -46,12 +46,14 @@ func _frames(secs: float) -> void:
 func _set_passive(k: Kin, amount: float) -> void:
 	k.ks.carry_passives = [{"stat": STAT, "amount": amount, "category": "defence"}]
 
-## A rival goes down and the thief takes its wisp.
+## A rival goes down and the thief takes its wisp. The thief stands on the wisp's far side once the knock slide
+## has settled: within the foe's revive radius the stomp prompt wins over the grab (Match._update_interact).
 func _steal_from(thief: Hunter, foe: Hunter) -> Kin:
 	m.knock(foe, thief, {})
-	_frames(0.1)
+	_frames(0.5)
 	var k: Kin = foe.kin
-	thief.teleport(Vector3(k.pos.x + 0.5, thief.pos.y, k.pos.z))
+	var away := Vector3(k.pos.x - foe.pos.x, 0.0, k.pos.z - foe.pos.z).normalized()
+	thief.teleport(Vector3(k.pos.x, thief.pos.y, k.pos.z) + away * 0.5)
 	thief.inp["interact"] = true
 	_frames(0.7)
 	thief.inp["interact"] = false
