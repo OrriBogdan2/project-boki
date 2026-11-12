@@ -34,10 +34,13 @@ void vertex() {
 	}
 }
 
-// Two dot eyes and a small smile, a few centimetres across on a 0.3 m body.
+// Two dot eyes and a small smile, a few centimetres across on a 0.3 m body, turned FACE_TILT radians up
+// the front so the game camera, looking steeply down, sees them.
+const float FACE_TILT = 0.5;
 float face(vec3 d) {
-	float eyes = max(step(0.993, dot(d, normalize(vec3(-0.27, 0.16, 0.95)))),
-		step(0.993, dot(d, normalize(vec3(0.27, 0.16, 0.95)))));
+	d = vec3(d.x, d.y * cos(FACE_TILT) - d.z * sin(FACE_TILT), d.y * sin(FACE_TILT) + d.z * cos(FACE_TILT));
+	float eyes = max(step(0.989, dot(d, normalize(vec3(-0.27, 0.16, 0.95)))),
+		step(0.989, dot(d, normalize(vec3(0.27, 0.16, 0.95)))));
 	float smile = step(abs(d.y - (-0.08 + 2.2 * d.x * d.x)), 0.014) * step(abs(d.x), 0.1) * step(0.0, d.z);
 	return max(eyes, smile);
 }

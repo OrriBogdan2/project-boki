@@ -19,7 +19,7 @@ const BURST_T := 1.1           # s of the knock burst over someone who just went
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
 const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
-const WISP_OFFSET := 1.45      # m over the feet: a downed Hunter's plate sits on their Wisp, over its plume
+const WISP_OFFSET := 2.1       # m over the feet: a downed Hunter's plate sits on their Wisp, at its plume's tip
 const PROMPT := "JUMP TO REVIVE"   # under a downed teammate's plate when you can bring them back (DownedMarks.cued)
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}

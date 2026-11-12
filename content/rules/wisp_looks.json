@@ -1,5 +1,5 @@
 {
-	"_doc": "Wisp skins (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into, a chubby round body sitting on the ground with a tiny face, under a see-through plume in the viewer's relation colour (SideColor: you green, your squad blue, rivals red). Add a skin = add an entry under 'looks'; any key left out comes from 'default'. A skin is chosen by its id in Save.d['look']['wisp']. A skin changes the body only: the plume and the rim always carry the relation colour, so every skin reads the same at a glance. body: radius and squash (height over width) of the round body, sunk 'sink' metres into the ground. core: 'color' the body, 'shade' its underside, 'face' the eyes and mouth (hex strings), 'style' plain, glitch (hue bands sliding, rows jumping sideways) or ember (cracks glowing 'glow_col' under a dark crust), rim_width the fraction of the outline in the relation colour. plume: height and width in metres over the body's middle, alpha how solid its heart is, speed how fast it licks upward. bob is the breathing squash (fraction), drag how far the body trails behind the hunter, settle the seconds it takes to catch up (heavy), lean the tilt in radians at full drag. Times in seconds, sfx names from Sfx.NAMES, hum.db the hum's level.",
+	"_doc": "Wisp skins (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into, a chubby round body sitting on the ground with a tiny face, under a see-through plume in the viewer's relation colour (SideColor: you green, your squad blue, rivals red). Add a skin = add an entry under 'looks'; any key left out comes from 'default'. A skin is chosen by its id in Save.d['look']['wisp']. A skin changes the body only: the plume and the rim always carry the relation colour, so every skin reads the same at a glance. body: radius and squash (height over width) of the round body, sunk 'sink' metres into the ground. core: 'color' the body, 'shade' its underside, 'face' the eyes and mouth (hex strings), 'style' plain, glitch (hue bands sliding, rows jumping sideways) or ember (cracks glowing 'glow_col' under a dark crust), rim_width the fraction of the outline in the relation colour. plume: height and width in metres, rising up the screen from the body's bottom edge, alpha how solid its heart is, speed how fast it licks upward. bob is the breathing squash (fraction), drag how far the body trails behind the hunter, settle the seconds it takes to catch up (heavy), lean the tilt in radians at full drag. Times in seconds, sfx names from Sfx.NAMES, hum.db the hum's level.",
 	"default": "default",
 	"looks": {
 		"default": {
@@ -7,7 +7,7 @@
 			"desc": "A plain cream soul with a tiny face, under a plume in its side's colour.",
 			"core": {"style": "plain", "color": "f1e8d6", "shade": "b9a98f", "face": "2b2330", "glow_col": "ffffff", "rim_width": 0.18},
 			"body": {"radius": 0.3, "squash": 0.88, "sink": 0.03},
-			"plume": {"height": 1.15, "width": 0.8, "alpha": 0.6, "speed": 1.0},
+			"plume": {"height": 1.3, "width": 1.2, "alpha": 0.85, "speed": 1.0},
 			"bob": 0.04,
 			"bob_hz": 0.45,
 			"drag": 0.45,

@@ -93,7 +93,8 @@ static func recolour(node: Node3D, side_col: Color) -> void:
 	(node.get_meta("mat") as ShaderMaterial).set_shader_parameter("rim_col", side_col)
 	(node.get_meta("plume") as ShaderMaterial).set_shader_parameter("col", side_col)
 
-## The flame: one upright quad that faces the camera, its base a little under the body's middle.
+## The flame: one quad that faces the camera (the shader turns it), its base at the body's bottom edge on
+## screen, with the body cut out of it so the body sits in the flame.
 static func _plume(look: Dictionary, root: Node3D) -> MeshInstance3D:
 	var spec: Dictionary = look["plume"]
 	var body: Dictionary = look["body"]
@@ -101,6 +102,9 @@ static func _plume(look: Dictionary, root: Node3D) -> MeshInstance3D:
 	mat.shader = PLUME
 	mat.set_shader_parameter("alpha", float(spec["alpha"]))
 	mat.set_shader_parameter("speed", float(spec["speed"]))
+	mat.set_shader_parameter("rise", float(spec["height"]) * 0.5 - float(body["radius"]) * float(body["squash"]))
+	mat.set_shader_parameter("lift", float(body["radius"]))
+	mat.set_shader_parameter("hole", float(body["radius"]))
 	var quad := QuadMesh.new()
 	quad.size = Vector2(float(spec["width"]), float(spec["height"]))
 	var plume := MeshInstance3D.new()
@@ -108,7 +112,6 @@ static func _plume(look: Dictionary, root: Node3D) -> MeshInstance3D:
 	plume.mesh = quad
 	plume.material_override = mat
 	plume.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	plume.position.y = float(spec["height"]) * 0.5 - float(body["radius"]) * float(body["squash"]) * 0.5
 	root.set_meta("plume", mat)
 	return plume
 
