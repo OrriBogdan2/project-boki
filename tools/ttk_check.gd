@@ -6,7 +6,7 @@ extends "res://tools/archetype_check.gd"
 ## cooldown or charge is back, LMB between. Each at rank 0 (unspent, slot_lv 1) and max.
 ## Rows outside RATIO_LO..RATIO_HI fail unless OVERRIDES cites the owner decision. --write updates docs/TTK.md.
 
-const RATIO_LO := 0.85     # ours / source time to knock: the parity bar, +-15% (owner digest 1112)
+const RATIO_LO := 0.85     # ours / source time to knock: the parity bar, +-15% either side
 const RATIO_HI := 1.15
 const SOURCE_DR := 0.2     # Common armour reduction (docs/SUPERVIVE_DATA.md section 3; its durability outlasts it)
 const OUR_HP := 154.0      # mean of the 12 Hunters' health (light 124, medium 145, heavy 193)
