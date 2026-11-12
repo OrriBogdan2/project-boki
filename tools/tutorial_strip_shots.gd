@@ -23,7 +23,8 @@ func _shot(what: String) -> void:
 func _on_screen(sv: StripView) -> Rect2:
 	var r := sv.rect()
 	var xf := sv.get_global_transform_with_canvas()
-	return Rect2(xf * r.position, r.size * xf.get_scale())
+	var k := tree.root.content_scale_factor      # Settings scales the node UI with the window height
+	return Rect2(xf * r.position * k, r.size * xf.get_scale() * k)
 
 func _check(what: String, r: Rect2, notice: Rect2) -> void:
 	var sz := Vector2(win)
