@@ -12,8 +12,9 @@ const END := "<!-- table:end -->"
 const HUNTER_COLS := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp",
 	"strafe", "crouch", "upper"]
 const BOKI_COLS := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp"]
-## A kit move key with one of these words is that state's clip (HunterAnim poses the rest).
-const DASH_RE := "dash|skate|vault"
+## A kit move key with one of these words is that state's clip (HunterAnim poses the rest). The dash also names the
+## Shift moves called for their motion: Cinder's ram and poof, Lace's roll and air flick.
+const DASH_RE := "dash|skate|vault|as_leap|lw_hop|pin_roll|pin_flick"
 const CAST_RE := "_e$|_e_|aim|call|seed|well|swap|wall|freeze|beam|spear|roar|cloak|mend|flare|hearth|raise|sense" \
 	+ "|spine|encore|bola|ult|rime|stoke|xform"
 
