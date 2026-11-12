@@ -351,7 +351,7 @@ var _flash_col := Color.WHITE
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
-## Puts the body's tint on its materials: the hit flash (white), else the wash (Spirit Walk), else the DoT tint (DotLook).
+## Tints the body: the hit flash (white), else the wash (Spirit Walk), else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
 	var fc := Color.WHITE
