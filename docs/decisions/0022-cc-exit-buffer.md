@@ -36,3 +36,10 @@ So the same rule holds: `DashFlow._route_lock` holds RMB and E (`LOCK_SLOTS`) th
 (`ArchKit.lock_refuses`, which Kael's E on a held chain passes, owner 113.7) and replays them on the first step
 the lock lets them, at most `Loco.press_buffer` after the press; a lock that runs on past that answers with the deny cue
 then. X stays the ult's own recast, Q's glove goes through. Check `--cast-lock-buffer-check`.
+
+**Holds and the owner's exception (ext/feel-input-batch, 2026-11-12).** `--cast-lock-buffer-check` part 2 presses E
+0.1 s before every RMB hold is let go (Lace, Kael, Cinder, Tenzo, Neve, Sparkle, Gil hold their RMB here): all seven
+cast E inside the charge, nothing is lost, so a hold wind-up is no lock and nothing holds the press. Part 3 is owner
+item 66: in Cinder's Flue Flight LMB, RMB and Shift are ignored, not buffered (nothing inside, nothing on landing;
+`AshwickJet.lock_inputs` drops them before DashFlow's lock route, which only holds what `ArchKit.lock_refuses`
+refuses), and E works inside it.
