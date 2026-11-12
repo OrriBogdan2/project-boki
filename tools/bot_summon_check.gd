@@ -5,6 +5,7 @@ extends RefCounted
 ## bot waits longer than an expert one.
 
 const DT := 1.0 / 60.0
+const FOE_D := 8.0   # m: the duel's rival, inside a bot's early reach (8 m x aggro 1.1)
 const EXPERT := {"abil": 1.0, "react": 0.16, "fire": 1.0, "dmg": 1.0, "aggro": 1.1}
 
 var bad := 0
@@ -32,7 +33,8 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-## A fresh match: one bot with a wisp Boki, the other hunters idle, the foe 8 m from the bot.
+## A fresh match: one bot with a wisp Boki, the other hunters idle, the foe FOE_D from the bot on open
+## ground at its own level.
 func _start(opts := {}) -> void:
 	if m:
 		m.queue_free()
@@ -50,7 +52,7 @@ func _start(opts := {}) -> void:
 			h.ctrl = "idle"
 			h.inp["move"] = Vector2.ZERO
 	foe = m.hunters.filter(func(h: Hunter) -> bool: return h.team != bot.team)[0]
-	foe.pos = bot.pos + Vector3(8, 0, 0)
+	foe.pos = bot.pos + _open_side() * FOE_D
 	foe.prev = foe.pos
 	bot.ai["diff"] = EXPERT
 	bot.ai["skill"] = 0.9
@@ -58,6 +60,19 @@ func _start(opts := {}) -> void:
 	first_at = -1.0
 	_prev_left = 0.0
 	pin = 0.0
+
+## The first of 8 directions from the bot with a flat, clear walk FOE_D long, so the rival is in sight and on
+## the bot's own level (the map around the seed's spawn changes with the world; +x alone put the rival on a
+## ledge out of sight in 0.24.6, and no bot fights what it cannot see).
+func _open_side() -> Vector3:
+	var from := Vector2(bot.pos.x, bot.pos.z)
+	for i in 8:
+		var dir := Vector3.RIGHT.rotated(Vector3.UP, TAU * i / 8.0)
+		var to := from + Vector2(dir.x, dir.z) * FOE_D
+		if KinPath.clear_line(m.world, from, to, 0.4, true):
+			return dir
+	ok(false, "setup: open ground %.0f m round the bot" % FOE_D)
+	return Vector3.RIGHT
 
 func _frames(secs: float) -> void:
 	var t := 0.0
