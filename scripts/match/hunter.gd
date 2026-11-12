@@ -245,6 +245,7 @@ var nth_n := 0                # shots since the weapon's "every Nth" bonus
 func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, name_txt: String, control: String, kit := {}) -> void:
 	setup(match_node, id)
 	kind = "hunter"
+	loco.on_exit(Loco.S.GLIDING, glide_lift.hand_over.bind(self))
 	team = team_id
 	cls = class_id if Data.CLASSES.has(class_id) else "medium"
 	cdat = Data.CLASSES[cls]
@@ -879,10 +880,10 @@ func _loco_state() -> int:
 		return Loco.S.KNOCKED
 	if roll_t > 0.0:
 		return Loco.S.DASHING
+	if not lfloat.is_empty() or mantling():
+		return Loco.S.MANTLING     # (a ledge caught from the glider: GlideLift.hand_over folds it)
 	if gliding:
 		return Loco.S.GLIDING
-	if not lfloat.is_empty() or mantling():
-		return Loco.S.MANTLING
 	return Loco.S.GROUNDED if grounded else Loco.S.AIRBORNE
 
 func _open_glider() -> void:
@@ -891,7 +892,7 @@ func _open_glider() -> void:
 	gliding = true
 	_glide_armed = false
 	grounded = false
-	_glider_sfx("open")
+	glider_sfx("open")
 	vel.y = Loco.glide_start(vel.y)
 	glide_lift.open_kick(self)
 
@@ -907,7 +908,7 @@ func _glide_boost_fx() -> void:
 		m.cam.pull_back(0.12)
 
 ## The glider's open/close sound for this hunter's glider skin (quieter, and positional, for everyone else).
-func _glider_sfx(which: String) -> void:
+func glider_sfx(which: String) -> void:
 	var skin := "classic"
 	if model and model.has_node("Rig/Torso/Glider"):
 		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
@@ -2395,7 +2396,7 @@ func _deploy() -> void:
 	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
-	_glider_sfx("open")
+	glider_sfx("open")
 
 ## Using a heal in the air: the glider folds (it can't be held while you drink; a fresh glide press
 ## opens it after a beat and spills what's left). The opening drop never gets here (AirLimits).
@@ -2403,7 +2404,7 @@ func _fold_for_action() -> void:
 	if gliding and not dropping:
 		gliding = false
 		glide_cd = maxf(glide_cd, 0.4)
-		_glider_sfx("close")
+		glider_sfx("close")
 
 ## Knocked out of a drink, a repair or a box revive: it spills (nothing is used up) and everyone sees it.
 func _interrupt_consume() -> void:
@@ -2469,7 +2470,7 @@ func _update_glide(dt: float) -> void:
 		if not want or not can:
 			gliding = false
 			glide_off_t = 0.0 if want == false and can else 9.0     # (feathering) a let-go, not a knock
-			_glider_sfx("close")
+			glider_sfx("close")
 		elif not in_current:
 			# heat builds faster while the glider is lifting you out of the abyss
 			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
@@ -2490,7 +2491,7 @@ func _update_glide(dt: float) -> void:
 		if below_lip:
 			m.sfx("glide", pos, -2.0, 1.4)
 			add_stat("feathers")
-		_glider_sfx("open")
+		glider_sfx("open")
 		vel.y = Loco.glide_start(vel.y)
 		glide_lift.open_kick(self)
 
@@ -2614,7 +2615,6 @@ func _try_ledge_grab(dt: float) -> void:
 	grap = {}
 	grap_cd = LEDGE_CD
 	push_t = 0.0
-	gliding = false
 	roll_t = 0.0
 	m.sfx("grab", pos, -8.0, 1.2)
 	m.on_ledge_grab(self)

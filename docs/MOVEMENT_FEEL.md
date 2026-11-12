@@ -426,6 +426,29 @@ rest of the dash and resume it on top (more than the source's 0.6x would come ov
 
 The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
+## A glide into a rim (`--mantle-check` glide-rim rows; DECISIONS: ledges always responsive)
+A glider flying head-on into a terrace face, keys pushing in, the glider opened by a press as a player's keys do.
+"Rim" is how far the top is above the glider as it comes in reach of the face (the probe starts it higher by the
+glider's sink on the way in). Full is cruise (5 m/s), slow is overheated (half). "t" runs from reach to over the
+top. The same on origin/main 272368589 before this change and after it: the outcomes were already the source's,
+only the hand-over changed (below).
+| Hunter | rim 0.5m full / slow | rim 1.0m full / slow | rim 1.8m full / slow | glider |
+| Lace (archer, tall climb) | mantle 0.32s / 0.42s | mantle 0.53s / 0.62s | mantle 0.48s / 0.50s | folds at the catch, stays shut |
+| Kael (juggernaut, tall climb) | mantle 0.33s / 0.42s | mantle 0.53s / 0.62s | mantle 0.48s / 0.50s | folds at the catch, stays shut |
+| Vex (gunslinger) | mantle 0.33s / 0.42s | mantle 0.53s / 0.62s | fall / fall | in reach: folds; 1.8m: stays open |
+| Albert (bulwark) | mantle 0.33s / 0.42s | mantle 0.53s / 0.62s | fall / fall | in reach: folds; 1.8m: stays open |
+- Over the top at 4.6-4.8 m/s from either glide speed (the mini-mantle's max(0.6x run, 3.5 m/s) with your keys
+  in). No bump and no slide head-on: a rim in reach (`MANTLE_REACH` 1.5m, +0.9m for the tall climbers) always
+  catches; above it the glider stays open and sinks down the face ("fall").
+- Source: the suction reaches 1.5m (MantleSuctionUpwardsForceHeightMax) and lifts at 2.5 m/s (its Z speed cap),
+  so a glider's rise is slower than a jump's, which brings its own up speed; bCanWallJump is the tall climb.
+  The footage (briefs/supervive-data/MANTLE_185b.md) has a glide up onto a low rim with no climb pose, rim to top
+  ~0.2s; briefs/hero-ref has no glide-to-ledge frames.
+- **The hand-over is a Locomotion edge** (`GlideLift.hand_over`, Hunter.loco's GLIDING exit hook): a caught ledge
+  outranks the glider in `Hunter._loco_state` (the farm avatar already ranked it so), and leaving GLIDING for
+  MANTLING folds the glider there, with its fold sound (the grab used to clear the flag silently), and no
+  feathering after. A fresh glide press mid-rise still opens it again. A held key (bots, scripted input) can
+  reopen it over the lip; a player's press-only keys never do.
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

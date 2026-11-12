@@ -1,6 +1,7 @@
 class_name GlideLift
 extends RefCounted
-## Per-hunter glider spring and float over the abyss, and when a ledge counts as yours to catch.
+## Per-hunter glider spring and float over the abyss, when a ledge counts as yours to catch, and the glider's
+## hand-over to the ledge rise that catches it.
 ## Opening the glider deep under an island's lip springs you up once per lift; the lift then floats
 ## over the lip under low gravity (Hunter.abyss_lift_vy does the climb itself). High over the ground
 ## the glider pulls you down toward HunterMove.glide_height. The swoop [game data]: fall that the glider's own
@@ -88,3 +89,13 @@ func open_kick(h: Hunter) -> void:
 ## stepping back up a terrace you just left.
 static func airborne_long(h: Hunter) -> bool:
 	return h.gliding or h.glide_off_t < Hunter.FEATHER_KEEP or h.air_t > LEDGE_AIR_T
+
+## Leaving GLIDING (Hunter.loco's exit hook): into a ledge rise (MANTLING) the glider hands over as in the
+## source's mantle out of a glide. It folds with its sound, no feathering after (the rise owns your speed, and
+## MantleCarry brings the glide's over the lip), and a fresh glide press mid-rise opens it again (Hunter._ledge_rise).
+func hand_over(to: int, h: Hunter) -> void:
+	if to != Loco.S.MANTLING:
+		return
+	h.gliding = false
+	h.glide_off_t = 9.0
+	h.glider_sfx("close")
