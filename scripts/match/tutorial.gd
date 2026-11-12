@@ -146,6 +146,13 @@ func _add_pad(id: String) -> void:
 	m.add_child(lab)
 	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab})
 
+## The sign over a gap step's pad (null for a step without one).
+func pad_sign(sid: String) -> Label3D:
+	for pd in _pads:
+		if pd["id"] == sid:
+			return pd["label"]
+	return null
+
 # ------------------------------------------------------------------ each step
 func id() -> String:
 	return String(steps()[step][0]) if step >= 0 and step < steps().size() else ""
