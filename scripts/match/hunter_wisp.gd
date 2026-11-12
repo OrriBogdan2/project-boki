@@ -156,7 +156,8 @@ static func _pose_fall(h: Hunter, st: Dictionary) -> void:
 	var node := st["node"] as Node3D
 	var from := _slide_at(st, 1.0)
 	var ease_up := 1.0 - (1.0 - rise) * (1.0 - rise)
-	node.position = Vector3(from.x * (1.0 - rise), lerpf(RISE_FROM, float(look["hover"]), ease_up), from.z * (1.0 - rise))
+	var y := lerpf(RISE_FROM, float(look["hover"]), ease_up)
+	node.position = Vector3(from.x * (1.0 - rise), y, from.z * (1.0 - rise))
 	node.scale = Vector3.ONE * lerpf(0.1, POP_FROM, rise)
 	_set_glow(node, 1.0 + FLASH_BOOST * rise, rise)
 	_fade_hero(st, smoothstep(FLOOR_K, 1.0, k))

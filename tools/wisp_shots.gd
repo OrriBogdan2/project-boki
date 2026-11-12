@@ -101,8 +101,9 @@ func _strip(id: String) -> void:
 		await _go(STRIP_DT)
 	var file := "strip_%s.jpg" % id
 	sheet.save_jpg(dir.path_join(file), 0.9)
-	var rows := "top, the knock to +%.2f s (the %s beat, the Wisp takes over at +%.2f s); bottom, the revive to +%.2f s" % [
-			STRIP_DT * (FALL_CELLS - 1), P.cls, HunterWisp.BEAT[P.cls]["t"], STRIP_DT * (RISE_CELLS - 1)]
+	var top := "top, the knock to +%.2f s (the %s beat, the Wisp takes over at +%.2f s)" % [
+			STRIP_DT * (FALL_CELLS - 1), P.cls, HunterWisp.BEAT[P.cls]["t"]]
+	var rows := "%s; bottom, the revive to +%.2f s" % [top, STRIP_DT * (RISE_CELLS - 1)]
 	lines.append("%s: %s, every %.2f s: %s" % [file, id, STRIP_DT, rows])
 
 ## The frame on screen now, cropped round the hero's middle (through the model: it leans to the camera), into the

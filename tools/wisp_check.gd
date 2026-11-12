@@ -2,7 +2,8 @@ extends RefCounted
 ## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
 ## a bot teammate and the tutorial: down a hero, it plays the knocked-down beat (on screen for its weight's
 ## HunterWisp.BEAT time: staggered along the hit's push on its hit clip, down on a knee, its death clip to the
-## floor, then fading while the Wisp rises out of it; downed from the first frame), then the hero model hides, the Wisp trails when it moves, a revive grows the
+## floor, then fading while the Wisp rises out of it; downed from the first frame), then the hero model hides,
+## the Wisp trails when it moves, a revive grows the
 ## hero back as it stands up (the fall backwards) and frees the Wisp, a revive before the puff only stands it up,
 ## and a bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
 ## look data: every look has all its keys and real sounds, an unknown id gives the default Wisp, a look
@@ -161,12 +162,14 @@ func _fall(p: Hunter, tag: String, stand: float) -> void:
 		return
 	var beat: Dictionary = HunterWisp.BEAT[p.cls]
 	var timed := absf(t - float(beat["t"])) <= DT * 3.0
-	ok(timed and shown and forward, tag + "the %s beat: on screen %.2f s (want %.2f) before the hero hides" % [p.cls, t, beat["t"]])
+	var beat_row := "the %s beat: on screen %.2f s (want %.2f) before the hero hides" % [p.cls, t, beat["t"]]
+	ok(timed and shown and forward, tag + beat_row)
 	var sd: Dictionary = clips.d["states"]
 	var hit: Array = [sd["hit"]["front"], sd["hit"]["back"]]
 	var staged: bool = seen.size() == 3 and seen[0] in hit and seen[1] == sd["reviving"] and seen[2] == sd["dead"]
 	ok(staged, tag + "...staggers on its hit clip, kneels, then its death clip: %s" % str(seen))
-	ok(slid >= float(beat["slide"]) * 0.95, tag + "...carried %.2f m along the hit's push (want %.2f)" % [slid, beat["slide"]])
+	var carried := "...carried %.2f m along the hit's push (want %.2f)" % [slid, beat["slide"]]
+	ok(slid >= float(beat["slide"]) * 0.95, tag + carried)
 	var up: bool = rise.size() >= 3 and rise[0] < rise[-1] and float(rise[0]) < 0.5
 	ok(up, tag + "...the Wisp rises out of the body before it hides (%d frames, %s m)" % [rise.size(),
 		"%.2f -> %.2f" % [rise[0], rise[-1]] if not rise.is_empty() else "-"])
@@ -193,8 +196,10 @@ func _weights() -> void:
 		_frames(0.8)
 	var heavy := float(at.get("heavy", 1.0))
 	var light := float(at.get("light", 0.0))
-	ok(heavy < mid - 0.02 and light > mid + 0.02, "the collapse half-way: heavy %.2f gathering, light %.2f crumpling (line %.2f)" % [heavy, light, mid])
-	ok(float(HunterWisp.BEAT["heavy"]["t"]) > float(HunterWisp.BEAT["light"]["t"]), "a heavy beat lasts longer than a light one")
+	var half := "the collapse half-way: heavy %.2f gathering, light %.2f crumpling (line %.2f)" % [heavy, light, mid]
+	ok(heavy < mid - 0.02 and light > mid + 0.02, half)
+	var longer := float(HunterWisp.BEAT["heavy"]["t"]) > float(HunterWisp.BEAT["light"]["t"])
+	ok(longer, "a heavy beat lasts longer than a light one")
 
 ## The rise: on screen from the first frame, the hero stands up off the floor (the death clip running back) and is
 ## up when the pop-out ends.
@@ -210,7 +215,8 @@ func _rise(p: Hunter, tag: String, stand: float) -> void:
 		_frames(DT)
 		t += DT
 	ok(back and HunterWisp.fall_k(p) < 0.0, tag + "the rise plays the fall backwards over %.2f s, then it clears" % t)
-	ok(Vector2(p.model.position.x, p.model.position.z).length() < 0.01, tag + "...back over the hunter, the stagger undone")
+	var off := Vector2(p.model.position.x, p.model.position.z).length()
+	ok(off < 0.01, tag + "...back over the hunter, the stagger undone")
 	var skin := p.model.find_children("*", "GeometryInstance3D", true, false)
 	ok(skin.all(func(g): return (g as GeometryInstance3D).transparency == 0.0), tag + "...and solid again")
 	if clips:

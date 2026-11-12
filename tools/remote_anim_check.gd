@@ -52,7 +52,8 @@ func _host() -> void:
 	for arch in DOWNED:
 		await _downed(G, arch)
 	if "--remote-anim-check=downed" in OS.get_cmdline_user_args():
-		return _finish()
+		await _finish()
+		return
 	for arch in ARCHS:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
@@ -112,6 +113,7 @@ func _downed(G: Hunter, arch: String) -> void:
 	beat = {}
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
+	m.train_t = 0.0      # (the training island stands its player up 2 s into the match: not while watched)
 	m.knock(P, G, {})
 	P.down_hp = 1e6
 	await _run(1.0)
@@ -131,11 +133,13 @@ func _downed(G: Hunter, arch: String) -> void:
 	var host_t := (float(mine["out"]) - float(mine["in"])) / 1000.0
 	var guest_t := (float(theirs["out"]) - float(theirs["in"])) / 1000.0
 	var lag := (float(theirs["in"]) - float(mine["in"])) / 1000.0
-	ok(absf(host_t - want) <= BEAT_TOL, "%s down: the host's %s beat lasts %.2f s (want %.2f)" % [arch, P.cls, host_t, want])
+	ok(absf(host_t - want) <= BEAT_TOL,
+		"%s down: the host's %s beat lasts %.2f s (want %.2f)" % [arch, P.cls, host_t, want])
 	ok(lag <= LAG_TOL + SKEW and absf(guest_t - host_t) <= BEAT_TOL,
 		"%s down: the guest's copy plays it %.2f s later for %.2f s" % [arch, lag, guest_t], info)
 	var slide := float(HunterWisp.BEAT[P.cls]["slide"])
-	ok(float(theirs.get("slide", 0.0)) >= slide * 0.95 and theirs.get("rose", false) and theirs.get("mode", "") == HunterWisp.IN,
+	var whole_beat: bool = theirs.get("rose", false) and theirs.get("mode", "") == HunterWisp.IN
+	ok(float(theirs.get("slide", 0.0)) >= slide * 0.95 and whole_beat,
 		"%s down: on the guest it staggers %.2f m (want %.2f), the Wisp rises out, then takes over" % [
 		arch, float(theirs.get("slide", 0.0)), slide], info)
 
