@@ -206,7 +206,7 @@ func slam(c: float, at_feet: bool) -> void:
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
-		var air: bool = not f.grounded or (f is Hunter and (f as Hunter).gliding)
+		var air := f is Hunter and (not (f as Hunter).grounded or (f as Hunter).gliding)
 		var o := {"src": "abil", "ab": "rmb", "kb": away * float(s["kb"]), "lift": 2.0, "heavy": true}
 		if in_core:
 			o["stun"] = lerpf(float(s["stun"][0]), float(s["stun"][1]), c)
@@ -216,7 +216,6 @@ func slam(c: float, at_feet: bool) -> void:
 			if m.world.is_void(f.pos.x, f.pos.z): d2 += float(s["dunk_void"])
 			o.erase("lift")
 			k.dunks += 1
-			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("9ad0ff"), true)
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))

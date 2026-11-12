@@ -74,7 +74,7 @@ static func climb(h: Hunter, blk: float) -> bool:
 	var rise := blk - h.pos.y
 	if rise <= 0.0 or rise > CLIMB_MAX:
 		return false
-	var w := face(h.m.world.dyn_walls, h.pos, h.hull_r(), blk)
+	var w := face(h.m.world.dyn_walls, h.pos, h.r, blk)
 	if w.is_empty() or (w.get("by") != h and not _ally_hop(w, h)):
 		return false
 	var p2 := Vector2(h.pos.x, h.pos.z)

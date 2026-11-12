@@ -2,24 +2,23 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars, barriers and ledge faces taller than a step-up don't stop her (Hunter.spirit_t,
-## World.occupy's ghost). Through a face she keeps the height she went in at (floor_under), so she comes out
-## the far side at her own level or walks on inside it; walking off a ledge drops her as usual. Damage ends
-## it. If it ends while she is inside something she is put back where she last stood clear on solid ground
-## (never the top of a face she walked into, never over the abyss). Inside something her screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
+## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
+## Damage ends it. If it ends while she is inside a rock or barrier she is put back where she last stood clear;
+## in a ledge she is set on top of it. While she is inside something her own screen goes dark blue; the whole
+## walk her body is darkened (PinFx wash) on every game.
 
 var k: ArcherKit
 var h: Hunter
 var t := 0.0                   # s of Spirit Walk left (0: not walking)
 var total := 0.0               # the length of this walk (the inside boost fades over it)
-var entry := Vector3.ZERO      # the last spot she stood clear of everything, on solid ground
-var safe_in := Vector3.INF     # her Hunter.safe_pos when she went in (kept while inside terrain)
+var entry := Vector3.ZERO      # the last spot she stood clear of everything
 var inside := false
 var walks := 0                 # (checks)
 var snap_backs := 0               # times it ended inside something and put her back (checks)
 var passed := 0                # steps spent inside something (checks)
 var orbs: Array = []           # spirit orbs left where she walked into something: {pos, t, node}
-var granted: Array = []        # others given a Spirit Walk: [hunter, seconds left, last clear spot]
+var granted: Array = []        # others the orbs gave a Spirit Walk to: [hunter, seconds left]
 const ORB_T := 4.0             # s an orb stays
 const ORB_R := 0.9             # m touch radius
 
@@ -30,6 +29,15 @@ func _init(kit: ArcherKit) -> void:
 func active() -> bool:
 	return t > 0.0
 
+## True from the roll until the walk is over, on every game: the owner's walk (spirit_t), or a remote copy's
+## kit move: pin_roll for the roll, pin_walk for the base walk (the wire carries the move, not the rank).
+func phasing() -> bool:
+	if h.spirit_t > 0.0:
+		return true
+	var dd := k.dash_def()
+	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
+	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
+
 func start() -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
@@ -39,7 +47,7 @@ func start() -> void:
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
-	entry = h.pos if h.grounded or h.safe_pos == Vector3.INF else h.safe_pos
+	entry = h.pos
 	inside = false
 	h.spirit_t = t
 	walks += 1
@@ -62,7 +70,7 @@ func _share_with_allies() -> void:
 			continue
 		var walk := walk_time()
 		x.spirit_t = walk
-		granted.append([x, walk, x.pos])
+		granted.append([x, walk])
 		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
@@ -96,76 +104,46 @@ func tick_orbs(dt: float) -> void:
 			if Vector2(x.pos.x - op.x, x.pos.z - op.z).length() < ORB_R + x.r and absf(x.pos.y - op.y) < 1.5:
 				var walk := walk_time()
 				x.spirit_t = walk
-				granted.append([x, walk, x.pos])
+				granted.append([x, walk])
 				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
-		if not is_instance_valid(x):
-			granted.erase(g)
-		elif float(g[1]) <= 0.0:
-			x.spirit_t = 0.0
-			if inside_of(x):
-				x.teleport(g[2])
-				x.vel = Vector3.ZERO
+		if not is_instance_valid(x) or float(g[1]) <= 0.0:
+			if is_instance_valid(x): x.spirit_t = 0.0
 			granted.erase(g)
 		else:
 			x.spirit_t = float(g[1])
-			if clear_ground(x):
-				g[2] = x.pos
 
-func blocked_here() -> bool:
-	return inside_of(h)
-
-## Is x inside something a Spirit Walk passes: a rock, tree or pillar tile, a movement-blocking barrier, or
-## terrain (a ledge face walked into: ground under its body stands above its feet).
-static func inside_of(x: Hunter) -> bool:
-	var w: World = x.m.world
-	if w.is_block(x.pos.x, x.pos.z) or in_terrain(x):
+## terrain: a ledge face still above her feet counts (the walk dims her screen); at the end it does not,
+## she is set on top of it instead (end).
+func blocked_here(terrain := true) -> bool:
+	var w: World = k.m.world
+	if w.is_block(h.pos.x, h.pos.z) or (terrain and w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP):
 		return true
-	var reach := x.hull_r() * 0.6
-	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, x.pos.x, x.pos.z, reach, x.pos.y) > 0.0
-
-static func in_terrain(x: Hunter) -> bool:
-	for o in [Vector2.ZERO, Vector2(x.r, 0), Vector2(-x.r, 0), Vector2(0, x.r), Vector2(0, -x.r)]:
-		if x.m.world.ground_at(x.pos.x + o.x, x.pos.z + o.y) > x.pos.y + World.STEP:
-			return true
-	return false
-
-## A spot to be put back to: clear of everything, standing, not over the abyss.
-static func clear_ground(x: Hunter) -> bool:
-	return x.grounded and not x.over_void() and not inside_of(x)
-
-## The floor under a spirit inside terrain is the height it went in at (Hunter._physics), so it walks through
-## a face at its own level instead of being lifted onto the top.
-static func floor_under(x: Hunter, g: float) -> float:
-	return x.pos.y if x.spirit_t > 0.0 and g > x.pos.y + World.STEP else g
+	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 
 func tick(dt: float) -> void:
 	if t <= 0.0:
 		return
-	if t <= dt:
-		end("time")             # (before t reaches 0: end() skips a walk that is already over)
-		return
 	t -= dt
-	h.spirit_t = t
+	h.spirit_t = maxf(t, 0.0)
 	var was_in := inside
 	inside = blocked_here()
 	if inside and not was_in:
 		_drop_orb(entry)
-		safe_in = h.safe_pos
-	if in_terrain(h) and safe_in != Vector3.INF:
-		h.safe_pos = safe_in            # (Hunter._physics saves where she stands; inside a face isn't safe)
 	# footage 655.55-655.65: the roll goes straight into the crouched walk, no landing beat, so the walk's pose
 	# takes over the moment the travel ends (roll_t) and the roll clip's standing tail (0.24-0.36) never shows
 	if k.anim_id == "pin_roll" and k.m.time - k.anim_at >= float(k.dash_def().get("roll_t", 0.24)):
 		k.play("pin_walk")
 	if inside:
 		passed += 1
-	elif clear_ground(h):
+	else:
 		entry = h.pos
 	k.fx.tint_to(1.0 if inside else 0.0)
 	k.fx.aura_on(clampf(t / 0.3, 0.0, 1.0))
+	if t <= 0.0:
+		end("time")
 
 ## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
@@ -175,7 +153,12 @@ func end(why: String) -> void:
 	h.spirit_t = 0.0
 	k.fx.aura_on(0.0)
 	k.fx.tint_to(0.0)
-	if blocked_here():
+	var top: float = k.m.world.ground_at(h.pos.x, h.pos.z)
+	if top > h.pos.y + World.STEP and not blocked_here(false):
+		h.pos.y = top      # ended mid-climb in a ledge: she stands on top of it, never inside terrain
+		h.vel.y = 0.0
+		h.grounded = true
+	if blocked_here(false):
 		snap_backs += 1
 		h.teleport(entry)
 		h.vel = Vector3.ZERO

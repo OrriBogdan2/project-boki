@@ -1,6 +1,6 @@
 extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
-##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
+##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
@@ -31,10 +31,10 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
-	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
-	ok(counts == [8, 9, 12], "17 health a segment: the classes' 124 -> 8, 145 -> 9, 193 -> 12 (%s)" % str(counts))
-	ok(HudStyle.seg_count(600.0) == 9 and HudStyle.seg_step(600.0) == 68.0,
-		"a huge pool doubles the segment size instead of crowding (600 -> 9 of 68)")
+	var counts := [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)]
+	ok(counts == [4, 6, 12], "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%s)" % str(counts))
+	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0,
+		"a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=plates")
@@ -52,11 +52,11 @@ func run(main_node: Node) -> void:
 	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
 	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp),
 		"the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
-	full.max_hp = 193.0
-	full.hp = 193.0
+	full.max_hp = 300.0
+	full.hp = 300.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 193: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0

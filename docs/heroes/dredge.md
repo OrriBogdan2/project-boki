@@ -10,21 +10,6 @@ Sources (gameplay facts only, written in our own words):
 - The footage reference sheet (frames kept on the local machine): timing, aiming, telegraphs, animation beats.
 - Owner notes: E in the air smashes straight down with the anchor (sync61 playtest); the grab goes through rocks (Nov 2 relay).
 
-## Ranks: tier table (source: Kingpin)
-On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
-and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
-Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
-applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
-ranks in the source or ours. R is left to decision 0022.
-
-| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
-|---|---|---|---|---|---|---|
-| LMB Scattergun | none | none | none | - | - | - |
-| RMB Abyssal Hand (12s; [D] 18s) | -2.5s | -2.5s | -50% cooldown on an enemy hit | 10.3s | 8.7s; a foe hit takes half off | `rmb.refund` at sec rank 3 |
-| Shift Barge (10s; [D] 7s) and air pounce (12.5s; [D] 12.5s) | -1.25s (air -2s) | -1.25s (air -2s) | dashing resets the bloom, shot hits cut the dash cooldown | 8.2s, air 10.5s | 6.4s, air 8.5s; a dash resets the spread, each pellet hit trims 0.25s | `dash.cut`, `dash.air.rank_cut`, the bloom reset at dash rank 3 |
-| E Anchor Drop (7s; [D] 12s) | +20% damage, -2.5s, +0.1s stun | +20% damage, -2.5s, +0.1s stun | +100% damage on a foe over the Abyss, +0.2s stun | 5.5s, damage +20%, stun +0.1s | 4.1s, damage +40%, stun +0.4s in all, double over the Abyss | `e.rank3_stun`, the abyss double at kin rank 3 |
-| Passive Salvage | none | none | none | - | - | - |
-
 ## Scaling
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
@@ -41,21 +26,14 @@ and cooldown numbers that already follow the ratios below. Numbers follow the so
 | RMB, Abyssal Hand | tap | a reaching abyssal arm 11.5m (a 0.2s coil-back (`rmb.windup`, the `dr_throw` clip, cancelled by a stun), then 17 m/s: 0.88s to full reach; was 26 m/s with no coil, 0.44s; owner playtest 11-10: too fast to dodge. The other pulls fly faster: Juggernaut's Warchain 32 m/s to 13m, Thief's Shadow Knife 40 m/s to 14m) to the first foe: it pierces terrain (rocks, props and cliff faces) and drags the foe over it (only a placed wall stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight; he stands braced while he reels, shuffling at 20% of his walk, which still swings them round him; you are Grounded while you reel (no jump or glide, the barge still works). From the throw until the miss or the end of the reel he holds his height (no fall mid-air or over the abyss; `CastHold.hover_slow`), and while the hook flies out he can only walk at 20% speed (`rmb.fly_slow`). Rank 3: a foe it hits takes half the cooldown off. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, scoops wisps, only dash castable; rank 4: -50% cooldown on an enemy hit | heavy bodies (wardens) can't be pulled; a placed wall stops it |
 | Shift, Barge | tap | a quick, short lunge the way you move (3.2m in 0.16s before the global dash feel, about 2.7m in 0.18s after it; 3 charges at 10s that chain 0.22s apart): a monster's low lunge, both hands clawing at the ground ahead and hauling him along, clods of turf thrown back (no burst: the owner's no-explosions-on-dashes rule); it touches nobody (the source's Brute Dash has no hit); in the air (the class air dash) a pounce, claws raked forward, 35% further (3.7m in 0.18s, the dash feel applied once); turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the class air dash. The footage's red burst at the start point is dropped (owner item 8/35) |
 | E, Anchor Drop | tap | on the ground: a hop of about 1 bh (1.8 m) forward along the locked direction (0.14 to 0.34 s), the free fist raised high and glowing brass while the exact 3m, 110 degree cone fills on the ground in front (everyone sees it; the direction locks at the press), then at 0.38s the fist slams down into it: the damage lands on that frame, cracks under the fist and across the area, a crescent sweep, dust and a shake there, a recoil and a slow recovery: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (owner note). Rank 3: double damage on a foe over the abyss and +0.2s stun more. 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), dunks foes over the abyss; rank 4: +100% damage vs foes over the abyss and +0.2s stun | owner note: the air cast is a straight-down smash with a height bonus (the source's rank 4 height bonus stays base). Owner item 33: one clear fist slam with a ground telegraph; the ghost anchor is gone. The footage's forward hop came back in the timing pass (below): the drawn cone is anchored on him and moves with him, so the area drawn at the slam frame is the area hit; `e.hop` = 0 in `dredge.json` turns it off |
-| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
-| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | a no-bloom shot does +66% armour damage |
-| LMB, scattergun | hold/tap | 7 slugs in a 20 degree fan at rest (bloom to 30 at most) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
-| RMB, Abyssal Hand | tap | a reaching abyssal arm 11.5m to the first foe: it pierces terrain (rocks, props and cliff faces) and drags the foe over it (only a placed wall stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight; he stands braced while he reels, shuffling at 20% of his walk, which still swings them round him; you are Grounded while you reel (no jump or glide, the barge still works). From the throw until the miss or the end of the reel he holds his height (no fall mid-air or over the abyss; `CastHold.hover_slow`), and while the hook flies out he can only walk at 20% speed (`rmb.fly_slow`). Rank 3: a foe it hits takes half the cooldown off. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, scoops wisps, only dash castable; rank 4: -50% cooldown on an enemy hit | heavy bodies (wardens) can't be pulled; a placed wall stops it |
-| Shift, Barge | tap | a quick, short lunge the way you move (3.2m in 0.16s before the global dash feel, about 2.7m in 0.18s after it; 3 charges at 10s that chain 0.22s apart): a monster's low lunge, both hands clawing at the ground ahead and hauling him along, clods of turf thrown back (no burst: the owner's no-explosions-on-dashes rule); it touches nobody (the source's Brute Dash has no hit); in the air a pounce, claws raked forward, 35% further (3.7m in 0.18s, the dash feel applied once), on its own 12.5s recharge (2s less per rank, `dash.air.cd`, KIT_PARITY 13); turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the pounce's own air slot (12.5s, per-kit since parity 13; it was the shared class air dash). The footage's red burst at the start point is dropped (owner item 8/35) |
-| E, Anchor Drop | tap | on the ground, planted: the free fist raised high and glowing brass while the exact 3m, 110 degree cone fills on the ground in front (everyone sees it; the direction locks at the press), then at 0.38s the fist slams down into it: the damage lands on that frame, cracks under the fist and across the area, a crescent sweep, dust and a shake there, a recoil and a slow recovery: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (owner note). Rank 3: double damage on a foe over the abyss and +0.2s stun more. 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), dunks foes over the abyss; rank 4: +100% damage vs foes over the abyss and +0.2s stun | owner note: the air cast is a straight-down smash with a height bonus (the source's rank 4 height bonus stays base). Owner item 33: one clear fist slam with a ground telegraph; the footage's forward hop and the ghost anchor are gone (the hop moved the area the telegraph promised) |
 | X, Brass Broadside (ult, level 6) | tap | a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, and it turns with his aim), then two waves 0.6s apart; he walks at 30% speed through the charge and 20% while the waves go (`x.charge_move`, `x.fire_move`, through `CastHold`), always turning to the cursor of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
 | R | | the Boki Merge (not a hero ability) | | |
-| E, Anchor Drop | tap | on the ground, planted: the free fist raised high and glowing brass while the exact 3m, 110 degree cone fills on the ground in front (everyone sees it; the direction locks at the press), then at 0.38s the fist slams down into it: the damage lands on that frame, cracks under the fist and across the area, a crescent sweep, dust and a shake there, a recoil and a slow recovery: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (owner note). Rank 3: double damage on a foe over the abyss and +0.2s stun more. 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), dunks foes over the abyss; rank 4: +100% damage vs foes over the abyss and +0.2s stun | owner note: the air cast is a straight-down smash with a height bonus (the source's rank 4 height bonus stays base). Owner item 33: one clear fist slam with a ground telegraph; the footage's forward hop and the ghost anchor are gone (the hop moved the area the telegraph promised) |
-| R, Brass Broadside (ult, level 6) | tap | a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, and it turns with his aim), then two waves 0.6s apart; he walks at 30% speed through the charge and 20% while the waves go (`x.charge_move`, `x.fire_move`, through `CastHold`), always turning to the cursor of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
-| X | | Fuse with your Boki (not a hero ability) | | |
 
-Rank 2 / 3: the source's upgrades (see Ranks: tier table): Hand -2.5s a tier, barge -1.25s a tier, Anchor -2.5s, +20% damage and
-+0.1s stun a tier. Rank 3 stands for the source's tiers 3 and 4: the Hand takes half its cooldown off on a foe, the barge's pellet
-hits trim 0.25s and a dash resets the spread, the Anchor does double damage on a foe over the abyss and adds 0.2s of stun.
+Rank 2 / 3: -10% cooldown steps (barge -15%). Rank 3 specials follow the source's last tier: the Abyssal Hand takes half its
+cooldown off when it hits a foe; the barge's pellet hits trim 0.25s off the recharge and a dash resets the gun's spread; the
+Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top of its +15% damage and +0.1s stun a rank).
+Mismatch: the source's tiers 2 and 3 are each -2.5s on the Abyssal Hand (-1.25s on the barge, -2.5s +20% damage +0.1s stun on the
+Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3 and 4 together.
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
@@ -69,11 +47,10 @@ the rest are the existing asserts named in "Combinations".
 | LMB | tracking | [F] he turns to the cursor and walks between shots | each volley is fanned on the cursor's direction at its shot; he walks on at the shared firing walk (0.8 of run) | matches ([D] has no firing slow for him; the shared rule stays) |
 | LMB | cadence | [F] shots 2-3 frames apart; card 0.5 s | a volley every 0.5 s while held | matches |
 | LMB | shape | [F] ~7 slugs in a ~30 degree fan (20 rested) that stop at ~3.5 bh whatever the cursor distance and hang as violet dots 0.2-0.4 s; two cone-edge lines, one aim line when idle | 7 slugs, the first volley of a burst on the aim line, then 30 degrees + bloom to 15, stop at 6.3 m (cursor at 2 m asserted), hang 0.26 s as violet dots; the edge lines, folding to one line idle | matches |
-| LMB | shape | [F] ~7 slugs in a ~30 degree fan (20 rested) that stop at ~3.5 bh whatever the cursor distance and hang as violet dots 0.2-0.4 s; two cone-edge lines, one aim line when idle | 7 slugs, 20 degrees at rest + bloom to 30, stop at 6.3 m (cursor at 2 m asserted), hang 0.26 s as violet dots; the edge lines, folding to one line idle | matches |
 | RMB | all | [D] pierces terrain, first target (ally too), scoops wisps; [F] caster Grounded while reeling | as the source (item 31: height held from the throw) | matches |
 | E | all | [F] 0221-0236: wind-up, a hop ~1 bh forward, the slam at ~0.4 s, stun ~1.1 s; ~1.8x a volley | 0.38 s wind-up with the hop, stun 1.1 s, 25 against a 14 volley (1.8x) | matches |
 | Dash | all | [O] 23:40: short, fast, visible dashes in a row (not a blink) | 3.2 m in 0.16 s, a short gap between charges | matches the owner note |
-| R | all | [F] f22-f43: a 1.1 s charge behind a 105 degree fan, two waves 0.6 s apart; [O] item 36: a slow walk through it | as the source with the owner's walk | matches |
+| X | all | [F] f22-f43: a 1.1 s charge behind a 105 degree fan, two waves 0.6 s apart; [O] item 36: a slow walk through it | as the source with the owner's walk | matches |
 
 ## Footage gaps, Nov 9 re-check
 
@@ -101,23 +78,6 @@ Nothing was built on this branch: the only row not closed is in flight, and ever
 
 ext/scrapking-lmb rewrites the gun (a `DredgeGun` spread whose edge lines follow it) and the hook in `dredge_kit.gd`; re-assert rows 4, 5, 9, 11, 12 and 13 after it merges.
 
-## Scattergun by range (parity: pellets, spread, damage, falloff)
-
-Source: [D] 7 slugs, bloom (supervive_kits.md); [F] ~30 degrees firing, ~20 rested, a fixed stop of ~3.5 bh, a point-blank volley
-about 0.55x the Anchor (193 against 349), one slug landing still does 46% (KINFALL_CLASSES). The source gives no damage falloff
-with range, only the fixed stop range, so ours has none either (no `close_mult`/`far_mult` on the shotgun). One rested volley at
-a dummy, asserted in `tools/dredge_gun_range_check.gd` ("gun range ..."):
-
-| Range | Slugs landing | Volley | Why |
-|---|---|---|---|
-| 2 m | 7 of 7 | 14.0 (the full volley) | the 20 degree fan is under 0.5 m across |
-| 6 m | 3 of 7 | 8.9 | the first slug 45.7% (6.4), two more 1.27 each |
-| 6.2 m (the stop range) | 3 of 7 | 8.9 | the same: nothing is lost to distance, only slugs that miss |
-
-Fixed here: the fan was 30 at rest and 45 at full bloom; the footage rests at 20 and blooms to 30 (no owner note), so `fan_deg` 20,
-`bloom_max_deg` 10. Not fixed, for the owner: Brass Broadside's slugs (6 a wave, 4 each, no falloff) hit 3.4x a gun volley
-where the footage reads about 3.9x (756 against 193); the burst cap above holds them down, and its fan is 105 against the footage's 100-120.
-
 ## Audit (Nov 3 23:40)
 
 Every Grimble row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on
@@ -133,22 +93,22 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 | Shift shoves foes | MED | (b) | it touches nobody (the source's Brute Dash). "barge: it shoves and hurts nobody ..." |
 | Shift turn lock after the slam | LOW | (c) | kept, wiki-sourced; it limits only the turn, Shift still acts at once (item 51) |
 | Shift distance / time | LOW | (c) | DECISIONS: slower and shorter |
-| Air dash cooldown | LOW | (b) | superseded: the air pounce is now its own 12.5s slot, 2s less per rank (`dash.air`, 0a5b33f48) |
+| Air dash cooldown | LOW | (c) | the class long-dash slot is shared by every hunter (the dash slot's air-dash diamond); a per-kit value is main's call |
 | Shift rank 3 | ok | (c) | matches |
 | E cooldown | ok | (c) | fine |
 | E walk in the wind-up, stale docstring | LOW | (b)+(c) | the docstring is fixed; the 70% walk stays (item 51 combos and his barge out of it need him free to move) |
 | E Grounded on the slammed foe | LOW | (c) | ours, noted in "Assumptions" (1 s after a 1.1 s stun) |
-| E / R self-shake | MED | (c) | ext/no-shake; none added |
+| E / X self-shake | MED | (c) | ext/no-shake; none added |
 | E air smash, E rank 3 | ok | (c) | owner / data |
 | LMB mag and reload | LOW | (c) | owner call (the footage never shows a reload); left as it is |
 | Passive cap and heal | LOW | (c) | wiki-sourced, owner call |
 | Passive stack ring | LOW | (b) | no ground ring on a stack: the word, the sound and the flex |
-| R | ok | (c) | matches |
-| R stop refund | LOW | (c) | ours, noted |
-| Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and R combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
+| X | ok | (c) | matches |
+| X stop refund | LOW | (c) | ours, noted |
+| Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and X combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
-## Ultimate on R: Brass Broadside
-Built as its own ultimate on R (owner decision, SERVER_UPDATE6). It was never folded into another slot, so nothing is unfolded.
+## Ultimate on X: Brass Broadside
+Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never folded into another slot, so nothing is unfolded.
 - Cooldown 21s against the Abyssal Hand's 12s (source 20.8s : 11.7s).
 - Damage: the source's two point-blank waves hit about 2.2x the slam each. Ours are 4 a slug (24 a wave against the Anchor's 25),
   lower than the ratio, because an ult straight into a merge must not one-shot anyone: at level 10 the twelve slugs deal 65 and
@@ -169,7 +129,7 @@ Built as its own ultimate on R (owner decision, SERVER_UPDATE6). It was never fo
 | He holds his height from the throw to the end of the reel; slow walk while the hook flies out | built (20%, `CastHold`) | owner item 31 | no |
 | The caster is Grounded while reeling; the target is stunned for the pull | built | footage | yes (0127) |
 | Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
-| The dash goes further in the air and has its own cooldown there | built (x1.35, its own 12.5s slot) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The slam then a dash limits the dash's turn | built (35 degrees for 0.8s) | [wiki](https://supervive.wiki.gg/wiki/Kingpin), patch 05.02.25 | no |
 | The slam pushes you down, never over the abyss | built (owner: the air cast smashes straight down) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Height adds slam damage (rank 4 in the source) | built for every rank (+50%) (owner note); the rank-3 bonus is the abyss damage | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
@@ -177,7 +137,6 @@ Built as its own ultimate on R (owner decision, SERVER_UPDATE6). It was never fo
 | Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Backstab +50% | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Bonus armour damage when fired without spread | built: a 0-bloom shot wears armour 1.66x (docs/ARMOUR_PARITY.md) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (ult 0034, 0040) |
 | Every slug applies Anti-Heal | built (3s, as the cloak's) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (green streaks) |
 | A fan grows on the ground over the 1.1s charge and is the exact hit area | built (AimKit cone, everyone sees it) | footage | yes (ult 0026, 0033) |
@@ -254,14 +213,14 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Rank 3 Abyssal Hand hit / pellet hit | half the cooldown off / barge recharge trimmed | "abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)"; "barge rank 3: a pellet hit trims the recharge" |
 | Reel over a gap in the island | the body is carried over the void and falls | "abyss: a foe reeled over the void falls (knock rules)" |
 | A Boki merge mid-reel, mid-wind-up or mid-charge | the rope goes, no landing; no slam; no wave | "merge hold: dredge's reel ends with the merge, the rope is freed, nobody lands Grounded"; "merge hold: dredge's Anchor wind-up is dropped, no slam mid-merge"; "merge hold: dredge's Broadside is dropped, no wave mid-merge" |
-| R below level 6 | nothing | "ult: no cast below level 6" |
-| R | a slow walk, the charge move, a growing fan everyone sees that turns with the aim, 21s cooldown | "ult cast: the charge move plays, its own cooldown starts (21s)"; "ult telegraph: a 105 degree fan everyone sees, growing over the charge"; "ult: he walks slowly through the charge (about 30% of his speed)"; "ult: he walks slower still while the waves go (about 20%), and keeps turning to the cursor" |
-| R, then wait | wave 1 at 1.1s, wave 2 at 1.7s, six slugs each (spawn_shot) | "ult: one press, two waves of six slugs through spawn_shot"; "ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later" |
-| R point blank / at 4.6m | all twelve slugs and Anti-Heal / two a wave | "ult payoff: point blank, all six slugs of each wave land"; "ult payoff: 4 a slug, no back bonus"; "ult payoff: the slugs leave Anti-Heal"; "ult payoff: at 4.6m fewer slugs land" |
-| R at nobody / into a hunter | no bond / a hit, once per cast | "ult bond: nothing for waves that hit nobody"; "ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)" |
-| Reel, then R | the hauled foe takes every slug | "ult combo: reel the foe in, then the Broadside lands (10+ slugs)" |
+| X below level 6 | nothing | "ult: no cast below level 6" |
+| X | a slow walk, the charge move, a growing fan everyone sees that turns with the aim, 21s cooldown | "ult cast: the charge move plays, its own cooldown starts (21s)"; "ult telegraph: a 105 degree fan everyone sees, growing over the charge"; "ult: he walks slowly through the charge (about 30% of his speed)"; "ult: he walks slower still while the waves go (about 20%), and keeps turning to the cursor" |
+| X, then wait | wave 1 at 1.1s, wave 2 at 1.7s, six slugs each (spawn_shot) | "ult: one press, two waves of six slugs through spawn_shot"; "ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later" |
+| X point blank / at 4.6m | all twelve slugs and Anti-Heal / two a wave | "ult payoff: point blank, all six slugs of each wave land"; "ult payoff: 4 a slug, no back bonus"; "ult payoff: the slugs leave Anti-Heal"; "ult payoff: at 4.6m fewer slugs land" |
+| X at nobody / into a hunter | no bond / a hit, once per cast | "ult bond: nothing for waves that hit nobody"; "ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)" |
+| Reel, then X | the hauled foe takes every slug | "ult combo: reel the foe in, then the Broadside lands (10+ slugs)" |
 | RMB or E while it runs; Shift; a stun in the charge | denied; the barge goes at once and the Broadside runs on (its pose and fan follow him, both waves still go); stopped, back in 8s | "ult: RMB and E are locked while it runs; Shift barges at once and it runs on"; "ult: barged out of in the charge, both waves still go"; "ult: a stun in the charge stops it, back in 8s" |
-| R, then the merge and its ultimate | a full-health light hunter survives | "burst: Brass Broadside then the merge never one-shots a full-health light hunter" |
+| X, then the merge and its ultimate | a full-health light hunter survives | "burst: Brass Broadside then the merge never one-shots a full-health light hunter" |
 
 ## Animation moves
 Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`).
@@ -275,7 +234,7 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 | Anchor Drop (E) | `dr_anchor` | the free fist raised high, shoulder turned away (0.12), up on the toes at the top (0.3), the fist driven down into the ground in front (0.38, the slam frame), a recoil bounce (0.48), a slow recovery (1.0) |
 | Anchor Drop in the air | `dr_dive` (hold), `dr_quake` | both fists locked overhead dropping like a stone; a huge squash on landing, a heave back up |
 | Salvage stack | `dr_flex` | chest out, both fists flexed, a stomp |
-| Brass Broadside (R) | `dr_blast` | hunched over the gun and his free fist through the 1.1s charge (deeper at the end), a shove with overshoot and a barrel kick at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
+| Brass Broadside (X) | `dr_blast` | hunched over the gun and his free fist through the 1.1s charge (deeper at the end), a shove with overshoot and a barrel kick at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
 
 ## Animation timing (ext/anim-time-grimble)
 Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-check`); the source is the footage sheet (`briefs/hero-ref/dredge.md`, 5 fps, one frame = 0.2 s, 1 bh = 1.8 m). The .glb clip lengths equal the kit's keyed moves (asserted), so a kit time is also the clip time. "Re-key" means a change the model branches (`ext/grimble-v2-model`, `ext/grimble-hook-arm-v2`) must make in the clip itself; the .glb and `tools/art1` are untouched here.

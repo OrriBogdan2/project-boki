@@ -101,9 +101,7 @@ func _run_later() -> void:
 		if float(it[0]) <= time: due.append(it)
 	for it in due:
 		_later.erase(it)
-		var cb: Callable = it[1]
-		if cb.is_valid():      # (a bound object freed since is skipped, not called)
-			cb.call()
+		(it[1] as Callable).call()
 var _bond_cb: Callable
 var _combo_cb: Callable
 var player_lost: Array = []  # your kin left behind when you went down: {uid, kin, holder}
@@ -1299,11 +1297,10 @@ func use_gear(h: Hunter, slot: int) -> void:
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
 		sfx("skill", h.pos, -4.0, 1.0)
 		return
-	var lau: Dictionary = gd.get("launch", {})      # launch gloves: m/s, m (content/gear)
 	match gid:
 		"gust_fan":
 			var d := h.aim_dir()
-			h.vel = Vector3(d.x * float(lau["fwd_mps"]), float(lau["up_mps"]), d.y * float(lau["fwd_mps"]))
+			h.vel = Vector3(d.x * 9.0, 13.0, d.y * 9.0)
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.shot_down = false
@@ -1339,7 +1336,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 		"rocket":
 			# straight up: a column of thrust that also cools your glider, so you can keep going
 			var d := h.aim_dir()
-			h.vel = Vector3(h.vel.x * 0.5 + d.x * lau.fwd_mps, lau.up_mps, h.vel.z * 0.5 + d.y * lau.fwd_mps)
+			h.vel = Vector3(h.vel.x * 0.5 + d.x * 2.0, 17.0, h.vel.z * 0.5 + d.y * 2.0)
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.shot_down = false
@@ -1352,10 +1349,10 @@ func use_gear(h: Hunter, slot: int) -> void:
 			# one there, otherwise straight up into the air
 			var d := h.aim_dir()
 			var aim: Vector3 = h.inp.get("aim", h.pos)
-			var reach := clampf(Vector2(aim.x - h.pos.x, aim.z - h.pos.z).length(), 2.0, float(lau["reach_m"]))
+			var reach := clampf(Vector2(aim.x - h.pos.x, aim.z - h.pos.z).length(), 2.0, 9.0)
 			var tx := h.pos.x + d.x * reach; var tz := h.pos.z + d.y * reach
 			var gy := world.ground_at(tx, tz)
-			var to := Vector3(h.pos.x + d.x * 3.0, h.pos.y + float(lau["rise_m"]), h.pos.z + d.y * 3.0)
+			var to := Vector3(h.pos.x + d.x * 3.0, h.pos.y + 8.0, h.pos.z + d.y * 3.0)
 			if gy > World.VOID + 1.0 and not world.is_block(tx, tz) and gy > h.pos.y - 1.0:
 				to = Vector3(tx, gy + 1.2, tz)
 			h.launch_to(to, 0.55)
@@ -1364,7 +1361,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("throw", h.pos, -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
-			h.vel.y = maxf(h.vel.y, float(lau["up_mps"]))
+			h.vel.y = maxf(h.vel.y, 11.0)
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.roll_t = 0.0
@@ -1515,7 +1512,7 @@ func _collide_breaks() -> void:
 			if absf(e.pos.y - bp.y) > 0.6:
 				continue
 			var d := Vector2(e.pos.x - bp.x, e.pos.z - bp.z)
-			var mind: float = e.hull_r() + 0.36
+			var mind: float = e.r + 0.36
 			var l := d.length()
 			if l >= mind:
 				continue
@@ -1524,7 +1521,7 @@ func _collide_breaks() -> void:
 				continue
 			var nrm := d / l if l > 0.0001 else Vector2(1, 0)
 			var push := nrm * (mind - l)
-			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.hull_r(), e.pos.y, e.grounded) == 0.0:
+			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.r, e.pos.y, e.grounded) == 0.0:
 				e.pos.x += push.x; e.pos.z += push.y
 
 ## Wild Boki are scarce on purpose (owner's call): catching one should feel like a goal, not a
@@ -1767,14 +1764,18 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			credit.heal(d * float(o["leech"]))     # a Void weapon drains what it deals
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
-		for h in ArmorXp.on_damage(credit, target, d):     # armour progress, dealt and taken (no level XP)
-			_armor_up(h)
+		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
+			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
+			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
+			if lv >= 0:
+				_armor_up(credit)
+				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
 	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
-		fx.hit_number(target, credit, d, col, crit)
+		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)
@@ -1788,8 +1789,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
-	if target == player and hud:
-		hud.dmg_dir.hit(self, by, target, d)
+	if target == player and by and hud:
+		hud.hurt_from(by.pos)
 	if target == player:
 		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
 		if hud: hud.hurt_flash(d)
@@ -1802,12 +1803,11 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
 	h.downed = true
-	JuggernautKit.mark_box(h, o, time)      # a Riposte knock goes on to the deathbox
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
 	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
@@ -1831,7 +1831,7 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
-			if credit.armor_gain(ArmorXp.knock) >= 0: _armor_up(credit)
+			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
@@ -1924,7 +1924,6 @@ func revive_hunter(h: Hunter, by: Ent) -> void:
 	if net_on:
 		net_event(["up", h.nid])
 	h.downed = false
-	Life.tally(h, "revived_n")
 	h.hp = h.max_hp * Life.R["revive_hp"]
 	h.armor = 0.0
 	h.revive = 0.0
@@ -2201,10 +2200,9 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
-	KillXp.pay(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
-	MobSfx.death(self, mb, big_mob)
+	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
@@ -2434,7 +2432,7 @@ func on_wild_dazed(k: Kin) -> void:
 ## A monster's stagger window opened.
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
-		MobSfx.stagger_open(self, mb)
+		sfx("warn", mb.pos, -10.0, 1.5)
 		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
@@ -2447,7 +2445,8 @@ func on_stagger(mb: Mob, by: Ent, ab: String) -> void:
 	fx.ring(mb.pos, mb.r + 1.8, Color("c47aff"), 0.4)
 	fx.burst(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 30, 6.0, 0.6, 2.0, 1.2)
 	fx.flash(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 1.4, 0.1)
-	MobSfx.stagger_hit(self, mb)
+	sfx("crit", mb.pos, 2.0, 0.7)
+	sfx("boom", mb.pos, -4.0, 1.6)
 	freeze_frame(0.08)
 	var hunter: Hunter = by as Hunter if by is Hunter else (by.owner_h if by is Kin else null)
 	if net_on:
@@ -2514,8 +2513,7 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 		if d < near:
 			return true
 		# sneaking (Ctrl) slows you but lets you see further, as in Supervive
-		var sight: float = 1.0 + h.gear_stat("sight") + (h.gear_stat("sneak_sight") if h.crouch else 0.0)
-		if d > rng * (1.25 if h.crouch else 1.0) * sight or (in_grass and not revealed):
+		if d > rng * (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight")) or (in_grass and not revealed):
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
@@ -2869,7 +2867,7 @@ func shot_stance_y(e: Ent) -> float:
 
 ## Shots flying between these heights (x..y) hit this body.
 func shot_band(e: Ent) -> Vector2:
-	var top: float = Arch.hit_h(e.arch) if e is Hunter else maxf(0.9, e.r * 2.2)
+	var top: float = 1.5 if e is Hunter else maxf(0.9, e.r * 2.2)
 	var fy := shot_stance_y(e)
 	return Vector2(fy - 0.45, fy + top + 0.9)
 
@@ -3030,7 +3028,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("blight"): o["blight"] = x["blight"]
 	if x.has("wallstun"): o["wallstun"] = x["wallstun"]
 	if x.has("ab"): o["ab"] = x["ab"]
-	for kk in ["burn_for", "slow_k", "dr", "armor_k"]:
+	for kk in ["burn_for", "slow_k", "dr"]:
 		if x.has(kk): o[kk] = x[kk]
 	if x.has("ride_dmg") and by:
 		# a kin's damage rider on your shots procs at most once a second on each target
@@ -3414,8 +3412,6 @@ func _gather_input() -> void:
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
 		HunterKeys.ult_pressed(player)
-	if Input.is_action_just_pressed("summon") and not paused:
-		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
@@ -3879,9 +3875,6 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
-		if pending_input.get("summon", false):
-			pending_input["summon"] = false
-			KinSummon.press(player)
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
@@ -4037,7 +4030,7 @@ func _separate() -> void:
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
-			var mind := a.hull_r() + b.hull_r()
+			var mind := a.r + b.r
 			var l := d.length()
 			if l < mind and l > 0.0001:
 				var push := d / l * (mind - l) * 0.5
@@ -4047,9 +4040,9 @@ func _separate() -> void:
 				var pa := -push * (wa / tot) * 2.0
 				var pb := push * (wb / tot) * 2.0
 				# bodies push each other around, but never off an edge
-				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.hull_r(), a.pos.y, a.grounded) == 0.0:
+				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.r, a.pos.y, a.grounded) == 0.0:
 					a.pos.x += pa.x; a.pos.z += pa.y
-				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.hull_r(), b.pos.y, b.grounded) == 0.0:
+				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.r, b.pos.y, b.grounded) == 0.0:
 					b.pos.x += pb.x; b.pos.z += pb.y
 
 ## --hold-demo (screenshots): every hunter in a row by you, each holding interact for something
@@ -4241,13 +4234,13 @@ func _update_interact(dt: float) -> void:
 			if o.team == h.team:
 				if o.remote:
 					_rev_out[o.nid] = float(_rev_out.get(o.nid, 0.0)) + dt / Life.R["revive_time"]
-					o.revive += dt / Life.revive_secs(o)
+					o.revive += dt / Life.R["revive_time"]
 				if h == player and best.is_empty():
 					# your own revive bar, so you know it's working (and when it's blocked)
 					if o.get_meta("stomped", false):
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
-						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  %.1fs, stay in the ring" % [o.pname, Life.revive_secs(o)], "col": Color("9ee2a0")}
+						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay on the wisp" % o.pname, "col": Color("9ee2a0")}
 			elif not o.remote:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
@@ -5173,7 +5166,7 @@ func _flags(h: Hunter) -> int:
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
-const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "reviving", "wild", "dazed", "fused"]
+const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "wisp", "wild", "dazed", "fused"]
 const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 
 func _ser(e: Ent) -> Array:
@@ -5422,7 +5415,6 @@ func _net_ev(x, from: String) -> void:
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
-		"xp": KillXp.net_in(self, x)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:
@@ -5504,7 +5496,7 @@ func _net_ev(x, from: String) -> void:
 		"rev":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.remote and who.downed:
-				who.revive += float(x[2]) * Life.diminish(who, "revived_n")
+				who.revive += float(x[2])
 				if who.revive >= 1.0:
 					revive_hunter(who, null)
 		"blsh":
@@ -5522,7 +5514,7 @@ func _net_ev(x, from: String) -> void:
 				who.dead = true
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
-				MobSfx.death(self, who as Mob, false)
+				sfx("kill", who.pos, -6.0, 1.3)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
@@ -5543,7 +5535,7 @@ func _net_ev(x, from: String) -> void:
 				(smb as Mob).stag_open = 0.0
 				fx.ring(smb.pos, smb.r + 1.8, Color("c47aff"), 0.4)
 				fx.burst(smb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 30, 6.0, 0.6, 2.0, 1.2)
-				MobSfx.stagger_hit(self, smb as Mob)
+				sfx("crit", smb.pos, 2.0, 0.7)
 				_stagger_reward(smb, ents_by_id.get(String(x[2]), null) as Hunter, String(x[3]))
 		"anc":
 			if String(x[1]) == "meteor":

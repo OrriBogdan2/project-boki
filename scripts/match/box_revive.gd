@@ -24,7 +24,9 @@ static func rules() -> Dictionary:
 
 ## Seconds to bring this Hunter back from their box: slower each time it has been done this match.
 static func time_for(o: Hunter) -> float:
-	return float(rules()["box_revive_s"]) / Life.diminish(o, "revived_n")
+	var curve: Array = rules()["box_diminish"]
+	var n := mini(int(o.get_meta("box_revived_n", 0)), curve.size() - 1)
+	return float(rules()["box_revive_s"]) / float(curve[n])
 
 ## The prompt at a teammate's box.
 static func prompt(h: Hunter, o: Hunter) -> String:
@@ -55,7 +57,7 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	h.box_t = 0.0
 	b["rev_at"] = -9.0
 	h.box_rev_at = -9.0
-	Life.tally(o, "revived_n")
+	o.set_meta("box_revived_n", int(o.get_meta("box_revived_n", 0)) + 1)
 	m.sfx("revive_done", b["pos"], 3.0)
 	m.fx.ring(b["pos"] + Vector3(0, 0.1, 0), 2.6, DONE_COL, 0.5)
 	m.fx.burst(b["pos"] + Vector3(0, 1.0, 0), DONE_COL, 26, 4.5, 0.7, -2.0, 1.2)

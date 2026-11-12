@@ -111,7 +111,7 @@
 			],
 			"word": "PRISM",
 			"rider": {
-				"chain": 0.08
+				"chain": 0.35
 			},
 			"dash": {
 				"dmg": 8.0,
@@ -143,7 +143,7 @@
 			],
 			"word": "ECHO",
 			"rider": {
-				"chain": 0.06
+				"chain": 0.3
 			},
 			"dash": {
 				"dmg": 8.0,
@@ -195,7 +195,7 @@
 			],
 			"word": "STORM",
 			"rider": {
-				"chain": 0.06
+				"chain": 0.4
 			},
 			"dash": {
 				"dmg": 9.0,
@@ -280,7 +280,7 @@
 			"rider": {
 				"burn": 3.5,
 				"burn_for": 2.0,
-				"chain": 0.05
+				"chain": 0.25
 			},
 			"dash": {
 				"dmg": 6.0,
@@ -326,13 +326,5 @@
 		"medium": 110,
 		"heavy": 150
 	},
-	"shell_note": "hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost.",
-	"band": {
-		"lo_k": {
-			"burst": 1.0,
-			"sust": 0.0,
-			"ehp": 0.0
-		},
-		"note": "--fusion-band-check (docs/FUSION_BAND.md): every Fusion's burst (most added damage in one second), sustained damage (added per second over 6 s) and effective health stay at or under the strongest Hunter ultimate's, measured on the training strip; lo_k x the ultimates' median is the floor (burst 1.0: a release is at least a typical ultimate, so it reads as an event). Pull a Fusion back in through its own numbers (its form file, its merge, its type's rider), never the code."
-	}
+	"shell_note": "hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost."
 }

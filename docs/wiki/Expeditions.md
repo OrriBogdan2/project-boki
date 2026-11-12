@@ -63,7 +63,7 @@ heartbeat and a warning near the end. There's room to recover:
   Walls cast sight shadows, teammates share what they see, tall grass hides you, and firing or getting
   hit gives you away for a moment. Sneaking (Ctrl) slows you, steadies your aim and keeps you hidden
   until rivals are close. Red arcs round the middle of the screen point at whoever is hitting you.
-- **Levels.** You start at level 1. XP comes from knocking rivals down and from lair bosses, not from time or damage (damage to Hunters only builds your armour); each level is a skill point. Your ultimate
+- **Levels.** You start at level 1. XP comes from fighting; each level is a skill point. Your ultimate
   opens at level 6. Some chests and events offer **run perks** (pick one of three with 1-3).
 - **Stagger.** Big monsters open short purple-ring windows while winding up a slam. Hit one with an
   ability (not a plain shot) in that window: a big hit, a long stun, extra damage the whole time, and

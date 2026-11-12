@@ -2,7 +2,7 @@
 
 Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R,
 ext/kitfix-dancer-juggernaut (Nov 2, server update 5) matched it to the gameplay footage and renamed the hero
-from Thief to Dancer, and the ult pass (server update 6) gave her own ultimate back on R. Player-facing names and text are ours; the source is named only in this research
+from Thief to Dancer, and the ult pass (server update 6) gave her own ultimate back on X. Player-facing names and text are ours; the source is named only in this research
 section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file names stay `thief`.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
@@ -15,25 +15,6 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 | RMB Bola | +50% damage; +100 distance after the hit and -4s; tier IV: two foes caught pool their Marks | 6.3s / 5.6s, damage +15% / +30%; 1m further and pooling at 3 | 7s / 4.8s, damage +50% / +50%; 1m further and pooling at 3 |
 | Shift Vault | +20% empowered damage x2; tier IV: +50% speed boost | recharge 3.8s / 3.2s (shared -15%), empowered +20% / +40%, speed boost x1.5 at 3 | recharge 4.5s flat (the source has none), empowered +20% / +40%, speed boost x1.5 at 3 |
 | E Shadow Knife | -8s; refund 25% on terrain, doubled on foes; landing on a foe resets Quickflip | 13.5s / 12s, damage +15% / +30%; refund and reset at 3 | 10.7s / 10.7s, no damage step; refund and reset at 3 |
-## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
-On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
-(briefs/supervive-data/supervive_kits.md, Shiv `Upg:` II / III / IV, read at level 15). Each slot reads `rank_cd` /
-`rank_dmg` in thief.json (the shared -10% cooldown / +15% damage / -15% recharge steps no longer apply to her). Our
-cooldowns differ from the source's, so a cut keeps the source's share of its own cooldown (Bolas -4 of 13; Farstep -8 of
-28, its 20s being read at tier IV). LMB and the Marks passive have no tiers in the data and do not rank; R (Encore on X)
-is decision 0022's.
-
-| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--dancer-combo-check` |
-|---|---|---|---|---|
-| LMB bolts | none [D] | - | - | - |
-| RMB Bola | +50% dmg / +100 distance after a hit, -4s / two foes caught pool their stacks [D] | damage +50% | damage +50%, 7s -> 4.85s; flies 1m further after the first foe; two caught pool their Marks | `upgrade parity: Bola ...`, `Bola on two (rank 3) = pooled Marks` |
-| Shift Vault | +20% empowered dmg / +20% / +50% speed boost [D] (5s at IV: no cooldown tier) | empowered bonus +20%, recharge 4.5s | empowered bonus +40%, speed boost x1.5 (0.18 -> 0.27), recharge 4.5s | `Vault ranks ...`, `upgrade parity: Vault recharge stays 4.5 ...` |
-| E Shadow Knife | -8s / sticking refunds 25% of the cooldown, doubled in a foe / a dagger in a foe resets the dash [D] | 15s -> 10.7s | 10.7s; the refund and the Vault back from a foe | `upgrade parity: Shadow Knife ...`, `Knife in a foe (rank 3) = Vault reset + refund` |
-| Passive Marks | none [D] | - | - | - |
-
-Fixed to the data in this pass: the Bola 6.3s / 5.6s and +15% / +30% (shared) -> 7s / 4.85s and +50% / +50%; the Vault
-recharge 3.8s / 3.2s (shared -15%, not in the data) -> 4.5s flat; the Knife 13.5s / 12s and +15% / +30% (shared) -> 10.7s /
-10.7s and no damage step (the data has none).
 
 ## Research summary
 
@@ -70,7 +51,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
 | Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add 10% of a bolt each, flat, as the source's +16 a stack |
 | Empowered ranks | +20% damage twice [game data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
-| Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s; code removed) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
+| Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
 | Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
 | The throw | 2-3 frames, one arm whipped from a wide stance [footage] | the body pitched, no arm keys | `thf_primed`: coiled with both blades cocked behind the shoulders, both driven out at 0.04, held to 0.12, a recoil onto the heels by 0.24, settled by 0.55 |
 | Auto rate | 0.45s [footage card] | 0.45s | unchanged |
@@ -127,7 +108,7 @@ pass above.
 | LMB | move while firing | 77-86 px/s firing against 113 (unconfirmed) [footage] | 90% of the run | unchanged (90%); asserted she keeps 85% or more |
 | LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
-| Shift, E, R | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
+| Shift, E, X | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
 
 ## Per-slot table
 
@@ -139,9 +120,6 @@ pass above.
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.8m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
-| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
-| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
-| R, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
 ## Body and movement (hero sheet "Body, scale and movement feel")
@@ -214,7 +192,7 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | Every ult shot refreshes all stacks | wiki R | n/a | Built; asserted |
 | LMB keeps firing during the ult, and she moves freely with the ring attached | wiki R, gamerblurb | yes (ult f41-f47) | Built; asserted |
 | The ult resets Cartwheel (the wiki: dashes while active) | in-game card, wiki R | yes (0193) | Built as the Vault back on the cast; asserted |
-| The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the R ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
+| The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
 | A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
 
 ## Combinations
@@ -231,10 +209,10 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 | Shadow Knife, then E | step to them | `combo dancer: Knife > E = step to them` |
 | Bola catches two (rank 3) | their Marks pool | `combo dancer: Bola on two (rank 3) = pooled Marks` |
 | Bola, then Grounded | no dash, jump or glide | `combo dancer: Bola > Grounded = no dash` |
-| Bola, then R | the Grounded foe can't leave the ring: every blade lands | `combo dancer: Bola > R = the Grounded foe takes every blade` |
-| R, then Vault and bolts | she walks and shoots through it, the ring rides along | `dancer R small mechanic: she walks and fires freely, the ring moves with her` |
-| R with a foe in the outer band | harder blades and a 6s blight | `dancer R small mechanic: the outer band hits harder and blights 6s; ...` |
-| R, then a merge | Encore ends, no blade after | `merge hold dancer: Encore's blades stop and its ring goes` |
+| Bola, then X | the Grounded foe can't leave the ring: every blade lands | `combo dancer: Bola > X = the Grounded foe takes every blade` |
+| X, then Vault and bolts | she walks and shoots through it, the ring rides along | `dancer X small mechanic: she walks and fires freely, the ring moves with her` |
+| X with a foe in the outer band | harder blades and a 6s blight | `dancer X small mechanic: the outer band hits harder and blights 6s; ...` |
+| X, then a merge | Encore ends, no blade after | `merge hold dancer: Encore's blades stop and its ring goes` |
 | Knock or assist | heal (25% in all), star and pillar | `dancer passive: a knock heals (25% in all), star + pillar` |
 
 ## Animation moves
@@ -250,7 +228,7 @@ with the crossbows tucked and the wings flaring, one aerial turn by 0.30, a land
 ThiefChain runs cartwheel, somersault, twist through a reset chain), `thf_exdash` (the air
 Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and stretched until she lands),
 `thf_land` (touching down from it: a low crouch for 0.1s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
-0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (R: blades raised as the
+0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (X: blades raised as the
 ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats that loop, a fling on each: two side flings, a pirouette, two low sweeps, a twirl back with the crossbows overhead; the legs are a stance, so walking she keeps walking)
 
 ## Look and sound (all ours)
@@ -271,8 +249,8 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
 - The Vault loop lives in `scripts/arch/kits/thief_chain.gd` (`ThiefChain`): the routine of flips (cartwheel, somersault,
   twist; a 2s gap starts it over) and the kept Shift presses (mid-flip to the flip's end, in the empowered bolt's flight
   to its landing). A reset gives back the air Vault's cooldown too. Asserted in `tools/dancer_loop_check.gd`.
-- Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); R reaches it through
-  `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared R base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
+- Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); X reaches it through
+  `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared X base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
-- The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on R it duplicated the
+- The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).

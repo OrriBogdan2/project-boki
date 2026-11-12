@@ -17,8 +17,6 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
-	if both:
-		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
@@ -74,83 +72,6 @@ func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	m.step(DT)
 	m.step(DT)
 	return _shot_reach(m, P)
-
-## Spirit Walk through terrain (docs/KIT_PARITY.md gap 8): a terrace face is passed at her own height, ending
-## inside a pillar puts her back where she went in (never on its top), a roll over an abyss gap into a cliff
-## ends back on her own island, never in the gap, and she still walks off a ledge.
-func _spirit_ledges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
-	var W: World = m.world
-	var hx := int(home.x)
-	var hz := int(home.z)
-	var lv := int(W.level[W.idx(hx, hz)])
-	var lv0: PackedByteArray = W.level.duplicate()
-	var kd0: PackedByteArray = W.kind.duplicate()
-	var build := func(x0: int, x1: int, z0: int, z1: int, tiers: int, kind: int):
-		W.level = lv0.duplicate()
-		W.kind = kd0.duplicate()
-		for z in range(hz + z0, hz + z1 + 1):
-			for x in range(hx + x0, hx + x1 + 1):
-				W.kind[W.idx(x, z)] = kind
-				W.level[W.idx(x, z)] = lv + tiers
-	var roll := func(at: Vector3, hold: float, secs: float):     # roll +z, keep walking `hold` s, stand to `secs`
-		P.teleport(at)
-		P.vel = Vector3.ZERO
-		P.grounded = true
-		P.dashes = P.max_dashes()
-		aim_at(P, at + Vector3(0, 0, 6))
-		P.inp["move"] = Vector2(0, 1)
-		P.do_dash()
-		var t := [0.0]
-		step(m, secs, func():
-			P.inp["move"] = Vector2(0, 1) if t[0] < hold else Vector2.ZERO
-			t[0] += DT)
-	# a 2 m thick, 2.4 m terrace face 1.5 m ahead: she comes out the far side at her own height
-	build.call(-2, 2, 2, 3, 3, World.T_GROUND)
-	var in0 := K.spirit.passed
-	roll.call(home, 1.0, 1.0)
-	ok(
-		"combo pin: Spirit Walk passes through a terrace face at her own height",
-		P.pos.z > hz + 4.3 and absf(P.pos.y - home.y) < 0.35 and K.spirit.passed > in0 and P.grounded,
-		"z +%.1f (face +1.5..+3.5) y %+.2f inside %d" % [P.pos.z - home.z, P.pos.y - home.y, K.spirit.passed - in0]
-	)
-	K.spirit.end("time")
-	step(m, 0.3)
-	# a 4.8 m pillar (no climb reaches its top): she stops inside it and the walk runs out
-	build.call(-1, 1, 2, 4, 6, World.T_GROUND)
-	var sn0 := K.spirit.snap_backs
-	roll.call(home, 0.0, K.spirit.walk_time() + 0.5)
-	ok(
-		"combo pin: Spirit Walk ending inside a pillar = back where she went in, not on its top",
-		K.spirit.snap_backs == sn0 + 1 and P.pos.z < hz + 2 and absf(P.pos.y - home.y) < 0.35
-			and P.safe_pos.y < home.y + 0.5,
-		"z +%.1f y %+.2f safe y %+.2f" % [P.pos.z - home.z, P.pos.y - home.y, P.safe_pos.y - home.y]
-	)
-	# a 2 m abyss gap, then a 4.8 m cliff (past any climb): rolled across into the cliff, the walk ends inside it
-	build.call(-2, 2, 2, 3, 0, World.T_VOID)
-	for z in range(hz + 4, hz + 8):
-		for x in range(hx - 2, hx + 3):
-			W.level[W.idx(x, z)] = lv + 6
-	sn0 = K.spirit.snap_backs
-	roll.call(home, 0.5, K.spirit.walk_time() + 0.5)
-	ok(
-		"combo pin: Spirit Walk over an abyss gap into a cliff = back on her own island, never in the gap",
-		K.spirit.snap_backs == sn0 + 1 and P.pos.z < hz + 2 and not P.over_void() and not P.out
-			and absf(P.pos.y - home.y) < 0.35,
-		"z +%.1f y %+.2f void %s" % [P.pos.z - home.z, P.pos.y - home.y, P.over_void()]
-	)
-	# ...and walking off a ledge still drops her (home raised 2 tiers, the ground beyond it not)
-	build.call(-3, 3, -3, 1, 2, World.T_GROUND)
-	roll.call(home + Vector3(0, 2 * World.LEVEL, 0), 1.0, 1.2)
-	ok(
-		"combo pin: Spirit Walk still walks off a ledge (lands on the ground below)",
-		P.pos.z > hz + 2.5 and absf(P.pos.y - home.y) < 0.1 and P.grounded,
-		"z +%.1f y %+.2f" % [P.pos.z - home.z, P.pos.y - home.y]
-	)
-	K.spirit.end("time")
-	W.level = lv0
-	W.kind = kd0
-	P.inp["move"] = Vector2.ZERO
-	step(m, 0.3)
 
 func _archer_combos() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -423,41 +344,6 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
-	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
-	fresh(T)
-	fresh(T2)
-	K.cd["e"] = 0.0
-	P.teleport(home)
-	aim_at(P, home + Vector3(5.0, 0, 0))
-	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
-	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
-	var t2_team := T2.team
-	T2.team = P.team
-	for w in [T, T2]:
-		w.downed = true
-		w.hp = 0.0
-		w.down_hp = float(Data.MATCH["down_hp"])
-	var hp_foe := T.hp
-	P.ak.use_e()
-	step(m, 1.6)
-	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
-	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
-	ok(
-		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
-		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
-		"rival %.1f ally %.1f" % [drained, bled]
-	)
-	ok(
-		"pin E: the wall does not slow, burn or damage a Wisp",
-		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
-		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
-	)
-	for w in [T, T2]:
-		w.downed = false
-		w.hp = w.max_hp
-		w.down_hp = 0.0
-	T2.team = t2_team
-	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
 	K.ch_rmb = 1.0
@@ -508,7 +394,7 @@ func _archer_combos() -> void:
 		P.slot_lv["kin"] = rk
 		up.append([
 			K.power("sec") / p1, K.power("kin") / pk1,
-			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"), K.arc_deg(),
+			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"),
 		])
 	ok("upgrade parity: Heavy Shot damage +20% / +40%", near.call(up[1][0], 1.2) and near.call(up[2][0], 1.4), str(up))
 	ok("upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5",
@@ -516,8 +402,6 @@ func _archer_combos() -> void:
 	ok("upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60%",
 			near.call(up[1][3], 13.0) and near.call(up[2][3], 9.0)
 			and near.call(up[1][1], 1.3) and near.call(up[2][1], 1.6), str(up))
-	ok("upgrade parity: rank 3 (tier IV) Hail Wall arc 120 -> 156 degrees",
-			near.call(up[1][4], 120.0) and near.call(up[2][4], 156.0), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
@@ -569,9 +453,17 @@ func _archer_combos() -> void:
 	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
+	var wash := [0.0]
 	step(m, 1.2, func():
 		P.inp["move"] = Vector2(1, 0)
+		K.fx._process(0.0)
+		wash[0] = maxf(wash[0], P.wash)
 		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+	ok(
+		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
+		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
+		"wash %.2f %s" % [wash[0], P.wash_col]
+	)
 	var mk_in: float = mk[0]
 	ok(
 		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
@@ -602,6 +494,10 @@ func _archer_combos() -> void:
 	)
 	# ...and ending inside it puts her back where she went in (no cost: there is no Focus)
 	K.spirit.end("time")
+	for _i in 8:
+		K.fx._process(0.0)
+		step(m, 0.05)
+	ok("pin tint: the body is back to normal when the walk ends", P.wash < 0.01, "wash %.2f" % P.wash)
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -645,21 +541,20 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 	ok(
-		"combo pin: Spirit Walk passes a raised terrace wall at her own height, out the far side (a plain walk stops)",
-		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and top_y < home.y + 0.3
+		"combo pin: Spirit Walk climbs a raised terrace wall and drops off the far side (a plain walk stops at it)",
+		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and top_y > home.y + 0.8
 			and absf(P.pos.y - home.y) < 0.1 and P.grounded and W.ground_at(P.pos.x, P.pos.z) <= P.pos.y + 0.1,
 		"plain x %.1f, spirit x %.1f y %+.2f peak %+.2f (wall %d..%d) inside %d"
 			% [plain_x, P.pos.x, P.pos.y - home.y, top_y - home.y, wx - 1, wx + 1, K.spirit.passed - in1]
 	)
-	# ending inside the terrace puts her back where she last stood clear (never on top of the face)
+	# ending inside the terrace sets her on top of it (never inside terrain, no snap back)
 	P.teleport(Vector3(wx + 0.5, home.y, home.z))
 	step(m, 0.05)
 	var sn1 := K.spirit.snap_backs
 	K.spirit.end("time")
 	ok(
-		"combo pin: Spirit Walk ending inside a terrace = back where she stood clear, not on top or inside",
-		K.spirit.snap_backs == sn1 + 1 and absf(P.pos.y - home.y) < 0.1
-			and W.ground_at(P.pos.x, P.pos.z) <= P.pos.y + 0.1,
+		"combo pin: Spirit Walk ending inside a terrace = on top of it, not inside",
+		K.spirit.snap_backs == sn1 and P.pos.y > home.y + 0.8 and W.ground_at(P.pos.x, P.pos.z) <= P.pos.y + 0.1,
 		"x %.1f y %+.2f ground %+.2f" % [P.pos.x, P.pos.y - home.y, W.ground_at(P.pos.x, P.pos.z) - home.y]
 	)
 	for dz in range(-2, 3):
@@ -674,7 +569,6 @@ func _archer_combos() -> void:
 	P.hurt(5.0, T2, {"src": "shot"})
 	step(m, 0.05)
 	ok("pin: damage ends Spirit Walk", not K.spirit.active() and P.spirit_t <= 0.0)
-	_spirit_ledges(m, P, K, home)
 	# rank 3 (data: Phase Walk IV): 0.5 s longer, +33% inside something that fades over the walk, allies near her walk too
 	P.slot_lv["dash"] = 3
 	step(m, 0.5)
@@ -870,6 +764,7 @@ func _bulwark_combos() -> void:
 		K.lock_t = 0.0
 		K.ch_rmb = 1.0
 		K.cd["rmb"] = 0.0
+		K.res = 0.0
 		P.fire_cd = 0.0
 		P.dashes = P.max_dashes()
 		K.lmb_t = -1.0
@@ -1158,20 +1053,6 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
 	)
-	# the Spin Dash recharge takes the data's -1.5 s a rank; no slot gets a rank damage step (the data names none)
-	var regens: Array = []
-	var dmgs: Array = []
-	for rk in [1, 2, 3]:
-		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
-		regens.append(P.dash_regen())
-		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
-	ok(
-		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field",
-		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
-				and dmgs[2] == dmgs[0],
-		"recharge %s power %s" % [str(regens), str(dmgs)]
-	)
-	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 3
 	ok(
 		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",
@@ -1233,25 +1114,28 @@ func _bulwark_combos() -> void:
 		)
 	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
-	# the source kit: Shift behind the shield is the Bash on the source's 6 s cooldown; no Guard meter, no Shield Slam
+	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
 	step(m, 1.0)
 	reset.call()
+	K.res = 80.0
+	var guard_before := K.res
+	var slams_before := K.shield_slams
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	var cd_full := float(K.cd["rmb"])
+	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
+	guard_before = K.res
 	P.do_dash()
 	step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
 	ok(
-		"combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam",
-		float(K.rmb_def()["cooldown"]) == 6.0 and float(K.cd["rmb"]) > 4.5 and cd_full <= 0.0
-				and not K.d.has("resource") and not K.d["rmb"].has("slam") and K.res_def().is_empty(),
-		"cd %.2f" % float(K.cd["rmb"])
+		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
+		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
+		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
-	ok("bulwark vfx: the Shield Charge plays its look and no Shield Slam follows (the Guard cut)",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 0,
+	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
+		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
+		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
@@ -1379,8 +1263,7 @@ func _bulwark_combos() -> void:
 	ok("bjorn small: Mending Ground doesn't repair a broken aegis", K.shield_hp < 1.0, "shield %.0f" % K.shield_hp)
 	ok(
 		"bjorn small: a downed teammate inside Mending Ground starts reviving",
-		# the burst gives 0.35, then the bar decays while nobody revives (life.gd revive_decay)
-		K.kickstarts == ks0 + 1 and A.revive >= 0.2,
+		K.kickstarts == ks0 + 1 and A.revive >= 0.3,
 		"revive %.2f" % A.revive
 	)
 	A.downed = false
@@ -1440,7 +1323,7 @@ func _bulwark_combos() -> void:
 	step(m, 4.0)
 	ok("bulwark: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the holds: no Crushing Blow when LMB is let go, the raised shield comes down
-	
+
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
