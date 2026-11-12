@@ -9,7 +9,7 @@ const SHOT_AT := 3.0         # s after the launch: the nose is down, the pose is
 const CROP := 220            # px: the part of the frame round the rider that is kept
 const SCALE := 3             # the crop is enlarged this much
 const COLS := 4
-const SIDE_DIST := 4.0       # m: the side camera's distance from the rider
+const SIDE_DIST := 4.0       # m: the side camera's distance from a rider of size 1 (further for a bigger one)
 const SIDE_FOV := 32.0       # degrees
 
 var main: Node
@@ -61,8 +61,10 @@ func _shot(m: Match, arch: String, dir: String) -> Array:
 	var side := Camera3D.new()          # (beside the rider, level with its chest, looking across the rocket's seat)
 	m.add_child(side)
 	side.fov = SIDE_FOV
-	side.global_position = P.global_position + P.model.global_basis.x.normalized() * SIDE_DIST + Vector3(0, 1.2, 0)
-	side.look_at(P.global_position + Vector3(0, 0.9, 0))
+	var big := maxf(1.0, P.model.scale.y)
+	var across := P.model.global_basis.x.normalized() * SIDE_DIST
+	side.global_position = P.global_position + (across + Vector3(0, 1.2, 0)) * big
+	side.look_at(P.global_position + Vector3(0, 0.9, 0) * big)
 	side.make_current()
 	await main.get_tree().process_frame
 	var close := await _grab(m, P, dir.path_join(arch + "_side.jpg"), true)
@@ -88,6 +90,7 @@ func _grab(m: Match, P: Hunter, path: String, whole := false) -> Image:
 		img = full.get_region(Rect2i((full.get_size() - Vector2i(edge, edge)) / 2, Vector2i(edge, edge)))
 		img.resize(CROP, CROP, Image.INTERPOLATE_LANCZOS)
 	img.resize(CROP * SCALE, CROP * SCALE, Image.INTERPOLATE_LANCZOS)
+	img.convert(Image.FORMAT_RGB8)      # (the sheet is RGB8: blit_rect skips an image of another format)
 	img.save_jpg(path, 0.92)
 	return img
 
