@@ -4,7 +4,10 @@ Run: python3 tools/art1/glb_react.py <glb> <clip> scale <factor> [<bone>,...]
        every listed bone's travel from its first key is scaled (rotations by slerp past the key), all bones if none
      python3 tools/art1/glb_react.py <glb> <clip> nudge <bone> <x,y,z deg> <peak_s> [<ease>]
        a rotation bump on the bone's own axes: nothing at 0, full at peak_s, back to nothing by the end along
-       1 - u^ease (ease 2: a heavy body carries the hit a while; 0.5: a light one snaps back)"""
+       1 - u^ease (ease 2: a heavy body carries the hit a while; 0.5: a light one snaps back)
+     python3 tools/art1/glb_react.py <glb> <clip> anchor <idle_clip>
+       the clip's travel from its first key rides on the idle clip's first key, so the clip starts and ends on the
+       pose the game stands in (a hit baked on an older stance ends off it and never settles back)"""
 import math
 import sys
 
@@ -91,11 +94,30 @@ def nudge(bone, deg, peak, ease):
     return edit
 
 
+def anchor(j, b, idle):
+    anim = next(a for a in j["animations"] if a["name"] == idle)
+    base = {(bone, ch["target"]["path"]): vals[0] for ch, bone, _, vals in _tracks(j, b, anim, [0.0])}
+
+    def edit(path, bone, typ, times, vals, length):
+        a = base.get((bone, path))
+        if a is None or path == "scale":
+            return
+        v0 = vals[0]
+        for i, v in enumerate(vals):
+            if typ == "VEC4":
+                vals[i] = _mul(a, _mul([-v0[0], -v0[1], -v0[2], v0[3]], v))
+            else:
+                vals[i] = [x - y + z for x, y, z in zip(v, v0, a)]
+    return edit
+
+
 if __name__ == "__main__":
     path, clip, op = sys.argv[1:4]
     glb, binary = read(path)
     if op == "scale":
         edit = scale(float(sys.argv[4]), sys.argv[5].split(",") if len(sys.argv) > 5 else [])
+    elif op == "anchor":
+        edit = anchor(glb, binary, sys.argv[4])
     else:
         edit = nudge(sys.argv[4], [float(x) for x in sys.argv[5].split(",")], float(sys.argv[6]),
                      float(sys.argv[7]) if len(sys.argv) > 7 else 2.0)
