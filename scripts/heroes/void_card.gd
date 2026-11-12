@@ -5,9 +5,10 @@ extends RefCounted
 ## reads on any ground.
 
 const TEX := "res://art/wardens/ostra/void_card.png"
-const SIZE := Vector2(0.11, 0.16)   # m: as the fan's cards, one glove-length tall (ostra_FINAL_sheet)
-const FLIGHT_K := 1.8               # in flight, for the match camera
+const SIZE := Vector2(0.11, 0.16)  # m: as the fan's cards, one glove-length tall (ostra_FINAL_sheet)
+const FLIGHT_K := 1.8  # in flight, for the match camera
 static var _mat: StandardMaterial3D
+
 
 static func make(k := FLIGHT_K) -> MeshInstance3D:
 	if _mat == null:

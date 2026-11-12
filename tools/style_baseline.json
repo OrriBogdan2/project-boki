@@ -4,10 +4,6 @@
 "nested_ternary": 1,
 "semicolon": 8
 },
-"scripts/arch/arch_demo.gd": {
-"long_line": 5,
-"semicolon": 12
-},
 "scripts/arch/arch_kit.gd": {
 "long_line": 28,
 "nested_ternary": 2,
@@ -116,10 +112,6 @@
 "nested_ternary": 1,
 "semicolon": 4
 },
-"scripts/core/gear_save.gd": {
-"long_line": 1,
-"nested_ternary": 1
-},
 "scripts/core/gliders.gd": {
 "long_line": 9,
 "nested_ternary": 1,
@@ -143,29 +135,15 @@
 "history_comment": 1,
 "long_line": 1
 },
-"scripts/core/look.gd": {
-"long_line": 2,
-"semicolon": 6
-},
 "scripts/core/loot.gd": {
 "long_line": 7,
 "nested_ternary": 3
 },
 "scripts/core/mutations.gd": {
-"long_line": 20,
-"nested_ternary": 2,
-"semicolon": 6
+"nested_ternary": 1
 },
 "scripts/core/net.gd": {
 "long_line": 1,
-"semicolon": 2
-},
-"scripts/core/progress.gd": {
-"long_line": 2
-},
-"scripts/core/ransom.gd": {
-"long_line": 10,
-"nested_ternary": 1,
 "semicolon": 2
 },
 "scripts/core/save.gd": {
@@ -182,8 +160,7 @@
 "semicolon": 3
 },
 "scripts/core/shiny.gd": {
-"nested_ternary": 2,
-"semicolon": 7
+"nested_ternary": 2
 },
 "scripts/core/social.gd": {
 "long_line": 13,
@@ -223,9 +200,6 @@
 },
 "scripts/home/farm_build_ui.gd": {
 "semicolon": 9
-},
-"scripts/home/farm_icons.gd": {
-"long_line": 6
 },
 "scripts/home/farm_models.gd": {
 "long_line": 12,
@@ -298,24 +272,13 @@
 "long_line": 12,
 "semicolon": 2
 },
-"scripts/home/work_models.gd": {
-"long_line": 24,
-"semicolon": 24
-},
 "scripts/kin/ability_spec.gd": {
 "long_line": 6
 },
-"scripts/kin/evolution_node.gd": {
-"long_line": 4,
-"semicolon": 1
-},
 "scripts/kin/grammar.gd": {
-"long_line": 11,
-"nested_ternary": 3,
-"semicolon": 5
+"nested_ternary": 1
 },
 "scripts/kin/grammar_report.gd": {
-"long_line": 2,
 "nested_ternary": 1
 },
 "scripts/kin/kin_exec.gd": {
@@ -355,15 +318,9 @@
 "scripts/kin/merge_spec.gd": {
 "long_line": 3
 },
-"scripts/kin/part_spec.gd": {
-"long_line": 6
-},
 "scripts/kin/parts.gd": {
 "long_line": 43,
 "semicolon": 2
-},
-"scripts/kin/stage_spec.gd": {
-"long_line": 7
 },
 "scripts/main.gd": {
 "long_line": 365,
@@ -497,10 +454,6 @@
 "long_line": 1,
 "semicolon": 2
 },
-"scripts/match/gear_pair.gd": {
-"long_line": 6,
-"semicolon": 4
-},
 "scripts/match/hand_layout.gd": {
 "long_line": 5,
 "semicolon": 5
@@ -511,9 +464,6 @@
 },
 "scripts/match/hero_gear_care.gd": {
 "long_line": 1
-},
-"scripts/match/hero_gear_pair.gd": {
-"long_line": 2
 },
 "scripts/match/hero_hair.gd": {
 "long_line": 20
@@ -570,10 +520,6 @@
 "scripts/match/kin_net.gd": {
 "long_line": 12,
 "nested_ternary": 1
-},
-"scripts/match/kin_path.gd": {
-"long_line": 2,
-"semicolon": 2
 },
 "scripts/match/kin_puppet.gd": {
 "long_line": 1,

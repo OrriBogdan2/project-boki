@@ -4,7 +4,8 @@ extends RefCounted
 ## scrap, gloves become gear items, the loadout moves to five gear slots) and what an extracted
 ## haul turns into on the farm (materials, on top of the gear itself going to the armory).
 
-const OLD_SCRAP := [1, 1, 2, 4, 7]       # what a stored weapon of each rarity breaks down into
+const OLD_SCRAP := [1, 1, 2, 4, 7]  # what a stored weapon of each rarity breaks down into
+
 
 ## Upgrades a v4 save in place. Old weapons (and anything the old loadout held) are scrapped, so
 ## nothing is lost: the scrap buys the same armory and backpack upgrades it always did.
@@ -17,7 +18,11 @@ static func migrate(data: Dictionary) -> void:
 				continue
 			match String(it.get("t", "")):
 				"weapon":
-					scrap += int(OLD_SCRAP[clampi(int(it.get("rar", 0)), 0, 4)]) + (2 if String(it.get("el", "")) != "" else 0) + (5 if String(it.get("uq", "")) != "" else 0)
+					scrap += (
+						int(OLD_SCRAP[clampi(int(it.get("rar", 0)), 0, 4)])
+						+ (2 if String(it.get("el", "")) != "" else 0)
+						+ (5 if String(it.get("uq", "")) != "" else 0)
+					)
 				"glove":
 					it["t"] = "gear"
 					out.append(it)
@@ -27,7 +32,8 @@ static func migrate(data: Dictionary) -> void:
 	data["scrap"] = scrap
 	var by_uid := {}
 	for key in ["armory", "raid_out"]:
-		for it in data[key]: by_uid[String((it as Dictionary).get("uid", ""))] = it
+		for it in data[key]:
+			by_uid[String((it as Dictionary).get("uid", ""))] = it
 	# the old glove loadout is re-keyed by where each piece really goes now (an old passive "glove" may be
 	# armor or boots today); a second piece for a slot that is taken just stays in the armory, never lost
 	var lo_new := {}
@@ -45,6 +51,7 @@ static func migrate(data: Dictionary) -> void:
 	var sg := Arch.signature(String(data.get("arch", "")))
 	if sg != "":
 		data["weapon"] = sg
+
 
 ## Farm materials from an extracted haul: every piece of gear brought home also gives parts
 ## (content/rules/gear.json "extract_mats", by rarity). Returns {"wood": n, "stone": n, "scrap": n}

@@ -11,30 +11,39 @@ class_name Auction
 ## A Lot is {id, key, payload, seller ("you" or an NPC), start, step, ends (unix s), friends,
 ## top (0 = no bid yet), bidder ("" / "you" / an NPC name), cap (an NPC lot's rivals' limit)}.
 
-const NPC_BID_CHANCE := 0.6      # per lot per expedition (offline): an NPC bids when it still can
+const NPC_BID_CHANCE := 0.6  # per lot per expedition (offline): an NPC bids when it still can
+
 
 static func _st() -> Dictionary:
 	return MarketSave.section("auction")
 
+
 static func _rules() -> Dictionary:
 	return Goods.rules()["auction"]
+
 
 static func lots() -> Array:
 	return _st()["lots"]
 
+
 static func find(id: String) -> Dictionary:
 	for lot in lots():
-		if String(lot["id"]) == id: return lot
+		if String(lot["id"]) == id:
+			return lot
 	return {}
+
 
 ## The least the next bid can be.
 static func min_bid(lot: Dictionary) -> int:
 	return int(lot["start"]) if int(lot["top"]) <= 0 else int(lot["top"]) + int(lot["step"])
 
+
 static func _note(text: String) -> void:
 	var lg: Array = _st()["log"]
 	lg.append(text)
-	while lg.size() > 30: lg.pop_front()
+	while lg.size() > 30:
+		lg.pop_front()
+
 
 # ------------------------------------------------------------------ selling
 ## Puts one of your goods up. {ok, why, id, fee}.
@@ -54,12 +63,25 @@ static func create(key: String, start: int, step: int, hours: int, friends: bool
 		return {"ok": false, "why": "Listing costs %d gems" % fee}
 	Save.d["gems"] = int(Save.d["gems"]) - fee
 	var payload: Dictionary = Goods.take(key)
-	if key.begins_with("gear:"): key = "gear:" + String(payload["gear"].get("uid", ""))
-	var lot := {"id": MarketSave.next_id(), "key": key, "payload": payload, "seller": "you", "start": start,
-		"step": step, "ends": MarketSave.now() + hours * 3600, "friends": friends, "top": 0, "bidder": "", "cap": 0}
+	if key.begins_with("gear:"):
+		key = "gear:" + String(payload["gear"].get("uid", ""))
+	var lot := {
+		"id": MarketSave.next_id(),
+		"key": key,
+		"payload": payload,
+		"seller": "you",
+		"start": start,
+		"step": step,
+		"ends": MarketSave.now() + hours * 3600,
+		"friends": friends,
+		"top": 0,
+		"bidder": "",
+		"cap": 0
+	}
 	lots().append(lot)
 	Save.save_game()
 	return {"ok": true, "why": "", "id": String(lot["id"]), "fee": fee}
+
 
 # ------------------------------------------------------------------ bidding
 ## Bids on a lot. The gems are held at once; outbid, they come back. {ok, why}.
@@ -82,6 +104,7 @@ static func bid(id: String, amount: int) -> Dictionary:
 	Save.save_game()
 	return {"ok": true, "why": ""}
 
+
 ## A new top bid: the one it beats gets its gems back, and a bid in the last minute extends the end.
 static func _place(lot: Dictionary, who: String, amount: int) -> void:
 	if String(lot["bidder"]) == "you":
@@ -94,6 +117,7 @@ static func _place(lot: Dictionary, who: String, amount: int) -> void:
 	if int(lot["ends"]) - now < int(_rules()["snipe_s"]):
 		lot["ends"] = now + int(_rules()["extend_s"])
 
+
 # ------------------------------------------------------------------ time passing
 ## Lots that ended are settled: the item goes to the winner, the seller is paid less tax, and a lot
 ## nobody bid on goes back to its seller. Returns lines for you.
@@ -101,7 +125,8 @@ static func settle() -> Array:
 	var news: Array = []
 	var now := MarketSave.now()
 	for lot in lots().duplicate():
-		if now < int(lot["ends"]): continue
+		if now < int(lot["ends"]):
+			continue
 		lots().erase(lot)
 		var what := Goods.name_of(String(lot["key"]), lot["payload"])
 		if String(lot["seller"]) == "you":
@@ -115,8 +140,10 @@ static func settle() -> Array:
 		elif String(lot["bidder"]) == "you":
 			Goods.give(String(lot["key"]), lot["payload"])
 			news.append("You won %s for %d gems." % [what, int(lot["top"])])
-	for line in news: _note(line)
+	for line in news:
+		_note(line)
 	return news
+
 
 ## NPC lots on offer: kept topped up to auction.npc_lots with rare and epic goods.
 static func refill() -> void:
@@ -130,24 +157,41 @@ static func refill() -> void:
 		var ref := Goods.ref_of(key)
 		var stall_names: Array = Goods.rules()["npc"]["stalls"]
 		var seller := String(stall_names[rng.randi_range(0, stall_names.size() - 1)])
-		lots().append({"id": MarketSave.next_id(), "key": key, "payload": {}, "seller": seller,
-			"start": int(ceil(ref * float(_rules()["npc_lot_start"]))), "step": maxi(1, int(ceil(ref * 0.05))),
-			"ends": MarketSave.now() + int(hours[rng.randi_range(0, hours.size() - 1)]) * 3600, "friends": false,
-			"top": 0, "bidder": "", "cap": int(round(ref * float(_rules()["npc_lot_cap"]) * rng.randf_range(0.8, 1.0))),
-		})
+		(
+			lots()
+			. append(
+				{
+					"id": MarketSave.next_id(),
+					"key": key,
+					"payload": {},
+					"seller": seller,
+					"start": int(ceil(ref * float(_rules()["npc_lot_start"]))),
+					"step": maxi(1, int(ceil(ref * 0.05))),
+					"ends": MarketSave.now() + int(hours[rng.randi_range(0, hours.size() - 1)]) * 3600,
+					"friends": false,
+					"top": 0,
+					"bidder": "",
+					"cap": int(round(ref * float(_rules()["npc_lot_cap"]) * rng.randf_range(0.8, 1.0))),
+				}
+			)
+		)
+
 
 ## One expedition's worth of NPC bidding (offline), then the endings. Returns lines for you.
 static func tick(rng: RandomNumberGenerator) -> Array:
 	for lot in lots():
 		var involves_you := String(lot["bidder"]) == "you" or String(lot["seller"]) == "you"
-		if not involves_you or MarketSave.now() >= int(lot["ends"]) or rng.randf() >= NPC_BID_CHANCE: continue
+		if not involves_you or MarketSave.now() >= int(lot["ends"]) or rng.randf() >= NPC_BID_CHANCE:
+			continue
 		var cap := _npc_cap(lot)
-		if min_bid(lot) > cap: continue
+		if min_bid(lot) > cap:
+			continue
 		var amount := mini(cap, min_bid(lot) + int(lot["step"]) * rng.randi_range(0, 2))
 		_place(lot, String(Data.BOT_NAMES[rng.randi_range(0, Data.BOT_NAMES.size() - 1)]), amount)
 	var news := settle()
 	refill()
 	return news
+
 
 ## How high NPCs bid on a lot: your lots up to npc_bid_k x reference (none on friends-only lots), an
 ## NPC lot's rivals up to its cap.

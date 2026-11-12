@@ -18,28 +18,32 @@ const TOOLS := {
 	"hammer": {"act": "build", "period": 0.8, "lift": 0.55, "haft": 0.4, "two_hands": false},
 }
 const ACTS := ["chop", "mine", "build"]
-const IMPACT := 0.78          # share of a swing at which the head meets the target
-const WIND := 0.5             # share of a swing spent lifting the tool before the strike
-const RECOIL := 0.12          # how far the tool bounces back up after the strike (share of the lift)
-const GRIP_GAP := 0.2         # m between the two hands on a haft
-const SIZE := 1.4            # the tool is drawn this much larger than life so it reads at the farm camera
-const POP_RATE := 12.0        # how fast the tool and the stowed weapon fade (per second)
+const IMPACT := 0.78  # share of a swing at which the head meets the target
+const WIND := 0.5  # share of a swing spent lifting the tool before the strike
+const RECOIL := 0.12  # how far the tool bounces back up after the strike (share of the lift)
+const GRIP_GAP := 0.2  # m between the two hands on a haft
+const SIZE := 1.4  # the tool is drawn this much larger than life so it reads at the farm camera
+const POP_RATE := 12.0  # how fast the tool and the stowed weapon fade (per second)
 const DIR_HIT := Vector3(0.0, -0.35, -1.0)
 const DIR_LIFT := Vector3(0.0, 0.8, -0.7)
 const HAMMER_DIR_HIT := Vector3(0.0, -0.25, -1.0)
 const HAMMER_DIR_LIFT := Vector3(0.0, 0.9, -0.5)
 
+
 static func period(tool: String) -> float:
 	return float(TOOLS[tool]["period"])
 
+
 static func act_of(tool: String) -> String:
 	return String(TOOLS[tool]["act"]) if TOOLS.has(tool) else ""
+
 
 static func tool_of_act(act: String) -> String:
 	for t in TOOLS:
 		if TOOLS[t]["act"] == act:
 			return t
 	return ""
+
 
 ## How far lifted the tool is, 0 on the target to 1 at the top of the swing, for `phase` 0..1.
 static func lift(phase: float) -> float:
@@ -50,19 +54,23 @@ static func lift(phase: float) -> float:
 		return 1.0 - k * k
 	return RECOIL * sin(PI * (phase - IMPACT) / (1.0 - IMPACT))
 
+
 # ------------------------------------------------------------------ the pose (HunterAnim asks)
 static func _u(act: String, phase: float) -> float:
 	return lift(phase) * float(TOOLS[tool_of_act(act)]["lift"])
+
 
 ## Leg angles: Vector4(hip_l, knee_l, hip_r, knee_r), a planted stance that sinks into the strike.
 static func legs(act: String, phase: float) -> Vector4:
 	var sink := 1.0 - _u(act, phase)
 	return Vector4(0.32 + sink * 0.08, -0.45 - sink * 0.2, -0.18, -0.3 - sink * 0.15)
 
+
 ## Forward lean of the body: back at the top of the swing, into it on the strike.
 static func pitch(act: String, phase: float) -> float:
 	var u := _u(act, phase)
 	return 0.3 * (1.0 - u) - 0.1 * u
+
 
 ## Where the tool's butt, its direction and the right hand go, in the torso's space.
 static func grip(tool: String, phase: float, sh_l: Vector3, sh_r: Vector3) -> Dictionary:
@@ -76,10 +84,12 @@ static func grip(tool: String, phase: float, sh_l: Vector3, sh_r: Vector3) -> Di
 	var dir_h := HAMMER_DIR_HIT.normalized().slerp(HAMMER_DIR_LIFT.normalized(), u)
 	return {"left": sh_l + Vector3(0.14, -0.2, -0.36), "right": hand, "dir": dir_h, "butt": hand - dir_h * 0.05}
 
+
 ## HunterAnim._act_hands: [left hand, right hand, how much the right hand lets go of the weapon].
 static func hands(act: String, phase: float, sh_l: Vector3, sh_r: Vector3) -> Array:
 	var g := grip(tool_of_act(act), phase, sh_l, sh_r)
 	return [g["left"], g["right"], 1.0]
+
 
 # ------------------------------------------------------------------ the weapon and the tool in the rig
 ## Every frame, before the arms: which pose, how far the weapon is put away and the tool brought out.
@@ -100,6 +110,7 @@ static func tick(a: HunterAnim, dt: float, s: Dictionary) -> void:
 	if a.focus:
 		a.focus.visible = held_back
 
+
 ## After the arms are posed: the tool in the hands.
 static func place(a: HunterAnim) -> void:
 	var node := a.torso.get_node_or_null("Tool") as Node3D
@@ -112,19 +123,22 @@ static func place(a: HunterAnim) -> void:
 	var right := a.arm_r.transform * (a.el_r.transform * a.hand_r.position)
 	var grip_dir := (right - left) if bool(TOOLS[a.tool_kind]["two_hands"]) else _hammer_dir(a)
 	var dir := grip_dir.normalized() if grip_dir.length() > 0.02 else Vector3.UP
-	var edge := Basis(Vector3.RIGHT, -PI * 0.5) * dir        # the blade, pick or face points where the swing goes
+	var edge := Basis(Vector3.RIGHT, -PI * 0.5) * dir  # the blade, pick or face points where the swing goes
 	var z_axis := -edge
 	var x_axis := dir.cross(z_axis).normalized()
 	z_axis = x_axis.cross(dir)
 	var origin := left - dir * 0.1 if bool(TOOLS[a.tool_kind]["two_hands"]) else right - dir * 0.05
 	node.transform = Transform3D(Basis(x_axis, dir, z_axis) * Basis.from_scale(Vector3.ONE * a.tool_k * SIZE), origin)
 
+
 static func _ease(cur: float, on: bool, dt: float) -> float:
 	return lerpf(cur, 1.0 if on else 0.0, 1.0 - exp(-POP_RATE * dt))
+
 
 static func _hammer_dir(a: HunterAnim) -> Vector3:
 	var u := _u("build", a.tool_ph)
 	return HAMMER_DIR_HIT.normalized().slerp(HAMMER_DIR_LIFT.normalized(), u)
+
 
 static func _build(a: HunterAnim) -> void:
 	var old := a.torso.get_node_or_null("Tool")

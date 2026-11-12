@@ -16,6 +16,7 @@ var peer: ENetMultiplayerPeer
 var api: SceneMultiplayer
 var connected := false
 
+
 func open(host: String, port: int) -> int:
 	peer = ENetMultiplayerPeer.new()
 	var err := peer.create_client(host, port, 2)
@@ -31,20 +32,24 @@ func open(host: String, port: int) -> int:
 	api.peer_packet.connect(_on_packet)
 	return OK
 
+
 func send(d: Dictionary, fast := false) -> void:
 	if not connected or api == null:
 		return
 	var mode := MultiplayerPeer.TRANSFER_MODE_UNRELIABLE_ORDERED if fast else MultiplayerPeer.TRANSFER_MODE_RELIABLE
 	api.send_bytes(JSON.stringify(d).to_utf8_buffer(), 1, mode, CH_FAST if fast else CH_RELIABLE)
 
+
 func close() -> void:
 	if peer:
 		peer.close()
 	connected = false
 
+
 func _on_lost() -> void:
 	connected = false
 	closed.emit("Lost the connection to the server.")
+
 
 func _on_packet(_from: int, bytes: PackedByteArray) -> void:
 	var parsed = JSON.parse_string(bytes.get_string_from_utf8())

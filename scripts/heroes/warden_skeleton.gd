@@ -7,20 +7,39 @@ extends RefCounted
 
 ## Each bone's parent (root has none). Thighs hang from root: the legs are not under the hips in the rig.
 const PARENT := {
-	"root": "", "hips": "root", "head": "hips",
-	"upper_arm.L": "hips", "forearm.L": "upper_arm.L", "hand.L": "forearm.L",
-	"upper_arm.R": "hips", "forearm.R": "upper_arm.R", "hand.R": "forearm.R",
-	"thigh.L": "root", "shin.L": "thigh.L", "thigh.R": "root", "shin.R": "thigh.R",
-	"pauldron.L": "hips", "pauldron.R": "hips", "skirt": "hips", "cape": "hips", "scarf": "hips",
-	"tail": "hips", "wings": "hips",
+	"root": "",
+	"hips": "root",
+	"head": "hips",
+	"upper_arm.L": "hips",
+	"forearm.L": "upper_arm.L",
+	"hand.L": "forearm.L",
+	"upper_arm.R": "hips",
+	"forearm.R": "upper_arm.R",
+	"hand.R": "forearm.R",
+	"thigh.L": "root",
+	"shin.L": "thigh.L",
+	"thigh.R": "root",
+	"shin.R": "thigh.R",
+	"pauldron.L": "hips",
+	"pauldron.R": "hips",
+	"skirt": "hips",
+	"cape": "hips",
+	"scarf": "hips",
+	"tail": "hips",
+	"wings": "hips",
 }
 ## The joint each limb bone points at (its Y axis); the hand and shin carry on in their parent's line.
 const POINTS_AT := {
-	"upper_arm.L": "forearm.L", "forearm.L": "hand.L", "upper_arm.R": "forearm.R", "forearm.R": "hand.R",
-	"thigh.L": "shin.L", "thigh.R": "shin.R",
+	"upper_arm.L": "forearm.L",
+	"forearm.L": "hand.L",
+	"upper_arm.R": "forearm.R",
+	"forearm.R": "hand.R",
+	"thigh.L": "shin.L",
+	"thigh.R": "shin.R",
 }
 const CARRY_ON := {"hand.L": "forearm.L", "hand.R": "forearm.R", "shin.L": "thigh.L", "shin.R": "thigh.R"}
-const REST_TOL := 0.01         # m a .glb bone's head may sit from its rig node
+const REST_TOL := 0.01  # m a .glb bone's head may sit from its rig node
+
 
 ## Model-space rest transform of every rig node a bone follows (the procedural model as Models.hunter has
 ## built it, before HunterAnim's rest pose). Read once when the hunter is dressed.
@@ -31,6 +50,7 @@ static func rig_rest(root: Node3D) -> Dictionary:
 		if nd != null:
 			out[b] = WardenGlb.model_xf(root, nd)
 	return out
+
 
 ## The contract armature for a rig rest (rig_rest): bones in parent-first order, unit-scale rests.
 static func build(rest: Dictionary) -> Skeleton3D:
@@ -51,6 +71,7 @@ static func build(rest: Dictionary) -> Skeleton3D:
 		sk.set_bone_pose(bi, local)
 	return sk
 
+
 ## Y along the limb toward the next joint (a hand or shin keeps its parent's line); other bones stand up.
 static func _basis(b: String, rest: Dictionary) -> Basis:
 	var from := (rest[b] as Transform3D).origin
@@ -66,10 +87,12 @@ static func _basis(b: String, rest: Dictionary) -> Basis:
 	x = x.normalized()
 	return Basis(x, y, x.cross(y)).orthonormalized()
 
+
 ## A contract bone in an imported armature: glTF tools write "upper_arm.L" as "upper_arm_L". -1 if absent.
 static func find(sk: Skeleton3D, bone: String) -> int:
 	var bi := sk.find_bone(bone)
 	return bi if bi >= 0 else sk.find_bone(bone.replace(".", "_"))
+
 
 ## What keeps `sk` from being the contract armature for `rest`: a missing bone, a wrong parent, or a bone
 ## whose head is off its rig node; and, for a Warden with variant bones (`extra`: bone -> parent, WardenGlb.EXTRA),

@@ -8,6 +8,7 @@ var _t := 0.0
 var _star: Node3D = null
 var _key: Node3D = null
 
+
 func _init() -> void:
 	name = "KeyGlint"
 	_key = KeyModels.key(0.7, false)
@@ -21,6 +22,7 @@ func _init() -> void:
 	_star = Models.icon_badge("ckey", 0.28, 0.55)
 	add_child(_star)
 
+
 func _process(delta: float) -> void:
 	_t += delta
 	_key.rotation.y += delta * 2.4
@@ -28,7 +30,9 @@ func _process(delta: float) -> void:
 	var wink := maxf(0.0, sin(_t * 4.4 - 1.2))
 	_star.scale = Vector3.ONE * (0.8 + wink * 0.5)
 
+
 var _base_h := 1.9
+
 
 func set_height(h: float) -> void:
 	_base_h = h
