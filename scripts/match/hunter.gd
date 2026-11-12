@@ -2265,7 +2265,7 @@ func _physics(dt: float) -> void:
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
 			stun_t = maxf(stun_t, st)
-			m.on_wall_slam(self)
+			m.on_wall_slam(self, pre_v.normalized())
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
 		wall_moves.land()

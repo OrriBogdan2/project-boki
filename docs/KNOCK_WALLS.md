@@ -30,3 +30,6 @@ Now, per source on a cliff, rock or Rink Wall: Heavy Shot 1.2 s, 178 damage, fra
 
 ## Not built (ideas of ours)
 A stun when a knocked body hits a sky-train car's side, or a crate that survives the hit. Both have no source row.
+
+## What it looks like
+At the moment of a wall stun the wall shows where the body hit: a short crack decal on the surface and a small dust puff, about 0.6 s, stone-coloured with the attacker's hero colour on the rim (scripts/match/wall_impact.gd). No ring on the ground (the old slam ring and burst are gone). `KnockWall.hit` (kits) and `KnockWall.slammed` (the body slam) raise `CombatBus.wall_stunned` with the contact point; a second source stunning the same body within 0.5 s adds nothing. Six decals at most (the oldest is reused). `--wall-stun-check` asserts one decal per wall stun at the wall face and none on a step, crate or Hunter; `--wall-stun-shots` takes the pictures.

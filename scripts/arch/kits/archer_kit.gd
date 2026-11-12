@@ -316,7 +316,7 @@ func _pin(a: Vector3, k: float) -> void:
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
 		# driven into terrain within 3m: pinned (a stun)
-		if KnockWall.behind(m, f, dir, float(pd["wall"])):
+		if KnockWall.hit(m, f, dir, float(pd["wall"]), h):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)

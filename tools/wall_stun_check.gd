@@ -19,6 +19,7 @@ func run(main_node: Node) -> void:
 		await _source(src)
 	await _monsters()
 	await _train()
+	_pool()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -42,11 +43,21 @@ func _source(src: String) -> void:
 		P.vel = Vector3.ZERO
 		T2.teleport(home + Vector3(0, 0, 8.0))
 		var undo := _build(m, T, T2, s, spot, lv)
+		var wi: WallImpact = m.fx.wall_impact
+		var decals0 := wi.placed
 		var rec := _knock(src, m, P, T)
 		undo.call()
 		var want := _expect(src, s)
 		var info := "stun %.2f dmg %.0f frame %d" % [rec["stun"], rec["dmg"], rec["frame"]]
 		ok("wall %s > %s" % [src, s], (rec["stun"] > 0.4) == want, info)
+		# one wall stun, one decal, on the wall face (a Hunter or a step is no wall: none)
+		var face := float(int(floor(spot.x)) + GAP)
+		var at := wi.last_at
+		var placed_ok := wi.placed - decals0 == (1 if s in WALLS else 0)
+		if s in WALLS and placed_ok:
+			placed_ok = at.x > face - 0.3 and at.x < face + 1.0 and absf(at.z - spot.z) < 1.0
+			placed_ok = placed_ok and wi.last_normal.is_equal_approx(Vector3(-1, 0, 0))
+		ok("decal %s > %s" % [src, s], placed_ok, "decals %d at %s" % [wi.placed - decals0, at])
 	await done(m)
 
 ## Puts `surface` GAP tiles east of the foe; returns how to take it away again.
@@ -134,6 +145,7 @@ func _monsters() -> void:
 		mb.stun_t = 0.0
 		mb.hp = mb.max_hp
 		var undo := _build(m, T, T2, s, spot, lv)
+		var decals0: int = m.fx.wall_impact.placed
 		mb.hurt(1.0, P, {"src": "abil", "ab": "lmb", "kb": Vector2(14.0, 0.0), "lift": 0.5})
 		var stun := 0.0
 		for i in FRAMES:
@@ -141,6 +153,8 @@ func _monsters() -> void:
 			stun = maxf(stun, mb.stun_t)
 		undo.call()
 		ok("wall monster > %s" % s, (stun > 0.4) == (s != "tier step"), "stun %.2f" % stun)
+		var made: int = m.fx.wall_impact.placed - decals0
+		ok("decal monster > %s" % s, made == (0 if s == "tier step" else 1), "decals %d" % made)
 	await done(m)
 
 ## The sky train: a flat car you stand on is no wall, the engine is solid.
@@ -165,3 +179,17 @@ func _train() -> void:
 			ok("wall train %s" % k, hit == (k == "engine"), "behind %s" % hit)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## The decals are pooled: stamping far more than the pool holds leaves no more than the pool visible, and the
+## dust and decals are gone by about 0.6 s.
+func _pool() -> void:
+	var wi := WallImpact.new()
+	main.add_child(wi)
+	for i in WallImpact.POOL * 3:
+		wi.stamp(Vector3(i, 1, 0), Vector3(-1, 0, 0), Color.WHITE)
+	var shown := wi.get_children().filter(func(c): return (c as Node3D).visible).size()
+	ok("decal pool is capped", shown == WallImpact.POOL, "%d shown of %d" % [shown, WallImpact.POOL])
+	wi._process(WallImpact.LIFE + 0.01)
+	shown = wi.get_children().filter(func(c): return (c as Node3D).visible).size()
+	ok("decals are gone after %.1f s" % WallImpact.LIFE, shown == 0, "%d still shown" % shown)
+	wi.queue_free()
