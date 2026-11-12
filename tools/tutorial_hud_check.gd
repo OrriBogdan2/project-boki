@@ -6,6 +6,8 @@ extends RefCounted
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner
+##   2b. one prompt: a fresh banner, a toast and a world prompt show as the banner alone; a fight's urgent
+##      line and its revive prompt still show; the step's plain words go to the lane once, not every frame
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
@@ -82,12 +84,15 @@ func _course() -> void:
 	ok(closed, "the intro card closes by itself within %.1fs (%.2fs)" % [Tutorial.INTRO_T, held_at])
 	ok(bool(Save.d["tutorial"].get("tut_intro", false)), "and is remembered, so it only shows the first time")
 	_marker()
+	_one_prompt()
 	var t := 0.0
 	var last := -1
 	var step_t := 0.0
 	var worst := 0.0
 	var toast_in_card := 0
 	var bubble_in_card := 0
+	var prompt_in_card := 0
+	var words_seen := 0
 	var shown_after := 0
 	var asked := 0
 	var under := 0
@@ -113,13 +118,18 @@ func _course() -> void:
 		if tu.card_up():
 			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
+			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
+			words_seen += int(tu.detail != "" and m.hud.msgs.texts().has(tu.detail))
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
+	var once := "(%d frames over %d steps)" % [words_seen, last + 1]
+	ok(words_seen > 0 and words_seen <= last + 1, "the step's plain words come to the lane once a step " + once)
+	ok(prompt_in_card == 0, "no world prompt shows while a banner is up (%d frames)" % prompt_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
@@ -137,6 +147,34 @@ func _course() -> void:
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
 	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+
+## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
+## and revive prompt get through; when the banner settles the toast shows.
+func _one_prompt() -> void:
+	var tu: Tutorial = m.tut
+	var lane: MsgLane = m.hud.msgs
+	lane.clear()
+	tu.card_t = 0.0
+	m.step(Match.DT)        # (the tutorial puts the lane on hold for the fresh banner)
+	m.hud.toast("one prompt", Color.WHITE)
+	m.interact = {"kind": "chest", "label": "Press F to open"}
+	var n := _prompts()
+	ok(tu.card_up() and n == 1, "a fresh banner, a toast and a world prompt: one prompt shows (%d)" % n)
+	lane.push("Your Boki is down", Color.WHITE, MsgLane.URGENT)
+	m.interact = {"kind": "revive", "label": "Hold F to revive"}
+	n = _prompts()
+	ok(n == 3 and lane.waiting() == 1, "a fight's urgent line and revive prompt still show (%d)" % n)
+	m.interact = {}
+	tu.card_t = Tutorial.CARD_T
+	m.step(Match.DT)
+	ok(lane.texts().has("one prompt"), "when the banner settles the toast shows (%s)" % str(lane.texts()))
+	lane.clear()
+
+## What asks for the player's eye now: the banner, the lane's lines on show, the world prompt.
+func _prompts() -> int:
+	var n := 1 if m.tut.step >= 0 else 0
+	n += m.hud.msgs.texts().size()
+	return n + int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
