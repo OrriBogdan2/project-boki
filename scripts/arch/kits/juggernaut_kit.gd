@@ -640,6 +640,10 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
+## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
+func rmb_open() -> bool:
+	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
+
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop) is kept for
 ## BUFFER and goes off when it ends; in the Warchain's pull (and just after) it spins at once.
 func press_rmb() -> void:
