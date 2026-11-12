@@ -249,6 +249,9 @@ func thief(a) -> void:
 			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
 			and A.dmg(T) <= 0.0,
 			"len %.1f" % float(bl.get("len", 0.0)))
+	A.ok("dancer RMB telegraph: the lane is drawn as wide as it catches (rmb.bola.lane_w, the parity 1.8 m)",
+			absf(float(bl.get("width", 0.0)) - float(K.rmb_def()["bola"]["lane_w"])) < 0.01,
+			"width %.2f" % float(bl.get("width", 0.0)))
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
@@ -266,6 +269,7 @@ func thief(a) -> void:
 	A.ok("dancer Bola: Grounded can't dash or jump",
 			T.dashes >= 0.99 and T.roll_t <= 0.0 and T.vel.y < 1.0, "dashes %.2f vy %.1f" % [T.dashes, T.vel.y])
 	A.step(m, 2.0)
+	_bola_edge(A, m, P, K, T, T2, home)
 	# ... it bounces once off a wall
 	var W = m.world
 	for dz in range(-3, 4):
@@ -1365,3 +1369,22 @@ func _fx(move: Dictionary, p: String) -> Dictionary:
 		if fx["p"] == p:
 			return fx
 	return {}
+
+## Drawn = hit for the Bola: the lane is the catch corridor for a foe of her size, so a foe whose body is just inside
+## the lane's reach past it is caught and one just outside is not.
+func _bola_edge(A, m: Match, P: Hunter, K, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var reach := float(K.rmb_def()["bola"]["lane_w"]) * 0.5 - P.r
+	A.fresh(T)
+	A.fresh(T2)
+	P.teleport(home)
+	T.teleport(home + Vector3(3.0, 0, T.r + reach - 0.08))
+	T2.teleport(home + Vector3(5.0, 0, -T2.r - reach - 0.08))
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.aim_at(P, home + Vector3(8.0, 0, 0))
+	A.tap(m, P)
+	A.step(m, 0.8)
+	A.ok("dancer RMB telegraph: a foe just inside the lane's edge is caught, one just outside is not",
+			KitStatus.grounded(T) and not KitStatus.grounded(T2), "in %s out %s" % [KitStatus.grounded(T),
+			KitStatus.grounded(T2)])
+	A.step(m, 1.8)

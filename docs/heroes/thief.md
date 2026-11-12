@@ -228,6 +228,19 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | A knock heals (the data: "heal when you knock an enemy", Shiv; no number) | owner's game data [D] | yes (0063) | Built: 15% (ours) plus the shared 5% = 20%, asserted exactly |
 | An assist heals 25% | wiki only; the data has no assist heal | no | Built; ours-only, listed on the owner card |
 
+## Telegraphs (drawn = hit, ported from telegraph-audit-c onto the 0.24.5 tells)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; drawn size is the data size. Checked in `--dancer-combo-check` (`tools/dancer_jug_check.gd`, `tools/dj_ult_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Bola (RMB) | a chevron lane `lane_len()` (10.8 m) long, `bola.lane_w` 1.8 m wide (the parity row, footage: about 1 bh) | the flight catches a foe whose body comes within `lane_w / 2 - her radius` (0.516 m) of it: a 1.8 m corridor for a foe her size | caster | the hit reached a magic 0.45 m past the body (a 1.67 m corridor); now it reads the reach off the drawn lane (+0.066 m a side). Asserted at the lane's edge both ways |
+| Grounded | two yellow binding rings round the foe | status marker, no area | all | kept (the source shows the rings) |
+| Knife (E) | the dagger's arrival circle, 1.6 m | the blink's arrival point | caster | kept (source arrival marker), no hit area |
+| Encore (X) | a thin ring (`RING_W` 0.25 m band) whose outer edge grows from `x.r0` 2.3 to `x.reach` 5.4 m over `x.grow`, and a dashed outer band at `x.rim` 0.75 of it | a blade at every foe inside `radius()`; past the band hits harder | all | already true on 0.24.5 (no beat swell); now asserted on every beat |
+
+Suggestion, not built: the source's knife ring is about 1.5 bh (2.7 m) across; ours is 1.6 m.
+
 ## Combinations
 
 All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `--dancer-combo-check`
