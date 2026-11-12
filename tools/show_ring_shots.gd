@@ -36,8 +36,11 @@ func run(main: Node) -> void:
 			break
 		await main.get_tree().process_frame
 	home._close_panel()
-	if main.get("fade") != null:
-		main.fade.reveal(0.01)
+	for f in 30:
+		await main.get_tree().process_frame
+	if main.get("fade") != null:   # the boot logo and ink stay up otherwise: the strip is of the game only
+		main.fade.logo.modulate.a = 0.0
+		main.fade.visible = false
 	var sr: ShowRing = home.hshow
 	if sr == null:
 		print("SHOWRINGSHOTS FAIL no stage")
@@ -52,10 +55,19 @@ func run(main: Node) -> void:
 		t += 0.1
 	var frames: Array[Image] = []
 	var got := Vector2i.ZERO
-	var start := Time.get_ticks_msec()
+	var mm = sr.get("marks")
+	if not is_instance_valid(mm):
+		print("SHOWRINGSHOTS FAIL no marks after the show")
+		main.get_tree().quit(1)
+		return
+	mm.set_process(false)   # its clock is set per grab, so a slow renderer still shows each moment
 	for i in TIMES.size():
-		while (Time.get_ticks_msec() - start) / 1000.0 < float(TIMES[i]):
-			await main.get_tree().process_frame
+		if is_instance_valid(mm):
+			mm.t = float(TIMES[i])
+			mm._process(0.0)
+		for f in 3:
+			await RenderingServer.frame_post_draw
+		print("SHOWRING frame %d t=%.2f marks=%s" % [i, TIMES[i], "on" if is_instance_valid(mm) else "gone"])
 		var img := main.get_viewport().get_texture().get_image()
 		if img == null:
 			print("SHOWRINGSHOTS FAIL no renderer (run through jobq --needs gpu)")
@@ -74,7 +86,6 @@ func run(main: Node) -> void:
 		f.resize(w, hh, Image.INTERPOLATE_BILINEAR)
 		strip.blit_rect(f, Rect2i(0, 0, w, hh), Vector2i((i % cols) * w, (i / cols) * hh))
 	strip.save_png(dir.path_join("strip.png"))
-	var m = sr.get("marks")
-	var rib: String = m.col.to_html(false) if is_instance_valid(m) else "gone"
+	var rib: String = mm.col.to_html(false) if is_instance_valid(mm) else "gone"
 	print("SHOWRINGSHOTS DONE %s %dx%d, show %.1f s, ribbon %s" % [dir, got.x, got.y, t, rib])
 	main.get_tree().quit()
