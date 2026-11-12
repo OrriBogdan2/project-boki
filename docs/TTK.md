@@ -25,6 +25,8 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 
 Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15) and the LMB is level 9 (Tetra about 18), so no combo row mixes the two.
 
+**Gil** (13th Hunter, 0.24.4) has no source hero: his rows are ours only, verdict `ours`, and his cast rows have no source share (n/a). His combo is Grab Bag (RMB), Ground Swim and Riptide (E), LMB between. His combo time moves between runs (5.0 to 7.7 s in three runs) because the potion bag is shuffled (the thunder stun and slow riders change how long the target stays in the thrusts); the table holds the last run. Balance outliers, not retuned: his LMB (8.7 s) sits inside the roster's 4.9 to 10.4 s,, and his combo gains only 1 to 4 s on it (his three casts add 21% of the target between them: 0.104 + 0.026 + 0.078); among the combos only Motley's (8.4 to 10.3 s) is slower.
+
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
 |---|---|---|---|---|---|
@@ -94,6 +96,10 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
 | rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| gil (-) | LMB rank 0 | 8.73 | never | n/a | ours |
+| gil (-) | LMB rank max | 8.73 | never | n/a | ours |
+| gil (-) | combo rank 0 | 6.85 | never | n/a | ours |
+| gil (-) | combo rank max | 5.03 | never | n/a | ours |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
