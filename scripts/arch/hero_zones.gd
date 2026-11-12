@@ -21,9 +21,8 @@ const ROCK_TH := 0.42                # m: half its depth (wider than a barrier s
 const STEP := 0.25                   # the walk along a cast, metres
 const ROCK_RISE_T := 0.22            # s: a rock heaving up out of the ground
 const ROCK_REACH := 0.75             # m: past a rock's top, how far above its base a punch or slam still takes it
-const SEED_A := 0.6                  # the seed drum's glass alpha...
+const SEED_A := 0.6                  # the seed globe's glass alpha...
 const SEED_BODY := 0.15              # ...and its core's share of it: 0.15 alpha at the centre, the rim carries it
-const SEED_TALL := 0.3               # m: the drum's height (a low disc with a lit side, not a dome over the target)
 
 ## Tests read what would go out over the network without a connection (--zone-check).
 static var capture := false
@@ -168,29 +167,41 @@ static func bridge(
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a low teal glass drum on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
+## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
 ## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
 ## teal rim ring. Ostra's own shape; no other zone looks like it.
-static func seed_visual(m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color) -> Node3D:
+const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
+
+## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
+static func seed_r(rmax: float, grow: float, t: float) -> float:
+	return rmax * clampf(t / grow, SEED_R0, 1.0)
+
+## Sets the globe to the seed's radius. The owner calls it every tick with the kit's own radius;
+## a remote seed has no kit here, so `seed_visual(remote)` runs the same growth on a tween.
+static func seed_size(n: Node3D, r: float) -> void:
+	n.scale = Vector3.ONE * r
+
+static func seed_visual(
+	m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color, remote := false
+) -> Node3D:
 	var n := Node3D.new()
 	var core := MeshInstance3D.new()
 	core.name = "Core"
-	core.mesh = Models.cyl(1.0, 1.0, 1.0, 28)
+	core.mesh = Models.sphere(1.0, 32)
 	core.material_override = KitLooks.glass_mat(Color("06221e"), OstraKit.SEA, SEED_A, SEED_BODY)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	core.position = Vector3(0, 0.5, 0)
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
-	ring.mesh = Models.cyl(1.0, 1.0, 0.04, 28)
-	ring.material_override = KitLooks.shade_mat(Color(col, 0.75))
+	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the teal globe reads
+	ring.material_override = Models.ring_mat(Color(col, 0.9), 0.06)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
 	m.add_child(n)
 	n.global_position = at + Vector3(0, 0.02, 0)
-	n.scale = Vector3(0.45, SEED_TALL, 0.45)
-	var tw := n.create_tween()
-	tw.tween_property(n, "scale", Vector3(rmax, SEED_TALL, rmax), grow).set_trans(Tween.TRANS_SINE)
+	seed_size(n, seed_r(rmax, grow, 0.0))
+	if remote:
+		n.create_tween().tween_method(func(t: float): seed_size(n, seed_r(rmax, grow, t)), 0.0, grow, grow)
 	var seeds: Dictionary = m.get_meta("zone_seeds", {})
 	seeds[sid] = n
 	m.set_meta("zone_seeds", seeds)
@@ -234,6 +245,6 @@ static func net_in(m: Node, x: Array) -> void:
 			if x.size() < 9: return
 			var sid := String(x[3])
 			if not (m.get_meta("zone_seeds", {}) as Dictionary).has(sid):
-				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), OstraKit.TEAL)
+				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), OstraKit.TEAL, true)
 		"pop":
 			seed_pop(m, String(x[2]))
