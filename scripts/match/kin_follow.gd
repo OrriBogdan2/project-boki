@@ -94,7 +94,7 @@ static func on_damage(target: Ent, by: Ent, d: float) -> void:
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 	if k.wisp:
 		return false          # (a wisp takes no orders: KinWisp)
-	if k.dead or k.state in ["downed", "bench", "away", "fused", "reviving"] or k.owner_h == null or k.rest_t > 0.0:
+	if k.dead or k.state in ["downed", "bench", "away", "fused", "wisp"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
 	match cmd:
