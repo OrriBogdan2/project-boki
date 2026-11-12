@@ -34,7 +34,9 @@ static func swap(h: Node, out_rec: Dictionary, in_rec: Dictionary) -> String:
 			leaving["goal"] = door(h)
 	var taken: Array = h.kins.map(func(o): return o["pos"])
 	var spot: Vector3 = h.world.free_spot_near(door(h) + Vector3(randf_range(-1.5, 1.5), 0, 2.5), taken, 1.3)
-	var waking: Dictionary = h._add_kin(in_rec, door(h))
+	var waking: Dictionary = h.add_kin(in_rec, 0)
+	waking["pos"] = door(h)
+	(waking["node"] as Node3D).position = door(h)
 	waking["burrow_t"] = walk
 	waking["goal"] = spot
 	waking["t"] = walk

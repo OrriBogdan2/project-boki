@@ -6,6 +6,7 @@ uniform vec4 color : source_color = vec4(1.0, 0.8, 0.4, 1.0);
 uniform float life = 0.0;
 uniform float seed = 0.0;
 uniform float rays = 6.0;
+#include "res://shaders/cel.gdshaderinc"
 void vertex() {
 	float s = length(MODEL_MATRIX[0].xyz);
 	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0] * s, INV_VIEW_MATRIX[1] * s, INV_VIEW_MATRIX[2] * s, MODEL_MATRIX[3]);
@@ -20,6 +21,6 @@ void fragment() {
 	float glow = (1.0 - smoothstep(0.0, 1.0, d)) * 0.35;
 	float k = 1.0 - life;
 	vec3 c = color.rgb * (glow + star + star2) + vec3(1.0) * core;
-	ALBEDO = c * k * color.a;
+	ALBEDO = cel_glow(c * k, UV * 0.5 + seed * 0.37) * color.a;     // flat cel steps, ragged edges
 	ALPHA = 1.0;
 }
