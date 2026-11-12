@@ -1356,3 +1356,7 @@ Batch 1112 (ext/mc-integ-1112a + b2 + c2, 36 members) merged to main. Do NOT re-
 ## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 537fec145 (PR #40, ext/health-lint-1112, no tag)
 - **Devs get:** gdlint follows the official GDScript style guide (snake_case, class-definitions-order; old code grandfathered). `check.sh --changed` wants every .gd a new branch changes gdformat clean. gdformat batch 1 (50 files) and 9 shadowing renames landed. **Rebase/merge main before touching those files.** tools/format_batch.py picks the next batch.
 - **Gate: one stack (main fb360f614 + health-lint + health-py + wisp-clarity) vs main, full suite; every branch-only red re-run side by side with main (flaky or red on main too). Export dry-run passed; health --strict OK. Not run: --displace-net, --remote-anim, --remote-smooth, --revive-net, --online-displace (box Godot queue jammed by stale slot holders, see coord LOG 13:47Z).**
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 0fa1778ed (PR #41, ext/health-py-1112, no tag)
+- **Devs get:** every argparse tool answers --help with no work at import; py_help_check runs in the CI unittest job (new tools need argparse + --help). tools/README.md: lint section, then Python scripts grouped by area; docs/CODE_HEALTH.md has the Python removal list.
+- **Gate:** same stack as PR #40 (tree byte-identical to the gated step).
