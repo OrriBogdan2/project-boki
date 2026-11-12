@@ -1924,6 +1924,7 @@ func revive_hunter(h: Hunter, by: Ent) -> void:
 	if net_on:
 		net_event(["up", h.nid])
 	h.downed = false
+	Life.tally(h, "revived_n")
 	h.hp = h.max_hp * Life.R["revive_hp"]
 	h.armor = 0.0
 	h.revive = 0.0
@@ -4170,13 +4171,13 @@ func _update_interact(dt: float) -> void:
 			if o.team == h.team:
 				if o.remote:
 					_rev_out[o.nid] = float(_rev_out.get(o.nid, 0.0)) + dt / Life.R["revive_time"]
-					o.revive += dt / Life.R["revive_time"]
+					o.revive += dt / Life.revive_secs(o)
 				if h == player and best.is_empty():
 					# your own revive bar, so you know it's working (and when it's blocked)
 					if o.get_meta("stomped", false):
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
-						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay in the ring" % o.pname, "col": Color("9ee2a0")}
+						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  %.1fs, stay in the ring" % [o.pname, Life.revive_secs(o)], "col": Color("9ee2a0")}
 			elif not o.remote:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
@@ -5431,7 +5432,7 @@ func _net_ev(x, from: String) -> void:
 		"rev":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.remote and who.downed:
-				who.revive += float(x[2])
+				who.revive += float(x[2]) * Life.diminish(who, "revived_n")
 				if who.revive >= 1.0:
 					revive_hunter(who, null)
 		"blsh":
