@@ -49,6 +49,9 @@ func _host() -> void:
 	var G := await _host_up()
 	if G == null:
 		return _finish()
+	ok(Net.VERSION != "0.24.5", "the Net version moved on with the boss event (%s)" % Net.VERSION)
+	for kind in BOSSES:
+		await _boss(kind, String(BOSSES[kind]))
 	for arch in ARCHS:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
@@ -57,9 +60,6 @@ func _host() -> void:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
-	ok(Net.VERSION != "0.24.5", "the Net version moved on with the boss event (%s)" % Net.VERSION)
-	for kind in BOSSES:
-		await _boss(kind, String(BOSSES[kind]))
 	_finish()
 
 ## One boss of `kind` on the host, asleep, woken, one attack, a phase change: the guest's copy plays the same.
