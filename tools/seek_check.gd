@@ -99,7 +99,7 @@ func _curiosity() -> void:
 
 func _night() -> void:
 	var spore := _kin(_species("spore"), "Spore", 10)
-	var plain := _kin(_species("stone"), "Plain", 10)
+	var plain := _kin(_species("rock"), "Plain", 10)
 	ok(HomeWork.is_night(NIGHT_T) and not HomeWork.is_night(DAY_T), "the day clock tells night from noon")
 	ok(BaseSeek.night_type(spore) and not BaseSeek.night_type(plain), "Spore is a night type, Stone is not")
 	var by_day := float(_wins(spore, plain, NIGHT_ROUNDS)) / NIGHT_ROUNDS
@@ -112,7 +112,7 @@ func _format() -> void:
 	var fmts: Array = BaseRace.rules()["twists"].filter(func(t): return t["game"] == "seek")
 	ok(not fmts.is_empty(), "%d Seek formats in the weekly list" % fmts.size())
 	var spore := _kin(_species("spore"), "Spore", 10)
-	var plain := _kin(_species("stone"), "Plain", 10)
+	var plain := _kin(_species("rock"), "Plain", 10)
 	for t in fmts:
 		var by_day := float(_wins(spore, plain, NIGHT_ROUNDS)) / NIGHT_ROUNDS
 		var tweaked := float(_wins(spore, plain, NIGHT_ROUNDS, bool(t["night"]))) / NIGHT_ROUNDS
