@@ -2856,12 +2856,7 @@ static func jump_pad(c: Color) -> Node3D:
 	return root
 
 static func gem() -> Node3D:
-	var root := Node3D.new()
-	var p := PrismMesh.new(); p.size = Vector3(0.28, 0.3, 0.28)
-	var m := toon(Color("7ef0d0"), false, 0.7)
-	part(root, p, m, Vector3(0, 0.15, 0))
-	part(root, p, m, Vector3(0, -0.15, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	return root
+	return ItemArt.gem()
 
 static func armor_shard() -> Node3D:
 	var root := Node3D.new()
@@ -2872,11 +2867,7 @@ static func armor_shard() -> Node3D:
 	return root
 
 static func tonic() -> Node3D:
-	var root := Node3D.new()
-	part(root, sphere(0.16, 12), toon(Color("8ff0a0"), false, 0.6), Vector3(0, 0.16, 0))
-	part(root, cyl(0.05, 0.06, 0.14, 8), toon(Color("e6f2ea")), Vector3(0, 0.34, 0))
-	part(root, cyl(0.065, 0.065, 0.05, 8), toon(Color("8b6d52")), Vector3(0, 0.43, 0))
-	return root
+	return ItemArt.tonic()
 
 static func seed_bag(c: Color) -> Node3D:
 	var root := Node3D.new()
