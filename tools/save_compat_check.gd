@@ -15,10 +15,12 @@ const MIGRATED_KEYS := ["name", "gems", "cls", "matches", "extracts"]
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SAVECOMPAT %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node, which := "check") -> void:
 	Save.no_write = true
@@ -29,11 +31,13 @@ func run(m: Node, which := "check") -> void:
 	print("SAVECOMPAT DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
+
 static func _arg(prefix: String) -> String:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with(prefix):
 			return String(a).substr(prefix.length())
 	return ""
+
 
 # ------------------------------------------------------------------ check
 func _check() -> void:
@@ -58,8 +62,11 @@ func _check() -> void:
 			ok(false, "%s is not a golden this check knows (docs/SAVES.md)" % n)
 	for k in seen:
 		ok(int(seen[k]) > 0, "a %s golden exists" % k)
-	ok(FileAccess.file_exists("%s/save_v%d_farm.json" % [DIR, Save.VERSION]),
-			"a golden for the current version (v%d) exists: add one with the migration (docs/SAVES.md)" % Save.VERSION)
+	ok(
+		FileAccess.file_exists("%s/save_v%d_farm.json" % [DIR, Save.VERSION]),
+		"a golden for the current version (v%d) exists: add one with the migration (docs/SAVES.md)" % Save.VERSION
+	)
+
 
 func _check_save(p: String, n: String) -> void:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(p))
@@ -89,6 +96,7 @@ func _check_save(p: String, n: String) -> void:
 	ok(lost.is_empty(), "%s loses nothing%s" % [n, "" if lost.is_empty() else ": " + str(lost.slice(0, 6))])
 	Save.d = Save.fresh()
 
+
 ## Every leaf of `before` that `after` lacks or holds differently, as a path (LOAD_REWRITES excepted).
 func _lost(before, after, path: String, out: Array) -> void:
 	if before is Dictionary:
@@ -107,40 +115,53 @@ func _lost(before, after, path: String, out: Array) -> void:
 	elif before != after:
 		out.append(path)
 
+
 func _check_settings(p: String) -> void:
 	var cf := ConfigFile.new()
 	ok(cf.load(p) == OK, "settings.cfg loads")
 	var known := Settings.DEFAULTS.keys() + Settings.REMOVED
 	var unknown := Array(cf.get_section_keys("s")).filter(
-			func(k): return not known.has(k) and not String(k).begins_with("keys"))
+		func(k): return not known.has(k) and not String(k).begins_with("keys")
+	)
 	ok(unknown.is_empty(), "settings.cfg: only keys Settings knows (a rename needs a migration) %s" % [unknown])
 	var v: Dictionary = {}
 	for k in Settings.DEFAULTS:
 		v[k] = cf.get_value("s", k, Settings.DEFAULTS[k])
-	ok(is_equal_approx(float(v["master"]), 0.5) and v["quality"] == "high" and bool(v["dash_to_cursor"]),
-			"settings.cfg keeps the values the golden was written with")
+	ok(
+		is_equal_approx(float(v["master"]), 0.5) and v["quality"] == "high" and bool(v["dash_to_cursor"]),
+		"settings.cfg keeps the values the golden was written with"
+	)
 	var keys: Dictionary = v.get("keys", {})
 	ok(not keys.is_empty() and int(v.get("keys_v", 0)) == Settings.KEYS_V, "settings.cfg keeps its key bindings")
 	ok(int(cf.get_value("save", "slot", 0)) == 2, "settings.cfg keeps the last save slot")
 
+
 func _check_feedback(p: String) -> void:
 	var st = JSON.parse_string(FileAccess.get_file_as_string(p))
-	ok(st is Dictionary and (st["minutes"] as Dictionary).size() == 1 and (st["done"] as Array).size() == 1,
-			"feedback.json keeps minutes and answered versions")
+	ok(
+		st is Dictionary and (st["minutes"] as Dictionary).size() == 1 and (st["done"] as Array).size() == 1,
+		"feedback.json keeps minutes and answered versions"
+	)
 	var q: Dictionary = st["queue"][0]
-	ok(q["scores"] == {"combat": 4.0, "boki": 5.0} and String(q["note"]) == "golden note" and q.has("version"),
-			"feedback.json keeps the queued answer")
+	ok(
+		q["scores"] == {"combat": 4.0, "boki": 5.0} and String(q["note"]) == "golden note" and q.has("version"),
+		"feedback.json keeps the queued answer"
+	)
 	var was := Feedback.path
 	Feedback.path = p
 	var back: Dictionary = Feedback._load()
 	Feedback.path = was
 	ok(back["queue"] == st["queue"] and back["done"] == st["done"], "Feedback reads the golden as it was written")
 
+
 func _check_warm_stamp(p: String) -> void:
 	var st = JSON.parse_string(FileAccess.get_file_as_string(p))
-	ok(st is Dictionary and ["id", "parts", "files", "unix", "keys"].all(func(k): return st.has(k)),
-			"warm_stamp.json keeps id, parts, files, unix and keys")
+	ok(
+		st is Dictionary and ["id", "parts", "files", "unix", "keys"].all(func(k): return st.has(k)),
+		"warm_stamp.json keeps id, parts, files, unix and keys"
+	)
 	ok((st["keys"] as Array).size() == 2 and int(st["files"]) >= 0, "warm_stamp.json keeps its warm keys")
+
 
 # ------------------------------------------------------------------ capture
 func _capture(out: String) -> void:
@@ -173,6 +194,7 @@ func _capture(out: String) -> void:
 	Feedback.minutes()
 	WarmStamp.save({"a": true, "b": true})
 	_write(out + "/warm_stamp.json", FileAccess.get_file_as_string(WarmStamp.PATH))
+
 
 func _write(p: String, text: String) -> void:
 	var f := FileAccess.open(p, FileAccess.WRITE)
