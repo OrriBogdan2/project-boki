@@ -3,17 +3,17 @@ class_name NookPreview
 ## theirs would be, read from Care.breed's own inputs. It adds no rules of its own.
 
 const PIC_PX := 56.0     # px, each possible baby's picture on the card
-## the note on an unstable mix (Care.unstable_mix: clashing elements or tempers)
-const UNSTABLE_NOTE := "An unstable mix: their elements or tempers clash. It hatches glum and needs care for a day."
 
 ## What Care.breed would give these two: {species: the kinds it can be, lean: its head start,
 ## lean_from: whose lean that is ("" for none), look: the blended rolls, unstable: a clashing mix}.
 static func facts(a: Dictionary, b: Dictionary) -> Dictionary:
 	var kinds: Array = [String(a["species"])]
 	if b["species"] != a["species"]: kinds.append(String(b["species"]))
+	var locket: String = NestItems.plan(a, b)["species"]
+	if locket != "": kinds = [locket]
 	var lean := Care.head_start(a, b)
 	return {"species": kinds, "lean": lean, "lean_from": "" if lean.is_empty() else String(Care.stronger(a, b)["name"]),
-		"look": Unique.blend_center(a, b), "unstable": Care.unstable_mix(a, b)}
+		"look": Unique.blend_center(a, b), "unstable": UnstableMix.unstable(a, b)}
 
 ## The card: each possible baby in the blended look, its size and coats, the lean head start, the
 ## unstable note, and why the pair can't have an egg yet (if so).
@@ -44,7 +44,7 @@ static func card(a: Dictionary, b: Dictionary, tree: SceneTree) -> PanelContaine
 	v.add_child(UI.kv("Coat", coats))
 	v.add_child(UI.kv("Head start", _lean_text(f)))
 	if f["unstable"]:
-		v.add_child(UI.para(UNSTABLE_NOTE, UI.T_SMALL, UI.GOLD))
+		v.add_child(UI.para(UnstableMix.preview_line(a, b), UI.T_SMALL, UI.GOLD))
 	var why := NookRules.pair_why(a, b)
 	if why != "": v.add_child(UI.para(why, UI.T_SMALL, UI.BAD))
 	return c
