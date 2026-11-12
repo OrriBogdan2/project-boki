@@ -759,8 +759,9 @@ def _air_audit_table():
 DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
                    ("rise", "Shift in a jump's rise"), ("same", "Space and Shift on one step")]
 DASH_JUMP_MODE = {"cancel": "the jump goes at once and ends the dash", "both": "the jump goes and the dash runs on",
-                  "ignore": "the dash runs on; the press is dropped", "end": "the dash ends, no jump",
-                  "buffer": "the jump waits for the dash's end", "dash": "the air dash goes at once and ends the rise"}
+                  "ignore": "the dash runs on; the press is dropped", "end": "the dash ends and the glider opens, no jump",
+                  "buffer": "the jump waits for the dash's end", "dash": "the air dash goes at once and ends the rise",
+                  "hop": "the air dash goes at once and arcs on as a hop, the rise kept"}
 
 def _dash_jump_rows(hero, f):
     """Space in a dash, Shift in a jump's rise, both on one step (dash_jump rows, --dash-jump-check)."""

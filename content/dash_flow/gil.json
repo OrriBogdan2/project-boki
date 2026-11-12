@@ -11,5 +11,11 @@
 			"reason": "Tidal Wave: he rides the wave down its line, untargetable, until it lands; the wave is his movement.",
 			"source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row."
 		}
+	},
+	"dash_jump": {
+		"ground": {"ours": "cancel", "carry": 0.74, "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
+		"air": {"ours": "end", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
+		"rise": {"ours": "dash", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"},
+		"same": {"ours": "cancel", "carry": 0.04, "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row.", "verdict": "[?]"}
 	}
 }
