@@ -2848,6 +2848,9 @@ static func portal(c: Color) -> Node3D:
 	return root
 
 static func jump_pad(c: Color) -> Node3D:
+	var glb := PropGlb.build("jump_pad", c)      # the 3D model, its plate "Top" in c; else this primitive one
+	if glb:
+		return glb
 	var root := Node3D.new()
 	part(root, cyl(0.7, 0.8, 0.14, 20), toon(Color("3f4456")), Vector3(0, 0.07, 0))
 	var top := part(root, cyl(0.55, 0.55, 0.02, 20), toon(c.darkened(0.25), false, 0.45), Vector3(0, 0.15, 0), Vector3.ONE, Vector3.ZERO, "Top")
