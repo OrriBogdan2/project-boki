@@ -25,5 +25,5 @@ kits that move a playing move's clock (a held draw, the Gunslinger's slide). The
 shows what the shooter's kit shows.
 
 ## Consequences
-Net.VERSION 0.24.5. `GripNet.AT` follows `NET_MOVE_SIZE` (3). match.gd unchanged. No save change.
+Net.VERSION 0.24.6 (main's 0.24.5 was taken by Limited Ways Out). `GripNet.AT` follows `NET_MOVE_SIZE` (3). match.gd unchanged. No save change.
 `--remote-anim-check` asserts both casts.
