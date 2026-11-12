@@ -6,7 +6,8 @@ extends CareLook
 ##   crystals on its edge; the lit ring at the hit radius is the kit's AimKit circle), the frost bud
 ##   at her feet, the light pillar of the crash and the ice block on each stunned foe. Her body is
 ##   IceBody's while sealed.
-## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted), keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
+## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted),
+## keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
 ## keep(key, "frostbud", at, {grow, crack}),
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
 

@@ -288,7 +288,8 @@ func rimewright() -> void:
 	ok(
 			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
 			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
-	var flash1 := float(((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override.get_shader_parameter("flash"))
+	var disc_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
+	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
 	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
 	step(m, 1.3)
