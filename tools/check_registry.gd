@@ -263,6 +263,7 @@ const CHECKS := {
 	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],      # Brimseed growth
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
+	"--creator-check": ["res://tools/creator_check.gd", "creator_check", null],      # the creator: first rows, More
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release

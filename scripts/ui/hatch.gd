@@ -56,6 +56,7 @@ var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
 var edit_only := false
+var more_looks := false       # the creator shows every row (always, when opened from the menu)
 var create_box: Control
 var sub_lbl: Label        # opened from the menu just to change how you look
 var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
@@ -411,9 +412,12 @@ func _show_create() -> void:
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
+	var all_rows := more_looks or edit_only
 	for r in Unmasked.ROWS.size():
 		var row: Array = Unmasked.ROWS[r]
-		if r == 0 or r == Unmasked.HOLLOW_ROW:
+		if not all_rows and not r in Unmasked.FIRST_ROWS:
+			continue
+		if all_rows and (r == 0 or r == Unmasked.HOLLOW_ROW):
 			v.add_child(UI.section("Body" if r == 0 else "The hollow"))
 		var key: String = row[0]
 		var opts: Array = row[2]
@@ -438,6 +442,10 @@ func _show_create() -> void:
 			hr.add_child(val)
 		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
 		v.add_child(hr)
+	if not all_rows:
+		v.add_child(UI.ghost("More", func():
+			more_looks = true
+			_show_create()))
 	var nr := UI.hbox(8)
 	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)
@@ -587,6 +595,7 @@ func _start_hatch() -> void:
 	stage = "warm"
 	hatch_t = 0.0
 	_clear_bottom()
+	if sub_lbl: sub_lbl.visible = false      # the pick's line has nothing to say while you knock
 	title.text = "Knock on the shell"
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
@@ -725,27 +734,20 @@ func _show_name() -> void:
 		picks.add_child(more)
 	fill_picks.call(fill_picks)
 	v.add_child(picks)
-	var you_row := UI.hbox(8)
-	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
-	you_row.add_child(yl)
-	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	you_row.add_child(ye)
-	v.add_child(you_row)
 	var btns := UI.hbox(10)
-	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
+	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, true), 240))
+	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, false), 180)
 	skip.flat = true
 	btns.add_child(skip)
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Head out together"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
+	# Enter in the box is the same as "Head out together"
+	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, true))
 	ne.grab_focus()
 	ne.select_all()
 
-func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
+func _finish(sp_id: String, kname: String, tutorial: bool) -> void:
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
 	rec["trust"] = 55.0
 	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
@@ -755,7 +757,6 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
