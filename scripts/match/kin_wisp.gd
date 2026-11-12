@@ -58,8 +58,8 @@ static func ride(k: Kin, dt: float) -> bool:
 	if k.owner_h == null or KinLoss.guarding(k) or k.state == "dazed":
 		set_wisp(k, false)          # left behind: the walking Boki's rules from here
 		return false
-	if k.state in ["away", "bench", "fused"]:
-		return false
+	if k.state in ["away", "bench", "fused", KinWispForm.STATE]:
+		return false          # (the Hunter-down wisp form is KinWispForm's)
 	if not k.remote and (k.state != "shoulder" or k.cmd != "return"):
 		k.stow()
 	if k.state != "shoulder":

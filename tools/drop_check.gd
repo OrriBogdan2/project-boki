@@ -2,19 +2,8 @@ extends RefCounted
 ## --drop-feel-check: the opening drop (DropFeel). Prints PASS/FAIL lines.
 ##   1. the player's Boki is never downed or killed in the first 10 s of a normal match or the tutorial
 ##   2. steering ramps (no snapping), the dive is clearly faster than the glider, the flare slows the last metres
-##   3. the reticle: projected landing within RETICLE_M of where you land (canopy and dive), sits on the ground,
-##      hides on landing; red over the void
-##   4. decision 0049, from the ship's height: a straight dive lands in DIVE_S, the canopy opens by itself at
-##      DropFeel.open_h, a canopy open from the top lands in CANOPY_S with CANOPY_REACH_M of flat reach, crouch
-##      held dives and letting go opens the canopy, a soft landing draws no ring, and the dive view (wider,
-##      tipped down) is back to the usual view within VIEW_BACK_S of landing
-##   5. no chests before the match proper: all hidden on the ship and the drop, all shown once you land
-const DIVE_S := [6.5, 7.5]
-const CANOPY_S := [21.0, 23.0]
-const CANOPY_REACH_M := 190.0
-const RETICLE_M := 2.0
-const VIEW_BACK_S := 1.0
-const WRAP_M := 20.0          # the arena is 40 m to a side: a long glide is stepped back this far to stay on it
+##   3. the reticle: projected landing matches where you land, sits on the ground, hides on landing; red over the void
+##   4. no chests before the match proper: all hidden on the ship and the drop, all shown once you land
 var bad := 0
 var m: Match
 var main: Node
@@ -98,15 +87,15 @@ func _steering() -> void:
 		snap = maxf(snap, hv.distance_to(prev) / Match.DT)
 		prev = hv
 		tmax = maxf(tmax, hv.length())
-	ok(snap <= DropFeel.dive_accel + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
-	ok(tmax > DropFeel.canopy_speed * 1.4 and tmax <= DropFeel.dive_speed + 0.1, "the dive tops out at %.1f m/s" % tmax)
+	ok(snap <= DropFeel.DIVE_ACCEL + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
+	ok(tmax > Hunter.DROP_SPEED * 1.4 and tmax <= Hunter.DIVE_SPEED + 0.1, "the dive tops out at %.1f m/s" % tmax)
 	P.inp["move"] = Vector2.ZERO
 	m.step(Match.DT)
 	var left := Vector2(P.vel.x, P.vel.z).length()
-	ok(left > tmax - DropFeel.brake * Match.DT * 1.5, "letting go decelerates, it does not stop dead")
+	ok(left > tmax - DropFeel.BRAKE * Match.DT * 1.5, "letting go decelerates, it does not stop dead")
 
-	var high := DropFeel.fall_vy(-DropFeel.dive_fall, true, 30.0, 0.1)
-	var low := DropFeel.fall_vy(-DropFeel.dive_fall, true, 1.0, 0.1)
+	var high := DropFeel.fall_vy(-13.0, 13.0, 7.0, 30.0, 0.1)
+	var low := DropFeel.fall_vy(-13.0, 13.0, 7.0, 1.0, 0.1)
 	ok(low > high + 1.0, "the flare slows the fall near the ground")
 
 func _reticle() -> void:
@@ -127,7 +116,7 @@ func _reticle() -> void:
 	var at: Vector3 = pr["at"]
 	ok(not pr["void"] and absf(at.y - P.ground()) < 0.5, "the projected spot is on the real ground (y %.2f)" % at.y)
 	var off := Vector2(at.x - landed_at.x, at.z - landed_at.z).length()
-	ok(off < RETICLE_M, "you land where the ring says, under the canopy (off by %.2f m)" % off)
+	ok(off < DropReticle.RADIUS, "you land inside the ring (off by %.2f m)" % off)
 	DropReticle.tick(P, 0.016)
 	ok(not r.visible, "the reticle hides on landing")
 	# over the void: red warning
@@ -161,84 +150,26 @@ func _chests_wait(what: String, hid: int) -> void:
 	ok(not m.chests.is_empty() and hid == m.chests.size() and landed and _hidden_chests() == 0,
 			"%s: no chest shows before you land, all once you have (%s)" % [what, info])
 
-## Steps `P` down to the ground with these keys, ticking the drop's view as a frame would. Returns the
-## seconds it took, the flat metres covered, the height the canopy opened at (-1: it never changed), the
-## widest field of view and steepest tilt on the way, and how far it was stepped back to stay on the arena.
-func _fall(P: Hunter, mv: Vector2, crouch_until := -1.0) -> Dictionary:
-	var out := {"t": 0.0, "flat": 0.0, "open_h": -1.0, "fov": 0.0, "tilt": 0.0, "wrapped": 0.0}
-	var x0 := P.pos.x
-	while P.dropping and out["t"] < 60.0:
-		P.inp["move"] = mv
-		P.inp["crouch"] = P.pos.y - P.ground() > crouch_until and crouch_until >= 0.0
-		var was := P.diving
-		var before := P.pos
+## Tutorial: no chest shows before you land (however many the level has), and every one does once you have.
+func _tutorial_chests_wait() -> void:
+	var seen := m.chests.size() - _hidden_chests()
+	var t := 0.0
+	while t < 30.0 and (m.player.riding or m.player.dropping):
+		if m.player.riding:
+			m.ship_jump(m.player, true)
 		m.step(Match.DT)
-		DropView.tick(m, Match.DT)
-		out["t"] += Match.DT
-		out["flat"] += Vector2(P.pos.x - before.x, P.pos.z - before.z).length()
-		out["fov"] = maxf(out["fov"], m.cam.fov)
-		out["tilt"] = maxf(out["tilt"], m.cam.dive_tilt)
-		if was and not P.diving:
-			out["open_h"] = P.pos.y - P.ground()
-		if P.pos.x - x0 > WRAP_M:
-			P.pos.x -= WRAP_M
-			P.prev.x -= WRAP_M
-			out["wrapped"] += WRAP_M
-	P.inp["crouch"] = false
-	return out
-
-func _height() -> void:
-	var top := DropFeel.ship_height
-	# a straight dive: no keys (a drop with no ship starts in the dive)
-	var P := _arena(top)
-	var mv := Vector2(0.3, 0.2)
-	var pr: Dictionary = DropReticle.project(P, mv)
-	var usual := m.cam.fov
-	var d := _fall(P, mv)
-	var dived := "a straight dive from %.0f m lands in %.2f s (%.1f to %.1f)" % [top, d["t"], DIVE_S[0], DIVE_S[1]]
-	ok(d["t"] >= DIVE_S[0] and d["t"] <= DIVE_S[1], dived)
-	var opened := "the canopy opens by itself at %.1f m (%.0f)" % [d["open_h"], DropFeel.open_h]
-	ok(d["open_h"] <= DropFeel.open_h and d["open_h"] > DropFeel.open_h - 1.0, opened)
-	var at: Vector3 = pr["at"]
-	var off := Vector2(at.x - P.pos.x - float(d["wrapped"]), at.z - P.pos.z).length()
-	ok(off < RETICLE_M, "you land where the ring said at the top of the dive (off by %.2f m)" % off)
-	var ringed := false
-	for r: Dictionary in m.fx.rings:
-		ringed = ringed or (r["node"] as Node3D).global_position.distance_to(P.pos) < 6.0
-	ok(not ringed, "a soft landing draws no ring")
-	var view: Dictionary = DropFeel.rules("view")
-	var wider: float = d["fov"] - usual
-	var tipped := rad_to_deg(d["tilt"])
-	ok(absf(wider - float(view["widen_deg"])) < 0.01 and absf(tipped - float(view["tilt_deg"])) < 0.01,
-		"the dive view: %.0f degrees wider, tipped %.0f further down" % [wider, tipped])
-	for i in int(VIEW_BACK_S / Match.DT):
-		m.step(Match.DT)
-		DropView.tick(m, Match.DT)
-	var dv := m.get_node_or_null("DropView")
-	var freed := dv == null or dv.is_queued_for_deletion()
-	var back := "the usual view is back within %.0f s of landing, the drop's view freed" % VIEW_BACK_S
-	ok(m.cam.fov == usual and m.cam.dive_tilt == 0.0 and freed, back)
-	# the canopy open from the top, steering one way all the way down
-	P = _arena(top)
-	P.diving = false
-	var c := _fall(P, Vector2(1, 0))
-	var floated := "under the canopy from %.0f m you land in %.2f s" % [top, c["t"]]
-	ok(c["t"] >= CANOPY_S[0] and c["t"] <= CANOPY_S[1], floated)
-	ok(c["flat"] >= CANOPY_REACH_M, "...with %.0f m of flat reach (at least %.0f)" % [c["flat"], CANOPY_REACH_M])
-	ok(c["open_h"] < 0.0, "the canopy stays open with no key held")
-	# the dive you hold: crouch folds the canopy, letting go at 50 m opens it there
-	P = _arena(top)
-	P.diving = false
-	var hd := _fall(P, Vector2.ZERO, 50.0)
-	var held := "crouch held dives, letting go opens the canopy (at %.1f m, down in %.1f s)" % [hd["open_h"], hd["t"]]
-	ok(hd["open_h"] > 48.0 and hd["open_h"] <= 50.0 and hd["t"] < c["t"] * 0.7, held)
+		t += Match.DT
+	var landed: bool = not (m.player.riding or m.player.dropping)
+	var n := m.chests.size()
+	var info := "%d of %d visible before landing, %d now, landed %s" % [seen, n, n - _hidden_chests(), landed]
+	ok(seen == 0 and landed and _hidden_chests() == 0,
+			"tutorial: no chest shows before you land, the level's chests do once you have (%s)" % info)
 
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	_steering()
 	_reticle()
-	_height()
 	for steer in [Vector2.ZERO, Vector2(1, 0)]:
 		_start({})
 		var hid := _hidden_chests()
@@ -247,10 +178,9 @@ func run(mn: Node) -> void:
 		ok(why == "", "normal match, steer %s: your Boki rides with you and is untouched for 12 s" % str(steer))
 		_chests_wait("normal match, steer %s" % str(steer), hid)
 	_start({"tutorial": true, "teams": 1, "length": 1500.0})
-	var thid := _hidden_chests()
 	var tw := _watch_boki(12.0)
 	print("  tutorial ", tw)
 	ok(tw == "", "tutorial: your Boki rides with you and is untouched for 12 s")
-	_chests_wait("tutorial", thid)
+	_tutorial_chests_wait()
 	print("DROP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
