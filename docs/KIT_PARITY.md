@@ -9,7 +9,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 **What was and was not verified.**
 - Numbers, modes and code paths were read from main. The Nov 3 audit (briefs/specs/kit-audit) is stale: many of its gaps are closed, and rows here were re-checked against main before use. `ext/online-displace` and `ext/no-shake` are merged, so the online pull bug and self-shake are closed.
 - All 12 `--<hero>-combo-check` runs pass: 1,560 PASS, 0 FAIL. They assert our spec, not the source, so a pass is not parity proof.
-- **Animation timing was not re-measured frame by frame.** Animation rows report clip coverage (computed from kit code, `warden_anim/*.json` and each GLB) plus timings already recorded in docs/heroes. Hitbox rows use content numbers; no in-game overlay run was done.
+- **Animation timing was not re-measured frame by frame.** Animation rows report clip coverage (computed from kit code, `warden_anim/*.json` and each GLB) plus timings already recorded in docs/heroes. Hitbox rows use content numbers; the in-game hit shapes of Vex, Kael, Lace and Cinder were then measured and shot with the hitbox circles (section "Hit shapes in game"), the other eight in the section after it.
 - `[?]` marks a row carried from a hero doc that I could not settle from code here.
 
 **Every Hunter, shared:**
@@ -51,7 +51,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Grimble | R fan, depth | 105, 5.9 | 100-110, 3.3 bh (5.9) | match |
 | Neve | RMB range, zone, burst | 12, 2.2, 2.7 | lands at the cursor, clamp and rings not measured | [?] (owner: travel time grows with distance) |
 | Neve | E width, slide | 1.8 to 4.5, to 16.2 | narrow to ~2.5 h (4.5), slide not measured | width match; slide [?] |
-| Neve | R rink radius | 7.2 | 4 bh (7.2) | match |
+| Neve | R rink radius | **8.3** (owner 11-08, +15%) | 4 bh (7.2) | differ (owner) |
 | Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), - | match; range [?] |
@@ -66,6 +66,126 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Sable | R ring | 5.4 (rim band outer 25%) | 3 bh (5.4); the first sheet's 3.5 bh is superseded | match |
 
 Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+
+## Hit shapes in game: Vex, Kael, Lace, Cinder (main 88b06b9e7, 2026-11-12)
+
+How: `--hit-shape-fine` (tools/hit_shape_fine.gd) fires each input of the four hunters at ONE training dummy moved around, in a match stepped at the game's 60 Hz, level 6 (rank 3 numbers apply): a scan along the aim line gives the nearest and farthest foe centre that still takes damage, a scan across the middle gives the lane, a scan round it the arc; the numbers below have the foe's circle taken off. `--hit-shape-shots` (tools/hit_shape_shots.gd) fires the same inputs at a field of dummies, each wearing its ground circle (its hitbox), at the gameplay camera: strips in `docs/shots/verify-hitbox-slice/`. Ours = `content/archetypes/<id>.json`; source = `briefs/supervive-data/supervive_kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m).
+
+What the game does with a number (so a row reads straight): areas (cone, ring, strip, disc, lane of a beam) take a foe in when its body circle, 0.40 m, touches them, so measured = content to 0.15 m. Bullets, hooks and swing rays take it in at body circle + 0.08 m + their own radius; a bullet starts 0.6 m ahead of the hunter and lives to the end of the 1/60 s step in which its range runs out (74 m/s: +1.2 m, 90 m/s: +1.5 m); a swing is a fan of 7 or 9 such rays 0.22 m wide, so its arc reads about 30 degrees wider than the drawn one (175 reads 206).
+
+| Hero | Move | Ours | Measured in game | Source | Verdict |
+|---|---|---|---|---|---|
+| Vex | LMB rifle | range 11, bullet 0.13 | reach 11.9, lane 0.24 (11 + 0.13 + 0.6 start, then the step) | no number; tracers ~1.5 bh, reach not seen | match; source gap |
+| Vex | RMB Burr | range 10.5, lane 0.72, cone 6 at 100 deg | lane reach 11.1, cone flank 6.1 from the stick point; angle not isolated (a lone foe leaves the cone by its length first) | 5-6 bh (9-10.8), 0.4 bh (0.72), cone 3.5 bh at 100 | match |
+| Vex | E Longneedle | range 18, beam 1.8 wide (JSON `width` 0.9 is the half) | reach 18.0, lane 1.8 | 10+ bh (18+), 0.5 bh (0.9) thick | match; width 2x source (owner item 68) |
+| Vex | R Cinderfall | range 14, radius 3.4 | disc centre 14.0 (cursor clamped), radius 3.4 | clamp not seen, disc 1.8-2 bh (3.2-3.6) | match; clamp [?] |
+| Kael | LMB sword | reach 3.1, arc 175 | reach 3.7, arc of centres 206 (ray 0.22 + circle) | ~180 deg, radius 1.8 bh (3.2) | match (-4%, -3%) |
+| Kael | LMB hold, Searing Wave | range 7 to 14, size 0.3 to 0.6, 36 m/s | full charge: reach 14.4, lane 1.14 | flies 20 bh/s (36), reach no number | match; reach gap |
+| Kael | RMB tap, Smash | radius 4, 70 deg | reach 4.0, angle 70 | 2.4 bh (4.3), a lane not a cone | match; angle and lane width [?] |
+| Kael | RMB hold, Lunge | 4.5 to 7.5 | full charge: reaches 8.6 with the body (7.5 + circles) | 5 flat | differ (owner: release flings far) |
+| Kael | E Warchain | range 13 | reach 14.2 (13 + hook + step), lane 0.44 | 7 bh (12.6) | match |
+| Kael | R Riposte | strip 3.6 x 1.8 from where he planted | length 3.6, width 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match; the drawn lane and the hit read one field |
+| Lace | LMB, Empowered | range 12, arrow 0.18 | reach 13.7 (12 + 0.2 + 0.6 start + step) | lands at the cursor, ~6 bh (10.8) seen | match |
+| Lace | LMB, Supercharged | range 16 | reach 18.1 | no number | match; source gap |
+| Lace | RMB Heavy Shot | 14 (+3 at rank 3), size 0.3 | reach 18.5 at rank 3 (17 + 0.6 + step) | gold bar ~2 bh while held; range not seen | match; range [?] |
+| Lace | E Hail Wall | reach 9, 120 deg, 1.8 deep | wall centre 9.0, arc 125 | 120 deg, centre at the cursor (8-10.8) | match |
+| Lace | R Starpiercer | range 18, width 0.5 | reach 20.4 (18 + 0.6 + 1.5 step), lane 0.5 | ~1.5x normal range (1.5 x 12 = 18) | match |
+| Cinder | LMB flame | range 6.1, width 0.65 to 2.85 | reach 6.8, fan 1.8 wide at 4 m (2.8 in foe centres) | ~4 bh (7.2) whatever the cursor; 0.3 bh to 1-1.5 bh wide | match; reach -15% to source |
+| Cinder | RMB Cinder Shot | range 14, size 0.3 | reach 13.9 | flew 6-8 bh (10.8-14.4); a miss ended at the cursor (11.7) | match; always-full-range vs ends at cursor [?] |
+| Cinder | E Furnace Cloak | radius 4.5 | radius 4.5 | 2.5 bh (4.5) | match |
+| Cinder | R Flue Flight | 12.6 m/s for 1.8 s, carpet 1.8 | carpet along the whole 22 m, lane 1.8 | 7 bh/s (12.6) for 1.3-1.4 s (16-18), carpet 1 bh | match; flight 26-40% longer (owner item 20) |
+
+**Result:** 20 moves, no plain mismatch between what the game draws, what it hits and what the content says, so no kit was changed. The follow-ups are all source gaps:
+1. Kael's sword has two numbers: `greatsword.json` says range 3.4, arc 160, the kit draws and hits `lmb` reach 3.1, arc 175 (the first is what `--hit-shape-check` and HITBOX_SIZE.md read; it also feeds bot range). One of them should go.
+2. Cinder's flame is 6.1 m against the footage's 4 bh (7.2); the far end is 2.85 wide against 1.8-2.7.
+3. Cinder Shot always flies 14 m; the footage shows a miss ending at the cursor (11.7 m) once, with no clamp read. The card says "long-range".
+4. Open source numbers, nothing to compare yet: Vex R range clamp, Kael slam lane width and wave range, Lace Supercharged and Heavy Shot max range, the Hail Wall depth.
+5. Already filed above for the owner: Kael lunge, Vex needle width, Cinder flight.
+6. The coarse `--hit-shape-check` reads swings and cones short (a ray stops at the first dummy of the grid, 20 Hz steps): Kael LMB there is 1.6 m / 113 deg against 3.7 / 206 here. Use `--hit-shape-fine` for those four heroes' areas.
+
+## Hit shapes in game: Albert, Neve, Tenzo, Sparkle, Grimble, Meeko, Sable, Motley (main 88b06b9e7 + ext/verify-hitbox-slice, 2026-11-12)
+
+Same method as the slice section above (`--hit-shape-fine`, rows for the eight added in tools/hit_shape_fine.gd; `--hit-shape-shots` for the hitbox-circle strips in `docs/shots/verify-hitbox-rest/<hero>_hit_shapes.jpg`, one tile per input, circles drawn on the dummies). Level 6, all slots unlocked, one lone dummy (circle 0.40 m) scanned along and across the aim line; **in-game numbers are foe centres, so an area reads its content number + 0.40 m on every edge, a swing ray + 0.30, a bullet or lane + 0.48 + its own radius, and a bullet starts 0.6 m ahead of the hero.** Where the row says "asserted", `--hit-shape-fine` fails if the game and the content drift apart (Albert LMB, Albert R, Sparkle E and R). The probe hero carries the weapon upgrades, so a weapon's range reads about 24% above its JSON (Grimble's shotgun 6.3 -> 7.8, Sable's bolt 8.5 -> 10.5); rows quote the JSON and say when the game number is that. Source = `briefs/supervive-data/supervive_kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m). **Not measured by a dummy** (they hurt nobody, or only after a second press, a delay or a dash): Albert RMB, E, Tenzo E, Meeko E and R, Motley E; those rows give the content number against the source and the strip shows the drawn shape.
+
+**Albert** (`bulwark`, source Oath)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB tap, hammer throw | throw_range 9.0, pierces, sweep 0.9 | reach 10.4 (9.0 + 0.9 + 0.4), lane 2.6 (2 x (0.9 + 0.4)); asserted | lands at the cursor, clamped; max not shown, 7 h (12.6 m) or more used | match content; ours 9.0 against 12.6 or more [source gap] |
+| LMB hold, Crushing Blow | smash_reach 2.8, arc 180 | reach 3.6 (2.8 + ray 0.3 + 0.4), arc of centres 220; asserted | one crescent, about 180 deg in front | match |
+| RMB Aegis, Shield Slam | wall 4.2 wide at 140 deg; slam r 2.6, 100 deg (only from the Shield Charge at Guard 50) | no foe hurt (a wall); the slam is not reached by a plain RMB | slab 2.2 h wide (4.0); the bash is not seen | content match; slam not measured |
+| E Mending Ground | radius 2.3 | heals only: not measured | green disc 1.3 h (2.34) | content match |
+| R Faultline | 4 cells x 4.0 = 16 m, width 4.5 | far 16.4, lane 5.2 (16.0 and 4.4 net); asserted | 9 bh x 2.5 bh (16.2 x 4.5) | match |
+
+**Neve** (`rimewright`, source Celeste)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB Ice Dart (hold) | range 10 (x1.3 for the three large darts), homing | plain darts reach 12.7 (12.2 net: 10 x 1.24), large darts 15.5 (16.1 expected); width and arc are the homing, not a shape | stream of homing darts, curve to the cursor; range not clear | match; source gap (range) |
+| RMB Ice Spear | range 12, hit_r 0.5, impact 1.2, burst 2.7 | reach 14.4 (12 + 0.6 start + 1.2 impact + 0.4 = 14.2), lane 1.4 | lands at the cursor (clamp not measured); rings 1.2 h and 1.5 h | match; clamp [?] |
+| E Rink Wall | slides 4.5 to 16.2 m, width 1.8 growing to 4.5 | the wall passes 1.0 to 8.1 in the 1.5 s window, 4.2 wide then; the slide, not the end shape | narrow to about 2.5 h (4.5); slide not measured | width match; slide [?] |
+| R Rimelock | radius 8.3 | reaches 8.7 (8.3 + 0.4), full circle (360 deg), after the 3.5 s hold | huge dome about 4 h (7.2) | game = content; content +15% on the source is the owner's (c05e9d3a5c, 11-08): differ (owner). The ranges table above said ours 7.2: corrected |
+
+**Tenzo** (`dolm`, source Tetra)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB tap, boulder | range 11, size 0.3 | reach 13.2 (12.7 net, 11 + 0.6 start + the blast), lane 1.5 (0.5 net) | boulder 0.4 bh across, blast 1.5 bh (2.7 m); range not settled | match; range [?] |
+| LMB hold, punch | len 4.2, width 1.8 | reach 4.6 (4.2 net), lane 2.6 (1.8 net) | lane about 2.5 bh x 1 bh (4.5 x 1.8) | match (-7% length) |
+| RMB Quakefall | reach 1.6, radius 3.82 tap / 4.5 hold | tap: reach 5.7 (1.6 + 3.82 + 0.4 = 5.8), width 7.9 | 2.5 bh (4.5) | match (hold not scanned) |
+| E Stone Row | dist 3.4, row gap 3.6 | rocks, hurts nobody: not measured | 2 bh ahead (3.6), span 3 bh (5.4) | content match |
+| R Basalt Spine | range 11, len 12, 9 rocks | damage seen only at 12.4 to 12.6 m (a rock rising under the dummy); the ridge is not a lane this method can scan | 10-12 bh long (18-21.6) | differ about 40%, kept (f2b60dc70); ridge shape not measured |
+
+**Sparkle** (`mage`, source Joule)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB bolt | range 13.0 | reach 17.6 (16.1 x 1.24 + 0.6 + step); base 14.2 | always max range, 7.5 bh (13.5) | match |
+| RMB Storm Rod (hold) | range 13.0 | reach 15.0 (13 + 0.6 + 0.9 step + 0.4) | 7.5 bh (13.5) | match |
+| E Skycall | reach 11.0, radius 1.5 | circle centre 11.0, radius 1.5; asserted | circle about 2 bh across (radius 1.8), reach not seen | game = content; radius -17% to source, kept (mage.md); reach [?] |
+| R Kitefall | range 14.4, radius 2.7 | centre 14.35, radius 2.65; asserted | ring 1.5 bh (2.7), range 8 bh (14.4) | match |
+
+**Grimble** (`dredge`, source Kingpin)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB shotgun | stop at 6.3, 7 slugs, first volley on the aim line | reach 8.8 (7.8 + 0.6 + 0.4: the probe's weapon reads 7.8); lane 1.2 | slugs stop about 3.5 bh out (6.3) | match (6.3 asserted by --dredge-combo-check) |
+| RMB Abyssal Hand | range 11.5 | reach 12.9 (11.5 + 0.6 + 0.4 + step), lane 1.4 | 6-7 bh (10.8-12.6) | match |
+| E Anchor Drop | hop 1.8, radius 3.0, 110 deg | far 5.2 = 1.8 + 3.0 + 0.4, near 0.5 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | match (+11% depth, inside footage error) |
+| R Brass Broadside | 6 orbs x 2 waves, fan 105, range 5.9 | far 5.9 (5.5 net), arc of centres 112 | fan 100-110, 3.3 bh (5.9) | match (-7%) |
+
+**Meeko** (`tender`, source Elluna)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB Ember Cast | range 12, +40% on the shot after a 1 s pause | plain reach 13.1 (12 + 0.6 + 0.5); 16.1 seen after a pause | flies past the cursor to max, 7-8 bh (12.6-14.4) | match |
+| RMB Burrseed | range 14, hit_r 0.7, burst 2.2 | reach 15.9 (14 + 0.6 + 0.7 + 0.4 + step), lane 1.6 | 8-9 bh (14.4-16.2), disc 1.2 bh (2.2) | match |
+| E Hearthlight | ring 2.6, thrown 2.9, reach 9 | heals, hurts nobody: not measured | ring 1.3-1.5 bh, thrown 1.6 bh (2.9) | content match |
+| R Hearth Call | range 12.6, pick 2.5, land 0.9 | not a damage input: not measured | tether ring 7 bh (12.6) | content match |
+
+**Sable** (`thief`, source Shiv)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB Arc Shots | range 8.5, to the cursor | reach 11.2 (10.5 x level-6 weapon + 0.6) | ends at the cursor, clamped; a hit at 7 bh (12.6) | game = content; ours 8.5 against 12.6 or more [source gap] |
+| RMB Bola | range 7 (+3.8 after the first catch), catch circle 0.85, lane drawn 1.8 | reach 8.3 (7 + 0.5 + 0.85), lane 1.7 | lane 5.5-6 bh (9.9-10.8) long, 1 bh (1.8) wide | match (the second catch at 10.8 is not scanned by a lone foe) |
+| E Shadow Knife | range 14 | reach 15.9 (14 + 0.6 + 0.4 + step) | landed at 9 bh (16.2), max not seen | match; max [?] |
+| R Encore | ring 5.4 (rim band 25%), 2 s | full circle, far 6.5 (6.1 net, 0.7 over the ring + circle 5.8), near 0.5 | ring 3 bh (5.4) | match: the field of dummies (strip) takes 5.0/1.5 (5.2 m) and not 5.0/3.0 (5.8 m) or 7.5/0, so the edge is 5.4 + 0.4; the lone-dummy scan's 6.5 m (0.7 over) is the probe's, cause not found |
+
+**Motley** (`ostra`, source Void)
+
+| Input | Ours (content) | In game | Source | Verdict |
+|---|---|---|---|---|
+| LMB Gravity Orb | range 12.25 | reach 16.9 (12.25 x 1.24 + 0.6 + step) | past the cursor to max; max not measured | game = content; source gap |
+| RMB Shard Snap | range 13, width 0.7 | reach 14.7 (13 + 0.6 + 0.4 + step), lane 1.6 (0.64 net, 0.7) | bundle seen over 6 h (10.8), max not seen | match; range [?] |
+| E Brimseed | reach 9, seed radius 3.2 (4.2 swollen) | the seed hurt nobody in 7.5 s: not measured | 1.8 h (3.2) | content match |
+| R Nightwell | range 10, radius 3.6 (5.1 swollen) | damage from 5.6 m out (10 - 3.6 - circle); the far end reads to the scan limit (22 m), which is not the shape: a caught foe is pulled in at 12 m/s, a stale pull from the probe before is the likely cause | 350 / 500 uu (3.5 / 5.0 m) | match: the field takes all five rows at 7.5, 10 and 12.5 m and none at 5 or 15 m, so near 6.0 (10 - 3.6 - 0.4) and far between 12.5 and 15 (14.0 = 10 + 3.6 + 0.4); the lone scan's far end is the stale pull |
+
+**Result:** 34 inputs scanned or read, no plain mismatch between what the game hits and what its content says, so no kit was changed. The one error found is in this file: the ranges table above had Neve's Rimelock radius as 7.2 (source); the content is 8.3 on the owner's order. Follow-ups, all source gaps or open measures:
+1. Source gaps (no number or a lower bound longer than ours): Albert's hammer lands at the cursor and 7 h (12.6 m) or more was seen against our 9.0; Sable's bolt reaches 12.6 m or more in the footage against our 8.5; Neve's dart range, Motley's orb range, Tenzo's boulder range and the Ice Spear clamp are not read.
+2. Not measured by a dummy and worth a probe that reads the zone, wall or rock objects: Albert's Aegis wall and Shield Slam, Mending Ground, Tenzo's Stone Row, Meeko's Hearthlight and Hearth Call, Motley's Brimseed seed, Neve's Rink Wall end shape.
+3. Open: the lone-dummy scan reads Sable's Encore 0.7 m past its ring and Motley's Nightwell across the whole scan (the strips' field of dummies shows both at their content edge, so the game is built right; the probe has an artefact, cause not found: low priority); Tenzo's Basalt Spine is read only at one rock (the field takes 10.0 and 12.5 m, all rows).
+4. `--hit-shape-check`'s grid reads swings short (rays stop at the first dummy: Albert LMB hold 1.2 m there against 3.6 here) and its "content" column picks the weapon with upgrades (Grimble 7.8); use `--hit-shape-fine` for these.
 
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
