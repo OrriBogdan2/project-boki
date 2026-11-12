@@ -111,7 +111,7 @@ Nothing here comes from SUPERVIVE's files.
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
 | e2e_render_frames (key to model moving) | 2 | 1 | <= 1 | no interpolation lag |
 | render_lag_m (model behind sim at a run) | 0.083m | 0.000m | <= 0.03m | |
-| cam_lag_m (camera behind you at a run) | 0.65m | 0.29m | <= 0.40m | [footage] centred |
+| cam_lag_m (camera behind you at a run) | 0.65m | 0.00m | <= 0.40m | [footage] centred: the follow is locked across |
 | cam_settle_t (after a stop) | 0.35s | 0.15s | <= 0.35s | |
 | cam_glide_lead_m | -0.67m (trailing) | +0.92m | >= 0.4m | lead in glide |
 | view_across_m (Supervive preset, 16:9) | 28.0m | 23.5m (movefeel 23.0m) | 22–25m | camcal: ~17 hunter silhouettes across, as in gameplay frames |
@@ -180,7 +180,7 @@ Other checks:
   - A move into a rock is pushed straight out and slides along it. Only the part of your speed going into it is dropped.
   - This ends the corner snag that held you until you dashed ("magnetizing").
 - **Camera and scale:**
-  - Follow across: 8 → 15 per second (about 0.07s).
+  - Follow across: locked (was 8, then 15 per second). The view moves with you, so no dash, pull, swap or knockback leaves you off centre: `--camera-fast-check` logs your screen offset per frame through every hero's dash, the Wirerun (40 m/s), the Warchain self-pull, an Abyssal Hand reel, a 10 m knockback and the sky train pulling out, and fails over 8% of the screen's height or a 3% single-frame jump (before the lock: 8-15% on the fast dashes, 58% at the swap's teleport). Up and down still follows softly (3.5 per second). Recording mode keeps its own slower trail.
   - Glide lead: 0.2s of glide velocity (max 1.8m).
   - The Supervive preset sits at 20.5m (was 25m): about 23m of ground across a 16:9 screen (was 28m).
   - Hunters are drawn 12% larger (`Hunter.VIS_SCALE`, visual only; hitboxes and rings unchanged).
