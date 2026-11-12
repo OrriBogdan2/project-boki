@@ -31,8 +31,8 @@ func run(main: Node) -> void:
 	var row := UI.hbox(24)
 	row.position = Vector2(30, 30)
 	layer.add_child(row)
-	var before := _card(rec, "Before: Thumpnut ×1 in the bag", "Feed: %s" % GardenItems.preview(rec, "thumpnut")["text"])
-	row.add_child(before)
+	var preview := String(GardenItems.preview(rec, "thumpnut")["text"])
+	row.add_child(_card(rec, "Before: Thumpnut ×1 in the bag", "Feed: " + preview))
 	GardenItems.use(rec, "thumpnut")
 	row.add_child(_card(rec, "After: eaten at home", "Thumpnut ×0 in the bag"))
 	for i in 6:

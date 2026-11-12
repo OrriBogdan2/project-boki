@@ -79,7 +79,7 @@ static func _store(it: Dictionary) -> void:
 		Incubator.add(String(it.get("sp", "")), String(it.get("boss", "")))
 		return
 	if Loot.is_bag_item(it):
-		Save.add_item(String(it["id"]), 1)      # the garden bag: the Waystone (GardenZones) and the feed menu look for it there
+		Save.add_item(String(it["id"]), 1)      # the garden bag: the Waystone and the feed menu look there
 		return
 	if String(it.get("t", "")) == "val":
 		var vd: Dictionary = Save.d["valuables"]

@@ -30,10 +30,14 @@ const VALUABLES := {
 	"soul_ember": {"name": "Soul Ember", "col": Color("9ff0e0"), "value": 140, "rar": 4, "desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back."},
 	# bag items ("bag"): banked in the garden bag at home, never sold. A locked zone's first key (GardenZones.wayseed)
 	# and the stat bites of GardenItems (names match garden_items.json, --garden-items-check keeps them so)
-	"thumpnut": {"name": "Thumpnut", "col": Color("e8a05a"), "value": 40, "rar": 2, "bag": true, "desc": "A hard sweet nut. At home a Boki eats it for Power."},
-	"shellbark_chew": {"name": "Shellbark Chew", "col": Color("b08a5a"), "value": 40, "rar": 2, "bag": true, "desc": "A tough bark chew. At home a Boki eats it for Guard."},
-	"zipseed": {"name": "Zipseed", "col": Color("f2e08a"), "value": 40, "rar": 2, "bag": true, "desc": "A seed that rattles. At home a Boki eats it for Speed."},
-	"hushpearl": {"name": "Hushpearl", "col": Color("c8d8f0"), "value": 40, "rar": 2, "bag": true, "desc": "A calm little pearl. At home a Boki eats it for Focus."},
+	"thumpnut": {"name": "Thumpnut", "col": Color("e8a05a"), "value": 40, "rar": 2, "bag": true,
+		"desc": "A hard sweet nut. At home a Boki eats it for Power."},
+	"shellbark_chew": {"name": "Shellbark Chew", "col": Color("b08a5a"), "value": 40, "rar": 2, "bag": true,
+		"desc": "A tough bark chew. At home a Boki eats it for Guard."},
+	"zipseed": {"name": "Zipseed", "col": Color("f2e08a"), "value": 40, "rar": 2, "bag": true,
+		"desc": "A seed that rattles. At home a Boki eats it for Speed."},
+	"hushpearl": {"name": "Hushpearl", "col": Color("c8d8f0"), "value": 40, "rar": 2, "bag": true,
+		"desc": "A calm little pearl. At home a Boki eats it for Focus."},
 	"wayseed_glasswater": {"name": "Glasswater Wayseed", "col": Color("6fd0e8"), "value": 150, "rar": 4, "bag": true,
 		"desc": "A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal."},
 	"wayseed_cinderstep": {"name": "Cinderstep Wayseed", "col": Color("e07a3a"), "value": 150, "rar": 4, "bag": true,

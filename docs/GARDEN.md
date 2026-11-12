@@ -31,3 +31,12 @@ dead end. The check fails above 2.0x.
 
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
+
+## Expedition loot into the garden
+
+DECISIONS 2026-11-09: the garden and extraction feed each other. Before this no match drop was a garden item (drops were
+gear, treasure, the Rare Egg and Wayseeds). A boss's lair pile now also holds one of the four stat bites (Thumpnut, Shellbark
+Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items.json`. They ride the pack as treasure marked
+`bag` (`Loot.VALUABLES`, `Loot.is_bag_item`, like the Wayseeds), come home into the garden bag (`Econ._store`), and are eaten from
+the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
+"ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
