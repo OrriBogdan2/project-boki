@@ -547,17 +547,25 @@ func _breah() -> void:
 		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
-	# the dunk
-	reset.call()
-	T.teleport(home + Vector3(1.3, 0, 0))
-	T.pos.y += 2.0
-	T.grounded = false
-	var dn0 := K.dunks
-	K._slam(0.5, true)
-	ok(
-		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
-		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
-	)
+	# the spike (docs/SPIKE_SLAM.md): the tap slam drives a foe in the air down for +40%; the dive landing does not
+	for tap_slam in [true, false]:
+		reset.call()
+		T.teleport(home + Vector3(1.3, 0, 0))
+		T.pos.y += 2.0
+		T.grounded = false
+		T.vel = Vector3.ZERO
+		var dn0 := K.dunks
+		var hp0 := T.hp
+		K._slam(0.0 if tap_slam else 0.5, not tap_slam)
+		var took := hp0 - T.hp
+		if tap_slam:
+			ok("rmb spike: the tap slam drives a foe in the air down (vy -22) for +40%",
+				K.dunks == dn0 + 1 and T.vel.y <= -21.0 and took >= 14.0 * 1.4 - 0.5,
+				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
+		else:
+			ok("rmb spike: the dive landing does not spike a foe in the air (a dive)",
+				K.dunks == dn0 and T.vel.y > -10.0 and took > 0.0,
+				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive

@@ -5,8 +5,9 @@ extends RefCounted
 ## speed, the move keys nudge the landing, and he slams on landing with the full circle. While charging,
 ## everyone sees the circle where the hop will land with its sweet spot growing from the centre; he can walk
 ## slowly, jump to leap forward (the circle comes with him) and punch to lunge further. The centre stuns,
-## foes in the air are dunked, rocks inside fly outward, and at rank 3 each slam that catches something
-## adds a Molten Guard shield stack (DolmKit.guard_stack).
+## the tap slam dunks foes in the air (GlideSpike.dunks; the hop and the dive are leaps and do not), rocks
+## inside fly outward, and at rank 3 each slam that catches something adds a Molten Guard shield stack
+## (DolmKit.guard_stack).
 
 var k: DolmKit
 var leapt := false             # jumped during this charge (the leap forward)
@@ -201,19 +202,19 @@ func slam(c: float, at_feet: bool) -> void:
 	m.sfx("br_slam", at, 0.0, 1.0)
 	k.net_ring(at, r, Color("3a7cff"))
 	var gained := false
+	var spike: Dictionary = {} if at_feet else s["spike"]      # only the tap slam: a hop or dive is a leap
 	for f in k.foes_in(at, r, 3.2):
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
-		var air := f is Hunter and (not (f as Hunter).grounded or (f as Hunter).gliding)
+		var air := GlideSpike.dunks(f, spike)
 		var o := {"src": "abil", "ab": "rmb", "kb": away * float(s["kb"]), "lift": 2.0, "heavy": true}
 		if in_core:
 			o["stun"] = lerpf(float(s["stun"][0]), float(s["stun"][1]), c)
 			o["dr"] = true
 		if air:
-			d2 *= 1.0 + float(s["dunk_k"])
-			if m.world.is_void(f.pos.x, f.pos.z): d2 += float(s["dunk_void"])
+			d2 *= 1.0 + float(spike["bonus"])
 			o.erase("lift")
 			k.dunks += 1
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("9ad0ff"), true)
@@ -221,7 +222,7 @@ func slam(c: float, at_feet: bool) -> void:
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -float(spike["vy"]), h)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
 		if not k.launchable(w): continue
