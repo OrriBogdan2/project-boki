@@ -4149,7 +4149,6 @@ func _setup_care() -> void:
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	ZoneAway.card(self)      # the one "While you were away" card: the stations' work and every zone's journal
-	GardenWishes.arrive(self)
 	Care.dex_sync()
 	_refresh_nest()
 
