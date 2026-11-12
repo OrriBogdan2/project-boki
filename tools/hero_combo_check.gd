@@ -174,12 +174,12 @@ func _mage() -> void:
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
 	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
-	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 10.0 and e2 > 11.5, "%.1f -> %.1f" % [e1, e2])
+	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 7.5 and e2 > 8.6, "%.1f -> %.1f" % [e1, e2])
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
 	ac.step(m, 0.7)
-	ok("Wirerun: a full hold streaks at least 12.5 m", _flat(P.pos, home) >= 12.5, "%.1f m" % _flat(P.pos, home))
+	ok("Wirerun: a full hold streaks at least 9.4 m", _flat(P.pos, home) >= 9.4, "%.1f m" % _flat(P.pos, home))
 	var short_v := 7.5 / K.run_time(7.5)
 	var long_v := 13.0 / K.run_time(13.0)
 	ok("Wirerun: a constant speed (40 m/s under the global dash feel), so a short run is quicker",
@@ -517,8 +517,8 @@ func _mage() -> void:
 	_dash(m, P, 0.45, func(): if K.run_t > 0.0 and P.phase_t <= 0.0: ok("small: Wirerun ignores projectiles while it runs", false))
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
-	var words: Array = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: the INVULNERABLE word shows on the run (source)", "INVULNERABLE" in words)
+	ok("Wirerun: the body turns into the bolt for the run (hidden), no floating word",
+			not P.model.visible and m.fx.nums.all(func(n): return not String(n["node"].text).contains("INVULNERABLE")))
 	ac.step(m, 0.6)
 	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
 			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,
@@ -729,6 +729,7 @@ func _gunslinger() -> void:
 	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
 			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
 			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
+	ok("RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash", T.flash_t > 0.12, "%.2f" % T.flash_t)
 	var rifle := {"src": "shot"}
 	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
 	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
