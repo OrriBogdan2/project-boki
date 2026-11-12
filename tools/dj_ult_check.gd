@@ -275,7 +275,79 @@ func zedran(a) -> void:
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
+	_guard_attacks(m, P, T, T2, home)
 	await A.done(m)
+
+## One cast with a bot attacker landing `at` s into the guard: "rifle" is a stream of three 6-damage shots 0.13s
+## apart (the rifle's own rate), "stun" one hit with a 1.5s stun and a knock, "none" nothing. The foe is
+## `foe_at` m ahead.
+## Returns what the guard let through and what the strike did.
+func _guard_case(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3, kind: String, at: float,
+		foe_at := 2.6) -> Dictionary:
+	var K: JuggernautKit = P.ak
+	var U: JuggernautUlt = K.riposte
+	A.step(m, 1.5)
+	A.fresh(T)
+	A.fresh(P)
+	T.teleport(home + Vector3(foe_at, 0, 0))
+	T2.teleport(home + Vector3(-6.0, 0, 3.0))
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.hp = P.max_hp
+	A.aim_at(P, T.pos)
+	K.cd["x"] = 0.0
+	K.res = 0.0               # (the last strike's Rage would add its +15% to this one)
+	K.enraged_t = 0.0
+	var t0 := m.time
+	var strikes0 := U.strikes
+	HunterKeys.ult_pressed(P)
+	var shots := []
+	if kind == "stun":
+		shots = [at]
+	elif kind == "rifle":
+		shots = [at, at + 0.13, at + 0.26]
+	var out := {"in_guard": 0.0, "after": 0.0, "stun": 0.0, "kb": 0.0}
+	for st in shots:
+		while m.time - t0 < float(st):
+			m.step(A.DT)
+		var hp0 := P.hp
+		var in_guard := U.guarding()
+		if kind == "stun":
+			P.hurt(8.0, T2, {"src": "abil", "stun": 1.5, "kb": Vector2(6.0, 0.0), "dr": true})
+			out["stun"] = maxf(float(out["stun"]), P.stun_t)
+			out["kb"] = maxf(float(out["kb"]), Vector2(P.vel.x, P.vel.z).length())
+		else:
+			P.hurt(6.0, T2, {"src": "shot"})
+		var slot := "in_guard" if in_guard else "after"
+		out[slot] = float(out[slot]) + hp0 - P.hp
+	while m.time - t0 < 0.9:         # the strike has landed (0.75s)
+		m.step(A.DT)
+	out["strikes"] = U.strikes - strikes0
+	out["dealt"] = U.last_dealt
+	return out
+
+## Kael's guard against two bot attackers (the source's Retaliation: no damage and no crowd control for 0.65s, then
+## the strike): a rifle stream and a stun, each landed 0.2s and 0.5s into the guard, then the strike's damage and reach.
+func _guard_attacks(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var base := float(P.ak.x_def()["dmg"])
+	for at in [0.2, 0.5]:
+		var r := _guard_case(m, P, T, T2, home, "rifle", at)
+		A.ok("juggernaut X guard: a rifle stream from %.1fs in takes nothing, the strike lands" % at,
+				float(r["in_guard"]) == 0.0 and int(r["strikes"]) == 1,
+				"in guard %.0f, after %.0f, strike %.1f (base %.0f)" % [r["in_guard"], r["after"], r["dealt"], base])
+		r = _guard_case(m, P, T, T2, home, "stun", at)
+		A.ok("juggernaut X guard: a stun and knock landed %.1fs in does not apply, the strike lands" % at,
+				float(r["in_guard"]) == 0.0 and float(r["stun"]) == 0.0 and float(r["kb"]) < 0.5
+				and int(r["strikes"]) == 1,
+				"damage %.0f stun %.2f push %.2f strike %.1f" % [r["in_guard"], r["stun"], r["kb"], r["dealt"]])
+	var one := _guard_case(m, P, T, T2, home, "stun", 0.5)
+	A.ok("juggernaut X guard: the strike with one hit blocked does %.0f x 1.2" % base,
+			absf(float(one["dealt"]) - base * 1.2) < 0.5, "dealt %.1f" % float(one["dealt"]))
+	var near := _guard_case(m, P, T, T2, home, "none", 0.0, 3.4)
+	var far := _guard_case(m, P, T, T2, home, "none", 0.0, 4.6)
+	A.ok("juggernaut X guard: the strike hits a foe 3.4m ahead and misses one 4.6m ahead",
+			float(near["dealt"]) > 0.0 and float(far["dealt"]) == 0.0,
+			"3.4m %.1f, 4.6m %.1f" % [near["dealt"], far["dealt"]])
 
 ## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
 func _cleave_fits(d: Dictionary) -> void:
