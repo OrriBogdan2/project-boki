@@ -5,6 +5,7 @@
 #   tools/check.sh                 everything (needs godot: set GODOT=... if it is not `godot` on PATH)
 #   tools/check.sh --files a b     only those files (what pre-commit passes; no Godot run, no health)
 #   tools/check.sh --no-godot      skip the Godot warning count
+#   tools/check.sh --changed       everything, and each .gd this branch changes must be gdformat clean (new branches)
 #   tools/check.sh --update        lower the baseline after cleaning a file up (it never raises a count)
 set -euo pipefail
 cd "$(dirname "$0")/.."

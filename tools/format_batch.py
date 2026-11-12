@@ -28,10 +28,14 @@ def busy_files(days):
     since = time.time() - days * 86400
     recent = [
         line.split()[0]
-        for line in git("for-each-ref", "--format=%(refname) %(committerdate:unix)", "refs/remotes/origin/ext").splitlines()
+        for line in git(
+            "for-each-ref", "--format=%(refname) %(committerdate:unix)", "refs/remotes/origin/ext"
+        ).splitlines()
         if int(line.split()[1]) >= since
     ]
-    merged = set(git("for-each-ref", "--merged", "origin/main", "--format=%(refname)", "refs/remotes/origin/ext").split())
+    merged = set(
+        git("for-each-ref", "--merged", "origin/main", "--format=%(refname)", "refs/remotes/origin/ext").split()
+    )
     busy = set()
     for ref in recent:
         if ref not in merged:

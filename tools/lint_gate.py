@@ -4,6 +4,8 @@
 Usage (normally through tools/check.sh, which sets up the venv):
   lint_gate.py                  all checks over the whole repo; exit 1 when any file is worse than the baseline
   lint_gate.py --files a b ...  only those files (pre-commit); skips the Godot warning count
+  lint_gate.py --changed [BASE] all checks, and every .gd the branch changes against BASE (origin/main) must be gdformat
+                                clean; only for branches cut after this rule (their merge base has tools/format_batch.py)
   lint_gate.py --update         write tools/lint_baseline.json: counts only ever go down, a missing baseline is created
 
 Baseline: {check: {file: problems}}. Old debt is listed there and may not grow; a file that is not listed must be clean.
@@ -169,6 +171,19 @@ def run_godot_warnings():
     return found
 
 
+def changed_unformatted(base):
+    """The .gd files changed since the merge base with `base` that gdformat would change (None: branch predates the rule)."""
+
+    def git(*a):
+        return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+
+    mb = git("merge-base", base, "HEAD")
+    if not mb or not git("ls-tree", "--name-only", mb, "tools/format_batch.py"):
+        return None
+    files = git("diff", "--name-only", "--diff-filter=d", mb, "--", "*.gd").split()
+    return [p for p in files if p.startswith(GD_DIRS) and gd_one(p)[1]]
+
+
 def run_all(only, selected):
     gd = [p for p in tracked(".gd") if p.startswith(GD_DIRS) and (only is None or p in only)]
     py = [p for p in tracked(".py") if only is None or p in only]
@@ -220,6 +235,15 @@ def main():
             for m in msgs[:5]:
                 print("    " + m)
         failed = failed or bool(worse)
+    if "--changed" in args:
+        i = args.index("--changed") + 1
+        dirty = changed_unformatted(args[i] if i < len(args) and not args[i].startswith("--") else "origin/main")
+        if dirty is None:
+            print("lint gdformat-changed: branch is older than the rule, skipped")
+        else:
+            print(f"lint gdformat-changed: {len(dirty)} changed files need gdformat --line-length {LINE_LENGTH}")
+            print("".join(f"  {p}\n" for p in dirty), end="")
+            failed = failed or bool(dirty)
     sys.exit(1 if failed else 0)
 
 
