@@ -62,6 +62,9 @@ cutting a hard line into it. One include, picked by renderer: Forward+/Mobile fa
 fragment; Compatibility (no depth texture to spare) fades by height over the match's tile ground (`fx_ground`, shared by
 `FxGround` on the World; off outside a match). Flat looks (scorch, rings, ground decals) lie on the ground and don't
 fade. `--hero-vfx-check` asserts each shader takes the include and the match world shares its ground map.
+Cost (`--perf-bench --bench-secs=30 --quality=medium`, real GPU, RTX 4090, Forward+, same worker, main vs branch): match
+GPU 7.13 -> 7.34 ms at 2560x1440 (3D scale 0.75), 0.32 -> 0.31 ms at 640x360; match wall 64.5 -> 65.4 ms (CPU-bound
+both sides, script 20.0 -> 20.8 ms); hub budget ok both (frame 13.5 / 13.2 of 16.7 ms). Strips: docs/shots/vfx-soft-dots.
 
 Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
