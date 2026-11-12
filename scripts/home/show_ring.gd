@@ -248,6 +248,15 @@ class Run:
 			return 0 if float(s[0]["look"]) >= float(s[1]["look"]) else 1
 		return 0 if float(s[0]["total"]) > float(s[1]["total"]) else 1
 
+## The ribbon your shown Boki takes: "gold" for the win, else "silver" or "bronze" by its total, else "part".
+static func placing(won: bool, total: float) -> String:
+	var at: Dictionary = rules()["ribbon_at"]
+	if won:
+		return "gold"
+	if total >= float(at["silver"]):
+		return "silver"
+	return "bronze" if total >= float(at["bronze"]) else "part"
+
 ## Pays out a finished show once: joy, trust, a memory each, energy, gems and the prize roll.
 ## Returns what the card shows, or {} when this show was already paid.
 static func settle(run: Run) -> Dictionary:
@@ -267,8 +276,10 @@ static func settle(run: Run) -> Dictionary:
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("show", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
+	var scores := run.scores()
+	var mine: Dictionary = scores[run.backed]
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize,
-			"scores": run.scores()}
+			"scores": scores, "mine": mine, "placing": placing(backed_won, float(mine["total"]))}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -283,6 +294,7 @@ var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
 var acts: Array = []           # [node, s left] for each Boki playing a show clip (its kact meta)
+var marks: ShowMarks = null    # the result's judge marks and ribbon (show_marks.gd)
 
 func _init(home) -> void:
 	h = home
@@ -353,6 +365,8 @@ func use() -> void:
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	var week := GardenPrizes.week_of(Time.get_unix_time_from_system())
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, week)
+	if is_instance_valid(marks):
+		marks.queue_free()
 	board.text = board_text(week)
 	_enter()
 	GardenSfx.countdown(h, stage.position)
@@ -570,6 +584,7 @@ func _walk_pos() -> Vector3:
 
 func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}
+	var shown := _shown()
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
@@ -584,6 +599,10 @@ func _end(finished: bool) -> void:
 		_act(h._kin_entry(res["win"]), "hop", float(rules()["card_s"]))
 		_act(h._kin_entry(res["lose"]), "bow", BOW_S)
 		GardenSfx.result(h, res)
+		if is_instance_valid(marks):
+			marks.queue_free()
+		marks = ShowMarks.new(shown, stage.position, res["mine"], res["placing"])
+		h.root_ui.add_child(marks)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
