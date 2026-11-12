@@ -69,7 +69,8 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
-	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
+	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
+	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
