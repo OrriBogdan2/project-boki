@@ -361,25 +361,26 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
-var _flash_shell := false
+var _flash_col := Color.WHITE
 const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
 var _flash_n := -1
-var _flash_hot := false
-## Puts the body's tint on its materials: the hit flash (white) or, when nothing hit it, the DoT tint (DotLook).
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
+## Puts the body's tint on its materials: the hit flash (white), else the DoT tint (DotLook), else the wash.
 func show_flash(hit: float) -> void:
 	var dot := DotLook.amount(self, Settings.quality() == "low")
-	var hot := hit <= 0.0 and dot > 0.0
 	var f := maxf(hit, dot)
-	var shell := shell_t > 0.0
+	var tint := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
+	if hit <= 0.0 and dot > 0.0:
+		tint = DotLook.COL
+	elif f <= 0.0 and wash > 0.0:
+		f = wash
+		tint = wash_col
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n or hot != _flash_hot or shell != _flash_shell:
+	if f != _flash_set or tint != _flash_col or mats.size() != _flash_n:
 		_flash_set = f
+		_flash_col = tint
 		_flash_n = mats.size()
-		_flash_hot = hot
-		_flash_shell = shell
-		var tint := SHELL_FLASH if shell else Color.WHITE
-		if hot:
-			tint = DotLook.COL
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
 			mt.set_shader_parameter("flash_color", tint)

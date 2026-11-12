@@ -8,6 +8,7 @@ extends RefCounted
 ## locked direction with its front at the charge, and Grimble's wedges are his hit cones to the content numbers.
 ## Claire's scarf tails hang from their anchor, follow it, stream behind a run and are off at Low. And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that.
+## Each ability's emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd).
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -51,6 +52,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
