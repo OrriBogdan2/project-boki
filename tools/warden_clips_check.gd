@@ -253,7 +253,8 @@ func _mantle(id: String, keyed: bool) -> void:
 	var an := HunterAnim.new(m)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
 	var foot := WardenSkeleton.find(sk, "shin.R")
-	var hand := WardenSkeleton.find(sk, "hand.R")
+	var hand_l := WardenSkeleton.find(sk, "hand.L")    # the higher hand: Albert pulls with his left (right: hammer)
+	var hand_r := WardenSkeleton.find(sk, "hand.R")
 	var head := WardenSkeleton.find(sk, "head")
 	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
 	var lo := 0.0
@@ -264,7 +265,8 @@ func _mantle(id: String, keyed: bool) -> void:
 		var p := sk.get_bone_global_pose(foot).origin
 		lo = minf(lo, p.y)
 		hi = maxf(hi, p.y)
-		hands.append(sk.get_bone_global_pose(hand).origin.y - sk.get_bone_global_pose(head).origin.y)
+		hands.append(maxf(sk.get_bone_global_pose(hand_l).origin.y, sk.get_bone_global_pose(hand_r).origin.y)
+				- sk.get_bone_global_pose(head).origin.y)
 	ok(hi - lo > 0.15, "%s: the legs move through the climb (%.2f m)" % [id, hi - lo])
 	var reach: float = 0.0 if keyed else float(hands[3]) + 0.15    # mantlekit's grab starts under the head
 	ok(float(hands[0]) > reach and float(hands[3]) < -0.1,
