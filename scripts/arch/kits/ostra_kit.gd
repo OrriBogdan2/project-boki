@@ -579,7 +579,7 @@ func _tick_seed(dt: float) -> void:
 	AimKit.circle(
 		h, "seed",
 		{
-			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": TEAL, "col2": VOID_COL,
+			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": VOID_COL, "col2": TEAL,
 			"dashed": seed_k() < 1.0
 		}
 	)

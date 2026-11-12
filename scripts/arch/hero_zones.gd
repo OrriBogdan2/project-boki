@@ -166,7 +166,7 @@ static func bridge(
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
 ## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
-## growing to its full width, with a teal rim ring. Ostra's own shape; no other zone looks like it.
+## growing to its full width, with a thin teal rim at its edge. Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
@@ -190,8 +190,8 @@ static func seed_visual(
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
-	ring.mesh = Models.cyl(1.0, 1.0, 0.02, 28)
-	ring.material_override = KitLooks.shade_mat(Color(col, 0.75))
+	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the violet globe reads
+	ring.material_override = Models.ring_mat(Color(col, 0.9), 0.06)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
 	m.add_child(n)
