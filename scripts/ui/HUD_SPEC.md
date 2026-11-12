@@ -46,8 +46,36 @@ strip `#7edaf0` (`SHIELD_BAR`), plate `#050f19` (`FRAME`), XP `#d33efd` (`XP`), 
 | Clock tab | 59x15, centred on the disc's top, grey | 40x13 | match time left; red under 30 s |
 | Phase line | words y ~316, bar h 6, x 19..257 | words + 3 px bar, x 7..177 | raid condition, phase word, `LV. n`; bar `#0863d4` on `#242f3e` |
 
+## Weapon (`weapon_hud.gd`)
+| Part | Reference (1080p px) | Layout px | Ours |
+|---|---|---|---|
+| Silhouette | pale white side-on gun, x 256..374, y 974..1022 | x 171..250, y 650..682 | `AT` (210, 666), `Icons` at scale 42 (~76 px wide), `SIL` `#eef6fb`, element tints it 35 % |
+| Ammo | none shown (its gun has no magazine) | | leaning count, font 15, "/ mag" font 10, baseline 700 under the silhouette; reload dims it and fills a 3 px strip |
+
+Every weapon has its own drawn silhouette in `icons.gd` (the 11 that had none got one).
+
+## Bottom-right row (`belt_hud.gd` `row`, `grip_hud.gd`) and gear column (`gear_panel.gd`)
+| Part | Reference (1080p px) | Layout px | Ours |
+|---|---|---|---|
+| Consumable slots | 39 square, pitch 43, foot y 1044 | 26, pitch 29, foot 696 | the belt (`BeltHud.SLOT`, `GAP`, `BOTTOM`); Boki throw left of it |
+| Count over a slot | "2/8", caps ~11 px, in the item colour | font 11, 4 px over the slot | "left/max" (replaces the old corner badge) |
+| Item cards | 53x62, pitch 60, rarity-coloured foot ~19 px | 36x42, pitch 40, foot 12 | gloves (rarity foot) and the Boki (foot = bond meter, gold) (`GripHud.W/H/BASE_H`) |
+| Gap consumables to cards | 48 | 32 | `TO_GRIPS` |
+| Item column, right edge | round icons dia ~34, pitch ~38 | 26, pitch 30, 14 from the edge | `GearPanel` (gloves, armour, boots), rarity rim |
+
+The weapon card that used to sit bottom-right is gone: weapon → silhouette above, gems → currency
+top right, seeds / box / backpack → the line under it.
+
+## Top right (`score_row.gd`)
+| Part | Reference (1080p px) | Layout px | Ours |
+|---|---|---|---|
+| Counter icons | ~15 px, pitch 43, centre y 26 | scale 6.5, pitch 28, y 17 | squads left, kills, knocks |
+| Rule | 1 px `#9cb8ce`, diamond ends, y 44 | y 29.5 | `RULE_*` |
+| Counts | caps ~12 px, white, under each icon | font 12, baseline 44 | |
+| Currency | caps ~21 px `#e8f8d0`, coin dia 26 at the right | font 20, baseline 23 | gems + gem icon (`CUR_*`, `COIN_R`) |
+| Carry line | (a stat list in the ref) | font 10-11, baseline 60 | seeds · box, backpack used/max |
+
 ## Left for later (not in this pass)
 - Squad rows and the ALLY KNOCKED world marker: `ext/squad-frames` (same reference, same `LEAN_K`
   and frame colour; its private `_slant` / `_lean_text` can switch to `HudStyle.slant` / `lean_text`).
-- Weapon silhouette between the vitals and the slots; item / consumable slots bottom-right (ref slots
-  41 px at 1080p, counts over them); currency and stat row top-right.
+- The ref's cut-out portrait bust (our portrait art has no transparency: round portrait).

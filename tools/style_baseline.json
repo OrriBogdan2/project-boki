@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -805,7 +805,7 @@
 "shadow": 1
 },
 "scripts/ui/gear_panel.gd": {
-"long_line": 2
+"long_line": 1
 },
 "scripts/ui/hatch.gd": {
 "long_line": 29,
@@ -822,9 +822,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 174,
-"nested_ternary": 33,
-"semicolon": 43,
+"long_line": 166,
+"nested_ternary": 29,
+"semicolon": 40,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {

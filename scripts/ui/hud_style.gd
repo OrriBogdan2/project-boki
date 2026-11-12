@@ -158,13 +158,6 @@ static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) ->
 	var at := Vector2(center.x - kw * 0.5, kr.position.y + 10.5)
 	c.draw_string(BIG, at, key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
 
-## A small count badge (charges, stack sizes) centred on `at`.
-static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
-	var s := str(n)
-	var w := maxf(16.0, BIG.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0)
-	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
-	ctext(c, at + Vector2(0, 4.5), s, 11, col)
-
 ## A parallelogram `w` wide and `h` tall whose top-left is `at`, its bottom LEAN_K * h further left.
 static func slant(c: CanvasItem, at: Vector2, w: float, h: float, col: Color) -> void:
 	if w <= 0.0:

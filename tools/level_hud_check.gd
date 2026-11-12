@@ -75,5 +75,20 @@ func run(main: Node) -> void:
 	near.call(hud.MM_D, 262.0, "minimap size")
 	near.call(HudVitals.XP_Y, 1182.0 - 108.0, "XP bar top")
 	ok(RankMarks.NUMERALS[3] == "III", "a rank shows as a numeral on the slot")
+	# the weapon between the vitals and the ability row; the bottom-right row; the top-right counters
+	near.call(WeaponHud.AT.x, 328.5, "weapon silhouette centre x")
+	near.call(WeaponHud.AT.y, 1148.0 - 108.0, "weapon silhouette centre y")
+	var wpn_l := WeaponHud.AT.x - 0.9 * WeaponHud.ICON_S
+	var wpn_r := WeaponHud.AT.x + 0.9 * WeaponHud.ICON_S
+	ok(wpn_l > HudVitals.PLATE_X + HudVitals.PLATE_W and wpn_r < HudVitals.SLOT_X,
+			"the weapon (x %.0f..%.0f) sits between the vitals plate and the first ability slot" % [wpn_l, wpn_r])
+	near.call(BeltHud.SLOT, 41.0, "belt slot size")
+	near.call(BeltHud.SLOT + BeltHud.GAP, 45.0, "belt slot pitch")
+	near.call(BeltHud.BOTTOM, 1195.0 - 108.0, "bottom-right row's foot")
+	near.call(GripHud.W, 55.0, "item card width")
+	near.call(GripHud.H, 65.0, "item card height")
+	near.call(GripHud.W + GripHud.GAP, 62.0, "item card pitch")
+	near.call(ScoreRow.PITCH, 44.3, "top-right counter pitch")
+	near.call(ScoreRow.CUR_Y, 144.0 - 108.0, "currency baseline")
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

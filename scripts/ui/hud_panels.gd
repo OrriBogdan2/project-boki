@@ -53,7 +53,8 @@ func _draw_panels() -> void:
 		if p and not p.out and not p.extracted:
 			HudVitals.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
-			hud._draw_weapon(sz, p)
+			WeaponHud.draw(hud, sz, p)
+			BeltHud.row(hud, p, sz)
 			GearPanel.draw(hud, sz, p)
 			hud._draw_kin_card(sz, p)
 			hud._draw_squad(sz, p)
