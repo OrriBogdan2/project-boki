@@ -34,7 +34,8 @@ climbing at `updraft_vy` (9 m/s, the old inline constant, now under the source's
   deleted (the live pad never lived there; STATE_MACHINES M1 deletes the rest of scripts/feel/).
 - Tunables `pad_vy`, `pad_clear`, `updraft_vy` in `content/rules/hunter_move.json`.
 - `--pad-check` (new) flies every hunter off a pad: apex height and time, glider shut in the rise and open
-  by itself at the apex, no steering in the rise and steering after, hands-off set down at the landing;
+  by itself at the apex, steering after, hands-off set down at the landing; the rise steers as the same throw
+  with no pad (0.24.6 merge: the owner's strong air control replaced `air_control` 0.015, docs/MERGE_0246_FEEL.md);
   plus the pocket pad and the updraft.
 - Net.VERSION bump: no. The launch is velocity, which the snapshot carries; `auto_glide` was already local.
 - The `pad` dictionary on Hunter now only holds scripted arcs (a ledge hop, a leap onto higher ground);

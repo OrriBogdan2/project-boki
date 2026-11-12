@@ -76,7 +76,7 @@ func _spike() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 		if h.grounded: landed_stun = h.stun_t
-	var want := Hunter.SPIKE_STUN - Match.DT
+	var want := GlideSpike.land_stun - Match.DT
 	ok(landed_stun >= want, "...it lands stunned %.2f s (source: 0.7 s)" % landed_stun)
 	_glide(0.0)
 	h.hurt(SHOT, foe)

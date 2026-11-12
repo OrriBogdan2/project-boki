@@ -740,20 +740,6 @@ func _render_balloon(delta: float) -> void:
 		string.position = Vector3(0, len * 0.5, 0)
 		string.scale = Vector3(1, len, 1)
 
-## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
-## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so.
-func _shot_down() -> void:
-	gliding = false
-	glide_cd = 2.5
-	shot_down = true
-	stun_t = maxf(stun_t, 0.35)
-	vel = Vector3(vel.x * 0.3, minf(vel.y, -6.0), vel.z * 0.3)
-	m.fx.burst(pos + Vector3(0, 1.8, 0), Color("ff9a5a"), 14, 3.0, 0.45, 6.0, 0.8)
-	m.sfx("knock", pos, -2.0, 1.3)
-	if ctrl == "local" and m.hud:
-		m.hud.toast_small("GLIDER SHOT DOWN", Color("ff9a5a"))
-
 ## Knockback is a clean, predictable shove: a knock replaces the flight you were in (Displace.knock_speed: a
 ## second knock takes over from the first, a pull or a reel), you slide for a fixed moment without control,
 ## and it never pops you into the air unless the attack says so.

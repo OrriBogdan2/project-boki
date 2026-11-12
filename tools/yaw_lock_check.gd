@@ -14,10 +14,12 @@ const HOLD_F := 30            # frames a held slot (LMB, RMB) stays down
 const WINDOWS := {"early": [6, 20], "late": [32, 46]}      # frames: the sweep, then the reading
 const FREE_DEG := 60.0        # a free body follows a 90 degree sweep by at least this much in 0.23 s
 const LOCK_DEG := 3.0         # a locked body moves no more than this (rounding, a knock)
-## m east of the Hunter the rival stands (where every slot is aimed at the press). Dredge's further out so his reel
-## is still hauling through the late window.
-const FOE_AT := {"dredge": 9.0}
-const FOE_DEFAULT := 5.0
+## Where the rival stands from the Hunter, m (x east, z south): east, where every slot is aimed at the press.
+## Dredge's Abyssal Hand leaves at the end of its coil (`rmb.windup`, 0.2 s) along the cursor of that moment, and
+## the early sweep has turned the cursor north by then: his rival stands there, near enough for the 17 m/s arm
+## to catch it before the late window and the reel to haul through it.
+const FOE_AT := {"dredge/rmb": Vector3(0, 0, -5)}
+const FOE_DEFAULT := Vector3(5, 0, 0)
 const SLOW_GAP := 3.0         # a capped turn: more than locked, no more than deg_s x window plus this
 
 var bad := 0
@@ -28,7 +30,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func _match(main: Node, arch: String) -> Match:
+func _match(main: Node, arch: String, slot: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
@@ -65,9 +67,16 @@ func _match(main: Node, arch: String) -> Match:
 		if other == P:
 			continue
 		other.ctrl = "idle"
-		# one rival east, where the slot is aimed (a hook, a grab or a step needs someone to land on)
-		var east := Vector3(float(FOE_AT.get(arch, FOE_DEFAULT)), 0, 0)
-		other.teleport(P.pos + (east if not foe_set and other.team != P.team else Vector3(40, 0, 40)))
+		# no Boki beside it: a hook or a grab takes the first body on its line, and the Boki stands in front
+		for kk in [other.kin, other.kin2]:
+			if kk:
+				m.kins.erase(kk)
+				kk.queue_free()
+		other.kin = null
+		other.kin2 = null
+		# one rival where the slot goes (a hook, a grab or a step needs someone to land on)
+		var at: Vector3 = FOE_AT.get(arch + "/" + slot, FOE_DEFAULT)
+		other.teleport(P.pos + (at if not foe_set and other.team != P.team else Vector3(40, 0, 40)))
 		foe_set = foe_set or other.team != P.team
 	for i in 20:
 		_aim(P, Vector2(1, 0))
@@ -135,7 +144,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch in _heroes():
 		for slot in SLOTS:
-			var m := _match(main, arch)
+			var m := _match(main, arch, slot)
 			var r := probe(m, slot)
 			var want: Dictionary = m.player.ak.turn_rule(slot)
 			if not r["went"]:

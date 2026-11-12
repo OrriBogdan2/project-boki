@@ -1,7 +1,7 @@
 class_name PadFlight
 extends RefCounted
 ## A jump pad's launch (the map's pads and the pocket Spring pad), after SUPERVIVE: a ballistic throw
-## under the world's gravity that the keys barely steer (HunterMove.air_control), and at the apex the
+## under the world's gravity that the keys steer as any airborne body (Loco.air_step), and at the apex the
 ## glider opens by itself (DECISIONS: pad and updraft auto-glides are the one exception to "a held Space
 ## never opens the glider"); from there it is a glide, steered as any glide and keeping the launch's speed.
 ## A map pad is aimed at its landing: left alone (or a bot) the glide is carried onto the landing and the
