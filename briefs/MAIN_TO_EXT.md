@@ -1360,3 +1360,8 @@ Batch 1112 (ext/mc-integ-1112a + b2 + c2, 36 members) merged to main. Do NOT re-
 ## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 0fa1778ed (PR #41, ext/health-py-1112, no tag)
 - **Devs get:** every argparse tool answers --help with no work at import; py_help_check runs in the CI unittest job (new tools need argparse + --help). tools/README.md: lint section, then Python scripts grouped by area; docs/CODE_HEALTH.md has the Python removal list.
 - **Gate:** same stack as PR #40 (tree byte-identical to the gated step).
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 449fcaf48 (PR #42, ext/wisp-clarity-1112, no tag)
+- **Player gets:** downed Hunters show a compact wisp mark and their Boki ride them as wisps; ally and enemy views read apart. Tools: --wisp-clarity-shots.
+- **Gate:** main now equals the gated stack tree byte for byte; --check and --kin-wisp-form-check green after merge. --revive-net-check not run (Godot queue jam); rerun it once the queue is cleared.
+- **Held for Friday:** ext/pve-raid-1111 (see the next note). Branches stacked on it (combat-raid-balance, sfx-raid-cues) wait with it.
