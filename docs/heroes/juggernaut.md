@@ -444,7 +444,7 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Smash landing art | scorch + sweep, cone 70 deg | same | everyone | - | fixed: sweep was 74 deg |
 | Smash hold (RMB) lunge | lane growing 4.5-7.5 m, width = body + 0.6 m each side | contact test uses the same width | her screen | lane along the dash | fixed: was 1.3 m against a 2.06 m test; both now share `lunge_w()` |
 | Lunge art | scorch lane, width follows `lunge_w()` | same | everyone | - | fixed: was a fixed 1.3 m |
-| Meteor Drop aim (air) | disc r 2.2 m under him | damage radius 2.2 m | her screen | landing marker | ok, asserted |
+| Meteor Drop aim (air) | disc r 2.2 m under him, hidden while a dash runs | damage radius 2.2 m | her screen | landing marker | ok, asserted |
 | Meteor Drop marker | disc r 2.2 m filling, core ring 1.2 m | damage 2.2 m, stun core 1.2 m | everyone | magenta disc | ok, asserted |
 | Meteor Drop landing art | scorch r 2.2 m, skirt at the core, shock ring 1.2 m | same | everyone | ground crack + ring | fixed: scorch and skirt were 1.05x and 1.15x |
 | Warchain (E) | chain line to the target; steer reach 3.5 m | hook shot | everyone | chain | not an area; ok |
