@@ -31,3 +31,14 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 - **Weapons:** twin flintlocks skinned to hand.R / hand.L, procedural silver and maroon wood with violet runes and a crystal, scaled up from v1 to the sheet (not projected from it). The silver and wood ramps sit a step under the sheet because the engine's toon light lifts them; the muzzle halos are small so the barrels keep their grey. Two moth-curved knives on each hip, from the turnaround's side view (the master shows two on her right). `anchor_bola` keeps its name on the hips; the kit needs the name.
 - **Face and skin:** the scan's stitched mouth was removed in three places: the low mesh's crease smoothed (`sable_finish.py`), the normal bake flattened there, and a thin smile painted (`face_fix` in `sable_paint.py`). The same pass grades the skin toward the sheet's grey-lilac (tuned in the engine: a step below the hair, not the Blender preview), redraws the beauty mark, cleans collar violet off the neck and paints the cut buns back to hair.
 - **The back of the skull:** the buns the scan grew are cut in `sable_source.py`; `hairback()` closes the hole with a fitted ellipsoid down to the nape.
+
+walk_fl, walk_fr, walk_bl, walk_br, run_fl, run_fr, run_bl, run_br, run_r (2026-11-11; the judge kept only these): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/sable/sable.glb OUT.glb 1.39 2.9`
+(the speed / 1.4, the game's rate cap her `loco.foot_mps` hits, / 1.13, what her `loco.stride` 1.5 adds to a planted sole), then
+`python3 tools/art1/glb_add_clips.py art/wardens/sable/sable.glb OUT.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl,run_br,run_r` (judge: docs/art/wardens/dirloops/JUDGE.md).
+
+walk_b, run_b, run_l (2026-11-11, second pass; the judge kept only these): the hand-keyed loops re-strided,
+`blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- sable.glb B.glb 1.39 2.9 b+,l+`, then
+`glb_add_clips.py sable.glb B.glb walk_b,run_b,run_l` and the diagonals walk_bl, walk_br, run_bl, run_br copied back
+after it (prefix match: walk_b replaces walk_bl/walk_br too).
+
+walk_f on the ring's recipe (2026-11-12, ext/anim-dir-all-1112; the hand-keyed walk_f carried 40% of the speed in game): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/sable/sable.glb OUT.glb 1.39 2.9 f 0 0 1 1,1 40 walk`, then `glb_add_clips.py sable.glb OUT.glb walk_f` and walk_fl, walk_fr copied back from the old file.
