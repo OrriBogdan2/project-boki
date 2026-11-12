@@ -1418,6 +1418,10 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 | gems_ran | 1 |
 | gems_doc | Gems to you when your backed Boki wins, or for any other show. |
 | card_s | 8 |
+| ribbon_at | {"silver": 20.0, "bronze": 12.0} |
+| ribbon_doc | The placing ribbon of your shown Boki: gold when it wins, else silver from this total, bronze from this total, else a plain green 'took part'. |
+| marks | {"pips": 5, "gap_s": 0.3, "life_s": 0.8, "drop_s": 0.25, "colors": {"gold": "f2c84a", "silver": "c9d3dc", "bronze": "c8814a", "part": "5bbf6a"}} |
+| marks_doc | The result's look (show_marks.gd): three judge marks pop gap_s apart, each shown as filled pips of pips and gone after life_s (the last by 1.4 s), then the placing ribbon drops onto the Boki over drop_s. |
 
 ## snack_patch (`content/rules/snack_patch.json`)
 
