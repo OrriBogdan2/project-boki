@@ -56,7 +56,10 @@ func _draw_panels() -> void:
 			hud._draw_weapon(sz, p)
 			if HudReveal.on(m, "gear"): GearPanel.draw(hud, sz, p)
 			hud._draw_kin_card(sz, p)
-			if HudReveal.on(m, "squad"): hud._draw_squad(sz, p)
-			if HudReveal.on(m, "perks"): hud._draw_perks(sz, p)
+			if HudReveal.on(m, "squad"):
+				hud._draw_squad(sz, p)
+				TeamBoki.draw(hud, p)
+			if HudReveal.on(m, "perks"):
+				hud._draw_perks(sz, p)
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0

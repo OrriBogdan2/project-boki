@@ -107,6 +107,15 @@ static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
 # ------------------------------------------------------------------ the strip
+## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
+## is not drawn (no Heart, a tutorial, training or a duel): what sits under it at the top-centre starts lower.
+static func bottom(m: Match) -> float:
+	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
+		return 0.0
+	if m.heart == null or m.heart.site == Vector3.INF:
+		return 0.0
+	return TOP_Y + CELL.y + 20.0 + 11.0
+
 static func draw(hud) -> void:
 	var m: Match = hud.m
 	if m.heart == null or m.heart.site == Vector3.INF:
@@ -126,6 +135,7 @@ static func draw(hud) -> void:
 	c.draw_line(Vector2(sx, r.position.y + 7), Vector2(sx, r.end.y - 7), Color(1, 1, 1, 0.14), 1.0)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
+	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 
 static func _any_open(sd: Array) -> bool:
 	for s in sd:
