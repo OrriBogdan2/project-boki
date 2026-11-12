@@ -58,5 +58,17 @@
 				}
 			}
 		},
-		"summon_call": "g_call_fling_r"
+		"summon_call": "g_call_fling_r",
+	"cancels": [
+		["ostra_snap_wind", 0.2, "stun"],
+		["ostra_snap_wind", 0.2, "ostra_orb"],
+		["ostra_snap_wind", 0.2, "ostra_seed"],
+		["ostra_snap_wind", 0.2, ""],
+		["ostra_well", 0.5, "stun"],
+		["ostra_well", 0.5, "ostra_well_snap"],
+		["ostra_swap_aim", 0.3, "ostra_orb"],
+		["ostra_swap_aim", 0.3, ""],
+		["ostra_swap_aim", 0.3, "ostra_swap"],
+		["ostra_orb", 0.1, "ostra_snap_wind"]
+	]
 }

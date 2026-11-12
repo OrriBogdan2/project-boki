@@ -77,10 +77,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, mantles; `stomp` and `drink` for a Hunter with no clip). A kit move with no clip does too. `--action-shots --warden=<id> --state=stomp|revive|drink --shots-dir=<dir>` renders the three (`--variant=proc` the rig's pose).
 - No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants
   the nearer foot on the wall over it, for every Hero (docs/art/WALL_POSE_AUDIT.md).
+- `cancels`: [from move, cut at s, to] rows, one per second press the hero's docs/heroes Cancels table lists (to: a move,
+  `""` the legs, `stun`, `glide`). `--clip-check` hands each over as the game does and asserts no pop and a blend done
+  within one footage frame (0.2 s); `--clip-shots --cancels` shoots the frames around each cut.
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
-channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
+loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2) > `full` (Blend2), each of the last two onto a
+Layer of two crossfaded seek channels: a new clip, or the same one started over, takes the channel with less weight
+on screen, so a cancel inside a fade never snaps. Built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)

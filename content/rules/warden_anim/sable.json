@@ -43,5 +43,18 @@
 		}
 	},
 	"summon_call": "g_call_fling_r",
-	"free_arm": {"vault_r": "L", "vault_l": "R"}
+	"free_arm": {"vault_r": "L", "vault_l": "R"},
+	"cancels": [
+		["thf_bola", 0.2, "stun"],
+		["thf_bola", 0.2, "thf_lmb_r"],
+		["thf_bola", 0.2, "thf_knife"],
+		["thf_bola", 0.2, "thf_encore"],
+		["thf_bola", 0.2, ""],
+		["thf_encore_dance", 0.8, ""],
+		["thf_encore_dance", 0.8, "thf_vault_r"],
+		["thf_encore_dance", 0.8, "thf_lmb_l"],
+		["thf_knife", 0.3, "thf_arrive"],
+		["thf_lmb_r", 0.1, "thf_lmb_l"],
+		["thf_vault_f", 0.2, "thf_encore"]
+	]
 }

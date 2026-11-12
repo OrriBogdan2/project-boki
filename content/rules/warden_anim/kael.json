@@ -233,5 +233,22 @@
 	},
 	"summon_call": "g_call_raise_r",
 	"free_arm": {"slam": "L", "meteor": "L"},
-	"mantle": {"clip": "mantle", "rise": 0.421}
+	"mantle": {"clip": "mantle", "rise": 0.421},
+	"cancels": [
+		["jug_wave_wind", 0.5, ""],
+		["jug_lunge_wind", 0.5, ""],
+		["jug_haul_wind", 0.3, ""],
+		["jug_meteor", 0.4, ""],
+		["jug_lunge_wind", 0.5, "jug_lunge"],
+		["jug_guard", 0.5, "glide"],
+		["jug_reel", 0.3, "jug_spin"],
+		["jug_reel", 0.3, "jug_dash"],
+		["jug_dash", 0.2, "jug_guard"],
+		["jug_exdash", 0.2, "jug_guard"],
+		["jug_exdash", 0.2, "jug_slam"],
+		["jug_slam", 0.2, "jug_slash_r"],
+		["jug_slam", 0.2, "jug_chain"],
+		["jug_slash_r", 0.2, "jug_slam"],
+		["jug_wave_wind", 0.5, "stun"]
+	]
 }

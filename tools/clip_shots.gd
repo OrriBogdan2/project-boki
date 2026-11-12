@@ -3,6 +3,11 @@ extends RefCounted
 ## [--carry [--heart]]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
 ## <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in
 ## <dir>/flinch/ (--heavy: stagger). Needs a renderer. ffmpeg makes the GIFs and sheets.
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]:
+## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
+## and with --turn a turntable in <dir>/turntable/; --cancels [--only=i,j] the file's cancel rows handed over as the
+## game does, from 0.1 s before the cut to 0.3 s after, in <dir>/cancel_<i>_<from>_<to>/. Needs a renderer. ffmpeg
+## makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -103,6 +108,8 @@ func run(main: Node) -> void:
 		await _moods(model, sync, clips, out)
 	if OS.get_cmdline_user_args().has("--carry"):
 		await _carry(model, sync, out)
+	if OS.get_cmdline_user_args().has("--cancels"):
+		await _cancels(model, sync, clips, out, fps)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
 
@@ -188,3 +195,35 @@ func _carry(model: Node3D, sync: Node, out: String) -> void:
 		ball.global_position = model.get_meta(WardenCarry.MOTE if heart else WardenCarry.SOCKET, Vector3.ZERO)
 		await _grab(dir.path_join("f%02d.png" % i))
 	ball.queue_free()
+## --cancels: each "cancels" row of the Hero's file fed as --clip-check feeds it (tools/clip_check.gd), the frames
+## around the cut: <dir>/cancel_<i>_<from>_<to>/f000.png...
+func _cancels(model: Node3D, sync: Node, clips: WardenClips, out: String, fps: float) -> void:
+	var only: Array = []
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--only="):
+			only = Array(a.substr(7).split(",", false))
+	var checker = load("res://tools/clip_check.gd")
+	var rows: Array = clips.d.get("cancels", [])
+	for i in rows.size():
+		if not only.is_empty() and not str(i) in only:
+			continue
+		var row: Array = rows[i]
+		var dir := out.path_join("cancel_%d_%s_%s" % [i, row[0], row[2] if row[2] != "" else "legs"])
+		DirAccess.make_dir_recursive_absolute(dir)
+		var s := {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true}
+		model.set_meta(WardenClips.STATE, s)
+		var cut: float = checker.LEAD + float(row[1])
+		var at := 0.0
+		var n := 0
+		var seq: Array = checker.cancel_seq(row)
+		for st in seq:
+			var t := 0.0
+			while t < float(st[1]):
+				checker.feed(s, String(st[0]), t)
+				sync.call("_process", 1.0 / fps)
+				if at >= cut - 0.1 and at <= cut + 0.3:
+					await _grab(dir.path_join("f%03d.png" % n))
+					n += 1
+				t += 1.0 / fps
+				at += 1.0 / fps
+		model.set_meta(WardenClips.STATE, {})

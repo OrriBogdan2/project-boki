@@ -201,5 +201,18 @@
 		"board": {"pose": {"head": [8, 0, 8], "upper_arm.R": [-55, 0, 0], "forearm.R": [-15, 0, 0], "upper_arm.L": [-10, 0, -30]}}
 	},
 	"summon_call": "g_call_slam_r",
-	"free_arm": {"lmb_throw": "L", "lmb_punch": "L"}
+	"free_arm": {"lmb_throw": "L", "lmb_punch": "L"},
+	"cancels": [
+		["breah_wind", 0.5, "breah_crouch"],
+		["breah_wind", 0.5, "breah_punch"],
+		["breah_spine_aim", 0.4, "stun"],
+		["breah_spine_aim", 0.4, ""],
+		["breah_crouch", 0.4, "breah_lunge"],
+		["breah_crouch", 0.4, "breah_leap"],
+		["breah_crouch", 0.3, ""],
+		["breah_crouch", 0.4, "breah_raise"],
+		["glide", 0.4, "breah_dive"],
+		["breah_raise", 0.1, "breah_punch"],
+		["breah_skate", 0.4, "breah_spine_aim"]
+	]
 }

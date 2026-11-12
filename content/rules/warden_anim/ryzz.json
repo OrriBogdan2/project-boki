@@ -42,5 +42,17 @@
 			}
 		}
 	},
-	"summon_call": "g_call_fling_r"
+	"summon_call": "g_call_fling_r",
+	"cancels": [
+		["mage_dash", 0.4, "stun"],
+		["mage_dash", 0.4, "mage_dash_go"],
+		["mage_x_air", 0.5, "mage_x_dive"],
+		["mage_x", 0.2, "mage_x_air"],
+		["mage_rmb_hold", 0.3, "mage_lmb_l"],
+		["mage_rmb_hold", 0.3, "mage_rmb"],
+		["mage_rmb_hold", 0.3, "mage_e"],
+		["mage_dash", 0.4, "mage_lmb_r"],
+		["glide", 0.4, "mage_e"],
+		["mage_x_dive", 0.2, "mage_x_land"]
+	]
 }

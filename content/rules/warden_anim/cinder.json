@@ -45,5 +45,15 @@
 		}
 	},
 	"summon_call": "g_call_fling_r",
-	"mantle": {"clip": "mantle", "rise": 0.488}
+	"mantle": {"clip": "mantle", "rise": 0.488},
+	"cancels": [
+		["as_lance", 0.6, "lw_jet"],
+		["lw_jet", 0.6, "lw_land"],
+		["lw_jet", 0.6, "lw_jump"],
+		["as_aim", 0.4, ""],
+		["as_lance", 0.6, ""],
+		["glide", 0.4, "as_shot"],
+		["glide", 0.4, "lw_jet"],
+		["as_leap", 0.2, "lw_jet"]
+	]
 }

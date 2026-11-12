@@ -216,5 +216,17 @@
 			}
 		}
 	},
-	"summon_call": "g_call_fling_r"
+	"summon_call": "g_call_fling_r",
+	"cancels": [
+		["dr_dive", 0.3, "glide"],
+		["dr_blast", 0.5, "stun"],
+		["dr_reel", 0.5, ""],
+		["dr_anchor", 0.2, ""],
+		["dr_throw", 0.2, "dr_shot"],
+		["dr_throw", 0.3, "dr_anchor"],
+		["dr_anchor", 0.2, "dr_shot"],
+		["dr_reel", 0.5, "dr_pullend"],
+		["dr_blast", 0.5, ""],
+		["dr_lunge", 0.2, "dr_anchor"]
+	]
 }

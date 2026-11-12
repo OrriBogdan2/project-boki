@@ -14,7 +14,8 @@ extends RefCounted
 ## and rise, or the glide, or the dive: a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a
 ## one-shot) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
-## so one move hands to the next without a pop (item 32).
+## so one move hands to the next without a pop (item 32), a cancel into stun, out of the glider or across the two
+## layers included (the "cancels" rows of the file, --clip-check).
 ##
 ## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
 ## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
@@ -584,26 +585,40 @@ func step(dt: float) -> void:
 		_p("seek_hit/seek_request", float(want["t"]))
 		_p("seek_hit0/seek_request", 0.0)
 	flinch_w = move_toward(flinch_w, 1.0 if flinching else 0.0, dt / FADE)
+	# (a layer faded out starts its next clip afresh, the crossfade snapped onto it: a stale pose on the other channel
+	# never bleeds into the first frames of a cancel into stun or a cast from the air)
+	if act_w <= 0.0:
+		cur = ""
+		act_out = FADE_LOCO
+	if up_w <= 0.0:
+		cur_u = ""
+	var fade := float(want.get("fade", FADE))
 	if flinching:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 	elif not proc and bool(want.get("upper", false)):
 		var clip_u := String(want["clip"])
 		if clip_u != cur_u:
-			cur_u = clip_u
-			chan_u = 1 - chan_u
-			_node("anim_u" + "ab"[chan_u]).animation = clip_u
-			if up_w <= 0.0:
+			if cur_u == "":
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
+			else:
+				chan_u = 1 - chan_u
+			cur_u = clip_u
+			_node("anim_u" + "ab"[chan_u]).animation = clip_u
 		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / float(want.get("fade", FADE)))
+		# (an upper move that cuts a full one starts at the full one's weight, so the hand-over is the one motion of
+		# the full layer letting go: the run's arm swing never shows between them)
+		up_w = move_toward(maxf(up_w, act_w), 1.0, dt / fade)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
 		var tt := float(want.get("t", -1.0))
 		if clip != cur:
+			if cur == "":
+				xf = float(chan)
+			else:
+				chan = 1 - chan
 			cur = clip
-			chan = 1 - chan
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
@@ -613,16 +628,14 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
-		up_w = move_toward(up_w, 0.0, dt / FADE)
+		act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / fade)
+		if act_w >= 1.0:      # (a full move covers the upper one as it fades in, and drops it once it owns the body)
+			up_w = 0.0
 	else:
 		act_w = move_toward(act_w, 0.0, dt / act_out)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
-		if act_w <= 0.0 and up_w <= 0.0:
-			cur = ""
-			act_out = FADE_LOCO
-	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
-	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
+	xf = move_toward(xf, float(chan), dt / fade)
+	xf_u = move_toward(xf_u, float(chan_u), dt / fade)
 	_p("act/blend_amount", xf)
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
@@ -760,7 +773,11 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var diving := bool(s.get("diving", false))
 	var gliding := bool(s.get("gliding", false)) or diving
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+	# (a move cast out of the glider: the glide pose holds while the move fades in over it and goes to the fall pose
+	# under it, so the arms make one motion, glider to cast, not glider to fall to cast)
+	var busy := maxf(act_w, up_w)
+	if busy <= 0.0 or busy >= 1.0 or gliding:
+		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
 	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)

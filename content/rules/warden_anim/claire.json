@@ -43,5 +43,17 @@
 			}
 		}
 	},
-	"summon_call": "g_call_fling_r"
+	"summon_call": "g_call_fling_r",
+	"cancels": [
+		["tm_spear_aim", 0.4, "tm_rime"],
+		["tm_spear_aim", 0.3, "tm_dart_r"],
+		["tm_spear_aim", 0.3, "tm_wall"],
+		["tm_spear", 0.05, "stun"],
+		["tm_rime_hold", 0.8, "tm_rime_break"],
+		["tm_rime_hold", 2.0, "tm_rime_crash"],
+		["tm_rime_hold", 0.8, ""],
+		["tm_rime_hold", 0.8, "tm_skate_go"],
+		["tm_skate", 0.3, "tm_rime"],
+		["tm_dart_r", 0.1, "tm_spear_aim"]
+	]
 }

@@ -44,5 +44,15 @@
 			}
 		}
 	},
-	"summon_call": "g_call_point_l"
+	"summon_call": "g_call_point_l",
+	"cancels": [
+		["arc_draw", 0.6, "pin_ult_nock"],
+		["arc_draw", 0.6, ""],
+		["arc_heavy_wind", 0.5, ""],
+		["pin_walk", 0.5, ""],
+		["glide", 0.4, "arc_heavy_wind"],
+		["glide", 0.4, "arc_hail"],
+		["glide", 0.4, "pin_ult_cast"],
+		["pin_ult_nock", 0.4, "pin_ult_loose"]
+	]
 }

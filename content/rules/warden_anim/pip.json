@@ -61,5 +61,18 @@
 		}
 	},
 	"summon_call": "g_call_fling_l",
-	"mantle": {"clip": "mantle", "rise": 0.541}
+	"mantle": {"clip": "mantle", "rise": 0.541},
+	"cancels": [
+		["mm_seed_aim", 0.5, "stun"],
+		["mm_seed_aim", 0.5, ""],
+		["mm_seed_aim", 0.5, "mm_shot_r"],
+		["mm_seed_aim", 0.5, "mm_hearth"],
+		["mm_seed_aim", 0.5, "mm_skip"],
+		["mm_call_hold", 1.0, "stun"],
+		["mm_call_hold", 1.0, "mm_shot_r"],
+		["mm_call_hold", 1.0, ""],
+		["mm_call_hold", 1.0, "mm_skip"],
+		["mm_skip", 0.12, "mm_call"],
+		["mm_call_hold", 1.0, "mm_call_end"]
+	]
 }

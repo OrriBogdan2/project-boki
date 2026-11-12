@@ -49,5 +49,15 @@
 		}
 	},
 	"summon_call": "g_call_point_r",
-	"mantle": {"clip": "mantle", "rise": 0.513}
+	"mantle": {"clip": "mantle", "rise": 0.513},
+	"cancels": [
+		["gunslinger_lmb", 0.1, "gunslinger_lmb"],
+		["gunslinger_lmb", 0.12, "gunslinger_rmb"],
+		["gunslinger_e", 0.3, "gunslinger_dash"],
+		["gunslinger_e", 0.3, "gunslinger_lmb"],
+		["gunslinger_e", 0.3, "glide"],
+		["glide", 0.4, "gunslinger_rmb"],
+		["glide", 0.4, "gunslinger_e"],
+		["gunslinger_lmb", 0.12, "stun"]
+	]
 }
