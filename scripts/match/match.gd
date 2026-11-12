@@ -5675,6 +5675,8 @@ func _tip(key: String, text: String) -> void:
 	seen[key] = true
 	hud.tip(text)
 
+const SELF_HOLD_S := 0.12   # s of root a hunter's own statue or stomp keeps refreshing: not a foe's root
+
 func _tips() -> void:
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
@@ -5695,6 +5697,11 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	var seen: Dictionary = Save.d["tutorial"]
+	var cc_tips: Dictionary = Content.rules("tutorial")["tips"]
+	if player.stun_t > 0.0 and not seen.has("cc_stun"): _tip("cc_stun", cc_tips["stun"])
+	elif player.root_t > SELF_HOLD_S and not seen.has("cc_root"): _tip("cc_root", cc_tips["root"])
+	elif KitStatus.grounded(player) and not seen.has("cc_grounded"): _tip("cc_grounded", cc_tips["grounded"])
 	var k: Kin = player.kin
 	if k == null:
 		return
