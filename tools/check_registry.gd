@@ -80,6 +80,7 @@ const CHECKS := {
 	"--sting-check": ["res://tools/sting_check.gd", "sting_check", null],      # run-end stingers
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
+	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
 	# draw calls, tris, shadow lights, frame ms

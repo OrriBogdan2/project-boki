@@ -36,7 +36,7 @@ static func fresh(m: Match, o: Ent) -> bool:
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
 const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
-const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft", "zone"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
@@ -717,6 +717,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
+	if m.zone and m.zone.k > 0 and m.zone.outside(h.pos):
+		best = null      # outside the zone's edge: get inside before anything else
 	a["tgt"] = best
 	if best:
 		return
@@ -861,6 +863,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			dt = m.world.random_ground()
 			a["detour"] = dt
 		goal = dt; gk = "roam"
+	# outside the zone, or a goal outside it: head inside first
+	if m.zone:
+		var zg := m.zone.bot_goal(h, goal)
+		if zg != goal:
+			goal = zg
+			gk = "zone"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
 	# for a while. Two goals pulling opposite ways had a bot turning round every think: it spun.
 	# (a goal that only moved a little is the same one, walking: a kin, a squadmate we follow)

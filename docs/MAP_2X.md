@@ -22,6 +22,7 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 | No jump-pad-only floating islands (BIGGER_MAP note) | done | Shardfall (pad-only perch, kept by map-regions) is removed in the merge. |
 | Hot drop zone per match, on drop map and minimap | done | `scripts/match/hot_zone.gd`: one non-Crown region per match from the shared match seed, +1 rarity step, ringed and labelled on the drop/full map and ringed on the minimap; bot squads weigh it. `--hot-zone-check`. |
 | …and it changes from match to match | partial (small) | It is re-picked from each match's seed, so it repeats the last match's region 1 time in 8. ext/hot-zone's "never twice in a row" needed a lobby field and a Net bump; dropped with its duplicate HotZone. |
+| Closing zone toward a seeded final area (owner 11-11) | done | `scripts/match/shrink_zone.gd`, numbers in `content/rules/shrink_zone.json`: 4 closes to r 150/95/58/32 m by 520 s, the final circle round a dock or outpost; edge on the drop/full map, minimap, a clock row and a wall in the world; damage outside, outer islands fall at the last close; docks close as the edge passes; bots keep in. `--shrink-zone-check`. Design: docs/decisions/0060-shrinking-zone.md. |
 
 ## Merge notes
 - ext/hot-zone and ext/map-regions both built a `HotZone`. The build's (map-regions) stays: region based, no Net change, region loot leans, bot drop weighting. ext/hot-zone's island version, `content/rules/hot_zone.json`, the lobby `hot` field and its Net bump are dropped.

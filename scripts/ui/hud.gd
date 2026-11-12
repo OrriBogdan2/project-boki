@@ -706,6 +706,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
+	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -843,6 +844,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y
+	if m.zone: mm_bottom = m.zone.hud_row(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 20)))
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
 	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
 	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
