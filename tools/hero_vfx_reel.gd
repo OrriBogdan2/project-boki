@@ -181,7 +181,7 @@ func _juggernaut_wave() -> void:
 		P.inp["fire"] = t < 1.15
 		_aim(T.pos)
 	await _go(2.9, hold, _sheet("wave",
-			"LMB hold, Searing Wave: the blade heating (AimKit's lane fills), the release, the wave "
+			"LMB hold, Searing Wave: the blade heating (the arc round him fills), the release, the wave "
 			+ "burning a lane that cools to fissures",
 			[0.5, 1.0, 1.2, 1.3, 1.4, 1.6, 1.9, 2.3, 2.8]), 3.0)
 	await _go(GAP)
