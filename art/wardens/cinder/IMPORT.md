@@ -72,3 +72,6 @@ Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with
 `python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
 On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
 command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.
+
+v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
+texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
