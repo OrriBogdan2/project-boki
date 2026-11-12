@@ -1,5 +1,5 @@
 {
-	"doc": "The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean, an aimed cast and the far look keep between you and the screen's edge. scout: the held far look (ScoutLook, Settings 'Look ahead'): ease_in_s / ease_out_s seconds the view takes to go 90% of the way out toward the cursor and back, sight_mul how much further you see inside a cone_deg cone along your aim while it is held (walking speed unchanged). source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them.",
+	"doc": "The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean, an aimed cast and the far look keep between you and the screen's edge. scout: the held far look (ScoutLook, Settings 'Look ahead'): ease_in_s / ease_out_s seconds the view takes to go 90% of the way out toward the cursor and back, zoom how much wider it gets held (0.25: 25%, the sight's share, so the lean has room up and down too), sight_mul how much further you see inside a cone_deg cone along your aim while it is held (walking speed unchanged). source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them.",
 	"styles": {
 		"supervive": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Supervive"},
 		"supervive_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Supervive (wider lens)"},
@@ -14,7 +14,7 @@
 		"locked": [0.0, 0.0, 0.0, 0.0, false]
 	},
 	"lean_edge_m": 1.5,
-	"scout": {"ease_in_s": 0.35, "ease_out_s": 0.25, "sight_mul": 1.25, "cone_deg": 30.0},
+	"scout": {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0},
 	"source": {
 		"pitch_deg": [64.0, 67.0],
 		"fov_deg": [25.0, 34.0],

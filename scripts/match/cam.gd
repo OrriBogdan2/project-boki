@@ -161,15 +161,15 @@ func _tick_cast(delta: float) -> void:
 const SCOUT_DEAD := 0.1       # share of the half-screen: a cursor this near the centre gives the far look no lean
 
 ## The far look's framing for the cursor at `rel` (-1..1 from the screen's centre on each axis): that way, a share of
-## the room the screen has (all of it at the edge) with you still EDGE inside. Read off the screen, not the ground,
-## so the view moving under a still cursor never steers where it goes.
+## the room the widened view (SCOUT zoom) has (all of it at the edge) with you still EDGE inside. Read off the
+## screen, not the ground, so the view moving under a still cursor never steers where it goes.
 func scout_to(rel: Vector2) -> Vector3:
 	var l := rel.length()
 	if l < SCOUT_DEAD:
 		return Vector3.ZERO
 	var way := Vector3(rel.x / l, 0.0, rel.y / l).rotated(Vector3.UP, yaw)
 	var share := minf(1.0, (l - SCOUT_DEAD) / (1.0 - SCOUT_DEAD))
-	return way * maxf(0.0, _cast_room(Vector2(way.x, way.z), 0.0)) * share
+	return way * maxf(0.0, _cast_room(Vector2(way.x, way.z), float(SCOUT["zoom"]))) * share
 
 func _tick_scout(delta: float, mouse_lead: bool) -> void:
 	var on := scout_on and mouse_lead
@@ -261,7 +261,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 + pull) * cast_wide()
+	var scout_wide := 1.0 + float(SCOUT["zoom"]) * scout_k
+	var z := zoom * (1.0 + pull) * cast_wide() * scout_wide
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)

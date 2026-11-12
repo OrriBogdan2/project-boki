@@ -1,7 +1,7 @@
 extends RefCounted
 ## The held far look (ScoutLook, content/rules/camera.json "scout").
 ## --scout-cam-check, on a 1920x1080 view:
-##   1. distance: held, the view leans the cursor's way on screen, at the edge as far as the screen has room for
+##   1. distance: held, the view widens and leans the cursor's way on screen, at the edge as far as it has room for
 ##      (further than the cursor lean wherever there is room), you stay on screen every way, none near the centre
 ##   2. ease: the view goes 90% of the way out in ease_in_s and back in ease_out_s; it lets go off the mouse
 ##   3. cone: in a live match, sight reaches sight_mul further inside the cone_deg cone along your aim while
@@ -48,6 +48,7 @@ func _distance(cam: CamRig) -> void:
 	ok(cam.scout_to(Vector2(CamRig.SCOUT_DEAD * 0.8, 0)) == Vector3.ZERO, "a cursor near the centre leans nowhere")
 	var halfway := cam.scout_to(Vector2(0.55, 0)).length()
 	ok(absf(halfway / cam.scout_to(Vector2(1, 0)).length() - 0.5) < 0.01, "a cursor halfway out leans half the room")
+	cam.scout_k = 1.0      # (the far look's wider view, for the on-screen test)
 	for z in [1.0, 1.45]:
 		cam.zoom = z
 		var worst := 1e9
@@ -63,11 +64,12 @@ func _distance(cam: CamRig) -> void:
 			for at in [Vector3.ZERO, Vector3(0, HEAD, 0)]:
 				var s := cam.unproject_position(at)
 				worst = minf(worst, minf(minf(s.x, VIEW.x - s.x), minf(s.y, VIEW.y - s.y)))
-		ok(short == 0 and further >= 8,
-				"zoom %.2f: the far look reaches the cursor lean every way, 1 m+ further %d of 16 ways" % [z, further])
+		ok(short == 0 and further == 16,
+				"zoom %.2f: the far look reaches 1 m+ past the cursor lean %d of 16 ways" % [z, further])
 		ok(worst >= 20.0, "zoom %.2f: at the full far look every way you stay on screen (%.0f px to the nearest edge)"
 				% [z, worst])
 	cam.zoom = 1.0
+	cam.scout_k = 0.0
 	cam.snap(Vector3.ZERO)
 	var side := cam.scout_to(Vector2(1, 0)).length()
 	var cap := float(CamRig.FOLLOW["supervive"][2])
