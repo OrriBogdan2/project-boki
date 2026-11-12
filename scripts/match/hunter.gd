@@ -2090,7 +2090,9 @@ func _physics(dt: float) -> void:
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
 		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
-			hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(hv, mv * gs, gs, carry, dt)
+			var base := glide_lift.unswoop(hv)     # the swoop rides on top of the glide's steering
+			base = glide_dive.steer(base, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(base, mv * gs, gs, carry, dt)
+			hv = glide_lift.reswoop(base)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
@@ -2150,13 +2152,9 @@ func _physics(dt: float) -> void:
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
 		elif glide_dive.on:
-			vel.y = glide_dive.fall_vy(vel.y, dt)
+			vel.y = glide_lift.build(self, glide_dive.fall_vy(vel.y, dt), sink)
 		else:
-			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
-			if vel.y < -sink:
-				vel.y = move_toward(vel.y, -sink, Loco.glide_catch * dt)    # the canopy eases the fall: absorbed, never turned into speed
-			else:
-				vel.y = maxf(vel.y - GLIDE_GRAV * glide_lift.gravity_scale() * dt, -sink)
+			vel.y = glide_lift.fall_vy(self, sink, dt)     # pulled down high up, caught, swooping on a level-out
 			# [footage] over the abyss a glider holds at island level instead of sinking below it,
 			# so you can cross until the heat runs out
 			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:

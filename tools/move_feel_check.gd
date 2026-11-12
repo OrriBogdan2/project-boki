@@ -70,13 +70,16 @@ const T := {
 	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
 	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
-	"glide_swoop_speed":       ["<=", 5.3, "m/s", "[owner 11-08 item 8] a high glide's pull-down never turns into speed"],
+	"glide_high_swoop_x":      ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, the pull's sink"],
 	"dive_vy":                 ["~", [32.0, 32.5], "m/s", "[game data] GlideDiveZTargetSpeed -3250 uu/s, crouch held"],
 	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
 	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
-	"dive_swoop_speed":        ["<=", 6.0, "m/s", "[owner 11-08 item 8] pulling out of a dive adds no speed"],
+	"swoop_x":                 ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
+	"swoop_fade_s":            ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
+	"swoop_left":              ["<=", 0.05, "m/s", "over cruise 1.5 s after the level-out"],
+	"swoop_hot_x":             ["~", [1.2, 1.3], "x", "overheated: the swoop at half strength"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      ["<=", 9.0, "m/s", "[owner 11-08 item 9] glide drag: dash speed bleeds back toward cruise"],
 	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
@@ -508,22 +511,27 @@ func _glide() -> void:
 		if fr < 0 and P.gliding: fr = i + 1
 	rec("reglide_frames", fr)
 
-## Gliding high over flat ground: pulled down to the height target; the drop never becomes speed.
+## Gliding high over flat ground: pulled down to the height target, where the level-out sheds the pull's extra
+## sink as swoop speed.
 func _glide_high() -> void:
 	_reset(flat + Vector3(0, HunterMove.glide_height + 8.0, 0), false)
 	P.inp["jump"] = true
 	var sink := 0.0
-	var swoop := 0.0
+	var base := -1.0
+	var peak := 0.0
 	for i in 600:
 		P.inp["glide"] = true
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
 		if i == 60: sink = -P.vel.y
-		if P.pos.y - flat.y <= HunterMove.glide_height:
-			swoop = _hv(P).length()
-			break
+		if base < 0.0 and P.pos.y - flat.y <= HunterMove.glide_height:
+			base = _hv(P).length()
+		elif base >= 0.0:
+			peak = maxf(peak, _hv(P).length())
+			if peak > _hv(P).length():
+				break
 	rec("glide_high_sink", sink)
-	rec("glide_swoop_speed", swoop)
+	rec("glide_high_swoop_x", (peak - base) / maxf(0.01, sink - Hunter.GLIDE_SINK))
 
 # ---------------------------------------------------------------- glide dive
 ## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
@@ -571,18 +579,12 @@ func _glide_dive() -> void:
 			m.step(DT)
 		side.append(_hv(P).length())
 	rec("dive_steer_ratio", float(side[0]) / maxf(0.01, float(side[1])))
-	# let go of crouch high up: the glide catches you and the drop becomes speed
-	_reset(flat + Vector3(0, 60.0, 0), false)
-	P.inp["jump"] = true
-	var swoop := 0.0
-	for i in 132:
-		P.inp["glide"] = true
-		P.inp["crouch"] = i < 72
-		P.inp["move"] = Vector2(1, 0)
-		m.step(DT)
-		if i >= 72:
-			swoop = maxf(swoop, _hv(P).length())
-	rec("dive_swoop_speed", swoop)
+	# a short dive, then let go: the glide catches you and the fall it shed becomes swoop speed, then fades
+	var r := _swoop(HunterMove.glide_height - 1.0, 60, 4, false)
+	rec("swoop_x", r[0])
+	rec("swoop_fade_s", r[1])
+	rec("swoop_left", r[2])
+	rec("swoop_hot_x", _swoop(40.0, 150, 6, true)[0])
 	# holding on: the plunge times out, and stays off until a fresh press
 	_reset(flat + Vector3(0, 360.0, 0), false)
 	P.inp["jump"] = true
@@ -598,6 +600,42 @@ func _glide_dive() -> void:
 	rec("dive_timeout_s", t_off)
 	ok(not P.glide_dive.on, "dive_timeout_holds: a timed-out plunge stays off while crouch stays held")
 	_clear_inp()
+
+## Glides forward at cruise from `h0` m up, dives `frames` steps from step `at` and lets go (overheated if `hot`).
+## Returns [speed gained per m/s of sink shed, s from the last swoop gain until it is gone, speed over cruise
+## left 1.5 s after that gain].
+func _swoop(h0: float, at: int, frames: int, hot: bool) -> Array:
+	_reset(flat + Vector3(0, h0, 0), false)
+	P.inp["jump"] = true
+	var base := 0.0
+	var fall := 0.0
+	var caught := 0.0
+	var peak := 0.0
+	var gained := -1
+	var gone := -1.0
+	var left := -1.0
+	var last := 0.0
+	for i in at + frames + 120:
+		P.inp["glide"] = true
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["crouch"] = i >= at and i < at + frames
+		if hot and P.gliding:
+			P.glide_fuel = 0.0
+		m.step(DT)
+		var sw: float = P.glide_lift.swoop
+		if sw > last:
+			gained = i
+		elif gained >= 0 and gone < 0.0 and sw <= 0.0:
+			gone = (i - gained) * DT
+		last = sw
+		if i == at - 1: base = _hv(P).length()
+		if i == at + frames - 1: fall = -P.vel.y
+		if i == at + frames + 15: caught = -P.vel.y     # back at the glide's sink
+		if i >= at + frames and i < at + frames + 20: peak = maxf(peak, _hv(P).length())
+		if gained >= 0 and i == gained + 91: left = _hv(P).length() - base     # speed shows a gain the step after
+	var shed := fall - caught
+	print("MFEEL swoop%s: cruise %.2f, dive fall %.2f, shed %.2f, peak %.2f" % [" (hot)" if hot else "", base, fall, shed, peak])
+	return [(peak - base) / maxf(0.01, shed), gone, left]
 
 # ---------------------------------------------------------------- dash into glide
 func _dash_glide() -> void:
