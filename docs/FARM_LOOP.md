@@ -26,3 +26,14 @@ Checks: `--raising-check` (new, all of the above but neglect), `--economy-check`
   gives no XP source at home [?]; needs an owner call.
 - Not verified: whether other players' clients see the meal tint (it rides on the kin record;
   nothing was added to the Net sync shape, so Net.VERSION is unchanged).
+
+## Placed blocks are climbable (owner, 11-11: "all farm blocks are climbable")
+Every solid thing you place (walls, fences, hedges, crates, benches, trees, statues, stations, buildings) stands
+you at a low top, not at a 3 m wall: `HomeLayout.CLIMB_TOP` 1.2 m, or a catalog `"top"` for a low item (bench, tub,
+warm stone: 0.5 m). `HomeBuild._apply_blockers` writes it into `World.block_top`; `ground_at` and the block
+collision read it, so the farm's one jump-and-mantle (`Home._mantle`, reach 1.5 m) climbs it and you walk off the
+edge back down. No second climbing system. A Boki stays on the ground: it walks round blocks on the same tile
+grid (`HomeBuild.refresh_grid` after every placement); one set down on a block (dropped from up there, or there
+when the layout changes) is stepped off by `HomeCarry.drop` / `Home.unstick`, and you are not pushed off a block you
+climbed. The wild trees and rocks of the meadow stay 3 m walls. Check: `--farm-climb-blocks-check`. Not built: Boki
+walking onto blocks (Boki have no height on the farm; say so if you want it).
