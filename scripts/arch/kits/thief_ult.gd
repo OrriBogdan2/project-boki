@@ -17,6 +17,7 @@ const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hit
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
+const WHIRR_DB := -6.0                 # dB: the blades' whirr while the ring runs
 const DANCE := "thf_encore_dance"
 const DANCED_OVER := ["thf_lmb_r", "thf_lmb_l"]   # her plain throws don't break the dance (the bolts still fly)
 const PULSE_FADE := 7.0                # per s: how fast a beat's pulse leaves the ring
@@ -38,6 +39,10 @@ func _init(kit: ThiefKit) -> void:
 func data() -> Dictionary:
 	return k.x_def()
 
+## The whirr's loop key, one per Sable (Sfx.loop_start).
+func whirr_key() -> String:
+	return "encore_whirr%d" % k.h.get_instance_id()
+
 func running() -> bool:
 	return not st.is_empty()
 
@@ -55,8 +60,9 @@ func start() -> void:
 	beat = 0
 	var h := k.h
 	k.play("thf_encore")
-	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
-	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
+	var cast_db := -2.0 if h.is_local() else -5.0
+	k.m.sfx("dj_encore", h.pos, cast_db, 1.0)
+	k.m.sfx("dj_encore_rise", h.pos, cast_db, 1.0)
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
 	DashReset.cue(h)
@@ -64,6 +70,7 @@ func start() -> void:
 ## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:
 	st = {}
+	Sfx.loop_stop(whirr_key())
 	if k.anim_id == DANCE:
 		k.play("")
 	AimKit.hide(k.h, "ult")
@@ -86,6 +93,8 @@ func tick(dt: float) -> void:
 		_volley(d)
 	_draw_ring(d)
 	_orbit(d)
+	if float(st["t"]) >= float(d["grow"]):
+		Sfx.loop_hold(whirr_key(), "dj_encore_whirr", h.pos, WHIRR_DB)   # her position every tick: it rides with her
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 

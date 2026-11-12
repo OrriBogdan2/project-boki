@@ -305,6 +305,6 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   to its landing). A reset gives back the air Vault's cooldown too. Asserted in `tools/dancer_loop_check.gd`.
 - Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); X reaches it through
   `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared X base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
-  Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
+  Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
