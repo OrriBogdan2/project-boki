@@ -4,7 +4,7 @@ extends "res://tools/clip_shots.gd"
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced).
+## forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
@@ -18,6 +18,7 @@ const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
 var close := false
+var aim_runs: Array = []    # --aim-runs=60,130: extra run strips with the run this many degrees off the facing
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -39,6 +40,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a.begins_with("--aim-runs="): aim_runs = Array(a.substr(11).split_floats(","))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -93,6 +95,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
+	for off in aim_runs:
+		await _loco(model, sync, dir.path_join("run_aim%d" % int(off)), RUN_MPS, frames, deg_to_rad(off))
 	var lc: Dictionary = clips.d["loco"]
 	await _keyed(model, sync, clips, dir.path_join("idle"), String(lc["idle"]), frames)
 	var atk: Array = ATTACKS[id]
@@ -109,18 +113,19 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+## `off` turns the run off the facing (aiming one way, running another).
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, off := 0.0) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
-	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
+	var fw := Vector3(-sin(SIDE_YAW + off), 0.0, -cos(SIDE_YAW + off))
 	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
-		_scroll(mps, DT)
+		_scroll(mps * cos(off), DT)
 	var steps := int(round(1.0 / (LOCO_FPS * DT)))
 	for i in frames:
 		for k in steps:
 			sync.call("_process", DT)
-			_scroll(mps, DT)
+			_scroll(mps * cos(off), DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
 
