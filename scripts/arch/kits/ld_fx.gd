@@ -45,7 +45,8 @@ const VOLLEY_HEAD := 0.34
 const VOLLEY_HALO := 0.8
 const VOLLEY_SMEAR := 1.1
 const VOLLEY_WIDTH := 0.55
-const CINDER_HALO := Color("6a5aff")
+const CINDER_GLOW := Color("d8281a")     # Cinder Shot's glow round its flame: her palette's deep red
+const CINDER_SMOKE := Color(Color("2a100a"), 0.7)   # ... and the char its comet tail burns down to
 const HOOK_R := 0.42          # m, the bone hook's curl
 const HOOK_BITS := 7          # pieces of the curl
 const ARM_SIDES := 6          # faces round the stretched arm
@@ -538,10 +539,11 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var tail_col := col2
 	match kind:
 		"cinder":
-			# Cinder Shot: a red-pink fireball with a yellow core inside a violet halo, a dark smoke tail
-			n.add_child(_rider_part("Halo", CINDER_HALO, CINDER_HALO, 1.15, 0.6))
+			# Cinder Shot: a flame-orange fireball with a white-hot core inside a deep-red glow, its tail burning
+			# down to char (sizes as before; the flicker is the orb and comet shader's own)
+			n.add_child(_rider_part("Halo", CINDER_GLOW, CINDER_GLOW, 1.15, 0.6))
 			n.add_child(_rider_part("Head", col, col2, 0.62, 1.0))
-			tail_col = Color(Color("3a2a3a"), 0.7)
+			tail_col = CINDER_SMOKE
 		"slug":
 			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
@@ -559,10 +561,11 @@ func _rider_part(part: String, col: Color, col2: Color, scl: float, cover: float
 	return mi
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends. The plain shot node is handed
-## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends.
+## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends. Returns the look's
+## node (shown while the shot flies), so a HeroVfx.trail can follow it.
 func ride(
 	sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()
-) -> void:
+) -> Node3D:
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
 	for c in n.get_children():
 		var mt := (c as MeshInstance3D).material_override as ShaderMaterial
@@ -579,6 +582,7 @@ func ride(
 		"node": n, "sd": sd, "kind": kind, "trail": trail, "width": width, "on_end": on_end, "last": sd["pos"]
 	})
 	_pose(n, sd["pos"], sd["vel"], trail, width)
+	return n
 
 func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> void:
 	n.global_position = at
