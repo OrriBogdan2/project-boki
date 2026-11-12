@@ -168,6 +168,18 @@ Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hi
 | E | 0 | grid | – | – | – | 9.0 / – / – |  |
 | R (hero ult) | 0 | grid | – | – | – | 12.6 / – / – |  |
 | Dash | 0 | grid | – | – | – | 4.2 / – / – |  |
+### gil
+
+| Input | hit | how | reach m | width m | arc deg | content reach / width / arc | FLAG |
+|---|---|---|---|---|---|---|---|
+| LMB tap | 1 | grid | 0.8 | – | – | 3.1 / – / 50 | reach -75%, arc -100% |
+| RMB | 26 | grid+wr | 7.5 | 3.5 | 40 | 8 / – / – |  |
+| E | 16 | grid+w | 2.3 | 3.5 | 127 | 11 / 2.2 / – | reach -79% |
+| R (hero ult) | 62 | grid+wr | 7.5 | 3.5 | 44 | 14 / 3.6 / – |  |
+| Dash | 34 | grid+w | 6.9 | 3.5 | 44 | 6 / – / – | reach +15% |
+
+Gil (13th Hunter, ours only). LMB: one dummy hurt at 0.8 m, the same kind of low melee read as Kael and Tenzo above, so the 3.1 m content reach and 50 degree arc are not confirmed by this probe (cause not traced; a measurement limit or a narrow thrust). E: the probe presses it once, so the row is the 2 s spin (2.3 m against its 2.2 m radius, a match); the 11 m figure is the spout, which needs the second press. RMB: the flask lands on the 8 m throw spot, so the grid ends first (`+r`); the held throw (12 m) lands past the grid and hurts nothing. The probe window now includes the flask's flight (`_flight_s`); without it the RMB row read 0 hits.
+
 ### Mismatches over 10% (follow-ups; nothing was changed in kits)
 
 Each is a row above flagged without `~`. Check the cause before changing a kit: some are the measurement (see Limits), some are the kit.

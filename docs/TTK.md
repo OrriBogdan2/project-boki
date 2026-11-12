@@ -11,6 +11,8 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 
 **Gaps in the source data.** `supervive_kits.md` has no LMB damage for Lace, Meeko, Tenzo, Grimble and Neve, so those five have no source row (n/a, ours only). Neve's, Meeko's, Tenzo's, Grimble's and Lace's abilities do have some numbers but no LMB to fill the time between them, so no combo row either.
 
+**Gil** (13th Hunter, 0.24.4) has no source hero: his rows are ours only, verdict `ours`, and his cast rows have no source share (n/a). His combo is Grab Bag (RMB), Ground Swim and Riptide (E), LMB between. His combo time moves between runs (5.0 to 7.7 s in three runs) because the potion bag is shuffled (the thunder stun and slow riders change how long the target stays in the thrusts); the table holds the last run. Balance outliers, not retuned: his LMB (8.7 s) sits inside the roster's 4.9 to 10.4 s,, and his combo gains only 1 to 4 s on it (his three casts add 21% of the target between them: 0.104 + 0.026 + 0.078); among the combos only Motley's (8.4 to 10.3 s) is slower.
+
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
 |---|---|---|---|---|---|
@@ -20,20 +22,20 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | gunslinger (Ghost) | combo rank max | 1.37 | 1.76 | 0.78 | FAIL |
 | juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 3.48 | 7.70 | 0.45 | FAIL |
-| juggernaut (Brall) | combo rank max | 1.15 | 7.00 | 0.16 | FAIL |
+| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
+| juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
 | ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
-| ashwick (Felix) | LMB rank max | 4.72 | 6.20 | 0.76 | FAIL |
+| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
 | ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
 | ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
 | mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
 | mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | combo rank 0 | 7.32 | 9.00 | 0.81 | ok |
-| mage (Joule) | combo rank max | 4.07 | 6.40 | 0.64 | FAIL |
+| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
+| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
 | bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
 | bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.12 | 5.85 | 0.70 | FAIL |
-| bulwark (Oath) | combo rank max | 3.65 | 5.00 | 0.73 | FAIL |
+| bulwark (Oath) | combo rank 0 | 4.08 | 5.85 | 0.70 | FAIL |
+| bulwark (Oath) | combo rank max | 4.18 | 5.00 | 0.84 | ok |
 | thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
@@ -52,13 +54,17 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
 | rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| gil (-) | LMB rank 0 | 8.73 | never | n/a | ours |
+| gil (-) | LMB rank max | 8.73 | never | n/a | ours |
+| gil (-) | combo rank 0 | 6.85 | never | n/a | ours |
+| gil (-) | combo rank max | 5.03 | never | n/a | ours |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
 | gunslinger (Ghost) | rmb | 0.143 | 0.128 | 1.11 |
 | gunslinger (Ghost) | e | 0.234 | 0.157 | 1.49 |
 | juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 |
-| juggernaut (Brall) | dash | 0.175 | 0.038 | 4.60 |
+| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 |
 | juggernaut (Brall) | e | 0.052 | 0.023 | 2.23 |
 | ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
 | ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
@@ -70,6 +76,9 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
 | ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
 | ostra (Void) | e | 0.091 | 0.154 | 0.59 |
+| gil (-) | rmb | 0.104 | n/a | n/a |
+| gil (-) | dash | 0.026 | n/a | n/a |
+| gil (-) | e | 0.078 | n/a | n/a |
 <!-- ttk:table -->
 
 **Outliers and causes (suggestions, nothing built)**

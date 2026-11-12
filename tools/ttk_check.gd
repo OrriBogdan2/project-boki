@@ -1,5 +1,5 @@
 extends "res://tools/archetype_check.gd"
-## --ttk-check: time to knock for all 12 Hunters against the source (PARITY FIRST, briefs/DECISIONS.md 2026-11-07).
+## --ttk-check: time to knock per Hunter against the source (PARITY FIRST, briefs/DECISIONS.md 2026-11-07); Gil ours.
 ## Ours: a live Match, the Hunter against an idle standard target (roster mean health, full armour).
 ## Source: the same fight worked out from supervive_kits.md (briefs/supervive-data on origin/ext/agent-briefs).
 ## (a) LMB alone; (b) the kit's simple combo: every direct-damage non-ult ability once, then again whenever its
@@ -21,7 +21,7 @@ const DT_SRC := 0.01       # s step of the source model
 ## LMB is [damage, interval s, extra damage per consecutive hit]. Abilities map a slot to
 ## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
 ## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so). A Hunter whose
-## LMB has no damage number there has no source row (n/a).
+## LMB has no damage number there has no source row (n/a); OURS_ONLY Hunters have no source hero.
 const HEROES := [
 	["gunslinger", "Ghost", "hold", false, [51.0, 0.08, 0.0], {
 		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]}],
@@ -43,7 +43,10 @@ const HEROES := [
 	["dolm", "Tetra", "tap", false, [], {}],
 	["dredge", "Kingpin", "hold", false, [], {}],
 	["rimewright", "Celeste", "hold", false, [], {}],
+	["gil", "-", "hold", false, [], {"rmb": [], "dash": [], "e": []}],
 ]
+
+const OURS_ONLY := ["gil"]      # Hunters with no source hero: our time to knock only, verdict "ours"
 
 ## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
 const OVERRIDES := {}
@@ -175,6 +178,12 @@ func _abilities(P: Hunter, slots: Array) -> void:
 func _fmt(v: float) -> String:
 	return "never" if v < 0.0 else "%.2f" % v
 
+func _share_text(src: float) -> String:
+	return "%.3f" % src if src > 0.0 else "n/a"
+
+func _share_ratio(ours: float, src: float) -> String:
+	return "%.2f" % (ours / src) if src > 0.0 else "n/a"
+
 func _ratio_text(ratio: float) -> String:
 	return "%.2f" % ratio if ratio > 0.0 else "n/a"
 
@@ -182,7 +191,7 @@ func _ratio_text(ratio: float) -> String:
 func _cell(hero: Array, label: String, ours: float, src: float) -> Dictionary:
 	var row := {"hero": hero[0], "name": hero[1], "label": label, "ours": ours, "src": src}
 	row["ratio"] = -1.0
-	row["state"] = "n/a"
+	row["state"] = "ours" if hero[0] in OURS_ONLY else "n/a"
 	if src <= 0.0:
 		return row
 	row["ratio"] = ours / src if ours > 0.0 else 99.0
@@ -213,11 +222,13 @@ func run(main_node: Node) -> void:
 					row["state"], hero[0], label, _fmt(ours), _fmt(src), _ratio_text(row["ratio"])])
 	for hero in HEROES:
 		for slot in hero[5]:
-			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
+			var src_share := -1.0      # (ours only: no source number)
+			if not hero[5][slot].is_empty():
+				src_share = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
 			hits.append([hero[0], hero[1], slot, ours_share, src_share])
-			print("TTK hit %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
-				hero[0], slot, ours_share, src_share, ours_share / src_share])
+			print("TTK hit %-11s %-4s ours %.3f of the target, source %s, ratio %s" % [
+				hero[0], slot, ours_share, _share_text(src_share), _share_ratio(ours_share, src_share)])
 	if "--write" in OS.get_cmdline_user_args():
 		_write()
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
@@ -235,7 +246,8 @@ func _write() -> void:
 	lines.append_array(["", "| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |"])
 	lines.append("|---|---|---|---|---|")
 	for h in hits:
-		lines.append("| %s (%s) | %s | %.3f | %.3f | %.2f |" % [h[0], h[1], h[2], h[3], h[4], h[3] / h[4]])
+		lines.append("| %s (%s) | %s | %.3f | %s | %s |" % [
+			h[0], h[1], h[2], h[3], _share_text(h[4]), _share_ratio(h[3], h[4])])
 	var path := "res://docs/TTK.md"
 	var parts := FileAccess.get_file_as_string(path).split(TABLE_MARK)
 	var f := FileAccess.open(path, FileAccess.WRITE)

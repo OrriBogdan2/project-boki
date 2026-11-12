@@ -55,6 +55,9 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 | Grimble (`dredge`) | 2346 | 43 | 0 | 33 | 62 | 42 | 14 | 26 | 62 |  |
 | Sable (`thief`) | 321 | 68 | 0 | 45 | 33 | 18 | 7 | 63 | 126 |  |
 | Mossy (`bulwark`) | 48 | 207 | 204 | 1 | 21 | 4 | 2 | 85 | 76 | shield charge 11, hammer throw 9, hammer recall 4, shield slam 1 |
+| Gil (`gil`) | 716 | 100 | 0 | 108 | 52 | 272 | 6 | 7 | 83 |  |
+
+**Gil (13th Hunter, 0.24.4; run on 0.24.4 main plus the fix below, seeds 3, 5, 9, 120 s).** Every column is used: the bag, the Riptide spin and spout, the Tidal Wave, Ground Swim and the glide. The check had one red on him: `rmb press` was 0, because `bot_use` pressed and released RMB in one step and no kit step saw the key down. It now sets `bot_hold["rmb"] = BOT_TAP` (0.1 s, still a tap under the 0.25 s hold) like the other kits (`gil_kit.gd`, +3). He has no hold or recast special: bots never take the held (50% further) throw, by design of the tap. Outlier, not changed: 7 dashes in 120 s, the fewest of the 13 (Ostra 12, Vex 13; Ground Swim has an 8 s cooldown, so 7 over 6 fighter-duels means the bots rarely reach for it; cause not traced). Cinder's LMB reads 1 hit because the check counts shot and primary tags, not the flame stream (fix on `ext/combat-bot-kit-use-reds`, not part of this change).
 
 ## What changed (bot code only; no kit numbers)
 
