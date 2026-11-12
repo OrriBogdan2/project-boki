@@ -41,12 +41,17 @@ static func next_id() -> String:
 	m["n"] = int(m.get("n", 0)) + 1
 	return "M%d" % int(m["n"])
 
+## Days the market clock runs ahead (tools/garden_unlock_pace_check.gd plays a save forward day by day).
+static var skew_days := 0
+
 static func now() -> int:
-	return int(Time.get_unix_time_from_system())
+	return int(Time.get_unix_time_from_system()) + skew_days * 86400
 
 ## Today as "YYYY-MM-DD" (strings compare in date order).
 static func today() -> String:
 	var t := Time.get_datetime_dict_from_system()
+	if skew_days != 0:
+		t = Time.get_datetime_dict_from_unix_time(now())
 	return "%d-%02d-%02d" % [t["year"], t["month"], t["day"]]
 
 ## True (and the stored day moves on) only when today is later than the stored day: a stock bought
@@ -66,13 +71,13 @@ static func cut(price: int, rate: float) -> int:
 ## One expedition's worth of time at the market (offline): NPC buyers at your stall, bids and
 ## endings at the auction house, NPC adopters at the shelter. After a run you made it out of, also
 ## the trophies and rare materials you found. Returns lines for the results screen.
-static func tick(won: bool, bosses: int, rng: RandomNumberGenerator = null) -> Array:
+static func tick(won: bool, bosses: int, rng: RandomNumberGenerator = null, stats := {}) -> Array:
 	if rng == null:
 		rng = RandomNumberGenerator.new()
 		rng.randomize()
 	var news: Array = []
 	if won:
-		for key in Goods.on_result(bosses, rng):
+		for key in Goods.on_result(bosses, rng, stats):
 			news.append("Found: %s (%s)." % [Goods.name_of(key), Goods.rarity_name(key)])
 	for s in Stalls.tick(rng):
 		var what := Goods.name_of(s["key"], s["payload"])
