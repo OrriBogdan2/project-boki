@@ -43,7 +43,7 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 | Grimble (dredge) | unclear | the ult's giant violet-and-gold spiked shape covers the whole fight for seconds; four colours across the kit | per-Hunter job |
 | Motley (ostra) | unclear | several large violet well discs at once, no edge to tell whose (now leaning red/blue via shared telegraphs only where they go through ArchKit/AimKit); indigo vs teal signature | per-Hunter job |
 | Meeko (tender) | unclear | big gold seed rings and teal ult dome fill the ground under everyone; heals and hurts look alike | per-Hunter job |
-| Sable (thief) | unclear | LMB hits barely show; her X discs are pale | per-Hunter job |
+| Sable (thief) | clear-ish | LMB hits: the struck body flashes violet (her colour) for the 3 full frames, then fades (`Ent.flash_tint`, set in `ThiefKit._bolt_end`; the starburst is `content/vfx/thief.json`); her X discs were done in `ext/vfx-sable-data`. Stills `docs/shots/combat-sable-lmb-hits/` (1080p, match camera, before = white flash) | `--clarity-check` Sable rows |
 | Albert (bulwark) | unclear | gold E box and the big gold ring under him read as one blob with Meeko's | per-Hunter job |
 | Sparkle (mage) | unclear | Kitefall's range disc washes the ground pink-violet; the Storm Rod lane is a thin cyan line next to pink orbs | fixed on READY `ext/vfx-sparkle-ult-local` (disc gone, lightning pink) and `ext/vfx-sparkle-casts`, not merged |
 | Tenzo (dolm) | clear-ish | Stone Row rocks read as objects; Quakefall's slam ring is plain and the X spine's line is thin at match zoom | X: the cracks now sit on their true band (this pass); slam and the cracks' scorch on READY `ext/vfx-tenzo-data`, not merged |
