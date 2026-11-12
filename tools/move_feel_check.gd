@@ -811,7 +811,8 @@ func _standing_dash() -> void:
 			P.inp["dash_down"] = i < STAND_HOLD
 		var moved := Vector2(P.pos.x - flat.x, P.pos.z - flat.z)
 		var miss := rad_to_deg(absf(moved.angle_to(STAND_AIM)))
-		ok(moved.length() > 0.5 and miss < STAND_DEG, "%s standing dash goes to the cursor (%.2f m, %.0f deg off)" % [a, moved.length(), miss])
+		var msg := "%s standing dash goes to the cursor (%.2f m, %.0f deg off)" % [a, moved.length(), miss]
+		ok(moved.length() > 0.5 and miss < STAND_DEG, msg)
 		P.inp["dash_down"] = false
 	P.reclass(cls_was, arch_was, wid_was)
 
