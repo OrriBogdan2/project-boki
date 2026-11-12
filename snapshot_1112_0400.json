@@ -1,0 +1,10 @@
+{"now": "2026-11-12T04:00:00+00:00",
+ "note": "11-12 03:30Z facts from the task, rolled to 04:00Z (Outlook1 just reset). Not live: rpc4 cswap has no usage for any slot.",
+ "accounts": [
+  {"name": "orribogdan@outlook.com", "label": "outlook1", "weekly": 0, "reset_at": "2026-11-19T04:00:00+00:00"},
+  {"name": "bogdanorri@outlook.com", "label": "outlook2", "weekly": 17, "reset_at": "2026-11-18T23:30:00+00:00", "fiveh": 100, "hold_until": "2026-11-12T06:33:00+00:00", "fiveh_start": "2026-11-12T01:33:00+00:00", "fiveh_reset": "2026-11-12T06:33:00+00:00"},
+  {"name": "orri@projectboki.com", "label": "projectboki", "weekly": 71, "reset_at": "2026-11-13T15:30:00+00:00"},
+  {"name": "orribogdan@gmail.com", "label": "gmail", "weekly": 75, "reset_at": "2026-11-15T03:30:00+00:00"},
+  {"name": "orri@generalcreative.ai", "label": "generalcreative", "weekly": 95, "reset_at": null},
+  {"name": "corybogdan@gmail.com", "label": "coord", "weekly": 0, "reset_at": null, "excluded": true}
+ ]}
