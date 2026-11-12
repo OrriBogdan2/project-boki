@@ -880,7 +880,9 @@ set the bar for "oomph": one resource that the kit's own abilities build, a hunt
 changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
 `payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
 follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
-`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`):
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`).
+No kit prints a word in the world (owner 11-11): armed, landed, reset and crowd-control moments read
+through glow, ring, flash, sound and the plate's status icon; only numbers float.
 
 - **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
   while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
@@ -987,7 +989,7 @@ above is superseded by this:
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
 - Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold, "SLAM READY" / "SHIELD SLAM READY". Payoff: "CRUSHED", `pay_slam`, T4.
+  shield burns gold. Payoff: `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.

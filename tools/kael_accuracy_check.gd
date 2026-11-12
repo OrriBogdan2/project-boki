@@ -29,7 +29,7 @@ func _rig() -> Dictionary:
 
 func _fresh(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	A.step(m, 0.7)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	K.riposte.drop()
 	P.inp["sec_hold"] = false
 	A.step(m, 0.1)
