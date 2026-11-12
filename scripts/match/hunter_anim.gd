@@ -192,6 +192,9 @@ var act_t := 0.0
 var act_aim := Vector3.INF     # world: where a garden move's hand goes (HunterVerbs.aim); INF: its own spot
 var act_need := -1.0           # m (legs' rest size): how deep that Boki asks the hips to go; < 0: the move's own
 var sh_y := 0.0                # m: the right shoulder's rest height in the model's space
+var act_last := [Vector3.ZERO, Vector3.ZERO, 0.0]      # this frame's hold: left hand, right hand, pitch
+var act_was: Array = []        # the hold switched away from (act_last then): eased out over SWAP_S, no pop
+const SWAP_S := 0.2            # s: one hold handing over to the next (a Boki lifted, then carried)
 var tool_kind := ""            # the tool in hand or fading out (HunterTool)
 var tool_k := 0.0
 var tool_ph := 0.0             # where the tool is in its swing, 0..1
@@ -875,7 +878,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var pitch := -float(st["lean"]) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
 	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
-	pitch -= act_k * _act_pitch()
+	act_last[2] = lerpf(act_was[2], _act_pitch(), _swap_k()) if not act_was.is_empty() else _act_pitch()
+	pitch -= act_k * float(act_last[2])
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
@@ -1585,6 +1589,11 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	# holding interact: the hands on what's being worked (see _act_hands)
 	if act_k > 0.01:
 		var ah := _act_hands(sh_l, sh_r)
+		if not act_was.is_empty():
+			ah[0] = (act_was[0] as Vector3).lerp(ah[0], _swap_k())
+			ah[1] = (act_was[1] as Vector3).lerp(ah[1], _swap_k())
+		act_last[0] = ah[0]
+		act_last[1] = ah[1]
 		fl = fl.lerp(ah[0], act_k)
 		free_l = maxf(free_l, act_k)
 		if float(ah[2]) > 0.0:
@@ -1715,6 +1724,7 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	if not grounded or (spd > 2.2 and not carrying) or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
 		want = ""
 	if want != "" and want != act_kind:
+		act_was = act_last.duplicate() if act_k > 0.01 and act_kind != "" else []
 		act_kind = want
 		act_t = 0.0
 	act_t += dt
@@ -1736,6 +1746,13 @@ func _aim_verb(box: AABB) -> void:
 	if act_aim != Vector3.INF:
 		var drop := sh_y - REACH * arm_k * HunterVerbs.REACH_K - model.to_local(act_aim).y
 		act_need = maxf(drop, 0.0) / legs.scale.y
+
+## 0 -> 1 over SWAP_S after one hold hands over to the next; then the old one is dropped.
+func _swap_k() -> float:
+	var k := smoothstep(0.0, SWAP_S, act_t)
+	if k >= 1.0:
+		act_was = []
+	return k
 
 ## Leg angles for the hold: Vector4(hip_l, knee_l, hip_r, knee_r).
 func _act_legs() -> Vector4:

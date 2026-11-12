@@ -3,7 +3,9 @@ extends RefCounted
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). The Empty (no clips: its
+## garden moves are HunterVerbs keys) puts its hand on the target at the peak of each care move (pet, feed, lift) for a
+## small and a big Boki (--home-verbs-check's reach()). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -17,6 +19,7 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+const CARE_TARGET_M := 0.15    # m: the Empty's hand (each hand, lifting) this near its target at a care move's peak
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -47,8 +50,20 @@ func run(main: Node) -> void:
 		n += 1
 		await _hero(main, String(id), art_name)
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
+	await _empty_care(main)
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The Empty's pet, feed and lift at a small and a big Boki: the hand on its target (the head, the mouth, both
+## flanks) at the peak of the move.
+func _empty_care(main: Node) -> void:
+	var hv = load("res://tools/home_verbs_check.gd").new()
+	hv.main = main
+	var got: Dictionary = await hv.reach()
+	for size in hv.BOKI:
+		for verb in hv.CARE:
+			var off := float(got["%s.%s" % [verb, size]]["aim_m"])
+			ok(off <= CARE_TARGET_M, "the Empty: %s, %s Boki, hand %.3f m from its target at the peak" % [verb, size, off])
 
 ## A Hero's own .glb, wearing its clips: a bad merge of WardenGlb falls back to the procedural body in silence.
 func _own_model(id: String, art_name: String) -> void:

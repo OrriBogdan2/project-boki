@@ -1,7 +1,7 @@
 class_name HomeVerbs
 extends RefCounted
-## Times the player's garden moves at home (HunterVerbs): feed, pat, toss, cheer. The paths that
-## already do the feeding, petting, ball tossing and drill or race cheering call play(), with the Boki
+## Times the player's garden moves at home (HunterVerbs): feed, pat, lift, toss, cheer. The paths that
+## already do the feeding, petting, picking up, ball tossing and drill or race cheering call play(), with the Boki
 ## when there is one to reach for; the owner passes step() to HunterAnim every frame. act_t is what a
 ## Hero's own clip (warden_anim "act") seeks to; act_box is the Boki's bounds the hands go to.
 

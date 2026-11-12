@@ -1,10 +1,11 @@
 extends RefCounted
 ## --home-verbs-check --home-verbs-shots=<dir>: the Empty's garden moves at home on a small and a big Boki
-## (a row each): the pat, the feed (through the real petting and feeding paths, so the Boki comes up and the
-## hands reach for its head and mouth), the cheer and the toss, each at its peak, cropped around the body.
+## (a row each): the pat, the feed and the lift (through the real petting, feeding and picking-up paths, so the
+## Boki comes up and the hands reach for its head, its mouth and its flanks), the cheer and the toss, each at
+## its peak, cropped around the body.
 ## Needs a real renderer.
 
-const PEAK := {"pat": 0.7, "feed": 0.55, "cheer": 0.32, "toss": 0.5}      # s into each move
+const PEAK := {"pat": 0.7, "feed": 0.55, "lift": 0.31, "cheer": 0.32, "toss": 0.5}      # s into each move
 const BOKI := ["glomwort", "zapple"]      # the smallest and the biggest Boki (0.5 and 1.2 m)
 const CROP := Vector2i(360, 400)       # px around the player
 
@@ -49,10 +50,13 @@ func run(main: Node, dir: String) -> void:
 			match verb:
 				"pat": home._pet_kin(ke)
 				"feed": home._care_feed(rec, "kibble")
+				"lift": home.carry.press_hold(ke)
 				_: home.verbs.play(verb)
 			await main.get_tree().create_timer(float(PEAK[verb])).timeout
 			_shot(main, home, strip, Vector2i(col * CROP.x, row * CROP.y))
 			print("HOMEVERBS strip %s %s" % [BOKI[row], verb])
+			if home.carry.carrying():
+				home.carry.drop()
 			home.verbs.act = ""
 			await main.get_tree().create_timer(0.6).timeout
 			col += 1
