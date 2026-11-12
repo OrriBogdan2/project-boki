@@ -135,6 +135,7 @@
 			"push_speed": 14.0
 		},
 		"slam": {
+			"on": "full",
 			"radius": 2.6,
 			"angle": 100.0,
 			"push": 12.0,

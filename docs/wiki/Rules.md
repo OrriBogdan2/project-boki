@@ -524,10 +524,8 @@ How the bond meter fills (it gates the Merge). All values are fractions of a ful
 
 | Setting | Value |
 |---|---|
-| _doc | How bots play the stomp (BotStomp, docs/BOT_KIT_USE.md 'Stomps'). punish_r: metres; a bot stomps a downed rival only when no enemy Hunter on its feet is this close to the wisp (the longest stun reach in the kits: Lace's Heavy Shot pin, 14 m). rescue_r: metres; how far a bot goes to break a stomp on its teammate. breakers: per archetype, the input key of the move that stuns or knocks (sec = RMB tap, sig = E) and reach, the metres from the stomper at which the bot presses it. A Hunter not listed has no quick tap that breaks a stomp: a root does not (Stomp.breaks), Sparkle's tapped Storm Rod only nudges, Riptide (gil) knocks up only after its 2 s spin, and Grimble's Anchor Drop misses a pinned stomper (docs/DEBT.md). |
-| punish_r | 14 |
+| _doc | How bots play the stomp (BotStomp, docs/BOT_KIT_USE.md 'Stomps'). rescue_r: metres; how far a bot goes to break a stomp on its teammate. The threat range (no stomp with a rival on its feet that close), which move breaks a stomp, its reach and cooldown are all read from the kits (BotStomp.punish_r, BotStomp.breaker), never listed per Hunter. |
 | rescue_r | 25 |
-| breakers | {"ostra": {"key": "sec", "reach": 11.0}, "dolm": {"key": "sec", "reach": 3.0}} |
 
 ## branch_forms (`content/rules/branch_forms.json`)
 

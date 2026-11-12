@@ -15,8 +15,8 @@ extends RefCounted
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
 ##  7. Bots (BotStomp): a lone bot stomps a downed rival; a bot with two rivals on their feet near the
-##     wisp does not; a bot with a ready breaker (content/rules/bot_stomp.json, every one listed)
-##     breaks a stomp on its teammate within 1 s and the wisp lives.
+##     wisp does not; two bots, one wisp: a bot with a ready breaker (BotStomp.breaker, read from each
+##     kit) breaks a stomp on its teammate within 1 s and the wisp lives; on cooldown it does not try.
 ## Never touches the save.
 
 var bad := 0
@@ -214,7 +214,7 @@ func _check_finish(at: Vector3) -> void:
 	ok(foe.stomp.is_empty(), "and the stomper is free again")
 
 ## The bot foe next to the fresh wisp W for up to 2 s, with `near` (its rivals) standing 10 m off: inside
-## BotStomp's punish_r, outside the reach at which a bot picks a fight this early in a match.
+## BotStomp.punish_r(), outside the reach at which a bot picks a fight this early in a match.
 func _bot_stomps(at: Vector3, near: Array) -> bool:
 	_setup(at)
 	for i in near.size():
@@ -237,24 +237,50 @@ func _check_bots(at: Vector3) -> void:
 	for k in m.kins:
 		k.dead = true      # (a Boki wandering into the line takes the shot)
 	rescuer.ai = m.bot_brain.new_mind(m.rng, 0.7)
-	for arch in BotStomp.rules()["breakers"]:
+	var n := 0
+	for arch in Arch.ids():
+		var b := BotStomp.breaker(arch)
+		if b.is_empty():
+			continue
+		n += 1
+		var w0 := m.time
+		while Stomp.breaks(m, foe) and m.time - w0 < 4.0:
+			_run(Match.DT)      # the row before's root/Grounded/stun wears off first
 		_setup(at)
 		rescuer.cls = Arch.weight(arch)
 		rescuer.set_arch(arch)
 		rescuer.unlock_all()
-		var reach := float(BotStomp.rules()["breakers"][arch]["reach"])
-		_spot(rescuer, at + Vector3(0, 0, maxf(1.5, reach - 1.0)))
+		_spot(rescuer, at + Vector3(0, 0, maxf(1.5, float(b["reach"]) - 1.0)))
 		_commit()
+		var started := not foe.stomp.is_empty()
 		rescuer.stun_t = 0.0      # (the row before's snap can bounce a stun back on it)
+		# two bots, one wisp: the stomper's bot mind runs too (the lock holds it)
+		foe.ctrl = "bot"
 		rescuer.ctrl = "bot"
 		var t0 := m.time
 		while not foe.stomp.is_empty() and m.time - t0 < 1.0:
 			_run(Match.DT)
 		rescuer.ctrl = "idle"
+		foe.ctrl = "idle"
 		var took := m.time - t0
-		ok(foe.stomp.is_empty() and W.downed and not W.out,
-			"a %s bot with its breaker ready breaks the stomp on its teammate (%.2fs)" % [arch, took])
+		ok(started and foe.stomp.is_empty() and W.downed and not W.out,
+			"a %s bot breaks the stomp on its teammate with %s %s (%s, reach %.1f m, cd %.1f s) in %.2fs%s" % [
+				arch, b["slot"], Arch.def(arch)[b["slot"]].get("name", "?"), b["cc"], b["reach"], b["cooldown"],
+				took, "" if started else " (NO STOMP STARTED)"])
 		Stomp.end(m, foe, "gone")
+		if arch == "ostra":
+			# the same scene with the breaker on cooldown: the bot doesn't take over its step for it
+			_setup(at)
+			_spot(rescuer, at + Vector3(0, 0, 5.0))
+			_commit()
+			rescuer.ak.ch_rmb = 0.0
+			rescuer.ai.erase("break_at")      # (no press of its own still flying)
+			ok(not foe.stomp.is_empty(), "(the stomp for the cooldown row started)")
+			ok(not BotStomp.rescue(m, rescuer), "a bot whose breaker is on cooldown leaves the stomp to others")
+			Stomp.end(m, foe, "gone")
+	ok(n >= 3, "%d Hunters have a stomp breaker read from their kit" % n)
+	var pr := BotStomp.punish_r()
+	ok(pr >= 14.0 and pr < 25.0, "threat range from the kits: %.1f m" % pr)
 	if W.downed:
 		m.revive_hunter(W, null)
 
