@@ -56,7 +56,7 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --revive-net-check=guest --rn-port=%d > '%s' 2>&1" % [
+	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --revive-net-check=guest --rn-port=%d > '%s' 2>&1" % [
 		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
