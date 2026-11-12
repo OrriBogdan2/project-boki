@@ -24,6 +24,9 @@ const KIT_FOE_SKILL := 0.5       # the foe bot's skill (0..1): it fights back bu
 const SECS := {4: 60.0, 7: 24.0, 8: 22.0, 9: 180.0, 10: 34.0}
 const RAID_DUOS := 3             # shot 9: teams of two
 const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 starts
+const CLOCK_LEFT_S := 840.0      # s on the match clock when a stepped shot starts (1e9 reads as junk)
+const KIT_FOE_REACH := 11.0      # m: a foe that has walked further than this from the Hunter is put back at the fight
+const DROP_PLAN_MAX_S := 25.0    # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5       # s of the ride out kept after the Hunter is extracted
 
 var shot := 2
@@ -152,17 +155,20 @@ func _raid(opts: Dictionary) -> void:
 	if opts.get("autoplay", false):
 		await m.warm_up()      # (an autoplay match skips the loading screen, which is what compiles the shaders)
 
-## Shot 8: the real loading screen and the drop; the drop mark is the first frame after the loading screen.
+## Shot 8: the real loading screen, the plan-your-drop screen and the drop; the drop mark is where the drop starts.
 func _drop() -> void:
 	await _raid(Match.demo_opts())
+	var waited := 0.0
+	while is_instance_valid(m.player) and not m.player.dropping and waited < DROP_PLAN_MAX_S:
+		await wait(0.25)      # (the plan-your-drop screen comes first, then the drop)
+		waited += 0.25
 	mark("drop")
 	await wait(SECS[8])
 
 ## Shot 9: the player is a bot (autoplay) in a small match, no drop: it loots and takes the fights it meets.
 func _loot() -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": RAID_DUOS, "squad": 2, "total": RAID_DUOS * 2, "autoplay": true, "no_drop": true,
-		"length": 1e9}, true)
+	o.merge({"teams": RAID_DUOS, "squad": 2, "total": RAID_DUOS * 2, "autoplay": true, "no_drop": true}, true)
 	o.erase("blight")
 	await _raid(o)
 	mark("loot")
@@ -177,6 +183,7 @@ func _escape() -> void:
 	var x: Dictionary = m.exits.of_kind("outpost")[0]
 	var mast: Vector3 = x["pos"]
 	m.time = float(x["open_at"]) + 1.0
+	m.length = m.time + CLOCK_LEFT_S
 	m.exits.act(x, "start", P)
 	x["prog"] = 1.0 - ESCAPE_CHARGE_LEFT * Exits.crew_rate(1) / m.exits.uplink_time(x)
 	x["wave_t"] = 1e9
@@ -213,7 +220,9 @@ func _step_frame(at: Vector3) -> void:
 ## The Hunter against one bot Hunter from another kit: attack held, then right click, then utility, round again.
 ## Stepped by hand at 1/60 s a frame (the base clips' way) so the abilities land on the rota exactly.
 func _kit() -> void:
+	Save.d["first_guide"] = 99
 	await _start(hunter, "cindle")
+	m.length = m.time + CLOCK_LEFT_S
 	var P := m.player
 	P.ctrl = "idle"
 	var base := _ground(P.pos)
@@ -230,12 +239,16 @@ func _kit() -> void:
 	while t < SECS[7]:
 		_purge()
 		_kit_press(t, P, foe)
-		_step_frame(_centre(squad_a + squad_b))
+		_step_frame(P.pos.lerp(foe.pos, 0.5))
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
 
 ## Aims at the foe and presses: attack held for the first part of each beat, then the right click, then the utility.
 func _kit_press(t: float, P: Hunter, foe: Hunter) -> void:
+	P.hp = P.max_hp      # neither of them goes down or walks off: the shot is about the kit
+	foe.hp = foe.max_hp
+	if P.flat_dist(foe) > KIT_FOE_REACH:
+		foe.teleport(_ground(P.pos + (foe.pos - P.pos).normalized() * FIGHT_GAP))
 	P.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
 	var beat := fmod(t, KIT_ROTA_S * 3.0) / KIT_ROTA_S
 	P.inp["fire"] = beat < 1.0
