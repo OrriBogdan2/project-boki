@@ -5,6 +5,8 @@ Seven held calls. Each is two options, what you'd notice in play, my pick and wh
 Clips are in `docs/shots/owner-picks-0246/`. The movement clips were rendered on the GPU through jobq
 from throwaway trees: the wave tree, and the same tree with only the picked number or branch changed.
 The two clip rigs (`--face-ab`, `--glide-ab`) were temporary and are not in the game.
+GPU jobs (jobq, 11-12): face A 20261112-044900-19226, face B 20261112-044916-26739, glide A 20261112-045043-29521,
+glide B 20261112-044930-07514, camera A 20261112-045209-31301, camera B 20261112-045222-18631.
 To answer, reply with one letter per pick, e.g. `1A 2B 3B 4A 5B 6B 7A`.
 
 ## 1. Facing turn: ext/feel-facing-turn-rebased d5333f969
@@ -26,8 +28,8 @@ To answer, reply with one letter per pick, e.g. `1A 2B 3B 4A 5B 6B 7A`.
   but the dash reads mostly through the ground moving.
 - **Pick: B.** It is already merged and checked in the feel wave (`--camera-fast-check`, and
   ext/feel-w0246-camera builds on it). A matches one footage read (dredge.md), but with A the reticle drifts while you aim out of a dash.
-- **Clip:** `cam_A_trail/` (`--camera-follow-shots` on the cam-dash branch) vs `cam_B_locked/`
-  (`--camera-fast-shots` on ext/w0246-feel).
+- **Clip:** `cam_A_trail.jpg` (`--camera-follow-shots` on the cam-dash branch: Grimble's barge) vs `cam_B_locked.jpg`
+  (`--camera-fast-shots` on ext/w0246-feel: the Wirerun, the worst case). White line = screen centre.
 
 ## 3. Glider heat and swoop: ext/glider-heat-parity e8de9552e
 - **A:** data heat: 14 s of level glide (`glide_heat_s`), and the 2.5x swoop above 8.5 m.
@@ -37,7 +39,8 @@ To answer, reply with one letter per pick, e.g. `1A 2B 3B 4A 5B 6B 7A`.
 - **Pick: B.** Both of B's rules are your later calls ("lasts too long, not punishing enough", item 8).
   The branch is also built on an older base and would bring the swoop back. Worth keeping from it:
   moving the heat numbers into `hunter_move.json` with source tags (a port, not this merge).
-- **Clip:** `glide_A_data.jpg` vs `glide_B_0245.jpg` (one frame every 1.5 s; time, heat left, speed and height under each).
+- **Clip:** `glide_A_data.jpg` vs `glide_B_0245.jpg` (one whole view every 1.5 s, gliding out over the abyss from 30 m; time, heat left, speed and height above
+  the start for each frame are in `captions.txt`).
 
 ## 4. Cooldown scale: ext/cooldown-parity-verify 2be9877c2
 - **A:** every kit at 1.0x of the source's level-1 cooldowns (Knife 28 s, rank texts recomputed).
