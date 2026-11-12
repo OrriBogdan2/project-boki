@@ -89,3 +89,10 @@ outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shot
 message lane, the shortened tutorials' hint pattern (Match._tip: once per save in Save.d["tutorial"] as
 "ways_<id>", tips setting, no tutorial step, nothing blocks): the Blight's tide first closes, a quest seat first
 opens, the Heart wakes. Texts: heart.json "hints". No save-format or Net change. Check: --ways-hints-check.
+## Heart reward gap (ext/combat-heart-reward-gap)
+Owner 2026-11-10: the early seat pays MINOR, the final seat MAJOR. Code pays exactly heart.json "reward" (`Heart.pay`: gems, seeds,
+materials and Boki trust at the exit; the Rare Egg and materials home through `Game.apply_result`). Loot kept and the Boki
+outcome are the same for both seats: any Heart exit is an extraction, so the haul and Bokis come home. The results screen
+says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
+Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
+the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
