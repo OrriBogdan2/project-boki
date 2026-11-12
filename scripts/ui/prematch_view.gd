@@ -174,8 +174,8 @@ func _tick_label() -> void:
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
-		if mine and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
-			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.turn_left <= PULSE_FROM else 1.0)
+		if mine and s >= 1 and s <= UiSfx.TICK_FROM:
+			UiSfx.lobby_tick(s)
 	_pulse(pm.turn_left if mine else Prematch.TURN)
 
 ## Digits warm to red below TICK_FROM and throb red below PULSE_FROM (your own turn only).
@@ -226,7 +226,7 @@ func _fill_hunters() -> void:
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
-	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
+	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak), "")
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var stack := UI.vbox(6)
@@ -258,10 +258,13 @@ func _tile(ak: String) -> PanelContainer:
 	return card
 
 func _choose(ak: String) -> void:
-	if pm.choose(ak):
-		_fill_hunters()
-		_fill_squad()
-		_announce_pick(false)
+	if not pm.choose(ak):
+		UiSfx.error()
+		return
+	UiSfx.lobby_pick()
+	_fill_hunters()
+	_fill_squad()
+	_announce_pick(false)
 
 ## Your squad in pick order; whoever is picking is outlined.
 func _fill_squad() -> void:
@@ -316,6 +319,7 @@ func _announce_loaded() -> void:
 		Net.lobby_emit("loaded", {})
 
 func _on_turn_done(i: int) -> void:
+	UiSfx.lobby_lock(String(pm.squad[i]["arch"]), pm.squad[i]["you"])
 	if pm.squad[i]["you"]:
 		_announce_pick(true)
 

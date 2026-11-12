@@ -18,6 +18,7 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
+##  11. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -49,6 +50,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_ui_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -315,6 +317,19 @@ func _build_cues() -> void:
 			if not src.contains(needle):
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
+## 11. Every sound UiSfx plays by name has a file, so a typo never plays silence.
+func _ui_cues() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
+	var re := RegEx.create_from_string('"([a-z_]+)"')
+	var names := {}
+	for hit in re.search_all(src):
+		names[hit.get_string(1)] = true
+	var missing := []
+	for n in names:
+		if _takes(String(n)).is_empty():
+			missing.append(n)
+	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
 
 func _takes(sname: String) -> Array:
 	var out := []
