@@ -251,7 +251,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 204,
+"long_line": 203,
 "nested_ternary": 27,
 "semicolon": 242,
 "shadow": 3

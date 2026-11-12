@@ -181,7 +181,7 @@ func _mob_stand_ins() -> Node3D:
 	# and the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
 	# ride, a 200 ms frame; CareLook, HeroVfx a second after landing); DJFx draws its own (DashPace.rehearse).
 	# A library's particle shaders run in an emitter drawn with each of its spatial shaders.
-	for lib: Script in [LDFx, VVFx, CareLook, UltLook, HeroVfx]:
+	for lib: Script in [LDFx, VVFx, CareLook, UltLook, HeroVfx, HeroVfxProps]:
 		var spatial: Array[Shader] = []
 		var particles: Array[Shader] = []
 		for v in lib.get_script_constant_map().values():

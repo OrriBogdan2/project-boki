@@ -300,9 +300,11 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
   (`hook_chain`, a hold): slack and swaying as it pays out, yanked taut and glowing as the hook bites (`hook_bite`, a burst
   of coins and sparks), again on each haul, sparks as it snaps back; the slam's gold telegraph cone with sparks along its
   edge under his raised fist, then a gold sweep, cracked ground, debris and coins; the air smash's ring of fire, debris and
-  coins. Kit-drawn in `scripts/arch/kits/ld_fx.gd`: the bone hook at the chain's end (`ld_bone.gdshader`, drawn through
-  rocks), the ghost anchor (`ld_anchor.gdshader`, gold rim), the chain ring at his feet while he reels, the gold stun
-  spirals, the barge's iron and brass after-images.
+  coins. His two props are data too (`"props"`, HeroVfx `prop` layers): the bone hook riding the chain's end (drawn
+  through rocks), the dark iron anchor with a gold rim he rides down through the air smash (`dive_anchor`, a hold) and that
+  stands planted where he lands (`quake`). The stun shows as the shared stun stars (StatusLooks); no chain ring at his
+  feet while he reels and none on the landing spot (a ground ring means gameplay: the landing circle is AimKit's). Kit-drawn
+  in `scripts/arch/kits/ld_fx.gd`: only the barge's iron and brass after-images.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
   takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,

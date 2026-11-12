@@ -1,23 +1,19 @@
 class_name LDFx
 extends Node3D
-## Cinder's and Dredge's own effects, pooled (one node per match, LDFx.of(m)). Every node is made once
-## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look) plus
-## the see-through bone shader (shaders/ld_bone.gdshader) for Grimble's hook.
+## Cinder's own effects and Grimble's barge puffs, pooled (one node per match, LDFx.of(m)). Every node is made
+## once and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look).
 ##
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot)
-## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
-##                         "pip", "spiral", "pilot", "anchor", "glow", "hook" (the bone hook); stop calling
-##                         and they hide
-## - one-shots: wave, lava, orb, anchor_drop, puff, wisp
+## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "pip",
+##                         "pilot", "glow"; stop calling and they hide
+## - one-shots: wave, lava, orb, puff, wisp
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
 ## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
 
 const SHADER: Shader = preload("res://shaders/ld_fx.gdshader")
 const GLOW_SHADER: Shader = preload("res://shaders/ld_fx_glow.gdshader")
-const ANCHOR_SHADER: Shader = preload("res://shaders/ld_anchor.gdshader")
-const BONE_SHADER: Shader = preload("res://shaders/ld_bone.gdshader")
 const LAVA_SHADER: Shader = preload("res://shaders/ld_lava.gdshader")     # alpha-blended: dark rims stay dark
 const M_FLAME := 0
 const M_ORB := 1
@@ -25,23 +21,13 @@ const M_COMET := 2
 const M_CRESCENT := 3
 const M_LAVA := 5
 const M_SWIRL := 7
-const M_LINKS := 8
 const M_PIP := 9
-const M_SPIRAL := 10
 const M_WAVE := 11
 const M_SMOKE := 13
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
 const CINDER_HALO := Color("6a5aff")
-const HOOK_R := 0.42          # m, the bone hook's curl
-const HOOK_BITS := 7          # pieces of the curl
-const ANCHOR_IRON := Color("3a3f48")
-const ANCHOR_RIM := Color("ffc832")     # coin gold, Grimble's signature colour
-const ANCHOR_DROP := 3.2       # m the anchor falls from (times its scale)
-const ANCHOR_HOLD := 0.25      # s it stays planted after it lands, before it fades
-const ANCHOR_FADE := 0.3
-const ANCHOR_LEAN := -0.9      # rad the anchor leans away from the camera, so its face turns to the view
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -197,50 +183,6 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 	_cres[key] = mesh
 	return mesh
 
-## Dredge's anchor (2 bh tall): shank, stock, ring and two flukes in solid dark iron with a gold rim.
-func _anchor_node() -> Node3D:
-	var n := Node3D.new()
-	var mt := ShaderMaterial.new()
-	mt.shader = ANCHOR_SHADER
-	mt.set_shader_parameter("color", ANCHOR_IRON)
-	mt.set_shader_parameter("color2", ANCHOR_RIM)
-	n.set_meta("mat", mt)
-	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
-		var p := _mi(mesh, mt)
-		p.position = pos
-		p.rotation = rot
-		n.add_child(p)
-	add.call(Models.box(0.36, 2.6, 0.3), Vector3(0, 1.6, 0))
-	add.call(Models.box(1.7, 0.3, 0.3), Vector3(0, 2.6, 0))
-	add.call(Models.cyl(0.4, 0.4, 0.22, 16), Vector3(0, 3.15, 0), Vector3(PI / 2, 0, 0))
-	for sx in [-1.0, 1.0]:
-		add.call(Models.box(1.3, 0.3, 0.3), Vector3(0.62 * sx, 0.55, 0), Vector3(0, 0, -0.62 * sx))
-		add.call(Models.box(0.34, 0.5, 0.34), Vector3(1.2 * sx, 1.0, 0), Vector3(0, 0, 0.3 * sx))
-	return n
-
-## Grimble's bone hook, the end of his chain (HeroVfx hook_chain): a knuckle, the jagged hook curling to one side,
-## a short split prong on the other and two spurs on top, drawn through walls (-z is the way it reaches).
-func _hook_node(_col: Color) -> Node3D:
-	var n := Node3D.new()
-	var mt := ShaderMaterial.new()
-	mt.shader = BONE_SHADER
-	var bit := func(from: Vector3, to: Vector3, r0: float, r1: float) -> void:
-		var mi := _mi(Models.cyl(r1, r0, from.distance_to(to), 6), mt)
-		mi.transform = Transform3D(
-			Basis.looking_at(from.direction_to(to), Vector3.UP) * Basis(Vector3.RIGHT, -PI / 2), (from + to) * 0.5)
-		n.add_child(mi)
-	bit.call(Vector3(0, 0, 0.2), Vector3(0, 0, -0.12), 0.24, 0.2)
-	var prev := Vector3(0, 0, -0.1)
-	for i in HOOK_BITS:
-		var phi := 1.25 * PI * float(i + 1) / HOOK_BITS
-		var at := Vector3(HOOK_R * (1.0 - cos(phi)), 0.06 * phi, -0.1 - HOOK_R * sin(phi))
-		bit.call(prev, at, lerpf(0.17, 0.02, float(i) / HOOK_BITS), lerpf(0.17, 0.02, float(i + 1) / HOOK_BITS))
-		prev = at
-	bit.call(Vector3(-0.1, 0, -0.1), Vector3(-0.3, 0.02, -0.62), 0.11, 0.015)
-	bit.call(Vector3(0.05, 0.14, 0.12), Vector3(0.1, 0.4, 0.0), 0.07, 0.01)
-	bit.call(Vector3(-0.06, 0.15, 0.0), Vector3(-0.12, 0.38, -0.14), 0.06, 0.01)
-	return n
-
 # ------------------------------------------------------------------ the hose
 ## The Torch Lance stream this step: parts [{p, age (0..1), r, seed}]. A pool of camera-facing puffs per id
 ## (FLAME_CAP at most), reused every step; stop calling and they hide.
@@ -348,35 +290,12 @@ func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	_param(n.material_override, "progress", ln)
 	e["keep_progress"] = true
 
-## The Anchor Drop's giant anchor falling onto `at` over `fall` seconds (0: already down), planted for
-## ANCHOR_HOLD, then fading. Returns its entry; the kit may move entry["at"] while it falls.
-func anchor_drop(at: Vector3, fall: float, scl := 1.2) -> Dictionary:
-	var n := _take("anchor", _anchor_node)
-	n.global_position = at + Vector3(0, ANCHOR_DROP * scl, 0) * signf(fall)
-	n.rotation = Vector3(ANCHOR_LEAN, 0, 0)
-	n.scale = Vector3.ONE * scl
-	_param(n.get_meta("mat"), "fade", 1.0)
-	var e := {
-		"node": n, "t": 0.0, "dur": fall + ANCHOR_HOLD + ANCHOR_FADE, "fall": fall, "kind": "anchor",
-		"s0": n.scale, "mat": n.get_meta("mat"), "at": at
-	}
-	live.append(e)
-	return e
-
-## Ends a one-shot early (an Anchor Drop whose wind-up was stunned out); it hides on the next frame.
-func stop(e: Dictionary) -> void:
-	if not e.is_empty(): e["t"] = float(e["dur"])
-
 # ------------------------------------------------------------------ immediate looks
 func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 	match kind:
 		"swirl": return _mi(_plane_mesh(), _mat(M_SWIRL, col, col2))
-		"chain": return _mi(_plane_mesh(), _mat(M_LINKS, col, col2))
 		"pip": return _mi(_quad_mesh(), _mat(M_PIP, col, col2, true))
-		"spiral": return _mi(_quad_mesh(), _mat(M_SPIRAL, col, col2, true))
 		"pilot", "glow": return _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
-		"anchor": return _anchor_node()
-		"hook": return _hook_node(col)
 		"skull": return _skull_node(col, col2)
 	return Node3D.new()
 
@@ -421,7 +340,7 @@ func place(
 	var n: Node3D = e["node"]
 	n.visible = true
 	n.global_position = at
-	n.rotation = Vector3(ANCHOR_LEAN if kind == "anchor" else 0.0, yaw, 0)
+	n.rotation = Vector3(0, yaw, 0)
 	n.scale = Vector3.ONE * scl
 	if n is MeshInstance3D:
 		var mt := (n as MeshInstance3D).material_override as ShaderMaterial
@@ -518,18 +437,6 @@ func track() -> void:
 		r["last"] = sd["pos"]
 
 # ------------------------------------------------------------------ per frame
-## The falling anchor: an accelerating drop, a squash as it bites into the ground, planted, then faded.
-func _pose_anchor(e: Dictionary, n: Node3D) -> void:
-	var t := float(e["t"])
-	var fall := float(e["fall"])
-	var s0: Vector3 = e["s0"]
-	var drop := clampf(t / fall, 0.0, 1.0) if fall > 0.0 else 1.0
-	n.global_position = (e["at"] as Vector3) + Vector3(0, ANCHOR_DROP * s0.y * (1.0 - drop * drop), 0)
-	var since := t - fall
-	var squash := 1.0 + 0.25 * (1.0 - clampf(since / 0.15, 0.0, 1.0)) if since >= 0.0 else 1.0
-	n.scale = s0 * Vector3(squash, 1.0 / squash, squash)
-	_param(e["mat"], "fade", 1.0 - clampf((since - ANCHOR_HOLD) / ANCHOR_FADE, 0.0, 1.0))
-
 func _alive(sd: Dictionary) -> bool:
 	for s in m.shots:
 		if is_same(s, sd): return true
@@ -547,13 +454,8 @@ func _process(_delta: float) -> void:
 			continue
 		e["t"] = float(e["t"]) + delta
 		var u := clampf(float(e["t"]) / float(e["dur"]), 0.0, 1.0)
-		var mt: ShaderMaterial = e["mat"]
-		match String(e["kind"]):
-			"anchor":
-				_pose_anchor(e, n)
-			_:
-				_param(mt, "life", u)
-				if e.has("grow"): n.scale = (e["s0"] as Vector3) * (1.0 + float(e["grow"]) * u)
+		_param(e["mat"], "life", u)
+		if e.has("grow"): n.scale = (e["s0"] as Vector3) * (1.0 + float(e["grow"]) * u)
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)

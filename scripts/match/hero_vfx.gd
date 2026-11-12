@@ -60,6 +60,7 @@ var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
 var scarves := HeroScarf.new(self)   # the cloth ends some Heroes trail (data "scarf")
+var props := HeroVfxProps.new(self)  # the solid props some Heroes set down (data "props")
 
 static func of(match_node: Node) -> HeroVfx:
 	if match_node.has_meta("hero_vfx"):
@@ -119,15 +120,15 @@ func anchor_pos(h: Hunter, anchor_name: String) -> Vector3:
 	if node != null:
 		return node.global_position
 	if a.has("bone"):
-		var on_bone := _bone_pos(h, String(a["bone"]), _vec(a.get("off", [0.0, 0.0, 0.0])))
+		var on_bone := _bone_pos(h, String(a["bone"]), vec(a.get("off", [0.0, 0.0, 0.0])))
 		if on_bone != Vector3.INF:
 			return on_bone
 	var gun: Node3D = h.model.get_node_or_null("Rig/Torso/Aim/Gun") if h.model else null
 	if gun != null and gun.is_inside_tree() and a.has("gun"):
-		return gun.global_transform * _vec(a["gun"])
+		return gun.global_transform * vec(a["gun"])
 	if a.has("hand") and h.ak != null:
 		return h.ak.hand_pos(String(a["hand"]) == "r")
-	var body := _vec(a.get("body", [0.0, 1.0, 0.0]))
+	var body := vec(a.get("body", [0.0, 1.0, 0.0]))
 	var aim := h.aim_dir()
 	return h.pos + Vector3(aim.x * body.z - aim.y * body.x, body.y, aim.y * body.z + aim.x * body.x)
 
@@ -162,7 +163,7 @@ func _bone_pos(h: Hunter, bone: String, off: Vector3) -> Vector3:
 	var sk2: Skeleton3D = hit[0]
 	return sk2.global_transform * (sk2.get_bone_global_pose(int(hit[1])) * off)
 
-static func _vec(v: Array) -> Vector3:
+static func vec(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[1]), float(v[2]))
 
 func _rec(h: Hunter, move: String) -> Dictionary:
@@ -255,12 +256,12 @@ func _num(layer: Dictionary, key: String, o: Dictionary, fallback := 1.0) -> flo
 		n *= 1.0 + float(layer[key + "_k"]) * float(o.get("k", 0.0))
 	return n
 
-func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
+func pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
 	var pal: Dictionary = data(h.arch).get("palette", {})
 	var key := String(name_or_hex) if name_or_hex != null else fallback
 	return Color(String(pal.get(key, key)))
 
-func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
+func layer_pos(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
 	var from := String(layer.get("at", "here"))
 	var p := at
 	if from == "h":
@@ -274,16 +275,18 @@ func _layer(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o: Dictiona
 	if not is_instance_valid(h):
 		return
 	var kind := String(layer["p"])
-	if MODES.has(kind):
+	if kind == "prop":
+		props.start(layer, h, layer_pos(layer, h, at, dir, o))
+	elif MODES.has(kind):
 		if kind == "ribbon":
 			_ribbon(layer, h, o)
 		elif kind == "bolt":
-			var from := _where(layer, h, at, dir, o)
+			var from := layer_pos(layer, h, at, dir, o)
 			_bolt(layer, h, from, _bolt_end(layer, h, from, dir, o), o)
 		else:
-			_surface(kind, layer, h, _where(layer, h, at, dir, o), dir, o)
+			_surface(kind, layer, h, layer_pos(layer, h, at, dir, o), dir, o)
 	else:
-		_burst(kind, layer, h, _where(layer, h, at, dir, o), dir, o, lod)
+		_burst(kind, layer, h, layer_pos(layer, h, at, dir, o), dir, o, lod)
 
 # ------------------------------------------------------------------ pooled nodes
 func _take(kind: String, build: Callable) -> Node3D:
@@ -302,10 +305,10 @@ func _take(kind: String, build: Callable) -> Node3D:
 		return fresh
 	var old: Node3D = arr.pop_front()
 	arr.append(old)
-	_drop_entry(old)
+	drop_entry(old)
 	return old
 
-func _drop_entry(node: Node3D) -> void:
+func drop_entry(node: Node3D) -> void:
 	for list: Array in [live, ribbons]:
 		for e in list:
 			if e["node"] == node:
@@ -500,9 +503,9 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1})
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
-	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
-	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
-	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
+	mt.set_shader_parameter("col", pal(h, layer.get("c"), "main"))
+	mt.set_shader_parameter("col2", pal(h, layer.get("c2"), "hot"))
+	mt.set_shader_parameter("col3", pal(h, layer.get("c3"), "char"))
 	mt.set_shader_parameter("seed", randf() * SEED_MAX)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
@@ -604,9 +607,9 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	pm.set_shader_parameter("drag", float(layer.get("drag", 1.0)))
 	pm.set_shader_parameter("curl", float(layer.get("curl", 1.0)))
 	pm.set_shader_parameter("size", _num(layer, "size", o, 0.08))
-	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
-	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
-	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "smoke" if kind == "smoke" else "char"))
+	mt.set_shader_parameter("col", pal(h, layer.get("c"), "main"))
+	mt.set_shader_parameter("col2", pal(h, layer.get("c2"), "hot"))
+	mt.set_shader_parameter("col3", pal(h, layer.get("c3"), "smoke" if kind == "smoke" else "char"))
 	mt.set_shader_parameter("stretch", float(layer.get("stretch", 0.05)))
 	mt.set_shader_parameter("gain", view_k(h))
 	var want := _num(layer, "n", o, 12.0) * float(Settings.q("fx")) * lod * view_k(h)
@@ -686,6 +689,9 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 			mi.scale = _wedge(mi.material_override, layer, _num(layer, "size", o), 1.0)
 			layers.append({"node": mi, "layer": layer, "n": 0})
 			continue
+		if kind == "prop":
+			layers.append({"node": props.take(layer, h), "layer": layer, "n": 0})
+			continue
 		if kind == "string" or kind == "chain":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
 				var mode: int = CHAIN_MODE if kind == "chain" else MODES["ribbon"]
@@ -696,7 +702,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if n < 1:
 			node.visible = false
 			continue
-		node.global_transform = Transform3D(Basis.IDENTITY, _where(layer, h, o.get("at", h.pos), aim))
+		node.global_transform = Transform3D(Basis.IDENTITY, layer_pos(layer, h, o.get("at", h.pos), aim))
 		node.one_shot = false
 		node.explosiveness = 0.0
 		node.emitting = true
@@ -719,12 +725,14 @@ func _tick_holds() -> void:
 			if lay["node"] is GPUParticles3D:
 				var node := lay["node"] as GPUParticles3D
 				var base: Vector3 = hunter.pos if e["at"] == null else e["at"]
-				node.global_position = _where(lay["layer"], hunter, base, aim)
+				node.global_position = layer_pos(lay["layer"], hunter, base, aim)
 				_reaim(node, lay["layer"], aim)
 			elif lay["layer"]["p"] == "chain":
 				_draw_chain(lay, hunter, e)
 			elif lay["layer"]["p"] == "wedge":
 				_hold_wedge(lay, hunter, e, aim)
+			elif lay["layer"]["p"] == "prop":
+				props.pose_held(lay, hunter, e)
 			else:
 				_draw_string(lay, hunter)
 
@@ -827,6 +835,7 @@ func _model_has(h: Hunter, node_name: String) -> bool:
 func _process(delta: float) -> void:
 	_tick_holds()
 	scarves.tick(delta)
+	props.tick(delta)
 	for i in range(live.size() - 1, -1, -1):
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta

@@ -21,20 +21,17 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const BONE := Color("e0d4c0")          # the bone hook
 const WORD_COL := Color("c0b0a0")      # the grey of a hook's misses (MISS, SNAGGED, TOO HEAVY, WALLED)
 const BRASS := Color("e0a040")
 const IRON := Color("3a3f48")
-const ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim, its telegraphs and its stun
+const ANCHOR_COL := Color("ffc832")    # coin gold (his palette main): his telegraphs, ANCHORED, SCOOPED
 const TELL_ALPHA := 0.7                # his cone tells' strength: fill under 0.25 at the apex (HeroVfx lights it)
-const STUN_DARK := Color("5a3a08")     # the stun spiral's dark band
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the chain yanks taut on each
 const SNAP_T := 0.14                   # s the chain takes to snap back to his hand after a miss or the reel
 const THROW_SLACK := 0.6               # the chain's tension (HeroVfx hook_chain k) when the hook reaches full range
 const YANK_T := 0.25                   # s the chain stays yanked taut and hot after the hook bites
 const REEL_TAUT := 0.6                 # its tension while reeling, between hauls
-const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
@@ -62,7 +59,6 @@ var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
 var armor_shreds := 0           # (tests) hits that shredded armor
-var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
 var fx: LDFx
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
 var grapples := 0               # (tests) foes reeled in
@@ -189,7 +185,6 @@ func move_k() -> float:
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
-	fx.track()
 	if h.downed and not _down_seen:
 		_down_seen = true
 		if res > 0.0:
@@ -283,22 +278,9 @@ func _dress_volley() -> void:
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
 		return
-	var id := h.get_instance_id()
-	if not pull.is_empty():
-		# Grounded while he reels: a chain ring at his feet
-		fx.place("chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), BRASS, IRON, 0.95, m.time * 0.6)
 	if barge_t > 0.0:
 		barge_t -= dt
 		_barge_trail(dt)
-	for s in stunned.duplicate():
-		var f = s["e"]
-		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
-			stunned.erase(s)
-			continue
-		fx.place(
-			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), ANCHOR_COL,
-			STUN_DARK, 0.6
-		)
 
 ## Grimble's 3D model: a hit knocks coins off the hoard. While the chain is out the model's hook shrinks into his
 ## wrist (hide_while_chain), so the one hook on screen is the chain's end.
@@ -395,8 +377,6 @@ func _tick_hook() -> void:
 ## The chain this step from his hand to the bone hook at `tip`, at tension `k` (HeroVfx hook_chain: 0 slack and
 ## swaying, 1 taut and glowing).
 func _draw_chain(tip: Vector3, k: float) -> void:
-	var out := tip - _hand()
-	fx.place("hook%d" % h.get_instance_id(), "hook", tip, ANCHOR_COL, BONE, 1.0, atan2(-out.x, -out.z))
 	HeroVfx.of(m).hold(h, "hook_chain", k, {"to": tip})
 
 ## The chain snaps back to his hand after a miss or the end of the reel, throwing sparks at the hook.
@@ -639,7 +619,6 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
-	stunned.append({"e": f, "until": m.time + stun})
 	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
@@ -685,20 +664,11 @@ func _tick_dive(dt: float) -> void:
 			"ticks": true, "col": ANCHOR_COL
 		}
 	)
-	if tells_visible(): _dive_looks(land, float(ed["quake_r"]))
+	if tells_visible(): HeroVfx.of(m).hold(h, "dive_anchor")     # he rides the anchor down
 	if h.grounded or h.pos.y - gy < 0.12 or float(dive["t"]) > 2.0:
 		var fell := maxf(float(dive["h0"]), float(dive["y0"]) - gy)
 		dive = {}
 		_quake(land, fell)
-
-## The air dive: he rides the anchor down (full size under his feet, ahead of the fall), and the landing
-## ring is a chain of brass links on the ground, solid enough to read on grass.
-func _dive_looks(land: Vector3, r: float) -> void:
-	var id := h.get_instance_id()
-	var under := h.pos - Basis(Vector3.RIGHT, LDFx.ANCHOR_LEAN) * Vector3(0, DIVE_ANCHOR_UP, 0)
-	under.y = maxf(land.y, under.y)
-	fx.place("dive_anchor%d" % id, "anchor", under, ANCHOR_COL, IRON, 1.0)
-	fx.place("dive_ring%d" % id, "chain", land + Vector3(0, 0.08, 0), BRASS, IRON, r / 0.82, m.time * 0.4)
 
 ## The air smash lands: a ring of anchor and dust round the landing, damage scaled by the height fallen.
 func _quake(at: Vector3, fell: float) -> void:
@@ -713,9 +683,7 @@ func _quake(at: Vector3, fell: float) -> void:
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
 	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
-	var d2 := h.aim_dir()
-	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)
-	vfx("quake", at, d2, {"r": r})
+	vfx("quake", at, h.aim_dir(), {"r": r})     # the anchor planted, the ground cracking
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)

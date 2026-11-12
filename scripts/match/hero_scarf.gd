@@ -144,8 +144,8 @@ func _node() -> MeshInstance3D:
 func _take(h: Hunter, cfg: Dictionary) -> MeshInstance3D:
 	var mi := _node()
 	var mt: ShaderMaterial = mi.material_override
-	mt.set_shader_parameter("root_col", fx._pal(h, cfg.get("c"), "hot"))
-	mt.set_shader_parameter("tip_col", fx._pal(h, cfg.get("c2"), "main"))
+	mt.set_shader_parameter("root_col", fx.pal(h, cfg.get("c"), "hot"))
+	mt.set_shader_parameter("tip_col", fx.pal(h, cfg.get("c2"), "main"))
 	mt.set_shader_parameter("seed", randf() * HeroVfx.SEED_MAX)
 	mt.set_shader_parameter("gain", fx.view_k(h))
 	mi.visible = false

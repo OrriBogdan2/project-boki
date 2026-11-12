@@ -1,7 +1,7 @@
 shader_type spatial;
-// Dredge's giant anchor (LDFx anchor_drop and the air dive): a solid dark iron body that holds its shape on
-// bright grass, a thin seafoam fresnel rim so the silhouette reads, and a faint top light. Opaque; `fade`
-// takes it away with a screen-door dither so it never turns see-through and pale.
+// HeroVfx "iron" props (scripts/match/hero_vfx_props.gd; Grimble's anchor on the air smash): a solid dark iron
+// body that holds its shape on bright grass, a thin fresnel rim in `color2` so the silhouette reads, and a faint top
+// light. Opaque; `fade` takes it away with a screen-door dither so it never turns see-through and pale.
 render_mode unshaded, shadows_disabled, cull_back, fog_disabled;
 uniform vec4 color : source_color = vec4(0.23, 0.25, 0.28, 1.0);    // the iron
 uniform vec4 color2 : source_color = vec4(0.36, 1.0, 0.85, 1.0);    // the rim glow

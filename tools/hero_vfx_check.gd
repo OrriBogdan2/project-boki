@@ -23,6 +23,8 @@ const KIT_FILES := {
 const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008", "smoke": "#404040"},
 	"anchors": {"palm": {"bone": "hand.R", "off": [0.0, 0.05, 0.0], "body": [0.3, 1.0, 0.2]},
 		"tip": {"body": [0.2, 1.1, 0.5]}},
+	"props": {"peg": {"parts": [{"box": [0.2, 1.0, 0.2], "at": [0.0, 0.5, 0.0]},
+			{"cyl": [0.1, 0.0], "from": [0.0, 1.0, 0.0], "to": [0.0, 1.0, -0.4]}]}},
 	"moves": {
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
@@ -33,7 +35,9 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"cone": {"fx": [{"p": "wedge", "size": "r", "arc": 110}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"rope": {"fx": [{"p": "chain", "at": "tip", "size": 0.2}]},
-		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
+		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]},
+		"plant": {"fx": [{"p": "prop", "prop": "peg", "fwd": 1.0, "squash": 0.25, "life": 0.5, "fade": 0.2}]},
+		"grip": {"fx": [{"p": "prop", "prop": "peg", "at": "to", "from": "h"}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
@@ -152,7 +156,10 @@ func _recipes(arch: String) -> void:
 			if (life > MAX_LIFE and not lasts) or flare_big or vortex_big:
 				over.append(mv)
 			var hold_only: bool = layer["p"] in ["string", "chain"]
-			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or hold_only):
+			if layer["p"] == "prop" and not (d.get("props", {}) as Dictionary).has(layer.get("prop")):
+				flat_only.append("prop " + str(layer.get("prop")))
+			var known: bool = HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or layer["p"] == "prop"
+			if not (known or hold_only):
 				flat_only.append(layer["p"])
 	ok(bad_sound.is_empty(), "%s: every sound in the data has a file %s" % [arch, bad_sound])
 	ok(bad_col.is_empty(), "%s: every colour is in the palette %s" % [arch, bad_col])
@@ -389,7 +396,33 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(V.ribbons.is_empty(), "the projectile ends: its tail runs out")
 	shot.queue_free()
 	_clear(V)
+	_props(V, P)
 	HeroVfx.set_data(P.arch, {})
+
+## A prop (HeroVfxProps): played once it lands squashed where the layer puts it, fades over its last `fade` s and is
+## gone after `life`, its node back in the pool; held at "to" it stands on the kit's point, turned along the reach.
+func _props(V: HeroVfx, P: Hunter) -> void:
+	V.play(P, "plant", P.pos, Vector2.RIGHT)
+	var shot: Dictionary = V.props.live[0]
+	var n: Node3D = shot["node"]
+	var mt: ShaderMaterial = n.get_meta("mat")
+	ok(n.visible and n.global_position.distance_to(P.pos + Vector3(1, 0, 0)) < 0.01 and n.scale.x > 1.2,
+			"a prop lands squashed where its layer puts it (%s, %.2f)" % [n.global_position - P.pos, n.scale.x])
+	V.props.tick(0.4)
+	ok(n.scale.is_equal_approx(Vector3.ONE) and absf(float(mt.get_shader_parameter("fade")) - 0.5) < 0.01,
+			"it settles and fades over its last part (fade %.2f)" % mt.get_shader_parameter("fade"))
+	V.props.tick(0.2)
+	ok(not n.visible and V.props.live.is_empty(), "and is gone after its life")
+	V.hold(P, "grip", 0.0, {"to": P.pos + Vector3(0, 1, -3)})
+	V._tick_holds()
+	var held: Node3D = V.holds.values()[0]["layers"][0]["node"]
+	var reach := -held.global_basis.z
+	ok(held == n and held.global_position.distance_to(P.pos + Vector3(0, 1, -3)) < 0.01
+			and reach.normalized().dot(Vector3(0, 0, -1)) > 0.99,
+			"held, it reuses the pooled node at the kit's point, turned along the reach (%s)" % reach)
+	V.m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	ok(not held.visible, "and goes when the asks stop")
 
 func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	V.plays.clear()

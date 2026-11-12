@@ -13,7 +13,7 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
-  ended. Particle layers only, and local.
+  ended. Particle, wedge, string, chain and prop layers; local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
@@ -36,6 +36,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`) | `size` radius, `spin` turns/s (negative: the other way), `grow` |
 | `wedge` | a cone's area on the ground (apex at `at`, along `dir`): a soft inside (coverage 0.04 at the apex, 0.22 by the rim), a dark char line and a lit rim on its exact edge, and a bright ragged front running out that reaches the rim after `lead` s, then the rim flashes and it burns away. In a hold it lies along the kit's locked `dir` (passed with the hold, else the aim) and the hold's `k` is the front, so it reaches the rim on the hit frame. Size it with `"r"` from the kit so it is the hit cone | `size` radius (`"r"`), `arc` deg (the hit cone's), `lead` s, `life` |
+| `prop` | a solid prop from the Hero's top-level `"props"` (parts: `box` [x, y, z] at `at` turned `rot`, or a tapered `cyl` [r, r] `from` -> `to`; `"shader"` iron or bone, `c` / `c2`: the iron and its rim, or the bone's rim and the bone) by `scripts/match/hero_vfx_props.gd`. Once: it lands squashed and fades over the last `fade` s of `life`. Held: at its anchor (`hang` m up its own axis there, `floor` keeps it out of the ground) or with `"at": "to"` on the hold's point, turned along the reach from `from` | `prop`, `size`, `lean` rad back toward the camera, `squash`, `life`, `fade`, `hang`, `floor`, `from` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 

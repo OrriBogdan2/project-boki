@@ -1,6 +1,6 @@
 shader_type spatial;
-// Grimble's bone hook (scripts/arch/kits/ld_fx.gd, the "hook" prop): lit bone with a coin-gold rim. Drawn on top of
-// walls and rocks too (no depth test), so the hook always reads.
+// HeroVfx "bone" props (scripts/match/hero_vfx_props.gd; Grimble's hook at the chain's end): lit bone (`color2`)
+// with a rim in `color`. Drawn on top of walls and rocks too (no depth test), so the hook always reads.
 render_mode unshaded, shadows_disabled, depth_draw_never, depth_test_disabled, blend_mix, cull_back, fog_disabled;
 uniform vec4 color : source_color = vec4(1.0, 0.78, 0.2, 1.0);     // the rim
 uniform vec4 color2 : source_color = vec4(0.86, 0.8, 0.7, 1.0);    // the bone

@@ -446,12 +446,16 @@ func _all() -> void:
 	)
 	ok(
 		"reel: Grimble is Grounded while he reels, the foe is stunned",
-		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
+		KitStatus.grounded(P) and T.stun_t > 0.0,
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
 	var chain: Dictionary = HeroVfx.of(m).holds.get("%d/hook_chain" % P.get_instance_id(), {})
 	ok("reel: the gold chain runs to the foe, yanked taut", not chain.is_empty() and chain["to"] is Vector3
 			and float(chain["k"]) >= DredgeKit.REEL_TAUT, "chain %s" % chain.get("k"))
+	HeroVfx.of(m)._tick_holds()     # (the hold's props are posed on the frame)
+	var hook: Array = chain.get("layers", []).filter(func(l): return l["layer"]["p"] == "prop")
+	ok("reel: the bone hook rides the chain's end", hook.size() == 1 and (hook[0]["node"] as Node3D).visible
+			and (hook[0]["node"] as Node3D).global_position.distance_to(chain["to"]) < 0.01)
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -503,7 +507,8 @@ func _all() -> void:
 		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and KitStatus.grounded(T) and T.stun_t > 0.8,
 		"anchors %d took %.0f stun %.2f" % [K.anchors, ak.dmg(T) - hp0, T.stun_t]
 	)
-	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
+	Sfx.listener = T.pos          # (the camera focus the status looks thin out from; no camera runs here)
+	ok("anchor: the stunned foe shows the stun stars", StatusLooks.of(m).showing(T, "stun"), "stun %.2f" % T.stun_t)
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
 	# --- Barge right after the Anchor can't turn
 	reset.call()
@@ -672,13 +677,14 @@ func _all() -> void:
 		te += ak.DT
 		vy = minf(vy, P.vel.y)
 		if AimKit.shown(P, "e_land"): land_seen = true
-		if K.fx.shown("dive_anchor%d" % P.get_instance_id()): anchor_seen = true
+		if HeroVfx.of(m).holds.has("%d/dive_anchor" % P.get_instance_id()): anchor_seen = true
 	var high: float = ak.dmg(T) - hp0
 	ok(
 		"air smash: straight down at once", vy <= -20.0 and absf(P.pos.x - home.x) < 0.4,
 		"vy %.1f drift %.2f" % [vy, P.pos.x - home.x]
 	)
 	ok("air smash: the landing ring shows while you fall, the anchor falls with you", land_seen and anchor_seen)
+	ok("air smash: the anchor stands planted where he lands", HeroVfx.of(m).props.live.size() >= 1)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
 		K.quakes == q0 + 1 and high > 0.0 and T.stun_t > 0.5, "quakes %d stun %.2f" % [K.quakes - q0, T.stun_t]

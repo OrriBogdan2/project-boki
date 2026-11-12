@@ -1,4 +1,4 @@
-// Cinder's and Dredge's effect looks (scripts/arch/kits/ld_fx.gd), a mode each. Every look has two parts:
+// Cinder's effect looks and Grimble's barge puffs (scripts/arch/kits/ld_fx.gd), a mode each. Every look has two parts:
 // a body drawn alpha-blended (ld_fx.gdshader), so its colour and its dark rims and smoke read on bright
 // grass instead of washing out to beige, and a glow drawn additively on top (ld_fx_glow.gdshader) for the
 // hot cores only. life runs 0 -> 1 over an effect. Flat looks lie on a PlaneMesh (XZ, UV 0..1);
@@ -9,10 +9,8 @@
 //   2 comet    a streak along UV.x (0 = head), soft across UV.y, with a smoke tail (color2)
 //   3 crescent a blade arc swept by `progress`: UV.x along the sweep, UV.y from the edge inward
 //   7 swirl    a ring of flame streaks rotating round the centre (Cinder's shield)
-//   8 links    a ring of chain links (Dredge Grounded while he reels)
 //   9 flame icon  a small teardrop flame (the burn pips over a foe)
-//  10 spiral   a stun spiral (Anchor Drop victims)
-//  11 wave     a cel shockwave ring that races out over life (the Anchor's landing ring, Cinder Shot's fizzle)
+//  11 wave     a cel shockwave ring that races out over life (Cinder Shot's fizzle)
 //  12 dot      a round dot with a dark core (a slug hanging at its stop line)
 uniform vec4 color : source_color = vec4(1.0, 0.6, 0.2, 1.0);
 uniform vec4 color2 : source_color = vec4(1.0, 1.0, 0.8, 1.0);
@@ -97,14 +95,6 @@ void ld_soft_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		body = mix(color.rgb * 0.6, color2.rgb, streak * n);
 		alpha = ring * (0.45 + 0.55 * streak) * strength;
 		glow = color2.rgb * ring * streak * n * 0.35 * strength;
-	} else if (mode == 8) {
-		float a = atan(uv.y, uv.x) / 6.2832 + 0.5;
-		float ring = 1.0 - smoothstep(0.0, 0.1, abs(d - 0.82));
-		float link = fract(a * 14.0 + seed);
-		float lit = smoothstep(0.08, 0.2, link) * (1.0 - smoothstep(0.42, 0.55, link));
-		body = mix(color2.rgb, color.rgb, lit);
-		alpha = ring * (0.5 + 0.5 * lit) * strength;
-		glow = color.rgb * ring * lit * 0.2 * strength;
 	} else if (mode == 9) {
 		vec2 p = vec2(uv.x, uv.y + 0.25);
 		float w = 0.55 * (1.0 - smoothstep(-0.9, 0.9, -p.y)) + 0.05;
@@ -115,13 +105,6 @@ void ld_soft_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		body = mix(color.rgb, color2.rgb, core);
 		alpha = shape * strength;
 		glow = color2.rgb * core * 0.5 * strength;
-	} else if (mode == 10) {
-		float a = atan(uv.y, uv.x);
-		float sp = fract((a / 6.2832) * 2.0 - d * 2.2 + TIME * 2.5);
-		float arm = (1.0 - smoothstep(0.0, 0.14, abs(sp - 0.5))) * (1.0 - smoothstep(0.7, 1.0, d)) * smoothstep(0.08, 0.2, d);
-		body = mix(color2.rgb, color.rgb, smoothstep(0.2, 0.8, d));
-		alpha = arm * strength;
-		glow = color.rgb * arm * 0.25 * strength;
 	} else if (mode == 11) {
 		float go = smoothstep(0.0, 0.6, life);
 		vec2 ring_v = cel_ring(uv01, go, life, seed);

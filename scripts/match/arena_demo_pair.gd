@@ -206,7 +206,6 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 ## of the frames that matter.
 static func _warm_looks(m: Node, at: Vector3) -> void:
 	var fx := LDFx.of(m)
-	fx.anchor_drop(at, 0.0, 0.05)
 	fx.orb(at, Color.BLACK, Color.BLACK, 0.01, 0.05)
 	fx.wave(at, 0.01, Color.BLACK, 0.05)
 
