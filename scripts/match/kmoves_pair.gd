@@ -363,12 +363,11 @@ const MOVES := {
 			"p": -0.2, "gp": -0.4, "sq": -0.1, "lift": 0.22, "lw": 1.0, "legs": [0.25, -0.6, 0.4, -0.8],
 			"fl": Vector3(-0.3, -0.15, 0.4), "hw": 1.0
 		}]]},
-	# the landing: no big impact, a squash onto his feet and he walks on (0.36s)
+	# the landing: light, as the source (no visible squash): a soft give in the knees and he walks on (0.2s)
 	"lw_land": {"keys": [
-		[0.0, {"p": -0.15, "sq": -0.05, "lift": 0.15}],
-		[0.08, {"p": 0.18, "sq": 0.35, "lift": -0.14, "lw": 1.0, "legs": [0.8, -1.3, 0.7, -1.2]}],
-		[0.2, {"p": -0.04, "sq": -0.08, "lift": 0.03}],
-		[0.36, {}]]},
+		[0.0, {"p": -0.08, "lift": 0.08}],
+		[0.07, {"p": 0.06, "sq": 0.1, "lift": -0.05, "lw": 0.5, "legs": [0.35, -0.6, 0.3, -0.55]}],
+		[0.2, {}]]},
 	# Brass Broadside (X, 2.1s): hunched over his fists while the charge builds (1.1s, deeper at the end), a
 	# two-fisted shove at wave 1 (overshoot), a short rewind, the second shove at 1.7s, then he straightens up
 	"dr_blast": {"keys": [

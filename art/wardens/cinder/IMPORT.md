@@ -40,3 +40,7 @@ Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUD
 `x_breath` leaf (eeb4f3ae4, e557cd71e). The 0.24.4 merge copied the 41 clips of that glb (spring tracks included)
 onto the swapped body by node name (same skeleton: no rest drift) and added `x_breath` with kael_retarget.py's
 `add_breath` at her own spot (0.283 m over hips) and chest band (1.0-1.32 m up, |x| under 0.17 m): 3363 vertices.
+
+Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with cinder_clips.py on
+~/meshy/cinder_v2/stage_p2/cinder.blend (a control bake of `walk_f` matched this glb's to 4e-7) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
