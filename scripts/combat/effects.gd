@@ -321,7 +321,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						o["stun"] = maxf(float(o.get("stun", 0.0)), float(e["spike"].get("stun", 0.8)))
 						o.erase("lift")
 						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
-						m.displace.spike(f, -16.0)
+						m.displace.spike(f, -16.0, caster)
 					f.hurt(dmg, caster, o)
 		"cone":
 			var d := _aim_dir(caster, ctx)
