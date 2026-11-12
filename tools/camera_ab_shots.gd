@@ -5,7 +5,8 @@ extends "res://tools/gameplay_media.gd"
 ##   glide   a ledge drop: the hero runs off an edge over the abyss and glides
 ##   squads  three squads of three, SQUAD_GAP apart, the hero's in the middle of it
 ## Both styles share one match and the same placements; the bots' rolls differ a little between the two.
-## The camera is driven as Match does it, minus the cursor lean (the cursor sits idle).  Needs a renderer (jobq --needs gpu).
+## The camera is driven as Match does it, minus the cursor lean (the cursor sits idle).
+## Needs a renderer (jobq --needs gpu).
 
 const STYLES := ["supervive", "source_scale"]
 const SIZE := Vector2i(1280, 720)   # px of each shot
@@ -15,7 +16,8 @@ const GLIDE_SECS := 1.4             # s after the run-off before the glide shot
 const RUN_MAX := 6.0                # s the run to the edge may take before the glide shot is given up on
 const SQUAD_GAP := 12.0             # m between the three squads' centres
 const EDGE_RUN := 6.0               # m of run-up to the edge the glide starts from
-const RIVALS := [["archer", "wisplet"], ["bulwark", "burrlet"], ["mage", "puddlet"], ["juggernaut", "pebbit"], ["gunslinger", "zapple"]]
+const RIVALS := [["archer", "wisplet"], ["bulwark", "burrlet"], ["mage", "puddlet"], ["juggernaut", "pebbit"],
+		["gunslinger", "zapple"]]
 
 var hero := "gunslinger"
 var pool: Array = []         # the rivals, parked (out) between shots
@@ -86,7 +88,8 @@ func _take(secs: float, file: String, each: Callable, until := Callable()) -> vo
 		await main.get_tree().process_frame
 		t += FRAME
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
-	print("CAMERAAB shot %s: hero at %s px of %s" % [file, str(m.cam.unproject_position(P.pos)), str(main.get_viewport().get_visible_rect().size)])
+	var east := m.cam.unproject_position(P.pos + Vector3(10, 0, 0)) - m.cam.unproject_position(P.pos)
+	print("CAMERAAB shot %s: 10 m of ground is %.0f px across" % [file, east.x])
 
 ## The rivals are parked (out), the hero set down at `at` with full health.
 func _clear(at: Vector3) -> void:
@@ -116,7 +119,8 @@ func _squads_shot(style: String) -> void:
 	var squads: Array = [mine]
 	for k in 2:
 		var c := base + Vector3(SQUAD_GAP, 0, 0).rotated(Vector3.UP, TAU * (k + 1) / 3.0)
-		squads.append([_rival(k + 1, c), _rival(k + 1, c + Vector3(1.4, 0, 1.6)), _rival(k + 1, c + Vector3(1.4, 0, -1.6))])
+		squads.append([_rival(k + 1, c), _rival(k + 1, c + Vector3(1.4, 0, 1.6)),
+				_rival(k + 1, c + Vector3(1.4, 0, -1.6))])
 	await _take(SQUAD_SECS, "%s_squads_%s.png" % [hero, style], func(t: float):
 		for s in squads.size():
 			_assist(t, squads[s], squads[(s + 1) % squads.size()]))
@@ -156,5 +160,5 @@ func _glide_shot(style: String) -> void:
 		P.inp["glide"] = left[0] >= 0.0
 		P.inp["glide_btn"] = left[0] >= 0.0,
 		func(t: float): return left[0] >= 0.0 and t - left[0] >= GLIDE_SECS)
-	print("CAMERAAB glide %s: gliding=%s y=%.1f pos=%s edge=%s start=%s" % [style, str(P.gliding), P.pos.y, str(P.pos), str(edge_at), str(edge_at - d * EDGE_RUN)])
+	print("CAMERAAB glide %s: gliding=%s y=%.1f" % [style, str(P.gliding), P.pos.y])
 	P.ctrl = "bot"

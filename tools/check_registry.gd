@@ -142,7 +142,7 @@ const CHECKS := {
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
-	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],      # --hero=<arch> --shots-dir=<dir> (GPU): the camera flag A/B
+	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
