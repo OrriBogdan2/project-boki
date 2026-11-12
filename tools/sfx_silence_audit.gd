@@ -95,7 +95,7 @@ func _poll() -> void:
 			belt += int(b.get("n", 0))
 		var kin_state: String = h.kin.state if h.kin is Kin else ""
 		var recast: bool = h.ak != null and not h.ak.recast_window().is_empty()
-		var s := {"downed": h.downed, "out": h.out, "extracted": h.extracted, "lvl": h.lvl, "belt": belt + h.rift_keys,
+		var s := {"downed": h.downed, "out": h.out, "extracted": h.extracted, "lvl": h.lvl, "belt": belt,
 			"recast": recast, "kin": kin_state, "arch": _who(h)}
 		var p: Dictionary = prev.get(id, s)
 		var who := _who(h)
