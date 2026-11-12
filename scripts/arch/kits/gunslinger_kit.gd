@@ -697,7 +697,7 @@ func _tick_needle(dt: float) -> void:
 		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
 
-## The locked aim turns toward the cursor at the "turn" e row's capped rate (deg/s): a flick across the screen can't drag it.
+## The locked aim turns toward the cursor at the "turn" e row's capped deg/s: a flick can't drag it.
 func _turn_needle(dt: float) -> void:
 	needle["dir"] = turn_lock(needle["dir"], turn_deg_s("e", "early"), dt).normalized()
 

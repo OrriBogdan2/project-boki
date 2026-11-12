@@ -6,36 +6,63 @@ extends RefCounted
 ## --yaw-lock-check=<id>,<id> runs only those Hunters.
 
 const DT := 1.0 / 60.0
-const HEROES := ["juggernaut", "thief", "archer", "bulwark", "mage", "gunslinger", "ashwick", "dredge", "tender",
-	"rimewright", "dolm", "ostra"]
+const HEROES := [
+	"juggernaut",
+	"thief",
+	"archer",
+	"bulwark",
+	"mage",
+	"gunslinger",
+	"ashwick",
+	"dredge",
+	"tender",
+	"rimewright",
+	"dolm",
+	"ostra"
+]
 const SLOTS := ["lmb", "rmb", "e", "x", "e_recast", "x_recast"]
-const PRESS_AT := 20          # frame of the recast press (0.33 s after the first)
-const HOLD_F := 30            # frames a held slot (LMB, RMB) stays down
-const WINDOWS := {"early": [6, 20], "late": [32, 46]}      # frames: the sweep, then the reading
-const FREE_DEG := 60.0        # a free body follows a 90 degree sweep by at least this much in 0.23 s
-const LOCK_DEG := 3.0         # a locked body moves no more than this (rounding, a knock)
+const PRESS_AT := 20  # frame of the recast press (0.33 s after the first)
+const HOLD_F := 30  # frames a held slot (LMB, RMB) stays down
+const WINDOWS := {"early": [6, 20], "late": [32, 46]}  # frames: the sweep, then the reading
+const FREE_DEG := 60.0  # a free body follows a 90 degree sweep by at least this much in 0.23 s
+const LOCK_DEG := 3.0  # a locked body moves no more than this (rounding, a knock)
 ## Where the rival stands from the Hunter: east (where every slot is aimed at the press) at FOE_DEFAULT m. Dredge's
 ## hand leaves after its 0.2 s coil-back along the aim then (the early sweep's north), and close enough that it
 ## lands before the late window, so his reel is hauling through it.
 const FOE_AT := {"dredge": Vector3(0, 0, -5.0)}
 const FOE_DEFAULT := Vector3(5.0, 0, 0)
-const SLOW_GAP := 3.0         # a capped turn: more than locked, no more than deg_s x window plus this
+const SLOW_GAP := 3.0  # a capped turn: more than locked, no more than deg_s x window plus this
 
 var bad := 0
 var skipped := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("YAWLOCK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _match(main: Node, arch: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({
-		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch),
-	})
+	(
+		m
+		. start(
+			{
+				"training": true,
+				"teams": 2,
+				"squad": 1,
+				"tier": 0,
+				"length": 1e9,
+				"seed": 77,
+				"no_drop": true,
+				"cls": Arch.weight(arch),
+				"arch": arch,
+				"weapon": Arch.signature(arch),
+			}
+		)
+	)
 	m.set_process(false)
 	for mob in m.mobs:
 		mob.queue_free()
@@ -75,14 +102,20 @@ func _match(main: Node, arch: String) -> Match:
 		m.step(DT)
 	return m
 
+
 func _aim(P: Hunter, d: Vector2) -> void:
 	P.inp["aim"] = P.pos + Vector3(d.x, 0.0, d.y) * 8.0 + Vector3(0, 0.9, 0)
 
+
 func _press(P: Hunter, slot: String) -> void:
 	match slot:
-		"rmb": P.inp["sec"] = true
-		"e", "e_recast": P.inp["sig"] = true
-		"x", "x_recast": HunterKeys.ult_pressed(P)
+		"rmb":
+			P.inp["sec"] = true
+		"e", "e_recast":
+			P.inp["sig"] = true
+		"x", "x_recast":
+			HunterKeys.ult_pressed(P)
+
 
 ## The most the body turned from where it was at each window's sweep: {"early": deg, "late": deg}.
 func probe(m: Match, slot: String) -> Dictionary:
@@ -113,9 +146,11 @@ func probe(m: Match, slot: String) -> Dictionary:
 	out["went"] = slot == "lmb" or _spent(P) != before
 	return out
 
+
 ## What the slots have spent so far (a press that went off changes it).
 func _spent(P: Hunter) -> String:
 	return str([P.used, P.ak.cd, P.ak.ch_rmb, P.ak.rmb_t, HeroUlt.cast_id(P.ak)])
+
 
 ## Does a turn of `deg` over a window match `rule` ("free", "locked" or a deg/s cap)?
 func matches(rule, deg: float) -> bool:
@@ -126,11 +161,13 @@ func matches(rule, deg: float) -> bool:
 	var cap := float(rule) * float(WINDOWS["early"][1] - WINDOWS["early"][0]) * DT
 	return deg > LOCK_DEG and deg <= cap + SLOW_GAP
 
+
 func _heroes() -> Array:
 	for arg in OS.get_cmdline_user_args() + OS.get_cmdline_args():
 		if arg.begins_with("--yaw-lock-check=") and arg.length() > 17:
 			return arg.substr(17).split(",")
 	return HEROES
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -147,8 +184,10 @@ func run(main: Node) -> void:
 				continue
 			for wname in WINDOWS:
 				var rule = want[wname]
-				ok(matches(rule, float(r[wname])), "%-10s %-8s %-5s turned %5.1f deg, row says %s"
-					% [arch, slot, wname, float(r[wname]), str(rule)])
+				ok(
+					matches(rule, float(r[wname])),
+					"%-10s %-8s %-5s turned %5.1f deg, row says %s" % [arch, slot, wname, float(r[wname]), str(rule)]
+				)
 			m.queue_free()
 			await main.get_tree().process_frame
 	print("YAWLOCK DONE, failures: %d, skipped: %d" % [bad, skipped])
