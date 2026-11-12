@@ -31,7 +31,7 @@ uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures ke
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
-uniform bool thin = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
+uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
 void vertex() {
@@ -219,7 +219,7 @@ vec4 vortex(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
 	float ang = atan(p.y, p.x);
-	if (thin) { return swirl_rim(d, ang); }
+	if (rim_only) { return swirl_rim(d, ang); }
 	// spiral arms pulled inward: angle bent by distance, turning over time
 	float sw = ang + d * 5.0 - TIME * spin * 6.28;
 	float arms = fbm3(vec2(sw * 1.6 + seed, d * 3.0 - TIME * spin));
