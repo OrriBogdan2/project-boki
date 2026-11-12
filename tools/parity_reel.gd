@@ -12,9 +12,16 @@ const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
 const KEYS := ["W", "A", "S", "D", "LMB", "RMB", "E", "R", "Shift", "Space"]
 const FAR := 12.0                       # m to the dummy for the moves that travel
+const RIM_GAP := 4.0                    # m of island kept east of the far dummy
+const STOP_GAP := 2.0                   # m short of the far dummy where the travel parts stop walking
 const KEY_LIT_S := 0.18                 # s a key cap stays lit after its press, so a one-step tap is seen
 const KEY_ON := Color(1.0, 0.82, 0.3)
 const KEY_OFF := Color(0.1, 0.1, 0.14, 0.7)
+const RIPOSTE_TD := 3.0                 # m to the dummy in Kael's R part (inside the 3.6 m cleave strip)
+const RIPOSTE_HIT_T := 0.4              # s into the part the dummy swings: in the 0.65 s guard after the 0.2 s press
+const RIPOSTE_HP_K := 0.6               # Kael's hp share at the start of his R part, so the heal shows
+const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
+const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
 
 var lit := {}                           # key cap -> s left lit
 var caps := {}                          # key cap -> its Label
@@ -38,6 +45,7 @@ func run(main_node: Node) -> void:
 		if arg.begins_with("--reel-only="):
 			only = arg.substr(12)
 	hero_name = who
+	Save.d["tutorial"][KitDrill.SAVE_KEY] = true     # no kit drill card under the title (Save.no_write is on)
 	await _setup()
 	_build_keys()
 	frame_dir = dir.path_join("frames")
@@ -155,34 +163,129 @@ func _rmb_shot(t: float, when: float, past: bool) -> bool:
 	return true
 
 func _p_e() -> void:
+	if who == "ostra":
+		await _e_brimseed()
+		return
 	await _seg("E, then the recast", 4.0, func(t: float) -> void:
 		P.inp["sig"] = _in(t, 0.2) or _in(t, 1.8))
 
+## Motley's Brimseed grows for its `grow` s: the recast waits until it is full size, so the whole growth shows.
+func _e_brimseed() -> void:
+	var grow := float(Arch.def(who)["e"]["grow"])
+	var popped := [-1.0]
+	await _seg("E, the seed grows full, then the recast", grow + 2.4, func(t: float) -> void:
+		var full: bool = popped[0] < 0.0 and t > 0.5 and P.ak.seed_k() >= 1.0
+		if full:
+			popped[0] = t
+		P.inp["sig"] = _in(t, 0.2) or full)
+	print("REEL_BRIMSEED grow %.1f popped at %.2f s" % [grow, popped[0]])
+
 func _p_r() -> void:
 	P.ak.cd["x"] = 0.0
-	await _seg("R, then the recast", 6.0, func(t: float) -> void:
-		if _at(t, 0.2) or _at(t, 2.6):
-			r_down = true
-			HunterKeys.ult_pressed(P))
+	if who == "juggernaut":
+		await _r_riposte()
+		return
+	if who == "tender":
+		await _r_hearth_call()
+		return
+	await _seg("R, then the recast", 6.0, _r_presses)
+
+func _r_presses(t: float) -> void:
+	if _at(t, 0.2) or _at(t, 2.6):
+		r_down = true
+		HunterKeys.ult_pressed(P)
+
+## Kael's Gilded Riposte answers a hit: he starts hurt (so the cleave's heal shows), the dummy stands inside the
+## cleave's strip and swings at him once in the guard (one plain hit, the Training Grounds dummy firing its own
+## weapon, else a direct blow), so the guard blocks it and the cleave lands and heals.
+func _r_riposte() -> void:
+	P.hp = P.max_hp * RIPOSTE_HP_K
+	var blow := [false]
+	await _seg("R: a hit on the guard, then the cleave", 6.0, func(t: float) -> void:
+		_r_presses(t)
+		T.inp["aim"] = P.pos + Vector3(0, 0.9, 0)
+		T.inp["fire"] = _in(t, RIPOSTE_HIT_T, DT * 1.5)
+		if _at(t, RIPOSTE_HIT_T + 0.15) and int(P.ak.riposte.blocked) == 0:
+			P.hurt(DUMMY_HIT, T, {"src": "melee"})       # its weapon missed or was slow: the blow itself
+			blow[0] = true
+	, RIPOSTE_TD)
+	T.inp["fire"] = false
+	var u = P.ak.riposte
+	var by := "direct blow" if blow[0] else "its weapon"
+	print("REEL_RIPOSTE blocked %d (%s) strikes %d healed %.0f" % [u.blocked, by, u.strikes, u.last_healed])
+
+## Meeko's Hearth Call needs a teammate: a downed ally dummy (the Training Grounds dummy on her team) lies in
+## reach; R tethers it, the tether heals it, and at the end it is pulled to her side and stood up.
+func _r_hearth_call() -> void:
+	var at := home + ALLY_AT
+	if T2 == null:                      # (the rig's second dummy slot: _park_others leaves it in place)
+		T2 = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, at, {"arch": "none"})
+		T2.lives = 99
+	var ally: Hunter = T2
+	ally.teleport(at)
+	ally.vel = Vector3.ZERO
+	if not ally.downed:
+		m.knock(ally, T, {})
+	var hp0: float = ally.down_hp
+	title.text = "R on a downed teammate"
+	await _reset(7.0)
+	ally.teleport(at)
+	await _go(6.0, func(t: float) -> void:
+		_aim(ally.pos)
+		_r_presses(t))
+	await _go(0.3)
+	print("REEL_CALL calls %d rescues %d downed %s down_hp %.0f" % [P.ak.stats["calls"], P.ak.stats["rescues"],
+			ally.downed, hp0])
+	ally.teleport(home + Vector3(-30, 0, 30))
+	T2 = null
 
 func _p_dash_ground() -> void:
 	var dash := func(t: float) -> void:
-		P.inp["move"] = Vector2(1, 0) if t < 2.2 else Vector2.ZERO
+		P.inp["move"] = Vector2(-1, 0) if _in(t, 1.2, 0.2) else _toward_far(t)
 		P.inp["dash"] = _in(t, 0.3) or _in(t, 1.3)
-	await _seg("Dash on the ground, twice", 3.0, dash, FAR)
+	await _travel("Dash on the ground, there and back", 3.0, dash)
 
 func _p_dash_air() -> void:
 	var dash := func(t: float) -> void:
-		P.inp["move"] = Vector2(1, 0) if t < 2.2 else Vector2.ZERO
+		P.inp["move"] = _toward_far(t)
 		P.inp["jump"] = _in(t, 0.2)
 		P.inp["dash"] = _in(t, 0.55)
-	await _seg("Jump, then dash in the air", 3.0, dash, FAR)
+	await _travel("Jump, then dash in the air", 3.0, dash)
 
 func _p_glide() -> void:
 	var glide := func(t: float) -> void:
 		P.inp["move"] = Vector2.from_angle(t * 1.5) if t > 0.3 else Vector2.ZERO
 		P.inp["jump"] = _in(t, 0.2, 3.4)
-	await _seg("Jump and hold Space: glide", 4.2, glide, FAR)
+	await _travel("Jump and hold Space: glide", 4.2, glide)
+
+## A travel part: the dummy FAR m east of where it starts, with RIM_GAP m of island past it. The Training
+## Grounds spot sits near the island's east rim, so the part starts that much west of the spot. The second
+## ground dash comes back west: two dashes east are longer than the island for the long dashes (Kael's ~14 m).
+func _travel(text: String, secs: float, each: Callable) -> void:
+	var back := maxf(0.0, FAR + RIM_GAP - _east_run())
+	home.x -= back
+	await _seg(text, secs, each, FAR)
+	var W = m.world
+	var on_ground: bool = W.kind[W.idx(int(P.pos.x), int(P.pos.z))] == World.T_GROUND
+	print("REEL_TRAVEL %s start %.1f m west of the spot, ends %.1f m east of start, drop %.1f m, on ground %s"
+			% [title.text, back, P.pos.x - home.x, home.y - P.pos.y, on_ground])
+	home.x += back
+
+## Whole metres of ground at the spot's level east of the spot.
+func _east_run() -> float:
+	var W = m.world
+	var lv := int(W.level[W.idx(int(home.x), int(home.z))])
+	var run := 0
+	while run < 40:
+		var i: int = W.idx(int(home.x) + run + 1, int(home.z))
+		if W.kind[i] != World.T_GROUND or int(W.level[i]) != lv:
+			break
+		run += 1
+	return float(run)
+
+## East, towards the far dummy, until 2.2 s in or STOP_GAP short of it.
+func _toward_far(t: float) -> Vector2:
+	return Vector2(1, 0) if t < 2.2 and P.pos.x < T.pos.x - STOP_GAP else Vector2.ZERO
 
 ## The Training Grounds has no terrace to run into, so the mantle is an island rim: dropped just below it, moving
 ## in, the Hunter catches the lip and comes over (as --cliff-mantle-check's "abyss" case).

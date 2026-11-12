@@ -255,7 +255,7 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 |---|---|---|---|---|---|
 | Rifle (LMB) | two thin arcs flanking her, r 1.25 m (firing brackets) | none (hitscan rounds) | her screen only | thin brackets while firing | kept: a tell on her body, not an area |
 | Burr Charge (RMB), in flight | none | 0.72 m wide shot, 10.5 m | - | a shell, no ground shape | ok |
-| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone, online too | a cone back toward her | ok, asserted. Online (Net 0.24.5) the stick sends the "cone" fx with its length, width and fuse, and other games draw the same 6 m cone for the fuse (no fill sweep there); `--remote-anim-check` compares host and guest lengths |
+| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone, online too | a cone back toward her | ok, asserted. Online (Net 0.24.6) the stick sends the "cone" fx with its length, width and fuse, and other games draw the same 6 m cone for the fuse (no fill sweep there); `--remote-anim-check` compares host and guest lengths |
 | Burr hit / stuck / detonation | none (was a 1.0, 1.6 and 1.8 m ring) | the cone above | - | no ring on the burr | removed: cosmetic rings that matched no hit |
 | Longneedle (E) charge | line 18 m long, 1.8 m wide narrowing to a core over 0.6 s | beam 18 m, 1.8 m wide, at 0.6 s | everyone locally | wide line narrowing to a core | ok, asserted |
 | Slipstep (dash) | none | none | - | none | ok |
