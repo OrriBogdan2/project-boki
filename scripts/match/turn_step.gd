@@ -13,7 +13,10 @@ const STEP_AGAIN := 0.35      # rad: still this far behind after a step: another
 const PINS := 0.05            # rad: a step that turns the legs more than this plants the other foot (it follows)
 const CANCEL_RATE := 25.0     # 1/s: how fast the legs come back under the body when a step is cancelled
 const DUR := 0.26             # s: one step, when the Hero's data has none
-const LIFT := 0.5             # rad: the stepping thigh's raise at mid-step (the shin folds twice that)
+const LIFT := 0.5             # rad: the stepping thigh's raise at mid-step
+const FOLD := 2.0             # the stepping shin folds this many times the thigh's raise
+const SHOT_HOLD := 0.25       # s after a shot the feet don't step
+const CAST_HOLD := 0.6        # s after a cast the feet don't step
 
 var lag := 0.0                # rad the legs are turned off the facing (the feet stay put while the body turns)
 var face := 0.0               # the facing lag was measured against (lag_at: a reader a frame apart)
@@ -32,7 +35,13 @@ func _init(arch: String) -> void:
 	dur = float(d.get("dur", DUR))
 	lift_max = float(d.get("lift", LIFT))
 
-## dface: how far the facing turned this frame (rad); standing: on the ground and still; busy: a shot, cast or move.
+## Moving (speed, m/s), a shot or a cast just now, a kit move or an emote: no step, and one under way stops.
+static func busy(s: Dictionary, speed: float) -> bool:
+	return speed >= WardenClips.STILL or float(s.get("fired", 99.0)) < SHOT_HOLD \
+			or float(s.get("cast", 99.0)) < CAST_HOLD or String(s.get("kmove", "")) != "" \
+			or String(s.get("emote", "")) != ""
+
+## dface: how far the facing turned this frame (rad); standing: on the ground and still; busy: see busy().
 func tick(dt: float, now_face: float, dface: float, standing: bool, busy: bool) -> void:
 	face = now_face
 	held = standing and not busy

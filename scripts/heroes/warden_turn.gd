@@ -6,7 +6,6 @@ extends RefCounted
 ## lifts and swings round, then is held where it lands; the body shifts over planted feet a wide stance can no
 ## longer reach. Moving, a shot or a cast lets the feet go. Run by WardenClips after the clips' pose.
 
-const FOLD := 2.0             # the shin folds this many times the thigh's raise
 const REACH := 0.995          # of the leg's length: the farthest a planted foot is reached for
 const SETTLE := 0.3           # s: the body drifts back over its middle when the feet let it
 const RELEASE := 0.1          # s: a planted foot comes back under the body when a step is cancelled
@@ -175,5 +174,5 @@ func _lift(f: int, raise: float) -> void:
 	hip.basis = Basis(side, raise) * hip.basis
 	skel.set_bone_global_pose(thighs[f], hip)
 	var knee := skel.get_bone_global_pose(shins[f])
-	knee.basis = Basis(side, -raise * FOLD) * knee.basis
+	knee.basis = Basis(side, -raise * TurnStep.FOLD) * knee.basis
 	skel.set_bone_global_pose(shins[f], knee)

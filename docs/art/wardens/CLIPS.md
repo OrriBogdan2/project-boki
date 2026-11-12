@@ -27,9 +27,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `turn`: {`dur` s, `lift` rad}, the step of turning on the spot (TurnStep, WardenTurn). Standing, the legs stay put
   while the aim swings (the body turns at `turn_rate`, 1280°/s) and the upper body leads; past 90° the foot on the side
-  of the turn steps round, pivoting on the other (planted by aiming its thigh), then the other follows. Moving, a shot,
-  a cast or a kit move cancels it. Heavy Heroes take a slower, lower step. No key: 0.26 s, 0.5 rad. No feet
-  (`rig_root`): no step.
+  of the turn steps round, pivoting on the other (planted by aiming its thigh), then the other follows. Moving, a shot
+  (0.25 s), a cast (0.6 s), a kit move or an emote cancels it (`TurnStep.busy`). Heavy Heroes take a slower, lower
+  step. No key: 0.26 s, 0.5 rad. No feet (`rig_root`): no step.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree

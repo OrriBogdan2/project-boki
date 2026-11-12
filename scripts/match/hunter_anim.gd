@@ -698,9 +698,7 @@ func update(dt: float, s: Dictionary) -> void:
 		else:
 			back = _ease(back, 1.0, 12.0, dt)
 		want_yaw = -clampf(rel, -1.15, 1.15)
-	var busy := spd >= WardenClips.STILL or fired < 0.25 or float(s.get("cast", 99.0)) < 0.6 \
-			or String(s.get("kmove", "")) != "" or String(s.get("emote", "")) != ""
-	spot.tick(dt, face, dface, grounded and not rolling and not stun and crouch_k < 0.5, busy)
+	spot.tick(dt, face, dface, grounded and not rolling and not stun and crouch_k < 0.5, TurnStep.busy(s, spd))
 	legs_yaw = lerp_angle(legs_yaw, want_yaw, kd)
 	# ---------------------------------------------------------------- contrapposto and fidgets
 	weight_t -= dt
@@ -736,9 +734,11 @@ func update(dt: float, s: Dictionary) -> void:
 	kr -= idle_w * (knee0 + free_r * 0.3 + bounce * 0.06)
 	var wl := -width * (1.0 - 0.4 * r1) - free_l * 0.04
 	var wr := width * (1.0 - 0.4 * r1) + free_r * 0.04
-	# stepping round on the spot
-	hl += spot.lift(0); kl -= spot.lift(0) * 2.0
-	hr += spot.lift(1); kr -= spot.lift(1) * 2.0
+	# stepping round on the spot: the thigh raised, the shin folded under it
+	hl += spot.lift(0)
+	kl -= spot.lift(0) * TurnStep.FOLD
+	hr += spot.lift(1)
+	kr -= spot.lift(1) * TurnStep.FOLD
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
 	if gait != null:
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
