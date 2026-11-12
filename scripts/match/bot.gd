@@ -707,10 +707,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		for o in m.hunters:
 			if o.team != h.team and o.downed and not o.out and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)):
 				best = o; break
-	# angry wild kin also count
+	# angry wild kin also count (a calm one only when no knocked-out Boki is close enough to scan)
 	if best == null:
+		var scan_near: bool = BotKin.scan_goal(m, h, a["goal"], BotKin.SCAN_NEAR) != Vector3.INF
 		for k in m.kins:
-			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or randf() < 0.5):
+			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
 	a["tgt"] = best
 	if best:
@@ -786,6 +787,10 @@ func _choose(m: Match, h: Hunter) -> void:
 			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
+	# a knocked-out Boki within a few strides: scan it before any lair, seat or exit run
+	if goal == Vector3.INF and not holding_yard:
+		goal = BotKin.scan_goal(m, h, cur, BotKin.SCAN_NEAR)
+		if goal != Vector3.INF: gk = "catch"
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
 	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
@@ -813,9 +818,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not g.is_empty():
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
-		for k in m.kins:
-			if KinLoss.scannable_by(h, k) and Capture.room(h) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
-				goal = k.pos; gk = "catch"; break
+		goal = BotKin.scan_goal(m, h, cur, BotKin.SCAN_FAR)
+		if goal != Vector3.INF: gk = "catch"
 	if goal == Vector3.INF:
 		var kg := BotKeys.goal(m, h, cur)      # no key yet: fight for one first
 		if not kg.is_empty():
