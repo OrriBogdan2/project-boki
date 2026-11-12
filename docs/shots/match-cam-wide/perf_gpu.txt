@@ -1,0 +1,21 @@
+Real GPU, 1920x1080, vsync off, --match-cam-wide-shots, 300 frames per view of a live match (autoplaying player, rivals and a pack brought in).
+Hollow Crown: job 20261112-034925-11874 on worker rp1-2. Skyreach: job 20261112-034939-32422 on worker pc-MRROBOTO.
+Different machines: compare the views within a map, not across maps. Wall time is CPU-bound (gpu ms is the render-thread estimate).
+== hollowcrown
+old (style old, zoom 1.00, reach 1.00): avg 50.74 ms = 20 fps, 1% low 5 fps, gpu 0.58 ms, draws 961, tris 721k
+new (style new, zoom 1.00, reach 1.58): avg 42.62 ms = 23 fps, 1% low 17 fps, gpu 0.60 ms, draws 718, tris 549k
+max (style new, zoom 1.40, reach 2.21): avg 42.47 ms = 24 fps, 1% low 16 fps, gpu 0.60 ms, draws 662, tris 584k
+== skyreach
+old (style old, zoom 1.00, reach 1.00): avg 27.91 ms = 36 fps, 1% low 13 fps, gpu 3.89 ms, draws 677, tris 507k
+new (style new, zoom 1.00, reach 1.58): avg 26.77 ms = 37 fps, 1% low 13 fps, gpu 7.05 ms, draws 893, tris 681k
+max (style new, zoom 1.46, reach 2.30): avg 22.93 ms = 44 fps, 1% low 18 fps, gpu 7.76 ms, draws 832, tris 746k
+
+Second, independent run (this job 20261112-042025-a1; same tool, same views):
+== hollowcrown (job 20261112-053927-09358, pc-MRROBOTO)
+old (supervive_close, zoom 1.00): avg 23.94 ms = 42 fps, 1% low 21, gpu 5.06 ms, draws 694, tris 481k
+new (supervive, zoom 1.00):       avg 26.29 ms = 38 fps, 1% low 17, gpu 8.97 ms, draws 999, tris 771k
+max (supervive, zoom 1.40):       avg 21.34 ms = 47 fps, 1% low 26, gpu 6.52 ms, draws 813, tris 667k
+== skyreach (job 20261112-053939-15112, rp1-2, slow box)
+old: avg 64.48 ms = 16 fps, 1% low 3, gpu 4.27 ms, draws 944, tris 699k
+new: avg 57.98 ms = 17 fps, 1% low 6, gpu 5.30 ms, draws 900, tris 779k
+max (zoom 1.46): avg 59.74 ms = 17 fps, 1% low 4, gpu 4.10 ms, draws 805, tris 747k

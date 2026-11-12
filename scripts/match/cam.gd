@@ -21,7 +21,7 @@ var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
-var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
+var user_zoom := 1.0           # the mouse wheel (CamWheel); multiplies the match's own zoom
 var lead := 1.0
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
@@ -71,6 +71,23 @@ var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
 var dist_mul := 1.0
+## Match Hunters are drawn this many times bigger (the style's "hunter_scale"; 1 but for the source_scale test
+## style, see Hunter.fit_scale).
+var hunter_scale := 1.0
+
+## How much more ground the view shows now than at the distance the draw, LOD and shadow distances were tuned for
+## (camera.json "reach_ref_m"), never under 1. Those distances scale by it, so nothing pops in at the view's edge.
+func reach() -> float:
+	return maxf(1.0, dist * dist_mul * zoom / float(RULES["reach_ref_m"]))
+
+## The same for a style's own framing, for the distances fixed when the match is built (draw ranges, shadows).
+static func style_reach(id: String) -> float:
+	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	return maxf(1.0, float(st["dist"]) / float(RULES["reach_ref_m"]))
+
+## Settings "draw" (how far small parts are drawn) grown with the style's view.
+static func draw_k() -> float:
+	return float(Settings.q("draw")) * style_reach(String(Settings.get_v("cam_style")))
 
 static func _load_rules() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/camera.json"))
@@ -85,6 +102,7 @@ func use_style(id: String) -> void:
 	dist = float(st["dist"])
 	fov = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
+	hunter_scale = float(st.get("hunter_scale", 1.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame.
@@ -101,6 +119,7 @@ static func style_across(id: String) -> float:
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
+	user_zoom = CamWheel.saved()
 	fov = 28.0
 	near = 1.0
 	far = 120.0

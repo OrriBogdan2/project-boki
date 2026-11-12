@@ -348,8 +348,8 @@ func _scarf(m: Match) -> void:
 		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, String(a["bone"])))
 		var off := Vector3(a["off"][0], a["off"][1], a["off"][2])
 		ok(neck.distance_to(sk.global_transform * (pose * off)) < 0.001, "the scarf anchor rides the neck bone")
-	ok(neck.y > P.pos.y + 1.0 and neck.y < P.pos.y + 1.8, "the scarf anchor sits at her neck (%.2f m up)"
-			% (neck.y - P.pos.y))
+	var up := (neck.y - P.pos.y) * Hunter.VIS_SCALE / P.vis_k      # (at the plain drawn size: a match draws her bigger)
+	ok(up > 1.0 and up < 1.8, "the scarf anchor sits at her neck (%.2f m up at the plain size)" % up)
 	for i in 90:
 		S.tick(1.0 / 60.0)
 	var ln := float(w.cfg["len"])

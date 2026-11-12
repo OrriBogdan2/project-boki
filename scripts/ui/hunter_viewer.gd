@@ -33,6 +33,8 @@ var slot_i := 0
 var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
 var burst_t := -1.0           # s since the reveal burst, -1 when none
 var spin_t := 0.0             # s the stage has run
+var zoom := ViewZoom.new()    # the wheel over the stage, or the pad's right stick and triggers
+var _stage_box: Control       # the stage's frame: the wheel only zooms while the mouse is over it
 
 var vp: SubViewport
 var pivot: Node3D
@@ -46,6 +48,7 @@ var fx: Control               # the 2D sparks, rings and flash over the stage
 var rows: Array = []          # one Control per ability, in `slots` order (an AbilityClip or a line)
 var _body: Control            # everything but the stage, rebuilt when the Hunter changes
 var _cols: HBoxContainer
+var _cam_k := 1.0             # the zoom the camera was last aimed at
 
 ## The abilities shown, in order. "x" (the Hunter's own ultimate on R) shows once a Hunter's data has an
 ## "x" entry; "r", the Boki Fusion, is always last.
@@ -214,6 +217,7 @@ func _stage(col: Color) -> Control:
 	holder.custom_minimum_size = stage_size
 	holder.clip_contents = true
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stage_box = holder
 	var back := Control.new()      # a soft pool of the Hunter's colour behind it
 	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -298,7 +302,16 @@ func _build_model() -> void:
 
 func _aim_camera() -> void:
 	var s := model.scale.y
-	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
+	var at := Vector3(0, 0.95 * s, 0)
+	var from := at + (Vector3(-1.0, 1.45, -5.3) * s - at) * zoom.k      # (zoom: the wheel, the pad)
+	cam.transform = Transform3D(Basis(), from).looking_at(at, Vector3.UP)
+	_cam_k = zoom.k
+
+func _input(event: InputEvent) -> void:
+	if _stage_box == null or not _stage_box.is_visible_in_tree():
+		return
+	if _stage_box.get_global_rect().has_point(get_global_mouse_position()) and zoom.wheel(event):
+		get_viewport().set_input_as_handled()
 
 ## Marks ability `i` (wraps) as the one picked: its clip lights up.
 func select(i: int) -> void:
@@ -330,6 +343,9 @@ func tick(dt: float) -> void:
 	if model == null:
 		return
 	spin_t += dt
+	zoom.tick(dt)
+	if not is_equal_approx(zoom.k, _cam_k):
+		_aim_camera()
 	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
 	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
 	if power_k > 0.0:

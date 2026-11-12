@@ -2,7 +2,9 @@ extends RefCounted
 ## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
-## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=supervive_close).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
@@ -35,6 +37,7 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
+var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 
 func run(main_node: Node) -> void:
@@ -53,6 +56,8 @@ func run(main_node: Node) -> void:
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
+		if arg.begins_with("--media-zoom="):
+			zoom_at = float(arg.substr(13))
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -62,6 +67,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
 		1: await _fight(secs)
 		2: await _boki_combat(secs)
@@ -132,6 +139,8 @@ func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> H
 
 ## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
 func _zoom(z: float) -> void:
+	if zoom_at > 0.0:
+		z = zoom_at
 	m.cam.zoom = z
 	m.cam.zoom_to = z
 
@@ -151,6 +160,8 @@ func _go(secs: float, each: Callable, cam_to: Callable) -> void:
 	var t := 0.0
 	while t < secs:
 		_purge()
+		if Overlay.is_open():
+			Overlay.close()      # a key pressed on the worker's own screen (Esc) must not pause the take
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)

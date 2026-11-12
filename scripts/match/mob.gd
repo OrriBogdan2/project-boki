@@ -528,7 +528,7 @@ func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	var ap: AnimationPlayer = model.get_meta("anim")
 	var C: Dictionary = model.get_meta("clips")
 	var cam = m.get("cam")
-	var far := cam != null and Vector2(pos.x - cam.focus.x, pos.z - cam.focus.z).length() > 30.0
+	var far: bool = cam != null and Vector2(pos.x - cam.focus.x, pos.z - cam.focus.z).length() > 30.0 * cam.reach()
 	ap.active = not far
 	if far:
 		return
