@@ -49,8 +49,6 @@
 			"b": "run_b",
 			"l": "run_l",
 			"r": "run_r",
-			"fl": "run_fl",
-			"fr": "run_fr",
 			"bl": "run_bl",
 			"br": "run_br"
 		},
@@ -213,6 +211,7 @@
 			"b": "crouch_b",
 			"l": "crouch_l",
 			"r": "crouch_r",
+			"fr": "crouch_fr",
 			"bl": "crouch_bl",
 			"br": "crouch_br"
 		},
