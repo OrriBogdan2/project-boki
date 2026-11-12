@@ -12,6 +12,8 @@ const GAP := 6.0         # px kept clear between two markers along the rim
 const LABEL_PX := 16     # label font size, px
 const LABEL_H := 22.0    # px a label line takes
 const LABEL_GAP := 12.0  # px between an arrow and its label
+const BADGE_DY := 18.0   # px a downed Wisp's ring sits above its label
+const BADGE_R := 10.0    # px radius of that ring
 
 var _ctr := Vector2.ZERO
 var _half := Vector2.ZERO        # half the rim rectangle's width and height (px)
@@ -32,14 +34,15 @@ func begin(rim: Rect2, arrow: float, radius := 0.0) -> void:
 	_size = arrow
 	_items.clear()
 
-## A marker for something in direction `dir` (screen px, any length) from the rim's centre.
-func add(dir: Vector2, col: Color, prio := PRIO_ALLY, label := "", dist := -1.0) -> void:
+## A marker for something in direction `dir` (screen px, any length) from the rim's centre. `downed`: a
+## Wisp whose bleed-out ring (DownedMarks.badge) is drawn above the label.
+func add(dir: Vector2, col: Color, prio := PRIO_ALLY, label := "", dist := -1.0, downed: Hunter = null) -> void:
 	if dir.length() < 0.1:
 		return
 	var text := label
 	if dist >= 0.0:
 		text = "%s  %dm" % [label, int(round(dist))]
-	_items.append({"d": dir.normalized(), "col": col, "prio": prio, "text": text})
+	_items.append({"d": dir.normalized(), "col": col, "prio": prio, "text": text, "downed": downed})
 
 ## Lay the markers out: sets each one's "pos" and "rect" (arrow plus label); returns them.
 func layout() -> Array[Dictionary]:
@@ -51,7 +54,7 @@ func layout() -> Array[Dictionary]:
 		placed.append(it)
 	return placed
 
-func draw(c: CanvasItem) -> void:
+func draw(c: CanvasItem, time := 0.0) -> void:
 	for it in layout():
 		var d: Vector2 = it["d"]
 		var p: Vector2 = it["pos"]
@@ -59,6 +62,8 @@ func draw(c: CanvasItem) -> void:
 		if it["text"] != "":      # a dark shadow keeps a world marker readable over the ground
 			c.draw_colored_polygon(_arrow(p, d, _size * 1.25), Color(0, 0, 0, 0.5))
 			HudStyle.ctext(c, _label_at(it, p) + Vector2(0, 5), it["text"], LABEL_PX, col, 3)
+		if it["downed"] != null:
+			DownedMarks.badge(c, _label_at(it, p) - Vector2(0, BADGE_DY), it["downed"], SideColor.ALLY, time, BADGE_R)
 		c.draw_colored_polygon(_arrow(p, d, _size), col)
 
 func _arrow(p: Vector2, d: Vector2, k: float) -> PackedVector2Array:

@@ -316,7 +316,7 @@ func _draw_all() -> void:
 			_draw_downed(sz, p)
 		elif p.out and not p.gone and not m.result.get("ending", false):
 			_draw_dead(sz, p)
-	edge_world.draw(c)
+	edge_world.draw(c, m.time)
 	if Input.is_action_pressed("scores"):
 		_draw_scores(sz)
 	if wheel_open:
@@ -1229,9 +1229,9 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
-		"reviving": st = "reviving you!"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
-	if k.state in ["active", "downed", "reviving", "fused", "returning"] or not k.giant.is_empty():
+	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
 		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
@@ -1498,11 +1498,12 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var away := sp - sz * 0.5
 		if behind: away = -away
 		var shown := float(dist)
-		if String(st[0]) == "WISP": lbl += " DOWN"
+		var wisp: Hunter = h if String(st[0]) == "WISP" else null
+		if wisp: lbl += " DOWN"
 		elif String(st[0]) == "DEATHBOX":
 			lbl = "%s's box %s" % [lbl, st[3]]
 			shown = -1.0      # (its text already says how far)
-		edge_world.add(away, col, EdgeMarker.PRIO_ALLY, lbl, shown)
+		edge_world.add(away, col, EdgeMarker.PRIO_ALLY, lbl, shown, wisp)
 
 ## Red arcs around the middle of the screen pointing at whoever just hit you.
 func _draw_hurt_dirs(sz: Vector2) -> void:
