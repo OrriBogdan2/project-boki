@@ -6,6 +6,7 @@ extends RefCounted
 ##   - downed (or dazed, benched, fused, away): none. A downed Boki has to be rescued (KinDowned).
 ## Every Boki starts a match at full health (Kin._init builds it from its stats), so nothing carries over.
 ## Called from Kin's tick. A little green + mote rises while it mends.
+## It also refills the owner_shield points on you (owner_shield_tick); Hunters have no regen of their own.
 
 const MOTE_EVERY := 0.7          # s between motes while healing
 const MOTE_COL := Color("8fffc0")
@@ -39,10 +40,22 @@ static func tick(k: Kin, dt: float) -> void:
 		k.regen_fx -= dt
 		if k.regen_fx <= 0.0:
 			k.regen_fx = MOTE_EVERY
-			k.m.fx.burst(k.pos + Vector3(0, 0.9, 0), MOTE_COL, 3, 0.9, 0.7, -1.5, 0.5)
+			motes(k.m.fx, k.pos + Vector3(0, 0.9, 0), MOTE_COL)
 	k.regen_hp = k.hp
 	k.mending = pct > 0.0
+
+## The little rising motes of mending (also the stat glint at home, StatGlint, in the stat's colour).
+static func motes(fx: Fx, at: Vector3, col: Color) -> void:
+	fx.burst(at, col, 3, 0.9, 0.7, -1.5, 0.5)
 
 ## The soft green wash over a Boki's health bar while it mends (HUD: one pulse per ~1.2 s).
 static func pulse(k: Kin, now: float) -> float:
 	return (0.35 + 0.35 * sin(now * 5.0)) if k.mending else 0.0
+
+## Your Boki's owner_shield points on you: the small shield refills owner_shield_pct_s of its size a
+## second once you have gone owner_shield_delay_s without taking damage (Hunter.regen_wait). Hunter tick.
+static func owner_shield_tick(h: Hunter, dt: float) -> void:
+	var cap := h.kin_pt("owner_shield")
+	if cap <= 0.0 or h.regen_wait > 0.0 or h.kin_shield >= cap:
+		return
+	h.kin_shield = minf(cap, h.kin_shield + cap * float(rules()["owner_shield_pct_s"]) * dt)
