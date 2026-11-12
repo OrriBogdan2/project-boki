@@ -3,7 +3,7 @@ extends RefCounted
 ## second key can be set, cleared and saved; a key already in use is caught and can be swapped;
 ## nothing else is on X in a match (the arena/duel reset is Backspace, separating from the drop is
 ## Z); glove 2 and play share V on purpose (a match key and a home key). With --shots-dir=<dir>, screenshots of
-## the Controls page and of the clash warning.
+## the Controls page and of the clash warning. tools/keybind_audit.gd: every action the game uses is listed in Controls.
 
 var bad := 0
 
@@ -87,6 +87,9 @@ func run(main: Node) -> void:
 	var ar := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
 	var du := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
 	ok(not ar.contains("KEY_X:") and ar.contains("KEY_BACKSPACE:") and not du.contains("KEY_X") and du.contains("KEY_BACKSPACE"), "the arena and duel resets moved to Backspace")
+	# every action the game uses is in Controls, ships bound, and no code names a physical key on its own
+	var audit: Array = load("res://tools/keybind_audit.gd").problems()
+	ok(audit.is_empty(), "every action is in Controls, no hard-wired key (%s)" % "; ".join(audit))
 	# the Controls page, and the clash warning
 	var shot := ""
 	for a in OS.get_cmdline_user_args():
