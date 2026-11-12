@@ -76,8 +76,9 @@ static func widen(L: Dictionary) -> Dictionary:
 		if T.has("path"):        # (a winding loop: its points and its stops move with the land)
 			T["path"] = (T["path"] as Array).map(sh2)
 			T["stations"] = (T["stations"] as Array).map(sh2)
-	for k in ["docks", "outposts", "hatches", "portals"]:
+	for k in ["outposts", "portals"]:
 		if W.has(k): W[k] = (W[k] as Array).map(func(a): return sh2.call(a))
+	if W.has("heart"): W["heart"] = sh2.call(W["heart"])
 	for LD in W.get("lairs", []):
 		LD["at"] = sh2.call(LD["at"])
 	for cat in W.get("spawn_points", {}):

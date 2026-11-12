@@ -10,10 +10,13 @@ extends "res://tools/clip_shots.gd"
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
+const START_FPS := 30.0    # frames/s of the start strip: the first 0.27 s from standing still to a run
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
 const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
 const POST_COUNT := 14
+const MANTLE_DEEP := 1.4        # m: the face a rise climbs (tools/art1/mantlekit.py DEEP)
+const MANTLE_SOLE := 0.12       # m: how far over the lip the body ends (mantlekit.py SOLE)
 const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
@@ -22,7 +25,7 @@ var close := false
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
 	"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "gunslinger": ["lmb", "rmb"],
-	"juggernaut": ["slash_r", "slam"], "mage": ["lmb_l", "rmb"], "ostra": ["orb", "snap"],
+	"juggernaut": ["slam", "meteor"], "mage": ["lmb_l", "rmb"], "ostra": ["orb", "snap"],
 	"rimewright": ["dart_r", "dart_heavy"], "tender": ["shot_r", "seed"], "thief": ["lmb_r", "vault_r"],
 }
 
@@ -91,13 +94,16 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.rotation.y = SIDE_YAW
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
-	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
-	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
+	await _loco(model, sync, dir.path_join("start"), RUN_MPS, frames, 0.0, START_FPS)
+	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames, WARM_S, LOCO_FPS)
+	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames, WARM_S, LOCO_FPS)
 	var lc: Dictionary = clips.d["loco"]
 	await _keyed(model, sync, clips, dir.path_join("idle"), String(lc["idle"]), frames)
 	var atk: Array = ATTACKS[id]
 	for i in 2:
 		await _keyed(model, sync, clips, dir.path_join("atk%d" % (i + 1)), String(atk[i]), frames)
+	if clips.d.has("mantle"):
+		await _mantle(model, sync, clips, dir.path_join("mantle"), frames)
 	model.queue_free()
 
 ## The side view at the Hunter's own scale: the head's height over CLOSE_REF_H scales the camera out and up.
@@ -109,14 +115,18 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, warm_s: float, fps: float) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
-	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
+	model.set_meta(WardenClips.STATE, {})
+	(sync.get("clips") as WardenClips).loco_pos = Vector2.ZERO
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
+	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
+	for k in int(warm_s / DT):
+		sync.call("_process", DT)
 		_scroll(mps, DT)
-	var steps := int(round(1.0 / (LOCO_FPS * DT)))
+	var steps := int(round(1.0 / (fps * DT)))
 	for i in frames:
 		for k in steps:
 			sync.call("_process", DT)
@@ -136,3 +146,28 @@ func _keyed(model: Node3D, sync: Node, clips: WardenClips, dir: String, clip: St
 		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	clips.force = {}
+
+## A ledge rise through the game's own state: half the frames climb the face (the state's mantle 0..1), the rest are the
+## vault in real time. The lip is a block whose top comes down past the Hunter as in the game (mantlekit.py `surface`).
+func _mantle(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var lip := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(1.0, 3.0, 2.0)
+	lip.mesh = box
+	lip.material_override = Models.toon(Color("55606a"), false)
+	holder.add_child(lip)
+	var md: Dictionary = clips.d["mantle"]
+	var length := clips.lib.get_animation(String(md["clip"])).length
+	var climb := frames / 2
+	var tail_steps := maxi(1, int(round(length * (1.0 - float(md["rise"])) / float(frames - climb) / DT)))
+	for i in frames:
+		var k := float(i) / (climb - 1) if i < climb else 1.0
+		lip.position = Vector3(0.38 + 0.5, MANTLE_DEEP * (1.0 - k) - MANTLE_SOLE - 1.5, 0.0)
+		var up: float = k if i < climb else -1.0
+		model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": false, "mantle": up})
+		for j in (3 if i < climb else tail_steps):
+			sync.call("_process", DT)
+		await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
+	lip.queue_free()

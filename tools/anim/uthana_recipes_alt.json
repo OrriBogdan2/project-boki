@@ -1,0 +1,315 @@
+{
+ "rigs": {
+  "breaker": {
+   "model": "res://glb/breaker.glb",
+   "arm_fix": {
+    "ours": "idle",
+    "calib": "res://glb/albert_idle_v2__albert_anim.glb",
+    "chain": [
+     "upper_arm.L",
+     "forearm.L"
+    ]
+   }
+  },
+  "hem": {
+   "model": "res://glb/hem.glb"
+  },
+  "dredge": {
+   "model": "res://glb/dredge.glb"
+  },
+  "pip": {
+   "model": "res://glb/pip.glb"
+  },
+  "claire": {
+   "model": "res://glb/claire.glb"
+  },
+  "sable": {
+   "model": "res://glb/sable.glb"
+  },
+  "ryzz": {
+   "model": "res://glb/ryzz.glb"
+  },
+  "tarek": {
+   "model": "res://glb/tarek.glb"
+  },
+  "vex": {
+   "model": "res://glb/vex.glb"
+  }
+ },
+ "clips": {
+  "albert_crescent": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_crescent__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_crescent__tar.glb"
+  },
+  "albert_death": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_death__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_death__tar.glb",
+   "warp": [
+    [
+     1.52,
+     0.0
+    ],
+    [
+     3.8,
+     2.28
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "albert_hit": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_hit__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_hit__tar.glb"
+  },
+  "albert_leapslam": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_leapslam__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_leapslam__tar.glb"
+  },
+  "albert_victory": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_victory__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_victory__tar.glb"
+  },
+  "albert_whirl": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_whirl__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_whirl__tar.glb"
+  },
+  "grimble_death": {
+   "rig": "dredge",
+   "raw": "res://glb/grimble_death__dredge.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/grimble_death__tar.glb",
+   "warp": [
+    [
+     0.45,
+     0.0
+    ],
+    [
+     2.9,
+     2.45
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "lace_death": {
+   "rig": "hem",
+   "raw": "res://glb/lace_death__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_death__tar.glb",
+   "warp": [
+    [
+     0.98,
+     0.0
+    ],
+    [
+     2.63,
+     1.65
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "lace_hail": {
+   "rig": "hem",
+   "raw": "res://glb/lace_hail__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_hail__tar.glb"
+  },
+  "lace_hit": {
+   "rig": "hem",
+   "raw": "res://glb/lace_hit__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_hit__tar.glb"
+  },
+  "lace_shot": {
+   "rig": "hem",
+   "raw": "res://glb/lace_shot__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_shot__tar.glb"
+  },
+  "lace_victory": {
+   "rig": "hem",
+   "raw": "res://glb/lace_victory__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_victory__tar.glb"
+  },
+  "meeko_death": {
+   "rig": "pip",
+   "raw": "res://glb/meeko_death__pip.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/meeko_death__tar.glb",
+   "warp": [
+    [
+     0.52,
+     0.0
+    ],
+    [
+     2.83,
+     2.31
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "meeko_victory": {
+   "rig": "pip",
+   "raw": "res://glb/meeko_victory__pip.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/meeko_victory__tar.glb"
+  },
+  "neve_death": {
+   "rig": "claire",
+   "raw": "res://glb/neve_death__claire.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/neve_death__tar.glb",
+   "warp": [
+    [
+     1.42,
+     0.0
+    ],
+    [
+     3.07,
+     1.65
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "neve_victory": {
+   "rig": "claire",
+   "raw": "res://glb/neve_victory__claire.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/neve_victory__tar.glb"
+  },
+  "sable_death": {
+   "rig": "sable",
+   "raw": "res://glb/sable_death__sable.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/sable_death__tar.glb",
+   "warp": [
+    [
+     0.75,
+     0.0
+    ],
+    [
+     2.73,
+     1.98
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "sable_victory": {
+   "rig": "sable",
+   "raw": "res://glb/sable_victory__sable.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/sable_victory__tar.glb"
+  },
+  "sparkle_death": {
+   "rig": "ryzz",
+   "raw": "res://glb/sparkle_death__ryzz.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/sparkle_death__tar.glb",
+   "warp": [
+    [
+     1.52,
+     0.0
+    ],
+    [
+     3.57,
+     2.05
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "sparkle_victory": {
+   "rig": "ryzz",
+   "raw": "res://glb/sparkle_victory__ryzz.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/sparkle_victory__tar.glb"
+  },
+  "tenzo_death": {
+   "rig": "tarek",
+   "raw": "res://glb/tenzo_death__tarek.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/tenzo_death__tar.glb",
+   "warp": [
+    [
+     0.52,
+     0.0
+    ],
+    [
+     2.8,
+     2.28
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "tenzo_hit": {
+   "rig": "tarek",
+   "raw": "res://glb/tenzo_hit__tarek.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/tenzo_hit__tar.glb"
+  },
+  "tenzo_victory": {
+   "rig": "tarek",
+   "raw": "res://glb/tenzo_victory__tarek.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/tenzo_victory__tar.glb"
+  },
+  "vex_death": {
+   "rig": "vex",
+   "raw": "res://glb/vex_death__vex.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/vex_death__tar.glb",
+   "warp": [
+    [
+     1.62,
+     0.0
+    ],
+    [
+     3.3,
+     1.68
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "vex_victory": {
+   "rig": "vex",
+   "raw": "res://glb/vex_victory__vex.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/vex_victory__tar.glb"
+  }
+ }
+}

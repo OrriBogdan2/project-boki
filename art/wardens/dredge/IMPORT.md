@@ -42,3 +42,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   it blends the weights of stretched vertices toward their neighbours' (400 passes), then deletes the triangles still over 1.25x and caps the
   holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
 
+- **Walk/run loops (2026-11-11, pilot gait):** walk_f/b/l/r and run_f/b/l/r rebuilt by `tools/art1/hunter_dir_gait.py` (closed L+R cycle,
+  stance sole pinned to a floor that passes at loco speed, soles on the floor from the skinned foot verts; no Meshy retarget, the poses are
+  his own hunch and hook arm). Walk 1.000 -> 0.750 s, run 0.633 -> 0.542 s; planted sole 1.03 -> 2.20 m/s (loco 2.2) and 3.15 -> 4.40 (loco 4.4),
+  pelvis dip 0, seam last key = first. Alternative kept out: a shorter "A" build (walk 0.604 s, run 0.5 s) that steps too fast for a 1.49 m
+  hunched Hero. Rebuild: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- dredge.glb out.glb walk_f run_f b,l,r,f 0.75 0.542`.
