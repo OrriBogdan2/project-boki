@@ -255,7 +255,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - She can walk while charging Quakefall, at 55% speed.
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
-- The KNOCK beam on the dunk is our DUNKED word plus a vertical light (a generic knock look in the source, it seems).
+- The KNOCK beam on the dunk is our DUNKED word plus a vertical light (a generic knock look in the source, it seems). Only the tap slam dunks (docs/SPIKE_SLAM.md): the hop and dive landings are leaps.
 - Anyone dropped onto a rock from above (a glide, a knock) stands on it and can walk off; only climbing is the caster's.
 - Rock Hop's landing spots: the cursor clamped to a hop's reach, pulled back to the nearest ground a body fits on (never into
   a wall). In the air Shift stays the class long dash. See Rock Hop below.
