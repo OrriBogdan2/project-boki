@@ -91,6 +91,7 @@ var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
 var verbs := HomeVerbs.new()       # your garden moves: feed, pat, toss, cheer (home_verbs.gd)
+var kin_frame := HomeKinFrame.new()  # the camera leaning in on a Boki you're with (kin_frame.gd)
 var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hsp: SnackPatch = null           # the garden snack patch (snack_patch.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
@@ -1095,8 +1096,11 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
-	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
-	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
+	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
+	cam.dist_mul *= kin_frame.closer()
+	var focus := kin_frame.frame(Vector3(ppos.x, minf(py, 0.0), ppos.z))
+	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing()
+	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
@@ -2943,6 +2947,7 @@ func _pet_kin(k: Dictionary) -> void:
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
 	verbs.play("pat")
+	kin_frame.start(k, ppos)
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
@@ -2976,6 +2981,7 @@ func _play_with_kin(k: Dictionary) -> void:
 	_emote(k, "!")
 	Sfx.play("throw", null, -8.0)
 	verbs.play("toss")
+	kin_frame.start(k, ppos)
 
 func _fetch_step(k: Dictionary, d: float) -> void:
 	var f: Dictionary = k["fetch"]
@@ -3120,6 +3126,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
 	var kpre := ("shimmering " if rec.get("shimmer", false) else "") + ((rare_pre + " ") if rare_pre != "" else "")
+	kin_frame.start(_kin_entry(rec), ppos, true)
 	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.hold(v, KIN_CARD_H)
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
@@ -4360,6 +4367,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	(k["node"] as Node3D).position = at
 	k["hold_t"] = 3.2
 	verbs.play("feed")
+	kin_frame.start(k, ppos)
 	_face(at)
 	var food := MeshInstance3D.new()
 	food.mesh = Models.sphere(0.11, 10)

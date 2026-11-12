@@ -218,6 +218,11 @@ Other checks:
 - **Settings:**
   - "Expedition camera" is now "Camera".
   - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`).
+- **Garden: framing you and a Boki (`HomeKinFrame`, `scripts/home/kin_frame.gd`, `--cam-framing-check`):** the farm camera sits at its wide framing, so petting, feeding, a ball toss or a Boki's card used to play out small in the middle of the farm.
+  - Pet, feed or toss a ball to a Boki, or open its card, and over 0.3 s the view eases 30% nearer (`CamRig.dist_mul`) and onto the middle of you both, with the cursor lean off.
+  - It eases back over 0.3 s when you move 2.5 m from where you started, when the Boki is more than 7 m per unit of zoom from you (8.4 m at the arrival zoom 1.2), or, opened by its card, when the card closes.
+  - The garden's wheel zoom (0.55-1.6) is unchanged and stacks with it; a match never ticks the frame.
+  - The check asserts the ease timing, both of you on screen at the wheel's closest, arrival and widest zooms (169/368/411 px from the nearest edge at full reach), and each way it lets go.
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
