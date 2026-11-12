@@ -43,6 +43,8 @@ Membership tests (flat XZ), so a kit's hit test matches what it draws:
 `in_arc(center, dir, radius, deg, thick, p)` and `in_circle(at, r, p)`. Each takes an optional `pad`
 (for example a target's radius).
 
+**Cursor on your own body:** `Hunter.aim_dir()` (the one direction every shot, cast and the facing read) ignores a cursor within two body radii (`AIM_MIN_BODIES`, a body width) and keeps the last good direction, so crossing the model never spins the body or sends rounds sideways. `--aim-near-check` sweeps the cursor across and around the body.
+
 ## 2. Telegraphs
 
 **Immediate style.** Call the shape every step while it should show, under an id of your own. The same
