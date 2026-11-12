@@ -38,8 +38,8 @@ const DEEP := Color("8a1aa8")       # the deep shade of her orchid: the overdraw
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
-const WASH_COL := Color("5a1a70")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
-const WASH_MAX := 0.55              # 0..1: how far the body mixes toward WASH_COL at the full tint
+const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
+const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
 
 var h: Hunter
