@@ -23,7 +23,7 @@ var flap_rate := 1.0
 var roar_k := 0.0
 
 func _init() -> void:
-	var hide := Models.toon(Color("2b1d33"))
+	var hide_mat := Models.toon(Color("2b1d33"))
 	var belly := Models.toon(Color("6b3a3c"))
 	var horn := Models.toon(Color("d8ccb6"))
 	var ember := Models.glow_mat(Color("ff8a2a"))
@@ -36,8 +36,8 @@ func _init() -> void:
 	# head
 	head = Node3D.new(); head.name = "Head"
 	add_child(head)
-	Models.part(head, Models.box(1.5, 1.1, 2.4), hide, Vector3(0, 0, -0.6))
-	Models.part(head, Models.box(1.1, 0.7, 1.4), hide, Vector3(0, -0.1, -2.2))          # snout
+	Models.part(head, Models.box(1.5, 1.1, 2.4), hide_mat, Vector3(0, 0, -0.6))
+	Models.part(head, Models.box(1.1, 0.7, 1.4), hide_mat, Vector3(0, -0.1, -2.2))          # snout
 	jaw = Node3D.new(); jaw.position = Vector3(0, -0.45, -0.6); head.add_child(jaw)
 	Models.part(jaw, Models.box(1.0, 0.3, 2.4), belly, Vector3(0, -0.1, -1.1))
 	for sx in [-1.0, 1.0]:
@@ -80,7 +80,7 @@ func _init() -> void:
 		var s := Node3D.new()
 		var k := float(i) / (SEGS - 1)
 		var rad := lerpf(1.25, 0.22, pow(k, 0.8)) * (1.15 if i in [2, 3, 4] else 1.0)
-		Models.part(s, Models.sphere(rad, 12), hide, Vector3.ZERO, Vector3(1.0, 0.9, 1.25))
+		Models.part(s, Models.sphere(rad, 12), hide_mat, Vector3.ZERO, Vector3(1.0, 0.9, 1.25))
 		Models.part(s, Models.sphere(rad * 0.8, 10), belly, Vector3(0, -rad * 0.32, 0), Vector3(1.0, 0.7, 1.2))
 		if i % 2 == 0:
 			Models.part(s, Models.cyl(0.0, rad * 0.32, rad * 0.9, 5), horn if i > 3 else ember, Vector3(0, rad * 0.95, 0), Vector3.ONE, Vector3(-0.5, 0, 0))
@@ -107,7 +107,7 @@ func _init() -> void:
 			var a: Vector3 = pts[1]; var b: Vector3 = pts[f]
 			var bone := Models.part(w, Models.cyl(0.07, 0.14, a.distance_to(b), 5), horn, (a + b) * 0.5)
 			_along(bone, a, b)
-		var arm := Models.part(w, Models.cyl(0.12, 0.28, pts[1].length(), 6), hide, pts[1] * 0.5)
+		var arm := Models.part(w, Models.cyl(0.12, 0.28, pts[1].length(), 6), hide_mat, pts[1] * 0.5)
 		_along(arm, Vector3.ZERO, pts[1])
 		if side < 0: wing_l = w
 		else: wing_r = w
