@@ -2,8 +2,9 @@ extends RefCounted
 ## --look-locker-check: making yourself in the LookLocker (scripts/ui/look_locker.gd). The four tabs with their
 ## icons; each tab's camera shot (Hollow closes in on the head, Glider pulls back); hovering a choice tries it on
 ## the model without keeping it; picking one keeps it, pops the model and flashes the turntable; the hood row
-## only on a cut with a hood; glider tiles in their rarity colours, a locked one never equips; the wheel zooms
-## within its limits and a drag turns the turntable; Looks good saves the look and takes the locker down.
+## only on a cut with a hood; the dais, satchel and lantern are the Meshy pieces; glider tiles in their rarity
+## colours, a locked one never equips; the wheel zooms within its limits and a drag turns the turntable; Looks
+## good saves the look and takes the locker down.
 ## --look-tour --shots-dir=<dir>: the same screen toured for the media (every frame a JPG in <dir>/frames, run
 ## it on a GPU worker with --fixed-fps 30). Never writes the save.
 
@@ -37,6 +38,7 @@ func run(main_node: Node, mode: String) -> void:
 	await _tabs()
 	await _try_and_pick()
 	_hood()
+	_props()
 	await _gliders()
 	await _zoom_and_turn()
 	hx._looks_good()
@@ -107,6 +109,24 @@ func _hood() -> void:
 	ok(_opts("accent:").size() == Unmasked.COLOURS.size() + 1 and _opt("accent:-1") != null,
 		"trim colour: Match, then the colours")
 
+## The Meshy pieces (scripts/match/look_props.gd): the dais under the turntable, the satchel and the lantern worn.
+## A worn piece is found by its node name (Models.bake_part_y gives every toon part a copy of its mesh): the same
+## vertices, painted in vertex colours, on the body's own leather (no material of its own).
+func _props() -> void:
+	var dais := LookProps.mesh("dais")
+	ok(locker._turn.get_children().any(func(c): return c is MeshInstance3D and c.mesh == dais),
+		"the turntable is the carved dais (art/look/dais.glb)")
+	for a in [[2, "satchel"], [4, "lantern"]]:
+		locker.pick("accessory", a[0])
+		var prop := LookProps.mesh(String(a[1]))
+		var worn := locker.model.find_child(LookProps.NODE, true, false) as MeshInstance3D
+		var leather := locker.model.find_children("*", "MeshInstance3D", true, false).filter(
+			func(m): return m != worn and m.material_override == (worn.material_override if worn else null))
+		ok(worn != null and worn.mesh.surface_get_array_len(0) == prop.surface_get_array_len(0)
+			and prop.surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR and not leather.is_empty(),
+			"the %s is worn as its vertex-painted Meshy piece, on a material the body already wears" % a[1])
+	locker.pick("accessory", 0)
+
 func _gliders() -> void:
 	ok(Gliders.rarity("classic") == 0 and Gliders.rarity("sunset") == 1 and Gliders.rarity("moth") == 2
 		and Gliders.rarity("ember") == 3 and Gliders.rarity("storm") == 3 and Gliders.rarity("paper_crane") == 4,
@@ -162,12 +182,17 @@ func _tour() -> void:
 	Save.d["gliders"] = ["sunset", "moth"]
 	var steps := {30: ["try", "gender:0"], 50: ["pick", "gender", 0], 70: ["try", "height:2"], 85: ["untry"],
 		100: ["tab", "Hollow"], 130: ["try", "glow:2"], 145: ["try", "glow:3"], 160: ["pick", "glow", 3],
-		180: ["pick", "hollow", 2], 205: ["tab", "Shroud"], 230: ["try", "shroud:4"], 245: ["try", "shroud:8"],
-		260: ["pick", "shroud", 8], 280: ["pick", "colour", 5], 300: ["tab", "Glider"], 325: ["try", "glider:ember"],
-		345: ["try", "glider:moth"], 360: ["pick", "glider", "moth"], 380: ["tab", "Body"], 400: ["zoom", 6]}
+		180: ["pick", "hollow", 2], 205: ["tab", "Shroud"], 225: ["try", "shroud:4"], 238: ["try", "shroud:8"],
+		250: ["pick", "shroud", 1], 260: ["pick", "colour", 5], 270: ["pick", "accessory", 2],
+		305: ["pick", "accessory", 4], 340: ["yaw", 0.0], 341: ["tab", "Glider"], 352: ["try", "glider:ember"],
+		364: ["try", "glider:moth"], 376: ["pick", "glider", "moth"], 390: ["tab", "Body"], 400: ["zoom", 6]}
 	for f in TOUR_FRAMES:
 		if steps.has(f):
 			_tour_step(steps[f])
+		if f >= 272 and f < 296:
+			locker._turn.rotation.y += 0.05          # the satchel's side (-x) round to the camera
+		if f >= 307 and f < 331:
+			locker._turn.rotation.y -= 0.1           # and on round to the lantern's (+x)
 		if f >= 410 and f < 445:
 			locker._turn.rotation.y += 0.09          # a drag round to the back and on
 		await RenderingServer.frame_post_draw
@@ -180,5 +205,6 @@ func _tour_step(step: Array) -> void:
 		"tab": locker.show_tab(String(step[1]))
 		"try": _opt(String(step[1])).mouse_entered.emit()
 		"untry": locker._untry()
+		"yaw": locker.set_yaw(float(step[1]))
 		"pick": locker.pick(String(step[1]), step[2])
 		"zoom": locker._zoom = clampf(1.0 - 0.08 * int(step[1]), LookLocker.ZOOM_MIN, LookLocker.ZOOM_MAX)

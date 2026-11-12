@@ -67,3 +67,8 @@ docs/DEBT.md for the planned CC0 swap).
 
 The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`, `zephyrak/`, `pebbit/`, `cairnback/`, `wisplet/`, `zapple/`, `hivara/`) are ours: built by script in Blender
 (`tools/boki/`). Their concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.
+
+The look locker's dais and the shroud's satchel and lantern (`art/look/`, drawn by `scripts/match/look_props.gd`) are
+ours: made in Meshy (text-to-image concept, then image-to-3D), cleaned up in Blender (scaled, pivoted, decimated,
+base colour only; the worn two at 700 triangles with their paint baked into vertex colours, so the Empty draws them
+with its own leather inside its 8-material budget). No outside asset is used.
