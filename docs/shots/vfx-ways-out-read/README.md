@@ -11,5 +11,5 @@ the match camera with two rivals fighting beside the player. Each frame is capti
   (the map badge: locked ring with its countdown arc, open bright ring and beam, in use in the squad's colour with
   its beam), its word and the distance; the Blight's wall within 70 m a crimson bar; won seats stay taken.
 
-Rendered with software GL (Xvfb, llvmpipe) on w2 while the GPU queue ran ~2 h deep; the same tool and build went
-to the GPU queue as jobq 20261111-225400-21031 (low) and 20261111-225403-29587 (high).
+`sheet_low.jpg` / `sheet_high.jpg`: GPU, 1280x720, jobq 20261111-225400-21031 (low, RTX 4090) and
+20261111-225403-29587 (high, RTX 4070 SUPER). `before_low.jpg`: software GL (Xvfb) on w2, 1920x1080.
