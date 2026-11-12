@@ -6,10 +6,9 @@ extends "res://tools/dash_flow_check.gd"
 ## Part 2, dashes: a dash at 30 fps, and at 60 fps with 100 ms stalls, runs the distance and time of the 60 fps dash
 ## within --move-feel-check's DASH_TOL. The frames are injected (Match._gather_input once per frame, then the fixed
 ## steps the frame's time buys, as Match._process does), so the numbers don't depend on the machine.
-## --low-fps-input-check=<id>,<id> picks the heroes. Never touches the save.
+## Every Hunter in Arch.ORDER; --low-fps-input-check=<id>,<id> picks others. Never touches the save.
 
 const MFC := preload("res://tools/move_feel_check.gd")
-const HEROES := ["gunslinger", "mage", "juggernaut"]
 const ACTION_OF := {"dash": "dash", "jump": "jump", "lmb": "fire", "e": "signature", "x": "hunter_ult"}
 const TAPS := 6                 # taps per key and round
 const CAP_FPS := 30             # the low-end target
@@ -61,7 +60,7 @@ func _hero_ids() -> Array:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--low-fps-input-check=") and arg.length() > 22:
 			return arg.get_slice("=", 1).split(",")
-	return HEROES
+	return Arch.ORDER
 
 ## An action pressed and let go before the next frame reads it (a real tap on a slow frame).
 func _tap(action: String) -> void:

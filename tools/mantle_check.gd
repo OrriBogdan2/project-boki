@@ -352,7 +352,6 @@ func _sheer() -> void:
 	ok(s_caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [s_caught, s_tried])
 
 # ---------------------------------------------------------------- 7. a dash into a rim
-const DASH_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]     # Lace, Kael, Vex, Albert
 const DASH_RIMS := [0.6, 1.0, 1.5, 2.0]     # m the lip sits above your feet when you press Shift
 const RIM_TOP_LV := 3                       # terraces: the rim's top above the floor (air rows hang below it)
 const RIM_TRIAL_S := 2.5                    # s: a dash that hasn't topped out by then never will
@@ -369,7 +368,7 @@ func _dash_rims() -> void:
 	var n: Vector2 = wl["n"]
 	var face: Vector2 = (wl["at"] as Vector2) + n * (h.r + 0.02)
 	var floor_lv := int(round(float(wl["low"]) / World.LEVEL))
-	for id in DASH_HEROES:
+	for id in Arch.ORDER:
 		h.reclass(Arch.weight(id), id)
 		_rim_level(face, floor_lv)
 		_dash_trial(id, true, float(wl["low"]), face, n, 0.0)     # (a class swap's first Shift is lost: throw one)

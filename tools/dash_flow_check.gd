@@ -305,9 +305,12 @@ const FAR_S := 0.2              # s early: outside it, so the press is dropped
 func _one_window(main: Node) -> void:
 	CombatBus.ability_used.connect(_on_used)
 	var went := {}
-	var m := _match(main, "gil")
+	var m := _match(main, "dolm")     # (his Shift -> E row is "buffer": Gil's is "fire", so no E waits out his dash)
 	for lead in [NEAR_S, FAR_S]:
-		went[[lead, "gil e held past a dash's end"]] = _past_dash(m, lead)
+		went[[lead, "dolm e held past a dash's end"]] = _past_dash(m, lead)
+	m.queue_free()
+	m = _match(main, "gil")
+	for lead in [NEAR_S, FAR_S]:
 		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
 	m.queue_free()
 	m = _match(main, "ostra")

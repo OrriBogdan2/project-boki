@@ -15,7 +15,6 @@ extends RefCounted
 ## With --verbose prints every try. Never touches the save.
 
 const DT := Match.DT
-const HEROES := ["thief", "gunslinger", "juggernaut", "mage", "dredge"]
 const MAX_FACES := 16          # faces sampled per rise
 const TRIAL_S := 2.6
 const MODES := ["jump_0", "jump_30", "jump_60", "dash_jump", "jump_dash", "glide"]
@@ -76,7 +75,7 @@ func _tier(main: Node, tier: int) -> void:
 	var faces := _faces()
 	var rims := _rims()
 	print("CLIFF tier %d: %d terrace faces, %d rims" % [tier, faces.size(), rims.size()])
-	for arch in HEROES:
+	for arch in Arch.ORDER:
 		h.set_arch(arch)
 		h.unlock_all()
 		for f in faces:
