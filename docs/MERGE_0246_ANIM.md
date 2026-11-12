@@ -16,7 +16,7 @@ re-applied 18 clips the first pass had given by file date). Most idle, gait and 
 ## Held
 - ext/anim-timing-bulwark: bul_guard starts on the host press before the wall, the guest copy lags it (remote-anim-check red 2 of 3 runs; reverted)
 - ext/anim-flinch-layer: WardenFlinch duplicates the base additive flinch layer; its stagger-only hit clip turns clip-check red on all 12 (reverted)
-- ext/anim-fusion-states-rebased-rebased: remote-anim-check: guest copies of Grimble/Vex/Motley play mf_release on a dash (reverted; WardenClips._move_clip split kept)
+- ext/anim-fusion-states-rebased-rebased: remote-anim-check: guest copies of Grimble/Vex/Motley play mf_release on a dash (reverted; WardenClips._move_clip split kept). Fixed and re-applied on ext/anim-fusion-remote: other games took the release from the merge_end event, which can land after the hero's next move id; the owner now sends it as the merge pose
 - ext/anim-cancel-blend: WardenClips Layer rewrite (56ee146a1) conflicts with the base's two-channel upper layer, flinch layer and per-move fade/lead picks; needs a rebase on the wave
 - ext/anim-downed: its fall/rise (hit clip over pop_in, rise backwards) conflicts with the base's same-day Wisp redesign 563a1d5b1 (puff pop-in, hero grows back with a squash); a design merge, not a text fix
 - ext/anim-elim-beat: built on the pre-redesign Wisp (lacks 563a1d5b1 round heavy Wisp); the 0.6 s beat needs a re-port onto the new hunter_wisp (states, constants, check, shots)

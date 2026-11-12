@@ -1,8 +1,10 @@
 extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
-## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
-## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
+## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held (R: once with its Fusion ended in the
+## cast, so the release counts too, once left to end on the next cast's reclass), and the guest's copy of it (a
+## remote hunter fed only by the snapshots, Net 0.16.0's kit move id; the release rides the merge pose,
+## KinNet.hunter_extra) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
 ## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
@@ -27,6 +29,7 @@ var last_row := ["?", "?"]
 var last_prev_t := 0.0
 var unlike := {}             # arch -> casts whose copy differs
 var played := {}             # arch -> casts that played any move
+var released := 0            # casts whose host rows hold the release (each then compared like any move)
 
 func _init() -> void:
 	tag = "RANIM"
@@ -43,22 +46,33 @@ func _host() -> void:
 		return _finish()
 	for arch in ARCHS:
 		for key in KEYS:
-			for held in ([false] if key in ["e", "r"] else [false, true]):
+			for held in _variants(key):
 				await _cast(G, arch, key, held)
+	ok(released >= ARCHS.size(), "every hero's R fuses and the host plays the release when it ends (%d)" % released)
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
 	_finish()
 
+## E is tapped; R is ended in the cast first (held = true), then left on; the rest tapped, then held.
+func _variants(key: String) -> Array:
+	match key:
+		"e": return [false]
+		"r": return [true, false]
+	return [false, true]
+
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var P := m.player
-	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	var end_r := key == "r" and held      # R, its Fusion ended in the cast (plain R's Fusion ends at the next reclass)
+	var what := "%s %s%s" % [arch, key, {"r": " end"}.get(key, " held") if held else ""]
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
 	_kit(arch)
 	P.fire_cd = 0.0
+	P.merge_cd = 0.0      # (R end used the Fusion up: plain R fuses again)
+	P.ult = 1.0
 	P.ammo = int(P.wpn.get("mag", 12))
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "kit", "arch": arch})
@@ -69,9 +83,13 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	last_row = ["?", "?"]
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
-	await _press(key, held)
+	await _press(key, held and not end_r)
 	await _run(SETTLE)
+	if end_r and KinMerge.active(P):      # (so the copy's release (mf_release) is compared too)
+		KinMerge.end(P, "test")
+		await _run(SETTLE)
 	var mine := log_rows.duplicate()
+	released += int(mine.any(func(r): return String(r[2]) == MergeMoves.RELEASE))
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "log"})
 	await _reply()
