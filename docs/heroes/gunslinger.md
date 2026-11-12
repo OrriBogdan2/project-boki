@@ -79,32 +79,38 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | X | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
 | Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
 
-## Timing pass (Nov 8)
+## Animation timing (Nov 12: the parity pass redone on 0.24.5's Vex)
 
-Every move in content/rules/warden_anim/vex.json measured in game (`--gunslinger-combo-check`,
-tools/vex_anim_time_check.gd, lines `TIME ...` and `Vex timing ...`): when the kit plays the move, when the clip
-owns the body (blend in), the hit or release frame, and when the body is back with the legs (blend out), against
-the footage frames in briefs/hero-ref/venator.md (one frame = 0.2 s, so anything under 0.2 s is within its
-resolution) and the timings above. Blend in is 0.1 s and blend out 0.16 s on every move (WardenClips.FADE,
-FADE_LOCO): both under one footage frame. Seconds from the press.
+Every keyed move in content/rules/warden_anim/vex.json, played in a real match with the model rendered
+(`--gunslinger-combo-check`, tools/vex_anim_time_check.gd: lines `TIME ...` and `Vex timing ...`), against the frames
+of briefs/hero-ref/venator.md: Ghost's real segment 523-578 s, 5 fps (one frame = 0.2 s, so anything under 0.2 s is
+inside its resolution). The visible release is read off vex.glb's own keys (30 fps): the frame the acting bone turns
+fastest (the kick, the snap) or, for the slide, the root half way down and half way back up; the clips play at rate 1
+from the kit's move clock, so a clip second is a second from the press. Each is asserted within one footage frame of
+the kit's effect. Blend in 0.1 s, blend out 0.16 s (WardenClips.FADE, FADE_LOCO), both under a frame. Seconds from
+the press. This redoes the Nov 10 pass (ext/anim-timing-gunslinger 364c76459, built on the 11-08 green-fire Vex with
+`clip_warp` and the Palm Lance, which 0.24.5 replaced) on these clips, with no kit number changed; it supersedes the
+Nov 8 pass (the rows below keep its results).
 
-| Move | Source (s) | Ours before | Ours after |
-|---|---|---|---|
-| LMB | a round every ~0.12, recoil in the gun only | round and move on the press's frame, clip 0.53, re-played each round (0.12) | unchanged |
-| RMB (launcher tap, owner item 112) | throw commit ~0.2 (superseded: a tap) | Burr at 0.02, clip 0.50, legs back 0.67; walking: the legs walk | unchanged |
-| Shift tap | skid ~0.45, upright by 0.55-0.6 | skid ends 0.53 (dash feel's time scale), clip 0.87 (stand-up key 0.62), legs back 1.03; walking off: the clip's standing legs stayed on her (full 1.00) to 0.75 and past | walking off the skid, the legs are hers from the skid's end (loco blends in by 0.68) |
-| Shift held | the slide holds, she stands as it ends | the clip stood up at 0.62 mid-slide (skid ends 0.73) | the clip holds its slide key (0.45) while she slides; stand-up 0.73, legs back 1.30 |
-| Shift in the air / dash_ex | not in the footage | 0.87 clip at the air hop, 0.6 travel | unchanged |
-| E Longneedle | cast bar 0.6, shove 0.2, recovery ~0.4 (settled ~1.2) | beam 0.63 on the clip's fire key (0.65), clip 1.07, legs back 1.23; walking after the shove: the clip's standing legs stayed on her to 1.05 and past | beam 0.63; walking off after the shove (from 0.8) the legs are hers (loco in by 1.03) |
-| X Cinderfall | raise then fire ~0.2, ~0.8 committed, no move seen | star, column and shot sfx on the press (0.02); clip 0.60, arm down 0.77; walking: frozen legs (full 1.00) | the shot leaves on the clip's kick key (0.14: the barrel is up at 0.1); walking through it the legs walk (upper body raise); the disc and column still show at the press |
-| Knock (gunslinger_knock) | not in the footage | 0.60 clip, back 0.77 | unchanged |
-| Hit, land | not in the footage | hit 0.42, land 0.4 | unchanged |
+| Move | Source (s) | Visible release vs effect | Ours before | Ours after |
+|---|---|---|---|---|
+| `gunslinger_lmb` | ten rounds in ~1.4 s (one every 0.12-0.14), the kick in the gun only, the legs walk | the arm's kick 0.07 (forearm.R, clip 0.03) vs the round 0.03 (the press's frame) | clip on by 0.12; held, 11 rounds in 1.4 s, one every 0.133 (data 0.12 at 60 fps steps), each re-plays the clip from its kick; walking, the legs walk | same |
+| `gunslinger_rmb` Burr (launcher tap, owner item 112) | a ~0.2 s overhand commit (the throw item 112 replaced), the legs walk | the launcher arm's snap 0.03 (forearm.L) vs the Burr 0.02 | clip 0.50, legs back 0.67; walking, the legs walk | same |
+| `gunslinger_dash` tap | a ~0.45 s front-loaded skid, upright by 0.55-0.6 | low 0.03 (root half down, clip 0.1 all the way) vs the skid on the press; half up 0.60 vs the skid's end 0.47 | clip 0.87, legs back 1.03; walking off, the legs are hers by 0.75 | same |
+| `gunslinger_dash` held | the slide holds, she stands as it ends | the clip held on its slide key (0.45-0.47) while she slides; half up 0.87 vs the skid's end 0.73 | legs back 1.30 | same |
+| Dash fired through (tap, held) | he fires throughout and is upright by 0.55-0.6 | rounds through the skid (4 tap, 6 held), the dash clip uncut; the kick of the first round past the clip's end vs that round | past the clip's end (0.87, 1.14) the rounds left from the walk pose: the shouldered kick came back only 1.2 s after the move's clock, at 1.23 and 1.50 | the first round past the clip's end shoulders the rifle again (`GunslingerKit.CLIP_END`, the clip lengths on the move clock): the kick at 0.97 and 1.23 |
+| `gunslinger_e` Longneedle | the cast bar 0.6 standing braced, the beam, a ~0.2 s shove, ~0.4 s to recover | the arm's recoil snap 0.63 (hand.L) vs the beam 0.63 | braced by 0.15, clip 1.07; walking off after the shove (from 0.8), the legs are hers by 1.03 | same |
+| `gunslinger_x` Cinderfall | the barrel up on the cast frame and the next (0195-0196), the shot column at 0197, the rifle down by 0198; ~0.8 s committed | the kick after the raise 0.13 (forearm.L, clip 0.1-0.13; the raise itself 0.03) vs the shot 0.15 (`GunslingerUlt.FIRE_T` 0.14, kept) | clip 0.60, arm down 0.77; walking, the legs walk | same |
+| `gunslinger_dash_ex` (air), `mf_xform` (merge) | not in the footage | none | 0.5 and 0.8 clips | same; their ends are in CLIP_END too (a round past them shoulders the rifle) |
+| `gunslinger_knock`, hit, land | not in the footage | none | knock 0.6 (back 0.77), hit 0.42, land 0.4 | same |
 
-Not built (ours, for the owner): an E recovery lock of ~0.4 s after the beam (the source's ~0.4 s recovery; ours
-lets her walk right after the shove, which the recoil impulse already allows) and the source's ~0.8 s X commit
-(ours is 0.6 s of clip, free to walk).
+Not built (ours, for the owner): an E recovery lock of ~0.4 s after the beam (ours lets her walk off once the
+shove has played, which the recoil impulse already allows); the source's ~0.8 s X commit (ours is 0.6 s of clip,
+free to walk); and the source's shot a frame after the raised barrel (0197 vs 0195-0196, ~0.2-0.4 s after the cast):
+ours fires at 0.15 on the clip's kick. Moving the shot to 0.2 (364c76459, and the 0.24.6 port
+ext/anim-timing-vex-port) is a kit number, left to the owner.
 
-Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 are that branch's):
+Clip re-keys (tools/art1/vex_clips.py, Blender; none needed for the timings above):
 
 | Clip | Re-key |
 |---|---|
