@@ -129,8 +129,10 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 	var pop: Dictionary = cue.get("pop", {})
 	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
 	for mk in cue.get("marks", []):
+		if not is_instance_valid(mk["e"]):
+			continue                   # a foe freed with its match: the typed read below would raise
 		var e: Ent = mk["e"]
-		if is_instance_valid(e) and e.visible and not cam.is_position_behind(e.position):
+		if e.visible and not cam.is_position_behind(e.position):
 			var n := int(seen.get(e, 0))
 			seen[e] = n + 1
 			var sp := cam.unproject_position(e.position + Vector3(0, BADGE_UP, 0)) + Vector2(BADGE_GAP * n, 0)

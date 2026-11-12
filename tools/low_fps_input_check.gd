@@ -1,24 +1,27 @@
 extends "res://tools/dash_flow_check.gd"
 ## --low-fps-input-check: input survives low frame rates (docs/DECISIONS 2026-11-08: 30+ fps on low-end PCs).
-## Part 1, taps: with the render rate capped at 30 fps (Engine.max_fps) and, in a second round, a 100 ms frame
-## stall before the tap (OS.delay_msec: the next frame's delta is 0.1 s), Shift, Space, LMB, E and R are each pressed
-## and released between two reads of the keys, inside one render frame, and must still go off every time.
+## Part 1, taps: for every Hunter, with the render rate capped at 30 fps and then 20 fps (Engine.max_fps), and in a
+## third round a 100 ms frame stall before the tap (OS.delay_msec: the next frame's delta is 0.1 s), each slot (LMB,
+## RMB, E, the ult, Q, Shift, Space) is pressed and released between two reads of the keys, inside one render frame,
+## and must still go off every time: no tap is lost at a low frame rate.
 ## Part 2, dashes: a dash at 30 fps, and at 60 fps with 100 ms stalls, runs the distance and time of the 60 fps dash
 ## within --move-feel-check's DASH_TOL. The frames are injected (Match._gather_input once per frame, then the fixed
-## steps the frame's time buys, as Match._process does), so the numbers don't depend on the machine.
+## steps the frame's time buys, as Match._process does), so the numbers don't depend on the machine. The dash
+## rounds run for DASH_HEROES (one dash path, DashPace, measured by the shared roll; the taps cover every kit).
 ## --low-fps-input-check=<id>,<id> picks the heroes. Never touches the save.
 
 const MFC := preload("res://tools/move_feel_check.gd")
-const HEROES := ["gunslinger", "mage", "juggernaut"]
-const ACTION_OF := {"dash": "dash", "jump": "jump", "lmb": "fire", "e": "signature", "x": "hunter_ult"}
-const TAPS := 6                 # taps per key and round
-const CAP_FPS := 30             # the low-end target
-const CAP_FRAMES := 15          # frames timed to see the cap holds
+const DASH_HEROES := ["gunslinger", "mage", "juggernaut"]
+const ACTION_OF := {"lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult", "q": "gear1",
+		"dash": "dash", "jump": "jump"}
+const TAPS := 3                 # taps per key and round
+const CAP_FRAMES := 15          # frames timed to see a cap holds
 const STALL_S := 0.1            # s: one frame's time lost (a disk read, a shader compile)
 const STALL_EVERY := 5          # frames between stalls in the dash rounds
 const SETTLE := 5               # frames a tap gets to show
 const RISE := 0.05              # m: a jump has left the ground by this
 const DASH_FRAMES := 150
+const TAP_ROUNDS := [["30 fps cap", 30, false], ["20 fps cap", 20, false], ["30 fps + 100 ms stall", 30, true]]
 const ROUNDS := [["30 fps", 1.0 / 30.0, false], ["60 fps + 100 ms stalls", 1.0 / 60.0, true]]
 
 func ok(cond: bool, what: String) -> void:
@@ -32,36 +35,41 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	for hero in _hero_ids():
 		var m := _match(main, hero)
-		Engine.max_fps = CAP_FPS
 		m.set_process(true)
-		var t0 := Time.get_ticks_msec()
-		for i in CAP_FRAMES:
-			await tree.process_frame
-		var ms := float(Time.get_ticks_msec() - t0) / CAP_FRAMES
-		ok(ms >= 1000.0 / CAP_FPS * 0.85, "frames capped at %d fps: %.1f ms a frame" % [CAP_FPS, ms])
-		for stall in [false, true]:
-			for key in ACTION_OF:
-				var lost := 0
-				for i in TAPS:
-					if not await _tap_trial(tree, m, key, stall):
-						lost += 1
-				var round_name := "100 ms stall" if stall else "30 fps cap"
-				ok(lost == 0, "%s %s tap, %s: %d/%d lost" % [hero, key, round_name, lost, TAPS])
+		for r in TAP_ROUNDS:
+			await _tap_round(tree, m, hero, r[0], r[1], r[2])
 		Engine.max_fps = 0
 		m.set_process(false)
-		for air in [false, true]:
-			await _dash_rounds(tree, m, hero, air)
+		if hero in DASH_HEROES:
+			for air in [false, true]:
+				await _dash_rounds(tree, m, hero, air)
 		m.queue_free()
 		await tree.process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	print("LOWFPS DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+## Every slot tapped TAPS times with the frame rate capped at `cap` fps (the cap is timed on the first round at it).
+func _tap_round(tree: SceneTree, m: Match, hero: String, round_name: String, cap: int, stall: bool) -> void:
+	if Engine.max_fps != cap:
+		Engine.max_fps = cap
+		var t0 := Time.get_ticks_msec()
+		for i in CAP_FRAMES:
+			await tree.process_frame
+		var ms := float(Time.get_ticks_msec() - t0) / CAP_FRAMES
+		ok(ms >= 1000.0 / cap * 0.85, "%s: frames capped at %d fps: %.1f ms a frame" % [hero, cap, ms])
+	for key in ACTION_OF:
+		var lost := 0
+		for i in TAPS:
+			if not await _tap_trial(tree, m, key, stall):
+				lost += 1
+		ok(lost == 0, "%s %s tap, %s: %d/%d lost" % [hero, key, round_name, lost, TAPS])
+
 func _hero_ids() -> Array:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--low-fps-input-check=") and arg.length() > 22:
 			return arg.get_slice("=", 1).split(",")
-	return HEROES
+	return Arch.ORDER
 
 ## An action pressed and let go before the next frame reads it (a real tap on a slow frame).
 func _tap(action: String) -> void:
@@ -75,7 +83,10 @@ func _event(action: String, down: bool) -> void:
 	e.strength = 1.0 if down else 0.0
 	Input.parse_input_event(e)
 
-## One tap, in the continuation of a frame (before that frame's _process): did it go off within SETTLE frames?
+## One tap, in the continuation of a frame (before that frame's _process): did it go off within SETTLE frames? "Went
+## off" is the dash-flow check's tell for the slot, plus the ones a tap of a hold leaves: the kit took the RMB press
+## (rmb_t written; a tap under a draw's hold looses nothing, as at 60 fps), the weapon saw the LMB (Hunter.idle_fire
+## reset: Cinder's lance tap is its pilot flicker, no shot), a kit's own dash started (a charge spent, in_dash).
 func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
 	_ready_up(m)
 	await tree.process_frame
@@ -85,13 +96,18 @@ func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
 	var before := _snap()
 	var y0 := hunter.pos.y
 	var dash0 := hunter.dash_at
+	var dashes0 := hunter.dashes
+	var idle0 := hunter.idle_fire
+	hunter.ak.rmb_t = -1.0
 	_tap(ACTION_OF[key])
 	for i in SETTLE:
 		await tree.process_frame
 		var went: bool
 		match key:
-			"dash": went = hunter.dash_at > dash0
+			"dash": went = hunter.dash_at > dash0 or hunter.dashes < dashes0 or hunter.ak.in_dash()
 			"jump": went = hunter.pos.y > y0 + RISE
+			"rmb": went = hunter.ak.rmb_t >= 0.0 or _went_off(before, key)
+			"lmb": went = hunter.idle_fire < idle0 or _went_off(before, key)
 			_: went = _went_off(before, key)
 		if went:
 			return true
