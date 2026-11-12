@@ -313,7 +313,7 @@ func tank(mb: Mob, camp: bool) -> void:
 	mb.hp = mb.max_hp
 	mb.dmg_mult = float(c["dmg"])
 	mb.r *= float(c["scale"])
-	mb.model.scale *= float(c["scale"])
+	mb.model.scale *= float(c["scale"]) * float(c["draw"])
 	mb.md = mb.md.duplicate()
 	mb.md["windup"] = float(mb.md["windup"]) * float(c["windup"])
 	mb.md["cd"] = float(mb.md["cd"]) * float(c["cd"])
