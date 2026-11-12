@@ -90,6 +90,9 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Clear Mind | Abilities recharge 12% faster. | 2 |
 | Tailwind | Glide 15% faster. | 1 |
 | Remedy | Tonics heal 40% more. | 1 |
+| Lava-walker | Lava can't burn you: walk the lava fields. | 1 |
+| Tidewader | Deep water doesn't slow or drown you: you swim fast. | 1 |
+| Iceboots | Spiked soles: full footing on the ice sheets. | 1 |
 | Field Surgeon | Needle and thread: tonics heal 35% more. | 1 |
 | Magpie Pouch | Shiny things stick: gems you pick up are worth 25% more. | 1 |
 | Wayfarer's Satchel | A deep bag: one more backpack slot. | 2 |

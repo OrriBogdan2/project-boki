@@ -49,17 +49,17 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 53 |  |
-| Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
+| The Crown | heart | Gloom | dangerous | 57 |  |
+| Stormcrown Gaol | camp | Storm | dangerous | 10 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
-| Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 24 |  |
-| Thornwood | nest | Bloom | contested | 68 | Bramble Rise |
-| Larkhollow | landing | Meadow | quiet | 46 | The Hollow |
-| Highwatch | landing | Frost | quiet | 6 | The Lookout |
-| Duskmoor | landing | Storm | quiet | 18 | Moor Chapel |
-| Saltmere | landing | Bloom | quiet | 34 | Salt River |
+| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 18 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 23 |  |
+| Thornwood | nest | Bloom | contested | 76 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 44 | The Hollow |
+| Highwatch | landing | Frost | quiet | 3 | The Lookout |
+| Duskmoor | landing | Storm | quiet | 21 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 16 | Salt River |
 
 ### Boss lairs
 
@@ -72,6 +72,18 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 **Exits:** 2 uplink outposts.
 
 **Getting around:** 9 bridges, 13 glide routes, 6 updrafts, a sky train with 10 stops (Lark Halt, Frost Halt, Watch Halt, Eyrie Halt, Storm Halt, Moor Halt, Bramble Halt, Salt Halt, Ash Halt, Cinder Halt).
+
+### Terrain hazards
+
+Ground that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) or a hazard perk (found as a perk orb, more often near its field) walks it safely; bots go round what theirs can't handle. Big fields make up half a region's ground with paths, fords and stepping stones through them.
+
+| Hazard | Where | Does | Safe with |
+|---|---|---|---|
+| Lava Field | Cinder Steps | Burning | Ember type, Lava-walker perk |
+| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak, Tidewader perk |
+| Ice Sheet | Frostgate | No footing | Frost type, Iceboots perk |
+| Static Flats | Stormbreak | Shocks | Storm type, Tempest type |
+| Bramble | Thornwood | Slow, scratches | Bloom type, Spore type |
 
 ### Rolled each match
 

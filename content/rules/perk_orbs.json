@@ -1,5 +1,5 @@
 {
- "_doc": "Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan.",
+ "_doc": "Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives, hazard = the immunity perks to lava, deep water and ice), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. hazard_near: loot dropped within m metres of a hazard field weighs its immunity perk boost times more (TerrainHazards.perk_near). bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan.",
  "take_radius": 1.2,
  "bot_radius": 16.0,
  "fan_radius": 2.4,
@@ -13,8 +13,10 @@
  "kinds": {
   "flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"],
   "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"],
-  "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]
+  "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"],
+  "hazard": ["lavawalker", "tidewader", "iceboots"]
  },
+ "hazard_near": {"m": 40.0, "boost": 12.0},
  "weights": {
   "brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7,
   "overcharge": 0.6, "remedy": 0.8

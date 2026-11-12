@@ -49,6 +49,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
+    hazard_areas (+)  [{kind, poly:[[x,z],...]}] terrain hazards on flat ground (lava, deep water, ice,
+                      static, bramble; content/rules/terrain_hazards.json, TerrainHazards): see HAZARD_AREAS
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name, rings}: glide routes for bots;
                       rings (+) true: an air lane both ways, glide rings laid along it (AirRings)
@@ -247,10 +249,10 @@ islands = [
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[26, 186], noise=0.08,
          landmark="obelisk",
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0),
-                 poly([(14, 171), (23, 167), (24, 176), (21, 184), (22, 194), (25, 202), (16, 201), (9, 186)], 2),
-                 poly([(31, 166), (43, 173), (45, 190), (35, 202), (31, 198), (32, 190), (31, 180), (33, 172)], 2)],
+                 poly([(14, 171), (19, 168), (19.5, 176), (19, 184), (19.5, 194), (20, 202), (16, 201), (9, 186)], 2),
+                 poly([(37, 167), (43, 173), (45, 190), (35, 202), (35, 199), (36, 190), (36, 180), (37, 172)], 2)],
          sheer=[[150, 210]],
-         ramps=[ramp(23, 180, "w", 3, 0, 2), ramp(30, 192, "e", 3, 0, 2)],
+         ramps=[ramp(19, 180, "w", 3, 0, 2), ramp(35, 197, "e", 3, 0, 2)],
          landings=[[14, 190], [38, 178], [28, 198]],
          chests=[[14, 182], [26, 196], [36, 180]],
          camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
@@ -285,14 +287,107 @@ MORE = {
 for _iid, _more in MORE.items():
     for _k, _pts in _more.items(): BY[_iid].setdefault(_k, []).extend(_pts)
 
+# Terrain hazard areas (owner 11-11: big fields, a region is half lava, deep water or ice and squads route
+# round it): ground that changes the way across a region, each on one flat terrace and clear of every spot,
+# stair foot and exit (check_hazards). A big field is an outline with `safe` shapes cut out of it: lane()
+# paths and discs of walkable ground (causeways, fords, sandbars, stepping stones); carve_islets() adds stone
+# round every spot the field reaches. The matching Boki type or hazard perk walks it safely (content/rules/
+# terrain_hazards.json). A region's `hazard` tag names the field kind it is built round and the share of its
+# ground the checks want under it (the map's regions carry it for other layouts to reuse).
+def lane(pts, w):
+    """A walkable strip along a polyline, w wide: a quad per leg and a disc at each bend."""
+    out = []
+    for (x0, z0), (x1, z1) in zip(pts, pts[1:]):
+        L = math.hypot(x1 - x0, z1 - z0); nx, nz = -(z1 - z0) / L * w / 2, (x1 - x0) / L * w / 2
+        out.append(dict(poly=[(x0 + nx, z0 + nz), (x1 + nx, z1 + nz), (x1 - nx, z1 - nz), (x0 - nx, z0 - nz)]))
+    return out + [dict(circle=[x, z], r=w / 2) for x, z in pts]
+
+def stones(r, *at):
+    """Stepping stones and sandbars: discs of walkable ground r wide."""
+    return [dict(circle=[x, z], r=r) for x, z in at]
+
+HAZARD_AREAS = {
+    # Cinder Steps: the Forge Yard is a lava lake. Three causeways run south from the Kilns stair, and the
+    # chests, camps and landings stand on islets; the lake's rim is stone on the east and the far south.
+    "frostgate": dict(chests=[[94, 30], [100, 62]], camps=[[80, 48, "heavy"]], landings=[[110, 28], [118, 62], [74, 46]],
+                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
+    "cinder": dict(chests=[[30, 100], [46, 93]], camps=[[34, 110, "heavy"]], landings=[[28, 84], [54, 112], [36, 116]],
+                   breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
+    "storm": dict(chests=[[190, 110], [160, 136]], camps=[[160, 116, "heavy"]], landings=[[158, 104], [190, 120], [166, 94]],
+                  breakables=[[188, 106, "crate"], [189, 106, "keg"]]),
+    "thorn": dict(chests=[[88, 184], [132, 184]], camps=[[116, 158, "heavy"]], landings=[[96, 186], [138, 166], [90, 160]],
+                  wild=[[90, 176]], breakables=[[124, 154, "crate"], [125, 154, "pot"]], wardens=[[130, 158]]),
+    "lark": dict(chests=[[44, 18]], camps=[[40, 20, "normal"]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
+    "highwatch": dict(chests=[[172, 30]], camps=[[194, 16, "normal"]], landings=[[200, 34], [186, 28]],
+                      breakables=[[200, 32, "keg"]]),
+    "duskmoor": dict(chests=[[194, 192]], camps=[[200, 176, "normal"]], landings=[[176, 172], [176, 200]]),
+    "saltmere": dict(chests=[[20, 196]], camps=[[36, 192, "normal"]], landings=[[14, 180], [40, 180]]),
+}
+for _iid, _more in MORE.items():
+    for _k, _pts in _more.items(): BY[_iid].setdefault(_k, []).extend(_pts)
+
+# Terrain hazard areas (owner 11-11: big fields, a region is half lava, deep water or ice and squads route
+# round it): ground that changes the way across a region, each on one flat terrace and clear of every spot,
+# stair foot and exit (check_hazards). A big field is an outline with `safe` shapes cut out of it: lane()
+# paths and discs of walkable ground (causeways, fords, sandbars, stepping stones); carve_islets() adds stone
+# round every spot the field reaches. The matching Boki type or hazard perk walks it safely (content/rules/
+# terrain_hazards.json). A region's `hazard` tag names the field kind it is built round and the share of its
+# ground the checks want under it (the map's regions carry it for other layouts to reuse).
+def lane(pts, w):
+    """A walkable strip along a polyline, w wide: a quad per leg and a disc at each bend."""
+    out = []
+    for (x0, z0), (x1, z1) in zip(pts, pts[1:]):
+        L = math.hypot(x1 - x0, z1 - z0); nx, nz = -(z1 - z0) / L * w / 2, (x1 - x0) / L * w / 2
+        out.append(dict(poly=[(x0 + nx, z0 + nz), (x1 + nx, z1 + nz), (x1 - nx, z1 - nz), (x0 - nx, z0 - nz)]))
+    return out + [dict(circle=[x, z], r=w / 2) for x, z in pts]
+
+def stones(r, *at):
+    """Stepping stones and sandbars: discs of walkable ground r wide."""
+    return [dict(circle=[x, z], r=r) for x, z in at]
+
+HAZARD_AREAS = {
+    # Cinder Steps: the Forge Yard is a lava lake. Three causeways run south from the Kilns stair, and the
+    # chests, camps and landings stand on islets; the lake's rim is stone on the east and the far south.
+    "cinder": [dict(kind="lava", poly=[(28.5, 91), (38, 89.5), (54, 89.5), (62, 91), (64, 98), (62.6, 108), (60.5, 117), (54, 123.5), (46, 125.5),
+                                         (38, 122.5), (31.5, 117), (28, 106), (27, 98)],
+                    safe=lane([(46, 89), (46, 100), (44, 112), (40, 119)], 2.8) + lane([(46, 98), (56, 98), (60, 94)], 2.4) + lane([(56, 98), (59, 104)], 2.4)
+                    + lane([(42, 100), (31, 100), (29, 90), (28, 84)], 2.4) + lane([(48, 111), (54, 112), (52, 118), (46, 123)], 2.4) + lane([(54, 112), (60, 112)], 2.4)
+                    + lane([(36, 116), (33, 110)], 2.4)),
+               dict(kind="lava", poly=[(27.5, 70.5), (30.5, 69), (31.5, 75), (31, 86), (29, 88.5), (27, 86), (26.5, 78)]),
+               dict(kind="lava", poly=[(59, 64.5), (62.5, 68), (64.5, 76), (64, 86), (61.5, 89), (60, 86), (61, 78), (59.5, 72)]),
+               dict(kind="lava", poly=[(32, 64), (36, 59.5), (46, 56.3), (55, 58), (59.5, 62), (55, 62.5), (46, 59), (39, 61), (35.5, 65)],
+                    safe=lane([(46, 56), (46, 61)], 2.4)),
+               dict(kind="lava", poly=[(34.5, 69), (41, 66.5), (43.5, 72), (43, 79), (38, 82.5), (35, 80), (34, 74)]),
+               dict(kind="lava", poly=[(49, 66.5), (55, 68.5), (58.5, 75), (57, 81.5), (52, 82.5), (48, 79), (48.5, 72)])],
+    "frostgate": [dict(kind="ice", poly=[(78, 36), (86, 30.5), (98, 27.5), (108, 28), (109, 36), (108.5, 50), (108, 57), (103, 62),
+                                           (92, 61.5), (83, 56), (77.5, 50), (75, 41)],
+                       safe=lane([(108, 42), (100, 44), (92, 44), (80, 46), (74, 44)], 2.6) + lane([(100, 44), (104, 57), (118, 60)], 2.6)
+                       + lane([(92, 44), (88, 36), (84, 32)], 2.6) + lane([(92, 44), (90, 54)], 2.6) + lane([(96, 36), (108, 29)], 2.6)),
+                  dict(kind="ice", poly=[(115, 59.5), (124, 59.5), (130, 59.5), (133.5, 58), (133, 60.5), (129, 62), (123, 63.5), (116, 63.5)],
+                       safe=stones(2.2, (121, 61.5))),
+                  dict(kind="ice", poly=[(118.5, 33), (133, 32.5), (139.5, 40), (136.5, 51), (118.5, 51)],
+                       safe=lane([(118, 42), (127, 42), (131, 44)], 2.6) + lane([(127, 42), (127, 52)], 2.6)),
+                  dict(kind="ice", poly=[(111, 26.5), (118, 25.5), (134, 27.5), (133.5, 29.3), (117, 29.3), (111, 29.5)])],
+    "saltmere": [dict(kind="deep_water", poly=[(20, 169), (26, 166.2), (32, 166.2), (36, 169.5), (35.9, 181), (35.9, 187), (33.8, 188.5),
+                                                 (33.8, 196), (34.3, 198), (33, 201), (27, 203), (21.5, 201.5), (19.6, 193), (19.8, 186),
+                                                 (20.8, 184), (20.8, 176), (19.8, 172)],
+                      safe=lane([(19, 178), (37, 178)], 2.4) + lane([(19, 193), (35, 193)], 2.4) + lane([(28, 178), (28, 186)], 2.4)
+                      + stones(4.4, (27, 186)))],
+    "storm": [dict(kind="static", poly=[(178, 134), (184, 134), (186, 137), (182, 140), (178, 139)])],
+    "thorn": [dict(kind="bramble", poly=[(106, 160), (111, 159), (113, 163), (110, 166), (105, 165)])],
+}
+for _iid, _hz in HAZARD_AREAS.items(): BY[_iid]["hazard_areas"] = _hz
+
 # One line each in docs/MAP_REGIONS.md. "loot" leans chests on top of the biome's lean (BiomeRun):
 # slot weights multiply, rarity steps add. Every region can be the match's hot drop zone (HotZone).
 regions = [
     dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne", "gaol_sw"],
          purpose="The vault on the Throne, two boss Gaols and the richest chests, under the most Blight."),
     dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"], loot={"slots": {"armor": 1.6}},
+         hazard="ice", hazard_min=0.35,
          purpose="The best armor on the map, the Keep's high ground over the Gate Span, an uplink outpost on the south edge."),
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}},
+         hazard="lava", hazard_min=0.42,
          purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on, an uplink outpost on the east rim."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
          purpose="The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."),
@@ -305,6 +400,7 @@ regions = [
     dict(id="duskmoor", name="Duskmoor", biome="storm", islands=["duskmoor"], loot={"slots": {"passive": 2.0}},
          purpose="Relics in the Moor Chapel ruins."),
     dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"],
+         hazard="deep_water", hazard_min=0.3,
          purpose="Salt caches along the dry river, the outer ring's most chests."),
 ]
 
@@ -473,6 +569,11 @@ def sc_wall(W):
         if k in W: W[k] = [sc(v) for v in W[k]]
     return W
 
+def sc_safe(S):
+    """A safe shape of a hazard area: a circle or a polygon, scaled with the layout."""
+    if "circle" in S: return dict(circle=[round(S["circle"][0] * K, 1), round(S["circle"][1] * K, 1)], r=round(S["r"] * K, 1))
+    return dict(poly=[[round(x * K, 1), round(z * K, 1)] for x, z in S["poly"]])
+
 POINT_KEYS = ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "areas")
 
 def scale_layout():
@@ -489,6 +590,9 @@ def scale_layout():
         for k in POINT_KEYS:
             if k in d: d[k] = [sc_pt(p) for p in d[k]]
         if "shrine" in d: d["shrine"] = sc_pt(d["shrine"])
+        for A in d.get("hazard_areas", []):
+            A["poly"] = [[round(x * K, 1), round(z * K, 1)] for x, z in A["poly"]]
+            A["safe"] = [sc_safe(S) for S in A.get("safe", [])]
     for G in glides:
         G["take"] = sc_pt(G["take"]); G["land"] = sc_pt(G["land"])
     for U in updrafts: U["at"] = sc_pt(U["at"])
@@ -689,6 +793,84 @@ def check(lv, owner, stairs):
         assert owner.get((int(B["from"][0]), int(B["from"][1]))) == B["a"], B
     return probs
 
+HAZARD_CLEAR = 2.5      # m: a hazard area keeps this far from every spot, exit and stair foot (you're never set down in one)
+ISLET_R = HAZARD_CLEAR + 0.5    # m: the stone round a spot a big field would otherwise swallow
+
+def island_spots(d):
+    """Every place on an island you're set down at or walk to: a field keeps clear of them, and you can reach them all."""
+    spots = [p for k in ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps") for p in d.get(k, [])]
+    spots += [e[:2] for e in outposts] + ([d["shrine"]] if "shrine" in d else [])
+    for R in d.get("ramps", []):
+        dx, dz = DIRS[R["dir"]]
+        spots.append([R["at"][0] - dx * 2, R["at"][1] - dz * 2])
+    spots += [L["at"] for L in lairs if L["island"] == d["id"]]
+    spots += [G["take"] for G in glides if G["a"] == d["id"]] + [G["land"] for G in glides if G["b"] == d["id"]]
+    spots += [B["from"] for B in bridges if B["a"] == d["id"]] + [B["to"] for B in bridges if B["b"] == d["id"]]
+    return [p[:2] for p in spots]
+
+_CELLS = {}
+
+def hazard_cells(A):
+    """The tiles a hazard area covers: those whose centre is inside its outline and outside its safe shapes
+    (TerrainHazards does the same)."""
+    if id(A) not in _CELLS:
+        xs = [p[0] for p in A["poly"]]; zs = [p[1] for p in A["poly"]]
+        _CELLS[id(A)] = [(x, z) for z in range(int(min(zs)), int(max(zs)) + 1) for x in range(int(min(xs)), int(max(xs)) + 1)
+                         if shape_d({"poly": A["poly"]}, x + 0.5, z + 0.5) < 1.0
+                         and not any(shape_d(S, x + 0.5, z + 0.5) < 1.0 for S in A.get("safe", []))]
+    return _CELLS[id(A)]
+
+def carve_islets():
+    """Stone round every spot a field reaches, so a big field never swallows a chest, camp, landing or exit."""
+    for d in islands:
+        for A in d.get("hazard_areas", []):
+            for p in island_spots(d):
+                if any(math.hypot(c[0] + 0.5 - p[0], c[1] + 0.5 - p[1]) < ISLET_R for c in hazard_cells(A)):
+                    A.setdefault("safe", []).append(dict(circle=[round(p[0], 1), round(p[1], 1)], r=ISLET_R))
+                    _CELLS.pop(id(A), None)
+
+GRASSY_HAZARDS = ("bramble",)      # hazard kinds tall grass still grows in
+
+def bare_cells(d):
+    """An island's tiles where no grass grows: its hazard areas but the grassy ones."""
+    return {q for A in d.get("hazard_areas", []) if A["kind"] not in GRASSY_HAZARDS for q in hazard_cells(A)}
+
+def check_hazards(lv, owner, stairs):
+    """Each hazard area sits on one terrace of its own island, off stairs and bridges, clear of spots, exits,
+    stair feet and lairs, and never cuts its island in two: every spot can still be walked to around it.
+    Each region tagged with a hazard has at least its share of ground under it."""
+    probs = []
+    for d in islands:
+        for A in d.get("hazard_areas", []):
+            what = "%s %s" % (d["id"], A["kind"])
+            cells = {c for c in hazard_cells(A) if owner.get(c) != d["id"] or lv[c] != -2}      # (a boulder in a field isn't ground)
+            if not cells: probs.append("%s covers no tiles" % what); continue
+            if {lv.get(c) for c in cells} - {lv.get(next(iter(cells)))} or any(owner.get(c) != d["id"] for c in cells):
+                probs.append("%s isn't on one terrace of its island" % what)
+            if any(c in stairs for c in cells): probs.append("%s covers a stair" % what)
+            spots = island_spots(d)
+            for p in spots:
+                if any(math.hypot(c[0] + 0.5 - p[0], c[1] + 0.5 - p[1]) < HAZARD_CLEAR for c in cells):
+                    probs.append("%s too close to %s" % (what, p[:2]))
+            # around it: the island minus every hazard still reaches all of its spots from one of them
+            wet = {c for B in d["hazard_areas"] if B["kind"] != "bramble" for c in hazard_cells(B)}
+            ground = {q: l for q, l in lv.items() if owner.get(q) == d["id"] and l != -2 and q not in wet}
+            reach = _walk(ground, (int(spots[0][0]), int(spots[0][1])))
+            for p in spots:
+                if (int(p[0]), int(p[1])) in ground and (int(p[0]), int(p[1])) not in reach:
+                    probs.append("%s cuts off %s" % (what, p[:2]))
+    for R in regions:
+        if "hazard" not in R: continue
+        isl = set(R["islands"])
+        walk = sum(1 for q, o in owner.items() if o in isl and lv[q] != -2)
+        under = sum(len(hazard_cells(A)) for d in islands if d["id"] in isl for A in d.get("hazard_areas", []) if A["kind"] == R["hazard"])
+        R["share"] = round(under / walk, 2)
+        if R["share"] < R["hazard_min"]: probs.append("%s: %s covers %.0f%% of its ground, wanted %.0f%%" % (R["id"], R["hazard"], R["share"] * 100, R["hazard_min"] * 100))
+    return probs
+
+HAZARD_LOOK = {"lava": (255, 90, 20), "deep_water": (40, 90, 220), "ice": (210, 245, 255), "static": (255, 240, 90),
+               "bramble": (90, 60, 30)}
+
 def preview(path, lv, owner, stairs):
     from PIL import Image, ImageDraw
     S = 4
@@ -722,6 +904,9 @@ def preview(path, lv, owner, stairs):
         for c in d.get("wardens", []):
             dr.ellipse([c[0] * S - 2, c[1] * S - 2, c[0] * S + 2, c[1] * S + 2], fill=(160, 0, 200))
         dr.text((d["poi"][0] * S - 20, d["poi"][1] * S), d["name"], fill=(255, 255, 255))
+        for A in d.get("hazard_areas", []):
+            for q in hazard_cells(A):
+                dr.rectangle([q[0] * S, q[1] * S, q[0] * S + S - 1, q[1] * S + S - 1], fill=HAZARD_LOOK[A["kind"]])
     for L in lairs:
         cx, cz = L["at"]; h = L["half"]
         dr.rectangle([(cx - h) * S, (cz - h) * S, (cx + h + 1) * S, (cz + h + 1) * S], outline=(255, 80, 60), width=2)
@@ -916,7 +1101,8 @@ class Cover:
                     for x in range(R[0], R[2] + 1): self.solid.add((x, z))
             for t in d.get("trees", []) + d.get("crates", []) + d.get("pillars", []): self.solid.add((int(t[0]), int(t[1])))
             for W in d.get("walls", []): self.solid |= _wall_tiles(W)
-        self.hard |= self.solid
+        self.bare = set().union(*[bare_cells(d) for d in islands])      # lava, deep water and ice: no grass
+        self.hard |= self.solid | self.bare
         for d in islands:
             for R in d.get("ramps", []): self.hard |= ramp_tiles(R)
             for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables"):
@@ -964,6 +1150,7 @@ class Cover:
         with that much margin."""
         tiles = _disc(cx, cz, r); keep = set(); lvl = None
         for q in _disc(cx, cz, r, 0.32):
+            if q in self.solid: return None      # (a boulder in a clump: the engine would grass the rock's tile)
             if not self.tile_ok(q, iid): continue
             if q in self.hard: return None
             l = self.lv[q]
@@ -1022,7 +1209,7 @@ def place_cover(lv, owner, stairs):
     C = Cover(lv, owner, stairs)
     ground = {}                     # biome -> walkable tiles; island -> tiles
     for d in islands:
-        n = sum(1 for q in INISLE[d["id"]] if q not in C.solid and q not in C.stairs)
+        n = sum(1 for q in INISLE[d["id"]] if q not in C.solid and q not in C.stairs and q not in C.bare)
         ground[d["id"]] = n
     bground = {}
     for d in islands: bground[d["biome"]] = bground.get(d["biome"], 0) + ground[d["id"]]
@@ -1124,17 +1311,24 @@ def place_cover(lv, owner, stairs):
                         C.plant(iid, P[0], P[1], kind); progressed = True; break
             if not progressed: break
         carry[d["biome"]] = max(0.0, want - have())
-        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]]
+        # no grass on lava, water, ice or static: their clumps go (the roll above stays as it was; the
+        # bramble keeps its grass, a thicket you can hide in at the price of the thorns)
+        wet = bare_cells(d)
+        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]
+                     if not wet & _disc(c[0], c[1], c[2])]
     return C
 
 def cover_report(C, lv, owner):
     T = _targets()
     ground = {}; bush = {}
     for d in islands:
+        # the ground grass can grow on (not the bare hazard areas), and the grass left on it
+        wet = bare_cells(d)
+        kept = set().union(*[_disc(c[0], c[1], c[2]) for c in d.get("bush", [])])
         for q in INISLE[d["id"]]:
-            if q in C.solid or q in C.stairs: continue
+            if q in C.solid or q in C.stairs or q in wet: continue
             ground[d["biome"]] = ground.get(d["biome"], 0) + 1
-            if q in C.bush: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
+            if q in C.bush and q in kept: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
     rows = []
     for b in ("bloom", "meadow", "gloom", "storm", "ember", "frost"):
         share = bush.get(b, 0) / max(1, ground.get(b, 1))
@@ -1142,12 +1336,14 @@ def cover_report(C, lv, owner):
     return rows
 
 def main():
+    carve_islets()
     lv, owner, stairs = rasterize()
     C = place_cover(lv, owner, stairs)
     probs = check(lv, owner, stairs)
     tp, stops, legs, loop = check_train(lv, owner)
     probs += tp
     probs += check_air(lv, owner, stairs)
+    probs += check_hazards(lv, owner, stairs)
     for b, share, tg in cover_report(C, lv, owner):
         print('cover %-7s %5.1f %%  (target %.1f-%.1f %%)' % (b, share * 100, tg[0] * 100, tg[1] * 100))
     print('cover patches', len(C.patches), 'clumps', sum(len(p['clumps']) for p in C.patches))
@@ -1167,7 +1363,8 @@ def main():
                      "A raised core (the Crown, its Throne and two boss Gaols), a ring of four regions each with one "
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
-               regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=updrafts,
+               regions=[{k: v for k, v in R.items() if k != "hazard_min"} for R in regions],
+               islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=updrafts,
                winds=[], train=train, heart=heart, ways_scale=round(K, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:

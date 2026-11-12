@@ -2232,6 +2232,82 @@
 					"Ride the wind!"
 				]
 			}
+		},
+		"hazard_safe": {
+			"direct": true,
+			"feel": "excited",
+			"word": "Easy",
+			"acts": [
+				"(trots ahead onto it)",
+				"(puffs up, proud)",
+				"(waves you on)",
+				"(hops in first)"
+			],
+			"lines": {
+				"_": [
+					"I can handle %H!",
+					"Follow me through %H!",
+					"Don't worry, %H can't hurt us!",
+					"Stay close, I've got %H.",
+					"Walk with me, %H's fine.",
+					"I'll keep you safe in %H.",
+					"Oh, %H is my thing!",
+					"Shortcut through %H!",
+					"Trust me on %H.",
+					"We can cross %H!",
+					"Easy, I know %H.",
+					"This way, through %H!"
+				],
+				"ember": [
+					"Lava feels like a warm bath!",
+					"Fire's my friend!"
+				],
+				"frost": [
+					"Ice is home to me!",
+					"Slide with me!"
+				],
+				"storm": [
+					"Sparks tickle me!",
+					"I'll take the shock!"
+				],
+				"tempest": [
+					"The static likes me!"
+				],
+				"bloom": [
+					"The thorns know me.",
+					"I'll part the brambles!"
+				],
+				"spore": [
+					"Thorns don't bother me!"
+				]
+			}
+		},
+		"hazard_risk": {
+			"direct": true,
+			"feel": "scared",
+			"word": "Careful",
+			"acts": [
+				"(tugs you back)",
+				"(ears flat, stops)",
+				"(sniffs, then backs off)",
+				"(points the other way)"
+			],
+			"lines": {
+				"_": [
+					"Careful, %H ahead!",
+					"I can't handle %H!",
+					"Let's go around %H.",
+					"Not through %H, please!",
+					"Ooh, %H scares me.",
+					"Watch out for %H!",
+					"Go around, %H's bad!",
+					"Keep out of %H!",
+					"I can't help in %H.",
+					"Look out, %H, another way!",
+					"Stay off %H!",
+					"No, %H is not for us."
+				]
+			}
 		}
 	}
 }
