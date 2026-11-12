@@ -28,10 +28,10 @@ pitch-reel --when-live [--build REF]
 |---|---|---|---|---|
 | 1 | Website scroll, Bokidex 4 entries | 1 | agent | `web_shot.py`: headless Chromium, frame-stepped, 30 s |
 | 2 | Egg hatch, reveal held | 3 | agent | real hatch screen, scripted knocks; takes pick other eggs |
-| 3 | Evolution T1 -> T2 | 2 | agent | farm: a Boki one level short, the farm's own evolution scene |
+| 3 | Evolution T1 -> T2 | 2 | agent | farm: a Boki one level short, the farm's own evolution scene; when the demo roster has no line with art, its first Boki becomes a species that has one |
 | 4 | Farm loop, 60 s | 1 | agent | care preset: trough, pat, fetch, brush, drill pressed in the gold |
 | 5 | Build process, 20 s | 1 | agent | `term_shot.py`: four terminal tiles, output scrubbed (emails, tokens, home paths, names in remotes) |
-| 6 | Hunter select, 15 s | 1 | agent | the Hunters screen steps through all 12, lands on `--hunter` |
+| 6 | Hunter select, 15 s | 1 | agent | the Hunters screen steps through all 12, lands on `--hunter` and picks it (the screen stays up) |
 | 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot, attack held, right click, utility on a rota; each take another Hunter |
 | 8 | Extraction drop | 2 | agent | the real loading screen and drop; loading cut at the `drop` mark |
 | 9 | Loot + fight, 3 min | 3 | owner / bot backup | autoplay match of three duos, no drop |
@@ -42,5 +42,7 @@ Takes differ by seed (egg, map roll, Hunter, foe).
 
 ## Limits
 - Needs a GPU worker with a Vulkan display; the queue on `--needs gpu` can be hours long.
-- Shot 3 needs a form with art: on origin/main 53e2fe7f3 no evolution has art at both ends (T2 models land with the new set).
-- Shots 7, 9 and 10 are untested on a real GPU until the first full run; shot 9 may not meet a fight in its 3 minutes.
+- Shot 3 needs a Boki species whose level evolution has art: on origin/main 53e2fe7f3 only caecilith and wisplet (T2) have
+  art and their T1 forms (zipling, mothlet) are not Boki species yet, so shot 3 waits for the new models.
+- Shots 7, 9 and 10 ran once on a real GPU (backups); shot 9 may not meet a fight in its 3 minutes.
+- If the models land before this branch is merged, the tool applies the branch's diff to the build it films.
