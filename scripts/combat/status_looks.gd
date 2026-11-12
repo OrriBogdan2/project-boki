@@ -31,6 +31,7 @@ const FLAG_SHIFT := 20         # a Hunter's snapshot flags carry NET_CC in bits 
 const BRIDGE := 0.5            # s a hit sent to another game shows its status before that game's snapshot says
 const KIN_TALL := 0.8          # m: a Boki at model scale 1 (KinModels)
 const KIN_WIDE := 0.7          # a Boki's width against a Hunter's legs, at model scale 1 and girth 1
+const ARROW_Y := 2.1          # m over the feet: the Grounded arrow's tip at rest (just over the head)
 const KEEP := 0.15             # s a keep() outlives its last ask
 
 static var _rules := {}
@@ -232,6 +233,10 @@ static func _mesh(key: String) -> Mesh:
 			mesh = p
 		"thorn":
 			mesh = _tube(0.0, 0.1, 0.95)
+		"arrow_head":
+			mesh = _tube(0.26, 0.0, 0.34)
+		"arrow_shaft":
+			mesh = _tube(0.08, 0.08, 0.32)
 		"ring", "ring_thin":
 			var t := TorusMesh.new()
 			var r := {"ring": [0.32, 0.4], "ring_thin": [0.36, 0.41]}[key] as Array
@@ -320,6 +325,9 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 			for i in 3:
 				Models.part(b, _mesh("ring"), col if i != 1 else dark, Vector3(0, 0.25 + 0.24 * i, 0),
 					Vector3(1.0 - 0.06 * i, 0.6, 1.0 - 0.06 * i), Vector3(0.22 * (1 - i), 0, 0.25 * (i - 1)), "P%d" % i)
+			var arrow := Models.part(b, _mesh("arrow_shaft"), col, Vector3(0, ARROW_Y + 0.33, 0), Vector3.ONE,
+				Vector3.ZERO, "Arrow")        # a down arrow over the head: pinned to the ground
+			Models.part(arrow, _mesh("arrow_head"), col, Vector3(0, -0.33, 0))
 		"anklets":
 			for i in 3:
 				var mat := col if i != 2 else dark
@@ -375,6 +383,7 @@ func _pose(n: Node3D, look: String, t: float) -> void:
 		"cords":
 			for i in 3:
 				(b.get_node("P%d" % i) as Node3D).rotation.y = t * (1.4 if i % 2 == 0 else -1.4)
+			(b.get_node("Arrow") as Node3D).position.y = ARROW_Y + 0.33 - 0.12 * absf(sin(t * 4.0))   # a stamp down
 		"anklets":
 			for i in 3:
 				var u := fposmod(t * 0.9 + i / 3.0, 1.0)      # the knee down to the ankle, again (never the ground)

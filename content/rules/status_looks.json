@@ -8,7 +8,7 @@
 		"root": {"look": "stakes", "col": "#9a6aff", "y": 0.0, "size": 1.0, "pace": 1.0,
 			"why": "any root (Meeko's violet): thorns driven in round the feet, leaning over them, straining; no ring on the ground"},
 		"gnd": {"look": "cords", "col": "#e0a03a", "dark": "#5a3a10", "y": 0.0, "size": 1.0, "pace": 1.0,
-			"why": "Grounded (the Bola, Warchain reel): cords wound round the legs"},
+			"why": "Grounded (the Bola, Warchain reel): cords wound round the legs and a down arrow stamping over the head"},
 		"slow": {"look": "anklets", "col": "#b8a8ff", "dark": "#2a2460", "y": 0.0, "size": 1.0, "pace": 1.0,
 			"why": "any slow: weighted rings sliding down the legs to the ankles (never onto the ground: a ground ring means gameplay)"},
 		"chill": {"look": "frost", "col": "#7fd0ff", "dark": "#2f6ac0", "hot": "#effcff", "y": 0.0, "size": 1.0, "pace": 1.0,

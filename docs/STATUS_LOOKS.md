@@ -12,7 +12,7 @@ root beam is gone), and nothing lies flat on the ground, the look or a ring as i
 | stun | stars on a dark disc | over the head | fast spin | yellow |
 | Daze | ring of crystals | high over the head | wobble | orange (Vex) |
 | root | thorns | driven in round the feet, leaning over them | strain | violet (Meeko) |
-| Grounded | cords | round the legs | counter-turning | amber (Bola) |
+| Grounded | cords and a down arrow | round the legs, arrow over the head | counter-turning, arrow stamps | amber (Bola) |
 | slow | rings | knees to the ankles | slide down and tighten | lavender |
 | Chill | ice shell, crystals | whole body | still | ice blue (Neve) |
 | burning | flame tongues | up the body | flicker | orange/yellow (Cinder) |
