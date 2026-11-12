@@ -52,6 +52,7 @@ const ALERT_R := 150.0         # everyone this close hears a lair fight start (a
 const UP_R := 1.5              # the escape updraft's radius
 const UP_TOP := 9.0            # ... and how high over the lair floor it carries you
 const UP_PUSH := 8.0           # ... and how hard it throws you out over the wall at the top
+const UP_LAND_ROOM := 9        # tiles of ground the ride's landing looks for round it (a dash out of the ride runs ~8 m on)
 const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
 
 var m: Match
@@ -148,18 +149,27 @@ func _add(D: Dictionary) -> void:
 	# lairs stay dormant (empty, sealed for good) until SpawnPlan rolls them live: see plug_into
 	_tint_dormant(L, true)
 
-## Where the escape updraft throws you: open ground just beyond the back wall (or failing that one of
-## the side walls), never the gate side. Out over the abyss if there's no ground there at all.
+## Where the escape updraft throws you: open ground beyond the back wall (or failing that one of the side
+## walls), never the gate side. The roomiest such spot wins (the first found of the most room, up to
+## UP_LAND_ROOM): a dash out of the ride carries you metres past the landing, and a spot only a few metres
+## from the island's rim sends that dash off the edge. Out over the abyss if there's no ground there at all.
 func _escape_spot(c: Vector3, hf: int, out: Vector2) -> Vector3:
 	var w := m.world
+	var best := Vector3.INF
+	var best_room := 1
 	for dv in [-out, Vector2(-out.y, out.x), Vector2(out.y, -out.x)]:
 		var d: Vector2 = dv
 		for dist in [3.5, 5.0, 6.5, 8.0, 10.0]:
 			for slide in [0.0, 2.0, -2.0, 4.0, -4.0]:
 				var p: Vector3 = c + Vector3(d.x, 0, d.y) * (float(hf) + float(dist)) + Vector3(-d.y, 0, d.x) * float(slide)
-				if w.is_void(p.x, p.z) or w.is_block(p.x, p.z) or w.lair_at(p.x, p.z, 1.5) >= 0 or w.edge_dist(int(p.x), int(p.z), 2) < 2:
+				if w.is_void(p.x, p.z) or w.is_block(p.x, p.z) or w.lair_at(p.x, p.z, 1.5) >= 0:
 					continue
-				return Vector3(floor(p.x) + 0.5, w.ground_at(p.x, p.z), floor(p.z) + 0.5)
+				var room := w.edge_dist(int(p.x), int(p.z), UP_LAND_ROOM)
+				if room > best_room:
+					best_room = room
+					best = Vector3(floor(p.x) + 0.5, w.ground_at(p.x, p.z), floor(p.z) + 0.5)
+	if best != Vector3.INF:
+		return best
 	var far := c - Vector3(out.x, 0, out.y) * (float(hf) + 6.0)
 	return Vector3(far.x, c.y, far.z)
 

@@ -2334,13 +2334,12 @@ func _physics(dt: float) -> void:
 
 ## Lost to the abyss: over the void a few metres below the lowest island lip around you (see
 ## World.abyss_floor), so a fall is over quickly instead of dropping a long way under the islands.
-## A glider that still has heat gets a little more room to lift you back out.
+## A glider that still has heat gets a little more room to lift you back out. Over solid ground nobody is
+## lost, however deep under it (_unclip puts them back on it).
 func _in_abyss() -> bool:
-	if pos.y < -40.0:
-		return true
 	if grounded or not over_void():
 		return false
-	return pos.y < abyss_kill_y()
+	return pos.y < -40.0 or pos.y < abyss_kill_y()
 
 ## (movefeel) The point of no return under you: below this you're lost to the abyss. World.ABYSS_DEPTH
 ## (6m, shared with monsters and the home island) plus ABYSS_EXTRA for hunters, so there's real room to

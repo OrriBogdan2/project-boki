@@ -40,6 +40,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
+| `--lair-fall-check` | A jump dash anywhere in a boss lair, or a dash out of its escape updraft, never ends in "you fell"; nobody over solid ground is lost to the abyss |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
 | `--train-map-check` | The sky train on the maps: one halt icon per stop, the marker at the engine's arc position, the countdown to a halt, the minimap's range rule |
