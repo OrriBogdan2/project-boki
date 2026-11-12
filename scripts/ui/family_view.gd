@@ -8,6 +8,7 @@ extends RefCounted
 const WILD := "wild"      # no parents recorded: caught in the wild
 const GONE := "gone"      # a parent that is no longer in the roster
 const OWNED := "owned"
+const VISITOR := "visitor"    # a wild visitor that left the egg (lineage["visitor"]: species, zone, day)
 const PORTRAIT := 44.0    # px
 const CELL_W := 210.0     # px
 
@@ -17,7 +18,8 @@ static func parents(rec: Dictionary) -> Array:
 	var uids: Array = lin.get("parents", [])
 	var names: Array = lin.get("names", [])
 	if uids.is_empty() and names.is_empty():
-		return [_slot(WILD), _slot(WILD)]
+		var v: Dictionary = lin.get("visitor", {})
+		return [_slot(WILD), _slot(WILD)] if v.is_empty() else [_visitor_slot(v), _slot(WILD)]
 	var out: Array = []
 	for i in 2:
 		var uid := String(uids[i]) if i < uids.size() else ""
@@ -49,6 +51,12 @@ static func passed(rec: Dictionary) -> Array:
 		if nest.get(kind, false):
 			out.append(String(NestItems.item_of(kind)["name"]))
 	return out
+
+static func _visitor_slot(v: Dictionary) -> Dictionary:
+	var sp := String(v["sp"])
+	var slot := _slot(VISITOR, {"species": sp, "name": "Wild " + String(Data.KIN[sp]["name"])})
+	slot["note"] = "wild visitor, %s, day %d" % [GardenVisitor.zone_name(String(v["zone"])), int(v["day"])]
+	return slot
 
 static func _slot(state: String, rec := {}) -> Dictionary:
 	var sp: Dictionary = Data.KIN.get(String(rec.get("species", "")), {})
@@ -92,7 +100,7 @@ static func _cell(slot: Dictionary, tree: SceneTree, open: Callable) -> Control:
 	var h := UI.hbox(8)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	h.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 4)
-	if slot["state"] == OWNED:
+	if slot["state"] == OWNED or slot["state"] == VISITOR:
 		h.add_child(KinPortrait.view(slot["rec"], tree, PORTRAIT))
 	else:
 		var gap := Control.new()
@@ -105,6 +113,8 @@ static func _cell(slot: Dictionary, tree: SceneTree, open: Callable) -> Control:
 	t.add_child(UI.label(String(slot["name"]), UI.T_BODY, UI.MUTED if dim else UI.INK))
 	if slot["type"] != "":
 		t.add_child(UI.label(String(slot["type"]), UI.T_SMALL, UI.MUTED))
+	if slot.has("note"):
+		t.add_child(UI.label(String(slot["note"]), UI.T_SMALL, UI.FAINT))
 	elif slot["state"] == GONE and slot["name"] != "unknown":
 		t.add_child(UI.label("no longer here", UI.T_SMALL, UI.FAINT))
 	h.add_child(t)
