@@ -269,7 +269,7 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 - Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan, the true area, in his gold at AimKit's low fill,
   sparks arcing between his fists while charging, six big orbs per wave with a dark core and a smear (`LDFx.volley`: saturated
   brass for wave 1, violet for wave 2) that fly the whole fan in the shot's 0.2s and hang at its edge fading for 0.35s as the
-  source's orbs do (f35-f38), a 0.6 m flash at the fists per wave, a small glow and a violet flicker on each target. Nothing
+  source's orbs do (f35-f38) in place of the plain shot sphere, a 0.6 m flash at the fists per wave, a small glow and a violet flicker on each target. Nothing
   sweeps the fan or stands over the bodies in it (docs/COMBAT_CLARITY.md; asserted in `dredge_ult_check.gd`).
 
 ## Engine notes

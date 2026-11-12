@@ -13,6 +13,7 @@ var ak = null
 var ok_fn: Callable
 var widest_flash := 0.0             # m: the largest look DredgeBlast put up while its waves went (clarity)
 var sweeps := 0                     # crescents drawn across the fan (clarity: none)
+var plain_slugs := 0                # slugs still drawn as Match's plain sphere under their volley look (clarity: none)
 
 func _init(arch_check, ok_cb: Callable) -> void:
 	ak = arch_check
@@ -29,6 +30,9 @@ func _scan_looks(K: DredgeKit) -> void:
 			sweeps += 1
 		if kind == "sunburst_bb":
 			widest_flash = maxf(widest_flash, (e["s0"] as Vector3).x)
+	for s: Dictionary in K.m.shots:
+		if s["by"] == K.h and (s["x"] as Dictionary).has("kx") and s["node"] != null:
+			plain_slugs += 1
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
 func _owed(P: Hunter) -> float:
@@ -118,9 +122,11 @@ func _charge_and_waves() -> void:
 	ak.aim_at(P, P.pos + Vector3(4, 0, 0))
 	ak.step(m, 0.65, _scan_looks.bind(K))
 	ok(
-		"ult clarity: no sweep across the fan, the wave flash at his fists no bigger than the scattergun's",
-		B.waves == 2 and sweeps == 0 and widest_flash > 0.0 and widest_flash <= DredgeBlast.MUZZLE_FLASH + 0.01,
-		"sweeps %d, widest flash %.2f m" % [sweeps, widest_flash]
+		"ult clarity: no sweep across the fan, no plain sphere under a slug's look, the flash at his fists no bigger than "
+			+ "the scattergun's",
+		B.waves == 2 and sweeps == 0 and plain_slugs == 0 and widest_flash > 0.0
+			and widest_flash <= DredgeBlast.MUZZLE_FLASH + 0.01,
+		"sweeps %d, plain slugs %d, widest flash %.2f m" % [sweeps, plain_slugs, widest_flash]
 	)
 	ok(
 		"ult: one press, two waves of six slugs through spawn_shot",

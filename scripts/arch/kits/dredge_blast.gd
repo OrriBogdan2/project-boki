@@ -144,6 +144,10 @@ func _wave(i: int) -> void:
 			k.fx.volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
 		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
+		var slug: Dictionary = m.shots[-1]
+		if shown and slug["node"]:       # the volley is this slug's look: the plain sphere goes back to Match's pool
+			(slug["node"] as Node3D).visible = false
+			slug["node"] = null
 	_wave_fx(i, at, dir)
 
 func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
