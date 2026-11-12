@@ -15,37 +15,40 @@ extends RefCounted
 
 const SECS := 40.0
 const SEED := 3011
-const RING_M := 11.0                 # m: the squads stand round you this far out, so it is one brawl
+const RING_M := 11.0  # m: the squads stand round you this far out, so it is one brawl
 const WHYS := [&"stolen", &"full", &"gap", &"stack"]
-const POOL_LOST := [&"stolen", &"full"]   # what the priority decides (gap and stack merge a repeat)
+const POOL_LOST := [&"stolen", &"full"]  # what the priority decides (gap and stack merge a repeat)
 
 var main: Node
 var bad := 0
-var lost := {"you": {}, "squad": {}, "enemy": {}}   # whose -> why -> count
-var names := {}                     # "whose why sound" -> count
+var lost := {"you": {}, "squad": {}, "enemy": {}}  # whose -> why -> count
+var names := {}  # "whose why sound" -> count
 var peak := 0
 var sum := 0
-var frame_ms := PackedFloat32Array()   # wall ms per frame of the fight, for the frame-time line
+var frame_ms := PackedFloat32Array()  # wall ms per frame of the fight, for the frame-time line
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SFXVOICE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	var secs := SECS
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--voice-secs="): secs = float(a.substr(13))
+		if a.begins_with("--voice-secs="):
+			secs = float(a.substr(13))
 	Save.no_write = true
 	Engine.max_fps = 60
 	Sfx.voices.cut.connect(_on_cut)
 	var m := await _brawl()
-	var P: Hunter = m.player
+	var me: Hunter = m.player
 	var start := m.time
 	var t := Time.get_ticks_usec()
 	while is_instance_valid(m) and m.time - start < secs:
-		P.hp = P.max_hp
+		me.hp = me.max_hp
 		await main.get_tree().process_frame
 		frame_ms.append((Time.get_ticks_usec() - t) / 1000.0)
 		t = Time.get_ticks_usec()
@@ -53,13 +56,25 @@ func run(main_node: Node) -> void:
 		peak = maxi(peak, n)
 		sum += n
 	var cap := Sfx.POOL + SfxVoices.LOOP_CAP
-	print("SFXVOICE %d Hunters, %d frames: voices peak %d, mean %.1f (cap %d), %d loops at the end" % [
-		m.hunters.size(), frame_ms.size(), peak, float(sum) / maxi(frame_ms.size(), 1), cap, Sfx.loops.size()])
+	print(
+		(
+			"SFXVOICE %d Hunters, %d frames: voices peak %d, mean %.1f (cap %d), %d loops at the end"
+			% [m.hunters.size(), frame_ms.size(), peak, float(sum) / maxi(frame_ms.size(), 1), cap, Sfx.loops.size()]
+		)
+	)
 	frame_ms.sort()
 	var ms_sum := 0.0
-	for x in frame_ms: ms_sum += x
-	print("SFXVOICE frame ms: mean %.2f, p99 %.2f" % [ms_sum / maxi(frame_ms.size(), 1),
-		frame_ms[int(frame_ms.size() * 0.99)] if not frame_ms.is_empty() else 0.0])
+	for x in frame_ms:
+		ms_sum += x
+	print(
+		(
+			"SFXVOICE frame ms: mean %.2f, p99 %.2f"
+			% [
+				ms_sum / maxi(frame_ms.size(), 1),
+				frame_ms[int(frame_ms.size() * 0.99)] if not frame_ms.is_empty() else 0.0
+			]
+		)
+	)
 	for whose: String in lost:
 		var line := "SFXVOICE lost %-5s" % whose
 		for why: StringName in WHYS:
@@ -84,13 +99,27 @@ func run(main_node: Node) -> void:
 	print("SFXVOICE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## You and two squadmates against nine rival trios, every Hunter on a kit, all round you.
 func _brawl() -> Match:
 	var archs: Array = Arch.ids()
 	var o := Match.demo_opts()
-	o.merge({"teams": 1, "squad": 3, "total": 3, "no_drop": true, "autoplay": true, "sim_keep": true, "seed": SEED,
-		"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0]),
-		"mates": [1, 2].map(func(i): return {"name": Arch.name_of(archs[i], true), "arch": archs[i]})}, true)
+	o.merge(
+		{
+			"teams": 1,
+			"squad": 3,
+			"total": 3,
+			"no_drop": true,
+			"autoplay": true,
+			"sim_keep": true,
+			"seed": SEED,
+			"arch": archs[0],
+			"cls": Arch.weight(archs[0]),
+			"weapon": Arch.signature(archs[0]),
+			"mates": [1, 2].map(func(i): return {"name": Arch.name_of(archs[i], true), "arch": archs[i]})
+		},
+		true
+	)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	var old = main.current
@@ -109,10 +138,13 @@ func _brawl() -> Match:
 	for h: Hunter in m.hunters:
 		var ang := TAU * float(h.team) / 10.0 + 0.3 * float(m.hunters.find(h) % 3)
 		var spot := at if h.team == 0 else at + Vector3(cos(ang), 0, sin(ang)) * RING_M
-		if h.team == 0 and h != m.player: spot += Vector3(1.5 * (m.hunters.find(h) % 3), 0, 1.0)
+		if h.team == 0 and h != m.player:
+			spot += Vector3(1.5 * (m.hunters.find(h) % 3), 0, 1.0)
 		h.teleport(Vector3(spot.x, m.world.ground_at(spot.x, spot.z), spot.z))
-		if h.kin: (h.kin as Kin).teleport(h.pos + Vector3(1.0, 0, 0.7))
+		if h.kin:
+			(h.kin as Kin).teleport(h.pos + Vector3(1.0, 0, 0.7))
 	return m
+
 
 func _far_loops() -> void:
 	Sfx.reset_scene_audio(0.0)
@@ -130,6 +162,7 @@ func _far_loops() -> void:
 	await main.get_tree().create_timer(0.3).timeout
 	ok(keys.slice(5).filter(paused).is_empty(), "with room again the paused loops sound")
 	Sfx.reset_scene_audio(0.0)
+
 
 func _on_cut(sname: String, rank: float, why: StringName) -> void:
 	var whose := "enemy"

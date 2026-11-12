@@ -7,24 +7,27 @@ extends RefCounted
 ## is not played (yours, with only yours playing, takes the oldest of them); the loops past LOOP_CAP pause, the
 ## farthest first, and sound again once there is room. Yours and your squad's loops never pause.
 
-const YOU := -2.0                # the rank of your own sounds (any other sound's: metres from you, or SQUAD)
-const SQUAD := -1.0              # the rank of your squadmates' sounds
-const FRIEND_M := 0.7            # m: a sound this close to you or a squadmate is yours or theirs (inside two
-                                 # bodies, Ent.r 0.4, so a rival pressed against them is not)
-const LOOP_CAP := 8              # looping voices sounding at once, on top of the pool's (Sfx.POOL)
-const CULL_MS := 100             # ms between loop culls (cheap: a sort of the loops, ten times a second)
-
 ## A sound that lost its voice (why: &"stolen") or got none (&"full"): for --sfx-voice-check.
 signal cut(sname: String, rank: float, why: StringName)
 
-var friends := PackedVector3Array()   # you, then your living squadmates, kept by keep_squad each match frame
-var rank := PackedFloat32Array()      # per pool voice: the rank of what it plays
-var sound := PackedStringArray()      # per pool voice: the sound it plays
+const YOU := -2.0  # the rank of your own sounds (any other sound's: metres from you, or SQUAD)
+const SQUAD := -1.0  # the rank of your squadmates' sounds
+## m: a sound this close to you or a squadmate is yours or theirs (inside two bodies, Ent.r 0.4, so a rival pressed
+## against them is not)
+const FRIEND_M := 0.7
+const LOOP_CAP := 8  # looping voices sounding at once, on top of the pool's (Sfx.POOL)
+const CULL_MS := 100  # ms between loop culls (cheap: a sort of the loops, ten times a second)
+
+var friends := PackedVector3Array()  # you, then your living squadmates, kept by keep_squad each match frame
+var rank := PackedFloat32Array()  # per pool voice: the rank of what it plays
+var sound := PackedStringArray()  # per pool voice: the sound it plays
 var _cull_at := 0
+
 
 func _init(pool: int) -> void:
 	rank.resize(pool)
 	sound.resize(pool)
+
 
 ## The match's frame: you and your living squadmates are the friends.
 func keep_squad(hunters: Array, me: Hunter) -> void:
@@ -36,6 +39,7 @@ func keep_squad(hunters: Array, me: Hunter) -> void:
 		if h != me and h.team == me.team and not h.dead:
 			friends.append(h.pos)
 
+
 func rank_of(pos, listener: Vector3, mine := false) -> float:
 	if mine or pos == null:
 		return YOU
@@ -44,6 +48,7 @@ func rank_of(pos, listener: Vector3, mine := false) -> float:
 		if Vector2(pos.x - f.x, pos.z - f.z).length_squared() < FRIEND_M * FRIEND_M:
 			return YOU if i == 0 else SQUAD
 	return Vector2(pos.x - listener.x, pos.z - listener.z).length()
+
 
 ## The pool voice for a sound of rank `r` (-1: none, the sound is not played): a free one (from `next` round
 ## the ring), else the farthest one ranked below it; yours with only yours playing takes `next`.
@@ -65,6 +70,7 @@ func pick(players: Array[AudioStreamPlayer], next: int, r: float, sname: String)
 	cut.emit(sname, r, &"full")
 	return -1
 
+
 ## Pauses the loops past LOOP_CAP, the farthest first, and resumes the rest (loops: Sfx.loops); at most every
 ## CULL_MS, or now (a loop just started, so a new one never sounds over the cap).
 func cull_loops(loops: Dictionary, listener: Vector3, now_too := false) -> void:
@@ -81,12 +87,15 @@ func cull_loops(loops: Dictionary, listener: Vector3, now_too := false) -> void:
 	for i in order.size():
 		(order[i][1] as AudioStreamPlayer).stream_paused = i >= LOOP_CAP and order[i][0] > SQUAD
 
+
 ## Pool voices and loops sounding now (a paused loop is not).
 static func sounding(players: Array[AudioStreamPlayer], loops: Dictionary) -> int:
 	var n := 0
 	for p in players:
-		if p.playing: n += 1
+		if p.playing:
+			n += 1
 	for key in loops:
 		var lp: AudioStreamPlayer = loops[key]["p"]
-		if is_instance_valid(lp) and lp.playing and not lp.stream_paused: n += 1
+		if is_instance_valid(lp) and lp.playing and not lp.stream_paused:
+			n += 1
 	return n
