@@ -1,0 +1,9 @@
+{
+ "_doc": "The Hunter Wisp's hum (scripts/match/wisp_hum.gd, docs/AUDIO.md): a low loop under every visible downed Hunter. reach_m: metres it is heard from; mate_db / foe_db / own_db: the level for a teammate's, a rival's and your own Wisp (a teammate's is a little louder: it is the one you can save); max_voices: the most hums at once (the nearest win); rise: how far the pitch climbs, as a share, while the revive channel fills.",
+ "reach_m": 20.0,
+ "mate_db": -8.0,
+ "foe_db": -12.0,
+ "own_db": -14.0,
+ "max_voices": 6,
+ "rise": 0.35
+}

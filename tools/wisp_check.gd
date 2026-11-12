@@ -49,6 +49,7 @@ func _start(opts: Dictionary) -> void:
 		h.inp["move"] = Vector2.ZERO
 
 func _frames(secs: float, drift := Vector3.ZERO) -> void:
+	Sfx.listener = m.player.pos      # the hum is heard only in earshot
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
@@ -80,7 +81,7 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.4)
 	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
 	ok(p.downed and not p.out, tag + "downed gameplay untouched: still downed, not out")
-	ok(Sfx.loop_on(HunterWisp.hum_key(p)), tag + "a downed Wisp hums")
+	ok(Sfx.loop_on(WispHum.key(p)), tag + "a downed Wisp hums")
 	_frames(0.3, Vector3(0.08, 0, 0))
 	ok(wisp.position.x < -0.1, tag + "a moving Wisp hangs back behind the hunter (%.2f m)" % -wisp.position.x)
 	ok((wisp.get_node("Body") as Node3D).basis != Basis.IDENTITY, tag + "...and leans")
@@ -92,7 +93,7 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.04)
 	var popping: bool = HunterWisp.mode_of(p) == HunterWisp.OUT
 	ok(not p.downed and p.model.visible and popping, tag + "revived: the hero is back, the pop-out plays")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), tag + "the revive stops the hum")
+	ok(not Sfx.loop_on(WispHum.key(p)), tag + "the revive stops the hum")
 	ok(p.model.scale.y < base.y * 0.95, tag + "the hero starts small (%.2f of full)" % (p.model.scale.y / base.y))
 	_frames(0.5)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
@@ -110,7 +111,7 @@ func _bleed_out() -> void:
 	_frames(0.1)
 	var gone: bool = HunterWisp.node_of(p) == null and HunterWisp.mode_of(p) == ""
 	ok(gone, "bleed-out or an execute breaks the Wisp (it is freed)")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), "...and stops the hum")
+	ok(not Sfx.loop_on(WispHum.key(p)), "...and stops the hum")
 	ok(m.fx.radial > burst0, "...with a burst of sparks")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
@@ -157,7 +158,7 @@ func _looks() -> void:
 		for key in default_look:
 			same_keys = same_keys and look.has(key)
 		ok(same_keys, "look '%s' has every key" % id)
-		for spec in [look["pop_in"], look["pop_out"], look["snuff"], look["hum"]]:
+		for spec in [look["pop_in"], look["pop_out"], look["snuff"]]:
 			ok(String(spec["sfx"]) in Sfx.NAMES, "look '%s': sound '%s' exists" % [id, spec["sfx"]])
 		_outline(String(id), look)
 	ok(WispLook.get_look("no_such_wisp") == default_look, "an unknown id gives the default Wisp")

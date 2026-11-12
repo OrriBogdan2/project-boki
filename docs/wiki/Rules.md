@@ -1631,6 +1631,20 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | default | ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"] |
 | paths | {"thief": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "gil": ["quickfeed", "longreach", "hotload", "quickfeed", "longreach"], "archer": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "mage": ["hotload", "hotload", "quickfeed", "longreach", "hotload"], "gunslinger": ["quickfeed", "hotload", "deepmag", "hotload", "longreach"], "juggernaut": ["hotload", "longreach", "hotload", "quickfeed", "hotload"], "bulwark": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "dredge": ["hotload", "hotload", "hotload", "quickfeed", "longreach"], "ashwick": ["hotload", "longreach", "hotload", "hotload", "quickfeed"], "tender": ["quickfeed", "hotload", "hotload", "longreach", "hotload"], "rimewright": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "dolm": ["hotload", "quickfeed", "hotload", "longreach", "quickfeed"], "ostra": ["hotload", "longreach", "hotload", "quickfeed", "hotload"]} |
 
+## wisp_hum (`content/rules/wisp_hum.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Hunter Wisp's hum (scripts/match/wisp_hum.gd, docs/AUDIO.md): a low loop under every visible downed Hunter. reach_m: metres it is heard from; mate_db / foe_db / own_db: the level for a teammate's, a rival's and your own Wisp (a teammate's is a little louder: it is the one you can save); max_voices: the most hums at once (the nearest win); rise: how far the pitch climbs, as a share, while the revive channel fills. |
+| reach_m | 20 |
+| mate_db | -8 |
+| foe_db | -12 |
+| own_db | -14 |
+| max_voices | 6 |
+| rise | 0.35 |
+
 ## wisp_looks (`content/rules/wisp_looks.json`)
 
 
@@ -1639,7 +1653,7 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 |---|---|
 | _doc | Wisp looks (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into. Add a look = add an entry under 'looks'; any key left out comes from 'default'. A look is chosen by its id in Save.d['look']['wisp']. Every look keeps the round outline (round = Hunter, critter = Boki). Colours: 'team' (the hunter's side colour, SideColor: you, ally, foe) or a hex string. core.rim_width is the fraction of the radius in the rim colour. body: radius and squash of the round body, head the radius of the head on top. hover is the body centre's height; drag how far the body trails behind the hunter, settle the seconds it takes to catch up (heavy), lean the tilt in radians at full drag. Times in seconds, sizes in metres, sfx names from Sfx.NAMES, hum.db the hum's level. |
 | default | default |
-| looks | {"default": {"name": "Wisp", "desc": "A round soul-light in your team's colour with a white heart, slow and heavy.", "core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3}, "body": {"radius": 0.3, "squash": 0.85, "head": 0.16}, "hover": 0.4, "bob": 0.04, "bob_hz": 0.45, "drag": 0.45, "settle": 0.5, "lean": 0.35, "hum": {"sfx": "wisp_hum", "db": -14.0}, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
+| looks | {"default": {"name": "Wisp", "desc": "A round soul-light in your team's colour with a white heart, slow and heavy.", "core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3}, "body": {"radius": 0.3, "squash": 0.85, "head": 0.16}, "hover": 0.4, "bob": 0.04, "bob_hz": 0.45, "drag": 0.45, "settle": 0.5, "lean": 0.35, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
 
 ## Combos
 
