@@ -316,8 +316,9 @@ Still differs:
 Seen in the reel (before `ext/tenzo-hit-impact`): the boulder trails an orange dotted line and bursts small, where
 the footage's bursts in a big fire flash with the damage number [F]; the punch shows its pale chevron lane but little
 impact, the footage a bright streak and rocks bursting in fire. Both hits now play a blue flash and short debris
-(`content/vfx/dolm.json`, sized by the 0.9 m splash and the lane's half width), no fire and no explosion; the Quakefall hold circle is pale blue-white where the footage's is red,
-while the dark red crater with orange cracks matches; Stone Row's molten basalt columns read like the footage's
+(`content/vfx/dolm.json`, sized by the 0.9 m splash and the lane's half width), no fire and no explosion (GPU
+before/after: `docs/shots/tenzo-hit-impact/before_after_gpu.jpg`); the Quakefall hold circle is pale blue-white where
+the footage's is red, while the dark red crater with orange cracks matches; Stone Row's molten basalt columns read like the footage's
 spiked rocks; Basalt Spine is a row of separate rocks where the footage's is one continuous orange spiked ridge
 with fire [F]; the Rock Hop shows a blue landing circle and a "SHIFT AGAIN" prompt, with no fire burst like the
 footage's Landslide.
