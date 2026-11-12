@@ -10,14 +10,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import meshkit as M, vex_parts as VP, vex_cannon as VC, vex_head as VH, vex_arm as VA, vex_paint as P
-from paintkit import ramp, hexc, mix, lit, clean_normal
+from paintkit import ramp, hexc, mix, lit
 from meshkit import smooth
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-NRM_CAGE, NRM_RAY = 0.005, 0.012      # m: the normal bake cage's extrusion, its ray's reach
 RAW = os.path.expanduser(os.environ.get("VEX_RAW", "~/meshy/vex_v2"))      # the Meshy run (never in git)
 UNIQ_W = 0.755
 HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
@@ -515,8 +514,8 @@ atlas = bpy.data.images.new("vex_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
 px[..., :3] = np.clip(OUTC, 0, 1)
 atlas.pixels.foreach_set(px.ravel())
-atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.jpg")
-atlas.file_format = "JPEG"
+atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.png")
+atlas.file_format = "PNG"
 atlas.save()
 
 for mt in me.materials:
@@ -546,9 +545,10 @@ for mt in me.materials:
     n_ = nt.nodes.new("ShaderNodeTexImage")
     n_.image = nrm_img
     nt.nodes.active = n_
-sc.cycles.samples = 16
+sc.cycles.samples = 4
 sc.render.bake.use_selected_to_active = True
-sc.render.bake.cage_extrusion, sc.render.bake.max_ray_distance = NRM_CAGE, NRM_RAY
+sc.render.bake.cage_extrusion = 0.014
+sc.render.bake.max_ray_distance = 0.03
 sc.render.bake.normal_space = "TANGENT"
 for o in bpy.data.objects:
     o.select_set(False)
@@ -561,12 +561,11 @@ bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6)
 NR = np.array(nrm_img.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)[..., :3]
 flat = ~((PID == 0) | (PID == names.index("hscan")))
 NR[flat] = (0.5, 0.5, 1.0)
-wrong = clean_normal(NR)
 px_n = np.ones((ATLAS, ATLAS, 4), np.float32)
 px_n[..., :3] = NR
 nrm_img.pixels.foreach_set(px_n.ravel())
 nrm_img.filepath_raw = os.path.join(os.path.dirname(OUT), "normal.png")
-nrm_img.file_format = "PNG"      # lossless in the .glb (JPEG bends a normal by 4 degrees on average); the engine compresses it (RG)
+nrm_img.file_format = "PNG"
 nrm_img.save()
 ob.select_set(True)
 for mt in me.materials:
@@ -575,7 +574,7 @@ for mt in me.materials:
     nm_ = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(n_.outputs[0], nm_.inputs["Color"])
     nt.links.new(nm_.outputs[0], nt.nodes["Principled BSDF"].inputs["Normal"])
-print("normal baked, wrong hits flattened %.4f" % wrong)
+print("normal baked")
 
 # ---- armature
 rig = json.load(open(RIG))
@@ -653,5 +652,5 @@ for o in list(bpy.data.objects):
         bpy.data.objects.remove(o)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(OUT)[0] + ".blend")
 objs = [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"]
-WK.export(OUT, objs, colors=True)
+WK.export(OUT, objs, image_format="JPEG", colors=True)
 print("exported", OUT, os.path.getsize(OUT))

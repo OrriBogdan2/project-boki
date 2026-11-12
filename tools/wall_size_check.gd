@@ -49,7 +49,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var base := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "no_drop": true}
-	await _match("Training Grounds", Match.arena_opts(), main)
+	await _match("Training Grounds", base.merged({"training": true, "practice": true, "seed": 4242}), main)
+	await _match("arena", Match.arena_opts(), main)
 	await _match("duel room", Match.duel_opts(), main)
 	await _match("tutorial", base.merged({"tutorial": true, "seed": 77}), main)
 	for seed_value in [3, 9]:
