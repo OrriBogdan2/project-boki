@@ -14,6 +14,8 @@ const QUIET_MAX := 900          # steps: the last trial's ability (an ult, a zon
 const DASH_WAIT := 40           # steps: a dash with a wind-up shows up within this
 const WATCH := 120              # steps after the press that we watch for the ability
 const GLOVE := "barrier"        # Q: an active glove that stays where it's cast
+const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Hearth Call): a squad of 2
+const ALLY_AT := Vector3(5, 0, -3)      # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
 ## the press goes mid-dash; Zedran and Bjorn dash AS the attack (no slash or swing inside it:
@@ -32,6 +34,7 @@ var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
 var hunter: Hunter
+var ally: Hunter                # the idle teammate of a NEEDS_ALLY hero, else null
 var wait_s := 0.0               # how long after the dash's end a buffered press went off
 
 func ok(cond: bool, what: String) -> void:
@@ -113,7 +116,8 @@ func _match(main: Node, hero: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
-		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+		"training": true, "teams": 2, "squad": 2 if hero in NEEDS_ALLY else 1, "tier": 0, "length": 1e9,
+		"seed": 77, "no_drop": true,
 		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero),
 	})
 	m.set_process(false)
@@ -140,9 +144,14 @@ func _match(main: Node, hero: String) -> Match:
 	hunter.unlock_all()
 	hunter.lvl = 10
 	hunter.gear[0] = {"id": GLOVE, "rar": 1}
+	ally = null
 	for other in m.hunters:
-		if other != hunter:
-			other.ctrl = "idle"
+		if other == hunter:
+			continue
+		other.ctrl = "idle"
+		if other.team == hunter.team:
+			ally = other
+		else:
 			other.teleport(hunter.pos + Vector3(60, 0, 60))
 	set_meta("home", hunter.pos)
 	_steps(m, 20)
@@ -190,6 +199,10 @@ func _ready_up(m: Match) -> void:
 	hunter.inp["move"] = Vector2.ZERO
 	hunter.inp["fire"] = false
 	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
+	if ally:
+		ally.teleport(hunter.pos + ALLY_AT)
+		ally.hp = ally.max_hp
+		hunter.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
 	_steps(m, 2)
 
 ## Control: the slot goes off when pressed without a dash, on the ground or up in the air (some need ground in
