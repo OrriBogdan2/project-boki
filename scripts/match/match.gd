@@ -3153,6 +3153,8 @@ func _process(delta: float) -> void:
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
+		if player and player.ak and player.inp["fire"] and Input.is_action_just_pressed("fire"):
+			player.ak.flow.press_frozen()      # no step sees this frame: the tap goes when the freeze ends
 		return
 	var d := DashPace.frame_dt(self, minf(delta, 0.1))
 	if slowmo > 0.0:
