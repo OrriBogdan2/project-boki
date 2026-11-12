@@ -93,7 +93,6 @@ func run(main: Node) -> void:
 							P.inp["glide"] = glide
 							m.step(DT)
 							# (a ledge rise counts once it has put you on top: see the next line)
-							pass
 							if P.grounded and P.pos.y > top - 0.2:
 								res = "caught"; break
 							if P.out or P.pos.y < top - HunterFeel.mantle_reach_abyss - 1.5:

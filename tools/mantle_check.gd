@@ -12,6 +12,8 @@ extends RefCounted
 ##   6. The fling: a jump in the window near the top flings you higher and further than a jump before
 ##      it or no jump at all.
 ##   5. Sheer cliffs (authored maps) never catch you.
+##   7. A dash into a rim (the four starters, ground and air, rims 0.6, 1.0, 1.5, 2.0 m): within reach you come
+##      over the top without stopping dead at the face; beyond it you never do (docs/MOVEMENT_FEEL.md).
 ## Counts fixed simulation steps; never touches the save. Prints "MCHECK ok|FAIL ..." lines and
 ## "MCHECK DONE, failures: N".
 
@@ -54,6 +56,7 @@ func run(main: Node) -> void:
 	_steering(walls)
 	_fling(walls)
 	_sheer()
+	_dash_rims()
 	print("MCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -347,3 +350,107 @@ func _sheer() -> void:
 					print("MCHECK   sheer caught: sheer tile (%.1f, %.1f) dir %s, rose from tile %s, hunter at %s, %.2fm under the top" % [gx, gz, str(dir), str(lt), str(h.pos.snapped(Vector3(0.01, 0.01, 0.01))), top - h.pos.y])
 				break
 	ok(s_caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [s_caught, s_tried])
+
+# ---------------------------------------------------------------- 7. a dash into a rim
+const DASH_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]     # Lace, Kael, Vex, Albert
+const DASH_RIMS := [0.6, 1.0, 1.5, 2.0]     # m the lip sits above your feet when you press Shift
+const RIM_TOP_LV := 3                       # terraces: the rim's top above the floor (air rows hang below it)
+const RIM_TRIAL_S := 2.5                    # s: a dash that hasn't topped out by then never will
+const STALL_MAX := 0.1                      # s stood still at a face you do climb: "always responsive"
+
+## Each starter dashes straight at a rim, keys held into it, from the ground and from the air. One row per
+## case: what happened (mantle, step up, stop, slide, bounce), the time from the press to standing on top,
+## the time stood still at the face, the time lost against the same press with no rim in the way, and the
+## speed you leave the face with. Ground rims come in whole terraces (0.8 m): a ground row builds the
+## terrace nearest its height. Lace's Shift with charges is the Spirit Walk (it climbs faces by design), so
+## her rows are her travel dash, the flick.
+func _dash_rims() -> void:
+	var wl: Dictionary = _carve_walls(1)[0]
+	var n: Vector2 = wl["n"]
+	var face: Vector2 = (wl["at"] as Vector2) + n * (h.r + 0.02)
+	var floor_lv := int(round(float(wl["low"]) / World.LEVEL))
+	for id in DASH_HEROES:
+		h.reclass(Arch.weight(id), id)
+		_rim_level(face, floor_lv)
+		_dash_trial(id, true, float(wl["low"]), face, n, 0.0)     # (a class swap's first Shift is lost: throw one)
+		var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(h) else 0.0)
+		for rim in DASH_RIMS:
+			var lv := maxi(1, int(round(rim / World.LEVEL)))
+			var built := lv * World.LEVEL
+			# the ground keeps its walking rule: a single terrace steps you up, a higher face needs a jump
+			_dash_rim_row(id, "ground", rim, built, floor_lv, lv, face, n, built <= World.LEVEL + 0.05)
+			var top := float(wl["low"]) + RIM_TOP_LV * World.LEVEL
+			_dash_rim_row(id, "air", rim, top - rim, floor_lv, RIM_TOP_LV, face, n, float(rim) <= reach)
+
+## The carved block's 5x5 tiles behind `face` (all the flat ground _carve_walls checked) set to terrace `lv`.
+func _rim_level(face: Vector2, lv: int) -> void:
+	for dz in range(-2, 3):
+		for dx in range(0, 5):
+			w.level[w.idx(int(round(face.x)) + dx, int(floor(face.y)) + dz)] = lv
+
+## One trial: Shift toward the face from feet height `y0` (the floor when `where` is "ground"), keys held.
+## Returns the step-by-step distance travelled along `n`, and what it met.
+func _dash_trial(id: String, grounded: bool, y0: float, face: Vector2, n: Vector2, top: float) -> Dictionary:
+	var at: Vector2 = face - n * (h.r + 1.2)
+	_reset(Vector3(at.x, y0, at.y), Vector3.ZERO, grounded)
+	for i in 20:
+		m.step(DT)     # the kit settles (its last move's timers)
+		if not grounded:
+			h.pos.y = y0     # held in the air
+			h.vel = Vector3.ZERO
+	h.dashes = 0.0 if id == "archer" else 2.0     # Lace out of charges: the flick, her travel dash
+	h.ex_cd = 0.0
+	h.air_dashed = false
+	h.inp["move"] = n
+	h.inp["dash"] = true
+	var t := 0.0
+	var out := {"t_top": -1.0, "stall": 0.0, "mantled": false, "back": 0.0, "slid": 0.0, "path": []}
+	var touched := false
+	var x0 := Vector2(h.pos.x, h.pos.z)
+	while t < RIM_TRIAL_S:
+		m.step(DT)
+		t += DT
+		h.inp["dash"] = false
+		var hv := Vector2(h.vel.x, h.vel.z)
+		var here := Vector2(h.pos.x, h.pos.z)
+		(out["path"] as Array).append((here - x0).dot(n))
+		var gap := (face - here).dot(n)     # m from your centre to the face
+		var at_face := gap <= h.r + 0.3
+		touched = touched or at_face
+		out["mantled"] = out["mantled"] or h.mantling()
+		if touched: out["back"] = maxf(out["back"], gap - h.r)
+		out["slid"] = maxf(out["slid"], absf((here - x0).dot(Vector2(-n.y, n.x))))
+		if at_face and hv.length() < 0.3 and h.pos.y < top - 0.1: out["stall"] += DT
+		if top > y0 + 0.1 and gap < -h.r and h.pos.y >= top - 0.05:     # over the rim, at its height or above
+			out["t_top"] = t
+			out["v_top"] = hv.length()
+			break
+	return out
+
+## One row: the dash at the rim, then the same press with the rim gone (the time the rim cost you).
+func _dash_rim_row(id: String, where: String, rim: float, y0: float, floor_lv: int, top_lv: int, face: Vector2,
+		n: Vector2, want_top: bool) -> void:
+	var grounded := where == "ground"
+	var feet := float(floor_lv) * World.LEVEL if grounded else y0
+	var top := float(floor_lv + top_lv) * World.LEVEL
+	_rim_level(face, floor_lv + top_lv)
+	var r := _dash_trial(id, grounded, feet, face, n, top)
+	var lost := -1.0
+	if r["t_top"] >= 0.0:
+		_rim_level(face, floor_lv)
+		var flat: Array = _dash_trial(id, grounded, feet, face, n, feet)["path"]
+		var d_top: float = (r["path"] as Array)[-1]
+		for i in flat.size():
+			if flat[i] >= d_top:
+				lost = maxf(0.0, r["t_top"] - (i + 1) * DT)     # (a step up's push can beat flat ground)
+				break
+	var what := "stop"
+	if r["t_top"] >= 0.0: what = "mantle" if r["mantled"] else "step"
+	elif r["back"] > 0.3: what = "bounce"
+	elif r["slid"] > 0.5: what = "slide"
+	var good: bool = (r["t_top"] >= 0.0) == want_top and (not want_top or r["stall"] <= STALL_MAX)
+	var top_s: String = ("%.2fs" % r["t_top"]) if r["t_top"] >= 0.0 else "never"
+	var lost_s: String = ("%.2fs" % lost) if lost >= 0.0 else "-"
+	var note := "" if want_top else "  (beyond reach: no climb wanted)"
+	ok(good, "dash-rim %-10s %-6s %.1fm (built %.1f): %-6s top %5s lost %5s stall %.2fs off-top %4.1fm/s%s"
+			% [id, where, rim, top - feet, what, top_s, lost_s, r["stall"], float(r.get("v_top", 0.0)), note])

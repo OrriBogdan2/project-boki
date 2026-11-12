@@ -977,10 +977,16 @@ func _wall2() -> Dictionary:
 					var hs: Vector2i = hi + side * sd
 					for k in range(0, 3):
 						var hk: Vector2i = hs + d * k
-						if not w.inb(hk.x, hk.y) or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 or w.sheer.has(w.idx(hk.x, hk.y)): good = false
+						if not w.inb(hk.x, hk.y) \
+								or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND \
+								or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 \
+								or w.sheer.has(w.idx(hk.x, hk.y)): good = false
 					for back in range(0, 4):
 						var lb: Vector2i = Vector2i(x, z) + side * sd - d * back
-						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0 or w.stairs.has(w.idx(lb.x, lb.y)): good = false
+						if not w.inb(lb.x, lb.y) \
+								or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND \
+								or int(w.level[w.idx(lb.x, lb.y)]) != l0 \
+								or w.stairs.has(w.idx(lb.x, lb.y)): good = false
 				if not good: continue
 				var n := Vector2(d)
 				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5
@@ -1302,7 +1308,7 @@ const OLD_FEEL := {
 	"lift_open_kick": 6.0, "lift_kick_heat": 0.08, "lift_hang_grav": 0.35, "lift_hang_t": 0.9, "ledge_air_t": 0.5,
 	"abyss_extra": 11.5
 }
-const OLD_TRACE_HASH := 3115338930
+const OLD_TRACE_HASH := 373774901   # recorded on origin/main 11-12, same trace
 
 func _moved_values() -> void:
 	var now := {
