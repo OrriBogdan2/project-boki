@@ -29,7 +29,6 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
-const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -44,7 +43,7 @@ var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the 
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
-var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
+var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (buffers.juggernaut_heavy)
 var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
@@ -323,7 +322,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
-	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
+	# pull, a dash or a Meteor Drop holds the blade is kept for buffers.juggernaut_heavy and swings when it's free
 	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
@@ -331,7 +330,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
 		# (a press in a dash is DashFlow's to hold)
-		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = BUFFER
+		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = Loco.buf_juggernaut_heavy
 		return true
 	if h.ctrl != "local":
 		# a bot: slashes up close, sometimes a Searing Wave from mid range
@@ -641,7 +640,7 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop) is kept for
-## BUFFER and goes off when it ends; in the Warchain's pull (and just after) it spins at once.
+## buffers.juggernaut_heavy and goes off when it ends; in the Warchain's pull (and just after) it spins at once.
 func press_rmb() -> void:
 	if smash_running():
 		rmb_queued_at = m.time
@@ -650,7 +649,7 @@ func press_rmb() -> void:
 	if rmb_down and rmb_ctx.get("e", false):
 		_release_rmb()
 
-## A heavy move owns the body: Smash and slash presses wait (BUFFER).
+## A heavy move owns the body: Smash and slash presses wait (buffers.juggernaut_heavy).
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
@@ -662,7 +661,7 @@ func _pull_waits() -> bool:
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
 	if not smash_running() and rmb_queued_at > -9.0:
-		var fresh: bool = m.time - rmb_queued_at <= BUFFER
+		var fresh: bool = m.time - rmb_queued_at <= Loco.buf_juggernaut_heavy
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
 	if e_held and not _pull_waits():

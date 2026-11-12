@@ -380,8 +380,8 @@ func _jump() -> void:
 # ---------------------------------------------------------------- input windows
 ## The input windows live in tuning.json buffers (DECISIONS 11-08): every key is set and has its line in
 ## buffers.doc, and none of the old code constants (or a literal window) is back anywhere in scripts/.
-const BUFFER_KEYS := ["ability_hold", "recast", "jump", "coyote", "shift"]
-const OLD_CONSTS := "const (BUFFER_S|RECAST_BUFFER|JUMP_BUFFER|DASH_BUFFER)\\b"
+const BUFFER_KEYS := ["ability_hold", "recast", "jump", "coyote", "shift", "juggernaut_heavy"]
+const OLD_CONSTS := "const (BUFFER_S|RECAST_BUFFER|JUMP_BUFFER|DASH_BUFFER)\\b|const BUFFER :="
 # a non-zero window set inline
 const WINDOW_LITERAL := "(coyote|jump_buf|dash_buf|recast_buf\\[[^]]*\\]) = [0-9.]*[1-9]"
 

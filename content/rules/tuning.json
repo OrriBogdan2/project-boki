@@ -12,12 +12,14 @@
 			"recast": "s: a recast pressed before its window opens is kept this long and goes the moment it opens",
 			"jump": "s: a jump pressed this long before you land goes off as you touch down",
 			"coyote": "s: after running off a ledge you can still jump for this long",
-			"shift": "s: a Shift pressed while a rush, grapple or pad flight still runs is kept this long and dashes as it ends"
+			"shift": "s: a Shift pressed while a rush, grapple or pad flight still runs is kept this long and dashes as it ends",
+			"juggernaut_heavy": "s: Juggernaut only: a Smash or slash pressed this close before a heavy move (Meteor Drop, Warchain pull, dash) ends goes off the moment it ends"
 		},
 		"ability_hold": 0.15,
 		"recast": 0.15,
 		"jump": 0.12,
 		"coyote": 0.12,
-		"shift": 0.18
+		"shift": 0.18,
+		"juggernaut_heavy": 0.12
 	}
 }

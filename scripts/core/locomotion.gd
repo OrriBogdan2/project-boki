@@ -41,6 +41,7 @@ static var buf_recast := 0.0
 static var buf_jump := 0.0
 static var buf_coyote := 0.0
 static var buf_shift := 0.0
+static var buf_juggernaut_heavy := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -76,6 +77,7 @@ static func load_tuning() -> bool:
 	buf_jump = b["jump"]
 	buf_coyote = b["coyote"]
 	buf_shift = b["shift"]
+	buf_juggernaut_heavy = b["juggernaut_heavy"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
