@@ -1,7 +1,9 @@
-"""Vespyx's skeleton and the clips that are its own: pincers, and tools in the tail."""
+"""Vespyx's skeleton and the clips that are its own: pincers, tools in the tail, and its gallop."""
+import math
+
 import boki_clips
 import vespyx
-from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
+from boki_clips import LOOK_UP, add, c, ear_pose, plant, s, seq, stride_leg, tail_wave, TAU
 from boki_clips import SHARED, idle
 from vespyx import SIDES, STING_C, TAIL_PTS
 
@@ -69,6 +71,40 @@ def attack(t):
         add(p, "hleg2." + sd, rx=-max(wind, 0) * 0.4)
     ear_pose(p, back=0.32 + max(wind, 0) * 0.4)
     tail_wave(p, t * 2, 0.04, up=wind * 0.22)
+    return p
+
+
+# a rotary gallop: each paw's touch-down (of the cycle). A gathered flight across 0, where the exported loop holds
+# its first frame for one frame, so no paw is down through that hold.
+GALLOP = {("hleg", ".L"): 0.08, ("hleg", ".R"): 0.23, ("fleg", ".L"): 0.46, ("fleg", ".R"): 0.61}
+GALLOP_DUTY = 0.12     # of the cycle a paw is down
+GALLOP_REACH = 0.155   # m before and behind its rest place that a paw sweeps back through at one speed
+GALLOP_LIFT = 0.07     # m a paw clears on its way forward
+RUN_DROP = -0.035      # m the body crouches into the gallop, so the paws reach the ground far ahead and behind
+
+
+def run(t):
+    """A gallop: the hind paws land one after the other and push, then the fore, then a gathered flight. Each planted
+    paw goes back at one steady speed, so it holds the ground at the rate BokiRig picks."""
+    p = {}
+    fr = s(t, 1, -0.15)
+    p["root_at"] = (0, RUN_DROP + 0.025 * max(0.0, c(t, 1, 0.1)) ** 3, 0)
+    add(p, "root", rx=fr * 0.06)
+    add(p, "hips", rx=fr * 0.16)
+    add(p, "spine", rx=-fr * 0.26)
+    add(p, "neck", rx=fr * 0.2 - 0.12)
+    add(p, "head", rx=fr * 0.14 - 0.04)
+    for (pre, sd), down in GALLOP.items():
+        ankle = BONES[pre.replace("leg", "paw") + sd][0]
+        u = (t - down) % 1.0
+        y, z = stride_leg(u, GALLOP_DUTY, ankle[2] - GALLOP_REACH, ankle[2] + GALLOP_REACH, ankle[1], GALLOP_LIFT)
+        curl = math.sin(math.pi * (u - GALLOP_DUTY) / (1 - GALLOP_DUTY)) if u > GALLOP_DUTY else 0.0
+        toes = (-0.8 if pre == "fleg" else 0.6) * curl      # in the air the forepaw flicks back, the hind toes curl
+        plant(p, BONES, (pre, sd), (y, z), toes, bend=-1.0)  # the straight foreleg folds at the wrist, backward
+    for sd, sx in SIDES:
+        add(p, "arm." + sd, rx=-0.25, rz=-sx * 0.2)
+    ear_pose(p, back=0.62 + fr * 0.08, out=0.08)
+    tail_wave(p, t, 0.09, up=0.7, roll=0.03, lag=0.07)
     return p
 
 
@@ -184,6 +220,7 @@ def mine(t):
 
 CLIPS = dict(SHARED)
 CLIPS.update({
+    "run": (0.44, True, run),
     "attack": (0.8, False, attack),
     "ability": (1.1, False, ability),
     "sleep": (3.4, True, sleep),
