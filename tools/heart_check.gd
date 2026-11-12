@@ -4,7 +4,7 @@ extends RefCounted
 ##   1. the site and Gate, the Blight's tide and its wall, the Heart asleep until wake_s, the Heartspark
 ##      charging, taking it, the carrier's slow and reveal, dropping on down, the Gate only for the carrier, the
 ##      minor bundle, no second Heartspark, a carrier leaving by uplink drops it, the major bundle at home, "ht"
-##      requests.
+##      requests, the two once-per-save tips (Heart.tip_for: charged and free, carrying it).
 ##   2. the Gate takes the carrier's squad within gate_take_r (a downed mate too), not a mate farther off.
 ##   3. the final seat: a squad alone fills the ring, a standing rival stalls it, an empty ring drains, full
 ##      takes that squad with major pay and the islands fall end_after_final_s later.
@@ -181,11 +181,13 @@ func _early_seat(main: Node) -> void:
 	ok(H.state == Heart.S.CHARGING, "a Heartspark starts charging when the Heart wakes")
 	_run(m, float(rl["charge_s"]) * 0.5)
 	ok(H.state == Heart.S.CHARGING and H.charge > 0.0, "still charging halfway")
+	ok(H.tip_for(p).is_empty(), "no Heartspark tip while it charges")
 	_put(m, p, H.site + Vector3(3, 0, 0))
 	_hold_f(m, p, 3.0)
 	ok(H.carrier == null, "an uncharged Heartspark can't be taken")
 	_run(m, float(rl["charge_s"]) * 0.5 + 1.0)
 	ok(H.state == Heart.S.READY, "the Heartspark is charged")
+	ok(H.tip_for(p) and H.tip_for(p)[0] == "heart_spark", "charged and free: the take-it tip")
 	# ---- taking it
 	_put(m, p, H.site + Vector3(6, 0, 0))
 	_hold_f(m, p, 3.0)
@@ -195,6 +197,9 @@ func _early_seat(main: Node) -> void:
 	ok(H.carrier == null, "a short hold doesn't take it")
 	_hold_f(m, p, float(rl["pickup_hold_s"]) + 0.3)
 	ok(H.state == Heart.S.CARRIED and H.carrier == p, "holding interact takes the Heartspark")
+	var other: Hunter = m.hunters.filter(func(x): return x != p)[0]
+	ok(H.tip_for(p) and H.tip_for(p)[0] == "heart_carry" and H.tip_for(other).is_empty(),
+		"the carrier gets the reach-the-Gate tip, nobody else a tip")
 	ok(is_equal_approx(float(p.get_meta("heart_slow", 0.0)), float(rl["carrier_slow"])),
 		"the carrier is slowed by %.0f%%" % (float(rl["carrier_slow"]) * 100.0))
 	p.set_meta("heart_slow", 0.0)

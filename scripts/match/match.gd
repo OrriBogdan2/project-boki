@@ -5693,6 +5693,8 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	var heart_tip := heart.tip_for(player) if heart else []
+	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
