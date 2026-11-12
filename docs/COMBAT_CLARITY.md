@@ -40,7 +40,7 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 
 | Hunter | grade | why (what still reads badly) | owner |
 |---|---|---|---|
-| Grimble (dredge) | clear-ish | ult fixed: the fan is the true area in his gold (`#ffc832`) at AimKit's low fill, the crescent that swept the fan each wave is cut, the wave flash at his fists 0.6 m (was 1.9 m) and a slug's hit glow 0.4 m (was 0.9 m); still four colours across the kit | ult on `ext/combat-grimble-ult-clarity` (stills `docs/shots/combat-grimble-ult-clarity/`), the rest per-Hunter |
+| Grimble (dredge) | clear-ish | ult fixed: the fan is the true area in his gold (`#ffc832`) at AimKit's low fill, the crescent that swept the fan each wave is cut, each slug draws only its own orb (Match's plain sphere and its 3 m halo went under it), the wave flash at his fists 0.6 m (was 1.9 m) and a slug's hit glow 0.4 m (was 0.9 m); still four colours across the kit | ult on `ext/combat-grimble-ult-clarity` (stills `docs/shots/combat-grimble-ult-clarity/`), the rest per-Hunter |
 | Motley (ostra) | unclear | several large violet well discs at once, no edge to tell whose (now leaning red/blue via shared telegraphs only where they go through ArchKit/AimKit); indigo vs teal signature | per-Hunter job |
 | Meeko (tender) | unclear | big gold seed rings and teal ult dome fill the ground under everyone; heals and hurts look alike | per-Hunter job |
 | Sable (thief) | unclear | LMB hits barely show; her X discs are pale | per-Hunter job |
