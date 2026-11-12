@@ -48,6 +48,8 @@ func _duel(main: Node, arch: String, seeds: Array, secs: float) -> void:
 		m.duel.arch = arch
 		m.duel.spawn_bot()
 		var fighters: Array = [m.player, m.duel.bot]
+		for f in fighters:       # (XP is a kill reward now and a 2-minute duel levels nobody: open the X ultimate)
+			f.lvl = maxi(f.lvl, int(Hunter.ULT_AT[0]))
 		var instant := float(Arch.def(arch).get("rmb", {}).get("hold", 0.0)) <= 0.0      # no hold: the press casts
 		var cb_use := func(who, id, slot): if who in fighters: _use(n, String(id), String(slot), instant)
 		var cb_hit := func(by, _t, _d, tags): if by in fighters: _hit(n, tags)
