@@ -46,34 +46,10 @@ func _phase(t: float) -> String:
 	return at
 
 func _hunter(main: Node, arch: String, dir: String) -> void:
-	var m := Match.new()
-	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
-	m.set_process(false)
-	m.hud.visible = false
-	for mob in m.mobs:
-		mob.queue_free()
-	m.mobs.clear()
+	var m := await _start(main, arch, dir)
 	var h: Hunter = m.player
-	h.set_arch(arch)
-	h.unlock_all()
-	for other in m.hunters:
-		if other != h:
-			other.ctrl = "idle"
-			other.teleport(h.pos + Vector3(60, 0, 60))
-	for i in 20:
-		m.step(Match.DT)
 	h.teleport(h.pos + Vector3(0, HEIGHT, 0))
-	cam = Camera3D.new()
-	m.add_child(cam)
-	cam.make_current()
-	cam.fov = FOV
-	var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
-	if sync:
-		sync.set_process(false)
-	for v in ["back", "side"]:
-		DirAccess.make_dir_recursive_absolute(dir.path_join(v))
+	var sync := _sync(h)
 	var heading := Vector2(1, 0)
 	var step := 0
 	var t := 0.0
@@ -107,6 +83,42 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 		t = step * Match.DT
 	m.queue_free()
 	await tree.process_frame
+
+## A live training match with `arch` alone in it (the mobs gone, the other Hunters idle far off), settled for 20 steps,
+## the camera made current and <dir>/{back,side} made (also --flue-flight-shots).
+func _start(main: Node, arch: String, dir: String) -> Match:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
+	m.set_process(false)
+	m.hud.visible = false
+	for mob in m.mobs:
+		mob.queue_free()
+	m.mobs.clear()
+	var h: Hunter = m.player
+	h.set_arch(arch)
+	h.unlock_all()
+	for other in m.hunters:
+		if other != h:
+			other.ctrl = "idle"
+			other.teleport(h.pos + Vector3(60, 0, 60))
+	for i in 20:
+		m.step(Match.DT)
+	cam = Camera3D.new()
+	m.add_child(cam)
+	cam.make_current()
+	cam.fov = FOV
+	for v in ["back", "side"]:
+		DirAccess.make_dir_recursive_absolute(dir.path_join(v))
+	return m
+
+## The Hero clips' sync, its own process off: the shot loop steps it after each render (null: no .glb).
+func _sync(h: Hunter) -> WardenGlb.Sync:
+	var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	if sync:
+		sync.set_process(false)
+	return sync
 
 ## The rig's and the shown body's tilt off upright, in degrees: roll (+ leaning left) and pitch (+ nose-down), from
 ## the Rig node, and from the .glb's hips-to-head line when it wears one.
