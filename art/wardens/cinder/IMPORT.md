@@ -1,9 +1,22 @@
-# Cinder (ashwick): import note, v95 swap of Cinder appeal3, body b (2026-11-10)
+# Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
-`cinder.glb`: the owner's pick (11-10), Cinder v95 r2 appeal3 `cand_b.glb` (body variant b with the appeal3 face, one mesh), swapped
+`cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
-`art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal3 (never in git); the spec reads `cinder_v95_b_body.glb`,
-which is `cand_b.glb` without its tail (unrigged in the master): the game's own tail stays.
+`art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
+`cinder_v95_bust5_body.glb`, which is `cand_5.glb` without its tail (unrigged in the master): the game's own tail stays.
+
+`cand_5.glb` (11-11) redoes candidate 3's bust after the owner's note that it juts out like a cone in side view (and "all the girls a
+bit curvier, tighter waist, not weird from the side"). Candidate 3 scaled the bust radially, so the apex moved most. Candidate 5
+displaces each breast as a dome instead: zero slope where it meets the chest wall (no shelf), volume spread over the whole breast,
+a fuller lower curve with a small drop, and the apex lower and softer (38.1 cm forward vs 38.8). Waist about 9% narrower at its
+narrowest, hips +4.5%. Same vertices and UVs, so the shell and lava seams ride it (triangle area p95 1.51x). Candidate 3's
+painted face is kept. Sheet: ~/art-review/cinder-bust-round-1111/cmp_bust_round.png; candidate 4 is the perkier alternative.
+
+`cand_3.glb` (previous in-game, 47415fdfe) was the owner's earlier pick (appeal3 `cand_b.glb`, body variant b with the appeal3 face; in game at 51ec101a8) after the
+owner's 11-10 evening note ("bust should be bigger", "both big and seductive"): a fuller rounded bust (apex 6.5 cm further forward,
+10.4 cm past the underbust instead of 3.9), waist 1.5 cm narrower, hips 1.9 cm wider, and half-lidded eyes, smoky liner, one raised
+brow and fuller lips painted into the appeal3 face. Same vertices and UVs as `cand_b.glb`. Numbers, the milder candidates 1 and 2
+and the reasons: `pick.txt` and `cmp_bust.png` beside the raw files. This is the worker's pick, not yet the owner's.
 
     blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/cinder_v95.json WORK art/wardens/cinder/cinder.glb
 
@@ -27,13 +40,17 @@ the new mesh (the spec's `anchors`). Her fire stream keeps the rules' NOZZLE.
 
 `cinder.glb.import`: `generate_lods=false`, `force_disable_compression=true`, `remove_immutable_tracks=false`.
 
-Shots on the game rig (`--warden-shots`): docs/shots/cinder-appeal-b/ (front_34, turnaround_close, closeup_front, closeup,
-poses_game, moves_close_1/2): no tearing at the mouth or elsewhere, no arm/chest clipping in idle, run or the moves.
+Shots on the game rig (`--warden-shots`): docs/shots/cinder-bust/ (front_34, turnaround_close, closeup_front, closeup,
+poses_game, moves_close_1/2, back_34, turnaround_game): no tearing at the mouth or elsewhere, and no arm crossing the bigger bust in
+idle, run or the moves (the chest rides `hips` rigidly, so it cannot tear).
 
-Checks: `--cinder-art-check` 0 fails; `--warden-glb-check` all ashwick lines pass (13.7k tris); `--warden-model-check`
+Checks (11-11, candidate 5): `--cinder-art-check` 0 fails; `--warden-glb-check` PASS; `--warden-model-check` PASS;
+`--stretch-check --wardens=ashwick` flags all 41 clips as before, worst 5.83x (lance_stoke; idle 2.17x), the same as candidate 3's.
+Shots on the game rig: docs/shots/cinder-bust/ (re-rendered for candidate 5).
+Earlier, candidate 3: `--cinder-art-check` 0 fails; `--warden-glb-check` 183 checks, 0 failed (13.7k tris); `--warden-model-check`
 passes with ashwick's `height_3d` re-measured to 1.15 (the new horns stand lower than v2's). `--stretch-check` (new,
-`tools/stretch_check.gd`, the same maths as `tools/art1/skin_relax.py`) still flags every ashwick clip past 1.3x, worst 6.8x
-(idle 2.3x, run 4.0x); the old build was worse on every clip (worst 19.4x, idle 5.8x, run 11.9x), from the same rig's hips,
+`tools/stretch_check.gd`, the same maths as `tools/art1/skin_relax.py`) still flags every ashwick clip past 1.3x, worst 5.9x
+(lance_stoke; idle 2.2x; 6.8x and 2.3x with body b); the old build was worse on every clip (worst 19.4x, idle 5.8x, run 11.9x), from the same rig's hips,
 thighs, forearms and the kept jets.
 
 Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUDIT.md idle and stance and the
@@ -41,11 +58,21 @@ Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUD
 onto the swapped body by node name (same skeleton: no rest drift) and added `x_breath` with kael_retarget.py's
 `add_breath` at her own spot (0.283 m over hips) and chest band (1.0-1.32 m up, |x| under 0.17 m): 3363 vertices.
 
-Directional loops (2026-11-11, second pass; the judge kept only these): run_b re-strided from the hand-keyed loop, and
-walk_fl, walk_fr, walk_bl, walk_br, run_fl, run_fr, run_bl on the recipe. On main's model:
-`blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- cinder.glb B.glb 2.26 5.19 b+` and
-`... -- cinder.glb DIAG.glb 2.26 5.19 fl,fr,bl,br` (her `loco.foot_mps`: the game plays the ring at speed / foot_mps, so
-the soles land at 2.2 and 4.6 m/s), then `glb_add_clips.py cinder.glb B.glb run_b` first and
-`glb_add_clips.py cinder.glb DIAG.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl` after (prefix match: run_b
-would replace run_bl). Her foot jets are scaled down in every loco clip; the recipe keys bone scale since this pass
-(the first pass's fl/br showed them full size). Judge: docs/art/wardens/dirloops/JUDGE.md.
+Directional loops (2026-11-11 first/second pass, merged onto main's cand_5 body 11-12): only the four walk diagonals
+survive, `walk_fl/fr/bl/br` (blind-judged winners on `hunter_dir_gait.py ... 2.26 5.19 fl,fr,bl,br`, foot jets' bone
+scale keyed), copied onto main's glb by `glb_add_clips.py cinder.glb <branch glb> walk_fl,walk_fr,walk_bl,walk_br`
+(walk_f/b/l/r are byte-equal on both sides). The branch's run_b restride and run_fl/fr/bl were baked on the old 0.7 s
+run_f; main's re-key (below) replaced run_* with a 0.333 s scurry, so they are dropped, main's run_f/b/l/r and
+`foot_mps` 5.15 stay. Run diagonals on the new run_f need a Blender pass (hunter_dir_gait.py on the re-keyed loop).
+Judge: docs/art/wardens/dirloops/JUDGE.md. `in_step` is on so the walk ring keeps time.
+
+Appeal4 (cand_5, ext/cinder-bust 7efd99345) in 0.24.5: that branch swapped onto the appeal3 b glb from before the
+line's IDLE_AUDIT clips, so the 0.24.5 merge copied the line glb's 41 clips (spring tracks included) onto the cand_5
+body by node name (same skeleton, no rest drift) and added `x_breath` at the line's spot with the chest band
+1.00-1.32 m up, |x| under 0.17 m (kael_retarget.add_breath): 3288 vertices.
+
+Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with cinder_clips.py on
+~/meshy/cinder_v2/stage_p2/cinder.blend (a control bake of `walk_f` matched this glb's to 4e-7) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
+On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
+command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.

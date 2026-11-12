@@ -215,3 +215,8 @@ Gate on this tree:
 
 Not passed: restride on side steps. Cinder's are already wide hand-keyed straddles, and a longer stance reads as a lunge.
 The next try is a crossover side step, with the trail foot passing in front, and the stance shortened rather than stretched.
+
+### Cinder after the 11-12 merge with main
+Main re-keyed Cinder's run_* (ext/anim-cinder-rekey: a 0.333 s scurry, `foot_mps` 5.15). Only the four walk diagonals
+(walk_fl/fr/bl/br, judged above) stay on her; the run_b restride and run_fl/fr/bl were baked on the old 0.7 s run_f and
+are dropped. Run diagonals on the new run_f are open (needs Blender, not on this worker). Sable and Vex unchanged.
