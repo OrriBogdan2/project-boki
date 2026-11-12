@@ -20,7 +20,7 @@ static func on_mob_dead(m: Match, mb: Mob, credit: Ent, o: Dictionary) -> void:
 	elif m.time - float(mb.team_hit.get(team, -1e9)) <= STEAL_WINDOW:
 		m._tip(STEAL_KEY, STEAL_TEXT)
 
-## v11 -> v12: the two flags exist in every save, unseen (an old save sees each line once).
+## v13 -> v14: the two flags exist in every save, unseen (an old save sees each line once).
 static func migrate(data: Dictionary) -> void:
 	var seen: Dictionary = data.get("tutorial", {})
 	seen[KILL_KEY] = bool(seen.get(KILL_KEY, false))
