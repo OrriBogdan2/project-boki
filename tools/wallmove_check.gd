@@ -361,7 +361,7 @@ func _spring_count(tap: bool) -> int:
 func _guards(low_wall: Dictionary, high_wall: Dictionary) -> void:
 	var taps := _spring_count(true)
 	ok(taps <= 1, "tap-open, release, tap-open springs once, not each time (%d springs)" % taps)
-	ok(h.vel.y <= Hunter.ABYSS_LIFT_CAP + 0.01, "the spring never beats the lift cap (%.1f m/s)" % h.vel.y)
+	ok(h.vel.y <= HunterFeel.abyss_lift_cap + 0.01, "the spring never beats the lift cap (%.1f m/s)" % h.vel.y)
 	var edge := _rim()
 	var g: Vector3 = edge["at"]
 	var d: Vector2 = edge["dir"]

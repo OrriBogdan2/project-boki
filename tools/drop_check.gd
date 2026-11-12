@@ -87,12 +87,13 @@ func _steering() -> void:
 		snap = maxf(snap, hv.distance_to(prev) / Match.DT)
 		prev = hv
 		tmax = maxf(tmax, hv.length())
-	ok(snap <= DropFeel.DIVE_ACCEL + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
-	ok(tmax > Hunter.DROP_SPEED * 1.4 and tmax <= Hunter.DIVE_SPEED + 0.1, "the dive tops out at %.1f m/s" % tmax)
+	ok(snap <= HunterFeel.drop_dive_accel + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
+	var dive_top := HunterFeel.dive_speed
+	ok(tmax > HunterFeel.drop_speed * 1.4 and tmax <= dive_top + 0.1, "the dive tops out at %.1f m/s" % tmax)
 	P.inp["move"] = Vector2.ZERO
 	m.step(Match.DT)
 	var left := Vector2(P.vel.x, P.vel.z).length()
-	ok(left > tmax - DropFeel.BRAKE * Match.DT * 1.5, "letting go decelerates, it does not stop dead")
+	ok(left > tmax - HunterFeel.drop_brake * Match.DT * 1.5, "letting go decelerates, it does not stop dead")
 
 	var high := DropFeel.fall_vy(-13.0, 13.0, 7.0, 30.0, 0.1)
 	var low := DropFeel.fall_vy(-13.0, 13.0, 7.0, 1.0, 0.1)

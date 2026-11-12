@@ -93,7 +93,7 @@ func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 	if h.grounded or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
 		return
 	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()      # (a shove outlives the dash: only its run is a ram)
-	if wall_top - h.pos.y <= Hunter.MANTLE_REACH or ramming or not h.charge.is_empty():
+	if wall_top - h.pos.y <= HunterFeel.mantle_reach or ramming or not h.charge.is_empty():
 		return
 	var into := -hit_v.dot(h.wall_n)
 	if into < BOUNCE_MIN_INTO or into > hit_v.length() * cos(deg_to_rad(BOUNCE_HEAD_ON_DEG)):

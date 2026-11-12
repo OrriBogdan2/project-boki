@@ -96,7 +96,7 @@ func run(main: Node) -> void:
 							pass
 							if P.grounded and P.pos.y > top - 0.2:
 								res = "caught"; break
-							if P.out or P.pos.y < top - Hunter.MANTLE_REACH_ABYSS - 1.5:
+							if P.out or P.pos.y < top - HunterFeel.mantle_reach_abyss - 1.5:
 								break
 							if glide and P.gliding and i > 90 and P.pos.y > top - 1.0:
 								res = "held"; break     # the glider holds you at the lip: not under the island

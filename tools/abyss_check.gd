@@ -165,7 +165,7 @@ func run(main: Node) -> void:
 	var dn := 0; var dgood := 0; var worst_drop := 0.0; var worst_t := 0.0; var stuck := 0; var grabbed := 0
 	for e in edges:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
-		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - (Hunter.MANTLE_REACH_ABYSS + 0.1), e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
+		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - (HunterFeel.mantle_reach_abyss + 0.1), e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
 		h.last_gy = top
 		var r := _run(6.0, func(_t): h.inp["move"] = -dir)
 		dn += 1
@@ -174,7 +174,7 @@ func run(main: Node) -> void:
 		worst_drop = maxf(worst_drop, _ref(Vector3(e["ex"], top, e["ez"])) - float(r["low"]))
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
-	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [Hunter.MANTLE_REACH_ABYSS + 0.1, grabbed])
+	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [HunterFeel.mantle_reach_abyss + 0.1, grabbed])
 	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
 	ok(stuck < 6, "sliding down the face never snags (longest hang %d frames)" % stuck)
 	# a plain walk off the edge: how far below the lip before the abyss

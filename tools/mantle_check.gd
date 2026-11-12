@@ -94,7 +94,7 @@ func _rims() -> void:
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
 			# hanging in the air against the face, 2.5m below the lip, pushing back toward the island
-			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
+			# (the side of an island catches you up to HunterFeel.mantle_reach_abyss below its lip; see --abyss-check)
 			var edge_x := at.x; var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
 				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25

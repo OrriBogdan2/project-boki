@@ -5,9 +5,9 @@ extends RefCounted
 ## over the lip under low gravity (Hunter.abyss_lift_vy does the climb itself). High over the ground
 ## the glider pulls you down toward HunterMove.glide_height; the drop never turns into speed (DECISIONS 11-08).
 
-const OPEN_KICK := 6.0      # [est] m/s of spring when the glider opens more than Hunter.ABYSS_BRAKE_DIST under the lip
+const OPEN_KICK := 6.0      # [est] m/s of spring when the glider opens deeper than abyss_brake_dist under the lip
 const KICK_HEAT := 0.08     # [est] share of a full glider's heat the spring costs
-const HANG_GRAV := 0.35     # [est] share of Hunter.GLIDE_GRAV while the lift's float lasts: a soft hang at the top
+const HANG_GRAV := 0.35     # [est] share of HunterFeel.glide_grav while the lift's float lasts: a soft hang at the top
 const HANG_T := 0.9         # [est] s the float lasts after the last lifting step
 const LEDGE_AIR_T := 0.5    # s in the air after which a ledge higher than where you last stood is yours to catch
 
@@ -34,13 +34,13 @@ func sink(h: Hunter, usual: float) -> float:
 
 ## Opening the glider well below an island's lip springs you upward, once per lift, for a little heat.
 func open_kick(h: Hunter) -> void:
-	if kicked or h.dropping or not h.below_lip or h.lip_y - h.pos.y <= Hunter.ABYSS_BRAKE_DIST:
+	if kicked or h.dropping or not h.below_lip or h.lip_y - h.pos.y <= HunterFeel.abyss_brake_dist:
 		return
 	kicked = true
-	h.vel.y = minf(maxf(h.vel.y, 0.0) + OPEN_KICK, Hunter.ABYSS_LIFT_CAP)
+	h.vel.y = minf(maxf(h.vel.y, 0.0) + OPEN_KICK, HunterFeel.abyss_lift_cap)
 	h.glide_fuel = maxf(0.0, h.glide_fuel - KICK_HEAT)
 
 ## Airborne long enough, gliding, or just off the glider: pressing into a wall means climbing it, not
 ## stepping back up a terrace you just left.
 static func airborne_long(h: Hunter) -> bool:
-	return h.gliding or h.glide_off_t < Hunter.FEATHER_KEEP or h.air_t > LEDGE_AIR_T
+	return h.gliding or h.glide_off_t < HunterFeel.feather_keep or h.air_t > LEDGE_AIR_T

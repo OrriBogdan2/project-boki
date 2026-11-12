@@ -221,7 +221,7 @@ Other checks:
 
 | Constant | Before | After | Why |
 |---|---|---|---|
-| `GlideLift.OPEN_KICK` | none | 6 m/s, once per lift, 8% of the heat, capped at `ABYSS_LIFT_CAP` | spring when the glider opens more than 2.5m under the lip |
+| `GlideLift.OPEN_KICK` | none | 6 m/s, once per lift, 8% of the heat, capped at `HunterFeel.abyss_lift_cap` | spring when the glider opens more than 2.5m under the lip |
 | `ABYSS_LIP_VY` | 1.5 m/s | 3.5 m/s | the lift reaches the lip still rising and floats over it |
 | `GlideLift.HANG_GRAV` / `HANG_T` | 1.0 / none | 0.35 / 0.9s | lower gravity at the top of a lift: a soft hang |
 | `GLIDE_DECEL` | 2.0 | 1.4 | less drag, a long coast |

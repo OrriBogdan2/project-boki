@@ -852,7 +852,7 @@ func _abyss_updraft() -> void:
 func _kill_y() -> float:
 	if P.has_method("abyss_kill_y"): return P.call("abyss_kill_y")
 	var fl: float = w.abyss_floor(P.pos.x, P.pos.z, P.last_gy)
-	return fl - (Hunter.ABYSS_GLIDE_ROOM if P.gliding and P.glide_fuel > 0.001 else 0.0)
+	return fl - (HunterFeel.abyss_glide_room if P.gliding and P.glide_fuel > 0.001 else 0.0)
 
 func _abyss_depths(g: Vector3, d: Vector2) -> void:
 	var out := Vector3(g.x + d.x * 4.0, g.y, g.z + d.y * 4.0)
@@ -1052,22 +1052,23 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
-		if tvy < 0.0 and -P.vel.y >= 0.9 * Hunter.DIVE_FALL: tvy = (i + 1) * DT
-		if tst < 0.0 and P.vel.x >= 0.9 * Hunter.DIVE_SPEED: tst = (i + 1) * DT
+		if tvy < 0.0 and -P.vel.y >= 0.9 * HunterFeel.dive_fall: tvy = (i + 1) * DT
+		if tst < 0.0 and P.vel.x >= 0.9 * HunterFeel.dive_speed: tst = (i + 1) * DT
 		if not P.diving: break
 	rec("drop_dive_vy_t", tvy if tvy > 0.0 else 9.0)
 	rec("drop_dive_steer_t", tst if tst > 0.0 else 9.0)
 	# deploy on a press (well above the auto height)
 	_reset(flat + Vector3(0, 40.0, 0), false)
 	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
-	P.vel = Vector3(0, -Hunter.DIVE_FALL, 0)
+	P.vel = Vector3(0, -HunterFeel.dive_fall, 0)
 	_steps(5)
 	P.inp["jump"] = true
 	var fd := -1; var ts := -1.0
 	for i in 60:
 		m.step(DT)
 		if fd < 0 and not P.diving: fd = i + 1
-		if ts < 0.0 and not P.diving and absf(-P.vel.y - Hunter.DROP_FALL) <= 0.1 * Hunter.DROP_FALL: ts = (i + 1) * DT
+		var sink := HunterFeel.drop_fall
+		if ts < 0.0 and not P.diving and absf(-P.vel.y - sink) <= 0.1 * sink: ts = (i + 1) * DT
 	rec("drop_deploy_frames", fd)
 	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
 	# steer under the canopy
@@ -1076,12 +1077,12 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(0, 1)
 		m.step(DT)
-		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.DROP_SPEED: tg = (i + 1) * DT
+		if tg < 0.0 and P.vel.z >= 0.9 * HunterFeel.drop_speed: tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
 	# land and move off straight away
 	_reset(flat + Vector3(0, 3.0, 0), false)
 	P.dropping = true; P.diving = false; P.gliding = true
-	P.vel = Vector3(0, -Hunter.DROP_FALL, 0)
+	P.vel = Vector3(0, -HunterFeel.drop_fall, 0)
 	var landed := false
 	for i in 120:
 		m.step(DT)
@@ -1280,6 +1281,19 @@ const OLD_VALUES := {
 	"dash_speed": 19.0, "dash_time": 0.19, "dash_regen": 2.2, "ex_dash_cd": 12.5, "dash_buffer": 0.18,
 	"ex_time_mul": 1.45, "ex_dist": 5.0,
 }
+const OLD_FEEL := {
+	"spirit_climb": 14.0, "jump_buffer": 0.12, "ground_accel": 90.0, "air_decel": 9.0, "air_overspeed": 3.0,
+	"glide_grav": 14.0, "glide_engage": 0.1, "abyss_lift": 22.0, "abyss_lift_per_m": 7.0, "abyss_lift_max": 5.0,
+	"abyss_lift_max_per_m": 1.1, "abyss_lift_cap": 18.2, "abyss_brake_dist": 2.5, "abyss_brake": 60.0,
+	"abyss_lip_vy": 4.5, "abyss_brake_gain": 3.5, "mantle_reach": 1.5, "tall_climb_extra": 0.9,
+	"mantle_reach_abyss": 4.5, "wall_catch_reach": 0.75, "abyss_glide_room": 1.5, "ledge_reach": 2.8, "ledge_cd":
+	0.45, "float_speed": 12.0, "glide_fall": 1.7, "glide_time": 9.0, "dive_fall": 13.0, "dive_speed": 14.0,
+	"drop_fall": 4.2, "drop_speed": 8.0, "dive_vy_rate": 7.0, "drop_vy_rate": 9.0, "deploy_pop": -1.6, "deploy_h":
+	8.0, "feather_keep": 0.6, "feather_min": 0.05, "feather_tap": 0.3, "feather_tap_heat": 1.0, "lrise_speed": 14.0,
+	"lrise_min": 4.0, "lrise_pop": 2.6, "lrise_off": 0.9, "lrise_window": 0.6, "fling_height": 0.9, "fling_speed":
+	7.5, "fling_early_height": 0.2, "drop_accel": 26.0, "drop_dive_accel": 45.0, "drop_brake": 30.0, "drop_flare_h":
+	4.0, "drop_flare_fall": 2.2, "drop_flare_rate": 6.0, "drop_land_squash": 0.45
+}
 const OLD_TRACE_HASH := 3115338930
 
 func _moved_values() -> void:
@@ -1292,6 +1306,16 @@ func _moved_values() -> void:
 	for k in OLD_VALUES:
 		var same := is_equal_approx(float(now[k]), OLD_VALUES[k])
 		ok(same, "tuning.json %s = %s (was %s)" % [k, str(now[k]), str(OLD_VALUES[k])])
+	var feel: Dictionary = Loco.T["feel"]
+	var moved := 0
+	for k in OLD_FEEL:
+		moved += 1 if is_equal_approx(float(feel[k]), OLD_FEEL[k]) else 0
+	var all_kept := moved == OLD_FEEL.size() and feel.size() == OLD_FEEL.size() + 1
+	ok(all_kept, "the %d hunter feel numbers kept their values (%d of them)" % [OLD_FEEL.size(), moved])
+	var untagged := 0
+	for k in OLD_FEEL:
+		untagged += 0 if str(feel["notes"].get(k, "")).substr(0, 3) in ["[D]", "[F]", "[O]", "[E]"] else 1
+	ok(untagged == 0, "every feel number has a note with a source tag (%d without)" % untagged)
 	var trace := _trace()
 	ok(trace == OLD_TRACE_HASH, "the run, jump, dash, glide trace is unchanged (%d, was %d)" % [trace, OLD_TRACE_HASH])
 
