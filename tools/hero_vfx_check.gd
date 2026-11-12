@@ -273,8 +273,8 @@ func _vex_tracer(main: Node) -> void:
 			var age := i - int(born[sd["sid"]])          # steps since it was fired (the kit picks it up a step on)
 			if (mine.is_empty() and age > 0) or (age >= TRACER_FULL and (drawn < 2.0 or drawn > 4.5)):
 				bare += 1
-			var glow: Color = ((sd["node"] as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("color")
-			if not mine.is_empty() and glow.a > 0.0:
+			var orb := (sd["node"] as MeshInstance3D).material_override as ShaderMaterial
+			if not mine.is_empty() and (orb.get_shader_parameter("color") as Color).a > 0.0:
 				lit += 1
 	P.inp["fire"] = false
 	ok(born.size() >= 15, "a held string fires its rounds (%d)" % born.size())
