@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	await _growth()
 	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	load("res://tools/ashwick_cancel_rows_check.gd").new(ak, ok).run()      # the Cancels table, row by row
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
