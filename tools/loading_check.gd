@@ -1,5 +1,5 @@
 extends RefCounted
-## --loading-check: the loading screen (scripts/ui/loading.gd). Every Hunter resolve a splash, a tip
+## --loading-check: the loading screen (scripts/ui/loading.gd). Every Hunter resolves a splash, a tip
 ## and a map name; then a real expedition load runs with the screen up and the bar is sampled every
 ## frame: it only moves forward, in steps small enough to read as smooth, passes the build and the
 ## graphics warm-up stages in order, and is full when the screen leaves.
