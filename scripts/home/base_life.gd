@@ -4,8 +4,9 @@ extends RefCounted
 ## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, or a
 ## snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
-## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
-## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
+## another Boki (friends chase, BaseChase), stares at a rival or comes to look at a newcomer. A retired mentor
+## (Mentor) only strolls slowly near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are
+## HomeToys' (k["play"]: it picks,
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
@@ -91,7 +92,7 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
-		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
+		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: BaseChase.clear(k))
 		m.on_exit(S.NAP, func(_to: int) -> void:
 			k.erase("life_pile")
 			BaseDuo.woke(k))
@@ -188,6 +189,9 @@ func choose(k: Dictionary) -> void:
 		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
+	var friend: Dictionary = BaseChase.pick(self, k, near)
+	if not friend.is_empty() and BaseChase.begin(self, k, friend):
+		return
 	var mate := _mate(k, near)
 	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
 		_tag(k, mate)
@@ -234,7 +238,10 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.PLAY:
 			_play_tick(k, m, dt)
 		S.PLAY_WITH:
-			_tag_tick(k, m)
+			if k.has("life_chase"):
+				BaseChase.tick(self, k, m, dt)
+			else:
+				_tag_tick(k, m)
 		S.WATCH, S.REACT:
 			_look_tick(k, m)
 		S.CHORE:

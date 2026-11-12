@@ -44,6 +44,62 @@ func _gather(home, at: Vector3) -> void:
 		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 
+## Two friends, the more outgoing one first: who starts, the cap, a swap, the 6-10 s length, the walkable ground
+## all through, and both lying down side by side at the end. The other two Boki are parked asleep.
+func _chase_rows(home, center: Vector3) -> void:
+	var R: Dictionary = BaseChase.rules()
+	var life: BaseLife = home.life
+	home.day_t = 0.4
+	for k in home.kins:
+		(life.machine(k) as Fsm).go(BaseLife.S.ROAM, "test")
+		k["nap_t"] = 0.0
+		k["pers"]["social"] = 1.0
+	var a: Dictionary = home.kins[0]
+	var b: Dictionary = home.kins[1]
+	var c: Dictionary = home.kins[2]
+	var d: Dictionary = home.kins[3]
+	a["pers"]["social"] = 0.4
+	b["pers"]["social"] = 0.1
+	BaseLife.add_bond(a["rec"], b["rec"], 2.0)
+	BaseLife.add_bond(c["rec"], d["rec"], 2.0)
+	_gather(home, center)
+	ok(BaseChase.pick(life, b, [a]).is_empty() and is_same(BaseChase.pick(life, a, [b]), b),
+		"friends: the more outgoing one (social 0.4 over 0.1) is the one that starts")
+	var began := BaseChase.begin(life, a, b)
+	ok(began and a.has("life_it") and not b.has("life_it") and life.machine(b).is_in(BaseLife.S.PLAY_WITH),
+		"start: both friends are in PlayWith and the starter is the chaser")
+	var secs := float(a["life_for"])
+	ok(secs >= R["secs"][0] and secs <= R["secs"][1], "start: the chase is %.1f s (6 to 10)" % secs)
+	ok(BaseChase.pick(life, c, [d]).is_empty() and BaseChase.running(life) == 1,
+		"cap: a second pair in the zone does not start while one chase runs")
+	var swaps := 0
+	var dry := true
+	var t := 0.0
+	var was_it: bool = a.has("life_it")
+	var ended_at := -1.0
+	while t < 20.0:
+		home._move_kin(DT)
+		t += DT
+		for k in [a, b]:
+			var p: Vector3 = k["pos"]
+			dry = dry and not home.world.is_void(p.x, p.z) and home.water.depth(p.x, p.z) < 2
+		swaps += 1 if a.has("life_it") != was_it and a.has("life_chase") else 0
+		was_it = a.has("life_it")
+		if ended_at < 0.0 and not life.machine(a).is_in(BaseLife.S.PLAY_WITH):
+			ended_at = t
+	ok(swaps >= 1, "swap: the tag landed and the roles swapped (%d swaps)" % swaps)
+	ok(dry, "nav: both stayed on the zone's ground, out of deep water")
+	ok(ended_at > 0.0 and absf(ended_at - secs) <= 1.0, "end: it stopped at %.1f s of the %.1f s" % [ended_at, secs])
+	ok(life.machine(a).is_in(BaseLife.S.NAP) and life.machine(b).is_in(BaseLife.S.NAP) and BaseLife._dist(a, b) < 2.5,
+		"end: both are resting together (%.1f m apart)" % BaseLife._dist(a, b))
+	var marks: bool = a.has("life_chase") or b.has("tag_pace") or BaseChase.running(life) > 0
+	ok(not marks, "end: the chase marks are gone")
+	var slow := {"stats": {"speed": 0}, "species": "cindle"}
+	var fast := {"stats": {"speed": 999}, "species": "cindle"}
+	var p_fast := BaseChase._pace(fast, 1.0)
+	var p_slow := BaseChase._pace(slow, 1.0)
+	ok(p_fast > p_slow, "pace: a higher Speed stat runs faster (%.2f over %.2f)" % [p_fast, p_slow])
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -72,6 +128,7 @@ func run(m: Node) -> void:
 	var day_asleep := 0
 	var pip_awake := 0
 	var refused := 0
+	var chase_max := 0         # most friend chases running at once in the 10 minutes
 	var t := 0.0
 	while t < SIM_SECS:
 		if t < ARRIVE_AT and t + DT >= ARRIVE_AT:
@@ -83,6 +140,7 @@ func run(m: Node) -> void:
 			home.day_t = 0.0
 		home._move_kin(DT)
 		t += DT
+		chase_max = maxi(chase_max, BaseChase.running(home.life))
 		for k in home.kins:
 			if not k.has("life"):
 				continue
@@ -118,6 +176,9 @@ func run(m: Node) -> void:
 	ok(pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames])
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
+	var cap := int(BaseChase.rules()["per_zone"])
+	ok(chase_max <= cap, "never more than %d friend chase at once in the 10 minutes (most %d)" % [cap, chase_max])
+	_chase_rows(home, center)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
