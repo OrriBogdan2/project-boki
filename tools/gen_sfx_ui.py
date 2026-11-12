@@ -4,6 +4,9 @@ Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quie
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
+Inventory (InvSfx): grab = a cloth lift under a tiny high tine, drop = a soft set-down into a slot,
+equip = a muted buckle clink over a leather thump, swap = a falling tick, a slide, a rising tick,
+take = a rustle and a short rising pair (quieter and duller than pickup).
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -134,6 +137,44 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+# ---------------------------------------------------------------- inventory (InvSfx)
+def rustle(d, lo=1200, hi=4500, amt=0.3):
+    """A short cloth rustle: band noise that comes and goes fast."""
+    return bpf(noise(d), lo, hi) * env(N(d), 0.006, d * 0.3) * amt
+
+
+def inv_grab(i):
+    j = jit(i, 0.03)
+    lift = S.sweep(240 * j, 420 * j, 0.06) * env(N(0.06), 0.004, 0.018) * 0.5
+    return finish(room(mix(rustle(0.08), lift, at(0.35 * pluck(NOTE['E6'] * j, 0.07, 0.014, 0.3), 0.025)), 0.3), 3400)
+
+
+def inv_drop(i):
+    j = jit(i, 0.03)
+    seat = S.sub(210 * j, 140, 0.08, 0.022)
+    return finish(room(mix(0.8 * seat, 0.55 * pluck(NOTE['C5'] * j, 0.12, 0.03, 0.4), rustle(0.05, 900, 3000, 0.2)), 0.3), 2600)
+
+
+def inv_equip(i):
+    j = jit(i, 0.03)
+    thump = S.sub(170 * j, 110, 0.1, 0.03)
+    clink = S.chime(NOTE['A5'] * j, 0.16, 0.035, ((1.0, 0.6), (2.76, 0.25)))
+    return finish(room(mix(0.8 * thump, at(0.35 * clink, 0.02), at(0.25 * clink, 0.075), rustle(0.07, 800, 3000, 0.2)), 0.4), 3600)
+
+
+def inv_swap(i):
+    j = jit(i, 0.03)
+    slide = bpf(noise(0.12), 500, 2200) * np.sin(np.pi * np.arange(N(0.12)) / N(0.12)) ** 2 * 0.25
+    return finish(room(mix(0.6 * pluck(NOTE['G5'] * j, 0.08, 0.018, 0.4), at(slide, 0.03),
+                           at(0.6 * pluck(NOTE['C6'] * j, 0.1, 0.022, 0.4), 0.13)), 0.3), 3600)
+
+
+def inv_take(i):
+    j = jit(i, 0.03)
+    return finish(room(mix(rustle(0.09, 1000, 4000, 0.25), at(0.6 * pluck(NOTE['D5'] * j, 0.1, 0.025, 0.5), 0.02),
+                           at(0.5 * pluck(NOTE['G5'] * j, 0.14, 0.035, 0.5), 0.07)), 0.3), 3200)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -150,6 +191,11 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.takes_cat('inv_grab', inv_grab, 3, 'ui')
+    S.takes_cat('inv_drop', inv_drop, 3, 'ui')
+    S.takes_cat('inv_equip', inv_equip, 2, 'ui')
+    S.takes_cat('inv_swap', inv_swap, 2, 'ui')
+    S.takes_cat('inv_take', inv_take, 3, 'ui')
 
 
 if __name__ == '__main__':
