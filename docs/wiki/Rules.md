@@ -1239,8 +1239,8 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | npc | {"buy_k": 0.8, "sell_lo": 1.0, "sell_hi": 1.4, "buy_chance": 0.5, "stalls": ["Brindle's Barrow", "The Tin Lantern", "Moss & Daughter", "Quayside Odds", "Old Fen Wares"], "per_stall": 5} |
 | npc_doc | Offline stand-ins for other players. NPC buyers take a listing only when it is priced at most buy_k x the item's reference price (buy_chance per expedition). NPC stalls sell at sell_lo..sell_hi x reference. buy_k < sell_lo is the anti-mint rule: buying from the game and selling back to it always loses gems. |
 | stall | {"max_listed": 6, "levels": {"1": "Vendor", "2": "Shelter, your stall and search", "3": "Auction House"}} |
-| shelter | {"strays": 4, "base": 30, "per_level": 6, "rare": 160, "shimmer": 120, "per_mutation": 60, "min_age_days": 7, "trust_keep": 0.5, "npc_adopt": 0.35, "gave_cap": 200} |
-| shelter_doc | Adopting costs base + per_level x (level - 1) + rare (rare species) + shimmer + per_mutation x mutations; the gems are destroyed. Giving a Boki up pays nothing. npc_adopt: chance per expedition that an NPC adopts a Boki someone gave up. |
+| shelter | {"strays": 3, "stray_fee": 20, "base": 30, "per_level": 6, "rare": 160, "shimmer": 120, "per_mutation": 60, "min_age_days": 7, "trust_keep": 0.5, "npc_adopt": 0.35, "gave_cap": 200} |
+| shelter_doc | The shelter always holds at least `strays` strays (ordinary commons that are not the usual starters, level 1) at the flat stray_fee; adopting one brings another at once. A given Boki costs base + per_level x (level - 1) + rare (rare species) + shimmer + per_mutation x mutations; the gems are destroyed. Giving a Boki up pays nothing. npc_adopt: chance per expedition that an NPC adopts a Boki someone gave up. |
 | transfer | {"fee": 40, "week_days": 7} |
 | transfer_doc | Handing a Boki straight to a named player: a flat fee (destroyed), one per week per sender, and the receiver has to accept. |
 | auction | {"hours": [12, 24, 48], "snipe_s": 60, "extend_s": 120, "max_open": 3, "npc_lots": 3, "npc_bid_k": 0.8, "npc_lot_start": 1.0, "npc_lot_cap": 1.3} |
