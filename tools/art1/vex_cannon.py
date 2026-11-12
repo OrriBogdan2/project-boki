@@ -86,7 +86,7 @@ def gatling():
     out = [lathe("gcollar", "metal-vex", 0.0, GATLING_F, [(REC_S1 - 0.005, 0.0), (REC_S1 - 0.005, 0.046), (REC_S1 + 0.03, 0.05), (REC_S1 + 0.045, 0.042), (REC_S1 + 0.045, 0.0)], n=12)]
     out.append(lathe("gspindle", "metal-vex", 0.0, GATLING_F, [(REC_S1 + 0.04, 0.018), (TIP_S - 0.01, 0.018)], n=6, bone="gatling", cap=False))
     for s0, s1, r in ((0.41, 0.43, 0.05), (TIP_S - 0.03, TIP_S - 0.005, 0.052)):
-        out.append(lathe("gband%d" % int(s0 * 100), "metal-vex", 0.0, GATLING_F, [(s0, 0.02), (s0, r), (s1, r), (s1, 0.02)], n=12, bone="gatling", cap=False))
+        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 > 0.45 else "metal-vex", 0.0, GATLING_F, [(s0, 0.02), (s0, r), (s1, r), (s1, 0.02)], n=12, bone="gatling", cap=False))
     for i in range(6):
         t = i / 6 * 2 * np.pi
         bu, bf = 0.033 * np.cos(t), GATLING_F + 0.033 * np.sin(t)

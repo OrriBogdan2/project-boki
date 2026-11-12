@@ -140,9 +140,10 @@ func tick(dt: float, a: HunterAnim, s: Dictionary) -> void:
 	hip = Vector3(_hip.x * side, _hip.y, _hip.z) * _idle_w + _fid_hip * fe
 	var free_l := (1.0 + side) * 0.5      # the weight on the right leaves the left one free
 	var free_r := 1.0 - free_l
-	hip_l = Vector2(_free_leg.x * free_l + _knee * 0.5, -_free_leg.y * free_l - _knee) * _idle_w
-	hip_r = Vector2(_free_leg.x * free_r + _knee * 0.5, -_free_leg.y * free_r - _knee) * _idle_w
-	spread = _spread * _idle_w
+	var legs_w := _idle_w * (1.0 - a.gait.gait_k) if a.gait != null else _idle_w      # the Empty's gait owns its legs
+	hip_l = Vector2(_free_leg.x * free_l + _knee * 0.5, -_free_leg.y * free_l - _knee) * legs_w
+	hip_r = Vector2(_free_leg.x * free_r + _knee * 0.5, -_free_leg.y * free_r - _knee) * legs_w
+	spread = _spread * legs_w
 	arm_l = _arm_l * _idle_w
 	breath_k = lerpf(1.0, _breath_amp, _w)
 	_tick_carry(dt, a, s)
@@ -174,9 +175,9 @@ func carry_free_l() -> float:
 func carry_free_r() -> float:
 	return _carry_free_r * carry_w
 
-## How far a whole-body move (downed, gliding, a ledge, a dodge, a trick...) takes over from the stance.
+## How far a whole-body move (gliding, a ledge, a dodge, a trick...) takes over from the stance.
 func _whole_body(a: HunterAnim) -> float:
-	var off := maxf(maxf(a.down_k, a.glide_k), maxf(a.dive_k, a.ledge_k))
+	var off := maxf(a.glide_k, maxf(a.dive_k, a.ledge_k))
 	off = maxf(off, maxf(maxf(a.revive_k, a.act_k), maxf(a.base_k, a.stomp_k)))
 	off = maxf(off, maxf(maxf(a.dash_k, a.emote_k), a.stun_k))
 	if a.roll_t >= 0.0 or a.trick != "":
