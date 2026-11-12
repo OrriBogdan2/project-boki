@@ -327,7 +327,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	var start := h.position
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
-	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
+	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0, "from": h.pos}
 	play("gunslinger_dash")
 	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
 	# No rings or discs: those mean damage or an area in this game
@@ -387,6 +387,10 @@ func _tick_slide(dt: float) -> void:
 				slide["held"] = true
 				curved = {}                              # the hold slide sets its own speed
 				slide["t0"] = t
+				# `slide` m is the whole hold from where she pressed: the slide covers what the skid hasn't
+				var from: Vector3 = slide["from"]
+				var skidded := Vector2(h.pos.x - from.x, h.pos.z - from.z).length()
+				slide["left"] = maxf(float(dd["slide"]) - skidded, 0.0)
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
@@ -404,7 +408,7 @@ func _tick_slide(dt: float) -> void:
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
 	if anim_id == "gunslinger_dash":
 		anim_at = maxf(anim_at, float(m.time) - SLIDE_KEY)   # the clip stays low on its slide key while she slides
-	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
+	h.roll_speed = float(slide["left"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 
 # ------------------------------------------------------------------ RMB: Burr Charge

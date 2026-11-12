@@ -758,12 +758,14 @@ func _plain_dash() -> void:
 		ok(dashed and spawned == 0, "a plain %s dash spawns no burst or ring (%d)" % [where, spawned])
 	m.biomes = biomes
 
-## Per-kit felt dash (KIT_PARITY gap 4): [metres, seconds] each plain dash really travels, ground and air.
+## Per-kit felt dash (KIT_PARITY gap 4): [metres, seconds] each plain dash really travels, ground and air
+## ("hold": the key kept down on the ground, for a kit whose held dash goes further).
 ## A sourced kit runs its source numbers as-is (no dash feel); the owner's x0.85 / x1.15 stays only on the
 ## kits with no source dash (content/rules/dash_feel.json). Claire's Skate and Ostra's Lantern Trade never
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
-	"gunslinger": {"ground": [4.8, 0.45], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
+	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
+	"gunslinger": {"ground": [4.8, 0.45], "hold": [7.0, 0.73], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
 	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
 	"archer": {"ground": [3.0, 0.386], "src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
@@ -786,10 +788,10 @@ func _kit_dashes() -> void:
 	for id in KIT_DASH:
 		var row: Dictionary = KIT_DASH[id]
 		P.reclass(Arch.weight(id), id)
-		for where in ["ground", "air"]:
+		for where in ["ground", "air", "hold"]:
 			if not row.has(where): continue
 			var want: Array = row[where]
-			var got := _dolm_hop() if id == "dolm" else _felt_dash(where == "air")
+			var got := _dolm_hop() if id == "dolm" else _felt_dash(where == "air", where == "hold")
 			var hit := absf(got[0] / float(want[0]) - 1.0) <= DASH_TOL[0]
 			hit = hit and absf(got[1] - float(want[1])) <= DASH_TOL[1]
 			ok(hit, "felt dash %-10s %-6s %.2f m in %.3f s, want %.2f m in %.3f s  (%s)"
@@ -803,11 +805,13 @@ func _kit_dashes() -> void:
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
-func _felt_dash(air: bool) -> Array:
+## `hold` keeps the dash key down to the end.
+func _felt_dash(air: bool, hold := false) -> Array:
 	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
+	P.inp["dash_down"] = hold
 	var start := Vector3.INF
 	var n := 0
 	for i in 150:
@@ -821,6 +825,7 @@ func _felt_dash(air: bool) -> Array:
 			n += 1
 		elif start != Vector3.INF:
 			var end := Vector2(P.pos.x, P.pos.z) - _hv(P) * (DT - left)
+			P.inp["dash_down"] = false
 			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
 
