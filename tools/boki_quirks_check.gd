@@ -5,7 +5,8 @@ extends RefCounted
 ## female, born male, half and half) and is the same for the same seed, through Save.new_kin and
 ## Care.breed; a fast eater gets hungry faster; rain lifts or sinks the moods of the kinds that care;
 ## a rain-sensing Boki warns once before rain and stays quiet when none is coming; the Field Book page
-## shows the quirk and the sex note. Never touches the save.
+## shows the quirk and the sex note, where it's found and its rarity ("?" for both until it's met), and
+## the boss-egg kinds close the book. Never touches the save.
 
 const SEEDS := 4000      # hatches rolled per kind for the share checks
 
@@ -129,4 +130,14 @@ func _field_book(main: Node) -> void:
 	var texts: Array = v.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	ok(texts.has(BokiQuirks.quirk("hivara")) and texts.has(BokiQuirks.sex_note("hivara")),
 		"the Field Book page shows its quirk and sex note")
+	var unmet: Array = texts.filter(func(t): return t == "?")
+	ok(unmet.size() >= 2 or FieldBook.form_seen("hivara"), "an unmet Boki's page shows ? for found in and rarity")
 	v.queue_free()
+	var book: Array = FieldBook.entries()
+	var tail_rare: bool = book.slice(-3).all(func(s): return Data.is_rare(s))
+	ok(tail_rare and not Data.is_rare(book[0]), "the boss-egg Boki are the last entries in the book")
+	ok(DexFound.tier("pebbit") == 0 and DexFound.tier("hivara") == 2, "wild is Common, Rare Egg is Very rare")
+	var wild_at := DexFound.found_in("pebbit")
+	var egg_at := DexFound.found_in("hivara")
+	ok(wild_at.begins_with("Expedition, The Hollow Crown: ") and egg_at.contains("Thornhive"),
+		"found in: the mode and map, then regions (wild) or the boss's lair: %s | %s" % [wild_at, egg_at])
