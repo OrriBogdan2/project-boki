@@ -16,11 +16,11 @@ icons, our portraits, our fonts).
 | Part | Reference (1080p px) | Layout px | Ours |
 |---|---|---|---|
 | Portrait | bust ~163x182, pale disc behind | ~109x122 | round, r 50 at (66, 596), pale disc in class colour |
-| Armour badge (round icon right of portrait) | dia 52 at (248, 919) | dia 35 at (165, 613) | `ArmorHud.RADIUS` 17.5 at `BADGE_C` |
+| Armour badge (round icon right of portrait) | dia 52 at (248, 919) | dia 35 at (165, 613) | `ArmorHud.RADIUS` 16 (+ outline) at `BADGE_C` |
 | Leaning plate | x 50..246, y 958..1010, lean 0.56 px/px | x 33..164, y 638..673 | `PLATE_*`, lean `HudStyle.LEAN_K` 0.5 (shared with squad rows) |
 | Armour bar (over health) | h 7, segmented ~32 px | y 639.5, h 4.5 | `AR_Y` / `AR_H`, segments `seg_step(max_armor)` |
 | Armour number | tab over plate, ~10 px caps | font 10 | tab at the plate's top-left |
-| Health bar | w 162, h 23, segments ~26 px | y 645, w ~108, h 15, segments ~17 | `HP_Y` / `HP_H` / `BAR_W` 104, `seg_step(max_hp)` (25 hp, about 18 px at 145 hp) |
+| Health bar | w 162, h 23, segments ~26 px | y 645, w ~108, h 15, segments ~17 | `HP_Y` / `HP_H` / `BAR_W` 107.5, `seg_step(max_hp)` (25 hp, about 18 px at 145 hp) |
 | Strip under health (+ value tab) | h 5, value on a tab at its right | y 662, h 3 | shield, or the merged form's shell |
 | Health number | caps ~23 px, heavy, leaning | font 21, baseline 683 | `NUM_FS`, `lean_text` |
 | "/ max" | caps ~10 px, muted | font 10 | `MAX_FS` |
@@ -42,14 +42,14 @@ strip `#7edaf0` (`SHIELD_BAR`), plate `#050f19` (`FRAME`), XP `#d33efd` (`XP`), 
 ## Minimap and phase line (`Hud._draw_minimap`, `_draw_clock_bar`)
 | Part | Reference (1080p px) | Layout px | Ours |
 |---|---|---|---|
-| Disc | dia 252, centre (138, 159), thin pale rim | dia 168, top-left (8, 22) | `MM_D`, `MM_AT`, rim 1.5 px |
-| Clock tab | 59x15, centred on the disc's top, grey | 40x13 | match time left; red under 30 s |
-| Phase line | words y ~316, bar h 6, x 19..257 | words + 3 px bar, x 7..177 | raid condition, phase word, `LV. n`; bar `#0863d4` on `#242f3e` |
+| Disc | dia 252, centre (138, 159), thin pale rim | dia 168, top-left (8, 22) | `MM_D`, `MM_AT`; the dark backing is exactly `MM_D` (it was 2 px bigger) |
+| Clock tab | 59x15, centred on the disc's top, grey | 40x10 | match time left; red under 30 s |
+| Phase line | words y ~316, bar h 6, x 19..257 | words + 4 px bar, x 12.7..171.3 | raid condition, phase word, `LV. n`; bar `#0863d4` on `#242f3e` |
 
 ## Weapon (`weapon_hud.gd`)
 | Part | Reference (1080p px) | Layout px | Ours |
 |---|---|---|---|
-| Silhouette | pale white side-on gun, x 256..374, y 974..1022 | x 171..250, y 650..682 | `AT` (210, 666), `Icons` at scale 42 (~76 px wide), `SIL` `#eef6fb`, element tints it 35 % |
+| Silhouette | pale white side-on gun, x 256..374, y 974..1022 | x 171..250, y 650..682 | `AT` (210, 662.5), `Icons` at scale 42 (~76 px wide), `SIL` `#eef6fb`, element tints it 35 % |
 | Ammo | none shown (its gun has no magazine) | | leaning count, font 15, "/ mag" font 10, baseline 700 under the silhouette; reload dims it and fills a 3 px strip |
 
 Every weapon has its own drawn silhouette in `icons.gd` (the 11 that had none got one).
@@ -61,7 +61,7 @@ Every weapon has its own drawn silhouette in `icons.gd` (the 11 that had none go
 | Count over a slot | "2/8", caps ~11 px, in the item colour | font 11, 4 px over the slot | "left/max" (replaces the old corner badge) |
 | Item cards | 53x62, pitch 60, rarity-coloured foot ~19 px | 36x42, pitch 40, foot 12 | gloves (rarity foot) and the Boki (foot = bond meter, gold) (`GripHud.W/H/BASE_H`) |
 | Gap consumables to cards | 48 | 32 | `TO_GRIPS` |
-| Item column, right edge | round icons dia ~34, pitch ~38 | 26, pitch 30, 14 from the edge | `GearPanel` (gloves, armour, boots), rarity rim |
+| Item column, right edge | round icons dia ~34, pitch ~38 | 23, pitch 25.5, 14 from the edge | `GearPanel` (gloves, armour, boots), rarity rim |
 
 The weapon card that used to sit bottom-right is gone: weapon → silhouette above, gems → currency
 top right, seeds / box / backpack → the line under it.
@@ -69,11 +69,19 @@ top right, seeds / box / backpack → the line under it.
 ## Top right (`score_row.gd`)
 | Part | Reference (1080p px) | Layout px | Ours |
 |---|---|---|---|
-| Counter icons | ~15 px, pitch 43, centre y 26 | scale 6.5, pitch 28, y 17 | squads left, kills, knocks |
+| Counter icons | ~15 px, pitch 43, centre y 26 | scale 7.5, pitch 28, y 17 | squads left, kills, knocks |
 | Rule | 1 px `#9cb8ce`, diamond ends, y 44 | y 29.5 | `RULE_*` |
 | Counts | caps ~12 px, white, under each icon | font 12, baseline 44 | |
-| Currency | caps ~21 px `#e8f8d0`, coin dia 26 at the right | font 20, baseline 23 | gems + gem icon (`CUR_*`, `COIN_R`) |
+| Currency | caps ~21 px `#e8f8d0`, coin dia 26 at the right | font 20, baseline 23 | gems + a gem on a round coin (`CUR_*`, `COIN_D`, `COIN_R`) |
 | Carry line | (a stat list in the ref) | font 10-11, baseline 60 | seeds · box, backpack used/max |
+
+## Verified render (`tools/hud_measure.py`)
+`--hud-verify-shots --size=WxH --shots-dir=<d>` saves the HUD in a fixed state and the same frame with the HUD
+hidden; `python3 tools/hud_measure.py <d>` diffs the pair, measures each row above in 1080p-equivalent px and fails
+on a drift over 2 px at 1080p, a difference over 2 px between 1920x1080, 1280x720 and 2560x1080, a part closer
+than 4 px to the window edge, or two parts overlapping. One row is kept (`KEPT`): the weapon silhouette is 5 px
+taller than the ref's (our rifle drawing has a taller grip; its width matches). The portrait stays our round
+r 50 (the ref's cut-out bust is private art we do not have).
 
 ## Left for later (not in this pass)
 - Squad rows and the ALLY KNOCKED world marker: `ext/squad-frames` (same reference, same `LEAN_K`

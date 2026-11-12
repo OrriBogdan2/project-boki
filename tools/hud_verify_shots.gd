@@ -44,11 +44,11 @@ func run(main: Node) -> void:
 			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame
 	var sz := main.get_viewport().get_visible_rect().size * main.get_window().content_scale_factor
-	var name := "hud_%dx%d" % [int(sz.x), int(sz.y)]
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(name + ".png"))
+	var stem := "hud_%dx%d" % [int(sz.x), int(sz.y)]
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(stem + ".png"))
 	m.hud.visible = false
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(name + "_bare.png"))
-	print("HUDVERIFY-SHOT ", name)
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(stem + "_bare.png"))
+	print("HUDVERIFY-SHOT ", stem)
 	main.get_tree().quit()

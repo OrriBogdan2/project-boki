@@ -77,7 +77,8 @@ func run(main: Node) -> void:
 	ok(RankMarks.NUMERALS[3] == "III", "a rank shows as a numeral on the slot")
 	# the weapon between the vitals and the ability row; the bottom-right row; the top-right counters
 	near.call(WeaponHud.AT.x, 328.5, "weapon silhouette centre x")
-	near.call(WeaponHud.AT.y, 1148.0 - 108.0, "weapon silhouette centre y")
+	# the drawn rifle sits 3.5 px under AT (measured by tools/hud_measure.py)
+	near.call(WeaponHud.AT.y + 3.5, 1148.0 - 108.0, "weapon silhouette centre y")
 	var wpn_l := WeaponHud.AT.x - 0.9 * WeaponHud.ICON_S
 	var wpn_r := WeaponHud.AT.x + 0.9 * WeaponHud.ICON_S
 	ok(wpn_l > HudVitals.PLATE_X + HudVitals.PLATE_W and wpn_r < HudVitals.SLOT_X,
