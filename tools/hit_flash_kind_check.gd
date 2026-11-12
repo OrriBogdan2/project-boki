@@ -123,7 +123,8 @@ func _shots() -> void:
 	for k in 30:
 		m.step(DT)
 		for t in [foe, wild]:
-			t.teleport(t.pos); t.vel = Vector3.ZERO
+			t.teleport(t.pos)
+			t.vel = Vector3.ZERO
 		m.cam.snap(home + Vector3(0, 0, 5))
 		await main.get_tree().process_frame
 	m.on_damage(foe, P, HIT, {"src": "primary"})

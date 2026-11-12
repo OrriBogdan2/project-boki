@@ -254,8 +254,8 @@ const CHECKS := {
 	# kit hits on Boki (BokiHit)
 	"--boki-hit-table-check": ["res://tools/boki_hit_table_check.gd", "boki_hit_table_check", null],
 	"--hitbox-size-shots": ["res://tools/hitbox_size_shots.gd", "hitbox_size_shots", null],
-	"--hit-flash-kind-check": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "check"],      # a hit shows what it struck
-	"--hit-flash-kind-shots": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "shots"],      # --shots-dir=<dir>
+	"--hit-flash-kind-check": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "check"],
+	"--hit-flash-kind-shots": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "shots"],
 	"--toy-check": ["res://tools/toy_check.gd", "toy_check", null],      # base toys (GARDEN.md 4)
 	"--stat-up-vfx-check": ["res://tools/stat_up_vfx_check.gd", "stat_up_vfx_check", "check"],      # StatGlint
 	"--stat-up-vfx-shots": ["res://tools/stat_up_vfx_check.gd", "stat_up_vfx_check", "shots"],      # --shots-dir=<dir>

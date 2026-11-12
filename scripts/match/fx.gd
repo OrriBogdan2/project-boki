@@ -326,7 +326,8 @@ func _num_look(l: Label3D, crit: bool) -> void:
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
 func _num_size(v: float, crit: bool, small := false) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int((lerpf(36.0, 46.0, k) + (8 if crit else 0)) * (Juice.BOKI_NUM_K if small else 1.0))
+	var pt := lerpf(36.0, 46.0, k) + (8.0 if crit else 0.0)
+	return int(pt * Juice.BOKI_NUM_K) if small else int(pt)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
