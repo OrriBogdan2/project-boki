@@ -517,7 +517,8 @@ func stack_telegraphs() -> void:
 		if low != t.get_meta("under", false):
 			t.set_meta("under", low)
 			var c: Color = t.material_override.get_shader_parameter("color")
-			t.material_override.set_shader_parameter("color", Color(c, float(t.get_meta("a0")) * (UNDER_A if low else 1.0)))
+			var keep := UNDER_A if low else 1.0
+			t.material_override.set_shader_parameter("color", Color(c, float(t.get_meta("a0")) * keep))
 
 ## True when a telegraph or a ring still spreading lies over the ground point `p`.
 func covers(p: Vector3) -> bool:

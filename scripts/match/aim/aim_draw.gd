@@ -122,7 +122,7 @@ func rebuild() -> void:
 	geo.world = m.get("world")
 	geo.reset()
 	var me = m.get("player")
-	var split := 0                      # first vertex of the rivals' telegraphs: a teammate's, then yours, draw under them
+	var split := 0                      # first vertex of the rivals' telegraphs: drawn over a teammate's, then yours
 	for tier in [SideColor.ORDER_ALLY, SideColor.ORDER_OWN, SideColor.ORDER_FOE]:
 		if tier == SideColor.ORDER_FOE:
 			split = geo.v.size()
@@ -143,11 +143,11 @@ func rebuild() -> void:
 	_surface(0, split, mat)
 	_surface(split, geo.v.size(), mat_foe)
 
-func _surface(from: int, to: int, material: Material) -> void:
-	if to <= from:
+func _surface(first: int, last: int, surf_mat: Material) -> void:
+	if last <= first:
 		return
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
-	for i in range(from, to):
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, surf_mat)
+	for i in range(first, last):
 		mesh.surface_set_color(geo.c[i])
 		mesh.surface_add_vertex(geo.v[i])
 	mesh.surface_end()

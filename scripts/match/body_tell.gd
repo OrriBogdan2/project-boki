@@ -53,7 +53,8 @@ static func tick(h: Hunter, delta: float) -> void:
 	_tint(h, t, hz)
 	if h.cast_at > float(h.get_meta("tell_cast", -9.0)):
 		h.set_meta("tell_cast", h.cast_at)
-		h.m.fx.ring(h.pos + Vector3(0, 0.05, 0), CAST_RING_R, SideColor.fx(h.m, h, Arch.color(h.arch)), CAST_RING_T, SideColor.order(h.m, h))
+		var col := SideColor.fx(h.m, h, Arch.color(h.arch))
+		h.m.fx.ring(h.pos + Vector3(0, 0.05, 0), CAST_RING_R, col, CAST_RING_T, SideColor.order(h.m, h))
 
 ## The body's tint now (transparent when none), for checks.
 static func tint_of(h: Hunter) -> Color:

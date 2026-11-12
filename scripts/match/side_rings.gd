@@ -20,7 +20,8 @@ static func tick(h: Hunter) -> void:
 	var col := SideColor.of(h.m, h)
 	var you: bool = h.m.get("player") == h
 	var aim := h.m.get_node_or_null("AimKit") as AimDraw
-	_paint(h.model.get_node_or_null("TeamRing") as MeshInstance3D, Color(col, YOU_A if you else OTHER_A), _covered(h.m, aim, h.pos))
+	var body_ring := h.model.get_node_or_null("TeamRing") as MeshInstance3D
+	_paint(body_ring, Color(col, YOU_A if you else OTHER_A), _covered(h.m, aim, h.pos))
 	_edge(h, Color(col, 0.0 if you else EDGE_A))
 	for k in [h.kin, h.kin2]:
 		if k != null and is_instance_valid(k):

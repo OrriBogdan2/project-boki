@@ -169,20 +169,23 @@ func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
 		if h.kin:
 			rings.append((h.kin as Kin).ring)
 	var base := (rings[0] as MeshInstance3D).material_override as ShaderMaterial
+	var full_a := SideRings.YOU_A
 	ok(rings.size() == 12, "a 3v3 melee with every Boki out: 12 ownership rings (%d)" % rings.size())
-	ok(is_equal_approx(float(base.get_shader_parameter("thickness")), SideRings.THIN), "an ownership ring is the thinnest band")
-	ok(rings.all(func(r): return (r.material_override as ShaderMaterial).render_priority == SideColor.ORDER_RING), "ownership rings draw under every cast")
-	ok(is_equal_approx(SideRings.shown(rings[0]).a, SideRings.YOU_A), "no telegraph: your ring is full strength")
-	var mine: Node3D = m.fx.telegraph_circle(at, 3.0, Color(SideColor.fx(m, P, Color.CYAN), 0.9), SideColor.order(m, P))
-	var theirs: Node3D = m.fx.telegraph_circle(at, 3.0, Color(SideColor.fx(m, foes[0], Color.CYAN), 0.9), SideColor.order(m, foes[0]))
-	var mates: Node3D = m.fx.telegraph_circle(at, 3.0, Color(SideColor.fx(m, ally, Color.CYAN), 0.9), SideColor.order(m, ally))
+	var thin := is_equal_approx(float(base.get_shader_parameter("thickness")), SideRings.THIN)
+	ok(thin, "an ownership ring is the thinnest band")
+	ok(rings.all(func(r): return _prio(r) == SideColor.ORDER_RING), "ownership rings draw under every cast")
+	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "no telegraph: your ring is full strength")
+	var mine := _tele(m, P, at)
+	var theirs := _tele(m, foes[0], at)
+	var mates := _tele(m, ally, at)
 	m.fx.stack_telegraphs()
-	var prio := func(n: Node3D) -> int: return (n.material_override as ShaderMaterial).render_priority
-	ok(prio.call(theirs) > prio.call(mine) and prio.call(mine) > prio.call(mates) and prio.call(mates) > SideColor.ORDER_RING, "draw order: rival over yours over a teammate's over the rings")
-	var full := m.fx.teles.filter(func(n): return (n.material_override as ShaderMaterial).get_shader_parameter("color").a > 0.8)
+	var ordered := _prio(theirs) > _prio(mine) and _prio(mine) > _prio(mates) and _prio(mates) > SideColor.ORDER_RING
+	ok(ordered, "draw order: rival over yours over a teammate's over the rings")
+	var full := m.fx.teles.filter(func(n): return _alpha(n) > 0.8)
 	ok(full == [theirs], "one full-strength fill under the pile: the rival's (%d)" % full.size())
 	AbilityFx.land(m, foes[1], at, 2.0, Color.ORANGE)
-	ok(not m.fx.rings.is_empty() and (m.fx.rings[0]["node"].material_override as ShaderMaterial).render_priority == SideColor.ORDER_FOE, "a rival's landing ring is on the rival tier")
+	var landed: bool = not m.fx.rings.is_empty() and _prio(m.fx.rings[0]["node"]) == SideColor.ORDER_FOE
+	ok(landed, "a rival's landing ring is on the rival tier")
 	ground.call()
 	ok(rings.all(func(r): return SideRings.shown(r).a < 0.3), "every ownership ring is faded under the telegraphs")
 	_aim_order(m, P, foes[0])
@@ -190,7 +193,17 @@ func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
 		m.fx.end_telegraph(n)
 	m.fx.rings.clear()
 	ground.call()
-	ok(is_equal_approx(SideRings.shown(rings[0]).a, SideRings.YOU_A), "the ring is back at full strength once the ground is clear")
+	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "the ring is back at full strength with the ground clear")
+
+func _tele(m: Match, by: Hunter, at: Vector3) -> Node3D:
+	var col := Color(SideColor.fx(m, by, Color.CYAN), 0.9)
+	return m.fx.telegraph_circle(at, 3.0, col, SideColor.order(m, by))
+
+func _prio(n: Node3D) -> int:
+	return (n.material_override as ShaderMaterial).render_priority
+
+func _alpha(n: Node3D) -> float:
+	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
 
 ## AimKit draws a rival's telegraph in its own surface after yours.
 func _aim_order(m: Match, P: Hunter, foe: Hunter) -> void:
@@ -198,7 +211,8 @@ func _aim_order(m: Match, P: Hunter, foe: Hunter) -> void:
 	AimKit.circle(foe, "rival", {"all": true, "at": P.pos, "r": 3.0})
 	var d := AimKit.layer(m)
 	d.rebuild()
-	ok(d.mesh.get_surface_count() == 2, "AimKit: yours and a rival's draw as two surfaces (%d)" % d.mesh.get_surface_count())
+	var n := d.mesh.get_surface_count()
+	ok(n == 2, "AimKit: yours and a rival's draw as two surfaces (%d)" % n)
 	ok(d.mat_foe.render_priority > d.mat.render_priority, "AimKit: the rival's surface draws after yours")
 	ok(d.covers(P.pos), "AimKit: the pile counts as covered")
 	AimKit.clear(P)
