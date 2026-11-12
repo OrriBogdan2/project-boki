@@ -77,6 +77,7 @@ func _save_strip(file: String) -> void:
 ## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 ## The boulder's burst and the punch's blow, each shot on the frames after the dummy is first hurt.
 func _breah_lmb() -> void:
+	Sfx.listener = P.pos          # (the rig has no listening camera; HeroVfx draws nothing far from it)
 	await _reset(7.0)
 	_aim(T.pos)
 	var tap := func(t: float):
