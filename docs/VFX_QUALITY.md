@@ -156,7 +156,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
-| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
+| Neve | rimewright | 26 | 5 | 4 | 4 | 3 | 3 | 4 | 4 | **27** | dash path is flat grey tiles. X Rimelock was a screen-wide cyan sheet (25); re-scored 11-12 on ext/vfx-neve-rimelock-area: the rink is a lit rim and fringe over a soft inside with thin cracks, the ground and the target show through (`docs/shots/vfx-neve-rimelock-area/r_before.jpg`, `r_after.jpg`) |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
 
@@ -171,7 +171,7 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
-2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
+2. Neve: texture the dash path tiles (the X wash is fixed on ext/vfx-neve-rimelock-area).
 3. Vex LMB and hold: a wider, brighter tracer at match zoom.
 4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
 5. Albert: ivory swing arcs for LMB/RMB.
