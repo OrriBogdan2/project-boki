@@ -1814,7 +1814,10 @@ func place_held() -> bool:
 	apply(false)
 	if from < 0 and TOY_CATS.has(String(c["cat"])):
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
-	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact") if not site.is_empty() else "", id, from >= 0)
+	var msg := ""
+	if not site.is_empty():
+		msg = "Site marked out: hold %s to hammer, Boki help. %s" % [Settings.key_cap("interact"), FarmTutorial.site_hint()]
+	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), msg.strip_edges(), id, from >= 0)
 	if nodes.has(popped): FarmBuildUi.pop(nodes[popped])
 	return true
 
