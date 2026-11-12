@@ -12,6 +12,7 @@
 		{"hero": "thief", "slot": "E", "field": "e.refund_wall", "value": 0.25, "tol": 0.0, "evidence": "D Farstep Dagger upg: refund 25% CD on hitting terrain"},
 		{"hero": "thief", "slot": "E", "field": "e.refund_foe", "value": 0.5, "tol": 0.0, "evidence": "D Farstep Dagger upg: doubled (50%) on enemies"},
 		{"hero": "rimewright", "slot": "RMB", "field": "rmb.charges", "value": 2, "tol": 0.0, "evidence": "D Cryo Spear: 2 charges"},
+		{"hero": "rimewright", "slot": "X", "field": "x.hold", "value": 3.3, "tol": 0.1, "evidence": "F Ice Crash: crystal to crash 3.2/3.4/3.4/3.2 s over four casts (docs/heroes/rimewright.md, Rimelock length)"},
 		{"hero": "dredge", "slot": "X", "field": "x.waves", "value": 2, "tol": 0.0, "evidence": "D Slugwave: two waves"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.dmg", "per": "lmb.dmg", "value": 3.0, "tol": 0.35, "evidence": "D Execution Slam 130 vs Caldera 43 = 3.0x (audit: 26/8 fine)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"},
