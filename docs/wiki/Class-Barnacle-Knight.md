@@ -1,6 +1,6 @@
 # The Barnacle Knight
 
-A heavy hammer-and-shield fighter. Blocks with his aegis to build Guard, then slams people into walls
+A heavy hammer-and-shield fighter. Blocks with his aegis, then knocks people into walls
 and into each other. Plants his hammer where the fight is and heals the squad there.
 
 <!-- gen:profile -->
@@ -17,8 +17,8 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 ## How it plays
 
 1. **Hold RMB** to raise his **aegis**, a curved gold shield: it has its own health, regenerates, and
-   blocks from the front while you walk slower. Damage it blocks becomes **Guard**.
-2. Let go (or tap) to **Bash**. At 50 Guard the Bash is a **Shield Slam** that stuns.
+   blocks from the front while you walk slower. Letting go only lowers it.
+2. **Shift** with the aegis up is the **Shield Charge**, a heavy shoulder-first knock (its own 6s cooldown).
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
    beacon, shows foes near it to your team, and comes back hitting on a second tap.
 4. **Hold LMB** to spin the hammer up (a glint on its head, a flare when it's full), then let go for a
@@ -34,8 +34,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 | Do this | And you get |
 |---|---|
-| Bash, Shield Charge or full Crushing Blow into a wall or another foe | Crushed: stun 0.5, +8 damage, you heal 24 |
-| Bash with 50+ Guard | Shield Slam: push 12, stun 0.6 (spends 50) |
+| A Crushing Blow, 360 Smash or Shield Charge into a wall or another foe | Crushed: stun 1.0, +8 damage |
 | Shift with the aegis raised | Shield Charge: invulnerable, heavier knock |
 | Throw the hammer, then E | Mending Ground lands where the hammer stands |
 | Hold LMB, then Shift | A short plain dash for half a charge; the spin keeps charging |
@@ -43,7 +42,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## Tips
 
-- Raise the aegis into their fire first: the Guard pays for the Slam.
+- Raise the aegis into their fire, then Shield Charge them into a wall.
 - Fight near walls and pillars. A Crushed stun sets up a full Crushing Blow.
 - Throw the hammer round a corner to scout it, then heal there; it waits until you call it.
 - A broken aegis locks you out for 3s: drop it before it breaks.
@@ -78,7 +77,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
+**Crushed (passive).** Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 
 **360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 

@@ -981,8 +981,7 @@ above is superseded by this:
 - Loop: raise the shield into their fire -> Shield Charge them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
-- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold. Payoff: `pay_slam`, T4.
+- Tells: none for a meter (it has none). Payoff: `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.

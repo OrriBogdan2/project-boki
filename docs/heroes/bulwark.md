@@ -144,7 +144,7 @@ Source polish, our gold and ember look. Every look is a pooled HeroVfx layer ins
 | Throw and recall | `throw`: an ember ribbon follows the hammer head the whole flight; `plant`: grit and a dust puff where it lands, the gold beacon stays (source, gameplay); `catch`: a few embers at the grip | the flight path, no glow quad or flash |
 | Charged swing, hold | `charge`: motes gather on the head from the glint (0.6 s), more with the charge; `full`: one flare and four stars on the head at full | the owner's whirl (item 59), the source glint |
 | Charged swing, release | `swing`: one flame sweep in front of him, 180 degrees out to the hit's reach (asserted equal to `smash_arc`), the head's ribbon, a dust puff; `hit`: dust on the foe and debris along the knock, `hit_trail` embers as it flies | the hit shape, a short burn-off (0.28 s) |
-| Shield Charge, Shield Slam | `charge_go`: a ribbon off the shield face and sparks along the dash (a flare on the shield when Guard is full); `slam`: a sweep over the cone's own 100 degrees (asserted equal to the data), grit off the shield | the cone, no ground ring |
+| Shield Charge | `charge_go`: a ribbon off the shield face and sparks along the dash | the cone, no ground ring |
 | Crushed (a foe into a wall) | `crush`: a ring of stars at the foe's head and a dust puff | the source's stars (1 s) |
 Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, the lane and eruption).
 

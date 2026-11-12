@@ -15,7 +15,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Crushed | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 

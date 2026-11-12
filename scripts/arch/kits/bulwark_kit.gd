@@ -92,27 +92,7 @@ func cd_k(slot: String) -> float:
 func heal_k() -> float:
 	return (1.0 + 0.25 * float(rank("kin") - 1)) * LevelGrowth.ap(h)
 
-func full_ready() -> bool:
-	return res >= float(res_def().get("slam", 50.0))
-
-func res_text() -> String:
-	return "SLAM" if full_ready() else "%d" % int(res)
-
-func ready_label() -> String:
-	return "SHIELD SLAM READY" if full_ready() else ""
-
-func add_guard(v: float) -> void:
-	var was := res
-	add_res(v)
-	touch_res()
-	for step in [33.0, 66.0, 100.0]:
-		if was < step and res >= step:
-			if anim_id == "": play("bul_armed")
-	if was < float(res_def().get("slam", 50.0)) and full_ready():
-		armed_fx("sec")
-
-func on_block(dmg: float, by) -> void:
-	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
+func on_block(_dmg: float, by) -> void:
 	if not wall.is_empty() or front_t > 0.0:
 		var d := h.aim_dir()
 		if by is Node3D and is_instance_valid(by):
@@ -707,21 +687,6 @@ func fire_rmb(c: Dictionary) -> void:
 		anim_id = ""                # a tap: the arm goes back down with no aegis
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
-## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
-func _shield_slam() -> void:
-	var sl: Dictionary = rmb_def()["slam"]
-	var dv := h.aim_dir()
-	shield_slams += 1
-	play("bul_slamshield")
-	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"])},
-		{"type": "push", "strength": float(sl["push"]), "from": "caster"},
-		{"type": "stun", "duration": float(sl["stun"])}]
-	knock_until = m.time + 0.2
-	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
-	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
-	vfx("slam", h.pos, dv, {"r": float(sl["radius"])})
-	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
-
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
 
@@ -749,8 +714,7 @@ func on_dash(use_ex: bool) -> bool:
 		_raise()          # Shift while the aegis is still rising: it is up now, the bash goes
 	if not wall.is_empty():
 		# Shield Charge (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
-		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
-		# Guard it ends in a Shield Slam
+		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"])
 		var t := dist / float(dd["charge_speed"])
@@ -758,11 +722,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
 		front_t = t_felt + 0.15
 		knock_until = m.time + t_felt + 0.1
-		var armed := full_ready()
-		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": dist, "armed": armed})
-		if armed:
-			res -= float(res_def().get("slam", 50.0))
-			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
+		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": dist})
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.sfx("bulwark_charge", h.pos, -2.0)

@@ -1443,12 +1443,11 @@ func _bulwark_combos() -> void:
 	ok(
 		"combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam",
 		float(K.rmb_def()["cooldown"]) == 6.0 and float(K.cd["rmb"]) > 4.5 and cd_full <= 0.0
-				and not K.d.has("resource") and not K.d["rmb"].has("slam") and not K.has_res(),
+				and not K.has_meter() and not K.d["rmb"].has("slam"),
 		"cd %.2f" % float(K.cd["rmb"])
 	)
-	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
-		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+	ok("bulwark vfx: the Shield Charge plays its look; no Shield Slam look is left",
+		int(hv.plays.get("charge_go", 0)) >= 1 and not hv.plays.has("slam"),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	ok("bulwark vfx: the Shield Slam fan and its flare are his ivory, not Kael's orange", _off_ivory("slam").is_empty(),
 		str(_off_ivory("slam")))
