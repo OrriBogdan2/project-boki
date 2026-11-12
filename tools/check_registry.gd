@@ -234,6 +234,7 @@ const CHECKS := {
 	"--dummy-move-shots": ["res://tools/dummy_move_shots.gd", "dummy_move_shots", null],      # (GPU)
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
 	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks
+	"--practice-ranks-shot": ["res://tools/practice_ranks_shot.gd", "practice_ranks_shot", null],
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
