@@ -25,6 +25,7 @@ const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
+const STEP := "clip_step"     # root meta: a foot lands on the next render (WardenSteps); unset: the rig's walk steps
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
@@ -70,6 +71,8 @@ var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var steps: WardenSteps       # when the walk and run put a foot down (scripts/heroes/warden_steps.gd)
+var art := ""                # the art name its data and plants are under
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
@@ -100,12 +103,22 @@ static func dying(h: Hunter) -> bool:
 		return false
 	return h.m.time - float(h.get_meta("died_at", -99.0)) < float(h.model.get_meta(DEATH_T, 0.0))
 
+## Whether a foot of `model` came down since the last ask: its clips' plants (WardenSteps) when its loops have them,
+## else `walk_phase` (the rig's own step).
+static func foot_down(model: Node3D, walk_phase: bool) -> bool:
+	if not model.has_meta(STEP):
+		return walk_phase
+	var down := bool(model.get_meta(STEP))
+	model.set_meta(STEP, false)
+	return down
+
 static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenClips:
 	var dd := data(art_name)
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
 	if dd.is_empty() or players.is_empty():
 		return null
 	var c := WardenClips.new()
+	c.art = art_name
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
 	return c
@@ -143,6 +156,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
+	if not steps.loops.is_empty():
+		root.set_meta(STEP, false)
 	return true
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
@@ -215,6 +230,7 @@ func _build() -> AnimationNodeBlendTree:
 		var at: Vector2 = (dirs[k[0]] + dirs[k[1]]).normalized()
 		if lc["walk"].has(k): bs.add_blend_point(_anim(String(lc["walk"][k])), at * 0.45)
 		if lc["run"].has(k): bs.add_blend_point(_anim(String(lc["run"][k])), at)
+	steps = WardenSteps.new(bs, lib, art)
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
@@ -451,6 +467,8 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	if steps.tick(tree, loco_pos, loco_k > 0.5):
+		root.set_meta(STEP, true)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_out(dt)

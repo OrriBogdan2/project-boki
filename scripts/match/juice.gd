@@ -206,9 +206,9 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
-## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). Only for people
-## close to you, quieter for everyone else, silent while sneaking.
+## A footstep, on the frame a foot lands (HunterAnim.stepped: a Hero's clip plants, WardenSteps, or the rig's walk
+## phase): what it sounds like depends on what's underfoot (planks, paved paths and stairs, snow, or grass and
+## earth). Only for people close to you, quieter for everyone else, silent while sneaking.
 static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
 	if m == null or m.world == null or h.unseen or h.crouch:
