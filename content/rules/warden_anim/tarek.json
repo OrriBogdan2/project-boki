@@ -47,14 +47,16 @@
 	},
 	"kmoves": {
 		"breah_throw": {
-			"clip": "lmb_throw"
+			"clip": "lmb_throw",
+			"upper": "moving"
 		},
 		"breah_wind": {
 			"clip": "lmb_wind",
 			"hold_from": 0.24
 		},
 		"breah_punch": {
-			"clip": "lmb_punch"
+			"clip": "lmb_punch",
+			"upper": "moving"
 		},
 		"breah_crouch": {
 			"clip": "rmb_gather",
@@ -93,7 +95,8 @@
 		},
 		"breah_spine_aim": {
 			"clip": "x_aim",
-			"hold_from": 0.12
+			"hold_from": 0.12,
+			"upper": "moving"
 		},
 		"breah_spine": {
 			"clip": "x_spine"

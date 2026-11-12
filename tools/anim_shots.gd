@@ -2,6 +2,7 @@ extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## --upper also shows each Hunter's atk2 on the upper body over the run (strip run_atk2: Tenzo's punch while running).
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
@@ -18,6 +19,7 @@ const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
 var close := false
+var upper := false
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -39,6 +41,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--upper": upper = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -98,6 +101,9 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	var atk: Array = ATTACKS[id]
 	for i in 2:
 		await _keyed(model, sync, clips, dir.path_join("atk%d" % (i + 1)), String(atk[i]), frames)
+	var over := _upper_move(clips, String(atk[1])) if upper else ""
+	if over != "":
+		await _loco(model, sync, dir.path_join("run_atk2"), RUN_MPS, frames, clips, over)
 	model.queue_free()
 
 ## The side view at the Hunter's own scale: the head's height over CLOSE_REF_H scales the camera out and up.
@@ -109,7 +115,17 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+## The kit move of `clip` that plays on the upper body while he moves, or "".
+func _upper_move(clips: WardenClips, clip: String) -> String:
+	for km in clips.d["kmoves"]:
+		var mv: Dictionary = clips.d["kmoves"][km]
+		if mv["clip"] == clip and mv.get("upper", false) is String:
+			return String(km)
+	return ""
+
+## `over`: a kit move played through the strip as the game plays it (state kmove), the legs still running.
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, clips: WardenClips = null,
+		over := "") -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
 	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
@@ -118,6 +134,10 @@ func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> v
 		_scroll(mps, DT)
 	var steps := int(round(1.0 / (LOCO_FPS * DT)))
 	for i in frames:
+		if over != "":
+			var length := clips.lib.get_animation(String(clips.d["kmoves"][over]["clip"])).length
+			model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true,
+					"kmove": over, "kmove_t": length * i / frames})
 		for k in steps:
 			sync.call("_process", DT)
 			_scroll(mps, DT)

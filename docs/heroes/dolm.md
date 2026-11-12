@@ -285,6 +285,8 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | X | `breah_spine_aim` (hold), `breah_spine` | `anim_br_spine` |
 | Passive find | `breah_sense` | `anim_br_sense` |
 
+While moving (source: she walks off a punch, throws on the move, moves while aiming X) `breah_throw`, `breah_punch` and `breah_spine_aim` play on the upper body over the walk or run (`"upper": "moving"` in warden_anim/tarek.json); standing, and every other move, own the body. Asserted: `--clip-check` (`dolm: breah_... runs over the legs walking`).
+
 ## Dash -> ability flow (owner review item 32; rows in content/dash_flow/dolm.json, table in docs/heroes/dash_interactions.md)
 - Rock Hop is a dash DashFlow sees (`in_dash()` from the press until the chain ends, `dash_left()` the planned flight
   left); it is no longer in `kit_owns`.

@@ -9,6 +9,9 @@ const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
+## Tetra's moves the source plays while moving (briefs/hero-ref/breah.md: the tap hurl, the fist recovering as she
+## walks off, the X aim) ride the upper body over the walk. Every other dolm move owns the body.
+const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim"]
 const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
@@ -87,6 +90,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			missing.append(c)
 	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
+	_upper(id, dd, clips)
 	_standing(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
@@ -218,6 +222,21 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if pre != "" and String(km).begins_with(pre) and not moves.has(km):
 			unmapped.append(km)
 	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
+
+## "upper": "moving" moves ride the upper body only while he walks and own the body standing (Tenzo: the source set).
+func _upper(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var moves: Dictionary = dd.get("kmoves", {})
+	for km in moves:
+		var wants_upper: bool = moves[km].has("upper")
+		if id == "dolm":
+			var how := "plays on the upper body" if wants_upper else "owns the body"
+			ok(wants_upper == TENZO_UPPER.has(km), "%s: %s %s" % [id, km, how])
+		if not wants_upper or not moves[km]["upper"] is String:
+			continue
+		var walking := clips._pick({"kmove": km, "kmove_t": 0.05, "vel": Vector3(0, 0, 3)}, 0.0)
+		var still := clips._pick({"kmove": km, "kmove_t": 0.05}, 0.0)
+		ok(bool(walking.get("upper", false)) and not bool(still.get("upper", true)),
+				"%s: %s runs over the legs walking and owns the body standing" % [id, km])
 
 ## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand. A blade tip
 ## that a floating companion carries (Meeko's sun circles her, off its bone) keeps its place on that companion instead.

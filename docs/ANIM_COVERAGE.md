@@ -32,7 +32,7 @@ onto its side (`Kin.render`).
 | pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | proc |
+| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 
 ### Starter Boki
@@ -55,5 +55,4 @@ onto its side (`Kin.render`).
    `hop` while `fly` is set would use the existing clip.
 4. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
    phase and charge poses stand in; only claire, kael, ryzz, sable, tarek and vex key a dash clip.
-5. **Tarek has no upper-body kit move**, so his attacks stop the legs.
-6. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
+5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
