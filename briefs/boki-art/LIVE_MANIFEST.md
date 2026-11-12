@@ -239,7 +239,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Teapotamus | ✓ | ✓ | ✓ |
 | Terrarimit | ✓ | ✓ | ✓ |
 | Terrasloth (Pangolith) | ✓ | ✓ | ✓ |
-| Tesselamb | ✓ | ✓ | ✓ |
+| Tesselamb (Tessaram) | ✓ | ✓ | ✓ |
 | Thistlynx | ✓ | ✓ | ✓ |
 | Thrumbird | ✓ | ✓ | ✓ |
 | Thunderstrich (Thundrich) | ✓ | ✓ | ✓ |

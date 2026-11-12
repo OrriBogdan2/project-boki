@@ -16,3 +16,4 @@ Art files keep the old name for now. LIVE_MANIFEST.json carries "display_name" f
 | Bastionpet | Basticlaw | it is a crab; "pet" read odd |
 | Glomworth | Glombulus | Glomwort/Glomworth were too easy to mix up |
 | Furnacowary | Furnowary | shorter, same idea |
+| Tesselamb | Tessaram | owner rename 11-11 (#200, Pebblamb line) |
