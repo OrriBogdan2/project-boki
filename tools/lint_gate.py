@@ -10,7 +10,7 @@ Baseline: {check: {file: problems}}. Old debt is listed there and may not grow; 
 For gdformat and ruff-format the count is 1 when the file would be reformatted.
 """
 
-import json, os, re, shutil, subprocess, sys, tempfile, urllib.request
+import hashlib, json, os, re, shutil, subprocess, sys, tempfile, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool
 
@@ -20,6 +20,7 @@ GD_DIRS = ("scripts", "tools", "tests")
 LINE_LENGTH = 120
 GLTF_VERSION = "2.0.0-dev.3.10"
 GLTF_URL = f"https://github.com/KhronosGroup/glTF-Validator/releases/download/{GLTF_VERSION}/gltf_validator-{GLTF_VERSION}-linux64.tar.xz"
+GLTF_SHA256 = "168eba887964125abe17ae97899b38d0b3cfd73c266c78424c194929ddcbc522"  # of that archive: never run an unchecked download
 # Godot warnings tracked in the suite: the unused-code ones (UNUSED_VARIABLE / _PARAMETER / _SIGNAL / ...)
 UNUSED = re.compile(r"never (explicitly )?used|never emitted|isn't used")
 
@@ -116,6 +117,9 @@ def gltf_binary():
     with tempfile.TemporaryDirectory() as tmp:
         archive = os.path.join(tmp, "v.tar.xz")
         urllib.request.urlretrieve(GLTF_URL, archive)
+        with open(archive, "rb") as f:
+            if hashlib.sha256(f.read()).hexdigest() != GLTF_SHA256:
+                sys.exit(f"lint_gate: {GLTF_URL} does not match GLTF_SHA256, not running it")
         subprocess.run(["tar", "xf", archive, "-C", cache, "gltf_validator"], check=True)
     return os.path.join(cache, "gltf_validator")
 
@@ -196,6 +200,9 @@ def main():
                 for p, m in per_file.items()
                 if old is None or p in old
             }
+            # a --files run only saw those files: keep the others as they were
+            if old is not None and only is not None:
+                new[check].update({p: n for p, n in old.items() if p not in only})
         for check in base.keys() - res.keys():
             new[check] = base[check]
         with open(BASELINE, "w", encoding="utf-8") as f:

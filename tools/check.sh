@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 VENV="${BOKI_LINT_VENV:-$HOME/.cache/boki-lint/venv}"
 if [ ! -x "$VENV/bin/ruff" ] || [ tools/lint-requirements.txt -nt "$VENV/.installed" ]; then
 	python3 -m venv "$VENV"
-	"$VENV/bin/pip" install -q -r tools/lint-requirements.txt
+	"$VENV/bin/pip" install -q --disable-pip-version-check -r tools/lint-requirements.txt
 	touch "$VENV/.installed"
 fi
 export PATH="$VENV/bin:$PATH"
