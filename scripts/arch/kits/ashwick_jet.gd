@@ -14,6 +14,7 @@ const STEER_LEAD := 1.0         # m the heading lane runs past where the flight 
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
 const FOOTING := 0.05           # s: the low flight counts as footing for a jump (Hunter.coyote) while it runs
 const ROAR_EVERY := 0.45        # s between the roars of the heel and tail fire
+const HOVER_EASE := 6.0         # m/s the flight eases up or down to its hover height over the ground below
 
 var k: AshwickKit
 var h: Hunter
@@ -170,14 +171,14 @@ func _feed(push: Vector2, x: Dictionary) -> void:
 	var dir: Vector2 = flight["dir"]
 	flight["dir"] = (dir * float(flight["speed"]) + push).normalized()
 
-## Low and upright: eased up to `hover` over the ground; over the abyss he holds his height.
+## Low and upright: eased to `hover` over the ground, up a rise or down off a terrace; over the abyss he holds
+## his height.
 func _hover(hover: float, dt: float) -> void:
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
 	h.vel.y = 0.0
 	if gy <= World.VOID + 1.0:
 		return
-	if h.pos.y < gy + hover:
-		h.pos.y = move_toward(h.pos.y, gy + hover, 6.0 * dt)
+	h.pos.y = move_toward(h.pos.y, gy + hover, HOVER_EASE * dt)
 	h.grounded = false
 
 ## A jump in the flight (Hunter.do_jump took off from it): he leaps off the jet, the flight over (no landing, the
@@ -198,8 +199,9 @@ func _land() -> void:
 	flight = {}
 	landings += 1
 	h.roll_t = 0.0
-	h.vel.x *= 0.3
-	h.vel.z *= 0.3
+	var run := HunterMove.dash_exit(Vector2(h.vel.x, h.vel.z), h.base_speed)     # he runs on, as out of a dash
+	h.vel.x = run.x
+	h.vel.z = run.y
 	AimKit.hide(h, "x_steer")
 	k.play("lw_land")
 	k.vfx("land")

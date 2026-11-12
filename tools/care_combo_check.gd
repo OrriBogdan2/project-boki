@@ -514,6 +514,113 @@ func _rime_skate_in() -> void:
 	P.inp["move"] = Vector2.ZERO
 	await _free(m)
 
+## Skates east for 0.4 s and casts Rimelock from it; returns the skate's speed at the cast.
+func _skate_into_rime(m: Match, P: Hunter) -> float:
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	step(m, 0.4)
+	var v := P.roll_speed
+	HunterKeys.ult_pressed(P)
+	P.inp["dash_down"] = false
+	return v
+
+## How Rimelock moves her (docs/heroes/rimewright.md "Movement settled"): WASD never steers the carry; after the
+## crash she has no momentum and the next step is hers; the carry slides off a terrace (never blocked) sinking
+## gently, then she drops rooted to the ground below; over the void it carries on, and X frees her glider.
+func _rime_move() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var W = m.world
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	var home := P.pos
+	_skate_into_rime(m, P)
+	var p0 := P.pos
+	var worst := 1.0
+	for i in int(round(float(K.x_def()["carry_t"]) * 60.0)):
+		P.inp["move"] = Vector2(0, 1)
+		var q := P.pos
+		step(m, 1.0 / 60.0)
+		var dv := Vector2(P.pos.x - q.x, P.pos.z - q.z)
+		if dv.length() > 0.001:
+			worst = minf(worst, dv.normalized().dot(Vector2.RIGHT))
+	ok("tm X move: WASD never steers the carry (held sideways, it runs on along the skate)",
+			worst > 0.99 and P.pos.x - p0.x > 2.0, "dot %.3f" % worst)
+	P.inp["move"] = Vector2.ZERO
+	while K.ult_running():
+		step(m, 1.0 / 60.0)
+	var still := Vector2(P.vel.x, P.vel.z).length()
+	var p1 := P.pos
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.15)
+	ok("tm X end: no momentum after the crash, and the next step is hers (she walks off)",
+			still < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.25,
+			"%.2f m/s then %.2f m" % [still, Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length()])
+	P.inp["move"] = Vector2.ZERO
+	# a terrace: she starts two levels up, the edge 3 m ahead
+	var hx := int(floor(home.x))
+	var hz := int(floor(home.z))
+	for dz in range(-3, 4):
+		for dx in range(-6, 3):
+			W.level[W.idx(hx + dx, hz + dz)] += 2
+	P.teleport(home + Vector3(-3.0, 2.0 * World.LEVEL, 0))
+	step(m, 0.5)
+	K.cd["x"] = 0.0
+	_skate_into_rime(m, P)
+	var y_top := 2.0 * World.LEVEL + home.y
+	var off := false
+	var sink := 0.0
+	for i in int(round(float(K.x_def()["carry_t"]) * 60.0)):
+		step(m, 1.0 / 60.0)
+		if not off and P.pos.x > home.x + 3.0:
+			off = true
+		if off and K._rime_carrying():
+			sink = maxf(sink, y_top - P.pos.y)
+	step(m, 1.0)
+	var on_ground: bool = absf(P.pos.y - W.ground_at(P.pos.x, P.pos.z)) < 0.1
+	var sink_max := float(K.dash_def()["air_fall"]) * float(K.x_def()["carry_t"])
+	ok("tm X ledge: the carry slides off a terrace (never blocked), sinking at the skate's air fall, then drops rooted",
+			off and sink <= sink_max and on_ground and K.ult_running() and P.root_t > 0.0,
+			"off %s sank %.2f grounded %s" % [off, sink, on_ground])
+	HunterKeys.ult_pressed(P)
+	step(m, 0.2)
+	for dz in range(-3, 4):
+		for dx in range(-6, 3):
+			W.level[W.idx(hx + dx, hz + dz)] -= 2
+	# the abyss 2 m ahead: the carry runs on over it; X frees her and the glider opens
+	for dz in range(-4, 5):
+		for dx in range(2, 20):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	P.teleport(home)
+	step(m, 0.5)
+	K.cd["x"] = 0.0
+	_skate_into_rime(m, P)
+	step(m, float(K.x_def()["carry_t"]))
+	var over: bool = W.is_void(P.pos.x, P.pos.z) and K.ult_running()
+	HunterKeys.ult_pressed(P)
+	var opened_t := -1.0
+	var t := 0.0
+	while t < 1.0 and opened_t < 0.0:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		step(m, 1.0 / 60.0)
+		t += 1.0 / 60.0
+		if P.gliding:
+			opened_t = t
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	var brk := KMovesCare.length("tm_rime_break")
+	ok("tm X abyss: the carry runs on over the void; X frees her and held glide opens the step the break move ends",
+			over and opened_t > 0.0 and opened_t <= brk + 0.05,
+			"over %s glider at %.2f s (break move %.2f s)" % [over, opened_t, brk])
+	await _free(m)
+
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
@@ -1588,6 +1695,7 @@ func rimewright() -> void:
 	await _statue_locks()
 	await _rime_glide_skate()
 	await _rime_skate_in()
+	await _rime_move()
 	await _skate_ice()
 	await _spear_rank3()
 	await _spear_travel()

@@ -918,8 +918,8 @@ func has_ult() -> bool: return true
 
 
 ## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside. Cast from
-## a skate, her momentum carries her on as the shell closes (x.carry_t, slowing evenly from the skate's speed
-## to a stop, so she travels speed * carry_t / 2), the rink riding with her; then she is rooted.
+## a skate, her momentum carries her on as the shell closes (x.carry_t, easing out as speed x (1 - (t/carry_t)^2),
+## so she travels speed * carry_t * 2/3), the rink riding with her; then she is rooted.
 func _start_rime() -> bool:
 	var carry := {}
 	if not rinkrun.is_empty():
