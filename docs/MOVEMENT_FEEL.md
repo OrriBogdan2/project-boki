@@ -378,8 +378,9 @@ Sable's right hand for the Bola and her hands for Encore are the ones that diffe
   (on screen) of that slot's weapon point two frames later, and the other game's copy of an LMB round must get the
   same offset. Since the look follows its anchor, a tagged round reads 0.000: what the check catches is a round
   that is not tagged (the Starpiercer arrows read 1.373 m before this change) or a slot mapped to the wrong anchor.
-  `--muzzle-shots` records each Hunter firing at the match camera (GPU); `tools/muzzle_sheet.sh` makes the sheet
-  (docs/shots/muzzle-fire/).
+  `--muzzle-shots` records each Hunter firing at the match camera (GPU); `tools/muzzle_sheet.sh` makes the sheet:
+  docs/shots/muzzle-fire/muzzle_fire_sheet.mp4 (real GPU, jobq 20261112-165706-02961; each Hunter, by name, presses
+  LMB, LMB, RMB held, E, R, X, then LMB at the closest wheel zoom).
 
 On-screen distance (m) of the round's look start from the weapon point, per press, in `--muzzle-live-check` (before =
 the look drawn at the round's gameplay start, as before this change; same weapon points). Sable's X before is the
