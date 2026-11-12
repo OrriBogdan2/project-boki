@@ -7,7 +7,7 @@ extends RefCounted
 ## Each Hero's step is data: content/rules/warden_anim/<art>.json "turn" {dur, lift}.
 
 const META := "turn_step"    # model meta: the TurnStep, for a Hero's clips (WardenTurn)
-const STEP_AT := 1.5          # rad (~86°): a bigger lag than this steps; a smaller one stays an upper-body lead
+const STEP_AT := PI / 2.0      # rad (90°): a bigger lag than this steps; a smaller one stays an upper-body lead
 const STEP_MAX := 1.3         # rad: the most one step turns the legs (more is taken by the next step)
 const STEP_AGAIN := 0.35      # rad: still this far behind after a step: another one
 const PINS := 0.05            # rad: a step that turns the legs more than this plants the other foot (it follows)

@@ -26,16 +26,18 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `act` (DECISIONS 2026-11-09, the garden): home verb (HunterVerbs: `pat`, `feed`, `cheer`) -> clip (`pet` 1.3 s, `give` 1.0 s, `cheer` 0.8 s, as long as HunterVerbs.LENGTH). Seeked to the state's `act_t`; a verb with no entry stays on the procedural rig. Vex, Kael, Lace (hem), Cinder: tools/art1/gardenkit.py holds the shared timing, each hero's `*_clips.py` (Kael: `kael_garden.py`) the poses and attitude; `glb_add_clips.py` copies them onto the shipped glb.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `turn`: {`dur` s, `lift` rad}, the step of turning on the spot (TurnStep, WardenTurn). Standing, the legs stay put
-  while the aim swings and the upper body leads; past ~86° the foot on the side of the turn steps round, pivoting on
-  the other (planted by aiming its thigh), then the other follows. Moving, a shot, a cast or a kit move cancels it.
-  Heavy Heroes take a slower, lower step. No feet (`rig_root`): no step. `--turn-step-check`, `--turn-shots`.
+  while the aim swings (the body turns at `turn_rate`, 1280°/s) and the upper body leads; past 90° the foot on the side
+  of the turn steps round, pivoting on the other (planted by aiming its thigh), then the other follows. Moving, a shot,
+  a cast or a kit move cancels it. Heavy Heroes take a slower, lower step. No key: 0.26 s, 0.5 rad. No feet
+  (`rig_root`): no step.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
-timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
-`--turn-step-check` asserts the planted feet slide under 3 cm through a 180° turn on the spot.
+timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
+under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
+renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
 1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.
