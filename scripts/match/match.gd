@@ -2592,17 +2592,20 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 	if net_on and not is_host and pid == "":
 		return
 	if pid == "":
+		if DropMerge.stack(self, kind_s, at, v, key):
+			return
 		drop_n += 1
 		pid = "d%d" % drop_n
 	var n: Node3D
 	match kind_s:
-		"gem": n = Models.gem()
+		"gem": n = DropMerge.gem_node(self, v)
 		"seed": n = Models.seed_bag(Data.CROPS[key]["color"])
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"ckey": n = KeyModels.pickup()
 		_: n = UtilityBelt.pickup_model(kind_s) if UtilityBelt.is_item(kind_s) else Models.gem()
-	add_child(n)
+	if n.get_parent() == null:
+		add_child(n)
 	n.position = at
 	var a := randf() * TAU
 	var v0: Vector3 = vel0 if vel0 != null else Vector3(cos(a) * randf_range(1.5, 3.5), randf_range(4.0, 7.0), sin(a) * randf_range(1.5, 3.5))
@@ -2649,10 +2652,10 @@ func _update_pickups(dt: float) -> void:
 		n.position = pos + Vector3(0, sin(time * 3.0 + p["v"]) * 0.06, 0)
 		n.rotation.y += dt * 2.0
 		if pos.y < -12.0:
-			n.queue_free(); pickups.erase(p)
+			DropMerge.release(self, p); pickups.erase(p)
 
 func _collect(h: Hunter, p: Dictionary) -> void:
-	p["node"].queue_free()
+	DropMerge.release(self, p)
 	pickups.erase(p)
 	if net_on:
 		net_event(["take", p["id"]])
@@ -5521,7 +5524,7 @@ func _net_ev(x, from: String) -> void:
 		"take", "gone":
 			for p in pickups:
 				if p["id"] == String(x[1]):
-					p["node"].queue_free()
+					DropMerge.release(self, p)
 					pickups.erase(p)
 					break
 			if String(x[0]) == "take" and is_host:
