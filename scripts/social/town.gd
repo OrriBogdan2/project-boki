@@ -694,8 +694,9 @@ func _open_guilds() -> void:
 				row.add_child(UI.button("Join", func():
 					_lock()
 					Social.join_guild(rid, func(okk: bool):
-						if okk: Sfx.play("unlock")
-						_toast(("Welcome to %s" if okk else "%s removed you, so you can't join again") % g["name"])
+						if okk:      # refused: the overlay says why (Social.clan_removed)
+							Sfx.play("unlock")
+							_toast("Welcome to %s" % g["name"])
 						if panel_open == "Guild registry": _open_guilds()), 90)))
 
 ## Who is in this clan, what rank they hold and the last thing each did (from their island snapshot).
