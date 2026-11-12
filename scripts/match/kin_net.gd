@@ -104,7 +104,7 @@ static func on_event(m: Match, x: Array) -> void:
 	match String(x[1]):
 		"throw":
 			m.fx.ring(at, 1.2, Color((e as Kin).sp["color"], 0.8) if e is Kin else Color.WHITE, 0.3)
-			m.sfx("throw", at, -4.0)
+			m.sfx("throw", e.pos, -4.0)       # where it leaves from, as on its own game; `at` is where it lands
 		"recall", "merge_leap", "hop":
 			m.sfx("recall", at, -6.0)
 		"cmd":

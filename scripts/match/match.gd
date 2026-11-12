@@ -86,12 +86,12 @@ var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
 var displace: Displace = null     # abilities moving someone else's body (online too: its owner's game moves it)
-var _later: Array = []     # [due time, Callable]: delayed ability steps, on match time (not wall-clock timers)
+var _later: Array = []     # [due time, Callable, its owner for SfxCast]: delayed ability steps, on match time
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
 ## SceneTree timer it pauses with the match, keeps step with headless sims and dies with the match.
 func later(delay: float, cb: Callable) -> void:
-	_later.append([time + maxf(0.0, delay), cb])
+	_later.append([time + maxf(0.0, delay), cb, SfxCast.current()])
 
 func _run_later() -> void:
 	if _later.is_empty():
@@ -101,7 +101,9 @@ func _run_later() -> void:
 		if float(it[0]) <= time: due.append(it)
 	for it in due:
 		_later.erase(it)
+		SfxCast.scope(it[2])
 		(it[1] as Callable).call()
+	SfxCast.scope(null)
 var _bond_cb: Callable
 var _combo_cb: Callable
 var player_lost: Array = []  # your kin left behind when you went down: {uid, kin, holder}
@@ -2721,6 +2723,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 
 func _update_shots(dt: float) -> void:
 	for s in shots.duplicate():
+		SfxCast.scope(s["by"])
 		s["life"] -= dt
 		var p: Vector3 = s["pos"]
 		s["prev"] = p
@@ -2833,6 +2836,7 @@ func _update_shots(dt: float) -> void:
 				continue
 		if s["life"] <= 0.0:
 			_shot_end(s, p, null, "expire")
+	SfxCast.scope(null)
 
 ## Shots fly level, so a target one terrace above or below still gets hit. Two terraces up and the
 ## shot goes under them into the cliff; two down and it sails over their head.
@@ -3896,7 +3900,7 @@ func step(dt: float) -> void:
 		arena.after_think()
 		arena.tick(dt)
 	_prof("train")
-	for h in hunters: h.sim(SimLod.step_dt(h, dt))
+	for h in hunters: SfxCast.sim(h, SimLod.step_dt(h, dt))
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -3906,7 +3910,7 @@ func step(dt: float) -> void:
 			h.set_meta("hist", hist)
 	if skydrop: skydrop.tick(dt)
 	_prof("drop")
-	for k in kins: k.sim(SimLod.kin_dt(k, dt))
+	for k in kins: SfxCast.sim_kin(k, SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
@@ -5414,6 +5418,7 @@ func _net_ev(x, from: String) -> void:
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
+				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
