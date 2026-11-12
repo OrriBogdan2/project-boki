@@ -11,6 +11,8 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 
 **Gaps in the source data.** `supervive_kits.md` has no LMB damage for Lace, Meeko, Tenzo, Grimble and Neve, so those five have no source row (n/a, ours only). Neve's, Meeko's, Tenzo's, Grimble's and Lace's abilities do have some numbers but no LMB to fill the time between them, so no combo row either.
 
+**Gil (ours, no source Hunter).** His rows are `gil (roster median)`: his LMB and combo (Grab Bag, Riptide, Ground Swim, no ult) against the median of the 12 Hunters' own times for the same row, with the same 0.85-1.15 bar. His combo moves run to run (the bag draws its potion at random: combo rank 0 5.7-7.7 s, rank max 5.0-7.2 s over 3 runs), so judge it by the range. Fix if out: `content/archetypes/gil.json` `lmb.rate` 0.32 -> 0.23 puts all four rows inside (LMB 0.87, combo 1.11 / 1.07 in the run measured); nothing else was touched.
+
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
 |---|---|---|---|---|---|
@@ -54,6 +56,10 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | combo rank 0 | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | combo rank max | 2.22 | never | n/a | n/a |
+| gil (roster median) | LMB rank 0 | 8.73 | 7.16 | 1.22 | FAIL |
+| gil (roster median) | LMB rank max | 8.73 | 7.16 | 1.22 | FAIL |
+| gil (roster median) | combo rank 0 | 5.70 | 4.82 | 1.18 | FAIL |
+| gil (roster median) | combo rank max | 6.88 | 4.12 | 1.67 | FAIL |
 | mage (Joule) | combo + Blowout rank 0 | 2.68 | 8.80 | 0.30 | shown |
 | mage (Joule) | combo + Blowout rank max | 1.27 | 4.00 | 0.32 | shown |
 

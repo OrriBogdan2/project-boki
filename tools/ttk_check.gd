@@ -52,6 +52,11 @@ const HEROES := [
 	["rimewright", "Celeste", "hold", false, [], {"rmb": [346.0, 0.547, 12.0, 3.5, 2, 0]}],
 ]
 
+## Gil has no source Hunter (he is ours), so his rows are held to the roster's own median time to knock instead,
+## with the same bar. Same row shape as HEROES: LMB held, no source numbers; his combo is every damage slot but the ult.
+const GIL := ["gil", "roster median", "hold", false, [], {
+	"rmb": [0.0, 0.0, 0.0, 0.0, 1, 0], "dash": [0.0, 0.0, 0.0, 0.0, 1, 0], "e": [0.0, 0.0, 0.0, 0.0, 1, 0]}]
+
 ## Ults the share table lists (never in a combo): hero -> source damage of one cast. our_hit casts it, then
 ## waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s).
 const ULT_HITS := {"rimewright": 155.0}
@@ -283,6 +288,7 @@ func run(main_node: Node) -> void:
 				bad += int(row["state"] == "FAIL")
 				print("TTK %-4s %-11s %-14s ours %s s, source %s s, ratio %s" % [
 					row["state"], hero[0], label, _fmt(ours), _fmt(src), _ratio_text(row["ratio"])])
+	bad += await _gil_rows()
 	for hero in HEROES:
 		for slot in hero[5]:
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
@@ -304,6 +310,26 @@ func run(main_node: Node) -> void:
 		_write()
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Gil's LMB and combo against the median of the 12 Hunters' own times (the rows above, same rank and kind).
+func _gil_rows() -> int:
+	var bad := 0
+	for combo in [false, true]:
+		for rank in [1, 3]:
+			var kind := "combo" if combo else "LMB"
+			var label := "%s %s" % [kind, "rank 0" if rank == 1 else "rank max"]
+			var times: Array = []
+			for r in rows:
+				if r["label"] == label and r["ours"] > 0.0:
+					times.append(r["ours"])
+			times.sort()
+			var mid: float = (times[(times.size() - 1) / 2] + times[times.size() / 2]) / 2.0
+			var row := _cell(GIL, label, await our_ttk(GIL, combo, rank), mid)
+			rows.append(row)
+			bad += int(row["state"] == "FAIL")
+			print("TTK %-4s gil %-14s ours %s s, median of %d Hunters %s s, ratio %s" % [
+				row["state"], label, _fmt(row["ours"]), times.size(), _fmt(mid), _ratio_text(row["ratio"])])
+	return bad
 
 ## One share-of-target row: printed and kept for the table.
 func _add_hit(hero: Array, slot: String, ours_share: float, src_share: float) -> void:
