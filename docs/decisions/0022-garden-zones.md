@@ -27,8 +27,8 @@ before the hub opens) and the board lists this week's twist; build mode there of
 first day's tutorial done or skipped, a plain `Game.goto("home")` lands in the hub (`GardenZones.landing`);
 before that it lands in Bramblebank, where the tutorial runs. One set (DECISIONS 2026-11-10, the hub at the
 centre): with the garden on, the house, Nook (with its Incubator and the one egg, `Save.d["egg"]`), stall and
-Burrow are the hub's. `HubLayout.holds` keeps a farm-start Bramblebank from building them: no nodes, blockers,
-build-mode tiles or auto-placed stall, so the first-day "pair two Boki in the Nook" and the Ember Boki's minding
+Burrow are the hub's. `HubLayout.holds` keeps Bramblebank from building them (a classic island's fixed set too:
+`ClassicSet`): no nodes, blockers, build-mode tiles or auto-placed stall, so the first-day "pair two Boki in the Nook" and the Ember Boki's minding
 happen at the hub's Nook. An older layout's entries stay on the save (the farm with the garden off still uses
 them), so no migration.
 
