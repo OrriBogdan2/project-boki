@@ -4,7 +4,9 @@ extends RefCounted
 ## the middle of the map and one at the map's outer edge (<dir>/<view>_mid.png, <view>_edge.png), and a timed run
 ## of a live match (autoplaying player, rivals and a monster pack brought to it, as --perf-bench's match) printed
 ## as WIDECAM lines: avg ms, fps, 1% low, gpu ms, draws. --wide-video also writes the new default's run as numbered
-## frames with the wheel scrolled out and in (<dir>/video_NNN.png, 30 fps; encode with ffmpeg). Never writes the save.
+## frames with the wheel scrolled out and in (<dir>/video_NNN.png, 30 fps; encode with ffmpeg). --start-video instead
+## writes the first seconds of an expedition twice: the old start (zoom 1) and a new player's (the widest)
+## (<dir>/start_before_NNN.png, start_after_NNN.png). Never writes the save.
 
 const PerfBench := preload("res://tools/perf_bench.gd")
 const DT := 1.0 / 60.0
@@ -15,6 +17,7 @@ const EDGE_IN := 0.85            # of the outermost island's radius: where the e
 const NOTCH_EVERY := 8           # video frames between wheel notches
 const HOLD := 45                 # video frames held still between the wheel's runs
 const OLD_STYLE := "supervive_close"
+const START_FRAMES := 150        # video frames of an expedition's start (5 s)
 
 var main: Node
 var bench := PerfBench.new()
@@ -26,16 +29,22 @@ var n := 0                       # video frame counter
 func run(main_node: Node) -> void:
 	main = main_node
 	var video := false
+	var start := false
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 		video = video or a == "--wide-video"
+		start = start or a == "--start-video"
 	DirAccess.make_dir_recursive_absolute(dir)
 	bench.setup(main)
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	Settings.v["cam_follow"] = "locked"      # no cursor lean: the idle cursor sits on the HUD
 	Settings.v["tips"] = false
+	if start:
+		await _starts()
+		main.get_tree().quit()
+		return
 	await _style("old", OLD_STYLE, [["old", 1.0]], false)
 	var out: float = CamWheel.rules()["match"]["max"]
 	await _style("new", "supervive", [["new", 1.0], ["max", out]], video)
@@ -54,10 +63,11 @@ func _style(tag: String, style: String, views: Array, video: bool) -> void:
 		m.cam.user_zoom = 1.0
 		await _video()
 
-func _build() -> void:
+func _build(expedition := false) -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "no_drop": true, "god": true, "autoplay": true,
-		"demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": 3, "squad": 2, "total": 6, "no_drop": true, "god": true, "demo_kin": "cindle", "seed": 4101}, true)
+	if not expedition:
+		o["autoplay"] = true
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -126,13 +136,8 @@ func _to_edge() -> void:
 
 ## The new default's live fight as frames: the wheel scrolled out to its furthest, in to its closest, then back.
 func _video() -> void:
-	var layer := CanvasLayer.new()
-	layer.layer = 100
-	main.add_child(layer)
-	label = Label.new()
-	label.position = Vector2(24, 20)
-	label.add_theme_font_size_override("font_size", 28)
-	layer.add_child(label)
+	_label()
+	var layer := label.get_parent()
 	var r: Dictionary = CamWheel.rules()["match"]
 	var notches := int(roundf((float(r["max"]) - 1.0) / float(r["step"])))
 	var back := int(roundf((float(r["max"]) - float(r["min"])) / float(r["step"])))
@@ -144,6 +149,32 @@ func _video() -> void:
 			await _hold(NOTCH_EVERY)
 		await _hold(HOLD)
 	layer.queue_free()
+
+## An expedition's first seconds under the default style: the old start (the style's framing, zoom 1, what a
+## player got before) and a new player's (no saved zoom: the widest), each from a fresh match.
+func _starts() -> void:
+	Settings.v["cam_style"] = "supervive"
+	Settings.v["lobby_enabled"] = false      # (straight into the match, as after the lobby)
+	_label()
+	for run in [["before", 1.0, "BEFORE: expedition starts at zoom 1.00"], ["after", 0.0, "AFTER: a new player's expedition"]]:
+		Settings.v["cam_zoom"] = float(run[1])
+		await _build(true)
+		print("WIDECAM START %s: expedition %s, zoom %.2f" % [run[0], Prematch.expedition(m.opts), m.cam.user_zoom])
+		for i in START_FRAMES:
+			await _tick(2)
+			label.text = "%s  ·  wheel zoom %.2f  ·  %.0f m across" % [run[2], m.cam.user_zoom,
+				CamRig.style_across(m.cam.style_id) * m.cam.zoom]
+			await RenderingServer.frame_post_draw
+			main.get_viewport().get_texture().get_image().save_png(dir.path_join("start_%s_%03d.png" % [run[0], i]))
+
+func _label() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	main.add_child(layer)
+	label = Label.new()
+	label.position = Vector2(24, 20)
+	label.add_theme_font_size_override("font_size", 28)
+	layer.add_child(label)
 
 func _hold(frames: int) -> void:
 	for i in frames:
