@@ -152,7 +152,7 @@ func _land(d: Dictionary) -> void:
 		if dealt <= 0.0:
 			continue
 		last_dealt += dealt
-		_impact(f, dir, dealt)
+		_impact(f, dir)
 		if HeroUlt.landed(k, f) in ["knock", "kill"]:
 			_reset()
 	if last_dealt > 0.0:
@@ -165,11 +165,10 @@ func _land(d: Dictionary) -> void:
 	if st.get("pull_next", false) and k.warchain.hooked():
 		k.warchain.pull()
 
-## On someone hit: the gold impact cloud, the hit-stop and a heavy shake.
-func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
+## On someone hit: the gold impact cloud and a heavy shake for those near (the hit's own weight holds it).
+func _impact(f: Ent, dir: Vector2) -> void:
 	var h := k.h
 	k.vfx("riposte_hit", f.pos, dir)
-	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
 	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
 ## A hunter who was up and went down to the cleave: it is ready again at once.

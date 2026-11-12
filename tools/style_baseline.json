@@ -14,8 +14,8 @@
 "semicolon": 6
 },
 "scripts/arch/feel.gd": {
-"long_line": 10,
-"nested_ternary": 2,
+"long_line": 9,
+"nested_ternary": 1,
 "semicolon": 5
 },
 "scripts/arch/hero_demo.gd": {

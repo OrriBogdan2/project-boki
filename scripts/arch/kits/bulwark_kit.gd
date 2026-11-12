@@ -445,7 +445,7 @@ func _smash() -> void:
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
 		if perfect:
-			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
+			Feel.hitstop(m, h, f, dmg, {"melee": true, "ab": "primary", "payoff": true})
 	var heavier := 1.0 if perfect else 0.0
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
 

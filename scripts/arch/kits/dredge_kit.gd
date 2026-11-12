@@ -635,7 +635,7 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	m.displace.spike(f, -16.0, h)
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
+	Feel.hitstop(m, h, f, 30.0, {"melee": true, "ab": "k1"})      # (the anchor's spike deals no hit of its own)
 	stunned.append({"e": f, "until": m.time + stun})
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
