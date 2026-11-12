@@ -70,7 +70,7 @@ What the in-game kit card (K) says.
 | LMB | Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one. |
 | RMB: Ice Spear | Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later. |
 | E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
-| Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
+| Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 8.3m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
 | Weapon: Hoar Fan | Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones. |
 
 ### Abilities in full
@@ -85,8 +85,7 @@ What the in-game kit card (K) says.
 
 **Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 
-**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
-**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.3s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
+**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.3s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 
@@ -97,7 +96,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10.2s -> 9.2s, damage +15%. | cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder. |
 | Dash (Shift) | recharge 13s -> 11s. | recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
 | E | cooldown 17s -> 15.3s, wall strength +15%. | cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength. |
-| R (ultimate) | Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Merge lasts 30% longer. | Rimelock cooldown 80s -> 60s, damage 40 -> 56. |
+| R (ultimate) | Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Fusion lasts 30% longer. | Rimelock cooldown 80s -> 60s, damage 40 -> 56. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

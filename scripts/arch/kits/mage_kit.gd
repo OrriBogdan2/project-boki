@@ -158,10 +158,9 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(now))     # the zap climbs with each stack
 
 func combo_read(f: Ent) -> Dictionary:
-	var s = sparks.get(f.get_instance_id())
-	if s == null:
+	if not sparks.has(f.get_instance_id()):
 		return {}
-	return {"icon": "shock", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
+	return {"icon": "shock", "n": spark_n(f), "max": int(res_def()["max"]), "left": Stacks.left(f, "static"),
 			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
 
 func clear_sparks(f: Ent) -> void:

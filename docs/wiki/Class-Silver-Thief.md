@@ -71,8 +71,6 @@ What the in-game kit card (K) says.
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
-| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
-| Dash: Vault | Cartwheel a short way (much further from a jump). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
 | RMB: Bola | Throw a Bola down the lane at once: it grounds and slows the first foe and flies on. Catch a second foe, or a wall or tree, and the stun lands. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder from its edge. |
@@ -87,7 +85,6 @@ What the in-game kit card (K) says.
 **Bola (RMB, 7s cooldown).**
 
 - *Tap:* Thrown the moment you press, 7m down the lane: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 5.5m (a crate it breaks counts as that first catch). With no catch yet it bounces once off a wall. After the first foe, a second foe, a wall or a tree stuns: the Bola pins them for 0.9s and they take +13 (TANGLED; a pinned one shows PINNED).
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
@@ -103,7 +100,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | damage +50%. | cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks. |
 | Dash (Shift) | the empowered bonus +20%. | the empowered bonus +40% in all, and the speed boost is half again as big. |
 | E | cooldown 15s -> 10.7s. | cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
-| R (ultimate) | Encore cooldown 24s -> 21.5s, damage 4 -> 4.4, rim damage 2 -> 2.2. The Merge lasts 30% longer. | Encore cooldown 24s -> 19s, damage 4 -> 4.8, rim damage 2 -> 2.4. |
+| R (ultimate) | Encore cooldown 24s -> 21.5s, damage 4 -> 4.4, rim damage 2 -> 2.2. The Fusion lasts 30% longer. | Encore cooldown 24s -> 19s, damage 4 -> 4.8, rim damage 2 -> 2.4. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
