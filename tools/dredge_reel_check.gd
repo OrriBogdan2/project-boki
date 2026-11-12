@@ -1,10 +1,9 @@
 extends RefCounted
 ## The Abyssal Hand reel against the source, for --dredge-combo-check (docs/heroes/dredge.md, "Reel parity"):
-## the arm's out-speed and reach, the reel's speed curve, where the body stops, what the reeled foe can do,
+## the arm's reach, the reel's speed curve, where the body stops, what the reeled foe can do,
 ## what Grimble can do while he reels, and what a miss costs. One row of the doc's table per assert.
 
 const BH := 1.8                  # m in one body height of the footage (briefs/hero-ref/linwick.md scale)
-const OUT_SPD := 12.5 * BH       # m/s the arm reaches out: 5 bh in 0.4 s (frames 121-123)
 const REEL_SPD := 5.0 * BH       # m/s the reel hauls: about 5 bh/s (frames 124-129)
 const CATCH := 9.0               # m: the foe's start, the footage's 5 bh catch
 const REEL_T := 1.0              # s the footage's 5 bh reel takes, grab to arrival (frames 124-129)
@@ -45,8 +44,9 @@ func _reel() -> void:
 		if K.flying and not K.hook_sd.is_empty():
 			out_spd = Vector2(K.hook_sd["pos"].x - at0.x, K.hook_sd["pos"].z - at0.z).length() / ak.DT
 	ok(
-		"reel parity: the arm reaches out at the footage's ~22 m/s (5 bh in 0.4 s)",
-		not K.pull.is_empty() and absf(out_spd - OUT_SPD) < 1.0, "%.1f m/s, caught %.2f s after the tap" % [out_spd, t]
+		"reel parity: the arm reaches out at rmb.speed (the owner's note, not the footage)",
+		not K.pull.is_empty() and absf(out_spd - float(K.rmb_def()["speed"])) < 1.0,
+		"%.1f m/s, caught %.2f s after the tap" % [out_spd, t]
 	)
 	# the reel: its speed each frame, and whether the foe or Grimble could act
 	var from := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).normalized()
@@ -131,13 +131,14 @@ func _miss() -> void:
 	var cd0 := float(K.cd["rmb"])
 	var far := 0.0
 	var t: float = ak.DT
-	while K.flying and t < 2.0:
-		far = maxf(far, Vector2(K.hook_sd["pos"].x - P.pos.x, K.hook_sd["pos"].z - P.pos.z).length())
+	while (K.flying or K.coil > 0.0) and t < 2.0:
+		if not K.hook_sd.is_empty():
+			far = maxf(far, Vector2(K.hook_sd["pos"].x - P.pos.x, K.hook_sd["pos"].z - P.pos.z).length())
 		m.step(ak.DT)
 		t += ak.DT
-	var fly_t := float(rdf["range"]) / float(rdf["speed"])
+	var fly_t := float(rdf["windup"]) + float(rdf["range"]) / float(rdf["speed"])
 	ok(
-		"miss: the arm flies its full 11.5 m in range/speed and grabs nothing",
+		"miss: the arm flies its full 11.5 m in windup + range/speed and grabs nothing",
 		K.grapples == 0 and absf(far - float(rdf["range"])) < 0.8 and absf(t - fly_t) < 0.1,
 		"%.1f m in %.2f s (%.2f expected)" % [far, t, fly_t]
 	)
