@@ -669,6 +669,8 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
 	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
+	if egg.has("visitor"):
+		baby["lineage"] = {"parents": [], "names": [], "gen": 0, "visitor": egg["visitor"]}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby

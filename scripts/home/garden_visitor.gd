@@ -7,7 +7,9 @@ extends RefCounted
 ## list and its favourite is shown. The third favourite meal makes it ask to stay as a new Boki when the
 ## zone has room, else leave an egg in the Incubator. The away card says who came and left.
 ## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next}: a lazy key, no save bump; the rec carries
-## "visitor": true until it joins. Tuning: content/rules/garden_visitor.json.
+## "visitor": true until it joins. The egg it leaves carries {sp, zone, day} (Incubator "visitor"): the baby's
+## lineage["visitor"] shows it as the wild parent on the Family tab, with one memory line.
+## Tuning: content/rules/garden_visitor.json.
 
 static var _look_t := 0.0
 static var _rng := RandomNumberGenerator.new()      # its own stream: seeded checks keep the global one
@@ -64,8 +66,23 @@ static func expired(now: float) -> bool:
 static func _name(r: Dictionary) -> String:
 	return String(Data.KIN[String(r["species"])]["name"])
 
+static func zone_name(zone: String) -> String:
+	return String(GardenZones.info(zone).get("name", ""))
+
 static func _zone_name() -> String:
-	return String(GardenZones.info(String(Save.d["visitor"]["zone"])).get("name", ""))
+	return zone_name(String(Save.d["visitor"]["zone"]))
+
+## The farm day at unix time `now`: day 1 is when the oldest Boki on the roster was born; a day is care_day_s.
+static func farm_day(now: float) -> int:
+	var first := now
+	for r in Save.d["roster"]:
+		first = minf(first, float(r.get("born", now)))
+	return 1 + int((now - first) / float(Content.rules("care")["care_day_s"]))
+
+## The one memory line of a baby hatched from a visitor's egg.
+static func born_line(v: Dictionary) -> String:
+	var wild := String(Data.KIN[String(v["sp"])]["name"])
+	return "hatched from the egg a wild %s left in %s on day %d" % [wild, zone_name(String(v["zone"])), int(v["day"])]
 
 ## Called from BaseLife.step at 10 Hz with the zone's home `h`: a visitor may arrive, or the one here may go.
 static func step(h, dt: float, now := -1.0) -> void:
@@ -125,7 +142,8 @@ static func _thank(h, r: Dictionary, now: float) -> void:
 			_dismiss(h, r)
 		h._toast("%s asks to stay. It is yours now" % r["name"])
 	else:
-		var egg := Incubator.add(String(r["species"]))
+		var from := {"sp": String(r["species"]), "zone": zone, "day": farm_day(now)}
+		var egg := Incubator.add(String(r["species"]), "", from)
 		leave(h, "A wild %s left %s" % [_name(r), "a " + Incubator.egg_name(egg)], now)
 		h._toast("%s left an egg" % _name(r))
 

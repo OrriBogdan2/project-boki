@@ -5025,7 +5025,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	# it's yours from the moment it hatches; the naming card only renames it
 	baby["name"] = Data.default_kin_name(String(baby["species"]))
 	if rare:
-		Save.remember(baby, "born", "hatched from a Rare Egg you carried home from %s" % String(Data.MOBS.get(boss, {}).get("name", "a boss's lair")), 2.0)
+		Save.remember(baby, "born", Incubator.born_line(baby, boss), 2.0)
 		Progress.add("rare_hatched")
 	else:
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)
