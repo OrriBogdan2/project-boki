@@ -21,12 +21,14 @@ const CHIP := 0.03          # share of max health: a rifle round (light)
 const HEAVY := 0.2          # share of max health: a staggering hit; as a payoff it lands heavy
 const SHOT_HEROES := ["gunslinger", "juggernaut", "archer", "ashwick"]     # --impact-shots default: Vex, Kael, Lace, Cinder
 const SHOT_FRAMES := 16     # strip frames, every other 60 Hz step
-const SHOT_PX := 256        # px: one strip frame (a square from the middle of the screen)
+const SHOT_PX := 320        # px: one strip frame, its own square view (no HUD)
+const SHOT_CAM := Vector3(2.9, 2.1, 3.6)     # m: the camera off the Hunter's feet (front 3/4, a little above)
 const SHOT_ROW := 8         # frames per strip row
 
 var bad := 0
 var shots := ""             # --impact-shots: where the strips go ("" = the check)
 var film: Array = []        # the frames of the strip being shot
+var view: SubViewport       # --impact-shots: the strip camera's own view of the match's world
 
 func ok(cond: bool, what: String) -> void:
 	print("IMPACT %s %s" % ["ok  " if cond else "FAIL", what])
@@ -252,12 +254,17 @@ func _impact(m: Match, P: Hunter, V: Hunter, A: Hunter, hs: Array, hero: String,
 ## The strike: two frames standing, then a heavy hit (the held frames, then the hit clip). The stun: its first kit
 ## move, stunned 0.1 s in.
 func _shoot(m: Match, V: Hunter, A: Hunter, hs: Array, hero: String) -> void:
+	view = SubViewport.new()
+	view.size = Vector2i(SHOT_PX, SHOT_PX)
+	view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	m.add_child(view)
 	var cam := Camera3D.new()
-	m.add_child(cam)
-	cam.fov = 35.0
-	cam.position = V.pos + Vector3(4.2, 3.4, 5.6)
-	cam.look_at(V.pos + Vector3(0, 1.1, 0))
-	cam.make_current()
+	view.add_child(cam)
+	cam.fov = 32.0
+	cam.position = V.pos + SHOT_CAM
+	cam.look_at(V.pos + Vector3(0, 1.15, 0))
+	cam.current = true
+	V.inp["aim"] = V.pos + Vector3(1.0, 0.9, 4.5)      # (the body turns to face just off the camera)
 	_settle(m, hs, 30)
 	film.clear()
 	for i in 4:
@@ -285,11 +292,7 @@ func _shot_frame(m: Match, hs: Array, i: int) -> void:
 	_frame(m, hs)
 	await RenderingServer.frame_post_draw
 	if i % 2 == 1:
-		var img := m.get_viewport().get_texture().get_image()
-		var side := mini(img.get_width(), img.get_height())
-		var sq := img.get_region(Rect2i((img.get_width() - side) / 2, (img.get_height() - side) / 2, side, side))
-		sq.resize(SHOT_PX, SHOT_PX, Image.INTERPOLATE_LANCZOS)
-		film.append(sq)
+		film.append(view.get_texture().get_image())
 
 func _sheet() -> Image:
 	var rows := ceili(float(film.size()) / SHOT_ROW)
