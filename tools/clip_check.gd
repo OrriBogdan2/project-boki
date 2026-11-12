@@ -393,9 +393,12 @@ func _cc(id: String, dd: Dictionary) -> void:
 	var root := await _cc_run(id, "rooted")
 	var lean := 0.0
 	var legs := 0.0
+	# (two model builds can settle at different constant leg offsets: measure the root's run against its own calm
+	# first frame, as the hit rows do)
+	var off := float(root[0]["legs"]) - float(calm[0]["legs"])
 	for i in calm.size():
 		lean = maxf(lean, float(calm[i]["head"].z) - float(root[i]["head"].z))
-		legs = maxf(legs, absf(float(root[i]["legs"]) - float(calm[i]["legs"])))
+		legs = maxf(legs, absf(float(root[i]["legs"]) - float(calm[i]["legs"]) - off))
 	ok(float(root[on_i]["root"]) >= 1.0 and lean >= ROOT_LEAN_M,
 			"%s: a root strains the torso forward (%.2f, head %.3f m, min %.2f)"
 			% [id, root[on_i]["root"], lean, ROOT_LEAN_M])
