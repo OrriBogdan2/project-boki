@@ -89,6 +89,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
+	Prof.begin("hud_tick")
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
@@ -102,6 +103,7 @@ func _process(delta: float) -> void:
 	_clear_under_toasts(delta)
 	c.queue_redraw()
 	cursor.queue_redraw()
+	Prof.end()
 
 var hit_armor := false
 
@@ -223,6 +225,11 @@ var hover_id := ""
 var hover_t := 0.0
 
 func _draw_all() -> void:
+	Prof.begin("hud_draw")
+	_draw_parts()
+	Prof.end()
+
+func _draw_parts() -> void:
 	var sz := c.size
 	var p := m.player
 	if m.tut and m.tut.intro:

@@ -3145,6 +3145,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 
 # ------------------------------------------------------------------ main loop
 func _process(delta: float) -> void:
+	Prof.frame()
 	if paused and not net_on:
 		return
 	_tips()
@@ -3177,6 +3178,7 @@ func _process(delta: float) -> void:
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
+	Prof.begin("render_entities")
 	for e in hunters: e.render(delta, alpha)
 	_vprof("hunters")
 	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
@@ -3201,6 +3203,8 @@ func _process(delta: float) -> void:
 		else:
 			e.lod_dt += delta
 	_vprof("kins_mobs")
+	Prof.end()
+	Prof.begin("vfx_render")
 	if verbs: verbs.render(alpha)
 	for s in shots:
 		if s.has("deco"):
@@ -3216,6 +3220,8 @@ func _process(delta: float) -> void:
 				var r: float = s.get("vr", s["r"])
 				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
 	_vprof("verbs_shots")
+	Prof.end()
+	Prof.begin("camera")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
 	if sty != cam_style:
@@ -3288,6 +3294,7 @@ func _process(delta: float) -> void:
 		cam.follow(foc, delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)
+	Prof.end()
 	_vprof("camera")
 	_update_aim(alpha)
 	_vprof("aim")
@@ -3879,10 +3886,12 @@ func step(dt: float) -> void:
 		KinKeys.apply(player)
 	_prof("pre")
 	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0022)
+	Prof.begin("bots")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted and SimLod.step_dt(h, dt) > 0.0:
 			bot_brain.tick(self, h, SimLod.step_dt(h, dt))
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
+	Prof.end()
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
 	if opts.has("train_demo") and skytrain and player:
@@ -3896,7 +3905,9 @@ func step(dt: float) -> void:
 		arena.after_think()
 		arena.tick(dt)
 	_prof("train")
+	Prof.begin("hunters_sim")
 	for h in hunters: h.sim(SimLod.step_dt(h, dt))
+	Prof.end()
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -3911,12 +3922,16 @@ func step(dt: float) -> void:
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
 	_prof("mobs")
+	Prof.begin("physics")
 	_separate()
 	_collide_breaks()
 	brk.tick(dt)
+	Prof.end()
 	_prof("separate")
+	Prof.begin("combat")
 	_update_rings(dt)
 	_update_shots(dt)
+	Prof.end()
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
@@ -3966,9 +3981,11 @@ func step(dt: float) -> void:
 	_prof("truce_spawns")
 	_update_events()
 	_update_zones(dt)
+	Prof.begin("vfx_tick")
 	fields.tick(dt)
 	verbs.tick(dt)
 	displace.tick(dt)
+	Prof.end()
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
