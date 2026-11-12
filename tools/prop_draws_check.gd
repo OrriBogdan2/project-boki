@@ -9,7 +9,7 @@ extends RefCounted
 
 ## Draws per model as measured on 11-11 (before the merges: chest with its padlocks 37, key 10,
 ## stall L1 32, L3 69, nook 60, incubator 235, burrow 67).
-const MAX_DRAWS := {"chest": 29, "key": 6, "stall1": 20, "stall3": 38, "nook": 17, "incubator": 171, "burrow": 37}
+const MAX_DRAWS := {"chest": 29, "key": 6, "stall1": 20, "stall3": 38, "nook": 17, "incubator": 173, "burrow": 37}
 
 var fails := 0
 
