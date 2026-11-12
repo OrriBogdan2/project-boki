@@ -26,9 +26,8 @@ var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (ho
 var shrines: Array = []     # {pos, used, prog, node}
 var breaks: Array = []      # {i, pos, kind, node, dead}
 var brk: Breakables
-var ring_n := 0
 var pellet_hits := {}        # shotgun volley + target -> slugs landed
-var air_rings: Array = []   # {pos, dir, node, cd: {hunter nid: time}}
+var air_rings: AirRings
 var wpicks: Array = []      # pickups on the ground: gear {gear}, tunings {tune}, treasure {val}, each with id, pos, rar, node
 var wdrop_n := 0
 var warden_done := false
@@ -375,12 +374,7 @@ func _start(o: Dictionary) -> void:
 	if not opts.get("arena", false):
 		await _spawn_breakables()
 	await _slice()
-	for rg in world.rings:
-		var rn := Models.air_ring()
-		rn.position = rg["pos"]
-		rn.rotation.y = atan2(float(rg["dir"].x), float(rg["dir"].y))
-		add_child(rn)
-		air_rings.append({"pos": rg["pos"], "dir": rg["dir"], "node": rn, "cd": {}})
+	air_rings = AirRings.new(self)
 	if o.get("break_demo", false) and player and not breaks.is_empty():
 		# test: stand by some breakables with two found weapons on the ground
 		var b0: Vector3 = breaks[0]["pos"]
@@ -1438,44 +1432,6 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 	if Pack.room(h):
 		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
 	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
-
-## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
-## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
-func _update_rings(dt: float) -> void:
-	if player and not player.out and int(time * 4.0) % 4 == 0:
-		for rg in air_rings:
-			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
-				break
-	for rg in air_rings:
-		# rings stand straight up facing along the route; they don't spin
-		for h in hunters:
-			if h.remote or h.grounded or h.out or h.downed or h.riding or not h.pad.is_empty():
-				continue
-			var c: Vector3 = rg["pos"]
-			var body: Vector3 = h.pos + Vector3(0, 0.8, 0)
-			if body.distance_to(c) > 1.6:
-				continue
-			if float(rg["cd"].get(h.nid, -9.0)) > time:
-				continue
-			rg["cd"][h.nid] = time + 3.0
-			ring_n += 1
-			h.add_stat("rings")
-			var hv := Vector2(h.vel.x, h.vel.z)
-			var rd: Vector2 = rg["dir"]
-			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
-			if absf(d.dot(rd)) > 0.5:
-				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
-			h.vel.x = d.x * spd; h.vel.z = d.y * spd
-			h.vel.y = maxf(h.vel.y, 2.0)
-			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
-			if not h.gliding and not h.dropping:
-				h.glide_cd = 0.0
-				h.gliding = true
-			fx.ring(c, 1.6, Color("8fe3ff"), 0.3)
-			fx.burst(c, Color("cff6ff"), 14, 4.0, 0.35, 0.0)
-			sfx("whoosh", c, -2.0 if h == player else -10.0, 1.3)
 
 ## Breakables are solid: push bodies out, and dashing straight through one smashes it.
 var _break_grid := {}
@@ -3785,15 +3741,7 @@ func step(dt: float) -> void:
 				if h.team != player.team:
 					h.teleport(rival_spot if rival_spot != Vector3.INF else spot + Vector3(4, 0, 0))
 					break
-	if opts.get("ring_demo", false) and player and time < 0.05 and not air_rings.is_empty():
-		var rg: Dictionary = air_rings[0]
-		var rd: Vector2 = rg["dir"]
-		player.teleport(rg["pos"] - Vector3(rd.x, 0, rd.y) * 5.0 + Vector3(0, -0.6, 0))
-		player.grounded = false; player.gliding = true
-		player.vel = Vector3(rd.x, 0, rd.y) * 9.6
-	if opts.get("ring_demo", false) and player and player.gliding:
-		player.inp["glide"] = true
-		player.inp["move"] = Vector2(player.vel.x, player.vel.z).normalized()
+	if opts.get("ring_demo", false) and air_rings: air_rings.demo()
 	if String(opts.get("map_demo", "")) == "mid" and player and hud and time > 0.6 and not has_meta("map_demo_done"):
 		# test: the map mid-match, with a few spawns scouted (found, empty and taken) and squad pings
 		set_meta("map_demo_done", true)
@@ -3915,7 +3863,7 @@ func step(dt: float) -> void:
 	_collide_breaks()
 	brk.tick(dt)
 	_prof("separate")
-	_update_rings(dt)
+	if air_rings: air_rings.tick(dt)
 	_update_shots(dt)
 	_prof("shots")
 	_update_pickups(dt)
