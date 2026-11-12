@@ -13,5 +13,10 @@ in about +1.8 s, out about +2.6 s).
   the end (+3.2 s). A laced portal opens on each side of the pillar where she went in and came out (+1.2 s to
   +2.4 s), seen by every game. The roll shows only its trail, as before.
 
-Both are software GL (xvfb, opengl3, llvmpipe) on rpc5. The GPU strip is jobq 20261111-220025-09470 (same
-arguments); it was still queued when this branch was posted.
+The xvfb pair is software GL (xvfb, opengl3, llvmpipe) on rpc5.
+
+- `gpu_after.jpg`: ext/vfx-lace-spirit-walk 7ac757639 on a GPU (jobq 20261112-002459-18519, pc-MRROBOTO,
+  RTX 4070 SUPER, OpenGL 3.3 compatibility; same arguments, re-run because the first job 20261111-220025-09470
+  lost its tree). Same read as `xvfb_after.jpg`: dark wash inside the pillar (+1.2 s), a laced portal on the
+  far side where she came out (+1.4 s on), held through the end of the walk. The whole-walk wash is subtle at
+  this camera (the grass only a little duller than at +0.0 s); the footage's ghost world is much darker.
