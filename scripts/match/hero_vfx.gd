@@ -18,7 +18,7 @@ const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "t
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
-const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
+const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 16, "thread": 18, "bolt": 12, "vortex": 4,
 	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -462,6 +462,7 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
 	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	mt.set_shader_parameter("streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
 

@@ -61,6 +61,7 @@ func run(main: Node) -> void:
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
+	await _vex_tracer(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -230,6 +231,51 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## Vex's rifle rounds are HeroVfx data (content/vfx/gunslinger.json): through a held string every live round of hers
+## carries a tracer (ribbon layers with a node to follow) as long as the round really flies (the tail's seconds times
+## the weapon's m/s) and wide enough to follow at match zoom, with a flash at the gun for each round and a spark where
+## one lands; the round's own speed is the weapon's.
+func _vex_tracer(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	V.plays.clear()
+	P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0.0)
+	P.inp["aim_y"] = P.pos.y
+	P.inp["fire"] = true
+	var seen: Array = []
+	var bare := 0                  # live rounds without a tracer riding them (past the step it was fired on)
+	var born := {}                 # round -> the step it was first seen
+	var thin := 0.0
+	var spd := float(P.wpn["speed"])
+	for i in 150:
+		m.step(1.0 / 60.0)
+		for sd: Dictionary in m.get("shots"):
+			if sd["by"] != P or (sd["x"] as Dictionary).has("src") or not is_instance_valid(sd["node"]):
+				continue
+			var mine: Array = V.ribbons.filter(func(e: Dictionary): return e["follow"] == sd["node"])
+			if not seen.has(sd):
+				seen.append(sd)
+				born[sd] = i
+				if seen.size() == 1:
+					ok(absf((sd["vel"] as Vector2).length() - spd) < 0.5, "a round flies at the weapon's speed (%.0f m/s)" % spd)
+			if mine.is_empty() and int(born[sd]) < i:
+				bare += 1
+			for e: Dictionary in mine:
+				thin = maxf(thin, float(e["width"]))
+				var ln := float(e["tail"]) * spd
+				if ln < 2.0 or ln > 4.5:
+					bare += 1
+	P.inp["fire"] = false
+	ok(seen.size() >= 15, "a held string fires its rounds (%d)" % seen.size())
+	ok(bare == 0, "every live round has a tracer 2-4.5 m long at its real speed (%d bare)" % bare)
+	ok(thin >= 0.3, "the tracer is wide enough for the match camera (%.2f m)" % thin)
+	ok(int(V.plays.get("shot", 0)) >= seen.size(), "a muzzle flash for every round (%d of %d)" % [int(V.plays.get("shot", 0)), seen.size()])
+	ok(int(V.plays.get("shot_trail", 0)) >= seen.size(), "a tracer for every round (%d of %d)" % [int(V.plays.get("shot_trail", 0)), seen.size()])
+	var spark: Array = (V._rec(P, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
+	ok(spark.has("flare") and spark.has("ember"), "a round that lands has a flash and sparks")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:

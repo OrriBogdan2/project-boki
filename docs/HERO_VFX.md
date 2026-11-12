@@ -29,7 +29,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow` |
-| `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
+| `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread), `"streak": true` a clean tracer (hot head, tail thinning and cooling, no burn-away noise; `tail` s x the round's m/s is its length) |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |

@@ -31,6 +31,7 @@ uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures ke
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
+uniform bool streak = false;  // M_RIBBON: a clean tracer (a hot needle head, a tail that thins and cools), no burn-away noise
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
 void vertex() {
@@ -176,7 +177,17 @@ vec4 flare(vec2 uv) {
 	return vec4(ramp(0.3 + core * 0.75) * a, a * 0.9);
 }
 
+vec4 tracer(vec2 uv) {
+	// a round in flight: solid across, a white-hot core inside a coloured body, bright at the head, the tail cools
+	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
+	float a = smoothstep(0.0, 0.3, across) * (1.0 - uv.x * uv.x);
+	float core = smoothstep(0.45, 0.85, across) * (1.0 - uv.x * 0.6);
+	vec3 c = mix(mix(col, col3, uv.x), col2, core);
+	return vec4(c * a, a);
+}
+
 vec4 ribbon(vec2 uv) {
+	if (streak) { return tracer(uv); }
 	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
 	float n = fbm3(vec2(uv.x * 5.0 - TIME * 5.0 + seed, uv.y * 3.0));
 	float body = across * 1.4 + (n - 0.5) * 0.9 - uv.x * 0.9;
