@@ -2346,6 +2346,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.pressed and panel_open == "":
+		if event.button_index == MOUSE_BUTTON_LEFT and stat_glint.open_card(event.position):
+			get_viewport().set_input_as_handled()      # a risen stat's glint: that Boki's card on the stat
+			return
 		# click a kin to see its details
 		if event.button_index == MOUSE_BUTTON_LEFT and not hover_k.is_empty() and visit.is_empty() and not building_now and not chat_open:
 			_open_kin(hover_k["rec"])
@@ -3189,7 +3192,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
 		"Training":
 			c1.add_child(UI.section("Stats", UI.FAINT.lightened(0.2)))
-			StatBudgetView.fill(c1, rec)
+			StatBudgetView.fill(c1, rec, stat_glint.lit_for(rec))
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			_kin_match_rows(rec, c2, true)
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
