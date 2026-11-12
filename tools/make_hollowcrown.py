@@ -257,8 +257,10 @@ MORE = {
     "gaol_ne": dict(chests=[[147, 62]]),
     "gaol_sw": dict(chests=[[48, 150]]),
     "frostgate": dict(chests=[[94, 30], [100, 62]], landings=[[110, 28], [118, 62], [74, 46]],
+                      rocks=[[134, 57, 135, 57]],    # the heavy camp's cover
                       breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
     "cinder": dict(chests=[[30, 100], [46, 93]], landings=[[28, 84], [54, 112], [36, 116]],
+                   rocks=[[58, 90, 59, 90]],     # the heavy camp's cover
                    breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
     "storm": dict(chests=[[190, 110], [160, 136]], landings=[[158, 104], [190, 120], [166, 94]],
                   breakables=[[188, 106, "crate"], [189, 106, "keg"]]),
@@ -279,8 +281,8 @@ for _iid, _more in MORE.items():
 # camps of a region stand 30-70 m apart, 14 m off a train halt and 20 m off a lair gate, vault and way-out seat.
 CAMPS = {
     "crown": [[99, 94, "heavy"], [104, 129, "heavy"], [133, 104, "heavy"], [126, 128, "normal"]],
-    "frostgate": [[117, 57, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
-    "cinder": [[60, 109, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
+    "frostgate": [[129, 60, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
+    "cinder": [[61, 87, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
     "storm": [[157, 117, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
     "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
     "lark": [[40, 42, "normal"], [50, 20, "light"], [27, 22, "light"]],
@@ -748,7 +750,7 @@ AMBUSH_R = (1.3, 1.9)   # m: clump radius of that patch (small enough to fit bet
 AMBUSH_LEAST = 12       # tiles: the smallest such patch
 COVER = {   # share of the biome's ground (inside the keys.json range), clump radius, clumps per patch, smallest patch worth planting (tiles), long bands along lanes?
     "bloom":  dict(share=0.18, r=(2.2, 3.2), n=(5, 6), least=40, band=False, gap=2, sp=0.88),
-    "meadow": dict(share=0.1, r=(1.4, 2.0), n=(4, 6), least=14, band=True, gap=2),
+    "meadow": dict(share=0.11, r=(1.4, 2.0), n=(4, 6), least=14, band=True, gap=2),
     "gloom":  dict(share=0.06, r=(1.3, 1.9), n=(3, 5), least=10, band=False, gap=2),
     "storm":  dict(share=0.03, r=(1.1, 1.6), n=(3, 4), least=8, band=False, gap=2),
     "ember":  dict(share=0.024, r=(1.0, 1.5), n=(3, 3), least=6, band=False, gap=2),
