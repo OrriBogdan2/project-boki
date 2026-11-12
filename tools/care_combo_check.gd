@@ -1556,6 +1556,7 @@ func rimewright() -> void:
 	ok(
 			"tm Shift: darts while skating are straight beams at dash.skate_dart_dmg_k (2x) the plain dart's damage",
 			bs.size() > nb and plain_d > 0.0 and K.stats["beams"] >= 1
+				and float(K.dash_def()["skate_dart_dmg_k"]) == 2.0
 				and absf(bd - plain_d * float(K.dash_def()["skate_dart_dmg_k"])) < 0.05,
 			"plain dart %.2f, skating beam %.2f" % [plain_d, bd])
 	step(m, 0.15)
