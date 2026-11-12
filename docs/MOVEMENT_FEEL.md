@@ -340,6 +340,38 @@ Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Air velocity: kit casts add to it, never overwrite it (DECISIONS 11-08; the eight kits outside the slice)
+
+Rule (briefs/DECISIONS.md 2026-11-08): in the air WASD accelerates toward the keys, counter-steers hard and drag
+bleeds speed above the cap (`Loco.air_step`); nothing overwrites the air velocity. A kit move may still own it when
+it is a sourced displacement (a dash, skate, Rock Hop, barge, lob, knock or pull, cited to its KIT_PARITY row);
+anything else adds to what you carry through `HunterMove.push` (the path `Hunter.impulse` and `BokiHit.knock` use).
+Every horizontal `vel` write in Bjorn, Claire, Tarek, Grimble, Ryzz, Pip, Sable and Ostra's kits and helpers
+(Vex, Zedran, Hem and Cinder are the slice pass's table). Shift moves that run on `roll_dir`/`roll_speed` are
+dashes and not listed per site.
+
+| Hunter | Site | What it writes (in the air) | Class | KIT_PARITY row / change |
+|---|---|---|---|---|
+| Bjorn | `BulwarkKit._spin_hit` | `+=` the 360 Smash's slide, grounded only | not airborne | Dash (Spin Dash) |
+| Claire | `RimewrightKit._rinkrun_end` | skate ends in the air: keeps the skate's own speed (the ground branch brakes ×0.3) | skate, keep | Dash (hold, release stops) |
+| Claire | `RimewrightKit._rime_hold_body` | the Rimelock statue: rooted, zero after its slide | sourced root, keep | R (body as ice) |
+| Tarek | `DolmKit._punch` | air punch: was the aim × max(step, speed), wiping a sideways drift | **overwrite, fixed**: `HunterMove.push` along the aim | LMB (hold punch) |
+| Tarek | `BreahSlam._tick_hop` | the slam's hop into the circle: its arc plus keys × `nudge` 1.3 m/s | sourced hop, keep | RMB (hold slam, centre stun) |
+| Tarek | `BreahSlam.fire` | slam out of a glide: glider folds, speed ×0.25, plunge | sourced, keep | RMB (glide slam) |
+| Tarek | `BreahSlam.arc` | the leap and the hop's jump arc | sourced leap, keep | RMB (jump to leap) |
+| Tarek | `BreahHop._touchdown` | zero before the skid on the new rock, grounded | Rock Hop, not airborne | Dash (Rock Hop) |
+| Grimble | `DredgeKit._hop` | the Anchor wind-up hop, skipped in the air | not airborne | E |
+| Grimble | `DredgeKit._start_dive` / `_tick_dive` | air smash: straight down onto its ring (a pounce in it carries) | sourced plunge, keep | E (slam, dunk) |
+| Grimble | `DredgeKit._tick_stop` | barge end: speed limited to 3 m/s, direction kept | barge, keep | Dash (barge) |
+| Ryzz | `MageKit._exit_run` | Wirerun end: `HunterMove.dash_exit` hand-over at run speed | dash, keep | Dash (lane at 40 m/s) |
+| Ryzz | `MageUlt._hold_air` / `_fall_tick` / `_strike` / `drop` | the ult's hover, fall and crash place her; zero speed | sourced, keep | R (launch, recast, crash) |
+| Pip | `TenderKit.drop_all` / `_call_home`, `CareUtil` carry | the carried or pulled body is placed, zero speed | pull / carry, keep | R (revive and pull), Passive (carry) |
+| Sable | `ThiefKit._blink` | the dagger blink: teleport to the ground spot, zero speed | sourced, keep | E (dagger, forced return) |
+| Ostra | `OstraKit._arrive` | the Trade lob's landing writes only `vel.y` | none horizontal | Dash (lob, swap) |
+
+`--dolm-combo-check` asserts it after the fixed cast: an air punch east keeps a 3 m/s drift south and steps her
+east, and holding the keys against the drift turns it within 0.25 s.
+
 ## Walking while attacking (fire-move parity, 2026-11-09)
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in

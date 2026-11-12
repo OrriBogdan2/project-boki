@@ -447,11 +447,13 @@ func _punch(k: float) -> void:
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
 	# that slides "step" metres ([footage] half a body height) under the ground brake
 	var stepv := HunterMove.slide_speed(float(pd["step"]))
+	var hv := dir * stepv
 	if not h.grounded:
-		# no ground brake up there: a short push, but never slower than she flies (item 51, out of an air dash)
-		stepv = maxf(stepv * float(pd["air_k"]), Vector2(h.vel.x, h.vel.z).length())
-	h.vel.x = dir.x * stepv
-	h.vel.z = dir.y * stepv
+		# no ground brake up there: a short push added to what she carries, never slower (item 51, out of an air
+		# dash) and never overwriting it, so the keys still steer (DECISIONS 11-08)
+		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
+	h.vel.x = hv.x
+	h.vel.z = hv.y
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
