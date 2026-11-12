@@ -3,9 +3,10 @@ extends RefCounted
 ## same drivers the other checks use (nothing is jumped over by setting save flags):
 ##   prologue (held to skip) -> hatch (card, look, egg pick, knocks, the Boki's look, naming) -> the first
 ##   Relic -> the tutorial match (TutorialDrive) -> results -> the farm (its tutorial walked step by step)
-##   -> Hob's second Relic -> the first expedition, played to the skiff.
+##   -> Hob's second Relic -> the first expedition, played to the uplink lift.
 ## Also the skip paths: "Skip the tutorial" on the naming card, and skipping the farm tutorial.
 ## The first Mask is Lace, Kael or Vex: `-- --starter=archer|juggernaut|gunslinger` picks whose (default Vex).
+## `-- --seed=N` sets the global RNG and the first expedition's map (default 4242, the fixed one).
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
 
@@ -22,6 +23,7 @@ var tree: SceneTree
 var stage_name := ""
 var stage_start := 0
 var starter := "gunslinger"      # the Hunter taken on the starter pick
+var run_seed := EXPEDITION_SEED      # --seed=
 var timings: Array = []
 
 func ok(cond: bool, what: String) -> void:
@@ -36,6 +38,8 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--starter="): starter = a.substr(10)
+		if a.begins_with("--seed="): run_seed = int(a.substr(7))
+	seed(run_seed)
 	ok(starter in ["archer", "juggernaut", "gunslinger"], "the starter is Lace, Kael or Vex (%s)" % starter)
 	main.get_window().size = Vector2i(1280, 720)
 	await _prologue()
@@ -291,7 +295,7 @@ func _second_relic(home) -> void:
 # ------------------------------------------------------------------ 6. the first expedition
 func _first_expedition(home) -> void:
 	_begin("first expedition: start")
-	home.exp_seed = EXPEDITION_SEED
+	home.exp_seed = run_seed
 	home._start_match()
 	await _wait(func(): return main.current is CanvasLayer or _match_running(), "'Go' leaves the farm")
 	_begin("first expedition: pre-match countdown")
@@ -301,13 +305,13 @@ func _first_expedition(home) -> void:
 	var worn := Arch.of_save()
 	ok(m.player.ak != null and m.player.ak.id == worn, "you play as the Relic you chose (%s)" % worn)
 	_begin("first expedition: play")
-	await _skiff(m)
+	await _uplink(m)
 
 ## The stick direction from the hunter to a spot on the ground.
 func _toward(p: Hunter, at: Vector3) -> Vector2:
 	return Vector2(at.x - p.pos.x, at.z - p.pos.z).normalized()
 
-func _skiff(m: Match) -> void:
+func _uplink(m: Match) -> void:
 	var P: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
@@ -323,27 +327,35 @@ func _skiff(m: Match) -> void:
 	P.inp["move"] = Vector2.ZERO
 	var landed: bool = P.grounded and not P.riding and not P.dropping
 	ok(landed, "jumping off the ship ends with you on your feet (%.0f s)" % fall_t)
-	var docks := m.exits.of_kind("dock")
-	ok(not docks.is_empty(), "there is a skiff to take")
-	var d: Dictionary = docks[0]
-	P.max_hp = 5000.0      # the driver stands at the dock while rivals and the wave come: the exit is what is tested
+	for o in m.hunters:
+		if o != P: o.ctrl = "idle"      # (a rival in the yard stalls the charge: the exit is what is tested)
+	var d: Dictionary = m.exits.uplink_x()
+	ok(not d.is_empty(), "there is an uplink to take")
+	P.max_hp = 5000.0      # the driver stands in the yard while rivals and the waves come: the exit is what is tested
 	P.hp = P.max_hp
-	while m.time < float(d["open_at"]) + 1.0 and not P.out:
+	while not m.exits.startable(d) and not P.out and m.time < 600.0:
 		P.teleport(d["pos"] + Vector3(0.3, 0, 0.3))
 		P.hp = P.max_hp
 		m.step(Match.DT)
-	ok(not P.out and d["state"] == "idle", "the skiff opens at %.0f s" % float(d["open_at"]))
-	for i in int(2.5 / Match.DT):
+	ok(not P.out and m.exits.startable(d), "the uplink comes online at %.0f s" % m.time)
+	for i in int((Exits.START_HOLD + 1.0) / Match.DT):
+		P.teleport(d["pos"] + Vector3(0.3, 0, 0.3))
+		P.hurt_at = -10.0      # (a hit breaks a start: rivals near the yard are not what is tested)
 		P.inp["interact"] = true
 		m.step(Match.DT)
 	P.inp["interact"] = false
-	ok(d["state"] == "called", "holding interact at the dock calls it")
+	ok(d["state"] == "charging", "holding interact at the console starts it")
 	var t0 := m.time
-	while d["state"] in ["called", "boarding"] and m.time - t0 < 120.0:
-		P.teleport(d["berth"])
+	while d["state"] == "charging" and m.time - t0 < 180.0:
+		P.teleport(d["pos"] + Vector3(0.3, 0, 0.3))
 		P.hp = P.max_hp
 		m.step(Match.DT)
-	ok(P.extracted, "the skiff takes you out (%.0f s of play)" % (m.time - t0))
+	ok(d["state"] == "open", "holding the yard charges it to an open lift (%.0f s)" % (m.time - t0))
+	while d["state"] == "open" and not P.extracted and m.time - t0 < 240.0:
+		P.teleport(d["pos"])
+		P.hp = P.max_hp
+		m.step(Match.DT)
+	ok(P.extracted, "the lift takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
 	_press(main.current, "Back to the farm")

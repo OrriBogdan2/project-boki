@@ -61,7 +61,12 @@ static func drive(m: Match) -> void:
 		"glove":
 			var wp := tu.ground_item()
 			if not wp.is_empty():
-				goto.call(wp["pos"])
+				var at: Vector3 = wp["pos"]      # (round the lookout cliff and over the bridge, not through them)
+				for v in ["via1", "via2", "via3"]:
+					if p.pos.x > tu.stop("pickup", v).x + 0.5:
+						at = tu.stop("pickup", v)
+						break
+				goto.call(at)
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "kin", "hook", "ult":
 			_fight(m, tu, goto)

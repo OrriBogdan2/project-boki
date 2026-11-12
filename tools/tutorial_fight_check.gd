@@ -7,6 +7,7 @@ extends RefCounted
 ## (right click, attack, dash, wall kick, Boki, E, glove, ultimate), and only the camps paid XP.
 
 var bad := 0
+var run_seed := 11      # --seed= (default: the fixed run)
 
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
 const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
@@ -23,13 +24,15 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--seed="): run_seed = int(a.substr(7))
 	for id in STARTERS:
 		await _play(main, id)
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _play(main: Node, id: String) -> void:
-	seed(11)       # (the same run each time)
+	seed(run_seed)       # (the same run each time)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({

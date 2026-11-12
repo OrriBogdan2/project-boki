@@ -54,3 +54,49 @@ touched ones: tutorial-hud/fight/idle, farm-tutorial, prematch, hob, tumble, ech
 Red here and on 0245: `--title-check` (the same 8 rows: headless title scene) and `--hob-check`'s script
 error at hob_check.gd:193 (guide.tracker is null). `--tutorial-fight-check` is flaky on the kick row (0245:
 juggernaut red once; here gunslinger once, then green). NEW-RED: 0.
+
+## Starter check: the first hour with Lace, Kael and Vex (ext/verify-tut-starters-0246, 2026-11-12)
+STACKED on ext/w0246-tutorial e4741341c, plus ext/tut-three-starters 4c79672df (the `--starter=` flag, per-starter
+kit drill rows; w0246 lacked it). Both checks take `-- --seed=N` now (`--new-player-flow-check`: the global RNG and
+the first expedition's map; `--tutorial-fight-check`: its RNG, default 11). Seeds 1, 2, 3, headless, one Godot at a time.
+
+| `--new-player-flow-check` | seed 1 | seed 2 | seed 3 |
+|---|---|---|---|
+| Lace (archer) | 0 fail | 0 fail | 0 fail |
+| Kael (juggernaut) | 0 fail | 0 fail | 0 fail |
+| Vex (gunslinger) | 0 fail | 0 fail | 0 fail |
+
+Each run: prologue, hatch, starter pick, tutorial course, results, farm, Hob's second Relic and the first expedition
+to the uplink lift. All 9 teach all 23 steps the kit has, none missed, slowest step 14-20 s.
+
+| `--tutorial-fight-check` (first hit, then reruns) | seed 1 | seed 2 | seed 3 |
+|---|---|---|---|
+| Lace | 0 fail | 0 fail | 0 fail |
+| Kael | 0 fail | 0 fail | 0 fail (1 slow-beats red once: kin step 71 s) / 1 red `kick` once |
+| Vex | `kick` row red once, then green | 0 fail | `kick` row red twice, green once; glove stall once (before the fix below) |
+
+Seeds 4, 5 and the default 11 also ran: green, except Lace seed 4 once (glove stall, did not repeat in 10 reruns).
+
+### What stalled, what was fixed
+- **Stale check, all 9 flow runs (fixed):** the first-expedition stage looked for a skiff; docks are gone (Ways Out), so
+  every starter failed "there is a skiff to take". It takes the uplink now: wait until it can start, hold the console,
+  hold the yard, ride the lift. Rivals are set idle and the hit-timer reset there: a rival in the yard stalls the charge
+  and a hit breaks the start, both real rules and not what the check is about.
+- **Glove step stalled for Kael and Vex (fixed, tutorial data + driver):** after the Boki camp fight the bot walked
+  straight at the pickup on the Range isle: into the lookout cliff on the north side, or off the lip of the Lookout
+  isle at the bridge head. Seen: Vex seeds 2 and 3, Kael seed 2 (850 s stall). Three waypoints in
+  `content/maps/tutorial.json` `course.pickup` (via1..via3: round the cliff, onto the bridge, off it) and the driver
+  follows them. A player is not affected (they see the bridge); the stall was the bot's straight line.
+- **kit-drill-check after the merge (fixed):** the walk finished the tech step with Lace's own id as "another Hunter's
+  tech", and asked every Hunter's dummy to be rigged weak (Vex's rig only). Now it uses another Hunter's id and rigs the
+  row for Vex only.
+- **Nothing found of another Hunter's key or text:** the flow check teaches every step the kit has with that Hunter's keys;
+  the fight check's first line names each starter's own move (draw / step in / shoot); kit-drill-check text rows pass.
+  This is not a full text audit of the 23 course lines per Hunter.
+
+### Listed, not fixed
+- `--tutorial-fight-check` "every ability used (missing kick)": the wall-kick step ends when the Hunter stands on the
+  lookout (`tutorial.gd` wallkick), so the bot can get up without a kick. Seen for all three starters, about 1 run in 4.
+  Same flake as noted above for 0245. Fix is a design pick (require the kick, or drop the row): left to the owner.
+- Kael seed 3 once: the Boki-camp step took 71 s (usually 15 s), over the check's 30-70 s window for the fight beats.
+- Lace seed 4 once: glove stall; not reproduced (10 reruns, seeds 4-9), no position seen.

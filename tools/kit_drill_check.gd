@@ -76,9 +76,9 @@ func _walk(k: KitDrill, hunter: String) -> void:
 		for i in n:
 			ok(k.step < k.plan.size() and k.plan[k.step]["slot"] == st["slot"], "step %s is open" % st["slot"])
 			if st["how"] == "tech":
-				k.tech_done("archer")
+				k.tech_done("gunslinger" if hunter == "archer" else "archer")
 				ok(k.step == k.plan.size() - 1, "another Hunter's tech does not finish the step")
-				k.tech_done("juggernaut")
+				k.tech_done(hunter)
 			elif st["how"] == "hold":
 				k.on_held(st["action"], KitDrill.HOLD_S)
 			else:
@@ -112,7 +112,8 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 					SignatureDrill.rig(m, kd.arch)
 					var dummy: Hunter = m.arena.dummies[0]["h"]
 					var rigged := dummy.has_meta(SignatureDrill.META) and dummy.hp <= 20.0
-					ok(rigged, "%s: Vex's dummy is rigged weak and left alone" % tag)
+					if hunter == "gunslinger":      # (Vex's rig: the dummy is left weak; Lace and Kael need none)
+						ok(rigged, "%s: Vex's dummy is rigged weak and left alone" % tag)
 					kd.tech_done(st["id"])
 					ok(not dummy.has_meta(SignatureDrill.META), "%s: the drill gives the dummy back" % tag)
 				elif st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
