@@ -35,7 +35,7 @@ pitch-reel --when-live [--build REF]
 | 4 | Farm loop, 60 s | 1 | agent | care preset: trough, pat, fetch, brush, drill pressed in the gold |
 | 5 | Build process, 20 s | 1 | agent | `term_shot.py`: four terminal tiles, output scrubbed (emails, tokens, home paths, names in remotes) |
 | 6 | Hunter select, 15 s | 1 | agent | the Hunters screen steps through all 12, lands on `--hunter` (default gunslinger) and picks it (the screen stays up) |
-| 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot 4.5 m away, attack held, right click, utility on a rota; each take another Hunter (or `--hunter`) |
+| 7 | Hunter kit | 5 | owner hands best; scripted backup | 1v1 vs a bot 4.5 m away on ground with no void within 10 m (the Hunter walks back when its dashes carry it off), attack held, right click, utility on a rota; each take another Hunter (or `--hunter`) |
 | 8 | Extraction drop | 2 | agent | the real loading screen and drop; loading cut at the `drop` mark |
 | 9 | Loot + fight, 3 min | 3 | owner / bot backup | autoplay match of three duos, no drop |
 | 10 | Escape | 3 | owner / scripted backup | a Hunter at an uplink yard as it finishes charging walks in and rides out |

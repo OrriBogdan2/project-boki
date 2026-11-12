@@ -27,8 +27,11 @@ const RAID_DUOS := 3             # shot 9: teams of two
 const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 starts
 const CLOCK_LEFT_S := 840.0      # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5          # m between the Hunter and its foe in the kit shot (both well inside the frame)
-const KIT_ZOOM := 0.85           # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on the frame's edges)
+const KIT_ZOOM := 0.85           # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on its edges)
 const KIT_FOE_REACH := 7.0       # m: a foe that has walked further than this from the Hunter is put back at the fight
+const KIT_ROOM_M := 10           # m of solid ground all round the kit fight (at a cliff edge both fell off)
+const KIT_LEASH_M := 3.0         # m the Hunter may stray from the fight's centre before it walks back (dashes)
+const KIT_SEARCH_M := 30         # m from the start the kit shot looks for that much room
 const DROP_PLAN_MAX_S := 25.0    # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5       # s of the ride out kept after the Hunter is extracted
 
@@ -127,7 +130,8 @@ func _film_one(s: int, k: int) -> int:
 	args.append_array(["--pitch-child", "--pitch-shot=%d" % s, "--pitch-take=%d" % k])
 	# OS.execute keeps all of a child's output in one String, and a movie child once printed over 2 GB (the parent
 	# crashed): the child runs behind a filter that passes its PITCH_ lines and only the first of the rest.
-	var filter := "\"$0\" \"$@\" 2>&1 | awk '/^PITCH_/ {print; next} n < %d {n++; print} END {print \"PITCH_LOG lines=\" NR}'; exit ${PIPESTATUS[0]}" % CHILD_LOG_LINES
+	var keep := "/^PITCH_/ {print; next} n < %d {n++; print} END {print \"PITCH_LOG lines=\" NR}" % CHILD_LOG_LINES
+	var filter := "\"$0\" \"$@\" 2>&1 | awk '%s'; exit ${PIPESTATUS[0]}" % keep
 	var out: Array = []
 	var rc := OS.execute("bash", ["-c", filter, OS.get_executable_path()] + args, out, true)
 	var marks := FileAccess.open(dir.path_join(stem + ".marks"), FileAccess.WRITE)
@@ -239,7 +243,8 @@ func _kit() -> void:
 	m.length = m.time + CLOCK_LEFT_S
 	var P := m.player
 	P.ctrl = "idle"
-	var base := _ground(P.pos)
+	var base := _roomy_ground(P.pos)
+	P.pos = base
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
 	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(KIT_GAP_M, 0, 0)))
 	foe.ai = m.bot_brain.new_mind(m.rng, KIT_FOE_SKILL, m.bot_cfg)
@@ -252,18 +257,35 @@ func _kit() -> void:
 	var t := 0.0
 	while t < SECS[7]:
 		_purge()
-		_kit_press(t, P, foe)
+		_kit_press(t, P, foe, base)
 		_step_frame(P.pos.lerp(foe.pos, 0.5))
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
 
-## Aims at the foe and presses: attack held for the first part of each beat, then the right click, then the utility.
-func _kit_press(t: float, P: Hunter, foe: Hunter) -> void:
+## The ground nearest `p` with no void within KIT_ROOM_M (`p` itself when there is none that roomy nearby).
+func _roomy_ground(p: Vector3) -> Vector3:
+	var best := p
+	var best_d := INF
+	for dz in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
+		for dx in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
+			var x := int(p.x) + dx
+			var z := int(p.z) + dz
+			var d := float(dx * dx + dz * dz)
+			if d < best_d and m.world.inb(x, z) and m.world.edge_dist(x, z, KIT_ROOM_M) > KIT_ROOM_M:
+				best = Vector3(x + 0.5, 0.0, z + 0.5)
+				best_d = d
+	return _ground(best)
+
+## Aims at the foe, walks back when it strays from `base`, and presses: attack held for the first part of each
+## beat, then the right click, then the utility.
+func _kit_press(t: float, P: Hunter, foe: Hunter, base: Vector3) -> void:
 	P.hp = P.max_hp      # neither of them goes down or walks off: the shot is about the kit
 	foe.hp = foe.max_hp
 	if P.flat_dist(foe) > KIT_FOE_REACH:
 		foe.teleport(_ground(P.pos + (foe.pos - P.pos).normalized() * KIT_GAP_M))
 	P.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
+	var back := Vector2(base.x - P.pos.x, base.z - P.pos.z)
+	P.inp["move"] = back.normalized() if back.length() > KIT_LEASH_M else Vector2.ZERO
 	var beat := fmod(t, KIT_ROTA_S * 3.0) / KIT_ROTA_S
 	P.inp["fire"] = beat < 1.0
 	if P.ak == null or t < 0.3:
