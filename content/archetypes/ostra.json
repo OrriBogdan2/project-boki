@@ -53,6 +53,7 @@
 	"dash": {
 		"id": "swap",
 		"name": "Lantern Trade",
+		"card_range": "reach",
 		"icon": "shadowstep",
 		"col": "#c65cff",
 		"cd": 9.5,
@@ -72,6 +73,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Shard Snap",
+		"card_range": "snap.range",
 		"short": "Snap",
 		"icon": "skypierce",
 		"col": "#9be8dc",
@@ -111,6 +113,8 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Brimseed",
+		"card_range": "reach",
+		"again": "pop the seed",
 		"short": "Seed",
 		"icon": "blaze_mantle",
 		"col": "#6fd0c6",
@@ -137,6 +141,7 @@
 	},
 	"x": {
 		"name": "Nightwell",
+		"card_range": "range",
 		"short": "Well",
 		"icon": "blaze_mantle",
 		"col": "#b06bff",

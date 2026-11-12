@@ -281,6 +281,7 @@ const CHECKS := {
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
+	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null], # ability cards = data
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--boss-anim-check": ["res://tools/boss_anim_check.gd", "boss_anim_check", null],      # boss keyed moves, strikes on the tell
 	"--boss-anim-shots": ["res://tools/boss_anim_shots.gd", "boss_anim_shots", null],      # boss move strips (GPU)

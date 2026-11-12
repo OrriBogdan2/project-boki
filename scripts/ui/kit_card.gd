@@ -119,6 +119,7 @@ func _row(slot: String) -> Control:
 	p.custom_minimum_size = Vector2(0, ROW_H)
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.3), 1, 12, 3))
 	p.set_meta("slot", slot)
+	AbilityCard.hover(p, arch, slot)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	p.add_child(row)
@@ -362,7 +363,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
-		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
+		AbilityCard.hover(b, a, s)
 		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
 		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
 		b.add_theme_stylebox_override("normal", rest_box)

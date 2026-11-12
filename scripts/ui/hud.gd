@@ -1932,6 +1932,8 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 		hover_id = id
 		hover_t = 0.0
 	hover_t += get_process_delta_time()
+	if AbilityCard.on_hud(c, id, hit[0] if hit.size() > 0 else Rect2(), p):      # Tab held: the ability card
+		return
 	if id == "" or hover_t < 0.25:
 		return
 	var lines := _tip_lines(id, p)

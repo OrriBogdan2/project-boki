@@ -57,6 +57,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Burr Charge",
+		"card_range": "burr.range",
 		"short": "Burr",
 		"icon": "skypierce",
 		"col": "#ffb36a",
@@ -90,6 +91,7 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Longneedle",
+		"card_range": "range",
 		"short": "Needle",
 		"icon": "haymaker",
 		"col": "#ffe0a0",
@@ -117,6 +119,7 @@
 	},
 	"x": {
 		"name": "Cinderfall",
+		"card_range": "range",
 		"short": "Fall",
 		"icon": "earthshatter",
 		"col": "#ff7a3c",

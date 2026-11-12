@@ -107,6 +107,7 @@
 	"rmb": {
 		"delivery": "cone",
 		"name": "Aegis",
+		"card_range": "slam.radius",
 		"short": "Aegis",
 		"icon": "wall",
 		"col": "#9ad8ff",
@@ -147,6 +148,7 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Mending Ground",
+		"card_range": "radius",
 		"short": "Mend",
 		"icon": "dome",
 		"col": "#8fe3c8",
