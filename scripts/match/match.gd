@@ -41,6 +41,7 @@ var glimmer_done := false
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
+var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
 var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
@@ -549,6 +550,7 @@ func _spawn_pads_and_exits() -> void:
 		add_child(arc)
 		pd["arc"] = arc
 	await _slice()
+	zone = ShrinkZone.make(self)
 	exits = Exits.new()
 	await exits.setup(self)
 	await _slice()
@@ -4943,7 +4945,8 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
 	_check_last()
 
-func _update_rules(_dt: float) -> void:
+func _update_rules(dt: float) -> void:
+	if zone: zone.tick(dt)
 	var left := length - time
 	if left < 30.0 and not collapse_warned:
 		collapse_warned = true
