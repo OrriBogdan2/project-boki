@@ -116,7 +116,7 @@ func _barge_run() -> void:
 			held = held and K.anim_id == "dr_lunge"
 		P.do_dash()
 		seeks.append(m.time - K.anim_at)
-	var joined := absf(seeks[1] - K.FOLD_T) < 0.001 and absf(seeks[2] - K.FOLD_T) < 0.001 and seeks[0] < 0.001
+	var joined: bool = absf(seeks[1] - K.FOLD_T) < 0.001 and absf(seeks[2] - K.FOLD_T) < 0.001 and seeks[0] < 0.001
 	ok("barge run: shoves 2 and 3 join the ball at the clip's closed pose, no opening between",
 			held and K.anim_id == "dr_lunge" and joined, "%s held %s" % [seeks, held])
 	var t := 0.0
