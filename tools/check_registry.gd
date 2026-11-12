@@ -197,6 +197,10 @@ const CHECKS := {
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
+	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],
+	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],
+	"--nook-moment-check": ["res://tools/nook_moment_check.gd", "nook_moment_check", "check"],
+	"--nook-moment-shots": ["res://tools/nook_moment_check.gd", "nook_moment_check", "shots"],
 	# a Boki taking a hit, strips
 	"--boki-flinch-shots": ["res://tools/boki_flinch_shots.gd", "boki_flinch_shots", null],
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
