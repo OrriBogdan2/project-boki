@@ -11,7 +11,7 @@ extends RefCounted
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
-##   8. dash_air per Hunter and the no-charge tick
+##   8. dash_air per Hunter (listed in dash.json and picked in the air) and the no-charge tick
 ##   9. the garden's ambience (HomeAmbience): every bed has its file, the parts of the day and the rain each
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
@@ -32,6 +32,13 @@ const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full s
 
 var bad := 0
 var levels := {}
+
+## Stands in for the match in Feel.dash_sound: notes the names it plays.
+class _Ear extends Node:
+	var player: Node = null
+	var heard: Array = []
+	func sfx(sname: String, _at: Vector3, _db: float, _pitch: float) -> void: heard.append(sname)
+	func later(_delay: float, _then: Callable) -> void: pass
 
 func ok(cond: bool, what: String) -> void:
 	print("SFXSET %s %s" % ["ok  " if cond else "FAIL", what])
@@ -208,8 +215,12 @@ func _fallback() -> void:
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
 
-## 7. Every Hunter's dash has an air variant that HeroSfx picks with no floor under it, and the no-charge tick exists.
+## 7. Every Hunter's dash has an air variant listed in dash.json that HeroSfx picks with no floor under it, and the
+## no-charge tick exists.
 func _dash_air() -> void:
+	var listed: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/dash.json"))["sounds"]
+	var unlisted := Arch.ids().filter(func(a): return not listed.has("%s_dash_air" % a))
+	ok(unlisted.is_empty(), "every roster Hunter has a <arch>_dash_air in dash.json (missing: %s)" % [unlisted])
 	var h := Hunter.new()
 	var picked := {}
 	for arch in Arch.ids():
@@ -218,9 +229,16 @@ func _dash_air() -> void:
 		picked[arch] = HeroSfx.dash_name(h)
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
+	var ear := _Ear.new()
+	h.arch = "gil"
+	for grounded in [false, true]:
+		h.grounded = grounded
+		Feel.dash_sound(ear, "gil", Vector3.ZERO, h)
+	ok(ear.heard == ["dash"], "Gil: the shared dash layer only on the ground, his own in the air (%s)" % [ear.heard])
+	ear.free()
 	h.free()
-	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
+	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash on the ground: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash"]
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
