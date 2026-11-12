@@ -11,13 +11,12 @@ sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import meshkit as M, sable_pieces as K, sable_paint as P
 from meshkit import smooth, Piece
-from paintkit import hexc, mix, clean_normal
+from paintkit import hexc, mix
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-NRM_CAGE, NRM_RAY = 0.005, 0.012      # m: the scan normal bake's cage extrusion and ray reach (the detail pilot's)
 MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid", "fur-feather", "card-wing", "glow-rune"]     # S1's limit: <= 8
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 1.2, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "hairback": 0.6, "wing": 1.3, "tail": 0.7, "lining": 0.35, "curl": 0.5,
          "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0, "runeC": 5.0,
@@ -497,13 +496,34 @@ def blur(a_, m, r):
 AO = blur(AO, (PID >= 0).astype(np.float32), 3)
 
 # ---- the normal map: the scan's stitching, straps and folds, baked from its full 750k triangles onto the low body; flat on the rebuilt pieces
-NM = np.ones((ATLAS, ATLAS, 4), np.float32)
-NM[..., :3] = WK.bake_normal(ob, [src], ATLAS, NRM_CAGE, NRM_RAY)
-NM[PID != 0, :3] = (0.5, 0.5, 1.0)
-wrong = clean_normal(NM[..., :3])
+nm_bake = bpy.data.images.new("nm_bake", ATLAS, ATLAS, float_buffer=True)
+nm_bake.colorspace_settings.name = "Non-Color"
+for mt in me.materials:
+    tn = next(n_ for n_ in mt.node_tree.nodes if n_.type == "TEX_IMAGE")
+    tn.image = nm_bake
+    mt.node_tree.nodes.active = tn
+src.hide_render = False
+sc.cycles.samples = 2
+sc.render.bake.use_selected_to_active = True
+sc.render.bake.cage_extrusion = 0.012
+sc.render.bake.max_ray_distance = 0.03
+sc.render.bake.normal_space = "TANGENT"
+bpy.ops.object.select_all(action="DESELECT")
+src.select_set(True)
+ob.select_set(True)
+bpy.context.view_layer.objects.active = ob
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6)
+sc.render.bake.use_selected_to_active = False
+src.hide_render = True
+src.select_set(False)
+NM = np.array(nm_bake.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)
+flat_ = PID != 0
+# (a steep texel is a ray that hit the wrong side: straps' undersides, the collar's inside)
+nk_ = smooth(0.62, 0.86, NM[..., 2] * 2.0 - 1.0)[..., None] * 0.75
+nk_[flat_] = 0.0
 # the scan's stitched mouth is in the bake too: flat there, the paint draws the mouth
 mq_ = smooth(0.055, 0.045, np.abs(POS[..., 0] - K.FACE_X)) * smooth(0.03, 0.022, np.abs(POS[..., 2] - K.MOUTH[2] + 0.002)) * (POS[..., 1] > 0.03) * (PID == 0)
-nk_ = 1 - mq_[..., None]
+nk_ = nk_ * (1 - mq_[..., None])
 NM[..., :3] = NM[..., :3] * nk_ + np.array([0.5, 0.5, 1.0], np.float32) * (1 - nk_)
 nm_img = bpy.data.images.new("sable_normal", ATLAS, ATLAS)         # a file like the atlas: the clips stage reopens the .blend
 nm_img.colorspace_settings.name = "Non-Color"
@@ -511,7 +531,7 @@ nm_img.pixels.foreach_set(NM.ravel())
 nm_img.filepath_raw = os.path.join(os.path.dirname(OUT), "normal.png")
 nm_img.file_format = "PNG"
 nm_img.save()
-print("normal baked, wrong hits flattened %.4f" % wrong)
+print("normal baked", float(NM[..., :3].std()))
 
 # each scan face's slot, by its paint: the face and neck skin, the white hair cap, everything else the coat
 low_faces = [i for i in range(nf) if faces_pid[i] == 0]
@@ -568,7 +588,8 @@ for q_ in tails:
     paint(lambda n, nm=q_[1].name: n == nm, lambda p, n, ao: P.lining(p, n, ao))
 for w_ in wings:
     paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across))
-paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(P.silver_engraved))
+paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock")), free(P.silver_engraved))
+paint(lambda n: n.startswith(("frizzen", "guard", "cap")), free(P.brass))
 paint(lambda n: n.startswith("stock"), free(P.wood))
 paint(lambda n: n.startswith("mouth"), P.mouth_glow)
 paint(lambda n: n.startswith("rune"), P.runes)
@@ -599,8 +620,8 @@ atlas = bpy.data.images.new("sable_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
 px[..., :3] = np.clip(OUTC, 0, 1)
 atlas.pixels.foreach_set(px.ravel())
-atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.jpg")
-atlas.file_format = "JPEG"
+atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.png")
+atlas.file_format = "PNG"
 atlas.save()
 print("atlas saved")
 
@@ -705,5 +726,5 @@ objs = [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"]
 for o in list(bpy.data.objects):
     if o.name in ("Src", "Low"):
         bpy.data.objects.remove(o)
-WK.export(OUT, objs, colors=True)
+WK.export(OUT, objs, image_format="JPEG", colors=True)
 print("exported", OUT, os.path.getsize(OUT))

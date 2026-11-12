@@ -70,7 +70,8 @@ Sparkle's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already 
    --shots-dir=<dir> --sheets=<dir with <id>.png>` (turnarounds, close-ups, front_34 and back_34, moves) and the
    clean match frame `--arena=<id> --record=2 --no-tips --arena-demo=pose --demo-zoom=1.0 --arena-shot=<png>` with a
    x4 crop. Composite with `B tools/meshy/compose.py`. Look at every one, the back too.
-10. **Checks** (fresh XDG, real output only): `--warden-glb-check`, `--warden-model-check`, `--mantle-look-check`,
+10. **Checks** (fresh XDG, real output only): `--warden-glb-check`, `--warden-rest-check` (after a procedural rig
+    change run `-- --warden-rest-bake` and commit content/rules/warden_rest.json), `--warden-model-check`, `--mantle-look-check`,
     `--move-feel-check`, `--<id>-combo-check`, `--weapon-clip-check`, `--warden-stance-check` (scratch branch),
     `python3 tools/health.py --strict`, style_lint.
 11. **Log and commit:** every Meshy task in the run log below; `git grep` for the key's prefix finds nothing.
@@ -562,6 +563,19 @@ the loupe is scripted; the face's squint, teeth and gums and the glowing veins a
 
 Claire v2 total: 6 tasks, 85 credits. Prompts in art/wardens/src/claire_recipe.json; built pieces (ears, braid, tail, spear) in art/wardens/claire/IMPORT.md.
 
+### Meeko v2 (Pip, tender; owner redesign: capelet with heart brooch, wicker satchel, bandaged ear, goggles and flowers, constellations), 2026-11-08 (116 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Meeko v2 edit front | 16:5x | 01a1bc10-acca-76f1-8769-d97060663188 | nano-banana-pro (image-to-image) | meeko_v2_turnaround front, arms out in an A-pose, wings and companions out | 9 | Kept |
+| Meeko v2 edit side | 16:5x | 01a1bc10-acda-716d-aa16-410fde30b30e | nano-banana-pro | as front, side | 9 | Kept |
+| Meeko v2 edit back | 16:5x | 01a1bc10-acea-77c3-9b06-00173d1db6c5 | nano-banana-pro | as front, back | 9 | Kept |
+| Meeko v2 edit 3/4 | 16:5x | 01a1bc10-ad34-7060-b567-c20bfec2f42e | nano-banana-pro | as front, three-quarter | 9 | Kept |
+| Meeko v2 body | 16:5x | 01a1bc12-21cd-7326-a163-bfa9a30aad63 | meshy-7.1 | the four edits as images and texture refs; geometry 2k, meshy-7 texture 8k, no PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+| Meeko v2 head | 16:5x | 01a1bc12-21c9-734f-a228-441481f9f979 | meshy-7.1 | the four heads cropped from the turnaround (front, 3/4, side, back); as the body | 40 | **Kept** |
+
+Meeko v2 total: 6 tasks, 116 credits. The same rig and clips: only the two scans changed (tools/art1/pip_source.py's class
+rules, joints, arm and tail paths; pip_head_scan.py's scale from the cheek width at the nose). IMPORT.md "Meeko v2".
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
@@ -631,13 +645,16 @@ code to a running Blender and looks at viewport screenshots). What his file show
   decimate keeps primitives' shapes well (Dredge 43.7k -> 14.5k: no loss at match zoom, some faceting on the hull
   close up; the planar pass only took 300). Build to the budget instead of decimating where you can.
 
-## The ~25k revamp (owner 11-09: Pip, Ryzz, Sable, Tarek, Vex)
-Each revamped Hunter is ~25k triangles (`--warden-glb-check` TRIS_REVAMP 25.5k) with face, hands and weapon kept
-denser, and one shared normal bake: `warden_kit.bake_normal(low, sources, 2048, cage 0.005 m, ray 0.012 m, 16 samples)`
-from the dense Meshy raw (Tarek through bake_warden.py's `normal` spec key), then `paintkit.clean_normal` flattens the
-texels tilted past 65° (wrong ray hits: 0.2-1.8%). The normal ships as a lossless PNG beside a JPEG atlas (every
-export and clips stage uses `export_image_format="AUTO"`; a JPEG normal blocks into facets under the toon ramp).
-Settings are the warden-detail-pilot's (Vex). Old-vs-new renders: docs/art/wardens/revamp/<hunter>/.
+## Baked normal map (the shared bake)
+`warden_kit.bake_normal(low, sources, 2048, cage 0.005 m, ray 0.012 m, 16 samples)` bakes the dense Meshy raw's sculpt
+onto the low mesh's UVs as a tangent normal (bake_warden.py: the `normal` {size, cage, ray} spec key), then
+`paintkit.clean_normal` flattens the texels tilted past 65° (wrong ray hits: 0.2-1.8%). Ship it as a lossless PNG beside
+the JPEG atlas (`export_image_format="AUTO"` in every export and clips stage; a JPEG normal blocks into facets under the
+toon ramp). Settings are the warden-detail-pilot's (Vex).
+
+The ~25k revamp of Pip, Ryzz, Sable, Tarek and Vex (owner 11-09) used this bake, but none of its models ship. The owner's
+11-10 appeal3 picks replaced Pip, Ryzz, Sable and Vex. Tarek kept main's v2 build, which has the idle/stance clips.
+The builds, their art1 recipes and old-vs-new renders are in git at fb240baa2c (`git show fb240baa2c --stat`).
 
 ### Revamp re-rolls, 2026-11-09 (meshy-7.1, PBR, same inputs as the shipped runs; balance 3416 before, 1496 after with other agents' spend; 12 tasks, 480 credits)
 Pip body `01a1c20d-dc11-75b4` (enhance on), `01a1c20d-dbac-712c` (off), head `01a1c20d-db5b-75f4`; Ryzz `01a1c20d-dc36-7040`,

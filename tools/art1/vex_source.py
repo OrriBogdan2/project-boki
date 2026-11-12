@@ -13,7 +13,7 @@ from meshkit import smooth, norm
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = int(os.environ.get("VEX_LOW_TRIS", 15000))      # the scan body's triangles (owner 11-09: ~25k in all; 5400 made the 15k model)
+LOW_TRIS = 5400
 CUT_FORE = 0.12                  # along the left forearm: the sleeve ends here
 CHIN_Z = 1.668                   # the scan head goes above this; rebuilt from the scan in vex_head
 SOLE = -0.946                   # the scan's sole (z)

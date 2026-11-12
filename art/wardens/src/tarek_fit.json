@@ -4,7 +4,7 @@
  "out": "~/meshy/tarek_v2/fit/fit.glb",
  "blend": "~/meshy/tarek_v2/fit.blend",
  "turn": 180,
- "max_tris": 24500,
+ "max_tris": 13200,
  "floater_verts": 8,
  "snap_r": 0.045,
  "scale_joints": [

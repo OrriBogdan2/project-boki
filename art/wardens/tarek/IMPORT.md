@@ -18,5 +18,3 @@ Rebuild (Blender under ulimit -v 12000000; raw files in ~/meshy/tarek_v2):
 
 tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
 --rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.
-
-Revamp (owner 11-09, ext/hunter-revamp-pz): ~25k triangles, face, hands and weapon kept denser, the 2048 normal baked from the dense Meshy raw (`warden_kit.bake_normal`, docs/art/wardens/PIPELINE.md "The ~25k revamp") and shipped as PNG beside the JPEG atlas. A fresh Meshy re-roll was compared and not used. Old vs new: docs/art/wardens/revamp/tarek/. tarek_bake.json bakes 24k triangles and the normal (`normal` key: normal.png beside the bake); tarek_fit.json's max_tris 24.5k keeps the fit from decimating again; tarek_scan.py packs normal.png (the props' flat texels flattened) and re-saves the atlas as JPEG. 25,175 triangles with the stones and shards.

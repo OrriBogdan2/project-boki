@@ -1,10 +1,9 @@
 """Tarek's v2 model (ART-1, briefs/art-refs/tarek_v2): the fitted Meshy scan (fit_warden, tarek_fit.json) finished on the
-contract armature. Adds the foot, lip and jaw bones, links the scan's baked normal map (bake_warden `normal`), keys the carved jade glyphs of his stone into an emission map (the dark
+contract armature. Adds the foot, lip and jaw bones, keys the carved jade glyphs of his stone into an emission map (the dark
 seams stay dark), and adds the scripted props: three rough eye-stones orbiting his head, the shards round his right fist and the
 ground rings, plus every anchor his kit's FX read.
     blender -b --factory-startup --python tools/art1/tarek_scan.py -- <fit.blend> <out dir>
 Writes <out dir>/tarek.blend for tools/art1/tarek_clips.py."""
-import json
 import math
 import os
 import subprocess
@@ -17,8 +16,6 @@ from mathutils import Matrix, Vector, noise
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
 import warden_kit as K  # noqa: E402
-
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 
 FIT, OUT = sys.argv[sys.argv.index("--") + 1:][:2]
 JADE = np.array((0.36, 0.9, 0.72), np.float32)     # the glyphs' glow: jade with a slight teal (owner, 2026-11-07)
@@ -192,43 +189,6 @@ def emissive(mat, im):
     b.inputs["Emission Strength"].default_value = 1.0
 
 
-def jpeg_atlas(atlas):
-    """The fit's atlas as a JPEG (the .glb's export keeps each map's own format, and the lossless normal map needs PNG)."""
-    w, h = atlas.size
-    a = np.array(atlas.pixels[:], np.float32).reshape(h, w, 4)[..., :3]
-    if atlas.is_float:
-        a = np.where(a <= 0.0031308, a * 12.92, 1.055 * np.maximum(a, 1e-5) ** (1 / 2.4) - 0.055)
-    jp = save_img(a, "tarek_atlas")
-    atlas.user_remap(jp)
-    jp.name = "tarek_atlas"
-    return jp
-
-
-def normal_map(body, uvs):
-    """The dense scan's sculpt (bake_warden's normal.png beside its .glb) on every body slot but the glow. The texels the
-    props sample (`uvs`: their whole mesh on one texel) go flat, so a stone shades by its own faces."""
-    bake = json.load(open(os.path.join(ROOT, "art", "wardens", "src", "tarek_bake.json")))
-    im = bpy.data.images.load(os.path.join(os.path.dirname(os.path.expanduser(bake["out"])), "normal.png"))
-    im.colorspace_settings.name = "Non-Color"
-    w, h = im.size
-    px = np.array(im.pixels[:], np.float32).reshape(h, w, 4)
-    for u, v in uvs:
-        x, y = int(u * w), int(v * h)
-        px[max(y - 2, 0):y + 3, max(x - 2, 0):x + 3, :3] = (0.5, 0.5, 1.0)
-    im.pixels.foreach_set(px.ravel())
-    im.name = "tarek_normal"
-    im.pack()
-    for m in body.data.materials:
-        if m.name.startswith("glow"):
-            continue
-        nt = m.node_tree
-        t = nt.nodes.new("ShaderNodeTexImage")
-        t.image = im
-        nm = nt.nodes.new("ShaderNodeNormalMap")
-        nt.links.new(t.outputs[0], nm.inputs["Color"])
-        nt.links.new(nm.outputs[0], nt.nodes["Principled BSDF"].inputs["Normal"])
-
-
 def glow_material(atlas, im):
     m = bpy.data.materials.new("glow-tarek")
     m.use_nodes = True
@@ -391,10 +351,9 @@ def main():
     rock = next(m for m in me.materials if m.name.startswith("leather"))
     emissive(rock, im)
     atlas = next(n.image for n in rock.node_tree.nodes if n.type == "TEX_IMAGE" and n.image != im)
-    atlas = jpeg_atlas(atlas)
+    atlas.name = "tarek_atlas"
     im.name = "tarek_emit"
     glow = glow_material(atlas, im)
-    normal_map(body, (grey_uv, jade_uv))
     stone_me = eye_stone(rock, glow, grey_uv, jade_uv)
     shard_me = shard(rock, grey_uv)
     fist_r = centroid(body, "hand.R")

@@ -3,7 +3,7 @@ modelled in place of the lantern. Edits art/wardens/pip/pip.glb: takes the lante
 pauldron.L) and the cloud (on pauldron.R) skinned rigidly at her shoulders, moves the lantern's FX points (weapon_muzzle,
 anchor_hang_lantern, anchor_lantern_top) onto the sun, and paints the 8 expression faces as one atlas (the game swaps cells:
 content/rules/warden_anim/pip.json "mood", scripts/heroes/warden_mood.gd). The rig, clips and every other anchor are kept.
-  blender -b --factory-startup --python tools/art1/pip_companions.py -- art/wardens/pip/pip.glb out.glb /tmp/faces.png  (the png's name is the glb image name: faces, which Godot extracts as pip_faces.png)
+  blender -b --factory-startup --python tools/art1/pip_companions.py -- art/wardens/pip/pip.glb out.glb art/wardens/pip/pip_faces.png
 Space: Blender's, facing +Y, her right hand +X (the sun floats on her left, -X), up +Z, metres at the class-neutral size."""
 import math
 import sys

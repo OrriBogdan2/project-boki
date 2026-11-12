@@ -180,9 +180,7 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it); the
-  revamped Hunters (Pip, Ryzz, Sable, Tarek, Vex: owner 11-09) carry ~25k (at most 25.5k) with a baked 2048 tangent
-  normal map (`warden_kit.bake_normal`, docs/art/wardens/PIPELINE.md). A Meshy
+- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
   bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
   triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
   LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
@@ -195,6 +193,9 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
   surface is on the hero toon shader with the atlas, the hit ring is unchanged, the budget holds, and the
   setting turns it procedural and back.
+- `--warden-rest-check`: the baked neutral rest (content/rules/warden_rest.json, WardenRest) equals the one
+  the procedural rig measures now, so a match builds the .glb without measuring it (0.15 to 0.7 s a Warden).
+  `-- --warden-rest-bake` rewrites the bake.
 - The Blender builds: `godot --headless -- --warden-rig-json --warden=<id>` writes the armature and landmarks
   (art/wardens/src/<name>_rig.json); `blender -b --factory-startup --python tools/blender/<name>.py` builds,
   bakes and exports (shared helpers in tools/blender/warden_kit.py; Vex first, see art/wardens/vex/IMPORT.md).

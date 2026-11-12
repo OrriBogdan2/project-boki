@@ -2,7 +2,7 @@
  "high": "~/meshy/tarek_v2/runA/glb.glb",
  "out": "~/meshy/tarek_v2/bake/low.glb",
  "blend": "~/meshy/tarek_v2/bake/bake.blend",
- "tris": 24000,
+ "tris": 30000,
  "tex": 4096,
  "head": {
   "centre": [
@@ -20,10 +20,5 @@
  "cage": 0.008,
  "ray": 0.03,
  "margin_px": 16,
- "floater_verts": 60,
- "normal": {
-  "size": 2048,
-  "cage": 0.005,
-  "ray": 0.012
- }
+ "floater_verts": 60
 }

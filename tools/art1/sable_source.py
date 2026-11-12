@@ -12,7 +12,7 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, TEX, RIG, OUT = a[0], a[1], a[2], a[3]
-LOW_TRIS, FACE_TRIS = 21000, 5200     # the scan body and its face: ~25k with the pieces (owner 11-09)
+LOW_TRIS, FACE_TRIS = 10300, 2600
 SOLE = -0.95                    # the scan's sole (z)
 K_ = 0.92                       # scan metres -> rig metres, where a bone's length doesn't set it
 SOLE_Z, ANKLE = 0.0, 0.145      # the rig: the boot's sole, the foot bone

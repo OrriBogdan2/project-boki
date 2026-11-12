@@ -1,4 +1,4 @@
-"""ART-1 Sparkle, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 25k tris, 8 surfaces.
+"""ART-1 Sparkle, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 15k tris, 8 surfaces.
 Run: blender -b --factory-startup --python tools/art1/ryzz_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 sys.stdout.reconfigure(line_buffering=True)
@@ -10,7 +10,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import meshkit as M, ryzz_pieces as K, ryzz_paint as P
-from paintkit import clean_normal
 from meshkit import smooth, Piece, catmull, sweep
 import warden_kit as WK
 
@@ -19,7 +18,6 @@ SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
 FACE_K = 6.0               # the face's texel density against the body
 UNIQ_W = 0.755
-NRM_CAGE, NRM_RAY = 0.005, 0.012      # m: the scan normal bake's cage extrusion and ray reach (the detail pilot's)
 EYE_R = (0.76, 0.12, 0.875, 0.22)
 MATS = ["skin-ryzz", "leather-ryzz", "cloth-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "cloth-gum"]      # (7: the top, brief and pack share leather's surface)
 SCALE = {"lid": 2.0, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "gum": 0.8, "Low": 1.0}
@@ -724,8 +722,8 @@ atlas = bpy.data.images.new("ryzz_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
 px[..., :3] = np.clip(OUTC, 0, 1)
 atlas.pixels.foreach_set(px.ravel())
-atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.jpg")
-atlas.file_format = "JPEG"
+atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.png")
+atlas.file_format = "PNG"
 atlas.save()
 print("atlas saved")
 for mt in me.materials:
@@ -745,14 +743,7 @@ ic[:, 3] = rooms
 attr.data.foreach_set("color", ic.ravel())
 me.color_attributes.active_color = attr
 
-# ---- the normal map: the scan's sculpt on its own faces (rebuilt pieces stay flat), plus a relief from the paint on
-# leather and metal (grain, pleats, stitches, rivets; the skin stays smooth). hero_toon use_nrm
-SCAN_N = WK.bake_normal(ob, [src], ATLAS, NRM_CAGE, NRM_RAY)
-SCAN_N[PID != 0] = (0.5, 0.5, 1.0)
-wrong = clean_normal(SCAN_N)
-SCAN_N = SCAN_N * 2.0 - 1.0
-fmat = np.array([p_.material_index for p_ in me.polygons])
-rough = np.isin(fmat[np.maximum(FID, 0)], [MATS.index("leather-ryzz"), MATS.index("metal-ryzz")]) & (FID >= 0)
+# ---- a relief normal map from the paint (leather grain, pleats, stitches, rivets; the skin stays smooth). hero_toon use_nrm
 lum_ = np.clip(OUTC, 0, 1).mean(2)
 paintm = (PID >= 0).astype(np.float32)
 hp = blur(lum_, paintm, 1) - blur(lum_, paintm, 10)
@@ -761,7 +752,7 @@ hp = hp * (~skinish) * paintm * (POS[..., 2] < K.NECK_Z + 0.03)
 dx = np.roll(hp, -1, 1) - np.roll(hp, 1, 1)
 dy = np.roll(hp, -1, 0) - np.roll(hp, 1, 0)
 NK = 5.0
-nm_ = SCAN_N + np.stack([-dx * NK, -dy * NK, np.zeros_like(hp)], -1) * rough[..., None]
+nm_ = np.stack([-dx * NK, -dy * NK, np.ones_like(hp)], -1)
 nm_ /= np.linalg.norm(nm_, axis=-1, keepdims=True)
 nimg = bpy.data.images.new("ryzz_nrm", ATLAS, ATLAS)
 nimg.colorspace_settings.name = "Non-Color"
@@ -771,9 +762,8 @@ nimg.pixels.foreach_set(pxn.ravel())
 nimg.filepath_raw = os.path.join(os.path.dirname(OUT), "nrm.png")
 nimg.file_format = "PNG"
 nimg.save()
-print("normal baked, wrong hits flattened %.4f" % wrong)
 for mt in me.materials:
-    if not mt.name.startswith("glow"):
+    if mt.name.startswith(("leather", "metal")):
         nt = mt.node_tree
         ti = nt.nodes.new("ShaderNodeTexImage")
         ti.image = nimg
@@ -870,5 +860,5 @@ objs = [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"]
 for o in list(bpy.data.objects):
     if o.name in ("Src", "Low"):
         bpy.data.objects.remove(o)
-WK.export(OUT, objs, colors=True)
+WK.export(OUT, objs, image_format="JPEG", colors=True)
 print("exported", OUT, os.path.getsize(OUT))

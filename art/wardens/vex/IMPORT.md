@@ -1,7 +1,22 @@
-# Vex (gunslinger): import note, v2 design (2026-11-06)
+# Vex (gunslinger): import note
 
-`vex.glb`: the owner's locked v2 redesign (briefs/art-refs/vex_v2/: index.md, master_sheet, turnaround), on the shared armature, at ~25k
-triangles (24,559, owner 11-09 revamp), six material slots, one 2048 atlas plus its normal map, hand-keyed clips (docs/art/wardens/CLIPS.md, content/rules/warden_anim/vex.json).
+## v95 swap, appeal3 body b (2026-11-10, ext/vex-appeal-b): the current vex.glb
+
+The mesh is the v95 master in the owner's appeal3 look, body variant b (owner pick 11-10: fuller bust, waist 3% narrower,
+the left jacket flap lying on the belly, a stray hair strand by her right eye tucked behind the skin) with the
+owner-approved round-2 face: ~/meshy/v95/Vex/r2/appeal3/cand_b.glb (pick.txt beside it). It is put on this rig by
+`tools/art1/v95_swap.py` with `art/wardens/src/vex_v95.json` (docs/art/wardens/V95_SWAP.md). The skeleton, the clips, the
+anchors (moved through the fit) and the coin (`keep`) are unchanged; the minigun is rigid on forearm.R. 13.1k tris, one
+embedded 2048 atlas (Godot's import extracts it to vex_atlas.jpg), no normal map. Shots: docs/shots/vex-appeal-b/.
+Fix over round 2's spec: the gun hangs against her right thigh at rest, so the trouser's outer side, its cargo pocket and a
+hip flap were weighted to forearm.R and lifted with the gun in the shoot clips as a dark panel. A `hips` region (the flap),
+a `thigh.R` region (`in_segs` thigh.R 0.17: the trouser) and `detach` forearm.R from thigh.R/hips/shin.R keep them on the leg.
+Limits: the barrels no longer spin (the gatling bone has no mesh), and the braid is rigid on the head.
+
+## Previous build: v2 design (2026-11-06)
+
+`vex.glb`: the owner's locked v2 redesign (briefs/art-refs/vex_v2/: index.md, master_sheet, turnaround), on the shared armature, under 15k
+triangles (10.7k), six material slots, one 2048 atlas plus its normal map (build outputs; the v95 swap dropped vex_normal.jpg, and vex_atlas.jpg is now the new atlas), hand-keyed clips (docs/art/wardens/CLIPS.md, content/rules/warden_anim/vex.json).
 Raw files in ~/meshy/vex_v2 (never in git); the Meshy tasks and credits are in docs/art/wardens/PIPELINE.md.
 
     python3 -I tools/meshy/meshy_task.py edit ...      # body views: bald, minigun and coin chain out; head views from a head sheet; prompts in ~/meshy/vex_v2/edit.sh
@@ -26,5 +41,3 @@ FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_mu
 Head: a separate Meshy scan of a v2 head sheet, placed on the body by its eye line and chin (H_EYE, H_CHIN in build.sh, read on the scan's
 gridded front render); the scan's braid is cut and rebuilt on the spring chain. Gun length elbow to muzzle 0.55 m = 31% of her height
 (the turnaround: about 30%).
-
-Revamp (owner 11-09, ext/hunter-revamp-pz): ~25k triangles, face, hands and weapon kept denser, the 2048 normal baked from the dense Meshy raw (`warden_kit.bake_normal`, docs/art/wardens/PIPELINE.md "The ~25k revamp") and shipped as PNG beside the JPEG atlas. A fresh Meshy re-roll was compared and not used. Old vs new: docs/art/wardens/revamp/vex/. The defaults are the shipped build: VEX_LOW_TRIS 15000, VEX_HEAD_TRIS 9200, VEX_FACE_TRIS 3500, VEX_HEAD_WELD seam (5400/5000/1800/all made the 10.7k model).

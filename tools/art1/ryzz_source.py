@@ -11,8 +11,8 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 21500     # the scan body, face included: the model's ~25k with the pieces (owner 11-09)
-FACE_TRIS = 4800
+LOW_TRIS = 8900
+FACE_TRIS = 2000
 SOLE = -0.9498
 K_ = 0.90
 ANKLE = 0.135
