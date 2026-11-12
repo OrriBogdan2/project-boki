@@ -102,13 +102,51 @@ now, but it takes Boki players find today out of Expeditions, against the series
   and a lobby mode.
 - **Off in a raid:** rival squads, lairs, outposts and the Heart's early seat (`Heart.locked`).
 
+## Balance sweep (2026-11-12, `--heart-raid-check`)
+First numbers, 5 fixed seeds (1-5) per cell. The player's seat is autopiloted and plays the three starter Hunters in turn
+(seed 1 Juggernaut, 2 Gunslinger, 3 Archer, 4 Juggernaut, 5 Gunslinger); the other seats are bots. One raid:
+`godot --headless --path . -- --heart-raid-check --seed=N --sweep=SQUAD:difficulty:arch` prints an `HRSWEEP` line
+(result, seconds, downs, wave, boss). "Downs" counts every time any Hunter of the squad went down (solo has no down
+state: the first death is the loss, so 0). Time is the match clock (limit 900 s).
+
+| Squad | Difficulty | Cleared | Time won / lost (s) | Downs avg (max) | Wave reached (avg of 8) | Boss reached |
+|---|---|---|---|---|---|---|
+| 1 | Normal | 0/5 (0%) | - / 545 | 0.0 (0) | 6.0 | 1/5 |
+| 1 | Hard | 1/5 (20%) | 721 / 572 | 0.0 (0) | 7.0 | 2/5 |
+| 1 | Nightmare | 0/5 (0%) | - / 512 | 0.0 (0) | 5.8 | 2/5 |
+| 2 | Normal | 1/5 (20%) | 824 / 643 | 7.0 (16) | 7.8 | 2/5 |
+| 2 | Hard | 0/5 (0%) | - / 787 | 18.0 (36) | 8.0 | 4/5 |
+| 2 | Nightmare | 0/5 (0%) | - / 752 | 11.8 (37) | 7.6 | 3/5 |
+| 4 | Normal | 1/5 (20%) | 781 / 838 | 37.4 (126) | 8.0 | 5/5 |
+| 4 | Hard | 1/5 (20%) | 850 / 780 | 26.8 (47) | 7.8 | 4/5 |
+| 4 | Nightmare | 0/5 (0%) | - / 758 | 58.4 (118) | 8.0 | 3/5 |
+
+Reading it: only 5 of 45 raids were won (11%), and every difficulty is within noise of each other (5 seeds is 20% a step).
+Solo Normal and solo Nightmare are 0% with 0 downs, the only cells the brief lets me change. I tried easing the solo row
+(`scale.count[0]` 1.0 -> 0.75, `scale.hp[0]` 0.8 -> 0.7) and re-ran the 15 solo raids: Normal 0/5 (wave 5.6), Hard 1/5
+(6.4), Nightmare 0/5 (6.8), no better than before, so **heart_raid.json is unchanged**. The loss is not the wave
+numbers: the autopilot and bots stall below the Heart plateau (docs/DEBT.md, "bots do not climb onto the Heart plateau"), so
+the squad rarely holds the ring, and a solo run also loses to one bad pull. The sweep measures the bots as much as the numbers.
+
+Proposals (the owner's call):
+1. Fix the bots/autopilot climbing to the Heart first, then re-run this sweep; tuning numbers before that tunes the bot.
+2. Squad of 4 takes the most downs (Normal 37 avg): cap 17 live wave monsters at squad 4 may be high; try `cap[3]` 14.
+3. Difficulty steps barely separate (Hard 2/5 won overall, Normal 2/5, Nightmare 0/5): the Hard step (hp 1.3, count 1.25) is
+   mild; Nightmare's is the only one that shows (more downs at 4).
+4. Solo: `boss_hp[0]` 0.2 is already small, yet 4 of 5 solo runs never see the boss: slow the waves for solo (`wave_every_s`
+   by squad) rather than shrink them.
+5. 10 more seeds per cell before any number moves.
+
 ## Risks
 - **Player split:** a second queue thins the Expedition lobbies. Keep the raid offline/party-only (no matchmaking)
   until the player count supports both. Bots fill the seats anyway.
 - **Matchmaking:** there is no raid queue. Online is the existing lobby ("Heart Raid" mode, the first 4 ready, the
   host fills the rest with bots). Clients see a lair boss as a plain monster: the bar over its head, no top bar.
 - **Perf:** at most 4 Hunters + 8 Boki + 17 wave monsters + 1 boss, against 30 Hunters + 60 Boki in an Expedition.
-  Not yet measured on a real GPU (--perf-bench).
+  Real GPU (jobq 20261112-112407-28815, rp1-0, RTX 4090, `--perf-bench --quality=medium`): the bench plays a plain
+  Expedition match, not a raid (`--perf-bench` ignores `--heart-raid`, job -10360 benched the hub): match wall avg 76.7 ms,
+  p99 216 ms (one 4.7 s start hitch), against 74-75 / 86-99 ms on main in GATE_1112c2, so no regression is visible, but the
+  raid's own load (17 wave monsters + boss) is **not** measured: a `--perf-bench` raid scene is open.
 - **Balance:** the numbers are first guesses. The smoke runs print a line a minute to tune from.
 
 ## Next steps
