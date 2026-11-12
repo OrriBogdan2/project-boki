@@ -12,6 +12,7 @@ extends RefCounted
 ##   6. The fling: a jump in the window near the top flings you higher and further than a jump before
 ##      it or no jump at all.
 ##   5. Sheer cliffs (authored maps) never catch you.
+##   7. A dash meets a rim: every starter, ground and air, four heights (tools/mantle_dash_rows.gd).
 ## Counts fixed simulation steps; never touches the save. Prints "MCHECK ok|FAIL ..." lines and
 ## "MCHECK DONE, failures: N".
 
@@ -54,6 +55,8 @@ func run(main: Node) -> void:
 	_steering(walls)
 	_fling(walls)
 	_sheer()
+	m.queue_free()
+	bad += load("res://tools/mantle_dash_rows.gd").new().run(main)     # 7. a dash meets a rim
 	print("MCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
