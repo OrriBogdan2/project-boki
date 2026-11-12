@@ -45,6 +45,14 @@ func move_k() -> float:
 		"recover": return 0.5
 	return 1.0
 
+## Seconds until the cleave lands and frees him (0: not planted). A guard held for a hauled foe counts its own length.
+func lock_left() -> float:
+	var d := data()
+	match String(st.get("phase", "")):
+		"guard": return maxf(0.0, float(d["guard"]) - float(st["t"])) + float(d["strike_t"])
+		"strike": return float(d["strike_t"]) - float(st["t"])
+	return 0.0
+
 ## X pressed: the guard goes up at once.
 func start() -> void:
 	var h := k.h

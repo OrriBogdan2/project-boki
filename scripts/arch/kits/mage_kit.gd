@@ -105,6 +105,9 @@ func busy() -> bool:
 func fire_ok() -> bool:
 	return not ult.busy()
 
+func lock_left() -> float:
+	return ult.lock_left()
+
 func full_ready() -> bool:
 	for k in sparks:
 		if int(sparks[k]["n"]) >= int(res_def()["max"]):

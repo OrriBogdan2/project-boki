@@ -53,6 +53,12 @@ func airborne() -> bool:
 func busy() -> bool:
 	return running() and phase() != AFTER
 
+## Seconds until the strike frees her (0: free): the drop's rest, and at least the whole drop before it.
+func lock_left() -> float:
+	if phase() == FALL:
+		return float(data()["drop"]) - float(leap["t"])
+	return float(data()["drop"]) if busy() else 0.0
+
 # ------------------------------------------------------------------ the press
 ## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
 func cast() -> bool:

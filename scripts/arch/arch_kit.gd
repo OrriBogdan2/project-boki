@@ -265,6 +265,9 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
+## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+func lock_left() -> float: return 0.0
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).

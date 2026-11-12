@@ -258,6 +258,9 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
+func lock_left() -> float:
+	return riposte.lock_left()
+
 ## Planted in the guard and the cleave: no other button does anything (but E on a held chain, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
