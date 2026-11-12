@@ -140,6 +140,20 @@ const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
 const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
+const MIN_CADENCE := 0.6      # clip rate a walk or run never drops under, but in a stop
+## The stop and the turn on the spot (docs/art/kin/RIGGED_BOKI.md "Stop and turn"). A Boki whose ground speed drops
+## under STOP_DROP of its eased speed is stopping: its gait keeps the clip it is on at the ground's own pace, so the
+## planted paws stay put, and under SETTLE_SPEED the gait holds its pose while the idle blends in over SETTLE_FADE. One
+## standing and turning faster than TURN_START treads round on its walk until it turns slower than TURN_END. A rig
+## with no stepping walk (no hips, or it hovers) just blends out. Both are off for a Boki Match draws at a quarter
+## rate (Ent.lod_dt): it only picks idle, walk or run.
+const STOP_DROP := 0.8        # ground speed under this share of the eased speed: a stop
+const SETTLE_SPEED := 0.1     # m/s: a stopping gait holds its pose under this
+const SETTLE_FADE := 0.3      # s: the held gait pose handing over to the idle
+const TURN_START := 2.5       # rad/s of yaw a standing Boki starts treading round at
+const TURN_END := 1.2         # rad/s it settles back under
+const TURN_EASE := 20.0       # 1/s the yaw rate is eased at
+const TURN_REACH := 0.25      # m at scale 1: paw to pivot; the paws tread at the yaw rate times this
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -205,6 +219,16 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _ground := 0.0             # m/s it moved this frame, not eased
+var _pace := 0.0               # m/s the gait clip is played for
+var _stopping := false
+var _turning := false
+var _yaw := 0.0
+var _yaw_rate := 0.0           # rad/s, eased
+var _steps := false            # it has a stepping walk: the turn treads on it
+var _ent: Ent                  # the match body, whose render Match may skip when far (null at home)
+var _held := 0.0               # s of skipped renders, taken on the next one
+var _far := false
 var _pulse := 0
 var _lunging := false
 var _shot_left := 0.0
@@ -293,6 +317,10 @@ func _ready() -> void:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	BokiSwing.add_clips(player)
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
+	_yaw = root.global_rotation.y if root.is_inside_tree() else 0.0
+	_ent = root.get_parent() as Ent
+	_steps = player.has_animation("walk") and float(FRAME[species]["hip"]) > 0.0 \
+			and not FRAME[species].get("hover", false)
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_swimmer = swimmer(species)
 	_faint.plan = _flinch.plan
@@ -338,8 +366,13 @@ func _process(dt: float) -> void:
 		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
 	_faint.update(_down, _flinch.push.x, dt)
 	_keep_flex()
-	_track_speed(dt)
-	_pick_clip(dt)
+	if _ent and _ent.lod_dt > 0.0:
+		_held += dt               # Match skipped this far one's render: it has not moved, so wait for the next
+	else:
+		_far = _held > 0.0
+		_track_speed(dt + _held)
+		_pick_clip(dt + _held)
+		_held = 0.0
 	_face_step(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll,
@@ -368,9 +401,12 @@ func _keep_flex() -> void:
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
-	var v := (gp - _pos_prev).length() / dt
+	_ground = (gp - _pos_prev).length() / dt
 	_pos_prev = gp
-	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
+	_speed = lerpf(_speed, _ground, 1.0 - exp(-10.0 * dt))
+	var yaw := root.global_rotation.y
+	_yaw_rate = lerpf(_yaw_rate, angle_difference(_yaw, yaw) / dt, 1.0 - exp(-TURN_EASE * dt))
+	_yaw = yaw
 
 func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
@@ -392,20 +428,31 @@ func _pick_clip(dt: float) -> void:
 			_start_shot("settle" if asleep else "wake")
 		_asleep = asleep
 	_down = ks == "faint"
+	_pace = _speed
 	var want := _state_clip()
+	player.speed_scale = DOWN_SPEED if _down else 1.0
+	if want == "idle" and (clip == "walk" or clip == "run") and not _far:
+		_settle()
+		return
 	if want == "idle":
 		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)
 	set_clip(want)
-	player.speed_scale = DOWN_SPEED if _down else 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
 	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
-	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	var least := 0.0 if _stopping else MIN_CADENCE
+	player.speed_scale = clampf(_pace / stride * burst, least, MAX_CADENCE * player.get_animation(want).length)
+
+## The gait it stopped on holds its pose, so the paws stay where they stand, while the idle blends in.
+func _settle() -> void:
+	player.play(clip, 0.0, 0.0)       # the same clip, from where it is, held still
+	clip = "idle"
+	player.play(clip, SETTLE_FADE)
 
 func _start_shot(which: String) -> void:
 	_shot = which
@@ -427,9 +474,25 @@ func _state_clip() -> String:
 		return _shot
 	if root.get_meta("happy", false):
 		return "hop"
-	if _speed >= RUN_SPEED:
-		return "run"
-	return "walk" if _speed >= WALK_SPEED else "idle"
+	return _gait()
+
+## Idle, walk or run from its speed, with the stop and the turn on the spot (see STOP_DROP); sets _pace.
+func _gait() -> String:
+	_stopping = _ground < _speed * STOP_DROP and not _far
+	if _stopping:
+		_pace = _ground
+		if (clip == "walk" or clip == "run") and _pace >= SETTLE_SPEED:
+			return clip               # no run-to-walk swap mid-stop: that crossfade drags the paws
+	var standing := _pace < WALK_SPEED
+	_turning = standing and _steps and not _far and absf(_yaw_rate) > (TURN_END if _turning else TURN_START) \
+			and String(root.get_meta("kstate", "")) != "perch"     # on your shoulder it turns with you
+	if _turning:
+		_stopping = false
+		_pace = absf(_yaw_rate) * TURN_REACH * model.global_basis.z.length()
+		return "walk"
+	if standing:
+		return "idle"
+	return "run" if _pace >= RUN_SPEED else "walk"
 
 ## "swim" or "paddle" while the water is deeper than SWIM_LINE of its height, else "".
 func _swim_clip() -> String:

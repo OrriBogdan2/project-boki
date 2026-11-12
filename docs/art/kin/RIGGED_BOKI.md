@@ -149,3 +149,44 @@ action, sleep, hop, ability or attack takes over at once and restarts the count.
 Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
 body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
 frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.
+
+## Stop and turn
+
+When a Hunter stops or turns sharply, its Boki used to carry on with its run loop while it braked: `BokiRig` paced
+the clip by an eased speed that lags the body by ~0.1 s, kept a 0.6x floor on the rate, and crossfaded the moving
+gait into the idle, so the paws skated into place. `BokiRig._gait` now picks two steps from the speed drop and the
+turn rate (constants and their reasons at `STOP_DROP` in `scripts/match/boki_rig.gd`):
+
+- **Stop (settle).** Ground speed under 0.8 of the eased speed is a stop: the gait keeps the clip it is on (no
+  run-to-walk swap mid-stop) at the ground's own pace, with no rate floor, so the planted paws stay put while it
+  brakes. Under 0.1 m/s the gait holds its pose (`play(clip, 0, 0)`) while the idle blends in over 0.3 s.
+  No rig has a stop clip of its own, so every rig ends on this blend-out.
+- **Turn on the spot.** Standing and turning faster than 2.5 rad/s (until under 1.2), a Boki with a stepping walk
+  (it has hips and does not hover) treads round on its walk at yaw rate x 0.25 m (paw to pivot) over its walk
+  stride, in the usual cadence limits. It settles back into the idle the same way. Not on your shoulder (`perch`):
+  there it turns with you.
+
+Neither runs for a Boki that Match draws at a quarter rate (`Ent.lod_dt`, far from the camera): the rig waits for
+the next drawn frame and takes the skipped time then, so a far Boki's speed is not misread as a stop. It only picks
+idle, walk or run. Nothing here allocates per frame.
+
+`--boki-anim-audit` drives each Boki at the four gait speeds and then brakes it the way `Kin._ground_move` does
+(12/s), six times per speed at different points in the step cycle. It sums how far each paw moves over the ground
+while down (within 3 cm of its lowest point, sweeping back while a gait plays) and keeps the worst. The gate is
+0.15 m on the starters (cindle, puddlet, burrlet); the other Boki are printed, not gated. It also turns each Boki
+on the spot at 6 rad/s: walk at the tread rate for the legged ones, idle for the rest and for a far one, and idle
+again once the turn stops.
+
+Worst stop slip in metres, origin/main 88b06b9e7 → this change. The same measure ran both:
+
+| Boki | 1.5 m/s | 2.4 | 4.4 | match |
+|---|---|---|---|---|
+| cindle | 0.17 → 0.11 | 0.14 → 0.11 | 0.19 → 0.11 | 0.21 → 0.10 |
+| puddlet | 0.14 → 0.09 | 0.15 → 0.11 | 0.14 → 0.12 | 0.14 → 0.12 |
+| burrlet | 0.14 → 0.08 | 0.14 → 0.08 | 0.14 → 0.09 | 0.14 → 0.08 |
+| zapple | 0.16 → 0.09 | 0.21 → 0.19 | 0.23 → 0.19 | 0.22 → 0.19 |
+| lodestick | 0.32 → 0.22 | 0.37 → 0.25 | 0.33 → 0.21 | 0.48 → 0.22 |
+| marchleaf | 0.17 → 0.13 | 0.15 → 0.15 | 0.17 → 0.16 | 0.17 → 0.16 |
+
+Every other legged Boki ends at 0.13 m or less. What is left is the blend-out: the held stride's planted paws drag
+to the idle stance (up to ~0.1 m). Removing that takes baked stop clips that lift the paws (`docs/DEBT.md`).

@@ -2,7 +2,8 @@ extends RefCounted
 ## --boki-anim-audit: every rigged Boki's walk and run, driven through the live BokiRig at the speeds Boki move at
 ## (HOME_SPEEDS and the species' own match speed, KinLib kin_speed), unscaled and at the size roll's ends. Per gait:
 ## the planted feet's slide as a share of the move speed, steps per second, then the loop seams and the idle-to-walk
-## pop. Fails a slide over MAX_SLIDE (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
+## pop, the paws' slip over a stop (gated on the STARTERS) and the turn on the spot. Fails a slide over MAX_SLIDE
+## (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
 ## BokiRig.STRIDE must also match what the clips measure. Table: docs/art/kin/RIGGED_BOKI.md "Gait audit".
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -33,6 +34,17 @@ const OVER := {
 const SAMPLES := 48           # poses per loop
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
 const DT := 1.0 / 60.0        # s per frame when the rig is driven live (the idle-to-walk pop)
+## The stop (BokiRig's settle): a Boki at speed eases to a halt as Kin._ground_move brakes it, and its planted paws
+## may slip at most STOP_SLIDE over the ground in all; gated on the starter lines, printed for the rest.
+const STOP_EASE := 12.0       # 1/s: Kin._ground_move's grounded speed ease
+const STOP_RUN_IN := 1.0      # s at a steady speed before the stop
+const STOP_TIME := 1.2        # s from the stop's start: it stands and the idle has blended in
+const STOP_SLIDE := 0.15      # m
+const STOP_PHASES := 6        # stops per speed, each a share of a step cycle later: the worst one counts
+const STOP_DOWN := 0.03       # m over its lowest (run or idle) a paw counts as down in a stop
+const STARTERS := ["cindle", "puddlet", "burrlet"]
+const TURN_TEST := 6.0        # rad/s: a standing Boki turning about as fast as Kin's facing eases (12/s) on a reversal
+const TURN_TIME := 1.2        # s: turning for half of it, then standing still
 ## Bones that are not limbs when a Boki has no paws and its lowest limb stands in for a foot.
 const NOT_LIMB := ["root", "hips", "spine", "neck", "head"]
 
@@ -73,6 +85,16 @@ func _species(main: Node, id: String) -> void:
 		var near: bool = absf(measured[i] - BokiRig.STRIDE[id][i]) <= STRIDE_TOL * measured[i]
 		ok(near, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], BokiRig.STRIDE[id][i]])
 	var speeds: Array = HOME_SPEEDS + [match_speed(id)]
+	var stops: Array = []
+	for v in speeds:
+		var slid := 0.0
+		for j in STOP_PHASES:
+			slid = maxf(slid, stop_slide(k, rig, v, float(j) / STOP_PHASES))
+		stops.append("%.2f" % slid)
+		if id in STARTERS:
+			ok(slid <= STOP_SLIDE, "%s stops from %.1f m/s, paws slip %.2f m, under %.2f" % [id, v, slid, STOP_SLIDE])
+	print("BOKIGAIT STOP %s slip m at %s m/s: %s" % [id, speeds, " ".join(stops)])
+	_turn(k, rig, id)
 	var row: Array = []
 	for grown in SIZES:
 		k.scale = Vector3.ONE * grown
@@ -93,6 +115,7 @@ static func match_speed(id: String) -> float:
 ## Returns [slide %, steps/s].
 func _gait(rig: BokiRig, steps: Dictionary, id: String, grown: float, v: float) -> Array:
 	rig._speed = v
+	rig._ground = v
 	rig._pick_clip(0.016)
 	var length := rig.player.get_animation(rig.clip).length
 	var sc := rig.player.speed_scale
@@ -214,6 +237,106 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 			steady = maxf(steady, jump)
 	k.position = Vector3.ZERO
 	return hand / maxf(steady, 0.0001)
+
+## m: the most one planted paw slips over the ground while the Boki, at `v` m/s, eases to a halt (STOP_EASE) `phase` of
+## a step cycle after STOP_RUN_IN, driven
+## live through the rig. A paw is planted within STOP_DOWN of its lowest and, while a gait plays, sweeping back (as
+## contact_steps: the clips swing a paw forward low too).
+static func stop_slide(k: Node3D, rig: BokiRig, v: float, phase: float) -> float:
+	var skel := rig.skeleton()
+	var feet := _feet(skel)
+	var low := _plant_limits(rig, feet)
+	k.position = Vector3.ZERO
+	rig.set_clip("run" if v >= BokiRig.RUN_SPEED else "walk", 0.0)
+	rig._pos_prev = k.global_position
+	rig._speed = v
+	var speed := v
+	var was := _paws(rig, feet)
+	var slid: Array = []
+	slid.resize(feet.size())
+	slid.fill(0.0)
+	var stride: float = BokiRig.STRIDE[rig.species][int(v >= BokiRig.RUN_SPEED)]
+	var cycle := rig.player.get_animation(rig.clip).length / maxf(v / stride, 0.01)       # s per step cycle
+	var stop := int((STOP_RUN_IN + phase * cycle) / DT)
+	for f in stop + int(STOP_TIME / DT):
+		if f >= stop:
+			speed *= exp(-STOP_EASE * DT)
+		k.position.z -= speed * DT
+		rig._keep_flex()
+		rig._track_speed(DT)
+		rig._pick_clip(DT)
+		rig.player.advance(DT)
+		var now := _paws(rig, feet)
+		var gait := rig.clip == "walk" or rig.clip == "run"
+		for i in feet.size():
+			var a := k.to_local(was[i])
+			var b := k.to_local(now[i])
+			if f >= stop and a.y <= low[i] and b.y <= low[i] and (b.z > a.z or not gait):
+				slid[i] += Vector2(now[i].x - was[i].x, now[i].z - was[i].z).length()
+		was = now
+	k.position = Vector3.ZERO
+	return slid.max()
+
+## The turn on the spot: standing and turning at TURN_TEST, a Boki with a stepping walk treads round on it at the rate
+## its paws sweep round the pivot, and settles back into the idle once it stops turning; one without (EXEMPT, the
+## feetless caecilith) and one Match draws at a quarter rate (BokiRig._far) stay on the idle.
+func _turn(k: Node3D, rig: BokiRig, id: String) -> void:
+	var legged := not (id in EXEMPT) and id != "caecilith"
+	for far in [false, true]:
+		k.position = Vector3.ZERO
+		k.rotation.y = 0.0
+		rig.set_clip("idle", 0.0)
+		rig._pos_prev = k.global_position
+		rig._yaw = 0.0
+		rig._speed = 0.0
+		rig._far = far
+		var during := ""
+		var rate := 0.0
+		for f in int(TURN_TIME / DT):
+			if f < int(TURN_TIME / DT / 2):
+				k.rotation.y += TURN_TEST * DT
+			rig._track_speed(DT)
+			rig._pick_clip(DT)
+			rig.player.advance(DT)
+			if f == int(TURN_TIME / DT / 2) - 1:
+				during = rig.clip
+				rate = rig.player.speed_scale
+		var want := "walk" if legged and not far else "idle"
+		var tread := clampf(TURN_TEST * BokiRig.TURN_REACH / float(BokiRig.STRIDE[id][0]), BokiRig.MIN_CADENCE,
+				BokiRig.MAX_CADENCE * rig.player.get_animation("walk").length)
+		var paced := want == "idle" or absf(rate - tread) < 0.05 * rate
+		ok(during == want and paced, "%s%s turning %.0f rad/s on the spot plays %s x%.2f (want %s)" % [id,
+				" far" if far else "", TURN_TEST, during, rate, want])
+		ok(rig.clip == "idle", "%s%s is back on the idle once it stops turning" % [id, " far" if far else ""])
+	rig._far = false
+	k.rotation.y = 0.0
+
+## World positions of the paws.
+static func _paws(rig: BokiRig, feet: Array) -> Array:
+	var skel := rig.skeleton()
+	var out: Array = []
+	for b: int in feet:
+		out.append(skel.to_global(skel.get_bone_global_pose(b).origin))
+	return out
+
+## Per paw, the height over the Boki's own ground under which it counts as down: STOP_DOWN over its lowest in the run
+## and the idle.
+static func _plant_limits(rig: BokiRig, feet: Array) -> Array:
+	var lo: Array = []
+	for f in feet:
+		lo.append(INF)
+	for clip in ["run", "idle"]:
+		rig.set_clip(clip, 0.0)
+		var anim := rig.player.get_animation(clip)
+		for i in SAMPLES:
+			rig.player.seek(anim.length * i / SAMPLES, true)
+			rig.player.advance(0.0)
+			var at := _paws(rig, feet)
+			for f in feet.size():
+				lo[f] = minf(lo[f], rig.root.to_local(at[f]).y)
+	for f in feet.size():
+		lo[f] += STOP_DOWN
+	return lo
 
 static func _bones(skel: Skeleton3D) -> Array:
 	var out: Array = []

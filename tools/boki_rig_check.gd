@@ -156,9 +156,11 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	await _body_stays_level(main, k, rig)
 	ok(_clip_for(rig, "happy", true) == "hop", "happy hops")
 	rig._speed = 4.0
+	rig._ground = 4.0           # moving steadily, not stopping
 	rig._pick_clip(0.016)
 	ok(rig.clip == "run", "fast runs")
 	rig._speed = 1.2
+	rig._ground = 1.2
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
 	rig._speed = 0.0
