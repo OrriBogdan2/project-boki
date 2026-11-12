@@ -493,12 +493,14 @@ func _fresh(T: Hunter) -> void:
 	T.set_meta("marks", {})
 	T.set_meta("gnd_until", 0.0)
 
-## Runs the match `secs` in real time (one step a frame at 60 fps), with no monsters about.
+## Runs the match `secs` in real time (one step a frame at 60 fps), with no monsters about (a check's lair boss stays).
 func _run(secs: float) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
+		for mb in m.mobs.duplicate():
+			if not mb is Boss:
+				mb.queue_free()
+				m.mobs.erase(mb)
 		m.step(DT)
 		t += DT
 		if watch and seen.is_empty(): seen = m.displace.towing(watch)
