@@ -717,7 +717,7 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
-	if not visit.is_empty():
+	if not visit.is_empty() and not play_hub:     # (the hub counts as a visit; the picker opens there too)
 		pass
 	elif play_hub:
 		MinigameHub.open(self)

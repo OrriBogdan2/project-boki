@@ -19,6 +19,7 @@ var h                          # the Home screen
 var node: Node3D = null        # the Waystone or the return pad
 var board: Node3D = null       # the hub's games board
 var aim := ""                  # "board" while the games board is what E would use (set by find)
+var picker_after := false     # the hop came from the minigame picker: open it on arrival
 var hopping := ""              # the zone being travelled to, during the light-up
 var pad := {}                  # the stone as something a Boki can look at: {"pos"}
 
@@ -106,13 +107,14 @@ func use() -> void:
 		ZoneCards.open(h, here())
 
 ## Travel to a zone (or the hub). Returns false, with a toast, for a locked zone or where you are.
-func hop(id: String) -> bool:
+func hop(id: String, to_picker := false) -> bool:
 	if hopping != "" or id == here():
 		return false
 	if id != GardenZones.HUB and not is_open(id):
 		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id).get("name", id))
 		return false
 	hopping = id
+	picker_after = to_picker
 	h._close_panel()
 	var col := Color(String(GardenZones.info(id).get("colour", "c9c2b2")))
 	h.fx.burst(node.position + Vector3(0, 0.4, 0), col, 24, 3.0, 0.6, -2.0)
@@ -121,7 +123,7 @@ func hop(id: String) -> bool:
 	return true
 
 func _go() -> void:
-	var opts := {"zone": hopping}
+	var opts := {"zone": hopping, "play_hub": picker_after}
 	if VisitZones.has(h.visit):
 		opts.merge({"visit": h.visit["all"], "visit_id": h.visit_id})      # a friend's garden: still theirs
 	Game.goto("home", opts)
