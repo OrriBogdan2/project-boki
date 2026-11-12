@@ -1,6 +1,6 @@
 extends RefCounted
-## --wisp-shots --shots-dir=<dir> [--shots-arch=<hero>]: review frames for the downed Wisp (docs/decisions/0019), in a live match
-## under xvfb with a renderer. The player is knocked, drifts, then is revived:
+## --wisp-shots --shots-dir=<dir> [--shots-arch=<hero>]: review frames for the downed Wisp (docs/decisions/0019),
+## in a live match under xvfb with a renderer. The player is knocked, drifts, then is revived:
 ##   wisp_0_hero      standing, before the knock
 ##   wisp_1_fall_a    the knocked-down beat (HunterFall), staggering along the hit
 ##   wisp_2_fall_b    down on a knee, the Wisp coming out of the body
