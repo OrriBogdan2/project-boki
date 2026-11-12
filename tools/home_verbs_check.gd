@@ -127,7 +127,7 @@ func _paths() -> void:
 		await main.get_tree().process_frame
 	ok(not home.train.is_empty() and home.verbs.act == "", "a drill is running, no cheer yet")
 	home.train["wait"] = 0.0
-	home.train["m"] = home.train["zone"]
+	home.train["bar"].m = home.train["bar"].zone      # marker on the gold: a great press
 	home.drill.hit()
 	ok(home.verbs.act == "cheer", "a great drill mark plays the cheer")
 	for i in 30:

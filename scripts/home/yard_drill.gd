@@ -1,12 +1,10 @@
 class_name YardDrill
 extends RefCounted
 ## Training at the yard: a timing game, three rounds, each a little faster. The session dict stays on
-## Home.train (other systems read it to know a drill is running); this holds the bar and the verbs.
+## Home.train (other systems read it to know a drill is running; train["bar"] is its TimingBar); this
+## holds the verbs.
 
 var h: Home                    # the Home screen
-var bar: Control = null
-var lbl: Label = null
-var draw: Control = null
 
 func _init(home: Home) -> void:
 	h = home
@@ -15,8 +13,8 @@ func _init(home: Home) -> void:
 func quit() -> void:
 	var tk: Dictionary = h.train["k"]
 	tk["busy"] = false
+	h.train["bar"].close()
 	h.train = {}
-	if is_instance_valid(bar): bar.queue_free()
 
 ## Start a drill of `stat` for `rec` at the yard.
 func start(rec: Dictionary, stat: String) -> void:
@@ -47,47 +45,23 @@ func start(rec: Dictionary, stat: String) -> void:
 	h.ppos = h.YARD_KIN + Vector3(-0.6, 0, 1.4)
 	h.player.position = h.ppos
 	h._face(h.YARD_KIN)
-	h.train = {"k": k, "stat": stat, "round": 0, "results": [], "m": 0.0, "dir": 1.0, "speed": 0.85, "zone": randf_range(0.3, 0.7), "wait": 0.0}
-	_build_bar()
+	var bar := TimingBar.new()
+	bar.open(h.root_ui, "Press %s (or click) when the marker is in the gold" % Settings.key_cap("interact"))
+	h.train = {"k": k, "stat": stat, "round": 0, "results": [], "bar": bar, "wait": 0.0}
+	_label()
 	Sfx.play("whoosh", null, -8.0)
 
-func _build_bar() -> void:
-	if is_instance_valid(bar): bar.queue_free()
-	var bar := UI.card(Color(UI.NIGHT, 0.92), 12, 14)
-	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	bar.offset_top = -64
-	bar.offset_bottom = -64
-	bar.custom_minimum_size.x = minf(560.0, h.get_viewport().get_visible_rect().size.x - 32.0)
-	var col := UI.vbox(8)
-	bar.add_child(col)
-	lbl = UI.label("", 15)
-	col.add_child(lbl)
-	draw = Control.new()
-	draw.custom_minimum_size = Vector2(0, 26)
-	draw.draw.connect(_draw)
-	col.add_child(draw)
-	col.add_child(UI.label("Press %s (or click) when the marker is in the gold" % Settings.key_cap("interact"), 12, UI.MUTED))
-	h.root_ui.add_child(bar)
-	bar = bar
-	_label()
-
 func _label() -> void:
-	if not is_instance_valid(lbl) or h.train.is_empty():
+	if h.train.is_empty() or not is_instance_valid(h.train["bar"].lbl):
 		return
 	var st: Dictionary = Care.STATS[h.train["stat"]]
 	var res: Array = h.train["results"]
 	var marks := ""
 	for r in res:
 		marks += {"great": "  ★", "good": "  ●", "miss": "  ✕"}[r]
+	var lbl: Label = h.train["bar"].lbl
 	lbl.text = "%s  ·  round %d of 3%s" % [st["drill"], mini(int(h.train["round"]) + 1, 3), marks]
 	lbl.add_theme_color_override("font_color", st["col"])
-
-func _draw() -> void:
-	if h.train.is_empty() or not is_instance_valid(draw):
-		return
-	TimingDrill.draw(draw, h.train)
 
 func process(d: float) -> void:
 	if h.train.is_empty():
@@ -97,19 +71,16 @@ func process(d: float) -> void:
 		if float(h.train["wait"]) <= 0.0 and int(h.train["round"]) >= 3:
 			_finish()
 		return
-	TimingDrill.sweep(h.train, d)
-	if is_instance_valid(draw): draw.queue_redraw()
+	h.train["bar"].step(d)
 
 func hit() -> void:
 	if h.train.is_empty() or float(h.train["wait"]) > 0.0:
 		return
-	var r := TimingDrill.grade(h.train)
+	var r: String = h.train["bar"].press()
 	h.train["results"].append(r)
 	if r == "great": h.verbs.play("cheer")
 	h.train["round"] = int(h.train["round"]) + 1
 	h.train["wait"] = 1.1
-	h.train["speed"] = float(h.train["speed"]) * 1.35
-	h.train["zone"] = randf_range(0.2, 0.8)
 	_anim(h.train["k"], String(h.train["stat"]), r)
 	_label()
 
@@ -126,7 +97,8 @@ func _anim(k: Dictionary, stat: String, r: String) -> void:
 			tw.tween_property(n, "position", to, 0.12)
 			tw.tween_callback(func():
 				if r != "miss":
-					h.fx.burst(dummy.global_position + Vector3(0, 1.0, 0), Color("e2c47a"), 12 if r == "great" else 6, 3.0, 0.4)
+					var sparks := 12 if r == "great" else 6
+					h.fx.burst(dummy.global_position + Vector3(0, 1.0, 0), Color("e2c47a"), sparks, 3.0, 0.4)
 					Sfx.play("kinhit", dummy.global_position, -6.0)
 					var dt := h.create_tween()
 					dt.tween_property(dummy, "rotation:z", 0.35 if r == "great" else 0.18, 0.08)
@@ -149,7 +121,10 @@ func _anim(k: Dictionary, stat: String, r: String) -> void:
 			tw.tween_property(n, "position", h.YARD_KIN, 0.18 if r != "miss" else 0.35)
 		"focus":
 			tw.tween_property(n, "rotation:y", n.rotation.y + TAU, 0.6)
-			tw.tween_callback(func(): if r != "miss": h.fx.burst(h.YARD_KIN + Vector3(0, 0.5, 0), col, 14 if r == "great" else 7, 1.6, 0.6, -3.0))
+			var puff := 14 if r == "great" else 7
+			tw.tween_callback(func():
+				if r != "miss":
+					h.fx.burst(h.YARD_KIN + Vector3(0, 0.5, 0), col, puff, 1.6, 0.6, -3.0))
 	h._emote(k, {"great": "★", "good": "♪", "miss": "?"}[r])
 
 func _finish() -> void:
@@ -170,13 +145,20 @@ func _finish() -> void:
 	Care.change(rec, "joy", 4.0 if (h.train["results"] as Array).has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
+	h._garden_xp(rec, "drill", false, pts)
+	var sname := String(Care.STATS[stat]["name"]).to_lower()
+	if gained > 0:
+		CareJournal.note(rec, "trained %s at the yard: +%d" % [sname, gained])
 	if Care.care_day(rec, "trained"):
-		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
+		Save.remember(rec, "trained", "trained %s with you at the yard" % sname, 1.0)
 	Save.save_game()
-	h._toast("+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], int(rec["stats"][stat]), Care.stat_cap(rec)] if gained > 0 else "No gain this time. Try again after a rest")
+	var shown := int(rec["stats"][stat])
+	var msg := "No gain this time. Try again after a rest"
+	if gained > 0:
+		msg = "+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], shown, Care.stat_cap(rec)]
+	h._toast(msg)
 	h._say(k, BokiLines.say(rec, "trained" if gained > 0 else "train_miss"))
 	k["busy"] = false
 	k["t"] = 1.5
+	h.train["bar"].close()
 	h.train = {}
-	if is_instance_valid(bar): bar.queue_free()
-	bar = null
