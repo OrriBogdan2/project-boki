@@ -163,6 +163,7 @@ func _base_world() -> void:
 	home._after_feed(k, "emberberry", Care.feed(k["rec"], "emberberry"))      # Care.feed leans, the home shows it
 	guide._poll()
 	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
+	ok(guide.hint_text().contains("Done"), "a tick says Done! on the strip line")
 	ok(_skip_shown(guide) and not FarmTutorial.hint_text("toy").contains("{"), "step 3: Skip on screen")
 	# resume: save and load after two steps, the tutorial carries on at the toy
 	var js := JSON.stringify(Save.d)
@@ -175,7 +176,7 @@ func _base_world() -> void:
 	ok(FarmTutorial.did("meet") and FarmTutorial.did("eat") and FarmTutorial.current() == "toy"
 			and FarmTutorial.done_count() == 2, "after save and load it resumes at the toy step")
 	guide._poll()
-	ok(_skip_shown(guide) and guide.hint_lbl.text.begins_with("3/4"), "resumed: 3/4 on the line, Skip still there")
+	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "3/4", "resumed: 3/4 on the line, Skip still there")
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
