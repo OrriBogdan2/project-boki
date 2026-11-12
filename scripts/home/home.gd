@@ -3475,7 +3475,7 @@ func _open_expedition() -> void:
 		var nrow := UI.hbox(8)
 		nrow.add_child(UI.label(String(td["name"]), UI.T_HEAD, UI.INK if not locked else UI.MUTED, UI.big))
 		nrow.add_child(UI.tag("Depth %d" % int(td["depth"]), UI.FAINT))
-		if KinLoss.at_risk(i): nrow.add_child(UI.tag("Boki at risk", UI.BAD))
+		if KinLoss.at_risk(i): nrow.add_child(UI.tag("Boki can be lost", UI.BAD))
 		tv.add_child(nrow)
 		if locked:
 			var need := int(td["unlock"]) - ex

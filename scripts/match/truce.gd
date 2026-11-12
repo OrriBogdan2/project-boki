@@ -132,7 +132,7 @@ func _offer(h: Hunter) -> void:
 	_cool["%d>%d" % [h.team, to]] = m.time + 25.0
 	events.append("offer %d->%d" % [h.team, to])
 	if _mine(to) and m.hud and not m.player.out:
-		m.hud.toast("%s offers a truce! Hold %s and pick Deal to accept" % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
+		m.hud.toast("%s offers a truce: no shooting each other. Hold %s, pick Deal" % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
 	elif _mine(h.team) and m.hud:
 		m.hud.toast_small("Truce offered to %s" % squad_name(to), Color("f4f1e6"))
 	# a bot squad answers in a moment (one with a living player in it waits for the player)
