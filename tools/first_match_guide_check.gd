@@ -3,6 +3,7 @@ extends RefCounted
 ##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
+##      and no new line comes in the first seconds of a fight with a monster
 ##   3. every line fits the banner lane in at most two lines at 1280x720
 var bad := 0
 var m: Match
@@ -63,6 +64,9 @@ func _walk() -> void:
 	for h in m.hunters:
 		if h != p:
 			h.pos = p.pos + Vector3(300, 0, 0)
+	for mb: Mob in m.mobs:
+		mb.pos = p.pos + Vector3(0, 0, 300)      # no fight until the check starts one
+		mb.tgt = null
 	p.skill_pts = 1
 	m.time = 0.0
 	if m.chests.is_empty():
@@ -94,9 +98,14 @@ func _walk() -> void:
 		if h != p and h.team != p.team:
 			foe = h
 	_tick(1.6)
+	var mob: Mob = m.spawn_mob("skitter", p.pos)
+	mob.pos = p.pos + Vector3(4, 0, 0)
 	foe.pos = p.pos + Vector3(10, 0, 0)
-	_tick(0.2)
+	_tick(1.0)
+	ok(g.line == "", "a monster just came close: no new line in the fight's first seconds")
+	_tick(1.2)
 	ok(g.id == "squad" and g.line.contains("squad"), "another squad close by: fight or avoid (%s)" % g.line)
+	mob.pos = p.pos + Vector3(0, 0, 300)
 	foe.pos = p.pos + Vector3(300, 0, 0)
 	_tick(0.2)
 	ok(g.line == "", "they are gone: it clears")
@@ -129,9 +138,11 @@ func _walk() -> void:
 	_fit()
 
 func _fit() -> void:
-	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var w := strip.size.x - strip.size.y
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle")
-		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
-		var n: int = fit["lines"].size()
-		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+		var px := int(strip.size.y * 0.5)
+		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+			px -= 1
+		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])

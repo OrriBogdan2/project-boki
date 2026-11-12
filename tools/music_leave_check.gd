@@ -67,8 +67,9 @@ func go(screen: String, opts := {}) -> Node:
 func start_match(opts: Dictionary, live := false) -> Match:
 	if live:
 		# the real way in: the loading screen, then the match running on its own for a while
+		var was: Node = main.current      # (the old screen stays current until the 0.3 s fade has covered it)
 		var m0: Match = await go("match", opts)
-		while not is_instance_valid(m0) or not m0.is_inside_tree() or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
+		while m0 == was or not is_instance_valid(m0) or not m0.is_inside_tree() or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
 			await main.get_tree().process_frame
 			m0 = main.current
 		return m0
@@ -78,7 +79,7 @@ func start_match(opts: Dictionary, live := false) -> Match:
 	return m
 
 func _training_duel_leave() -> void:
-	var m := await start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	var m := await start_match(Match.arena_opts())
 	step(m, 3.0)
 	await settle(4.0)
 	var a := audible()
@@ -99,7 +100,8 @@ func _training_duel_leave() -> void:
 	a = audible()
 	ok("leave duel: no stem of the match score is left", Sfx.layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("layer:")), str(a))
 	ok("leave duel: only the farm's own music + ambience", Sfx.music_name.begins_with("home") or Sfx.music_name in ["orchard", "meadow", "summit"], "music '%s' %s" % [Sfx.music_name, str(a)])
-	ok("leave duel: no match ambience beds (abyss / ruins)", Sfx.amb_layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("amb_layer")), str(a))
+	var match_beds := ["abyss", "ruins"]      # music_dir's beds; the farm keeps its own (HomeAmbience)
+	ok("leave duel: no match ambience beds (abyss / ruins)", match_beds.all(func(n): return not Sfx.amb_layers.has(n)) and a.keys().all(func(k): return not String(k).trim_prefix("amb_layer:") in match_beds), str(a))
 	ok("leave duel: nothing stray on the Music bus", a.keys().all(func(k): return not String(k).begins_with("stray")), str(a))
 	await go("title")
 	await settle()

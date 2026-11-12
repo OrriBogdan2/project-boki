@@ -398,6 +398,7 @@ func _show_create() -> void:
 	stage = "create"
 	if look.is_empty():
 		look = Unmasked.clean(Save.d.get("look", {}))
+		MasteryLook.refresh(look)
 	title.text = "Make yourself"
 	_clear_bottom()
 	if create_box: create_box.queue_free()
@@ -438,6 +439,7 @@ func _show_create() -> void:
 			hr.add_child(val)
 		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
 		v.add_child(hr)
+	_mastery_rows(v)
 	var nr := UI.hbox(8)
 	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)
@@ -448,13 +450,35 @@ func _show_create() -> void:
 	var br := UI.hbox(10)
 	br.alignment = BoxContainer.ALIGNMENT_END
 	br.add_child(UI.ghost("Random", func():
+		var kept: Dictionary = look["features"]
 		look = Unmasked.random_look()
+		look["features"] = kept
 		_show_create(), 120, "swap"))
 	br.add_child(UI.primary("Looks good", _looks_good, 200))
 	v.add_child(br)
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
 	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+
+## What your Relics have left on you (MasteryLook): one row each, to keep or fade.
+func _mastery_rows(v: VBoxContainer) -> void:
+	var feats := MasteryLook.features().filter(func(f): return (look["features"] as Dictionary).has(String(f["id"])))
+	if feats.is_empty():
+		return
+	v.add_child(UI.label("Left by your Relics", 12, UI.ACCENT, UI.caps))
+	for f in feats:
+		var id := String(f["id"])
+		var hr := UI.hbox(8)
+		var l := UI.label("%s  (%s)" % [f["name"], HeroTitle.base_name(String(f["hunter"]))], UI.T_BODY, UI.MUTED)
+		l.custom_minimum_size.x = 250
+		hr.add_child(l)
+		var kept := bool(look["features"][id])
+		var b := UI.ghost("Keep" if kept else "Faded", func():
+			MasteryLook.toggle(look, id)
+			_show_create(), 120)
+		b.name = "Feature_%s" % id
+		hr.add_child(b)
+		v.add_child(hr)
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()
@@ -765,13 +789,27 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 		return
 	_head_out(tutorial)
 
-## Your first Relic, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
+## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
+## put it on in the world (MaskMoment), then `then`.
 func _mask_moment(then: Callable) -> void:
 	stage = "mask"
 	_clear_bottom()
 	top_box.visible = false
-	var first := String(ClassUnlock.starters()[0])
-	ClassUnlock.choose_starters([first])
+	var holder := ColorRect.new()      # (the island dimmed behind the cards)
+	holder.color = Color(0.02, 0.01, 0.05, 0.55)
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.add_child(centre)
+	var picked := func(id: String):
+		holder.queue_free()
+		_put_on_first(id, then)
+	var offer := HobOffer.new(ClassUnlock.starters(), FarmBuilder.rules()["talk"], "starter_title",
+			func(id): return ClassUnlock.choose_starters([id]), picked)
+	centre.add_child(offer.build())
+	ui.add_child(holder)
+
+func _put_on_first(first: String, then: Callable) -> void:
 	Save.d["arch"] = first
 	Save.d["cls"] = Arch.weight(first)
 	Save.d["weapon"] = Arch.signature(first)

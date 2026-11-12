@@ -204,7 +204,7 @@ func _build_farm(fk: Array) -> void:
 	for i in maxi(0, KinBox.farm_cap() - fk.size()): fg.add_child(_cell({}, "farm", -1))
 	var cost := KinBox.expand_cost()
 	if cost >= 0:
-		var nxt: int = KinBox.FARM_CAPS[KinBox.farm_lvl() + 1]
+		var nxt: int = KinBox.farm_caps()[KinBox.farm_lvl() + 1]
 		var eb := UI.button("Expand: room for %d\n%d gems" % [nxt, cost], func():
 			var why := KinBox.expand()
 			if why != "": _fail(why)
@@ -430,6 +430,13 @@ func _build_detail() -> void:
 		var dt := Time.get_datetime_dict_from_unix_time(int(rec["got_t"]))
 		joined = "  ·  joined %d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
 	detail.add_child(UI.label("Trust %d  ·  %s bond%s" % [int(rec.get("trust", 0)), bd[1], joined], 12, Color("ffb3c6")))
+	var duo := BaseDuo.best_friend(rec)
+	if not duo.is_empty():
+		var dr := UI.hbox(2)
+		dr.add_child(UI.IconDot.new("heart", Color("ff8fbf"), 14.0))
+		dr.add_child(UI.IconDot.new("heart", Color("ff8fbf"), 14.0))
+		dr.add_child(UI.label("  Duo with %s" % duo["name"], 12, Color("ffb3c6")))
+		detail.add_child(dr)
 	detail.add_child(WorkView.chips(rec, 18.0))
 	detail.add_child(IvView.mini(rec, 18.0))      # its IVs, with the numbers on hover
 	AboutView.block(rec, detail, true)            # its size, coat, eyes, habit, serial and origin

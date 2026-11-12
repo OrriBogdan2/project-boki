@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 		if dd.has("crouch"):
 			n += 1
 			await _hero(main, String(id), art_name)
-		elif not dd.is_empty():
+		elif dd.has("loco"):      # (no clips at all yet, as Gil: nothing to crouch with)
 			ok(id in LATER, "%s: has clips and a crouch" % id)
 	ok(n > 0, "at least one Hero has a crouch (%d)" % n)
 	print("CROUCH_CHECK_DONE, failures: ", bad)
@@ -119,7 +119,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
 		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K)
 		ok(carry >= PLANT or id in SKATES, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
-	ok(hmax - hmin <= BOB, "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
+	ok(hmax - hmin <= BOB + _float_bob(id), "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
 	for k in 30:
 		_tick(m, a, sync, 1.0)
 	last = _at(m, sk, "head").y
@@ -131,7 +131,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		pop = maxf(pop, absf(hy - last))
 		last = hy
 	ok(pop <= POP, "%s: no pop coming up (%.3f m a frame)" % [id, pop])
-	ok(absf(last - stand.y) <= 0.04, "%s: back up on the idle (%.2f m, stood %.2f)" % [id, last, stand.y])
+	var back := absf(last - stand.y)
+	ok(back <= 0.04 + _float_bob(id), "%s: back up on the idle (%.2f m, stood %.2f)" % [id, last, stand.y])
 	m.free()
 	# with no data the clips stand through it
 	var dd: Dictionary = WardenClips.data(art_name)
@@ -182,5 +183,9 @@ func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed:
 	return sum / maxf(n, 1) / speed
 
 ## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
+## m: the rise and fall a floating hero's hover adds on its own (Motley's bob, KMovesStone), allowed on top.
+func _float_bob(id: String) -> float:
+	return 2.0 * KMovesStone.HOVER_BOB if KMovesStone.hover(id, 0.0) > 0.0 else 0.0
+
 func _foot(sk: Skeleton3D, side: String) -> String:
 	return "foot." + side if WardenSkeleton.find(sk, "foot." + side) >= 0 else "x_foot." + side
