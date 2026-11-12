@@ -1782,7 +1782,7 @@ func _head(h: Node3D, up: float) -> Vector3:
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, 2.7 * float(p.cdat["scale"]))
+	var at := _head(p, 2.7 * float(p.cdat["scale"]) * cam.hunter_scale)
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)

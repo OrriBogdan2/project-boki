@@ -57,6 +57,9 @@ const CHECKS := {
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
+	"--wheel-zoom-check": ["res://tools/wheel_zoom_check.gd", "wheel_zoom_check", null],      # the wheel zooms
+	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],      # GPU: the wheel zooming
+	"--match-cam-wide-shots": ["res://tools/match_cam_wide_shots.gd", "match_cam_wide_shots", null],      # GPU
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],

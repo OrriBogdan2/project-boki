@@ -238,7 +238,7 @@ func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 const RANGE_SMALL := 80.0
 const RANGE_BIG := 125.0
 static func _draw_range(root: Node) -> void:
-	var k := float(Settings.q("draw"))
+	var k := CamRig.draw_k()
 	var stack: Array = [root]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -456,7 +456,7 @@ func _start(o: Dictionary) -> void:
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
-	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
+	Practice.attach(self)      # the practice areas' bottom bar and J hero picker
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -477,7 +477,7 @@ func _build_env() -> void:
 	env.environment = Look.environment({"top": sky.darkened(0.2), "mid": sky.lerp(amb, 0.35), "horizon": (cl[1] as Color).lerp(T["sun"], 0.5).lightened(0.15),
 		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"]})
 	add_child(env)
-	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
+	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0 * CamRig.style_reach(cam_style))
 	sun.shadow_opacity = 0.8
 	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
 	raid = RaidLook.pick(opts, seed_val)
@@ -3183,7 +3183,7 @@ func _process(delta: float) -> void:
 	# the time it skipped); near ones every frame
 	_render_n += 1
 	var cf := cam.focus
-	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var near2 := pow(34.0 * cam.reach(), 2.0)
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
@@ -3259,10 +3259,10 @@ func _process(delta: float) -> void:
 			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
 			# the camera only eases back while gliding, so jumps and falls never change the framing
 			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
+			cam.zoom_to = CamWheel.widen(player)
 			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
+			cam.zoom_to = CamWheel.final(cam.zoom_to, cam.user_zoom, player)       # the wheel, and Ctrl past its range
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:
@@ -3414,6 +3414,9 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if CamWheel.input(self, event):
+		get_viewport().set_input_as_handled()
+		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()
