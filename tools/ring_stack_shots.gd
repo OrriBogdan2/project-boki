@@ -18,9 +18,6 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var o := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
-	o.merge(Match.arena_opts(), true)
-	o["teams"] = 2
-	o["squad"] = 3
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
@@ -32,7 +29,7 @@ func run(main_node: Node) -> void:
 		await main.fade.reveal(0.01)
 	home = _spot(P.pos)
 	if m.hud: m.hud.visible = false
-	for i in m.hunters.size():
+	for i in mini(m.hunters.size(), PILE.size()):
 		var h: Hunter = m.hunters[i]
 		h.ctrl = "idle"
 		h.teleport(home + PILE[i])
