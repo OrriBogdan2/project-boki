@@ -64,7 +64,8 @@ func show_result(r: Dictionary) -> void:
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Foes downed", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
+	var big4 := [["knock", "Foes downed", float(r.get("knocks", 0)), ""],
+		["burst", "Damage", float(r.get("damage", 0)), ""],
 		["clock", "Time", float(secs), "time"]]
 	for i in big4.size():
 		var t: Array = big4[i]

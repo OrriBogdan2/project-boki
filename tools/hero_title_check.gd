@@ -102,7 +102,7 @@ func _old_name_in(text: String) -> String:
 func _all_titles() -> Array:
 	return Arch.ids().map(func(id): return HeroTitle.title(id))
 
-## The results screen puts the player's own name in the headline ("Hunter made it out"), never as a Relic title ("Hunter the Hired Gun").
+## The results headline carries the player name ("Hunter made it out"), never as a Relic title ("Hunter the Hired Gun").
 func _results_name_line(main: Node) -> void:
 	var screen: Control = load("res://scripts/ui/results.gd").new()
 	main.add_child(screen)
@@ -111,5 +111,5 @@ func _results_name_line(main: Node) -> void:
 	var player := String(Save.d.get("name", "Hunter"))
 	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
 	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
-	ok(texts.has("Foes downed"), "results: the strip says Foes downed")
+	ok(texts.has("FOES DOWNED"), "results: the strip says Foes downed")
 	screen.queue_free()
