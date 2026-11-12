@@ -55,7 +55,6 @@ func _shot(copy: Hunter, arch: String, key: String, held: float, id: String, cap
 	copy.reclass(Arch.weight(arch), arch)  # the copy's body, as the guest's kit wears it
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "cast", "arch": arch, "key": key, "held": held})
-	await _reply()
 	var t := 0.0
 	while not AimKit.shown(copy, id) and t < 4.0:
 		await _frame(copy)
@@ -63,13 +62,17 @@ func _shot(copy: Hunter, arch: String, key: String, held: float, id: String, cap
 	for i in 12:
 		await _frame(copy)
 	var up := AimKit.shown(copy, id)
-	ok(up, "%s %s: the guest's %s telegraph is up on this game" % [arch, key, id])
+	var entries := AimKit.layer(m).entries.keys()
 	var file := "tele_net_%s_%s.png" % [arch, key]
 	var img := main.get_viewport().get_texture().get_image()
 	ok(img != null, "%s %s: a frame to save (needs a renderer)" % [arch, key])
 	if img != null:
 		img.save_png(shots_dir.path_join(file))
 	lines.append("tele_net|%s|%s (seen by a foe on another game)" % [file, caption])
+	await _reply()  # the guest says what it drew once the key is up
+	var said := str(replies[0]) if not replies.is_empty() else "no reply"
+	var here := "copy remote %s arch %s, entries %s; guest: %s" % [copy.remote, copy.arch, entries, said]
+	ok(up, "%s %s: the guest's %s telegraph is up on this game" % [arch, key, id], here)
 	await _run(1.0)
 
 
@@ -93,7 +96,6 @@ func _on_msg(topic: String, data, from: String) -> void:
 func _cast_here(arch: String, key: String, held: float) -> void:
 	_kit(arch)
 	_aim(m.player.pos + AIM)
-	Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 	var me := m.player
 	var inp: String = {"lmb": "fire", "rmb": "sec", "e": "sig", "r": "ult"}[key]
 	me.inp[inp] = true
@@ -105,6 +107,6 @@ func _cast_here(arch: String, key: String, held: float) -> void:
 		me.inp[inp] = false
 	await main.get_tree().create_timer(held).timeout
 	var up := AimKit.layer(m).entries.keys().filter(func(k): return AimKit.layer(m).entries[k]["all"])
-	print("%s guest cast %s %s: all telegraphs up %s, online %s" % [tag, arch, key, str(up), m.net_on])
+	Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "up": up, "online": m.net_on, "arch": me.arch})
 	for k in ["fire", "sec", "sec_hold", "sig", "ult"]:
 		me.inp[k] = false
