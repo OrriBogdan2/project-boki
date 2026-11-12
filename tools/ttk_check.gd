@@ -53,8 +53,9 @@ const HEROES := [
 ]
 
 ## Gil has no source Hunter (he is ours), so his rows are held to the roster's own median time to knock instead,
-## with the same bar. Same row shape as HEROES: LMB held, no source numbers; his combo is every damage slot but the ult.
-const GIL := ["gil", "roster median", "hold", false, [], {
+## with the same bar. Same row shape as HEROES: LMB clicked (held is his Tide Lunge), no source numbers; his combo
+## is every damage slot but the ult.
+const GIL := ["gil", "roster median", "tap", false, [], {
 	"rmb": [0.0, 0.0, 0.0, 0.0, 1, 0], "dash": [0.0, 0.0, 0.0, 0.0, 1, 0], "e": [0.0, 0.0, 0.0, 0.0, 1, 0]}]
 
 ## Ults the share table lists (never in a combo): hero -> source damage of one cast. our_hit casts it, then

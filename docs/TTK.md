@@ -56,10 +56,10 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | combo rank 0 | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | combo rank max | 2.22 | never | n/a | n/a |
-| gil (roster median) | LMB rank 0 | 8.73 | 7.16 | 1.22 | FAIL |
-| gil (roster median) | LMB rank max | 8.73 | 7.16 | 1.22 | FAIL |
-| gil (roster median) | combo rank 0 | 5.70 | 4.82 | 1.18 | FAIL |
-| gil (roster median) | combo rank max | 6.88 | 4.12 | 1.67 | FAIL |
+| gil (roster median) | LMB rank 0 | 7.58 | 7.16 | 1.06 | ok |
+| gil (roster median) | LMB rank max | 7.58 | 7.16 | 1.06 | ok |
+| gil (roster median) | combo rank 0 | 6.10 | 4.82 | 1.27 | FAIL |
+| gil (roster median) | combo rank max | 4.95 | 4.12 | 1.20 | FAIL |
 | mage (Joule) | combo + Blowout rank 0 | 2.68 | 8.80 | 0.30 | shown |
 | mage (Joule) | combo + Blowout rank max | 1.27 | 4.00 | 0.32 | shown |
 
