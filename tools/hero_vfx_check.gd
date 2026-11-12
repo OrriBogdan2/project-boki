@@ -31,9 +31,9 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "drop", "n": 24}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
-## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
+## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
-	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
+	"fire_super", "fire_over", "fire_heavy", "fire_ult", "rock_crumble"]
 
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()

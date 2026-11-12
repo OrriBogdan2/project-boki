@@ -73,7 +73,6 @@ func start() -> void:
 	k.play("breah_hop")
 	if not h.grounded:
 		return
-	m.fx.dust(h.pos, 10)
 	m.sfx("br_rise", h.pos, -4.0, 1.2)
 	_raise(h.pos, st["dir"])
 	CombatBus.ability_used.emit(h, String(dd().get("id", "dash")), "dodge")
@@ -166,6 +165,7 @@ func _raise(at: Vector3, dir: Vector2) -> Dictionary:
 		float(d["hop_rock_t"]), float(d["hop_rock_hp"]), true, float(d["hop_top"])
 	)
 	w["hop"] = true
+	k.vfx("leap_rise", at, dir)
 	return w
 
 func tick(dt: float) -> void:
@@ -238,7 +238,7 @@ func _kick() -> void:
 		h.inv_t = maxf(h.inv_t, float(d["invuln"]))
 	h.dash_at = m.time
 	k.play("breah_hop")
-	m.fx.dust(h.pos, 6)
+	k.vfx("leap")
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 	Feel.dash_sound(m, k.id, h.pos, h)
 
@@ -282,7 +282,7 @@ func _touchdown() -> void:
 	st["left"] = maxf(float(d["window"]) - float(st["t"]), float(d["skid_min"]))
 	st["t"] = 0.0
 	k.play("breah_skate")
-	m.fx.dust(h.pos, 8)
+	k.vfx("dust_step")
 	m.sfx("br_slam", h.pos, -11.0, 1.5)
 	var dir: Vector2 = st["dir"]
 	h.vel.x = 0.0
@@ -331,7 +331,7 @@ func _crash() -> void:
 	chain_dist = Vector2(at.x - start_at.x, at.z - start_at.z).length()
 	k.leap_lands += 1
 	k.play("breah_leap_land")
-	m.fx.dust(at, 14)      # the hit area showed all through the flight: no ring or blast here
+	k.vfx("leap_land", at)      # the hit area showed all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
 	for f in k.foes_in(at, r, 2.0):
 		k.leap_hits += 1
@@ -357,7 +357,6 @@ func _landslide(at: Vector3, dir: Vector2) -> void:
 	var d := dd()
 	k.landslides += 1
 	var from := at + Vector3(dir.x * 0.9, 0.85, dir.y * 0.9)
-	m.fx.burst(from, Color("8f9cb8"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
-	m.fx.dust(from, 8)
+	k.vfx("landslide", from, dir)
 	k._fire_rock(from, dir, float(d["dmg"]) * k.power("dash"), "dash", "dashrock", float(d["rock_range"]))
 	m.sfx("br_roll", from, -3.0, 1.0)

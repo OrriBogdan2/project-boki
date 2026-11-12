@@ -8,8 +8,10 @@ extends ArchKit
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
-## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in
-## KitLooks.
+## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd). Looks: his
+## moments (rock eruptions with heavy debris, cracked ground, dust and grit, the eye-stones flaring as the tell of
+## his big moves and sparking when he leaps) are HeroVfx's (content/vfx/dolm.json); the rock skins, held fist
+## glows and stun crowns KitLooks'.
 
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
@@ -123,9 +125,7 @@ func launch(w: Dictionary, dir: Vector2, src: String) -> void:
 	var rd := rock_def()
 	var mid := rock_mid(w)
 	HeroZones.remove_rock(m, w)
-	m.sfx("dolm_rock_crunch", mid, -4.0, randf_range(0.92, 1.08))      # torn out of the ground
-	m.fx.burst(mid + Vector3(0, 0.6, 0), Color("8f9cb8"), 14, 5.0, 0.4, 6.0, 1.1)
-	m.fx.spark(mid + Vector3(0, 0.4, 0), Vector3(dir.x, 0.6, dir.y), COBALT, 10, 7.0, 35.0, 0.3, 6.0, 1.2)
+	vfx("rock_launch", mid, dir)
 	_fire_rock(mid + Vector3(0, 0.9, 0), dir, float(rd["dmg"]) * power("kin"), src, "rock", float(rd["range"]))
 	if w.has("ult"):
 		m.shots[-1]["x"]["ult"] = int(w["ult"])
@@ -141,7 +141,7 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 			"ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why, src)
 		}
 	)
-	KitLooks.of(m).skin(m.shots[-1], skin)
+	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], skin))
 	m.sfx("br_launch", start, -3.0, 1.0)
 
 ## Where a launched rock ends: it bursts, shreds and slows what it caught and splashes whoever is next
@@ -153,13 +153,8 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		return
 	x["burst_done"] = true
 	var blast := float(rd["blast"])
-	m.fx.ring(at, blast, Color("3a7cff"), 0.3)
-	m.fx.ring(at, blast * 0.55, Color("d8ecff"), 0.18)
-	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.23, 0.49, 1.0, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
-	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
-	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
+	vfx("rock_burst", AimMode.ground(m, at), (s["vel"] as Vector2).normalized())
 	m.sfx("br_burst", at, -3.0, 1.0)
-	net_ring(at, blast, Color("3a7cff"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
@@ -208,11 +203,15 @@ func _tick(dt: float) -> void:
 	var n := rocks_up()
 	res = float(n)
 	self_pips(6, mini(6, n), false, dt)
-	tell = "full" if n >= 6 else ("half" if n > 0 else "")
+	tell = ""
+	if n >= 6:
+		tell = "full"
+	elif n > 0:
+		tell = "half"
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
-	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
-		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("d8ecff"), 0.28)      # the Molten Guard ring
+	if shield_stacks > 0 and h.shield > 0.0:
+		HeroVfx.of(m).hold(h, "guard")      # Molten Guard: embers rising round her while it holds
 	if dive:
 		_tick_dive()
 	hop.tick(dt)
@@ -314,10 +313,10 @@ func stonesight() -> int:
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
-		m.fx.ring(o.pos, 0.9, Color("3a7cff"), 0.55)
-		m.fx.ring(o.pos, 0.5, Color("d8ecff"), 0.4)
+		vfx("sense", o.pos)
 		n += 1
 	if n > 0:
+		vfx("eye_flare")
 		play("breah_sense")
 		m.sfx("br_sense", h.pos, -10.0, 1.0)
 	sight_pings += n
@@ -371,6 +370,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			h.mel_hold = k
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
+			HeroVfx.of(m).hold(h, "punch_charge", k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
@@ -413,19 +413,16 @@ func _boulder() -> void:
 		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("9ad0ff"),
 		{"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
 	)
-	KitLooks.of(m).skin(m.shots[-1], "boulder")
+	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], "boulder"))
 	m.sfx("br_throw", h.pos, -3.0, 1.0)
-	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), COBALT, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
+	vfx("boulder_throw", start, dir)
 	Juice.shot(h, start, dir)
 
-## The boulder bursts where it ends: a small fireball with a red ring on the ground, splashing the
-## foes beside the one it hit.
+## The boulder bursts where it ends: stone chips and dust over a small cracked patch, splashing the foes
+## beside the one it hit.
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
-	var g := AimMode.ground(m, at)
-	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
-	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
-	m.fx.flash(at, Color("9ad0ff"), 0.5, 0.06)
+	vfx("boulder_hit", AimMode.ground(m, at), (s["vel"] as Vector2).normalized())
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -454,10 +451,7 @@ func _punch(k: float) -> void:
 	h.vel.z = dir.y * stepv
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
-	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
-	m.fx.burst(fp, Color("8f9cb8"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
-	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), COBALT, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
-	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, COBALT, k > 0.6)
+	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
@@ -491,15 +485,10 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
-## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a hot flash, stone
+## chunks thrown on along the punch and dust, bigger the longer she held.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
-	var fwd := Vector3(dir.x, 0.25, dir.y)
-	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
-	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
-	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
-	m.fx.flash(at + Vector3(0, 0.7, 0), Color("9ad0ff"), 0.5 + 0.3 * k, 0.07)
+	vfx("punch_hit", at, dir, {"k": k})
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
@@ -570,7 +559,6 @@ func on_dash(use_ex: bool) -> bool:
 	hop.start()
 	return true
 
-## Her dash after-image: a puff of quarry dust and a few embers, not the shared pill.
 ## Her own hand tell (the molten fists) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
@@ -601,9 +589,8 @@ func dash_left() -> float:
 func dodge_anim() -> String:
 	return "kit"
 
+## No shared after-image pill: her dashes kick up their own debris and dust (content/vfx "leap_rise", "leap").
 func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.56, 0.61, 0.72, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
-	m.fx.burst(h.pos + Vector3(0, 0.9, 0), COBALT, 1, 1.5, 0.3, 2.0, 0.8)
 	return true
 
 # ------------------------------------------------------------------ RMB: Quakefall (BreahSlam)
@@ -632,7 +619,7 @@ func guard_stack() -> void:
 	shield_at = m.time
 	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
 	h.shield_t = float(gd["t"])
-	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
+	vfx("guard_up")
 
 # ------------------------------------------------------------------ E: Stone Row
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an
@@ -672,6 +659,7 @@ func cast_e() -> bool:
 		if h.is_local() and m.hud: m.hud.toast_small("No room for rocks here", col_of(ed))
 		return false
 	play("breah_raise")
+	vfx("eye_flare")
 	# the tell: a red-orange flash on the ground where each rock will rise, then the rocks
 	var tell := float(ed["tell"])
 	for j in spots.size():
@@ -679,19 +667,18 @@ func cast_e() -> bool:
 		AimKit.circle(
 			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("3a7cff"), "all": true, "dur": tell}
 		)
-		m.fx.spark(p + Vector3(0, 0.1, 0), Vector3.UP, COBALT, 4, 3.0, 40.0, 0.2, 2.0, 0.8)
+		vfx("row_tell", p, dir)
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
 		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
 	m.later(tell, _raise_feel)
-	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
-	m.fx.burst(p + Vector3(0, 0.2, 0), COBALT, 8, 4.0, 0.3, 8.0, 1.0)
+	vfx("rock_rise", p, dir)
 
 func _raise_feel() -> void:
 	if not is_instance_valid(h):

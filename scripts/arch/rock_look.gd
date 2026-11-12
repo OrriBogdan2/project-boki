@@ -129,11 +129,8 @@ static func cool(n: Node3D) -> void:
 		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
-## A rock coming up: a burst of dust and earth at its foot and one short rumble.
-static func rise_fx(m: Node, at: Vector3) -> void:
-	m.fx.dust(at, 14)
-	m.fx.burst(at + Vector3(0, 0.3, 0), STONE_HI, 12, 3.5, 0.45, 8.0, 1.2)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("3a7cff"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
+## A rock coming up: one short rumble (the debris and dust are its kit's HeroVfx move, content/vfx/dolm.json).
+static func rumble(m: Node, at: Vector3) -> void:
 	if absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
@@ -147,8 +144,9 @@ static func crumble(m: Node, w: Dictionary) -> void:
 	w["node"] = null
 	var at := n.global_position
 	m.sfx("br_crumble", at, -4.0, 1.0)
-	m.fx.dust(at, 12)
-	KitLooks.of(m).chips(at + Vector3(0, TOP * 0.5, 0), 6, 0.2)
+	var by := w.get("by") as Hunter
+	if by != null and is_instance_valid(by):
+		HeroVfx.of(m).play(by, "rock_crumble", at + Vector3(0, TOP * 0.5, 0), Vector2.ZERO)
 	var shadow := n.get_node_or_null("Shadow") as Node3D
 	if shadow != null:
 		shadow.visible = false
