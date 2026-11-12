@@ -16,6 +16,7 @@ var hunters: Array = []
 var kins: Array = []
 var mobs: Array = []
 var shots: Array = []
+var shot_floor := ShotFloor.new(self)      # the readable core on every LMB projectile
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
@@ -3215,6 +3216,7 @@ func _process(delta: float) -> void:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
 				var r: float = s.get("vr", s["r"])
 				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
