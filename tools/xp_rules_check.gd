@@ -100,7 +100,8 @@ func run(main: Node) -> void:
 	_zero_xp()
 	_spot(C, spot + Vector3(25, 0, 0))
 	_kill(spot, [[P, 10.0]])
-	ok(P.xp > 0.0 and is_equal_approx(P.xp, C.xp), "the killer and a squadmate at 25 m are paid the same (%.1f, %.1f)" % [P.xp, C.xp])
+	ok(P.xp > 0.0 and is_equal_approx(P.xp, C.xp),
+		"the killer and a squadmate at 25 m are paid the same (%.1f, %.1f)" % [P.xp, C.xp])
 	var paid := P.xp
 	_zero_xp()
 	_spot(C, spot + Vector3(SHARE_R + 10.0, 0, 0))
@@ -142,7 +143,8 @@ func run(main: Node) -> void:
 	b.stagger_t = 0.0
 	b.hurt(b.hp * 0.95, P, {"src": "shot"})
 	b.stagger_t = 0.0
-	ok(float(b.damage_by.get(P.team, 0.0)) > b.max_hp * 0.9 and not b.dead, "squad A has dealt over 90%% of the boss, it stands")
+	ok(float(b.damage_by.get(P.team, 0.0)) > b.max_hp * 0.9 and not b.dead,
+		"squad A has dealt over 90%% of the boss, it stands")
 	_zero_xp()
 	b.hurt(b.hp + b.max_hp, Q, {"src": "shot"})
 	ok(b.dead, "squad B's last hit kills it")
