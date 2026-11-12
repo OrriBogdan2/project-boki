@@ -3,25 +3,33 @@
 `scripts/combat/status_looks.gd` (`StatusLooks.of(m)`), data in `content/rules/status_looks.json`.
 The source makes every plain status readable at gameplay distance with its own body effect; this is ours.
 Combo marks and two-hit combo states are the overhead tags' (the 11-08 recast/marks rule), not this.
+**One look per status, whoever puts it there**: every source (a kit, a Boki, a monster) lands on the same timers,
+so a stun reads as the same stars from Vex, Grimble or a Brute. A kit adds no body look of its own for these (Pip's
+root beam is gone), and nothing lies flat on the ground, the look or a ring as it lands (a ground ring means gameplay).
 
 | Status | Look | Where | Motion | Colour (owner) |
 |---|---|---|---|---|
 | stun | stars on a dark disc | over the head | fast spin | yellow |
 | Daze | ring of crystals | high over the head | wobble | orange (Vex) |
-| root | thorns and a ring | ground at the feet | ring pulses | violet (Meeko) |
+| root | thorns | driven in round the feet, leaning over them | strain | violet (Meeko) |
 | Grounded | cords | round the legs | counter-turning | amber (Bola) |
-| slow | rings | shins to the ground | slide down and spread | lavender |
+| slow | rings | knees to the ankles | slide down and tighten | lavender |
 | Chill | ice shell, crystals | whole body | still | ice blue (Neve) |
 | burning | flame tongues | up the body | flicker | orange/yellow (Cinder) |
 | Static | jagged bolts | across the body | jump at 14 Hz | teal/pink (Sparkle) |
-| Anti-Heal | streaks and a dark ring | rising out of the body | rise | magenta (Kael) |
-| resurrection sickness | wisps and a pale ring | round the body | sink | pale lilac |
+| Anti-Heal | streaks | rising out of the body | rise | magenta (Kael) |
+| resurrection sickness | wisps | round the body | sink | pale lilac |
 
 **Where a status comes from.** The body's own timers (`stun_t`, `root_t`, `slow_t`, `burn_t`, `blight_t`, `sick_t`,
 the Grounded and Daze metas) on the game that owns the body. `keep()` once per tick for a kit's own status (Neve's
 Chill, Sparkle's Static). `put()` for a remote body's kit status (KitStatus `kst`) and `from_hit()` for a hit sent
-to another game, shown for the status's length. A third player's game sees only kit statuses on a body neither
-owns: plain timers are not in the synced state (that would be a Net shape change).
+to another game. Every game sees a remote body's stun, root and slow from its owner's snapshot (`net_bits`,
+Net 0.24.6: a Hunter's flags bits 20-22, the last field of a Boki's and a monster's), so the look is up exactly as
+long as the owner runs the status, give or take one snapshot; `from_hit()` covers the first `BRIDGE` (0.5 s) until
+that snapshot arrives. Grounded and Daze reach every game as the kit's `kst` event, shown for its length.
+
+**Size.** A look is sized to the body's hitbox (`StatusLooks.body_k`): across, the hitbox radius over a Hunter's
+0.38 m; up, a Hunter's scale, a monster's 2.2 hitbox radii over 2 m.
 
 **On a summoned Boki.** The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md: stun, root, slow, Daze;
 Grounded never lands) wears the Hunter's look, rig, colours and pace. Only the size differs (`StatusLooks.body_k`):
@@ -29,14 +37,18 @@ across it is the Boki's model scale x its girth x 0.7, up it is its model scale 
 look (thorns, rings) wraps its squat body, and a look over the head (stars, the Daze ring) keeps its shape and sits
 as far over the Boki's head as over a Hunter's; a giant ridden Boki's look grows with it. A stunned Boki keeps the
 puppet's squint but not its own circling stars (model meta `starry`), so it shows one ring of stars, the shared one.
-Mobs keep the flat 0.8.
+A monster is sized from its hitbox (above).
 
 **Cost.** One rig of 3-12 meshes per (body, status) shown, shared meshes and unshaded materials, pooled per status;
 nothing is built per frame once warm, and nothing draws past 34 m from the camera focus. A body with no status
 costs one cheap test per frame.
 
-**Checks.** `--hero-vfx-check` puts each status on a body the way the game does and asserts its look comes up on
-that body only, uses at most 16 meshes, goes when the status ends, all ten fit one body from the pool, a hit sent
+**Checks.** `--status-look-check` lands each row of the crowd control table in `docs/KIT_PARITY.md` from a caster of
+that kit the way the kit does (a hit carrying stun, root or slow; KitStatus for Grounded and Daze), and a Boki's and
+a monster's, and asserts for each: the look comes up, the same rig whatever the source, sized to the hitbox, up for
+every step the status runs and gone when it ends, nothing flat below the ankle and no ring at the feet as it lands,
+and a game that does not own the body shows it (snapshot or event) and drops it with the owner.
+`--hero-vfx-check` puts each status on a body the way the game does and asserts its look comes up on that body only, uses at most 16 meshes, goes when the status ends, all ten fit one body from the pool, a hit sent
 to another game shows and ends, and nothing draws far away. `--status-shots --shots-dir=<dir>` (GPU) writes one
 sheet per ground (map grass, a pale floor, a dark floor): a row per status, 5 crops 0.2 s apart, the carrier on
 the left and a clean Hunter beside it; with `--boki` the carrier is a summoned Boki (rows none, stun, root, Grounded,

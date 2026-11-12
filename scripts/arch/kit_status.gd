@@ -6,7 +6,7 @@ extends RefCounted
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
 ##        source's Daze is only a damage window); a crystal ring over the head (StatusLooks)
-##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and the slow's body look
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
@@ -78,7 +78,7 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 		e.slow_t = maxf(e.slow_t, secs)
 
 ## What everyone sees: the body look (StatusLooks: cords round the legs, a ring over the head) for its
-## length, and a word and a ring as it lands.
+## length, and a word as it lands (no ground ring: that means gameplay).
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
 	match kind:
@@ -86,16 +86,13 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			_look(e, "gnd", secs)
 			if toast == "":
 				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
-			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
 			_look(e, "daze", secs)
 			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
-			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
 			_look(e, "slow", secs)
 			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
-			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)

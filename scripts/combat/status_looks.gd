@@ -11,15 +11,24 @@ extends Node3D
 ##
 ## Where a status comes from: the timers on the body (the game that owns it runs them), or put()/keep()
 ## for what this game only hears about: a kit's own status (Chill, Static), a remote body's kit status
-## (KitStatus "kst"), and a hit sent to someone else's game (from_hit). Presentation only.
+## (KitStatus "kst"), and a hit sent to someone else's game (from_hit). A remote body's stun, root and
+## slow come from its owner's snapshot (net_bits, Net 0.24.6), so every game shows them for as long as
+## the owner runs them. Every source (a kit, a Boki, a mob) lands on the same timers, so a status has
+## one look whoever put it there. Nothing sits flat on the ground: a ground ring means gameplay.
+## Presentation only.
 ## Cost: one rig per (Hunter, status) shown, a few shared meshes and materials, pooled per status;
 ## nothing is made per frame and nothing draws past LOD_FAR from the camera focus.
 
 const RULES_PATH := "res://content/rules/status_looks.json"
 const LOD_FAR := 34.0          # m from the camera focus: no status drawn beyond (as HeroVfx)
 const BODIES := ["hunters", "kins", "mobs"]      # the Match lists whose bodies' own timers are read
-const MOB_K := 0.8             # a look's scale on a mob (a Hunter's and a Boki's come from their bodies)
+const BODY_R := 0.38           # m: the hitbox radius the data is set on (a Hunter at scale 1, Arch.hit_r)
 const BODY_TALL := 2.0         # m: the body the data is set on (a Hunter at scale 1)
+const MOB_TALL_PER_R := 2.2    # a mob stands about this many hitbox radii tall (Data.MOBS "r")
+const NET_CC := ["stun", "root", "slow"]   # the timers a body's owner sends in its snapshot, bit i each
+const ANKLE := 0.15            # m: the lowest a look's ring goes on a 2 m body (a ring on the ground means gameplay)
+const FLAG_SHIFT := 20         # a Hunter's snapshot flags carry NET_CC in bits 20-22 (Match._flags; 15-19 are taken)
+const BRIDGE := 0.5            # s a hit sent to another game shows its status before that game's snapshot says
 const KIN_TALL := 0.8          # m: a Boki at model scale 1 (KinModels)
 const KIN_WIDE := 0.7          # a Boki's width against a Hunter's legs, at model scale 1 and girth 1
 const KEEP := 0.15             # s a keep() outlives its last ask
@@ -56,11 +65,11 @@ static func rules() -> Dictionary:
 ## True while the body's own timers carry `st` (the game that owns the body runs them).
 static func carries(e: Ent, st: String) -> bool:
 	match st:
-		"stun": return e.stun_t > 0.0
+		"stun": return e.stun_t > 0.0 or e.net_cc & 1 != 0
 		"daze": return KitStatus.rattled(e)
-		"root": return e.root_t > 0.0
+		"root": return e.root_t > 0.0 or e.net_cc & 2 != 0
 		"gnd": return KitStatus.grounded(e)
-		"slow": return e.slow_t > 0.0
+		"slow": return e.slow_t > 0.0 or e.net_cc & 4 != 0
 		"burn": return e.burn_t > 0.0
 		"antiheal": return e.blight_t > 0.0
 		"sick": return e is Hunter and (e as Hunter).sick_t > 0.0
@@ -68,7 +77,7 @@ static func carries(e: Ent, st: String) -> bool:
 
 ## Whether the body carries any status at all (the cheap test before asking for each one).
 static func _any(e: Ent) -> bool:
-	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.blight_t > 0.0 \
+	return e.net_cc != 0 or e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.blight_t > 0.0 \
 		or e.has_meta("rat_until") or e.has_meta("gnd_until") or (e is Hunter and (e as Hunter).sick_t > 0.0)
 
 ## Shows `st` on `e` for `secs`: what this game only hears about (a remote body, a kit's own status).
@@ -86,10 +95,19 @@ func put(e: Ent, st: String, secs: float) -> void:
 func keep(e: Ent, st: String) -> void:
 	put(e, st, KEEP)
 
-## A hit sent to the game that owns the body: show what it carries here until that game would end it.
+## The stun/root/slow bits of a body this game owns, for its snapshot (bit i is NET_CC[i]).
+static func net_bits(e: Ent) -> int:
+	var bits := 0
+	if e.stun_t > 0.0: bits |= 1
+	if e.root_t > 0.0: bits |= 2
+	if e.slow_t > 0.0: bits |= 4
+	return bits
+
+## A hit sent to the game that owns the body: show what it carries here until that game's snapshot
+## says (BRIDGE); from then on the owner's bits hold the look for exactly as long as it runs the status.
 func from_hit(e: Ent, o: Dictionary) -> void:
-	for st in ["stun", "root", "slow"]:
-		put(e, st, float(o.get(st, 0.0)))
+	for st in NET_CC:
+		put(e, st, minf(float(o.get(st, 0.0)), BRIDGE))
 	put(e, "antiheal", float(o.get("blight", 0.0)))
 	if float(o.get("burn", 0.0)) > 0.0:
 		put(e, "burn", float(o.get("burn_for", 3.0)))
@@ -160,16 +178,16 @@ func _show(h: Ent, st: String, dt: float) -> void:
 	(n.get_child(0) as Node3D).position.y = y * k.y / k.x
 	_pose(n, String(r["look"]), float(r["t"]))
 
-## A look's scale on `e`, [across, up]. A Hunter: its own scale both ways. A Boki: its body (model scale, its girth
-## across, KIN_TALL up), so a look wraps a squat Boki, or a giant ridden one, as it wraps a Hunter; a look over
-## the head keeps its shape (scaled across) and sits as high over the Boki's head. A mob: MOB_K.
+## A look's scale on `e`, [across, up]. A Hunter: its hitbox across, its scale up. A Boki: its body (model scale,
+## its girth across, KIN_TALL up), so a look wraps a squat Boki, or a giant ridden one, as it wraps a Hunter; a
+## look over the head keeps its shape (scaled across) and sits as high over the Boki's head. A mob: its hitbox
+## across, MOB_TALL_PER_R hitbox radii up.
 static func body_k(e: Ent) -> Vector2:
 	if e is Hunter:
-		var s := float((e as Hunter).cdat.get("scale", 1.0))
-		return Vector2(s, s)
+		return Vector2(e.r / BODY_R, float((e as Hunter).cdat.get("scale", 1.0)))
 	var model: Node3D = (e as Kin).model if e is Kin else null
 	if model == null:
-		return Vector2(MOB_K, MOB_K)
+		return Vector2(e.r / BODY_R, e.r * MOB_TALL_PER_R / BODY_TALL)
 	var g := maxf(model.scale.y, 0.05)
 	return Vector2(g * KIN_WIDE * float(model.get_meta("girth", 1.0)), g * KIN_TALL / BODY_TALL)
 
@@ -214,9 +232,9 @@ static func _mesh(key: String) -> Mesh:
 			mesh = p
 		"thorn":
 			mesh = _tube(0.0, 0.1, 0.95)
-		"ring", "ring_wide", "ring_thin":
+		"ring", "ring_thin":
 			var t := TorusMesh.new()
-			var r := {"ring": [0.32, 0.4], "ring_wide": [0.5, 0.62], "ring_thin": [0.36, 0.41]}[key] as Array
+			var r := {"ring": [0.32, 0.4], "ring_thin": [0.36, 0.41]}[key] as Array
 			t.inner_radius = float(r[0])
 			t.outer_radius = float(r[1])
 			t.rings = 20
@@ -293,10 +311,10 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 				Models.part(b.get_node("Ring"), _mesh("crystal"), col, Vector3(cos(a2) * 0.4, 0.05, sin(a2) * 0.4),
 					Vector3.ONE * 1.5, Vector3(0, -a2, 0))
 		"stakes":
-			Models.part(b, _mesh("ring_wide"), col, Vector3(0, 0.03, 0), Vector3(1, 0.4, 1), Vector3.ZERO, "Ring")
 			for i in 5:
 				var a3 := TAU * i / 5.0
-				var thorn := Models.part(b, _mesh("thorn"), col, Vector3(cos(a3) * 0.5, 0.3, sin(a3) * 0.5))
+				var thorn := Models.part(b, _mesh("thorn"), col, Vector3(cos(a3) * 0.5, 0.3, sin(a3) * 0.5),
+					Vector3.ONE, Vector3.ZERO, "P%d" % i)
 				thorn.basis = Basis(Vector3(-sin(a3), 0, cos(a3)), -0.45)       # leaning in over the feet
 		"cords":
 			for i in 3:
@@ -325,11 +343,9 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 				var bolt := Models.part(b, _mesh("bolt"), col, Vector3(0, 0.3, 0), Vector3.ONE, Vector3.ZERO, "P%d" % i)
 				Models.part(bolt, _mesh("bolt_core"), hot, Vector3.ZERO)
 		"streaks":
-			Models.part(b, _mesh("ring_wide"), dark, Vector3(0, 0.03, 0), Vector3(0.85, 0.3, 0.85))
 			for i in 6:
 				Models.part(b, _mesh("streak"), col, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "P%d" % i)
 		"wisps":
-			Models.part(b, _mesh("ring_wide"), _mat_a(col, 0.5), Vector3(0, 0.03, 0), Vector3(0.8, 0.3, 0.8))
 			for i in 4:
 				Models.part(b, _mesh("wisp"), col, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "P%d" % i)
 	for c in b.find_children("*", "MeshInstance3D", true, false):
@@ -354,16 +370,17 @@ func _pose(n: Node3D, look: String, t: float) -> void:
 		"halo":
 			b.rotation = Vector3(sin(t * 3.2) * 0.45, t * 1.5, cos(t * 3.2) * 0.45)
 		"stakes":
-			b.get_node("Ring").scale = Vector3.ONE * (1.0 + 0.06 * sin(t * 8.0)) * Vector3(1, 0.4, 1)
+			for i in 5:        # the thorns strain against the body, never let go
+				(b.get_node("P%d" % i) as Node3D).scale = Vector3(1.0, 1.0 + 0.1 * sin(t * 8.0 + i * 1.3), 1.0)
 		"cords":
 			for i in 3:
 				(b.get_node("P%d" % i) as Node3D).rotation.y = t * (1.4 if i % 2 == 0 else -1.4)
 		"anklets":
 			for i in 3:
-				var u := fposmod(t * 0.9 + i / 3.0, 1.0)      # top of the shin to the ground, again
+				var u := fposmod(t * 0.9 + i / 3.0, 1.0)      # the knee down to the ankle, again (never the ground)
 				var p: Node3D = b.get_node("P%d" % i)
-				p.position.y = 0.75 * (1.0 - u)
-				p.scale = Vector3.ONE * (0.8 + 0.5 * u)
+				p.position.y = ANKLE + (0.85 - ANKLE) * (1.0 - u)
+				p.scale = Vector3.ONE * (1.0 - 0.3 * u)
 		"flames":
 			for i in 6:
 				var p2: Node3D = b.get_node("P%d" % i)

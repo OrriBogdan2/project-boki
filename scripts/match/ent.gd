@@ -28,6 +28,7 @@ var burn_by: Ent = null
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
+var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
