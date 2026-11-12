@@ -12,6 +12,7 @@ const SIZE := Vector2i(1280, 720)   # px of each shot
 const FIGHT_SECS := 2.0             # s of fight before the open-ground shot
 const SQUAD_SECS := 2.5             # s of fight before the squads shot
 const GLIDE_SECS := 1.4             # s after the run-off before the glide shot
+const RUN_MAX := 6.0                # s the run to the edge may take before the glide shot is given up on
 const SQUAD_GAP := 12.0             # m between the three squads' centres
 const EDGE_RUN := 6.0               # m of run-up to the edge the glide starts from
 const RIVALS := [["archer", "wisplet"], ["bulwark", "burrlet"], ["mage", "puddlet"], ["juggernaut", "pebbit"], ["gunslinger", "zapple"]]
@@ -29,12 +30,16 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
-	await _start(hero, "cindle")
-	m.player.ctrl = "bot"
-	m.player.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 	for style in STYLES:
-		await _fight_shot(style)
+		if m:
+			m.queue_free()
+			pool.clear()
+		await _start(hero, "cindle")      # a match each: the fights leave burns and slows on the hero
+		m.player.ctrl = "bot"
+		m.player.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+		_style(style)
 		await _glide_shot(style)
+		await _fight_shot(style)
 		await _squads_shot(style)
 	print("CAMERAAB %s in %s" % [hero, dir])
 	main.get_tree().quit(0)
@@ -61,12 +66,12 @@ func _rival(team: int, at: Vector3) -> Hunter:
 	return h
 
 ## Steps `secs` of the match as Match runs a frame (the camera follows the hero, the zoom eases), then saves the shot.
-func _film(secs: float, file: String, each: Callable) -> void:
+func _take(secs: float, file: String, each: Callable, until := Callable()) -> void:
 	var P := m.player
 	var t := 0.0
 	m.cam.zoom = 1.0
 	m.cam.snap(P.pos)
-	while t < secs:
+	while t < secs and not (until.is_valid() and until.call(t)):
 		_purge()
 		each.call(t)
 		for _i in 2:
@@ -90,17 +95,19 @@ func _clear(at: Vector3) -> void:
 	P.teleport(at)
 	P.vel = Vector3.ZERO
 	P.hp = P.max_hp
+	P.out = false
+	P.downed = false
+	P.stun_t = 0.0
+	P.root_t = 0.0
 
 func _fight_shot(style: String) -> void:
-	_style(style)
 	var base := _ground(m.player.pos)
 	_clear(base)
 	var foe := _rival(1, base + Vector3(FIGHT_GAP, 0, 0))
 	var mine: Array = [m.player]
-	await _film(FIGHT_SECS, "%s_fight_%s.png" % [hero, style], func(t: float): _assist(t, mine, [foe]))
+	await _take(FIGHT_SECS, "%s_fight_%s.png" % [hero, style], func(t: float): _assist(t, mine, [foe]))
 
 func _squads_shot(style: String) -> void:
-	_style(style)
 	var base := _ground(m.player.pos)
 	_clear(base)
 	var mine: Array = [m.player, _rival(0, base + Vector3(-1.4, 0, 1.6)), _rival(0, base + Vector3(-1.4, 0, -1.6))]
@@ -108,7 +115,7 @@ func _squads_shot(style: String) -> void:
 	for k in 2:
 		var c := base + Vector3(SQUAD_GAP, 0, 0).rotated(Vector3.UP, TAU * (k + 1) / 3.0)
 		squads.append([_rival(k + 1, c), _rival(k + 1, c + Vector3(1.4, 0, 1.6)), _rival(k + 1, c + Vector3(1.4, 0, -1.6))])
-	await _film(SQUAD_SECS, "%s_squads_%s.png" % [hero, style], func(t: float):
+	await _take(SQUAD_SECS, "%s_squads_%s.png" % [hero, style], func(t: float):
 		for s in squads.size():
 			_assist(t, squads[s], squads[(s + 1) % squads.size()]))
 
@@ -123,13 +130,12 @@ func _edge() -> Array:
 				for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
 					if not w.inb(x + 2 * d.x, z + 2 * d.y) or w.kind[w.idx(x + d.x, z + d.y)] != World.T_VOID:
 						continue
-					var back := Vector2i(x, z) - d * int(EDGE_RUN)
+					var back: Vector2i = Vector2i(x, z) - d * int(EDGE_RUN)
 					if w.inb(back.x, back.y) and w.kind[w.idx(back.x, back.y)] == World.T_GROUND:
 						return [Vector2i(x, z), d]
 	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1)]
 
 func _glide_shot(style: String) -> void:
-	_style(style)
 	var P := m.player
 	var e := _edge()
 	var d := Vector3(e[1].x, 0, e[1].y)
@@ -139,10 +145,14 @@ func _glide_shot(style: String) -> void:
 	var foe := _rival(1, edge_at - d * (EDGE_RUN + 3.0))
 	foe.ctrl = "idle"
 	P.ctrl = "idle"
-	var run := EDGE_RUN / P.base_speed + 0.3
-	await _film(run + GLIDE_SECS, "%s_glide_%s.png" % [hero, style], func(t: float):
+	var left := [-1.0]      # the time the hero left the ground
+	await _take(RUN_MAX, "%s_glide_%s.png" % [hero, style], func(t: float):
+		if left[0] < 0.0 and not P.grounded:
+			left[0] = t
 		P.inp["move"] = Vector2(d.x, d.z)
 		P.inp["glide_press_only"] = true
-		P.inp["glide_btn"] = t > run)
-	print("CAMERAAB glide %s: gliding=%s y=%.1f" % [style, str(P.gliding), P.pos.y])
+		P.inp["glide"] = left[0] >= 0.0
+		P.inp["glide_btn"] = left[0] >= 0.0,
+		func(t: float): return left[0] >= 0.0 and t - left[0] >= GLIDE_SECS)
+	print("CAMERAAB glide %s: gliding=%s y=%.1f pos=%s edge=%s start=%s" % [style, str(P.gliding), P.pos.y, str(P.pos), str(edge_at), str(edge_at - d * EDGE_RUN)])
 	P.ctrl = "bot"
