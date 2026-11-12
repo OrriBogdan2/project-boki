@@ -18,30 +18,30 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | gunslinger (Ghost) | LMB rank max | 2.18 | 2.00 | 1.09 | ok |
 | gunslinger (Ghost) | combo rank 0 | 0.77 | 0.80 | 0.96 | ok |
 | gunslinger (Ghost) | combo rank max | 0.68 | 0.72 | 0.95 | ok |
-| juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
-| juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
-| ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
-| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
-| ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
-| ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
-| mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
-| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
-| bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.08 | 5.85 | 0.70 | FAIL |
-| bulwark (Oath) | combo rank max | 4.18 | 5.00 | 0.84 | ok |
+| juggernaut (Brall) | LMB rank 0 | 13.20 | 12.95 | 1.02 | ok |
+| juggernaut (Brall) | LMB rank max | 13.20 | 12.95 | 1.02 | ok |
+| juggernaut (Brall) | combo rank 0 | 7.88 | 7.70 | 1.02 | ok |
+| juggernaut (Brall) | combo rank max | 7.25 | 7.00 | 1.04 | ok |
+| ashwick (Felix) | LMB rank 0 | 5.72 | 6.20 | 0.92 | ok |
+| ashwick (Felix) | LMB rank max | 5.62 | 6.20 | 0.91 | ok |
+| ashwick (Felix) | combo rank 0 | 3.93 | 4.30 | 0.91 | ok |
+| ashwick (Felix) | combo rank max | 2.63 | 3.00 | 0.88 | ok |
+| mage (Joule) | LMB rank 0 | 13.67 | 13.60 | 1.00 | ok |
+| mage (Joule) | LMB rank max | 13.67 | 13.60 | 1.00 | ok |
+| mage (Joule) | combo rank 0 | 8.42 | 9.00 | 0.94 | ok |
+| mage (Joule) | combo rank max | 6.62 | 6.40 | 1.03 | ok |
+| bulwark (Oath) | LMB rank 0 | 7.85 | 6.75 | 1.16 | ok |
+| bulwark (Oath) | LMB rank max | 7.85 | 6.75 | 1.16 | ok |
+| bulwark (Oath) | combo rank 0 | 6.28 | 5.85 | 1.07 | ok |
+| bulwark (Oath) | combo rank max | 5.45 | 5.00 | 1.09 | ok |
 | thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
 | thief (Shiv) | combo rank max | 4.22 | 4.95 | 0.85 | ok |
-| ostra (Void) | LMB rank 0 | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | LMB rank max | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | combo rank 0 | 10.33 | 4.80 | 2.15 | FAIL |
-| ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
+| ostra (Void) | LMB rank 0 | 7.22 | 6.60 | 1.09 | ok |
+| ostra (Void) | LMB rank max | 7.22 | 6.60 | 1.09 | ok |
+| ostra (Void) | combo rank 0 | 5.42 | 4.80 | 1.13 | ok |
+| ostra (Void) | combo rank max | 4.82 | 4.80 | 1.00 | ok |
 | archer (Myth) | LMB rank 0 | 7.83 | never | n/a | n/a |
 | archer (Myth) | LMB rank max | 7.83 | never | n/a | n/a |
 | tender (Elluna) | LMB rank 0 | 7.10 | never | n/a | n/a |
@@ -52,24 +52,28 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
 | rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
 | rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| rimewright (Celeste) | combo rank 0 | 2.93 | never | n/a | n/a |
+| rimewright (Celeste) | combo rank max | 2.22 | never | n/a | n/a |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
 | gunslinger (Ghost) | rmb | 0.127 | 0.128 | 0.99 |
 | gunslinger (Ghost) | e | 0.156 | 0.157 | 0.99 |
-| juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 |
-| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 |
-| juggernaut (Brall) | e | 0.052 | 0.023 | 2.23 |
-| ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
-| ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
-| ashwick (Felix) | e | 0.045 | 0.060 | 0.76 |
-| mage (Joule) | rmb | 0.117 | 0.104 | 1.13 |
-| mage (Joule) | dash | 0.130 | 0.119 | 1.09 |
-| mage (Joule) | e | 0.130 | 0.126 | 1.03 |
+| juggernaut (Brall) | rmb | 0.101 | 0.101 | 1.00 |
+| juggernaut (Brall) | dash | 0.013 | 0.038 | 0.34 |
+| juggernaut (Brall) | e | 0.023 | 0.023 | 1.00 |
+| ashwick (Felix) | rmb | 0.094 | 0.082 | 1.14 |
+| ashwick (Felix) | dash | 0.117 | 0.117 | 1.00 |
+| ashwick (Felix) | e | 0.058 | 0.060 | 0.98 |
+| mage (Joule) | rmb | 0.104 | 0.104 | 1.00 |
+| mage (Joule) | dash | 0.119 | 0.119 | 1.00 |
+| mage (Joule) | e | 0.126 | 0.126 | 1.00 |
 | bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 |
-| thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
-| ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
-| ostra (Void) | e | 0.091 | 0.154 | 0.59 |
+| thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 |
+| ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
+| ostra (Void) | e | 0.172 | 0.154 | 1.11 |
+| rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
+| rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
 <!-- ttk:table -->
 
 **Outliers and causes (suggestions, nothing built)**
