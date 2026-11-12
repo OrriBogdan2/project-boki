@@ -405,4 +405,5 @@ func _sable_ring(main: Node) -> void:
 		orbit /= float(ThiefUlt.ORBITERS)
 		worst = maxf(worst, maxf(ring.distance_to(Vector2(P.pos.x, P.pos.z)),
 				Vector2(orbit.x, orbit.z).distance_to(Vector2(P.pos.x, P.pos.z))))
-	ok(P.pos.distance_to(from) > 3.0 and worst < 0.1, "Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst)
+	ok(P.pos.distance_to(from) > 3.0 and worst < 0.1,
+			"Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst)
