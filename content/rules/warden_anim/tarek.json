@@ -44,13 +44,13 @@
 			1.5,
 			1.2
 		],
-		"foot_mps": [2.96, 5.25],
+		"foot_mps": [3.26, 5.25],
 		"arm_swing": {
 			"L": 0.5,
 			"R": 0.5
 		},
 		"in_step": true,
-		"cadence": 0.9
+		"cadence": 0.85
 	},
 	"crouch": {
 		"idle": "crouch_idle",

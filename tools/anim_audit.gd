@@ -10,7 +10,7 @@ extends RefCounted
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
-const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
+const WARM_S := 3.0          # s of locomotion before a sample: the blends and the gait's 0.8 s running means settle
 const SAMPLE_S := 2.4        # s of locomotion sampled
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
 const CROUCH_K := 0.55      # of the run speed a crouch walks at (Hunter._physics): the sneak sampled at full stick
