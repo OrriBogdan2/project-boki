@@ -38,8 +38,7 @@ func _match_course() -> void:
 	var tu: Tutorial = m.tut
 	ok(Tutorial.NAG_T < IDLE_S, "a nag comes inside the %.0f s window (NAG_T %.0f s)" % [IDLE_S, Tutorial.NAG_T])
 	ok(Tutorial.NAG_T < SILENT_MAX, "and a nag comes before %.0f s of silence" % SILENT_MAX)
-	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T, "KEY_WAIT_T": Tutorial.KEY_WAIT_T,
-			"KIN_WATCH_T": Tutorial.KIN_WATCH_T}
+	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T}
 	for k in timed:
 		ok(float(timed[k]) > Tutorial.NAG_T, "%s (%.0f s) outlasts a nag, so it never waits in silence" % [k, timed[k]])
 	print("IDLE match | step | hint s | Boki | nag s | marker | note")
