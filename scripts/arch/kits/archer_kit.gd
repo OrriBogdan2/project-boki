@@ -416,7 +416,8 @@ func _tick_rain(dt: float) -> void:
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
 		# (a tick: the hit reactions stay off, so the slow only takes speed: no squash, flinch or hold)
-		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}}), f.pos, stg)
+		var tick := cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}})
+		KinExec.apply_foe(stg.effects, f, tick, f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 
 # ------------------------------------------------------------------ bots
