@@ -562,7 +562,6 @@ func _reset_fx(t: Ent) -> void:
 	vfx("reset", at, dir.normalized())
 	var at_hand := hand_pos(hand == 1)
 	vfx("reset_hand", at_hand)
-	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", soft_col, false)
 	RecastCue.payoff(self, t)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -577,8 +576,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		clear_marks(t)
 	vfx("knock_heal")
 	play("thf_flourish")
-	var who: String = "TAKEN" if mine else "ASSIST"
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, HEAL_WORD, true)
+	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, HEAL_WORD, true, "+")
 
 # ------------------------------------------------------------------ RMB: Bola
 func fire_rmb(c: Dictionary) -> void:
@@ -743,7 +741,6 @@ func _tangle(f, other: Ent) -> void:
 	var a: Vector3 = other.pos if both.size() < 2 else (both[1] as Ent).pos
 	var span := Vector2(other.pos.x - a.x, other.pos.z - a.z)
 	vfx("tangle", a, span.normalized(), {"len": span.length()})      # the cord between the pair, a flash on each
-	m.fx.word((a + other.pos) * 0.5 + Vector3(0, 2.6, 0), "TANGLED", col, true)
 
 # ------------------------------------------------------------------ E: Shadow Knife
 func in_e() -> bool:

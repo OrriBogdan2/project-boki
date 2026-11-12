@@ -147,8 +147,6 @@ func _impact(s: Dictionary) -> void:
 		if core:
 			centre += 1
 	last = {"at": at, "hits": n, "centre": centre}
-	if centre > 0:
-		kit.m.fx.word(at + Vector3(0, 2.6, 0) + kit.fx().screen_up() * 1.2, "DEAD CENTRE", GunslingerKit.hot_col, true)
 
 ## The impact: a white-hot flash column, an green-fire shock ring, a spray of green sparks, a boom, and the scorched
 ## patch with its burning rim that stays for the zone.
