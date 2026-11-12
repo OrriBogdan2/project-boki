@@ -14,10 +14,11 @@ const HOLD_F := 30            # frames a held slot (LMB, RMB) stays down
 const WINDOWS := {"early": [6, 20], "late": [32, 46]}      # frames: the sweep, then the reading
 const FREE_DEG := 60.0        # a free body follows a 90 degree sweep by at least this much in 0.23 s
 const LOCK_DEG := 3.0         # a locked body moves no more than this (rounding, a knock)
-## m east of the Hunter the rival stands (where every slot is aimed at the press). Dredge's further out so his reel
-## is still hauling through the late window.
-const FOE_AT := {"dredge": 9.0}
-const FOE_DEFAULT := 5.0
+## Where the rival stands from the Hunter: east (where every slot is aimed at the press) at FOE_DEFAULT m. Dredge's
+## hand leaves after its 0.2 s coil-back along the aim then (the early sweep's north), and close enough that it
+## lands before the late window, so his reel is hauling through it.
+const FOE_AT := {"dredge": Vector3(0, 0, -5.0)}
+const FOE_DEFAULT := Vector3(5.0, 0, 0)
 const SLOW_GAP := 3.0         # a capped turn: more than locked, no more than deg_s x window plus this
 
 var bad := 0
@@ -65,9 +66,9 @@ func _match(main: Node, arch: String) -> Match:
 		if other == P:
 			continue
 		other.ctrl = "idle"
-		# one rival east, where the slot is aimed (a hook, a grab or a step needs someone to land on)
-		var east := Vector3(float(FOE_AT.get(arch, FOE_DEFAULT)), 0, 0)
-		other.teleport(P.pos + (east if not foe_set and other.team != P.team else Vector3(40, 0, 40)))
+		# one rival where the slot lands (a hook, a grab or a step needs someone to land on)
+		var at: Vector3 = FOE_AT.get(arch, FOE_DEFAULT)
+		other.teleport(P.pos + (at if not foe_set and other.team != P.team else Vector3(40, 0, 40)))
 		foe_set = foe_set or other.team != P.team
 	for i in 20:
 		_aim(P, Vector2(1, 0))
