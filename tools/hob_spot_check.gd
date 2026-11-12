@@ -2,7 +2,7 @@ extends RefCounted
 ## --hob-spot-check: Hob's fixed home spot and its clear ring (HobSpot, FarmHob, HomeBuild.cell_reason).
 ##   1. a new farm: his spot is saved, every tile and place you interact with stays outside the ring, and it is
 ##      the same spot after the layout syncs again
-##   2. build mode: the market stall moved next to his spot is refused, red, with "Too close to Hob"
+##   2. build mode: the market stall moved anywhere into his ring is refused, red, mostly with "Too close to Hob"
 ##   3. a save with the stall inside his ring: on load he moves to the nearest free tile (once) and walks there
 ##   4. interact: by Hob the prompt is Hob, by the stall it is the stall, and their talk rings never overlap
 ## Screenshots: --hob-spot-shots=<dir> (tools/hob_spot_shots.gd).
@@ -39,9 +39,10 @@ func _new_farm() -> void:
 	k["starter"] = true
 	d["roster"].append(k)
 	d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true, "home": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
 	Save.d = d
 	HomeLayout.ensure(Save.d)      # (a farm-start island)
+	d["tutorial"]["home"] = true     # (the welcome is behind us)
 	ClassUnlock.choose_starters(["gunslinger"])
 	Game.apply_result({"arch": "gunslinger", "extracted": true, "why": "extracted", "knocks": 0, "kills": 0,
 			"gems": 0, "seeds": {}, "stats": {}, "lvl": 1, "caught": [], "kin_runs": [], "tonics": 0, "tutorial": true})
@@ -89,11 +90,25 @@ func _placement() -> void:
 	var s := Vector2i(int(floor(home.hob.spot.x)), int(floor(home.hob.spot.z)))
 	var item := {"kind": "deco", "id": "market_stall", "r": 0, "from": int(e["u"])}
 	var sz := HomeLayout.size_of("market_stall", 0)
-	var next_to := HomeLayout.cells_of([s.x + 2, s.y - 1, s.x + 1 + sz.x, s.y - 2 + sz.y])
 	hb.held = item
-	hb.cells = next_to
-	hb._check_cells()
-	ok(not hb.ghost_ok and hb.why == HobSpot.REASON, "the stall moved next to Hob: refused, '%s'" % hb.why)
+	var tried := 0
+	var fits_inside := []
+	var why_hob := 0
+	for z in range(s.y - 5 - sz.y, s.y + 6):
+		for x in range(s.x - 5 - sz.x, s.x + 6):
+			var cells := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
+			if not cells.any(func(c): return home.hob.crowds(c)):
+				continue
+			tried += 1
+			hb.cells = cells
+			hb._check_cells()
+			if hb.ghost_ok:
+				fits_inside.append(Vector2i(x, z))
+			elif hb.why == HobSpot.REASON:
+				why_hob += 1
+	ok(tried > 0 and fits_inside.is_empty() and why_hob > 0,
+			"the stall moved into his ring: all %d spots refused, %d of them red with '%s' %s"
+			% [tried, why_hob, HobSpot.REASON, fits_inside])
 	hb.cells = HomeLayout.deco_cells(e)
 	hb._check_cells()
 	ok(hb.ghost_ok, "where it stands it still fits (%s)" % hb.why)
