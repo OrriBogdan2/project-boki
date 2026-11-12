@@ -307,6 +307,31 @@ Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6
 - **Matches, not changed:** a stun shuts the glider and a fresh press opens it the step the stun ends (0.5 s stun: 0.53 s with the press). A shut glider waits out a shove over 4 m/s for 0.4 s ([est], kept: `--abyss-check` asserts it at the rim). A lighter knock (Lace and Vex, 2.6-3.1 m/s) keeps it shut for its 0.16-0.2 s slide. A nudge under 2.5 m/s (Kael and Albert, LMB) is not a knock: it neither ends a dash nor holds the glider.
 - **Not changed:** Kael's 0.57 s reopen after an air Rampage is AirLimits (the glider stays shut while his kit move runs, items 162). Ground dashes and kit rushes (move kind "rush") still ride through a knock: not asked here, not measured. An overheated glider still lifts you out of the abyss at half strength (`--glider-heat-check`).
 
+## Glide entry and brake: the undecoded source values (2026-11-11)
+The data names `GlideInitialMin/MaxXYSpeed`, `GlideInitialSpeedDuration` / `DecayDuration` and
+`GlideBrakingForceMin/Max`, `GlideBrakingForceDelay` / `RampDuration`, with no values
+(briefs/supervive-data/supervive_physics.md, "not decoded yet"). The footage was frame-stepped for them and
+settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` changed.
+| Source value | Ours (`tuning.json` / code) | Status |
+|---|---|---|
+| Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
+| Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
+What was frame-stepped (both clips are 1080p at 60 fps, read from 480p full-rate proxies; every hero-ref folder on
+`ext/hero-ref-footage` is a slice of one of them):
+- **Tetra guide** (300 s, folder `breah`): every second at 1 fps, then 13-19, 40.5-48.5, 69-75, 120.5-124.5 and
+  243-249 s at 5 fps. The player never opens the glider: abilities on the ground, and at 121.7-124.3 s Tetra runs
+  on her own rock over the void. Enemy gliders cross the fights at 13.6-18.8, 72.4-74.8 and 245.6-246.8 s, already
+  open or being dunked, behind effects, with unknown keys and a camera that follows Tetra: no start, no brake.
+- **Ability showcase** (1174 s, the other folders): a 4 fps scan for open sky under the hunter flagged 207.5, 418,
+  508-512, 740, 1048 and 1127-1170 s. At 5 fps they are a camera pan over cliffs, a dunk at a cliff, a fight at
+  the edge, a heal disc, Void's ultimate and Celeste's blue ice ultimate: no glide. Elluna's air dashes (706.8,
+  731.1, 735.9, 745.1 s, mooshmoosh.md) are her kit's float; 706-712 and 729-747 s show no glider.
+Settling them needs a 60 fps clip of glides by the player: three opens (off a ledge at run speed, out of a dash,
+from a fall) and three back-key brakes from cruise and from a dash speed, on a view with ground at glider height.
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
