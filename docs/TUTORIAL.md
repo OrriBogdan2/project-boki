@@ -70,6 +70,23 @@ plain text: fixed (section 4).
 Stage totals: load 0.6 s wall, course 95 to 104 s sim, results 1.6 s wall. Steps over 10 s of play: `kin` (11 to 26 s), `glove`
 (7 to 14 s), `ult` (12 to 17 s), `defend` (14 s, the capture timer). In all 5 complete runs `kin` and `ult` nagged.
 
+### The three slowest steps, shortened (`ext/tut-slowest-three`)
+
+The table above is the "before". Medians of 3 runs each (before: the table above and two re-runs on the same line; after:
+three runs of `--tutorial-timing-check` on the branch, all with the gunslinger starter Vex):
+
+| Step | Before s (runs) | Median | Why it was slow | Change | After s (runs) | Median |
+|---|---|---|---|---|---|---|
+| `kin` | 26.0, 17.1, 12.6 | 17.1 | A second E press during the 0.6 s unlock step fired Longneedle at nothing, so "Hit the line" opened on an 11 s cooldown with nothing saying why. The row stood 8 m away, inside an idle monster's 7.5 m notice range, so it charged in and the line broke up. Your Boki killed the camp before the cast, so the camp came back. Then three 2.5x-health skitters to shoot down. | The step's E is ready when the step opens. The row starts 10 m out and holds its line. The row's monsters have 1x health, so one Longneedle clears the line. | 2.7, 1.7, 1.4 | 1.7 |
+| `ult` | 15.4, 14.2, 14.9 | 14.9 | After the fuse, a 7-monster fight (8 for Kael) at 2.5x health: the lesson is the fuse, not the fight | The ult camp is 3 monsters (skitter, spitter, skitter) for every starter, in `camps.ult`. The per-starter `fight_foes` list is gone. | 4.6, 7.0, 6.6 | 6.6 |
+| `defend` | 14.0, 14.0, 14.0 | 14.0 | A fixed 14 s capture timer (`Exits.TUT_UPLINK_T`) | 8 s: still long enough for its one wave of 2 skitters to arrive | 8.0, 8.0, 8.0 | 8.0 |
+
+The match course went from 87 to 104 s of driven play to 61 to 65 s. `kin` and `ult` no longer nag. A kill in the step's camp now
+counts as progress (`Tutorial._stall`), so a fight that is going well no longer pulses the panel. What each step teaches is the
+same: E fired through a line of monsters, a fuse and a fight while fused, holding the circle while a wave comes. The fight beats
+per starter (`--tutorial-fight-check`) went from 41/53/35 s (Lace/Kael/Vex) to 17/38/17 s, so its floor `FIGHT_MIN` is 12 s
+(it was 30). The longest step is now `glove` (7 to 12 s: the walk over the bridge to the glove).
+
 ## 3. Farm tutorial (11 rows) and garden first day (5 lines)
 
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |
@@ -114,8 +131,10 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 1. The match tutorial is 23 steps (decision: about 8); 262 words, about 85 s of reading on top of 104 s of play. `pick_*`, `points`,
    `ranks` and the three gap steps are the obvious merges.
 2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip the tutorial") and on the naming card.
-3. `kin` ("Hit the line with Longneedle") and `ult` nag in every run and take 11 to 26 s with the driver: check the step's aim line.
-4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro.
+3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
+4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
+   in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
+   sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
