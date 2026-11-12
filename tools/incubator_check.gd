@@ -178,7 +178,99 @@ func run(m: Node) -> void:
 	for e in Incubator.eggs(): e["heat"] = Incubator.HEAT_NEED
 	H.hw.scan()
 	ok(not H.hw.jobs.any(func(j): return String(j["kind"]) == "warm"), "with every egg ready there's nothing to warm")
+	_egg_sounds_home(H)
 	ok(H.hinc.prompt().begins_with("Hatch"), "walking up says: %s" % H.hinc.prompt())
 	H.queue_free()
+	_egg_sounds()
 	print("INCUBATOR CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## In the garden: the Incubator's own tick plays each cradle's sounds as its warmth climbs, a ready egg puts up
+## no message, and the Nook's nest egg chimes once it is ready.
+func _egg_sounds_home(H) -> void:
+	EggSfx.heard.clear()
+	GardenSfx.heard.clear()
+	H.hinc.ready_ids.clear()
+	var lane := MsgLane.of(H.root_ui)
+	lane.clear()
+	var need := Incubator.secs_left({"heat": 0.0})      # seconds of warmth an egg needs
+	var n := Incubator.eggs().size()
+	for e in Incubator.eggs(): e["heat"] = need * 0.5 - 0.5
+	Sfx.listener = H.INCUB_AT
+	for i in 40: H.hinc.tick(0.05)
+	var knocks := int(GardenSfx.heard.get("egg_knock", 0))
+	ok(knocks == n, "warmed past half by the Incubator: each of %d eggs knocks once (%d)" % [n, knocks])
+	for e in Incubator.eggs(): e["heat"] = need - 0.5
+	Sfx.listener = H.INCUB_AT + Vector3(EggSfx.EARSHOT_M + 3.0, 0, 0)
+	for i in 40: H.hinc.tick(0.05)
+	var away := int(GardenSfx.heard.get("egg_ready", 0))
+	Sfx.listener = H.INCUB_AT
+	H.hinc.tick(0.05)
+	var near := int(GardenSfx.heard.get("egg_ready", 0))
+	var chimed := Incubator.ready_eggs().size() == n and away == 0 and near == n
+	ok(chimed, "ready while you were far off: no chime, then one each when you come near (%d, %d)" % [away, near])
+	ok(lane.count() == 0, "a ready egg puts up no message (%s)" % [lane.texts()])
+	var roster: Array = Save.d["roster"]
+	var laid := Time.get_unix_time_from_system()
+	Save.d["egg"] = {"a": roster[0]["uid"], "b": roster[1]["uid"], "sp": "cindle", "m": 99, "t": laid + 600.0}
+	H._refresh_nest()
+	Sfx.listener = H.NEST_AT
+	H._care_tick(0.05)
+	var waiting := int(GardenSfx.heard.get("egg_ready", 0)) - near
+	Save.d["egg"]["t"] = laid      # its time is up
+	H._care_tick(0.05)
+	H._care_tick(0.05)
+	var chimes := int(GardenSfx.heard.get("egg_ready", 0)) - near
+	ok(waiting == 0 and chimes == 1, "the Nook's nest egg: silent while it waits, one chime when ready (%d)" % chimes)
+
+## The egg's sounds (EggSfx) follow the progress it stores: one knock past half, a small crack every few seconds
+## from 90% while you are near, one chime when ready; at the egg, only within earshot, and a step missed while you
+## were away plays when you come near.
+func _egg_sounds() -> void:
+	EggSfx.heard.clear()
+	EggSfx.crack_in.clear()
+	GardenSfx.heard.clear()
+	var egg_at := Vector3(10, 0, 10)
+	var near := egg_at + Vector3(2, 0, 1)
+	var away := egg_at + Vector3(EggSfx.EARSHOT_M + 2.0, 0, 0)
+	var plays := func(sname: String) -> int: return int(GardenSfx.heard.get(sname, 0))
+	var sit := func(key: String, progress: float, secs: float) -> void:
+		for i in roundi(secs / 0.1): EggSfx.hear(key, progress, egg_at, 0.1)
+	Sfx.listener = near
+	sit.call("a", 0.49, 1800.0)
+	ok(GardenSfx.heard.is_empty(), "just under half warm for 30 minutes: silent (its progress decides, not a clock)")
+	sit.call("a", 0.5, 5.0)
+	ok(plays.call("egg_knock") == 1, "half warm: one gentle wobble and knock")
+	sit.call("a", 0.8, 60.0)
+	ok(plays.call("egg_knock") == 1 and plays.call("egg_crack") == 0, "then quiet up to 90%")
+	sit.call("a", 0.9, 10.0)
+	var cracks: int = plays.call("egg_crack")
+	ok(cracks == 3, "from 90%%: a small crack every %.0f s while you are near (%d in 10 s)" % [EggSfx.CRACK_S, cracks])
+	Sfx.listener = away
+	sit.call("a", 0.95, 30.0)
+	sit.call("a", 1.0, 5.0)
+	var far_off: bool = plays.call("egg_crack") == 3 and plays.call("egg_ready") == 0
+	ok(far_off, "past %.0f m: no cracks, and no chime as it turns ready" % EggSfx.EARSHOT_M)
+	Sfx.listener = near
+	sit.call("a", 1.0, 10.0)
+	ok(plays.call("egg_ready") == 1 and plays.call("egg_crack") == 3, "come near: one ready chime, and the cracks stop")
+	Sfx.listener = away
+	sit.call("b", 0.6, 1.0)
+	Sfx.listener = near
+	sit.call("b", 0.6, 3.0)
+	ok(plays.call("egg_knock") == 2, "half warm while you were away: its knock plays once you come near")
+	sit.call("c", 0.95, 0.1)
+	ok(plays.call("egg_knock") == 2 and plays.call("egg_crack") == 4, "past half and 90% while away: just the cracks")
+	for p in [0.0, 1.0, 0.0, 1.0]: sit.call("nest", p, 1.0)
+	ok(plays.call("egg_ready") == 3, "the nest egg chimes when ready, and the next egg laid there chimes again")
+	var vol_at := func(metres: float) -> float:
+		EggSfx.heard.erase("loud")
+		Sfx.listener = egg_at + Vector3(metres, 0, 0)
+		Sfx.last_played.erase("egg_ready")      # (Sfx merges a quick repeat and plays a burst of one sound quieter)
+		Sfx.recent.erase("egg_ready")
+		EggSfx.hear("loud", 1.0, egg_at, 0.1)
+		var voice: AudioStreamPlayer = Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL]
+		return voice.volume_db if Sfx.last_played.has("egg_ready") else NAN
+	var v_close: float = vol_at.call(1.0)
+	var v_far: float = vol_at.call(8.0)
+	ok(v_far < v_close - 3.0, "Sfx plays the chime at the egg: %.1f dB from 1 m, %.1f dB from 8 m" % [v_close, v_far])
