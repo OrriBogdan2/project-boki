@@ -8,6 +8,7 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--tracy=<dir>]  a Tracy capture of the match part into <dir>, then the run ends (docs/PERF.md)
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
@@ -26,6 +27,7 @@ const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 vis
 const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
 const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
 const NavCheck := preload("res://tools/garden_nav_check.gd")
+const PerfTracy := preload("res://tools/perf_tracy.gd")
 
 var main: Node
 var secs := 60.0
@@ -33,6 +35,7 @@ var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
 var zone := ""
+var tracy_dir := ""
 var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
 var hud_us := 0
@@ -42,6 +45,9 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	setup(main_node)
+	if tracy_dir != "":
+		await _tracy_match()
+		return
 	await _match()
 	await _farm("farm", {})
 	await _base()
@@ -64,6 +70,7 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--tracy="): tracy_dir = a.substr(8)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -140,6 +147,15 @@ func _match() -> Array:
 	_meshes()
 	Match.prof_on = false
 	return fl
+
+## The match part alone under tracy-capture; the exit code says whether the zones were exported.
+func _tracy_match() -> void:
+	var cap := PerfTracy.new()
+	failed = not cap.start(tracy_dir)
+	if not failed:
+		await _match()
+		failed = not await cap.finish(main.get_tree())
+	_finish()
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
