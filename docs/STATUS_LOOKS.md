@@ -6,6 +6,8 @@ Combo marks and two-hit combo states are the overhead tags' (the 11-08 recast/ma
 **One look per status, whoever puts it there**: every source (a kit, a Boki, a monster) lands on the same timers,
 so a stun reads as the same stars from Vex, Grimble or a Brute. A kit adds no body look of its own for these (Pip's
 root beam is gone), and nothing lies flat on the ground, the look or a ring as it lands (a ground ring means gameplay).
+The parts are cel-lit (the toon shader with a little glow, no outline pass); see-through parts stay unshaded. A big
+hit's stagger (Oomph: a 0.28 s slow that is the hit's own feel) shows no slow look, so a stun hit is the stars alone.
 
 | Status | Look | Where | Motion | Colour (owner) |
 |---|---|---|---|---|
@@ -39,14 +41,14 @@ as far over the Boki's head as over a Hunter's; a giant ridden Boki's look grows
 puppet's squint but not its own circling stars (model meta `starry`), so it shows one ring of stars, the shared one.
 A monster is sized from its hitbox (above).
 
-**Cost.** One rig of 3-12 meshes per (body, status) shown, shared meshes and unshaded materials, pooled per status;
+**Cost.** One rig of 3-12 meshes per (body, status) shown, shared meshes and materials (one toon material per colour), pooled per status;
 nothing is built per frame once warm, and nothing draws past 34 m from the camera focus. A body with no status
 costs one cheap test per frame.
 
 **Checks.** `--status-look-check` lands each row of the crowd control table in `docs/KIT_PARITY.md` from a caster of
 that kit the way the kit does (a hit carrying stun, root or slow; KitStatus for Grounded and Daze), and a Boki's and
 a monster's, and asserts for each: the look comes up, the same rig whatever the source, sized to the hitbox, up for
-every step the status runs and gone when it ends, nothing flat below the ankle and no ring at the feet as it lands,
+every step the status runs and gone when it ends, no other look with it (a stun hit's stagger is not a slow), nothing flat below the ankle and no ring at the feet as it lands,
 and a game that does not own the body shows it (snapshot or event) and drops it with the owner.
 `--hero-vfx-check` puts each status on a body the way the game does and asserts its look comes up on that body only, uses at most 16 meshes, goes when the status ends, all ten fit one body from the pool, a hit sent
 to another game shows and ends, and nothing draws far away. `--status-shots --shots-dir=<dir>` (GPU) writes one

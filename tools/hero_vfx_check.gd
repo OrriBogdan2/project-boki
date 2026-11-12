@@ -473,8 +473,11 @@ func _boki_statuses(m: Match, P: Hunter) -> void:
 		var body: Node3D = (kr["n"] as Node3D).get_child(0)
 		if y > 0.0:
 			var up := body.global_position.y - k.pos.y
-			ok(up > 0.7 and up < 1.3, "boki status %s: over the Boki's head (%.2f m up, a Hunter's %.2f)"
-				% [st, up, (fr["n"] as Node3D).get_child(0).global_position.y - F.pos.y])
+			var head := k.model.scale.y * StatusLooks.KIN_TALL       # (a Boki's size varies: measured from its head)
+			var hunter_up: float = (fr["n"] as Node3D).get_child(0).global_position.y - F.pos.y
+			ok(up > head and up < head + 0.6,
+				"boki status %s: over the Boki's head (%.2f m up, its head %.2f, a Hunter's %.2f)"
+				% [st, up, head, hunter_up])
 		else:
 			var n: Node3D = kr["n"]
 			ok(n.scale.y < n.scale.x and n.scale.x < (fr["n"] as Node3D).scale.x,
@@ -517,8 +520,9 @@ func _put_cc(m: Match, e: Ent, st: String, on: bool) -> void:
 func _mats(n: Node3D) -> Array:
 	var out := {}
 	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
-		var mat := mi.material_override as StandardMaterial3D
-		if mat: out[mat.albedo_color.to_html()] = true
+		var mat := mi.material_override
+		if mat is StandardMaterial3D: out[(mat as StandardMaterial3D).albedo_color.to_html()] = true
+		elif mat is ShaderMaterial: out[Color((mat as ShaderMaterial).get_shader_parameter("albedo")).to_html()] = true
 	var keys := out.keys()
 	keys.sort()
 	return keys

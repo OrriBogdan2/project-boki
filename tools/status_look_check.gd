@@ -98,13 +98,19 @@ func _row(m: Match, L: StatusLooks, T: Hunter, by: Ent, st: String, secs: float,
 	ok(_flat_low(r, T) == "", "%s: nothing flat on the ground %s" % [what, _flat_low(r, T)])
 	var steps_on := 0
 	var steps_up := 0
+	var alone := 0
+	var pre := "%d/" % T.get_instance_id()
 	while _left(T, st) > 0.0 and steps_on < 400:
 		steps_on += 1
 		steps_up += 1 if L.showing(T, st) else 0
+		alone += 1 if L.rigs.keys().filter(func(key): return String(key).begins_with(pre)).size() == 1 else 0
 		T.tick_status(DT)
+		Oomph.render_hit(T, DT)        # the stagger clock (Hunter.render runs it)
 		m.time += DT
 	ok(steps_on > 0 and steps_up == steps_on and not L.showing(T, st),
 		"%s: up all %d steps the status runs, gone when it ends" % [what, steps_on])
+	ok(alone == steps_on, "%s: no other look with it (a stun hit's stagger is not a slow), %d of %d steps"
+		% [what, alone, steps_on])
 	await m.get_tree().process_frame
 	return sig
 
@@ -158,9 +164,14 @@ func _sig(r: Dictionary) -> Array:
 		return []
 	var out: Array = [String(r["look"])]
 	for mi: MeshInstance3D in (r["n"] as Node3D).find_children("*", "MeshInstance3D", true, false):
-		var mat := mi.material_override as StandardMaterial3D
-		out.append("%s %s" % [mi.mesh.get_class(), mat.albedo_color.to_html() if mat else ""])
+		out.append("%s %s" % [mi.mesh.get_class(), _albedo(mi.material_override)])
 	return out
+
+## A part's colour: the toon shader's albedo (cel-lit parts) or a see-through part's.
+func _albedo(mat: Material) -> String:
+	if mat is ShaderMaterial:
+		return Color((mat as ShaderMaterial).get_shader_parameter("albedo")).to_html()
+	return (mat as StandardMaterial3D).albedo_color.to_html() if mat is StandardMaterial3D else ""
 
 ## A flat mesh (a disc or a ring) of the rig lying lower than an ankle on `e`; "" when there is none.
 func _flat_low(r: Dictionary, e: Ent) -> String:

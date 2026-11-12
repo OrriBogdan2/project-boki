@@ -33,6 +33,7 @@ const KIN_TALL := 0.8          # m: a Boki at model scale 1 (KinModels)
 const KIN_WIDE := 0.7          # a Boki's width against a Hunter's legs, at model scale 1 and girth 1
 const ARROW_Y := 2.1          # m over the feet: the Grounded arrow's tip at rest (just over the head)
 const KEEP := 0.15             # s a keep() outlives its last ask
+const GLOW := 0.35             # cel-lit parts' self-light (toon "glow"), so a look keeps its hue on dark ground
 
 static var _rules := {}
 static var _meshes := {}       # name -> Mesh, shared by every rig
@@ -70,11 +71,15 @@ static func carries(e: Ent, st: String) -> bool:
 		"daze": return KitStatus.rattled(e)
 		"root": return e.root_t > 0.0 or e.net_cc & 2 != 0
 		"gnd": return KitStatus.grounded(e)
-		"slow": return e.slow_t > 0.0 or e.net_cc & 4 != 0
+		"slow": return slowed(e) or e.net_cc & 4 != 0
 		"burn": return e.burn_t > 0.0
 		"antiheal": return e.blight_t > 0.0
 		"sick": return e is Hunter and (e as Hunter).sick_t > 0.0
 	return false
+
+## A slow, not a big hit's stagger (Oomph: a short slow that is the hit's own feel, no status look of its own).
+static func slowed(e: Ent) -> bool:
+	return e.slow_t > 0.0 and not (e is Hunter and (e as Hunter).stagger_t >= e.slow_t)
 
 ## Whether the body carries any status at all (the cheap test before asking for each one).
 static func _any(e: Ent) -> bool:
@@ -101,7 +106,7 @@ static func net_bits(e: Ent) -> int:
 	var bits := 0
 	if e.stun_t > 0.0: bits |= 1
 	if e.root_t > 0.0: bits |= 2
-	if e.slow_t > 0.0: bits |= 4
+	if slowed(e): bits |= 4
 	return bits
 
 ## A hit sent to the game that owns the body: show what it carries here until that game's snapshot
@@ -211,9 +216,10 @@ func _take(st: String, d: Dictionary) -> Node3D:
 	made += 1
 	return n
 
-static func _mat(hex: String) -> StandardMaterial3D:
+## A cel-lit part in `hex` (the toon shader, no outline pass, GLOW so the hue holds in shade), shared by every rig.
+static func _mat(hex: String) -> ShaderMaterial:
 	if not _mats.has(hex):
-		_mats[hex] = DJFx.solid(Color(hex))
+		_mats[hex] = Models.toon(Color(hex), false, GLOW)
 	return _mats[hex]
 
 static func _mesh(key: String) -> Mesh:
@@ -301,7 +307,7 @@ static func _zigzag(w: float) -> ArrayMesh:
 	return st.commit()
 
 ## The look's parts under `b`, named so _pose finds them ("P0", "P1", ...).
-func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Material) -> void:
+func _build(b: Node3D, look: String, col: ShaderMaterial, dark: ShaderMaterial, hot: ShaderMaterial) -> void:
 	match look:
 		"stars":
 			Models.part(b, _mesh("disc"), _mat_a(dark, 0.55), Vector3(0, -0.06, 0), Vector3.ONE, Vector3.ZERO, "Back")
@@ -359,10 +365,12 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 	for c in b.find_children("*", "MeshInstance3D", true, false):
 		(c as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
-static func _mat_a(base: StandardMaterial3D, a: float) -> StandardMaterial3D:
-	var key := "%s|%.2f" % [base.albedo_color.to_html(), a]
+## A see-through part in `base`'s colour (unshaded: the toon shader draws opaque).
+static func _mat_a(base: ShaderMaterial, a: float) -> StandardMaterial3D:
+	var col: Color = base.get_shader_parameter("albedo")
+	var key := "%s|%.2f" % [col.to_html(), a]
 	if not _mats.has(key):
-		_mats[key] = DJFx.solid(Color(base.albedo_color, a))
+		_mats[key] = DJFx.solid(Color(col, a))
 	return _mats[key]
 
 ## A value 0..1 that jumps `rate` times a second, different per `i` (no rng: looks never touch it).
