@@ -10,6 +10,7 @@ extends RefCounted
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
 ##      wall kick (taller than a jump, within a jump and a kick's climb)
+##   6. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
 
 var bad := 0
 var m: Match
@@ -27,6 +28,7 @@ func run(mn: Node) -> void:
 	_lanes()
 	_course()
 	_reach()
+	_zone_lines()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -207,3 +209,94 @@ func _reach() -> void:
 	var cr := tu.stop("crouch")
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
 	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+
+# ------------------------------------------------------------------ 6. the closing zone's two lines
+## A real expedition with the first-match guide, every other guide line already shown, the player landed.
+func _zone_match() -> Match:
+	var zm := Match.new()
+	main.add_child(zm)
+	zm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	zm.set_process(false)
+	for h in zm.hunters:
+		if h != zm.player:
+			h.pos = zm.player.pos + Vector3(300, 0, 0)
+	zm.player.dropping = false
+	for row: Array in FirstMatchGuide.rules()["lines"]:
+		if not row[0] in FirstMatchGuide.ONCE_PER_PROFILE:
+			zm.guide.shown[row[0]] = true
+	return zm
+
+func _zone_tick(zm: Match, secs: float) -> void:
+	for i in int(secs * 10.0):
+		zm.zone.tick(0.1)
+		zm.guide.tick(0.1)
+
+func _zone_lines() -> void:
+	Save.d["first_guide"] = 0
+	Save.d["tutorial"].erase("guide_zone")
+	Save.d["tutorial"].erase("guide_wall")
+	var zm := _zone_match()
+	var g := zm.guide
+	var z := zm.zone
+	var p := zm.player
+	ok(g != null and z != null, "a real expedition has the zone and the first-match guide")
+	zm.time = 1.0
+	_zone_tick(zm, 3.0)
+	ok(g.id == "" and not g.shown.has("zone"), "before the first warning there is no zone line")
+	zm.time = z.t0[1] - float(ShrinkZone.rules()["warn_s"]) + 1.0
+	_zone_tick(zm, 2.0)
+	ok(z.told == 1, "the zone's first warning has come (close 1)")
+	var line := g.line.to_lower()
+	var points := line.contains("blue ring") and line.contains("minimap")
+	ok(g.id == "zone" and points, "first warning: the line points to the safe ring on the minimap (%s)" % g.line)
+	ok(line.contains("lose health over time"), "and says outside costs health over time")
+	ok(bool(Save.d["tutorial"].get("guide_zone", false)), "the profile remembers it was told")
+	_zone_tick(zm, float(FirstMatchGuide.rules()["lines"][1][2]) + 1.0)
+	ok(g.line == "", "it clears after its time")
+	_zone_tick(zm, 5.0)
+	ok(g.line == "", "the zone line does not repeat in the same match (close %d told)" % z.told)
+	# the wall: inside, nothing; outside after the edge has begun to close, one line, once
+	zm.time = z.t0[1] + 1.0
+	_zone_tick(zm, 3.0)
+	var wall_msg := "outside when the wall passes: a second line (%s)"
+	ok(not z.outside(p.pos) and g.line == "", "inside the ring when the wall passes: no wall line")
+	p.pos = Vector3(z.cur_c.x + z.cur_r + 40.0, p.pos.y, z.cur_c.y)
+	_zone_tick(zm, 2.0)
+	ok(z.outside(p.pos) and g.id == "wall", wall_msg % g.line)
+	var wall := g.line.to_lower()
+	ok(wall.contains("losing health") and wall.contains("blue ring"), "it says you are losing health and where to run")
+	ok(bool(Save.d["tutorial"].get("guide_wall", false)), "the profile remembers the wall line too")
+	p.pos = Vector3(z.cur_c.x, p.pos.y, z.cur_c.y)
+	_zone_tick(zm, 1.0)
+	ok(g.line == "", "back inside: the wall line clears")
+	p.pos = Vector3(z.cur_c.x + z.cur_r + 40.0, p.pos.y, z.cur_c.y)
+	_zone_tick(zm, 20.0)
+	ok(g.line == "", "outside again: the wall line does not repeat in the match")
+	_zone_widths(zm)
+	zm.queue_free()
+	# a later match of the same profile: neither line comes back
+	var zn := _zone_match()
+	zn.zone.tick(0.0)
+	zn.time = zn.zone.t0[1] - 5.0
+	_zone_tick(zn, 2.0)
+	var quiet := not zn.guide.shown.has("zone") and zn.guide.line == ""
+	ok(zn.zone.told == 1 and quiet, "next match: the first warning gets no zone line")
+	zn.time = zn.zone.t0[1] + 1.0
+	zn.player.pos = Vector3(zn.zone.cur_c.x + zn.zone.cur_r + 40.0, zn.player.pos.y, zn.zone.cur_c.y)
+	_zone_tick(zn, 3.0)
+	ok(zn.guide.line == "", "next match: outside the wall gets no wall line")
+	zn.queue_free()
+
+## Each of the two lines is one line in the guide strip at every screen size.
+func _zone_widths(zm: Match) -> void:
+	for sz: Vector2 in SIZES:
+		var strip := TutorialStrip.rect(sz)
+		for lid in FirstMatchGuide.ONCE_PER_PROFILE:
+			for row: Array in FirstMatchGuide.rules()["lines"]:
+				if row[0] != lid:
+					continue
+				var px := int(strip.size.y * 0.5)
+				var w := strip.size.x - strip.size.y
+				while px > 12 and zm.hud.big.get_string_size(String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+					px -= 1
+				ok(px >= 12, "%dx%d: the %s line fits the strip on one line (%d px)" % [sz.x, sz.y, lid, px])

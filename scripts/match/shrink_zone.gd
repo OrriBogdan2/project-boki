@@ -55,7 +55,7 @@ var k := 0                       # closes begun so far (0 = none yet)
 var cur_c := Vector2.ZERO        # the edge right now
 var cur_r := 0.0
 var fallen := false
-var _told := 0                   # the last close the feed and the kin warned of
+var told := 0                    # the last close the feed and the kin warned of (the first-match guide reads it)
 var _owed := {}                  # Hunter -> outside damage not landed yet
 var _wall: MeshInstance3D = null
 var _mat: ShaderMaterial = null
@@ -177,9 +177,9 @@ func tick(dt: float) -> void:
 
 func _warn() -> void:
 	var nx := k + 1
-	if nx > last() or _told >= nx or t0[nx] - m.time > float(rules()["warn_s"]):
+	if nx > last() or told >= nx or t0[nx] - m.time > float(rules()["warn_s"]):
 		return
-	_told = nx
+	told = nx
 	var secs := int(ceil(t0[nx] - m.time))
 	var tail := ": the islands outside the last circle will fall!" if nx == last() else ". Get inside the ring!"
 	m.add_feed("The zone closes in %d s%s" % [secs, tail])
