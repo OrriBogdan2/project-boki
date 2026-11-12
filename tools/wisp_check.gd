@@ -2,7 +2,8 @@ extends RefCounted
 ## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
 ## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, it hums, it
 ## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
-## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out breaks it. The downed
+## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out plays the elimination beat
+## (the hit, the fall into the deathbox, the Wisp's pop; once, nothing left, no death clip after). The downed
 ## gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
 ## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
 ## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
@@ -104,18 +105,84 @@ func _bleed_out() -> void:
 	p.hp = p.max_hp
 	_frames(0.1)
 	m.knock(p, foe, {})
+	p.last_hit_by = foe
 	_frames(0.4)
-	var burst0: int = m.fx.radial
+	var wisp := HunterWisp.node_of(p)
+	var mat := wisp.get_meta("mat") as ShaderMaterial
 	m.eliminate(p, foe, "finished")
-	_frames(0.1)
-	var gone: bool = HunterWisp.node_of(p) == null and HunterWisp.mode_of(p) == ""
-	ok(gone, "bleed-out or an execute breaks the Wisp (it is freed)")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), "...and stops the hum")
-	ok(m.fx.radial > burst0, "...with a burst of sparks")
+	_frames(DT)
+	ok(_pop_rings(p) == 0, "elimination: no explosion as the beat starts")
+	ok(wisp.is_inside_tree() and wisp.get_parent() == p, "elimination: the Wisp stays on the hunter for the beat")
+	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), "elimination: the hum stops")
+	_elim_beat(p, foe, wisp, mat)
+	ok(HunterWisp.mode_of(p) == HunterWisp.GONE and HunterWisp.node_of(p) == null, "elimination: the Wisp is gone")
+	var left_over := false
+	for c in p.get_children():
+		left_over = left_over or (c.name == "Wisp" and not c.is_queued_for_deletion())
+	ok(not left_over, "elimination: nothing is left behind after the beat")
+	ok(not p.visible and not p.model.visible, "elimination: no death clip after the Wisp, the hunter is hidden")
+	var box := Life.box_of(m, p)
+	var box_node := box.get("node") as Node3D
+	var full: bool = box_node != null and box_node.is_inside_tree() and box_node.scale.is_equal_approx(Vector3.ONE)
+	ok(full and box["pos"] is Vector3, "elimination: the deathbox that holds their gear stands at full size")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
 	_frames(0.1)
-	ok(p.model.visible, "back from the dead: the hero shows")
+	ok(p.model.visible and HunterWisp.mode_of(p) == "", "back from the dead: the hero shows")
+
+## The beat, frame by frame: it plays once; the hit shows the killer's colour in the heart, the rim keeps the
+## team colour throughout, the Wisp falls, scales only evenly (round), and pops at the end.
+func _elim_beat(p: Hunter, foe: Hunter, wisp: Node3D, mat: ShaderMaterial) -> void:
+	var kcol := SideColor.of(m, foe)
+	var team := SideColor.of(m, p)
+	var beats := 1
+	var was := true
+	var hit_frames := 0
+	var rim_kept := true
+	var round_body := true
+	var lowest := INF
+	var last_at := Vector3.INF
+	var popped := false
+	var shown := true
+	var t := 0.0
+	while t < 0.9:
+		_frames(DT)
+		t += DT
+		var now := HunterWisp.mode_of(p) == HunterWisp.ELIM
+		beats += 1 if now and not was else 0
+		popped = popped or (was and not now and _pop_rings(p) == 1)
+		was = now
+		if not now:
+			continue
+		shown = shown and p.visible and not p.model.visible
+		hit_frames += 1 if mat.get_shader_parameter("core_col") == kcol else 0
+		rim_kept = rim_kept and mat.get_shader_parameter("rim_col") == team
+		var sc := wisp.scale
+		round_body = round_body and is_equal_approx(sc.x, sc.y) and is_equal_approx(sc.y, sc.z)
+		lowest = minf(lowest, wisp.position.y)
+		last_at = wisp.global_position
+	ok(beats == 1, "elimination: the beat plays once (%d)" % beats)
+	ok(shown, "elimination: the Wisp shows through the beat, the hero stays hidden")
+	var heart := "elimination: the hit shows the killer's colour in the heart (%d frames)" % hit_frames
+	ok(hit_frames > 0 and hit_frames < 20, heart)
+	ok(rim_kept, "elimination: the rim keeps the team colour (outline rule)")
+	ok(round_body, "elimination: it only scales evenly, the round outline holds")
+	var hover := float(WispLook.get_look("")["hover"])
+	ok(lowest < hover - 0.1, "elimination: the Wisp falls toward the box (%.2f m)" % lowest)
+	var box_at: Vector3 = Life.box_of(m, p).get("pos", Vector3.INF)
+	var miss := Vector2(last_at.x - box_at.x, last_at.z - box_at.z).length()
+	ok(miss < 0.3, "elimination: the Wisp lands in its box (%.2f m off)" % miss)
+	ok(popped, "elimination: the Wisp pops at the end of the beat")
+
+## The Wisp's elimination pop rings on the hunter (fx.radial counts every hunter's bursts, so it can't tell).
+func _pop_rings(p: Hunter) -> int:
+	var radius := float(WispLook.get_look("")["snuff"]["ring"])
+	var n := 0
+	for ring in m.fx.rings:
+		var at: Vector3 = (ring["node"] as Node3D).global_position
+		var on_hunter := Vector2(at.x - p.position.x, at.z - p.position.z).length() < 0.1
+		n += 1 if is_equal_approx(float(ring["r"]), radius) and on_hunter else 0
+	return n
 
 ## A bot or remote teammate has no saved look: it gets the default Wisp, from `downed` alone.
 func _teammate() -> void:
@@ -159,6 +226,7 @@ func _looks() -> void:
 		ok(same_keys, "look '%s' has every key" % id)
 		for spec in [look["pop_in"], look["pop_out"], look["snuff"], look["hum"]]:
 			ok(String(spec["sfx"]) in Sfx.NAMES, "look '%s': sound '%s' exists" % [id, spec["sfx"]])
+		ok(String(look["snuff"]["hit_sfx"]) in Sfx.NAMES, "look '%s': the elimination hit sound exists" % id)
 		_outline(String(id), look)
 	ok(WispLook.get_look("no_such_wisp") == default_look, "an unknown id gives the default Wisp")
 	var rules_looks: Dictionary = rules["looks"]

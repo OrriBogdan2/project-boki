@@ -10,15 +10,21 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
 
 ## Decision
 - A downed Hunter shows as a Wisp. `HunterWisp` (scripts/match/hunter_wisp.gd) is a small state machine
-  (`""` → `in` → `on` → `out`) kept in the hunter's meta `wisp`, driven from `Hunter.render`. It reads
-  `downed` and `out` only, so nothing new is replicated: remote players and bots get the Wisp from the
-  state they already receive (flag bit 1 in the `st` snapshot, the `knock` and `up` events).
+  (`""` → `in` → `on` → `out`, and `on` → `elim` → `gone`) kept in the hunter's meta `wisp`, driven from
+  `Hunter.render`. It reads `downed`, `out` and `last_hit_by` only, so nothing new is replicated: remote
+  players and bots get the Wisp from the state they already receive (flag bit 1 in the `st` snapshot, the `knock` and `up` events).
 - Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive, the
   hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
-  scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
+  scales from 0.6 to full with a small squash. Death or a bleed-out plays the elimination beat (the
+  look's `snuff`, 0.6 s, one `elim` state): the hit (the Wisp is knocked up, its white heart takes the
+  killer's side colour, `last_hit_by`, the hunter's own when unknown; the rim keeps the team colour), the
+  fall (the Wisp dims and drops into the deathbox as the box grows in, scaling evenly so it stays round;
+  a box put more than 2 m off, by the abyss or the sky train, is not fallen into: it drops in place),
+  then the Wisp's pop (a small ring and puff, no explosion). After it the machine sits in `gone`, so the
+  hero's death clip never plays after a Wisp.
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally. The id is `Save.d["look"]["wisp"]`, the same pattern as glider skins; unknown ids give
   `default`.
