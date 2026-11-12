@@ -3172,6 +3172,7 @@ func _open_kin(rec: Dictionary) -> void:
 			for n in Care.NEEDS:
 				row.call(c1, Care.NEED_INFO[n]["name"], Care.need(rec, n) / 100.0, Care.NEED_INFO[n]["col"], str(int(Care.need(rec, n))))
 			c2.add_child(UI.section("Likes"))
+			ZoneAffinity.add_line(c2, rec)
 			var known: Array = rec["known"]
 			var lk: Dictionary = rec["likes"]
 			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
