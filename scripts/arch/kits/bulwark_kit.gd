@@ -161,7 +161,7 @@ func _tick(dt: float) -> void:
 	launch.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
-		h.dash_buf = Hunter.DASH_BUFFER
+		h.dash_buf = Loco.buf_shift
 	if not mend.is_empty():
 		_tick_mend(dt)
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed

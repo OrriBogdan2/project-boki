@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
 var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
@@ -235,7 +234,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.buf_recast for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -251,7 +250,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.buf_recast
 
 func held(which: String) -> bool:
 	match which:

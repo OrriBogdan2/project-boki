@@ -36,6 +36,11 @@ static var glide_catch := 0.0
 static var glide_max := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
+static var buf_ability_hold := 0.0     # s: tuning.json buffers (each key's line is in buffers.doc)
+static var buf_recast := 0.0
+static var buf_jump := 0.0
+static var buf_coyote := 0.0
+static var buf_shift := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -65,6 +70,12 @@ static func load_tuning() -> bool:
 	glide_max = g["max"]
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
+	var b: Dictionary = T["buffers"]
+	buf_ability_hold = b["ability_hold"]
+	buf_recast = b["recast"]
+	buf_jump = b["jump"]
+	buf_coyote = b["coyote"]
+	buf_shift = b["shift"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
