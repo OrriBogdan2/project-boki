@@ -690,13 +690,16 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
+## A filling ground circle everyone sees; enemies get the hostile rim and, unless it is an ultimate's, hear
+## TellCue. Returns the node.
 func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
 	var c := col
 	var p = m.get("player")
 	if p != null and int(p.team) != h.team:
 		c = col.lerp(Feel.RIM_ENEMY, 0.45)
 	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
+	if not fusing() and not ult_running():
+		TellCue.start(m, h, at, PI * r * r)
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
@@ -709,6 +712,8 @@ func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Colo
 	if p != null and int(p.team) != h.team:
 		c = col.lerp(Feel.RIM_ENEMY, 0.45)
 	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
+	if not fusing() and not ult_running():
+		TellCue.start(m, h, at + Vector3(dir.x, 0.0, dir.y) * length * 0.5, length * width)
 	if t > 0.0:
 		var tw := tele.create_tween()
 		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
