@@ -69,20 +69,20 @@ What the in-game kit card (K) says.
 | Passive: Carrier | Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them. |
 | Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
-| RMB: Burrseed | Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later. |
+| RMB: Burrseed | Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them. |
 | E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
 | Hunter ultimate: Hearth Call | Hearth Call (hunter ultimate, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. |
 | Weapon: Ember Cast | Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle. |
 
 ### Abilities in full
 
-**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
 **Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
 
 **Burrseed (RMB, 10.5s cooldown).**
 
-- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
+- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within 15m of you. After 2s of that it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.
 
