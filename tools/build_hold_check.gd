@@ -106,7 +106,7 @@ func _rules() -> void:
 	FarmSites.clean(old)
 	var loaded_paid: bool = int(old["site"]["steps"]) == FarmSites.STEPS and old["site"]["cost"] == old["site"]["paid"]
 	ok(loaded_paid and not FarmSites.stalled(old),
-			
+
 			"a site saved before this loads as fully paid and never asks for more")
 	Work.add_mat("wood", 0)
 	var done := false
