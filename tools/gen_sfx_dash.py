@@ -5,7 +5,9 @@
 Each <arch>_dash_air is that Hunter's own ground dash (audio/<arch>_dash*.wav, made by its group script)
 re-voiced for a dash with no floor under it: the foot scrape and ground thump filtered out, wind rushing
 past, and the one thing that Hunter's motion trails: Kael's flame, Grimble's tumbling junk, Neve's ice
-flecks off the blade, Sparkle's crackle. dash_empty is the tick of a Shift press with no charge to spend.
+flecks off the blade, Sparkle's crackle. Gil has no ground dash to re-voice (he swims under the floor), so
+gil_dash_air is made whole here in his water: a wet flick of the tail, bubbles shed off the scales, drops falling
+behind. dash_empty is the tick of a Shift press with no charge to spend.
 Run it after the group scripts (it reads their dash files). Original synthesis, no samples.
 """
 import os, sys, wave
@@ -70,6 +72,16 @@ def air(arch, ground, i):
     return mix(x, rush, np.pad(t, (0, max(0, len(x) - len(t))))[:len(x)])
 
 
+def gil_air(i):
+    """Gil's air dash: a wet rush, a burst of bubbles off the scales and a spray of drops behind (take i)."""
+    d = 0.3 + 0.03 * i
+    rush = S.hiss(d, 500, 2600, 0.04, 0.2) * shape(d, 0.04, d * 0.25, d * 0.6)
+    body = lpf(noise(d), 700) * shape(d, 0.02, d * 0.2, d * 0.5) * 0.6
+    shed = S.bubbles(d * 0.5, 50, 500, 1400, 0.03) * 0.4
+    drops = S.bubbles(d * 0.6, 20, 1600, 3200, 0.02) * 0.25
+    return mix(rush, body, shed, S.at(drops, d * 0.35))[:N(d)]
+
+
 def empty():
     """A soft tick: the slot has nothing to give."""
     return mix(click(0.004, 1500, 4500) * 0.8, lpf(noise(0.04), 600) * env(N(0.04), 0.001, 0.012) * 0.5)
@@ -80,6 +92,7 @@ def build():
         ground = ground_takes(arch)
         S.takes_cat('%s_dash_air' % arch, lambda i, a=arch, g=ground: air(a, g, i), 2, 'dash')
     S.save_cat('dash_empty', empty(), 'ui')
+    S.takes_cat('gil_dash_air', gil_air, 2, 'dash')
 
 
 if __name__ == '__main__':
