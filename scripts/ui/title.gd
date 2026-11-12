@@ -59,7 +59,7 @@ func _ready() -> void:
 			cam_override = Array(a.substr(12).split(",")).map(func(x): return float(x))
 		elif a.begins_with("--title-t="):
 			t = float(a.substr(10))
-	_sky()        # the painted splashes (TitleBackdrop) cover the screen, so the 3D island, squad and sky props are off
+	_sky()        # the painted art (SplashGallery) covers the screen, so the 3D island, squad and sky props are off
 	cam = Camera3D.new(); cam.fov = 36.0; cam.far = 1600.0
 	add_child(cam)
 	cam.make_current()
@@ -430,7 +430,7 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.name = "TitleUI"
 	ui.add_child(root)
-	root.add_child(TitleBackdrop.new())
+	root.add_child(SplashGallery.new())
 	root.add_child(VoidSpecks.new())       # void specks drifting over the key art
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom

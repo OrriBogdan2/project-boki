@@ -1,7 +1,7 @@
 extends RefCounted
-## --loading-check: the loading screen (scripts/ui/loading.gd). All 13 Hunters resolve a splash, a tip
-## and a map name; then a real expedition load runs with the screen up and the bar is sampled every
-## frame: it only moves forward, in steps small enough to read as smooth, passes the build and the
+## --loading-check: the loading screen (scripts/ui/loading.gd). For all 13 Hunters its art opens on their own
+## splash, and it has a tip and a map name; then a real expedition load runs with the screen up and the bar is
+## sampled every frame: it only moves forward, in steps small enough to read as smooth, passes the build and the
 ## graphics warm-up stages in order, and is full when the screen leaves.
 
 const LOADING := "res://scripts/ui/loading.gd"
@@ -29,16 +29,16 @@ func run(main: Node) -> void:
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
+## Every Hunter: the art opens on its splash, a tip from the tip set (also with the Blight off), the map's name.
 func _hunters() -> void:
 	var ids := Arch.ids()
 	ok(ids.size() >= 13, "all 13 Hunters, Gil too (%d)" % ids.size())
 	for ak in ids:
 		var ld: Node = load(LOADING).new()
 		ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak})
-		var tex: Texture2D = ld.splash
-		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
-		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
+		var opens: Texture2D = (ld.gallery as SplashGallery).shown
+		var splash := Portraits.art_path(ak, true)
+		ok(opens != null and opens.resource_path == splash, "%s: the art opens on its splash (%s)" % [ak, splash])
 		ok(ld.tip != "" and ld.TIPS.has(ld.tip), "%s: a tip from the tip set" % ak)
 		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
 		ld.free()

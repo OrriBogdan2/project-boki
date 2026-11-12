@@ -1,7 +1,7 @@
 extends CanvasLayer
-## The screen between home and an expedition: your Hunter's painted splash under the tier's sky tint,
-## the tier name, the map, what you're heading into, a tip, and a spinner with the stage being worked
-## on over a progress bar. The bar follows the real load stages (the build, then the shader warm-up)
+## The screen between home and an expedition: the painted art (SplashGallery, from your Hunter's splash on)
+## under the tier's sky tint, the tier name, the map, what you're heading into, a tip, and a spinner with the
+## stage being worked on over a progress bar. The bar follows the real load stages (the build, then the shader warm-up)
 ## and only ever moves forward. The match builds in short slices between frames (see Match._slice and
 ## World._slice), so the spinner keeps turning the whole way.
 
@@ -47,7 +47,7 @@ const COVER_T := 0.1        # s the ink takes to cover it once the match is read
 const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
-const SKY_TINT := 0.45     # how much of the tier's sky gradient lies over the splash (0..1)
+const SKY_TINT := 0.45     # how much of the tier's sky gradient lies over the art (0..1)
 const BAR_MIN_SPEED := 0.9  # bar share per second, at least, so it never sits still while the load works
 const BAR_CATCH_UP := 6.0   # the bar closes this many times its gap per second (eases out into each stage)
 
@@ -66,9 +66,7 @@ var raid := ""           # the raid condition this expedition rolled ("" when it
 var tip := ""
 var map_name := ""       # the map this expedition is on ("" when unknown)
 var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
-var arch := ""           # the Hunter whose splash fills the screen
-var splash_path := ""    # that splash's file ("" when the Hunter has none)
-var splash: Texture2D
+var gallery: SplashGallery   # the art under everything, opening on your Hunter's splash
 var sky_tex: GradientTexture2D
 var shade_tex: GradientTexture2D
 var _glass_at := {}      # fade step -> the tip card's glass box
@@ -107,10 +105,9 @@ func setup(opts: Dictionary) -> void:
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
 	tip = tips[randi() % tips.size()]
-	arch = String(opts.get("arch", Arch.of_save()))
-	splash_path = Portraits.art_path(arch, true)
-	if splash_path != "":
-		splash = load(splash_path)
+	gallery = SplashGallery.new(Portraits.art_path(String(opts.get("arch", Arch.of_save())), true))
+	gallery.modulate.a = 0.0
+	add_child(gallery)
 	var sky: Color = T["sky"]
 	var cl: Array = T["clouds"]
 	sky_tex = _grad([sky.darkened(0.3), sky.lerp(cl[1], 0.35), (cl[1] as Color).lerp(sky, 0.1)], [0.0, 0.6, 1.0])
@@ -133,6 +130,7 @@ func _process(delta: float) -> void:
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
 	prog = move_toward(prog, want, delta * maxf(BAR_MIN_SPEED, (want - prog) * BAR_CATCH_UP))
+	gallery.modulate.a = fade
 	c.queue_redraw()
 
 ## A real load stage reached (0..1 of the whole load): the bar's target only ever moves forward, so a
@@ -168,10 +166,8 @@ func set_stage(key: String) -> void:
 func _draw() -> void:
 	var sz := c.size
 	var a := fade
-	# the Hunter's splash filling the screen (its framing point stays in view), the tier's sky tinted over it
-	if splash:
-		c.draw_texture_rect_region(splash, Rect2(Vector2.ZERO, sz), Portraits.region(arch, splash_path, splash.get_size(), sz), Color(1, 1, 1, a))
-	c.draw_texture_rect(sky_tex, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a * (SKY_TINT if splash else 1.0)))
+	# the tier's sky tinted over the art (the gallery draws under this)
+	c.draw_texture_rect(sky_tex, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a * SKY_TINT))
 	# a soft shade behind the text
 	c.draw_texture_rect(shade_tex, Rect2(0, sz.y * 0.42, sz.x, sz.y * 0.58), false, Color(1, 1, 1, a))
 	# progress and the tip card sit at the bottom; the text block above them moves up when it would reach the bar
