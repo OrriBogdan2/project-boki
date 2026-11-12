@@ -1145,16 +1145,6 @@
 "semicolon": 25,
 "shadow": 1
 },
-"tools/rolling_check.gd": {
-"history_comment": 1,
-"long_line": 44,
-"semicolon": 18
-},
-"tools/rolling_sim.gd": {
-"long_line": 25,
-"nested_ternary": 2,
-"semicolon": 7
-},
 "tools/shot_vertical_check.gd": {
 "long_line": 4,
 "semicolon": 12

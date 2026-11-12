@@ -5001,7 +5001,7 @@ func _end_soon(after: float) -> void:
 		return
 	result["ending"] = true
 	if opts.get("sim_keep", false) and time < length:
-		return      # (--rolling-sim: the session runs on to 30:00 after the player is done)
+		return      # (the dev-only rolling session runs on to 30:00 after the player is done)
 	get_tree().create_timer(after).timeout.connect(_finish)
 
 func _finish() -> void:
