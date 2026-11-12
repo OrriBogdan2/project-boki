@@ -11,7 +11,8 @@ const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to th
 const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
-const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw"]      # the action inputs
+const KEYS := [      # the action inputs
+		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
@@ -32,7 +33,8 @@ static func drive(m: Match) -> void:
 	tu.ack()
 	if tu.step != last_step:
 		var live := m.mobs.filter(func(x): return not x.dead).size()
-		print("TUT step ", tu.step, " ", tu.id(), " t=", snapped(m.time, 0.1), " mobs=", live)
+		print("TUT step ", tu.step, " ", tu.id(), " t=", snapped(m.time, 0.1), " mobs=", live, " lv=", m.player.lvl,
+			" pts=", m.player.skill_pts, " kin=", m.player.kin != null, " seen=", tu.seen.keys())
 		last_step = tu.step
 	var p := m.player
 	for k in KEYS:
@@ -52,7 +54,12 @@ static func drive(m: Match) -> void:
 	var dest := tu.stop(sid)
 	var pad := tu.stop(sid, "pad")
 	match sid:
-		"move": goto.call(dest, 0.4)
+		"pick_sec", "pick_dash", "pick_kin", "pick_ult":
+			var slot := TutorialCamps.pick_slot(sid)
+			if tu.t > 1.0:
+				p.level_slot(slot)       # (the key press did not take: as a click on the gold +)
+			elif tu.t > 0.4:
+				p.inp[{"sec": "sec", "dash": "dash", "kin": "sig", "ult": "ult"}[slot]] = int(m.time * 10.0) % 2 == 0
 		"dash", "exdash", "glide":
 			var to := Vector2(dest.x - p.pos.x, dest.z - p.pos.z)
 			var pd := Vector2(pad.x - p.pos.x, pad.z - p.pos.z)
@@ -70,43 +77,33 @@ static func drive(m: Match) -> void:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
 				if sid == "glide": p.inp["glide"] = true
+		"wallkick":
+			goto.call(tu.stop("crouch"), 0.4)
+			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
+				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
 		"crouch":
 			goto.call(dest, 0.4)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
-		"pickup":
+		"glove":
 			var wp := tu.ground_item()
 			if not wp.is_empty():
 				goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
-		"shoot", "sig", "utility", "throw", "kin1", "fight":
+		"sec", "shoot", "gkey", "kin", "hook", "ult":
 			_fight(m, tu, goto)
-		"gkey":
-			if fmod(m.time, 1.5) < Match.DT and p.kin:
-				KinCommand.tap(p)
-				_acted = true
-		"rank":
-			p.level_slot("kin")
+		"ranks":
+			for slot in ["sec", "dash", "kin"]:
+				p.level_slot(slot)
 			_acted = true
-		"key":
-			for pk in m.pickups:
-				if pk["kind"] == "ckey":
-					goto.call(pk["pos"], 0.3)
-		"orders":
-			if fmod(m.time, 1.0) < Match.DT:
-				KinCommand.order(p, "guard" if p.kin and p.kin.cmd != "guard" else "follow")
-				_acted = true
-		"chest":
-			goto.call(tu.stop("chest"), 0.4)
-			p.inp["interact"] = true
-		"goexit", "uplink", "defend", "extract":
+		"wayout", "uplink", "defend", "extract":
 			_outpost(m, tu, goto)
 	var go: Vector2 = p.inp["move"]
 	if p.grounded and go != Vector2.ZERO:
 		var ahead := p.pos + Vector3(go.x, 0.0, go.y).normalized() * 0.9
 		if m.world.ground_at(ahead.x, ahead.z) > p.pos.y + 0.3 and not m.world.is_void(ahead.x, ahead.z):
 			p.inp["jump"] = true       # a ledge in the way: jump it, as a player would
-	if still_t > 1.5 and go != Vector2.ZERO and sid != "crouch":
-		p.inp["jump"] = true       # (stuck against something: hop, but never on the lookout: it is climbed plainly)
+	if still_t > 1.5 and go != Vector2.ZERO:
+		p.inp["jump"] = true       # (stuck against something: hop)
 	idle = not _acted and go == Vector2.ZERO and not KEYS.any(func(k): return p.inp[k])
 
 ## One frame of the step's row: seconds in it, idle, reading, and the longest wait that was not reading.
@@ -142,28 +139,37 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
-	var best: Ent = null
-	var bd := 1e9
-	for mb in m.mobs:
-		if not mb.dead and p.flat_dist(mb) < bd:
-			bd = p.flat_dist(mb)
-			best = mb
 	var sid := tu.id()
-	if sid == "utility":
+	var best: Mob = tu.camps.nearest("sentinel" if sid == "hook" else "")
+	if best == null:
+		best = tu.camps.nearest()
+	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
-	if p.flat_dist(best) > (1.6 if melee else 3.0): goto.call(best.pos)
-	if sid in ["shoot", "fight"]: p.inp["fire"] = _fire_key(m)
-	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
-	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
-		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
-		_acted = true
-	elif sid == "fight" and p.kin and p.kin.state in ["shoulder", "active"]:
-		p.kin.throw_to(best.pos)
-		_acted = true
+	var reach := 1.6 if melee else 3.0
+	if sid == "hook" and not tu.flag:
+		reach = 9.0
+	if p.flat_dist(best) > reach: goto.call(best.pos)
+	match sid:
+		"shoot": p.inp["fire"] = _fire_key(m)
+		"gkey":
+			if fmod(m.time, 1.5) < Match.DT and p.kin:
+				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
+				_acted = true
+			p.inp["fire"] = tu.flag and _fire_key(m)
+		"kin":
+			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
+			p.inp["fire"] = tu.flag and _fire_key(m)
+		"hook":
+			p.inp["gear1"] = not tu.flag and p.flat_dist(best) < 9.5 and int(m.time * 10.0) % 2 == 0
+			p.inp["fire"] = tu.flag and _fire_key(m)
+		"ult":
+			p.inp["ult"] = not tu.flag and int(m.time * 10.0) % 2 == 0
+			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.
@@ -191,7 +197,7 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 		return
 	var c: Vector3 = o["pos"]
 	match tu.id():
-		"goexit":
+		"wayout":
 			# go there the way a bot would: over the bridges, or jump and glide across a gap
 			var mv := m.bot_brain._path_dir(m, p, c)
 			if p.ai.has("cross"):
