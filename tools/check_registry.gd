@@ -288,6 +288,7 @@ const CHECKS := {
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],      # the Dash's showcase wall
+	# --glint-fishing-check also takes --glint-fishing-shots=<dir>
 	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],      # 4.2 game 4
 	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],      # garden minigame sounds
 	"--echo-steps-check": ["res://tools/echo_steps_check.gd", "echo_steps_check", null],  # GARDEN_MODERN 4.2
