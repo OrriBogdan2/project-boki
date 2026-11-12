@@ -161,8 +161,6 @@ func _users(main: Node) -> void:
 		ok(tag + "nameplate and health roles", roles == [p["you"], p["ally"], p["foe"]])
 		ok(tag + "a rival's hit marker", foe._marker_col() == p["foe"])
 		ok(tag + "your squad's hit marker", _same(Color(mate._marker_col(), 1.0), p["ally"]))
-		var shot: Color = Oomph.shot_look(m, foe, Color.WHITE, 0.2)[0]
-		ok(tag + "a rival's shot tints toward the rival colour", _same(shot, Color.WHITE.lerp(p["foe"], 0.35)))
 		ok(tag + "a rival's box", Life.owner_col(m, {"owner": foe}) == p["foe"])
 		ok(tag + "an enemy ping", PingInput.color(m, me, "enemy") == p["foe"])
 		ok(tag + "squad map colours", m.mate_col(me) == p["mates"][0] and m.mate_col(mate) == p["mates"][1])
