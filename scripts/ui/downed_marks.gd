@@ -6,38 +6,36 @@ extends RefCounted
 ##     revive progress filling inside it, flashing over the last LOW_S seconds; red and pulsing while
 ##     an enemy stands on them (stomp)
 ##   - only for a teammate close by (CUE_RANGE), the revive reach on the ground, thin, filling as they
-##     revive, and one line on the HUD saying to step onto the Wisp
-## Reviving is standing on the Wisp (Life), so there is no key to press.
+##     revive; their plate over the Wisp says to jump on it (HudPlate)
+## Reviving is jumping onto or standing over the Wisp (Life), so there is no key to press.
 
-const MARK_UP := 0.45         # m over the feet: the Hunter Wisp's middle (WispLook hover)
+const MARK_UP := 0.25         # m over the feet: the Hunter Wisp's middle (WispLook.hover)
 const MARK_R := 17.0          # px: the ring round the Wisp
 const MARK_W := 4.0           # px: its width
 const LOW_S := 5.0            # s: the last seconds of a bleed-out flash
-const CUE_RANGE := 9.0        # m: a teammate this close sees the revive reach and the HUD line
+const CUE_RANGE := 9.0        # m: a teammate this close sees the revive reach and the jump prompt
 const STOMP_RED := Color(1.0, 0.18, 0.1)
 const BACK := Color(0.03, 0.04, 0.07, 0.55)
 
 ## Draws every visible downed Hunter's marks on the HUD canvas.
 static func draw(c: Control, m: Match) -> void:
 	var p: Hunter = m.player
-	var cue: Hunter = null
 	for o: Hunter in m.hunters:
 		if not o.downed or o.out or (o.unseen and o != p):
 			continue
 		var stomped: bool = o.get_meta("stomped", false)
 		var col := STOMP_RED if stomped else SideColor.of(m, o)
-		var mate := p != null and p != o and o.team == p.team and not p.out and not p.downed
-		if mate and not stomped and p.flat_dist(o) < CUE_RANGE:
+		if cued(p, o):
 			_reach(c, m, o, col)
-			if p.flat_dist(o) > float(Life.R["revive_radius"]) and (cue == null or p.flat_dist(o) < p.flat_dist(cue)):
-				cue = o
 		var at3 := o.pos + Vector3(0, MARK_UP, 0)
 		if not m.cam.is_position_behind(at3):
 			badge(c, m.cam.unproject_position(at3), o, col, m.time, MARK_R)
-	if cue:
-		var sz := c.size
-		HudStyle.ctext(c, Vector2(sz.x * 0.5, sz.y * 0.8), "Step onto %s's wisp to revive" % cue.pname, 15,
-			SideColor.of(m, cue))
+
+## Does the viewer `p` get the revive cues for downed `o` (the reach, the jump prompt): a teammate who is
+## up, close by, and nobody is stomping `o`. Rivals and the downed themselves never do.
+static func cued(p: Hunter, o: Hunter) -> bool:
+	return p != null and p != o and o.team == p.team and not p.out and not p.downed \
+		and not o.get_meta("stomped", false) and p.flat_dist(o) < CUE_RANGE
 
 ## The ring round a Wisp at screen point `at` (radius `r` px): bleed-out left in `col`, revive progress
 ## inside it; flashes while little time is left. The squad's offscreen arrows draw the same one.
