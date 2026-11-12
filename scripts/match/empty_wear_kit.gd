@@ -6,7 +6,7 @@ extends RefCounted
 ## Layers go on bottom, top, shoes, gloves, headwear (EmptyWear.DRESS_ORDER).
 
 const OFF := 0.014                  # m: a garment's surface out from what it covers
-const BOOT_SNUG := 0.004            # m: boots and straps, thinner: a thicker shell folds into itself at the ankle's crease
+const BOOT_SNUG := 0.004            # m: boots and straps: thicker folds into itself at the ankle
 const SNUG := 0.008                 # m: leggings, gloves, shoes
 const LOOSE := 0.032                # m: baggy trousers
 const TRIM := 0.006                 # m: a band stands this far out from the garment it edges
@@ -290,8 +290,8 @@ func _head(it: int, mats: Array) -> void:
 			_hat_crown(gear, mats, 0.08, OFF)
 			_put(gear, HeroGear.brim("empty_wide", 0.2, 0.38, 0.03, 0.0, 0.01), mats[0], HC + Vector3(0, 0.08, 0))
 			var tip := HC + Vector3(0.2, 0.16, 0.06)
-			_put(gear, HeroKit.lock_mesh("empty_feather", [tip, tip + Vector3(0.04, 0.12, 0.08), tip + Vector3(0.05, 0.2, 0.2)],
-				0.05, 0.25, Vector3.BACK), mats[2])
+			var quill := [tip, tip + Vector3(0.04, 0.12, 0.08), tip + Vector3(0.05, 0.2, 0.2)]
+			_put(gear, HeroKit.lock_mesh("empty_feather", quill, 0.05, 0.25, Vector3.BACK), mats[2])
 		3:   # cap with a bill
 			_hat_crown(gear, mats, 0.06, OFF)
 			_put(gear, Models.box(0.28, 0.018, 0.16), mats[0], HC + Vector3(0, 0.07, -0.29))

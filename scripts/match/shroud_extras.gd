@@ -143,8 +143,10 @@ static func _bandolier(t: ShroudTailor, fit: Dictionary) -> void:
 ## A scarf wound twice round the neck, its two ends hanging down the front.
 static func _scarf(t: ShroudTailor, fit: Dictionary) -> void:
 	var r := float(fit["neck"])
-	t.rigid(t.torso, HeroKit.mantle("shroud|scarf|%.3f" % r, r, r * 0.92, 0.05, 6.0), t.m["leather"], Vector3(0, 0.64, 0))
+	var wound := HeroKit.mantle("shroud|scarf|%.3f" % r, r, r * 0.92, 0.05, 6.0)
+	t.rigid(t.torso, wound, t.m["leather"], Vector3(0, 0.64, 0))
 	for sx in [-1.0, 1.0]:
 		var top := Vector3(0.06 * sx, 0.62, -r - 0.01)
 		var tail := [top, top + Vector3(0.01 * sx, -0.12, -0.03), top + Vector3(0.02 * sx, -0.26, -0.035)]
-		t.rigid(t.torso, HeroKit.lock_mesh("shroud|scarf_end%.0f|%.3f" % [sx, r], tail, 0.07, 0.3, Vector3.FORWARD), t.m["trim"])
+		var end := HeroKit.lock_mesh("shroud|scarf_end%.0f|%.3f" % [sx, r], tail, 0.07, 0.3, Vector3.FORWARD)
+		t.rigid(t.torso, end, t.m["trim"])

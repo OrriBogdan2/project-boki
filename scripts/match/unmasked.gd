@@ -24,7 +24,8 @@ const COLOURS := [Color("6b6f7a"), Color("3f4a63"), Color("2d3561"), Color("4f6b
 	Color("ece6da"), Color("17161c"), Color("c4392f"), Color("4f8fd0"), Color("e0b23a"), Color("7ab87a")]
 const VOID_SKIN := Color("0b0814")    # what the head is made of under the void shell
 ## The bare body's void fill (look["void"]) and its outline and lit edge (look["line"]).
-const VOID_TINTS := [Color("0b0814"), Color("060b18"), Color("16091a"), Color("06130f"), Color("111114"), Color("1d1236")]
+const VOID_TINTS := [Color("0b0814"), Color("060b18"), Color("16091a"), Color("06130f"), Color("111114"),
+	Color("1d1236")]
 const LINES := [Color("8ae8ff"), Color("f4f0ff"), Color("ffd36a"), Color("ff7ab0"), Color("b48cff"), Color("7affc4"),
 	Color("ff9a5a")]
 ## Hair styles (look["hair"]): none, then HeroHair's human styles in order (Models.LOOK_HAIRS without Bald).

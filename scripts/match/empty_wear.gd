@@ -12,7 +12,7 @@ const LAYERS := ["top", "bottom", "shoes", "gloves", "head"]      # kept in look
 const DRESS_ORDER := ["bottom", "top", "shoes", "gloves", "head"]  # a top hangs over the trousers, boots under them
 const COLOURS_PER_ITEM := 3
 const VOID_BODY := preload("res://shaders/void_body.gdshader")
-const OUTLINE_W := 0.0024           # the bare body's ink line (outline.gdshader): bolder than a Hunter's, it is the look
+const OUTLINE_W := 0.0024           # the bare body's ink line (outline.gdshader), bolder than a Hunter's
 const DROP_Z := -0.01               # m: a part in front of the knee's pivot is the knee pad (the bare body has none)
 ## The skin-side materials Models.hunter gives the body: on the Empty they all become the void.
 const SKIN_MATS := ["body", "pants", "skin", "leather", "dark"]

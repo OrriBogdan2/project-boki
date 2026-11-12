@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-5> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-6> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -9,6 +9,7 @@ extends RefCounted
 ##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
 ##   5 creator       the Empty's creator: the bare void body, Female and Male frames, then dressing up
+##   6 sheet         six example Empties (the four presets and two random rolls), a still each: clip6_<n>.png
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -59,6 +60,7 @@ func run(main_node: Node) -> void:
 		3: await _extraction(secs)
 		4: await _hatch(secs)
 		5: await _creator(secs)
+		6: await _sheet()
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -324,11 +326,49 @@ func _creator_steps(p: CreatorPanel) -> Array:
 		func(): pass, func(): pass, func(): pass,
 		func(): frame_to.call(0, 0.5, 0.5, 0.5), func(): pass, func(): pass,
 		func(): frame_to.call(1, 0.5, 0.5, 0.5), func(): pass, func(): pass,
-		func(): frame_to.call(1, 0.9, 0.2, 0.9), func(): frame_to.call(0, 0.2, 0.9, 0.3), func(): frame_to.call(0, 0.5, 0.5, 0.5),
+		func(): frame_to.call(1, 0.9, 0.2, 0.9), func(): frame_to.call(0, 0.2, 0.9, 0.3),
+		func(): frame_to.call(0, 0.5, 0.5, 0.5),
 		func(): p.show_tab("Outfit"),
 		func(): p.pick_item("top", 2), func(): p.pick_colour("top", 0, 3),
 		func(): p.pick_item("bottom", 1), func(): p.pick_colour("bottom", 0, 1),
 		func(): p.pick_item("shoes", 2), func(): p.pick_item("gloves", 1),
 		func(): p.pick_item("head", 2), func(): p.pick_colour("head", 0, 5),
-		func(): p.pick_item("back", 0), func(): p.pick_item("accessory", 2), func(): pass, func(): pass,
+		func(): p.pick_item("accessory", 5), func(): pass, func(): pass,
 	]
+
+const SHEET_RANDOM := [7, 11]      # seeds of the sheet's two random looks
+const SHEET_SETTLE := 2.5         # s for the camera to arrive before the first still
+const SHEET_HOLD := 0.8            # s a look stands in the creator before its still
+
+## Six looks, a still of the whole screen each (the panel hidden), turned a little to the side.
+func _sheet() -> void:
+	Save.d = Save.fresh()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	hx.edit_only = true
+	main.add_child(hx)
+	for _i in 4:
+		await main.get_tree().process_frame
+	await main.fade.reveal(0.01)
+	var panel: CreatorPanel = hx.create_box
+	panel.visible = false
+	hx.title.visible = false
+	hx.sub_lbl.visible = false
+	for _i in int(SHEET_SETTLE / FRAME):
+		await main.get_tree().process_frame
+	var looks: Array = []
+	for nm in EmptyFrame.rules()["presets"]:
+		looks.append(nm)
+	for sd in SHEET_RANDOM:
+		looks.append(sd)
+	for k in looks.size():
+		if looks[k] is String:
+			panel.use_preset(looks[k])
+		else:
+			seed(int(looks[k]))
+			panel.randomize_look()
+		hx.preview_yaw = PI - 0.4
+		hx.preview.rotation.y = PI - 0.4
+		for _i in int(SHEET_HOLD / FRAME):
+			await main.get_tree().process_frame
+		main.get_viewport().get_texture().get_image().save_png(dir.path_join("clip6_%d.png" % k))
+		frame += 1

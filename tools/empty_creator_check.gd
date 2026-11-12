@@ -14,7 +14,8 @@ const HIDDEN := 0.004        # m: a body point this far inside its region's oute
 const SURFACE := 0.6        # a garment face's corners' normals agree with it at least this much
 const STRIDE := 3           # every third body vertex: neighbours are a few mm apart
 const MIN_ITEMS := 6
-const POSED := ["Rig/Torso", "Rig/Torso/Skirt", "Rig/Torso/HeadPivot", "Rig/Legs/LegL", "Rig/Legs/LegR", "Rig/Legs/LegL/Knee",
+const POSED := ["Rig/Torso", "Rig/Torso/Skirt", "Rig/Torso/HeadPivot", "Rig/Legs/LegL", "Rig/Legs/LegR",
+	"Rig/Legs/LegL/Knee",
 	"Rig/Legs/LegR/Knee", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmRPivot", "Rig/Torso/ArmLPivot/Elbow",
 	"Rig/Torso/ArmRPivot/Elbow", "Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Torso/ArmRPivot/Elbow/Hand"]
 const TRI_BUDGET := 15000   # the Hunter budget (S1), everything worn
@@ -58,7 +59,8 @@ func _round_trip() -> void:
 			var after: Dictionary = Save.d["look"]
 			var diff := lk.keys().filter(func(k): return not after.has(k) or str(after[k]) != str(lk[k]))
 			diff.append_array(after.keys().filter(func(k): return not lk.has(k)))
-			print("EMPTY  (round trip differs in %s: %s)" % [str(diff), str(diff.map(func(k): return [lk.get(k), after.get(k)]))])
+			var was := diff.map(func(k): return [lk.get(k), after.get(k)])
+			print("EMPTY  (round trip differs in %s: %s)" % [str(diff), str(was)])
 			same = false
 	ok(same, "12 random looks (frame, outfit, colours, face) save and load back exactly, and clean to themselves")
 	var a := Unmasked.clean(Unmasked.random_look())
@@ -118,7 +120,7 @@ func _empty_slots() -> void:
 	var bare := _build(Unmasked.default_look())
 	var mats := _mats(bare)
 	var all_void := mats.all(func(m: Material) -> bool: return _is_body(m) or _is_head(m))
-	ok(all_void and mats.any(_is_body), "a new Empty is the bare void body: nothing worn, nothing but the void and its line")
+	ok(all_void and mats.any(_is_body), "a new Empty is the bare void body: only the void and its outline")
 	var ink: Material = mats.filter(_is_body)[0].next_pass
 	ok(ink is ShaderMaterial and (ink as ShaderMaterial).shader == Models.OUTLINE, "the bare body has an outline pass")
 	bare.free()
@@ -141,7 +143,8 @@ func _empty_slots() -> void:
 			total += 1
 			m.free()
 	ok(counts, "every slot offers at least %d items and 2-3 colour slots" % MIN_ITEMS)
-	ok(builds == total, "every item of every slot builds on its own, and every slot empty shows nothing (%d / %d)" % [builds, total])
+	ok(builds == total, "every item of every slot builds alone, and every slot empty shows nothing (%d / %d)"
+		% [builds, total])
 	var full := Unmasked.default_look()
 	for id in EmptyWear.LAYERS:
 		EmptyWear.set_item(full, id, 1)
@@ -156,14 +159,6 @@ func _empty_slots() -> void:
 	EmptyWear.set_item(heavy, "accessory", 4)
 	var hm := _build(Unmasked.clean(heavy))
 	var tris := _tris(hm)
-	if OS.get_environment("EMPTY_DEBUG") != "":
-		for mi in hm.find_children("*", "MeshInstance3D", true, false):
-			var t1 := 0
-			var mesh := (mi as MeshInstance3D).mesh
-			if mesh == null: continue
-			for sf in mesh.get_surface_count():
-				t1 += (mesh.surface_get_arrays(sf)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-			if t1 > 300: print("EMPTY  (tris %d %s %s)" % [t1, hm.get_path_to(mi), _kind((mi as MeshInstance3D).material_override)])
 	ok(tris <= TRI_BUDGET, "the heaviest outfit stays in the Hunter budget (%d / %d triangles)" % [tris, TRI_BUDGET])
 	hm.free()
 
@@ -175,7 +170,8 @@ func _tris(m: Node3D) -> int:
 			continue
 		for s in mesh.get_surface_count():
 			var idx: PackedInt32Array = mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX]
-			out += idx.size() / 3 if not idx.is_empty() else (mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+			var verts: PackedVector3Array = mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]
+			out += (idx.size() if not idx.is_empty() else verts.size()) / 3
 	return out
 
 ## The materials a model is drawn in, not counting its glider, weapon and team ring.
@@ -185,7 +181,8 @@ func _mats(m: Node3D) -> Array:
 		if _under(mi, ["Glider", "Gun", "TeamRing"], m):
 			continue
 		var mat := (mi as MeshInstance3D).material_override
-		if mat and (mi as MeshInstance3D).mesh and (mi as MeshInstance3D).mesh.get_surface_count() > 0 and not mat in out:
+		var mesh := (mi as MeshInstance3D).mesh
+		if mat and mesh and mesh.get_surface_count() > 0 and not mat in out:
 			out.append(mat)
 	return out
 
@@ -243,8 +240,8 @@ func _no_clipping() -> void:
 	worst = {"m": 0.0, "what": ""}
 	_measure_bites(found)
 	worst = found
-	ok(worst["m"] <= TOL, "no shape corner (x2 sexes x 7 outfits, %d looks, %d ms) clips the body through an outfit (worst %.1f mm: %s)"
-		% [looks, Time.get_ticks_msec() - t0, worst["m"] * 1000.0, worst["what"]])
+	var msg := "no shape corner (x2 sexes x 7 outfits, %d looks, %d ms) clips through an outfit (worst %.1f mm: %s)"
+	ok(worst["m"] <= TOL, msg % [looks, Time.get_ticks_msec() - t0, worst["m"] * 1000.0, worst["what"]])
 
 ## The joints straight, as the outfit was fitted (Models.hunter hands the model over in its stance: knees and elbows
 ## bent, legs apart). Clothes are rigid per joint, so a bent joint can still fold a hem into the next part.
@@ -266,7 +263,7 @@ func _measure_bites(found: Dictionary) -> void:
 		if mi and _is_body(mi.material_override):
 			mi.mesh = EmptyWearKit.grown(mi.mesh, 0.03, -INF, INF)
 	_pokes(m, "grown")
-	ok(float(worst["m"]) > 0.01, "the clipping measure catches a body grown through its top (%.1f mm; %d pairs in the sweep)"
+	ok(float(worst["m"]) > 0.01, "the clipping measure catches a body grown through its top (%.1f mm; %d pairs)"
 		% [float(worst["m"]) * 1000.0, int(found.get("pairs", 0))])
 	m.free()
 
@@ -308,8 +305,6 @@ func _pokes(m: Node3D, what: String) -> void:
 		var past := _past(grid, tris, at, body[1][i], names[body[2][i]])
 		worst["pairs"] = int(worst.get("pairs", 0)) + (1 if past > -INF else 0)
 		var where := "%s %s at %s" % [what, names[body[2][i]], str(at.snapped(Vector3.ONE * 0.001))]
-		if past > 0.01 and OS.get_environment("EMPTY_DEBUG") != "":
-			print("EMPTY  (poke %s, %.1f mm)" % [where, past * 1000.0])
 		if past > float(worst["m"]):
 			worst["m"] = past
 			worst["what"] = where
@@ -377,7 +372,8 @@ func _faces(mesh: Mesh, xf: Transform3D, into: Array, part: String) -> void:
 			if fn.length_squared() < 1e-14:
 				continue
 			fn = fn.normalized()
-			var corners := [(nb * ns[idx[t]]).normalized(), (nb * ns[idx[t + 1]]).normalized(), (nb * ns[idx[t + 2]]).normalized()]
+			var corners := [(nb * ns[idx[t]]).normalized(), (nb * ns[idx[t + 1]]).normalized(),
+				(nb * ns[idx[t + 2]]).normalized()]
 			if fn.dot(corners[0] + corners[1] + corners[2]) < 0.0:
 				fn = -fn
 			if corners.all(func(cn: Vector3) -> bool: return cn.dot(fn) > SURFACE):
@@ -471,7 +467,8 @@ func _panel(main: Node) -> void:
 	c.show_tab("Outfit")
 	c.pick_item("top", 2)
 	c.pick_colour("top", 0, 5)
-	ok(EmptyWear.item(c.look, "top") == 2 and EmptyWear.colour(c.look, "top", 0) == 5, "the Outfit tab puts on an item and colours it")
+	ok(EmptyWear.item(c.look, "top") == 2 and EmptyWear.colour(c.look, "top", 0) == 5,
+		"the Outfit tab puts on an item and colours it")
 	c.pick_item("top", EmptyWear.NONE)
 	ok(EmptyWear.item(c.look, "top") == EmptyWear.NONE, "and takes it off again")
 	c.use_preset(String(EmptyFrame.rules()["presets"].keys()[0]))

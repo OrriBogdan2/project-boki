@@ -57,6 +57,17 @@ profile.
 - Migration of old looks; `--empty-creator-check`: save/load round trip per slot, old-save migration, every slot
   empty and every item alone, no clipping at the shape corners, the M/F frame, the panel.
 
+## Checks and media
+- `--empty-creator-check`: save/load round trip per slot, old-save migration (twice), every slot empty and every item
+  alone, no shape corner (2 sexes x 8 slider corners x 7 outfits) clips through an outfit (3 mm), triangle budget,
+  the M/F frame, the panel. `--unmasked-check` (the older Empty check) now reads the frame sliders.
+- Clip and sheet: `--gameplay-media --media-clip=5` (void body, Female / Male frames, then dressing up) and
+  `--media-clip=6` (six example Empties). Made on rpc4: `/home/boki/meshy/char-creator-1111.mp4` (1280x720, 26 s) and
+  `/home/boki/meshy/char-creator-1111-sheet.png`.
+- Fit notes from the clipping sweep: boots and sandal straps are thin (a thick shell folds in at the ankle crease),
+  the hood and helm are fitted to the void head (the Hunter's own hood and helm poke through it), a glove's thumb
+  is grown whole, hand wraps cover palm and thumb under two bands.
+
 ## Missing / not done
 - **Voice:** the Empty has no voice lines anywhere yet, so there is no voice pick.
 - **Clipping in motion:** the check covers the rest pose. Skirts hang from the "Skirt" pivot (it sways), not the
