@@ -291,7 +291,7 @@ func puzzle_of(h: Hunter) -> Dictionary:
 	return {}
 
 ## The awake boss the local player is fighting (inside its lair, or right by it), or null.
-func boss_for(p: Hunter) -> Boss:
+func boss_for(p: Hunter) -> Mob:
 	if p == null:
 		return null
 	for L in list:

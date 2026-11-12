@@ -79,6 +79,7 @@ var cleared_t := -1.0          # session time the last wave was cleared (-1 unti
 var squad_n := 1               # Hunters in the squad (1-4): the scale row
 var difficulty := "normal"     # rules "difficulty" key
 var gates: HeartRaidGates      # where and when each wave comes out, and its marks
+var boss_nid := ""             # a client: the host's boss id, until its Mob arrives
 var boss: Mob = null           # the boss (a Boss on the host; a client mirrors a plain Mob)
 var lair := {}                 # the boss's fight square round the Heart, in Lairs' lair shape
 var foes: Array[Mob] = []      # wave monsters alive
@@ -134,6 +135,8 @@ func tick(dt: float) -> void:
 		_sync_t -= THINK_S
 		if _sync_t <= 0.0:
 			_broadcast()
+	elif boss == null and boss_nid != "":
+		boss = m.ents_by_id.get(boss_nid, null) as Mob      # its snapshot lands after the "hr" that names it
 	_check_end()
 
 func _direct() -> void:
@@ -284,12 +287,13 @@ func _boss_down() -> void:
 		m.hud.toast("THE HEART OPENS  ·  HOLD ITS RING", Heart.COL)
 	_broadcast()
 
-## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for).
-func boss_for(p: Hunter) -> Boss:
-	if not (boss is Boss) or boss.dead or p == null:
+## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for). A client's boss is a
+## plain Mob (hp and max_hp ride the snapshot), so the square comes from the rules, not from the host's lair.
+func boss_for(p: Hunter) -> Mob:
+	if boss == null or not is_instance_valid(boss) or boss.dead or p == null:
 		return null
-	var c: Vector3 = lair["c"]
-	var hf := float(lair["half"]) + 4.0
+	var c: Vector3 = m.heart.site
+	var hf := float(rules()["boss"]["half"]) + 4.0
 	return boss if absf(p.pos.x - c.x) <= hf and absf(p.pos.z - c.z) <= hf else null
 
 ## The raid's reward bundle (Heart.pay, the final seat in a raid) and the species of its egg: one of the
@@ -330,4 +334,5 @@ func net_in(x: Array) -> void:
 	wave = int(x[2])
 	next_wave_t = r("first_wave_s") + wave * r("wave_every_s")     # the host's wave clock (fixed timers)
 	boss_down = phase == P.HOLD or phase == P.WON
-	boss = m.ents_by_id.get(String(x[3]), null) as Mob
+	boss_nid = String(x[3])
+	boss = m.ents_by_id.get(boss_nid, null) as Mob

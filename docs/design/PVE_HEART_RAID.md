@@ -106,7 +106,9 @@ now, but it takes Boki players find today out of Expeditions, against the series
 - **Player split:** a second queue thins the Expedition lobbies. Keep the raid offline/party-only (no matchmaking)
   until the player count supports both. Bots fill the seats anyway.
 - **Matchmaking:** there is no raid queue. Online is the existing lobby ("Heart Raid" mode, the first 4 ready, the
-  host fills the rest with bots). Clients see a lair boss as a plain monster: the bar over its head, no top bar.
+  host fills the rest with bots). A client's boss is a plain Mob fed by the snapshot (hp, max_hp), and the HUD's top bar draws it too: name from
+  these rules, phase from its health (`Boss.phase_at`), no enrage clock (that runs on the host). No Net field.
+  Proof: `--raid-boss-bar-online-check` (host + guest over the relay).
 - **Perf:** at most 4 Hunters + 8 Boki + 17 wave monsters + 1 boss, against 30 Hunters + 60 Boki in an Expedition.
   Not yet measured on a real GPU (--perf-bench).
 - **Balance:** the numbers are first guesses. The smoke runs print a line a minute to tune from.

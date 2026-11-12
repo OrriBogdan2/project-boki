@@ -53,6 +53,10 @@ func init_boss(match_node: Node, id: String, k: String, at: Vector3, tier_k: flo
 func mass() -> float:
 	return 80.0
 
+## The phase a boss with this health is in (0, 1 at 66%, 2 at 33%); a client works it out from the synced hp.
+static func phase_at(hp_now: float, hp_max: float) -> int:
+	return 0 if hp_now > hp_max * 0.66 else (1 if hp_now > hp_max * 0.33 else 2)
+
 func col() -> Color:
 	return COL.get(mkind, Color("ff6a4a"))
 
@@ -202,7 +206,7 @@ func sim(dt: float) -> void:
 	if md.get("stag", false):
 		_tick_stagger(dt)
 	# phases at 66% and 33%
-	var want := 0 if hp > max_hp * 0.66 else (1 if hp > max_hp * 0.33 else 2)
+	var want := phase_at(hp, max_hp)
 	if want > phase:
 		_phase_up(want)
 	if not enraged and awake_t >= float(md.get("enrage", 75.0)):

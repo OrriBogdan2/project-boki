@@ -319,6 +319,8 @@ const CHECKS := {
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
+	# 2 games, relay: a raid client's boss top bar
+	"--raid-boss-bar-online-check": ["res://tools/raid_boss_bar_online_check.gd", "raid_boss_bar_online_check", null],
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	# + a server, delay
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],
