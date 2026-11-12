@@ -3137,6 +3137,7 @@ func render(delta: float, alpha: float) -> void:
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed and not crouch:
 		Sfx.step(pos, -14.0 if is_local() else -20.0)
+	if posed: HazardMoveSfx.play(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)

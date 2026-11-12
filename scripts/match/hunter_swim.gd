@@ -21,11 +21,18 @@ const REACH_TREAD := 0.45    # share of the stroke when only treading water
 const SIDE_X := 0.1          # m: the hand stays this far out from its shoulder line
 const EASE_RATE := 8.0       # 1/s: how fast the wade and the swim ease in and out
 
-## Eases the wade and swim weights and turns the stroke at the pace of the swim.
+## Eases the wade and swim weights and turns the stroke at the pace of the swim. Sets a.hz_cues (HazardMoveSfx):
+## a stroke when a hand goes in (the phase passes 0 or PI), going into and out of the swim, footing lost and back.
 static func tick(a: HunterAnim, dt: float, s: Dictionary, spd: float) -> void:
+	var swim := bool(s.get("swim", false))
+	var ice := not (s.get("footing", {}) as Dictionary).is_empty()
+	a.hz_cues = HazardMoveSfx.edges(a, swim, ice)
 	a.wade_k = move_toward(a.wade_k, 1.0 if bool(s.get("wade", false)) else 0.0, dt * EASE_RATE)
-	a.swim_k = move_toward(a.swim_k, 1.0 if bool(s.get("swim", false)) else 0.0, dt * EASE_RATE)
+	a.swim_k = move_toward(a.swim_k, 1.0 if swim else 0.0, dt * EASE_RATE)
+	var ph0 := a.swim_ph
 	a.swim_ph += dt * TAU * lerpf(HZ_TREAD, HZ_FULL, speed_k(spd))
+	if swim and a.swim_k > 0.5 and int(floor(a.swim_ph / PI)) != int(floor(ph0 / PI)):
+		a.hz_cues |= HazardMoveSfx.STROKE
 
 ## 0 treading .. 1 a full swim.
 static func speed_k(spd: float) -> float:

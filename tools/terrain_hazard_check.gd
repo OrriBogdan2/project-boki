@@ -68,6 +68,7 @@ func run(main_node: Node) -> void:
 					hud.get("safe", null) == safe)
 				_hint(kind, safe)
 		_fields()
+		await _move_sounds()
 		await _stack()
 		_bots()
 	print("TERRAIN CHECK DONE, %d checks, failures: %d" % [n, fails])
@@ -334,3 +335,75 @@ func _bots() -> void:
 		bot.teleport(Vector3(edge.x + 0.5, float(tz.areas[ai]["y"]), edge.y + 0.5))
 		var guard := "ignores" if safe else "steers off"
 		ok("its edge guard %s the lava ahead" % guard, m.bot_brain._safe(m, bot, d, 3.5) == safe)
+
+# ------------------------------------------------------------------ the moves' sounds (HazardMoveSfx)
+## Runs the real frames for secs and returns what the player's pose found: the strokes counted, every sound played.
+func _listen(secs: float) -> Dictionary:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	var strokes := 0
+	var bits := 0
+	var t := 0.0
+	while t < secs:
+		m.step(Match.DT)
+		P.render(Match.DT, 1.0)
+		await main.get_tree().process_frame
+		var c := P.anim.hz_cues
+		strokes += 1 if c & HazardMoveSfx.STROKE else 0
+		bits |= c
+		t += Match.DT
+	return {"strokes": strokes, "bits": bits, "heard": Sfx.last_played.keys()}
+
+## The volume of the sound Sfx played last (its pool voice).
+func _last_db() -> float:
+	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
+
+## Whether _listen found the cue bit and heard the sound for it.
+func _cue(r: Dictionary, bit: int, sound: String) -> bool:
+	return r["bits"] & bit != 0 and sound in r["heard"]
+
+func _move_sounds() -> void:
+	_kin(PLAIN)
+	P.perks.clear()
+	var water := _first("deep_water")
+	var ice := _first("ice")
+	_stand(water)
+	Sfx.listener = P.pos
+	var r := await _listen(2.5)
+	ok("deep water: a splash going in and a stroke splash per arm stroke (%d in 2.5 s)" % r["strokes"],
+		r["bits"] & HazardMoveSfx.ENTER != 0 and r["strokes"] >= 2 and "splash" in r["heard"] and "swim" in r["heard"],
+		str(r["heard"]))
+	_stand(ice)
+	Sfx.listener = P.pos
+	r = await _listen(0.5)
+	ok("leaving the water: a splash coming out", _cue(r, HazardMoveSfx.EXIT, "splash"), str(r["heard"]))
+	ok("ice, no footing: a skid scrape", _cue(r, HazardMoveSfx.SKID, "hazard_skid"), str(r["heard"]))
+	P.perks = [TerrainHazards.ward_for("ice")]
+	r = await _listen(0.5)
+	ok("a ward puts the footing back: a catch", _cue(r, HazardMoveSfx.CATCH, "hazard_catch"), str(r["heard"]))
+	P.perks.clear()
+	var rival: Hunter = null
+	for h in m.hunters:
+		if h != P:
+			rival = h
+			break
+	ok("a rival to compare with", rival != null)
+	if rival == null:
+		return
+	rival.render(Match.DT, 1.0)       # (builds its pose: the match's own render is off)
+	var db := {}
+	for who: Hunter in [P, rival]:
+		Sfx.listener = who.pos
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		who.anim.hz_cues = HazardMoveSfx.SKID
+		HazardMoveSfx.play(who)
+		db[who] = _last_db()
+	ok("a rival's skid is %.0f dB quieter than yours" % -HazardMoveSfx.OTHERS_DB,
+		is_equal_approx(float(db[P]) - float(db[rival]), -HazardMoveSfx.OTHERS_DB), str(db.values()))
+	Sfx.listener = rival.pos + Vector3(60, 0, 0)
+	Sfx.last_played.clear()
+	HazardMoveSfx.play(rival)
+	ok("out of earshot (60 m): no sound", Sfx.last_played.is_empty(), str(Sfx.last_played.keys()))
+	rival.anim.hz_cues = 0
+	P.anim.hz_cues = 0

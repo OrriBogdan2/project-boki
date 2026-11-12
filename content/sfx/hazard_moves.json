@@ -1,0 +1,9 @@
+{
+ "group": "hazard_moves",
+ "name": "Hazard moves",
+ "script": "tools/gen_sfx_hazard_moves.py",
+ "sounds": {
+  "hazard_skid": "dash",
+  "hazard_catch": "impact"
+ }
+}
