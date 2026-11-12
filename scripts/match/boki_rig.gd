@@ -426,7 +426,7 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
-	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	var asleep := _lying()
 	if asleep != _asleep:
 		_asleep = asleep
 		if _speed < WALK_SPEED:
@@ -459,6 +459,10 @@ func _start_shot(which: String, rate := 1.0) -> void:
 	_shot = which
 	_shot_rate = rate
 	_shot_left = player.get_animation(which).length / rate
+
+## Asleep at home (kstate) or fainted in a match (kdown): no clip of its own, so it settles down, naps and wakes.
+func _lying() -> bool:
+	return String(root.get_meta("kstate", "")) == "sleep" or bool(root.get_meta("kdown", false))
 
 func _state_clip() -> String:
 	if _aloft:

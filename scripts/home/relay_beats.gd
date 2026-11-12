@@ -5,7 +5,8 @@ extends RefCounted
 ## a moment), and the finish (the winning team cheers, the losers sulk). Duo friends (BaseDuo) tap in the same
 ## happy hop and their burst swells and eases instead of stepping, so their pass reads smoother.
 ## A rigged Boki plays a clip through BokiRig's "kact" meta, the burst through its "kburst" meta; a clip the
-## species does not have is a hop (stonehop), and a sulk without a clip is a head drop (the node pitches).
+## species does not have plays its "fallback" clip from the rules (win hops, sulk stands: no rig has either) if it
+## has that, else a hop (stonehop), and a sulk without a clip is a head drop (the node pitches).
 ## Tuning: content/rules/base_relay.json "beats". Never touches the save.
 
 const CLIP_DUO := "stonehop"       # both runners of a duo pass hop together
@@ -60,7 +61,10 @@ func clear(nodes: Array) -> void:
 		n.rotation.x = 0.0
 
 static func _play(n: Node3D, clip: String) -> void:
-	n.set_meta("kact", clip if _has_clip(n, clip) else CLIP_DUO)
+	var play := clip
+	if not _has_clip(n, play):
+		play = String(rules()["fallback"].get(clip, CLIP_DUO))
+	n.set_meta("kact", play if _has_clip(n, play) else CLIP_DUO)
 
 static func _has_clip(n: Node3D, clip: String) -> bool:
 	for p in n.find_children("*", "AnimationPlayer", true, false):
