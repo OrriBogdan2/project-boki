@@ -8,9 +8,14 @@ scarf stay whole). `--ramp M` pulls body vertices up to M under the cut onto the
 inside it); it closes a crack on a smooth single layer but crumples layered fur, hair or clips, so it is off by default.
 `--keep-node NAME` copies a node of the head glb as it is (the live spear). `--compact` drops the head's unused
 vertices (a game master; the site file keeps them so v95-promote's face lock sees the same face primitive).
-Both glbs must share a frame (Meshy outputs of the same character: soles and crown at the same height).
+Both glbs must share a frame (Meshy outputs of the same character: soles and crown at the same height), or
+`--body-fit S,TX,TY,TZ` scales the body by S and moves it by T into the head's frame.
+`--head-box XMAX,ZMIN[,YMAX]` (repeatable, a union) limits the head part above the cut to |x| < XMAX, z > ZMIN (and
+y < YMAX): props outside it (Sparkle's rods behind the head) stay the body's. `--min-island N` drops the specks such
+boxes cut off (islands under N triangles, joined through shared positions).
 Run: blender -b --factory-startup --python tools/meshy/head_graft.py -- HEAD_GLB BODY_GLB OUT_GLB --cut Y
-     [--keep-node NAME]... [--compact] [--ramp M]"""
+     [--keep-node NAME]... [--compact] [--ramp M] [--body-fit S,TX,TY,TZ]
+     [--head-box XMAX,ZMIN[,YMAX]]... [--min-island N]"""
 
 import argparse
 import json
@@ -211,7 +216,50 @@ def interpolated_normal(P, N, tri, at):
     return n / (np.linalg.norm(n) or 1.0)
 
 
-def graft(head_path, body_path, out_path, cut, keep_nodes, compact, ramp=RAMP):
+def in_box(P, T, boxes):
+    """triangles of T whose centroid is inside one of the head boxes (XMAX, ZMIN[, YMAX]); all of them without boxes."""
+    if not boxes:
+        return np.ones(len(T), bool)
+    c = P[T].mean(1)
+    inside = np.zeros(len(T), bool)
+    for b in boxes:
+        inside |= (np.abs(c[:, 0]) < b[0]) & (c[:, 2] > b[1]) & (c[:, 1] < (b[2] if len(b) > 2 else np.inf))
+    return inside
+
+
+def drop_islands(P, T, min_tris):
+    """T without its islands (connected through shared positions, so UV seams do not split them) of fewer than
+    min_tris triangles: box-cut prop specks."""
+    if min_tris <= 0 or not len(T):
+        return T
+    _, weld = np.unique(np.round(P / 1e-5).astype(np.int64), axis=0, return_inverse=True)
+    W = weld.ravel()[T]
+    lab = np.arange(W.max() + 1)
+    while True:
+        m = lab[W].min(1)
+        new = lab.copy()
+        np.minimum.at(new, W.ravel(), np.repeat(m, 3))
+        new = new[new]
+        if np.array_equal(new, lab):
+            break
+        lab = new
+    root = lab[W[:, 0]]
+    _, inv, cnt = np.unique(root, return_inverse=True, return_counts=True)
+    return T[cnt[inv] >= min_tris]
+
+
+def graft(
+    head_path,
+    body_path,
+    out_path,
+    cut,
+    keep_nodes,
+    compact,
+    ramp=RAMP,
+    fit=(1.0, 0.0, 0.0, 0.0),
+    boxes=(),
+    min_island=0,
+):
     hj, hb = read(head_path)
     bj, bb = read(body_path)
     head_src, body_src = (hj, hb), (bj, bb)
@@ -220,11 +268,12 @@ def graft(head_path, body_path, out_path, cut, keep_nodes, compact, ramp=RAMP):
     HP = acc(hj, hb, hp["attributes"]["POSITION"]).astype(np.float64)
     HN = acc(hj, hb, hp["attributes"]["NORMAL"]).astype(np.float64)
     HT = acc(hj, hb, hp["indices"]).reshape(-1, 3)
-    BP = acc(bj, bb, bp["attributes"]["POSITION"]).astype(np.float64)
+    BP = acc(bj, bb, bp["attributes"]["POSITION"]).astype(np.float64) * fit[0] + np.array(fit[1:])
     BT = acc(bj, bb, bp["indices"]).reshape(-1, 3)
 
-    head_tris = HT[HP[HT, 1].mean(1) > cut - OVERLAP]
-    body_tris = BT[BP[BT, 1].mean(1) <= cut]
+    head_tris = HT[(HP[HT, 1].mean(1) > cut - OVERLAP) & in_box(HP, HT, boxes)]
+    body_tris = BT[(BP[BT, 1].mean(1) <= cut) | ~in_box(BP, BT, boxes)]
+    head_tris, body_tris = drop_islands(HP, head_tris, min_island), drop_islands(BP, body_tris, min_island)
 
     near = HT[np.abs(HP[HT, 1].mean(1) - cut) < NEAR_CUT]
     bvh = BVHTree.FromPolygons([Vector(p) for p in HP], near.tolist(), all_triangles=True)
@@ -309,8 +358,15 @@ def main():
     ap.add_argument("--keep-node", action="append", default=[])
     ap.add_argument("--compact", action="store_true")
     ap.add_argument("--ramp", type=float, default=RAMP, help="m of body under the cut pulled onto the head (0 = none)")
+    ap.add_argument("--body-fit", default="1,0,0,0", help="S,TX,TY,TZ: body scale and move into the head's frame")
+    ap.add_argument(
+        "--head-box", action="append", default=[], help="XMAX,ZMIN[,YMAX]: head part extent above the cut (m)"
+    )
+    ap.add_argument("--min-island", type=int, default=0, help="drop cut fragments of fewer triangles (0 = keep all)")
     a = ap.parse_args(sys.argv[sys.argv.index("--") + 1 :])
-    graft(a.head, a.body, a.out, a.cut, a.keep_node, a.compact, a.ramp)
+    fit = [float(v) for v in a.body_fit.split(",")]
+    boxes = [[float(v) for v in b.split(",")] for b in a.head_box]
+    graft(a.head, a.body, a.out, a.cut, a.keep_node, a.compact, a.ramp, fit, boxes, a.min_island)
 
 
 main()
