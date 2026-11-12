@@ -9,9 +9,10 @@ extends RefCounted
 
 const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
-const TILE_W := 140.0          # px, one Hunter tile
-const TILE_COLS := 3
-const LEFT_W := TILE_W * TILE_COLS + 16.0      # px, the tiles with their gaps: mastery and the glider pick match it
+const TILE_W := 214.0          # px, one Hunter tile: wide enough for "The Barnacle Knight" on one line
+const TILE_COLS := 2
+const TILE_GAP := 8            # px, between tiles
+const LEFT_W := TILE_W * TILE_COLS + TILE_GAP * (TILE_COLS - 1)      # px, tiles and gaps: mastery, glider match it
 const STAGE := Vector2(180, 240)
 const CLIP := Vector2(150, 84)        # px: each ability clip beside the turntable
 
@@ -33,12 +34,18 @@ static func open(home: Node, sel := "") -> void:
 	cols.add_child(left)
 	var grid := GridContainer.new()
 	grid.columns = TILE_COLS
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
+	grid.add_theme_constant_override("h_separation", TILE_GAP)
+	grid.add_theme_constant_override("v_separation", TILE_GAP)
 	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	left.add_child(grid)
+	var folded: Array = []      # (first visit: only open and ready Relics and the picked one show; the rest fold)
 	for id in ordered():
-		grid.add_child(_tile(home, String(id), String(id) == sel))
+		var tile := _tile(home, String(id), String(id) == sel)
+		grid.add_child(tile)
+		if ExpFold.first_visit() and String(id) != sel and ClassUnlock.status(String(id)) in ["progress", "locked"]:
+			folded.append(tile)
+	if not folded.is_empty():
+		ExpFold.add(left, folded, "Locked Relics")
 	home.set_meta("classes_grid", grid)
 	home.set_meta("hero_grid", grid)
 	var details := UI.vbox(10)
@@ -93,9 +100,7 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(c)
-	var name_label := UI.label(Arch.name_of(id), 14, col if st in ["open", "ready"] else UI.FAINT, UI.big)
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # ("The Barnacle Knight" wraps; it used to be cut)
-	c.add_child(name_label)
+	c.add_child(UI.label(Arch.name_of(id), 14, col if st in ["open", "ready"] else UI.FAINT, UI.big))
 	var cur := id == Arch.of_save()
 	match st:
 		"open": c.add_child(UI.label("Playing" if cur else "Unlocked", 11, UI.GOOD, UI.semi))
@@ -170,6 +175,7 @@ static func _show(home: Node, id: String) -> void:
 			grid.remove_child(old)
 			old.queue_free()
 			var tile := _tile(home, aid, aid == id)
+			tile.visible = old.visible or aid == id      # (a folded tile stays folded; the picked one shows)
 			(grid as GridContainer).add_child(tile)
 			(grid as GridContainer).move_child(tile, at)
 	_fill(home, id, viewer)
