@@ -86,3 +86,13 @@ Each check run alone (xvfb, opengl3, 600 s): all four were cross-branch stale as
 - impact-weight (1 red, ashwick LMB dealt nothing): feel-point-blank starts the lance's flame at Cinder's body (ShotOrigin). feel-impact-tiers' 20-step tap let go before the flame reached the dummy 3 m off. The LMB hold is now LMB_HOLD 40 steps. The point-blank rule is kept.
 - hitstop-input (parse error, timed out): feel-impact-tiers removed Feel.HITSTOP (T0-T5), so the injected freeze is ImpactWeight.hold_s("heavy"). Gil, the 13th Hunter, came after the check: added with Riptide (E) as his top own-body hit.
 - Not this group, seen on the way: --pad-check still says "keys barely steer the rise (air_control 0.015)", and its RISE_DRIFT 0.6 m contradicts Loco.air_step (5 m sideways by the apex). Its move-feel doc line in MOVEMENT_FEEL "Jump pads and updrafts" says the same.
+
+## Support and ult-bond reds settled (ext/combat-w0246-support-reds)
+Each check alone on the wave tree had one red row. Neither row is a heal, shield or bond number: every heal, shield and ally row of --support-check (Meeko, Neve) and every bond row of --ultbond-check passed unchanged, so no data moved and the source (supervive_kits.md, KIT_PARITY, no ours-only riders) and the owner's bond rules were not in question. Both rows asserted the game from before a feel-wave branch.
+
+| Check, row | Wave branch (game) | The row assumed | Kept, and why | Fixed |
+|---|---|---|---|---|
+| support (rimewright): "letting go stops with a hockey stop and refunds part of the charge" | feel-dash-off-ledge e410ed6cf, decision 0046: a Shift dash that leaves a ledge ends in the air with no ground pose; Neve's braced stop plays only on the ground | the stop pose on every let-go; the row's own setup skates her off a step first, so she lets go 1.3 m up | 0046 (the game): the stop is a ground pose, an air let-go keeps the skate's speed like any air dash | the ledge row asserts the air let-go (skate over, charge back, no stop pose); a new row checks the hockey stop on the two flat-ground let-gos in _skate_feel (proved: with the stop pose removed it fails, 0 of 2) |
+| ultbond: "R casts the hunter ultimate, not the Merge (cooldown 0.0)" | feel-same-frame 047b42a57: R from the keyboard waits for the kit's next step (DashFlow, after a same-frame Shift) | the cast during input gathering; the row pressed R and read the cooldown with no step in between | same-frame (the game): the dash goes first | the row steps the match once after the press (cooldown 42 s, no Merge) |
+
+Checks on the stacked tree (tree = ext/w0246-feel; origin/main merged in adds no file change): --support-check 225/0, --ultbond-check 0 fail, --rimewright-combo-check with the stop pose removed 1 fail (the new ground row).

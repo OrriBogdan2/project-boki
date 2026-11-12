@@ -161,6 +161,7 @@ func _presses() -> void:
 	P.lvl = int(Hunter.ULT_AT[0])
 	P.ak.cd["x"] = 0.0
 	await _press("hunter_ult")
+	_run_for(Match.DT)          # R from the keyboard casts in the kit's next step, after its Shift (HunterKeys.press)
 	ok(has_own and float(P.ak.cd["x"]) > 0.0 and not m.pending_input["ult"] and not KinMerge.active(P),
 		"R casts the hunter ultimate, not the Merge (cooldown %.1f)" % float(P.ak.cd.get("x", 0.0)))
 	P = _fresh()
