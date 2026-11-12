@@ -18,7 +18,6 @@ const M_LINKS := 5
 const M_BOLT := 6
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const CORE_W := 0.35           # of a streak's width: its bright core
-const WARM_PUFFS := 12         # puffs made at load for the miss puffs (MissFx)
 const KEEP := 0.1              # s an immediate-style look (place / chain) stays without a refresh
 
 var m: Node
@@ -117,14 +116,6 @@ func prewarm(at: Vector3) -> void:
 			add_child(node)
 	for node: MeshInstance3D in _warming:
 		node.global_position = at
-	warm_puffs(WARM_PUFFS)
-
-## Makes the miss puffs now, hidden, so the first misses of a fight take pooled nodes (MissFx).
-func warm_puffs(n: int) -> void:
-	while free_pools.get("puff", []).size() < mini(n, POOL_CAP):
-		_fx("puff", M_PUFF, _quad_mesh(), true)
-	for node: Node3D in free_pools["puff"]:
-		node.visible = false
 
 func prewarm_end() -> void:
 	for node: MeshInstance3D in _warming:

@@ -432,7 +432,7 @@ func _ready_rest() -> void:
 		rack_node.position = spots["rack"]
 		add_child(rack_node)
 	portal.get_node("Disc").visible = true
-	(portal.get_node("Beam") as CPUParticles3D).emitting = true
+	ZoneDress.calm_pad(portal)
 	if not fs:
 		var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
 		(pond.get_child(0) as MeshInstance3D).material_override = HomeBuild.water_mat()      # animated water
@@ -980,7 +980,9 @@ func _spawn_kin() -> void:
 		var isl: int = 0 if rec["uid"] == _d().get("active", "") else open_isles[ri % open_isles.size()]
 		ri += 1
 		add_kin(rec, isl, farm_kin.find(rec))
-	if hb and hb.astar: hb.assign_beds()
+	if hb and hb.astar:
+		hb.assign_beds()
+		PlaceClearance.free_trapped(self)
 
 ## One kin on the farm: its model, mood label and entry in kins, on island `isl`; `slot` (its place in the
 ## roster, -1 for none) picks its bed.
@@ -1430,7 +1432,7 @@ func _move_kin(d: float) -> void:
 				if arrived:
 					k["hold_t"] = 1.4; k["joy_t"] = 0.9; k["t"] = randf_range(2.5, 4.0)
 					_emote(k, "♥" if float(k["rec"]["trust"]) > 55.0 else "♪")
-					Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
+					Sfx.play("kin_happy", k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
 					if k.has("welcome"): _say(k, BokiLines.say(k["rec"], "greet"))
 				k.erase("welcome")
 		var pos: Vector3 = k["pos"]
@@ -1454,7 +1456,7 @@ func _move_kin(d: float) -> void:
 				k["t"] = randf_range(1.5, 3.0)
 				if k["chase_t"] > 0.0:
 					_emote(k, "♪"); _emote(other, "!")
-					Sfx.play(KinVoice.cue(other["rec"]["species"], "happy"), other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					Sfx.play("kin_happy", other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -1719,8 +1721,7 @@ func _respawn_safe() -> void:
 func _glider_look() -> void:
 	if glider_node == null or not is_instance_valid(glider_node):
 		glider_node = MeshInstance3D.new()
-		glider_node.mesh = Gliders.mesh(Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
-		glider_node.material_override = Models.vtoon_outlined()
+		Gliders.dress(glider_node, Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
 		glider_node.position = Vector3(0, 2.0, 0.05); glider_node.scale = Vector3.ONE * 0.8
 		glider_node.visible = false
 		player.add_child(glider_node)
@@ -1734,8 +1735,7 @@ func _glider_rack() -> Node3D:
 		Models.part(n, Models.cyl(0.06, 0.07, 1.9, 8), wood, Vector3(0.75 * sx, 0.95, 0))
 	Models.part(n, Models.cyl(0.05, 0.05, 1.7, 8), dark, Vector3(0, 1.85, 0), Vector3.ONE, Vector3(0, 0, PI / 2))
 	var can := MeshInstance3D.new(); can.name = "Canopy"
-	can.mesh = Gliders.mesh(Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
-	can.material_override = Models.vtoon_outlined()
+	Gliders.dress(can, Gliders.equipped(), Data.TEAM_COLORS[0], UI.ACCENT)
 	can.position = Vector3(0, 1.75, 0); can.scale = Vector3.ONE * 0.75; can.rotation = Vector3(-0.35, 0, 0)
 	n.add_child(can)
 	var sign := Label3D.new(); sign.text = "Gliders"
@@ -1757,8 +1757,7 @@ func _open_rack() -> void:
 	Look.lights(w3, Color("fff1dc"), 1.0)
 	var holder := Node3D.new(); w3.add_child(holder)
 	var can := MeshInstance3D.new()
-	can.mesh = Gliders.mesh(rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
-	can.material_override = Models.vtoon_outlined()
+	Gliders.dress(can, rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
 	holder.add_child(can)
 	var tr := Gliders.trail(rack_pick, Data.TEAM_COLORS[0], UI.ACCENT)
 	if tr: tr.position = Vector3(0, -0.05, 0.3); tr.local_coords = true; tr.direction = Vector3(0, -0.2, 1); holder.add_child(tr)
@@ -1848,7 +1847,7 @@ func _rack_equip(id: String) -> void:
 	_rack_sound(id)
 	if is_instance_valid(rack_node):
 		var can := rack_node.get_node_or_null("Canopy") as MeshInstance3D
-		if can: can.mesh = Gliders.mesh(id, Data.TEAM_COLORS[0], UI.ACCENT)
+		if can: Gliders.dress(can, id, Data.TEAM_COLORS[0], UI.ACCENT)
 	_refresh_top()
 	_open_rack()
 
@@ -1893,7 +1892,7 @@ func _whistle() -> void:
 			k.erase("nap_go"); k.erase("nap_go_t"); k.erase("going_in")
 			k["called_t"] = 7.0
 			_emote(k, "!")
-			Sfx.play(KinVoice.cue(k["rec"]["species"], "alert"), k["pos"], -12.0, 0.15, Unique.voice(k["rec"]))
+			Sfx.play("kin_alert", k["pos"], -12.0, 0.15, Unique.voice(k["rec"]))
 			if world.island_of(k["pos"].x, k["pos"].z) != my_isle and my_isle >= 0:
 				_start_leap(k, ppos + slot))
 	if not inside.is_empty():
@@ -2346,6 +2345,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.pressed and panel_open == "":
+		if event.button_index == MOUSE_BUTTON_LEFT and stat_glint.open_card(event.position):
+			get_viewport().set_input_as_handled()      # a risen stat's glint: that Boki's card on the stat
+			return
 		# click a kin to see its details
 		if event.button_index == MOUSE_BUTTON_LEFT and not hover_k.is_empty() and visit.is_empty() and not building_now and not chat_open:
 			_open_kin(hover_k["rec"])
@@ -2942,7 +2944,7 @@ func _pet_kin(k: Dictionary) -> void:
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0, 0.12, Unique.voice(rec))
+	Sfx.play("kin_happy", null, -4.0, 0.12, Unique.voice(rec))
 	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
@@ -3169,6 +3171,7 @@ func _open_kin(rec: Dictionary) -> void:
 			for n in Care.NEEDS:
 				row.call(c1, Care.NEED_INFO[n]["name"], Care.need(rec, n) / 100.0, Care.NEED_INFO[n]["col"], str(int(Care.need(rec, n))))
 			c2.add_child(UI.section("Likes"))
+			ZoneAffinity.add_line(c2, rec)
 			var known: Array = rec["known"]
 			var lk: Dictionary = rec["likes"]
 			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
@@ -3189,7 +3192,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
 		"Training":
 			c1.add_child(UI.section("Stats", UI.FAINT.lightened(0.2)))
-			StatBudgetView.fill(c1, rec)
+			StatBudgetView.fill(c1, rec, stat_glint.lit_for(rec))
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			_kin_match_rows(rec, c2, true)
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
@@ -3668,7 +3671,7 @@ func _play_evolutions() -> void:
 	for e in evs:
 		if e["kind"] == "form": big = true
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
-	Sfx.play("boki_evolve")
+	Sfx.play("skill")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
 	var tw := create_tween()
@@ -4143,7 +4146,6 @@ func _setup_care() -> void:
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	ZoneAway.card(self)      # the one "While you were away" card: the stations' work and every zone's journal
-	GardenWishes.arrive(self)
 	Care.dex_sync()
 	_refresh_nest()
 
@@ -4245,7 +4247,7 @@ func _update_bubbles(d: float) -> void:
 			if rl != "":
 				_say(k, rl)
 				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
-				Sfx.play(KinVoice.cue(rec["species"], "happy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
+				Sfx.play("kin_happy", k["pos"], -8.0, 0.15, Unique.voice(rec))
 				Save.save_game()
 		if visit.is_empty() and float(k["hi_cd"]) <= 0.0 and panel_open == "" and not chat_open and train.is_empty() and not k.get("busy", false):
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
@@ -4290,7 +4292,6 @@ func _care_step(k: Dictionary, d: float) -> void:
 		if float(k["z_t"]) <= 0.0:
 			k["z_t"] = 2.2
 			_emote(k, "z")
-			Sfx.play("boki_sleep", pos, -10.0, 0.1, Unique.voice(rec))
 		k["slept"] = float(k.get("slept", 0.0)) + d
 		if float(k["nap_t"]) <= 0.0:
 			Care.change(rec, "energy", 40.0 * clampf(float(k["slept"]) / 30.0, 0.0, 1.0))
@@ -4304,7 +4305,6 @@ func _care_step(k: Dictionary, d: float) -> void:
 		k["slept"] = 0.0
 		k["nap_t"] = 30.0
 		k["z_t"] = 0.5
-		Sfx.play("boki_sleep", k["pos"], -10.0)
 	if k.has("stare") and Vector2(pos.x - k["goal"].x, pos.z - k["goal"].z).length() < 0.5:
 		var at: Vector3 = k["stare"]
 		k.erase("stare")
@@ -4376,11 +4376,10 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	var body: Node3D = (k["node"] as Node3D).get_node("Body")
 	var tw := create_tween()
 	if res["ok"]:
-		Sfx.play("boki_eat", fp, -8.0)
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3))
+			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
@@ -4500,9 +4499,7 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
-		Sfx.play("boki_sleep", k["pos"], -10.0)
 	_say(k, BokiLines.say(rec, "nap"))
-	Sfx.play(KinVoice.cue(rec["species"], "sleepy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
 
 # ---- training: a timing game at the yard; three rounds, each a little faster
 func _start_drill(rec: Dictionary, stat: String) -> void:
@@ -5030,7 +5027,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	# it's yours from the moment it hatches; the naming card only renames it
 	baby["name"] = Data.default_kin_name(String(baby["species"]))
 	if rare:
-		Save.remember(baby, "born", "hatched from a Rare Egg you carried home from %s" % String(Data.MOBS.get(boss, {}).get("name", "a boss's lair")), 2.0)
+		Save.remember(baby, "born", Incubator.born_line(baby, boss), 2.0)
 		Progress.add("rare_hatched")
 	else:
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)

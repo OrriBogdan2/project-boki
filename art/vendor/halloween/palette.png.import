@@ -3,29 +3,27 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://8cd5w0bftk48"
-path.bptc="res://.godot/imported/palette.png-de1a9323e379cdebbfbeed3a63971b49.bptc.ctex"
-path.astc="res://.godot/imported/palette.png-de1a9323e379cdebbfbeed3a63971b49.astc.ctex"
+path="res://.godot/imported/palette.png-de1a9323e379cdebbfbeed3a63971b49.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://art/vendor/halloween/palette.png"
-dest_files=["res://.godot/imported/palette.png-de1a9323e379cdebbfbeed3a63971b49.bptc.ctex", "res://.godot/imported/palette.png-de1a9323e379cdebbfbeed3a63971b49.astc.ctex"]
+dest_files=["res://.godot/imported/palette.png-de1a9323e379cdebbfbeed3a63971b49.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

@@ -8,7 +8,7 @@ const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird", "gibbelle", "caecilith"]
+	"nettlynx", "thrumbird", "caecilith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
@@ -18,11 +18,8 @@ const T_FRAMES := 8            # frames sampled over a game clip
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
-## A Meshy body (docs/art/kin/MESHY_BOKI_RECIPE.md): 16k of body, the face, the props and the grown parts.
-const MESHY_TRIS := 20000
 ## Models merged from the single-species branches over that rule: a ratchet at their count today, to be cut down.
-const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636,
-	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS}
+const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636}
 const MAX_BONES := 64
 
 var bad := 0

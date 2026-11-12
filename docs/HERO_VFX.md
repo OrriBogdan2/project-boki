@@ -32,7 +32,6 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
-| `chain` | holds only: a chain of links from `at` to the kit's `to` (passed on every ask); the hold's `k` is its tension: 0 hangs slack and sways, 1 pulls straight and glows, with glints running toward the hand | `size` width, `link` m per link, `slack` m of sway |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`) | `size` radius, `spin` turns/s (negative: the other way), `grow` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
@@ -61,8 +60,12 @@ includes the file and runs its cover and glow through `cel_cover()` / `cel_glow(
 `"anchors"` in the data names points on the Hero. Each resolves in order: `nodes` (empties on the .glb, e.g.
 `anchor_blade_tip`, or `weapon_muzzle`), `bone` (a contract bone such as `hand.R`, `forearm.L`, `head`, with `off` [x, y, z] in the bone's space: follows the live pose on any .glb model), `gun` (a point in the Gun node's space), `body` ([side, up, forward] from the feet along
 the aim), with `hand` r / l between them for a point that rides a hand bone. So a look works on today's model and picks the new anchors up when a model ships them. `docs/RIG_STANDARD.md` lists
-the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
-`anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
+the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain` (his right wrist, where the hanging
+warchain hides when thrown), `anchor_feet` when present, Lace `anchor_nock` (on the string bone `bow_s`, so it follows
+the draw), `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`. An empty rides the bone that carries
+its mesh: Vex's muzzles sit on `forearm.R` with the minigun, not on the clips' `gatling` and `launcher` bones.
+`--hero-vfx-check` (tools/hero_vfx_emit.gd) holds each ability's emitter within 0.15 m of its bone, or of the mesh
+the bone carries, through every clip of Vex, Kael, Lace, Cinder, Albert and Meeko.
 
 ## Cloth ends
 A top-level `"scarf"` block hangs two cloth tails off the Hero (Claire: the frost-scarf ends from the back of her neck
@@ -72,14 +75,6 @@ wrap). `scripts/match/hero_scarf.gd` runs them for every Hero on the map: each t
 a little `back` and out (`splay`); moving, the air's drag streams it back against the motion and it flutters harder the
 faster she goes. Keys: `at`, `gap`, `len`, `w` m wide, `back`, `splay`, `c`, `c2`. A wearer keeps its pair of meshes; a
 gone one's pair goes back to the pool, and one drawn while the match loads compiles the shader. Off at the Low preset, past `LOD_FAR` and while the Hero is hidden.
-## Armour on the body (every Hunter and bot, not a recipe)
-`Juice.hit` flashes the body cyan (`Ent.SHELL_FLASH`) for a hit that lands on armour and white for one on health;
-`Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
-The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
-## Armour tier-up
-`HeroVfx.tier_up(h, tier)` (called from `Match._armor_up`) is the one look that is not a recipe: a `sheen` (a band of light climbing a
-body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
-everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
 
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
@@ -91,67 +86,3 @@ everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). No
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
-
-## Boki type accents
-Boki casts (`Kin._cast`) are drawn by `KinExec` in the effect's category colour (`KinRules.CAT_COLORS`: damage
-orange, control violet, sustain green, utility gold), with the shape of the delivery (ring, cone, bolt, burst).
-**Audit (main d255acbee + the type rename):** no ability has a type-specific look. Cast and impact are the same for
-all 15 Boki types in play (50 species). The only per-type signal was the `k_<type>` cue, which has 6 sounds
-(`content/sfx/boki.json`, still under the old ids), so after the rename every Boki falls back to the generic `skill`
-sound. Ability `theme` fields do not match the species' type (a Fire Boki can carry a Steel ability), so a type's
-look cannot follow the ability.
-
-`KinTypeFx` (`scripts/match/kin_type_fx.gd`) fixes that: one cheap accent per type, played on **every cast by a Boki
-of that type** (active, auto and triggered casts; not while the Boki is out of the local player's sight). It sits at
-the Boki's feet and chest and uses the shared `Fx` pools only (dots, streaks, one ground ring), so it adds no node,
-no shader and no per-frame code. It does not recolour the effect itself, so colour keeps meaning the effect.
-Budget per cast: at most 10 dots, 8 streaks, 3 rings (before the quality preset's `fx` factor). `--kin-type-fx-check`
-asserts coverage of all 18 types, distinct colours and shapes, the budget and a real cast. Sheet:
-`--kin-type-sheet --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`). Tuned on grass over GPU sheets 20261109-121559 (too faint),
-20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
-The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
-
-| Type | Species | Colour | Accent | Before |
-|---|---|---|---|---|
-| Normal | 0 | cream | plain short puff | none |
-| Fire | 4 | orange | embers rise slowly | none |
-| Water | 0 | blue | droplets arc up and fall | none |
-| Grass | 4 | green | leaves drift down | none |
-| Spore | 3 | tan | big soft puffs float up | cue only |
-| Electric | 4 | yellow | thin fast zaps, all directions | none |
-| Ice | 4 | cyan | chunky shards fall | none |
-| Rock | 4 | brown | pebbles drop fast | none |
-| Psychic | 3 | violet | two slow ripples and rising motes | cue only |
-| Flying | 2 | sky white | wind streaks along the cast | none |
-| Dragon | 0 | indigo | embers and streaks rising | none |
-| Dark | 4 | deep violet | big slow smoke | none |
-| Poison | 3 | acid green | bubbles rise | cue only |
-| Bug | 4 | amber | many tiny dots, scattered | none |
-| Steel | 2 | silver | short thick glints along the cast | none |
-| Fairy | 3 | pink | small sparkles float up | cue only |
-| Crystal | 3 | teal | facets fan upward | cue only |
-| Sound | 3 | gold | three quick rings | cue only |
-
-Types that shared a look before: all of them (one category-coloured look). Types with no look of their own in the
-data: Normal, Water and Dragon have no species yet (accents ready). Merged forms (`KinMerge`) are not changed.
-## Shot floor (LMB projectiles)
-Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s
-beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p (9 px at 1080p) with the default camera, sized
-at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.far_depth`), inside a side-coded rim
-(foe's shots red-orange, your side's cool and softer), drawn over particles (render priority) on its own render layer
-(`ShotFloor.LAYER`). The shot keeps its own look and Hunter ability colour. It is visual only: the hit radius
-`s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
-the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
-exactly that size and measures its own look, the core and the rim in pixels across the flight line.
-- **Receiving a heal or a shield:** one shared cue on the body (`ReceiverCue`), whoever gives it: a soft rise of light
-  for a heal, a thin shell flash for a shield, tinted by the giver's ability colour, plus a `+N` in the heal or shield
-  colour through `Fx.number`. No particles, bursts or rings (a ground ring means gameplay): the cue is a pooled body-sized
-  shell (`POOL` of them, 0 particles; `shaders/receiver_cue.gdshader`, mix-blended so the tint reads on bright
-  ground, where an additive glow washes out), so it reads at every quality. Sources call `Hunter.heal`, `Effects._heal` or
-  `ReceiverCue.shield`; a zone ticking again inside `GAP_S` is one rise. Checked by `--receiver-cue-check`.
-## Missed shots
-A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
-puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, wider and fainter where the shot ran out of
-range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
-oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
-asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).

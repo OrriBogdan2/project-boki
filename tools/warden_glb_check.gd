@@ -37,6 +37,9 @@ const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles diff
 const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
 ## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
 const TRIS_OVER := {"juggernaut": 24000}
+## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
+## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
+const WHITE_HAIR := {"thief": 0.08}
 
 var bad := 0
 var n := 0
@@ -97,6 +100,7 @@ func run(main: Node) -> void:
 		_springs(a)
 		_orbits(a)
 		_own_look(a)
+		_white_hair(a)
 		await _halo(main, a)
 	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
@@ -122,7 +126,7 @@ func _contract(a: String) -> void:
 	var tris := 0
 	var slots := {}
 	var unskinned := 0
-	for mi in _body_meshes(m):
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
 		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
 		# cut out of the body, Meeko's sun and cloud)
@@ -134,7 +138,6 @@ func _contract(a: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
-	_ink_shells(m, a)
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
 	var cap: int = TRIS_OVER.get(a, TRIS_MAX)
 	ok(unskinned == 0 and tris <= cap and slots.size() <= SLOT_MAX and unknown.is_empty(),
@@ -269,7 +272,7 @@ func _shading(a: String) -> void:
 	var textured := 0
 	var relief := 0
 	var no_relief := 0
-	for mi in _body_meshes(m):
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
@@ -413,7 +416,7 @@ func _own_look(a: String) -> void:
 	var slots: Dictionary = own.get("slots", {})
 	var seen := 0
 	var wrong: Array = []
-	for mi in _body_meshes(m):
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si)
@@ -436,6 +439,47 @@ func _own_look(a: String) -> void:
 	ok(seen > 0 and wrong.is_empty(), "%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)"
 			% [a, seen, str(wrong)])
 	m.free()
+
+func _white_hair(a: String) -> void:
+	if not WHITE_HAIR.has(a):
+		return
+	var m := _model(a)
+	var sum := Vector3.ZERO
+	var texels := 0
+	var desat := 0.0
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var src := mesh.surface_get_material(si) as BaseMaterial3D
+			if src == null or String(src.resource_name).get_slice("-", 0) != "hair" or src.albedo_texture == null:
+				continue
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			desat = float(sm.get_shader_parameter("desat")) if sm.get_shader_parameter("desat") != null else 0.0
+			var img := src.albedo_texture.get_image()
+			if img.is_compressed():
+				img.decompress()
+			for uv in mesh.surface_get_arrays(si)[Mesh.ARRAY_TEX_UV] as PackedVector2Array:
+				var c := img.get_pixel(clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1),
+						clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1))
+				sum += Vector3(c.r, c.g, c.b)
+				texels += 1
+	m.free()
+	var paint := Vector3.ZERO if texels == 0 else sum / texels
+	var drawn := paint.lerp(Vector3.ONE * paint.dot(Vector3(0.3, 0.59, 0.11)), desat)
+	var sat := Color(drawn.x, drawn.y, drawn.z).s
+	ok(texels > 0 and sat <= float(WHITE_HAIR[a]), "%s: the hair reads white, paint saturation %.3f as drawn (max %.2f)"
+			% [a, sat, WHITE_HAIR[a]])
+	var base := MantleLook.params(a, PlayerLook.neutral())
+	var moved: Array = []
+	for pick in Models.LOOK_HAIR.size():
+		var lk := PlayerLook.neutral()
+		lk["hair_col"] = pick
+		lk["eyes"] = pick % PlayerLook.pick_list("eyes").size()
+		var got := MantleLook.params(a, lk)
+		if not (got["hair_col"] as Color).is_equal_approx(base["hair_col"]) \
+				or not (got["eye_col"] as Color).is_equal_approx(base["eye_col"]):
+			moved.append(pick)
+	ok(moved.is_empty(), "%s: no hair or eye pick tints her hair or eyes (moved by %s)" % [a, str(moved)])
 
 func _within_tint(got: Color, want: Color) -> bool:
 	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
@@ -613,26 +657,3 @@ func _setting(a: String) -> void:
 	on.free()
 	ok(proc and back, "%s: the Warden models setting turns it procedural (%s) and back to its 3D model (%s)"
 			% [a, str(proc), str(back)])
-
-## The model's own meshes: not WardenMerge's ink shells, which draw the ink pass its surfaces gave up.
-func _body_meshes(m: Node) -> Array:
-	var shells := WardenMerge.inks(m)
-	return m.get_node("Warden").find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return not mi in shells)
-
-## Each ink shell is its body's skinned copy on the outline shader, and no surface of that body still wears
-## the same ink as a pass (it would draw twice).
-func _ink_shells(m: Node, a: String) -> void:
-	var bad: Array = []
-	var shells := WardenMerge.inks(m)
-	for shell: MeshInstance3D in shells:
-		var body := shell.get_parent() as MeshInstance3D
-		var ink := shell.material_override as ShaderMaterial
-		var twice := range(body.mesh.get_surface_count()).any(
-				func(si): return body.get_active_material(si).next_pass == ink)
-		if ink == null or ink.shader != Models.OUTLINE or shell.skin != body.skin or twice \
-				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
-			bad.append(shell.name)
-	ok(bad.is_empty(),
-			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
-			% [a, shells.size(), str(bad)])

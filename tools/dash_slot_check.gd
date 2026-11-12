@@ -105,14 +105,7 @@ func _flash_and_tick(m: Match, P: Hunter, hid: int) -> void:
 	await _drawn(m.hud)
 	var flash := float(hud.ready_flash.get("dash", 0.0))
 	ok(flash > 0.1, "a charge returning flashes the slot (%.2fs left)" % flash)
-	ok(int(Sfx.last_played.get("click", -1000)) == tick0, "... from empty, the ready cue speaks instead")
-	P.dashes = 1.9
-	await _drawn(m.hud)
-	tick0 = int(Sfx.last_played.get("click", -1000))
-	P.dashes = 2.0
-	await _drawn(m.hud)
-	var ticked: bool = int(Sfx.last_played.get("click", -1000)) > tick0 or Sfx.streams.is_empty()
-	ok(ticked, "... a charge back with another left ticks")
+	ok(int(Sfx.last_played.get("click", -1000)) > tick0 or Sfx.streams.is_empty(), "... and ticks softly")
 	hud.ready_flash.erase("dash")
 	DashSlot._was.erase(hid)
 	P.dashes = 2.0

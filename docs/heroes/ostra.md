@@ -62,7 +62,7 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 | LMB Tether Lantern | tap or hold | the aim line; orbs fly their full range (`"aim": "max"`) through walls and terrain (`shot_x.pierce_terrain` on the weapon; placed walls and domes still stop them) | 9 dmg shots every 0.6s, two looks (owner 11-08): below half charge (`KitLooks.ORB_HELD_K`, about 1.0s of wait) a small quick violet glass shard (a flat card, one violet mote of trail, a violet spark spray on impact); from half charge a void orb (dark glass with a magenta rim shell, a smoke tail and magenta motes, a smoke, mote, flash and ring impact), at least 1.8x the shard (x1.9 full). The wait between shots charges the next one in a straight line, from plain at 0.6s (`lmb.charge_from`, the fire rate, so held fire stays plain orbs) to full at 1.4s (`lmb.idle`): damage up to +34%, speed up to x1.4, size (drawn and hit) up to +90% (item 117: at least 1.6x; 31 vs 58 px wide at the match camera), glass, core and impact bigger and brighter with the charge; a full orb also slows 10% for 1.5s. `charge_from` is the one value for the curve: at 0 a held orb is already x1.39, so full is only 1.37x it and item 117's 1.6x no longer holds against held fire. A violet glow at his hand grows with the charge, with a soft chime at full; from half charge magenta motes and smoke are drawn into the hand (the tell). The void orb plays `os_orb_hot` (a heavier release with a low gulp and a glass chime) instead of `os_orb`; gameplay numbers are unchanged | `ostra_orb`, `ostra_orb_hot` (void orb) | `os_orb`, `os_orb_hot`, `os_prime` |
 | RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.32s wind-up (an opaque black orb with a thin pale rim swelling at his hand as he coils back; he slows 25%), then on the release beat (both palms shoved out) one 2.7m bundle of dark violet crystal prisms with bright rims flies 29.5 m/s to 13m (0.44s at full range) and the damage lands on its impact: 9.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy; a 0.15s recovery keeps him slowed (item 40: the data has no timing, so the whole cast is +40%, 0.54s -> 0.76s at full range, all in the wind-up and the flight; the footage's bundle crosses about 30 m/s) | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
 | Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (his ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (violet at him, magenta at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark void lantern (dark glass, magenta rim, violet spikes, a pale mask face with slanted eyes and a grin; owner 11-08: purple and ominous, the UI's Void & Masks colours) lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail and dark smoke wisps, 1.8s; the lantern, motes, smoke, flashes and arrival ring are drawn 1.3x (`TRADE_LOOK_K`, owner 11-08 +25-35%; visual only, the rings and sigils stay at the real 1.5m catch); meanwhile he drifts at 35% of run speed (`dash.fly_slow`, CastHold) at the height he cast at, even over the abyss (no fall); then he is there (both ends fold in on themselves, motes drawn inward with no ring or blast, and his appear-pop), keeping his height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where he is when it lands, each keeping its place in the circle (nobody is slowed: the data's Swap only swaps). A knock while it flies still shoves him (only his height is held). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap` (ground), `ostra_swap_air` (air), `ostra_arrive` | `os_swap_lob` (a dash sound, owner 11-08: a low whoosh, void drone and reversed whisper under a glassy semitone sting), `os_swap` |
-| E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x (COLLAPSE on a hunter at full); left alone it waits at full size for the recast, and fizzles harmlessly after 10s unpopped | `ostra_seed`, `ostra_pop` | `os_seed`, `ostra_music_box`, `os_pop` + `ostra_spring_boing` |
+| E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass globe with a violet swirl and a teal rim grows 6.5s to a 3.2m radius, its drawn radius always the radius the pop hits (--ostra-combo-check, ostra_globe_check.gd; strips: --ostra-globe-shots); a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x (COLLAPSE on a hunter at full); left alone it waits at full size until the recast, with no timer (a death takes it with no damage) | `ostra_seed`, `ostra_pop` | `os_seed`, `ostra_music_box`, `os_pop` + `ostra_spring_boing` |
 | X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Motley is locked in the cast for the 1.0s dome (Void's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (Void acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
@@ -85,7 +85,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 | LMB spam penalty | "firing faster lowers projectile speed and damage" (card, footage) | none: the fixed 0.6s cadence can't be beaten, so there is nothing to penalise | (not built) |
 | RMB | a 0.2s black-orb wind-up, one crystal-spear cluster, stun 0.8-1.8s by distance [footage] | 0.32s wind-up (owner item 40: slower), one bundle, 0.8-1.8s | `item 40: ...`, `rmb: ...` |
 | Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 67.5% (owner, item 75; 11-08 35%; 11-10 slow halved: 65% -> 32.5%) | `item 17: ...`, `owner: ...` |
-| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast (a 10s fizzle cap at full) | `combo: ...`, seed rows |
+| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast, no timer (the data lists none; Unstable Anomaly: "reactivate to detonate", supervive_kits.md:116) | `combo: ...`, seed rows |
 | X | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
 
 ## Audit (Nov 3 23:40)
@@ -96,7 +96,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Nightwell locks him 4.5 s (owner: about 1 s, then free) | HIGH | (a) | 59010b31, e62732d6; `lock: ...`, `release: ...` (ult check) |
 | Nightwell text and DashFlow rows describe the old lock | HIGH | (a) | 59010b31, e62732d6 |
 | X cd 64 s vs 70 s | LOW | (b) | 8e5c6340: 70 s; `ult cast: ... (70s, data)` |
-| The seed pops by itself (data: reactivate to detonate) | MED | (b) | 8e5c6340: it waits at full size for the recast; left 10 s at full it fizzles with no damage (our cap, so it can't be parked forever); `e: a full seed waits for the recast ...`, `e: left unpopped ... fizzles out harmlessly` |
+| The seed pops by itself (data: reactivate to detonate) | MED | (b) | it waits at full size for the recast and nothing else ends it: the 10 s fizzle (ours) is removed per DECISIONS 2026-11-07 (ours-only riders: keep none). Source: briefs/supervive-data/supervive_kits.md:116 lists no expiry (timed kits there state theirs, e.g. Farstep Dagger 6 s); briefs/hero-ref/ostra.md only asks "does the bomb auto-detonate at 6.5 s?" (open, footage ended ~6.4 s, 1674 pink number). The cooldown starts on the plant (kept, [?]: the source does not say; Vireo's Surge shows SV starts on press). Going down ends the seed with no damage (the source is silent, [?]); a merge leaves it. `e: no fizzle ...`, `e: a merge does not take the waiting seed`, `e: going down ends the seed` |
 | The strong orb doesn't go through terrain (data) | MED | (b) | 8e5c6340, widened by item 60: `pierce_terrain` on every orb (owner over the data); `item 60: every orb passes ...`, `walls: ...` (also real maps, point blank and at range: tools/ostra_arena_check.gd), `net: ...` |
 | Orb magazine 12 / 1.5 s reload (not in the source) | MED | (b) | 8e5c6340: mag 99 (no reload in play) |
 | Spam penalty (footage card only) | LOW | (c) | not built: the fixed 0.6 s cadence can't be beaten, so there is nothing to penalise (parity table) |
@@ -137,12 +137,12 @@ The 8 ranked rows of briefs/hero-ref/ostra.md section 4, marked on main d255acbe
 | 2 | Permanent aim line, the Snap's double line | closed | 773e1aba4: `OstraKit._reticle` (line with arrowhead; two rails while RMB is held or winding up; the Swap's landing circle); `reticle: the thin aim line ...`, `rmb aim: ... two rails`, `dash aim: ... the landing at the cursor` |
 | 3 | Swap timing and markers | closed | `dash.time` 1.8s, `time_swollen` 1.25s, `lob` 4.5m; `AimKit.swap` rings at both ends and the sigil that fills; `dash: the lob takes about 1.8s`, `dash: a high lob` (peak 4m+), `dash: let go = ... both ends shown to all` |
 | 4 | Snap shape and stun | closed | 648436a60 (item 40): 0.32s wind-up, one bundle, stun `[0.8, 1.8]`; `item 40`, `rmb` rows |
-| 5 | Bomb growth and damage curve | closed | grow 6.5s, 3.5x (5b9a528d2), `min_recast` 0.3s, light column from 68%, implosion pop; `e: ...` rows. In flight: ext/motley-seed-fizzle 9f521695a drops the 10s fizzle (the source lists no expiry) |
+| 5 | Bomb growth and damage curve | closed | grow 6.5s, 3.5x (5b9a528d2), `min_recast` 0.3s, light column from 68%, implosion pop; `e: ...` rows. The 10s fizzle is dropped (the source lists no expiry; ext/motley-globe-full carries 9f521695a) |
 | 6 | Empowered aura | closed | `OstraKit.add_swell`: pink sphere (`os_aura`), vortex disc, pink flash; `swollen_t` 9s; `passive: full Swell = Swollen for 9s, wrapped in the pink sphere` |
 | 7 | Bomb cast is a lob | closed | `e.drop` 0.25s, the `os_drop` mote; `e: a small orb drops from his hand onto the spot` |
 | 8 | Black Hole | closed / owner override | Nightwell on X (392bcdcc7, 59010b314); the 1.0s cast lock, then free, is owner item 16 (OWNER_REVIEW_1103) and DECISIONS (Ostra ult); `ult open`, `lock`, `release` |
 
-Nothing is open in the ranked list, so no code was changed. In flight, not touched: ext/motley-seed-fizzle (row 5 fizzle),
+Nothing is open in the ranked list, so no code was changed. In flight, not touched:
 ext/anim-time-motley-rebased, ext/ostra-gait-rebased, ext/vfx-quality-motley and ext/vfx-ostra-abilities (VFX look),
 ext/recast-marker-a (a world ring on the seed). Suggestions, not built: assert that the Swap's flight marker fills from 0 to 1
 (the sigil) and that the aim line ends at the cursor; both sit in `tools/ostra_combo_check.gd`, which two of those branches edit.
@@ -200,7 +200,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
   is the only way a keyboard player sees it; it also removes any chance of a stray dash.
 - With no dash charge, or pressed in the air, Shift never falls back to the long base dash (owner note). So he has no base dash
   variant; his Trade's lob and arrival are his dash moves.
-- Brimseed waits at full size for the recast (the data: "reactivate to detonate"); 10s unpopped at full it fizzles with no damage (ours, so it can't be parked forever).
+- Brimseed waits at full size for the recast (the data: "reactivate to detonate"); nothing times it out (the data lists no expiry); the cooldown starts on the plant; going down ends it with no damage.
 - Trade: loose items on the ground are not traded. Pickups are each game's own copies; moving them on one game would leave
   the others disagreeing. Boki riding a shoulder (or benched) stay with their hunter.
 - Trade: the bodies keep their offset from the circle's centre at his origin; one that would land on the abyss or a step
@@ -218,45 +218,6 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 - The well stays when Motley is knocked or merges; it is a placed thing, and he is free during it.
 - Bond: paid when a hunter is caught (a hit), topped up if one is knocked or killed inside it; never per tick. The sheet's
   0.4 per hunter capped at 0.8 is the main session's to set (KinBond.from_ult).
-
-## Cancels (ability to ability)
-
-What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
-ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
-Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
-or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
-ability; the hero's ultimate is X. Rules that hold for every pair not in the table: ArchKit has no shared cast lock,
-so the second goes now (both); every press is ignored, not buffered, while stunned or downed; the attack key is a
-held key (`Hunter.trigger`), so a tap that lands while the gun is blocked is lost and a held one fires on the first
-free frame; the glider won't open while a keyed move runs (`AirLimits.glide_locked`); a Merge start drops every
-hold, wind-up and charge with nothing fired (the `merge hold` lines of the check).
-
-| First (phase) | Second | Source | Ours | Verdict | Evidence |
-|---|---|---|---|---|---|
-| Shard Snap wind-up (0.32 s, slowed 25%) and the 0.15 s recovery | LMB | not shown; patch notes: Void Snap slows him while casting (so he acts through it) | both: an orb goes (probed); the aim line turns to the Snap's two rails | unsettled (consistent with the slow) | dash_flow `rmb` source line; `snap` has no lock |
-| Snap wind-up | RMB again | [F] ostra.md:17 one shard cluster per tap; one charge | ignored (`snap` is not empty), no second charge spent | match | `fire_rmb` |
-| Snap wind-up | E | not shown | both: the seed drops, the Snap still releases (probed) | unsettled | `cast_e` has no `snap` test |
-| Snap wind-up | X | not shown | both (`HeroUlt.press` ignores `snap`) | unsettled | code |
-| Snap wind-up | stun, downed | [W] stun cancels | the Snap is dropped | match (generic stun rule) | `_tick_snap` |
-| Snap flight (29.5 m/s, to 13 m) | LMB, E, X, RMB | not shown | all go (nothing holds him after the release beat) | unsettled | `item 40` timing rows |
-| Brimseed planted, growing (6.5 s) | E again before 0.3 s | [F] ostra.md:19, 193 "recast after 0.3 s or more" | eaten: nothing pops, the seed keeps growing (`early_pops`) | match | `e_recast`; the seed rows of the combo check |
-| Brimseed | E again from 0.3 s | same, [D] "reactivate to detonate" | pops at once; damage 12.5 up to 3.5x with its age | match | `combo: Snap > seed on the stunned foe > pop` |
-| Brimseed (growing or full) | LMB, RMB, X, jump | not shown; the seed is a placed object | all go; it grows on | match | `combo: Seed > Trade puts the foe inside it` |
-| Brimseed left alone | its own end | [F] lists no expiry | fizzles after 10 s (an ours-only rider) | mismatch, not fixed: in flight as ext/motley-seed-fizzle (removes the timer) | Audit row "The seed pops by itself" (8e5c6340); the READY line of ext/motley-seed-fizzle |
-| Nightwell dome (1.0 s, filling; the cast pose) | LMB, RMB, E, glove, jump, glide, Shift | [F] ult f23-f33: held in the cast through the dome; owner 18:20 | all refused; no walking, no turning after 0.25 s; a held Shift is kept and goes the step it opens; a held LMB fires once he is free | match (footage and owner) | `well.locked` -> `cast_locked`, `can_shoot`; dash_flow `into_jump.x` lock and `into_dash.x` buffer; `lock: ...` in the ult check |
-| Nightwell open (3.5 s) | any press | [F] ult f50: "Void is free to act during it" (he is shooting) | everything goes at full speed | match | `release: ...` (ult check) |
-| Nightwell (cast or open) | X again | [F] a tap, no recast | ignored | match | `HeroUlt.press`, `ult_recast` default false |
-| Nightwell dome | stun, knock | not shown | frees him early; the well stays | unsettled (ours) | `lock: ...` in the ult check |
-| Trade aim (Shift held, 1.8 s lob after) | LMB, RMB, E, X | [D] Swap is a lob that swaps units; nothing blocks the others; owner 11-02: he hovers while the lantern flies | all go (the Trade's flight is his dash for DashFlow: rows `fire`) | match (owner, dash rows) | `item 32` row in Combinations; dash_interactions.md |
-| any wind-up or aim | R (Merge) | not in the source (our rule) | the Trade, its aim, the Snap wind-up and the orb prime drop; a placed Nightwell keeps going | ours | `merge hold: ...` rows |
-
-Fixes made: none. The pairs the source shows (the seed's 0.3 s recast minimum, the dome lock, the free well) already
-match. The one real mismatch, the 10 s seed fizzle, is already a READY branch (ext/motley-seed-fizzle, source lists no
-expiry), so it is not fixed here. Suggestions only, not built: a clip of LMB held through the Snap's wind-up would say
-whether the gun stops for it. The in-flight Motley branches (ext/motley-rework-2, models) don't touch these rules.
 
 ## Animation moves (KMovesStone)
 | Ability | Moves | Strip |
