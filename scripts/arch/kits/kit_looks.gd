@@ -11,9 +11,9 @@ extends Node3D
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
-##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
-##              brightens it with its charge
-##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
+##   orb        Motley's Gravity Orb: a teal glass shard, or from half charge a void orb with a teal rim; skin_orb
+##              grows and brightens it with its charge (its trail and hit are content/vfx/ostra.json)
+##   spear      Shard Snap: a long bundle of dark crystal prisms with pale teal rims (trail and hit: ostra.json)
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
@@ -28,12 +28,13 @@ const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 static var vis_rng := RandomNumberGenerator.new()
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
 const TRAIL_DT := 0.016       # s: a skinned shot leaves its trail every frame
-const ORB_CORE := [Color("3a0d5c"), Color("8a3fe0")]      # the orb's glass core, plain and at full charge
-const ORB_RIM := [Color("e070ff"), Color("ffeaff")]       # its rim, the same
+const ORB_CORE := [Color("06322b"), Color("1aa88c")]      # the orb's glass core, plain and at full charge
+const ORB_RIM := [Color("2ee6c0"), Color("eafffa")]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
 const ORB_HELD_K := 0.5       # charge from which Motley's shot is the void orb, not the quick shard
-const ORB_SMOKE := Color(0.118, 0.078, 0.188, 0.8)   # the void orb's smoke (the UI's #1e1430)
-const ORB_EDGE := Color("ff3fd0")    # the void orb's magenta rim (the UI's Void & Masks neon)
+const ORB_SMOKE := Color(0.118, 0.078, 0.188, 0.8)   # the void orb's smoke tail (the UI's #1e1430)
+const ORB_EDGE := Color("2ee6c0")    # the void orb's rim shell: Motley's sea teal (docs/VFX_QUALITY.md)
+const WELL_RIM := Color(0.18, 0.9, 0.75, 0.95)     # the Nightwell's lit rim (its inside fades to 0 at the centre)
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
 const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
 const MASK_TILT := 0.58       # rad: the Trade lantern's mask tipped back toward the match camera (pitch 57 deg)
@@ -111,11 +112,11 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, lump(0.13), rock_mat(0.7, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.7, 1.3))
 		"column":
 			Models.part(
-				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("20003a"), Color("b06bff"), 0.75, 0.3),
+				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("06221e"), ORB_EDGE, 0.75, 0.3),
 				Vector3(0, 3.0, 0)
 			)
 		"well_dome":
-			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("0a2440"), Color("a8e4ff"), 0.45, 0.1), Vector3.ZERO)
+			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("06221e"), Color("b8fff0"), 0.45, 0.1), Vector3.ZERO)
 			Models.part(
 				n,
 				Models.sphere(0.3, 16),
@@ -128,7 +129,7 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
 		"dark":
-			Models.part(n, Models.sphere(0.22, 16), glass_mat(Color("0a0012"), Color("f2eaff"), 1.0, 1.0), Vector3.ZERO)
+			Models.part(n, Models.sphere(0.22, 16), glass_mat(Color("02100d"), Color("b8fff0"), 1.0, 1.0), Vector3.ZERO)
 		"star":
 			_build_star(n)
 		"sigil":
@@ -160,7 +161,7 @@ func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
 	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
 
-## Ostra's shots: dark violet glass with bright rims, each with its own length and tail (the tail points
+## Ostra's shots: dark glass with bright teal rims, each with its own length and tail (the tail points
 ## back along the flight, -Z being forward after look_at).
 func _build_void_shot(n: Node3D, kind: String) -> void:
 	match kind:
@@ -176,33 +177,33 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.2)
 				var len_ := 2.7 if i == 0 else 2.0
 				Models.part(
-					b, PrismMesh.new(), glass_mat(Color("240838"), Color("d8a8ff"), 1.0, 0.85),
+					b, PrismMesh.new(), glass_mat(Color("06221e"), Color("b8fff0"), 1.0, 0.85),
 					off + Vector3(0, 0, 0.15 * float(i % 2)), Vector3(0.26, len_, 0.26), Vector3(-PI * 0.5, 0, a)
 				)
 
-## Motley's quick shot (charge under ORB_HELD_K): a small flat violet card-shard, a long thin diamond lying
+## Motley's quick shot (charge under ORB_HELD_K): a small flat teal card-shard, a long thin diamond lying
 ## flat to the camera, with a pale edge and a thin streak behind it.
 func _build_shard(n: Node3D) -> void:
 	var shard := Node3D.new()
 	shard.name = "Shard"
 	shard.scale = Vector3(1.0, 1.0, 2.4)      # stretches the square below into a long diamond along the flight
 	n.add_child(shard)
-	var card := glass_mat(Color("5a1f9a"), Color("eac2ff"), 1.0, 0.6)
+	var card := glass_mat(Color("128a72"), Color("d8fff6"), 1.0, 0.6)
 	Models.part(shard, Models.box(0.16, 0.035, 0.16), card, Vector3.ZERO, Vector3.ONE, Vector3(0, PI * 0.25, 0))
-	_tail(shard, 0.07, 0.35, Color(0.75, 0.45, 1.0, 0.5))
+	_tail(shard, 0.07, 0.35, Color(ORB_EDGE, 0.5))
 
-## Motley's charged shot: a round void orb (dark glass, white-hot core), a magenta rim shell and a long
+## Motley's charged shot: a round void orb (dark glass, white-hot core), a teal rim shell and a long
 ## trailing tail of smoke.
 func _build_held_orb(n: Node3D) -> void:
 	var orb := Node3D.new()
 	orb.name = "Orb"
 	n.add_child(orb)
-	var glass := glass_mat(Color("3a0d5c"), Color("e070ff"), 1.0, 0.75)
+	var glass := glass_mat(ORB_CORE[0], ORB_RIM[0], 1.0, 0.75)
 	Models.part(orb, Models.sphere(0.28, 12), glass, Vector3.ZERO).name = "Glass"
 	var rim := shade_mat(Color(ORB_EDGE, 0.28))
 	rim.render_priority = -1      # under the glass
 	Models.part(orb, Models.sphere(0.36, 14), rim, Vector3.ZERO)
-	var hot := Models.glow_mat(Color("ffd6ff"))
+	var hot := Models.glow_mat(Color("eafffa"))
 	hot.render_priority = 1      # always over the glass (same-node alpha sorting flickers in flight)
 	Models.part(orb, Models.sphere(0.09, 8), hot, Vector3(0, 0, -0.12)).name = "Hot"
 	_tail(orb, 0.3, 1.5, ORB_SMOKE)
@@ -320,14 +321,21 @@ func _build_mask(n: Node3D) -> void:
 		var grin_at := Vector3(sin(a) * 0.1, 0.04, 0.07 + 0.035 * cos(a))
 		Models.part(mask, Models.box(0.045, 0.02, 0.018), slit, grin_at, Vector3.ONE, Vector3(0, -a * 0.6, 0))
 
-## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
-## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
+## Ostra's Nightwell, radius 1 (scaled to the well): a lit teal rim with a soft inner falloff and no floor
+## (docs/VFX_QUALITY.md zone rule), four spiral arms of light turning on it, small black orbs riding the rim, and a
+## pink core shown when she cast it Swollen.
 func _build_well(n: Node3D) -> void:
-	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.14, 0.03, 0.3, 0.88)), Vector3.ZERO)
+	var floor_mat := Models.ring_mat(WELL_RIM, 0.1)
+	floor_mat.set_shader_parameter("fill", 0.0)
+	floor_mat.set_shader_parameter("wash", 1.0)
+	floor_mat.set_shader_parameter("halo", 0.6)
+	var floor_mesh := PlaneMesh.new()
+	floor_mesh.size = Vector2(2, 2)
+	Models.part(n, floor_mesh, floor_mat, Vector3(0, 0.015, 0)).name = "Floor"
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	var arm_mat := shade_mat(Color(0.7, 0.36, 1.0, 0.95))
+	var arm_mat := shade_mat(Color(0.35, 0.95, 0.82, 0.8))
 	for arm in 4:
 		for j in 6:
 			var u := float(j + 1) / 6.0
@@ -370,9 +378,9 @@ func pooled(kind: String) -> int:
 	return (pools.get(kind, []) as Array).size()
 
 # ------------------------------------------------------------------ shot skins
-## Dresses a Match shot in a skin (the shot dictionary spawn_shot just appended). The shared sphere goes
-## back to Match's pool at once, so it can't be drawn under ours.
-func skin(s: Dictionary, kind: String) -> void:
+## Dresses a Match shot in a skin (the shot dictionary spawn_shot just appended) and returns the skin. The shared
+## sphere goes back to Match's pool at once, so it can't be drawn under ours.
+func skin(s: Dictionary, kind: String) -> Node3D:
 	var sn = s.get("node")
 	if sn != null and is_instance_valid(sn):
 		(sn as Node3D).visible = false
@@ -380,6 +388,7 @@ func skin(s: Dictionary, kind: String) -> void:
 	var n := _take(kind)
 	n.global_position = s["pos"]
 	live.append({"s": s, "n": n, "kind": kind, "t": 0.0, "trail": 0.0, "last": s["pos"]})
+	return n
 
 ## The last shot `by` fired, dressed (weapon shots the kit didn't spawn itself).
 func skin_last(by: Ent, kind: String) -> bool:
@@ -391,11 +400,11 @@ func skin_last(by: Ent, kind: String) -> bool:
 	return false
 
 ## Dresses Motley's last shot at charge k (0..1), `scl` times the plain shot: under ORB_HELD_K the quick
-## shard, from it the void orb, its glass and core brighter with the charge. (Pooled, so every shot sets
-## its looks back.)
-func skin_orb(by: Ent, k: float, scl: float) -> void:
+## shard, from it the void orb, its glass and core brighter with the charge, and returns it (null: no shot to
+## dress). (Pooled, so every shot sets its looks back.)
+func skin_orb(by: Ent, k: float, scl: float) -> Node3D:
 	if not skin_last(by, "orb"):
-		return
+		return null
 	var e: Dictionary = live.back()
 	e["k"] = k
 	var n: Node3D = e["n"]
@@ -407,6 +416,7 @@ func skin_orb(by: Ent, k: float, scl: float) -> void:
 	glass.set_shader_parameter("core", (ORB_CORE[0] as Color).lerp(ORB_CORE[1], k))
 	glass.set_shader_parameter("rim", (ORB_RIM[0] as Color).lerp(ORB_RIM[1], k))
 	(n.get_node("Orb/Hot") as Node3D).scale = Vector3.ONE * lerpf(1.0, ORB_HOT_K, k)
+	return n
 
 func skins_live(kind: String) -> int:
 	return live.filter(func(e): return e["kind"] == kind).size()
@@ -425,32 +435,10 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 			var dust := Color(0.62, 0.48, 0.34, 0.85)
 			fx.burst(p - Vector3(0, 0.4, 0), dust, 3, 2.0, 0.4, 4.0, 1.4, back + Vector3.UP, 50.0)
 			fx.spark(p, back, Color("ff8a2c"), 2, 2.0, 30.0, 0.25, 4.0, 0.8)
-		"orb":
-			var k := float(e["k"])
-			if k < ORB_HELD_K:
-				fx.burst(p, Color(0.72, 0.42, 1.0, 0.7), 1, 0.4, 0.15, 0.0, 0.6, back, 10.0)
-				return
-			fx.burst(p, ORB_SMOKE, 2, 0.7, 0.45, -1.0, 1.4 + 0.8 * k, back, 25.0)
-			fx.burst(p, Color(ORB_EDGE, 0.75), 1, 0.8, 0.25, 0.0, 0.9 + 0.5 * k, back, 30.0)
-		"spear":
-			fx.burst(p, Color(0.5, 0.2, 0.8, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
 
 func _impact(e: Dictionary, p: Vector3) -> void:
-	var fx: Fx = m.fx
-	match String(e["kind"]):
-		"orb":
-			var k := float(e["k"])
-			if k < ORB_HELD_K:      # the shard splinters: a quick violet spray, a small flash
-				fx.spark(p, Vector3.UP, Color("c890ff"), 7, 6.0, 70.0, 0.16, 6.0, 0.7)
-				fx.flash(p, Color("c890ff"), 0.35, 0.05)
-				return
-			# the void orb bursts: dark smoke, magenta motes, a magenta ring and a bigger flash
-			fx.burst(p, ORB_SMOKE, 8 + roundi(k * 6.0), 2.0, 0.5, -1.5, 2.0 + k)
-			fx.burst(p, Color(ORB_EDGE, 0.85), 10 + roundi(k * 10.0), 3.5 + k * 2.0, 0.28, 0.0, 1.1 + 0.6 * k)
-			fx.flash(p, ORB_EDGE, 0.6 + 0.6 * k, 0.08 + 0.04 * k)
-			fx.ring(p, 0.5 + k, ORB_EDGE, 0.25 + 0.1 * k)
-		"boulder":
-			fx.dust(p, 6)
+	if String(e["kind"]) == "boulder":
+		m.fx.dust(p, 6)
 
 func _process(delta: float) -> void:
 	_tick_skins(delta)

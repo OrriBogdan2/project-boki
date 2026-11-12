@@ -138,7 +138,7 @@
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",
-		"col": "#b06bff",
+		"col": "#2ee6c0",
 		"cooldown": 70.0,
 		"range": 10.0,
 		"tell": 1.0,
