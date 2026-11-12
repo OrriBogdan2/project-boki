@@ -343,3 +343,30 @@ root). The branch can be dropped.
 
 Left: thief (24 %, one gate point under the limit) and dolm (19 %, one foot skates 0.5 m) slide most under
 WardenStride. Not traced here (docs/DEBT.md).
+
+### The stop-start parts, ported onto WardenStride (Nov 12, ext/anim-stop-on-stride)
+
+Traced in `--stride-check` frame by frame, the slip under WardenStride came from two places, not from the slide: the
+planted foot's step-in moved along the ground before it lifted (Kael: 10 cm, arc 7 cm from a foot 5 cm under its
+standing sole), and the pins let go over 5 frames while the loco blend was still 0.07-0.10 out, so the feet jumped
+4-6 cm onto the loop's legs. Ported from `ext/anim-stop-start` as data in `content/rules/warden_stride.json`, one path:
+- feet planted through the stop: after the step-in the pins hold until the loco blend stands in the idle, then hand
+  over over `settle_s` (its legs-settle-into-the-idle idea);
+- no skate on the last step: the step-in rises for `lift_p` of the step before it travels and lands before it stops;
+- weight-class stop length: `settle_s` 0.3-0.32 s for Kael, Albert, Tenzo, 0.26 Dredge, 0.16-0.2 the light (its
+  `stop_rate` 5 vs 8); Kael's step-in also lifts higher (`arc_m` 0.09, `lift_p` 0.3).
+
+| Hero (Hunter) | `--stride-check` planted foot, old -> new | `--anim-audit` STOP, old -> new |
+|---|---|---|
+| Vex (gunslinger) | 0.015 -> 0.007 m | 9 % (0.18 m) -> 7 % (0.15 m) |
+| Kael (juggernaut) | **0.150** -> 0.025 m | 10 % (0.02 m) -> 4 % (0.01 m) |
+| Lace (archer) | **0.039** -> 0.019 m | 6 % (0.09 m) -> 4 % (0.06 m) |
+| Cinder (ashwick) | **0.033** -> 0.013 m | 10 % (0.17 m) -> 6 % (0.09 m) |
+| Albert (bulwark) | 0.014 -> 0.014 m | 10 % (0.20 m) -> 10 % (0.23 m) |
+| Tenzo (dolm) | **0.100** -> 0.009 m | 22 % -> 21 % |
+| Neve (rimewright) | 0.011 -> 0.024 m | (no leg motion) |
+
+(`--stride-check` limit 3 cm, bold over it; it now follows a stop until WardenStride hands the feet back to the idle,
+1 s at most, and covers Lace and Cinder. Neve's 2.4 cm: her idle shifts weight while the pins hand over.) Albert's
+audit skate rises 3 cm: the audit window (0.4 s) ends inside his longer step-in. GPU strip:
+`docs/shots/anim-stop-on-stride/`.

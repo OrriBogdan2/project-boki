@@ -5,7 +5,7 @@ Net.VERSION untouched: anim-summon-call brings the Boki wisp and summon (KinWisp
 boki_wisps setting, default off) and anim-guardian-stance the guardian summon; both change the sync shape, so the
 combine must bump it.
 
-Counts: 73 in (65 merged, 8 carried by a merged branch), 18 held, 12 superseded.
+Counts: 73 in (65 merged, 8 carried by a merged branch), 17 held, 13 superseded (anim-stop-start moved to superseded by ext/anim-stop-on-stride).
 anim-boki-cast-rebased and anim-react-2-rebased tips merge ext/mc-20261110-0630 (2,200+ commits): their own commits
 were merged (a9e410abe, 2eea0e098) without it.
 
@@ -29,11 +29,11 @@ re-applied 18 clips the first pass had given by file date). Most idle, gait and 
 - ext/boki-gait: its per-species gait table (content/rules/boki_gait.json, play_scale) is a second Boki stride system next to 0245's BokiRig.STRIDE + MAX_CADENCE + size-roll scale, and RUN_SPEED 3.2 vs 0245's 2.2: one needs picking and the other ported (data over code favours its json)
 - ext/anim-mantle-2: a parallel ledge-climb system (data "climb", WardenClips._climb, climb_t; hunter.mantle_k) next to anim-mantle-1's (data "mantle", _mantle, Hunter._rise_k) for the same feature; its Lace/Tenzo/Grimble/Neve clips need a port onto mantle-1's data
 - ext/anim-mantle-3: a third ledge-climb system (WardenClips._climb(st, s) on the states' "mantle"/"ledge" clips) next to anim-mantle-1's (data "mantle", _mantle); its Sparkle/Albert/Sable/Motley clips need a port onto mantle-1's data
-- ext/anim-stop-start: its loco stop (stop_rate blend, WardenGait.plan by blend position, follow, stand_k) overlaps anim-run-start-stop's WardenStride (merged) on the same run stop, and rewrites the WardenGait API under time-cinder's cadence and the crouch rate; one stop needs picking, then a port
 - ext/anim-strafe-back: stacked on ext/feel-facing-turn (0a8e3f09d 'the body turns onto the cursor at the footage rate'), which the feel wave held for an owner pick (FACE_TURN 5400 deg/s vs 0245 HunterMove.turn_rate); merge after that pick
 - ext/vfx-origin-v2-rebased: carries ext/vfx-pass (13 READY 11-08 VFX branches, 53 commits): 31 conflicted files incl. match.gd, hero_vfx.gd and four shaders, a VFX-lane merge over the 0245 HeroVfx rework, far past a 30-min fix; no wave has it yet
 
 ## Superseded
+- ext/anim-stop-start: the run stop has one owner, WardenStride (anim-run-start-stop, merged); ext/anim-stop-on-stride ports what stop-start added that WardenStride lacked as rows in content/rules/warden_stride.json, not a second path: the feet stay pinned after the step-in until the loops stand in the idle and then hand over over `settle_s` (its stand_k settle; heavy Kael/Albert/Tenzo 0.3-0.32 s, its stop_rate 5 vs 8), and the step-in rises for `lift_p` before it travels (no skate on the last step). Its stop_rate blend, WardenGait.plan-by-blend/follow API and stand_k layer are dropped. --stride-check planted-foot slide through the stop, old -> new (m): Vex 0.015 -> 0.007, Kael 0.150 -> 0.025, Lace 0.039 -> 0.019, Cinder 0.033 -> 0.013, Albert 0.014 -> 0.014 (--anim-audit STOP: 9/10/6/10/10 % -> 7/4/4/6/10 %); table in docs/art/ANIM_QUALITY_AUDIT.md
 - ext/anim-pilot-albert-neve: AI-motion pilot loops (run_f/walk_f) keyed on the pre-v95 breaker/claire; the base's newer v95 clips win both, so none of it survives
 - ext/idle-archer-rebased: Lace idle+stance rework re-baked on the Ravel v2 hem: the newer 11-10 appeal3 swap and 11-11 pilot idle (anim-pilot-idle-slice) win every clip, theirs' model edits were on the old body
 - ext/idle-bulwark-rebased: idle rework re-baked on the pre-swap model: the newer 11-10 appeal3/v95 swaps (and 11-11 pilot idles) win every clip, its model edits were on the old body
@@ -48,7 +48,7 @@ re-applied 18 clips the first pass had given by file date). Most idle, gait and 
 - ext/anim-react-audit: its re-keyed hit_f/hit_b lose to the newer 11-10 appeal3/v95 swaps in all 5 glbs (as react-2); nothing else of it survives
 
 ## Merged with a side picked or a part left out
-- ext/anim-idle-walk-gap-rebased (merged on its own: its container anim-stop-start is held)
+- ext/anim-idle-walk-gap-rebased (merged on its own: its container anim-stop-start is superseded)
 - ext/anim-nook-moment (its Nook preview card commit 119c5630e left out: the garden wave resolved it to 0245 NookRules.preview)
 - ext/anim-prop-handoff (dr_throw THROW_SKIP left out: 0245 Dredge hook has a coil-back wind-up, the hook no longer leaves on the press)
 - ext/anim-relic-puton (mask_moment.json deleted as it does; the new 1.5 s beat has no whispers, so 0245 Gil whisper line goes with it)
