@@ -3015,6 +3015,7 @@ func _anim_state(stretch: float) -> void:
 	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
+	HazardMoves.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
@@ -3103,7 +3104,7 @@ func render(delta: float, alpha: float) -> void:
 		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
 	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
-	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))
+	model.position.y = lerpf(model.position.y, ride - HazardMoves.sink(self), minf(1.0, delta * 12.0))
 	if remote:
 		update_lip()
 	_render_weapon_fx(delta)

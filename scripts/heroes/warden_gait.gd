@@ -8,6 +8,8 @@ extends RefCounted
 ##    mean), so a planted foot stays put on the floor without the cadence going frantic;
 ##  - "loco.arm_swing": {"L": gain, "R": gain} puts the arm on the opposite swing of its own side's leg: its pitch
 ##    about the side axis follows minus the leg's, around the arm's running mean (a static arm gets a swing too).
+##  - with no footing (state "footing", HazardMoves on ice: the hazard's "moves" data) the stride shortens by "stride",
+##    the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -21,7 +23,9 @@ var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+var foot := {}               # the last "footing" data (kept while it fades out)
+var foot_w := 0.0            # 0 sure footing .. 1 none
 
 func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 	skel = sk
@@ -34,7 +38,14 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 		var hi := WardenSkeleton.find(sk, "hand." + String(side))
 		var ti := WardenSkeleton.find(sk, "thigh." + String(side))
 		if ai >= 0 and hi >= 0 and ti >= 0:
-			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
+			var out := signf(sk.get_bone_global_rest(ai).origin.x)      # (turning toward this side lifts it out)
+			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN, out])
+
+## Eases toward the state's "footing" ({} on sure ground) before plan.
+func footing(dt: float, ft: Dictionary) -> void:
+	foot_w = move_toward(foot_w, 0.0 if ft.is_empty() else 1.0, FADE_RATE * dt)
+	if not ft.is_empty():
+		foot = ft
 
 ## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
 ## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, tools/anim_audit.gd), between the
@@ -44,9 +55,10 @@ func plan(spd: float, lc: Dictionary) -> float:
 	var run := float(lc.get("run_speed", 4.6))
 	var t := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
 	var stride: Array = lc.get("stride", [1.0, 1.0])
-	var foot: Array = lc.get("foot_mps", [walk, run])
-	gain = lerpf(float(stride[0]), float(stride[1]), t)
-	return clampf(spd / maxf(lerpf(float(foot[0]), float(foot[1]), t), 0.1), RATE_MIN, RATE_MAX)
+	var feet: Array = lc.get("foot_mps", [walk, run])
+	gain = lerpf(float(stride[0]), float(stride[1]), t) * lerpf(1.0, float(foot.get("stride", 1.0)), foot_w)
+	var rate := spd / maxf(lerpf(float(feet[0]), float(feet[1]), t), 0.1)
+	return clampf(rate * lerpf(1.0, float(foot.get("cadence", 1.0)), foot_w), RATE_MIN, RATE_MAX)
 
 ## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
 func apply(dt: float, legs_k: float, arm_k: float) -> void:
@@ -68,9 +80,11 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 		if arm_w <= 0.0:
 			continue
 		var turn := (float(r[5]) - float(r[4]) * angle_difference(r[6], leg_p) - arm_p) * arm_w
+		var spread := float(foot.get("arms_out", 0.0)) * foot_w * arm_w * float(r[7])
 		var pq := _basis_q(r[1])
 		var q := skel.get_bone_pose_rotation(r[0])
-		skel.set_bone_pose_rotation(r[0], pq.inverse() * Quaternion(Vector3.RIGHT, turn) * pq * q)
+		var turn_q := Quaternion(Vector3.BACK, spread) * Quaternion(Vector3.RIGHT, turn)
+		skel.set_bone_pose_rotation(r[0], pq.inverse() * turn_q * pq * q)
 
 ## How far forward (rad, + forward, -Z) a direction points from straight down.
 func _pitch(dir: Vector3) -> float:

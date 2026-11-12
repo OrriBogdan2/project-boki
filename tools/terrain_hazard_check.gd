@@ -8,6 +8,8 @@ extends RefCounted
 ##   ice         low grip, a push slides far             / frost: full grip, it stops short
 ##   static      the next shock hurts and stuns          / storm: no damage, no stun
 ##   bramble     slowed and scratched                    / bloom: neither
+## and the body's move there (HazardMoves): every hunter in deep water swims, one without footing on ice says so
+## (the gait's footing), a warded one doesn't,
 ## each with its counter Boki and with its ward perk (plain Boki + perk), the big fields (tagged regions,
 ## safe paths and stones, ward loot near them),
 ## the ward rule (content/rules/terrain_hazards.json "ward"): the best single protection applies, no
@@ -217,6 +219,7 @@ func _deep_water(ai: int, safe: bool) -> void:
 	await _run(0.3)
 	var spd := P.slow_mult() * (1.35 if P.haste_t > 0.0 else 1.0)
 	var hits := TerrainHazards.hit_mult(m, P)
+	ok("deep water %s: the hunter swims" % _who(safe), HazardMoves.of(P) == HazardMoves.SWIM, str(HazardMoves.of(P)))
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
 	var lost := P.max_hp - P.hp
 	if safe:
@@ -231,6 +234,9 @@ func _ice(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(0.1)
 	var g := m.ground_grip(P.pos, P)
+	var want := HazardMoves.NONE if safe else HazardMoves.FOOTING
+	ok("ice %s: %s" % [_who(safe), "sure footing" if safe else "no footing (short stride, arms out)"],
+		HazardMoves.of(P) == want, str(HazardMoves.of(P)))
 	var from := P.pos
 	P.vel = Vector3(5.0, 0, 0)
 	await _run(0.5)
