@@ -159,8 +159,6 @@ func add_spark(f: Ent, n := 1) -> void:
 		var swing: bool = anim_id == "" or m.time - anim_at > 0.3
 		vfx("live", f.position, null, {"swing": swing})
 		m.sfx("vv_static_full", f.pos, -2.0)
-		# the word goes above the marker so the two never print over each other
-		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
 		if swing: play("mage_live")
 	elif int(s["n"]) > was:
 		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
@@ -441,7 +439,6 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
 	vfx("dash_go", h.position, v.normalized(), {"len": v.length() * time, "t1": time + 0.25, "t2": time + 0.15})
 	m.sfx("vv_surge_go", h.pos, -1.0)
-	m.fx.word(h.pos + Vector3(0, 2.2, 0), "INVULNERABLE", PINK, false)   # the source labels the streak
 	if h.model: h.model.visible = false
 	m.later(time, _arrive)
 
@@ -495,7 +492,7 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	vfx("blowout", f.position)
-	payoff_fx(f.pos, "BLOWOUT", PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
+	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
@@ -641,7 +638,6 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
-		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
@@ -779,7 +775,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not wire.is_empty() or rmb_down or ult.busy():
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]):
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return

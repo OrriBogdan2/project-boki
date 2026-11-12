@@ -189,8 +189,8 @@ func _take_off() -> void:
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
-	kit.vfx("x_air", from, null, {"len": float(data()["height"])})
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
+	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
+	kit.vfx("x_air", from, null, {"r": r, "len": float(data()["height"]), "t": hover})
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
