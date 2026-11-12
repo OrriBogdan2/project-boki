@@ -409,11 +409,13 @@ func gunslinger() -> void:
 	ac.step(m, 0.5)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
-	var core_r := float(disc.get("core", 0))
+	var core := AimKit.entry(P, "xc1")
+	var core_r := float(core.get("r", 0))
 	var fill := float(disc.get("fill", 0))
-	ok("Cinderfall: the disc with its hot centre, seen by everyone, filling",
+	ok("Cinderfall: the disc and its hot centre ring, seen by everyone, filling together",
 			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
-			and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2,
+			and bool(core.get("all", false)) and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2
+			and is_equal_approx(float(core.get("fill", 0)), fill),
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
 	# he is free the whole time: he walks and the rifle works
 	var p0 := P.pos
