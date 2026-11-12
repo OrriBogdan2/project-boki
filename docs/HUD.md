@@ -118,7 +118,7 @@ no kit draws its own recast HUD.
   left, name and seconds, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
-- **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
+- **Buffer.** A press up to `Loco.press_buffer` (tuning.json, 0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
