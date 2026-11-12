@@ -57,6 +57,7 @@ func _draw_panels() -> void:
 			GearPanel.draw(hud, sz, p)
 			hud._draw_kin_card(sz, p)
 			hud._draw_squad(sz, p)
+			TeamBoki.draw(hud, p)
 			hud._draw_perks(sz, p)
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0

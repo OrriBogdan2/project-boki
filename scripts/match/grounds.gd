@@ -1,6 +1,6 @@
 class_name Grounds
 extends RefCounted
-## The Training Area' stations (the --arena map's "grounds" block, content/maps/arena.json).
+## The Training Grounds' stations (the --arena map's "grounds" block, content/maps/arena.json).
 ## Pedestals on the sky perches let you try every Hunter, Boki, glove/armor/boot and belt item, and spawn
 ## a sparring bot of any Hunter; a ring on the floor takes you to the duel room. Walk up, press interact.
 ## Cheap by design: every pedestal shares one mesh and a few materials, a label only shows when you are close,
@@ -25,7 +25,7 @@ var _belt_turn := 0            # which belt slot a full belt gives up next
 var prompt: Label = null
 var _layer: CanvasLayer = null
 
-## The map's "grounds" block ({} when this isn't the Training Area).
+## The map's "grounds" block ({} when this isn't the Training Grounds).
 static func data() -> Dictionary:
 	return World.load_layout("arena").get("grounds", {})
 
@@ -167,7 +167,7 @@ func tick() -> void:
 	if P.pos.y < FALL_Y and not P.downed:
 		P.teleport(a.home)
 		P.vel = Vector3.ZERO
-		if m.hud: m.hud.toast_small("Back to the Training Area", Color("8fe3c8"))
+		if m.hud: m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
 	var best := -1
 	var bd := ACT_R
