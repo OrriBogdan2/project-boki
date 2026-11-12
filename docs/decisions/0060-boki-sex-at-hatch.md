@@ -12,7 +12,7 @@ Owner (11-11): the hatch reveal should show the Boki's sex and say he or she, ne
 2. A save step that writes the sex once, by the kind's share, and puts a single-sex kind right.
 
 ## Decision
-Option 2. Save v12 -> v13 runs the same step as v2 -> v3 (`_migrate_sexes`, `Unique.ensure_sex`), which now draws by the kind's share (`BokiQuirks.sex_for`) and overrides a wrong sex on a single-sex kind. The first egg builds its record as the Boki pops out (`Hatch._hatched_rec`), so the reveal, the name card and the save all use one sex. Text says he / she through `Unique.pronouns(rec)` templates ("{He}'s looking at you").
+Option 2. Save v13 -> v14 runs the same step as v2 -> v3 (`_migrate_sexes`, `Unique.ensure_sex`), which now draws by the kind's share (`BokiQuirks.sex_for`) and overrides a wrong sex on a single-sex kind. The first egg builds its record as the Boki pops out (`Hatch._hatched_rec`), so the reveal, the name card and the save all use one sex. Text says he / she through `Unique.pronouns(rec)` templates ("{He}'s looking at you").
 
 ## Consequences
-save.gd (VERSION 13), unique.gd, hatch.gd, kin_reveal.gd, and the Boki text that names one Boki (burrow, bond, About page, Boki actions in boki_lines.json). No Net change: kin records already sync whole. Checks: --hatch-check (the "it" scan, the sex mark), --unique-check (the v12 step).
+save.gd (VERSION 14), unique.gd, hatch.gd, kin_reveal.gd, and the Boki text that names one Boki (burrow, bond, About page, Boki actions in boki_lines.json). No Net change: kin records already sync whole. Checks: --hatch-check (the "it" scan, the sex mark), --unique-check (the v14 step).

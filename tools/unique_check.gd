@@ -96,11 +96,11 @@ func run(m: Node) -> void:
 	var roster12 := [{"uid": "kB", "species": "hivara", "dna": hiv},
 			{"uid": "kC", "species": "cindle", "dna": r0b.duplicate()},
 			{"uid": "kD", "species": "cindle", "dna": r0.duplicate()}]
-	var old12 := {"v": 12, "roster": roster12, "lost_kin": [], "graves": []}
+	var old12 := {"v": 13, "roster": roster12, "lost_kin": [], "graves": []}
 	var moved := Save.migrate(old12) and int(old12["v"]) == Save.VERSION
 	var sexes: Array = roster12.map(func(r): return String(r["dna"].get("sex", "")))
 	ok(moved and sexes[0] == "f" and sexes[1] == BokiQuirks.sex_for("cindle", 31337) and roster12[2]["dna"] == r0,
-			"v12 -> v13: a Boki with no sex gets one, an all-female kind is put right, the rest keep theirs %s"
+			"v13 -> v14: a Boki with no sex gets one, an all-female kind is put right, the rest keep theirs %s"
 			% str(sexes))
 	var big := Save.new_kin("cindle", "Big", 1); big["dna"]["size"] = 2.6
 	var small := Save.new_kin("cindle", "Small", 2); small["dna"]["size"] = -2.6

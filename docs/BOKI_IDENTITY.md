@@ -124,6 +124,15 @@ serial are never inherited.
   This is the hook for ranked play or lower tiers to neutralize size later: set the option when
   starting those matches.
 
+## Size at home: carrying (`HomeCarry`)
+
+Hold interact on a Boki to pick it up; press interact again to set it down; a tap is still a pat.
+By weight (`Unique.size_info`): up to 3.5 kg rides in your arms, up to 9 kg on your back, heavier ones
+are led beside you (hold again to let go). You walk at 90%. Brave ones wriggle, timid ones cling, a
+grumpy one (temper over 0.62) squirms free after 5 s. A Close-or-better bond gains 1 trust from its
+first carry of the day (3 s or more); the day is kept in `rec["carried_day"]` (absent on old saves,
+so no migration). Home only.
+
 ## Showing it to the player
 
 Following docs/POSITIONING.md (design branch): rarity shows in the Boki itself (its size, coat,
@@ -146,7 +155,7 @@ case, so `basaltoad` reads `rampartoad`). The Field Book page shows both. A few 
 - `female_share`: the hatch-time sex roll (`BokiQuirks.sex_for`, from the egg's seed, in
   `Save.new_kin` and after `Care.breed` inherits). Hivara and Mossgrade hatch only female,
   Marchleaf and Lodestick 95% female, Buckleron always male. Every other kind keeps the coin flip.
-  Save v13 writes it once into every record that has none, by the same share, and puts a single-sex
+  Save v14 writes it once into every record that has none, by the same share, and puts a single-sex
   kind right (an older 50/50 roll could make a male Hivara; decision 0060).
 - Text about one Boki says he or she, never "it": `Unique.pronouns(rec)` fills templates like
   `"{He}'s looking at you"` (keys he, him, his and capitalised); Boki actions in `boki_lines.json` use
