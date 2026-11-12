@@ -12,7 +12,7 @@ extends RefCounted
 
 const DOME_COL := Color("b8fff0")
 const DISC_COL := OstraKit.SEA
-const PINK := Color("ff4fd8")
+const SWOLLEN_COL := OstraKit.HOT     # the core when cast Swollen: his lighter teal
 const TICK := 0.1                       # s between damage ticks
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
 const GATHER_Y := 2.4                   # m over his ground point: the orb above his raised hands
@@ -120,7 +120,7 @@ func unlock(go_dash := true, move := "ostra_well_end") -> void:
 func _tick_tell(dt: float) -> void:
 	phase_t += dt
 	var tell := float(xd()["tell"])
-	var accent := PINK if swollen else DISC_COL
+	var accent := SWOLLEN_COL if swollen else DISC_COL
 	AimKit.circle(k.h, "x", {
 		"at": center, "r": radius, "fill": phase_t / tell, "all": true, "col": DOME_COL, "col2": accent,
 		"ticks": true,

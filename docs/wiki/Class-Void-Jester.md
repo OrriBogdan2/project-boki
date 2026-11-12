@@ -48,7 +48,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
+**Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a light-teal sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
 **Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
 

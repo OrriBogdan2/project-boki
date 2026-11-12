@@ -1,7 +1,6 @@
 {
 	"palette": {
-		"main": "#2ee6c0", "pale": "#7fe0d0", "hot": "#eafffa", "char": "#06221e", "smoke": "#3a5c58",
-		"pink": "#ff4fd8"
+		"main": "#2ee6c0", "pale": "#7fe0d0", "hot": "#eafffa", "char": "#06221e", "smoke": "#3a5c58"
 	},
 	"anchors": {
 		"hand": {"nodes": ["anchor_orb"], "bone": "hand.R", "off": [0.0, 0.1, 0.0], "body": [0.3, 1.15, 0.4]},
@@ -10,9 +9,9 @@
 	},
 	"moves": {
 		"swell": {"sfx": [{"n": "os_empower", "db": -2}], "fx": [
-			{"p": "flare", "at": "chest", "size": 1.6, "grow": 1.3, "life": 0.22, "c": "pink", "c2": "hot", "c3": "char"},
+			{"p": "flare", "at": "chest", "size": 1.6, "grow": 1.3, "life": 0.22, "c": "main", "c2": "hot", "c3": "char"},
 			{"p": "star", "at": "chest", "n": 14, "speed": 3.0, "spread": 1.0, "drag": 2.0, "grav": -0.6, "life": 0.7,
-				"size": 0.14, "c": "pink", "c2": "hot"}
+				"size": 0.14, "c": "main", "c2": "hot"}
 		]},
 		"orb_ready": {"fx": [
 			{"p": "star", "at": "hand", "shape": "gather", "radius": 0.55, "n": 6, "speed": 1.6, "life": 0.3,
