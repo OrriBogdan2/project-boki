@@ -3,7 +3,8 @@ extends "res://tools/hero_pair_check.gd"
 ## dummy through the real match code: the Fencer chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each
 ## vial's effect, hold range, the air drop), Fish Out of Water (three marks Beach), Ground Swim (hittable, surfacing
 ## knocks up), Riptide (spin damage, the spout's knockup, longer spin = wider spout) and Tidal Wave (untargetable,
-## knockup then slow, lands with a shield).
+## knockup then slow, lands with a shield). Last, his sound set: every move and phase that ran plays a sound of
+## its own (content/vfx/gil.json, made by tools/gen_sfx_gil.py), none shared with another move or the stock set.
 
 var m: Match
 var P: Hunter
@@ -29,6 +30,7 @@ func run(main_node: Node) -> void:
 	_swim()
 	_riptide()
 	_wave()
+	_sounds()
 	await done(m)
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -343,3 +345,36 @@ func _wave_way(run: Vector2) -> void:
 		"along %.2f off-line %.2f" % [along, off])
 	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
 		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)
+
+## Each move or phase of the kit -> the sound it plays (the thrusts and the dash pick theirs by "k" and HeroSfx).
+const OWN_SOUNDS := {
+	"thrust": ["gil_thrust", "gil_thrust_low"], "lunge": ["gil_lunge"], "thrust_hit": ["gil_thrust_hit"],
+	"lunge_hit": ["gil_lunge_hit"], "tide_wind": ["gil_tide_wind"], "tide_full": ["gil_tide_full"],
+	"tide_lunge": ["gil_tide_lunge"], "tide_hit": ["gil_tide_hit"], "throw": ["gil_toss"],
+	"shatter_thunder": ["gil_pop_thunder"], "shatter_slime": ["gil_pop_slime"], "shatter_air": ["gil_pop_air"],
+	"shatter_fire": ["gil_pop_fire"], "shatter_zeep": ["gil_pop_zeep"], "mark": ["gil_mark"],
+	"beached": ["gil_beached"], "surface": ["gil_surface"], "spin": ["gil_spin"], "spout": ["gil_spout"],
+	"wave": ["gil_wave"], "wave_land": ["gil_wave_land"],
+}
+
+func _sounds() -> void:
+	var moves: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/gil.json"))["moves"]
+	var set_names: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/gil.json"))["sounds"]
+	var wrong := []
+	var silent := []
+	for mv in OWN_SOUNDS:
+		var names := (moves[mv].get("sfx", []) as Array).map(func(e): return String(e["n"]))
+		if names != OWN_SOUNDS[mv] or not names.all(func(n): return set_names.has(n) and Sfx.ensure(n)):
+			wrong.append("%s %s" % [mv, names])
+		if int(HeroVfx.of(m).plays.get(mv, 0)) == 0:
+			silent.append(mv)
+	ok("sounds: every move and phase plays its own levelled gil_* sound (wrong: %s)" % [wrong], wrong.is_empty())
+	ok("sounds: every one of those moves ran in this check (never ran: %s)" % [silent], silent.is_empty())
+	ok("sounds: the dive is the dash sound alone (no second layer)", not moves["dive"].has("sfx"))
+	P.grounded = true
+	var ground := HeroSfx.dash_name(P)
+	P.grounded = false
+	var air := HeroSfx.dash_name(P)
+	P.grounded = true
+	ok("sounds: Ground Swim dives in gil_dash, the air dash plays gil_dash_air",
+		ground == "gil_dash" and air == "gil_dash_air", "%s / %s" % [ground, air])
