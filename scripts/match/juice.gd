@@ -13,6 +13,10 @@ extends RefCounted
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
+const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
+const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
+const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
+const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
 ## sparks fly (on through it).
@@ -139,8 +143,9 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	var c := Vector3(h.pos.x, h.hit_y() + 1.0, h.pos.z)
 	m.fx.flash(c, Color("9ad8ff"), 0.8, 0.14)
 	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
-	m.sfx("armor_break", h.pos, -1.0)
+	m.sfx("armor_break", h.pos, ARMOR_BREAK_DB_VICTIM if h == m.player else ARMOR_BREAK_DB)
 	if credit == m.player and h != m.player:
+		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)     # the "push now" tick, only for whoever broke it
 		m.freeze_frame(0.045)
 
 ## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
