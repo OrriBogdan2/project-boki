@@ -1,14 +1,15 @@
 class_name KinFlinch
 extends RefCounted
 ## How a Boki's body takes a hit, for KinPuppet (the primitive bodies) and BokiRig (the rigged ones).
-## KinFlinch.hit() writes the meta "hit" on the kin's model root; each driver owns one KinFlinch,
+## KinFlinch.hit() writes the metas hit_n, hit_k, hit_push and hit_mass on the kin's model root (plain values: a hit
+## allocates nothing); each driver owns one KinFlinch,
 ## calls update() every frame, and adds rot, shove, wide and tall to Flex.
 ## The body snaps to the jolt at once (it has to read within 0.1 s), then springs back: how far
 ## scales with the hit and shrinks with mass, how long it takes grows with mass (light Boki snap
 ## back, heavy ones carry the hit). Each body plan jolts its own way (PLAN).
 
 const SETTLE_LIGHT := 0.20     # s until the jolt is down to a quarter, for MASS_LIGHT
-const SETTLE_HEAVY := 0.38     # s, for MASS_HEAVY
+const SETTLE_HEAVY := 0.30     # s, for MASS_HEAVY
 const MASS_LIGHT := 0.8        # KinSpec mass of the lightest Boki
 const MASS_HEAVY := 2.0        # ...and of the heaviest
 const DAMPING := 0.55          # spring damping ratio: one small overshoot
@@ -35,21 +36,26 @@ var _amp := 0.0                # strength of the current jolt
 var _x := 0.0                  # 1 at the hit, springs to 0
 var _v := 0.0
 var _omega := 20.0
-var _push := Vector2.ZERO      # which way the body is shoved, in Flex space (x right, y back)
+var push := Vector2.ZERO       # which way the last hit shoved the body, in Flex space (x right, y back)
 
-## A hit on a Boki: `push` is the way the hit shoves it (world), `frac` the share of its max health the hit took,
+## A hit on a Boki: `away` is the way the hit shoves it (world), `frac` the share of its max health the hit took,
 ## `mass` its KinSpec mass.
-static func hit(model: Node3D, push: Vector3, frac: float, mass: float) -> void:
-	var cur: Dictionary = model.get_meta("hit", {"n": 0})
-	var k := clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1))
-	model.set_meta("hit", {"n": int(cur["n"]) + 1, "k": k, "push": push, "mass": mass})
+static func hit(model: Node3D, away: Vector3, frac: float, mass: float) -> void:
+	model.set_meta(&"hit_k", clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1)))
+	model.set_meta(&"hit_push", away)
+	model.set_meta(&"hit_mass", mass)
+	model.set_meta(&"hit_n", count(model) + 1)
+
+## How many hits the model has taken.
+static func count(model: Node3D) -> int:
+	return int(model.get_meta(&"hit_n", 0))
 
 ## Takes up a new hit if there is one and steps the spring; then rot, shove, wide and tall are the pose.
 func update(root: Node3D, dt: float) -> void:
-	var h: Dictionary = root.get_meta("hit", {})
-	if not h.is_empty() and int(h["n"]) != _n:
-		_n = int(h["n"])
-		_start(root, h)
+	var n := count(root)
+	if n != _n:
+		_n = n
+		_start(root)
 	var left := minf(dt, 0.1)
 	while left > 0.0:
 		var step := minf(left, 1.0 / 120.0)
@@ -58,21 +64,21 @@ func update(root: Node3D, dt: float) -> void:
 		_x += _v * step
 	_pose()
 
-func _start(root: Node3D, h: Dictionary) -> void:
+func _start(root: Node3D) -> void:
 	var cur := absf(_amp * _x)
-	_amp = maxf(float(h["k"]), cur)
+	_amp = maxf(float(root.get_meta(&"hit_k", K_MIN)), cur)
 	_x = 1.0
 	_v = 0.0
-	var m := float(h["mass"])
+	var m := float(root.get_meta(&"hit_mass", 1.0))
 	var heft := clampf((m - MASS_LIGHT) / (MASS_HEAVY - MASS_LIGHT), 0.0, 1.0)
 	_omega = OMEGA_PER_S / lerpf(SETTLE_LIGHT, SETTLE_HEAVY, heft)
-	var local := root.global_basis.inverse() * (h["push"] as Vector3)
-	_push = Vector2(local.x, local.z).normalized() if Vector2(local.x, local.z).length() > 0.01 else Vector2.ZERO
+	var local := root.global_basis.inverse() * (root.get_meta(&"hit_push", Vector3.ZERO) as Vector3)
+	push = Vector2(local.x, local.z).normalized() if Vector2(local.x, local.z).length() > 0.01 else Vector2.ZERO
 
 func _pose() -> void:
 	var p: Dictionary = PLAN.get(plan, PLAN["blob"])
 	var s := _amp * _x
-	rot = Vector3(s * float(p["pitch"]) * _push.y, s * float(p["yaw"]) * _push.x, -s * float(p["roll"]) * _push.x)
-	shove = Vector3(_push.x * float(p["shove"]), float(p["lift"]), _push.y * float(p["shove"])) * s
+	rot = Vector3(s * float(p["pitch"]) * push.y, s * float(p["yaw"]) * push.x, -s * float(p["roll"]) * push.x)
+	shove = Vector3(push.x * float(p["shove"]), float(p["lift"]), push.y * float(p["shove"])) * s
 	tall = 1.0 - s * float(p["squash"])
 	wide = 1.0 + s * float(p["squash"]) * 0.5
