@@ -1,25 +1,29 @@
-# Hem (archer; shown as Ravyl): import note, ART-1 rebuild for Ravel v2 (2026-11-07)
+# Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
-`hem.glb`: one Meshy multi-view scan of `ravel_v2_turnaround.jpg` (brief: briefs/art-refs/ravel_v2/ on ext/agent-briefs) plus scripted parts, on the
-shared armature, the ids and file names kept. Raw files in ~/meshy/ravel_v2 (never in git). 14.4k triangles with the bow, one 2048 atlas (`hem_atlas.jpg`,
-the pieces on flat cells at its right edge) and a 512x256 RGBA card atlas (`hem_cards.png`). No normal map. Slots: skin, hair, cloth (corset), leather (skirt, belt, boots, bow), metal, card.
+`hem.glb`: the owner's pick (11-10), Lace v95 r2 appeal3 `cand_b.glb` (the slimmer body; its face is the appeal3 face, one mesh), swapped
+onto Hem's own skeleton, 48 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/hem_v95.json`.
+Raw files in ~/meshy/v95/lace/r2/appeal3 (never in git); the spec reads `lace_v95_b_body.glb`, which is `cand_b.glb` without its
+`lace_bow` node (cut from the glTF JSON, the buffer untouched): the game's bow and arrow (`bow_mesh`, `arrow_mesh`, on `bow*`/`arrow`)
+stay as they were, with their weights.
 
-Scripted (tools/art1/hem_pieces.py): the closed bow hand, the bow (1.6 m), the two back needles (1.21 m, 0.67 of her height, as on the sheet) lashed in an X,
-severed strings, thread spools and pins on the belt, bun pins, the arrow, and her eyelids (`eyelids`: a shell per eye on `lid.R`/`lid.L`, pivot 13 mm under
-the painted eye, that comes out over it when a clip turns the bone down; open it hides in the face but for its dark lash rim). Cards (hem_finish.py): the frayed
-thread hem, on the skirt chains, and the smoke at her hair's ends (dark root to grey-violet).
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/hem_v95.json WORK art/wardens/hem/hem.glb
 
-    ~/meshy/ravel_v2/build.sh source    # source (hem_source.py: scan -> rig rest pose, heel flattened, Low), finish (hem_finish.py), clips (hem_clips.py)
-    INSTALL=1 ~/meshy/ravel_v2/build.sh # copies stage/c/hem_out.glb here
+Body: 13k triangles (head 2.6k), one 2048 atlas embedded (Godot extracts it to `hem_atlas_1.jpg`; `hem_atlas.jpg` is the bow's).
+Slots by colour and box (first match wins): metal (the back needles), hair, skin, cloth (red corset), leather (dark skirt, boots).
+Weights: bone heat from the spec's joints; the back needles ride `hips`, the head box `head`, the left shoulder mask `pauldron.L`.
 
-48 clips, the same set as before, keyed in hem_clips.py (poses lifted with her hips). Rig: `legs` 2.05, `neck` -0.05 in content/archetypes/archer.json; regenerate with
-`godot --headless -- --warden-rig-json --warden=archer`. The eyes stay the scan's paint; the lids are modelled, so blinks read.
+Lost from the scripted build (tools/art1/hem_pieces.py, hem_finish.py: that build is replaced, not merged):
+the modelled eyelids (blinks no longer show; `lid`/`brow` bones move nothing), the lit strings on her right hand (no glow slot),
+the thread and smoke cards, and the closed bow hand (her hands are the master's, open; the bow sits in the left hand as before).
+`cape`, `skirt` and the spring chains carry no weight, so the skirt follows the legs. tools/warden_glb_check.gd no longer
+asks for the lids and strings.
 
-Proportions against the sheet: the head is fitted at 1:1 (hem_source.py `HEAD_K`; pass 2 had 1.06). Her belt sits about 8 cm under the sheet's because the
-shared rig's shoulders do too (shoulder to belt matches, 0.40 m); lifting it would shorten the corset, so it stays with the rig. Skin under the shoulder mask
-is plain porcelain (the scan painted its own mask there, class 0.9 in `class_bake`).
+Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/archer.json.
 
-**walk_f / run_f (anim pilot, 11-11):** rebuilt on the v2 rig by retargeting Meshy animation-library actions (her pilot2 Meshy
+Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
+through the chest; the bow passes through her open left hand.
+
+**walk_f / run_f (anim pilot, 11-11):** rebuilt on the v2 rig (the clips carry over to the appeal3 body by bone name, `tools/art1/glb_add_clips.py`, same rig) by retargeting Meshy animation-library actions (her pilot2 Meshy
 rig task), loops rebuilt, sole planted at loco speed. Blind Fable 5.2 judge (pilot1 rubric): walk 4.17 vs 3.67 current,
 run 4.17 vs 3.67. Licence: Meshy API output on the paid plan, commercial use allowed under Meshy's terms. Idle unchanged
 (owned by the pilot4 idle job).

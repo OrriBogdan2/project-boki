@@ -1,55 +1,54 @@
-# Kael (juggernaut): import note, v2 (2026-11-07)
+# Kael (juggernaut): import note, v95 swap of Kael appeal3, body c (2026-11-10)
 
-`kael.glb` is the owner's locked v2 redesign (briefs/art-refs/kael_v2 on ext/agent-briefs: the 4K
-kael_v2_turnaround and kael_v2_master_sheet) through the ART-1 pipeline. One Meshy body scan of the turnaround,
-fitted onto the contract rig by script; the sword, the wrist chains and the alpha cards are built by script. Raw
-files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Run log: docs/art/wardens/PIPELINE.md.
+`kael.glb`: the owner's pick (11-10), Kael v95 r2 appeal3 `cand_c.glb` (body variant c with the new appeal3 face:
+waist taper, arms and shawl 5 cm in per side), swapped onto juggernaut's own skeleton, clips and anchors by
+`tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/kael_v95.json`. Raw files in
+~/meshy/v95/Kael/r2/appeal3 (never in git); the spec reads `kael_v95_c_body.glb`, which is `cand_c.glb` without its
+own sword mesh (`kael_sword`): the game's skinned sword stays.
 
-    T=tools/meshy/meshy_task.py; B="~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python"
-    python3 -I $T edit ...   (x4: the turnaround's front, 3/4, left side, back; prompts in ~/meshy/kael_v2/edit.sh)
-    python3 -I $T create runB in/front.png in/tq.png in/side.png in/back.png --texture-refs <same> --pose ""
-    godot --headless -- --warden-rig-json --warden=juggernaut       # -> art/wardens/src/kael_rig.json
-    $B tools/art1/kael_source.py -- runB/glb.glb art/wardens/src/kael_rig.json stage/source.blend
-    $B tools/art1/kael_finish.py -- stage/source.blend art/wardens/src/kael_rig.json kael.glb
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/kael_v95.json WORK art/wardens/kael/kael.glb
 
-- **Edits:** each view loses both wrist chains (cuffs kept) and the long sash tails (knot kept); nothing else.
-- **Scan:** meshy-7.1, no pose (the A-pose run opened his fists and gloved the cursed hand black: not used). It
-  keeps his own head, white mane, scarf over the mouth, the two-tone torn shawl, the X-harness, belts, trousers,
-  knee guards, boots, the black right glove and the bare crimson left hand (swapped to the sword arm in the finish).
-- **Rig:** the v2 sheet is a tall build (8 heads, long legs). juggernaut.json `body`: legs 1.55 -> 2.05, head
-  0.62 -> 0.48, neck -0.02 -> -0.012 put the rig's joints on the scan's (hip 0.52, shoulder 0.79, head pivot 0.87
-  of his height); `size` 1.06 -> 0.97 keeps his height in the game (the owner's Nov 4 size).
-- **Fit** (kael_source): soft weights by distance to the bone segments, each bone moves its vertices onto the rig;
-  girth 1.07 (torso) and 1.1 (arms) for the sheet's broad build; decimated to 11k triangles.
-- **Finish** (kael_finish): the scan's colour baked onto the low mesh (one 2048 atlas, the scripted pieces on flat
-  cells at its right edge). Slots by colour and by distance off the body (the shawl and scarf stand off the skin).
-- **Curse:** on his RIGHT (sword) arm and hand and the chest. The scan draws it on the left, so kael_finish bakes the
-  scan twice (once mirrored in x) and the arm, hand and chest skin take the mirrored bake: the veined arm and bare
-  crimson hand land on the sword arm, the black glove on the left. The veins are a 2048 emission map (kael_emit),
-  tinted by juggernaut.json `model_glow.core` (crimson); the arm blooms (warden_look `kael`) sit on anchor_arm_up /
-  _elbow / _fore, on the right arm.
-- **Cards** (`card-kael`, a 512x256 RGBA kael_cards atlas): the shawl's torn hem (a card under each rim edge, down
-  the shawl's own surface) and two sash tails from the knot at his right hip, placed on the trousers by ray.
-- **Wrist chains:** short chains from each cuff, two bones each on the hang chains the game knows
-  (spring_hangcuff_* left, spring_hangwarchain_* right).
-- **Sword (skinned, joined into Body):** the turnaround's broad cracked blade (bevelled slab, white-hot cracks as
-  `glow-sword` ribbons in model_glow `sword`), the guard with its point, the red wrapped grip, the ring pommel and
-  its hooked chain. Sized to the turnaround against his height: whole sword 0.80, blade 0.61, blade width 0.10
-  (after the Gun's 1.42 and warden_look weapon_scale 0.85). It is weighted 1.0 to hand.R in the glb, so the clips
-  carry it (`skinned_weapon` in content/rules/warden_anim/kael.json; the Gun is only an invisible reference). The FX
-  empties weapon_muzzle (tip), anchor_blade_mid and anchor_blade_root sit on hand.R along the blade.
-- **Clips:** 49, retargeted from the v1 glb (origin/ext/art1-kael-2) by bone name with `tools/art1/kael_retarget.py`
-  (shared bones keep their rest rotations; translation tracks take the rest-translation delta; v1 spring and
-  renamed bones are dropped, the game's spring chains drive them; dash ends at kit 113's 0.42 s keys). Config:
-  content/rules/warden_anim/kael.json (`fade` on jug_wave_wind, jug_lunge_wind). The clips were authored for
-  kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which the game now runs. Checked by `--clip-check` (juggernaut in OWN_MODELS).
-- **Armature:** the contract's plus the spring chains of v1 (mane x5, hangcuff, hangwarchain); the anchors of v1
-  kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 12.6k triangles
-  in all (body 11.7k, sword 0.9k).
-- `kael.glb.import`: `generate_lods=false` (LODs would eat the thin cards), `force_disable_compression=true`.
+Body: 13k triangles (head 2.6k), one 2048 atlas and the master's emission map baked beside it (`"emit": true`), both
+embedded (Godot extracts them to `kael_atlas.jpg` and `kael_emit.jpg`). The curse veins are the emission map, tinted
+by juggernaut.json `model_glow.core` as before. Slots by colour, bone and box (first match wins): leather (dark),
+metal (grey), hair (white, in the head box), skin (chest, both arms, the face's warmer parts), cloth (the crimson
+shawl, scarf and sash; the pale shawl; most of his pale face, which the cloth slot keeps warm where kael's skin slot,
+with its cool shadow tint, turns it lilac). The face has one rule ahead of hair and skin (face box, s 0.04-0.4, v
+0.35-0.95): its tones sit either side of the skin rule's s 0.08 and its ridge highlights took the hair slot, so the
+skin and hair triangles drew a pale lilac-blue streak down the nose; the white hair (s < 0.04 or v > 0.95) stays hair.
+Weights: bone heat from the spec's joints, limbs on the rig's own segments (`spread: "rig"`); the shawl rides the
+hips box, its shoulder wings the pauldrons (minus the upper arms), the head box the head. The master's wrist cuffs and
+chains ride the hands; the old spring chains (hangcuff, hangwarchain) stay in the rig, unweighted.
+
+**Curse side:** the v2 build mirrored the scan so the curse sat on his right (sword) arm. The appeal3 master paints it
+on his LEFT arm and chest, as the v2 turnaround does, and the swap keeps the master's paint: the bare veined arm and
+crimson hand on the left, the black glove on the right (sword) hand. The arm blooms (warden_look `kael`, on
+anchor_arm_up / _elbow / _fore) move with it: the spec's `anchor_bones` puts them on upper_arm.L / forearm.L.
+Alternative not taken: mirror the master's texture to keep the curse on the sword arm.
+
+Kept from the old build (`keep_mats`): the skinned sword (glow-sword, leather-grip, metal-sword, _dk, _edge; 0.9k
+triangles, weighted to hand.R; `skinned_weapon` in content/rules/warden_anim/kael.json), with weapon_muzzle,
+anchor_blade_mid and anchor_blade_root on hand.R along the blade, unchanged. Gone: the alpha cards and their sheet
+`kael_cards.png` (the master models the torn hem and sash), the scripted wrist chains.
+
+Clips: the 49 clips of the v2 build (the swap keeps the game rig). The swap ran on main's kael.glb, before the
+docs/art/IDLE_AUDIT.md idle (6 s) and stance (8 s); the 0.24.4 merge put them back with `kael_retarget.py` (plain
+numpy: `python3 tools/art1/kael_retarget.py -- <old kael.glb> <swapped kael.glb> <out>`, the old glb's 49 clips over
+the swapped ones, rest rotation drift none), which also adds the `x_breath` leaf (3430 chest-band vertices) and prints
+the sword point at the idle's first frame (0.8 cm under the ground, as before). `anchor_head_top` and `anchor_chest`
+move onto the new mesh (the spec's `anchors`).
+
+`kael.glb.import`: unchanged (`generate_lods=false`, `force_disable_compression=true`).
+
+Shots on the game rig (`--warden-shots`): docs/shots/kael-appeal/.
+
+Checks (2026-11-11): `--warden-glb-check` 183/0 failed, `--warden-model-check` 157/0 failed. `--stretch-check
+--wardens=juggernaut` still flags all 49 clips (worst 7.45x in fusion, idle 2.56x, run_f 4.09x, mostly hips and
+thighs), against 31.06x (death), idle 10.39x and run_f 16.72x for the old v2 build: better, but not under 1.3x. No
+tearing or arm, chest or cape clipping shows in the turnaround, idle, run or kit poses.
 
 **Anim slice3 (11-11), no change:** walk_f/run_f candidates retargeted from Meshy library actions (rig walk, rig run,
 action 510; Meshy API output on the paid plan, commercial use under Meshy's terms), each held to Kael's hunched lean
 (hips -22/-23 deg) with the arms carried from the current clips, planted at 2.2 / 4.6 m/s. The blind Fable 5.2 judge kept
 the current clips: walk 4.00 vs 3.00 / 2.83, run 4.00 vs 3.00 / 3.00 (the candidates' stride reads narrow and light).
-The judge noted that the current walk's sword tip may dip to the ground line. Idle is left to the pilot4 idle job.
+The judge noted that the current walk's sword tip may dip to the ground line. Idle is left to the pilot4 idle job. The judging ran on the v2 build's clips; the appeal3 swap keeps the same 49 clips, so the verdict stands.
