@@ -1271,7 +1271,7 @@ func _walls_key() -> int:
 ## gradient reads the part's height range from UV2 in its own space, so each part's range moves with
 ## it; a part tipped off upright (its height would mix with x and z) stays a node of its own.
 func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
-	var groups := {}     # [chunk, material key] -> {mat, st}
+	var groups := {}     # [chunk, material key] -> {mat, parts: [arrays, transform]}
 	var loose: Array = []
 	for r in roots:
 		await _slice()
@@ -1291,24 +1291,21 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 				continue
 			var key := [Vector2i(int(xf.origin.x) / 32, int(xf.origin.z) / 32), Models._mat_key(mi.material_override)]
 			if not groups.has(key):
-				var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
-				groups[key] = {"mat": mi.material_override, "st": st}
+				groups[key] = {"mat": mi.material_override, "parts": []}
 			var am := mi.mesh as ArrayMesh
 			var sy := xf.basis.y.y
 			for si in am.get_surface_count():
-				var arrs := am.surface_get_arrays(si)
+				var arrs := MeshArrays.of(am, si)
 				var uv2 = arrs[Mesh.ARRAY_TEX_UV2]
 				if uv2 is PackedVector2Array:
 					var nu := PackedVector2Array(uv2)
 					for k in nu.size(): nu[k] = Vector2(nu[k].x * sy + xf.origin.y, nu[k].y * sy + xf.origin.y)
 					arrs[Mesh.ARRAY_TEX_UV2] = nu
-				var tmp := ArrayMesh.new()
-				tmp.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-				(groups[key]["st"] as SurfaceTool).append_from(tmp, 0, xf)
+				(groups[key]["parts"] as Array).append([arrs, xf])
 	for key in groups:
 		await _slice()
 		var mi := MeshInstance3D.new()
-		mi.mesh = (groups[key]["st"] as SurfaceTool).commit()
+		mi.mesh = MeshArrays.merge(groups[key]["parts"])     # (no SurfaceTool: it reads every part back)
 		mi.material_override = groups[key]["mat"]
 		mi.name = "%s_%d_%d" % [label, key[0].x, key[0].y]
 		parent.add_child(mi)
@@ -1352,7 +1349,7 @@ static func with_lods(m: Mesh) -> Mesh:
 	if tris >= 240 and am.get_blend_shape_count() == 0:
 		var im := ImporterMesh.new()
 		for si in am.get_surface_count():
-			im.add_surface(am.surface_get_primitive_type(si), am.surface_get_arrays(si), [], {}, am.surface_get_material(si), am.surface_get_name(si))
+			im.add_surface(am.surface_get_primitive_type(si), MeshArrays.of(am, si), [], {}, am.surface_get_material(si), am.surface_get_name(si))
 		if im.get_method_argument_count("generate_lods") >= 3:
 			im.call("generate_lods", 25.0, 60.0, [])
 		else:
