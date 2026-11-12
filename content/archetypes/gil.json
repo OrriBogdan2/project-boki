@@ -50,8 +50,8 @@
 		"range": 14.0, "width": 3.6, "time": 1.0, "dmg": 18.0, "lift": 9.0, "knockup": 1.0, "slow_k": 0.5, "slow": 2.0, "shield": 40.0, "shield_t": 3.0,
 		"desc": "Call a wave and surf its crest 14m toward the cursor in 1s; you can't be targeted while you ride it. Every foe it rolls over takes 18, is knocked up for 1s, then slowed 50% for 2s. You land with a 40 shield for 3s."},
 	"order": ["sec", "dash", "kin", "sec", "dash", "sec", "kin", "gear"],
-	"rank2": {"sec": "Rank 2: cooldown 5s -> 4.5s per charge, damage +15%.", "dash": "Rank 2: cooldown 8s -> 7s, surfacing radius +0.3m.", "kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%."},
+	"rank2": {"ult": "Rank 2: Tidal Wave cooldown 90s -> 81s. The Merge lasts 30% longer.", "sec": "Rank 2: cooldown 5s -> 4.5s per charge, damage +15%.", "dash": "Rank 2: cooldown 8s -> 7s, surfacing radius +0.3m.", "kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%."},
 	"rank3": {"sec": "the next two potions in the bag show", "dash": "surfacing also slows 30% for 1s", "kin": "the spout pulls foes to its line"},
-	"rank_next": {"sec": "Rank 3: cooldown 5s -> 4s, damage +30%.", "dash": "Rank 3: cooldown 8s -> 6s.", "kin": "Rank 3: cooldown 12s -> 9.6s, damage +30%."},
+	"rank_next": {"ult": "Rank 3: Tidal Wave cooldown 90s -> 72s.", "sec": "Rank 3: cooldown 5s -> 4s, damage +30%.", "dash": "Rank 3: cooldown 8s -> 6s.", "kin": "Rank 3: cooldown 12s -> 9.6s, damage +30%."},
 	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"}
 }

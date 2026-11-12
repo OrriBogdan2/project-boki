@@ -94,6 +94,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 5s -> 4.5s per charge, damage +15%. | cooldown 5s -> 4s, damage +30%. |
 | Dash (Shift) | cooldown 8s -> 7s, surfacing radius +0.3m. | cooldown 8s -> 6s. |
 | E | cooldown 12s -> 10.8s, damage +15%. | cooldown 12s -> 9.6s, damage +30%. |
+| R (ultimate) | Tidal Wave cooldown 90s -> 81s. The Merge lasts 30% longer. | Tidal Wave cooldown 90s -> 72s. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
