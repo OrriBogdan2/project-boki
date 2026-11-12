@@ -49,7 +49,28 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
-- An ability's sound plays from the event it belongs to (the release, the hit, the rock rising), never from its own timer beside it. `--sfx-strike-check` times every Hero move's sounds against the clip's strike and the hit; results in docs/art/SFX_TIMING.md.
+- An ability's sound plays from the event it belongs to (the release, the hit, the rock rising), never from its own timer beside it. `--sfx-strike-check` times every Hero move's sounds, from when each is heard, against the clip's strike, the release and the hit, and fails a kit with a sound off all of them; method and reasons in docs/art/SFX_TIMING.md.
+
+### Release sounds on the beat (11-12)
+
+What each Hunter's release sounds play from, after the anim-time passes moved the beats (ms after the press, in the
+check's set-up; "heard" is the sound against its beat). Press sounds that are wind-ups (draws, tells, charges) stay
+on the press.
+
+| Hunter | Release sound: the event it plays from | Beat | Heard | Change |
+|---|---|---|---|---|
+| Lace (archer) | pin_loose, pin_heavy: the arrow; pin_hail: the volley; pin_rain, pin_patter: the rain | 17-500 | 0 to +50 | none |
+| Cinder (ashwick) | lw_bolt: the bolt; lw_roar: the flame; lw_jet: the lift-off flame | 0-500 | 0 to +50 | none |
+| Albert (bulwark) | bjorn_throw: the hammer leaving his hand; bjorn_slam: the swing; bjorn_ult_slam: the slam | 100, 500, 400 | +17, 0, 0 | throw moved off the press (11-09) |
+| Tenzo (dolm) | br_throw: the boulder; br_punch: the hit; br_raise: the first Stone Row rock; br_spine: the cracks | 17, 500, 200, 200 | 0, +60, 0, -50 | Stone Row off its timer (11-09) |
+| Grimble (dredge) | dr_shot: the shot; dr_throw: the arm shooting out after the coil-back; dr_anchor: the anchor | 0, 217, 383 | +17, 0, 0 | dr_throw moved off the press (was -217) |
+| Vex (gunslinger) | vn_rifle: the shot; grenade thunk: the Burr; vn_ion_fire: the beam; vn_nuke_fire: the kick key | 0, 0, 633, 133 | 0 | none |
+| Kael (juggernaut) | jug_slash, jug_wave, jug_slam_hit, jug_lunge_hit, jug_chain; jug_riposte (built to lead in 100 ms) | 17-750 | -13 to +20 | none |
+| Sparkle (mage) | vv_bolt: the bolt; vv_rod_throw: the rod leaving (0.35 s on a tap); vv_sky_strike: the strike | 0, 350, 817 | 0 | none |
+| Motley (ostra) | os_orb_hot: the orb; os_snap: the snap; os_seed: the seed (planted on the press) | 0, 333, 0 | 0 | gesture moves on ext/anim-release-sync-meeko-motley |
+| Neve (rimewright) | rime_shard: the dart; rime_lance: the lance; rime_wall: the wall | 0, 117, 217 | 0 to +50 | none |
+| Meeko (tender) | tend_ember: the ember; tend_seed: the seed; tend_hearth: the hearth (on the press) | 0, 1000, 0 | 0 | gesture moves on the same branch |
+| Sable (thief) | dj_bolt: the bolt; dj_bola_throw: the bola; dj_knife_throw: the knife (`KNIFE_OUT`); dj_blade: each Encore blade | 0, 417, 133, 400 | -13 to +40 | none |
 
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
