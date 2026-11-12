@@ -203,12 +203,15 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 	return dmg * (1.0 + float(res_def().get("enraged_dmg", 0.15)) * enraged_k())
 
+## Shares of the run: the Lunge charge walks at `rmb.lunge.walk_k`; the Searing Wave charge (past the tap window) is
+## planted at `lmb.walk_k` 0, as the source (he stands through every hold on film). On the ground only: a hold in
+## the air never brakes the jump or dash he carries (the air-punch rule).
 func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
 	if meteor.running(): return meteor.move_k()
 	if not slam_w.is_empty(): return 0.6
 	if lunge_charging(): return float(rmb_def()["lunge"]["walk_k"])
-	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
+	return float(lmb_def()["walk_k"]) if lmb_t > float(lmb_def()["tap"]) and h.grounded else 1.0
 
 ## RMB held past the tap on the ground, off the chain: the Lunge charging (rmb_hold_tick's lane and pose).
 func lunge_charging() -> bool:

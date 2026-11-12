@@ -105,6 +105,8 @@ Still differs:
 - Wirerun (Shift) at 40 m/s vs about 32 (owner), a 7.5 to 13 m lane, a 20 damage pass hit, Blowout reset; cooldown 8
   vs 9.
 - Cooldowns: Storm Rod 8 vs 10, Skycall 10.5 vs 12, Kitefall 42 vs 60.
+- Storm Rod hold: the reel shows her walking at full; `ext/holds-stand-parity` plants it (`rmb.walk_k` 0), as the
+  source stands through every hold [F].
 - The dash flow row into R is unsourced `[?]`.
 - Skycall's cast is a small ring in our reel; the footage's is a dark disc with a gold pillar and a direction
   chevron [F]; the drag-aim for it exists but is not shown here.
@@ -219,6 +221,8 @@ Still differs:
 - Warchain: tether 24 m is ours; the source's throw is about 12.6 m and the leash is unknown `[?]`. Cd 12.8 vs 16.
 - Riposte: the kill reset is `[?]`; cd 36 vs 45. RMB cd 2.0 vs 2.5, air drop 7.2 vs 9.
 - His glow is white-hot (owner); the source's is hot red.
+- Searing Wave charge: the reel shows him walking at 55%; `ext/feel-hold-stand` plants it (`lmb.walk_k` 0), as the
+  source stands through all 7 holds [F 0062-0120]. The Lunge charge walks at 80%, the footage's 0.69-0.84 [F].
 
 Seen in the reel: the LMB hold lays a long gold lane to the dummy (the source shows a white arc round him [F
 0087]); the tap slam is an orange ring; the chain is a thin dotted line and the dummy reads CHAINED, where the
@@ -309,8 +313,9 @@ Still differs:
   18 to 25 m [F] (dolm.md gap 9). `ext/tenzo-cone-length` c557c270d grows it to 25 m and is not on main. Not in the
   reel (it needs a sneak).
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
-- Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
-  only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
+- Punch hold and Quakefall charge: the reel shows him walking at 85% and 55%; `ext/holds-stand-parity` plants both
+  (`lmb.walk_k`, `slam.walk_k` 0), as the source stands in every hold seen [F]. An air punch never slows him below his
+  flying speed.
 - Molten Guard: the shield per punch matches; the charge scaling is ours.
 
 Seen in the reel: the boulder trails an orange dotted line and bursts small, where the footage's bursts in a big

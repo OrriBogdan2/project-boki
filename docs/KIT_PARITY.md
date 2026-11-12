@@ -255,18 +255,19 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 - Albert: the Shield Slam stun 0.6 s and the Crushing Blow stun 0.4 s have no source row.
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s.
 
-## Hold walk: Tenzo and Sparkle (main 53e2fe7f3, 2026-11-12)
+## Hold walk: Tenzo, Sparkle and Kael (main 53e2fe7f3, 2026-11-12)
 
-Frames on `origin/ext/hero-ref-footage` (footage/breah 4 fps, footage/vireo 5 fps). The hero's name bar or sprite
+Frames on `origin/ext/hero-ref-footage` (footage/breah 4 fps, footage/vireo and footage/juggernaut 5 fps). The hero's name bar or sprite
 tracked against the ground (phase correlation of the ground blocks for the camera, normalised cross-correlation for the
 hero); 1 bh is about 40 px. A walk at run speed would show about 25-30 px a frame. No owner line names a speed for
 these holds; owner 61b wants Tenzo locked through the Quakefall, the same direction. Data keys are shares of the run.
 
 | Hold | Source (px a frame) | Ours before | Ours now | Verdict |
 |---|---|---|---|---|
-| Tenzo LMB punch hold | 0 with the lane up (0118-0119), then the punch step | 0.85 (`rubble_fists` `fire_slow`) | planted once the lane is up (`lmb.walk_k` 0); tap window and recovery keep `fire_slow` | match, asserted |
+| Tenzo LMB punch hold | 0 with the lane up (0118-0119), then the punch step | 0.85 (`rubble_fists` `fire_slow`) | planted once the lane is up (`lmb.walk_k` 0, on the ground; an air hold keeps its carry); tap window and recovery keep `fire_slow` | match, asserted |
 | Tenzo RMB Quakefall charge | 0-2 through three charges (0253-0256, 0265-0268, 0315-0320) | 0.55 (`slam.walk_k`) | planted (`slam.walk_k` 0); the hop keeps `carry` of the run he charged from (owner item 61) | match, asserted; [O] 61b agrees |
 | Sparkle RMB Storm Rod hold | 0-1 through three holds (0044-0048, 0058-0062, 0079-0083) | full (no `move_k`) | planted (`rmb.walk_k` 0) | match, asserted |
+| Kael LMB Searing Wave charge | 0 px/s in all 7 holds (0062-0067, 0076-0120; 1 px = 0.05 m) against about 4 m/s on his runs | 0.55 (a kit literal) | planted (`lmb.walk_k` 0) once the tap window (0.22 s) is past, on the ground (an air hold keeps its carry); the Lunge charge keeps its sourced 0.8 | match, asserted (ext/feel-hold-stand) |
 
 Not shown by the frames: whether the source merely stood by choice (no hold with a move key is on film). Parity first
 takes what is seen.

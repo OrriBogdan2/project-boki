@@ -244,6 +244,10 @@ ultimate (now the X cooldown).
 - Rampage: a 0.07 s dip (planted), then 4.5 m in 0.17 s, then a short low recovery (owner 113.8)
   (keys end at 0.9 s). Its after-images are his own orange flame streaks.
 - The Enraged look is embers and dark drips on his body; no ground disc or light under him.
+- Hold walk (2026-11-12, parity): the Searing Wave charge is planted once the tap window is past (`lmb.walk_k` 0, on
+  the ground; a hold up in a jump keeps its carry):
+  the source stands through all 7 holds on film (0062-0067, 0076-0120, 5 fps). The Lunge charge walks at 80%
+  (`rmb.lunge.walk_k`, the footage's 0.69-0.84). Asserted in `--juggernaut-combo-check`.
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
 
