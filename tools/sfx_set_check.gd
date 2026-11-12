@@ -16,6 +16,8 @@ extends RefCounted
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
 ##  10. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
+##  11. a Boki type's ability impact ki_<type> (content/rules/boki_impact.json): all 19 types map to the take set of
+##      their cast cue, Sfx loads it, only a Kin's k1/k2/zone hits play it
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -47,6 +49,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_boki_cues()
+	_boki_impacts()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -65,6 +68,29 @@ func _boki_cues() -> void:
 	for theme in KinLib.TYPE_OF_THEME:
 		types[KinLib.TYPE_OF_THEME[theme]] = true
 	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+
+func _boki_impacts() -> void:
+	var r := BokiImpact.rules()
+	var types: Dictionary = r.get("types", {})
+	var bad := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
+	ok(types.size() == 19 and bad.is_empty(), "each of the 19 types has impact ki_<type> on its cast set %s" % [bad])
+	var gone := KinLib.kin_ids().filter(func(id): return BokiImpact.cue_of(_type_of(id)) == "")
+	ok(gone.is_empty(), "every Boki species resolves to an impact %s" % str(gone))
+	ok(BokiImpact.cue_of("no_such_type") == "ki_normal", "an unknown type takes the default impact")
+	var kin := Kin.new()
+	var yes := [{"src": "kin", "ab": "k1"}, {"src": "kin", "ab": "zone"}]
+	var no := [{"src": "kin", "ab": "recall"}, {"src": "abil", "ab": "k1"}]
+	ok(yes.all(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "a Boki's k1 and zone hits get a type impact")
+	ok(not no.any(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "...its strike and a Hunter's do not")
+	kin.free()
+	var caps := [Sfx.IMPACT_GAP, Sfx.STACK_MAX]
+	ok(caps[0] >= 60 and caps[1] <= 4, "impacts keep their own gap (%d ms) and the stack cap (%d)" % caps)
+
+func _impact_ok(types: Dictionary, t: String) -> bool:
+	return String(types.get(t, "")) == "ki_" + t and not _takes("k_" + t).is_empty() and Sfx.ensure("ki_" + t)
+
+func _type_of(id: String) -> String:
+	return String(KinLib.species(id).get("type", ""))
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))

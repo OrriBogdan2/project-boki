@@ -27,6 +27,10 @@ const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "
 	"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
 	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
+## A Boki type's impact ki_<type> is the take set of its cast cue k_<type> (BokiImpact), with its own gap and cap.
+const IMPACT_PREFIX := "ki_"
+const IMPACT_PREFIX_OF := "k_"
+const IMPACT_GAP := 90
 const STACK_MAX := 3
 const STACK_MS := 90
 const STACK_DB := 3.5
@@ -440,6 +444,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
+	if sname.begins_with(IMPACT_PREFIX): gap = IMPACT_GAP
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
@@ -593,9 +598,10 @@ func _lazy(sname: String) -> bool:
 	if _lazy_miss.has(sname):
 		return false
 	var takes: Array = []
-	var paths: Array = ["res://audio/%s.wav" % sname]
+	var file := IMPACT_PREFIX_OF + sname.trim_prefix(IMPACT_PREFIX) if sname.begins_with(IMPACT_PREFIX) else sname
+	var paths: Array = ["res://audio/%s.wav" % file]
 	for i in range(1, 5):
-		paths.append("res://audio/%s_%d.wav" % [sname, i])
+		paths.append("res://audio/%s_%d.wav" % [file, i])
 	for path in paths:
 		if ResourceLoader.exists(path):
 			takes.append(load(path))

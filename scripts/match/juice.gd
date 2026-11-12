@@ -48,6 +48,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var src := String(o.get("src", ""))
 	var p: Hunter = m.player
+	# a Boki's ability hit has its type's impact wherever it lands (the sound culls by distance itself)
+	var typed := _credit(by) != p and BokiImpact.play(m, by, target, o, crit, "taken" if target == p else "other")
 	if p != null and p.flat_dist(target) > FAR:
 		return
 	var hp := _hit_point(target, by, o)
@@ -82,7 +84,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
-	elif target != p and credit != p:
+
+	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
