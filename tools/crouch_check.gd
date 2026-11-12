@@ -19,7 +19,6 @@ const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetyp
 const PLANT := 0.45        # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
 const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
 const LATER := ["juggernaut"]    # Kael: landing after art1-integ
-const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the top rate (docs/DEBT.md)
 
 var bad := 0
 var holder: Node3D
@@ -118,7 +117,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	if feet:
 		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
 		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K)
-		ok(carry >= PLANT or id in SKATES, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
+		ok(carry >= PLANT, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
 	ok(hmax - hmin <= BOB + _float_bob(id), "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
 	for k in 30:
 		_tick(m, a, sync, 1.0)

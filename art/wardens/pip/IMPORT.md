@@ -10,6 +10,10 @@ two back wings (`model_part0`, `model_part5`), without the master's own sun and 
     $B -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/pip_v95.json WORK WORK/pip_swap.glb
     $B -b --factory-startup --python tools/art1/pip_companions.py -- WORK/pip_swap.glb art/wardens/pip/pip.glb art/wardens/pip/pip_faces.png
 
+The crouch clips were re-baked into this glb on 11-11 (`blender -b --python tools/art1/pip_clips.py -- art/wardens/pip/pip.glb
+OUT.glb crouch_idle,crouch_f,crouch_b,crouch_l,crouch_r,crouch_in,crouch_out`, then OUT.glb copied over pip.glb): the longer
+TIPTOE stride that plants her sneak. The other clips, the meshes and the anchors come through unchanged.
+
 14,293 triangles: the body 13k (head 4.4k) on one 2048 atlas (Godot extracts it to `pip_atlas.jpg`), the companions 1.3k on
 flat colours and the 2048x1024 face atlas (`pip_faces.png`, unchanged). Materials: skin-atlas, skin-face-atlas (the head box:
 warden_look's `skin-face` look), cloth-atlas (the wings, the capelet), leather-atlas (satchel, strap, pouch), brass-atlas
