@@ -82,9 +82,9 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [hunters, wisps, Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
-		win.size.y, win.scaling_3d_scale])
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [
+		hunters, wisps, Settings.quality(), RenderingServer.get_current_rendering_method(),
+		RenderingServer.get_video_adapter_name(), win.size.x, win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
