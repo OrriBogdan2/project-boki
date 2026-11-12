@@ -15,6 +15,7 @@ extends RefCounted
 
 const CMD_IDS := ["guard", "follow", "chase", "return"]       # the index is what goes over the network (KinNet)
 const NAMES := {"guard": "Guard", "follow": "Follow", "chase": "Chase", "return": "Return"}
+const HOP_DB := -8.0        # dB: the leap back to its owner (the recall cue, under the ordered recall)
 const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place Boki closes on its side spot, on top of your pace
 const GUARD_PULL := 14.0   # 1/s: how fast a big Boki on the Return order closes on its guard spot beside you
 
@@ -169,6 +170,8 @@ static func leap(k: Kin, to: Vector3, dest: String, cmd_hit := false) -> void:
 	k.vel = Vector3.ZERO
 	k.stuck_t = 0.0
 	k.m.fx.ring(k.pos, 0.9, Color(k.sp["color"], 0.7), 0.2)
+	if not cmd_hit:
+		k.m.sfx("recall", k.pos, HOP_DB)       # (an ordered recall plays its own, louder)
 	KinNet.event(k.m, "hop", k, to)
 
 ## Back to your side: stuck, or beyond the leash.

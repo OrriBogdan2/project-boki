@@ -12,6 +12,8 @@ extends RefCounted
 
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
+const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
+const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
@@ -80,6 +82,12 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
+	elif target != p and credit != p:
+		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
+
+## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
+static func rival_pickup(m: Match, h: Hunter) -> void:
+	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
