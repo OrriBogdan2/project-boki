@@ -122,8 +122,7 @@ func _charge_and_waves() -> void:
 	ak.aim_at(P, P.pos + Vector3(4, 0, 0))
 	ak.step(m, 0.65, _scan_looks.bind(K))
 	ok(
-		"ult clarity: no sweep across the fan, no plain sphere under a slug's look, the flash at his fists no bigger than "
-			+ "the scattergun's",
+		"ult clarity: no sweep over the fan, no plain sphere under a slug, a fist flash no bigger than the gun's",
 		B.waves == 2 and sweeps == 0 and plain_slugs == 0 and widest_flash > 0.0
 			and widest_flash <= DredgeBlast.MUZZLE_FLASH + 0.01,
 		"sweeps %d, plain slugs %d, widest flash %.2f m" % [sweeps, plain_slugs, widest_flash]
