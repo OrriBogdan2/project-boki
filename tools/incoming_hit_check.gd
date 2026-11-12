@@ -87,11 +87,7 @@ func _directions() -> void:
 		var at: Vector3 = (v as AudioStreamPlayer3D).global_position
 		var off := rad_to_deg(_flat(at - P.pos).angle_to(d))
 		var pan := (cam.global_transform.affine_inverse() * at).normalized().x
-		var side := cos(TAU * k / DIRS.size())
-		var follows := absf(pan) < 0.05
-		if absf(side) > 0.1:
-			follows = signf(pan) == signf(side) and absf(pan) > 0.15
-		ok(at.distance_to(foe.pos) < 0.01 and off < 1.0 and follows,
+		ok(at.distance_to(foe.pos) < 0.01 and off < 1.0 and _follows(k, pan),
 			"a hit from the %s: the cue is on the rival (%.2f deg off) and pans %+.2f" % [DIRS[k], off, pan])
 		pans.append("%s %+.2f" % [DIRS[k], pan])
 	print("INCOMINGHIT pan by direction: %s" % ", ".join(pans))
@@ -172,6 +168,7 @@ func _reel() -> void:
 	for k in DIRS.size():
 		foe.pos = P.pos + _dir(k) * R
 		await _frames(12)
+		P.hp = P.max_hp    # eight 30-damage shots would down you by the fourth, and a downed you takes no hits
 		_hush()
 		_fire(foe.pos + Vector3(0, 1.0, 0))
 		var f := 0
@@ -182,7 +179,7 @@ func _reel() -> void:
 		var v = IncomingHitSfx.voice()
 		var pan: float = (cam.global_transform.affine_inverse() * v.global_position).normalized().x if v else 0.0
 		print("INCOMINGHIT mark %s frame=%d pan=%+.2f" % [DIRS[k], Engine.get_process_frames(), pan])
-		ok(v != null, "the shot from the %s plays the cue" % DIRS[k])
+		ok(v != null and _follows(k, pan), "the shot from the %s plays the cue, panned %+.2f" % [DIRS[k], pan])
 		await _frames(18)
 
 ## The movie writer's flags are engine arguments and jobq passes its job's after "--", so the recording runs
@@ -227,6 +224,13 @@ func _cues() -> int:
 func _cue_at() -> Vector3:
 	var v = IncomingHitSfx.voice()
 	return (v as AudioStreamPlayer3D).global_position if v is AudioStreamPlayer3D else Vector3.INF
+
+## The pan for direction k: right of you pans right, left pans left, straight up or down stays in the middle.
+func _follows(k: int, pan: float) -> bool:
+	var side := cos(TAU * k / DIRS.size())
+	if absf(side) <= 0.1:
+		return absf(pan) < 0.05
+	return signf(pan) == signf(side) and absf(pan) > 0.15
 
 func _dir(k: int) -> Vector3:
 	var a := TAU * k / DIRS.size()
