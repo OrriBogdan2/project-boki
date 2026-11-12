@@ -71,6 +71,7 @@ func _press(m: Match, P: Hunter, slot: String, held: bool) -> Dictionary:
 		P.inp[k] = false
 	if slot == "lmb" and not first.is_empty():
 		_look_eases(P, first)
+		_copy_leaves(m, P, first)
 	if group.is_empty():
 		return {"n": 0, "off": -1.0}
 	var mid := Vector3.ZERO
@@ -95,6 +96,19 @@ func _look_eases(P: Hunter, s: Dictionary) -> void:
 	var far := start_at + Vector3(Muzzle.BLEND_M, 0, 0)
 	ok(Muzzle.drawn(s, far) == far and Muzzle.drawn(s, start_at) == start_at + (s["vis"] as Vector3),
 		"%s: the look is at the muzzle at the start and on the round's line %.0f m on" % [P.arch, Muzzle.BLEND_M])
+
+## The other player's game (decision 0061): the copy the "s" event makes of the round gets its look's offset
+## from the shooter's weapon there too.
+func _copy_leaves(m: Match, P: Hunter, s: Dictionary) -> void:
+	if not s.has("vis"):
+		return
+	var at: Vector3 = s["start"]
+	var v: Vector2 = s["vel"]
+	m._net_ev(["s", at.x, at.y, at.z, v.x, v.y, 0.1, 0.2, "ffffff", 0.0, P.team, 0, P.nid, "lmb"], "")
+	var vis: Variant = m.shots[-1].get("vis")
+	var want := Muzzle.offset(P, "lmb", at)
+	ok(vis != null and want != Vector3.ZERO and (vis as Vector3).distance_to(want) < 0.01,
+		"%s: the other player's copy of the round leaves the same weapon point" % P.arch)
 
 func run(main: Node) -> void:
 	Save.no_write = true

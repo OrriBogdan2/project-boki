@@ -45,6 +45,13 @@ static func offset(h: Hunter, slot: String, at: Vector3) -> Vector3:
 	var s := start(h, slot, at)
 	return s - at if s != at else Vector3.ZERO
 
+## Another game's round copied from the "s" event (decision 0061): its look leaves the shooter's weapon as this game
+## draws that Hunter, the offset from this game's copy of its model and this game's camera.
+static func copied(m: Match, s: Dictionary, nid: String, slot: String) -> void:
+	var by: Variant = m.ents_by_id.get(nid)
+	if by is Hunter and slot != "":
+		s["vis"] = offset(by as Hunter, slot, s["start"])
+
 ## Where a round's look is drawn: its place `p` plus the offset it left the muzzle with (s["vis"]), eased out over
 ## BLEND_M m of flight, so the look leaves the drawn weapon and joins the round's own line. Only looks move: the
 ## round (its start, aim, speed, reach and hits) is the match's.
