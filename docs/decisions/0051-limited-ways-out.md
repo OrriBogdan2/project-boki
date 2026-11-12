@@ -90,3 +90,10 @@ rows of the palette table, the default row full and the others only where it wou
 Heart and Gate). Squad and rival never read by hue alone: the beacon's text (`OURS` / `RIVAL`), the strip's word and pip
 (disc / diamond), the map badge's centre mark and the minimap banner (plain / swallow-tailed). Check: --colour-vision-check
 (rows 4a, 4b); shots per palette: --ways-out-palette-shots (GPU).
+## Heart reward gap (ext/combat-heart-reward-gap)
+Owner 2026-11-10: the early seat pays MINOR, the final seat MAJOR. Code pays exactly heart.json "reward" (`Heart.pay`: gems, seeds,
+materials and Boki trust at the exit; the Rare Egg and materials home through `Game.apply_result`). Loot kept and the Boki
+outcome are the same for both seats: any Heart exit is an extraction, so the haul and Bokis come home. The results screen
+says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
+Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
+the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
