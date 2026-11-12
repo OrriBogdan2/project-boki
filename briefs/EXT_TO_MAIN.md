@@ -7941,3 +7941,4 @@ READY ext/ui-zone-next 54f9d1c4a (SUPERSEDES a1da17cda; guard found this branch 
 READY ext/lace-playtest-1108 fe8194556 (Lace 11-08 items 18-20 on main: nothing left behind, instant Starpiercer, 0.35 s window glow, tick-only slow; contains ext/lace-1111 merged; --lace-playtest-check)
 READY ext/ui-zone-cards 40c37701e7 (zone cards: colour band, up to six Boki pictures with mood faces, +N more, today's game and your best via a play id, one plain line when locked; merged with main)
 READY ext/farm-breed-sim 8817d6d43e (--breed-sim-check: 500 random pairs bred, 50/50 sex split, trait/IV/habit/look/mutation inheritance asserted; no bugs found)
+READY ext/tenzo-hop-window 50a76d6a9 (Rock Hop: crouch, skid and last-flight Shift presses no longer dropped; press timings + SHIFT AGAIN prompt asserted in --dolm-combo-check)
