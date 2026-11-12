@@ -2,14 +2,14 @@
 	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
-			"lmb": {"mode": "buffer", "source": "data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair)"},
+			"lmb": {"mode": "buffer", "source": "Not determinable. Checked briefs/supervive-data/supervive_kits.md:91 (Spin Dash dashes forward and hits round him; no rule on a press inside it) and briefs/hero-ref/bjorn.md:127-142, 347-360 (footage 0369-0372, 0377-0379: a ~0.17 s dash into one spin on arrival and ~0.4 s recovery; no press inside any of it; :398 asks for a clip of the dash with other presses). The source does not say whether an LMB press fires mid-dash; left `buffer`. Ours: the hammer is busy in the spin, so a throw, recall or swing goes when the dash ends."},
 			"rmb": {"mode": "fire", "source": "data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash)"},
 			"e": {"mode": "fire", "source": "data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair)"},
 			"x": {"mode": "cancel", "source": "data: Abyssalbreaker sends a fissure from where he stands; footage f25-f31: he is planted for the slam. It ends the dash where he is (no footage of the pair)"},
 			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 		},
 		"air": {
-			"lmb": {"mode": "buffer", "source": "footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends"},
+			"lmb": {"mode": "buffer", "source": "Not determinable. No source: briefs/hero-ref/bjorn.md:362 (section 5, air dash) shows none and :398 lists a mid-air Shift as an open question. Left `buffer`. Ours: as the ground dash, the hammer goes when the shove ends."},
 			"rmb": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
 			"e": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
 			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is"},
