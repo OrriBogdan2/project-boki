@@ -836,7 +836,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var xl: Array = m.exits.clock_line() if m.exits else ["", MUTED]
 	if left < 30.0 and (m.exits == null or m.exits.active_for(m.player.team if m.player else -9).is_empty()): phase = "ISLANDS FALLING"; pc = BAD
 	else: phase = String(xl[0]); pc = xl[1]
-	r = HudTopRow.draw_clock(self, r, [_fmt(left), BAD if left < 30.0 else INK], [phase, pc], ("LV %d" % m.player.lvl) if m.player else "")
+	var lv := ("LV %d" % m.player.lvl) if m.player else ""
+	r = HudTopRow.draw_clock(self, r, [_fmt(left), BAD if left < 30.0 else INK], [phase, pc], lv)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
