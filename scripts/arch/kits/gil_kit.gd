@@ -394,6 +394,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.6:
+		h.inp["aim"] = tgt.pos          # the wave rolls along the aim
 		HunterKeys.ult_pressed(h)
 		return
 	if spin_t >= 0.0:

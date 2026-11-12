@@ -657,8 +657,9 @@ func _pop(hit: bool) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist < 9.0 and los and randf() < 0.1:
-		h.inp["aim"] = tgt.pos
+	if HeroUlt.ready(self) and dist < 9.0 and los:
+		# (aimed where they walk to in the tell)
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * float(x_def()["tell"]) * 0.5
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():
