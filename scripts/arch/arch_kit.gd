@@ -499,22 +499,20 @@ func _bond_tell() -> void:
 ## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", DashState.long_cd(h.cdat)))
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
 	if use_ex:
-		if h.ex_cd > 0.0:
+		if not h.dash.spend_long(long_dash_cd()):
 			h._ab_feedback("dash", "deny")
 			return false
-		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
 	else:
-		if h.dashes < 1.0:
+		if not h.dash.spend_short():
 			h._ab_feedback("dash", "deny")
 			return false
-		h.dashes -= 1.0
 	return true
 
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on

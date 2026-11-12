@@ -3765,7 +3765,7 @@ func _home_build_check() -> void:
 	var mv: Node = home4
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = 0.0; mv.pvy = 0.0
 	var x0: float = mv.ppos.x
-	mv.dash_charges = 2.0
+	mv.dash.charges = 2.0
 	mv.start_dash(Vector2(1, 0), 23.0, 0.15)
 	for i in 6: mv._move_player(0.05)
 	ok.call(mv.ppos.x - x0 > 2.0, "a dash at home carries you %.1fm" % (mv.ppos.x - x0))
@@ -3795,20 +3795,20 @@ func _home_build_check() -> void:
 		Save.d["cls"] = ck
 		var dg: Dictionary = mv._dodge()
 		var want := int(Content.class_dodge(ck).charges) if Content.class_dodge(ck) else int(Data.CLASSES[ck]["dashes"])
-		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.ex_cd = 0.0
-		mv.dash_charges = 9.0; mv._move_player(0.0001)     # topped up to the class's count
+		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.dash.ex_cd = 0.0
+		mv.dash.charges = 9.0; mv._move_player(0.0001)     # topped up to the class's count
 		var shorts := 0
 		var longs := 0
 		for k in want + 2:
 			mv.dash_t = 0.0; mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0
-			var had: float = mv.dash_charges
+			var had: float = mv.dash.charges
 			if mv.try_dash(Vector2(1, 0), false):
 				if had >= 1.0: shorts += 1
 				else: longs += 1
 		var regen := float(dg["cd"])
 		mv.dash_t = 0.0
 		var waited := 0.0
-		while mv.dash_charges < 1.0 and waited < 40.0:
+		while mv.dash.charges < 1.0 and waited < 40.0:
 			mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0
 			mv._move_player(0.05); waited += 0.05
 		mv.dash_t = 0.0
