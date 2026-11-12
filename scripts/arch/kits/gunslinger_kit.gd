@@ -126,6 +126,10 @@ const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.js
                                      # keeps the clip there, so she stands up as the skid ends, not mid-skid
 const WALK_OFF := {"gunslinger_dash": 0.0, "gunslinger_e": 0.8}   # s into the move its hit is past: the dash's
                                      # from the skid's end, the Longneedle's once its shove has played
+const CLIP_END := {"gunslinger_dash": 0.87, "gunslinger_dash_ex": 0.5, "gunslinger_rmb": 0.5, "gunslinger_e": 1.07,
+		"gunslinger_x": 0.6, "gunslinger_knock": 0.6, "mf_xform": 0.8}   # s on the move clock each vex.glb clip ends
+		# (mf_xform: the fusion clip): a round fired past it takes the upper body back for its kick (the source fires
+		# throughout); vex_anim_time_check asserts the table against her clips
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
                                      # is over to the clips (the kit's anim_id is read as long as it is set)
 
@@ -244,7 +248,7 @@ func _tick_lmb() -> void:
 			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
 			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
 			break
-	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
+	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at >= float(CLIP_END.get(anim_id, OVER)):
 		play("gunslinger_lmb")
 
 ## While the rifle fires, two thin arcs bracket her left and right (your screen only; the footage's firing
