@@ -8,7 +8,7 @@ extends "res://tools/archetype_check.gd"
 
 const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
 
-## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; _first() takes the first step.
+## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; first() takes the first step.
 const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", "e"], ["rimewright", "x"],
 	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"]]
 
@@ -71,7 +71,7 @@ func _expired() -> void:
 	var m: Match = s[0]
 	var P: Hunter = s[1]
 	aim_at(P, s[2].pos)
-	_first(m, P, "dash")
+	first(m, P, "dash")
 	var w := _open(m, P, "dash")
 	step(m, float(w.get("left", 0.0)) + 0.3)
 	ok("dolm dash: an unused window shows EXPIRED", String(P.ak.cue.get("exp_slot", "")) == "dash"
