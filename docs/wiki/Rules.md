@@ -446,6 +446,21 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | courts | {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}} |
 | courts_doc | A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post. |
 
+## boki_fly (`content/rules/boki_fly.json`)
+
+Fliers in the garden (scripts/home/boki_fly.gd, BokiRig's hover, glide and flare clips). A species whose look has wings (its species JSON colors.wing) takes to the air while it roams (BaseLife's Roam) a zone listed in zones, and while it crosses a gap (a bridge over the void, the leap to another isle, The Dash's jump). Each flight picks a height in height (m over the ground); it rises at climb and comes down at sink (m/s), hovering while it stands and gliding while it moves. It flares for flare_s (s) as it touches down: the flare starts sink x flare_s / 2 m up, so the feet land halfway through it. Then it walks.
+
+| Setting | Value |
+|---|---|
+| zones | ["ridge"] |
+| zones_doc | Garden zones where a roaming flier stays in the air: Kitewind Ridge. |
+| height | [0.5, 1.5] |
+| climb | 1.6 |
+| sink | 1.4 |
+| flare_s | 0.4 |
+| gap_lead | 0.5 |
+| gap_lead_doc | s: a flier takes off this long before it reaches a bridge at its pace, so it is up over the gap. |
+
 ## How kit hits land on a Boki (`content/rules/boki_hit.json`)
 
 How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the source's creeps and summons take every ability as written (one number per card, no creep scaling) and every crowd control on the cards works on them.

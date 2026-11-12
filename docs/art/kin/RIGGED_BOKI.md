@@ -36,6 +36,14 @@ loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body 
 Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
 asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
+A flier (its species JSON `colors.wing`: `BokiFly.flier`; rigged today: hivara, kestrike, kindlewren, thrumbird,
+wisplet, zapple, zephyrak) also gets hover (a wingbeat every 0.4 s, KinPuppet's flyer rate: tipped up, legs hanging,
+the body rising on each downstroke), glide (wings held wide with a slow rock, nose down, legs tucked, a 1.2 s bank)
+and flare (once, `boki_fly.json` `flare_s`: pitched up, wings forward to brake, feet reaching, a squash as they land
+halfway). No rig has them baked, so they reuse its wing, leg and tail bones the same way. The rig plays them from
+BokiFly's metas: `aloft` picks hover (standing) or glide (moving, horizontal speed only); `aloft` turning false
+starts the flare, which comes before whatever it landed for; `lift` (m up) keeps a ground shadow, made the first
+time a flier lifts, on the ground under it. Strip: `--boki-fly-shots` (docs/shots/boki-fly/fly.png).
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.

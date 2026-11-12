@@ -1,13 +1,14 @@
 class_name BokiHomeClips
 extends RefCounted
 ## Runtime clips for a rigged Boki's life at home (no Blender): settle, nap, wake, munch, nudge, climb, splash,
-## and the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), timed by their rules.
+## the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), timed by their rules, and a flier's
+## hover, glide and flare (BokiFly), its wings and tail driving them.
 ## Each is the species' baked idle (or sleep) with BokiHomePoses' deltas laid over it, sampled into a new Animation,
 ## so every Boki keeps its own rest shape and idle motion. Built once per species and shared.
 
 const NAMES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin"]
-const LOOPED := ["nap", "munch", "nudge", "climb", "splash"]
+	"rush", "brace", "dodge", "stonehop", "spin", "hover", "glide", "flare"]
+const LOOPED := ["nap", "munch", "nudge", "climb", "splash", "hover", "glide"]
 const SETTLE_SECS := 1.5
 const WAKE_SECS := 1.7
 const STEP := 0.05                  # s between keys
@@ -44,6 +45,10 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 		out[n] = _clip(skel, pose, n, idle, null, impact, BokiHomePoses.cycles(n, impact))
 	out["stonehop"] = _clip(skel, pose, "stonehop", idle, null, float(EchoSteps.rules()["hop_s"]))
 	out["spin"] = _clip(skel, pose, "spin", idle, null, EchoSteps.spin_s())
+	if BokiFly.flier(species):
+		for n in ["hover", "glide"]:
+			out[n] = _clip(skel, pose, n, idle, null, il, BokiHomePoses.cycles(n, il))
+		out["flare"] = _clip(skel, pose, "flare", idle, null, float(BokiFly.rules()["flare_s"]))
 	return out
 
 ## `a` is the base (and `b` what it turns into over the clip, for settle and wake).
