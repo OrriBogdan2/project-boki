@@ -7,8 +7,9 @@ extends RefCounted
 ## list and its favourite is shown. The third favourite meal makes it ask to stay as a new Boki when the
 ## zone has room, else leave an egg in the Incubator. The away card says who came and left.
 ## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next}: a lazy key, no save bump; the rec carries
-## "visitor": true until it joins. The egg it leaves carries {sp, zone, day} (Incubator "visitor"): the hatched
-## baby's lineage["visitor"] shows it as the wild parent on the Family tab, with one memory line. Tuning: content/rules/garden_visitor.json.
+## "visitor": true until it joins. The egg it leaves carries {sp, zone, day} (Incubator "visitor"): the baby's
+## lineage["visitor"] shows it as the wild parent on the Family tab, with one memory line.
+## Tuning: content/rules/garden_visitor.json.
 
 static var _look_t := 0.0
 static var _rng := RandomNumberGenerator.new()      # its own stream: seeded checks keep the global one
