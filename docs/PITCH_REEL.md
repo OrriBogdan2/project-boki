@@ -21,6 +21,11 @@ pitch-reel --when-live [--build REF]
 - A child writes `shot<N>_take<K>.avi` (MJPEG, quality 0.85) and `.marks` (`PITCH_MARK <part> movie_frame=<n>`, then the
   first 300 lines of its log; a filter keeps its output small, one GPU child printed over 2 GB): the
   encoder starts each clip at its first mark, so the loading before the drop and the title are cut.
+- Watchdog (`tools/pitch_take_filter.sh`): a take whose movie has not grown for max(3x the shot's length, 10 min) is
+  killed (`PITCH_STALL`, rc 124), marked failed, and the next take goes on, so a hung child (one sat at 4% CPU for
+  90 min on rp1-1) cannot hold the GPU slot and the job returns the takes it has. While frames come it puts a
+  `PITCH_BEAT` line in the job's log at most once a minute, so a pitch-reel job whose log is still for 20 min is wedged
+  and the GPU queue should requeue it (boki-tools side).
 - The tool encodes H.264 (CRF 17, +faststart) and checks each clip: 1920x1080, 60 fps, black and frozen stretches.
   Debug text, FPS counters and watermarks are checked by eye on the frames.
 - A shot a build cannot show (shot 3 until a form has art) prints `PITCH_FAIL`, exits 1 and is left out of the index.

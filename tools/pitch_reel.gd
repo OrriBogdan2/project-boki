@@ -19,6 +19,8 @@ const WIDTH_PX := 1920
 const HEIGHT_PX := 1080
 const MJPEG_QUALITY := 0.85      # 1.0 is huge at 1080p60; 0.85 holds up to the H.264 encode
 const CHILD_LOG_LINES := 300     # lines of a take's own output (past its PITCH_ lines) the recorder keeps
+const STALL_X := 3.0             # a take whose movie has not grown for this x its length is hung and killed ...
+const STALL_MIN_S := 600.0       # ... but never sooner than this many s (loading; the shots that run to their end)
 const KIT_ROTA_S := 2.1          # s between a Hunter's ability presses in the kit shot
 const KIT_FOE_SKILL := 0.5       # the foe bot's skill (0..1): it fights back but does not hunt the Hunter down
 ## s of each shot that runs for a set time (the others run to the end of their script: 2, 3, 6)
@@ -111,26 +113,19 @@ func _film_all(shots: PackedStringArray, takes: int) -> void:
 	f.store_string("window/size/viewport_height=%d\n\n" % HEIGHT_PX)
 	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=%s\n" % MJPEG_QUALITY)
 	f.close()
-	# OS.execute keeps all of a child's output in one String, and a movie child once printed over 2 GB (the parent
-	# crashed): each child runs behind this filter, which passes its PITCH_ lines and only the first of the rest.
-	# (A script file: OS.execute runs its command through a shell, which would expand the filter's $ in an argument.)
-	var filter := dir.path_join("take_filter.sh")
-	f = FileAccess.open(filter, FileAccess.WRITE)
-	f.store_line("\"$@\" 2>&1 | awk '/^PITCH_/ {print; next} n < %d {n++; print} END {print \"PITCH_LOG lines=\" NR}'"
-		% CHILD_LOG_LINES)
-	f.store_line("exit ${PIPESTATUS[0]}")
-	f.close()
 	var bad := 0
 	for s in shots:
 		for k in range(1, takes + 1):
-			bad += _film_one(int(s), k, filter)
+			bad += _film_one(int(s), k)
 	DirAccess.remove_absolute(cfg)
-	DirAccess.remove_absolute(filter)
 	print("PITCH_ALL failed=%d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## One take, its child behind the output `filter`; returns 1 when the child failed or wrote no movie.
-func _film_one(s: int, k: int, filter: String) -> int:
+## One take, its child behind tools/pitch_take_filter.sh (OS.execute keeps all of a child's output in one String and a
+## movie child once printed over 2 GB, so the filter trims it; it also kills a take whose movie stops growing for
+## max(STALL_X x the shot's length, STALL_MIN_S) s, rc 124). Returns 1 when the child failed or wrote no movie,
+## and the next take goes on. (A script file: OS.execute runs through a shell that would expand `$` in an argument.)
+func _film_one(s: int, k: int) -> int:
 	var stem := "shot%d_take%d" % [s, k]
 	var movie := dir.path_join(stem + ".avi")
 	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "vulkan",
@@ -139,7 +134,10 @@ func _film_one(s: int, k: int, filter: String) -> int:
 	args.append_array(OS.get_cmdline_user_args())
 	args.append_array(["--pitch-child", "--pitch-shot=%d" % s, "--pitch-take=%d" % k])
 	var out: Array = []
-	var rc := OS.execute("bash", [filter, OS.get_executable_path()] + args, out, true)
+	var stall := maxf(STALL_X * float(SECS.get(s, 0.0)), STALL_MIN_S)
+	var watch := [ProjectSettings.globalize_path("res://tools/pitch_take_filter.sh"), movie, str(int(stall)),
+		str(CHILD_LOG_LINES), OS.get_executable_path()]
+	var rc := OS.execute("bash", watch + args, out)  # stderr stays the job's log: the filter's PITCH_BEAT lines
 	var marks := FileAccess.open(dir.path_join(stem + ".marks"), FileAccess.WRITE)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
 		marks.store_line(line)
