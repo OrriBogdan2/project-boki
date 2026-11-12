@@ -4,6 +4,7 @@ extends "res://tools/combo51_shots.gd"
 ## of crops round the action, <dir>/<hero>_<part>.png) and REEL_MARK lines with the frame each part starts on.
 ## A Hero with a script of its own (tools/vfx_reel/<arch>.gd, extending this one: parts() and `_part_<name>` funcs)
 ## plays its scripted parts; Kael and Lisette's are below; any other plays the generic set (LMB, RMB, Shift, E, R).
+## --reel-only=<part> runs that one part, also one outside the set (airdash: Shift on the ground, then in the air).
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
@@ -58,9 +59,7 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in parts():
-		if only != "" and part != only:
-			continue
+	for part: String in ([only] if only != "" else parts()):
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
 		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
 		P.ak.set("enraged_t", 0.0)
@@ -131,6 +130,21 @@ func _part_rmb() -> void:
 		P.inp["sec_hold"] = t > 0.1 and t < 0.5
 		_aim(T.pos)
 	await _go(2.4, cast, _sheet("rmb", "RMB at the dummy", [0.15, 0.25, 0.35, 0.5, 0.65, 0.8, 1.0, 1.4, 2.0]), 2.0)
+	await _go(GAP)
+
+## Shift on the ground, then Shift at the top of a jump: the two looks side by side (playtest 11-08 item 17).
+func _part_airdash() -> void:
+	await _reset(6.0)
+	var dash := func(t: float):
+		P.inp["jump"] = t >= 1.3 and t < 1.3 + DT
+		if _at(t, 0.15) or _at(t, 1.6):
+			P.inp["move"] = Vector2(1, 0) if t < 1.0 else Vector2(-1, 0)
+			P.do_dash()
+		if (t > 0.3 and t < 1.5) or t > 1.8:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(3.2, dash, _sheet("airdash", "Shift on the ground, then Shift at the top of a jump",
+			[0.2, 0.35, 0.6, 1.62, 1.7, 1.8, 1.9, 2.1, 2.6]), 2.5)
 	await _go(GAP)
 
 func _part_dash() -> void:

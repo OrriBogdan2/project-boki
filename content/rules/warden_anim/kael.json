@@ -83,10 +83,10 @@
 			"clip": "meteor_land"
 		},
 		"jug_dash": {
-			"clip": "dash"
+			"clip": "dash", "air_clip": "exdash"
 		},
 		"jug_exdash": {
-			"clip": "exdash"
+			"clip": "exdash", "air_clip": "exdash"
 		},
 		"jug_chain": {
 			"clip": "chain"
