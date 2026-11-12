@@ -173,6 +173,68 @@ func _tender_breaks() -> void:
 	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
 		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
+	await _tender_cancels()
+
+
+## The source's cancels, one case each: she is stunned, she is knocked, she dies, the teammate dies cancel
+## it (and pay nothing, with the tether snapping); the teammate being knocked, her own dash and a hit do not.
+func _tender_cancels() -> void:
+	for which in ["stun", "knock", "dead", "mate_dead"]:
+		var r: Array = sc.setup("tender", 14.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var A: Hunter = r[2]
+		var K: TenderKit = P.ak
+		sc.aim_at(P, A.pos)
+		_press(P, m)
+		step(m, 0.5)
+		var up := not K.hearth_call.is_empty() and K.ulk().showing("tether")
+		var snaps := int(K.stats["broken"])
+		match which:
+			"stun": P.stun_t = 0.5
+			"knock": m.knock(P, null, {})
+			"dead": m.eliminate(P, null, "test", true)
+			"mate_dead": A.out = true
+		step(m, 0.1)
+		ok("mm X cancel (%s): the tether ends, snaps once, and pays nothing" % which, up
+			and K.hearth_call.is_empty() and not K.ulk().showing("tether")
+			and int(K.stats["broken"]) == snaps + 1 and _bond_kind(K) == "")
+		await _free(m)
+	await _tender_keeps_going()
+
+
+## No cancel: the teammate is knocked mid-channel (it carries on, heals them and stands them up at the end),
+## and a dash and plain damage on her (the source lists neither; nothing like silence exists to test).
+func _tender_keeps_going() -> void:
+	var r: Array = sc.setup("tender", 14.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var K: TenderKit = P.ak
+	A.teleport(P.pos + Vector3(-4.0, 0, 2.0))
+	sc.aim_at(P, A.pos)
+	_press(P, m)
+	step(m, 0.5)
+	P.hurt(20.0, null, {"src": "shot"})
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	step(m, 0.1)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	var dashed := P.roll_t > 0.0 or P.move_kind == "dash"
+	step(m, 0.3)
+	ok("mm X: plain damage and her own dash do not end it", dashed and not K.hearth_call.is_empty()
+		and int(K.stats["broken"]) == 0, "dashed %s" % str(dashed))
+	sc.down(m, A)
+	step(m, 0.5)
+	var down_hp0 := A.down_hp
+	step(m, 1.0)
+	ok("mm X: the teammate being knocked mid-channel does not end it, and it heals them", A.downed
+		and not K.hearth_call.is_empty() and A.down_hp > down_hp0 + 3.0, "%.0f -> %.0f" % [down_hp0, A.down_hp])
+	step(m, 3.5)
+	ok("mm X: ... and at the end they are pulled to her and revived", not A.downed and P.flat_dist(A) < 1.6
+		and int(K.stats["rescues"]) == 1 and _bond_kind(K) == "kill")
+	await _free(m)
 
 
 # ================================================================== Claire: Rimelock
@@ -197,9 +259,10 @@ func rimewright() -> void:
 		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
-		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
-		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
+		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
+		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	_rime_ring_is_hit(K, T, ring, float(xd["radius"]))
 	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
 		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
@@ -215,13 +278,13 @@ func rimewright() -> void:
 	ok("tm X: inside the shell she is invulnerable and rooted, and nothing fires", P.hp >= php - 0.01
 		and _moved(P, p0) < 0.2 and m.shots.size() == n_shots, "hp %.0f moved %.2f" % [P.hp - php, _moved(P, p0)])
 	var slow1 := T.slow_k
-	var fill1 := float(AimKit.entry(P, "x").get("fill", 0.0))
+	var hot1 := float(AimKit.entry(P, "x").get("hot", 0.0))
 	step(m, 1.6)
 	ok("tm X: the slow on a foe in the rink stacks the longer they stay (small mechanic)", T.slow_k > slow1 + 0.15
 		and T.slow_k <= float(xd["slow_max"]) + 0.001 and K.chilled(T), "%.2f -> %.2f" % [slow1, T.slow_k])
 	ok(
-			"tm X: the countdown fill (and the cracks) brighten as it builds",
-			float(AimKit.entry(P, "x").get("fill", 0.0)) > fill1 + 0.3)
+			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
+			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
 	step(m, 1.3)
 	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
@@ -236,9 +299,63 @@ func rimewright() -> void:
 	await _free(m)
 	await _rime_recasts()
 	await _rime_sight_and_cap()
+	await _rime_ice_body()
+
+
+## Her body becomes ice while sealed: the model's own materials trade for the ice shader, a frost front
+## climbing from the feet over snap_t; ending it thaws the front back down and gives the materials back.
+func _rime_ice_body() -> void:
+	var r: Array = sc.setup("rimewright", 4.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var parts: Array = P.model.find_children("*", "MeshInstance3D", true, false)
+	var body: MeshInstance3D = null
+	for n in parts:
+		if IceBody.is_body(n as MeshInstance3D):
+			body = n
+			break
+	var was: Material = body.material_override if body.material_override else body.get_surface_override_material(0)
+	var skin: Material = body.get_active_material(0)
+	_press(P, m)
+	step(m, 0.05)
+	var ice := K.icb()
+	var now: Material = body.get_active_material(0)
+	ok("tm X: on the cast her body's materials trade for the ice shader (no shell), the front still climbing",
+		ice.active() and ice.k < 0.9 and now is ShaderMaterial and (now as ShaderMaterial).shader == IceBody.SHADER
+		and (now as ShaderMaterial).next_pass == (skin as ShaderMaterial).next_pass,
+		"k %.2f, %d surfaces" % [ice.k, ice.mats.size()])
+	step(m, 0.3)
+	ok("tm X: all ice within snap_t, every surface of the model", ice.frozen() and ice.mats.size() == ice.swaps.size()
+		and ice.mats.size() >= 1, "%d surfaces" % ice.mats.size())
+	_press(P, m)
+	step(m, 0.05)
+	ok("tm X: ending it thaws the front back down", ice.active() and ice.thawing and ice.k < 0.95, "k %.2f" % ice.k)
+	step(m, 0.3)
+	ok("tm X: thawed, her own materials are back on every surface", not ice.active()
+		and body.get_active_material(0) == skin
+		and (body.material_override if body.material_override else body.get_surface_override_material(0)) == was)
+	await _free(m)
 
 
 ## X again: early (before the last 0.75 s) just breaks the shell; late cracks it open at two thirds.
+## The rink as drawn is the rink that hits: a thin lit ring (no filled disc) whose outer edge is the data
+## radius, a foe whose body reaches inside it is in, one just past it is out; the centre is the frost bud.
+func _rime_ring_is_hit(K: RimewrightKit, T: Ent, ring: Dictionary, radius: float) -> void:
+	var at: Vector3 = K.rime["at"]
+	var band := float(ring.get("band", 0.0))
+	ok("tm X: the rink is a thin ring at the hit radius, no countdown fill, the frost bud at its centre",
+		band > 0.0 and band <= 0.3 and float(ring.get("fill", -1.0)) < 0.0
+		and absf(float(ring.get("r", 0.0)) - radius) < 0.01 and K.ulk().showing("bud"), "band %.2f" % band)
+	var was := T.pos
+	T.pos = at + Vector3(radius + T.r - 0.05, 0.0, 0.0)
+	var edge_in: bool = T in K.foes_in(at, radius)
+	T.pos = at + Vector3(radius + T.r + 0.05, 0.0, 0.0)
+	var edge_out: bool = not T in K.foes_in(at, radius)
+	T.pos = was
+	ok("tm X: drawn == hit: a body touching the ring is in the rink, one just past it is out", edge_in and edge_out)
+
+
 func _rime_recasts() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]
