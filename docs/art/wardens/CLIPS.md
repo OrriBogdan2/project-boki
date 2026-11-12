@@ -14,12 +14,24 @@ Hero live in `tools/art1/` (Kael is the pilot).
   launcher 0.9, cannon 0.55 of her height as on the sheet.
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
-- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has
+  them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time; `--clip-check`
+  holds each loop's pelvis to the forward loop's height at the same phase).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
-  thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
-  and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
+  thighs about their running mean (hand-keyed loops only: on a ring of pinned soles it stretches the side and back loops
+  unevenly); `foot_mps` [walk, run] is the ring's planted-sole speed at rate 1 in game (m/s: the median of the 8
+  directions `--loco-dir-check` reads), and move speed over it sets the clip rate (0.6 to 1.8, eased). The idle lies
+  under the rings on one weight (up to `walk_speed`), the walk ring under the run ring on another (the run ring above
+  1.3x `walk_speed`, back under 1.2x, never resting between them), and the direction is a blend position on each ring:
+  all three ride critically damped springs, so a start, stop or ring change never jumps a foot.
+  `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+  `aim_twist` (Vex, Lace, Cinder): run-and-aim as the source does it. The walk and run play forward with the legs turned
+  to the way he goes and the hips taking the turn back, so the torso stays on the aim, up to `WardenClips.TWIST_MAX`
+  (~96 deg). Past 90 deg the legs turn round and play the backward run (they hold it 0.1 rad either side of 90, so a
+  run near it does not flicker). While he runs, the legs hold their way when the aim swings. Off: the f, b, l, r ring.
+- `crouch` (item 143): idle, walk by direction (f, b, l, r, and fl, fr, bl, br: the sneak ring is synced, every loop
+  crouch_f's length and strike key from `tools/art1/hunter_dir_gait.py ... crouch`, docs/art/LOCO_DIR.md), `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
@@ -28,7 +40,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
+loco (Blend2 of the idle and the rings; the rings a Blend2 of two BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
 

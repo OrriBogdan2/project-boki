@@ -31,3 +31,9 @@ fail is tender's hit flash, the same on the base), --warden-model-check 157/157.
 Stretch check: all 49 clips over 1.3 (worst 6.61 revive, idle 6.01, run_f 3.15), almost all
 in `hips`; before the braid fix: worst 8.01, idle 6.35, run_f 5.72. The relax runs with CUTS 0 (no holes), as Lace, Sparkle and Meeko, so a stretched
 edge stays rather than a hole; it is not reworked here.
+
+walk and run b, l, r, fl, fr, bl, br (2026-11-11), in step with the pilot walk_f/run_f: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/claire/claire.glb OUT.glb 2.2 4.6`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/claire/claire.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
+(judge: docs/art/wardens/dirloops/JUDGE.md). Her skate clips (skate*, tm_skate) are not walks and stay as keyed.
+
+walk_f and run_f on the ring's recipe (2026-11-12, ext/anim-dir-all-1112; the pilot loops planted 2.03..3.22 and 3.20..6.18 m/s): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/claire/claire.glb OUT.glb 2.2 4.58 f 0 0 1 1,1 40 walk,run`, then `glb_add_clips.py claire.glb OUT.glb walk_f,run_f` and walk_fl, walk_fr, run_fl, run_fr copied back from the old file.

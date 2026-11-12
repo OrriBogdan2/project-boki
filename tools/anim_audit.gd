@@ -146,7 +146,8 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 ## A gait at speed s, as the game plays it: the state carries the velocity, facing -Z.
 func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) -> Dictionary:
 	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true})
-	clips.loco_pos = Vector2.ZERO
+	clips.move_w = 0.0     # (from a stand: the rings ease in as the game's do)
+	clips.move_v = 0.0
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
 	var fr: Array = []
