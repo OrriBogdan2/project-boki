@@ -257,6 +257,32 @@ Suggestions, not built (parity first): the recall catch lands at 0.17 s, before 
 | X (Faultline), 10 fps beats | `bul_ult_wind` (held), `bul_ult_slam` | planted wide, the hammer hauled overhead and leaning back (0.4 s); one frame down into the ground, a deep crouch through the 0.2 s plant, then the legs free to walk while the back comes up |
 Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 
+## Animation timing (Nov 10: per slot against the footage, 5 fps; 10 fps for the ult)
+Source times from briefs/hero-ref/bjorn.md (one frame = 0.2 s; the ult footage 0.1 s). Ours measured in
+`--bulwark-combo-check` (tools/bulwark_anim_time_check.gd prints `BEAT` and `EVENT` lines): the clip's beats offline
+through `WardenClips` (the hammer head's fastest frame, or where it stops; the shield bone for the aegis), the kit's
+moment in a match. Clips in art/wardens/breaker/breaker.glb (keys in tools/art1/breaker_anims.py); blend in 0.1 s,
+out 0.16 s, under one footage frame. Seconds from the press.
+
+| Slot | Source: wind-up / strike / active / recover | Ours: kit / clip | Verdict |
+|---|---|---|---|
+| LMB tap (throw) | cocked 1 frame (0033), thrown 0034, flight 0.2-0.4, card cadence 0.45 | hammer leaves 0.10 (`THROW_WIND` 0.08 + the step); arm's fastest frame 0.12 (keys 0.07 back, 0.11 over, 0.19 out), clip 0.5, cadence 0.45 | match (0.04, asserted) |
+| LMB tap again (recall) | flight 0.2-0.4 for 5-7 h, caught with a flash | thrown 6 m: caught 0.17; the hand's reach key 0.18, the catch rock-back 0.3, clip 0.48 | match (catch on the reach) |
+| LMB hold | crouched side-on, glint at 0.6, full ~2.6 | `bul_smash_wind` from 0.2 (tap), 0.2 up then held; full 1.25 (data) | owner override (item 59 whirl), kept |
+| LMB release (Crushing Blow) | sweep 1 frame (0146), impact the frame after (0147), recover ~0.4 (0147-0149) | hit on the release step (0.02 into `bul_smash`); fastest 0.05, ground 0.08, stance 0.5 (0.42 after), next action 0.61 | match (asserted) |
+| RMB hold (aegis) | 0.15 card cast (data 0.1), up at once | blocks 0.12 (hold 0.1 + the step); `bul_guard` starts there, shield arm up 0.07 in, held from 0.12 | inside a frame: the arm trails the block by 0.07, under the 0.1 blend; kept |
+| Shift (360 Smash) | dash 0.15-0.2, one spin 0.15-0.2 on arrival, crouched recover ~0.4 | 3.5 m in 0.20, spin hit 0.20; run-up to 0.17, spin 0.17-0.33 (fastest 0.22), skid to 0.58, stance 0.75 (0.42 after) | match (asserted) |
+| Shift, LMB held (short dash) | no spin (wiki), not in the footage | 2.6 m in 0.15, `dash_short` 0.25 | no footage, kept |
+| Air dash (`bul_lumber`) | not shown | 4.2 m in 0.35, clip 0.6 (shoulder in 0.12, out 0.3, settled 0.5) | no footage, kept |
+| E (Mending Ground) | hammer hauled up, driven down; column 0412-0416, pulse 0418, gone ~0421 (press frame not seen) | hammer up 0.16, down 0.26 (fastest 0.18), clip 0.95; column lands 1.0 (`e.delay`) | press not in the footage, kept |
+| R | Earthshatter: ours is on X (R is the Merge) | | see X |
+| X wind-up (Faultline) | hammer overhead f25-f28: 0.4 | `x.windup` 0.4: slam 0.42; `x_wind` overhead by 0.2, held | match |
+| X slam | slam and gold flood on the same frame (f29), planted to f31 (0.2) | before: strike and flood at 0.42, the hammer met the ground 0.10 into `x_slam` (a full 10 fps frame late) under a 0.1 blend. Now `lead` 0.07, `fade` 0.04 (warden_anim/breaker.json): ground 0.03 in; plant 0.2 (`x.plant`) | **fixed** (asserted: on the strike, blend inside 0.04) |
+
+Strip: `--arena --arena-demo=anim_bul_ult_slam` (GPU job 20261110-035400-15011, still queued at the hand-off; frames 0.86 wind, 0.94 the strike step,
+0.97, 1.02, 1.2, 1.5; cast at 0.5). Suggestions (ours, not built): start `bul_guard` on the RMB press so the arm is up
+as the aegis blocks; the recall flies back a frame faster than the source (`recall_speed`, kit data, not a clip).
+
 ## Engine notes
 - Kit: `scripts/arch/kits/bulwark_kit.gd`, `bjorn_fx.gd` (pooled effects: hammer, beacon, glint, flare, crescent, swirl, aegis, column, disc), `kit_shaders.gd` / `kit_meshes.gd`, `scripts/match/pin_bjorn_weapons.gd` (war hammer under a "Hammer" pivot, the aegis-sigil tower shield), `scripts/match/kmoves_pin_bjorn.gd`. Data: `content/archetypes/bulwark.json` (`lmb.carry`, `lie_t` 0 = never auto-recall, `dash.spin_r`), `content/weapons/tower_shield.json`.
 - The throw uses `AimMode.dist(h, throw_range)`; the slam's step is a 0.24 s `Hunter.dash_with` (no dash rider). The perfect launch is `scripts/arch/kits/bjorn_launch.gd` (BjornLaunch: the window, the launch, the jump-out and the off-ledge glide); data `lmb.perfect` (`window`, `dist`, `time`, `kb_k`).

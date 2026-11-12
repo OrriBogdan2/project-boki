@@ -125,6 +125,7 @@
 		},
 		"bul_ult_slam": {
 			"clip": "x_slam",
+			"lead": 0.07,
 			"fade": 0.04
 		},
 		"mf_xform": {

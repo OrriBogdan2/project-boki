@@ -31,6 +31,7 @@ func run(main_node: Node) -> void:
 		await own.bjorn()
 		await launch.bjorn()
 		await atime.anim_time()
+		await load("res://tools/bulwark_anim_time_check.gd").new().run(self)
 	n += ult.n + own.n + launch.n + tall.n + atime.n
 	fails += ult.fails + own.fails + launch.fails + tall.fails + atime.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
