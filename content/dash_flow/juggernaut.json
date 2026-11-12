@@ -102,8 +102,8 @@
 	},
 	"air_cast": {
 		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:18); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
-		"rmb": {"h": "push", "v": "slow", "ours": "the Meteor Drop: slides to the cursor disc (5 m at most) in a 0.2 s hang, then slams straight down", "source": "Data: Obsidian Slam is the RMB while airborne, 'strike down' (supervive_kits.md:22); footage 0261-0288: up to the top, about 0.2 s there, then a steep drive down onto the cursor disc (hero-ref/juggernaut.md:276-283)", "verdict": "match"},
+		"rmb": {"h": "zero", "v": "drop", "ours": "the Meteor Drop: stops his drift, a hang of 0.08 s at most, then a fast drop straight down; owner playtest 11-10 replaced the slide to the cursor", "source": "Data: Obsidian Slam is the RMB while airborne, 'strike down' (supervive_kits.md:22); footage 0261-0288: up to the top, about 0.2 s there, then a steep drive down onto the cursor disc (hero-ref/juggernaut.md:276-283)", "verdict": "owner"},
 		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:27); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
-		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:28); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"}
+		"x": {"h": "slow", "v": "fall", "source": "Data silent on the air (supervive_kits.md:28); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"}
 	}
 }

@@ -26,7 +26,7 @@
 	"air_cast": {
 		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:48); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
 		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:49); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
-		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:51); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
+		"e": {"h": "slow", "v": "fall", "source": "Data silent on the air (supervive_kits.md:51); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
 		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:52); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"}
 	}
 }

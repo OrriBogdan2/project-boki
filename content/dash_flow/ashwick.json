@@ -35,7 +35,7 @@
 		}
 	},
 	"air_cast": {
-		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:40); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]"},
+		"lmb": {"h": "slow", "v": "fall", "source": "Data silent on the air (supervive_kits.md:40); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]", "ours": "pouring fire slows him after 0.35 s, lmb.slow_after"},
 		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:41); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]"},
 		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:43); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]"},
 		"x": {"h": "push", "v": "hover", "ours": "the flight starts at once and holds the jump's height", "source": "Data: fly forward (supervive_kits.md:44); footage: lift-off instant, a low flight over ground; a cast from the air not shown (hero-ref/linwick.md:206, 230, 281)", "verdict": "[?]"}
