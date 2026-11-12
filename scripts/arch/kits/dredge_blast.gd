@@ -10,7 +10,7 @@ extends RefCounted
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s the slowed walk lasts after the last wave
-const SLUG_COL := Color("fff0b0")    # the slugs in flight: pale coin gold (their trail is HeroVfx "slug")
+const SLUG_COL := Color("fff0b0")    # the slugs in flight: pale coin gold (size, trail: HeroVfx "broadside_slug")
 const WAVE_PITCH := [1.0, 0.82]
 ## the fan on the ground: coin gold (the signature), and how strong its fill and rim are over AimKit's defaults
 const FAN_COL := DredgeKit.ANCHOR_COL
@@ -129,7 +129,7 @@ func _wave(i: int) -> void:
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(e, why, dmg)
 		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), SLUG_COL, {"kx": cb})
 		if k.tells_visible():
-			HeroVfx.of(m).trail(h, "slug", m.shots[-1]["node"])
+			HeroVfx.of(m).shot(h, "broadside_slug", m.shots[-1])
 	_wave_fx(i, at, dir)
 
 func _slug_hit(e: Ent, why: String, dmg: float) -> void:

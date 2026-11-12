@@ -16,6 +16,8 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   ended. Particle layers only, and local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+- `HeroVfx.of(m).shot(h, "move", s)`: a shot from `Match.spawn_shot` gets the move's trail, and the move's `"draw"`
+  (default 1) scales the drawn slug and its streak (`s["vr"]`). Visual only: the hit radius `s["r"]` is not touched.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
   cones and delivery sounds) stays out, so only the Hero's own look shows.
 

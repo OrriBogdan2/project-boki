@@ -278,7 +278,7 @@ func _dress_volley() -> void:
 		seen += 1
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
-		HeroVfx.of(m).trail(h, "slug", sd["node"])
+		HeroVfx.of(m).shot(h, "slug", sd)
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
