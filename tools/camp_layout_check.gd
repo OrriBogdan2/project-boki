@@ -42,7 +42,7 @@ func run(main: Node) -> void:
 	for s in L["train"]["stations"]: far.append([Vector2(s[0], s[1]), FROM_HALT, "halt"])
 	for p in L["spawn_points"]["vault"]["points"]: far.append([Vector2(p[0], p[1]), FROM_SEAT, "vault"])
 	for k in ["docks", "outposts", "hatches"]:
-		for s in L[k]: far.append([Vector2(s[0], s[1]), FROM_SEAT, k.trim_suffix("s")])
+		for s in L.get(k, []): far.append([Vector2(s[0], s[1]), FROM_SEAT, k.trim_suffix("s")])
 	for sd in SEEDS:
 		var w := World.new()
 		w.generate_authored(L, sd)

@@ -257,7 +257,8 @@ MORE = {
     "gaol_ne": dict(chests=[[147, 62]]),
     "gaol_sw": dict(chests=[[48, 150]]),
     "frostgate": dict(chests=[[94, 30], [100, 62]], landings=[[110, 28], [118, 62], [74, 46]],
-                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
+                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]],
+                      rocks=[[105, 42, 106, 42]]),   # the heavy camp's cover
     "cinder": dict(chests=[[30, 100], [46, 93]], landings=[[28, 84], [54, 112], [36, 116]],
                    breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
     "storm": dict(chests=[[190, 110], [160, 136]], landings=[[158, 104], [190, 120], [166, 94]],
@@ -279,8 +280,8 @@ for _iid, _more in MORE.items():
 # camps of a region stand 30-70 m apart, 14 m off a train halt and 20 m off a lair gate, vault and way-out seat.
 CAMPS = {
     "crown": [[99, 94, "heavy"], [104, 129, "heavy"], [133, 104, "heavy"], [126, 128, "normal"]],
-    "frostgate": [[117, 57, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
-    "cinder": [[60, 109, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
+    "frostgate": [[110, 40, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
+    "cinder": [[62, 84, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
     "storm": [[157, 117, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
     "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
     "lark": [[40, 42, "normal"], [50, 20, "light"], [27, 22, "light"]],

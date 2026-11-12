@@ -6,7 +6,6 @@ extends RefCounted
 ## the smoke columns equal the camps during the drop and are gone 5 s after landing; every new string
 ## fits one line. Never touches the save.
 
-const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
 const FLAMES := {"small": 1, "camp": 2, "great": 3, "chief": 3}
 const ONE_LINE_PX := 340.0      # the legend's width for a row, at the size it draws
 
@@ -64,7 +63,8 @@ func _regions(m: Match) -> void:
 			continue
 		var camps := m.camps.list().filter(func(e): return e["region"] == ri)
 		var xp := 0.0
-		for e in camps: xp += SIZE_XP[e["size"]]
+		for e in camps:
+			for mb in e["mobs"]: xp += XpRules.kill_xp(mb)
 		var lvl := 1
 		for i in range(1, Hunter.XP_TO.size()):
 			if xp >= Hunter.XP_TO[i]: lvl = i + 1
