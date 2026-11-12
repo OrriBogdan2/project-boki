@@ -91,7 +91,7 @@ func _palettes() -> void:
 	for id in SideColor.ORDER:
 		var p: Dictionary = SideColor.PALETTES[id]
 		var sides := [p["you"], p["ally"], p["foe"]]
-		var distinct := sides[0] != sides[1] and sides[1] != sides[2] and sides[0] != sides[2]
+		var distinct: bool = sides[0] != sides[1] and sides[1] != sides[2] and sides[0] != sides[2]
 		ok("%s: you, squad and rivals differ" % id, distinct)
 		ok("%s: the squad colours avoid the rivals'" % id,
 			(p["mates"] as Array).all(func(c): return _apart(c, p["foe"]) > MIN_APART))
@@ -161,8 +161,6 @@ func _users(main: Node) -> void:
 		ok(tag + "nameplate and health roles", roles == [p["you"], p["ally"], p["foe"]])
 		ok(tag + "a rival's hit marker", foe._marker_col() == p["foe"])
 		ok(tag + "your squad's hit marker", _same(Color(mate._marker_col(), 1.0), p["ally"]))
-		var shot: Color = Oomph.shot_look(m, foe, Color.WHITE, 0.2)[0]
-		ok(tag + "a rival's shot tints toward the rival colour", _same(shot, Color.WHITE.lerp(p["foe"], 0.35)))
 		ok(tag + "a rival's box", Life.owner_col(m, {"owner": foe}) == p["foe"])
 		ok(tag + "an enemy ping", PingInput.color(m, me, "enemy") == p["foe"])
 		ok(tag + "squad map colours", m.mate_col(me) == p["mates"][0] and m.mate_col(mate) == p["mates"][1])

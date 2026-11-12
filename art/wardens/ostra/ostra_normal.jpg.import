@@ -2,26 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://oln1obq5wxhu"
-path.bptc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex"
-path.astc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"
+uid="uid://d2vnsvx6dyo80"
+path="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "9c6b7ac51d4e8487a4548479ed072fe6"
+"md5": "461c879ddf8c200c9558255bfbeff6a8"
 }
 
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_normal.jpg"
-dest_files=["res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex", "res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"]
+dest_files=["res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
