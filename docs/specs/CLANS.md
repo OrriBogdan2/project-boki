@@ -37,7 +37,7 @@ Limits: roster 24 (matches `guild_members` limit 24), showcase wall 12 slots, sc
 ## 2. Join, leave, roles
 
 - **Join:** `Social.join_guild` already sets `guild_id`, republishes, resets `contrib` for a new guild. Add: write `clanroster/<gid>_<me>` with role `member`, assign `corner_seed` (hash of me+gid, picks the corner plot). Invite is by clan id from the registry (`scripts/social/town.gd _open_guilds`) or a link `goto:visit`-style; a clan can be `open` or `invite` (default open, section 6).
-- **Leave:** `leave_guild` already clears the id and perks. Add: delete own `clanroster` doc, a lent Boki still comes home after its day (section 7)), the showcase slots you owned empty. Founder leaving hands founder to the longest-standing officer, else oldest member; last member leaving deletes nothing (the doc just goes idle).
+- **Leave:** `leave_guild` already clears the id and perks. Add: delete own `clanroster` doc, a lent Boki still comes home after its day (section 7), the showcase slots you owned empty. Founder leaving hands founder to the longest-standing officer, else oldest member; last member leaving deletes nothing (the doc just goes idle).
 - **Roles:** `founder`, `officer`, `member`, plus a **focus** each member picks freely: `raiser`, `breeder`, `extractor` (or none). Focus is taste, not permission: it only changes which base chores and league tracks pay out to you. Permissions: founder and officers can set name, motto, open/invite, kick; only the founder promotes officers and disbands. A kicked member's own client notices a missing roster doc on `refresh_guild` and clears `guild_id` (we cannot write to their save).
 
 ## 3. What the shared base syncs
