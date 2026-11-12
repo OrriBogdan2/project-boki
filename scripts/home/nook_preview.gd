@@ -4,22 +4,24 @@ class_name NookPreview
 
 const PIC_PX := 56.0     # px, each possible baby's picture on the card
 const SWATCH_PX := 12.0   # px, a parent's colour swatch
-## the note on an unstable mix (Care.unstable_mix: clashing elements or tempers)
-const UNSTABLE_NOTE := "An unstable mix: their elements or tempers clash. It hatches glum and needs care for a day."
 
 ## What Care.breed would give these two: {species: the kinds it can be, lean: its head start,
-## lean_from: whose lean that is ("" for none), look: the blended rolls, unstable: a clashing mix}.
+## lean_from: whose lean that is ("" for none), look: the blended rolls, unstable: why it clashes ("" if calm)}.
+## A Locket of Kind on a parent fixes the kind (NestItems.plan).
 static func facts(a: Dictionary, b: Dictionary) -> Dictionary:
 	var kinds: Array = [String(a["species"])]
 	if b["species"] != a["species"]: kinds.append(String(b["species"]))
+	var locket: String = NestItems.plan(a, b)["species"]
+	if locket != "": kinds = [locket]
 	var lean := Care.head_start(a, b)
 	return {"species": kinds, "lean": lean, "lean_from": "" if lean.is_empty() else String(Care.stronger(a, b)["name"]),
-		"look": Unique.blend_center(a, b), "unstable": Care.unstable_mix(a, b), "odds": odds()}
+		"look": Unique.blend_center(a, b), "unstable": UnstableMix.preview_line(a, b), "odds": odds(a, b)}
 
 ## The chances Care.breed and Unique.inherit give an egg, per trait: each stat from one parent (each)
-## or fresh, the coat from one parent (each) or fresh, and the species when the parents differ.
-static func odds() -> Dictionary:
-	var stat_from := float(Care.IV_INHERIT) / float(Care.IV_KEYS.size()) * 0.5
+## or fresh (gift Threads raise the count, NestItems.plan), the coat from one parent (each) or fresh,
+## and the species when the parents differ.
+static func odds(a: Dictionary, b: Dictionary) -> Dictionary:
+	var stat_from := float(NestItems.plan(a, b)["inherit"]) / float(Care.IV_KEYS.size()) * 0.5
 	return {"species": 0.5, "stat_parent": stat_from, "stat_fresh": 1.0 - 2.0 * stat_from,
 		"coat_parent": Unique.COAT_TAKE, "coat_fresh": 1.0 - 2.0 * Unique.COAT_TAKE}
 
@@ -52,8 +54,7 @@ static func card(a: Dictionary, b: Dictionary, tree: SceneTree) -> PanelContaine
 	v.add_child(UI.kv("Coat", coats))
 	v.add_child(UI.kv("Head start", _lean_text(f)))
 	v.add_child(UI.kv("Shimmer", Shiny.odds_text(Shiny.egg_chance(a, b))))
-	if f["unstable"]:
-		v.add_child(UI.para(UNSTABLE_NOTE, UI.T_SMALL, UI.GOLD))
+	if f["unstable"] != "": v.add_child(UI.para(f["unstable"], UI.T_SMALL, UI.GOLD))
 	v.add_child(UI.section("What each can pass on", UI.FAINT.lightened(0.2)))
 	v.add_child(parents(a, b))
 	var o: Dictionary = f["odds"]
