@@ -32,7 +32,7 @@ static func record(target: Node, status: String, by: Node, _dur: float) -> void:
 		var sb := String(c.get("setup_by", "any"))
 		if sb != "any" and sb != role:
 			continue
-		target.marks[String(c["id"])] = {"team": by.team, "owner": own, "until": float(m.time) + float(c.get("window", 2.5))}
+		target.marks[String(c["id"])] = {"team": by.team, "owner": own, "until": float(m.time) + float(c.get("window", 2.5)), "window": float(c.get("window", 2.5))}
 
 ## Called from Ent.hurt before damage lands. Returns the (maybe boosted) damage.
 static func payoff(target: Ent, by: Ent, dmg: float, opts: Dictionary) -> float:
@@ -68,5 +68,6 @@ static func payoff(target: Ent, by: Ent, dmg: float, opts: Dictionary) -> float:
 		if own is Hunter:
 			Bond.add(own, float(c.get("bond", 0.06)))
 		m.on_combo(target, own, c)
+		if own is Hunter and (own as Hunter).ak: RecastCue.payoff((own as Hunter).ak, target)
 		return dmg * float(c.get("bonus", 1.3))
 	return dmg
