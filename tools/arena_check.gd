@@ -1,8 +1,9 @@
 extends RefCounted
 ## --arena-check: the Arena boots on its own map with its practice tools, dummies take damage and
-## show it, reset works, archetype / weapon / Boki / glove swaps apply, the toggles work, the kit
-## card builds for all six archetypes, the expedition loadout shows the card, and the Training Grounds
-## gets the same tools. Prints ARENACHECK PASS/FAIL.
+## show it, reset works, the Esc menu's Practice page sets your ranks (--practice-shot=<dir> saves
+## it), archetype / weapon / Boki / glove swaps apply, the toggles work, the kit card builds for all
+## six archetypes, the expedition loadout shows the card, and the Training Grounds gets the same
+## tools. Prints ARENACHECK PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -340,11 +341,72 @@ func _arena() -> void:
 	ok("kit card opens in the arena", A.card_layer != null)
 	A.toggle_card()
 	ok("kit card closes", A.card_layer == null and not m.paused)
+	await _practice_page(m)
 	A.teardown()
 	m.queue_free()
 	printerr("ARENACHECK (arena match freed)")
 	await main.get_tree().process_frame
 	printerr("ARENACHECK (next frame)")
+
+## The Esc menu's Practice page (PracticeRanks), driven through its buttons: Max all, Pick your max
+## (that ability's top rank and data bonus, the rest at rank 1), Reset; the dummies' ranks stay theirs.
+func _practice_page(m: Match) -> void:
+	var tree := main.get_tree()
+	var P: Hunter = m.player
+	var D: Hunter = m.arena.dummies[0]["h"]
+	var dummy_ranks: Dictionary = D.slot_lv.duplicate()
+	var was: Node = main.get("current")
+	main.set("current", m)         # (the Esc menu finds the match through the current screen)
+	Overlay.open_pause("match")
+	await tree.process_frame
+	ok("practice: the Esc menu has Practice", await _press("Practice") and Overlay.page == "practice", Overlay.page)
+	ok("practice: Max all", await _press("Max all") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s]), str(P.slot_lv))
+	ok("practice: max rank shortens the cooldown", is_equal_approx(P.rank_cd_k("sec"), 0.8), str(P.rank_cd_k("sec")))
+	var dash := String(P.slot_info("dash")["name"])
+	var bonus := String(Arch.next_ranks(P.arch, "dash", 1)[-1][1])
+	ok("practice: Pick your max shows its bonus", _button("Max " + dash).tooltip_text == bonus, bonus)
+	ok(
+		"practice: Pick your max maxes that ability only",
+		await _press("Max " + dash) and P.ak.rank("dash") == 3 and P.slot_lv["sec"] == 1 and P.slot_lv["kin"] == 1 and P.slot_lv["ult"] == 1,
+		str(P.slot_lv)
+	)
+	await _practice_shot()
+	var buttons: Array = Overlay.host.find_children("*", "Button", true, false)
+	ok("practice: one-line labels", buttons.all(func(b): return not String(b.text).contains("\n")))
+	var r := Rect2(Vector2.ZERO, main.get_viewport().get_visible_rect().size)
+	ok("practice: the page fits the screen", buttons.all(func(b): return r.encloses(b.get_global_rect())), str(r.size))
+	ok("practice: Reset", await _press("Reset to rank 1") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1) and P.skill_pts == 0, str(P.slot_lv))
+	ok("practice: the dummies keep their ranks", D.slot_lv == dummy_ranks, str(D.slot_lv))
+	Overlay.close()
+	main.set("current", was)
+	await tree.process_frame
+
+## --practice-shot=<dir> (needs a renderer, jobq --needs gpu): the Practice page at 1280x720 as <dir>/practice_page.png.
+func _practice_shot() -> void:
+	var dirs: Array = OS.get_cmdline_user_args().filter(func(a): return String(a).begins_with("--practice-shot="))
+	if dirs.is_empty():
+		return
+	var dir := String(dirs[0]).trim_prefix("--practice-shot=")
+	DirAccess.make_dir_recursive_absolute(dir)
+	main.get_window().size = Vector2i(1280, 720)
+	for i in 20: await main.get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("practice_page.png"))
+
+func _button(text: String) -> Button:
+	for b in Overlay.host.find_children("*", "Button", true, false):
+		if (b as Button).text == text and not b.is_queued_for_deletion():
+			return b
+	return null
+
+## Presses the open page's button with this text; false when there is none.
+func _press(text: String) -> bool:
+	var b := _button(text)
+	if b == null:
+		return false
+	b.pressed.emit()
+	await main.get_tree().process_frame
+	return true
 
 func _training() -> void:
 	var m := Match.new()
