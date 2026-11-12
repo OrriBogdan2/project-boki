@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	ok(fx.ghosts.size() == glows0 + 1 and float(fx.ghosts[-1]["rise"]) > 0.0, "a level-up gives one upward body glow")
 	ok(fx.ghosts[-1]["col"] == Arch.color(P.arch), "the glow is the Hunter's colour")
 	var glows1 := fx.ghosts.size()
-	P.ak.armed_fx("READY", "")
+	P.ak.armed_fx("")
 	ok(fx.radial == radial0 and fx.rings.is_empty(), "an ability coming ready spawns no ring or burst")
 	ok(fx.ghosts.size() == glows1 + 1, "an ability coming ready gives one body glow")
 	P.ak._charge_full_tick(Color("ff8844"))
