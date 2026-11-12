@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const CLEAVE_TALL := 2.4        # m: the crescent tops a Hunter (about 1.9 m)
+
 var A
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
@@ -277,16 +279,23 @@ func zedran(a) -> void:
 	_cleave_fits(U.data())
 	await A.done(m)
 
-## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
+## The cleave is a tall crescent standing along the aim (tilt 90): its tip at the strip's far end, its back edge
+## inside the strip, taller than a Hunter, and no burst layer reaching past the strip's end.
 func _cleave_fits(d: Dictionary) -> void:
-	var sweep: Dictionary = HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"][0]
 	var ln := float(d["len"])
-	var radius := float(sweep["size_x"]) * ln
-	var tip := float(sweep["fwd_x"]) * ln + radius
-	var half := radius * sin(deg_to_rad(float(sweep["arc"])) * 0.5)
-	var w := float(d["width"])
-	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
-			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
+	var fits := true
+	var tall := 0.0
+	for layer: Dictionary in HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"]:
+		if layer["p"] != "sweep":
+			continue
+		var radius := float(layer["size"])
+		var half := deg_to_rad(float(layer["arc"])) * 0.5
+		var mid := float(layer["fwd_x"]) * ln
+		tall = maxf(tall, float(layer["y"]) + radius * sin(half))
+		fits = fits and float(layer["tilt"]) == 90.0 and mid + radius < ln + 0.4 and mid - radius * cos(half) > 0.0 \
+				and mid + radius > ln - 0.1
+	A.ok("juggernaut X: the cleave's crescent stands tall inside its strip", fits and tall >= CLEAVE_TALL,
+			"top %.2f m (at least %.1f), strip %.1f m" % [tall, CLEAVE_TALL, ln])
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:
