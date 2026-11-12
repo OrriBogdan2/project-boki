@@ -66,6 +66,7 @@ const CHECKS := {
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
+	"--care-ult-check": ["res://tools/support_check.gd", "support_check", "tender"],      # Meeko's ult
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
