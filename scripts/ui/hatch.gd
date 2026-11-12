@@ -440,9 +440,7 @@ func _show_create() -> void:
 	br.alignment = BoxContainer.ALIGNMENT_END
 	var zr := UI.hbox(10)
 	zr.alignment = BoxContainer.ALIGNMENT_END
-	var zb := UI.ghost(_zoom_text(), view.toggle, 150)
-	zb.pressed.connect(func(): zb.text = _zoom_text())
-	zr.add_child(zb)
+	zr.add_child(view.zoom_button())
 	v.add_child(zr)
 	if not view.before.is_empty():
 		br.add_child(UI.ghost("Back", func():
@@ -456,9 +454,6 @@ func _show_create() -> void:
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
 	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
-
-func _zoom_text() -> String:
-	return "See your face" if view.want < 0.5 else "See all of you"
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()

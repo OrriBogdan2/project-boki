@@ -6,7 +6,7 @@ extends RefCounted
 ## renderer) it saves the whole body, the face and a surprise. Prints CVIEW ok/FAIL lines and
 ## "CVIEW DONE, failures: N". Never touches the real save.
 
-const FACE_NEAR := 1.6        # m: the close-up camera is at most this far from the face
+const FACE_NEAR := 1.8        # m: the close-up camera is at most this far from the face
 const SETTLE_S := 3.0        # s: long enough for the camera to ease to a new shot
 const BODY_SLACK := 0.15      # m: back at the whole body, give or take the idle's glances
 
@@ -75,6 +75,7 @@ func _turn(hx) -> void:
 	ok(absf(hx.preview.rotation.y - yaw - turned) < 0.001, "a 100 px drag turns the model")
 	hx._unhandled_input(mm)
 	ok(absf(hx.preview.rotation.y - yaw - turned) < 0.001, "moving without the button held doesn't")
+	hx.preview.rotation.y = yaw      # facing the camera again for the shots
 	await _frames(1)
 
 func _zoom(hx) -> void:
@@ -85,8 +86,9 @@ func _zoom(hx) -> void:
 		_mouse(MOUSE_BUTTON_WHEEL_UP, true)
 		_mouse(MOUSE_BUTTON_WHEEL_UP, false)
 	await _settle()
-	ok(hx.view.want == 1.0 and _face_dist(hx) < FACE_NEAR,
-		"four wheel notches up come in to the face (%.2f m, was %.2f m)" % [_face_dist(hx), body_dist])
+	ok(hx.view.want == 1.0 and _face_dist(hx) < FACE_NEAR and hx.view.button.text == "See all of you",
+		"four wheel notches up: the face, and the button offers the way back (%.2f m, was %.2f m)"
+		% [_face_dist(hx), body_dist])
 	ok(_face_on_screen(hx), "the face is in the frame, right of the card")
 	await _shot("creator_face", 5)
 	for i in 4:

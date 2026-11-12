@@ -7,14 +7,16 @@ extends RefCounted
 const TURN_PER_PX := 0.012    # rad of turn per pixel dragged
 const ZOOM_STEP := 0.25       # one wheel notch, of the way from the whole body (0) to the face (1)
 const ZOOM_RATE := 6.0        # 1/s: how fast the shot eases to the wanted zoom
-const FACE_DIST := 1.15       # m: camera to face, fully zoomed in
+const FACE_DIST := 1.5        # m: camera to face, fully zoomed in (head and shoulders)
 const FACE_UP := 0.12         # m: the face's middle, above the neck pivot
+const AIM_ABOVE := 0.1        # m: the close-up aims this far over the face, so it sits below the title
 const BODY_CAM := Vector3(0.05, 1.2, 4.75)    # m: the whole body in frame, clear of the card on the left
 const BODY_AIM := Vector3(0.2, 0.98, 1.6)
 
 var zoom := 0.0               # the shot now, 0 whole body .. 1 face
 var want := 0.0               # the shot it eases to
 var before: Dictionary = {}   # the look before the last Surprise me ({} once Back has been used)
+var button: Button            # See your face / See all of you, kept in step with the wheel
 var _turning := false
 var _face := BODY_AIM         # where the face is, measured at rest on each new model
 var _aim_off := Vector3.ZERO  # keeps the face where the body stood in frame, right of the card
@@ -35,11 +37,23 @@ func handle(event: InputEvent, model: Node3D) -> bool:
 func _nudge(pressed: bool, dir: float) -> bool:
 	if pressed:
 		want = clampf(want + dir * ZOOM_STEP, 0.0, 1.0)
+		_relabel()
 	return true
 
 ## Closer (to the face) if you're further than halfway, else back to the whole body.
 func toggle() -> void:
 	want = 1.0 if want < 0.5 else 0.0
+	_relabel()
+
+## The zoom button for this creator card, labelled for where it would take you.
+func zoom_button() -> Button:
+	button = UI.ghost("", toggle, 150)
+	_relabel()
+	return button
+
+func _relabel() -> void:
+	if is_instance_valid(button):
+		button.text = "See your face" if want < 0.5 else "See all of you"
 
 ## Measures a freshly built model (standing at rest) so the close-up finds its face.
 func fit(model: Node3D) -> void:
@@ -52,7 +66,7 @@ func fit(model: Node3D) -> void:
 ## Eases the shot; the camera's wanted spot and aim for this frame.
 func step(delta: float) -> Array:
 	zoom = lerpf(zoom, want, minf(1.0, delta * ZOOM_RATE))
-	var face_aim := _face + _aim_off
+	var face_aim := _face + _aim_off + Vector3(0, AIM_ABOVE, 0)
 	var face_cam := face_aim + (BODY_CAM - BODY_AIM).normalized() * FACE_DIST
 	return [BODY_CAM.lerp(face_cam, zoom), BODY_AIM.lerp(face_aim, zoom)]
 
