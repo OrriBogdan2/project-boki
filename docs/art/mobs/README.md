@@ -1,6 +1,6 @@
 # Enemy mob art pass, step 1: design sheets (2026-11-10)
 
-**Gate:** design cards, spec and prompts only. No image gens or Meshy spend for mobs until the owner approves hunters, then mobs (briefs/DECISIONS.md 2026-11-09). No game code changed.
+**Gate:** opened for 2D sheets by the owner 11-10 ~12:50 PM EST (briefs/DECISIONS.md: mobs + lair bosses before new Boki). Sheets for the 7 mobs and the 3 lair bosses (`bosses/`) run on the Mac runner (`briefs/boki-art/batch/specs_zzzzz_mobs.py`); Meshy for each creature still waits for the owner's approval of its sheet. No game code changed.
 
 ## Files
 - `TURNAROUND_SPEC.md`: the one sheet format (canvas, views, line/shade, mob world rules, post step, prompt blocks, refs, checks). Read first.

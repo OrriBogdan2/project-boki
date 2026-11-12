@@ -2,7 +2,7 @@
 
 Every enemy mob sheet uses exactly this format. A sheet that breaks it is redone, not patched. The prompt cards in `docs/art/mobs/<mob>.md` all build on the blocks below.
 
-**Gate:** nothing here runs yet. Mob image gens and Meshy spend wait for the owner's hunter approval (briefs/DECISIONS.md 2026-11-09 "approval gates": hunters, then mobs, then Boki).
+**Gate:** 2D sheet gens opened by the owner 11-10 ~12:50 PM EST (briefs/DECISIONS.md); Meshy spend per creature waits for the owner's approval of its sheet. Lair bosses use this format with the changes in `bosses/README.md`.
 
 ## 1. Canvas
 - Nano Banana Pro (Gemini 3 Pro Image on Vertex, the art runner), **16:9, 4K** (about 5504 x 3072), the same as the hunter turnarounds (`briefs/art-refs/vex_v2/vex_v2_turnaround.jpg`).
