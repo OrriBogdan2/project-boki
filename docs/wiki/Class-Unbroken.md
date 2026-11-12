@@ -21,9 +21,9 @@ every knock.
 2. The greatsword slashes fast and hits twice as hard at the tip. Hold it for a **Searing Wave**,
    which fills Rage three times as fast.
 3. **Rampage** (Shift, 3 charges): a short dash attack the way you face; its tip hits hardest and can stun into a wall.
-4. **Smash** (RMB): tap for a wound-up **Finishing Slam** behind a magenta strike lane (more to the
-   badly hurt, who show a red outline while it's ready); hold for a **Lunge**: crouch while a lane grows
-   ahead of you and flashes magenta at full (you can jump while you charge), then let go to fling
+4. **Smash** (RMB): tap for a wound-up **Finishing Slam** behind a crimson strike lane (more to the
+   badly hurt, who show a red outline while it's ready); hold for a **Lunge**: the blade goes up over your head
+   (nothing is drawn ahead; you can jump while you charge), then let go to fling
    yourself forward; in the air, a disc shows under your cursor and the **Meteor Drop** dives onto it.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
 6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
@@ -112,7 +112,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->
