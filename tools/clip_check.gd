@@ -378,6 +378,9 @@ func _flinch(id: String) -> void:
 func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
+	# (Models.hunter rest-posed the Rig with a sway drawn from the instance id; a rig_root Hero, as Ostra, stands on
+	# the Rig, so both runs get the same pose from the seed or their legs differ before the hit)
+	HunterAnim.rest_pose(m)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
