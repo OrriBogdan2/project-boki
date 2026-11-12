@@ -360,6 +360,7 @@ const CHECKS := {
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
+	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
