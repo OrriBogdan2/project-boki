@@ -592,6 +592,11 @@ func _cancels(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Diction
 	var rows: Array = dd.get("cancels", [])
 	if rows.is_empty():
 		return
+	# (1.5 s on the run first: whatever the checks before left easing (a lock-in's slow let-go, the stance, a landing,
+	# the air tilt) is gone, so the first row's cut meets the same model as the rest)
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true})
+	for k in 45:
+		sync.call("_process", DT)
 	var height := 1.6 * absf(m.scale.y)
 	var worst := 0.0
 	var where := ""
