@@ -10,7 +10,7 @@ extends Node3D
 ##   smear    a fading hot-headed streak (the grenade's flight)
 ##   pillar   a column of light that narrows over its life (the drag disc's countdown, the refund column)
 ##   ring     an expanding ring with spark needles (arrivals, shock rings, the slide's start ring)
-##   disc     a dark filled disc with a crackling rim and veins (Skycall's area, the slide's scrape)
+##   disc     a lit crackling rim on the area's radius, a see-through dark falloff and veins (Skycall, Cinderfall)
 ##   star     a camera-facing 4-point crackle (fingertip, muzzle)
 ##   fan      a flat blast sector (the grenade's cone)
 ##   swirl    spinning comma arcs riding on a target (Dazed)
@@ -36,6 +36,8 @@ const ECHO_CAP := 10           # after-images per hunter at most (each copies th
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
 const NO_EDGE := Color(0, 0, 0, 0)
+const DISC_EDGE := 0.9          # the disc shader's rim radius on its unit quad: disc() scales it so the rim is on r
+const DISC_FILL_A := 0.2        # alpha at a disc's centre: a zone never hides who stands in it (VFX_QUALITY.md)
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -252,13 +254,14 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "ring", dur)
 
-## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
-## Returns the node, so a long one can be ended early with cut().
+## An area on the ground, radius r: a jagged crackling rim on r in `rim`, lit with col2, and a soft falloff of col
+## in from it that is DISC_FILL_A at the centre; veins of col2 inside. Returns the node, so a long one can be ended
+## early with cut().
 func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	_look(n, col, col2, rim)
+	_look(n, col, col2, rim).set_shader_parameter("fill_a", DISC_FILL_A)
 	n.global_position = at + Vector3(0, 0.08, 0)
-	n.scale = Vector3(r, 1.0, r)
+	n.scale = Vector3(r / DISC_EDGE, 1.0, r / DISC_EDGE)
 	_play(n, "disc", dur)
 	return n
 
