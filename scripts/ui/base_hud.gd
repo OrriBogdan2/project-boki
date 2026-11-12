@@ -20,7 +20,7 @@ static func draw(H) -> void:
 
 
 static func _channel(H, h: Hunter) -> void:
-	var cam: Camera3D = H.cam
+	var cam: Camera3D = H.m.cam
 	var mint := BaseRecall.MINT
 	var f := BaseRecall.progress(h)
 	if not cam.is_position_behind(h.position):
