@@ -13,6 +13,8 @@ const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
+const NO_STRIDE_M := 0.05      # m: a shin swinging less than this does not step (Motley hovers: his legs hang, 0.024 m)
+const HAND_PIECE_M := 0.25     # m: carrying, a shown piece on one hand alone may reach this far (a hand, not a weapon)
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
@@ -109,6 +111,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	await _carry(id, m, sync, clips, dd)
 	m.free()
 	await _flinch(id)
 
@@ -400,3 +403,132 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 		t += DT
 	m.free()
 	return out
+
+## The rescue carry (WardenCarry): the walk legs stay on the clips, both wrists come in round the socket the Boki
+## rides at, the data's weapon bones are put away, the legs keep stepping, and it lets go when the carry ends.
+func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var hips := WardenSkeleton.find(sk, "hips")
+	var s := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var plain := await _stride(sync, sk)
+	s["kmove"] = WardenCarry.MOVE
+	s["kmove_t"] = 0.5
+	var stride := await _stride(sync, sk)
+	var socket: Vector3 = m.get_meta(WardenCarry.SOCKET, Vector3.INF)
+	ok(clips.proc_w <= 0.0 and clips.carry_w >= 1.0 and socket != Vector3.INF,
+			"%s: the carry lies over the clips, not the rig, and leaves a socket" % id)
+	var height := 1.6 * absf(m.scale.y)
+	var hips_at := sk.global_transform * sk.get_bone_global_pose(hips).origin
+	var worst := 0.0
+	var front := INF
+	for side in ["L", "R"]:
+		var wrist := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
+		worst = maxf(worst, wrist.distance_to(socket))
+		front = minf(front, hips_at.z - wrist.z)       # (the model faces -Z)
+	ok(worst <= 0.3 * height and front > 0.05 * height,
+			"%s: both wrists cradle the Boki at the chest (%.2f m from the socket, %.2f m in front of the hips)"
+			% [id, worst, front])
+	ok(socket.y > hips_at.y and socket.y < hips_at.y + 0.9 * height,
+			"%s: the Boki rides at chest height (%.2f m over the hips)" % [id, socket.y - hips_at.y])
+	var clear := _clear(sk, socket, height)
+	ok(clear > 0.1, "%s: the Boki rides in front of the chest, not in it (%.2f m clear)" % [id, clear])
+	var held := 0.0
+	for nm in dd.get("carry_stow", []):
+		held = maxf(held, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
+	ok(held < 0.01, "%s: the weapon bones the data stows are put away (%.3f)" % [id, held])
+	if not (dd.get("carry_drop", []) + dd.get("carry_drop_surfaces", []) as Array).is_empty():
+		var bare := not clips.drop.is_empty()
+		for h in clips.drop:
+			bare = bare and h[0].mesh == h[2] and _tris(h[2]) < _tris(h[1])
+		ok(bare, "%s: the weapon modelled into the hand leaves the shown mesh" % id)
+	for gone in dd.get("carry_drop_surfaces", []):
+		ok(_surface_tris(clips.drop, String(gone)) <= 1, "%s: the fused weapon (%s) is hidden" % [id, gone])
+	var loose := _hand_piece(sk)
+	ok(loose <= HAND_PIECE_M,
+			"%s: no weapon rides a hand into the Boki (longest piece on a hand alone %.2f m, limit %.2f)"
+			% [id, loose, HAND_PIECE_M])
+	ok(plain < NO_STRIDE_M or stride >= plain * 0.75,
+			"%s: the legs keep stepping under it (%.3f m of stride, %.3f m without)" % [id, stride, plain])
+	s["kmove"] = "rs_done"
+	for k in 20:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+	ok(clips.proc_w <= 0.0, "%s: the stand-up beat stays on the clips" % id)
+	s.erase("kmove")
+	for k in 20:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+	var back := 1.0
+	for nm in dd.get("carry_stow", []):
+		back = minf(back, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
+	for h in clips.drop:
+		back = back if h[0].mesh == h[1] else 0.0
+	ok(clips.carry_w <= 0.0 and not m.has_meta(WardenCarry.SOCKET) and back > 0.5,
+			"%s: the carry lets go (socket gone, weapon back, size %.2f)" % [id, back])
+
+## How far the socket lies in front of the body's surface at its height and across it (the meshes' rest vertices
+## within a band round the socket; the model faces -Z, at rest about the skeleton).
+func _clear(sk: Skeleton3D, socket: Vector3, height: float) -> float:
+	var at := sk.global_transform.affine_inverse() * socket
+	var front := INF
+	for n in sk.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.skin == null or not mi.visible:
+			continue
+		for si in mi.mesh.get_surface_count():
+			for v in mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				if absf(v.y - at.y) < 0.06 * height and absf(v.x - at.x) < 0.1 * height:
+					front = minf(front, v.z)
+	return front - at.z if front != INF else 1.0
+
+## The furthest any piece of the shown skinned meshes that rides one hand alone reaches from it (m; 0: none). Read
+## off the meshes, not the data, so a weapon skinned into a hand the data forgot shows here.
+func _hand_piece(sk: Skeleton3D) -> float:
+	var most := 0.0
+	for n in sk.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.skin == null or not mi.visible or not mi.mesh is ArrayMesh:
+			continue
+		var head := WardenCarry.hand_heads(mi.skin, sk, ["hand.L", "hand.R"])
+		for si in mi.mesh.get_surface_count():
+			var arrays: Array = mi.mesh.surface_get_arrays(si)
+			if arrays[Mesh.ARRAY_BONES] == null:
+				continue
+			var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var piece := WardenCarry.pieces(idx, arrays[Mesh.ARRAY_VERTEX])
+			var reach := WardenCarry.on_hands(arrays, head, piece)
+			for t in range(0, idx.size(), 3):   # (only what a triangle draws: a stripped mesh keeps the weapon's
+				if idx[t] != idx[t + 1]:        # vertices, and an emptied surface one degenerate triangle)
+					most = maxf(most, float(reach.get(piece[idx[t]], 0.0)))
+	return most
+
+## The most triangles a shown mesh still draws on the named surface (an emptied one keeps a single degenerate one).
+func _surface_tris(held: Array, surface: String) -> int:
+	var most := 0
+	for h in held:
+		var shown := (h[0] as MeshInstance3D).mesh
+		for si in shown.get_surface_count():
+			if shown.surface_get_name(si) == surface:
+				most = maxi(most, shown.surface_get_array_index_len(si) / 3)
+	return most
+
+## A mesh's triangle count.
+func _tris(m: Mesh) -> int:
+	var n := 0
+	for si in m.get_surface_count():
+		n += m.surface_get_array_index_len(si) / 3
+	return n
+
+## How far the right shin swings front to back over 40 frames of the state.
+func _stride(sync: Node, sk: Skeleton3D) -> float:
+	var shin := WardenSkeleton.find(sk, "shin.R")
+	var lo := INF
+	var hi := -INF
+	for k in 40:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		var z := (sk.global_transform * sk.get_bone_global_pose(shin).origin).z
+		lo = minf(lo, z)
+		hi = maxf(hi, z)
+	return hi - lo

@@ -87,6 +87,9 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
+var stowed := false          # "carry_stow" bones are put away
+var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is in a "carry_drop" hand or surface
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -146,6 +149,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
+	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -382,7 +386,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
 				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
-	if km != "":
+	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
 	if act.has(String(s.get("act", ""))):
@@ -479,6 +483,24 @@ func step(dt: float) -> void:
 	_air_tilt()
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
+
+## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
+func _carry(on: bool, dt: float) -> void:
+	carry_w = move_toward(carry_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if carry_w <= 0.0:
+		root.remove_meta(WardenCarry.SOCKET)
+		if stowed:
+			stowed = false
+			WardenCarry.stow(skel, d.get("carry_stow", []), 0.0)
+			WardenCarry.hold(drop, false)
+			_out(0.0)       # (a weapon bone with a size of its own gets it back)
+		return
+	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
+	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w, fwd))
+	stowed = true
+	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
+	WardenCarry.hold(drop, carry_w >= 0.5)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
