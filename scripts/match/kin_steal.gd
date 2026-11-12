@@ -14,7 +14,7 @@ extends RefCounted
 ## orbit, the summon's leash and the hit credit follow the carrier.
 ## Online: the Boki's own game decides (loose, scatter, home, and the grabs and summons it is asked for). A grab
 ## or a stolen summon from another game is a kcmd event ("wgrab"/"wsum", extra = the Boki's id); the kin
-## snapshot carries the loose seconds, the carrier and the used summon (KinNet, Net 0.30.0).
+## snapshot carries the loose seconds, the carrier and the used summon (KinNet, Net 0.24.6).
 
 const BOB_M := 0.12      # m a loose wisp bobs up and down
 const BOB_HZ := 0.8      # bobs per second

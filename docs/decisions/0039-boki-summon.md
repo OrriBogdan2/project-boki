@@ -23,5 +23,5 @@ a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiH
 Left out on purpose: guardian summon, stealing, the reveal on a killed summon, bots summoning, mounts.
 
 ## Consequences
-- Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
+- Net.VERSION 0.28.0 on the prototype line, landed as 0.24.6: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
