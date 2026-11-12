@@ -24,6 +24,8 @@ var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
 var aim_t := 0.0
+const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
+const TELE_LW := 0.1                 # m, their rim
 var tele_n := 0                     # each potion and line has its own AimKit telegraph id
 
 func _setup() -> void:
@@ -290,7 +292,7 @@ func _tick_lines(list: Array, dt: float) -> void:
 	for s in list.duplicate():
 		var fill := 1.0 - float(s["left"]) / float(s["len"]) if s["ab"] != "ult" else -1.0
 		AimKit.lane(h, s["id"], {"from": s["from"], "dir": s["dir"], "len": s["len"], "width": s["w"], "col": s["col"],
-			"fill": fill, "all": true})
+			"fill": fill, "all": true, "alpha": TELE_A, "lw": TELE_LW})
 		var step := float(s["spd"]) * dt
 		s["p"] = (s["p"] as Vector2) + (s["dir"] as Vector2) * step
 		s["left"] = float(s["left"]) - step
@@ -359,7 +361,7 @@ func _tick(dt: float) -> void:
 		m.fx.burst(p, col_of(vd), 1, 0.3, 0.25, 0.0)
 		# the landing circle everyone sees, filling until the potion lands
 		AimKit.circle(h, it["id"], {"at": it["at"], "r": float(vd["radius"]), "col": col_of(vd), "fill": k,
-			"all": true})
+			"all": true, "alpha": TELE_A, "lw": TELE_LW})
 		if float(it["left"]) <= 0.0:
 			flying.erase(it)
 			_shatter(it)
