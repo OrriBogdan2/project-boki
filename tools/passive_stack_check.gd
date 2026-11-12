@@ -5,20 +5,31 @@ extends RefCounted
 ## or the match ends. Passives are set by hand (one stat) so the sums are exact. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
-const STAT := "damage_reduction"       # carry cap 0.15 (x, a fraction of damage taken)
-const OWN := 0.06                      # x, the thief's own Boki
-const THEIRS := 0.12                   # x, each stolen Boki before its share
+const STAT := "damage_reduction"  # carry cap 0.15 (x, a fraction of damage taken)
+const OWN := 0.06  # x, the thief's own Boki
+const THEIRS := 0.12  # x, each stolen Boki before its share
 
 var bad := 0
 var m: Match
 var main: Node
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
-		"boki_wisps": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 3,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 78,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -32,10 +43,12 @@ func run(main_node: Node) -> void:
 	print("PASSIVESTACK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PSTACK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _frames(secs: float) -> void:
 	var t := 0.0
@@ -43,8 +56,10 @@ func _frames(secs: float) -> void:
 		m.step(DT)
 		t += DT
 
+
 func _set_passive(k: Kin, amount: float) -> void:
 	k.ks.carry_passives = [{"stat": STAT, "amount": amount, "category": "defence"}]
+
 
 ## A rival goes down and the thief takes its wisp. The thief stands on the wisp's far side once the knock slide
 ## has settled: within the foe's revive radius the stomp prompt wins over the grab (Match._update_interact).
@@ -59,14 +74,17 @@ func _steal_from(thief: Hunter, foe: Hunter) -> Kin:
 	thief.inp["interact"] = false
 	return k
 
+
 func _want(stolen: int) -> float:
 	var cap := float(KinParts.OWNER_STATS[STAT][2])
 	return minf(cap, OWN + float(stolen) * THEIRS * float(KinSteal.rules()["passive_k"]))
+
 
 func _stat(what: String, stolen: int) -> void:
 	_frames(0.1)
 	var got := m.player.owner_stat(STAT)
 	ok(absf(got - _want(stolen)) < 0.0005, "%s: %s %.3f (want %.3f)" % [what, STAT, got, _want(stolen)])
+
 
 func _stack() -> void:
 	var p: Hunter = m.player
@@ -74,8 +92,10 @@ func _stack() -> void:
 	var f1: Hunter = foes[0]
 	var f2: Hunter = foes[1]
 	var cap := float(KinParts.OWNER_STATS[STAT][2])
-	ok(int(KinSteal.rules()["carry_max"]) == 2 and is_equal_approx(float(KinSteal.rules()["passive_k"]), 0.5),
-		"rules: a thief holds 2 stolen wisps, each at half strength")
+	ok(
+		int(KinSteal.rules()["carry_max"]) == 2 and is_equal_approx(float(KinSteal.rules()["passive_k"]), 0.5),
+		"rules: a thief holds 2 stolen wisps, each at half strength"
+	)
 	var half := THEIRS * float(KinSteal.rules()["passive_k"])
 	ok(OWN + half < cap and OWN + 2.0 * half > cap, "setup: one stolen fits under the cap, two do not")
 	_set_passive(p.kin, OWN)
