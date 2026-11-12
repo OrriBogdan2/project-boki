@@ -345,12 +345,15 @@ func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 ## slow, being downed, reloading, firing, drinking, crouching, the kit's own pace, a stolen kin carried,
 ## the Heartspark's weight.
 func _move_mult() -> float:
-	var k := slow_mult(0.65) * _fire_slow() * (0.88 if reload_t > 0.0 else 1.0) * (0.55 if crouch else 1.0)
+	var k := slow_mult(0.65) * _fire_slow() * UtilityUse.channel_move(self) * KinDowned.carry_speed(self)
+	if reload_t > 0.0: k *= 0.88
+	if crouch: k *= 0.55
+	if stolen_carry: k *= 0.92
+	if ak: k *= ak.pace()
 	if downed: k *= 0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0)
-	k *= UtilityUse.channel_move(self)
-	k *= (0.92 if stolen_carry else 1.0) * (ak.pace() if ak else 1.0) * KinDowned.carry_speed(self)
 	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
-	return k * (Hex.SPEED_K if Hex.active(self) else 1.0)      # a hexed critter scurries
+	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
+	return k
 
 ## The colour that marks this hunter's effects (from their class).
 func accent() -> Color:
