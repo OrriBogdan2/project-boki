@@ -16,6 +16,11 @@ static func ids() -> Array:
 		out.append(String(it["id"]))
 	return out
 
+## The stat bite a lair pile holds beside its gear, or "" when this pile has none (roll in 0..1).
+static func lair_drop(roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["lair_drop"]
+	return String(d["ids"][pick % d["ids"].size()]) if roll < float(d["chance"]) else ""
+
 static func has(id: String) -> bool:
 	return not item(id).is_empty()
 
