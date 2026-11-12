@@ -2,10 +2,11 @@ class_name FarmTutorial
 extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
 ## on a new farm: axe, chop trees, mine rocks, house, hammer, a job for your Boki, feed, crop (by the water),
-## buy a seed, sell a crop, meet Hob, head out.
+## buy a seed, sell a crop, meet Hob, head out. With base_mode on (FarmUnlocks) the four steps of
+## rules()["base"] run instead: meet your Boki, feed it, place a toy and watch it play, head out or stay.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
-##   done / skipped   finished, or skipped (nothing is granted or taken away)
+##   done / skipped   finished, or skipped (no gems or items change hands; the tools are still handed over)
 ##   gift     the starter food was handed out
 ## Old saves never see it: the v8 migration marks them done, and so does tutorial.day1_done (the flag
 ## every test save and the new-game shortcuts already set).
@@ -32,8 +33,16 @@ static func active() -> bool:
 		return false
 	return not bool(state()["done"])
 
+## The base's tutorial instead of the farm's (farm_build.json base_mode).
+static func base() -> bool:
+	return FarmUnlocks.base_mode()
+
 static func steps() -> Array:
-	return rules()["steps"]
+	return rules()["base"]["steps"] if base() else rules()["steps"]
+
+## Does the tutorial show a Skip? Always in the base; on the farm the option says.
+static func skippable() -> bool:
+	return base() or bool(option("skippable"))
 
 static func step_def(id: String) -> Dictionary:
 	for s in steps():
@@ -45,7 +54,7 @@ static func did(id: String) -> bool:
 	return bool((state()["did"] as Dictionary).get(id, false))
 
 static func done_count() -> int:
-	return (state()["did"] as Dictionary).size()
+	return steps().filter(func(s): return did(String(s["id"]))).size()
 
 ## Can this step be the active one yet? Its "needs" are done; the last step waits for everything;
 ## "after_built" waits for the house to stand (a pinned Boki would stop building); without the
@@ -96,6 +105,8 @@ static func stage(id: String) -> String:
 			return "stall" if not HomeLayout.fixtures(Save.d, "stall").is_empty() else "bar"
 		"task":
 			return "page" if FarmTaskGuide.page_up() else "go"
+		"toy":
+			return "watch" if toy_spot().x != INF else "place"
 	return "go"
 
 static func _crop_stage() -> String:
@@ -112,6 +123,12 @@ static func _crop_stage() -> String:
 		best = "water" if float(p.get("wt", 0.0)) <= 0.0 and not FarmWater.plot_near(Save.d, i) else "grow"
 	return best
 
+static func toy_spot() -> Vector3:
+	for e in HomeLayout.of(Save.d).get("deco", []):
+		if HomeToys.rules()["toys"].has(String(e.get("id", ""))):
+			return HomeLayout.deco_center(e)
+	return Vector3.INF
+
 static func hint_text(id: String) -> String:
 	var s := step_def(id)
 	if s.is_empty():
@@ -120,20 +137,28 @@ static func hint_text(id: String) -> String:
 
 ## A hint line with the player's own keys, the Boki's name and the house cost filled in.
 static func fill_hint(raw: String) -> String:
-	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
+	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
+
+## What the spotlight lights for this step's current stage: {"hub": bar button id, "world": true}, or {}.
+static func spot(id: String) -> Dictionary:
+	return (step_def(id).get("spot", {}) as Dictionary).get(stage(id), {})
 
 static func world_text(id: String) -> String:
 	var s := step_def(id)
 	return "" if s.is_empty() else String((s["world"] as Dictionary).get(stage(id), ""))
 
 # ------------------------------------------------------------------ progress
-## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal.
+## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal; in the base
+## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay).
 static func event(what: String) -> void:
 	if not active():
 		return
 	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
+	if base():
+		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out"}
 	var id := ids.get(what, "") as String
 	detect()
 	if id != "" and available(id):
@@ -142,6 +167,11 @@ static func event(what: String) -> void:
 ## Looks at the farm for steps that need no hook. A later step done means the earlier ones are too.
 static func detect() -> void:
 	if not active():
+		return
+	if base():
+		if Save.d["roster"].any(func(r): return not (r.get("lean", {}) as Dictionary).is_empty()):
+			mark("meet")      # fed, so it has been met
+			mark("eat")
 		return
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))
@@ -170,7 +200,7 @@ static func mark(id: String) -> void:
 	if bool((st["did"] as Dictionary).get(id, false)) or step_def(id).is_empty():
 		return
 	st["did"][id] = true
-	if (st["did"] as Dictionary).size() >= steps().size():
+	if done_count() >= steps().size():
 		finish()
 	Save.save_game()
 
@@ -184,8 +214,12 @@ static func finish() -> int:
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return gems
 
-## Skipping: nothing granted or taken. (FarmGuide puts the house down as a site when none is.)
+## Skipping: no gems or items granted or taken, and the tools the steps would have handed over are handed over
+## (a skipper must not be worse off than a player who walked it). FarmGuide puts the house down as a site when
+## none is; in the base it puts a toy down and the starter food is handed over.
 static func skip() -> void:
+	for s in steps():
+		give_step_tool(String(s["id"]))
 	var st := state()
 	st["done"] = true
 	st["skipped"] = true
@@ -211,12 +245,16 @@ static func give_seed_gems() -> int:
 	Save.d["gems"] = int(Save.d["gems"]) + add
 	return add
 
-## Starter food for the trough, once, when the tutorial's feeding step is reached.
+## The starter food: the base's is a typed one, so its meal shows the lean.
+static func food() -> Dictionary:
+	return rules()["base"]["start_food"] if base() else rules()["start_food"]
+
+## Starter food, once, when the tutorial's feeding step is reached (or skipped past).
 static func give_food() -> void:
 	var st := state()
 	if bool(st["gift"]):
 		return
 	st["gift"] = true
-	var food: Dictionary = rules()["start_food"]
-	for k in food:
-		Save.d["items"][k] = int(Save.d["items"].get(k, 0)) + int(food[k])
+	var meal := food()
+	for k in meal:
+		Save.d["items"][k] = int(Save.d["items"].get(k, 0)) + int(meal[k])

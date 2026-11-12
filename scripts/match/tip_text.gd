@@ -31,9 +31,6 @@ static func send(boki: String) -> String:
 static func scan() -> String:
 	return "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact")
 
-static func hatch() -> String:
-	return "A Rift Key opens this hatch (%s)  ·  three can drop through" % Settings.key_cap("interact")
-
 static func stagger(mob: String) -> String:
 	var keys := [Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")]
 	return ("A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long "

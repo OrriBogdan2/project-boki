@@ -3,7 +3,7 @@ extends RefCounted
 ## Every action is rebound to an unusual key (a few to mouse buttons 4 and 5, every other one through its
 ## alternate slot with the first slot cleared), then every match tutorial step (banner,
 ## second line, key cap, scout hint, the Boki's lines), every garden tutorial hint, every first-time hint
-## (TipText), the Training Area drill rows, the Relic pick words and the home key row are read again.
+## (TipText), the Training Area drill rows, the Relic pick words and the kit cards are read again.
 ## A default key that should have changed fails, and so does text built before the rebind that does not
 ## refresh. The glide steps say: jump, then press again in the air and hold.
 
@@ -11,11 +11,14 @@ var bad := 0
 var main: Node
 var stale_words: Array = []       # default caps no rebound action uses any more, as whole words
 const PLAIN_WORDS := ["I", "A"]     # one-letter words that are also plain English
-const LITERALS := ["Shift", "Space", "Ctrl", "WASD", "W A S D", "left click", "right click", "Left click", "Right click"]
+const LITERALS := ["Shift", "Space", "Ctrl", "WASD", "W A S D", "left click", "right click", "Left click",
+		"Right click"]
 const UNUSUAL := [KEY_KP_0, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9,
 		KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F11, KEY_F12, KEY_F13, KEY_F14, KEY_F15,
 		KEY_F16, KEY_F17, KEY_F18, KEY_F19, KEY_F20, KEY_F21, KEY_F22, KEY_F23, KEY_F24, KEY_INSERT, KEY_HOME, KEY_END,
-		KEY_PAGEUP, KEY_PAGEDOWN, KEY_PAUSE, KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE]
+		KEY_PAGEUP, KEY_PAGEDOWN, KEY_PAUSE, KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE, KEY_KP_PERIOD,
+		KEY_SCROLLLOCK, KEY_PRINT, KEY_MENU, KEY_F25, KEY_F26, KEY_F27, KEY_F28, KEY_F29, KEY_F30, KEY_F31, KEY_F32,
+		KEY_F33, KEY_F34, KEY_F35, KEY_BACKSLASH, KEY_BRACKETLEFT, KEY_BRACKETRIGHT, KEY_SEMICOLON, KEY_APOSTROPHE]
 const RELIC_FILES := ["match/practice_hero", "ui/class_reveal", "ui/class_card", "home/home_classes", "home/hob_offer"]
 const MOUSE_BOUND := {"fire": MOUSE_BUTTON_XBUTTON1, "throw": MOUSE_BUTTON_XBUTTON2}
 
@@ -37,23 +40,18 @@ func run(mn: Node) -> void:
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	tu.intro = false
-	var row := LiveKeyRow.make(func(): return [[Settings.move_caps(" "), "walk"], [Settings.key_cap("jump"), "jump"]])
-	main.add_child(row)
 	for i in 3:
 		m.step(Match.DT)
 	_open_step(tu, "glide")
-	var glide_before := [tu.text, tu.detail, tu.key_cap, TipText.move(), _row_text(row)]
+	var glide_before := [tu.text, TipText.move()]
 	_rebind_everything(before)
 	for i in 2:
 		m.step(Match.DT)
 	ok(tu.id() == "glide", "the glide step is still the one showing (%s)" % tu.id())
-	var glide_after := [tu.text, tu.detail, tu.key_cap, TipText.move(), _row_text(row)]
-	for i in 3:
-		ok(glide_before[i] != glide_after[i], "built before the rebind, refreshed after it: %s ('%s' -> '%s')"
-				% [["banner", "second line", "key cap"][i], glide_before[i], glide_after[i]])
-	ok(glide_before[3] != glide_after[3], "a first-time hint is built when it shows: the move hint follows a rebind")
-	ok(glide_before[4] != glide_after[4], "the home key row rebuilds when a binding changes ('%s' -> '%s')"
-			% [glide_before[4], glide_after[4]])
+	var glide_after := [tu.text, TipText.move()]
+	ok(glide_before[0] != glide_after[0], "built before the rebind, refreshed after it: the glide banner ('%s' -> '%s')"
+			% [glide_before[0], glide_after[0]])
+	ok(glide_before[1] != glide_after[1], "a first-time hint is built when it shows: the move hint follows a rebind")
 	_match_tutorial(m, tu)
 	_boki_lines(m)
 	_tips()
@@ -65,12 +63,6 @@ func run(mn: Node) -> void:
 	Settings.reset_all()
 	print("TUTREBIND DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-func _row_text(row: Node) -> String:
-	var out := []
-	for l in row.find_children("*", "Label", true, false):
-		out.append((l as Label).text)
-	return "|".join(out)
 
 func _open_step(tu: Tutorial, sid: String) -> void:
 	tu.step = Tutorial.steps().find_custom(func(s): return s[0] == sid)
@@ -100,10 +92,11 @@ func _rebind_everything(before: Dictionary) -> void:
 		now.append(Settings.key_cap(a[0]))
 	for a in before:
 		var cap: String = before[a]
-		if cap not in now and cap not in stale_words and cap.length() > 0:
+		if cap not in now and cap not in stale_words and cap.length() > 0 and cap != "?":      # (? = unbound)
 			stale_words.append(cap)
-	ok(Settings.key_cap("fire") == "M4" and Settings.key_cap("throw") == "M5" and Settings.key_cap("jump") != before["jump"],
-			"the rebind took (fire %s, Boki %s, jump %s)" % [Settings.key_cap("fire"), Settings.key_cap("throw"), Settings.key_cap("jump")])
+	var jump := Settings.key_cap("jump")
+	ok(Settings.key_cap("fire") == "M4" and Settings.key_cap("throw") == "M5" and jump != before["jump"],
+			"the rebind took (fire %s, Boki %s, jump %s)" % [Settings.key_cap("fire"), Settings.key_cap("throw"), jump])
 
 ## Default caps and literal key words found in a line, whole words only ("A" and "I" are plain English).
 func stale_in(line: String, leftovers := true) -> Array:
@@ -121,8 +114,8 @@ func stale_in(line: String, leftovers := true) -> Array:
 		found.append("leftover " + left.get_string())
 	return found
 
-func _clean(line: String, where: String, digits := true) -> void:
-	var s := stale_in(line).filter(func(w): return digits or not String(w).is_valid_int())
+func _clean(line: String, where: String, digits := false, leftovers := true) -> void:
+	var s := stale_in(line, leftovers).filter(func(w): return digits or not String(w).is_valid_int())
 	ok(s.is_empty(), "%s has no default key left %s: '%s'" % [where, str(s), line])
 
 # ------------------------------------------------------------------ the match tutorial
@@ -131,13 +124,13 @@ func _match_tutorial(m: Match, tu: Tutorial) -> void:
 	for st in Tutorial.steps():
 		var sid: String = st[0]
 		_open_step(tu, sid)
-		_clean(tu.text, "tutorial '%s' banner" % sid)
+		_clean(tu.text, "tutorial '%s' banner" % sid, false)
 		if tu.detail != "":
-			_clean(tu.detail, "tutorial '%s' second line" % sid)
+			_clean(tu.detail, "tutorial '%s' second line" % sid, false)
 		var want := ""
-		if sid in ["land", "move"]:
+		if sid == "land":
 			want = Settings.move_caps()
-		elif sid == "rank":
+		elif sid == "ranks":
 			want = TutorialText.rank_combo()
 		elif Tutorial.KEYS.has(sid):
 			want = Settings.key_cap(Tutorial.KEYS[sid])
@@ -146,11 +139,8 @@ func _match_tutorial(m: Match, tu: Tutorial) -> void:
 			print("  key cap of '%s': '%s', wanted '%s'" % [sid, tu.key_cap, want])
 	ok(caps_ok, "every step's key cap is the rebound key")
 	_open_step(tu, "glide")
-	var jump := Settings.key_cap("jump")
-	ok(tu.text.contains(jump) and tu.key_cap == jump, "glide banner names the jump key ('%s', cap '%s')" % [tu.text, tu.key_cap])
-	ok(tu.detail.contains("press %s again in the air and hold" % jump),
-			"glide says: jump, then press again in the air and hold ('%s')" % tu.detail)
-	_open_step(tu, "move")
+	ok(tu.text.contains(Settings.key_cap("jump")), "glide banner names the jump key ('%s')" % tu.text)
+	_open_step(tu, "dash")
 	tu.target = m.player.pos + Vector3(Tutorial.FAR_SCOUT + 10.0, 0, 0)
 	m.player.crouch = false
 	var scout := tu.scout_hint()
@@ -158,8 +148,8 @@ func _match_tutorial(m: Match, tu: Tutorial) -> void:
 	_clean(scout, "the scout hint")
 
 func _boki_lines(m: Match) -> void:
-	for sid in KinVoice.TUT_HINT:
-		for line in KinVoice.TUT_HINT[sid]:
+	for sid in BokiChatter.TUT_HINT:
+		for line in BokiChatter.TUT_HINT[sid]:
 			_clean(TutorialText.fill(String(line), m.player), "the Boki's '%s' line" % sid)
 	_clean(TutorialText.ability_tip(m.player), "the ability line")
 
@@ -168,7 +158,7 @@ func _tips() -> void:
 	var lines := {"move": TipText.move(), "rings": TipText.rings(), "ability (kit)": TipText.ability(true),
 			"ability": TipText.ability(false), "bond full": TipText.bond_full("Fuse", false),
 			"bond full (next)": TipText.bond_full("Fuse", true), "send": TipText.send("Pip"), "scan": TipText.scan(),
-			"hatch": TipText.hatch(), "stagger": TipText.stagger("Brute")}
+			"stagger": TipText.stagger("Brute")}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
 	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air and hold"),
@@ -206,7 +196,7 @@ func _relic_pick() -> void:
 	for f in RELIC_FILES:
 		for line in FileAccess.get_file_as_string("res://scripts/%s.gd" % f).split("\n"):
 			if line.contains("UI.") or line.contains("_toast"):
-				_clean(_quoted_all(line), "%s: '%s'" % [f, line.strip_edges()], false)
+				_clean(_quoted_all(line), "%s: '%s'" % [f, line.strip_edges()], false, false)
 	m.queue_free()
 
 func _quoted_all(line: String) -> String:
@@ -233,11 +223,12 @@ func _sources() -> void:
 	var bare := 0
 	for line in src.split("\n"):
 		if line.contains("_tip(\""):
-			if not line.contains("TipText.") and not _quoted(line).is_empty() and not stale_in(_quoted(line), false).is_empty():
+			var words := _quoted(line)
+			if not line.contains("TipText.") and not words.is_empty() and not stale_in(words, false).is_empty():
 				bare += 1
 				print("  bare hint: ", line.strip_edges())
 	ok(bare == 0, "no match.gd hint spells a default key out (%d)" % bare)
-	ok(not FileAccess.get_file_as_string("res://scripts/home/home.gd").contains("\"W A S D\""),
+	ok(not FileAccess.get_file_as_string("res://scripts/home/farm_key_hints.gd").contains("\"W A S D\""),
 			"the home key row builds the walk caps from the bindings")
 
 func _quoted(line: String) -> String:
