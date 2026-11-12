@@ -288,8 +288,49 @@ func _first_expedition(home) -> void:
 	m.set_process(false)
 	var worn := Arch.of_save()
 	ok(m.player.ak != null and m.player.ak.id == worn, "you play as the Relic you chose (%s)" % worn)
+	_begin("first expedition: first knock")
+	_knock_tip(m)
 	_begin("first expedition: play")
 	await _skiff(m)
+
+## The first knock of the first expedition: one two-line card, the tip for what hit hardest; not again.
+func _knock_tip(m: Match) -> void:
+	var P: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != P.team)[0]
+	var mob: Mob = m.mobs[0]
+	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
+	m.on_damage(P, mob, 30.0, {})
+	m.on_damage(P, rival, 20.0, {})
+	m.on_damage(P, mob, 50.0, {})
+	var want: String = KnockTip.card("monster")
+	m.knock(P, mob, {})
+	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
+	var texts: Array = lane.map(func(e): return e["text"])
+	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
+	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
+	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
+	P.downed = false
+	m.on_damage(P, rival, 90.0, {})
+	m.knock(P, rival, {})
+	ok(int(Save.d["tutorial"]["knock_tip"]) == 1, "a second knock in the same match shows nothing")
+	P.downed = false
+	P.hp = P.max_hp
+	var k := KnockTip.for_match(m, m.guide)
+	k.note(rival, 40.0, {})
+	ok(k.top() == "rival" and KnockTip.card("rival").contains("squad"), "a hunter's hits give the squad tip")
+	k.note(null, 80.0, {"src": "wall"})
+	var dash_tip := KnockTip.card("blight").contains(Settings.key_cap("dash"))
+	ok(k.top() == "blight" and dash_tip, "the Blight gives the dash tip")
+	Save.d["tutorial"]["knock_tip"] = 2
+	ok(KnockTip.for_match(m, m.guide) == null, "after two cards there is never a third")
+	Save.d["tutorial"]["knock_tip"] = 1
+	Settings.set_v("tips", false, false)
+	var quiet := KnockTip.for_match(m, m.guide)
+	quiet.m = m
+	quiet.on_knock()
+	ok(not quiet.shown and int(Save.d["tutorial"]["knock_tip"]) == 1, "with tips off there is no card")
+	Settings.set_v("tips", true, false)
+	ok(KnockTip.for_match(m, null) == null, "a match outside the first two gets none")
 
 ## The stick direction from the hunter to a spot on the ground.
 func _toward(p: Hunter, at: Vector3) -> Vector2:

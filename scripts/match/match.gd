@@ -40,6 +40,7 @@ var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first three Extractions
+var ktip: KnockTip = null           # the first-knock card, in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -275,6 +276,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	ktip = KnockTip.for_match(self, guide)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1792,6 +1794,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
+		if ktip: ktip.note(by, d, o)
 		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
@@ -1821,6 +1824,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
+		if ktip: ktip.on_knock()
 		# getting knocked hits hard: slow time, flash red, pull the camera in
 		_slow(0.55, 0.3)
 		if hud: hud.flash(Color("ff3a2a"), 0.3)
