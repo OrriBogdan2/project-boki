@@ -10,7 +10,7 @@ server/
   matchmaker/           Python 3 stdlib only, no pip
     matchmaker.py       the service (also --selftest)
     fake_server.py      stand-in game server for tests
-    mm/                 config, queue, launcher, core, api, selftest, log
+    mm/                 config, queue, launcher, core, picks, api, selftest, log
     tests/              python3 -m unittest
   deploy/
     install.sh          box setup, run as root on Ubuntu 24.04 (idempotent, --dry-run)
@@ -35,9 +35,10 @@ All bodies are JSON. The client's `Net.VERSION` must equal the version the match
 | `POST /queue` | `{"mode": "duel\|arena\|trio", "name": "...", "version": "<client Net.VERSION>", "party": ["friend", ...]}` | `200 {"ticket": "<id>"}`; `409 {"error": "version", "server_version": "..."}`; `400 {"error": "mode"}` or `{"error": "bad_request"}` |
 | `GET /queue/<ticket>` | | `{"state": "waiting", "position": n, "eta_s": n}` while queued or while the server boots; `{"state": "ready", "host": "<PUBLIC_HOST>", "port": N, "token": "<one-time>"}`; `{"state": "gone"}` |
 | `DELETE /queue/<ticket>` | | `{"state": "gone"}` (leaves the queue; a ticket that already has a match leaves its slot to a bot) |
+| `POST /queue/<ticket>/pick` | `{"hunter": "<Hunter id>"}` (`""` only reads) | `200 {"ok": true, "picks": {"phase": "loading\|picking\|done", "loaded": n, "of": N, "teams": [{"order", "picking", "left_s", "picks"}]}}`; `409 {"error": "loading\|turn\|taken"}`; `400 {"error": "unknown"}`; `404 {"error": "no_match"}`. Works after the token is spent: picking waits until every human slot joined (or 60 s), then each team picks in turn, 10 s each, one of each Hunter per team (mm/picks.py) |
 
 Queues: duel is 1v1 (2 slots), arena 4v4 (8 slots), trio is extraction in teams of 3 (`TRIO_SLOTS`,
-default 12). A match starts as soon as the line holds a full match of humans, or when the oldest ticket
+default 18). A match starts as soon as the line holds a full match of humans, or when the oldest ticket
 has waited the fill timeout (20 s duel and trio, 30 s arena); bots fill the rest, at least one human is
 in. `party` lists the names of friends who queued their own tickets; tickets that name each other land
 on the same team when there is room (a party larger than a team is split).
@@ -77,7 +78,7 @@ with stdout piped, and:
 | `SERVER_VERSION` | probe | the build's Net.VERSION when `--version` isn't supported |
 | `PORT_MIN`, `PORT_MAX` | `7777`, `7799` | UDP match ports |
 | `FILL_TIMEOUT_DUEL`, `_ARENA`, `_TRIO` | `20`, `30`, `20` | seconds before bots fill a match |
-| `TRIO_SLOTS` | `12` | players per extraction match |
+| `TRIO_SLOTS` | `18` | players per extraction match (6 trios: the 2x Hollow Crown, capped at 30 hunters) |
 | `TOKEN_TTL_S` | `60` | an unused token's lifetime |
 | `READY_TIMEOUT_S` | `30` | how long a server may take to print `ready` |
 | `TOKENS_DIR` | `/run/boki` | where tokens files are written (0600) |
