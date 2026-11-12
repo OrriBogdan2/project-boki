@@ -35,7 +35,13 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 ## The tabs this stall's level opens.
 func tabs() -> Array:
 	var lv := Stalls.level()
-	return TABS.filter(func(t): return int(t[1]) <= lv).map(func(t): return String(t[0]))
+	var no_exchange := FarmUnlocks.base_mode()
+	return TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
+			.map(func(t): return String(t[0]))
+
+## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.
+static func vendor_tabs() -> Array:
+	return VENDOR_TABS.filter(func(t): return not (FarmUnlocks.base_mode() and t in ["Seeds", "Sell"]))
 
 ## --open=<name> from the home screen. Returns true if it was one of ours.
 func open_named(which: String) -> bool:
@@ -96,7 +102,7 @@ func _next_level(v: VBoxContainer) -> void:
 func _vendor(v: VBoxContainer) -> void:
 	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
 	var row := UI.hbox(6)
-	for t in VENDOR_TABS:
+	for t in vendor_tabs():
 		var tt: String = t
 		row.add_child(UI.choice(tt, vendor_tab == tt, func(): vendor_tab = tt; open(), 0))
 	v.add_child(row)
@@ -189,7 +195,7 @@ func _home_goods() -> Array:
 	return goods
 
 func _farm_goods() -> Array:
-	var goods: Array = HomeGather.shop_goods() + h.hecon.shop_goods()
+	var goods: Array = [] if FarmUnlocks.base_mode() else HomeGather.shop_goods() + h.hecon.shop_goods()
 	# the Incubator by the Nook: coals to warm Rare Eggs faster, and more cradles
 	goods.append(["coals", "Ember Coals", "Stoke them into the Incubator's brazier: every Rare Egg warms twice as fast for %d minutes." % int(Incubator.COAL_SECS / 60.0),
 		Incubator.COAL_PRICE, Color("ff9a4a"), func(): Save.add_item("coals", 1), "have %d" % int(Save.d["items"].get("coals", 0))])
