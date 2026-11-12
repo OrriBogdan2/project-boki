@@ -25,7 +25,7 @@
 			"skin": "4aa8ff", "hair_col": "1a1a22", "eyes": "f4f4f4", "outfit": "1a1a22"},
 		"thief": {"gender": "female", "race": "human", "face": "Smug", "hair": "Bob", "detail": "Beauty mark",
 			"skin": "f1c9a0", "hair_col": "d8d2c8", "eyes": "7a6a9a", "outfit": "c9a0ff",
-			"tint": {"hair": {"sat": 0.08, "val": 0.1}}},
+			"tint": {"hair": {"pull": 0.0}, "eyes": {"pull": 0.0}}},
 		"archer": {"gender": "female", "race": "human", "face": "Fierce", "hair": "Bob", "detail": "None",
 			"skin": "cfa08b", "hair_col": "2b233a", "eyes": "8a2a34", "outfit": "e8483e"},
 		"juggernaut": {"gender": "male", "race": "human", "face": "Fierce", "hair": "Buzzed", "detail": "Beard",
