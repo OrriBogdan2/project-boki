@@ -106,6 +106,7 @@ func _outcome(r: Dictionary, s: Dictionary, won: bool) -> Control:
 	_line(head, WaysResult.hid_line(r), UI.MUTED)
 	if won and s.has("heart"):
 		_line(head, WaysResult.reward_line(s["heart"]), UI.GOLD)
+		_line(head, WaysResult.other_line(String(r.get("how", ""))), UI.MUTED)
 	if r.get("tutorial", false):
 		_line(head, "That's the basics. Now come see your home.", UI.ACCENT_HI)
 	return head
