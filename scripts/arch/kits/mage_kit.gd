@@ -409,6 +409,9 @@ func _end_wire(refund: bool) -> void:
 	if wire.is_empty(): return
 	if refund: h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
 	wire = {}
+	if h.knock_t < 0.05 and h.loco.is_in(Loco.S.KNOCKED):
+		h.knock_t = 0.0         # the wire's own knocked state (a real knock lasts longer) ends with it, so the streak
+		h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)       # is a dash a glide press can cancel
 	AimKit.hide(h, "dash")
 	AimKit.hide(h, "dash_end")
 

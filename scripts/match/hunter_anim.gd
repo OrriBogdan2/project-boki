@@ -1111,6 +1111,7 @@ func update(dt: float, s: Dictionary) -> void:
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
 ## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset), wg (a 3D model's wings
 ## flared, 0..1: WardenGlb.Springs).
+## A move with "land": true is a landing or arrival pose: it never keeps the glider shut (AirLimits).
 ## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
 ## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the

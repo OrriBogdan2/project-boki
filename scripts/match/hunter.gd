@@ -790,6 +790,7 @@ func do_jump() -> void:
 		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
 		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
 		roll_t = 0.0
+		glide_cd = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
@@ -814,7 +815,8 @@ func do_jump() -> void:
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
-		return
+		if gliding:
+			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = JUMP_BUFFER
 
@@ -861,11 +863,13 @@ func can_glide() -> bool:
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
-## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled.
+## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled. The
+## dash's own wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 func _dash_into_glide() -> bool:
-	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or glide_cd > 0.0 or downed or shot_down:
+	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or downed or shot_down:
 		return false
 	roll_t = 0.0
+	glide_cd = 0.0
 	shove = {}
 	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
 		_glide_boost_fx()
