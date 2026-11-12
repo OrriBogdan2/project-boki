@@ -164,13 +164,21 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# an island is solid all the way down: below its top, its whole column is a wall. (A wall is
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
+	# The body is a true circle against each terrain tile's square too: with 9 sample points a terrace
+	# corner poked in between two of them, and sliding on along the face caught on it (--snag-check)
 	var hit := false
 	if not ghost:
-		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-			var g := ground_at(x + o.x, z + o.y)
-			if g > y + STEP:
-				worst = maxf(worst, g)
-				hit = true
+		for tz in range(int(floor(z - r)), int(floor(z + r)) + 1):
+			for tx in range(int(floor(x - r)), int(floor(x + r)) + 1):
+				var cx := clampf(x, tx, tx + 1.0)
+				var cz := clampf(z, tz, tz + 1.0)
+				var d2 := (cx - x) * (cx - x) + (cz - z) * (cz - z)
+				if d2 >= r * r and d2 > 0.0:
+					continue
+				var g := ground_at(minf(cx, tx + IN_TILE), minf(cz, tz + IN_TILE))
+				if g > y + STEP:
+					worst = maxf(worst, g)
+					hit = true
 	if hit:
 		return maxf(worst, WALL_MIN)
 	if guard:
@@ -180,6 +188,7 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	return 0.0
 
 const BLOCK_BODY := 0.7      # a body's radius against rocks, trees and walls, as a share of its radius
+const IN_TILE := 0.999      # m: a tile's far edge, still read as that tile (its ground, not the next one's)
 const BLOCK_SKIN := 0.004    # push_out_blocks leaves this much room, so the spot it gives is free
 
 ## The top of the first blocker tile (rock, tree, wall) a circle of radius rb at (x, z) overlaps that
