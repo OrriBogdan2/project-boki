@@ -520,7 +520,8 @@ Rules (the stacking caps, `cap` in the rules):
   its weight (multi-hit rule). Echoes (`repeat`) use half.
 - Projectiles never hold the attacker (Capcom); a heavy hit you land holds you too, even from range.
 - Cap: every body takes at most 110ms of hold in any 0.5s however many hit it, and every offline global freeze
-  (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the player's same budget.
+  (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the player's same budget, charged
+  only for the time it adds to a freeze already running (`--impact-weight-check`).
 - The shake of heavy hits on you starts at most once per 0.5s; inside that gap more only raise its strength.
 - Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
   tier (multi-hit rule). Echoes (`repeat`) use half.
@@ -534,13 +535,14 @@ Rules (the stacking caps, `cap` in the rules):
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
-Your own abilities, dashes, landings and hits never shake or kick your camera: impact reads through
+Your own abilities (your Boki's and your Fuse's too), dashes, landings and hits never shake or kick your
+camera: impact reads through
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
 never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
 started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
-`--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
+`--shake-check` asserts it for all 12 hunters and your Boki. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 
