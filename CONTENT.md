@@ -24,7 +24,7 @@ IVs aren't set per species: every kin is born with its own (Health, Power, Speed
 
 Open `tests/kin_gallery.tscn` and press F6 to see it next to the others.
 
-## A new hunter ability: `content/abilities/<id>.json`
+## A new hunter ability: `content/hunter_abilities/<id>.json`
 
 Weapon utilities (RMB) and class dodges. (Kin abilities are the grammar's, above.)
 
