@@ -1,0 +1,15 @@
+21:44:14 debit 0.4042 text-to-motion-3.0 4.0417 21.1791
+21:44:08 debit 0.4042 text-to-motion-3.0 4.0417 21.5833
+21:43:48 debit 0.4042 text-to-motion-3.0 4.0417 21.9875
+21:43:41 debit 0.4042 text-to-motion-3.0 4.0417 22.3917
+21:43:33 debit 0.4042 text-to-motion-3.0 4.0417 22.7959
+21:43:31 debit 0.4042 text-to-motion-3.0 4.0417 23.2001
+21:43:12 debit 0.4042 text-to-motion-3.0 4.0417 23.6043
+21:42:10 debit 0.1233 text-to-motion-1.0 6.1667 24.0085
+21:42:07 debit 0.1190 text-to-motion-2.0 3.9667 24.1318
+21:42:04 debit 0.1190 text-to-motion-2.0 3.9667 24.2508
+21:42:01 debit 0.1190 text-to-motion-2.0 3.9667 24.3698
+21:41:22 debit 0.0140 stitch-loop-2.0 1.4 24.4888
+21:41:20 debit 0.0260 locomotion-1.0 1.3 24.5028
+21:41:08 debit 0.0230 stitch-loop-2.0 2.3 24.5288
+21:40:41 debit 0.0440 locomotion-1.0 2.2 24.5518

@@ -1,0 +1,126 @@
+{
+ "rigs": {
+  "breaker": {
+   "model": "res://glb/breaker.glb",
+   "arm_fix": {
+    "ours": "idle",
+    "calib": "res://glb/albert_idle_v2__albert_anim.glb",
+    "chain": [
+     "upper_arm.L",
+     "forearm.L"
+    ]
+   }
+  },
+  "hem": {
+   "model": "res://glb/hem.glb"
+  }
+ },
+ "clips": {
+  "albert_death2": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_death2__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_death2__tar.glb",
+   "warp": [
+    [
+     1.45,
+     0.0
+    ],
+    [
+     3.13,
+     1.68
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "albert_heavy2": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_heavy2__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_heavy2__tar.glb"
+  },
+  "albert_hit2": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_hit2__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_hit2__tar.glb"
+  },
+  "albert_roar": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_roar__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_roar__tar.glb"
+  },
+  "albert_shieldbash": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_shieldbash__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_shieldbash__tar.glb"
+  },
+  "albert_victory2": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_victory2__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_victory2__tar.glb"
+  },
+  "albert_whirl2": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_whirl2__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_whirl2__tar.glb"
+  },
+  "lace_death2": {
+   "rig": "hem",
+   "raw": "res://glb/lace_death2__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_death2__tar.glb",
+   "warp": [
+    [
+     1.15,
+     0.0
+    ],
+    [
+     3.6,
+     2.45
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "lace_dodge2": {
+   "rig": "hem",
+   "raw": "res://glb/lace_dodge2__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_dodge2__tar.glb"
+  },
+  "lace_hit2": {
+   "rig": "hem",
+   "raw": "res://glb/lace_hit2__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_hit2__tar.glb"
+  },
+  "lace_shot2": {
+   "rig": "hem",
+   "raw": "res://glb/lace_shot2__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_shot2__tar.glb"
+  },
+  "lace_victory2": {
+   "rig": "hem",
+   "raw": "res://glb/lace_victory2__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_victory2__tar.glb"
+  }
+ }
+}

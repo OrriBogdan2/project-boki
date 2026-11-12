@@ -6,7 +6,7 @@ extends RefCounted
 ##   - the first time on a new farm: who he is, the stall, the house spot and the axe (the farm tutorial's start)
 ##   - while the tutorial runs: the step you're on, pointing at where it happens
 ##   - once the house is down and the second Mask is on offer (ClassUnlock.second_pending): "By the way..." and
-##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
+##     the pick of three (HobOffer); taking one plays the put-on beat (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
 ## When a line is about something (a "show"), he points at it and the camera looks there for a moment. On the
 ## first arrival the camera also swings over to him for a moment while he waves and calls you over.
@@ -57,7 +57,7 @@ func start() -> void:
 	box.closed.connect(_closed)
 	if offer_due():
 		box.say(_offer_lines(), _show_offer)
-	elif first and FarmTutorial.active():
+	elif first and FarmTutorial.active() and not FarmTutorial.base():      # the base tutorial is the Boki's to lead
 		box.say(rules()["intro"], box.close)
 	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
@@ -117,7 +117,7 @@ func _put_on(id: String) -> void:
 	var hands := hob.node.global_position - hob.node.global_basis.z * 0.5 + Vector3.UP * 1.2
 	relic.global_position = hands
 	hob.node.pose = "idle"
-	MaskBeat.play(relic, h.player, func(_body): _after_beat(id), false, true)
+	MaskBeat.play(relic, h.player, func(_body): _after_beat(id), false)
 
 func _after_beat(id: String) -> void:
 	ClassUnlock.reveal_done(id)      # (the beat was its reveal)
@@ -198,7 +198,7 @@ func _intro(dt: float) -> void:
 		var tut: Dictionary = Save.d["tutorial"]
 		var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
 		var met := bool(FarmBuilder.state().get("met", false))
-		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active():
+		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active() or FarmTutorial.base():
 			return
 		tut["hob_intro"] = true
 		intro_t = 0.0
