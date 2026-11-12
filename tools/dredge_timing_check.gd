@@ -116,15 +116,16 @@ func _barge_run() -> void:
 			held = held and K.anim_id == "dr_lunge"
 		P.do_dash()
 		seeks.append(m.time - K.anim_at)
+	var shove := P.roll_t
 	var joined: bool = absf(seeks[1] - K.FOLD_T) < 0.001 and absf(seeks[2] - K.FOLD_T) < 0.001 and seeks[0] < 0.001
 	ok("barge run: shoves 2 and 3 join the ball at the clip's closed pose, no opening between",
 			held and K.anim_id == "dr_lunge" and joined, "%s held %s" % [seeks, held])
 	var t := 0.0
-	while t < P.roll_t + 0.1 and K.anim_id != "dr_lunge_out":
+	while t < shove + 0.1 and K.anim_id != "dr_lunge_out":
 		m.step(ak.DT)
 		t += ak.DT
 	ok("barge run: the ball opens as the last shove ends (no charge left)",
-			K.anim_id == "dr_lunge_out" and t < 0.3, "%.2f s" % t)
+			K.anim_id == "dr_lunge_out" and t < shove + 0.05, "%.2f s, shove %.2f" % [t, shove])
 	P.dashes = 3.0
 	while m.time < K.next_barge + 0.2:
 		m.step(ak.DT)
@@ -134,7 +135,7 @@ func _barge_run() -> void:
 	while t < 1.0 and K.anim_id != "dr_lunge_out":
 		m.step(ak.DT)
 		t += ak.DT
-	var after := P.roll_t + gap
+	var after := shove + gap
 	ok("barge run: a lone shove stays closed through the gap, opens just after it",
 			t >= after and t <= after + K.CHAIN_GRACE + 0.1, "%.2f s (gap %.2f)" % [t, gap])
 	await ak.done(m)
