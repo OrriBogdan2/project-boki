@@ -11,7 +11,7 @@
  "min_time_s": 90.0,
  "few_glide_s": 6.0,
  "tips": [
-  {"id": "abyss_catch", "when": "abyss", "text": "Falling all the way into the abyss is death. Hold {glide} below the edge to catch an updraft back up, or touch the cliff to climb onto it."},
+  {"id": "abyss_catch", "when": "abyss", "text": "Falling all the way into the abyss is death. Glide (press {jump} again in the air, or {glide}, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it."},
   {"id": "abyss_wall", "when": "abyss", "text": "Knocked off an edge? Touch the island's side and you float back up onto it."},
   {"id": "abyss_kick", "when": "abyss", "text": "Short of the ledge? Jump at a wall in the air to kick off it, then glide the rest."},
   {"id": "abyss_drop", "when": "abyss", "text": "Open your glider early when you jump off the skyship. A longer, slower fall means you land where you planned."},
@@ -22,7 +22,7 @@
   {"id": "e_basic", "when": "no_e", "text": "{signature} is your hunter's utility ability. It recharges by itself, so use it every fight."},
   {"id": "e_combo", "when": "no_e", "text": "Open a fight with {signature}, then follow up with your weapon. Most kits chain the two."},
   {"id": "e_secondary", "when": "no_e", "text": "Every weapon has its own right-click ability on {secondary}. Try them all in Training."},
-  {"id": "glide_basic", "when": "few_glide", "text": "Hold {glide} (or {jump}) in the air to glide. You can open your glider off any booster too."},
+  {"id": "glide_basic", "when": "few_glide", "text": "Press {jump} again in the air (or {glide}) and hold to glide. You can open your glider off any booster too."},
   {"id": "glide_hits", "when": "few_glide", "text": "Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you drop like a stone."},
   {"id": "glide_dash", "when": "few_glide", "text": "Dash in mid-air, then glide: you cross gaps a plain jump can't."},
   {"id": "wisp_sense", "when": "wisp_stolen", "text": "A rival took your Boki? You'll sense it when they're nearby. Take it back."},
