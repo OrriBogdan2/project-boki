@@ -8,6 +8,7 @@ extends RefCounted
 ##   6. extracting brings the carry-out Boki home (Game.apply_result)
 ##   7. stealing from a deathbox: one stolen slot, at most 4 Boki on one hunter
 ##   8. bots bring two
+##   9. the first match with two Boki says what the swap key does, once
 ## --carry-two-clip --shots-dir=<dir>: the swap and the carry-out HUD as numbered JPGs (frame_0000.jpg ...) for an MP4.
 
 var bad := 0
@@ -30,6 +31,7 @@ func run(main: Node, mode := "") -> void:
 	_step(0.5)
 	var P := m.player
 	_two_in(P)
+	_lead_hint(P)
 	_passives(P)
 	_swap(P)
 	_carry_out(P)
@@ -49,6 +51,26 @@ func _step(secs: float) -> void:
 func _two_in(P: Hunter) -> void:
 	ok(P.kin != null and P.kin2 != null and P.kin != P.kin2, "the lead and the second both come in")
 	ok(P.kin2 != null and (P.kin2 as Kin).state == "bench", "the second waits in the satchel")
+
+## The first-time hint (Match._tips) names the swap key the first time you carry two, then never again.
+func _lead_hint(P: Hunter) -> void:
+	Settings.v["tips"] = true
+	Save.d["tutorial"].erase("lead_swap")
+	m._tip_t = 2.0
+	var lane := m.hud.msgs
+	var before := lane.rects().size()
+	m._tips()
+	var want := "%s swaps your lead Boki" % Settings.key_cap("swap_kin")
+	ok(Save.d["tutorial"].get("lead_swap", false) and lane.rects().size() > before, "carrying two shows '%s' once" % want)
+	var seen_n := lane.rects().size()
+	m._tips()
+	ok(lane.rects().size() == seen_n, "and not again")
+	var kin2 := P.kin2
+	P.kin2 = null
+	Save.d["tutorial"].erase("lead_swap")
+	m._tips()
+	ok(not Save.d["tutorial"].has("lead_swap"), "with one Boki there is nothing to swap, so no hint")
+	P.kin2 = kin2
 
 ## Lead: move_speed 0.06. Second: move_speed 0.10 and dodge_regen 0.2.
 func _passives(P: Hunter) -> void:

@@ -5690,6 +5690,8 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	if player.kin2 != null:
+		_tip("lead_swap", "%s swaps your lead Boki" % Settings.key_cap("swap_kin"))
 	var k: Kin = player.kin
 	if k == null:
 		return
