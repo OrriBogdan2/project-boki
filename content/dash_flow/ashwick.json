@@ -29,9 +29,9 @@
 	"hold": {
 		"lmb": {"ground": {"mode": "keep", "source": "Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Flue Flight is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends."}, "air": {"mode": "keep", "source": "As on the ground: held through the poof, the stream is back the step it ends."}, "jump": {"mode": "keep", "source": "Ours: the hose keeps burning through a jump."}},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: in the source the bolt's aim lane shows only a moment before the shot (it may be a quick cast with an indicator, not a hold), and no dash is made with the lane up; the kit text is silent. Ours: the Cinder Shot lane survives the ram and fires on the release."},
+			"air": {"mode": "keep", "source": "Not determinable: the source shows no air dash at all. Ours: the lane survives the air ram and fires on the release, in the air."},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump is shown and the kit text is silent. Ours: the lane stays up through the jump and fires on the release, in the air."}
 		}
 	}
 }

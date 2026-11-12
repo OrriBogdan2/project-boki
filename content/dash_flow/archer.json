@@ -21,14 +21,14 @@
 	},
 	"hold": {
 		"lmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: the source's bow is hold to draw, release to fire, and its Shift is a dodge roll into a spirit walk; neither the kit text nor the footage shows a roll made with a draw up, so whether it keeps, looses, drops or refuses is unknown. Ours: the draw charges on through the roll and a release in it looses as the roll ends."},
+			"air": {"mode": "keep", "source": "Not determinable: no air dash is shown at all, let alone one with a draw up. Ours: as on the ground, the draw charges on through it and looses on the release, in the air."},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump is shown in the footage and the kit text says nothing on jumping mid-draw. Ours: the draw goes on through the jump and looses on the release, in the air."}
 		},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: the source's heavy arrow is hold to charge, release to fire, and no roll is made with it charging in the footage; the kit text is silent. Ours: the Heavy Shot draw survives the roll and looses on the release."},
+			"air": {"mode": "keep", "source": "Not determinable: no air dash is shown. Ours: the Heavy Shot draw survives it and looses on the release, in the air."},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump is shown and the kit text is silent. Ours: the Heavy Shot draw goes on through the jump and looses on the release."}
 		}
 	}
 }

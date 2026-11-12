@@ -301,7 +301,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 17 | Ostra's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
-| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 19 dash-flow rows have no source `[?]` (Hem 8, Ryzz 5, Tarek 6), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
+| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 13 dash-flow rows have no source `[?]` (Hem 2, Ryzz 5, Tarek 6), listed below; Hem, Cinder and Zedran hold rows looked up (2026-11-12) | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
 
 ## Item 20: jump speed and the unsourced flow rows
 
@@ -311,11 +311,13 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 
 | Hero | Rows `[?]` |
 |---|---|
-| Hem (`archer`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
+| Hem (`archer`) | `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
 | Ryzz (`mage`) | `hold.rmb.{ground,air,jump}` (3, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`, ours) |
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
-Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+**Hold rows looked up (2026-11-12).** What Shift (and a jump) does while a hold is up, for the 15 hold rows with no `source`: Hem `hold.lmb.*`, `hold.rmb.*`; Cinder `hold.rmb.*`; Zedran `hold.lmb.jump`, `hold.rmb.*`. Kit text first, then the footage. None is settled: the source never dashes or jumps with these holds up (Hem's bow and heavy arrow, Cinder's bolt lane, which may not even be a hold there, Zedran's blast charge and Lunge charge), and it shows no air dash for any of the three. The one partial answer: Zedran's source dash is described as usable while attacking, so refusing Shift in the Lunge charge is out, but keep, release or cancel is not shown. Each row now carries `Not determinable: <why>` plus what ours does, and stays `keep`. `--dash-flow-check` (and through it `--archer-combo-check`, `--ashwick-combo-check`, `--juggernaut-combo-check`) asserts, per row of these three heroes, that it names a source and that an unsettled one keeps (`SOURCED_HOLDS`), next to the existing trial that the hold really carries through the move. To settle them: a clip of each hero pressing Shift or jumping with the hold up.
+
+Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Bjorn 1, Claire 3, Pip 3; one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
 
 ## Health
 

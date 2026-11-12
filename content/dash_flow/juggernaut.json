@@ -78,18 +78,22 @@
 				"source": "As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air."
 			},
 			"jump": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable: no plain jump is shown (in the air he only slams), and the kit text says nothing on jumping with the blast charging. Ours: the Searing Wave charge goes on through the jump and the wave leaves on the release, in the air."
 			}
 		},
 		"rmb": {
 			"ground": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable: the source's dash text says it goes while attacking, so refusing Shift is out, but no dash is made with the Lunge charging, so keep, release or cancel is not shown. Ours: the Lunge charge survives the Rampage and the release flings him."
 			},
 			"air": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable: no air dash is shown (in the air he slams instead). Ours: the Lunge charge survives the air dash and the release flings him."
 			},
 			"jump": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable: airborne, the source's RMB is its slam, but no jump is made with the Lunge already charging. Ours: the charge stays up through the jump and the release flings him, in the air."
 			}
 		}
 	},
