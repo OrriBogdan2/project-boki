@@ -61,8 +61,9 @@ func run(main: Node) -> void:
 	print("SQUADFMT density: %d exits (%.2f a squad), %d chests (%.2f a hunter), %d monsters (%.2f a hunter)"
 		% [n_exits, n_exits / float(Data.SQUADS), m.chests.size(), m.chests.size() / 30.0, n_mobs, n_mobs / 30.0])
 	# (chests are laid out by the map, not the headcount: 2+ a squad is what the old 10-squad Duos had)
-	var holds := n_exits >= Data.SQUADS / 2 and m.chests.size() >= Data.SQUADS * 2 and n_mobs >= Data.MATCH_PLAYERS
-	ok(holds, "the map holds 30: an exit for every 2 squads, 2+ chests a squad, a monster a hunter")
+	# (Limited Ways Out, owner 11-10: a map has its two Uplinks and the Heart, not an exit per squad)
+	var holds := n_exits >= 2 and m.chests.size() >= Data.SQUADS * 2 and n_mobs >= Data.MATCH_PLAYERS
+	ok(holds, "the map holds 30: its Ways Out exits, 2+ chests a squad, a monster a hunter")
 	var cost30 := _step_cost(m)
 	m.free()
 	var m20 := _match(main, {"teams": 7, "squad": 3, "total": 20})
