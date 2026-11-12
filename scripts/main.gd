@@ -414,6 +414,7 @@ func _ready() -> void:
 		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
+		return
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
