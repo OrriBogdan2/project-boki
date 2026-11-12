@@ -50,20 +50,26 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			e.set_meta("gnd_until", maxf(float(e.get_meta("gnd_until", 0.0)), float(m.time) + secs))
 			if e is Hunter:
 				(e as Hunter).gliding = false
-			if not was: _show(e, kind, secs, toast)
+			if not was:
+				_show(e, kind, secs, toast)
+				CcSfx.play(e, "ground")
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
 		"rat":
 			var was_r := rattled(e)
 			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
-			if not was_r: _show(e, kind, secs)
+			if not was_r:
+				_show(e, kind, secs)
+				CcSfx.play(e, "daze")
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
 			e.set_meta("dsr_until", maxf(float(e.get_meta("dsr_until", 0.0)), float(m.time) + secs))
 			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, k if k > 0.0 else 0.4)
 			e.slow_t = maxf(e.slow_t, secs)
-			if not was_d: _show(e, kind, secs)
+			if not was_d:
+				_show(e, kind, secs)
+				if secs >= CcSfx.MIN_SLOW_S: CcSfx.play(e, "slow")
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
