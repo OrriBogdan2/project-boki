@@ -228,7 +228,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Jump while charging leaps forward | wiki (Volcano Crusher) | yes (frames 0938-0958) | built |
 | Punch to extend the charge | footage tip title "Punch to Extend Dash/RMB" | yes | built (one lunge per charge) |
 | Slam resets on knock or kill | wiki | yes | removed in the data pass: the owner's tooltip data has no reset |
-| Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | not built: the owner wants only the rock's own caster to climb it (review item 25 overrides the source and the data pass's ally climb); allies and foes are stopped, walking or jumping |
+| Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built (owner 23:55): an ally jumping against the rock is lifted over (`StoneStand` `_ally_hop`); walking, allies are stopped; foes are stopped either way; only the caster climbs by walking (item 25) |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on X; asserted `ult drag: ...` |
 | Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.4s rise, 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
 | Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | built as rocks, not tiles (owner, Nov 2026, reversing item 15): over the abyss the ridge's rocks are ground you can stand on while they last |
@@ -311,10 +311,11 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Rock ownership (owner review item 25)
 - A rock belongs to the Tenzo who raised it (Stone Row, Basalt Spine): the wall's `by`. Only she climbs it: walking into
   its face (moving into it, no jump) lifts her at 5 m/s with her walk carried on, so she rises onto the top and walks
-  over it in about half a second (asserted at most 0.6s). Everyone else, allies included, and every bot and Boki is
-  stopped by it as by a full wall, walking or jumping; another Tenzo's rocks are a wall to her too. A body that lands on
+  over it in about half a second (asserted at most 0.6s). Everyone else is stopped by it as by a full wall when walking;
+  foes, bots and Boki are stopped jumping too, but an ally jumping against it is lifted over (owner 23:55, below);
+  another Tenzo's rocks are a wall to her too. A body that lands on
   a rock from above still stands on it and can walk off.
-- This replaces the data pass's ally climb (the source lets allies hop friendly walls); the owner's call wins.
+- Ally hop (owner 23:55, the source lets allies hop friendly walls): `StoneStand._ally_hop`; item 25 only stops allies walking.
 - Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),
   StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster only).
 
