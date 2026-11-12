@@ -389,7 +389,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if hit < dur or chip < dur:
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit if hit < dur else chip, "flinch": hit >= dur}
+		var side := "front" if dir.dot(fw) >= 0.0 else "back"
+		var staggered := hit < dur
+		return {"clip": hd[side], "t": hit if staggered else chip, "flinch": not staggered}
 	return {}
 
 func step(dt: float) -> void:

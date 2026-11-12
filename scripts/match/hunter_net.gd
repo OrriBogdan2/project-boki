@@ -20,9 +20,10 @@ static func apply(h: Hunter, it: Array) -> void:
 		h.lvl = maxi(1, int(it[i + 1]))
 
 static func cc_bits(h: Hunter) -> int:
-	return (STUNNED if h.stun_t > 0.0 else 0) | (KNOCKED if h.knock_t > 0.0 else 0)
+	var f := STUNNED if h.stun_t > 0.0 else 0
+	return f | (KNOCKED if h.knock_t > 0.0 else 0)
 
 static func apply_cc(h: Hunter, f: int) -> void:
 	if f & KNOCKED != 0 and h.net_cc & KNOCKED == 0:
-		h.kb_t = h.m.time       # the knock starts on the copy as the snapshot shows it (the clips play the hit from here)
+		h.kb_t = h.m.time       # the copy's knock starts as the snapshot shows it: its hit clip plays from here
 	h.net_cc = f & (STUNNED | KNOCKED)

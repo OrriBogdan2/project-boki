@@ -369,7 +369,8 @@ func _flinch(id: String) -> void:
 	var still := await _run_hit(id, 0.0, true, 0.0)
 	var stagger := await _run_hit(id, 0.0, true, 4.0)
 	var mid := hit.size() / 3
-	ok(float(poke[mid]["act"]) <= 0.0, "%s: a chip hit standing still only flinches (the whole body waits for a stagger)" % id)
+	ok(float(poke[mid]["act"]) <= 0.0,
+			"%s: a chip hit standing still only flinches (the whole body waits for a stagger)" % id)
 	ok(float(still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
 	ok(float(hit[mid]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)

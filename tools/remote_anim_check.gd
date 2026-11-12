@@ -81,7 +81,8 @@ func _cc() -> void:
 		var at := _cc_on(mine, k)
 		var seen_at := _cc_on(theirs, k)
 		ok(at >= 0.0 and seen_at >= 0.0 and seen_at - at <= (LAG_TOL + SKEW) * 1000.0,
-			"the copy shows the host's %s (%.2f s after it)" % [what, (seen_at - at) / 1000.0], "rows %s / %s" % [mine, theirs])
+			"the copy shows the host's %s (%.2f s after it)" % [what, (seen_at - at) / 1000.0],
+			"rows %s / %s" % [mine, theirs])
 
 ## The unix ms of the first row with column k on, -1 when none.
 func _cc_on(rows: Array, k: int) -> float:

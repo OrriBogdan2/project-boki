@@ -19,7 +19,7 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const CHIP := 0.03          # share of max health: a rifle round (light)
 const HEAVY := 0.2          # share of max health: a staggering hit; as a payoff it lands heavy
-const SHOT_HEROES := ["gunslinger", "juggernaut", "archer", "ashwick"]     # --impact-shots default: Vex, Kael, Lace, Cinder
+const SHOT_HEROES := ["gunslinger", "juggernaut", "archer", "ashwick"]     # --impact-shots: Vex, Kael, Lace, Cinder
 const SHOT_FRAMES := 16     # strip frames, every other 60 Hz step
 const SHOT_PX := 320        # px: one strip frame, its own square view (no HUD)
 const SHOT_CAM := Vector3(2.9, 2.1, 3.6)     # m: the camera off the Hunter's feet (front 3/4, a little above)
@@ -247,8 +247,8 @@ func _impact(m: Match, P: Hunter, V: Hunter, A: Hunter, hs: Array, hero: String,
 			if c.cur == stun_clip and c.act_w > 0.5: stunned += 1
 	ok(moves.is_empty() or stunned >= 10, "%s: stunned in its %s move, the stun clip shows (%d of 20 frames)" % [
 			hero, moves[0] if moves.size() > 0 else "-", stunned])
-	print("IMPACT %s light %.3f s, heavy %.3f s, flash %.2f, pose held %s, light clip %s, heavy clip %s, knock %d/%d" % [
-			hero, chip_t, heavy_t, flash, held, shown_chip, shown_heavy, posed, slid])
+	print("IMPACT %s light %.3f s, heavy %.3f s, flash %.2f, pose held %s, light clip %s, heavy clip %s, knock %d/%d"
+			% [hero, chip_t, heavy_t, flash, held, shown_chip, shown_heavy, posed, slid])
 
 # ------------------------------------------------------------------ --impact-shots
 ## The strike: two frames standing, then a heavy hit (the held frames, then the hit clip). The stun: its first kit
@@ -298,5 +298,6 @@ func _sheet() -> Image:
 	var rows := ceili(float(film.size()) / SHOT_ROW)
 	var out := Image.create(SHOT_PX * SHOT_ROW, SHOT_PX * rows, false, (film[0] as Image).get_format())
 	for i in film.size():
-		out.blit_rect(film[i], Rect2i(0, 0, SHOT_PX, SHOT_PX), Vector2i((i % SHOT_ROW) * SHOT_PX, (i / SHOT_ROW) * SHOT_PX))
+		var at := Vector2i((i % SHOT_ROW) * SHOT_PX, (i / SHOT_ROW) * SHOT_PX)
+		out.blit_rect(film[i], Rect2i(0, 0, SHOT_PX, SHOT_PX), at)
 	return out
