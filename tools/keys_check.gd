@@ -172,7 +172,8 @@ func _chest_and_keys() -> void:
 	P.inp["interact"] = false
 	step(m, DT)
 	pr = KeyChest.prompt(P, c2)
-	ok("with a key: the prompt is a press, not a hold", not String(pr["label"]).begins_with("Hold"), String(pr["label"]))
+	var press := not String(pr["label"]).begins_with("Hold")
+	ok("with a key: the prompt is a press, not a hold", press, String(pr["label"]))
 	P.inp["interact"] = true
 	step(m, DT)
 	P.inp["interact"] = false
