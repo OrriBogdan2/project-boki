@@ -11,7 +11,8 @@ uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);
 uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);
 // 0 ember, 1 smoke, 2 chunk (a dark tumbling shard of ground), 3 shard (a crisp crystal), 4 card (a tumbling card
-// that burns from its edges), 5 coin (a spinning metal glint), 6 star (a twinkling four-point star), 7 drop (water)
+// that burns from its edges), 5 coin (a spinning metal glint), 6 star (a twinkling four-point star), 7 drop (water),
+// 8 splinter (a thin tumbling sliver of wood), 9 sherd (a curved broken shard of fired clay)
 uniform int look = 0;
 uniform float stretch = 0.05;  // s of velocity an ember's streak spans
 uniform float gain = 1.0;
@@ -52,6 +53,7 @@ void vertex() {
 		vec2 qq = q;
 		if (look == 4 || look == 5) { qq.x *= cos(age * 14.0 + pick * 9.0); }   // flipping over as it tumbles
 		if (look == 4) { qq.y *= 1.4; }
+		if (look == 8) { qq *= vec2(0.3, 1.7 * abs(cos(age * 11.0 + pick * 7.0))); }   // end over end
 		vec2 off = vec2(qq.x * ca - qq.y * sa, qq.x * sa + qq.y * ca) * grow;
 		world = center + right * off.x + up * off.y;
 	}
@@ -124,6 +126,26 @@ void fragment() {
 		float drop = 1.0 - smoothstep(0.35, 1.0, d);
 		a = drop * (1.0 - smoothstep(0.6, 1.0, age)) * 0.75;
 		ALBEDO = mix(col.rgb, col2.rgb, smoothstep(0.4, 0.9, d)) * a * gain;
+		ALPHA = a * gain;
+	} else if (look == 8) {
+		// a splinter: a sliver pointed at both ends, lit down one side, a pale fresh-split edge on the other
+		float taper = 1.0 - p.y * p.y;
+		float cut = taper * 0.9 - abs(p.x) + (texture(vfx_noise, vec2(p.y * 0.3, pick)).g - 0.5) * 0.25;
+		float body = hard(cut);
+		a = body * (1.0 - hard(age - 0.85));
+		c = mix(col3.rgb, col.rgb, hard(-p.x));
+		c = mix(c, col2.rgb, hard(p.x - taper * 0.45));
+		ALBEDO = c * a * gain;
+		ALPHA = a * gain;
+	} else if (look == 9) {
+		// a sherd: a bowed triangle of glaze in two flat tones, the raw clay showing along its broken edge
+		vec2 q = p + vec2(0.0, p.x * p.x * (pick - 0.5));
+		float tri = max(abs(q.x) * 0.866 + q.y * 0.5, -q.y);
+		float body = hard(0.62 - tri);
+		a = body * (1.0 - hard(age - 0.85));
+		c = mix(col3.rgb, col.rgb, hard(dot(p, light_uv) + 0.1));
+		c = mix(c, col2.rgb, hard(tri - 0.48));
+		ALBEDO = c * a * gain;
 		ALPHA = a * gain;
 	} else {
 		float rock = step(abs(p.x) + abs(p.y) * (0.7 + pick * 0.6), 0.85);
