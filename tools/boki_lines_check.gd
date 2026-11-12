@@ -68,9 +68,10 @@ func _data() -> void:
 		for a in KinSpeak.ACTS[key]:
 			if it_act_re.search(String(a)):
 				it_words.append("ACTS.%s: %s" % [key, a])
-	ok("no Boki line or action calls a Boki it/its/itself (use {he} {his} {him} {himself})", it_words.is_empty(), str(it_words))
-	var m_line := KinSpeak.pronouns("(pats {his} belly, {he} grins, {He} waits for {him} by {himself})", "m")
-	var f_line := KinSpeak.pronouns("(pats {his} belly, {he} grins, {He} waits for {him} by {himself})", "f")
+	ok("no Boki line or action calls a Boki it/its", it_words.is_empty(), str(it_words))
+	var tpl := "(pats {his} belly, {he} grins, {He} waits for {him} by {himself})"
+	var m_line := KinSpeak.pronouns(tpl, "m")
+	var f_line := KinSpeak.pronouns(tpl, "f")
 	ok("pronoun tokens fill by sex", m_line == "(pats his belly, he grins, He waits for him by himself)"
 			and f_line == "(pats her belly, she grins, She waits for her by herself)", m_line + " / " + f_line)
 	var tones_ok := true
