@@ -51,77 +51,103 @@
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r"
+			"clip": "slash_r",
+			"fade_out": 0.4
 		},
 		"jug_slash_l": {
-			"clip": "slash_l"
+			"clip": "slash_l",
+			"fade_out": 0.4
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
 			"hold_from": 0.5,
-			"fade": 0.2
+			"fade": 0.25,
+			"fade_out": 0.4
 		},
 		"jug_wave": {
-			"clip": "wave"
+			"clip": "wave",
+			"fade_out": 0.4
 		},
 		"jug_slam": {
-			"clip": "slam"
+			"clip": "slam",
+			"fade": 0.3,
+			"fade_out": 0.4
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
 			"hold_from": 0.45,
-			"fade": 0.18
+			"fade": 0.18,
+			"fade_out": 0.4
 		},
 		"jug_lunge": {
-			"clip": "lunge"
+			"clip": "lunge",
+			"fade_out": 0.4
 		},
 		"jug_meteor": {
 			"clip": "meteor",
-			"hold_from": 0.3
+			"hold_from": 0.3,
+			"fade_out": 0.4
 		},
 		"jug_meteor_land": {
-			"clip": "meteor_land"
+			"clip": "meteor_land",
+			"fade_out": 0.4
 		},
 		"jug_dash": {
-			"clip": "dash"
+			"clip": "dash",
+			"fade_out": 0.4
 		},
 		"jug_exdash": {
-			"clip": "exdash"
+			"clip": "exdash",
+			"fade_out": 0.4
 		},
 		"jug_chain": {
-			"clip": "chain"
+			"clip": "chain",
+			"fade_out": 0.4
 		},
 		"jug_reel": {
 			"clip": "reel",
 			"hold_from": 0.25,
-			"heading": true
+			"heading": true,
+			"fade_out": 0.4
 		},
 		"jug_spin": {
-			"clip": "spin"
+			"clip": "spin",
+			"fade": 0.3,
+			"fade_out": 0.4
 		},
 		"jug_chainlunge": {
-			"clip": "chainlunge"
+			"clip": "chainlunge",
+			"fade_out": 0.4
 		},
 		"jug_haul_wind": {
 			"clip": "haul_wind",
-			"hold_from": 0.15
+			"hold_from": 0.15,
+			"fade": 0.15,
+			"fade_out": 0.4
 		},
 		"jug_haulslam": {
-			"clip": "haulslam"
+			"clip": "haulslam",
+			"fade_out": 0.4
 		},
 		"jug_guard": {
 			"clip": "guard",
-			"hold_from": 0.2
+			"hold_from": 0.2,
+			"fade_out": 0.4
 		},
 		"jug_riposte": {
-			"clip": "riposte"
+			"clip": "riposte",
+			"fade_out": 0.4
 		},
 		"jug_roar": {
 			"clip": "roar",
-			"upper": true
+			"upper": true,
+			"fade": 0.12,
+			"fade_out": 0.4
 		},
 		"mf_xform": {
-			"clip": "fusion"
+			"clip": "fusion",
+			"fade": 0.18,
+			"fade_out": 0.4
 		}
 	},
 	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
