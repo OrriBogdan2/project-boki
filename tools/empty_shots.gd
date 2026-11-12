@@ -1,11 +1,11 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir> [--shot-size=1920x1080]: review screenshots of the Empty creator (Male / Female,
 ## three heights, builds, hollow styles, every Ghost close up), the Relics viewer and the first-Relic moment (xvfb
-## with a renderer).
-## Add --only=creator|first|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and
-## back, the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and
-## walking; farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check 
-## --shots-dir=.
+## with a renderer). Add --only=creator|first|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg
+## pick, then the black mystery egg picked; shroud: the creator from front, side and back, the aura levels and shroud
+## styles; feet: the soles at the shortest and tallest height, standing and walking; farm: the Empty at home from
+## every side and above; gait: three bodies running past floor posts, not run by default). The second Relic, from
+## Hob: --hob-check --shots-dir=.
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
@@ -16,6 +16,9 @@ const LOOKS := {
 	"void_torn_violet": {"gender": 0, "hollow": 2, "glow": 2, "ghost": 3, "colour": 5},
 	"void_crescent_gold": {"hollow": 3, "glow": 4, "ghost": 1, "colour": 7},
 }
+
+const GAIT_SHOTS := 8        # frames of the gait strip
+const GAIT_EVERY := 4        # frames (60 fps) between its shots: 8 x 4 = half a second, about two strides
 
 var dir := ""
 var only := ""
@@ -46,10 +49,14 @@ func run(main_node: Node) -> void:
 		await _mask(tree)
 	if only in ["", "shroud"]:
 		await _shroud(tree)
+	if only == "gait":
+		await _gait(tree)
 	if only in ["", "feet"]:
 		await _feet(tree)
 	if only in ["", "farm"]:
 		await _farm(tree)
+	if only in ["", "eggs"]:
+		await _eggs(tree)
 	print("EMPTYSHOTS done in %s" % dir)
 	tree.quit(0)
 
@@ -94,6 +101,19 @@ func _first_screens(tree: SceneTree) -> void:
 		hx.create_box.use_preset("Fierce")
 		hx.zoom = 1.0
 		await _shot(tree, "creator_face", 2.5)
+	hx.queue_free()
+	await tree.process_frame
+
+func _eggs(tree: SceneTree) -> void:
+	_fresh()
+	Save.d["look"] = Unmasked.default_look()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	await tree.process_frame
+	hx._looks_good()
+	await _shot(tree, "hatch_eggs", 2.5)
+	hx._pick(3)
+	await _shot(tree, "hatch_mystery_picked", 1.2)
 	hx.queue_free()
 	await tree.process_frame
 
@@ -213,6 +233,64 @@ func _feet(tree: SceneTree) -> void:
 				(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
 			await tree.process_frame
 		await _shot(tree, "feet_%s_short_tall" % ("idle" if step == 0 else "walking"), 0.0)
+	stage.queue_free()
+	await tree.process_frame
+
+## The gait strip: short/slight, average and tall/sturdy bodies running at the farm's full stick from the side past
+## floor posts every half metre (a planted foot holds against them, a sliding one skates), GAIT_SHOTS shots
+## GAIT_EVERY frames apart from the moment the lead body enters the frame.
+func _gait(tree: SceneTree) -> void:
+	_fresh()
+	var stage := Node3D.new()
+	main.add_child(stage)
+	var floor_mesh := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(12, 8)
+	floor_mesh.mesh = plane
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color(0.35, 0.55, 0.3)
+	plane.material = floor_mat
+	stage.add_child(floor_mesh)
+	var post_mat := StandardMaterial3D.new()
+	post_mat.albedo_color = Color(0.9, 0.85, 0.6)
+	for i in 13:
+		var post := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.03, 0.25, 0.03)
+		box.material = post_mat
+		post.mesh = box
+		post.position = Vector3(-3.0 + 0.5 * i, 0.125, 0.9)
+		stage.add_child(post)
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-50, -30, 0)
+	stage.add_child(sun)
+	var cam := Camera3D.new()
+	cam.fov = 32.0
+	stage.add_child(cam)
+	cam.position = Vector3(0.0, 0.7, 6.0)
+	cam.look_at(Vector3(0.0, 0.5, 0.0))
+	cam.make_current()
+	var anims := []
+	var models := []
+	for b in 3:
+		var look := Unmasked.clean({"unmasked": true, "height": b, "build": b, "shroud": 1})     # a Wrap: the legs show
+		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
+		m.get_node("Rig/Torso/Aim/Gun").free()
+		m.position = Vector3(-4.6 - 0.6 * b, 0, -0.8 + 0.8 * b)
+		m.rotation.y = -PI * 0.5
+		stage.add_child(m)
+		models.append(m)
+		anims.append(HunterAnim.new(m))
+	var vel := Vector3(5.0, 0, 0)
+	var shot := 0
+	for i in 200:
+		for j in anims.size():
+			(models[j] as Node3D).position += vel / 60.0
+			(anims[j] as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
+		await tree.process_frame
+		if (models[0] as Node3D).position.x >= -1.5 and (i % GAIT_EVERY) == 0 and shot < GAIT_SHOTS:
+			await _shot(tree, "gait_%02d" % shot, 0.0)
+			shot += 1
 	stage.queue_free()
 	await tree.process_frame
 
