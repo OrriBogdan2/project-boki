@@ -60,7 +60,7 @@ func init_blight(
 
 
 func mass() -> float:
-	return 80.0 if mkind == "bl_nest" else (4.0 if mkind == "bl_warden" else 0.8)
+	return {"bl_nest": 80.0, "bl_warden": 4.0}.get(mkind, 0.8)
 
 
 ## Health, damage and speed for a strength level. Health keeps its share when it changes.

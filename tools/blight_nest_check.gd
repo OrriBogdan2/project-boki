@@ -183,7 +183,10 @@ func _none_outside(main: Node) -> void:
 	var far_nest: float = c["far"]
 	print(
 		(
-			"NESTS 150 s of bots: %d Skitters appeared, all from nests (%d strays, farthest %.1f m from its nest), %d released"
+			(
+				"NESTS 150 s of bots: %d Skitters appeared, all from nests"
+				+ " (%d strays, farthest %.1f m from its nest), %d released"
+			)
 			% [total, stray, far_nest, B.nests.released]
 		)
 	)

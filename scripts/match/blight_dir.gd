@@ -8,7 +8,7 @@ extends RefCounted
 ##   - how long YOUR squad has been down on the islands (per squad, so late arrivals get a soft start)
 ##   - the region: the outer islands are safer than the core (an island's "danger" 0/1/2)
 ##   - the raid condition (RaidLook.BLIGHT: night and storms are worse)
-## Nothing comes from nowhere (owner, 11-12): Skitters climb out of visible nests at fixed spots, a
+## Nothing comes from nowhere (docs/decisions/0061): Skitters climb out of visible nests at fixed spots, a
 ## fixed stock each, after a pulse you can see and hear; noise and Wardens' shrieks only wake nests.
 ## Health and damage: early Blight die fast and hit soft (hp_k, dmg_k); later ones are the real thing.
 ##
