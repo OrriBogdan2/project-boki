@@ -49,7 +49,7 @@ static func data() -> Dictionary:
 static func best(arch: String) -> float:
 	return float((Save.d.get("time_trial", {}) as Dictionary).get(arch, 0.0))
 
-## Save v12 -> v13: the time trial's personal bests start empty.
+## Save v13 -> v14: the time trial's personal bests start empty.
 static func migrate(data: Dictionary) -> void:
 	if typeof(data.get("time_trial")) != TYPE_DICTIONARY:
 		data["time_trial"] = {}
