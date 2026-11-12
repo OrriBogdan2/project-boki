@@ -185,30 +185,35 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 
 ## Cancels (ability to ability)
 
-What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
-ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
-Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first ends),
+**both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**. Dash rows
+(Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
 briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). The 11-12 pass settled 4 of the rows it
+left unsettled (LMB draw + X stays unsettled). None of [D] (the Myth card, supervive_kits.md:71-79), [F]
+(briefs/hero-ref/pin.md: no frame presses a second key in a draw, in the ult window or from a glider) or [W] (the Myth
+page and its patch notes, as cited above) shows those pairs, so each follows **rule**: DECISIONS 11-07 "every
+interaction is chainable", read through DashFlow's default (decision 0015: a missing row combines, the second press
+goes and the first runs on) and AirLimits ("an open glider is never folded"). Each is one assert in
+`--archer-combo-check` ("Lace cancel ...", tools/lace_cancel_rows_check.gd). Any pair not in the table: both (ArchKit
+has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack
+key does nothing from a glide (`Hunter.can_fire`; the glide row below says that is a mismatch).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
 | LMB draw (held) | RMB | not shown; one bow, and the Heavy Shot's "charge pose is like the LMB draw" | both: two draws run at once and each looses on its own release | **mismatch, not fixed**: one bow can't hold two arrows, but the source's answer (the press cancels the draw, is ignored, or waits) isn't shown. Flagged below | [F] 0264-0269, 0494 |
 | RMB held (Heavy Shot) | LMB | not shown | both, as above | **mismatch, not fixed** (same row) | |
-| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | unsettled | [F] 0457, 0498 |
+| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | both (match) | rule; [F] 0457, 0498 show no draw under the cast |
 | LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
 | LMB draw | X | "a self-buff with no cast lock" | the draw is dropped with no arrow; a still-held LMB nocks the first empowered shot at once (0.3 s) | unsettled (the clip's cast at f33 isn't mid-draw) | [F] ult f33 |
 | RMB held | its own end | "Max hold duration after cast increased from 1.5 >>> 3.0 seconds" | 3.0 s, then it looses by itself | match (what the source does at 3 s isn't stated) | [W] |
 | E (instant) | any | instant: no wind-up, no lock | instant: everything goes at once | match | [F] 0457 |
 | X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.3 s, then the beam | match (no charge; the nock length is a timing note) | [F] ult; thebackdash |
 | X window | walk, Spirit Walk | "she can walk between shots" | shots kept through Spirit Walk; she walks between them | match | [F] ult |
-| X window | RMB, E | not shown | both | unsettled | |
-| Glide | LMB | not shown | ignored | unsettled | |
-| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | unsettled | |
+| X window | RMB, E | not shown (the card: "next 3 Bow shots", so RMB and E are not among them) | both: the Heavy Shot draw starts, the wall goes up, the three shots stay | both (match) | rule; [D] :77 |
+| Glide | LMB | not shown | ignored (`Hunter.can_fire` refuses while gliding) | both: the bow draws from the open glider, which stays open. **Mismatch, not fixed** (doc and assert only; the kit change is named in the pass report) | rule; AirLimits "an open glider is never folded" |
+| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) and the glider stays open | both (match) | rule |
 
 Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bow source, but which way the
 source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
