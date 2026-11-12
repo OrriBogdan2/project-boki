@@ -193,7 +193,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var in_form := KinMerge.in_form(p)
 	if in_form:
 		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
-	var from_txt := "from Boki" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
+	var from_txt := "Boki's move" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
 	if in_form:
 		from_txt = "FUSED"
 	H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), from_txt, 8, DOWN_COL if down else Color(H.INK, 0.5 if in_form else 0.7), H.big)

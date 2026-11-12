@@ -82,6 +82,20 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
 - **Title:** "Arena", "Save files".
 
+### Tutorial HUD terms: what was done (ext/tut-hud-term-hints)
+
+Hints are one lane line each, once per save (`TermHints`, `scripts/ui/term_hints.gd`; flags `term_*` in `Save.d["tutorial"]`, off with the Tips setting), fired the moment the thing first changes.
+
+| Term | What was done |
+|---|---|
+| Fever | Name kept (owner-set kit name). Hint when it first lights: "Fever is lit: your hits heal you until it burns out". |
+| FIGHTING / FOLLOW (under the portrait) | Plain words: "attacking" while it has a target, else "with you" / "guarding" / "chasing" (`KinFollow.PLAIN`). The order names (Follow, Guard...) stay on the G wheel and tile. |
+| COMMON / UNCOMMON (armour tier) | Tier 0 shows no tier word. The tier name appears at the first tier-up, with a hint: "Armor tier up: hitting foes fills it, and each tier adds plates". Tier names kept (owner-set). |
+| AUTO | Kept on the tile. Hint the first time the Boki is out: "Your Boki fights and uses its move by itself (AUTO)  ·  hold G for orders". |
+| "from Boki" | Plain words: "Boki's move" (over the Boki ability tile). |
+
+Not touched (still in the list above): CARRY OFF FOLLOW, the Relics / Leave bar, glider strip, belt, Q V X, Box, weapon class, perk toasts.
+
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
