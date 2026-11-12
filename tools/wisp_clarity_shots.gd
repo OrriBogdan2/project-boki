@@ -38,6 +38,7 @@ func run(main_node: Node) -> void:
 	await _walk_to(mate, 3.0)
 	await _go(5.0)
 	# ---- enemy view: a rival goes down with their Boki out, and you stomp them out
+	print("WISPCLARITY enemy view from frame %d" % frame)
 	var rival: Hunter = foes[1]
 	rival.teleport(P.pos + Vector3(-4.0, 0, -2.0))
 	_pet_out(rival, Vector3(4.0, 0, 2.5))
