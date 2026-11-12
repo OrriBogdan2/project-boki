@@ -124,7 +124,20 @@ Cinder 30, Kael 29); scoring all twelve from the strips with one hand puts them 
 
 Parity rule (DECISIONS: match the source's readability and polish, no explosions on dashes, a ground ring means
 gameplay): no Hunter's dash plays an explosion in these strips. Ground rings worth a check against a hitbox: Vex's
-Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a hitbox here.
+Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Checked against the code on `ext/vfx-ground-ring-hitbox`
+(DECISIONS: a ground ring means gameplay; no rings or discs on dashes, landings or resets); the verdicts:
+
+| Ring | What it is in code | Verdict |
+|---|---|---|
+| Vex Shift (Slipstep) | Nothing draws a ring or disc: `GunslingerKit.on_dash` plays after-images, dust and two skid streaks (a lane of marks along the slide, no hit). (`ext/vfx-dash-no-rings` found the pale ring in the strip is her ground shadow plus the start flash.) | No change. `--gunslinger-combo-check` asserts no `Fx.ring` or `VVFx` ring/disc appears from the press to the slide's end. |
+| Tenzo X (Basalt Spine) rock-rise ring | Each rock's rise hurts and slows foes within `x.slow_r` (1.6 m, `BreahSpine._raise`), but the ring was `DolmImpact.RISE_RING` (1.4 m, Stone Row's size). | Fixed: the ring takes `slow_r`. `--dolm-combo-check` asserts every ring up during a cast sits on a rock's spot with radius `slow_r`, every frame. |
+| Tenzo X cast ring | A 1.2 m ring at the ridge's centre for other players (`net_ring`): no hit or zone there, the cracks already show to everyone. | Removed. |
+| Neve Skate plates | `rimewright_kit._lay_slabs`: flat ice plates (not rings) under the blades, 3 s, decoration. | Kept: it is the non-ring trail. |
+| Neve Skate frost patch, hockey-stop scorch | `skate_frost` (a round `scorch` disc every third plate, 2 s) and a `scorch` in `skate_stop` (the landing mark): decoration discs on a dash. | Removed. `--rimewright-combo-check` asserts no `scorch` disc is live while skating or after the stop. |
+| Neve rank-3 ice over the Abyss | `HeroZones.bridge` (3.6 m x 1.6 m, walkable terrain): gameplay, drawn as the span itself, not a ring. | Kept. |
+
+Suggestion, not built (parity first): Tenzo's Stone Row rock-rise ring (`DolmImpact.rise` from `DolmKit._raise`, 1.4 m)
+marks a rock's footprint, not a hit or zone, so by the same rule it could go or shrink to the rock's width.
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
