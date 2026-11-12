@@ -294,6 +294,8 @@ func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
 	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
+## A fresh glide press in the air: the kit's own flight lets go for the glider (Rock Hop). True = it ended now.
+func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 

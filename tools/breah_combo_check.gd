@@ -618,6 +618,7 @@ func _breah() -> void:
 		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
 		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
 	step(m, 0.8)
+	_hop_let_go(m, P, K, reset)
 	# out of charges the long dash is hers alone: the heavy shove move
 	reset.call()
 	P.ex_cd = 0.0
@@ -932,6 +933,37 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	step(m, 0.8)
 
 ## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+## DECISIONS 11-08 (Shift cancels into glide instantly, every Hunter): Space 0.15 s into a hop's flight opens the
+## glider within 2 steps (launch_to's fly_t hold ends), at the hop's own speed; the chain ends with no crash.
+func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.pos.y += 6.0
+	P.grounded = false
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.do_dash()
+	step(m, BreahHop.CROUCH + 0.09)
+	var hv0 := Vector2(P.vel.x, P.vel.z).length()
+	var lands0 := K.leap_lands
+	var open_in := 99
+	P.inp["jump"] = true
+	for i in 10:
+		P.inp["glide"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		if P.gliding:
+			open_in = i + 1
+			break
+	var hv1 := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"glide (DECISIONS 11-08): Space 0.15 s into a hop's flight opens the glider within 2 steps, "
+			+ "at the hop's speed, no crash",
+		open_in <= 2 and P.fly_t == 0.0 and not K.hop.chaining() and hv1 <= hv0 + 0.05 and K.leap_lands == lands0,
+		"open after %s steps fly_t %.2f chaining %s h %.2f -> %.2f m/s crashes %d -> %d"
+			% [str(open_in), P.fly_t, str(K.hop.chaining()), hv0, hv1, lands0, K.leap_lands]
+	)
+	step(m, 0.3)
+	P.inp["glide"] = false
+
 func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 	if air:
 		P.pos.y += 1.5

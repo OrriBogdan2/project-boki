@@ -584,6 +584,11 @@ func charge_orb() -> bool:
 func locks_glide() -> bool:
 	return dive and not h.over_void()
 
+## Space in a hop's flight (DECISIONS 11-08: Shift cancels into glide instantly, every Hunter): the hop lets go
+## and the glider opens at the hop's own speed, as the glider never holds his slam out of a glide the other way.
+func glide_cancel() -> bool:
+	return hop.let_go()
+
 func in_dash() -> bool:
 	return super.in_dash() or hop.chaining()
 
