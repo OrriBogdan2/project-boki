@@ -3,7 +3,8 @@ extends RefCounted
 ## high up, through one glide: a fall, the glider opening, a straight hold, a hard turn left and one right (the keys
 ## kept 60 degrees off the heading: the glider turns as fast as it can), the dive (crouch held) and the glide catching
 ## again. <dir>/<arch>/{back,side}/f000.png... at 15 fps: from behind (the bank reads) and from the left (the dive's
-## pitch reads). Prints one GLIDE_SHOT line a frame with the rig's tilt and the body's, so a strip reads with them.
+## pitch reads), the body's lean toward the match camera (CamRig.char_lean) left out, as it would read as a roll from
+## here. Prints one GLIDE_SHOT line a frame with the rig's tilt and the body's, so a strip reads with them.
 ## Needs a renderer.
 
 const HEIGHT := 60.0       # m above the ground: room for the dive
@@ -91,6 +92,7 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 		h.inp["crouch"] = ph == "dive"
 		m.step(Match.DT)
 		h.render(Match.DT, 1.0)
+		h.model.basis = Basis(Vector3.UP, h.face).scaled_local(h.model.scale)
 		if sync:
 			sync._process(Match.DT)
 		if step % EVERY == 0:
