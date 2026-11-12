@@ -4351,9 +4351,10 @@ func _update_interact(dt: float) -> void:
 				Capture.hold(self, h, best["ent"], dt)
 			"chest":
 				var c: Dictionary = best["chest"]
-				h.set_hold("chest")
-				c["prog"] += dt / float(ChestLoot.R()["hold_s"])
-				if c["prog"] >= 1.0:
+				if not KeyChest.keyed(h, c):
+					h.set_hold("chest")
+					c["prog"] += dt / float(ChestLoot.R()["hold_s"])
+				if c["prog"] >= 1.0 or KeyChest.keyed(h, c):      # a key opens it on the press
 					_open_chest(h, c)
 			"locked":
 				KeyChest.deny(self, h, best["chest"])

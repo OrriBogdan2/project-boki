@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the carriers: per region the number of key carriers equals the number of chests (a quiet
 ##      region with too few monsters is carried for by its neighbours), they change between seeds,
 ##      and every carrier shows a key glint
-##   2. a chest will not open without a key, and opening one uses exactly one
+##   2. a chest will not open without a key, and opening one uses exactly one (a single press with a key)
 ##   3. keys drop in a deathbox, can be looted from it, and lie on the ground to be picked up
 ##   4. a carrier drops its key when it dies
 ##   5. the Shrubling: disguised until approached, flees (faster than a hunter on foot, slower than a
@@ -169,9 +169,18 @@ func _chest_and_keys() -> void:
 	step(m, 2.0)
 	ok("holding interact at a locked chest does nothing", not c2["open"] and float(c2["prog"]) == 0.0)
 	P.chest_keys = 1
-	step(m, 1.6)
 	P.inp["interact"] = false
-	ok("holding interact with a key opens it for one key", c2["open"] and P.chest_keys == 0, "keys %d" % P.chest_keys)
+	step(m, DT)
+	pr = KeyChest.prompt(P, c2)
+	ok("with a key: the prompt is a press, not a hold", not String(pr["label"]).begins_with("Hold"), String(pr["label"]))
+	P.inp["interact"] = true
+	step(m, DT)
+	P.inp["interact"] = false
+	ok(
+			"one press of interact with a key opens it for one key, no hold",
+			c2["open"] and P.chest_keys == 0 and P.holding() != "chest", "keys %d" % P.chest_keys)
+	var free_c := {"free": true, "open": false}
+	ok("a free chest is still held open", String(KeyChest.prompt(P, free_c)["label"]).begins_with("Hold"))
 	# deathbox
 	P.chest_keys = 3
 	var box := Life.drop_box(m, P, "test")
