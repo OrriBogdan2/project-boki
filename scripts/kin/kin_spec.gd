@@ -2,7 +2,7 @@ class_name KinSpec
 extends RefCounted
 ## A kin species in the grammar (content/kin_v2/<id>.json, docs/KIN_GRAMMAR.md): the animals it's
 ## based on, its body and looks, a stat profile that spends exactly KinParts.STAT_BUDGET points,
-## personality and AI weights, how it's carried, what its throw and dodge rider do, its slots
+## personality and AI weights, how it's carried, what its throw does, its slots
 ## (active on E, an optional auto active, the merge) and its evolution paths.
 ## Parsing checks structure; check_refs() then checks it against the abilities, merges and nodes.
 
@@ -26,7 +26,6 @@ var carry_passives: Array = []
 var carry_on_shot := {}
 var mount := {}
 var throw_effects: Array[PartSpec] = []
-var dodge_rider := {}        # name, as, on_pass: Array[PartSpec], on_start/on_end: Array[StageSpec], modifiers
 var active := ""
 var auto := ""
 var merge := ""
@@ -36,7 +35,7 @@ var voice := {}
 var egg := {}
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "dodge_rider", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
+const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
 const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
@@ -126,8 +125,6 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 			if e:
 				if e.target != "foes": rep.err("throw.effects[%d].target" % i, "a throw lands on a foe")
 				k.throw_effects.append(e)
-	if d.has("dodge_rider"):
-		k.dodge_rider = _rider(d["dodge_rider"], rep)
 	# slots
 	k.active = rep.ident(d, "active", "")
 	k.auto = rep.ident(d, "auto", "", false)
@@ -208,29 +205,6 @@ static func _unit_block(d: Dictionary, key: String, names: Array, rep: GrammarRe
 	rep.keys(b, key, names + extra, names + extra)
 	for n in names:
 		out[n] = rep.number(b, n, key, 0.0, 1.0, 0.5)
-	return out
-
-## The class dodge's kin rider: effects on what you dodge through, stages at the start or end,
-## an echo, or the dodge becoming a blink.
-static func _rider(v: Variant, rep: GrammarReport) -> Dictionary:
-	var d := rep.obj(v, "dodge_rider")
-	rep.keys(d, "dodge_rider", ["name", "as", "on_pass", "on_start", "on_end", "modifiers"], ["name"])
-	var out := {"name": rep.text(d, "name", "dodge_rider"), "as": rep.choice(d, "as", ["dash", "blink"], "dodge_rider", "dash"),
-		"on_pass": [], "on_start": MergeSpec._stages(d, "on_start", rep), "on_end": MergeSpec._stages(d, "on_end", rep), "modifiers": []}
-	var effs := rep.arr(d.get("on_pass", []), "dodge_rider.on_pass")
-	for i in effs.size():
-		var e := PartSpec.parse("effect", effs[i], "dodge_rider.on_pass[%d]" % i, rep)
-		if e:
-			if e.is_hard_cc(): rep.err("dodge_rider.on_pass[%d]" % i, "a dodge can't %s what it passes through" % e.type)
-			out["on_pass"].append(e)
-	var mods := rep.arr(d.get("modifiers", []), "dodge_rider.modifiers")
-	for i in mods.size():
-		var m := PartSpec.parse("modifier", mods[i], "dodge_rider.modifiers[%d]" % i, rep)
-		if m:
-			if m.type != "repeat": rep.err("dodge_rider.modifiers[%d]" % i, "a dodge rider can only take repeat, not %s" % m.type)
-			out["modifiers"].append(m)
-	if (out["on_pass"] as Array).is_empty() and (out["on_start"] as Array).is_empty() and (out["on_end"] as Array).is_empty() and (out["modifiers"] as Array).is_empty() and out["as"] == "dash":
-		rep.err("dodge_rider", "does nothing: add on_pass, on_start, on_end, modifiers or as: blink")
 	return out
 
 ## Checks the slots and evolution against the loaded library {abilities, merges, evolution}.
