@@ -82,9 +82,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
   within one footage frame (0.2 s); `--clip-shots --cancels` shoots the frames around each cut.
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2) > `full` (Blend2), each of the last two onto a
-Layer of two crossfaded seek channels: a new clip, or the same one started over, takes the channel with less weight
-on screen, so a cancel inside a fade never snaps. Built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
+loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2) > `full` (Blend2), each of the last two onto two
+crossfaded seek channels. A cancel hands over clean: a layer that starts from off snaps its crossfade onto the new clip
+(no stale pose bleeds in), an upper move that cuts a full one starts at the full one's weight and a full one covers the
+upper one until it owns the body (the run's arm swing never shows between them), and the glide pose holds under a move
+cast from the glider. Built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)

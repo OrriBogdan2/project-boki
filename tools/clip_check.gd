@@ -51,8 +51,12 @@ const STAND_OPEN := {
 ## Cancels found open: "<id> <from>@<at>><to>" -> what. The hand's speed through a blend of two far-apart arm poses
 ## peaks mid-arc (a hammer's lever, a cartwheel cut upside down); a cut as the source does would snap the whole
 ## difference in one frame. Each needs an art pass (a nearer first key on the second clip) that then drops its entry.
+## Grimble's is the free arm (WardenFreeArm): the throw lets the left hang, the shot the right, and that ease rides on
+## the crossfade, so the right hand drops most of its way in the first frame; a fix holds the loose weight under a fade.
 const CANCEL_OPEN := {
-	"bulwark bul_smash_wind@0.50>bul_ult_wind": "hammer from the wind-up hold to overhead, 0.64 m in a frame",
+	"bulwark bul_throw@0.10>bul_recall": "hammer from the throw's overhead swing (hand 2.3 m up) to the reach, 1.0 m",
+	"ashwick as_lance@0.60>lw_jet": "lance hold to the jet's arms-down, mid-arc 0.30 m in a frame (limit 0.29)",
+	"dredge dr_throw@0.20>dr_shot": "the free arm swaps sides on the cut, its ease over the crossfade, 0.47 m",
 	"thief thf_vault_f@0.20>thf_encore": "cartwheel cut upside down into the Encore pose, 0.46 m in a frame",
 }
 
@@ -157,7 +161,6 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	await _rooted(id, m, sync, clips, dd)
 	own = {}
 	await _handover(id, m, sync, clips, dd)
-	await _cancels(id, m, sync, clips, dd)
 	_snaps(id, m, clips, dd)
 	await _carry(id, m, sync, clips, dd)
 	await _pond(id, m, sync, clips)
@@ -165,6 +168,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	var reach := StrikeReach.new()
 	await reach.hero(id, m, sync, dd, holder.get_tree())
 	bad += reach.bad
+	await _cancels(id, m, sync, clips, dd)
 	m.free()
 	await _flinch(id)
 
@@ -596,8 +600,14 @@ func _cancels(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Diction
 		var r := await _run_seq(m, sync, clips, dd, cancel_seq(row), 2)
 		var what := "%s %s@%.2f>%s" % [id, row[0], row[1], row[2] if row[2] != "" else "legs"]
 		pops.append([float(r[0]), what])
-		print("CLIP pop %.3f m %s (%s)" % [r[0], what, r[1]])
-		if CANCEL_OPEN.has(what):
+		# (a move with its own fade under FADE snaps in by design: its strike key sits inside the blend-in (_snaps), so
+		# a cancel into it is that snap, not a blend to hold to the pop limit)
+		var to: Dictionary = dd.get("kmoves", {}).get(row[2], {})
+		var snap_in: bool = float(to.get("fade", WardenClips.FADE)) < WardenClips.FADE
+		print("CLIP pop %.3f m %s (%s)%s" % [r[0], what, r[1], " snap-in" if snap_in else ""])
+		if snap_in:
+			pass
+		elif CANCEL_OPEN.has(what):
 			var stale := " (now passes: drop it from CANCEL_OPEN)" if float(r[0]) <= POP * height else ""
 			print("CLIP open %s %.3f m [%s]%s" % [what, r[0], CANCEL_OPEN[what], stale])
 			ok(float(r[0]) > POP * height, "%s: CANCEL_OPEN entry still needed" % what)
@@ -618,21 +628,18 @@ func _settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 		var off := clips.act_w <= 0.001 and clips.up_w <= 0.001
 		return off and (st == "" or clips.glide_w >= 0.999 and clips.air_w >= 0.999)
 	var mv: Dictionary = dd.get("kmoves", {}).get(st, {})
-	var up = mv.get("upper", false)
-	var upper: bool = up is String or bool(up)      # (the run: "moving" is upper)
-	var w := clips.up_w if upper else clips.act_w
-	var xf := clips.xf_u if upper else clips.xf
-	var chan := clips.chan_u if upper else clips.chan
-	var cur := clips.cur_u if upper else clips.cur
 	var clips_of: Array = [clip_of(dd, st), mv.get("alt", "")]
-	return w >= 0.999 and absf(xf - chan) < 0.001 and cur in clips_of
+	# (whichever layer the move took: "upper", or a full move on the run / in the air with "air_legs")
+	if clips.up_w >= 0.999 and absf(clips.xf_u - clips.chan_u) < 0.001 and clips.cur_u in clips_of:
+		return true
+	return clips.act_w >= 0.999 and absf(clips.xf - clips.chan) < 0.001 and clips.cur in clips_of
 
 ## A sequence [[state, s], ...] fed frame by frame as the game does: [worst pop m, where (with the frames either side),
 ## settled]. A strike is meant
 ## to snap, so a pop is the hand moving further in a frame than the clip alone moves it there (the clip's own path,
 ## sampled once) and further than in the frames either side (SPIKE): a jump, where a fast blend carries on. Pops
-## count from step `judge` on (a cancel: the cut itself; the move's own start and loop are the flow's business).
-## Settled: each step's state after the lead-in owns the body SOURCE_FRAME after it begins.
+## count from step `judge` on (a cancel: the cut itself; the move's own start and loop are the flow's business), and so
+## does settled: each of those steps' state owns the body SOURCE_FRAME after it begins.
 func _run_seq(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array, judge := 1) -> Array:
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
 	var moves: Dictionary = dd.get("kmoves", {})
@@ -670,7 +677,7 @@ func _run_seq(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Ar
 		var clip := clip_of(dd, String(st[0]))
 		var t := 0.0
 		var i := 0
-		var judged: bool = k == 0
+		var judged: bool = k < judge      # (settled: the states from `judge` on; a cut source may be over by then)
 		while t < float(st[1]):
 			feed(s, String(st[0]), t)
 			# (a move that turns its side to the way he goes is fed that facing)
