@@ -196,7 +196,6 @@ func _take_off() -> void:
 	kit.m.fx.dust(from, 6)
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.PINK_WHITE, MageKit.PINK, 0.9, 0.25)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
