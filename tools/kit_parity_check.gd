@@ -17,15 +17,23 @@ func _num(hero: Dictionary, path: String) -> float:
 			return NAN
 	return float(cur) if (cur is float or cur is int) else NAN
 
+## The number at a row's path: "wpn.<key>" reads the hero's signature weapon (content/weapons/<id>.json
+## "primary"), any other path the hero's own JSON.
+func _at(hero: Dictionary, path: String) -> float:
+	if path.begins_with("wpn."):
+		var w := Content.weapon(String(hero.get("signature", "")))
+		return _num(w.primary, path.trim_prefix("wpn.")) if w else NAN
+	return _num(hero, path)
+
 func run(host: Node) -> void:
 	var table: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/kit_parity.json"))
 	var rows: Array = table.get("rows", [])
 	for r in rows:
 		var hero := Arch.def(String(r["hero"]))
-		var got := _num(hero, String(r["field"]))
+		var got := _at(hero, String(r["field"]))
 		var label := "%s %s %s" % [r["hero"], r["slot"], r["field"]]
 		if r.has("per"):
-			got /= _num(hero, String(r["per"]))
+			got /= _at(hero, String(r["per"]))
 			label += "/" + String(r["per"])
 		var good := not is_nan(got) and absf(got - float(r["value"])) <= float(r["tol"]) + 1e-6
 		var verdict := "ok  " if good else "FAIL"
