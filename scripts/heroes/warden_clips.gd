@@ -72,6 +72,8 @@ var move_w := 0.0            # how much the rings show over the idle (0..1 of wa
 var move_v := 0.0            # its rate (1/s)
 var run_w := 0.0             # how much the run ring shows over the walk ring
 var run_v := 0.0
+var start_ph: Array = []     # [walk, run] 0..1: where the rings pick up when he moves off from idle (WardenStart)
+var starting := false        # moving off: the rings are still fading in over the idle
 var dir_pos := Vector2.ZERO  # the rings' blend position: the move off the facing (x his right, y forward)
 var dir_v := Vector2.ZERO
 var still_t := 0.0
@@ -159,6 +161,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.root_node = tree.get_path_to(glb)
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
+	start_ph = WardenStart.phases(lib, d["loco"], sk)
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
@@ -231,8 +234,11 @@ func _build() -> AnimationNodeBlendTree:
 	t.add_node("walk", _ring(lc["walk"], in_step))
 	t.add_node("run", _ring(lc["run"], in_step))
 	t.add_node("rings", AnimationNodeBlend2.new())
-	t.connect_node("rings", 0, "walk")
-	t.connect_node("rings", 1, "run")
+	for i in 2:
+		var ring: String = ["walk", "run"][i]
+		t.add_node(ring + "_seek", AnimationNodeTimeSeek.new())
+		t.connect_node(ring + "_seek", 0, ring)
+		t.connect_node("rings", i, ring + "_seek")
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
 	t.connect_node("loco_rate", 0, "rings")
 	t.add_node("idle", _anim(String(lc["idle"])))
@@ -583,6 +589,15 @@ func _loco(s: Dictionary, dt: float) -> void:
 		dir = _aim_twist(flat, face) if twist_on else Vector2((flat / spd).dot(rt), (flat / spd).dot(fw))
 	# (the idle under the rings eases in to a stop, the walk ring over it up to walk_speed; the run ring shows, or the
 	# walk ring: never held half and half, out of step they cancel the feet)
+	var walk_len := _length(String(lc["walk"]["f"]))
+	var run_len := _length(String(lc["run"]["f"]))
+	if moving and move_w <= 0.001:     # (moving off: the rings pick up at the pose nearest the idle, WardenStart)
+		_p("walk_seek/seek_request", float(start_ph[0]) * walk_len)
+		_p("run_seek/seek_request", float(start_ph[1]) * run_len)
+		starting = true
+	elif on_run and run_w <= 0.001:     # (a ring at no weight stands still: the run comes in on the walk's stride)
+		var walk_ph := float(tree.get("parameters/walk/current_position")) / walk_len
+		_p("run_seek/seek_request", fposmod(walk_ph - float(start_ph[0]) + float(start_ph[1]), 1.0) * run_len)
 	var w := _spring(move_w, move_v, minf(spd / walk, 1.0) if moving else 0.0, dt)
 	move_w = w[0]
 	move_v = w[1]
@@ -596,6 +611,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	else:
 		dir_pos = dir     # (nothing of the rings shows: they turn at once)
 		dir_v = Vector2.ZERO
+	starting = starting and moving and move_w < 0.99
 	if move_w >= 0.999:
 		_p("idle_seek/seek_request", 0.0)     # (a stop starts the idle from its top, never mid-fidget)
 	_p("loco/blend_amount", clampf(move_w, 0.0, 1.0))
@@ -603,7 +619,9 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("walk/blend_position", dir_pos)
 	_p("run/blend_position", dir_pos)
 	var rate := gait.plan(spd, lc, clampf(run_w, 0.0, 1.0))
-	loco_rate = lerpf(loco_rate, rate, 1.0 - exp(-dt * RATE_EASE))
+	# (a start plays the rings at the ground speed from the first frame: the clip's stride covers what the accel
+	# carries him, so the first foot down lands on its contact key; after it the rate eases)
+	loco_rate = rate if starting else lerpf(loco_rate, rate, 1.0 - exp(-dt * RATE_EASE))
 	_p("loco_rate/scale", loco_rate)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
