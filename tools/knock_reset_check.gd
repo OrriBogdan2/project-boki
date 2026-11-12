@@ -43,6 +43,11 @@ func _knock(m: Match, t: Hunter, by: Hunter) -> void:
 	t.hurt(50.0, by, {"src": "test"})
 	A.step(m, 0.05)
 
+## `by` has hit `t` (what Match.on_damage records: the game-wide assist note and the kit's 5 s memory).
+func _touch(by: Hunter, t: Hunter) -> void:
+	DashReset.note(t, by)
+	by.ak.note_hit(t)
+
 func _cues_for(h: Hunter, since: int) -> Array:
 	return cues.slice(since).filter(func(c): return c[0] == h).map(func(c): return c[1])
 
@@ -76,7 +81,7 @@ func _global() -> void:
 	# an assist: P hit T, the ally knocks T: P's dash is back, P is not healed, the softer cue
 	P.max_hp = 200.0
 	_spend(P, 0.5)
-	P.ak.note_hit(T)
+	_touch(P, T)
 	var c0 := cues.size()
 	_knock(m, T, al)
 	A.ok("global: an assist (a hit in the last 5s, a teammate's knock) gives the dash back",
@@ -85,7 +90,7 @@ func _global() -> void:
 			and _cues_for(P, c0) == ["assist"], "hp %.1f cues %s" % [P.hp, str(_cues_for(P, c0))])
 	# a third team's knock on a foe P hit is no assist
 	P.dashes = 0.0
-	P.ak.note_hit(T2)
+	_touch(P, T2)
 	_knock(m, T2, third)
 	A.ok("global: a third team's knock gives nothing", T2.downed and P.dashes < 0.1, "dashes %.2f" % P.dashes)
 	await A.done(m)
@@ -130,7 +135,7 @@ func _cinder() -> void:
 	# an assist gives the charge back but not the Cloak or the heal
 	_spend(P, 0.5)
 	K.cd["e"] = 6.0
-	K.note_hit(T2)
+	_touch(K.h, T2)
 	_knock(m, T2, al)
 	A.ok("cinder: an assist: one charge, no Cloak reset, no heal", P.dashes >= 1.0 and P.dashes < 1.5
 			and float(K.cd["e"]) > 5.0 and absf(_hp_k(P) - 0.5) < 0.01,
@@ -185,7 +190,7 @@ func _sable() -> void:
 	A.ok("sable: her knock heals her (+5% takedown)", absf(_hp_k(P) - want) < 0.01,
 			"%.3f want %.3f" % [_hp_k(P), want])
 	_spend(P, 0.4)
-	K.note_hit(T2)
+	_touch(K.h, T2)
 	_knock(m, T2, al)
 	want = 0.4 + float(rd["heal_assist"])
 	A.ok("sable: an assist heals her and gives the Vault back", absf(_hp_k(P) - want) < 0.01
@@ -223,7 +228,7 @@ func _grimble() -> void:
 	var al := _dummy(m, "Ally", P.team, r[4] + Vector3(0, 0, 2))
 	var res0 := K.res
 	P.dashes = 0.0
-	K.note_hit(T)
+	_touch(K.h, T)
 	_knock(m, T, al)
 	A.ok("grimble: an assist adds a Salvage stack", is_equal_approx(K.res, res0 + 1.0), "%.0f -> %.0f" % [res0, K.res])
 	A.ok("grimble: an assist gives one barge charge of three", P.max_dashes() >= 2.0

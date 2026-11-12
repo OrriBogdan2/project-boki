@@ -63,9 +63,13 @@ func dancer(a) -> void:
 	A.ok("dancer X: its cooldown runs from the cast (24s)", absf(float(K.cd["x"]) - float(d["cooldown"])) < 0.1,
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
-	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band dashed; no blade before it",
-			absf(float(AimKit.entry(P, "ult")["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
-			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(AimKit.entry(P, "ult")["r"]))
+	var thin: Dictionary = AimKit.entry(P, "ult")
+	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band marked; no blade before it",
+			absf(float(thin["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
+			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(thin["r"]))
+	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
+			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
+			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
 	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
@@ -270,7 +274,19 @@ func zedran(a) -> void:
 					float(K.cd["x"])])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
+	_cleave_fits(U.data())
 	await A.done(m)
+
+## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
+func _cleave_fits(d: Dictionary) -> void:
+	var sweep: Dictionary = HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"][0]
+	var ln := float(d["len"])
+	var radius := float(sweep["size_x"]) * ln
+	var tip := float(sweep["fwd_x"]) * ln + radius
+	var half := radius * sin(deg_to_rad(float(sweep["arc"])) * 0.5)
+	var w := float(d["width"])
+	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
+			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:

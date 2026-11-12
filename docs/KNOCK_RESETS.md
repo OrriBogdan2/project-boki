@@ -8,7 +8,7 @@ Proof: `--knock-reset-check` (tools/knock_reset_check.gd), plus the combo checks
 | Trigger | Rule | Source |
 |---|---|---|
 | Your blow knocks an enemy hunter | Dash back: a one-charge dash whole, a dash with charges +1 charge; long-dash cooldown cleared; heal 5% max health | [O] 159, [W] patch "multi-charge: 1 charge on Knock" |
-| A teammate knocks a hunter you hit in the last 5 s (assist) | The same dash back, no heal, softer cue (`"assist"`) | [O] 159 ("assists count"; owner said ~4 s, we reuse the kits' 5 s assist window) |
+| A teammate knocks a hunter you hit or crowd-controlled in the last 4 s (assist) | The same dash back, no heal, softer cue (`"assist"`) | [O] 159 ("assists count", ~4 s); decision 0022-knock-dash-refresh-assists |
 | Your blow kills a downed hunter | The knock rule again | ours (kept from the takedown reset) |
 | A third team's knock, a mob kill | Nothing | [O] 159 |
 

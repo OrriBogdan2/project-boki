@@ -339,7 +339,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	T.teleport(home + Vector3(9.0, 0, off))
 	P.teleport(home)
 	C.ac.step(m, 0.3)
-	var east := home + Vector3(10.0, 0, 0)
+	var east := home + Vector3(18.0, 0, 0)       # the full range: the push-out scales with the aim distance (item 144b)
 	C.ac.aim_at(P, east)
 	cam.cast_k = 0.0
 	var hits0 := K.needle_hits
@@ -425,7 +425,8 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
-	var knocked := K.knocked.has(T.get_instance_id())      # the knock flourish ran (the dash back is DashReset's)
+	DashReset.takedown(P, T)         # the knock's dash back is the game-wide rule now (decision 0022), as Match runs it
+	var knocked := P.dashes >= 1.0
 	C.ac.step(m, 0.5, watch)
 	T.downed = false
 	T.hp = T.max_hp

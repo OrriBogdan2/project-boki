@@ -3,7 +3,8 @@ extends RefCounted
 ## The hero's own ultimate on X: the parts main's X path (HunterKeys.ult_pressed: the level gate, then
 ## ArchKit.cast_ult) doesn't carry. A kit's cast_ult() returns HeroUlt.press(self, start): a recast while the ult
 ## runs, else the ult's own cooldown (cd["x"]) and a fresh cast id. Landing it charges the Boki bond through
-## landed(), never the cast alone (KinBond.from_ult: the best event of a cast counts).
+## landed(), never the cast alone (KinBond.from_ult: the best event of a cast counts). Every cast also gives
+## UltCue, the sound the whole area hears.
 
 static var _casts := 0            # cast ids are "<hero>_<n>", one per cast, unique in the run
 
@@ -23,6 +24,7 @@ static func press(k: ArchKit, start: Callable) -> bool:
 	k.st["ult_cast"] = "%s_%d" % [k.id, _casts]
 	k.h.used["x"] = int(k.h.used.get("x", 0)) + 1
 	k.h._ab_feedback("x", "cast")
+	UltCue.cast(k)
 	CombatBus.ability_used.emit(k.h, k.id + "_x", "ultimate")
 	return true
 
