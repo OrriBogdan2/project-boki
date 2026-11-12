@@ -2069,6 +2069,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	painted(m_dark, 2, 0.2, 0.2, 0.2)
 	bake_part_y(body_root)
 	Evo.dress(root, rec)
+	GardenAura.dress(root, rec)          # a worn garden aura (Glowmoss Sprig), looks only
 	if shimmer:
 		# a shimmer sparkles a little, all the time
 		for i in 3:

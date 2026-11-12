@@ -279,6 +279,7 @@ static func settle(run: Run) -> Dictionary:
 		Save.remember(win, "echo", "out-danced %s at Echo Steps" % lose["name"], float(R["win_trust"]))
 		Save.remember(lose, "echo", "lost Echo Steps to %s" % win["name"])
 		res.merge({"win": win, "lose": lose, "good": win == you})
+		res["prize"] = GardenPrizes.settle("echo", you, run.recs[RIVAL], win == you)
 	else:
 		var good := float(run.hits[YOU]) >= float(R["solo_good"]) * float(run.beats[YOU])
 		if good:
@@ -286,6 +287,7 @@ static func settle(run: Run) -> Dictionary:
 		var trust := float(R["win_trust"]) if good else 0.0
 		Save.remember(you, "echo", "danced Echo Steps for %d points" % run.score[YOU], trust)
 		res["good"] = good
+		res["prize"] = GardenPrizes.settle("echo", you, {"stats": {}}, good)
 	res["gems"] = int(R["gems_win"]) if res["good"] else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + res["gems"]
 	return res
@@ -596,6 +598,7 @@ func _card(res: Dictionary) -> void:
 		rows.append(["%s danced Echo Steps: %d points" % [you["name"], res["score"][YOU]], 18, UI.ACCENT_HI])
 	rows.append(["Best streak %d" % res["best"], 14, UI.INK])
 	rows.append(["+%d gems" % res["gems"], 14, UI.GOLD])
+	rows.append_array(GardenPrizes.rows(res["prize"], 14))
 	if is_instance_valid(card):
 		card.queue_free()
 	card = BaseRace.result_card(h, rows)

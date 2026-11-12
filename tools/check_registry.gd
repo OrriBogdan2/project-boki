@@ -369,6 +369,7 @@ const CHECKS := {
 	"--seek-check": ["res://tools/seek_check.gd", "seek_check", null],      # Seek, GARDEN.md 5.3
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
 	"--decor-tags-check": ["res://tools/decor_tags_check.gd", "decor_tags_check", null],      # GARDEN_MODERN 5 rank 7
+	"--lantern-check": ["res://tools/lantern_check.gd", "lantern_check", null],      # Lantern Match, GARDEN_MODERN 4.2
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],      # the Dash's showcase wall
 	# --glint-fishing-check also takes --glint-fishing-shots=<dir>
