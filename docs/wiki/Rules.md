@@ -908,7 +908,7 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 
 ## garden_visitor (`content/rules/garden_visitor.json`)
 
-Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/garden_visitor.gd). While you are in a zone, every check_s seconds of farm time and with no visitor and none due to wait, a wild Boki may wander in: one of the common species that has a rigged model, whose theme is in the zone's group, when the zone has a toy it likes (toys.json likes) and at least residents of the group living there. It stays one garden day (care.json care_day_s), plays your games as one more Boki, and eats only what you hand it. feeds meals of its favourite make it leave an egg (or, with room in the zone, ask to stay as a new Boki). Save.d visitor = {rec, zone, t, fed, notes, next}, a lazy key with no save bump.
+Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/garden_visitor.gd). While you are in a zone, every check_s seconds of farm time and with no visitor and none due to wait, a wild Boki may wander in: one of the common species that has a rigged model, whose theme is in the zone's group, when the zone has a toy it likes (toys.json likes) and at least residents of the group living there. It stays one garden day (care.json care_day_s), plays your games as one more Boki, and eats only what you hand it. feeds meals of its favourite make it leave an egg (or, with room in the zone, ask to stay as a new Boki). Save.d visitor = {rec, zone, t, fed, notes, next, lead}; intro: the first visitor on a save is led to by your partner with one tip (scripts/home/visitor_intro.gd), a lazy key with no save bump.
 
 | Setting | Value |
 |---|---|
@@ -922,6 +922,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | feeds_doc | Favourite meals it takes before it leaves an egg or asks to stay. |
 | gap_s | 300 |
 | gap_s_doc | Seconds after one leaves before the next may come (one garden day). |
+| intro | {"text": "A wild {name} is visiting {zone} today. Press {interact} on it and hand it {food}, its favourite, three times: it may leave an egg or ask to stay.", "lead_s": 60.0, "lead_s_doc": "Seconds your partner leads you to the first visitor on a save, if you do not walk over first.", "near_m": 3.5, "near_m_doc": "Metres from the visitor at which you count as having come over.", "tip_s": 9.0, "tip_s_doc": "Seconds the tip stays in the message lane."} |
 | groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
 | groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
 

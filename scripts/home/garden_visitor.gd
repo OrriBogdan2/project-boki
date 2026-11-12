@@ -6,7 +6,7 @@ extends RefCounted
 ## (it is in the zone's kins, GardenZones.out_here) and eats only what you hand it: E on it opens the feed
 ## list and its favourite is shown. The third favourite meal makes it ask to stay as a new Boki when the
 ## zone has room, else leave an egg in the Incubator. The away card says who came and left.
-## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next}: a lazy key, no save bump; the rec carries
+## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next, lead}: a lazy key, no save bump; the rec carries
 ## "visitor": true until it joins. The egg it leaves carries {sp, zone, day} (Incubator "visitor"): the baby's
 ## lineage["visitor"] shows it as the wild parent on the Family tab, with one memory line.
 ## Tuning: content/rules/garden_visitor.json.
@@ -113,6 +113,7 @@ static func _look(h, dt: float, now: float) -> void:
 		return
 	var r := begin(zone, sp, now)
 	h.add_kin(r, 0)
+	VisitorIntro.start(h, r, now)
 	var loves := Care.food_name(String(r["likes"]["food"]))
 	h._toast("A wild %s wandered into %s. It loves %s" % [_name(r), _zone_name(), loves])
 
