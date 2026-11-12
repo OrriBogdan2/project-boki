@@ -293,6 +293,8 @@ Seek, the Boki base's third minigame (briefs/design/GARDEN.md section 5.3, scrip
 | min_hide_doc | The item must be hidden at least this many metres from where the Boki start. |
 | max_s | 60 |
 | max_doc | A hunt that nobody has finished by max_s seconds goes to whoever is nearer the item. |
+| practice_s | 12 |
+| practice_doc | The first practice hunt (FirstRound) stops after this many seconds, paying nothing. |
 | energy | 8 |
 | win_joy | 12 |
 | win_trust | 3 |

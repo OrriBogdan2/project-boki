@@ -179,6 +179,7 @@ func _garden() -> void:
 		for k in home.kins:
 			k.erase("indoors")
 			k["busy"] = false
+		Save.d["tutorial"]["first_shove"] = true      # past the practice bout (FirstRound, --tut-first-games-check)
 		sh.use()
 		var t := 0.0
 		while sh.run != null and t < float(BaseShove.rules()["max_s"]) + 5.0:

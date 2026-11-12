@@ -27,6 +27,7 @@ const ARC := 1.0                             # m the seed rises on a normal hit
 const SPIKE_ARC := 0.35                      # m the seed rises on a spike
 const SEED_R := 0.1                          # m, the seed's radius
 const REACH := 1.8                           # m from the log to start a match
+const FIRST := "first_volley"                # Save.d.tutorial: the practice match ran (FirstRound)
 
 static func rules() -> Dictionary:
 	return Content.rules("base_volley")
@@ -187,6 +188,7 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var practice := false          # the first practice match: ends at the first press, no gain, no cost
 
 func _init(home) -> void:
 	h = home
@@ -261,6 +263,10 @@ func use() -> void:
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to call a spike" % Settings.key_cap("interact"))
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
+	practice = FirstRound.due(FIRST, "volley")
+	if practice:
+		FirstRound.take(FIRST)
+		bar.lbl.text = FirstRound.line("when the marker is in the gold to call a spike")
 	seed_node.visible = true
 	_place()
 	GardenSfx.countdown(h, log_node.position)
@@ -280,6 +286,9 @@ func input(event: InputEvent) -> bool:
 		GardenSfx.crowd(r, pair[run.backed]["pos"])
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
+		if practice:
+			h._toast("That's a spike call: gold hits hardest. " + FirstRound.DONE)
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -333,6 +342,8 @@ func _seed_at() -> Vector3:
 	return Vector3(0, 0.6, _side_z(run.server, 1.0))
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice match never pays out
+	practice = false
 	var res := settle(run) if finished else {}
 	for k in pair:
 		k["busy"] = false
