@@ -8,7 +8,7 @@ const STEP := 1.0 / 60.0
 const RUN_S := 1.4                # s moving before the still
 const LANE := 10.0                # m of the area's ground the run has ahead of it
 const CELL := Vector2i(320, 240)  # px per Hunter on a sheet
-const CROP := Vector2i(560, 420)  # px cut round the screen's middle before scaling to a cell
+const CROP := Vector2i(360, 270)  # px cut round the screen's middle before scaling to a cell
 const COLS := 4
 const ARCHS := ["archer", "thief", "tender", "gunslinger", "ashwick", "mage", "dolm", "rimewright", "dredge",
 	"bulwark", "ostra", "juggernaut"]
