@@ -1,8 +1,10 @@
 class_name HubHints
 extends RefCounted
 ## First-time hints for a new player in the garden hub (briefs/design/GARDEN.md 10): the Waystone's
-## ring, the nest corner and a sleeping zone's two keys. Each shows once per save as a line in the
-## message lane (never a panel, so nothing blocks), one at a time, when you stand near what it is about.
+## ring, the nest corner, a sleeping zone's two keys and, by the first egg placed in the Incubator, that
+## it grows while you play (its look says when it is ready, with no message). Each shows once per save
+## as a line in the message lane (never a panel, so nothing blocks), one at a time, when you stand near
+## what it is about.
 ## The rules and texts are content/rules/garden_zones.json "hub_hints"; seen ones live in
 ## Save.d["tutorial"]["hub_hints"]. The garden tutorial's own closing hint is not repeated here.
 ## A Wayseed has two more, both once per save: a line on a run the first time one goes into your pack
@@ -57,8 +59,14 @@ func _now(e: Dictionary, seen: Dictionary) -> bool:
 		return false
 	if bool(e.get("locked", false)) and GardenZones.ids().all(func(id): return GardenZones.is_open(id)):
 		return false
-	var at: Vector3 = h.hway.node.position if e["at"] == "waystone" else h.NEST_AT
-	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(rules()["near_m"])
+	var at: Vector3 = h.NEST_AT
+	if e["at"] == "waystone":
+		at = h.hway.node.position
+	elif e["at"] == "egg":
+		at = h.INCUB_AT
+	if Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() >= float(rules()["near_m"]):
+		return false
+	return e["at"] != "egg" or not Incubator.eggs().is_empty()      # the egg's line waits for its first egg
 
 func _holds_seed() -> bool:
 	var items: Dictionary = Save.d["items"]

@@ -3,7 +3,8 @@ extends RefCounted
 ## (5 to start, more bought up to 8) and warm side by side; the rest wait on the shelf. Each takes
 ## time (2 expeditions or ~8 minutes warm), never hatches by itself, an Ember kin at the brazier and
 ## Ember Coals each speed every egg up, hatching gives a rare kin with the IV floor, the breeding nest
-## is untouched, and older saves move over. Never touches the real save.
+## is untouched, older saves move over, and a ready egg on the farm says so by its look alone, with no
+## message. Never touches the real save.
 
 var bad := 0
 var main: Node
@@ -179,6 +180,11 @@ func run(m: Node) -> void:
 	H.hw.scan()
 	ok(not H.hw.jobs.any(func(j): return String(j["kind"]) == "warm"), "with every egg ready there's nothing to warm")
 	ok(H.hinc.prompt().begins_with("Hatch"), "walking up says: %s" % H.hinc.prompt())
+	var lane := MsgLane.of(H.root_ui)
+	lane.clear()
+	for i in 12: H.hinc.tick(0.05)
+	var said := ", ".join(lane.texts())
+	ok(H.hinc.ready_ids.size() == 3 and lane.count() == 0, "ready eggs burst once and say nothing (%s)" % said)
 	H.queue_free()
 	print("INCUBATOR CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
