@@ -2,9 +2,8 @@
 
 GARDEN.md 10.6 sets the budget; `content/rules/garden_zones.json` holds it (`budget`, `budget_hub`) and the
 held ceilings (`ratchet`). Candidate stack: origin/main + `ext/garden-cinderstep-zone` (carries hub-zones and
-Glasswater) + `ext/garden-hub-horizon`. Hushwood and Kitewind Ridge are not in it: their branches
-(`ext/garden-lantern-zone-hub`, `ext/garden-ridge`) conflict heavily with the shared `ZoneLayout`/`ZoneDress`
-build, so they have no numbers yet; bench them with `--bench-zone=<id>` once ported.
+Glasswater) + `ext/garden-hub-horizon`. Since `ext/garden-zone-draws` Hushwood and Kitewind Ridge are ZoneLayout
+builds too (data in `garden_zones.json`, themes in `home_layout.gd`), so `--bench-zone=all` covers all five.
 
 ## Run
 `jobq submit --needs gpu --only <worker> --tree <tree> --out bench -- --perf-bench --bench-secs=5 --bench-farm=10 --bench-zone=all --quality=<medium|low>`
@@ -34,3 +33,82 @@ Draws did not come down in this change: the way to the target is merging the sta
 pattern, which frees its roots and needs `material_override` on every mesh, so each fixture has to be checked for
 outside references first) and shrinking the Boki rig's mesh count at Low and Medium. `ratchet` fails the bench
 if any held number gets worse.
+
+## Draw fixes (ext/garden-zone-draws, 2026-11-11)
+- A home's world scatter goes in one MultiMesh per kind (`World.scatter_chunk`): the whole island is on screen,
+  so the match's 32-tile chunks only multiplied draws.
+- Every placed layout piece (house, stall, toys, patch) bakes its plain parts into one mesh per material in each
+  of its groups (`HomeBuild._merge_parts` over `Models.merge_static`; moving groups merge among themselves).
+- Ponds were one mesh per tile plus a foam strip and three rim stones per bank edge: now three MultiMeshes.
+  This was the "unexplained" Cinderstep extra: the bench save (NavCheck) paints a stream.
+- No lights were added and no materials changed, so looks stay the same on every preset.
+
+Draw passes per part, headless, top 20 owners (`BENCH draw passes by owner`, a pass is one surface, two with an
+outline; a GPU adds shadow passes on top). Before = e7f172aa9 (ports only), after = the branch tip:
+
+| part | before | after |
+|---|---|---|
+| hub | 753 | 615 |
+| Bramblebank (zone part) | 782 | 498 |
+| Glasswater | 489 | 406 |
+| Cinderstep | 675 | 414 |
+| Hushwood | 507 | 431 |
+| Kitewind Ridge | 660 | 414 |
+
+What is left: nine Boki are about 30 passes each (~270 of a zone: animated pivots, each with an outline), world
+far scenery about 50 (six Flora styles of far rocks, kept for the look), and in the hub the incubator, burrow and
+nest, built outside the layout path (not merged here).
+
+GPU, `--perf-bench --bench-secs=5 --bench-farm=10 --bench-zone=all`, draws / frame ms, before (e7f172aa9) -> after
+(aaccf1179). M5 Medium: jobq 20261111-090814-15113 -> 20261111-090939-17282; pc-MRROBOTO Low (RTX 4070 SUPER,
+gl_compatibility): 20261111-090952-22488 -> 20261111-091010-11716.
+
+| part | M5 Medium before | M5 Medium after | MRROBOTO Low before | MRROBOTO Low after |
+|---|---|---|---|---|
+| hub | 595 / 8.6 | 495 / 8.7 | 577 / 7.0 | 470 / 7.0 |
+| Bramblebank | 458 / 15.9 | 349 / 16.6 | 458 / 7.0 | 342 / 7.0 |
+| Glasswater | 316 / 18.0 | 255 / 11.5 | 283 / 7.0 | 265 / 7.0 |
+| Cinderstep | 385 / 17.4 | 294 / 17.7 | 315 / 7.0 | 257 / 7.0 |
+| Hushwood | 357 / 17.2 | 326 / 16.4 | 325 / 7.0 | 301 / 7.0 |
+| Kitewind Ridge | 469 / 17.6 | 301 / 17.3 | 434 / 7.0 | 256 / 7.0 |
+
+Every zone is now under 350 draws on both machines; the ratchet keeps only what is still over: the hub (M5 520,
+Low 370 held from rp1-0, which MRROBOTO's 470 is past: a different machine, not loosened) and the M5 frame of
+Cinderstep and Ridge (17-18 ms at a 640x360 window, near the 60 Hz line on both sides of the fixes, so the frame is
+not draw-bound there). Objects, nodes, emitters and base_life are within budget everywhere.
+
+## VFX clarity: keep / cut (ext/vfx-garden-clarity, 2026-11-12)
+Owner principle: a particle, glow card or decal stays only if it says something (a ripe plant, water, a Boki's mood,
+something you can use). `--perf-bench` now prints `BENCH vfx <part> <emitter|card:<shader>|decal> <owner> xN` for every
+particle system that is emitting, every Decal and every see-through light/glow mesh in the home
+(`FX_SHADERS` in `tools/perf_bench.gd`), and `--bench-shots=<dir>` saves each part's default-camera frame (UI hidden).
+
+| what (hub, Glasswater, Hushwood, Ridge) | what it says | verdict |
+|---|---|---|
+| Portal beam, 40 motes at the pad | "the expedition portal is here, press E" | keep, 40 -> 20 (`ZoneDress.BEAM_AMOUNT`) |
+| Portal Disc (glow card) and Base ring | the portal and where to step | keep |
+| Portal Zone ring and ZoneFill (r 2.6 m) | only a match's exit fills them; in a home a dim extra ring round the pad | cut (freed in `ZoneDress.calm_pad`) |
+| Landmark motes/snow/sparks, 22 each (Glasswater statue, Hushwood ring, Ridge spire) | nothing: 45 m from the camera frame, simulated all day | cut in built zones (`ZoneDress.quiet_landmarks`); the rocks stay, matches keep theirs |
+| Boki Aura, 7 motes while a Boki glows | its mood or type | keep |
+| Fx pool bursts (3-16 motes, a few at once at a toy) | a hit, a play, a cheer: one-shot, caused by an action | keep |
+| Rain (260) | weather | keep (not emitting unless raining) |
+| Decals | none exist in the home | n/a |
+| Shallows sheet (Glasswater) | water | keep |
+| Zone scatter (crystals, reeds, pebbles, mushrooms, ferns, flowers; counts in `garden_zones.json`) | ground dressing, not VFX | untouched; a lighter scatter is a separate look decision |
+
+Numbers, headless-GL (xvfb, opengl3, llvmpipe, 1280x720, 9 Boki out, UI hidden), before = 085d31018 -> after = this
+branch; draws / emitting emitters:
+
+| part | before | after |
+|---|---|---|
+| hub | 455 / 2 | 453 / 2 |
+| Glasswater | 244 / 9 | 242 / 4 |
+| Hushwood | 290 / 8 | 294 / 3 |
+| Kitewind Ridge | 249 / 3 | 243 / 2 |
+
+Draws barely move (a glow card is one draw; the zones are not particle-bound); the win is on screen: the pad is one
+lit ring plus a thinner beam, with no faint outer circle, and three fewer simulated landmark systems in the zones.
+Emitter counts also swing with how many Boki bursts are live in the frame (Hushwood's 8 -> 3 is mostly that), so the
+deterministic part is: Beam 40 -> 20, landmark emitters 1 -> 0 per zone. Shots: `docs/shots/garden-clarity/<part>.jpg`
+(left before, right after; software-GL frames). GPU frames: jobq 20261112-044534-13097 (before) and
+20261112-044708-17279 (after), `--quality=medium`, `--bench-shots=shots`; queued behind ~45 jobs when this was written.
