@@ -19,7 +19,15 @@ func ok(cond: bool, what: String) -> void:
 func _match(main: Node, seed_v: int, extra := {}) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	var o := {"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true, "raid": "clear"}
+	var o := {
+		"teams": 3,
+		"squad": 2,
+		"tier": 0,
+		"length": 1e9,
+		"seed": seed_v,
+		"no_drop": true,
+		"raid": "clear"
+	}
 	o.merge(extra, true)
 	m.start(o)
 	m.set_process(false)
@@ -57,7 +65,11 @@ func _beside(m: Match, n: Dictionary, d: float) -> Vector3:
 	for k in 16:
 		var a := TAU * k / 16.0
 		var q := m.world.free_spot_near(p + Vector3(cos(a), 0, sin(a)) * d, [p], 1.0, 0.45, 1.5)
-		if absf(q.y - p.y) < 1.0 and m.world.los(p, q, p.y + 0.7) and Vector2(q.x - p.x, q.z - p.z).length() > d - 1.6:
+		if (
+			absf(q.y - p.y) < 1.0
+			and m.world.los(p, q, p.y + 0.7)
+			and Vector2(q.x - p.x, q.z - p.z).length() > d - 1.6
+		):
 			return q
 	return Vector3.INF
 
@@ -100,10 +112,18 @@ func _placement(main: Node) -> void:
 	)
 	ok(N.list.size() >= w.islands.size(), "every island has a nest (%d)" % N.list.size())
 	ok(
-		N.list.all(func(n): return n["mob"] is Blight and not n["mob"].dead and n["mob"].flat_dist(n["pos"]) < 0.5),
+		N.list.all(
+			func(n):
+				return (
+					n["mob"] is Blight and not n["mob"].dead and n["mob"].flat_dist(n["pos"]) < 0.5
+				)
+		),
 		"each nest stands as a body at its spot"
 	)
-	ok(N.list.all(func(n): return int(n["full"]) >= 6 and int(n["full"]) <= 8), "each holds 6-8 Skitters")
+	ok(
+		N.list.all(func(n): return int(n["full"]) >= 6 and int(n["full"]) <= 8),
+		"each holds 6-8 Skitters"
+	)
 	ok(_skitters(m).is_empty(), "no Skitters at the start")
 	var clash := 0
 	for p in spots:
@@ -168,7 +188,10 @@ func _none_outside(main: Node) -> void:
 		)
 	)
 	ok(stray == 0, "no Skitter appears outside a nest")
-	ok(total > 0 and total <= B.nests.released, "every Skitter seen is one a nest released (%d of %d)" % [total, B.nests.released])
+	ok(
+		total > 0 and total <= B.nests.released,
+		"every Skitter seen is one a nest released (%d of %d)" % [total, B.nests.released]
+	)
 	var held := 0
 	for n in B.nests.list:
 		held += int(n["full"])
@@ -216,7 +239,13 @@ func _cycle(main: Node) -> void:
 			% [out, full, N.rule("warn_s"), int(N.rule("area_cap"))]
 		)
 	)
-	ok(out > 0 and out <= want, "then it releases its stock, within the area cap and the Blight cap %d (%d)" % [m.blight.cap(), out])
+	ok(
+		out > 0 and out <= want,
+		(
+			"then it releases its stock, within the area cap and the Blight cap %d (%d)"
+			% [m.blight.cap(), out]
+		)
+	)
 	# kill them all (and whatever the rest of the stock brings) while standing there
 	var killed := 0
 	var t := 0.0
@@ -229,13 +258,19 @@ func _cycle(main: Node) -> void:
 	ok(int(n["stock"]) == 0 and N.cooling(n), "%d killed, the nest is empty and cooling" % killed)
 	ok(killed == full, "it gave exactly what it held (%d of %d)" % [killed, full])
 	var left := N.refill_left(n)
-	ok(absf(left - N.rule("cooldown_s")) < 25.0, "it stays empty for its cooldown (%.0fs left)" % left)
+	ok(
+		absf(left - N.rule("cooldown_s")) < 25.0,
+		"it stays empty for its cooldown (%.0fs left)" % left
+	)
 	# still standing right by it: nothing comes, through most of the cooldown
 	var sk1 := N.released
 	_run(m, 3.0)
 	m.time += left - 8.0
 	_run(m, 3.0, func(): P.teleport(stand))
-	ok(N.released == sk1 and _skitters(m).is_empty(), "standing by an empty nest for %.0fs: quiet" % (left - 2.0))
+	ok(
+		N.released == sk1 and _skitters(m).is_empty(),
+		"standing by an empty nest for %.0fs: quiet" % (left - 2.0)
+	)
 	# break it: gems, XP to the squad close by, the feed line
 	var gems0 := m.pickups.filter(func(p): return p["kind"] == "gem").size()
 	P.lvl = 1  # (the 9999-damage kills above maxed the level; gain_xp stops at the top)
@@ -282,7 +317,10 @@ func _shriek_and_home(main: Node) -> void:
 	ok(n["stir_at"] != INF, "but a nest %.0f m away stirs" % W.flat_dist(n["pos"]))
 	_run(m, N.rule("warn_s") + 0.4)
 	var out := _skitters(m).size() - sk0
-	ok(out > 0 and out <= mini(full, int(N.rule("area_cap"))), "and gives up what it holds, within the caps (%d)" % out)
+	ok(
+		out > 0 and out <= mini(full, int(N.rule("area_cap"))),
+		"and gives up what it holds, within the caps (%d)" % out
+	)
 	# send them home: idle, far from everyone
 	var s: Blight = _skitters(m)[0]
 	var st0 := int(n["stock"])
@@ -296,7 +334,10 @@ func _shriek_and_home(main: Node) -> void:
 		B._despawn_tick()
 		ok(
 			s.gone and int(n["stock"]) == (st0 + 1 if not N.cooling(n) else st0),
-			"an idle Skitter far from everyone burrows home (stock %d -> %d)" % [st0, int(n["stock"])]
+			(
+				"an idle Skitter far from everyone burrows home (stock %d -> %d)"
+				% [st0, int(n["stock"])]
+			)
 		)
 	else:
 		ok(true, "(burrow home: spots too close on this map, skipped)")
@@ -305,7 +346,8 @@ func _shriek_and_home(main: Node) -> void:
 		x.hurt(9999.0, P, {})
 	n["stock"] = 0
 	n["refill_at"] = m.time + 100.0
-	var mine := func(): return _skitters(m).filter(func(x): return int(x.get_meta("nest", -1)) == 0).size()
+	var mine := func():
+		return _skitters(m).filter(func(x): return int(x.get_meta("nest", -1)) == 0).size()
 	W.shriek_cd = 0.0
 	B.on_shriek(W, P)
 	_run(m, N.rule("warn_s") + 0.4)
@@ -350,7 +392,13 @@ func _bots(main: Node) -> void:
 		path += Vector2(bot.pos.x - last.x, bot.pos.z - last.z).length()
 		last = bot.pos
 		for x in m.mobs:
-			if x is Blight and x.mkind == "bl_skitter" and x.dead and not x.gone and not ids.has(x.nid):
+			if (
+				x is Blight
+				and x.mkind == "bl_skitter"
+				and x.dead
+				and not x.gone
+				and not ids.has(x.nid)
+			):
 				ids[x.nid] = true
 				killed += 1
 	var nest_dead: bool = n["mob"] == null or n["mob"].dead
@@ -395,7 +443,10 @@ func _net_and_boss(main: Node) -> void:
 		"the nest event carries its stock and refill clock"
 	)
 	N.net(["nest", 0, 5, -1.0, 1])
-	ok(not N.cooling(n) and n["stir_at"] != INF and int(n["stock"]) == 5, "... and that it is stirring")
+	ok(
+		not N.cooling(n) and n["stir_at"] != INF and int(n["stock"]) == 5,
+		"... and that it is stirring"
+	)
 	ok(MapDetail.DETAIL.has("nest"), "nests have a minimap kind")
 	m.queue_free()
 	var src := FileAccess.get_file_as_string("res://scripts/match/boss.gd")

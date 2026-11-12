@@ -48,6 +48,10 @@ static func _nest(hud, pv: Vector2, s: float, n: Dictionary, N: BlightNests) -> 
 	Icons.draw(c, "egg", pv, s * 0.8, col)
 	var k := int(n["stock"])
 	for i in k:
-		c.draw_circle(pv + Vector2((i - (k - 1) * 0.5) * s * 0.45, s * 1.35 + 2.5), maxf(0.9, s * 0.14), col)
+		c.draw_circle(
+			pv + Vector2((i - (k - 1) * 0.5) * s * 0.45, s * 1.35 + 2.5), maxf(0.9, s * 0.14), col
+		)
 	if cooling:
-		hud._ctext(pv + Vector2(0, -s * 1.6), Lairs.clock(N.refill_left(n)), 10, Color.WHITE, hud.big)
+		hud._ctext(
+			pv + Vector2(0, -s * 1.6), Lairs.clock(N.refill_left(n)), 10, Color.WHITE, hud.big
+		)
