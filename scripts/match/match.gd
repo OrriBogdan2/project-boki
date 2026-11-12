@@ -2298,6 +2298,8 @@ func on_merge(h: Hunter, k: Kin, u: MergeSpec) -> void:
 func on_merge_end(h: Hunter, why: String) -> void:
 	if h == player and hud and why in ["time", "throw"]:
 		hud.toast_small("FUSION ENDED", Color("ffd84a"))
+	if h == player:
+		Save.d["tutorial"]["ult"] = true      # fused once (here or in the tutorial): no bond-full prompt again
 
 func on_combo(target: Ent, own: Node, c: Dictionary) -> void:
 	kstat["combo"] += 1
@@ -5623,25 +5625,25 @@ func _tips() -> void:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
 			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
-	if player.ult >= 1.0 and player.kin:
-		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
-		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var boki: String = k.rec.get("name", "your Boki")
+	if KinMerge.can_cast(player):
+		_tip("ult", "Bond full! Press %s to Fuse with %s" % [Settings.key_cap("ultimate"), boki])
+	if k.rest_t > 0.0:      # only set when your Boki lands from your Fuse
+		_tip("fuse_rest", "%s rests a few seconds after a Fuse: its card counts it down" % boki)
 	if _tip_t > 9.0:
 		var near_foe := false
 		for f in foes_of(player.team):
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
+			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), boki])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [boki, a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
 		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
