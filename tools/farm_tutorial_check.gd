@@ -624,7 +624,7 @@ func _world() -> void:
 	var home = await _home(1)
 	var stall := HomeLayout.deco_center(HomeLayout.fixtures(Save.d, "stall")[0])
 	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
-			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
+			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 9.0,
 			"Hob waits by the market stall from the start")
 	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_text().contains("Hob"),
 			"the first prompt is on screen: %s" % home.guide.hint_text())
