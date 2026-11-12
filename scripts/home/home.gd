@@ -432,7 +432,7 @@ func _ready_rest() -> void:
 		rack_node.position = spots["rack"]
 		add_child(rack_node)
 	portal.get_node("Disc").visible = true
-	(portal.get_node("Beam") as CPUParticles3D).emitting = true
+	ZoneDress.calm_pad(portal)
 	if not fs:
 		var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
 		(pond.get_child(0) as MeshInstance3D).material_override = HomeBuild.water_mat()      # animated water
