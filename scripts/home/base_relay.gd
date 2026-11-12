@@ -6,7 +6,8 @@ extends RefCounted
 ## the timing bar: the grade sets the seconds the next runner loses taking the baton; rivals fumble unless the
 ## press is great, and duo friends (BaseDuo) hand off cleanly on their own and run the next leg faster.
 ## The visitors mirror your three at the cup round's strength (rivals()), so every win is a cup win in
-## content/rules/garden_prizes.json "relay". Tuning: content/rules/base_relay.json. Run has no nodes, so
+## content/rules/garden_prizes.json "relay". The runners' body language (hand-off contact, launch burst, finish
+## cheer and sulk) is RelayBeats. Tuning: content/rules/base_relay.json. Run has no nodes, so
 ## --relay-cup-check (tools/relay_cup_check.gd) runs it headless with a seed.
 
 const STAND_OFF := Vector3(-1.3, 0, -2.4)   # m from the loop's start line to the relay stand
@@ -18,7 +19,7 @@ static func rules() -> Dictionary:
 
 ## Seconds `rec` takes over leg `leg` with no wobble.
 static func leg_time(rec: Dictionary, leg: int) -> float:
-	var st: Array = BaseRace.stretches()
+	var st: Array = BaseRace.rules()["stretches"]
 	var out := 0.0
 	for s in rules()["legs"][leg]:
 		out += float(st[s]["len"]) / BaseRace.stretch_pace(rec, int(s))
@@ -79,7 +80,7 @@ class Run:
 		teams = [mine, theirs]
 		rng = r
 		var at := 0.0
-		for s in BaseRace.stretches():
+		for s in BaseRace.rules()["stretches"]:
 			at += float(s["len"])
 			ends.append(at)
 		for team in 2:
@@ -204,7 +205,8 @@ var anchor := {}               # your Boki the prize and cup go to: your partner
 var bar: TimingBar = null
 var heard := [0, 0]            # hand-offs sounded so far, per team
 var crossed := [false, false]  # each team's finish sounded
-var cue: GardenCues.BatonCue = null   # each team's glowing baton while a relay runs
+var beats := RelayBeats.new()  # the runners' hand-off, launch and finish body language
+var finish_left := -1.0        # s the finished teams still show their cheer or sulk (-1: the relay is on)
 
 func _init(dash: BaseRace) -> void:
 	race = dash
@@ -275,13 +277,13 @@ func use() -> void:
 		var n := Models.kin(String(rec["species"]), rec)
 		h.add_child(n)
 		visitors.append({"rec": rec, "node": n})
-	cue = GardenCues.BatonCue.new(h)
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s before each mark to hand off" % Settings.key_cap("interact"))
 	_bar_label("")
 	_place_runners()
 	heard = [0, 0]
 	crossed = [false, false]
+	finish_left = -1.0
 	GardenSfx.countdown(h, race.start)
 
 func _bar_label(last: String) -> void:
@@ -313,9 +315,13 @@ func tick(d: float) -> void:
 	bar.step(d)
 	_place_runners()
 	_hear()
-	_baton_cue(d)
+	beats.step(run.t)
 	if run.over():
-		_end(true)
+		if finish_left < 0.0:
+			finish_left = float(RelayBeats.rules()["finish_s"])
+		finish_left -= d
+		if finish_left <= 0.0:
+			_end(true)
 
 ## Sounds for what happened this step, per team: a clean pass (no more lost than a good press) or a fumble at the
 ## runner taking the baton, and the tape when its last runner is home.
@@ -328,12 +334,18 @@ func _hear() -> void:
 			var s := float(lost[heard[team]])
 			heard[team] = int(heard[team]) + 1
 			GardenSfx.cue("relay_handoff" if s <= clean_s else "relay_fumble", ents[heard[team]]["pos"])
+			var at: int = heard[team]
+			beats.hand_off(ents[at - 1]["node"], ents[at]["node"], run.t, s, run.boost[team])
 		if float(run.done_t[team]) >= 0.0 and not crossed[team]:
 			crossed[team] = true
 			GardenSfx.cue("relay_finish", ents[-1]["pos"])
+			RelayBeats.finish(_nodes(ents), not crossed[1 - team])
+
+func _nodes(ents: Array) -> Array:
+	return ents.map(func(e): return e["node"])
 
 func _place_runners() -> void:
-	var st: Array = BaseRace.stretches()
+	var st: Array = BaseRace.rules()["stretches"]
 	var lane := float(BaseRace.rules()["lane"])
 	for team in 2:
 		var side := lane * (team - 0.5)
@@ -356,28 +368,17 @@ func _place_runners() -> void:
 			n.rotation.y = race.heading(s)
 			ents[i]["pos"] = p
 
-## Each team's baton over its runner, blinking while the runner takes it; a burst where it changes hands.
-func _baton_cue(d: float) -> void:
-	cue.step(d)
-	for team in 2:
-		var ents: Array = mine if team == 0 else visitors
-		var leg := int(run.leg[team])
-		var lost: Array = run.lost[team]
-		cue.update(team, ents[leg]["pos"], leg, GardenCues.type_colour(ents[leg]["rec"]), float(run.wait[team]) > 0.0,
-				lost.is_empty() or float(lost[-1]) == 0.0)
-
 func _end(finished: bool) -> void:
 	var res := {}
 	if finished:
 		res = settle(run, anchor)
+	beats.clear(_nodes(mine) + _nodes(visitors))
 	for k in mine:
 		k["busy"] = false
 		k["t"] = 1.5
 	for v in visitors:
 		v["node"].queue_free()
 	bar.close()
-	cue.clear()
-	cue = null
 	if finished:
 		_card(res)
 		var k: Dictionary = h._kin_entry(anchor)
@@ -391,7 +392,7 @@ func _end(finished: bool) -> void:
 	visitors = []
 
 func _card(res: Dictionary) -> void:
-	var st: Array = BaseRace.stretches()
+	var st: Array = BaseRace.rules()["stretches"]
 	var legs: Array = []
 	for i in run.legs.size():
 		legs.append("%s the %s" % [run.teams[0][i]["name"], st[run.legs[i][0]]["kind"]])

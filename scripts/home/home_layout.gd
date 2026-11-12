@@ -39,6 +39,8 @@ const THEMES := {
 		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
 	"cinderstep": {"name": "Cinderstep", "zone": true, "own_ground": true, "region": 1,
 		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
+	"hushwood": {"name": "Hushwood", "zone": true, "region": 0, "style": "gloom", "top": "4a6a52", "top2": "3a5848",
+		"side": "4a3d52", "deep": "20202e", "leaf": "6f8f9c"},
 	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
 		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
@@ -370,6 +372,7 @@ static func lobe(level: int) -> Array:
 ## the save's size. The original island's shape is untouched, so nothing that stood on it falls off.
 ## sk: a farm-start island's size scale (its layout's "sk"); 0 for the classic and procedural meadows.
 static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
+	world.scatter_chunk = 1024      # the camera sees the whole home at once: one scatter batch per kind
 	# a farm-start island keeps only a small fixed heart round the portal: the rest is its own shape
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
