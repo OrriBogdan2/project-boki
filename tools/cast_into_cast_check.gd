@@ -1,10 +1,10 @@
 extends RefCounted
 ## --cast-into-cast-check: for every hero with into_cast rows in content/dash_flow (the "Cast into cast" tables in
 ## docs/heroes/dash_interactions.md), a second ability pressed during the first one's wind-up and its recovery does
-## what the row says: "fire" (goes within ACT_S), "queue" (held, goes after the row's wait, +-WAIT_TOL) or "drop"
-## (never goes). The two press times per first move are its row's "at" (s after its press). An LMB hold is held
-## HOLD_S, then let go. --cast-into-cast-check=<id>,<id> runs only those heroes. Reuses --dash-flow-check's arena,
-## ready-up and "went off" probes. Never touches the save.
+## what the row says: "fire" (goes within ACT_S), "queue" (held, goes after the row's wait, +-WAIT_TOL), "cancel"
+## (goes at once and the first move never comes) or "drop" (never goes). The two press times per first move are its
+## row's "at" (s after its press). An LMB hold is held HOLD_S, then let go. --cast-into-cast-check=<id>,<id> runs
+## only those heroes. Reuses --dash-flow-check's arena, ready-up and "went off" probes. Never touches the save.
 
 const PHASES := ["windup", "recovery"]
 const ACT_S := 0.1              # s: a press that goes this soon went at once
@@ -16,6 +16,7 @@ const FOE_AT := Vector3(0, 0, -40)      # the other hunter, out of every reach (
 
 var flow_check = preload("res://tools/dash_flow_check.gd").new()
 var bad := 0
+var first_cut := false      # the last trial's first move never went off (pressed second, it ended it)
 var trials := 0
 
 func ok(cond: bool, what: String) -> void:
@@ -63,16 +64,16 @@ func _row(main: Node, hero: String, first: String, second: String, moves: Dictio
 		else:
 			ok(got == want, what + ")")
 
-## A trial's wait (see _wait) as "fire", "queue <s it waited>", "drop", or "no first" (the first move never went
-## off). It is counted past the second's own time to go off when pressed alone (`base`: a hold goes off at its tap
-## threshold).
+## A trial's wait (see _wait) as "fire", "queue <s it waited>", "cancel" (it went at once and the first move never
+## came), "drop", or "no first" (neither went off). It is counted past the second's own time to go off when pressed
+## alone (`base`: a hold goes off at its tap threshold).
 func _verdict(wait: float, base: float) -> String:
-	if wait == NO_FIRST or wait < 0.0:
-		return "no first" if wait == NO_FIRST else "drop"
+	if wait < 0.0:
+		return "no first" if first_cut else "drop"
 	wait -= base
-	return "fire" if wait <= ACT_S + 0.001 else "queue %.2f" % wait
-
-const NO_FIRST := -2.0
+	if wait <= ACT_S + 0.001:
+		return "cancel" if first_cut else "fire"
+	return "queue %.2f" % wait
 
 ## Seconds from the press of `second` until it went off (-1: never), `at` s into `first` ("": pressed alone). A
 ## fresh arena per trial: no trial leaves a charge, a buff or a roused foe to the next.
@@ -91,25 +92,29 @@ func _timed(m: Match, first: String, second: String, at: float) -> float:
 			other.teleport(h.pos + FOE_AT)
 	var hold_steps := int(round(HOLD_S / Match.DT)) if first == "lmb_hold" else 1
 	var step := 0
+	var before: Dictionary = flow_check._snap()
+	var first_went := first == ""
 	if first != "":
-		var before: Dictionary = flow_check._snap()
 		_press(first)
-		var first_went := false
 		while step < int(round(at / Match.DT)):
 			_step(m, step + 1 < hold_steps)
 			step += 1
 			first_went = first_went or flow_check._went_off(before, _key(first))
-		if not first_went:
-			return NO_FIRST
-	var before: Dictionary = flow_check._snap()
+	var first_before := before
+	before = flow_check._snap()
 	_press(second)
 	var second_hold := int(round(HOLD_S / Match.DT)) if second == "lmb_hold" else 1
+	var wait := -1.0
 	for i in int(WATCH_S / Match.DT):
 		_step(m, (first != "" and step + 1 < hold_steps) or i + 1 < second_hold)
 		step += 1
-		if flow_check._went_off(before, _key(second)):
-			return float(i + 1) * Match.DT
-	return -1.0
+		first_went = first_went or flow_check._went_off(first_before, _key(first))
+		if wait < 0.0 and flow_check._went_off(before, _key(second)):
+			wait = float(i + 1) * Match.DT
+		if wait >= 0.0 and first_went:
+			break
+	first_cut = not first_went
+	return wait
 
 func _step(m: Match, fire_down: bool) -> void:
 	m.step(Match.DT)

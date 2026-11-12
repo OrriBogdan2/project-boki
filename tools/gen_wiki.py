@@ -763,7 +763,7 @@ CAST_SLOTS = [("lmb", "LMB tap"), ("lmb_hold", "LMB hold"), ("rmb", "RMB"), ("e"
 def _cast_ours(row, phase):
     mode = row.get(phase, "?")
     return "queued, goes %.2f s later" % row.get(phase + "_wait", 0) if mode == "queue" else {
-        "fire": "fires at once", "drop": "dropped"}.get(mode, mode)
+        "fire": "fires at once", "cancel": "fires at once, ends it", "drop": "dropped"}.get(mode, mode)
 
 def _cast_tables(flows):
     """One "Cast into cast" table per hero with into_cast rows: a press in another ability's wind-up and recovery."""
@@ -787,7 +787,8 @@ def _cast_tables(flows):
         return ""
     return ("\n## Cast into cast\n\nThe second ability pressed during the first one's wind-up and its recovery (the times "
             "are seconds after the first press), read from `into_cast` in `content/dash_flow/<hero>.json` and asserted by "
-            "`--cast-into-cast-check`. Cancels are not asserted: in the measuring runs no press ended the first move (its hit or state still came). \"Source\" is what the footage shows; "
+            "`--cast-into-cast-check`, which also asserts the first move still comes (a press that ends it reads "
+            "\"ends it\"; none did in the measuring runs). \"Source\" is what the footage shows; "
             "`[?]` marks a pair it cannot settle.\n") + out
 
 def gen_dash_flow():
