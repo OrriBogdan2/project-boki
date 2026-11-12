@@ -629,7 +629,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 215,
+"long_line": 214,
 "nested_ternary": 18,
 "semicolon": 141,
 "shadow": 7
