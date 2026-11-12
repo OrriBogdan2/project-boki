@@ -259,8 +259,8 @@ func _declutter(view: Control) -> void:
 		var ak: String = card.get_meta("arch")
 		var role := String(Arch.def(ak)["card"]["role_word"])
 		var chip: Node = card.find_child("StartHere", false, false)
-		var labels := card.find_children("*", "Label", true, false)
-		var lines := labels.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
+		var labels: Array = card.find_children("*", "Label", true, false)
+		var lines: Array = labels.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
 		var texts: Array = lines.map(func(l): return (l as Label).text)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
@@ -278,8 +278,8 @@ func _declutter(view: Control) -> void:
 ## The three starters wear a "Start here" stamp on both pickers until one match is played (a stamp over the card,
 ## not a third line: _declutter counts the lines); it picks nothing for you.
 func _start_here(view: Control) -> void:
-	var tagged := _tagged(view.grid)
-	var starters := ClassUnlock.starters()
+	var tagged: Array = _tagged(view.grid)
+	var starters: Array = ClassUnlock.starters()
 	var three: bool = starters.size() == 3 and tagged.size() == 3 and starters.all(func(a): return tagged.has(a))
 	var msg := "a fresh save: Start here on the three starters only, no pick made for you (%s)" % [tagged]
 	ok(three and view.pm.pick == "", msg)
@@ -289,7 +289,7 @@ func _start_here(view: Control) -> void:
 	ok(_tagged(grid) == tagged, "the expedition panel tags the same three (%s)" % [_tagged(grid)])
 	Save.d["matches"] = 1
 	view._fill_hunters()
-	var gone := _tagged(view.grid).is_empty()
+	var gone: bool = _tagged(view.grid).is_empty()
 	panel.free()
 	panel = VBoxContainer.new()
 	HunterPickRow.add(null, panel)
@@ -300,6 +300,6 @@ func _start_here(view: Control) -> void:
 	ok(gone, "after one match no card says Start here")
 
 func _tagged(grid: Node) -> Array:
-	var cards := grid.get_children().filter(func(c): return not c.is_queued_for_deletion())
-	var tagged := cards.filter(func(c): return c.find_child("StartHere", false, false) != null)
+	var cards: Array = grid.get_children().filter(func(c): return not c.is_queued_for_deletion())
+	var tagged: Array = cards.filter(func(c): return c.find_child("StartHere", false, false) != null)
 	return tagged.map(func(c): return String(c.get_meta("arch")))
