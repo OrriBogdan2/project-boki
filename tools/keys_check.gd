@@ -282,6 +282,11 @@ func _shrubling() -> void:
 			mb.hp = 0.0
 			mb.dead = true
 			mb.visible = false
+	if m.biomes:
+		m.biomes.hazards.clear()      # a storm rod's strike near the hunter would wake it: only the test's hits count
+	for k in m.kins:
+		if k.owner_h == P:
+			k.bench()      # the hunter's Boki would chase it down and knock it out: the test lands its own hits
 	ok("it always carries a key", KeyCarry.carries(S))
 	ok("it starts as a bush: disguised, standing on grass", S.ss == "disguised" and m.world.in_bush(S.pos.x, S.pos.z))
 	# set it on bare ground, so any cover there is the Shrubling's own
