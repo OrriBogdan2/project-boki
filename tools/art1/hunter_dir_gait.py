@@ -13,9 +13,8 @@ A rig without foot bones (Kael) is posed on thigh and shin: the foot is the shin
 shin's tail) and turns with the shin. On a Hunter whose walk_f/run_f still lean on `loco.stride`/`foot_mps`, pass the
 foot_mps pair as the speeds, so every direction gets the forward loop's rate and stride in game.
 A direction written "b+" keeps the shipped loop instead (restride): only its feet are pushed along the move until a
-planted sole travels at the loco speed, for a hand-keyed loop whose look wins but whose feet slide. A diagonal written
-"fl~" is the shipped f (or b) loop turned 45 degrees into the move: the root and the legs turn, the chest keeps the
-source's facing, every key as timed (for a rig the recipe can't step: Albert's crouch, 14 cm legs under hips 9 cm up).
+planted sole travels at the loco speed, for a hand-keyed loop whose look wins but whose feet slide. A diagonal turned off the
+forward or back loop (a rig the recipe can't step: Albert) is tools/art1/glb_turn_clip.py, on the shipped keys.
   blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED [DIRS WALK_S RUN_S SIZE CYCLES TURN GAITS]
 SIZE: game metres per model metre (Albert's breaker.glb is 2.0); the metre constants below are game metres.
 CYCLES: WALK,RUN left + right pairs a loop (Albert's 14 cm legs walk 2,1: a half-length step in the forward loop's time).
@@ -460,27 +459,6 @@ def restride(name, src, speed, planted):
           "pelvis dip %.3f m" % (name, stretch, planted * stretch, speed, worst, dip))
 
 
-def turned(name, src, k):
-    """turn: the source loop, its root (and so the legs and their steps) turned about the vertical through the armature
-    origin from the source's line onto direction k, the hips turned back so the chest keeps the source's facing."""
-    d = DIRS[k]
-    yaw = math.atan2(-d.x, d.y) if d.y > 0 else math.atan2(d.x, -d.y)   # (the f loop goes +y, the b loop -y)
-    turn = Matrix.Rotation(yaw, 4, "Z")
-    keys = []
-    for key in src["keys"]:
-        for pb in PB:
-            pb.location, pb.rotation_quaternion, pb.scale = key["basis"][pb.name]
-        layer.update()
-        chest = PB["hips"].matrix.to_3x3().to_4x4()
-        PB["root"].matrix = turn @ PB["root"].matrix
-        layer.update()
-        PB["hips"].matrix = Matrix.Translation(PB["hips"].matrix.translation) @ chest
-        layer.update()
-        keys.append({pb.name: (pb.location.copy(), pb.rotation_quaternion.copy(), pb.scale.copy()) for pb in PB})
-    key_action(name, keys)
-    print("TURNED %s from the %s loop, %.0f deg" % (name, "f" if d.y > 0 else "b", math.degrees(yaw)))
-
-
 def measure(name, src, speed):
     """The shipped loop's floor: the speed under each planted sole against the loco speed, and the pelvis's rise and fall."""
     sp = []
@@ -508,17 +486,12 @@ for gait in GAITS:
         SPEED[gait] = measure("crouch_f", fwd, 0.0)
     planted = {k: measure("%s_%s" % (gait, k), shipped[k], SPEED[gait]) for k in shipped}
     for k in BUILD:
-        name = "%s_%s" % (gait, k.rstrip("~+"))
+        name = "%s_%s" % (gait, k.rstrip("+"))
         old = bpy.data.actions.get(name) or next((a for a in bpy.data.actions if a.name.startswith(name + "_") and
                                                   not a.name.endswith("_was") and "Armature" in a.name), None)
         if old is not None:                                # (a loop already on the model: the new one takes its name)
             old.name = name + "_was"
         arm.animation_data.action = None
-        if k.endswith("~"):
-            k = k[:-1]
-            turned(name, shipped["f" if DIRS[k].y > 0 else "b"], k)
-            made.append(name)
-            continue
         if k.endswith("+"):
             k = k[:-1]
             restride(name, shipped[k], SPEED[gait], planted[k])
