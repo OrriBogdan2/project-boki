@@ -84,3 +84,14 @@ the glb in CURRENT_OVERRIDES.txt, or `--face` by hand. An undeclared head change
 put back (`<stem>_keephead.glb`); anything else is refused. `v95-promote --check` fails if a lock-era promote changed
 a head without a face pass (`--selftest` covers the lock). Swap specs here should name the promoted master
 (`current.json` "glb"), not an r2 candidate, so the game gets the same face.
+
+## The hunters are counted from art/wardens (2026-11-12)
+v95-promote takes its hunters from `~/meshy/v95/_tools/v95_roster.py`: every `art/wardens/<id>/<id>.glb` on the
+game's origin/main (13 with Gil), not a fixed list. Its `KNOWN` table only maps an art id to its v95 folder and
+display name (owner room order 2026-11-08); a warden that is not in it still counts, named after its id. A hunter in
+art/wardens without a `v95.glb` yet shows in `--status` and is a WARN in `--check`. The Model Room's build3d.py on
+hetzner reads the same roster once `~/meshy/v95/_tools/model-room-roster-patch.py` has replaced its fixed 12-row
+list (it refuses unless that list is found exactly once).
+Gil's first v95 pass (no gil_v2 refs, so the approved 2D): `~/meshy/v95/Gil/r2/v95a/NOTES.txt` (cand_B, judge 85;
+the live 12 score 76-88), sheet `Gil/before_after.jpg`, `Gil/turntable.mp4`. Its promote is a face pass:
+`v95-promote Gil r2/v95a/cand_B.glb --face "first v95 face for Gil"`; his swap spec follows from the promoted master.
