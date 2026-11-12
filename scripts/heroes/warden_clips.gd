@@ -19,8 +19,8 @@ extends RefCounted
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
-const FADE := 0.1            # s: one clip into the next, and into or out of an action
-const FADE_LOCO := 0.16      # s: an action back to the legs
+const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides)
+const FADE_LOCO := 0.16      # s: an action back to the legs (a move's "fade_out" overrides)
 const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
@@ -51,6 +51,7 @@ var xf := 0.0                # the crossfade between the channels (0: channel a)
 var cur_u := ""              # the clip on the live upper-body channel
 var chan_u := 0              # which upper-body channel is live, 0 or 1
 var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
+var fade_out := FADE_LOCO    # s: the blend back to the legs after the clip playing now (its "fade_out")
 var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
 var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less its first frame) rides on the upper body
@@ -358,7 +359,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
+				"fade": float(mv.get("fade", FADE)), "fade_out": float(mv.get("fade_out", FADE_LOCO)),
+				"legs_heading": bool(mv.get("legs_heading", false)),
 				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
@@ -415,6 +417,7 @@ func step(dt: float) -> void:
 			if up_w <= 0.0:
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
 		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
+		fade_out = float(want.get("fade_out", FADE_LOCO))
 		up_w = move_toward(up_w, 1.0, dt / FADE)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
@@ -432,13 +435,15 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
+		fade_out = float(want.get("fade_out", FADE_LOCO))
 		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
-		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
-		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
+		act_w = move_toward(act_w, 0.0, dt / fade_out)
+		up_w = move_toward(up_w, 0.0, dt / fade_out)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
+			fade_out = FADE_LOCO
 	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
 	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
 	_p("act/blend_amount", xf)
