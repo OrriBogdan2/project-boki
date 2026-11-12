@@ -205,7 +205,6 @@ func _strike(i: int) -> void:
 		hit[f.get_instance_id()] = true
 		f.hurt(strike, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("strike_stun", 0.5)), "dr": true,
 			"tags": ["ultimate"]})
-		KitLooks.of(k.m).crown(f, float(x.get("strike_stun", 0.5)))
 		if f is Hunter:
 			HeroUlt.landed(k, f)
 

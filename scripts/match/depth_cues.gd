@@ -72,7 +72,7 @@ func _process(_dt: float) -> void:
 		_lay(disc, h.global_position, h.visible and not h.out)
 	var n := 0
 	for s: Dictionary in _match.shots:
-		var node: MeshInstance3D = s["node"]
+		var node: MeshInstance3D = s.get("node")
 		if node == null:
 			continue
 		if n == _shot_discs.size():

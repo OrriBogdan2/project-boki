@@ -77,7 +77,7 @@ files (one per kind of mistake) and should always print errors. Phase 3 builds t
 	"name": "Stinger Hook",
 	"short": "Hook",
 	"flavor": "Vespyx lashes its tail and reels in whatever it stings.",
-	"theme": "venom",
+	"theme": "poison",
 	"tier": 1,
 	"from": "kin",
 	"range": 8,

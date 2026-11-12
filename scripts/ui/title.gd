@@ -50,7 +50,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
-	Sfx.play_ambience("match")          # the wind
+	Sfx.play_ambience("title")          # its own slow drone, not the match wind
 	rng.seed = 2026
 	low = Settings.lite()
 	fx_k = float(Settings.q("fx"))
@@ -492,6 +492,8 @@ func _build_ui() -> void:
 		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
+	if Net.mm.addr != "":
+		items.append(["Party", func(): Game.goto("party", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
 	if not OS.has_feature("web"):

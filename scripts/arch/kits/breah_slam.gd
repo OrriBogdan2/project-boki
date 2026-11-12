@@ -197,6 +197,7 @@ func slam(c: float, at_feet: bool) -> void:
 		at + Vector3(0, 0.2, 0), Vector3.UP, Color("9ad0ff"), int(10 + 10 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3
 	)
 	m.fx.flash(at + Vector3(0, 0.5, 0), Color("9ad0ff"), 0.6 + 0.3 * c, 0.08)
+	DolmImpact.hit(m, at, dmg)
 	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
 	m.sfx("br_slam", at, 0.0, 1.0)
 	k.net_ring(at, r, Color("3a7cff"))
@@ -219,7 +220,6 @@ func slam(c: float, at_feet: bool) -> void:
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("9ad0ff"), true)
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
-		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
 			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
 		gained = true

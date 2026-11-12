@@ -37,11 +37,13 @@ static func nap_outside(k: Dictionary) -> void:
 	k["slept"] = 0.0
 	k["z_t"] = 0.5
 	k["goal"] = k["pos"]
+	Sfx.play("boki_sleep", k["pos"], -10.0)
 
 ## It goes in for a nap.
 static func enter(k: Dictionary, night: bool) -> void:
 	k["indoors"] = nap_secs(night)
 	k["in_t"] = 0.0
+	Sfx.play("boki_sleep", k["pos"], -10.0)
 	inside[String(k["rec"]["uid"])] = k["indoors"]
 
 ## Counts a nap down. True when the Boki should come out: its time is up, you walked up to the

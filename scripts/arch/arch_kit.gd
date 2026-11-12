@@ -694,25 +694,17 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
+## A filling ground circle everyone sees: the hero's colour, edged in the side colour. Returns the node.
 func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(col, 0.9), SideColor.of(m, h))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
 	return tele
 
-## A filling lane (dash arrows, beams, charge lines).
+## A filling lane (dash arrows, beams, charge lines), edged in the side colour like tele_circle.
 func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
+	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(col, 0.9), SideColor.of(m, h))
 	if t > 0.0:
 		var tw := tele.create_tween()
 		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -1132,14 +1124,12 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var rc := col
-		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
+		var ring_r := 1.15 * float(h.cdat.get("scale", 1.0))
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, ring_r, Color(col, 0.9), SideColor.of(m, h))
 		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)
-		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
+		net_ring(h.pos, 0.8, col)           # remote players: "they're winding something up"
 	chg["k"] = k
 	var ring2: Node3D = chg.get("ring")
 	if ring2 and is_instance_valid(ring2):
@@ -1191,13 +1181,4 @@ func _charge_release() -> void:
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
-## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
-func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
-	var k := 0.3
-	while k <= reach:
-		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
-			return true
-		k += 0.3
-	return false
 

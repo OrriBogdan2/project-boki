@@ -1,9 +1,9 @@
 extends RefCounted
 ## --clarity-check: the one colour rule and the downed picture. In a 2v2: your ring is the "you" colour,
 ## your teammate's the ally colour and both rivals' the foe colour, and every Boki's ring matches its
-## Hunter's. With your teammate knocked: their bleed-out drains, their Boki's status icon says what it
-## is doing (pulling them up, down too, defending) and only your squad's Boki get tethers. Never touches
-## the save.
+## Hunter's, and a Vex telegraph or shot keeps Vex's fill with a side-coloured edge. With your teammate
+## knocked: their bleed-out drains, their Boki's status icon says what it is doing (pulling them up,
+## down too, defending) and only your squad's Boki get tethers. Never touches the save.
 
 const DT := 1.0 / 60.0
 
@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		if h.kin:
 			ok(_same(SideRings.shown((h.kin as Kin).ring), want), "%s's Boki ring matches its Hunter" % h.pname)
 			ok(SideColor.of(m, h.kin) == want, "%s's Boki takes its Hunter's colour" % h.pname)
+	_cues(m, ally, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -125,6 +126,24 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)
+
+## The side cue: the same Vex telegraph (an AimKit area, where kit rings live) and shot from your teammate and
+## from a rival: the same fill, edged in the ally colour and the foe colour.
+func _cues(m: Match, ally: Hunter, foe: Hunter) -> void:
+	var vex := Arch.color("gunslinger")
+	for h: Hunter in [ally, foe]:
+		AimKit.circle(h, "cue", {"self": true, "all": true, "col": vex})
+	AimKit.layer(m).rebuild()
+	var ea := AimKit.entry(ally, "cue")
+	var ef := AimKit.entry(foe, "cue")
+	var rims: bool = _same(ea.get("side", vex), SideColor.ALLY) and _same(ef.get("side", vex), SideColor.FOE)
+	ok(_same(ea["col"], ef["col"]) and rims, "an AimKit area: the same fill, ally and foe rims")
+	AimKit.clear(ally)
+	AimKit.clear(foe)
+	var la: Array = Oomph.shot_look(m, ally, vex, 0.2)
+	var lf: Array = Oomph.shot_look(m, foe, vex, 0.2)
+	var halos: bool = _same(la[3], SideColor.ALLY) and _same(lf[3], SideColor.FOE)
+	ok(_same(lf[0], Color(vex.lightened(0.1), 1.0)) and halos, "a Vex shot: Vex's bolt, its halo in the side colour")
 
 func _run(m: Match, secs: float) -> void:
 	var t := 0.0

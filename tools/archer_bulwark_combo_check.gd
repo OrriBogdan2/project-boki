@@ -33,6 +33,22 @@ func run(main_node: Node) -> void:
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+## A 3 m rock column across the strip at x = `x` (`kind` T_BLOCK), or the ground back (T_GROUND).
+func _hawk_rock(m: Match, x: int, z: int, kind: int) -> void:
+	var wk: PackedByteArray = m.world.kind
+	for dz in range(-1, 2):
+		wk[m.world.idx(x, z + dz)] = kind
+	m.world.kind = wk
+
+## How many of `f`'s meshes wear Hawk Sense's through-cover outline.
+func _hawk_lines(f: Hunter) -> int:
+	if f.model == null:
+		return 0
+	var lines := f.model.find_children("*", "MeshInstance3D", true, false).filter(func(mi):
+		var o := (mi as MeshInstance3D).material_overlay as ShaderMaterial
+		return o != null and o.shader == HawkSense.XRAY)
+	return lines.size()
+
 ## A raised block of terrain `dx` east of `at` (so a knock east runs into it).
 func _wall_at(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 	var W: World = m.world
@@ -416,19 +432,35 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	# Hawk Sense: a rival under half health is seen through cover
+	# Hawk Sense: a rival under the health line within 22 m is revealed and outlined through cover (HawkSense)
+	# (a rock between them: only Hawk Sense lets her side see past it)
+	var rock_x := int(home.x) + 4
+	_hawk_rock(m, rock_x, int(home.z), World.T_BLOCK)
 	fresh(T)
-	T.hp = T.max_hp
-	T.reveal_t = 0.0
-	step(m, 0.5)
-	var healthy_seen := T.reveal_t > 0.0
+	step(m, 0.5, func(): aim_at(P, T.pos))
+	var healthy_seen := T.reveal_t > 0.0 or K.sense.senses(T) or _hawk_lines(T) > 0 or m.can_see(P.team, T)
 	T.hp = T.max_hp * 0.4
-	step(m, 0.5)
+	step(m, 0.5, func(): aim_at(P, T.pos))
 	ok(
-		"combo archer: Hawk Sense shows only the injured",
-		not healthy_seen and T.reveal_t > 0.0,
-		"healthy %s injured %.2f" % [healthy_seen, T.reveal_t]
+		"combo archer: Hawk Sense: above the line hidden, below it seen past a rock and outlined",
+		not healthy_seen and T.reveal_t > 0.0 and m.can_see(P.team, T) and _hawk_lines(T) > 0,
+		"healthy %s injured %.2f seen %s, %d outlined meshes at %.1f m"
+			% [healthy_seen, T.reveal_t, m.can_see(P.team, T), _hawk_lines(T), P.flat_dist(T)]
 	)
+	T.hp = T.max_hp * 0.55
+	step(m, 0.5)
+	ok("combo archer: Hawk Sense: healed past the line, the reveal and outline go", T.reveal_t <= 0.0
+		and not m.can_see(P.team, T) and _hawk_lines(T) == 0, "reveal %.2f, %d outlined" % [T.reveal_t, _hawk_lines(T)])
+	_hawk_rock(m, rock_x, int(home.z), World.T_GROUND)
+	fresh(T)
+	T.hp = T.max_hp * 0.4
+	P.teleport(home - Vector3(7, 0, 0))
+	T.teleport(home + Vector3(18, 0, 0))
+	step(m, 0.5)
+	ok("combo archer: Hawk Sense: hurt but past 22 m stays hidden", T.reveal_t <= 0.0 and _hawk_lines(T) == 0,
+		"reveal %.2f at %.1f m" % [T.reveal_t, P.flat_dist(T)])
+	P.teleport(home)
+	T.teleport(home + Vector3(7, 0, 0))
 	T.hp = T.max_hp
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world

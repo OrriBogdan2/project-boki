@@ -6,6 +6,9 @@ Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
+The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
+for you), steal_won (a quick bright rise, you took a monster another squad fought hardest) and
+steal_lost (a dull falling pair over a low bump: you were robbed of it).
 """
 import numpy as np
 import sfx_lib as S
@@ -133,6 +136,69 @@ def charge(i):
     high = S.sweep(660, 1040, d) * u ** 1.5
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
+# ---------------------------------------------------------------- capture and extraction cues
+def capture(i):
+    """A Boki scanned and kept: a quick rising triad, a held top note and a soft sparkle."""
+    j = jit(i, 0.01)
+    notes = [at(pluck(NOTE[n] * j, 0.4, 0.08), 0.06 * k) for k, n in enumerate(['E5', 'G5', 'C6'])]
+    top = at(mix(pluck(NOTE['E6'] * j, 0.8, 0.22), pluck(NOTE['G5'] * j, 0.8, 0.22) * 0.5), 0.2)
+    spark = at(S.chime(NOTE['C6'] * 2, 0.7, 0.25, ((1.0, 0.6), (2.76, 0.18))) * 0.2, 0.22)
+    return finish(room(mix(*notes, top, spark), 0.8), 5400)
+
+
+def extract_start(i):
+    """An extraction begins (skiff called, hatch unlocking, uplink on): rising open notes over a breath."""
+    j = jit(i, 0.01)
+    breath = swell(True, 0.5, 400, 2200) * 0.3
+    return finish(room(mix(breath, pluck(NOTE['C5'] * j, 0.5, 0.12), at(pluck(NOTE['G5'] * j, 0.6, 0.16), 0.12),
+                           at(pluck(NOTE['D6'] * j, 0.7, 0.2), 0.26)), 0.7), 4200)
+
+
+def extract_fail(i):
+    """An extraction is lost (the uplink shut off, the call dropped): a slow falling trio, muted."""
+    j = jit(i, 0.01)
+    notes = [at(S.sweep(f * 1.04, f, 0.3) * env(N(0.3), 0.004, 0.12) + 0.2 * pluck(f * 2, 0.3, 0.05, 0.3), 0.14 * k)
+             for k, f in enumerate([NOTE['A4'] * j, NOTE['E4'] * j, 196 * j])]
+    return finish(room(mix(*notes), 0.5), 1900)
+
+
+def ready_ult(i):
+    """Ultimate back: a low felt pluck on A4 then E5 (a fifth up), a soft breath of air between, no glass."""
+    first = pluck(NOTE['A4'], 0.3, 0.12, 0.6)
+    swell = S.hiss(0.2, 700, 2400, 0.08, 0.08) * 0.12
+    second = pluck(NOTE['E5'], 0.4, 0.17, 0.5)
+    return finish(room(mix(first, at(swell, 0.1), at(second, 0.2)), 0.6), 3000)
+
+
+def ready_boki(i):
+    """Boki summon back: a breathy rise (a wisp drawing in) that lands on one soft high glass note."""
+    rise = S.sweep(520, 980, 0.28) * env(N(0.28), 0.1, 0.1) * 0.5 + S.hiss(0.28, 1500, 5000, 0.12, 0.1) * 0.18
+    note = S.chime(NOTE['E6'], 0.3, 0.14, ((1.0, 1.0), (2.0, 0.25))) * 0.55
+    return finish(room(mix(rise, at(note, 0.22)), 0.5), 5200)
+
+
+def ready_dash(i):
+    """Dash charge back: the shortest of the three, one dry wood tick with a small upward blip."""
+    blip = S.sweep(900, 1500, 0.06) * env(N(0.06), 0.004, 0.02) * 0.6
+    tick = pluck(NOTE['G6'], 0.1, 0.02, 0.3) * 0.5
+    return finish(mix(blip, tick), 4000)
+
+
+def xp_tick(i):
+    return finish(room(pluck(NOTE['G6'], 0.16, 0.035, 0.5), 0.25), 5200)
+
+
+def steal_won(i):
+    rise = [at(pluck(NOTE[n], 0.3, 0.07), 0.055 * k) for k, n in enumerate(['D5', 'G5', 'D6'])]
+    flick = at(S.chime(NOTE['G6'], 0.4, 0.12, ((1.0, 0.5), (2.76, 0.2))) * 0.3, 0.17)
+    return finish(room(mix(*rise, flick), 0.5), 5400)
+
+
+def steal_lost(i):
+    fall = [at(pluck(NOTE[n], 0.35, 0.09, 0.4), 0.09 * k) for k, n in enumerate(['E5', 'C5'])]
+    bump = at(pluck(NOTE['C4'] / 2, 0.3, 0.1, 0.1) * 1.2, 0.09)
+    return finish(room(mix(*fall, bump), 0.4), 2600)
+
 
 # ---------------------------------------------------------------- write
 def main():
@@ -150,6 +216,15 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.save_cat('ready_ult', ready_ult(0), 'ui')
+    S.save_cat('ready_boki', ready_boki(0), 'ui')
+    S.save_cat('ready_dash', ready_dash(0), 'ui')
+    S.takes_cat('ui_capture', capture, 2, 'ui')
+    S.takes_cat('ui_extract_start', extract_start, 2, 'ui')
+    S.takes_cat('ui_extract_fail', extract_fail, 2, 'ui')
+    S.save_cat('xp_tick', xp_tick(0), 'ui')
+    S.save_cat('steal_won', steal_won(0), 'ui')
+    S.save_cat('steal_lost', steal_lost(0), 'ui')
 
 
 if __name__ == '__main__':

@@ -219,6 +219,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
+	WardenMerge.merge_equal(glb)
+	WardenMerge.join_inks(glb)
 	_lights(glb, look(art(arch)))
 	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)

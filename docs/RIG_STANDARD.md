@@ -47,6 +47,12 @@ skinned to its bones in the .glb, its FX points are empties on them (`weapon_muz
 an invisible reference kept on the blade. `body.shoulder` in the archetype moves the arm pivots in or out (keep the
 Hero's own width there, never by `body.chest`). A Hero's variant bones can sit in its data file (`extra_bones`).
 
+## Draw calls
+Budget: at most 4 draws per model (surfaces plus ink passes); `--model-draws` lists surfaces, materials, bones and
+tris per Hunter and Boki .glb. When a Hunter is dressed, `WardenMerge.merge_equal` joins the surfaces whose toon
+materials come out identical. `WardenMerge.join_inks` then gives each skinned body one ink shell instead of one ink
+pass per surface. Eyes, glow, cards, void and flame stay apart. `--warden-glb-check` asserts the shells.
+
 ## The check
 `--rig-standard-check` (all 12): the armature matches the standard; the attachment points exist; the rest pose has
 the arms hanging; the weapon's bounds hold the grip; and in the run, both casts and every kit move that keeps a hand

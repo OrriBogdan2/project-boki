@@ -4,14 +4,16 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low.
+## a held stream turns with the aim, a projectile trail follows its node and ends with it; a held wedge lies on its
+## locked direction with its front at the charge, and Grimble's wedges are his hit cones to the content numbers.
+## Claire's scarf tails hang from their anchor, follow it, stream behind a run and are off at Low. And the status looks
+## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
-## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
-## data must answer.
+## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / shot(h, "move", ...) / play(h, "move")
+## calls each Hero's data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
 	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
@@ -27,8 +29,10 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}]},
+			{"p": "drop", "n": 24}, {"p": "wedge", "size": 2.0, "arc": 90}]},
+		"cone": {"fx": [{"p": "wedge", "size": "r", "arc": 110}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
+		"rope": {"fx": [{"p": "chain", "at": "tip", "size": 0.2}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
@@ -57,17 +61,69 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_armour(m, P)
 	_net(m, V, P)
+	_statuses(m, P)
+	_tier_up(m, V, P)
 	await _core_kinds(main, m, V, P)
+	_wedges(m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+## A held wedge (a wind-up's area) lies on the ground along the kit's locked direction, `r` to its rim, its front at
+## the hold's charge so it reaches the rim on the hit; Grimble's wedges are exactly his E and X cones, and the
+## Broadside's front reaches the rim when the slugs do.
+func _wedges(m: Match, V: HeroVfx, P: Hunter) -> void:
+	var uniforms := HeroVfx.SURFACE.get_shader_uniform_list().map(func(u): return u["name"])
+	ok("reach_t" in uniforms, "the looks' shader compiles with the wedge's front (%d uniforms)" % uniforms.size())
+	HeroVfx.set_data(P.arch, TEST)
+	_clear(V)
+	P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+	V.hold(P, "cone", 0.4, {"r": 3.0, "dir": Vector2(0, 1)})
+	V._tick_holds()
+	var w: MeshInstance3D = V.holds.values()[0]["layers"][0]["node"]
+	var mt: ShaderMaterial = w.material_override
+	var fwd := w.global_basis.z.normalized()
+	ok(w.visible and fwd.distance_to(Vector3(0, 0, 1)) < 0.01 and absf(w.global_basis.z.length() - 6.0) < 0.01,
+			"a held wedge lies along its locked direction, not the aim, 3 m to its rim (%s)" % fwd)
+	ok(is_equal_approx(float(mt.get_shader_parameter("life")), 0.4) and float(mt.get_shader_parameter("reach_t")) == 1.0
+			and is_equal_approx(float(mt.get_shader_parameter("arc")), deg_to_rad(55.0)), "its front is the charge")
+	m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	ok(not w.visible, "and goes when the asks stop")
+	_clear(V)
+	HeroVfx.set_data(P.arch, {})
+	var moves: Dictionary = HeroVfx.data("dredge")["moves"]
+	var arch: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/dredge.json"))
+	var ed: Dictionary = arch["e"]
+	var x: Dictionary = arch["x"]
+	for mv in ["anchor_wind", "anchor_slam", "broadside_charge", "broadside_wave"]:
+		var lay: Dictionary = (moves[mv]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
+		var deg := float(x["fan_deg"]) if mv.begins_with("broadside") else float(ed["angle"])
+		ok(lay["size"] == "r" and float(lay["arc"]) == deg,
+				"dredge %s: the wedge is the hit cone (r, %d deg)" % [mv, deg])
+	var wave: Dictionary = (moves["broadside_wave"]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
+	var fly := (float(x["range"]) - DredgeBlast.MUZZLE) / float(x["speed"])
+	ok(absf(float(wave["lead"]) - fly) < 0.02, "the Broadside's front reaches the rim with the slugs (%.2f s)" % fly)
+	_slug_draw(V, P, moves)
+
+## Grimble's slugs (LMB and X) draw larger than they hit: the move's "draw" scales the drawn slug only.
+func _slug_draw(V: HeroVfx, P: Hunter, moves: Dictionary) -> void:
+	HeroVfx.set_data(P.arch, {"moves": moves})
+	for mv in ["slug", "broadside_slug"]:
+		var s := {"vr": 0.5, "r": 0.45, "node": null}
+		V.shot(P, mv, s)
+		var k := float(moves[mv]["draw"])
+		ok(k > 1.0 and is_equal_approx(float(s["vr"]), 0.5 * k) and float(s["r"]) == 0.45,
+				"dredge %s: drawn %.2fx, hit radius unchanged" % [mv, k])
+	HeroVfx.set_data(P.arch, {})
+
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
 	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail|shot)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
 			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
@@ -107,7 +163,8 @@ func _recipes(arch: String) -> void:
 			var lasts: bool = layer["p"] == "thread"      # (a needle's thread stays as long as the needle)
 			if (life > MAX_LIFE and not lasts) or flare_big or vortex_big:
 				over.append(mv)
-			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or layer["p"] == "string"):
+			var hold_only: bool = layer["p"] in ["string", "chain"]
+			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or hold_only):
 				flat_only.append(layer["p"])
 	ok(bad_sound.is_empty(), "%s: every sound in the data has a file %s" % [arch, bad_sound])
 	ok(bad_col.is_empty(), "%s: every colour is in the palette %s" % [arch, bad_col])
@@ -221,6 +278,34 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
+## One language for armour on every body: a hit on the shell flashes the body shell-coloured, a health hit white, the
+## break holds the flash and sheds shards with no ring or burst, and the HUD strip flashes as the armour empties.
+func _armour(m: Match, P: Hunter) -> void:
+	var at := P.pos + Vector3(-4, 0, 0)
+	var foe: Hunter = m.make_hunter("A", P.team + 1, "medium", "Foe", "idle", {}, at, {"arch": "none"})
+	foe.hurt(5.0, P, {})
+	ok(foe.armor > 0.5 and foe.shell_t > 0.0, "a hit on the armour flashes the body shell-coloured")
+	foe.tick_status(Juice.SHELL_FLASH_T + 0.01)
+	foe.armor = 0.0
+	foe.hurt(5.0, P, {})
+	ok(foe.shell_t <= 0.0 and foe.flash_t > 0.0, "a hit on health flashes white")
+	foe.armor = 1.0
+	foe.shell_t = 0.0
+	var radial0: int = m.fx.radial
+	var rings0: int = m.fx.rings.size()
+	foe.hurt(60.0, P, {})
+	var held := foe.shell_t > Juice.SHELL_FLASH_T and foe.flash_t > Juice.SHELL_FLASH_T
+	ok(foe.armor <= 0.0 and held, "the break holds the shell flash on the body")
+	ok(m.fx.radial == radial0 and m.fx.rings.size() == rings0, "no ring and no burst with it")
+	var plates := HudPlate.new()
+	plates._watch(foe, 0.016)
+	foe.armor = foe.max_armor
+	plates._watch(foe, 0.016)
+	foe.armor -= 5.0
+	plates._watch(foe, 0.016)
+	ok(plates.armor_flash_of(foe) > 0.5, "the armour strip flashes as it loses some")
+	foe.hp = 0.0
+
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var K: JuggernautKit = P.ak
@@ -261,7 +346,8 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V._anchors.clear()
 	_clear(V)
 	V.play(P, "all", P.pos, Vector2.RIGHT)
-	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
+	# (minus one as before, and minus the sheen: the armour tier-up's own surface, never a recipe layer)
+	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 2, "every layer kind plays")
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
@@ -287,6 +373,18 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(way.distance_to(Vector3(0, 0, 1)) < 0.01, "a stream held along the aim turns with it (%s)" % way)
 	m.time += HeroVfx.HOLD_LINGER + 0.1
 	V._tick_holds()
+	_clear(V)
+	V.hold(P, "rope", 0.0, {"to": P.pos + Vector3(3, 1, 0)})
+	V.hold(P, "rope", 1.0, {"to": P.pos + Vector3(0, 1, 3)})
+	V._tick_holds()
+	var rope: MeshInstance3D = V.holds.values()[0]["layers"][0]["node"]
+	var tension: float = (rope.material_override as ShaderMaterial).get_shader_parameter("life")
+	var far_end := (rope.mesh as ImmediateMesh).get_aabb().end
+	ok(rope.visible and tension == 1.0 and far_end.z > P.pos.z + 2.5,
+			"a held chain runs to the kit's newest point at its tension (%.1f, %s)" % [tension, far_end])
+	m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	ok(not rope.visible, "and goes when the asks stop")
 	_clear(V)
 	var shot := Node3D.new()
 	m.add_child(shot)
@@ -372,3 +470,91 @@ func _scarf(main: Node) -> void:
 	S.prewarm(P.pos)
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
+# ------------------------------------------------------------------ status looks
+## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16          # meshes one status look may use (30 Hunters each with a few stay cheap)
+
+## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
+func _set_status(m: Match, F: Hunter, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": F.stun_t = t
+		"root": F.root_t = t
+		"slow": F.slow_t = t
+		"burn": F.burn_t = t
+		"antiheal": F.blight_t = t
+		"sick": F.sick_t = t
+		"gnd": F.set_meta("gnd_until", m.time + t)
+		"daze": F.set_meta("rat_until", m.time + t)
+		"chill", "static":
+			if on: StatusLooks.of(m).keep(F, st)
+			else: m.time += StatusLooks.KEEP + 0.01
+
+func _statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var rules := StatusLooks.rules()
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	Sfx.listener = P.pos
+	ok(STATUSES.all(func(st): return rules.has(st)), "status looks: every plain status has data")
+	var looks := {}
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+		var up := L.showing(F, st)
+		var rig: Node3D = (L.rigs.get("%d/%s" % [F.get_instance_id(), st], {}) as Dictionary).get("n")
+		var parts := rig.find_children("*", "MeshInstance3D", true, false).size() if rig else 0
+		ok(up and not L.showing(P, st), "status %s: its look comes up on that body only" % st)
+		ok(parts > 0 and parts <= RIG_PARTS, "status %s: %d meshes (at most %d)" % [st, parts, RIG_PARTS])
+		looks[String(rules[st]["look"])] = true
+		_set_status(m, F, st, false)
+		ok(not L.showing(F, st), "status %s: the look goes when it ends" % st)
+	ok(looks.size() == STATUSES.size(), "status looks: each status has a look of its own (%d)" % looks.size())
+	var made := L.made
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+	ok(STATUSES.all(func(st): return L.showing(F, st)) and L.made == made,
+		"status looks: all at once on one body, from the pool (built %d)" % L.made)
+	for st: String in STATUSES:
+		_set_status(m, F, st, false)
+	L.from_hit(F, {"stun": 0.5, "burn": 4.0, "burn_for": 2.0, "blight": 1.0})
+	ok(L.showing(F, "stun") and L.showing(F, "burn") and L.showing(F, "antiheal"),
+		"status looks: a hit sent to another game's body shows what it carries here")
+	m.time += 2.1
+	ok(not L.showing(F, "stun") and not L.showing(F, "burn"), "status looks: ... until that status would end")
+	F.stun_t = 1.0
+	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
+	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
+	F.stun_t = 0.0
+
+## The armour tier-up sheen: one per tier-up (the real path, Match._armor_up), coloured by the new tier, climbing the
+## body for SHEEN_LIFE; a break and a gain that stays inside the tier draw none; another game's tier-up arrives too.
+func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
+	_clear(V)
+	V.plays.clear()
+	var sheens := func() -> Array:
+		return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
+	P.armor_xp = 0.0
+	P.armor_tier = 0
+	ok(P.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen without a tier-up")
+	for tier in range(1, Hunter.ARMOR_TIERS.size()):
+		_clear(V)
+		V.plays.clear()
+		P.armor_gain(float(Hunter.ARMOR_TIERS[tier][2]) - P.armor_xp)
+		m._armor_up(P)
+		var made: Array = sheens.call()
+		ok(made.size() == 1 and int(V.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
+		var col := Color.BLACK
+		if made.size() == 1:
+			col = (made[0].material_override as ShaderMaterial).get_shader_parameter("col")
+		ok(col.is_equal_approx(Hunter.ARMOR_TIERS[tier][1]), "tier %d: the new tier's colour" % tier)
+	ok(V.live.size() == 1 and is_equal_approx(float(V.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
+	_clear(V)
+	V.plays.clear()
+	m.on_armor_break(P, null)
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
+	V.net_in(["fx", "hvfx", P.nid, "armor_up", P.pos.x, P.pos.y, P.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
+	ok(sheens.call().size() == 1, "a rival's tier-up arrives from another game")

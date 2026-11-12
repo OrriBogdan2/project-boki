@@ -69,44 +69,44 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
-| Slot | Source | Ours | Verdict |
-|---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) |
-| Q | none | glove | ours |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
-| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) |
-| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
-| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match |
-| Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
+| Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
+|---|---|---|---|---|
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | A round every 0.13 s held (0.12 on the clock, frame-rounded), first 0.07 s after the press; 6.0, 5.7, 5.4, 5.1 on the first hits, 3.0 by round 10; 82 dmg in 3 s. **match** |
+| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | 22 dmg + Dazed, lands 0.20 s after the press at 6 m, cd 6.5 s; wall cone 16 + shove, fuse 0.9 s (combo check). Still named Burr Charge: owner 11-08 Coin Blast not on this branch (gap A). **match, rename missing** |
+| Q | none | glove | ours | not measured (ours) |
+| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match | Beam at 0.63 s, 36 dmg (+20% on Dazed, passes a wall), cd 11.5 s, shave 20%/30%. Still fires from the rifle: owner 11-08 Palm Lance (palm origin) not on this branch (gap A). **match, palm missing** |
+| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) | Impact 1.62 s after the press (24, 36 in the core), then 3 per tick for 3 s, cd 42 s. Ticks are 0.52 s apart, not 0.5 (gap C). **match** |
+| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match | Tap 4.85 m, 98% by 0.43 s (data 4.8/.45); hold 10.3 m in 0.82 s: the 0.18 s skid then the 7 m slide, charge cost 1.4 (gap B); 8.5 s per charge. Fires through both; dash-flow rows 0 fail. **match; hold is skid + 7 m** |
+| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match | 6% for 3.5 s, one stack; Dazed +90% rifle, all PASS in the combo check. **match** |
+| Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage | Clip on within 0.03 s (LMB), 0.10 s (RMB); move lengths RMB 0.5, dash 0.87 (legs back 1.30 on a hold), E 1.07, R 0.60 s; all PASS. **match** |
 
-## Zedran (`juggernaut`, source Brall) · slice Warden
+## Kael (`juggernaut`, source Brall; was Zedran) · slice Warden
 
-| Slot | Source | Ours | Verdict |
-|---|---|---|---|
-| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB buffers (gap 9) |
-| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, cursor marker | match; 0.8x cd |
-| Q | none | glove | ours |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) |
-| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` |
-| Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) |
-| Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape |
-| Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) |
+| Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
+|---|---|---|---|---|
+| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB buffers (gap 9) | Taps swing every 0.35 to 0.40 s at 0.1 s press steps (0.34 s rate, 3 slashes in 1 s PASS), 8 then 12.8 per slash; hold 0.5 s lets go a wave of 15.3 (12 to 20 by hold), 20 at full 0.95 s, the wave flies 36 m/s (0.15 s to 6 m); held 3 s it never fires. **match** |
+| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) | Slam 26 lands 0.72 s after a tap (0.6 wind-up); Lunge 16 at hold 0.45 s, 20 at 0.8 s and over; cd 2.0 s. Held 5 s it never fires, blade over the head, a flash each second; release on the flash flings 7.8 m against 6.6 m (+18%, owner note). **match** |
+| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, cursor marker | match; 0.8x cd | Air row PASS (airborne after a chain launch = Meteor Drop); cd 7.2 s in the data, disc 2.2 m. **match** |
+| Q | none | glove | ours | not measured (ours) |
+| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) | Hook 8 dmg 0.28 s after the press at 10 m (32 m/s), cd 12.8 s from the cast; recast hauls 9.4 m, within 2 m of the foe 0.37 s later (22 m/s); holds 5 s, pays out to 24.06 m and holds taut, a strafe or a look bends the pull 2.9 m aside, backing away slings 24.5 m/s (owner Warchain note PASS). **match** |
+| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` | Guard 0.65 + strike 0.1: 43 dmg at 0.77 s, cd 36 s (source 45). **match; cd 0.8x** |
+| Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) | 4.14 m in 0.35 s (0.07 dip, 3.1 m by 0.2 s: 3.8 m felt plus 0.35 m exit carry); 2 charges, a charge back every 10.4 s; hold = tap. dash-flow rows 0 fail. **match** |
+| Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape | Damage fills Rage, full = Enraged +15%, ability and dash haste (combo check PASS). **match** |
+| Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) | Still `kael.glb` 0 clips (gap 1 below). **missing** |
 
-## Hem (`archer`, source Myth) · slice Warden
+## Lace (`archer`, source Myth; was Hem) · slice Warden
 
-| Slot | Source | Ours | Verdict |
-|---|---|---|---|
-| LMB | Hold to charge, release; perfect speeds next draw [D,F] | PinDraw two stages, reticle, stops at cursor, cadence .5, perfect → quick draw | match |
-| RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Hold .5 dead zone (ours), wall_dmg 12, floor .4, stun 1.2, cd 16 | **differ**: payoff ~0.4x vs ~5x (gap 6) |
-| Q | none | glove | ours |
-| E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
-| R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
-| Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open |
-| Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
-| Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 |
+| Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
+|---|---|---|---|---|
+| LMB | Hold to charge, release; perfect speeds next draw [D,F] | PinDraw two stages, reticle, stops at cursor, cadence .5, perfect → quick draw | match | Tap 0.1 s: 15 at 0.20 s at 6 m; Empowered 0.6 s: 30; Supercharged 1.15 s: 60; overdraw 1.65 s: half. Shots at least 0.60 s apart at 0.1 s press steps (rate 0.5); perfect window opens at +0 and closes by +0.19 s (+0.13 s counts). **match** |
+| RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Hold .5 dead zone (ours), wall_dmg 12, floor .4, stun 1.2, cd 16 | **differ**: payoff ~0.4x vs ~5x (gap 6) | A 0.1 s tap loosens nothing and costs no charge; 0.6 s hold 23, full 1.1 s 30, wall pin 178 on the shot (173 extra, 4.94x); stun 1.2 s; cd 16 s; 38% speed while held. Gap 6 closed. **match** |
+| Q | none | glove | ours | not measured (ours) |
+| E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match | First tick 0.38 s (tell 0.35), 5 per tick, 8 ticks in 4.4 s at 0.52 s (gap C); slow 35%, cd 15 s. **match** |
+| R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match | First beam 0.90 s after the press and fire held (nock 0.5); 18, 18, 25 (finisher under 12%), 1.52 s apart (footage 1.5), cd 60 s. **match** |
+| Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) | Roll 3.03 m, 98% by 0.37 s (data 3.0/.27), cd 9.5 s; Spirit Walk passes rocks and terrace walls (combo PASS). Gap 8 closed on terraces. dash-flow rows 0 fail. **match** |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | Hawk Sense shows only the injured (PASS); Focus and Deadeye cut. **match** |
+| Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage | Draw, loose, perfect, overdraw, Heavy and ult clips all PASS by name. **match** |
+| Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 | Draw and hold carry through a dash, jump out in 0.1 s (item 51 PASS). **match** |
 
 ## Cinder (`ashwick`, source Felix) · slice Warden
 
@@ -226,6 +226,25 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 4.5 | match |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
+
+## Starter trio re-check: Vex, Kael, Lace (2026-11-10, ext/release-integ-0244-fix ec3c9dafb)
+
+DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player touches these three. The last column of the three hero tables above is the re-measure, run in the Training Area (`Match.start({"training": true})`, a 10000 HP dummy, a clean `XDG_DATA_HOME`). The base is the release integration branch, not main: main has no `--kit-parity-check` or parity bench yet.
+
+**Method.** Each number is read from the dummy's HP over 60 Hz steps (first hit after the press, hit sizes, gaps) and from the kit's cooldown table; dashes are the hunter's travel with no keys held, aimed along +x. The same driver was run on origin/main d255acbee: every LMB, RMB, E and R number is identical there, so the integration broke none of them. The only changes are the dash lengths (the merged dash-feel pass: Vex tap 4.32 to 4.85 m, Lace 3.35 to 3.03 m, Kael 3.99 to 4.14 m), all toward the sourced figures. `--parity-bench-check` 19 ok, 0 FAIL; the bench panel reads the same hit and status events.
+
+**Cancels and buffers (docs/heroes/dash_interactions.md).** `--dash-flow-check` 0 failures (140 rows for the three, 14 skipped for all heroes). Kael: ground and air dash into LMB buffer to the dash's end (0.02 s after it), RMB fires mid ground dash and cancels the air dash into the Meteor Drop, E fires mid-dash and cancels out with Shift, X cancels the dash. Vex: every pair fires mid-dash, LMB, RMB, E and X keep running into a dash. Lace: every slot fires mid-dash, the draw carries through a dash, a jump or a hold lets go in the air.
+
+**Owner notes.**
+- Kael's Warchain: PASS. The chain pays out to 24 m as he backs away and holds taut there, the pull bends with a strafe or a look and slings when he backs away (combo check "jug chain").
+- Kael RMB: PASS. Held 5 s it never fires; a release on the flash flings about 18% further (7.8 against 6.6 m).
+- Lace's missed arrows linger: PASS. A spent arrow stays stuck in the ground at the cursor (`pin vfx` check).
+- Vex Coin Blast and Palm Lance: **not on this branch**, gap A.
+
+**Gaps, none an integration regression.**
+- **A. Vex Coin Blast / Palm Lance (owner 11-08).** `content/archetypes/gunslinger.json:59` still "Burr Charge", `:92` still "Longneedle", fired from the rifle. The work is READY as ext/vex-coin-palm-1108 `0478765f6` (9 commits on ext/vfx-gunslinger) and was never merged into the integration or main.
+- **B. Vex hold slide is 10.3 m, not 7.** `scripts/arch/kits/gunslinger_kit.gd:369-372`: a held Shift joins the slide at the tap's 0.18 s mark, after the skid has already gone about 3.2 m; `:392` then adds the data's 7 m. Main did the same (9.1 m). Source length for a hold `[?]`; decide whether the 7 m includes the skid.
+- **C. Zone ticks run 0.52 s, not 0.5.** `scripts/arch/kits/gunslinger_ult.gd:181-183` (Cinderfall) and `scripts/arch/kits/archer_kit.gd:401-404` (Hail Wall) reset the tick timer and drop the remainder, so 0.5 s costs 31 frames. 3% slow, same on main. Keep the remainder (`+= every`) in both.
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
 

@@ -18,16 +18,24 @@ var ended := false            # the run-end sting has played
 var last_said := false        # the last-squad sting has played
 
 func start(m: Match) -> void:
+	CombatBus.ability_used.connect(_ult_duck.bind(m))
 	if m.tier >= 2:
 		Sfx.play_music("hollow")
 		return
 	started = true
 	Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 
+## A rival's ultimate going off (the wind-up, the cast, or an X ult) dips the score and the beds, so the cast reads.
+func _ult_duck(caster: Node, _ability: String, slot: String, m: Match) -> void:
+	var rival := caster as Hunter
+	if rival != null and slot in ["ult_fuse", "ult", "ultimate"] and m.player != null and rival.team != m.player.team:
+		Sfx.duck_for("ult", rival.pos)
+
 ## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
-## glide over it), the creak and grit of the old ruins among their walls, and now and then a
-## creature calling from somewhere out of sight.
+## glide over it), the creak and grit of the old ruins among their walls, the meadow, rock and shore
+## beds and the weather (AmbBeds), and now and then a creature calling from somewhere out of sight.
 var amb_t := 0.0
+var beds := AmbBeds.new()
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
@@ -52,6 +60,7 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	if w.is_void(p.pos.x, p.pos.z) or p.gliding or p.dropping: abyss = 1.0
 	Sfx.amb_layer("abyss", abyss)
 	Sfx.amb_layer("ruins", clampf(float(walls) / 6.0, 0.0, 1.0))
+	beds.tick(m, p)
 	call_t -= 0.25
 	if call_t <= 0.0:
 		call_t = rng.randf_range(16.0, 34.0)
@@ -66,10 +75,17 @@ func last_squad() -> void:
 		last_said = true
 		Sfx.sting("last")
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> Sfx.Muffle:
+	if p.downed or p.out:
+		return Sfx.Muffle.DOWN
+	return Sfx.Muffle.LOW_HP if LowHpCue.under_line(p) else Sfx.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.set_muffle(_muffle_for(p))
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true

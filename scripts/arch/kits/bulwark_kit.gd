@@ -268,7 +268,8 @@ func ult_running() -> bool:
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
-		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		# it takes the hit (and turns it into Guard) as it does a shot
+		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
@@ -310,7 +311,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not KnockWall.hit(m, t, dir, float(res_def().get("crush_reach", 1.5)), h):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -546,7 +547,6 @@ func _throw() -> void:
 	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
 	h.swing_t = 0.18; h.swing_n += 1
-	m.sfx("bjorn_throw", h.pos, -2.0)
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
@@ -599,6 +599,7 @@ func _tick_mace(dt: float) -> void:
 				mace["st"] = "fly"
 				fx.in_hand(false)
 				HeroVfx.of(m).trail(h, "throw", fx.hammer)
+				m.sfx("bjorn_throw", h.pos, -2.0)      # on the release, the clip's strike
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt
@@ -894,8 +895,7 @@ func _mend_tick() -> void:
 		if o.downed:
 			continue
 		ticks_healed += 1
-		o.heal(heal)
-		m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 4, 1.5, 0.35, -3.0)
+		o.heal(heal, Feel.cat_color("sustain"))
 
 func _mend_burst() -> void:
 	var ed := e_def()
@@ -910,8 +910,7 @@ func _mend_burst() -> void:
 			kickstarts += 1
 			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
-			o.heal(heal)
-			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
+			o.heal(heal, Feel.cat_color("sustain"))
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))

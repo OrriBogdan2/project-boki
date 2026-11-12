@@ -2,13 +2,25 @@
 
 Voices are two layers: a bright chirp (a sine with a pitch scoop, vibrato and a quiet 2nd/3rd harmonic,
 the "squeak") and a soft wordless vowel (S.voice, formants scaled up for a small body). Several takes
-of each so a Boki that talks a lot never repeats itself. Moves are by element:
-  venom   bubbling gloop and a spit      spore   fluffy puffs and falling sparkle
-  gravity a deep soft thud and a pull    prism   a glassy chime fan
-  lunar   moonlit wind and a pale bell   echo    one ping bouncing away through a dark room
+of each so a Boki that talks a lot never repeats itself. The cast cue is one short sound per standard
+type (k_<type>: the 18 types of DECISIONS 2026-11-08 22:29; KinLib.cue_type maps a species' theme to it):
+  normal  a plain double pop             fire    a crackle and a warm whoomp
+  water   droplets and a splash          grass   leaf rustle and a wooden pluck
+  spore   fluffy puffs, falling sparkle  electric an FM zap with a buzz
+  ice     frozen ticks and a thin chime  rock    a deep soft thud and a stone rumble
+  psychic a wobbling pulse that warps    flying  two rising gusts
+  dragon  a low growl and ember hiss     dark    a reversed swell on a tritone
+  poison  bubbling gloop and a spit      bug     chitter and wing buzz
+  steel   a short metal clang            fairy   moonlit wind and a pale bell
+  crystal a glassy chime fan             sound   one ping bouncing away through a dark room
+Every rigged species also has its own voice set, bk_<species>_<mood> (happy, alert, unsure, sleepy,
+hurt; 2 takes each): base pitch from its weight, timbre from its type (SPECIES_VOICE below), and a
+3-note signature motif that every mood bends (happy as is, alert clipped and high, unsure ending on
+a question, sleepy a sigh, hurt a yelp). KinVoice.cue picks the set; kin_happy/alert/unsure stay the fallback.
 Existing names are regenerated (kin_happy/unsure/alert, kinhit, recall, throw, catch, bond, skill,
-k_<element>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
+k_<type>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
 """
+import json, os
 import numpy as np
 import sfx_lib as S
 from sfx_lib import N, T, env, mix, at, lpf, hpf, bpf, noise
@@ -141,8 +153,8 @@ def skill(i):
     return soft(room(mix(rise, sparkle, at(squeak(1100, 0.2, 0.1) * 0.4, 0.18)), 0.4), 5000)
 
 
-# ---------------------------------------------------------------- elements (k_<element>)
-def venom(i):
+# ---------------------------------------------------------------- types (k_<type>)
+def poison(i):
     """Toxic gloop: a run of fat bubbles that climb, a wet spit, a sizzling hiss."""
     f = j(i, 0.08)
     bubs = [at(bubble(180 * f * (1 + 0.35 * k + S.rng.uniform(-0.05, 0.1)), 0.09, 1.9), 0.06 * k) for k in range(5)]
@@ -162,8 +174,8 @@ def spore(i):
     return soft(room(mix(*puffs, at(dust, 0.05), *fall), 0.5), 4600)
 
 
-def gravity(i):
-    """A deep soft thud that sucks in first: a reverse swell, a sub drop, a stone rumble."""
+def rock(i):
+    """A deep soft thud that sucks in first: a reverse swell, a sub drop, a stone rumble (mob slams use it)."""
     f = j(i, 0.06)
     d = 0.7
     suck = lpf(noise(0.18), 500) * (np.arange(N(0.18)) / N(0.18)) ** 2 * 0.7
@@ -174,7 +186,7 @@ def gravity(i):
     return lpf(room(mix(suck, drop, rumble, tick), 0.3), 1400 if i == 0 else 1400 + 100 * i)
 
 
-def prism(i):
+def crystal(i):
     """A glassy chime fan climbing a pentatonic scale, with a shimmer."""
     f = j(i, 0.02)
     notes = [(784, 0.0), (988, 0.05), (1175, 0.1), (1568, 0.15)]
@@ -185,7 +197,7 @@ def prism(i):
     return soft(room(mix(*bells, shimmer, air), 0.8), 7500)
 
 
-def lunar(i):
+def fairy(i):
     """Moonlit wind: a breathy swirl that rises and a pale, slow bell inside it."""
     f = j(i, 0.04)
     d = 0.75; n = N(d); u = np.arange(n) / n
@@ -195,7 +207,7 @@ def lunar(i):
     return soft(room(mix(wind * 0.9, pad_t, bell), 0.7), 3400)
 
 
-def echo(i):
+def sound(i):
     """One round ping that bounces away through a dark room, each repeat darker and quieter."""
     f = j(i, 0.03)
     base = mix(S.chime(660 * f, 0.3, 0.12, ((1.0, 1.0), (2.0, 0.3))), S.kick(140, 70, 0.2, 0.01, 0.05, 1.5) * 0.5)
@@ -206,6 +218,113 @@ def echo(i):
         cut *= 0.72
     rumble = bpf(noise(0.5), 60, 300) * env(N(0.5), 0.03, 0.15) * 0.5
     return soft(mix(out, rumble), 4200)
+
+
+def normal(i):
+    """A plain, friendly double pop with a small round thump."""
+    f = j(i, 0.05)
+    pops = [at(mix(bubble(fr * f, 0.06, 1.5), squeak(fr * f * 1.5, 0.08, 0.1) * 0.35), dl) for fr, dl in ((420, 0.0), (520, 0.09))]
+    return soft(room(mix(*pops, S.kick(160, 80, 0.12, 0.02, 0.05, 1.5) * 0.4), 0.3), 4500)
+
+
+def fire(i):
+    """A warm whoomp with a crackle on top and a few flying sparks."""
+    f = j(i, 0.07)
+    whoomp = lpf(noise(0.4), 900 * f) * env(N(0.4), 0.05, 0.12) * 0.9
+    low = S.sweep(140 * f, 70, 0.4) * env(N(0.4), 0.01, 0.13) * 0.6
+    crackle = S.grains(0.5, 90, 1800, 6500, 0.001, 0.004, fall=0.2) * 0.45
+    sparks = at(S.grains(0.3, 40, 4500, 9000, 0.001, 0.003, fall=0.1) * 0.25, 0.1)
+    return soft(room(mix(whoomp, low, crackle, sparks), 0.4), 5000)
+
+
+def water(i):
+    """Three rising droplets, then a little splash of bright noise."""
+    f = j(i, 0.06)
+    drops = [at(bubble(500 * f * (1 + 0.3 * k), 0.08, 1.8) * 0.8, 0.07 * k) for k in range(3)]
+    splash = at(bpf(noise(0.25), 900, 3800) * env(N(0.25), 0.01, 0.07) * 0.5, 0.2)
+    return soft(room(mix(*drops, splash), 0.6), 5200)
+
+
+def grass(i):
+    """A fluttering leaf rustle and a soft wooden pluck."""
+    f = j(i, 0.05)
+    d = 0.4; u = np.arange(N(d)) / N(d)
+    leaves = bpf(noise(d), 2200, 6500) * env(N(d), 0.03, 0.12) * (0.6 + 0.4 * np.sin(2 * np.pi * 14 * u)) * 0.55
+    pluck = at(S.chime(330 * f, 0.3, 0.1, ((1.0, 1.0), (2.1, 0.4), (3.3, 0.15))) * 0.6, 0.08)
+    return soft(room(mix(leaves, pluck, at(squeak(660 * f, 0.1, 0.12) * 0.25, 0.16)), 0.4), 5200)
+
+
+def electric(i):
+    """A quick FM zap that falls through a buzz, with a dry crack at the front."""
+    f = j(i, 0.06)
+    zap = S.fm(1400 * f, 1.41, 6, 0.22, 0.09) * 0.5
+    zip_t = S.sweep(2600 * f, 500, 0.18) * env(N(0.18), 0.002, 0.06) * 0.4
+    buzz = S.sat(S.sweep(110, 100, 0.3), 4) * env(N(0.3), 0.01, 0.1) * 0.3
+    return soft(mix(zap, zip_t, buzz, S.crack(0.05, 2500, 9000, 0.008) * 0.4), 7200)
+
+
+def ice(i):
+    """Frozen ticks, a brittle snap and one thin cold chime."""
+    f = j(i, 0.04)
+    ticks = S.rattle(0.3, 55, 3500, 8500, 0.5, 0.08) * 0.35
+    snap = S.crack(0.08, 3000, 9000, 0.015) * 0.5
+    ping = at(S.chime(1760 * f, 0.5, 0.2, ((1.0, 1.0), (3.1, 0.25))) * 0.35, 0.05)
+    return soft(room(mix(ticks, snap, ping, hpf(noise(0.3), 5000) * env(N(0.3), 0.05, 0.08) * 0.1), 0.5), 8000)
+
+
+def psychic(i):
+    """A wobbling pulse that bends up and back, two sines slightly apart so the air seems to warp."""
+    f = j(i, 0.04)
+    d = 0.6; n = N(d); u = np.arange(n) / n
+    ph = 2 * np.pi * np.cumsum(330 * f * (1 + 0.5 * np.sin(np.pi * u))) / S.SR
+    wob = np.sin(ph) + np.sin(ph * 1.012)
+    pulse = wob * (0.65 + 0.35 * np.sin(2 * np.pi * 9 * u)) * np.sin(np.pi * u) ** 1.5 * 0.35
+    ping = at(S.chime(990 * f, 0.4, 0.2, ((1.0, 0.8), (1.5, 0.3))) * 0.3, 0.3)
+    return soft(room(mix(pulse, ping), 0.8), 3800)
+
+
+def flying(i):
+    """Two quick gusts that climb, with a fluttering feather squeak."""
+    f = j(i, 0.05)
+
+    def gust(lo, hi, d):
+        return bpf(noise(d), lo, hi) * np.sin(np.pi * np.arange(N(d)) / N(d)) ** 2
+    g = mix(gust(500 * f, 1800 * f, 0.3) * 0.7, at(gust(900 * f, 3200 * f, 0.28) * 0.6, 0.12))
+    return soft(room(mix(g, at(squeak(1500 * f, 0.08, 0.2) * 0.2, 0.3)), 0.4), 5500)
+
+
+def dragon(i):
+    """A short low growl over a drop, with an ember hiss as it ends."""
+    f = j(i, 0.06)
+    growl = S.voice(0.45, 110 * f, 70 * f, 'ah', breath=0.2, rasp=0.9, vib=0.03, scale=0.85, a=0.03, decay=0.28) * 0.9
+    drop = S.sweep(90 * f, 45, 0.4) * env(N(0.4), 0.01, 0.15) * 0.5
+    ember = at(S.hiss(0.3, 2500, 7000, 0.06, 0.12) * 0.25, 0.25)
+    return lpf(room(mix(growl, drop, ember), 0.4), 3200)
+
+
+def dark(i):
+    """A reversed swell that lands on a low tritone, a little breath of shade."""
+    f = j(i, 0.04)
+    d = 0.55; n = N(d); u = np.arange(n) / n
+    swell = lpf(noise(d), 700) * u ** 2.2 * 0.8
+    tri = (np.sin(2 * np.pi * 150 * f * T(d)) + np.sin(2 * np.pi * 212 * f * T(d))) * u ** 1.5 * (1 - u) ** 0.6 * 0.4
+    thud = at(S.kick(110, 50, 0.25, 0.03, 0.08, 1.5) * 0.6, 0.4)
+    return lpf(room(mix(swell, tri, thud), 0.6), 1800)
+
+
+def bug(i):
+    """A quick chitter of clicks over a buzzing wing."""
+    f = j(i, 0.06)
+    chit = S.rattle(0.28, 70, 3200 * f, 6500, 0.4, 0.1) * 0.45
+    wing = S.sat(np.sin(2 * np.pi * 240 * f * T(0.32)), 2) * (0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 85 * T(0.32)))) * env(N(0.32), 0.02, 0.1) * 0.3
+    return soft(room(mix(chit, at(wing, 0.04)), 0.3), 6000)
+
+
+def steel(i):
+    """A short bright clang: struck bell-metal with a click."""
+    f = j(i, 0.04)
+    clang = S.chime(540 * f, 0.5, 0.25, ((1.0, 1.0), (2.76, 0.6), (5.4, 0.4), (8.93, 0.2)))
+    return soft(room(mix(clang * 0.6, S.click(0.004, 3000, 9000) * 0.6, S.fm(900 * f, 1.4, 3, 0.2, 0.06) * 0.3), 0.3), 8000)
 
 
 # ---------------------------------------------------------------- everyday life (boki_*, new names)
@@ -237,21 +356,109 @@ def work(i):
     return soft(room(mix(h(620, 0.0), h(700, 0.13), scuff), 0.3), 4000)
 
 
-def fuse(i):
-    """Fusion: the Boki leaps in. A rising sparkle spiral, a warm swell and a bright pop with a bell."""
-    d = 0.9; n = N(d); u = np.arange(n) / n
-    spiral = S.sweep(300, 1800, d, curve=1.6) * np.sin(np.pi * u ** 0.6) * 0.5
-    swell_t = S.sweep(180, 360, d) * np.sin(np.pi * u ** 1.2) * 0.45
-    grain = S.grains(d, 90, 3000, 8500, 0.002, 0.005, fall=0.4) * 0.3 * u
-    bell = at(mix(S.chime(1047, 1.2, 0.5, ((1.0, 1.0), (2.76, 0.3))), S.chime(1568, 1.2, 0.5, ((1.0, 0.7),))) * 0.4, 0.78)
-    pop = at(mix(bubble(400, 0.1, 2.5), S.kick(150, 60, 0.3, 0.02, 0.1, 2.0) * 0.5), 0.76)
-    return soft(room(mix(spiral, swell_t, grain, bell, pop), 0.9), 5400)
+TYPES = [
+    'normal', 'fire', 'water', 'grass', 'spore', 'electric', 'ice', 'rock', 'psychic',
+    'flying', 'dragon', 'dark', 'poison', 'bug', 'steel', 'fairy', 'crystal', 'sound']
+
+# ---------------------------------------------------------------- per-species voices
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+MOODS = ['happy', 'alert', 'unsure', 'sleepy', 'hurt']
+# Species theme -> the texture laid under its voice. crackle: Fire and sparks, burble: Water and venom,
+# rustle: Grass, spores and swarms, chime: Crystal, moon and sound; anything else stays a plain voice.
+TIMBRE = {'ember': 'crackle', 'storm': 'crackle', 'venom': 'burble', 'tempest': 'burble',
+          'spore': 'rustle', 'bloom': 'rustle', 'swarm': 'rustle',
+          'prism': 'chime', 'lunar': 'chime', 'echo': 'chime', 'frost': 'chime', 'stone': 'chime'}
+# Per species: (vowel, signature motif as 3 pitch ratios). The motif is what makes a Pebbit and a
+# Cairnback tell apart even at the same size.
+SPECIES_VOICE = {
+    'burrlet': ('eh', (1, 1.26, 1.12)), 'caecilith': ('uh', (1, 0.84, 1.19)), 'gibbelle': ('ee', (1, 1.68, 1.26)),
+    'cairnback': ('oh', (1, 0.84, 0.84)), 'cindle': ('eh', (1, 1.5, 1.19)),
+    'glintmole': ('ee', (1, 1.12, 1.5)), 'gloamshell': ('uh', (1, 0.9, 1.07)), 'glomwort': ('uh', (1, 1.19, 1.41)),
+    'hivara': ('eh', (1, 1, 1.26)), 'kestrike': ('ee', (1, 1.78, 1.34)), 'kindlewren': ('ee', (1, 1.33, 1.67)),
+    'lodestick': ('ah', (1, 0.94, 1.12)), 'marchleaf': ('eh', (1, 1.12, 1.26)), 'mossgrade': ('mm', (1, 0.89, 1)),
+    'nettlynx': ('ah', (1, 1.41, 1.12)), 'pebbit': ('oh', (1, 1, 0.89)), 'puddlet': ('uh', (1, 1.26, 1.5)),
+    'rimeshrew': ('ee', (1, 1.68, 1.5)), 'selenfin': ('oh', (1, 1.12, 1.33)), 'thrumbird': ('eh', (1, 1.19, 1.19)),
+    'wisplet': ('ee', (1, 1.5, 1.78)), 'zapple': ('ah', (1, 1.33, 1)), 'zephyrak': ('ee', (1, 1.5, 2.0)),
+}
 
 
-def unfuse(i):
-    d = 0.5; n = N(d); u = np.arange(n) / n
-    fall = S.sweep(1400, 380, d) * np.sin(np.pi * u ** 0.4) * (1 - u) * 0.6
-    return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
+def species_data(sp):
+    """(weight kg, theme, curiosity, temper) of a species from its content files."""
+    home = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
+    v2 = json.load(open(os.path.join(ROOT, 'content', 'kin_v2', sp + '.json')))
+    pers = v2['personality']
+    return home['size']['kg'], v2['theme'], pers['curiosity'], pers['temper']
+
+
+def texture(kind, d, f, amt):
+    """The type's colour under a voice of d seconds around pitch f."""
+    n = N(d)
+    if kind == 'crackle':
+        return amt * 0.5 * S.grains(d, 150, 2500, 9000, 0.001, 0.004, fall=d * 0.7)
+    if kind == 'burble':
+        out = np.zeros(n)
+        for _ in range(int(14 * d) + 1):
+            out = mix(out, at(bubble(f * S.rng.uniform(0.4, 0.8), 0.05, 1.8) * 0.5, S.rng.uniform(0, d * 0.8)))
+        return amt * out
+    if kind == 'rustle':
+        gate = np.abs(lpf(S.rng.standard_normal(n), 40)) * 14
+        return amt * 0.4 * bpf(noise(d), 3500, 9000) * np.clip(gate, 0, 1) * env(n, 0.01, d * 0.8)
+    if kind == 'chime':
+        return amt * 0.35 * S.chime(f * 2, d, 0.25, ((1.0, 1.0), (2.76, 0.3)))
+    return amt * 0.4 * S.sweep(f * 0.5, f * 0.5, d) * env(n, 0.01, d * 0.6)
+
+
+def note(f, f_end, d, vow, tail_d=None):
+    """One syllable: a squeak with a soft vowel under it, gliding f -> f_end."""
+    sq = squeak(f, d, 0.1, 0.02, tail_d=tail_d)
+    return mix(sq, 0.45 * vowel(f * 0.5, f_end * 0.5, d, vow, 1.4))
+
+
+def species_voice(sp, mood, i):
+    kg, theme, curious, temper = species_data(sp)
+    vow, motif = SPECIES_VOICE[sp]
+    kind = TIMBRE.get(theme, 'plain')
+    base = float(np.clip(1000.0 * (2.5 / kg) ** 0.2, 520, 1450)) * j(i, 0.04)
+    dd = 0.11 / (0.8 + 0.5 * curious)                 # curious ones chatter faster
+    f = [base * m for m in motif]
+    if mood == 'happy':
+        out, t0 = np.zeros(0), 0.0
+        for fr, d in zip(f, (dd, dd, dd * 1.5)):
+            out = mix(out, at(note(fr, fr * 1.04, d, vow), t0))
+            t0 += d * 0.85
+        d_all = t0 + 0.1
+    elif mood == 'alert':
+        hi = 1.0 + 0.3 * temper                       # the temperamental ones go higher
+        parts = [at(note(f[k % 2] * hi, f[k % 2] * hi * 1.05, 0.07, vow, 0.04), 0.085 * k) for k in range(3)]
+        out, d_all = mix(*parts), 0.4
+    elif mood == 'unsure':
+        a = note(f[2] * 0.8, f[1] * 0.75, dd * 1.2, vow)
+        b = note(f[0] * 0.7, f[0] * 1.15, dd * 2.2, vow)          # ends on a question
+        out, d_all = mix(a, at(b, dd * 1.1)), dd * 3.6
+    elif mood == 'sleepy':
+        d_all = 0.7
+        sigh = note(f[0] * 0.75, f[0] * 0.45, d_all * 0.85, 'mm', tail_d=0.4)
+        out = lpf(mix(sigh, 0.3 * hpf(noise(d_all), 1500) * env(N(d_all), 0.2, 0.3)), 2200)
+    else:   # hurt
+        d_all = 0.26
+        yelp = mix(squeak(f[0] * 1.3, 0.2, -0.25, 0.0, a=0.003, tail_d=0.1),
+                   0.6 * S.voice(0.2, f[0] * 0.65, f[0] * 0.4, vow, rasp=0.5, scale=1.35, a=0.004))
+        out = mix(yelp, at(S.kick(180, 80, 0.1, 0.01, 0.03, 1.2) * 0.4, 0.0))
+    amt = 0.45 if mood in ('sleepy', 'hurt') else 1.0
+    out = mix(out, texture(kind, d_all, base, amt))
+    return soft(room(out, 0.3), 5200 if mood != 'sleepy' else 3000)
+
+
+def species_names():
+    return sorted(SPECIES_VOICE)
+
+
+def voice_sets():
+    """Writes bk_<species>_<mood> (2 takes) for every rigged species."""
+    S.reseed(7001)
+    for sp in species_names():
+        for mood in MOODS:
+            S.takes_cat('bk_%s_%s' % (sp, mood), lambda i, sp=sp, mood=mood: species_voice(sp, mood, i), 1, 'boki')
 
 
 def main():
@@ -264,19 +471,14 @@ def main():
     S.takes_cat('catch', catch, 0, 'boki')
     S.takes_cat('bond', bond, 0, 'boki')
     S.takes_cat('skill', skill, 2, 'boki')
-    S.takes_cat('k_venom', venom, 3, 'boki')
-    S.takes_cat('k_spore', spore, 3, 'boki')
-    S.takes_cat('k_gravity', gravity, 3, 'boki')
-    S.takes_cat('k_prism', prism, 3, 'boki')
-    S.takes_cat('k_lunar', lunar, 3, 'boki')
-    S.takes_cat('k_echo', echo, 3, 'boki')
+    for t in TYPES:
+        S.takes_cat('k_' + t, globals()[t], 3, 'boki')
     S.takes_cat('boki_downed', downed, 2, 'boki')
     S.takes_cat('boki_revive', revive, 0, 'boki')
     S.takes_cat('boki_eat', eat, 2, 'boki')
     S.takes_cat('boki_sleep', sleep, 1, 'boki')
     S.takes_cat('boki_work', work, 3, 'boki')
-    S.takes_cat('boki_fuse', fuse, 0, 'boki')
-    S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
+    voice_sets()
 
 
 if __name__ == '__main__':

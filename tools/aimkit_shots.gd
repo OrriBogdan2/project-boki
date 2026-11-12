@@ -54,7 +54,7 @@ func take(main_node: Node, out: String) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)      # the boot splash stays up when a check starts the match by hand
-	home = _spot(P.pos)
+	home = open_stretch(m.world, P.pos)
 	P.teleport(home); P.vel = Vector3.ZERO
 	T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"})
 	for i in 5: m.step(1.0 / 60.0)
@@ -72,9 +72,8 @@ func take(main_node: Node, out: String) -> void:
 	await main.get_tree().process_frame
 
 ## A real flat stretch of island (the check's strip is flattened in data only, so it draws as abyss):
-## 16 x 7 tiles of plain ground on one level, away from the start.
-func _spot(start: Vector3) -> Vector3:
-	var W = m.world
+## 16 x 7 tiles of plain ground on one level, away from the start. tools/hit_class_shots.gd uses it too.
+static func open_stretch(W: World, start: Vector3) -> Vector3:
 	for z in range(6, W.h - 6, 3):
 		for x in range(6, W.w - 18, 3):
 			if Vector2(x - start.x, z - start.z).length() < 24.0:

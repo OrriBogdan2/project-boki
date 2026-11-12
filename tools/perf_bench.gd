@@ -6,7 +6,8 @@ extends RefCounted
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-total=6] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv]
+##   [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
@@ -34,6 +35,7 @@ var base_secs := 60.0
 var out_path := ""
 var zone := ""
 var failed := false      # a budget line said FAIL: the exit code carries it
+var total := 6           # Hunters in the match, each with their Boki (--bench-total=30)
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -57,6 +59,7 @@ func setup(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
+		if a.begins_with("--bench-total="): total = int(a.substr(14))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-base="): base_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
@@ -84,7 +87,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+	o.merge({"teams": total >> 1, "squad": 2, "total": total, "raid": "ash", "blight": true, "no_drop": true,
+		"god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")

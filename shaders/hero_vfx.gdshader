@@ -15,8 +15,11 @@ const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
+const int M_SHEEN = 9;      // a band of light climbing a body-shaped capsule, facing the camera: UV.y top (0) to foot (1)
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
+const int M_CHAIN = 10;     // a held chain: UV.x counts links from the hand, UV.y across; life is its tension 0..1
+const int M_WEDGE = 11;     // a cone's area on the ground, apex at the centre, pointing +UV.y: UV across the quad
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -26,7 +29,8 @@ uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
 uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
-uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
+uniform float arc = 1.0;    // M_SCORCH cone, M_WEDGE: half angle (rad). M_SKIRT: the share of the circle it covers
+uniform float reach_t = 1.0;  // M_WEDGE: share of its life the front takes to the rim (1: a hold, life is the front)
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
@@ -160,6 +164,17 @@ vec4 skirt(vec2 uv) {
 	return vec4(ramp(heat) * a * 0.8, a * 0.8);
 }
 
+vec4 sheen(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float body = 1.0 - smoothstep(0.7, 1.0, length(vec2(p.x / 0.5, p.y)));   // the capsule the band is seen through
+	float d = (1.0 - uv.y) - (life * 1.25 - 0.1);                // the band climbs from below the feet to above the head
+	float band = exp(-d * d / 0.012);
+	float trail = (d < 0.0 ? exp(d * 7.0) : 0.0) * 0.3;          // a faint wash left behind it
+	float fade = 1.0 - smoothstep(0.75, 1.0, life);
+	float a = clamp(band + trail, 0.0, 1.0) * body * fade;
+	return vec4(mix(col.rgb, col2.rgb, band) * a, a);
+}
+
 vec4 flare(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
@@ -204,6 +219,21 @@ vec4 bolt(vec2 uv) {
 	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
 }
 
+vec4 chain(vec2 uv) {
+	// links face on (an oval ring) and edge on (a bar) in turn, each with a dark rim so it reads on bright grass
+	vec2 p = vec2(fract(uv.x) * 2.0 - 1.0, uv.y * 2.0 - 1.0);
+	float ring = abs(length(p * vec2(0.95, 1.35)) - 0.68);
+	float bar = length(vec2(max(abs(p.x) - 0.95, 0.0), p.y * 2.2));
+	float d = mod(floor(uv.x), 2.0) < 0.5 ? ring : bar;
+	float metal = 1.0 - smoothstep(0.13, 0.19, d);
+	float rim = 1.0 - smoothstep(0.19, 0.3, d);
+	// pulled taut it heats, and glints run down it toward the hand (the yank)
+	float glint = smoothstep(0.82, 1.0, sin(uv.x * 0.7 + TIME * 22.0)) * life;
+	float shine = smoothstep(0.1, -0.6, p.y) * 0.5 + 0.35 * life + glint;
+	vec3 c = mix(col3.rgb, mix(col.rgb, mix(col2.rgb, vec3(1.0), glint * 0.6), clamp(shine, 0.0, 1.0)), metal);
+	return vec4(c * rim, rim);
+}
+
 vec4 vortex(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
@@ -219,6 +249,31 @@ vec4 vortex(vec2 uv) {
 	float a = clamp(streak * 0.85 + hole * 0.75 + edge * 0.12, 0.0, 1.0) * fade;
 	vec3 c = mix(col.rgb, col2.rgb, smoothstep(0.6, 0.9, arms) * (1.0 - hole)) * streak + col3.rgb * hole;
 	return vec4(c * fade, a);
+}
+
+// A cone's area, never a solid sheet: a soft inside (coverage 0.04 at the apex, 0.22 by the rim), a dark char line
+// and a lit rim on its exact edge, and a bright ragged front running out from the apex that reaches the rim on the
+// hit (after `reach_t` of its life); the rim flashes there and the whole look burns away.
+vec4 wedge(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float d = length(p);
+	float ang = abs(atan(p.x, p.y));
+	float edge = min(1.0 - d, d * sin(max(arc - ang, 0.0)));     // to the rim or the nearer side, 0 on the edge
+	if (edge <= 0.0 || ang > arc) { return vec4(0.0); }
+	float n = fbm3(vec2(ang * 3.0 + seed, d * 4.0 - TIME * 2.0));
+	float go = min(life / max(reach_t, 0.01), 1.0);
+	float behind = hard(go - d + (n - 0.5) * 0.06);
+	float after = reach_t >= 1.0 ? 0.0 : clamp((life - reach_t) / (1.0 - reach_t), 0.0, 1.0);
+	float gone = smoothstep(after * 1.3 - 0.3, after * 1.3, n + 0.15);
+	float fill = mix(0.04, 0.22, smoothstep(0.0, 1.0, d)) * behind;
+	float rim = (1.0 - hard(edge - 0.035)) * mix(0.75, 1.0, behind);
+	float char_line = hard(edge - 0.035) * (1.0 - hard(edge - 0.06)) * 0.45;
+	float front = (1.0 - smoothstep(0.0, 0.07, abs(go - d + (n - 0.5) * 0.06))) * (1.0 - smoothstep(0.0, 0.18, after));
+	float flash = 1.0 - smoothstep(0.0, 0.35, after);
+	vec3 rim_c = mix(col.rgb, col2.rgb, 0.4 + 0.6 * flash);
+	vec3 c = col.rgb * fill + col3.rgb * char_line + rim_c * rim + mix(col2.rgb, vec3(1.0), 0.5) * front * 1.4;
+	float a = max(max(fill, char_line), max(rim, front));
+	return vec4(c, a) * gone;
 }
 
 vec4 ring(vec2 uv) {
@@ -238,11 +293,14 @@ void fragment() {
 	if (mode == M_SWEEP) { v = sweep(UV); }
 	else if (mode == M_SCORCH) { v = scorch(UV); }
 	else if (mode == M_SKIRT) { v = skirt(UV); }
+	else if (mode == M_SHEEN) { v = sheen(UV); }
 	else if (mode == M_FLARE) { v = flare(UV); }
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
+	else if (mode == M_CHAIN) { v = chain(UV); }
+	else if (mode == M_WEDGE) { v = wedge(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;

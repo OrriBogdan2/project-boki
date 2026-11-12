@@ -14,12 +14,13 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8}
+	"ring": 8, "sheen": 9, "wedge": 11}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
+	"ring": 6, "sheen": 6, "wedge": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
+	"drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -34,7 +35,14 @@ const ARC_SEGS := 24           # segments of a sweep's arc mesh
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
 const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
+const SHEEN_LIFE := 0.4        # s the armour tier-up sheen takes to sweep up the body
+const SHEEN_SIZE := 2.2        # m square, facing the camera: the band climbs a body-shaped capsule inside it
+const SHEEN_LIFT := 0.95       # m above the feet the square is centred (a Hunter's mid-body)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
+const CHAIN_MODE := 10         # the shader's M_CHAIN: a hold's chain, drawn on a mesh-trail node
+const CHAIN_SEG := 0.12        # m between a chain's strip points (its sway bends smoothly)
+const CHAIN_WAVES := 2.0       # waves of sway along a slack chain
+const CHAIN_SWAY_HZ := 16.0    # rad/s the slack sway travels
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
 
@@ -188,9 +196,32 @@ func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
 ## The same moment arriving from another game (["fx", "hvfx", ...]: other players' games don't run this kit).
 func net_in(x: Array) -> void:
 	var who: Variant = m.ents_by_id.get(String(x[2]), null)
-	if who is Hunter:
+	if who is Hunter and String(x[3]) == "armor_up":
+		tier_up(who, int(x[9]))
+	elif who is Hunter:
 		play(who, String(x[3]), Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]),
 				{"k": float(x[9]), "len": float(x[10]), "r": float(x[11])})
+
+## Armor went up a tier: one sheen in the new tier's colour sweeps up the body, for everyone to read (a rival just got
+## tougher). Not a recipe: the colour is the tier's, so the tier rides the net message's charge slot.
+func tier_up(h: Hunter, tier: int) -> void:
+	plays["armor_up"] = int(plays.get("armor_up", 0)) + 1
+	if m.get("net_on") and not h.remote:
+		m.net_fx(["hvfx", h.nid, "armor_up", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 0.0, 0.0, tier, 0.0,
+				0.0])
+	if lod_at(h.pos) <= 0.0 or (h.unseen and h != m.get("player")):
+		return
+	var mi: MeshInstance3D = _take("sheen", _surface_node.bind("sheen"))
+	var mt: ShaderMaterial = mi.material_override
+	var col: Color = Hunter.ARMOR_TIERS[tier][1]
+	mt.set_shader_parameter("col", col)
+	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, 0.6))
+	mt.set_shader_parameter("life", 0.0)
+	mt.set_shader_parameter("gain", view_k(h))
+	var s := Vector3.ONE * SHEEN_SIZE
+	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos + Vector3(0, SHEEN_LIFT, 0))
+	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s,
+			"follow": h})
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
@@ -306,7 +337,7 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"flare":
+		"flare", "sheen":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -316,7 +347,7 @@ func _surface_node(kind: String) -> Node3D:
 			strip.size = Vector2.ONE
 			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
-		"vortex", "ring":
+		"vortex", "ring", "wedge":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
 			mi.mesh = disc
@@ -342,6 +373,13 @@ func _arc(deg: float) -> ArrayMesh:
 		st.add_vertex(way * SWEEP_INNER)
 	_arcs[key] = st.commit()
 	return _arcs[key]
+
+## A wedge's shape on its material: `arc` degrees wide, `extent` metres to the rim, its front reaching the rim after
+## `lead` of its life. Returns the quad's scale.
+func _wedge(mt: ShaderMaterial, layer: Dictionary, extent: float, lead: float) -> Vector3:
+	mt.set_shader_parameter("arc", deg_to_rad(float(layer.get("arc", 60.0))) * 0.5)
+	mt.set_shader_parameter("reach_t", clampf(lead, 0.0, 1.0))
+	return Vector3(extent * 2.0, 1.0, extent * 2.0)
 
 ## An open unit cylinder: UV.x round it, UV.y from the foot to the top.
 func _cylinder() -> ArrayMesh:
@@ -452,6 +490,10 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
+		"wedge":
+			s0 = _wedge(mt, layer, extent, _num(layer, "lead", o, 0.0) / _num(layer, "life", o, 0.4))
+			s1 = s0
+			p.y += SCORCH_LIFT
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
@@ -469,6 +511,7 @@ func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	var mt: ShaderMaterial = mi.material_override
 	_paint(mt, layer, h)
+	mt.set_shader_parameter("mode", MODES["ribbon"])          # (the node may have drawn a chain last)
 	mi.global_transform = Transform3D.IDENTITY
 	(mi.mesh as ImmediateMesh).clear_surfaces()
 	ribbons.append({"node": mi, "mat": mt, "h": h, "anchor": String(layer.get("at", "chest")), "t": 0.0,
@@ -521,6 +564,12 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
+
+## A kit's shot: the move's "draw" scales the drawn slug and its streak (s["vr"], what Match.render draws), never
+## the hit radius s["r"]; then the move's trail follows it.
+func shot(h: Hunter, move: String, s: Dictionary) -> void:
+	s["vr"] = float(s["vr"]) * float(_rec(h, move).get("draw", 1.0))
+	trail(h, move, s["node"])
 
 func _mote_node(kind: String) -> Node3D:
 	var p := GPUParticles3D.new()
@@ -613,12 +662,14 @@ func shell(h: Hunter, move: String) -> MeshInstance3D:
 
 # ------------------------------------------------------------------ holds
 ## Something that lasts while the kit keeps asking, once per tick: a blade heating, a body burning. It follows its
-## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended.
+## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended. A "chain"
+## layer runs to `extra.to`, which the kit passes on every ask (the hook in flight).
 func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	var key := "%d/%s" % [h.get_instance_id(), move]
 	if holds.has(key):
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
+		holds[key]["to"] = extra.get("to")
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -635,9 +686,16 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if lod < 1.0 and bool(layer.get("near", false)):
 			continue
 		var kind := String(layer["p"])
-		if kind == "string":
+		if kind == "wedge":
+			var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
+			_paint(mi.material_override, layer, h)
+			mi.scale = _wedge(mi.material_override, layer, _num(layer, "size", o), 1.0)
+			layers.append({"node": mi, "layer": layer, "n": 0})
+			continue
+		if kind == "string" or kind == "chain":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
-				layers.append({"node": _string_node(layer, h), "layer": layer, "n": 0})
+				var mode: int = CHAIN_MODE if kind == "chain" else MODES["ribbon"]
+				layers.append({"node": _strip_node(layer, h, mode), "layer": layer, "n": 0})
 			continue
 		var node: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		var n := _aim_emitter(node, kind, layer, h, _way(layer, aim), o, lod)
@@ -650,7 +708,8 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		node.emitting = true
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
-	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at")}
+	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "to": o.get("to"),
+			"dir": o.get("dir")}
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
@@ -668,8 +727,22 @@ func _tick_holds() -> void:
 				var base: Vector3 = hunter.pos if e["at"] == null else e["at"]
 				node.global_position = _where(lay["layer"], hunter, base, aim)
 				_reaim(node, lay["layer"], aim)
+			elif lay["layer"]["p"] == "chain":
+				_draw_chain(lay, hunter, e)
+			elif lay["layer"]["p"] == "wedge":
+				_hold_wedge(lay, hunter, e, aim)
 			else:
 				_draw_string(lay, hunter)
+
+## A held wedge (a wind-up's area): on the ground under him, along the kit's locked "dir" (else the aim), its front at
+## the hold's charge, so it reaches the rim on the frame the move hits.
+func _hold_wedge(lay: Dictionary, h: Hunter, e: Dictionary, aim: Vector2) -> void:
+	var mi: MeshInstance3D = lay["node"]
+	var dir: Vector2 = aim if e["dir"] == null else e["dir"]
+	var at: Vector3 = h.pos if e["at"] == null else e["at"]
+	at.y = m.world.ground_at(at.x, at.z) + SCORCH_LIFT
+	mi.global_transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)).scaled(mi.scale), at)
+	(mi.material_override as ShaderMaterial).set_shader_parameter("life", clampf(float(e["k"]), 0.0, 1.0))
 
 ## A hold's emitter turned to the aim now, so a stream along it follows a sweep (the particles already out keep
 ## their own way, as a hose's fire does).
@@ -691,10 +764,12 @@ func _end_hold(e: Dictionary) -> void:
 		else:
 			node.visible = false
 
-## A thin glowing line through named anchors (a bowstring): a mesh trail node drawn fresh from them each frame.
-func _string_node(layer: Dictionary, h: Hunter) -> Node3D:
+## A strip drawn fresh each frame on a mesh trail node: a thin glowing line through named anchors (a bowstring),
+## or a chain (CHAIN_MODE).
+func _strip_node(layer: Dictionary, h: Hunter, mode: int) -> Node3D:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	_paint(mi.material_override, layer, h)
+	(mi.material_override as ShaderMaterial).set_shader_parameter("mode", mode)
 	mi.global_transform = Transform3D.IDENTITY
 	return mi
 
@@ -718,6 +793,38 @@ func _draw_string(lay: Dictionary, h: Hunter) -> void:
 		mesh.surface_add_vertex(pts[i] - side)
 	mesh.surface_end()
 
+## A chain from the layer's anchor to the hold's `to`, its links turned to the camera (UV.x counts links). The hold's
+## k is its tension: at 0 it hangs slack and sways, pinned at both ends; toward 1 it pulls straight and glows.
+func _draw_chain(lay: Dictionary, h: Hunter, e: Dictionary) -> void:
+	var mi := lay["node"] as MeshInstance3D
+	var mesh: ImmediateMesh = mi.mesh
+	mesh.clear_surfaces()
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or not e["to"] is Vector3:
+		return
+	var layer: Dictionary = lay["layer"]
+	var a := anchor_pos(h, String(layer.get("at", "chest")))
+	var b: Vector3 = e["to"]
+	var span := a.distance_to(b)
+	if span < 0.05:
+		return
+	var k := clampf(float(e["k"]), 0.0, 1.0)
+	(mi.material_override as ShaderMaterial).set_shader_parameter("life", k)
+	var side := (b - a).cross(-cam.global_basis.z).normalized()
+	var half := float(layer.get("size", 0.2)) * 0.5
+	var links := span / float(layer.get("link", 0.25))
+	var sway := float(layer.get("slack", 0.3)) * (1.0 - k)
+	var n := maxi(2, int(span / CHAIN_SEG))
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in n + 1:
+		var f := float(i) / n
+		var p := a.lerp(b, f) + side * sin(f * TAU * CHAIN_WAVES - m.time * CHAIN_SWAY_HZ) * sway * sin(f * PI)
+		mesh.surface_set_uv(Vector2(f * links, 0.0))
+		mesh.surface_add_vertex(p + side * half)
+		mesh.surface_set_uv(Vector2(f * links, 1.0))
+		mesh.surface_add_vertex(p - side * half)
+	mesh.surface_end()
+
 ## True when the Hero's model has this node ("" is never there): a look can stand down for one built in.
 func _model_has(h: Hunter, node_name: String) -> bool:
 	return node_name != "" and h.model != null and WardenGlb.anchor(h.model, node_name) != null
@@ -735,6 +842,8 @@ func _process(delta: float) -> void:
 			live.remove_at(i)
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
+		if e.has("follow") and is_instance_valid(e["follow"]):
+			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)

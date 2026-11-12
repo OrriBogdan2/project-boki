@@ -31,7 +31,7 @@ static func mates(m: Node, h: Hunter, at := Vector3.INF, r := 1e9, include_downe
 
 ## Heal a teammate. A standing one heals normally (remote ones through the "heal" event); a downed
 ## one gets its bleed-out bar topped up `wisp_k` times as much, or revive progress if it is online.
-static func heal(m: Node, t: Hunter, n: float, wisp_k := 5.0) -> void:
+static func heal(m: Node, t: Hunter, n: float, wisp_k := 5.0, tint := Color.TRANSPARENT) -> void:
 	if t == null or t.out or t.dead:
 		return
 	if t.downed:
@@ -41,7 +41,7 @@ static func heal(m: Node, t: Hunter, n: float, wisp_k := 5.0) -> void:
 		else:
 			t.down_hp = minf(cap, t.down_hp + n * wisp_k)
 		return
-	t.heal(n)
+	t.heal(n, tint)
 
 ## Stand a downed teammate back up (the existing revive; online ones are told through "rev").
 static func revive(m: Node, t: Hunter, by: Ent) -> bool:

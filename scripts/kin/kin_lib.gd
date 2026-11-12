@@ -13,6 +13,10 @@ extends RefCounted
 ## Everything here is data in, data out: nothing named in a file is loaded or called.
 
 const ROOT := "res://content"
+## A species' theme as its standard type (DECISIONS 2026-11-08 22:29). The type picks the cast cue k_<type>.
+const TYPE_OF_THEME := {"ember": "fire", "bloom": "grass", "storm": "electric", "frost": "ice", "venom": "poison",
+	"swarm": "bug", "tempest": "flying", "stone": "rock", "titan": "steel", "lunar": "fairy", "prism": "crystal",
+	"shadow": "dark", "echo": "sound", "gravity": "psychic", "spore": "spore"}
 
 static var _lib := {}
 static var _reports := {}
@@ -59,6 +63,10 @@ static func merge(id: String) -> MergeSpec:
 
 static func node(id: String) -> EvolutionNode:
 	return lib()["evolution"].get(id, null)
+
+## The cast cue of a theme: k_<type>.
+static func cue_of(theme: String) -> String:
+	return "k_" + String(TYPE_OF_THEME.get(theme, "normal"))
 
 static func kin_ids() -> Array:
 	var ids: Array = lib()["kin"].keys()

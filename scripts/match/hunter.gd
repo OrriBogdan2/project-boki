@@ -1778,7 +1778,7 @@ func _kin_riders(extra: Dictionary) -> void:
 			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": KinRules.cat_color("damage").to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
-func heal(n: float) -> void:
+func heal(n: float, tint := Color.TRANSPARENT) -> void:
 	if downed or out:
 		return
 	if remote:
@@ -1788,8 +1788,7 @@ func heal(n: float) -> void:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
-	if hp - before > 1.0:
-		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+	ReceiverCue.heal(self, hp - before, tint)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
@@ -2251,12 +2250,13 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
+		var flung: bool = m.time - kb_t < 0.6 and pre_v.length() > 8.0
+		if flung and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
 			stun_t = maxf(stun_t, st)
-			m.on_wall_slam(self)
+			m.on_wall_slam(self, pre_v.normalized())
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
 		wall_moves.land()

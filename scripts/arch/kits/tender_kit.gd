@@ -606,7 +606,7 @@ func _pulse(c: Vector3, per: float) -> void:
 ## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
 ## "heal_stars").
 func _mend(o: Hunter, amt: float, wisp_k := 5.0) -> void:
-	CareUtil.heal(m, o, amt, wisp_k)
+	CareUtil.heal(m, o, amt, wisp_k, h.accent())
 	vfx("heal_stars", o.pos)
 
 func _hearth_end(flare: bool, word: String) -> void:
