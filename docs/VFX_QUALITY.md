@@ -68,8 +68,8 @@ Still open (shared, not done here):
   ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
   rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
   is per kit (backlog).
-- Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
-  moves them to teal. The alternative (keep void violet) would clash with Sable.
+- Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
+  void violet) would clash with Sable.
 
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
@@ -78,7 +78,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Tenzo | dolm | 2 | 2 | 1 | 2 | 3 | 1 | 3 | 14 | E telegraph is opaque orange discs; X is a thin red line and ring; everything red/orange (now cobalt on this branch); `breah_*` draws flat rings with no debris |
-| 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
+| 2 | Motley | ostra | 2→4 | 2→4 | 1→3 | 2→3 | 2→4 | 2→4 | 3 | 14→25 | re-scored 11-11 from --hero-vfx-reel strips (ext/vfx-motley-data, `docs/shots/vfx-motley-data/*_before_after.jpg`, xvfb opengl3; GPU strip jobq 20261111-151420-01798 seen, `gpu_after_full_e_r.jpg`, same read): his moments are content/vfx/ostra.json on HeroVfx in sea teal; X is a teal rim with arms and no floor, E a low teal drum, both clear over the target; every LMB orb bursts on the foe it hits (flash, shards, from half charge a ring). Left: the Trade lantern and its sigils stay violet (owner 11-08), Swollen pink; sounds unchanged |
 | 3 | Vex | gunslinger | 1 | 2 | 2 | 2 | 3 | 1 | 4 | 15 | LMB and held LMB show almost no tracer or muzzle flash; RMB crescents are pink; E/X are opaque brown scorch discs |
 | 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
 | 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
