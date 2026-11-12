@@ -39,6 +39,7 @@ func _opens(e: Dictionary, fuel: float, cd: float, btn: bool) -> bool:
 	h.glide_cd = cd
 	var t := 0.0
 	while t < 0.4:
+		h.inp["jump"] = t == 0.0     # the second press (a held Space never opens it)
 		h.inp["glide"] = true
 		h.inp["glide_btn"] = btn
 		m.step(Match.DT)
@@ -87,6 +88,7 @@ func run(main: Node) -> void:
 	h.glide_fuel = 0.0
 	var reopened := false
 	for i in 90:
+		h.inp["jump"] = i == 0 or i == 41     # the press opens it (a held Space never does)
 		h.inp["glide"] = (i < 20) or (i > 40)
 		h.glide_fuel = 0.0
 		m.step(Match.DT)
