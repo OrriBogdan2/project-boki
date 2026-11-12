@@ -21,7 +21,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
-| `tutorial_hud.gd` (`TutorialHud`) | the tutorial's step banner, a slim strip at the top centre (at most 35% x 10% of the screen; its glow stays above the middle, `--tutorial-hud-check`): each new step slides in at full glow with a soft chime (`ui_step`), settles over 1.2 s to a steady breathing glow, and flares three times when the player stalls for `Tutorial.NAG_T` (8 s); keys the line names are key caps in it, else the step's key cap leads it. Plus the check, the pick ring and the intro card. Reel: `--tutorial-hud-shots --banner-reel --tut-from=<step>` |
+| `tutorial_hud.gd` (`TutorialHud`) | the match tutorial's step banner, drawn by `TutorialStrip` (see the strip rows above; its glow stays above the middle, `--tutorial-hud-check`): each new step slides in at full glow with a soft chime (`ui_step`, Tutorial.CHIME_AT), settles over `TutorialStrip.PULSE_T` to a steady breathing glow (a line marked `steady`; the farm's strip stays calm), and flares three times when the player stalls for `Tutorial.NAG_T` (8 s); keys the line names are key caps in it, else the step's key cap leads it. Plus the check, the pick ring and the intro card. Reel: `--tutorial-hud-shots --banner-reel --tut-from=<step>` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -114,3 +114,15 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+
+## Tutorial objective strip (one banner for both tutorials)
+- `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
+  title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
+  pulses for 1.6 s whenever the objective changes, then keeps a steady rim. The message lane starts at 72% of the
+  width, so the strip never touches it. In the match tutorial the Ways Out strip, the match clock and the ship's
+  planning countdown are off; in a real match (`FirstMatchGuide`) the strip drops under `WaysOutHud.bottom()`
+  (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
+- The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
+  Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.
