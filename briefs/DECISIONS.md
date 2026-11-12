@@ -608,3 +608,10 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 ## 2026-11-11 owner (7:20 PM EST): CORE SERIES PRINCIPLES (apply to every mode, design doc and spawn table)
 1. CLARITY FIRST (Supervive-level readability). Far less visual noise; our hunters, other hunters and Boki must read instantly. NO random enemy spawns: every enemy/camp/boss spawns at a fixed, learnable place on a predictable timer, telegraphed before it appears (minimap/world marker + countdown). Waves in Heart Raid follow the same rule (scripted, timed, telegraphed). VFX/particles/decals that do not carry gameplay info get cut or toned down.
 2. BOKI ARE LOCKED TO A GAME/MODE. Project Boki is a series of many different games/modes; every Boki type is found in exactly one game/mode (not ownership-locked: you find it only there). Each mode has a spawn table with rarity tiers COMMON / RARE / VERY RARE. Rarer Boki sit behind harder difficulties: e.g. Heart Raid has its own Boki, and its higher difficulty tiers unlock its rare and very rare ones. Every new mode ships with its own Boki list + rarity table + difficulty gates. The Bokidex should show where each Boki is found and its rarity.
+
+## 2026-11-12 (owner, Wed 11-11 ~8 PM EST): DAILY SHIP-EVERYTHING TRAIN
+- Every day ~6 PM EST the coordinator ships one patch (0.24.x+1) with EVERY branch posted READY that passes the gate
+  (no unexplained NEW-RED, export dry-run OK). Runs for 1-2 weeks (until ~11-25), then reviewed.
+- No holding finished features for a "big release day": small player count, ship as soon as it is gated.
+  Unfinished features ship behind a flag or a "(prototype)" label, never half-wired into the default path.
+- Post READY by ~1 PM EST to make that day's train.
