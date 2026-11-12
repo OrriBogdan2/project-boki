@@ -25,6 +25,11 @@ const ROCK_R := 0.7               # m, the rock's radius
 const GLINT_R := 0.08             # m, a glint's radius
 const LINE_W := 0.015             # m, the line's thickness
 const ROD_UP := 0.6               # m above the ground the line leaves your Boki
+const SEAT_M := 2.0               # m from you your partner sits, side-on to the cast
+const CALL_S := 8.0               # s your partner has to walk over before it is set down at its seat
+const LEAN_RAD := 0.3             # rad your partner leans toward the bobber on a bite
+const CHEER_S := [0.9, 1.6]       # s of cheering hops for a common, a rare catch
+const HOP_M := [0.26, 0.5]        # m the hop lifts the Boki for a common, a rare catch
 
 static func rules() -> Dictionary:
 	return Content.rules("glint_fishing")
@@ -290,6 +295,10 @@ var marker: ColorRect = null
 var band_rect: ColorRect = null
 var card: Control = null
 var card_t := 0.0
+var slot := Vector3.ZERO       # your partner's seat, from you
+var cheer := 0.0               # s of cheering left
+var cheer_len := 1.0           # s the cheer began with
+var cheer_hop := 0.0           # m, its hop
 
 func _init(home) -> void:
 	h = home
@@ -363,20 +372,36 @@ func use() -> void:
 	if ks.is_empty():
 		h._toast("Glint Fishing needs your partner rested and out here")
 		return
+	if not ComeLook.at_leisure(ks[0]):
+		h._toast("%s is asleep or busy right now" % ak["name"])
+		return
 	who = ks[0]
-	who["busy"] = true
+	_call_over()
 	var dice := RandomNumberGenerator.new()
 	dice.randomize()
 	run = Run.new(ak, day_of(Time.get_unix_time_from_system()), dice)
 	holding = false
 	last = Run.S.DONE
 	_open_bar()
-	var at := _water(0.0, -ROCK_R - 0.3)
-	at.y = maxf(0.0, h._ground_h(at.x, at.z))
-	who["node"].position = at
-	who["node"].rotation.y = atan2(_dir().x, _dir().y)
-	who["pos"] = at
 	h._toast("Hold %s to swing the cast, let go on a glint" % Settings.key_cap("interact"))
+
+## Your partner walks over (the whistle's follow) to sit SEAT_M from you, on the side it already is.
+func _call_over() -> void:
+	var side := Vector3(-_dir().y, 0.0, _dir().x)
+	if side.dot(who["pos"] - h.ppos) < 0.0:
+		side = -side
+	slot = h.world.free_spot_near(h.ppos + side * SEAT_M) - h.ppos
+	who["called_t"] = CALL_S
+	who["call_slot"] = slot
+
+## Once it has walked over (or run out of time), it stays at its seat for the session.
+func _seated() -> void:
+	if who.get("busy", false) or who.has("called_t"):
+		return
+	who["busy"] = true
+	who["vel"] = Vector3.ZERO
+	who["pos"] = h.ppos + slot
+	(who["node"] as Node3D).position = who["pos"]
 
 ## A press or release: true when fishing took it.
 func input(event: InputEvent) -> bool:
@@ -402,6 +427,7 @@ func tick(d: float) -> void:
 		return
 	var was_ears := run.ears()
 	run.step(d, holding)
+	_seated()
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
 		Sfx.play("ping", null, -6.0)
@@ -410,6 +436,8 @@ func tick(d: float) -> void:
 	if run.state != last:
 		_entered(run.state)
 	_draw_water()
+	if who.get("busy", false):
+		_pose(d)
 	if run.over():
 		_end(true)
 
@@ -436,6 +464,26 @@ func _entered(s: Run.S) -> void:
 				h.verbs.play("land")
 			h._toast("Cast %d of %d: %s" % [run.casts.size(), int(rules()["casts"]), got])
 			h._emote(who, "♥" if c["how"] == "caught" else "…", true)
+			if c["how"] == "caught":
+				_cheer(c["rare"])
+
+## A catch: hops for joy, higher and longer for a rare one.
+func _cheer(rare: bool) -> void:
+	cheer_len = CHEER_S[int(rare)]
+	cheer = cheer_len
+	cheer_hop = HOP_M[int(rare)]
+	Sfx.play("kin_happy", who["pos"], -10.0, 0.15, Unique.voice(who["rec"]))
+
+## Your partner looks at the bobber (or the water ahead), leans in while the ears are up, and hops when cheering.
+func _pose(d: float) -> void:
+	var n: Node3D = who["node"]
+	var body: Node3D = n.get_node("Body")
+	var at := bobber.global_position if bobber.visible else _water(float(rules()["near_m"]), 0.0)
+	var k := minf(1.0, d * 8.0)
+	n.rotation.y = lerp_angle(n.rotation.y, atan2(n.position.x - at.x, n.position.z - at.z), k)
+	body.rotation.x = lerpf(body.rotation.x, -LEAN_RAD if run.ears() else 0.0, k)
+	cheer = maxf(0.0, cheer - d)
+	body.position.y = absf(sin(cheer * 10.0)) * cheer_hop * cheer / cheer_len
 
 ## m along the cast and m to its side, from the rock, as a point on the water.
 func _water(along: float, side: float) -> Vector3:
@@ -508,6 +556,11 @@ func _end(finished: bool) -> void:
 	who["busy"] = false
 	who["t"] = 1.5
 	h.verbs.hold("")
+	who.erase("called_t")
+	var body: Node3D = who["node"].get_node("Body")
+	body.rotation.x = 0.0
+	body.position.y = 0.0
+	cheer = 0.0
 	if is_instance_valid(bar):
 		bar.queue_free()
 	for g in glint_nodes:
