@@ -7,6 +7,8 @@ extends RefCounted
 ##      with a box from it (or UiFrame)
 ##   4. no stray hard-coded panel styles: no StyleBoxFlat.new(), UI._box() or per-screen theme
 ##      outside the style module (the in-match HUD and reserved files excepted, see ALLOWED)
+##   5. building the theme logs no engine error (a startup error print raced worker threads on the
+##      GPU bench and crashed it: docs/DEBT.md, GPU bench flakes)
 
 var main: Node
 var fails := 0
@@ -32,9 +34,25 @@ func run(main_node: Node) -> void:
 	_removed(src)
 	await _migration()
 	_static_styles(src)
+	_theme_builds_clean()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Counts the engine errors logged while it is added (OS.add_logger).
+class ErrorCount extends Logger:
+	var errors: Array[String] = []
+
+	func _log_error(_function: String, _file: String, _line: int, code: String, rationale: String,
+			_editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		errors.append(rationale if rationale != "" else code)
+
+func _theme_builds_clean() -> void:
+	var count := ErrorCount.new()
+	OS.add_logger(count)
+	UiTheme.build()
+	OS.remove_logger(count)
+	ok("theme builds without an engine error", count.errors.is_empty(), "; ".join(count.errors))
 
 # ------------------------------------------------------------------ 1, 2: the settings
 ## path -> source text of every script under dir.
