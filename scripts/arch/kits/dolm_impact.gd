@@ -10,7 +10,7 @@ const DMG_FULL := 30.0         # damage that reads as a full-size impact (the sl
 const RISE_RING := 1.4         # m: radius of the ring a rising rock throws
 const RISE_FLASH := 1.1        # m: size of the flash at its foot
 const FLASH_A := 0.75         # the flash's strength (it adds over the hit's own fire)
-const FLASH_BASE := 1.5        # m: the flash's size at the smallest hit; the footage's boulder fireball is about 2.7 m across
+const FLASH_BASE := 1.5        # m: smallest flash (the footage's boulder fireball is 2.7 m across)
 const DMG_MIN := 0.25          # smallest weight: even the boulder's 9 shows a flash and a ring
 
 ## Weight 0.25..1 for a hit of `dmg`.

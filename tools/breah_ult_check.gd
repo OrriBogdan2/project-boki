@@ -170,6 +170,10 @@ func _punch_and_bond() -> void:
 		"spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep",
 		shape_ok and HeroZones.ROCK_TH * 2.0 < 1.0
 	)
+	var joined := true
+	for w in rocks(m).filter(func(w): return w.has("ult")):
+		joined = joined and (w["node"] as Node3D).get_node_or_null("ColRidge") != null
+	ok("spine parity: every rock wears the ridge fin that joins it to the next, one ridge not nine rocks", joined)
 	_arc_and_width(m, K)
 	var paid0 := paid(P)
 	var l0 := K.launches

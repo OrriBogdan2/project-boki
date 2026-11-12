@@ -12,7 +12,7 @@ extends ArchKit
 ## KitLooks.
 
 const ROCK_PAY := "ROCKFALL"
-const PUNCH_STREAK_W := 0.8             # m: width of the bright streak down the punch lane (the footage's is a thick white-hot streak)
+const PUNCH_STREAK_W := 0.8             # m: width of the bright streak down the punch lane
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
