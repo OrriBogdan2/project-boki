@@ -115,9 +115,14 @@ static func level_up(rec: Dictionary) -> void:
 static func has_art(id: String) -> bool:
 	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
 
-## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, or "trade"),
-## art or not; "" when that isn't a way it evolves.
+## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, "trade", or "path":
+## the path meter's winner when the player presses Evolve), art or not; "" when that isn't a way it evolves.
+## A branching final with a path meter (EvoPath) never evolves by "level" alone: the player presses Evolve.
 static func next_for(rec: Dictionary, how: String, item := "") -> String:
+	if how == "path":
+		return EvoPath.pick(rec)
+	if how == "level" and not EvoPath.line(rec).is_empty():
+		return ""
 	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
 	var fits: Array = []
 	for o in line.get("into", []):
@@ -141,10 +146,10 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
 	var to := next_for(rec, how, item)
-	if to == "" or not has_art(to):
+	if to == "" or not has_art(to) or rec.get("stay", false):      # a worn Stayleaf: no new forms
 		return {}
 	var before := form_name(rec)
-	var a := leading(rec)
+	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
 	rec["was"].append(String(rec["species"]))
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)

@@ -68,6 +68,7 @@ var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level o
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
+var hold: ItemHold                    # an item in your hand and its preview card (item_hold.gd)
 var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
@@ -1097,11 +1098,12 @@ func _process(delta: float) -> void:
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
-	if hb and hb.active:
+	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
-	if carry.tick(d, interact, panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()):
+	if carry.tick(d, interact, idle):
 		return
-	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not interact.is_empty():
+	if idle and not interact.is_empty():
 		if Input.is_action_just_pressed("interact"):
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
@@ -2398,6 +2400,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	ui = CanvasLayer.new(); add_child(ui)
+	hold = ItemHold.new(self)
 	stat_glint = StatGlint.new(self); ui.add_child(stat_glint)
 	root_ui = Control.new()
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -3210,6 +3213,7 @@ func _open_kin(rec: Dictionary) -> void:
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
 				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
+			EvoPathView.block(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities"))
@@ -5185,7 +5189,8 @@ func _open_feed(rec: Dictionary) -> void:
 			row_for.call(f, n, aff + "Fills it up.")
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
 	var any := GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
-			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or not rows.is_empty()
+			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec),
+			func(id: String, pick: String): hold.peek(rec, id, pick)) or not rows.is_empty()
 	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))

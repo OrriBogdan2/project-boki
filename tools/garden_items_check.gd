@@ -43,6 +43,7 @@ func run(m: Node) -> void:
 		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
+	_ribbon()
 	_migration()
 	print("GARDENITEMS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -55,7 +56,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 26 and fine, "26 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 27 and fine, "27 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -124,6 +125,17 @@ func _feeding() -> void:
 	var tea := Care.feed(rec, "unwind_tea")
 	var power: int = rec["stats"]["power"]
 	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
+
+func _ribbon() -> void:
+	var rec := _boki("cindle", 3, "power")
+	var fresh := GardenItems.award_ribbon(rec, "dash", 5, "won the Dash Crown cup")
+	ok(fresh and not GardenItems.award_ribbon(rec, "dash", 6, "again"), "a Cup Ribbon: once a sport a Boki")
+	var other := GardenItems.award_ribbon(rec, "shove", 6, "won the Shove Crown cup")
+	ok(other and rec["ribbons"].size() == 2, "...and one for each sport")
+	var paged := int(rec["ribbons"]["dash"]["week"]) == 6 and GardenItems.owned("cup_ribbon")
+	ok(paged, "the cup's week moves on and the item has its page")
+	var kept: bool = not GardenItems.fed("cup_ribbon") and not GardenItems.preview(rec, "cup_ribbon")["ok"]
+	ok(kept and not GardenItems.take_off(rec, "cup_ribbon"), "worn for good: not eaten, not taken off")
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")
