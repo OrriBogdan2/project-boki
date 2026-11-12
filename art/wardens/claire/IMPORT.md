@@ -1,5 +1,16 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
+## Owner fix 2026-11-12: arms and hands (`tools/art1/warden_fix_1112.py claire`, on the 11-10 file)
+The owner's Model Room note: "arm / hands are weird". Bone heat had put the sleeves mostly on `hips` and the gloves on
+`forearm`, and the skirt, the sash and its bow on the forearms and hands, so a raised arm dragged a lump of skirt and the
+bow up with it (the bulky "sleeve", the bow fused into the hand). The mesh's arms also hung 6-10 cm outside the arm bones.
+The fix: the sleeve (fur by the arm's line) and the glove (its purple paint, or all-arm weights, and the claws) are the arm,
+grown over the mesh; only they keep arm weights (upper_arm, then forearm over 3 cm round the elbow; the glove rides the
+forearm, as the clips' wrist turns were keyed for the old fist round the spear); everything else loses its arm weights.
+The 35 faces fusing the cuffs to the skirt and sash below the armpit are cut. Each arm is then turned onto its bones
+(upper arm about the shoulder, forearm about the elbow) so it bends where the clips bend it; the bones stay on the rig
+nodes (REST_TOL). Body proportions untouched. Stretch check: worst 5.41 (was 6.61); idle 0 stretched edges (was 93).
+
 `claire.glb`: the owner's pick (11-10), Claire v95 r2 appeal3 `cand_a.glb` (the appeal3 face on body a, one mesh), swapped onto
 Claire's own skeleton, 49 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/claire_v95.json`. Raw files in ~/meshy/v95/claire/r2/appeal3 (never in git); the spec reads
