@@ -32,17 +32,17 @@ hatch shield kept on `x_shield` (`keep`).
     blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- breaker.glb WORK/breaker_dir.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55
     python3 tools/art1/glb_add_clips.py breaker.glb WORK/breaker_dir.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br
 
-crouch_bl, crouch_br (2026-11-12, ext/anim-dir-all-1112): the recipe can't step his crouch (14 cm legs under hips 9 cm up:
-`hunter_dir_gait.py ... crouch` plants no sole), so these are crouch_b turned 45 degrees into the move, the chest on the
-source's facing: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/breaker/breaker.glb
-OUT.glb 1 1 "bl~,br~" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_bl,crouch_br`. The same
-turn of crouch_f does not help (it barely plants: its copies carry 0.2 of the speed), so fl and fr still blend f with
-l and r; a hand-made sneak is docs/DEBT.md.
+crouch_fl, crouch_fr, crouch_bl, crouch_br (2026-11-12, ext/anim-loco-slip): the recipe can't step his crouch (14 cm
+legs under hips 9 cm up: `hunter_dir_gait.py ... crouch` plants no sole), so each is crouch_f (or crouch_b) turned 45
+degrees into the move, the chest on the source's facing, on the source's own keys:
+`python3 tools/art1/glb_turn_clip.py art/wardens/breaker/breaker.glb crouch_fl=crouch_f:45,crouch_fr=crouch_f:-45,crouch_bl=crouch_b:-45,crouch_br=crouch_b:45`.
+The first bl/br were the same turn baked in Blender (`hunter_dir_gait.py "bl~,br~"`), which reads a loop at whole frames
+of its 48 fps scene: the 0.600 s crouch_b (30 fps keys) came out 0.604 s, so the sneak ring's loops no longer shared one
+length and WardenClips ran it unsynced; its crouch_f copies walked 61-71 deg off in game and were not shipped.
 
 run_fl, run_fr (2026-11-12, ext/anim-loco-slip): run_f turned 45 degrees into the move, as crouch_bl/br. The recipe's
 diagonals were baked while his feet were skinned on `x_foot`; the 0.24.5 body skins them on the shin, so the foot pivot
 that kept `x_foot` planted dragged the visible foot (planted sole 7.2 m/s at rate 1 against run_f's 4.0). The recipe
-can't rebuild them on this body (`fl,fr ... run`: stance 0.14, pelvis dips 12-20 cm). Run from the repo root (jobq
-blender workers take tree-relative paths): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py --
-art/wardens/breaker/breaker.glb OUT.glb 2.0 4.5 "fl~,fr~" 0 0 2.0 2,1 55 run`, then
-`glb_add_clips.py breaker.glb OUT.glb run_fl,run_fr`.
+can't rebuild them on this body (`fl,fr ... run`: stance 0.14, pelvis dips 12-20 cm). They were baked with the Blender
+turn (`"fl~,fr~"`, since replaced); run_f is keyed at 48 fps, so the bake kept its length, and
+`glb_turn_clip.py ... run_fl=run_f:45,run_fr=run_f:-45` gives the same keys to 4e-7.
