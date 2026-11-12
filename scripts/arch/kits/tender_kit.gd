@@ -328,11 +328,12 @@ func _tick_glide(dt: float) -> void:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
 # ------------------------------------------------------------------ RMB: Burrseed
-## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
-## (`wind_move`), a short dotted lane follows the aim and a ring glows round her. The seed then
+## Owner items 118 and 23 (11-08): a press starts a short fixed wind-up (`windup`, Darkside Binding's quick
+## cast) that nothing extends: she slows (`wind_move`) and a short dotted lane follows the aim. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
 ## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
+func rmb_winding() -> bool: return seed_aim
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
@@ -345,13 +346,12 @@ func fire_rmb(c: Dictionary) -> void:
 	seed_wind = float(rmb_def()["windup"])
 	play("mm_seed_aim")
 	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
-	lk().burst("flare", h.pos,
-			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
 	_seed_lane()
 
 func _seed_lane() -> void:
 	var sd := rmb_def()
-	var width := float(sd["seed"]["hit_r"]) * 2.0
+	# the seed's own width (its shot radius is half hit_r): the footage's lane is about 0.4 bh wide
+	var width := float(sd["seed"]["hit_r"])
 	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
 
 ## Her share of run speed during the wind-up.
@@ -397,7 +397,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern
+	vfx("seed_cast", null, dir)          # the cast flare from her lantern, riding her hop (footage: about 0.3 s up)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
