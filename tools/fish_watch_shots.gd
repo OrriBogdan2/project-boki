@@ -6,10 +6,13 @@ extends RefCounted
 const WAIT_S := 30.0         # s to wait for the zone to load and the partner to walk over
 const FRAMES := 4
 const CHEER_FRAMES := 40     # frames watched for the top of a hop
+const CAM_AHEAD_M := 2.4     # m the camera stands out over the water, 3/4 in front of the partner
+const CAM_AWAY_M := 1.2      # m it steps off the partner's side away from you, so you never block it
 
 var main: Node
 var px := 320
 var out := "shots"
+var you := Vector3.ZERO      # where you stand fishing
 
 func run(m: Node) -> void:
 	main = m
@@ -43,6 +46,8 @@ func run(m: Node) -> void:
 		await main.get_tree().process_frame
 		w += main.get_process_delta_time()
 	var n: Node3D = pk["node"]
+	you = gw.ppos
+	gw.root_ui.visible = false     # the partner and the bobber, without the panels over them
 	var cam := Camera3D.new()
 	gw.add_child(cam)
 	cam.make_current()
@@ -70,8 +75,9 @@ func _frame(strip: Image, i: int, cam: Camera3D, n: Node3D, hop := false) -> voi
 	var best := -1.0
 	for _f in (CHEER_FRAMES if hop else 3):
 		var ahead := -n.global_transform.basis.z
-		cam.global_position = n.global_position - ahead * 3.2 + Vector3(0, 1.5, 0) + ahead.cross(Vector3.UP) * 1.6
-		cam.look_at(n.global_position + Vector3(0, 0.9, 0) + ahead * 1.2)
+		var away := (n.global_position - you).normalized()
+		cam.global_position = n.global_position + ahead * CAM_AHEAD_M + away * CAM_AWAY_M + Vector3(0, 0.9, 0)
+		cam.look_at(n.global_position + Vector3(0, 0.8, 0))
 		await main.get_tree().process_frame
 		var y: float = (n.get_node("Body") as Node3D).position.y
 		if not hop or y > best:
