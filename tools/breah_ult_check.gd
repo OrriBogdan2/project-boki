@@ -58,6 +58,9 @@ func _cast_and_rise() -> void:
 	ok("ult: no cast below level 6", not S.running() and float(K.cd["x"]) == 0.0, "level %d" % P.lvl)
 	P.lvl = 6
 	var paid0 := paid(P)
+	Sfx.listener = home
+	for n in ["br_crack", "br_rumble", "br_slam"]:
+		Sfx.last_played.erase(n)
 	_press(m, P, home + Vector3(7, 0, 0), false)
 	var released := m.time
 	ok("ult: one X press is one cast", int(P.used.get("x", 0)) == 1 and S.casts == 1, "used %s" % str(P.used.get("x")))
@@ -76,7 +79,15 @@ func _cast_and_rise() -> void:
 			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1,
 		"axis %s" % str(S.axis)
 	)
-	step(m, 1.0)
+	step(m, 0.3)
+	var roll_keys := Sfx.loops.keys().filter(func(key): return String(key).begins_with("spine_roll_"))
+	ok("ult sound: cracks at the release, then one rumble in two voices (a half each), none per rock",
+		Sfx.last_played.has("br_crack") and roll_keys.size() == 2 and not Sfx.last_played.has("br_rumble"),
+		"voices %d, rumble played one-shot %s" % [roll_keys.size(), str(Sfx.last_played.has("br_rumble"))])
+	step(m, 0.7)
+	roll_keys = Sfx.loops.keys().filter(func(key): return String(key).begins_with("spine_roll_"))
+	ok("ult sound: the rumble ends with the eruption and one heavy crack lands",
+		roll_keys.is_empty() and Sfx.last_played.has("br_slam"), "voices %d" % roll_keys.size())
 	var first := S.first_rise_t - released
 	ok("ult beats: the first rock rises 0.2s after the release (the cracks)", absf(first - 0.2) < 0.05, "%.2f" % first)
 	var ult_rocks := rocks(m).filter(func(w): return w.has("ult"))
