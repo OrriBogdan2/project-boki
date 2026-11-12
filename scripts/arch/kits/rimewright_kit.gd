@@ -1076,8 +1076,9 @@ func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 		vfx("rime_creak", at + Vector3(cos(a) * radius * 0.6, 0.0, sin(a) * radius * 0.6))
 
 
-## The crash: a light pillar comes down on her, the shell bursts into shards, and every foe in the rink
-## she can see takes the damage and an ice-block stun (k < 1: an early crack).
+## The crash: a light pillar comes down on her, the rink bursts into shards, and every foe in the rink
+## she can see takes the damage and an ice-block stun (k < 1: an early crack). Her own shell tells rivals how
+## it ended: it breaks outward when she chose to come out, it melts off her when the time ran out.
 func _rime_crash(k: float) -> void:
 	var xd := x_def()
 	var at: Vector3 = rime["at"]
@@ -1098,6 +1099,10 @@ func _rime_crash(k: float) -> void:
 	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
 	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
 	vfx("rime_crash", h.pos, null, {"r": radius})
+	if k < 1.0:
+		vfx("rime_break")
+	else:
+		vfx("rime_melt")
 	m.sfx("rime_crash", at, 1.0, 1.0)
 	play("tm_rime_crash")
 	_rime_clear()
@@ -1106,7 +1111,7 @@ func _rime_crash(k: float) -> void:
 func _rime_cancel() -> void:
 	stats["cancels"] += 1
 	ulk().burst("spikes", h.pos, {"r": 1.6, "dur": 0.35})
-	vfx("rime_cancel")
+	vfx("rime_break")
 	m.sfx("rime_crack", h.pos, -3.0, 1.0)
 	play("tm_rime_break")
 	_rime_clear()
