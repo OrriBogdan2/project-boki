@@ -5,7 +5,7 @@ extends RefCounted
 ## visitor comes, only one at a time, it is in the zone's kins and the Dash lineup, it is saved and
 ## reloaded as it was, and it stays one garden day then goes home (one away card line, then a wait).
 ## Three favourite meals make it ask to stay as a new Boki when the zone has room, else leave an egg.
-## Never touches the real save.
+## The first visitor on a save is led to by your partner with one tip (VisitorIntro), once. Never touches the real save.
 
 const DT := 0.25             # s of farm time per step
 const LOOK_S := 5.0          # s of farm time between looks, so the check does not wait minutes
@@ -105,6 +105,7 @@ func _stay_part() -> void:
 	ok(not r.is_empty() and _wild().size() == 1, "a visitor wandered into Bramblebank")
 	ok(GardenVisitor.suits("bramblebank", String(r.get("species", "")), ["toy_dig"]),
 		"the one that came suits the zone")
+	await _intro_part()
 	await _step(60.0)
 	ok(_wild().size() == 1 and GardenVisitor.rec() == r, "only one visitor at a time")
 	var k: Dictionary = _wild()[0]
@@ -123,12 +124,33 @@ func _stay_part() -> void:
 	Save.d["visitor"]["next"] = 0.0
 	await _step(COME_S, func(): return not GardenVisitor.rec().is_empty())
 	ok(not GardenVisitor.rec().is_empty() and next > 0.0, "then another can come")
+	ok(not Save.d["visitor"].has("lead"), "a later visitor gets no lead: once per save")
 	Save.d["visitor"]["t"] = float(Save.d["visitor"]["t"]) - DAY_S
 	var away := CareJournal.arrival()      # you were away over the day
 	ok(GardenVisitor.rec().is_empty() and away.any(func(l): return "went home" in l),
 		"a stay that ran out while you were away is told on arrival")
 	Save.d["visitor"]["next"] = 0.0
 	home._spawn_kin()      # the zone loads again: its visitor is not there
+
+## The first visitor on a save: the partner leads to it and one tip names it, once; a later one gets neither.
+func _intro_part() -> void:
+	var wild: Dictionary = _wild()[0]
+	var mine: Dictionary = home.kins.filter(func(k): return k["rec"] == Save.active_kin())[0]
+	ok(Save.d["tutorial"].get("visitor_intro", false) and Save.d["visitor"].has("lead"), "the first visitor starts it")
+	var leading := func(): return (mine["life"] as Fsm).is_in(BaseLife.S.LEAD)
+	var behind := func():      # you stay just behind it and the visitor stands off (it first looks at the newcomer)
+		home.ppos = mine["pos"] + Vector3(-2, 0, 0)
+		wild["pos"] = mine["pos"] + Vector3(9, 0, 0)
+		return leading.call()
+	await _step(40.0, behind)
+	ok(leading.call(), "your partner leads to it")
+	var gap: float = (wild["pos"] - mine["pos"]).length()
+	await _step(4.0)
+	ok((wild["pos"] - mine["pos"]).length() < gap or gap < 3.0, "it runs to the visitor")
+	home.ppos = wild["pos"] + Vector3(1, 0, 0)
+	await _step(1.0)
+	ok(VisitorIntro.lead_at(home, mine).x == INF, "the lead ends when you come over")
+	home.ppos = Vector3(-500, 0, -500)
 
 ## Feeds the visitor its favourite three times, as the feed list does.
 func _feed_three() -> void:
