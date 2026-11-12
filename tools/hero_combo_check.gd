@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -25,6 +26,7 @@ func run(main_node: Node, who: String) -> void:
 	if who == "mage":
 		await _mage()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
+		await _knocked_holds()
 		await _growth()
 		await ults.mage()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
@@ -33,12 +35,24 @@ func run(main_node: Node, who: String) -> void:
 		await parity.vireo()
 		n += parity.n
 		fails += parity.fails
+		await _ally("mage")
 	else:
 		await _gunslinger()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gunslinger")
 		await ults.gunslinger()
+		var abyss = load("res://tools/abyss_cast.gd").new()
+		abyss.main = main
+		await abyss.gunslinger()
+		n += abyss.n
+		fails += abyss.fails
+		await _ally("gunslinger")
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 func _wall(m: Match, p: Vector3) -> void:
 	var W = m.world
@@ -153,6 +167,11 @@ func _mage() -> void:
 			K.live(T) and int(mk.get("n", 0)) == 4 and grows,
 			"%d -> %d" % [sparks_1, sparks_4])
 	ok("Static: the marker sits above the HP bar", high >= K._top(T) + 0.45, "%.2f m" % high)
+	P.hp = P.max_hp * 0.5
+	K.on_knock(T, true)
+	ok("Static (data: 4 stacks, no knock heal): cap 4, a knock heals nothing, the card says none",
+			int(K.res_def()["max"]) == 4 and P.hp <= P.max_hp * 0.5 + 1.0
+			and not String(K.d["passive"]["desc"]).contains("heals you"), "hp %.1f" % P.hp)
 	# 3. Wirerun: the charge is spent on the press, the lane + end ring grow with the hold (not the cursor)
 	K.sparks.clear()
 	ac.fresh(T)
@@ -178,7 +197,13 @@ func _mage() -> void:
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
-	ac.step(m, 0.7)
+	ac.step(m, 0.15)       # past the plain dash's 0.1 s frame
+	var surge_hp := P.hp + P.armor + P.shield
+	P.hurt(30.0, T, {"src": "abil", "ab": "k1"})
+	ok("Wirerun parity: shots pass through the streak (wiki), a blow still lands, not Invulnerable",
+			K.run_t > 0.0 and P.phase_t > 0.0 and P.inv_t < 0.2 and P.hp + P.armor + P.shield < surge_hp,
+			"run %.2f phase %.2f inv %.2f" % [K.run_t, P.phase_t, P.inv_t])
+	ac.step(m, 0.55)
 	ok("Wirerun: a full hold streaks at least 9.4 m", _flat(P.pos, home) >= 9.4, "%.1f m" % _flat(P.pos, home))
 	var short_v := 7.5 / K.run_time(7.5)
 	var long_v := 13.0 / K.run_time(13.0)
@@ -291,14 +316,14 @@ func _mage() -> void:
 		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 				K.e_def()["cooldown"] * K.cd_k("kin"),
 				K.power("sec") / pb1, K.power("dash"), K.power("kin") / pk1])
-	ok("upgrade parity: Storm Rod cooldown 8 -> 7.2 -> 6.4 and damage +20% / +90%",
-			near.call(up[1][0], 7.2) and near.call(up[2][0], 6.4)
+	ok("upgrade parity: Storm Rod cooldown 10 -> 9 -> 8 and damage +20% / +90%",
+			near.call(up[1][0], 9.0) and near.call(up[2][0], 8.0)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.9), str(up))
-	ok("upgrade parity: Wirerun recharge 8 -> 7.33 -> 6.67, no shared damage step",
-			near.call(up[1][1], 7.33) and near.call(up[2][1], 6.67)
+	ok("upgrade parity: Wirerun recharge 9 -> 8.25 -> 7.5, no shared damage step",
+			near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5)
 			and near.call(up[1][4], up[0][4]) and near.call(up[2][4], up[0][4]), str(up))
-	ok("upgrade parity: Skycall cooldown 10.5 -> 10.5 -> 7.9 and damage +25% / +50%",
-			near.call(up[1][2], 10.5) and near.call(up[2][2], 7.875)
+	ok("upgrade parity: Skycall cooldown 12 -> 12 -> 9 and damage +25% / +50%",
+			near.call(up[1][2], 12.0) and near.call(up[2][2], 9.0)
 			and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.5), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
@@ -414,12 +439,12 @@ func _mage() -> void:
 			"%.2f" % Displace.slide_speed(sl_d, sl_t, 0.0))
 	ok("Skycall: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
 	# source rows (briefs/hero-ref/vireo.md "E: Lightning Javelin": 0.8 s = 4 frames at 5 fps; briefs/supervive-data/
-	# supervive_kits.md Joule E: 12 s, 1 Static; cooldown kept at our 8 : 8 : 10.5 pace, E / rod = 9.2 / 7)
+	# supervive_kits.md Joule E: 12 s, 1 Static; cooldown 12 against the rod 10, the data)
 	var rod_cd := float(K.rmb_def()["cooldown"])
-	ok("Skycall data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 10.5 at the source's E : rod ratio",
+	ok("Skycall data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 12 (the data)",
 			absf(float(e_d["delay"]) - 0.8) < 0.001 and int(e_d["stacks"]) == 1
-			and absf(float(e_d["reach"]) - 11.0) < 0.001 and absf(float(e_d["cooldown"]) - 10.5) < 0.001
-			and absf(float(e_d["cooldown"]) / rod_cd - 9.2 / 7.0) < 0.05,
+			and absf(float(e_d["reach"]) - 11.0) < 0.001 and absf(float(e_d["cooldown"]) - 12.0) < 0.001
+			and absf(float(e_d["cooldown"]) / rod_cd - 12.0 / 10.0) < 0.05,
 			"%s / %s" % [e_d["cooldown"], rod_cd])
 	# the drag window is ours (the source states none): held with no release, it commits at drag_max, then 0.8 s
 	K.cd["e"] = 0.0
@@ -618,6 +643,38 @@ func _mage() -> void:
 			"took %.0f -> %.0f dashes %.1f" % [took0, ac.dmg(T), P.dashes])
 	await ac.done(m)
 	fails += ac.fails
+
+## Interrupts (docs/heroes/mage.md): knocked mid Storm Rod hold she throws nothing; knocked in the Kitefall crouch
+## she never takes off. (The check sets `downed` itself: a real knock of the lone player ends the training team.)
+func _knocked_holds() -> void:
+	var r: Array = ac.setup("mage", 5.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: MageKit = P.ak
+	ac.aim_at(P, T.pos)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	ac.step(m, 0.6, func(): P.inp["sec_hold"] = true)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 1.2)
+	ok("knocked mid Storm Rod hold: no throw, no damage, the charge kept",
+			not K.rmb_down and ac.dmg(T) == 0.0 and K.ch_rmb == 1.0, "took %.0f charges %.0f" % [ac.dmg(T), K.ch_rmb])
+	P.downed = false
+	P.inp["sec_hold"] = false
+	P.lvl = int(Hunter.ULT_AT[0])
+	var y0 := P.pos.y
+	var pressed := HunterKeys.ult_pressed(P)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 0.8)
+	ok("knocked in the Kitefall crouch: no take-off", pressed and not K.ult.running() and P.pos.y < y0 + 0.5,
+			"pressed %s running %s y +%.1f" % [pressed, K.ult.running(), P.pos.y - y0])
+	P.downed = false
+	await ac.done(m)
 
 # ------------------------------------------------------------------ Vex
 ## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the
@@ -826,6 +883,29 @@ func _gunslinger() -> void:
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
+	# yaw lock: a 180 deg cursor flip mid-charge turns the line <= turn_deg_s * charge; the beam goes along it
+	ac.fresh(T)
+	KitStatus.clear_rattled(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(3, 0, 0))      # near enough that the lock's small turn still sweeps over it
+	ac.step(m, 0.1)
+	K.cd["e"] = 0.0
+	ac.aim_at(P, T.pos)
+	P.ak.use_e()
+	ac.step(m, 0.05)
+	var d0: Vector2 = P.aim_dir()
+	ac.aim_at(P, home + Vector3(-8, 0, 0))
+	ac.step(m, 0.5)
+	var cap: float = float(K.e_def()["turn_deg_s"]) * float(K.e_def()["charge"])
+	var turned: float = rad_to_deg(absf(d0.angle_to(P.aim_dir())))
+	ok("Longneedle yaw lock: a 180 deg flip turns it <= cap * charge",
+			turned > 1.0 and turned <= cap + 0.5, "%.1f of %.1f deg" % [turned, cap])
+	ac.step(m, 0.2)
+	var locked_now: Vector2 = K.needle_dir
+	var off := rad_to_deg(absf(d0.angle_to(locked_now)))
+	ok("Longneedle yaw lock: the beam fires along the locked line, not the cursor",
+			off <= cap + 0.5 and locked_now.x > 0.0 and ac.dmg(T) >= 30.0, "%.1f deg off" % off)
+	T.teleport(home + Vector3(8, 0, 0))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
@@ -945,8 +1025,8 @@ func _gunslinger() -> void:
 	ok("small: Fever wears off all at once", K.res == 0.0)
 	K.add_fever(1)
 	K.add_fever(1)
-	ok("small: Fever is one flat level of 6% (a second ability hit adds nothing)",
-			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and K.res_wait > 3.0, "%.2f %.2f" % [K.res, K.fever_k()])
+	ok("small: Fever is one flat level of 6% for 3.5s (a second ability hit adds nothing)",
+			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and absf(K.res_wait - 3.5) < 0.01, "%.2f %.2f" % [K.res, K.fever_k()])
 	var hp_before := P.hp
 	P.hp = 50.0
 	K.on_deal(T, 100.0, {"src": "shot"})
@@ -995,12 +1075,12 @@ func _gunslinger() -> void:
 			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin") / K.power("sec"),
 		])
-	ok("upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3",
-			near.call(up[0][0], 6.5) and near.call(up[1][0], 5.4) and near.call(up[2][0], 4.3), str(up))
-	ok("upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3",
-			near.call(up[0][1], 8.5) and near.call(up[1][1], 7.4) and near.call(up[2][1], 6.3), str(up))
-	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
-			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
+	ok("upgrade parity: Burr Charge cooldown 9 -> 7.5 -> 6",
+			near.call(up[0][0], 9.0) and near.call(up[1][0], 7.5) and near.call(up[2][0], 6.0), str(up))
+	ok("upgrade parity: Slipstep recharge 11.5 -> 10 -> 8.5",
+			near.call(up[0][1], 11.5) and near.call(up[1][1], 10.0) and near.call(up[2][1], 8.5), str(up))
+	ok("upgrade parity: Longneedle cooldown stays 12 and damage +20% / +40%",
+			near.call(up[1][2], 12.0) and near.call(up[2][2], 12.0)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
@@ -1013,8 +1093,9 @@ func _gunslinger() -> void:
 	K.ch_rmb = 0.0
 	P.hp = 40.0
 	T.hp = 0.0
-	T.downed = true
-	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	K.on_knock(T, false)
+	ok("Assist: no Slipstep or Burr reset (knocks only)", P.dashes < 1.0 and float(K.cd["rmb"]) > 0.0)
+	K.on_knock(T, true)      # (KnockCredit.settle calls it for the knocker)
 	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
 			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
 	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)

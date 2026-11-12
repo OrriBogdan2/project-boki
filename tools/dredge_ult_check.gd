@@ -62,8 +62,8 @@ func _charge_and_waves() -> void:
 	var shots0: int = m.shot_n
 	_cast(P, home + Vector3(4, 0, 0))
 	ok(
-		"ult cast: the charge move plays, its own cooldown starts (21s)",
-		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(K.cd["x"])
+		"ult cast: the charge move plays, its own cooldown starts (36s)",
+		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 36.0) < 0.2, "cd %.1f" % float(K.cd["x"])
 	)
 	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
 	var fan: Dictionary = AimKit.entry(P, "x_fan")
@@ -138,7 +138,8 @@ func _charge_and_waves() -> void:
 		"ult payoff: 4 a slug, no back bonus (12 slugs, target facing away)", absf(ak.dmg(T) - per * 12.0) < 0.6,
 		"dmg %.1f expected %.1f" % [ak.dmg(T), per * 12.0]
 	)
-	ok("ult payoff: the slugs leave Anti-Heal", T.blight_t > 0.0, "%.1fs" % T.blight_t)
+	ok("ult payoff: the slugs leave Anti-Heal, 3s at most (source: Slugwave, no duration given)",
+		T.blight_t > 0.0 and T.blight_t <= 3.0, "%.1fs" % T.blight_t)
 	ok(
 		"ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)",
 		absf(_owed(P) - 0.6) < 0.001, "owed %.2f" % _owed(P)

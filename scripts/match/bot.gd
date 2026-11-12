@@ -147,7 +147,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 	# ---- combat
 	var finishing: bool = tgt is Hunter and tgt.downed and not tgt.out
-	if tgt and not tgt.dead and tgt.hittable() and (finishing or not (tgt is Hunter and not tgt.targetable())):
+	if tgt and not tgt.dead and (finishing or (tgt.hittable() and not (tgt is Hunter and not tgt.targetable()))):
 		var d := h.flat_dist(tgt)
 		var to := h.dir_to(tgt)
 		var pref: float = {"light": 4.5, "medium": 7.0, "heavy": 5.5}[h.cls]
@@ -276,6 +276,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
 		if heal_ok:
+			BotShop.think(m, h)
 			BotBelt.think(m, h, a, inp)       # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -769,6 +770,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		var og := PerkOrbs.bot_goal(m, h, cur)
 		if og != Vector3.INF:
 			goal = og; gk = "orb"
+	if goal == Vector3.INF:
+		var sg := BotShop.goal(m, h)       # spare gems and a vendor close: go shopping
+		if not sg.is_empty():
+			goal = sg[0]
+			gk = String(sg[1])
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]

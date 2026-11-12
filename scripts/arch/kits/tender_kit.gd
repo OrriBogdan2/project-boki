@@ -82,10 +82,16 @@ func res_frac() -> float: return float(best_kindle()) / float(res_def().get("max
 func res_text() -> String: return "%d/%d" % [best_kindle(), int(res_def().get("max", 5))]
 func full_ready() -> bool: return false
 
+## Embers ramp per Kindle stack, and the hit's damage number warms with the stacks it landed on
+## (the resource's "num_cols", cream to ember, one per stack; no stack keeps the plain hit colour).
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
-	if String(o.get("src", "")) == "shot":
-		return dmg + float(res_def().get("per_stack", 1.0)) * float(kindle_on(t))
-	return dmg
+	if String(o.get("src", "")) != "shot":
+		return dmg
+	var n := kindle_on(t)
+	o.erase("num_col")
+	if n > 0:
+		o["num_col"] = Color(String((res_def()["num_cols"] as Array)[n - 1]))
+	return dmg + float(res_def().get("per_stack", 1.0)) * float(n)
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
@@ -268,7 +274,7 @@ func drop_all(broken: bool) -> void:
 	if broken:
 		lock_t = float(d["passive"].get("lock", 4.0))
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "DROPPED", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -4.0, 1.2)
+		m.sfx("tender_drop", h.pos, -4.0)
 
 # ------------------------------------------------------------------ dash: Relay Step
 func on_dash(use_ex: bool) -> bool:
@@ -354,7 +360,8 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _seed_lane() -> void:
 	var sd := rmb_def()
-	var width := float(sd["seed"]["hit_r"]) * 2.0
+	# the seed's own width (its shot radius is half hit_r): the footage's lane is about 0.4 bh wide
+	var width := float(sd["seed"]["hit_r"])
 	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
 
 ## Her share of run speed during the wind-up.
@@ -400,7 +407,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern
+	vfx("seed_cast", null, dir)          # the cast flare from her lantern, riding her hop (footage: about 0.3 s up)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
@@ -629,7 +636,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 				_mend(o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
 	else:
 		m.fx.word(c + Vector3(0, 2.0, 0), word, Color("ff8a6a"), false)
-		m.sfx("knock", c, -6.0, 1.4)
+		m.sfx("tender_hearth_snuff", c, -4.0)
 	lk().drop("hearth")
 	hearth = {}
 	e_t = 0.0
@@ -834,7 +841,7 @@ func _call_snap(who: Hunter) -> void:
 	if who != null:
 		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", snap, false)
-	m.sfx("knock", h.pos, -8.0, 1.5)
+	m.sfx("tender_tether_snap", h.pos, -5.0)
 
 
 ## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online
@@ -854,12 +861,19 @@ func _bot_idle(dt: float) -> void:
 	# squadmate hurt nearby: light the lantern; carrying under fire: run away from the nearest rival
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and hearth.is_empty() and not busy():
 		var need := 0.0
-		for o in CareUtil.mates(m, h, h.pos, float(e_def()["radius"]) - 0.6, true):
+		# (a hurt squadmate outside the ring gets the light thrown to them, below)
+		for o in CareUtil.mates(m, h, h.pos, float(e_def()["reach"]), true):
 			need += (o.max_hp - o.hp) if not o.downed else 40.0
 		if h.hp < h.max_hp * 0.6:
 			need += (h.max_hp - h.hp) * 0.33
 		if need > 30.0:
 			h.inp["sig"] = true
+	if e_t > 0.0 and e_recastable():
+		for o in CareUtil.mates(m, h, h.pos, float(e_def()["reach"])):
+			if h.flat_dist(o) > float(e_def()["radius"]) and o.hp < o.max_hp * 0.7:
+				h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)       # E again: the light goes to them
+				h.inp["sig"] = true
+				break
 	var cs := carrying()
 	if cs.is_empty():
 		safe_t = 0.0

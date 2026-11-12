@@ -1,4 +1,4 @@
-# The Red Stitch
+# Red Stitch
 
 A light marksman who controls space. Every bow draw is timed, Heavy Shots pin people to walls, and a pinned
 target eats the big shot. Spirit Walk carries her through rocks and barriers.
@@ -70,7 +70,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
-| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
+| Passive: Hawk Sense | Hawk Sense: rivals under half health within 22m show through walls and fog for your team. |
 | Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
@@ -80,15 +80,15 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Hawk Sense (passive).** Rivals under half health are seen through cover within 22m.
+**Hawk Sense (passive).** Rivals under half health within 22m are seen by your team through walls and fog.
 
 **Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
-- *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 8 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
-**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 3.4 every 0.5s, are slowed 35% and get Anti-Heal for 1s (healing barely takes; refreshed while they stay in). A Heavy Shot that knocks a burning foe Cremates them: +10.
 
 **Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.5s and looses a big arrow to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 
@@ -101,6 +101,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 16s -> 13s, damage +20%. | cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge. |
 | Dash (Shift) | recharge 9.5s -> 8.5s per charge. | recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 13s, damage +30%. | cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider. |
+| R (ultimate) | Starpiercer cooldown 60s -> 55s, damage 18 -> 19.8, last-shot damage 25 -> 27.5. The Fusion lasts 30% longer. | Starpiercer cooldown 60s -> 50s, damage 18 -> 21.6, last-shot damage 25 -> 30. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 

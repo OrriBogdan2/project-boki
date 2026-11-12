@@ -420,11 +420,10 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	var slid := K.last_dash_kind
 	P.inp["move"] = Vector2.ZERO
 	P.slot_lv["dash"] = 1
-	K.knocked.clear()
 	P.dashes = 0.0
 	T.hp = 0.0
 	T.downed = true
-	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	K.on_knock(T, true)
 	DashReset.takedown(P, T)         # the knock's dash back is the game-wide rule now (decision 0022), as Match runs it
 	var knocked := P.dashes >= 1.0
 	C.ac.step(m, 0.5, watch)
@@ -435,7 +434,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 			"%s, knock %s, %s" % [slid, knocked, str(seen)])
 	C.ac.fresh(T)
 	KitStatus.apply(T, "rat", 1.4)
-	C.ok("Vex audit: Dazed is a damage window only, no slow (the data)",
+	C.ok("Vex audit: Dazed adds no slow (it locks like a stun instead: CcLockout)",
 			KitStatus.rattled(T) and T.slow_t <= 0.0, "slow %.2f for %.2f s" % [T.slow_k, T.slow_t])
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
@@ -464,7 +463,8 @@ func _into_dash(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	K.use_e()
 	C.ac.step(m, 0.2)
 	P.dashes = P.max_dashes()
-	P.inp["move"] = Vector2(0, 1)
+	# back along the line: the beam is yaw-locked, so a sideways slide would walk off it
+	P.inp["move"] = Vector2(-1, 0)
 	P.do_dash()
 	var p0 := P.pos
 	C.ac.step(m, 0.9)

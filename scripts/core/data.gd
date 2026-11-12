@@ -22,22 +22,22 @@ const MATCH_PLAYERS := 30
 
 const CLASSES := {
 	"light": {
-		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 4.4, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
+		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 4.4, "dashes": 1, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
 		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow", "coilcaster"],
-		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
+		"desc": "Fast and fragile. The fastest dash and the longest glide.",
 	},
 	"medium": {
-		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.4, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
+		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.4, "dashes": 1, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
 		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff", "quill_rifle"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {
-		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.4, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
+		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.4, "dashes": 2, "scale": 1.14, "hit_r": 0.50,
 		"ex_dist": 4.2, "ex_time": 0.21, "ex_cd": 15.0, "glide_cap": 0.85,
 		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword", "tower_shield"],
-		"desc": "Slow and tough. Two short dashes, the most health, and very hard to push off a ledge.",
+		"desc": "Slow and tough. Two short dashes and the most health.",
 	},
 }
 
@@ -46,7 +46,7 @@ const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds 
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
 	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
-		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "rifle", "color": Color("d9ff66"), "size": 0.12},
+		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "gun_rifle", "color": Color("d9ff66"), "size": 0.12},
 }
 
 ## Rarity tiers, Common to Legendary: the names and colours gear is sold, shown and sorted by
@@ -132,7 +132,7 @@ const PERKS := {
 	"satchel": {"name": "Wayfarer's Satchel", "desc": "A deep bag: one more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
 	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further through grass and gloom.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sight": 0.12}},
 	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
-	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
+	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Orbs and tuning pickups drop them.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
 	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},

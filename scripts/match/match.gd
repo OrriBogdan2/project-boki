@@ -77,11 +77,13 @@ var muzzle_light: OmniLight3D
 var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
 var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
 var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
+var mob_cap := MobCap.new(self)    # monsters awake near you, capped by preset (MobCap)
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
+var ult_cue := UltReadyCue.new()   # the chime when your R is back
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -322,6 +324,7 @@ func _start(o: Dictionary) -> void:
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
+	StatusLooks.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -359,6 +362,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
+		Shops.build(self)
 	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
@@ -1370,24 +1374,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("jump", h.pos, -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
-	for gp in gpads.duplicate():
-		gp["t"] = float(gp["t"]) - dt
-		if float(gp["t"]) <= 0.0:
-			(gp["node"] as Node3D).queue_free(); gpads.erase(gp); continue
-		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
-		if top: top.scale = Vector3.ONE * (1.0 + sin(time * 6.0) * 0.06)
-		for h in hunters:
-			if h.out or h.downed or h.remote or not h.grounded:
-				continue
-			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
-				gp["cd"][h.nid] = time + 1.0
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				h.vel = Vector3(d.x * maxf(hv.length(), 6.0), 17.0, d.y * maxf(hv.length(), 6.0))
-				h.grounded = false
-				h.glide_cd = 0.0
-				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
-				sfx("jump", h.pos, -2.0, 0.8)
+	UtilityMore.pads(self, dt)
 	for sm in smokes.duplicate():
 		sm["t"] = float(sm["t"]) - dt
 		var n: Node3D = sm["node"]
@@ -1757,6 +1744,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
+		var rival: bool = credit is Hunter and credit.team != target.team and not target.remote
+		if rival and (target as Hunter).armor_gain(d) >= 0: _armor_up(target)     # taken counts too
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
 	if credit is Hunter and target != credit:
 		credit.dmg_done += d
@@ -1765,20 +1754,20 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
+	var tint: Color = o.get("num_col", HudStyle.HIT)      # a kit's optional per-hit colour (Meeko's Kindle)
+	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player, tint)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
+	KnockCredit.note(self, credit, target)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
-		(credit as Hunter).ak.note_hit(target)
 		(credit as Hunter).ak.on_deal(target, d, o)
 	if target is Hunter and (target as Hunter).ak and not target.remote:
 		(target as Hunter).ak.on_take(by, d, o)
@@ -1842,7 +1831,9 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 				BokiChatter.say(self, player.kin, "kill")
 	else:
 		add_feed("%s went down" % h.pname)
+	KnockCredit.settle(self, h, credit)      # the knocker's and the assisters' kits
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
+	UtilityMore.on_knock(self, h, credit)        # a Bounty Banner's timer
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
@@ -2199,39 +2190,14 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
-	KeyCarry.on_mob_dead(self, mb)
+	KillXp.pay(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
-	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
-	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
-		# the gems come as one pile (DropMerge)
-		var gn := int(mb.md["gems"])
-		DropMerge.gems(self, mb.pos + Vector3(0, 0.6, 0), gn, int(round(3 * float(T["loot"]))))
-		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
-			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
-		GearDrops.run_table(self, mb.mkind, mb.pos + Vector3(0, 0, 0.4), rng, {"h": credit if credit is Hunter else null, "bonus": biomes.rarity_bonus_at(mb.pos) if biomes else 0})
-		if mb.mkind == "warden":
-			# the Warden guards the best things: treasure, maybe a Soul Ember
-			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
-			if rng.randf() < 0.5:
-				spawn_val(Loot.valuable("soul_ember"), mb.pos + Vector3(0.9, 0, -0.6))
-		elif mb.mkind == "brute" and rng.randf() < 0.25:
-			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
-		if mb.mkind == "glimmer":
-			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
-		if mb.mkind == "bl_warden":
-			# a Warden's lamp holds something worth the risk: armor, often a tonic
-			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight or mb is Boss else 0.12)):
-			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
-	# the big ones are worth a perk to whoever brought them down
-	if mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
-		PerkOrbs.drop(self, "boss" if mb.mkind == "warden" else "brute", mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
+	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
+	later(MobDissolve.begin(self, mb), func(): MobDrops.spill(self, mb, credit, loot))
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
@@ -2496,7 +2462,7 @@ const VIEW_COS := 0.6          # about 106 degrees wide
 const NEAR_SENSE := 3.2
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or ArcherKit.sensed_by(self, team_i, target):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
@@ -2790,8 +2756,9 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
-				_shot_end(s, p, null)
-				hit = true; break
+				if not sx.get("pierce_break", false):       # (Starpiercer smashes props and flies on)
+					_shot_end(s, p, null)
+					hit = true; break
 			for e in near:
 				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and (shot_height_ok(e, p.y) or shot_from_above_ok(s, e, p.y)):
 					if sx.has("hitset"):
@@ -2974,6 +2941,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if e == null:
 		fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return
+	if x.has("snd"): sfx(x["snd"], at, -4.0)      # a mob's own landing sound (mob.gd)
 	var by: Ent = s["by"]
 	var dmg: float = s["dmg"]
 	if x.has("swing"):
@@ -3028,7 +2996,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("blight"): o["blight"] = x["blight"]
 	if x.has("wallstun"): o["wallstun"] = x["wallstun"]
 	if x.has("ab"): o["ab"] = x["ab"]
-	for kk in ["burn_for", "slow_k", "dr"]:
+	for kk in ["burn_for", "slow_k", "dr", "armor_k"]:
 		if x.has(kk): o[kk] = x[kk]
 	if x.has("ride_dmg") and by:
 		# a kin's damage rider on your shots procs at most once a second on each target
@@ -3222,6 +3190,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	cam.abyss_depth = 0.0            # only a live fall under a lip pulls the view out (set below)
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3267,6 +3236,7 @@ func _process(delta: float) -> void:
 			var alt := player_altitude()
 			if alt > 4.0:
 				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
+			cam.abyss_depth = player.lip_y - player.pos.y if player.below_lip else 0.0
 			cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
 		cam.follow(player.render_pos(alpha), delta, not player.dropping)
@@ -3377,8 +3347,8 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
-		if a[0] in ["util2", "util3", "util4"] and arena != null:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["util5", "util5"], ["util6", "util6"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
+		if a[0] in ["util2", "util3", "util4", "util5", "util6"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
@@ -3412,6 +3382,8 @@ func _gather_input() -> void:
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
 		HunterKeys.ult_pressed(player)
+	if Input.is_action_just_pressed("summon") and not paused:
+		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
@@ -3868,13 +3840,16 @@ func step(dt: float) -> void:
 		if pending_input["base"]:
 			pending_input["base"] = false
 			player.start_base(base_target(player))
-		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
+		if pending_input.get("summon", false):
+			pending_input["summon"] = false
+			KinSummon.press(player)
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
@@ -3908,6 +3883,7 @@ func step(dt: float) -> void:
 	_prof("drop")
 	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
+	mob_cap.tick(dt)
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
 	_prof("mobs")
@@ -3922,6 +3898,7 @@ func step(dt: float) -> void:
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
 	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
+	Shops.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
 	_prof("pickups")
@@ -3944,6 +3921,7 @@ func step(dt: float) -> void:
 	Beacons.tick(self, dt)
 	if heart: heart.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
+	ult_cue.tick(self)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)
@@ -4029,11 +4007,15 @@ func _separate() -> void:
 			var b: Ent = bodies[j]
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
+			# Hunters pass through each other as the source's do (hunter_move.json hunter_push 0)
+			var share := HunterMove.hunter_push if a is Hunter and b is Hunter else 1.0
+			if share <= 0.0:
+				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
 			var mind := a.r + b.r
 			var l := d.length()
 			if l < mind and l > 0.0001:
-				var push := d / l * (mind - l) * 0.5
+				var push := d / l * (mind - l) * 0.5 * share
 				var own := b is Kin and (b as Kin).owner_h == a      # your own Boki steps aside, never shoves you
 				var wa := 0.0 if own else 1.0 / a.mass(); var wb := 1.0 / b.mass()
 				var tot := wa + wb
@@ -4274,6 +4256,8 @@ func _update_interact(dt: float) -> void:
 				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
+		if best.is_empty():
+			best = KinSteal.interact_for(self, h, want, dt)      # 2b. grab a loose Boki wisp
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
 			var bd := 1.5
@@ -4297,6 +4281,8 @@ func _update_interact(dt: float) -> void:
 				if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
 					best = {"kind": "shrine", "shrine": sh, "label": "Hold " + Settings.key_cap("interact") + " to pray: heal, a blessing and a perk"}
 					break
+		if best.is_empty() and h == player:
+			best = Shops.prompt(self, h)
 		# 5. the exits: start an uplink
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
@@ -4329,6 +4315,10 @@ func _update_interact(dt: float) -> void:
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
+			"shop":
+				if not h.swap_hold:
+					h.swap_hold = true
+					Shops.use(self, h, best)
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -5008,6 +4998,7 @@ func _finish() -> void:
 	if over:
 		return
 	over = true
+	KinSteal.match_end(self)
 	if Overlay.is_open():
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)
@@ -5161,6 +5152,7 @@ func _flags(h: Hunter) -> int:
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
+	if UltGlow.kit_ready(h): f |= UltGlow.READY_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
@@ -5315,6 +5307,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.riding = f & 1024 != 0
 			h.diving = f & 16384 != 0
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
+			h.ult_ready = f & UltGlow.READY_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
 			if f & 2048 != 0:
@@ -5415,6 +5408,7 @@ func _net_ev(x, from: String) -> void:
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
+		"xp": KillXp.net_in(self, x)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:
@@ -5558,6 +5552,8 @@ func _net_ev(x, from: String) -> void:
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
+		"sbuy", "sgot", "sno":
+			Shops.on_net(self, x)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):

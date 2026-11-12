@@ -16,6 +16,21 @@ var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 func ok(what: String, cond: bool, info := "") -> void:
 	sc.ok(what, cond, info)
 
+## The root bone's rise in a glb clip, from its first frame, up the skeleton's Y (rig units):
+## [its rise by t_up, its rise by t_down (negative: a squash below the start)]. [0, 0] when there is no clip.
+static func _root_lift(a: Animation, sk: Skeleton3D, t_up: float, t_down: float) -> Array:
+	if a == null or sk == null or sk.find_bone("root") < 0:
+		return [0.0, 0.0]
+	var up: Basis = sk.get_bone_rest(sk.find_bone("root")).basis
+	for i in a.get_track_count():
+		if a.track_get_type(i) != Animation.TYPE_POSITION_3D or not String(a.track_get_path(i)).ends_with(":root"):
+			continue
+		var p0: Vector3 = a.position_track_interpolate(i, 0.0)
+		var at_up: Vector3 = a.position_track_interpolate(i, t_up) - p0
+		var at_down: Vector3 = a.position_track_interpolate(i, t_down) - p0
+		return [(up * at_up).y, (up * at_down).y]
+	return [0.0, 0.0]
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	sc.step(m, secs, each)
 
@@ -789,6 +804,46 @@ func _release_beats() -> void:
 	ok("mm LMB: the hand releases within the source's %.2f s wind of the ember" % SRC_WIND,
 			wind <= SRC_WIND, "%.3f s" % wind)
 
+## Sheet gap 9 (footage: numbers go white to yellow as the ramp builds): an ember's damage number takes the
+## colour of the Kindle stacks it landed on, one clear step per stack from the plain hit, through the shared
+## damage-number path (the hit's "num_col"); other sources keep the plain colour.
+func _kindle_numbers(m: Match, P: Hunter, T: Hunter, K: TenderKit) -> void:
+	const MIN_STEP := 0.08    # RGB distance between neighbouring stack colours (about 14 dE in Lab)
+	T.armor = 0.0
+	var cols: Array = []
+	for n in 6:
+		K.kind[T.get_instance_id()] = {"t": T, "n": n, "left": 3.0}
+		T.hp = T.max_hp
+		var o := {"src": "shot"}
+		T.hurt(8.0, P, o)
+		cols.append(_newest_num_col(m))
+	var step_min := 9.0
+	for i in range(1, cols.size()):
+		var a: Color = cols[i - 1]
+		var b: Color = cols[i]
+		step_min = minf(step_min, Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length())
+	var crit_gap := 9.0
+	for c: Color in cols.slice(1):
+		crit_gap = minf(crit_gap, Vector3(c.r - HudStyle.CRIT.r, c.g - HudStyle.CRIT.g, c.b - HudStyle.CRIT.b).length())
+	# a Burrseed hit on the same Kindled foe keeps the plain colour (only embers ramp)
+	T.hurt(8.0, P, {"src": "abil"})
+	var plain := _newest_num_col(m) == HudStyle.HIT
+	ok(
+			"mm passive: each Kindle stack (0-5) tints the ember's damage number one clear step, cream to ember",
+			cols[0] == HudStyle.HIT and cols[5] == Color(String(Arch.def("tender")["resource"]["num_cols"][4]))
+			and step_min >= MIN_STEP and crit_gap >= MIN_STEP and plain,
+			"min step %.2f, nearest crit %.2f" % [step_min, crit_gap])
+	K.kind.erase(T.get_instance_id())
+	T.hp = T.max_hp
+
+## The colour of the damage number hit last (the one whose last hit is newest; words have no "val").
+func _newest_num_col(m: Match) -> Color:
+	var best: Dictionary = {}
+	for x: Dictionary in m.fx.nums:
+		if x.has("val") and (best.is_empty() or float(x["last"]) < float(best["last"])):
+			best = x
+	return (best["node"] as Label3D).modulate if not best.is_empty() else Color.BLACK
+
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
 
@@ -817,6 +872,7 @@ func tender() -> void:
 	ok(
 			"mm LMB: the ember flies its full range past the cursor",
 			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
+	ok("mm LMB: the ember's range is 13 m (footage 7 to 8 bh at 1.8 m)", absf(float(P.wpn["range"]) - 13.0) < 0.01)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
@@ -844,6 +900,7 @@ func tender() -> void:
 	ok(
 			"mm passive: Kindle ramps embers about +45% at 5 stacks", ramp > 0.38 and ramp < 0.52,
 			"+%.0f%%" % (ramp * 100.0))
+	_kindle_numbers(m, P, T, K)
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
 	var e0: int = K.stats["emp"]
@@ -879,12 +936,20 @@ func tender() -> void:
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
 			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
-			and is_equal_approx(float(lane.get("width", 0.0)), 2.0 * float(K.rmb_def()["seed"]["hit_r"]))
+			and absf(float(lane.get("width", 0.0)) - float(K.rmb_def()["seed"]["hit_r"])) < 0.01
 			and K.anim_id == "mm_seed_aim"
 			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
 			"%s len %.1f %s k %.2f" % [
 				String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id, K.move_k()])
 	ok("mm RMB: nothing leaves during the wind-up", _mine(m, P).size() == n0 and K.ch_rmb >= 1.0)
+	var sync: Node = P.model.get_node_or_null("Warden/Sync")
+	var clips: WardenClips = sync.get("clips") if sync else null
+	var lib: AnimationLibrary = clips.lib if clips else null
+	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
+	ok(
+			"mm RMB: Pip's hand-keyed stretch-and-gather is exactly as long as the wind-up",
+			aim_clip != null and absf(aim_clip.length - wind) <= 0.04,
+			"clip %.2f wind %.2f" % [aim_clip.length if aim_clip else -1.0, wind])
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
@@ -901,6 +966,22 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	ok(
+			"mm RMB: the seed leaves on the release clip's first frame (the snap, not after it)",
+			m.time - K.anim_at <= 1.5 / 60.0,
+			"clip at %.3f s" % (m.time - K.anim_at))
+	var seed_clip: Animation = lib.get_animation("seed") if lib and lib.has_animation("seed") else null
+	var hop := _root_lift(seed_clip, WardenGlb.skeleton(P.model.get_node("Warden")), 0.1, 0.32)
+	ok(
+			"mm RMB: the release clip hops (footage: a small hop, about 0.3 s in the air) and lands in a squash",
+			hop[0] >= 0.12 and hop[1] < -0.03,
+			"rise %.3f at 0.1 s, %.3f at 0.32 s" % [hop[0], hop[1]])
+	var seed_shot: Dictionary = _mine(m, P)[-1]
+	var seed_v := (seed_shot["vel"] as Vector2).length()
+	ok(
+			"mm RMB: the seed leaves at 36 m/s and flies a fixed 15.3 m lane (source ~20 body heights/s)",
+			absf(seed_v - 36.0) < 0.1 and absf(float(seed_shot["life0"]) * seed_v - 15.3) < 0.1,
+			"%.1f m/s, %.1f m" % [seed_v, float(seed_shot["life0"]) * seed_v])
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:
@@ -1149,7 +1230,7 @@ func _dashes_cute() -> void:
 	await _moosh_audit()
 
 ## Audit: the glide is airborne only (on the ground with the hop spent, Shift is refused, never a glide
-## along the ground); the move keys steer the glide (air control); Burrseed 10.5 s (the data's ratio to E);
+## along the ground); the move keys steer the glide (air control); Burrseed 11.5 s (the data);
 ## her Ember Cast has no magazine and no slow while firing (the source has neither).
 func _moosh_audit() -> void:
 	var r: Array = sc.setup("tender", 20.0)
@@ -1186,8 +1267,8 @@ func _moosh_audit() -> void:
 			turned > 40.0 and turned < 90.0, "turned %.0f deg in 0.4 s" % turned)
 	step(m, 1.0)
 	ok(
-			"mm RMB: Burrseed 10.5 s (the data's 11.5 : 12 against Hearthlight's 11 s)",
-			absf(float(K.rmb_def()["cooldown"]) - 10.5) < 0.01)
+			"mm RMB: Burrseed 11.5 s (the data)",
+			absf(float(K.rmb_def()["cooldown"]) - 11.5) < 0.01)
 	ok(
 			"mm LMB: Ember Cast has no magazine to reload and no slow while firing (the source has neither)",
 			int(P.wpn["mag"]) >= 99 and float(P.wpn["fire_slow"]) >= 1.0)
@@ -1483,7 +1564,7 @@ func rimewright() -> void:
 			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
 			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
 	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
-	K.chill.erase(T2.get_instance_id())
+	Stacks.clear(T2, "chill")
 	K.fan_hits.clear()
 	# off to the side, clear of the downed foe
 	var ahead := (T.pos - P.pos).normalized().rotated(Vector3.UP, PI / 2.0)
@@ -1512,6 +1593,19 @@ func rimewright() -> void:
 	ok(
 			"tm passive: Chill lasts 4s and a new hit refreshes it",
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
+	# --- the Shatter is damage only (data): no slow, no fresh Chill; numbers as the data/footage ratios
+	var pd: Dictionary = Arch.def("rimewright")["passive"]
+	Stacks.clear(T2, "chill")
+	T2.slow_t = 0.0
+	T2.hp = T2.max_hp
+	K.splinter(T2.pos, float(pd["splinter_dmg"]), float(pd["splinter_r"]))
+	ok(
+			"tm passive (data): Shatter 37 in 3m after 0.4s, 8 darts -> 60; no slow and no Chill from it",
+			float(pd["splinter_dmg"]) == 37.0 and float(pd["splinter_r"]) == 3.0
+			and float(pd["splinter_delay"]) == 0.4 and float(pd["fan_splinter"]) == 60.0
+			and int(pd["fan_hits"]) == 8 and T2.hp < T2.max_hp
+			and T2.slow_t <= 0.3 and not K.chilled(T2),   # 0.28: the big-hit stagger
+			"slow_t %.2f chilled %s" % [T2.slow_t, str(K.chilled(T2))])
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
@@ -1650,8 +1744,8 @@ func rimewright() -> void:
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
 	ok(
-			"tm RMB: two charges on a 10.2 s cooldown",
-			K.rmb_charges() == 2 and K.cd["rmb"] > 9.0 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
+			"tm RMB: two charges on a 12 s cooldown",
+			K.rmb_charges() == 2 and K.cd["rmb"] > 10.8 and K.cd["rmb"] <= 12.0, "cd %.2f" % K.cd["rmb"])
 	ok(
 			"tm RMB: a foe in the zone is slowed and Chilled", T.slow_t > 0.0 and T.slow_k >= 0.34 and K.chilled(T),
 			"slow %.2f" % T.slow_k)
@@ -1664,6 +1758,24 @@ func rimewright() -> void:
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
 			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
+	await _free(m)
+	# --- Interrupts (rimewright.md): knocked in the Rink Wall's tell, no wall rises
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	sc.aim_at(P, P.pos + Vector3(7.0, 0, 0))
+	step(m, 0.05)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	var telling := not K.wall_cast.is_empty()
+	P.downed = true            # set directly: a real knock of the lone player ends the training team
+	P.down_hp = 60.0           # a wisp with no down health is finished at once
+	step(m, 0.4)
+	ok("tm E: knocked in the tell, no wall rises", telling and K.wall_cast.is_empty() and K.wall.is_empty(),
+			"tell %s cast %s wall %s" % [telling, K.wall_cast.is_empty(), K.wall.is_empty()])
+	P.downed = false
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)

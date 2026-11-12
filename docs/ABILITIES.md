@@ -6,7 +6,7 @@ This file is generated from the JSON by a script; the descriptions are the one-l
 
 ## Archetypes (the kit you play)
 
-Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), X (the hunter ultimate, run level 6, rank 2 at 9; none yet) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. T is the Merge with your Boki (a full bond meter), R reloads. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).
+Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), X (the hunter ultimate, run level 6, rank 2 at 9, rank 3 at 10) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. T is the Merge with your Boki (a full bond meter), R reloads. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).
 
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
@@ -15,7 +15,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Crushed | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -74,21 +74,23 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
-  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+  - in the air: Meteor Drop: slam straight down, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, Anti-Heal 5s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+- **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
 ### Mossy (heavy)
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Passive: Crushed.** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 0.5s (8 damage).
 - **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 - **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
@@ -96,13 +98,14 @@ The old class dashes and weapon RMBs below are kept as data (the verbs return as
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-3, docs/decisions/0022-ult-ranks.md). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
 - each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%
 - kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds
 - the merge at rank 2 lasts 30% longer and its effects hit 15% harder
+- the hero ultimate on X (`HeroUlt`) grows by its own `x.per_rank` steps at R ranks 2 and 3 (the source's R tiers, 0022); a kit without them gets the 10% cooldown step only
 - dash and charge distances never grow: dashes stay short
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.

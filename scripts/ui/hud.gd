@@ -759,12 +759,14 @@ func _draw_minimap(sz: Vector2) -> void:
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
 		var age := m.time - float(sp["t"])
-		if age > 1.6: continue
+		var life := float(sp.get("life", 1.6))
+		if age > life: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
 		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
 		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
-		var a := clampf(1.0 - age / 1.6, 0.0, 1.0)
+		if sp["kind"] == "wisp": col = Color("9fe8ff")      # a rival's killed Boki showing its owner
+		var a := clampf(1.0 - age / life, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
 			c.draw_circle(pv, 2.5, Color(col, a))
@@ -1036,15 +1038,12 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
-## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
-## weapon's step on even levels, which also get a gold wash).
-func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
-	var line := "LEVEL %d  ·  +1 skill point" % lv
-	if lv % 2 == 0:
-		flash(Color("ffd27a"), 0.16)
-		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
-	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
+## A level just went up (Hunter.gain_xp): the badge pops, the screen washes gold and the lane names
+## the skill point to rank an ability with (the growth itself is quiet, LevelGrowth).
+func level_up(lv: int) -> void:
+	lvl_pop = 0.35
+	flash(Color("ffd27a"), 0.16)
+	msgs.push("LEVEL %d  ·  +1 skill point" % lv, Color("ffd27a"), MsgLane.HIGH)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1446,8 +1445,8 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 	_draw_squad_markers(sz, p)
 
 func _has_status(e: Ent) -> bool:
-	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
-		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
+	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.blight_t > 0.0 \
+		or e.guard_t > 0.0 or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -1927,13 +1926,13 @@ func _draw_overhead(p: Hunter) -> void:
 		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
 		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
+		var df := 1.0 - p.drink_t / p.drink_len
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
 		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
-		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
+		var kf := 1.0 - p.kit_t / p.kit_len
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
@@ -1956,6 +1955,8 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 		hover_id = id
 		hover_t = 0.0
 	hover_t += get_process_delta_time()
+	if AbilityCard.on_hud(c, id, hit[0] if hit.size() > 0 else Rect2(), p):      # Tab held: the ability card
+		return
 	if id == "" or hover_t < 0.25:
 		return
 	var lines := _tip_lines(id, p)
@@ -2007,7 +2008,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			return out
 	var si := p.slot_info(id)
 	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Right click", "k1": "Utility (%s)" % Settings.key_cap("signature"), "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -2019,10 +2020,9 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	for i in nr.size():
 		out.append(["%s%s: %s" % ["Next  ·  " if i == 0 else "", String(nr[i][0]), String(nr[i][1])], Color(si["col"], 0.95 if i == 0 else 0.7), 12])
 	if id == "r":
-		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
+		out.append(["Unlocks at level %d, rank 2 at %d, rank 3 at %d. " % Hunter.ULT_AT, MUTED, 12])
 	if id == "sec":
-		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+		out.append(["Passive: %s" % AbilityText.full(p.arch, "passive"), Color(p.ak.res_col(), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 
@@ -2109,7 +2109,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
 			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
-		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
+		"util1", "util2", "util3", "util4", "util5", "util6": out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level": out = ArmorHud.tip(p)
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])

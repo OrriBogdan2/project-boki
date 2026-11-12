@@ -7,6 +7,7 @@ extends RefCounted
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
@@ -34,11 +35,14 @@ var base_secs := 60.0
 var out_path := ""
 var zone := ""
 var failed := false      # a budget line said FAIL: the exit code carries it
+var hunters := 6
+var wisps := false
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
 const HITCH_MS := 100.0
 var vp: RID
+var slept := 0           # most monsters the preset's MobCap held asleep at once (sampled once a second)
 
 func run(main_node: Node) -> void:
 	setup(main_node)
@@ -64,6 +68,8 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--bench-hunters="): hunters = maxi(2, int(a.substr(16)))
+		if a == "--boki-wisps": wisps = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -74,9 +80,9 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
-		win.size.y, win.scaling_3d_scale])
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [hunters,
+		wisps, Settings.quality(), RenderingServer.get_current_rendering_method(),
+		RenderingServer.get_video_adapter_name(), win.size.x, win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
@@ -84,8 +90,9 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "client_cap": true, "demo_kin": "cindle", "seed": 4101,
+		"boki_wisps": wisps}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -130,9 +137,12 @@ func _match() -> Array:
 			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
 				added])
 		added.clear()
+		if fl.size() % 60 == 0:
+			slept = maxi(slept, m.mob_cap.sleeping())
 		last = now
 	_summary("match", fl)
 	_emitters()
+	print("BENCH mob cap %d, most asleep at once %d" % [m.mob_cap.limit(), slept])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])

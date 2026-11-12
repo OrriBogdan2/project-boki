@@ -4,6 +4,8 @@ extends RefCounted
 ## payoff, the cooldown, the small mechanics, the bond paid only when it lands, the merge-start drop,
 ## and (burst_cap) that the ult followed straight by a merge never knocks a full-health hunter.
 
+const CC := preload("res://tools/cc_probe.gd")
+
 var sc        # the SupportCheck running us (setup, step, ok, aim_at, down)
 
 
@@ -73,8 +75,8 @@ func tender() -> void:
 		"calls +%d" % (int(K.stats["calls"]) - calls0))
 	ok("mm X: X starts the tether on that teammate with the cast move", not K.hearth_call.is_empty()
 		and K.hearth_call["who"] == A and K.anim_id == "mm_call", K.anim_id)
-	ok("mm X: its own cooldown (46 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(K)) < 0.2
-		and HeroUlt.cooldown(K) == 46.0, "cd %.1f" % float(K.cd["x"]))
+	ok("mm X: its own cooldown (60 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(K)) < 0.2
+		and HeroUlt.cooldown(K) == 60.0, "cd %.1f" % float(K.cd["x"]))
 	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos
@@ -276,6 +278,8 @@ func rimewright() -> void:
 	P.inp["fire"] = false
 	ok("tm X: inside the shell she is invulnerable and rooted, and nothing fires", P.hp >= php - 0.01
 		and _moved(P, p0) < 0.2 and m.shots.size() == n_shots, "hp %.0f moved %.2f" % [P.hp - php, _moved(P, p0)])
+	ok("tm X parity: sealed in she is Invulnerable, a pull, a knock and a slow take no hold either",
+		CC.landed(m, P, T) == "" and K.cc_proof())
 	var slow1 := T.slow_k
 	var fill1 := float(AimKit.entry(P, "x").get("fill", 0.0))
 	step(m, 1.6)
@@ -337,7 +341,7 @@ func _rime_ice_body() -> void:
 	await _free(m)
 
 
-## X again: early (before the last 0.75 s) just breaks the shell; late cracks it open at two thirds.
+## X again: early (before the last 0.3 s) just breaks the shell; late cracks it open at two thirds.
 func _rime_recasts() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]
@@ -355,14 +359,23 @@ func _rime_recasts() -> void:
 	ok("tm X: after the early break she is free (not rooted or invulnerable)", P.root_t <= 0.0 and P.inv_t <= 0.06)
 	K.cd["x"] = 0.0
 	step(m, 1.0)
+	_press(P, m)
+	step(m, 2.95)
+	_press(P, m)
+	step(m, 0.1)
+	ok("tm X: the late window is the footage's last 0.3 s (from 3.2 s of 3.5 s): X at 3.0 s only breaks the shell",
+		absf(float(K.x_def()["late"]) - 0.3) < 0.001 and K.rime.is_empty() and int(K.stats["cancels"]) == 2
+		and T.hp >= h0 - 6.0 and T.stun_t <= 0.0, "late %.2f cancels %d" % [K.x_def()["late"], K.stats["cancels"]])
+	K.cd["x"] = 0.0
+	step(m, 1.0)
 	T.hp = T.max_hp
 	h0 = T.hp
 	_press(P, m)
-	step(m, 3.0)
+	step(m, 3.25)
 	_press(P, m)
 	var dealt := h0 - T.hp
 	var full := float(K.x_def()["dmg"]) * K.power("ult")
-	ok("tm X: X in the last 0.75 s cracks it open early at two thirds (small mechanic)", K.rime.is_empty()
+	ok("tm X: X in the last 0.3 s cracks it open early at two thirds (small mechanic)", K.rime.is_empty()
 		and dealt > full * 0.55 and dealt < full * 0.8 and T.stun_t > 0.3 and T.stun_t < 0.6,
 		"dealt %.0f of %.0f stun %.2f" % [dealt, full, T.stun_t])
 	K.cd["x"] = 0.0

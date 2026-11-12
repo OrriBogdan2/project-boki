@@ -8,6 +8,7 @@ extends RefCounted
 ## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
 var main: Node
@@ -27,12 +28,18 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _lance_combos()
 	await _growth()
+	await _ally()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally() -> void:
+	var bad: Array = await ALLY.sweep(main, "ashwick")
+	ok("ashwick ally: no slot hurts, stuns, roots or slows a teammate", bad.is_empty(), "; ".join(bad))
 
 ## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
 ## keeps burning through a jump.
@@ -155,9 +162,9 @@ func _hold_at(hunter: Hunter, target: Hunter) -> void:
 	ak.aim_at(hunter, target.pos)
 
 ## Holds the lance with the burn's own ticks and the Char held off, so only the hose counts.
-func _hold_bare(hunter: Hunter, target: Hunter, kit: AshwickKit) -> void:
+func _hold_bare(hunter: Hunter, target: Hunter) -> void:
 	_hold_at(hunter, target)
-	kit.chars = {}
+	target.stacks.erase("char")
 	target.burn_t = 0.0
 
 func _all() -> void:
@@ -188,8 +195,8 @@ func _all() -> void:
 			x.blight_t = 0.0
 		T.teleport(home + Vector3(4.0, 0, 0))
 		T2.teleport(home + Vector3(5.5, 0, 1.5))
-		K.chars = {}
-		K.ignites = {}
+		T.stacks.clear()
+		T2.stacks.clear()
 		m.displace.tows.clear()
 		K.hose.clear()
 		K.relight_t = 0.0
@@ -268,6 +275,8 @@ func _all() -> void:
 		"lance: a sweep bends the stream (old fire keeps its own heading)", east >= 3 and north >= 1,
 		"still east %d, new north %d" % [east, north]
 	)
+	var heat_id := "heat%d" % P.get_instance_id()
+	ok("lance: her palm glows with heat while it roars", K.fx.shown(heat_id) and K.heat > 0.0, "heat %.2f" % K.heat)
 	P.inp["fire"] = false
 	ak.step(m, 0.15)
 	var live := 0
@@ -285,6 +294,9 @@ func _all() -> void:
 		"emitted +%d" % (K.hose.emitted - em0)
 	)
 	P.inp["fire"] = false
+	ak.step(m, AshwickKit.HEAT_COOL)
+	var cooled: bool = not K.fx.shown(heat_id) and K.heat == 0.0
+	ok("lance: the heat glow cools off after she lets go", cooled, "heat %.2f" % K.heat)
 	# --- Char builds into Ablaze, then Flashover
 	reset.call()
 	var aim_t := func(): P.inp["fire"] = true
@@ -314,15 +326,15 @@ func _all() -> void:
 	)
 	# +25% on a burning foe (the burn's own ticks held off so only the hose counts)
 	reset.call()
-	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {})
+	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); T.stacks.erase("char"))
 	var d0: float = ak.dmg(T)
 	var t0: int = K.flame_ticks
-	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
+	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); T.stacks.erase("char"); T.burn_t = 0.0)
 	var cold: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 1.0, 99.0)
 	d0 = ak.dmg(T)
 	t0 = K.flame_ticks
-	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
+	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); T.stacks.erase("char"); T.burn_t = 0.0)
 	var hot: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
 	var chip := T.max_hp * 0.015 * float(K.lmbd()["tick"])
 	ok(
@@ -330,10 +342,10 @@ func _all() -> void:
 		cold > 1.5 and absf(hot - (cold * 1.25 + chip)) < cold * 0.12,
 		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * 1.25 + chip]
 	)
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 2, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 2.0, 99.0)
 	d0 = ak.dmg(T)
 	t0 = K.flame_ticks
-	ak.step(m, 1.0, func(): _hold_bare(P, T, K))
+	ak.step(m, 1.0, func(): _hold_bare(P, T))
 	var flash: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
 	var chip2 := T.max_hp * 0.025 * float(K.lmbd()["tick"])
 	ok(
@@ -348,7 +360,7 @@ func _all() -> void:
 	P.inp["fire"] = false
 	reset.call()
 	K.relight_t = 0.0
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 1.0, 99.0)
 	ak.step(m, 0.7, func(): _hold_at(P, T))
 	ok(
 		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
@@ -427,7 +439,7 @@ func _all() -> void:
 	var cinder_cold: float = ak.dmg(T)
 	ak.step(m, 7.0)
 	reset.call()
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 1.0, 99.0)
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	ak.aim_at(P, T.pos)
@@ -594,6 +606,12 @@ func _all() -> void:
 		"dmg %.0f char %.0f blight %.1f shield %.1f" % [ak.dmg(T), K.char_of(T), T.blight_t, P.shield]
 	)
 	ok(
+		"cloak: Anti-Heal 3s and a shield of 6.4% + 5.1% per foe hit of max health, 3s (wiki: Heat Shield)",
+		T.blight_t > 2.0 and T.blight_t <= 3.0 and absf(P.shield - P.max_hp * 0.115) < 0.5
+			and P.shield_t > 1.5 and P.shield_t <= 3.0,
+		"blight %.1f shield %.2f of %.2f t %.1f" % [T.blight_t, P.shield, P.max_hp * 0.115, P.shield_t]
+	)
+	ok(
 		"cloak: foes in sight are dragged toward you", P.flat_dist(T) < 2.6 and K.pulled >= 1,
 		"dist %.1f" % P.flat_dist(T)
 	)
@@ -651,12 +669,12 @@ func _all() -> void:
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("sec") / pb1, K.power("kin") / pc1,
 			K.rank_k("rank_shield", "kin", 1.0),
 		])
-	ok("upgrade parity: Cinderbolt cooldown 7 -> 5.8 -> 4.7 and damage +25% / +50%",
-			near.call(up[1][0], 5.8) and near.call(up[2][0], 4.7)
+	ok("upgrade parity: Cinderbolt cooldown 9 -> 7.5 -> 6 and damage +25% / +50%",
+			near.call(up[1][0], 7.5) and near.call(up[2][0], 6.0)
 			and near.call(up[1][3], 1.25) and near.call(up[2][3], 1.5), str(up))
 	ok("upgrade parity: Ram recharge 9 -> 8.25 -> 7.5", near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5), str(up))
-	ok("upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
-			near.call(up[1][2], 8.9) and near.call(up[2][2], 7.3) and near.call(up[1][4], 1.25)
+	ok("upgrade parity: Furnace Cloak cooldown 13 -> 11 -> 9, damage +25% / +50%, shield +25% / +80%",
+			near.call(up[1][2], 11.0) and near.call(up[2][2], 9.0) and near.call(up[1][4], 1.25)
 			and near.call(up[2][4], 1.5) and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.8), str(up))
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
@@ -664,6 +682,17 @@ func _all() -> void:
 	reset.call()
 	K.add_char(T, 100.0)
 	ok("passive: Char past 31 is discarded (burn, then 0)", K.burning(T) == 1 and K.char_of(T) == 0.0)
+	var cr: Dictionary = K.res_def()
+	var ib: Dictionary = K.d["ignite_bonus"]
+	ok(
+		"passive numbers: Ablaze at 31 Char, 3s, 2% (4%), gone after 5s, +25% (40%), 1.5% (2.5%), heal 16%",
+		int(cr["ignite_at"]) == 31 and absf(float(cr["ignite_t"]) - 3.0) < 0.001
+		and absf(float(cr["dps1"]) - 0.02) < 0.0001
+		and absf(float(cr["dps2"]) - 0.04) < 0.0001 and absf(float(cr["expire"]) - 5.0) < 0.001
+		and absf(float(cr["heal_knock"]) - 0.16) < 0.0001 and absf(float(ib["dmg_k"][0]) - 1.25) < 0.0001
+		and absf(float(ib["dmg_k"][1]) - 1.4) < 0.0001 and absf(float(ib["tick_pct"][0]) - 0.015) < 0.0001
+		and absf(float(ib["tick_pct"][1]) - 0.025) < 0.0001, str(cr)
+	)
 	K.add_char(T2, 10.0)
 	ak.step(m, 5.4)
 	ok(

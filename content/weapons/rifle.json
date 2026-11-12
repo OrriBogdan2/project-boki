@@ -15,7 +15,7 @@
 		"range": 9.5,
 		"size": 0.14,
 		"color": "#d9ff66",
-		"sfx": "rifle",
+		"sfx": "gun_rifle",
 		"sustain_loss": 0.4,
 		"sustain_rounds": 10,
 		"desc": "Steady and accurate. Long strings of fire lose some damage, so fire in bursts.",

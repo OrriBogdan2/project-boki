@@ -139,15 +139,15 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 		h, start, dir * spd, dmg, rng / spd, 0.45, Color("3a7cff"),
 		{
 			"kb": float(rd["kb"]) if src != "dash" else float(dash_def()["kb"]), "tracer": 0.3, "src": "abil",
-			"ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why, src)
+			"ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why)
 		}
 	)
 	KitLooks.of(m).skin(m.shots[-1], skin)
 	m.sfx("br_launch", start, -3.0, 1.0)
 
-## Where a launched rock ends: it bursts, shreds and slows what it caught and splashes whoever is next
+## Where a launched rock ends: it bursts, shreds what it caught and splashes whoever is next
 ## to it. A rock bursting on someone a rock already burst on inside the repeat window deals less.
-func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) -> void:
+func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String) -> void:
 	var rd := rock_def()
 	var x: Dictionary = s["x"]
 	if x.get("burst_done", false):
@@ -161,7 +161,6 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
 	net_ring(at, blast, Color("3a7cff"))
-	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
@@ -170,8 +169,6 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			s["dmg"] = spine.capped(e, float(s["dmg"]))
 			_ult_rock_landed(e, ult_cast)
-		x["slow"] = slow_t
-		x["slow_k"] = float(rd["slow_k"])
 		if e is Hunter:
 			launch_pay += 1
 			payoff_fx(e.pos, ROCK_PAY, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
@@ -184,7 +181,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		f.hurt(
 			f_dmg, h,
 			{
-				"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]),
+				"src": "abil", "ab": "rock",
 				"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0
 			}
 		)
@@ -453,8 +450,8 @@ func _punch(k: float) -> void:
 		stepv = maxf(stepv * float(pd["air_k"]), Vector2(h.vel.x, h.vel.z).length())
 	h.vel.x = dir.x * stepv
 	h.vel.z = dir.y * stepv
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
 	m.fx.burst(fp, Color("8f9cb8"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), COBALT, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
@@ -489,7 +486,6 @@ func _punch(k: float) -> void:
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
-			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
@@ -704,11 +700,14 @@ func _raise_feel() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist > 3.0 and dist < float(x_def()["range"]) and los:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
+	# Stone Row: the rocks rise 3.4 m ahead and never into a body or over an abyss, so the bot asks row_spots first
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.0 and dist < 10.0 and los and randf() < 0.5 \
+			and not row_spots(h.dir_to(tgt)).is_empty():
+		h.inp["aim"] = tgt.pos
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:

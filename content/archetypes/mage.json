@@ -17,7 +17,7 @@
 		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",
 		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
 		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back.",
-		"e": "Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them.",
+		"e": "Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. {e.delay}s later lightning drags everyone inside that way (an arrow shows it) and grounds them.",
 		"x": "Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits.",
 		"weapons": {
 			"coilcaster": "Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static."
@@ -37,14 +37,14 @@
 	},
 	"passive": {
 		"name": "Static",
-		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health."
+		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back."
 	},
 	"dash": {
 		"id": "wirerun",
 		"name": "Wirerun",
 		"icon": "dash",
 		"col": "#9ff5e0",
-		"cd": 8.0,
+		"cd": 9.0,
 		"reset_mult": 1.5,
 		"reset_charge": 0.75,
 		"reset_window": 5.0,
@@ -66,10 +66,11 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Storm Rod",
+		"card_range": "coil.range",
 		"short": "Rod",
 		"icon": "shock",
 		"col": "#7dffd8",
-		"cooldown": 8.0,
+		"cooldown": 10.0,
 		"charges": 1,
 		"hold": 1.0,
 		"min_t": 0.33,
@@ -91,8 +92,8 @@
 			"mote_r": 1.1
 		},
 		"variants": {
-			"tap": "Let go early (it still takes 0.3s to summon): 18 damage and a short knock, flying the full 13m lane.",
-			"hold": "Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static."
+			"tap": "Let go early (it still takes 0.33s to summon): 18 damage and a short knock, flying the full 13m lane.",
+			"hold": "Hold to {rmb.hold}s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static."
 		},
 		"sockets": {
 			"hit": "add",
@@ -105,10 +106,11 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Skycall",
+		"card_range": "reach",
 		"short": "Sky",
 		"icon": "updraft",
 		"col": "#b8f7ff",
-		"cooldown": 10.5,
+		"cooldown": 12.0,
 		"reach": 11.0,
 		"delay": 0.8,
 		"radius": 1.5,
@@ -116,7 +118,7 @@
 		"slide_dist": 3.4,
 		"slide_t": 1.1,
 		"grounded": 1.5,
-		"desc": "Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.",
+		"desc": "Press to drop a circle at your cursor (up to {e.reach}m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for {e.delay}s, then lightning strikes: 20 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -129,12 +131,14 @@
 		"pull_reach": 9.0,
 		"stacks": 1
 	},
-	"x": {
+	"x": {"per_rank": {"dmg": [11, 0], "cooldown": [-7.5, -7.5]}, 
 		"name": "Kitefall",
+		"card_range": "range",
+		"again": "strike down at the cursor",
 		"short": "Fall",
 		"icon": "quake",
 		"col": "#ffd36a",
-		"cooldown": 42.0,
+		"cooldown": 60.0,
 		"windup": 0.3,
 		"rise": 0.3,
 		"height": 5.0,
@@ -148,7 +152,7 @@
 		"push": 8.0,
 		"lift": 0.4,
 		"stacks": 1,
-				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+				"desc": "Crouch, then launch straight up and hang in the air, shots passing through you, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",
@@ -164,8 +168,8 @@
 	"rank_cd": {"sec": [1, 0.9, 0.8], "dash": [1, 0.9167, 0.8333], "kin": [1, 1, 0.75]},
 	"rank_dmg": {"sec": [1, 1.2, 1.9], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
 	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
-	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
-	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
+	"rank2": {"ult": "Rank 2: Kitefall cooldown 60s -> 52.5s, damage 22 -> 33. The Fusion lasts 30% longer.", "sec": "Rank 2: cooldown 10s -> 9s, damage +20%.", "dash": "Rank 2: recharge 9s -> 8.3s.", "kin": "Rank 2: damage +25%."},
+	"rank_next": {"ult": "Rank 3: Kitefall cooldown 60s -> 45s, damage 22 -> 33.", "sec": "Rank 3: cooldown 10s -> 8s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 12s -> 9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 9s -> 7.5s; the run's own hit deals double."},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",

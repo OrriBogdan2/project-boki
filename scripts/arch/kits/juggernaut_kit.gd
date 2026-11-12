@@ -218,21 +218,21 @@ func lunge_charging() -> bool:
 	var held := rmb_down and rmb_t > float(rmb_def()["hold"])
 	return held and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false)
 
-## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
-## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
-## enemy resets Volcanic Rebuke", any hit, not only the sweet spot).
+## A knock of ours heals a share of the knocked hunter's health, and if the Finishing Slam hit them in the
+## last 2s the Gilded Riposte is ready again (the data: "knocking an enemy resets Volcanic Rebuke", any hit,
+## not only the sweet spot). An assist gives neither.
 func on_knock(t: Hunter, mine: bool) -> void:
-	var rd := res_def()
-	if mine and is_instance_valid(t):
-		var hp0 := h.hp
-		h.heal(t.max_hp * float(rd.get("heal_knock", 0.2)))
-		knock_healed += h.hp - hp0
-		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
-		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
-		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
-		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
-		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
-	var key := t.get_instance_id() if is_instance_valid(t) else -1
+	if not mine or not is_instance_valid(t):
+		return
+	var hp0 := h.hp
+	h.heal(t.max_hp * float(res_def().get("heal_knock", 0.2)))
+	knock_healed += h.hp - hp0
+	fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
+	fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
+	m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
+	m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
+	if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
+	var key := t.get_instance_id()
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
 		slam_hit.erase(key)
 		_reset_riposte()
@@ -258,6 +258,10 @@ func _start_riposte() -> bool:
 	rampage_wind = 0.0                 # X in the Rampage's crouch (its dash row: cancel): no drive after the guard
 	riposte.start()
 	return true
+
+## The Riposte's guard: invulnerable to everything but the abyss, pulls and knocks included.
+func cc_proof() -> bool:
+	return riposte.guarding()
 
 func ult_running() -> bool:
 	return riposte.running()
@@ -434,7 +438,6 @@ func _wave() -> void:
 			{"type": "push", "strength": lerpf(3.0, 6.0, k), "from": "caster"}]
 	if full:
 		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
-		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})
 	var stg := StageSpec.parse(
 			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
@@ -615,7 +618,7 @@ func lunge_k(t: float) -> float:
 func smash_k() -> float:
 	return 1.0 + 0.2 * float(clampi(rank("sec") - 1, 0, 2))
 
-## The Meteor Drop's own cooldown, 2.4s shorter at rank 3.
+## The Meteor Drop's own cooldown, 3s shorter at rank 3 (the data).
 func air_cooldown() -> float:
 	var dd: Dictionary = rmb_def()["drop"]
 	return float(dd["cooldown"]) - (float(dd["r3_cut"]) if rank("sec") >= 3 else 0.0)
@@ -818,9 +821,7 @@ func _tick_lunge() -> void:
 			lunge = {}
 			h.roll_t = 0.0
 			h.vel = Vector3.ZERO
-			if was_chain and f.hittable():
-				f.hurt(1.0, h,
-						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
+			if was_chain:
 				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
@@ -851,7 +852,7 @@ func _aims_down_chain() -> bool:
 	return to.length() > 0.05 and off <= deg_to_rad(float(rmb_def()["lunge"]["chain_deg"]))
 
 ## Charged while tethered and let go: the Lunge runs along the chain to its end (the foe it holds, or
-## the wall), harder and with a short stun on the foe; the chain is spent.
+## the wall), harder; the chain is spent.
 func _chain_lunge(k: float) -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var f := warchain.target
@@ -907,11 +908,7 @@ func _haul_land(k: float) -> void:
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
 		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
 				{"type": "push", "strength": float(hd["push"])}]})
-	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
-		if is_instance_valid(f) and not f.dead:
-			f.hurt(1.0, h,
-					{"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"],
-							"stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
+	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
@@ -1042,7 +1039,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		if dist < 3.2:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true # the Finishing Slam (best on the wounded)
-		elif dist < 7.0 and randf() < 0.45:
+		elif dist < 7.0 and randf() < 0.6:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 			bot_hold["rmb"] = rmb_charge_full() + PERFECT_LEAD       # a full charge let go in the perfect window

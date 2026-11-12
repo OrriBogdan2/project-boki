@@ -133,6 +133,7 @@ func _tick_tell(dt: float) -> void:
 
 func _open() -> void:
 	AimKit.hide(k.h, "x")
+	KitLooks.of(k.m).release("os_well_dome")
 	phase = "open"
 	phase_t = 0.0
 	tick_left = 0.0
@@ -147,8 +148,7 @@ func _tick_open(dt: float) -> void:
 	var dur := float(xd()["time"])
 	var left := dur - phase_t
 	var disc := KitLooks.of(k.m).hold_on("os_well", "well", k.m, center + Vector3(0, 0.04, 0), radius)
-	(disc.get_node("Spin") as Node3D).rotate_y(-dt * 2.4)
-	(disc.get_node("Core") as Node3D).visible = swollen
+	KitLooks.well_set(disc, phase_t, swollen)
 	tick_left -= dt
 	if tick_left <= 0.0:
 		tick_left += TICK
@@ -177,7 +177,6 @@ func _tick_catch(left: float) -> void:
 
 ## A caught body is drawn to the centre (Displace: online, its own game draws it in), held there until it closes.
 func _on_catch(f: Ent) -> void:
-	KitLooks.of(k.m).crown(f, float(xd()["time"]))
 	var c := _floor(center)
 	draws.append(k.m.displace.tow(f, null, {
 		"mode": "glide", "to": [c.x, c.y, c.z], "spd": float(xd()["pull"]), "gap": HOLD_R, "hold": true,
@@ -189,9 +188,10 @@ func _on_catch(f: Ent) -> void:
 func _floor(p: Vector3) -> Vector3:
 	return Vector3(p.x, k.m.world.ground_at(p.x, p.z), p.z)
 
-## It just stops: the disc folds in on itself, nothing bursts.
+## It just stops: the whirlpool goes at once and a small ring folds in, nothing bursts.
 func _close() -> void:
 	phase = ""
+	KitLooks.of(k.m).release("os_well")
 	for rec in draws:
 		k.m.displace.stop(rec)
 	draws = []

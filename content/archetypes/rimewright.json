@@ -18,7 +18,7 @@
 	},
 	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
 	"color": "#8ae6ff",
-	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
+	"fantasy": "A frost bunny show-skater. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 	"card": {
 		"role_word": "Controller",
@@ -26,13 +26,13 @@
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
 		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
-		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
+		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; {key:signature} again freezes it.",
 		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
 			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
 		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a {x.radius}m slowing rink; it cracks open at {x.hold}s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {
@@ -45,7 +45,7 @@
 	},
 	"passive": {
 		"name": "Hoarfrost",
-		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
+		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
 		"splinter_delay": 0.4,
@@ -79,10 +79,11 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Ice Spear",
+		"card_range": "lance.range",
 		"short": "Spear",
 		"icon": "binding",
 		"col": "#8fe8d8",
-		"cooldown": 10.2,
+		"cooldown": 12.0,
 		"charges": 2,
 		"hold": 0.2,
 		"lance": {
@@ -112,10 +113,12 @@
 	"e": {
 		"delivery": "wall",
 		"name": "Rink Wall",
+		"card_range": "travel",
+		"again": "freeze the wall in place",
 		"short": "Rink",
 		"icon": "dome",
 		"col": "#9af0e6",
-		"cooldown": 17.0,
+		"cooldown": 20.0,
 		"hp": 200.0,
 		"slide": 4.5,
 		"time": 4.5,
@@ -151,23 +154,25 @@
 		"dash": "a Skate over the Abyss lays ice underfoot that holds for 5s",
 		"kin": "the wall is 40 points tougher"
 	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 10.2s -> 9.2s, damage +15%.",
+	"rank2": {"ult": "Rank 2: Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Fusion lasts 30% longer.", 
+		"sec": "Rank 2: cooldown 12s -> 10.8s, damage +15%.",
 		"dash": "Rank 2: recharge 13s -> 11s.",
-		"kin": "Rank 2: cooldown 17s -> 15.3s, wall strength +15%."
+		"kin": "Rank 2: cooldown 20s -> 18s, wall strength +15%."
 	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder.",
+	"rank_next": {"ult": "Rank 3: Rimelock cooldown 80s -> 60s, damage 40 -> 56.", 
+		"sec": "Rank 3: cooldown 12s -> 9.6s, damage +30%; the detonation hits 45% harder.",
 		"dash": "Rank 3: recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s.",
-		"kin": "Rank 3: cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength."
+		"kin": "Rank 3: cooldown 20s -> 16s, wall strength +30%; +40 wall strength."
 	},
 	"tells": {
 		"half": "a frost glow on foes that grows with each dart",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
 		"dash_spent": "skate blades dark, dash pip dark"
 	},
-	"x": {
+	"x": {"per_rank": {"dmg": [16, 0], "cooldown": [-10, -10]}, 
 		"name": "Rimelock",
+		"card_range": "radius",
+		"again": "break out early",
 		"short": "Rime",
 		"icon": "quake",
 		"col": "#7fd8ff",
@@ -178,13 +183,13 @@
 		"carry_t": 0.8,
 		"carry_k": 1.05,
 		"hold": 3.5,
-		"late": 0.75,
+		"late": 0.3,
 		"late_k": 0.67,
 		"dmg": 40.0,
 		"stun": 0.75,
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.3s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

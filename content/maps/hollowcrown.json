@@ -1327,6 +1327,13 @@
      76
     ]
    ],
+   "shops": [
+    [
+     141,
+     56,
+     "armor"
+    ]
+   ],
    "areas": [
     [
      181,
@@ -1656,6 +1663,13 @@
     [
      42,
      113
+    ]
+   ],
+   "shops": [
+    [
+     65,
+     152,
+     "gear"
     ]
    ],
    "areas": [
@@ -2071,6 +2085,13 @@
      169
     ]
    ],
+   "shops": [
+    [
+     230,
+     161,
+     "move"
+    ]
+   ],
    "shrine": [
     246,
     167
@@ -2461,6 +2482,13 @@
     [
      147,
      243
+    ]
+   ],
+   "shops": [
+    [
+     150,
+     251,
+     "perks"
     ]
    ],
    "areas": [
@@ -4538,6 +4566,78 @@
  "pads": [],
  "updrafts": [],
  "winds": [],
+ "surfaces": [
+  {
+   "kind": "sand",
+   "rect": [
+    11,
+    232,
+    65,
+    288
+   ],
+   "name": "Saltmere shore"
+  },
+  {
+   "kind": "water",
+   "rect": [
+    20,
+    263,
+    40,
+    277
+   ],
+   "name": "Saltmere tide pool"
+  },
+  {
+   "kind": "sand",
+   "rect": [
+    277,
+    243,
+    291,
+    277
+   ],
+   "name": "Duskmoor skiff beach"
+  },
+  {
+   "kind": "water",
+   "rect": [
+    130,
+    243,
+    141,
+    251
+   ],
+   "name": "Nest Glade pool"
+  },
+  {
+   "kind": "metal",
+   "rect": [
+    48,
+    152,
+    71,
+    172
+   ],
+   "name": "Forge Yard iron floor"
+  },
+  {
+   "kind": "metal",
+   "rect": [
+    56,
+    90,
+    73,
+    107
+   ],
+   "name": "The Kilns grating"
+  },
+  {
+   "kind": "metal",
+   "rect": [
+    75,
+    202,
+    95,
+    222
+   ],
+   "name": "Sunken Forge scrap"
+  }
+ ],
  "train": {
   "cars": 4,
   "speed": 12.0,

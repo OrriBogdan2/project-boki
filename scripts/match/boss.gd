@@ -13,6 +13,9 @@ extends Mob
 ##   Brood Mother    spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
 ##                   hatch into adds, burrows and bursts up under you; a brood of adds on each phase
 
+const PHASE_HP := [0.66, 0.33]   # health fractions where phases 1 and 2 start ([?] no source value)
+const LEASH_T := 12.0            # s with no foe inside the lair before it resets ([?] no source value)
+
 var lair: Dictionary = {}
 var dormant := true
 var phase := 0
@@ -201,8 +204,7 @@ func sim(dt: float) -> void:
 	if invul_t > 0.0: invul_t -= dt
 	if md.get("stag", false):
 		_tick_stagger(dt)
-	# phases at 66% and 33%
-	var want := 0 if hp > max_hp * 0.66 else (1 if hp > max_hp * 0.33 else 2)
+	var want := 0 if hp > max_hp * PHASE_HP[0] else (1 if hp > max_hp * PHASE_HP[1] else 2)
 	if want > phase:
 		_phase_up(want)
 	if not enraged and awake_t >= float(md.get("enrage", 75.0)):
@@ -212,7 +214,7 @@ func sim(dt: float) -> void:
 	var inside := foes_inside()
 	if inside.is_empty():
 		empty_t += dt
-		if empty_t > 12.0:
+		if empty_t > LEASH_T:
 			m.lairs.reset_boss(self)
 			return
 	else:
@@ -294,7 +296,7 @@ func _attack_move(spd: float) -> Vector2:
 func _begin(name: String, length: float, anim := "") -> void:
 	atk = name; atk_t = 0.0; atk_end = length; steps = []
 	anim_kind = anim; anim_k = 0.0
-	m.sfx("v_warden", pos, -2.0, {"colossus": 0.6, "serpent": 1.35, "brood": 0.9}.get(mkind, 1.0))
+	m.sfx("boss_%s_tell" % mkind, pos)      # swells with the telegraph: dodge by ear
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})
@@ -357,7 +359,7 @@ func _atk_slam() -> void:
 		stag_open = maxf(stag_open, w + 0.15)
 	_at(w, func():
 		blast(at, float(md["slam_r"]), float(md["dmg"]), 9.0, 5.0)
-		m.sfx("k_gravity", at, 2.0, 0.6)
+		m.sfx("boss_slam", at)
 		_wave(at, 9.5, 7.5)
 		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
 		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
@@ -416,7 +418,7 @@ func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: St
 	m.add_child(n)
 	var from := pos + Vector3(0, 3.6 if mkind == "colossus" else 2.0, 0)
 	n.global_position = from
-	m.sfx("throw", pos, 0.0, 0.6)
+	m.sfx("boss_throw", pos)
 	flying.append({"from": from, "to": to, "t": 0.0, "dur": dur, "n": n, "r": rad, "dmg": base, "what": what})
 
 func _tick_flying(dt: float) -> void:
@@ -433,10 +435,10 @@ func _tick_flying(dt: float) -> void:
 			flying.erase(f)
 			if f["what"] == "boulder":
 				blast(b, float(f["r"]), float(f["dmg"]), 6.0, 4.0, {"stun": 0.3})
-				m.sfx("boom", b, -2.0, 0.7)
+				m.sfx("boss_boulder", b)
 			else:
 				m.fx.burst(b + Vector3(0, 0.3, 0), col(), 20, 4.0, 0.5, 5.0)
-				m.sfx("k_spore", b, -2.0, 0.7)
+				m.sfx("boss_glob", b)
 				_puddle(b, float(f["r"]), 5.0)
 
 func _atk_fissure() -> void:
@@ -453,7 +455,7 @@ func _atk_fissure() -> void:
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
 		Shake.incoming_big(m, a, 0.5)
-		m.sfx("k_gravity", a, 0.0, 0.5))
+		m.sfx("boss_slam", a, -2.0, 0.9))
 
 # ---- Stormcoil
 func _atk_dash() -> void:
@@ -546,7 +548,7 @@ func _atk_spit() -> void:
 		for i in n:
 			var dd := d2.rotated(0.22 * (i - (n - 1) * 0.5))
 			m.spawn_shot(self, pos + Vector3(dd.x * 1.4, 0.9, dd.y * 1.4), dd * 10.0, dmg(14.0), 1.0, 0.36, Color("b6ff6a"), {"mob": true, "kb": 2.5, "slow": 1.0})
-		m.sfx("k_spore", pos, 0.0, 0.8))
+		m.sfx("boss_spit", pos))
 
 func _atk_lob() -> void:
 	var w := 0.7
@@ -623,7 +625,7 @@ func _atk_burrow() -> void:
 	_at(0.4, func():
 		buried = true
 		m.fx.dust(pos, 20)
-		m.sfx("k_gravity", pos, 0.0, 0.7))
+		m.sfx("boss_slam", pos, -3.0, 0.8))
 	var mark := {"at": pos}
 	_at(0.5, func():
 		var to := clamp_in(tgt.pos if tgt else centre(), 1.0)
@@ -635,7 +637,7 @@ func _atk_burrow() -> void:
 		pos = Vector3(at.x, pos.y, at.z); prev = pos
 		_surface()
 		blast(at, 3.0, 24.0, 8.0, 8.0)
-		m.sfx("boom", at, 2.0, 0.6))
+		m.sfx("boss_boulder", at))
 
 func _surface() -> void:
 	buried = false
@@ -721,15 +723,7 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	if dead:
-		death_t += delta
-		var k := clampf(death_t / 1.4, 0.0, 1.0)
-		model.position.y = -k * 1.5
-		model.rotation.z = k * 0.5
-		visible = k < 1.0
-		for mt in mats:
-			if mt is ShaderMaterial: mt.set_shader_parameter("flash", 1.0 - k)
-		for s in model.get_meta("segs", []):
-			(s as Node3D).visible = k < 0.6
+		visible = MobDissolve.step(self, delta)
 		return
 	model.visible = not buried
 	model.rotation.y = face

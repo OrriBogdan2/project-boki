@@ -116,7 +116,11 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
+	# hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	T.armor_tier = 0
+	T.armor_xp = 0.0
 	T.set_meta("marks", {})
+	T.stacks.clear()
 
 func dmg(T: Hunter) -> float:
 	return T.max_hp - T.hp
@@ -236,7 +240,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).has("x"): continue      # every hero ult on X ranks with R (0022)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -251,7 +255,7 @@ func _data() -> void:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
 		for k in ["dash", "rmb", "e", "resource", "order"]:
-			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
+			if not Arch.def(a).has(k) and not (a == "bulwark" and k == "resource"): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
 	ok("weapons: Sable bolts / Lace bow / Sparkle coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
@@ -306,10 +310,11 @@ func _archer() -> void:
 	step(m, 1.6)
 	ok("archer passive: no Focus meter (Hawk Sense only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
-	# Hawk Sense stays: a rival under half health is seen through cover within 22m
-	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
+	# Hawk Sense stays: a rival under half health within 22m is seen by her team (numbers: --archer-combo-check)
+	fresh(T)
+	T.hp = T.max_hp * 0.4
 	step(m, 0.5)
-	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	ok("archer Hawk Sense: a hurt rival is sensed", ArcherKit.sensed_by(m, P.team, T))
 	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
@@ -536,32 +541,31 @@ func _bulwark() -> void:
 	var home: Vector3 = r[4]
 	var K: BulwarkKit = P.ak
 	ok("bulwark: War Hammer & Aegis", P.wid == "tower_shield")
-	# hold: raise the shield; blocked shots become Guard
-	K.res = 0.0
+	# hold: raise the shield; it blocks shots from the front
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.can_fire(), "hp %.0f" % P.hp)
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
-	# tap: no Bash (it is Shift behind the shield); at 50 Guard the Shield Charge ends in a Shield Slam
+	# tap: no Bash (it is Shift behind the shield)
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s",
+		not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)
 	step(m, 0.3)
 	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and dmg(T) <= 0.0 and absf(T.pos.x - x0 - 2.0) < 0.3, "pushed %.1f" % (T.pos.x - x0))
-	K.res = 0.0
 	# Crushed: a Shield Charge into a wall stuns (no heal)
 	var W: World = m.world
 	var lv: int = r[5]
@@ -714,7 +718,7 @@ func _infusion() -> void:
 	var r := setup("thief", 6.0, "cindle")
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	tap(m, P)
-	step(m, 0.8)          # (the Bola's 0.4s wind-up with the lane, then its flight)
+	step(m, 0.8)          # (the Bola's flight)
 	ok("infusion runtime: Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	await done(m)
 	r = setup("mage", 5.0, "puddlet")

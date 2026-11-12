@@ -20,7 +20,7 @@ and passive build-ups.
 
 | Layer | Gives | Lives in |
 |---|---|---|
-| **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
+| **Weight class** (light, medium, heavy) | HP, run speed, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
 | **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (G), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
@@ -94,7 +94,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
-| Bulwark | **Guard** | blocking | defence meter |
+| Bulwark | none (Crushed stun on a wall knock) | n/a | n/a |
 
   The Gunslinger's is the lightest. If playtests show six resources is too much to read, cut that one first.
 
@@ -663,14 +663,7 @@ shape and the banner**.
 The shield's HP is 160, regenerating 20/s after 2s lowered. If it breaks, it's locked out for 3s. It
 has no cooldown; it's HP-gated.
 
-**Passive: Guard.** Damage blocked by your shield, your walls or your Interpose guard becomes Guard
-(1 per 2 HP blocked, max 100). It decays 5/s out of combat. It's spent by:
-- an empowered Bash (50);
-- the Interpose ally-leap shield (20 for its +15 shield);
-- Bastion (all of it: +1s per 50).
-
-**Tells:** shield runes light in three steps (33, 66, 100); the crest glows at 100. HUD: a Guard bar
-on the shield icon.
+**Passive: Crushed.** Any knock of his that drives a foe into a wall or another foe stuns it 0.5s (owner decision 2026-11-07: the Guard meter was invented and is cut; there is no resource and no Guard HUD).
 
 **RMB: Shield**:
 
@@ -680,7 +673,6 @@ on the shield icon.
 | tap | **Bash** (6s): a 2.5m, 90° cone, 10 damage, push 8. Stun 0.8 into a wall |
 | airborne / gliding | **Shield Surf**: hold to block from the front while gliding (frontal hits can't spike you); glider heat builds 25% faster while it's up |
 | during E (inside the Banner's radius) | the shield is +1.5m wider (it covers allies), and a Bash heals allies behind you 8 |
-| Guard 50+ | the Bash becomes **Shield Slam** (spends 50): push 12 and stun 0.6 even without a wall. A 0.3s shield flare is the tell |
 
 **E: Rally Banner** (18s, utility): plant a banner totem up to 7m away for 6s (60 HP, 4m radius).
 Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
@@ -693,13 +685,12 @@ Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
   - On start, foes inside are pushed out (12).
   - Allies inside regenerate 8/s.
   - Bodies can still walk in.
-  - It spends all Guard for +1s per 50.
 - **Counterplay:** walk in and fight up close, or reposition and wait it out.
 
-**Dash: Interpose** (DASHES §3.2): a braced step, or a leap to an ally. Both build and spend Guard.
+**Dash: Interpose** (DASHES §3.2): a braced step, or a leap to an ally.
 
-**Loop:** block → Guard → Interpose to an ally in trouble → Banner over the fight → Shield Slam
-whoever dives → Bastion when the squad is collapsing (bigger with more Guard).
+**Loop:** block → Interpose to an ally in trouble → Banner over the fight → Bash
+whoever dives → Bastion when the squad is collapsing.
 
 **Level-up order:** 1 RMB · 2 Dash · 3 E · 4 RMB · 5 E · 6 R · 7 RMB · 8 Dash · 9 R · 10 Q.
 
@@ -710,8 +701,7 @@ whoever dives → Bastion when the squad is collapsing (bigger with more Guard).
 | E | the Banner's radius is 5m |
 | R rank 2 | the dome is 5.5m |
 
-**Counterplay:** flank the frontal shield. Glowing runes mean a Shield Slam is ready, so stay off the
-front. Break the Banner (60 HP). Melee inside Bastion.
+**Counterplay:** flank the frontal shield. Break the Banner (60 HP). Melee inside Bastion.
 
 **Kin modifiers:**
 
@@ -968,7 +958,7 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
   check 50 -> 41.
 - Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.
 
-### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
+### Bulwark: Block -> Crushed (rebuilt on an Oath-style shield-tank baseline)
 
 Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
 close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
@@ -977,17 +967,16 @@ above is superseded by this:
 | Slot | What it does |
 |---|---|
 | LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
-| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). (Owner 2026-11-07: the Guard meter and Shield Slam were cut; the kit is the source's.) |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
-| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| Passive | **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
 | E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
-| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
+| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each) |
 
-- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
+- Loop: raise the shield into their fire -> Shield Charge them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
-- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold, "SLAM READY" / "SHIELD SLAM READY". Payoff: "CRUSHED", `pay_slam`, T4.
+- Tells: none for a resource (he has none). Payoff: "CRUSHED", `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.
@@ -1032,6 +1021,15 @@ Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every arche
 the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
 rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.
 
+### Ability words: one reader
+
+`AbilityText` (`scripts/arch/ability_text.gd`) is the only code that reads a slot's name, short name,
+one-line text and full description from `content/archetypes/*.json`. The HUD slot and tooltip, the kit
+card and strip, the viewer, the pick and the E hint all call it. Texts hold `{key:action}` (the
+player's own key via `Settings.key_cap`, never a letter: `dash`, `secondary`, `signature`, `fire`) and
+`{slot.field}` (a number from the same JSON, e.g. `{e.time}`). `--ability-text-check` holds all twelve
+kits to one name and one set of numbers in every context, with the keys rebound.
+
 ## Kits2: the Thief and the Juggernaut ported from SUPERVIVE (Nov 1)
 
 Owner: "do you think Thief and Juggernaut can be better too?", then: port them "as accurately as
@@ -1073,7 +1071,7 @@ ranks.)
 | Slot | Input | Brall (wiki) | Ours |
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
-| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
+| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns). Shotgun and minigun as before |
 | RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
@@ -1089,8 +1087,8 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
-| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 1-2) | the SWEET SPOT payoff (T4) | wiki |
@@ -1237,3 +1235,7 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios, and level-1 cooldowns. A cooldown we scale on purpose stays a row: it FAILs and is listed for the owner (gap 10 in `docs/KIT_PARITY.md`), nothing is loosened to hide it. `value` is the source number, so a FAIL is a real difference.
+- `"owner": "<note>"` marks a row where an owner call overrides the source: `value` is then the owner's number (ours), `evidence` still names the source number it replaces, and the check prints the note.
+- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance. A path may index an array (`rmb.coil.dmg.0`) or start `weapon.` to read the hero's `signature` weapon (`weapon.primary.dmg` is the LMB).

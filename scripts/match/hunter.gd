@@ -58,11 +58,10 @@ const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4
 const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
 const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
-## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
-## durability left; what gets through hurts your health and wears the durability down by the same
+## Armor (docs/ARMOUR_PARITY.md): while it has durability it takes its tier's share off every hit
+## (ARMOR_TIERS), then what gets through hurts your health and wears the durability by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
-const ARMOR_DR := 0.2
-const ARMOR_DUR := 2.2        # durability as a multiple of max health
+const ARMOR_DUR := 2.2        # Common durability as a multiple of max health
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
@@ -72,7 +71,8 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "glide_press_only": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false,
+	"util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
@@ -113,7 +113,7 @@ var down_hp := 0.0
 var revive := 0.0
 var out := false
 var gone := false              # dead for good: no box revive, no beacon (see Life)
-var sick_t := 0.0              # resurrection sickness after a beacon revive: -25% damage
+var sick_t := 0.0              # resurrection sickness after a beacon revive: -25% damage and healing
 var stolen_carry := false      # carrying someone else's kin: it struggles, slowing you a little
 var chase: Hunter = null       # whoever has your kin: you run faster toward them
 var box_t := 0.0               # holding interact at a deathbox
@@ -175,7 +175,8 @@ var max_armor := 50.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
 var crouch := false           # slower, steadier aim, and much harder to spot
 var crouch_k := 0.0
-var reveal_t := 0.0           # seen through bushes and around walls for a moment after firing or getting hit
+var reveal_t := 0.0           # seen through bushes and outside view cones for a moment after firing or getting hit
+var sensed_until := {}        # team -> match time: that team's Hawk Sense sees this hunter until then (ArcherKit)
 var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
@@ -205,6 +206,8 @@ var auto_glide := false        # carried by a lair's escape updraft: the glider 
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
+var ult_ready := false        # the hero ultimate is ready (UltGlow: read from the kit, or from the net)
+var ult_glow := 0.0           # its glow on the body, 0..1 (UltGlow)
 var ult := 0.0                # the bond meter, 0..1: R calls your kin's bond ultimate at 1
 var crit_t := 0.0             # shots crit while this runs (Blink)
 var phase_t := 0.0            # Light's Phase Step: shots pass through you while this runs
@@ -371,6 +374,7 @@ func _kit_from_weapon() -> void:
 		return
 	var wd := Content.weapon(wid)
 	if ak:
+		wpn["sfx"] = String(ak.lmb_def().get("sfx", wpn["sfx"]))      # a Hunter's own shot over a shared gun's (Dredge)
 		runner.set_slot("utility", null)      # right click is the archetype's
 		return
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)
@@ -379,8 +383,8 @@ func _kit_from_weapon() -> void:
 ## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
 ## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
-	if kin == null or not (kin as Kin).carried():
-		return false
+	if kin == null or not (kin as Kin).carried() or (kin as Kin).owner_h != self:
+		return false      # (its wisp may be stolen: KinSteal)
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
 ## Riding the giant Fusion form right now (a Boki on the Return order guards at your side, never under you).
@@ -399,6 +403,7 @@ func _refresh_kin_stats() -> void:
 		if kin_carry_on():
 			for ps in k.ks.carry_passives:
 				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
+	KinSteal.add_passives(self, out)
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -442,14 +447,16 @@ func buff(stat: String) -> float:
 	var b: Array = kbuffs.get(stat, [0.0, 0.0])
 	return float(b[0]) if float(b[1]) > 0.0 else 0.0
 
-func mass() -> float:
-	return float(cdat.get("mass", 1.0))
-
+## A downed Hunter is a Wisp (decision 0019): shots and areas pass through it. Stomps, executes and revives
+## reach it by their own rules (Life), not through here.
 func hittable() -> bool:
-	return not dead and not out and not extracted and not riding
+	return not dead and not out and not extracted and not riding and not downed
+
+func cc_proof() -> bool:
+	return ak != null and ak.cc_proof()
 
 func targetable() -> bool:
-	return hittable() and not downed and cloak_t <= 0.0 and not dropping
+	return hittable() and cloak_t <= 0.0 and not dropping
 
 func is_local() -> bool:
 	return ctrl == "local"
@@ -527,9 +534,10 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
-		d *= 1.0 - ARMOR_DR
-		# your kin's armor stats make it wear more slowly
-		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
+		d *= 1.0 - float(ARMOR_TIERS[armor_tier][3])
+		# your kin's armor stats make it wear more slowly; armor_k = a hit's bonus damage to armor only
+		var wear := d * float(opts.get("armor_k", 1.0))
+		armor = maxf(0.0, armor - wear * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
 		if armor <= 0.0:
 			m.on_armor_break(self, by)
 	if gliding and d > 0.0:
@@ -731,7 +739,8 @@ func _render_balloon(delta: float) -> void:
 
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so.
+## pops you into the air unless the attack says so. Every Hunter takes it the same (no per-class mass:
+## the source gives every Hunter Mass 100).
 var knock_t := 0.0
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
@@ -739,13 +748,13 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
 	var k := kbv * (1.0 - owner_stat("knockback_resist"))
-	var s := k.length() / mass()
-	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift / mass() >= 3.0):
+	var s := k.length()
+	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift >= 3.0):
 		launched_at = m.time
 	if s < 0.05:
 		if lift >= 0.0:
 			# a straight-up lift (a slam's crater, an eruption) with no sideways push
-			vel.y = maxf(vel.y, minf(9.0, lift / mass()))
+			vel.y = maxf(vel.y, minf(9.0, lift))
 			grounded = false
 		return
 	if s > 4.0:
@@ -758,7 +767,7 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s > 2.5:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 	if lift >= 0.0:
-		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
+		vel.y = maxf(vel.y, minf(9.0, lift))
 		grounded = false
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:
@@ -770,7 +779,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 func do_jump() -> void:
 	if ak and ak.cast_locked() and not grounded and not gliding:
 		_glide_armed = true      # a cast keeps the glider shut: held, it opens as the cast ends
-	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
+	if downed or CcLockout.blocks(self, "jump") or grap.size() > 0 or out or (ak and ak.cast_locked()):
 		return
 	if not lfloat.is_empty():
 		_ledge_fling()
@@ -794,7 +803,7 @@ func do_jump() -> void:
 		jump_at = m.time
 		grounded = false
 		coyote = 0.0
-		m.sfx("jump", pos, -6.0)
+		MoveSfx.jump(self, -6.0)
 		m.fx.dust(pos, 2)                   # (movefeel) a little kick of dust off the ground
 		return
 	if air_jumps < int(owner_stat("extra_jumps")) and not gliding:
@@ -802,7 +811,7 @@ func do_jump() -> void:
 		air_jumps += 1
 		vel.y = JUMP_V
 		m.fx.dust(pos, 4)
-		m.sfx("jump", pos, -4.0, 1.2)
+		MoveSfx.jump(self, -4.0, 1.2)
 		return
 	if wall_moves.try_kick(self):
 		return
@@ -853,8 +862,8 @@ var _glide_armed := false
 var _glide_btn_held := false
 
 func can_glide() -> bool:
-	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
+	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and not CcLockout.blocks(self, "glide") \
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not shot_down \
 		and not (ak != null and ak.no_glide()) and not AirLimits.glide_locked(self)
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
@@ -912,6 +921,8 @@ func _glider_sfx(which: String) -> void:
 		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
 	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
+	if which == "open":
+		m.sfx(HeroSfx.weighted(self, "glide_open", ""), pos, vol)
 
 ## The class's dodge (Shift), as described by its ability data: a dash, plus anything else in its
 ## effect list (the heavy class's charge shoves people).
@@ -1016,8 +1027,8 @@ const DASH_BUFFER := 0.18
 func do_dash() -> void:
 	if downed or out:
 		return
-	# stunned, rooted, hexed or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
-	if stun_t > 0.0 or root_t > 0.0 or Hex.active(self) or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
+	# stunned, Dazed, rooted, hexed or Grounded (a reeling Dredge, Grounded by his own hook, still barges)
+	if Hex.active(self) or CcLockout.blocks(self, "dash", "gnd" if DredgeKit.reeling(self) else ""):
 		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
@@ -1137,6 +1148,7 @@ func dash_with(e: Dictionary) -> void:
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
 	m.sfx(HeroSfx.dash_name(self), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
+	MoveSfx.dash(self)
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
@@ -1174,9 +1186,10 @@ func can_fire() -> bool:
 		return false
 	if ak and not ak.can_shoot():
 		return false
-	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
+	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or CcLockout.blocks(self, "lmb")):
 		return true          # shooting from a held slide
-	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
+	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or CcLockout.blocks(self, "lmb") or grap.size() > 0 or gliding \
+		or charge.size() > 0)
 
 const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]
 var shot_n := 0
@@ -1533,6 +1546,7 @@ func _emit_shot() -> void:
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
 		extra["crit"] = true
+	if wbloom <= 0.0 and wpn.has("clean_armor_k"): extra["armor_k"] = wpn["clean_armor_k"]   # a no-bloom shot
 	Loot.rider(self, extra, dmg)
 	_kin_riders(extra)
 	if pel > 1:
@@ -1786,6 +1800,8 @@ func heal(n: float) -> void:
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
+	if sick_t > 0.0:
+		n *= Life.R["sickness_heal"]
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	if hp - before > 1.0:
@@ -1795,7 +1811,10 @@ func heal(n: float) -> void:
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
+var drink_id := "tonic"        # which belt drink is being drunk, and how long it takes (UtilityUse, the item's "time")
+var drink_len := 1.0
 var kit_t := 0.0
+var kit_len := 1.6             # how long the armor kit takes (its "time"; both lengths are set when a use starts)
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -1844,7 +1863,7 @@ func sim(dt: float) -> void:
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
-			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -1876,7 +1895,8 @@ func sim(dt: float) -> void:
 		air_dashed = false
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
-		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
+		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty() \
+			and not CcLockout.blocks(self, "crouch")
 	var want_bloom := -0.3 if crouch else 0.0
 	if not grounded: want_bloom = 1.0
 	elif Vector2(vel.x, vel.z).length() > 1.5 and not crouch: want_bloom = 0.45
@@ -1907,7 +1927,7 @@ func sim(dt: float) -> void:
 		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5", "util6",
 				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
@@ -1978,7 +1998,7 @@ func sim(dt: float) -> void:
 		use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()
@@ -2019,7 +2039,7 @@ func _pad_fly(dt: float) -> void:
 		pad = {}
 		squash = 0.12 if ledge else 0.3
 		m.fx.dust(pos, 3 if ledge else 8)
-		m.sfx("land", pos, -12.0 if ledge else -8.0)
+		MoveSfx.land(self, -12.0 if ledge else -8.0)
 
 ## Where a mantle has you at progress k (0..1): up the face with an ease-out (a quick pull that
 ## slows near the top), then over the lip with a small hop and an ease-in-out onto the top. The
@@ -2057,7 +2077,7 @@ func _physics(dt: float) -> void:
 	if grap.size() > 0:
 		_grapple(dt)
 		return
-	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
+	var mv: Vector2 = Vector2.ZERO if CcLockout.blocks(self, "move") else inp["move"]
 	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
@@ -2302,13 +2322,13 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 6)
 				squash = 0.15
 				land_t = 0.2
-				m.sfx("land", pos, -10.0)
+				MoveSfx.land(self, maxf(HeroSfx.land_db(-fv), -12.0))
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
 				# and a soft thud; no lockout, you keep moving the same step
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
-				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
+				MoveSfx.land(self, HeroSfx.land_db(-fv) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
 				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
@@ -2457,8 +2477,8 @@ func _update_glide(dt: float) -> void:
 			heat_burn -= 20.0
 			hurt(20.0, null, {"src": "heat"})
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
-	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
+	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed \
+		and not CcLockout.blocks(self, "glide") and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	var btn_down: bool = inp.get("glide_btn", false)
 	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
@@ -2718,7 +2738,7 @@ func _ledge_fling() -> void:
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
-	m.sfx("jump", pos, -6.0)
+	MoveSfx.jump(self, -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
 		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
@@ -2757,11 +2777,11 @@ var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from fighting (damage, knocks) and a slow trickle; each level gives a
-# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
+# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
 const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)
-const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 2}
-const ULT_AT := [6, 9]
+const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 3}
+const ULT_AT := [6, 9, 10]          # run level each R rank opens at (0022)
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
@@ -2777,15 +2797,12 @@ func gain_xp(x: float) -> void:
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1
 		skill_pts += 1
-		var wstep := {}
-		if lvl % 2 == 0 and m and not remote:
-			wstep = WeaponPath.on_level(self, lvl)      # every other level: the next step of this hero's fixed weapon path
 		if m and not remote: LevelGrowth.apply(self)      # every level: a little more health and ability power, quietly
 		# one upward glow in the hunter's colour that everyone nearby sees (no ground ring: that means gameplay)
 		if m and m.fx and visible and not unseen:
 			m.fx.body_glow(pos, Arch.color(arch) if Arch.exists(arch) else Color("ffd27a"))
 		if is_local() and m and m.hud:
-			m.hud.level_up(lvl, wstep)
+			m.hud.level_up(lvl)
 			# the level-up chime: its own rising bell run over a warm swell (tools/gen_sfx_ui.py)
 			m.sfx("level_up", null, -2.0, 1.0)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
@@ -2827,11 +2844,11 @@ func level_slot(slot: String) -> bool:
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "sec", "kin", "dash", "sec", "kin", "dash"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens (and
-		# any "gear" left in it: gloves don't rank)
+		# the archetype's recommended order (ARCHETYPES §6) without the R (ranks 1-2 as they open, rank 3 once
+		# every slot is rank 2) or any "gear" left in it (gloves don't rank)
 		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult" and SLOT_MAX.has(x)) + ["kin", "dash", "sec"]
 	while skill_pts > 0:
-		if can_level("ult"):
+		if can_level("ult") and (int(slot_lv["ult"]) < 2 or SLOTS.all(func(s): return int(slot_lv[s]) >= 2)):
 			level_slot("ult"); continue
 		var done := false
 		# follow the order as a list of ranks (sec 1, dash 1, kin 1, gear 1, sec 2, ...), so every slot
@@ -2865,12 +2882,14 @@ func _gate(key: String, slot: String, fb: String) -> void:
 			m.hud.toast(TutorialCamps.locked_text(self), Color("a2a8bb"))
 
 var base_armor := 50.0
-## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters
-## count a third), and a knock adds a big chunk. Each tier adds plates on top of the base, and the new
-## plates arrive full. Tier colour shows on everyone's armor bar, so you can read how fed a rival is.
-const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0], ["Uncommon", Color("7fe08a"), 220.0], ["Rare", Color("5fb6ff"), 560.0],
-	["Epic", Color("c27cff"), 1000.0], ["Legendary", Color("ffbf3a"), 1600.0]]
-const ARMOR_TIER_BONUS := 0.15     # of base armor per tier above Common
+## Armor evolves through a run, like the source's: damage you deal to and take from rival hunters
+## fills it (monsters count a third), and a knock adds a big chunk. A tier raises the reduction and,
+## at the top two, the durability; new plates arrive full. Tier colour shows on everyone's armor bar.
+## Rows: name, colour, progress to reach it (the source's 2k/3.6k/12k/20k x 0.11), damage reduction,
+## durability x the Common piece (source 2,500 / 2,500 / 2,500 / 3,000 / 3,500).
+const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0, 0.20, 1.0], ["Uncommon", Color("7fe08a"), 220.0, 0.25, 1.0],
+	["Rare", Color("5fb6ff"), 396.0, 0.30, 1.0], ["Epic", Color("c27cff"), 1320.0, 0.35, 1.2],
+	["Legendary", Color("ffbf3a"), 2200.0, 0.35, 1.4]]
 const ARMOR_KNOCK_XP := 140.0
 var armor_xp := 0.0
 var armor_tier := 0
@@ -2903,7 +2922,7 @@ func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
-	max_armor = round(base_armor * (1.0 + ARMOR_TIER_BONUS * float(armor_tier))) + gear_stat("armor")
+	max_armor = round(base_armor * float(ARMOR_TIERS[armor_tier][4])) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 
@@ -3040,7 +3059,7 @@ func _anim_state(stretch: float) -> void:
 	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
-	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
+	s["drink"] = (1.0 - drink_t / drink_len) if drink_t > 0.0 else -1.0
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)
 	s["fired"] = idle_fire
@@ -3129,6 +3148,7 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
+	UltGlow.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
 	if out and has_meta("fling"):
@@ -3177,7 +3197,7 @@ func render(delta: float, alpha: float) -> void:
 		anim.update(_anim_dt, anim_s)
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed and not crouch:
-		Sfx.step(pos, -14.0 if is_local() else -20.0)
+		MoveSfx.footstep(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
@@ -3204,7 +3224,6 @@ func render(delta: float, alpha: float) -> void:
 		if step_t <= 0.0:
 			step_t = 0.32
 			m.fx.dust(pos, 2)
-			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
