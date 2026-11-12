@@ -38,6 +38,7 @@ const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
+const ITALIC_SLANT := 0.22     # glyph x shift per unit of height: BIG leaned into a bold italic
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
 const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
@@ -167,6 +168,15 @@ static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
 	return HIT_ARMOR if armor_hit else HIT
+
+static var _italic: FontVariation
+## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
+static func big_italic() -> Font:
+	if _italic == null:
+		_italic = FontVariation.new()
+		_italic.base_font = BIG
+		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
+	return _italic
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}

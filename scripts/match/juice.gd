@@ -97,8 +97,11 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	m.fx.muzzle(start + Vector3(dir2.x, 0, dir2.y) * 0.25, dir2, col, power)
 
 ## Someone knocked down (Match.knock): a burst of their team colour, a shockwave on the ground and a
-## white flash, so the moment reads from anywhere on screen.
+## white flash, so the moment reads from anywhere on screen; a teammate down or a rival your squad
+## knocked also gets the banner top-centre (KnockBanner, with its sound).
 static func knock(m: Match, h: Hunter, credit: Ent) -> void:
+	if m != null and m.hud:
+		m.hud.knocks.knocked(m.player, h, credit)
 	if m == null or m.fx == null:
 		return
 	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
@@ -109,8 +112,6 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
-	if credit == m.player and h != m.player:
-		m.sfx("knock_confirm", null, -6.0)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:

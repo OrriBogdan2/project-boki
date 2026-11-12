@@ -5428,6 +5428,7 @@ func _net_ev(x, from: String) -> void:
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
+				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)
