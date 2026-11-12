@@ -193,9 +193,13 @@ func _wanted(kind: String) -> float:
 		"dash": return P.roll_speed
 		_: return GLIDE_WANT
 
-## The stall just confirmed: skip it when a wall blocks by design, else file it by cell.
+## The stall just confirmed: skip it when a wall blocks by design, else file it by cell. Mantle reach
+## counts only while a catch is open: in the grab cooldown after a rise (Hunter.LEDGE_CD) any wall over
+## a step blocks, as the game has it.
 func _stall(arch: String, kind: String, dir: Vector2) -> void:
 	var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(P) else 0.0)
+	if P.grap_cd > 0.0:
+		reach = World.STEP
 	var d := dir.normalized()
 	var slide := _ideal_slide(d, reach)
 	if slide < STALL_FRAC:
