@@ -13,6 +13,8 @@ const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a
 const SKEW := 0.05           # s: clocks of two processes on one machine
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
+const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
+const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
@@ -31,6 +33,9 @@ var unlike := {}             # arch -> casts whose copy differs
 var cc_rows: Array = []      # [unix ms, stunned, knocked] as the watched hunter's anim state shows them; one per change
 var last_cc := [false, false]
 var played := {}             # arch -> casts that played any move
+var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
+var wash_host: Array = []    # Lace's tapped Shift: the host's rows
+var wash_guest: Array = []   # ... and the guest's copy's
 
 func _init() -> void:
 	tag = "RANIM"
@@ -49,6 +54,7 @@ func _host() -> void:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
+	_wash_rows_ok()
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
@@ -106,16 +112,21 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	_aim(P.pos + Vector3(6.0, 0, 0))
 	await _run(0.3)
 	log_rows.clear()
+	wash_rows.clear()
 	last_row = ["?", "?"]
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
 	await _press(key, held)
-	await _run(SETTLE)
+	var lace_walk: bool = what == "archer dash"
+	await _run(SETTLE + (WALK if lace_walk else 0.0))
 	var mine := log_rows.duplicate()
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "log"})
 	await _reply()
 	var theirs: Array = replies[0].get("log", []) if not replies.is_empty() else []
+	if lace_walk:
+		wash_host = wash_rows.duplicate()
+		wash_guest = replies[0].get("wash", []) if not replies.is_empty() else []
 	var cmp := _compare(mine, theirs)
 	if cmp["moves"] > 0:
 		played[arch] = int(played.get(arch, 0)) + 1
@@ -151,6 +162,25 @@ func _press(key: String, held: bool) -> void:
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
+
+## Lace's Spirit Walk darkens her body on both games: on within LAG_TOL of the host's, and off again within
+## LAG_TOL of the host's (the copy's walk is the base length, so it never outstays the walk).
+func _wash_rows_ok() -> void:
+	var h_on := _wash_at(wash_host, true)
+	var g_on := _wash_at(wash_guest, true)
+	var h_off := _wash_at(wash_host, false)
+	var g_off := _wash_at(wash_guest, false)
+	var detail := "host %s guest %s" % [str(wash_host), str(wash_guest)]
+	ok(h_on >= 0.0 and h_off > h_on + 2.0, "archer: the host's own body tints through the Spirit Walk", detail)
+	ok(g_on >= h_on - SKEW and g_on <= h_on + LAG_TOL, "archer: the guest's copy tints within %.1f s" % LAG_TOL, detail)
+	ok(g_off > g_on + 2.0 and g_off <= h_off + LAG_TOL, "archer: the copy's tint ends with the walk", detail)
+
+## The first time (s) the rows change to `on`; -99 when none.
+func _wash_at(rows: Array, on: bool) -> float:
+	for r in rows:
+		if bool(r[1]) == on:
+			return float(r[0]) / 1000.0
+	return -99.0
 
 ## The host's rows against the guest's: every move of the host's that lasted a snapshot shows on the guest
 ## in order within LAG_TOL, and the guest shows no move the host never played.
@@ -191,10 +221,11 @@ func _on_msg(topic: String, data, from: String) -> void:
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 			"mark":
 				log_rows.clear()
+				wash_rows.clear()
 				last_row = ["?", "?"]
 				cc_rows.clear()
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "cc": cc_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "cc": cc_rows, "wash": wash_rows})
 		return
 	super._on_msg(topic, data, from)
 
@@ -218,6 +249,9 @@ func _sample() -> void:
 		cc_rows.append([int(Time.get_unix_time_from_system() * 1000.0), cc[0], cc[1]])
 	if H.ak == null or H.anim == null:
 		return
+	var shown := H.wash > WASH_ON
+	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
+		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
 	var row := [H.ak.anim_id, H.anim.km_id]
 	var restart: bool = H.anim.km_prev_t < last_prev_t - 0.001
 	last_prev_t = H.anim.km_prev_t
