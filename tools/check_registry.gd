@@ -142,6 +142,7 @@ const CHECKS := {
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
 	"--aim-latency-check": ["res://tools/aim_latency_check.gd", "aim_latency_check", null],  # reticle/aim under a scripted mouse move
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
+	"--chain-sweep-check": ["res://tools/chain_sweep_check.gd", "chain_sweep_check", null],  # advisory
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--owner-kit-rules-check": ["res://tools/owner_kit_rules_check.gd", "owner_kit_rules_check", null],
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
