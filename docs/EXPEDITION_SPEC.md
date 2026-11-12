@@ -6,7 +6,7 @@ not from extracted game data. Treat them as starting points to tune
 against, not ground truth. Where a value is a pure guess from footage it
 is marked (eyeball).
 
-Sources: supervive.wiki.gg (Gliding, Getting Started), Deltia's Gaming
+Sources: the community wiki (Gliding, Getting Started), Deltia's Gaming
 gliding guide, general gameplay footage. The wiki's own stats pages are
 flagged outdated, so hard numbers are scarce; mechanics are well
 documented, magnitudes are inferred.

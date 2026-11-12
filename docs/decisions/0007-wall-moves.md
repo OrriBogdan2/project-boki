@@ -5,7 +5,7 @@
 - **Area:** movement
 
 ## Problem
-The Cinder Steps plateau (4 terraces, 3.2m) was out of reach (jump + mantle ~2.85m). Hitting a wall at speed just stopped you. Ledges only caught you near a jump's apex, and a ledge lower than where you last stood never caught you at all, so gliding up to one near the top of the map failed. The abyss lift felt flat next to SUPERVIVE.
+The Cinder Steps plateau (4 terraces, 3.2m) was out of reach (jump + mantle ~2.85m). Hitting a wall at speed just stopped you. Ledges only caught you near a jump's apex, and a ledge lower than where you last stood never caught you at all, so gliding up to one near the top of the map failed. The abyss lift felt flat next to the reference.
 
 ## Options
 1. Raise the jump or the mantle reach: rejected, it changes every wall on every map.

@@ -5,11 +5,11 @@
 - **Area:** movement
 
 ## Problem
-Two glide rows in `briefs/supervive-data/PHYSICS_PARITY.md` were never settled: GlideTargetXYForce 162,500
-against our steer acceleration (a hunter.gd const on main, tuning.json on ext/supervive-movement), and
+Two glide rows in `sv/briefs/PHYSICS_PARITY.md` were never settled: GlideTargetXYForce 162,500
+against our steer acceleration (a hunter.gd const on main, tuning.json on ext/the reference-movement), and
 GlideStartFallSpeedMin -85 uu/s against our canopy catch (60 m/s², ours). The hero-ref notes
 (`briefs/hero-ref/*.md`) track dashes and casts, not gliders: no reversal or canopy-catch frames exist. The
-only glide footage is in SUPERVIVE_FEEL.md: the glider opens "instantly", and a lift from ~8 m deep is back
+only glide footage is in sv/FEEL.md: the glider opens "instantly", and a lift from ~8 m deep is back
 at the lip ~1.25 s later.
 
 ## Options

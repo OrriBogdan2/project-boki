@@ -12,7 +12,7 @@ What the newer source does: a two-stage bow draw (Empowered at about 0.6-0.8 s, 
 Where the footage and our older doc disagree, the footage (the newer version) wins, except where the owner notes override it.
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
-Source vs ours per slot; [data] = the game data (supervive-data), [footage] = hero-ref/pin.md at 5 fps. Asserted in
+Source vs ours per slot; [data] = the game data (sv/briefs), [footage] = hero-ref/pin.md at 5 fps. Asserted in
 `--archer-combo-check` (`parity pin: ...`, tools/parity_pvb.gd) unless noted.
 
 | Slot | Source | Ours | Status |
@@ -68,7 +68,7 @@ with the commit or code and the assert in `--archer-combo-check`; owner override
 | 13 | No audio in the footage | no source | our own sounds; the per-weapon hit sound is in flight: READY ext/hit-feedback-pass d6b86ff8d |
 
 No open row is left, so nothing was built here. In flight on her files (not re-checked here): ext/lace-playtest-1108, ext/lace-dash-charges,
-ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
+ext/vfx-pass (merges ext/vfx-archer), ext/the reference-movement (`pin_spirit.gd`).
 
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
@@ -87,7 +87,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | R | - | the Boki Merge | - | R is the Merge for every hero |
 
 ## Assumptions (the footage is silent; the owner can correct these)
-- Spirit Walk passes rocks, trees, pillars, ability barriers and raised terrain: the data's Phase Walk rolls "through a pillar and the raised-platform wall" (supervive_kits.md:78, KIT_PARITY gap 8). She climbs a ledge face at 14 m/s and drops off the far side; if the walk ends in a ledge she is set on top of it, never inside terrain; the edge of the abyss still holds her.
+- Spirit Walk passes rocks, trees, pillars, ability barriers and raised terrain: the data's Phase Walk rolls "through a pillar and the raised-platform wall" (sv/briefs/kits.md:78, KIT_PARITY gap 8). She climbs a ledge face at 14 m/s and drops off the far side; if the walk ends in a ledge she is set on top of it, never inside terrain; the edge of the abyss still holds her.
 - A Supercharged shot with no target flies its full 16 m (not a longer clamp past the cursor).
 - The quick draw after a perfect release is 1.6x until Empowered, then normal speed; the next release consumes it, perfect or not.
 - The perfect window is 0.15 s from each stage coming up (about one footage frame).
@@ -115,25 +115,25 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 |---|---|---|---|---|
 | Stage 1 lands at the cursor, stage 2 flies past it | sheet pin.md | confirms (0117, 0168-0169) | built | `pin aim:` lines |
 | A perfect release makes the next charge faster | sheet pin.md (newer kit) | card text only | built, 1.6x to Empowered | `combo pin: perfect > ...` |
-| Perfect shots ease the self-slow of drawing | [wiki: Greenwood Bow](https://supervive.wiki.gg/wiki/Myth) | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
+| Perfect shots ease the self-slow of drawing | [wiki: Greenwood Bow](https://the community wiki/wiki/Myth) | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
 | Overdraw halves the shot | sheet pin.md | confirms (0252-0256) | built | `pin bow: overdrawn` |
-| Spirit Walk: dodge roll, then 2.8 s through walls, objects and terrain (data wins over the sheet's "not terrain") | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...`, `...raised terrace wall` |
-| +150 decaying move speed while inside terrain (rank IV) | in-game data, [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not measurable | built at rank 3: +33% (150 on the data's 455 base) inside something, fading to nothing over the walk; x1.1 elsewhere | `pin small: no extra speed inside...`, `pin rank 3: +33% inside something, fading` |
-| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
-| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | card text | built (the 30 mana has no equivalent: we have no mana, so it costs nothing) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
-| Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
-| Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
-| Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
-| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
-| Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
-| Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
-| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
-| Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
-| Ult: pierces enemies, longer range, knocks back | [wiki](https://supervive.wiki.gg/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
-| Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
+| Spirit Walk: dodge roll, then 2.8 s through walls, objects and terrain (data wins over the sheet's "not terrain") | [wiki: Phase Walk](https://the community wiki/wiki/Myth), sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...`, `...raised terrace wall` |
+| +150 decaying move speed while inside terrain (rank IV) | in-game data, [wiki: Phase Walk](https://the community wiki/wiki/Myth) | not measurable | built at rank 3: +33% (150 on the data's 455 base) inside something, fading to nothing over the walk; x1.1 elsewhere | `pin small: no extra speed inside...`, `pin rank 3: +33% inside something, fading` |
+| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | [wiki: Phase Walk](https://the community wiki/wiki/Myth) | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
+| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | [wiki](https://the community wiki/wiki/Myth), sheet | card text | built (the 30 mana has no equivalent: we have no mana, so it costs nothing) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
+| Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://the community wiki/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
+| Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://the community wiki/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
+| Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://the community wiki/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
+| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://the community wiki/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
+| Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://the community wiki/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
+| Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://the community wiki/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
+| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://the community wiki/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
+| Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://the community wiki/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
+| Ult: pierces enemies, longer range, knocks back | [wiki](https://the community wiki/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
+| Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://the community wiki/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
+| Affects wisps (downed hunters) | [wiki](https://the community wiki/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -188,7 +188,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both

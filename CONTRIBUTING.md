@@ -31,7 +31,7 @@ Not sure where to start? Look for issues labelled `good first issue`, or ask in 
 
 ## Rules
 
-- **No assets from other games.** No models, textures, sounds, music or data files ripped from Supervive or any other commercial game. Pull requests with them get closed. Reference values gathered from public sources (wiki, patch notes, measured footage) are fine, and go in `docs/`.
+- **No assets from other games.** No models, textures, sounds, music or data files ripped from the reference or any other commercial game. Pull requests with them get closed. Reference values gathered from public sources (wiki, patch notes, measured footage) are fine, and go in `docs/`.
 - **Only add assets you have the right to share.** Your own work, or assets with a license that allows it (CC0, CC-BY, OFL, etc.). Add anything third-party to [docs/ASSET_CREDITS.md](docs/ASSET_CREDITS.md) with its source and license.
 - **Kin definitions are data, never script.** Kin and ability files must stay pure JSON so community content can't run code on players' machines.
 - **No selling power.** Kinfall will never sell kin or kin power. Don't add anything that does.

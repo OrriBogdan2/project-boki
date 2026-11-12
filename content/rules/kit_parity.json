@@ -1,8 +1,8 @@
 {
 	"about": "Sourced kit numbers the audit (briefs/specs/kit-audit) marks as matching the source. --kit-parity-check fails when content/archetypes/<hero>.json drifts outside tolerance. How to add a row: docs/ARCHETYPES.md, 'Kit parity lock'.",
 	"rows": [
-		{"hero": "gunslinger", "slot": "passive", "field": "resource.vamp", "value": 0.06, "tol": 0.0, "evidence": "D Ghost Combat Rush: +6% Omnivamp (supervive_kits.md)"},
-		{"hero": "gunslinger", "slot": "passive", "field": "resource.wait", "value": 3.5, "tol": 0.0, "evidence": "D Ghost Combat Rush: for 3.5s (supervive_kits.md)"},
+		{"hero": "gunslinger", "slot": "passive", "field": "resource.vamp", "value": 0.06, "tol": 0.0, "evidence": "D Ghost Combat Rush: +6% Omnivamp (sv/briefs/kits.md)"},
+		{"hero": "gunslinger", "slot": "passive", "field": "resource.wait", "value": 3.5, "tol": 0.0, "evidence": "D Ghost Combat Rush: for 3.5s (sv/briefs/kits.md)"},
 		{"hero": "gunslinger", "slot": "E", "field": "e.shave", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: hitting a hunter reduces CD by 20%"},
 		{"hero": "gunslinger", "slot": "E", "field": "e.shave_rank3", "value": 0.3, "tol": 0.0, "evidence": "D Arcane Railgun upg IV: -30% CD per target hit"},
 		{"hero": "gunslinger", "slot": "E", "field": "e.rattle_k", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: +20% dmg vs Dazed"},

@@ -8,7 +8,7 @@ docs/wiki/Inspirations.md.
 
 ## Research summary
 
-- **Source hero:** Brall, from SUPERVIVE (supervive.wiki.gg ability text, levels 2-4, patch history).
+- **Source hero:** Brall, from the reference (the community wiki ability text, levels 2-4, patch history).
   Version chosen: the wiki's current page as read on Nov 1, with the patch notes' shapes where they differ.
 - **Patches that shaped it:** *Leveling Rework + Big Balance Patch* (LMB hitbox -20%, sweet spot moved to the
   central tip, the 3rd/4th-hit bonus removed, Flame Step charges, R no longer resets on Wisp execution) and
@@ -62,7 +62,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
-Source vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/juggernaut.md, 10 fps
+Source vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md), [F] footage (hero-ref/juggernaut.md, 10 fps
 in the ability clips), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `tools/zedran_feel_check.gd`
 ("jug parity ...").
 
@@ -113,9 +113,9 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 
 The owner's review (items 21 and 22) asked for the source's level of control on E. Sources, by precedence:
 **[O]** the owner's notes (OWNER_REVIEW items 21/22, the 14:07 ET "small mechanics" note), **[D]** the game data
-(`supervive-data/supervive_kits.md`: "Feysteel Chain (16s, 15): tether that attaches to enemies or walls, 30 dmg;
+(`sv/briefs/kits.md`: "Feysteel Chain (16s, 15): tether that attaches to enemies or walls, 30 dmg;
 reactivate to pull yourself to the target. Upg: -2s CD x3"), **[W]** the wiki's ability page and patch notes
-(https://supervive.wiki.gg/wiki/Brall: tether 5s; the pull is an impulse of 1900 uu/s; the cooldown starts on the
+(https://the community wiki/wiki/Brall: tether 5s; the pull is an impulse of 1900 uu/s; the cooldown starts on the
 second press or when the chain breaks; a stun breaks it; no throw while rooted or Grounded), **[F]** the footage
 notes (`hero-ref/juggernaut.md` E and RMB sections, frames 0301-0366).
 
@@ -223,7 +223,7 @@ Differences from the source, and why:
 - **Exits:** the footage never shows a dash or a jump in the pull; we let Shift cancel it and a jump launch out of
   it, so it never locks you in.
 - **The tether length** (24 m, held taut there) is ours `[?]`: neither the data nor the footage shows one. Re-checked 11-09
-  (`supervive_kits.md` Brall rows, `kit_comparison.md`, `supervive_physics.md`, `hero-ref/juggernaut.md` 0301-0366): the
+  (`sv/briefs/kits.md` Brall rows, `kit_comparison.md`, `sv/briefs/physics.md`, `hero-ref/juggernaut.md` 0301-0366): the
   only numbers are the throw (7 bh on the wall test, ~12.6 m, a floor; our 13 m) and the pull (5 bh in 0.4 s). The chain
   stays on while he walks ~2.5 s at ~3.9 m/s, so the leash is at least ~10 m; no frame shows it taut or breaking. Kept 24 m.
   Revisit when a frame shows the chain longer than the throw. Alternative not taken: leash = throw range would end the extend-on-retreat the owner asked for.
@@ -263,7 +263,7 @@ ultimate (now the X cooldown).
 
 ## Small mechanics
 
-From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Brall) and the owner's notes.
+From the wiki's ability page and patch notes (https://the community wiki/wiki/Brall) and the owner's notes.
 "Built" means it is in the kit and asserted in `--juggernaut-combo-check` / `--kit-combo-check`.
 
 | Mechanic | Source | Footage | Ours |
@@ -281,7 +281,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
-| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
+| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (sv/briefs/physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
 | The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
@@ -303,7 +303,7 @@ Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffe
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both

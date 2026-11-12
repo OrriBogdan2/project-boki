@@ -61,8 +61,8 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 ## Parity pass (LMB first)
 
 The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
-slot against the source. [game data] is briefs/supervive-data (Ghost; the shared rotation rate from
-supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner notes override both. Asserted in
+slot against the source. [game data] is sv/briefs (Ghost; the shared rotation rate from
+sv/briefs/physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner notes override both. Asserted in
 `--gunslinger-combo-check` (tools/venator_parity_check.gd, lines `Venator parity ...`).
 
 | Slot | Beat | Source | Ours before | Ours now |
@@ -145,7 +145,7 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
@@ -175,19 +175,19 @@ level-9 hunter).
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
 |---|---|---|---|
-| Rifle damage decays over the first 10 rounds to 50% | [wiki: Ghost](https://supervive.wiki.gg/wiki/Ghost) (rifle) | numbers 60 to 30 | yes: data asserted |
-| Bonus damage to Dazed targets | [wiki](https://supervive.wiki.gg/wiki/Ghost) | 1.9x yellow numbers | yes: "+90%", gold numbers |
-| Wall blast: cone, knockback, launched into terrain = stun | [wiki](https://supervive.wiki.gg/wiki/Ghost) (Spike Grenade) | cone shown | yes |
+| Rifle damage decays over the first 10 rounds to 50% | [wiki: Ghost](https://the community wiki/wiki/Ghost) (rifle) | numbers 60 to 30 | yes: data asserted |
+| Bonus damage to Dazed targets | [wiki](https://the community wiki/wiki/Ghost) | 1.9x yellow numbers | yes: "+90%", gold numbers |
+| Wall blast: cone, knockback, launched into terrain = stun | [wiki](https://the community wiki/wiki/Ghost) (Spike Grenade) | cone shown | yes |
 | The caster's view pushes out 25% and leans along the line through the cast, easing in and out over about 0.2 s, no shake | Owner item 68 | not shown | yes: "Vex item 68" |
 | The Longneedle's aim locks at the press and turns at a capped 90 deg/s (`turn_deg_s`); a 180-degree flick moves the beam at most 54 deg, a small adjustment still lands | Owner item 144 (Ghost's E feel) | not shown | yes: "a 180-degree flick" |
 | The push-out scales with the aim distance: none inside 5 m (`view_near_m`), a smooth ramp to the full 25% at the 18 m range, eased | Owner item 144b | not shown | yes: "an aim at 3 m leaves the camera alone" |
 | Aim stays free through a dash: the body and rifle stay on the cursor, only the legs follow the slide (owner item 109) | Owner | slides up-left while firing up-right | yes: "Vex item 109", `--dash-aim-check` |
-| Combat Slide: tapped in the air for 2/3 of the full-hold distance | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
+| Combat Slide: tapped in the air for 2/3 of the full-hold distance | [wiki](https://the community wiki/wiki/Ghost) patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
 | Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | not separable | yes: "a held slide is owed a longer cooldown and letting go early refunds nothing" |
-| Knocks reset the slide | [wiki](https://supervive.wiki.gg/wiki/Ghost) | not shown | yes |
-| The omnivamp stacks wear off all at once | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
-| Railgun pierces terrain and every target | [wiki](https://supervive.wiki.gg/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |
-| The grenade sticks to dynamic objects (shields, barricades) | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
+| Knocks reset the slide | [wiki](https://the community wiki/wiki/Ghost) | not shown | yes |
+| The omnivamp stacks wear off all at once | [wiki](https://the community wiki/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
+| Railgun pierces terrain and every target | [wiki](https://the community wiki/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |
+| The grenade sticks to dynamic objects (shields, barricades) | [wiki](https://the community wiki/wiki/Ghost) patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
 | Mini Nuke: lands where the cursor was at cast, 1.6 s after, no tracking | reference sheet (both casts) | f29 to f45 | yes: "it lands exactly at the cursor", "nothing lands before 1.6s" |
 | Mini Nuke: +50% damage in the centre | [thebackdash hunter list](https://thebackdash.com) (older "arcane napalm" wording) | red-orange core (f41) | yes: "+50% in the centre" |
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |

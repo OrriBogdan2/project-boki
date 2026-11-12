@@ -20,7 +20,7 @@ Body (`body` in rimewright.json): the final design (art/wardens/claire/IMPORT.md
 Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 (15x) -> 60, skating darts x1.6 (56/35), spear detonation 584 (about 1.1x a Shatter) -> 60. Cooldown ratio Skate : Wall kept at 1 : 2 (8.3 : 16.7) -> 8.5 : 17. Rimelock: cooldown 47s against the Wall's 17 (source card 45.8 : 16.7). Its crash is 40 (10 darts, two thirds of a Shatter) instead of the footage's 17 darts (607 / 35): with 68 the crash straight into a merge and the Titan form's ultimate knocked a full-health medium hunter, which the owner's burst rule forbids. `--rimewright-combo-check` "burst:" asserts it (50 + 82 = 132 of 145 at level 6, no armor).
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Celeste), [footage] = briefs/hero-ref/tamsin.md (5 fps).
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, Celeste), [footage] = briefs/hero-ref/tamsin.md (5 fps).
 
 | Slot | Source | Ours before | Ours now | Asserted (`--rimewright-combo-check`) |
 |---|---|---|---|---|
@@ -77,29 +77,29 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
 |---|---|---|---|---|
-| Damaging abilities Chill for 4s; a Chilled foe knocked or a Chilled creep killed Shatters after a short delay | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (Shatter) | yes | "knocking a Chilled foe Shatters them after a beat" |
-| 8 dart hits on one target trigger Shatter | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (0068) | yes | "8 darts on one foe Shatter them" |
-| Darts are semi-homing, curving toward the cursor side | [wiki](https://supervive.wiki.gg/wiki/Celeste), footage | yes | yes | "darts come out slowly ... bowed", "the bowed darts curve back onto the foe" |
-| Darts hit harder while skating | [wiki](https://supervive.wiki.gg/wiki/Celeste) (2x), footage (1.6x); not in the tooltip data | yes | removed in the data pass (straight beams, normal damage) | "darts while skating are straight beams at normal damage" |
-| Hold to skate in your direction, release to stop, early release refunds part of the cooldown | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes | yes | "Shift held starts a skate", "letting go stops ... refunds" |
+| Damaging abilities Chill for 4s; a Chilled foe knocked or a Chilled creep killed Shatters after a short delay | [wiki](https://the community wiki/wiki/Celeste) | yes (Shatter) | yes | "knocking a Chilled foe Shatters them after a beat" |
+| 8 dart hits on one target trigger Shatter | [wiki](https://the community wiki/wiki/Celeste) | yes (0068) | yes | "8 darts on one foe Shatter them" |
+| Darts are semi-homing, curving toward the cursor side | [wiki](https://the community wiki/wiki/Celeste), footage | yes | yes | "darts come out slowly ... bowed", "the bowed darts curve back onto the foe" |
+| Darts hit harder while skating | [wiki](https://the community wiki/wiki/Celeste) (2x), footage (1.6x); not in the tooltip data | yes | removed in the data pass (straight beams, normal damage) | "darts while skating are straight beams at normal damage" |
+| Hold to skate in your direction, release to stop, early release refunds part of the cooldown | [wiki](https://the community wiki/wiki/Celeste) | yes | yes | "Shift held starts a skate", "letting go stops ... refunds" |
 | Skating carries on over a ledge | footage (0199) | yes | yes | "she skates on over a ledge" |
-| The spear: closer hits slow more, far hits deal more | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | replaced by the slow zone (footage) | (see Assumptions) |
-| The spear detonates again after a delay | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (1.8-2s) | yes | "it detonates about 1.8 s after landing" |
-| The wall moves, blocks projectiles, pushes what it hits | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes | yes | "it slides toward the cursor, widening, and shoves the foe ahead"; "the wall stops a foe's shot" |
-| Recast freezes the wall in place; a frozen wall lasts 6s | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 22.01.25) | no | yes | "E again freezes it where it stands, for 6 s" |
+| The spear: closer hits slow more, far hits deal more | [wiki](https://the community wiki/wiki/Celeste) | no | replaced by the slow zone (footage) | (see Assumptions) |
+| The spear detonates again after a delay | [wiki](https://the community wiki/wiki/Celeste) | yes (1.8-2s) | yes | "it detonates about 1.8 s after landing" |
+| The wall moves, blocks projectiles, pushes what it hits | [wiki](https://the community wiki/wiki/Celeste) | yes | yes | "it slides toward the cursor, widening, and shoves the foe ahead"; "the wall stops a foe's shot" |
+| Recast freezes the wall in place; a frozen wall lasts 6s | [wiki](https://the community wiki/wiki/Celeste) (patch 22.01.25) | no | yes | "E again freezes it where it stands, for 6 s" |
 | A thin aim line to the cursor | footage | yes | yes | "the thin aim line to the cursor is always up" |
 | X: invulnerable and rooted inside the shell | card, footage | yes | yes | "tm X: inside the shell she is invulnerable and rooted, and nothing fires" |
-| X: the zone's slow stacks for up to 3.5s | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (15% + 12%/s, cap 55%) | "tm X: the slow on a foe in the rink stacks the longer they stay" |
+| X: the zone's slow stacks for up to 3.5s | [wiki](https://the community wiki/wiki/Celeste) | no | yes (15% + 12%/s, cap 55%) | "tm X: the slow on a foe in the rink stacks the longer they stay" |
 | X: it goes off by itself at the end (about 3.5s) | footage (f25 -> f57) | yes | yes | "tm X: it cracks open by itself at 3.5 s" |
-| X: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes | "tm X: X in the last 0.75 s cracks it open early at two thirds" |
-| X: reactivating earlier cancels it, no stun | [wiki](https://supervive.wiki.gg/wiki/Celeste), sheet correction | no | yes | "tm X: X early ends it with no damage, no stun and no bond" |
-| X: the crash is blocked by line of sight | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (from the rink's centre) | "tm X: a foe behind a rock is not hit (line of sight)" |
-| X: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone" |
+| X: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | [wiki](https://the community wiki/wiki/Celeste) (patch 05.03.25) | no | yes | "tm X: X in the last 0.75 s cracks it open early at two thirds" |
+| X: reactivating earlier cancels it, no stun | [wiki](https://the community wiki/wiki/Celeste), sheet correction | no | yes | "tm X: X early ends it with no damage, no stun and no bond" |
+| X: the crash is blocked by line of sight | [wiki](https://the community wiki/wiki/Celeste) | no | yes (from the rink's centre) | "tm X: a foe behind a rock is not hit (line of sight)" |
+| X: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | [wiki](https://the community wiki/wiki/Celeste) (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone" |
 | X: allies are unaffected | footage, card | yes | yes (foes only) | (by construction: `foes_in`) |
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|

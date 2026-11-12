@@ -57,7 +57,7 @@ tiers 3 and 4 together and the in-between numbers differ.
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
-Source (Felix) vs ours per slot, LMB first. [D] game data (supervive_kits.md, the wiki), [F] footage
+Source (Felix) vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md, the wiki), [F] footage
 (hero-ref/linwick.md, 5 fps), [O] owner notes. Asserts: the "lance ..." rows of `--ashwick-combo-check` named in
 "Combinations".
 
@@ -134,25 +134,25 @@ carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows 
 | The stream runs its full length whatever the cursor distance | built | footage | yes (0012) |
 | Cyan pilot flame for one beat before the fire, and while idle | built | footage | yes (0021, 0047) |
 | Fire stops at once on release | built | footage | yes (0047) |
-| 0.35s before the flamethrower can be used again; 0.35s self-slow after release | built | [wiki](https://supervive.wiki.gg/wiki/Felix), patch 20.11.2024 | the slow is not visible at 5 fps |
+| 0.35s before the flamethrower can be used again; 0.35s self-slow after release | built | [wiki](https://the community wiki/wiki/Felix), patch 20.11.2024 | the slow is not visible at 5 fps |
 | Flame and bolt hit harder on a burning foe, and the flame chips max health | built (+25%, +40% Flashed over; 1.5% / 2.5% of max health a second) | owner data (the sizes are ours), footage (29 -> 36) | yes (219-220 s) |
-| Char above 31 is discarded; it all falls off after 5s | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| Any new burn refreshes the duration | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| Cinder spread uses the first foe's level before its upgrade | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no (one dummy) |
-| Cinder Shot doesn't knock back | built | [wiki](https://supervive.wiki.gg/wiki/Felix), patch 18.12.24 | yes |
+| Char above 31 is discarded; it all falls off after 5s | built | [wiki](https://the community wiki/wiki/Felix) | no |
+| Any new burn refreshes the duration | built | [wiki](https://the community wiki/wiki/Felix) | no |
+| Cinder spread uses the first foe's level before its upgrade | built | [wiki](https://the community wiki/wiki/Felix) | no (one dummy) |
+| Cinder Shot doesn't knock back | built | [wiki](https://the community wiki/wiki/Felix), patch 18.12.24 | yes |
 | Cinder Shot always flies its full range in the aim direction | built | owner review (wins over the one footage miss that ended near the cursor) | one sample (0133) |
-| Ram stops on the first foe; the foe is knocked back and Cinder slightly too | built | [wiki](https://supervive.wiki.gg/wiki/Felix), footage | yes (0141-0145) |
-| A knock restores only one ram charge | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| The cloak is blocked by line of sight; a knock resets it | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| The carpet can't form over the abyss; builds burns every 0.3s | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
+| Ram stops on the first foe; the foe is knocked back and Cinder slightly too | built | [wiki](https://the community wiki/wiki/Felix), footage | yes (0141-0145) |
+| A knock restores only one ram charge | built | [wiki](https://the community wiki/wiki/Felix) | no |
+| The cloak is blocked by line of sight; a knock resets it | built | [wiki](https://the community wiki/wiki/Felix) | no |
+| The carpet can't form over the abyss; builds burns every 0.3s | built | [wiki](https://the community wiki/wiki/Felix) | no |
 | The flight steers toward the cursor while flying (curved trails) | built: 120 degrees a second at most | footage | yes (ult 0034, 0038) |
-| Reactivating ends the flight early | built (X again lands) | [wiki](https://supervive.wiki.gg/wiki/Felix), card | no |
-| The trail forms under him whatever his height or speed and grows with the distance flown | built (a piece every metre) | [wiki](https://supervive.wiki.gg/wiki/Felix) | yes |
-| The trail slows and builds Ignite quickly: 4 stacks every 0.3s, Ignited after about 2.4s | built (4 Char every 0.3s, Ablaze at 31) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| The trail lasts 4s and fades from the oldest end | built (5.2s: owner review, +30% with the flight) | [wiki](https://supervive.wiki.gg/wiki/Felix), footage | yes (ult 0072) |
-| The trail can't form over the abyss | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| The shield ability can be cast mid-flight | built (Furnace Cloak) | [wiki](https://supervive.wiki.gg/wiki/Felix) | yes (ult 0137) |
-| Knockback impulses greatly increase the flight's speed | built (up to +10 m/s, bent the way he was pushed) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
+| Reactivating ends the flight early | built (X again lands) | [wiki](https://the community wiki/wiki/Felix), card | no |
+| The trail forms under him whatever his height or speed and grows with the distance flown | built (a piece every metre) | [wiki](https://the community wiki/wiki/Felix) | yes |
+| The trail slows and builds Ignite quickly: 4 stacks every 0.3s, Ignited after about 2.4s | built (4 Char every 0.3s, Ablaze at 31) | [wiki](https://the community wiki/wiki/Felix) | no |
+| The trail lasts 4s and fades from the oldest end | built (5.2s: owner review, +30% with the flight) | [wiki](https://the community wiki/wiki/Felix), footage | yes (ult 0072) |
+| The trail can't form over the abyss | built | [wiki](https://the community wiki/wiki/Felix) | no |
+| The shield ability can be cast mid-flight | built (Furnace Cloak) | [wiki](https://the community wiki/wiki/Felix) | yes (ult 0137) |
+| Knockback impulses greatly increase the flight's speed | built (up to +10 m/s, bent the way he was pushed) | [wiki](https://the community wiki/wiki/Felix) | no |
 | A red-orange ember ring at lift-off, no big landing | built | footage | yes (ult 0025, 0039) |
 
 ## Assumptions
@@ -233,7 +233,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both

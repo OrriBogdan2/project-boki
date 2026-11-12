@@ -1,10 +1,10 @@
-# Weapon firing data: how attacks work in Supervive, and what Project Boki does with it
+# Weapon firing data: how attacks work in the reference, and what Project Boki does with it
 
 Sources:
 - Frame-by-frame measurements of 60fps practice-range footage: Ryan Lemur's all-abilities video and the TheSixGame walkthrough.
 - Patch notes (Steam/SteamDB) and the wiki.
 
-Units: Supervive's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]` = never published.
+Units: The reference's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]` = never published.
 
 ## 1. The big rules
 
@@ -22,7 +22,7 @@ Units: Supervive's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]
 
 ## 2. Per weapon type
 
-| Type | What Supervive does | Numbers | Source |
+| Type | What the reference does | Numbers | Source |
 |---|---|---|---|
 | **Auto rifle** (Ghost) | Hold to fire. 30-round magazine. Damage per round falls over the first 10 rounds to 50%, so short bursts are rewarded | ~12 shots/s (0.08s apart) | [wiki] + [footage] |
 | **Burst blaster** (Carbine) | Up to 3 quick shots, then reload. First shot of a full magazine hits harder beyond ~50% range. Dashing gives a free empowered shot | reload time [gap] | [wiki] |

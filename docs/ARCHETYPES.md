@@ -11,7 +11,7 @@ owner bonus, carry mode, auto ability and the merge.
 
 Read with `docs/DASHES_AND_ABILITY_FEEL.md`. Each dash is specified there (§3), and so are the feel
 rules (telegraphs, hitstop, shake, sound, colour) that every ability here inherits. Everything is
-original to Kinfall. The SUPERVIVE research only informed structure: the kit layout, contextual RMBs
+original to Kinfall. The the reference research only informed structure: the kit layout, contextual RMBs
 and passive build-ups.
 
 ---
@@ -121,11 +121,11 @@ That's 10 points for 14 possible ranks, so choices matter.
   recharge), the verb's own numbers grow (`Effects.RANK_GROW`). Dash distances never grow. R rank 2:
   +30% duration and +15% cast effects. Each archetype adds **one rank-3 special** per slot, listed below.
 
-### 3.5 HUD: making the level obvious (SUPERVIVE-style portrait cluster)
+### 3.5 HUD: making the level obvious (reference-style portrait cluster)
 
 Most of this exists in `hud.gd` already: the portrait with a run-level badge and XP ring, a pulsing
 "+" for unspent points, rank pips over each slot, a padlock on locked slots and "LV 6" over a locked
-R. The layout was modelled on SUPERVIVE's portrait cluster from public gameplay footage. The proposal
+R. The layout was modelled on the reference's portrait cluster from public gameplay footage. The proposal
 makes it louder:
 
 | Element | Today | Proposed |
@@ -255,7 +255,7 @@ game's scale (`Data.CLASSES` HP 124 / 145 / 193; kin abilities hit for 8-22).
 
 ### 6.1 Thief (light)
 
-> **Nov 1 (kits2): superseded.** The Thief was rebuilt as a port of SUPERVIVE's Shiv (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+> **Nov 1 (kits2): superseded.** The Thief was rebuilt as a port of the reference's Shiv (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the cutpurse. Slips behind you, marks you, cashes in, gone in smoke.
 **Silhouette:** the smallest and most hunched. A hood with a long pointed tail, a short asymmetric
@@ -569,7 +569,7 @@ RMB. The held slide is a long line. Break line of sight against Last Round.
 
 ### 6.5 Juggernaut (heavy)
 
-> **Nov 1 (kits2): superseded.** The Juggernaut was rebuilt as a port of SUPERVIVE's Brall (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+> **Nov 1 (kits2): superseded.** The Juggernaut was rebuilt as a port of the reference's Brall (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the wrecking ball. Gets angrier, crashes through, slams you into the wall.
 **Silhouette:** the biggest shoulders in the game, with horned pauldrons. Hunched forward, with an
@@ -758,15 +758,15 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 ## Sources
 
 - Kinfall: `docs/KIN_GRAMMAR.md`, `docs/ABILITIES.md`, `docs/KINFALL_CLASSES.md`,
-  `docs/SUPERVIVE_DATA.md` (§7 levels), `docs/DASHES_AND_ABILITY_FEEL.md`, `scripts/core/data.gd`,
+  `sv/DATA.md` (§7 levels), `docs/DASHES_AND_ABILITY_FEEL.md`, `scripts/core/data.gd`,
   `scripts/core/game.gd` (binds), `scripts/match/hunter.gd` (XP_TO, ULT_AT, slot_lv),
   `scripts/ui/hud.gd` (portrait cluster), `content/weapons`, `content/kin_v2`
-- SUPERVIVE structure references (public wiki): kit layout and contextual RMB, e.g.
-  [Brall](https://supervive.wiki.gg/wiki/Brall) (tap, hold, airborne and during-Q RMB variants),
-  [Oath](https://supervive.wiki.gg/wiki/Oath) (shield + Shift context), and build-up passives such as
-  [Joule](https://supervive.wiki.gg/wiki/Joule) (Static), [Crysta](https://supervive.wiki.gg/wiki/Crysta)
-  (Reverberation), [Celeste](https://supervive.wiki.gg/wiki/Celeste) (Chill),
-  [Felix](https://supervive.wiki.gg/wiki/Felix) (Ignite), [Void](https://supervive.wiki.gg/wiki/Void)
+- The reference structure references (public wiki): kit layout and contextual RMB, e.g.
+  [Brall](https://the community wiki/wiki/Brall) (tap, hold, airborne and during-Q RMB variants),
+  [Oath](https://the community wiki/wiki/Oath) (shield + Shift context), and build-up passives such as
+  [Joule](https://the community wiki/wiki/Joule) (Static), [Crysta](https://the community wiki/wiki/Crysta)
+  (Reverberation), [Celeste](https://the community wiki/wiki/Celeste) (Chill),
+  [Felix](https://the community wiki/wiki/Felix) (Ignite), [Void](https://the community wiki/wiki/Void)
   (Empowered). The full hunter list is in DASHES_AND_ABILITY_FEEL.md's sources.
 - Readability references: [Riot, "Clarity in League"](https://riotgames.com/en/news/dev-clarity-in-league)
   (silhouette primary feature, clarity parity) and
@@ -970,7 +970,7 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
 
 ### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
 
-Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
+Owner direction (Nov 1): base the kits on the reference / League references, and make the Bulwark as
 close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
 above is superseded by this:
 
@@ -1032,10 +1032,10 @@ Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every arche
 the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
 rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.
 
-## Kits2: the Thief and the Juggernaut ported from SUPERVIVE (Nov 1)
+## Kits2: the Thief and the Juggernaut ported from the reference (Nov 1)
 
 Owner: "do you think Thief and Juggernaut can be better too?", then: port them "as accurately as
-possible, ability-wise, passive included" from the supervive.wiki.gg pages: the Thief is **Shiv**, the
+possible, ability-wise, passive included" from the the community wiki pages: the Thief is **Shiv**, the
 Juggernaut is **Brall**. Every slot follows the wiki's input pattern, shape, conditions, resets and
 upgrade path; numbers are scaled to our health and TTK (their relative sizes kept); only the names,
 art, sounds and on-screen text are ours. They follow the kits4 conventions (hold wind-up feel,
@@ -1082,7 +1082,7 @@ ranks.)
 ### E + RMB combinations and the other cross-ability interactions
 
 `--kit-combo-check` scripts each of these and asserts the variant that fires (it also runs inside
-`--archetype-check`). "Wiki" rows are SUPERVIVE's own interactions; "owner" rows are the owner's
+`--archetype-check`). "Wiki" rows are the reference's own interactions; "owner" rows are the owner's
 asked-for chain combinations ("E, charge RMB, then use either to affect the swing"), each with its own
 pose, sound and VFX.
 
@@ -1139,7 +1139,7 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 
 ### Sources cross-checked (Nov 1)
 
-- supervive.wiki.gg **Shiv** and **Brall** pages (ability text, levels 2-4, the patch history per
+- the community wiki **Shiv** and **Brall** pages (ability text, levels 2-4, the patch history per
   ability) are the baseline for everything above.
 - Wiki patch pages: *Leveling Rework + Big Balance Patch* (Brall: LMB hitbox -20%, sweet spot moved to
   the central tip, the 3rd/4th consecutive-hit bonus removed, Empowered attack speed +100% -> 0%, R no
@@ -1218,22 +1218,22 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 
 | Archetype | Hero | Reference hero's public page | Notes |
 |---|---|---|---|
-| `thief` | Thief | [Shiv](https://supervive.wiki.gg/wiki/Shiv) | Ported ability by ability (Kits2 above) |
-| `juggernaut` | Juggernaut | [Brall](https://supervive.wiki.gg/wiki/Brall) | Ported ability by ability (Kits2 above) |
-| `archer` | Archer | [Myth](https://supervive.wiki.gg/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
-| `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
-| `mage` | Sparkle | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
-| `gunslinger` | Vex | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
-| `ashwick` | Cinder (was Ashwick) | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
-| `dredge` | Grimble | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
-| `tender` | Meeko, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
-| `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
-| `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
-| `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+| `thief` | Thief | [Shiv](https://the community wiki/wiki/Shiv) | Ported ability by ability (Kits2 above) |
+| `juggernaut` | Juggernaut | [Brall](https://the community wiki/wiki/Brall) | Ported ability by ability (Kits2 above) |
+| `archer` | Archer | [Myth](https://the community wiki/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
+| `bulwark` | Bulwark | [Oath](https://the community wiki/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
+| `mage` | Sparkle | [Joule](https://the community wiki/wiki/Joule) | `docs/heroes/mage.md` |
+| `gunslinger` | Vex | [Ghost](https://the community wiki/wiki/Ghost) | `docs/heroes/gunslinger.md` |
+| `ashwick` | Cinder (was Ashwick) | [Felix](https://the community wiki/wiki/Felix) | `docs/heroes/ashwick.md` |
+| `dredge` | Grimble | [Kingpin](https://the community wiki/wiki/Kingpin) | `docs/heroes/dredge.md` |
+| `tender` | Meeko, the Tender | [Elluna](https://the community wiki/wiki/Elluna) | `docs/heroes/tender.md` |
+| `rimewright` | Neve, the Rimewright | [Celeste](https://the community wiki/wiki/Celeste) | `docs/heroes/rimewright.md` |
+| `dolm` | Tenzo | [Tetra](https://the community wiki/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `ostra` | Motley | [Void](https://the community wiki/wiki/Void) | `docs/heroes/ostra.md` |
 
 ## Kit parity lock
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
-- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `sv/briefs` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).

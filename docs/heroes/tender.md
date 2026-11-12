@@ -20,7 +20,7 @@ Body: a very small hunter (`body` in tender.json; legs 0.98, torso 1.02, shoulde
 Scaling: HP 145 (medium). Hearth Call heals 35 over 5s (7/s, about a quarter of a medium health bar); cooldown 46s against Hearthlight's 11s (source card 41.6 : 10). Ratios kept: an ember is 8, rising to about 11.6 at 5 Kindle (+45%; footage 64 -> 93). The seed burst is 32 (4x an ember). Hearthlight is 10 + 22 per squadmate. Cooldown ratio: Burrseed 10.5s against Hearthlight 11s (the data's 11.5 : 12).
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Elluna), [footage] = briefs/hero-ref/mooshmoosh.md.
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, Elluna), [footage] = briefs/hero-ref/mooshmoosh.md.
 
 | Slot | Source | Ours | Asserted (`--tender-combo-check`) |
 |---|---|---|---|
@@ -57,22 +57,22 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
 |---|---|---|---|---|
-| A teammate being stomped can't be picked up | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | "a teammate being stomped can't be scooped up" |
-| Damage or a stun drops them (not a root or hex) with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carrier shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (existing) | `--support-check` Bearer rows |
-| The Empowered shot after a pause: more range, double return | [wiki](https://supervive.wiki.gg/wiki/Elluna), card | card only | yes | "after a pause the next ember is Empowered" |
+| A teammate being stomped can't be picked up | [wiki](https://the community wiki/wiki/Elluna) | no | yes | "a teammate being stomped can't be scooped up" |
+| Damage or a stun drops them (not a root or hex) with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carrier shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://the community wiki/wiki/Elluna) | no | yes (existing) | `--support-check` Bearer rows |
+| The Empowered shot after a pause: more range, double return | [wiki](https://the community wiki/wiki/Elluna), card | card only | yes | "after a pause the next ember is Empowered" |
 | Embers fly to max range, past the cursor | footage | yes | yes | "the ember flies its full range past the cursor" |
 | Bound by Fate shows a lane to max range while aiming and fires on release | footage | yes | yes | "held, a dotted lane..."; "nothing leaves while it is held" |
 | Its area shows at once and roots 2s later, held by her reach (owner 11-10 over the footage's 0.6-0.8s) | wiki (2s), owner | no (footage 0.6-0.8s) | yes, 2s; out of 15m it unwinds 2x and falls off | "it roots at about 2.0 s of contact", "out of her reach it unwinds 2x", "escaped ... never roots" |
-| The aura's recast throws it to a spot, and it sticks to the first ally it passes | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage | the spot, yes | yes | "thrown, it lands on the cursor"; `--support-check` latch |
+| The aura's recast throws it to a spot, and it sticks to the first ally it passes | [wiki](https://the community wiki/wiki/Elluna), footage | the spot, yes | yes | "thrown, it lands on the cursor"; `--support-check` latch |
 | A stun on you does not put out the aura (data pass; the wiki's rule was not in the tooltip data) | tooltip data | no | yes | `--support-check` |
 | Dashing through an ally refunds nothing (data pass: the source has no such bonus) | tooltip data | no | removed | `--support-check` |
-| Rank 3 (source level 4): picking up a wisp refreshes the air dash | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
-| Healing is x5 on wisps and x0.33 on yourself | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
+| Rank 3 (source level 4): picking up a wisp refreshes the air dash | [wiki](https://the community wiki/wiki/Elluna) | no | yes | `--support-check` |
+| Healing is x5 on wisps and x0.33 on yourself | [wiki](https://the community wiki/wiki/Elluna) | no | yes | `--support-check` |
 | Relay Step goes where you move, not at the cursor | footage | yes | yes | "Relay Step goes where you move" |
 | X: she can move while the tether channels | footage (f41-f72) | yes | yes | "mm X: she walks while it channels" |
-| X: other abilities can be cast during the channel | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | "mm X: other abilities still cast during the channel" |
-| X: it ends if she is knocked or stunned, or moves too far from the teammate | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (break range = the 7 bh ring) | "mm X: it breaks when the teammate leaves the ring, and pays nothing", "mm X cancel (stun / knock / dead / mate_dead)", "mm X: plain damage and her own dash do not end it", "the teammate being knocked mid-channel does not end it" |
-| X: on a downed teammate (wisp) the heal goes to her, and at the end they are resurrected and teleported to her | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage f74-f75 | the teleport, yes | yes | "mm X: the tether heals the downed teammate ...", "... pulled to her side and stood up" |
+| X: other abilities can be cast during the channel | [wiki](https://the community wiki/wiki/Elluna) | no | yes | "mm X: other abilities still cast during the channel" |
+| X: it ends if she is knocked or stunned, or moves too far from the teammate | [wiki](https://the community wiki/wiki/Elluna) | no | yes (break range = the 7 bh ring) | "mm X: it breaks when the teammate leaves the ring, and pays nothing", "mm X cancel (stun / knock / dead / mate_dead)", "mm X: plain damage and her own dash do not end it", "the teammate being knocked mid-channel does not end it" |
+| X: on a downed teammate (wisp) the heal goes to her, and at the end they are resurrected and teleported to her | [wiki](https://the community wiki/wiki/Elluna), footage f74-f75 | the teleport, yes | yes | "mm X: the tether heals the downed teammate ...", "... pulled to her side and stood up" |
 | X: unit-targeted, an aim line onto the ally first | footage f19-f24 | yes | yes (a tap; the line and ring show while the cursor is on a teammate) | "mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them" |
 
 ## Footage gaps, Nov 9 re-check

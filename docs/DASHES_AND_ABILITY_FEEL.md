@@ -19,9 +19,9 @@ Until archetypes ship, the three current class dashes stay as they are. Phase St
 Thief's Flicker, Combat Roll into the Gunslinger's Slide Reload, and Shoulder Charge into the
 Juggernaut's Rampage. Archer, Mage and Bulwark get new dashes.
 
-Research section 1 is SUPERVIVE-only and comes from the public wiki. Section 2 adds LoL, Battlerite,
+Research section 1 is the reference-only and comes from the public wiki. Section 2 adds LoL, Battlerite,
 Smash, Street Fighter, Overwatch and general game-feel sources. Nothing here comes from game files.
-No SUPERVIVE hunter names, kits or numbers are copied into Kinfall content. They only informed the
+No the reference hunter names, kits or numbers are copied into Kinfall content. They only informed the
 patterns.
 
 ---
@@ -44,10 +44,10 @@ patterns.
 
 ---
 
-## 1. Research: how SUPERVIVE hunters' movement abilities differ
+## 1. Research: how the reference hunters' movement abilities differ
 
-Source: each hunter's page on supervive.wiki.gg, read Oct 2026 (the game shut down Feb 2026, so
-these are final values; see docs/SUPERVIVE_DATA.md for eras). The wiki almost never publishes dash
+Source: each hunter's page on the community wiki, read Oct 2026 (the game shut down Feb 2026, so
+these are final values; see sv/DATA.md for eras). The wiki almost never publishes dash
 distances or speeds. Where it doesn't, the column says "n/l" (not listed). "Knock" means downing an
 enemy hunter. "Ex-dash" means the long dash you get in the air or while the main dash is on cooldown.
 
@@ -115,10 +115,10 @@ Takeaways for Kinfall:
 |---|---|
 | Average reaction to a single, expected, clear stimulus is ~265ms (~16 frames). 15f is "virtually unreactable", 19f is "reactable but near the limit", ~27f is easy when it's the main threat but harder in a mix | infil, "On Reaction Times" |
 | A strong visual windup tell matters as much as total startup: moves with little early motion are hard to react to even when slow | infil |
-| SUPERVIVE cast windups in its data run 0.1-0.65s (median 0.45); charge-to-full 0.5-1.25s (median 1.0) | docs/SUPERVIVE_DATA.md §6 (wiki) |
-| SUPERVIVE delays its big area hits: Shrike's Dive-Bomb 0.65s fuse; Hudson's Barbed Wire 1s activation (raised from 0.6); Kingpin's second slug wave 0.6s later; Celeste's ult must be held to full; Bishop's ult cast raised 0.3→0.5s | wiki hunter pages |
-| SUPERVIVE added **enemy-only global iconography** to Elluna's delayed root, so the victim knows a 2s detonation is coming; Joule's ult got a landing indicator | Elluna and Joule wiki pages (patch notes) |
-| SUPERVIVE added wind-down frames after dashes and big swings (Brall, Oath) so you can't instantly glide away; an end-of-action vulnerability window | Brall and Oath wiki pages |
+| The reference cast windups in its data run 0.1-0.65s (median 0.45); charge-to-full 0.5-1.25s (median 1.0) | sv/DATA.md §6 (wiki) |
+| The reference delays its big area hits: Shrike's Dive-Bomb 0.65s fuse; Hudson's Barbed Wire 1s activation (raised from 0.6); Kingpin's second slug wave 0.6s later; Celeste's ult must be held to full; Bishop's ult cast raised 0.3→0.5s | wiki hunter pages |
+| The reference added **enemy-only global iconography** to Elluna's delayed root, so the victim knows a 2s detonation is coming; Joule's ult got a landing indicator | Elluna and Joule wiki pages (patch notes) |
+| The reference added wind-down frames after dashes and big swings (Brall, Oath) so you can't instantly glide away; an end-of-action vulnerability window | Brall and Oath wiki pages |
 | Battlerite: cues exist "to show players what to dodge or interrupt". The sniper shows an aim line and has a distinct cast sound that plays even from stealth. A teleport was cut for a dash that stops on the first enemy hit because it was "more consistent and fair to land" | Stunlock dev blog 003 |
 | Kinfall today: enemy area casts get a 0.32s filling ground marker; leaps show their landing circle to everyone; `delay` shows a telegraph ring | docs/ABILITIES.md, KIN_GRAMMAR.md |
 
@@ -145,9 +145,9 @@ Takeaways for Kinfall:
 | Overwatch mixes each player's sounds by **threat**: how big they are on your screen, whether they're aiming at you, and path distance (not straight-line distance). Each hero has distinct footsteps, so you can tell who's coming by ear | Overwatch audio, PCGamesN |
 | Battlerite: a character should read as what it is "just by looking at it" | 80.lv Battlerite interview |
 
-### 2.4 Kit cohesion and counterplay in SUPERVIVE
+### 2.4 Kit cohesion and counterplay in the reference
 
-Nearly every SUPERVIVE kit has one mark, stack or state that its other parts feed and consume:
+Nearly every the reference kit has one mark, stack or state that its other parts feed and consume:
 
 | Kit | Setter | Payoff |
 |---|---|---|
@@ -290,7 +290,7 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
   overhead health bar, so enemies' charges are no longer shown; the enemy read is the dash animation itself.
 - Every dash has a start pose of at least 0.05s (an animation, not a delay on movement) and a unique
   sound per archetype. The kin's rider adds a theme sweetener.
-- Wind-down: no glider for 0.12s after a ground dash ends, as SUPERVIVE did. Dash → jump is unchanged.
+- Wind-down: no glider for 0.12s after a ground dash ends, as the reference did. Dash → jump is unchanged.
 - Dash buffer (0.18s), rush cancels and the glide → dash → glide chains stay as built (KINFALL_CLASSES.md).
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
@@ -463,7 +463,7 @@ Rules:
 
 - Enemy telegraphs are never culled by the effect budget. Allied cosmetics are culled first.
 - Enemy-only icons go over a target's head when a delayed effect is coming for them (a delayed burst
-  on them, a trap they triggered, a tether, a Rampage arrow on their line). SUPERVIVE added exactly
+  on them, a trap they triggered, a tether, a Rampage arrow on their line). The reference added exactly
   this to Elluna's delayed root.
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
@@ -514,7 +514,7 @@ Rules:
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
 - Cap: 110ms in any 0.5s per player.
-- The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
+- The spike tier is a bit longer than the reference-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
@@ -629,9 +629,9 @@ authors see what the game will do.
 
 ## Sources
 
-SUPERVIVE (public wiki pages, read Oct 2026):
-- [Ghost](https://supervive.wiki.gg/wiki/Ghost), [Jin](https://supervive.wiki.gg/wiki/Jin), [Shiv](https://supervive.wiki.gg/wiki/Shiv), [Myth](https://supervive.wiki.gg/wiki/Myth), [Shrike](https://supervive.wiki.gg/wiki/Shrike), [Brall](https://supervive.wiki.gg/wiki/Brall), [Carbine](https://supervive.wiki.gg/wiki/Carbine), [Crysta](https://supervive.wiki.gg/wiki/Crysta), [Joule](https://supervive.wiki.gg/wiki/Joule), [Saros](https://supervive.wiki.gg/wiki/Saros), [Wukong](https://supervive.wiki.gg/wiki/Wukong), [Bishop](https://supervive.wiki.gg/wiki/Bishop), [Kingpin](https://supervive.wiki.gg/wiki/Kingpin), [Felix](https://supervive.wiki.gg/wiki/Felix), [Oath](https://supervive.wiki.gg/wiki/Oath), [Elluna](https://supervive.wiki.gg/wiki/Elluna), [Zeph](https://supervive.wiki.gg/wiki/Zeph), [Eva](https://supervive.wiki.gg/wiki/Eva), [Beebo](https://supervive.wiki.gg/wiki/Beebo), [Celeste](https://supervive.wiki.gg/wiki/Celeste), [Hudson](https://supervive.wiki.gg/wiki/Hudson), [Mercury](https://supervive.wiki.gg/wiki/Mercury), [Void](https://supervive.wiki.gg/wiki/Void), [Tetra](https://supervive.wiki.gg/wiki/Tetra), [Getting Started](https://supervive.wiki.gg/wiki/Getting_Started)
-- Kinfall's earlier SUPERVIVE research: docs/SUPERVIVE_DATA.md, docs/SUPERVIVE_FEEL.md
+The reference (public wiki pages, read Oct 2026):
+- [Ghost](https://the community wiki/wiki/Ghost), [Jin](https://the community wiki/wiki/Jin), [Shiv](https://the community wiki/wiki/Shiv), [Myth](https://the community wiki/wiki/Myth), [Shrike](https://the community wiki/wiki/Shrike), [Brall](https://the community wiki/wiki/Brall), [Carbine](https://the community wiki/wiki/Carbine), [Crysta](https://the community wiki/wiki/Crysta), [Joule](https://the community wiki/wiki/Joule), [Saros](https://the community wiki/wiki/Saros), [Wukong](https://the community wiki/wiki/Wukong), [Bishop](https://the community wiki/wiki/Bishop), [Kingpin](https://the community wiki/wiki/Kingpin), [Felix](https://the community wiki/wiki/Felix), [Oath](https://the community wiki/wiki/Oath), [Elluna](https://the community wiki/wiki/Elluna), [Zeph](https://the community wiki/wiki/Zeph), [Eva](https://the community wiki/wiki/Eva), [Beebo](https://the community wiki/wiki/Beebo), [Celeste](https://the community wiki/wiki/Celeste), [Hudson](https://the community wiki/wiki/Hudson), [Mercury](https://the community wiki/wiki/Mercury), [Void](https://the community wiki/wiki/Void), [Tetra](https://the community wiki/wiki/Tetra), [Getting Started](https://the community wiki/wiki/Getting_Started)
+- Kinfall's earlier the reference research: sv/DATA.md, sv/FEEL.md
 
 Readability, telegraphs, feel:
 - [Riot Games, "Clarity in League"](https://riotgames.com/en/news/dev-clarity-in-league)

@@ -140,7 +140,7 @@ you scanned to your farm.
 
 ## Down, dead and back
 
-On SUPERVIVE-style rules, tuned for extraction (numbers on [Rules](Rules.md#down-death-and-revive)):
+On reference-style rules, tuned for extraction (numbers on [Rules](Rules.md#down-death-and-revive)):
 
 - **Downed.** At 0 health you become a **wisp**: you crawl, can't be shot, and bleed out in 15 s.
   A teammate standing on you brings you back in 4 s at a quarter of your health (extra teammates make

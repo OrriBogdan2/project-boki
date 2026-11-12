@@ -5,8 +5,8 @@ player-facing; every name, number and word in the shipped game is our own (renam
 Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, owner, Nov 2026). Ids and file names stay `dolm`.
 
 ## Research summary
-- Sources: the reference sheet from guide footage (briefs/hero-ref/breah.md, outside the repo), the reference hero's wiki page
-  (https://supervive.wiki.gg/wiki/Tetra) and the full patch-note text from the Steam news feed (patches 1.01-2.04, 2025).
+- Sources: The reference sheet from guide footage (briefs/hero-ref/breah.md, outside the repo), the reference hero's wiki page
+  (https://the community wiki/wiki/Tetra) and the full patch-note text from the Steam news feed (patches 1.01-2.04, 2025).
 - Owner notes (sync61 playtest) override the footage: raised rocks give verticality (stand on them, climb them), punching
   rocks sends them flying, LMB is a hold.
 - **Deliberate change from the source (owner dash note, Nov 2):** the source's Landslide is an odd short dash followed by a

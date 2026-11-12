@@ -5,7 +5,7 @@
 - **Area:** movement
 
 ## Problem
-KIT_PARITY item 18: SUPERVIVE's glider can fold into a dive (Z target -3250 uu/s, pulled there by 350,000
+KIT_PARITY item 18: The reference's glider can fold into a dive (Z target -3250 uu/s, pulled there by 350,000
 force over 100 mass, keys at 0.25 of their force, cancelled 350 uu above the ground or after 10 s). Ours
 only sank or swooped. The source's data and footage name no dive input, and Space is the glider itself
 (item 179: hold to glide, release to close).
@@ -29,6 +29,6 @@ and costs no new bind. A dedicated bind stays open as the alternative if the own
 - Net.VERSION bump: no. The dive changes velocity, which the snapshot already carries; the folded pose
   is local-only until `diving` joins the snapshot.
 - Checks: `--move-feel-check` rows `dive_*` assert each source number; docs/MOVEMENT_FEEL.md and
-  docs/SUPERVIVE_FEEL.md updated.
+  sv/FEEL.md updated.
 - Debt: the dive cancels 3.5 m up but the canopy can't brake 32.5 m/s in that height, so you land hard
   (no fall damage exists). Source behaviour near the ground is unknown.

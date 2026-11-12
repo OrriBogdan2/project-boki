@@ -1,6 +1,6 @@
 # Project Boki classes and weapons (v1 numbers)
 
-These are Kinfall's own numbers, set inside the ranges Supervive's roster used (docs/SUPERVIVE_DATA.md §6). They're data files you can retune without touching code:
+These are Kinfall's own numbers, set inside the ranges the reference's roster used (sv/DATA.md §6). They're data files you can retune without touching code:
 
 - `data/classes/light.tres`, `medium.tres`, `heavy.tres` (script: `scripts/combat/class_profile.gd`)
 - `data/weapons/*.tres`, 9 weapons (script: `scripts/combat/weapon_profile.gd`), fired by `scripts/combat/weapon_user.gd`
@@ -10,7 +10,7 @@ These are Kinfall's own numbers, set inside the ranges Supervive's roster used (
 
 ## Classes
 
-| | Light | Medium | Heavy | Supervive range |
+| | Light | Medium | Heavy | The reference range |
 |---|---|---|---|---|
 | HP (level 1) | 900 | 1,050 | 1,400 | 880–1,596 |
 | HP at level 15 | 1,656 | 1,932 | 2,576 | +~6%/level |
@@ -24,7 +24,7 @@ These are Kinfall's own numbers, set inside the ranges Supervive's roster used (
 
 How the classes differ:
 - **Light:** fragile and slippery. Fastest dash, longest glide, gets thrown furthest by hits.
-- **Medium:** the Supervive baseline.
+- **Medium:** the reference baseline.
 - **Heavy:** most HP, slowest, two short dashes instead of one long one, hard to push off ledges. That last point matters a lot in an abyss game.
 
 ### The kit (keys)
@@ -36,7 +36,7 @@ too) · Q active glove · E kin ability · C or middle mouse throw / recall kin 
 
 ## Weapons
 
-Each class has two guns and one sword. Firing behavior is measured from Supervive footage and patch notes (see WEAPON_FIRING_DATA.md).
+Each class has two guns and one sword. Firing behavior is measured from the reference footage and patch notes (see WEAPON_FIRING_DATA.md).
 
 | Weapon | Class | How it fires | Per hit | Rate | Range | Magazine / reload |
 |---|---|---|---|---|---|---|
@@ -68,7 +68,7 @@ Notes on the table:
 - **Rifle:** the number is for holding the trigger. Tapping keeps damage near full, ~250+ DPS while firing.
 - **Sniper and shotgun:** built around one big hit (240, and up to 175 point-blank), not DPS.
 
-**Why it's set this way.** Supervive fights are long by shooter standards, with abilities doing a big share of the damage. With guns and swords alone, ~5s of perfect aim to kill a Medium leaves room for dashing, gliding and knocking people into the abyss to matter more than raw DPS. Once kin abilities are in, real TTK will drop to ~3s.
+**Why it's set this way.** the reference fights are long by shooter standards, with abilities doing a big share of the damage. With guns and swords alone, ~5s of perfect aim to kill a Medium leaves room for dashing, gliding and knocking people into the abyss to matter more than raw DPS. Once kin abilities are in, real TTK will drop to ~3s.
 
 - **Armor stretches these times.** Common armor (20% reduction) makes them ~1.25× longer; Legendary (35%) makes them ~1.5× longer.
 - **Rifle DPS is the tapping number.** Held fire averages lower because of the falloff.
@@ -109,7 +109,7 @@ Notes on the table:
 
 ## Base to a teammate (B, squads)
 
-- 3s channel toward the teammate nearest your cursor. **Stationary**, like Supervive's recall:
+- 3s channel toward the teammate nearest your cursor. **Stationary**, like the reference's recall:
   moving, dashing, jumping, attacking or casting cancels it, and so does any damage (feedback toast,
   a 4s lockout). Everyone sees a filling ring on you and an "incoming" marker on the teammate.
 - You appear beside them with **recall weakness** for 3s: damage dealt ×0.5, the stun/root/slow you
@@ -128,7 +128,7 @@ Notes on the table:
 
 ## Camera and aim (Oct 2026)
 
-- Default follow is **Supervive**: the view leans toward the cursor in proportion to how far the
+- Default follow is **The reference**: the view leans toward the cursor in proportion to how far the
   cursor is from your character (1.4m deadzone, 42% of the distance, capped at 7.5m), eased at 6/s,
   so you see more where you aim and you never leave the screen. The old presets stay in Settings.
 - Sneaking (Ctrl) zooms the camera out to 1.45x, eased; the cursor lean works the same.
@@ -139,6 +139,6 @@ Notes on the table:
 ## Hooks for the combat code
 - `notify_damaged(amount)`: returns true if the hit spiked a glider (credit the attacker).
 - `knockback(impulse)`: divided by the target's class weight.
-- `refund_dash_charge()`: call on knock (Supervive 1.0 knock reward), alongside healing `knock_heal`.
+- `refund_dash_charge()`: call on knock (The reference 1.0 knock reward), alongside healing `knock_heal`.
 - `incoming_damage_multiplier()`: ×2 while gliding.
 - `WeaponProfile.dps()`: sustained DPS, for balance checks.

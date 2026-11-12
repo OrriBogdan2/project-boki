@@ -18,7 +18,7 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 
 ## Research summary
 
-- **Source hero:** Shiv, from SUPERVIVE. The kit now follows the footage reference sheet
+- **Source hero:** Shiv, from the reference. The kit now follows the footage reference sheet
   (`briefs/hero-ref/dancer.md`, frames at 5 fps) where it disagrees with the wiki text.
 - **The big change:** the source's left click is a ranged bolt from alternating hands that stops at the
   cursor. Our old signature (Twin Blades, a melee combo) is replaced by **Arc Bolts** (our name, our model).
@@ -36,7 +36,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 ## Feel pass (item 7)
 
 Owner review 1103 item 7: her Cartwheel, the empowered bolt after it and the reset are the source's identity.
-[game data] is briefs/supervive-data/supervive_kits.md (Shiv, read at level 15); [footage] is
+[game data] is sv/briefs/kits.md (Shiv, read at level 15); [footage] is
 briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asserted in `--dancer-combo-check`
 (tools/dancer_feel_check.gd, lines `dancer feel: ...`).
 
@@ -64,7 +64,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | What | Source | Ours before | Ours now |
 |---|---|---|---|
 | Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | unchanged |
-| Range | 850 units = 8.5m, "the aim laser length" (docs/SUPERVIVE_FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). supervive_kits.md gives no range [game data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
+| Range | 850 units = 8.5m, "the aim laser length" (sv/FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). sv/briefs/kits.md gives no range [game data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
 | Projectile speed | no figure in the data; the footage shows a bolt cover 200 px in about 0.2s, 1000 px/s x 0.0375 = 37.5 m/s [footage, one frame at 5 fps, so rough] | 34 m/s | 37.5 m/s (8.5m in 0.23s) |
 
 Asserted in `--dancer-combo-check` (`dancer LMB: clamped to 8.5m`, `dancer LMB: flight time`, the empowered 9.5m line).
@@ -93,8 +93,8 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 ## Parity pass (LMB first)
 
 The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
-slot against the source. [game data] is briefs/supervive-data (Shiv; the shared rotation rate from
-supervive_physics.md); [footage] is briefs/hero-ref/dancer.md (5 fps). Asserted in `--dancer-combo-check`
+slot against the source. [game data] is sv/briefs (Shiv; the shared rotation rate from
+sv/briefs/physics.md); [footage] is briefs/hero-ref/dancer.md (5 fps). Asserted in `--dancer-combo-check`
 (tools/dancer_parity_check.gd, lines `dancer parity ...`); the Cartwheel and the empowered bolt are the feel
 pass above.
 
@@ -140,7 +140,7 @@ pass above.
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
@@ -169,8 +169,8 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 
 ## Small mechanics
 
-From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Shiv), two guides
-(https://gamerblurb.com/articles/supervive-how-to-play-shiv) and the footage sheet. "Built" means it is in the kit
+From the wiki's ability page and patch notes (https://the community wiki/wiki/Shiv), two guides
+(https://gamerblurb.com/articles/the reference-how-to-play-shiv) and the footage sheet. "Built" means it is in the kit
 and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 
 | Mechanic | Source | Footage | Ours |

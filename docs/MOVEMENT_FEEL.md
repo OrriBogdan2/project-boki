@@ -1,6 +1,6 @@
 # Movement feel: targets, sources, measurements
 
-The owner's note (Oct 31 2026): dropping, gliding and moving felt sloppy. SUPERVIVE is the bar: snappy and responsive, especially the glide, and Shift into a glide should give you more momentum.
+The owner's note (Oct 31 2026): dropping, gliding and moving felt sloppy. The reference is the bar: snappy and responsive, especially the glide, and Shift into a glide should give you more momentum.
 
 Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save.
 
@@ -10,15 +10,15 @@ XDG_DATA_HOME=<scratch> godot --headless --path . -- --move-feel-check
 
 It prints one `MFEEL <key> = <value> target <op> <target> ok|FAIL (source)` line per measurement and ends with `MOVE FEEL CHECK DONE, failures: N`.
 
-Source tags follow SUPERVIVE_FEEL.md / SUPERVIVE_DATA.md:
+Source tags follow sv/FEEL.md / sv/DATA.md:
 
-- `[wiki]` is supervive.wiki.gg.
+- `[wiki]` is the community wiki.
 - `[guide]` is a published guide (Deltia's Gaming gliding guide, ludo.guide).
-- `[footage]` is a frame measurement from SUPERVIVE_FEEL.md.
+- `[footage]` is a frame measurement from sv/FEEL.md.
 - `[spec]` is docs/EXPEDITION_SPEC.md.
 - `[est]` is our own estimate, tuned for feel and labelled as such.
 
-Nothing here comes from SUPERVIVE's files.
+Nothing here comes from the reference's files.
 
 ## What the public sources say (and don't)
 
@@ -26,15 +26,15 @@ Nothing here comes from SUPERVIVE's files.
 - **Air dashes [guide]:** mid-air dashes, jump pads and relics combine with gliding to go faster. Some hunters "dash mid-air before gliding for a fast speed gain".
 - **Opening the glider [guide]:** you hold jump while already jumping or falling, and letting go closes it. No engage delay is published anywhere.
 - **Abyss lift [wiki]:** a rapid upward impulse to ground level, then a rapid deceleration on arrival. Letting go before the top keeps the upward momentum.
-- **Fall depth and glide speed [footage]** (SUPERVIVE_FEEL.md): 1s off an edge is ~8m deep. Glide speed is ~5 m/s, about run speed. The hunter stays roughly centred on screen.
+- **Fall depth and glide speed [footage]** (sv/FEEL.md): 1s off an edge is ~8m deep. Glide speed is ~5 m/s, about run speed. The hunter stays roughly centred on screen.
 - **Ledges [footage] and the owner's description:** in the air, touching the side of ground above you while moving into it floats you up. Falling players who touch an island wall spring back onto it, even from a full second deep, in about 0.8s. The owner adds that there's no climb animation: you gain upward momentum, you can fling yourself a little in any direction with WASD, and a well-timed input or jump gives a better fling. The game never takes control.
-- **Feathering:** players tap the glider on and off. The owner points to a video about Nidhogg. The public wiki and guide pages we could read (supervive.wiki.gg Gliding, Abyss) don't describe it, so every feathering number here is [est]. [footage] says heat keeps climbing across repeated drop-and-lift cycles and only really cools on the ground.
+- **Feathering:** players tap the glider on and off. The owner points to a video about Nidhogg. The public wiki and guide pages we could read (the community wiki Gliding, Abyss) don't describe it, so every feathering number here is [est]. [footage] says heat keeps climbing across repeated drop-and-lift cycles and only really cools on the ground.
 - **Ground movement [spec]:** near-instant acceleration and deceleration (a 0.05–0.1s ramp). Camera follow smoothing is 0.08–0.15s.
 - **Not published:**
   - Jump height or arc.
   - Glide turn rate.
   - Drop dive speed.
-  - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump keeps the glider open, so **no variable jump height** was added.
+  - Whether jump height is variable. Nothing suggests the reference has it, and holding jump keeps the glider open, so **no variable jump height** was added.
   - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
 
 ## Targets and results
@@ -58,7 +58,7 @@ Nothing here comes from SUPERVIVE's files.
 | air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
 | dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
-| dash_curve_<hero>_peak_u / _peak_k (gunslinger, juggernaut, archer: where the speed peaks, peak / mean) | flat | 0.11 / 1.86, 0.29 / 1.74, 0.44 / 1.86 | the fit ± ~0.08 / ± ~0.1 | [footage] docs/SUPERVIVE_FEEL.md "Dash speed curves" |
+| dash_curve_<hero>_peak_u / _peak_k (gunslinger, juggernaut, archer: where the speed peaks, peak / mean) | flat | 0.11 / 1.86, 0.29 / 1.74, 0.44 / 1.86 | the fit ± ~0.08 / ± ~0.1 | [footage] sv/FEEL.md "Dash speed curves" |
 | dash_curve_dist / dash_curve_exit_run (distance against the kit's, hand-over / run) | n/a | 1.00–1.01x / 0.31–1.0x | 0.95–1.05x / <= 1.05x | the curve's mean is 1; the skid falls through run speed |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
@@ -114,7 +114,7 @@ Nothing here comes from SUPERVIVE's files.
 | cam_lag_m (camera behind you at a run) | 0.65m | 0.29m | <= 0.40m | [footage] centred |
 | cam_settle_t (after a stop) | 0.35s | 0.15s | <= 0.35s | |
 | cam_glide_lead_m | -0.67m (trailing) | +0.92m | >= 0.4m | lead in glide |
-| view_across_m (Supervive preset, 16:9) | 28.0m | 23.5m (movefeel 23.0m) | 22–25m | camcal: ~17 hunter silhouettes across, as in gameplay frames |
+| view_across_m (The reference preset, 16:9) | 28.0m | 23.5m (movefeel 23.0m) | 22–25m | camcal: ~17 hunter silhouettes across, as in gameplay frames |
 | hunter_screen_pct (medium hunter, feet to head) | 5.4% | ~7% (movefeel 7.6%) | 6.4–7.6% | camcal: its silhouette ~10.5% of the height, as in gameplay frames |
 | hunter_feet_below_pct (feet below screen centre) | 0% | ~4% | 1.5–5% | camcal: the view aims at the body |
 
@@ -142,7 +142,7 @@ Other checks:
     - 420°/s at cruise, in wider arcs above cruise (down to 45%).
     - 16.25 m/s² toward where you steer ([game data] GlideTargetXYForce 162,500 / Mass 100, `HunterMove.glide_accel`, decision 0027): a 90° turn ~0.38 s, a reversal ~0.6 s at cruise. Over-speed bleeds back (tuning.json glide.drag).
     - Steering more than 115° against your heading brakes at 36 m/s². Letting go drifts.
-  - Cruise 5.0 → 6.5 m/s and sink 2.2 → 1.4 m/s. The owner found the glide "falls a bit faster and feels weaker than SUPERVIVE".
+  - Cruise 5.0 → 6.5 m/s and sink 2.2 → 1.4 m/s. The owner found the glide "falls a bit faster and feels weaker than the reference".
   - The glider opens falling at least 0.85 m/s ([game data] GlideStartFallSpeedMin, `Loco.glide_start`, match and farm): a rising jump is cut at the open, no float-up, and the jump pad's own 2 m/s cap went with it. The canopy then catches a fall at 60 m/s² (ours: the source's matching fastest-fall clamp is locked; [guide] it opens "instantly").
   - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
   - **Dive** (`GlideDive`, `HunterMove.dive_*`, all [game data]): hold crouch (Ctrl) under an open glider and the canopy folds into a plunge toward 32.5 m/s at 35 m/s², the keys steering at a quarter of their glide force. Let go, come within 3.5 m of the ground (or the island's lip over the abyss) or hold for 10 s and the glide catches you again; the drop you pull out of becomes speed, capped at the glide's 15 m/s max. The key is ours: the source names no dive input, and Space is the glider itself. The folded pose is local-only (the dive isn't in the net snapshot).
@@ -153,10 +153,10 @@ Other checks:
   - While the glider is closed in the air its heat cools at 0.04 per second (was 0.06) (a full glider is 1.0). The ground still cools it fastest: [footage] "it only really cools on the ground".
   - For 0.6s after you let go you keep the glide's speed and steering.
   - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats at 0.4x a level glide (was 1x; lowered with the shorter glider so feathering still beats holding). Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
-  - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
+  - Unconfirmed: what the reference's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
 - **Jump out of a dash** (`Loco.dash_jump_keep`, tuning.json `dash.jump_keep`, 0.75): the dash ends and the jump carries 75% of its speed, the rest is air drag's; the farm does the same (it used to keep the whole dash, the match 55%: a one-step 45% stop). A Shift's speed is `Loco.dash_hv` in both places (the per-hunter ease too).
 - **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
-- **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
+- **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of the reference.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
   - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
@@ -182,15 +182,15 @@ Other checks:
 - **Camera and scale:**
   - Follow across: 8 → 15 per second (about 0.07s).
   - Glide lead: 0.2s of glide velocity (max 1.8m).
-  - The Supervive preset sits at 20.5m (was 25m): about 23m of ground across a 16:9 screen (was 28m).
+  - The the reference preset sits at 20.5m (was 25m): about 23m of ground across a 16:9 screen (was 28m).
   - Hunters are drawn 12% larger (`Hunter.VIS_SCALE`, visual only; hitboxes and rings unchanged).
   - Together these take the medium hunter from 5.4% to 7.6% of the screen's height.
-- **Camera calibration (`camcal`):** the Supervive preset re-measured from 1080p gameplay frames (training-map footage, HUD visible; one zoomed-out transition frame left out).
+- **Camera calibration (`camcal`):** the reference preset re-measured from 1080p gameplay frames (training-map footage, HUD visible; one zoomed-out transition frame left out).
   - Pitch 65.5° ±1.5 and vertical FOV ~32° (25–34°): a least-squares camera fit to a floor ring and the platform rim it sits in (ellipse extents), plus a matched pair of barrels at the top and bottom of the screen (lid widths 70 vs 87 px, sides 47 vs 25 px). A matched pair of posts gives the same answer (vertical sides 67 vs 45 px, about 34°).
   - The hunter's silhouette is ~10.5% of the screen's height (75–80 px of 742), centred across, with the feet ~3–4% below the centre. The ground across is ~17 silhouette heights. Crates read ~1.1 and walkways ~1.5 silhouette heights wide.
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
-  - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
+  - The movefeel framing stays available as "the reference (wider lens)" (`the wide target-feel camera`). `--cam-style=<id>` picks a style for one tooling run.
 - **Camera framing vs the source (parity pass, 2026-11-09, `--cam-framing-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
 
   | Measure | Source | Ours before | Ours now |
@@ -214,10 +214,10 @@ Other checks:
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
-- **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the SUPERVIVE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends.
+- **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the reference wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends.
 - **Wall bounce** (`WallMoves`): an airborne dash, glide or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Ground dashes, shoves and charges, walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, a spark and the landing thud mark it.
 - **Ledges:** the rise no longer waits for the apex of a jump. Any airborne state (rising, falling, gliding, just after releasing the glider, after a dash) catches a ledge top within `MANTLE_REACH` above you when you press into it, or when glide momentum carries you into it. A ledge higher than where you last stood counts once you have been in the air 0.5s (`GlideLift.LEDGE_AIR_T`), are gliding, or let go of the glider within the last 0.6s (`FEATHER_KEEP`); before, launching from a higher place meant the ledge never caught you. Stunned or rooted players never grab a ledge. Only a tile sharing an edge with yours counts, so sliding along a wall never pulls you up it.
-- **Abyss (SUPERVIVE-like float):**
+- **Abyss (reference-like float):**
 
 | Constant | Before | After | Why |
 |---|---|---|---|
@@ -251,9 +251,9 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 **Suggestion (not built, parity):** a run is 4.4-4.9 m/s, so a plain run-and-jump bounces only when it meets the wall between 20 and about 26-35 degrees off the normal (`BOUNCE_MIN_INTO` 4 m/s and `BOUNCE_HEAD_ON_DEG` 20 are our estimates, no source number). Tenzo's and Claire's runs didn't bounce at 25 degrees (they are slowest in the air). If the source bounces off a walking jump, drop `BOUNCE_MIN_INTO` to about 3 m/s.
 
-## Physics pass: SUPERVIVE's game data (`physics76`)
+## Physics pass: The reference's game data (`physics76`)
 
-Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in SUPERVIVE_DATA.md.
+Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in sv/DATA.md.
 
 - **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s (the data's 7.5 would let jump + mantle top four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
 - **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).
@@ -273,7 +273,7 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 ## Walking while attacking (fire-move parity, 2026-11-09)
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in
-briefs/supervive-data/supervive_kits.md (none of them gives a self-slow number); `[F]` = briefs/hero-ref/<file>.md
+sv/briefs/kits.md (none of them gives a self-slow number); `[F]` = briefs/hero-ref/<file>.md
 footage; `[wiki]` as above. Rule (briefs/DECISIONS.md 2026-11-07, parity first): a row changes only when the
 source contradicts it and no owner note covers it. Data keys: the weapon's `fire_slow`/`draw_slow`
 (content/weapons/, `Hunter._fire_slow`, non-melee default 0.8), and the kit's `move_k()`.

@@ -2,7 +2,7 @@
 
 Parity first (briefs/DECISIONS.md 2026-11-07). A downed Hunter is a Wisp (docs/decisions/0019, presentation only). Our
 `Match.foes_of` skips downed Hunters and `Hunter.hurt` returns 0 for them, so every ability that finds targets through
-those two ignores Wisps. Evidence tags: [D] hero card / `briefs/supervive-data/supervive_kits.md`, [W] wiki row quoted in
+those two ignores Wisps. Evidence tags: [D] hero card / `sv/briefs/kits.md`, [W] wiki row quoted in
 docs/heroes, [F] footage frames in `briefs/hero-ref/*.md` (5 fps, 0.2 s a frame). Magnitudes marked "unknown" are not
 in the refs: nobody has measured them.
 
@@ -18,7 +18,7 @@ in the refs: nobody has measured them.
 | 6 | Bjorn's Regen Field burst: allied Wisps hit begin to resurrect | [D] kits:92 | **Built** (+0.35 of the revive bar; bulwark.md 87/118) | none | none |
 | 7 | Ostra Level 4: allies and Wisps entering the outgoing zone get a shield | [W] ostra.md 145 | allies only | a shield on a Wisp has no meaning while Wisps take no damage: skip unless rule 2 lands | none |
 | 8 | Juggernaut: R no longer resets on Wisp execution (patch 22.01.25) | [W] | n/a, hunters only | none | none |
-| 9 | Stomp: standing on an enemy Wisp drains it, blocks revive; stun or knockback breaks the stomp | [W] SUPERVIVE_DATA.md 56 | **Built** (life.gd, `stomp_mult`, `stomp_slow`) | none | none |
+| 9 | Stomp: standing on an enemy Wisp drains it, blocks revive; stun or knockback breaks the stomp | [W] sv/DATA.md 56 | **Built** (life.gd, `stomp_mult`, `stomp_slow`) | none | none |
 | 10 | Knocked-down mate pulled by a knock/launch while an enemy stomps: unknown | none in refs | Rule 1 can launch a stomped Wisp off the stomper; the stomper's channel "misses" as for a drifting Wisp | keep; check footage if a clip appears | none |
 
 ## Open questions (owner, not built)

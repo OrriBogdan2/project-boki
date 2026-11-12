@@ -86,7 +86,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Row (sev) | Verdict | Where / why |
 |---|---|---|
 | E input: hold, drag, release (HIGH) | (b) | held E keeps the drag open (up to 1 s), the release commits; a tap drags away (asserted: still dragging at 0.6 s, the release starts the countdown) |
-| E numbers re-measured (KIT_PARITY) | (a) | countdown 0.8 s = 4 frames at 5 fps (briefs/hero-ref/vireo.md, E: Lightning Javelin, 0186 to 0190); 1 Static and 12 s from briefs/supervive-data/supervive_kits.md (Joule E). The source states no drag window ("hold and drag before release"; the footage shows the commit one frame after placing), so the 1 s cap is ours; asserted: held with no release it commits at 1 s. Enemies see the all-player rim circle from the placement and the pillar for the 0.8 s. Open: the footage info panel says the javelin adds 2 Static (kept at the data's 1), and the cooldown is 10.5 at our 8 : 8 : 10.5 pace (data 12 / 10 / 9) |
+| E numbers re-measured (KIT_PARITY) | (a) | countdown 0.8 s = 4 frames at 5 fps (briefs/hero-ref/vireo.md, E: Lightning Javelin, 0186 to 0190); 1 Static and 12 s from sv/briefs/kits.md (Joule E). The source states no drag window ("hold and drag before release"; the footage shows the commit one frame after placing), so the 1 s cap is ours; asserted: held with no release it commits at 1 s. Enemies see the all-player rim circle from the placement and the pillar for the 0.8 s. Open: the footage info panel says the javelin adds 2 Static (kept at the data's 1), and the cooldown is 10.5 at our 8 : 8 : 10.5 pace (data 12 / 10 / 9) |
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
 | Blowout ground ring (MED) | (b) | removed (the shared payoff ring too: `payoff_fx(..., rings := false)`); the copper pillars stay |
 | Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its 1.5 m radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
@@ -140,15 +140,15 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
 |---|---|---|---|
-| The bolt passes through every target it strikes | [wiki: Joule](https://supervive.wiki.gg/wiki/Joule) (Jolt) | not shown | no (audit): the game data says one bolt; it stops on the first foe ("a finger bolt stops on the first foe") |
-| Surge passes through targets and hits each one | [wiki](https://supervive.wiki.gg/wiki/Joule) (Surge) | shown (pass hit 146) | yes: "Wirerun hits every foe it passes" |
-| Surge ignores projectiles; stuns, roots, grounds cancel it | [wiki](https://supervive.wiki.gg/wiki/Joule) patch 05.03.25 | INVULNERABLE label shown | yes: phase while running; "a stun mid-hold cancels Wirerun" |
-| Knocking an enemy does not reset Surge | [wiki](https://supervive.wiki.gg/wiki/Joule) (Surge) | not shown | the kit adds no knock reset; since sync65 the game-wide takedown reset (DashReset) gives every hero their dash back on a knock, which overrides this |
-| Spear has a minimum cast time (0.33 to 0.4s) | [wiki](https://supervive.wiki.gg/wiki/Joule) patch notes 20.11.24, 05.03.25 | only 1.2s casts seen | yes: "Storm Rod's 0.33s minimum cast" |
-| Spear stuns on terrain or another target | [wiki](https://supervive.wiki.gg/wiki/Joule) (Voltaic Spear) | stun on a pillar | yes: wall and foe stuns |
-| Lightning Strike flings enemy orbs, which can then be stolen | [wiki](https://supervive.wiki.gg/wiki/Joule) (Lightning Strike) | orb flung (`0283`) | yes: "flings a rival's orb, now yours" |
-| Lightning Strike can launch Wisps | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | built: rival downed hunters in the circle slide with the strike (no Static, no Grounded); `--mage-combo-check`. Spec: docs/specs/DOWNED_ABILITIES.md |
-| Static Charged detonation restores mana | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (no mana) |
+| The bolt passes through every target it strikes | [wiki: Joule](https://the community wiki/wiki/Joule) (Jolt) | not shown | no (audit): the game data says one bolt; it stops on the first foe ("a finger bolt stops on the first foe") |
+| Surge passes through targets and hits each one | [wiki](https://the community wiki/wiki/Joule) (Surge) | shown (pass hit 146) | yes: "Wirerun hits every foe it passes" |
+| Surge ignores projectiles; stuns, roots, grounds cancel it | [wiki](https://the community wiki/wiki/Joule) patch 05.03.25 | INVULNERABLE label shown | yes: phase while running; "a stun mid-hold cancels Wirerun" |
+| Knocking an enemy does not reset Surge | [wiki](https://the community wiki/wiki/Joule) (Surge) | not shown | the kit adds no knock reset; since sync65 the game-wide takedown reset (DashReset) gives every hero their dash back on a knock, which overrides this |
+| Spear has a minimum cast time (0.33 to 0.4s) | [wiki](https://the community wiki/wiki/Joule) patch notes 20.11.24, 05.03.25 | only 1.2s casts seen | yes: "Storm Rod's 0.33s minimum cast" |
+| Spear stuns on terrain or another target | [wiki](https://the community wiki/wiki/Joule) (Voltaic Spear) | stun on a pillar | yes: wall and foe stuns |
+| Lightning Strike flings enemy orbs, which can then be stolen | [wiki](https://the community wiki/wiki/Joule) (Lightning Strike) | orb flung (`0283`) | yes: "flings a rival's orb, now yours" |
+| Lightning Strike can launch Wisps | [wiki](https://the community wiki/wiki/Joule) | not shown | built: rival downed hunters in the circle slide with the strike (no Static, no Grounded); `--mage-combo-check`. Spec: docs/specs/DOWNED_ABILITIES.md |
+| Static Charged detonation restores mana | [wiki](https://the community wiki/wiki/Joule) | not shown | not built (no mana) |
 | Eye of the Storm: invulnerable while in the air | [thebackdash hunter list](https://thebackdash.com) (pre-1.0 wording) | INVULNERABLE tag (f45) | yes: "invulnerable in the air" |
 | Eye of the Storm: landing spot at the cursor within a range ring, two presses | reference sheet (both casts) | ring f29, crown reticle f36 | yes: "clamped inside the ring", "the second press brings her down" |
 | Eye of the Storm: landing damage in an area, knockback, 1 Static stack each | thebackdash (pre-1.0 wording) | light pillar and shock ring f49 | yes: "a knockback and 1 Static each" |
@@ -156,7 +156,7 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|

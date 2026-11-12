@@ -11,7 +11,7 @@ but all it does is open the hero ult and the Merge (the Merge lasts +30% at rank
 reads no rank. Owner decisions: on level-up the player chooses which ability to rank; maxing one unlocks
 its bonus; the ult is R.
 
-## Source: R ranks (briefs/supervive-data/supervive_kits.md, on ext/agent-briefs)
+## Source: R ranks (sv/briefs/kits.md, on ext/agent-briefs)
 Tiers: "R has II/III only" (line 4), so an R has three ranks: I (base) and two upgrades. `A / B` = tier
 II / tier III; `x2` = the same step at each tier. Cooldown is in seconds.
 

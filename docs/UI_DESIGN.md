@@ -1,7 +1,7 @@
 # Project Boki menu design
 
 How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that build them. The
-in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it
+in-match HUD (`scripts/ui/hud.gd`) has its own reference-style layout and isn't covered here; it
 shares the colours and fonts.
 
 **Look: "Void & Masks"** (spec: `briefs/UI_STYLE.md` on ext/agent-briefs, November 2026). Panels are

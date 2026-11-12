@@ -2,7 +2,7 @@
 
 This audit compares, for all 12 Hunters and LMB / RMB / E / R, what the caster sees while aiming against
 the source. The telegraph audits (ext/telegraph-audit-a/b/c) covered what foes see. Sources:
-`briefs/hero-ref/<sheet>.md` [F], `briefs/supervive-data` [D], and owner notes (`briefs/DECISIONS.md`,
+`briefs/hero-ref/<sheet>.md` [F], `sv/briefs` [D], and owner notes (`briefs/DECISIONS.md`,
 `OWNER_REVIEW_1103.md`), which win. The ours column was read at origin/main d255acbee. R is our ult
 (`"x"` in the data).
 

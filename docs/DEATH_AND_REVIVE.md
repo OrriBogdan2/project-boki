@@ -1,4 +1,4 @@
-# Down, death, revive and respawn (built on Supervive's rules, tuned for extraction)
+# Down, death, revive and respawn (built on the reference's rules, tuned for extraction)
 
 Code: `scripts/match/` (`life.gd`, `box_revive.gd`, `beacons.gd`; numbers in `content/rules/revive.json`). Rules per mode: `data/rules/trios.tres`, `duos.tres`, `solo.tres` (script `life_rules.gd`; every value is tagged in that file). Rules per run tier: `data/tiers/shallows.tres`, `deeps.tres`, `abyss.tres`.
 
@@ -42,7 +42,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 **Keep solos, but as their own queue with different rules. Don't mix solos into team lobbies.** That's what `solo.tres` does:
 
 - **No wisp:** 0 HP = dead, deathbox, done. That's how solo modes in extraction games generally work, since there's no one to pick you up.
-- **Self-revive item** (`self_revive_items`, a rare consumable): you go down as a wisp and get back up on your own after **8s** (Supervive's Guardian Angel), unless an enemy stands on you. It's a high-value find worth fighting over.
+- **Self-revive item** (`self_revive_items`, a rare consumable): you go down as a wisp and get back up on your own after **8s** (The reference's Guardian Angel), unless an enemy stands on you. It's a high-value find worth fighting over.
 
 Reasons to keep solos:
 - A big share of extraction players queue alone.
@@ -51,7 +51,7 @@ Reasons to keep solos:
 The real risk is player count. Three queues (solo, duo, trio) split a small launch population three ways. A sensible order:
 1. **Launch trios (plus duos)** while the player base is small.
 2. Turn on solos when queue times allow.
-3. Same for Supervive: it moved its main queue from squads to trios at 1.0.
+3. Same for the reference: it moved its main queue from squads to trios at 1.0.
 
 ## Kin when you die: depends on the run tier
 

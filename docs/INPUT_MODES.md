@@ -12,7 +12,7 @@ two-step (recast) rules of 2026-11-08 can be checked against one page. Read-only
 extra, listed so nobody builds on it). `differ (owner #n)`: an owner item overrides the source (OWNER_REVIEW_1103 item n), so it
 stays. `unsettled`: the sources disagree or are silent and I did not guess; it is a follow-up question, not a fix.
 
-**Evidence.** [D] briefs/supervive-data/supervive_kits.md (game tooltips). [S:x] the footage sheet briefs/hero-ref/x.md (5 fps, 0.2 s a
+**Evidence.** [D] sv/briefs/kits.md (game tooltips). [S:x] the footage sheet briefs/hero-ref/x.md (5 fps, 0.2 s a
 frame). [W] our docs/heroes/<id>.md rows. [O n] OWNER_REVIEW_1103 item n. Trust order: owner > D > wiki > footage. Source files live
 on `origin/ext/agent-briefs`. Ours is read from `content/archetypes/<id>.json` (card, `rmb.hold`, `dash`), `content/weapons/*.json`
 and the `scripts/arch/kits/<id>_kit.gd` hooks (`fire_rmb`, `rmb_hold_tick`, `e_recast`, `ult_recast`, `lmb_override`). Not verified:

@@ -23,4 +23,4 @@ ground dash calls `travel(..., {"curved": true})` and `ArchKit._tick_curve` sets
 
 ## Consequences
 Distances and times are unchanged (`--move-feel-check` dash_curve_dist), the peaks move to the source's share
-of the dash. Rampage's short time makes its peak ~34 m/s. Fits and errors: docs/SUPERVIVE_FEEL.md.
+of the dash. Rampage's short time makes its peak ~34 m/s. Fits and errors: sv/FEEL.md.

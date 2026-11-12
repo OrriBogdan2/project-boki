@@ -1,14 +1,14 @@
-# ADS camera (Supervive "ADS camera distance 12700 uu")
+# ADS camera (The reference "ADS camera distance 12700 uu")
 
 Status: spec only, nothing built (PARITY FIRST, DECISIONS 2026-11-07). Evidence is too thin to build.
 
 ## What the source says
-- Only one line exists: `briefs/supervive-data/supervive_physics.md:16`, "ADS camera distance | 12700 uu | Fog-of-war radius x1.25, 30° cone".
+- Only one line exists: `sv/briefs/physics.md:16`, "ADS camera distance | 12700 uu | Fog-of-war radius x1.25, 30° cone".
   PHYSICS_PARITY.md:43 repeats it as "not audited". Beside it, CameraDistance is 5500 uu for all 12 hunters.
 - 12700 / 5500 = 2.31. That reads as the camera boom length, not a pan: if the view is the same lens, a boom 2.3x longer shows ~2.3x the width.
   But the note says the fog-of-war radius is only x1.25 and the view is a 30° cone, so the sight (vision) range grows 25% inside a narrow cone. This is
   a vision mode (look further in one direction), not a zoom of the whole screen. The two readings disagree; the data does not say which.
-- Which input: unknown. The data names none. Not found in supervive_kits.md, hero-ref sheets (5 fps) or the wiki. The nearest
+- Which input: unknown. The data names none. Not found in sv/briefs/kits.md, hero-ref sheets (5 fps) or the wiki. The nearest
   matches are hold-to-aim kit inputs (Vex's Palm Lance, Lace's draws, Linwick's Fire Bolt) but no sheet records the camera moving for them;
   the sheets say "no per-hero camera change" (bjorn, breah, linwick) and "one fixed zoom" (linwick.md:242, mooshmoosh.md:264).
 - Closest real analogue: Breah's Stonesight (breah.md:22-44): hold Sneak, a 35-40° pale cone that follows the cursor and widens
@@ -18,7 +18,7 @@ Status: spec only, nothing built (PARITY FIRST, DECISIONS 2026-11-07). Evidence 
 ## What we already have
 - `cam.gd` `cast_view()` (item 68): aimed casts (gunslinger Needle, view_zoom 0.25, range 18) widen the view 25% and lean along the aim
   over ~0.2 s (CAST_EASE 16). That is the only "look further while aiming" behaviour, and it is hold-to-aim, like the source's long shots.
-- Cursor pan presets (`FOLLOW`): supervive caps the lean at 7.5 m.
+- Cursor pan presets (`FOLLOW`): The reference caps the lean at 7.5 m.
 - Sneak key is `crouch` (settings.gd:114), "Sneak". DECISIONS tutorial line: crouch lets you "see further". No new key is needed for a Sneak-bound view.
 
 ## Fit and options

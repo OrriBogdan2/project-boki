@@ -16,8 +16,8 @@ cuts are the source's seconds (our base cooldowns equal the source's tier-I ones
 | E Brimseed | +10% x2; tier IV: -2s and a damage-over-time on foes inside | 9s / 8s, damage +15% / +30%; burn at 3 | 10s / 8s, damage +10% / +20%; burn at 3 |
 
 ## Research summary
-- Sources: the reference sheet from footage (briefs/hero-ref/ostra.md, outside the repo), the wiki page
-  (https://supervive.wiki.gg/wiki/Void) and the Steam patch-note text (Nov 2024 - Dec 2025).
+- Sources: The reference sheet from footage (briefs/hero-ref/ostra.md, outside the repo), the wiki page
+  (https://the community wiki/wiki/Void) and the Steam patch-note text (Nov 2024 - Dec 2025).
 - Owner notes (sync61) override the footage: spamming Shift must never dash in a random direction; Shift keeps his height; RMB
   has one charge and must visibly stun, the training dummy too.
 - Owner dash note (Nov 2) on the Trade: a target circle at the cursor with a landing marker; while the lantern flies he
@@ -75,7 +75,7 @@ to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the
 level-4 bonus.
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, Void), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
 
 | Slot | Source | Ours | Asserted (`--ostra-combo-check`) |
 |---|---|---|---|
@@ -186,7 +186,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
