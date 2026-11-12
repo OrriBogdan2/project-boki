@@ -14,6 +14,7 @@ extends RefCounted
 
 const CROUCH := 0.06           # s: the first rock bursts up and he crouches on it
 const RISE_LEAD := 0.06        # s before touchdown: the landing rock comes up to meet him
+const RAIL_CLEAR := 0.2       # m: a hop down a slope passes this high over the end of the rock it sprang off
 const RAIL_BACK := 0.3         # m: the rock's centre lies this far ahead of the landing, so the skid stays on it
 const FOOT_KEY := "br_foot"
 
@@ -226,8 +227,8 @@ func _kick() -> void:
 	chain_hops = int(st["n"])
 	h.roll_t = 0.0
 	var at: Vector3 = spot["at"]
-	var T := float(st["T"])
 	var feet := Vector3(at.x, float(spot["feet"]), at.z)
+	var T := _flight_to(feet)
 	h.launch_to(feet, T)
 	if not h.pad.is_empty():
 		h.pad["ledge"] = true          # up onto a ledge: a sure arc, and a press in it must not break it
@@ -241,6 +242,28 @@ func _kick() -> void:
 	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 	Feel.dash_sound(m, k.id, h.pos, h)
+
+## The hop's time in the air: its own, or longer down a slope, so the arc (still landing on the spot) is
+## RAIL_CLEAR over the rock he springs off as it passes its end; a quicker one sinks back onto that rock.
+func _flight_to(feet: Vector3) -> float:
+	var T := float(st["T"])
+	var drop := h.pos.y - feet.y
+	var dist := Vector2(feet.x - h.pos.x, feet.z - h.pos.z).length()
+	if drop <= 0.0 or dist < 0.1:
+		return T
+	var f := clampf(_rock_ahead(st["dir"]) / dist, 0.05, 0.8)     # the share of the hop over the rock
+	var need := (RAIL_CLEAR + drop * f) / (0.5 * (Hunter.H_GRAV + _pull()) * f * (1.0 - f))
+	return maxf(T, sqrt(need))
+
+## How far ahead along dir the rock under him still holds him up at his take-off height.
+func _rock_ahead(dir: Vector2) -> float:
+	var d := 0.0
+	while d < 3.0:
+		var p := h.pos + Vector3(dir.x, 0, dir.y) * (d + 0.1)
+		if StoneStand.top_under(m.world.dyn_walls, p, h.r, m.world.ground_at(p.x, p.z)) < h.pos.y - 0.05:
+			return d
+		d += 0.1
+	return d
 
 ## Rock Hop falls at its own leap_grav: the pull on top of gravity.
 func _pull() -> float:
@@ -304,6 +327,8 @@ func _skid_room(dir: Vector2) -> float:
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt
+	if not h.grounded:
+		return             # skidded off a ledge: the next hop and the crash wait for the ground below
 	if bool(st["press"]) and float(st["t"]) >= float(dd()["skid_min"]) and int(st["n"]) < int(dd()["hops"]):
 		if _aim_hop():
 			_kick()

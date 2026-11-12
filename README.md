@@ -25,8 +25,8 @@ The project uses the Compatibility renderer so the same build runs on the web.
 | Left click | Weapon attack |
 | Right click | Your weapon's ability |
 | Shift | Dash (in the air it's the long dash; your class decides distance and charges) |
-| Space | Jump; hold it in the air to glide |
-| Mouse 5 | Glide (hold in the air; never jumps) |
+| Space | Jump; press it again in the air and hold to glide |
+| Mouse 5 | Glide (press in the air, then keep it down; never jumps) |
 | Q | Your active glove (gloves are found on the run) |
 | E | Your Boki's ability (thrown out first if it's on your shoulder) |
 | C or middle mouse | Throw your Boki at the cursor, or recall it |

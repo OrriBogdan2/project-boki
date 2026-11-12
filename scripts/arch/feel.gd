@@ -132,32 +132,11 @@ static func floors_apply(m: Node, team: int) -> bool:
 	return p != null and int(p.team) != team
 
 # ---- §5.4 hitstop ----
-## Tier -> [attacker (melee), target] seconds. Projectiles never freeze the attacker.
-const HITSTOP := [[0.0, 0.0], [0.0, 0.025], [0.035, 0.045], [0.05, 0.065], [0.07, 0.09], [0.10, 0.0]]
-const HS_CAP := 0.11           # at most this much freeze in any 0.5s per player
-const HS_WINDOW := 0.5
-const HS_MULTI := 0.25         # further hits on the same pair inside this get a third of their tier
-static var _pair_t := {}       # "a|b" -> last time
-static var _budget := {}       # nid -> [window start, spent]
-
-## The hitstop tier of one hit (T0..T5), from what it did (§5.4 table).
-static func tier(target: Ent, d: float, o: Dictionary) -> int:
-	if String(o.get("src", "")) in ["burn", "fall", "heat", "mob"] or o.get("tick", false):
-		return 0
-	if o.get("bonded", false) or o.get("merge_start", false):
-		return 5
-	if o.get("payoff", false) or o.get("spiked", false) or o.get("exploit", false) or String(o.get("src", "")) == "wall":
-		return 4
-	var mh := maxf(1.0, target.max_hp)
-	var cc := float(o.get("stun", 0.0)) > 0.0 or float(o.get("root", 0.0)) > 0.0 or float(o.get("lift", 0.0)) > 0.0
-	if cc or d >= mh * 0.15:
-		return 3
-	var kb: Vector2 = o.get("kb", Vector2.ZERO) if o.get("kb", null) is Vector2 else Vector2.ZERO
-	if d >= mh * 0.08 or kb.length() >= 8.0 or o.get("reflected", false):
-		return 2
-	if d > 0.0 and float(o.get("slow", 0.0)) <= 0.0:
-		return 1
-	return 0
+## A hit's weight (ImpactWeight: light, solid or heavy) sets a fixed hold. Projectiles never hold the
+## attacker. Every hold a body takes is capped per window (the team-fight cap); a hit no heavier than the
+## last on the same pair inside repeat_s holds for a share of its tier.
+static var _pair := {}         # "a|b" -> [last time, its tier index]
+static var _budget := {}       # body instance id -> [window start, spent]
 
 static func is_melee(by: Ent, target: Ent, o: Dictionary) -> bool:
 	if o.get("melee", false):
@@ -167,47 +146,59 @@ static func is_melee(by: Ent, target: Ent, o: Dictionary) -> bool:
 		return true
 	return by != null and is_instance_valid(by) and by.flat_dist(target) <= 2.6 and String(o.get("src", "")) == "abil"
 
-## Applies the hitstop of a hit. Offline it uses the global freeze when the local player is one of
-## the two involved; online (and for everyone else's fights) it freezes only the two bodies' visuals
-## (Ent.freeze_t), never the simulation.
-static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> int:
-	var t := tier(target, d, o)
-	if t <= 0 or m == null:
-		return t
+## Applies the hitstop and shake of a hit and returns its weight. Offline the local player's hold is the
+## global freeze (Match.freeze_frame, which spends the player's cap); everyone else's, and everything
+## online, holds only that body's visuals (Ent.freeze_t), never the simulation.
+static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> String:
+	var w := ImpactWeight.of_hit(by, target, d, o)
+	if w == "" or m == null or target == null:
+		return w
 	var now := float(m.time)
 	var key := "%s|%s" % [by.get_instance_id() if by else 0, target.get_instance_id()]
+	var rank := ImpactWeight.TIERS.find(w)
+	var last: Array = _pair.get(key, [-9.0, 0])
 	var k := 1.0
-	if now - float(_pair_t.get(key, -9.0)) < HS_MULTI:
-		k = 1.0 / 3.0
-	if (o.get("echo", false)):
+	if now - float(last[0]) < ImpactWeight.cap("repeat_s") and rank <= int(last[1]):
+		k = ImpactWeight.cap("repeat_k")
+	if o.get("echo", false):
 		k = minf(k, 0.5)
-	_pair_t[key] = now
+	_pair[key] = [now, rank]
+	if _pair.size() > 256: _pair.clear()
+	var tt := ImpactWeight.hold_s(w) * k
 	var melee := is_melee(by, target, o)
-	var ta := float(HITSTOP[t][0]) * k if melee else 0.0
-	var tt := float(HITSTOP[t][1]) * k
-	if t == 5 and by: ta = float(HITSTOP[5][0])
+	var ta := tt if melee and ImpactWeight.holds_attacker(w) else 0.0
 	var p = m.get("player")
 	var mine: bool = p != null and (by == p or target == p or (by is Kin and (by as Kin).owner_h == p))
 	if not bool(m.get("net_on")) and mine:
-		var want := tt if target == p else (ta if melee else 0.0)
-		# a payoff you land (Cash In, a wall slam, a spike) freezes you too, even from range
-		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
-		want = _spend(p, want, now)
+		var want := tt if target == p else ta
+		# a heavy hit you land (an ult, a slam, a payoff) holds you too, even from range
+		if w == "heavy" and by == p: want = maxf(want, tt)
 		if want > 0.0: m.freeze_frame(want)
-		# your ranged hits never freeze you (Capcom), but the body you hit still holds for its tier
-		if by == p and target: target.freeze_t = maxf(target.freeze_t, tt)
+		# your ranged hits never hold you, but the body you hit still holds for its tier
+		if target != p: hold(target, tt, now)
 	else:
-		if target: target.freeze_t = maxf(target.freeze_t, tt)
-		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)
-	return t
+		hold(target, tt, now)
+		if by and ta > 0.0: hold(by, ta, now)
+	if target == p and by != p:
+		Shake.incoming_big(m, target.pos, ImpactWeight.shake(w), by)
+	return w
 
-static func _spend(p: Ent, want: float, now: float) -> float:
-	var b: Array = _budget.get(p.get_instance_id(), [now, 0.0])
-	if now - float(b[0]) > HS_WINDOW:
+## Holds one body's visuals for up to `secs`, within its cap.
+static func hold(body: Ent, secs: float, now: float) -> void:
+	body.freeze_t = maxf(body.freeze_t, spend(body, secs, now))
+
+## How much of a `want` s hold a body may still take: at most the cap's hitstop_ms in any window.
+static func spend(body: Ent, want: float, now: float) -> float:
+	if body == null or want <= 0.0:
+		return maxf(want, 0.0)
+	var id := body.get_instance_id()
+	var b: Array = _budget.get(id, [now, 0.0])
+	if now - float(b[0]) > ImpactWeight.cap("hitstop_window_s"):
 		b = [now, 0.0]
-	var got := clampf(HS_CAP - float(b[1]), 0.0, want)
+	var got := clampf(ImpactWeight.cap("hitstop_ms") / 1000.0 - float(b[1]), 0.0, want)
 	b[1] = float(b[1]) + got
-	_budget[p.get_instance_id()] = b
+	_budget[id] = b
+	if _budget.size() > 256: _budget.clear()
 	return got
 
 # ---- §5.6 sound layering (placeholder sounds from the existing Sfx set) ----

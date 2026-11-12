@@ -1,11 +1,8 @@
 class_name CamRig
 extends Camera3D
-## Supervive-style camera: high, far and narrow, leaning toward the cursor so you see where you aim.
+## Supervive-style camera: high, far and narrow, centred on you. Only the Standard and Dynamic follow
+## presets lean toward the cursor; the footage shows none (camera.json "follow").
 
-const HEIGHT := 27.0
-const BACK := 17.5
-const LEAD_X := 4.2
-const LEAD_Z := 5.4
 ## The numbers (Settings "Camera" presets, "Camera follow" cursor lean, the edge kept) are in content/rules/camera.json.
 ## The Supervive preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
@@ -13,6 +10,9 @@ static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
 static var STYLES: Dictionary = RULES["styles"]
+## Width / height of the screen the styles' lenses are measured at. Every screen shows that frame's width of
+## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
+static var FRAME_ASPECT: float = RULES["frame_aspect"]
 
 var focus := Vector3.ZERO
 var target: Node3D = null
@@ -28,35 +28,52 @@ var top := 0.0                # 0 = the usual angle, 1 = looking straight down (
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
 var dist := 32.2              # how far back it sits
+var lens := 28.0              # degrees: the vertical lens on a FRAME_ASPECT screen (the style's "fov")
 var rise := 0.0               # (camcal) the view aims this far above the focus (the style's "rise")
 var yaw := 0.0                # turned around the focus (0 = looking north); only the skyship ride turns it
 var yaw_to := 0.0
 var chase := 0.0              # 0 = the usual angle, 1 = low behind-the-ship view
 var chase_to := 0.0
-## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Supervive (the default)
-## leans toward the cursor in proportion to how far it is from YOU, past a deadzone, eased, and capped so you
-## never leave the screen (lean_to). Locked stays centred on you.
+## Cursor panning, from Supervive's camera presets (content/rules/camera.json "follow"): [deadzone, maxzone, pan
+## distance m, ease 1/s, quadratic easing], the zones as shares of the half screen. Supervive (the default) stays
+## centred on you wherever the cursor is (docs/MOVEMENT_FEEL.md "Camera lead"); locked too.
 static var FOLLOW: Dictionary = RULES["follow"]
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
-## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
-## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
-## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
-const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
-const FOLLOW_Y := 3.5
+## Follow: locked across (the view moves with you, so a dash, a pull or a swap never leaves you off centre
+## [footage]; --camera-fast-check), softer up and down so falls and glides don't jolt the view. While
+## gliding Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+const FOLLOW_Y := 3.5         # 1/s
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
 
+## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
+## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
+## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
+const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
+const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [Supervive]
+const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
+const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
+const ALT_ZOOM_MAX := 0.7     # ...up to +70%
+func air_zoom(h: Hunter, alt: float) -> float:
+	var z := 1.0
+	if h.gliding:
+		z = GLIDE_ZOOM
+	elif h.crouch and h.grounded:
+		z = SNEAK_ZOOM
+	z *= user_zoom * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
+	return maxf(z, zoom) if h.glide_dive.on else z
+
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
 ## about 0.2 s, no shake. Only the casting player's camera ever hears about it.
 const CAST_EASE := 16.0       # 1/s
 const CAST_HOLD := 0.04       # s a request lasts, so the view lets go as soon as the kit stops asking
 const CAST_STEP := 1.0 / 60.0 # s a frame can take off that at most
-static var EDGE: float = RULES["lean_edge_m"]      # m the cursor lean and a cast keep between you and the screen's edge
+static var EDGE: float = RULES["lean_edge_m"]      # m an aimed cast keeps between you and the screen's edge
 var cast_k := 0.0             # 0 = the usual view, 1 = fully pushed out
 var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
 var cast_left := 0.0
@@ -78,7 +95,7 @@ func use_style(id: String) -> void:
 	style_id = id if STYLES.has(id) else "supervive"
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
-	fov = float(st["fov"])
+	lens = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
@@ -89,14 +106,18 @@ func apply_settings() -> void:
 	if sty != style_id:
 		use_style(sty)
 
-## Metres of ground across a 16:9 screen at the focus, for a style at zoom 1.
+## Metres of ground across any screen at the focus, for a style at zoom 1.
 static func style_across(id: String) -> float:
 	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
-	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * 16.0 / 9.0)
+	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * FRAME_ASPECT)
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
+## The vertical lens for this screen: `lens` widened or narrowed so the view shows a FRAME_ASPECT screen's width.
+func frame_fov() -> float:
+	var view := get_viewport().get_visible_rect().size
+	return rad_to_deg(2.0 * atan(tan(deg_to_rad(lens) * 0.5) * FRAME_ASPECT * view.y / maxf(1.0, view.x)))
+
 func _ready() -> void:
-	fov = 28.0
 	near = 1.0
 	far = 120.0
 	current = true
@@ -149,54 +170,39 @@ func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
 	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
 
-## The Supervive cursor lean for a cursor `rel` metres from you on the ground: a share of the distance past the
-## deadzone, capped, and never more than the screen has room for along that way (you stay EDGE inside it).
-func lean_to(rel: Vector3) -> Vector3:
-	var fm: Array = FOLLOW["supervive"]
-	var l := rel.length()
-	if l <= float(fm[0]):
+## The view's lean for a cursor at `at` (viewport px) with the current follow preset, in world metres.
+func cursor_pan(at: Vector2) -> Vector3:
+	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
+	if float(fm[2]) <= 0.0:
 		return Vector3.ZERO
-	var dir := rel / l
-	var amt := minf((l - float(fm[0])) * float(fm[1]), float(fm[2]) * maxf(1.0, zoom)) * lead
-	return dir * maxf(0.0, minf(amt, _cast_room(Vector2(dir.x, dir.z), 0.0)))
+	var half := get_viewport().get_visible_rect().size * 0.5
+	var rel := (at - half) / half       # -1..1 on each axis
+	var l := rel.length()
+	if l <= float(fm[0]) or float(fm[1]) <= float(fm[0]):
+		return Vector3.ZERO
+	var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
+	if fm[4]:
+		f *= f
+	return Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
 
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
-	var lean_k := float(rr[2])
-	var want_pan := Vector3.ZERO
 	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
-	if follow_mode == "supervive" and mouse_lead:
-		# where the cursor points on the ground at your height, relative to you
-		var cur := mouse_on_plane(p.y)
-		want_pan = lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
-		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	elif mouse_lead and float(fm[2]) > 0.0:
-		var vp := get_viewport()
-		var sz := vp.get_visible_rect().size
-		var half := sz * 0.5
-		var rel := (vp.get_mouse_position() - half) / half       # -1..1 on each axis
-		var l := rel.length()
-		if l > float(fm[0]) and float(fm[1]) > float(fm[0]):
-			var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
-			if fm[4]: f *= f
-			want_pan = Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
-	if follow_mode == "supervive" and mouse_lead:
-		pass        # (eased above)
-	elif not mouse_lead or float(fm[3]) <= 0.0:
-		pan = want_pan if mouse_lead else pan.lerp(Vector3.ZERO, minf(1.0, delta * 6.0))
-	else:
-		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	if follow_mode == "dynamic" and mouse_lead and not Record.clean():
+	var want_pan := cursor_pan(get_viewport().get_mouse_position()) if mouse_lead else Vector3.ZERO
+	if not mouse_lead:
+		pan = pan.lerp(Vector3.ZERO, minf(1.0, delta * 6.0))
+	elif float(fm[3]) <= 0.0 or (follow_mode == "dynamic" and not Record.clean()):
 		pan = want_pan
+	else:
+		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * float(rr[2]) * delta))
 	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
 	# far up in the sky you stay on screen
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
-	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
-	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
+	# across, the view is locked to you; only recording mode trails, at its own slower, smoother rates
+	var kxz := 1.0 - exp(-float(rr[0]) * delta) if Record.clean() else 1.0
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
@@ -220,6 +226,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
 	var z := zoom * (1.0 + pull) * cast_wide()
+	fov = frame_fov()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
@@ -261,7 +268,10 @@ func mouse_ray() -> Array:
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
-	var mp := get_viewport().get_mouse_position()
+	return screen_on_plane(get_viewport().get_mouse_position(), y)
+
+## Where screen point mp points on the horizontal plane at height y.
+func screen_on_plane(mp: Vector2, y: float) -> Vector3:
 	var o := project_ray_origin(mp)
 	var d := project_ray_normal(mp)
 	if absf(d.y) < 0.0001:

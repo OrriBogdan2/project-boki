@@ -1,6 +1,6 @@
 class_name PressDeny
 extends RefCounted
-## A refused ability press (on cooldown, no charge left, stunned or hexed, a kit's lock-out such as Cinder's Flue
+## A refused ability press (on cooldown, no charge left, stunned, a kit's lock-out such as Cinder's Flue
 ## Flight): the slot's frame pulses red once (HudSlot.DENY_T) and a quiet tick plays (ui_deny; the softer
 ## dash_empty for a Shift with no charge), at most once per THROTTLE_S per slot so a mashed key never rattles.
 ## Hunter._ab_feedback and the home dash slot send every deny here. A press DashFlow (or a kit's own buffer) is

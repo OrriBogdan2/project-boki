@@ -2,8 +2,9 @@ class_name Reticle
 extends RefCounted
 ## The aiming reticle at the cursor, in the player's own style (Settings > Gameplay > Reticle): shape,
 ## size, colour, opacity and a dark outline. The default is a small thin ring broken into four arcs,
-## with a centre dot. The HUD draws it first; the aim states (ammo ring, charge arcs, hit marker and the
+## with a centre dot. The HUD draws it first; the aim states (ammo ring, charge arcs, the hit tick and the
 ## AimKit cursor states on their own layer) always draw on top of it.
+## One instance per HUD also owns the hit tick (`new(match)`, `tick`, `draw_tick`): see below.
 
 ## Shape id -> its name in Settings.
 const SHAPES := [
@@ -31,6 +32,57 @@ const ARC_GAP := 0.32      # rad: each of the default ring's four breaks
 const CHARGE_R := 13.0     # a charge, warm-up, spin-up or reload arc
 const AMMO_R := 16.0       # the ammo left, a thin arc below
 const RES_R := 22.0        # the archetype resource, an arc above
+## The hit tick: your own landed hit snaps four short strokes out of the reticle in your Hunter's colour
+## (AimKit.hero_col, the colour of its ability aim); a hit that knocks a Hunter down draws them longer
+## and heavier with a ring. The hero-ref footage shows no reticle confirm, so the look is ours.
+const TICK_S := 0.09       # s a normal tick shows
+const KNOCK_S := 0.12      # s the knock tick shows (the cap for any tick)
+const TICK_IN := 7.0       # px from the cursor where each stroke starts
+const TICK_LEN := 6.0      # px a normal stroke reaches past TICK_IN at its start, half that as it ends
+const KNOCK_LEN := 10.0    # px the same for a knock
+const DIAG := [Vector2(0.7071, 0.7071), Vector2(-0.7071, 0.7071), Vector2(0.7071, -0.7071), Vector2(-0.7071, -0.7071)]
+
+var m: Match
+var tick_t := 0.0          # s left on the tick showing
+var tick_knock := false
+var ticks := 0             # ticks raised (read by --hit-marker-check)
+
+## Listens on the shared damage path (CombatBus.hit_landed), so every weapon and ability raises it.
+func _init(match_node: Match = null) -> void:
+	m = match_node
+	if m:
+		CombatBus.hit_landed.connect(_on_hit)
+
+## Only hits you land yourself on a foe's Hunter, Boki or a monster. Misses never reach here; zone
+## (damage-over-time) ticks, your Boki's and teammates' hits and anything else raise nothing.
+func _on_hit(by: Node, target: Node, amount: float, tags: Array) -> void:
+	if by == null or by != m.player or tags.has("zone"):
+		return
+	if not (target is Hunter or target is Kin or target is Mob) or (target as Ent).team == m.player.team:
+		return
+	var e := target as Ent
+	# (a remote body's hp drops on its owner's game: this hit knocks it if it covers what's left)
+	tick_knock = target is Hunter and not (target as Hunter).downed and e.hp <= (amount if e.remote else 0.0)
+	tick_t = KNOCK_S if tick_knock else TICK_S
+	ticks += 1
+
+func tick(delta: float) -> void:
+	tick_t = maxf(0.0, tick_t - delta)
+
+## The tick round the reticle at `at`, dark-edged so it reads over bright effects.
+func draw_tick(c: CanvasItem, at: Vector2) -> void:
+	if tick_t <= 0.0:
+		return
+	var k := tick_t / (KNOCK_S if tick_knock else TICK_S)
+	var col := AimKit.hero_col(m.player)
+	var reach := TICK_IN + (KNOCK_LEN if tick_knock else TICK_LEN) * (0.5 + 0.5 * k)
+	var w := 3.0 if tick_knock else 2.0
+	var a := minf(1.0, k * 2.5)
+	for d in DIAG:
+		c.draw_line(at + d * TICK_IN, at + d * reach, Color(0.05, 0.03, 0.08, 0.6 * a), w + 2.0)
+		c.draw_line(at + d * TICK_IN, at + d * reach, Color(col, a), w)
+	if tick_knock:
+		c.draw_arc(at, reach + 3.0, 0.0, TAU, 28, Color(col.lerp(Color.WHITE, 0.5), a), 2.0, true)
 
 ## The style in effect: {shape, k (size factor), col (with the opacity), outline}.
 static func style() -> Dictionary:

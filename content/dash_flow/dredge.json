@@ -1,8 +1,8 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). window.source: the footage evidence for the buffer window (DashFlow.BUFFER_S), shown in docs/heroes/dash_interactions.md. dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}.",
 	"dash": {
 		"ground": {
-			"lmb": {"mode": "buffer", "source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."},
+			"lmb": {"mode": "buffer", "source": "Not determinable (re-checked 11-09). Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no shot inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) and its rank IV 'dashing resets bloom, shots reduce dash CD on hit' set no cast rule; no wiki line covers it; ext/cancel-matrix-c defers dash rows here. Kept: held to the dash's end (owner 18:20 UTC fallback)."},
 			"rmb": {"mode": "fire", "source": "Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is)."},
 			"e": {"mode": "fire", "source": "Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it."},
 			"x": {"mode": "fire", "source": "Data: Slugwave has no dash lock. Footage: not shown from a dash. Ours: the charge starts at once (he walks slowly through it)."},
@@ -25,5 +25,43 @@
 	},
 	"into_jump": {
 		"rmb": {"mode": "lock", "reason": "Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).", "source": "Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout."}
+	},
+	"window": {"source": "Grimble (dredge.md 296): back on the aim within 0.1 s after a dash (493.45-493.55 s), Brute Dash a 0.12 s blink; no press inside it is visible."},
+	"glide_rows": [
+		{
+			"pair": "air dash -> glide press",
+			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
+			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. Asserted in --airdash-glide-check."
+		},
+		{
+			"pair": "ability -> glide press",
+			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
+			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.37 s; RMB 0.68 s; E at once; X 2.08 s; Q at once (n/a: the press did not go off in the air in the check)."
+		},
+		{
+			"pair": "hold -> glide press",
+			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
+			"ours": "glide pressed 0.3 s into a hold: LMB 0.10 s; RMB 0.42 s; E at once; X 1.82 s; Q at once."
+		}
+	],
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:56); no cast from the air in the footage (hero-ref/dredge.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "hover", "ours": "the hand flies while his height holds and the jump's speed carries (a standstill drifts at 20%)", "source": "Footage f121-123: keeps moving, body planted (dredge.md 'Reel parity'); the air not shown. Owner playtest 11-10 (ext/dredge-rmb f9b5d2002): a jump back with the hand keeps its speed", "verdict": "owner 11-10"},
+		"e": {"h": "zero", "v": "drop", "ours": "the Anchor Drop drives him straight down", "source": "Data: slam fist down (supervive_kits.md:60); whether it drives him down from the air is not shown (hero-ref/dredge.md:244)", "verdict": "[?]"},
+		"x": {"h": "slow", "v": "fall", "ours": "the charge's 30% walk brakes the jump's speed (the kit steers as on the ground)", "source": "Data: two waves, no move speed (supervive_kits.md:61); footage: cast on the ground only", "verdict": "[?]"}
+	},
+	"dash_jump": {
+		"ground": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358).", "verdict": "[?]"},
+		"air": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358).", "verdict": "[?]"},
+		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358).", "verdict": "[?]"},
+		"same": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open."},
+		"e": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open. Primal Slam dunks over the Abyss (supervive_kits.md:60). Ours: the smash folds the glider."},
+		"x": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open. The source's Brute Dash (Air) is its own slot (supervive_kits.md:58-59); ours: Shift in a glide is that air dash, it folds the glider and hands its speed back."}
 	}
 }

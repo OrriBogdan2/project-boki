@@ -3,7 +3,6 @@ extends Node3D
 ## guild isles (member cottages and the projects everyone builds together). Other players who are
 ## here right now walk around too.
 
-const SPEED := 5.0
 
 var mode := "hub"          # hub | guild
 var gid := ""              # the guild whose isle this is
@@ -22,7 +21,7 @@ var pvel := Vector3.ZERO
 var pface := 0.0
 var py := 0.0
 var pvy := 0.0
-var walk_ph := 0.0
+var mover := FarmStep.new()    # fixed steps and a blended facing, as on the farm (farm_step.gd)
 var spots: Array = []          # {kind, pos, label, reach, data}
 var interact: Dictionary = {}
 var others := {}               # peer id -> {node, label, pos, to, face}
@@ -310,7 +309,7 @@ func _on_peers(arr: Array) -> void:
 # ------------------------------------------------------------------ loop
 func _process(delta: float) -> void:
 	var d := minf(delta, 0.05)
-	_move_player(d)
+	mover.run(d, player, _move_player)
 	for o in others.values():
 		var pos: Vector3 = o["pos"]
 		var to: Vector3 = o["to"]
@@ -342,7 +341,7 @@ func _process(delta: float) -> void:
 			k["hop"] += d * 9.0
 		n.position = k["pos"]
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * 0.12
-	cam.follow(ppos, d, panel_open == "")
+	cam.follow(ppos + mover.lag, d, panel_open == "")
 	_send_presence(d)
 	_find_interact()
 	if panel_open == "" and not Overlay.is_open() and Input.is_action_just_pressed("interact") and not interact.is_empty():
@@ -353,18 +352,18 @@ func _move_player(d: float) -> void:
 	if panel_open == "" and not Overlay.is_open():
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
-	var hv := Vector2(pvel.x, pvel.z)
-	hv += (mv * SPEED - hv) * (1.0 - exp(-14.0 * d))
+	var hv := mover.walk(Vector2(pvel.x, pvel.z), mv, d)
 	var nx := ppos.x + hv.x * d
 	if not _blocked(nx, ppos.z, 0.38): ppos.x = nx
 	var nz := ppos.z + hv.y * d
 	if not _blocked(ppos.x, nz, 0.38): ppos.z = nz
 	pvel = Vector3(hv.x, 0, hv.y)
-	if panel_open == "" and not Overlay.is_open() and py <= 0.0 and pvy <= 0.0 and Input.is_action_just_pressed("jump"):
-		pvy = 8.5
+	var can_act := panel_open == "" and not Overlay.is_open()
+	if mover.jump(can_act and mover.pressed(&"jump"), py > 0.0 or pvy > 0.0, pvy, py, d) == FarmStep.Jump.JUMP:
+		pvy = Hunter.JUMP_V
 		Sfx.play("jump", null, -12.0)
 	if py > 0.0 or pvy > 0.0:
-		pvy -= 26.0 * d
+		pvy -= Hunter.H_GRAV * d
 		py = maxf(0.0, py + pvy * d)
 		if py <= 0.0: pvy = 0.0
 	player.position = ppos + Vector3(0, py, 0)
@@ -377,13 +376,11 @@ func _move_player(d: float) -> void:
 		if Vector2(aim.x - ppos.x, aim.z - ppos.z).length() > 0.4: want = atan2(-(aim.x - ppos.x), -(aim.z - ppos.z))
 	elif hv.length() > 0.3:
 		want = atan2(-hv.x, -hv.y)
-	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
+	pface = rotate_toward(pface, want, HunterMove.turn_rate * d)
+	mover.face(pface)
 	player.rotation.y = pface
 	if not player.has_meta("anim"): player.set_meta("anim", HunterAnim.new(player))
-	var pa: HunterAnim = player.get_meta("anim")
-	pa.update(d, {"vel": Vector3(hv.x, 0, hv.y), "face": pface, "fired": 99.0})
-	if pa.stepped:
-		Sfx.step(null, -20.0)
+	mover.pose(player.get_meta("anim"), {"vel": Vector3(hv.x, 0, hv.y), "face": pface, "fired": 99.0}, d)
 
 func _blocked(x: float, z: float, r: float) -> bool:
 	if world.occupy(x, z, r, 0.0, true) != 0.0:

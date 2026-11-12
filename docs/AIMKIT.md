@@ -13,6 +13,8 @@ cursor state plus `MANIFEST.txt`).
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
 
+Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
+
 Scale: 1 body height (bh) = 1.8 m (`AimKit.BH`). The hero sheets measure in bh.
 
 ## 1. Aim modes
@@ -35,6 +37,7 @@ Helpers for kit-driven shots and placements:
 var d := AimMode.dist(h, 12.0)                  # cursor distance clamped to [1.5, 12]
 var d2 := AimMode.dist(h, 12.0, AimMode.MAX)    # 12
 var at := AimMode.point(h, 9.0)                 # the ground point at the cursor, clamped to 9 m
+var g := AimMode.ray_ground(world, ray, h.pos.y)  # the first ground a cursor ray meets (Match._mouse_aim)
 var md := AimMode.mode_of(h)                    # what the next shot will do (does not consume)
 m.spawn_shot(h, start, dir * spd, dmg, AimMode.dist(h, rng) / spd, size, col, extra)
 ```
@@ -42,6 +45,8 @@ Membership tests (flat XZ), so a kit's hit test matches what it draws:
 `AimMode.in_lane(from, dir, len, width, p)`, `in_cone(from, dir, len, deg, p, inner)`,
 `in_arc(center, dir, radius, deg, thick, p)` and `in_circle(at, r, p)`. Each takes an optional `pad`
 (for example a target's radius).
+
+**Cursor on your own body:** `Hunter.aim_dir()` (the one direction every shot, cast and the facing read) ignores a cursor within two body radii (`AIM_MIN_BODIES`, a body width) and keeps the last good direction, so crossing the model never spins the body or sends rounds sideways. `--aim-near-check` sweeps the cursor across and around the body.
 
 ## 2. Telegraphs
 

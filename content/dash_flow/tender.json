@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. held_fire.<dash|rmb|e|x|q|all>: {source, ours}: notes for the held-LMB rows (docs only: LMB is a held input everywhere, Hunter.trigger reads the key every frame and fire resumes the frame a slot's lock ends; --held-fire-resume-check). window.source: the footage evidence for the buffer window (DashFlow.BUFFER_S), shown in docs/heroes/dash_interactions.md. dash_jump.<ground|air|rise|same>: Space in a ground dash, Space in an air dash, Shift in a jump's rise, both on one step: {ours: cancel | both | ignore | end | buffer | dash (measured, --dash-jump-check), carry: share of the dash's speed kept, source, verdict: match | [?] (the source doesn't settle it)}.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "buffer", "source": "Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.2s skip ends (held to the dash end, the default: nothing in the source shows otherwise)."},
@@ -32,5 +32,43 @@
 			"air": {"mode": "keep"},
 			"jump": {"mode": "keep"}
 		}
+	},
+	"window": {"source": "Pip (mooshmoosh.md 321, 340; 30 fps crops): every dash comes 0.1-0.3 s after a jump and the air dash lasts 0.6 s; no ability pressed inside a dash is shown."},
+	"glide_rows": [
+		{
+			"pair": "air dash -> glide press",
+			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
+			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. Her air Shift is the 0.9 s Elluna glide-dash: the press ends it. Asserted in --airdash-glide-check."
+		},
+		{
+			"pair": "ability -> glide press",
+			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
+			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.43 s; RMB n/a; E 0.63 s; X 0.32 s; Q at once (n/a: the press did not go off in the air in the check)."
+		},
+		{
+			"pair": "hold -> glide press",
+			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
+			"ours": "glide pressed 0.3 s into a hold: LMB shut while held; RMB n/a; E 0.53 s; X 0.05 s; Q at once."
+		}
+	],
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:8); no cast from the air in the footage (hero-ref/mooshmoosh.md)", "verdict": "[?]"},
+		"rmb": {"cast": "landing", "h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:9); no air cast in the footage. The wait is ours: owner items 118 and 118b (the 1 s wind-up outlasts the hop; dash_flow jump row)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:12); no cast from the air in the footage (hero-ref/mooshmoosh.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:13); no cast from the air in the footage (hero-ref/mooshmoosh.md)", "verdict": "[?]"}
+	},
+	"dash_jump": {
+		"ground": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Elluna): every dash comes 0.1-0.3 s after a jump (mooshmoosh.md:340); none has Space pressed inside it.", "verdict": "[?]"},
+		"air": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Elluna): every dash comes 0.1-0.3 s after a jump (mooshmoosh.md:340); none has Space pressed inside it.", "verdict": "[?]"},
+		"rise": {"ours": "dash", "source": "Footage f35, f157, f181, f227 (mooshmoosh.md:340-358): Shift 0.1-0.3 s into the jump air-dashes at once and flat ('already up from the jump and keeps her height through the burst'); frame 0157 shows the card 'goes further while airborne'.", "verdict": "match"},
+		"same": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Elluna): every dash comes 0.1-0.3 s after a jump (mooshmoosh.md:340); none has Space pressed inside it. The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/mooshmoosh.md shows Elluna cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/mooshmoosh.md shows Elluna cast or pressed with the glider open. Darkside Binding is a shot with no air rule (supervive_kits.md:9). Ours: the seed throws from a glide."},
+		"e": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/mooshmoosh.md shows Elluna cast or pressed with the glider open."},
+		"x": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/mooshmoosh.md shows Elluna cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/mooshmoosh.md shows Elluna cast or pressed with the glider open. The source's Lunar Air Dash is its own slot (supervive_kits.md:10-11); ours: Shift in a glide is that air dash, it folds the glider and hands its speed back."}
 	}
 }

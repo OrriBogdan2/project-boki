@@ -56,7 +56,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | RMB air, Meteor Drop | in the air only (already jumping or falling) | Owner spec 11-10: a down slam, no dive across and no leap. A purple circle shows where it would hit while it's ready. Press: his drift stops, a 0.08s hang (blade hauled overhead), then a straight drop to the ground under him (24 m/s, 0.12 to 0.35s) with flame streaks. The hit is a 2.4m circle (1.2m stun core) centred 0.8m ahead of where he lands, in his facing at the press, shown to everyone from the press. The landing: a crouch, cracks across the circle, a shock ring and cel dust, debris, a shake for others nearby and a deep boom; 18, and everyone in it knocked down 0.45s (anyone airborne or gliding spiked to the ground); the core +50% and down 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | Ours (owner 11-10): straight down where he is, the hit a little ahead, not at the cursor |
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
-| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve, walking in speeds and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
@@ -131,8 +131,32 @@ while he moves about, but only ~5-6 bh (~10 m) long, and it is let go by 0320 wi
 ring on screen there is centred on him: the throw's range, ~6.8 bh). Ours: the chain pays out to **24 m** (about
 1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
 the 5 s). The 24 m is our pick; the owner can set it. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
-the pull starts at the reel speed plus a slingshot from his speed away from the anchor (0.8 of it, up to +10 m/s),
-his sideways speed carries in, and he flies a circular arc (at most 6 rad/s) to a point beside the anchor.
+the pull starts at the reel speed plus his motion along the chain (moving in adds all of it, as an impulse adds to
+the velocity; backing away is the owner's slingshot, 0.8 of it; up to +10 m/s), his sideways speed carries in, and
+he flies a circular arc (at most 6 rad/s) to a point beside the anchor.
+
+**What the sources measure (re-checked 2026-11-10, owner DECISIONS Kits: "how it pulls him depends on where he's
+facing and how he's moving").** [D] the game data's movement component: `AirControl` 0.015 (input barely steers a
+body in flight), `FallingLateralFriction` 0.375, MoveSpeed 455 uu/s (4.55 m/s); nothing chain-specific beyond the
+card. [W] the impulse (2150, then 1900 since 05.02.25), the 5 s tether (5.5 s before that), a stun breaks it, no
+throw rooted or Grounded, the cooldown on the recast or the break; no length, no steer, no pull speed. [F] the
+footage pulls are all straight at a dummy: about 5 bh in 0.4 s (22.5 m/s), the chain on ~2.5 s while he walks.
+So, per question:
+- **Pull speed:** 22 m/s ([F] 22.5; [W] 1900 uu/s = 19). Constant through the pull: the data's lateral friction
+  would bleed it, but the owner's item 57 keeps the speed through the curve, and the owner wins.
+- **Arc or straight:** straight with nothing held and the cursor on the line ([W] one impulse; [F] every pull);
+  it curves only from the facing, a held strafe or sideways speed at the press ([O] item 57, 23:00).
+- **WASD in the pull:** A/D (across the chain) swing it, stacked with the facing ([O] items 22, 57); W and S (along
+  it) change nothing, neither the line nor the speed ([D] air control 0.015: the impulse, not the keys, flies him).
+- **WASD at the press (how he's moving):** walking in adds his speed, backing away slingshots, strafing starts it
+  swung out that way ([O] 23:00; [W] the impulse adds to his motion; the slingshot's sign is the owner's).
+- **Facing:** sets the swing, live through the pull ([O] item 57); while hooked it only bows the chain and draws
+  the predicted arc (nothing moves until the recast).
+- **What ends it:** the arrival (the foe's body, 0.7 m off a wall, passing beside it, a wall in the way); a stun
+  or root stops it dead ([W] a stun breaks the tether; dead stop is ours); a knock ends it and its shove carries
+  him ([D] a knock sets the velocity); Shift or a jump break off (ours); a recast does nothing ([W] two presses
+  only). Max length never ends it: the chain only shortens in the pull, and while hooked it holds at its length
+  (that length is a separate job).
 
 **The swing (owner item 57, 18:54 UTC Nov 4: "you fly somewhat in the direction you're facing").** Neither [D], [W]
 nor [F] gives a steer limit (the footage's pulls are all straight), so the owner's description sets it. Looking 90
@@ -159,20 +183,24 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Hooked (foe or wall) | time | the link chain stays on while you walk, jump, glide or dash, 5 s, then breaks; the cooldown starts | [W] 5 s; [F] 0305-0317 |
 | Hooked | he backs away (or the foe walks off) | the chain pays out; the links pull straight and glow hotter past 85% of its length, a creak as it tightens | [F] 0305-0317 tension |
 | Hooked | at its full length (24 m) | it holds: whoever is moving away (him, or a hooked foe) is stopped at the end of it, with a hard creak; it never breaks for length | [O] 23:00; [W] breaks only on a stun or the time; the length is ours (no data, no footage) |
-| Hooked | E | Pulling (the cooldown starts): an impulse toward the anchor at 22 m/s | [D] [W] impulse |
-| Hooked | E while moving away from the anchor | Pulling, slingshot: +0.8 of his speed away (up to +10 m/s) | [O] 23:00; [W] an impulse adds to his motion |
-| Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00 |
+| Hooked | E | Pulling (the cooldown starts): an impulse toward the anchor at 22 m/s | [D] [W] impulse; [F] 0333 22.5 m/s |
+| Hooked | E while walking at the anchor | Pulling, his speed added (about 26.5 m/s at a walk; up to +10 m/s) | [W] an impulse adds to his motion |
+| Hooked | E while moving away from the anchor | Pulling, slingshot: +0.8 of his speed away (up to +10 m/s) | [O] 23:00 "slingshot" (a plain impulse would be slower here: the owner wins) |
+| Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00; [W] impulse |
+| Hooked | looks aside (no E) | nothing moves; the chain bows and the predicted arc shows | [O] item 57 |
 | Hooked | E with the Lunge charging | Pulling with a Haul Slam armed for the arrival | ours |
 | Hooked | he holds aside | the chain bows that way and his screen shows the predicted arc | [O] item 57 |
 | Hooked | stunned, or the foe is downed or gone | Broken: "CHAIN BROKE", the cooldown starts | [W] 05.02.25 |
 | Hooked | a Boki merge starts | Broken | ours |
-| Pulling | each step | you fly at the pull's speed along a circular arc (at most 6 rad/s) to the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 |
-| Pulling | facing aside (the cursor off the chain's line) | you swing out that way, 36% of the chain's length at 90 deg (up to 6 m): a ~40 deg arc that lands beside or past the anchor | [O] item 57 |
-| Pulling | movement held across the pull | the same swing, stacked with the facing (still up to 6 m) | [O] 14:07 note, 23:00, item 57 |
+| Pulling | each step, nothing held, the cursor on the line | a straight line at the pull's speed to the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 (all pulls straight) |
+| Pulling | facing aside (the cursor off the chain's line) | you swing out that way along a circular arc (turning at most 6 rad/s, ours), 36% of the chain's length at 90 deg (up to 6 m): a ~40 deg arc that lands beside or past the anchor, no speed lost | [O] item 57 |
+| Pulling | A or D (across the chain) held | the same swing, stacked with the facing (still up to 6 m); against the facing it cancels | [O] 14:07 note, 23:00, item 57 |
+| Pulling | W or S (along the chain) held | nothing: the same line, the same speed | [D] AirControl 0.015 |
 | Pulling | Shift | the pull ends and the Rampage goes the way you dash (exit) | ours (no source footage) |
 | Pulling | jump | the pull ends in a jump that keeps 70% of its speed (slingshot included) along the heading (a chain launch); the glider takes it too | ours |
 | Pulling | E | ignored (no second pull, no stop) | ours |
-| Pulling | stunned, rooted or knocked | the pull stops dead | [W] stun rule |
+| Pulling | stunned or rooted | the pull stops dead | [W] a stun breaks it; the dead stop is ours |
+| Pulling | knocked | the pull ends and the knock's shove carries him (it was added to the pull's speed) | [D] a knock sets the velocity |
 | Pulling | reaches the foe (contact) or the wall (0.7 m off it), passes it alongside within 3.5 m, or runs 0.5 s past its expected time | Arriving | [D] [F] |
 | Arriving | (0.25 s window) | you keep 35% of the pull's speed (slingshot included) along your heading (momentum into the next move); an armed Haul Slam lands | [O] "arrival keeps momentum" |
 | Arriving | over the abyss | you fall from the pull's height (the glider works) | ours |
@@ -244,6 +272,24 @@ ultimate (now the X cooldown).
 - Rampage: a 0.07 s dip (planted), then 4.5 m in 0.17 s, then a short low recovery (owner 113.8)
   (keys end at 0.9 s). Its after-images are his own orange flame streaks.
 - The Enraged look is embers and dark drips on his body; no ground disc or light under him.
+
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/juggernaut.md) | Verdict |
+|---|---|---|---|---|
+| LMB | tap swings | 1.0 (greatsword, melee) | keeps walking while swinging | match |
+| LMB | held past 0.22 s, Searing Wave charge | 0.55 | a 0.6-1.0 s charge arc; the walk isn't measured | [?] |
+| RMB | tap, Finishing Slam 0.6 s wind-up | 0.6 | 0.6 s wind-up, blade cocked low; the walk isn't measured | [?] |
+| RMB | held, Lunge charging | **0.8** (`rmb.lunge.walk_k`; was 1.0) | 85-95 px/s against 113-124 on plain runs (0178-0181, 0198-0208), about 0.7 to 0.85 | CHANGED |
+| RMB | air, Meteor Drop | 0 airborne; 0 for 0.2 s after landing, then 0.3 to 1.0 by 0.5 s | the landing walk isn't measured | [?] |
+| Shift | Rampage | n/a | a dash | n/a |
+| E | Warchain hooked | 1.0 | walks ~2.5 s with the tether attached (0305-0317) | match |
+| X | Gilded Riposte guard and strike | 0.0 | planted through the guard (f33-f38) | match |
+| X | Riposte recovery | 0.5 | ~0.35 s low recovery, blade dragging; the walk isn't measured | [?] |
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
 
@@ -423,3 +469,23 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB tap, Finishing Slam wind-up | 0.6 s cocked low; walking unmeasured | 0.6 s at 0.6 | listed, unchanged (no measure) |
+| RMB tap, strike and after | long low recovery on heavy moves (sheet, body language) | none locked; 1.0 | listed, unchanged (unmeasured) |
+| RMB hold, Lunge charge | runs slower: 85-95 px/s against 104 median and 113-124 plain runs (0178-0181, 0198-0208), about 0.8; can jump | **was 1.0, now 0.8** (`rmb.lunge.hold_move`); jump still allowed | **fixed**: `--juggernaut-combo-check` "walks at 0.8 of a run while charging" and "released ... back to full" |
+| RMB release, Lunge | about 5 m in about 0.2 s, then stops with a burst | 4.5-7.5 m dash (`lunge`), then 1.0 | match |
+| RMB air, Meteor Drop | hang, crash, about 0.5 s low recovery (412.0-413.9 s) | planted 0.2 s, then 0.3 rising to 1.0 over 0.5 s | match |
+| E Warchain, throw | skillshot; no lock seen | no lock; 1.0 | match |
+| E, hooked | the tether stays on while he walks (0305-0317) | stays on 5 s; free walk, jump, glide, dash | match |
+| Facing | upper body follows the cursor with the blade | cursor throughout; the Lunge flies along the aim at the release | match |
+
+The Slam wind-up and recovery are the only open rows; the sheet's frames (a red lane, no body motion read) do not settle them.

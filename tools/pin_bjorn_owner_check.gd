@@ -447,10 +447,10 @@ func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 		"throw %.3f swing %.3f lock %.3f" % [tr, sr, rl])
 	var tail := 0.0
 	for id in ["bul_throw", "bul_recall"]:
-		var keys: Array = KMovesPinBjorn.MOVES[id]["keys"]
+		var keys: Array = KMovesBjorn.MOVES[id]["keys"]
 		tail = maxf(tail, float((keys[-1] as Array)[0]))
 	ok("bjorn auto: the throw and recall poses end with the faster cadence (no pose cut mid-way)",
-		float((KMovesPinBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
+		float((KMovesBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
 			"tail %.2f" % tail)
 	var throws := _throws_in(_m, _P, K, 3.0)
 	ok("bjorn auto: throw, recall and throw again within 3 s at least 4 times", throws >= 4, "throws %d" % throws)
@@ -523,26 +523,28 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		P.fire_cd = 0.0
 		P.dashes = P.max_dashes()
 		K.lmb_t = -1.0
-		K.hold_blocked = false
-	# a mantle ends the hold within one frame, and it stays ended while the button stays down
+		K.mace = {}          # (a hold let go under its tap throws the hammer)
+	# a mantle ends the hold within one frame; the button still down starts a fresh one once he is off the lip
+	# (LMB is a held input, docs/decisions/0022-held-fire-resume.md)
 	reset.call()
 	step(m, 0.6, aim)
 	ok("bjorn hold: the swing is charging", K.lmb_t > 0.4, "lmb_t %.2f" % K.lmb_t)
 	P.lfloat = {"lip": P.pos.y + 2.0, "n": Vector2(1, 0), "t": 0.0, "g0": false, "shove": false, "kb0": P.kb_t,
 		"at": Vector2(P.pos.x, P.pos.z), "downed": false, "win": false, "tile": Vector2i(0, 0), "max_t": 5.0}
 	m.step(DT)
-	ok("bjorn hold: a mantle ends the hold within one frame", K.lmb_t < 0.0 and P.mel_hold == 0.0 and K.hold_blocked,
-		"lmb_t %.2f blocked %s" % [K.lmb_t, K.hold_blocked])
+	ok("bjorn hold: a mantle ends the hold within one frame", K.lmb_t < 0.0 and P.mel_hold == 0.0,
+		"lmb_t %.2f" % K.lmb_t)
 	P.lfloat = {}
 	var sl0 := K.slams
 	step(m, 0.5, aim)
-	ok("bjorn hold: after the mantle the held button does not start it again", K.lmb_t < 0.0 and K.slams == sl0,
+	ok("bjorn hold: after the mantle the held button starts a fresh hold, no swing", K.lmb_t > 0.0 and K.slams == sl0,
 		"lmb_t %.2f slams %d" % [K.lmb_t, K.slams - sl0])
 	P.inp["fire"] = false
-	m.step(DT)
+	step(m, 0.8)          # the swing it lets go passes
 	step(m, 0.5, aim)
 	ok("bjorn hold: letting go and pressing again starts a fresh hold", K.lmb_t > 0.2, "lmb_t %.2f" % K.lmb_t)
-	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51)
+	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51); the
+	# charge is gone, and the button still down starts a fresh hold the step he is free
 	var cases := {
 		"glide": func(): P.gliding = true,
 		"knock": func(): P.impulse(Vector2(40.0, 0.0)),
@@ -556,8 +558,8 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		(cases[key] as Callable).call()
 		m.step(DT)
 		m.step(DT)
-		ok("bjorn hold: %s ends the hold" % key, live and K.lmb_t < 0.0 and P.mel_hold == 0.0,
-			"live %s lmb_t %.2f" % [live, K.lmb_t])
+		ok("bjorn hold: %s ends the hold" % key, live and K.lmb_t < 0.1 and P.mel_hold < 0.1,
+			"live %s lmb_t %.2f mel_hold %.2f" % [live, K.lmb_t, P.mel_hold])
 		P.gliding = false
 	reset.call()
 	# the swing lunges him forward and knocks a foe back along it
@@ -673,7 +675,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var loosed0 := K.draw.loosed_at
 	P.do_dash()
 	var rolling := P.roll_t > 0.0
-	for i in 3:
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))
@@ -723,6 +725,7 @@ func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"
 		and _mode("bulwark", "rmb", false) == "fire" and _mode("bulwark", "e", false) == "fire"
 		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "fire")
+	P.inp["fire"] = false          # the last trial's hold lets go and its swing passes
 	step(m, 1.5)
 	P.teleport(home)
 	T.teleport(home + Vector3(30.0, 0, 6.0))

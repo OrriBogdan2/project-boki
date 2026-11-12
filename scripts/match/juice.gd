@@ -205,24 +205,3 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 		m.sfx("extract_ok", null, -3.0)
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
-
-## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). Only for people
-## close to you, quieter for everyone else, silent while sneaking.
-static func footstep(h: Hunter) -> void:
-	var m: Match = h.m
-	if m == null or m.world == null or h.unseen or h.crouch:
-		return
-	var p: Hunter = m.player
-	if p != null and h != p and p.flat_dist(h) > 14.0:
-		return
-	var w: World = m.world
-	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
-	if not w.inb(ix, iz):
-		return
-	var i := w.idx(ix, iz)
-	var surf := "grass"
-	if w.bridge.has(i): surf = "wood"
-	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
-	elif w.style_at(i) == "frost": surf = "snow"
-	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)

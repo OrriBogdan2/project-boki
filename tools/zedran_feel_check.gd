@@ -344,6 +344,25 @@ func chain_pull() -> void:
 	A.ok("jug pull: a stun stops it dead", W.exits == "stopped" and Vector2(P.vel.x, P.vel.z).length() < 1.5,
 			"exit %s" % W.exits)
 	A.step(m, 0.4)
+	_settle(m, P, K, home)
+	_hook(m, P, K, T.pos, 0.4)
+	K.use_e()
+	A.step(m, 0.08)
+	P.root_t = 0.3
+	A.step(m, 0.03)
+	A.ok("jug pull: a root stops it dead", W.exits == "stopped" and Vector2(P.vel.x, P.vel.z).length() < 1.5,
+			"exit %s" % W.exits)
+	A.step(m, 0.4)
+	# a knock in the pull: the shove takes over (it is not eaten by the pull stopping)
+	_settle(m, P, K, home)
+	_hook(m, P, K, T.pos, 0.4)
+	K.use_e()
+	A.step(m, 0.08)
+	P.impulse(Vector2(0, 12.0) * P.mass())
+	A.step(m, 0.03)
+	A.ok("jug pull: a knock ends it and its shove carries him", W.exits == "knocked" and W.state == "ready"
+			and P.vel.z > 6.0, "exit %s vel %s" % [W.exits, P.vel])
+	A.step(m, 0.4)
 	# across a gap: the pull holds its height over the void and lands on the far side
 	_settle(m, P, K, home)
 	var Wd = m.world
@@ -537,7 +556,7 @@ func dash_moves() -> void:
 	A.ok("jug dash moves: his own ground and air dashes (jug_dash, jug_exdash), nobody else's table has them",
 			ground == "jug_dash" and air == "jug_exdash" and KMovesDJ.MOVES.has(ground) and KMovesDJ.MOVES.has(air)
 			and not HunterAnim.KMOVES.has(ground) and not HunterAnim.KMOVES.has(air)
-			and not KMovesPair.MOVES.has(air) and not KMovesPinBjorn.MOVES.has(air),
+			and not KMovesPair.MOVES.has(air) and not KMovesPin.MOVES.has(air) and not KMovesBjorn.MOVES.has(air),
 			"%s / %s" % [ground, air])
 	A.ok("jug dash moves: each fits its dash (keys cover the move, recovery at most 0.45s past it)",
 			g_len >= g_dash and g_len <= g_dash + 0.45 and a_len >= a_dash and a_len <= a_dash + 0.45,
@@ -869,7 +888,8 @@ func chain_steer() -> void:
 			Wd.level[Wd.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 3
 	T.teleport(home + Vector3(-6.0, 0, 8.0))
 	var runs := {}
-	for how in ["straight", "strafe", "face", "sling"]:
+	var held := {"strafe": Vector2(0, 1), "in": Vector2(1, 0), "back": Vector2(-1, 0)}     # keys held in the pull
+	for how in ["straight", "strafe", "face", "sling", "walk_in", "in", "back"]:
 		_settle(m, P, K, home)
 		if how == "sling":
 			P.teleport(home + Vector3(3.0, 0, 0))
@@ -877,6 +897,8 @@ func chain_steer() -> void:
 		var hooked := W.hooked() and W.target == null
 		if how == "sling":
 			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
+		if how == "walk_in":
+			A.step(m, 0.35, func(): P.inp["move"] = Vector2(1, 0))       # walking at the anchor when he presses
 		if how == "face":
 			A.aim_at(P, P.pos + Vector3(0, 0, 9.0))
 		var from := P.pos
@@ -886,7 +908,7 @@ func chain_steer() -> void:
 		var start_z := W.pull_dir.y
 		var look: Vector3 = P.inp["aim"] - P.pos       # the cursor stays put on screen as the camera follows him
 		while W.state == "pulling" and t < 1.5:
-			P.inp["move"] = Vector2(0, 1) if how == "strafe" else Vector2.ZERO
+			P.inp["move"] = held.get(how, Vector2.ZERO)
 			P.inp["aim"] = P.pos + look
 			m.step(A.DT)
 			t += A.DT
@@ -909,6 +931,16 @@ func chain_steer() -> void:
 			float(sl["sling"]) > 2.5 and float(sl["speed"]) > float(ed["reel_speed"]) + 2.5
 					and float(sl["avg"]) > float(st["avg"]) + 1.5, "sling %.1f, avg %.1f against %.1f m/s" % [
 					float(sl["sling"]), float(sl["avg"]), float(st["avg"])])
+	var wi: Dictionary = runs["walk_in"]
+	A.ok("jug chain pull: pulled while walking at the anchor his speed adds to it (the impulse adds to his motion)",
+			float(wi["sling"]) > 3.0 and float(wi["speed"]) > float(ed["reel_speed"]) + 3.0
+					and float(wi["wide"]) < 0.3, str(wi))
+	for how in ["in", "back"]:
+		var kd: Dictionary = runs[how]
+		A.ok("jug chain pull: holding %s in the pull changes neither its line nor its speed (the data's air control "
+				% ("W toward the anchor" if how == "in" else "S away") + "0.015)",
+				kd["exit"] == "arrived" and float(kd["wide"]) < 0.3 and absf(float(kd["t"]) - float(st["t"])) < 0.05
+						and absf(float(kd["speed"]) - float(st["speed"])) < 0.01, str(kd))
 	# strafing at the press: the pull starts swung wide that way (the sideways speed carries in)
 	_settle(m, P, K, home)
 	_hook(m, P, K, home + Vector3(9.0, 0, 0), 0.35)

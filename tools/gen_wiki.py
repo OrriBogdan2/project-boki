@@ -669,6 +669,8 @@ def gen_controls():
 # ------------------------------------------------------------------ dash -> ability rows
 DASH_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)"), ("q", "Q glove")]
 DASH_MODE = {"fire": "fires mid-dash", "buffer": "buffered to the dash's end", "cancel": "cancels the dash"}
+GLIDE_SLOTS = DASH_SLOTS + [("dash", "Shift dash")]
+GLIDE_MODE = {"cast": "casts, the glider stays open", "fold": "casts, the glider folds", "refuse": "refused while the glider is open"}
 INTO_DASH_MODE = {"fire": "the dash goes, the ability keeps running", "buffer": "the dash waits for the ability",
                   "cancel": "the dash cancels its wind-up or recovery", "lock": "the dash is refused while it runs"}
 
@@ -678,6 +680,12 @@ INTO_MOVE_MODE = {"fire": "the move goes at once, the ability keeps running", "c
 HOLD_MODE = {"keep": "the hold carries through and lets go there", "cancel": "the move ends the hold"}
 HOLD_MOVES = [("ground", "a ground dash"), ("air", "an air dash"), ("jump", "a jump"), ("mantle", "a mantle")]
 
+def _src(row):
+    """The Source cell of a row. `[?]` marks a row that exists but no source or footage settles (docs/KIT_PARITY.md
+    item 20): no source field, or one that says "Not determinable". A pair with no row stays empty."""
+    src = (row or {}).get("source", "")
+    return "[?] " + src if row and (not src or src.startswith("Not determinable")) else src
+
 def _combo_ours(row, modes, default):
     """A combo row (docs/decisions/0015-combo-flow.md): its mode, and the reason when it's an exception (a mode
     that doesn't combine: anything but the default, or a cancel that moves you out at once)."""
@@ -686,24 +694,29 @@ def _combo_ours(row, modes, default):
         return modes[mode] + ("" if row else " (default)")
     return "**exception:** %s (%s)" % (modes[mode], row.get("reason", "no reason given"))
 
+HELD_FIRE_SLOTS = dict(DASH_SLOTS, dash="a dash", all="any slot")      # held_fire keys -> the pair's label
+
 def _combo_rows(hero, f):
     """The item 51 rows of one hero: jump -> slot, slot -> jump, slot -> air dash, holds through each move."""
     rows = []
     for slot, label in DASH_SLOTS:
         row = f.get("jump", {}).get(slot, {})
-        rows.append([hero, "jump -> %s" % label, row.get("source", ""), _combo_ours(row, JUMP_MODE, "fire")])
+        rows.append([hero, "jump -> %s" % label, _src(row), _combo_ours(row, JUMP_MODE, "fire")])
     for slot, label in DASH_SLOTS:
         row = f.get("into_jump", {}).get(slot, {})
-        rows.append([hero, "%s -> jump" % label, row.get("source", ""), _combo_ours(row, INTO_MOVE_MODE, "fire")])
+        rows.append([hero, "%s -> jump" % label, _src(row), _combo_ours(row, INTO_MOVE_MODE, "fire")])
         air = f.get("into_dash", {}).get(slot, {}).get("air")
         if air:
-            rows.append([hero, "%s -> air dash" % label, air.get("source", ""), _combo_ours(air, INTO_MOVE_MODE, "fire")])
+            rows.append([hero, "%s -> air dash" % label, _src(air), _combo_ours(air, INTO_MOVE_MODE, "fire")])
     for slot, label in DASH_SLOTS:
         held = f.get("hold", {}).get(slot)
         for move, name in HOLD_MOVES if held is not None else []:
             if move in held:
-                rows.append([hero, "hold %s through %s" % (label, name), held[move].get("source", ""),
+                rows.append([hero, "hold %s through %s" % (label, name), _src(held[move]),
                              _combo_ours(held[move], HOLD_MODE, "keep")])
+    for slot, row in f.get("held_fire", {}).items():
+        label = HELD_FIRE_SLOTS.get(slot, slot)
+        rows.append([hero, "hold LMB through %s" % label, _src(row), row.get("ours", "")])
     return rows
 
 def _dash_ours(row, modes):
@@ -755,14 +768,91 @@ def _air_audit_table():
             ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
         rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
+def _dash_window(flows):
+    """The buffer-window section: DashFlow.BUFFER_S and each hero's footage evidence for it (window.source)."""
+    buffer_s = gd_const("arch/dash_flow.gd", "BUFFER_S")
+    rows = [[ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}).get("window", {}).get("source", "")]
+            for aid in ARCH_ORDER]
+    return ("A press held for the dash's end that finds the hunter unable to act (stunned, downed, out) waits up to "
+            "`DashFlow.BUFFER_S` = %s s, then goes through its slot's own path (the cast, or the deny cue). The "
+            "source footage is 5 fps (0.2 s a frame; briefs/supervive-data/PHYSICS_PARITY.md): every chain in it has "
+            "the follow-up on the first frame after the dash and none shows a press dropped, so the window is that "
+            "one frame, and there is no early-press limit (a press any time inside the dash is kept). `--dash-flow-check` "
+            "stuns the hunter as a dash ends, inside and outside the window. The evidence per hero:\n\n"
+            % buffer_s) + table(["Hero", "Source footage"], rows)
+
+AIR_CAST_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)")]
+AIR_CAST_H = {"keep": "keeps the jump's speed (steers as in any jump)", "slow": "slows below the jump's speed",
+              "zero": "stops", "push": "driven faster than the jump"}
+AIR_CAST_V = {"fall": "falls as from the jump", "hover": "holds the height", "rise": "rises",
+              "slow": "falls slower than the jump", "drop": "drops faster (lands early)"}
+AIR_CAST_WHEN = {"landing": "waits for the landing; in the air the jump goes on", "no": "not cast in the air (the press is dropped)"}
+
+def _air_cast_rows(hero, f):
+    """LMB, RMB, E and R cast at the top of a running jump (air_cast rows, --air-cast-check)."""
+    rows = []
+    for slot, label in AIR_CAST_SLOTS:
+        row = f.get("air_cast", {}).get(slot, {})
+        cast = row.get("cast", "air")
+        h = AIR_CAST_H.get(row.get("h"), "no row")
+        v = AIR_CAST_V.get(row.get("v"), "no row")
+        ours = AIR_CAST_WHEN[cast] if cast in AIR_CAST_WHEN else "horizontal: %s; vertical: %s" % (h, v)
+        if row.get("ours"):
+            ours += " (%s)" % row["ours"]
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
+
+DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
+                   ("rise", "Shift in a jump's rise"), ("same", "Space and Shift on one step")]
+DASH_JUMP_MODE = {"cancel": "the jump goes at once and ends the dash", "both": "the jump goes and the dash runs on",
+                  "ignore": "the dash runs on; the press is dropped", "end": "the dash ends, no jump",
+                  "buffer": "the jump waits for the dash's end", "dash": "the air dash goes at once and ends the rise"}
+
+def _dash_jump_rows(hero, f):
+    """Space in a dash, Shift in a jump's rise, both on one step (dash_jump rows, --dash-jump-check)."""
+    rows = []
+    for kind, label in DASH_JUMP_CASES:
+        row = f.get("dash_jump", {}).get(kind, {})
+        ours = DASH_JUMP_MODE.get(row.get("ours"), "no row")
+        if row.get("carry") is not None and row.get("ours") in ("cancel", "both"):
+            ours += ", keeping %d%% of its speed" % round(row["carry"] * 100)
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
+
+TURN_SLOTS = [("lmb", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("e_recast", "E recast"), ("x", "ult (X)"),
+              ("x_recast", "ult (X) recast")]
+
+def _turn(rule):
+    return rule if isinstance(rule, str) else "slow (%g deg/s)" % rule
+
+def gen_turn_table():
+    """The body-turn rows from each kit JSON's "turn" block (ArchKit.turn_rule, --yaw-lock-check)."""
+    rows = []
+    for aid in ARCH_ORDER:
+        hero = ARCH.get(aid, {}).get("name", aid)
+        for slot, label in TURN_SLOTS:
+            row = ARCH.get(aid, {}).get("turn", {}).get(slot)
+            if row:
+                rows.append([hero, label, _turn(row["early"]), _turn(row["late"]), row["source"]])
+    return ("\n## Body turning during casts\n\n_Generated from the \"turn\" block in `content/archetypes/<hero>.json`._"
+            "\n\nDoes the body follow the cursor while the slot runs? `--yaw-lock-check` presses each slot with the cursor "
+            "east, swings it 90 degrees at 0.1 s and again at 0.53 s, and reads the body over the next 0.23 s: free (it "
+            "follows), locked (it holds) or slow (it turns at the capped rate). A recast row a hero lacks is its first "
+            "cast's.\n\n" + table(["Hero", "Slot", "0.1-0.33 s (wind-up, channel)", "0.53-0.77 s (release, after)",
+                                    "Source"], rows))
 
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
     rows = []
+    glide_rows = []
     for aid in ARCH_ORDER:
         f = flows.get(aid, {})
+        hero = "%s (%s)" % (ARCH[aid]["base_name"], aid) if aid in ARCH else aid
         hero = ARCH.get(aid, {}).get("name", aid)
+        for slot, label in GLIDE_SLOTS:
+            row = f.get("glide", {}).get(slot, {})
+            glide_rows.append([hero, label, row.get("source", ""), GLIDE_MODE.get(row.get("mode"), "")])
         for kind in ("ground", "air"):
             given = f.get("dash", {}).get(kind, {})
             for slot, label in DASH_SLOTS:
@@ -770,22 +860,53 @@ def gen_dash_flow():
                 ours = _dash_ours(row, DASH_MODE)
                 if kind in f.get("kit_owns", []):
                     ours = "the kit's own dash state: not routed yet"
-                rows.append([hero, "%s dash -> %s" % (kind, label), row.get("source", ""), ours])
+                rows.append([hero, "%s dash -> %s" % (kind, label), _src(row), ours])
         for slot, label in DASH_SLOTS:
             row = f.get("into_dash", {}).get(slot)
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
-            rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
+            rows.append([hero, "%s -> dash" % label, _src(row), ours])
         rows += _combo_rows(hero, f)
+        rows += [[hero, g["pair"], g["source"], g["ours"]] for g in f.get("glide_rows", [])]
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
             "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
-            "with no hold row keeps through every move.\n\n")
+            "with no hold row keeps through every move.\n\n"
+            "`[?]` in Source marks a row that exists but that no source or footage settles (no source, or \"Not "
+            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n"
+            "LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes "
+            "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
+            "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
+            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n"
+            "The glide rows (`glide_rows` in the same file) say what a fresh glide press does after a dash, an ability and "
+            "during a hold; the numbers come from `--airdash-glide-check`.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
+    body += "\n\n## Buffer window\n\n" + _dash_window(flows)
+    body += ("\n\n## Cast at the top of a jump\n\nOne row per hero and slot, from `air_cast` in the same files: running, "
+             "jumping and pressing the slot at the jump's top, keys held forward. \"Ours\" is what the next 0.4 s do to the "
+             "horizontal and vertical speed against the same jump with no cast, measured headless by `--air-cast-check`, "
+             "which fails when the game stops doing it. The source's falling physics (AirControl 0.015, "
+             "briefs/supervive-data/supervive_physics.md:46) is what \"steers as in any jump\" copies. Verdict: match "
+             "(the source settles it and ours does the same), owner (an owner call), or [?] (the source doesn't settle "
+             "it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Slot", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _air_cast_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += ("\n\n## Space and Shift together\n\nOne row per hero and case, from `dash_jump` in the same files. \"Ours\" is "
+             "measured headless by `--dash-jump-check`, which fails when the game stops doing it. Verdict: match (the source "
+             "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += gen_turn_table()
+    body += ("\n## From the glider\n\nA press while the glider is open (`glide` rows in `content/dash_flow/<hero>.json`, "
+             "owner rule in briefs/DECISIONS.md: the source decides, the glider never blocks a slam; `--glide-cast-check` "
+             "presses every row). R is the hero's own ultimate (the X tile). A row marked [?] is one nothing in the "
+             "source settles: the data (briefs/supervive-data/) states no rule for an open glider and no footage frame "
+             "(briefs/hero-ref/, ext/hero-ref-footage) shows a cast with it open.\n\n")
+    body += table(["Hero", "Slot", "Source", "Ours"], glide_rows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

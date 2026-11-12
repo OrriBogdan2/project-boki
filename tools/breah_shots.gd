@@ -215,6 +215,7 @@ func _breah_glide() -> void:
 	P.grounded = false
 	var glide := func(t: float):
 		P.inp["glide"] = true
+		P.inp["glide_btn"] = true     # (the glide button: a held Space never opens it)
 		if t >= 0.6 and t < 0.6 + DT:
 			P.ak.press_rmb()
 	var marks := _strip(
@@ -225,3 +226,4 @@ func _breah_glide() -> void:
 	)
 	await _go(1.4, glide, marks)
 	P.inp["glide"] = false
+	P.inp["glide_btn"] = false

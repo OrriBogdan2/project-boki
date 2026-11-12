@@ -15,7 +15,6 @@ const POP := 0.12          # m: the head's most in one frame at 60 fps, down or 
 const BOB := 0.07          # m: the head's rise and fall over a sneak
 const STEP := 0.14         # m: how far a foot travels over a sneak
 const K := 8.0             # 1/s: Hunter.render's crouch rate
-const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetype's run speed
 const PLANT := 0.45        # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
 const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
 const LATER := ["juggernaut"]    # Kael: landing after art1-integ
@@ -117,7 +116,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			zmax = maxf(zmax, z)
 	if feet:
 		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
-		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K)
+		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * HunterMove.sneak_speed)
 		ok(carry >= PLANT or id in SKATES, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
 	ok(hmax - hmin <= BOB + _float_bob(id), "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
 	for k in 30:

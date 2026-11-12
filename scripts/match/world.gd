@@ -5,7 +5,7 @@ extends Node3D
 
 const VOID := -1.0e9
 const LEVEL := 0.8      # height of one terrace
-const STEP := 0.32      # how high you can walk up without jumping
+static var STEP: float = HunterMove.step_height      # m: the tallest lip you walk up without jumping (hunter_move.json)
 const BLOCK_H := 3.0
 
 enum { T_VOID, T_GROUND, T_BLOCK }
@@ -65,6 +65,10 @@ func idx(x: int, z: int) -> int:
 
 func inb(x: int, z: int) -> bool:
 	return x >= 0 and z >= 0 and x < w and z < h
+
+## True on a flight of stairs, where the ground rises smoothly instead of in lips.
+func on_stairs(x: float, z: float) -> bool:
+	return stairs.has(idx(int(floor(x)), int(floor(z))))
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:

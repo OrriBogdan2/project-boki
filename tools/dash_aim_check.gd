@@ -3,11 +3,19 @@ extends RefCounted
 ## north: where the rounds go, whether the body turns to the aim, and how long the rounds stop. A hero whose dash row
 ## fires LMB keeps its body on the cursor (ArchKit.aims_in_dash); a "buffer" row sends no round in the dash, and the
 ## first one after it goes along the live aim. Nobody's aim stays locked to the dash.
+## Steady part (feel-aim-steady): the cursor held still on screen 15 m out while the view moves (a dash, a 10 m
+## knock), through the real frame (Match._process): every round must leave on the line to the reticle's world point
+## as that frame's camera shows it, as in the source. Aim taken before the camera moved trails it by a frame.
 
 const DT := 1.0 / 60.0
 const FIRES := ["gunslinger", "thief", "rimewright"]      # LMB goes mid-dash and the body stays on the aim
 const FAN_DEG := 25.0        # a round's widest allowed miss of the cursor (the widest shotgun fan, the widest sway)
 const RANGED := ["gunslinger", "thief", "rimewright", "ostra", "archer", "mage", "ashwick", "tender", "dredge", "dolm"]
+
+const STEADY := ["gunslinger", "archer", "mage", "rimewright"]      # Vex, Lace (on the release), Sparkle, Neve
+const STEADY_AT := 15.0      # m, how far out the reticle sits
+const STEADY_M := 0.25       # m, the widest a round may pass the reticle at STEADY_AT
+const KNOCK := 23.5          # the shove east (Ent.impulse), about a 10 m knock on a medium body
 
 var bad := 0
 
@@ -124,8 +132,76 @@ func probe(m: Match, in_air: bool) -> Dictionary:
 	P.inp["move"] = Vector2.ZERO
 	return out
 
+## The mouse over `p` (a world point), as the OS would move it (in window pixels, which the content scale can stretch).
+func _cursor(m: Match, p: Vector3) -> void:
+	var at := m.get_viewport().get_screen_transform() * m.cam.unproject_position(p)
+	var mv := InputEventMouseMotion.new()
+	mv.position = at
+	mv.global_position = at
+	Input.parse_input_event(mv)
+	Input.flush_buffered_events()
+
+## The cursor still on screen 15 m north; on one frame the move (`how`: dash or knock east) and the shot (a press, or
+## Lace's release) together, then 40 frames of fire held. The miss is of the aim each round left on (the weapon's
+## own spread or bow comes after it). {err (m off the reticle at STEADY_AT, worst), rounds,
+## cam (the camera's biggest step in one frame, m), moved (m)}
+func steady(m: Match, how: String) -> Dictionary:
+	var P: Hunter = m.player
+	var out := {"err": 0.0, "rounds": 0, "cam": 0.0, "moved": 0.0}
+	m.acc = 0.0
+	var release := P.wpn.has("draw")
+	for i in 60:
+		_cursor(m, P.pos + Vector3(0, 0.95, -STEADY_AT))
+		if release and i == 20:
+			Input.action_press("fire")
+		m._process(DT)
+	var start := P.pos
+	if release:
+		Input.action_release("fire")
+	else:
+		Input.action_press("fire")
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
+	if how == "dash":
+		P.inp["move"] = Vector2(1, 0)
+		P.do_dash()
+	else:
+		P.impulse(Vector2(KNOCK, 0) * P.mass())
+	for s in m.shots:
+		s["_seen"] = true
+	for i in 40:
+		var was := m.cam.global_position
+		P.ammo = int(P.wpn.get("mag", 30))
+		P.fire_cd = 0.0          # a round every frame the gun can, so each frame's camera step is measured
+		m._process(DT)
+		out["cam"] = maxf(float(out["cam"]), was.distance_to(m.cam.global_position))
+		var r: Vector3 = m._mouse_aim()
+		for s in m.shots:
+			if s["by"] != P or s.has("_seen"):
+				continue
+			s["_seen"] = true
+			var o: Vector3 = s["start"]
+			var aim: Vector3 = P.inp["aim"]
+			var to := Vector2(r.x - o.x, r.z - o.z)
+			var miss := STEADY_AT * absf(sin(Vector2(aim.x - o.x, aim.z - o.z).angle_to(to)))
+			out["err"] = maxf(float(out["err"]), miss)
+			out["rounds"] = int(out["rounds"]) + 1
+	Input.action_release("fire")
+	out["moved"] = Vector2(P.pos.x - start.x, P.pos.z - start.z).length()
+	return out
+
 func run(main: Node) -> void:
 	Save.no_write = true
+	for arch in STEADY:
+		for how in ["dash", "knock"]:
+			var m := _match(main, arch)
+			var r := steady(m, how)
+			var tag := "%s %s" % [arch, how]
+			var row := "DASHAIM steady %-16s rounds %2d  moved %4.1fm  camera step %.2fm  off reticle %.3fm at %.0fm"
+			print(row % [tag, r["rounds"], r["moved"], r["cam"], r["err"], STEADY_AT])
+			ok(int(r["rounds"]) >= 1 and float(r["err"]) <= STEADY_M, "%s: rounds leave on the reticle" % tag)
+			m.queue_free()
+			await main.get_tree().process_frame
 	for arch in RANGED:
 		for in_air in [false, true]:
 			var m := _match(main, arch)

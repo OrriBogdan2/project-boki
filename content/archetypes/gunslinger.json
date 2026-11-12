@@ -154,5 +154,11 @@
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
 		"dash_spent": "an ember afterimage and faint skid streaks"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown"},
+		"e": {"early": 90.0, "late": "free", "source": "briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner (ext/vex-e-turn): it turns toward the aim at e.turn_deg_s 90 deg/s at most; free after the shot"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held"}
 	}
 }
