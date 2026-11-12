@@ -435,6 +435,20 @@ func _voice(pos) -> AudioStreamPlayer:
 	p.bus = "SFXFar" if far else "SFX"
 	return p
 
+## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
+const SAMPLE := "ping"
+var sample_voice: AudioStreamPlayer
+func play_sample(bus_name: String) -> void:
+	if not streams.has(SAMPLE) and not _lazy(SAMPLE):
+		return
+	if sample_voice == null:
+		sample_voice = AudioStreamPlayer.new()
+		add_child(sample_voice)
+	var st = streams[SAMPLE]
+	sample_voice.stream = _once(st[0] if st is Array else st)
+	sample_voice.bus = bus_name
+	sample_voice.play()
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:

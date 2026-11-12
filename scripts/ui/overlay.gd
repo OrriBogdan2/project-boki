@@ -553,7 +553,10 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 		sl.value_changed.connect(func(val):
 			pct.text = "%d%%" % int(round(val * 100.0))
 			Settings.set_v(key, val, false))
-		sl.drag_ended.connect(func(_c): Settings.save())
+		sl.drag_ended.connect(func(_c):
+			Settings.save()
+			if Settings.BUSES.has(key):
+				Sfx.play_sample(Settings.BUSES[key]))
 	r.add_child(sl)
 	r.add_child(pct)
 
