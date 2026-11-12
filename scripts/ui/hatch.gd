@@ -50,6 +50,7 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
+var new_rec: Dictionary = {}  # the hatchling's record, made when the name card opens (so its sex mark shows there) and kept by _finish
 var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
 var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var look: Dictionary = {}
@@ -696,6 +697,9 @@ func _show_name() -> void:
 	var card := UI.card(UI.CARD, 16, 18)
 	card.custom_minimum_size = Vector2(520, 0)
 	var v := UI.vbox(10); card.add_child(v)
+	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
+		new_rec = Save.new_kin(sp_id)          # rolled now: its sex (and he/she) is known before it is named
+	var she: bool = Unique.sex(new_rec) == "f"
 	# (lifted like the egg names: a dark species colour, Vespyx's plum, vanished on the dark card)
 	var scol: Color = sp["color"]
 	while scol.get_luminance() < 0.55:
@@ -703,7 +707,12 @@ func _show_name() -> void:
 	v.add_child(UI.section("A new Boki", scol))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
-	v.add_child(UI.label("Voice: %s. A babbler for now; any name you give will stick." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
+	var sex_row := UI.hbox(8)
+	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
+	sex_row.add_child(UI.label("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
+		"A babbler for now; any name you give will stick."], 16, UI.MUTED))
+	v.add_child(sex_row)
+	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
@@ -746,7 +755,8 @@ func _show_name() -> void:
 	ne.select_all()
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
+	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else Save.new_kin(sp_id)
+	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
 	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
 	if not muts.is_empty(): rec["mutations"] = muts
