@@ -8,7 +8,8 @@ extends RefCounted
 ##     (content/merges_v2) plus a look, the type's rider on LMB and its trail as the form dash
 ##     (content/rules/merge_forms.json). No tiers, no scaling by level or trust.
 ## The form is a plain Dictionary kept in Hunter.merge_st["form"]:
-##   {id, kit, name, type, color, glow, accent, parts, style, word, haste, aug, size, ring, dur, surge, def}
+##   {id, kit, name, type, color, glow, accent, parts, style, word, haste, aug, size, ring, dur, surge, def, cue}
+##   (`cue` is the sound type: boki_fuse_<cue>)
 ## `def` is the form's data (empty for the fallback and the surge); `kit` is true for a form with its own file. The rest crosses the net (KinNet).
 
 static func data() -> Dictionary:
@@ -17,6 +18,11 @@ static func data() -> Dictionary:
 static func type_of(k: Kin) -> String:
 	var t := String(k.sp.get("type", "none"))
 	return t if (data().get("types", {}) as Dictionary).has(t) else "none"
+
+## The sound type of a Fusion type (boki_fuse_<cue>).
+static func type_cue(ty: String) -> String:
+	var types: Dictionary = data()["types"]
+	return String((types[ty] if types.has(ty) else types["none"])["cue"])
 
 ## The form this Boki gives you right now.
 static func for_boki(k: Kin) -> Dictionary:
@@ -32,7 +38,8 @@ static func kit_form(id: String, dur := 0.0) -> Dictionary:
 	var lk: Dictionary = fd["look"]
 	return {"id": id, "kit": true, "name": String(fd["name"]), "type": "kit", "color": Color(String(pal["body"])), "glow": Color(String(pal["glow"])),
 		"accent": Color(String(pal.get("accent", pal["glow"]))), "parts": lk["parts"], "style": "kit", "word": String(fd["name"]).to_upper(), "haste": float((fd["aug"].get("stats", {}) as Dictionary).get("cooldown", 0.0)),
-		"aug": fd["aug"], "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "part_k": float(lk.get("part_k", 1.7)), "dur": dur, "surge": false, "def": fd}
+		"aug": fd["aug"], "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "part_k": float(lk.get("part_k", 1.7)), "dur": dur, "surge": false, "def": fd,
+		"cue": String(fd["sound"]["cue"])}
 
 ## The stat-style look of a Boki with no form yet, from its type.
 static func fallback_form(ty: String, col: Color, glow: Color) -> Dictionary:
@@ -41,14 +48,14 @@ static func fallback_form(ty: String, col: Color, glow: Color) -> Dictionary:
 	var fb: Dictionary = d["fallback"]
 	return {"id": "", "kit": false, "name": String(td["word"]).capitalize(), "type": ty, "color": col, "glow": glow, "accent": glow, "parts": td["parts"], "style": String(td["style"]),
 		"word": String(td["word"]), "haste": float(fb["haste"]), "aug": _fallback_aug(td), "size": float(fb["size"]), "ring": 3.0, "part_k": 1.3, "dur": 0.0,
-		"surge": false, "def": {}}
+		"surge": false, "def": {}, "cue": type_cue(ty)}
 
 ## The weak merge you get with no Boki able to fight: no silhouette, a plain light.
 static func surge_form() -> Dictionary:
 	var sd: Dictionary = data()["surge"]
 	var c := Color(String(sd["color"]))
 	return {"id": "", "kit": false, "name": String(sd["name"]), "type": "none", "color": c, "glow": c, "accent": c, "parts": [], "style": "nova",
-		"word": String(sd["name"]).to_upper(), "haste": float(sd["haste"]), "aug": {}, "size": 1.0, "ring": 3.0, "part_k": 1.0, "dur": 0.0, "surge": true, "def": {}}
+		"word": String(sd["name"]).to_upper(), "haste": float(sd["haste"]), "aug": {}, "size": 1.0, "ring": 3.0, "part_k": 1.0, "dur": 0.0, "surge": true, "def": {}, "cue": "normal"}
 
 ## The surge as a MergeSpec, so it runs through the same state and tick as a merge.
 static func surge_spec() -> MergeSpec:

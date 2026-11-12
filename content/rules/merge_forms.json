@@ -51,6 +51,7 @@
 	},
 	"types": {
 		"venom": {
+			"cue": "poison",
 			"style": "nova",
 			"parts": [
 				"fangs",
@@ -69,6 +70,7 @@
 			}
 		},
 		"spore": {
+			"cue": "spore",
 			"style": "bloom",
 			"parts": [
 				"crest",
@@ -87,6 +89,7 @@
 			}
 		},
 		"gravity": {
+			"cue": "psychic",
 			"style": "quake",
 			"parts": [
 				"plates",
@@ -103,6 +106,7 @@
 			}
 		},
 		"prism": {
+			"cue": "crystal",
 			"style": "prism",
 			"parts": [
 				"crest",
@@ -119,6 +123,7 @@
 			}
 		},
 		"lunar": {
+			"cue": "fairy",
 			"style": "spiral",
 			"parts": [
 				"halo",
@@ -135,6 +140,7 @@
 			}
 		},
 		"echo": {
+			"cue": "sound",
 			"style": "storm",
 			"parts": [
 				"antennae",
@@ -151,6 +157,7 @@
 			}
 		},
 		"ember": {
+			"cue": "fire",
 			"style": "pillar",
 			"parts": [
 				"horns",
@@ -169,6 +176,7 @@
 			}
 		},
 		"frost": {
+			"cue": "ice",
 			"style": "bloom",
 			"parts": [
 				"spikes",
@@ -187,6 +195,7 @@
 			}
 		},
 		"storm": {
+			"cue": "electric",
 			"style": "storm",
 			"parts": [
 				"wings",
@@ -203,6 +212,7 @@
 			}
 		},
 		"stone": {
+			"cue": "rock",
 			"style": "quake",
 			"parts": [
 				"plates",
@@ -219,6 +229,7 @@
 			}
 		},
 		"bloom": {
+			"cue": "grass",
 			"style": "bloom",
 			"parts": [
 				"crest",
@@ -235,6 +246,7 @@
 			}
 		},
 		"shadow": {
+			"cue": "dark",
 			"style": "spiral",
 			"parts": [
 				"horns",
@@ -254,6 +266,7 @@
 			}
 		},
 		"titan": {
+			"cue": "steel",
 			"style": "quake",
 			"parts": [
 				"horns",
@@ -270,6 +283,7 @@
 			}
 		},
 		"swarm": {
+			"cue": "bug",
 			"style": "storm",
 			"parts": [
 				"antennae",
@@ -289,6 +303,7 @@
 			}
 		},
 		"tempest": {
+			"cue": "flying",
 			"style": "storm",
 			"parts": [
 				"wings",
@@ -305,6 +320,7 @@
 			}
 		},
 		"none": {
+			"cue": "normal",
 			"style": "nova",
 			"parts": [
 				"crest",
