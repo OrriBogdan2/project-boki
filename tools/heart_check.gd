@@ -153,8 +153,8 @@ func _early_seat(main: Node) -> void:
 	m.time = t_keep
 	ok(with_tide > without or with_tide >= BlightDir.LVL_MAX - 1.0e-4,
 		"BlightDir reads the tide (%.2f vs %.2f at the same spot)" % [with_tide, without])
-	ok(Heart.tide_heat(m, far) > 0.0 and Heart.tide_heat(m, H.site) == 0.0,
-		"squads outside the ring heat the Blight sooner")
+	ok(Heart.tide_out(m, far) > 0.0 and Heart.tide_out(m, H.site) == 0.0,
+		"squads outside the ring are out in the tide (BlightNests stirs a nest near them on a clock)")
 	# ---- the wall in the world and the next ring on the maps (on m2: a step mid-tide wakes its Heart)
 	var W: Heart = m2.heart
 	m2.time = m.time

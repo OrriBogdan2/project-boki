@@ -119,6 +119,7 @@ const CHECKS := {
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],      # docs/SPAWNS.md
+	"--blight-nest-check": ["res://tools/blight_nest_check.gd", "blight_nest_check", null],      # docs/decisions/0061
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],

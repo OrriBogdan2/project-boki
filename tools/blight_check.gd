@@ -1,8 +1,8 @@
 extends RefCounted
 ## --blight-check: the Blight (scripts/match/blight.gd, blight_dir.gd). Its strength curve (weak
 ## early and on the outer islands, stronger with time, the core and night), where Wardens stand,
-## the grace period after landing, noise drawing Skitters in, a level-1 hunter beating or
-## outrunning an early Skitter, a Warden's light and shriek (a warning early, Skitters later),
+## noise in the open drawing no Skitters (they only come from nests: --blight-nest-check), a level-1
+## hunter beating or outrunning an early Skitter, a Warden's light and shriek (never makes Skitters),
 ## Skitters going for bots and bots fighting back, idle ones burrowing away, and the network
 ## snapshot of a Blight. Never touches the save.
 
@@ -137,29 +137,19 @@ func _spawns(main: Node) -> void:
 			if b.flat_dist(c["pos"]) < 8.0: bad_spot += 1
 		if m.lairs and not m.lairs.lair_of(b.pos, 3.0).is_empty(): bad_spot += 1
 	ok(bad_spot == 0, "Wardens stand clear of camps and lairs")
-	# the grace period: nothing comes for a squad in its first GRACE seconds, even if it's loud
+	# noise in the open draws nothing out of the ground: Skitters only come from nests (blight_nests.gd)
 	_quiet(m)
 	var P := m.player
-	B.land_at.clear()
+	B.land_at[P.team] = m.time - 600.0
+	var far := true
+	for n in B.nests.list:
+		far = far and P.flat_dist(n["pos"]) > 30.0
 	var n0 := B.spawned
-	_run(m, 2.0)
-	_run(m, BlightDir.GRACE - 6.0, func():
-		if int(m.time * 60.0) % 30 == 0: m.note_sound(P, P.pos, "shot"))
-	ok(B.spawned == n0, "nothing claws out of the ground in the first %ds after landing (%d spawned)" % [int(BlightDir.GRACE), B.spawned - n0])
-	# after it, noise brings them: a loud squad draws a Skitter
-	var t_end := m.time + 40.0
-	while m.time < t_end and B.spawned == n0:
-		if int(m.time * 60.0) % 20 == 0: m.note_sound(P, P.pos, "shot")
-		P.hp = P.max_hp
-		m.step(Match.DT)
-	var first: Array = B.alive().filter(func(x): return x.mkind == "bl_skitter")
-	print("BLIGHT after the grace period a loud squad drew %d Skitter(s) at t=%.1f (heat %.2f)" % [B.spawned - n0, m.time, float(B.heat.get(P.team, 0.0))])
-	ok(B.spawned > n0, "noise after the grace period draws Skitters")
-	ok(B.spawned - n0 <= 2, "early on that's one or two, not a swarm")
-	if not first.is_empty():
-		var f: Blight = first[0]
-		ok(f.flat_dist(P) > 10.0, "they claw out of the ground away from you (%.1f tiles)" % f.flat_dist(P))
-		ok(not m.sees(P.team, f.pos) or f.flat_dist(P) > 12.0, "... out of your sight")
+	_run(m, 30.0, func():
+		if int(m.time * 60.0) % 20 == 0: m.note_sound(P, P.pos, "boom")
+		P.hp = P.max_hp)
+	print("BLIGHT 30 s of blasts late in a run, %s every nest: %d Skitter(s)" % ["away from" if far else "near", B.spawned - n0])
+	ok(not far or B.spawned == n0, "noise away from any nest draws no Skitters (they only come from nests)")
 	m.queue_free()
 
 # ------------------------------------------------------------------ 3. noise, a fight, a chase
@@ -286,14 +276,14 @@ func _warden(main: Node) -> void:
 	ok(P.reveal_t > 0.0, "the light lights you up for everyone")
 	ok(B.skitters_alive() == n_sk, "early on the shriek is only a warning: no Skitters came out of it")
 	# a nearby idle Skitter heard the shriek
-	# late in a squad's run, a shriek brings Skitters out of the ground round the Warden
+	# late in a squad's run, a shriek still makes no Skitters of its own (it may wake a nest: --blight-nest-check)
 	B.land_at[P.team] = m.time - 600.0
 	W.set_level(B.level(W.pos, P.team))
 	W.shriek_cd = 0.0
-	var sh0 := B.skitters_alive()
+	var sh0 := B.spawned
 	W.shriek(P)
-	print("BLIGHT a late shriek (lvl %.2f) brought %d Skitters" % [W.lvl, B.skitters_alive() - sh0])
-	ok(B.skitters_alive() > sh0, "late on, a shriek brings Skitters")
+	print("BLIGHT a late shriek (lvl %.2f) made %d Skitters" % [W.lvl, B.spawned - sh0])
+	ok(B.spawned == sh0, "late on, a shriek still makes no Skitters of its own")
 	# crouching just past the shortened reach: not spotted
 	for b in B.alive():
 		if b != W: (b as Blight).burrow()

@@ -166,8 +166,7 @@ func on_popped(b: Blight, by: Ent) -> void:
 		return
 	n["stock"] = 0
 	n["stir_at"] = INF
-	if not cooling(n):
-		n["refill_at"] = m.time + rule("cooldown_s")
+	n["refill_at"] = m.time + rule("cooldown_s")      # broken: the full quiet, from now
 	var credit: Ent = by.owner_h if by is Kin and (by as Kin).owner_h else by
 	if credit is Hunter:
 		for h in m.hunters:
