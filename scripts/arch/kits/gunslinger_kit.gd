@@ -14,6 +14,7 @@ extends ArchKit
 
 const EMBER := Color("ff9a5c")
 const HOT := Color("fff1c8")
+const NET_CONE_ID := "burr_net"      # the AimKit id of a stuck burr's cone on another player's game
 const DAZE_PINK := Color("ff4fb0")   # the Daze's own colour (stars, swirl): its bonus is not a plain crit
 const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
@@ -602,9 +603,30 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
+	_net_cone(b, bd)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
 	m.fx.burst(at, SCRAPE, 6, 2.5, 0.4, 6.0, 0.8)       # the miss: a dull dust puff, no flash, nothing on a foe
+
+## Other players' games don't run this kit: the stick sends its cone through the Net fx "cone" event, with the
+## length the shooter's game uses, and their copy of Vex draws it for the fuse (net_cone).
+func _net_cone(b: Dictionary, bd: Dictionary) -> void:
+	if not m.net_on or h.remote:
+		return
+	var at: Vector3 = b["pos"]
+	var out: Vector2 = b["out"]
+	m.net_fx(["cone", m._r(at.x), m._r(at.y), m._r(at.z), m._r(out.x), m._r(out.y), float(bd["cone_len"]), h.nid])
+
+## The "cone" fx event on another player's game: the stuck burr's cone under that player's copy of Vex, the
+## length sent, up for the fuse. x: ["fx", "cone", x, y, z, out x, out y, length, hunter id].
+static func net_cone(game: Match, x: Array) -> void:
+	var who: Variant = game.ents_by_id.get(String(x[8]), null)
+	if not (who is Hunter and (who as Hunter).ak is GunslingerKit):
+		return
+	var bd := ((who as Hunter).ak.rmb_def()["burr"]) as Dictionary
+	var cone := {"from": Vector3(x[2], x[3], x[4]), "dir": Vector2(x[5], x[6]), "len": float(x[7])}
+	cone.merge({"deg": float(bd["cone_deg"]), "all": true, "col": EMBER, "col2": HOT, "dur": float(bd["fuse"])})
+	AimKit.cone(who, NET_CONE_ID, cone)
 
 func _detonate(b: Dictionary) -> void:
 	var bd := rmb_def()["burr"] as Dictionary

@@ -253,7 +253,7 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 |---|---|---|---|---|---|
 | Rifle (LMB) | two thin arcs flanking her, r 1.25 m (firing brackets) | none (hitscan rounds) | her screen only | thin brackets while firing | kept: a tell on her body, not an area |
 | Burr Charge (RMB), in flight | none | 0.72 m wide shot, 10.5 m | - | a shell, no ground shape | ok |
-| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone locally | a cone back toward her | ok, asserted. Online the cone shows as a fixed 5 m fan (the net event has no length); a real fix needs a Net change, so it is a suggestion only |
+| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone, online too | a cone back toward her | ok, asserted. Online the stick sends Net 0.24.6's "cone" fx event with the length, and the other games draw the same cone for the fuse (`--remote-anim-check`, decision 0061) |
 | Burr hit / stuck / detonation | none (was a 1.0, 1.6 and 1.8 m ring) | the cone above | - | no ring on the burr | removed: cosmetic rings that matched no hit |
 | Longneedle (E) charge | line 18 m long, 1.8 m wide narrowing to a core over 0.6 s | beam 18 m, 1.8 m wide, at 0.6 s | everyone locally | wide line narrowing to a core | ok, asserted |
 | Slipstep (dash) | none | none | - | none | ok |
@@ -261,12 +261,12 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Cinderfall impact | one ring at r 3.4 m | the disc | everyone | impact ring | fixed: was two rings at 1.3x and 0.7x r |
 | Cinderfall burn, 3 s | rim r 3.4 m fading | ticks inside 3.4 m | everyone locally | burning patch | ok |
 
-Suggestion (not built): carry the burr cone length over the network so remote players see the true 6 m cone.
-
 ## Engine notes
 - Kit `scripts/arch/kits/gunslinger_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd`; moves
   `scripts/match/kmoves_vv.gd`; rifle model `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_vex.py`.
 - Rattled ("Dazed" on screen) is a `KitStatus` status carried by the existing Net event. No Net change.
+- Burr stuck online: `GunslingerKit._net_cone` sends the Net fx "cone" event (point, direction, length, hunter id);
+  `GunslingerKit.net_cone` draws it on the other games (docs/decisions/0061-vex-burr-cone-online.md).
 - Cinderfall: `scripts/arch/kits/gunslinger_ult.gd` (GunslingerUlt) on the shared ult base `scripts/arch/hero_ult.gd`
   (HeroUlt); X reaches it through main's HunterKeys.ult_pressed and `GunslingerKit.cast_ult()`; numbers in
   `gunslinger.json` `x`.
