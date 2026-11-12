@@ -41,7 +41,8 @@ MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
   19/31/32 ms, load 11.7/13.0/13.8 s. (Superseded by the GPU pass below: capped at 30.)
 - Load still grows with the hunter count: each hunter model takes ~120 ms (GPU box) to build, and a
   Warden with a 3D model builds the whole procedural body first, then hides it (docs/DEBT.md).
-  Since ext/perf-skip-proc-body it builds only its rig and the kept pieces (`HunterBody` holds the body).
+  Fixed 11-12: a .glb Warden builds only its rig and the kept pieces (`HunterBody` holds the body);
+  build.hunters 1.70-1.84 -> 1.27-1.29 s headless (--load-check, 6 Hunters, rpc1 under load).
   Alternative not taken: 30 hunters (loses squads-per-area parity for ~0.8 s).
 - Flat pass (job 20261108-121503-a4): an idle camp naps (Mob.NAP_M 36 m, 3D, looked at every 0.5 s);
   a Warden's .glb scene is loaded once a session and prefetched on a thread with the HUD; a bot aboard
