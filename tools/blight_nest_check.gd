@@ -111,15 +111,7 @@ func _placement(main: Node) -> void:
 		)
 	)
 	ok(N.list.size() >= w.islands.size(), "every island has a nest (%d)" % N.list.size())
-	ok(
-		N.list.all(
-			func(n):
-				return (
-					n["mob"] is Blight and not n["mob"].dead and n["mob"].flat_dist(n["pos"]) < 0.5
-				)
-		),
-		"each nest stands as a body at its spot"
-	)
+	ok(N.list.all(_standing), "each nest stands as a body at its spot")
 	ok(
 		N.list.all(func(n): return int(n["full"]) >= 6 and int(n["full"]) <= 8),
 		"each holds 6-8 Skitters"
@@ -458,3 +450,8 @@ func _net_and_boss(main: Node) -> void:
 		brood.find("randi()") < 0 and brood.find("randf()") < 0 and Boss.BROOD_ADDS.size() == 4,
 		"boss egg sacs cycle their adds in a fixed order (no dice)"
 	)
+
+
+func _standing(n: Dictionary) -> bool:
+	var b = n["mob"]
+	return b is Blight and not b.dead and b.flat_dist(n["pos"]) < 0.5
