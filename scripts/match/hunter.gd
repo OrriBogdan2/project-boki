@@ -780,6 +780,7 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s >= Displace.KNOCK_MIN:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 		if m is Match: (m as Match).displace.knocked(self)
+		HunterMove.cut_air_dash(self)
 	if lift >= 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
@@ -2078,6 +2079,7 @@ func _physics(dt: float) -> void:
 	var spd := HunterMove.ground_speed(base_speed, HunterMove.speed_bonus(self, mv), _move_mult())
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
+	if stun_t > 0.0: HunterMove.cut_air_dash(self)
 	HunterMove.dash_off_ledge(self)
 	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
 	if roll_t > 0.0:
@@ -2637,6 +2639,7 @@ func _try_ledge_grab(dt: float) -> void:
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
+		"dash_vy": MantleCarry.dash_rise(self),               # a dash hands over: its speed takes you up the face
 		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
 	if grounded:
 		vel.y = maxf(vel.y, LRISE_MIN)     # walking into it: under way at once
@@ -2706,7 +2709,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-	vel.y = HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt)
+	vel.y = maxf(HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt), float(lf["dash_vy"]))
 	return true
 
 ## Is there ground at the ledge's height within reach of your side (the face you're rising up)?

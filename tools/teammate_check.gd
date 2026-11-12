@@ -9,7 +9,7 @@ extends RefCounted
 ##   5. caring: flinch and yelp when you're hit, low-health worry and a found tonic, cheering a knock,
 ##      a boss kill and extraction, comfort after a loss, all written to its memory
 ##   6. the memory line it brings up at home, in its own talking level
-##   7. the tutorial: it leads to the chest and the outpost, hints at each step, shows a dash and a
+##   7. the tutorial: it leads to the glove and the outpost, hints at each step, shows a dash and a
 ##      jump, and the tutorial still finishes
 
 var bad := 0
@@ -389,14 +389,14 @@ func _tutorial() -> void:
 		var tu: Tutorial = m.tut
 		var id := tu.id()
 		steps_seen[id] = true
-		if id == "pickup" and fell_t < 0.0:
+		if id == "glove" and fell_t < 0.0:
 			fell_t = t
 			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
 		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
 			led[id] = true
-		var goes_somewhere := id in ["move", "dash", "exdash", "glide", "crouch", "pickup", "chest", "goexit", "uplink",
+		var goes_somewhere := id in ["land", "dash", "exdash", "glide", "crouch", "glove", "wayout", "uplink",
 			"defend", "extract"]
 		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
 			no_marker += 1
@@ -414,10 +414,10 @@ func _tutorial() -> void:
 	ok(back_ok, "a fall into the void puts you back at the last stop")
 	var need := ["crouch", "pick_sec", "kin", "glide"].all(func(s): return steps_seen.has(s))
 	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
-	# (goexit and uplink both point at the outpost: when the fight ends next to it, goexit can be over in a
+	# (wayout and uplink both point at the outpost: when the fight ends next to it, wayout can be over in a
 	# second, while the Boki is still flying back or riding your shoulder over the last gap)
-	var outpost := led.has("goexit") or led.has("uplink")
-	ok(led.has("chest") and outpost, "it leads you to (or gets to) the chest and the outpost")
+	var outpost := led.has("wayout") or led.has("uplink")
+	ok(led.has("glove") and outpost, "it leads you to (or gets to) the glove and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
 
