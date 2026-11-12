@@ -191,6 +191,8 @@ func roll(seed_val: int) -> void:
 		var pool: Array = of(cat)
 		var pk: Array = cats[cat].get("pick", [1, 1])
 		var n := clampi(r.randi_range(int(pk[0]), int(pk[1])), 0, pool.size())
+		if cat == "cache":
+			n = KeyChest.kept(n)      # caches are chests too: the same share as the map's
 		# shuffle with our own generator (Array.shuffle uses the global one)
 		for i in range(pool.size() - 1, 0, -1):
 			var j := r.randi_range(0, i)
