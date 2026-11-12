@@ -3,7 +3,7 @@
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/hunter_abilities/bulwark.json) is now Bracewall.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Oath, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
+Source: ref-bulwark, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
 shared damage step is gone (the source gives none of these slots any). The ultimate takes no upgrade in our kit (the
 source's R: +20% damage, -5s, twice), so it is not changed. Rank 3 also sends both dashes 1m further (ours, not the source's; kept).
 
@@ -30,8 +30,8 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | LMB release: timing [footage 0146-0149] | one-frame sweep, the impact the frame after, ~0.4 s recovery | the same keys (`bul_smash`), 0.61 s before the next action | unchanged; asserted: the swing goes on the release step at the cursor (even behind him), the hit within 0.1 s, 0.61 s recovery |
 | LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49) |
 | LMB tap: throw [footage 0033-0036] | one frame of wind-up, cocked low behind, then an overhand throw | the hammer left on the press while the arm was still cocking | leaves the hand ~0.12 s after the press, as the arm comes through (`THROW_WIND`); asserted |
-| LMB cadence [game data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
-| RMB [game data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
+| LMB cadence [reference data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
+| RMB [reference data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
 | Shift [footage 0369-0380, game data Spin Dash] | ~3.5 m hard dash, one spin, 0.4 s recovery; 8 s (data at level 15) / 9.2 s (card) | matched in the earlier pass (3.5 m, 0.17 s, one spin) | off the dash feel, so it is felt as 3.5 m in 0.17 s (it was 3.0 m in 0.2 s under it); cooldown 8 s (game data, set in the audit) |
 | Shift while charging [wiki] | a short dash without the spin, ending the charge, on a reduced cooldown | short dash for half a charge | short dash on a full charge (owner #51 keeps the charge, so the reduction has no reason left; the game data doesn't list one) |
 | E, X, passive | see the per-slot table | matched in the earlier passes | unchanged |
@@ -154,23 +154,23 @@ Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, t
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|
 | The throw lands at the cursor, clamped to range | sheet bjorn.md, owner note | confirms (0408, 0024-0029) | built | `bjorn aim: the hammer lands at the cursor` |
-| The hammer flies a minimum distance | [wiki patch 20.11.24](https://the community wiki/wiki/Oath) (5 m) | consistent | built at 2.5 m so close clicks land near the cursor (owner: anywhere in range) | `bjorn small: a close cursor still throws 2.5 m` |
-| A recall can't come within 0.25 s of the throw | [wiki patch 20.11.24](https://the community wiki/wiki/Oath) | consistent (0.4 s round trips) | built | `bjorn small: a recall in the first 0.25 s is ignored` |
-| It passes through enemies, hitting out and back for the same damage | [wiki: Magnetic Hammer](https://the community wiki/wiki/Oath) | confirms (0041, 0043) | built | `bulwark LMB` lines |
-| Allies get vision round the planted hammer | [wiki](https://the community wiki/wiki/Oath) | not visible | built (already ours) | archetype check |
+| The hammer flies a minimum distance | wiki patch 20.11.24 (5 m) | consistent | built at 2.5 m so close clicks land near the cursor (owner: anywhere in range) | `bjorn small: a close cursor still throws 2.5 m` |
+| A recall can't come within 0.25 s of the throw | wiki patch 20.11.24 | consistent (0.4 s round trips) | built | `bjorn small: a recall in the first 0.25 s is ignored` |
+| It passes through enemies, hitting out and back for the same damage | wiki: Magnetic Hammer | confirms (0041, 0043) | built | `bulwark LMB` lines |
+| Allies get vision round the planted hammer | wiki | not visible | built (already ours) | archetype check |
 | No automatic return | sheet | 3.6 s+ planted | built | `bjorn: the planted hammer never comes back by itself` |
-| Wind-down frames after the swing and the spin: no glider straight away, so momentum carries | [wiki patch 05.02.25](https://the community wiki/wiki/Oath) | not visible | built: 0.3 s glide lock after the slam and the 360 spin (not after the perfect launch, which hands its speed to the glider: owner #49) | `bjorn small: wind-down after the slam` |
+| Wind-down frames after the swing and the spin: no glider straight away, so momentum carries | wiki patch 05.02.25 | not visible | built: 0.3 s glide lock after the slam and the 360 spin (not after the perfect launch, which hands its speed to the glider: owner #49) | `bjorn small: wind-down after the slam` |
 | Perfect window: launch >= 3.5 m in it, step <= 2 m outside, off a ledge into a glide at >= 70% of the launch speed | owner #49 | (no lunge in the footage) | built | `bjorn #49 ...` (tools/bjorn_launch_check.gd) |
 | Ult: free to move from the end of the slam while it erupts | owner #48, sheet f25-f49 | confirms (planted f25-f31, then he shifts) | built | `bjorn #48 ult: ...` |
-| Hammer Smash full at 1.25 s | [wiki](https://the community wiki/wiki/Oath) | full by 2.4 s | built | `bjorn LMB held: the full-charge flare at 1.25s` |
-| Shift during a Hammer Smash: a short dash without the spin, reduced cooldown | [wiki: Spin Dash](https://the community wiki/wiki/Oath) | not shown | built as the short dash without the spin; owner #51 keeps the charge, so it costs a full charge (the reduced cooldown went with the ending) | `combo bulwark: hold LMB > Shift` |
-| Shield up + Shift: a bash with its own 6 s cooldown, briefly invulnerable | in-game data, [wiki: Shield Bash](https://the community wiki/wiki/Oath) | not shown | built: Shield Charge on the RMB slot's cooldown | `combo bulwark: shield up > Shift`, `... spends no dash charge and has its own 6 s cooldown` |
-| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, [wiki: Valiant Strength](https://the community wiki/wiki/Oath) | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the 360 Smash, the Shield Charge and Slam; walls only | `combo bulwark: the 360 Smash into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him` |
-| Regen Field: a lasting zone round the hammer with a burst at its end; heals the shield only while it's up; never repairs a broken one | in-game data, [wiki: Regen Field](https://the community wiki/wiki/Oath) | confirms the zone (0414) | built: 4 s of ticks, then the burst | `combo bulwark: Mending Ground is a zone`, `bjorn small: Mending Ground doesn't repair a broken aegis` |
-| Allied wisps hit by the burst begin to resurrect | [wiki: Regen Field](https://the community wiki/wiki/Oath) | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
-| Ult: a fissure that travels forward from him | [wiki: Abyssalbreaker](https://the community wiki/wiki/Oath), sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
-| Ult: the first strike is small and briefly stuns; the eruptions hit hard and slow heavily | [wiki](https://the community wiki/wiki/Oath) | not legible | built: the racing fissure strikes each foe on the lane (4 + stun 0.5, data: "stuns struck targets"), then 18 + slow 50% per cell | same, `bjorn ult: the racing fissure struck every foe ...` |
-| Ult: blocked by walls | [wiki](https://the community wiki/wiki/Oath) | not shown | built | `bjorn ult small: a wall stops the fissure` |
+| Hammer Smash full at 1.25 s | wiki | full by 2.4 s | built | `bjorn LMB held: the full-charge flare at 1.25s` |
+| Shift during a Hammer Smash: a short dash without the spin, reduced cooldown | wiki: Spin Dash | not shown | built as the short dash without the spin; owner #51 keeps the charge, so it costs a full charge (the reduced cooldown went with the ending) | `combo bulwark: hold LMB > Shift` |
+| Shield up + Shift: a bash with its own 6 s cooldown, briefly invulnerable | in-game data, wiki: Shield Bash | not shown | built: Shield Charge on the RMB slot's cooldown | `combo bulwark: shield up > Shift`, `... spends no dash charge and has its own 6 s cooldown` |
+| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, wiki: Valiant Strength | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the 360 Smash, the Shield Charge and Slam; walls only | `combo bulwark: the 360 Smash into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him` |
+| Regen Field: a lasting zone round the hammer with a burst at its end; heals the shield only while it's up; never repairs a broken one | in-game data, wiki: Regen Field | confirms the zone (0414) | built: 4 s of ticks, then the burst | `combo bulwark: Mending Ground is a zone`, `bjorn small: Mending Ground doesn't repair a broken aegis` |
+| Allied wisps hit by the burst begin to resurrect | wiki: Regen Field | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
+| Ult: a fissure that travels forward from him | wiki: Abyssalbreaker, sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
+| Ult: the first strike is small and briefly stuns; the eruptions hit hard and slow heavily | wiki | not legible | built: the racing fissure strikes each foe on the lane (4 + stun 0.5, data: "stuns struck targets"), then 18 + slow 50% per cell | same, `bjorn ult: the racing fissure struck every foe ...` |
+| Ult: blocked by walls | wiki | not shown | built | `bjorn ult small: a wall stops the fissure` |
 | Ult: planted for the wind-up and slam, the lane shown first | sheet | confirms (f25-f31) | built | `bjorn ult cast: planted`, `bjorn ult telegraph` |
 | Ult: a crack stays about 10 s | sheet | confirms (f43-f71) | built: slows 20% | `bjorn ult small: the scar ...` |
 | Ult: interrupted by a stun in the wind-up | ours | - | built | `bjorn ult small: a stun in the wind-up interrupts it` |

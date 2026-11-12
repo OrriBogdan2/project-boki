@@ -6,7 +6,7 @@ from Thief to Dancer, and the ult pass (server update 6) gave her own ultimate b
 section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file names stay `thief`.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Shiv, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared steps are not used). Cooldown cuts keep the
+Source: ref-thief, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared steps are not used). Cooldown cuts keep the
 source's fraction of its own cooldown (Bolas -4 of 13, Farstep -8 of 28; Farstep's 20s is read at tier IV, so 28 at tier I).
 The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twice; our X has a fixed 24s), so it is not changed.
 
@@ -18,7 +18,7 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 
 ## Research summary
 
-- **Source hero:** Shiv, from the reference. The kit now follows the footage reference sheet
+- **Source hero:** ref-thief, from the reference. The kit now follows the footage reference sheet
   (`briefs/hero-ref/dancer.md`, frames at 5 fps) where it disagrees with the wiki text.
 - **The big change:** the source's left click is a ranged bolt from alternating hands that stops at the
   cursor. Our old signature (Twin Blades, a melee combo) is replaced by **Arc Bolts** (our name, our model).
@@ -36,7 +36,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 ## Feel pass (item 7)
 
 Owner review 1103 item 7: her Cartwheel, the empowered bolt after it and the reset are the source's identity.
-[game data] is sv/briefs/kits.md (Shiv, read at level 15); [footage] is
+[reference data] is sv/briefs/kits.md (ref-thief, read at level 15); [footage] is
 briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asserted in `--dancer-combo-check`
 (tools/dancer_feel_check.gd, lines `dancer feel: ...`).
 
@@ -46,17 +46,17 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
 | Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
-| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
-| What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
+| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [reference data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
+| What empowers | the dash empowers the next Arcslinger [reference data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
 | How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
-| Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add 10% of a bolt each, flat, as the source's +16 a stack |
-| Empowered ranks | +20% damage twice [game data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
-| Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
-| Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
+| Empowered damage | +214 on a 160 bolt, so 2.34x [reference data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add 10% of a bolt each, flat, as the source's +16 a stack |
+| Empowered ranks | +20% damage twice [reference data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
+| Empowered extras | an Arcslinger hit: 1 stack [reference data] | 2 Marks and Shred (+15% damage taken, 3s) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
+| Empowered range, look | 850 -> 950 units (+12%) [reference data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
 | The throw | 2-3 frames, one arm whipped from a wide stance [footage] | the body pitched, no arm keys | `thf_primed`: coiled with both blades cocked behind the shoulders, both driven out at 0.04, held to 0.12, a recoil onto the heels by 0.24, settled by 0.55 |
 | Auto rate | 0.45s [footage card] | 0.45s | unchanged |
-| Reset | landing the empowered shot resets Quickflip and refunds its mana [game data]; hit at 0187, the next Cartwheel at 0193 [footage] | the Vault back on the hit | unchanged, asserted on the hit's own step; a cyan star at her hip and the `thf_reset` heel snap |
-| Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
+| Reset | landing the empowered shot resets Quickflip and refunds its mana [reference data]; hit at 0187, the next Cartwheel at 0193 [footage] | the Vault back on the hit | unchanged, asserted on the hit's own step; a cyan star at her hip and the `thf_reset` heel snap |
+| Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [reference data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
 ## LMB range, speed (parity pass, ext/sable-lmb-range)
@@ -64,7 +64,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | What | Source | Ours before | Ours now |
 |---|---|---|---|
 | Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | unchanged |
-| Range | 850 units = 8.5m, "the aim laser length" (sv/FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). sv/briefs/kits.md gives no range [game data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
+| Range | 850 units = 8.5m, "the aim laser length" (sv/FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). sv/briefs/kits.md gives no range [reference data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
 | Projectile speed | no figure in the data; the footage shows a bolt cover 200 px in about 0.2s, 1000 px/s x 0.0375 = 37.5 m/s [footage, one frame at 5 fps, so rough] | 34 m/s | 37.5 m/s (8.5m in 0.23s) |
 
 Asserted in `--dancer-combo-check` (`dancer LMB: clamped to 8.5m`, `dancer LMB: flight time`, the empowered 9.5m line).
@@ -93,7 +93,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 ## Parity pass (LMB first)
 
 The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
-slot against the source. [game data] is sv/briefs (Shiv; the shared rotation rate from
+slot against the source. [reference data] is sv/briefs (ref-thief; the shared rotation rate from
 sv/briefs/physics.md); [footage] is briefs/hero-ref/dancer.md (5 fps). Asserted in `--dancer-combo-check`
 (tools/dancer_parity_check.gd, lines `dancer parity ...`); the Cartwheel and the empowered bolt are the feel
 pass above.
@@ -169,7 +169,7 @@ Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is 
 
 ## Small mechanics
 
-From the wiki's ability page and patch notes (https://the community wiki/wiki/Shiv), two guides
+From the wiki's ability page and patch notes (reference notes), two guides
 (https://gamerblurb.com/articles/the reference-how-to-play-shiv) and the footage sheet. "Built" means it is in the kit
 and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 

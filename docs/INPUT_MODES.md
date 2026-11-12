@@ -19,7 +19,7 @@ and the `scripts/arch/kits/<id>_kit.gd` hooks (`fire_rmb`, `rmb_hold_tick`, `e_r
 frame timings (not re-measured), the dash buffer, Q and G (ours only). `rmb.hold` is the tap/hold guard in seconds: 0 means the
 press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quick tap fires on release.
 
-## Vex (`gunslinger`, source Ghost, sheet venator)
+## Vex (`gunslinger`, source ref-gunslinger, sheet venator)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press, cursor-placed area, no recast | tap, shell lands on the cursor 1.6 s later, no recast | match | D; S:venator 118 |
 | Shift | press = short slide, hold = longer slide | tap (<0.18 s) skid 4.8 m, hold slide 7 m, fires through both | match | D "PRESS ... HOLD"; json `dash.tap_t` |
 
-## Kael (`juggernaut`, source Brall, sheet juggernaut)
+## Kael (`juggernaut`, source ref-juggernaut, sheet juggernaut)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -39,7 +39,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press, guard then automatic strike, no recast | press, guard 0.65 s then lunge, no recast | match | D; S:juggernaut 198 |
 | Shift | press, several charges | press, 2 charges (3rd at rank 2) | match (count is not input) | D; S:juggernaut 20 |
 
-## Lace (`archer`, source Myth, sheet pin)
+## Lace (`archer`, source ref-archer, sheet pin)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -49,7 +49,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press, then the next 3 charged shots need no charge, 6 s | press, next 3 LMB presses nock 0.5 s then loose a piercing arrow, 6 s window | match | D; S:pin 251 ff; W archer.md Starpiercer |
 | Shift | press = roll then Phase Walk | press = roll then Spirit Walk 2.8 s | match | D; S:pin 22 |
 
-## Cinder (`ashwick`, source Felix, sheet linwick)
+## Cinder (`ashwick`, source ref-ashwick, sheet linwick)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -59,7 +59,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press, flies; footage: ends at the end of the flight or on a recast | press, flies 1.8 s, press again lands early (`ult_recast`) | match; window 1.8 s ours, flight length source unread | S:linwick 226 |
 | Shift | press, 2 charges | press, 2 charges | match | D; S:linwick 17 |
 
-## Meeko (`tender`, source Elluna, sheet mooshmoosh)
+## Meeko (`tender`, source ref-tender, sheet mooshmoosh)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -69,7 +69,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press with an ally under the cursor, ~5 s channel, walk freely, no recast | same, 5 s tether, press while it runs is swallowed (`ult_recast` true) | match | D; S:mooshmoosh 221 |
 | Shift | press, own air-dash slot | press hop, air press = long glide on its own 14 s cooldown | match | D |
 
-## Tenzo (`dolm`, source Tetra, sheet breah)
+## Tenzo (`dolm`, source ref-dolm, sheet breah)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -79,7 +79,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | tap, or hold-drag to set the angle | tap, or hold the key and drag, release casts | match | D "TAP ... HOLD and drag"; S:breah 28 |
 | Shift | press, one dash with a rock | Rock Hop: press, then press again within 0.6 s of each take-off, up to 3 hops | differ (owner #111) | O 111; DECISIONS 2026-11-08 lists it as a recast |
 
-## Grimble (`dredge`, source Kingpin, sheet dredge)
+## Grimble (`dredge`, source ref-dredge, sheet dredge)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -89,7 +89,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | footage: one press, two waves 0.6 s apart, he stands planted | press, 1.1 s fan charge, two waves; he may walk slowly | match in input; walking differs (owner #36) | S:dredge 143 correction, 254; O 36 |
 | Shift | press | press, 3 chained charges, air pounce own slot | match | D |
 
-## Neve (`rimewright`, source Celeste, sheet tamsin)
+## Neve (`rimewright`, source ref-rimewright, sheet tamsin)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -99,7 +99,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press; recast any time cancels, a late recast stuns | press; recast breaks the shell with no stun until the last 0.75 s of 3.5 s, then it cracks early at 0.67 damage | match in shape; window unsettled (ours last 0.75 s, footage "about 3.2-3.5 s") | D "Reactivate early to cancel"; S:tamsin 222 |
 | Shift | hold-drag skate, release stops; air press skates in the air | hold skate (11.5 m/s, 1.6 s cap), release stops, air press skates at once | match | D "HOLD to skate"; S:tamsin 19 |
 
-## Albert (`bulwark`, source Oath, sheet bjorn)
+## Albert (`bulwark`, source ref-bulwark, sheet bjorn)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -109,7 +109,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press | press; plant, raise 0.4 s, slam | match | D; S:bjorn 27 |
 | Shift | press; with the shield up it is Shield Bash | press 360 Smash; with the aegis up a Shield Charge on its own cooldown | match | D; S:bjorn 25 |
 
-## Motley (`ostra`, source Void, sheet ostra)
+## Motley (`ostra`, source ref-ostra, sheet ostra)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -119,7 +119,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | tap, cursor-placed | tap, dome at the cursor 1 s, then the well | match | D; S:ostra 20 |
 | Shift | press, lob lands at the cursor | tap lobs at once; hold shows both ends, release lobs | match+ | S:ostra 18; O 135 keeps the mechanic |
 
-## Sparkle (`mage`, source Joule, sheet vireo)
+## Sparkle (`mage`, source ref-mage, sheet vireo)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -129,7 +129,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | R | press launches, reactivate (or click) crashes down | press; press again or attack lands; lands alone after 2 s | match; auto-land unsettled (source open question) | D; S:vireo 397 |
 | Shift | press = short dash, hold-charge = longer dash | press-and-hold charges the lane (0.6 s, auto at 0.9 s), release streaks; a tap is a short zap | match | D; json `dash.hold` 0.6 |
 
-## Sable (`thief`, source Shiv, sheet dancer)
+## Sable (`thief`, source ref-thief, sheet dancer)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
@@ -143,15 +143,15 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 
 | Recast | Source window | Ours | Verdict |
 |---|---|---|---|
-| Void E, Motley | from 0.3 s, bomb grows 6.5 s [S:ostra] | from 0.3 s, grows 6.5 s, fizzles 10 s at full | match, fizzle ours |
-| Shiv E, Sable | until 6 s [D] | 6 s | match |
-| Elluna E, Meeko | while the 2.5 s zone is up [D] | 2.5 s ring | match |
-| Celeste R, Neve | any time cancels; late stuns [D, S] | any time; late stun in the last 0.75 s | unsettled (window) |
-| Brall E, Kael | while attached, lifetime unread | 5 s | unsettled |
-| Joule R, Sparkle | second press lands, hover 1.6-2.0 s seen | 2 s then auto-lands | unsettled (auto-land) |
-| Felix R, Cinder | ends on a recast [S:linwick 226] | 1.8 s flight, recast lands early | match |
-| Tetra Shift, Tenzo | none (plain dash) | 0.6 s per hop, 3 hops | differ (owner #111) |
-| Oath LMB, Albert | hammer stays planted until recalled [D] | until recalled | match |
+| ref-ostra E, Motley | from 0.3 s, bomb grows 6.5 s [S:ostra] | from 0.3 s, grows 6.5 s, fizzles 10 s at full | match, fizzle ours |
+| ref-thief E, Sable | until 6 s [D] | 6 s | match |
+| ref-tender E, Meeko | while the 2.5 s zone is up [D] | 2.5 s ring | match |
+| ref-rimewright R, Neve | any time cancels; late stuns [D, S] | any time; late stun in the last 0.75 s | unsettled (window) |
+| ref-juggernaut E, Kael | while attached, lifetime unread | 5 s | unsettled |
+| ref-mage R, Sparkle | second press lands, hover 1.6-2.0 s seen | 2 s then auto-lands | unsettled (auto-land) |
+| ref-ashwick R, Cinder | ends on a recast [S:linwick 226] | 1.8 s flight, recast lands early | match |
+| ref-dolm Shift, Tenzo | none (plain dash) | 0.6 s per hop, 3 hops | differ (owner #111) |
+| ref-bulwark LMB, Albert | hammer stays planted until recalled [D] | until recalled | match |
 
 ## Result
 

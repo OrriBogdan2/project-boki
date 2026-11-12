@@ -1,6 +1,6 @@
-NEED OWNER: Celeste LMB reference
+NEED OWNER: ref-rimewright LMB reference
 
-# Neve the Snowglide (`rimewright`) vs Celeste: owner playtest 11-08
+# Neve the Snowglide (`rimewright`) vs ref-rimewright: owner playtest 11-08
 
 ## Part 1: LMB (Ice Darts): not pinned down, so Step 1 was skipped per the brief's guard
 
@@ -22,7 +22,7 @@ and slow the small darts to roughly the footage's stream.
 
 ## Part 2: E Rink Wall vs Frozen Barricade
 
-| | Celeste Frozen Barricade (source) | Neve Rink Wall before | after | note |
+| | ref-rimewright Frozen Barricade (source) | Neve Rink Wall before | after | note |
 |---|---|---|---|---|
 | Cooldown | 20 / 17.5 / 15 s by rank [D]; footage card 16.7 with CDR | 17 s | 17 s | kept: footage card matches |
 | Wall health | 1750 [wiki], about 50 of her own darts (35 a dart) | 70 HP (17 of our darts) | 200 HP (50 of ours at 4) | changed: dart-ratio parity |
@@ -39,15 +39,15 @@ Alternative not taken: travel 10.8 m / life 3 s (source parity) against owner it
 
 ## Part 3: X Rimelock
 
-| | source (Celeste Ice Crash) | before | after |
+| | source (ref-rimewright Ice Crash) | before | after |
 |---|---|---|---|
 | Rink radius | 4 bh = 7.2 m [F]; no number in the data | 7.2 m | 8.3 m (+15%, hitbox and the drawn rink, one `radius`) |
 | Statue slide (cast from a skate) | none in the source (our mechanic) | skate speed easing out over 0.8 s, about 6 m | 1.05x the skate speed, about 6.3 m (`carry_k`) |
 | Hold / crack | 3.5 s | 3.5 s | 3.5 s (unchanged) |
 | Her body | eight-point ice star | a frost bud of six ice petals closing over her (a shell) | her body is ice: every mesh of her model trades its material for `shaders/hero_ice.gdshader` |
 
-Parity used for the size: Celeste's rink measured at 4 body heights (7.2 m) from the footage, then +15%.
-Celeste's data gives no radius, so the footage number is the base.
+Parity used for the size: ref-rimewright's rink measured at 4 body heights (7.2 m) from the footage, then +15%.
+ref-rimewright's data gives no radius, so the footage number is the base.
 
 The ice body (`scripts/arch/kits/ice_body.gd`): on the cast a frost front climbs from her feet to above her
 head over the 0.2 s snap, every surface turning to translucent refractive ice (screen refraction, fresnel

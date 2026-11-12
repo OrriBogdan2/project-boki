@@ -37,7 +37,7 @@ Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
-Source (Kingpin) vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md), [F] footage (hero-ref/dredge.md,
+Source (ref-dredge) vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md), [F] footage (hero-ref/dredge.md,
 5 fps), [O] owner notes. The parity asserts are `_parity_gun` in `tools/dredge_combo_check.gd` ("parity gun ...");
 the rest are the existing asserts named in "Combinations".
 
@@ -120,30 +120,30 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |
 |---|---|---|---|
-| The grab pierces terrain and drags the target over it | built for rocks, props and cliff faces (a placed wall still stops it) | owner data, [wiki](https://the community wiki/wiki/Kingpin), owner | yes (0141, 0147) |
-| The grab takes the first target, enemy or ally; an ally is pulled to safety | built | [wiki](https://the community wiki/wiki/Kingpin), [guide](https://deltiasgaming.com/?p=298298) | no |
-| The pull follows physics: a target you don't let reach you swings round you | built (weighted reel; his braced shuffle still swings it) | [wiki](https://the community wiki/wiki/Kingpin) | partly (0147: the pull follows the hunter) |
-| The pull lasts until arrival or 3s | built | [wiki](https://the community wiki/wiki/Kingpin) | yes |
-| It scoops up wisps along its path | built (downed hunters it passes are reeled in too) | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| Only the dash and the air dash can be used while pulling | built | [wiki](https://the community wiki/wiki/Kingpin) | no |
+| The grab pierces terrain and drags the target over it | built for rocks, props and cliff faces (a placed wall still stops it) | owner data, wiki, owner | yes (0141, 0147) |
+| The grab takes the first target, enemy or ally; an ally is pulled to safety | built | wiki, [guide](https://deltiasgaming.com/?p=298298) | no |
+| The pull follows physics: a target you don't let reach you swings round you | built (weighted reel; his braced shuffle still swings it) | wiki | partly (0147: the pull follows the hunter) |
+| The pull lasts until arrival or 3s | built | wiki | yes |
+| It scoops up wisps along its path | built (downed hunters it passes are reeled in too) | wiki | no |
+| Only the dash and the air dash can be used while pulling | built | wiki | no |
 | He holds his height from the throw to the end of the reel; slow walk while the hook flies out | built (20%, `CastHold`) | owner item 31 | no |
 | The caster is Grounded while reeling; the target is stunned for the pull | built | footage | yes (0127) |
-| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | [wiki](https://the community wiki/wiki/Kingpin) | yes |
-| The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| The slam then a dash limits the dash's turn | built (35 degrees for 0.8s) | [wiki](https://the community wiki/wiki/Kingpin), patch 05.02.25 | no |
-| The slam pushes you down, never over the abyss | built (owner: the air cast smashes straight down) | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| Height adds slam damage (rank 4 in the source) | built for every rank (+50%) (owner note); the rank-3 bonus is the abyss damage | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | [wiki](https://the community wiki/wiki/Kingpin) | yes (0040 vs 0112) |
-| Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| Backstab +50% | built | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | [wiki](https://the community wiki/wiki/Kingpin) | no |
-| The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | [wiki](https://the community wiki/wiki/Kingpin) | yes (ult 0034, 0040) |
-| Every slug applies Anti-Heal | built (3s, as the cloak's) | [wiki](https://the community wiki/wiki/Kingpin) | yes (green streaks) |
+| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | wiki | yes |
+| The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | wiki | no |
+| The slam then a dash limits the dash's turn | built (35 degrees for 0.8s) | wiki, patch 05.02.25 | no |
+| The slam pushes you down, never over the abyss | built (owner: the air cast smashes straight down) | wiki | no |
+| Height adds slam damage (rank 4 in the source) | built for every rank (+50%) (owner note); the rank-3 bonus is the abyss damage | wiki | no |
+| The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | wiki | yes (0040 vs 0112) |
+| Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | wiki | no |
+| Backstab +50% | built | wiki | no |
+| Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | wiki | no |
+| The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | wiki | yes (ult 0034, 0040) |
+| Every slug applies Anti-Heal | built (3s, as the cloak's) | wiki | yes (green streaks) |
 | A fan grows on the ground over the 1.1s charge and is the exact hit area | built (AimKit cone, everyone sees it) | footage | yes (ult 0026, 0033) |
 | He stands planted through the charge | replaced (owner item 36): a slow walk (30% charging, 20% firing) and the aim follows the cursor; still no gun, Abyssal Hand, Anchor or barge until it ends | footage | yes (ult 0022-0041) |
 | Up close every slug of both waves connects | built (slugs leave his fists, so at 1.6m all six hit) | footage | yes (ult 0034, 0040) |
 | Best after a stun (the reel or the slam covers the charge) | built (the reel combo is asserted) | [guide](https://deltiasgaming.com/?p=298298) | yes |
-| Explosive: more damage to destructibles | built: every slug breaks a crate or pot and lights a keg (props break in one hit, so "more damage" is moot); asserted `ult props` | [wiki](https://the community wiki/wiki/Kingpin) | no |
+| Explosive: more damage to destructibles | built: every slug breaks a crate or pot and lights a keg (props break in one hit, so "more damage" is moot); asserted `ult props` | wiki | no |
 
 ## Moving while casting (RMB and E)
 

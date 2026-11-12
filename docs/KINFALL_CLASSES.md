@@ -17,8 +17,8 @@ These are Kinfall's own numbers, set inside the ranges the reference's roster us
 | Run speed | 4.85 m/s | 4.65 m/s | 4.40 m/s | 4.15–4.9 |
 | Hitbox radius | 0.35m | 0.40m | 0.50m | — |
 | Dash | 3.6m, every 6.5s (was 4.5m + slide) | 3.45m, every 9s (was 3.8m + slide) | 3.1m, 2 charges, 12s each (was 3.2m + slide) | 6.5–15s |
-| Air dash (ex) | 5m, 12s (was 7m) | 4.6m, 13s (was 6m) | 4.2m, 15s (was 5m) | Jin: 12.5s |
-| Knockback taken | ×1.18 (weight 0.85) | ×1.0 | ×0.74 (weight 1.35) | Beebo is "10% lighter" |
+| Air dash (ex) | 5m, 12s (was 7m) | 4.6m, 13s (was 6m) | 4.2m, 15s (was 5m) | ref-duelist: 12.5s |
+| Knockback taken | ×1.18 (weight 0.85) | ×1.0 | ×0.74 (weight 1.35) | ref-hunter is "10% lighter" |
 | Glide before overheat | ~17s (heat ×1.2) | ~14s | ~12s (heat ×0.85) | ~14s; Glide Boots +40% |
 | Knock heal | 250 | 250 | 250 | 250 (1.0) |
 
@@ -41,14 +41,14 @@ Each class has two guns and one sword. Firing behavior is measured from the refe
 | Weapon | Class | How it fires | Per hit | Rate | Range | Magazine / reload |
 |---|---|---|---|---|---|---|
 | SMG | Light | Hold; spread grows while firing; damage drops to 60% past 60% of range | 20 | 14/s | 7m, 55 m/s shots | 36 / 1.4s |
-| Sniper | Light | Press → 0.6s aim with a laser enemies can see → one round at 32 m/s you can dodge. 50% damage point-blank, full from half range. Slowed while aiming (Shrike) | 240 | every 1.5s | 16m | 5 / 2.2s |
-| Twin Blades | Light | Tap for a 3-hit combo with small lunges; hold 0.5s for a 4.5m lunging stab (Jin) | 38 / 38 / 64; charged 120 | 0.22s per swing | 2.0m, 110° | — |
-| Rifle | Medium | Hold; damage falls to 60% over the first 10 rounds, so short bursts win (Ghost) | 28 | 12.5/s | 9.5m, 110 m/s | 30 / 1.8s |
+| Sniper | Light | Press → 0.6s aim with a laser enemies can see → one round at 32 m/s you can dodge. 50% damage point-blank, full from half range. Slowed while aiming (ref-sniper) | 240 | every 1.5s | 16m | 5 / 2.2s |
+| Twin Blades | Light | Tap for a 3-hit combo with small lunges; hold 0.5s for a 4.5m lunging stab (ref-duelist) | 38 / 38 / 64; charged 120 | 0.22s per swing | 2.0m, 110° | — |
+| Rifle | Medium | Hold; damage falls to 60% over the first 10 rounds, so short bursts win (ref-gunslinger) | 28 | 12.5/s | 9.5m, 110 m/s | 30 / 1.8s |
 | Burst Rifle | Medium | 3-round bursts | 40 ×3 | burst every 0.48s | 10.5m, 60 m/s | 27 / 1.5s |
 | Longsword | Medium | 3-hit combo, +25% on the blade tip; hold 0.8s for a 3m lunge | 46 / 46 / 74; charged 160 | 0.28s | 2.4m, 140° | — |
-| Shotgun | Heavy | 7 slugs in a 60° fan that slow down and stop at 5m. Spread grows +8° per shot (max +24°); dashing resets it. One slug landing still does 46% (Kingpin) | 7 × 25 | every 0.9s | 5m | 6 / 1.8s |
-| Minigun | Heavy | Hold: 0.7s spin-up, then spread narrows from 14° to 3° over 1.5s. Slowed to 50% while firing; +1.5m range once spun up (Hudson) | 17 | 16.7/s | 10m (11.5m spun) | 150 / 3s |
-| Greatsword | Heavy | Slow 3-hit combo, +30% on the tip; hold 1s for a slam that stuns 0.6s and knocks back hard (Brall: 3.2m reach) | 64 / 64 / 104; charged 200 | 0.4s | 3.2m, 160° | — |
+| Shotgun | Heavy | 7 slugs in a 60° fan that slow down and stop at 5m. Spread grows +8° per shot (max +24°); dashing resets it. One slug landing still does 46% (ref-dredge) | 7 × 25 | every 0.9s | 5m | 6 / 1.8s |
+| Minigun | Heavy | Hold: 0.7s spin-up, then spread narrows from 14° to 3° over 1.5s. Slowed to 50% while firing; +1.5m range once spun up (ref-minigun) | 17 | 16.7/s | 10m (11.5m spun) | 150 / 3s |
+| Greatsword | Heavy | Slow 3-hit combo, +30% on the tip; hold 1s for a slam that stuns 0.6s and knocks back hard (ref-juggernaut: 3.2m reach) | 64 / 64 / 104; charged 200 | 0.4s | 3.2m, 160° | — |
 
 ## Time to kill (primary weapon only, every hit lands, reloads included, no armor)
 

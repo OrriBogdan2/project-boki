@@ -25,7 +25,7 @@ slide tap 4.6 m and hold 7 m.
 
 ## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Vex: each slot reads
-`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Ghost, `Upg:` lines.
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: ref-gunslinger, `Upg:` lines.
 
 | Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
 |---|---|---|---|
@@ -61,7 +61,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 ## Parity pass (LMB first)
 
 The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
-slot against the source. [game data] is sv/briefs (Ghost; the shared rotation rate from
+slot against the source. [reference data] is sv/briefs (ref-gunslinger; the shared rotation rate from
 sv/briefs/physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner notes override both. Asserted in
 `--gunslinger-combo-check` (tools/venator_parity_check.gd, lines `Venator parity ...`).
 
@@ -72,7 +72,7 @@ sv/briefs/physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | LMB | tracking | direction only, rounds to max range past the cursor; yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted with the cursor sweeping round her at 6 rad/s while she walks: every round leaves on its own step's aim; 180 degrees in 0.15s |
 | LMB | cadence | a string of about 10 rounds in about 1.4s [footage] | 0.12s | unchanged; asserted held |
 | LMB | slow while firing | "no visible slow while firing" [footage] | the shared 80% | none (`fire_slow` 1.0) |
-| LMB | magazine | a 30-round magazine that "rapidly reloads when not firing"; the first 10 rounds of each hit harder [game data]; no reload is seen in the footage | 24 rounds, then a 1.7s reload | 30 rounds; after 0.35s with no round leaving it refills at 40 rounds a second (a string after a pause starts full, as its first 10 rounds do). No reload exists (owner decision 23:45 UTC): run dry, the trigger is dead until the drum is full again (about 1.1s, held or not), then the string picks up |
+| LMB | magazine | a 30-round magazine that "rapidly reloads when not firing"; the first 10 rounds of each hit harder [reference data]; no reload is seen in the footage | 24 rounds, then a 1.7s reload | 30 rounds; after 0.35s with no round leaving it refills at 40 rounds a second (a string after a pause starts full, as its first 10 rounds do). No reload exists (owner decision 23:45 UTC): run dry, the trigger is dead until the drum is full again (about 1.1s, held or not), then the string picks up |
 | LMB | reticle | two arcs "( )" bracket the hunter left and right while firing, about 0.7 bh [footage 0026, 0099] | none | two thin arcs 1.25m out either side, on your screen only, while the rifle fires |
 | RMB | launcher shot | the owner, item 112: fired from the cannon's top launcher, "the bigger explosion thing, not the minigun" (replaces the side toss and the footage's overhand) | cocked over the shoulder, an overhand whip, leaving 1.6m up | no throw: a recoil kick on the cannon, a muzzle puff and the grenade thunk |
 | E | recoil | a ~0.5 bh shove back on fire [footage] | the shove, and a screen shake on your own camera | the shove; no screen shake (owner rule 50) |
@@ -175,19 +175,19 @@ level-9 hunter).
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
 |---|---|---|---|
-| Rifle damage decays over the first 10 rounds to 50% | [wiki: Ghost](https://the community wiki/wiki/Ghost) (rifle) | numbers 60 to 30 | yes: data asserted |
-| Bonus damage to Dazed targets | [wiki](https://the community wiki/wiki/Ghost) | 1.9x yellow numbers | yes: "+90%", gold numbers |
-| Wall blast: cone, knockback, launched into terrain = stun | [wiki](https://the community wiki/wiki/Ghost) (Spike Grenade) | cone shown | yes |
+| Rifle damage decays over the first 10 rounds to 50% | wiki: ref-gunslinger (rifle) | numbers 60 to 30 | yes: data asserted |
+| Bonus damage to Dazed targets | wiki | 1.9x yellow numbers | yes: "+90%", gold numbers |
+| Wall blast: cone, knockback, launched into terrain = stun | wiki (Spike Grenade) | cone shown | yes |
 | The caster's view pushes out 25% and leans along the line through the cast, easing in and out over about 0.2 s, no shake | Owner item 68 | not shown | yes: "Vex item 68" |
-| The Longneedle's aim locks at the press and turns at a capped 90 deg/s (`turn_deg_s`); a 180-degree flick moves the beam at most 54 deg, a small adjustment still lands | Owner item 144 (Ghost's E feel) | not shown | yes: "a 180-degree flick" |
+| The Longneedle's aim locks at the press and turns at a capped 90 deg/s (`turn_deg_s`); a 180-degree flick moves the beam at most 54 deg, a small adjustment still lands | Owner item 144 (ref-gunslinger's E feel) | not shown | yes: "a 180-degree flick" |
 | The push-out scales with the aim distance: none inside 5 m (`view_near_m`), a smooth ramp to the full 25% at the 18 m range, eased | Owner item 144b | not shown | yes: "an aim at 3 m leaves the camera alone" |
 | Aim stays free through a dash: the body and rifle stay on the cursor, only the legs follow the slide (owner item 109) | Owner | slides up-left while firing up-right | yes: "Vex item 109", `--dash-aim-check` |
-| Combat Slide: tapped in the air for 2/3 of the full-hold distance | [wiki](https://the community wiki/wiki/Ghost) patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
+| Combat Slide: tapped in the air for 2/3 of the full-hold distance | wiki patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
 | Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | not separable | yes: "a held slide is owed a longer cooldown and letting go early refunds nothing" |
-| Knocks reset the slide | [wiki](https://the community wiki/wiki/Ghost) | not shown | yes |
-| The omnivamp stacks wear off all at once | [wiki](https://the community wiki/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
-| Railgun pierces terrain and every target | [wiki](https://the community wiki/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |
-| The grenade sticks to dynamic objects (shields, barricades) | [wiki](https://the community wiki/wiki/Ghost) patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
+| Knocks reset the slide | wiki | not shown | yes |
+| The omnivamp stacks wear off all at once | wiki patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
+| Railgun pierces terrain and every target | wiki | crosses a chasm | yes: through a wall, two targets |
+| The grenade sticks to dynamic objects (shields, barricades) | wiki patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
 | Mini Nuke: lands where the cursor was at cast, 1.6 s after, no tracking | reference sheet (both casts) | f29 to f45 | yes: "it lands exactly at the cursor", "nothing lands before 1.6s" |
 | Mini Nuke: +50% damage in the centre | [thebackdash hunter list](https://thebackdash.com) (older "arcane napalm" wording) | red-orange core (f41) | yes: "+50% in the centre" |
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
@@ -197,7 +197,7 @@ level-9 hunter).
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
 - **Owner rule (11-10 playtest): the Burr Charge climbs terrain, only strict walls stop it.** In flight it reads the ground every 0.25 m (`BURR_SAMPLE`) and never flies lower than 0.25 m over it (`BURR_RIDE`), so it rides up ramps, stairs and ledges below it to a foe on high ground. A strict wall is a blocker tile (rock, tree, wall) standing above it, or ground that rises more than a walkable step (`World.STEP`, 0.32 m) at steeper than 50 deg (`BURR_WALL_DEG`; stairs are 39 deg) with its top above the charge: a terrace face. It sticks just in front, never past. (Before, any ground 0.6 m over her feet stopped it, so the top of a ramp did.) Assert `venator RMB: rides a ramp up to a foe on high ground`, `... a vertical wall stops it`, `... a rock stops it too`. Training Area: stand below a stair flight, aim RMB at a dummy on the terrace above. Other ground lanes keep their own rule, no shared code: Bjorn's ult lane (`bjorn_ult.gd` `_reach`, any ground 1.2 m over his feet ends it).
 - RMB is a tap fired from the arm-cannon's top launcher (owner item 112: no hold, no throw): on the press, ground or air, no lane first. It leaves from `launcher_fire` on the new model, above the gun's muzzle otherwise; the flash waits 0.1 s for `launcher_muzzle`.
-- **The drum, with no reload in the game (owner decision 23:45 UTC):** the data gives Ghost's rifle a 30-round
+- **The drum, with no reload in the game (owner decision 23:45 UTC):** the data gives ref-gunslinger's rifle a 30-round
   magazine that "rapidly reloads when not firing", and the footage never shows a reload. Ours: after 0.35 s with no
   round leaving, the drum refills at 40 rounds a second (the data says only "rapidly"). Run dry, nothing fires until
   the drum is full again, whether the trigger is held or not (0.35 s + 0.75 s); that full refill is the only pause a

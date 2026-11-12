@@ -1,11 +1,11 @@
 # Motley the Void Jester (archetype id `ostra`, Medium)
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
-player-facing; every name, number and word in the shipped game is our own (renames: Swap -> Lantern Trade, Void Snap -> Shard
+player-facing; every name, number and word in the shipped game is our own (renames: Swap -> Lantern Trade, ref-ostra Snap -> Shard
 Snap, Unstable Anomaly -> Brimseed, gravity orb -> Tether Lantern orb).
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Void, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% / 15% steps are not used). Cooldown
+Source: ref-ostra, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% / 15% steps are not used). Cooldown
 cuts are the source's seconds (our base cooldowns equal the source's tier-I ones). The ultimate takes no upgrade in our kit
 (the source's R: -5s, twice; our X has a fixed 70s), so it is not changed.
 
@@ -17,7 +17,7 @@ cuts are the source's seconds (our base cooldowns equal the source's tier-I ones
 
 ## Research summary
 - Sources: The reference sheet from footage (briefs/hero-ref/ostra.md, outside the repo), the wiki page
-  (https://the community wiki/wiki/Void) and the Steam patch-note text (Nov 2024 - Dec 2025).
+  (reference notes) and the Steam patch-note text (Nov 2024 - Dec 2025).
 - Owner notes (sync61) override the footage: spamming Shift must never dash in a random direction; Shift keeps his height; RMB
   has one charge and must visibly stun, the training dummy too.
 - Owner dash note (Nov 2) on the Trade: a target circle at the cursor with a landing marker; while the lantern flies he
@@ -63,7 +63,7 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 | RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.32s wind-up (an opaque black orb with a thin pale rim swelling at his hand as he coils back; he slows 25%), then on the release beat (both palms shoved out) one 2.7m bundle of dark violet crystal prisms with bright rims flies 29.5 m/s to 13m (0.44s at full range) and the damage lands on its impact: 9.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy; a 0.15s recovery keeps him slowed (item 40: the data has no timing, so the whole cast is +40%, 0.54s -> 0.76s at full range, all in the wind-up and the flight; the footage's bundle crosses about 30 m/s) | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
 | Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (his ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (violet at him, magenta at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark void lantern (dark glass, magenta rim, violet spikes, a pale mask face with slanted eyes and a grin; owner 11-08: purple and ominous, the UI's Void & Masks colours) lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail and dark smoke wisps, 1.8s; the lantern, motes, smoke, flashes and arrival ring are drawn 1.3x (`TRADE_LOOK_K`, owner 11-08 +25-35%; visual only, the rings and sigils stay at the real 1.5m catch); meanwhile he drifts at 35% of run speed (`dash.fly_slow`, CastHold) at the height he cast at, even over the abyss (no fall); then he is there (both ends fold in on themselves, motes drawn inward with no ring or blast, and his appear-pop), keeping his height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where he is when it lands, each keeping its place in the circle (nobody is slowed: the data's Swap only swaps). A knock while it flies still shoves him (only his height is held). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap` (ground), `ostra_swap_air` (air), `ostra_arrive` | `os_swap_lob` (a dash sound, owner 11-08: a low whoosh, void drone and reversed whisper under a glassy semitone sting), `os_swap` |
 | E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x (COLLAPSE on a hunter at full); left alone it waits at full size for the recast, and fizzles harmlessly after 10s unpopped | `ostra_seed`, `ostra_pop` | `os_seed`, `ostra_music_box`, `os_pop` + `ostra_spring_boing` |
-| X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Motley is locked in the cast for the 1.0s dome (Void's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (Void acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
+| X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Motley is locked in the cast for the 1.0s dome (ref-ostra's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (ref-ostra acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
 Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
@@ -75,7 +75,7 @@ to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the
 level-4 bonus.
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, Void), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, ref-ostra), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
 
 | Slot | Source | Ours | Asserted (`--ostra-combo-check`) |
 |---|---|---|---|
@@ -167,7 +167,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | The orb charge is binary (charged or not), since 05.02.25 | patch notes, wiki | no | changed by the owner (item 60): a continuous build-up over the same 1.4s window |
 | Charged orb: faster, slows 10% for 1.5s | wiki | yes (SLOWED) | built |
 | Charged orb passes through terrain | wiki, owner's data | no | not built (our shots stop on terrain; a pierce would read as a bug on our islands) |
-| Snap slows Void while casting (25% less since Jan 2025) | patch notes | no | built: 25% slower during the 0.32s wind-up and the 0.15s recovery |
+| Snap slows ref-ostra while casting (25% less since Jan 2025) | patch notes | no | built: 25% slower during the 0.32s wind-up and the 0.15s recovery |
 | Snap stun grows with distance | wiki, card | yes | built 0.8-1.8s |
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
 | Swap travel 1.7s, 1.25s Empowered | wiki | yes (about 1.8s) | built |
@@ -179,7 +179,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | A dome telegraph of the final size before it opens | footage | yes (f23-f32, 1.0s) | built, everyone sees it; asserted |
 | Enemies who enter during the 3.5s are caught too ("for 3.5s") | card | no | built; asserted `a foe who walks in later is caught too` |
 | Empowered: radius 350 -> 500 (and a June patch made Empowered really enlarge it) | card, patch notes (June 25) | yes (f89-f101) | built: 3.6m -> 5.1m when cast Swollen; asserted |
-| Void is held for the cast, then acts freely while it holds | footage | yes (f23-f33 cast, f50 shooting) | built (owner 18:20, replacing item 16's full lock): locked for the 1.0s dome, free once it opens; asserted `lock: ...`, `release: ...` |
+| ref-ostra is held for the cast, then acts freely while it holds | footage | yes (f23-f33 cast, f50 shooting) | built (owner 18:20, replacing item 16's full lock): locked for the 1.0s dome, free once it opens; asserted `lock: ...`, `release: ...` |
 | Allies unaffected; it never breaks allied destructibles (patch) | sheet, patch notes (June 25) | | built: foes only; it hurts no walls at all |
 | Empowered damage is Explosive (175 a tick to destructibles) | wiki | no | built for props: a Swollen well's ticks break crates and pots and light kegs in its radius (a plain well does not); asserted. Placed walls are unchanged (they take no well damage) |
 | It closes with no explosion | footage | yes (f66) | built |
@@ -190,7 +190,7 @@ Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is 
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
-| RMB wind-up (ours 0.32 s; footage one frame, about 0.2 s) | Patch notes: Snap slows Void 25% while casting; black orb at the hand | Walks at 75% (`snap.cast_slow` 0.25 in `move_k`), faces the cursor | matches the patch notes |
+| RMB wind-up (ours 0.32 s; footage one frame, about 0.2 s) | Patch notes: Snap slows ref-ostra 25% while casting; black orb at the hand | Walks at 75% (`snap.cast_slow` 0.25 in `move_k`), faces the cursor | matches the patch notes |
 | RMB release and recovery (0.15 s) | Both palms shove out; no stop shown | Same 25% slow through the 0.15 s recovery (`snap_rec`) | matches |
 | E drop (0.25 s orb falls on the spot) | A small orb drops at the cursor; nothing about the body | Free at full speed, faces the cursor | unmeasured, no data to change |
 | E bomb growing (6.5 s) | Not shown | Free | n/a |

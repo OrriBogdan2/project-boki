@@ -20,7 +20,7 @@
 		"lmb": {"mode": "fire", "variant": "short", "source": "wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown. Owner item 51 overrides the ending: the short plain dash goes on a full charge (with the charge kept the reduced cooldown has no reason left) and the swing keeps charging through it (hold.lmb.ground); in the swing's step or the perfect launch, Shift goes at once"},
 		"rmb": {"mode": "fire", "variant": "charge", "source": "data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it"},
 		"e": {"mode": "fire", "source": "data: Regen Field stays round the hammer; the dash doesn't touch it"},
-		"x": {"mode": "buffer", "reason": "planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant", "source": "Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: Oath planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts."},
+		"x": {"mode": "buffer", "reason": "planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant", "source": "Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: ref-bulwark planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts."},
 		"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 	},
 	"hold": {

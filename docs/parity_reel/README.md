@@ -41,7 +41,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - **Glide dive** (hold Ctrl under the glider) has the source's numbers, but the key is ours.
 - **Dash to LMB/RMB flow rows** marked `[?]` have no source; they run as the kit's default.
 
-## Grimble the Scrap King (`dredge`, source Kingpin)
+## Grimble the Scrap King (`dredge`, source ref-dredge)
 [dredge.mp4](dredge.mp4)
 
 Still differs:
@@ -61,7 +61,7 @@ Seen in the reel: the slugs hang as violet dots at the stop line like the footag
 drags (HOOKED); the cone telegraph and slam read; the Broadside's fan is a flat-edged amber wedge where the
 footage's is a pale rounded fan [F]; the hero is smaller in frame than the source's view.
 
-## Neve the Snowglide (`rimewright`, source Celeste)
+## Neve the Snowglide (`rimewright`, source ref-rimewright)
 [rimewright.mp4](rimewright.mp4)
 
 Still differs:
@@ -82,7 +82,7 @@ Seen in the reel: the spear's burst ring and the wall's tall pale-blue slab matc
 dash leaves an ice slab behind instead of the footage's streaking crystal ribbon; Rimelock is one big cyan disc
 with a swirl, the footage's a smaller frost bud with the zone ring [F].
 
-## Sparkle the Storm Chaser (`mage`, source Joule)
+## Sparkle the Storm Chaser (`mage`, source ref-mage)
 [mage.mp4](mage.mp4)
 
 Still differs:
@@ -98,7 +98,7 @@ Still differs:
 Seen in the reel: the Storm Rod's pink burst reads like the footage's spear impact; Kitefall is a wide pink
 storm field over the arena, where the footage zooms out to a dark ring with a gold marker at the cursor [F].
 
-## Mossy the Barnacle Knight (`bulwark`, source Oath)
+## Mossy the Barnacle Knight (`bulwark`, source ref-bulwark)
 [bulwark.mp4](bulwark.mp4)
 
 Still differs:
@@ -115,7 +115,7 @@ Seen in the reel: the throw's dotted line, the flame-arc swing and the green zon
 Faultline telegraph is an amber rectangle with rubble where the footage's is a cyan one with a gold eruption
 [F]; the 360 Smash leaves an orange ring, the footage a red spin ring with a damage number.
 
-## Sable the Silver Thief (`thief`, source Shiv)
+## Sable the Silver Thief (`thief`, source ref-thief)
 [thief.mp4](thief.mp4)
 
 Still differs:
@@ -128,7 +128,7 @@ Still differs:
 Seen in the reel: the Vault flip reads like the footage; the Encore is a wide pale-violet disc where the footage's
 is a thin cyan ring [F].
 
-## Motley the Void Jester (`ostra`, source Void)
+## Motley the Void Jester (`ostra`, source ref-ostra)
 [ostra.mp4](ostra.mp4)
 
 Still differs:

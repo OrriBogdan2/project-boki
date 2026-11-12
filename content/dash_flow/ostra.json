@@ -4,45 +4,45 @@
 		"ground": {
 			"lmb": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Gravity Orbs keep firing."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so Gravity Orbs keep firing."
 			},
 			"rmb": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Void Snap casts during the flight."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so ref-ostra Snap casts during the flight."
 			},
 			"e": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Unstable Anomaly plants during the flight."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so Unstable Anomaly plants during the flight."
 			},
 			"x": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Black Hole casts during the flight (ours then holds him in its cast for the 1.0 s dome while the Trade still resolves)."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so Black Hole casts during the flight (ours then holds him in its cast for the 1.0 s dome while the Trade still resolves)."
 			},
 			"q": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him; a glove is an item, unaffected."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him; a glove is an item, unaffected."
 			}
 		},
 		"air": {
 			"lmb": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Gravity Orbs keep firing. Not shown from the air in the footage; the same rule."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so Gravity Orbs keep firing. Not shown from the air in the footage; the same rule."
 			},
 			"rmb": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Void Snap casts during the flight. Not shown from the air in the footage; the same rule."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so ref-ostra Snap casts during the flight. Not shown from the air in the footage; the same rule."
 			},
 			"e": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Unstable Anomaly plants during the flight. Not shown from the air in the footage; the same rule."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so Unstable Anomaly plants during the flight. Not shown from the air in the footage; the same rule."
 			},
 			"x": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Black Hole casts during the flight (ours then holds him in its cast for the 1.0 s dome while the Trade still resolves). Not shown from the air in the footage; the same rule."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him, so Black Hole casts during the flight (ours then holds him in its cast for the 1.0 s dome while the Trade still resolves). Not shown from the air in the footage; the same rule."
 			},
 			"q": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him; a glove is an item, unaffected. Not shown from the air in the footage; the same rule."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) ref-ostra stays roughly in place and nothing in the data or footage locks him; a glove is an item, unaffected. Not shown from the air in the footage; the same rule."
 			}
 		}
 	},
@@ -53,7 +53,7 @@
 		},
 		"rmb": {
 			"mode": "fire",
-			"source": "Void Snap slows Void while casting (patch notes), so he keeps acting through its short wind-up; nothing in the data or footage blocks Swap then: the lob goes and the Snap still releases."
+			"source": "ref-ostra Snap slows ref-ostra while casting (patch notes), so he keeps acting through its short wind-up; nothing in the data or footage blocks Swap then: the lob goes and the Snap still releases."
 		},
 		"e": {
 			"mode": "fire",
@@ -61,7 +61,7 @@
 		},
 		"x": {
 			"mode": "buffer",
-			"source": "Void is held in the cast for Black Hole's 1.0 s telegraph (footage f23-f33) and acts freely once it opens (f50, shooting); the owner (18:20) keeps that ~1 s lock. Shift during the dome is held (never lost) and goes the step the well opens and frees him; after that Swap goes at once.",
+			"source": "ref-ostra is held in the cast for Black Hole's 1.0 s telegraph (footage f23-f33) and acts freely once it opens (f50, shooting); the owner (18:20) keeps that ~1 s lock. Shift during the dome is held (never lost) and goes the step the well opens and frees him; after that Swap goes at once.",
 			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens Shift goes at once"
 		},
 		"q": {
@@ -73,7 +73,7 @@
 		"x": {
 			"mode": "lock",
 			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once",
-			"source": "Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
+			"source": "Footage (ult f23-f33): ref-ostra is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
 		}
 	}
 }

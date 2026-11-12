@@ -67,7 +67,7 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 
 Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
 
-## Vex (`gunslinger`, source Ghost) · slice Warden
+## Vex (`gunslinger`, source ref-gunslinger) · slice Warden
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -80,7 +80,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match |
 | Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
 
-## Zedran (`juggernaut`, source Brall) · slice Warden
+## Zedran (`juggernaut`, source ref-juggernaut) · slice Warden
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -94,7 +94,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape |
 | Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) |
 
-## Hem (`archer`, source Myth) · slice Warden
+## Hem (`archer`, source ref-archer) · slice Warden
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -108,7 +108,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 |
 
-## Cinder (`ashwick`, source Felix) · slice Warden
+## Cinder (`ashwick`, source ref-ashwick) · slice Warden
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -121,7 +121,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Ignite levels, bonus dmg [D] | Flashover 1/2, `ignite_bonus`, heal_knock .16 (wiki only) | match |
 | Anim | Footage poses | 12 moves, all on `cinder.glb` (41) | match on coverage |
 
-## Pip (`tender`, source Elluna)
+## Pip (`tender`, source ref-tender)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -134,7 +134,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | differ: shield ours. Drop lockout built (lock 4 s); which hits drop not traced |
 | Anim | Footage poses | 16 moves, all on `pip.glb` (45) | match on coverage |
 
-## Tarek (`dolm`, source Tetra)
+## Tarek (`dolm`, source ref-dolm)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -147,7 +147,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match |
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
 
-## Grimble (`dredge`, source Kingpin)
+## Grimble (`dredge`, source ref-dredge)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -160,7 +160,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down | match |
 | Anim | Footage poses | 13 moves, all on `dredge.glb` (40) | match on coverage |
 
-## Claire (`rimewright`, source Celeste)
+## Claire (`rimewright`, source ref-rimewright)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -174,7 +174,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Anim | Footage poses | 19 moves, all on `claire.glb` (49) | match on coverage |
 | Body | 1.1-1.15 [F] | size 1.15 | match |
 
-## Ostra (`ostra`, source Void)
+## Ostra (`ostra`, source ref-ostra)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -187,7 +187,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Damage Empowers; floats [D] | Swollen variants | match; floating `[?]` |
 | Anim | Footage poses | 14 moves, all on `ostra.glb` (45) | match on coverage |
 
-## Bjorn (`bulwark`, source Oath)
+## Bjorn (`bulwark`, source ref-bulwark)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -200,7 +200,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open |
 | Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
 
-## Ryzz (`mage`, source Joule)
+## Ryzz (`mage`, source ref-mage)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -214,7 +214,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Anim | Footage poses | 16 moves, all on `ryzz.glb` (45) | match on coverage |
 | Flow | Silent | Dash→LMB, X buffer | gap 9 |
 
-## Sable (`thief`, source Shiv)
+## Sable (`thief`, source ref-thief)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -229,7 +229,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
 
-Read from `content/archetypes/*.json` and the kit code. Source = the card text in `sv/briefs/kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Ostra's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except Oath's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
+Read from `content/archetypes/*.json` and the kit code. Source = the card text in `sv/briefs/kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Ostra's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except ref-bulwark's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
 
 | Hunter | Effect (ours) | Source | Verdict |
 |---|---|---|---|
@@ -325,18 +325,18 @@ PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a 
 
 | Hunter (weight) | Ours | Share | Source (Base HP) | Share | Ratio |
 |---|---|---|---|---|---|
-| Vex / Ghost (medium) | 145 | 0.942 | 1225 | 0.953 | 0.99 |
-| Zedran = Kael / Brall (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
-| Hem = Lace / Myth (light) | 124 | 0.805 | 1100 | 0.856 | 0.94 |
-| Cinder / Felix (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
-| Pip = Meeko / Elluna (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
-| Tarek = Tenzo / Tetra (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
-| Grimble / Kingpin (heavy) | 193 | 1.253 | 1445 | 1.124 | 1.12 |
-| Claire = Neve / Celeste (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
-| Ostra = Motley / Void (medium) | 145 | 0.942 | 1150 | 0.895 | 1.05 |
-| Bjorn = Albert / Oath (heavy) | 193 | 1.253 | 1475 | 1.147 | 1.09 |
-| Ryzz = Sparkle / Joule (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
-| Sable / Shiv (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
+| Vex / ref-gunslinger (medium) | 145 | 0.942 | 1225 | 0.953 | 0.99 |
+| Zedran = Kael / ref-juggernaut (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
+| Hem = Lace / ref-archer (light) | 124 | 0.805 | 1100 | 0.856 | 0.94 |
+| Cinder / ref-ashwick (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
+| Pip = Meeko / ref-tender (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
+| Tarek = Tenzo / ref-dolm (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
+| Grimble / ref-dredge (heavy) | 193 | 1.253 | 1445 | 1.124 | 1.12 |
+| Claire = Neve / ref-rimewright (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
+| Ostra = Motley / ref-ostra (medium) | 145 | 0.942 | 1150 | 0.895 | 1.05 |
+| Bjorn = Albert / ref-bulwark (heavy) | 193 | 1.253 | 1475 | 1.147 | 1.09 |
+| Ryzz = Sparkle / ref-mage (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
+| Sable / ref-thief (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
 
 **Verdict: no outlier over 1.25x, so no health number was changed** (global scale untouched). Kael and Cinder sit at 1.249 and Neve, Sparkle and Sable at 0.802 (1/1.247): inside the bar by a hair, caused by the same thing: three weight classes against a source where 8 of 12 Hunters share 1290. No owner note on tankiness was found in DECISIONS or OWNER_REVIEW_1103, so none overrides these rows. `--archetype-check` ("health:" rows) asserts every Hunter is inside 0.8x to 1.25x.
 

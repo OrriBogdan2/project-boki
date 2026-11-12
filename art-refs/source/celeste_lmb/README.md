@@ -1,4 +1,4 @@
-# Celeste LMB reference (The reference) — no frames saved
+# ref-rimewright LMB reference (The reference) — no frames saved
 
 No clip frames could be saved here on 2026-11-08: the only footage sources found (YouTube, the owner's
 footage sheet) cannot be downloaded from this worker (yt-dlp download refused, no pip), and every text

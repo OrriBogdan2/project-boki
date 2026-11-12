@@ -42,7 +42,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | Heavy Shot wall payoff ~5x, pierce invented (MED) | (b) pierce, (c) the ratio | it stops on the first foe (asserted). PARITY FIRST (owner 2026-11-07): the wall hit is 4.94x the shot (`pin.wall_mult`, the data's 173 extra on 35), so 80 to 148 on top of 16 to 30; a full pin is 178 and takes any 124 HP light in one. Asserted (`parity lace`) |
 | RMB hold 0.5 s dead zone, auto-release (LOW) | (c) | PARITY FIRST: `rmb.hold` 0.15 s is only a tap guard; the charge counts from the press and is full at 1.1 s. Asserted (`parity lace`) |
 | RMB self-recoil (LOW) | (b) | removed |
-| E cooldown 9 vs 15, DPS (MED) | (b) cd, (c) DPS | 15 s (data). DPS kept: 10/s is 8% of a light's HP a second, the source's 61/s is 5.5% of Myth's |
+| E cooldown 9 vs 15, DPS (MED) | (b) cd, (c) DPS | 15 s (data). DPS kept: 10/s is 8% of a light's HP a second, the source's 61/s is 5.5% of ref-archer's |
 | X cooldown 36 vs 60, beam damage (MED) | (b) cd, (c) damage | 60 s (data). Beams stay 18/25: the burst cap (the ult then the merge never one-shots a full-health light) |
 | Self-shake (MED) | (c) | ext/no-shake owns item 50 |
 
@@ -115,25 +115,25 @@ ext/vfx-pass (merges ext/vfx-archer), ext/the reference-movement (`pin_spirit.gd
 |---|---|---|---|---|
 | Stage 1 lands at the cursor, stage 2 flies past it | sheet pin.md | confirms (0117, 0168-0169) | built | `pin aim:` lines |
 | A perfect release makes the next charge faster | sheet pin.md (newer kit) | card text only | built, 1.6x to Empowered | `combo pin: perfect > ...` |
-| Perfect shots ease the self-slow of drawing | [wiki: Greenwood Bow](https://the community wiki/wiki/Myth) | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
+| Perfect shots ease the self-slow of drawing | wiki: Greenwood Bow | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
 | Overdraw halves the shot | sheet pin.md | confirms (0252-0256) | built | `pin bow: overdrawn` |
-| Spirit Walk: dodge roll, then 2.8 s through walls, objects and terrain (data wins over the sheet's "not terrain") | [wiki: Phase Walk](https://the community wiki/wiki/Myth), sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...`, `...raised terrace wall` |
-| +150 decaying move speed while inside terrain (rank IV) | in-game data, [wiki: Phase Walk](https://the community wiki/wiki/Myth) | not measurable | built at rank 3: +33% (150 on the data's 455 base) inside something, fading to nothing over the walk; x1.1 elsewhere | `pin small: no extra speed inside...`, `pin rank 3: +33% inside something, fading` |
-| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | [wiki: Phase Walk](https://the community wiki/wiki/Myth) | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
-| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | [wiki](https://the community wiki/wiki/Myth), sheet | card text | built (the 30 mana has no equivalent: we have no mana, so it costs nothing) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
-| Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://the community wiki/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
-| Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://the community wiki/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
-| Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://the community wiki/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
-| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://the community wiki/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
-| Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://the community wiki/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
-| Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://the community wiki/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
-| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://the community wiki/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
-| Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://the community wiki/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
-| Ult: pierces enemies, longer range, knocks back | [wiki](https://the community wiki/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
-| Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://the community wiki/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
+| Spirit Walk: dodge roll, then 2.8 s through walls, objects and terrain (data wins over the sheet's "not terrain") | wiki: Phase Walk, sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...`, `...raised terrace wall` |
+| +150 decaying move speed while inside terrain (rank IV) | in-game data, wiki: Phase Walk | not measurable | built at rank 3: +33% (150 on the data's 455 base) inside something, fading to nothing over the walk; x1.1 elsewhere | `pin small: no extra speed inside...`, `pin rank 3: +33% inside something, fading` |
+| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | wiki: Phase Walk | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
+| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | wiki, sheet | card text | built (the 30 mana has no equivalent: we have no mana, so it costs nothing) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
+| Knocking an enemy restores a dash charge | wiki: Phase Walk | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
+| Heartpiercer can be held 3 s after cast before it fires | wiki patch 20.11.24 | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
+| Short Heartpiercer charges push harder | wiki patch 20.11.24 | not shown | built: minimum push 6 -> 8 | same |
+| Into terrain: 1.2 s stun and extra damage | wiki: Heartpiercer | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
+| Knocking back a burning enemy Cremates it | wiki: Rain of Arrows, sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
+| Rain of Arrows: a cone/arc wall, slow and anti-heal | wiki, sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
+| Climb double-high walls by jumping while facing them | wiki: Spectral Hunter | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and ref-juggernaut only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
+| Ult: empowered arrows need no charge, 6 s, the next 3 shots | wiki: Virideth's Fury, sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
+| Ult: pierces enemies, longer range, knocks back | wiki | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
+| Ult: the final shot hits harder and executes; shots shred armor | wiki, card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://the community wiki/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
+| Affects wisps (downed hunters) | wiki | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -150,7 +150,7 @@ Rank paths that do not fit our system: the dash recharge is shared code (Hunter.
 Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on X) untouched.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Myth, `Upg:` lines. Rank cooldown and damage now come from `rank_cd` / `rank_dmg` (the old `cd_per_rank` and the
+Source: ref-archer, `Upg:` lines. Rank cooldown and damage now come from `rank_cd` / `rank_dmg` (the old `cd_per_rank` and the
 shared dash step are gone).
 
 | Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |

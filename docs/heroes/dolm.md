@@ -6,7 +6,7 @@ Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, own
 
 ## Research summary
 - Sources: The reference sheet from guide footage (briefs/hero-ref/breah.md, outside the repo), the reference hero's wiki page
-  (https://the community wiki/wiki/Tetra) and the full patch-note text from the Steam news feed (patches 1.01-2.04, 2025).
+  (reference notes) and the full patch-note text from the Steam news feed (patches 1.01-2.04, 2025).
 - Owner notes (sync61 playtest) override the footage: raised rocks give verticality (stand on them, climb them), punching
   rocks sends them flying, LMB is a hold.
 - **Deliberate change from the source (owner dash note, Nov 2):** the source's Landslide is an odd short dash followed by a
@@ -124,7 +124,7 @@ Tenzo branch.
   left the ground). Quakefall has never raised a rock: the slam only throws rock chips (the flying lumps of the impact
   look) and launches rocks already standing in the ring. The rock the owner saw is most likely those chips plus the flat
   lunge, or Rock Hop's last rock (Shift).
-- **Source (Tetra's Volcano Crusher):** hold to charge, a short hop forward (about 1-1.5 bh) into a circular slam,
+- **Source (ref-dolm's Volcano Crusher):** hold to charge, a short hop forward (about 1-1.5 bh) into a circular slam,
   centre stun, the sweet spot grows with the charge, jump while charging for a longer forward leap. No rock.
 - **Now:** the release is a short hop, a real jump arc of 0.35s (about 2m, 1.1 bh, 0.4m up) with a dust kick at the
   push-off; the slam lands as she does (`breah_slam` re-timed: push-off 0.05, fists high behind the head at the top

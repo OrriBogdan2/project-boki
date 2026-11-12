@@ -9,7 +9,7 @@ Owner 11-09: does locomotion feel as snappy as the target? Four values were off,
 | Turn to cursor | exponential 20/s (farm 14/s): 20° flick 0.13 s, 180° ~0.22 s | fixed 1280°/s: 0.017 s, 0.150 s |
 | Over-run speed on the ground (knock, kit step) | 110 m/s² no keys, 30 with keys: a 10 m/s shove slides ~0.7 m | brake 22.2 m/s² + 2/s: 1.33 m (1.09 m to a run with keys) |
 | Mantle rise | set to 4-14 m/s every step (a yank) | jump momentum + suction to 2.5 m/s within 1.5 m; peak 14 -> 5.6 m/s |
-| Dash shape (Myth) | curve x cos ease stacked: 1.09x the distance | the curve x 0.7 speed (owner item 9): 1.0x |
+| Dash shape (ref-archer) | curve x cos ease stacked: 1.09x the distance | the curve x 0.7 speed (owner item 9): 1.0x |
 
 Unchanged: ground accel 47-54 m/s² and brake (0020), gravity 14.7 m/s² and the abyss fall cap, jump 6.8 m/s
 (terraces, 0020), strong air control (owner 11-08, 0022), mass 1.0 for all hunters, walk-while-firing from the weapon

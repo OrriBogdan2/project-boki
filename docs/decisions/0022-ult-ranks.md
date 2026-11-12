@@ -17,21 +17,21 @@ II / tier III; `x2` = the same step at each tier. Cooldown is in seconds.
 
 | Source hero (line) | Ours | Base | Upg: II / III | Ours already? |
 |---|---|---|---|---|
-| Elluna, channel heal (13) | tender Hearth Call | 60s | none listed | no ranks; base only |
-| Brall, Volcanic Rebuke (28) | juggernaut Gilded Riposte | 45s | +30 dmg, +5% AP, -5s CD at each tier | cd 36s; the generic rank only |
-| Celeste, Chilling Finale (36) | rimewright Rimelock | 80s | +40% dmg and -10s / -10s | cd 80s; none |
-| Felix, Flight of the Firefox (44) | ashwick Flue Flight | 45s | -15s / +25% dmg | cd 36s; none |
-| Ghost, Summon Napalm (52) | gunslinger Cinderfall | 55s | +20% dmg, -5s at each tier | cd 42s; none |
-| Kingpin, Slugwave (61) | dredge Brass Broadside | 36s | +20% dmg, -5s at each tier | cd 21s; none |
-| Joule, Thunderstorm (69) | mage Kitefall | 60s | +50% impact dmg and -7.5s / -7.5s | cd 42s; none |
-| Myth, Virideth's Fury (77) | archer Starpiercer | 60s | +10% dmg, -5s at each tier | cd 60s; none |
-| Oath, Abyssalbreaker (93) | bulwark Faultline | 50s | +20% dmg, -5s at each tier | cd 40s; none |
-| Shiv, Fusillade (101) | thief Encore | 50s | +10% dmg, -5s at each tier | cd 24s; none |
-| Tetra, Tetraform (109) | dolm Basalt Spine | 45s | -5s, +2.5s wall life at each tier | cd 45s; none |
-| Void, Singularity (117) | ostra Nightwell | 70s | -5s at each tier | cd 70s; none |
+| ref-tender, channel heal (13) | tender Hearth Call | 60s | none listed | no ranks; base only |
+| ref-juggernaut, Volcanic Rebuke (28) | juggernaut Gilded Riposte | 45s | +30 dmg, +5% AP, -5s CD at each tier | cd 36s; the generic rank only |
+| ref-rimewright, Chilling Finale (36) | rimewright Rimelock | 80s | +40% dmg and -10s / -10s | cd 80s; none |
+| ref-ashwick, Flight of the Firefox (44) | ashwick Flue Flight | 45s | -15s / +25% dmg | cd 36s; none |
+| ref-gunslinger, Summon Napalm (52) | gunslinger Cinderfall | 55s | +20% dmg, -5s at each tier | cd 42s; none |
+| ref-dredge, Slugwave (61) | dredge Brass Broadside | 36s | +20% dmg, -5s at each tier | cd 21s; none |
+| ref-mage, Thunderstorm (69) | mage Kitefall | 60s | +50% impact dmg and -7.5s / -7.5s | cd 42s; none |
+| ref-archer, Virideth's Fury (77) | archer Starpiercer | 60s | +10% dmg, -5s at each tier | cd 60s; none |
+| ref-bulwark, Abyssalbreaker (93) | bulwark Faultline | 50s | +20% dmg, -5s at each tier | cd 40s; none |
+| ref-thief, Fusillade (101) | thief Encore | 50s | +10% dmg, -5s at each tier | cd 24s; none |
+| ref-dolm, Tetraform (109) | dolm Basalt Spine | 45s | -5s, +2.5s wall life at each tier | cd 45s; none |
+| ref-ostra, Singularity (117) | ostra Nightwell | 70s | -5s at each tier | cd 70s; none |
 
 "Approximate" today means only the base: every kit has a cooldown near the source's (a few were cut for our
-shorter matches) and the shared rank rules (below). No kit reads an X rank. Elluna's line lists no Upg, so
+shorter matches) and the shared rank rules (below). No kit reads an X rank. ref-tender's line lists no Upg, so
 tender gets the generic step only.
 
 ## Options
