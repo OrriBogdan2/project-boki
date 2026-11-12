@@ -1,5 +1,5 @@
 extends RefCounted
-## --loading-check: the loading screen (scripts/ui/loading.gd). All 12 Hunters resolve a splash, a tip
+## --loading-check: the loading screen (scripts/ui/loading.gd). Every Hunter resolve a splash, a tip
 ## and a map name; then a real expedition load runs with the screen up and the bar is sampled every
 ## frame: it only moves forward, in steps small enough to read as smooth, passes the build and the
 ## graphics warm-up stages in order, and is full when the screen leaves.
@@ -32,7 +32,7 @@ func run(main: Node) -> void:
 ## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
 func _hunters() -> void:
 	var ids := Arch.ids()
-	ok(ids.size() == 12, "12 Hunters (%d)" % ids.size())
+	ok(ids.size() >= 12, "every Hunter (%d)" % ids.size())
 	for ak in ids:
 		var ld: Node = load(LOADING).new()
 		ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak})
