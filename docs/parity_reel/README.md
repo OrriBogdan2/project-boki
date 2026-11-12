@@ -15,7 +15,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 | 0:07.9 | RMB, then again | RMB |
 | 0:12.7 | E, then a second press (the recast, for kits that have one) | E |
 | 0:17.5 | R, then a second press | R |
-| 0:24.4 | dash on the ground, twice | Shift |
+| 0:24.4 | dash on the ground, there and back | Shift, D, A |
 | 0:28.2 | jump, then dash in the air | Space, Shift |
 | 0:32.0 | jump and hold Space: the glide, steering round | Space, WASD |
 | 0:37.1 | mantle | none (the catch is automatic) |
@@ -30,7 +30,14 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - The Training Grounds has no terrace to run into, so the mantle part drops the Hunter just under an island rim,
   moving in, and the lip catch carries them over (the `--cliff-mantle-check` "abyss" case). A terrace mantle is
   covered by that check, not by a reel.
-- The dummy stands 7 m away (12 m for the three travel parts).
+- The dummy stands 7 m away (12 m for the three travel parts). The Training Grounds spot sits 11 m from the
+  island's east rim, so the travel parts start 5 m west of it, keeping 4 m of island past the far dummy; the
+  Hunter walks only to 2 m short of the dummy, and the second ground dash comes back west (two long dashes east,
+  like Kael's ~14 m one, are longer than the 24 m island). `REEL_TRAVEL` lines say where each part ends.
+- The first-time kit drill is marked done for the reel (in memory, the save is never written), so its card does
+  not sit under the title.
+- Motley's E part waits for the Brimseed to grow full (6.5 s, her `e.grow`) before the recast, so it runs
+  about 5 s longer than the other Hunters' E parts and her later parts start that much later.
 - Re-render one: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-reel --shots-dir=shots
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
@@ -148,8 +155,8 @@ Still differs:
 - Lantern Trade: 12 m lob; faster (1.25 s) only while Swollen.
 - Footstep silence while floating is `[?]`.
 
-Seen in the reel: the Brimseed is popped at 1.8 s by the reel's recast, so its full growth (the footage's
-room-sized violet globe) is not shown; the Nightwell tell is a pale-cyan disc where the footage's vortex is a
+Seen in the reel: the reel predates `ext/parity-reel-tool`, so the Brimseed is popped at 1.8 s and its full growth
+(the footage's room-sized violet globe) is not shown; the tool now holds it to full size (not re-rendered); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
 violet swirl [F].
 
 # The four slice Wardens (main 88b06b9e7, 2026-11-11)
@@ -169,10 +176,10 @@ the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on
   red laces for Hail Wall. Based on ext/release-integ-0245, not main.
 - `ext/albert-hold-cinder-orb` 4cf2f22b4: Cinder's cyan palm orb becomes a gold/white tell in the 0.2 s spool only.
 
-**Reel-tool suggestions** (all four reels): the Training Grounds now opens a kit drill, so its card ("1/5, Skip
-drill") sits under the reel title for the whole reel; and the 12 m dummy of the travel parts stands past the island
-rim, so both dash parts end with the Hunter sliding off into the void (pink fall screen). `tools/parity_reel.gd`
-could skip the drill and place the far dummy on the island.
+**Reel-tool fixes** (`ext/parity-reel-tool`): these four reels show the kit drill card ("1/5, Skip drill") under
+the title and both dash parts ending in the void, because the 12 m dummy stood past the island rim. The tool now
+skips the drill and keeps the travel parts on the island (see the notes at the top); only `juggernaut.mp4` is
+re-rendered with it so far.
 
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
   `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
