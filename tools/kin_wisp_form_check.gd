@@ -43,6 +43,11 @@ func run(main_node: Node) -> void:
 		if h.kin == null:
 			m.give_kin(h, m.bot_kin_record())
 	var spot := m.world.random_ground()
+	for _i in 40:      # ground 25 m either side, or the teammate falls out of the world
+		var floor_y := World.VOID + 1.0
+		if m.world.ground_at(spot.x + 25.0, spot.z) > floor_y and m.world.ground_at(spot.x - 25.0, spot.z) > floor_y:
+			break
+		spot = m.world.random_ground()
 	_put(bot, spot)
 	_put(P, spot + Vector3(25, 0, 0))
 	_put(foe, spot + Vector3(-25, 0, 0))

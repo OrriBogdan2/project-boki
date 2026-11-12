@@ -401,7 +401,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
