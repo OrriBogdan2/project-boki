@@ -7,7 +7,9 @@ extends RefCounted
 ## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives; with an
 ## unminded egg in the Nook, a Boki with the Ember knack comes to the hub to mind it. Hub fixtures
 ## (step 3): each one stands and works, the games board shows this week's Dash twist and has the
-## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. Moving
+## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. One set: Bramblebank
+## builds none of the hub's house, Nook, Incubator, stall or Burrow (not even an older layout's) and a plain goto
+## lands in the hub once the first day's tutorial is done or skipped. Moving
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
@@ -43,7 +45,9 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_save_part()
 	_keys_part()
+	_landing_part()
 	await _travel_part(m)
+	await _one_set_part(m)
 	await _move_part(m)
 	await _glasswater_part(m)
 	await _cinderstep_part(m)
@@ -83,6 +87,52 @@ func _keys_part() -> void:
 	var lines := ZoneCards.key_lines("glasswater")
 	ok(lines.size() == 2 and "[x] A Wayseed" in lines[0] and "[x] A Boki leaning Water, Ice or Crystal" in lines[1],
 		"the card lists both keys: %s" % " / ".join(lines))
+
+## The first day's tutorial runs in the start zone; once it is done or skipped, a plain goto lands in the hub.
+func _landing_part() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	ok(GardenZones.landing({}) == "", "a new save lands in the start zone for its first day's tutorial")
+	FarmTutorial.skip()
+	ok(GardenZones.landing({}) == GardenZones.HUB, "with the tutorial done or skipped, home is the hub")
+	Content.rules("farm_build")["base_mode"] = false
+
+## An older start-zone layout's house, Nook, stall and Burrow: kept on the save, built only in the hub.
+func _old_fixtures() -> Array:
+	var lay: Dictionary = Save.d["layout"]
+	var out: Array = []
+	for f in HubLayout.DECO:
+		var e := {"u": HomeLayout._next_uid(lay), "id": f[0], "x": int(f[1]) - 12, "z": int(f[2]) - 6, "r": 0}
+		(lay["deco"] as Array).append(e)
+		out.append(e)
+	return out
+
+## A new save's Bramblebank (a farm-start island, where the first day's tutorial runs) builds none of the hub's
+## fixtures (HubLayout.holds), not even an older layout's, and build mode offers none: the one Nook, Incubator
+## and egg are the hub's.
+func _one_set_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	Save.d["roster"] = [Save.new_kin("zapple", "Pip")]
+	Save.d["active"] = Save.d["roster"][0]["uid"]
+	HomeLayout.ensure(Save.d)
+	var old := _old_fixtures()
+	Game.goto("home", {"zone": GardenZones.start()})
+	var bb = await _arrived(m, Game.main.current)
+	ok(bb != null and HomeLayout.fs(Save.d), "a new save's Bramblebank loads")
+	if bb != null:
+		_start_zone_part(bb, old)
+	Content.rules("farm_build")["base_mode"] = false
+
+func _start_zone_part(bb, old: Array) -> void:
+	ok(old.all(func(e): return (Save.d["layout"]["deco"] as Array).has(e)), "an older layout keeps its entries")
+	ok(not old.any(func(e): return bb.hb.nodes.has(int(e["u"]))), "Bramblebank builds none of them")
+	ok(bb.house_node == null and bb.burrow_node == null and bb.spots["stall"].x < -100.0, "no house, Burrow or stall")
+	ok(bb.NEST_AT.x < -100.0 and not bb.hinc.node.visible, "no Nook or Incubator: the egg shows only in the hub")
+	(Save.d["layout"]["deco"] as Array).erase(old.filter(func(e): return e["id"] == "market_stall")[0])
+	ok(not HomeStall.ensure(bb) and HomeLayout.count_of("market_stall", Save.d) == 0, "no stall is set down there")
+	var ids: Array = bb.hb.entries.tab("Buildings").map(func(e): return String(e.get("id", "")))
+	ok(not HubLayout.DECO.any(func(f): return ids.has(f[0])), "build mode offers none of them there")
 
 func _new_save() -> void:
 	var d := Save.fresh()
