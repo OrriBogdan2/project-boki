@@ -39,8 +39,6 @@
 	"push_s": 6.8,
 	"result_s": 5.5,
 	"time_doc": "Seconds: the walk to the marks before the first tell; the rival's tell; the pick window after it (no pick goes with what your Boki wants); the charge, with one press on the drill bar while it runs (none is a miss), the hit landing as it ends; the shove, slide, shake-off and walk back to the marks with the push shown; the tumble off before the card.",
-	"visitor_spread": 15,
-	"visitor_doc": "With one rested Boki, a garden visitor is the rival: a random species, each stat within this many points of yours.",
 	"ring_off": [-2.4, 0.0, -2.6],
 	"ring_doc": "Metres from the stump to the ring's middle (clear of the stump's reach).",
 	"reach_m": 1.6,
