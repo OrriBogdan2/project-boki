@@ -4,6 +4,8 @@ extends RefCounted
 ##   2. steering ramps (no snapping), the dive is clearly faster than the glider, the flare slows the last metres
 ##   3. the reticle: projected landing matches where you land, sits on the ground, hides on landing; red over the void
 ##   4. no chests before the match proper: all hidden on the ship and the drop, all shown once you land
+##   5. the plan screen: a fresh save's first expedition shows only the header and the map (the legend, the
+##      ways out and the squad return on the held key); a later match keeps all five groups
 var bad := 0
 var m: Match
 var main: Node
@@ -44,6 +46,31 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 		if k.dead or k.state == "downed" or k.hp < hp0 - 0.01:
 			return "t=%.2fs state=%s hp=%.1f/%.1f at %s" % [t, k.state, k.hp, hp0, str(k.pos)]
 	return ""
+
+## The plan screen's groups (FullMap.groups) for a save that has had `had` guided matches, with the key held or not.
+func _plan_groups(had: int, held := false) -> PackedStringArray:
+	Save.d["first_guide"] = had
+	if m: m.queue_free()
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
+	m.set_process(false)
+	for i in 3:
+		m.step(Match.DT)
+		await main.get_tree().process_frame
+	if held: Input.action_press("scores")
+	var g: PackedStringArray = m.hud.full_map.groups()
+	Input.action_release("scores")
+	return g
+
+func _plan() -> void:
+	var first := await _plan_groups(0)
+	ok(m.skydrop.planning and m.hud.map_open(), "plan: the map is up while the ship waits")
+	ok(first == PackedStringArray(["header", "map"]), "fresh save, first expedition: header and map only %s" % [first])
+	var held := await _plan_groups(0, true)
+	ok(held.size() == 5, "scoreboard key held: squad, legend, ways out return (%d)" % held.size())
+	var later := await _plan_groups(2)
+	ok(later.size() == 5, "a later match keeps today's five groups (%d)" % later.size())
 
 ## A flat training arena with the player `h` metres up, dropping (diving) with the glider open.
 func _arena(h: float) -> Hunter:
@@ -170,6 +197,7 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	_steering()
 	_reticle()
+	await _plan()
 	for steer in [Vector2.ZERO, Vector2(1, 0)]:
 		_start({})
 		var hid := _hidden_chests()
