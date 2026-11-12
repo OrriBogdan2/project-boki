@@ -212,7 +212,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 202,
 "nested_ternary": 27,
 "semicolon": 243
 },
@@ -396,9 +396,9 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 1,
-"semicolon": 49
+"semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
@@ -492,7 +492,7 @@
 "scripts/match/kin.gd": {
 "long_line": 30,
 "nested_ternary": 7,
-"semicolon": 19
+"semicolon": 18
 },
 "scripts/match/kin_command.gd": {
 "long_line": 5,
@@ -684,8 +684,8 @@
 "semicolon": 1
 },
 "scripts/ui/boki_hud.gd": {
-"long_line": 31,
-"nested_ternary": 5
+"long_line": 29,
+"nested_ternary": 2
 },
 "scripts/ui/capture_hud.gd": {
 "long_line": 5
