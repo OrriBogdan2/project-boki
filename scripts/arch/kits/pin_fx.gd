@@ -14,6 +14,7 @@ extends Node3D
 ## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
 ##   burn flames on foes inside
 ## - the Spirit Walk screen tint: a wash of her deep shade while she walks, darker inside something (her own screen)
+## - the Spirit Walk body tint: her whole body darkens toward her deep orchid for the roll and the walk (every game)
 
 const STARS := 8
 const BURSTS := 3
@@ -39,6 +40,9 @@ const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
 const TINT_WALK := 0.45         # the Spirit Walk wash while she walks clear of everything (1 = inside something)
 const TINT_SHADE := 0.6         # how much darker than DEEP the wash is: a dark spirit-world look, not a colour flash
+const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
+const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
+const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
 
 var h: Hunter
 var stars: Array = []          # {node, t, dur, size, follow}
@@ -60,6 +64,7 @@ var wisp_at := -1.0
 var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
+var wash_k := 0.0              # 0..1: the body tint now
 var planted := 0               # spent arrows planted (checks)
 var staked := 0                # Heavy Shot stakes left in walls (checks)
 var fx_clock := 0.0            # the match time effects last advanced to
@@ -513,6 +518,10 @@ func _process(_delta: float) -> void:
 	tick_shots()
 	_tick_rain(delta)
 	_tick_streaks(delta)
+	var phasing: bool = h.ak is ArcherKit and (h.ak as ArcherKit).spirit.phasing()
+	wash_k = move_toward(wash_k, 1.0 if phasing else 0.0, delta * WASH_RATE)
+	h.wash = wash_k * WASH_MAX
+	h.wash_col = WASH_COL
 	if tint:
 		tint_k = move_toward(tint_k, tint_want, delta * 5.0)
 		tint.material.set_shader_parameter("power", tint_k)
