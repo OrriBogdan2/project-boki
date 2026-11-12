@@ -260,7 +260,8 @@ func _vex_tracer(main: Node) -> void:
 				seen.append(sd)
 				born[sd] = i
 				if seen.size() == 1:
-					ok(absf((sd["vel"] as Vector2).length() - spd) < 0.5, "a round flies at the weapon's speed (%.0f m/s)" % spd)
+					var fly := (sd["vel"] as Vector2).length()
+					ok(absf(fly - spd) < 0.5, "a round flies at the weapon's speed (%.0f m/s)" % spd)
 			if mine.is_empty() and int(born[sd]) < i:
 				bare += 1
 			for e: Dictionary in mine:
@@ -272,8 +273,10 @@ func _vex_tracer(main: Node) -> void:
 	ok(seen.size() >= 15, "a held string fires its rounds (%d)" % seen.size())
 	ok(bare == 0, "every live round has a tracer 2-4.5 m long at its real speed (%d bare)" % bare)
 	ok(thin >= 0.3, "the tracer is wide enough for the match camera (%.2f m)" % thin)
-	ok(int(V.plays.get("shot", 0)) >= seen.size(), "a muzzle flash for every round (%d of %d)" % [int(V.plays.get("shot", 0)), seen.size()])
-	ok(int(V.plays.get("shot_trail", 0)) >= seen.size(), "a tracer for every round (%d of %d)" % [int(V.plays.get("shot_trail", 0)), seen.size()])
+	var flashes := int(V.plays.get("shot", 0))
+	var tracers := int(V.plays.get("shot_trail", 0))
+	ok(flashes >= seen.size(), "a muzzle flash for every round (%d of %d)" % [flashes, seen.size()])
+	ok(tracers >= seen.size(), "a tracer for every round (%d of %d)" % [tracers, seen.size()])
 	var spark: Array = (V._rec(P, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
 	ok(spark.has("flare") and spark.has("ember"), "a round that lands has a flash and sparks")
 
