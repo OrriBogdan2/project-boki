@@ -664,6 +664,10 @@ def main():
         setattr(skin_relax, k, v)
     skin_relax.relax(arm)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
+    # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
+    for act in bpy.data.actions:
+        act.use_frame_range = True
+        act.frame_start, act.frame_end = round(act.frame_range[0]), round(act.frame_range[1])
     select([o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")], arm)
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",

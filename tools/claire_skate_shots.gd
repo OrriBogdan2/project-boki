@@ -1,8 +1,14 @@
 extends RefCounted
 ## --claire-skate-shots --shots-dir=<dir>: Claire skating in a real Match at the match camera: the frost trail her kit
 ## lays behind the blades, a curve so it shows, frames skate_00..; the ART-1 fidelity proof. Needs a renderer.
+## close_stand.png: the close-up from behind her shoulder (her scarf tails hanging); close_run.png: side-on to her run
+## (them streaming back).
 
 const DT := 1.0 / 60.0
+const CLOSE_BACK := 1.6        # m the close-up stands behind her
+const CLOSE_SIDE := 1.1        # m off to her right
+const CLOSE_UP := 1.5          # m up
+const CLOSE_LOOK := 1.05       # m up the point it looks at
 
 func run(main: Node) -> void:
 	var out := ""
@@ -21,6 +27,7 @@ func run(main: Node) -> void:
 	var r: Array = A.setup(arch, 11.0, "", true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
+	HeroVfx.of(m)          # (a real Match makes it in warm_up)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var tree := main.get_tree()
@@ -29,11 +36,18 @@ func run(main: Node) -> void:
 		await _step(m, P, tree)
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(out.path_join("stand.png"))
+	var b := P.model.global_basis.orthonormalized()
+	await _close(main, m, P, b.z * CLOSE_BACK + b.x * CLOSE_SIDE, out.path_join("close_stand.png"))
 	P.inp["move"] = Vector2(1, 0)
 	for f in 40:           # plain strokes first: the match look with no skate after-image over her
 		await _step(m, P, tree)
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(out.path_join("strokes.png"))
+	var scarves := HeroVfx.of(m).scarves
+	var vel: Vector3 = scarves.wearers[0].vel if not scarves.wearers.is_empty() else -b.z
+	var run := Vector3(vel.x, 0.0, vel.z).normalized()
+	await _close(main, m, P, run.cross(Vector3.UP) * CLOSE_BACK * 1.3 - run * CLOSE_SIDE * 0.5,
+			out.path_join("close_run.png"))
 	P.dashes = 1.0
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
@@ -56,6 +70,21 @@ func _clear_view(m: Match, P: Hunter) -> void:
 		if P.is_ancestor_of(n) or n.global_transform.origin.y > P.pos.y + 0.4 or n is MultiMeshInstance3D:
 			if not P.is_ancestor_of(n):
 				n.visible = false
+
+## One frame from a camera `from` her (flat, m) and CLOSE_UP high, then the match camera again.
+func _close(main: Node, m: Match, P: Hunter, from: Vector3, path: String) -> void:
+	var c := Camera3D.new()
+	c.fov = 40.0
+	m.add_child(c)
+	var at := P.model.global_position
+	c.look_at_from_position(at + from + Vector3.UP * CLOSE_UP,
+			at + Vector3.UP * CLOSE_LOOK)
+	c.make_current()
+	await main.get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	main.get_viewport().get_texture().get_image().save_png(path)
+	m.cam.make_current()
+	c.queue_free()
 
 func _step(m: Match, P: Hunter, tree: SceneTree) -> void:
 	m.step(DT)
