@@ -6,10 +6,10 @@ of each so a Boki that talks a lot never repeats itself. Moves are by element:
   venom   bubbling gloop and a spit      spore   fluffy puffs and falling sparkle
   gravity a deep soft thud and a pull    prism   a glassy chime fan
   lunar   moonlit wind and a pale bell   echo    one ping bouncing away through a dark room
-Every rigged species also has its own voice set, bk_<species>_<mood> (happy, alert, unsure, sleepy,
-hurt; 2 takes each): base pitch from its weight, timbre from its type (SPECIES_VOICE below), and a
-3-note signature motif that every mood bends (happy as is, alert clipped and high, unsure ending on
-a question, sleepy a sigh, hurt a yelp). KinVoice.cue picks the set; kin_happy/alert/unsure stay the fallback.
+Every species the game can show (Data.KIN) also has its own voice set, bk_<species>_<mood> (happy,
+alert, unsure, sleepy, hurt; 2 takes each): base pitch from its weight, timbre from its type
+(SPECIES_VOICE below), and a 3-note signature motif that every mood bends (happy as is, alert
+clipped and high, unsure ending on a question, sleepy a sigh, hurt a yelp). KinVoice.cue picks the set; kin_happy/alert/unsure stay the fallback.
 Existing names are regenerated (kin_happy/unsure/alert, kinhit, recall, throw, catch, bond, skill,
 k_<element>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
 """
@@ -277,6 +277,36 @@ SPECIES_VOICE = {
     'nettlynx': ('ah', (1, 1.41, 1.12)), 'pebbit': ('oh', (1, 1, 0.89)), 'puddlet': ('uh', (1, 1.26, 1.5)),
     'rimeshrew': ('ee', (1, 1.68, 1.5)), 'selenfin': ('oh', (1, 1.12, 1.33)), 'thrumbird': ('eh', (1, 1.19, 1.19)),
     'wisplet': ('ee', (1, 1.5, 1.78)), 'zapple': ('ah', (1, 1.33, 1)), 'zephyrak': ('ee', (1, 1.5, 2.0)),
+    # added later: appended, not sorted in, so the takes above keep their random draws
+    'caecilith': ('mm', (1, 0.84, 1.12)),     # a low, curious hum from under the ground
+    'lilybara': ('oh', (1, 1.06, 0.94)),      # a slow, contented bath sigh
+    'umbrathere': ('uh', (1, 0.89, 0.79)),    # a brooding, falling grumble
+    'basaltoad': ('uh', (1, 0.75, 1)),        # a deep gulping croak: down a fourth and back
+    'casquebill': ('ah', (1, 1.33, 0.75)),    # a honk that climbs, then sinks like a dropped anchor
+    'cindowary': ('ah', (1, 1.19, 0.84)),     # a hot bellow that swells and drops
+    'duskapi': ('mm', (1, 0.94, 0.79)),       # a soft snuffling hum sinking into the dusk
+    'floenatee': ('oh', (1, 1.12, 1)),        # a slow, gentle song that rises and settles
+    'gibbelle': ('ee', (1, 1.5, 1.26)),       # a whoop up a fifth that rings back down
+    'glaciyak': ('oh', (1, 0.89, 1.06)),      # a low lowing with a lift at the end
+    'goliathite': ('uh', (1, 1.06, 1.12)),    # a grinding, step-by-step climb
+    'heatherhorn': ('eh', (1, 1.06, 0.89)),   # a wobbling bleat
+    'hoarheron': ('ah', (1, 1.41, 1.41)),     # a stiff two-tone call held on the high note
+    'kilnbadger': ('ah', (1, 0.89, 1.19)),    # a gruff huff that flares up
+    'limpetor': ('mm', (1, 1, 1.06)),         # a clamped, steady hum that barely moves
+    'moonloris': ('oh', (1, 1.26, 1.68)),     # a soft, wondering "ooh" that rises
+    'moundvark': ('uh', (1, 1.19, 0.94)),     # a busy snuffling grunt
+    'murmurling': ('mm', (1, 1.12, 1.19)),    # a murmur that crowds upward
+    'nacrolin': ('ee', (1, 2.0, 1.5)),        # a bright octave flash that settles a fourth lower
+    'nimbostrich': ('ah', (1, 1.5, 1.33)),    # a booming, rolling call
+    'opalisk': ('eh', (1, 1.33, 1.78)),       # a bubbly, climbing sparkle
+    'orchisloth': ('ah', (1, 0.94, 0.84)),    # a slow yawning sigh
+    'scaldamus': ('uh', (1, 1.33, 1.12)),     # a chugging bark
+    'sentrikat': ('eh', (1, 1.41, 1.68)),     # a sharp lookout chirp, up and up again
+    'spatewader': ('eh', (1, 0.84, 1.26)),    # a sloshing dip and rise
+    'squalltross': ('ah', (1, 1.78, 1.5)),    # a wide, gliding sea cry
+    'threadwyrm': ('uh', (1, 1.12, 0.84)),    # a soft call that winds up and coils back
+    'tuatrune': ('oh', (1, 1.33, 1.33)),      # a solid step up a fourth, held like a lock clicking shut
+    'velvorm': ('eh', (1, 0.79, 0.94)),       # a gurgle dipping down a pipe
 }
 
 
@@ -348,11 +378,11 @@ def species_voice(sp, mood, i):
 
 
 def species_names():
-    return sorted(SPECIES_VOICE)
+    return list(SPECIES_VOICE)
 
 
 def voice_sets():
-    """Writes bk_<species>_<mood> (2 takes) for every rigged species."""
+    """Writes bk_<species>_<mood> (2 takes) for every species the game can show."""
     S.reseed(7001)
     for sp in species_names():
         for mood in MOODS:

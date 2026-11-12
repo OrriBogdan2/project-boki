@@ -15,8 +15,9 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
-##  10. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
-##      an unknown species falls back to the generic cues, and no two species share a happy take
+##  10. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
+##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
+##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -78,12 +79,13 @@ func _check_set(path: String) -> void:
 	if group == "boki_voices":
 		_boki_voices(d["sounds"])
 
-## 10. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
+## 10. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
+## species on a shared cue fails, an unknown one falls back.
 func _boki_voices(sounds: Dictionary) -> void:
 	var gaps := []
 	var same := []
 	var seen := {}
-	for sp in DirAccess.get_directories_at("res://art/kin"):
+	for sp in Data.KIN:
 		for mood in KinVoice.GENERIC_CUE:
 			var want := "bk_%s_%s" % [sp, mood]
 			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
@@ -92,8 +94,8 @@ func _boki_voices(sounds: Dictionary) -> void:
 		if seen.has(sig):
 			same.append("%s = %s" % [sp, seen[sig]])
 		seen[sig] = sp
-	var what := "boki_voices: %d species, 5 moods, 2 takes (gaps %s)" % [seen.size(), gaps]
-	ok(gaps.is_empty() and not seen.is_empty(), what)
+	var what := "boki_voices: %d shown species, 5 moods, 2 takes, none on a shared cue" % Data.KIN.size()
+	ok(gaps.is_empty() and not Data.KIN.is_empty(), "%s (gaps %s)" % [what, gaps])
 	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
 	var fell := []
 	for mood in KinVoice.GENERIC_CUE:
