@@ -7,7 +7,7 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 
 The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot with no hold row keeps through every move.
 
-An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `DashFlow.BUFFER_S` (0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
+An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
