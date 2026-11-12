@@ -5,9 +5,14 @@ extends RefCounted
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
 ## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump.
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
-## line's delay, taken from the quickest recent arrival.
+## line's delay, taken from the quickest recent arrival. The margin on top of one snapshot gap follows how
+## late recent snapshots came against that quickest one (a jitter buffer), so a jittery long line (two hops
+## of 150 +-20 ms) doesn't run the body on past a dash's end and pull it back (docs/ONLINE_FEEL.md).
 
-const DELAY := 0.15         # s drawn behind the quickest arrival: one 0.1 s snapshot gap plus 40 ms of jitter
+const GAP := 0.1            # s between an owner's snapshots (Net.tick's send_t)
+const JITTER_MIN := 0.05    # s of margin over GAP at least: the drawn delay is 0.15 s on a steady line
+const JITTER_MAX := 0.12    # s of margin at most: a worse line runs on (RUN_ON) rather than lag further
+const JITTER_KEEP := 0.97   # share of the margin kept per snapshot as the line calms (about 2 s to halve)
 const RUN_ON := 0.25        # s at most the body runs on along its last velocity when snapshots stop
 const SNAP_SPEED := 40.0    # m/s between two snapshots: anything faster is a teleport
 const RESYNC := 0.5         # s an arrival is off the usual: a clock was reset, start over
@@ -18,6 +23,7 @@ var ts := PackedFloat64Array()
 var ps := PackedVector3Array()
 var vs := PackedVector3Array()
 var off := 0.0
+var late := JITTER_MIN      # s: the margin, the latest recent snapshot against the quickest
 var jumped := false         # a teleport came in: the next follow snaps instead of sweeping
 
 func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
@@ -29,8 +35,10 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 	if n > 0 and t_owner <= ts[n - 1]:
 		return
 	if n == 0 or gap < off:
+		late += off - gap if n > 0 else 0.0
 		off = gap
 	else:
+		late = maxf(late * JITTER_KEEP, gap - off)
 		off += (gap - off) * OFF_EASE
 	if n > 0 and p.distance_to(ps[n - 1]) > SNAP_SPEED * (t_owner - ts[n - 1]):
 		_clear()
@@ -45,7 +53,7 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 
 ## Moves the body to where it is drawn at our match time `now`.
 func follow(e: Ent, now: float) -> void:
-	var rt := now - off - DELAY
+	var rt := now - off - GAP - clampf(late, JITTER_MIN, JITTER_MAX)
 	var n := ts.size()
 	if rt <= ts[0]:
 		e.pos = ps[0]
