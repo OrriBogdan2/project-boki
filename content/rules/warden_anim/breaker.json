@@ -210,6 +210,8 @@
 		"idle": "crouch_idle",
 		"walk": {
 			"f": "crouch_f",
+			"fl": "crouch_fl",
+			"fr": "crouch_fr",
 			"b": "crouch_b",
 			"l": "crouch_l",
 			"r": "crouch_r",

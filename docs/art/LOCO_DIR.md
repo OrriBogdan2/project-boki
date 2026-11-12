@@ -32,7 +32,7 @@ today's audit.
 |---|---|---|---|---|---|---|---|---|
 | Lace (archer) | 1 → 0 | 1 → 0 | 4 → 0 | 4 → 0 | 0 → 0 | 4 → 0 | 1 → 0 | 15 → 0 |
 | Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 0 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 0 |
-| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 2 | 25 → 22 |
+| Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 3 | 3 → 2 | 2 → 3 | 2 → 2 | 25 → 15 |
 | Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
 | Grimble (dredge) | 5 → 0 | 5 → 3 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 1 | 5 → 0 | 28 → 6 |
 | Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
@@ -41,9 +41,9 @@ today's audit.
 | Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
 | Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
 | Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
-| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 4 | 31 → 2 | **271 → 30** |
+| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 3 | 6 → 2 | 47 → 4 | 31 → 2 | **271 → 23** |
 
-By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 20.
+By test, before → after: DIR 24 → 0, SKATE 77 → 0, SLIP 78 → 8, SNAP 92 → 15.
 
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
@@ -67,10 +67,13 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
 - The audit named his left "r" (the model's yaw turns him left); every side cell was the mirror one.
 
 ## Left (docs/DEBT.md)
-- Albert (22): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs), so neither the recipe nor a turned
-  copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
-  Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
-  flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
+- Albert (15): his crouch_f barely plants (0.39 m/s, hips 9 cm up on 14 cm legs, no foot bone), so the recipe plants no
+  sole in his crouch and a turned copy only carries what the loop does. His hammer forearm sat 179..189 deg off its rest in
+  the crouch loops (the idle 177) and Godot 4.6 blends a bone as a turn off its rest: `breaker_crouch_arm.py` holds it at
+  177, which cleared every crouch start and stop snap; crouch_fl/fr are crouch_l/r turned 45 deg ("fl~l"), so the front
+  diagonals walk where they go (fr was 137 deg off). Left: crouch bl/br slip 1.45 m/s of 2.67 (bar 1.20; the same from
+  crouch_b, crouch_l or crouch_f turned), l/b/fl crouch start and stop toe jumps just over the bar, and run_fl/fr slip.
+  Needs a hand-made sneak. A faster sneak rate (`crouch.speed` 1.1..1.5) trades slips for snaps, no net gain.
 - Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
   rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
   steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,

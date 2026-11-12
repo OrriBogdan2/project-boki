@@ -35,6 +35,9 @@ hatch shield kept on `x_shield` (`keep`).
 crouch_bl, crouch_br (2026-11-12, ext/anim-dir-all-1112): the recipe can't step his crouch (14 cm legs under hips 9 cm up:
 `hunter_dir_gait.py ... crouch` plants no sole), so these are crouch_b turned 45 degrees into the move, the chest on the
 source's facing: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/breaker/breaker.glb
-OUT.glb 1 1 "bl~,br~" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_bl,crouch_br`. The same
-turn of crouch_f does not help (it barely plants: its copies carry 0.2 of the speed), so fl and fr still blend f with
-l and r; a hand-made sneak is docs/DEBT.md.
+OUT.glb 1 1 "bl~,br~" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_bl,crouch_br`. crouch_fl, crouch_fr (2026-11-12, ext/anim-loco-dir-kael-crouch): crouch_l and crouch_r turned 45 degrees into the move
+(`hunter_dir_gait.py ... "fl~l,fr~r" 0 0 2.0 2,1 55 crouch`, then `glb_add_clips.py breaker.glb OUT.glb crouch_fl,crouch_fr`,
+data crouch.walk fl/fr). The same turn of crouch_f does not carry a front diagonal (it barely plants). Forearm.R of the
+crouch loops (179..189 deg off its rest, the idle 177: Godot blends a bone as a turn off its rest, so every crouch start
+and stop flipped the arm) is held at 177 by `python3 tools/art1/breaker_crouch_arm.py art/wardens/breaker/breaker.glb`
+(the tracks only; the rest of the .glb stays byte for byte). A hand-made sneak is docs/DEBT.md.
