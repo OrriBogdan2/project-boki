@@ -51,8 +51,11 @@ const HEROES := [
 	["rimewright", "Celeste", "hold", false, [], {}],
 ]
 
-## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
-const OVERRIDES := {}
+## Owner decisions that accept a slower Hunter: hero -> [damage share given up, "DECISIONS date: what"].
+## A row above RATIO_HI passes as "override" only up to RATIO_HI / (1 - share).
+const OVERRIDES := {
+	"ostra": [0.15, "DECISIONS 2026-11-06: item 117 accepted as is, Motley loses ~15% held-fire DPS, no compensation"],
+}
 
 var rows: Array = []
 var hits: Array = []      # [id, source name, slot, our share of the target, source share]
@@ -219,11 +222,15 @@ func _cell(hero: Array, label: String, ours: float, src: float) -> Dictionary:
 	row["ratio"] = ours / src if ours > 0.0 else 99.0
 	if row["ratio"] >= RATIO_LO and row["ratio"] <= RATIO_HI:
 		row["state"] = "ok"
-	elif OVERRIDES.has(hero[0]):
+	elif row["ratio"] > RATIO_HI and row["ratio"] <= RATIO_HI / (1.0 - _given_up(hero[0])):
 		row["state"] = "override"
 	else:
 		row["state"] = "FAIL"
 	return row
+
+## The damage share an owner decision lets this Hunter give up (OVERRIDES), else 0.
+func _given_up(id: String) -> float:
+	return float(OVERRIDES[id][0]) if OVERRIDES.has(id) else 0.0
 
 func run(main_node: Node) -> void:
 	main = main_node

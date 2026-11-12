@@ -24,6 +24,12 @@
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},
 		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.lane_w", "value": 1.8, "tol": 0.18, "evidence": "F Trickshot lane about 1 bh wide = 1.8 m (hero-ref/dancer.md)"},
-		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"}
+		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"},
+		{"hero": "ostra", "slot": "LMB", "field": "lmb.prime_dmg", "value": 0.34, "tol": 0.01, "evidence": "D Gravity Orb: after not firing 353 vs 263 = +34%"},
+		{"hero": "ostra", "slot": "LMB", "field": "lmb.idle", "value": 1.4, "tol": 0.0, "evidence": "O item 60: the wait charges the next orb to full over 1.4 s"},
+		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.dmg", "per": "e.dmg", "value": 0.759, "tol": 0.02, "evidence": "D Void Snap 277 vs Unstable Anomaly 365 (the orb is --ttk-check's, item 117)"},
+		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.swollen_k", "value": 0.44, "tol": 0.01, "evidence": "D Void Snap Empowered 399 vs 277 = +44%"},
+		{"hero": "ostra", "slot": "E", "field": "e.dmg_max_k", "value": 3.5, "tol": 0.0, "evidence": "D Unstable Anomaly: up to 3.5x based on held time"},
+		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"}
 	]
 }
