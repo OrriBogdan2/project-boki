@@ -20,9 +20,10 @@ static func make(match_node: Match) -> DuelRingHint:
 	hint.m = match_node
 	return hint
 
-## What the hint says: the pad key, then what the pad opens (the duel room's sparring bot; no online queue here).
+## What the hint says: the pad key, then the ring's two ways to fight (scripts/match/duel_ring.gd).
 static func line() -> String:
-	return "Duel ring: stand on the pad and press %s to Fight a bot in the duel room." % Settings.key_cap("interact")
+	var key := Settings.key_cap("interact")
+	return "Duel ring: stand on the pad and press %s to Fight a bot or Duel online, one on one." % key
 
 ## Per frame while the hint is live. Returns false once it is finished (the player reached the pad).
 func tick() -> bool:

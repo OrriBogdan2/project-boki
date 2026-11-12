@@ -1,7 +1,8 @@
 extends RefCounted
 ## --duel-ring-hint-check: the duel ring hint shows on the first walk into the ring area only. Far from
-## the pad: nothing. Inside the area: the hint line (pad key + the choices) and a beam over the pad, and
-## the save remembers it. Standing on the pad ends the beam. A new match on the same save: no hint.
+## the pad: nothing. Inside the area: the hint line (pad key + both choices) and a beam over the pad, and
+## the save remembers it. Standing on the pad ends the beam; the pad opens the ring's two choices. A new
+## match on the same save: no hint.
 
 # the Training Grounds the farm Esc menu opens (Home._start_training): the one with the duel pad
 const GROUNDS := {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242}
@@ -25,6 +26,7 @@ func run(mn: Node) -> void:
 	var pad := m.duel_pad
 	var line := DuelRingHint.line()
 	var named := line.contains(Settings.key_cap("interact")) and line.contains("Fight a bot")
+	named = named and line.contains("Duel online")
 	named = named and not line.contains("Arena")
 	ok(named, "the line names the key and a choice", line)
 	m.player.pos = pad + Vector3(DuelRingHint.NEAR_M + 6.0, 0, 0)
@@ -40,6 +42,11 @@ func run(mn: Node) -> void:
 	m.player.pos = pad
 	m._update_training(0.1)
 	ok(m.duel_hint == null and beam.is_queued_for_deletion(), "on the pad: the beam ends")
+	var ring := DuelRing.open(m)
+	var goes := ring.layer.find_children("*", "Button", true, false).filter(func(b): return b.text == "Go")
+	ok(m.paused and goes.size() == 2, "the pad opens the ring: Fight a bot and Duel online")
+	ring.close()
+	ok(not m.paused and ring.layer.is_queued_for_deletion(), "Back gives the match back")
 	m.queue_free()
 	await main.get_tree().process_frame
 	var again := await _match()
