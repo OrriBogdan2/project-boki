@@ -7,19 +7,20 @@ extends Control
 ## and `/unmute name` hush one player (Settings chat_muted); Settings squad_chat turns chat off.
 
 const TOPIC := "chat"
-const SHOWN := 5            # lines on screen at once
-const FADE_S := 8.0         # s a line stays fully visible
-const FADE_OUT_S := 1.0     # s it then takes to fade away
-const MAX_CHARS := 140      # characters in one line
-const FONT := 18            # px
+const SHOWN := 5  # lines on screen at once
+const FADE_S := 8.0  # s a line stays fully visible
+const FADE_OUT_S := 1.0  # s it then takes to fade away
+const MAX_CHARS := 140  # characters in one line
+const FONT := 18  # px
 
-var roster: Array = []      # online roster entries {peer, name, team}; empty offline, and chat stays off
-var me := ""                # my peer id
-var m: Match = null         # in a match: typing holds your Hunter still
+var roster: Array = []  # online roster entries {peer, name, team}; empty offline, and chat stays off
+var me := ""  # my peer id
+var m: Match = null  # in a match: typing holds your Hunter still
 var send: Callable = Net.chat
 var typing := false
 var input: LineEdit
 var box: VBoxContainer
+
 
 ## Puts chat under `parent` when this is an online squad (opts["net"] carries the roster); else nothing.
 static func attach(parent: Node, opts: Dictionary, in_match: Match = null) -> SquadChat:
@@ -32,9 +33,11 @@ static func attach(parent: Node, opts: Dictionary, in_match: Match = null) -> Sq
 	parent.add_child(c)
 	return c
 
+
 ## A chat line made safe to show and send: trimmed, one line, at most MAX_CHARS characters.
 static func clean(s: String) -> String:
 	return s.replace("\n", " ").strip_edges().left(MAX_CHARS)
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -56,14 +59,17 @@ func _ready() -> void:
 	box.add_child(input)
 	Net.message.connect(receive)
 
+
 func _exit_tree() -> void:
 	if Net.message.is_connected(receive):
 		Net.message.disconnect(receive)
 	if typing:
 		close()
 
+
 func active() -> bool:
 	return me != "" and bool(Settings.get_v("squad_chat")) and team_of(me) >= 0
+
 
 func team_of(peer: String) -> int:
 	for r in roster:
@@ -71,14 +77,17 @@ func team_of(peer: String) -> int:
 			return int(r["team"])
 	return -1
 
+
 func name_of(peer: String) -> String:
 	for r in roster:
 		if String(r["peer"]) == peer:
 			return String(r["name"])
 	return "Hunter"
 
+
 func is_muted(who: String) -> bool:
 	return who.to_lower() in Settings.get_v("chat_muted")
+
 
 ## A chat message from the relay: shown when chat is on, the sender is a teammate and not muted.
 func receive(topic: String, data, from: String) -> void:
@@ -90,6 +99,7 @@ func receive(topic: String, data, from: String) -> void:
 	if not is_muted(who):
 		show_line(who, clean(String(data.get("t", ""))), UI.INK)
 
+
 func _submit(text: String) -> void:
 	text = clean(text)
 	close()
@@ -98,6 +108,7 @@ func _submit(text: String) -> void:
 	elif text != "":
 		show_line(name_of(me), text, UI.ACCENT_HI)
 		send.call({"t": text})
+
 
 ## `/mute name` and `/unmute name`: the list lives in Settings so a mute holds from lobby to match.
 func _command(text: String) -> void:
@@ -114,6 +125,7 @@ func _command(text: String) -> void:
 		show_line("", "Chat commands: /mute name, /unmute name.", UI.MUTED)
 	Settings.set_v("chat_muted", muted)
 
+
 func show_line(who: String, text: String, col: Color) -> void:
 	var l := Label.new()
 	l.text = "%s: %s" % [who, text] if who != "" else text
@@ -125,11 +137,12 @@ func show_line(who: String, text: String, col: Color) -> void:
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.set_meta("age", 0.0)
 	box.add_child(l)
-	box.move_child(l, box.get_child_count() - 2)      # above the input row
+	box.move_child(l, box.get_child_count() - 2)  # above the input row
 	if box.get_child_count() > SHOWN + 1:
 		var oldest := box.get_child(0)
 		box.remove_child(oldest)
 		oldest.queue_free()
+
 
 func _process(delta: float) -> void:
 	for l in box.get_children():
@@ -141,8 +154,10 @@ func _process(delta: float) -> void:
 	if typing and Overlay.is_open():
 		close()
 
+
 func lines_shown() -> int:
 	return box.get_child_count() - 1
+
 
 func _unhandled_input(e: InputEvent) -> void:
 	var k := e as InputEventKey
@@ -152,10 +167,12 @@ func _unhandled_input(e: InputEvent) -> void:
 		open()
 		get_viewport().set_input_as_handled()
 
+
 func _input(e: InputEvent) -> void:
 	if typing and e.is_action_pressed("menu"):
 		close()
 		get_viewport().set_input_as_handled()
+
 
 func open() -> void:
 	typing = true
@@ -163,6 +180,7 @@ func open() -> void:
 	input.grab_focus.call_deferred()
 	if m:
 		m.paused = true
+
 
 func close() -> void:
 	typing = false

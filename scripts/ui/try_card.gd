@@ -5,15 +5,18 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/try_today.json"
 
+
 static func rules() -> Dictionary:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 	return parsed if parsed is Dictionary else {}
+
 
 ## True when there is a card to show that this player has not dismissed.
 static func due() -> bool:
 	var r := rules()
 	var seen := String(Settings.v.get("try_dismissed", ""))
 	return not (r.get("lines", []) as Array).is_empty() and seen != String(r.get("id", ""))
+
 
 ## Builds the card (the caller places it) or returns null when none is due.
 static func build() -> Control:
@@ -33,6 +36,7 @@ static func build() -> Control:
 	gone.focus_mode = Control.FOCUS_NONE
 	v.add_child(gone)
 	return card
+
 
 static func dismiss(card: Control) -> void:
 	Settings.set_v("try_dismissed", String(rules().get("id", "")))
