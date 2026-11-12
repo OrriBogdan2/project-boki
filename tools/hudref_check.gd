@@ -29,6 +29,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d.erase("hud_reveal")      # this check reads every HUD group (HudReveal shows all on an older save)
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
 	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
