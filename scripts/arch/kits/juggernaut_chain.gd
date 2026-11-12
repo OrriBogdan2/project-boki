@@ -132,7 +132,11 @@ func _hook(f: Ent, at: Vector3) -> void:
 	tightened = false
 	hooks += 1
 	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
-	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
+	if f:
+		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
+	else:
+		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
+	if m.time - e_pressed_at <= Loco.press_buffer:
 		pull()                      # E was pressed a hair before it bit
 
 func _miss(at: Vector3) -> void:
