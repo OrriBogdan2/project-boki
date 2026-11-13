@@ -71,6 +71,10 @@ func _draw_panels() -> void:
 			TeamBoki.draw(hud, p)
 			HudScale.begin(hud, "perks", sz)
 			hud._draw_perks(sz, p)
+		else:
+			HudScale.close(hud)
+			SafeArea.begin("")
+			m.spectate.draw(hud, sz)
 	HudScale.close(hud)
 	SafeArea.begin("")
 	HudScale.pass_end()
