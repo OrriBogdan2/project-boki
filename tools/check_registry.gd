@@ -400,6 +400,8 @@ const CHECKS := {
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
+	# the sight wedge first-time hint
+	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
 	# quit and carry on
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
