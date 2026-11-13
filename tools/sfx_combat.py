@@ -554,13 +554,6 @@ def build():
                    at(reflections(tail(1.0, 1100, 0.3) * 1.2), 0.31))
     takes('pay_rage', pay_rage, 1, rms_db=-14)
 
-    # a Wisp finished (heard by the finisher's squad): a low drop, then a falling three-note chime
-    # over a rising airy shimmer, so it reads as a light going out; not the rising 'kill' bloom
-    shimmer = grains(0.9, 160, 1800, 7000, 0.001, 0.004, fall=0.2) * 0.7
-    save('elim_confirm', mix(click(0.005, 1500, 9000) * 1.4, kick(130, 42, 0.9, 0.03, 0.12, 3.2) * 0.7, sub(52, 30, 0.9, 0.2) * 0.4,
-                             at(note(880, 0.8, 0.22), 0.02) * 1.3, at(note(659, 0.8, 0.26), 0.1) * 1.3, at(note(440, 1.0, 0.4), 0.18) * 1.5,
-                             at(shimmer, 0.12)), rms_db=-15)
-
 
 if __name__ == '__main__':
     build()

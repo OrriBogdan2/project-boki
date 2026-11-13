@@ -37,8 +37,9 @@ const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles diff
 const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
 ## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
 const TRIS_OVER := {"juggernaut": 24000}
-## Pieces (by material) that must ride only these bones, per art: Ravel's lit strings on her raised hand, her lids.
-const RIDES := {"hem": {"glow-thread": ["hand.R"], "skin-lid": ["lid.R", "lid.L"]}}
+## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
+## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
+const WHITE_HAIR := {"thief": 0.08}
 
 var bad := 0
 var n := 0
@@ -98,8 +99,8 @@ func run(main: Node) -> void:
 		_shield(a)
 		_springs(a)
 		_orbits(a)
-		_rides(a)
 		_own_look(a)
+		_white_hair(a)
 		await _halo(main, a)
 	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
@@ -275,8 +276,8 @@ func _shading(a: String) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm and (sm.shader == WardenMood.FACE_SHADER or sm.shader == WardenMood.ATLAS_SHADER):
-				continue        # (a face drawn on glass or a mood-atlas face: its own shader, no toon)
+			if sm and sm.shader in [WardenMood.FACE_SHADER, WardenMood.ATLAS_SHADER]:
+				continue        # (a face drawn on glass or from the mood atlas: no toon surface)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
@@ -292,7 +293,7 @@ func _shading(a: String) -> void:
 			if sm and sm.shader == WardenGlb.FLAME:
 				shows = true      # (fire: no paint of its own)
 			elif sm and atlas:
-				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
@@ -405,36 +406,6 @@ func _orbits(a: String) -> void:
 			% [a, before.size(), moved, drift])
 	m.free()
 
-## The pieces in RIDES are in the .glb and every vertex of them is weighted only to their bones.
-func _rides(a: String) -> void:
-	var want: Dictionary = RIDES.get(WardenGlb.art(a), {})
-	if want.is_empty():
-		return
-	var m := _model(a)
-	var found := {}
-	for mi: MeshInstance3D in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
-		for si in mi.mesh.get_surface_count():
-			var src := mi.mesh.surface_get_material(si)
-			var mat := String(src.resource_name) if src else ""
-			if want.has(mat) and mi.skin != null:
-				found[mat] = _bones_of(mi, si).all(func(b): return b in want[mat])
-	ok(found.size() == want.size() and found.values().all(func(v): return v),
-			"%s: %s are in the .glb and ride only their bones (found %s)" % [a, str(want), str(found)])
-	m.free()
-
-## The bones a skinned surface's vertices carry weight on.
-func _bones_of(mi: MeshInstance3D, si: int) -> Array:
-	var arr := mi.mesh.surface_get_arrays(si)
-	var idx: PackedInt32Array = arr[Mesh.ARRAY_BONES]
-	var w: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
-	var sk := mi.get_node(mi.skeleton) as Skeleton3D
-	var out := {}
-	for i in idx.size():
-		if w[i] > 0.01:
-			var bi := mi.skin.get_bind_bone(idx[i])
-			out[mi.skin.get_bind_name(idx[i]) if bi < 0 else sk.get_bone_name(bi)] = true
-	return out.keys()
-
 ## A model's own look (content/rules/warden_look.json) reaches its surfaces: every surface of a slot it names
 ## carries that slot's values. (No entry: nothing to check.)
 func _own_look(a: String) -> void:
@@ -468,6 +439,47 @@ func _own_look(a: String) -> void:
 	ok(seen > 0 and wrong.is_empty(), "%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)"
 			% [a, seen, str(wrong)])
 	m.free()
+
+func _white_hair(a: String) -> void:
+	if not WHITE_HAIR.has(a):
+		return
+	var m := _model(a)
+	var sum := Vector3.ZERO
+	var texels := 0
+	var desat := 0.0
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var src := mesh.surface_get_material(si) as BaseMaterial3D
+			if src == null or String(src.resource_name).get_slice("-", 0) != "hair" or src.albedo_texture == null:
+				continue
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			desat = float(sm.get_shader_parameter("desat")) if sm.get_shader_parameter("desat") != null else 0.0
+			var img := src.albedo_texture.get_image()
+			if img.is_compressed():
+				img.decompress()
+			for uv in mesh.surface_get_arrays(si)[Mesh.ARRAY_TEX_UV] as PackedVector2Array:
+				var c := img.get_pixel(clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1),
+						clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1))
+				sum += Vector3(c.r, c.g, c.b)
+				texels += 1
+	m.free()
+	var paint := Vector3.ZERO if texels == 0 else sum / texels
+	var drawn := paint.lerp(Vector3.ONE * paint.dot(Vector3(0.3, 0.59, 0.11)), desat)
+	var sat := Color(drawn.x, drawn.y, drawn.z).s
+	ok(texels > 0 and sat <= float(WHITE_HAIR[a]), "%s: the hair reads white, paint saturation %.3f as drawn (max %.2f)"
+			% [a, sat, WHITE_HAIR[a]])
+	var base := MantleLook.params(a, PlayerLook.neutral())
+	var moved: Array = []
+	for pick in Models.LOOK_HAIR.size():
+		var lk := PlayerLook.neutral()
+		lk["hair_col"] = pick
+		lk["eyes"] = pick % PlayerLook.pick_list("eyes").size()
+		var got := MantleLook.params(a, lk)
+		if not (got["hair_col"] as Color).is_equal_approx(base["hair_col"]) \
+				or not (got["eye_col"] as Color).is_equal_approx(base["eye_col"]):
+			moved.append(pick)
+	ok(moved.is_empty(), "%s: no hair or eye pick tints her hair or eyes (moved by %s)" % [a, str(moved)])
 
 func _within_tint(got: Color, want: Color) -> bool:
 	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001

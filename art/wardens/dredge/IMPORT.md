@@ -1,5 +1,16 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**v95 (2026-11-11):** the mesh is the v95 master with the appeal3 face and calves (~/meshy/v95/Grimble/r2/appeal3/cand_b.glb: the face
+repainted from the v2 art, with scrap-metal teeth, the gold tooth, a dark gap, purple lips and the smug squint; the calves 12% slimmer;
+pick.txt beside it) put on this same skeleton, clips and anchors by tools/art1/v95_swap.py with art/wardens/src/grimble_v95.json
+(docs/art/wardens/V95_SWAP.md; shots in docs/shots/grimble-appeal/, the first swap's in docs/shots/grimble-v95/).
+14.9k triangles, one 2048 atlas, 5 slots (skin, leather, metal, brass, glow). No extra hand: the slime arm and bone crescent on
+his right, the gauntlet on his left. What below differs: the hoard is v95's own (height_3d 1.5), the junk ball rides at its back,
+the anchor_lamp_l halo is gone (one lantern), and skin_relax runs without cuts (no holes; worst stretch 2.2x to 5.3x per clip, so the
+1.3x line in the Stretch note no longer holds). The notes below are v2's and still say how the rig, clips and kit work.
+warden_look's `closeup` {fov 36, up -0.3} aims `--warden-shots`' two head shots at his face: the hunch carries it below and ahead of
+HeadPivot, so without it they framed the hoard.
+
 `dredge.glb`: one Meshy scan of the v2 turnaround fitted to the rig (body, head, bone-hook arm, gauntlet), v1's sculpted hoard,
 bells, lanterns, blunderbuss and junk ball on top, the loupe scripted, and 40 clips keyed as targets. Budget: <= 15k triangles
 with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, brass, glow. Raw files in ~/meshy/grimble_v2 (never in git).

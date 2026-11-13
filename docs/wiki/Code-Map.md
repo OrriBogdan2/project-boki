@@ -54,7 +54,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `kin_companion.gd` | A Boki as a teammate: callouts, caring, keeping close |
 | `boki_chatter.gd` | What a Boki says in a match (BokiLines) |
 | `life.gd` | Down, death, deathboxes, revives and beacons |
-| `exits.gd`, `exit_models.gd` | Skiff docks, rift hatches, uplink outposts and their props |
+| `exits.gd`, `exit_models.gd` | Uplink outposts and their props (the Heart is `heart.gd`) |
 | `lairs.gd`, `boss.gd`, `boss_models.gd` | Boss lairs, their locks and seals; the three bosses |
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
@@ -66,6 +66,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `gear.gd` | Gloves (loaded from `content/gloves`) |
 | `biome_run.gd` | Regional monsters and hazards on authored maps |
 | `sky_train.gd` | The sky train |
+| `train_halts.gd`, `train_lamp.gd` | The sky train's halt beacons and pier glow; its headlight, beam and trail |
 | `arena.gd`, `duel.gd` | The Arena's practice tools; the duel room |
 | `cam.gd` | The match camera |
 | `fx.gd`, `juice.gd`, `abyss_fx.gd` | Pooled effects; hit feel; the abyss tint |
@@ -132,7 +133,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `title.gd`, `prologue.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story, first egg |
 | `kit_card.gd` | A class's whole kit on one page (K) |
 | `full_map.gd`, `map_paint.gd` | The M map and its baked painting |
-| `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd`, `hold_skip.gd` | Between screens |
+| `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd` | Between screens |
 | `dex_view.gd`, `about_view.gd`, `iv_view.gd`, `kinbox_view.gd`, `incubator_view.gd`, `work_view.gd` | Boki menus |
 | `egg_hatch.gd`, `kin_reveal.gd`, `kin_portrait.gd`, `portraits.gd`, `icons.gd` | Hatching, portraits, icons |
 
