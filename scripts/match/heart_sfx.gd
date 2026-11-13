@@ -18,6 +18,9 @@ extends RefCounted
 ##   warn   ways_warn         a seat shuts in warn_before_shut_s (the Heart's final seat: the islands falling)
 ##   last   ways_last         one way out is left, a beat after the seat that made it so
 ## Each plays once per seat; a start repeats for a squad only after START_GAP_S (a ring that drained and refilled).
+## The countdown: ways_tick once a second over the last TICK_FROM_S before a quest seat shuts or the islands fall
+## (the final seat), louder and higher in the last TICK_LAST_S. Each game ticks for its own player only, and only
+## while that seat is still reachable for them (_reachable), so a squad hears the clock of the seats it can take.
 
 const CHARGE_KEY := "heart_charge"
 const BEAT_KEY := "heart_beat"
@@ -28,10 +31,16 @@ const GATE_DB := 0.0
 const CALL_DB := -2.0
 const START_GAP_S := 10.0              # s before the same squad starting the same seat sounds again
 const LAST_DELAY_S := 1.5              # s the "last way out" sting waits behind the taken sting
+const TICK_FROM_S := 10                # s before a seat shuts that the countdown starts ticking, one tick a second
+const TICK_LAST_S := 3                 # the last s that tick stronger
+const TICK_DB := -12.0                 # the soft tick, well under CALL_DB
+const TICK_LAST_DB := -6.0             # the strong tick, still under CALL_DB
+const TICK_LAST_PITCH := 1.2           # the strong tick's playback speed (a little higher)
 const SEATS := {"lair": "the Sealed Lair", "early": "the Heart Gate", "uplink": "the Uplink", "final": "the Heart"}
 const SHUT_KEY := {"lair": "lair_shut_s", "uplink": "uplink_shut_s"}   # heart.json "quest": when a quest seat shuts
 
 var cues: Array = []                   # every one-shot cue in order, for the check
+var ticks: Array = []                  # [seat, whole seconds left, dB] per countdown tick played, for the check
 var tide: TideSfx                      # the Blight tide's onset, front rumble and close sting
 var used := {}                         # seat -> true once a squad left by it
 var _h: Heart
@@ -39,6 +48,7 @@ var _state := -1
 var _opened := {}                      # seat -> true once it opened
 var _said := {}                        # call key -> match time it last played
 var _spent_t := -1.0                   # match time of the latest seat taken (the "last" sting waits behind it)
+var _ticked := {}                      # seat -> the whole second it last ticked
 
 func _init(heart: Heart) -> void:
 	_h = heart
@@ -56,6 +66,8 @@ func update() -> void:
 	if _state == Heart.S.CARRIED and _h.carrier == m.player:
 		Sfx.loop_hold(BEAT_KEY, "heart_beat", null, BEAT_DB)
 	_watch_shut()
+	for seat in ["lair", "uplink", "final"]:
+		_watch_tick(seat)
 	tide.update()
 
 func _on_change(to: int) -> void:
@@ -82,6 +94,34 @@ func _watch_shut() -> void:
 		var seat: String = ways_left()[0]
 		_spent_t = -1.0
 		call_out("last", seat)
+
+## One tick per whole second left, the last TICK_FROM_S before the seat shuts, if you can still reach it.
+func _watch_tick(seat: String) -> void:
+	var sec := ceili(shut_at(seat) - _h.m.sess_time())
+	if sec < 1 or sec > TICK_FROM_S or _ticked.get(seat, 0) == sec or not _reachable(seat):
+		return
+	_ticked[seat] = sec
+	var strong := sec <= TICK_LAST_S
+	var db := TICK_LAST_DB if strong else TICK_DB
+	ticks.append([seat, sec, db])
+	_h.m.sfx("ways_tick", null, db, TICK_LAST_PITCH if strong else 1.0)
+
+## Can this game's player still leave by the seat: still in the match, the seat not taken or shut, and no other
+## squad on it (a quest seat a rival is sealed in or charging; your own squad's charge still races the clock,
+## your own lair fight does not, the clock leaves it be).
+func _reachable(seat: String) -> bool:
+	var p: Hunter = _h.m.player
+	if p == null or p.out or p.extracted or used.has(seat):
+		return false
+	if seat == "final":
+		return _h.state == Heart.S.FINAL
+	var qs: QuestSeats = _h.m.exits.seats if _h.m.exits else null
+	if qs == null:
+		return false
+	var s: QuestSeat = qs.lair if seat == "lair" else qs.uplink
+	if s == null:
+		return false
+	return s.state == QuestSeat.S.OPEN or (seat == "uplink" and s.state == QuestSeat.S.IN_USE and s.team == p.team)
 
 ## The session second a seat shuts at (INF: it stays open until the islands fall, or never).
 func shut_at(seat: String) -> float:

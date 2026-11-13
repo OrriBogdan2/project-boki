@@ -80,7 +80,15 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, a
   counter under 0.3, or a hip bob over 11 cm at a run on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
+  move speed, so a sliding foot slides against them. `--aim-runs=60,130` adds runs that many degrees off the facing
+  (the aim twist). The "before" is a frozen copy of this branch's parent.
+- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
+  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
+- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
+  counter under 0.3 on a Hunter with legs, fails. `ostra` has no stepping legs and is exempt, and
+  is listed below as open. Each row also prints the slide at the sole (`sole`: the lower of the heel and toe, from
+  the skinned foot verts), which a heel-to-toe pinned gait reads truer than the ankle; it is not gated.
 
 ## What is wrong with all of them
 
@@ -170,8 +178,8 @@ posts scroll at the move speed).
    keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
    a dragged flail, so the hammer rides low in front as keyed.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
-4. Open: at a jog (3.4 m/s, between the walk and run rings) the walk and run clips blend out of phase and the feet
-   slide 80 %; the gate reads the run only, and Albert's game speed sits at the run ring.
+4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
+   80 %; `loco.cycle_s` now keeps them in step (docs/art/FOOT_SLIDE.md: 2.86 to 1.27 m/s at worst).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
@@ -221,7 +229,10 @@ posts scroll at the move speed).
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
 
 **Neve (`rimewright`)**
-1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Unchanged: needs a new gait clip.
+1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Fixed 2026-11-11
+   (`ext/anim-neve-stride`): walk_f/run_f and seven directional loops on the pilot gait recipe, soles pinned at her
+   loco speed over her 0.867 model scale; run slide 24 % (sole 21 %), arms 0.97, now inside the gate
+   (art/wardens/claire/IMPORT.md).
 2. Arms barely move in a gait (reach 0.14 and 0.01).
 3. Nothing else is wrong: loop seams and the idle gap (0.06) are clean.
 
@@ -255,11 +266,12 @@ Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
+- `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra` holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage`, `thief` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
+- Mid-blend slide (walk into run, every direction) and Tenzo's strafe run: docs/art/FOOT_SLIDE.md.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
