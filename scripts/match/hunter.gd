@@ -140,7 +140,7 @@ func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
 var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
-var kin2: Ent = null            # the benched kin, swapped in with X
+var kin2: Ent = null            # the second kin: in the satchel, its carry passives on (KinSlots), swapped in
 var swap_cd := 0.0
 var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, giant, pulse, form, phase, kit, shell...} (KinMerge)
 var merge_cd := 0.0             # the spent window after a merge ends
@@ -406,12 +406,7 @@ func owner_stat(stat: String) -> float:
 	return float(_kst.get(stat, 0.0))
 
 func _refresh_kin_stats() -> void:
-	var out := {}
-	var k: Kin = kin
-	if k and k.ks:
-		if kin_carry_on():
-			for ps in k.ks.carry_passives:
-				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + RunPayoff.amount(ps, k.carry_k)
+	var out := KinSlots.carry_stats(self)      # the lead's and the second's carry passives (x carry_k), no double stack
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -1725,15 +1720,16 @@ func _ab_feedback(slot: String, kind: String) -> void:
 	m.hud.ability_feedback(slot, kind)
 	m.sfx("skill", null, -9.0, 1.15)
 
-## X: swap which of your two kin is out. The benched one rests in your satchel.
+## The swap key (swap_kin): your lead and second Boki trade places (KinSlots). Only a Boki in the satchel comes
+## out; a downed lead stays where it fell and goes back in the satchel when it comes round (KinDowned.come_round).
 func swap_kin(force := false) -> void:
 	if kin2 == null or riding or out or (not force and (swap_cd > 0.0 or downed)):
 		return
 	var a: Kin = kin
 	var b: Kin = kin2
-	if b.dead or KinLoss.guarding(b) or (a and (a.state == "fused" or KinLoss.guarding(a))):
+	if b.dead or b.state != "bench" or (a and (a.state == "fused" or KinLoss.guarding(a))):
 		return
-	if a: a.bench()
+	if a and a.state != "downed": a.bench()
 	b.unbench()
 	kin = b
 	kin2 = a
@@ -1952,7 +1948,7 @@ func sim(dt: float) -> void:
 		if inp.get("kin_ab", false) and not Hex.active(self) and not ak.cast_locked(): use_boki_c()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
-	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
+	if inp["swap"]: swap_kin()       # the swap key: lead and second trade places (KinSlots)
 	if inp["sec"] and runner and runner.has_slot("utility") and ak == null:
 		var ud: AbilityDef = runner.def_of("utility")
 		if not ud.charge.is_empty() and runner.is_ready("utility") and abil_charge.is_empty():

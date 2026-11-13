@@ -77,6 +77,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | G | Boki: tap to send out or call back (a wisp: out of it, again: back), hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
+| C | Swap your lead and second Boki (in a match) | `swap_kin` | yes |
 | Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 | Glide (hold in the air) | `glide` | yes |

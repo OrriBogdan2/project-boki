@@ -5,8 +5,8 @@ extends RefCounted
 ## key read straight from an event in a file that is not on the fixed-key list below.
 
 ## Actions the game registers and reads but keeps off the Controls page: Esc always opens the menu (it is also
-## the rebind cancel); swap_kin is the retired second-Boki swap (Match.TWO_KIN is false, nothing presses it).
-const NOT_LISTED := ["menu", "swap_kin"]
+## the rebind cancel).
+const NOT_LISTED := ["menu"]
 ## Controls actions that ship with no key on purpose (a new player sees only G for the Boki).
 const SHIPS_UNBOUND := ["kin_summon", "kin_chase", "kin_guard", "kin_return", "kin_follow"]
 ## Files that may name a physical key, and why: dev rigs, list picks by number, menu conventions.
