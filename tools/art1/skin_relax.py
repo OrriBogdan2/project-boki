@@ -3,19 +3,26 @@ Evaluates linear-blend skinning in numpy for every action of the armature (the s
 edges that stretch past LIMIT, and blends the weights of their vertices toward their neighbours'. Edges that weights alone cannot
 save (a hook that leaves the wrist, a crouch that pulls the belly apart) are then cut: their triangles go, each hole is closed again
 with a flat cap on its own side (cut()), and the edges the caps add are checked the same way. Compression is not stretch.
-Use: skin_relax.relax(arm) from a clips script, before the export. Blender only (bpy, numpy)."""
+Use: skin_relax.relax(arm) from a clips script, before the export. Blender only (bpy, numpy).
+A shipped .glb whose bake cannot run again (its WORK files are gone) is relaxed in place, its spec's "relax" keys as KEY=JSON:
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- IN.glb OUT.glb [CAP_LAST=true ...]"""
+import json
+import os
+import sys
+
 import bmesh
 import bpy
 import numpy as np
 
 LIMIT = 1.22         # x rest length: the target, under the game's 1.3 check (tools/stretch_check.gd)
 BLEND = 0.6          # how far a bad vertex's weights move toward its neighbours' per pass
-CUT_LIMIT = 1.3      # the cut takes the edges still over this after the weights are done
+CUT_LIMIT = 1.26     # the cut takes the edges still over this after the weights are done (under 1.3: the game samples between frames)
 MAX_ITER = 60
 RINGS = 1            # rings of vertices around the bad ones that relax with them (the band the stretch spreads over widens)
-STEP = 3             # frames between samples of a clip (the last frame is always sampled)
+STEP = 1             # frames between samples of a clip (every 3rd let 1.34x through between samples)
 MIN_EDGE = 0.008     # m: shorter rest edges say nothing about stretch (as in the check)
-CUTS = 3             # rounds of cut and cap; the last only cuts
+CUTS = 3             # rounds of cut and cap; the last only cuts unless CAP_LAST
+CAP_LAST = False     # the last round caps too: no open holes, the caps' own stretch is left to the check's ceiling
 HOLE_SIDES = 400     # biggest hole (edges round it) that is capped
 MAX_INFL = 4         # bones per vertex the glTF exporter keeps
 
@@ -109,7 +116,7 @@ class Skin:
 
 def cut(s, poses, arm):
     """Deletes the triangles on edges still over CUT_LIMIT and caps each hole (no new vertices: the weights stay as they are).
-    Up to CUTS rounds; the last one only deletes. Returns the Skin of the cut mesh."""
+    Up to CUTS rounds; the last one only deletes (unless CAP_LAST). A cap takes the paint its rim has. Returns the Skin of the cut mesh."""
     for rnd in range(CUTS):
         worst, _ = s.stretch(poses)
         bad = {tuple(sorted(e)) for e in s.edges[worst > CUT_LIMIT].tolist()}
@@ -120,15 +127,22 @@ def cut(s, poses, arm):
         bm.faces.ensure_lookup_table()
         gone = [f for f in bm.faces if any(tuple(sorted((e.verts[0].index, e.verts[1].index))) in bad for e in f.edges)]
         mat, count = gone[0].material_index, len(gone)
+        opened = {v for f in gone for v in f.verts}
         bmesh.ops.delete(bm, geom=gone, context="FACES_ONLY")
         bmesh.ops.delete(bm, geom=[e for e in bm.edges if not e.link_faces], context="EDGES")
-        if rnd < CUTS - 1:
-            rim = [e for e in bm.edges if len(e.link_faces) == 1]
+        if rnd < CUTS - 1 or CAP_LAST:          # (only the holes the cut opened: the mesh's own openings stay open)
+            rim = [e for e in bm.edges if len(e.link_faces) == 1 and all(v in opened for v in e.verts)]
             new = bmesh.ops.holes_fill(bm, edges=rim, sides=HOLE_SIDES)["faces"]
             new = bmesh.ops.triangulate(bm, faces=new)["faces"]
             bmesh.ops.recalc_face_normals(bm, faces=new)
+            uv = bm.loops.layers.uv.active
+            caps = set(new)
             for f in new:
                 f.material_index = mat
+                for lp in f.loops:
+                    src = next((x for x in lp.vert.link_loops if x.face not in caps), None)
+                    if uv is not None and src is not None:
+                        lp[uv].uv = src[uv].uv
         bm.to_mesh(s.ob.data)
         bm.free()
         s.ob.data.update()
@@ -169,3 +183,36 @@ def relax(arm):
         left += int((before > LIMIT).sum())
         print("relax %s after cuts: edges over %.2f: %d, worst %.2f" % (s.ob.name, LIMIT, (before > LIMIT).sum(), max(per)), flush=True)
     return left
+
+
+def relax_glb(src, out, overrides):
+    """Imports a game .glb (bone axes as exported, so the rest re-exports unchanged), relaxes it and exports it again with
+    v95_swap.py's export settings."""
+    from posekit import FPS
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.context.scene.render.fps = FPS     # (the importer keys the clips on the scene's frames: at 24 fps their ends round off)
+    bpy.ops.import_scene.gltf(filepath=src, bone_heuristic="BLENDER")
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    if arm.animation_data is None:
+        arm.animation_data_create()
+    for k, v in overrides.items():
+        setattr(sys.modules[__name__], k, json.loads(v))
+    relax(arm)
+    for act in bpy.data.actions:        # an imported clip ends a hair under its last frame, and the export would drop it
+        act.use_frame_range = True
+        act.frame_start, act.frame_end = round(act.frame_range[0]), round(act.frame_range[1])
+    arm.animation_data.action = None
+    for o in bpy.data.objects:
+        o.select_set(o.type in ("ARMATURE", "MESH", "EMPTY"))
+    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
+                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    tris = sum(len(p.vertices) - 2 for o in bpy.data.objects if o.type == "MESH" for p in o.data.polygons)
+    print("relax exported", out, "tris", tris, flush=True)
+
+
+if __name__ == "__main__" and "--" in sys.argv:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    args = sys.argv[sys.argv.index("--") + 1:]
+    relax_glb(args[0], args[1], dict(a.split("=", 1) for a in args[2:]))

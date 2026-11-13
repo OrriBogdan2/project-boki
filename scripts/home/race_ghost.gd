@@ -3,7 +3,8 @@ extends RefCounted
 ## Ghost laps for the Dash (BaseRace): a time trial against a friend's best lap, with no live netcode.
 ## Every Run tapes how far each runner is along the lap every TICK (Tape). When a lap at home finishes, the
 ## fastest Boki's lap is kept if it beats the best on that course (keep_best): a course is the lap's stretch
-## layout, so the weekly "Two streams" loop is a course of its own. The visit snapshot carries the laps
+## layout and length (each garden zone has its own loop), so the weekly "Two streams" loop is a course of
+## its own. The visit snapshot carries the laps
 ## (Social.profile_doc); a visitor at the friend's race post runs their partner against the faded ghost
 ## (BaseRace.use on a visit), and a ghost beaten sends the friend a "race" gift that pins the winner to their
 ## showcase wall when they next come home (take_gift).
@@ -55,7 +56,10 @@ class Replay:
 		return lerpf(last, lap_m, (t - n * TICK) / maxf(end_t - n * TICK, 0.001))
 
 static func course(stretches: Array) -> String:
-	return "-".join(stretches.map(func(s): return String(s["kind"])))
+	var m := 0.0
+	for s in stretches:
+		m += float(s.get("len", 0.0))
+	return "%s@%d" % ["-".join(stretches.map(func(s): return String(s["kind"]))), roundi(m)]
 
 ## Runner i's finished lap of a Run as a saved ghost.
 static func lap(run, i: int) -> Dictionary:
@@ -193,7 +197,7 @@ func tick(run) -> void:
 	var from := float(run.ends[s - 1]) if s > 0 else 0.0
 	var f := clampf((d - from) / (float(run.ends[s]) - from), 0.0, 1.0)
 	node.position = race.track_at(s, f, LANE * float(BaseRace.rules()["lane"]))
-	node.rotation.y = race.heading(s)
+	node.rotation.y = race.heading(s, f)
 
 ## The race is over (or left): the card, and a gift for the friend when the ghost was beaten.
 func finish(run, finished: bool) -> void:
