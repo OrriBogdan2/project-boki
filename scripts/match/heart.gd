@@ -7,7 +7,9 @@ extends RefCounted
 ##     holds there gate_hold_s, and every member of that squad within gate_take_r of the Gate leaves: MINOR.
 ##   - the final seat: at final_s (or at once, rush_k faster, when one squad is left) the Heart ring opens.
 ##     A squad holding it alone fills it (faster with more of them, Exits.crew_rate); a standing rival stalls
-##     it; an empty ring drains. Full: that squad's members in the ring leave, MAJOR, the islands fall soon.
+##     it; an empty ring drains. Downed Hunters (Wisps) neither hold nor stall it: when none of the holders
+##     stands in it and one other squad does, that squad takes it over from nothing. Full: that squad's
+##     members in the ring leave, MAJOR, the islands fall soon.
 ##   The Blight's tide closes on the Heart all match (tide_r; read by BlightDir.level / _spawn_tick).
 ## One explicit state (briefs/STATE_MACHINES.md): S, with the legal edges in NEXT; only go() moves it (a
 ## refused edge is counted, never applied), and only the host does. _force() is the mirror for clients and demos.
@@ -315,6 +317,9 @@ func _ring_crews() -> Dictionary:
 
 func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
+	if final_team >= 0 and not crews.has(final_team) and crews.size() == 1:
+		final_team = -1      # the holders are out of the ring or down: a squad standing in it alone takes it over
+		final_prog = 0.0
 	if final_team < 0 and crews.size() == 1:
 		final_team = int(crews.keys()[0])
 		audio.call_out("start", "final", final_team)
@@ -550,9 +555,11 @@ func _build() -> void:
 	_root.add_child(h)
 	Models.part(h, Models.cyl(1.5, 1.7, 0.3, 14), Models.toon(Color("cfc6c8")), Vector3(0, 0.15, 0))
 	Models.part(h, Models.cyl(1.1, 1.25, 0.2, 14), Models.toon(Color("e6dde0")), Vector3(0, 0.4, 0))
-	var glass := Models.toon(GLASS, false, 0.45)
-	Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
-	Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
+	# the sculpted glass heart; without its model, a glass egg
+	if ItemArt.add(h, "heart", 0.5, Color.WHITE, 0.3) == null:
+		var glass := Models.toon(GLASS, false, 0.45)
+		Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
+		Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
 	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(COL, 0.1)), Vector3(0, 1.6, 0))
 	_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new()

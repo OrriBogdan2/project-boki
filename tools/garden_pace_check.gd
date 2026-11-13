@@ -15,9 +15,10 @@ const DRILL_ROUNDS := 3
 const GOAL_LEVEL := 4             # the first form (Evo.on_level)
 const GIVE_UP_MIN := 24.0 * 60.0
 const BREED_GIVE_UP_MIN := 7.0 * 24.0 * 60.0   # the breed table stops here and prints "never"
-const XP_KEYS := ["feed", "feed_love", "pet", "pet_love", "fetch", "fetch_love", "drill_per_point"]
+const XP_KEYS := ["care", "drill_per_point", "play", "win", "first_win"]
 
 var bad := 0
+var now_s := 0.0                  # simulated clock in s: a kin's first feed, pat and fetch each day pay
 var rng := RandomNumberGenerator.new()
 var clock := 0.0                  # s of play so far; the trust cooldowns read it
 var track_trust := false          # the breed table needs friends; the first-form numbers stay as measured
@@ -38,7 +39,7 @@ func _kin(uid := "pace-a") -> Dictionary:
 ## happy with a pat or a ball, otherwise drill. Returns the seconds it took.
 func _garden_step(rec: Dictionary, since_pat: float) -> Dictionary:
 	if Care.need(rec, "food") < 50.0:
-		GardenXp.give(rec, "feed", false)
+		GardenXp.give(rec, "feed", 0, now_s)
 		if track_trust: Care.trust_up(rec, "food", clock, "kibble")
 		Care.feed(rec, "kibble")
 		return {"s": FEED_S, "pat": since_pat + FEED_S}
@@ -48,19 +49,19 @@ func _garden_step(rec: Dictionary, since_pat: float) -> Dictionary:
 	if Care.need(rec, "joy") < 70.0:
 		if since_pat >= PET_GAP:
 			Care.change(rec, "joy", 5.0)
-			GardenXp.give(rec, "pet", false)
+			GardenXp.give(rec, "pet", 0, now_s)
 			if track_trust: Care.trust_up(rec, "pet", clock)
 			return {"s": PET_S, "pat": 0.0}
 		Care.change(rec, "joy", 14.0)
 		Care.change(rec, "energy", -6.0)
 		Care.change(rec, "clean", -4.0)
-		GardenXp.give(rec, "fetch", false)
+		GardenXp.give(rec, "fetch", 0, now_s)
 		return {"s": FETCH_S, "pat": since_pat + FETCH_S}
 	var pts := 0
 	for _i in DRILL_ROUNDS: pts += [3, 3, 3, 2, 2, 0][rng.randi_range(0, 5)]
 	Care.change(rec, "energy", -18.0)
 	Care.change(rec, "food", -6.0)
-	GardenXp.give(rec, "drill", false, pts)
+	GardenXp.give(rec, "drill", pts)
 	return {"s": DRILL_S, "pat": since_pat + DRILL_S}
 
 ## Garden play for up to `budget` seconds (or until the goal level). Returns the seconds used.
@@ -71,17 +72,20 @@ func _garden(rec: Dictionary, budget: float) -> float:
 		var st := _garden_step(rec, pat)
 		Care.tick(rec, float(st["s"]), false)
 		used += float(st["s"])
+		now_s += float(st["s"])
 		pat = float(st["pat"])
 	return used
 
 func _minutes_garden_only() -> float:
 	var rec := _kin()
+	now_s = 0.0
 	return _garden(rec, GIVE_UP_MIN * 60.0) / 60.0
 
 ## Runs of run_min, each followed by home_gap_min of garden play; a win every 1/win_rate runs.
 func _minutes_runner(pace: Dictionary) -> float:
 	var rec := _kin()
 	var t := 0.0
+	now_s = 0.0
 	var run_n := 0
 	while int(rec["level"]) < GOAL_LEVEL and t < GIVE_UP_MIN:
 		run_n += 1
@@ -89,6 +93,7 @@ func _minutes_runner(pace: Dictionary) -> float:
 		for nd in Care.MATCH_COST: Care.change(rec, nd, Care.MATCH_COST[nd])
 		Game.add_xp(rec, 40 + (40 if won else 0) + int(float(pace["knocks"]) * 10.0), {})
 		t += float(pace["run_min"])
+		now_s = t * 60.0
 		if int(rec["level"]) < GOAL_LEVEL: t += _garden(rec, float(pace["home_gap_min"]) * 60.0) / 60.0
 	return t
 
@@ -97,6 +102,7 @@ func _garden_tick(rec: Dictionary, st: Dictionary) -> float:
 	var s := float(st["s"])
 	Care.tick(rec, s, false)
 	clock += s
+	now_s = clock
 	return s
 
 ## Minutes to each breeding milestone (a key is missing when not reached in BREED_GIVE_UP_MIN) for a player
@@ -113,6 +119,7 @@ func _breed_ms(runner: bool, grown: int, pace: Dictionary) -> Dictionary:
 	var pat := PET_GAP
 	var runs := 0
 	clock = 0.0
+	now_s = 0.0
 	track_trust = true
 	while clock < BREED_GIVE_UP_MIN * 60.0 and not ms.has("egg"):
 		var tgt: Dictionary = a if int(a["level"]) < grown or b.is_empty() else b
@@ -122,6 +129,7 @@ func _breed_ms(runner: bool, grown: int, pace: Dictionary) -> Dictionary:
 			for nd in Care.MATCH_COST: Care.change(tgt, nd, Care.MATCH_COST[nd])
 			Game.add_xp(tgt, 40 + (40 if won else 0) + int(float(pace["knocks"]) * 10.0), {})
 			clock += float(pace["run_min"]) * 60.0
+			now_s = clock
 		var chunk := 0.0
 		while chunk < float(pace["home_gap_min"]) * 60.0:
 			tgt = a if int(a["level"]) < grown or b.is_empty() else b
@@ -164,6 +172,32 @@ func _breed_table(pace: Dictionary) -> void:
 			print(row % ([o["id"], o["grown_lv"], who] + at))
 	for k in XP_KEYS: r[k] = saved[k]
 
+## The live rows: care pays once a kind a day, the four games pay play / win / first win, the curve.
+func _check_rows() -> void:
+	var rec := _kin()
+	var care := int(GardenXp.rules()["care"])
+	GardenXp.give(rec, "feed", 0, 100.0)
+	GardenXp.give(rec, "feed", 0, 200.0)
+	ok(int(rec["xp"]) == care, "a second feed the same day pays nothing (%d xp)" % int(rec["xp"]))
+	GardenXp.give(rec, "feed", 0, 90000.0)
+	ok(int(rec["xp"]) == 2 * care, "the next day's first feed pays again (%d xp)" % int(rec["xp"]))
+	rec["xp"] = 0
+	rec["level"] = 10      # high enough that no row levels it up
+	var r: Dictionary = GardenXp.rules()
+	var want := {"play": [false, false], "win": [true, false], "first_win": [true, true]}
+	for id in r["games"]:
+		for row in want:
+			rec["xp"] = 0
+			GardenXp.play(id, rec, want[row][0], want[row][1])
+			ok(int(rec["xp"]) == int(r[row]), "%s: %s pays %d (%d)" % [id, row, int(r[row]), int(rec["xp"])])
+	rec["xp"] = 0
+	GardenXp.play("relay", rec, true, true)
+	ok(int(rec["xp"]) == 0, "a game not in the list pays no XP")
+	var c: Dictionary = r["curve"]
+	var flat := int(c["flat_from"])
+	ok(Game.xp_need(1) == int(c["per_level"]) and Game.xp_need(flat + 30) == Game.xp_need(flat),
+			"Game.xp_need follows the curve (%d at level 1, flat from level %d)" % [Game.xp_need(1), flat])
+
 func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -178,8 +212,9 @@ func run(m: Node) -> void:
 	ok(garden < GIVE_UP_MIN, "garden-only reaches the first form at all (%.0f min)" % garden)
 	ok(ratio <= limit, "garden-only is at most %.1fx slower (%.2fx)" % [limit, ratio])
 	var rec := _kin()
-	GardenXp.give(rec, "drill", false, 12)
+	GardenXp.give(rec, "drill", 12)
 	ok(int(rec["xp"]) > 0, "a farm action gives XP")
+	_check_rows()
 	_breed_table(pace)
 	print("PACE CHECK DONE, failures: ", bad)
 	m.get_tree().quit()
