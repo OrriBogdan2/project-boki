@@ -59,12 +59,15 @@ static func enabled(opts: Dictionary) -> bool:
 # ------------------------------------------------------------------ the tide (read by BlightDir)
 ## The tide ring's radius in metres at this match time (0 before it starts: no ring).
 static func tide_r(m: Match) -> float:
-	if m.heart == null:
+	if m.heart == null or m.sess_time() < r("tide_start_s"):
 		return 0.0
-	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
-	if t < 0.0:
-		return 0.0
-	return lerpf(r("tide_r0"), r("tide_r1"), clampf(t, 0.0, 1.0))
+	return ring_at(m.sess_time(), m.heart.ways_scale)
+
+## The tide ring's radius t seconds into a match on a map of ways_scale k (the radius it starts at
+## before the tide moves).
+static func ring_at(t: float, k: float) -> float:
+	var f := clampf((t - r("tide_start_s")) / r("tide_close_s"), 0.0, 1.0)
+	return lerpf(r("tide_r0"), r("tide_r1"), f) * k
 
 ## 0 inside the ring, 1 forty metres past it.
 static func tide_out(m: Match, p: Vector3) -> float:
@@ -73,15 +76,12 @@ static func tide_out(m: Match, p: Vector3) -> float:
 		return 0.0
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
-## The ring's radius at the end of the current stage: where it closes to next (tide_r0 before the
-## tide starts, so the drop map shows the first ring).
+## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
+## tide starts, so the drop map shows it; tide_r1 once the ring holds).
 static func next_r(m: Match) -> float:
 	if m.heart == null:
 		return 0.0
-	var st := tide_stage(m)
-	if st < 0:
-		return r("tide_r0")
-	return lerpf(r("tide_r0"), r("tide_r1"), float(st + 1) / TIDE_STAGES)
+	return ring_at(m.sess_time() + r("tide_next_s"), m.heart.ways_scale)
 
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
@@ -115,6 +115,7 @@ static func tide_dmg(stage: int) -> float:
 var m: Match
 var site := Vector3.INF
 var gate := Vector3.INF
+var ways_scale := 1.0          # the map's "ways_scale": tide radii and gate_dist stretch with it (1.412 on the 2x map)
 var state := S.ASLEEP
 var trail: Array[String] = []    # "time from>to why", every move of the state (the checks read it)
 var refused := 0               # edges NEXT turned down: always 0 in a sane run
@@ -126,6 +127,7 @@ var final_team := -1           # the squad whose progress the Heart ring holds
 var final_prog := 0.0          # 0..1
 var rush := false              # one squad left: the final seat is open and faster
 var drops := 0
+var audio: HeartSfx            # the hum, stings, heartbeat, gate cues and the Ways Out calls
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
 var _sync_t := 0.0
 var _tide_t := 0.0             # seconds since the last tide tick
@@ -137,45 +139,56 @@ var _spark: Node3D
 var _beam: MeshInstance3D
 var _beam_mat: ShaderMaterial
 var _halo: MeshInstance3D
-var _gate_node: Node3D
-var _gate_mat: ShaderMaterial
-var _gate_beam: MeshInstance3D
-var _final_mat: ShaderMaterial
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	audio = HeartSfx.new(self)
 
 func host() -> bool:
 	return not m.net_on or m.is_host
 
-## Picks the Heart site (one of the biggest islands, by the match seed), puts the gate near it and
-## builds the nodes.
-func setup() -> void:
+## Puts the Heart on the map's authored "heart" site (else one of the biggest islands, by the match seed),
+## the Gate gate_dist from it at a seeded angle clear of the uplink outposts, and builds the nodes.
+func setup(layout: Dictionary) -> void:
 	var w := m.world
 	if w.islands.is_empty():
 		return
 	_rng.seed = int(m.seed_val) * 17 + 4242
-	var isl: Array = []
-	for i in w.islands.size():
-		isl.append(i)
-	isl.sort_custom(func(a, b): return float(w.islands[a]["r"]) > float(w.islands[b]["r"]))
-	var ii: int = isl[_rng.randi() % mini(3, isl.size())]
-	var c: Vector2 = w.islands[ii]["c"]
+	ways_scale = float(layout.get("ways_scale", 1.0))
+	var c: Vector2
+	if layout.has("heart"):
+		c = Vector2(float(layout["heart"][0]) + 0.5, float(layout["heart"][1]) + 0.5)
+	else:
+		var isl: Array = range(w.islands.size())
+		isl.sort_custom(func(a, b): return float(w.islands[a]["r"]) > float(w.islands[b]["r"]))
+		c = w.islands[isl[_rng.randi() % mini(3, isl.size())]]["c"]
 	site = w.free_spot_near(Vector3(c.x, 0.0, c.y), [], 1.0, 0.9, 10.0)
 	spark_pos = site
-	var best := Vector3.INF
+	gate = _pick_gate(w)
+	_build()
+
+## The first of 16 angles from a seeded start whose spot is on the Heart's island and gate_clear from
+## every uplink outpost; failing that, the first one on that island, then the first spot found.
+func _pick_gate(w: World) -> Vector3:
+	var ii := w.island_of(site.x, site.z)
+	var clear := float(rules()["map"]["gate_clear"]) * ways_scale
+	var outposts := w.exit_defs.filter(func(ed): return ed["kind"] == "outpost")
+	var near := Vector3.INF
+	var any := Vector3.INF
 	var a0 := _rng.randf() * TAU
 	for k in 16:
 		var a := a0 + TAU * k / 16.0
-		var want := site + Vector3(cos(a), 0.0, sin(a)) * r("gate_dist")
+		var want := site + Vector3(cos(a), 0.0, sin(a)) * r("gate_dist") * ways_scale
 		var p := w.free_spot_near(want, [site], 8.0, 0.9, 3.0)
-		if Vector2(p.x - want.x, p.z - want.z).length() < 3.5 and w.island_of(p.x, p.z) == ii:
-			best = p
-			break
-		if best == Vector3.INF:
-			best = p
-	gate = best
-	_build()
+		if any == Vector3.INF:
+			any = p
+		if Vector2(p.x - want.x, p.z - want.z).length() >= 3.5 or w.island_of(p.x, p.z) != ii:
+			continue
+		if outposts.all(func(ed): return Vector2(p.x - ed["pos"].x, p.z - ed["pos"].z).length() >= clear):
+			return p
+		if near == Vector3.INF:
+			near = p
+	return near if near != Vector3.INF else any
 
 # ------------------------------------------------------------------ the state
 func go(to: S, why: String) -> bool:
@@ -223,6 +236,7 @@ func tick(dt: float) -> void:
 	_tide_tick(dt)
 	_apply_carrier()
 	_update_nodes()
+	audio.update()
 
 func _host_tick(dt: float) -> void:
 	var t := m.sess_time()
@@ -303,6 +317,7 @@ func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
 	if final_team < 0 and crews.size() == 1:
 		final_team = int(crews.keys()[0])
+		audio.call_out("start", "final", final_team)
 	if final_team < 0:
 		return
 	var own := int(crews.get(final_team, 0))
@@ -339,6 +354,7 @@ func _take(seat: String, team: int) -> void:
 ## This game's own Hunters of the squad at the seat leave (downed ones too): the Gate takes those within
 ## gate_take_r of it, the ring those inside it.
 func _leave(seat: String, team: int) -> void:
+	audio.call_out("taken", "early" if seat == HOW_EARLY else "final", team)
 	if seat == HOW_EARLY:
 		early_team = team
 		carrier = null
@@ -372,7 +388,6 @@ func _pick(h: Hunter) -> void:
 	else:
 		_broadcast()
 	m.add_feed("%s took the Heartspark" % h.pname)
-	m.sfx("ping", h.pos, 0.0, 0.6)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
 
 func _drop(at: Vector3) -> void:
@@ -423,7 +438,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			var gneed := r("gate_hold_s")
 			return {"kind": "heart", "act": "leave", "need": gneed, "col": GATE_COL,
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
-				"label": "Hold %s to leave through the Heart Gate with your squad" % key}
+				"label": "Hold %s: leave now, small reward" % key}
 		return {"kind": "heart", "col": GATE_COL, "label": "The Heart Gate only opens for the Heartspark's bearer"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
@@ -560,13 +575,6 @@ func _build() -> void:
 	ring.material_override = Models.ring_mat(COL, 0.04)
 	ring.position = Vector3(0, 0.35, 0)
 	h.add_child(ring)
-	# the Heart ring of the final seat: dim until the Heart opens
-	_final_mat = Models.ring_mat(COL, 0.08)
-	var fr := MeshInstance3D.new()
-	fr.mesh = Models.flat_quad(r("final_r") * 2.0)
-	fr.material_override = _final_mat
-	fr.position = Vector3(0, 0.3, 0)
-	h.add_child(fr)
 	# the Heartspark: a small bright mote that grows as it charges
 	_spark = Node3D.new()
 	_root.add_child(_spark)
@@ -580,27 +588,15 @@ func _build() -> void:
 	_beam.material_override = _beam_mat
 	_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_root.add_child(_beam)
-	# the Heart Gate: two pale pillars and a disc of light, dark until the Heartspark is carried
-	_gate_node = Node3D.new()
-	_gate_node.position = gate
-	_root.add_child(_gate_node)
+	# the Heart Gate: two pale pillars (its light and the Heart ring are WaysOutVfx seats)
+	var gate_node := Node3D.new()
+	gate_node.position = gate
+	_root.add_child(gate_node)
 	var stone := Models.toon(Color("cfc6c8"))
 	for sgn in [-1.0, 1.0]:
-		Models.part(_gate_node, Models.cyl(0.32, 0.4, 3.2, 10), stone, Vector3(sgn * r("gate_r") * 0.8, 1.6, 0))
+		Models.part(gate_node, Models.cyl(0.32, 0.4, 3.2, 10), stone, Vector3(sgn * r("gate_r") * 0.8, 1.6, 0))
 		var knob := Vector3(sgn * r("gate_r") * 0.8, 3.4, 0)
-		Models.part(_gate_node, Models.sphere(0.34, 10), Models.toon(GLASS, false, 0.5), knob)
-	_gate_mat = Models.ring_mat(GATE_COL, 0.08)
-	var gr := MeshInstance3D.new()
-	gr.mesh = Models.flat_quad(r("gate_r") * 2.2)
-	gr.material_override = _gate_mat
-	gr.position = Vector3(0, 0.12, 0)
-	_gate_node.add_child(gr)
-	_gate_beam = MeshInstance3D.new()
-	_gate_beam.mesh = Models.cyl(0.2, 0.5, 14.0, 10)
-	_gate_beam.material_override = Models.glow_mat(Color(GATE_COL, 0.2))
-	_gate_beam.position = Vector3(0, 7.0, 0)
-	_gate_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_gate_node.add_child(_gate_beam)
+		Models.part(gate_node, Models.sphere(0.34, 10), Models.toon(GLASS, false, 0.5), knob)
 
 func _update_nodes() -> void:
 	if _root == null:
@@ -629,10 +625,6 @@ func _update_nodes() -> void:
 	if state == S.CHARGING:
 		hs = f
 	_halo.scale = Vector3.ONE * (0.8 + 0.4 * hs)
-	var open := spark_live() and carrier != null
-	_gate_mat.set_shader_parameter("color", Color(GATE_COL, 0.9 if open else 0.18))
-	_gate_beam.visible = open
-	_final_mat.set_shader_parameter("color", Color(COL, 0.5 + 0.4 * final_prog if state == S.FINAL else 0.08))
 
 func stop() -> void:
 	if _root and is_instance_valid(_root):

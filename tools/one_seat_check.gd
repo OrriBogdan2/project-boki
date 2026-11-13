@@ -33,9 +33,6 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	var O: OneSeat = m.exits.one_seat
 	say(P.extracted and mate.extracted and not far.extracted, "the Gate takes the two at it, not the third 40 m away")
 	say(O.late.has(far) and not O.late.has(P) and O.spent(far), "the one left behind is on the clock, the squad spent")
-	var grace := FirstTimeHint.text("seat_grace")
-	say(FirstTimeHint.seen("seat_grace") and grace.contains("%d s" % int(late_s)),
-		"the boarded player is told once: " + grace)
 	# no second seat: the spark is theirs to take no more, and neither is an uplink
 	m.heart._force(Heart.S.READY, "check")
 	m.heart.carrier = null

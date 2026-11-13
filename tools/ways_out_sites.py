@@ -1,18 +1,21 @@
 """The map rule for the Limited Ways Out mode (briefs/specs/LIMITED_WAY_OUTS.md section 8), shared by the
 map generators. A map authors "heart": [x, y] (the Throne / vault crown), the quest sites (lairs, uplink
 outposts) and nothing else; the Heart Gate is picked by the match seed at GATE_DIST from the heart.
-Numbers are the 216 m map's; `scale` (1.41 on the 2x map) stretches radii and bands, never times."""
-import math
+Numbers come from content/rules/heart.json ("map" and the tide), in metres on the 216 m design; `scale`
+(the map's "ways_scale", 1.412 on the 305 m Hollow Crown) stretches radii and bands, never times."""
+import json, math, os
 
-TIDE_START, TIDE_CLOSE = 90.0, 510.0   # s: the Blight ring starts closing, and takes this long to close
-RING_R0, RING_R1 = 130.0, 34.0         # m: the ring's first and final radius (the final ring holds from 10:00)
-WINDOW = 150.0                         # s: a quest seat's site stays inside the ring this long after it opens
-OPENS = {"lair": 120.0, "uplink": 360.0}   # s: the Sealed Lair opens at 2:00, the Uplink powers on at 6:00
-GATE_DIST = 24.0                       # m: heart to Heart Gate (inside the final ring)
-GATE_CLEAR = 60.0                      # m: every uplink outpost is at least this far from the Gate
-UPLINK_BAND = (42.0, 50.0)             # m: uplink outposts from the heart
-UPLINK_APART = 90.0                    # degrees round the heart between the two outposts (opposite sides)
-GATE_ARC_MIN = 30                      # degrees of seeded gate angle that must be on ground and clear
+_R = json.load(open(os.path.join(os.path.dirname(__file__), "..", "content", "rules", "heart.json")))
+_M = _R["map"]
+TIDE_START, TIDE_CLOSE = _R["tide_start_s"], _R["tide_close_s"]   # s: the Blight ring starts closing, and takes this long
+RING_R0, RING_R1 = _R["tide_r0"], _R["tide_r1"]   # m: the ring's first and final radius (the final ring holds from 10:00)
+WINDOW = _M["seat_window_s"]                      # s: a quest seat's site stays inside the ring this long after it opens
+OPENS = {"lair": _R["quest"]["lair_open_s"], "uplink": _R["quest"]["uplink_open_s"]}
+GATE_DIST = _R["gate_dist"]                       # m: heart to Heart Gate (inside the final ring)
+GATE_CLEAR = _M["gate_clear"]                     # m: every uplink outpost is at least this far from the Gate
+UPLINK_BAND = tuple(_M["uplink_band"])            # m: uplink outposts from the heart
+UPLINK_APART = _M["uplink_apart_deg"]             # degrees round the heart between the two outposts
+GATE_ARC_MIN = _M["gate_arc_min_deg"]             # degrees of seeded gate angle that must be on ground and clear
 
 
 def ring_r(t, scale=1.0):

@@ -24,13 +24,9 @@ func taken(how: String, team: int, where: String, col: Color, at: Vector3, reach
 		if h.team != team or h.remote or h.out or h.extracted:
 			continue
 		late[h] = {"how": how, "where": where, "col": col, "at": at, "until": m.time + left, "reach": reach}
-	var p := m.player
-	if p == null or p.team != team or m.hud == null:
-		return
-	if FirstTimeHint.show("seat_grace", m.hud.toast.bind(col)) or not late.has(p):
-		return
-	var msg := "Your squad took a seat out (%s)  ·  get there in %d s or go home without your loot"
-	m.hud.toast(msg % [where, int(left)], col)
+		if h == m.player and m.hud:
+			var msg := "Your squad took a seat out (%s)  ·  get there in %d s or go home without your loot"
+			m.hud.toast(msg % [where, int(left)], col)
 
 func tick(_dt: float) -> void:
 	for h: Hunter in late.keys():
