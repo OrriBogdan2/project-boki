@@ -757,19 +757,27 @@ func _show_name() -> void:
 	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	you_row.add_child(ye)
 	v.add_child(you_row)
-	var btns := UI.hbox(10)
-	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
-	skip.flat = true
-	btns.add_child(skip)
+	var btns := UI.hbox(14)
+	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, ne.text, ye.text, false)))
+	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, ne.text, ye.text, true)))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Head out together"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
+	# Enter in either box is the same as "Tend the garden"
+	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ne.grab_focus()
 	ne.select_all()
+
+## One of the two equal ways on from the naming card: a button and a line under it, one click.
+func _path_card(label: String, line: String, go: Callable) -> Control:
+	var c := UI.vbox(6)
+	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	c.add_child(UI.primary(label, go, 240))
+	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
+	return c
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
@@ -786,7 +794,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
-	if ClassUnlock.needs_starters():
+	if tutorial and ClassUnlock.needs_starters():      # (the garden path picks at the portal: FirstRelic)
 		_mask_moment(func(): _head_out(tutorial))
 		return
 	_head_out(tutorial)
@@ -812,10 +820,7 @@ func _mask_moment(then: Callable) -> void:
 	ui.add_child(holder)
 
 func _put_on_first(first: String, then: Callable) -> void:
-	Save.d["arch"] = first
-	Save.d["cls"] = Arch.weight(first)
-	Save.d["weapon"] = Arch.signature(first)
-	Save.save_game()
+	FirstRelic.wear(first)
 	var moment := MaskMoment.make(self, cam, kin_node, first)
 	moment.finished.connect(then)
 	add_child(moment)
