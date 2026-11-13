@@ -2162,6 +2162,8 @@ func _extract_check() -> void:
 	await get_tree().process_frame
 	# ---- 3d. the Uplink quest seat (tools/uplink_seat_check.gd)
 	if not await load("res://tools/uplink_seat_check.gd").new().check(self, fresh, run, done): ok = false
+	# ---- 3e. one seat per squad (tools/one_seat_check.gd)
+	if not await load("res://tools/one_seat_check.gd").new().check(self, fresh, run, done): ok = false
 	print("EXCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 

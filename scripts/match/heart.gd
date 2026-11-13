@@ -316,7 +316,7 @@ func in_ring(h: Hunter) -> bool:
 func _ring_crews() -> Dictionary:
 	var crews := {}
 	for h in m.hunters:
-		if not h.downed and in_ring(h):
+		if not h.downed and in_ring(h) and not _spent(h):
 			crews[h.team] = int(crews.get(h.team, 0)) + 1
 	return crews
 
@@ -371,13 +371,26 @@ func _leave(seat: String, team: int) -> void:
 	for h in m.hunters:
 		if h.team != team or h.remote or h.out or h.extracted:
 			continue
-		var here: bool = in_ring(h) if seat == HOW_FINAL else h.flat_dist(gate) <= r("gate_take_r")
-		if here:
-			m._extract(h, seat, "Heart Gate" if seat == HOW_EARLY else "the Heart")
+		if at_seat(h, seat):
+			m._extract(h, seat, seat_name(seat))
+	if m.exits and m.exits.one_seat:
+		var at := site if seat == HOW_FINAL else gate
+		m.exits.one_seat.taken(seat, team, seat_name(seat), COL, at, at_seat.bind(seat))
+
+## This Hunter's squad already used a seat: no second one.
+func _spent(h: Hunter) -> bool:
+	return m.exits != null and m.exits.one_seat != null and m.exits.one_seat.spent(h)
+
+func seat_name(seat: String) -> String:
+	return "the Heart" if seat == HOW_FINAL else "Heart Gate"
+
+## Is this Hunter in the seat: inside the ring, or within gate_take_r of the Gate.
+func at_seat(h: Hunter, seat: String) -> bool:
+	return in_ring(h) if seat == HOW_FINAL else h.flat_dist(gate) <= r("gate_take_r")
 
 # ------------------------------------------------------------------ taking the spark, dropping it
 func _pick(h: Hunter) -> void:
-	if not spark_live() or carrier != null or h == null or h.downed or h.out or h.extracted:
+	if not spark_live() or carrier != null or h == null or h.downed or h.out or h.extracted or _spent(h):
 		return
 	carrier = h
 	if state == S.READY:
@@ -418,6 +431,8 @@ func on_leave(h: Hunter, how: String) -> void:
 ## What holding interact near the Heart or the Gate does for this Hunter (Match._update_interact).
 func interact_for(h: Hunter) -> Dictionary:
 	if site == Vector3.INF:
+		return {}
+	if _spent(h):
 		return {}
 	var key := Settings.key_cap("interact")
 	if not bool(h.inp.get("interact", false)):

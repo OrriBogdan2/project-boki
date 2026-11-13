@@ -400,4 +400,5 @@ func _why(w: String) -> String:
 		"team wiped", "finished": return "got knocked out"
 		"bled out": return "bled out"
 		"left": return "left early"
+		"left behind": return "was sent home when their squad's seat left"
 	return w

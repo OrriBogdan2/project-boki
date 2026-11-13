@@ -22,6 +22,7 @@ static func world_labels(hud) -> void:
 		return
 	var cam: Camera3D = m.cam
 	_outside(hud, m, ht)
+	OneSeat.draw(hud)
 	if ht.carrier and ht.carrier != m.player:
 		var who := "%s has the Heartspark" % ht.carrier.pname
 		hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.COL)

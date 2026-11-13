@@ -33,13 +33,16 @@ var list: Array = []          # every exit, see _add_*
 var rush := false             # the last squad standing: uplinks charge faster
 var seats: QuestSeats = null  # Limited Ways Out: the Sealed Lair and the Uplink seats (null outside the mode)
 var hints := ZoneHint.new()   # the fading "more teammates fuel it faster" tip
+var one_seat: OneSeat = null  # ...and the rule that a squad uses one seat (null outside the mode)
 
 func setup(match_node: Match) -> void:
 	m = match_node
 	if m.opts.get("training", false) or m.opts.get("duel", false):
 		return
 	var tut: bool = m.opts.get("tutorial", false)
-	if Heart.enabled(m.opts): seats = QuestSeats.new(m)      # (the Heart itself is built after the exits)
+	if Heart.enabled(m.opts):      # (the Heart itself is built after the exits)
+		seats = QuestSeats.new(m)
+		one_seat = OneSeat.new(m)
 	var defs: Array = m.world.exit_defs if not m.world.exit_defs.is_empty() else _default_defs()
 	for d in defs:
 		await m._slice()       # under the loading screen: a frame now and then
@@ -152,7 +155,9 @@ func interact_for(h: Hunter) -> Dictionary:
 		match String(x["state"]):
 			"idle":
 				var why := seats.uplink_wait(x) if seats else ""
-				if why != "":
+				if one_seat and one_seat.spent(h):
+					best = {"label": "Your squad already used a seat"}
+				elif why != "":
 					best = {"label": why}
 				elif m.time < float(x["open_at"]):
 					best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
@@ -187,6 +192,8 @@ func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 
 func act(x: Dictionary, what: String, h: Hunter, from_net := false) -> void:
 	if what != "start" or x["state"] != "idle" or (seats and not from_net and not seats.may_start(x)):
+		return
+	if one_seat and h and one_seat.spent(h):
 		return
 	_start(x, h)
 	if m.net_on and not from_net:
@@ -274,7 +281,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			var seat: bool = x.get("seat", false)      # the Uplink seat: its lift is the finishing squad's alone
 			var rode := false
 			for h in m.hunters:
-				var at_lift: bool = _live(h) and not h.remote and h.flat_dist(p) < LIFT_R and absf(h.pos.y - p.y) < 1.5
+				var at_lift: bool = _live(h) and not h.remote and in_lift(h, x)
 				if at_lift and (not seat or h.team == int(x["team"])):
 					m._extract(h, "uplink", x["name"])
 					rode = true
@@ -354,6 +361,10 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	var near: bool = m.player != null and in_yard(x, m.player)
 	var charging: bool = x["state"] == "charging"
 	OutpostLook.rings(n, near or x["contested"], charging, float(x["prog"]))
+
+func in_lift(h: Hunter, x: Dictionary) -> bool:
+	var p: Vector3 = x["pos"]
+	return h.flat_dist(p) < LIFT_R and absf(h.pos.y - p.y) < 1.5
 
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
@@ -459,6 +470,7 @@ func _hunter_near(p: Vector3, r: float) -> bool:
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:
 	if seats: seats.tick(dt)
+	if one_seat: one_seat.tick(dt)
 	for x in list:
 		_tick_outpost(x, dt)
 		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1

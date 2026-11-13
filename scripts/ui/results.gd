@@ -315,6 +315,7 @@ func _lost_title(why: String) -> String:
 		"abyss": return "You fell"
 		"train": return "Hit by the Sky Train"
 		"left": return "You left the match"
+		"left behind": return "Sent home"
 	return "Knocked out"
 
 ## What happened to a hauled piece on arrival: sold (the armory was full), salvaged (armor), or kept.

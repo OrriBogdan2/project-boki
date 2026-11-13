@@ -97,3 +97,17 @@ outcome are the same for both seats: any Heart exit is an extraction, so the hau
 says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
 Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
 the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
+
+## One seat per squad (OneSeat)
+`OneSeat` (scripts/match/one_seat.gd, `Exits.one_seat`) is the rule's one home. Each seat, in every game, calls
+`taken(how, team, where, col, at, reach)` when it fires (Heart `_leave`, the lair's `_leave_lair`, the Uplink's first
+TAKEN): it marks the squad used and puts each of this game's own living members not in the seat on a `late_s` clock
+(heart.json, 20 s). `tick` extracts one who `reach`es the seat in time (the seat's own reward), and sends home one who
+does not: gems, seeds and caught Boki dropped, `out` + `gone`, the result "left behind"; their Boki is never lost. A
+used squad is refused every other seat (`spent`: Heartspark pick, ring crew, Uplink start, prompts). No new Net message
+(each game handles its own Hunters from the seat events it already gets). The HUD draws the countdown through
+`HeartHud.world_labels`. Not done: bots left behind are not steered to the seat; the lair race is not blocked while
+the grace runs (a boss fight cannot end in 20 s); the final ring's islands fall 15 s after it is taken, so the grace is
+15 s there in practice. Check: --extract-check section 3e (tools/one_seat_check.gd).
+In a save's first two Extractions, `FirstMatchGuide`'s `seat` line tells the one on the clock the rule,
+ahead of any other line (--first-match-guide-check).

@@ -195,6 +195,11 @@ func _apply(s: QuestSeat) -> void:
 					_leave_lair(s)
 	else:
 		var x: Dictionary = s.ref
+		if s.state == QuestSeat.S.TAKEN and not _left.has("uplink"):
+			_left["uplink"] = true
+			x["t"] = maxf(float(x["t"]), Heart.r("late_s"))      # the lift stays open for the squad's late members
+			var os: OneSeat = m.exits.one_seat
+			os.taken("uplink", s.team, String(x["name"]), ExitModels.UPLINK, x["pos"], m.exits.in_lift.bind(x))
 		if s.state == QuestSeat.S.SHUT and String(x["state"]) in ["idle", "charging", "fizzling", "spent"]:
 			m.exits.close_outpost(x)
 
@@ -203,11 +208,14 @@ func _apply(s: QuestSeat) -> void:
 func _leave_lair(s: QuestSeat) -> void:
 	var L: Dictionary = s.ref
 	for h in m.hunters:
-		if h.team != s.team or h.remote or h.out or h.extracted:
-			continue
-		var up: bool = (L.get("flown", []) as Array).has(h) or (L.get("escaped", []) as Array).has(h)
-		if up or m.lairs.inside(L, h.pos, 0.5):
+		if h.team == s.team and not h.remote and not h.out and not h.extracted and at_lair(h, L):
 			m._extract(h, HOW_LAIR, String(L["name"]))
+	m.exits.one_seat.taken(HOW_LAIR, s.team, String(L["name"]), Lairs.color_of(L), L["up"], at_lair.bind(L))
+
+## In the lair, on its updraft or just thrown out over the wall by it.
+func at_lair(h: Hunter, lair_d: Dictionary) -> bool:
+	var gone: bool = (lair_d.get("flown", []) as Array).has(h) or (lair_d.get("escaped", []) as Array).has(h)
+	return gone or m.lairs.inside(lair_d, h.pos, 0.5)
 
 ## The Sealed Lair shut unused: its gate closes again (Lairs._tick_seal walks anyone inside out).
 func _reseal(L: Dictionary) -> void:

@@ -96,7 +96,8 @@ Nesting holds by the numbers: each step's centre move is no more than its radius
 | Heart, final | 10:00 to 12:00 | Hold the Heart ring (6 m): 20 s alone, 11 s with three; stalls while a standing rival is in it, drains when empty | Anyone alive | **MAJOR** |
 
 Shared rules:
-- A seat fires once and takes the squad members inside it at that moment (downed ones too). A living squadmate who was not there is still in the match.
+- A seat fires once and takes the squad members inside it at that moment (downed ones too).
+- **One seat per squad.** The moment a squad takes a seat, each living member not in it has **20 s** (`late_s` in heart.json) to reach it: a HUD countdown and a line to the seat. Arriving in time they leave by it with their loot. Out of time they go home **without the loot they carried** (gems, seeds, caught Boki; their own Boki always comes home, nothing is lost) and are out of the match. The squad can use no other seat: no Heartspark, no Uplink start, no ring crew. The Uplink lift stays open at least 20 s for the same reason.
 - The seat reward goes to every member of the squad, dead ones included. Carried loot comes home only with the Hunters who physically left.
 - A hit from a rival resets the Heart Gate hold. **A seat whose ground is outside the wall does not work.**
 - Why each seat sits where it does on the zone clock: the lair is inside circles 1 and 2 with 20 m to spare and is taken one minute after it shuts; the uplink is inside circle 3 with 14 m to spare and is taken as it shuts; the Gate is inside The Crown and is taken 24 s into the final collapse, which ends the "leave small" choice exactly when the last fight starts.
