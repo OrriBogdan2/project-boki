@@ -304,6 +304,7 @@ var tl_yv := 0.0
 var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
+var feet := FootPlant.new()     # the feet put on the terrain after update (Hunter.render calls feet.plant)
 var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
 var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
 var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)

@@ -212,6 +212,10 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - The climb: StoneStand lifts the caster at 8.5 m/s, easing off 0.85m under the top so it ends about 0.2m past it (a straight
   8.5 m/s would throw him 2m up). Crossing a rock takes 0.58s (0.52s before). `CLIMB_MAX` 2.7m.
 - A punch or slam from on top of a rock still takes it (HeroZones.rock_in_reach, the old 2m reach would have missed it).
+- Feet on the rocks (`--rock-feet-check`, docs/art/FOOT_PLANT.md): standing on a rock, walking the ridge and stepping
+  between rocks of different heights, his weight-bearing foot sits on the rock's top within 4 cm (FootPlant); walked
+  onto a higher rock the body eases up instead of popping (StoneStand.stand). The top is flat at 2.2 m over the
+  footprint, the crags' peaks and gaps are not (the mesh lies 0.02-2.2 m under a planted foot).
 - Allies still hop over by jumping (owner 23:55, DECISIONS), which item 67's "nobody else can" does not override: foes cannot.
 - Asserted (`--dolm-combo-check`): `item 67: a rock's top is at least 1.6x...`, `item 67: the look reaches the top...`,
   `item 67: every rock has a ground shadow`, `rock (item 25): ...`. Old vs new: /home/boki/shots-s2/kits/tarek/.

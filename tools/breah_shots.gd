@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["lmb", "rmb", "rocks", "dash", "spine", "climb", "glide"]
+const PARTS := ["lmb", "rmb", "rocks", "dash", "spine", "climb", "glide", "ridge"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -239,6 +239,38 @@ func _breah_climb() -> void:
 		[0.3, 0.42, 0.5, 0.6, 0.72, 0.9]
 	)
 	await _go(1.1, walk, marks)
+	P.inp["move"] = Vector2.ZERO
+
+## Standing on the Basalt Spine, then walking along it (his feet on the rock tops: --rock-feet-check).
+func _breah_ridge() -> void:
+	await _reset(14.0)
+	P.lvl = 6
+	P.ak.cd["x"] = 0.0
+	_aim(home + Vector3(0, 0, -5.0))
+	P.inp["x_down"] = false
+	HunterKeys.ult_pressed(P)
+	await _go(1.0)
+	var ridge: Array = m.verbs.walls.filter(func(w): return w.has("top"))
+	ridge.sort_custom(func(a, b): return float((a["a"] as Vector2).x) < float((b["a"] as Vector2).x))
+	var start: Vector2 = ((ridge[2]["a"] as Vector2) + (ridge[2]["b"] as Vector2)) * 0.5
+	P.teleport(Vector3(start.x, float(ridge[2]["y"]) + float(ridge[2]["top"]), start.y))
+	var walk := func(t: float):
+		var ahead := P.pos + Vector3(3.0, 0, 0)
+		for w in ridge:
+			var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
+			if mid.x > P.pos.x + 0.6:
+				ahead = Vector3(mid.x, P.pos.y, mid.y)
+				break
+		_aim(ahead)
+		P.inp["move"] = Vector2(ahead.x - P.pos.x, ahead.z - P.pos.z).normalized() if t > 0.5 else Vector2.ZERO
+	var marks := _strip(
+		"ridge_strip",
+		"Tenzo on his Basalt Spine at gameplay zoom: standing on a rock (two frames), then walking along the ridge"
+			+ " from rock to rock; his feet on the rock tops (--rock-feet-check)",
+		[0.25, 0.45, 0.7, 0.85, 1.0, 1.15]
+	)
+	marks.append([0.4, "full", "ridge_stand", "Standing on the ridge, the match camera", Callable()])
+	await _go(1.3, walk, marks)
 	P.inp["move"] = Vector2.ZERO
 
 ## Quakefall out of a glide (the owner's 23:00 answer): gliding, the press folds the glider, the plunge, the

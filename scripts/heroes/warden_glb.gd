@@ -946,6 +946,7 @@ class Sync extends Node:
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 	var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
+	var leg_bones := PackedInt32Array()     # LEG_BONES' indices, for FootPlant.bones
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -959,6 +960,8 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		for b in LEG_BONES:
+			leg_bones.append(WardenSkeleton.find(skel, b))
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
@@ -992,6 +995,7 @@ class Sync extends Node:
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
 		if clips and bool(dd.get("rig_root", false)):
 			rig_root = links.filter(func(l): return int(l[0]) == WardenSkeleton.find(skel, "root"))
+			leg_bones.clear()       # a hover (Motley): no feet on the ground to plant
 		if clips:
 			for sd in ["L", "R"]:
 				var nd := root.get_node_or_null(String(BONES["hand." + sd])) as Node3D
@@ -1024,6 +1028,7 @@ class Sync extends Node:
 		else:
 			apply()
 			apply_blade()
+		FootPlant.bones(root, skel, leg_bones, dt)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		if companions:
