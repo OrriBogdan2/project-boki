@@ -10,7 +10,8 @@ extends RefCounted
 ##     it; an empty ring drains. Downed Hunters (Wisps) neither hold nor stall it: when none of the holders
 ##     stands in it and one other squad does, that squad takes it over from nothing. Full: that squad's
 ##     members in the ring leave, MAJOR, the islands fall soon.
-##   The Blight's tide closes on the Heart all match (tide_r; read by BlightDir.level / _spawn_tick).
+##   The Blight's tide closes on the Heart all match, then the end phase closes it to the final circle (tide_r;
+##   read by BlightDir.level / _spawn_tick).
 ## One explicit state (briefs/STATE_MACHINES.md): S, with the legal edges in NEXT; only go() moves it (a
 ## refused edge is counted, never applied), and only the host does. _force() is the mirror for clients and demos.
 ## An early seat nobody used by final_s stays open in FINAL (early_team < 0): the spark can still be taken out.
@@ -65,11 +66,25 @@ static func tide_r(m: Match) -> float:
 		return 0.0
 	return ring_at(m.sess_time(), m.heart.ways_scale)
 
-## The tide ring's radius t seconds into a match on a map of ways_scale k (the radius it starts at
-## before the tide moves).
+## The tide ring's radius t seconds into a match on a map of ways_scale k: tide_r0 (also before the tide
+## moves) closing to tide_r1 by the last close, then the end phase closing on to end_r, held to the fall.
 static func ring_at(t: float, k: float) -> float:
+	if t > last_close():
+		return lerpf(r("tide_r1"), r("end_r"), end_f(t)) * k
 	var f := clampf((t - r("tide_start_s")) / r("tide_close_s"), 0.0, 1.0)
 	return lerpf(r("tide_r0"), r("tide_r1"), f) * k
+
+## The session time of the tide's last close: the end phase starts there (with the final seat).
+static func last_close() -> float:
+	return r("tide_start_s") + r("tide_close_s")
+
+## How far the end phase's close has gone at session time t: 0 up to the last close, 1 once done.
+static func end_f(t: float) -> float:
+	return clampf((t - last_close()) / r("end_close_s"), 0.0, 1.0)
+
+## The end phase is on: past the tide's last close the Blight keeps to its tide and finishes its own downed.
+static func end_phase(m: Match) -> bool:
+	return m.heart != null and end_f(m.sess_time()) > 0.0
 
 ## 0 inside the ring, 1 forty metres past it.
 static func tide_out(m: Match, p: Vector3) -> float:
@@ -79,7 +94,7 @@ static func tide_out(m: Match, p: Vector3) -> float:
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
-## tide starts, so the drop map shows it; tide_r1 once the ring holds).
+## tide starts, so the drop map shows it; the final circle once it holds).
 static func next_r(m: Match) -> float:
 	if m.heart == null:
 		return 0.0
@@ -112,6 +127,10 @@ static func tide_dmg(stage: int) -> float:
 			v = lerpf(float(a[1]), float(b[1]), float(stage - int(a[0])) / float(int(b[0]) - int(a[0])))
 			break
 	return v * float(Data.CLASSES["medium"]["hp"]) / r("tide_src_hp")
+
+## Flat damage one tide tick deals now: the stage's, ramped through the end phase's close from 1x to end_dmg_k.
+static func tick_dmg(m: Match) -> float:
+	return tide_dmg(maxi(tide_stage(m), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m.sess_time()))
 
 # ------------------------------------------------------------------ state
 var m: Match
@@ -266,7 +285,9 @@ func on_last_team() -> void:
 		go(S.FINAL, "last squad")
 
 ## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
-## damage ("heat"): armor doesn't take it and it doesn't drain a glider.
+## damage ("heat"): armor doesn't take it and it doesn't drain a glider. In the end phase it also wears
+## down those it downed itself out there (a Boki's revive stops the bleed, not the Blight; Life ends them
+## at 0); one a rival downed keeps the usual bleed, even with the edge past them.
 func _tide_tick(dt: float) -> void:
 	var st := tide_stage(m)
 	if st < 0:
@@ -276,15 +297,22 @@ func _tide_tick(dt: float) -> void:
 		return
 	_tide_t -= r("tide_tick_s")
 	var tr := tide_r(m)
-	var d := tide_dmg(st)
+	var d := tick_dmg(m)
+	var finish := end_phase(m)
 	for h in m.hunters:
-		if h.remote or h.downed or h.out or h.extracted:
+		if h.remote or h.out or h.extracted or Vector2(h.pos.x - site.x, h.pos.z - site.z).length() <= tr:
 			continue
-		if Vector2(h.pos.x - site.x, h.pos.z - site.z).length() > tr:
+		if not h.downed:
 			h.hurt(d, null, {"src": "heat", "tags": ["tide"]})
 			if h == m.player:
 				hit_t = m.time
 				Sfx.play("thump", null, -8.0, 0.0, 0.7)
+		elif finish and _by_blight(h):
+			h.down_hp -= d
+
+## The Blight downed them: the tide leaves no attacker, a Blight mob is one.
+static func _by_blight(h: Hunter) -> bool:
+	return not is_instance_valid(h.last_hit_by) or h.last_hit_by is Blight
 
 ## The slow and the reveal on whoever holds it (each game sets it on the Hunters it plays).
 func _apply_carrier() -> void:

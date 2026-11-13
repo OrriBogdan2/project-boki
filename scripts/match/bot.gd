@@ -36,9 +36,13 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
-const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft",
-	"retreat", "assist"]
+const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
+	"seat", "ring", "gate"]
+const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape",
+	"lair_lever", "lair_updraft", "spark", "gate", "ring", "ring_in", "retreat", "assist"]
+## Goals a bot holds interact at on arrival, and goals it may stand and wait at (no give-up timer).
+const HOLD_GOALS := ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever", "spark", "gate"]
+const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp", "seat", "ring"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
@@ -269,10 +273,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				var ah: Vector2 = a["aim_hold"]
 				inp["aim"] = Vector3(h.pos.x + ah.x * AIM_AHEAD, h.pos.y + 0.9, h.pos.z + ah.y * AIM_AHEAD)
 			inp["aim_y"] = h.pos.y
-			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever"]:
+			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in HOLD_GOALS:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp", "roam"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp", "seat", "ring", "roam"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -688,6 +692,13 @@ func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
 
 func _choose(m: Match, h: Hunter) -> void:
 	var a := h.ai
+	# out at the tide ring's edge: walk back in before anything else (BotWays)
+	var back := BotWays.ring_back(m, h)
+	if back != Vector3.INF:
+		a["tgt"] = null
+		a["goal"] = back
+		a["goal_kind"] = "ring_in"
+		return
 	# fight: nearest rival hunter in sight, else monsters close by
 	var best: Ent = null; var bs := -1e9
 	var ign: Dictionary = a.get("ignore", {})
@@ -766,18 +777,12 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
 		if goal != Vector3.INF: gk = "boki"
-	# a dead teammate: their deathbox while the soul's there, else a revive beacon
+	# a dead teammate: their deathbox while the soul's there (a revive beacon comes after the seat below)
 	if goal == Vector3.INF:
 		for b in m.boxes:
 			var o: Hunter = b["owner"]
 			if o.team == h.team and o != h and Life.soul_here(m, b) and h.flat_dist(b["pos"]) < 45.0:
 				goal = b["pos"]; gk = "box"; break
-	if goal == Vector3.INF and m.hunters.any(func(x): return x.team == h.team and x.out and not x.gone):
-		var bd := 90.0
-		for bc in m.beacons:
-			if bc["used"]: continue
-			var d := h.flat_dist(bc["pos"])
-			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
 	# hurt with the Blight close: get away from it first
 	if goal == Vector3.INF and m.blight:
 		var fl := _blight_flee(m, h)
@@ -797,6 +802,20 @@ func _choose(m: Match, h: Hunter) -> void:
 		var yg: Array = m.exits.bot_goal(h, true)
 		if not yg.is_empty() and String(yg[1]) == "yard":
 			goal = yg[0]; gk = "yard"
+	# Limited Ways Out: the squad's seat (its plan, then the next open one, then the final)
+	var ways := BotWays.on(m)
+	if goal == Vector3.INF and ways:
+		var wg := BotWays.goal(m, h)
+		if not wg.is_empty():
+			goal = wg[0]
+			gk = String(wg[1])
+	# a revive beacon for a dead teammate (a seat in play comes first)
+	if goal == Vector3.INF and m.hunters.any(func(x): return x.team == h.team and x.out and not x.gone):
+		var bd := 90.0
+		for bc in m.beacons:
+			if bc["used"]: continue
+			var d := h.flat_dist(bc["pos"])
+			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
 	# a squadmate is in a fight within earshot: go and help
 	if goal == Vector3.INF:
 		goal = BotSquad.assist_goal(m, h, a, helping)
@@ -853,7 +872,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var lg: Array = m.lairs.bot_goal(h, lair_leave)
 		if not lg.is_empty():
 			goal = lg[0]; gk = String(lg[1])
-	if goal == Vector3.INF and m.exits and not m.exits.list.is_empty():
+	if goal == Vector3.INF and m.exits and not m.exits.list.is_empty() and not ways:
 		# heading home: late in the match, with a good haul, or just because
 		if not a.get("leave", false) and randf() < 0.0015:
 			BotSquad.agree(m, h, "leave", true)      # (the squad's bots leave together)
@@ -902,19 +921,20 @@ func _choose(m: Match, h: Hunter) -> void:
 		var lead_to := BotSquad.roam_to(m, h, a)
 		if lead_to != Vector3.INF:
 			a["wander"] = lead_to
-		elif a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:
+		elif a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02 or not BotWays.inside(m, a["wander"]):
 			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
 			if alive_mobs.size() > 0 and randf() < 0.6:
 				a["wander"] = alive_mobs.pick_random().pos
 			else:
 				a["wander"] = m.world.random_ground()
 		goal = a["wander"]; gk = "roam"
+	goal = BotWays.keep_inside(m, goal)      # (never a goal out in the tide)
 	# a goal we gave up on for now: head for a detour instead, and keep it (re-rolling a fresh one
 	# every think left the bot dithering on the spot)
 	if _banned(m, a, goal):
 		var dt: Vector3 = a.get("detour", Vector3.INF)
 		if dt == Vector3.INF or _banned(m, a, dt) or h.flat_dist(dt) < 2.0:
-			dt = m.world.random_ground()
+			dt = BotWays.keep_inside(m, m.world.random_ground())      # (a detour too stays out of the tide)
 			a["detour"] = dt
 		goal = dt; gk = "roam"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
@@ -932,7 +952,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		a["goal_since"] = m.time
 	elif goal != Vector3.INF:
 		var d := h.flat_dist(goal)
-		if d < 2.0 and String(a.get("goal_kind", "")) in ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp"]:
+		if d < 2.0 and String(a.get("goal_kind", "")) in WAIT_GOALS:
 			a["goal_since"] = m.time      # there and waiting (charging an uplink, working a dial) is fine
 		if d < float(a.get("goal_best", 1e9)) - 0.5:
 			a["goal_best"] = d
@@ -1039,7 +1059,8 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		return h.dir_to(goal)
 	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
 		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
-		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt)}
+		var wide: bool = String(h.ai.get("goal_kind", "")) in RING_GOALS
+		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt, wide)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
@@ -1119,11 +1140,29 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 			return false
 	return true
 
-## Breadth-first search over walkable tiles (a window around the trip), returning tile centres.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
+## Tiles of slack round the trip a tile path may use. Heading for the Heart ring or back in out of the
+## Blight (BotWays) a bot may also try a wide window, enough to reach a ramp beside a cliff (The Crown's
+## raised Heart has two, 23 m out east and west); everywhere a wide window had bots turning between detours.
+const PATH_SLACK := 8
+const PATH_SLACK_RING := 24
+const RING_GOALS := ["ring", "ring_in"]
+
+## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
+## No path leads deeper into the Blight's tide than the ring or where the bot stands (BotWays.path_r).
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, wide: bool) -> Array:
+	var cap := BotWays.path_r(m, Vector3(a.x + 0.5, 0.0, a.y + 0.5))
+	var p := _grid_path_in(m, a, b, PATH_SLACK, cap)
+	if p.is_empty() and wide:
+		p = _grid_path_in(m, a, b, PATH_SLACK_RING, cap)
+	return p
+
+## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
+## `cap` from the Heart, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, slack: int, cap: float) -> Array:
 	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
+	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
+	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false
@@ -1140,7 +1179,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
 			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not W.inb(nx.x, nx.y):
 				continue
 			var i := W.idx(nx.x, nx.y)
-			if W.kind[i] != World.T_GROUND:
+			if W.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
 				continue
 			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue

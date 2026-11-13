@@ -76,6 +76,74 @@ max 40) goes through `Game.apply_result` into `gems`. `KinLoss.resolve`: "nobody
 The skiff and hatch lines are gone from the screen (task 3 deletes those exits). Open: `Ransom.lose`'s non-rival branch
 is no longer reached from a match.
 
+## Bots (spec task 7)
+`BotWays` (scripts/match/bot_ways.gd) gives each squad a plan by the match seed from heart.json "bots" "plans":
+raider (the Sealed Lair from `raider_at_s`, in through `Lairs.bot_lair`), runner (at the Heart by `runner_at_s`,
+takes the spark with no rival within `runner_rival_r`, carries it to the Gate and holds; squadmates stand within
+the Gate's reach), holder (the Uplink from `holder_at_s`, then the existing yard and lift goals) or stayer (loots).
+A squad whose seat is taken, shut or capped falls through to the next open early seat, then the final (the Heart
+ring, from 20 s before it opens or at once on the last-squad rush); a rival on a squad's own seat is chased (the
+carrier) or stood on (the uplink yard). Fairness (risk 5): a bot squad starts a seat `seat_delay_s` after it opens
+(the spark: after it is charged) and bot squads hold or take at most min(2, bot squads / 3) of the three early
+seats; a squad with a human in it (the player's, on --autoplay too) has neither. Every bot keeps inside the tide
+ring: goals are pulled in to ground inside the ring 20 s on, and a bot near the edge drops everything and walks
+in. In the mode `Bot._choose` skips the old leave rule (time_left < 170, gems > 40, a random leave); outside it
+(tutorial, endless-clock tests) it stays. Checks: --bot-ways-check (plans, cap, delay, fall-through, ring),
+--ways-out-sim (whole bot matches, below).
+
+First --ways-out-sim, seeds 1-50, Hollow Crown, 10 trios (the --autoplay player's squad is the human one; 9 bot
+squads, cap 2), on 0.24.5 tip 272368589 plus this: squads out 18.2% (91/500, max 3 a match; gate at most 40%: pass);
+Sealed Lair used 40% (median 4:40), Uplink 32% (7:20) (gate over 50% each: miss), spark 68% (6:12), final 68% (7:51);
+2.08 seats a match, first seat at 5:59 (median); no-winner finals 4/50 = 8% (gate at most 5%: miss: two with two
+squads still in at 12:00, one where a Hunter left behind by its squad's Gate seat stood alone); the human squad got
+out 6/50; bots never passed the cap. Seat tries over the 50: 41 lair seal-ins, 37 spark pick-ups, 25 uplink starts.
+What drives the misses is the pace, not the seat plans: 6 squads are left at 2:00 (median, the spec guesses 9-10)
+and 0.3 at 10:00 (the spec 2-4), so 44 of 50 finals open early on the last-squad rush (docs/PACING_1111.md on
+ext/verify-expedition-pacing saw the same early wipe with no Ways Out bots). heart.json is not tuned here (task 9).
+
+## The end phase (ext/combat-blight-endgame)
+DECISIONS 2026-11-10: everyone without an earned exit plays last team standing as the Blight closes. Measured first
+with `--ways-out-sim` (10 trios, Hollow Crown, 0.24.5 + ext/ways-out-sim, seeds 1-10): 9 of 10 matches were down to
+one squad before the tide's last close at 10:00 (at 5:54-9:56), so the end played out once (2 squads, settled 13 s
+after 10:00); no timeout, nobody apart. To play the end itself, `--final=4` lands 4 squads, jumps the clock to 8:30
+and sets each squad down inside the ring: on the held 48 m ring 7 of 10 settled within 90 s of 10:00, 2 timed out
+and 3 fell with no winner, one pair stood 62 s apart, 9 Blight downs in the safe ring. Why: bots below The Crown's
+raised Heart ground never found its two ramps (the tile path's window was too tight), a Boki keeps reviving its
+owner out in the Blight (no bleed while it revives), and Blight mobs fight in the final.
+
+The rule (heart.json `end_*`; `Heart.ring_at`, `tick_dmg`, `end_phase`):
+- **Final circle.** At the last close (10:00, as the final seat opens) the Blight closes on from `tide_r1` (48 m,
+  The Crown) to `end_r` over `end_close_s`: 28 m round the Heart on the 2x Hollow Crown by 11:00 (0.33 m/s, a
+  Hunter runs 13x faster), then holds. 28 m keeps the raised Heart ground, both its ramps (23 m out) and a strip of
+  its foot inside, so the way in never lies in the Blight; the 6 m Heart ring is its middle. The spec's 12 m (and
+  16 and 25 m) were run: they cut off the ramps or the ground below them and caught bots on their way in. The Heart
+  Gate (34 m) goes under at about 10:43: the "leave small" choice ends as the last fight starts.
+- **Damage ramp.** Outside, a tick deals the last stage's damage at 10:00 (3 ticks down a medium Hunter), ramping
+  to `end_dmg_k` (2x, 2 ticks) by 11:00. In the end phase the Blight also wears down the down health of those it
+  downed itself (out in 1-2 ticks); one a rival downed keeps the usual bleed, edge past them or not. Its creatures
+  inside the ring burrow and none come up for a squad inside it (BlightDir): the final circle is squad against squad.
+- **At zero (12:00)**, squads still in and the final seat not taken: the islands fall on all of them. Both lose: no
+  winner, no MAJOR, a tie for place (WaysResult), as LIMITED_WAY_OUTS rev 2 section 6 says. Not sudden death (the
+  circle closing to nothing, last one standing wins): the Heart ring picks the winner.
+- **Bots.** BotWays drops the spark seat once the Blight closes over the Gate. Heading for the Heart ring or back in
+  out of the Blight, `Bot._grid_path` retries a failed tight window (8 tiles) in a wide one (24), so a bot below the
+  raised ground finds a ramp; for every goal the wide window had bots turning between detours (--bot-sanity-check).
+  No tile path leads farther from the Heart than the ring or the bot itself (`BotWays.path_r`): the wide window had
+  bots walking round the cliff out through the Blight. A detour (a goal given up on) is kept inside the ring like
+  every other goal (it was random ground: bots roamed out to the edge and back). In the end phase a bot walks in
+  from `bots.end_edge_m` (5 m, 7 m on The Crown) inside the edge, not 2 m, so a rival's knock-back leaves it inside.
+
+Result. The first build looked fine on seeds 1-10, but 20 more (`--final=4`, seeds 11-30) had 10 Blight downs of
+bots that stood in the ring 5 s before, 2 timeouts and 3 finals over 90 s: bots on a detour out to the edge, a path
+round the cliff through the Blight, knock-back at the 28 m edge. With the three bot fixes above, `--final=4` seeds
+1-30: 30 of 30 settled within 90 s (4-85 s), no timeout, no no-winner final, longest apart 9 s, no Blight down at
+all. Real 10 trios (seeds 1-10): 7 down to one squad before 10:00 (at 7:04-9:55),
+3 with 2 squads at 10:00 settled +5, +15 and +19 s; no timeout, longest apart 14 s, one tide down 41 m out in the
+Blight (not in the ring), one no-winner (seed 3: the lone squad, the DEBT below). --bot-sanity-check 0 flagged. Left (DEBT): a lone last squad does not
+always take the rush final (one real run fell at 12:00 with it on the low ground). Checks: --heart-check (the ring
+through the end), --blight-check (the ramp, the downed), --ways-out-map-ui-check (the dashed ring), --bot-ways-check
+(the Gate), --ways-out-sim (`WAYS end` lines and sum; the sim does not repeat a match run to run).
+
 ## Seat looks (ext/vfx-ways-out-seats)
 Every seat reads from across the island with one of five looks: locked (dim stub, countdown glyph), open (tall clear
 beam in neutral light), in use (the using squad's colour, ring filling with the hold), taken (the beam sinks in 0.7 s,

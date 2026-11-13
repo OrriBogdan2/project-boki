@@ -400,7 +400,44 @@ func _tide(main: Node) -> void:
 	hp0 = P.hp
 	_run(m, float(rl["tide_tick_s"]) * 2.0 + 0.1)
 	ok(P.hp >= hp0, "inside the ring the tide doesn't hurt")
+	_end_phase(m)
 	m.queue_free()
+
+## The end phase (0051): a tick ramps from the last stage's to end_dmg_k times it over the end close, and
+## out in the Blight it wears down the down health of a Hunter it downed itself (never before the end phase,
+## never one a rival downed).
+func _end_phase(m: Match) -> void:
+	var rl := Heart.rules()
+	var top := Heart.tide_dmg(Heart.TIDE_STAGES - 1)
+	var end_t := Heart.last_close() + float(rl["end_close_s"])
+	m.time = Heart.last_close() - m.sess_t0
+	ok(is_equal_approx(Heart.tick_dmg(m), top), "at the last close a tick is the last stage's (%.1f)" % top)
+	m.time = end_t + float(rl["end_close_s"]) - m.sess_t0
+	var end_dmg := Heart.tick_dmg(m)
+	ok(is_equal_approx(end_dmg, top * float(rl["end_dmg_k"])),
+		"once the end close is done a tick is end_dmg_k times that (%.1f)" % end_dmg)
+	var B: Hunter = m.hunters.filter(func(o): return o != m.player)[0]
+	var rival: Hunter = m.hunters.filter(func(o): return o.team != B.team)[0]
+	var site: Vector3 = m.heart.site
+	var cases := [["before the end phase", Heart.last_close() - 30.0, null], ["downed by a rival", end_t, rival],
+		["downed by the Blight", end_t, null]]
+	for c: Array in cases:
+		m.time = float(c[1]) - m.sess_t0
+		B.teleport(m.world.free_spot_near(site + Vector3(Heart.tide_r(m) + 10.0, 0, 0), [], 1.0, 0.45, 8.0))
+		var outside := B.flat_dist(site) > Heart.tide_r(m)
+		B.downed = false
+		B.last_hit_by = c[2]
+		m.knock(B, c[2], {})
+		var dh0 := B.down_hp
+		_run(m, float(rl["tide_tick_s"]) + 0.1)
+		var lost := dh0 - B.down_hp if not B.out else dh0
+		print("BLIGHT end phase, %s: a downed Hunter out in the Blight (%s) lost %.1f down health in a tick (tick %.1f)"
+			% [c[0], outside, lost, Heart.tick_dmg(m)])
+		if c[0] == "downed by the Blight":
+			var worn := B.out or lost >= Heart.tick_dmg(m)
+			ok(outside and worn, "in the end phase the Blight wears down those it downed (%.1f)" % lost)
+		else:
+			ok(outside and lost < top * 0.5, "%s: the tide leaves the downed to bleed (%.1f)" % [c[0], lost])
 
 # ------------------------------------------------------------------ 7. the tide's sounds
 ## Onset once when the tide starts, a sting at each new close stage and none inside one, the front's rumble on

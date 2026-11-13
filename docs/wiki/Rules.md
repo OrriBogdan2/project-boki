@@ -1180,11 +1180,17 @@ Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the
 | _end_after_final_s | once the final seat is taken the islands fall this many seconds later |
 | tide_start_s | 90 |
 | tide_close_s | 510 |
-| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |
+| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this (the last close), then the end phase closes on |
 | tide_next_s | 60 |
 | _tide_next_s | the dashed ring on the maps is where the tide will be this many seconds from now |
 | tide_r0 | 130 |
 | tide_r1 | 34 |
+| end_close_s | 60 |
+| _end_close_s | the end phase (0051 "The end phase"): from the last close, when the final seat opens, the ring closes on from tide_r1 to end_r over this long, then holds to the islands' fall |
+| end_r | 20 |
+| _end_r | the final circle round the Heart, scaled like the tide radii (28 m on the 2x Hollow Crown: The Crown's raised Heart ground, both its ramps 23 m out and a strip of the ground at its foot, so the way in never lies in the Blight): nowhere to hide |
+| end_dmg_k | 2 |
+| _end_dmg_k | a tide tick outside the ring deals the last stage's damage times this once the end close is done (1x at the last close, linear between); in the end phase it also wears down the down health of those it downed |
 | tide_boost | 0.55 |
 | _tide_boost | added to the Blight's strength outside the tide ring (so they hit harder and are tougher there), scaled by how far out |
 | tide_dmg | [[0, 3.0], [1, 6.0], [2, 50.0], [10, 450.0]] |
@@ -1199,7 +1205,7 @@ Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the
 | reward | {"_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is 3x to 4x minor in what it pays (gems 150 vs 40) and the only one with the egg; the ratio is an open question in docs/decisions/0051", "minor": {"egg": false, "seeds": {"emberberry": 1, "sunroot": 1, "mindmint": 1, "tidebloom": 1}, "goods": {"heartwood": 1}, "gems": 40, "trust": 6.0}, "major": {"egg": true, "seeds": {"emberberry": 3, "sunroot": 3, "mindmint": 3, "tidebloom": 3}, "goods": {"heartwood": 2, "starstone": 2}, "gems": 150, "trust": 20.0}} |
 | quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
 | place | {"_doc": "placement pay for a squad that did not leave (spec task 5, Game.apply_result)", "gems_per_squad_below": 5, "gems_max": 40, "min_level": 2, "_min_level": "a squad whose Hunters are all still below this run level at the end hid all match and gets no placement gems"} |
-| bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
+| bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats", "end_edge_m": 5.0, "_end_edge_m": "in the end phase (0051) a bot this far inside the ring's edge (design map metres, times ways_scale) drops everything and walks in, so a rival's knock-back in the last fight leaves it inside"} |
 | hints | {"_doc": "first-time one-line hints for a new player (scripts/match/ways_hints.gd), each once per save, in the message lane: tide when the Blight first closes, quest when a quest seat first opens, heart when the Heart wakes", "tide": "The Blight is closing in on the Heart: stay inside its ring", "quest": "A way out is open: the first squad to finish its quest leaves", "heart": "The Heart is awake: carry its spark to the Gate and your squad leaves early"} |
 | demo_charge | 1 |
 
