@@ -7,16 +7,17 @@ extends RefCounted
 ## and how far you are from the site. Hidden otherwise, and while the boss bar is up: inside the fight that bar is
 ## the objective and shows the same progress. Reads Exits.seats; drawn with HudStyle on the Hud's canvas.
 
-const GAP := 3.0          # px between the strip and the card
-const H := 28.0           # px: the card's height, so it ends above the message lane (Hud.msgs.top, y 84)
-const PAD := 10.0         # px inside the card, left and right
-const BASE_Y := 13.0      # px from the card's top to the text's baseline
-const BAR_Y := 17.0       # px from the card's top to your squad's bar
-const BAR_H := 4.0        # px: your squad's bar
-const RIVAL_H := 2.0      # px: the leading rival's bar, 2 px under yours
-const FS := 12            # font px of the words and the numbers
-const LABEL_FS := 11      # font px of the seat's name
+const GAP := 3.0  # px between the strip and the card
+const H := 28.0  # px: the card's height, so it ends above the message lane (Hud.msgs.top, y 84)
+const PAD := 10.0  # px inside the card, left and right
+const BASE_Y := 13.0  # px from the card's top to the text's baseline
+const BAR_Y := 17.0  # px from the card's top to your squad's bar
+const BAR_H := 4.0  # px: your squad's bar
+const RIVAL_H := 2.0  # px: the leading rival's bar, 2 px under yours
+const FS := 12  # font px of the words and the numbers
+const LABEL_FS := 11  # font px of the seat's name
 const WORDS := {"lair": ["SEALED LAIR", "Defeat the boss"], "uplink": ["UPLINK", "Hold the yard to charge it"]}
+
 
 ## The quest seat this squad is on now, or null (also outside Ways Out).
 static func seat_of(m: Match, team: int) -> QuestSeat:
@@ -26,6 +27,7 @@ static func seat_of(m: Match, team: int) -> QuestSeat:
 		if s.state == QuestSeat.S.IN_USE and s.team == team:
 			return s
 	return null
+
 
 ## The quest seat a rival of this squad is on that is furthest along, or null when no rival is on one.
 static func rival_seat(m: Match, team: int) -> QuestSeat:
@@ -38,6 +40,7 @@ static func rival_seat(m: Match, team: int) -> QuestSeat:
 			best = s
 	return best
 
+
 ## How far the squad on `s` is, 0 to 1: the uplink's charge, or the health taken off the lair's boss.
 static func progress(m: Match, s: QuestSeat) -> float:
 	if s.kind == "uplink":
@@ -47,6 +50,7 @@ static func progress(m: Match, s: QuestSeat) -> float:
 		return 0.0
 	return clampf(1.0 - b.hp / b.max_hp, 0.0, 1.0)
 
+
 ## The card's numbers: your squad's progress, the leading rival's (when one is on a quest seat) and how far the
 ## player is from the site.
 static func numbers(m: Match, s: QuestSeat, rival: QuestSeat) -> String:
@@ -54,6 +58,7 @@ static func numbers(m: Match, s: QuestSeat, rival: QuestSeat) -> String:
 	if rival:
 		t += "  ·  rival %d%%" % roundi(progress(m, rival) * 100.0)
 	return t + "  ·  %d m" % roundi(m.player.flat_dist(s.site()))
+
 
 ## Draws the card under the Ways Out strip (`strip`, its rect) for the player's squad, or nothing.
 static func draw(hud, strip: Rect2) -> void:
@@ -83,6 +88,7 @@ static func draw(hud, strip: Rect2) -> void:
 	if rival:
 		var thin := Rect2(bar.position + Vector2(0.0, BAR_H + 2.0), Vector2(bar.size.x, RIVAL_H))
 		HudStyle.strip(c, thin, progress(m, rival), _squad_col(rival.team))
+
 
 static func _squad_col(team: int) -> Color:
 	return Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
