@@ -7,11 +7,17 @@ extends RefCounted
 ## them, every step; its Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals
 ## SimLod.THINK_FAR_K times less often; a bot aboard the sky ship picks nothing. A bot in a fight re-tests
 ## its line of sight to the same target every Bot.LOS_RECHECK_S (a new target at once).
+## Poses (SimLod.pose_every): a rival far on screen at the widest match view (the sky ship ride's camera) is
+## posed every SimLod.POSE_FAR frames, off screen every POSE_OFF_SCREEN, hidden every POSE_UNSEEN, every frame
+## once on the player's squad or in a fight with it; one that comes on screen is posed that frame, and a Hero's
+## clips and skeleton (WardenGlb.Sync) hold with it and catch up the time.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
 ## once and reused until it changes. Skinned rigs (RigPace): every frame off GL over Metal; at RigPace.EVERY a
 ## Warden away from the camera's focus is posed every few frames with the held time, the one at the focus every frame.
+## Fight effects (FxPool): a flurry of rings, after-images, bolts, beams and swings adds no node to the Fx, and every
+## mesh is back in its pool once they end.
 
 var main: Node
 var fails := 0
@@ -32,9 +38,11 @@ func run(main_node: Node) -> void:
 	_far_bots()
 	_far_mobs()
 	_bot_los()
+	await _pose_rates()
 	_shadows()
 	await _plates()
 	await _rig_pace()
+	await _fx_pools()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -155,6 +163,88 @@ func _far_bots() -> void:
 	b.riding = false
 	_place(b, m.player.pos + Vector3(5.0, 0, 0))
 	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")
+
+func _pose_rates() -> void:
+	var b: Hunter = null
+	for h in m.hunters:
+		if h.ctrl == "bot":
+			b = h
+	var P: Hunter = m.player
+	m.cam.focus = P.pos
+	m.cam.zoom = Match.RIDE_CAM_DIST / m.cam.dist
+	m.cam.chase = 1.0
+	m.cam._apply(Vector3.ZERO)
+	var far_at := Vector3.INF
+	for i in 36:
+		var at := P.pos + Vector3(CamRig.POSE_FAR_M + 4.0, 0, 0).rotated(Vector3.UP, TAU * i / 36.0)
+		if m.cam.on_screen(at):
+			far_at = at
+			break
+	ok(far_at != Vector3.INF, "setup: a spot past %.0f m on screen from the ride's camera" % CamRig.POSE_FAR_M)
+	b.ai["tgt"] = null
+	b.hurt_at = -9.0
+	b.teleport(P.pos + Vector3(4.0, 0, 0))
+	ok(SimLod.pose_every(m, b) == 1, "a rival near the player is posed every frame")
+	b.teleport(far_at)
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_FAR, "far on screen at the wide view: every %d frames" % SimLod.POSE_FAR)
+	b.unseen = true
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_UNSEEN, "hidden by sight: every %d frames" % SimLod.POSE_UNSEEN)
+	b.unseen = false
+	b.ai["tgt"] = P
+	ok(SimLod.pose_every(m, b) == 1, "far but after the player: every frame")
+	b.ai["tgt"] = null
+	b.last_hit_by = P
+	b.hurt_at = m.time
+	ok(SimLod.pose_every(m, b) == 1, "far but just hit by the player: every frame")
+	b.last_hit_by = null
+	b.hurt_at = -9.0
+	P.last_hit_by = b
+	P.hurt_at = m.time
+	await main.get_tree().process_frame      # (who hit the squad is gathered once a frame)
+	ok(SimLod.pose_every(m, b) == 1, "far but just hit the player: every frame")
+	P.hurt_at = -9.0
+	await main.get_tree().process_frame
+	var team := b.team
+	b.team = P.team
+	ok(SimLod.pose_every(m, b) == 1, "the player's squad: every frame")
+	b.team = team
+	b.teleport(P.pos + m.cam.global_transform.basis.x * 150.0)      # (square to the side of the view)
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_OFF_SCREEN, "off screen: every %d frames" % SimLod.POSE_OFF_SCREEN)
+	var held := false
+	for i in SimLod.POSE_UNSEEN:
+		b.render(Match.DT, 1.0)
+		held = held or _held(b.model)
+	ok(held, "off screen some frames are not posed")
+	for i in SimLod.POSE_UNSEEN:
+		b.render(Match.DT, 1.0)
+		if not _held(b.model):
+			break
+	b.render(Match.DT, 1.0)
+	b.render(Match.DT, 1.0)      # (two frames into its wait: more than a far pose's wait of backlog)
+	b.teleport(far_at)
+	b.render(Match.DT, 1.0)
+	ok(not _held(b.model), "coming on screen it is posed that frame")
+	var sync: WardenGlb.Sync = null
+	for h in m.hunters:
+		if h.model.get_node_or_null("Warden/Sync"):
+			sync = h.model.get_node("Warden/Sync")
+	ok(sync != null, "setup: a Hero model")
+	if sync:
+		sync.pace.held = 0.0
+		sync.root.set_meta(WardenGlb.POSE_HELD, Engine.get_process_frames())
+		sync._process(Match.DT)
+		sync._process(Match.DT)
+		var waited: float = sync.pace.held
+		sync.root.set_meta(WardenGlb.POSE_HELD, -1)
+		sync._process(Match.DT)
+		ok(is_equal_approx(waited, 2.0 * Match.DT) and sync.pace.held == 0.0,
+			"a Hero's clips hold with the Hunter and catch up the time")
+	m.cam.zoom = 1.0
+	m.cam.chase = 0.0
+
+## The Hunter model skipped its pose this frame (WardenGlb.POSE_HELD).
+func _held(model: Node3D) -> bool:
+	return int(model.get_meta(WardenGlb.POSE_HELD, -1)) == Engine.get_process_frames()
 
 const WALK_TRIES := 6       # walks from open ground far off, each a different heading
 const WALK_STEPS := 240     # sim steps a walk (4 s)
@@ -463,3 +553,24 @@ func _rig_pace() -> void:
 	ok(posed == RigPace.EVERY * 2, "the one at the camera's focus every frame (%d)" % posed)
 	sy.pace.every = want
 	sy.set_process(true)
+func _fx_pools() -> void:
+	var fx: Fx = m.fx
+	var pools: Array[FxPool] = [fx.ring_pool, fx.ghost_pool, fx.beam_pool, fx.slash_pool]
+	var kids := fx.get_child_count()
+	var out: Array = pools.map(func(p: FxPool) -> int: return p.live())
+	for i in 3:
+		var at := Vector3(i, 0, 0)
+		fx.ring(at, 3.0, Color.WHITE)
+		fx.ghost(at, 0.0, Color.WHITE, 1.0)
+		fx.bolt(at, at + Vector3(4, 1, 0), Color.CYAN)
+		fx.beam(at, at + Vector3(5, 1, 0), Color.WHITE)
+		fx.slash(at, 0.5 * i, 2.0, 2.4, Color.WHITE, i == 2)
+	ok(fx.ring_pool.live() == int(out[0]) + 3, "a flurry takes pooled meshes (3 more rings out)")
+	for i in 60:
+		fx._process(0.02)
+		await main.get_tree().process_frame
+	ok(fx.get_child_count() == kids, "a flurry of rings, ghosts, bolts, beams and swings adds no node to the Fx")
+	var back := true
+	for i in pools.size():
+		back = back and pools[i].live() <= int(out[i])
+	ok(back, "the flurry's ring, ghost, beam and swing meshes are all back in their pools")
