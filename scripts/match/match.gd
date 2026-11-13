@@ -3338,7 +3338,7 @@ func _gather_input() -> void:
 	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
-	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
+	var over_ui: bool = (hud != null and hud.mouse_on_ui() or PanelInput.panel_up(hud)) and player.draw_t < 0.0
 	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
 	if paused and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
@@ -3386,7 +3386,7 @@ func _gather_input() -> void:
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
 			aim_hold = ""          # right click while aiming something else cancels the cast
 			continue
-		if slot_of.has(a[0]) and player and Input.is_action_just_pressed(a[0]) and not paused:
+		if slot_of.has(a[0]) and player and PanelInput.pressed(self, a[0]):
 			var sl: String = slot_of[a[0]]
 			if Input.is_key_pressed(KEY_ALT) and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
 				player.level_slot(sl)       # Alt + key: put a point into it
@@ -3403,13 +3403,13 @@ func _gather_input() -> void:
 			aimable = false       # a self-centred E goes off on the press (no cursor preview)
 		if aimable:
 			# hold to see where it will land, let go to cast it
-			if Input.is_action_just_pressed(a[0]) and not paused:
+			if PanelInput.pressed(self, a[0]):
 				aim_hold = a[0]
 			if aim_hold == a[0] and not Input.is_action_pressed(a[0]):
 				aim_hold = ""
 				pending_input[a[1]] = true
 			continue
-		if Input.is_action_just_pressed(a[0]):
+		if PanelInput.pressed(self, a[0]):
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
 		HunterKeys.ult_pressed(player)
