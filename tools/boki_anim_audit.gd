@@ -24,8 +24,8 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## re-keyed with boki_gait.planted (docs/DEBT.md). Six rose 2-5 points once the clips lost the frame each loop held
 ## at its start (glb_clip_start.py): that frame let the rig play them faster under MAX_CADENCE, and slid itself.
 const OVER := {
-	"burrlet walk": 0.30, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75,
-	"glintmole walk": 0.35, "glintmole run": 0.75, "hivara run": 0.70, "kestrike walk": 0.65, "kestrike run": 0.92,
+	"burrlet walk": 0.30, "burrlet run": 0.75, "cairnback run": 0.60,
+	"glintmole walk": 0.35, "glintmole run": 0.75, "hivara run": 0.70, "kestrike walk": 0.40, "kestrike run": 0.65,
 	"marchleaf walk": 0.50,
 	"marchleaf run": 0.65, "nettlynx run": 0.80, "pebbit walk": 0.30, "pebbit run": 0.70, "puddlet run": 0.70,
 	"rimeshrew run": 0.50, "wisplet run": 0.30, "caecilith walk": 0.70, "caecilith run": 0.90,

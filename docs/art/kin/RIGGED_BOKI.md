@@ -111,9 +111,16 @@ enough frames (`BokiRig` sets the rate from `STRIDE`, so the length only sets th
 read "before planting → after". A paw aimed past 97% of a two-bone leg's reach from the hip is aimed that far
 instead, along the same line (`boki_gait.within`): kestrike's and wisplet's short legs under a body that skims up
 in the air used to whirl the hip round and flip the knee to get there, and now tuck. Three runs still pass 25% at
-scale 0.8 and match speed (kestrike 38%, rimeshrew 47%, wisplet 28%): their legs are too short for the reach
+scale 0.8 and match speed (kestrike 60%, rimeshrew 47%, wisplet 28%): their legs are too short for the reach
 6 steps/s needs (`docs/DEBT.md`). Kestrike's run seam reads 2.0 because its stance is 3 frames at the wrap: the
 paws kick back fastest there; the wrap step itself matches the frames on either side of it.
+
+On a Meshy-scan species (`boki_scan`) the bones move through the fit, so a planted clip is solved again on the
+fitted rig (`planted(...).refit`, called by `Scan.CLIPS`): the paws aim from the fitted rest places and the reach,
+lift and drop scale with the first leg's new length (kestrike's scan legs are 0.62 of the proxy's). Kestrike and
+cairnback (four_legs, a trot) walk and run that way; their glbs keep main's scan model with only walk/run spliced
+in (`glb_add_clips.py`), from builds on the machine that holds the dense scans. Kestrike's and cairnback's rows read
+"main's sine clips on the scan → planted".
 
 Clips start at 0 s: Blender keys a clip from frame 1, and Godot fills the gap before the first key with the first
 pose, so every Boki loop used to hold still for a frame each time round (a planted paw stopped while the body went
@@ -132,12 +139,12 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | glintmole | 74% → 31% 4.4 steps/s | 74% → 33% 5.3 steps/s | 79% → 51% 6.0 steps/s | 84% → 65% 6.0 steps/s (6.2) | 1.6 / 1.1 / 1.2 | 0.9 |
 | rimeshrew | 27% → 11% 5.1 steps/s | 40% → 12% 2.8 steps/s | 54% → 12% 5.2 steps/s | 72% → 34% 6.0 steps/s (7.4) | 1.5 / 0.9 / 1.1 | 0.9 |
 | pebbit | 75% → 27% 4.1 steps/s | 75% → 32% 5.1 steps/s | 82% → 50% 6.0 steps/s | 85% → 60% 6.0 steps/s (5.4) | 1.4 / 1.1 / 1.2 | 0.9 |
-| cairnback | ?% → 31% 5.7 steps/s | ?% → 39% 5.5 steps/s | 86% → 57% 6.0 steps/s | 88% → 65% 6.0 steps/s (5.6) | 1.2 / 1.4 / 1.1 | 0.9 |
+| cairnback | 31% → 5% 5.7 steps/s | 39% → 20% 5.5 steps/s | 57% → 33% 6.0 steps/s | 65% → 47% 6.0 steps/s (5.6) | 1.2 / 1.3 / 0.9 | 0.9 |
 | wisplet | 34% → 11% 4.2 steps/s | 43% → 19% 1.8 steps/s | 62% → 19% 3.3 steps/s | 79% → 19% 6.0 steps/s (8.0) | 1.0 / 1.0 / 1.1 | 0.9 |
 | zapple | 59% → 24% 2.5 steps/s | 71% → 13% 1.6 steps/s | 71% → 13% 3.0 steps/s | 69% → 13% 5.2 steps/s (7.6) | 1.0 / 1.1 / 1.7 | 0.6 |
 | hivara | 66% → 24% 3.3 steps/s | 66% → 33% 3.8 steps/s | 63% → 34% 6.0 steps/s | 75% → 59% 6.0 steps/s (7.0) | 1.2 / 1.0 / 1.0 | 0.9 |
-| kestrike | ?% → 54% 6.0 steps/s | ?% → 63% 6.0 steps/s | ?% → 80% 6.0 steps/s | ?% → 83% 6.0 steps/s (7.4) | 0.5 / 1.4 / 1.0 | 1.0 |
-| kindlewren | 30% → 10% 2.8 steps/s | 43% → 12% 1.7 steps/s | 69% → 12% 3.1 steps/s | 81% → 12% 5.2 steps/s (7.4) | 0.5 / 2.1 / 1.4 | 0.9 |
+| kestrike | 54% → 20% 6.0 steps/s | 63% → 18% 3.4 steps/s | 80% → 19% 6.0 steps/s | 83% → 50% 6.0 steps/s (7.4) | 0.5 / 1.1 / 1.7 | 1.0 |
+| kindlewren | 30% → 11% 2.8 steps/s | 43% → 12% 1.7 steps/s | 69% → 12% 3.1 steps/s | 81% → 12% 5.2 steps/s (7.4) | 0.5 / 0.7 / 1.4 | 0.9 |
 | lodestick | 62% → 4% 3.3 steps/s | 48% → 12% 1.5 steps/s | 70% → 12% 2.7 steps/s | 82% → 12% 4.7 steps/s (7.6) | 1.1 / 1.6 / 1.1 | 1.2 |
 | marchleaf | ?% → 48% 4.0 steps/s | ?% → 43% 3.2 steps/s | ?% → 43% 5.9 steps/s | ?% → 53% 6.0 steps/s (6.6) | 0.6 / 1.0 / 0.9 | 0.9 |
 | mossgrade | 51% → 7% 3.4 steps/s | 35% → 11% 1.8 steps/s | 41% → 11% 3.4 steps/s | 57% → 11% 4.6 steps/s (6.0) | 1.5 / 1.9 / 1.2 | 0.7 |
