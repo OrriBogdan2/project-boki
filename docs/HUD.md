@@ -27,6 +27,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`); `push` takes an optional icon. Check: `--msg-queue-check` |
 | `steal_call.gd` (`StealCall`, scripts/match) | the stolen-kill line through the lane: for a lair boss, elite or key carrier the squad that did most of the damage reads "<Hunter> stole the <monster>", the squad that got the last hit reads "Stolen: <monster>" (key mark if it carried one); uncontested kills say nothing. Credit is the existing one (Match.on_mob_dead). Local to the machine that runs the death, no Net change. Check: `--steal-call-check` |
+| `boki_carry.gd` (`BokiCarry`) + `kin_pair.gd` (`KinPair`, scripts/match) | carry two in, one extra out (DECISIONS 2026-11-11) in the Boki box's column, rows in a column left of the gloves, up from the boxes' bottom (below the lead box is the 18 px screen margin, above it the belt), one each and only while used, nearest first: the second Boki (portrait, health bar, its carry passive's icon by group, the `swap_kin` key cap with a ring that fills while the swap cools) then the carry-out slot (`Hunter.caught`, one place: the claimed Boki and RIDES HOME, an empty outline while you scan, STOLEN after a rival looted it from your deathbox); the stolen wisps stack above them. Lead and second both give their carry passives, equal stats count once (the stronger); a hunter holds at most `steal.wisp_max` 4 wisps. Same widths at 720p and ultrawide (right-anchored). Check: `--boki-carry-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 | `knock_callout.gd` (`KnockCallout`, made on the HUD at the first call) | "KNOCKED / ELIMINATED <name>" just under your hunter (clear of the alerts and message lane) for 1 s when you knock or eliminate a rival (pink-magenta / rival red), up to 3 stacked; called from `Juice.knock` / `Juice.kill` and the client knock and out events; the confirm sound is Juice's knock_confirm / kill, played by `say(..., true)` on an online client. Check: `--hudref-check` section 7 |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy|callout` screenshot scenes |
@@ -179,3 +180,15 @@ The source shows no scoreboard: only a squads-left counter, your squad's list an
 that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
 levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
 Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
+
+## Tutorial objective strip (one banner for both tutorials)
+- `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
+  title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
+  pulses for 1.6 s whenever the objective changes, then keeps a steady rim. The message lane starts at 72% of the
+  width, so the strip never touches it. In the match tutorial the Ways Out strip, the match clock and the ship's
+  planning countdown are off; in a real match (`FirstMatchGuide`) the strip drops under `WaysOutHud.bottom()`
+  (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
+- The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
+  Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.
