@@ -3036,6 +3036,7 @@ func _anim_state(stretch: float) -> void:
 	s["crouch"] = crouch_k
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
+	s["fall"] = HunterFall.clip_k(self)
 	s["ledge"] = grap.size() > 0
 	var mk := -1.0
 	if pad.has("face"):
@@ -3132,8 +3133,9 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
-	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
-	else: model.rotation.y = face
+	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
+	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale)     # leaned toward the camera (CamRig.char_lean)
+	else: model.rotation.y = body_face
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
 		var fl: Dictionary = get_meta("fling")

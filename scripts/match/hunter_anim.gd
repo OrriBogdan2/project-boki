@@ -32,6 +32,7 @@ extends RefCounted
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
 ##   cast (seconds since an ability went off) cast_slot hit_t (seconds since a hit) hit_dir
 ##   (Vector2, world, from the attacker) stun reviving base (0..1, -1) emote (id) emote_t (seconds)
+##   fall (0..1 into the knocked-down beat's death clip, -1 when not: HunterFall; without the clip it kneels)
 ##   air_h (height above the ground, enables the long-jump tricks) squash (0..1) stretch
 ##   kin_on_shoulder
 ## Out: stepped (a foot came down this frame) slammed (a heavy landing hit the ground) flipping; the root's
@@ -49,6 +50,7 @@ const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays 
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
 const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
+const FALL_SLUMP := 1.1                   # rad: a knocked-down body with no death clip slumps this far over its knee
 const GLIDE_BANK := 0.436                 # rad (25 deg): the roll into a glider turn at full steer
 const GLIDE_BANK_EASE := 8.0              # 1/s: how fast that roll follows the turn, and settles out of it
 const DIVE_PITCH := 1.15                  # rad: the whole body nose-down in a dive (the skydive, the glider's)
@@ -192,6 +194,7 @@ var crouch_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
 var revive_k := 0.0
+var fall_k := 0.0           # into the knocked-down beat (state "fall"), 0 when not
 var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
 var act_kind := ""
 var act_t := 0.0
@@ -570,6 +573,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
+	fall_k = maxf(0.0, float(s.get("fall", -1.0)))
 	HunterTool.tick(self, dt, s)
 	_act_tick(dt, s, grounded, spd)
 	var base_p := float(s.get("base", -1.0))
@@ -848,6 +852,12 @@ func update(dt: float, s: Dictionary) -> void:
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
+	# knocked down (a Hero without a death clip): down on one knee, then slumping over it (see pitch)
+	var kneel := smoothstep(0.1, 0.45, fall_k)
+	hl = lerpf(hl, 1.35, kneel)
+	kl = lerpf(kl, -1.45, kneel)
+	hr = lerpf(hr, -0.15, kneel)
+	kr = lerpf(kr, -1.9, kneel)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
 	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack" and not HunterRod.ACTS.has(act_kind):
 		var al := _act_legs()
@@ -876,6 +886,7 @@ func update(dt: float, s: Dictionary) -> void:
 	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
 	pitch -= act_k * _act_pitch()
+	pitch -= smoothstep(0.4, 0.8, fall_k) * FALL_SLUMP
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0

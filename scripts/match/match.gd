@@ -1807,6 +1807,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
+	HunterFall.knocked(h, by)
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
@@ -5417,8 +5418,9 @@ func _net_ev(x, from: String) -> void:
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
+			var by: Ent = ents_by_id.get(String(x[2]), null)
+			if who is Hunter: HunterFall.knocked(who, by)       # the copy's fall goes away from the knocker
 			if who is Hunter and not who.downed:
-				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
