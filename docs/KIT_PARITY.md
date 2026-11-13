@@ -2,6 +2,25 @@
 
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
 
+## 0.24.5 verify: Meeko, Tenzo, Grimble, Neve, Motley, Albert, Sparkle, Sable (ext/release-integ-0245 92df78ce4, 2026-11-11)
+
+Each row was read against `content/archetypes/*.json` and the kit code on the 0.24.5 line. **No row regressed**: every `done ... (main)` row above still holds (Meeko Carrier shield gone, drop lock 4 s; Tenzo ally hop; Grimble air slot 12.5 s; Neve Chill 4 s with no slow, late dart homing; Motley bomb 3.5x; Albert throw rate 0.45, E zone 2.3 m, aegis block rules; Sparkle dash to LMB; Sable LMB 8.5 m, no Shred). `--kit-parity-check` 0 failures; combo checks: tender 104, dolm 172, dredge 112, rimewright 116, ostra 213, bulwark 166, mage 143, dancer (Sable) 144, all 0 failures. `--cooldown-parity-check` does not exist on this line (it lives on ext/cooldown-parity-verify).
+
+**Every "branch ready" fix of the 0.24.4 re-audit is still missing from the 0.24.5 line** (none of these branches is an ancestor of it). All trial merges conflict, so each needs a rebase before it can land:
+
+| Hunter | Row still open on 0.24.5 | Fix branch | Conflicts on a trial merge |
+|---|---|---|---|
+| Meeko | Empowered +40% range (`shot_range_k` 1.4, tender_kit.gd:117,172), Hearthlight `self_k` 0.33 | ext/parity-no-riders-meeko 0d6177875 | KIT_PARITY.md, docs/heroes/tender.md |
+| Tenzo | rock `slow_t` 0.8 / `slow_k` 0.3, Rock Hop `slow_t` 1.5 (dolm.json); punch dmg [12, 24] and kb [6, 11] scale with charge | ext/parity-tenzo-rock-slows 44040c047; ext/parity-no-riders-grimble-tenzo 7b130d5c7 | rock-slows: KIT_PARITY.md only; grimble-tenzo: dolm.json, dredge.json, dredge_kit.gd, docs |
+| Grimble | E Grounds the foe (dredge.json); cooldowns RMB 12, E 7, R 21 vs 18, 12, 36 | ext/parity-no-riders-grimble-tenzo; ext/grimble-parity-verify d94bc7769 | dredge.json (the E line, also edited by ext/anim-time-grimble-rebased) |
+| Albert | Guard meter, Shield Slam, slam stun 0.6 (bulwark.json `resource`, `slam`); Crushing Blow `smash_stun` 0.4; aegis routing; R cd 40 vs 50 | ext/albert-parity-verify b69c6ca3b (carries guardcut); ext/parity-albert-blow-stun 46a88e3a1; ext/combat-albert-aegis-input 91c3dba10 | bulwark.json, bulwark_kit.gd, bjorn_fx.gd, archer_bulwark_combo_check.gd, wiki |
+| Motley | un-popped Brimseed fizzles at 10 s (`hold_full` 10.0) | ext/motley-seed-fizzle 9f521695a | KIT_PARITY.md, docs/heroes/ostra.md |
+| Neve, Sparkle, Sable, Meeko, Albert | cooldowns not at source level 1 (see each section) | ext/cooldown-parity-verify 2be9877c2 | rimewright.json, thief.json, dredge.json and the slice heroes' data |
+| Sparkle | Skycall circle 1.5 (source reading 1.8) | ext/parity-skycall-size 7a40610b7 | KIT_PARITY.md |
+| Sable | E range 14 (source reading 16.2) | ext/parity-ranges-rest bee6f9728 | KIT_PARITY.md |
+
+Not a regression but stale text: the Albert section's E row says r 3.5; the data is 2.3 (the ranges table is right). Still owner or `[?]`, unchanged: Tenzo ridge 12 m, Motley orb slow 10% vs 6%, floats, Neve rink +15%, Sparkle slide 3.4. Filed in docs/DEBT.md.
+
 ## Re-audit 2026-11-11 (0.24.4 candidate, ext/release-integ-0244c 23cc281bd)
 
 Every row below marked differ, missing or `[?]`, and the top-20 table, was re-read against the candidate's `content/` and kit code. Each one now ends with a mark: **done** `ext/<branch>` (the branch that fixed it; `main` = already on main d255acbee, else only on the candidate), **open** (still a gap), or **owner** (an owner note overrides the source, or the fix needs an owner call). "Branch ready" = a READY branch in briefs/EXT_TO_MAIN.md that fixes it but is not on the candidate (docs/GATE_0244.md lists what was merged). No numbers or code were changed here.
@@ -240,6 +259,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 
 ## Meeko (`tender`, source Elluna; was Pip)
 
+**0.24.5:** tender-combo 104/0. Carrier shield gone and the 4 s drop lock stand. Open (fix not on the line): Empowered range and `self_k` (ext/parity-no-riders-meeko); cooldowns RMB 10.5, E 11, R 46 vs 11.5, 12, 60 (ext/cooldown-parity-verify).
+
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered = cue only (no range, no refund) | match; Empowered effect is not in the source, our rider removed |
@@ -263,6 +284,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 
 ## Tenzo (`dolm`, source Tetra; was Tarek)
 
+**0.24.5:** dolm-combo 172/0. Ally hop stands; cooldowns 11, 12.5, 45, 12 already match the source. Open: rock and Rock Hop slows, punch charge scaling (ext/parity-tenzo-rock-slows, ext/parity-no-riders-grimble-tenzo).
+
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Tap boulder; hold punch launches rocks, .6 s [D] | Boulder .6, punch .7/.6 | match |
@@ -280,6 +303,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
 
 ## Grimble (`dredge`, source Kingpin)
+
+**0.24.5:** dredge-combo 112/0. Air slot 12.5 s stands. Open: E Grounds the foe (ext/parity-no-riders-grimble-tenzo); cooldowns 12, 7, 21 vs 18, 12, 36 (ext/grimble-parity-verify, ext/cooldown-parity-verify).
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -308,6 +333,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 
 ## Neve (`rimewright`, source Celeste)
 ## Neve (`rimewright`, source Celeste; was Claire)
+
+**0.24.5:** rimewright-combo 116/0. Chill 4 s with no slow and the late skating homing stand. Open: E cd 17 vs 20 (ext/cooldown-parity-verify).
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -340,6 +367,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 ## Motley (`ostra`, source Void)
 ## Motley (`ostra`, source Void; was Ostra)
 
+**0.24.5:** ostra-combo 213/0. Bomb 3.5x stands. Open: the 10 s seed fizzle (ext/motley-seed-fizzle); floats `[?]` and the orb slow stay owner/untraced.
+
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Orb; idle next orb stronger, terrain, Slow [D] | Tether Lantern: 9 dmg every 0.6 s, 14 m; waiting up to 1.4 s makes the next +34% with a Slow; every orb pierces terrain | differ (owner items 60, 117; data overruled) |
@@ -363,6 +392,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 
 ## Albert (`bulwark`, source Oath)
 ## Albert (`bulwark`, source Oath; was Bjorn)
+
+**0.24.5:** bulwark-combo 166/0. Throw rate 0.45 and E zone 2.3 m stand (the E row's r 3.5 is stale text). Open: Guard meter and Shield Slam, Crushing Blow stun 0.4, aegis routing (ext/albert-parity-verify, ext/parity-albert-blow-stun, ext/combat-albert-aegis-input); R cd 40 vs 50 (ext/cooldown-parity-verify).
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -389,6 +420,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 ## Sparkle (`mage`, source Joule)
 ## Sparkle (`mage`, source Joule; was Ryzz)
 
+**0.24.5:** mage-combo 143/0. Dash to LMB stands. Open: cooldowns RMB 8, E 10.5, R 42 vs 10, 12, 60 (ext/cooldown-parity-verify); Skycall radius 1.5 (ext/parity-skycall-size).
+
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Bolt + Static, F .8 s [D,F] | Coilcaster: 12 dmg every .648 s, 13 m, stops on first foe, 1 Static | differ (owner items 70, 116) |
@@ -413,6 +446,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Flow | Silent | Dash→LMB, X buffer | gap 9 · **done** `ext/parity-dashlmb` (main): LMB fires mid-dash; 5 rows unsourced **open** [?] |
 
 ## Sable (`thief`, source Shiv)
+
+**0.24.5:** dancer-combo 144/0. LMB 8.5 m and no Shred stand. Open: cooldowns RMB 7, E 15, R 24 vs 13, 28, 50 (ext/cooldown-parity-verify); E range 14 `[?]` (ext/parity-ranges-rest).
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
