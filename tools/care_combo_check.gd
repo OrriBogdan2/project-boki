@@ -1155,10 +1155,10 @@ func tender() -> void:
 	await _dashes_cute()
 	await _no_blasts()
 
-## Elluna's dashes, copied (numbers in docs/heroes/tender.md): the ground hop is the source's 2 bh
-## in 0.2 s (after the dash feel), the air glide its measured 13.3 m over 0.95 s peaking about 17 m/s, 3-4x the
-## hop's distance and about 5x its time; each plays its own move (item 35), sized to its dash, and no other kit
-## plays those moves.
+## Her dashes (numbers in docs/heroes/tender.md): Elluna's, slowed by the owner (11-11): the ground hop 3.15 m in
+## 0.23 s (after the dash feel), the air glide 10.5 m over 0.95 s peaking about 14 m/s with a short float-out that
+## leaves her under run speed, 3-4x the hop's distance and about 5x its time; each plays its own move (item 35),
+## sized to its dash, and no other kit plays those moves.
 func _dashes_cute() -> void:
 	var r: Array = sc.setup("tender", 20.0)
 	var m: Match = r[0]
@@ -1176,8 +1176,8 @@ func _dashes_cute() -> void:
 	step(m, P.roll_t)
 	var ground_d := P.pos.x - p0.x
 	ok(
-			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s (off the dash feel)",
-			absf(ground_d - 3.6) < 0.25 and absf(ground_t - 0.2) < 0.02,
+			"mm dashes: the ground hop is 3.15 m in 0.23 s, shorter and slower than Elluna's",
+			absf(ground_d - 3.15) < 0.25 and absf(ground_t - 0.23) < 0.02,
 			"%.2f m in %.2f s" % [ground_d, ground_t])
 	step(m, 0.5)
 	P.teleport(P.pos + Vector3(0, 3.0, 0))
@@ -1190,15 +1190,26 @@ func _dashes_cute() -> void:
 	var air_t := P.roll_t
 	var glide_cd := P.ex_cd
 	var air_move := K.anim_id
-	var peak := {"v": 0.0}
+	var air: Dictionary = K.dash_def()["air"]
+	var tail_t := air_t - float(air["ramp"]) - float(air["burst"])
+	var peak := {"v": 0.0, "tail_x": 0.0}
 	# measured at the glide's end: what she carries out of it after is the shared air drag's (Loco, tuning.json)
-	step(m, air_t, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
+	step(m, air_t, func():
+		peak["v"] = maxf(float(peak["v"]), P.roll_speed)
+		if P.roll_t > tail_t:
+			peak["tail_x"] = P.pos.x)
 	var air_d := P.pos.x - a0.x
+	var exit_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"mm dashes: the air glide is Elluna's: 13.3 m over 0.95 s, peaking 16.5-22 m/s",
-			absf(air_d - 13.3) < 0.7 and absf(air_t - 0.95) < 0.03 and float(peak["v"]) >= 16.5
-				and float(peak["v"]) <= 22.0,
+			"mm dashes: the air glide is 10.5 m over 0.95 s, peaking 13-15.5 m/s, slower than Elluna's",
+			absf(air_d - 10.5) < 0.7 and absf(air_t - 0.95) < 0.03 and float(peak["v"]) >= 13.0
+				and float(peak["v"]) <= 15.5,
 			"%.2f m in %.2f s, peak %.1f m/s" % [air_d, air_t, float(peak["v"])])
+	var tail_d := P.pos.x - float(peak["tail_x"])
+	ok(
+			"mm air dash: little movement at the end: a float-out under a quarter, left under run speed",
+			tail_d <= air_d * 0.25 and exit_v < P.base_speed,
+			"float-out %.2f m of %.2f, leaves at %.1f m/s" % [tail_d, air_d, exit_v])
 	var ratio := air_d / maxf(0.01, ground_d)
 	ok(
 			"mm dashes: Elluna's cooldowns: the glide 14 s, a hop charge 7 s (separate)",

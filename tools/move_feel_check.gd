@@ -978,7 +978,7 @@ const KIT_DASH := {
 	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
 	"archer": {"ground": [3.0, 0.386], "src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
-	"tender": {"ground": [3.6, 0.2], "src": "[footage] Elluna 2 bh in 0.2 s (air glide: tender's own check)"},
+	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
 	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
 	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
 	"thief": {"ground": [4.5, 0.48], "air": [4.5, 0.48], "src": "[footage] Shiv Cartwheel 4.5 m in 0.48 s"},
