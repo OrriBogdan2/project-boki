@@ -28,6 +28,8 @@ extends RefCounted
 ##  13. a Boki's life cues (BokiLifeSfx): eating, dozing off, a Fusion and going down each have a cue; the takes
 ##      rotate, never one twice running; one cue per Boki at a time; softer at home than in a match; HomeChimes
 ##      voices a Boki dozing off; each event's code (yours and other players' in a match) plays its cue
+##  14. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
+##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -65,6 +67,7 @@ func run(main: Node) -> void:
 	_strip_chime()
 	_boss_moves()
 	_boki_life()
+	_cc_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -247,6 +250,72 @@ func _nuke_fall() -> void:
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
+
+## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
+func _cc_cues() -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nvar player: Node\nvar time := 0.0\n"
+	stub.reload()
+	var m: Node = stub.new()
+	var me := _cc_body(m, 0, Vector3.ZERO)
+	var mate := _cc_body(m, 0, Vector3(6, 0, 0))
+	var far_mate := _cc_body(m, 0, Vector3(20, 0, 0))
+	var rival := _cc_body(m, 1, Vector3(3, 0, 0))
+	m.set("player", me)
+	Sfx.listener = me.pos
+	for kind: String in CcSfx.KINDS:
+		var own := "cc_" + kind
+		var quiet := own + "_mate"
+		var gap := _rms(own) - (_rms(quiet) + CcSfx.MATE_DB)
+		m.set("time", float(m.get("time")) + 1.0)
+		var heard := []
+		for h in [me, mate, rival, far_mate]:
+			heard.append(_cc_heard(h, kind))
+		var want := [[own], [quiet], [], []]
+		var who := "cc %s: you hear %s, a squadmate 6 m off %s (%.1f dB under), " % [kind, own, quiet, gap]
+		ok(heard == want and gap >= 6.0, who + "a rival and a squadmate 20 m off nothing (%s)" % [heard])
+	m.set("time", float(m.get("time")) + 1.0)
+	var first := _cc_heard(me, "stun")
+	m.set("time", float(m.get("time")) + 0.1)
+	var stacked := _cc_heard(me, "root")
+	m.set("time", float(m.get("time")) + CcSfx.CAP_S)
+	var later := _cc_heard(me, "slow")
+	ok(first.size() == 1 and stacked.is_empty() and later.size() == 1, "stacked CC plays once: a root 0.1 s after "
+			+ "a stun is silent, a slow %.1f s later plays (%s %s %s)" % [CcSfx.CAP_S, first, stacked, later])
+	var all := {"stun": 1.0, "root": 1.0, "slow": 1.0}
+	var pick := CcSfx.fresh_on_hit(me, all)
+	var nudge := CcSfx.fresh_on_hit(me, {"slow": 0.2})
+	me.stun_t = 1.0
+	var refresh := CcSfx.fresh_on_hit(me, {"stun": 1.0})
+	ok(pick == "stun" and nudge == "" and refresh == "", "a hit with stun, root and slow plays the stun; "
+			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh])
+	var ent := FileAccess.get_file_as_string("res://scripts/match/ent.gd")
+	var ks := FileAccess.get_file_as_string("res://scripts/arch/kit_status.gd")
+	ok(ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
+			"Ent.hurt and KitStatus.apply play the cues where the status lands")
+	for h in [me, mate, far_mate, rival]:
+		h.free()
+	m.free()
+
+func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
+	var h := Hunter.new()
+	h.m = m
+	h.team = team
+	h.pos = at
+	return h
+
+## The cc sounds that `kind` landing on `h` plays here (Sfx.last_played, cleared first).
+func _cc_heard(h: Hunter, kind: String) -> Array:
+	for k in Sfx.last_played.keys():
+		if String(k).begins_with("cc_"):
+			Sfx.last_played.erase(k)
+			Sfx.recent.erase(k)
+	CcSfx.play(h, kind)
+	return Sfx.last_played.keys().filter(func(k): return String(k).begins_with("cc_"))
+
+func _rms(sname: String) -> float:
+	var takes := _takes(sname)
+	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
