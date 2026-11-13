@@ -273,3 +273,5 @@ Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and th
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check` (with the `anim` timing rows), `--warden-clips-check`. `WardenClips._pick` adds a kmove's `lead` to the kit's `kmove_t`.
+
+Placed barriers (what the Rink Wall blocks, passes or destroys): [barriers.md](barriers.md).

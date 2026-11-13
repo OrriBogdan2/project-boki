@@ -521,7 +521,8 @@ func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 		var q := at + Vector3(dir.x, 0, dir.y) * run
 		var dist: float = float(b["t"]) * speed
 		var u := clampf(dist / float(b["range"]), 0.0, 1.0)
-		if _burr_wall(g_last, q, run):      # q is still at the height it arrives with
+		# q is still at the height it arrives with; the other team's placed barrier is a wall to it too
+		if _burr_wall(g_last, q, run) or Blockers.cut(m.verbs.walls, at, q, h.team, "solid") < INF:
 			_stick(b, at, true)
 			return
 		var gy := ground(q).y
