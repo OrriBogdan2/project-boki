@@ -9,6 +9,7 @@ extends RefCounted
 ##   - Verbs.wall_blocks asks top_for(): the rock's top for its caster (and for a body standing on it), a
 ##     full wall for anyone else; Hunter's move step sets `mover` so the rule knows who is asking;
 ##   - Ent.ground() reads top_under(), so a body over a rock lands and stands on it;
+##   - Hunter's grounded step calls stand(): walked onto a higher top, the drawn body eases up (no pop);
 ##   - Hunter's move step calls climb(): the caster pushing into her own rock rises onto it.
 ##   - Bot asks hop_ahead(): a bot walking into a teammate's rock jumps it (its paths ignore rocks).
 ## Walking off the top drops you (the ground falls away like any ledge). A launched or broken rock is
@@ -22,6 +23,8 @@ const SETTLE := 0.85           # m under the top where the lift eases off, so it
 const SETTLE_OVER := 0.2       # m: how far past the top it carries you
 const CARRY_K := 1.0          # share of her run speed kept as she rises (air control is near nil)
 const ON_TOP := 0.05           # m: feet this close to the top count as standing on it
+const POP := 0.1               # m: a grounded body risen more than this in one step went onto a higher top (a stair
+                               # walked up rises far less a step)
 
 ## The hunter whose move step is asking World.occupy (set and cleared around it by Hunter); null for any
 ## other query (bot paths, ability probes), which treat rocks as full walls.
@@ -54,6 +57,15 @@ static func top_under(list: Array, p: Vector3, r: float, g: float) -> float:
 		if p2.distance_to(c) < float(w["th"]) + r * FOOT_K:
 			g = top
 	return g
+
+## A grounded body follows the ground g under it. Walked from a lower top onto a higher one (one of his rocks onto
+## another, top_under), the drawn body eases up to it as a walked-up terrace does (Hunter.step_vis) instead of
+## popping, and FootPlant keeps the feet on the top meanwhile.
+static func stand(h: Hunter, g: float) -> void:
+	if g - h.pos.y > POP:
+		h.step_vis -= g - h.pos.y
+		h.prev.y = g
+	h.pos.y = g
 
 ## The standable wall a body at p is pressing into at height `blk` (occupy's answer), or {}.
 static func face(list: Array, p: Vector3, r: float, blk: float) -> Dictionary:
