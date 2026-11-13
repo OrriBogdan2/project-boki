@@ -38,6 +38,17 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Status (2026-11-13, ext/showcase-1113): Vex, Kael, Tarek and Meeko on their current masters
+Swapped to each current.json master (face kept: the specs name the promoted master): Vex (tilt1112 cand_A2), Kael
+(tilt_A, sword stripped: `kael_tilt_A_body.glb`), Tarek (n95 c01, eye stones stripped: `tarek_c01_body.glb`), Meeko (n95
+best, sun and cloud stripped: `best_nocomp.glb`, then pip_companions.py). Already on their newest master: Cinder, Neve,
+Grimble, Motley, Lace. Not swapped:
+- Sable (r5 low4 tilt A): the new body's left hand stretches 6.0 -> 21.1x and 10 clips go over her 18.5 ceiling. Her joint
+  points need refitting to the new body first.
+- Sparkle, Albert i1 and Gil: still as in the 11-12 evening section above (memory/base colour, solid cyan glow, no spec).
+bake_warden.py now joins a multi-mesh master safely and bakes each material's own colour image (Meeko's wings are a
+separate Meshy part on their own texture).
+
 ## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
 In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
 ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
