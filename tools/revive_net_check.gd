@@ -2,6 +2,8 @@ extends RefCounted
 ## --revive-net-check: deathboxes and revives between two real games (docs/decisions/0018). This process
 ## is the host (it runs the relay in-process) and starts a second headless game, the guest
 ## (--revive-net-check=guest). Both are squad-mates in the same seeded match.
+##  0. The guest wears a Wisp and glider skin of its own: its join kit carries them, and when it is knocked down
+##     the host's copy of it shows that Wisp and has that glider.
 ##  1. The guest dies on its own game: a box drops there, nothing ends for it, and the host sees it out
 ##     with a soul marker at the same spot.
 ##  2. The host holds interact at that marker for BoxRevive.time_for seconds: the guest's own game
@@ -16,6 +18,9 @@ const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match
 const SEED := 4242
 const KEYS := 1              # chest keys the guest carries into its first death (the belt holds one)
+const WISP := "check_net"     # a Wisp only this check has (data only, added on both games), rim colour below
+const WISP_RIM := "6aff9a"
+const GLIDER := "ember"       # a bought glider skin the guest owns
 
 var main: Node
 var bad := 0
@@ -41,6 +46,7 @@ func run(main_node: Node) -> void:
 		if a == "--revive-net-check=guest": guest = true
 		if a.begins_with("--rn-port="): port = int(a.substr(10))
 	Net.message.connect(_on_msg)
+	(WispLook.rules()["looks"] as Dictionary)[WISP] = {"core": {"rim": WISP_RIM}}
 	if guest:
 		await _guest()
 	else:
@@ -64,14 +70,15 @@ func _host() -> void:
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
-			if String(id) != Net.me: other = String(id)
+			if String(id) != Net.me and (Net.peers[id] as Dictionary).has("look"): other = String(id)
 		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return _finish()
 	var d := {"mid": "rn%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 2, "tier": 0, "roster": [
 		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
-		{"peer": other, "team": 0, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
+		{"peer": other, "team": 0, "name": "Guest", "cls": "medium", "weapon": "", "kin": {},
+			"look": Net.peers[other].get("look", {})}]}
 	Net.lobby_emit("rn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
@@ -82,10 +89,25 @@ func _host() -> void:
 	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
 	if G == null:
 		return _finish()
+	await _look_case(G)
 	await _box_case(G)
 	await _beacon_case(G)
 	await _gone_case(G)
 	_finish()
+
+## The guest's own Wisp and glider skin show on the host: the join kit carried them (PlayerLook.shared).
+func _look_case(G: Hunter) -> void:
+	var glider: Node3D = G.model.get_node_or_null("Rig/Torso/Glider") if G.model else null
+	var skin := String(glider.get_meta("skin", "")) if glider else "no glider"
+	ok(skin == GLIDER, "the host's copy of the guest has its glider skin", skin)
+	await _say_do("knock", 1.0)
+	HunterWisp.tick(G, DT)      # (the host's render is off in this check: the Wisp is built here)
+	var look: Dictionary = G.get_meta("wisp", {}).get("look", {})
+	ok(G.downed and HunterWisp.node_of(G) != null, "the guest is knocked down on both games: the host shows its Wisp")
+	var rim := String(look["core"]["rim"]) if not look.is_empty() else "-"
+	ok(rim == WISP_RIM, "...and it is the guest's own Wisp, not the default", "rim " + rim)
+	await _say_do("up", 1.0)
+	ok(not G.downed, "the guest is back up on the host")
 
 func _box_case(G: Hunter) -> void:
 	var P := m.player
@@ -196,6 +218,9 @@ func _reply() -> Dictionary:
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
 	print("RVNET guest pid=%d" % OS.get_process_id())
+	Save.d["gliders"] = [GLIDER]
+	Gliders.equip(GLIDER)
+	WispLook.equip(WISP)
 	if not await _connect():
 		print("RVNET guest: no relay")
 		main.get_tree().quit(1)
@@ -226,6 +251,12 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		"gone":
 			if m and m.player: Life.make_gone(m, m.player)
 			_say()
+		"knock":
+			if m and m.player: m.knock(m.player, null, {})
+			_say()
+		"up":
+			if m and m.player: m.revive_hunter(m.player, null)
+			_say()
 		"ask": _say()
 
 func _say() -> void:
@@ -247,7 +278,7 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
-	Net.set_presence({"name": "rn"})
+	Net.set_presence({"name": "rn", "look": PlayerLook.shared()})
 	return Net.mode == "server"
 
 ## The same match on both games: the same seed, squad-mates of one team, the bots idle, no Boki.

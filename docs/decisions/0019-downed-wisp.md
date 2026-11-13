@@ -46,8 +46,9 @@ Add an entry under `looks` in `wisp_looks.json` with only the keys that differ f
 every entry, including the outline rule (round body with a head, team rim, white core, low, steady).
 
 ## Consequences
-- The local player's Wisp look is not sent to other players (they see `default`, tinted by their side colour, SideColor). Sending it
-  needs a join-kit field and a Net.VERSION bump: see docs/DEBT.md.
+- Your Wisp id and glider skin ride the join kit (`PlayerLook.shared`: lobby presence -> match roster -> the remote Hunter's
+  `bot_look`, Net.VERSION 0.24.6), so other players see your Wisp (tinted by your side colour, SideColor); an id their game has no
+  look for gives `default`. Bots wear `default`. Check: `--revive-net-check` (the two-game round trip).
 - (done) HunterAnim's downed crawl code is removed; the clip files stay.
 - Check: `--wisp-check`.
 

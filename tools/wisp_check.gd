@@ -220,14 +220,17 @@ func _bleed_out() -> void:
 	_frames(0.1)
 	ok(p.model.visible, "back from the dead: the hero shows")
 
-## A bot or remote teammate has no saved look: it gets the default Wisp, from `downed` alone.
+## A teammate's Wisp comes from `downed` alone, in the look its join kit names (bot_look; a bot has none):
+## an id this game has no look for gives the default Wisp. (The two-game round trip: --revive-net-check.)
 func _teammate() -> void:
 	var p: Hunter = m.player
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	mate.bot_look["wisp"] = "no_such_wisp"
 	m.knock(mate, foe, {})
 	_frames(0.6)       # past the knocked-down beat
 	ok(HunterWisp.node_of(mate) != null and not mate.model.visible, "a teammate's downed state shows their Wisp")
+	ok(mate.get_meta("wisp")["look"] == WispLook.get_look(""), "a teammate's unknown Wisp id shows the default Wisp")
 	var teammates_downed: bool = mate.downed
 	m.revive_hunter(mate, null)
 	_frames(0.6)

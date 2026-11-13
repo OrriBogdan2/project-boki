@@ -282,6 +282,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	ctrl = control
 	if control != "local":
 		bot_look = PlayerLook.random()
+		bot_look.merge(kit.get("look", {}), true)      # a remote player's own glider skin and Wisp (PlayerLook.shared)
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
 	# the belt issue and the equal pack size (Equal.pack_slots)
@@ -2758,7 +2759,7 @@ func _grapple(dt: float) -> void:
 		pad = {"from": pos, "to": land, "t": 0.0, "dur": 0.22, "h": 0.4, "ledge": true}
 
 # ------------------------------------------------------------------ visuals
-var bot_look: Dictionary = {}  # how a bot hunter looks (random)
+var bot_look: Dictionary = {}  # how a bot or remote hunter looks (random, a remote one's join-kit look on top)
 var runner: AbilityRunner     # weapon utility now; kin abilities later
 var dodge_def: AbilityDef     # the class's dodge
 var stats := {}                # this match's counts for challenges (the local player's)
