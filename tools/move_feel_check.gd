@@ -15,6 +15,7 @@ const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const FALL_ROWS := preload("res://tools/fall_carry_rows.gd")
+const DIRS := preload("res://tools/move_feel_dirs.gd")      # the W A S D and diagonal rows
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -293,6 +294,7 @@ func run(main: Node) -> void:
 	await _no_fall_carry(main)
 	m.queue_free()
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
+	bad += DIRS.new(m, flat, _reset).run()      # W A S D and the diagonals, on screen and in speed
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
