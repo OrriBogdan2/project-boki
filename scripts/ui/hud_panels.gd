@@ -70,6 +70,8 @@ func _draw_panels() -> void:
 			TeamBoki.draw(hud, p)
 			SafeArea.begin("perks")
 			hud._draw_perks(sz, p)
+		else:
+			m.spectate.draw(hud, sz)
 	SafeArea.begin("")
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0
