@@ -1822,6 +1822,8 @@ func _open_rack() -> void:
 			UI.footer_primary(v, "Equip", func(): _rack_equip(rack_pick), 140, "check")
 	elif g.has("unlock"):
 		var lk := UI.label(Gliders.how(rack_pick), UI.T_SMALL, UI.ACCENT_HI)
+		lk.custom_minimum_size.x = 440      # px: a long mastery goal wraps to two lines, not one word per line
+		lk.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		lk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		UI.footer(v).add_child(lk)
 	else:
