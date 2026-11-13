@@ -31,7 +31,7 @@
 			"at": [0.05, 0.6],
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). Ours since main: X goes through the arm's flight (commit b8253ec76a: the wiki's only lock is while it pulls; the data card has none on the throw)."}
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."}
 		},
 		"lmb_hold": {
 			"at": [0.3, 0.95],
@@ -44,7 +44,7 @@
 			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md)."},
 			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "Grasp, then Iron Smash on the target stunned at your feet is the source combo (briefs/hero-ref/dredge.md:98,140): ours fires. Matches."},
-			"x": {"windup": "drop", "recovery": "drop", "source": "[?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown."}
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown. Ours since main: X goes through the arm's flight (commit b8253ec76a: the wiki's only lock is while it pulls; the data card has none on the throw)."}
 		},
 		"e": {
 			"at": [0.05, 0.6],
