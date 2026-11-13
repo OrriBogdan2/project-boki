@@ -3,12 +3,15 @@ extends Node
 ## The parity bench: a toggle panel in the practice areas that have dummies (the Training Area and the
 ## Arena; never a real match). For the selected dummy (the last one hit) it reads, from CombatBus
 ## hit and status events only: rolling damage per second and the last hit, the crowd control it is under
-## and how long is left, and how far and how long the last knock moved it. Reset clears the readouts and
-## sends everyone back to their marks (Arena.reset).
+## and how long is left, and how far and how long the last knock moved it. It also reads the damage of the
+## last WINDOW seconds and the time that DPS would take to down a medium Hunter. Walking away from the dummy
+## clears it; Reset also sends everyone back to their marks (Arena.reset).
 
 const KNOCK_MIN_SPEED := 2.5     # m/s, a hit that leaves the dummy at least this fast (and in a knock slide) is a knock
 const KNOCK_END_SPEED := 0.5     # m/s, slower than this the knock is over
 const KNOCK_MAX_T := 1.0         # s, give up following a knock (the dummy walks back to its mark after a quiet moment)
+const WINDOW := 5.0              # s, the span of the "last N seconds" damage line
+const AWAY_DIST := 14.0          # m, walk this far from the selected dummy and the readout clears
 const PANEL_POS := Vector2(16, 120)   # px, from the top left, under the portrait
 
 var m: Match
@@ -121,6 +124,8 @@ func _on_status(t: Node, st: String, dur: float) -> void:
 	cc_kind = st
 
 func _process(_dt: float) -> void:
+	if target != null and (not is_instance_valid(target) or m.player.pos.distance_to(target.pos) > AWAY_DIST):
+		_deselect()
 	if knocking and is_instance_valid(target):
 		var hv := Vector2(target.vel.x, target.vel.z)
 		if hv.length() < KNOCK_END_SPEED or m.time - _knock_t0 > KNOCK_MAX_T:
@@ -134,11 +139,29 @@ func _clear_knock() -> void:
 	knock_time = 0.0
 	knocking = false
 
-## Clears the readouts and sends the player, dummies and bot back to their marks.
-func reset() -> void:
+func _deselect() -> void:
 	target = null
 	cc_kind = ""
 	_clear_knock()
+
+## Damage in the last `win` seconds out of hits [[time, damage]].
+static func dealt_in(hits: Array, now: float, win: float) -> float:
+	var s := 0.0
+	for hh in hits:
+		if now - float(hh[0]) <= win:
+			s += float(hh[1])
+	return s
+
+## Seconds `dps` takes to down a medium Hunter: its health through the armour's flat share (the armour,
+## 2.2 times the health, outlasts it). 0 when nothing has been dealt.
+static func time_to_down(dps: float) -> float:
+	if dps <= 0.0:
+		return 0.0
+	return float(Data.CLASSES["medium"]["hp"]) / (1.0 - Hunter.ARMOR_DR) / dps
+
+## Clears the readouts and sends the player, dummies and bot back to their marks.
+func reset() -> void:
+	_deselect()
 	m.arena.reset()
 
 ## The readout as lines, one per quantity (also what the check asserts on).
@@ -149,9 +172,13 @@ func lines() -> Array:
 	var cc := "none"
 	if cc_kind != "" and cc_until > m.time:
 		cc = "%s  %.1f s left" % [cc_kind, cc_until - m.time]
+	var dps := Arena.dps_of(dm["hits"], m.time)
+	var down := "%.1f s" % time_to_down(dps) if dps > 0.0 else "-"
 	return [
-		"DPS  %d" % int(round(Arena.dps_of(dm["hits"], m.time))),
+		"DPS  %d" % int(round(dps)),
 		"Last hit  %d" % int(round(float(dm["last"]))),
+		"Last %d s  %d" % [int(WINDOW), int(round(dealt_in(dm["hits"], m.time, WINDOW)))],
+		"Down a Hunter  " + down,
 		"CC  %s" % cc,
 		"Knock  %.2f m in %.2f s" % [knock_dist, knock_time] + ("  (moving)" if knocking else ""),
 	]
