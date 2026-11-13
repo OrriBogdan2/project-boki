@@ -747,7 +747,8 @@ func _all() -> void:
 	await main.get_tree().process_frame
 
 ## Cinder Shot in flight reads as fire: the orb is her flame orange (the archetype colour) round a white-hot core in a
-## deep-red glow, at its old size, with the data's flicker trail following it.
+## deep-red glow, drawn at its hit radius (docs/VFX_QUALITY.md "Scale"), leaving her palm and then on its hitbox, with
+## the data's flicker trail following it.
 func _orb_look(K: AshwickKit, m: Node, old_ribbons: Array) -> void:
 	var r: Dictionary = {}
 	for e: Dictionary in K.fx.riders:
@@ -765,10 +766,26 @@ func _orb_look(K: AshwickKit, m: Node, old_ribbons: Array) -> void:
 		"body %s core %s" % [body.to_html(false), core.to_html(false)]
 	)
 	ok(
-		"cinder: its glow is fire (red-orange, not violet), sizes kept (glow 1.15, head 0.62)",
-		hl != null and (glow.h < 0.12 or glow.h > 0.95) and glow.s > 0.6 and is_equal_approx(hl.scale.x, 1.15)
-		and is_equal_approx(hd.scale.x, 0.62), "glow %s" % glow.to_html(false)
+		"cinder: its glow is fire (red-orange, not violet)",
+		hl != null and (glow.h < 0.12 or glow.h > 0.95) and glow.s > 0.6, "glow %s" % glow.to_html(false)
 	)
+	var sd: Dictionary = r.get("sd", {})
+	var hr := float(sd.get("r", 0.0))
+	var gs := hl.scale.x if hl else 0.0
+	var bs := hd.scale.x if hd else 0.0
+	ok(
+		"cinder: the orb is drawn at its hit radius (%.2f m), the body inside its glow" % hr,
+		hr > 0.0 and absf(gs - hr * LDFx.ORB_GLOW_K) < 0.001 and bs > 0.0 and bs < gs, "glow %.3f body %.3f" % [gs, bs]
+	)
+	var start: Vector3 = sd.get("start", Vector3.ZERO) + (r.get("drawn", Vector3.ZERO) as Vector3)
+	ok(
+		"cinder: the orb is drawn leaving her palm",
+		(r.get("drawn", Vector3.ZERO) as Vector3).length() > 0.05 and start.distance_to(K.tip()) < 0.35,
+		"%.2f m off" % start.distance_to(K.tip())
+	)
+	K.fx._process(0.0)
+	var off: float = n.global_position.distance_to(sd.get("pos", Vector3.ZERO)) if n else 9.0
+	ok("cinder: after %.2f s the orb is drawn on its hitbox" % LDFx.DRAWN_FADE, off < 0.01, "%.3f m off" % off)
 	var trails := 0
 	for e: Dictionary in HeroVfx.of(m).ribbons:
 		if is_same(e.get("follow"), n) and not old_ribbons.has(e): trails += 1

@@ -464,7 +464,8 @@ func fire_rmb(c: Dictionary) -> void:
 	run_own(stg, cx("rmb", "cinder_shot", aim(), {"on_foe": func(f: Ent, _c: Dictionary): _cinder_hit(f)}))
 	if m.shots.size() > n0:
 		# the plain shot node is hidden by ride(), so the flicker trail follows the look riding it
-		var orb := fx.ride(m.shots[-1], "cinder", col_of(rdf), BOLT_CORE, 1.1, 0.5, _bolt_end)
+		var sd: Dictionary = m.shots[-1]
+		var orb := fx.ride(sd, "cinder", col_of(rdf), BOLT_CORE, 1.1, 0.5, _bolt_end, tip() - (sd["pos"] as Vector3))
 		HeroVfx.of(m).trail(h, "shot_trail", orb)
 	vfx("shot")
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)

@@ -47,6 +47,11 @@ const VOLLEY_SMEAR := 1.1
 const VOLLEY_WIDTH := 0.55
 const CINDER_GLOW := Color("d8281a")     # Cinder Shot's glow round its flame: her palette's deep red
 const CINDER_SMOKE := Color(Color("2a100a"), 0.7)   # ... and the char its comet tail burns down to
+# Cinder Shot's orb is drawn at its shot's hit radius r (drawn = hit, docs/VFX_QUALITY.md "Scale"). Quad scale per m
+# of r: the soft glow's cover (strength 0.5) ends at r, the body's (strength 1.6) at 0.8 r (ld_fx.gdshaderinc mode 1).
+const ORB_GLOW_K := 1.35
+const ORB_BODY_K := 0.92
+const DRAWN_FADE := 0.12       # s a rider takes to join its shot from where it was drawn leaving (a palm)
 const HOOK_R := 0.42          # m, the bone hook's curl
 const HOOK_BITS := 7          # pieces of the curl
 const ARM_SIDES := 6          # faces round the stretched arm
@@ -62,7 +67,7 @@ const ANCHOR_LEAN := -0.9      # rad the anchor leans away from the camera, so i
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
 var live: Array = []           # one-shot effects: {node, t, dur, kind, s0, mat}
-var riders: Array = []         # looks riding on a shot: {node, sd, kind, last, on_end}
+var riders: Array = []         # looks riding on a shot: {node, sd, kind, last, on_end, drawn, t0}
 var placed := {}               # id -> {node, kind, t}
 var flames := {}               # id -> {node, t}
 var arms := {}                # id -> {node, mesh, t}
@@ -540,9 +545,9 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	match kind:
 		"cinder":
 			# Cinder Shot: a flame-orange fireball with a white-hot core inside a deep-red glow, its tail burning
-			# down to char (sizes as before; the flicker is the orb and comet shader's own)
-			n.add_child(_rider_part("Halo", CINDER_GLOW, CINDER_GLOW, 1.15, 0.6))
-			n.add_child(_rider_part("Head", col, col2, 0.62, 1.0))
+			# down to char (ride() sizes it to the shot's hit; the flicker is the orb and comet shader's own)
+			n.add_child(_rider_part("Halo", CINDER_GLOW, CINDER_GLOW, 1.0, 0.5))
+			n.add_child(_rider_part("Head", col, col2, 1.0, 1.6))
 			tail_col = CINDER_SMOKE
 		"slug":
 			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
@@ -562,16 +567,22 @@ func _rider_part(part: String, col: Color, col2: Color, scl: float, cover: float
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends. The plain shot node is handed
 ## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends. Returns the look's
-## node (shown while the shot flies), so a HeroVfx.trail can follow it.
+## node (shown while the shot flies), so a HeroVfx.trail can follow it. A cinder orb is drawn at the shot's hit
+## radius. drawn: where the look is drawn leaving, off the shot's start (a palm); it joins the shot over DRAWN_FADE.
 func ride(
-	sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()
+	sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable(),
+	drawn := Vector3.ZERO
 ) -> Node3D:
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
+	var r := float(sd.get("r", 0.3))
 	for c in n.get_children():
 		var mt := (c as MeshInstance3D).material_override as ShaderMaterial
 		if c.name == "Head":
 			_param(mt, "color", col)
 			_param(mt, "color2", col2)
+			if kind == "cinder": (c as Node3D).scale = Vector3.ONE * r * ORB_BODY_K
+		if c.name == "Halo" and kind == "cinder":
+			(c as Node3D).scale = Vector3.ONE * r * ORB_GLOW_K
 		if c.name == "Trail":
 			_param(mt, "color", col)
 	var sn = sd.get("node")
@@ -579,10 +590,16 @@ func ride(
 		(sn as Node3D).visible = false
 		sd["node"] = null
 	riders.append({
-		"node": n, "sd": sd, "kind": kind, "trail": trail, "width": width, "on_end": on_end, "last": sd["pos"]
+		"node": n, "sd": sd, "kind": kind, "trail": trail, "width": width, "on_end": on_end, "last": sd["pos"],
+		"drawn": drawn, "t0": m.time
 	})
-	_pose(n, sd["pos"], sd["vel"], trail, width)
+	_pose(n, sd["pos"] + drawn, sd["vel"], trail, width)
 	return n
+
+## How far off its shot a rider is still drawn: its `drawn` start, eased away over DRAWN_FADE.
+func _drawn_off(r: Dictionary) -> Vector3:
+	var k := 1.0 - smoothstep(0.0, DRAWN_FADE, float(m.time) - float(r["t0"]))
+	return (r.get("drawn", Vector3.ZERO) as Vector3) * k
 
 func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> void:
 	n.global_position = at
@@ -715,7 +732,7 @@ func _process(_delta: float) -> void:
 			live.erase(e)
 	track()
 	for r in riders:
-		_pose(r["node"], r["sd"]["pos"], r["sd"]["vel"], float(r["trail"]), float(r["width"]))
+		_pose(r["node"], r["sd"]["pos"] + _drawn_off(r), r["sd"]["vel"], float(r["trail"]), float(r["width"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:
