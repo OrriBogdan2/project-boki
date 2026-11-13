@@ -188,6 +188,21 @@ Asserted by the `ult move` / `ult end` / `ult ledge` / `ult abyss` rows of `--as
 | Knockback impulses greatly increase the flight's speed | built (up to +10 m/s, bent the way he was pushed) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
 | A red-orange ember ring at lift-off, no big landing | built | footage | yes (ult 0025, 0039) |
 
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/linwick.md) | Verdict |
+|---|---|---|---|---|
+| LMB | held, the stream | 1.0 (the kit runs the lance; asserted "at his full walk") | walks while firing, no visible slow (0007-0019) | match |
+| LMB | 0.35 s after letting go | 0.6 (`lmb.slow_after`) | "subtle at 5 fps", not resolvable | [?] |
+| RMB | Cinder Shot, aim lane and release | 1.0 | "Felix does not stop moving" (0072-0137) | match |
+| Shift | Soot Ram | n/a (rank 3: 1.16 for 2 s after) | a dash | n/a |
+| E | Furnace Cloak, on press | 1.0 | the walk isn't stated | [?] |
+| X | Flue Flight | n/a | a steered flight | n/a |
+
 ## Assumptions
 Where the footage and the wiki are silent, we picked the most likely behaviour (the owner can correct these):
 - Cinder Shot is "hold to aim, release to fire" (the lane shows about 0.4s before each shot); a tap fires at once. It always

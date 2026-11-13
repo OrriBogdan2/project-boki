@@ -306,6 +306,24 @@ ultimate (now the R cooldown).
   (keys end at 0.9 s). Its after-images are his own orange flame streaks.
 - The Enraged look is embers and dark drips on his body; no ground disc or light under him.
 
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/juggernaut.md) | Verdict |
+|---|---|---|---|---|
+| LMB | tap swings | 1.0 (greatsword, melee) | keeps walking while swinging | match |
+| LMB | held past 0.22 s, Searing Wave charge | 0.55 | a 0.6-1.0 s charge arc; the walk isn't measured | [?] |
+| RMB | tap, Finishing Slam 0.6 s wind-up | 0.6 | 0.6 s wind-up, blade cocked low; the walk isn't measured | [?] |
+| RMB | held, Lunge charging | **0.8** (`rmb.lunge.walk_k`; was 1.0) | 85-95 px/s against 113-124 on plain runs (0178-0181, 0198-0208), about 0.7 to 0.85 | CHANGED |
+| RMB | air, Meteor Drop | 0 airborne; 0 for 0.2 s after landing, then 0.3 to 1.0 by 0.5 s | the landing walk isn't measured | [?] |
+| Shift | Rampage | n/a | a dash | n/a |
+| E | Warchain hooked | 1.0 | walks ~2.5 s with the tether attached (0305-0317) | match |
+| X | Gilded Riposte guard and strike | 0.0 | planted through the guard (f33-f38) | match |
+| X | Riposte recovery | 0.5 | ~0.35 s low recovery, blade dragging; the walk isn't measured | [?] |
+
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
 
 1. **Quick Attack direction:** the slashes follow the aim (cursor), not the movement direction.
