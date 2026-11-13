@@ -100,8 +100,8 @@ func _training_duel_leave() -> void:
 	a = audible()
 	ok("leave duel: no stem of the match score is left", Sfx.layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("layer:")), str(a))
 	ok("leave duel: only the farm's own music + ambience", Sfx.music_name.begins_with("home") or Sfx.music_name in ["orchard", "meadow", "summit"], "music '%s' %s" % [Sfx.music_name, str(a)])
-	var match_beds := ["abyss", "ruins"]      # music_dir's beds; the farm keeps its own (HomeAmbience)
-	ok("leave duel: no match ambience beds (abyss / ruins)", match_beds.all(func(n): return not Sfx.amb_layers.has(n)) and a.keys().all(func(k): return not String(k).trim_prefix("amb_layer:") in match_beds), str(a))
+	# the farm plays its own garden beds (HomeAmbience: time of day + zone), so only the match's beds must be gone
+	ok("leave duel: no match ambience beds (abyss / ruins)", Sfx.MATCH_BEDS.all(func(b): return not Sfx.amb_layers.has(b) and not a.has("amb_layer:" + b)), str(a))
 	ok("leave duel: nothing stray on the Music bus", a.keys().all(func(k): return not String(k).begins_with("stray")), str(a))
 	await go("title")
 	await settle()

@@ -326,8 +326,11 @@ func match_voices() -> int:
 			n += 1
 	for key in loops:
 		if is_instance_valid(loops[key]["p"]): n += 1
+	var own := []           # the farm's garden beds belong to the farm, not to a match (MATCH_BEDS are the match's)
+	for nm in amb_layers:
+		if not nm in MATCH_BEDS: own.append(amb_layers[nm]["p"])
 	for c in get_children():
-		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb:
+		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb and not c in own:
 			n += 1          # also a stem or bed or loop still fading out
 	return n
 
@@ -344,6 +347,7 @@ func _stop_layers(fade: float) -> void:
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
 var amb_layers := {}      # name -> {p, want}
+const MATCH_BEDS := ["abyss", "ruins"]   # MusicDir's beds; other amb_layers are the farm's
 
 func amb_layer(name: String, level: float) -> void:
 	if not amb_layers.has(name):
