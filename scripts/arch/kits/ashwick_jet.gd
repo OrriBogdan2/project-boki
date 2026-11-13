@@ -1,7 +1,8 @@
 class_name AshwickJet
 extends RefCounted
-## Cinder's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, then 1.8s of
-## low flight toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
+## Cinder's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, where she hangs
+## for lift_t (rising to her hover height and turning to the aim, as Felix does), then 1.8s of low flight
+## toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
 ## him as he goes and lasts 5.2s: it burns, slows and builds Char. X again lands early; a stun ends the flight;
 ## a knockback, or Shift (a poof from the bellows), speeds it up; a jump leaps off it, keeping its speed. The
 ## carpet never forms over the abyss. An enemy hunter it burns (or knocks, or kills) fills the Boki bond
@@ -18,7 +19,7 @@ const ROAR_EVERY := 0.45        # s between the roars of the heel and tail fire
 var k: AshwickKit
 var h: Hunter
 var m: Node
-var flight := {}                # hold: the flight under way {t, dir, speed, last, set_v}
+var flight := {}                # hold: the flight under way {lift, t, dir, speed, last, set_v}
 var trail: Array = []           # carpet pieces: {a, b, until}
 var tick_acc := 0.0
 var laid := 0
@@ -81,10 +82,11 @@ func start() -> bool:
 	var x := xd()
 	var dir := h.aim_dir()
 	var speed := float(x["speed"])
-	h.dash_with({"speed": speed, "time": float(x["time"]), "invuln": 0.0, "dir": dir, "kind": "jet"})
+	var lift := float(x["lift_t"])
+	h.dash_with({"speed": 0.0, "time": lift + float(x["time"]), "invuln": 0.0, "dir": dir, "kind": "jet"})
 	h.gliding = false
-	flight = {"t": float(x["time"]), "dir": dir, "speed": speed, "last": k.ground(h.pos), "set_v": dir * speed,
-		"knock": h.knock_t}
+	flight = {"lift": lift, "t": float(x["time"]), "dir": dir, "speed": speed, "last": k.ground(h.pos),
+		"set_v": Vector2.ZERO, "knock": h.knock_t}
 	flights += 1
 	k.play("lw_jet")
 	_liftoff_fx()
@@ -130,17 +132,22 @@ func _fly(dt: float) -> void:
 		h.dash_buf = 0.0            # Shift in the flight (Hunter.do_dash holds it for the flight's end): a poof now
 		k.on_dash(true)
 	var x := xd()
-	flight["t"] = float(flight["t"]) - dt
+	var lift := float(flight["lift"])        # s still to hang at the ring before the flight moves
+	if lift > 0.0:
+		flight["lift"] = lift - dt
+	else:
+		flight["t"] = float(flight["t"]) - dt
 	_take_boost(x)
 	var dir: Vector2 = flight["dir"]
 	var turn := deg_to_rad(float(x["turn_deg"])) * dt
 	dir = dir.rotated(clampf(dir.angle_to(h.aim_dir()), -turn, turn))
 	flight["dir"] = dir
 	var speed := float(flight["speed"])
+	var moving := speed if lift <= 0.0 else 0.0
 	h.roll_dir = dir
-	h.roll_speed = speed
-	h.roll_t = maxf(0.02, float(flight["t"]))
-	flight["set_v"] = dir * speed
+	h.roll_speed = moving
+	h.roll_t = maxf(0.02, float(flight["t"]) + maxf(0.0, lift))
+	flight["set_v"] = dir * moving
 	_hover(float(x["hover"]), dt)
 	var p := k.ground(h.pos)
 	if Vector2(p.x - (flight["last"] as Vector3).x, p.z - (flight["last"] as Vector3).z).length() >= LAY_STEP:

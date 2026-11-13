@@ -142,13 +142,13 @@ func _flight() -> void:
 		"ult recast: he stops soon after the early landing", P.pos.distance_to(start) < 1.6,
 		"slid %.1f" % P.pos.distance_to(start)
 	)
-	# a full flight: 1.8s (about 30% past the source's 1.4s), about 22.7m
+	# a full flight: 1.8s (about 30% past the source's 1.4s), about 22.7m, after the hang at the ring
 	var xd := K.x_def()
 	var fly_t := float(xd["time"])
 	var want := float(xd["speed"]) * fly_t
 	P.teleport(home)
 	_cast(P, home + Vector3(20, 0, 0))
-	ak.step(m, fly_t - 0.1, func(): ak.aim_at(P, home + Vector3(20, 0, 0)))
+	ak.step(m, float(xd["lift_t"]) + fly_t - 0.1, func(): ak.aim_at(P, home + Vector3(20, 0, 0)))
 	var still_up := J.running()
 	ak.step(m, 0.2, func(): ak.aim_at(P, home + Vector3(20, 0, 0)))
 	var flown := Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
@@ -164,7 +164,7 @@ func _flight() -> void:
 	await _steer(m, P, K, home)
 	await ak.done(m)
 
-## Steering: the flight follows the cursor at no more than 120 degrees a second, so the carpet curves.
+## Steering: the flight follows the cursor at no more than turn_deg a second, so the carpet curves.
 func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	var J := K.jet
 	P.teleport(home)
@@ -174,9 +174,10 @@ func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	ak.step(m, 0.2, func(): ak.aim_at(P, P.pos + Vector3(0, 0, 12)))
 	var d1: Vector2 = J.flight["dir"]
 	var turned := rad_to_deg(absf(d0.angle_to(d1)))
+	var cap := float(K.x_def()["turn_deg"]) * 0.2
 	ok(
-		"ult steer: the heading turns toward the cursor, capped at 120 deg/s",
-		turned > 15.0 and turned <= 120.0 * 0.2 + 3.0, "%.0f deg in 0.2s" % turned
+		"ult steer: the heading turns toward the cursor at its cap (turn_deg)",
+		turned > cap * 0.75 and turned <= cap + 3.0, "%.0f deg in 0.2s, cap %.0f" % [turned, cap]
 	)
 	ak.step(m, 1.2, func(): ak.aim_at(P, P.pos + Vector3(0, 0, 12)))
 	ok(
@@ -295,7 +296,7 @@ func _abyss(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
 	P.teleport(home)
 	var skips := J.void_skips
 	_cast(P, home + Vector3(16, 0, 0))
-	ak.step(m, 1.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	ak.step(m, float(K.x_def()["lift_t"]) + 1.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	var over := false
 	for t in J.trail:
 		for p in [t["a"], t["b"]]:
