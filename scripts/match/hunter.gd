@@ -760,10 +760,10 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 		return
 	var k := kbv * (1.0 - owner_stat("knockback_resist"))
 	var s := k.length() / mass()
-	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift / mass() >= 3.0):
+	if s >= Capture.HARD_KNOCK or lift / mass() >= 3.0:
 		launched_at = m.time
 	if s < 0.05:
-		if lift >= 0.0:
+		if lift > 0.0:      # (only a lift above 0 leaves the ground: a 0 riding a slow or a shove is no launch)
 			# a straight-up lift (a slam's crater, an eruption) with no sideways push
 			vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 			grounded = false
@@ -775,7 +775,7 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s > 2.5:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 		HunterMove.cut_air_dash(self)
-	if lift >= 0.0:
+	if lift > 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
 

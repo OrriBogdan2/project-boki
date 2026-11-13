@@ -242,8 +242,8 @@ func impulse(kb: Vector2, lift := -1.0) -> void:
 	vel.x += kb.x / ms
 	vel.z += kb.y / ms
 	var s := kb.length() / ms
-	if lift >= 0.0 or s > 6.0:
-		var up := lift / ms if lift >= 0.0 else s * 0.45
+	if lift > 0.0 or s > 6.0:      # (a lift of 0 is no lift, the same as none)
+		var up := lift / ms if lift > 0.0 else s * 0.45
 		vel.y = maxf(vel.y, minf(9.0, up))
 		grounded = false
 
