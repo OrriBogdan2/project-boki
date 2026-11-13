@@ -2,14 +2,16 @@ extends RefCounted
 ## --perf-throttle-check, item 94's script throttles: an idle monster with nobody within Mob.NAP_M stops
 ## simulating and wakes when a Hunter comes close; a bot further than SimLod.FAR_M from the local player, on
 ## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
-## skipped time added in), and walking on open ground it keeps to the ground (never over the abyss or in
-## a rock) on the path a full-rate bot walks; a near one, one fighting near the player or just hit by
+## skipped time added in, and walking on open ground it keeps to the ground (never over the abyss or in
+## a rock) on the path a full-rate bot walks); a near one, one fighting near the player or just hit by
 ## them, every step; its Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals
-## SimLod.THINK_FAR_K times less often; a bot aboard the sky ship picks nothing.
+## SimLod.THINK_FAR_K times less often; a bot aboard the sky ship picks nothing. A bot in a fight re-tests
+## its line of sight to the same target every Bot.LOS_RECHECK_S (a new target at once).
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes.
+## once and reused until it changes. Skinned rigs (RigPace): every frame off GL over Metal; at RigPace.EVERY a
+## Warden away from the camera's focus is posed every few frames with the held time, the one at the focus every frame.
 
 var main: Node
 var fails := 0
@@ -29,8 +31,10 @@ func run(main_node: Node) -> void:
 	_mob_naps()
 	_far_bots()
 	_far_mobs()
+	_bot_los()
 	_shadows()
 	await _plates()
+	await _rig_pace()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -63,6 +67,31 @@ func _mob_naps() -> void:
 		k.pos = m.player.pos
 	_step(1.5)
 	ok(mb.st != "idle" or mb.pos != at, "a Hunter walking up wakes it (%s)" % mb.st)
+
+func _bot_los() -> void:
+	var b: Hunter = null
+	for h in m.hunters:
+		if h.ctrl == "bot":
+			b = h
+	ok(b != null, "setup: a bot for the line-of-sight cache")
+	if b == null:
+		return
+	var brain: Bot = m.bot_brain
+	var first := brain.los_to(m, b, m.player, Match.DT)
+	var real := first == brain.can_hit(m, b, m.player)
+	ok(b.ai["los_tgt"] == m.player and real, "a bot's first look at a target is a real line-of-sight test")
+	b.ai["los"] = not first
+	var trusted := brain.los_to(m, b, m.player, Match.DT) == (not first)
+	ok(trusted, "within %.1f s it trusts its last look" % Bot.LOS_RECHECK_S)
+	var mb: Mob = m.mobs[0]
+	var fresh := brain.los_to(m, b, mb, Match.DT)
+	ok(b.ai["los_tgt"] == mb and fresh == brain.can_hit(m, b, mb), "a new target is looked at at once")
+	b.ai["los"] = not fresh
+	var again := fresh
+	for i in int(Bot.LOS_RECHECK_S / Match.DT) + 1:
+		again = brain.los_to(m, b, mb, Match.DT)
+	var looked := again == brain.can_hit(m, b, mb)
+	ok(looked, "after %.1f s on the same target it looks again" % Bot.LOS_RECHECK_S)
 
 func _far_bots() -> void:
 	var b: Hunter = null
@@ -404,3 +433,33 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
+
+func _rig_pace() -> void:
+	var syncs := m.find_children("Sync", "Node", true, false).filter(func(n): return n is WardenGlb.Sync)
+	ok(not syncs.is_empty(), "the match has Warden rigs (%d)" % syncs.size())
+	if syncs.is_empty():
+		return
+	var want := RigPace.EVERY if RigPace.dear() else 1
+	ok(syncs.all(func(sy): return sy.pace.every == want), "each rig's pace fits the driver")
+	var sy: WardenGlb.Sync = syncs[0]
+	sy.set_process(false)
+	sy.pace.every = RigPace.EVERY
+	sy.pace.held = 0.0
+	m.cam.focus = sy.root.global_position + Vector3(RigPace.LEAD_M * 4.0, 0, 0)
+	var posed := 0
+	for i in RigPace.EVERY * 2:
+		await main.get_tree().process_frame
+		sy._process(0.01)
+		if sy.pace.held == 0.0:
+			posed += 1
+	ok(posed == 2, "a Warden away from the focus is posed on %d of %d frames" % [posed, RigPace.EVERY * 2])
+	m.cam.focus = sy.root.global_position
+	posed = 0
+	for i in RigPace.EVERY * 2:
+		await main.get_tree().process_frame
+		sy._process(0.01)
+		if sy.pace.held == 0.0:
+			posed += 1
+	ok(posed == RigPace.EVERY * 2, "the one at the camera's focus every frame (%d)" % posed)
+	sy.pace.every = want
+	sy.set_process(true)

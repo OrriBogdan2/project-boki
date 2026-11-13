@@ -97,7 +97,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | RMB | tap, lands at the cursor | tap fires at the cursor; holding past 0.2 s shows the landing ring and release throws | match+ | S:tamsin 18; W rimewright.md row RMB; json `rmb.hold` 0.2 |
 | E | press, recast freezes it | press, E again while it slides freezes it 6 s | match; window = the 4.5 s slide, source not read | D; W |
 | R | press; recast any time cancels, a late recast stuns | press; recast breaks the shell with no stun until the last 0.75 s of 3.5 s, then it cracks early at 0.67 damage | match in shape; window unsettled (ours last 0.75 s, footage "about 3.2-3.5 s") | D "Reactivate early to cancel"; S:tamsin 222 |
-| Shift | hold-drag skate, release stops; air press skates in the air | hold skate (11.5 m/s, 1.6 s cap), release stops, air press skates at once | match | D "HOLD to skate"; S:tamsin 19 |
+| Shift | hold-drag skate, release stops; air press skates in the air | hold skate (10.5 m/s, 1.6 s cap), release stops, air press skates at once | match | D "HOLD to skate"; S:tamsin 19 |
 
 ## Albert (`bulwark`, source Oath, sheet bjorn)
 

@@ -162,7 +162,7 @@ static func finish(e: Dictionary) -> bool:
 	var was_new := not bool(e["site"].get("up", false))
 	e["t"] = maxi(tier(e), to)
 	e.erase("site")
-	if was_new:
+	if was_new and not FarmLots.is_lot(e):
 		Progress.add("fb_built", 1)
 	return true
 
@@ -242,12 +242,12 @@ static func settle(e: Dictionary) -> Dictionary:
 		s["steps"] = int(s["steps"]) + 1
 	return spent
 
-## All the sites on this save's layout (new builds and upgrades).
+## All the sites on this save's layout (new builds and upgrades, and the lot buildings going up).
 static func sites(d: Dictionary = Save.d) -> Array:
 	var out: Array = []
 	for e in HomeLayout.of(d).get("deco", []):
 		if has_site(e): out.append(e)
-	return out
+	return out + FarmLots.sites(d)
 
 ## Station speed from tier (1.0, 1.25, 1.5).
 static func tier_speed(e: Dictionary) -> float:
@@ -255,6 +255,8 @@ static func tier_speed(e: Dictionary) -> float:
 	return float(tb[tier(e) - 1])
 
 static func entry(u: int) -> Dictionary:
+	if u >= FarmLots.U0:
+		return FarmLots.entry(FarmLots.id_of(u))
 	for e in HomeLayout.of(Save.d).get("deco", []):
 		if int(e["u"]) == u: return e
 	return {}
@@ -267,7 +269,7 @@ static func scan(hw) -> void:
 		if stalled(e): continue
 		var u := int(e["u"])
 		var left := int(e["site"]["need"]) - int(e["site"]["got"])
-		var nm := String(HomeLayout.CATALOG[String(e["id"])]["name"]).to_lower()
+		var nm := FarmUnlocks.name_of(String(e["id"])).to_lower()
 		for slot in mini(slots, left):
 			hw._job("build:%d:%d" % [u, slot], "craft", "build", hw.stand(e, slot), HomeLayout.deco_center(e), {"u": u, "site": true, "what": nm})
 
@@ -336,10 +338,13 @@ static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 		Sfx.play("unlock", at, -4.0)
 		hw.h.fx.burst(at + Vector3(0, 1.4, 0), UI.GOLD, 22, 5.0, 0.8, 8.0, 1.2)
 		hw.h.fx.ring(at, 3.0, Color(UI.GOLD, 0.9), 0.5)
-		hw.produced(at, "%s %s the %s" % [who, "upgraded" if up else "finished", HomeLayout.CATALOG[String(e["id"])]["name"].to_lower()], "craft", "")
+		hw.produced(at, "%s %s the %s" % [who, "upgraded" if up else "finished", FarmUnlocks.name_of(String(e["id"])).to_lower()], "craft", "")
 		Work.count("built", 1)
-		if hw.h.hb: hw.h.hb.apply(false)
+		if FarmLots.is_lot(e): FarmLots.complete(hw.h, e)
+		elif hw.h.hb: hw.h.hb.apply(false)
 		hw.scan_t = 0.0
+	elif FarmLots.is_lot(e):
+		FarmLots.restage(hw.h, e)
 	Save.save_game()
 
 ## Station tiers speed their jobs up (HomeWork._boost).

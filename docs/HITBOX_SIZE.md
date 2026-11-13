@@ -168,6 +168,8 @@ Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hi
 | E | 0 | grid | – | – | – | 9.0 / – / – |  |
 | R (hero ult) | 0 | grid | – | – | – | 12.6 / – / – |  |
 | Dash | 0 | grid | – | – | – | 4.2 / – / – |  |
+**Finer run for four heroes.** `--hit-shape-fine` (one dummy moved around, game step 60 Hz, edges to about 0.1 m) re-measured Vex, Kael, Lace and Cinder: every area and lane matches its content number to 0.15 m, and the Kael LMB this grid reads short (1.6 m against 3.7 m fine) is a grid effect (each swing ray stops at the first dummy it meets); the same short reads on other heroes' swings (Breah, Bulwark) were not re-measured. Table and sources in docs/KIT_PARITY.md, "Hit shapes in game".
+
 ### Mismatches over 10% (follow-ups; nothing was changed in kits)
 
 Each is a row above flagged without `~`. Check the cause before changing a kit: some are the measurement (see Limits), some are the kit.
