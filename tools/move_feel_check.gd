@@ -287,7 +287,7 @@ func run(main: Node) -> void:
 	_screen_scale()
 	_e2e()
 	_aim_rel()          # last: its ~11 s of match time would move the abyss rows
-	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel (the rows leave match state it reads); W A S D and the diagonals, on screen and in speed
+	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
