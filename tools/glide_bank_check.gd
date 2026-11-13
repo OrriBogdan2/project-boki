@@ -9,25 +9,35 @@ extends RefCounted
 ## and leans with the body. Angles are taken in the Hunter's own frame (the camera's lean toward you left out).
 ## Prints "BANK ok|FAIL ..." and "BANK DONE, failures: N".
 
-const HEIGHT := 60.0       # m above the ground: room for the dive
-const STEER := 30.0        # degrees the keys sit ahead of the heading in a hard turn
-const MIN_DEG := 20.0      # a hard turn banks at least this much (GLIDE_BANK is 25)
-const JUMP_DEG := 3.5      # the most the bank may move in one 60 Hz step
-const LEVEL_DEG := 1.0     # the bank left once a turn has been over for a phase
+const HEIGHT := 60.0  # m above the ground: room for the dive
+const STEER := 30.0  # degrees the keys sit ahead of the heading in a hard turn
+const MIN_DEG := 20.0  # a hard turn banks at least this much (GLIDE_BANK is 25)
+const JUMP_DEG := 3.5  # the most the bank may move in one 60 Hz step
+const LEVEL_DEG := 1.0  # the bank left once a turn has been over for a phase
 const DIVE_MIN_DEG := 45.0
-const FOLLOW_DEG := 5.0    # the .glb's root may turn this far off the rig's tilt (a clip's own sway: Lace, Sparkle ~3)
-const SEAT_M := 0.03       # m: how far the rider may move on the torso you see from where it sat in the straight glide
-const LEAN_DEG := 2.0      # the rider's lean may differ from the rig's by this much
+const FOLLOW_DEG := 5.0  # the .glb's root may turn this far off the rig's tilt (a clip's own sway: Lace, Sparkle ~3)
+const SEAT_M := 0.03  # m: how far the rider may move on the torso you see from where it sat in the straight glide
+const LEAN_DEG := 2.0  # the rider's lean may differ from the rig's by this much
 ## s: the phases, each to the next one's start
-const PHASES := [["fall", 0.0], ["hold", 0.3], ["left", 1.0], ["level", 2.0], ["right", 2.8], ["level2", 3.8],
-	["dive", 4.6], ["end", 5.4]]
+const PHASES := [
+	["fall", 0.0],
+	["hold", 0.3],
+	["left", 1.0],
+	["level", 2.0],
+	["right", 2.8],
+	["level2", 3.8],
+	["dive", 4.6],
+	["end", 5.4]
+]
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("BANK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -36,6 +46,7 @@ func run(main: Node) -> void:
 	print("BANK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _phase(t: float) -> String:
 	var at := "fall"
 	for p in PHASES:
@@ -43,11 +54,24 @@ func _phase(t: float) -> String:
 			at = String(p[0])
 	return at
 
+
 func _hunter(main: Node, arch: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
+	await m.start(
+		{
+			"training": true,
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 77,
+			"no_drop": true,
+			"cls": Arch.weight(arch),
+			"arch": arch,
+			"weapon": Arch.signature(arch)
+		}
+	)
 	m.set_process(false)
 	for mob in m.mobs:
 		mob.queue_free()
@@ -79,9 +103,11 @@ func _hunter(main: Node, arch: String) -> void:
 		var ph := _phase(t)
 		if Vector2(h.vel.x, h.vel.z).length() > 1.0:
 			heading = Vector2(h.vel.x, h.vel.z).normalized()
-		var steer := 0.0       # (a Vector2 of x, z turns right for a positive angle)
-		if ph == "left": steer = -STEER
-		elif ph == "right": steer = STEER
+		var steer := 0.0  # (a Vector2 of x, z turns right for a positive angle)
+		if ph == "left":
+			steer = -STEER
+		elif ph == "right":
+			steer = STEER
 		h.inp["move"] = heading.rotated(deg_to_rad(steer))
 		h.inp["aim"] = h.pos + Vector3(heading.x, 0, heading.y) * 8.0 + Vector3(0, 0.9, 0)
 		h.inp["glide"] = ph != "fall"
@@ -112,6 +138,7 @@ func _hunter(main: Node, arch: String) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 ## One frame of a turn or the dive against the straight glide: the phase's last frame is kept (the held state), and
 ## the worst of the .glb root's drift off the rig and of the rider's over all of them.
 func _compare(r: Dictionary, ph: String, bank: float, now: Dictionary, hold: Dictionary) -> void:
@@ -125,25 +152,52 @@ func _compare(r: Dictionary, ph: String, bank: float, now: Dictionary, hold: Dic
 		r["seat"] = maxf(r["seat"], ((now["seat"] as Vector3) - (hold["seat"] as Vector3)).length())
 		r["lean"] = maxf(r["lean"], absf(d.call("rider") - rig))
 
-func _report(arch: String, h: Hunter, r: Dictionary) -> void:
+
+func _report(arch: String, _h: Hunter, r: Dictionary) -> void:
 	var left: Dictionary = r.get("left", {"bank": 0.0})
 	var right: Dictionary = r.get("right", {"bank": 0.0})
 	var dive: Dictionary = r.get("dive", {"root": 0.0, "line": 0.0, "rig": 0.0})
 	var cap := rad_to_deg(HunterAnim.GLIDE_BANK)
-	ok(float(left["bank"]) >= MIN_DEG and float(right["bank"]) <= -MIN_DEG,
-		"%s: a hard turn banks into it, left %+.1f deg, right %+.1f (at least %.0f)" % [arch, left["bank"],
-		right["bank"], MIN_DEG])
-	ok(float(r["most"]) <= cap + 0.01 and float(r["jump"]) <= JUMP_DEG,
-		"%s: the bank stays within %.0f deg (%.1f) and eases (at most %.1f deg a step, limit %.1f)" % [arch, cap,
-		r["most"], r["jump"], JUMP_DEG])
+	ok(
+		float(left["bank"]) >= MIN_DEG and float(right["bank"]) <= -MIN_DEG,
+		(
+			"%s: a hard turn banks into it, left %+.1f deg, right %+.1f (at least %.0f)"
+			% [arch, left["bank"], right["bank"], MIN_DEG]
+		)
+	)
+	ok(
+		float(r["most"]) <= cap + 0.01 and float(r["jump"]) <= JUMP_DEG,
+		(
+			"%s: the bank stays within %.0f deg (%.1f) and eases (at most %.1f deg a step, limit %.1f)"
+			% [arch, cap, r["most"], r["jump"], JUMP_DEG]
+		)
+	)
 	ok(float(r["level"]) <= LEVEL_DEG, "%s: level again after the turn (%.2f deg)" % [arch, r["level"]])
-	ok(float(dive["root"]) >= DIVE_MIN_DEG, "%s: the dive pitches the whole body you see nose-down %.0f deg (rig %.0f,"
-		% [arch, dive["root"], dive["rig"]] + " hips to head %.0f)" % dive["line"])
-	ok(float(r["follow"]) <= FOLLOW_DEG, "%s: the whole body you see turns with the rig (off by %.1f deg at most)"
-		% [arch, r["follow"]])
-	ok(int(r["rode"]) > 0 and float(r["seat"]) <= SEAT_M and float(r["lean"]) <= LEAN_DEG,
-		"%s: the Boki riding on it keeps its seat (%d frames, moved %.3f m on the torso you see) and leans with it"
-		% [arch, r["rode"], r["seat"]] + " (%.1f deg off)" % r["lean"])
+	ok(
+		float(dive["root"]) >= DIVE_MIN_DEG,
+		(
+			(
+				"%s: the dive pitches the whole body you see nose-down %.0f deg (rig %.0f,"
+				% [arch, dive["root"], dive["rig"]]
+			)
+			+ " hips to head %.0f)" % dive["line"]
+		)
+	)
+	ok(
+		float(r["follow"]) <= FOLLOW_DEG,
+		"%s: the whole body you see turns with the rig (off by %.1f deg at most)" % [arch, r["follow"]]
+	)
+	ok(
+		int(r["rode"]) > 0 and float(r["seat"]) <= SEAT_M and float(r["lean"]) <= LEAN_DEG,
+		(
+			(
+				"%s: the Boki riding on it keeps its seat (%d frames, moved %.3f m on the torso you see) and leans with it"
+				% [arch, r["rode"], r["seat"]]
+			)
+			+ " (%.1f deg off)" % r["lean"]
+		)
+	)
+
 
 ## The tilts, in degrees off upright in the Hunter's own frame (the model's, the camera's lean left out): roll toward
 ## the left of the way it flies (+), pitch toward the way it faces (+ nose-down). "rig": the Rig node; "root": the
@@ -161,7 +215,7 @@ func _pose(h: Hunter, k: Kin) -> Dictionary:
 	var glb := h.model.get_node_or_null("Warden")
 	var sk := WardenGlb.skeleton(glb) if glb else null
 	var pts := []
-	var torso := (h.model.get_node("Rig/Torso") as Node3D).global_transform     # the body's frame, world
+	var torso := (h.model.get_node("Rig/Torso") as Node3D).global_transform  # the body's frame, world
 	if sk:
 		for b in ["hips", "head"]:
 			pts.append(inv * (sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin))
@@ -177,10 +231,11 @@ func _pose(h: Hunter, k: Kin) -> Dictionary:
 	_tilts(out, "line", (pts[1] as Vector3) - (pts[0] as Vector3), left)
 	if k and k.state == "shoulder" and not k.beside:
 		_tilts(out, "rider", Basis(Vector3.UP, h.face).inverse() * k.model.global_basis.y, left)
-		var frame := inv * torso       # (model space: a body "bulk" scales the model on x and z only)
-		frame.basis = frame.basis.orthonormalized()       # (and a bone's frame carries the look's scale)
+		var frame := inv * torso  # (model space: a body "bulk" scales the model on x and z only)
+		frame.basis = frame.basis.orthonormalized()  # (and a bone's frame carries the look's scale)
 		out["seat"] = frame.affine_inverse() * (inv * k.global_position) * absf(h.model.scale.y)
 	return out
+
 
 static func _tilts(out: Dictionary, nm: String, up: Vector3, left: Vector3) -> void:
 	out[nm + "_roll"] = rad_to_deg(atan2(up.dot(left), up.y))
