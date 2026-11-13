@@ -3,7 +3,7 @@ extends RefCounted
 ## Training Grounds, the Arena, the Duel room and the tutorial: the bottom bar exists (Hero, the area's
 ## menu, Leave), its Hero button and J open the picker with every hero, picking swaps the hunter's archetype
 ## in place, keeps the Boki, opens every rank and saves the expedition pick, the Esc menu has Change hero,
-## and the mouse wheel zooms the camera (the Duel room included). A real match gets none of it.
+## and the mouse wheel zooms the camera (the Duel room included: CamWheel). A real match gets no bar or picker.
 
 var bad := 0
 const DT := 1.0 / 60.0
@@ -31,6 +31,7 @@ func run(main: Node) -> void:
 	for area in areas:
 		var o: Dictionary = OPTS.duplicate()
 		o.merge(areas[area], true)
+		Settings.v["cam_zoom"] = 1.0      # (the wheel is kept between matches: each starts from the default)
 		var m := Match.new()
 		main.add_child(m)
 		await m.start(o)
@@ -44,7 +45,7 @@ func run(main: Node) -> void:
 	main.add_child(rm)
 	await rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
 	rm.set_process(false)
-	ok(Practice.of(rm) == null and rm.cam.user_zoom == 1.0, "a real match has no practice bar, picker or wheel zoom")
+	ok(Practice.of(rm) == null, "a real match has no practice bar or picker")
 	rm.queue_free()
 	print("PRACTICEHERO DONE, failures: %d" % bad)
 	tree.quit()
@@ -110,7 +111,7 @@ func _area(main: Node, m: Match, area: String) -> void:
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	ok(m.cam.user_zoom > zin, "%s: and out again (%.2f)" % [area, m.cam.user_zoom])
 	for i in 200: await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
-	ok(is_equal_approx(m.cam.user_zoom, Practice.ZOOM_MAX), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
+	ok(is_equal_approx(m.cam.user_zoom, float(CamWheel.rules()["match"]["max"])), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
 
 func _key(tree: SceneTree, action: String) -> void:
 	var ev := InputEventAction.new(); ev.action = action; ev.pressed = true

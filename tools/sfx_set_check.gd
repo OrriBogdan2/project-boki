@@ -36,6 +36,8 @@ extends RefCounted
 ##      (as long as its fuse) and blast, and every chest tier opens with its own lid creak (content/sfx/breakables.json)
 ##  17. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
 ##      tools/sfx_world_cues.gd
+##  18. falloff sized to the match view: a cue at the screen's side edge is heard (full-ish level, not muffled),
+##      one 10 m past it is quieter, one past ~30 m is silent
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -82,6 +84,7 @@ func run(main: Node) -> void:
 	_boki_impacts()
 	_breakables()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -321,6 +324,19 @@ func _nuke_fall() -> void:
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
 ## 5. A Hunter without its own set plays the shared sounds.
+## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
+## is within -12 dB and on the clear bus, 10 m further is at least 6 dB quieter, past 30 m nothing plays.
+func _falloff() -> void:
+	var edge := CamRig.style_across("supervive") * 0.5
+	var at_edge := Sfx._distance_db(Vector3(edge, 0, 0))
+	var off := Sfx._distance_db(Vector3(edge + 10.0, 0, 0))
+	var gone := Sfx._distance_db(Vector3(31.0, 0, 0))
+	print("SFXSET falloff: edge %.1f m %.1f dB, +10 m %.1f dB, 31 m %s" % [edge, at_edge, off, gone])
+	var clear := at_edge > -12.0 and edge < Sfx.FAR
+	ok(clear, "a cue at the screen edge (%.1f m) is heard clearly (%.1f dB, clear bus)" % [edge, at_edge])
+	ok(off < at_edge - 6.0 and not is_nan(off), "...one 10 m off screen is still there but quieter (%.1f dB)" % off)
+	ok(is_nan(gone), "...and past ~30 m it is silent")
+
 func _fallback() -> void:
 	var h := Hunter.new()
 	h.arch = "no_such_hunter"

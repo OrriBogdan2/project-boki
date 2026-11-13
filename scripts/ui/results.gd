@@ -1,6 +1,7 @@
 extends Control
 ## After a match: what you brought home, what your kin thinks, and the way back to the farm.
 
+
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -295,8 +296,12 @@ func _note(txt: String, col: Color) -> Label:
 	return l
 
 var shown_at := 0
+var zoom := ViewZoom.new()      # the wheel or the pad over the island (ResultsStage moves its camera by it)
 ## Enter, Space or Esc also takes you home, so you can never get stuck on this screen.
 func _unhandled_input(e: InputEvent) -> void:
+	if zoom.wheel(e):
+		get_viewport().set_input_as_handled()
+		return
 	if Time.get_ticks_msec() - shown_at < 900:
 		return
 	if e.is_action_pressed("ui_accept") or e.is_action_pressed("menu") or e.is_action_pressed("jump"):
@@ -308,7 +313,9 @@ func _stage(r: Dictionary, s: Dictionary) -> void:
 	var squad: Array = r.get("squad", [])
 	if squad.is_empty():
 		squad = [{"arch": Arch.of_save(), "name": String(Save.d.get("name", "Hunter")), "you": true, "kin": s.get("kin", {})}]
-	add_child(ResultsStage.make(squad, r.get("extracted", false)))
+	var stage := ResultsStage.make(squad, r.get("extracted", false))
+	stage.zoom = zoom
+	add_child(stage)
 
 func _lost_title(why: String) -> String:
 	match why:

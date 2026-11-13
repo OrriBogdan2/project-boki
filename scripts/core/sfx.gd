@@ -47,9 +47,13 @@ const STACK_DB := 3.5
 const BLAST := ["boom", "ab_blast", "ab_slam"]
 const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
-## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
-const NEAR := 3.5
-const FAR := 9.0
+## Distance falloff, sized to the match view (the wide camera, ~37 m across, so ~18.5 m to the side edge): what you
+## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
+## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
+## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".
+const NEAR := 5.5
+const SPREAD := 8.0
+const FAR := 19.0
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus: a low-pass and a small gain drop.
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
@@ -64,7 +68,7 @@ var next := 0
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}           # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO   # set by the camera each frame
-var hear_range := 22.0
+var hear_range := 30.0     # m: silent beyond this (a sound's own "reach" overrides it)
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
@@ -486,8 +490,8 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var dist := Vector2(pos.x - listener.x, pos.z - listener.z).length()
 	if dist > hr:
 		return NAN
-	# a soft inverse-distance roll-off (about -8 dB by 10 m), easing to silence at the edge of hearing
-	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
+	# a soft inverse-distance roll-off (about -8 dB at the screen edge), easing to silence at the edge of hearing
+	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / SPREAD) / log(10.0)
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 

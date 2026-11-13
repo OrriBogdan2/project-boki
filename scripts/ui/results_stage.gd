@@ -24,6 +24,7 @@ var extracted := true
 var built := 0               # Hunter models (or Wisps) standing on the island
 var _w3: Node3D
 var _cam: Camera3D
+var zoom := ViewZoom.new()   # the camera's distance factor (Results hands it the screen's wheel and pad)
 var _t := 0.0
 var _todo: Array = []        # member indices still to build
 var _bodies: Array = []      # [member index, Node3D]
@@ -100,11 +101,12 @@ func _process(dt: float) -> void:
 		if not extracted:
 			var w: Node3D = pair[1]
 			w.position.y = WISP_HOVER + sin(_t * 1.6 + pair[0]) * 0.12
+	zoom.tick(dt)
 	_drift()
 
 func _drift() -> void:
 	var span := SPACING * maxi(members.size(), 1)
-	var dist := 5.0 + span * 0.75
+	var dist := (5.0 + span * 0.75) * zoom.k
 	var shift := LEFT_THIRD * 2.0 * dist * tan(deg_to_rad(_cam.fov * 0.5)) * size.x / maxf(size.y, 1.0)
 	_cam.position = Vector3(shift + sin(_t * TAU * DRIFT_HZ) * DRIFT_M, 2.2, dist)
 	_cam.look_at(Vector3(shift + sin(_t * TAU * DRIFT_HZ) * DRIFT_M * 0.5, 0.9, 0.0))
