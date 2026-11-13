@@ -17,7 +17,7 @@ const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "t
 	"ring": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
-const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
+const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2, "pool": 3}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
 	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
@@ -28,6 +28,7 @@ const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
+const HELD_LIFE := 0.85        # share of its life a held surface waits at (a pool's fade starts here)
 const RIBBON_SAMPLES := 18     # points a mesh trail keeps
 const RIBBON_WAVES := 11.0     # rad along a trail's "wave" (a thread trailing in the air)
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
@@ -252,7 +253,7 @@ func _layer(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o: Dictiona
 			_ribbon(layer, h, o)
 		elif kind == "bolt":
 			var from := _where(layer, h, at, dir, o)
-			_bolt(layer, h, from, _bolt_end(layer, h, from, dir, o), o)
+			_bolt(layer, h, from, _bolt_end(layer, h, at, from, dir, o), o)
 		else:
 			_surface(kind, layer, h, _where(layer, h, at, dir, o), dir, o)
 	else:
@@ -406,7 +407,7 @@ func _prewarm_strip(mesh: ImmediateMesh) -> void:
 		mesh.surface_add_vertex(Vector3(float(i), 0.0, float(i % 2)) * 0.01)
 	mesh.surface_end()
 
-func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> void:
+func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> Dictionary:
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
 	var mt: ShaderMaterial = mi.material_override
 	var yaw := atan2(dir.x, dir.y) + deg_to_rad(float(layer.get("yaw", 0.0)))
@@ -428,6 +429,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			var sh := String(layer.get("shape", "disc"))
 			mt.set_shader_parameter("shape", SCORCH_SHAPES[sh])
 			mt.set_shader_parameter("stitch", bool(layer.get("stitch", false)))
+			mt.set_shader_parameter("pool_band", float(layer.get("band", 1.0)))
 			if sh == "lane":
 				var ln := _num(layer, "len", o, 4.0)
 				var w := _num(layer, "w", o, 1.5)
@@ -466,7 +468,11 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
 	if layer.get("ride", false):      # it rides on the Hero (an anchor goes with the clip: a hop, a lunge)
 		e.merge({"ride": h, "layer": layer, "dir": dir, "off": p - _where(layer, h, h.pos, dir)})
+	if o.get("on") is Node3D:
+		e["on"] = o["on"]
+		e["off"] = p - (o["on"] as Node3D).global_position
 	live.append(e)
+	return e
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
@@ -487,10 +493,13 @@ func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 			"width": _num(layer, "size", o, 0.4), "wave": float(layer.get("wave", 0.0)),
 			"follow": o.get("follow") if layer.get("follow", false) else null, "pts": []})
 
-## Where a bolt ends: the kit's `o.to`, else a named anchor ("to"), else `len` metres along the aim.
-func _bolt_end(layer: Dictionary, h: Hunter, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
+## Where a bolt ends: the kit's `o.to`, else the move's point `to_y` m up ("to": "here": a bolt out of the sky), else a
+## named anchor ("to"), else `len` metres along the aim.
+func _bolt_end(layer: Dictionary, h: Hunter, at: Vector3, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
 	if o.get("to") is Vector3:
 		return o["to"]
+	if layer.get("to") == "here":
+		return at + Vector3(0, _num(layer, "to_y", o, 0.0), 0)
 	if layer.has("to"):
 		return anchor_pos(h, String(layer["to"]))
 	var ln := _num(layer, "len", o, 3.0)
@@ -517,7 +526,8 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 			"s0": Vector3.ONE, "s1": Vector3.ONE})
 
 ## A mesh trail that follows a projectile (its node) until it is gone, hidden, or TRAIL_MAX runs out: tracers,
-## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays.
+## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays. Its "end" names
+## a move played where the trail stopped.
 func trail(h: Hunter, move: String, follow: Node3D) -> void:
 	var rec := _rec(h, move)
 	if rec.is_empty() or follow == null or lod_at(follow.global_position) <= 0.0:
@@ -525,6 +535,7 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 	if h.unseen and h != m.get("player"):
 		return
 	plays[move] = int(plays.get(move, 0)) + 1
+	var end_move := String(rec.get("end", ""))
 	for layer: Dictionary in rec.get("fx", []):
 		if String(layer.get("p", "")) != "ribbon":
 			continue
@@ -532,6 +543,8 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
+		e["end"] = end_move
+		end_move = ""                  # (it plays once, off the first trail)
 
 func _mote_node(kind: String) -> Node3D:
 	var p := GPUParticles3D.new()
@@ -624,7 +637,8 @@ func shell(h: Hunter, move: String) -> MeshInstance3D:
 
 # ------------------------------------------------------------------ holds
 ## Something that lasts while the kit keeps asking, once per tick: a blade heating, a body burning. It follows its
-## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended.
+## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended. A surface
+## layer (a cast's dark ring) waits at HELD_LIFE of its life while asked, then runs out the rest.
 func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	var key := "%d/%s" % [h.get_instance_id(), move]
 	if holds.has(key):
@@ -646,6 +660,10 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if lod < 1.0 and bool(layer.get("near", false)):
 			continue
 		var kind := String(layer["p"])
+		if MODES.has(kind):
+			var e := _surface(kind, layer, h, _where(layer, h, o.get("at", h.pos), aim, o), aim, o)
+			layers.append({"node": e["node"], "layer": layer, "n": 0, "surface": e})
+			continue
 		if kind == "string":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
 				layers.append({"node": _string_node(layer, h), "layer": layer, "n": 0})
@@ -674,7 +692,10 @@ func _tick_holds() -> void:
 		var hunter: Hunter = h
 		var aim := hunter.aim_dir()
 		for lay: Dictionary in e["layers"]:
-			if lay["node"] is GPUParticles3D:
+			if lay.has("surface"):
+				var s: Dictionary = lay["surface"]
+				s["t"] = minf(float(s["t"]), float(s["dur"]) * HELD_LIFE)
+			elif lay["node"] is GPUParticles3D:
 				var node := lay["node"] as GPUParticles3D
 				var base: Vector3 = hunter.pos if e["at"] == null else e["at"]
 				node.global_position = _where(lay["layer"], hunter, base, aim)
@@ -699,7 +720,7 @@ func _end_hold(e: Dictionary) -> void:
 		if node is GPUParticles3D:
 			(node as GPUParticles3D).emitting = false
 			motes.append({"node": node, "t": 0.0, "dur": (node as GPUParticles3D).lifetime * 1.1, "n": lay["n"]})
-		else:
+		elif not lay.has("surface"):          # (a surface runs out the rest of its life)
 			node.visible = false
 
 ## A thin glowing line through named anchors (a bowstring): a mesh trail node drawn fresh from them each frame.
@@ -749,6 +770,8 @@ func _process(delta: float) -> void:
 		if e.has("ride") and is_instance_valid(e["ride"]):
 			var r: Hunter = e["ride"]
 			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
+		if e.has("on") and is_instance_valid(e["on"]):
+			(e["node"] as Node3D).global_position = (e["on"] as Node3D).global_position + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)
@@ -774,6 +797,7 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 	var follow: Variant = e["follow"]
 	if follow != null and (not is_instance_valid(follow) or not (follow as Node3D).visible):
 		e["dur"] = minf(float(e["dur"]), now)      # what it follows is gone: the tail runs out
+		_trail_end(e, pts)
 	elif now <= float(e["dur"]) and is_instance_valid(h):
 		var followed: Node3D = follow
 		pts.push_front([followed.global_position if followed else anchor_pos(h, String(e["anchor"])), now])
@@ -786,6 +810,16 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 		return false
 	_draw_ribbon(e, pts, now, tail)
 	return true
+
+## A trail's shot is gone: its recipe's "end" move plays where it stopped, facing the way it flew (a bolt's splinters).
+func _trail_end(e: Dictionary, pts: Array) -> void:
+	if String(e.get("end", "")) == "" or pts.is_empty() or not is_instance_valid(e["h"]):
+		return
+	var at: Vector3 = pts[0][0]
+	var back: Vector3 = pts[mini(1, pts.size() - 1)][0]
+	var way := Vector2(at.x - back.x, at.z - back.z)
+	play(e["h"], e["end"], at, way.normalized() if way.length() > 0.01 else (e["h"] as Hunter).aim_dir())
+	e["end"] = ""
 
 func _draw_ribbon(e: Dictionary, pts: Array, now: float, tail: float) -> void:
 	var mesh: ImmediateMesh = (e["node"] as MeshInstance3D).mesh

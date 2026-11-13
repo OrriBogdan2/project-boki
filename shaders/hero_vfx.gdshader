@@ -25,7 +25,7 @@ uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);  // char, what i
 uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
-uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
+uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone, 3 pool (a still dark disc under a cast)
 uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
@@ -35,6 +35,7 @@ uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fil
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 uniform float head_t = 0.28;  // M_SWEEP: the share of the life its head takes to run the arc
 uniform float band = 0.0;     // M_SWEEP: an even blade this deep (share of the arc's depth), not tapered at the ends
+uniform float pool_band = 1.0;   // M_SCORCH pool: how much of the radius it covers from the edge in (1: all of it, a ring below)
 
 void vertex() {
 	if (billboard) {
@@ -115,8 +116,22 @@ vec4 thread(vec2 uv) {
 	return vec4(mix(col.rgb, col2.rgb, line * 0.2) * a, a);
 }
 
+// A cast's ground mark: a flat dark disc (or a ring band) out to the exact edge, dark from the first frame,
+// gone in the last POOL_OUT of its life. Not fire: it does not burn or dissolve.
+const float POOL_A = 0.62;    // how much of the ground it darkens
+const float POOL_OUT = 0.15;  // the share of its life it takes to go
+vec4 pool(vec2 uv) {
+	float d = length(uv * 2.0 - 1.0);
+	float n = fbm3((uv * 2.0 - 1.0) * 3.0 + seed);
+	float inside = 1.0 - hard(d - 1.0);
+	float ring = pool_band >= 1.0 ? 1.0 : smoothstep(1.0 - pool_band, 1.0 - pool_band + 0.04, d);
+	float a = POOL_A * (0.85 + 0.15 * n) * inside * ring * (1.0 - smoothstep(1.0 - POOL_OUT, 1.0, life));
+	return vec4(col3.rgb * a, a);
+}
+
 vec4 scorch(vec2 uv) {
 	if (stitch) { return seam(uv); }
+	if (shape == 3) { return pool(uv); }
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
 	float mask = 1.0;

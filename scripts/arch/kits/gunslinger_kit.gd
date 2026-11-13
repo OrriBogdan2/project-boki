@@ -260,7 +260,7 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
+			fx().ride(sd, EMBER, HOT, 2.6, 0.18, _round_end)
 			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:

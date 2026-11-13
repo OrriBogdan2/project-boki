@@ -56,6 +56,34 @@ func _unwall(m: Match, p: Vector3) -> void:
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
+## HeroVfx's live surface looks centred on `at`: {mode, shape, band, size (the quad's x), tall, dur, col, col3}.
+func _looks_at(m: Match, at: Vector3) -> Array:
+	var out := []
+	for e: Dictionary in HeroVfx.of(m).live:
+		var mt: ShaderMaterial = e["mat"]
+		if _flat((e["node"] as Node3D).global_position, at) > 0.1:
+			continue
+		var look := {"mode": _param(mt, "mode", -1), "shape": _param(mt, "shape", 0), "band": _param(mt, "band", 1.0)}
+		look.merge({"dur": float(e["dur"])})
+		look.merge({"size": (e["s0"] as Vector3).x, "tall": (e["s0"] as Vector3).y})
+		look.merge({"col": mt.get_shader_parameter("col"), "col3": mt.get_shader_parameter("col3")})
+		out.append(look)
+	return out
+
+## A shader parameter, or `unset` when the look never set it.
+func _param(mt: ShaderMaterial, key: String, unset: Variant) -> Variant:
+	var v: Variant = mt.get_shader_parameter(key)
+	return unset if v == null else v
+
+## A dark pool (scorch "pool") of radius r among `looks`, `band` of its radius wide (1: a disc).
+func _pool(looks: Array, r: float, band := 1.0) -> Dictionary:
+	for l: Dictionary in looks:
+		if l["mode"] == HeroVfx.MODES["scorch"] and l["shape"] == HeroVfx.SCORCH_SHAPES["pool"] \
+				and absf(float(l["size"]) - 2.0 * r) < 0.01 and absf(float(l["band"]) - band) < 0.01 \
+				and (l["col3"] as Color).v < 0.35:
+			return l
+	return {}
+
 func _fire(m: Match, P: Hunter) -> void:
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -108,6 +136,17 @@ func _growth() -> void:
 			"L1 %.2f L10 %.2f" % [d1, d10])
 
 # ------------------------------------------------------------------ Sparkle
+## The next puff of Static sparks on `T` (content/vfx/mage.json "static", every MageKit.STATIC_GAP): its particles.
+func _static_puff(m: Match, T: Ent) -> int:
+	var V := HeroVfx.of(m)
+	var was := int(V.plays.get("static", 0))
+	var made := V.motes.size()
+	for i in 10:
+		ac.step(m, 0.05)
+		if int(V.plays.get("static", 0)) > was:
+			return int(V.motes[-1]["n"]) if V.motes.size() > made else 0
+	return 0
+
 func _mage() -> void:
 	var r: Array = ac.setup("mage", 4.0, "", true)
 	var m: Match = r[0]
@@ -133,8 +172,12 @@ func _mage() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
-			not sd.is_empty() and absf(_flight(sd) - 13.0) < 0.5, "%.1f m" % _flight(sd))
-	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
+			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
+	var orb: Node3D = sd.get("node")
+	var rides := HeroVfx.of(m).ribbons.any(func(e): return e["follow"] == orb and orb != null)
+	ok("LMB: the round is a jagged bolt (a HeroVfx trail on the shrunk round)",
+			rides and orb.scale.x < 0.01 and orb.visible, "trail %s" % rides)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
 	_fire(m, P)
@@ -154,14 +197,16 @@ func _mage() -> void:
 	ok("Static: a marker over the head shows the count",
 			not mk.is_empty() and int(mk["n"]) == K.spark_n(T) and K.spark_n(T) >= 1 and (mk["node"] as Node3D).visible,
 			"%s n %d" % [mk.keys(), K.spark_n(T)])
-	var sparks_1 := ((mk["node"] as Node3D).get_node("Sparks") as CPUParticles3D).amount if not mk.is_empty() else 0
 	var n_1 := K.spark_n(T)
+	Sfx.listener = P.pos               # (the camera's focus: the looks thin with distance from it)
+	var sparks_1 := _static_puff(m, T)
 	K.add_spark(T, 4 - n_1)
-	ac.step(m, 0.05)
+	var sparks_4 := _static_puff(m, T)
 	mk = VVFx.of(m).markers.get("vs%d" % T.get_instance_id(), {})
-	var sparks_4 := ((mk["node"] as Node3D).get_node("Sparks") as CPUParticles3D).amount if not mk.is_empty() else 0
 	var high := float((mk["node"] as Node3D).global_position.y - T.position.y) if not mk.is_empty() else 0.0
-	var grows := sparks_1 == 2 * n_1 and sparks_4 == 8
+	var V := HeroVfx.of(m)
+	var share := float(Settings.q("fx")) * V.lod_at(T.position) * V.view_k(P)
+	var grows := sparks_1 == int(2 * n_1 * share) and sparks_4 == int(8 * share)
 	ok("Static: 4 = Live, the sparks grow 2 a stack (to 8)",
 			K.live(T) and int(mk.get("n", 0)) == 4 and grows,
 			"%d -> %d" % [sparks_1, sparks_4])
@@ -392,6 +437,7 @@ func _mage() -> void:
 	ac.step(m, 0.2)
 	K.cd["e"] = 0.0
 	ac.aim_at(P, T.pos)
+	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
 	P.inp["e_down"] = true
 	P.ak.use_e()
 	ok("Skycall: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
@@ -405,6 +451,20 @@ func _mage() -> void:
 	P.inp["e_down"] = false
 	m.step(ac.DT)
 	ok("Skycall: the release commits the drag and starts the countdown", String(K.strikes[0]["phase"]) == "count")
+	var sky := _looks_at(m, K.strikes[0]["at"])
+	var sky_r := float(K.e_def()["radius"])
+	var delay := float(K.e_def()["delay"])
+	var disc := _pool(sky, sky_r)
+	var pillars := 0
+	for l: Dictionary in sky:
+		var gold := (l["col"] as Color).r > 0.9 and (l["col"] as Color).b < 0.4
+		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and gold:
+			pillars += 1
+	ce = AimKit.entry(P, "e0")
+	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short gold pillar, the chevron",
+			not disc.is_empty() and absf(float(disc["dur"]) * HeroVfx.HELD_LIFE - delay) < 0.01
+			and pillars == 1 and (ce.get("pointer", Vector2.ZERO) as Vector2).x < -0.9,
+			"disc %s pillars %d" % [disc.get("dur", "none"), pillars])
 	ac.step(m, 0.75)
 	ok("Skycall: nothing lands before the 0.8s countdown", ac.dmg(T) < 0.5)
 	var tx0 := T.pos.x

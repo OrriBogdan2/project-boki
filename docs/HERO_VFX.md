@@ -14,26 +14,28 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
-  ended. Particle layers only, and local.
+  ended. Local. Particle layers, `string`, and surface layers: a surface (a cast's dark ring) stays at 85% of its
+  `life` while asked and runs out the rest when the asks stop.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
-  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. The recipe's `"end"` names a move
+  played where the trail stopped, facing the way it flew (Sparkle's bolt splinters).
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
   cones and delivery sounds) stays out, so only the Hero's own look shows.
 
 ## A recipe
 `"move": {"sfx": [...], "fx": [...]}`. Options the kit passes (`"r"`, `"len"`, `"w"`, `"k"` the charge, `"flip"`, or any flag
-named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_x"` to scale it, `"size_k"` to grow with `k`.
+named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground and shell looks ride, local only) fill sizes: `"size": "r"` with `"size_x"` to scale it, `"size_k"` to grow with `k`.
 
 | layer `p` | what | key fields |
 |---|---|---|
 | `sweep` | an arc of flame, burning away; its head runs the arc in `turn` s (default 0.28 of the life); `band` (0..1 of its depth) draws an even blade, not tapered (a 360 ring) | `size` outer radius, `arc` deg, `tilt`, `yaw`, `flip`, `turn`, `band` |
-| `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
+| `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches; `pool` is a still dark disc in `c3` under a cast (no fire), dark at once, gone in its last 15% | `shape` disc / lane / cone / pool, `size` or `len` + `w`, `arc`, `band` (pool: share of the radius in from the edge, 1 = all) |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
-| `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
+| `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor; `"here"`: the move's point `to_y` m up, a bolt out of the sky with `y`), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`); with `"thin": true` only three lit comet arcs on its rim (no fill, no core), which `grow` < 1 draws in toward the centre | `size` radius, `spin` turns/s (negative: the other way), `grow`, `thin` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |

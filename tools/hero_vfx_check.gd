@@ -90,7 +90,8 @@ func _recipes(arch: String) -> void:
 	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
 	ok(not called.is_empty() and missing.is_empty(),
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
-	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
+	var ends := moves.values().map(func(rec): return String(rec.get("end", "")))     # a trail's end move
+	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE and not k in ends)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
 	var pal: Dictionary = d["palette"]
 	var bad_sound: Array = []
