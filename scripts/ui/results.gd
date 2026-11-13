@@ -71,7 +71,9 @@ func show_result(r: Dictionary) -> void:
 		if i > 0:
 			var sep := ColorRect.new(); sep.color = UI.LINE; sep.custom_minimum_size = Vector2(1, 0)
 			sh.add_child(sep)
-		sh.add_child(_stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08))
+		var tile := _stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08)
+		tile.tooltip_text = String(STAT_TIPS.get(t[0], ""))
+		sh.add_child(tile)
 	v.add_child(strip)
 	var det := UI.vbox(6)      # what is behind the Details toggle
 	det.visible = false
@@ -81,7 +83,9 @@ func show_result(r: Dictionary) -> void:
 		if int(s["gems"]) > 0:
 			chips.append(["gem", "%d gems" % s["gems"], UI.GOLD])
 		for sd in s["seeds"]:
-			chips.append(["seed", "%d %s seeds" % [s["seeds"][sd], Data.CROPS[sd]["name"]], Data.CROPS[sd]["color"]])
+			var crop: Dictionary = Data.CROPS[sd]
+			var n := int(s["seeds"][sd])
+			chips.append(["seed", "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"], crop["color"]])
 		for k in s["caught"]:
 			var rare := " ".join(Mutations.tags(k))
 			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
@@ -178,6 +182,9 @@ func show_result(r: Dictionary) -> void:
 	outer.add_child(row)
 	go.grab_focus()
 	Sfx.play("bond" if won else "fall", null, -6.0, 0.0, 1.0 if won else 0.8)
+
+## One line of plain words on hover for the strip tiles that need one (by icon).
+const STAT_TIPS := {"knock": "Enemy hunters you put on the ground this match."}
 
 ## One stat on the strip: a number that counts up from zero, with what it is under it.
 func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: float) -> Control:
