@@ -5032,7 +5032,7 @@ func _name_baby(baby: Dictionary) -> void:
 		v.add_child(UI.label("A rare %s%s%s, hatched from the egg %s guarded. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], String(Data.MOBS.get(String(baby.get("from_boss", "")), {}).get("name", "a boss")), Care.nature(baby)], 15))
 	else:
 		v.add_child(UI.label("A %s%s%s, child of %s and %s. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], baby["parents"][0], baby["parents"][1], Care.nature(baby)], 15))
-		if life and baby.has("gifts"): v.add_child(UI.label(Parentage.gift_text(baby), 14, UI.MUTED))      # base_mode: who gave what
+		if HatchParents.has_row(baby): v.add_child(HatchParents.view(baby, get_tree()))      # who gave what
 	if baby.has("gift"):
 		v.add_child(UI.label(Mentor.line(baby["gift"]), 15, UI.ACCENT_HI))
 	for mid in Mutations.of(baby):

@@ -115,6 +115,7 @@ func run(m: Node) -> void:
 		await tree.process_frame
 	ok(named["go"], "Name it hands over to naming")
 	await _first_mask(tree)
+	_parents_row(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
@@ -209,3 +210,26 @@ func _texts(n: Node) -> Array:
 	elif n is Button: out.append((n as Button).text)
 	for c in n.get_children(): out.append_array(_texts(c))
 	return out
+
+# ---------------------------------------------------------------- 4. a bred egg's parents row
+## A bred egg's hatch card shows both parents and marks each trait with the parent it came from;
+## a starter, wild or Rare Egg's Boki has no parents, so no row.
+func _parents_row(tree: SceneTree) -> void:
+	var a := Save.new_kin("cindle", "Ash")
+	var b := Save.new_kin("puddlet", "Bri")
+	for p in [a, b]: Save.d["roster"].append(p)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var baby := Care.breed(a, b, rng)
+	var row := HatchParents.view(baby, tree)
+	var names: Array = row.get_child(0).find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(names == ["Ash", "Bri"], "a bred egg's card shows both parents (%s)" % ", ".join(names))
+	var whats: Array = HatchParents.traits(baby).map(func(t): return t["what"])
+	var wanted := ["Kind and colour", "Best stat", "Loves", "Likes"].all(func(w): return whats.has(w))
+	ok(wanted, "it marks its colour, a stat and its personality with a parent (%s)" % ", ".join(whats))
+	row.free()
+	var starter := Save.new_kin("cindle", "First")
+	var rare := Save.new_kin("burrlet", "Lair")
+	rare["rare"] = true
+	var none := not HatchParents.has_row(starter) and not HatchParents.has_row(rare)
+	ok(none, "starter and Rare Egg Boki get no parents row")
