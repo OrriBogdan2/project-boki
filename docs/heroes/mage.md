@@ -23,16 +23,20 @@ its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.5 m radius.
 
-## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Joule, `Upg:` lines. Cooldown cuts keep the source's fraction of its own cooldown (ours stay as the owner set them);
-damage steps add up. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% step is not used). The ultimate takes no
-upgrade in our kit (the source's R: +50% impact damage -7.5s, then -7.5s; our X has a fixed cooldown), so it is not changed.
+## Ranks: tier table (source: Joule)
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
 
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Storm Rod | +20% damage, -1s x2; tier IV +50% damage | 7.2s / 6.4s, damage +15% / +30%, then x1.5 on top (x1.95) | 7.2s / 6.4s, damage +20% / +90% (+40%, +50% on top) |
-| Shift Wirerun | -0.75s x2; tier IV +100% non-passive dash damage | 7.2s / 6.4s, damage +15% / +30% on the Blowout and run | 7.3s / 6.7s; no shared damage step; the run's own hit x2 at 3 (Blowout unchanged) |
-| E Skycall | +25% x2; tier IV -3s | 9.5s / 5.4s (3s off the shared 8.4s), damage +15% / +30% | 10.5s / 7.9s (a quarter off, the source's 3 of 12), damage +25% / +50% |
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB bolt | none | none | none | - | - | - |
+| RMB Storm Rod (8s; [D] 10s) | +20% damage, -1s | +20% damage, -1s | +50% damage | 7.2s, damage +20% | 6.4s, damage +90% (+40%, then +50%) | `rank_dmg.sec` |
+| Shift Wirerun (8s; [D] 9s) | -0.75s | -0.75s | +100% non-passive dash damage | 7.3s | 6.7s; the run's own hit x2 (the Blowout does not grow) | `dash.rank3_mult` (`run_rank_k`) |
+| E Skycall (10.5s; [D] 12s) | +25% damage | +25% damage | -3s cooldown | 10.5s, damage +25% | 7.9s (a quarter off: 3 of 12), damage +50% | `rank_cd.kin` |
+| Passive Static | none | none | none | - | - | - |
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
 Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md at 5 fps. Asserted in `--mage-combo-check`

@@ -16,6 +16,21 @@ Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, own
   he raises, the skateboard/parkour idea. See Rock Hop below; the crash and the rolling rock stay on the last landing.
 - Copied: structure, timing ratios and interactions. Not copied: names, text, raw numbers, art, sound.
 
+## Ranks: tier table (source: Tetra (read at level 15))
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB punch and boulder | none | none | none | - | - | - |
+| RMB Quakefall (11s; [D] 11s) | +50 damage, -1s | +50 damage, -1s | slamming foes or rocks grants a Molten Guard stack | 10s, damage +24% (+50 on [S] about 208) | 9s, damage +48%, an 18 shield stack per slam (up to 4) | `breah_slam.gd` (`guard_stack` at sec rank 3) |
+| Shift Rock Hop (12s; [D] 12s) | -2s | +1 charge | the dash lasts 33% longer | 10s | 10s, a second charge, each hop a third further | `extra_dashes`, `dash.speed_k` (breah_hop.gd) |
+| E Stone Row (12.5s; [D] 12.5s) | -1s | -1.5s | an extra rock wall | 11.5s | 10s, an extra row behind the first | `rock_cap` / the row count at kin rank 3 |
+| Passive Molten Guard | none | none | none | - | - | - |
+
 ## Design
 Weight Medium (145 hp). Fixed weapon Rubble Fists (`content/weapons/rubble_fists.json`): a huge basalt gauntlet on each fist,
 with magma cracks (shaders/molten_rock.gdshader), knuckle studs and a hot core (scripts/match/hero_arms.gd); the gauntlets
@@ -274,9 +289,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   adds the second charge (the data's +1 charge) and the third-further reach (its +33%), still 10s per charge.
 - Allies climbing the rocks: the data pass let any hunter jump onto a rock; owner review item 25 replaced that: only the
   rock's caster climbs it (see Rock ownership).
-- Not touched: the R wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (9s and 13s against the
-  data's 11s and 12.5s, within the ratio the other hunters use).
-- Not touched: the X wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (now 11s and 12.5s, the data's;
+- Not touched: the R wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (now 11s and 12.5s, the data's;
   they were 9s and 13s when this pass was written).
 
 ## Assumptions (the footage is silent; easy to change in content/archetypes/dolm.json)

@@ -10,6 +10,21 @@ Sources (gameplay facts only, written in our own words):
 - The footage reference sheet (frames kept on the local machine): timing, aiming, telegraphs, animation beats.
 - Owner notes: E in the air smashes straight down with the anchor (sync61 playtest); the grab goes through rocks (Nov 2 relay).
 
+## Ranks: tier table (source: Kingpin)
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB Scattergun | none | none | none | - | - | - |
+| RMB Abyssal Hand (12s; [D] 18s) | -2.5s | -2.5s | -50% cooldown on an enemy hit | 10.3s | 8.7s; a foe hit takes half off | `rmb.refund` at sec rank 3 |
+| Shift Barge (10s; [D] 7s) and air pounce (12.5s; [D] 12.5s) | -1.25s (air -2s) | -1.25s (air -2s) | dashing resets the bloom, shot hits cut the dash cooldown | 8.2s, air 10.5s | 6.4s, air 8.5s; a dash resets the spread, each pellet hit trims 0.25s | `dash.cut`, `dash.air.rank_cut`, the bloom reset at dash rank 3 |
+| E Anchor Drop (7s; [D] 12s) | +20% damage, -2.5s, +0.1s stun | +20% damage, -2.5s, +0.1s stun | +100% damage on a foe over the Abyss, +0.2s stun | 5.5s, damage +20%, stun +0.1s | 4.1s, damage +40%, stun +0.4s in all, double over the Abyss | `e.rank3_stun`, the abyss double at kin rank 3 |
+| Passive Salvage | none | none | none | - | - | - |
+
 ## Scaling
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
@@ -38,11 +53,9 @@ and cooldown numbers that already follow the ratios below. Numbers follow the so
 | X, Brass Broadside (ult, level 6) | tap | a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, and it turns with his aim), then two waves 0.6s apart; he walks at 30% speed through the charge and 20% while the waves go (`x.charge_move`, `x.fire_move`, through `CastHold`), always turning to the cursor of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
 | R | | the Boki Merge (not a hero ability) | | |
 
-Rank 2 / 3: -10% cooldown steps (barge -15%). Rank 3 specials follow the source's last tier: the Abyssal Hand takes half its
-cooldown off when it hits a foe; the barge's pellet hits trim 0.25s off the recharge and a dash resets the gun's spread; the
-Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top of its +15% damage and +0.1s stun a rank).
-Mismatch: the source's tiers 2 and 3 are each -2.5s on the Abyssal Hand (-1.25s on the barge, -2.5s +20% damage +0.1s stun on the
-Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3 and 4 together.
+Rank 2 / 3: the source's upgrades (see Ranks: tier table): Hand -2.5s a tier, barge -1.25s a tier, Anchor -2.5s, +20% damage and
++0.1s stun a tier. Rank 3 stands for the source's tiers 3 and 4: the Hand takes half its cooldown off on a foe, the barge's pellet
+hits trim 0.25s and a dash resets the spread, the Anchor does double damage on a foe over the abyss and adds 0.2s of stun.
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
