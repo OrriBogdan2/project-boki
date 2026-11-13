@@ -1,6 +1,6 @@
 class_name NetSmooth
 extends RefCounted
-## A remote Hunter's snapshot buffer. The body is drawn DELAY behind its owner's clock, on a smooth
+## A remote Hunter's snapshot buffer. The body is drawn GAP + a margin (0.15 s on a steady line) behind its owner's clock, on a smooth
 ## curve between the two snapshots around that moment (cubic Hermite through their positions and
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
 ## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump, unless the
@@ -8,12 +8,18 @@ extends RefCounted
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest arrival of the last OFF_KEEP (so an owner whose clock fell behind,
 ## a hitch past its 0.1 s step cap, is caught up with within a second). The drawn moment `rt` runs on our
-## clock and only leans (SLEW) toward now - off - DELAY, so a quicker arrival or a slower owner bends the
+## clock and only leans (SLEW) toward now - off - GAP - the margin, so a quicker arrival or a slower owner bends the
 ## drawn speed by a few percent instead of jumping the body; out of snapshots it eases to a stop at most
 ## RUN_ON past the newest (a run-on that kept going jumped 4.8 m in a frame when the next one came in), and
 ## where the late snapshot puts the body behind its run-on the miss is taken back as it moves on (`fix`).
+## The margin on top of one snapshot gap follows how late recent snapshots came against that quickest one (a
+## jitter buffer), so a jittery long line (two hops of 150 +-20 ms) doesn't run the body on past a dash's end
+## and pull it back (docs/ONLINE_FEEL.md).
 
-const DELAY := 0.15         # s drawn behind the quickest arrival: one 0.1 s snapshot gap plus 40 ms of jitter
+const GAP := 0.1            # s between an owner's snapshots (Net.tick's send_t)
+const JITTER_MIN := 0.05    # s of margin over GAP at least: the drawn delay is 0.15 s on a steady line
+const JITTER_MAX := 0.12    # s of margin at most: a worse line runs on (RUN_ON) rather than lag further
+const JITTER_KEEP := 0.97   # share of the margin kept per snapshot as the line calms (about 2 s to halve)
 const RUN_ON := 0.25        # s at most the body runs on along its last velocity when snapshots stop
 const SNAP_SPEED := 40.0    # m/s between two snapshots: anything faster is a teleport
 const RESYNC := 0.5         # s an arrival is off the usual: a clock was reset, start over
@@ -40,6 +46,7 @@ var last_at := Vector3.ZERO # the curve's point at the last follow
 var on_t := -1.0            # the newest snapshot's time while the last follow ran on past it (-1: it didn't)
 var on_p := Vector3.ZERO    # and that snapshot's position and velocity
 var on_v := Vector3.ZERO
+var late := JITTER_MIN      # s: the margin, the latest recent snapshot against the quickest
 var jumped := false         # a teleport came in: the next follow snaps instead of sweeping
 var guessing := false       # drawn running on past its last snapshot: a guess, so it shoves no body (Match._separate)
 
@@ -52,11 +59,14 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 		n = 0
 	if n > 0 and t_owner <= ts[n - 1]:
 		return
+	var old := off
 	gaps.append(gap)
 	if gaps.size() > OFF_KEEP:
 		gaps.remove_at(0)
 	off = gap
 	for g in gaps: off = minf(off, g)
+	if n > 0:     # the margin is against the quickest: a quicker one widens it, the quickest ageing out narrows it
+		late = maxf(late * JITTER_KEEP - (off - old), gap - off)
 	if n > 0 and p.distance_to(ps[n - 1]) > _reach(p - ps[n - 1], v, vs[n - 1]) * (t_owner - ts[n - 1]):
 		_clear()
 		jumped = true
@@ -72,7 +82,7 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 func follow(e: Ent, now: float) -> void:
 	var n := ts.size()
 	guessing = false
-	var mark := now - off - DELAY
+	var mark := now - off - GAP - clampf(late, JITTER_MIN, JITTER_MAX)
 	var dt := maxf(0.0, now - last_now)
 	var fresh := last_now < 0.0 or absf(mark - rt) > RESYNC
 	if fresh:
