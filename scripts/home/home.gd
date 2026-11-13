@@ -4848,7 +4848,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
-	Sfx.play("garden_egg")
+	NookSfx.commit(get_tree(), rec, ok, NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.
@@ -4910,7 +4910,7 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair": pa["lean"] = {"ember": 6.0, "storm": 2.0}; nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"egg":
 			ppos = NEST_AT + Vector3(0, 0, 2.2)
 			player.position = ppos
