@@ -2157,8 +2157,8 @@ static func air_ring() -> Node3D:
 static func training_yard() -> Node3D:
 	var root := Node3D.new()
 	var wood := toon(Color("8b6d52")); var straw := toon(Color("e2c47a")); var mat := toon(Color("c9604a"))
-	part(root, cyl(0.07, 0.08, 1.3, 8), wood, Vector3(1.0, 0.65, -0.6))
-	var dummy := Node3D.new(); dummy.name = "Dummy"; dummy.position = Vector3(1.0, 0.0, -0.6); root.add_child(dummy)
+	part(root, cyl(0.07, 0.08, 1.3, 8), wood, Vector3(0.45, 0.65, -0.55))
+	var dummy := Node3D.new(); dummy.name = "Dummy"; dummy.position = Vector3(0.45, 0.0, -0.55); root.add_child(dummy)
 	part(dummy, sphere(0.28, 12), straw, Vector3(0, 0.95, 0), Vector3(1, 1.3, 1))
 	part(dummy, sphere(0.16, 10), straw, Vector3(0, 1.45, 0))
 	part(dummy, box(0.7, 0.08, 0.08), wood, Vector3(0, 1.1, 0))
@@ -2170,8 +2170,8 @@ static func training_yard() -> Node3D:
 	var ring_m := toon(Color("f2c84a"))
 	for i in 2:
 		var t := TorusMesh.new(); t.inner_radius = 0.26; t.outer_radius = 0.32
-		part(root, t, ring_m, Vector3(-1.1 - i * 0.6, 0.34, 0.3 - i * 0.2), Vector3.ONE, Vector3(PI / 2, 0.3, 0))
-		part(root, cyl(0.025, 0.025, 0.34, 6), wood, Vector3(-1.1 - i * 0.6, 0.0, 0.3 - i * 0.2))
+		part(root, t, ring_m, Vector3(-0.95 + i * 0.45, 0.34, 0.45 + i * 0.35), Vector3.ONE, Vector3(PI / 2, 0.3, 0))
+		part(root, cyl(0.025, 0.025, 0.34, 6), wood, Vector3(-0.95 + i * 0.45, 0.0, 0.45 + i * 0.35))
 	return root
 
 ## The Nesting Nook at home: a flower arbor over a big straw nest with two cushions, where two kin
