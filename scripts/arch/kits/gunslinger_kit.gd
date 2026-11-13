@@ -190,7 +190,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 ## burst add up on it) and a pink flare on the body. Only the shooter's screen gets the number.
 func _daze_bonus_fx(t: Ent, bonus: float) -> void:
 	vfx("daze_hit", t.pos, h.dir_to(t))
-	if h.is_local() and Settings.get_v("damage_numbers"):
+	if h.is_local():
 		m.fx.number(t.pos + Vector3(0, DAZE_NUM_LIFT, 0), bonus, DAZE_PINK, true, "+")
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:

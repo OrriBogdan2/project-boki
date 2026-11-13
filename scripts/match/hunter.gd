@@ -1786,13 +1786,13 @@ func heal(n: float) -> void:
 		return
 	if remote:
 		m.net_event(["heal", nid, n])
+		m.fx.healed(self, minf(n, max_hp - hp))     # its own game heals it; the heal shows here now
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
-	if hp - before > 1.0:
-		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+	m.fx.healed(self, hp - before)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).

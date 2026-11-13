@@ -333,16 +333,44 @@ func body_glow(at: Vector3, col: Color) -> void:
 	g["dur"] = GLOW_DUR
 	g["rise"] = GLOW_RISE
 
+## The one read for a heal, whatever gave it (docs/DASHES_AND_ABILITY_FEEL.md 5.1, sustain): a soft
+## green-gold glow that rises over the healed Hunter and moves with them, a few motes rising off them
+## (they keep the read on bright ground, where the additive glow fades), and a green "+N" heal number.
+## While their glow is still up, more heals only add to the number, so fast heals (a tether's ticks,
+## lifesteal on every bullet) pulse instead of stacking. A Hunter you can't see shows nothing.
+func healed(h: Hunter, n: float) -> void:
+	if n <= 0.0 or h.unseen or not h.visible:
+		return
+	number(h.pos + Vector3(0, HEAL_NUM_Y, 0), n, HudStyle.HEAL, false, "+", "", Num.HEAL)
+	var id := h.get_instance_id()
+	for g in ghosts:
+		if int(g.get("on", 0)) == id:
+			return
+	var col := Feel.cat_color("sustain")
+	body_glow(h.global_position, col)
+	var glow: Dictionary = ghosts[ghosts.size() - 1]
+	glow["on"] = id
+	(glow["node"] as Node3D).reparent(h)
+	_emit(h.global_position + Vector3(0, 0.25, 0), col, HEAL_MOTES, 2.6, GLOW_DUR, -4.0, 1.3, Vector3.UP, 20.0)
+
+## What a floating number counts. A number adds up only with its own kind on a target, so a heal never
+## joins a damage number (or a Daze bonus) on the same body.
+enum Num { HIT, HEAL }
+const NUM_MIN := 0.5          # a number under this would read 0: such a hit shows nothing, such a heal waits
+const HEAL_NUM_Y := 2.1       # m over the feet: heal numbers sit above the damage numbers (1.5 m)
+const HEAL_MOTES := 16        # motes in a heal's rise, before the particle quality scales them
+
 ## One floating number. Hits with the same `key` (Fx.roll_key: one source on one target) roll into a
 ## single label that counts up while they keep landing (a burn, a zone, a minigun), then floats off;
-## a crit never rolls into the count. Without a key, nearby numbers of the same kind merge.
+## a crit never rolls into the count. Without a key, nearby numbers of the same kind merge. A heal
+## (Num.HEAL) never joins a damage number, whatever its prefix.
 ## Numbers stay out of the screen area round the reticle.
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "") -> void:
-	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "", kind := Num.HIT) -> void:
+	if v <= 0.0 or (kind == Num.HIT and (v < NUM_MIN or (prefix == "" and not Settings.get_v("damage_numbers")))):
 		return
 	at = _off_reticle(at)
 	for n in nums:
-		if n.has("val") and _rolls_into(n, at, prefix, crit, key):
+		if n.has("val") and _rolls_into(n, at, prefix, crit, key, kind):
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -358,6 +386,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
+			ln.visible = float(n["val"]) >= NUM_MIN
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -370,14 +399,15 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 	l.font_size = _num_size(v, crit)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
-	l.visible = true
+	l.visible = v >= NUM_MIN       # a sliver of a heal (lifesteal on a light hit) shows once more adds up
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v,
+		"pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key, "kind": kind})
 
 ## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
 ## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
-func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String) -> bool:
-	if String(n["pre"]) != prefix:
+func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String, kind: int) -> bool:
+	if String(n["pre"]) != prefix or int(n["kind"]) != kind:
 		return false
 	if key == "":
 		return String(n["key"]) == "" and float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6
@@ -662,6 +692,9 @@ func _process(delta: float) -> void:
 		if f["t"] >= f["dur"]:
 			mi.visible = false; flashes.erase(f)
 	for g in ghosts.duplicate():
+		if not is_instance_valid(g["node"]):
+			ghosts.erase(g)         # a heal glow goes with the Hunter it rides on
+			continue
 		g["t"] += delta
 		var k: float = g["t"] / float(g["dur"])
 		var gm: MeshInstance3D = g["node"]
