@@ -365,7 +365,10 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
+var _flash_col := Color.WHITE
 var _flash_n := -1
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -383,9 +386,15 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
+	var fc := Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n:
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
 		_flash_set = f
+		_flash_col = fc
 		_flash_n = mats.size()
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)

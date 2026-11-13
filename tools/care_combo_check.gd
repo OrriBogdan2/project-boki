@@ -1535,7 +1535,7 @@ func rimewright() -> void:
 			"tm passive: Chill lasts 4s and a new hit refreshes it",
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	await _free(m)
-	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
+	# --- Skate: darts fly straight and thick at double damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
 	m = r[0]
 	P = r[1]
@@ -1553,6 +1553,13 @@ func rimewright() -> void:
 	P.teleport(P.pos + Vector3(0, World.LEVEL, 0))
 	step(m, 0.1)
 	P.dashes = P.max_dashes()
+	sc.aim_at(P, T.pos)
+	P.inp["fire"] = true
+	step(m, 0.05)
+	P.inp["fire"] = false
+	var plain_shots: Array = _mine(m, P)
+	var plain_d := float(plain_shots[-1]["dmg"]) if not plain_shots.is_empty() else 0.0
+	step(m, 0.3)
 	P.inp["move"] = Vector2(-1, 0)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
@@ -1569,9 +1576,11 @@ func rimewright() -> void:
 	var bs: Array = _mine(m, P)
 	var bd := float(bs[-1]["dmg"]) if bs.size() > nb else 0.0
 	ok(
-			"tm Shift: darts while skating are straight beams at normal damage",
-			bs.size() > nb and absf(bd - float(P.wpn["dmg"])) < 0.05 and K.stats["beams"] >= 1,
-			"dmg %.2f" % bd)
+			"tm Shift: darts while skating are straight beams at dash.skate_dart_dmg_k (2x) the plain dart's damage",
+			bs.size() > nb and plain_d > 0.0 and K.stats["beams"] >= 1
+				and float(K.dash_def()["skate_dart_dmg_k"]) == 2.0
+				and absf(bd - plain_d * float(K.dash_def()["skate_dart_dmg_k"])) < 0.05,
+			"plain dart %.2f, skating beam %.2f" % [plain_d, bd])
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
