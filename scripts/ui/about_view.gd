@@ -215,6 +215,9 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 		r.add_child(kl)
 		r.add_child(UI.label(Unique.sex_name(rec), UI.T_SMALL, UI.SEX_COL[sx], UI.semi))
 		parent.add_child(r)
+	var rare := BokiQuirks.rare_of(rec)
+	if not rare.is_empty():
+		_row(parent, "Rare", "%s: a rare trait" % rare["name"], Color("c9a6ff"), null, "gem")
 	_row(parent, "Size", size_short(rec), UI.INK, null, "ruler")
 	var ms := Mutations.of(rec).filter(func(m): return String(Mutations.info(m).get("group", "")) == "size")
 	if not ms.is_empty():
@@ -227,6 +230,9 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	var bm := birth_short(rec)
 	if bm != "": _row(parent, "Birthmark", bm, UI.INK, null, "burst")
 	_row(parent, "Food", food_short(rec), UI.INK, null, "tonic")
+	var toy := FavToy.of(rec)
+	if toy != "": _row(parent, "Fav toy", String(HomeLayout.CATALOG[toy]["name"]), UI.INK, null, toy)
+	PrizeBoard.add_ribbons(parent, rec)
 
 ## Where it came from (Save.register), one short line each.
 static func history(rec: Dictionary, parent: Control) -> void:
