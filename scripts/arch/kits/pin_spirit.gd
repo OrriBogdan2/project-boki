@@ -35,7 +35,7 @@ func phasing() -> bool:
 	if h.spirit_t > 0.0:
 		return true
 	var dd := k.dash_def()
-	var span := roll_time() if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
+	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
 	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
 
 func start() -> void:
@@ -55,10 +55,6 @@ func start() -> void:
 	if k.rank("dash") >= 3:
 		_share_with_allies()
 	k.vfx("spirit_go", h.pos, dir)  # no ring or burst on a dash; the shell shows the walk
-
-## Seconds the roll travels: its roll_t, stretched by her slowed dash (tuning.json dash_speed) as Hunter's travel is.
-func roll_time() -> float:
-	return float(k.dash_def().get("roll_t", 0.24)) / Loco.dash_speed(h.arch)
 
 ## Seconds of Spirit Walk after the roll: rank 3 adds "time_rank3".
 func walk_time() -> float:
@@ -137,8 +133,8 @@ func tick(dt: float) -> void:
 	if inside and not was_in:
 		_drop_orb(entry)
 	# footage 655.55-655.65: the roll goes straight into the crouched walk, no landing beat, so the walk's pose
-	# takes over the moment the travel ends (roll_time) and the roll clip's standing tail (0.39-0.52) never shows
-	if k.anim_id == "pin_roll" and k.m.time - k.anim_at >= roll_time():
+	# takes over the moment the travel ends (roll_t) and the roll clip's standing tail (0.24-0.36) never shows
+	if k.anim_id == "pin_roll" and k.m.time - k.anim_at >= float(k.dash_def().get("roll_t", 0.24)):
 		k.play("pin_walk")
 	if inside:
 		passed += 1
