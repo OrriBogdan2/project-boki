@@ -144,6 +144,11 @@ All match sounds go through `Sfx._distance_db`; the numbers live in one place at
 
 `--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 6 dB quieter but present, one at 31 m is silent.
 
+## Opening a chest or a deathbox (`LootOpenSfx`, `content/sfx/loot.json`)
+- While the open channel runs (the chest hold, a bot's deathbox hold in `Match._update_interact`) a short keyed loop plays at the box: `loot_creak` (chest), `loot_latch` (deathbox). Each step of the hold re-asks for it; `LootOpenSfx.sweep` after the channels stops any loop nobody held that step, so a cancel cuts it the same step. It carries `Sfx.hear_range`, so a nearby squad hears the looting; at most `MAX_LOOPS` (3) at once, none from beyond hearing.
+- On completion one sting for the rarest thing inside (`Data.RARITY` step, the ground-loot colours): Rare `loot_rare`, Epic `loot_epic`, Legendary `loot_legend`; Common and Fine and an empty box are silent. A deathbox stings once (the player's instant loot window and a bot's hold both count as its open).
+- `--loot-open-sfx-check` asserts the loop, the cancel, the one sting and the limits.
+
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 19 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 
