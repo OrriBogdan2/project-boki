@@ -90,6 +90,30 @@ Suggestions for the owner (not built): the pacing set in row 5 (4.5 / 7 / 15 s f
 
 Asserted in `--dancer-combo-check` (`dancer LMB: clamped to 8.5m`, `dancer LMB: flight time`, the empowered 9.5m line).
 
+## Shadow Knife audit (ext/sable-knife-audit, Nov 12)
+
+Every `e` field in content/archetypes/thief.json against Shiv's Farstep Dagger card (supervive_kits.md) [D], the
+footage sheet (briefs/hero-ref/dancer.md, frames 0219-0280 and the info panel 0401) [F] and the wiki rows under
+Small mechanics. 1 bh = 1.8 m (docs/KIT_PARITY.md). No number is changed: none that a source settles is off.
+`[?]` = no source settles it; left as is for the owner. Locked rows are in content/rules/kit_parity.json.
+
+| Field | Source | Ours | Verdict |
+|---|---|---|---|
+| Throw: sticks in the first foe, else lands at the end of its path | [F] 0222-0258; [D] "throw a dagger" | same, to the cursor | match |
+| `range` | [D] none. [F] a throw with no target landed about 9 bh (16.2 m) away, at the cursor or the end of range; the max is not seen | 14 m | [?] 14 is shorter than the one throw seen; the max is unknown |
+| `speed` | [F] about 25 bh/s (45 m/s), read at 5 fps | 40 m/s | match within footage error (16.2 m in 0.41 s against 0.36 s, a quarter of a frame); locked 45 +-5 |
+| `dmg` | [D] the card gives no damage (every other Shiv row has one); [F] no number read on the stick (0255-0258) | 8 (0.62 of a bolt) | [?] |
+| `slow` | [D] none; [F] the panel says "Slows", the dummy slowed (0258); wiki Q: 50% | 0.5 | match (wiki); locked |
+| `slow_t` | none: card, panel, wiki row and frames give no time | 2.5 s | [?] |
+| `time`, recast | [D] "after 6s Shiv MUST teleport back to it; recast to teleport early" | 6 s, recast blinks | match (locked) |
+| Blink | [F] one frame, under 0.2 s | instant | match |
+| `ghosts` | [F] "4 to 5 cyan ghost copies" (0238, 0279) | 5 | match; locked 4.5 +-0.5 |
+| `refund_wall` / `refund_foe` (rank 3) | [D] tier III: "refund 25% CD on hitting terrain, doubled on enemies" | 0.25 / 0.5 | match (locked). [?] whether a plain floor landing is "terrain": ours refunds 25% on any stick that is not a foe |
+| Vault back on a foe (rank 3) | [D] tier IV: "landing dagger on an enemy resets Quickflip" | yes | match |
+| `cooldown` | [D] 20 s at tier IV (read at level 15), -8 s at tier II, so 28 s at tier I; [F] the card read 15 s | 15 s, 10.7 s from rank 2 (the -8 of 28 ratio) | [?] data and footage disagree; DECISIONS' 1.0x default does not say which read. Kept |
+
+The refund split and the ghosts both have a source row (above), so neither is an ours-only rider.
+
 ## Audit (Nov 3 23:40)
 
 The kit audit (briefs/specs/kit-audit/vex_vireo_sable.md, Sable rows, against main 200effce), row by row: (a) already
