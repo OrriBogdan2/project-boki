@@ -463,13 +463,17 @@ func _channel(m: Match, hud, P: Hunter) -> void:
 	ok(ChannelBar.shown.is_empty(), "no channel, no bar")
 	K.hearth_call = {"who": P, "left": total, "tick": 0.0, "fx": 0.0}
 	await hud.panels.draw
+	# the match may tick a step before the HUD draws, so the bar is read against the seconds left at that draw
 	var bar: Dictionary = ChannelBar.shown.get(M.nid, {})
-	ok(not bar.is_empty() and is_equal_approx(float(bar["frac"]), 1.0) and total == 5.0,
+	var live := float(K.hearth_call["left"]) / total
+	ok(not bar.is_empty() and absf(float(bar["frac"]) - live) < 0.01 and live > 0.95 and total == 5.0,
 		"her channel on you (%.1f s): the bar is up, full (%s)" % [total, bar])
 	K.hearth_call["left"] = total * 0.4
 	await hud.panels.draw
 	var drained := float(ChannelBar.shown.get(M.nid, {}).get("frac", -1.0))
-	ok(absf(drained - 0.4) < 0.01, "it drains with the seconds left (%.2f, want 0.40)" % drained)
+	live = float(K.hearth_call["left"]) / total
+	ok(absf(drained - live) < 0.01 and absf(live - 0.4) < 0.03,
+		"it drains with the seconds left (%.2f, want %.2f)" % [drained, live])
 	var row: Array = m._ser(M)
 	K.hearth_call = {}
 	M.remote = true

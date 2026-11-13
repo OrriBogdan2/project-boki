@@ -134,6 +134,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 func _shields(m: Match, P: Hunter) -> void:
 	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
 	P.inv_t = 0.0
+	P.hp = P.max_hp        # the ult-ready part revived you low; three breaks must not down you
 	for kind in ["ward", "cloak", "molten"]:
 		P.shield = 30.0
 		P.shield_kind = "" if kind == "ward" else kind
