@@ -58,7 +58,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | Script | Purpose | Example |
 |---|---|---|
 | `gen_sfx.py` | The base sound palette into `audio/*.wav` (numpy, scipy) | `python3 tools/gen_sfx.py` |
-| `gen_sfx_<group>.py` (one per hero or system), `gen_hero_sfx.py`, `gen_key_sfx.py`, `gen_pair_sfx.py`, `gen_reset_sfx.py`, `gen_break_sfx.py`, `gen_mask_sfx.py`, `gen_train_sfx.py`, `gen_wisp_sfx.py` | One sound set each, with its own random stream so no other set moves | `python3 tools/gen_sfx_vex.py` |
+| `gen_sfx_<group>.py` (one per hero or system), `gen_hero_sfx.py`, `gen_key_sfx.py`, `gen_pair_sfx.py`, `gen_reset_sfx.py`, `gen_break_sfx.py`, `gen_train_sfx.py`, `gen_wisp_sfx.py` | One sound set each, with its own random stream so no other set moves | `python3 tools/gen_sfx_vex.py` |
 | `sfx_lib.py`, `sfx_combat.py` | Shared synth blocks and the combat layer (imported) | |
 | `gen_music.py`, `compose.py`, `gen_ambience.py`, `gen_garden_ambience.py` | Music and ambience loops into `audio/*.ogg` | `python3 tools/gen_music.py` |
 | `sfx_stats.py` | Loudness and spectrum numbers for a mix pass | `python3 tools/sfx_stats.py audio --json now.json` |
