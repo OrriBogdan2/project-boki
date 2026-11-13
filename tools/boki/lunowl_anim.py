@@ -109,7 +109,7 @@ def idle(t):
     add(p, "neck", ry=turn * 0.6)
     look(p)
     add(p, "head", rx=br * 0.02, ry=turn * 0.4, rz=tilt)
-    shuffle = seq(t, [(0, 0), (0.86, 0), (0.9, 1), (0.95, -0.4), (1, 0)])
+    shuffle = seq(t, [(0, 0), (0.8, 0), (0.84, 1), (0.89, -0.4), (0.94, 0), (1, 0)])   # settled by the loop's end
     wings(p, br * 0.02 + shuffle * 0.18, hind=shuffle * 0.1)
     streamers(p, t * 2, 0.04, droop=shuffle * -0.1)
     tufts(p, 0.03 + tilt * 0.2, tilt * 0.15)
