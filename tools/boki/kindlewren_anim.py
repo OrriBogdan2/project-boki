@@ -141,6 +141,7 @@ HOPS = hind_legs(0.62, 0.62)      # both feet down together, in each hop's squas
 
 # ---------------------------------------------------------------- clips
 WALK_FROM = 0.39     # of the walk cycle: where its loop starts, at the bottom of a landing (hop phase 0.78)
+WALK_HOPS = hind_legs((0.62 - 2 * WALK_FROM) % 1.0, (0.62 - 2 * WALK_FROM) % 1.0)   # HOPS, the walk's feet that late
 
 
 def idle(t):
@@ -356,7 +357,7 @@ def ability(t):
 
 CLIPS = {
     "idle": (3.0, True, idle),
-    "walk": (0.6, True, planted(walk, BONES, HOPS, duty=0.35, reach=0.1, lift=0.04, drop=0.01, steps=2)),
+    "walk": (0.6, True, planted(walk, BONES, WALK_HOPS, duty=0.35, reach=0.1, lift=0.04, drop=0.01, steps=2)),
     "run": (0.84, True, planted(run, BONES, HOPS, duty=0.16, reach=0.12, lift=0.08, drop=0.03, steps=2)),
     "hop": (1.0, True, hop), "pet": (2.4, True, pet), "carry": (0.66, True, carry), "tend": (1.2, True, tend),
     "attack": (0.7, False, attack), "ability": (1.1, False, ability), "sleep": (3.6, True, sleep),
