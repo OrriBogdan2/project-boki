@@ -61,7 +61,10 @@ static func drive(m: Match) -> void:
 		"glove":
 			var wp := tu.ground_item()
 			if not wp.is_empty():
-				goto.call(wp["pos"])
+				if p.flat_dist(wp["pos"]) > 3.0:
+					_travel(m, wp["pos"])      # (across the bridge: a straight line can end against a cliff)
+				else:
+					goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "kin", "hook", "ult":
 			_fight(m, tu, goto)
@@ -132,6 +135,30 @@ static func _rmb(m: Match, tu: Tutorial) -> void:
 	m.player.inp["sec"] = ph < 0.1 or (ph > 0.6 and ph < (1.5 if tu.rmb_has_hold() else 0.7))
 	m.player.inp["sec_hold"] = m.player.inp["sec"]
 
+## Go there the way a bot would: over the bridges, or jump and glide across a gap.
+static func _travel(m: Match, to: Vector3) -> void:
+	var p := m.player
+	var mv := m.bot_brain._path_dir(m, p, to)
+	if p.ai.has("cross"):
+		var L: Dictionary = p.ai["cross"]
+		var land: Vector3 = L["land"]
+		var tol := Vector2(land.x - p.pos.x, land.z - p.pos.z)
+		var past_take: bool = tol.length() < Vector2(land.x - L["take"].x, land.z - L["take"].z).length()
+		# (a stuck hop on the way there is not the jump)
+		var crossing: bool = past_take or p.flat_dist(L["take"]) < 2.0
+		if p.grounded and m.world.island_of(p.pos.x, p.pos.z) == int(L["to"]):
+			p.ai.erase("cross")
+		elif L.get("bridge", false) and past_take:
+			mv = tol.normalized()      # (a bridge is walked across: path_dir would send you back to its take spot)
+		elif not p.grounded and crossing:
+			mv = tol.normalized()
+			p.inp["glide"] = tol.length() > 1.6 or m.world.is_void(p.pos.x, p.pos.z)
+		elif p.grounded and p.flat_dist(L["take"]) < 1.3:
+			mv = tol.normalized()
+			p.inp["jump"] = true
+	p.inp["move"] = mv
+	p.inp["aim"] = p.pos + Vector3(mv.x, 0.9, mv.y) * 3.0
+
 static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
 	var o := tu.outpost()
@@ -140,22 +167,7 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var c: Vector3 = o["pos"]
 	match tu.id():
 		"wayout":
-			# go there the way a bot would: over the bridges, or jump and glide across a gap
-			var mv := m.bot_brain._path_dir(m, p, c)
-			if p.ai.has("cross"):
-				var L: Dictionary = p.ai["cross"]
-				var land: Vector3 = L["land"]
-				var tol := Vector2(land.x - p.pos.x, land.z - p.pos.z)
-				if p.grounded and m.world.island_of(p.pos.x, p.pos.z) == int(L["to"]):
-					p.ai.erase("cross")
-				elif not p.grounded:
-					mv = tol.normalized()
-					p.inp["glide"] = tol.length() > 1.6 or m.world.is_void(p.pos.x, p.pos.z)
-				elif p.flat_dist(L["take"]) < 1.3:
-					mv = tol.normalized()
-					p.inp["jump"] = true
-			p.inp["move"] = mv
-			p.inp["aim"] = p.pos + Vector3(mv.x, 0.9, mv.y) * 3.0
+			_travel(m, c)
 		"uplink":
 			goto.call(c)
 			p.inp["interact"] = p.flat_dist(c) < 1.4
