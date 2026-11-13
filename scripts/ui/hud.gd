@@ -234,6 +234,7 @@ func _draw_all() -> void:
 	if m.tut and m.tut.intro:
 		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
 		return
+	edge_world.begin(EdgeMarker.world_rim(sz), WORLD_ARROW)
 	_draw_world_labels()
 	_draw_bubbles()
 	_draw_pings(sz)
@@ -321,6 +322,7 @@ func _draw_all() -> void:
 			_draw_downed(sz, p)
 		elif p.out and not p.gone and not m.result.get("ending", false):
 			_draw_dead(sz, p)
+	edge_world.draw(c, m.time)
 	if Input.is_action_pressed("scores"):
 		_draw_scores(sz)
 	else:
@@ -659,6 +661,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if not riding and vh:
 		var R := 34.0
 		view = Rect2(Vector2(vh.pos.x, vh.pos.z) - Vector2(R, R), Vector2(R, R) * 2.0)
+	edge_mini.begin(Rect2(inner.position + Vector2(6, 6), inner.size - Vector2(12, 12)), MINI_ARROW, mm_circ.z - 7.0 if mm_circ.z > 0.0 else 0.0)
 	var k := inner.size.x / view.size.x
 	var to_map := func(p3: Vector3) -> Vector2:
 		return inner.position + (Vector2(p3.x, p3.z) - view.position) * k
@@ -702,7 +705,7 @@ func _draw_minimap(sz: Vector2) -> void:
 				continue
 			if not on_map.call(pv, 4.0):
 				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
-				if busy: _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+				if busy: edge_mini.add(pv - inner.get_center(), Exits.color_of(x), EdgeMarker.PRIO_GOAL)
 				continue
 			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
 	if m.lairs:
@@ -737,17 +740,17 @@ func _draw_minimap(sz: Vector2) -> void:
 				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
 				c.draw_circle(wp, MapDetail.ICON_R, Color("ffb64a"))
 			else:
-				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
+				edge_mini.add(wp - inner.get_center(), Color("ffb64a"))
 		for h in m.hunters:
 			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
 				continue
 			var bp: Vector2 = to_map.call(h.pos)
 			if on_map.call(bp, 3.0): bounty_marker(c, bp, MapDetail.ICON_R / 6.5)
-			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
+			else: edge_mini.add(bp - inner.get_center(), Color("ffb64a"))
 	if m.tut and m.tut.target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut.target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
-		else: _edge_arrow(inner, inner.get_center(), tv, Color("8fe3c8"))
+		else: edge_mini.add(tv - inner.get_center(), Color("8fe3c8"), EdgeMarker.PRIO_GOAL)
 	for pg in m.pings:
 		if pg.has("team") and m.player and int(pg["team"]) != m.player.team:
 			continue        # another squad's ping
@@ -760,7 +763,7 @@ func _draw_minimap(sz: Vector2) -> void:
 				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R - 1.0, pg["col"])
 			else:
 				c.draw_circle(pv, MapDetail.ICON_R - 1.0, pg["col"])
-		else: _edge_arrow(inner, inner.get_center(), pv, pg["col"])
+		else: edge_mini.add(pv - inner.get_center(), pg["col"], EdgeMarker.PRIO_LOW)
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
 		var age := m.time - float(sp["t"])
@@ -774,7 +777,7 @@ func _draw_minimap(sz: Vector2) -> void:
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
 			c.draw_circle(pv, 2.5, Color(col, a))
 		else:
-			_edge_arrow(inner, inner.get_center(), pv, Color(col, a))
+			edge_mini.add(pv - inner.get_center(), Color(col, a), EdgeMarker.PRIO_LOW)
 	# truce partners you can see (white), and anyone who just broke a truce (red, seen by all)
 	if m.truce and m.player:
 		for h in m.hunters:
@@ -786,7 +789,7 @@ func _draw_minimap(sz: Vector2) -> void:
 				if on_map.call(tv, 3.0):
 					c.draw_circle(tv, MapDetail.ICON_R - 1.0, BAD)
 					c.draw_arc(tv, MapDetail.ICON_R + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
-				else: _edge_arrow(inner, inner.get_center(), tv, BAD)
+				else: edge_mini.add(tv - inner.get_center(), BAD)
 			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0) and MapDetail.shows("ally", hold):
 				c.draw_circle(tv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 				c.draw_circle(tv, MapDetail.ICON_R - 1.0, Color("f4f1e6"))
@@ -800,7 +803,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		var pv: Vector2 = to_map.call(mst[2])
 		var col: Color = INK if h == m.player else mst[1]
 		if not on_map.call(pv, 3.0):
-			_edge_arrow(inner, inner.get_center(), pv, col)
+			edge_mini.add(pv - inner.get_center(), col)
 			continue
 		if h == m.player:
 			var d: Vector2 = h.aim_dir()
@@ -816,8 +819,9 @@ func _draw_minimap(sz: Vector2) -> void:
 		if on_map.call(dv, 3.0):
 			BokiHud.map_dot(c, dv, dk, MapDetail.ICON_R, m.time)
 		else:
-			_edge_arrow(inner, inner.get_center(), dv, Color(dk.sp.get("glow", dk.sp["color"])))
+			edge_mini.add(dv - inner.get_center(), Color(dk.sp.get("glow", dk.sp["color"])))
 
+	edge_mini.draw(c)
 	if mm_circ.z > 0.0:
 		var ctr := Vector2(mm_circ.x, mm_circ.y)
 		c.draw_arc(ctr, mm_circ.z + 1.0, 0, TAU, 72, Color(0.85, 0.8, 1.0, 0.55), 2.5, true)
@@ -865,6 +869,10 @@ func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
 		var a := PI * 0.5 * i
 		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
+const WORLD_ARROW := 16.0      # px: the scale of the world's screen-edge arrows (EdgeMarker)
+const MINI_ARROW := 4.0        # px: the same on the minimap's rim
+var edge_world := EdgeMarker.new()    # off-screen markers on the play box, laid out once a frame
+var edge_mini := EdgeMarker.new()     # off-map markers on the minimap's rim
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 	if mm_circ.z > 0.0:
@@ -873,7 +881,7 @@ func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 
 ## A world marker: a bobbing pin and label over the spot, or (when it's off screen or behind the
 ## camera, or under the hunter: MarkerDir) a big arrow at the screen edge pointing the way. Both show how far.
-func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
+func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.PRIO_GOAL) -> void:
 	var cam := m.cam
 	var sz := c.size
 	var dist := int(round(Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length()))
@@ -888,15 +896,7 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
 		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
-		# kept inside the play area: under the tutorial panel, above the ability bar
-		var ctr := Vector2(sz.x * 0.5, sz.y * 0.47)
-		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
-		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
-		var edge := ctr + d * t + d * bob * 0.5
-		var perp := Vector2(-d.y, d.x)
-		c.draw_colored_polygon(PackedVector2Array([edge + d * 44.0, edge - d * 12.0 + perp * 28.0, edge - d * 12.0 - perp * 28.0]), Color(0, 0, 0, 0.5))
-		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
-		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
+		edge_world.add(d, col, prio, label, dist)
 
 ## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
 ## when not; a pulsing ring while it's going.
@@ -943,19 +943,6 @@ func _draw_exit_labels() -> void:
 				_ctext(lp + Vector2(0, 17), line, 16 if st == "open" else 12, col if st == "open" else INK, big)
 		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
 			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
-
-## A small arrow on the minimap's edge pointing at something off the map.
-func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
-	var d := (to - from)
-	if d.length() < 0.1: return
-	d = d.normalized()
-	var hx := inner.size.x * 0.5 - 6.0; var hy := inner.size.y * 0.5 - 6.0
-	var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
-	if mm_circ.z > 0.0:
-		from = Vector2(mm_circ.x, mm_circ.y); t = mm_circ.z - 7.0
-	var p := from + d * t
-	var side := Vector2(-d.y, d.x)
-	c.draw_colored_polygon(PackedVector2Array([p + d * 5.0, p - d * 3.0 + side * 4.0, p - d * 3.0 - side * 4.0]), col)
 
 ## On narrow windows the ability bar takes the whole bottom row and the player card sits above it.
 func _narrow(sz: Vector2) -> bool:
@@ -1496,18 +1483,16 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 			continue          # on screen: their own label (or their box's, ReviveHud) says it
 		if String(st[0]) == "DEATHBOX":
 			col = m.mate_col(h)
-		var ctr := sz * 0.5
-		var d := (sp - ctr) * (-1.0 if behind else 1.0)
-		if d.length() < 1.0: continue
-		d = d.normalized()
-		var t := minf(inner.size.x * 0.5 / maxf(0.001, absf(d.x)), inner.size.y * 0.5 / maxf(0.001, absf(d.y)))
-		var e := ctr + d * t
-		var side := Vector2(-d.y, d.x)
-		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
-		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
-		if String(st[0]) == "WISP": DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ALLY, m.time, 10.0)
-		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
-		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
+		var lbl: String = h.pname.substr(0, 10)
+		var away := sp - sz * 0.5
+		if behind: away = -away
+		var shown := float(dist)
+		var wisp: Hunter = h if String(st[0]) == "WISP" else null
+		if wisp: lbl += " DOWN"
+		elif String(st[0]) == "DEATHBOX":
+			lbl = "%s's box %s" % [lbl, st[3]]
+			shown = -1.0      # (its text already says how far)
+		edge_world.add(away, col, EdgeMarker.PRIO_ALLY, lbl, shown, wisp)
 
 ## Aboard the skyship: when to jump.
 func _draw_ship_prompt(sz: Vector2) -> void:
@@ -1594,7 +1579,7 @@ func _draw_squad_pings(p: Hunter) -> void:
 		if not pg.has("by") or int(pg.get("team", -1)) != p.team:
 			continue
 		var a := clampf(float(pg.get("life", 4.0)) - float(pg["t"]), 0.0, 1.0)
-		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a))
+		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a), EdgeMarker.PRIO_LOW)
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
 		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
@@ -1603,7 +1588,7 @@ func _draw_squad_pings(p: Hunter) -> void:
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
 		var lbl2 := String(pg.get("label", ""))
-		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2))
+		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2), EdgeMarker.PRIO_LOW)
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
@@ -2737,9 +2722,9 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 				c.draw_arc(pv, 10.0, 0, TAU, 24, Color(acol, 0.9), 2.0, true)
 			_lair_icon(pv, L, MapDetail.ICON_R / 8.0)
 		elif al:
-			_edge_arrow(inner, inner.get_center(), pv, acol)
+			edge_mini.add(pv - inner.get_center(), acol)
 		elif L["state"] == "awake":
-			_edge_arrow(inner, inner.get_center(), pv, BAD)
+			edge_mini.add(pv - inner.get_center(), BAD)
 	# a dropped Rare Egg (and whoever just picked it up) shows to everyone for a few seconds
 	for e in m.lairs.egg_pings:
 		var at: Vector3 = e["pos"]
@@ -2753,7 +2738,7 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 			c.draw_circle(Vector2.ZERO, 5.0, Color("ffd36a"))
 			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		else:
-			_edge_arrow(inner, inner.get_center(), pv, GOLD)
+			edge_mini.add(pv - inner.get_center(), GOLD)
 
 ## Over each lair nearby: what's going on at its gate. Someone working the dial shows a small dial
 ## over the lectern so everyone can see it turning; runes being lit show their fill.

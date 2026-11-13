@@ -90,7 +90,7 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable, hold:
 		if on_map.call(pv, 4.0):
 			beacon_glyph(hud.c, pv, MapDetail.ICON_R, bc, m.time)
 		elif bc["lit"] and not bc["used"]:
-			hud._edge_arrow(inner, inner.get_center(), pv, Beacons.COL)
+			hud.edge_mini.add(pv - inner.get_center(), Beacons.COL, EdgeMarker.PRIO_ALLY)
 	for b in _known_boxes(m):
 		var pv: Vector2 = to_map.call(b["pos"])
 		if not MapDetail.shows("squad" if _ally(m, b) else "rival_box", hold):
@@ -98,7 +98,7 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable, hold:
 		if on_map.call(pv, 3.0):
 			box_glyph(hud.c, pv, MapDetail.ICON_R, Life.owner_col(m, b), Life.soul_here(m, b))
 		elif Life.soul_here(m, b) and _ally(m, b):
-			hud._edge_arrow(inner, inner.get_center(), pv, Life.owner_col(m, b))
+			hud.edge_mini.add(pv - inner.get_center(), Life.owner_col(m, b), EdgeMarker.PRIO_ALLY)
 
 ## Boxes and beacons on the full map (FullMap.draw).
 static func full_map(fm) -> void:

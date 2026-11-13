@@ -724,7 +724,7 @@
 "history_comment": 2,
 "long_line": 190,
 "nested_ternary": 33,
-"semicolon": 43
+"semicolon": 40
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
