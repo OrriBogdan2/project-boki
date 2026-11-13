@@ -11,7 +11,8 @@ extends RefCounted
 ##           if its new key is already a custom key of another action.
 ##   step 5  Middle mouse left the Boki key (throw) for the new ping key: a saved throw binding drops it, and
 ##           ping starts unbound if middle mouse is another action's custom key.
-##   step 6  The swap key (lead and second Boki) takes C in a match; it starts unbound if C is another action's
+##   step 6  Glove 2 gets Mouse 4 as its second key, unless it has two keys or is unbound, or Mouse 4 is taken.
+##   step 7  The swap key (lead and second Boki) takes C in a match; it starts unbound if C is another action's
 ##           custom key (Details at home shares C).
 
 static func _code(k: int) -> String:
@@ -47,9 +48,12 @@ static func run(s: Dictionary) -> void:
 		_mmb_to_ping(ks)
 		s["keys5_v"] = 1
 	if int(s.get("keys6_v", 0)) < 1:
+		_glove2_mouse4(ks)
+		s["keys6_v"] = 1
+	if int(s.get("keys7_v", 0)) < 1:
 		if not ks.has("swap_kin") and _used_elsewhere(ks, _code(KEY_C), ["swap_kin", "details"]):
 			ks["swap_kin"] = []
-		s["keys6_v"] = 1
+		s["keys7_v"] = 1
 
 static func _steps_one_to_three(s: Dictionary, ks: Dictionary) -> void:
 	if int(s.get("keys2_v", 0)) < 1:
@@ -103,3 +107,9 @@ static func _mmb_to_ping(ks: Dictionary) -> void:
 			ks["throw"] = kept
 	if not ks.has("ping") and _used_elsewhere(ks, mmb, ["ping"]):
 		ks["ping"] = []
+
+## A saved glove 2 with one key gains Mouse 4 as its second (the default for a fresh config, Game._setup_input).
+static func _glove2_mouse4(ks: Dictionary) -> void:
+	var m4 := "mouse:%d" % MOUSE_BUTTON_XBUTTON1
+	if (ks.get("gear2", []) as Array).size() == 1 and not _used_elsewhere(ks, m4, []):
+		(ks["gear2"] as Array).append(m4)

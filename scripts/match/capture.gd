@@ -5,7 +5,7 @@ extends RefCounted
 ##   - hold the interact key (F) for hold_s beside it to commit; then the scan runs on its own for scan_s:
 ##     a beam from you binds the Boki, it dissolves into light and into a capsule, with a rising hum and a
 ##     pop at the end. No holding needed.
-##   - while it runs you are rooted and can aim but not shoot. A dash cancels it (your choice). Crowd control
+##   - while it runs you are rooted and can aim but not shoot. Space or a dash cancels it. Crowd control
 ##     on you (stun, root, a knockback, Grounded, a hex, a grapple) interrupts it; plain damage does not.
 ##     The Boki's daze timer waits (Kin.scan_by) and picks up again if you are interrupted, so you can retry.
 ##   - success puts a capsule in your carry-out slot (Hunter.caught: carry_out slots for claims, stolen slots for
@@ -13,13 +13,17 @@ extends RefCounted
 ##     capsule stays in the box for the match: it never follows you, fights, or joins your Boki (no passive, no
 ##     summon). It spills into your deathbox like the rest and comes home when
 ##     you extract.
-##   - the beam and the hum are in the world: rivals see and hear it (Match.note_sound), and other players
+##   - the beam (in the scanner's ability colour) and the hum are in the world: rivals see and hear it
+##     (Match.note_sound), and other players
 ##     see it through kcmd events (KinNet): scan_start (repeated about once a second, with the progress),
 ##     scan_stop, scan_done.
 ## State lives in the hunter's meta "cap": {phase: "hold"|"scan", k, hold|t, seen, remote, beam, hum, ping, beat}.
 
 const HOLD_OVER := 2.5      # s: a scan nobody has confirmed for this long lets the Boki wake up again (a rival's game vanished)
-const BEAM_COL := Color("bff0ff")
+const BEAM_A := 0.55          # alpha of the beam
+# m: beam radius when the scan is done and when it starts (thick enough to read from 20 m at match zoom)
+const BEAM_W := Vector2(0.14, 0.2)
+const FIZZLE_COL := Color("c9c2b8")     # the dull grey of a scan that was interrupted
 
 static func rules() -> Dictionary:
 	return Content.rules("capture")
@@ -78,6 +82,10 @@ static func caught_line(h: Hunter, rec: Dictionary) -> String:
 	var nm: String = Data.KIN.get(String(rec.get("species", "")), {}).get("name", "A Boki")
 	var slot := "stolen slot" if is_stolen(h, rec) else "carry-out slot"
 	return "%s rides in your %s. Extract to bring it home." % [nm, slot]
+
+## The colour of a scanner's beam and pop: their Hunter's ability colour (DECISIONS 2026-11-08).
+static func beam_col(h: Hunter) -> Color:
+	return Arch.color(h.ak.id) if h.ak else h.accent()
 
 static func state(h: Hunter) -> Dictionary:
 	return h.get_meta("cap", {})
@@ -162,6 +170,7 @@ static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
 	var k: Kin = kv if is_instance_valid(kv) else null
 	var why := interrupt_reason(h, k)
 	if why != "":
+		h.inp["jump"] = false            # the Space press that cancelled is spent: it does not also hop
 		cancel(m, h, why)
 		return
 	# committed: rooted, aim stays free, no shooting
@@ -192,13 +201,15 @@ const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 static func controlled(h: Hunter) -> bool:
 	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
-## What stops any channel on the hunter (a scan, a rescue): "dash" (your choice) or "cc" (crowd control). "" = neither.
+## What stops a channel on the hunter (a scan): "jump" or "dash" (your choice), or "cc" (crowd control). "" = none.
 static func hunter_stop(h: Hunter) -> String:
+	if h.inp.get("jump", false) and h.is_local():      # (a bot's hop never cancels its own scan)
+		return "jump"
 	if h.inp.get("dash", false) or h.roll_t > 0.0:
 		return "dash"
 	return "cc" if controlled(h) else ""
 
-## What stops a scan: "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
+## What stops a scan: "jump" or "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
 ## Plain damage is not on the list.
 static func interrupt_reason(h: Hunter, k: Kin) -> String:
 	if k == null or not is_instance_valid(k) or k.dead or k.state != "dazed":
@@ -224,9 +235,12 @@ static func cancel(m, h: Hunter, why: String) -> void:
 	if k is Kin and is_instance_valid(k):
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
-	if why in ["dash", "cc"]:               # (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+		_fizzle(m, k)
+	# (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+	if why in ["jump", "dash", "cc"]:
 		if h.is_local() and m.hud:
-			m.hud.toast("Scan cancelled: hold %s beside it to try again" % Settings.key_cap("interact") if why == "dash" else "Scan interrupted: hold %s to try again" % Settings.key_cap("interact"), Color("ffd89a"))
+			var lead := "Scan interrupted" if why == "cc" else "Scan cancelled"
+			m.hud.toast("%s: hold %s beside it to try again" % [lead, Settings.key_cap("interact")], Color("ffd89a"))
 		m.sfx("scan_fail", h.pos, 0.0)
 
 ## The match is going away: stop every beam and hum (a loop key outlives the node that started it).
@@ -260,7 +274,7 @@ static func release(m, h: Hunter, idx: int) -> bool:
 		return false
 	var rec: Dictionary = h.caught[idx]
 	h.caught.remove_at(idx)
-	m.sfx("kin_happy", h.pos, -4.0)
+	m.sfx(KinVoice.cue(String(rec["species"]), "happy"), h.pos, -4.0)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color(Data.KIN[String(rec["species"])]["color"]), 12, 3.0)
 	if h.is_local() and m.hud:
 		m.hud.toast("%s was let go" % rec.get("name", "The Boki"), Color("bfe9ff"))
@@ -297,6 +311,7 @@ static func on_net(m, h: Hunter, kind: String, extra: String) -> void:
 				_stop_fx(m, h, st2)
 				h.remove_meta("cap")
 				if kind == "scan_stop" and k != null and not k.dead:
+					_fizzle(m, k)
 					m.sfx("scan_fail", h.pos, 0.0)          # a rival's scan broke off: you hear the snap
 			if kind == "scan_done" and k != null:
 				_pop(m, h, k)
@@ -318,13 +333,13 @@ static func _start_fx(m, h: Hunter, k: Kin, st: Dictionary) -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.cyl(1.0, 1.0, 1.0, 12)
 	mi.rotation.x = PI / 2.0
-	mi.material_override = Models.glow_mat(Color(BEAM_COL, 0.5))
+	mi.material_override = Models.glow_mat(Color(beam_col(h), BEAM_A))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mi)
 	st["beam"] = root
 	st["hum"] = "scanhum" + h.nid
 	Sfx.loop_start(st["hum"], "revive_hum", h.pos, 0.0, float(rules()["hear_range"]))
-	m.fx.ring(k.pos, 1.4, Color(BEAM_COL, 0.8), 0.4)
+	m.fx.ring(k.pos, 1.4, Color(beam_col(h), 0.8), 0.4)
 
 static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> void:
 	var root = st.get("beam")
@@ -335,12 +350,13 @@ static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> voi
 		(root as Node3D).global_position = a + d * 0.5
 		if d.length() > 0.05:
 			(root as Node3D).look_at(b, Vector3.UP if absf(d.normalized().y) < 0.99 else Vector3.RIGHT)
-		var w := (0.05 + 0.09 * (1.0 - frac * 0.5)) * (1.0 + 0.25 * sin(m.time * 22.0))
+		var w := lerpf(BEAM_W.y, BEAM_W.x, frac) * (1.0 + 0.25 * sin(m.time * 22.0))
 		(root as Node3D).scale = Vector3(w, w, d.length())
 	var rp: Array = rules()["rise_pitch"]
 	Sfx.loop_set(String(st.get("hum", "")), h.pos, lerpf(float(rp[0]), float(rp[1]), frac))
 	if randf() < 0.5:
-		m.fx.burst(k.pos + Vector3(randf_range(-0.3, 0.3), 0.3 + frac * 1.2, randf_range(-0.3, 0.3)), BEAM_COL, 1, 1.2, 0.5, -3.0, 0.6)
+		var spark := k.pos + Vector3(randf_range(-0.3, 0.3), 0.3 + frac * 1.2, randf_range(-0.3, 0.3))
+		m.fx.burst(spark, beam_col(h), 1, 1.2, 0.5, -3.0, 0.6)
 
 static func _stop_fx(m, h: Hunter, st: Dictionary) -> void:
 	var root = st.get("beam")
@@ -367,7 +383,7 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
-	m.fx.ring(k.pos, 1.8, Color(BEAM_COL, 0.9), 0.45)
+	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)
 	var cap := MeshInstance3D.new()
 	var sm := SphereMesh.new()
 	sm.radius = 0.16; sm.height = 0.32
@@ -379,6 +395,10 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	var tw := cap.create_tween()
 	tw.tween_property(cap, "global_position", h.pos + Vector3(0, 1.2, 0), 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(cap.queue_free)
+
+## An interrupted scan: one small dull ring on the Boki, no light and no capsule (the opposite of the pop).
+static func _fizzle(m, k: Kin) -> void:
+	m.fx.ring(k.pos, 1.0, Color(FIZZLE_COL, 0.7), 0.3)
 
 ## The Boki coming apart into light as the scan fills (Kin.render calls this last).
 static func dissolve(k: Kin) -> void:
