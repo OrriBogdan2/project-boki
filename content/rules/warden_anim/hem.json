@@ -11,7 +11,7 @@
 		"walk_speed": 2.2, "run_speed": 4.6, "stride": [1.5, 1.5], "foot_mps": [1.18, 3.72], "arm_swing": {"L": 0.2, "R": 0.5}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.27},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive", "dive_tilt": 35.0, "glide_tilt": -30.0},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}},
 	"kmoves": {
 		"arc_draw": {"clip": "draw", "hold_from": 1.15, "upper": true, "fade": 0.05}, "arc_tap": {"clip": "tap", "upper": true, "fade": 0.05}, "arc_loose": {"clip": "loose", "upper": true, "fade": 0.03},
@@ -27,7 +27,7 @@
 	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}, "stomp": "stomp", "drink": "drink"},
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_wag"},
-	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
+	"procedural": ["ledge", "base", "wade", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "fing_a1.R", "fing_a2.R", "fing_b1.R", "fing_b2.R", "thumb1.R", "thumb2.R", "bow", "bow_t", "bow_b", "bow_s", "arrow", "brow.L", "brow.R", "lid.L", "lid.R"],
 	"carry_stow": ["bow"],
 	"heart_hand": "R",
@@ -44,5 +44,6 @@
 			}
 		}
 	},
-	"summon_call": "g_call_point_l"
+	"summon_call": "g_call_point_l",
+	"mantle": {"clip": "mantle", "rise": 0.382}
 }
