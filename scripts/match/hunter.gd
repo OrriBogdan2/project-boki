@@ -1178,7 +1178,8 @@ func can_fire() -> bool:
 		return false
 	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
 		return true          # shooting from a held slide
-	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
+	var glide_shut := gliding and not (ak and ak.fires_in_glide())
+	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or glide_shut or charge.size() > 0)
 
 const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]
 var shot_n := 0

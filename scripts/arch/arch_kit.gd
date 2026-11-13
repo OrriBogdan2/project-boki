@@ -922,6 +922,8 @@ func _tick_knocks() -> void:
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
 ## The weapon fires in this hero's dash when its LMB row says "fire" (DashFlow); a kit with its own dash overrides.
 func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
+## The weapon fires from an open glider (it stays open); false: the attack key does nothing there.
+func fires_in_glide() -> bool: return false
 ## The body and weapon stay on the cursor through this dash, the legs alone following it (item 109). False: she
 ## turns along the dash. A kit that fires mid-dash answers true, or the gun points away from its own rounds.
 func aims_in_dash() -> bool: return fires_in_dash()

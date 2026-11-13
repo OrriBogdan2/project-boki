@@ -151,12 +151,17 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet briefs/hero-ref/venator.md (5 fps: one frame is 0.2 s,
+so a buffer shorter than that can't be seen), [W] the wiki page linked above and its patch notes, [O] the owner
+(DECISIONS / OWNER_REVIEW_1103). The 11-09 cancel-matrix pass read the code and probed it headless. The 11-12 pass
+settled the 11 rows it had left unsettled. None of [D], [F] or [W] shows those pairs: the card lines (supervive_kits.md
+:47-51) give no cancel, the clips never press a second key during these moves, and no wiki or patch line on the kit
+(the slide's air tap, 05.03.25; the 0.8 s charge) names a cancel. So each row follows the owner where they have a line (162b, 51), otherwise
+**rule**: DECISIONS 11-07 "every interaction is chainable" read through DashFlow's default (decision 0015: a missing
+row combines, so the second press goes and the first runs on). Each row is one assert in `--gunslinger-combo-check`
+("Vex cancel ...", tools/vex_cancel_rows_check.gd). Any pair not in the table: both (ArchKit has no shared cast lock),
+except that every press is ignored, not buffered, while stunned or downed, and no hero but Vex fires from a glide
+(`Hunter.can_fire`, `ArchKit.fires_in_glide`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
@@ -166,18 +171,27 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 | E wind-up | X | not shown | ignored, not buffered (`GunslingerUlt.cast` refuses while the needle charges) | unsettled | |
 | E wind-up | glide | not shown | the glider opens, the charge goes on | unsettled | |
 | E recovery (0.6 s from the beam: the shove, then about 0.4 s) | any (but Q's glove, the Boki's C) | committed: he stands through it | waits: a press in its last 0.15 s goes as it ends, an earlier one is dropped | match | [F] 0170, venator.md E 4 |
+| E Longneedle, wind-up (0.6 s, standing still) | LMB | not shown: the rifle is braced through the cast bar, but no press is seen | both: the rifle fires through the charge (3 rounds in 0.3 s) and the beam still goes | both | rule; [F] 0164-0169 shows no press |
+| E wind-up | RMB | not shown | both: the grenade leaves, the beam still goes | both | rule |
+| E wind-up | jump | not shown (he stands still, no jump pressed in the clip) | both: a 0.9 m hop, the charge goes on (walking is 0 in the cast) | both | rule (no `into_jump.e` row: combine); [F] 555.8-556.4 s |
+| E wind-up | X | not shown | both: Cinderfall goes and the beam still goes (was ignored: `GunslingerUlt.cast` refused while the needle charged) | both, **fixed** | rule |
+| E wind-up | glide | not shown | waits: the glider stays shut through the charge (`AirLimits`: the needle's charge) and the recoil shove; held, it opens about 0.42 s after the beam (the 11-09 pass had it opening at once, which main never did) | waits | [O] OWNER_REVIEW_1103 162b: no glider during an ability animation, it opens after, buffered |
+| E recovery (about 0.4 s after the recoil) | any | not shown | no lock: a jump, LMB and RMB go the step the beam fires (Shift: [dash_interactions.md](dash_interactions.md)); only the glider waits out the recoil shove (row above) | both | [O] item 51: a jump or Shift leaves any recovery within 0.1 s; rule; [F] 0170 shows the recoil only |
 | X Cinderfall, after the shot (shell falling 1.6 s) | walk, jump, LMB | free: he walks and takes a jump pad while it falls | free: she moves, jumps and shoots | match | [F] ult f103 |
 | X, the commit (0.76 s from the tap) | any (but Q's glove, the Boki's C) | about 0.8 s committed, no move seen | waits: a press in its last 0.15 s goes as it ends, an earlier one is dropped | match | venator.md R 4 |
 | X, after the commit | E, RMB | not shown | both | unsettled | |
 | LMB held (the string) | RMB, E, X | not shown | both: the string goes on through each | unsettled | |
 | LMB held | jump | not shown (he fires while walking) | both | unsettled | [F] 0007-0023 |
+| X | E, RMB | not shown | both: each goes while the shell falls | both | rule |
+| LMB held (the string) | RMB, E, X | not shown | both: each goes and the string goes on through each (X too while the E charges) | both | rule (no `hold.lmb` row: keep) |
+| LMB held | jump | not shown (he fires while walking) | both: the string goes on through the hop | both | rule (no `hold.lmb.jump` row: keep); [F] 0007-0023 |
 | RMB (the launcher shot) | any | owner item 112: a tap, no hold and no throw, so there is no wind-up to cancel | instant: everything goes at once | owner | OWNER_REVIEW_1103 112 |
-| Glide | LMB | not shown | ignored | unsettled | |
-| Glide | RMB, E, X | not shown | each goes (RMB as its air variant) | unsettled | |
+| Glide | LMB | not shown | both: the rifle fires from the open glider, which stays open (was ignored) | both, **fixed** | rule; MOVEMENT_FEEL "an open glider is never folded" |
+| Glide | RMB, E, X | not shown | each goes (RMB as its air variant), the glider stays open | both | rule |
 
-Fixes made: none. No pair has a source frame or line that disagrees with ours. Timing note (not a cancel): the
-wiki's Railgun reads "Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the
-level-9 hunter).
+Fixes made (11-12): X during the Longneedle's charge now casts (`GunslingerUlt.cast` no longer refuses), and her
+rifle fires from an open glider (`GunslingerKit.fires_in_glide`). Timing note (not a cancel): the wiki's Railgun reads
+"Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the level-9 hunter).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
