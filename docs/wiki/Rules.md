@@ -1467,10 +1467,10 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 
 | Setting | Value |
 |---|---|
-| gunslinger | 15 |
-| juggernaut | 7.95 |
-| archer | 10.2 |
-| ashwick | 6.4 |
+| gunslinger | 3.8 |
+| juggernaut | 2.65 |
+| archer | 3.8 |
+| ashwick | 3.4 |
 
 ## toys (`content/rules/toys.json`)
 
