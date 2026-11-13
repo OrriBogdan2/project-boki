@@ -380,7 +380,7 @@ east, and holding the keys against the drift turns it within 0.25 s.
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in
 briefs/supervive-data/supervive_kits.md (none of them gives a self-slow number); `[F]` = briefs/hero-ref/<file>.md
-footage; `[wiki]` as above. Rule (briefs/DECISIONS.md 2026-11-07, parity first): a row changes only when the
+footage; `[wiki]` as above; `[?]` = the source can't settle it, so ours stays. Rule (briefs/DECISIONS.md 2026-11-07, parity first): a row changes only when the
 source contradicts it and no owner note covers it. Data keys: the weapon's `fire_slow`/`draw_slow`
 (content/weapons/, `Hunter._fire_slow`, non-melee default 0.8), and the kit's `move_k()`.
 
@@ -393,7 +393,7 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 | Grimble (Kingpin) | 0.80 (default) | hook out 0.15-0.25; Broadside 0.3 / 0.2 | full between shots | [F] dredge.md: walks between shots, no number | kept; Broadside: owner item 36 |
 | Vex (Ghost) | full (`fire_slow` 1.0) | Longneedle: planted (`self_slow` 1.0) | full | [F] venator.md: no fire slow; stands still through the cast | kept (matches) |
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84) | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check` |
-| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full on main | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (ext/sparkle-dash-feel adds 0.82 on its own) |
+| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full **[?]** | full | [F] vireo.md (5 fps): all 3 holds (0043-0048, 0057-0062, 0078-0083) are planted with no move input or camera pan; the only runs (0154-0160, 0270-0274) have no cast; no other Joule clip in the notes or supervive-data shows a hold, so walk-or-root can't be told | kept: full until a clip of a hold with movement input; ext/sparkle-dash-feel's 0.82 has no source either |
 | Motley (Void) | 0.90 (`fire_slow`) | Snap wind-up 0.75 (`cast_slow`); Trade drift 0.3 | full after the 0.15 s recovery | [patch] Snap slows Void while casting (25% less) | kept |
 | Neve (Celeste) | full (kit-fired darts; the weapon's `fire_slow` 0.9 never applies) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
 | Meeko (Elluna) | full (`fire_slow` 1.0) | Burrseed wind-up 0.5 (`wind_move`) | 0.5 until the seed leaves | [F] mooshmoosh.md: keeps walking while firing | kept |
@@ -401,7 +401,7 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 
 Open, not built (suggestions): Sable may slow more while firing (0.7-0.75 if a straight-run clip confirms it);
 Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) and Tenzo's punch hold have no
-source number either way.
+source number either way. Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
 
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
