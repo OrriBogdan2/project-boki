@@ -2057,9 +2057,8 @@ func on_fell(e: Ent) -> void:
 	if e is Hunter:
 		if e.out:
 			return
-		sfx("fall", e.pos, 0.0)
-		# swallowed by the cloud sea a few metres under the islands: a whoosh, a puff, a quick fade
-		sfx("whoosh", e.pos, -3.0, 0.7)
+		AbyssSfx.fall_out(e)
+		# swallowed by the cloud sea a few metres under the islands: a puff and a quick fade
 		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
 		if e == player and hud:
 			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
