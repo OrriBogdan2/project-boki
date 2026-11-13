@@ -54,7 +54,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `kin_companion.gd` | A Boki as a teammate: callouts, caring, keeping close |
 | `boki_chatter.gd` | What a Boki says in a match (BokiLines) |
 | `life.gd` | Down, death, deathboxes, revives and beacons |
-| `exits.gd`, `exit_models.gd` | Skiff docks, rift hatches, uplink outposts and their props |
+| `exits.gd`, `exit_models.gd` | Uplink outposts and their props (the Heart is `heart.gd`) |
 | `lairs.gd`, `boss.gd`, `boss_models.gd` | Boss lairs, their locks and seals; the three bosses |
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
