@@ -19,10 +19,15 @@ const NET_GRACE := 2.0     # s past TIME a stomp from another game may wait for 
 const LOCKED_INPUTS := ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
 		"gear1", "gear2", "fire", "throw", "kin_ab"]
 
-## Hard crowd control that breaks a stomp: a stun, a hex, or a real knock or launch. Plain damage and
-## the small shove most hits carry don't (the stomper stays put through them).
+## Hard crowd control that breaks a stomp: a stun, a hex, a real knock or launch, a root, Grounded or a
+## tow (Nightwell, a reel, a drag). Plain damage, slows, Daze and the small shove most hits carry don't
+## (the stomper stays put through them). --stomp-cc-check sweeps KIT_PARITY's Crowd control rows.
 static func breaks(h: Hunter) -> bool:
-	return h.stun_t > 0.0 or Hex.active(h) or h.m.time - h.launched_at < Capture.LAUNCH_AGE
+	if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h) or KitStatus.grounded(h):
+		return true
+	if h.m.time - h.launched_at < Capture.LAUNCH_AGE:
+		return true
+	return h.m.displace.tows.any(func(t): return t["e"] == h)
 
 ## Where the stomp is in beats (0..BEATS), -1 when not stomping: HunterAnim's "stomp".
 static func beat(h: Hunter) -> float:

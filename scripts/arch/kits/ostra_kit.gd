@@ -298,6 +298,7 @@ func _tick_swap_aim(dt: float) -> void:
 	if (held("dash") and swap_aim < float(dd["aim_max"])) and not h.downed and h.stun_t <= 0.0:
 		var spot := swap_spot()
 		AimKit.swap(h, "swap", {"b": spot, "r": float(dd["radius"]), "col": TRADE_COL})
+		AimReach.ring(self, "dash")
 		return
 	swap_aim = -1.0
 	if h.downed or h.stun_t > 0.0:
@@ -320,7 +321,13 @@ func _swap_cast() -> void:
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), SMOKE, 12, 1.6, 0.7, -1.5, 2.0 * TRADE_LOOK_K)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), TRADE_EDGE)
+	_tx_trade(["zone", "trade", h.nid, m._r(land.x), m._r(land.y), m._r(land.z), float(dd["radius"]), swap_time()])
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
+
+## The Trade's landing sigil on every other game (HeroZones "trade" / "tradego"): the cue a foe steps out on.
+func _tx_trade(e: Array) -> void:
+	if (m.net_on or HeroZones.capture) and not h.remote:
+		HeroZones.tx(m, e)
 
 ## His dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
 func swap_move() -> String:
@@ -400,19 +407,21 @@ func _swap_end(go: bool) -> void:
 	for key in ["os_star", "os_sigil_from", "os_sigil_to"]:
 		KitLooks.of(m).release(key)
 	if not go:
+		_tx_trade(["zone", "tradego", h.nid])
 		return
 	swaps += 1
 	_fold_in(from, TRADE_COL)
+	if rank("dash") >= 3:
+		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
-	if rank("dash") >= 3:
-		# allies who were by his side when he left share in it: a shield
-		for o2 in m.hunters:
-			if o2 != h and o2.team == h.team and not o2.downed and (
-				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
-			):
-				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
-				o2.shield_t = 3.0
+
+## Rank 3 (the source's tier IV): allies in his ring as he leaves get a shield, a share of his health.
+func _shield_allies(from: Vector3, dd: Dictionary) -> void:
+	for o2 in m.hunters:
+		if o2 != h and o2.team == h.team and not o2.downed and o2.flat_dist(from) < float(dd["radius"]):
+			o2.shield = maxf(o2.shield, h.max_hp * float(dd["ally_shield"]))
+			o2.shield_t = maxf(o2.shield_t, float(dd["ally_shield_t"]))
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
 ## its place in the circle. Bodies another game owns are moved there over Net.
@@ -531,11 +540,18 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
+## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
+## glide. The source gives Void's E and R no ground-only rule (Tetra's wall has one), so height changes nothing.
+func cast_from() -> Vector3:
+	var g: float = m.world.ground_at(h.pos.x, h.pos.z)
+	return h.pos if h.grounded or g <= World.VOID + 1.0 else Vector3(h.pos.x, g, h.pos.z)
+
 func cast_e() -> bool:
 	var ed := e_def()
-	var pw := HeroZones.walk(m, h.pos, aim(), float(ed["reach"]))
+	var from := cast_from()
+	var pw := HeroZones.walk(m, from, aim(), float(ed["reach"]))
 	var p: Vector3 = pw["pos"]
-	if not pw["ok"] or not HeroZones.fits(m, p, h.pos.y, false):
+	if not pw["ok"] or not HeroZones.fits(m, p, from.y, false):
 		seed_denied += 1
 		if h.is_local() and m.hud: m.hud.toast_small("No ground to plant on", col_of(ed))
 		return false

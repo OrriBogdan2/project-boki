@@ -8,11 +8,12 @@ class_name Life
 ## Everything here runs on whichever game owns the hunter (local and bots); remote hunters only
 ## show what their owner sends.
 
+
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
 	"revive_radius": 1.6,       # [est] a teammate this close revives you
 	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
+	"revive_hp": 0.25,          # [design] a quarter of your health (a per-tick heal scaled to ours gives 12-35%)
 	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
 	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
@@ -51,6 +52,15 @@ static func box_color(b: Dictionary) -> Color:
 	for t in BOX_TIERS:
 		if box_value(b) >= int(t[0]): col = t[1]
 	return col
+
+## The rarity tier of the best piece of gear or valuable in a box (what its glow shows).
+static func box_rarity(b: Dictionary) -> int:
+	var best := 0
+	for g in b.get("gear", []):
+		best = maxi(best, int(g["rar"]))
+	for it in b.get("pack", []):
+		best = maxi(best, Loot.rar_of(it))
+	return best
 
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
@@ -163,7 +173,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	return b
 
 static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
-	var n := Models.deathbox(box_color(b))
+	var n := Models.deathbox(box_color(b), box_rarity(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
@@ -240,8 +250,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var gd: Dictionary = Gear.ALL.get(String(g["id"]), {})
 		var r: Dictionary = Data.RARITY[clampi(int(g["rar"]), 0, Data.RARITY.size() - 1)]
 		var slot := Gear.slot_on(h, String(g["id"]))
-		var cur: Dictionary = h.gear[slot]
-		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
+		var up := Pack.beats_worn(h, Loot.gear(String(g["id"]), int(g["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
 			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
 			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
@@ -252,7 +261,8 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b.get("pack", []) as Array).size():
 		var it: Dictionary = b["pack"][i]
 		out.append({"key": "pack", "i": i, "name": Loot.name_of(it), "sub": Loot.sub_of(it), "icon": Loot.icon_of(it), "col": Loot.col_of(it),
-			"upgrade": Pack.wants(h, it), "value": Loot.value(it), "el": String(it.get("el", "")), "full": not Pack.room(h)})
+			"upgrade": Pack.wants(h, it), "value": Loot.value(it), "el": String(it.get("el", "")), "full": not Pack.room(h),
+			"wear": Pack.wears(h, it)})
 	return out
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.

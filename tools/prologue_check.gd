@@ -9,6 +9,8 @@ const HOLLOWING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
 const RELICS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
 	+ "Relics, the masks of fallen Hunters.\nOnly those who wear a Hunter's Relic can save our souls."
+## a skip is over within this many seconds of game time (a slow software renderer stretches wall time, not this)
+const SKIP_MAX_S := 0.4
 ## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
 	[[1.0, "start: the land whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
@@ -100,12 +102,13 @@ func _skips(tree: SceneTree) -> void:
 		var pr = main.current
 		for i in 3:
 			await tree.process_frame
-		var t0 := Time.get_ticks_msec()
+		var took := 0.0
 		pr._unhandled_input(ev)
-		while main.current == pr and Time.get_ticks_msec() - t0 < 3000:
+		while main.current == pr and took < SKIP_MAX_S * 8.0:
 			await tree.process_frame
-		var took := Time.get_ticks_msec() - t0
-		ok(main.current != pr and took <= 400, "one %s press skips to the hatch (%d ms)" % [ev.get_class(), took])
+			took += tree.root.get_process_delta_time()
+		var what := "one %s press skips to the hatch (%d ms of game time)" % [ev.get_class(), took * 1000.0]
+		ok(main.current != pr and took <= SKIP_MAX_S, what)
 	ok(bool(Save.d["tutorial"]["prologue"]), "a skip is remembered")
 	await main.show_screen("prologue", {"then": "hatch"})
 	var again = main.current
