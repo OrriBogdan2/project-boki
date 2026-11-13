@@ -184,7 +184,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
-	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
+	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}), "hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	_setup_out()

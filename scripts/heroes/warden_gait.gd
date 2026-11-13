@@ -24,6 +24,7 @@ var skel: Skeleton3D
 var bob := 1.0               # x: the hips' vertical travel at this speed
 var hips := -1               # hips bone index
 var hips_rest_y := 0.0       # m: the hips' local height at rest (the clips key no hips position)
+var hips_keyed := false      # the clips do key it (data "offset_bones": Motley's spring): their height, not the rest
 var hips_y := NAN            # m: running mean of the hips' height (skeleton space)
 var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
@@ -31,8 +32,9 @@ var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
 var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
 
-func _init(sk: Skeleton3D, swing: Dictionary) -> void:
+func _init(sk: Skeleton3D, swing: Dictionary, keyed := false) -> void:
 	skel = sk
+	hips_keyed = keyed
 	for b in LEG_BONES:
 		var bi := WardenSkeleton.find(sk, b)
 		if bi >= 0:
@@ -74,9 +76,11 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 	var k := 1.0 + (gain - 1.0) * legs_w
 	if hips >= 0:
 		var hp := skel.get_bone_pose_position(hips)
-		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - hips_rest_y)   # (the clip's, without our offset)
+		# (a clip that keys the hips set this frame's height; else it is the rest plus last frame's offset of ours)
+		var base := hp.y if hips_keyed else hips_rest_y
+		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - base)   # (the clip's, without our offset)
 		hips_y = gy if is_nan(hips_y) else lerpf(hips_y, gy, a)
-		hp.y = hips_rest_y - (gy - hips_y) * (1.0 - bob) * legs_w
+		hp.y = base - (gy - hips_y) * (1.0 - bob) * legs_w
 		skel.set_bone_pose_position(hips, hp)
 	for l in legs:
 		var q := skel.get_bone_pose_rotation(l[0])
