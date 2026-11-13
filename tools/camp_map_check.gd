@@ -63,7 +63,7 @@ func _regions(m: Match) -> void:
 			continue
 		var camps := m.camps.list().filter(func(e): return e["region"] == ri)
 		var xp := 0.0
-		for e in camps:
+		for e in m.camps.camps.filter(func(c): return c["region"] == ri):   # list() leaves the mobs out
 			for mb in e["mobs"]: xp += XpRules.kill_xp(mb)
 		var lvl := 1
 		for i in range(1, Hunter.XP_TO.size()):
