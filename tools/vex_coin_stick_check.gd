@@ -61,7 +61,7 @@ func _case(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3, far:
 		C.ok("Vex coin: it rides %s as it moves" % what, moved and b.has("on"), "moved %.2f" % (now.x - at.x))
 	var held: Vector3 = b.get("pos", Vector3.ZERO)
 	if broken:
-		m.verbs.absorb(w, 9999.0)
+		m.verbs.absorb(w, 9999.0, P.pos)      # the blow comes from her side
 	else:
 		w["t"] = 0.0
 	C.ac.step(m, 0.03)
