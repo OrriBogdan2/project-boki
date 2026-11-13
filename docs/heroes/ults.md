@@ -15,9 +15,10 @@ Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the cas
 | Motley (Void, Black Hole) | 1.0 s dome telegraph, then free to act while the vortex runs | 1.0 s lock (no move, no turn after 0.25 s, nothing else), then free; a stun or knock frees him | match (owner: about 1 s then free) | ostra.md Ultimate 4; `ostra_ult_check` "lock:" rows |
 | Neve (Celeste, Ice Crash) | Invulnerable in a star crystal for about 3.2 s, zone stays on her, recast ends early | Frost statue, invulnerable and rooted, 3.5 s; recast or Shift breaks out | match (owner: Rimelock ends on Shift) | tamsin.md Ultimate 1, 4; `care_ult_check` |
 | Meeko (Elluna, Divine Intervention) | 5 s channel on an ally; she walks normally | No lock; walks and casts for 5 s; X again is swallowed | match | mooshmoosh.md Ultimate 1, 2; `care_ult_check` "she walks while it channels" |
-| Sable (Shiv, Death Blossom) | 0.4 s ring grow, then 2 s of blades; moves, shoots and dashes freely | No lock; ring rides with her, free to move, shoot and dash | match | dancer.md Ultimate 1; `dj_ult_check` "she walks and fires freely" |
+| Sable (Shiv, Death Blossom) | 0.4 s ring grow, then 2 s of blades; moves, shoots and dashes freely | No lock; ring rides with her, free to move, shoot and dash | match; ring, cadence and damage measured in thief.md "Death Blossom: source vs ours" | thief.md Ultimate; `dj_ult_check` "she walks and fires freely", `dancer_ring` rows |
 
 ## Fixed
+- Cinder, Nov 12: the Merge key and G's tap still got through in the flight (a merge or a Sic started). Both gated in the kit (`AshwickJet.LOCKED`, `ArchKit.gate_kin_tap`); asserted by `ashwick_ult_check` "ult 66: in the flight LMB, RMB, G and the Merge key fire nothing".
 - Cinder: the card text (`ashwick.json` `x.desc`) still said the Cinder Shot works in the flight and Shift speeds it up. The kit, the hero sheet and the owner rule (Nov 5, item 66) say only the Furnace Cloak works. Text changed; asserted in the Cinder combo check. The hero sheet's cooldown cell said 32 s against the data's 36 s: fixed too.
 
 ## Left as they are
@@ -26,3 +27,19 @@ Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the cas
 
 ## Suggestions (ours, not built)
 - Grimble: a short full-stop in the first part of the charge would match the footage, if the owner wants the source over item 36.
+
+## R pose against the lock (job ext/anim-ult-lock-poses, 2026-11-11)
+`--ult-pose-check` casts every Hunter's R with the walk key held and reads the clips (`content/rules/warden_anim/<art>.json`): the lock it measures must match the table above; while it lasts the R move owns the body (or the upper body, for Grimble's slowed walk) with no bare walk cycle; once it is over, a walking Hunter's legs are on the walk within 0.2 s. All twelve commit for the whole lock. Seven held a full-body clip over a free walk; they now take `"upper": "moving"` (the full clip while standing, the legs back on the walk the moment he moves):
+
+| Hunter | Move | Lock ends | Full-body pose held to (before) |
+|---|---|---|---|
+| Albert | `bul_ult_slam` | 0.6 s | 1.1 s |
+| Neve | `tm_rime_crash` | 3.5 s | 4.0 s |
+| Sparkle | `mage_x_land` | 2.5 s | 3.1 s |
+| Motley | `ostra_well_snap` | 1.0 s | 1.6 s |
+| Cinder | `lw_land` | no lock | 0.45 s after the landing |
+| Tenzo | `breah_spine` | no lock | 1.1 s |
+| Sable | `thf_encore` | no lock | 0.4 s |
+
+Also fixed: a kit move the kit ended early (`play("")`: Sable's dance, Grimble's blast, Kael's recovery left by a jump, Cinder's flight dropped by a merge) stayed in the hunter's anim state at its last time, freezing the pose until the next move; `Hunter._anim_state` now writes the move every frame.
+Kael's riposte is full-body through the half-speed recovery and lets go with it at 1.1 s, as the footage recovers by about 1.1 s.
