@@ -65,13 +65,13 @@ func _play() -> void:
 	ok(HunterStats.per_match(_row_of("ostra")) == "-", "an empty row shows a dash for damage per match")
 	ok(HunterStats.cells(t)[0] == "All Hunters" and HunterStats.cells(a)[0] == Arch.label("archer"), "row labels")
 
-## A v13 save: Hunters it counted get a match count (their escapes, at least 1); empty ones stay empty.
+## A v14 save: Hunters it counted get a match count (their escapes, at least 1); empty ones stay empty.
 func _migrate() -> void:
-	ok(Save.VERSION >= 14 and Save.MIGRATIONS.get(13, "") == "_migrate_13_to_14", "a 13 -> 14 step exists")
+	ok(Save.VERSION >= 15 and Save.MIGRATIONS.get(14, "") == "_migrate_14_to_15", "a 14 -> 15 step exists")
 	var data := Save.fresh()
-	data["v"] = 13
+	data["v"] = 14
 	data["classes"]["hunters"] = {"archer": {"extracts": 4, "knocks": 9}, "juggernaut": {"knocks": 1}, "mage": {}}
-	ok(Save.migrate(data) and int(data["v"]) == Save.VERSION, "a v13 save loads")
+	ok(Save.migrate(data) and int(data["v"]) == Save.VERSION, "a v14 save loads")
 	var h: Dictionary = data["classes"]["hunters"]
 	ok(int(h["archer"]["matches"]) == 4 and int(h["archer"]["knocks"]) == 9 and int(h["juggernaut"]["matches"]) == 1,
 		"played Hunters keep their counts and get a match count")
