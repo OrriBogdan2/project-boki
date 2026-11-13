@@ -179,7 +179,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
 | Swap travel 1.7s, 1.25s Empowered | wiki | yes (about 1.8s) | built |
 | Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 35% speed (item 75; was 20%, then 30%; owner 11-08 asked +15-25%, 35% keeps the earlier 25-35% band; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
-| Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing |
+| Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing; wisps wait on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 7) |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
 | Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size; the knock heal is removed (the owner's tooltip data has none) |
 | Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on X; asserted `ult open`, `drawn to the middle`, `small ticks` |
