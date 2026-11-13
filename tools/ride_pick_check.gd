@@ -103,15 +103,16 @@ func _lobby(main: Node) -> void:
 	Prematch.deal_mates(o)
 	var view := await _view(main, o)
 	ok(_tiles(view.ride_box).size() == RidePick.choices().size(), "the lobby shows the swap row while picks are open")
-	var col: float = (view.ride_box.get_parent() as Control).custom_minimum_size.x
+	var col: float = view.get_viewport_rect().size.x
 	var need: float = view.ride_box.get_combined_minimum_size().x
-	ok(need <= col, "the panel fits the lobby side column (%d of %d px)" % [need, col])
+	ok(need <= col, "the panel fits the lobby width (%d of %d px)" % [need, col])
 	var to: Control = _tiles(view.ride_box)[0]
 	var uid := String(to.get_meta("swap_uid"))
 	to.gui_input.emit(_click())
 	await main.get_tree().process_frame
 	ok(_rider(view.ride_box) == uid and Save.active_kin()["uid"] == uid, "a lobby swap shows the new rider")
-	view.pm.left = 0.0
+	view.pm.turn = view.pm.squad.size()      # every pick is in: the lobby locks
+	view.pm.locked = true
 	view._process(0.0)
 	await main.get_tree().process_frame
 	ok(_tiles(view.ride_box).is_empty() and _rider(view.ride_box) != "", "once picks lock: rider stays, no swap")
@@ -149,7 +150,7 @@ func _shots(main: Node) -> void:
 		for _i in 20:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join(f + ".png"))
-		view.pm.left = 0.0
+		view.pm.turn = view.pm.squad.size()
 		view.pm.locked = true
 		view._fill_ride()
 		view._fill_hunters()
