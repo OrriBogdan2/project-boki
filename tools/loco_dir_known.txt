@@ -18,3 +18,7 @@ dredge run f
 thief walk r
 thief run fr
 thief run fl
+ashwick run br
+ashwick run b
+ashwick run bl
+ashwick run l
