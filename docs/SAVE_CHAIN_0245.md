@@ -19,15 +19,16 @@ Rules:
 |---|---|---|
 | v11 -> v12 | release-integ-0245 (ext/evolution-rules-1108 + ext/garden-integrated) | `Evo.migrate` (levels capped, old form kept) and base life (`rec["bonds"] = {}`) |
 | v12 -> v13 | release-integ-0245 (ext/garden-waystone, ext/garden-items line) | v11 -> v12 again, then `GardenZones.migrate` and `Care.ensure` on every Boki |
-| v13 -> v14 | ext/tut-move-drills (was its v11 -> v12) | v12 -> v13 again (heals the first-time-hints line's v13), then `d["drills"] = {}` |
-| v14 -> v15 | ext/tut-resume (was v11 -> v12) | `TutorialResume.migrate`: a played save is past the combat tutorial |
-| v15 -> v16 | ext/clans-slice-1/-2 (was v11 -> v12) | a guild becomes its clan as a member (`Social.clan_for`); a clan it already has stays |
-| v16 -> v17 | ext/tut-xp-hint / ext/tut-xp-share (was v11 -> v12) | `XpHints.migrate`: the XP first-time lines are unseen |
-| v17 -> v18 | ext/garden-sleepovers (was v12 -> v13) | `d["sleepovers"] = []` |
+| v13 -> v14 | main (ext carry-pick, docs/decisions/0061-carry-pick.md) | carry 2: `d["active2"] = ""` (the second starts empty). Main took v14 before this chain landed, so the chain's v14-v18 moved up by one |
+| v14 -> v15 | ext/tut-move-drills (was its v11 -> v12, then v13 -> v14) | v12 -> v13 again (heals the first-time-hints line's v13), then `d["drills"] = {}` |
+| v15 -> v16 | ext/tut-resume (was v11 -> v12, then v14 -> v15) | `TutorialResume.migrate`: a played save is past the combat tutorial |
+| v16 -> v17 | ext/clans-slice-1/-2 (was v11 -> v12, then v15 -> v16) | a guild becomes its clan as a member (`Social.clan_for`); a clan it already has stays |
+| v17 -> v18 | ext/tut-xp-hint / ext/tut-xp-share (was v11 -> v12, then v16 -> v17) | `XpHints.migrate`: the XP first-time lines are unseen |
+| v18 -> v19 | ext/garden-sleepovers (was v12 -> v13, then v17 -> v18) | `d["sleepovers"] = []`; also `d["active2"] = ""` if missing (a dev save from this chain's v14-v18 skipped carry 2) |
 
 The clash noted on ext/garden-waystone: ext/tutorial-beats-7-8-rebased and the other `*-rebased` branches
 of merge candidate mc-20261110-1030 use v13 = `FirstTimeHint.migrate`, while 0.24.5 uses v13 = zones. A
-dev save from that line skips the garden half at v13 -> v14, so v13 -> v14 re-runs it first; its hints
+dev save from that line skips the garden half at v13, so v14 -> v15 (drills) re-runs it first; its hints
 step comes at its own number below.
 
 ## Next numbers, in this order, for the branches not merged here
@@ -37,11 +38,11 @@ this branch. Each takes the next free number when it lands, in this order, and a
 
 | Planned | Branch | Its old number | Step |
 |---|---|---|---|
-| v18 -> v19 | ext/tutorials-cut line (ext/tutorial-beats-7-8-rebased, ext/first-hints-check, ...) | v11 -> v12 or v12 -> v13 | `FirstTimeHint.migrate` |
-| v19 -> v20 | ext/hunter-first-hints | v12 -> v13 | `HunterHints.migrate` |
-| v20 -> v21 | ext/wisp-cosmetics | v11 -> v12 | `BokiWispCosmetics.migrate` |
-| v21 -> v22 | ext/tut-first-breed | v11 -> v12 | `FirstBreed.migrate` |
-| v22 -> v23 | ext/farm-boki-xp-curve | v12 -> v13 | `Evo.migrate_xp` (saved XP keeps its share of the level) |
+| v19 -> v20 | ext/tutorials-cut line (ext/tutorial-beats-7-8-rebased, ext/first-hints-check, ...) | v11 -> v12 or v12 -> v13 | `FirstTimeHint.migrate` |
+| v20 -> v21 | ext/hunter-first-hints | v13 -> v14 | `HunterHints.migrate` |
+| v21 -> v22 | ext/wisp-cosmetics | v12 -> v13 | `BokiWispCosmetics.migrate` |
+| v22 -> v23 | ext/tut-first-breed | v12 -> v13 | `FirstBreed.migrate` |
+| v23 -> v24 | ext/farm-boki-xp-curve | v13 -> v14 | `Evo.migrate_xp` (saved XP keeps its share of the level) |
 
 The order is the order of their READY lines in briefs/EXT_TO_MAIN.md. `Evo.migrate_xp` rescales XP and is
 not idempotent as written: when it lands it needs a marker (or another guard) so a second run changes

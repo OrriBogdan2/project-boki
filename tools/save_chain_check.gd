@@ -21,6 +21,7 @@ func run(m: Node) -> void:
 	_steps()
 	_from_v11()
 	_clash_v13()
+	_chain_v18()
 	var newer := {"v": Save.VERSION + 1, "roster": []}
 	ok(not Save.migrate(newer) and int(newer["v"]) == Save.VERSION + 1, "a save from a newer game is refused")
 	print("SAVE-CHAIN DONE, failures: %d" % bad)
@@ -67,19 +68,27 @@ func _from_v11() -> void:
 	var zoned: bool = data["zones"] is Dictionary and rec["zone"] == GardenZones.start()
 	ok(zoned, "v12 -> v13: garden zones, the Boki in the start zone")
 	ok(rec.has("needs") and rec.has("needs_t"), "v12 -> v13: shaping items (Care.ensure on every Boki)")
-	ok(data["drills"] == {}, "v13 -> v14: no drill times yet")
-	ok(bool(data["tutorial"].get("match", false)), "v14 -> v15: a played save is past the combat tutorial")
+	ok(data["active2"] == "", "v13 -> v14: carry 2, the second starts empty")
+	ok(data["drills"] == {}, "v14 -> v15: no drill times yet")
+	ok(bool(data["tutorial"].get("match", false)), "v15 -> v16: a played save is past the combat tutorial")
 	var clan := Social.clan_for("g42", "p7", "member", 0.0)
-	ok(data["clan"] == clan, "v15 -> v16: the guild becomes its clan, as a member")
+	ok(data["clan"] == clan, "v16 -> v17: the guild becomes its clan, as a member")
 	var keys := [XpHints.KILL_KEY, XpHints.STEAL_KEY, XpHints.SHARE_KEY]
 	var hints := keys.all(func(k): return data["tutorial"][k] == false)
-	ok(hints, "v16 -> v17: the XP first-time lines are unseen")
-	ok(data["sleepovers"] == [], "v17 -> v18: no Boki away on a sleepover")
+	ok(hints, "v17 -> v18: the XP first-time lines are unseen")
+	ok(data["sleepovers"] == [], "v18 -> v19: no Boki away on a sleepover")
 	data["clan"]["role"] = "elder"
 	var once := JSON.stringify(data)
 	data["v"] = FIRST
 	var same := Save.migrate(data) and JSON.stringify(data) == once
 	ok(same, "the chain again from v11 changes nothing (the clan role stays)")
+
+## A dev save from this chain before main took v14 (drills v14 .. sleepovers v18, no carry 2) gets its empty second.
+func _chain_v18() -> void:
+	var data: Dictionary = JSON.parse_string(JSON.stringify(_v11()))
+	data.erase("active2")
+	data["v"] = 18
+	ok(Save.migrate(data) and data.get("active2", null) == "", "a v18 dev save from the old chain gets carry 2")
 
 ## The other line's v13: Evo and first-time hints, no base life or zones. It must still get them.
 func _clash_v13() -> void:
