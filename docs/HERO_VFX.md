@@ -86,6 +86,14 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).
+- **Fight worst case** (owner 11-08: under 4,000 particles on screen, no frame over 50 ms): `--perf-bench --bench-fight`
+  (tools/perf_fight.gd) casts each Hunter's E and R alone at a dummy, then puts three trios with their Boki out in one
+  camp beside a monster camp, every Hunter casting E and R in waves. It prints particles and nodes made per kit, the
+  busiest moment's particles by owner, and the nodes made during the fight by who made them; `--perf-budget-check`
+  fails at 4,000 particles. On a real GPU at High (jobq 11-12) the busiest moment is 1,761 (770 of them the regions'
+  ambient motes; 1,847 before the pools); a kit's E and R alone add 0-195 (noisy run to run). Nodes made in the
+  camp fight went 5,294 -> 2,351 (Fx 2,830 -> 132). Effects made mid-fight come from pools (Fx's FxPool, HeroVfx,
+  VVFx, Thief's Mark pips).
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness

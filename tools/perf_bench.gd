@@ -13,6 +13,7 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -46,6 +47,10 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	setup(main_node)
+	if "--bench-fight" in OS.get_cmdline_user_args():
+		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
+		_finish()
+		return
 	await _match()
 	await _farm("farm", {})
 	await _base()

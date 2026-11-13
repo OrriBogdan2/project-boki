@@ -11,6 +11,8 @@ extends RefCounted
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
 ## once and reused until it changes. Skinned rigs (RigPace): every frame off GL over Metal; at RigPace.EVERY a
 ## Warden away from the camera's focus is posed every few frames with the held time, the one at the focus every frame.
+## Fight effects (FxPool): a flurry of rings, after-images, bolts, beams and swings adds no node to the Fx, and every
+## mesh is back in its pool once they end.
 
 var main: Node
 var fails := 0
@@ -34,6 +36,7 @@ func run(main_node: Node) -> void:
 	_shadows()
 	await _plates()
 	await _rig_pace()
+	await _fx_pools()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -374,3 +377,24 @@ func _rig_pace() -> void:
 	ok(posed == RigPace.EVERY * 2, "the one at the camera's focus every frame (%d)" % posed)
 	sy.pace.every = want
 	sy.set_process(true)
+func _fx_pools() -> void:
+	var fx: Fx = m.fx
+	var pools: Array[FxPool] = [fx.ring_pool, fx.ghost_pool, fx.beam_pool, fx.slash_pool]
+	var kids := fx.get_child_count()
+	var out: Array = pools.map(func(p: FxPool) -> int: return p.live())
+	for i in 3:
+		var at := Vector3(i, 0, 0)
+		fx.ring(at, 3.0, Color.WHITE)
+		fx.ghost(at, 0.0, Color.WHITE, 1.0)
+		fx.bolt(at, at + Vector3(4, 1, 0), Color.CYAN)
+		fx.beam(at, at + Vector3(5, 1, 0), Color.WHITE)
+		fx.slash(at, 0.5 * i, 2.0, 2.4, Color.WHITE, i == 2)
+	ok(fx.ring_pool.live() == int(out[0]) + 3, "a flurry takes pooled meshes (3 more rings out)")
+	for i in 60:
+		fx._process(0.02)
+		await main.get_tree().process_frame
+	ok(fx.get_child_count() == kids, "a flurry of rings, ghosts, bolts, beams and swings adds no node to the Fx")
+	var back := true
+	for i in pools.size():
+		back = back and pools[i].live() <= int(out[i])
+	ok(back, "the flurry's ring, ghost, beam and swing meshes are all back in their pools")
