@@ -203,7 +203,6 @@ const CHECKS := {
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],
 	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],   # frames of that orbit
 	# glide, turn, dive, close, air dash (GPU)
-	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],
 	"--pond-shots": ["res://tools/pond_shots.gd", "pond_shots", null],      # every Hunter on the pond walk (wade, swim)
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],      # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],      # WardenBreak frames

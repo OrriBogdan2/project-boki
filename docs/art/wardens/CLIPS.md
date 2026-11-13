@@ -32,10 +32,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
   `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
   plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
-- `air`, `land`: rise, fall, glide, dive (a plunge: the glider's Ctrl dive and the opening skydive; `dive_at` s holds a
-  one-shot clip on one frame); a landing clip after `min_fall` s airborne. The whole-body pitch and bank on top are
-  HunterAnim's AIR_TILT through `WardenClips._air_tilt` (the entry above); the 0.24.6 wave's own `WardenAirTilt` and its
-  `dive_tilt`/`glide_tilt`/`glide_bank` keys were dropped when origin/main merged in (both ran: the dive doubled). Strips: `--glide-shots`.
+- `air`, `land`: rise, fall, glide (a plunge, the glider's Ctrl dive and the opening skydive, plays the glide clip); a
+  landing clip after `min_fall` s airborne. The whole-body pitch and bank on top are HunterAnim's AIR_TILT through
+  `WardenClips._air_tilt` (the entry above). The 0.24.6 wave's dive clip blend (`dive`, `dive_at`) and its
+  `WardenAirTilt` (`dive_tilt`/`glide_tilt`/`glide_bank`) were dropped when origin/main merged into ext/mantle-port-b:
+  with main's pitch on top the leaning dive clips over- or under-shot it by 12-46 deg (`--glide-bank-check`). Strips: `--glide-shots`.
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body

@@ -27,8 +27,10 @@ Bank: the lean into a left glider turn (deg; + leans in). Dive: tilt in the Ctrl
 | ostra (ostra) | 17 → 29 | -0.19 → -0.17 | -0.06 → 0.04 | -13 → 9 | 79 → 115 |
 
 ## What was wrong, worst first, and the fix
-(ext/mantle-port-b, main merge 11-13: `WardenAirTilt` and its `dive_tilt`/`glide_tilt`/`glide_bank` keys below are gone;
-main's HunterAnim AIR_TILT, `WardenClips._air_tilt`, does the pitch and bank for every Hunter, `--glide-bank-check`.)
+(ext/mantle-port-b, main merge 11-13: fixes 1, 2 and 4 below are gone: no dive clip blend, no `WardenAirTilt`, no
+`dive_tilt`/`glide_tilt`/`glide_bank` keys. Main's HunterAnim AIR_TILT, `WardenClips._air_tilt`, pitches the glide clip
+65 deg in a dive and banks it in turns for every Hunter, `--glide-bank-check`. Alternative not taken: keep the dive
+clips with a per-Hero pitch of 65 deg minus the clip's own lean.)
 1. **No dive pose for anyone.** WardenClips never read `air.dive`: the Ctrl dive (and the opening skydive) played the
    upright glide clip with the canopy folded. Now the plunge blends to the Hero's dive clip and WardenAirTilt pitches
    the whole .glb head-down about the hips (`dive_tilt`, default 105 deg; less where the clip already leans).
