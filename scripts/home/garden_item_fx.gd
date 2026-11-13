@@ -5,7 +5,7 @@ extends Node3D
 ## their stat colour), a path token's pip sliding onto the path meter over the head and its charm popping on,
 ## a sweet filling the lean ring at the feet in the type colour, Rinse Melon draining it (the tint fades), and
 ## Stayleaf's leaf settling on the head under a lock that closes. All of it is cel bits (Models.toon) from one
-## pool made once; a give never makes a node. Nothing here for the aura items: none is in the game yet.
+## pool made once; a give never makes a node. The aura items (GardenAura draws them) get no moment here.
 
 const POOL := 16           # bits on screen at once: a full lean ring plus spares; a new moment takes the oldest
 const LIFE := 1.2          # s a moment lasts
