@@ -25,7 +25,7 @@ func _ready() -> void:
 		god = true
 
 ## Mod mode (Settings > Gameplay, for the game's owner): everything unlocked, building and
-## bridges are free and need no expeditions, kin can be spawned from the admin tools (F1).
+## bridges are free and need no expeditions, kin can be spawned from the admin tools (`).
 func modding() -> bool:
 	return bool(Settings.get_v("mod_mode")) and Overlay.admin_allowed()
 
@@ -68,13 +68,12 @@ func _setup_input() -> void:
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
-	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
 	_key("util4", [KEY_4])                    # utility belt slot 4
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
-	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
+	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
@@ -85,7 +84,6 @@ func _setup_input() -> void:
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
-	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
@@ -95,6 +93,8 @@ func _setup_input() -> void:
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
 	_key("whistle", [KEY_H])                  # at home: your partner comes; hold: the nearest Boki
+	_key("goals", [KEY_G])                    # at home: the Goals line opens into the whole list
+	_key("fold_guide", [KEY_H])               # training / duel: fold the guide and the kit panel away (and back)
 	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
@@ -103,8 +103,17 @@ func _setup_input() -> void:
 	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
+	_key("undo", [KEY_Z])                     # build mode: undo the last piece (with Ctrl)
+	_key("keep_placing", [KEY_SHIFT])         # build mode: hold while placing to keep placing more
+	_key("level_mod", [KEY_ALT])              # in a match: hold with a slot key to put a skill point in it
+	_key("kit_card", [KEY_K])                 # Hunters screen / practice: the hovered hunter's full kit card
+	_key("confirm", [KEY_ENTER, KEY_KP_ENTER]) # press the open panel's main button
+	_key("push_to_talk", [KEY_V])             # pre-match: hold to talk to the squad
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
+	_key("mate_look_1", [KEY_F1])             # hold: the camera looks at your teammate 1 (MateLook)
+	_key("mate_look_2", [KEY_F2])             # teammate 2
+	_key("mate_look_3", [KEY_F3])             # teammate 3 (a 4-player squad)
 	_key("move_readout", [KEY_F7])            # the movement readout (speeds, state) for tuning
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 
@@ -216,7 +225,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
 	# the market turns over while you're out (offline), and what you found comes home
-	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)), null, ms)
+	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)))
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
@@ -295,6 +304,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
 	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
+	Unmasked.migrate(Save.d)       # a mastery level reached shows on you at home (MasteryLook)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()
@@ -350,9 +360,10 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
 
-## XP a kin needs to go from level `lv` to the next.
+## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:
-	return 100 * lv
+	var c: Dictionary = GardenXp.rules()["curve"]
+	return int(c["per_level"]) * mini(lv, int(c["flat_from"]))
 
 ## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
 func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:

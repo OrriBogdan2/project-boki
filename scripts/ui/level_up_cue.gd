@@ -1,7 +1,7 @@
 class_name LevelUpCue
 extends RefCounted
 ## Your level-up moment (Hunter.gain_xp -> Hud.level_up), the one place it is told: a gold light column
-## with chevrons rising over your hero, and a short card just over the ability row saying what improved
+## with chevrons rising over your hero, and a short card just over the vitals (above the XP tracker) saying what improved
 ## (health and ability power, the weapon's step, the ultimate opening, points to spend). It is gone in
 ## LIFE s. No toast and no screen wash; the sound is Hunter's, the world glow is Fx.body_glow.
 ## Hud keeps one (hud.lvl_cue); checks read `t` and `lines`.

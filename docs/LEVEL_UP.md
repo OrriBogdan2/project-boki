@@ -1,7 +1,7 @@
 # In-match level-ups: what the source does, what we do
 
 Owner playtest 11-11: level-ups need to be clearer, with fewer pop-ups overall. Code: `scripts/ui/level_up_cue.gd`,
-`HudVitals.xp_bar` / `level_coin`, `Hunter.gain_xp`. Check: `--level-hud-check`. Video: `--levelup-reel`.
+`HudVitals.xp_row` (main's XP tracker, merged 11-13), `Hunter.gain_xp`. Check: `--level-hud-check`. Video: `--levelup-reel`.
 
 ## What the source does (and how sure we are)
 - **Persistent level + XP.** 1.0 HUD: the level number sits at the far left of the vitals block on a dark strip,
@@ -28,10 +28,11 @@ and a gold full-screen wash on even levels. The world cue (Fx.body_glow) is the 
 "resource full", so it can't mark a level-up on its own.
 
 ## Ours, now
-- **Always there:** the level coin (number, gold rim) with a long gold **XP bar** coming out of it, under the
-  ability row and running to the end of the health bar (the 1.0 layout's long bar, in our style). The clock
-  bar's duplicate "LV n" is gone, and so is the clipped class name under the portrait (the vitals hover has it).
-- **The moment (all at once, then gone):** the chime (unchanged), the coin pops, a **gold column with three
+- **Always there:** main's XP tracker (11-13, `ext/ui-xp-tracker`) on the vitals block's top edge: LV number and a
+  gold XP bar that fills smoothly, popping when XP lands. It replaced the level coin and the long bar under the
+  ability row this branch first drew; the coin is gone, the rest of this section stands. The clock bar's
+  duplicate "LV n" is gone, and so is the clipped class name under the portrait (the vitals hover has it).
+- **The moment (all at once, then gone):** the chime (unchanged), the level number goes gold, a **gold column with three
   rising chevrons over your hero** (0.8 s, HUD-drawn, so no ground ring), and a **card just over the vitals**
   (2.6 s): "LEVEL n", then "+6% health +5% ability power", then what is new (the weapon's step, "ultimate
   open (X)", "n points to spend"). The slots a point can go into already wear gold borders or a gold +.

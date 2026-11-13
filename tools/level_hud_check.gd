@@ -1,8 +1,9 @@
 extends RefCounted
-## --level-hud-check: the run level reads at a glance and a level-up is one clear moment. The portrait's
-## coin carries the level with a long XP bar out of it that fills toward the next level. A level-up pops
-## the coin, plays its own sound (audio/level_up.wav, tools/gen_sfx_ui.py) and opens LevelUpCue: a gold
-## column over your hero and a short card over the ability row saying what improved, gone in under 3 s.
+## --level-hud-check: the run level reads at a glance and a level-up is one clear moment. The XP tracker
+## (HudVitals.xp_row) shows the level number and a bar that fills toward the next level, with a pop when
+## XP lands (once per gain) and a gold pulse while a skill point can be ranked. A level-up turns the
+## number gold, plays its own sound (audio/level_up.wav, tools/gen_sfx_ui.py) and opens LevelUpCue: a gold
+## column over your hero and a short card over the vitals saying what improved, gone in under 3 s.
 ## No toast in the message lane and no screen wash. R shows locked (a padlock and "6") until level 6, and
 ## can't be cast or ranked before then. Never touches the save.
 
@@ -29,12 +30,26 @@ func run(main: Node) -> void:
 	ok(hud != null and P.ak != null, "a match with a HUD and an archetype (%s)" % P.arch)
 	# ---------------------------------------------------------------- 1. the sound exists and is its own
 	ok(Sfx.streams.has("level_up") and ResourceLoader.exists("res://audio/level_up.wav"), "the level-up sound is loaded (audio/level_up.wav)")
-	# ---------------------------------------------------------------- 2. XP ring follows the level's progress
+	# ---------------------------------------------------------------- 2. XP bar follows the level's progress
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
 	for s in Hunter.SLOTS: P.slot_lv[s] = 0
-	ok(P.xp_frac() == 0.0, "level 1, no XP: the XP bar is empty")
+	hud.xp_seen = -1.0
+	hud.xp_shown = -1.0
+	hud.xp_pop = 0.0
+	ok(HudVitals.xp_step(hud, P, 10.0) == 0.0 and hud.xp_pop <= 0.0, "level 1, no XP: the bar is empty, no pop")
 	P.gain_xp((float(Hunter.XP_TO[1]) - float(Hunter.XP_TO[0])) * 0.5)
-	ok(P.lvl == 1 and absf(P.xp_frac() - 0.5) < 0.02, "half way to level 2: the bar is half full (%.2f)" % P.xp_frac())
+	ok(P.lvl == 1 and absf(P.xp_frac() - 0.5) < 0.02, "half way to level 2: half full (%.2f)" % P.xp_frac())
+	var fr := HudVitals.xp_step(hud, P, 0.0)
+	ok(hud.xp_pop > 0.0 and fr < 0.5, "XP landing pops once, the bar starts to fill (%.2f)" % fr)
+	hud.xp_pop = 0.0
+	fr = HudVitals.xp_step(hud, P, 10.0)
+	ok(absf(fr - 0.5) < 0.02 and hud.xp_pop <= 0.0, "settled at half (%.2f), no pop without new XP" % fr)
+	P.gain_xp(7.0)
+	HudVitals.xp_step(hud, P, 0.0)
+	ok(hud.xp_pop > 0.0, "a second gain pops again")
+	hud.xp_pop = 0.0
+	fr = HudVitals.xp_step(hud, P, 10.0)
+	ok(absf(fr - P.xp_frac()) < 0.005, "the bar matches xp_frac after a second gain (%.3f)" % fr)
 	# ---------------------------------------------------------------- 3. a level-up: pop, sound, the card
 	var ups0 := P.level_ups
 	var last0: int = int(Sfx.last_played.get("level_up", -1000))
@@ -43,7 +58,7 @@ func run(main: Node) -> void:
 	P.gain_xp(float(Hunter.XP_TO[1]) - P.xp + 1.0)
 	var cue: LevelUpCue = hud.lvl_cue
 	ok(P.lvl == 2 and P.level_ups == ups0 + 1, "level 2 reached: the level-up moment plays once")
-	ok(hud.lvl_pop > 0.0, "the portrait's coin pops (%.2f)" % hud.lvl_pop)
+	ok(hud.lvl_pop > 0.0, "the level number pops gold (%.2f)" % hud.lvl_pop)
 	ok(int(Sfx.last_played.get("level_up", -1000)) > last0, "the level-up sound plays")
 	ok(cue.t == LevelUpCue.LIFE and cue.lines[0] == "LEVEL 2", "the level-up card opens: %s" % str(cue.lines))
 	var grew := String(cue.lines[1])
@@ -52,6 +67,11 @@ func run(main: Node) -> void:
 	ok(LevelUpCue.LIFE <= 3.0 and LevelUpCue.BODY <= 1.0, "it is brief: card %.1f s, column %.1f s" % [LevelUpCue.LIFE, LevelUpCue.BODY])
 	ok(hud.flash_t <= 0.0, "no screen wash")
 	ok(hud.msgs.texts().is_empty(), "no toast in the message lane (%s)" % str(hud.msgs.texts()))
+	HudVitals.xp_step(hud, P, 0.0)
+	var lt := HudVitals.lvl_text(P)
+	ok(hud.xp_pop > 0.0 and lt == "2", "the level text is '%s' and the gain popped" % lt)
+	fr = HudVitals.xp_step(hud, P, 10.0)
+	ok(absf(fr - P.xp_frac()) < 0.005 and P.lvl == 2, "after a level-up the bar shows the new fraction (%.2f)" % fr)
 	# two levels in one go: each counts
 	P.gain_xp(float(Hunter.XP_TO[3]) - P.xp + 1.0)
 	ok(P.lvl == 4 and P.level_ups == ups0 + 3 and cue.lines[0] == "LEVEL 4",
