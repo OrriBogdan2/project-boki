@@ -786,24 +786,17 @@ func on_dash(use_ex: bool) -> bool:
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
 	var dist2 := float(dd["whirl"])
 	var t2 := dist2 / float(dd["whirl_speed"])
-	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd, "curved": true})
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": dash_dir(), "curved": true})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
 	m.later(t2, func():
-		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
+		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit())
 	return true
 
-## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
-const SPIN_GLIDE := 6.0
-
-## The 360 Smash's spin on arrival: one hit all round him, still sliding on along `wd`; its ring (HeroVfx "spin")
-## lies on the hit radius and runs round once with the turn.
-func _spin_hit(wd: Vector2) -> void:
-	if h.grounded:
-		h.vel.x += wd.x * SPIN_GLIDE
-		h.vel.z += wd.y * SPIN_GLIDE
+## The 360 Smash's spin on arrival: one hit all round him, sliding out of the dash at its run-speed hand-over;
+## its ring (HeroVfx "spin") lies on the hit radius and runs round once with the turn.
+func _spin_hit() -> void:
 	var dd := dash_def()
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1

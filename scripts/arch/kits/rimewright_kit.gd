@@ -514,9 +514,13 @@ func _rinkrun_end(into_rime := false) -> void:
 		h.vel.x *= 0.3
 		h.vel.z *= 0.3
 	else:
-		# ended in the air: she keeps the skate's speed the way any air dash does (Loco's air drag bleeds it)
-		h.vel.x = h.roll_dir.x * h.roll_speed
-		h.vel.z = h.roll_dir.y * h.roll_speed
+		# ended in the air: she carries on the way any air dash does, at most at her run (HunterMove.dash_exit),
+		# or a held glider takes the skate's speed
+		var keep := h.roll_dir * h.roll_speed
+		if not h.inp.get("glide", false):
+			keep = HunterMove.dash_exit(keep, h.run_speed)
+		h.vel.x = keep.x
+		h.vel.z = keep.y
 	play("tm_skate_stop")
 	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)

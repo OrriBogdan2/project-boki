@@ -218,6 +218,8 @@ const CHECKS := {
 	"--reticle-latency": ["res://tools/reticle_latency.gd", "reticle_latency", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--hold-pose-check": ["res://tools/hold_pose_check.gd", "hold_pose_check", null],  # hold poses need the key
+	"--dash-momentum-check": ["res://tools/dash_momentum_check.gd", "dash_momentum_check", null],  # air = ground
+	"--dash-momentum-shots": ["res://tools/dash_momentum_shots.gd", "dash_momentum_shots", null],  # (GPU)
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
 	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
@@ -230,6 +232,8 @@ const CHECKS := {
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
 	# cast at a jump's top: momentum per slot
 	"--air-cast-check": ["res://tools/air_cast_check.gd", "air_cast_check", null],
+	# Space in a dash, Shift in a jump
+	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],
 	# docs/decisions/0022
 	"--cc-exit-buffer-check": ["res://tools/cc_exit_buffer_check.gd", "cc_exit_buffer_check", null],
 	# a tap inside a hit-stop goes when it ends
@@ -259,7 +263,8 @@ const CHECKS := {
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
-	"--impact-check": ["res://tools/impact_check.gd", "impact_check", null],      # hit-stop, flash, hit and knock poses (12 Hunters)
+	# hit-stop, flash, hit and knock poses (12 Hunters)
+	"--impact-check": ["res://tools/impact_check.gd", "impact_check", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
@@ -521,6 +526,7 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
+	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
 	"--tutorial-timing-check": ["res://tools/tutorial_timing_check.gd", "tutorial_timing_check", null],

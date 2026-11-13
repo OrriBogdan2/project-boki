@@ -994,3 +994,17 @@ Albert (`bulwark`, section "Bjorn"), Neve (`rimewright`, "Claire"), Tenzo (`dolm
 | Motley | CC | open: orb slow 10% (wiki) vs 6% (card read) undecided |
 
 **Shared rows still open for these eight:** gap 2 (stopping), 3 (air control), 4 (dash carry), 10 (cooldown pace 0.48x to 1.0x), 19 (ours-only riders); health ratios unchanged (Neve, Sparkle, Sable 0.80 against the 1.25x bar); every `?` range in the ranges table stays `?`.
+## Allies and forced movement (PARITY FIRST pass, ext/feel-ally-safe)
+
+Every knock, pull, push, root, slow, stun and Grounded the 12 kits apply goes to `foes_of(team)` (or `foes_in`), so a teammate is never moved or given a status. `--ally-cc-check` (`tools/ally_cc_check.gd`) proves it: each hero presses LMB, RMB tap and hold, E, X and the dash, on the ground and in the air, with a teammate standing on the aim line at 2, 3.5, 6 and 9 m; the teammate must not move, be towed, or gain stun, root, slow, knock, Shred, Blight, burn, Grounded, Dazed or Disoriented. Over the relay, `--displace-net-check` aims Cinder's cloak, Sparkle's Skycall and Albert's aegis at a teammate on the guest's game: no move is sent and the guest stays put.
+
+Where the source lets a move touch an ally (`supervive_kits.md`), the check excuses exactly that slot:
+
+| Move | Source | Ours |
+|---|---|---|
+| Grimble's Abyssal Grasp | "pulling in the first target hit (enemy or ally)" | hook pulls the first hunter hit, ally included |
+| Motley's Swap (dash) | "swaps you and all units to its location" | foes, allies and Boki in the circle are sent back; allies get the shield |
+| Meeko's ult | "reviving them and pulling them to" her | a downed ally is called to her side |
+| Tenzo's rocks | "allies can hop over friendly walls" (owner-decided) | allies hop; not a move |
+
+Not in the source, kept: Tenzo's Basalt Spine never raises a rock inside a body, so anyone on the line (ally included) steps to their side of it. That is a collision fix, not a status; the check allows a move there and nothing else. A dash or lunge that runs into a teammate shoves it like any two bodies (`Match._separate`); the check ignores that sideways shove but still fails on any status or tow. No leak was found in the kits, so no gameplay code changed.

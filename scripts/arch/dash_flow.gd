@@ -162,8 +162,8 @@ func _dash_set_off_in_air() -> bool:
 	return not kit.h.grounded
 
 ## Presses made while the kit's own cast lock holds the body (Motley's Nightwell, Sparkle's flight, Kael's guard) wait
-## as a dash's do: one made within Loco.buf_ability_hold of the lock's end goes when it ends, an earlier one gets its deny cue then.
-## X stays with the ult's own recast. True while a lock holds.
+## as a dash's do: one made within Loco.buf_ability_hold of the lock's end goes when it ends, an earlier one gets
+## its deny cue then. X stays with the ult's own recast. True while a lock holds.
 func _hold_through_lock(fire_pressed: bool) -> bool:
 	if not kit.busy() or kit.disabled():
 		return false

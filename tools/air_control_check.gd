@@ -159,8 +159,8 @@ func _open_lane() -> Vector3:
 	return Vector3.INF
 
 ## Items 6/7: one chain holding D: run, Shift, jump out of it, a glide press, let go, land. The h-speed never
-## drops more than 30% in one step (no sudden stop), never jumps up except as a dash starts (no spike),
-## and the step after touchdown you are still moving.
+## drops more than 30% in one step (no sudden stop) but where the dash ends (down to the run, never below it),
+## never jumps up except as a dash starts (no spike), and the step after touchdown you are still moving.
 func _chain() -> void:
 	var at := _open_lane()
 	if at == Vector3.INF:
@@ -175,6 +175,8 @@ func _chain() -> void:
 	var land := [-1.0, -1.0]
 	var prev := 0.0
 	var was_air := false
+	var was_dashing := false
+	var end_short := false
 	for i in 150:
 		h.inp["dash"] = i == 30
 		h.inp["jump"] = i == 44 or i == 56
@@ -184,19 +186,23 @@ func _chain() -> void:
 		var dashing := h.roll_t > 0.0 or (h.ak != null and h.ak.in_dash())
 		if i > 0 and not (dashing and hs > prev):
 			worst_gain = maxf(worst_gain, hs - prev)
-		if i > 0 and prev > 0.5:
+		if i > 0 and prev > 0.5 and was_dashing and not dashing:
+			# the step a dash ends it hands over at the run speed (docs/decisions/0061): a drop to
+			# the run is the hand-over, not a stop; below it would be
+			end_short = end_short or hs < minf(prev, h.run_speed) * 0.95
+		elif i > 0 and prev > 0.5:
 			worst_drop = maxf(worst_drop, (prev - hs) / prev)
 		if was_air and h.grounded and land[0] < 0.0 and i > 60:
 			land = [prev, hs]
 		was_air = not h.grounded
+		was_dashing = dashing
 		prev = hs
 		if i % 10 == 9: trace.append("%s %.1f" % [h.loco.state_name().left(4), hs])
 	h.inp["move"] = Vector2.ZERO
 	h.inp["glide"] = false
 	print("ACHECK note chain h-speed every 1/6 s: %s" % ", ".join(trace))
-	# (the worst is the jump out of the dash: it keeps Loco.dash_jump_keep, 0.75, plus that step's air drag)
-	ok(worst_drop <= 0.3, "item 7: run > dash > jump > glide > land never loses over 30%% in a step (worst %d%%)"
-		% int(100.0 * worst_drop))
+	ok(worst_drop <= 0.3 and not end_short, "item 7: run > dash > jump > glide > land never loses over 30%% in a step"
+		+ " (worst %d%%), and the dash's end never below the run" % int(100.0 * worst_drop))
 	ok(worst_gain <= 2.0,
 		"item 7: and never gains over 2 m/s in a step outside a dash's start (worst %.2f)" % worst_gain)
 	ok(land[0] > 0.0 and land[1] >= land[0] * 0.9, "item 6: the step after touchdown you keep moving (%.2f -> %.2f m/s)"
