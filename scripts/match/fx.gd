@@ -28,6 +28,8 @@ var flash_pool: Array[MeshInstance3D] = []
 var fi := 0
 
 func _ready() -> void:
+	wall_impact = WallImpact.new(self)
+	add_child(wall_impact)
 	particles = PARTICLES * float(Settings.q("fx"))
 	particle_mat = StandardMaterial3D.new()
 	particle_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -208,6 +210,7 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
+var wall_impact: WallImpact     # the crack decals where a wall stun landed
 var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
 ## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
@@ -245,8 +248,8 @@ func _ground_under(at: Vector3) -> float:
 	return m.world.ground_at(at.x, at.z) if m else NO_GROUND
 
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
-func dust(at: Vector3, n := 8) -> void:
-	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
+func dust(at: Vector3, n := 8, col := Color(0.82, 0.8, 0.72, 0.9)) -> void:
+	_emit(at + Vector3(0, 0.1, 0), col, n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
 ## A thin smoke puff drifting behind `dir` (an overheated glider's trail). Like dust, not a burst: dark and grey
 ## (no hot core), ~0.4 m soft dots that rise a little and fade over a second, so the puffs left every SMOKE_EVERY

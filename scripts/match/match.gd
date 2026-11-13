@@ -2482,9 +2482,8 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
-func on_wall_slam(e: Ent) -> void:
-	fx.burst(e.pos + Vector3(0, 0.9, 0), Color("e6dccb"), 16, 4.0, 0.4)
-	fx.ring(e.pos, 1.2, Color("fff27a"), 0.3)
+func on_wall_slam(e: Ent, dir: Vector2) -> void:
+	KnockWall.slammed(e, dir, e.last_hit_by)
 	sfx("knock", e.pos, -2.0, 1.2)
 	var sc: Ent = e.last_hit_by
 	if sc is Kin and (sc as Kin).owner_h: sc = (sc as Kin).owner_h

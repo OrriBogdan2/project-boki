@@ -382,6 +382,7 @@ const CHECKS := {
 	"--mantle-fling-check": ["res://tools/mantle_fling_check.gd", "mantle_fling_check", null],      # owner bug 11-11
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--wall-stun-check": ["res://tools/wall_stun_check.gd", "wall_stun_check", null],      # which surfaces a wall stun counts
+	"--wall-stun-shots": ["res://tools/wall_stun_shots.gd", "wall_stun_shots", null],      # --shots-dir=<dir>
 	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input

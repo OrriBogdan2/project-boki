@@ -658,7 +658,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 		o["lift"] = 2.0
 		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
 		daze(f, float(bd["cone_rattle"]))         # the training dummy too
-		if f is Hunter and KnockWall.behind(m, f, away, 2.4):
+		if f is Hunter and KnockWall.hit(m, f, away, 2.4, h):
 			wall_slams += 1
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
 			slam["dr"] = true
