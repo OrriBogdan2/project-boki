@@ -4334,6 +4334,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var nm: String = rec["name"]
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
+		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
 		Save.save_game()
 		_refresh_top()
