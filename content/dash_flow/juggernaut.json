@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. into_cast.<first>.<second> (the Cast into cast table): <second> pressed at <first>'s at[0] s (windup) and at[1] s (recovery) after <first>'s press: fire (at once) | queue (goes <phase>_wait s later) | drop (never goes); lmb_hold is LMB held 0.75 s; asserted by --cast-into-cast-check.",
 	"dash": {
 		"ground": {
 			"lmb": {
@@ -102,6 +102,41 @@
 			"mode": "lock",
 			"reason": "The source plants him through the guard: no jump until the counter has struck.",
 			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
+		}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.3],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120)."}
+		},
+		"rmb": {
+			"at": [0.3, 0.8],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366)."}
+		},
+		"x": {
+			"at": [0.3, 0.9],
+			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
+			"lmb_hold": {"windup": "queue", "windup_wait": 0.45, "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
+			"e": {"windup": "drop", "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."}
 		}
 	}
 }

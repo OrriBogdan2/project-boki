@@ -22,5 +22,40 @@
 		"e": {"mode": "fire", "source": "Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to."},
 		"x": {"mode": "fire", "source": "Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a shot in the clip (briefs/hero-ref/dancer.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside a held shot in the clip (briefs/hero-ref/dancer.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Trickshot's 0.4-0.6 s lane before the throw: no other press inside it (briefs/hero-ref/dancer.md:26)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its E in the clip (briefs/hero-ref/dancer.md)."}
+		},
+		"x": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."}
+		}
 	}
 }
