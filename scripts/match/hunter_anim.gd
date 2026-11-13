@@ -549,7 +549,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var rolling: bool = s.get("rolling", false)
 	var stun: bool = s.get("stun", false)
 	var fired: float = s.get("fired", 99.0)
-	var hv := Vector2(vel.x, vel.z)
+	var rooted := WardenClips.planted(s)      # feet planted, whatever the velocity says
+	var hv := Vector2.ZERO if rooted else Vector2(vel.x, vel.z)
 	var spd := hv.length()
 	# where the ground is, for keeping the weapon out of it (unknown in the air without air_h)
 	floor_ok = grounded or s.has("air_h")
@@ -839,6 +840,8 @@ func update(dt: float, s: Dictionary) -> void:
 	if not km.is_empty() and km.has("legs") and float(km["lw"]) > 0.0:
 		var kl4: Array = km["legs"]
 		var lw := clampf(float(km["lw"]), 0.0, 1.0) * stance_leg_k(km_stance, run_k)
+		if rooted and not km_stance:
+			lw = 0.0      # (rooted: only a planted stance's legs play)
 		hl = lerpf(hl, kl4[0], lw); kl = lerpf(kl, kl4[1], lw)
 		hr = lerpf(hr, kl4[2], lw); kr = lerpf(kr, kl4[3], lw)
 	# pulling up a ledge or vaulting: one knee comes up onto it

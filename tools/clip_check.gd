@@ -18,6 +18,7 @@ const HAND_PIECE_M := 0.25     # m: carrying, a shown piece on one hand alone ma
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
+const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
 ## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
@@ -114,6 +115,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		var want := float(dd["bone_scale"][nm])
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
+	await _rooted(id, m, sync, clips, dd)
 	await _handover(id, m, sync, clips, dd)
 	await _carry(id, m, sync, clips, dd)
 	m.free()
@@ -296,6 +298,64 @@ func _sliders(id: String, sync: Node) -> void:
 	var stays := float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0))
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
+
+## Rooted (a foe's Root, the state's "rooted"), the legs stay planted while the body casts: through every kit move the
+## feet move under ROOT_FOOT_M over the idle's sway, though the velocity says he runs (Rimelock's statue is frozen).
+func _rooted(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var feet: Array = []
+	for nm in ["shin.L", "shin.R"]:
+		var kids := sk.get_bone_children(WardenSkeleton.find(sk, nm))
+		feet.append(kids[0] if not kids.is_empty() else WardenSkeleton.find(sk, nm))
+	var s := {"vel": Vector3(0, 0, -3.0), "face": 0.0, "grounded": true, "rooted": true}
+	m.set_meta(WardenClips.STATE, s)
+	for k in 12:
+		sync.call("_process", DT)
+	await holder.get_tree().process_frame
+	clips.still_t = 0.0
+	clips.stance_w = 0.0
+	for k in 20:
+		sync.call("_process", DT)
+	await holder.get_tree().process_frame
+	var rest: Array = []
+	for b in feet:
+		rest.append(sk.global_transform * sk.get_bone_global_pose(b).origin)
+	var moves: Dictionary = dd.get("kmoves", {})
+	var worst := 0.0
+	var where := ""
+	var sway := 0.0      # (the idle's own weight shift moves a heavy Hero's feet; a cast adds to it)
+	var idle_len := clips.lib.get_animation(String((dd["loco"] as Dictionary)["idle"])).length
+	for k in ceili(idle_len / DT):      # (the whole idle loop: a foot shift can come late in it)
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		sway = maxf(sway, _foot_dist(sk, feet, rest))
+	for km in moves:
+		if (dd.get("still", []) as Array).has(moves[km]["clip"]):
+			continue
+		var length := minf(clips.lib.get_animation(String(moves[km]["clip"])).length, 1.5)
+		var t := 0.0
+		clips.still_t = 0.0      # (the standing stance after 6 s still is its own pose, not the cast's)
+		while t < length:
+			s["kmove"] = km
+			s["kmove_t"] = t
+			sync.call("_process", DT)
+			await holder.get_tree().process_frame
+			var d := _foot_dist(sk, feet, rest)
+			if d > worst:
+				worst = d
+				where = "%s @%.2f" % [km, t]
+			t += DT
+	s.erase("kmove")
+	m.set_meta(WardenClips.STATE, {})
+	ok(worst <= sway + ROOT_FOOT_M, "%s: rooted, feet planted over every move (worst %.3f, %s; idle %.3f)"
+			% [id, worst, where, sway])
+
+## How far the furthest-moved foot has gone from where it stood.
+func _foot_dist(sk: Skeleton3D, feet: Array, rest: Array) -> float:
+	var far := 0.0
+	for i in feet.size():
+		far = maxf(far, (sk.global_transform * sk.get_bone_global_pose(feet[i]).origin).distance_to(rest[i]))
+	return far
 
 ## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand
 ## moving further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.
