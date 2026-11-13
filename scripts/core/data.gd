@@ -112,38 +112,35 @@ const MUSIC := {
 ## Perks are found during an expedition, never brought from home: chests, shrines and bosses drop
 ## perk orbs you walk into (PerkOrbs, content/rules/perk_orbs.json). They stack up to "max" and last
 ## until the expedition ends, extracted or not. stats feed Hunter.gear_stat like gear does
-## (speed, dmg, armor, cdr, heat, glide_speed, dodge, heal_in, sneak_sight), "hp" is max health added
-## on pickup; the rest are read by name with Hunter.perk_n(). Numbers follow the source's perks where
-## one matches (docs/PERK_PARITY.md, --perk-orb-check).
+## (speed, dmg, armor, cdr, heat, glide_speed); the rest are read by name with Hunter.perk_n().
 const PERKS := {
 	"quickhands": {"name": "Quick Hands", "desc": "Reload 30% faster.", "icon": "medkit", "col": Color("ffd27a"), "max": 1},
-	"secondwind": {"name": "Second Wind", "desc": "Dashes recharge 5% faster.", "icon": "dash", "col": Color("bfe6ff"), "max": 1, "stats": {"dodge": 0.0476}},
-	"featherfall": {"name": "Featherfall", "desc": "Your glider holds 60% more heat.", "icon": "updraft", "col": Color("cfeaff"), "max": 1, "stats": {"heat": 0.6}},
+	"secondwind": {"name": "Second Wind", "desc": "One extra dash charge.", "icon": "dash", "col": Color("bfe6ff"), "max": 1},
+	"featherfall": {"name": "Featherfall", "desc": "Your glider lasts 60% longer.", "icon": "updraft", "col": Color("cfeaff"), "max": 1},
 	"scavenger": {"name": "Scavenger", "desc": "Gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 2},
-	"toughskin": {"name": "Tough Skin", "desc": "+8 max health, healed right away.", "icon": "heart", "col": Color("8fe0a0"), "max": 3, "hp": 8.0},
+	"toughskin": {"name": "Tough Skin", "desc": "+15 max health, healed right away.", "icon": "heart", "col": Color("8fe0a0"), "max": 3},
 	"overcharge": {"name": "Overcharge", "desc": "Your bond ultimate charges 30% faster.", "icon": "bond", "col": Color("ffd23f"), "max": 1},
 	"keen": {"name": "Keen Edge", "desc": "8% more damage.", "icon": "burst", "col": Color("ff8a6a"), "max": 3, "stats": {"dmg": 0.08}},
-	"fleet": {"name": "Fleet Foot", "desc": "1% faster on foot.", "icon": "jump", "col": Color("8fd16a"), "max": 2, "stats": {"speed": 0.0096}},
+	"fleet": {"name": "Fleet Foot", "desc": "6% faster on foot.", "icon": "jump", "col": Color("8fd16a"), "max": 2, "stats": {"speed": 0.06}},
 	"plating": {"name": "Plating", "desc": "+20 max armor.", "icon": "fortify", "col": Color("dfe9f7"), "max": 2, "stats": {"armor": 20.0}},
-	"focus": {"name": "Clear Mind", "desc": "Abilities recharge 5% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 2, "stats": {"cdr": 0.05}},
+	"focus": {"name": "Clear Mind", "desc": "Abilities recharge 12% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 2, "stats": {"cdr": 0.12}},
 	"tailwind": {"name": "Tailwind", "desc": "Glide 15% faster.", "icon": "gust", "col": Color("9fe8ff"), "max": 1, "stats": {"glide_speed": 0.15}},
-	"remedy": {"name": "Remedy", "desc": "Heals on you are 10% stronger.", "icon": "tonic", "col": Color("8fe0a0"),
-		"max": 1, "stats": {"heal_in": 0.10}},
+	"remedy": {"name": "Remedy", "desc": "Tonics heal 40% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1},
 	# the old kit passives, now found as orbs (the same numbers they had as kit gear)
-	"field_kit": {"name": "Field Surgeon", "desc": "Tonics heal 35% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1, "stats": {"tonic": 0.35}},
-	"magpie": {"name": "Magpie Pouch", "desc": "Gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 1, "stats": {"gems": 0.25}},
-	"satchel": {"name": "Wayfarer's Satchel", "desc": "One more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
-	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further while sneaking.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sneak_sight": 0.12}},
-	"tinker_roll": {"name": "Tinker's Roll", "desc": "Reload 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
+	"field_kit": {"name": "Field Surgeon", "desc": "Needle and thread: tonics heal 35% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1, "stats": {"tonic": 0.35}},
+	"magpie": {"name": "Magpie Pouch", "desc": "Shiny things stick: gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 1, "stats": {"gems": 0.25}},
+	"satchel": {"name": "Wayfarer's Satchel", "desc": "A deep bag: one more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
+	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further through grass and gloom.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sight": 0.12}},
+	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
 	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
 	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
-	"longreach": {"name": "Long Reach", "desc": "12% more range, or reach for blades.", "icon": "gust", "col": Color("9fe8ff"), "max": 2, "wup": {"range": 0.12}},
+	"longreach": {"name": "Long Reach", "desc": "12% more range (and reach, for blades).", "icon": "gust", "col": Color("9fe8ff"), "max": 2, "wup": {"range": 0.12}},
 	"brand_fire": {"name": "Ember Brand", "desc": "Your hits burn: 5 damage a second for 3s.", "icon": "fireball", "col": Color("ff8a3a"), "max": 1, "wup": {"brand": "fire"}},
-	"brand_frost": {"name": "Rime Brand", "desc": "Your hits slow 35% for 1s, and every 5th roots for 0.6s.", "icon": "snare", "col": Color("bff0ff"), "max": 1, "wup": {"brand": "frost"}},
-	"brand_storm": {"name": "Storm Brand", "desc": "Every 4th hit arcs to 2 more foes for half damage.", "icon": "chain", "col": Color("fff27a"), "max": 1, "wup": {"brand": "storm"}},
-	"brand_venom": {"name": "Venom Brand", "desc": "Your hits poison for 3 damage a second for 3s and slow 35% for 0.35s.", "icon": "burst", "col": Color("9aff6a"), "max": 1, "wup": {"brand": "venom"}},
+	"brand_frost": {"name": "Rime Brand", "desc": "Your hits chill, and every 5th freezes.", "icon": "snare", "col": Color("bff0ff"), "max": 1, "wup": {"brand": "frost"}},
+	"brand_storm": {"name": "Storm Brand", "desc": "Every 4th hit arcs to 2 more foes.", "icon": "chain", "col": Color("fff27a"), "max": 1, "wup": {"brand": "storm"}},
+	"brand_venom": {"name": "Venom Brand", "desc": "Your hits poison and slow.", "icon": "burst", "col": Color("9aff6a"), "max": 1, "wup": {"brand": "venom"}},
 	"brand_void": {"name": "Hollow Brand", "desc": "Your hits heal you for 8% of the damage.", "icon": "shadowstep", "col": Color("b08aff"), "max": 1, "wup": {"brand": "void"}},
 }
 

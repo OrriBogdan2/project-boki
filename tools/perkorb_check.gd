@@ -136,12 +136,12 @@ func _drops() -> void:
 			ok("perk %s has the kit's numbers" % id, same, str(g.get("stats", {})))
 	var cap0: int = P.pack_cap
 	var gm0 := PerkOrbs.gem_mult(P)
-	var s0: float = P.gear_stat("sneak_sight") + P.gear_stat("reload") + P.gear_stat("tonic")
+	var s0: float = P.gear_stat("sight") + P.gear_stat("reload") + P.gear_stat("tonic")
 	for id in ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]:
 		PerkOrbs.grant(P, id)
 	ok("the satchel perk adds a backpack slot", P.pack_cap == cap0 + 1, "%d -> %d" % [cap0, P.pack_cap])
 	ok("the magpie perk makes gems worth 25% more", is_equal_approx(PerkOrbs.gem_mult(P), gm0 + 0.25))
-	ok("the spyglass, tinker's roll and field kit perks add their stats", is_equal_approx(P.gear_stat("sneak_sight") + P.gear_stat("reload") + P.gear_stat("tonic") - s0, 0.12 + 0.15 + 0.35))
+	ok("the spyglass, tinker's roll and field kit perks add their stats", is_equal_approx(P.gear_stat("sight") + P.gear_stat("reload") + P.gear_stat("tonic") - s0, 0.12 + 0.15 + 0.35))
 	m.queue_free()
 
 # ------------------------------------------------------------------ 4. fan: fade for you only
