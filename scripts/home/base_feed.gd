@@ -76,6 +76,7 @@ static func tick(h, k: Dictionary, since: float) -> bool:
 		SnackPatch.shelve(Save.d, food)      # it would not eat it: back on the shelf
 		h._emote(k, "?")
 		return false
+	BokiLifeSfx.at_home(k, "eat")
 	h._emote(k, "♥" if res.get("love", false) else "♪")
 	GardenFirstDay.mark("feed", h)
 	if String(e["from"]) == "patch":
