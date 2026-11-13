@@ -51,7 +51,7 @@ func run(main: Node) -> void:
 	_button(hm.panel_host, "Locked Relics").pressed.emit()
 	await _frames(tree)
 	ok(_shown(tiles).size() == tiles.size(), "the fold shows every Relic tile")
-	_names_whole(hm.panel_host, tree, "Relics page", func(id): return Arch.name_of(id))
+	_names_whole(hm.panel_host, tree, "Relics page", _tile_name)
 	hm.queue_free()
 	await _frames(tree)
 	# a second drop is open: nothing is folded
@@ -72,6 +72,11 @@ func run(main: Node) -> void:
 	print("RELICSFOLD DONE, failures: %d" % bad)
 	tree.quit()
 
+## The big name label on a Relics tile: the base name, or the whole name when it has none.
+func _tile_name(id: String) -> String:
+	var base := HeroTitle.base_name(id)
+	return base if base != "" else Arch.name_of(id)
+
 func _lit(tile: Node, me: String) -> bool:
 	return tile.get_meta("class_status") in ["open", "ready"] or tile.get_meta("arch") == me
 
@@ -89,6 +94,7 @@ func _farm(main: Node, extracts: int) -> Node:
 	d["cls"] = Arch.weight("gunslinger")
 	d["extracts"] = extracts
 	Save.d = d
+	ClassUnlock.choose_starters(["gunslinger"])      # (a new save must pick its starter before the portal opens)
 	var hm = await main._hb_home()
 	await _frames(main.get_tree(), 30)
 	return hm
