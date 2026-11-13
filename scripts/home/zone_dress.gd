@@ -86,6 +86,7 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 	var stump := BaseShove.spot()
 	if not stump.is_empty():
 		keep.append(Vector3(stump[0], 0.0, stump[1]))
+	keep.append_array(BaseRace.loop_points())
 	for kind in KINDS_FLORA:
 		var by: Array = [[], []]
 		for i in int(S.get(kind, 0)):

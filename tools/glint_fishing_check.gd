@@ -10,7 +10,10 @@ extends RefCounted
 ##   6. the machine: no move is refused, every session is five casts, early, late and empty-water casts
 ##      end as such, and the bot's sessions last about two minutes
 ##   7. settle: each catch is banked (items to the bag, snacks to the pantry), joy, energy, a memory line
-##   8. on the rock: Glasswater has the rock and a session started there runs to a result card; the Empty
+##   8. the looks (content/rules/glint_fishing_vfx.json, glint_fx.gd): every recipe is whole, the rings stay wide until
+##      the ears go up and close by the bite, the bite fires once, a catch's glint grows with what came up, and
+##      each look hides itself when its life is spent
+##   9. on the rock: Glasswater has the rock and a session started there runs to a result card; the Empty
 ##      holds the rod and casts through it (HunterRod poses via HomeVerbs) and puts it away at the end
 ## --glint-fishing-shots=<dir> makes a strip of one cast on the Empty instead (a real renderer).
 ## Never touches the real save.
@@ -48,9 +51,45 @@ func run(m: Node) -> void:
 	_sign()
 	_machine()
 	_settle()
+	_looks()
 	await _on_rock()
 	print("FISH DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The looks: recipes, the closing rings and bite timing, one-shot lives, the catch glint's size.
+func _looks() -> void:
+	var recs := GlintFx.recipes()
+	var whole := true
+	for key in GlintFx.KEYS:
+		var rec: Dictionary = recs.get(key, {})
+		whole = whole and GlintFx.look_id(String(rec.get("look", ""))) >= 0 and rec.has("size") and rec.has("c")
+	ok(whole, "plop, wait, bite and catch each have a recipe with a look, a size and colours")
+	var r := GlintFishing.Run.new(_rec(50, 50), 20000, RandomNumberGenerator.new())
+	r.hooked = 0
+	r.bite_t = 4.0
+	r.go(GlintFishing.Run.S.WAIT)
+	r.step(r.bite_t - r.warn - 0.1, false)
+	ok(not r.ears() and r.close_k() == 0.0 and not r.bitten(), "before the ears the rings stay wide and no bite")
+	r.step(0.1 + r.warn * 0.5, false)
+	var half_closed := absf(r.close_k() - 0.5) < 0.05
+	ok(r.ears() and half_closed and not r.bitten(), "half way through the warning, half closed")
+	r.step(r.bite_t - r.state_t + 0.01, false)
+	ok(r.bitten() and r.close_k() == 1.0, "at the bite they are closed and the splash is due")
+	var rock := Node3D.new()
+	var fx := GlintFx.new(rock)
+	fx.play("bite", Vector3.ZERO)
+	ok(fx.node_of("bite").visible, "the splash shows when played")
+	fx.tick(float(recs["bite"]["life"]) + 0.01)
+	ok(not fx.node_of("bite").visible, "and hides when its life is spent")
+	var sizes := {}
+	for k in ["snack", "item", "rare"]:
+		fx.play("catch", Vector3.ZERO, k)
+		sizes[k] = fx.node_of("catch").scale.x
+	ok(sizes["snack"] < sizes["item"] and sizes["item"] < sizes["rare"], "the glint grows with the catch %s" % sizes)
+	var rare_key := GlintFx.catch_size_key({"kind": "item"}, true)
+	var snack_key := GlintFx.catch_size_key({"kind": "snack"}, false)
+	ok(rare_key == "rare" and snack_key == "snack", "a rare draws at the rare size, else by kind")
+	rock.free()
 
 func _rec(focus: int, power: int) -> Dictionary:
 	var r := Save.new_kin("zapple", "Pip")
@@ -256,14 +295,17 @@ func _on_rock() -> void:
 	gf.use()
 	ok(gf.run != null, "a session starts with your partner")
 	var t := 0.0
+	var plopped := false
 	var posed := {}              # the Empty's rod poses seen (HomeVerbs: a one-shot over the held pose)
 	while gf.run != null and t < float(GlintFishing.rules()["max_s"]) + 30.0:
 		gf.holding = fmod(t, 1.0) < 0.5
 		gf.tick(0.1)
+		plopped = plopped or (gf.run != null and gf.fx.node_of("plop").visible)
 		t += 0.1
 		posed[gw.verbs.act if gw.verbs.act != "" else gw.verbs.stance] = true
 	ok(posed.has("wait") and posed.has("cast"), "the Empty holds the rod and casts (poses seen: %s)" % [posed.keys()])
 	ok(gw.verbs.stance == "" and gw.verbs.act == "", "the rod is put away when fishing ends")
+	ok(plopped, "a cast's plop showed on the water during the session")
 	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
 	Content.rules("farm_build")["base_mode"] = false
 

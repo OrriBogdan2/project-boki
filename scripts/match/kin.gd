@@ -81,6 +81,7 @@ var st_kos := 0
 var st_throws := 0
 var st_skills := 0
 var cd_mult := 1.0
+var carry_k := 1.0                 # carry passives x this: how well it was raised (RunPayoff)
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
 var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
@@ -132,6 +133,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 		cd_mult *= float(cm["cd"])
 		power *= float(cm["skill"])
 		mood = float(cm["mood"])
+		carry_k = RunPayoff.carry_mult(rec)
 		# IVS (inborn stats, Care.iv_mult): at most +10% health / +10% damage / +5% speed at 31,
 		# on top of the kin's final stats (budget points + level growth + mutations + care).
 		# The only match-side use besides the bond meter (Bond.add).
@@ -285,7 +287,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 		verdict = "hesitate"
 	if verdict == "refuse":
 		bark("refuse")
-		m.sfx("kin_unsure", owner_h.pos, -2.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -2.0, Unique.voice(rec))
 		note("refused", "refused to jump into a fight that looked too dangerous", -1.0)
 		pend_slot = ""; pend_skill = Vector3.INF
 		return
@@ -294,7 +296,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 		hesitate_to = p
 		if trust < 60.0 or not owner_h.is_local():
 			bark("hesitate")
-		m.sfx("kin_unsure", owner_h.pos, -4.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -4.0, Unique.voice(rec))
 		return
 	if from_shoulder:
 		_launch(p)
@@ -537,7 +539,7 @@ func land_pumped(secs: float) -> void:
 	rest_t = secs
 	m.fx.burst(pos + Vector3(0, 1.0, 0), sp["color"], 22, 4.0)
 	m.fx.ring(pos, 1.6, Color(sp["color"], 0.9), 0.35)
-	m.sfx("kin_happy", pos, -4.0, Unique.voice(rec))
+	m.sfx(KinVoice.cue(species, "sleepy"), pos, -4.0, Unique.voice(rec))
 	KinNet.event(m, "rest", self, owner_h.pos, "%.1f" % secs)
 	if owner_h.is_local():
 		KinCommand.say(owner_h, "%s is pumped: back in %ds" % [rec.get("name", "Your Boki"), int(ceil(secs))], sp["color"])
@@ -590,11 +592,14 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	atk_cd = maxf(0.0, atk_cd - dt)
+	lunge_t = maxf(0.0, lunge_t - dt)
+	throw_cd = maxf(0.0, throw_cd - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	rest_t = maxf(0.0, rest_t - dt)
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
-		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
 		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt
@@ -734,6 +739,7 @@ func _sim_fly(dt: float) -> void:
 		else:
 			pos.y = g
 			grounded = true
+			KinFlinch.land(model, mass())
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
@@ -816,7 +822,8 @@ func _sim_active(dt: float) -> void:
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
-		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) \
+				or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
@@ -1037,6 +1044,8 @@ func render(delta: float, alpha: float) -> void:
 		return
 	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
+	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
+	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	model.set_meta("pose", pose_now)
@@ -1090,7 +1099,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 		body.rotation.x = -0.4 if lunge_t > 0.0 else 0.0
-	if state == "flying" and not fly.get("rush", false):
+	if airborne:
 		body.rotation.x += delta * 14.0
 	if state == "active":
 		_render_attention(delta, body)
