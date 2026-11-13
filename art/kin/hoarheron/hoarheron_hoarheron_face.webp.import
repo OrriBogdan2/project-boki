@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ssmmamgkl3ce"
-path="res://.godot/imported/hoarheron_hoarheron_face.webp-d2ca66afc22b7e62ae82f1bf47eb1760.ctex"
+path.bptc="res://.godot/imported/hoarheron_hoarheron_face.webp-d2ca66afc22b7e62ae82f1bf47eb1760.bptc.ctex"
+path.astc="res://.godot/imported/hoarheron_hoarheron_face.webp-d2ca66afc22b7e62ae82f1bf47eb1760.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9d0bb8a808e96a0cfc4741479b93cfd4"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/hoarheron/hoarheron_hoarheron_face.webp"
-dest_files=["res://.godot/imported/hoarheron_hoarheron_face.webp-d2ca66afc22b7e62ae82f1bf47eb1760.ctex"]
+dest_files=["res://.godot/imported/hoarheron_hoarheron_face.webp-d2ca66afc22b7e62ae82f1bf47eb1760.bptc.ctex", "res://.godot/imported/hoarheron_hoarheron_face.webp-d2ca66afc22b7e62ae82f1bf47eb1760.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm56kb3c7vmpt"
-path="res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.ctex"
+path.bptc="res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.bptc.ctex"
+path.astc="res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e4085baa07eda3b5a11cf771d11b7214"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/goliathite/goliathite_goliathite_face.webp"
-dest_files=["res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.ctex"]
+dest_files=["res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.bptc.ctex", "res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

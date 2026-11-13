@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bj4co12feseuw"
-path="res://.godot/imported/hoarheron_hoarheron_atlas.webp-7f8170d6d408adf969ae790733b27073.ctex"
+path.bptc="res://.godot/imported/hoarheron_hoarheron_atlas.webp-7f8170d6d408adf969ae790733b27073.bptc.ctex"
+path.astc="res://.godot/imported/hoarheron_hoarheron_atlas.webp-7f8170d6d408adf969ae790733b27073.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8fe39cf5a91490cd2059e4550130ca99"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/hoarheron/hoarheron_hoarheron_atlas.webp"
-dest_files=["res://.godot/imported/hoarheron_hoarheron_atlas.webp-7f8170d6d408adf969ae790733b27073.ctex"]
+dest_files=["res://.godot/imported/hoarheron_hoarheron_atlas.webp-7f8170d6d408adf969ae790733b27073.bptc.ctex", "res://.godot/imported/hoarheron_hoarheron_atlas.webp-7f8170d6d408adf969ae790733b27073.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
