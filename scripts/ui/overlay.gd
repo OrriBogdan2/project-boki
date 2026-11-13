@@ -5,6 +5,9 @@ extends CanvasLayer
 
 signal closed
 
+## The settings body's held height: as tall as the window allows on every tab (most tabs need more than a
+## 720p window has, and scroll), so switching tabs never resizes the panel.
+const SETTINGS_H := INF
 const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 
 var root: Control
@@ -313,6 +316,7 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
+	UI.hold(v, SETTINGS_H)
 	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
 		tab = t
 		_show_settings())
@@ -510,7 +514,9 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	lc.add_child(UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi))
+	var head := UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi)
+	head.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long action name wraps, never widens the panel
+	lc.add_child(head)
 	if hint != "":
 		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))
 	r.add_child(lc)
