@@ -45,6 +45,9 @@ extends RefCounted
 ##      and ArchKit._tells plays it; every kit file that emits a cue is walked by item 4
 ##  21. mobs and bosses: every kind that attacks has its own mob_<kind>_atk and _hit, each boss its _tell,
 ##      and no sound played by mob.gd, boss.gd or blight.gd is a Boki cue (k_*), so a Boki rename cannot silence them
+##  22. footsteps: a Hunter walked over every surface of the Hollow Crown (the sky train's car deck; a plank
+##      bridge tile laid on it) plays the cue for it: its own set on grass, stone, wood and snow, the
+##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -73,6 +76,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
 	levels = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))
 	ok(levels is Dictionary and (levels.get("cats", {}) as Dictionary).size() >= 8, "the loudness table loads")
 	var sets := 0
@@ -100,6 +105,7 @@ func run(main: Node) -> void:
 	_fusion_cues()
 	_res_tells()
 	_unwalked()
+	await _steps(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -739,3 +745,71 @@ func _hold(main: Node, sname: String, held: bool) -> Dictionary:
 		peak = maxi(peak, live)
 		await main.get_tree().process_frame
 	return {"peak": peak, "takes": takes, "shots": shots}
+
+## 22. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
+const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
+const STEP_VOL := -13.0       # dB: the player's own step in Juice.footstep
+
+func _steps(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.set_process(false)
+	ok(m.world.layout_id == "hollowcrown", "step check runs on the Hollow Crown (%s)" % m.world.layout_id)
+	var spots := _surface_tiles(m)
+	ok(m.world.bridge.is_empty(), "the Hollow Crown has no plank bridges (its docks are gone)")
+	ok(m.skytrain != null, "the Hollow Crown has a sky train")
+	if m.skytrain != null:
+		var car: Transform3D = m.skytrain.cur[1]
+		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
+		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
+		spots["metal"] = deck
+	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
+	for surf in ["grass", "stone", "snow", "metal", "wood"]:
+		if surf == "wood":      # last: lays a plank tile on the grass one
+			m.world.bridge[m.world.idx(int(plank.x), int(plank.z))] = true
+			ok(StepSurface.at(m, plank) == "wood", "a plank bridge tile is wood")
+			spots["wood"] = plank
+		if spots.has(surf):
+			_walk(m, m.player, surf, spots[surf])
+		else:
+			ok(false, "the Hollow Crown has %s to step on" % surf)
+	for cls in WEIGHT_ARCH:
+		var wade := "step_water_" + StepSurface.weight_of(WEIGHT_ARCH[cls])
+		ok(wade == "step_water_" + cls and Sfx.ensure(wade), "farm wading: %s plays %s" % [cls, wade])
+	m.queue_free()
+
+## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
+## shared steps get quieter to heavier, and the sound has its takes loaded.
+func _walk(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
+	var arch0 := h.arch
+	var vols := []
+	for cls in WEIGHT_ARCH:
+		h.arch = WEIGHT_ARCH[cls]
+		h.teleport(p)
+		var want := "step_%s_%s" % [surf, cls] if surf in StepSurface.SHARED else "%s_step_%s" % [h.arch, surf]
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		Sfx.listener = p
+		Juice.footstep(h)
+		var got: Array = Sfx.last_played.keys()
+		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
+		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
+	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
+	ok(spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
+			"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols])
+	h.arch = arch0
+
+## A walkable ground tile centre per ground surface (grass, stone, snow).
+func _surface_tiles(m: Match) -> Dictionary:
+	var w: World = m.world
+	var out := {}
+	for z in w.h:
+		for x in w.w:
+			if w.kind[w.idx(x, z)] != World.T_GROUND:
+				continue
+			var p := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
+			var surf := StepSurface.at(m, p)
+			if not out.has(surf):
+				out[surf] = p
+	return out
