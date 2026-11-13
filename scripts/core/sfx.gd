@@ -520,16 +520,16 @@ func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
 ## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
 var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
 
-func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
+func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0, bus := "SFX") -> void:
 	if loops.has(key):
 		return
 	var st = streams.get(sname)
 	if st is Array: st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
-	p.bus = "SFX"
+	p.bus = bus
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry}
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry, "bus": bus}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
@@ -563,8 +563,8 @@ func loop_stop(key: String) -> void:
 ## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
 ## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
 const HOLD_MS := 250
-func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
-	loop_start(key, sname, pos, vol_db)
+func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0, bus := "SFX") -> void:
+	loop_start(key, sname, pos, vol_db, 0.0, bus)
 	loops[key]["vol"] = vol_db
 	loops[key]["held"] = Time.get_ticks_msec()
 	loop_set(key, pos, pitch)
@@ -582,7 +582,7 @@ func _loop_level(L: Dictionary) -> void:
 	var p: AudioStreamPlayer = L["p"]
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
 	p.volume_db = -80.0 if is_nan(v) else v
-	p.bus = _bus_for(L["pos"])
+	p.bus = _bus_for(L["pos"]) if L["bus"] == "SFX" else L["bus"]
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
 func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) -> void:

@@ -439,11 +439,11 @@ func tick(d: float) -> void:
 		return
 	var was_ears := run.ears()
 	var was_bitten := run.bitten()
+	var was := last
 	run.step(d, holding)
 	_seated()
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
-		Sfx.play("ping", null, -6.0)
 	if run.state == Run.S.WAIT and run.state_t >= run.bite_t and run.state_t - d < run.bite_t:
 		h.verbs.play("bite")
 	if run.state != last:
@@ -452,6 +452,7 @@ func tick(d: float) -> void:
 	_draw_fx(d, was_bitten)
 	if who.get("busy", false):
 		_pose(d)
+	GlintSfx.tick(h, run, was, was_ears, _sfx_at())
 	if run.over():
 		_end(true)
 
@@ -465,10 +466,8 @@ func _entered(s: Run.S) -> void:
 		h.verbs.play("cast")
 	match s:
 		Run.S.WAIT:
-			Sfx.play("splash", null, -10.0)
 			fx.play("plop", _water(float(run.glints[run.hooked]["d"]), 0.0) - rock.position)
 		Run.S.REEL:
-			Sfx.play("splash", null, -4.0)
 			h._toast("Hooked! Hold and let go to keep the line in the band")
 		Run.S.SHOW:
 			var c: Dictionary = run.casts[-1]
@@ -516,6 +515,10 @@ func _pose(d: float) -> void:
 	body.rotation.x = lerpf(body.rotation.x, -LEAN_RAD if run.ears() else 0.0, k)
 	cheer = maxf(0.0, cheer - d)
 	body.position.y = absf(sin(cheer * 10.0)) * cheer_hop * cheer / cheer_len
+
+## Where the line meets the water, for the sounds: the bobber while it shows, else where the swing was let go.
+func _sfx_at() -> Vector3:
+	return bobber.global_position if bobber.visible else _water(run.reach(), 0.0)
 
 ## m along the cast and m to its side, from the rock, as a point on the water.
 func _water(along: float, side: float) -> Vector3:
@@ -592,6 +595,7 @@ func _end(finished: bool) -> void:
 	body.rotation.x = 0.0
 	body.position.y = 0.0
 	cheer = 0.0
+	GlintSfx.stop()
 	h.verbs.hold("")
 	if is_instance_valid(bar):
 		bar.queue_free()
