@@ -88,19 +88,33 @@ def planted(body, bones, legs, duty, reach, lift, drop=0.0, steps=1, guess=(0.0,
             ab = solve(bones, pose, foot, aim, setter, guess)
             setter(pose, ab[0], ab[1])
         return pose
+
+    def refit(moved):
+        """The same clip on the same rig with its bones moved (a Meshy scan's fit, boki_scan): the paws are aimed
+        from the moved rest places, and the stride, lift and drop scale with the first leg's new length."""
+        foot, _, setter = legs[0][:3]
+        k = _long(moved, setter.hip, foot) / _long(bones, setter.hip, foot) if hasattr(setter, "hip") else 1.0
+        return planted(body, moved, [leg[:3] + tuple(b * k for b in leg[3:]) for leg in legs], duty, reach * k,
+                       lift * k, drop * k, steps, guess)
+    clip.refit = refit
     return clip
+
+
+def _long(bones, hip, foot):
+    """The leg's length from `hip` down its chain to `foot`'s head."""
+    long = 0.0
+    while foot != hip:
+        parent = bones[foot][2]
+        long += float(np.linalg.norm(np.array(bones[foot][0], float) - np.array(bones[parent][0], float)))
+        foot = parent
+    return long
 
 
 def within(bones, pose, hip, foot, aim):
     """`aim` (model space: up, back), pulled in toward the hip to REACH of the leg's length if it is past that. For a
     leg that swings in that plane (two_bone's, which names its `hip`); a leg splayed out to the side reaches further."""
     at = where(bones, pose, hip)[1:]
-    long = 0.0
-    bone = foot
-    while bone != hip:
-        parent = bones[bone][2]
-        long += float(np.linalg.norm(np.array(bones[bone][0], float) - np.array(bones[parent][0], float)))
-        bone = parent
+    long = _long(bones, hip, foot)
     off = aim - at
     far = float(np.linalg.norm(off))
     return aim if far <= REACH * long else at + off * (REACH * long / far)
