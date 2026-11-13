@@ -25,6 +25,11 @@ check: `--base-life-check`.
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
   `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
+  Joy sets the pace: at the base it wears `base_joy_decay` a minute awake (care.json, 8; Care.DECAY's 0.6 off the
+  base and for time you were away), a Boki under toys.json `joy_below` (90) goes to a toy on its own, and a play
+  gives only `joy_gain` (3): play trains stats, care keeps a Boki happy. A favourite meal (+28) is about one day's
+  wear, so a Boki you feed plays 5-10 times a day and stays content; one left alone plays too but slides toward
+  sulky (care.json `sulky`), never sick.
 - Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
   goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
   the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
@@ -33,7 +38,8 @@ check: `--base-life-check`.
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
 - Duo bonus (`scripts/home/base_duo.gd`, `content/rules/base_duo.json`): friends at bond 0.6 or more wake +6 joy from a shared nap (8 s asleep side by side), hand off cleanly in the Dash (x1.06 pace into a stretch with the friend alongside), show a heart pair and "Duo with X" on the Boki card in the Burrow view, and get one journal line the first time. The Show Ring joint trick waits for the Show Ring. Check: `--duo-check`.
-- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, or an unfed Boki that never ate on its own, and writes every state change to user://garden_soak.json.
+- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, an unfed Boki that never ate on its own, or a fed Boki that plays under 3.5 toys a day, starts under one every other day from low joy, or
+  is ever sulky (it prints toys a day, lowest joy and time sulky for each Boki), and writes every state change to user://garden_soak.json.
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
   = {gifted}`. In `BaseLife` it is the MENTOR state: slow steps (`Mentor.PACE`, `mentor`/`mentor_radius` in the
