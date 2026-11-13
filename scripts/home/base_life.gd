@@ -128,6 +128,7 @@ func step(d: float) -> void:
 				_arrived(k)
 			_seen[uid] = true
 	for k in h.kins:
+		BaseShy.tick(h, k, dt)
 		_tick(k, dt)
 	GardenVisitor.step(h, dt)
 	if h.hway:
@@ -173,6 +174,8 @@ func choose(k: Dictionary) -> void:
 		return
 	if Mentor.is_mentor(rec):
 		_mentor(k)
+		return
+	if BaseShy.keep_to_edge(h, k):
 		return
 	var near := _near(k)
 	_greet(k, near)
@@ -403,6 +406,7 @@ func _ask(k: Dictionary) -> bool:
 
 ## A new Boki on the base: the ones near by come over to have a look.
 func _arrived(k: Dictionary) -> void:
+	BaseShy.arrive(h, k)
 	for o in _near(k):
 		if machine(o).can(S.REACT) and machine(o).go(S.REACT, "newcomer"):
 			o["life_at"] = k
@@ -415,10 +419,11 @@ func _arrived(k: Dictionary) -> void:
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
 
-## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors or leaping).
+## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors, leaping or looking at
+## news with ComeLook).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) \
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) or k.has("look") \
 		or float(k.get("hold_t", 0.0)) > 0.0
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:
@@ -435,6 +440,8 @@ func _mate(k: Dictionary, near: Array) -> Dictionary:
 	var best := {}
 	var top := -INF
 	for o in near:
+		if BaseShy.shy(o["rec"]):
+			continue
 		var b := bond(k["rec"], o["rec"])
 		var score := b + randf() * 0.6
 		if b > float(R["rival_at"]) and (o["life"] as Fsm).is_in(S.ROAM) and not o.has("play") and score > top:
